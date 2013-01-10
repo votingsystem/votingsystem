@@ -1,0 +1,40 @@
+task copyApplet(dependsOn: [':SistemaVotacionApplet:signJar', ':HerramientaValidacionCopiasDeSeguridad:signJar']) {
+	
+	doLast {
+		File appletFirma = new File("$projectDir/web-app/applet/AppletFirma.jar")
+		if(appletFirma.exists()) appletFirma.delete()
+		appletFirma << rootProject.appletFirma?.bytes
+		
+		File appletHerramienta = new File("$projectDir/web-app/applet/HerramientaValidacion.jar")
+		if(appletHerramienta.exists()) appletHerramienta.delete()
+		appletHerramienta << rootProject.herramientaValidacion?.bytes
+	}
+}
+
+task stopApp << {
+	file("${projectDir}/.kill-run-app").createNewFile()
+}
+
+task runApp << { task ->
+	ProcessBuilder pb = new ProcessBuilder("grails", "run-app");
+	pb.directory(projectDir);
+	Process proc = pb.start();
+	proc.consumeProcessErrorStream(System.err)
+	proc.consumeProcessOutputStream(System.out)
+	if (proc.waitFor() != 0) {
+		throw new RuntimeException('runApp failed')
+	}
+}
+
+task war << {task ->
+	ProcessBuilder pb = new ProcessBuilder("grails", "war");
+	pb.directory(projectDir);
+	Process proc = pb.start();
+	proc.consumeProcessErrorStream(System.err)
+	proc.consumeProcessOutputStream(System.out)
+	if (proc.waitFor() != 0) {
+		throw new RuntimeException('war failed')
+	}
+}
+
+defaultTasks 'war'

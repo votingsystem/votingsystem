@@ -1,0 +1,120 @@
+/* Sacado de http://nontroppo.org/test/tab1.html */
+#tabmenu {
+		color: #000;
+		border-bottom: 2px solid black;
+		margin: 12px 0px 0px 0px;
+		padding: 0px;
+		z-index: 1;
+		padding-left: 10px }
+
+	#tabmenu li {
+		display: inline;
+		overflow: hidden;
+		list-style-type: none; }
+
+	#tabmenu a, a.active {
+		color: #3e125f;
+		background: #eaf4ff;
+		font: bold 1em "Trebuchet MS", Arial, sans-serif;
+		border: 2px solid black;
+		padding: 2px 5px 0px 5px;
+		margin: 0px;
+		text-decoration: none; }
+
+	#tabmenu a.active {
+		background: white;
+		border-bottom: 3px solid white; }
+
+	#tabmenu a:hover {
+		color: #fff;
+		background: #3e125f; }
+
+	#tabmenu a:visited {}
+
+	#tabmenu a.active:hover {
+		background: white;
+		color: #3e125f; }
+		
+
+	#content {
+		text-align: justify;
+		padding: 20px;
+		z-index: 2;	}
+
+	#content a {
+		text-decoration: none;
+		}
+	
+/***********************************************************************/		
+	#status {
+		border: .2em solid #fff;
+		margin: 1em 1em 1em;
+		padding: 1em;
+		width: 11em;
+		float: right;
+
+	}
+
+	.ie6 #status {
+		display: inline; /* float double margin fix http://www.positioniseverything.net/explorer/doubled-margin.html */
+	}
+
+	#status ul {
+		font-size: 0.9em;
+		list-style-type: none;
+		margin-bottom: 0.6em;
+		padding: 0;
+	}
+
+	#status h1 {
+		text-transform: uppercase;
+		font-size: 1.1em;
+		margin: 0 0 0.3em;
+        color: #333333;
+        text-decoration:underline;
+	}
+
+	#page-body {
+		margin: -2.5em 18em 1.25em 1.25em;
+	}
+
+	h2 {
+		margin-top: 1em;
+		margin-bottom: 0.3em;
+		font-size: 1em;
+	}
+
+	p {
+		margin: 0.25em 0;
+	}
+
+	#controller-list ul {
+		list-style-position: inside;
+		margin-left: 2em;
+	}
+
+	#controller-list li {
+		list-style-position: inside;
+		margin: 0.25em 0;
+	}
+
+	@media screen and (max-width: 480px) {
+		#status {
+			display: none;
+		}
+
+		#page-body {
+			margin: 0 1em 1em;
+		}
+
+		#page-body h1 {
+			margin-top: 0;
+		}
+	}
+  	
+  	.tituloSeccion {
+		font-size: 1.2em;
+                              font-weight:bold;
+                              color: #3E125F;
+                              margin: 1em 0 0.3em 0;
+	}

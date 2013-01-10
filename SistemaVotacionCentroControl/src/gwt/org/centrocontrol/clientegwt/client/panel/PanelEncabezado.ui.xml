@@ -1,0 +1,53 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:svUtil="urn:import:org.centrocontrol.clientegwt.client.util"
+	xmlns:panelSV='urn:import:org.centrocontrol.clientegwt.client.panel'>
+	<ui:style type='org.centrocontrol.clientegwt.client.panel.PanelEncabezado.Style'>
+		.mainPanel {width: 968px; height: 30px;}
+		.subPanel {width:100%;}
+		.nombreSistema{border-bottom:1pt solid #3E125F; width: 100%; margin: 5px 0px 0px 0px;}
+		.subscripciones {cursor: pointer; cursor: hand; font-size: 11px; margin-left:5px;}
+		.subscripcionesPanel{float: left; margin:5px 0px 0px 20px;}
+		.feedImage {}
+		.textoSeleccionEstado{font-weight: bold; margin-top:5px; color:#3e125f;}
+		.panelBusqueda { float: right;margin-top: 2px;}
+		.tituloAnchor {cursor: pointer; cursor: hand; font-size: 28px; font-weight:bold; with:100%; text-align:center;}
+		.buscarTextBox {padding:1px 3px 1px 3px; margin-top: 5px; border:1pt solid #3E125F;}	
+		.busquedaLink {cursor: pointer; margin:7px 10px 0px 3px; width:150px;
+        	display: inline-block; color: #3E125F; font-weight: bold; font-size: 12px;}		
+		.panelSubsistemas {margin: 0px 0px 0px 20px;}
+		.subsistemas {height: 100%;}
+		.buttonPanel { float: right;}		
+		.boton { margin: 5px; cursor:pointer;}	
+		.seleccionEstadoPanel{ margin-top:5px;}
+		.listaEstados{margin-left:8px; float:left; border:1pt solid #3E125F; color:#3E125F;}
+		.listaEstadoAbierto{margin-left:8px; float:left; border:1pt solid #6bad74;}
+		.listaEstadoFinalizado{margin-left:8px; float:left; border:1pt solid #cc1606;}
+		.listaEstadoPendiente{margin-left:8px; float:left; border:1pt solid #fba131;}
+	</ui:style>
+	<ui:with field='res' type='org.centrocontrol.clientegwt.client.Recursos'/>
+	<ui:with field='constantes' type='org.centrocontrol.clientegwt.client.Constantes'/>
+	<g:VerticalPanel styleName="{style.mainPanel}">
+	   	<g:HorizontalPanel styleName="{style.nombreSistema}">
+   		    <g:HorizontalPanel ui:field='subscripcionesPanel' styleName="{style.subscripcionesPanel}">
+		        <g:Image resource='{res.feedImage}' styleName="{style.feedImage}"/>
+				<g:Anchor ui:field='subscripciones' styleName="{style.subscripciones}"/>
+		    </g:HorizontalPanel>
+   	   		<g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
+				<g:Anchor styleName="{style.tituloAnchor}" ui:field="tituloAnchor"/>
+		    </g:cell>				
+			<g:HorizontalPanel styleName="{style.panelBusqueda}">
+				<g:TextBox styleName='{style.buscarTextBox}' ui:field='buscarTextBox' text="{constantes.searchLabel}" width ="140px"/>
+				<g:Anchor styleName='{style.busquedaLink}' text="{constantes.busquedaAvanzadaLabel}" ui:field='busquedaAvanzada'/>
+			</g:HorizontalPanel>
+		</g:HorizontalPanel>
+		<g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE" width ="100%">
+   		    <g:HorizontalPanel ui:field='seleccionEstadoPanel' styleName="{style.seleccionEstadoPanel}">
+			    <g:Label styleName="{style.textoSeleccionEstado}" text="{constantes.stateSelectionLabel}"/>
+    			<g:ListBox styleName="{style.listaEstados}" 
+			    	ui:field="listaEstados" visibleItemCount='1'/>
+			</g:HorizontalPanel>
+		</g:cell>
+	</g:VerticalPanel>
+</ui:UiBinder>

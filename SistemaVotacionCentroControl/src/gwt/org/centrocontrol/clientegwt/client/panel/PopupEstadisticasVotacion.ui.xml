@@ -1,0 +1,60 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+ 	    .datosEstadisticas {margin: 15px 0px 20px 50px;}
+ 	    .estadisticaLabel {margin-top: 7px;margin-left: 3px;font-weight: bold; font-size: 16px;}
+ 	    .valorEstadisticaLabel {margin-top: 7px; margin-left: 3px; font-size: 16px;}
+   		.textPanel {margin: 10px; width:500px;}
+		.boton { margin: 2px; cursor:pointer;}
+		.buttonPanel { float: right; margin: 10px;}
+		.texto{}
+		.mensajeSolicitudCopiaSeguridadVotacionAbierta{margin:10px 0px 0px 0px;}
+	</ui:style>
+	<ui:image field='solicitarCopiaSeguridad' src="../BotonSolicitarCopia.png"/>
+	<ui:with field='constantes' type='org.centrocontrol.clientegwt.client.Constantes'/>		
+	<g:DecoratedPopupPanel glassEnabled="false" ui:field="popupPanel" animationEnabled="true">
+		<g:VerticalPanel>
+   	   		<g:VerticalPanel ui:field="datosEstadisticas" styleName="{style.datosEstadisticas}">
+				<g:HorizontalPanel>
+					<g:Label text="{constantes.numVotosLabel}" styleName="{style.estadisticaLabel}"/>
+					<g:Label ui:field="numVotos" styleName="{style.valorEstadisticaLabel}"/>
+				</g:HorizontalPanel>
+				<g:HorizontalPanel>
+					<g:Label text="{constantes.numVotosOKLabel}" styleName="{style.estadisticaLabel}"/>
+					<g:Label ui:field="numVotosOK" styleName="{style.valorEstadisticaLabel}"/>
+				</g:HorizontalPanel>
+				<g:HorizontalPanel>
+					<g:Label text="{constantes.numVotosANULADOSLabel}" styleName="{style.estadisticaLabel}"/>
+					<g:Label ui:field="numVotosANULADOS" styleName="{style.valorEstadisticaLabel}"/>
+				</g:HorizontalPanel>
+				<g:HorizontalPanel>
+					<g:Label text="{constantes.numSolicitudesAccesoLabel}" styleName="{style.estadisticaLabel}"/>
+					<g:Label ui:field="numSolicitudesAcceso" styleName="{style.valorEstadisticaLabel}"/>
+				</g:HorizontalPanel>
+				<g:HorizontalPanel>
+					<g:Label text="{constantes.numSolicitudesAccesoOKLabel}" styleName="{style.estadisticaLabel}"/>
+					<g:Label ui:field="numSolicitudesAccesoOK" styleName="{style.valorEstadisticaLabel}"/>
+				</g:HorizontalPanel>
+				<g:HorizontalPanel>
+					<g:Label text="{constantes.numSolicitudesAccesoANULADASLabel}" styleName="{style.estadisticaLabel}"/>
+					<g:Label ui:field="numSolicitudesAccesoANULADAS" styleName="{style.valorEstadisticaLabel}"/>
+				</g:HorizontalPanel>
+			</g:VerticalPanel>
+		    
+			<g:VerticalPanel styleName="{style.textPanel}">
+			    <g:HTML styleName="{style.texto}" HTML='{constantes.mensajeSolicitudCopiaSeguridad}'/>
+   			    <g:HTML ui:field='mensajeSolicitudCopiaSeguridadVotacionAbierta' 
+   			        styleName="{style.mensajeSolicitudCopiaSeguridadVotacionAbierta}" 
+			        HTML='{constantes.mensajeSolicitudCopiaSeguridadVotacionAbierta}'/>			    
+			</g:VerticalPanel>
+			<g:HorizontalPanel styleName="{style.buttonPanel}">
+				<g:HorizontalPanel styleName="{style.boton}">
+	      			<g:PushButton ui:field='solicitarCopiaSeguridadButton'>
+   						<g:upFace image='{solicitarCopiaSeguridad}'/>
+ 					</g:PushButton>
+				</g:HorizontalPanel>
+			</g:HorizontalPanel>
+		</g:VerticalPanel>
+	</g:DecoratedPopupPanel>
+</ui:UiBinder> 

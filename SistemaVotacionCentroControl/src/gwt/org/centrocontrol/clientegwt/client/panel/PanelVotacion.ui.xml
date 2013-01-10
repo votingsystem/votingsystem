@@ -1,0 +1,104 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:svUtil="urn:import:org.centrocontrol.clientegwt.client.util"
+	xmlns:svPanel="urn:import:org.centrocontrol.clientegwt.client.panel"
+	xmlns:dp="urn:import:com.google.gwt.user.datepicker.client">
+	<ui:style type='org.centrocontrol.clientegwt.client.panel.PanelVotacion.EditorStyle'>
+    	.mainPanel{width: 950px;}
+		.messagePanel{padding: 7px 12px 7px 12px; margin: 12px 50px 12px 12px; 
+			border: 2px solid #cc1606;}
+	    .messageLabel {color: #cc1606; font-size: 16px; font-weight: bold; margin: 10px 10px 10px 10px; text-align: center;}
+		.enlaceJustificante {font-size: 12px; font-weight: bold; 
+				margin: 0px 0px 0px 10px; text-align: center;}	
+		.htmlMessagePanel{ margin: 0px 0px 20px 10px; background-color:#f2f2f2;
+			padding:10px 10px 10px 10px;}
+		.pageTitlePanel {width: 100%; border-bottom: 1px dotted; color:#02227a;}
+		.pageTitle {margin: 20px 0px 0px 0px; font-size: 20px; 
+			font-weight: bold; text-align: center;}
+		.autorPanel {margin: 0px 0px 0px 15px; float:left;}
+		.autorLabel {margin: 7px 0px 0px 3px;}
+	    .date {margin-left: 15px; font-weight: bold; width:180px;}
+ 	    .textBox {margin-left: 10px; margin-top: 7px; border: 1px solid #02227a; width:300px}
+ 	    .datosLabel {margin-top: 7px;margin-left: 3px;}
+		.publicadoPorlabel {font-weight: bold; margin-top: 7px;margin-left: 20px; width:100px;}
+ 	    .fechaLabel {font-weight: bold; margin-top: 7px;margin-left: 20px;}
+		.cargandoLabel {font-weight: bold; margin-top: 20px; margin-left: 20px;font-size: 16px;}
+    	.errorTextBox {border-color: red;}
+    	.contenidoPanel {width: 100%; height:100%; margin: 10px 0px 10px 0px; 
+    			padding: 10px 10px 10px 10px; border: 1px solid #f2f2f2;}
+		.boton { margin: 2px; cursor:pointer;vertical-align:middle;}
+		.solicitudCopiaLabel {font-weight: bold; margin-top: 7px;margin-left: 10px;}
+		.botonSolicitarCopia {float:left; cursor:pointer;  margin-top:3px;}
+		.buttonPanel { margin: 0px 100px 0px 10px; width:100%;}
+		.submitButtonsPanel {float: right;}
+		.opcionesLabel{font-size: 20px; font-weight:bold; color:#02227a; margin-top:22px;}
+		.labelInfoDocumento{font-size: 18px; font-weight:bold; color:#3a7f35;}
+		.administracionDocumentoLabel {cursor: pointer; cursor: hand; font-size: 10px; font-weight:bold; 
+			float:right; margin:6px 0px 0px 0px; color: #2a7fd4;}
+		.panelInfoDocumento {border:1pt solid #3a7f35; margin-top:0px; 
+			padding:3px 10px 3px 10px; float: left; margin-right:0px;
+			-moz-border-radius: 5px; border-radius: 5px; cursor: pointer; cursor: hand;}
+		.panelGraficoVotacion {margin: 0px 0px 20px 0px;}
+	</ui:style>
+	<ui:image field='firmar' src="../BotonFirmar.png"/>
+	<ui:with field='constantes' type='org.centrocontrol.clientegwt.client.Constantes'/>
+	<ui:with field='res' type='org.centrocontrol.clientegwt.client.Recursos'/>
+	<g:VerticalPanel width="100%">
+	   	<g:cell horizontalAlignment="ALIGN_CENTER">
+			<g:VerticalPanel styleName="{style.mainPanel}">
+			    <g:HorizontalPanel ui:field="panelBarrarProgreso" width="100%" height="100%">
+			   		<g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
+			   		    <g:VerticalPanel>
+		       	   		    <g:Label styleName="{style.cargandoLabel}" text="{constantes.cargandoLabel}"/>
+				    		<g:Image resource='{res.indeterminate}'/>
+			   		    </g:VerticalPanel> 
+				    </g:cell>
+			    </g:HorizontalPanel>
+			    <g:VerticalPanel ui:field="panelContenidos" width="100%" >
+					<g:HorizontalPanel styleName="{style.pageTitlePanel}">
+					    <g:cell horizontalAlignment="ALIGN_CENTER">
+					        <g:HTML ui:field='pageTitle' styleName="{style.pageTitle}"/>
+					    </g:cell>
+					</g:HorizontalPanel>
+				    <g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE" width="100%">
+				        <g:VerticalPanel ui:field="messagePanel" styleName="{style.messagePanel}">
+							<g:Label ui:field="messageLabel" styleName="{style.messageLabel}"/>
+							<g:Anchor ui:field='enlaceJustificante' styleName="{style.enlaceJustificante}"/>
+						</g:VerticalPanel>	
+				    </g:cell>
+					<g:VerticalPanel ui:field='contentPanel' width="100%" height="100%">
+					    <g:HorizontalPanel width="100%">
+					        <g:HorizontalPanel>	  
+								<g:Label styleName="{style.fechaLabel}" text="{constantes.fechaLimiteVotoslabel}"/>
+								<g:Label ui:field="fechaLimiteLabel" styleName="{style.datosLabel}"/>
+							</g:HorizontalPanel>
+       			   			<g:HorizontalPanel ui:field='autorPanel' styleName="{style.autorPanel}">
+								<g:Label styleName="{style.publicadoPorlabel}" text="{constantes.publicadoPorlabel}"/>
+								<g:Label ui:field="autorLabel" styleName="{style.autorLabel}"/>
+							</g:HorizontalPanel>
+							<svUtil:PopUpLabel ui:field="administracionDocumentoLabel"  text='{constantes.administracionDocumentoLabel}'
+					    		styleName="{style.administracionDocumentoLabel}" />
+					    </g:HorizontalPanel>
+						<g:VerticalPanel ui:field='contenidoPanel' styleName="{style.contenidoPanel}" width="100%" height="300px"/>
+						<g:cell horizontalAlignment="ALIGN_CENTER">
+							<g:VerticalPanel width="500px">
+							    <g:Label ui:field='opcionesLabel' styleName="{style.opcionesLabel}"/>
+							    <g:VerticalPanel ui:field='contenedorOpcionesPanel'/>
+							</g:VerticalPanel>	
+						</g:cell>
+					</g:VerticalPanel>
+				    <g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
+				        <svPanel:PanelGraficoResultadoDeVotacion ui:field='panelGraficoVotacion' 
+				        	styleName="{style.panelGraficoVotacion}"/>
+				    </g:cell>
+				    <g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
+						<g:VerticalPanel styleName="{style.htmlMessagePanel}">
+				   		    <g:HTML HTML='{constantes.piePaginaVotar}'/>
+						</g:VerticalPanel>	
+					</g:cell>
+			    </g:VerticalPanel>
+			</g:VerticalPanel>
+		</g:cell>
+	</g:VerticalPanel>
+</ui:UiBinder> 

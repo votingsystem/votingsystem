@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-configuration SYSTEM "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+ <session-factory name="">
+  <property name="hibernate.search.default.directory_provider">org.hibernate.search.store.FSDirectoryProvider</property>
+  <!--<property name="hibernate.search.default.directory_provider">org.hibernate.search.store.RAMDirectoryProvider</property>-->
+  <property name="hibernate.search.analyzer">org.apache.lucene.analysis.standard.StandardAnalyzer</property>
+  <mapping package="org.sistemavotacion.centrocontrol.modelo"/>
+  <mapping class="org.sistemavotacion.centrocontrol.modelo.AnuladorVoto"/>
+  <mapping class="org.sistemavotacion.centrocontrol.modelo.Certificado"/>
+  <mapping class="org.sistemavotacion.centrocontrol.modelo.ControlAcceso"/> 
+  <mapping class="org.sistemavotacion.centrocontrol.modelo.ActorConIP" />    
+  <mapping class="org.sistemavotacion.centrocontrol.modelo.EtiquetaEvento"/>
+  <mapping class="org.sistemavotacion.centrocontrol.modelo.EventoVotacion"/>
+  <mapping class="org.sistemavotacion.centrocontrol.modelo.Etiqueta"/>
+  <mapping class="org.sistemavotacion.centrocontrol.modelo.Incidencia"/> 
+  <mapping class="org.sistemavotacion.centrocontrol.modelo.MensajeSMIME"/>
+  <mapping class="org.sistemavotacion.centrocontrol.modelo.OpcionDeEvento"/>
+  <mapping class="org.sistemavotacion.centrocontrol.modelo.Voto"/>
+  <mapping class="org.sistemavotacion.centrocontrol.modelo.Usuario"/>
+ </session-factory>
+</hibernate-configuration>
