@@ -1,0 +1,68 @@
+version = '0.5.0'
+
+apply plugin: 'java'
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+ }
+
+dependencies {
+	
+	compile group: "org.sistemavotacion", name: "SistemaVotacionApplet", version: "0.5.0"
+	compile group: "org.sistemavotacion", name: "HerramientaValidacionCopiasDeSeguridad", version: "0.5.0"
+	compile ('org.apache.httpcomponents:httpmime:4.2.2',
+		'org.apache.httpcomponents:httpclient:4.1.2',
+		'net.sf.json-lib:json-lib:2.4:jdk15',
+		'org.bouncycastle:bcprov-jdk16:1.46',
+		'org.bouncycastle:bcmail-jdk16:1.46',
+		'javax.mail:mail:1.4.1',
+		'javax.activation:activation:1.1.1',
+		'org.slf4j:slf4j-log4j12:1.5.8',
+		'org.bouncycastle:bctsp-jdk16:1.46',
+		'log4j:log4j:1.2.12',
+		'com.miglayout:miglayout:3.7.4:swing',
+		'org.swinglabs:swingx:1.6.1',
+		'commons-io:commons-io:2.1',
+		'com.itextpdf:itextpdf:5.1.3')
+	testCompile 'junit:junit:4.8.2'
+	
+}
+
+task buildJar(type:VotingSystemApplet){
+	manifest {
+		attributes 'Main-Class': 'org.sistemavotacion.test.MainFrame',
+				   'url':'https://github.com/jgzornoza/TestSistemaVotacion',
+				   'provider': 'GruposP2P'
+	}
+}
+
+cleanCompileJava.dependsOn ':SistemaVotacionApplet:install'
+classes.dependsOn cleanCompileJava
+buildJar.dependsOn classes
+
+
+task copyToLib(type: Copy) {
+	into "$buildDir/jarDeps/lib"
+	from configurations.runtime
+}
+ 
+task runApp(dependsOn: buildJar) << { task ->
+	Process proc = ["java", "-cp", 
+		task.project.sourceSets.main.runtimeClasspath.asPath,
+		"org.sistemavotacion.test.MainFrame"].execute() 
+    proc.consumeProcessErrorStream(System.err) 
+    proc.consumeProcessOutputStream(System.out) 
+    if (proc.waitFor() != 0) { 
+        throw new RuntimeException('exec failed') 
+    } 
+} 
+ 
+
+sourceSets {
+	main {
+	  //to override the defaults:
+	  //output.resourcesDir = 'out/res'
+	  output.classesDir   = "$buildDir/classes"
+	}
+}

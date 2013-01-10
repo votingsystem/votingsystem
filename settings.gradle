@@ -1,0 +1,3 @@
+include "SistemaVotacionApplet", "SistemaVotacionTest", 
+	"HerramientaValidacionCopiasDeSeguridad", "SistemaVotacionAndroid",  
+	"SistemaVotacionCentroControl",	"SistemaVotacionControlAcceso"
