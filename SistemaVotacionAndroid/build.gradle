@@ -1,0 +1,21 @@
+task antDebugInstall << {
+	ProcessBuilder pb = new ProcessBuilder("ant", "debug", "install");
+	pb.directory(projectDir);
+	Process proc = pb.start();
+	proc.consumeProcessErrorStream(System.err)
+	proc.consumeProcessOutputStream(System.out)
+	if (proc.waitFor() != 0) {
+		throw new RuntimeException('antDebugInstall failed')
+	}
+}
+
+task release <<  {
+	ProcessBuilder pb = new ProcessBuilder("ant", "release");
+	pb.directory(projectDir);
+	Process proc = pb.start();
+	proc.consumeProcessErrorStream(System.err)
+	proc.consumeProcessOutputStream(System.out)
+	if (proc.waitFor() != 0) {
+		throw new RuntimeException('release failed')
+	}
+}

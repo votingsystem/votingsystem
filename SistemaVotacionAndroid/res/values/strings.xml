@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="sending_data_lbl">Enviando información</string>
+    <string name="back_to_cancel_lbl">Pulsar \'atrás\' para cancelar</string>
+    
+    <string name="manifest_pendind_lbl">Manifiesto pendiente de abrir</string>
+    <string name="claim_pending_lbl">Reclamacion pendiente de abrir</string>
+    <string name="voting_pending_lbl">Votación pendiente de abrir</string>
+    <string name="manifest_closed_lbl">Manifiesto cerrado</string>
+    <string name="claim_closed_lbl">Reclamación cerrada</string>
+    <string name="voting_closed_lbl">Votación cerrada</string>
+    <string name="manifest_open_lbl">Manifiesto abierto, quedan %1$s horas</string>
+    <string name="claim_open_lbl">Reclamación abierta, quedan %1$s horas</string>
+    <string name="voting_open_lbl">Votación abierta, quedan %1$s horas</string>
+    
+    
+    <string name="author_lbl">Publicado por</string>
+    <string name="inicio_lbl">Inicio</string>
+    <string name="fin_lbl">Fin</string>
+    <string name="remain_lbl">Quedan %1$s horas</string>
+    
+    
+    <string name="voting_drop_down_lbl">Votaciones</string>
+    <string name="claims_drop_down_lbl">Reclamaciones</string>
+    <string name="manifiests_drop_down_lbl">Manifiestos</string>
+    <string name="unknown_drop_down_lbl">Sistema desconocido</string>
+    <string name="subject_lbl">Asunto</string>
+    
+    <string name="open_voting_tab_lbl">ABIERTAS</string>
+    <string name="pending_voting_tab_lbl">PENDIENTES</string>
+    <string name="closed_voting_tab_lbl">CERRADAS</string>
+    <string name="unknown_tab_lbl">... DESCONOCIDO ...</string>
+    
+    <string name="query_hint_lbl">Buscar...</string>
+   	<string name="search_hint">Buscar...</string>
+    <string name="search_label"></string>
+    <string name="search_invoke">Búsquedas</string>
+    <string name="empty_search_lbl">Consulta sin resultados</string>
+    
+	<string name="lockscreen_sim_unlock_progress_dialog_message">lockscreen sim unlock progress dialog message</string>
+	<string name="keyguard_password_enter_pin_code">Introduzca el código PIN de votación</string>
+	<string name="keyguard_password_enter_first_pin_code">Introduzca el código PIN que deberá introducir en cada votación</string>
+	<string name="keyguard_password_wrong_pin_code">keyguard password wrong pin code</string>
+	<string name="invalidPin">Código PIN inválido</string>
+	<string name="pin_short">Código PIN debe tener al menos %1$d caracteres</string>
+	
+	<string name="password_mismatch">Los códigos PIN no coinciden. Inténtelo de nuevo</string>
+	<string name="repeat_password">Vuelva a introducir el código PIN</string>
+	
+	<string name="nif_error">NIF con errores. Por favor vuelva a intentarlo</string>
+	<string name="searchLabel">Buscar</string>
+
+    <string name="app_name">Votaciones</string>
+    <string name="request_cert_msg">Tramitando solicitud</string>
+    <string name="alert_exception_caption">Excepción!</string>
+    <string name="cancel_back_msg">Pulsar \'atrás\' para cancelar</string>
+    <string name="cert_state_msg">Comprobando el estado de la solicitud de certificado</string>
+    <string name="cert_downloaded_msg">El certificado de usuario está disponible</string>
+    
+    <string name="request_msg_subject">[SOLICITUD ACCESO]-%1$s</string>
+
+    <string name="pin_error_msg">¿Seguro que la contraseña es correcta?</string>
+    
+    <string name="sign_send_msg">Firmar y enviar</string>
+    
+    <string name="label_eventos">Eventos</string>
+    <string name="label_evento">Evento</string>
+    <string name="solicitud_csr">Solicitud CSR</string>
+    <string name="enviarVoto">Enviar Voto</string>
+    <string name="receipt_error_msg">Error validando recibo de voto</string>
+
+    <string name="lanzarServicio">Lanzar Servicio</string>
+    <string name="eventos_no_encontrados_message">No se han encontrado eventos</string>    
+    <string name="menu_actualizar">Actualizar</string>
+    <string name="menu_solicitar_certificado">Solicitar certificado</string>
+    <string name="solicitud_certificado_usuario_activity_text">No dispone de ningún 
+        certificado con el que poder acceder a los servicios. Para poder votar debe solicitar
+        un certificado de usuario. ¿Desea solicitar el certificado?</string>
+    <string name="resultado_solicitud_certificado_activity"><![CDATA[Para poder votar necesita tener
+        instalado un certificado.<br/><br/>Usted ya ha solicitado el certificado, ahora hace falta verificar
+        su identidad, para ello puede presentarse en cualquiera de <br/><br/>
+        <a href="%1$s"> las siguientes direcciones</a>]]></string>
+        
+    <string name="search_query_info_msg"><![CDATA[<b>Resultado de la busqueda</b>: %1$s]]></string>
+        
+   <string name="access_request_repeated_msg"><![CDATA[
+        <a href="%1$s">Pulse aquí</a> para acceder a la solicitud que le impide volver a votar sobre este asunto]]></string>
+
+    <string name="cert_install_error_msg">Error instalando certificado de usuario</string>
+    <string name="resultado_solicitud_certificado_activity_ok">El certificado se
+        ha importado correctamente.</string>
+    <string name="request_cert_again_button">Volver a solicitar el certificado</string>   
+    <string name="install_cert_button">Instalar el certificado</string>   
+    <string name="go_app_button">Ir a la aplicación</string>
+    <string name="request_cert_again_msg"><![CDATA[Si vuelve a solicitar el certificado deberá personarse 
+        en las instalaciones que se le indiquen para verificar su identidad.<br/>
+        ¿Está seguro?]]></string>
+    
+    
+    <string name="request_user_cert_error_msg">Error comprobando el estado de la solicitud</string>
+    <string name="cancelar_label">Cancelar</string>
+    <string name="solicitar_label">Solicitar</string>
+    <string name="nif_label">Introduzca su NIF</string>
+    <string name="password_label">Contraseña del certificado</string>
+    <string name="dialogo_password_text_entry">Introducir contraseña</string>
+    <string name="repeat_password_label">Repita la contraseña</string>
+    <string name="cancelar_button">Cancelar</string>
+    <string name="cerrar_button">Cerrar</string>
+    <string name="ok_button">OK</string>
+    <string name="aceptar_button">Aceptar</string>
+    <string name="formulario_solicitud_certificado_label">Datos del certificado de usuario</string>
+	<string name="campos_vacios_msg">Debe rellenar todos los campos</string>
+	<string name="password_error_msg">Las contraseñas no coinciden</string>
+	<string name="dialogo_campos_reclamacion_caption">Rellenar los campos</string>
+	<string name="error_lbl">Error</string>   
+	<string name="operacion_ok_msg">Operación completada con éxito</string> 
+	<string name="certificado_no_encontrado_msg">No tiene instalado ningún certificado con el que poder firmar la solicitud.</string>    
+	<string name="nif_password_message_label">Cada vez que vote se le pedirá el código PIN que introducirá a continuación. Recuerde, si lo olvida tendrá que pedir otro certificado para poder votar.</string>    
+	<string name="error_password_msg">Contraseña inválida</string>
+
+</resources>
