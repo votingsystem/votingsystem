@@ -1,0 +1,3 @@
+{"codigoEstado":700, 
+    "urlTimeStampServer":"http://localhost:8080/SistemaVotacionControlAcceso/timeStamp/obtener",
+    "operacion":"FIRMA_MANIFIESTO_PDF", "mensaje":null, "urlEnvioDocumento":"http://localhost:8080/SistemaVotacionControlAcceso/recolectorFirma/validarPDF?id=20", "nombreDestinatarioFirma":"Primer ControlAcceso", "urlDocumento":"http://localhost:8080/SistemaVotacionControlAcceso/eventoFirma/obtenerPDF?id=20", "respuestaConRecibo":false}

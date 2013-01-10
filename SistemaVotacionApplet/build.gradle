@@ -5,8 +5,6 @@ apply plugin: 'maven'
 
 dependencies {
 	
-	compile group: "org.sistemavotacion", name: "SistemaVotacionApplet", version: "0.5.0"
-	
 	compile ('org.apache.httpcomponents:httpmime:4.1.1',
 		'org.apache.httpcomponents:httpclient:4.1.2',
 		'net.sf.json-lib:json-lib:2.4:jdk15',
@@ -18,18 +16,16 @@ dependencies {
 		'org.bouncycastle:bctsp-jdk16:1.46',
 		'log4j:log4j:1.2.12',
 		'com.itextpdf:itextpdf:5.1.3')
-	
 	compile files('../libs/plugin-1.3.jar')
-	
 	testCompile 'junit:junit:4.8.2'
 	
 }
 
-task buildVotingApplet(type:VotingSystemApplet) {
+task buildVotingApplet(type:VotingSystemApplet){
 	manifest {
-		attributes 'Main-Class': 'org.sistemavotacion.herramientavalidacion.AppletHerramienta',
+		attributes 'Main-Class': 'org.sistemavotacion.Aplicacion',
 				   'SplashScreen-Image':'resources/images/cert_100x108.png',
-				   'url':'https://github.com/jgzornoza/HerramientaValidacionCopiasDeSeguridad',
+				   'url':'https://github.com/jgzornoza/SistemaVotacionAppletFirma',
 				   'provider': 'GruposP2P'
 	}
 }
@@ -41,22 +37,20 @@ task signJar {
 			alias:signKeyAlias,
 			jar:jar.archivePath,
 			signedjar:"$buildDir/$signedjarName")
-		rootProject.ext.set("herramientaValidacion",file("$buildDir/$signedjarName"))
+		rootProject.ext.set("appletFirma",file("$buildDir/$signedjarName"))
 		announce.announce("$signedjarName firmado y puesto en contexto de construcción", "local")
 	}
 	
 }
 
-cleanCompileJava.dependsOn ':SistemaVotacionApplet:install'
-
 classes.dependsOn cleanCompileJava
 buildVotingApplet.dependsOn classes
 signJar.dependsOn buildVotingApplet
 
-
-
-
-
-
-
-
+sourceSets {
+	main {
+	  //to override the defaults:
+	  //output.resourcesDir = 'out/res'
+	  output.classesDir   = "$buildDir/classes"
+	}
+}
