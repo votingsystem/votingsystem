@@ -57,6 +57,10 @@ task runApp(dependsOn: buildJar) << { task ->
         throw new RuntimeException('exec failed') 
     } 
 } 
+
+project.ext {
+  mainClass = "org.sistemavotacion.test.MainFrame"
+}
  
 
 sourceSets {

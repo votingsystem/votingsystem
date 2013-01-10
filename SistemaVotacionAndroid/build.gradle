@@ -1,3 +1,11 @@
+import org.ajoberstar.gradle.git.tasks.*
+
+buildscript {
+  repositories { mavenCentral() }
+  dependencies { classpath 'org.ajoberstar:gradle-git:0.2.3' }
+}
+
+
 task antDebugInstall << {
 	ProcessBuilder pb = new ProcessBuilder("ant", "debug", "install");
 	pb.directory(projectDir);
@@ -19,3 +27,25 @@ task release <<  {
 		throw new RuntimeException('release failed')
 	}
 }
+
+task cloneActionBarSherlockGitRepo(type: GitClone) {
+        def destination = file("../ActionBarSherlock")
+        uri = "https://github.com/JakeWharton/ActionBarSherlock.git"
+        destinationPath = destination
+        bare = false
+        enabled = !destination.exists() //to clone only once
+}
+
+task updateActionBarSherlock << {
+	ProcessBuilder pb = new ProcessBuilder("android", "update", "project", "-p", ".");
+	pb.directory(file("../ActionBarSherlock/library"));
+	Process proc = pb.start();
+	proc.consumeProcessErrorStream(System.err)
+	proc.consumeProcessOutputStream(System.out)
+	if (proc.waitFor() != 0) {
+		throw new RuntimeException('antDebugInstall failed')
+	}
+}
+
+updateActionBarSherlock.dependsOn cloneActionBarSherlockGitRepo
+release.dependsOn updateActionBarSherlock
