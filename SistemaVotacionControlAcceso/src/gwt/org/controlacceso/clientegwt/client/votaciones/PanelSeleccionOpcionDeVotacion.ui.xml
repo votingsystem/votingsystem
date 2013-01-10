@@ -1,0 +1,16 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+		.mainPanel {}
+		.opcionImage {margin: 5px 3px 0px 0px; cursor: pointer; cursor: hand;}
+		.opcionButton {font-size: 26px; width:500px; margin:5px 0px 10px 0px;
+				padding: 3px 5px 3px 5px;}
+		.opcionLabel {font-size: 26px; margin:10px 0px 0px 0px;}
+	</ui:style>
+	<g:HorizontalPanel styleName="{style.mainPanel}">
+        <g:Label styleName="{style.opcionImage}"  ui:field="opcionImage"/>
+		<g:Button styleName="{style.opcionButton}" ui:field="opcionButton"/>
+		<g:Label styleName="{style.opcionLabel}"  ui:field="opcionLabel"/>
+	</g:HorizontalPanel>
+</ui:UiBinder>

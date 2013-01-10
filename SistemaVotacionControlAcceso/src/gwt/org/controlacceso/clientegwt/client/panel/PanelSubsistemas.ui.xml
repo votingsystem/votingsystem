@@ -1,0 +1,18 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+		.datosAplicacion {cursor: pointer; cursor: hand; font-size: 10px; font-weight:bold; 
+			position:relative; left:5px; top:4px; }	
+		.mainPanel{heigth:100%;}	
+	</ui:style>
+	<ui:with field='constantes' type='org.controlacceso.clientegwt.client.Constantes'/>
+	<g:VerticalPanel styleName="{style.mainPanel}">
+		<g:Hyperlink ui:field="sistemaVotacionLink" text='{constantes.sistemaVotacionLabel}'
+			 styleName="{style.datosAplicacion}"/>
+		<g:Hyperlink ui:field="sistemaFirmasLink" text='{constantes.sistemaFirmasLabel}'
+			 styleName="{style.datosAplicacion}"/>
+		<g:Hyperlink ui:field="sistemaReclamacionesLink"  text='{constantes.sistemaReclamacionesLabel}'
+		    styleName="{style.datosAplicacion}"/>
+	</g:VerticalPanel>
+</ui:UiBinder>

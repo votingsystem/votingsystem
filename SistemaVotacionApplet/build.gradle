@@ -46,6 +46,7 @@ task signJar {
 classes.dependsOn cleanCompileJava
 buildVotingApplet.dependsOn classes
 signJar.dependsOn buildVotingApplet
+install.dependsOn signJar
 
 sourceSets {
 	main {

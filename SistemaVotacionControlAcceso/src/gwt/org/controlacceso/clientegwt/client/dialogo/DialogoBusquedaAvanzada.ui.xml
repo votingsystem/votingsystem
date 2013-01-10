@@ -1,0 +1,61 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:p1="urn:import:com.google.gwt.user.datepicker.client">
+	<ui:style>
+   		.textPanel {margin: 10px;}
+		.boton { margin: 2px; cursor:pointer;}
+		.buttonPanel { float: right; margin: 10px; margin-top: 15px;}
+		.texto{font-weight: bold;}
+		.textoMsg {margin: 10px; font-weight: bold;}
+		.textBox {border:1pt solid #3E125F;}
+	</ui:style>
+	<ui:with field='recursos' type='org.controlacceso.clientegwt.client.Recursos'/>
+	<ui:with field='constantes' type='org.controlacceso.clientegwt.client.Constantes'/>
+	<ui:image field='aceptar' src="../BotonAceptar.png"/>
+	<ui:image field='cerrar' src="../BotonCancelar.png"/>
+	<g:DialogBox ui:field="dialogBox" autoHide="false" modal="true" glassEnabled="true" 
+	    animationEnabled="true" text="{constantes.advancedSearchCaption}"   >
+		<g:VerticalPanel>        
+			<g:VerticalPanel ui:field="textPanel" styleName="{style.textPanel}">
+			    <g:Label styleName="{style.textoMsg}" text="{constantes.advancedSearchMsg}"/>
+				<g:VerticalPanel styleName="{style.textPanel}">
+					<g:Label styleName="{style.texto}" text="{constantes.searchQueryTextLabel}"/>
+					<g:TextBox  ui:field="searchText" styleName="{style.textBox}"  width="300px"/>
+				</g:VerticalPanel>
+				<g:HorizontalPanel>
+					<g:VerticalPanel styleName="{style.textPanel}">
+						<g:HTML styleName="{style.texto}" text="{constantes.beginFromLabel}"/>
+						<p1:DateBox ui:field="fechaInicioDesde" styleName="{style.textBox}"/>
+					</g:VerticalPanel>
+					<g:VerticalPanel styleName="{style.textPanel}">
+						<g:Label styleName="{style.texto}" text="{constantes.beginToLabel}"/>
+						<p1:DateBox ui:field="fechaInicioHasta" styleName="{style.textBox}"/>
+					</g:VerticalPanel>	
+				</g:HorizontalPanel>	
+				<g:HorizontalPanel>
+					<g:VerticalPanel styleName="{style.textPanel}">
+						<g:HTML styleName="{style.texto}" text="{constantes.endFromLabel}"/>
+						<p1:DateBox ui:field="fechaFinDesde" styleName="{style.textBox}"/>
+					</g:VerticalPanel>
+					<g:VerticalPanel styleName="{style.textPanel}">
+						<g:Label styleName="{style.texto}" text="{constantes.endToLabel}"/>
+						<p1:DateBox ui:field="fechaFinHasta" styleName="{style.textBox}"/>
+					</g:VerticalPanel>	
+				</g:HorizontalPanel>		
+			</g:VerticalPanel>
+			<g:HorizontalPanel styleName="{style.buttonPanel}">
+				<g:HorizontalPanel styleName="{style.boton}">
+	      			<g:PushButton ui:field='cerrarButton'>
+			   			<g:upFace image='{cerrar}'/>
+ 					</g:PushButton>
+				</g:HorizontalPanel>
+				<g:HorizontalPanel styleName="{style.boton}">
+	      			<g:PushButton  ui:field='aceptarButton'>
+   						<g:upFace image='{aceptar}'/>
+ 					</g:PushButton>
+				</g:HorizontalPanel>
+			</g:HorizontalPanel>
+		</g:VerticalPanel>
+	</g:DialogBox>
+	
+</ui:UiBinder> 

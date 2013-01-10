@@ -1,0 +1,14 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+		.mainPanel { height: 30px; padding:1px; }
+		.imgBorrarOpcion {margin: 7px 3px 0px 10px; cursor: pointer; cursor: hand;}
+		.contenidoLabel {font-size: 26px;}
+	</ui:style>
+	<ui:with field='res' type='org.controlacceso.clientegwt.client.Recursos'/>
+	<g:HorizontalPanel styleName="{style.mainPanel}">
+        <g:Image resource='{res.cancel_16x16}' styleName="{style.imgBorrarOpcion}"  ui:field="borrarImage"/>
+		<g:Label styleName="{style.contenidoLabel}" ui:field="contenidoLabel"/>
+	</g:HorizontalPanel>
+</ui:UiBinder>

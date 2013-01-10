@@ -1,0 +1,46 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style type='org.controlacceso.clientegwt.client.panel.PanelEvento.EditorStyle'>
+		.mainPanel{float:left; background-color:#f2f2f2; border: 1px solid #02227a; margin: 10px 5px 5px 10px;
+			-moz-border-radius: 5px; border-radius: 5px;
+			cursor: pointer; cursor: hand; width:260px; height:150px;}	
+		.mainPanelPendiente{border: 1px solid #fba131;}
+		.mainPanelCancelado{border: 1px solid #cc1606;}
+		.mainPanelAbierto{border: 1px solid #6bad74;}
+		.abiertoLabel{color:#6bad74; font-weight:bold;}
+		.pendienteAbrirLabel{color:#fba131; font-weight:bold;}
+		.canceladoLabel{color:#cc1606; font-weight:bold;}
+		.finalizadoLabel{color:#cc1606; font-weight:bold;}
+		.autorLabel {font-size: 12px;}
+		.comienzoLabel{font-size: 12px;margin:5px 0px 0px 0px;}
+		.duracionLabel{font-size: 12px; font-weight: bold; margin:5px 0px 0px 10px;}
+		.estadoLabel{margin: 3px 10px 0px 10px; float:right; font-size: 16px;}
+		.bodyPanel {width:100%, margin:0px 10px 0px 10px;}
+		.asuntoLabel {font-size: 16px; font-weight:bold; color:white;  margin: 5px 5px 5px 5px;}
+		.headerPanel{width:100%;}
+		.abiertoHeader{background-color:#6bad74; font-weight:bold;}
+		.pendienteAbrirHeader{background-color:#fba131; font-weight:bold;}
+		.canceladoHeader{background-color:#cc1606; font-weight:bold;}
+		.finalizadoHeader{background-color:#cc1606; font-weight:bold;}
+	</ui:style>
+	<g:VerticalPanel ui:field='mainPanel' styleName="{style.mainPanel}">
+        <g:VerticalPanel ui:field='headerPanel' styleName="{style.headerPanel}">
+            <g:cell horizontalAlignment="ALIGN_CENTER">
+           		<g:Label ui:field='asuntoLabel' styleName="{style.asuntoLabel}"/>
+            </g:cell>
+        </g:VerticalPanel>
+   	    <g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE" height="100%">
+	 	    <g:VerticalPanel styleName="{style.bodyPanel}">
+		   		<g:HTML ui:field='autorLabel' styleName="{style.autorLabel}"/>
+				<g:HTML ui:field='comienzoLabel' styleName="{style.comienzoLabel}"/>
+			</g:VerticalPanel>
+   	    </g:cell>
+		<g:HorizontalPanel width="100%">
+		    <g:Label ui:field='duracionLabel' styleName="{style.duracionLabel}"/>
+			<g:Label ui:field='estadoLabel' styleName="{style.estadoLabel}"/>
+		</g:HorizontalPanel>
+	</g:VerticalPanel>
+</ui:UiBinder>
+
+		   				

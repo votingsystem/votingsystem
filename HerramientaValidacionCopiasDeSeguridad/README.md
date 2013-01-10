@@ -1,4 +1,10 @@
 HerramientaValidacionCopiasDeSeguridad
 ======================================
 
-Herramienta para validar archivos firmados y copias de seguridad del Sistema de Votación (https://github.com/jgzornoza/SistemaVotacionControlAcceso/wiki/Control-de-Acceso)
+Herramienta para validar los archivos firmados y las copias de seguridad generadas por el Sistema de Votación.
+
+Para generar el Applet firmado hay que ejecutar desde la línea de comandos:
+	
+	$gradle install
+
+* Al tener que acceder a recursos restringidos del sistema el Applet debe ir firmado.

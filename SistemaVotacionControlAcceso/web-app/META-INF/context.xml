@@ -1,0 +1,13 @@
+<Context>
+
+<Resource name="jdbc/controlacceso"
+        auth="Container"
+        type="javax.sql.DataSource"
+		maxActive="100" maxIdle="30" maxWait="10000"
+        username="UsuarioVotacion"
+        password="UsuarioVotacion"
+        driverClassName="org.postgresql.Driver"
+        url="jdbc:postgresql://localhost:5432/SistemaVotacionControlAcceso"
+        validationQuery="select 1"/>
+
+</Context>

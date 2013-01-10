@@ -37,7 +37,7 @@ task buildJar(type:VotingSystemApplet){
 	}
 }
 
-cleanCompileJava.dependsOn ':SistemaVotacionApplet:install'
+cleanCompileJava.dependsOn ':HerramientaValidacionCopiasDeSeguridad:install'
 classes.dependsOn cleanCompileJava
 buildJar.dependsOn classes
 

@@ -52,6 +52,7 @@ cleanCompileJava.dependsOn ':SistemaVotacionApplet:install'
 classes.dependsOn cleanCompileJava
 buildVotingApplet.dependsOn classes
 signJar.dependsOn buildVotingApplet
+install.dependsOn signJar
 
 
 
