@@ -2,14 +2,15 @@
 
 - Prototipo de cliente de votación para plataformas Android del Sistema de Votación
 
-- Para ejecutar el proyecto hay que integrar la librería ActionBarSherlock -> http://actionbarsherlock.com/index.html
+- Para construir ejecutar desde la línea de comandos:
+	$gradle release
+
+--- DESARROLLO EN ECLIPSE ---
+- El proyecto necesita la librería ActionBarSherlock -> http://actionbarsherlock.com/index.html
 http://www.grokkingandroid.com/adding-actionbarsherlock-to-your-project/
 
-- Para construir e instalar desde la consola de comandos hay modificar la ruta del sdk en el archivo 'local.properties' y ejecutar:
-$ant debug install
-
 - Al añadir la integración con Ant se pueden presentar problemas en Eclipse con la librería ActionbarSherlock. Para resolverlos:
-- Crear el archivo build.xml en el proyecto ActionbarSherlock ejecutando:
+- Crear el archivo build.xml en la librería del proyecto ActionbarSherlock ejecutando:
 	${ActionbarSherlock_Home}/library/android update project -p .
 Refrescando y reconstruyendo los proyectos (si no funciona probar añadiendo y quitando la librería 
 desde las propiedades del proyecto)

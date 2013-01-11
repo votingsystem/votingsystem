@@ -36,7 +36,9 @@ task cloneActionBarSherlockGitRepo(type: GitClone) {
         enabled = !destination.exists() //to clone only once
 }
 
-task updateActionBarSherlock << {
+task setActionBarSherlockEnv << {
+	def actionBarSherlockLibBuild = file("../ActionBarSherlock/library/build.xml")
+	if(actionBarSherlockLibBuild.exists()) return
 	ProcessBuilder pb = new ProcessBuilder("android", "update", "project", "-p", ".");
 	pb.directory(file("../ActionBarSherlock/library"));
 	Process proc = pb.start();
@@ -47,5 +49,23 @@ task updateActionBarSherlock << {
 	}
 }
 
-updateActionBarSherlock.dependsOn cloneActionBarSherlockGitRepo
-release.dependsOn updateActionBarSherlock
+task checkDependencies(dependsOn:
+	['setAndroidEnv', 'setActionBarSherlockEnv']) << {}
+
+task setAndroidEnv << {
+	def env = System.getenv()
+	//env.each{println it} 
+	String androidHome= env['ANDROID_HOME']
+	if(!androidHome) {
+		throw new RuntimeException(
+			'You must install the android sdk -> http://developer.android.com/sdk/index.html')
+	}
+	println "androidHome: ${androidHome}"
+	ant.replace(file:"local.properties", 
+                token:"[sdk.dir]", 
+                value:androidHome) 
+}
+
+
+setActionBarSherlockEnv.dependsOn cloneActionBarSherlockGitRepo
+release.dependsOn checkDependencies
