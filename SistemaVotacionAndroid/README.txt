@@ -5,6 +5,9 @@
 - Para construir ejecutar desde la línea de comandos:
 	$gradle release
 
+- Para instalar en dispositivo conectado al puerto USB:
+	$ gradle antDebugInstall
+
 --- DESARROLLO EN ECLIPSE ---
 - El proyecto necesita la librería ActionBarSherlock -> http://actionbarsherlock.com/index.html
 http://www.grokkingandroid.com/adding-actionbarsherlock-to-your-project/

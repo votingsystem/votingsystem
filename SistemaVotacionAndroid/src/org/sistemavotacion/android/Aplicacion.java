@@ -16,8 +16,10 @@
 
 package org.sistemavotacion.android;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.UUID;
 
 import org.bouncycastle.tsp.TSPAlgorithms;
@@ -80,7 +82,7 @@ public class Aplicacion extends SherlockActivity {
     public static final String TIMESTAMP_VOTE_HASH = TSPAlgorithms.SHA256;
     
     public static final String ASUNTO_MENSAJE_FIRMA_DOCUMENTO = "[Firma]-";    
-    public static final String CONTROL_ACCESO_URL = "http://192.168.1.4:8080/SistemaVotacionControlAcceso";
+    public static String CONTROL_ACCESO_URL = "http://192.168.1.4:8080/SistemaVotacionControlAcceso";
     public static final String SISTEMA_VOTACION_DIR = "SistemaVotacion";
     
     private SubSystem selectedSubsystem = SubSystem.VOTING;
@@ -123,6 +125,17 @@ public class Aplicacion extends SherlockActivity {
             return;
         }
     	INSTANCIA = this;
+        Properties props = new Properties();
+        try {
+            props.load(getAssets().open("VotingSystem.properties"));
+            if(props != null) {
+            	String controlAccesoURL = props.getProperty("CONTROL_ACCESO_URL");
+            	if(controlAccesoURL != null) CONTROL_ACCESO_URL = controlAccesoURL;
+            	Log.d(TAG + ".onCreate()", " - controlAccesoURL: " + controlAccesoURL);
+            }
+        } catch (IOException ex) {
+        	Log.e(TAG + ".onCreate()", ex.getMessage(), ex);
+        }
     	settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
     	setActivityState();
     }

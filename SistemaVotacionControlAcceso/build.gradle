@@ -28,7 +28,7 @@ task runApp << { task ->
 	}
 }
 
-task war << {task ->
+task war(dependsOn:'copyApplet') << {task ->
 	ProcessBuilder pb = new ProcessBuilder("grails", "war");
 	pb.directory(projectDir);
 	Process proc = pb.start();
@@ -37,6 +37,8 @@ task war << {task ->
 	if (proc.waitFor() != 0) {
 		throw new RuntimeException('war failed')
 	}
+	announce.announce("$project.name - Done creating WAR", "local")
 }
+
 
 defaultTasks 'runApp'

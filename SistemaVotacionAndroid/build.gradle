@@ -1,13 +1,33 @@
+import java.net.*;
 import org.ajoberstar.gradle.git.tasks.*
+
+
+apply plugin: 'java'
 
 buildscript {
   repositories { mavenCentral() }
   dependencies { classpath 'org.ajoberstar:gradle-git:0.2.3' }
 }
 
+dependencies {
+	archives ('org.apache.httpcomponents:httpmime:4.2.2') {
+		exclude module: 'httpcore'
+	}
+}
 
 task antDebugInstall << {
 	ProcessBuilder pb = new ProcessBuilder("ant", "debug", "install");
+	pb.directory(projectDir);
+	Process proc = pb.start();
+	proc.consumeProcessErrorStream(System.err)
+	proc.consumeProcessOutputStream(System.out)
+	if (proc.waitFor() != 0) {
+		throw new RuntimeException('antDebugInstall failed')
+	}
+}
+
+task cleanAndroid << {
+	ProcessBuilder pb = new ProcessBuilder("ant", "clean");
 	pb.directory(projectDir);
 	Process proc = pb.start();
 	proc.consumeProcessErrorStream(System.err)
@@ -49,23 +69,46 @@ task setActionBarSherlockEnv << {
 	}
 }
 
-task checkDependencies(dependsOn:
-	['setAndroidEnv', 'setActionBarSherlockEnv']) << {}
+task copyToLib(type: Copy) {
+	into "libs"
+	from project.configurations.archives
+}
+
+task checkDependencies(dependsOn:['copyToLib',
+	'setAndroidEnv', 'setActionBarSherlockEnv']) << {}
 
 task setAndroidEnv << {
-	def env = System.getenv()
+	//def env = System.getenv()
 	//env.each{println it} 
-	String androidHome= env['ANDROID_HOME']
-	if(!androidHome) {
-		throw new RuntimeException(
-			'You must install the android sdk -> http://developer.android.com/sdk/index.html')
-	}
-	println "androidHome: ${androidHome}"
-	ant.replace(file:"local.properties", 
-                token:"[sdk.dir]", 
-                value:androidHome) 
+	//String androidHome= env['ANDROID_HOME']
+	def controlAccesoURL = "$rootProject.controlAccesoProtocol://" + 
+		"${getDevelopmentServerIP()}:$rootProject.controlAccesoPort" + 
+		"$rootProject.controlAccesoPath";
+	println("controlAccesoURL: $controlAccesoURL")
+	ant.copy(file:"assets/VotingSystem",
+		toFile:"assets/VotingSystem.properties")
+	ant.replace(file:"assets/VotingSystem.properties",
+		token:"[CONTROL_ACCESO_URL]",
+		value:controlAccesoURL)
 }
 
 
+def getDevelopmentServerIP() {
+	Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
+	for (NetworkInterface netint : Collections.list(nets)){
+		Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
+		for (InetAddress inetAddress : Collections.list(inetAddresses)) {
+			if(inetAddress.isSiteLocalAddress()) {
+				String inetAddressStr = inetAddress.toString();
+				while(inetAddressStr.startsWith("/"))
+					inetAddressStr = inetAddressStr.substring(1)
+				return inetAddressStr
+			}
+			
+		}
+	}
+}
+
 setActionBarSherlockEnv.dependsOn cloneActionBarSherlockGitRepo
 release.dependsOn checkDependencies
+antDebugInstall.dependsOn checkDependencies
