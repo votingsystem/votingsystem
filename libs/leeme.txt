@@ -1,0 +1,4 @@
+La librería 'plugin-1.3.jar' es necesaria para compilar los proyectos 'SistemaVotacionApplet' y 'HerramientaValidacionCopiasDeSeguridad'.
+Es necesaria para que el Applet pueda comunicarse con la interfaz de usuario web usando Javascript.
+
+La librería se puede encontrar en el directorio jre/lib de las máquinas virtuales Java de Oracle.
