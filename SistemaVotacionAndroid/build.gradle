@@ -85,7 +85,7 @@ task setAndroidEnv << {
 		"${getDevelopmentServerIP()}:$rootProject.controlAccesoPort" + 
 		"$rootProject.controlAccesoPath";
 	println("controlAccesoURL: $controlAccesoURL")
-	ant.copy(file:"assets/VotingSystem",
+	ant.copy(file:"$rootProject.projectDir/templates/VotingSystem.properties",
 		toFile:"assets/VotingSystem.properties")
 	ant.replace(file:"assets/VotingSystem.properties",
 		token:"[CONTROL_ACCESO_URL]",
