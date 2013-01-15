@@ -44,7 +44,8 @@ public class EnviarSolicitudControlAccesoWorker extends SwingWorker<Respuesta, S
     
     @Override
     protected Respuesta doInBackground() throws Exception {
-        logger.debug("doInBackground - urlSolicitudAcceso: " + urlSolicitudAcceso);
+        logger.debug("doInBackground - urlSolicitudAcceso: " + urlSolicitudAcceso 
+                + " - solicitudAcceso: " + solicitudAcceso.getAbsolutePath());
         Respuesta respuesta = null;
         HttpResponse response = Contexto.getHttpHelper().enviarSolicitudAcceso(
                 pkcs10WrapperClient.getPEMEncodedRequestCSR(), solicitudAcceso,

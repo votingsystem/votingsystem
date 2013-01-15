@@ -43,6 +43,10 @@ task signJar {
 	
 }
 
+project.ext {
+  mainClass = "org.sistemavotacion.AppletFirma"
+}
+
 classes.dependsOn cleanCompileJava
 buildVotingApplet.dependsOn classes
 signJar.dependsOn buildVotingApplet
@@ -51,7 +55,7 @@ install.dependsOn signJar
 sourceSets {
 	main {
 	  //to override the defaults:
-	  //output.resourcesDir = 'out/res'
+	  output.resourcesDir = "$buildDir/classes"
 	  output.classesDir   = "$buildDir/classes"
 	}
 }

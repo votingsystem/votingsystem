@@ -406,6 +406,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
         CMSSignedData cmsdata = smimeSigned.replaceSigners(smimeSigned, newSignersStore);
         replaceSigners(cmsdata);
         if(file != null) writeTo(new FileOutputStream(file));
+        else logger.debug("File null!!!");
         return file;
     }
     

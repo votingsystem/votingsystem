@@ -286,14 +286,12 @@ public class VotacionDialog extends JDialog implements WorkerListener {
 
     
     private void lanzarVoto(String password) {
-        File accessRequest = new File (
-                directorioArchivoVoto.getAbsolutePath() 
-                + File.separator + Contexto.
-                NOMBRE_ARCHIVO_SOLICITUD_ACCESO_TIMESTAMPED);
         KeyStore keyStore = null;
         try {
-        	accessRequest = VotacionHelper.obtenerSolicitudAcceso(
-        			votoEvento, password, accessRequest);
+            File accessRequest = File.createTempFile(
+                NOMBRE_ARCHIVO_SOLICITUD_ACCESO_TIMESTAMPED, SIGNED_PART_EXTENSION);
+            accessRequest = VotacionHelper.obtenerSolicitudAcceso(
+                    votoEvento, password, accessRequest);
             //No se hace la comprobación antes porque no hay usuario en contexto
             //hasta que no se firma al menos una vez
             votoEvento.setUsuario(Contexto.getUsuario());
@@ -310,6 +308,9 @@ public class VotacionDialog extends JDialog implements WorkerListener {
                 directorioArchivoVoto = new File (Contexto.
                         getRutaArchivosVoto(votoEvento, Contexto.getUsuario().getNif()));
                 directorioArchivoVoto.mkdirs();
+                File accessRequestCopy = new File (directorioArchivoVoto.getAbsolutePath() 
+                    + File.separator + Contexto.NOMBRE_ARCHIVO_SOLICITUD_ACCESO);
+                FileUtils.copyFileToFile(accessRequest, accessRequestCopy);
                 if(IS_TIME_STAMPED_SIGNATURE) {
                     setTimeStampedDocument(accessRequest, TIMESTAMP_ACCESS_REQUEST, TIMESTAMP_DNIe_HASH);
                 } else {
@@ -363,8 +364,7 @@ public class VotacionDialog extends JDialog implements WorkerListener {
         if(document == null) return;
         final Operacion operacion = appletFirma.getOperacionEnCurso();
         try {
-            timeStampedDocument = new SMIMEMessageWrapper(null,
-                        new FileInputStream(document), null);
+            timeStampedDocument = new SMIMEMessageWrapper(null,document);
             new TimeStampWorker(timeStampOperation, operacion.getUrlTimeStampServer(),
                     this, timeStampedDocument.getTimeStampRequest(timeStamprequestAlg)).execute();
         } catch (Exception ex) {
