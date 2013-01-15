@@ -42,20 +42,20 @@ public class LanzadoraFirma  implements Callable<InfoFirma> {
             KeyStore mockDnie = KeyStoreHelper.crearMockDNIe(infoFirma.getFrom(), file);
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, 
                 ContextoPruebas.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
-                ContextoPruebas.VOTE_SIGN_MECHANISM);            
-            File docFirmado = signedMailGenerator.genFile(infoFirma.getFrom(), 
+                ContextoPruebas.VOTE_SIGN_MECHANISM);
+            String rutaDocFirmado = ContextoPruebas.getUserDirPath(infoFirma.getFrom()) +
+                    "archivoFirmado";            
+            File docFirmado = new File(rutaDocFirmado);           
+            docFirmado = signedMailGenerator.genFile(infoFirma.getFrom(), 
                 infoFirma.getEvento().getControlAcceso().getNombreNormalizado(), 
                 EnvioFirmas.obtenerFirmaParaEventoJSON(infoFirma.getEvento()),
-                asuntoMensaje, null, SignedMailGenerator.Type.USER); 
-            String rutaDocFirmado = ContextoPruebas.getUserDirPath(infoFirma.getFrom()) +
-                        "archivoFirmado";
-            FileUtils.copyFileToFile(docFirmado, new File(rutaDocFirmado));
+                asuntoMensaje, null, SignedMailGenerator.Type.USER, docFirmado); 
             String urlRecepcionFirmas = infoFirma.getEvento().getControlAcceso().getServerURL() + 
             		"/recolectorFirma/guardarAdjuntandoValidacion"; 
             HttpResponse response = Contexto.getHttpHelper().enviarArchivoFirmado(
                     docFirmado, urlRecepcionFirmas);
             if (200 == response.getStatusLine().getStatusCode()) {
-                SMIMEMessageWrapper dnieMimeMessage = SMIMEMessageWrapper.build(
+                SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(null,
                         new ByteArrayInputStream(EntityUtils.toByteArray(response.getEntity())),
                         docFirmado.getName());
                 respuesta = new Respuesta(

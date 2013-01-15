@@ -44,7 +44,8 @@ public class ValidateSignedWithKeyStore {
             PKIXParameters params = obtenerPKIXParametersFromFile(cadenaCA);
             //byte[] bytes = FileUtils.getBytesFromFile(new File(CreatedSignedWithKeyStore.signedFilePath));
             byte[] bytes = FileUtils.getBytesFromFile(new File(signedFilePath));
-            SMIMEMessageWrapper dnieMimeMessage = SMIMEMessageWrapper.build(new ByteArrayInputStream(bytes), null);
+            SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(
+            		null, new ByteArrayInputStream(bytes), null);
             ValidationResult validationResult = null;
             if (dnieMimeMessage != null) {
                 logger.debug("signatura valida?" + SMIMEMessageWrapper.isValidSignature(dnieMimeMessage.getSmimeSigned()));

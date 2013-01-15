@@ -32,7 +32,8 @@ public class ValidateSignatureFromCsrSignedCert {
 
         
             byte[] bytes = FileUtils.getBytesFromFile(new File(CsrTest.keyStoreFirmaVotosSignedFilePath));
-            SMIMEMessageWrapper dnieMimeMessage = SMIMEMessageWrapper.build(new ByteArrayInputStream(bytes), null);
+            SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(
+            		null, new ByteArrayInputStream(bytes), null);
             ValidationResult validationResult = null;
             if (dnieMimeMessage != null) {
                 System.out.println("signatura valida?" + SMIMEMessageWrapper.isValidSignature(dnieMimeMessage.getSmimeSigned()));

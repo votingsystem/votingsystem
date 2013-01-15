@@ -578,7 +578,7 @@ public class CrearVotacionDialog extends JDialog implements KeyListener, Lanzado
                     + respuesta.getCodigoEstado()); 
             if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
                 try {
-                    SMIMEMessageWrapper dnieMimeMessage = SMIMEMessageWrapper.build(
+                    SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(null, 
                                 new ByteArrayInputStream(respuesta.getMensaje().getBytes()),"ReciboRespuesta");
                     PKIXParameters params = Contexto.getHttpHelper()
                             .obtenerPKIXParametersDeServidor(ContextoPruebas.getControlAcceso().getServerURL());

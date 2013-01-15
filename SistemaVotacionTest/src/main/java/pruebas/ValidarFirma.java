@@ -52,7 +52,8 @@ public class ValidarFirma {
         logger.debug("validarMensaje");
         try {
             Security.addProvider(new BouncyCastleProvider());
-            SMIMEMessageWrapper dniemm = SMIMEMessageWrapper.build(new FileInputStream("signedKeystore.message"), null);
+            SMIMEMessageWrapper dniemm = new SMIMEMessageWrapper(null, 
+            		new FileInputStream("signedKeystore.message"), null);
             //DNIeMimeMessage dniemm = DNIeMimeMessage.build(new FileInputStream("C:\\temp\\SistemaVotacionClientePublicacion\\signed.message"));
 
             //logger.debug("signatura valida?" + dniemm.isValidSignature());
@@ -65,7 +66,8 @@ public class ValidarFirma {
      public static void validarMensajeKeyStoreSinParametros () {
         try {
             Security.addProvider(new BouncyCastleProvider());
-            SMIMEMessageWrapper dniemm = SMIMEMessageWrapper.build(new FileInputStream("signedKeystore.message"), null);
+            SMIMEMessageWrapper dniemm = new SMIMEMessageWrapper(
+            		null, new FileInputStream("signedKeystore.message"), null);
                //DNIeMimeMessage dniemm = DNIeMimeMessage.build(new FileInputStream("C:\\temp\\SistemaVotacionClientePublicacion\\signed.message"));
 
                //logger.debug("signatura valida?" + dniemm.isValidSignature());
@@ -105,7 +107,8 @@ public class ValidarFirma {
             //
             
             byte[] bytes = FileUtils.getBytesFromFile(new File("C:\\temp\\Validado.txt"));
-            SMIMEMessageWrapper dnieMimeMessage = SMIMEMessageWrapper.build(new ByteArrayInputStream(bytes), null);
+            SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(
+            		null, new ByteArrayInputStream(bytes), null);
             
             //DNIeMimeMessage dnieMimeMessage = DNIeMimeMessage.build(new FileInputStream("C:\\temp\\Validado.txt"));
             logger.debug("dniemm: " + dnieMimeMessage);

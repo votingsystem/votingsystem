@@ -47,17 +47,15 @@ public class LanzadoraAnulacionSolicitudAcceso  implements Callable<Respuesta> {
                 ContextoPruebas.VOTE_SIGN_MECHANISM);
         String asuntoMensaje = ContextoPruebas.ASUNTO_MENSAJE_ANULACION_SOLICITUD_ACCESO
                         + solicitudAcceso.getEventoId();
-        File anulador = null;
+        File anulador = new File(ContextoPruebas.getUserDirPath(solicitudAcceso.getUserNif())
+                + ContextoPruebas.ANULACION_FIRMADA_FILE + solicitudAcceso.getEventoId() + 
+                "_usu" + solicitudAcceso.getUserNif() + ".p7m");;
         synchronized(this) {
              anulador = signedMailGenerator.genFile(solicitudAcceso.getUserNif(), 
                 ContextoPruebas.getControlAcceso().getNombreNormalizado(), 
                 DeObjetoAJSON.obtenerAnuladorDeVotoJSON(solicitudAcceso),
-                asuntoMensaje, null, SignedMailGenerator.Type.USER); 
+                asuntoMensaje, null, SignedMailGenerator.Type.USER, anulador); 
         }
-        File copiaAnulador = new File(ContextoPruebas.getUserDirPath(solicitudAcceso.getUserNif())
-                + ContextoPruebas.ANULACION_FIRMADA_FILE + solicitudAcceso.getEventoId() + 
-                "_usu" + solicitudAcceso.getUserNif() + ".p7m");
-        FileUtils.copy(anulador, copiaAnulador);
         HttpResponse response = Contexto.getHttpHelper().enviarArchivoFirmado(
             anulador, ContextoPruebas.getURLAnulacionVoto(
             		ContextoPruebas.getControlAcceso().getServerURL()));
@@ -65,7 +63,7 @@ public class LanzadoraAnulacionSolicitudAcceso  implements Callable<Respuesta> {
             PKIXParameters params = Contexto.getHttpHelper()
                     .obtenerPKIXParametersDeServidor(
             		ContextoPruebas.getControlAcceso().getServerURL());
-            SMIMEMessageWrapper dnieMimeMessage = SMIMEMessageWrapper.build(
+            SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(null,
                     new ByteArrayInputStream(EntityUtils.toByteArray(response.getEntity())),
                     "ReciboAnulacionVoto");
             respuesta = new Respuesta(response.getStatusLine().getStatusCode(), 

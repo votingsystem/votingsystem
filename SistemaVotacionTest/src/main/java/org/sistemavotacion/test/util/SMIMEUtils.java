@@ -29,8 +29,8 @@ public class SMIMEUtils {
         SolicitudAcceso solicitud = null;
         try {
             byte[] bytes = FileUtils.getBytesFromFile(archivo);
-            SMIMEMessageWrapper smimeMessage = 
-                    SMIMEMessageWrapper.build(new ByteArrayInputStream(bytes), null);
+            SMIMEMessageWrapper smimeMessage = new SMIMEMessageWrapper(
+            		null, new ByteArrayInputStream(bytes), null);
             if (smimeMessage.isValidSignature()) {
                 solicitud = DeJSONAObjeto.obtenerSolicitudAcceso(
                         smimeMessage.getSignedContent());

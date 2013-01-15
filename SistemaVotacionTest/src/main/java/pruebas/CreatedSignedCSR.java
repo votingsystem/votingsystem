@@ -38,12 +38,9 @@ public class CreatedSignedCSR {
                     CsrTest.keyStoreFirmaVotosPass.toCharArray(), 
                     ContextoPruebas.VOTE_SIGN_MECHANISM);
             Header header  = new Header("hasnCert", "34f3g25");
-            FileUtils.copyFileToFile(dnies.genFile(
-                    "from@m.com", "toUser@m.com", "blim blim", "asunto", header, 
-                    SignedMailGenerator.Type.USER), 
-                    new File(CsrTest.keyStoreFirmaVotosSignedFilePath));
-
-
+            dnies.genFile("from@m.com", "toUser@m.com", 
+            		"blim blim", "asunto", header, 
+                    SignedMailGenerator.Type.USER, new File(CsrTest.keyStoreFirmaVotosSignedFilePath));
         }catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
         } 

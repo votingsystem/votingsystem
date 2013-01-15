@@ -39,9 +39,8 @@ public class CreatedSignedWithKeyStore {
                     ContextoPruebas.VOTE_SIGN_MECHANISM);
             logger.debug(dnies.genString("from@m.com", "toUser@m.com", 
                     "blim blim", "asunto", null, SignedMailGenerator.Type.USER));
-            FileUtils.copyFileToFile(dnies.genFile("from@m.com", "toUser@m.com", 
-                    "blim blim", "asunto", null, SignedMailGenerator.Type.USER), 
-                    new File(signedFilePath));
+            dnies.genFile("from@m.com", "toUser@m.com", "blim blim", 
+            		"asunto", null, SignedMailGenerator.Type.USER,new File(signedFilePath));
         }catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
         } 

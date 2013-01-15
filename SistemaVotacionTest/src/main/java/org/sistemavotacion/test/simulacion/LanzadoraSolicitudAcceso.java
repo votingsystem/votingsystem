@@ -60,17 +60,16 @@ public class LanzadoraSolicitudAcceso  implements Callable<InfoVoto> {
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, 
                 ContextoPruebas.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
                 ContextoPruebas.VOTE_SIGN_MECHANISM);
-        File solicitudAcceso = signedMailGenerator.genFile(infoVoto.getFrom(), 
+        File solicitudAcceso = new File(ContextoPruebas.getUserDirPath(infoVoto.getFrom())
+                + ContextoPruebas.SOLICITUD_FILE + infoVoto.getVoto().getEventoId() + 
+                "_usu" + infoVoto.getFrom() + ".p7m");
+        solicitudAcceso = signedMailGenerator.genFile(infoVoto.getFrom(), 
                 infoVoto.getVoto().getControlAcceso().getNombreNormalizado(), 
                 DeObjetoAJSON.obtenerSolicitudAccesoJSON(
                     ContextoPruebas.getControlAcceso().getServerURL(),infoVoto.getVoto()),
-                asuntoMensaje, null, SignedMailGenerator.Type.USER); 
-        File recibo = new File(ContextoPruebas.getUserDirPath(infoVoto.getFrom())
-                + ContextoPruebas.SOLICITUD_FILE + infoVoto.getVoto().getEventoId() + 
-                "_usu" + infoVoto.getFrom() + ".p7m");
-        FileUtils.copy(solicitudAcceso, recibo);
+                asuntoMensaje, null, SignedMailGenerator.Type.USER, solicitudAcceso); 
         logger.debug("call - infoVoto: " + infoVoto.getFrom() + " - Hash Solicitud Acceso: " + infoVoto.getVoto().getHashSolicitudAccesoBase64()
-                + " - Solicitud Acceso: " + recibo.getAbsolutePath());
+                + " - Solicitud Acceso: " + solicitudAcceso.getAbsolutePath());
         HttpResponse response = Contexto.getHttpHelper().enviarSolicitudAcceso(
                 wrapperClient.getPEMEncodedRequestCSR(), solicitudAcceso,
                 ContextoPruebas.getURLSolicitudAcceso(
