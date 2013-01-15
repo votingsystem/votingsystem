@@ -77,7 +77,7 @@ public class Contexto {
     public static final String DEFAULT_SIGNED_FILE_NAME = "smimeMessage";
     public static String CERT_STORE_TYPE = "Collection";
     
-    public static final String SIGNED_PART_EXTENSION = ".p7s";
+    public static final String SIGNED_PART_EXTENSION = ".p7m";
     
     public static final String OCSP_DNIE_URL = "http://ocsp.dnie.es";
     

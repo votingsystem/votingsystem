@@ -38,7 +38,9 @@ import org.slf4j.LoggerFactory;
 */
 public class FirmaDialog extends JDialog implements WorkerListener {
 
-    private static Logger logger = LoggerFactory.getLogger(FirmaDialog.class);
+	private static final long serialVersionUID = 1L;
+
+	private static Logger logger = LoggerFactory.getLogger(FirmaDialog.class);
     
     private byte[] bytesDocumento;
     private volatile boolean mostrandoPantallaEnvio = false;
@@ -46,7 +48,7 @@ public class FirmaDialog extends JDialog implements WorkerListener {
     private SwingWorker tareaEnEjecucion;
     private File documentoFirmado;
     private AppletFirma appletFirma;
-    private SMIMEMessageWrapper timeStampWrapper;
+    private SMIMEMessageWrapper timeStampedDocument;
     private static FirmaDialog INSTANCIA;
     
     public FirmaDialog(Frame parent, boolean modal, final AppletFirma appletFirma) {
@@ -293,12 +295,14 @@ public class FirmaDialog extends JDialog implements WorkerListener {
                         case PUBLICACION_RECLAMACION_SMIME:
                         case CANCELAR_EVENTO:
                         case PUBLICACION_VOTACION_SMIME:
+                        	documentoFirmado = new File(FileUtils.APPTEMPDIR + NOMBRE_ARCHIVO_FIRMADO);
                             documentoFirmado = DNIeSignedMailGenerator.genFile(null,
                                 operacion.getNombreDestinatarioFirmaNormalizado(),
                                 operacion.getContenidoFirma().toString(),
-                                finalPassword.toCharArray(), operacion.getAsuntoMensajeFirmado());
+                                finalPassword.toCharArray(), operacion.getAsuntoMensajeFirmado(), 
+                                documentoFirmado);
                             if(IS_TIME_STAMPED_SIGNATURE) {                                
-                                getTimeStampDocument(documentoFirmado, TIMESTAMP_DNIe_HASH);
+                                setTimeStampDocument(documentoFirmado, TIMESTAMP_DNIe_HASH);
                                 return;
                             }
                             break;
@@ -381,14 +385,13 @@ public class FirmaDialog extends JDialog implements WorkerListener {
     // End of variables declaration//GEN-END:variables
 
     
-    private void getTimeStampDocument(File document, String timeStampRequestAlg) {
+    private void setTimeStampDocument(File document, String timeStampRequestAlg) {
         if(document == null) return;
         final Operacion operacion = appletFirma.getOperacionEnCurso();
         try {
-            timeStampWrapper = SMIMEMessageWrapper.build(
-                        new FileInputStream(document), null);
+        	timeStampedDocument = new SMIMEMessageWrapper(null, document);
             new TimeStampWorker(null, operacion.getUrlTimeStampServer(),
-                    this, timeStampWrapper.getTimeStampRequest(timeStampRequestAlg)).execute();
+                    this, timeStampedDocument.getTimeStampRequest(timeStampRequestAlg)).execute();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
         }
@@ -418,10 +421,8 @@ public class FirmaDialog extends JDialog implements WorkerListener {
         if(worker instanceof TimeStampWorker) {
             if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
                 try {
-                    File resultado = new File(
-                            FileUtils.APPTEMPDIR + NOMBRE_ARCHIVO_FIRMADO);
-                    processDocument(timeStampWrapper.setTimeStampToken(
-                            (TimeStampWorker)worker, resultado));
+                    processDocument(timeStampedDocument.setTimeStampToken(
+                            (TimeStampWorker)worker));
                 } catch (Exception ex) {
                     logger.error(ex.getMessage(), ex);
                     MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);

@@ -26,7 +26,7 @@ import org.bouncycastle.cert.jcajce.JcaCertStore;
 import org.bouncycastle.cms.SignerInfoGenerator;
 import org.bouncycastle.util.Store;
 import org.sistemavotacion.Contexto;
-import org.sistemavotacion.util.FileUtils;
+
 /**
 * @author jgzornoza
 * Licencia: http://bit.ly/j9jZQH
@@ -36,13 +36,12 @@ public class DNIeSignedMailGenerator {
     private static Logger logger = LoggerFactory.getLogger(DNIeSignedMailGenerator.class); 
           
     public static File genFile(String fromUser, String toUser, String textoAFirmar, 
-            char[] password, String asunto) throws Exception {
-    	return genFile(fromUser, toUser, textoAFirmar, password, asunto, null);
+            char[] password, String asunto, File resultado) throws Exception {
+    	return genFile(fromUser, toUser, textoAFirmar, password, asunto, null, resultado);
     }
     
     public static File genFile(String fromUser, String toUser, String textoAFirmar, 
-            char[] password, String asunto, Header header) throws Exception {
-        File resultado = new File(FileUtils.APPTEMPDIR + NOMBRE_ARCHIVO_FIRMADO);
+            char[] password, String asunto, Header header, File resultado) throws Exception {
         MimeMessage body = gen(fromUser, toUser, textoAFirmar,  password, asunto, header);
         body.writeTo(new FileOutputStream(resultado));
         return resultado;

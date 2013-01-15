@@ -15,7 +15,6 @@ import java.util.List;
 import javax.swing.JDialog;
 import javax.swing.SwingWorker;
 import javax.swing.text.html.parser.ParserDelegator;
-import org.bouncycastle.tsp.TSPAlgorithms;
 import org.sistemavotacion.dialogo.MensajeDialog;
 import org.sistemavotacion.dialogo.PasswordDialog;
 import org.sistemavotacion.modelo.Evento;
@@ -52,7 +51,7 @@ public class VotacionDialog extends JDialog implements WorkerListener {
     private Evento votoEvento;
     private AppletFirma appletFirma;
     private File directorioArchivoVoto;
-    private SMIMEMessageWrapper timeStampWrapper;
+    private SMIMEMessageWrapper timeStampedDocument;
     PKCS10WrapperClient pkcs10WrapperClient = null;
     
     public VotacionDialog(java.awt.Frame parent, boolean modal, final AppletFirma appletFirma) {
@@ -287,10 +286,14 @@ public class VotacionDialog extends JDialog implements WorkerListener {
 
     
     private void lanzarVoto(String password) {
-        File solicitudAcceso = null;
+        File accessRequest = new File (
+                directorioArchivoVoto.getAbsolutePath() 
+                + File.separator + Contexto.
+                NOMBRE_ARCHIVO_SOLICITUD_ACCESO_TIMESTAMPED);
         KeyStore keyStore = null;
         try {
-            solicitudAcceso = VotacionHelper.obtenerSolicitudAcceso(votoEvento, password);
+        	accessRequest = VotacionHelper.obtenerSolicitudAcceso(
+        			votoEvento, password, accessRequest);
             //No se hace la comprobación antes porque no hay usuario en contexto
             //hasta que no se firma al menos una vez
             votoEvento.setUsuario(Contexto.getUsuario());
@@ -307,13 +310,10 @@ public class VotacionDialog extends JDialog implements WorkerListener {
                 directorioArchivoVoto = new File (Contexto.
                         getRutaArchivosVoto(votoEvento, Contexto.getUsuario().getNif()));
                 directorioArchivoVoto.mkdirs();
-                File copiaLocalSolicitudAcceso = new File (directorioArchivoVoto.getAbsolutePath() 
-                    + File.separator + Contexto.NOMBRE_ARCHIVO_SOLICITUD_ACCESO);
-                FileUtils.copyFileToFile(solicitudAcceso, copiaLocalSolicitudAcceso);
                 if(IS_TIME_STAMPED_SIGNATURE) {
-                    getTimeStampDocument(solicitudAcceso, TIMESTAMP_ACCESS_REQUEST, TIMESTAMP_DNIe_HASH);
+                    setTimeStampedDocument(accessRequest, TIMESTAMP_ACCESS_REQUEST, TIMESTAMP_DNIe_HASH);
                 } else {
-                    tareaEnEjecucion = new EnviarSolicitudControlAccesoWorker(solicitudAcceso, 
+                    tareaEnEjecucion = new EnviarSolicitudControlAccesoWorker(accessRequest, 
                         votoEvento.getUrlSolicitudAcceso(), pkcs10WrapperClient, this);
                     tareaEnEjecucion.execute();
                 }
@@ -336,13 +336,16 @@ public class VotacionDialog extends JDialog implements WorkerListener {
                 getString("notificandoCentroControlLabel") +"</b></html>");
         mostrarPantallaEnvio(true);
         String votoJSON = votoEvento.obtenerVotoJSONStr();
-        File votoFirmado = null;
+        File votoFirmado = new File (
+                directorioArchivoVoto.getAbsolutePath() 
+                + File.separator + getString("TIMESTAMPED_VOTE_SMIME_FILE"));
         try {
             votoFirmado = pkcs10WrapperClient.genSignedFile(Contexto.getUsuario().getNif(), 
                     StringUtils.getCadenaNormalizada(votoEvento.getCentroControl().getNombre()),
-                    votoJSON, getString("asuntoVoto"), null, SignedMailGenerator.Type.USER);
+                    votoJSON, getString("asuntoVoto"), null, 
+                    SignedMailGenerator.Type.USER, votoFirmado);
             if(IS_TIME_STAMPED_SIGNATURE) {
-                getTimeStampDocument(votoFirmado, TIMESTAMP_VOTE, TIMESTAMP_VOTE_HASH);
+                setTimeStampedDocument(votoFirmado, TIMESTAMP_VOTE, TIMESTAMP_VOTE_HASH);
             } else {
                 tareaEnEjecucion = new NotificarVotoWorker(votoEvento, 
                     votoEvento.getUrlRecolectorVotosCentroControl(), votoFirmado, this);
@@ -355,15 +358,15 @@ public class VotacionDialog extends JDialog implements WorkerListener {
         }
     }
     
-    private void getTimeStampDocument(File document, int timeStampOperation, 
+    private void setTimeStampedDocument(File document, int timeStampOperation, 
             String timeStamprequestAlg) {
         if(document == null) return;
         final Operacion operacion = appletFirma.getOperacionEnCurso();
         try {
-            timeStampWrapper = SMIMEMessageWrapper.build(
+            timeStampedDocument = new SMIMEMessageWrapper(null,
                         new FileInputStream(document), null);
             new TimeStampWorker(timeStampOperation, operacion.getUrlTimeStampServer(),
-                    this, timeStampWrapper.getTimeStampRequest(timeStamprequestAlg)).execute();
+                    this, timeStampedDocument.getTimeStampRequest(timeStamprequestAlg)).execute();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
@@ -418,13 +421,8 @@ public class VotacionDialog extends JDialog implements WorkerListener {
             case TIMESTAMP_ACCESS_REQUEST:
                 if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
                     try {
-                        File timeStampedAccessRequest = new File (
-                                directorioArchivoVoto.getAbsolutePath() 
-                                + File.separator + Contexto.
-                                NOMBRE_ARCHIVO_SOLICITUD_ACCESO_TIMESTAMPED);
-                        timeStampWrapper.setTimeStampToken(worker, timeStampedAccessRequest);
                         tareaEnEjecucion = new EnviarSolicitudControlAccesoWorker(
-                                timeStampedAccessRequest, votoEvento.
+                        		timeStampedDocument.setTimeStampToken(worker), votoEvento.
                                 getUrlSolicitudAcceso(), pkcs10WrapperClient, this);
                         tareaEnEjecucion.execute();
                     } catch (Exception ex) {
@@ -440,12 +438,9 @@ public class VotacionDialog extends JDialog implements WorkerListener {
             case TIMESTAMP_VOTE:
                 if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
                     try {
-                        File timeStampedVote = new File (
-                                directorioArchivoVoto.getAbsolutePath() 
-                                + File.separator + getString("TIMESTAMPED_VOTE_SMIME_FILE"));
-                        timeStampWrapper.setTimeStampToken(worker, timeStampedVote);
                         tareaEnEjecucion = new NotificarVotoWorker(votoEvento, 
-                            votoEvento.getUrlRecolectorVotosCentroControl(), timeStampedVote, this);
+                            votoEvento.getUrlRecolectorVotosCentroControl(), 
+                            timeStampedDocument.setTimeStampToken(worker), this);
                             tareaEnEjecucion.execute();
                     } catch (Exception ex) {
                         logger.error(ex.getMessage(), ex);

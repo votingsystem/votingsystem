@@ -1,7 +1,6 @@
 package org.sistemavotacion.seguridad;
 
 import static org.sistemavotacion.Contexto.*;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -39,7 +38,6 @@ public class PKCS10WrapperClient {
     private PrivateKey privateKey;
     private SignedMailGenerator signedMailGenerator;
     private KeyStore keyStore;
-    private boolean isSignerLoaded = false;
 
     public PKCS10WrapperClient(int keySize, String keyName, 
             String sigName, String provider, String controlAccesoURL, String eventoId,
@@ -107,32 +105,32 @@ public class PKCS10WrapperClient {
         certificados.toArray(arrayCerts);
         signedMailGenerator = new SignedMailGenerator(
                 privateKey, arrayCerts,VOTE_SIGN_MECHANISM);
-        keyStore = KeyStore.getInstance("JKS");
+        keyStore = KeyStore.getInstance("PKCS12");
         keyStore.load(null, null);
         keyStore.setKeyEntry(ALIAS_CLAVES, privateKey, PASSWORD_CLAVES.toCharArray(), arrayCerts);
-        isSignerLoaded = true;
     }
     //(KeyStore keyStore, String keyAlias, char[] password)
     public void initSigner (KeyStore keyStore) throws Exception {
         this.keyStore = keyStore;
         signedMailGenerator = new SignedMailGenerator(keyStore, ALIAS_CLAVES, 
                 PASSWORD_CLAVES.toCharArray(),VOTE_SIGN_MECHANISM);
-        isSignerLoaded = true;
     }
     
     public String genSignedString(String fromUser, String toUser, String textoAFirmar, 
             String asunto, Header header, Type signerType) throws Exception {
-        if (!isSignerLoaded) throw new Exception ("signedMailGenerator no inicializado ");
+        if (signedMailGenerator == null) 
+        	throw new Exception ("signedMailGenerator no inicializado ");
         String result = signedMailGenerator.genString(
                 fromUser, toUser, textoAFirmar, asunto, header, signerType);
         return result;
     }
     
     public File genSignedFile(String fromUser, String toUser, String textoAFirmar, 
-            String asunto, Header header, Type signerType) throws Exception {
-        if (!isSignerLoaded) throw new Exception ("signedMailGenerator no inicializado ");
-        File result = signedMailGenerator.genFile(
-                fromUser, toUser, textoAFirmar, asunto, header, signerType);
+            String asunto, Header header, Type signerType, File output) throws Exception {
+        if (signedMailGenerator == null) 
+        	throw new Exception ("signedMailGenerator no inicializado ");
+        File result = signedMailGenerator.genFile(fromUser, toUser, 
+        		textoAFirmar, asunto, header, signerType, output);
         return result;
     }
 
@@ -140,7 +138,7 @@ public class PKCS10WrapperClient {
      * @return the keyStore
      */
     public KeyStore getKeyStore() throws Exception {
-        if (!isSignerLoaded) throw new Exception ("signedMailGenerator no inicializado ");
+        if (signedMailGenerator == null) throw new Exception ("signedMailGenerator no inicializado ");
         return keyStore;
     }
 }

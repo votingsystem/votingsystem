@@ -52,7 +52,7 @@ public class NotificarVotoWorker extends SwingWorker<Respuesta, String> {
                 enviarArchivoFirmado(votoFirmado, urlServidorRecolectorVotos);
         if (200 == response.getStatusLine().getStatusCode()) {
             byte[] votoValidadoBytes = EntityUtils.toByteArray(response.getEntity());
-            SMIMEMessageWrapper votoValidado = SMIMEMessageWrapper.build(
+            SMIMEMessageWrapper votoValidado = new SMIMEMessageWrapper(null,
                 new ByteArrayInputStream(votoValidadoBytes), null);                        
             reciboVoto = new ReciboVoto(200, votoValidado, evento);
             respuesta = new Respuesta(

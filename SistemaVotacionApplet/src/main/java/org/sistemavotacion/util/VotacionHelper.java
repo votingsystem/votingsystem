@@ -44,12 +44,12 @@ public class VotacionHelper {
     }
    
     public static File obtenerSolicitudAcceso (Evento voto, 
-            String password) throws NoSuchAlgorithmException, Exception {
+            String password, File resultado) throws NoSuchAlgorithmException, Exception {
         String asuntoMensaje = 
                 ASUNTO_MENSAJE_SOLICITUD_ACCESO + voto.getEventoId();
         File solicitudAcceso = DNIeSignedMailGenerator.genFile("",
                 NOMBRE_DESTINATARIO, voto.obtenerSolicitudAccesoJSONStr(),
-                password.toCharArray(), asuntoMensaje, null);
+                password.toCharArray(), asuntoMensaje, resultado);
         return solicitudAcceso;
     }
     

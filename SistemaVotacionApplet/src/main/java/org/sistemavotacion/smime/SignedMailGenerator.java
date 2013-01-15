@@ -93,12 +93,11 @@ public class SignedMailGenerator {
     }
     
     public File genFile(String fromUser, String toUser, String textoAFirmar, 
-            String asunto, Header header, Type signerType) throws Exception {
-        File resultado = File.createTempFile("smime", ".p7m");
+            String asunto, Header header, Type signerType, File output) throws Exception {
         MimeMessage body = gen(
                 fromUser, toUser, textoAFirmar, asunto, header, signerType);
-        body.writeTo(new FileOutputStream(resultado));
-        return resultado;
+        body.writeTo(new FileOutputStream(output));
+        return output;
     }
           
     public String genString(String fromUser, String toUser, String textoAFirmar, 

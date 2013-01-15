@@ -6,6 +6,7 @@ import com.sun.mail.util.BASE64DecoderStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,7 +47,6 @@ import java.util.Locale;
 import java.util.Set;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.sistemavotacion.modelo.Firmante;
 import org.sistemavotacion.seguridad.PKIXCertPathReviewer;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -81,6 +81,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
 
     private String messageId;
     private String fileName;
+    private File file;
     private String contentType;
     private String signedContent;
     private SMIMESigned smimeSigned = null;
@@ -96,32 +97,27 @@ public class SMIMEMessageWrapper extends MimeMessage {
     private SMIMEMessageWrapper(Session session) throws MessagingException {
         super(session);
         fileName =  RandomLowerString(System.currentTimeMillis(), 7);
-        setDisposition("attachment; fileName=" + fileName + ".p7m");
-        contentType = "application/x-pkcs7-mime; smime-type=signed-data; name=" + fileName + ".p7m";
-    }
-
-    public static SMIMEMessageWrapper build(InputStream inputStream, String name) 
-            throws IOException, MessagingException, CMSException, SMIMEException, Exception {
-        //Properties props = System.getProperties();
-        //return new DNIeMimeMessage (Session.getDefaultInstance(props, null), fileInputStream);
-        SMIMEMessageWrapper dnieMimeMessage = null;
-        try {
-            dnieMimeMessage = new SMIMEMessageWrapper (null, inputStream, name);
-        } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            return null;
-        } 
-        return dnieMimeMessage;
+        setDisposition("attachment; fileName=" + fileName + SIGNED_PART_EXTENSION);
+        contentType = "application/x-pkcs7-mime; smime-type=signed-data; name=" + fileName 
+        		+ SIGNED_PART_EXTENSION;
     }
 
     public SMIMEMessageWrapper (Session session, InputStream inputStream, String fileName) 
             throws IOException, MessagingException, CMSException, SMIMEException, Exception {
+        //Properties props = System.getProperties();
+        //return new DNIeMimeMessage (Session.getDefaultInstance(props, null), fileInputStream);
         super(session, inputStream);
         if (fileName == null) this.fileName = DEFAULT_SIGNED_FILE_NAME; 
-        this.fileName = fileName;
+        else this.fileName = fileName;
         initSMIMEMessage();
     }
 
+    public SMIMEMessageWrapper (Session session, File file) throws IOException, 
+    		MessagingException, CMSException, SMIMEException, Exception {
+    	this(session, new FileInputStream(file), file.getName());
+    	this.file = file;
+    }
+    
     private void initSMIMEMessage() throws IOException, MessagingException, 
             CMSException, SMIMEException, Exception{
         if (getContent() instanceof BASE64DecoderStream) {
@@ -368,11 +364,9 @@ public class SMIMEMessageWrapper extends MimeMessage {
         return timeStampToken;
     }
     
-    public File setTimeStampToken(TimeStampWorker timeStampWorker, 
-            File outputFile) throws Exception {
+    public File setTimeStampToken(TimeStampWorker timeStampWorker) throws Exception {
         if(timeStampWorker == null || timeStampWorker.getTimeStampToken() == null) 
             throw new Exception("NULL_TIME_STAMP_TOKEN");
-        File result = null;
         TimeStampToken timeStampToken = timeStampWorker.getTimeStampToken();
         byte[] hashTokenBytes = timeStampToken.getTimeStampInfo().getMessageImprintDigest();
         String hashTokenStr = new String(Base64.encode(hashTokenBytes));
@@ -411,10 +405,8 @@ public class SMIMEMessageWrapper extends MimeMessage {
         SignerInformationStore newSignersStore = new SignerInformationStore(newSigners);
         CMSSignedData cmsdata = smimeSigned.replaceSigners(smimeSigned, newSignersStore);
         replaceSigners(cmsdata);
-        if(outputFile != null) writeTo(new FileOutputStream(outputFile));
-        else logger.debug("outputFile null");
-        result = outputFile;
-        return result;
+        if(file != null) writeTo(new FileOutputStream(file));
+        return file;
     }
     
     public TimeStampRequest getTimeStampRequest(String timeStampRequestAlg) {

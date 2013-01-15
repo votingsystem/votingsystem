@@ -266,7 +266,7 @@ public class Respuesta<T> {
     }
         
     private String comprobarRecibo(byte[] bytesFirmados) throws Exception {
-        SMIMEMessageWrapper smimeMessage = SMIMEMessageWrapper.build(
+        SMIMEMessageWrapper smimeMessage = new SMIMEMessageWrapper(null,
                     new ByteArrayInputStream(bytesFirmados), null);
         if (smimeMessage.isValidSignature()) {
             logger.debug("Firma valida - contenido mensaje: " + smimeMessage.getSignedContent());
