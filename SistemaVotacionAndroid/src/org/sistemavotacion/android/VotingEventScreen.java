@@ -16,13 +16,8 @@
 
 package org.sistemavotacion.android;
 
-import static org.sistemavotacion.android.Aplicacion.CONTROL_ACCESO_URL;
-import static org.sistemavotacion.android.Aplicacion.KEY_SIZE;
 import static org.sistemavotacion.android.Aplicacion.KEY_STORE_FILE;
 import static org.sistemavotacion.android.Aplicacion.MAX_SUBJECT_SIZE;
-import static org.sistemavotacion.android.Aplicacion.PROVIDER;
-import static org.sistemavotacion.android.Aplicacion.SIGNATURE_ALGORITHM;
-import static org.sistemavotacion.android.Aplicacion.SIG_NAME;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -34,21 +29,16 @@ import java.util.Set;
 
 import org.sistemavotacion.android.ui.CertPinScreen;
 import org.sistemavotacion.android.ui.CertPinScreenCallback;
-import org.sistemavotacion.json.DeObjetoAJSON;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.OpcionDeEvento;
 import org.sistemavotacion.modelo.ReciboVoto;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.PKCS10WrapperClient;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
-import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.task.DataListener;
-import org.sistemavotacion.task.GetVotingCertTask;
-import org.sistemavotacion.task.SendDataTask;
 import org.sistemavotacion.task.VotingListener;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
-import org.sistemavotacion.util.ServerPaths;
 import org.sistemavotacion.util.VotacionHelper;
 
 import android.app.AlertDialog;
@@ -57,6 +47,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -67,19 +58,19 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 
-public class VotingEventScreen extends 
-		SherlockActivity implements CertPinScreenCallback, VotingListener {
+public class VotingEventScreen extends SherlockFragmentActivity 
+	implements CertPinScreenCallback, VotingListener {
 	
 	public static final String TAG = "VotingEventScreen";
-	
+    private static final String CERT_PIN_DIALOG = "certPinDialog";
 
 
     private Evento evento;
     private ProgressDialog progressDialog = null;
     private PKCS10WrapperClient pkcs10WrapperClient = null;
-    private AlertDialog certPinDialog;
+    private CertPinScreen certPinScreen;
     private AsyncTask runningTask = null;
     private List<Button> optionButtons = null;
     byte[] keyStoreBytes = null;
@@ -177,14 +168,13 @@ public class VotingEventScreen extends
 		Set<OpcionDeEvento> opciones = evento.getOpciones();
 		LinearLayout linearLayout = (LinearLayout)findViewById(R.id.contenedor_evento);
 		optionButtons = new ArrayList<Button>();
-		FrameLayout.LayoutParams paramsButton = new FrameLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+		FrameLayout.LayoutParams paramsButton = new 
+				FrameLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
 		paramsButton.setMargins(10, 10, 10, 10);
-	    
 		for (final OpcionDeEvento opcion:opciones) {
 			Button opcionButton = new Button(this);
 			opcionButton.setText(opcion.getContenido());
 			opcionButton.setOnClickListener(new Button.OnClickListener() {
-				
 				OpcionDeEvento opcionSeleccionada = opcion;
 				
 	            public void onClick(View v) {
@@ -214,6 +204,11 @@ public class VotingEventScreen extends
 				showMessage(getString(R.string.error_lbl), e.getMessage());
 			}	
 		}
+		try {
+			getActionBar().setLogo(R.drawable.poll_22x22);
+		} catch(NoSuchMethodError ex) {
+			Log.d(TAG + ".onCreate(...)", " --- android api 11 I dooesn't have method 'setLogo'");
+		}  
 	}
 
 	private void showCertNotFoundDialog() {
@@ -302,14 +297,10 @@ public class VotingEventScreen extends
 	}
 	
     private void showPinScreen(String message) {
-    	AlertDialog.Builder builder= new AlertDialog.Builder(
-    			VotingEventScreen.this);
-    	CertPinScreen certPinScreen = new CertPinScreen(
-    			getApplicationContext(), VotingEventScreen.this);
-    	if(message != null) certPinScreen.setMessage(message);
-    	builder.setView(certPinScreen);
-    	certPinDialog = builder.create();
-    	certPinDialog.show();
+    	certPinScreen = CertPinScreen.newInstance(
+    			VotingEventScreen.this, message);
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        certPinScreen.show(ft, CERT_PIN_DIALOG);
     }
 
 	@Override public void setPin(final String pin) {
@@ -326,7 +317,8 @@ public class VotingEventScreen extends
 	        		});
 	        firmarEnviarVoto(pin.toCharArray());
 		} 
-		certPinDialog.dismiss();
+		if(certPinScreen.getDialog() != null)
+			certPinScreen.getDialog().dismiss();
 	}
 
 	@Override

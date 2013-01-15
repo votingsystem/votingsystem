@@ -4,6 +4,7 @@ import java.security.cert.CertPath;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
+import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.cms.SignerInformation;
 import org.bouncycastle2.util.encoders.Base64;
 import org.bouncycastle2.util.encoders.Hex;
@@ -22,6 +23,7 @@ public class Firmante {
     private SignerInformation signer;
     private CertPath certPath;
     private String contenidoFirmado;
+    private TimeStampToken timeStampToken;
 
     public Firmante() { }    
     
@@ -158,5 +160,19 @@ public class Firmante {
      */
     public void setContenidoFirmado(String contenidoFirmado) {
         this.contenidoFirmado = contenidoFirmado;
+    }
+
+    /**
+     * @return the timeStampToken
+     */
+    public TimeStampToken getTimeStampToken() {
+        return timeStampToken;
+    }
+
+    /**
+     * @param timeStampToken the timeStampToken to set
+     */
+    public void setTimeStampToken(TimeStampToken timeStampToken) {
+        this.timeStampToken = timeStampToken;
     }
 }

@@ -149,9 +149,11 @@ public class EventListFragmentLoader extends SherlockFragmentActivity {
 	        subMenu1.getItem(1).setIcon(R.drawable.cert_22x22);
 	        Intent intentRefresh =  new Intent(Aplicacion.INSTANCIA, FragmentTabsPager.class);
 	        Intent intentGetCert = new Intent(Aplicacion.INSTANCIA, Aplicacion.class);
+	        Log.d(TAG +  " EventListFragment.onCreateOptionsMenu", " **** Aplicacion.INSTANCIA.getEstado(): " + Aplicacion.INSTANCIA.getEstado());
 	        switch (Aplicacion.INSTANCIA.getEstado()) {
 		    	case SIN_CSR:
 		    		intentGetCert = new Intent(Aplicacion.INSTANCIA, Aplicacion.class);
+		    		break;
 		    	case CON_CSR:
 		    		intentGetCert = new Intent(Aplicacion.INSTANCIA, UserCertResponseForm.class);
 		    		break;

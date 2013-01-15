@@ -15,7 +15,7 @@ import org.bouncycastle2.util.encoders.Hex;
 import android.util.Log;
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class Evento implements Serializable {
 	

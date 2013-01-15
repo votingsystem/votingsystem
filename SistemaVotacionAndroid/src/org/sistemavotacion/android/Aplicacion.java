@@ -16,6 +16,8 @@
 
 package org.sistemavotacion.android;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +69,9 @@ public class Aplicacion extends SherlockActivity {
     public static final String NOMBRE_ARCHIVO_FIRMADO    = "archivoFirmado";
     public static final String NOMBRE_ARCHIVO_CSR        = "csr";
     public static final String NOMBRE_ARCHIVO_BYTE_ARRAY = "byteArray";
+    public static final String SIGNED_PART_EXTENSION     = ".p7m";
+    public static final String DEFAULT_SIGNED_FILE_NAME  = "smimeMessage";
+    public static final String SIGN_PROVIDER             = "BC";
     public static final int KEY_SIZE = 1024;
     public static final int EVENTS_PAGE_SIZE = 30;
     public static final int MAX_SUBJECT_SIZE = 60;
@@ -74,6 +79,7 @@ public class Aplicacion extends SherlockActivity {
     public static final String SIG_HASH = "SHA256";
     public static final String SIG_NAME = "RSA";
     public static final String SIGNATURE_ALGORITHM = "SHA256WithRSA";
+    public static final String VOTE_SIGN_MECHANISM = "SHA256withRSA";
     public static final String PROVIDER = "BC";
     public static final String ALIAS_CERT_USUARIO = "CertificadoUsuario";
     public static final String KEY_STORE_FILE = "keyStoreFile.p12";
@@ -290,6 +296,42 @@ public class Aplicacion extends SherlockActivity {
 		return getString(resourceId, formatArgs);
 	}
 
+	public static FileOutputStream openFileOutputStream(String filename) {
+		Log.d(TAG + ".openFileOutputStream(...)", " - filename: " + filename);
+		FileOutputStream fout = null;
+		try {
+			fout = INSTANCIA.openFileOutput(filename, Context.MODE_PRIVATE);
+		} catch(Exception ex) {
+			Log.e(TAG + ".openFileOutputStream(...)", ex.getMessage(), ex);
+		}
+		return fout;
+	}
+	
+	public static File getFile(String filename) {
+		File file = null;
+		try {
+			file = new File(INSTANCIA.
+					getApplicationContext().getFilesDir(), filename);
+			Log.d(TAG + ".getFile(...)", " - file.getAbsolutePath(): " 
+					+ file.getAbsolutePath());
+		} catch(Exception ex) {
+			Log.e(TAG + ".getFile(...)", ex.getMessage(), ex);
+		}
+		return file;
+	}
+	
+    
+	/*public static File guardar (String nif, String controlAcceso, String idEvento, 
+	 		MimeMessage body) throws FileNotFoundException {
+		File sdCard = Environment.getExternalStorageDirectory();
+		File dir = new File (sdCard.getAbsolutePath() + File.separator + 
+				SISTEMA_VOTACION_DIR + File.separator + controlAcceso + 
+				File.separator + nif + File.separator + idEvento);
+		dir.mkdirs();
+		File resultado = new File(dir, "filename");
+        body.writeTo(new FileOutputStream(resultado));
+        return resultado;
+	}*/
 	
 	public Estado getEstado() {
 		return estado;

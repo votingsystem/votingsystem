@@ -38,36 +38,37 @@ import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.sistemavotacion.seguridad.PKCS10WrapperClient;
 import org.sistemavotacion.task.DataListener;
 import org.sistemavotacion.task.SendDataTask;
-import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.ServerPaths;
 import org.sistemavotacion.util.StringUtils;
-import android.view.View.OnKeyListener;
-import android.app.Activity;
+
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentTransaction;
 import android.telephony.TelephonyManager;
 import android.text.Html;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnKeyListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class UserCertRequestForm extends Activity 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+
+public class UserCertRequestForm extends SherlockFragmentActivity 
 		implements CertPinScreenCallback {
 
 	public static final String TAG = "UserCertRequestForm";
+    private static final String CERT_PIN_DIALOG = "certPinDialog";
 	
     private ProgressDialog progressDialog = null;
     private String password = null;
@@ -75,8 +76,7 @@ public class UserCertRequestForm extends Activity
     private String telefono = null;
     private String deviceId = null;
     private PKCS10WrapperClient pkcs10WrapperClient;
-    
-    private AlertDialog certPinDialog;
+    private CertPinScreen certPinScreen;
     private EditText nifText;
 	
     DataListener<String> envioCsrListener =new DataListener<String>() {
@@ -255,14 +255,10 @@ public class UserCertRequestForm extends Activity
     }
     
     private void showPinScreen(String message) {
-    	AlertDialog.Builder builder= new AlertDialog.Builder(
-    			UserCertRequestForm.this);
-    	CertPinScreen certPinScreen = new CertPinScreen(
-    			getApplicationContext(), UserCertRequestForm.this);
-    	if(message != null) certPinScreen.setMessage(message);
-    	builder.setView(certPinScreen);
-    	certPinDialog = builder.create();
-    	certPinDialog.show();
+    	certPinScreen = CertPinScreen.newInstance(
+    			UserCertRequestForm.this, message);
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        certPinScreen.show(ft, CERT_PIN_DIALOG);
     }
 
 	public void manejarExcepcion(String exMessage) {
@@ -275,8 +271,14 @@ public class UserCertRequestForm extends Activity
 
 	@Override
 	public void setPin(String pin) {
-		Log.d(TAG + ".setPin(...) ", "pin:" + pin);
-		certPinDialog.dismiss();
+		Log.d(TAG + ".setPin(...) ", "pin: " + pin);
+		certPinScreen.getDialog().dismiss();
+		/*android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
+	    android.app.Fragment prev = getFragmentManager().findFragmentByTag("dialog");
+	    if (prev != null) {
+	        ft.remove(prev);
+	    }
+	    ft.addToBackStack(null);*/
 		if(pin == null) {
 			password = null;
 			return;

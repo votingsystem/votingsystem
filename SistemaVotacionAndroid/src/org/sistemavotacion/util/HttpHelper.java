@@ -40,7 +40,7 @@ import android.util.Log;
 import static org.sistemavotacion.android.Aplicacion.*;
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class HttpHelper {
     

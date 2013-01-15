@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class OpcionDeEvento implements Serializable {
 

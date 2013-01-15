@@ -16,11 +16,7 @@
 
 package org.sistemavotacion.android;
 
-import static org.sistemavotacion.android.Aplicacion.ALIAS_CERT_USUARIO;
-import static org.sistemavotacion.android.Aplicacion.ASUNTO_MENSAJE_FIRMA_DOCUMENTO;
-import static org.sistemavotacion.android.Aplicacion.CONTROL_ACCESO_URL;
-import static org.sistemavotacion.android.Aplicacion.KEY_STORE_FILE;
-import static org.sistemavotacion.android.Aplicacion.MAX_SUBJECT_SIZE;
+import static org.sistemavotacion.android.Aplicacion.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -52,6 +48,7 @@ import org.sistemavotacion.util.PdfUtils;
 import org.sistemavotacion.util.ServerPaths;
 
 import android.app.AlertDialog;
+import android.support.v4.app.FragmentTransaction;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -67,23 +64,22 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
-
-import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.itextpdf.text.pdf.PdfReader;
 
-public class EventScreen extends 
-		SherlockActivity implements CertPinScreenCallback {
+public class EventScreen extends SherlockFragmentActivity 
+	implements CertPinScreenCallback {
 	
 	public static final String TAG = "EventScreen";
-
+    private static final String CERT_PIN_DIALOG = "certPinDialog";
+	
     private Button firmarEnviarButton;
     private Evento evento;
     private Map<Long, EditText> mapaCamposReclamacion;
     private ProgressDialog progressDialog = null;
-    private AlertDialog certPinDialog;
+    private CertPinScreen certPinScreen;
     private AsyncTask runningTask = null;
     byte[] keyStoreBytes = null;
-	
     
     DataListener<String> sendFileListener = new DataListener<String>() {
 
@@ -105,14 +101,12 @@ public class EventScreen extends
 		}
     };
 
-    
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
         setTheme(Aplicacion.THEME);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.event_screen);
 		evento = Aplicacion.INSTANCIA.getEventoSeleccionado();
-		setTitle(evento);
 		TextView asuntoTextView = (TextView) findViewById(R.id.asunto_evento);
 		String subject = evento.getAsunto();
 		if(subject != null && subject.length() > MAX_SUBJECT_SIZE) 
@@ -152,11 +146,17 @@ public class EventScreen extends
 				showMessage(getString(R.string.error_lbl), e.getMessage());
 			}	
 		}
+		setTitle(evento);
 	}
 
 	private void setTitle(Evento event) {
 		switch(evento.getTipo()) {
 			case EVENTO_FIRMA:
+				try {
+					getActionBar().setLogo(R.drawable.manifest_22x22);	
+				} catch(NoSuchMethodError ex) {
+					Log.d(TAG + ".setTitle(...)", " --- android api 11 doesn't have method 'setLogo'");
+				}        		
 				switch(evento.getEstadoEnumValue()) {
 					case ACTIVO:
 						setTitle(getString(R.string.manifest_open_lbl, 
@@ -170,6 +170,11 @@ public class EventScreen extends
 				}
 				break;
 			case EVENTO_RECLAMACION:
+				try {//android api 11 I don't have this method
+	        		getActionBar().setLogo(R.drawable.claim_22x22);
+				} catch(NoSuchMethodError ex) {
+					Log.d(TAG + ".setTitle(...)", " --- android api 11 doesn't have method 'setLogo'");
+				}   
 				switch(evento.getEstadoEnumValue()) {
 					case ACTIVO:
 						setTitle(getString(R.string.claim_open_lbl, 
@@ -206,12 +211,15 @@ public class EventScreen extends
         } else if (evento.getTipo().equals(Tipo.EVENTO_RECLAMACION)) {
         	urlEnvio = ServerPaths.getURLReclamacion(CONTROL_ACCESO_URL);
         }
-		SignedMailGenerator dnies = 
-				new SignedMailGenerator(keyStoreBytes, ALIAS_CERT_USUARIO, password);
+		SignedMailGenerator signedMailGenerator = new SignedMailGenerator(keyStoreBytes, 
+				ALIAS_CERT_USUARIO, password, SIGNATURE_ALGORITHM);
 		String signatureContent = DeObjetoAJSON.obtenerFirmaParaEventoJSON(evento);
-		File simimeSignedFile = dnies.genFile(usuario, 
-				Aplicacion.getControlAcceso().getNombreNormalizado(), 
-				signatureContent, asunto, null, SignedMailGenerator.Type.USER);
+		
+        File simimeSignedFile = getFile("signedFile_" + 
+        		evento.getId() + SIGNED_PART_EXTENSION);
+		simimeSignedFile = signedMailGenerator.genFile(usuario, 
+				Aplicacion.getControlAcceso().getNombreNormalizado(), signatureContent, 
+				asunto, null, SignedMailGenerator.Type.USER, simimeSignedFile);
         SendFileTask enviarArchivoTask = new SendFileTask(sendFileListener, simimeSignedFile);
         runningTask = enviarArchivoTask;
         enviarArchivoTask.execute(urlEnvio);
@@ -367,14 +375,10 @@ public class EventScreen extends
 	}
 	
     private void showPinScreen(String message) {
-    	AlertDialog.Builder builder= new AlertDialog.Builder(
-    			EventScreen.this);
-    	CertPinScreen certPinScreen = new CertPinScreen(
-    			getApplicationContext(), EventScreen.this);
-    	if(message != null) certPinScreen.setMessage(message);
-    	builder.setView(certPinScreen);
-    	certPinDialog = builder.create();
-    	certPinDialog.show();
+    	certPinScreen = CertPinScreen.newInstance(
+    			EventScreen.this, message);
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        certPinScreen.show(ft, CERT_PIN_DIALOG);
     }
 
 	@Override public void setPin(final String pin) {
@@ -391,7 +395,7 @@ public class EventScreen extends
 	        		});
 	        firmarEnviar(pin.toCharArray());
 		} 
-		certPinDialog.dismiss();
+		certPinScreen.getDialog().dismiss();
 	}
 	
 }

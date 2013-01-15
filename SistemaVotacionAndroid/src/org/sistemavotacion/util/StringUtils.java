@@ -6,7 +6,7 @@ import java.io.InputStream;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class StringUtils {
 	
@@ -56,5 +56,9 @@ public class StringUtils {
             return null;
         }
     }
+
+	public static String getCadenaNormalizada(String cadena) {
+        return cadena.replaceAll("[\\/:.]", ""); 
+	}
         
 }

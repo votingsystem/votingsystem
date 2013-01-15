@@ -18,21 +18,9 @@ import android.util.Log;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class FileUtils {
-
-    public static String TEMPDIR =  System.getProperty("java.io.tmpdir");
-    public static String BASEDIR =  System.getProperty("user.home");
-    public static String APPDIR =  FileUtils.BASEDIR + File.separator + 
-            ".ClientePublicacion"  + File.separator;
-    public static String APPTEMPDIR =  APPDIR + File.separator + "temp"
-             + File.separator;
-    public static String APPVOTODIR =  APPDIR + File.separator + "votos"
-             + File.separator;
-    //public static String PROPERTIES_FILE = APPDIR  + File.separator + "app.properties";
-    //An smime.p7m file is an encrypted or signed email.
-    public static String SIGNED_FILE_EXTENSION = "p7m";
 	
     public static byte[] getBytesFromFile(File file) throws IOException {
         byte[] b = new byte[(int) file.length()];
@@ -82,20 +70,6 @@ public class FileUtils {
         in.close();
         out.close();
     }
-
-     public static File getFileFromString (String contenido) {
-        File temp = null;
-        try {
-             temp = new File("recibo");
-             temp.deleteOnExit();
-             BufferedWriter out = new BufferedWriter(new FileWriter(temp));
-             out.write(contenido);
-             out.close();
-        } catch (IOException ex) {
-        	Log.e("FileUtils", ex.getMessage(), ex);
-        }
-        return temp;
-     }
      
     public static String getStringFromFile (File file) 
             throws FileNotFoundException, IOException {
@@ -123,32 +97,6 @@ public class FileUtils {
             out.close();
         } catch (IOException ex) {
         	Log.e("FileUtils", ex.getMessage(), ex);
-        }
-    }
-
-    public static void addDirToSystemClasspath(String s) throws IOException {
-        try {
-            // This enables the java.library.path to be modified at runtime
-            // From a Sun engineer at http://forums.sun.com/thread.jspa?threadID=707176
-            //
-            Field field = ClassLoader.class.getDeclaredField("usr_paths");
-            field.setAccessible(true);
-            String[] paths = (String[])field.get(null);
-            for (int i = 0; i < paths.length; i++) {
-                    if (s.equals(paths[i])) {
-                            return;
-                    }
-            }
-            String[] tmp = new String[paths.length+1];
-            System.arraycopy(paths,0,tmp,0,paths.length);
-            tmp[paths.length] = s;
-            field.set(null,tmp);
-            System.setProperty("java.library.path",
-                    System.getProperty("java.library.path") + File.pathSeparator + s);
-        } catch (IllegalAccessException e) {
-            throw new IOException("Failed to get permissions to set library path");
-        } catch (NoSuchFieldException e) {
-            throw new IOException("Failed to get field handle to set library path");
         }
     }
 

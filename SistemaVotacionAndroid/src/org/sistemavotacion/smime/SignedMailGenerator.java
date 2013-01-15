@@ -1,23 +1,20 @@
 package org.sistemavotacion.smime;
 
-import static org.sistemavotacion.android.Aplicacion.SISTEMA_VOTACION_DIR;
-
 import java.io.ByteArrayOutputStream;
-import java.security.cert.CertificateEncodingException;
-import javax.mail.Header;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
+
 import javax.mail.Address;
+import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
@@ -25,8 +22,6 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
-import org.sistemavotacion.android.Aplicacion;
-import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.bouncycastle2.asn1.ASN1EncodableVector;
 import org.bouncycastle2.asn1.cms.AttributeTable;
 import org.bouncycastle2.asn1.smime.SMIMECapabilitiesAttribute;
@@ -37,13 +32,12 @@ import org.bouncycastle2.cms.SignerInfoGenerator;
 import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
 import org.bouncycastle2.operator.OperatorCreationException;
 import org.bouncycastle2.util.Store;
-
-import android.os.Environment;
-import android.util.Log;
+import org.sistemavotacion.android.Aplicacion;
+import org.sistemavotacion.seguridad.KeyStoreUtil;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class SignedMailGenerator {
     
@@ -58,12 +52,8 @@ public class SignedMailGenerator {
     private static Properties props = System.getProperties();
     private static Session session = Session.getDefaultInstance(props, null);
     
-    public SignedMailGenerator(byte[] keyStoreBytes, String keyAlias, char[] password) throws Exception {
-    	KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
-        PrivateKey key = (PrivateKey)keyStore.getKey(keyAlias, password);
-        Certificate[] chain = keyStore.getCertificateChain(keyAlias);
-        init(key, chain);
-    }
+    /*
+
     
     public SignedMailGenerator(InputStream keyStoreInputStream, String keyAlias, char[] password) throws Exception {
     	KeyStore keyStore = KeyStoreUtil.getKeyStoreFromStream(keyStoreInputStream, password);
@@ -80,9 +70,22 @@ public class SignedMailGenerator {
     
     public SignedMailGenerator(PrivateKey key, Certificate[] chain) throws Exception {
         init(key, chain);
+    }*/
+    public SignedMailGenerator(byte[] keyStoreBytes, String keyAlias, 
+    		char[] password, String signMechanism) throws Exception {
+    	KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
+        PrivateKey key = (PrivateKey)keyStore.getKey(keyAlias, password);
+        Certificate[] chain = keyStore.getCertificateChain(keyAlias);
+        init(key, chain, signMechanism);
     }
     
-    private void init (PrivateKey key, Certificate[] chain) 
+    public SignedMailGenerator(PrivateKey privateKey,
+			X509Certificate[] arrayCerts, String signMechanism) 
+					throws CertificateEncodingException, OperatorCreationException {
+    	init(privateKey, arrayCerts, signMechanism);
+	}
+
+	private void init (PrivateKey key, Certificate[] chain, String signatureMechanism) 
             throws CertificateEncodingException, OperatorCreationException {
         ASN1EncodableVector signedAttrs = new ASN1EncodableVector();
         SMIMECapabilityVector caps = new SMIMECapabilityVector();
@@ -102,23 +105,19 @@ public class SignedMailGenerator {
         jcaSignerInfoGeneratorBuilder = jcaSignerInfoGeneratorBuilder.setProvider(SIGN_PROVIDER);
         jcaSignerInfoGeneratorBuilder.setSignedAttributeGenerator(new AttributeTable(signedAttrs));
         SignerInfoGenerator signerInfoGenerator = jcaSignerInfoGeneratorBuilder.build(
-        		Aplicacion.SIGNATURE_ALGORITHM, key, (X509Certificate)chain[0]);
+        		signatureMechanism, key, (X509Certificate)chain[0]);
         smimeSignedGenerator.addSignerInfoGenerator(signerInfoGenerator);
         // add our pool of certs and cerls (if any) to go with the signature
         smimeSignedGenerator.addCertificates(certs);
     }
+	
     
     public File genFile(String fromUser, String toUser, String textoAFirmar, 
-            String asunto, Header header, Type signerType) throws Exception {
-		File sdCard = Environment.getExternalStorageDirectory();
-		File dir = new File (sdCard.getAbsolutePath() + File.separator + 
-				SISTEMA_VOTACION_DIR);
-		dir.mkdirs();
-		File resultado = new File(dir, "smime");
+            String asunto, Header header, Type signerType, File outputFile) throws Exception {
         MimeMessage body = gen(
                 fromUser, toUser, textoAFirmar, asunto, header, signerType);
-        body.writeTo(new FileOutputStream(resultado));
-        return resultado;
+        body.writeTo(new FileOutputStream(outputFile));
+        return outputFile;
     }
           
     public String genString(String fromUser, String toUser, String textoAFirmar, 

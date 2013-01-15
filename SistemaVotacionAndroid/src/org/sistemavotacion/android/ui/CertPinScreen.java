@@ -18,27 +18,30 @@ package org.sistemavotacion.android.ui;
 
 import org.sistemavotacion.android.R;
 
+import com.actionbarsherlock.app.SherlockDialogFragment;
+import android.app.DialogFragment;
 import android.content.Context;
+import android.os.Bundle;
 import android.text.Editable;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.view.ViewGroup;
 import android.widget.TextView;
-
 /**
  * Para evitar que salga bien hay que poner en las actividades que lo utilicen:
  * android:screenOrientation="portrait"
  * Basado en com.android.internal.policy.impl.SimUnlockScreen.java de Android-Level7
  */
-public class CertPinScreen extends LinearLayout implements View.OnClickListener {
-	
+public class CertPinScreen extends SherlockDialogFragment 
+	implements View.OnClickListener {
+
 	public static final String TAG = "CertPinScreen";
 	
 	public static final int PASSWORD_LENGTH = 4;
 	
-    private final CertPinScreenCallback mCallback;
+    private CertPinScreenCallback mCallback;
 
     private TextView mHeaderText;
     private TextView mPinText;
@@ -50,25 +53,52 @@ public class CertPinScreen extends LinearLayout implements View.OnClickListener 
     private static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
     
     Context mContext;
-
-    public CertPinScreen(Context context, CertPinScreenCallback callback) {
-        super(context);
-        this.mContext = context;
-        mCallback = callback;
-        LayoutInflater.from(context).inflate(R.layout.pin_screen_portrait, this, true);
+    
+    View pinScreenView;
+    
+    public static CertPinScreen newInstance(
+    		CertPinScreenCallback callback, String message) {
+    	CertPinScreen certPinScreen = new CertPinScreen();
+    	certPinScreen.setCallback(callback);
+        Bundle args = new Bundle();
+        args.putString("message", message);
+        certPinScreen.setArguments(args);
+        return certPinScreen;
+    }
+    
+    private void setCallback(CertPinScreenCallback callback) {
+    	mCallback = callback;
+    }
+    
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        //setStyle(DialogFragment.STYLE_NO_FRAME, android.R.style.Theme_Panel);
+        setStyle(DialogFragment.STYLE_NO_TITLE, 0);
+    }
+    
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState) {
+        pinScreenView = inflater.
+        		inflate(R.layout.pin_screen_portrait, container, true);
         new TouchInput();
-        mHeaderText = (TextView) findViewById(R.id.headerText);
-        mPinText = (TextView) findViewById(R.id.pinDisplay);
-        mBackSpaceButton = findViewById(R.id.backspace);
+        mHeaderText = (TextView) pinScreenView.findViewById(R.id.headerText);
+        mPinText = (TextView) pinScreenView.findViewById(R.id.pinDisplay);
+        mBackSpaceButton = pinScreenView.findViewById(R.id.backspace);
         mBackSpaceButton.setOnClickListener(this);
-        mOkButton = (TextView) findViewById(R.id.ok);
+        mOkButton = (TextView) pinScreenView.findViewById(R.id.ok);
         mHeaderText.setText(R.string.keyguard_password_enter_pin_code);
         mPinText.setFocusable(false);
         mOkButton.setOnClickListener(this);
-        setFocusableInTouchMode(true);
+        pinScreenView.setFocusableInTouchMode(true);
+        setMessage(getArguments().getString("message"));
+        //getDialog().getWindow().setLayout(300, 300);
+        return pinScreenView;
     }
 
     public void setMessage(String message) {
+    	if(message == null) message = "";
     	 mHeaderText.setText(message);
     }
     
@@ -77,9 +107,9 @@ public class CertPinScreen extends LinearLayout implements View.OnClickListener 
         mEnteredDigits = 0;
     }
     
-    /** {@inheritDoc} */
-    public void onResume() {
+    @Override public void onResume() {
     	Log.d(TAG + ".onResume", "onResume -- ");
+    	super.onResume();
         mHeaderText.setText(R.string.keyguard_password_enter_pin_code);
         mPinText.setText("");
         mEnteredDigits = 0;
@@ -98,7 +128,6 @@ public class CertPinScreen extends LinearLayout implements View.OnClickListener 
             checkPin();
         }
     }
-
 
 
     private void checkPin() {
@@ -203,6 +232,7 @@ public class CertPinScreen extends LinearLayout implements View.OnClickListener 
      * the keyboard is shut.
      */
     private class TouchInput implements View.OnClickListener {
+    	
         private TextView mZero;
         private TextView mOne;
         private TextView mTwo;
@@ -216,17 +246,17 @@ public class CertPinScreen extends LinearLayout implements View.OnClickListener 
         private TextView mCancelButton;
 
         private TouchInput() {
-            mZero = (TextView) findViewById(R.id.zero);
-            mOne = (TextView) findViewById(R.id.one);
-            mTwo = (TextView) findViewById(R.id.two);
-            mThree = (TextView) findViewById(R.id.three);
-            mFour = (TextView) findViewById(R.id.four);
-            mFive = (TextView) findViewById(R.id.five);
-            mSix = (TextView) findViewById(R.id.six);
-            mSeven = (TextView) findViewById(R.id.seven);
-            mEight = (TextView) findViewById(R.id.eight);
-            mNine = (TextView) findViewById(R.id.nine);
-            mCancelButton = (TextView) findViewById(R.id.cancel);
+            mZero = (TextView)pinScreenView.findViewById(R.id.zero);
+            mOne = (TextView)pinScreenView.findViewById(R.id.one);
+            mTwo = (TextView)pinScreenView.findViewById(R.id.two);
+            mThree = (TextView)pinScreenView.findViewById(R.id.three);
+            mFour = (TextView)pinScreenView.findViewById(R.id.four);
+            mFive = (TextView)pinScreenView.findViewById(R.id.five);
+            mSix = (TextView)pinScreenView.findViewById(R.id.six);
+            mSeven = (TextView)pinScreenView.findViewById(R.id.seven);
+            mEight = (TextView)pinScreenView.findViewById(R.id.eight);
+            mNine = (TextView)pinScreenView.findViewById(R.id.nine);
+            mCancelButton = (TextView)pinScreenView.findViewById(R.id.cancel);
 
             mZero.setText("0");
             mOne.setText("1");

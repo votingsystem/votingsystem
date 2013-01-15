@@ -38,7 +38,7 @@ import org.sistemavotacion.task.GetDataTask;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.ServerPaths;
 
-import android.app.Activity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -47,6 +47,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentTransaction;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -55,15 +56,15 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
-public class UserCertResponseForm extends Activity 
+public class UserCertResponseForm extends SherlockFragmentActivity 
 	implements CertPinScreenCallback {
 	
 	public static final String TAG = "UserCertResponseForm";
-    
+    private static final String CERT_PIN_DIALOG = "certPinDialog";
+	
 	private ProgressDialog progressDialog = null;
 	private GetDataTask getDataTask = null;
 	private String csrFirmado = null;
-    private AlertDialog certPinDialog;
     private CertPinScreen certPinScreen;
     private Button goAppButton;
     private Button insertPinButton;
@@ -174,14 +175,10 @@ public class UserCertResponseForm extends Activity
     }
     
     private void showPinScreen(String message) {
-    	AlertDialog.Builder builder= new AlertDialog.Builder(
-    			UserCertResponseForm.this);
-    	certPinScreen = new CertPinScreen(
-    			getApplicationContext(), UserCertResponseForm.this);
-    	if(message != null) certPinScreen.setMessage(message);
-    	builder.setView(certPinScreen);
-    	certPinDialog = builder.create();
-    	certPinDialog.show();
+    	certPinScreen = CertPinScreen.newInstance(
+    			UserCertResponseForm.this, message);
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        certPinScreen.show(ft, CERT_PIN_DIALOG);
     }
     
     private boolean actualizarKeyStore (char[] password) {
@@ -237,17 +234,17 @@ public class UserCertResponseForm extends Activity
 	    				R.string.resultado_solicitud_certificado_activity_ok));
 			    insertPinButton.setVisibility(View.GONE);
 			    requestCertButton.setVisibility(View.GONE);
-				certPinDialog.dismiss();
+				certPinScreen.getDialog().dismiss();
 			} else {
 				setMessage(getString(
 						R.string.cert_install_error_msg));
-				certPinDialog.dismiss();
+				certPinScreen.getDialog().dismiss();
 				requestCertButton.setVisibility(View.VISIBLE);
 			}
 		} else {
 			setMessage(getString(
 					R.string.cert_install_error_msg));
-			certPinDialog.dismiss();
+			certPinScreen.getDialog().dismiss();
 		} 
 		goAppButton.setVisibility(View.VISIBLE);
 	}

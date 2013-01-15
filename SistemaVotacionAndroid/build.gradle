@@ -15,7 +15,7 @@ dependencies {
 	}
 }
 
-task antDebugInstall << {
+task antDebugInstall(dependsOn:'cleanAndroid') << {
 	ProcessBuilder pb = new ProcessBuilder("ant", "debug", "install");
 	pb.directory(projectDir);
 	Process proc = pb.start();
@@ -24,6 +24,7 @@ task antDebugInstall << {
 	if (proc.waitFor() != 0) {
 		throw new RuntimeException('antDebugInstall failed')
 	}
+	announce.announce("$project.name - Done antDebugInstall", "local")
 }
 
 task cleanAndroid << {
@@ -78,13 +79,15 @@ task checkDependencies(dependsOn:['copyToLib',
 	'setAndroidEnv', 'setActionBarSherlockEnv']) << {}
 
 task setAndroidEnv << {
-	//def env = System.getenv()
+	def env = System.getenv()
 	//env.each{println it} 
-	//String androidHome= env['ANDROID_HOME']
+	String androidHome= env['ANDROID_HOME']
+	if(!androidHome) throw new RuntimeException('Android SDK not Found you must install -> http://developer.android.com/sdk/index.html')
 	def controlAccesoURL = "$rootProject.controlAccesoProtocol://" + 
 		"${getDevelopmentServerIP()}:$rootProject.controlAccesoPort" + 
 		"$rootProject.controlAccesoPath";
 	println("controlAccesoURL: $controlAccesoURL")
+	ant.delete(file:"assets/VotingSystem.properties")
 	ant.copy(file:"$rootProject.projectDir/templates/VotingSystem.properties",
 		toFile:"assets/VotingSystem.properties")
 	ant.replace(file:"assets/VotingSystem.properties",

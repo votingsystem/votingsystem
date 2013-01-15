@@ -51,6 +51,8 @@
 	<string name="nif_error">NIF con errores. Por favor vuelva a intentarlo</string>
 	<string name="searchLabel">Buscar</string>
 
+	
+	<string name="vote_cert_request_error_msg">No existe ningún certificado de voto</string>
     <string name="app_name">Votaciones</string>
     <string name="request_cert_msg">Tramitando solicitud</string>
     <string name="alert_exception_caption">Excepción!</string>
@@ -59,6 +61,7 @@
     <string name="cert_downloaded_msg">El certificado de usuario está disponible</string>
     
     <string name="request_msg_subject">[SOLICITUD ACCESO]-%1$s</string>
+    <string name="vote_msg_subject">[VOTO]</string>
 
     <string name="pin_error_msg">¿Seguro que la contraseña es correcta?</string>
     
@@ -118,5 +121,6 @@
 	<string name="certificado_no_encontrado_msg">No tiene instalado ningún certificado con el que poder firmar la solicitud.</string>    
 	<string name="nif_password_message_label">Cada vez que vote se le pedirá el código PIN que introducirá a continuación. Recuerde, si lo olvida tendrá que pedir otro certificado para poder votar.</string>    
 	<string name="error_password_msg">Contraseña inválida</string>
-
+	<string name="error_vote_repeated_msg">Error, voto repetido</string>
+	
 </resources>
