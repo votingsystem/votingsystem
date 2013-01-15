@@ -13,6 +13,9 @@
 // if (System.properties["${appName}.config.location"]) {
 //    grails.config.locations << "file:" + System.properties["${appName}.config.location"]
 // }
+import java.net.*;
+
+
 grails.config.locations = [ "classpath:app-config.properties"]
 
  if(System.properties["${appName}.config.location"]) {
@@ -72,17 +75,35 @@ grails.hibernate.cache.queries = true
 environments {
 	
     development {
-        grails.logging.jul.usebridge = true
-		grails.serverURL = "http://192.168.1.4:8081/${appName}"
+        //grails.logging.jul.usebridge = true
+		String localIP = getDevelopmentServerIP();
+        grails.serverURL = "http://${localIP}:8081/${appName}"
     }
     production {
-        grails.logging.jul.usebridge = false
+        //grails.logging.jul.usebridge = false
 		//grails.serverURL = "http://gruposp2p.dyndns.org/${appName}"
 		grails.serverURL = "http://sistemavotacioncentrocontrol.cloudfoundry.com"
     }
 	test {
 		//grails.serverURL = "http://sistemavotacioncontrolacceso.cloudfoundry.com"
 		grails.serverURL = "http://localhost:8081/${appName}"
+	}
+}
+
+def getDevelopmentServerIP() {
+	Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
+	for (NetworkInterface netint : Collections.list(nets)){
+		Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
+		for (InetAddress inetAddress : Collections.list(inetAddresses)) {
+			if(inetAddress.isSiteLocalAddress()) {
+				String inetAddressStr = inetAddress.toString();
+				while(inetAddressStr.startsWith("/"))
+					inetAddressStr = inetAddressStr.substring(1)
+				log.debug("Setting development address to: ${inetAddressStr}")
+				return inetAddressStr
+			}
+			
+		}
 	}
 }
 
@@ -122,9 +143,6 @@ log4j = {
 
 }
 
-grails.plugin.cloudfoundry.username = 'jgzornoza@gmail.com'
-grails.plugin.cloudfoundry.password = 'cloudfoundrysotopo'
-grails.plugin.cloudfoundry.appname = 'SistemaVotacionCentroControl'
 
 grails.war.copyToWebApp = { args ->
 	fileset(dir:"WEB-INF/cms") {

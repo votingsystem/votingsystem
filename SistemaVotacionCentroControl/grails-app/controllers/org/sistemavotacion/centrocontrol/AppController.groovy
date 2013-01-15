@@ -2,5 +2,9 @@ package org.sistemavotacion.centrocontrol
 
 class AppController {
 
-    def index() { }
+    def prueba() { 
+		render (view: "prueba")
+	}
+	
+	def index() {}
 }

@@ -253,10 +253,10 @@ public class VotacionHelper implements TaskListener {
 	                        SignedMailGenerator.Type.USER, votoFirmado);
 		            setTimeStampedDocument(TIMESTAMP_VOTE, votoFirmado, TIMESTAMP_VOTE_HASH);
 				} catch (Exception e) {
-					votingListener.setException(getAppString(R.string.error_vote_repeated_msg));
+					votingListener.setException(e.getMessage());
 				}	
 	        } if(Respuesta.SC_ERROR_VOTO_REPETIDO == getVotingCertTask.getStatusCode()) {
-	        	votingListener.setException(e.getMessage());
+	        	votingListener.setException(getAppString(R.string.error_vote_repeated_msg));
 	        } else {
 	        	votingListener.setException(getVotingCertTask.getMessage());
 	        }

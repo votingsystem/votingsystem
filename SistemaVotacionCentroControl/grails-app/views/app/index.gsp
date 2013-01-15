@@ -1,16 +1,53 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
 <head>
-        <link rel="stylesheet" href="${resource(dir:'css',file:'clean.css')}" />                                   
+		<% request.setAttribute("org.grails.rendering.view", Boolean.TRUE) %>
+        <link rel="stylesheet" href="${resource(dir:'css',file:'clean.css')}" />                               
   		<title>${message(code: 'nombreServidorLabel', null)}</title>
-		<script src="${resource(dir:'js',file:'deployJava.js')}"></script>
+ 		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+ 		<script src="${resource(dir:'js',file:'deployJava.js')}"></script>
+ 		<script>
+		//http://www.mkyong.com/javascript/how-to-detect-ie-version-using-javascript/
+		function getInternetExplorerVersion() {
+		// Returns the version of Windows Internet Explorer or a -1
+		// (indicating the use of another browser).
+		   var rv = -1; // Return value assumes failure.
+		   if (navigator.appName == 'Microsoft Internet Explorer')
+		   {
+		      var ua = navigator.userAgent;
+		      var re  = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
+		      if (re.exec(ua) != null)
+		         rv = parseFloat( RegExp.$1 );
+		   }
+		   return rv;
+		}
+		
+		function checkIEVersion() {
+		   var ver = getInternetExplorerVersion();
+		   if ( ver> -1 ) {
+		      if ( ver<= 8.0 ) {
+		    	  alert("Navegador no soportado, actualizate")
+			  }
+		   }
+		}
 
-  <!--                                           -->
-  <!-- This script loads your compiled module.   -->
-  <!-- If you add any GWT meta tags, they must   -->
-  <!-- be added before this line.                -->
-  <!--                                           -->
-  <script type="text/javascript" src="${resource(dir: 'gwt/org.centrocontrol.clientegwt.PuntoEntradaPrincipal', file: 'org.centrocontrol.clientegwt.PuntoEntradaPrincipal.nocache.js')}"></script>                                           
+		function loadjsfile(filename){
+			var fileref=document.createElement('script')
+			fileref.setAttribute("type","text/javascript")
+		 	fileref.setAttribute("src", filename)
+		 }
+
+		function setAppMessage(appMessage) {
+			ClienteAndroid.setAppMessage(appMessage);
+		}
+		
+ 		</script>
+  		<script type="text/javascript" 
+  				src="${resource(dir: 'gwt/org.centrocontrol.clientegwt.PuntoEntradaPrincipal', 
+				file: 'org.centrocontrol.clientegwt.PuntoEntradaPrincipal.nocache.js')}">
+
+
+  		</script>
 </head>
 
 <!--                                           -->
@@ -18,9 +55,9 @@
 <!-- you can leave the body empty if you want  -->
 <!-- to create a completely dynamic ui         -->
 <!--                                           -->
-<body id="uiBody">
+<body id="uiBody" onload="checkIEVersion()">
   <!-- OPTIONAL: include this if you want history support -->
-  	<iframe id="__gwt_historyFrame" style="width:0;height:0;border:0"></iframe>
+    <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
    	<div class="ui" id="ui"></div>
 </body>
 </html>
