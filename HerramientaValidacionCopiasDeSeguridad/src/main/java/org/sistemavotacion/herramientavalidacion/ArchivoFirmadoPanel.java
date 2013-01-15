@@ -50,7 +50,7 @@ public class ArchivoFirmadoPanel extends JPanel {
         byte[] bytes = FileUtils.getBytesFromFile(file);
         ArchivoFirmadoPanel archivoFirmadoPanel = null;
         try {
-            smimeMessageWraper = SMIMEMessageWrapper.build(
+            smimeMessageWraper = new SMIMEMessageWrapper(null,
                     new ByteArrayInputStream(bytes), null);
             if (smimeMessageWraper.isValidSignature()) {
                 resultadoFirmaButton.setText("<html><b>" + 
