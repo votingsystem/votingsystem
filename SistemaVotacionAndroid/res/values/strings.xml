@@ -122,5 +122,6 @@
 	<string name="nif_password_message_label">Cada vez que vote se le pedirá el código PIN que introducirá a continuación. Recuerde, si lo olvida tendrá que pedir otro certificado para poder votar.</string>    
 	<string name="error_password_msg">Contraseña inválida</string>
 	<string name="error_vote_repeated_msg">Error, voto repetido</string>
+	<string name="connection_error_msg">Error de conexión</string>
 	
 </resources>

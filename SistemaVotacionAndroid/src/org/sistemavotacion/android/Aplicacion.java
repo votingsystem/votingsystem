@@ -34,7 +34,7 @@ import org.sistemavotacion.task.GetDataTask;
 import org.sistemavotacion.util.ServerPaths;
 import org.sistemavotacion.util.SubSystem;
 import org.sistemavotacion.util.SubSystemChangeListener;
-
+import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -105,19 +105,21 @@ public class Aplicacion extends SherlockActivity {
 		@Override public void updateData(int codigoEstado, String data) {
 			Log.d(TAG + ".dataServerListener.updateData() ", "data: " + data);
 			try {
-				ActorConIP controlAcceso = DeJSONAObjeto.obtenerActorConIP(
+				controlAcceso = DeJSONAObjeto.obtenerActorConIP(
 						data, ActorConIP.Tipo.CONTROL_ACCESO);
-				setControlAcceso(controlAcceso);
 			} catch (Exception e) {
 				Log.e(TAG + ".dataServerListener.updateData() ", e.getMessage(), e);
-				e.printStackTrace();
+			    showMessage(getApplicationContext().getString(
+						R.string.error_lbl), e.getMessage());
 			}
 			
 		}
 
-		@Override public void setException(String exceptionMsg) {
-			Log.d(TAG + ".dataServerListener.manejarExcepcion() ", "exceptionMsg: " + exceptionMsg);	
-      	  	Toast.makeText(Aplicacion.this, exceptionMsg, Toast.LENGTH_LONG).show();
+		@Override public void setException(final String exceptionMsg) {
+			Log.d(TAG + ".dataServerListener.manejarExcepcion(...) ", 
+					" -- exceptionMsg: " + exceptionMsg);	
+		    showMessage(getApplicationContext().getString(
+					R.string.error_lbl), exceptionMsg);
 		}
 	};
     
@@ -145,16 +147,21 @@ public class Aplicacion extends SherlockActivity {
     	settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
     	setActivityState();
     }
-    
+
     @Override public void onResume() {
     	super.onResume();
     	Log.d(TAG + ".onResume() ", " - onResume");
     	//setActivityState();
     }
+    
+    public void checkConnection() {
+    	if (controlAcceso == null) 
+    		new GetDataTask(dataServerListener).execute(ServerPaths.getURLInfoServidor(CONTROL_ACCESO_URL));
+    }
 
     private void setActivityState() {
     	String estadoAplicacion = settings.getString(PREFS_ESTADO, Estado.SIN_CSR.toString());
-    	new GetDataTask(dataServerListener).execute(ServerPaths.getURLInfoServidor(CONTROL_ACCESO_URL));
+    	checkConnection();
     	estado = Estado.valueOf(estadoAplicacion);
     	Log.d(TAG + ".setActivityState()", " - estadoAplicacion: " + estadoAplicacion);
     	Intent intent = null;	
@@ -198,6 +205,18 @@ public class Aplicacion extends SherlockActivity {
         	startActivity(intent);	
     	}
     }
+    
+
+    
+	private void showMessage(final String caption, final String message) {
+		Log.d(TAG + ".showMessage(...)", " - caption: " + caption + 
+				" - message: " + message + " isDestroyed(): " + isDestroyed());
+    	runOnUiThread(new Runnable() {
+    	    public void run() {
+    	    	Toast.makeText(Aplicacion.this, message, Toast.LENGTH_LONG).show();
+    	    }
+    	});   
+	}
 
     @Override protected void onStop() {
         super.onStop();
@@ -234,11 +253,9 @@ public class Aplicacion extends SherlockActivity {
 		Aplicacion.usuario = usuario;
 	}
 
-
 	public static ActorConIP getControlAcceso() {
 		return controlAcceso;
 	}
-
 
 	public static void setControlAcceso(ActorConIP controlAcceso) {
 		Aplicacion.controlAcceso = controlAcceso;
@@ -290,10 +307,6 @@ public class Aplicacion extends SherlockActivity {
 			listener.onChangeSubSystem(selectedSubsystem);
 		}
 		return getSelectedSubsystemDesc();
-	}
-	
-	public String getResourceString(int resourceId, Object formatArgs) {
-		return getString(resourceId, formatArgs);
 	}
 
 	public static FileOutputStream openFileOutputStream(String filename) {

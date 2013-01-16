@@ -16,13 +16,8 @@
 
 package org.sistemavotacion.android;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-
 import org.sistemavotacion.util.ServerPaths;
-
 import android.app.Activity;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,7 +26,6 @@ import android.view.View.OnClickListener;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Button;
-import android.widget.Toast;
 
 public class UriLauncherActivity extends Activity {
 	

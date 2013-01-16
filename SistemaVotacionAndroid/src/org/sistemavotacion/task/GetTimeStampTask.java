@@ -29,12 +29,11 @@ public class GetTimeStampTask extends AsyncTask<String, Void, Integer>
     byte[] digest = null;
     private Exception exception = null;
     private TimeStampToken timeStampToken = null;
-    
-    
     private Integer id;
     private Attribute timeStampAsAttribute = null;
     private AttributeTable timeStampAsAttributeTable = null;
     private TimeStampRequest timeStampRequest = null;
+    private String message = null;
 
     
     public GetTimeStampTask(Integer id, byte[] digest, 
@@ -53,8 +52,6 @@ public class GetTimeStampTask extends AsyncTask<String, Void, Integer>
 		this.listener = listener;
 		this.timeStampRequest = timeStampRequest;
     }
-    
-
 	
 	@Override
 	protected Integer doInBackground(String... urls) {
@@ -76,9 +73,9 @@ public class GetTimeStampTask extends AsyncTask<String, Void, Integer>
                 hashTable.put(PKCSObjectIdentifiers.
                             id_aa_signatureTimeStampToken, timeStampAsAttribute);
                 timeStampAsAttributeTable = new AttributeTable(hashTable);
-            }
+            } else message = response.getStatusLine().toString();
         } catch (Exception ex) {
-        	Log.e(TAG + ".doInBackground", ex.getMessage(), ex);
+        	Log.e(TAG + ".doInBackground(...)", ex.getMessage(), ex);
         	exception = ex;
         }
         return statusCode;
@@ -109,21 +106,13 @@ public class GetTimeStampTask extends AsyncTask<String, Void, Integer>
 		return id;
 	}
 
-	public void setId(Integer id) {
-		this.id = id;
-	}
-
 	public int getStatusCode() {
 		return statusCode;
 	}
 
-	public void setStatusCode(int statusCode) {
-		this.statusCode = statusCode;
-	}
-
 	public String getMessage() {
 		if(exception != null) return exception.getMessage();
-		return null;
+		return message;
 	}
 
 }

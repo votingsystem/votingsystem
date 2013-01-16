@@ -37,6 +37,7 @@ public class GetDataTask extends AsyncTask<String, Void, String> {
     @Override
     protected void onPostExecute(String data) {
     	Log.d(TAG + ".onPostExecute", " - data: " + data);
+    	
     	if(data != null)listener.updateData(statusCode, data);
     	else if(exception != null) 
     		listener.setException(exception.getMessage());

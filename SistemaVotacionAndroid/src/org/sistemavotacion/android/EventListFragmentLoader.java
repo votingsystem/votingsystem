@@ -1,5 +1,7 @@
 package org.sistemavotacion.android;
 
+import static org.sistemavotacion.android.Aplicacion.*;
+
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -21,6 +23,7 @@ import org.sistemavotacion.util.ServerPaths;
 import org.sistemavotacion.util.SubSystem;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -52,6 +55,8 @@ public class EventListFragmentLoader extends SherlockFragmentActivity {
 	public static final String TAG = "EventListFragmentLoader";
 	
 	public static final String MENU_SEARCH_TITLE = "MENU_SEARCH_TITLE";
+	
+	private static String errorLoadingEventsMsg = null;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -206,7 +211,13 @@ public class EventListFragmentLoader extends SherlockFragmentActivity {
 	    
 		@Override public void onLoadFinished(Loader<List<EventEntry>> loader, List<EventEntry> data) {
 			Log.i(TAG +  ".EventListFragment.onLoadFinished", " - onLoadFinished ");
-			mAdapter.setData(data);
+			if(errorLoadingEventsMsg == null) {
+				mAdapter.setData(data);
+                Aplicacion.INSTANCIA.checkConnection();
+			} else {
+				setEmptyText(getAppString(R.string.connection_error_msg));
+				errorLoadingEventsMsg = null;			
+			}
 			if (isResumed()) {
 			    setListShown(true);
 			} else {
@@ -262,26 +273,22 @@ public class EventListFragmentLoader extends SherlockFragmentActivity {
 	                switch(evento.getEstadoEnumValue()) {
 		                case ACTIVO:
 		                	imgView.setImageResource(R.drawable.open);
-		                	dateInfoStr = "<b>" + Aplicacion.INSTANCIA.
-	                				getResourceString(R.string.remain_lbl, 
+		                	dateInfoStr = "<b>" + getAppString(R.string.remain_lbl, 
 	                				DateUtils.getElpasedTimeHoursFromNow(evento.getFechaFin()))  +"</b>";
 		                	break;
 		                case PENDIENTE_COMIENZO:
 		                	imgView.setImageResource(R.drawable.pending);
-		                	dateInfoStr = "<b>" + Aplicacion.INSTANCIA.
-			                		getResourceString(R.string.inicio_lbl, null) + "</b>: " + 
+		                	dateInfoStr = "<b>" + getAppString(R.string.inicio_lbl) + "</b>: " + 
 		                			DateUtils.getShortSpanishStringFromDate(evento.getFechaInicio()) + " - " + 
-                					"<b>" + Aplicacion.INSTANCIA.
-			                		getResourceString(R.string.fin_lbl, null) + "</b>: " + 
+                					"<b>" + getAppString(R.string.fin_lbl) + "</b>: " + 
 		                			DateUtils.getShortSpanishStringFromDate(evento.getFechaFin());
 		                	break;
 		                case FINALIZADO:
 		                	imgView.setImageResource(R.drawable.closed);
-		                	dateInfoStr = "<b>" + Aplicacion.INSTANCIA.
-			                		getResourceString(R.string.inicio_lbl, null) + "</b>: " + 
+		                	dateInfoStr = "<b>" + getAppString(R.string.inicio_lbl) + "</b>: " + 
 		                			DateUtils.getShortSpanishStringFromDate(evento.getFechaInicio()) + " - " + 
                 					"<b>" + Aplicacion.INSTANCIA.
-			                		getResourceString(R.string.fin_lbl, null) + "</b>: " + 
+			                		getAppString(R.string.fin_lbl) + "</b>: " + 
 		                			DateUtils.getShortSpanishStringFromDate(evento.getFechaFin());
 		                	break;
 	                }
@@ -289,8 +296,7 @@ public class EventListFragmentLoader extends SherlockFragmentActivity {
 	                else dateInfo.setVisibility(View.GONE);
 	                if(evento.getUsuario() != null && !"".equals(
 	                		evento.getUsuario().getNombreCompleto())) {
-		                String authorStr =  "<b>" + Aplicacion.INSTANCIA.
-		                		getResourceString(R.string.author_lbl, null) + "</b>: " + 
+		                String authorStr =  "<b>" + getAppString(R.string.author_lbl) + "</b>: " + 
 		                		evento.getUsuario().getNombreCompleto();
 		                author.setText(Html.fromHtml(authorStr));
 	                } else author.setVisibility(View.GONE);
@@ -355,9 +361,10 @@ public class EventListFragmentLoader extends SherlockFragmentActivity {
 	                	for(Evento evento:consulta.getEventos()) {
 	                		eventEntryList.add(new EventEntry(evento));
 	                	}
-	                }
+	                } else errorLoadingEventsMsg = response.getStatusLine().toString();
 	            } catch (Exception ex) {
 	            	Log.e(TAG + ".doInBackground", ex.getMessage(), ex);
+	            	errorLoadingEventsMsg = getAppString(R.string.connection_error_msg);
 	            }
 	            return eventEntryList;
 	        }
