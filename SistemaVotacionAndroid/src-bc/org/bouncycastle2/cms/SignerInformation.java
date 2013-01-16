@@ -52,6 +52,9 @@ import org.bouncycastle2.operator.OperatorCreationException;
 import org.bouncycastle2.operator.RawContentVerifier;
 import org.bouncycastle2.operator.SignatureAlgorithmIdentifierFinder;
 
+import android.util.Base64;
+import android.util.Log;
+
 /**
  * an expanded SignerInfo block from a CMS Signed message
  */
@@ -642,6 +645,12 @@ public class SignerInformation
 
                 ASN1OctetString signedMessageDigest = (ASN1OctetString)validMessageDigest;
 
+                String resultDigestStr = Base64.encodeToString(resultDigest, Base64.DEFAULT);
+                String signedMessageDigestStr = Base64.encodeToString(signedMessageDigest.getOctets(), Base64.DEFAULT);
+                
+				Log.d("SignerInformation ", ".doVerify(...) - resultDigestStr: " + resultDigestStr 
+						+ " - signedMessageDigestStr: " + signedMessageDigestStr);
+                
                 if (!Arrays.constantTimeAreEqual(resultDigest, signedMessageDigest.getOctets()))
                 {
                     throw new CMSSignerDigestMismatchException("message-digest attribute value does not match calculated value");

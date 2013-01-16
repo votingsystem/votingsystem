@@ -130,7 +130,8 @@ public class SMIMEMessageWrapper extends MimeMessage {
     
     private void initSMIMEMessage() throws IOException, MessagingException, 
     	CMSException, SMIMEException, Exception{
-    	 if (getContent() instanceof BASE64DecoderStream) {
+     	Log.d("SMIMEMessageWrapper", " -initSMIMEMessage - getContent().getClass(): " + getContent().getClass());
+    	if (getContent() instanceof BASE64DecoderStream) {
              smimeSigned = new SMIMESigned(this); 
              ByteArrayOutputStream baos = new ByteArrayOutputStream();
              ((CMSProcessable)smimeSigned.getSignedContent()).write(baos);
@@ -304,6 +305,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
         // check each signer
         firmantes = new HashSet<Firmante>();
         while (it.hasNext()) {
+            Log.d(TAG, "----------------------- Signer -----------------------------------");
             SignerInformation   signer = it.next();
             AttributeTable  attributes = signer.getSignedAttributes();
             DERUTCTime time = null;
@@ -344,8 +346,6 @@ public class SMIMEMessageWrapper extends MimeMessage {
             byte[] digestParams = signer.getDigestAlgParams();
             String digestParamsStr = new String(Base64.encode(hash));
             Log.d(TAG, " -- digestParamsStr: " + digestParamsStr);
-            //byte[] digest, AlgorithmIdentifier encryptionAlgorithm, AlgorithmIdentifier  digestAlgorithm, PublicKey key, byte[] signature, 
-            //String sigProviderSignerInformation signer, X509Certificate cert,  String provider
             
             // boolean cmsVerifyDigest = CMSUtils.verifyDigest(signer, cert, SIGN_PROVIDER);
             // Log.d(TAG, " -- cmsVerifyDigest: " + cmsVerifyDigest);
@@ -469,16 +469,6 @@ public class SMIMEMessageWrapper extends MimeMessage {
         setContent(mimeMultipart, mimeMultipart.getContentType());
         saveChanges();
     }
-    
-    @Override public void saveChanges() throws MessagingException {
-        super.saveChanges();
-        try {
-            initSMIMEMessage();
-        } catch(Exception ex) {
-        	Log.e(TAG + ".saveChanges() ",	ex.getMessage(), ex);
-        } 
-    }
-    
     
     public static PKIXParameters getPKIXParameters (X509Certificate... certs) 
             throws InvalidAlgorithmParameterException{

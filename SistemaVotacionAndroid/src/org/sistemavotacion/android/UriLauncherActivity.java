@@ -18,6 +18,9 @@ package org.sistemavotacion.android;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+
+import org.sistemavotacion.util.ServerPaths;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -60,7 +63,7 @@ public class UriLauncherActivity extends Activity {
         myWebView.addJavascriptInterface(jsi, "ClienteAndroid");
         webSettings.setJavaScriptEnabled(true);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-        myWebView.loadUrl("http://192.168.1.3:8080/SistemaVotacionControlAcceso/app/index?clienteAndroidLoaded=true");
+        myWebView.loadUrl(ServerPaths.getUrlAndroidBrowserSession(Aplicacion.CONTROL_ACCESO_URL));
 		
         setClienteFirmaMessage("Contacto establecido con cliente Android");
         
@@ -68,7 +71,7 @@ public class UriLauncherActivity extends Activity {
         aceptarButton.setVisibility(View.VISIBLE);
         aceptarButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-            	setClienteFirmaMessage("Hooooooola desde Annnnndroid");
+            	setClienteFirmaMessage("Hola desde la aplicación Android del Sistema de Votación");
             }
         });
         /*try {

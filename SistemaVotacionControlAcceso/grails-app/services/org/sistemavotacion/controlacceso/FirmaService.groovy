@@ -302,7 +302,8 @@ class FirmaService {
 			eventTrustedCerts.add(certCAEvento)
 			eventTrustedCertsHashMap.put(evento.id, eventTrustedCerts)
 		}
-		log.debug("validarCertificacionFirmantesVoto - firmantes.size(): ${firmantes.size()} - eventTrustedCerts.size(): ${eventTrustedCerts.size()}")
+		log.debug("validarCertificacionFirmantesVoto - firmantes.size():" + 
+			" ${firmantes.size()} - eventTrustedCerts.size(): ${eventTrustedCerts.size()}")
 		for(Usuario usuario: firmantes) {
 			log.debug("Validando firmante ${usuario.getCertificate().getSubjectDN()}")
 			try {
@@ -315,7 +316,8 @@ class FirmaService {
 			} catch (Exception ex) {
 				log.error(ex.getMessage(), ex)
 				return new Respuesta(codigoEstado:400, mensaje:
-					"Error validando Certificación del certificado '${usuario.getCertificate().getSubjectDN()?.toString()}'")
+					"Error validando Certificación del certificado" + 
+					" '${usuario.getCertificate().getSubjectDN()?.toString()}'")
 			}
 		}
 		return new Respuesta(codigoEstado:200)
@@ -328,7 +330,8 @@ class FirmaService {
 	public Respuesta validarCertificacionFirmantes(
 			SMIMEMessageWrapper messageWrapper, Locale locale) {
 		Set<Usuario> firmantes = messageWrapper.getFirmantes();
-		log.debug("validarCertificacionFirmantes - firmantes.size(): ${firmantes.size()} - trustedCerts.size(): ${trustedCerts.size()}")
+		log.debug("validarCertificacionFirmantes - firmantes.size(): " +
+			" ${firmantes.size()} - trustedCerts.size(): ${trustedCerts.size()}")
 		if(firmantes.size() == 0) return new Respuesta(
 			codigoEstado:400, mensaje:"Documento sin firmantes")
 		for(Usuario usuario: firmantes) {

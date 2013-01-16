@@ -272,6 +272,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
         // check each signer
         firmantes = new HashSet<Firmante>();
         while (it.hasNext()) {
+        	logger.debug("-------------- signer -------------------");
             SignerInformation   signer = it.next();
             AttributeTable  attributes = signer.getSignedAttributes();
             DERUTCTime time = null;
@@ -309,16 +310,16 @@ public class SMIMEMessageWrapper extends MimeMessage {
                 logger.debug("signature failed!");
                 result = false;
             }
-            byte[] digestParams = signer.getDigestAlgParams();
-            String digestParamsStr = new String(Base64.encode(hash));
-            logger.debug(" -- digestParamsStr: " + digestParamsStr);
+            //byte[] digestParams = signer.getDigestAlgParams();
+            //String digestParamsStr = new String(Base64.encode(digestParams));
+            //logger.debug(" -- digestParamsStr: " + digestParamsStr);
             //byte[] digest, AlgorithmIdentifier encryptionAlgorithm, AlgorithmIdentifier  digestAlgorithm, PublicKey key, byte[] signature, 
             //String sigProviderSignerInformation signer, X509Certificate cert,  String provider
             
-//            boolean cmsVerifyDigest = CMSUtils.verifyDigest(signer, cert, SIGN_PROVIDER);
-    //        logger.debug(" -- cmsVerifyDigest: " + cmsVerifyDigest);
-  //          boolean cmsVerifySignature = CMSUtils.verifySignature(signer, cert, SIGN_PROVIDER);
-      //      logger.debug(" -- cmsVerifySignature: " + cmsVerifySignature);
+            //boolean cmsVerifyDigest = CMSUtils.verifyDigest(signer, cert, SIGN_PROVIDER);
+            //logger.debug(" -- cmsVerifyDigest: " + cmsVerifyDigest);
+            //boolean cmsVerifySignature = CMSUtils.verifySignature(signer, cert, SIGN_PROVIDER);
+            //logger.debug(" -- cmsVerifySignature: " + cmsVerifySignature);
         }
         return result;
     }

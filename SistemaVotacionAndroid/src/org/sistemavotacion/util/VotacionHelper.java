@@ -125,7 +125,7 @@ public class VotacionHelper implements TaskListener {
 				keyStoreBytes, ALIAS_CERT_USUARIO, password, VOTE_SIGN_MECHANISM);
 		String contenidoFirma = DeObjetoAJSON.obtenerSolicitudAccesoJSON(event);
         File solicitudAcceso = getFile("accessRequest_" + 
-        		event.getId() + SIGNED_PART_EXTENSION);
+        		event.getEventoId() + SIGNED_PART_EXTENSION);
 		solicitudAcceso = signedMailGenerator.genFile(usuario, 
 				Aplicacion.getControlAcceso().getNombreNormalizado(), 
 				contenidoFirma, asunto, null, SignedMailGenerator.Type.USER, 
@@ -133,8 +133,7 @@ public class VotacionHelper implements TaskListener {
 		setTimeStampedDocument(TIMESTAMP_ACCESS_REQUEST, solicitudAcceso, 
 				TIMESTAMP_VOTE_HASH);
 		
-		
-		
+				
 		
 		/* problema -> javax.activation.UnsupportedDataTypeException: 
 		 * no object DCH for MIME type application/pkcs7-signature
@@ -153,28 +152,6 @@ public class VotacionHelper implements TaskListener {
 		String contentDigest = Base64.encodeToString(contentDigestBytes, Base64.DEFAULT);
 		Log.d(TAG + ".obtenerSolicitudAcceso(...)", " - contentDigest: " + contentDigest);*/
     	
-		/*SMIMEMessageWrapper smimeSignedWrapper = new SMIMEMessageWrapper(null,
-				new FileInputStream(solicitudAcceso), null);
-		SMIMESigned solicitudAccesoSMIME = smimeSignedWrapper.getSmimeSigned();
-		signerInformation = ((SignerInformation)
-				solicitudAccesoSMIME.getSignerInfos().getSigners().iterator().next());
-		AttributeTable table = signerInformation.getSignedAttributes();
-		Attribute hash = table.get(CMSAttributes.messageDigest);
-		ASN1OctetString as = ((ASN1OctetString)hash.getAttrValues().getObjectAt(0));
-		//String digest = Base64.encodeToString(as.getOctets(), Base64.DEFAULT);
-		//Log.d(TAG + ".obtenerSolicitudAcceso(...)", " - digest: " + digest);
-        TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
-        //reqgen.setReqPolicy(m_sPolicyOID);
-        TimeStampRequest timeStampRequest = reqgen.generate(
-        		TIMESTAMP_USU_HASH, as.getOctets());
-        //String timeStampRequestStr = Base64.encodeToString(timeStampRequest.getEncoded(), Base64.DEFAULT);
-        //byte[] messageImprintDigestBytes = timeStampRequest.getMessageImprintDigest(); 
-        //String messageImprintDigestStr = Base64.encodeToString(messageImprintDigestBytes, Base64.DEFAULT);
-        //Log.d(TAG + ".obtenerSolicitudAcceso(...)", " - messageImprintDigestStr: " + messageImprintDigestStr);
-        //Log.d(TAG + ".obtenerSolicitudAcceso(...)", " - timeStampRequestStr: " + timeStampRequestStr);
-		votingListener.setRunningTask(new SendByteArrayTask(
-				timeStampListener, timeStampRequest.getEncoded()).execute(
-				ServerPaths.getURLTimeStampService(Aplicacion.CONTROL_ACCESO_URL)));*/
     }
     
     private void setTimeStampedDocument(int timeStampOperation, File document,  
@@ -246,7 +223,7 @@ public class VotacionHelper implements TaskListener {
 		            if (Aplicacion.getUsuario() != null) usuario = 
 		            		Aplicacion.getUsuario().getNif();
 		            File votoFirmado = getFile("vote_" + 
-	                		event.getId() + SIGNED_PART_EXTENSION);
+	                		event.getEventoId() + SIGNED_PART_EXTENSION);
 	                votoFirmado = getVotingCertTask.genSignedFile(usuario, 
 	                		event.getCentroControl().getNombreNormalizado(),
 	                        votoJSON, getAppString(R.string.vote_msg_subject), null, 
@@ -255,7 +232,7 @@ public class VotacionHelper implements TaskListener {
 				} catch (Exception e) {
 					votingListener.setException(e.getMessage());
 				}	
-	        } if(Respuesta.SC_ERROR_VOTO_REPETIDO == getVotingCertTask.getStatusCode()) {
+	        } else if(Respuesta.SC_ERROR_VOTO_REPETIDO == getVotingCertTask.getStatusCode()) {
 	        	votingListener.setException(getAppString(R.string.error_vote_repeated_msg));
 	        } else {
 	        	votingListener.setException(getVotingCertTask.getMessage());

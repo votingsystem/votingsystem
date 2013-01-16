@@ -149,6 +149,11 @@ public class ServerPaths {
     			"&eventoId=" + eventoId;
     }
     
+    public static String getUrlAndroidBrowserSession (String serverURL) {
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+    	return serverURL + "app/index?clienteAndroidLoaded=true";
+    }
+    
     public static String getURLSolicitudCertificadoUsuario (
     		String serverURL, String idSolicitudCSR) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";

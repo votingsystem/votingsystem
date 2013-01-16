@@ -41,7 +41,7 @@ public class SignedMailGenerator {
     
     public static final String NOMBRE_ARCHIVO_FIRMADO = "EventoEnviado";
     public static final String NOMBRE_ARCHIVO_MULTIFIRMA = "MultiFirma";
-    public static final String SIGN_MECHANISM = "SHA1withRSA";
+    public static final String SIGN_MECHANISM = "SHA256withRSA";
     public static final String SIGN_PROVIDER = "BC";
     public static final String SIGNED_PART_EXTENSION = ".p7s";
     

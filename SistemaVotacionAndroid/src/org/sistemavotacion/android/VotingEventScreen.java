@@ -19,28 +19,22 @@ package org.sistemavotacion.android;
 import static org.sistemavotacion.android.Aplicacion.KEY_STORE_FILE;
 import static org.sistemavotacion.android.Aplicacion.MAX_SUBJECT_SIZE;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
 import org.sistemavotacion.android.ui.CertPinScreen;
 import org.sistemavotacion.android.ui.CertPinScreenCallback;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.OpcionDeEvento;
 import org.sistemavotacion.modelo.ReciboVoto;
-import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.PKCS10WrapperClient;
-import org.sistemavotacion.smime.SMIMEMessageWrapper;
-import org.sistemavotacion.task.DataListener;
 import org.sistemavotacion.task.VotingListener;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.VotacionHelper;
-
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -69,76 +63,10 @@ public class VotingEventScreen extends SherlockFragmentActivity
 
     private Evento evento;
     private ProgressDialog progressDialog = null;
-    private PKCS10WrapperClient pkcs10WrapperClient = null;
     private CertPinScreen certPinScreen;
     private AsyncTask runningTask = null;
     private List<Button> optionButtons = null;
     byte[] keyStoreBytes = null;
-	
-    DataListener<String> certificadoVotoListener = new DataListener<String>() {
-    	
-		@Override public void updateData(int statusCode, String data) {
-			Log.d(TAG + ".certificadoVotoListener.updateData(...) ", data);
-	        if (progressDialog != null && progressDialog.isShowing()) {
-	            progressDialog.dismiss();
-	        }
-	        if(Respuesta.SC_OK == statusCode) {
-		        try {
-		        	/*pkcs10WrapperClient.initVoteSigner(data.getBytes());
-		            String votoJSON = DeObjetoAJSON.obtenerVotoParaEventoJSON(evento);
-		            String usuario = null;
-		            if (Aplicacion.getUsuario() != null) usuario = 
-		            		Aplicacion.getUsuario().getNif();
-		            String votoFirmado = pkcs10WrapperClient.genSignedString(usuario, 
-		                    evento.getCentroControl().getNombreNormalizado(),
-		                    votoJSON, "[VOTO]", null, SignedMailGenerator.Type.USER);
-			    	new SendDataTask(votingListener, votoFirmado, true).execute(ServerPaths.getURLVoto(
-			    			evento.getCentroControl().getServerURL()));*/
-				} catch (Exception e) {
-					Log.e(TAG + "VotacionHelper.obtenerCSR(...)", "Message: " + e.getMessage());
-					e.printStackTrace();
-					setException(e.getMessage());
-					setOptionButtonsEnabled(true);
-				}	
-	        } else {
-	        	showMessage(getString(R.string.error_lbl), data);
-	        }
-		}
-		
-		@Override public void setException(String exceptionMsg) {
-			Log.d(TAG + ".certificadoVotoListener.setException() ", exceptionMsg);	
-			showMessage(getString(R.string.error_lbl), exceptionMsg);
-		}
-    };
-
-    DataListener<String> votingListener = new DataListener<String>() {
-
-    	@Override public void updateData(int statusCode, String response) {
-			Log.d(TAG + ".votingListener.updateData(...) ",	" - statusCode: " + statusCode);
-	        if (progressDialog != null && progressDialog.isShowing()) {
-	            progressDialog.dismiss();
-	        }
-	        if (Respuesta.SC_OK == statusCode) {
-                try {
-					SMIMEMessageWrapper votoValidado = new SMIMEMessageWrapper(null,
-							new ByteArrayInputStream(response.getBytes()), null);
-					ReciboVoto  reciboVoto = new ReciboVoto(
-							Respuesta.SC_OK, votoValidado, evento);
-					showMessage(getString(R.string.operacion_ok_msg), 
-							reciboVoto.getMensaje());
-				} catch (Exception e) {
-					e.printStackTrace();
-					setException("Error validando recibo de voto: " + e.getMessage());
-					setOptionButtonsEnabled(true);
-				}
-	        } else setOptionButtonsEnabled(true);
-		}
-		
-    	@Override public void setException(String exceptionMsg) {
-			Log.d(TAG + ".votingListener.setException(...) ", " - exceptionMsg: " + exceptionMsg);	
-	        showMessage(getString(R.string.error_lbl), exceptionMsg);
-		}
-    };
     
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -259,21 +187,6 @@ public class VotingEventScreen extends SherlockFragmentActivity
 			setOptionButtonsEnabled(false);
 			VotacionHelper.procesarVoto(getApplicationContext(), evento, this, 
 					keyStoreBytes, password);
-
-	    	/*VotacionHelper.prepararVoto(evento);
-	    	Log.d(TAG + ".firmarEnviarVoto(...)", " - HashCertificadoVotoHex:" + evento.getHashCertificadoVotoHex());
-	    	pkcs10WrapperClient = PKCS10WrapperClient.buildCSRVoto(KEY_SIZE, SIG_NAME, 
-			        SIGNATURE_ALGORITHM, PROVIDER, CONTROL_ACCESO_URL, 
-			        evento.getEventoId().toString(), evento.getHashCertificadoVotoHex());
-			String csr = new String(pkcs10WrapperClient.getPEMEncodedRequestCSR());
-			Log.d(TAG  + ".firmarEnviarVoto(...)", " - csr:" + csr);
-	    	File solicitudAcceso = VotacionHelper.obtenerSolicitudAcceso(keyStoreBytes, evento, password);
-	    	Log.d(TAG + ".firmarEnviar(...)", " - solicitudAcceso: " 
-	    			+ FileUtils.getStringFromFile(solicitudAcceso));
-	        GetVotingCertTask obtenerCertificadoVotoTask = new GetVotingCertTask(
-	        		certificadoVotoListener, solicitudAcceso, csr.getBytes());
-	        runningTask = obtenerCertificadoVotoTask;
-	        obtenerCertificadoVotoTask.execute(ServerPaths.getURLSolicitudAcceso(CONTROL_ACCESO_URL));*/
 		} catch (IOException ex) {
 			Log.e(TAG + ".firmarEnviarVoto(...)", "Exception: " + ex.getMessage());
 			showMessage(getString(R.string.error_lbl), 
@@ -282,7 +195,6 @@ public class VotingEventScreen extends SherlockFragmentActivity
 			Log.e(TAG + ".firmarEnviarVoto(...)", "Exception: " + ex.getMessage());
 			showMessage(getString(R.string.error_lbl), ex.getMessage());
 		}
-		setOptionButtonsEnabled(true);
 	}
 
 	
@@ -336,7 +248,6 @@ public class VotingEventScreen extends SherlockFragmentActivity
 	@Override
 	public void setException(String exceptionMsg) {
 		showMessage(getString(R.string.error_lbl), exceptionMsg);
-		setOptionButtonsEnabled(true);
 	}
 
 	@Override

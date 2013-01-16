@@ -298,7 +298,7 @@ public class DataHandler implements Transferable {
 		    }
 		}
 	    },
-		      "DataHandler.getInputStream").start();
+	    "DataHandler.getInputStream").start();
 	    ins = pin;
 	}
 
