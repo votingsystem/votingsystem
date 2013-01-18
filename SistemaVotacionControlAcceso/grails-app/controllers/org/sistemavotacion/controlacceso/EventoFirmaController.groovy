@@ -17,6 +17,7 @@ class EventoFirmaController {
 	def pdfRenderingService
 	def pdfService
 	def eventoService
+	def htmlService
 	
 	def index() { }
 	
@@ -64,6 +65,8 @@ class EventoFirmaController {
 				return false
 			} else {
 				def eventoJSON = JSON.parse(eventoStr)
+				log.debug "eventoJSON.contenido: ${eventoJSON.contenido}"
+				eventoJSON.contenido = htmlService.prepareHTMLToPDF(eventoJSON.contenido.getBytes())
 				EventoFirma evento = new EventoFirma(asunto:eventoJSON.asunto,
 					fechaInicio:DateUtils.todayDate,
 					estado: Evento.Estado.PENDIENTE_DE_FIRMA,
