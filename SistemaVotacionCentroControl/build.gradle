@@ -1,4 +1,5 @@
-task copyApplet(dependsOn: [':SistemaVotacionApplet:signJar', ':HerramientaValidacionCopiasDeSeguridad:signJar']) {
+task copyApplet(dependsOn: [':SistemaVotacionApplet:signJar', ':HerramientaValidacionCopiasDeSeguridad:signJar',
+	':SistemaVotacionAndroid:zipalign']) {
 	
 	doLast {
 		File appletFirma = new File("$projectDir/web-app/applet/AppletFirma.jar")
@@ -8,6 +9,10 @@ task copyApplet(dependsOn: [':SistemaVotacionApplet:signJar', ':HerramientaValid
 		File appletHerramienta = new File("$projectDir/web-app/applet/HerramientaValidacion.jar")
 		if(appletHerramienta.exists()) appletHerramienta.delete()
 		appletHerramienta << rootProject.herramientaValidacion?.bytes
+		
+		File appAndroid = new File("$projectDir/web-app/android/SistemaVotacion.apk")
+		if(appAndroid.exists()) appAndroid.delete()
+		appAndroid << rootProject.aplicacionAndroid?.bytes
 	}
 }
 

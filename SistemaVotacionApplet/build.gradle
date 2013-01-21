@@ -32,13 +32,13 @@ task buildVotingApplet(type:VotingSystemApplet){
 
 task signJar {
 	doLast {
-		ant.signjar(keystore: "$projectDir/mockDnie.jks",
-			storepass:keyStorePassword,
-			alias:signKeyAlias,
+		ant.signjar(keystore: "$rootProject.projectDir/mockDnie.jks",
+			storepass:rootProject.keyStorePassword,
+			alias:rootProject.signKeyAlias,
 			jar:jar.archivePath,
-			signedjar:"$buildDir/$signedjarName")
-		rootProject.ext.set("appletFirma",file("$buildDir/$signedjarName"))
-		announce.announce("$signedjarName firmado y puesto en contexto de construcción", "local")
+			signedjar:"$buildDir/$rootProject.signAppletJarName")
+		rootProject.ext.set("appletFirma",file("$buildDir/$rootProject.signAppletJarName"))
+		announce.announce("$rootProject.signAppletJarName firmado y puesto en contexto de construcción", "local")
 	}
 	
 }

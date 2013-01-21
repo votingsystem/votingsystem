@@ -59,7 +59,8 @@ task runApp(dependsOn: buildJar) << { task ->
 } 
 
 project.ext {
-  mainClass = "org.sistemavotacion.test.MainFrame"
+  //mainClass = "org.sistemavotacion.test.MainFrame"
+  mainClass = "org.sistemavotacion.test.KeyStoreHelper"
 }
  
 

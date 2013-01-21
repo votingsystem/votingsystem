@@ -38,7 +38,7 @@ task cleanAndroid << {
 	}
 }
 
-task release <<  {
+task releaseUnSigned <<  {
 	ProcessBuilder pb = new ProcessBuilder("ant", "release");
 	pb.directory(projectDir);
 	Process proc = pb.start();
@@ -47,6 +47,32 @@ task release <<  {
 	if (proc.waitFor() != 0) {
 		throw new RuntimeException('release failed')
 	}
+}
+
+task signRelease(dependsOn:'releaseUnSigned') <<  {
+	ant.signjar(keystore: "$rootProject.projectDir/mockDnie.jks",
+		storepass:rootProject.keyStorePassword,
+		alias:rootProject.signKeyAlias,
+		jar:"bin/Aplicacion-release-unsigned.apk",
+		signedjar:"bin/Aplicacion-release.apk")
+}
+
+
+task zipalign(dependsOn:'signRelease') <<  {
+	ProcessBuilder pb = new ProcessBuilder("zipalign", "-v", "4", 
+		"bin/Aplicacion-release.apk", "bin/${signedAppName}.apk");
+	pb.directory(projectDir);
+	Process proc = pb.start();
+	proc.consumeProcessErrorStream(System.err)
+	proc.consumeProcessOutputStream(System.out)
+	if (proc.waitFor() != 0) {
+		throw new RuntimeException('release failed')
+	}
+}
+
+task release(dependsOn:'zipalign') <<  {
+	rootProject.ext.set("aplicacionAndroid",file("bin/${signedAppName}.apk"))
+	announce.announce("Aplicación Android firmada", "local")
 }
 
 task cloneActionBarSherlockGitRepo(type: GitClone) {

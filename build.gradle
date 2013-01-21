@@ -17,6 +17,7 @@ subprojects {
 ext {
 	appletFirma = null
 	appletHerramienta = null
+	aplicacionAndroid = null
 }
 
 task buildAll(dependsOn:['SistemaVotacionApplet:signJar', 
