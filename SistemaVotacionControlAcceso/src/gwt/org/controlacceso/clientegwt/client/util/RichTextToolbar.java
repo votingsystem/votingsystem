@@ -343,6 +343,10 @@ public class RichTextToolbar extends Composite {
 		}
 	}
 
+	public static native String getUserAgent() /*-{
+		return navigator.userAgent.toLowerCase();
+	}-*/;
+	
 	/** Native JavaScript that returns the selected text and position of the start **/
 	public static native JsArrayString getSelection(Element elem) /*-{
 		var txt = "";
@@ -499,4 +503,3 @@ public class RichTextToolbar extends Composite {
 	}
 
 }
-

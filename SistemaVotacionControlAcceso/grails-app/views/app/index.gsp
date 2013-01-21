@@ -5,6 +5,8 @@
         <link rel="stylesheet" href="${resource(dir:'css',file:'clean.css')}" />                               
   		<title>${message(code: 'nombreServidorLabel', null)}</title>
  		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+ 		<meta name="viewport" content="width=device-width" />
+ 		<meta name="HandheldFriendly" content="true" />
  		<script src="${resource(dir:'js',file:'deployJava.js')}"></script>
  		<script>
 		//http://www.mkyong.com/javascript/how-to-detect-ie-version-using-javascript/

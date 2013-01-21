@@ -69,8 +69,8 @@ public class PanelEvento extends Composite {
 	public PanelEvento(EventoSistemaVotacionJso evento) {
 		initWidget(uiBinder.createAndBindUi(this));
         sinkEvents(Event.ONCLICK);
-        sinkEvents(Event.ONMOUSEOVER);
-        sinkEvents(Event.ONMOUSEOUT);
+        //sinkEvents(Event.ONMOUSEOVER);
+        //sinkEvents(Event.ONMOUSEOUT);
 		this.evento = evento;
 		asuntoLabel.setText(truncateEventSubject(evento.getAsunto()));
 		if(evento.getUsuario() != null) {
@@ -147,7 +147,7 @@ public class PanelEvento extends Composite {
 	    		History.newItem(HistoryToken.VOTAR.toString() 
 	    				+ "&eventoId=" +  evento.getId());
 	       		break;
-			case Event.ONMOUSEOVER:
+			/*case Event.ONMOUSEOVER:
 				if(popupInfoEvento == null || !popupInfoEvento.isShowing()) {
 					mostrarPopupInfoEvento(event.getClientX(), event.getClientY());
 				} 
@@ -157,7 +157,7 @@ public class PanelEvento extends Composite {
 		    	if(!DOM.isOrHasChild(getElement(), DOM.eventGetToElement(event))) {
 			    	popupInfoEvento.hide();
 		    	}
-		    	break;
+		    	break;*/
 		}
 	}
 	

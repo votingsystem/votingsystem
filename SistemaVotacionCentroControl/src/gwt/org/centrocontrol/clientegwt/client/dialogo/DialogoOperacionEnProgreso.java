@@ -11,16 +11,20 @@ import org.centrocontrol.clientegwt.client.util.Browser;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArrayString;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class DialogoOperacionEnProgreso implements EventoGWTMensajeClienteFirma.Handler{
+public class DialogoOperacionEnProgreso implements EventoGWTMensajeClienteFirma.Handler, 
+		ValueChangeHandler<String>{
 	
     private static Logger logger = Logger.getLogger("DialogoOperacionEnProgreso");
 	
@@ -45,6 +49,7 @@ public class DialogoOperacionEnProgreso implements EventoGWTMensajeClienteFirma.
     
 	public DialogoOperacionEnProgreso() {
         uiBinder.createAndBindUi(this);
+        History.addValueChangeHandler(this);
         BusEventos.addHandler(
         		EventoGWTMensajeClienteFirma.TYPE, this);
         dialogBox.setText(Constantes.INSTANCIA.dialogoProgresoCaption());
@@ -105,6 +110,11 @@ public class DialogoOperacionEnProgreso implements EventoGWTMensajeClienteFirma.
 				break;
 		}
 		
+	}
+
+
+	@Override public void onValueChange(ValueChangeEvent<String> event) {
+		dialogBox.hide();
 	}
     
 }

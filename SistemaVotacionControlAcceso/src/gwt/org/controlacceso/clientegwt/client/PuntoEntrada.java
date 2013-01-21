@@ -10,7 +10,6 @@ import org.controlacceso.clientegwt.client.evento.EventoGWTMensajeAplicacion;
 import org.controlacceso.clientegwt.client.evento.EventoGWTMensajeClienteFirma;
 import org.controlacceso.clientegwt.client.modelo.ActorConIPJso;
 import org.controlacceso.clientegwt.client.modelo.MensajeClienteFirmaJso;
-import org.controlacceso.clientegwt.client.modelo.MensajeClienteFirmaJso.Operacion;
 import org.controlacceso.clientegwt.client.panel.PanelCentral;
 import org.controlacceso.clientegwt.client.panel.PanelEncabezado;
 import org.controlacceso.clientegwt.client.util.Browser;

@@ -136,8 +136,8 @@ public class PanelEvento extends Composite {
 		}
 		//DOM.setStyleAttribute(label.getElement(),"border", "1px solid #00f");
         sinkEvents(Event.ONCLICK);
-        sinkEvents(Event.ONMOUSEOVER);
-        sinkEvents(Event.ONMOUSEOUT);
+        //sinkEvents(Event.ONMOUSEOVER);
+        //sinkEvents(Event.ONMOUSEOUT);
 
 	}
 
@@ -177,7 +177,7 @@ public class PanelEvento extends Composite {
 						break;
 	    		}
 	       		break;
-			case Event.ONMOUSEOVER:
+			/*case Event.ONMOUSEOVER:
 				if(popupInfoEvento == null || !popupInfoEvento.isShowing()) {
 					mostrarPopupInfoEvento(event.getClientX(), event.getClientY());
 				} 
@@ -187,7 +187,7 @@ public class PanelEvento extends Composite {
 		    	if(!DOM.isOrHasChild(getElement(), DOM.eventGetToElement(event))) {
 			    	popupInfoEvento.hide();
 		    	}
-		    	break;
+		    	break;*/
 		}
 	}
 	

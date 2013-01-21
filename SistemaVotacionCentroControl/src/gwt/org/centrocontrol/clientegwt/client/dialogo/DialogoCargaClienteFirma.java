@@ -1,21 +1,22 @@
 package org.centrocontrol.clientegwt.client.dialogo;
 
 import java.util.logging.Logger;
-
 import org.centrocontrol.clientegwt.client.util.Browser;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class DialogoCargaClienteFirma {
+public class DialogoCargaClienteFirma implements ValueChangeHandler<String>{
 	
     private static Logger logger = Logger.getLogger("DialogoCargaClienteFirma");
 	
@@ -33,6 +34,7 @@ public class DialogoCargaClienteFirma {
     
 	public DialogoCargaClienteFirma() {
         uiBinder.createAndBindUi(this);
+        History.addValueChangeHandler(this);
         INSTANCIA = this;
         if(Browser.isChrome()) textPanel.remove(textoAdvertencia);
         else textPanel.remove(textoChrome); 
@@ -52,5 +54,9 @@ public class DialogoCargaClienteFirma {
     	dialogBox.show();
     	
     }
+	
+	@Override public void onValueChange(ValueChangeEvent<String> event) {
+		dialogBox.hide();
+	}
     
 }
