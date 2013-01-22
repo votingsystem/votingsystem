@@ -29,20 +29,20 @@ task buildVotingApplet(type:VotingSystemApplet) {
 	manifest {
 		attributes 'Main-Class': 'org.sistemavotacion.herramientavalidacion.AppletHerramienta',
 				   'SplashScreen-Image':'resources/images/cert_100x108.png',
-				   'url':'https://github.com/jgzornoza/HerramientaValidacionCopiasDeSeguridad',
+				   'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/HerramientaValidacionCopiasDeSeguridad',
 				   'provider': 'GruposP2P'
 	}
 }
 
 task signJar {
 	doLast {
-		ant.signjar(keystore: "$projectDir/mockDnie.jks",
-			storepass:keyStorePassword,
-			alias:signKeyAlias,
+		ant.signjar(keystore: "$rootProject.projectDir/mockDnie.jks",
+			storepass:rootProject.keyStorePassword,
+			alias:rootProject.signKeyAlias,
 			jar:jar.archivePath,
-			signedjar:"$buildDir/$signedjarName")
-		rootProject.ext.set("herramientaValidacion",file("$buildDir/$signedjarName"))
-		announce.announce("$signedjarName firmado y puesto en contexto de construcción", "local")
+			signedjar:"$buildDir/$rootProject.validationAppletJarName")
+		rootProject.ext.set("herramientaValidacion",file("$buildDir/$rootProject.validationAppletJarName"))
+		announce.announce("$rootProject.validationAppletJarName firmado y puesto en contexto de construcción", "local")
 	}
 	
 }

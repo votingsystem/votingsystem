@@ -38,7 +38,7 @@ task cleanAndroid << {
 	}
 }
 
-task releaseUnSigned <<  {
+task releaseUnSigned(dependsOn:'cleanAndroid') <<  {
 	ProcessBuilder pb = new ProcessBuilder("ant", "release");
 	pb.directory(projectDir);
 	Process proc = pb.start();

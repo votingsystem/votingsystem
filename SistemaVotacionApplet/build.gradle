@@ -25,7 +25,7 @@ task buildVotingApplet(type:VotingSystemApplet){
 	manifest {
 		attributes 'Main-Class': 'org.sistemavotacion.Aplicacion',
 				   'SplashScreen-Image':'resources/images/cert_100x108.png',
-				   'url':'https://github.com/jgzornoza/SistemaVotacionAppletFirma',
+				   'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/SistemaVotacionApplet',
 				   'provider': 'GruposP2P'
 	}
 }

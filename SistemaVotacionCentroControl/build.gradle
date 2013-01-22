@@ -1,7 +1,11 @@
-task copyApplet(dependsOn: [':SistemaVotacionApplet:signJar', ':HerramientaValidacionCopiasDeSeguridad:signJar',
-	':SistemaVotacionAndroid:zipalign']) {
+task copyApps(dependsOn: [':MonitorDescarga:signJar', ':SistemaVotacionApplet:signJar', 
+	':HerramientaValidacionCopiasDeSeguridad:signJar', ':SistemaVotacionAndroid:zipalign']) {
 	
 	doLast {
+		File downloadMonitor = new File("$projectDir/web-app/applet/MonitorDescarga.jar")
+		if(downloadMonitor.exists()) downloadMonitor.delete()
+		downloadMonitor << rootProject.downloadMonitor?.bytes
+		
 		File appletFirma = new File("$projectDir/web-app/applet/AppletFirma.jar")
 		if(appletFirma.exists()) appletFirma.delete()
 		appletFirma << rootProject.appletFirma?.bytes
@@ -31,7 +35,7 @@ task runApp << { task ->
 	}
 }
 
-task war(dependsOn:'copyApplet') << {task ->
+task war(dependsOn:'copyApps') << {task ->
 	ProcessBuilder pb = new ProcessBuilder("grails", "war");
 	pb.directory(projectDir);
 	Process proc = pb.start();

@@ -18,9 +18,11 @@ ext {
 	appletFirma = null
 	appletHerramienta = null
 	aplicacionAndroid = null
+	downloadMonitor = null
 }
 
-task buildAll(dependsOn:['SistemaVotacionApplet:signJar', 
+task buildAll(dependsOn:['MonitorDescarga:signJar',
+	'SistemaVotacionApplet:signJar', 
 	'HerramientaValidacionCopiasDeSeguridad:signJar',
 	'SistemaVotacionAndroid:release',
 	'SistemaVotacionControlAcceso:war',
