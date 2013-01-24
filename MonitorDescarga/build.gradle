@@ -9,7 +9,7 @@ dependencies { }
 task buildVotingApplet(type:VotingSystemApplet){
 	manifest {
 		attributes 'Main-Class': 'org.sistemavotacion.MonitorDescarga',
-				   'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/MonitorDescargas'
+				   'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/MonitorDescarga'
 	}
 }
 
