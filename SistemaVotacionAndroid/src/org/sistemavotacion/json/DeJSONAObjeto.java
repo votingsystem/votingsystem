@@ -38,7 +38,7 @@ public class DeJSONAObjeto {
     
 	public static final String TAG = "DeJSONAObjeto";
     
-    public Evento obtenerEvento(String eventoStr) throws ParseException, JSONException  {
+    public static Evento obtenerEvento(String eventoStr) throws ParseException, JSONException  {
     	Log.d(TAG + ".obtenerEvento(...)", eventoStr);
     	return obtenerEvento(new JSONObject(eventoStr));
     }
@@ -47,6 +47,8 @@ public class DeJSONAObjeto {
         JSONArray jsonArray;
         JSONObject jsonObject;
         Evento evento = new Evento();
+        if (eventoJSON.has("URL"))
+            evento.setURL(eventoJSON.getString("URL"));
         if (eventoJSON.has("contenido"))
             evento.setContenido(eventoJSON.getString("contenido"));
         if (eventoJSON.has("asunto"))        
@@ -113,9 +115,12 @@ public class DeJSONAObjeto {
         if (eventoJSON.has("centroControl")) {
             jsonObject = eventoJSON.getJSONObject("centroControl");
             CentroControl centroControl = new CentroControl();
-            centroControl.setId(jsonObject.getLong("id"));
-            centroControl.setServerURL(jsonObject.getString("serverURL"));
-            centroControl.setNombre(jsonObject.getString("nombre"));
+            if(jsonObject.has("id"))
+            	centroControl.setId(jsonObject.getLong("id"));
+            if(jsonObject.has("serverURL"))
+            	centroControl.setServerURL(jsonObject.getString("serverURL"));
+            if(jsonObject.has("nombre"))
+            	centroControl.setNombre(jsonObject.getString("nombre"));
             evento.setCentroControl(centroControl);
         }
         if (eventoJSON.has("estado")) {

@@ -151,7 +151,7 @@ public class ServerPaths {
     
     public static String getUrlAndroidBrowserSession (String serverURL) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
-    	return serverURL + "app/index?clienteAndroidLoaded=true";
+    	return serverURL + "app/index?androidClientLoaded=true";
     }
     
     public static String getURLSolicitudCertificadoUsuario (

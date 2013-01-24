@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
-
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.sistemavotacion.json.DeJSONAObjeto;
 import org.sistemavotacion.modelo.ActorConIP;
@@ -34,7 +33,6 @@ import org.sistemavotacion.task.GetDataTask;
 import org.sistemavotacion.util.ServerPaths;
 import org.sistemavotacion.util.SubSystem;
 import org.sistemavotacion.util.SubSystemChangeListener;
-import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -197,7 +195,19 @@ public class Aplicacion extends SherlockActivity {
 	    		intent = new Intent(getApplicationContext(), UserCertResponseForm.class);
 	    		break;
 	    	case CON_CERTIFICADO:
-	    		intent = new Intent(getApplicationContext(), FragmentTabsPager.class);
+	    		if(AppData.INSTANCE.getOperation() != null) {
+		            switch(AppData.INSTANCE.getOperation().getTipo()) {
+				        case VOTAR:
+				        	intent = new Intent(this, VotingEventScreen.class);
+				        	break;
+				        case FIRMAR_MANIFIESTO:
+				        case FIRMAR_RECLAMACION:
+				        	intent = new Intent(this, EventScreen.class);
+				        	break;
+			        }
+		            eventoSeleccionado = AppData.INSTANCE.getOperation().getEvento();
+	    			AppData.INSTANCE.setOperation(null);
+	    		} else intent = new Intent(getApplicationContext(), FragmentTabsPager.class);
 	    		break;
     	}
     	if(intent != null) {
@@ -205,8 +215,6 @@ public class Aplicacion extends SherlockActivity {
         	startActivity(intent);	
     	}
     }
-    
-
     
 	private void showMessage(final String caption, final String message) {
 		Log.d(TAG + ".showMessage(...)", " - caption: " + caption + 
@@ -242,7 +250,6 @@ public class Aplicacion extends SherlockActivity {
 	    if (netInfo != null && netInfo.isConnectedOrConnecting()) return true;
 	    return false;
 	}
-	
 
 	public static Usuario getUsuario() {
 		return usuario;
@@ -260,7 +267,6 @@ public class Aplicacion extends SherlockActivity {
 	public static void setControlAcceso(ActorConIP controlAcceso) {
 		Aplicacion.controlAcceso = controlAcceso;
 	}
-
 
 	public void addSubSystemChangeListener(SubSystemChangeListener listener) {
 		subSystemChangeListeners.add(listener);
@@ -290,7 +296,6 @@ public class Aplicacion extends SherlockActivity {
 				return getApplicationContext().getString(R.string.unknown_drop_down_lbl);
 		}
 	}
-	
 	
 	public String setSelectedSubsystem (SubSystem selectedSubsystem) {
 		if(selectedSubsystem == this.selectedSubsystem) 
@@ -332,7 +337,6 @@ public class Aplicacion extends SherlockActivity {
 		}
 		return file;
 	}
-	
     
 	/*public static File guardar (String nif, String controlAcceso, String idEvento, 
 	 		MimeMessage body) throws FileNotFoundException {

@@ -36,7 +36,7 @@ public class DeObjetoAJSON {
 
 	public static final String TAG = "DeObjetoAJSON";
 
-    public String obtenerEventoJSON(Evento evento) throws JSONException{
+    public static String obtenerEventoJSON(Evento evento) throws JSONException{
     	Log.d(TAG + ".obtenerEventoJSON(...)", "");
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("asunto", evento.getAsunto());

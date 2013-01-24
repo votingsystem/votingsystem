@@ -18,6 +18,7 @@ package org.sistemavotacion.android;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.widget.Toast;
 
@@ -35,7 +36,7 @@ public class JavaScriptInterface {
         mContext = c;
     }
     
-    public void setAppMessage (String appMessage) {
+    @JavascriptInterface public void setAppMessage (String appMessage) {
     	Toast.makeText(mContext, appMessage, Toast.LENGTH_SHORT).show();
     }
 

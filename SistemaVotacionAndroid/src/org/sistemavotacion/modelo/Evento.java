@@ -1,16 +1,21 @@
 package org.sistemavotacion.modelo;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.sistemavotacion.android.Aplicacion;
+import org.sistemavotacion.json.DeJSONAObjeto;
+import org.sistemavotacion.json.DeObjetoAJSON;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.HttpHelper;
 import org.sistemavotacion.util.ServerPaths;
 import org.bouncycastle2.util.encoders.Hex;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.util.Log;
 /**
@@ -38,6 +43,7 @@ public class Evento implements Serializable {
     private CardinalidadDeOpciones cardinalidadDeOpciones;
     private String contenido;
     private String asunto;
+    private String URL;
     private Integer numeroTotalFirmas;
     private Integer numeroTotalVotos;
     private String controlAccesoServerURL;    
@@ -543,6 +549,20 @@ public class Evento implements Serializable {
 		return mensaje;
 	}
 
+	public static Evento parse(String eventStr) 
+			throws ParseException, JSONException {
+		return DeJSONAObjeto.obtenerEvento(eventStr);
+	} 
+
+	public static Evento parse(JSONObject jsonObject) 
+			throws ParseException, JSONException {
+		return DeJSONAObjeto.obtenerEvento(jsonObject);
+	}
+	
+	public String obtenerJSON() throws JSONException {
+		return DeObjetoAJSON.obtenerEventoJSON(this);
+	}
+	
 	public void setEstado(String estado) {
 		this.estado = estado;
 	}
@@ -550,4 +570,13 @@ public class Evento implements Serializable {
 	public String getEstado() {
 		return this.estado;
 	}
+
+	public String getURL() {
+		return URL;
+	}
+
+	public void setURL(String uRL) {
+		URL = uRL;
+	}
+
 }
