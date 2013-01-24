@@ -6,7 +6,6 @@ import org.centrocontrol.clientegwt.client.Constantes;
 import org.centrocontrol.clientegwt.client.modelo.SistemaVotacionQueryString;
 import org.centrocontrol.clientegwt.client.HistoryToken;
 import org.centrocontrol.clientegwt.client.modelo.EventoSistemaVotacionJso;
-import org.controlacceso.clientegwt.client.util.Browser;
 
 public class StringUtils {
 	
