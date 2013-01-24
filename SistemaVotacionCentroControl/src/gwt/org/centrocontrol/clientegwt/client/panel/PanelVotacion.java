@@ -303,7 +303,7 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
 		mensajeClienteFirma.setEmailSolicitante(email);
     	mensajeClienteFirma.setNombreDestinatarioFirma(
     			PuntoEntrada.INSTANCIA.servidor.getNombre());
-		setWidgetsStateFirmando(true);
+    	if(!Browser.isAndroid()) setWidgetsStateFirmando(true);
 		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
 	}
 
@@ -343,7 +343,8 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
 
         @Override
         public void onError(Request request, Throwable exception) {
-        	new ErrorDialog().show ("Exception", exception.getMessage());                
+        	new ErrorDialog().show (Constantes.INSTANCIA.exceptionLbl(), 
+        			exception.getMessage());                
         }
 
         @Override

@@ -14,6 +14,8 @@ import org.centrocontrol.clientegwt.client.panel.PanelEncabezado;
 import org.centrocontrol.clientegwt.client.util.Browser;
 import org.centrocontrol.clientegwt.client.util.RequestHelper;
 import org.centrocontrol.clientegwt.client.util.ServerPaths;
+import org.centrocontrol.clientegwt.client.util.StringUtils;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
@@ -73,7 +75,7 @@ public class PuntoEntrada implements EntryPoint {
         History.fireCurrentHistoryState();
         clienteFirmaFrame = new NamedFrame(Constantes.ID_FRAME_APPLET);
         logger.info("--- isJavaAvailable: " + isJavaAvailable());
-        if(!isJavaAvailable() && ! Browser.isAndroid()) {
+        if(!isJavaAvailable() && Browser.isPC()) {
         	ErrorDialog errorDialog = new ErrorDialog();
         	errorDialog.show(Constantes.INSTANCIA.captionNavegadorSinJava(), 
         	Constantes.INSTANCIA.mensajeNavegadorSinJava());
@@ -88,7 +90,7 @@ public class PuntoEntrada implements EntryPoint {
     		"false".equals(Window.Location.getParameter("androidClientLoaded"))) {
         	DialogoCargaClienteAndroid dialogoCarga = new DialogoCargaClienteAndroid();
         	dialogoCarga.show(ServerPaths.getUrlClienteAndroid() + 
-        			"?androidClientLoaded=false#VOTAR&eventoId=26", null);
+        			"?androidClientLoaded=false" + StringUtils.getEncodedToken(token), null);
         }
         logger.info("queryString: " +  Window.Location.getQueryString());
     }
@@ -98,7 +100,8 @@ public class PuntoEntrada implements EntryPoint {
 
         @Override
     	public void onError(Request request, Throwable exception) {
-        	new ErrorDialog().show("Exception", exception.getMessage());
+        	new ErrorDialog().show(Constantes.INSTANCIA.exceptionLbl(), 
+        			exception.getMessage());
         	logger.log(Level.SEVERE, exception.getMessage(), exception);
     	}
 
@@ -112,14 +115,19 @@ public class PuntoEntrada implements EntryPoint {
                 		servidor, HistoryToken.OBTENIDA_INFO_SERVIDOR);
                 BusEventos.fireEvent(mensaje);
     		} else if (response.getStatusCode() == Response.SC_UNAUTHORIZED) {}
-    		else {
-            	new ErrorDialog().show("Error", "Response status: " 
-            			+ response.getStatusCode());
+    		else if(response.getStatusCode() == 0) { //Magic Number!!! -> network problem
+        		showErrorDialog (Constantes.INSTANCIA.errorLbl() , 
+        				Constantes.INSTANCIA.networkERROR());
+        	} else showErrorDialog (String.valueOf(
+        			response.getStatusCode()), response.getText());
     		}
     	}
 
-    }
 
+	private void showErrorDialog (String text, String body) {
+		ErrorDialog errorDialog = new ErrorDialog();
+		errorDialog.show(text, body);	
+	}
     public boolean isClienteFirmaCargado () {
     	return clienteFirmaCargado;
     }
@@ -213,4 +221,5 @@ public class PuntoEntrada implements EntryPoint {
     	}
     	return resultado;
     }
+    
 }

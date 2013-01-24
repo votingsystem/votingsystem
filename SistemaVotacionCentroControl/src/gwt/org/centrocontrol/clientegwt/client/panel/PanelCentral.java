@@ -154,11 +154,17 @@ public class PanelCentral extends Composite implements ValueChangeHandler<String
     	History.newItem(HistoryToken.BUSQUEDAS.toString());
     }
     
+    private void showErrorDialog (String text, String body) {
+    	ErrorDialog errorDialog = new ErrorDialog();
+    	errorDialog.show(text, body);	
+    }
+    
     private class ServerRequestEventCallback implements RequestCallback {
 
         @Override
         public void onError(Request request, Throwable exception) {
-        	new ErrorDialog().show ("Exception", exception.getMessage());                
+        	showErrorDialog (Constantes.INSTANCIA.exceptionLbl(), 
+        			exception.getMessage());                  
         }
 
         @Override
@@ -175,8 +181,11 @@ public class PanelCentral extends Composite implements ValueChangeHandler<String
         	    	BusEventos.fireEvent(new EventoGWTConsultaEvento(eventoSeleccionado));
                 } else History.newItem(HistoryToken.VOTACIONES.toString());
             } else {
-            	logger.log(Level.SEVERE, "response.getText(): " + response.getText());
-            	new ErrorDialog().show (String.valueOf(response.getStatusCode()), response.getText());
+            	if(response.getStatusCode() == 0) {//Magic Number!!! -> network problem
+            		showErrorDialog (Constantes.INSTANCIA.errorLbl() , 
+            				Constantes.INSTANCIA.networkERROR());
+            	} else showErrorDialog (String.valueOf(
+            			response.getStatusCode()), response.getText());
             }
         }
 

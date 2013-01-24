@@ -6,6 +6,7 @@ import org.centrocontrol.clientegwt.client.Constantes;
 import org.centrocontrol.clientegwt.client.modelo.SistemaVotacionQueryString;
 import org.centrocontrol.clientegwt.client.HistoryToken;
 import org.centrocontrol.clientegwt.client.modelo.EventoSistemaVotacionJso;
+import org.controlacceso.clientegwt.client.util.Browser;
 
 public class StringUtils {
 	
@@ -96,6 +97,39 @@ public class StringUtils {
   		}
   		return result;
   	}
+  	
+  	
+  	public static String getEncodedToken(String token) {
+  		if(token == null) return null;
+  		String historyToken = null;
+  		String msg = null;
+  		String serverURL = null;
+  		if(token.contains("&")) {
+  			historyToken = token.split("&")[0];
+  		}
+  		if(token.contains("&msg=")) {
+  			msg = token.split("&msg=")[1];
+  			if(msg.contains("&")) {
+  				msg = msg.split("&")[0];
+  			}
+  			msg = Browser.getDecodedString(msg);
+  			msg = Browser.getEncodedString(msg);
+  		}
+  		if(token.contains("&serverURL=")) {
+  			serverURL = token.split("&serverURL=")[1];
+  			if(serverURL.contains("&")) {
+  				serverURL = serverURL.split("&")[0];
+  			}
+  		}
+  		Integer eventoId = getEventoId(token);
+  		StringBuilder result = new StringBuilder();
+  		if(historyToken != null) result.append("&browserToken=" + historyToken);
+  		if(eventoId != null) result.append("&eventoId=" + eventoId);
+  		if(serverURL != null) result.append("&serverURL=" + serverURL);
+  		if(msg != null) result.append("&msg=" + msg);
+  		return result.toString();
+  	}
+  	
   	
   	private static HistoryToken getHistoryToken(String query) {
   		HistoryToken result = null;

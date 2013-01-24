@@ -2,7 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:style>
-   		.mainPanel {padding: 15px 15px 15px 15px; width:500px;}
+   		.mainPanel {padding: 15px 15px 15px 15px; width:470px;}
 		.boton { margin: 2px; cursor:pointer;}
 		.buttonPanel { float: right; margin: 10px; margin-top: 15px;}
 		.msg{margin: 0px 0px 15px 0px;}

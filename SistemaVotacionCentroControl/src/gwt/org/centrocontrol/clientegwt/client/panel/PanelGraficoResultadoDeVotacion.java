@@ -232,7 +232,7 @@ public class PanelGraficoResultadoDeVotacion extends Composite implements Solici
 		mensajeClienteFirma.setUrlEnvioDocumento(ServerPaths.getUrlSolicitudCopiaSeguridad());
 		mensajeClienteFirma.setEvento(evento);
 		mensajeClienteFirma.setEmailSolicitante(email);
-		PanelVotacion.INSTANCIA.setWidgetsStateFirmando(true);
+		if(!Browser.isAndroid()) PanelVotacion.INSTANCIA.setWidgetsStateFirmando(true);
 		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
 	}
 	

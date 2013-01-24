@@ -56,7 +56,7 @@ public class DialogoAnulacionSolicitudAcceso implements EventoGWTMensajeClienteF
 		mensajeClienteFirma.setUrlEnvioDocumento(ServerPaths.getURLAnulacionVoto(
 				voto.getControlAcceso().getServerURL()));
 		mensajeClienteFirma.setNombreDestinatarioFirma(PuntoEntrada.INSTANCIA.servidor.getNombre());
-		PanelVotacion.INSTANCIA.setWidgetsStateFirmando(true);
+		if(!Browser.isAndroid()) PanelVotacion.INSTANCIA.setWidgetsStateFirmando(true);
 		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
 		anularSolicitudButton.setVisible(false);
     }

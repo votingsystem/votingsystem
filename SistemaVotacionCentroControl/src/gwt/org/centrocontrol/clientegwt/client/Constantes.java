@@ -38,6 +38,10 @@ public interface Constantes extends Messages{
         String canceladoLabel();
         String searchLabel();
         
+    	String exceptionLbl();
+    	String errorLbl();
+    	String networkERROR();
+        
         String mensajeNavegadorSinJava();
         String captionNavegadorSinJava();
         

@@ -91,6 +91,11 @@ public class ServerPaths {
     public static String getUrlFrameClienteFirma () {
     	return getApplicationPath() + "applet/cliente";
     }
+    
+    public static String getUrlTimeStampServer (String controlAccesoUrl) {
+    	if (!controlAccesoUrl.endsWith("/")) controlAccesoUrl = controlAccesoUrl + "/";
+    	return controlAccesoUrl + "evento/guardarCancelacion";
+    }
 
     public static String getUrlSolicitudAccesoPorNif (
     		String controlAccesoUrl, String nif, int eventoId) {

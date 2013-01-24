@@ -48,6 +48,11 @@ public class Browser {
 
 	public static void ejecutarOperacionClienteFirma(MensajeClienteFirmaJso mensajeClienteFirma) {
 		if(mensajeClienteFirma == null) return;
+		if(mensajeClienteFirma.getEvento() != null && 
+				mensajeClienteFirma.getEvento().getControlAcceso() != null) {
+			mensajeClienteFirma.setUrlTimeStampServer(ServerPaths.getUrlTimeStampServer(
+					mensajeClienteFirma.getEvento().getControlAcceso().getServerURL()));
+		}
 		if(isAndroid()) {
 			String encodedMsg = getEncodedString(mensajeClienteFirma.toJSONString());
 			String url = ServerPaths.getUrlClienteAndroid() + "?browserToken=" 
@@ -68,5 +73,13 @@ public class Browser {
 	public static boolean isAndroid () {
 		return (getUserAgent().indexOf("android") > - 1);
 	}
+
+	public static boolean isPC() {
+		return !isAndroid ();
+	}
+    
+    public static native String getDecodedString(String str) /*-{
+			return decodeURIComponent(str);
+	}-*/;
 
 }

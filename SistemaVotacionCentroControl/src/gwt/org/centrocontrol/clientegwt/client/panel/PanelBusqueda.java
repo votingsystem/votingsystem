@@ -53,7 +53,8 @@ public class PanelBusqueda extends Composite implements BarraNavegacion.Listener
 
         @Override
         public void onError(Request request, Throwable exception) {
-        	showErrorDialog ("Exception", exception.getMessage());                
+        	showErrorDialog (Constantes.INSTANCIA.exceptionLbl(), 
+        			exception.getMessage());               
         }
 
         @Override
@@ -66,7 +67,11 @@ public class PanelBusqueda extends Composite implements BarraNavegacion.Listener
         		tituloLabel.setVisible(true);
                 panelEventos.setVisible(true);
             } else {
-            	showErrorDialog (String.valueOf(response.getStatusCode()), response.getText());
+            	if(response.getStatusCode() == 0) {//Magic Number!!! -> network problem
+            		showErrorDialog (Constantes.INSTANCIA.errorLbl() , 
+            				Constantes.INSTANCIA.networkERROR());
+            	} else showErrorDialog (String.valueOf(
+            			response.getStatusCode()), response.getText());
             }
         }
 

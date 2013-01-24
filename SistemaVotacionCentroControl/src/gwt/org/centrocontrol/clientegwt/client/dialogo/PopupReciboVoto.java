@@ -43,7 +43,7 @@ public class PopupReciboVoto {
 		MensajeClienteFirmaJso mensajeClienteFirma = MensajeClienteFirmaJso.create();
 		mensajeClienteFirma.setArgs(voto.getHashCertificadoVotoBase64());
 		mensajeClienteFirma.setOperacionEnumValue(Operacion.GUARDAR_RECIBO_VOTO);
-		PanelVotacion.INSTANCIA.setWidgetsStateFirmando(true);
+		if(!Browser.isAndroid())  PanelVotacion.INSTANCIA.setWidgetsStateFirmando(true);
 		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
     }
 

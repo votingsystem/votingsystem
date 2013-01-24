@@ -165,4 +165,12 @@ public final class MensajeClienteFirmaJso extends JavaScriptObject {
 		return {eventoId: eventoId, estado: estado};
 	}-*/;
 
+	public final native String getUrlTimeStampServer() /*-{
+		return this.urlTimeStampServer;
+	}-*/;
+		
+	public final native void setUrlTimeStampServer(String value) /*-{
+		this.urlTimeStampServer = value;
+	}-*/;
+
 }
