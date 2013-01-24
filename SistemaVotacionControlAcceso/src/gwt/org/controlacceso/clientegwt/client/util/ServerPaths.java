@@ -35,9 +35,13 @@ public class ServerPaths {
         if (!applicationPath.endsWith("/")) applicationPath = applicationPath + "/";
         return applicationPath;
     }
-    
+
     public static String getUrlClienteAndroid () {
     	return getApplicationPath() + "app/clienteAndroid";
+    }
+
+    public static String getUrlAppAndroid () {
+   	 	return getApplicationPath() + "android/SistemaVotacion.apk";
     }
     
     public static String getUrlEventos (int max, int offset) {
@@ -147,7 +151,7 @@ public class ServerPaths {
    	 	return getApplicationPath() + "eventoVotacion/estadisticas?id=" + eventoId;
     }
     
-    public static String getUrlDatosApliacion () {
+    public static String getUrlDatosAplicacion () {
    	 	return getApplicationPath() + "infoServidor/informacion";
     }
     

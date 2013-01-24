@@ -58,6 +58,7 @@ public class PanelFirmaManifiesto extends Composite implements SolicitanteEmail,
     }
 
 	@UiField HTML pageTitle;
+	@UiField HTML piePagina;
     @UiField EditorStyle style;
     @UiField VerticalPanel panelContenidos;
     @UiField HorizontalPanel panelBarrarProgreso;
@@ -92,6 +93,11 @@ public class PanelFirmaManifiesto extends Composite implements SolicitanteEmail,
 		administracionDocumentoLabel.setListener(administrarEventoEventListener);
 		panelInfoDocumento.setVisible(false);
 		panelContenidos.setVisible(false);
+        if(Browser.isAndroid()) {
+        	piePagina.setHTML(Constantes.INSTANCIA.piePaginaFirmarDocumentoAndroid());
+        } else {
+        	piePagina.setHTML(Constantes.INSTANCIA.piePaginaFirmarDocumento());
+        }
         BusEventos.addHandler(EventoGWTConsultaEvento.TYPE, this);
         BusEventos.addHandler(
         		EventoGWTMensajeClienteFirma.TYPE, this);
@@ -110,7 +116,7 @@ public class PanelFirmaManifiesto extends Composite implements SolicitanteEmail,
 				getUrlPDFManifiesto(evento.getId()));
 		mensajeClienteFirma.setRespuestaConRecibo(false);
 		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
-		setWidgetsStateFirmando(true);
+		if(!Browser.isAndroid()) setWidgetsStateFirmando(true);
     }
     
     @UiHandler("cerrarButton")
@@ -303,7 +309,7 @@ public class PanelFirmaManifiesto extends Composite implements SolicitanteEmail,
 		mensajeClienteFirma.setUrlEnvioDocumento(ServerPaths.getUrlSolicitudCopiaSeguridad());
 		mensajeClienteFirma.setEvento(evento);
 		mensajeClienteFirma.setEmailSolicitante(email);
-		setWidgetsStateFirmando(true);
+		if(!Browser.isAndroid()) setWidgetsStateFirmando(true);
 		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
 	}
 

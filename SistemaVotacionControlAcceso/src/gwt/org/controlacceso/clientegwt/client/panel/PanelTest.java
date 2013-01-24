@@ -1,17 +1,24 @@
 package org.controlacceso.clientegwt.client.panel;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.controlacceso.clientegwt.client.Constantes;
 import org.controlacceso.clientegwt.client.HistoryToken;
 import org.controlacceso.clientegwt.client.HtmlTemplates;
 import org.controlacceso.clientegwt.client.PuntoEntrada;
+import org.controlacceso.clientegwt.client.dialogo.ErrorDialog;
 import org.controlacceso.clientegwt.client.modelo.MensajeClienteFirmaJso;
 import org.controlacceso.clientegwt.client.modelo.MensajeClienteFirmaJso.Operacion;
 import org.controlacceso.clientegwt.client.util.Browser;
+import org.controlacceso.clientegwt.client.util.RequestHelper;
 import org.controlacceso.clientegwt.client.util.ServerPaths;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -62,11 +69,39 @@ public class PanelTest extends Composite {
     
     @UiHandler("enviarMensaje")
     void handleEnviarMensaje(ClickEvent e) {
-    	enviarMensaje("Hoooooooola desde GWT");
+    	enviarMensaje("Hola desde GWT");
     }
     
+    @UiHandler("redirect") void handleRedirect(ClickEvent e) {
+    	logger.info("redirect");
+    	ServerPaths.redirect(ServerPaths.getUrlClienteAndroid());
+    }
+    
+    @UiHandler("doget") void handleDoget(ClickEvent e) {
+    	logger.info("doget");
+		RequestHelper.doGet(ServerPaths.getUrlClienteAndroid(), new ServerAndroidRequestCallback());
+    }
     
 	public static native void enviarMensaje(String appMesage) /*-{
-		$wnd.setAppMessage(appMesage);
+		$wnd.setClienteFirmaMessage(appMesage);
 	}-*/;
+	
+    private class ServerAndroidRequestCallback implements RequestCallback {
+
+        @Override
+        public void onError(Request request, Throwable exception) {
+        	new ErrorDialog().show (Constantes.INSTANCIA.exceptionLbl(), exception.getMessage());                
+        }
+
+        @Override
+        public void onResponseReceived(Request request, Response response) {
+            if (response.getStatusCode() == Response.SC_OK) {
+            	logger.info("OK - response.getText(): " + response.getText());
+            } else {
+            	logger.log(Level.SEVERE, "ERROR - response.getText(): " + response.getText());
+            	//new ErrorDialog().show (String.valueOf(response.getStatusCode()), response.getText());
+            }
+        }
+
+    }
 }

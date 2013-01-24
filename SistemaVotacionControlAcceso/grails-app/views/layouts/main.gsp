@@ -42,7 +42,7 @@
          </div>
 		<g:layoutBody/>
 		<div class="pieDePagina" role="contentinfo">
-        	<a href="mailto:jgzornoza@gmail.com">Correo</a>
+        	<a href="mailto:${grailsApplication.config.SistemaVotacion.emailAdmin}">${message(code: 'emailLabel', null)}</a>
         </div>
 		<div id="spinner" class="spinner" style="display:none;"><g:message code="spinner.alt" default="Loading&hellip;"/></div>
     </body>

@@ -2,30 +2,24 @@ package org.controlacceso.clientegwt.client.votaciones;
 
 import java.util.List;
 import java.util.logging.Logger;
+
 import org.controlacceso.clientegwt.client.Constantes;
-import org.controlacceso.clientegwt.client.PuntoEntrada;
 import org.controlacceso.clientegwt.client.dialogo.ErrorDialog;
 import org.controlacceso.clientegwt.client.modelo.ConsultaEventosSistemaVotacionJso;
 import org.controlacceso.clientegwt.client.modelo.EventoSistemaVotacionJso;
 import org.controlacceso.clientegwt.client.modelo.EventosSistemaVotacionJso;
-import org.controlacceso.clientegwt.client.modelo.MensajeClienteFirmaJso;
-import org.controlacceso.clientegwt.client.modelo.MensajeClienteFirmaJso.Operacion;
 import org.controlacceso.clientegwt.client.panel.BarraNavegacion;
 import org.controlacceso.clientegwt.client.panel.PanelEncabezado;
 import org.controlacceso.clientegwt.client.panel.PanelEvento;
-import org.controlacceso.clientegwt.client.util.Browser;
 import org.controlacceso.clientegwt.client.util.RequestHelper;
 import org.controlacceso.clientegwt.client.util.ServerPaths;
+
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -41,8 +35,7 @@ public class PanelVotaciones extends Composite implements BarraNavegacion.Listen
     @UiField VerticalPanel panelBarrarProgreso;
     @UiField FlowPanel panelContenedorEventos;
     @UiField HTML emptySearchLabel;
-
-    
+ 
 
     private static PanelVotacionesUiBinder uiBinder = GWT.create(PanelVotacionesUiBinder.class);
 
@@ -59,7 +52,8 @@ public class PanelVotaciones extends Composite implements BarraNavegacion.Listen
 
         @Override
         public void onError(Request request, Throwable exception) {
-        	showErrorDialog ("Exception", exception.getMessage());                
+        	showErrorDialog (Constantes.INSTANCIA.exceptionLbl(), 
+        			exception.getMessage());                
         }
 
         @Override
@@ -69,7 +63,11 @@ public class PanelVotaciones extends Composite implements BarraNavegacion.Listen
                 		ConsultaEventosSistemaVotacionJso.create(response.getText());
                 recepcionConsultaEventos(consulta);
             } else {
-            	showErrorDialog (String.valueOf(response.getStatusCode()), response.getText());
+            	if(response.getStatusCode() == 0) {//Magic Number!!! -> network problem
+            		showErrorDialog (Constantes.INSTANCIA.errorLbl() , 
+            				Constantes.INSTANCIA.networkERROR());
+            	} else showErrorDialog (String.valueOf(
+            			response.getStatusCode()), response.getText());
             }
         }
 

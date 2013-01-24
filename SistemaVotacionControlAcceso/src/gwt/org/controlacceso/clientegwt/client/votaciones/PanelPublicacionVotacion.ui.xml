@@ -57,7 +57,7 @@
 				<g:VerticalPanel ui:field='contentPanel' width="100%" height="100%">
 					<g:HorizontalPanel>
 						<g:Label styleName="{style.tituloLabel}" text='{constantes.tituloLabel}'/>
-						<g:TextBox ui:field='titulo' styleName="{style.textBox}" width="380px"/>
+						<g:TextBox ui:field='titulo' styleName="{style.textBox}" width="360px"/>
 						<g:Label styleName="{style.fechaLabel}" text='{constantes.fechaInicioLabel}'/>
 						<dp:DateBox ui:field="fechaIncioDateBox" styleName="{style.textBox}" width="130px"/>
 						<g:Label styleName="{style.fechaLabel}" text='{constantes.fechaFinalLabel}'/>

@@ -59,6 +59,7 @@ public class PanelFirmaReclamacion extends Composite implements SolicitanteEmail
     }
 
 	@UiField HTML pageTitle;
+	@UiField HTML piePagina;
     @UiField EditorStyle style;
     @UiField VerticalPanel panelContenidos;
     @UiField HorizontalPanel panelBarrarProgreso;
@@ -94,6 +95,11 @@ public class PanelFirmaReclamacion extends Composite implements SolicitanteEmail
         messagePanel.setVisible(false);
 		panelInfoDocumento.setVisible(false);
 		panelContenidos.setVisible(false);
+        if(Browser.isAndroid()) {
+        	piePagina.setHTML(Constantes.INSTANCIA.piePaginaFirmarDocumentoAndroid());
+        } else {
+        	piePagina.setHTML(Constantes.INSTANCIA.piePaginaFirmarDocumento());
+        }
 		administracionDocumentoLabel.setListener(administrarEventoEventListener);
 		panelInfoDocumento.setEventListener(infoDocumentoEventListener);
         BusEventos.addHandler(EventoGWTConsultaEvento.TYPE, this);
@@ -119,7 +125,7 @@ public class PanelFirmaReclamacion extends Composite implements SolicitanteEmail
 		mensajeClienteFirma.setNombreDestinatarioFirma(PuntoEntrada.INSTANCIA.servidor.getNombre());
 		mensajeClienteFirma.setContenidoFirma(evento);
 		mensajeClienteFirma.setRespuestaConRecibo(true);
-		setWidgetsStateFirmando(true);
+		if(!Browser.isAndroid()) setWidgetsStateFirmando(true);
 		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
     }
     
@@ -318,7 +324,7 @@ public class PanelFirmaReclamacion extends Composite implements SolicitanteEmail
     	mensajeClienteFirma.setNombreDestinatarioFirma(
     			PuntoEntrada.INSTANCIA.servidor.getNombre());
 		mensajeClienteFirma.setEmailSolicitante(email);
-		setWidgetsStateFirmando(true);
+		if(!Browser.isAndroid()) setWidgetsStateFirmando(true);
 		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
 	}
 

@@ -4,6 +4,7 @@ import java.util.logging.Logger;
 import org.controlacceso.clientegwt.client.PuntoEntrada;
 import org.controlacceso.clientegwt.client.modelo.MensajeClienteFirmaJso;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 
 /**
@@ -21,11 +22,13 @@ public class Browser {
 	public static boolean isAndroid () {
 		return (getUserAgent().indexOf("android") > - 1);
 	}
-	
-	
-	
+
 	public static boolean isFirefox () {
 		return (getUserAgent().indexOf("firefox") > - 1);
+	}
+	
+	public static boolean isPC () {
+		return !isAndroid ();
 	}
 	
 	public static native String getUserAgent() /*-{
@@ -34,21 +37,17 @@ public class Browser {
 	
 	public static void ejecutarOperacionClienteFirma(MensajeClienteFirmaJso mensajeClienteFirma) {
 		if(mensajeClienteFirma == null) return;
-		logger.info("ejecutarOperacionClienteFirma - mensajeClienteFirma: " + mensajeClienteFirma.toJSONString());
-		logger.info("ejecutarOperacionClienteFirma - mensajeClienteFirma HEX: " + getEncodedString(mensajeClienteFirma.toJSONString()));
-		//TODO
-		String androidUrl = ServerPaths.getUrlClienteAndroid() + "?appMessage=" + 
-				getEncodedString(mensajeClienteFirma.toJSONString());
-		//String androidUrl = "SistemaVotacion://org.sistemavotacion.android?appMessage=" + 
-		//				getEncodedString(mensajeClienteFirma.toJSONString());				
-		logger.info("ejecutarOperacionClienteFirma - androidUrl: " + androidUrl);
 		mensajeClienteFirma.setUrlTimeStampServer(ServerPaths.getUrlTimeStampServer());
 		if(isAndroid()) {
-			Window.alert("Redireccionando a: " + androidUrl);
-			ServerPaths.redirect(androidUrl);
+			String encodedMsg = getEncodedString(mensajeClienteFirma.toJSONString());
+			String url = ServerPaths.getUrlClienteAndroid() + "?browserToken=" 
+	    			+ History.getToken() + "&serverURL=" + ServerPaths.getApplicationPath() 
+	    			+ "&msg=" + encodedMsg;
+	    	ServerPaths.redirect(url);
 		} else {
+			logger.info("ejecutarOperacionClienteFirma - mensajeClienteFirma: " + mensajeClienteFirma.toJSONString());
 			PuntoEntrada.INSTANCIA.cargarClienteFirma();
-			PuntoEntrada.INSTANCIA.setMensajeClienteFirmaPendiente(mensajeClienteFirma);
+			PuntoEntrada.INSTANCIA.setMensajeClienteFirmaPendiente(mensajeClienteFirma);	
 		}
 	}
 	
@@ -99,5 +98,11 @@ public class Browser {
     public static native String getEncodedString(String str) /*-{
 			return encodeURIComponent(str);
 	}-*/;
+    
+    public static native String getDecodedString(String str) /*-{
+			return decodeURIComponent(str);
+	}-*/;
 
+    
+    
 }

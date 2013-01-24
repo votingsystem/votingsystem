@@ -3,13 +3,11 @@ package org.controlacceso.clientegwt.client.votaciones;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.controlacceso.clientegwt.client.Constantes;
 import org.controlacceso.clientegwt.client.PuntoEntrada;
 import org.controlacceso.clientegwt.client.dialogo.DialogoOperacionEnProgreso;
 import org.controlacceso.clientegwt.client.dialogo.ErrorDialog;
 import org.controlacceso.clientegwt.client.dialogo.PopupAdministrarDocumento;
-import org.controlacceso.clientegwt.client.dialogo.PopupSolicitudCopiaSeguridad;
 import org.controlacceso.clientegwt.client.dialogo.SolicitanteEmail;
 import org.controlacceso.clientegwt.client.evento.BusEventos;
 import org.controlacceso.clientegwt.client.evento.EventoGWTConsultaEvento;
@@ -26,7 +24,6 @@ import org.controlacceso.clientegwt.client.util.PopUpLabel;
 import org.controlacceso.clientegwt.client.util.RequestHelper;
 import org.controlacceso.clientegwt.client.util.ServerPaths;
 import org.controlacceso.clientegwt.client.util.StringUtils;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.http.client.Request;
@@ -39,6 +36,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
@@ -62,6 +60,7 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
     }
 
 	@UiField HTML pageTitle;
+	@UiField HTML piePagina;
     @UiField EditorStyle style;
     @UiField VerticalPanel panelContenidos;
     @UiField HorizontalPanel panelBarrarProgreso;
@@ -85,7 +84,6 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
     private HTML contenidoEvento = null;
     private EventoSistemaVotacionJso evento;
     DialogoOperacionEnProgreso dialogoProgreso;
-    private PopupSolicitudCopiaSeguridad popUpSolicitudCopiaSeguridad;
     public static PanelVotacion INSTANCIA;
     
     
@@ -97,6 +95,11 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
         INSTANCIA = this;
         panelGraficoVotacion.setVisible(false);
         panelContenidos.setVisible(false);
+        if(Browser.isAndroid()) {
+        	piePagina.setHTML(Constantes.INSTANCIA.piePaginaVotarAndroid());
+        } else {
+        	piePagina.setHTML(Constantes.INSTANCIA.piePaginaVotar());
+        }
         BusEventos.addHandler(EventoGWTConsultaEvento.TYPE, this);
         BusEventos.addHandler(
         		EventoGWTMensajeClienteFirma.TYPE, this);
@@ -190,14 +193,6 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
 			if(dialogoProgreso == null) dialogoProgreso = new DialogoOperacionEnProgreso();
 			dialogoProgreso.hide();
 		}
-	}
-	
-	private void mostrarPopupSolicitudCopiaSeguridad(int clientX, int clientY) {
-		if(popUpSolicitudCopiaSeguridad == null) {
-			popUpSolicitudCopiaSeguridad = new PopupSolicitudCopiaSeguridad(this);
-		}
-		popUpSolicitudCopiaSeguridad.setPopupPosition(clientX, clientY);
-		popUpSolicitudCopiaSeguridad.show();
 	}
 
 	@Override
@@ -309,13 +304,12 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
 		mensajeClienteFirma.setEmailSolicitante(email);
     	mensajeClienteFirma.setNombreDestinatarioFirma(
     			PuntoEntrada.INSTANCIA.servidor.getNombre());
-		setWidgetsStateFirmando(true);
+    	if(!Browser.isAndroid()) setWidgetsStateFirmando(true);
 		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
 	}
 
 	@Override
 	public void procesarOpcionSeleccioda(OpcionDeEventoJso opcion) {
-		// TODO Auto-generated method stub
 		MensajeClienteFirmaJso mensajeClienteFirma = MensajeClienteFirmaJso.create(null, 
 				Operacion.ENVIO_VOTO_SMIME.toString(), 
 				MensajeClienteFirmaJso.SC_PROCESANDO);
@@ -326,8 +320,7 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
 		mensajeClienteFirma.setEvento(evento);
     	mensajeClienteFirma.setNombreDestinatarioFirma(
     			PuntoEntrada.INSTANCIA.servidor.getNombre());
-		//mensajeClienteFirma.setUrlEnvioDocumento();
-		setWidgetsStateFirmando(true);
+    	if(!Browser.isAndroid()) setWidgetsStateFirmando(true);
 		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
 	}
 	
@@ -340,7 +333,8 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
 
         @Override
         public void onError(Request request, Throwable exception) {
-        	new ErrorDialog().show ("Exception", exception.getMessage());                
+        	new ErrorDialog().show (Constantes.INSTANCIA.exceptionLbl(), 
+        			exception.getMessage());                
         }
 
         @Override
@@ -351,6 +345,26 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
             	mostraEstadisticas(estadistica);
             } else {
             	logger.log(Level.SEVERE, "response.getText(): " + response.getText());
+            	//new ErrorDialog().show (String.valueOf(response.getStatusCode()), response.getText());
+            }
+        }
+
+    }
+    
+    private class ServerAndroidRequestCallback implements RequestCallback {
+
+        @Override
+        public void onError(Request request, Throwable exception) {
+        	new ErrorDialog().show (Constantes.INSTANCIA.exceptionLbl(), 
+        			exception.getMessage());                
+        }
+
+        @Override
+        public void onResponseReceived(Request request, Response response) {
+            if (response.getStatusCode() == Response.SC_OK) {
+            	logger.info("OK - response.getText(): " + response.getText());
+            } else {
+            	logger.log(Level.SEVERE, "ERROR - response.getText(): " + response.getText());
             	//new ErrorDialog().show (String.valueOf(response.getStatusCode()), response.getText());
             }
         }

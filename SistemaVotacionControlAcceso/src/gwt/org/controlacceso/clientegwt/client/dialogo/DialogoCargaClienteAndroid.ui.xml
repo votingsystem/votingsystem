@@ -2,22 +2,18 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:style>
-   		.textPanel {margin: 10px; width:500px;}
+   		.mainPanel {padding: 15px 15px 15px 15px; width:470px;}
 		.boton { margin: 2px; cursor:pointer;}
 		.buttonPanel { float: right; margin: 10px; margin-top: 15px;}
-		.texto{}
-		.textoChrome {margin-bottom: 15px;}
+		.msg{margin: 0px 0px 15px 0px;}
 	</ui:style>
 	<ui:image field='aceptar' src="../BotonAceptar.png"/>
 	<ui:with field='constantes' type='org.controlacceso.clientegwt.client.Constantes'/>
 	<g:DialogBox ui:field="dialogBox" autoHide="false" modal="true" glassEnabled="true" 
-	    animationEnabled="true" text="{constantes.cargaAppletCaption}">
-		<g:VerticalPanel>
-			<g:VerticalPanel ui:field="textPanel" styleName="{style.textPanel}">
-			    <g:HTML ui:field='textoChrome' styleName="{style.textoChrome}" 
-			        HTML="{constantes.cargaAppletTextoChrome}"/>
-				<g:HTML ui:field='textoAdvertencia' styleName="{style.texto}"  
-				    HTML="{constantes.cargaAppletTextoAdvertenciaApplet}"/>
+	    animationEnabled="true" text="{constantes.cargaClienteAndroidCaption}">
+		<g:VerticalPanel styleName="{style.mainPanel}">
+			<g:VerticalPanel ui:field="textPanel">
+			    <g:HTML ui:field='userMsg' styleName="{style.msg}"/>
 			</g:VerticalPanel>
 			<g:HorizontalPanel styleName="{style.buttonPanel}">
 				<g:HorizontalPanel styleName="{style.boton}">
@@ -28,5 +24,5 @@
 			</g:HorizontalPanel>
 		</g:VerticalPanel>
 	</g:DialogBox>
-	
+
 </ui:UiBinder> 

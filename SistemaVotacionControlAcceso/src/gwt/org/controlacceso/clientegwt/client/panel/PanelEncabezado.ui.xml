@@ -12,7 +12,7 @@
 		.feedImage {}
 		.seleccionEstadoPanel{ margin-top:15px;}
 		.textoSeleccionEstado{font-weight: bold; margin-top:5px; color:#3e125f;}
-		.panelBusqueda { float: right;margin-top: 5px;}
+		.panelBusqueda { float: right;margin-top: 5px; width:270px;}
 		.tituloAnchor {cursor: pointer; cursor: hand; font-size: 28px; font-weight:bold; with:100%; text-align:center;}
 		.buscarTextBox {padding:1px 3px 1px 3px; margin-top: 5px; border:1pt solid #3E125F;}	
 		.busquedaLink {
@@ -26,7 +26,7 @@
         	font-weight: bold;
         	font-size: 12px;
 		}		
-		.panelSubsistemas {margin: 0px 0px 0px 20px;}
+		.panelSubsistemas {margin: 0px 0px 0px 20px; width:140px;}
 		.subsistemas {height: 100%;}
 		.buttonPanel { float: right;}		
 		.boton { margin: 5px; cursor:pointer;}	
@@ -43,7 +43,7 @@
 	<g:VerticalPanel styleName="{style.mainPanel}">
 	   	<g:HorizontalPanel styleName="{style.nombreSistema}">
 	    	<panelSV:PanelSubsistemas styleName="{style.panelSubsistemas}" ui:field='panelSubsistemas'/>
-    	   	<g:cell horizontalAlignment="ALIGN_CENTER">
+    	   	<g:cell horizontalAlignment="ALIGN_CENTER" width ="100%">
 				<g:Anchor styleName="{style.tituloAnchor}" ui:field="tituloAnchor"/>
 			</g:cell>
 			<g:HorizontalPanel styleName="{style.panelBusqueda}">

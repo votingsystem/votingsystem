@@ -3,7 +3,6 @@ package org.controlacceso.clientegwt.client.votaciones;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.controlacceso.clientegwt.client.Constantes;
-import org.controlacceso.clientegwt.client.dialogo.DialogoCargaClienteFirma;
 import org.controlacceso.clientegwt.client.evento.BusEventos;
 import org.controlacceso.clientegwt.client.evento.EventoGWTMensajeClienteFirma;
 import org.controlacceso.clientegwt.client.modelo.InfoServidorJso;
@@ -160,8 +159,6 @@ public class DialogoAsociarCentroControl implements EventoGWTMensajeClienteFirma
 		logger.info("procesarMensajeClienteFirma - Operacion: " + mensaje.getOperacion() +
 				" - Codigo Estado: " + mensaje.getCodigoEstado());
 		if(MensajeClienteFirmaJso.Operacion.ASOCIAR_CENTRO_CONTROL_SMIME == mensaje.getOperacionEnumValue()) {
-			if(DialogoCargaClienteFirma.INSTANCIA != null) 
-				DialogoCargaClienteFirma.INSTANCIA.hide();
 			urlCentroControlTextBox.setEnabled(true);
 	    	comprobarConexion.setEnabled(true);
 	    	asociarButton.setEnabled(true);

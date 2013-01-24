@@ -170,8 +170,8 @@ public class PanelPublicacionManifiesto extends Composite
 		@Override
     	public void onError(Request request, Throwable exception) {
 			setWidgetsStatePublicando(false);
-        	new ErrorDialog().show("Exception", exception.getMessage());
-        	new ErrorDialog().show("Exception", exception.getMessage());
+        	new ErrorDialog().show(Constantes.INSTANCIA.exceptionLbl(), 
+        			exception.getMessage());
         	logger.log(Level.SEVERE, exception.getMessage());
         	aceptarButton.setEnabled(true);
     	}

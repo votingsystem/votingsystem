@@ -51,7 +51,7 @@ public class PopupAnulacionVoto {
 			mensajeClienteFirma.setOperacionEnumValue(Operacion.ANULAR_VOTO);
 			mensajeClienteFirma.setUrlEnvioDocumento(ServerPaths.getURLAnulacionVoto());
 			mensajeClienteFirma.setNombreDestinatarioFirma(PuntoEntrada.INSTANCIA.servidor.getNombre());
-			PanelVotacion.INSTANCIA.setWidgetsStateFirmando(true);
+			if(!Browser.isAndroid()) PanelVotacion.INSTANCIA.setWidgetsStateFirmando(true);
 			Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
 		}
     }

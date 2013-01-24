@@ -7,7 +7,7 @@ public interface Constantes extends Messages{
     
 	public static final Constantes INSTANCIA = GWT.create(Constantes.class);
 	
-	public static final int EVENTS_RANGE = 20;
+	public static final int EVENTS_RANGE = 21;
 	public static final int MAX_NUM_CARACTERES_SUBJECT = 100;
     public static final String ID_FRAME_APPLET = "frameClienteFirma";
     public static final String ID_FRAME_HERRAMIENTA_PUBLICACION = "frameHerramientaPublicacion";
@@ -21,25 +21,30 @@ public interface Constantes extends Messages{
 	  
 	@Key("headerPanel.title")
 	String headerPanelTitle();
-	  
-	@Key("tituloEncabezado")
-	String tituloEncabezado();
 	
 	String emptyFieldException();
+	
+	String cargaClienteAndroidCaption();
+	String cargaClienteAndroidMsg(String urlAction, String urlAppAndroid);
+	String androidOperationMsg(String urlAppAndroid);
+	
+	String exceptionLbl();
+	String errorLbl();
+	String networkERROR();
         
-        String horasLabel();
-        String duracionLabel();
-        String publicadoPorLabel();
-        String abiertoLabel();
-        String finalizadoLabel();
-        String canceladoLabel();
-        
-        String tipoCampoLabelOpciones();
-        String tipoCampoLabelCamposReclamacion();
-        
-        String cancelAccessRequestCaption();
-        String cancelAccessRequestMsg();
-        String accessRequestCanceledMsg();
+    String horasLabel();
+    String duracionLabel();
+    String publicadoPorLabel();
+    String abiertoLabel();
+    String finalizadoLabel();
+    String canceladoLabel();
+    
+    String tipoCampoLabelOpciones();
+    String tipoCampoLabelCamposReclamacion();
+    
+    String cancelAccessRequestCaption();
+    String cancelAccessRequestMsg();
+    String accessRequestCanceledMsg();
 	
 	String centroControlNotSelected();
 	
@@ -48,15 +53,15 @@ public interface Constantes extends Messages{
 	String documentoSinCambios();
 	String documentoSinTexto();
         
-        String detallesRecuentoLabel();
+    String detallesRecuentoLabel();
 	
 	String centroControlNoValido();
 
 	String conectandoConServidor();
-        String estatusCentroControlError();
-        String estatusCentroControlErrorNoVoting();
-        String continuaLabel();
-        String searchLabel();
+    String estatusCentroControlError();
+    String estatusCentroControlErrorNoVoting();
+    String continuaLabel();
+    String searchLabel();
 	
 	String asociacionCentroControlOK();
 	String asociacionCentroControlError();
@@ -64,11 +69,11 @@ public interface Constantes extends Messages{
 	String confirmarBorradoOpcion();	
 	String votoConfirmLabel(String value);
 	String administracionDocumentoLabel();
-        String herramientaValidacionLabel();
+    String herramientaValidacionLabel();
 	
 	
 	String mensajeNavegadorSinJava();
-        String captionNavegadorSinJava();
+    String captionNavegadorSinJava();
 	String asuntoAsociarCentroControl();
 	String asuntoPublicarVotacion();
 	String publicacionVotacionOK();
@@ -76,44 +81,44 @@ public interface Constantes extends Messages{
 	
 	String administracionLabel();
         
-        String advancedSearchCaption();
-        String advancedSearchMsg();
-        String searchQueryTextLabel();
-        String beginFromLabel();
-        String beginToLabel();
-        String endFromLabel();
-        String endToLabel();
-        String remainLabel();
-        
-        String stateSelectionLabel();
-        String allVotingsListboxOption();
-        String onlyOpenVotingsListboxOption();
-        String onlyPendingVotingsListboxOption();
-        String onlyClosedVotingsListboxOption();
-        
-        String allManifestListboxOption();
-        String onlyOpenManifestListboxOption();
-        String onlyClosedManifestListboxOption();
-        
-        String allClaimsListboxOption();
-        String onlyOpenClaimsListboxOption();
-        String onlyClosedClaimsListboxOption();
-                
-        String searchPanelTitle();
-        String emptySearchLabel();
-        String searchStringLabel();
-        String beginAfterLabel();
-        String beginBeforeLabel();
-        String beginBeforeLabel1();
-        String endAfterLabel();
-        String endBeforeLabel();
-        String endBeforeLabel1();
-        String fechaInicioAfterFechaFinalMsg();
-        String pendingLabel();
+    String advancedSearchCaption();
+    String advancedSearchMsg();
+    String searchQueryTextLabel();
+    String beginFromLabel();
+    String beginToLabel();
+    String endFromLabel();
+    String endToLabel();
+    String remainLabel();
+    
+    String stateSelectionLabel();
+    String allVotingsListboxOption();
+    String onlyOpenVotingsListboxOption();
+    String onlyPendingVotingsListboxOption();
+    String onlyClosedVotingsListboxOption();
+    
+    String allManifestListboxOption();
+    String onlyOpenManifestListboxOption();
+    String onlyClosedManifestListboxOption();
+    
+    String allClaimsListboxOption();
+    String onlyOpenClaimsListboxOption();
+    String onlyClosedClaimsListboxOption();
+            
+    String searchPanelTitle();
+    String emptySearchLabel();
+    String searchStringLabel();
+    String beginAfterLabel();
+    String beginBeforeLabel();
+    String beginBeforeLabel1();
+    String endAfterLabel();
+    String endBeforeLabel();
+    String endBeforeLabel1();
+    String fechaInicioAfterFechaFinalMsg();
+    String pendingLabel();
         
 	String asuntoPublicarManifiesto();
 	String asuntoFirmaReclamacion(String value);
-        String asuntoCancelarDocumento(String value);
+    String asuntoCancelarDocumento(String value);
         
 	String publicacionManifiestoOK();
 	String publicacionManifiestoERROR();
@@ -131,8 +136,10 @@ public interface Constantes extends Messages{
 	String piePaginaFirmarReclamacion();
 	String piePaginaPublicarReclamacion();
 	String piePaginaFirmarDocumento();
+	String piePaginaFirmarDocumentoAndroid();
 	String piePaginaPublicarVotacion();
 	String piePaginaVotar();
+	String piePaginaVotarAndroid();
 	String piePaginaPublicarManifiesto();
 	
 	String sistemaVotacionLabel();
@@ -171,7 +178,7 @@ public interface Constantes extends Messages{
 	String infoCopiaSeguridadReclamaciones();
 	String mensajeSolicitudCopiaSeguridad();
 	String mensajeSolicitudCopiaSeguridadOK();
-        String mensajeSolicitudCopiaSeguridadVotacionAbierta();
+    String mensajeSolicitudCopiaSeguridadVotacionAbierta();
 	
 	String mensajeInfoManifiestoUnaFirma();
 	String mensajeInfoManifiesto(int value);
@@ -193,7 +200,7 @@ public interface Constantes extends Messages{
 	String votacionLabel();
 	
 	String singleSelectionMessage();
-        String singleSelectionFinishedMessage();
+    String singleSelectionFinishedMessage();
 	String salirSinVotarConfirmLabel();
 	
 	String cargaAppletCaption();
@@ -216,52 +223,52 @@ public interface Constantes extends Messages{
 	String mensajeGuardarReciboERROR();
 	String mensajeGuardarReciboOK(String rutaArchivo);
 	
-        String checkBoxAnularDocumento();
-        String checkBoxCancelarDocumento();
+    String checkBoxAnularDocumento();
+    String checkBoxCancelarDocumento();
         
 	String cargandoLabel();
-        String mensajeCancelarEvento(String tipoDocumento);
-        String cancelarDocumentoCheckBoxMsg();
+    String mensajeCancelarEvento(String tipoDocumento);
+    String cancelarDocumentoCheckBoxMsg();
 	String firmaLabelCancelarMsg();
-        String votacionLabelCancelarMsg();
-        String reclamacionLabelCancelarMsg();
-        String cancelarManifiestoCaption();
-        String cancelarReclamacionCaption();
-        String cancelarVotacionCaption();
-        
-        String reclamacionCanceladaMsg();
-        String reclamacionFinalizadaMsg();
-        String manfiestoCanceladoMsg();
-        String manfiestoFinalizadoMsg();
-        String votingFinishedMsg();
-        String votingCanceledMsg();
-        String votingPendingMsg();
+    String votacionLabelCancelarMsg();
+    String reclamacionLabelCancelarMsg();
+    String cancelarManifiestoCaption();
+    String cancelarReclamacionCaption();
+    String cancelarVotacionCaption();
+    
+    String reclamacionCanceladaMsg();
+    String reclamacionFinalizadaMsg();
+    String manfiestoCanceladoMsg();
+    String manfiestoFinalizadoMsg();
+    String votingFinishedMsg();
+    String votingCanceledMsg();
+    String votingPendingMsg();
 
-        
-        String feedsManifiestosLabel();
-        String feedsReclamacionesLabel();
-        String feedsVotacionesLabel();
-        String busquedaAvanzadaLabel();
-        
-        String numSolicitudesAccesoLabel();
-        String numSolicitudesAccesoOKLabel();
-        String numSolicitudesAccesoANULADASLabel();
-        String numVotosLabel();
-        String numVotosOKLabel();
-        String numVotosANULADOSLabel();
-        String recuentoVotosLabel();
-        String solicitudCopiaSeguridadLabel();
-        
-        String dialogoProgresoCaption();
-        String opcionGraficoLabel();
-        String numVotosGraficoLabel();
-        
-        String arrancandoClienteFirmaLabel();
-        String arrancandoHerramientaValidacionLabel();
-        String porcentajeDescargaLabel(String porcentaje);
-        
-        String eventoCanceladoOK();
-        String eventoBorradoOK();
+    
+    String feedsManifiestosLabel();
+    String feedsReclamacionesLabel();
+    String feedsVotacionesLabel();
+    String busquedaAvanzadaLabel();
+    
+    String numSolicitudesAccesoLabel();
+    String numSolicitudesAccesoOKLabel();
+    String numSolicitudesAccesoANULADASLabel();
+    String numVotosLabel();
+    String numVotosOKLabel();
+    String numVotosANULADOSLabel();
+    String recuentoVotosLabel();
+    String solicitudCopiaSeguridadLabel();
+    
+    String dialogoProgresoCaption();
+    String opcionGraficoLabel();
+    String numVotosGraficoLabel();
+    
+    String arrancandoClienteFirmaLabel();
+    String arrancandoHerramientaValidacionLabel();
+    String porcentajeDescargaLabel(String porcentaje);
+    
+    String eventoCanceladoOK();
+    String eventoBorradoOK();
         
         
 }

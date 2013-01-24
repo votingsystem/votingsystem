@@ -7,12 +7,15 @@
     xmlns:panelVotacionesSV='urn:import:org.controlacceso.clientegwt.client.votaciones'>
 	<ui:style>
 		.mainPanel {vertical-align: top; width:100%; height:500px; margin:50px;}	
-		.boton {margin:50px;}	
+		.boton {margin:50px;}
+		.buttonPanel{margin-top:500px;}	
 	</ui:style>
     <g:VerticalPanel styleName='{style.mainPanel}'>
-     	<g:HorizontalPanel>
+     	<g:HorizontalPanel styleName='{style.buttonPanel}'>
 		    <g:Button ui:field='votarAndroidButton' styleName='{style.boton}'>Votar</g:Button>
 		    <g:Button ui:field='enviarMensaje' styleName='{style.boton}'>Enviar mensaje</g:Button>
+		    <g:Button ui:field='redirect' styleName='{style.boton}'>Redirect</g:Button>
+		    <g:Button ui:field='doget' styleName='{style.boton}'>DO Get</g:Button>
 		</g:HorizontalPanel>
     </g:VerticalPanel>
 </ui:UiBinder> 

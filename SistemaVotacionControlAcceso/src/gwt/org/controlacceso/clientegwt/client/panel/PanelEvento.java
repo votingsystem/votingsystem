@@ -203,7 +203,8 @@ public class PanelEvento extends Composite {
 
         @Override
     	public void onError(Request request, Throwable exception) {
-        	new ErrorDialog().show("Exception", exception.getMessage());
+        	new ErrorDialog().show(Constantes.INSTANCIA.exceptionLbl(), 
+        			exception.getMessage());
         	logger.log(Level.SEVERE, exception.getMessage(), exception);
     	}
 

@@ -50,7 +50,8 @@ public class PanelReclamaciones extends Composite implements BarraNavegacion.Lis
 
         @Override
         public void onError(Request request, Throwable exception) {
-        	showErrorDialog ("Exception", exception.getMessage());                
+        	showErrorDialog (Constantes.INSTANCIA.exceptionLbl(), 
+        			exception.getMessage());                
         }
 
         @Override
@@ -60,7 +61,11 @@ public class PanelReclamaciones extends Composite implements BarraNavegacion.Lis
                 		ConsultaEventosSistemaVotacionJso.create(response.getText());
                 recepcionConsultaEventos(consulta);
             } else {
-            	showErrorDialog (String.valueOf(response.getStatusCode()), response.getText());
+            	if(response.getStatusCode() == 0) {//Magic Number!!! -> network problem
+            		showErrorDialog (Constantes.INSTANCIA.errorLbl() , 
+            				Constantes.INSTANCIA.networkERROR());
+            	} else showErrorDialog (String.valueOf(
+            			response.getStatusCode()), response.getText());
             }
         }
 

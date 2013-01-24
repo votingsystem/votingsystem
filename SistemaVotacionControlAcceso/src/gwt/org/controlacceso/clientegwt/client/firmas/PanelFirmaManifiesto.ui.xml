@@ -4,7 +4,7 @@
 	xmlns:svUtil="urn:import:org.controlacceso.clientegwt.client.util"
 	xmlns:dp="urn:import:com.google.gwt.user.datepicker.client">
 	<ui:style type='org.controlacceso.clientegwt.client.firmas.PanelFirmaManifiesto.EditorStyle'>
-    	.mainPanel{width: 950px;}
+    	.mainPanel{padding: 0px 20px 0px 20px;}
 		.messagePanel{padding: 7px 12px 7px 12px; margin: 12px 20px 12px 20px; 
 			border: 2px solid #cc1606;}
 	    .messageLabel {color: #cc1606; font-size: 16px; font-weight: bold; margin: 10px 10px 10px 10px; text-align: center;}
@@ -96,7 +96,7 @@
 				</g:VerticalPanel>
 				<g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
 					<g:VerticalPanel styleName="{style.htmlMessagePanel}">
-		   		    	<g:HTML HTML='{constantes.piePaginaFirmarDocumento}'/>
+		   		    	<g:HTML ui:field='piePagina'/>
 					</g:VerticalPanel>	
 				</g:cell>
 			</g:VerticalPanel>

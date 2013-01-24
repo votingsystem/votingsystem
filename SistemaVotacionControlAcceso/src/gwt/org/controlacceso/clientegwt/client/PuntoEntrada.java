@@ -3,7 +3,7 @@ package org.controlacceso.clientegwt.client;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.controlacceso.clientegwt.client.dialogo.DialogoCargaClienteFirma;
+import org.controlacceso.clientegwt.client.dialogo.DialogoCargaClienteAndroid;
 import org.controlacceso.clientegwt.client.dialogo.ErrorDialog;
 import org.controlacceso.clientegwt.client.evento.BusEventos;
 import org.controlacceso.clientegwt.client.evento.EventoGWTMensajeAplicacion;
@@ -15,11 +15,10 @@ import org.controlacceso.clientegwt.client.panel.PanelEncabezado;
 import org.controlacceso.clientegwt.client.util.Browser;
 import org.controlacceso.clientegwt.client.util.RequestHelper;
 import org.controlacceso.clientegwt.client.util.ServerPaths;
+import org.controlacceso.clientegwt.client.util.StringUtils;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
@@ -28,7 +27,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.NamedFrame;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -54,6 +52,7 @@ public class PuntoEntrada implements EntryPoint {
     public static PuntoEntrada INSTANCIA;
     private NamedFrame clienteFirmaFrame;
     private boolean clienteFirmaCargado = false;
+    private boolean androidClientLoaded = false;
     private EstadoClienteFirma estadoAppetFirma;
     private MensajeClienteFirmaJso mensajeClienteFirmaPendiente; 
 	
@@ -76,41 +75,32 @@ public class PuntoEntrada implements EntryPoint {
         History.fireCurrentHistoryState();
         clienteFirmaFrame = new NamedFrame(Constantes.ID_FRAME_APPLET);
         logger.info("--- isJavaAvailable: " + isJavaAvailable());
-        if(!isJavaAvailable() && ! Browser.isAndroid()) {
+        if(!isJavaAvailable() && Browser.isPC()) {
         	ErrorDialog errorDialog = new ErrorDialog();
         	errorDialog.show(Constantes.INSTANCIA.captionNavegadorSinJava(), 
         	Constantes.INSTANCIA.mensajeNavegadorSinJava());
         }
         logger.info("queryString: " +  Window.Location.getQueryString());
-        //logger.info("loaded: " +  Window.Location.getParameter("loaded"));
-        if(Browser.isAndroid() && Window.Location.getParameter("clienteAndroidLoaded") != null &&
-        		"true".equals(Window.Location.getParameter("clienteAndroidLoaded"))) {
-        	logger.info("Cargado cliente android");
-        	return;
-        } else if (Browser.isAndroid() && Window.Location.getParameter("clienteAndroidLoaded") != null &&
-    		"false".equals(Window.Location.getParameter("clienteAndroidLoaded"))) {
-        	Window.alert("La aplicación no está instalada - consejos");
-        } else if(Browser.isAndroid()) {
-        	Button dummyButtom = new Button();
-        	dummyButtom.addClickHandler(new ClickHandler() {
-    			@Override
-    			public void onClick(ClickEvent event) {
-    				Window.alert("Enviando mensaje a cliente android");
-    				MensajeClienteFirmaJso mensajeClienteFirma = MensajeClienteFirmaJso.create(null, 
-    	    				"Arrancando cliente android", MensajeClienteFirmaJso.SC_PROCESANDO);
-    	    		mensajeClienteFirma.setEmailSolicitante("España continuación");
-    	    		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
-    				
-    			}
-    		});
-        	appPanel.add(dummyButtom);
-        	dummyButtom.setVisible(false);
-        	dummyButtom.click();
-        } 
+        //is webkit web session? 
+        if(Browser.isAndroid() && Window.Location.getParameter("androidClientLoaded") != null &&
+        		"true".equals(Window.Location.getParameter("androidClientLoaded"))) {
+        	logger.info("androidClientLoaded");
+        	androidClientLoaded = true;
+        }
+        if (Browser.isAndroid() && Window.Location.getParameter("androidClientLoaded") != null &&
+    		"false".equals(Window.Location.getParameter("androidClientLoaded"))) {
+        	DialogoCargaClienteAndroid dialogoCarga = new DialogoCargaClienteAndroid();
+        	dialogoCarga.show(ServerPaths.getUrlClienteAndroid() + 
+        			"?androidClientLoaded=false" + StringUtils.getEncodedToken(token), null);
+        }
     }
     
     public boolean isClienteFirmaCargado () {
     	return clienteFirmaCargado;
+    }
+    
+    public boolean isAndroidClientLoaded() {
+    	return androidClientLoaded;
     }
     
     public void cargarClienteFirma () {
@@ -178,8 +168,6 @@ public class PuntoEntrada implements EntryPoint {
     		switch(mensajeClienteFirma.getOperacionEnumValue()) {
 	    		case MENSAJE_APPLET:
 	    			clienteFirmaCargado = true;
-	    			if(DialogoCargaClienteFirma.INSTANCIA != null) 
-	    				DialogoCargaClienteFirma.INSTANCIA.hide();
 	    			break;
 	    		case MENSAJE_CIERRE_APPLET:
 	    			if(clienteFirmaFrame != null) RootPanel.get("uiBody").remove(clienteFirmaFrame);
@@ -205,6 +193,11 @@ public class PuntoEntrada implements EntryPoint {
     	return resultado;
     }
     
+    private void showErrorDialog (String text, String body) {
+    	ErrorDialog errorDialog = new ErrorDialog();
+    	errorDialog.show(text, body);	
+    }
+
     private class ServerRequestInfoCallback implements RequestCallback {
 
         @Override
@@ -225,8 +218,11 @@ public class PuntoEntrada implements EntryPoint {
 
     		} else if (response.getStatusCode() == Response.SC_UNAUTHORIZED) {}
     		else {
-            	new ErrorDialog().show("Error", "Response status: " 
-            			+ response.getStatusCode());
+            	if(response.getStatusCode() == 0) {//Magic Number!!! -> network problem
+            		showErrorDialog (Constantes.INSTANCIA.errorLbl() , 
+            				Constantes.INSTANCIA.networkERROR());
+            	} else showErrorDialog (String.valueOf(
+            			response.getStatusCode()), response.getText());
     		}
     	}
 
