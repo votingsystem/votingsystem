@@ -63,6 +63,7 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
     }
 
 	@UiField HTML pageTitle;
+	@UiField HTML piePagina;
     @UiField EditorStyle style;
     @UiField VerticalPanel panelContenidos;
     @UiField HorizontalPanel panelBarrarProgreso;
@@ -98,6 +99,11 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
         INSTANCIA = this;
         panelGraficoVotacion.setVisible(false);
         panelContenidos.setVisible(false);
+        if(Browser.isAndroid()) {
+        	piePagina.setHTML(Constantes.INSTANCIA.piePaginaVotarAndroid());
+        } else {
+        	piePagina.setHTML(Constantes.INSTANCIA.piePaginaVotar());
+        }
         BusEventos.addHandler(EventoGWTConsultaEvento.TYPE, this);
         BusEventos.addHandler(
         		EventoGWTMensajeClienteFirma.TYPE, this);

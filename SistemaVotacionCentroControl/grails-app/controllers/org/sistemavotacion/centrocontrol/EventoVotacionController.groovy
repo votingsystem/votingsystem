@@ -114,7 +114,7 @@ class EventoVotacionController {
 						   EventoVotacion.Estado.PENDIENTE_COMIENZO, params)
 				}
 			}
-			eventosMap.offset = params.offset
+			eventosMap.offset = params.long('offset')
 		}
         eventosMap.numeroTotalEventosVotacionEnSistema = EventoVotacion.countByEstadoOrEstadoOrEstadoOrEstado(
 			EventoVotacion.Estado.ACTIVO, EventoVotacion.Estado.CANCELADO, 

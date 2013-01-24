@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 import org.centrocontrol.clientegwt.client.Constantes;
 import org.centrocontrol.clientegwt.client.HistoryToken;
 import org.centrocontrol.clientegwt.client.HtmlTemplates;
+import org.centrocontrol.clientegwt.client.util.Browser;
 import org.centrocontrol.clientegwt.client.util.ServerPaths;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -34,14 +35,17 @@ public class PanelInferior extends Composite {
 		administracionHTML.setHTML(HtmlTemplates.INSTANCIA.enlaceDatosAplicacion(
     			ServerPaths.getUrlDatosAplicacion(), 
     			Constantes.INSTANCIA.administracionLabel()));
-		herramientaValidacionAnchor.addClickHandler(new ClickHandler() {
-			
-			@Override
-			public void onClick(ClickEvent event) {
-				History.newItem(HistoryToken.DUMMY_TOKEN.toString());
-				History.newItem(HistoryToken.HERRAMIENTA_VALIDACION.toString());
-			}
-		});
+		if(Browser.isAndroid()) {
+			herramientaValidacionAnchor.setVisible(false);
+		}else {
+			herramientaValidacionAnchor.addClickHandler(new ClickHandler() {
+				@Override
+				public void onClick(ClickEvent event) {
+					History.newItem(HistoryToken.DUMMY_TOKEN.toString());
+					History.newItem(HistoryToken.HERRAMIENTA_VALIDACION.toString());
+				}
+			});	
+		}
 	}
     
 

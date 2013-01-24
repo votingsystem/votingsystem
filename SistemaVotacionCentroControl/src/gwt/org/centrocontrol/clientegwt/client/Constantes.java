@@ -7,7 +7,7 @@ public interface Constantes extends Messages{
     
 		public static final Constantes INSTANCIA = GWT.create(Constantes.class);
 		
-		public static final int EVENTS_RANGE = 20;
+		public static final int EVENTS_RANGE = 21;
 	    public static final String ID_FRAME_APPLET = "frameClienteFirma";
 	    public static final String ID_FRAME_HERRAMIENTA_PUBLICACION = "frameHerramientaPublicacion";
 
@@ -129,6 +129,7 @@ public interface Constantes extends Messages{
 		String piePaginaFirmarDocumento();
 		String piePaginaPublicarVotacion();
 		String piePaginaVotar();
+		String piePaginaVotarAndroid();
 		String piePaginaPublicarManifiesto();
 		
 		String sistemaVotacionLabel();

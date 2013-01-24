@@ -94,7 +94,7 @@
 				    </g:cell>
 				    <g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
 						<g:VerticalPanel styleName="{style.htmlMessagePanel}">
-				   		    <g:HTML HTML='{constantes.piePaginaVotar}'/>
+				   		    <g:HTML ui:field='piePagina'/>
 						</g:VerticalPanel>	
 					</g:cell>
 			    </g:VerticalPanel>
