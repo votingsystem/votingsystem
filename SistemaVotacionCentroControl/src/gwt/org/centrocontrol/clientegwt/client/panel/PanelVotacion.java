@@ -303,7 +303,6 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
 
 	@Override
 	public void procesarOpcionSeleccioda(OpcionDeEventoJso opcion) {
-		// TODO Auto-generated method stub
 		MensajeClienteFirmaJso mensajeClienteFirma = MensajeClienteFirmaJso.create(null, 
 				Operacion.ENVIO_VOTO_SMIME.toString(), 
 				MensajeClienteFirmaJso.SC_PROCESANDO);
@@ -325,7 +324,7 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
     	mensajeClienteFirma.setNombreDestinatarioFirma(
     			PuntoEntrada.INSTANCIA.servidor.getNombre());
 		//mensajeClienteFirma.setUrlEnvioDocumento();
-		setWidgetsStateFirmando(true);
+    	if(!Browser.isAndroid()) setWidgetsStateFirmando(true);
 		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
 	}
 	

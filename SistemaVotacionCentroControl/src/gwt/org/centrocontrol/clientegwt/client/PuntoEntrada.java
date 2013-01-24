@@ -2,8 +2,7 @@ package org.centrocontrol.clientegwt.client;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.centrocontrol.clientegwt.client.dialogo.DialogoCargaClienteFirma;
+import org.centrocontrol.clientegwt.client.dialogo.DialogoCargaClienteAndroid;
 import org.centrocontrol.clientegwt.client.dialogo.ErrorDialog;
 import org.centrocontrol.clientegwt.client.evento.BusEventos;
 import org.centrocontrol.clientegwt.client.evento.EventoGWTMensajeAplicacion;
@@ -50,6 +49,7 @@ public class PuntoEntrada implements EntryPoint {
     public ActorConIPJso servidor;
     public static PuntoEntrada INSTANCIA;
     private boolean clienteFirmaCargado = false;
+    private boolean androidClientLoaded = false;
     private NamedFrame clienteFirmaFrame;
     private EstadoClienteFirma estadoAppetFirma;
     private MensajeClienteFirmaJso mensajeClienteFirmaPendiente; 
@@ -73,10 +73,22 @@ public class PuntoEntrada implements EntryPoint {
         History.fireCurrentHistoryState();
         clienteFirmaFrame = new NamedFrame(Constantes.ID_FRAME_APPLET);
         logger.info("--- isJavaAvailable: " + isJavaAvailable());
-        if(!isJavaAvailable()) {
+        if(!isJavaAvailable() && ! Browser.isAndroid()) {
         	ErrorDialog errorDialog = new ErrorDialog();
         	errorDialog.show(Constantes.INSTANCIA.captionNavegadorSinJava(), 
         	Constantes.INSTANCIA.mensajeNavegadorSinJava());
+        }
+        //is webkit web session? 
+        if(Browser.isAndroid() && Window.Location.getParameter("androidClientLoaded") != null &&
+        		"true".equals(Window.Location.getParameter("androidClientLoaded"))) {
+        	logger.info("androidClientLoaded");
+        	androidClientLoaded = true;
+        }
+        if (Browser.isAndroid() && Window.Location.getParameter("androidClientLoaded") != null &&
+    		"false".equals(Window.Location.getParameter("androidClientLoaded"))) {
+        	DialogoCargaClienteAndroid dialogoCarga = new DialogoCargaClienteAndroid();
+        	dialogoCarga.show(ServerPaths.getUrlClienteAndroid() + 
+        			"?androidClientLoaded=false#VOTAR&eventoId=26", null);
         }
         logger.info("queryString: " +  Window.Location.getQueryString());
     }
@@ -110,6 +122,10 @@ public class PuntoEntrada implements EntryPoint {
 
     public boolean isClienteFirmaCargado () {
     	return clienteFirmaCargado;
+    }
+    
+    public boolean isAndroidClientLoaded() {
+    	return androidClientLoaded;
     }
     
     public void cargarClienteFirma () {
@@ -174,11 +190,6 @@ public class PuntoEntrada implements EntryPoint {
     		}
     		BusEventos.fireEvent(new EventoGWTMensajeClienteFirma(mensajeClienteFirma));
     		switch(mensajeClienteFirma.getOperacionEnumValue()) {
-	    		case MENSAJE_APPLET:
-	    			clienteFirmaCargado = true;
-	    			if(DialogoCargaClienteFirma.INSTANCIA != null) 
-	    				DialogoCargaClienteFirma.INSTANCIA.hide();
-	    			break;
 	    		case MENSAJE_CIERRE_APPLET:
 	    			if(clienteFirmaFrame != null) RootPanel.get("uiBody").remove(clienteFirmaFrame);
 	    			clienteFirmaFrame = null;

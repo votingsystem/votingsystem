@@ -2,7 +2,9 @@
 <html>
 <head>
 		<% request.setAttribute("org.grails.rendering.view", Boolean.TRUE) %>
-        <link rel="stylesheet" href="${resource(dir:'css',file:'clean.css')}" />                               
+        <link rel="stylesheet" href="${resource(dir:'css',file:'clean.css')}" />   
+        <link rel="stylesheet" media="handheld, only screen and (max-device-width: 320px)" 
+        	href="${resource(dir:'css',file:'mobile.css')}">                            
   		<title>${message(code: 'nombreServidorLabel', null)}</title>
  		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
  		<script src="${resource(dir:'js',file:'deployJava.js')}"></script>
@@ -38,7 +40,7 @@
 		 }
 
 		function setAppMessage(appMessage) {
-			ClienteAndroid.setAppMessage(appMessage);
+			androidClient.setAppMessage(appMessage);
 		}
 		
  		</script>

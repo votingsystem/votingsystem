@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title><g:layoutTitle default="Control de Acceso" /></title>
+        <title><g:layoutTitle default="${message(code: 'nombreServidorLabel', null)}"/></title>
         <link rel="stylesheet" href="${resource(dir:'css',file:'main.css')}" />
         <link rel="shortcut icon" href="${resource(dir:'images',file:'favicon.ico')}" type="image/x-icon" />
       <style type="text/css" media="screen">
@@ -37,12 +37,13 @@
     </head>
     <body>
                 <div id="encabezado">
-                  <div id="tituloEncabezado" class="tituloEncabezado" role="banner"><a href="${grailsApplication.config.grails.serverURL}">Centro de Control</a></div>
+                  <div id="tituloEncabezado" class="tituloEncabezado" role="banner"><a href="${grailsApplication.config.grails.serverURL}">
+                  		${message(code: 'nombreServidorLabel', null)}</a></div>
                 </div>
 		<g:layoutBody/>
 		<div class="pieDePagina" role="contentinfo">
-                  <a href="mailto:jgzornoza@gmail.com">Correo</a>
-                </div>
+        	<a href="mailto:${grailsApplication.config.SistemaVotacion.emailAdmin}">${message(code: 'emailLabel', null)}</a>
+        </div>
 		<div id="spinner" class="spinner" style="display:none;"><g:message code="spinner.alt" default="Loading&hellip;"/></div>
 		<g:javascript library="application"/>
     </body>

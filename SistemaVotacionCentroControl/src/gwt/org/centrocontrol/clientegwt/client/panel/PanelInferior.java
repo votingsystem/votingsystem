@@ -32,7 +32,7 @@ public class PanelInferior extends Composite {
 	public PanelInferior() {
 		initWidget(uiBinder.createAndBindUi(this));
 		administracionHTML.setHTML(HtmlTemplates.INSTANCIA.enlaceDatosAplicacion(
-    			ServerPaths.getUrlDatosApliacion(), 
+    			ServerPaths.getUrlDatosAplicacion(), 
     			Constantes.INSTANCIA.administracionLabel()));
 		herramientaValidacionAnchor.addClickHandler(new ClickHandler() {
 			

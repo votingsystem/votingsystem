@@ -5,7 +5,7 @@
 	xmlns:svPanel="urn:import:org.centrocontrol.clientegwt.client.panel"
 	xmlns:dp="urn:import:com.google.gwt.user.datepicker.client">
 	<ui:style type='org.centrocontrol.clientegwt.client.panel.PanelVotacion.EditorStyle'>
-    	.mainPanel{width: 950px;}
+    	.mainPanel{padding: 0px 20px 0px 20px;}
 		.messagePanel{padding: 7px 12px 7px 12px; margin: 12px 50px 12px 12px; 
 			border: 2px solid #cc1606;}
 	    .messageLabel {color: #cc1606; font-size: 16px; font-weight: bold; margin: 10px 10px 10px 10px; text-align: center;}

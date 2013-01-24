@@ -1,11 +1,10 @@
 package org.centrocontrol.clientegwt.client.util;
 
 import java.util.logging.Logger;
-
 import org.centrocontrol.clientegwt.client.PuntoEntrada;
 import org.centrocontrol.clientegwt.client.modelo.MensajeClienteFirmaJso;
-
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.History;
 
 /**
 * @author jgzornoza
@@ -49,9 +48,25 @@ public class Browser {
 
 	public static void ejecutarOperacionClienteFirma(MensajeClienteFirmaJso mensajeClienteFirma) {
 		if(mensajeClienteFirma == null) return;
-		logger.info("ejecutarOperacionClienteFirma - mensajeClienteFirma: " + mensajeClienteFirma.toJSONString());
-		PuntoEntrada.INSTANCIA.cargarClienteFirma();
-		PuntoEntrada.INSTANCIA.setMensajeClienteFirmaPendiente(mensajeClienteFirma);
+		if(isAndroid()) {
+			String encodedMsg = getEncodedString(mensajeClienteFirma.toJSONString());
+			String url = ServerPaths.getUrlClienteAndroid() + "?browserToken=" 
+	    			+ History.getToken() + "&serverURL=" + ServerPaths.getApplicationPath() 
+	    			+ "&msg=" + encodedMsg;
+	    	ServerPaths.redirect(url);
+		} else {
+			logger.info("ejecutarOperacionClienteFirma - mensajeClienteFirma: " + mensajeClienteFirma.toJSONString());
+			PuntoEntrada.INSTANCIA.cargarClienteFirma();
+			PuntoEntrada.INSTANCIA.setMensajeClienteFirmaPendiente(mensajeClienteFirma);	
+		}
+	}
+
+    public static native String getEncodedString(String str) /*-{
+			return encodeURIComponent(str);
+	}-*/;
+    
+	public static boolean isAndroid () {
+		return (getUserAgent().indexOf("android") > - 1);
 	}
 
 }

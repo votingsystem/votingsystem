@@ -17,8 +17,8 @@
 		
 		<div id="content" role="main">
             <h1><a href="${grailsApplication.config.grails.serverURL}/app/index">${message(code: 'mainPageLabel', null)}</a>
-            <a href="https://github.com/jgzornoza/SistemaVotacionControlAcceso">${message(code: 'sourceCodeLabel', null)}</a>
-            <a href="https://github.com/jgzornoza/SistemaVotacionControlAcceso/wiki/Control-de-Acceso">${message(code: 'wikiLabel', null)}</a></h1>
+            <a href="https://github.com/jgzornoza/SistemaVotacion/tree/master/SistemaVotacionCentroControl">${message(code: 'sourceCodeLabel', null)}</a>
+            <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Centro-de-Control">${message(code: 'wikiLabel', null)}</a></h1>
             <p id="contentText">${message(code: 'urlMatch', null)}: <b>${grailsApplication.config.grails.serverURL}</b></p>
 		</div>
 		

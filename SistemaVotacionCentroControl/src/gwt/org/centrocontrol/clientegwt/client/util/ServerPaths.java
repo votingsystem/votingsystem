@@ -49,7 +49,7 @@ public class ServerPaths {
    	 	return getApplicationPath() + "buscador/consultaJSON?max=" + max + "&offset=" + offset;
     }
     
-    public static String getUrlDatosApliacion () {
+    public static String getUrlDatosAplicacion () {
    	 	return getApplicationPath() + "infoServidor/informacion";
     }
     
@@ -138,6 +138,14 @@ public class ServerPaths {
     
     public static String getUrlComprobacionFechasEvento(int eventoId) {
         return getApplicationPath() + "eventoVotacion/comprobarFechas?id=" + eventoId;
+    }
+    
+    public static String getUrlClienteAndroid () {
+    	return getApplicationPath() + "app/clienteAndroid";
+    }
+
+    public static String getUrlAppAndroid () {
+   	 	return getApplicationPath() + "android/SistemaVotacion.apk";
     }
     
 }

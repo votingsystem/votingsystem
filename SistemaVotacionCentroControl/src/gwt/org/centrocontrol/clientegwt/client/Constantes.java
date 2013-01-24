@@ -26,8 +26,10 @@ public interface Constantes extends Messages{
 		@Key("tituloEncabezado")
 		String tituloEncabezado();
 		
+		String cargaClienteAndroidCaption();
 		String emptyFieldException();
-        
+		String cargaClienteAndroidMsg(String urlAction, String urlAppAndroid);
+		String androidOperationMsg(String urlAppAndroid);
         String horasLabel();
         String duracionLabel();
         String publicadoPorLabel();

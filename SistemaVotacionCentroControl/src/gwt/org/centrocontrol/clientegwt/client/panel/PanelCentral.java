@@ -43,7 +43,7 @@ public class PanelCentral extends Composite implements ValueChangeHandler<String
     Composite selectedPanel;
     private NamedFrame herramientaPublicacionFrame;
     PanelVotacion panelVotacion;
-
+    PanelTest panelTest;
     
     public PanelCentral() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -77,6 +77,13 @@ public class PanelCentral extends Composite implements ValueChangeHandler<String
     			selectedPanel = panelVotacion;
             	panelSeleccionado.add(selectedPanel);
     			break;    			
+    		case TEST:
+    			if(panelTest == null) {
+    				panelTest = new PanelTest();
+    			}
+    			selectedPanel = panelTest;
+            	panelSeleccionado.add(selectedPanel);
+    			break;       			
     		case BUSQUEDAS:
     			if(panelBusqueda == null) {
     				panelBusqueda = new PanelBusqueda();
@@ -111,7 +118,6 @@ public class PanelCentral extends Composite implements ValueChangeHandler<String
         DOM.setElementAttribute(herramientaPublicacionFrame.getElement(), "id", 
         		herramientaPublicacionFrame.getName());
     }
-    
     
 	@Override
 	public void onValueChange(ValueChangeEvent<String> event) {

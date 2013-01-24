@@ -1,5 +1,23 @@
 /* Styles for mobile devices */
 
+/*
+ * 1. Sets default font family to sans-serif.
+ * 2. Prevents iOS text size adjust after orientation change, without disabling
+ *    user zoom.
+ */
+
+html {
+    font-family: sans-serif; /* 1 */
+    -webkit-text-size-adjust: 100%; /* 2 */
+    -ms-text-size-adjust: 100%; /* 2 */
+}
+
+.ui{
+	width:200px;
+	float: center;
+	margin: 0 auto 0 auto;
+}
+
 @media screen and (max-width: 480px) {
 	.nav {
 		padding: 0.5em;
