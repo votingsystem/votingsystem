@@ -1,0 +1,16 @@
+
+apply plugin: 'groovy'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+targetCompatibility = "1.6"
+sourceCompatibility = "1.6"
+
+dependencies {
+	compile group: "org.sistemavotacion", name: "SistemaVotacionApplet", version: "0.5.0"
+    
+}
+
+

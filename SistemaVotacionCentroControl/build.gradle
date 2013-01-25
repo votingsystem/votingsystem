@@ -1,7 +1,14 @@
+import java.io.File;
+
 task copyApps(dependsOn: [':MonitorDescarga:signJar', ':SistemaVotacionApplet:signJar', 
 	':HerramientaValidacionCopiasDeSeguridad:signJar', ':SistemaVotacionAndroid:zipalign']) {
 	
 	doLast {
+		File appletDir = new File("$projectDir/web-app/applet/");
+		appletDir.mkdirs();
+		File androidDir = new File("$projectDir/web-app/android/");
+		androidDir.mkdirs();
+		
 		File downloadMonitor = new File("$projectDir/web-app/applet/MonitorDescarga.jar")
 		if(downloadMonitor.exists()) downloadMonitor.delete()
 		downloadMonitor << rootProject.downloadMonitor?.bytes
