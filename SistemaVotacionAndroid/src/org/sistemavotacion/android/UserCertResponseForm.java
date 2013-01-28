@@ -176,7 +176,7 @@ public class UserCertResponseForm extends SherlockFragmentActivity
     
     private void showPinScreen(String message) {
     	certPinScreen = CertPinScreen.newInstance(
-    			UserCertResponseForm.this, message);
+    			UserCertResponseForm.this, message, true);
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         certPinScreen.show(ft, CERT_PIN_DIALOG);
     }

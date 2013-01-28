@@ -26,6 +26,7 @@ class VotingSystemApplet extends Jar {
 			project.configurations.compile.collect {
 				if(it.isDirectory()) it
 				else {
+					if(!it.exists()) return;
 					byte[] buf = new byte[2048];
 					ZipInputStream zin = new ZipInputStream(new FileInputStream(it));
 					ZipEntry entry = zin.getNextEntry();

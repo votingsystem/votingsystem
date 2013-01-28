@@ -376,7 +376,7 @@ public class EventScreen extends SherlockFragmentActivity
 	
     private void showPinScreen(String message) {
     	certPinScreen = CertPinScreen.newInstance(
-    			EventScreen.this, message);
+    			EventScreen.this, message, true);
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         certPinScreen.show(ft, CERT_PIN_DIALOG);
     }

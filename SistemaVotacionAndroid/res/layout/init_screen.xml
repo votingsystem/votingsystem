@@ -48,6 +48,7 @@
             android:layout_marginRight="30dp"
             android:layout_weight="1"
             android:drawableLeft="@drawable/accept_22x22"
+            android:maxWidth="100dp"
             android:text="@string/solicitar_label"
             android:textStyle="bold" />
 

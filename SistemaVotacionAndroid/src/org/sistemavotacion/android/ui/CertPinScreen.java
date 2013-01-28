@@ -28,6 +28,7 @@ public class CertPinScreen extends SherlockDialogFragment
     private CertPinScreenCallback mCallback;
 
     private TextView mHeaderText;
+    private TextView voteValueText;
     private TextView mPinText;
     private TextView mOkButton;
     private View mBackSpaceButton;
@@ -40,12 +41,13 @@ public class CertPinScreen extends SherlockDialogFragment
     
     View pinScreenView;
     
-    public static CertPinScreen newInstance(
-    		CertPinScreenCallback callback, String message) {
+    public static CertPinScreen newInstance(CertPinScreenCallback callback, 
+    		String message, boolean headerVisibility) {
     	CertPinScreen certPinScreen = new CertPinScreen();
     	certPinScreen.setCallback(callback);
         Bundle args = new Bundle();
         args.putString("message", message);
+        args.putBoolean("isHeaderVisible", headerVisibility);
         certPinScreen.setArguments(args);
         return certPinScreen;
     }
@@ -64,10 +66,14 @@ public class CertPinScreen extends SherlockDialogFragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
+    	Log.d(TAG + ".onResume", "onCreateView -- ");
         pinScreenView = inflater.
         		inflate(R.layout.pin_screen_portrait, container, true);
         new TouchInput();
         mHeaderText = (TextView) pinScreenView.findViewById(R.id.headerText);
+        
+        voteValueText = (TextView) pinScreenView.findViewById(R.id.voteValueText);
+        
         mPinText = (TextView) pinScreenView.findViewById(R.id.pinDisplay);
         mBackSpaceButton = pinScreenView.findViewById(R.id.backspace);
         mBackSpaceButton.setOnClickListener(this);
@@ -77,13 +83,16 @@ public class CertPinScreen extends SherlockDialogFragment
         mOkButton.setOnClickListener(this);
         pinScreenView.setFocusableInTouchMode(true);
         setMessage(getArguments().getString("message"));
+        if(getArguments().getBoolean("isHeaderVisible")) {
+        	mHeaderText.setVisibility(View.VISIBLE);
+        } else mHeaderText.setVisibility(View.GONE);
         //getDialog().getWindow().setLayout(300, 300);
         return pinScreenView;
     }
 
     public void setMessage(String message) {
     	if(message == null) message = "";
-    	 mHeaderText.setText(message);
+    	voteValueText.setText(message);
     }
     
     public void resetPin() {

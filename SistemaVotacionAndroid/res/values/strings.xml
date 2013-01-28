@@ -19,7 +19,7 @@
     <string name="inicio_lbl">Inicio</string>
     <string name="fin_lbl">Fin</string>
     <string name="remain_lbl">Quedan %1$s horas</string>
-    
+    <string name="option_selected_msg">Seleccionada opción \'%1$s\'</string>
     
     <string name="voting_drop_down_lbl">Votaciones</string>
     <string name="claims_drop_down_lbl">Reclamaciones</string>
@@ -81,9 +81,14 @@
     <string name="vote_msg_subject">[VOTO]</string>
 
     <string name="pin_error_msg">¿Seguro que la contraseña es correcta?</string>
+    <string name="low_memory_msg">Memoria baja</string>
     
     <string name="sign_send_msg">Firmar y enviar</string>
     
+    <string name="voted_lbl">Seleccionada opción</string>
+    <string name="cancel_vote_lbl">Anular voto</string>
+    <string name="save_receipt_lbl">Guardar recibo de voto</string>
+    <string name="app_name_lbl">Aplicación de votación</string>
     <string name="label_eventos">Eventos</string>
     <string name="label_evento">Evento</string>
     <string name="solicitud_csr">Solicitud CSR</string>
@@ -103,10 +108,16 @@
         <a href="%1$s"> las siguientes direcciones</a>]]></string>
         
     <string name="search_query_info_msg"><![CDATA[<b>Resultado de la busqueda</b>: %1$s]]></string>
+    <string name="option_error_msg"><![CDATA[<html>La opción del recibo no coincide con la del voto.
+        <br/> ¿Desea anular la operación?</html>]]></string>
+    <string name="vote_ok_msg"><![CDATA[En el evento \'%1$s\' usted ha elegido la opción \'%2$s\']]></string>
+    <string name="vote_repeated_msg"><![CDATA[Ya había enviado un voto para la convocatoria \'%1$s\' en el que 
+        había elegido la opción \'%2$s\']]></string>
         
    <string name="access_request_repeated_msg"><![CDATA[
         <a href="%1$s">Pulse aquí</a> para acceder a la solicitud que le impide volver a votar sobre este asunto]]></string>
 
+   <string name="cert_install_error_msg">Error instalando certificado de usuario</string>
     <string name="cert_install_error_msg">Error instalando certificado de usuario</string>
     <string name="resultado_solicitud_certificado_activity_ok">El certificado se
         ha importado correctamente.</string>
@@ -134,6 +145,7 @@
 	<string name="password_error_msg">Las contraseñas no coinciden</string>
 	<string name="dialogo_campos_reclamacion_caption">Rellenar los campos</string>
 	<string name="error_lbl">Error</string>   
+	<string name="msg_lbl">Mensaje</string>   
 	<string name="operacion_ok_msg">Operación completada con éxito</string> 
 	<string name="certificado_no_encontrado_msg">No tiene instalado ningún certificado con el que poder firmar la solicitud.</string>    
 	<string name="nif_password_message_label">Cada vez que vote se le pedirá el código PIN que introducirá a continuación. Recuerde, si lo olvida tendrá que pedir otro certificado para poder votar.</string>    

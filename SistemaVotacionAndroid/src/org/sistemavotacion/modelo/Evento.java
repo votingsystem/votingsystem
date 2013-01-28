@@ -1,15 +1,18 @@
 package org.sistemavotacion.modelo;
 
 import java.io.Serializable;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import org.sistemavotacion.android.Aplicacion;
 import org.sistemavotacion.json.DeJSONAObjeto;
 import org.sistemavotacion.json.DeObjetoAJSON;
+import org.sistemavotacion.smime.CMSUtils;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.HttpHelper;
 import org.sistemavotacion.util.ServerPaths;
@@ -502,6 +505,16 @@ public class Evento implements Serializable {
         return hashSolicitudAccesoBase64;
     }
 
+    public Evento initVoteData() throws NoSuchAlgorithmException {
+    	this.origenHashSolicitudAcceso = UUID.randomUUID().toString();
+    	this.hashSolicitudAccesoBase64 = CMSUtils.obtenerHashBase64(
+    			this.origenHashSolicitudAcceso, Aplicacion.SIG_HASH);
+    	this.origenHashCertificadoVoto = UUID.randomUUID().toString();
+    	this.hashCertificadoVotoBase64 = CMSUtils.obtenerHashBase64(
+    			this.origenHashCertificadoVoto, Aplicacion.SIG_HASH); 
+    	return this;
+    }
+    
     /**
      * @param hashSolicitudAccesoBase64 the hashSolicitudAccesoBase64 to set
      */

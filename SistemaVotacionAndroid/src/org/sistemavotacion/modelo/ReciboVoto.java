@@ -4,39 +4,19 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import javax.mail.MessagingException;
+
+import org.sistemavotacion.android.R;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import android.util.Log;
 import org.json.JSONObject;
+import static org.sistemavotacion.android.Aplicacion.getAppString;
 
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class ReciboVoto {
-
     
-    public static final String MENSAJE_ERROR_FIRMA_RECIBO = 
-            "<html>Recibo de voto con errores.<br/>"
-           + "<b>Desea notificar la incidencia</b></html>";
-    public static final String MENSAJE_ERROR_OPCION = 
-            "<html>La opción seleccionada del recibo no coincide con la que "
-            + "usted ha enviado.<br/> ¿Desea anular el recibo?</html>";
-    
-    public static String obtenerMensajeVotoOk (Evento voto) {
-        return "En el evento '" + voto.getAsunto() + "' usted ha elegido la opción '" 
-                + voto.getOpcionSeleccionada().getContenido() + "'";
-    }
-
-    public static String obtenerMensajeVotoRepetido (Evento evento, String opcion) {
-        return "Ya había enviado un voto para la convocatoria '" + evento.getAsunto() + 
-                "' en el que había elegido la opción '" + opcion + "'";
-    }
-    
-    public static String obtenerMensajeErrorVotoRepetido(String asunto, String usuario) {
-        return "Voto anulado. Ya se había recibido un voto del usuario '" 
-                + usuario + "' para el asunto '" + asunto + "'";
-    }  
-
     private Long id;
     private int codigoEstado;
     private String mensaje;
@@ -75,19 +55,20 @@ public class ReciboVoto {
     private void comprobarRecibo () throws Exception {
         if (409 == codigoEstado) {//voto repetido
             esValido = true; 
-            mensaje = obtenerMensajeVotoRepetido(voto, 
-                    voto.getContenidoOpcion(opcionSeleccionadaId));
+            mensaje = getAppString(R.string.vote_repeated_msg, 
+            		voto.getAsunto(), voto.getOpcionSeleccionada().getContenido());
             return;
         }
         if (!opcionSeleccionadaId.equals(voto.getOpcionSeleccionada().getId())) {
-            Log.e("ReciboVoto", MENSAJE_ERROR_OPCION);
+            Log.e("ReciboVoto", getAppString(R.string.option_error_msg));
             esValido = false; 
-            mensaje = MENSAJE_ERROR_OPCION;
+            mensaje = getAppString(R.string.option_error_msg);
             return;
         }
         if (smimeMessage.isValidSignature()) {
             esValido = true;
-            mensaje = obtenerMensajeVotoOk(voto);
+            mensaje = getAppString(R.string.vote_ok_msg, 
+        		voto.getAsunto(), voto.getOpcionSeleccionada().getContenido());
         } 
     }
     

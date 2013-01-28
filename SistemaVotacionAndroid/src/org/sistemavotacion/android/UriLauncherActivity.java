@@ -26,9 +26,11 @@ import org.sistemavotacion.task.GetDataTask;
 import org.sistemavotacion.util.ServerPaths;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -78,17 +80,19 @@ public class UriLauncherActivity extends Activity {
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.uri_launcher);
         final Uri data = getIntent().getData();
+        
         serverURL = data.getQueryParameter("serverURL");
         String eventoId = data.getQueryParameter("eventoId");
         String browserToken = data.getQueryParameter("browserToken");
         String encodedMsg = data.getQueryParameter("msg");
         String msg = decodeString(encodedMsg);
-        Log.d(TAG + ".onCreate() - ", "data.getPath(): " + data.getPath() + 
-        		"data.getUserInfo(): " + data.getUserInfo() + 
-        		"serverURL: " + serverURL + 
-        		"eventoId: " + eventoId +
-        		"browserToken: " + browserToken + 
-        		"msg: " + msg);
+        Aplicacion.CONTROL_ACCESO_URL = data.getHost();
+        Log.d(TAG + ".onCreate() - ", " - host: " + data.getHost() + 
+        		" - path: " + data.getPath() + 
+        		" - userInfo: " + data.getUserInfo() + 
+        		" - serverURL: " + serverURL + " - eventoId: " + eventoId +
+        		" - browserToken: " + browserToken + 
+        		" - msg: " + msg);
         if(msg != null) {
     		try {
     			operation = Operation.parse(msg);
@@ -103,6 +107,7 @@ public class UriLauncherActivity extends Activity {
     }
     
     private String decodeString(String string) {
+    	if(string == null) return null;
     	String result = null;
         try {
         	result = URLDecoder.decode(string, "UTF-8");
@@ -121,7 +126,14 @@ public class UriLauncherActivity extends Activity {
     
 	private void showMsg(String caption, String msg) {
     	AlertDialog.Builder builder= new AlertDialog.Builder(UriLauncherActivity.this);
-		builder.setTitle(caption).setMessage(msg).show();
+		builder.setTitle(caption).setMessage(msg)
+			.setPositiveButton(R.string.solicitar_label, new DialogInterface.OnClickListener() {
+	            public void onClick(DialogInterface dialog, int whichButton) {
+	        		Intent intent = new Intent(
+	        				UriLauncherActivity.this, Aplicacion.class);;
+	                startActivity(intent);
+	            }
+				}).show();
 	}
     
     private void initBrowser() {
