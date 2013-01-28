@@ -7,6 +7,7 @@ import java.util.zip.ZipInputStream
 import java.util.zip.ZipEntry
 import java.util.UUID;
 
+
 class VotingSystemApplet extends Jar {
 	
 	private static Logger logger = LoggerFactory.getLogger(VotingSystemApplet.class);
@@ -51,6 +52,7 @@ class VotingSystemApplet extends Jar {
 				}
 			}
 			appletDependencies = new File("$project.buildDir/applet-dependencies.jar")
+			appletDependencies.delete()
 			ant.zip(destfile: appletDependencies.path, basedir: outputFolder)
 			project.zipTree(appletDependencies)
 		}

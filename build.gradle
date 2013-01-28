@@ -1,5 +1,3 @@
-import java.io.File;
-
 version = '0.5.0'
 
 subprojects {
@@ -19,6 +17,7 @@ ext {
 	appletHerramienta = null
 	aplicacionAndroid = null
 	downloadMonitor = null
+	certsDataMap = null
 }
 
 task buildAll(dependsOn:['MonitorDescarga:signJar',
@@ -30,34 +29,55 @@ task buildAll(dependsOn:['MonitorDescarga:signJar',
 	'SistemaVotacionTest:buildJar']) << {
 	
 }
+
+
+task genAppsCerts() {
 	
-task genWebAppsCerts(type: CertGenerator) << {task ->
-	File controlAccesoKeyStoreFile = new File("$projectDir/SistemaVotacionControlAcceso/web-app/WEB-INF/cms/ControlAcceso.jks");
-	task.genUserKeyStore(project.controlAccesoDN, controlAccesoKeyStoreFile, project.controlAccesoCertAlias)
+	doFirst { }
 	
-	File centroControlKeyStoreFile = new File("$projectDir/SistemaVotacionCentroControl/web-app/WEB-INF/cms/CentroControl.jks");
-	task.genUserKeyStore(project.centroControlDN, centroControlKeyStoreFile, project.centroControlCertAlias)
-	
+	doLast {
+		rootProject.certsDataMap = [rootCertFile:"$rootProject.projectDir/appsRootCert.jks",
+			rootSubjectDN:rootProject.rootSubjectDN,
+			password:rootProject.keyStorePassword]
+		
+		Map certMap = [file:"$rootProject.projectDir/mockDnie.jks",
+			distinguishedName:rootProject.appCertDN, alias:rootProject.signKeyAlias]
+		
+		List certs = [certMap]
+		rootProject.certsDataMap.certs = certs
+		
+		tasks.getByPath('SistemaVotacionApplet:genCerts').execute()
+		/*project(':SistemaVotacionApplet').tasks.each {task ->
+			println task.path
+		}*/
+	}
 }
 
-genWebAppsCerts.doFirst {
-	rootCertFile = new File("$projectDir/webAppsRootCert.jks")
-	rootCertNIF = project.rootCertNIF
-	rootSubjectDN = project.rootSubjectDN
-	password = project.keyStorePassword
+task genWebAppsCerts() {
+	
+	doFirst { }
+	
+	doLast {
+		rootProject.certsDataMap = [rootCertFile:"$rootProject.projectDir/webAppsRootCert.jks",
+			rootSubjectDN:"$rootProject.rootSubjectDN",
+			password:"$rootProject.keyStorePassword"]
+		
+		Map controAccesoMap = [file:"$rootProject.projectDir/SistemaVotacionControlAcceso/web-app/WEB-INF/cms/ControlAcceso.jks",
+			distinguishedName:"$rootProject.controlAccesoDN", alias:"$rootProject.controlAccesoCertAlias"]
+		
+		Map centroControMap = [file:"$rootProject.projectDir/SistemaVotacionCentroControl/web-app/WEB-INF/cms/CentroControl.jks",
+			distinguishedName:"$rootProject.centroControlDN", alias:"$rootProject.centroControlCertAlias"]
+		
+		List certs = [controAccesoMap, centroControMap]
+		rootProject.certsDataMap.certs = certs
+		
+		tasks.getByPath('SistemaVotacionApplet:genCerts').execute()
+
+	}
 }
 
-task genAppsCerts(type: CertGenerator) << {task ->
-	File appsKeyStoreFile = new File("$projectDir/mockDnie1.jks");
-	task.genUserKeyStore(project.appCertDN, appsKeyStoreFile, project.signKeyAlias)
-}
+//tasks.getByPath(':SistemaVotacionApplet:genCerts')
 
-genAppsCerts.doFirst {
-	rootCertFile = new File("$projectDir/appsRootCert.jks")
-	rootCertNIF = project.rootCertNIF
-	rootSubjectDN = project.rootSubjectDN
-	password = project.keyStorePassword
-}
 // This is a task that generates the gradlew scripts, allowing users to run gradle without having gradle installed
 // on their system.
 // This task should be run by "build master" and the resulting output committed to source control.  Its outputs include:

@@ -21,6 +21,19 @@ dependencies {
 	
 }
 
+task genCerts(dependsOn: ['classes'], type: JavaExec) {
+	
+	onlyIf {rootProject.certsDataMap}
+	
+	doFirst {
+		args groovy.json.JsonOutput.toJson(rootProject.certsDataMap)
+	}
+	
+	main = 'org.sistemavotacion.CertGenerator'
+	classpath = sourceSets.main.runtimeClasspath
+}
+
+
 task buildVotingApplet(type:VotingSystemApplet){
 	manifest {
 		attributes 'Main-Class': 'org.sistemavotacion.Aplicacion',

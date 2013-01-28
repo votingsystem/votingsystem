@@ -5,7 +5,9 @@ apply plugin: 'maven'
 
 dependencies {
 	
-	compile group: "org.sistemavotacion", name: "SistemaVotacionApplet", version: "0.5.0"
+	//compile group: "org.sistemavotacion", name: "SistemaVotacionApplet", version: "0.5.0"
+	
+	compile project(':SistemaVotacionApplet')
 	
 	compile ('org.apache.httpcomponents:httpmime:4.1.1',
 		'org.apache.httpcomponents:httpclient:4.1.2',
