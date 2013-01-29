@@ -2,6 +2,7 @@ package org.controlacceso.clientegwt.client.util;
 
 import java.util.logging.Logger;
 import org.controlacceso.clientegwt.client.PuntoEntrada;
+import org.controlacceso.clientegwt.client.modelo.EventoSistemaVotacionJso;
 import org.controlacceso.clientegwt.client.modelo.MensajeClienteFirmaJso;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.History;
@@ -39,6 +40,8 @@ public class Browser {
 		if(mensajeClienteFirma == null) return;
 		mensajeClienteFirma.setUrlTimeStampServer(ServerPaths.getUrlTimeStampServer());
 		if(isAndroid()) {
+			//to avoid URI too large
+			mensajeClienteFirma.getEvento().setContenido(null);
 			String encodedMsg = getEncodedString(mensajeClienteFirma.toJSONString());
 			String url = ServerPaths.getUrlClienteAndroid() + "?browserToken=" 
 	    			+ History.getToken() + "&serverURL=" + ServerPaths.getApplicationPath() 

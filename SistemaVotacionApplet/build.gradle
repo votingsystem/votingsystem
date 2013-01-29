@@ -2,8 +2,18 @@ version = '0.5.0'
 
 apply plugin: 'java'
 apply plugin: 'maven'
+apply plugin: 'groovy'
+
+ext.groovyVersion = '2.1.0'
 
 dependencies {
+	
+	compile localGroovy()
+	
+	//compile 'org.codehaus.groovy:groovy-all:2.1.0'
+	compile 'commons-cli:commons-cli:1.2'
+	
+	groovy "org.codehaus.groovy:groovy:$ext.groovyVersion"
 	
 	compile ('org.apache.httpcomponents:httpmime:4.1.1',
 		'org.apache.httpcomponents:httpclient:4.1.2',
@@ -21,7 +31,7 @@ dependencies {
 	
 }
 
-task genCerts(dependsOn: ['classes'], type: JavaExec) {
+task genCertsJava(dependsOn: ['classes'], type: JavaExec) {
 	
 	onlyIf {rootProject.certsDataMap}
 	
@@ -33,6 +43,18 @@ task genCerts(dependsOn: ['classes'], type: JavaExec) {
 	classpath = sourceSets.main.runtimeClasspath
 }
 
+task genCertsGroovy(dependsOn: ['classes'], type: JavaExec) {
+	
+	onlyIf {rootProject.certsDataMap}
+	
+	doFirst {
+		args groovy.json.JsonOutput.toJson(rootProject.certsDataMap)
+		//args "-h"
+		main = 'org.sistemavotacion.CertGen'
+		classpath = sourceSets.main.runtimeClasspath
+	}
+	
+}
 
 task buildVotingApplet(type:VotingSystemApplet){
 	manifest {
@@ -59,6 +81,7 @@ task signJar {
 project.ext {
   mainClass = "org.sistemavotacion.AppletFirma"
 }
+
 
 classes.dependsOn cleanCompileJava
 buildVotingApplet.dependsOn classes

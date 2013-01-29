@@ -1,15 +1,22 @@
 version = '0.5.0'
 
 apply plugin: 'java'
+apply plugin: 'groovy'
 
 repositories {
 	mavenLocal()
 	mavenCentral()
  }
 
+ext.groovyVersion = '2.1.0'
+
 dependencies {
 	
 	compile project(':HerramientaValidacionCopiasDeSeguridad')
+	
+	compile 'org.codehaus.groovy:groovy-all:2.1.0'
+	
+	groovy "org.codehaus.groovy:groovy:$ext.groovyVersion"
 	
 	compile ('org.apache.httpcomponents:httpmime:4.2.2',
 		'org.apache.httpcomponents:httpclient:4.1.2',
@@ -57,6 +64,31 @@ task runApp(dependsOn: buildJar) << { task ->
         throw new RuntimeException('exec failed') 
     } 
 } 
+
+task runTestGroovy1() << {
+	ProcessBuilder pb = new ProcessBuilder("groovy", "src/main/groovy/TestDates.groovy", "install");
+	pb.directory(projectDir);
+	Process proc = pb.start();
+	proc.consumeProcessErrorStream(System.err)
+	proc.consumeProcessOutputStream(System.out)
+	if (proc.waitFor() != 0) {
+		throw new RuntimeException('antDebugInstall failed')
+	}
+	
+}
+
+task runTestGroovy2() << {
+	new GroovyShell().run(file('src/main/groovy/TestDates.groovy'))
+}
+
+task runTestGroovy(type: JavaExec) {
+	doFirst {
+		args groovy.json.JsonOutput.toJson(rootProject.certsDataMap)
+	}
+	
+	main = 'TestDates'
+	classpath = sourceSets.main.runtimeClasspath
+}
 
 project.ext {
   //mainClass = "org.sistemavotacion.test.MainFrame"

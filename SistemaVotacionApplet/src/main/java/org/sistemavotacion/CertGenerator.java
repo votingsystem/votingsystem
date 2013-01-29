@@ -32,9 +32,9 @@ public class CertGenerator {
 	public static final int PERIODO_VALIDEZ_ALMACEN_RAIZ = 2000000000;//En producción durará lo que dure una votación
 	 public static final int PERIODO_VALIDEZ_CERT = 2000000000;
 	 
-	private static File rootCertFile;
-	private static String rootSubjectDN;
-	private static String password;
+	private File rootCertFile;
+	private String rootSubjectDN;
+	private String password;
 
 	
 	X500PrivateCredential rootPrivateCredential;
@@ -43,9 +43,13 @@ public class CertGenerator {
 		if(args == null) return;
 		generate(args[0]);
 	}
-
-	public CertGenerator() throws Exception {
+	
+	public CertGenerator(File rootCertFile, String rootSubjectDN, 
+			String password) throws Exception {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+		this.rootCertFile = rootCertFile;
+		this.rootSubjectDN = rootSubjectDN;
+		this.password = password;
 		KeyStore rootKeyStore = KeyStoreUtil.createRootKeyStore(COMIEZO_VALIDEZ_CERT,
 				PERIODO_VALIDEZ_ALMACEN_RAIZ, password.toCharArray(), ROOT_ALIAS,
 				rootCertFile.getAbsolutePath(), rootSubjectDN);
@@ -67,6 +71,9 @@ public class CertGenerator {
     public static void generate (String operacionStr) throws Exception {
         logger.debug("- generate: '" + operacionStr + "'");
         if(operacionStr == null) return;
+        File rootCertFile = null;
+        String rootSubjectDN = null;
+        String password = null;
         JSON datosJSON = JSONSerializer.toJSON(operacionStr);
         if(JSONNull.getInstance().equals(datosJSON)) return;
         JSONObject operacionJSON = null;
@@ -82,13 +89,10 @@ public class CertGenerator {
         if (operacionJSON.containsKey("password")) {
         	password = operacionJSON.getString("password");
         } else throw new Exception(" --- Missing arg -> password");
-        CertGenerator cerGenerator = new CertGenerator();
+        CertGenerator cerGenerator = new CertGenerator(rootCertFile, rootSubjectDN, password);
         if (operacionJSON.containsKey("certs")) {
             JSONArray arrayCerts = operacionJSON.getJSONArray("certs");
             for(int i = 0; i < arrayCerts.size(); i++) {
-            	//String subjectDN, File file, String alias
-            	//	Map controAccesoMap = [file:"$projectDir/SistemaVotacionControlAcceso/web-app/WEB-INF/cms/ControlAcceso.jks", 
-        		//distinguishedName:"$rootProject.controlAccesoDN", alias:"$rootProject.controlAccesoCertAlias"]
             	JSONObject certData  = arrayCerts.getJSONObject(i);
             	File certFile = null;
             	String distinguishedName = null;

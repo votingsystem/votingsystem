@@ -2,6 +2,7 @@ package org.centrocontrol.clientegwt.client.util;
 
 import java.util.logging.Logger;
 import org.centrocontrol.clientegwt.client.PuntoEntrada;
+import org.centrocontrol.clientegwt.client.modelo.EventoSistemaVotacionJso;
 import org.centrocontrol.clientegwt.client.modelo.MensajeClienteFirmaJso;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.History;
@@ -54,6 +55,8 @@ public class Browser {
 					mensajeClienteFirma.getEvento().getControlAcceso().getServerURL()));
 		}
 		if(isAndroid()) {
+			//to avoid URI too large
+			mensajeClienteFirma.getEvento().setContenido(null);
 			String encodedMsg = getEncodedString(mensajeClienteFirma.toJSONString());
 			String url = ServerPaths.getUrlClienteAndroid() + "?browserToken=" 
 	    			+ History.getToken() + "&serverURL=" + ServerPaths.getApplicationPath() 

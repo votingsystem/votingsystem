@@ -23,6 +23,17 @@ public class KeyStoreHelper {
     private static X500PrivateCredential mockRaizDNIe;
     
     public static void main(String args[]) throws Exception {
+    	//arg[0] -> root file
+    	//arg[1] -> 
+        Contexto.inicializar();
+        
+        crearMockServidoresVotacion();
+        crearMockRaizDNIe();
+        File file = File.createTempFile("mockDnie", ".jks");
+        crearMockDNIe("1234567A", new File("/home/jgzornoza/github/recursos/mockDnie.jks"));
+    }
+    
+    public static void test() throws Exception {
         Contexto.inicializar();
         
         crearMockServidoresVotacion();
