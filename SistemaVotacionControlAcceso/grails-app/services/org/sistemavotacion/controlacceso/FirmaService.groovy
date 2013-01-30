@@ -59,6 +59,11 @@ class FirmaService {
 			if(!pemCertsArray) pemCertsArray = CertUtil.fromX509CertToPEM (chain[i])
 			else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtil.fromX509CertToPEM (chain[i]))
 		}
+		
+		trustedCerts = new HashSet<X509Certificate>()
+		X509Certificate localServerCertSigner = (X509Certificate) ks.getCertificate(aliasClaves);
+		trustedCerts.add(localServerCertSigner)
+		
 		def rutaCadenaCertificacion = getAbsolutePath("${grailsApplication.config.SistemaVotacion.rutaCadenaCertificacion}")
 		FileUtils.copyStreamToFile(new ByteArrayInputStream(pemCertsArray), new File(rutaCadenaCertificacion))
 		inicializarAutoridadesCertificadoras();
@@ -66,7 +71,6 @@ class FirmaService {
 	
 	def inicializarAutoridadesCertificadoras() { 
 		try {
-			trustedCerts = new HashSet<X509Certificate>()
 			trustedCertsHashMap = new HashMap<Long, Certificado>();
 			String rutaDirectorioArchivosCA = getAbsolutePath(
 				"${grailsApplication.config.SistemaVotacion.rutaDirectorioArchivosCA}")
@@ -185,6 +189,9 @@ class FirmaService {
 			FileUtils.getBytesFromFile(keyStoreFile), password.toCharArray());
 		PrivateKey privateKeySigner = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray());
 		X509Certificate certSigner = (X509Certificate) keyStore.getCertificate(aliasClaves);
+		
+		log.debug("certSigner:${certSigner}");
+		
 		PKCS10WrapperServer pkcs10wrapper = new PKCS10WrapperServer(privateKeySigner, certSigner);
 		Date today = Calendar.getInstance().getTime();
 		Calendar today_plus_year = Calendar.getInstance();
@@ -330,11 +337,12 @@ class FirmaService {
 	public Respuesta validarCertificacionFirmantes(
 			SMIMEMessageWrapper messageWrapper, Locale locale) {
 		Set<Usuario> firmantes = messageWrapper.getFirmantes();
-		log.debug("validarCertificacionFirmantes - firmantes.size(): " +
+		inicializar()
+		log.debug("*** validarCertificacionFirmantes - firmantes.size(): " +
 			" ${firmantes.size()} - trustedCerts.size(): ${trustedCerts.size()}")
 		if(firmantes.size() == 0) return new Respuesta(
 			codigoEstado:400, mensaje:"Documento sin firmantes")
-		for(Usuario usuario: firmantes) {
+		for(Usuario usuario: firmantes) {			 
 			try {
 				PKIXCertPathValidatorResult pkixResult = CertUtil.verifyCertificate(
 					usuario.getCertificate(), trustedCerts, false)

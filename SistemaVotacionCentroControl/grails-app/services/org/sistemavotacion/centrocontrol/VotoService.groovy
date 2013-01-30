@@ -186,7 +186,8 @@ class VotoService {
 		def anulacionJSON = JSON.parse(smimeMessage.getSignedContent())
 		def origenHashCertificadoVoto = anulacionJSON.origenHashCertificadoVoto
 		def hashCertificadoVotoBase64 = anulacionJSON.hashCertificadoVotoBase64
-		def hashCertificadoVoto = CMSUtils.obtenerHashBase64(origenHashCertificadoVoto)
+		def hashCertificadoVoto = CMSUtils.obtenerHashBase64(origenHashCertificadoVoto, 
+			"${grailsApplication.config.SistemaVotacion.votingHashAlgorithm}")
 		if (!hashCertificadoVotoBase64.equals(hashCertificadoVoto))
 				return new Respuesta(codigoEstado:400, mensaje:messageSource.getMessage(
 					'anulacionVoto.errorEnHashCertificado', null, locale))

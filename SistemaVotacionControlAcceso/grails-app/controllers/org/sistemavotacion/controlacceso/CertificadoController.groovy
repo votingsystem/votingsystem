@@ -80,10 +80,10 @@ class CertificadoController {
 			}
 			Certificado certificado
 			Certificado.withTransaction {
-				//certificado = Certificado.findWhere(
-				//	usuario:usuario, estado:Certificado.Estado.OK)
-				certificado = Certificado.get(8)
+				certificado = Certificado.findWhere(
+					usuario:usuario, estado:Certificado.Estado.OK)
 			}
+			log.debug("certificado: ${certificado.id}")
 			if (certificado) {
 				response.status = 200
 				ByteArrayInputStream bais = new ByteArrayInputStream(certificado.contenido)
