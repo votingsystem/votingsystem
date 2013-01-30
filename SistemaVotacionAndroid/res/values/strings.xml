@@ -13,7 +13,7 @@
     <string name="manifest_open_lbl">Manifiesto abierto, quedan %1$s horas</string>
     <string name="claim_open_lbl">Reclamación abierta, quedan %1$s horas</string>
     <string name="voting_open_lbl">Votación abierta, quedan %1$s horas</string>
-    
+    <string name="already_voted_lbl">Usted ha elegido en este asunto la opción \'%1$s\'</string>
     
     <string name="author_lbl">Publicado por</string>
     <string name="inicio_lbl">Inicio</string>
@@ -49,8 +49,13 @@
     <string name="closed_voting_tab_lbl">CERRADAS</string>
     <string name="unknown_tab_lbl">... DESCONOCIDO ...</string>
     
+
+    <string name="panel_principal_lbl">Panel principal</string>
     <string name="query_hint_lbl">Buscar...</string>
-   	<string name="search_hint">Buscar...</string>
+    <string name="search_hint">Buscar...</string>
+   	
+	<string name="anular_voto_label">Anular voto</string>
+	<string name="guardar_recibo_voto_label">Guardar recibo</string>
     <string name="search_label"></string>
     <string name="search_invoke">Búsquedas</string>
     <string name="empty_search_lbl">Consulta sin resultados</string>
@@ -67,7 +72,6 @@
 	
 	<string name="nif_error">NIF con errores. Por favor vuelva a intentarlo</string>
 	<string name="searchLabel">Buscar</string>
-
 	
 	<string name="vote_cert_request_error_msg">No existe ningún certificado de voto</string>
     <string name="app_name">Votaciones</string>
@@ -147,8 +151,9 @@
 	<string name="error_lbl">Error</string>   
 	<string name="msg_lbl">Mensaje</string>   
 	<string name="operacion_ok_msg">Operación completada con éxito</string> 
+	<string name="receipt_file_saved_msg">Documento incorporado a la lista de recibos</string> 
 	<string name="certificado_no_encontrado_msg">No tiene instalado ningún certificado con el que poder firmar la solicitud.</string>    
-	<string name="nif_password_message_label">Cada vez que vote se le pedirá el código PIN que introducirá a continuación. Recuerde, si lo olvida tendrá que pedir otro certificado para poder votar.</string>    
+	<string name="user_cert_request_form_message_label">Cada vez que vote se le pedirá el código PIN que introducirá a continuación. Recuerde, si lo olvida tendrá que pedir otro certificado para poder votar.</string>    
 	<string name="error_password_msg">Contraseña inválida</string>
 	<string name="error_vote_repeated_msg">Error, voto repetido</string>
 	<string name="connection_error_msg">Error de conexión</string>

@@ -26,11 +26,14 @@ import java.util.UUID;
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.sistemavotacion.json.DeJSONAObjeto;
 import org.sistemavotacion.modelo.ActorConIP;
+import org.sistemavotacion.modelo.Consulta;
 import org.sistemavotacion.modelo.Evento;
+import org.sistemavotacion.modelo.Operation;
 import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.task.DataListener;
 import org.sistemavotacion.task.GetDataTask;
 import org.sistemavotacion.util.ServerPaths;
+import org.sistemavotacion.util.StringUtils;
 import org.sistemavotacion.util.SubSystem;
 import org.sistemavotacion.util.SubSystemChangeListener;
 import android.app.SearchManager;
@@ -39,6 +42,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -70,6 +74,7 @@ public class Aplicacion extends SherlockActivity {
     public static final String SIGNED_PART_EXTENSION     = ".p7m";
     public static final String DEFAULT_SIGNED_FILE_NAME  = "smimeMessage";
     public static final String SIGN_PROVIDER             = "BC";
+    public static final String SERVER_URL_EXTRA_PROP_NAME= "serverURL";
     public static final int KEY_SIZE = 1024;
     public static final int EVENTS_PAGE_SIZE = 30;
     public static final int MAX_SUBJECT_SIZE = 60;
@@ -96,17 +101,18 @@ public class Aplicacion extends SherlockActivity {
 	private static Usuario usuario;
     private static Estado estado = Estado.SIN_CSR;
     public static Aplicacion INSTANCIA; 
+    private Operation operation = null;
     private SharedPreferences settings;
     
-    DataListener<String> dataServerListener = new DataListener<String>() {
+    DataListener<String> serverDataListener = new DataListener<String>() {
 
 		@Override public void updateData(int codigoEstado, String data) {
-			Log.d(TAG + ".dataServerListener.updateData() ", "data: " + data);
+			Log.d(TAG + ".serverDataListener.updateData() ", "data: " + data);
 			try {
 				controlAcceso = DeJSONAObjeto.obtenerActorConIP(
 						data, ActorConIP.Tipo.CONTROL_ACCESO);
 			} catch (Exception e) {
-				Log.e(TAG + ".dataServerListener.updateData() ", e.getMessage(), e);
+				Log.e(TAG + ".serverDataListener.updateData() ", e.getMessage(), e);
 			    showMessage(getApplicationContext().getString(
 						R.string.error_lbl), e.getMessage());
 			}
@@ -114,12 +120,41 @@ public class Aplicacion extends SherlockActivity {
 		}
 
 		@Override public void setException(final String exceptionMsg) {
-			Log.d(TAG + ".dataServerListener.manejarExcepcion(...) ", 
+			Log.d(TAG + ".serverDataListener.manejarExcepcion(...) ", 
 					" -- exceptionMsg: " + exceptionMsg);	
 		    showMessage(getApplicationContext().getString(
 					R.string.error_lbl), exceptionMsg);
 		}
 	};
+	
+    DataListener<String> eventDataListener = new DataListener<String>() {
+
+		@Override public void updateData(int codigoEstado, String data) {
+			Log.d(TAG + ".eventDataListener.updateData(...) ", 
+					" - codigoEstado: " + codigoEstado);
+			try {
+				Consulta consulta =  DeJSONAObjeto.obtenerConsultaEventos(data);
+				if(consulta.getEventos() != null && consulta.getEventos().size() > 0) {
+					eventoSeleccionado = consulta.getEventos().iterator().next();
+					operation.setEvento(eventoSeleccionado);	
+				}
+				processOperation(operation);
+			} catch (Exception e) {
+				Log.e(TAG + ".eventDataListener.updateData() ", e.getMessage(), e);
+				showMessage(getApplicationContext().getString(
+						R.string.error_lbl), e.getMessage());
+			}
+			
+		}
+
+		@Override public void setException(final String exceptionMsg) {
+			Log.d(TAG + ".eventDataListener.manejarExcepcion(...) ", 
+					" -- exceptionMsg: " + exceptionMsg);	
+			showMessage(getApplicationContext().getString(
+					R.string.error_lbl), exceptionMsg);
+		}
+	};
+	
     
     @Override protected void onCreate(Bundle savedInstanceState) {
         Log.i(TAG + ".onCreate(...)", " - onCreate - ");
@@ -130,8 +165,14 @@ public class Aplicacion extends SherlockActivity {
             Log.d(TAG + ".onCreate()", " - Intent.ACTION_SEARCH - query: "+ query);
             return;
         }
+        if(getIntent().getStringExtra(SERVER_URL_EXTRA_PROP_NAME) != null) {
+        	CONTROL_ACCESO_URL = getIntent().getStringExtra(SERVER_URL_EXTRA_PROP_NAME);
+        }
+    	settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+    	String estadoAplicacion = settings.getString(PREFS_ESTADO, Estado.SIN_CSR.toString());
+    	estado = Estado.valueOf(estadoAplicacion);
     	INSTANCIA = this;
-        Properties props = new Properties();
+    	Properties props = new Properties();
         try {
             props.load(getAssets().open("VotingSystem.properties"));
             if(props != null) {
@@ -142,7 +183,37 @@ public class Aplicacion extends SherlockActivity {
         } catch (IOException ex) {
         	Log.e(TAG + ".onCreate()", ex.getMessage(), ex);
         }
-    	settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        if(Intent.ACTION_VIEW.equals(getIntent().getAction())) {
+        	//getIntent().getCategories().contains(Intent.CATEGORY_BROWSABLE);
+            final Uri data = getIntent().getData();
+            CONTROL_ACCESO_URL = data.getQueryParameter("serverURL");
+            String eventoId = data.getQueryParameter("eventoId");
+            String browserToken = data.getQueryParameter("browserToken");
+            String encodedMsg = data.getQueryParameter("msg");
+            String msg = StringUtils.decodeString(encodedMsg);
+            Log.d(TAG + ".onCreate() - ", " - launched by browser - host: " + 
+            		data.getHost() + 
+            		" - path: " + data.getPath() + 
+            		" - userInfo: " + data.getUserInfo() + 
+            		" - serverURL: " + CONTROL_ACCESO_URL + " - eventoId: " + eventoId +
+            		" - browserToken: " + browserToken + 
+            		" - msg: " + msg);
+            if(msg != null) {
+        		try {
+        			operation = Operation.parse(msg);
+        		} catch (Exception ex) {
+        			Log.e(TAG + ".onCreate(...)", ex.getMessage(), ex);
+        		}
+            } else {
+            	Log.d(TAG + ".onCreate(...)", "- msg null");
+            	operation = new Operation();
+            }
+            operation.setTipo(browserToken.trim());
+            if(operation.getEvento() != null) {
+            	new GetDataTask(eventDataListener).execute(operation.getEvento().getURL());
+            }
+            return;
+        }
     	setActivityState();
     }
 
@@ -154,14 +225,12 @@ public class Aplicacion extends SherlockActivity {
     
     public void checkConnection() {
     	if (controlAcceso == null) 
-    		new GetDataTask(dataServerListener).execute(ServerPaths.getURLInfoServidor(CONTROL_ACCESO_URL));
+    		new GetDataTask(serverDataListener).execute(ServerPaths.getURLInfoServidor(CONTROL_ACCESO_URL));
     }
 
     private void setActivityState() {
-    	String estadoAplicacion = settings.getString(PREFS_ESTADO, Estado.SIN_CSR.toString());
     	checkConnection();
-    	estado = Estado.valueOf(estadoAplicacion);
-    	Log.d(TAG + ".setActivityState()", " - estadoAplicacion: " + estadoAplicacion);
+    	Log.d(TAG + ".setActivityState()", " - estado: " + estado);
     	Intent intent = null;	
     	switch (estado) {
 	    	case SIN_CSR:
@@ -195,25 +264,34 @@ public class Aplicacion extends SherlockActivity {
 	    		intent = new Intent(getApplicationContext(), UserCertResponseForm.class);
 	    		break;
 	    	case CON_CERTIFICADO:
-	    		if(AppData.INSTANCE.getOperation() != null) {
-		            switch(AppData.INSTANCE.getOperation().getTipo()) {
-				        case VOTAR:
-				        	intent = new Intent(this, VotingEventScreen.class);
-				        	break;
-				        case FIRMAR_MANIFIESTO:
-				        case FIRMAR_RECLAMACION:
-				        	intent = new Intent(this, EventScreen.class);
-				        	break;
-			        }
-		            eventoSeleccionado = AppData.INSTANCE.getOperation().getEvento();
-	    			AppData.INSTANCE.setOperation(null);
-	    		} else intent = new Intent(getApplicationContext(), FragmentTabsPager.class);
+	    		intent = new Intent(getApplicationContext(), FragmentTabsPager.class);
 	    		break;
     	}
     	if(intent != null) {
     		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         	startActivity(intent);	
     	}
+    }
+    
+    private void processOperation(Operation operation) {
+    	Log.d(TAG + ".processOperation(...)", "- processOperation(...)");
+    	Intent intent = null;
+    	if(Estado.CON_CERTIFICADO == estado) {
+    		switch(operation.getTipo()) {
+		        case VOTAR:
+		        	Log.d(TAG + ".setActivityState(...)", " - intent voting ---- ");
+		        	intent = new Intent(this, VotingEventScreen.class);
+		        	break;
+		        case FIRMAR_MANIFIESTO:
+		        case FIRMAR_RECLAMACION:
+		        	intent = new Intent(this, EventScreen.class);
+		        	break;
+		        default: 
+		        	Log.e(TAG + ".processOperation(...)", "- unknown operation");;
+	        }
+    		checkConnection();
+    		startActivity(intent);
+    	} else setActivityState();
     }
     
 	private void showMessage(final String caption, final String message) {

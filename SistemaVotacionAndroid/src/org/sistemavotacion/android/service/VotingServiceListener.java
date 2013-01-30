@@ -1,12 +1,12 @@
 package org.sistemavotacion.android.service;
 
-import org.sistemavotacion.modelo.ReciboVoto;
+import org.sistemavotacion.modelo.VoteReceipt;
 
 import android.app.Service;
 
 public interface VotingServiceListener {
 
 	void setMsg(int statusCode, String msg);
-	void proccessReceipt(ReciboVoto receipt);
+	void proccessReceipt(VoteReceipt receipt);
 	  
 }

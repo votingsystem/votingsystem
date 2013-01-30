@@ -3,12 +3,18 @@ package org.sistemavotacion.util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+
+import android.util.Log;
 
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class StringUtils {
+	
+	public static final String TAG = "StringUtils";
 	
     private static final int TAMANYO_TITULO = 20;
 
@@ -57,6 +63,17 @@ public class StringUtils {
         }
     }
 
+    public static String decodeString(String string) {
+    	if(string == null) return null;
+    	String result = null;
+        try {
+        	result = URLDecoder.decode(string, "UTF-8");
+		} catch (UnsupportedEncodingException ex) {
+			Log.e(TAG + ".decodeString()", ex.getMessage(), ex);
+		}
+    	return result;
+    }
+    
 	public static String getCadenaNormalizada(String cadena) {
         return cadena.replaceAll("[\\/:.]", ""); 
 	}

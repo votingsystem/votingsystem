@@ -65,6 +65,8 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.itextpdf.text.pdf.PdfReader;
 
 public class EventScreen extends SherlockFragmentActivity 
@@ -190,6 +192,14 @@ public class EventScreen extends SherlockFragmentActivity
 		}
 	}
 	
+    @Override public boolean onCreateOptionsMenu(Menu menu) {
+    	Intent intent = new Intent(this, FragmentTabsPager.class);
+        menu.add(getString(R.string.panel_principal_lbl)).setIntent(intent)
+            .setIcon(R.drawable.password_22x22)
+            .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+        return true;
+    }
+	
 	public void onClickSubject(View v) {
 		Log.d(TAG + ".onClickSubject(...)", " - onClickSubject");
 		if(evento != null && evento.getAsunto() != null &&
@@ -249,6 +259,7 @@ public class EventScreen extends SherlockFragmentActivity
 		    				Log.e(TAG + ".firmarEnviarVoto(...)", "Exception: " + ex.getMessage());
 		    				showMessage(getString(R.string.error_lbl), 
 		    						getString(R.string.pin_error_msg));
+		    		        firmarEnviarButton.setEnabled(true);
 		    			} catch (Exception ex) {
 		    				Log.e(TAG + ".firmarEnviarVoto(...)", "Exception: " + ex.getMessage());
 		    				showMessage(getString(R.string.error_lbl), ex.getMessage());
@@ -274,6 +285,7 @@ public class EventScreen extends SherlockFragmentActivity
 			Log.e(TAG + ".firmarEnviarVoto(...)", "Exception: " + ex.getMessage());
 			showMessage(getString(R.string.error_lbl), 
 					getString(R.string.pin_error_msg));
+	        firmarEnviarButton.setEnabled(true);
 		} catch (Exception ex) {
 			Log.e(TAG + ".firmarEnviarVoto(...)", "Exception: " + ex.getMessage());
 			showMessage(getString(R.string.error_lbl), ex.getMessage());

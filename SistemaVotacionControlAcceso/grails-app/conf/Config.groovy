@@ -69,7 +69,8 @@ grails.hibernate.cache.queries = true
 // set per-environment serverURL stem for creating absolute links
 environments {
     production {
-        grails.serverURL = "http://sistemavotacioncontrolacceso.cloudfoundry.com/${appName}"
+        //grails.serverURL = "http://sistemavotacioncontrolacceso.cloudfoundry.com/${appName}"
+		grails.serverURL = "http://sistemavotacioncontrolacceso.cloudfoundry.com"
     }
     development {
 		String localIP = getDevelopmentServerIP();
@@ -139,8 +140,8 @@ grails {
 	mail {
 		host = "smtp.gmail.com"
 		port = 465
-		username = "gruposp2p@gmail.com"
-		password = "m#rcill@"
+		username = "SistemaVotacion"
+		password = "*****"
 		props = ["mail.smtp.auth":"true",
 			 "mail.smtp.socketFactory.port":"465",
 			 "mail.smtp.socketFactory.class":"javax.net.ssl.SSLSocketFactory",
@@ -148,10 +149,6 @@ grails {
 
 	}
 }
-
-grails.plugin.cloudfoundry.username = 'josejavier.garcia.zornoza@gmail.com'
-grails.plugin.cloudfoundry.password = 'JctHSXXN'
-grails.plugin.cloudfoundry.appname = 'SistemaVotacionControlAcceso'
 
 grails.war.copyToWebApp = { args ->
 	fileset(dir:"WEB-INF/cms") {

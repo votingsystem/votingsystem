@@ -65,31 +65,6 @@ task runApp(dependsOn: buildJar) << { task ->
     } 
 } 
 
-task runTestGroovy1() << {
-	ProcessBuilder pb = new ProcessBuilder("groovy", "src/main/groovy/TestDates.groovy", "install");
-	pb.directory(projectDir);
-	Process proc = pb.start();
-	proc.consumeProcessErrorStream(System.err)
-	proc.consumeProcessOutputStream(System.out)
-	if (proc.waitFor() != 0) {
-		throw new RuntimeException('antDebugInstall failed')
-	}
-	
-}
-
-task runTestGroovy2() << {
-	new GroovyShell().run(file('src/main/groovy/TestDates.groovy'))
-}
-
-task runTestGroovy(type: JavaExec) {
-	doFirst {
-		args groovy.json.JsonOutput.toJson(rootProject.certsDataMap)
-	}
-	
-	main = 'TestDates'
-	classpath = sourceSets.main.runtimeClasspath
-}
-
 project.ext {
   //mainClass = "org.sistemavotacion.test.MainFrame"
   mainClass = "org.sistemavotacion.test.KeyStoreHelper"

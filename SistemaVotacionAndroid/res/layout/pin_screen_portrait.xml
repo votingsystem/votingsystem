@@ -20,7 +20,7 @@
     android:layout_width="@dimen/pin_screen_width"
     android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal"
-    android:background="#6bad74"
+    android:background="#33b5e5"
     android:padding="2dp" >
 
    	<ScrollView
@@ -53,7 +53,7 @@
            android:layout_marginTop="9dip"
            android:gravity="center"
            android:textAppearance="?android:attr/textAppearanceLarge"
-           android:textColor="#6bad74" />
+           android:textColor="#33b5e5" />
 
         <TextView
             android:id="@+id/headerText"

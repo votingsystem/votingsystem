@@ -15,7 +15,7 @@ import static org.sistemavotacion.android.Aplicacion.getAppString;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
-public class ReciboVoto {
+public class VoteReceipt {
     
     private Long id;
     private int codigoEstado;
@@ -30,12 +30,12 @@ public class ReciboVoto {
     private SMIMEMessageWrapper smimeMessage;
     private Evento voto;
     
-    public ReciboVoto (int codigoEstado, String mensaje) { 
+    public VoteReceipt (int codigoEstado, String mensaje) { 
         this.codigoEstado = codigoEstado;
         this.mensaje = mensaje;
     }
     
-    public ReciboVoto (int codigoEstado, 
+    public VoteReceipt (int codigoEstado, 
             SMIMEMessageWrapper votoValidado, Evento voto) throws Exception { 
         this.smimeMessage = votoValidado;
         this.codigoEstado = codigoEstado;
@@ -51,6 +51,11 @@ public class ReciboVoto {
         return esValido;
     }
 
+    public void writoToFile(File file) throws Exception {
+    	if(file == null) throw new Exception("File null");
+    	if(smimeMessage == null) throw new Exception("Receipt null");
+    	smimeMessage.writeTo(new FileOutputStream(file));
+    }
     
     private void comprobarRecibo () throws Exception {
         if (409 == codigoEstado) {//voto repetido

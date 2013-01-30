@@ -16,12 +16,13 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import org.sistemavotacion.android.Aplicacion;
+import org.sistemavotacion.android.AppData;
 import org.sistemavotacion.android.FragmentTabsPager;
 import org.sistemavotacion.android.R;
 import org.sistemavotacion.android.VotingEventScreen;
 import org.sistemavotacion.json.DeObjetoAJSON;
 import org.sistemavotacion.modelo.Evento;
-import org.sistemavotacion.modelo.ReciboVoto;
+import org.sistemavotacion.modelo.VoteReceipt;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.PKCS10WrapperClient;
 import org.sistemavotacion.seguridad.TimeStampWrapper;
@@ -33,6 +34,7 @@ import org.sistemavotacion.task.GetVotingCertTask;
 import org.sistemavotacion.task.SendFileTask;
 import org.sistemavotacion.task.TaskListener;
 import org.sistemavotacion.util.ServerPaths;
+import org.sistemavotacion.util.StringUtils;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -112,16 +114,20 @@ public class VotingService extends Service implements TaskListener {
                 try {
 					SMIMEMessageWrapper votoValidado = new SMIMEMessageWrapper(null,
 							new ByteArrayInputStream(response.getBytes()), null);
-					ReciboVoto receipt = new ReciboVoto(Respuesta.SC_OK, votoValidado, event);
+					VoteReceipt receipt = new VoteReceipt(Respuesta.SC_OK, votoValidado, event);
 					voteProcessListener.proccessReceipt(receipt);
 					
 					NotificationManager notificationManager =
 						    (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-					Intent intent = new Intent(VotingService.this, FragmentTabsPager.class);
-					Intent intentSaveVote = new Intent(VotingService.this, FragmentTabsPager.class);
+					Intent intent = new Intent(VotingService.this, VotingEventScreen.class);
+					AppData.INSTANCE.putReceipt(StringUtils.getCadenaNormalizada(
+							receipt.getEventoURL()), receipt);
+					intent.putExtra(VotingEventScreen.RECEIPT_KEY_PROP_NAME, 
+							StringUtils.getCadenaNormalizada(receipt.getEventoURL()));
+					Intent intentSaveVote = new Intent(VotingService.this, VotingEventScreen.class);
 					intentSaveVote.putExtra(VotingEventScreen.INTENT_EXTRA_DIALOG_PROP_NAME, 
 							VotingEventScreen.SAVE_VOTE_DIALOG);
-					Intent intentCancelVote = new Intent(VotingService.this, FragmentTabsPager.class);
+					Intent intentCancelVote = new Intent(VotingService.this, VotingEventScreen.class);
 					intentCancelVote.putExtra(VotingEventScreen.INTENT_EXTRA_DIALOG_PROP_NAME, 
 							VotingEventScreen.CANCEL_VOTE_DIALOG);
 				    PendingIntent pIntent = PendingIntent.getActivity(

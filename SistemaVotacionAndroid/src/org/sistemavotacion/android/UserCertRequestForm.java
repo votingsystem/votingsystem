@@ -129,7 +129,7 @@ public class UserCertRequestForm extends SherlockFragmentActivity
         setTheme(Aplicacion.THEME);
     	super.onCreate(savedInstanceState);
         Log.d(TAG + ".onCreate(...) ", " - onCreate");
-        setContentView(R.layout.nif_password); 
+        setContentView(R.layout.user_cert_request_form); 
         setTitle(getApplicationContext().getString(R.string.formulario_solicitud_certificado_label));
         
         Button cancelarButton = (Button) findViewById(R.id.cancelar_button);

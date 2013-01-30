@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+   <TextView
+       android:id="@+id/asunto_evento"
+       android:layout_width="fill_parent"
+       android:layout_height="wrap_content"
+       android:clickable="true"
+       android:gravity="center"
+       android:onClick="onClickSubject"
+       android:text="@string/label_evento"
+       android:textColor="#33b5e5"
+       android:textSize="30sp" />
+
+    <LinearLayout android:id="@+id/receipt_buttons" 
+	android:layout_width="fill_parent" android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/cancel_vote_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="20dip"
+            android:layout_marginTop="10dp"
+            android:layout_weight="0.32"
+            android:drawableLeft="@drawable/cancel_22x22"
+            android:text="@string/anular_voto_label"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/guardar_recibo_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="30dp"
+            android:layout_marginTop="10dp"
+            android:layout_weight="0.43"
+            android:drawableLeft="@drawable/filesave_22x22"
+            android:text="@string/guardar_recibo_voto_label"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:gravity="center_vertical"/>
+
+	<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+		android:id="@+id/scroller"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:fillViewport="true" >
+			<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+			    android:id="@+id/contenedor_evento"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent"
+				android:padding="10dp"
+				android:orientation="vertical">
+
+				<TextView
+				    android:id="@+id/contenido_evento"
+				    android:layout_width="fill_parent"
+				    android:layout_height="fill_parent"
+				    android:layout_weight="1.0"
+				    android:textSize="20sp" />
+
+			</LinearLayout>	  
+	</ScrollView>
+</LinearLayout>
