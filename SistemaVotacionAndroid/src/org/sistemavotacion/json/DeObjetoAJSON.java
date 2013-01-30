@@ -19,11 +19,14 @@ package org.sistemavotacion.json;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sistemavotacion.android.Aplicacion;
 import org.sistemavotacion.modelo.*;
+import org.sistemavotacion.smime.CMSUtils;
 import org.sistemavotacion.util.*;
 
 import android.util.Log;
@@ -36,7 +39,7 @@ public class DeObjetoAJSON {
 
 	public static final String TAG = "DeObjetoAJSON";
 
-    public static String obtenerEventoJSON(Evento evento) throws JSONException{
+    public static JSONObject obtenerEventoJSON(Evento evento) throws JSONException{
     	Log.d(TAG + ".obtenerEventoJSON(...)", "");
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("asunto", evento.getAsunto());
@@ -65,8 +68,12 @@ public class DeObjetoAJSON {
         if (evento.getOpciones() != null) {
             Set<OpcionDeEvento> opciones = evento.getOpciones();
             JSONArray jsonArray = new JSONArray();
+            Map<String, Object> opcionMap = new HashMap<String, Object>(); 
             for (OpcionDeEvento opcion : opciones) {
-            	jsonArray.put(opcion.getContenido());
+            	opcionMap.put("id", opcion.getId());
+            	opcionMap.put("contenido", opcion.getContenido());
+            	JSONObject opcionJSON = new JSONObject(opcionMap);
+            	jsonArray.put(opcionJSON);
             }
             jsonObject.put("opciones", jsonArray);
         }
@@ -91,9 +98,24 @@ public class DeObjetoAJSON {
             JSONObject opcionSeleccionadaJSON = new JSONObject(opcionSeleccionadaMap);
             jsonObject.put("opcionSeleccionada", opcionSeleccionadaJSON);
         } 
-        return jsonObject.toString();    
+        if(evento.getHashSolicitudAccesoBase64() != null)
+        	map.put("hashSolicitudAccesoBase64", evento.getHashSolicitudAccesoBase64()); 
+        if(evento.getOrigenHashSolicitudAcceso() != null)
+        	map.put("origenHashSolicitudAcceso", evento.getOrigenHashSolicitudAcceso()); 
+        if(evento.getHashCertificadoVotoBase64() != null)
+        	map.put("hashCertificadoVotoBase64", evento.getHashCertificadoVotoBase64());        
+        if(evento.getOrigenHashCertificadoVoto() != null)
+        	map.put("origenHashCertificadoVoto", evento.getOrigenHashCertificadoVoto());
+        return jsonObject;    
     }
 
+    public static String obtenerEventoJSONString(Evento evento) throws JSONException{
+    	JSONObject eventoJSON = obtenerEventoJSON(evento);
+    	if(eventoJSON == null) return null;
+    	return eventoJSON.toString();
+    }
+    
+    
     public static String obtenerDatosBusqueda(DatosBusqueda datosBusqueda) {
     	Log.d(TAG + ".obtenerDatosBusqueda(...)", " - obtenerDatosBusqueda");
     	Map<String, Object> map = new HashMap<String, Object>();

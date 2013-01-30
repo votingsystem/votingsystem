@@ -71,6 +71,8 @@
         
         <activity android:name="org.sistemavotacion.android.WebActivity" android:label="@string/app_name"/>
         
+        <activity android:name="org.sistemavotacion.android.ui.VoteReceiptListScreen" android:label="@string/app_name"/>
+           
 		<activity android:label="@string/app_name" android:name=".FragmentTabsPager">
             
             <!-- This metadata entry causes .Aplicacion to be the default context -->
@@ -104,5 +106,7 @@
                   android:authorities="org.sistemavotacion.util.SuggestionProvider" />
         
         <service android:name="org.sistemavotacion.android.service.VotingService"/>
+        <service android:name="org.sistemavotacion.android.service.SignService"/>
+        
     </application>
 </manifest>

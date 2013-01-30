@@ -89,7 +89,7 @@ public class CertPinScreen extends SherlockDialogFragment
         //getDialog().getWindow().setLayout(300, 300);
         return pinScreenView;
     }
-
+    
     public void setMessage(String message) {
     	if(message == null) message = "";
     	voteValueText.setText(message);
@@ -148,8 +148,18 @@ public class CertPinScreen extends SherlockDialogFragment
         }.start();*/
     }
 
+    @Override public void onStop() {
+        super.onStop();
+    	Log.d(TAG +  ".onStop()", " - onStop - ");
+    }
+    
+    @Override public void onPause() {
+        super.onPause();
+    	Log.d(TAG +  ".onPause()", " - onPause - ");
+    }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+    	Log.d(TAG + ".onKeyDown", " - onKeyDown -- ");
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             mCallback.setPin(null);
             return true;
@@ -166,7 +176,7 @@ public class CertPinScreen extends SherlockDialogFragment
             }
             return true;
         }
-
+        
         if (keyCode == KeyEvent.KEYCODE_ENTER) {
             checkPin();
             mCallback.setPin(mPinText.getText().toString());

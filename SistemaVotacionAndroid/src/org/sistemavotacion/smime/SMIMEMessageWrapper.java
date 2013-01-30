@@ -417,7 +417,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
                 AttributeTable attributeTable = signer.getUnsignedAttributes();
                 SignerInformation updatedSigner = null;
                 if(attributeTable == null) {
-                    Log.d(TAG, "setTimeStampToken - sigenr without UnsignedAttributes - actualizando token");
+                    Log.d(TAG, "setTimeStampToken - signer without UnsignedAttributes - actualizando token");
                     updatedSigner = 
                             signer.replaceUnsignedAttributes(signer, timeStampWrapper.
                             		getTimeStampTokenAsAttributeTable());

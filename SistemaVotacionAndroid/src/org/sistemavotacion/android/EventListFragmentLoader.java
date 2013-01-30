@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
+import org.sistemavotacion.android.ui.VoteReceiptListScreen;
 import org.sistemavotacion.json.DeJSONAObjeto;
 import org.sistemavotacion.json.DeObjetoAJSON;
 import org.sistemavotacion.modelo.Consulta;
@@ -150,25 +151,30 @@ public class EventListFragmentLoader extends SherlockFragmentActivity {
 	    			getString(R.string.menu_actualizar));
 	        subMenu1.add(getActivity().getApplicationContext().
 	    			getString(R.string.menu_solicitar_certificado));
+	        subMenu1.add(getActivity().getApplicationContext().
+	    			getString(R.string.menu_receipt_list));	        
 	        subMenu1.getItem(0).setIcon(R.drawable.reload_22x22);
 	        subMenu1.getItem(1).setIcon(R.drawable.cert_22x22);
-	        Intent intentRefresh =  new Intent(Aplicacion.INSTANCIA, FragmentTabsPager.class);
-	        Intent intentGetCert = new Intent(Aplicacion.INSTANCIA, Aplicacion.class);
+	        subMenu1.getItem(2).setIcon(R.drawable.manifest_22x22);
+	        Intent intentRefresh =  new Intent(getActivity(), FragmentTabsPager.class);
+	        Intent intentGetCert = new Intent(getActivity(), Aplicacion.class);
+	        Intent intentReceiptList = new Intent(getActivity(), VoteReceiptListScreen.class);
 	        Log.d(TAG +  " EventListFragment.onCreateOptionsMenu", " **** Aplicacion.INSTANCIA.getEstado(): " + Aplicacion.INSTANCIA.getEstado());
 	        switch (Aplicacion.INSTANCIA.getEstado()) {
 		    	case SIN_CSR:
-		    		intentGetCert = new Intent(Aplicacion.INSTANCIA, Aplicacion.class);
+		    		intentGetCert = new Intent(getActivity(), Aplicacion.class);
 		    		break;
 		    	case CON_CSR:
-		    		intentGetCert = new Intent(Aplicacion.INSTANCIA, UserCertResponseForm.class);
+		    		intentGetCert = new Intent(getActivity(), UserCertResponseForm.class);
 		    		break;
 		    	case CON_CERTIFICADO:
-		    		intentGetCert = new Intent(Aplicacion.INSTANCIA, UserCertRequestForm.class);
+		    		intentGetCert = new Intent(getActivity(), UserCertRequestForm.class);
 		    		intentGetCert.putExtra(Aplicacion.NEW_CERT_KEY, true);
 		    		break;
 	        }
 	        subMenu1.getItem(0).setIntent(intentRefresh);
 	        subMenu1.getItem(1).setIntent(intentGetCert);
+	        subMenu1.getItem(2).setIntent(intentReceiptList);
 	        MenuItem subMenu1Item = subMenu1.getItem();
 	        subMenu1Item.setIcon(android.R.drawable.ic_menu_more);
 	        subMenu1Item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);

@@ -126,6 +126,22 @@ public class DeJSONAObjeto {
         if (eventoJSON.has("estado")) {
             evento.setEstado(eventoJSON.getString("estado"));
         }
+        if (eventoJSON.has("hashSolicitudAccesoBase64")) {
+            evento.setHashSolicitudAccesoBase64(eventoJSON.
+            		getString("hashSolicitudAccesoBase64"));
+        }
+        if (eventoJSON.has("origenHashSolicitudAcceso")) {
+            evento.setOrigenHashSolicitudAcceso(eventoJSON.
+            		getString("origenHashSolicitudAcceso"));
+        }
+        if (eventoJSON.has("hashCertificadoVotoBase64")) {
+            evento.setHashCertificadoVotoBase64(eventoJSON.
+            		getString("hashCertificadoVotoBase64"));
+        }
+        if (eventoJSON.has("origenHashCertificadoVoto")) {
+            evento.setOrigenHashCertificadoVoto(eventoJSON.
+            		getString("origenHashCertificadoVoto"));
+        }
         evento.comprobarFechas();
         return evento;
     }

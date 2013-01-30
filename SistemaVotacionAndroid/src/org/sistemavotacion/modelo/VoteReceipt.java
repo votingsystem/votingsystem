@@ -3,11 +3,19 @@ package org.sistemavotacion.modelo;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.mail.MessagingException;
 
 import org.sistemavotacion.android.R;
+import org.sistemavotacion.json.DeJSONAObjeto;
+import org.sistemavotacion.json.DeObjetoAJSON;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import android.util.Log;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 import static org.sistemavotacion.android.Aplicacion.getAppString;
 
@@ -16,9 +24,11 @@ import static org.sistemavotacion.android.Aplicacion.getAppString;
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class VoteReceipt {
+
+	public static final String TAG = "VoteReceipt";
     
-    private Long id;
-    private int codigoEstado;
+    private int id;
+    private int codigoEstado = 0;
     private String mensaje;
     private String eventoURL;    
     private Long eventoVotacionId;
@@ -45,6 +55,35 @@ public class VoteReceipt {
         this.opcionSeleccionadaId = contenidoReciboJSON.getLong("opcionSeleccionadaId");
         this.eventoURL = contenidoReciboJSON.getString("eventoURL");
         comprobarRecibo();
+    }
+    
+    public VoteReceipt (int codigoEstado, Evento voto) throws Exception { 
+        this.codigoEstado = codigoEstado;
+        this.voto = voto;
+    }
+    
+    public String toJSONString() throws JSONException {
+    	Log.d(TAG + ".toJSONString(...)", " --- voto.getHashSolicitudAccesoBase64(): " 
+    			+ voto.getHashSolicitudAccesoBase64());
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("codigoEstado", codigoEstado);
+        if(voto != null) map.put("voto", DeObjetoAJSON.obtenerEventoJSON(voto));
+        JSONObject jsonObject = new JSONObject(map);
+        return jsonObject.toString();
+    }
+    
+    public static VoteReceipt parse(String jsonVoteReceipt) throws Exception {
+    	Log.d(TAG + ".parse(...)", "- jsonVoteReceipt: '" + jsonVoteReceipt + "'");
+    	if(jsonVoteReceipt == null) return null;
+    	int codigoEstado = 0;
+    	Evento voto = null;
+    	Log.d(TAG + ".parse(...)", " - parse(...)");
+    	JSONObject jsonObject = new JSONObject (jsonVoteReceipt);
+        if(jsonObject.has("codigoEstado"))
+        	codigoEstado = jsonObject.getInt("codigoEstado");
+        if(jsonObject.has("voto"))
+        	voto = DeJSONAObjeto.obtenerEvento(jsonObject.getJSONObject("voto"));
+    	return new VoteReceipt(codigoEstado, voto);
     }
     
     public boolean esValido () throws Exception {
@@ -77,10 +116,10 @@ public class VoteReceipt {
         } 
     }
     
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
-    public Long getId() {
+    public int getId() {
         return id;
     }
 

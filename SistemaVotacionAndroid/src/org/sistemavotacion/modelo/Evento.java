@@ -431,21 +431,6 @@ public class Evento implements Serializable {
         	} 
         }
     }
-    
-    public void comprobarFechasJJGZ() {
-		final String checkURL = ServerPaths.getURLCheckEvent(
-		Aplicacion.CONTROL_ACCESO_URL, eventoId);
-        Runnable runnable = new Runnable() {
-            public void run() { 
-            	try {
-					HttpHelper.getFile(checkURL);
-				} catch (Exception e) {
-					e.printStackTrace();
-				} 
-            }
-        };
-        new Thread(runnable).start();
-    }
 
     /**
      * @return the origenHashCertificadoVoto
@@ -573,7 +558,7 @@ public class Evento implements Serializable {
 	}
 	
 	public String obtenerJSON() throws JSONException {
-		return DeObjetoAJSON.obtenerEventoJSON(this);
+		return DeObjetoAJSON.obtenerEventoJSONString(this);
 	}
 	
 	public void setEstado(String estado) {

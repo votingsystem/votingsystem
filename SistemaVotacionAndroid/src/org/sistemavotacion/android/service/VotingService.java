@@ -17,7 +17,6 @@ import java.util.List;
 
 import org.sistemavotacion.android.Aplicacion;
 import org.sistemavotacion.android.AppData;
-import org.sistemavotacion.android.FragmentTabsPager;
 import org.sistemavotacion.android.R;
 import org.sistemavotacion.android.VotingEventScreen;
 import org.sistemavotacion.json.DeObjetoAJSON;

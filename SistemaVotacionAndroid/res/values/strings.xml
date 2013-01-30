@@ -83,6 +83,9 @@
     
     <string name="request_msg_subject">[SOLICITUD ACCESO]-%1$s</string>
     <string name="vote_msg_subject">[VOTO]</string>
+    <string name="cancel_vote_msg_subject">[ANULACION VOTO]</string>
+    <string name="cancel_vote_result_msg">Su voto para el asunto \'%1$s\' ha sido anulado.
+	Puede volver votar de nuevo.</string>
 
     <string name="pin_error_msg">¿Seguro que la contraseña es correcta?</string>
     <string name="low_memory_msg">Memoria baja</string>
@@ -91,6 +94,7 @@
     
     <string name="voted_lbl">Seleccionada opción</string>
     <string name="cancel_vote_lbl">Anular voto</string>
+    <string name="cancel_vote_msg">Si continua anulará su voto</string>
     <string name="save_receipt_lbl">Guardar recibo de voto</string>
     <string name="app_name_lbl">Aplicación de votación</string>
     <string name="label_eventos">Eventos</string>
@@ -103,6 +107,8 @@
     <string name="eventos_no_encontrados_message">No se han encontrado eventos</string>    
     <string name="menu_actualizar">Actualizar</string>
     <string name="menu_solicitar_certificado">Solicitar certificado</string>
+    <string name="menu_receipt_list">Lista de recibos</string>
+    
     <string name="solicitud_certificado_usuario_activity_text">No dispone de ningún 
         certificado con el que poder acceder a los servicios. Para poder votar debe solicitar
         un certificado de usuario. ¿Desea solicitar el certificado?</string>

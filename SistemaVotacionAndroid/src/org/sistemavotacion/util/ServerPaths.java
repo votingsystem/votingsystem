@@ -61,6 +61,11 @@ public class ServerPaths {
         return serverURL + sufixURLPDFManifestCollector + manifestId;        
     }
     
+    public static String getURLAnulacionVoto(String serverURL) {
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+    	return serverURL + "anuladorVoto/guardarAdjuntandoValidacion";
+    }
+    
     public static String getURLEventos (String serverURL) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         return serverURL + sufijoURLEventos;        
