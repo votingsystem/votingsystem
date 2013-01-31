@@ -15,6 +15,7 @@
     <string name="voting_open_lbl">Votación abierta, quedan %1$s horas</string>
     <string name="already_voted_lbl">Usted ha elegido en este asunto la opción \'%1$s\'</string>
     
+    <string name="closed_upper_lbl">CERRADO</string>
     <string name="author_lbl">Publicado por</string>
     <string name="inicio_lbl">Inicio</string>
     <string name="fin_lbl">Fin</string>
@@ -54,7 +55,7 @@
     <string name="query_hint_lbl">Buscar...</string>
     <string name="search_hint">Buscar...</string>
    	
-	<string name="anular_voto_label">Anular voto</string>
+	<string name="cancel_vote_lbl">Anular voto</string>
 	<string name="guardar_recibo_voto_label">Guardar recibo</string>
     <string name="search_label"></string>
     <string name="search_invoke">Búsquedas</string>
@@ -86,6 +87,8 @@
     <string name="cancel_vote_msg_subject">[ANULACION VOTO]</string>
     <string name="cancel_vote_result_msg">Su voto para el asunto \'%1$s\' ha sido anulado.
 	Puede volver votar de nuevo.</string>
+    <string name="saved_cancel_vote_recepit_msg">Puede encontrar el recibo de la cancelación
+	de este voto en la lista de recibos.</string>
 
     <string name="pin_error_msg">¿Seguro que la contraseña es correcta?</string>
     <string name="low_memory_msg">Memoria baja</string>
@@ -94,6 +97,7 @@
     
     <string name="voted_lbl">Seleccionada opción</string>
     <string name="cancel_vote_lbl">Anular voto</string>
+    <string name="open_recepit_lbl">Abrir recibo</string>
     <string name="cancel_vote_msg">Si continua anulará su voto</string>
     <string name="save_receipt_lbl">Guardar recibo de voto</string>
     <string name="app_name_lbl">Aplicación de votación</string>
@@ -108,6 +112,8 @@
     <string name="menu_actualizar">Actualizar</string>
     <string name="menu_solicitar_certificado">Solicitar certificado</string>
     <string name="menu_receipt_list">Lista de recibos</string>
+    <string name="receipt_list_screen_caption">Recibos guardados por el usuario</string>
+    <string name="receipt_options_dialog_msg">Opciones disponibles para el recibo:</string>
     
     <string name="solicitud_certificado_usuario_activity_text">No dispone de ningún 
         certificado con el que poder acceder a los servicios. Para poder votar debe solicitar

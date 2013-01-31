@@ -115,6 +115,7 @@ public class EventScreen extends SherlockFragmentActivity
 			subject = subject.substring(0, MAX_SUBJECT_SIZE) + " ...";
 		asuntoTextView.setText(subject);
 		TextView contenidoTextView = (TextView) findViewById(R.id.contenido_evento);
+		getActionBar().setHomeButtonEnabled(true);
 		contenidoTextView.setText(Html.fromHtml(evento.getContenido()));
 		contenidoTextView.setMovementMethod(LinkMovementMethod.getInstance());
 		firmarEnviarButton = (Button) findViewById(R.id.firmar_enviar_button);
@@ -155,7 +156,7 @@ public class EventScreen extends SherlockFragmentActivity
 		switch(evento.getTipo()) {
 			case EVENTO_FIRMA:
 				try {
-					getActionBar().setLogo(R.drawable.manifest_22x22);	
+					getActionBar().setLogo(R.drawable.manifest_32);	
 				} catch(NoSuchMethodError ex) {
 					Log.d(TAG + ".setTitle(...)", " --- android api 11 doesn't have method 'setLogo'");
 				}        		
@@ -173,7 +174,7 @@ public class EventScreen extends SherlockFragmentActivity
 				break;
 			case EVENTO_RECLAMACION:
 				try {//android api 11 I don't have this method
-	        		getActionBar().setLogo(R.drawable.claim_22x22);
+	        		getActionBar().setLogo(R.drawable.filenew_32);
 				} catch(NoSuchMethodError ex) {
 					Log.d(TAG + ".setTitle(...)", " --- android api 11 doesn't have method 'setLogo'");
 				}   
@@ -189,6 +190,19 @@ public class EventScreen extends SherlockFragmentActivity
 						setTitle(getString(R.string.claim_closed_lbl));
 				}
 				break;
+		}
+	}
+	
+	@Override public boolean onOptionsItemSelected(MenuItem item) {  
+		Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
+		switch (item.getItemId()) {        
+	    	case android.R.id.home:  
+	    		Intent intent = new Intent(this, FragmentTabsPager.class);   
+	    		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); 
+	    		startActivity(intent);            
+	    		return true;        
+	    	default:            
+	    		return super.onOptionsItemSelected(item);    
 		}
 	}
 	

@@ -8,18 +8,19 @@
         android:id="@+id/system_icon"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
-        android:layout_marginRight="2dip"
+        android:layout_marginRight="5dip"
         android:src="@drawable/machine" />
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="0dip"
+        android:layout_marginTop="3dip"
         android:layout_weight="1"
         android:layout_height="fill_parent">
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="0dip"
         android:layout_weight="1"
-        android:textSize="15sp"
+        android:textSize="18sp"
         android:id="@+id/system_subject"
         android:textColor="#FFFFFF"
         android:singleLine="true"

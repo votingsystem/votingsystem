@@ -153,7 +153,6 @@ public class FragmentTabsPager extends SherlockFragmentActivity
         }
         Aplicacion.INSTANCIA.addSubSystemChangeListener(this);
     }
-    
 	
     @Override
     protected void onNewIntent(Intent intent) {

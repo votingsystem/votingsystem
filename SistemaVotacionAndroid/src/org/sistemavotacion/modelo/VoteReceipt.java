@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import javax.mail.MessagingException;
 
@@ -28,6 +30,7 @@ public class VoteReceipt {
 	public static final String TAG = "VoteReceipt";
     
     private int id;
+    private int notificationId;
     private int codigoEstado = 0;
     private String mensaje;
     private String eventoURL;    
@@ -38,11 +41,24 @@ public class VoteReceipt {
     private String controlAccesoServerURL;    
     private boolean esValido = false;
     private SMIMEMessageWrapper smimeMessage;
+    private SMIMEMessageWrapper cancelVoteReceipt;
     private Evento voto;
+    private Date dateCreated;
+    private Date dateUpdated;
     
     public VoteReceipt (int codigoEstado, String mensaje) { 
         this.codigoEstado = codigoEstado;
         this.mensaje = mensaje;
+    }
+    
+    public int initNotificationId() {
+        Random randomGenerator = new Random();
+        this.notificationId = randomGenerator.nextInt(100);
+        return notificationId;
+    }
+    
+    public int getNotificationId() {
+        return notificationId;
     }
     
     public VoteReceipt (int codigoEstado, 
@@ -275,5 +291,29 @@ public class VoteReceipt {
     public void setVoto(Evento voto) {
         this.voto = voto;
     }
+
+	public SMIMEMessageWrapper getCancelVoteReceipt() {
+		return cancelVoteReceipt;
+	}
+
+	public void setCancelVoteReceipt(SMIMEMessageWrapper cancelVoteReceipt) {
+		this.cancelVoteReceipt = cancelVoteReceipt;
+	}
+
+	public Date getDateUpdated() {
+		return dateUpdated;
+	}
+
+	public void setDateUpdated(Date dateUpdated) {
+		this.dateUpdated = dateUpdated;
+	}
+
+	public Date getDateCreated() {
+		return dateCreated;
+	}
+
+	public void setDateCreated(Date dateCreated) {
+		this.dateCreated = dateCreated;
+	}
 	
 }

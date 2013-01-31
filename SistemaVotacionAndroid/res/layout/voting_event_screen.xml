@@ -28,7 +28,8 @@
             android:layout_marginTop="10dp"
             android:layout_weight="0.32"
             android:drawableLeft="@drawable/cancel_22x22"
-            android:text="@string/anular_voto_label"
+            android:text="@string/cancel_vote_lbl"
+            android:onClick="cancelVote"
             android:textStyle="bold" />
 
         <Button
@@ -42,6 +43,7 @@
             android:layout_weight="0.43"
             android:drawableLeft="@drawable/filesave_22x22"
             android:text="@string/guardar_recibo_voto_label"
+            android:onClick="saveVote"
             android:textStyle="bold" />
 
     </LinearLayout>
@@ -70,6 +72,13 @@
 				    android:layout_height="fill_parent"
 				    android:layout_weight="1.0"
 				    android:textSize="20sp" />
+							
+				<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+				    android:id="@+id/option_button_container"
+    				android:layout_width="fill_parent"
+					android:layout_height="fill_parent"
+					android:padding="10dp"
+					android:orientation="vertical"/>
 
 			</LinearLayout>	  
 	</ScrollView>

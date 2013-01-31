@@ -33,6 +33,7 @@ import org.sistemavotacion.android.service.SignService;
 import org.sistemavotacion.android.service.SignServiceListener;
 import org.sistemavotacion.android.service.VotingService;
 import org.sistemavotacion.android.service.VotingServiceListener;
+import org.sistemavotacion.android.ui.CancelVoteDialog;
 import org.sistemavotacion.android.ui.CertPinScreen;
 import org.sistemavotacion.android.ui.CertPinScreenCallback;
 import org.sistemavotacion.android.ui.VotingResultDialog;
@@ -46,6 +47,7 @@ import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.ServerPaths;
 
 import android.app.AlertDialog;
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.DialogInterface;
@@ -60,7 +62,6 @@ import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -72,19 +73,19 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 
 public class VotingEventScreen extends SherlockFragmentActivity 
-	implements CertPinScreenCallback, VotingServiceListener, 
-	SignServiceListener {
+	implements CertPinScreenCallback, VotingServiceListener, SignServiceListener {
 	
 	public static final String TAG = "VotingEventScreen";
+	
+	
+	public enum Operation {CANCEL_VOTE, SAVE_VOTE, VOTE};
+	
     private static final String CERT_PIN_DIALOG = "certPinDialog";
     public static final String INTENT_EXTRA_DIALOG_PROP_NAME = "dialog";
     public static final String RECEIPT_KEY_PROP_NAME = "receiptKey";
-    public static final int CANCEL_VOTE_DIALOG = 1;
-    public static final int SAVE_VOTE_DIALOG = 2;
-    public static final int VOTE_DIALOG = 3;
     public static final int SELECTED_OPTION_MAX_LENGTH = 27;
 
-    public static int operation = VOTE_DIALOG;
+    public static Operation operation = Operation.VOTE;
     private Evento evento;
     private VoteReceipt receipt;
     private ProgressDialog progressDialog = null;
@@ -94,19 +95,33 @@ public class VotingEventScreen extends SherlockFragmentActivity
     byte[] keyStoreBytes = null;
 	private Intent votingServiceIntent = null;
 	private Intent signServiceIntent = null;
-	private VotingService votingService;
 	private Button saveReceiptButton;
 	private Button cancelVoteButton;
-	private SignService signService;
+	private VotingService votingService = null;
+	private SignService signService = null;
     
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Log.d(TAG + ".onCreate(...)", " - onCreate");
         setTheme(Aplicacion.THEME);
 		super.onCreate(savedInstanceState);
+		if(Aplicacion.INSTANCIA == null) return; 
+		if (Aplicacion.Estado.CON_CERTIFICADO.equals(Aplicacion.INSTANCIA.getEstado())) {
+			FileInputStream fis = null;
+			try {
+				fis = openFileInput(KEY_STORE_FILE);
+				keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
+			} catch (Exception e) {
+				e.printStackTrace();
+				showMessage(getString(R.string.error_lbl), e.getMessage());
+			}	
+		}
 		setContentView(R.layout.voting_event_screen);
+		saveReceiptButton = (Button) findViewById(R.id.save_receipt_button);
+		cancelVoteButton = (Button) findViewById(R.id.cancel_vote_button);
 		try {
-			getActionBar().setLogo(R.drawable.poll_22x22);
+			getActionBar().setHomeButtonEnabled(true);
+			getActionBar().setLogo(R.drawable.poll_32);
 		} catch(NoSuchMethodError ex) {
 			Log.d(TAG + ".onCreate(...)", " --- android api 11 I doesn't have method 'setLogo'");
 		}  
@@ -122,8 +137,22 @@ public class VotingEventScreen extends SherlockFragmentActivity
         	setReceiptScreen(receipt);
         	return;
         }
+        operation = Operation.VOTE;
         evento = Aplicacion.INSTANCIA.getEventoSeleccionado();
         setEventScreen(evento);
+	}
+	
+	@Override public boolean onOptionsItemSelected(MenuItem item) {  
+		Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
+		switch (item.getItemId()) {        
+	    	case android.R.id.home:  
+	    		Intent intent = new Intent(this, FragmentTabsPager.class);   
+	    		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); 
+	    		startActivity(intent);            
+	    		return true;        
+	    	default:            
+	    		return super.onOptionsItemSelected(item);    
+		}
 	}
 	
 	private void setReceiptScreen(final VoteReceipt receipt) {
@@ -136,55 +165,40 @@ public class VotingEventScreen extends SherlockFragmentActivity
 		if(subject != null && subject.length() > MAX_SUBJECT_SIZE) 
 			subject = subject.substring(0, MAX_SUBJECT_SIZE) + " ...";
 		asuntoTextView.setText(subject);
+		cancelVoteButton.setEnabled(true);
+		saveReceiptButton.setEnabled(true);
 		TextView contenidoTextView = (TextView) findViewById(R.id.contenido_evento);
 		contenidoTextView.setText(Html.fromHtml(receipt.getVoto().getContenido()));
 		contenidoTextView.setMovementMethod(LinkMovementMethod.getInstance());
 		Set<OpcionDeEvento> opciones = receipt.getVoto().getOpciones();
-		LinearLayout linearLayout = (LinearLayout)findViewById(R.id.contenedor_evento);
-		optionButtons = new ArrayList<Button>();
-		FrameLayout.LayoutParams paramsButton = new 
-				FrameLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
-		paramsButton.setMargins(15, 15, 15, 15);
-		for (final OpcionDeEvento opcion:opciones) {
-			Button opcionButton = new Button(this);
-			opcionButton.setText(opcion.getContenido());
-			optionButtons.add(opcionButton);
-			opcionButton.setEnabled(false);
-			linearLayout.addView(opcionButton, paramsButton);			   
-		}
-		int dialog = getIntent().getIntExtra("dialog", 0);
-		saveReceiptButton = (Button) findViewById(R.id.save_receipt_button);
-		saveReceiptButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) { 
-            	saveVote();
-            }
-        }); 
-		cancelVoteButton = (Button) findViewById(R.id.cancel_vote_button);
-        cancelVoteButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) { 
-            	cancelVote();
-            }
-        }); 
-		switch(dialog) {
-			case CANCEL_VOTE_DIALOG:
-				cancelVote();
-				break;
-			case SAVE_VOTE_DIALOG:
-				saveVote();
-				break;
-		}
+		LinearLayout linearLayout = (LinearLayout)findViewById(R.id.option_button_container);
+		if(optionButtons == null) {
+			optionButtons = new ArrayList<Button>();
+			FrameLayout.LayoutParams paramsButton = new 
+					FrameLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+			paramsButton.setMargins(15, 15, 15, 15);
+			for (final OpcionDeEvento opcion:opciones) {
+				Button opcionButton = new Button(this);
+				opcionButton.setText(opcion.getContenido());
+				optionButtons.add(opcionButton);
+				opcionButton.setEnabled(false);
+				linearLayout.addView(opcionButton, paramsButton);			   
+			}	
+		} else setOptionButtonsEnabled(false);
+		//int dialog = getIntent().getIntExtra(INTENT_EXTRA_DIALOG_PROP_NAME, 0);
+		//switch(dialog) {}
 	}
 	
-	private void cancelVote() {
+	public void cancelVote(View v) {
 		Log.d(TAG + ".cancelVote(...)", " - cancelVote");
     	signServiceIntent = new Intent(VotingEventScreen.this, SignService.class);
 		startService(signServiceIntent);
-    	operation = CANCEL_VOTE_DIALOG;
+    	operation = Operation.CANCEL_VOTE;
 		bindService(signServiceIntent, signServiceConnection, BIND_AUTO_CREATE);
     	showPinScreen(getString(R.string.cancel_vote_msg));
 	}
 	
-	private void saveVote() {
+	public void saveVote(View v) {
 		Log.d(TAG + ".saveVote(...)", " - saveVote");
 		/*Log.d(TAG + ".guardarReciboButton ", " - Files dir path: " + 
 		getActivity().getApplicationContext().getFilesDir().getAbsolutePath());
@@ -211,13 +225,13 @@ public class VotingEventScreen extends SherlockFragmentActivity
 		}
 	}
 	
-    @Override public boolean onCreateOptionsMenu(Menu menu) {
+    /*@Override public boolean onCreateOptionsMenu(Menu menu) {
     	Intent intent = new Intent(this, FragmentTabsPager.class);
         menu.add(getString(R.string.panel_principal_lbl)).setIntent(intent)
             .setIcon(R.drawable.password_22x22)
             .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
         return true;
-    }
+    }*/
 	
 	private void setEventScreen(final Evento event) {
 		Log.d(TAG + ".setEventScreen(...)", " - setEventScreen");
@@ -234,6 +248,8 @@ public class VotingEventScreen extends SherlockFragmentActivity
 				setTitle(getString(R.string.voting_closed_lbl));
 		}
 		TextView asuntoTextView = (TextView) findViewById(R.id.asunto_evento);
+		cancelVoteButton.setEnabled(true);
+		saveReceiptButton.setEnabled(true);
 		String subject = event.getAsunto();
 		if(subject != null && subject.length() > MAX_SUBJECT_SIZE) 
 			subject = subject.substring(0, MAX_SUBJECT_SIZE) + " ...";
@@ -242,7 +258,8 @@ public class VotingEventScreen extends SherlockFragmentActivity
 		contenidoTextView.setText(Html.fromHtml(event.getContenido()));
 		contenidoTextView.setMovementMethod(LinkMovementMethod.getInstance());
 		Set<OpcionDeEvento> opciones = event.getOpciones();
-		LinearLayout linearLayout = (LinearLayout)findViewById(R.id.contenedor_evento);
+		LinearLayout linearLayout = (LinearLayout)findViewById(R.id.option_button_container);
+		if(optionButtons != null) linearLayout.removeAllViews();
 		optionButtons = new ArrayList<Button>();
 		FrameLayout.LayoutParams paramsButton = new FrameLayout.LayoutParams(
 				LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
@@ -256,6 +273,7 @@ public class VotingEventScreen extends SherlockFragmentActivity
 	            	Log.d(TAG + "- opcionButton - opcionId: " + 
 	            			opcionSeleccionada.getId(), "estado: " + 
 	            			Aplicacion.INSTANCIA.getEstado().toString());
+	            	operation = Operation.VOTE;
 	            	event.setOpcionSeleccionada(opcionSeleccionada);
 	            	if (!Aplicacion.Estado.CON_CERTIFICADO.equals(Aplicacion.INSTANCIA.getEstado())) {
 	            		Log.d(TAG + "- firmarEnviarButton -", " mostrando dialogo certificado no encontrado");
@@ -271,22 +289,11 @@ public class VotingEventScreen extends SherlockFragmentActivity
 	        });
 			optionButtons.add(opcionButton);
 			if (!event.estaAbierto()) opcionButton.setEnabled(false);
-			linearLayout.addView(opcionButton, paramsButton);			   
-		}
-		if (Aplicacion.Estado.CON_CERTIFICADO.equals(Aplicacion.INSTANCIA.getEstado())) {
-			FileInputStream fis = null;
-			try {
-				fis = openFileInput(KEY_STORE_FILE);
-				keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
-			} catch (Exception e) {
-				e.printStackTrace();
-				showMessage(getString(R.string.error_lbl), e.getMessage());
-			}	
-		}
+			linearLayout.addView(opcionButton, paramsButton);		
 
+		}	
 	}
 	
-
     @Override public void onResume() {
     	super.onResume();
     	Log.d(TAG + ".onResume() ", " - onResume");
@@ -354,18 +361,17 @@ public class VotingEventScreen extends SherlockFragmentActivity
 			if(votingService != null) votingService.processVote(evento, this, keyStoreBytes, password);	
 			//VotacionHelper.procesarVoto(getApplicationContext(), evento, this, 
 			//		keyStoreBytes, password);
-		} catch (IOException ex) {
+		} catch (Exception ex) {
 			Log.e(TAG + ".firmarEnviarVoto(...)", "Exception: " + ex.getMessage());
+			String msg = ex.getMessage();
+			if(msg == null) msg = getString(R.string.alert_exception_caption);
 			showMessage(getString(R.string.error_lbl), 
 					getString(R.string.pin_error_msg));
 			setOptionButtonsEnabled(true);
-		} catch (Exception ex) {
-			Log.e(TAG + ".firmarEnviarVoto(...)", "Exception: " + ex.getMessage());
-			showMessage(getString(R.string.error_lbl), ex.getMessage());
 		}
 	}
 
-	private void cancelVote(char[] password) {
+	private void processCancelVote(char[] password) {
         Map map = new HashMap();
         map.put("origenHashCertificadoVoto", receipt.getVoto().getOrigenHashCertificadoVoto());
         map.put("hashCertificadoVotoBase64", receipt.getVoto().getHashCertificadoVotoBase64());
@@ -380,7 +386,8 @@ public class VotingEventScreen extends SherlockFragmentActivity
     		if(signService != null) signService.processSignature(signatureContent, subject, serverURL, this, 
     				true, keyStoreBytes, password);	
         } catch(Exception ex) {
-			Log.e(TAG + ".firmarEnviarVoto(...)", "Exception: " + ex.getMessage());
+        	ex.printStackTrace();
+			Log.e(TAG + ".processCancelVote(...)", "Exception: " + ex.getMessage());
 			cancelVoteButton.setEnabled(true);
         }
 
@@ -398,8 +405,8 @@ public class VotingEventScreen extends SherlockFragmentActivity
 	
 	private void unbindVotingService() {
 		Log.d(TAG + ".unbindVotingService()", "--- unbindVotingService");
-		if(votingServiceConnection != null && votingServiceIntent != null) 
-			unbindService(votingServiceConnection);
+		//if(votingServiceConnection != null && votingServiceIntent != null) 
+		if(votingService != null) unbindService(votingServiceConnection);
 	}
 	
 	private void stopVotingService() {
@@ -410,8 +417,8 @@ public class VotingEventScreen extends SherlockFragmentActivity
 	
 	private void unbindSignService() {
 		Log.d(TAG + ".unbindSignService()", "--- unbindSignService");
-		if(signServiceConnection != null && signServiceIntent != null) 
-			unbindService(signServiceConnection);
+		//if(signServiceConnection != null && signServiceIntent != null) 
+		if(signService != null)	unbindService(signServiceConnection);
 	}
 	
 	private void stopSignService() {
@@ -442,14 +449,14 @@ public class VotingEventScreen extends SherlockFragmentActivity
 		                }
 	        		});
 	        switch(operation) {
-	        	case VOTE_DIALOG:
+	        	case VOTE:
 	        		firmarEnviarVoto(pin.toCharArray());
 	        		break;
-	        	case CANCEL_VOTE_DIALOG:
-	        		cancelVote(pin.toCharArray());
+	        	case CANCEL_VOTE:
+	        		processCancelVote(pin.toCharArray());
 	        		break;
 	        	default:
-	        		Log.d(TAG + ".showPinScreen()", "--- unknown operation:" + operation);
+	        		Log.d(TAG + ".setPin(...)", "--- unknown operation:" + operation);
 	        }
 	        
 		}
@@ -493,17 +500,25 @@ public class VotingEventScreen extends SherlockFragmentActivity
 			caption = getString(R.string.error_lbl) + " " 
 					+ new Integer(statusCode).toString();
 			cancelVoteButton.setEnabled(true);
-		} else {
-			msg = getString(R.string.cancel_vote_result_msg, 
-					receipt.getVoto().getAsunto());
-			caption = getString(R.string.msg_lbl);
 		}
 		showMessage(caption, msg);
 	}
 	
 	@Override
-	public void proccessReceipt(SMIMEMessageWrapper receipt) {
+	public void proccessReceipt(SMIMEMessageWrapper cancelReceipt) {
 		Log.d(TAG + ".proccessReceipt(...)", "--- proccessReceipt " );
+		NotificationManager notificationManager =
+			    (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		notificationManager.cancel(receipt.getNotificationId());
+		receipt.setCancelVoteReceipt(cancelReceipt);
+		String msg = getString(R.string.cancel_vote_result_msg, 
+				this.receipt.getVoto().getAsunto());
+		String caption = getString(R.string.msg_lbl);
+		setEventScreen(Aplicacion.INSTANCIA.getEventoSeleccionado());
+		CancelVoteDialog cancelVoteDialog = CancelVoteDialog.newInstance(
+				caption, msg, receipt);
+		FragmentManager fm = getSupportFragmentManager();
+		cancelVoteDialog.show(fm, "fragment_cancel_vote_result");
 	}
 	
 	ServiceConnection votingServiceConnection = new ServiceConnection() {

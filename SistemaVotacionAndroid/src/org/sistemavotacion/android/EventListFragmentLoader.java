@@ -24,7 +24,6 @@ import org.sistemavotacion.util.ServerPaths;
 import org.sistemavotacion.util.SubSystem;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -71,7 +70,6 @@ public class EventListFragmentLoader extends SherlockFragmentActivity {
             fm.beginTransaction().add(android.R.id.content, list).commit();
         }
     }
-
     /**
      * Perform alphabetical comparison of application entry objects.
      */
@@ -147,15 +145,14 @@ public class EventListFragmentLoader extends SherlockFragmentActivity {
 			.setIcon(android.R.drawable.ic_menu_search)
 			.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
 	        SubMenu subMenu1 = menu.addSubMenu("");
-	        subMenu1.add(getActivity().getApplicationContext().
-	    			getString(R.string.menu_actualizar));
-	        subMenu1.add(getActivity().getApplicationContext().
-	    			getString(R.string.menu_solicitar_certificado));
-	        subMenu1.add(getActivity().getApplicationContext().
-	    			getString(R.string.menu_receipt_list));	        
-	        subMenu1.getItem(0).setIcon(R.drawable.reload_22x22);
+	        subMenu1.add(getActivity().getString(R.string.menu_actualizar));
+	        subMenu1.add(getActivity().getString(R.string.menu_solicitar_certificado));
+	        subMenu1.add(getActivity().getString(R.string.menu_receipt_list));	        
+	        subMenu1.getItem(0).setIcon(R.drawable.reload_32);
 	        subMenu1.getItem(1).setIcon(R.drawable.cert_22x22);
-	        subMenu1.getItem(2).setIcon(R.drawable.manifest_22x22);
+	        subMenu1.getItem(2).setIcon(R.drawable.receipt_22);
+	       
+	        
 	        Intent intentRefresh =  new Intent(getActivity(), FragmentTabsPager.class);
 	        Intent intentGetCert = new Intent(getActivity(), Aplicacion.class);
 	        Intent intentReceiptList = new Intent(getActivity(), VoteReceiptListScreen.class);

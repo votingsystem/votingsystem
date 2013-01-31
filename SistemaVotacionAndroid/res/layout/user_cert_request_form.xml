@@ -26,7 +26,9 @@
         android:autoText="false"
         android:capitalize="none"
         android:gravity="fill_horizontal"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium" >
+        	<requestFocus />
+      </EditText>
         
 	<TextView
         android:id="@+id/nif_password_message"

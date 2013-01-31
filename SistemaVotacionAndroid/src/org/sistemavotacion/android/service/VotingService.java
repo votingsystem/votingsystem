@@ -123,12 +123,20 @@ public class VotingService extends Service implements TaskListener {
 							receipt.getEventoURL()), receipt);
 					intent.putExtra(VotingEventScreen.RECEIPT_KEY_PROP_NAME, 
 							StringUtils.getCadenaNormalizada(receipt.getEventoURL()));
-					Intent intentSaveVote = new Intent(VotingService.this, VotingEventScreen.class);
+				    PendingIntent pIntent = PendingIntent.getActivity(
+				    		VotingService.this, 0, intent, 0);
+				    Notification noti = new Notification.Builder(VotingService.this)
+			        .setContentTitle(event.getAsunto())
+			        .setContentText(getString(R.string.voted_lbl) + ": " + event.getOpcionSeleccionada().
+			        		getContenido()).setSmallIcon(R.drawable.poll_48)
+			        .setContentIntent(pIntent).build();
+					
+					/*Intent intentSaveVote = new Intent(VotingService.this, VotingEventScreen.class);
 					intentSaveVote.putExtra(VotingEventScreen.INTENT_EXTRA_DIALOG_PROP_NAME, 
-							VotingEventScreen.SAVE_VOTE_DIALOG);
+							VotingEventScreen.Operation.SAVE_VOTE);
 					Intent intentCancelVote = new Intent(VotingService.this, VotingEventScreen.class);
 					intentCancelVote.putExtra(VotingEventScreen.INTENT_EXTRA_DIALOG_PROP_NAME, 
-							VotingEventScreen.CANCEL_VOTE_DIALOG);
+							VotingEventScreen.Operation.CANCEL_VOTE);
 				    PendingIntent pIntent = PendingIntent.getActivity(
 				    		VotingService.this, 0, intent, 0);
 				    PendingIntent pIntentSaveVote = PendingIntent.getActivity(
@@ -142,11 +150,11 @@ public class VotingService extends Service implements TaskListener {
 				        		getContenido()).setSmallIcon(R.drawable.poll_22x22)
 				        .setContentIntent(pIntent)
 				        .addAction(R.drawable.cancel_22x22, getString(R.string.cancel_vote_lbl), pIntent)
-				        .addAction(R.drawable.filesave_22x22, getString(R.string.save_receipt_lbl), pIntent).build();
+				        .addAction(R.drawable.filesave_22x22, getString(R.string.save_receipt_lbl), pIntent).build();*/
 				    // Hide the notification after its selected
 				    noti.flags |= Notification.FLAG_AUTO_CANCEL;
 				  //notificationManager.notify(/* id */, notification);
-				    notificationManager.notify(0, noti);
+				    notificationManager.notify(receipt.initNotificationId(), noti);
 				} catch (Exception ex) {
 					Log.e(TAG + ".voteListener.updateData(...)", ex.getMessage(), ex);
 					String msg = getString(R.string.receipt_error_msg) 

@@ -91,8 +91,8 @@ public class SignService extends Service implements TaskListener {
                 	if(isWithSignedReceipt) {
                 		SMIMEMessageWrapper receipt = new SMIMEMessageWrapper(null,
     							new ByteArrayInputStream(response.getBytes()), null);
-                		//signServiceListener.proccessReceipt(receipt);
                 		signServiceListener.setSignServiceMsg(Respuesta.SC_OK, null);
+                		signServiceListener.proccessReceipt(receipt);
                 	}
 				} catch (Exception ex) {
 					Log.e(TAG + ".sendFileListener.updateData(...)", ex.getMessage(), ex);
@@ -145,7 +145,7 @@ public class SignService extends Service implements TaskListener {
         if (Aplicacion.getUsuario() != null) usuario = Aplicacion.getUsuario().getNif();
 		SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
 				keyStoreBytes, ALIAS_CERT_USUARIO, password, SIGNATURE_ALGORITHM);
-        File signedFile = File.createTempFile("signedDocument", SIGNED_PART_EXTENSION);;
+        File signedFile = File.createTempFile("signedDocument", SIGNED_PART_EXTENSION);
         signedFile = signedMailGenerator.genFile(usuario, 
 				Aplicacion.getControlAcceso().getNombreNormalizado(), 
 				signatureContent, subject, null, SignedMailGenerator.Type.USER, 

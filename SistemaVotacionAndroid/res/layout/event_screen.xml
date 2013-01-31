@@ -42,7 +42,7 @@
 				    android:layout_gravity="center"
 				    android:layout_marginBottom="10dp"
 				    android:layout_weight="0"
-	                android:drawableLeft="@drawable/manifest_22x22"
+	                android:drawableLeft="@drawable/manifest_32"
 				    android:text="@string/sign_send_msg" />
 
 			</LinearLayout>	  
