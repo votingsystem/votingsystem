@@ -64,9 +64,10 @@
 	<string name="lockscreen_sim_unlock_progress_dialog_message">lockscreen sim unlock progress dialog message</string>
 	<string name="keyguard_password_enter_pin_code">Introduzca el código PIN de votación</string>
 	<string name="keyguard_password_enter_first_pin_code">Introduzca el código PIN que deberá introducir en cada votación</string>
-	<string name="keyguard_password_wrong_pin_code">keyguard password wrong pin code</string>
+	<string name="pin_dialog_Caption">Introducir PIN de certificado de voto</string>
 	<string name="invalidPin">Código PIN inválido</string>
 	<string name="pin_short">Código PIN debe tener al menos %1$d caracteres</string>
+	<string name="enter_pin_import_cert_msg">Introduzca el PIN que eligió al solicitar el certificado</string>
 	
 	<string name="password_mismatch">Los códigos PIN no coinciden. Inténtelo de nuevo</string>
 	<string name="repeat_password">Vuelva a introducir el código PIN</string>
@@ -106,6 +107,8 @@
     <string name="solicitud_csr">Solicitud CSR</string>
     <string name="enviarVoto">Enviar Voto</string>
     <string name="receipt_error_msg">Error validando recibo de voto</string>
+    <string name="cert_not_found_caption">No tiene instalado ningún certificado</string>
+    <string name="cert_not_found_msg">Para poder votar y firmar documentos debe tener instalado un certificado</string>
 
     <string name="lanzarServicio">Lanzar Servicio</string>
     <string name="eventos_no_encontrados_message">No se han encontrado eventos</string>    
@@ -113,7 +116,8 @@
     <string name="menu_solicitar_certificado">Solicitar certificado</string>
     <string name="menu_receipt_list">Lista de recibos</string>
     <string name="receipt_list_screen_caption">Recibos guardados por el usuario</string>
-    <string name="receipt_options_dialog_msg">Opciones disponibles para el recibo:</string>
+    <string name="receipt_options_dialog_msg">Opciones disponibles para el recibo</string>
+    <string name="canceling_vote_caption">Anulando voto</string>
     
     <string name="solicitud_certificado_usuario_activity_text">No dispone de ningún 
         certificado con el que poder acceder a los servicios. Para poder votar debe solicitar
@@ -142,7 +146,7 @@
     <string name="go_app_button">Ir a la aplicación</string>
     <string name="request_cert_again_msg"><![CDATA[Si vuelve a solicitar el certificado deberá personarse 
         en las instalaciones que se le indiquen para verificar su identidad.<br/>
-        ¿Está seguro?]]></string>
+        ¿Desea continuar?]]></string>
     
     
     <string name="request_user_cert_error_msg">Error comprobando el estado de la solicitud</string>

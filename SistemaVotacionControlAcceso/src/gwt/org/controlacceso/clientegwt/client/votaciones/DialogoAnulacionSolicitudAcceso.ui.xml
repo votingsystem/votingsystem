@@ -9,7 +9,7 @@
 		.texto{font-size: 14px; font-weight:bold; }
 	</ui:style>
 	<ui:image field='anular' src="../BotonAnularSolicitudAcceso.png"/>
-	<ui:image field='aceptar' src="../BotonAceptar.png"/>
+	<ui:image field='cerrar' src="../BotonCancelar.png"/>
 	<ui:with field='constantes' type='org.controlacceso.clientegwt.client.Constantes'/>
 	<g:DialogBox ui:field="dialogBox" autoHide="false" modal="true" glassEnabled="true" 
 	    animationEnabled="true" text="{constantes.cancelAccessRequestCaption}">
@@ -22,11 +22,11 @@
 			</g:VerticalPanel>
 			<g:HorizontalPanel styleName="{style.buttonPanel}">
 				<g:HorizontalPanel styleName="{style.boton}">
+	      			<g:PushButton ui:field='cancelButton'>
+   						<g:upFace image='{cerrar}'/>
+ 					</g:PushButton>
 	      			<g:PushButton  ui:field='anularSolicitudButton'>
    						<g:upFace image='{anular}'/>
- 					</g:PushButton>
-	      			<g:PushButton  ui:field='aceptarButton'>
-   						<g:upFace image='{aceptar}'/>
  					</g:PushButton>
 				</g:HorizontalPanel>
 			</g:HorizontalPanel>

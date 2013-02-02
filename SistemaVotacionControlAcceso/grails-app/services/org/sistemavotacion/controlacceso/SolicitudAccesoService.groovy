@@ -74,7 +74,7 @@ class SolicitudAccesoService {
                     solicitudAcceso = SolicitudAcceso.findWhere(usuario:usuario, 
                             eventoVotacion:eventoVotacion, estado:Tipo.OK)
                     if (solicitudAcceso){
-                            log.debug("El usuario ya ha Votado" )//
+                            log.debug("El usuario ya ha Votado - id solicitud previa: " + solicitudAcceso.id)//
                             mensajeSMIME.tipo = Tipo.SOLICITUD_ACCESO_REPETIDA
                             respuesta = new Respuesta(tipo:Tipo.SOLICITUD_ACCESO_REPETIDA,
 								solicitudAcceso:solicitudAcceso, 

@@ -29,7 +29,7 @@ public class DialogoAnulacionSolicitudAcceso implements EventoGWTMensajeClienteF
     interface DialogoAnulacionSolicitudAccesoUiBinder extends UiBinder<Widget, DialogoAnulacionSolicitudAcceso> {}
 
     @UiField PushButton anularSolicitudButton;
-    @UiField PushButton aceptarButton;
+    @UiField PushButton cancelButton;
     @UiField HTML cancelAccessRequestMsg;
     @UiField HTML accessRequestCanceledMsg;
     
@@ -41,7 +41,6 @@ public class DialogoAnulacionSolicitudAcceso implements EventoGWTMensajeClienteF
 	public DialogoAnulacionSolicitudAcceso(EventoSistemaVotacionJso voto) {
         uiBinder.createAndBindUi(this);
         this.voto = voto;
-        aceptarButton.setVisible(false);
         accessRequestCanceledMsg.setVisible(false);
         BusEventos.addHandler(
         		EventoGWTMensajeClienteFirma.TYPE, this);
@@ -59,8 +58,8 @@ public class DialogoAnulacionSolicitudAcceso implements EventoGWTMensajeClienteF
 		anularSolicitudButton.setVisible(false);
     }
     
-    @UiHandler("aceptarButton")
-    void handleAceptarButton(ClickEvent e) {
+    @UiHandler("cancelButton")
+    void handleCancelButton(ClickEvent e) {
     	dialogBox.hide();
     }
     
@@ -82,7 +81,7 @@ public class DialogoAnulacionSolicitudAcceso implements EventoGWTMensajeClienteF
 				if(MensajeClienteFirmaJso.SC_OK == mensaje.getCodigoEstado()) {
 			        accessRequestCanceledMsg.setVisible(true);
 			        cancelAccessRequestMsg.setVisible(false);
-			        aceptarButton.setVisible(true);
+			        cancelButton.setVisible(true);
 				} else {
 					anularSolicitudButton.setVisible(true);
 				}

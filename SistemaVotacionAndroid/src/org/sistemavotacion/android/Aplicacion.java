@@ -36,6 +36,8 @@ import org.sistemavotacion.util.ServerPaths;
 import org.sistemavotacion.util.StringUtils;
 import org.sistemavotacion.util.SubSystem;
 import org.sistemavotacion.util.SubSystemChangeListener;
+
+import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -274,7 +276,8 @@ public class Aplicacion extends SherlockActivity {
     }
     
     private void processOperation(Operation operation) {
-    	Log.d(TAG + ".processOperation(...)", "- processOperation(...)");
+    	Log.d(TAG + ".processOperation(...)", "- operation: " + 
+    			operation.getTipo() + " - estado: " + estado);
     	Intent intent = null;
     	if(Estado.CON_CERTIFICADO == estado) {
     		switch(operation.getTipo()) {
@@ -291,7 +294,12 @@ public class Aplicacion extends SherlockActivity {
 	        }
     		checkConnection();
     		startActivity(intent);
-    	} else setActivityState();
+    	} else {
+    		AlertDialog.Builder builder= new AlertDialog.Builder(this);
+    		builder.setTitle(getString(R.string.cert_not_found_caption)).
+    			setMessage(R.string.cert_not_found_msg).show();
+    		setActivityState();
+    	}
     }
     
 	private void showMessage(final String caption, final String message) {
@@ -406,6 +414,7 @@ public class Aplicacion extends SherlockActivity {
 	public static File getFile(String filename) {
 		File file = null;
 		try {
+			//file = new File(INSTANCIA.getExternalFilesDir(null), filename);
 			file = new File(INSTANCIA.
 					getApplicationContext().getFilesDir(), filename);
 			Log.d(TAG + ".getFile(...)", " - file.getAbsolutePath(): " 

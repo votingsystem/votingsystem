@@ -21,7 +21,7 @@
     </p>   
     <p>- <u>POST</u> - <a href="${grailsApplication.config.grails.serverURL}/csr/firmar">/csr/firmar</a><br/>
       <b>Parámetros:</b><br/>
-       - <u>archivoFirmado</u>: <a href="https://github.com/jgzornoza/SistemaVotacionControlAcceso/wiki/Documento-de-validaci%C3%B3n-de-usuario">
+       - <u>archivoFirmado</u>: <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Documento-de-validaci%C3%B3n-de-usuario">
        Documento de validación de usuario</a>.<br/>
          <b>Respuesta:</b><br/>
          Si todo es correcto, una respuesta HTTP con código de estado 200.<br/>

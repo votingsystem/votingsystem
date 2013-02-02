@@ -62,10 +62,15 @@ public class ReciboVoto {
         this.codigoEstado = codigoEstado;
         this.voto = voto;
         String contenidoRecibo = votoValidado.getSignedContent();
-        JSONObject contenidoReciboJSON = (JSONObject) JSONSerializer.toJSON(contenidoRecibo);
-        this.opcionSeleccionadaId = contenidoReciboJSON.getLong("opcionSeleccionadaId");
-        this.eventoURL = contenidoReciboJSON.getString("eventoURL");
-        comprobarRecibo();
+        Object jsonData = JSONSerializer.toJSON(contenidoRecibo);
+        if(jsonData instanceof JSONObject) {
+            JSONObject contenidoReciboJSON = (JSONObject) JSONSerializer.toJSON(contenidoRecibo);
+            this.opcionSeleccionadaId = contenidoReciboJSON.getLong("opcionSeleccionadaId");
+            this.eventoURL = contenidoReciboJSON.getString("eventoURL");
+            comprobarRecibo();	
+        } else {
+        	logger.debug("ERROR - contenido del recibo: " + contenidoRecibo);
+        }
     }
     
     public ReciboVoto (int codigoEstado, SMIMEMessageWrapper votoValidado,

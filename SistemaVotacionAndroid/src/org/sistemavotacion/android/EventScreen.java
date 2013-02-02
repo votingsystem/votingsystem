@@ -16,7 +16,14 @@
 
 package org.sistemavotacion.android;
 
-import static org.sistemavotacion.android.Aplicacion.*;
+import static org.sistemavotacion.android.Aplicacion.ALIAS_CERT_USUARIO;
+import static org.sistemavotacion.android.Aplicacion.ASUNTO_MENSAJE_FIRMA_DOCUMENTO;
+import static org.sistemavotacion.android.Aplicacion.CONTROL_ACCESO_URL;
+import static org.sistemavotacion.android.Aplicacion.KEY_STORE_FILE;
+import static org.sistemavotacion.android.Aplicacion.MAX_SUBJECT_SIZE;
+import static org.sistemavotacion.android.Aplicacion.SIGNATURE_ALGORITHM;
+import static org.sistemavotacion.android.Aplicacion.SIGNED_PART_EXTENSION;
+import static org.sistemavotacion.android.Aplicacion.getFile;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,8 +36,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.sistemavotacion.android.ui.CertPinScreen;
-import org.sistemavotacion.android.ui.CertPinScreenCallback;
+import org.sistemavotacion.android.ui.CertPinDialog;
+import org.sistemavotacion.android.ui.CertPinDialogListener;
 import org.sistemavotacion.json.DeObjetoAJSON;
 import org.sistemavotacion.modelo.CampoDeEvento;
 import org.sistemavotacion.modelo.Evento;
@@ -48,7 +55,7 @@ import org.sistemavotacion.util.PdfUtils;
 import org.sistemavotacion.util.ServerPaths;
 
 import android.app.AlertDialog;
-import android.support.v4.app.FragmentTransaction;
+import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -64,22 +71,21 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
+
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.itextpdf.text.pdf.PdfReader;
 
 public class EventScreen extends SherlockFragmentActivity 
-	implements CertPinScreenCallback {
+	implements CertPinDialogListener {
 	
 	public static final String TAG = "EventScreen";
-    private static final String CERT_PIN_DIALOG = "certPinDialog";
 	
     private Button firmarEnviarButton;
     private Evento evento;
     private Map<Long, EditText> mapaCamposReclamacion;
     private ProgressDialog progressDialog = null;
-    private CertPinScreen certPinScreen;
     private AsyncTask runningTask = null;
     byte[] keyStoreBytes = null;
     
@@ -115,7 +121,8 @@ public class EventScreen extends SherlockFragmentActivity
 			subject = subject.substring(0, MAX_SUBJECT_SIZE) + " ...";
 		asuntoTextView.setText(subject);
 		TextView contenidoTextView = (TextView) findViewById(R.id.contenido_evento);
-		getActionBar().setHomeButtonEnabled(true);
+		//getActionBar().setHomeButtonEnabled(true);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 		contenidoTextView.setText(Html.fromHtml(evento.getContenido()));
 		contenidoTextView.setMovementMethod(LinkMovementMethod.getInstance());
 		firmarEnviarButton = (Button) findViewById(R.id.firmar_enviar_button);
@@ -401,10 +408,14 @@ public class EventScreen extends SherlockFragmentActivity
 	}
 	
     private void showPinScreen(String message) {
-    	certPinScreen = CertPinScreen.newInstance(
-    			EventScreen.this, message, true);
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        certPinScreen.show(ft, CERT_PIN_DIALOG);
+    	CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
+		android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
+	    Fragment prev = getFragmentManager().findFragmentByTag("pinDialog");
+	    if (prev != null) {
+	        ft.remove(prev);
+	    }
+	    ft.addToBackStack(null);
+	    pinDialog.show(ft, "pinDialog");
     }
 
 	@Override public void setPin(final String pin) {
@@ -421,7 +432,6 @@ public class EventScreen extends SherlockFragmentActivity
 	        		});
 	        firmarEnviar(pin.toCharArray());
 		} 
-		certPinScreen.getDialog().dismiss();
 	}
 	
 }

@@ -30,8 +30,8 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.UUID;
 
-import org.sistemavotacion.android.ui.CertPinScreen;
-import org.sistemavotacion.android.ui.CertPinScreenCallback;
+import org.sistemavotacion.android.ui.CertPinDialog;
+import org.sistemavotacion.android.ui.CertPinDialogListener;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
@@ -42,6 +42,7 @@ import org.sistemavotacion.util.ServerPaths;
 import org.sistemavotacion.util.StringUtils;
 
 import android.app.AlertDialog;
+import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -49,7 +50,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentTransaction;
 import android.telephony.TelephonyManager;
 import android.text.Html;
 import android.util.Log;
@@ -65,10 +65,9 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 
 public class UserCertRequestForm extends SherlockFragmentActivity 
-		implements CertPinScreenCallback {
+		implements CertPinDialogListener {
 
 	public static final String TAG = "UserCertRequestForm";
-    private static final String CERT_PIN_DIALOG = "certPinDialog";
 	
     private ProgressDialog progressDialog = null;
     private String password = null;
@@ -76,7 +75,6 @@ public class UserCertRequestForm extends SherlockFragmentActivity
     private String telefono = null;
     private String deviceId = null;
     private PKCS10WrapperClient pkcs10WrapperClient;
-    private CertPinScreen certPinScreen;
     private EditText nifText;
 	
     DataListener<String> envioCsrListener =new DataListener<String>() {
@@ -141,10 +139,12 @@ public class UserCertRequestForm extends SherlockFragmentActivity
             }
         });      
         nifText = (EditText)findViewById(R.id.nif_edit);
+        
         nifText.setOnKeyListener(new OnKeyListener() {
 
 			@Override
 			public boolean onKey(View v, int keyCode, KeyEvent event) {
+				Log.d(TAG + ".onKey(...)", " - keyCode: " + keyCode);
 				if (event != null && keyCode == KeyEvent.KEYCODE_ENTER) {
 					processNif();
 					return true;
@@ -255,10 +255,14 @@ public class UserCertRequestForm extends SherlockFragmentActivity
     }
     
     private void showPinScreen(String message) {
-    	certPinScreen = CertPinScreen.newInstance(
-    			UserCertRequestForm.this, message, false);
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        certPinScreen.show(ft, CERT_PIN_DIALOG);
+    	CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, true);
+		android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
+	    Fragment prev = getFragmentManager().findFragmentByTag("pinDialog");
+	    if (prev != null) {
+	        ft.remove(prev);
+	    }
+	    ft.addToBackStack(null);
+	    pinDialog.show(ft, "pinDialog");
     }
 
 	public void manejarExcepcion(String exMessage) {
@@ -271,30 +275,16 @@ public class UserCertRequestForm extends SherlockFragmentActivity
 
 	@Override
 	public void setPin(String pin) {
-		Log.d(TAG + ".setPin(...) ", "pin: " + pin);
-		certPinScreen.getDialog().dismiss();
-		/*android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
-	    android.app.Fragment prev = getFragmentManager().findFragmentByTag("dialog");
+		Log.d(TAG + ".setPin(...) ", " --- pin");
+		password = pin;
+		if(password == null) return;
+		android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
+	    Fragment prev = getFragmentManager().findFragmentByTag("pinDialog");
 	    if (prev != null) {
 	        ft.remove(prev);
 	    }
-	    ft.addToBackStack(null);*/
-		if(pin == null) {
-			password = null;
-			return;
-		} 
-		if(password != null) {
-			if(password.equals(pin)) {
-				Log.d(TAG + ".setPin(...) ", "lanzando sendCsrRequest()");
-				sendCsrRequest();
-			} else {
-				password = null;
-				showPinScreen(getApplication().getString(R.string.password_mismatch));
-			}
-		} else {
-			password = pin;
-			showPinScreen(getApplication().getString(R.string.repeat_password));
-		}
+	    ft.addToBackStack(null);
+		sendCsrRequest();
 	}
 		
 }

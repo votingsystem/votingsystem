@@ -16,7 +16,7 @@
 
 package org.sistemavotacion.android.ui;
 
-public interface CertPinScreenCallback {
+public interface CertPinDialogListener {
 
     void setPin(String pin);
 

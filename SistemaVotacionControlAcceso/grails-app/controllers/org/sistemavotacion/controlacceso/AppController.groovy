@@ -16,7 +16,7 @@ class AppController {
 		if(params.eventoId) uri = "${uri}&eventoId=${params.eventoId}"
 		if(params.serverURL) uri = "${uri}&serverURL=${params.serverURL}"
 		if(params.msg) {
-			String msg = URLEncoder.encode(params.msg, "UTF-8")
+			String msg = URLEncoder.encode("${params.msg}", "UTF-8")
 			uri = "${uri}&msg=${msg}"
 			log.debug("msg: ${msg}")
 		} 

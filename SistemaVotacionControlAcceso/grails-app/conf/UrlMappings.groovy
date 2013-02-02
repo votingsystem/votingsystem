@@ -16,7 +16,12 @@ class UrlMappings {
 				// apply constraints here
 			}
 		}
-
+		
+		"/android/SistemaVotacion.apk" {
+			controller = "android"
+			action = "app"
+		}
+	
 		"/"(view:"/index")
 		"400"(controller:"error400", action:"procesar")
 		"500"(controller:"error500", action:"procesar")

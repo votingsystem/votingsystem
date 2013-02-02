@@ -1,22 +1,47 @@
 package org.sistemavotacion.android.ui;
 
-import java.util.ArrayList;
-import java.util.List;
+import static org.sistemavotacion.android.Aplicacion.KEY_STORE_FILE;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.sistemavotacion.android.ui.CertPinDialog;
+import org.sistemavotacion.android.ui.CertPinDialogListener;
+import javax.mail.MessagingException;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.sistemavotacion.android.Aplicacion;
 import org.sistemavotacion.android.FragmentTabsPager;
 import org.sistemavotacion.android.R;
 import org.sistemavotacion.android.VotingEventScreen;
+import org.sistemavotacion.android.VotingEventScreen.Operation;
 import org.sistemavotacion.android.db.VoteReceiptDBHelper;
+import org.sistemavotacion.android.service.SignService;
+import org.sistemavotacion.android.service.SignServiceListener;
+import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.modelo.VoteReceipt;
+import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.util.DateUtils;
+import org.sistemavotacion.util.FileUtils;
+import org.sistemavotacion.util.ServerPaths;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.app.ListActivity;
+import android.app.ProgressDialog;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.support.v4.app.FragmentManager;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,20 +50,26 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class VoteReceiptListScreen extends ListActivity {
+public class VoteReceiptListScreen extends ListActivity 
+	implements CertPinDialogListener, ReceiptOperationsListener, 
+	SignServiceListener{
 	
 	public static final String TAG = "VoteReceiptListScreen";
 	
+	public enum Operation {CANCEL_VOTE};
+	
 	protected VoteReceiptDBHelper db;
-	List<VoteReceipt> voteReceiptList;
-	ReceiptListAdapter adapter;
-	//ReceiptListAdapter mAdapter = null;
+	private List<VoteReceipt> voteReceiptList;
+	private ReceiptListAdapter adapter;
+	private Operation operation = null;
+    private ProgressDialog progressDialog = null;
+	private SignService signService = null;
+	private VoteReceipt operationReceipt = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +85,7 @@ public class VoteReceiptListScreen extends ListActivity {
 		adapter = new ReceiptListAdapter(this);
 		adapter.setData(voteReceiptList);
 		try {
+			getActionBar().setDisplayHomeAsUpEnabled(true);
 			getActionBar().setTitle(getString(R.string.receipt_list_screen_caption));
 			getActionBar().setLogo(R.drawable.receipt_48);
 		} catch(NoSuchMethodError ex) {
@@ -61,8 +93,18 @@ public class VoteReceiptListScreen extends ListActivity {
 		}  
 		getActionBar().setHomeButtonEnabled(true);
 		setListAdapter(adapter);
-		//ListView listView = (ListView) findViewById(R.id.list);
-		//listView.setOnClickListener(this);
+	}
+	
+	private void refreshReceiptList() {
+		Log.d(TAG + ".refreshReceiptList(...)", " --- refreshReceiptList");
+		try {
+			voteReceiptList = db.getVoteReceiptList();	
+		} catch(Exception ex) {
+			ex.printStackTrace();
+		}
+		adapter.setData(voteReceiptList);
+		adapter.notifyDataSetChanged();
+		adapter.setNotifyOnChange (true);
 	}
 	
 	@Override public void onListItemClick(ListView l, View v, int position, long id) {
@@ -70,8 +112,9 @@ public class VoteReceiptListScreen extends ListActivity {
 		VoteReceipt receipt = ((VoteReceipt) getListAdapter().getItem(position));
 		String caption = receipt.getVoto().getAsunto();
 		String msg = getString(R.string.receipt_options_dialog_msg);
-		ReceiptOptionsDialog optionsDialog = ReceiptOptionsDialog.newInstance(caption, msg, receipt);
-	    FragmentTransaction ft = getFragmentManager().beginTransaction();
+		ReceiptOptionsDialog optionsDialog = ReceiptOptionsDialog.newInstance(
+				caption, msg, receipt, this);
+		android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
 	    Fragment prev = getFragmentManager().findFragmentByTag("optionsDialog");
 	    if (prev != null) {
 	        ft.remove(prev);
@@ -99,7 +142,19 @@ public class VoteReceiptListScreen extends ListActivity {
 		getMenuInflater().inflate(R.menu.vote_receipt_list, menu);
 		return true;
 	}
-
+    
+    private void showPinScreen(String message) {
+    	CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
+		android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
+	    Fragment prev = getFragmentManager().findFragmentByTag("pinDialog");
+	    if (prev != null) {
+	        ft.remove(prev);
+	    }
+	    ft.addToBackStack(null);
+	    pinDialog.show(ft, "pinDialog");
+    }
+ 
+	
 	private class VoteReceiptLisAdapter extends ArrayAdapter<VoteReceipt> {
 
 		Context context;
@@ -227,5 +282,108 @@ public class VoteReceiptListScreen extends ListActivity {
         }
     }
 	
+	private void showMessage(String caption, String message) {
+		Log.d(TAG + ".showMessage(...) ", " - caption: " 
+				+ caption + "  - showMessage: " + message);
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
+		AlertDialog.Builder builder= new AlertDialog.Builder(this);
+		builder.setTitle(caption).setMessage(message).show();
+	}
+    
+	private void processCancelVote(char[] password) {
+        Map map = new HashMap();
+        map.put("origenHashCertificadoVoto", operationReceipt.
+        		getVoto().getOrigenHashCertificadoVoto());
+        map.put("hashCertificadoVotoBase64", operationReceipt.
+        		getVoto().getHashCertificadoVotoBase64());
+        map.put("origenHashSolicitudAcceso", operationReceipt.
+        		getVoto().getOrigenHashSolicitudAcceso());
+        map.put("hashSolicitudAccesoBase64", operationReceipt.
+        		getVoto().getHashSolicitudAccesoBase64());
+        JSONObject jsonObject = new JSONObject(map);
+        String signatureContent = jsonObject.toString();     
+        String subject = getString(R.string.cancel_vote_msg_subject); 
+        String serverURL = ServerPaths.getURLAnulacionVoto(Aplicacion.CONTROL_ACCESO_URL);
+        try {
+			FileInputStream fis = openFileInput(KEY_STORE_FILE);
+			byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
+    		if(signService != null) signService.processSignature(signatureContent, subject, serverURL, this, 
+    				true, keyStoreBytes, password);	
+        } catch(Exception ex) {
+        	ex.printStackTrace();
+			showMessage(getString(R.string.error_lbl), ex.getMessage());
+        }
+
+	}
+    
+	ServiceConnection signServiceConnection = new ServiceConnection() {
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			Log.d(TAG + ".signingServiceConnection.onServiceDisconnected()", 
+					" - signingServiceConnection.onServiceDisconnected");
+		}
+
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			Log.d(TAG + ".signingServiceConnection.onServiceConnected()", 
+					" - signingServiceConnection.onServiceConnected");
+			signService = ((SignService.SignServiceBinder) service).getBinder();
+		}
+	};
+
+
+
+	@Override public void setPin(final String pin) {
+		Log.d(TAG + ".setPin()", "--- setPin - operation: " + operation);
+		if(pin != null) {
+	        progressDialog = ProgressDialog.show(this, 
+	        		getString(R.string.canceling_vote_caption), 
+	        		getString(R.string.sending_data_lbl), true,
+		            true, new DialogInterface.OnCancelListener() {
+		                @Override
+		                public void onCancel(DialogInterface dialog) { }
+	        		});
+	        processCancelVote(pin.toCharArray());   
+		}
+	}
 	
+	@Override
+	public void cancelVote(VoteReceipt receipt) {
+		Log.d(TAG + ".cancelVote(...)", " - cancelVote");
+		operation = Operation.CANCEL_VOTE;
+		Intent signServiceIntent = new Intent(this, SignService.class);
+		startService(signServiceIntent);
+		bindService(signServiceIntent, signServiceConnection, BIND_AUTO_CREATE);
+    	showPinScreen(getString(R.string.cancel_vote_msg));
+	}
+
+	@Override
+	public void proccessReceipt(SMIMEMessageWrapper cancelReceipt) {
+		operationReceipt.setCancelVoteReceipt(cancelReceipt);
+		String msg = getString(R.string.cancel_vote_result_msg, 
+				this.operationReceipt.getVoto().getAsunto());
+		try {
+			db.updateVoteReceipt(operationReceipt);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
+		refreshReceiptList();
+		AlertDialog.Builder builder= new AlertDialog.Builder(this);
+		builder.setTitle(getString(R.string.msg_lbl)).setMessage(msg).show();
+	}
+
+	@Override
+	public void setSignServiceMsg(int statusCode, String msg) {
+		Log.d(TAG + ".setSignServiceMsg()", "--- statusCode: " 
+				+ statusCode + " - msg: " + msg);
+		String caption  = null;
+		if(Respuesta.SC_OK != statusCode) {
+			caption = getString(R.string.error_lbl) + " " 
+					+ new Integer(statusCode).toString();
+		}
+		showMessage(caption, msg);
+	}
 }

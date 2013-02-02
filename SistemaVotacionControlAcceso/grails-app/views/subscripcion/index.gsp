@@ -2,7 +2,7 @@
 <div>
   	<h4>Métodos soportados</h4>
     <p>- <u>POST</u> - <a href="${grailsApplication.config.grails.serverURL}/subscripcion/guardarAsociacionConCentroControl">/subscripcion/guardarAsociacionConCentroControl</a><br/>
-      	Servicio que permite guardar asociaciones con <a href="https://github.com/jgzornoza/SistemaVotacionCentroControl/wiki/Centro-de-Control">Centros de Control</a>.<br/><br/>
+      	Servicio que permite guardar asociaciones con <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Centro-de-Control">Centros de Control</a>.<br/><br/>
       <b>Parámetros:</b><br/>
        - <u>archivoFirmado</u>: <a href="https://github.com/jgzornoza/SistemaVotacionClientePublicacion/wiki/Solicitud-de-Asociaci%C3%B3n">Solicitud de Asociación</a>.<br/>
          <b>Respuesta:</b><br/>

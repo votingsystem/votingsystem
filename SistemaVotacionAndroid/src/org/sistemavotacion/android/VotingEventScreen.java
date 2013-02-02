@@ -20,7 +20,6 @@ import static org.sistemavotacion.android.Aplicacion.KEY_STORE_FILE;
 import static org.sistemavotacion.android.Aplicacion.MAX_SUBJECT_SIZE;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,8 +33,8 @@ import org.sistemavotacion.android.service.SignServiceListener;
 import org.sistemavotacion.android.service.VotingService;
 import org.sistemavotacion.android.service.VotingServiceListener;
 import org.sistemavotacion.android.ui.CancelVoteDialog;
-import org.sistemavotacion.android.ui.CertPinScreen;
-import org.sistemavotacion.android.ui.CertPinScreenCallback;
+import org.sistemavotacion.android.ui.CertPinDialog;
+import org.sistemavotacion.android.ui.CertPinDialogListener;
 import org.sistemavotacion.android.ui.VotingResultDialog;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.OpcionDeEvento;
@@ -47,6 +46,7 @@ import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.ServerPaths;
 
 import android.app.AlertDialog;
+import android.app.Fragment;
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
@@ -57,7 +57,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -69,27 +68,25 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 
 public class VotingEventScreen extends SherlockFragmentActivity 
-	implements CertPinScreenCallback, VotingServiceListener, SignServiceListener {
+	implements VotingServiceListener, SignServiceListener,
+	CertPinDialogListener {
 	
 	public static final String TAG = "VotingEventScreen";
 	
 	
 	public enum Operation {CANCEL_VOTE, SAVE_VOTE, VOTE};
 	
-    private static final String CERT_PIN_DIALOG = "certPinDialog";
     public static final String INTENT_EXTRA_DIALOG_PROP_NAME = "dialog";
     public static final String RECEIPT_KEY_PROP_NAME = "receiptKey";
-    public static final int SELECTED_OPTION_MAX_LENGTH = 27;
+    public static final int SELECTED_OPTION_MAX_LENGTH = 60;
 
     public static Operation operation = Operation.VOTE;
     private Evento evento;
     private VoteReceipt receipt;
     private ProgressDialog progressDialog = null;
-    private CertPinScreen certPinScreen;
     private AsyncTask runningTask = null;
     private List<Button> optionButtons = null;
     byte[] keyStoreBytes = null;
@@ -120,7 +117,8 @@ public class VotingEventScreen extends SherlockFragmentActivity
 		saveReceiptButton = (Button) findViewById(R.id.save_receipt_button);
 		cancelVoteButton = (Button) findViewById(R.id.cancel_vote_button);
 		try {
-			getActionBar().setHomeButtonEnabled(true);
+			//getActionBar().setHomeButtonEnabled(true);
+			getActionBar().setDisplayHomeAsUpEnabled(true);
 			getActionBar().setLogo(R.drawable.poll_32);
 		} catch(NoSuchMethodError ex) {
 			Log.d(TAG + ".onCreate(...)", " --- android api 11 I doesn't have method 'setLogo'");
@@ -283,6 +281,7 @@ public class VotingEventScreen extends SherlockFragmentActivity
 	            		String contenido = opcionSeleccionada.getContenido().length() > SELECTED_OPTION_MAX_LENGTH ?
 	        				 opcionSeleccionada.getContenido().substring(0, SELECTED_OPTION_MAX_LENGTH) + 
 	        				 "..." : opcionSeleccionada.getContenido();
+	            		bindService(votingServiceIntent, votingServiceConnection, BIND_AUTO_CREATE);
 	            		showPinScreen(getString(R.string.option_selected_msg, contenido));
 	            	} 
 	            }
@@ -428,11 +427,14 @@ public class VotingEventScreen extends SherlockFragmentActivity
 	}
 	
     private void showPinScreen(String message) {
-		bindService(votingServiceIntent, votingServiceConnection, BIND_AUTO_CREATE);
-    	certPinScreen = CertPinScreen.newInstance(
-    			VotingEventScreen.this, message, true);
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        certPinScreen.show(ft, CERT_PIN_DIALOG);
+    	CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
+		android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
+	    Fragment prev = getFragmentManager().findFragmentByTag("pinDialog");
+	    if (prev != null) {
+	        ft.remove(prev);
+	    }
+	    ft.addToBackStack(null);
+	    pinDialog.show(ft, "pinDialog");
     }
 
 	@Override public void setPin(final String pin) {
@@ -460,8 +462,6 @@ public class VotingEventScreen extends SherlockFragmentActivity
 	        }
 	        
 		}
-		if(certPinScreen.getDialog() != null)
-			certPinScreen.getDialog().dismiss();
 	}
 
 	@Override

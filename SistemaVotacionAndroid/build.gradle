@@ -1,4 +1,6 @@
 import java.net.*;
+import java.util.Properties;
+
 import org.ajoberstar.gradle.git.tasks.*
 
 
@@ -109,8 +111,14 @@ task setAndroidEnv << {
 	//env.each{println it} 
 	String androidHome= env['ANDROID_HOME']
 	if(!androidHome) throw new RuntimeException('Android SDK not Found you must install -> http://developer.android.com/sdk/index.html')
+	String developmentServerIP = getDevelopmentServerIP()
+	
+	java.util.Properties props = new Properties();
+	props.load(new FileInputStream(file('assets/VotingSystem.properties')))
+	String lastIp = "${props.DEVELOPMENT_IP}"
+	
 	def controlAccesoURL = "$rootProject.controlAccesoProtocol://" + 
-		"${getDevelopmentServerIP()}:$rootProject.controlAccesoPort" + 
+		"${developmentServerIP}:$rootProject.controlAccesoPort" + 
 		"$rootProject.controlAccesoPath";
 	println("controlAccesoURL: $controlAccesoURL")
 	ant.delete(file:"assets/VotingSystem.properties")
@@ -119,6 +127,17 @@ task setAndroidEnv << {
 	ant.replace(file:"assets/VotingSystem.properties",
 		token:"[CONTROL_ACCESO_URL]",
 		value:controlAccesoURL)
+	ant.replace(file:"assets/VotingSystem.properties",
+		token:"[DEVELOPMENT_IP]",
+		value:developmentServerIP)
+
+	println "last development IP: ${lastIp} - new development IP: ${developmentServerIP}"
+	//other way
+	File manifest = file("AndroidManifest.xml");
+	String manifestContent = manifest.text;
+	manifestContent = manifestContent.replaceAll(
+		"android:host=\"${lastIp}\"", "android:host=\"${developmentServerIP}\"")
+	manifest.write(manifestContent);
 }
 
 

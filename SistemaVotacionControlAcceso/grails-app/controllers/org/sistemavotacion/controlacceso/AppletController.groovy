@@ -11,7 +11,6 @@ class AppletController {
 	
 	def cliente = { }
 	
-	def herramientaValidacion = { }
 	
 	def prueba = {
 		render RCU.getLocale(request)

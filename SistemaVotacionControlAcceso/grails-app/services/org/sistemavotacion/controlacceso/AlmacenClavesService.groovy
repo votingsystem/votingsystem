@@ -31,7 +31,7 @@ class AlmacenClavesService {
 		} 
 		//String password = (1..7).inject("") { a, b -> a += ('a'..'z')[new Random().nextFloat() * 26 as int] }.toUpperCase()
 		//TODO
-		String password = grailsApplication.config.SistemaVotacion.passwordClavesFirma
+		String password = "${grailsApplication.config.SistemaVotacion.passwordClavesFirma}"
 		String eventoUrl = "${grailsApplication.config.grails.serverURL}/evento/obtener?id=${evento.id}";
 		String strSubjectDNRoot = "CN=eventoUrl:${eventoUrl}, OU=Votaciones";
 		String aliasClavesFirma = grailsApplication.config.SistemaVotacion.aliasClavesFirma
