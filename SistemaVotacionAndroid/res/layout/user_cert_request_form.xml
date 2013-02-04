@@ -21,12 +21,9 @@
         android:layout_width="fill_parent"
         android:layout_marginLeft="20dip"
         android:layout_marginRight="20dip"
-        android:scrollHorizontally="true"
         android:imeOptions="actionDone"
-        android:autoText="false"
-        android:capitalize="none"
-        android:gravity="fill_horizontal"
-        android:textAppearance="?android:attr/textAppearanceMedium" >
+        android:nextFocusDown="@+id/solicitar_button" 
+        android:gravity="fill_horizontal">
         	<requestFocus />
       </EditText>
         

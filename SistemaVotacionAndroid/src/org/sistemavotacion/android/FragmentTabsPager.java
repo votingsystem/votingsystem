@@ -44,6 +44,7 @@ import android.widget.TabHost;
 import android.widget.TabWidget;
 import android.widget.TextView;
 
+//ActionBar for pre Honeycomb devices
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -76,7 +77,6 @@ public class FragmentTabsPager extends SherlockFragmentActivity
         Log.d(TAG + ".onCreate()", " - onCreate");
         //setTitle("Votaciones");
         selectedSubSystem = Aplicacion.INSTANCIA.getSelectedSubsystem();
-        
         
         getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
         getSupportActionBar().setDisplayShowHomeEnabled(false);
@@ -198,30 +198,6 @@ public class FragmentTabsPager extends SherlockFragmentActivity
 	  }
 	}
 
-
-    /*public SearchView getSearchView() {
-    	SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-    	final SearchView searchView = new SearchView(getSupportActionBar().getThemedContext());
-    	OnQueryTextListener qtl = new OnQueryTextListener(){
-
-			@Override
-			public boolean onQueryTextSubmit(String query) {
-				Aplicacion.INSTANCIA.launchQuery(query);
-				return false;
-			}
-
-			@Override
-			public boolean onQueryTextChange(String onQueryTextChange) {
-				return false;
-			}};
-		searchView.setOnQueryTextListener(qtl);
-	    searchView.setSearchableInfo(
-	            searchManager.getSearchableInfo(getComponentName()));
-    	searchView.setQueryHint(
-    			getApplicationContext().getString(R.string.query_hint_lbl));
-    	return searchView;
-    }*/
-    
     /**
      * This is a helper class that implements the management of tabs and all
      * details of connecting a ViewPager with associated TabHost.  It relies on a
@@ -342,13 +318,13 @@ public class FragmentTabsPager extends SherlockFragmentActivity
 	public String getTabDesc (EnumTab tab) {
 		switch(tab) {
 			case CLOSED:
-				return getApplicationContext().getString(R.string.closed_voting_tab_lbl);
+				return getString(R.string.closed_voting_tab_lbl);
 			case OPEN:
-				return getApplicationContext().getString(R.string.open_voting_tab_lbl);
+				return getString(R.string.open_voting_tab_lbl);
 			case PENDING:
-				return getApplicationContext().getString(R.string.pending_voting_tab_lbl);
+				return getString(R.string.pending_voting_tab_lbl);
 			default: 
-				return getApplicationContext().getString(R.string.unknown_tab_lbl);
+				return getString(R.string.unknown_tab_lbl);
 		}
 	}
     

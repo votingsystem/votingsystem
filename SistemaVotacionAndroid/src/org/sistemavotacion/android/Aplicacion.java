@@ -28,6 +28,7 @@ import org.sistemavotacion.json.DeJSONAObjeto;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Consulta;
 import org.sistemavotacion.modelo.Evento;
+import org.sistemavotacion.modelo.OpcionDeEvento;
 import org.sistemavotacion.modelo.Operation;
 import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.task.DataListener;
@@ -47,15 +48,15 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockActivity;
 
-public class Aplicacion extends SherlockActivity {
+public class Aplicacion extends FragmentActivity {
 	
 	public static final String TAG = "Aplicacion";
 	
@@ -66,7 +67,6 @@ public class Aplicacion extends SherlockActivity {
 	public static final int THEME = R.style.Theme_Sherlock;
 	
 	public static final String PREFS_ESTADO              = "estado";
-	public static final String NEW_CERT_KEY              = "NEW_CERT";
 	public static final String PREFS_ID_SOLICTUD_CSR     = "idSolicitudCSR";
 	public static final String PREFS_ID_APLICACION       = "idAplicacion";
 	public static final String MANIFEST_FILE_NAME        = "Manifest";
@@ -96,6 +96,8 @@ public class Aplicacion extends SherlockActivity {
     public static String CONTROL_ACCESO_URL = "http://192.168.1.4:8080/SistemaVotacionControlAcceso";
     public static final String SISTEMA_VOTACION_DIR = "SistemaVotacion";
     
+    public static final String CERT_NOT_FOUND_DIALOG_ID      = "certNotFoundDialog";
+    
     private SubSystem selectedSubsystem = SubSystem.VOTING;
     private List<SubSystemChangeListener> subSystemChangeListeners = new ArrayList<SubSystemChangeListener>();
 	private Evento eventoSeleccionado;
@@ -115,8 +117,7 @@ public class Aplicacion extends SherlockActivity {
 						data, ActorConIP.Tipo.CONTROL_ACCESO);
 			} catch (Exception e) {
 				Log.e(TAG + ".serverDataListener.updateData() ", e.getMessage(), e);
-			    showMessage(getApplicationContext().getString(
-						R.string.error_lbl), e.getMessage());
+			    showMessage(getString(R.string.error_lbl), e.getMessage());
 			}
 			
 		}
@@ -124,8 +125,7 @@ public class Aplicacion extends SherlockActivity {
 		@Override public void setException(final String exceptionMsg) {
 			Log.d(TAG + ".serverDataListener.manejarExcepcion(...) ", 
 					" -- exceptionMsg: " + exceptionMsg);	
-		    showMessage(getApplicationContext().getString(
-					R.string.error_lbl), exceptionMsg);
+		    showMessage(getString(R.string.error_lbl), exceptionMsg);
 		}
 	};
 	
@@ -138,13 +138,14 @@ public class Aplicacion extends SherlockActivity {
 				Consulta consulta =  DeJSONAObjeto.obtenerConsultaEventos(data);
 				if(consulta.getEventos() != null && consulta.getEventos().size() > 0) {
 					eventoSeleccionado = consulta.getEventos().iterator().next();
+					eventoSeleccionado.setOpcionSeleccionada(operation.
+							getEvento().getOpcionSeleccionada());
 					operation.setEvento(eventoSeleccionado);	
 				}
 				processOperation(operation);
 			} catch (Exception e) {
 				Log.e(TAG + ".eventDataListener.updateData() ", e.getMessage(), e);
-				showMessage(getApplicationContext().getString(
-						R.string.error_lbl), e.getMessage());
+				showMessage(getString(R.string.error_lbl), e.getMessage());
 			}
 			
 		}
@@ -152,8 +153,7 @@ public class Aplicacion extends SherlockActivity {
 		@Override public void setException(final String exceptionMsg) {
 			Log.d(TAG + ".eventDataListener.manejarExcepcion(...) ", 
 					" -- exceptionMsg: " + exceptionMsg);	
-			showMessage(getApplicationContext().getString(
-					R.string.error_lbl), exceptionMsg);
+			showMessage(getString(R.string.error_lbl), exceptionMsg);
 		}
 	};
 	
@@ -373,13 +373,13 @@ public class Aplicacion extends SherlockActivity {
 	public String getSubsystemDesc (SubSystem subsystem) {
 		switch(subsystem) {
 			case CLAIMS:
-				return getApplicationContext().getString(R.string.claims_drop_down_lbl);
+				return getString(R.string.claims_drop_down_lbl);
 			case VOTING:
-				return getApplicationContext().getString(R.string.voting_drop_down_lbl);
+				return getString(R.string.voting_drop_down_lbl);
 			case MANIFESTS:
-				return getApplicationContext().getString(R.string.manifiests_drop_down_lbl);
+				return getString(R.string.manifiests_drop_down_lbl);
 			default: 
-				return getApplicationContext().getString(R.string.unknown_drop_down_lbl);
+				return getString(R.string.unknown_drop_down_lbl);
 		}
 	}
 	
@@ -447,7 +447,7 @@ public class Aplicacion extends SherlockActivity {
 	}
     
     public static String getAppString(int resId, Object... formatArgs) {
-    	return INSTANCIA.getApplicationContext().getString(resId, formatArgs);
+    	return INSTANCIA.getString(resId, formatArgs);
     }
     
 	public static void setEstado(Estado estado) {

@@ -51,12 +51,7 @@ class AnuladorVotoController {
 					mensajeSMIMEValidado:anuladorVoto.mensajeSMIME)
 				return false
             }				
-        } else if(Respuesta.SC_OK_ANULACION_SOLICITUD_ACCESO) {
-			AnuladorVoto anuladorVoto = respuesta.anuladorVoto
-			flash.respuesta = new Respuesta(codigoEstado:200,
-				mensajeSMIMEValidado:anuladorVoto.mensajeSMIME)
-			return false
-		}
+        }
 		flash.respuesta = respuesta
 		return false
     }

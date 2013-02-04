@@ -5,5 +5,6 @@ import org.sistemavotacion.modelo.VoteReceipt;
 public interface ReceiptOperationsListener {
 
 	void cancelVote(VoteReceipt receipt);
+	void removeReceipt(VoteReceipt receipt);
 
 }

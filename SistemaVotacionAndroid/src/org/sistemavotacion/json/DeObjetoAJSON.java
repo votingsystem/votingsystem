@@ -40,15 +40,14 @@ public class DeObjetoAJSON {
 	public static final String TAG = "DeObjetoAJSON";
 
     public static JSONObject obtenerEventoJSON(Evento evento) throws JSONException{
-    	Log.d(TAG + ".obtenerEventoJSON(...)", "");
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("asunto", evento.getAsunto());
-        map.put("contenido", evento.getContenido());
-        map.put("fechaInicio", DateUtils.getStringFromDate(evento.getFechaInicio()));
-        map.put("fechaFin", DateUtils.getStringFromDate(evento.getFechaFin()));
-        if (evento.getTipo() != null) map.put("tipoEvento", evento.getTipo().toString()); 
-        if (evento.getEventoId() != null) map.put("eventoId", evento.getEventoId()); 
-        JSONObject jsonObject = new JSONObject(map);
+    	Log.d(TAG + ".obtenerEventoJSON(...)", " - obtenerEventoJSON -");
+    	JSONObject jsonObject = new JSONObject();
+    	jsonObject.put("asunto", evento.getAsunto());
+    	jsonObject.put("contenido", evento.getContenido());
+    	jsonObject.put("fechaInicio", DateUtils.getStringFromDate(evento.getFechaInicio()));
+    	jsonObject.put("fechaFin", DateUtils.getStringFromDate(evento.getFechaFin()));
+        if (evento.getTipo() != null) jsonObject.put("tipoEvento", evento.getTipo().toString()); 
+        if (evento.getEventoId() != null) jsonObject.put("eventoId", evento.getEventoId()); 
         if (evento.getEtiquetas() != null) {
             String[] etiquetas = evento.getEtiquetas();
             JSONArray jsonArray = new JSONArray();
@@ -90,7 +89,8 @@ public class DeObjetoAJSON {
             }
             jsonObject.put("campos", jsonArray);
         }
-        if (evento.getTipoEleccion() != null) map.put("cardinalidad", evento.getTipoEleccion().toString()); 
+        if (evento.getTipoEleccion() != null) jsonObject.put(
+        		"cardinalidad", evento.getTipoEleccion().toString()); 
         if (evento.getOpcionSeleccionada() != null) {
             Map<String, Object> opcionSeleccionadaMap = new HashMap<String, Object>(); 
             opcionSeleccionadaMap.put("id", evento.getOpcionSeleccionada().getId());
@@ -99,13 +99,13 @@ public class DeObjetoAJSON {
             jsonObject.put("opcionSeleccionada", opcionSeleccionadaJSON);
         } 
         if(evento.getHashSolicitudAccesoBase64() != null)
-        	map.put("hashSolicitudAccesoBase64", evento.getHashSolicitudAccesoBase64()); 
+        	jsonObject.put("hashSolicitudAccesoBase64", evento.getHashSolicitudAccesoBase64()); 
         if(evento.getOrigenHashSolicitudAcceso() != null)
-        	map.put("origenHashSolicitudAcceso", evento.getOrigenHashSolicitudAcceso()); 
+        	jsonObject.put("origenHashSolicitudAcceso", evento.getOrigenHashSolicitudAcceso()); 
         if(evento.getHashCertificadoVotoBase64() != null)
-        	map.put("hashCertificadoVotoBase64", evento.getHashCertificadoVotoBase64());        
+        	jsonObject.put("hashCertificadoVotoBase64", evento.getHashCertificadoVotoBase64());        
         if(evento.getOrigenHashCertificadoVoto() != null)
-        	map.put("origenHashCertificadoVoto", evento.getOrigenHashCertificadoVoto());
+        	jsonObject.put("origenHashCertificadoVoto", evento.getOrigenHashCertificadoVoto());
         return jsonObject;    
     }
 

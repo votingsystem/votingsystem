@@ -44,6 +44,7 @@ import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -125,12 +126,14 @@ public class VotingService extends Service implements TaskListener {
 							StringUtils.getCadenaNormalizada(receipt.getEventoURL()));
 				    PendingIntent pIntent = PendingIntent.getActivity(
 				    		VotingService.this, 0, intent, 0);
-				    Notification noti = new Notification.Builder(VotingService.this)
-			        .setContentTitle(event.getAsunto())
-			        .setContentText(getString(R.string.voted_lbl) + ": " + event.getOpcionSeleccionada().
+				    NotificationCompat.Builder notBuilder = new NotificationCompat.Builder(VotingService.this)
+			        	.setContentTitle(event.getAsunto())
+			        	.setContentText(getString(R.string.voted_lbl) + ": " + event.getOpcionSeleccionada().
 			        		getContenido()).setSmallIcon(R.drawable.poll_48)
-			        .setContentIntent(pIntent).build();
-					
+			        .setContentIntent(pIntent);
+				    Notification notification = notBuilder.getNotification();
+				    
+				    
 					/*Intent intentSaveVote = new Intent(VotingService.this, VotingEventScreen.class);
 					intentSaveVote.putExtra(VotingEventScreen.INTENT_EXTRA_DIALOG_PROP_NAME, 
 							VotingEventScreen.Operation.SAVE_VOTE);
@@ -152,9 +155,9 @@ public class VotingService extends Service implements TaskListener {
 				        .addAction(R.drawable.cancel_22x22, getString(R.string.cancel_vote_lbl), pIntent)
 				        .addAction(R.drawable.filesave_22x22, getString(R.string.save_receipt_lbl), pIntent).build();*/
 				    // Hide the notification after its selected
-				    noti.flags |= Notification.FLAG_AUTO_CANCEL;
+				    notification.flags |= Notification.FLAG_AUTO_CANCEL;
 				  //notificationManager.notify(/* id */, notification);
-				    notificationManager.notify(receipt.initNotificationId(), noti);
+				    notificationManager.notify(receipt.initNotificationId(), notification);
 				} catch (Exception ex) {
 					Log.e(TAG + ".voteListener.updateData(...)", ex.getMessage(), ex);
 					String msg = getString(R.string.receipt_error_msg) 

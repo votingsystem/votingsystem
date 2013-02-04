@@ -15,7 +15,7 @@
     <Button android:id="@+id/go_app_button"
         android:layout_width="240dip"
         android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/next"
+        android:drawableLeft="@drawable/next_22"
         android:text="@string/go_app_button" />
     
     <Button
@@ -23,7 +23,7 @@
         android:layout_width="240dip"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:drawableLeft="@drawable/signature_ok_22x22"
+        android:drawableLeft="@drawable/signature_ok_22"
         android:text="@string/install_cert_button" />
 
     <Button
@@ -31,7 +31,7 @@
         android:layout_width="240dip"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:drawableLeft="@drawable/reload_32"
+        android:drawableLeft="@drawable/reload_22"
         android:text="@string/request_cert_again_button" />
 
 </LinearLayout>

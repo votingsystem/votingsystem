@@ -76,6 +76,12 @@ class VotoService {
 		def hashCertificadoVotoBase64 = anulacionJSON.hashCertificadoVotoBase64
 		def origenHashSolicitudAcceso = anulacionJSON.origenHashSolicitudAcceso
 		def hashSolicitudAccesoBase64 = anulacionJSON.hashSolicitudAccesoBase64
+		if(!origenHashCertificadoVoto || !hashCertificadoVotoBase64 || 
+			!origenHashSolicitudAcceso || !hashSolicitudAccesoBase64) {
+			return new Respuesta(codigoEstado:400,
+				mensaje:messageSource.getMessage('anulacionVoto.dataError', null, locale))
+		}
+		
 		def hashCertificadoVoto = CMSUtils.obtenerHashBase64(origenHashCertificadoVoto, 
 			"${grailsApplication.config.SistemaVotacion.votingHashAlgorithm}")
 		def hashSolicitud = CMSUtils.obtenerHashBase64(origenHashSolicitudAcceso, 

@@ -142,6 +142,13 @@ public class DeJSONAObjeto {
             evento.setOrigenHashCertificadoVoto(eventoJSON.
             		getString("origenHashCertificadoVoto"));
         }
+        if (eventoJSON.has("opcionSeleccionada")) {
+        	jsonObject = eventoJSON.getJSONObject("opcionSeleccionada");
+        	OpcionDeEvento opcionSeleccionada = new OpcionDeEvento ();
+        	opcionSeleccionada.setId(jsonObject.getLong("id"));
+        	opcionSeleccionada.setContenido(jsonObject.getString("contenido"));
+            evento.setOpcionSeleccionada(opcionSeleccionada);
+        }
         evento.comprobarFechas();
         return evento;
     }

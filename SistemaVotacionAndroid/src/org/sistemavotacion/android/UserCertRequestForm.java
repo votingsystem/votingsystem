@@ -42,29 +42,32 @@ import org.sistemavotacion.util.ServerPaths;
 import org.sistemavotacion.util.StringUtils;
 
 import android.app.AlertDialog;
-import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.telephony.TelephonyManager;
-import android.text.Html;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-
-public class UserCertRequestForm extends SherlockFragmentActivity 
+public class UserCertRequestForm extends FragmentActivity 
 		implements CertPinDialogListener {
 
 	public static final String TAG = "UserCertRequestForm";
@@ -112,23 +115,19 @@ public class UserCertRequestForm extends SherlockFragmentActivity
 		}
     };
     
-    DialogInterface.OnClickListener requestCertClickListener = new DialogInterface.OnClickListener() {
-
-		@Override
-		public void onClick(DialogInterface dialog, int which) {
-			Log.d(TAG + ".cancelRequestCertClickListener.onclick(...) ", " - which:" + which);
-			if(which == DialogInterface.BUTTON_NEGATIVE) {
-				finish();	
-			}
-		}};
     
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
         setTheme(Aplicacion.THEME);
     	super.onCreate(savedInstanceState);
-        Log.d(TAG + ".onCreate(...) ", " - onCreate");
+        Log.d(TAG + ".onCreate(...) ", " - onCreate - ");
         setContentView(R.layout.user_cert_request_form); 
-        setTitle(getApplicationContext().getString(R.string.formulario_solicitud_certificado_label));
+		try {//android api 11 I don't have this method
+			getActionBar().setDisplayHomeAsUpEnabled(true);
+		} catch(NoSuchMethodError ex) {
+			Log.d(TAG + ".setTitle(...)", " --- android api 11 doesn't have method 'setLogo'");
+		}  
+        setTitle(getString(R.string.formulario_solicitud_certificado_label));
         
         Button cancelarButton = (Button) findViewById(R.id.cancelar_button);
         cancelarButton.setOnClickListener(new OnClickListener() {
@@ -139,9 +138,19 @@ public class UserCertRequestForm extends SherlockFragmentActivity
             }
         });      
         nifText = (EditText)findViewById(R.id.nif_edit);
-        
-        nifText.setOnKeyListener(new OnKeyListener() {
+        nifText.setOnEditorActionListener(new OnEditorActionListener(){
+			@Override
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				if (actionId == EditorInfo.IME_ACTION_DONE) {
+		            InputMethodManager imm = (InputMethodManager)v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+		            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+		            return true;	
+		        }
+		        return false;
+			}});
 
+        nifText.setOnKeyListener(new OnKeyListener() {
+        	// android:imeOptions="actionDone" doesn't work
 			@Override
 			public boolean onKey(View v, int keyCode, KeyEvent event) {
 				Log.d(TAG + ".onKey(...)", " - keyCode: " + keyCode);
@@ -152,35 +161,52 @@ public class UserCertRequestForm extends SherlockFragmentActivity
 			}
 
         });
-        
-        
         Button solicitarButton = (Button) findViewById(R.id.solicitar_button);
         solicitarButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             	processNif();
             }
         });
-        if(getIntent().getBooleanExtra(Aplicacion.NEW_CERT_KEY, false)) {
-            Log.d(TAG + ".onCreate(...)", " - Nuevo certificado !!!");
-        	AlertDialog.Builder builder= new AlertDialog.Builder(UserCertRequestForm.this);
-    		builder.setTitle(getString(R.string.
-    				menu_solicitar_certificado));
-    		builder.setMessage(Html.fromHtml(
-    				getString(R.string.request_cert_again_msg)));
-    		builder.setPositiveButton(getString(
-    				R.string.ok_button), requestCertClickListener);
-    		builder.setNegativeButton(getString(
-    				R.string.cancelar_button), requestCertClickListener);
-    		builder.show();
-        }
     }
     
+    @Override public void onStart() {
+    	Log.d(TAG + ".onStart(...) ", " --- onStart --- ");
+    	super.onStart();
+    }
+    
+    @Override //android:configChanges="orientation"
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        Log.d(TAG + ".onConfigurationChanged(...) ", " --- onConfigurationChanged --- ");
+        // Checks the orientation of the screen
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        	Log.d(TAG + ".onConfigurationChanged(...) ", " - ORIENTATION_LANDSCAPE - ");
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+        	Log.d(TAG + ".onConfigurationChanged(...) ", " - ORIENTATION_PORTRAIT - ");
+        }
+      }
+    
+    
+	@Override public boolean onOptionsItemSelected(MenuItem item) {  
+		Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
+		switch (item.getItemId()) {        
+	    	case android.R.id.home:  
+	    		Log.d(TAG + ".onOptionsItemSelected(...) ", " - home - ");
+	    		Intent intent = new Intent(this, FragmentTabsPager.class);   
+	    		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); 
+	    		startActivity(intent);            
+	    		return true;        
+	    	default:            
+	    		return super.onOptionsItemSelected(item);    
+		}
+	}
+	
     private void processNif() {
     	InputMethodManager imm = (InputMethodManager)getSystemService(
   		      Context.INPUT_METHOD_SERVICE);
   		imm.hideSoftInputFromWindow(nifText.getWindowToken(), 0);
       	if (validarFormulario ()) {
-          	showPinScreen(getApplicationContext().getString(
+          	showPinScreen(getString(
           			R.string.keyguard_password_enter_first_pin_code));
       	}
     }
@@ -195,12 +221,8 @@ public class UserCertRequestForm extends SherlockFragmentActivity
     }
     
     private void sendCsrRequest() {
-        progressDialog = getProgressDialog(getApplicationContext().getString(R.string.request_cert_msg));
-    	runOnUiThread(new Runnable() {
-    	    public void run() {
-    	    	progressDialog.show();
-    	    }
-    	});   
+        progressDialog = getProgressDialog(getString(R.string.request_cert_msg));
+        progressDialog.show(); 
         String csr = null;
     	try {
 			pkcs10WrapperClient = PKCS10WrapperClient.buildCSRUsuario (KEY_SIZE, SIG_NAME, 
@@ -256,8 +278,8 @@ public class UserCertRequestForm extends SherlockFragmentActivity
     
     private void showPinScreen(String message) {
     	CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, true);
-		android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
-	    Fragment prev = getFragmentManager().findFragmentByTag("pinDialog");
+		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+	    Fragment prev = getSupportFragmentManager().findFragmentByTag("pinDialog");
 	    if (prev != null) {
 	        ft.remove(prev);
 	    }
@@ -268,22 +290,14 @@ public class UserCertRequestForm extends SherlockFragmentActivity
 	public void manejarExcepcion(String exMessage) {
 		Log.d(TAG + ".manejarExcepcion(...) ", "Message:" + exMessage);
 		AlertDialog.Builder builder= new AlertDialog.Builder(this);
-		builder.setTitle(getApplicationContext().getString(
-				R.string.alert_exception_caption)).setMessage(exMessage)
-				.setPositiveButton("OK", null).show();
+		builder.setTitle(getString(R.string.alert_exception_caption))
+			.setMessage(exMessage).setPositiveButton("OK", null).show();
 	}
 
-	@Override
-	public void setPin(String pin) {
+	@Override public void setPin(String pin) {
 		Log.d(TAG + ".setPin(...) ", " --- pin");
 		password = pin;
 		if(password == null) return;
-		android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
-	    Fragment prev = getFragmentManager().findFragmentByTag("pinDialog");
-	    if (prev != null) {
-	        ft.remove(prev);
-	    }
-	    ft.addToBackStack(null);
 		sendCsrRequest();
 	}
 		

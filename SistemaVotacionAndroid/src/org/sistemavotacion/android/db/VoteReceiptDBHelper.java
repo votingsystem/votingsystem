@@ -113,6 +113,7 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
         //db.delete("repos", "orgId=?", new String[] { Integer.toString(org.getId()) });
         
         //db.delete(DB_TABLE_NOTES, where, whereArgs);
+		db.close();
 	}
 
 	public List<VoteReceipt> getVoteReceiptList() {
@@ -156,6 +157,7 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 				}
 			} while (cursor.moveToNext());
 		}
+		db.close();
 		return voteReceiptList;
 	}
 

@@ -3,22 +3,15 @@ package org.sistemavotacion.android.ui;
 import static org.sistemavotacion.android.Aplicacion.KEY_STORE_FILE;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.sistemavotacion.android.ui.CertPinDialog;
-import org.sistemavotacion.android.ui.CertPinDialogListener;
-import javax.mail.MessagingException;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.sistemavotacion.android.Aplicacion;
 import org.sistemavotacion.android.FragmentTabsPager;
 import org.sistemavotacion.android.R;
-import org.sistemavotacion.android.VotingEventScreen;
-import org.sistemavotacion.android.VotingEventScreen.Operation;
 import org.sistemavotacion.android.db.VoteReceiptDBHelper;
 import org.sistemavotacion.android.service.SignService;
 import org.sistemavotacion.android.service.SignServiceListener;
@@ -30,8 +23,6 @@ import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.ServerPaths;
 
 import android.app.AlertDialog;
-import android.app.Fragment;
-import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -41,7 +32,9 @@ import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.app.FragmentManager;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -49,13 +42,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class VoteReceiptListScreen extends ListActivity 
+public class VoteReceiptListScreen extends FragmentActivity 
 	implements CertPinDialogListener, ReceiptOperationsListener, 
 	SignServiceListener{
 	
@@ -63,6 +58,8 @@ public class VoteReceiptListScreen extends ListActivity
 	
 	public enum Operation {CANCEL_VOTE};
 	
+	private static final String PIN_DIALOG_ID = "pinDialog";
+	private static final String OPTIONS_DIALOG_ID = "optionsDialog";
 	protected VoteReceiptDBHelper db;
 	private List<VoteReceipt> voteReceiptList;
 	private ReceiptListAdapter adapter;
@@ -87,13 +84,48 @@ public class VoteReceiptListScreen extends ListActivity
 		try {
 			getActionBar().setDisplayHomeAsUpEnabled(true);
 			getActionBar().setTitle(getString(R.string.receipt_list_screen_caption));
-			getActionBar().setLogo(R.drawable.receipt_48);
+			getActionBar().setLogo(R.drawable.receipt_32);
 		} catch(NoSuchMethodError ex) {
 			Log.d(TAG + ".onCreate(...)", " --- android api 11 I doesn't have method 'setLogo'");
 		}  
-		getActionBar().setHomeButtonEnabled(true);
-		setListAdapter(adapter);
+        final ListView listView = (ListView) findViewById(R.id.listView);
+        OnItemClickListener clickListener = new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?>  l, View v, int position, long id) {
+				VoteReceipt receipt = ((VoteReceipt) adapter.getItem(position));
+				launchOptionsDialog(receipt);
+			}};
+		listView.setOnItemClickListener(clickListener);
+        listView.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
 	}
+	
+	private void launchOptionsDialog(VoteReceipt receipt) {
+		String caption = receipt.getVoto().getAsunto();
+		String msg = getString(R.string.receipt_options_dialog_msg);
+		ReceiptOptionsDialog optionsDialog = ReceiptOptionsDialog.newInstance(
+				caption, msg, receipt, this);
+		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+	    Fragment prev = getSupportFragmentManager().findFragmentByTag(OPTIONS_DIALOG_ID);
+	    if (prev != null) {
+	        ft.remove(prev);
+	    }
+	    ft.addToBackStack(null);
+	    optionsDialog.show(ft, OPTIONS_DIALOG_ID);
+	}
+	
+
+    private void showPinScreen(String message) {
+    	CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
+		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+	    Fragment prev = getSupportFragmentManager().findFragmentByTag(PIN_DIALOG_ID);
+	    if (prev != null) {
+	        ft.remove(prev);
+	    }
+	    ft.addToBackStack(null);
+	    pinDialog.show(ft, "pinDialog");
+    }
 	
 	private void refreshReceiptList() {
 		Log.d(TAG + ".refreshReceiptList(...)", " --- refreshReceiptList");
@@ -107,21 +139,21 @@ public class VoteReceiptListScreen extends ListActivity
 		adapter.setNotifyOnChange (true);
 	}
 	
-	@Override public void onListItemClick(ListView l, View v, int position, long id) {
+	/*@Override public void onListItemClick(ListView l, View v, int position, long id) {
 		Log.d(TAG +  ".onListItemClick", "Item clicked: " + id);
 		VoteReceipt receipt = ((VoteReceipt) getListAdapter().getItem(position));
 		String caption = receipt.getVoto().getAsunto();
 		String msg = getString(R.string.receipt_options_dialog_msg);
 		ReceiptOptionsDialog optionsDialog = ReceiptOptionsDialog.newInstance(
 				caption, msg, receipt, this);
-		android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
-	    Fragment prev = getFragmentManager().findFragmentByTag("optionsDialog");
+		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+	    Fragment prev = getSupportFragmentManager().findFragmentByTag("optionsDialog");
 	    if (prev != null) {
 	        ft.remove(prev);
 	    }
 	    ft.addToBackStack(null);
 	    optionsDialog.show(ft, "optionsDialog");
-	}
+	}*/
 	
 	@Override public boolean onOptionsItemSelected(MenuItem item) {  
 		Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
@@ -142,18 +174,6 @@ public class VoteReceiptListScreen extends ListActivity
 		getMenuInflater().inflate(R.menu.vote_receipt_list, menu);
 		return true;
 	}
-    
-    private void showPinScreen(String message) {
-    	CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
-		android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
-	    Fragment prev = getFragmentManager().findFragmentByTag("pinDialog");
-	    if (prev != null) {
-	        ft.remove(prev);
-	    }
-	    ft.addToBackStack(null);
-	    pinDialog.show(ft, "pinDialog");
-    }
- 
 	
 	private class VoteReceiptLisAdapter extends ArrayAdapter<VoteReceipt> {
 
@@ -238,10 +258,6 @@ public class VoteReceiptListScreen extends ListActivity
                 }
                 if(dateInfoStr != null) dateInfo.setText(Html.fromHtml(dateInfoStr));
                 else dateInfo.setVisibility(View.GONE);
-
-                
-  
-                
                 
                 Log.d(TAG + ".ReceiptListAdapter.getView(...)", " - fecha fin: " + 
                 		voteReceipt.getVoto().getFechaFin());
@@ -306,6 +322,7 @@ public class VoteReceiptListScreen extends ListActivity
         String signatureContent = jsonObject.toString();     
         String subject = getString(R.string.cancel_vote_msg_subject); 
         String serverURL = ServerPaths.getURLAnulacionVoto(Aplicacion.CONTROL_ACCESO_URL);
+        
         try {
 			FileInputStream fis = openFileInput(KEY_STORE_FILE);
 			byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
@@ -354,10 +371,34 @@ public class VoteReceiptListScreen extends ListActivity
 	public void cancelVote(VoteReceipt receipt) {
 		Log.d(TAG + ".cancelVote(...)", " - cancelVote");
 		operation = Operation.CANCEL_VOTE;
+		operationReceipt = receipt;
 		Intent signServiceIntent = new Intent(this, SignService.class);
 		startService(signServiceIntent);
 		bindService(signServiceIntent, signServiceConnection, BIND_AUTO_CREATE);
-    	showPinScreen(getString(R.string.cancel_vote_msg));
+		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+	    Fragment prev = getSupportFragmentManager().findFragmentByTag(OPTIONS_DIALOG_ID);
+	    if (prev != null) {
+	        ft.remove(prev);
+	    }
+	    ft.addToBackStack(null);
+    	if (!Aplicacion.Estado.CON_CERTIFICADO.equals(Aplicacion.INSTANCIA.getEstado())) {
+    		Log.d(TAG + "- firmarEnviarButton -", " mostrando dialogo certificado no encontrado");
+    		showCertNotFoundDialog();
+    		return;
+    	} else {
+    		showPinScreen(getString(R.string.cancel_vote_msg));
+    	} 
+	}
+	
+	private void showCertNotFoundDialog() {
+		CertNotFoundDialog certDialog = new CertNotFoundDialog();
+		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+	    Fragment prev = getSupportFragmentManager().findFragmentByTag(Aplicacion.CERT_NOT_FOUND_DIALOG_ID);
+	    if (prev != null) {
+	        ft.remove(prev);
+	    }
+	    ft.addToBackStack(null);
+	    certDialog.show(ft, Aplicacion.CERT_NOT_FOUND_DIALOG_ID);
 	}
 
 	@Override
@@ -385,5 +426,16 @@ public class VoteReceiptListScreen extends ListActivity
 					+ new Integer(statusCode).toString();
 		}
 		showMessage(caption, msg);
+	}
+
+	@Override
+	public void removeReceipt(VoteReceipt receipt) {
+		try {
+			db.deleteVoteReceipt(operationReceipt);
+			refreshReceiptList();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
+		
 	}
 }

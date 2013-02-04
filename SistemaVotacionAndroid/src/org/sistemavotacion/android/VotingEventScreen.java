@@ -33,6 +33,7 @@ import org.sistemavotacion.android.service.SignServiceListener;
 import org.sistemavotacion.android.service.VotingService;
 import org.sistemavotacion.android.service.VotingServiceListener;
 import org.sistemavotacion.android.ui.CancelVoteDialog;
+import org.sistemavotacion.android.ui.CertNotFoundDialog;
 import org.sistemavotacion.android.ui.CertPinDialog;
 import org.sistemavotacion.android.ui.CertPinDialogListener;
 import org.sistemavotacion.android.ui.VotingResultDialog;
@@ -46,7 +47,7 @@ import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.ServerPaths;
 
 import android.app.AlertDialog;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
@@ -56,10 +57,13 @@ import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -67,10 +71,7 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.MenuItem;
-
-public class VotingEventScreen extends SherlockFragmentActivity 
+public class VotingEventScreen extends FragmentActivity 
 	implements VotingServiceListener, SignServiceListener,
 	CertPinDialogListener {
 	
@@ -80,8 +81,10 @@ public class VotingEventScreen extends SherlockFragmentActivity
 	public enum Operation {CANCEL_VOTE, SAVE_VOTE, VOTE};
 	
     public static final String INTENT_EXTRA_DIALOG_PROP_NAME = "dialog";
-    public static final String RECEIPT_KEY_PROP_NAME = "receiptKey";
-    public static final int SELECTED_OPTION_MAX_LENGTH = 60;
+    public static final String RECEIPT_KEY_PROP_NAME         = "receiptKey";
+    public static final int SELECTED_OPTION_MAX_LENGTH       = 60;
+    public static final String PIN_DIALOG_ID                 = "pinDialog";
+    
 
     public static Operation operation = Operation.VOTE;
     private Evento evento;
@@ -166,7 +169,7 @@ public class VotingEventScreen extends SherlockFragmentActivity
 		cancelVoteButton.setEnabled(true);
 		saveReceiptButton.setEnabled(true);
 		TextView contenidoTextView = (TextView) findViewById(R.id.contenido_evento);
-		contenidoTextView.setText(Html.fromHtml(receipt.getVoto().getContenido()));
+		contenidoTextView.setText(Html.fromHtml(receipt.getVoto().getContenido()) + "\n");
 		contenidoTextView.setMovementMethod(LinkMovementMethod.getInstance());
 		Set<OpcionDeEvento> opciones = receipt.getVoto().getOpciones();
 		LinearLayout linearLayout = (LinearLayout)findViewById(R.id.option_button_container);
@@ -207,11 +210,11 @@ public class VotingEventScreen extends SherlockFragmentActivity
 		try {
 			reciboVoto.writoToFile(file);
 			AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
-			builder.setTitle(getActivity().getString(R.string.operacion_ok_msg)).
-				setMessage(getActivity().getString(R.string.receipt_file_saved_msg)).show();
+			builder.setTitle(getString(R.string.operacion_ok_msg)).
+				setMessage(getString(R.string.receipt_file_saved_msg)).show();
 		} catch(Exception ex) {
 			AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
-			builder.setTitle(getActivity().getString(R.string.error_lbl)).
+			builder.setTitle(getString(R.string.error_lbl)).
 				setMessage(ex.getMessage()).show();
 		}*/
     	VoteReceiptDBHelper db = new VoteReceiptDBHelper(VotingEventScreen.this);
@@ -253,8 +256,8 @@ public class VotingEventScreen extends SherlockFragmentActivity
 			subject = subject.substring(0, MAX_SUBJECT_SIZE) + " ...";
 		asuntoTextView.setText(subject);
 		TextView contenidoTextView = (TextView) findViewById(R.id.contenido_evento);
-		contenidoTextView.setText(Html.fromHtml(event.getContenido()));
-		contenidoTextView.setMovementMethod(LinkMovementMethod.getInstance());
+		contenidoTextView.setText(Html.fromHtml(event.getContenido()));		
+		//contenidoTextView.setMovementMethod(LinkMovementMethod.getInstance());
 		Set<OpcionDeEvento> opciones = event.getOpciones();
 		LinearLayout linearLayout = (LinearLayout)findViewById(R.id.option_button_container);
 		if(optionButtons != null) linearLayout.removeAllViews();
@@ -271,19 +274,7 @@ public class VotingEventScreen extends SherlockFragmentActivity
 	            	Log.d(TAG + "- opcionButton - opcionId: " + 
 	            			opcionSeleccionada.getId(), "estado: " + 
 	            			Aplicacion.INSTANCIA.getEstado().toString());
-	            	operation = Operation.VOTE;
-	            	event.setOpcionSeleccionada(opcionSeleccionada);
-	            	if (!Aplicacion.Estado.CON_CERTIFICADO.equals(Aplicacion.INSTANCIA.getEstado())) {
-	            		Log.d(TAG + "- firmarEnviarButton -", " mostrando dialogo certificado no encontrado");
-	            		showCertNotFoundDialog();
-	            		return;
-	            	} else {
-	            		String contenido = opcionSeleccionada.getContenido().length() > SELECTED_OPTION_MAX_LENGTH ?
-	        				 opcionSeleccionada.getContenido().substring(0, SELECTED_OPTION_MAX_LENGTH) + 
-	        				 "..." : opcionSeleccionada.getContenido();
-	            		bindService(votingServiceIntent, votingServiceConnection, BIND_AUTO_CREATE);
-	            		showPinScreen(getString(R.string.option_selected_msg, contenido));
-	            	} 
+	            	processSelectedOption(opcionSeleccionada);
 	            }
 	        });
 			optionButtons.add(opcionButton);
@@ -291,6 +282,26 @@ public class VotingEventScreen extends SherlockFragmentActivity
 			linearLayout.addView(opcionButton, paramsButton);		
 
 		}	
+		if(event.getOpcionSeleccionada() != null) 
+			processSelectedOption(event.getOpcionSeleccionada());
+		else Log.d(TAG + ".setEventScreen", "Opción seleccionada nula");
+	}
+	
+	private void processSelectedOption(OpcionDeEvento opcionSeleccionada) {
+		Log.d(TAG + ".processSelectedOption", " -- processSelectedOption");
+    	operation = Operation.VOTE;
+    	evento.setOpcionSeleccionada(opcionSeleccionada);
+    	if (!Aplicacion.Estado.CON_CERTIFICADO.equals(Aplicacion.INSTANCIA.getEstado())) {
+    		Log.d(TAG + "- firmarEnviarButton -", " mostrando dialogo certificado no encontrado");
+    		showCertNotFoundDialog();
+    		return;
+    	} else {
+    		String contenido = opcionSeleccionada.getContenido().length() > SELECTED_OPTION_MAX_LENGTH ?
+				 opcionSeleccionada.getContenido().substring(0, SELECTED_OPTION_MAX_LENGTH) + 
+				 "..." : opcionSeleccionada.getContenido();
+    		bindService(votingServiceIntent, votingServiceConnection, BIND_AUTO_CREATE);
+    		showPinScreen(getString(R.string.option_selected_msg, contenido));
+    	} 
 	}
 	
     @Override public void onResume() {
@@ -311,30 +322,15 @@ public class VotingEventScreen extends SherlockFragmentActivity
     };
     
 	private void showCertNotFoundDialog() {
-    	AlertDialog.Builder builder= new AlertDialog.Builder(VotingEventScreen.this);
-		builder.setTitle(getString(R.string.error_lbl))
-			.setMessage(Html.fromHtml(getString(
-					R.string.certificado_no_encontrado_msg)))
-			.setPositiveButton(R.string.solicitar_label, new DialogInterface.OnClickListener() {
-	            public void onClick(DialogInterface dialog, int whichButton) {
-	            	Intent intent = null;
-	          	  	switch(Aplicacion.INSTANCIA.getEstado()) {
-	          	  		case CON_CSR:
-	          	  			intent = new Intent(getApplicationContext(), UserCertResponseForm.class);
-	          	  			break;
-	          	  		case SIN_CSR:
-	          	  			intent = new Intent(getApplicationContext(), UserCertRequestForm.class);
-	          	  			break;
-	          	  	}
-	          	  	if(intent != null) {
-		          	  	intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		          	    startActivity(intent);
-	          	  	}
-	            }
-				})
-			.setNegativeButton(R.string.cancelar_button, null).show();
+		CertNotFoundDialog certDialog = new CertNotFoundDialog();
+		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+	    Fragment prev = getSupportFragmentManager().findFragmentByTag(Aplicacion.CERT_NOT_FOUND_DIALOG_ID);
+	    if (prev != null) {
+	        ft.remove(prev);
+	    }
+	    ft.addToBackStack(null);
+	    certDialog.show(ft, Aplicacion.CERT_NOT_FOUND_DIALOG_ID);
 	}
-	
 	
 	public void onClickSubject(View v) {
 		Log.d(TAG + ".onClickSubject(...)", " - onClickSubject");
@@ -428,20 +424,20 @@ public class VotingEventScreen extends SherlockFragmentActivity
 	
     private void showPinScreen(String message) {
     	CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
-		android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
-	    Fragment prev = getFragmentManager().findFragmentByTag("pinDialog");
+		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+	    Fragment prev = getSupportFragmentManager().findFragmentByTag(PIN_DIALOG_ID);
 	    if (prev != null) {
 	        ft.remove(prev);
 	    }
 	    ft.addToBackStack(null);
-	    pinDialog.show(ft, "pinDialog");
+	    pinDialog.show(ft, PIN_DIALOG_ID);
     }
 
 	@Override public void setPin(final String pin) {
 		Log.d(TAG + ".setPin()", "--- setPin - operation: " + operation);
 		if(pin != null) {
 	        progressDialog = ProgressDialog.show(VotingEventScreen.this, 
-	        		getString(R.string.back_to_cancel_lbl), 
+	        		getString(R.string.sending_data_caption), 
 	        		getString(R.string.sending_data_lbl), true,
 		            true, new DialogInterface.OnCancelListener() {
 		                @Override

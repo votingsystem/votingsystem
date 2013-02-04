@@ -17,11 +17,11 @@
 package org.sistemavotacion.android.ui;
 
 import org.sistemavotacion.android.R;
-
-import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnKeyListener;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -31,11 +31,9 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
-public class CertPinDialog  extends DialogFragment {
+public class CertPinDialog extends DialogFragment implements OnKeyListener {
 
 	public static final String TAG = "CertPinDialog";
-
-    private CertPinDialogListener dialogListener;
 	
     public CertPinDialog() {
         // Empty constructor required for DialogFragment
@@ -43,31 +41,27 @@ public class CertPinDialog  extends DialogFragment {
     
     private TextView msgTextView;
     private EditText userPinEditText;
-    private String firstPin = null;
-    private Boolean withPasswordConfirm = null;
+    //orientation changes
+    private static CertPinDialogListener listener;
+    private static String firstPin = null;
+    private static Boolean withPasswordConfirm = null;
 
     public static CertPinDialog newInstance(String msg, 
-    		CertPinDialogListener dialogListener, boolean withPasswordConfirm) {
+    		CertPinDialogListener dialogListener, boolean isWithPasswordConfirm) {
     	CertPinDialog dialog = new CertPinDialog();
         Bundle args = new Bundle();
         args.putString("message", msg);
         dialog.setArguments(args);
-        dialog.setListener(dialogListener);
-        dialog.setWithPasswordConfirm(withPasswordConfirm);
+        listener = dialogListener;
+        withPasswordConfirm = isWithPasswordConfirm;
         return dialog;
     }
 
-    private void setListener(CertPinDialogListener dialogListener) {
-    	this.dialogListener = dialogListener;
-    }
-    
-    private void setWithPasswordConfirm(Boolean withPasswordConfirm) {
-    	this.withPasswordConfirm = withPasswordConfirm;
-    }
-    
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
+    	Log.d(TAG + ".onCreateView(...) ", " - onCreateView -");
         View view = inflater.inflate(R.layout.cert_pin_dialog, container, false);
         msgTextView = (TextView) view.findViewById(R.id.msg);
         userPinEditText = (EditText)view.findViewById(R.id.user_pin);
@@ -79,52 +73,34 @@ public class CertPinDialog  extends DialogFragment {
         	msgTextView.setVisibility(View.VISIBLE);
         	msgTextView.setText(getArguments().getString("message"));
         }
-        getDialog().setOnKeyListener(new OnKeyListener() {
-
-			@Override
-			public boolean onKey(DialogInterface dialog, int keyCode,
-					KeyEvent event) {
-				//OnKey is fire twice: the first time for key down, and the second time for key up, 
-				//so you have to filter:
-				if (event.getAction()!=KeyEvent.ACTION_DOWN)
-                    return true;
-				Log.d(TAG + ".onKey(...) ", " - keyCode: " + keyCode);
-                if (keyCode == KeyEvent.KEYCODE_BACK) {
-                	Log.d(TAG + ".onKey(...) ", " - KEYCODE_BACK KEYCODE_BACK ");
-                    dialog.dismiss();
-                }
-                //if (keyCode == KeyEvent.KEYCODE_DEL) { } 
-                if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                	Log.d(TAG + ".onKey(...) ", " - KEYCODE_ENTER");
-                	String pin = userPinEditText.getText().toString();
-                	if(pin != null && pin.length() ==4) {
-                		setPin(pin);
-                	} 
-                }
-                //True if the listener has consumed the event, false otherwise.
-				return false;
-			}
-
-        });
+        getDialog().setOnKeyListener(this);
+        setRetainInstance(true);
         /*int width = getResources().getDimensionPixelSize(R.dimen.cert_pin_dialog_width);
         int height = getResources().getDimensionPixelSize(R.dimen.cert_pin_dialog_height);        
         getDialog().getWindow().setLayout(width, height);*/
         firstPin = null;
         return view;
     }
+  
+    
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+    	//super.onConfigurationChanged(newConfig);
+    	Log.d(TAG + ".onConfigurationChanged(...) ", " - onConfigurationChanged");
+    }
     
     private void setPin(String pin) {
     	if(withPasswordConfirm) {
     		if(firstPin == null) {
     			firstPin = pin;
-    			msgTextView.setText(getActivity().getString(R.string.repeat_password));
+    			msgTextView.setText(getString(R.string.repeat_password));
     			userPinEditText.setText("");
     			return;
     		} else {
     			if (!firstPin.equals(pin)) {
     				firstPin = null;
         			userPinEditText.setText("");
-    				msgTextView.setText(getActivity().getString(R.string.password_mismatch));
+    				msgTextView.setText(getString(R.string.password_mismatch));
     				return;
     			} 
     		}
@@ -133,6 +109,29 @@ public class CertPinDialog  extends DialogFragment {
     	InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(
   		      getActivity().INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(userPinEditText.getWindowToken(), 0);
-		dialogListener.setPin(pin);
+		listener.setPin(pin);
     }
+
+
+	@Override
+	public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+		//OnKey is fire twice: the first time for key down, and the second time for key up, 
+		//so you have to filter:
+		if (event.getAction()!=KeyEvent.ACTION_DOWN)
+            return true;
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+        	Log.d(TAG + ".onKey(...) ", " - KEYCODE_BACK KEYCODE_BACK ");
+            dialog.dismiss();
+        }
+        //if (keyCode == KeyEvent.KEYCODE_DEL) { } 
+        if (keyCode == KeyEvent.KEYCODE_ENTER) {
+        	Log.d(TAG + ".onKey(...) ", " - KEYCODE_ENTER");
+        	String pin = userPinEditText.getText().toString();
+        	if(pin != null && pin.length() ==4) {
+        		setPin(pin);
+        	} 
+        }
+        //True if the listener has consumed the event, false otherwise.
+		return false;
+	}
 }

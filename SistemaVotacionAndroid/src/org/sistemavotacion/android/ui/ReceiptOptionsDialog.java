@@ -9,7 +9,9 @@ import org.sistemavotacion.android.R;
 import org.sistemavotacion.android.service.SignService;
 import org.sistemavotacion.modelo.VoteReceipt;
 
-import android.app.DialogFragment;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -30,19 +32,15 @@ public class ReceiptOptionsDialog  extends DialogFragment {
         // Empty constructor required for DialogFragment
     }
     
-    private VoteReceipt receipt;
-    private TextView msgTextView;
-    private Button cancelVoteButton;
-    private Button openReceiptButton;
-	private SignService signService = null;
-	private ReceiptOperationsListener listener = null;
+    private static VoteReceipt receipt;
+	private static ReceiptOperationsListener listener = null;
 	
     public static ReceiptOptionsDialog newInstance(String caption, 
-    		String msg, VoteReceipt receipt, ReceiptOperationsListener listener) {
+    		String msg, VoteReceipt voteReceipt, ReceiptOperationsListener operationsListener) {
     	ReceiptOptionsDialog receiptOptionsDialog = new ReceiptOptionsDialog();
         Bundle args = new Bundle();
-        receiptOptionsDialog.setVoteReceipt(receipt);
-        receiptOptionsDialog.setListener(listener);
+        receipt = voteReceipt;
+        listener = operationsListener;
         args.putString("caption", caption);
         if(msg != null && msg.length() > MAX_MSG_LENGTH)
         	msg = msg.substring(0, MAX_MSG_LENGTH) + "...";
@@ -51,29 +49,19 @@ public class ReceiptOptionsDialog  extends DialogFragment {
         return receiptOptionsDialog;
     }
     
-    private void setVoteReceipt(VoteReceipt receipt) {
-    	this.receipt = receipt;
-    }
-    
-    private void setListener(ReceiptOperationsListener listener) {
-    	this.listener = listener;
-    }
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.receipt_options_dialog, container);
-        msgTextView = (TextView) view.findViewById(R.id.msg);
-        cancelVoteButton = (Button) view.findViewById(R.id.cancel_vote_button);
+        TextView msgTextView = (TextView) view.findViewById(R.id.msg);
+        final Button cancelVoteButton = (Button) view.findViewById(R.id.cancel_vote_button);
         cancelVoteButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
             	cancelVoteButton.setEnabled(false);
             	listener.cancelVote(receipt);
-            	getDialog().dismiss();
             }  
         });
-        openReceiptButton = (Button) view.findViewById(R.id.open_receipt_button);
+        Button openReceiptButton = (Button) view.findViewById(R.id.open_receipt_button);
         openReceiptButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
             	try {
@@ -93,6 +81,14 @@ public class ReceiptOptionsDialog  extends DialogFragment {
             	}
             }  
         });
+        
+        Button removeReceiptButton = (Button) view.findViewById(R.id.remove_receipt_button);
+        openReceiptButton.setOnClickListener(new Button.OnClickListener() {
+            public void onClick(View v) {
+            	listener.removeReceipt(receipt);
+            }
+        });
+ 
         
         if(getArguments().getString("caption") != null) {
         	getDialog().setTitle(getArguments().getString("caption"));

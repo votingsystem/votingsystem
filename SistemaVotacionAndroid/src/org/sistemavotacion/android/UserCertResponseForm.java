@@ -39,7 +39,8 @@ import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.ServerPaths;
 
 import android.app.AlertDialog;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -47,17 +48,18 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
 
-public class UserCertResponseForm extends SherlockFragmentActivity 
+public class UserCertResponseForm extends FragmentActivity 
 	implements CertPinDialogListener {
 	
 	public static final String TAG = "UserCertResponseForm";
@@ -103,26 +105,19 @@ public class UserCertResponseForm extends SherlockFragmentActivity
 		}
     };
     
-    DialogInterface.OnClickListener requestCertClickListener = new DialogInterface.OnClickListener() {
-
-		@Override
-		public void onClick(DialogInterface dialog, int which) {
-			Log.d(TAG + ".requestCertClickListener.onclick(...) ", " - which:" + which);
-			if(which == DialogInterface.BUTTON_POSITIVE) {
-				Intent intent = new Intent(getApplicationContext(), 
-						UserCertRequestForm.class);
-		    	startActivity(intent);	
-			}
-		}};
-	
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
         setTheme(Aplicacion.THEME);
     	super.onCreate(savedInstanceState);
         Log.d(TAG + ".onCreate(...) ", " - onCreate");
-        setContentView(R.layout.user_cert_response_screen);                
+        setContentView(R.layout.user_cert_response_screen);  
+		try {//android api 11 I don't have this method
+			getActionBar().setDisplayHomeAsUpEnabled(true);
+		} catch(NoSuchMethodError ex) {
+			Log.d(TAG + ".setTitle(...)", " --- android api 11 doesn't have method 'setLogo'");
+		}  
         goAppButton = (Button) findViewById(R.id.go_app_button);
-        goAppButton.setVisibility(View.INVISIBLE);
+        goAppButton.setVisibility(View.GONE);
         goAppButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             	Intent intent = new Intent(getApplicationContext(), FragmentTabsPager.class);
@@ -130,26 +125,30 @@ public class UserCertResponseForm extends SherlockFragmentActivity
             }
         });
         insertPinButton = (Button) findViewById(R.id.insert_pin_button);
-        insertPinButton.setVisibility(View.INVISIBLE);
+        insertPinButton.setVisibility(View.GONE);
         insertPinButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             	showPinScreen(getString(R.string.enter_pin_import_cert_msg));
             }
         });
         requestCertButton = (Button) findViewById(R.id.request_cert_button);
-        requestCertButton.setVisibility(View.INVISIBLE);
+        //requestCertButton.setVisibility(View.GONE);
         requestCertButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-            	AlertDialog.Builder builder= new AlertDialog.Builder(UserCertResponseForm.this);
-        		builder.setTitle(getString(R.string.
-        				menu_solicitar_certificado));
-        		builder.setMessage(Html.fromHtml(
-        				getString(R.string.request_cert_again_msg)));
-        		builder.setPositiveButton(getString(
-        				R.string.ok_button), requestCertClickListener);
-        		builder.setNegativeButton(getString(
-        				R.string.cancelar_button), requestCertClickListener);
-        		builder.show();
+            	Intent intent = null;
+          	  	switch(Aplicacion.INSTANCIA.getEstado()) {
+			    	case SIN_CSR:
+			    		intent = new Intent(getApplicationContext(), Aplicacion.class);
+			    		break;
+			    	case CON_CSR:
+			    	case CON_CERTIFICADO:
+			    		intent = new Intent(getApplicationContext(), UserCertRequestForm.class);
+			    		break;
+          	  	}
+          	  	if(intent != null) {
+	          	  	intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+	            	startActivity(intent);
+          	  	}
             }
         });
 
@@ -173,10 +172,24 @@ public class UserCertResponseForm extends SherlockFragmentActivity
     			CONTROL_ACCESO_URL, String.valueOf(idSolicitudCSR)));
     }
     
+	@Override public boolean onOptionsItemSelected(MenuItem item) {  
+		Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
+		switch (item.getItemId()) {        
+	    	case android.R.id.home:  
+	    		Log.d(TAG + ".onOptionsItemSelected(...) ", " - home - ");
+	    		Intent intent = new Intent(this, FragmentTabsPager.class);   
+	    		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); 
+	    		startActivity(intent);            
+	    		return true;        
+	    	default:            
+	    		return super.onOptionsItemSelected(item);    
+		}
+	}
+	
     private void showPinScreen(String message) {
     	CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
-		android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
-	    Fragment prev = getFragmentManager().findFragmentByTag("pinDialog");
+		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+	    Fragment prev = getSupportFragmentManager().findFragmentByTag("pinDialog");
 	    if (prev != null) {
 	        ft.remove(prev);
 	    }

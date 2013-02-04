@@ -55,29 +55,29 @@ import org.sistemavotacion.util.PdfUtils;
 import org.sistemavotacion.util.ServerPaths;
 
 import android.app.AlertDialog;
-import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
-
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.itextpdf.text.pdf.PdfReader;
 
-public class EventScreen extends SherlockFragmentActivity 
+public class EventScreen extends FragmentActivity 
 	implements CertPinDialogListener {
 	
 	public static final String TAG = "EventScreen";
@@ -122,7 +122,11 @@ public class EventScreen extends SherlockFragmentActivity
 		asuntoTextView.setText(subject);
 		TextView contenidoTextView = (TextView) findViewById(R.id.contenido_evento);
 		//getActionBar().setHomeButtonEnabled(true);
-		getActionBar().setDisplayHomeAsUpEnabled(true);
+		try {//android api 11 I don't have this method
+			getActionBar().setDisplayHomeAsUpEnabled(true);
+		} catch(NoSuchMethodError ex) {
+			Log.d(TAG + ".setTitle(...)", " --- android api 11 doesn't have method 'setLogo'");
+		}  
 		contenidoTextView.setText(Html.fromHtml(evento.getContenido()));
 		contenidoTextView.setMovementMethod(LinkMovementMethod.getInstance());
 		firmarEnviarButton = (Button) findViewById(R.id.firmar_enviar_button);
@@ -409,8 +413,8 @@ public class EventScreen extends SherlockFragmentActivity
 	
     private void showPinScreen(String message) {
     	CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
-		android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
-	    Fragment prev = getFragmentManager().findFragmentByTag("pinDialog");
+		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+	    Fragment prev = getSupportFragmentManager().findFragmentByTag("pinDialog");
 	    if (prev != null) {
 	        ft.remove(prev);
 	    }

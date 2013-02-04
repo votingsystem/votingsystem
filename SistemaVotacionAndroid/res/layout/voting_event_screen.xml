@@ -59,24 +59,27 @@
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
 		android:fillViewport="true" >
-			<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+			<LinearLayout
+			    xmlns:android="http://schemas.android.com/apk/res/android"
 			    android:id="@+id/contenedor_evento"
-				android:layout_width="fill_parent"
-				android:layout_height="fill_parent"
-				android:padding="10dp"
-				android:orientation="vertical">
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:orientation="vertical"
+			    android:padding="10dp" >
 
 				<TextView
 				    android:id="@+id/contenido_evento"
 				    android:layout_width="fill_parent"
 				    android:layout_height="fill_parent"
+    			    android:minHeight="100dp"
 				    android:layout_weight="1.0"
 				    android:textSize="20sp" />
 							
 				<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
 				    android:id="@+id/option_button_container"
     				android:layout_width="fill_parent"
-					android:layout_height="fill_parent"
+					android:layout_height="wrap_content"
 					android:padding="10dp"
 					android:orientation="vertical"/>
 
