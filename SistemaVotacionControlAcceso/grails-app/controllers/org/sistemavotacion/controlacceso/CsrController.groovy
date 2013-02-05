@@ -164,7 +164,7 @@ class CsrController {
 		}
 		log.debug ("consulta: ${consulta}")
 		def consultaJSON = JSON.parse(consulta)
-		Dispositivo dispositivo = Dispositivo.findByDeviceId(consultaJSON?.deviceId)
+		Dispositivo dispositivo = Dispositivo.findByDeviceId(consultaJSON?.deviceId?.trim())
 		if (!dispositivo) {
 			response.status = 400
 			render message(code: "csr.solicitudNoEncontrada", args: ["deviceId: ${consultaJSON?.deviceId}"])

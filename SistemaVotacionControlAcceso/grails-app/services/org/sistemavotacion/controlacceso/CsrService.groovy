@@ -45,7 +45,7 @@ class CsrService {
 			if (!serverURL.equals(controlAccesoURL)) {
 				respuesta.codigoEstado = 400
 				respuesta.mensaje = messageSource.getMessage(
-					'error.urlControlAccesoWrong', [controlAccesoURL].toArray(), locale)
+					'error.urlControlAccesoWrong', [serverURL, controlAccesoURL].toArray(), locale)
 				log.error(respuesta.mensaje)
 				return respuesta
 			}	

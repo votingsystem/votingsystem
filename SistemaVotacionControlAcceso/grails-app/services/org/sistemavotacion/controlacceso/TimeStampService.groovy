@@ -89,7 +89,7 @@ class TimeStampService {
 		PrivateKey signingKey = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray());
 		X509Certificate signingCert = keyStore.getCertificate(aliasClaves)
 		Certificate[] chain = keyStore.getCertificateChain(aliasClaves);
-		Store certs = new JcaCertStore(Arrays.asList(chain));		
+		Store certs = new JcaCertStore(Arrays.asList(chain));
 		JcaSignerInfoGeneratorBuilder infoGeneratorBuilder = new JcaSignerInfoGeneratorBuilder(
 			new JcaDigestCalculatorProviderBuilder().setProvider(BC).build());
 		TimeStampTokenGenerator timeStampTokenGen = new TimeStampTokenGenerator(infoGeneratorBuilder.build(
@@ -113,24 +113,24 @@ class TimeStampService {
 	
 	/*Method to Tests*/
 	void inicializarTest() {
-        log.debug("TimeStampService - inicializarTest");
+		log.debug("TimeStampService - inicializarTest");
 		sernoGenerator = SernoGenerator.instance(messageSource);
-        String authorityDN = "O=Sistema de Votación, C=ES";
-        KeyPair authorityKP = TSPTestUtil.makeKeyPair();
-        X509Certificate authorityCert = TSPTestUtil.makeCACertificate(authorityKP,
-                authorityDN, authorityKP, authorityDN);
-        String signingDN = "CN=, E=jgzornoza@gmail.com, O=Sistema de Votación, C=ES";
-        KeyPair signingKP = TSPTestUtil.makeKeyPair();
+		String authorityDN = "O=Sistema de Votación, C=ES";
+		KeyPair authorityKP = TSPTestUtil.makeKeyPair();
+		X509Certificate authorityCert = TSPTestUtil.makeCACertificate(authorityKP,
+				authorityDN, authorityKP, authorityDN);
+		String signingDN = "CN=, E=jgzornoza@gmail.com, O=Sistema de Votación, C=ES";
+		KeyPair signingKP = TSPTestUtil.makeKeyPair();
 		X509Certificate signingCert = TSPTestUtil.makeCertificate(signingKP, signingDN, authorityKP, authorityDN);
-        PrivateKey signingKey = signingKP.getPrivate();
+		PrivateKey signingKey = signingKP.getPrivate();
 		List certList = new ArrayList();
-        certList.add(signingCert);
-        certList.add(authorityCert);
-        Store certs = new JcaCertStore(certList);
+		certList.add(signingCert);
+		certList.add(authorityCert);
+		Store certs = new JcaCertStore(certList);
 		JcaSignerInfoGeneratorBuilder infoGeneratorBuilder = new JcaSignerInfoGeneratorBuilder(
 			new JcaDigestCalculatorProviderBuilder().setProvider(BC).build());
 		TimeStampTokenGenerator timeStampTokenGen = new TimeStampTokenGenerator(infoGeneratorBuilder.build(
-			new JcaContentSignerBuilder(SIGNATURE_ALGORITHM).setProvider(BC).build(signingKey), signingCert), 
+			new JcaContentSignerBuilder(SIGNATURE_ALGORITHM).setProvider(BC).build(signingKey), signingCert),
 			new ASN1ObjectIdentifier(DEFAULT_TSA_POLICY_OID));
 		timeStampTokenGen.setAccuracyMicros(ACCURACYMICROS);
 		timeStampTokenGen.setAccuracyMillis(ACCURACYMILLIS);
@@ -143,14 +143,14 @@ class TimeStampService {
 	}
 	
 	
-	public Respuesta processRequest(byte[] timeStampRequestBytes, 
+	public Respuesta processRequest(byte[] timeStampRequestBytes,
 			Locale locale) throws Exception {
 		log.debug("processRequest")
 		if(!timeStampRequestBytes) return
 		try {
-			if(!timeStampResponseGen) inicializarTest()
+			if(!timeStampResponseGen) inicializar()
 			String timeStampRequestStr = new String(Base64.encode(timeStampRequestBytes));
-			TimeStampRequest timeStampRequest = new TimeStampRequest(timeStampRequestBytes)		
+			TimeStampRequest timeStampRequest = new TimeStampRequest(timeStampRequestBytes)
 			final Date date = DateUtils.getTodayDate();
 			final BigInteger serialNumber = sernoGenerator.getSerialNumber();
 			log.debug("processRequest - serialNumber: '${serialNumber.longValue()}'" );
@@ -176,7 +176,7 @@ class TimeStampService {
 			}
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex)
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
 				mensaje:messageSource.getMessage('error.timeStampGeneration', null, locale))
 		}
 	}
@@ -208,4 +208,37 @@ class TimeStampService {
 		log.debug("-- getAcceptedExtensions: " + acceptedExtensions?.toArray())
 		return acceptedExtensions;
 	}
+	
+	private static class MyChecker
+	extends PKIXCertPathChecker
+ {
+	 private static int count;
+
+	 public void init(boolean forward)
+	 throws CertPathValidatorException
+	 {
+		 //To change body of implemented methods use File | Settings | File Templates.
+	 }
+
+	 public boolean isForwardCheckingSupported()
+	 {
+		 return true;
+	 }
+
+	 public Set getSupportedExtensions()
+	 {
+		 return null;
+	 }
+
+	 public void check(Certificate cert, Collection unresolvedCritExts)
+	 throws CertPathValidatorException
+	 {
+		 count++;
+	 }
+
+	 public int getCount()
+	 {
+		return count;
+	 }
+ }
 }

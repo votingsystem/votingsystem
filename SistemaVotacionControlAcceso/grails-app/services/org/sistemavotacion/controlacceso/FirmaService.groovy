@@ -293,6 +293,7 @@ class FirmaService {
 		Set<Usuario> firmantes = messageWrapper.getFirmantes();
 		if(firmantes.size() == 0) return new Respuesta(
 			codigoEstado:400, mensaje:"Documento sin firmantes")
+		if(!eventTrustedCertsHashMap) inicializar();
 		Set<X509Certificate> eventTrustedCerts = eventTrustedCertsHashMap.get(evento?.id)
 		if(!eventTrustedCerts) {
 			Certificado certificadoCAEvento = Certificado.findWhere(

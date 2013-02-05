@@ -17,8 +17,8 @@ class BootStrap {
             return it?.format("yyyy-MM-dd' 'HH:mm:ss")
         }
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-        firmaService.inicializar()
-		pdfService.inicializar()
+        //firmaService.inicializar()
+		//pdfService.inicializar()
     }
 	
     def destroy = {}

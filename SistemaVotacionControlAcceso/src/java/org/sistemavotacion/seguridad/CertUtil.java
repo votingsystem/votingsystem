@@ -8,7 +8,6 @@ import java.io.OutputStreamWriter;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -18,21 +17,17 @@ import java.security.PublicKey;
 import java.security.SignatureException;
 import java.security.cert.CRLException;
 import java.security.cert.CertPath;
-import java.security.cert.CertPathBuilder;
-import java.security.cert.CertPathBuilderException;
 import java.security.cert.CertPathValidator;
+import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertPathValidatorResult;
-import java.security.cert.CertStore;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-import java.security.cert.CollectionCertStoreParameters;
-import java.security.cert.PKIXBuilderParameters;
-import java.security.cert.PKIXCertPathBuilderResult;
+import java.security.cert.PKIXCertPathChecker;
 import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CRL;
-import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,7 +36,9 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.security.auth.x500.X500Principal;
+
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cms.Attribute;
@@ -56,7 +53,6 @@ import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.x509.X509V1CertificateGenerator;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
-import java.security.cert.CertificateException;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
 import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
 import org.slf4j.Logger;
@@ -241,6 +237,10 @@ public class CertUtil {
             anchors.add(anchor);
         }
         PKIXParameters params = new PKIXParameters(anchors);
+        
+        SVCertExtensionChecker checker = new SVCertExtensionChecker();
+        params.addCertPathChecker(checker);        
+        
         params.setRevocationEnabled(checkCRL); // if false tell system do not check CRL's
         CertPathValidator certPathValidator
             = CertPathValidator.getInstance("PKIX","BC");
@@ -298,6 +298,40 @@ public class CertUtil {
 		} finally {
 			crlStream.close();
 		}
+	}
+	
+	//To bypass id_kp_timeStamping ExtendedKeyUsage exception
+	private static class SVCertExtensionChecker extends PKIXCertPathChecker {
+		
+		Set supportedExtensions;
+		
+		SVCertExtensionChecker() {
+			supportedExtensions = new HashSet();
+			supportedExtensions.add(X509Extensions.ExtendedKeyUsage);
+		}
+		
+		public void init(boolean forward) throws CertPathValidatorException {
+		 //To change body of implemented methods use File | Settings | File Templates.
+	    }
+
+		public boolean isForwardCheckingSupported(){
+			return true;
+		}
+
+		public Set getSupportedExtensions()	{
+			return null;
+		}
+
+		public void check(Certificate cert, Collection<String> unresolvedCritExts)
+				throws CertPathValidatorException {
+			for(String ext : unresolvedCritExts) {
+				if(X509Extensions.ExtendedKeyUsage.toString().equals(ext)) {
+					logger.debug("------------- ExtendedKeyUsage removed from validation");
+					unresolvedCritExts.remove(ext);
+				}
+			}
+		}
+
 	}
 	
 }

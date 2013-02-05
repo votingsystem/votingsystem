@@ -140,9 +140,7 @@ public class SernoGenerator {
 					&& (serno.compareTo(highest) <= 0)) {
 				ok = true;
 			} else {
-			    String[] msgArgs = {new String(serno.toByteArray())};
-				String msg = messageSource.getMessage("", msgArgs, null);
-				logger.info(msg);
+				logger.info("--- discarding seno -> " + new String(serno.toByteArray()));
 			}
 		}
 		return serno;

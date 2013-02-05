@@ -18,9 +18,11 @@ import java.security.SignatureException;
 import java.security.cert.CRLException;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathValidator;
+import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertPathValidatorResult;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.PKIXCertPathChecker;
 import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
@@ -197,6 +199,10 @@ public class CertUtil {
         }
         PKIXParameters params = new PKIXParameters(anchors);
         params.setRevocationEnabled(false); // tell system do not check CRL's
+        
+        SVCertExtensionChecker checker = new SVCertExtensionChecker();
+        params.addCertPathChecker(checker);   
+        
         CertPathValidator certPathValidator
             = CertPathValidator.getInstance("PKIX","BC");
         List<Certificate> certificates = new ArrayList<Certificate>();
@@ -287,5 +293,39 @@ public class CertUtil {
         X509Certificate cert = certificateChain.iterator().next();
         return cert;
     }
+    
+	//To bypass id_kp_timeStamping ExtendedKeyUsage exception
+	private static class SVCertExtensionChecker extends PKIXCertPathChecker {
+		
+		Set supportedExtensions;
+		
+		SVCertExtensionChecker() {
+			supportedExtensions = new HashSet();
+			supportedExtensions.add(X509Extensions.ExtendedKeyUsage);
+		}
+		
+		public void init(boolean forward) throws CertPathValidatorException {
+		 //To change body of implemented methods use File | Settings | File Templates.
+	    }
+
+		public boolean isForwardCheckingSupported(){
+			return true;
+		}
+
+		public Set getSupportedExtensions()	{
+			return null;
+		}
+
+		public void check(Certificate cert, Collection<String> unresolvedCritExts)
+				throws CertPathValidatorException {
+			for(String ext : unresolvedCritExts) {
+				if(X509Extensions.ExtendedKeyUsage.toString().equals(ext)) {
+					logger.debug("------------- ExtendedKeyUsage removed from validation");
+					unresolvedCritExts.remove(ext);
+				}
+			}
+		}
+
+	}
     
 }
