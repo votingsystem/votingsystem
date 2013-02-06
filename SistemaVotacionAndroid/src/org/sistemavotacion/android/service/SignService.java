@@ -100,7 +100,7 @@ public class SignService extends Service implements TaskListener {
 							+ ": " + ex.getMessage();
 					setException(msg);
 				}
-	        } else setException(response);
+	        } else signServiceListener.setSignServiceMsg(statusCode, response);;
 		}
 		
     	@Override public void setException(String exceptionMsg) {

@@ -294,18 +294,18 @@ public class Operation {
     }
 
     public JSONObject obtenerJSON () throws JSONException {
-        Map map = new HashMap();
-        if(codigoEstado != null) map.put("codigoEstado", codigoEstado);
-        if(mensaje != null) map.put("mensaje", mensaje);
-        if(tipo != null) map.put("operacion", tipo.toString());
-        if(urlDocumento != null) map.put("urlDocumento", urlDocumento);
-        if(urlEnvioDocumento != null) map.put("urlEnvioDocumento", urlEnvioDocumento);
-        if(asuntoMensajeFirmado != null) map.put("asuntoMensajeFirmado", urlEnvioDocumento);
-        if(nombreDestinatarioFirma != null) map.put("nombreDestinatarioFirma", nombreDestinatarioFirma);
-        if(respuestaConRecibo != null) map.put("respuestaConRecibo", respuestaConRecibo);
-         if(urlTimeStampServer != null) map.put("urlTimeStampServer", urlTimeStampServer);
-        if(args != null) map.put("args", args);
-        JSONObject jsonObject = new JSONObject(map);
+    	JSONObject jsonObject = new JSONObject();
+        if(codigoEstado != null) jsonObject.put("codigoEstado", codigoEstado);
+        if(mensaje != null) jsonObject.put("mensaje", mensaje);
+        if(tipo != null) jsonObject.put("operacion", tipo.toString());
+        if(urlDocumento != null) jsonObject.put("urlDocumento", urlDocumento);
+        if(urlEnvioDocumento != null) jsonObject.put("urlEnvioDocumento", urlEnvioDocumento);
+        if(asuntoMensajeFirmado != null) jsonObject.put("asuntoMensajeFirmado", urlEnvioDocumento);
+        if(nombreDestinatarioFirma != null) jsonObject.put("nombreDestinatarioFirma", nombreDestinatarioFirma);
+        if(respuestaConRecibo != null) jsonObject.put("respuestaConRecibo", respuestaConRecibo);
+         if(urlTimeStampServer != null) jsonObject.put("urlTimeStampServer", urlTimeStampServer);
+        if(args != null) jsonObject.put("args", args);
+        
         if(evento != null) jsonObject.put("evento", evento.obtenerJSON());
         return jsonObject;
     }

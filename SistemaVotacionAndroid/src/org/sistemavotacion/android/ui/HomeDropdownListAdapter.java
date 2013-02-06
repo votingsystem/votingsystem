@@ -56,24 +56,26 @@ public class HomeDropdownListAdapter extends BaseAdapter {
         }
         TextView itemSubject = (TextView) v.findViewById(R.id.system_subject);
         ImageView imgView = (ImageView)v.findViewById(R.id.system_icon);
-        switch(position) {
-        	case ACTION_VOTING:
-        		itemSubject.setText(Aplicacion.INSTANCIA.
-        				getSubsystemDesc(SubSystem.VOTING));
-        		imgView.setImageResource(R.drawable.poll_32);
-        		break;
-        	case ACTION_MANIFEST:
-        		itemSubject.setText(Aplicacion.INSTANCIA.
-        				getSubsystemDesc(SubSystem.MANIFESTS));
-        		imgView.setImageResource(R.drawable.manifest_32);
-        		break;
-        	case ACTION_CLAIM:
-        		itemSubject.setText(Aplicacion.INSTANCIA.
-        				getSubsystemDesc(SubSystem.CLAIMS));
-        		imgView.setImageResource(R.drawable.filenew_32);
-        		break;
-        	default:
-        		imgView.setImageResource(R.drawable.machine);
+        if(Aplicacion.INSTANCIA != null) {
+            switch(position) {
+	        	case ACTION_VOTING:
+	        		itemSubject.setText(Aplicacion.INSTANCIA.
+	        				getSubsystemDesc(SubSystem.VOTING));
+	        		imgView.setImageResource(R.drawable.poll_32);
+	        		break;
+	        	case ACTION_MANIFEST:
+	        		itemSubject.setText(Aplicacion.INSTANCIA.
+	        				getSubsystemDesc(SubSystem.MANIFESTS));
+	        		imgView.setImageResource(R.drawable.manifest_32);
+	        		break;
+	        	case ACTION_CLAIM:
+	        		itemSubject.setText(Aplicacion.INSTANCIA.
+	        				getSubsystemDesc(SubSystem.CLAIMS));
+	        		imgView.setImageResource(R.drawable.filenew_32);
+	        		break;
+	        	default:
+	        		imgView.setImageResource(R.drawable.machine);
+	        }	
         }
         return v;
 	}

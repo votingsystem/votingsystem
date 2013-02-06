@@ -28,7 +28,6 @@ import org.sistemavotacion.json.DeJSONAObjeto;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Consulta;
 import org.sistemavotacion.modelo.Evento;
-import org.sistemavotacion.modelo.OpcionDeEvento;
 import org.sistemavotacion.modelo.Operation;
 import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.task.DataListener;
@@ -97,6 +96,7 @@ public class Aplicacion extends FragmentActivity {
     public static final String SISTEMA_VOTACION_DIR = "SistemaVotacion";
     
     public static final String CERT_NOT_FOUND_DIALOG_ID      = "certNotFoundDialog";
+    public static final String PIN_DIALOG_ID                 = "pinDialog";
     
     private SubSystem selectedSubsystem = SubSystem.VOTING;
     private List<SubSystemChangeListener> subSystemChangeListeners = new ArrayList<SubSystemChangeListener>();
@@ -304,7 +304,7 @@ public class Aplicacion extends FragmentActivity {
     
 	private void showMessage(final String caption, final String message) {
 		Log.d(TAG + ".showMessage(...)", " - caption: " + caption + 
-				" - message: " + message + " isDestroyed(): " + isDestroyed());
+				" - message: " + message);
     	runOnUiThread(new Runnable() {
     	    public void run() {
     	    	Toast.makeText(Aplicacion.this, message, Toast.LENGTH_LONG).show();

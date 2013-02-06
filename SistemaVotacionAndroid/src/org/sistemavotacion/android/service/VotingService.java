@@ -3,6 +3,7 @@ package org.sistemavotacion.android.service;
 import static org.sistemavotacion.android.Aplicacion.ALIAS_CERT_USUARIO;
 import static org.sistemavotacion.android.Aplicacion.CONTROL_ACCESO_URL;
 import static org.sistemavotacion.android.Aplicacion.KEY_SIZE;
+import static org.sistemavotacion.android.Aplicacion.KEY_STORE_FILE;
 import static org.sistemavotacion.android.Aplicacion.PROVIDER;
 import static org.sistemavotacion.android.Aplicacion.SIGNATURE_ALGORITHM;
 import static org.sistemavotacion.android.Aplicacion.SIGNED_PART_EXTENSION;
@@ -12,9 +13,14 @@ import static org.sistemavotacion.android.Aplicacion.VOTE_SIGN_MECHANISM;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.sistemavotacion.android.Aplicacion;
 import org.sistemavotacion.android.AppData;
 import org.sistemavotacion.android.R;
@@ -32,6 +38,7 @@ import org.sistemavotacion.task.GetTimeStampTask;
 import org.sistemavotacion.task.GetVotingCertTask;
 import org.sistemavotacion.task.SendFileTask;
 import org.sistemavotacion.task.TaskListener;
+import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.ServerPaths;
 import org.sistemavotacion.util.StringUtils;
 
@@ -52,8 +59,9 @@ public class VotingService extends Service implements TaskListener {
 	
 	public static final String TAG = "VotingService";
 	
-    private static final int TIMESTAMP_ACCESS_REQUEST = 0;
-    private static final int TIMESTAMP_VOTE           = 1;
+    private static final int TIMESTAMP_ACCESS_REQUEST        = 0;
+    private static final int TIMESTAMP_VOTE                  = 1;
+    private static final int TIMESTAMP_CANCEL_ACCESS_REQUEST = 2;
 	
     
     private Evento event;
@@ -172,6 +180,62 @@ public class VotingService extends Service implements TaskListener {
 			voteProcessListener.setMsg(Respuesta.SC_ERROR_EJECUCION, exceptionMsg);
 		}
     };
+    
+    DataListener<String> cancelAccessListener = new DataListener<String>() {
+
+    	@Override public void updateData(int statusCode, String response) {
+			Log.d(TAG + ".sendFileListener.updateData(...) ",	" --- statusCode: " + statusCode);
+	        if (Respuesta.SC_OK == statusCode) {
+                try {
+                	SMIMEMessageWrapper receipt = new SMIMEMessageWrapper(null,
+							new ByteArrayInputStream(response.getBytes()), null);
+                	voteProcessListener.setMsg(Respuesta.SC_ERROR_EJECUCION, getString(R.string.canceling_access_request_msg));
+				} catch (Exception ex) {
+					Log.e(TAG + ".sendFileListener.updateData(...)", ex.getMessage(), ex);
+					String msg = getString(R.string.receipt_error_msg) 
+							+ ": " + ex.getMessage();
+					setException(msg);
+				}
+	        } else setException(response);
+		}
+		
+    	@Override public void setException(String exceptionMsg) {
+			Log.d(TAG + ".sendFileListener.setException(...) ", " - exceptionMsg: " + exceptionMsg);
+			voteProcessListener.setMsg(Respuesta.SC_ERROR_EJECUCION, exceptionMsg);
+		}
+    };
+    
+	private void processCancelVote(char[] password) throws JSONException {
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("origenHashCertificadoVoto", 
+        		event.getOrigenHashCertificadoVoto());
+		jsonObject.put("hashCertificadoVotoBase64", 
+        		event.getHashCertificadoVotoBase64());
+		jsonObject.put("origenHashSolicitudAcceso", 
+        		event.getOrigenHashSolicitudAcceso());
+		jsonObject.put("hashSolicitudAccesoBase64", 
+        		event.getHashSolicitudAccesoBase64());
+        
+        String signatureContent = jsonObject.toString();     
+        String subject = getString(R.string.cancel_vote_msg_subject); 
+        try {
+    		SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
+    				keyStoreBytes, ALIAS_CERT_USUARIO, password, SIGNATURE_ALGORITHM);
+            File signedFile = File.createTempFile("signedDocument", SIGNED_PART_EXTENSION);
+        	String usuario = null;
+            if (Aplicacion.getUsuario() != null) usuario = Aplicacion.getUsuario().getNif();
+            signedFile = signedMailGenerator.genFile(usuario, 
+    				Aplicacion.getControlAcceso().getNombreNormalizado(), 
+    				signatureContent, subject, null, SignedMailGenerator.Type.USER, 
+    				signedFile);
+    		setTimeStampedDocument(TIMESTAMP_CANCEL_ACCESS_REQUEST, signedFile, TIMESTAMP_VOTE_HASH);
+        } catch(Exception ex) {
+        	ex.printStackTrace();
+			voteProcessListener.setMsg(Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
+        }
+
+	}
+    
     @Override
     public void onStart(Intent intent, int startId) {
     	Log.d(TAG + ".onStart(...) ", " *** onStart ");
@@ -266,6 +330,12 @@ public class VotingService extends Service implements TaskListener {
 		            		timeStampedDocument.setTimeStampToken(
 		            		timeStampWrapper)).execute(ServerPaths.getURLVoto(
 			    			event.getCentroControl().getServerURL()));
+					break;
+				case TIMESTAMP_CANCEL_ACCESS_REQUEST:
+					runningTask = new SendFileTask(cancelAccessListener, 
+							timeStampedDocument.setTimeStampToken(
+							timeStampWrapper)).execute(
+							ServerPaths.getURLAnulacionVoto(Aplicacion.CONTROL_ACCESO_URL));
 					break;
 			}	
 		} catch (Exception ex) {

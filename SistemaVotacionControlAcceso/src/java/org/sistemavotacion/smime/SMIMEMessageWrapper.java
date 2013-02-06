@@ -163,18 +163,20 @@ public class SMIMEMessageWrapper extends MimeMessage {
             setHeader("Message-ID", messageId);
     }
 
+    public void setMessageID(String messageId) throws MessagingException {
+    	this.messageId = messageId;
+    	updateMessageID();
+    }
+    
+    public void setTo(String to) throws MessagingException {
+    	setHeader("To", to);
+    }
+    
     public void setContent (byte[] content) throws MessagingException {
             setContent(content, contentType);
             saveChanges();
     }
 
-    public void updateMessageID(String nifUsuario) throws MessagingException {
-            messageId = fileName + "@" + nifUsuario;
-            Address[] addresses = {new InternetAddress(nifUsuario)};
-            addFrom(addresses);
-            updateMessageID(); 
-    }
-	
     public static String RandomLowerString(long seed, int size) {
         StringBuffer tmp = new StringBuffer();
         Random random = new Random(seed);
@@ -267,8 +269,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
         }
 		return null; 
     }
-    
-    
+      
     
     public static boolean isValidSignatureCAVerified(SMIMESigned smimeSigned) throws Exception {
         // certificates and crls passed in the signature

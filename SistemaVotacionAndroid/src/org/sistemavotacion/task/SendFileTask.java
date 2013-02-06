@@ -24,7 +24,7 @@ public class SendFileTask extends AsyncTask<String, Void, String> {
 	
 	@Override
 	protected String doInBackground(String... urls) {
-        Log.d(TAG + ".doInBackground", "");
+        Log.d(TAG + ".doInBackground", " - doInBackground - url: " + urls[0]);
         String result = null;  
         try {
             HttpResponse response = HttpHelper.sendFile(file, urls[0]);
@@ -39,7 +39,7 @@ public class SendFileTask extends AsyncTask<String, Void, String> {
 	
     @Override
     protected void onPostExecute(String data) {
-    	Log.d(TAG + ".onPostExecute", " - data: " + data);
+    	Log.d(TAG + ".onPostExecute", " - onPostExecute - ");
     	if(data != null)listener.updateData(statusCode, data);
     	else if(exception != null) 
     		listener.setException(exception.getMessage());

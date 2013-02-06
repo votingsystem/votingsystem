@@ -154,14 +154,14 @@ public class UserCertResponseForm extends FragmentActivity
 
         progressDialog = ProgressDialog.show(
         		UserCertResponseForm.this,
-        		getString(R.string.cancel_back_msg),
+        		getString(R.string.connecting_caption),
         		getString(R.string.cert_state_msg), true,
 	            true, new DialogInterface.OnCancelListener() {
 	                @Override
 	                public void onCancel(DialogInterface dialog) { 
-	                	if (getDataTask != null) {
+	                	/*if (getDataTask != null) {
 	                		getDataTask.cancel(true);
-	                	}
+	                	}*/
 	                }
             });
     	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());

@@ -151,7 +151,11 @@ public class EventListFragmentLoader extends SherlockFragmentActivity {
 			Log.d(TAG +  "onCreateOptionsMenu(..)", " +++++++++++++++++++++++++++++");
 			menu.add(MENU_SEARCH_TITLE).setIcon(android.R.drawable.ic_menu_search)
 			.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
-	        SubMenu subMenu1 = menu.addSubMenu("");
+			/*inflater.inflate(R.menu.main, menu);
+			menu.findItem(R.id.reload);
+			menu.findItem(R.id.get_cert);
+			menu.findItem(R.id.receipt_list);*/
+			SubMenu subMenu1 = menu.addSubMenu("");
 	        subMenu1.add(getString(R.string.menu_actualizar));
 	        subMenu1.add(getString(R.string.menu_solicitar_certificado));
 	        subMenu1.add(getString(R.string.menu_receipt_list));	

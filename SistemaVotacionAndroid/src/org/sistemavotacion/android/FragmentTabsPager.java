@@ -75,9 +75,7 @@ public class FragmentTabsPager extends SherlockFragmentActivity
     	super.onCreate(savedInstanceState);
         INSTANCIA = this;
         Log.d(TAG + ".onCreate()", " - onCreate");
-        //setTitle("Votaciones");
-        selectedSubSystem = Aplicacion.INSTANCIA.getSelectedSubsystem();
-        
+
         getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
         getSupportActionBar().setDisplayShowHomeEnabled(false);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -87,7 +85,6 @@ public class FragmentTabsPager extends SherlockFragmentActivity
         	homeAdapter = new HomeDropdownListAdapter(this);   	
         }
         getSupportActionBar().setListNavigationCallbacks(homeAdapter, this);
-        getSupportActionBar().setSelectedNavigationItem(selectedSubSystem.getPosition());
         
         setContentView(R.layout.fragment_tabs_pager);
         TextView searchTextView = (TextView) findViewById(R.id.search_query);
@@ -116,18 +113,24 @@ public class FragmentTabsPager extends SherlockFragmentActivity
         
         Bundle openBundle = new Bundle(queryBundle);
         openBundle.putString("enumTab", EnumTab.OPEN.toString());
-        openBundle.putString("subSystem", selectedSubSystem.toString());
         openBundle.putInt("offset", offsetOpenTab);
         
         Bundle pendingBundle = new Bundle(queryBundle);
         pendingBundle.putString("enumTab", EnumTab.PENDING.toString());
-        pendingBundle.putString("subSystem", selectedSubSystem.toString());
         openBundle.putInt("offset", offsetPendingTab);
         
         Bundle closedBundle = new Bundle(queryBundle);
         closedBundle.putString("enumTab", EnumTab.CLOSED.toString());
-        closedBundle.putString("subSystem", selectedSubSystem.toString());
         openBundle.putInt("offset", offsetClosedTab);
+        
+        if(Aplicacion.INSTANCIA != null) {
+        	selectedSubSystem = Aplicacion.INSTANCIA.getSelectedSubsystem();
+        	getSupportActionBar().setSelectedNavigationItem(selectedSubSystem.getPosition());
+        	Aplicacion.INSTANCIA.addSubSystemChangeListener(this);
+        	openBundle.putString("subSystem", selectedSubSystem.toString());
+        	pendingBundle.putString("subSystem", selectedSubSystem.toString());
+            closedBundle.putString("subSystem", selectedSubSystem.toString());
+        }
         
         mTabsAdapter.addTab(mTabHost.newTabSpec(
         		EnumTab.OPEN.toString()).setIndicator(getTabDesc(EnumTab.OPEN)),
@@ -151,7 +154,6 @@ public class FragmentTabsPager extends SherlockFragmentActivity
 	   		Typeface typeface = Typeface.create(tv.getTypeface(), Typeface.BOLD);
 	   		tv.setTypeface(typeface);
         }
-        Aplicacion.INSTANCIA.addSubSystemChangeListener(this);
     }
 	
     @Override

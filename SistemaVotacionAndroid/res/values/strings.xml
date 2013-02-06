@@ -28,6 +28,8 @@
     <string name="manifiests_drop_down_lbl">Manifiestos</string>
     <string name="unknown_drop_down_lbl">Sistema desconocido</string>
     <string name="subject_lbl">Asunto</string>
+    <string name="menuSync">Sincronizar</string>
+    
     
     
     <string name="ASOCIAR_CENTRO_CONTROL_SMIME">Asociando Centro de Control </string>
@@ -59,6 +61,7 @@
 	<string name="cancel_vote_lbl">Anular voto</string>
 	<string name="guardar_recibo_voto_label">Guardar recibo</string>
 	<string name="remove_receipt_lbl">Borrar recibo</string>
+	<string name="remove_receipt_msg">¿Seguro que desea borrar recibo?</string>
     <string name="search_label"></string>
     <string name="search_invoke">Búsquedas</string>
     <string name="empty_search_lbl">Consulta sin resultados</string>
@@ -82,16 +85,21 @@
     <string name="request_cert_msg">Tramitando solicitud</string>
     <string name="alert_exception_caption">Excepción!</string>
     <string name="cancel_back_msg">Pulsar \'atrás\' para cancelar</string>
+    <string name="connecting_caption">Conectando</string>
     <string name="cert_state_msg">Comprobando el estado de la solicitud de certificado</string>
     <string name="cert_downloaded_msg">El certificado de usuario está disponible</string>
     
     <string name="request_msg_subject">[SOLICITUD ACCESO]-%1$s</string>
     <string name="vote_msg_subject">[VOTO]</string>
     <string name="cancel_vote_msg_subject">[ANULACION VOTO]</string>
+    <string name="canceled_lbl">ANULADO</string>
+
     <string name="cancel_vote_result_msg">Su voto para el asunto \'%1$s\' ha sido anulado.
 	Puede volver votar de nuevo.</string>
     <string name="saved_cancel_vote_recepit_msg">Puede encontrar el recibo de la cancelación
 	de este voto en la lista de recibos.</string>
+    <string name="open_cancel_vote_receipt_lbl">Abrir recibo de cancelación</string>
+
 
     <string name="pin_error_msg">¿Seguro que la contraseña es correcta?</string>
     <string name="low_memory_msg">Memoria baja</string>
@@ -120,6 +128,9 @@
     <string name="receipt_list_screen_caption">Recibos guardados por el usuario</string>
     <string name="receipt_options_dialog_msg">Opciones disponibles para el recibo</string>
     <string name="canceling_vote_caption">Anulando voto</string>
+    <string name="canceling_access_request_msg">Problemas con el servicio, por favor inténtelo mas tarde.</string>
+    <string name="no_receipts">No tiene guardado ningún recibo</string>
+
     
     <string name="solicitud_certificado_usuario_activity_text">No dispone de ningún 
         certificado con el que poder acceder a los servicios. Para poder votar debe solicitar

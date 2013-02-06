@@ -78,7 +78,8 @@ class EventoVotacionService {
 			return new Respuesta(codigoEstado:400, mensaje:"solicitud sin centro de control")
         }
 		evento.save(flush:true)
-        evento.url = "${grailsApplication.config.grails.serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLEventoVotacionValidado}${evento.id}"
+        evento.url = "${grailsApplication.config.grails.serverURL}" + 
+			"${grailsApplication.config.SistemaVotacion.sufijoURLEventoVotacionValidado}${evento.id}"
         if (mensajeJSON.opciones) {
             def opciones = opcionDeEventoService.guardarOpciones(evento, mensajeJSON.opciones)
             JSONArray arrayOpciones = new JSONArray()
@@ -87,7 +88,8 @@ class EventoVotacionService {
             }
             mensajeJSON.opciones = arrayOpciones
         } 
-        mensajeJSON.controlAcceso = [serverURL:grailsApplication.config.grails.serverURL, nombre:grailsApplication.config.SistemaVotacion.NombreControlAcceso] as JSONObject
+        mensajeJSON.controlAcceso = [serverURL:grailsApplication.config.grails.serverURL, 
+			nombre:grailsApplication.config.SistemaVotacion.NombreControlAcceso] as JSONObject
 		if (mensajeJSON.etiquetas) {
 			Set<Etiqueta> etiquetaSet = etiquetaService.guardarEtiquetas(mensajeJSON.etiquetas)
 			evento.setEtiquetaSet(etiquetaSet)

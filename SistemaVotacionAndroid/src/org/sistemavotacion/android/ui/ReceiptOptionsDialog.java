@@ -1,20 +1,29 @@
 package org.sistemavotacion.android.ui;
 
-import static org.sistemavotacion.android.Aplicacion.SIGNED_PART_EXTENSION;
-
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
+import javax.mail.MessagingException;
+
+import org.bouncycastle2.cms.CMSException;
+import org.bouncycastle2.mail.smime.SMIMEException;
+import org.sistemavotacion.android.Aplicacion;
 import org.sistemavotacion.android.R;
-import org.sistemavotacion.android.service.SignService;
+import org.sistemavotacion.android.UserCertRequestForm;
 import org.sistemavotacion.modelo.VoteReceipt;
+import org.sistemavotacion.smime.SMIMEMessageWrapper;
 
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.v4.app.DialogFragment;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -64,28 +73,35 @@ public class ReceiptOptionsDialog  extends DialogFragment {
         Button openReceiptButton = (Button) view.findViewById(R.id.open_receipt_button);
         openReceiptButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-            	try {
-            		/*File receiptFile =  new File(getActivity()
-            				.getExternalFilesDir(null), "vote_receipt_" + 
-            				receipt.getNotificationId() + SIGNED_PART_EXTENSION);*/
-                    File receiptFile = File.createTempFile(
-                    	"vote_recepit", SIGNED_PART_EXTENSION);
-                    receipt.getSmimeMessage().writeTo(new FileOutputStream(receiptFile));
-            		Log.d(TAG + ".onCreate(...) ", " - receiptFile path: " + receiptFile.getAbsolutePath() 
-            				+ " - length: " + receiptFile.length() );
-                	Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
-                	intent.setDataAndType(Uri.fromFile(receiptFile), "text/plain");
-                	startActivity(intent);	
-            	}catch(Exception ex) {
-            		ex.printStackTrace();
-            	}
+            	openReceipt();
             }  
         });
-        
-        Button removeReceiptButton = (Button) view.findViewById(R.id.remove_receipt_button);
-        openReceiptButton.setOnClickListener(new Button.OnClickListener() {
+        if(receipt != null && receipt.isCanceled()) {
+        	cancelVoteButton.setVisibility(View.GONE);
+        	if(receipt.getCancelVoteReceipt() != null) {
+        		openReceiptButton.setText(getActivity().
+            			getString(R.string.open_cancel_vote_receipt_lbl));
+        	} else {
+        		openReceiptButton.setVisibility(View.GONE);
+        	}
+        } 
+        final Button removeReceiptButton = (Button) view.findViewById(R.id.remove_receipt_button);
+        removeReceiptButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-            	listener.removeReceipt(receipt);
+            	removeReceiptButton.setEnabled(false);
+				AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
+	    		builder.setTitle(getString(R.string.remove_receipt_lbl));
+	    		builder.setMessage(getString(R.string.remove_receipt_msg));
+	    		builder.setPositiveButton(getString(
+	    				R.string.ok_button), new DialogInterface.OnClickListener() {
+	    		            public void onClick(DialogInterface dialog, int whichButton) {
+	    		            	listener.removeReceipt(receipt);
+	    		            	getDialog().dismiss();
+	    		            }
+	    					});
+	    		builder.setNegativeButton(getString(
+	    				R.string.cancelar_button), null);
+	    		builder.show();
             }
         });
  
@@ -98,5 +114,36 @@ public class ReceiptOptionsDialog  extends DialogFragment {
         }
         return view;
     }
+    
+    private void openReceipt() {
+       	try {
+    		/*File receiptFile =  new File(getActivity()
+    				.getExternalFilesDir(null), "vote_receipt_" + 
+    				receipt.getNotificationId() + SIGNED_PART_EXTENSION);*/
+    		String fileName = "receipt_" + receipt.getId() + Aplicacion.SIGNED_PART_EXTENSION;
+       		File receiptFile = getTemporaryFile(getActivity(), fileName);
+       		
+    		if(receipt.getCancelVoteReceipt() != null) {
+    			receipt.getCancelVoteReceipt().writeTo(
+        				new FileOutputStream(receiptFile));
+    		} else receipt.getSmimeMessage().writeTo(
+    				new FileOutputStream(receiptFile));
+    		Log.d(TAG + ".openReceipt - ", " - receiptFile path: " + receiptFile.getAbsolutePath() 
+    				+ " - length: " + receiptFile.length() );
+        	Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+        	intent.setDataAndType(Uri.fromFile(receiptFile), "text/plain");
+        	startActivity(intent);	
+    	}catch(Exception ex) {
+    		ex.printStackTrace();
+    	}
+    }
+    
+    private File getTemporaryFile(Context context, String fileName){
+  	  final File path = new File( Environment.getExternalStorageDirectory(), context.getPackageName() );
+  	  if(!path.exists()){
+  	    path.mkdir();
+  	  }
+  	  return new File(path, fileName);
+	}
     
 }

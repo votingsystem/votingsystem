@@ -180,6 +180,8 @@ public class SignedMailGenerator {
  		 return multiSignedMessage;*/
          smimeMessage.setSubject(mailSubject);
          smimeMessage.setContent(newMimeMultipart, newMimeMultipart.getContentType());
+         //smimeMessage.setHeader("To", "Username");
+         smimeMessage.setHeader("Message-ID", "11111111111 my-message-id");
          smimeMessage.saveChanges();
          return smimeMessage;
      }

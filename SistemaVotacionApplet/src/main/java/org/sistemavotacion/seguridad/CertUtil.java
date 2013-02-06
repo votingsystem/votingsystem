@@ -43,6 +43,8 @@ import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
+import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
@@ -123,6 +125,8 @@ public class CertUtil {
         certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(true, 0));
         certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false, new SubjectKeyIdentifierStructure(pair.getPublic()));
         certGen.addExtension(X509Extensions.KeyUsage, true, new KeyUsage(KeyUsage.keyCertSign | KeyUsage.cRLSign));
+        certGen.addExtension(X509Extensions.ExtendedKeyUsage, true,
+                new ExtendedKeyUsage(new DERSequence(KeyPurposeId.id_kp_timeStamping)));
         return certGen.generate(pair.getPrivate(), "BC");
     }
 
@@ -144,6 +148,31 @@ public class CertUtil {
         certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false, new SubjectKeyIdentifierStructure(entityKey));
         certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(false));
         certGen.addExtension(X509Extensions.KeyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment));
+        certGen.addExtension(X509Extensions.ExtendedKeyUsage, true,
+                new ExtendedKeyUsage(new DERSequence(KeyPurposeId.id_kp_timeStamping)));
+        return certGen.generate(caKey, "BC");
+    }
+    
+    /**
+     * Genera un certificado V3 para usarlo como certificado de usuario final
+     */
+    public static X509Certificate generateTimeStampCert(PublicKey entityKey, 
+    		PrivateKey caKey, X509Certificate caCert, long comienzo, int periodoValidez,
+                String endEntitySubjectDN) throws Exception {
+        X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
+        certGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()));
+        certGen.setIssuerDN(PrincipalUtil.getSubjectX509Principal(caCert));
+        certGen.setNotBefore(new Date(comienzo));
+        certGen.setNotAfter(new Date(comienzo + periodoValidez));
+        certGen.setSubjectDN(new X500Principal(endEntitySubjectDN));
+        certGen.setPublicKey(entityKey);
+        certGen.setSignatureAlgorithm(SIG_ALGORITHM);        
+        certGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(caCert));
+        certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false, new SubjectKeyIdentifierStructure(entityKey));
+        certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(false));
+        certGen.addExtension(X509Extensions.KeyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment));
+        certGen.addExtension(X509Extensions.ExtendedKeyUsage, true,
+                new ExtendedKeyUsage(new DERSequence(KeyPurposeId.id_kp_timeStamping)));
         return certGen.generate(caKey, "BC");
     }
     

@@ -146,7 +146,7 @@ class FirmaService {
 		MimeMessage multifirma = getFirmadoraValidaciones().genMultiSignedMessage(smimeMessage, mailSubject); 
 		return multifirma
 	}
-	
+			
 	public Respuesta firmarCertificadoVoto (byte[] csr, Evento evento, Locale locale) {
 		log.debug("firmarCertificadoVoto - evento: ${evento?.id}");
 		Respuesta respuesta = csrService.validarCSRVoto(csr, evento, locale)

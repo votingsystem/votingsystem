@@ -33,7 +33,7 @@ task buildAll(dependsOn:['MonitorDescarga:signJar',
 }
 
 
-task genAppsCerts() {
+task genAppsCerts(dependsOn:['SistemaVotacionApplet:classes']) {
 	
 	doFirst { }
 	
@@ -55,7 +55,7 @@ task genAppsCerts() {
 	}
 }
 
-task genWebAppsCerts() {
+task genWebAppsCerts(dependsOn:['SistemaVotacionApplet:classes']) {
 	
 	doFirst { }
 	
@@ -72,6 +72,7 @@ task genWebAppsCerts() {
 		
 		List certs = [controAccesoMap, centroControMap]
 		rootProject.certsDataMap.certs = certs
+		tasks.getByPath('SistemaVotacionApplet:classes').execute()
 		tasks.getByPath('SistemaVotacionApplet:genCertsGroovy').execute()
 	}
 }

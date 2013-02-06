@@ -22,6 +22,7 @@
            android:id="@+id/cancel_vote_button"
            android:layout_width="400dp"
            android:layout_height="wrap_content"
+            android:layout_marginTop="10dip"
            android:layout_marginLeft="20dip"
            android:layout_marginRight="30dp"
            android:layout_gravity="center"
@@ -34,6 +35,7 @@
            android:id="@+id/open_receipt_button"
            android:layout_width="400dp"
            android:layout_height="wrap_content"
+           android:layout_marginTop="10dip"
            android:layout_marginLeft="20dip"
            android:layout_marginRight="30dp"
            android:layout_gravity="center"
@@ -42,10 +44,11 @@
            android:text="@string/open_recepit_lbl"
            android:textStyle="bold" />
        
-  	        <Button
+  	   <Button
             android:id="@+id/remove_receipt_button"
             android:layout_width="400dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dip"
             android:layout_marginLeft="20dip"
             android:layout_marginRight="30dp"
             android:layout_gravity="center"

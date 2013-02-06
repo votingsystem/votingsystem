@@ -1,21 +1,23 @@
 package org.sistemavotacion;
 
-import static org.sistemavotacion.Contexto.*;
+import static org.sistemavotacion.Contexto.IS_TIME_STAMPED_SIGNATURE;
+import static org.sistemavotacion.Contexto.NOMBRE_ARCHIVO_FIRMADO;
+import static org.sistemavotacion.Contexto.TIMESTAMP_DNIe_HASH;
+import static org.sistemavotacion.Contexto.getString;
 
-import com.itextpdf.text.pdf.PdfReader;
 import java.awt.Desktop;
 import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.List;
+
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.SwingWorker;
-import org.bouncycastle.tsp.TSPAlgorithms;
+
 import org.sistemavotacion.dialogo.MensajeDialog;
 import org.sistemavotacion.dialogo.PasswordDialog;
 import org.sistemavotacion.modelo.Operacion;
@@ -25,12 +27,14 @@ import org.sistemavotacion.smime.DNIeSignedMailGenerator;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.worker.EnviarDocumentoFirmadoWorker;
-import org.sistemavotacion.worker.WorkerListener;
 import org.sistemavotacion.worker.ObtenerArchivoWorker;
 import org.sistemavotacion.worker.PDFSignerDNIeWorker;
 import org.sistemavotacion.worker.TimeStampWorker;
+import org.sistemavotacion.worker.WorkerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.itextpdf.text.pdf.PdfReader;
 
 /**
 * @author jgzornoza
@@ -280,6 +284,8 @@ public class FirmaDialog extends JDialog implements WorkerListener {
             if (password == null) return;
         }
         final String finalPassword = password;
+        mostrarPantallaEnvio(true);
+        progressLabel.setText("<html>" + getString("progressLabel")+ "</html>");
         final EnviarDocumentoFirmadoWorker lanzador = new EnviarDocumentoFirmadoWorker(null, 
             operacion.getUrlEnvioDocumento(), this);
         tareaEnEjecucion = lanzador;
@@ -348,8 +354,6 @@ public class FirmaDialog extends JDialog implements WorkerListener {
         };
         Thread thread = new Thread(runnable);
         thread.start();
-        mostrarPantallaEnvio(true);
-        progressLabel.setText("<html>" + getString("progressLabel")+ "</html>");
         pack();       
     }//GEN-LAST:event_enviarButtonActionPerformed
 

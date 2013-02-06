@@ -106,14 +106,22 @@ class VotoService {
     synchronized Respuesta enviarVoto_A_ControlAcceso (MimeMessage smimeMessage,
             EventoVotacion eventoVotacion) {
         log.debug ("enviarVoto_A_ControlAcceso")
+		String localServerURL = grailsApplication.config.grails.serverURL
+		
+		MensajeSMIME multifirmaCentroControl = new MensajeSMIME(
+			tipo:Tipo.VOTO_VALIDADO_CENTRO_CONTROL, valido:true)
+		multifirmaCentroControl.save()
+		
+		smimeMessage.setMessageID("${localServerURL}/mensajeSMIME/obtener?id=${multifirmaCentroControl.id}")
+		smimeMessage.setTo("${eventoVotacion.controlAcceso.serverURL}")
+				
         MimeMessage multiSignedMessage = firmaService.generarMultifirma(
             smimeMessage, "[VOTO_VALIDADO_CENTRO_CONTROL]")
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         multiSignedMessage.writeTo(out);
 		byte[] multiSignedMessageBytes = out.toByteArray()
-		MensajeSMIME multifirmaCentroControl = new MensajeSMIME(
-			tipo:Tipo.VOTO_VALIDADO_CENTRO_CONTROL,valido:true,
-			contenido:multiSignedMessageBytes)
+
+		multifirmaCentroControl.contenido = multiSignedMessageBytes
 		multifirmaCentroControl.save();
         String urlVotosControlAcceso = "${eventoVotacion.controlAcceso.serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLNotificacionVotoControlAcceso}"
         Respuesta respuestaControlAcceso = httpService.enviarMensaje(urlVotosControlAcceso, multiSignedMessageBytes)

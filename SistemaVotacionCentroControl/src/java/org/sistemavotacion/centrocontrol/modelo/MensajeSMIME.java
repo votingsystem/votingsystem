@@ -39,7 +39,7 @@ public class MensajeSMIME implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name="tipo", nullable=false)
     private Tipo tipo;
-    @Column(name="contenido", nullable=false)
+    @Column(name="contenido")
     @Lob
     private byte[] contenido;
     

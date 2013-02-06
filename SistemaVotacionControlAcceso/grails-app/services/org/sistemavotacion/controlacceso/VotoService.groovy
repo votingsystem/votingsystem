@@ -51,15 +51,19 @@ class VotoService {
 			return new Respuesta (codigoEstado:400, mensaje:mensaje)
 		}
 		mensajeSMIME.save()	
+		MensajeSMIME multifirmaControlAcceso = new MensajeSMIME(smimePadre:mensajeSMIME,
+			tipo:Tipo.VOTO_VALIDADO_CONTROL_ACCESO, valido:true, evento:evento)
+		multifirmaControlAcceso.save()
+		smimeMessage.setMessageID("${localServerURL}/mensajeSMIME/obtener?id=${multifirmaControlAcceso.id}")
+		smimeMessage.setTo(infoVoto.hashCertificadoVotoBase64)	
+		
 		MimeMessage multiFirmaMimeMessage = firmaService.generarMultifirma(
 			smimeMessage, "[VOTO_VALIDADO_CONTROL_ACCESO]")
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		multiFirmaMimeMessage.writeTo(baos);		
-		MensajeSMIME multifirmaControlAcceso = new MensajeSMIME(
-			tipo:Tipo.VOTO_VALIDADO_CONTROL_ACCESO,
-			contenido:baos.toByteArray(), valido:true, evento:evento)
-		multifirmaControlAcceso.smimePadre = mensajeSMIME
+		multifirmaControlAcceso.contenido = baos.toByteArray()
 		multifirmaControlAcceso.save()
+
 		Voto voto = new Voto(opcionDeEvento:opcionSeleccionada, 
 			eventoVotacion:evento, estado:Voto.Estado.OK,
 			certificado:certificado, mensajeSMIME:multifirmaControlAcceso)
@@ -97,7 +101,7 @@ class VotoService {
 				return new Respuesta(codigoEstado:400, mensaje:messageSource.getMessage(
 					'anulacionVoto.errorSolicitudNoEncontrada', null, locale))
 		if(solicitudAcceso.estado.equals(SolicitudAcceso.Estado.ANULADO)) {
-			return new Respuesta(codigoEstado:400, mensaje:messageSource.getMessage(
+			return new Respuesta(codigoEstado:Respuesta.SC_ANULACION_REPETIDA, mensaje:messageSource.getMessage(
 				'anulacionVoto.errorSolicitudAnulada', null, locale))
 		}	
 		if (!hashCertificadoVotoBase64.equals(hashCertificadoVoto))
@@ -131,14 +135,22 @@ class VotoService {
 		certificado.estado = Certificado.Estado.ANULADO
 		certificado.save()
 		String asuntoMultiFirmaMimeMessage = messageSource.getMessage('mime.asunto.anulacionVotoValidada', null, locale)
+
+		MensajeSMIME mensajeSMIMEValidado = new MensajeSMIME(tipo:Tipo.FIRMA_VALIDADA,
+			smimePadre:mensajeSMIME, evento:eventoVotacion, valido:true)
+		mensajeSMIMEValidado.save();
+		smimeMessage.setMessageID("${grailsApplication.config.grails.serverURL}" + 
+			"/mensajeSMIME/obtener?id=${mensajeSMIMEValidado.id}")
+		smimeMessage.setTo(hashCertificadoVotoBase64)
+		
 		MimeMessage multiFirmaMimeMessage = firmaService.generarMultifirma (
 			smimeMessage, asuntoMultiFirmaMimeMessage)
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		multiFirmaMimeMessage.writeTo(baos);
-		MensajeSMIME mensajeSMIMEValidado = new MensajeSMIME(tipo:Tipo.FIRMA_VALIDADA,
-			smimePadre:mensajeSMIME, evento:eventoVotacion,
-			valido:true, contenido:baos.toByteArray())
+				
+		mensajeSMIMEValidado.contenido = baos.toByteArray()
 		mensajeSMIMEValidado.save();
+		
 		AnuladorVoto anuladorVoto = new AnuladorVoto(mensajeSMIME:mensajeSMIMEValidado,
 			solicitudAcceso:solicitudAcceso, solicitudCSRVoto:solicitudCSR,
 			origenHashSolicitudAccesoBase64:origenHashSolicitudAcceso,

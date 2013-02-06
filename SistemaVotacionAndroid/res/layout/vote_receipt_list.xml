@@ -3,6 +3,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+   <TextView
+    android:id="@+id/emptyListMsg" 
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:text="@string/no_receipts"
+	android:textSize="22sp"
+	android:gravity="center_vertical|center_horizontal"
+	/>
     
     <ListView
         android:id="@+id/listView" 
@@ -10,5 +18,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true">
     </ListView>
+
 
 </LinearLayout>

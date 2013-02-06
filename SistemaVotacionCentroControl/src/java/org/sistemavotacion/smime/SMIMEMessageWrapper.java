@@ -154,6 +154,15 @@ public class SMIMEMessageWrapper extends MimeMessage {
             setHeader("Message-ID", messageId);
     }
 
+    public void setMessageID(String messageId) throws MessagingException {
+    	this.messageId = messageId;
+    	updateMessageID();
+    }
+    
+    public void setTo(String to) throws MessagingException {
+    	setHeader("To", to);
+    }
+    
     public void setContent (byte[] content) throws MessagingException {
             setContent(content, contentType);
             saveChanges();

@@ -21,9 +21,7 @@ import static org.sistemavotacion.android.Aplicacion.MAX_SUBJECT_SIZE;
 
 import java.io.FileInputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.json.JSONObject;
@@ -45,9 +43,9 @@ import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.ServerPaths;
+import org.sistemavotacion.util.StringUtils;
 
 import android.app.AlertDialog;
-import android.support.v4.app.Fragment;
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
@@ -57,6 +55,7 @@ import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -83,7 +82,6 @@ public class VotingEventScreen extends FragmentActivity
     public static final String INTENT_EXTRA_DIALOG_PROP_NAME = "dialog";
     public static final String RECEIPT_KEY_PROP_NAME         = "receiptKey";
     public static final int SELECTED_OPTION_MAX_LENGTH       = 60;
-    public static final String PIN_DIALOG_ID                 = "pinDialog";
     
 
     public static Operation operation = Operation.VOTE;
@@ -99,12 +97,13 @@ public class VotingEventScreen extends FragmentActivity
 	private Button cancelVoteButton;
 	private VotingService votingService = null;
 	private SignService signService = null;
-    
+
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Log.d(TAG + ".onCreate(...)", " - onCreate");
+		Log.d(TAG + ".onCreate(...)", " --- onCreate");
         setTheme(Aplicacion.THEME);
-		super.onCreate(savedInstanceState);
+		super.onCreate(savedInstanceState);		
 		if(Aplicacion.INSTANCIA == null) return; 
 		if (Aplicacion.Estado.CON_CERTIFICADO.equals(Aplicacion.INSTANCIA.getEstado())) {
 			FileInputStream fis = null;
@@ -128,14 +127,15 @@ public class VotingEventScreen extends FragmentActivity
 		}  
 		votingServiceIntent = new Intent(VotingEventScreen.this, VotingService.class);
 		startService(votingServiceIntent);
-        if(receipt != null || getIntent().getStringExtra(
-        		RECEIPT_KEY_PROP_NAME) != null) {
-        	Log.d(TAG + ".onCreate(...)", " - receipt key: " + 
+        if(getIntent().getStringExtra(RECEIPT_KEY_PROP_NAME) != null) {
+        	Log.d(TAG + ".onCreate(...)", " - Mostrando recibo - receipt key: " + 
         			getIntent().getStringExtra(RECEIPT_KEY_PROP_NAME));
         	receipt = AppData.INSTANCE.getReceipt(
         			getIntent().getStringExtra(RECEIPT_KEY_PROP_NAME));
-        	evento = receipt.getVoto();
-        	setReceiptScreen(receipt);
+        	if(receipt != null) {
+	        	evento = receipt.getVoto();
+	        	setReceiptScreen(receipt);
+        	}
         	return;
         }
         operation = Operation.VOTE;
@@ -192,6 +192,9 @@ public class VotingEventScreen extends FragmentActivity
 	
 	public void cancelVote(View v) {
 		Log.d(TAG + ".cancelVote(...)", " - cancelVote");
+		NotificationManager notificationManager =
+			    (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		notificationManager.cancel(receipt.getNotificationId());
     	signServiceIntent = new Intent(VotingEventScreen.this, SignService.class);
 		startService(signServiceIntent);
     	operation = Operation.CANCEL_VOTE;
@@ -201,6 +204,9 @@ public class VotingEventScreen extends FragmentActivity
 	
 	public void saveVote(View v) {
 		Log.d(TAG + ".saveVote(...)", " - saveVote");
+		NotificationManager notificationManager =
+			    (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		notificationManager.cancel(receipt.getNotificationId());
 		/*Log.d(TAG + ".guardarReciboButton ", " - Files dir path: " + 
 		getActivity().getApplicationContext().getFilesDir().getAbsolutePath());
 		String receiptFileName = StringUtils.getCadenaNormalizada(reciboVoto.getEventoURL()) ;
@@ -219,7 +225,9 @@ public class VotingEventScreen extends FragmentActivity
 		}*/
     	VoteReceiptDBHelper db = new VoteReceiptDBHelper(VotingEventScreen.this);
 		try {
-			db.addVoteReceipt(receipt);
+			receipt.setId(db.insertVoteReceipt(receipt));
+			AppData.INSTANCE.putReceipt(StringUtils.getCadenaNormalizada(
+					receipt.getEventoURL()), receipt);
 			saveReceiptButton.setEnabled(false);
 		} catch (Exception ex) {
 			Log.e(TAG + ".guardarReciboButton.setOnClickListener(...) ", ex.getMessage(), ex);
@@ -357,9 +365,7 @@ public class VotingEventScreen extends FragmentActivity
 			//VotacionHelper.procesarVoto(getApplicationContext(), evento, this, 
 			//		keyStoreBytes, password);
 		} catch (Exception ex) {
-			Log.e(TAG + ".firmarEnviarVoto(...)", "Exception: " + ex.getMessage());
-			String msg = ex.getMessage();
-			if(msg == null) msg = getString(R.string.alert_exception_caption);
+			ex.printStackTrace();
 			showMessage(getString(R.string.error_lbl), 
 					getString(R.string.pin_error_msg));
 			setOptionButtonsEnabled(true);
@@ -367,12 +373,19 @@ public class VotingEventScreen extends FragmentActivity
 	}
 
 	private void processCancelVote(char[] password) {
-        Map map = new HashMap();
-        map.put("origenHashCertificadoVoto", receipt.getVoto().getOrigenHashCertificadoVoto());
-        map.put("hashCertificadoVotoBase64", receipt.getVoto().getHashCertificadoVotoBase64());
-        map.put("origenHashSolicitudAcceso", receipt.getVoto().getOrigenHashSolicitudAcceso());
-        map.put("hashSolicitudAccesoBase64", receipt.getVoto().getHashSolicitudAccesoBase64());
-        JSONObject jsonObject = new JSONObject(map);
+		JSONObject jsonObject = new JSONObject();
+		try {
+			jsonObject.put("origenHashCertificadoVoto", 
+					receipt.getVoto().getOrigenHashCertificadoVoto());
+			jsonObject.put("hashCertificadoVotoBase64", 
+					receipt.getVoto().getHashCertificadoVotoBase64());
+			jsonObject.put("origenHashSolicitudAcceso", 
+					receipt.getVoto().getOrigenHashSolicitudAcceso());
+			jsonObject.put("hashSolicitudAccesoBase64", 
+					receipt.getVoto().getHashSolicitudAccesoBase64());	
+		} catch(Exception ex) {
+			ex.printStackTrace();
+		}
         String signatureContent = jsonObject.toString();     
         String subject = getString(R.string.cancel_vote_msg_subject); 
         String serverURL = ServerPaths.getURLAnulacionVoto(Aplicacion.CONTROL_ACCESO_URL);
@@ -382,7 +395,8 @@ public class VotingEventScreen extends FragmentActivity
     				true, keyStoreBytes, password);	
         } catch(Exception ex) {
         	ex.printStackTrace();
-			Log.e(TAG + ".processCancelVote(...)", "Exception: " + ex.getMessage());
+        	showMessage(getString(R.string.error_lbl), 
+					getString(R.string.pin_error_msg));
 			cancelVoteButton.setEnabled(true);
         }
 
@@ -425,16 +439,22 @@ public class VotingEventScreen extends FragmentActivity
     private void showPinScreen(String message) {
     	CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
 		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-	    Fragment prev = getSupportFragmentManager().findFragmentByTag(PIN_DIALOG_ID);
+	    Fragment prev = getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
 	    if (prev != null) {
 	        ft.remove(prev);
 	    }
 	    ft.addToBackStack(null);
-	    pinDialog.show(ft, PIN_DIALOG_ID);
+	    pinDialog.show(ft, CertPinDialog.TAG);
     }
 
 	@Override public void setPin(final String pin) {
 		Log.d(TAG + ".setPin()", "--- setPin - operation: " + operation);
+		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+	    Fragment prev = getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
+	    if (prev != null) {
+	        ft.remove(prev);
+	    }
+	    ft.addToBackStack(null);
 		if(pin != null) {
 	        progressDialog = ProgressDialog.show(VotingEventScreen.this, 
 	        		getString(R.string.sending_data_caption), 
@@ -503,19 +523,28 @@ public class VotingEventScreen extends FragmentActivity
 	@Override
 	public void proccessReceipt(SMIMEMessageWrapper cancelReceipt) {
 		Log.d(TAG + ".proccessReceipt(...)", "--- proccessReceipt " );
-		NotificationManager notificationManager =
-			    (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		notificationManager.cancel(receipt.getNotificationId());
 		receipt.setCancelVoteReceipt(cancelReceipt);
 		String msg = getString(R.string.cancel_vote_result_msg, 
 				this.receipt.getVoto().getAsunto());
 		String caption = getString(R.string.msg_lbl);
+		AppData.INSTANCE.removeReceipt(StringUtils.getCadenaNormalizada(
+				receipt.getEventoURL()));
+		if(receipt.getId() > 0) {
+	    	VoteReceiptDBHelper db = new VoteReceiptDBHelper(VotingEventScreen.this);
+			try {
+				db.insertVoteReceipt(receipt);
+			} catch (Exception ex) {
+				Log.e(TAG + ".guardarReciboButton.setOnClickListener(...) ", ex.getMessage(), ex);
+			}			
+		}
+		Aplicacion.INSTANCIA.getEventoSeleccionado().setOpcionSeleccionada(null);
 		setEventScreen(Aplicacion.INSTANCIA.getEventoSeleccionado());
 		CancelVoteDialog cancelVoteDialog = CancelVoteDialog.newInstance(
 				caption, msg, receipt);
 		FragmentManager fm = getSupportFragmentManager();
 		cancelVoteDialog.show(fm, "fragment_cancel_vote_result");
 	}
+
 	
 	ServiceConnection votingServiceConnection = new ServiceConnection() {
 

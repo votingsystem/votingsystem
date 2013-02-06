@@ -63,25 +63,18 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 		Log.d(TAG + ".onUpgrade(...)", " - onUpgrade - oldV: " + oldV + 
 				" - newV: " + newV);
 		db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
-		// Create tables again
-		onCreate(db);
+		onCreate(db);// Create tables again
 	}
 	  
-	public void addVoteReceipt(VoteReceipt voteReceipt) throws 
+	//returns the receipt id in the database
+	public int insertVoteReceipt(VoteReceipt voteReceipt) throws 
 		JSONException, IOException, MessagingException {
-		Log.d(TAG + ".addVoteReceipt(...)", " - addVoteReceipt");
 		SQLiteDatabase db = this.getWritableDatabase();
 
 		ContentValues values = new ContentValues();
 		String receiptKey = StringUtils.getCadenaNormalizada(
 				voteReceipt.getEventoURL());
-		
-		Log.d(TAG + ".addVoteReceipt(...)", "=====================");
-		Cursor cursor = db.query(TABLE_NAME, ID_DETAIL_COL_PROJECTION,  KEY_COL + "=?",
-                new String[] { receiptKey }, null,  null,  TIMESTAMP_CREATED_COL + " DESC", "1");
-		Log.d(TAG + ".addVoteReceipt(...)", " - cursor.getCount(): " + cursor.getCount());
-		Log.d(TAG + ".addVoteReceipt(...)", "=====================");
-		
+
 		if(voteReceipt.getSmimeMessage() != null) {
 	        values.put(SMIME_COL, voteReceipt.getSmimeMessage().getBytes());
 		}
@@ -91,19 +84,22 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 		}
 		byte[] jsonDataBytes = null;
 		String jsonDataStr = voteReceipt.toJSONString();
-		Log.d(TAG + ".addVoteReceipt(...)", "===== jsonDataStr: " + jsonDataStr);
+		//Log.d(TAG + ".insertVoteReceipt(...)", "===== jsonDataStr: " + jsonDataStr);
 		if(jsonDataStr != null) jsonDataBytes = jsonDataStr.getBytes();
 		values.put(KEY_COL, receiptKey);
 		values.put(JSON_DATA_COL, jsonDataBytes);
 	    values.put(TIMESTAMP_CREATED_COL, System.currentTimeMillis());
 	    values.put(TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
-		db.insert(TABLE_NAME, null, values);
+	    //From SQLite.org: If a table contains a column of type 
+	    //INTEGER PRIMARY KEY, then that column becomes an alias for the ROWID
+		long rowId = db.insert(TABLE_NAME, null, values);
 		db.close();
+		Log.d(TAG + ".insertVoteReceipt(...)", " - inserted receipt: " + rowId);
+		return new Long(rowId).intValue();
 	}
 	
 	public void deleteVoteReceipt(VoteReceipt voteReceipt) {
-		SQLiteDatabase db = this.getWritableDatabase();
-		
+		SQLiteDatabase db = this.getWritableDatabase();	
 		
 		int count = db.delete(TABLE_NAME, ID_COL + "=" + voteReceipt.getId(), null);
 	    //int count = db.delete(TABLE_NAME, ID_COL + "=" + voteReceipt.getId(), new String[] {});
@@ -123,8 +119,9 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 		String selectQuery = "SELECT  * FROM " + TABLE_NAME;
 		SQLiteDatabase db = this.getWritableDatabase();
 		Cursor cursor = db.rawQuery(selectQuery, null);
-		Log.d(TAG + ".getVoteReceiptList(...)", " - cursor.getColumnCount(): " 
-				+ cursor.getColumnCount());
+		
+		Log.d(TAG + ".getVoteReceiptList(...)", " - cursor.getCount(): " 
+				+ cursor.getCount());
 		if (cursor.moveToFirst()) {
 			do {
 				int id = cursor.getInt(0);
@@ -135,12 +132,14 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 				byte[] jsonDataBytes = cursor.getBlob(5);
 				byte[] cancelVoteSmimeMessageBytes = cursor.getBlob(6);
 				String jsonDataStr =  new String(jsonDataBytes);
-				Log.d(TAG + ".getVoteReceiptList(...)", " - reading receipt: " + id + 
+				Log.d(TAG + ".getVoteReceiptList(...)", " - reading receipt: " + id);
+				/*Log.d(TAG + ".getVoteReceiptList(...)", " - reading receipt: " + id + 
 						" -receiptKey: " + receiptKey + " - timestampCreated: " + timestampCreated + 
 						" - timestampUPdated: " + timestampUPdated + 
-						" - jsonDataStr: " + jsonDataStr);
+						" - jsonDataStr: " + jsonDataStr);*/
 				try {
 					VoteReceipt voteReceipt = VoteReceipt.parse(jsonDataStr); 
+					voteReceipt.setId(id);
 					if(timestampCreated != null) 
 						voteReceipt.setDateCreated(new Date(timestampCreated));
 					if(timestampUPdated != null) 
@@ -148,16 +147,18 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 					if(smimeMessageBytes != null)
 						voteReceipt.setSmimeMessage(new SMIMEMessageWrapper(null,
 								new ByteArrayInputStream(smimeMessageBytes), null));
-					if(cancelVoteSmimeMessageBytes != null)
-						voteReceipt.setCancelVoteReceipt(new SMIMEMessageWrapper(null,
-								new ByteArrayInputStream(cancelVoteSmimeMessageBytes), null));
+					if(cancelVoteSmimeMessageBytes != null) {
+						SMIMEMessageWrapper smimeMessageWrapper = new SMIMEMessageWrapper(null,
+								new ByteArrayInputStream(cancelVoteSmimeMessageBytes), null);
+						voteReceipt.setCancelVoteReceipt(smimeMessageWrapper);
+					}
 					voteReceiptList.add(voteReceipt);
 				}catch(Exception ex) {
-					Log.e(TAG + ".getVoteReceiptList(...) ", ex.getMessage(), ex);
+					ex.printStackTrace();
 				}
 			} while (cursor.moveToNext());
 		}
-		db.close();
+		close(cursor, db);
 		return voteReceiptList;
 	}
 
@@ -166,18 +167,23 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 		Log.d(TAG + ".updateVoteReceipt(...)", " - updateVoteReceipt");
 		SQLiteDatabase db = this.getWritableDatabase();
 		ContentValues values = new ContentValues();
-		String receiptKey = StringUtils.getCadenaNormalizada(
-				voteReceipt.getEventoURL());
 		if(voteReceipt.getSmimeMessage() != null) 
 	        values.put(SMIME_COL, voteReceipt.getSmimeMessage().getBytes());
 		if(voteReceipt.getCancelVoteReceipt() != null)
 			values.put(CANCEL_VOTE_RECEIPT_SMIME_COL, 
 					voteReceipt.getCancelVoteReceipt().getBytes());
-		values.put(KEY_COL, receiptKey);
 		values.put(JSON_DATA_COL, voteReceipt.toJSONString());
 	    values.put(TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
 		db.update(TABLE_NAME, values, ID_COL + " = ?",new String[] {String.valueOf(voteReceipt.getId())});
 		db.close();
 	}
 
+  private static void close(Cursor cursor, SQLiteDatabase database) {
+	    if (cursor != null) {
+	      cursor.close();
+	    }
+	    if (database != null) {
+	      database.close();
+	    }
+  }
 }

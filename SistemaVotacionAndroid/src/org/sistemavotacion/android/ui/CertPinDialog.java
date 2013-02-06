@@ -17,6 +17,8 @@
 package org.sistemavotacion.android.ui;
 
 import org.sistemavotacion.android.R;
+
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnKeyListener;
 import android.content.res.Configuration;
@@ -105,10 +107,11 @@ public class CertPinDialog extends DialogFragment implements OnKeyListener {
     			} 
     		}
     	}
-		this.dismiss();
-    	InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(
-  		      getActivity().INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(userPinEditText.getWindowToken(), 0);
+        InputMethodManager imm = (InputMethodManager)getActivity().
+        		getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(getDialog().
+        		getCurrentFocus().getWindowToken(), 0);
+    	getDialog().dismiss();
 		listener.setPin(pin);
     }
 

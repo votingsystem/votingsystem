@@ -3,11 +3,16 @@ package org.sistemavotacion.android.ui;
 import static org.sistemavotacion.android.Aplicacion.KEY_STORE_FILE;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.mail.MessagingException;
+
+import org.bouncycastle2.cms.CMSException;
+import org.bouncycastle2.mail.smime.SMIMEException;
 import org.json.JSONObject;
 import org.sistemavotacion.android.Aplicacion;
 import org.sistemavotacion.android.FragmentTabsPager;
@@ -32,6 +37,7 @@ import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
@@ -58,7 +64,6 @@ public class VoteReceiptListScreen extends FragmentActivity
 	
 	public enum Operation {CANCEL_VOTE};
 	
-	private static final String PIN_DIALOG_ID = "pinDialog";
 	private static final String OPTIONS_DIALOG_ID = "optionsDialog";
 	protected VoteReceiptDBHelper db;
 	private List<VoteReceipt> voteReceiptList;
@@ -71,6 +76,7 @@ public class VoteReceiptListScreen extends FragmentActivity
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
 		setContentView(R.layout.vote_receipt_list);
 		db = new VoteReceiptDBHelper(this);
 		try {
@@ -80,6 +86,8 @@ public class VoteReceiptListScreen extends FragmentActivity
 		}
 		Log.d(TAG + ".onCreate(...) ", " - voteReceiptList.size(): " + voteReceiptList.size());
 		adapter = new ReceiptListAdapter(this);
+		if(voteReceiptList.size() > 0) 
+			((TextView)findViewById(R.id.emptyListMsg)).setVisibility(View.GONE);
 		adapter.setData(voteReceiptList);
 		try {
 			getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -100,7 +108,8 @@ public class VoteReceiptListScreen extends FragmentActivity
         listView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
 	}
-	
+
+
 	private void launchOptionsDialog(VoteReceipt receipt) {
 		String caption = receipt.getVoto().getAsunto();
 		String msg = getString(R.string.receipt_options_dialog_msg);
@@ -119,7 +128,7 @@ public class VoteReceiptListScreen extends FragmentActivity
     private void showPinScreen(String message) {
     	CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
 		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-	    Fragment prev = getSupportFragmentManager().findFragmentByTag(PIN_DIALOG_ID);
+	    Fragment prev = getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
 	    if (prev != null) {
 	        ft.remove(prev);
 	    }
@@ -131,29 +140,17 @@ public class VoteReceiptListScreen extends FragmentActivity
 		Log.d(TAG + ".refreshReceiptList(...)", " --- refreshReceiptList");
 		try {
 			voteReceiptList = db.getVoteReceiptList();	
+			if(voteReceiptList.size() == 0) 
+				((TextView)findViewById(R.id.emptyListMsg)).setVisibility(View.VISIBLE);
+			else ((TextView)findViewById(R.id.emptyListMsg)).setVisibility(View.GONE);
 		} catch(Exception ex) {
 			ex.printStackTrace();
 		}
+		dimissOptionsDialog();
 		adapter.setData(voteReceiptList);
 		adapter.notifyDataSetChanged();
 		adapter.setNotifyOnChange (true);
 	}
-	
-	/*@Override public void onListItemClick(ListView l, View v, int position, long id) {
-		Log.d(TAG +  ".onListItemClick", "Item clicked: " + id);
-		VoteReceipt receipt = ((VoteReceipt) getListAdapter().getItem(position));
-		String caption = receipt.getVoto().getAsunto();
-		String msg = getString(R.string.receipt_options_dialog_msg);
-		ReceiptOptionsDialog optionsDialog = ReceiptOptionsDialog.newInstance(
-				caption, msg, receipt, this);
-		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-	    Fragment prev = getSupportFragmentManager().findFragmentByTag("optionsDialog");
-	    if (prev != null) {
-	        ft.remove(prev);
-	    }
-	    ft.addToBackStack(null);
-	    optionsDialog.show(ft, "optionsDialog");
-	}*/
 	
 	@Override public boolean onOptionsItemSelected(MenuItem item) {  
 		Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
@@ -169,12 +166,17 @@ public class VoteReceiptListScreen extends FragmentActivity
 		}
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
+	@Override public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.vote_receipt_list, menu);
 		return true;
 	}
 	
+    @Override protected void onDestroy() {
+        super.onDestroy();
+    	Log.d(TAG + ".onDestroy()", " - onDestroy");
+    	unbindSignService();
+    };
+    
 	private class VoteReceiptLisAdapter extends ArrayAdapter<VoteReceipt> {
 
 		Context context;
@@ -239,6 +241,7 @@ public class VoteReceiptListScreen extends FragmentActivity
                 TextView subject = (TextView) view.findViewById(R.id.event_subject);
                 TextView dateInfo = (TextView) view.findViewById(R.id.event_date_info);
                 TextView author = (TextView) view.findViewById(R.id.event_author);
+                TextView receiptState = (TextView) view.findViewById(R.id.receipt_state);
                 
                 subject.setText(voteReceipt.getVoto().getAsunto());
                 String dateInfoStr = null;
@@ -258,35 +261,18 @@ public class VoteReceiptListScreen extends FragmentActivity
                 }
                 if(dateInfoStr != null) dateInfo.setText(Html.fromHtml(dateInfoStr));
                 else dateInfo.setVisibility(View.GONE);
+                if(voteReceipt.isCanceled()) {
+                	Log.d(TAG + ".ReceiptListAdapter.getView(...)", " - voteReceipt: " + voteReceipt.getId() 
+                			+ " -position: " + position + " - isCanceled");
+                	receiptState.setText(getContext().getString(R.string.canceled_lbl));
+                	receiptState.setVisibility(View.VISIBLE);
+                } else {
+                	Log.d(TAG + ".ReceiptListAdapter.getView(...)", " - voteReceipt: " + voteReceipt.getId() 
+                			+ " -position: " + position);
+                	receiptState.setVisibility(View.GONE);
+                } 
                 
-                Log.d(TAG + ".ReceiptListAdapter.getView(...)", " - fecha fin: " + 
-                		voteReceipt.getVoto().getFechaFin());
-                
-                /*switch(evento.getEstadoEnumValue()) {
-	                case ACTIVO:
-	                	imgView.setImageResource(R.drawable.open);
-	                	dateInfoStr = "<b>" + getContext().getString(R.string.remain_lbl, 
-                				DateUtils.getElpasedTimeHoursFromNow(evento.getFechaFin()))  +"</b>";
-	                	break;
-	                case PENDIENTE_COMIENZO:
-	                	imgView.setImageResource(R.drawable.pending);
-	                	dateInfoStr = "<b>" + getContext().getString(R.string.inicio_lbl) + "</b>: " + 
-	                			DateUtils.getShortSpanishStringFromDate(evento.getFechaInicio()) + " - " + 
-            					"<b>" + getContext().getString(R.string.fin_lbl) + "</b>: " + 
-	                			DateUtils.getShortSpanishStringFromDate(evento.getFechaFin());
-	                	break;
-	                case FINALIZADO:
-	                	imgView.setImageResource(R.drawable.closed);
-	                	dateInfoStr = "<b>" + getContext().getString(R.string.inicio_lbl) + "</b>: " + 
-	                			DateUtils.getShortSpanishStringFromDate(evento.getFechaInicio()) + " - " + 
-            					"<b>" + Aplicacion.INSTANCIA.
-		                		getContext().getString(R.string.fin_lbl) + "</b>: " + 
-	                			DateUtils.getShortSpanishStringFromDate(evento.getFechaFin());
-	                	break;
-                }
-                */
-                Log.d(TAG + ".ReceiptListAdapter.getView(...)", " - Usuario: " +
-                		voteReceipt.getVoto().getUsuario());
+                //Log.d(TAG + ".ReceiptListAdapter.getView(...)", " - Usuario: " + voteReceipt.getVoto().getUsuario());
                 if(voteReceipt.getVoto().getUsuario() != null && !"".equals(
                 		voteReceipt.getVoto().getUsuario().getNombreCompleto())) {
 	                String authorStr =  "<b>" + getContext().getString(R.string.author_lbl) + "</b>: " + 
@@ -309,28 +295,31 @@ public class VoteReceiptListScreen extends FragmentActivity
 	}
     
 	private void processCancelVote(char[] password) {
-        Map map = new HashMap();
-        map.put("origenHashCertificadoVoto", operationReceipt.
-        		getVoto().getOrigenHashCertificadoVoto());
-        map.put("hashCertificadoVotoBase64", operationReceipt.
-        		getVoto().getHashCertificadoVotoBase64());
-        map.put("origenHashSolicitudAcceso", operationReceipt.
-        		getVoto().getOrigenHashSolicitudAcceso());
-        map.put("hashSolicitudAccesoBase64", operationReceipt.
-        		getVoto().getHashSolicitudAccesoBase64());
-        JSONObject jsonObject = new JSONObject(map);
+		JSONObject jsonObject = new JSONObject();
+		try {
+			jsonObject.put("origenHashCertificadoVoto", operationReceipt.
+	        		getVoto().getOrigenHashCertificadoVoto());
+			jsonObject.put("hashCertificadoVotoBase64", operationReceipt.
+	        		getVoto().getHashCertificadoVotoBase64());
+			jsonObject.put("origenHashSolicitudAcceso", operationReceipt.
+	        		getVoto().getOrigenHashSolicitudAcceso());
+			jsonObject.put("hashSolicitudAccesoBase64", operationReceipt.
+	        		getVoto().getHashSolicitudAccesoBase64());
+		} catch(Exception ex) {
+			ex.printStackTrace();
+		}
         String signatureContent = jsonObject.toString();     
         String subject = getString(R.string.cancel_vote_msg_subject); 
         String serverURL = ServerPaths.getURLAnulacionVoto(Aplicacion.CONTROL_ACCESO_URL);
-        
         try {
 			FileInputStream fis = openFileInput(KEY_STORE_FILE);
 			byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
     		if(signService != null) signService.processSignature(signatureContent, subject, serverURL, this, 
     				true, keyStoreBytes, password);	
         } catch(Exception ex) {
-        	ex.printStackTrace();
-			showMessage(getString(R.string.error_lbl), ex.getMessage());
+			ex.printStackTrace();
+			showMessage(getString(R.string.error_lbl), 
+					getString(R.string.pin_error_msg));
         }
 
 	}
@@ -351,8 +340,11 @@ public class VoteReceiptListScreen extends FragmentActivity
 		}
 	};
 
-
-
+	private void unbindSignService() {
+		Log.d(TAG + ".unbindSignService()", "--- unbindSignService");
+		if(signService != null)	unbindService(signServiceConnection);
+	}
+	
 	@Override public void setPin(final String pin) {
 		Log.d(TAG + ".setPin()", "--- setPin - operation: " + operation);
 		if(pin != null) {
@@ -375,12 +367,7 @@ public class VoteReceiptListScreen extends FragmentActivity
 		Intent signServiceIntent = new Intent(this, SignService.class);
 		startService(signServiceIntent);
 		bindService(signServiceIntent, signServiceConnection, BIND_AUTO_CREATE);
-		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-	    Fragment prev = getSupportFragmentManager().findFragmentByTag(OPTIONS_DIALOG_ID);
-	    if (prev != null) {
-	        ft.remove(prev);
-	    }
-	    ft.addToBackStack(null);
+
     	if (!Aplicacion.Estado.CON_CERTIFICADO.equals(Aplicacion.INSTANCIA.getEstado())) {
     		Log.d(TAG + "- firmarEnviarButton -", " mostrando dialogo certificado no encontrado");
     		showCertNotFoundDialog();
@@ -388,6 +375,18 @@ public class VoteReceiptListScreen extends FragmentActivity
     	} else {
     		showPinScreen(getString(R.string.cancel_vote_msg));
     	} 
+	}
+	
+	private void dimissOptionsDialog() {
+		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+		DialogFragment prev = (DialogFragment) getSupportFragmentManager().findFragmentByTag(OPTIONS_DIALOG_ID);
+	    if(prev != null) {
+	    	prev.getDialog().dismiss();
+		    if (prev != null) {
+		        ft.remove(prev);
+		    }
+		    ft.addToBackStack(null);
+	    }
 	}
 	
 	private void showCertNotFoundDialog() {
@@ -403,6 +402,7 @@ public class VoteReceiptListScreen extends FragmentActivity
 
 	@Override
 	public void proccessReceipt(SMIMEMessageWrapper cancelReceipt) {
+		Log.d(TAG + ".proccessReceipt(..)", "--- proccessReceipt -- ");
 		operationReceipt.setCancelVoteReceipt(cancelReceipt);
 		String msg = getString(R.string.cancel_vote_result_msg, 
 				this.operationReceipt.getVoto().getAsunto());
@@ -424,14 +424,24 @@ public class VoteReceiptListScreen extends FragmentActivity
 		if(Respuesta.SC_OK != statusCode) {
 			caption = getString(R.string.error_lbl) + " " 
 					+ new Integer(statusCode).toString();
+			if(Respuesta.SC_ANULACION_REPETIDA == statusCode) {
+				Log.e(TAG + ".setSignServiceMsg(...)", " --- ANULACION_REPETIDA --- ");
+				operationReceipt.setCanceled(true);
+				try {
+					db.updateVoteReceipt(operationReceipt);
+				} catch (Exception e) {
+					e.printStackTrace();
+				} 
+			}
 		}
 		showMessage(caption, msg);
 	}
 
 	@Override
 	public void removeReceipt(VoteReceipt receipt) {
+		Log.d(TAG + ".removeReceipt()", " --- receipt: " + receipt.getId());
 		try {
-			db.deleteVoteReceipt(operationReceipt);
+			db.deleteVoteReceipt(receipt);
 			refreshReceiptList();
 		} catch (Exception e) {
 			e.printStackTrace();

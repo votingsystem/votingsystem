@@ -42,6 +42,7 @@ public class VoteReceipt {
     private boolean esValido = false;
     private SMIMEMessageWrapper smimeMessage;
     private SMIMEMessageWrapper cancelVoteReceipt;
+    private boolean isCanceled = false;
     private Evento voto;
     private Date dateCreated;
     private Date dateUpdated;
@@ -81,25 +82,30 @@ public class VoteReceipt {
     public String toJSONString() throws JSONException {
     	Log.d(TAG + ".toJSONString(...)", " --- voto.getHashSolicitudAccesoBase64(): " 
     			+ voto.getHashSolicitudAccesoBase64());
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("codigoEstado", codigoEstado);
-        if(voto != null) map.put("voto", DeObjetoAJSON.obtenerEventoJSON(voto));
-        JSONObject jsonObject = new JSONObject(map);
+    	JSONObject jsonObject = new JSONObject();
+    	jsonObject.put("codigoEstado", codigoEstado);
+        if(voto != null) jsonObject.put("voto", DeObjetoAJSON.obtenerEventoJSON(voto));
+        jsonObject.put("isCanceled", isCanceled);
         return jsonObject.toString();
     }
     
     public static VoteReceipt parse(String jsonVoteReceipt) throws Exception {
-    	Log.d(TAG + ".parse(...)", "- jsonVoteReceipt: '" + jsonVoteReceipt + "'");
+    	//Log.d(TAG + ".parse(...)", "- jsonVoteReceipt: '" + jsonVoteReceipt + "'");
     	if(jsonVoteReceipt == null) return null;
     	int codigoEstado = 0;
+    	boolean isCanceled = false;
     	Evento voto = null;
     	Log.d(TAG + ".parse(...)", " - parse(...)");
     	JSONObject jsonObject = new JSONObject (jsonVoteReceipt);
         if(jsonObject.has("codigoEstado"))
         	codigoEstado = jsonObject.getInt("codigoEstado");
+        if(jsonObject.has("isCanceled"))
+        	isCanceled = jsonObject.getBoolean("isCanceled");
         if(jsonObject.has("voto"))
         	voto = DeJSONAObjeto.obtenerEvento(jsonObject.getJSONObject("voto"));
-    	return new VoteReceipt(codigoEstado, voto);
+        VoteReceipt voteReceipt = new VoteReceipt(codigoEstado, voto);
+        voteReceipt.setCanceled(isCanceled);
+    	return voteReceipt;
     }
     
     public boolean esValido () throws Exception {
@@ -298,6 +304,7 @@ public class VoteReceipt {
 
 	public void setCancelVoteReceipt(SMIMEMessageWrapper cancelVoteReceipt) {
 		this.cancelVoteReceipt = cancelVoteReceipt;
+		if(cancelVoteReceipt != null) isCanceled = true;
 	}
 
 	public Date getDateUpdated() {
@@ -314,6 +321,14 @@ public class VoteReceipt {
 
 	public void setDateCreated(Date dateCreated) {
 		this.dateCreated = dateCreated;
+	}
+
+	public boolean isCanceled() {
+		return isCanceled;
+	}
+
+	public void setCanceled(boolean isCanceled) {
+		this.isCanceled = isCanceled;
 	}
 	
 }

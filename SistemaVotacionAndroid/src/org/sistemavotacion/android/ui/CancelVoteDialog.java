@@ -45,10 +45,12 @@ public class CancelVoteDialog  extends DialogFragment {
     }
     
 	public void saveCancelReceipt(View v) {
-		Log.d(TAG + ".saveCancelReceipt(...)", " - saveVote");
+		Log.d(TAG + ".saveCancelReceipt(...)", " - saveCancelReceipt");
     	VoteReceiptDBHelper db = new VoteReceiptDBHelper(getActivity());
 		try {
-			db.updateVoteReceipt(receipt);
+			if(receipt.getId() > 0) {
+				db.updateVoteReceipt(receipt);
+			} else db.insertVoteReceipt(receipt);
 			cancelVoteButton.setEnabled(false);
 			msgTextView.setText(getString(R.string.saved_cancel_vote_recepit_msg));
 		} catch (Exception ex) {
@@ -68,7 +70,7 @@ public class CancelVoteDialog  extends DialogFragment {
             	saveCancelReceipt(v);
             }  
         });
-         
+        if(receipt.getId() > 0) cancelVoteButton.setVisibility(View.GONE);
         if(getArguments().getString("caption") != null) {
         	getDialog().setTitle(getArguments().getString("caption"));
         }
