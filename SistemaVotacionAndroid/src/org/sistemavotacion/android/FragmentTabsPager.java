@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
 import android.support.v4.app.Fragment;
@@ -44,15 +45,11 @@ import android.widget.TabHost;
 import android.widget.TabWidget;
 import android.widget.TextView;
 
-//ActionBar for pre Honeycomb devices
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
 
 /**
  */
-public class FragmentTabsPager extends SherlockFragmentActivity 
-		implements OnNavigationListener, SubSystemChangeListener {
+public class FragmentTabsPager extends FragmentActivity 
+		implements SubSystemChangeListener {
 	
 	public static final String TAG = "FragmentTabsPager";
 
@@ -71,20 +68,22 @@ public class FragmentTabsPager extends SherlockFragmentActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-    	setTheme(Aplicacion.THEME);
+    	
     	super.onCreate(savedInstanceState);
         INSTANCIA = this;
         Log.d(TAG + ".onCreate()", " - onCreate");
-
-        getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-        getSupportActionBar().setDisplayShowHomeEnabled(false);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-        
         if(homeAdapter == null) {
         	Log.d(TAG + ".onCreate()", " - arrancando homeAdapter");
         	homeAdapter = new HomeDropdownListAdapter(this);   	
         }
-        getSupportActionBar().setListNavigationCallbacks(homeAdapter, this);
+        
+
+        
+        
+
+        
+
+        
         
         setContentView(R.layout.fragment_tabs_pager);
         TextView searchTextView = (TextView) findViewById(R.id.search_query);
@@ -125,7 +124,6 @@ public class FragmentTabsPager extends SherlockFragmentActivity
         
         if(Aplicacion.INSTANCIA != null) {
         	selectedSubSystem = Aplicacion.INSTANCIA.getSelectedSubsystem();
-        	getSupportActionBar().setSelectedNavigationItem(selectedSubSystem.getPosition());
         	Aplicacion.INSTANCIA.addSubSystemChangeListener(this);
         	openBundle.putString("subSystem", selectedSubSystem.toString());
         	pendingBundle.putString("subSystem", selectedSubSystem.toString());
@@ -153,6 +151,29 @@ public class FragmentTabsPager extends SherlockFragmentActivity
         	tv.setTextColor(Color.parseColor(EnumTab.valueOf(j).getColor()));
 	   		Typeface typeface = Typeface.create(tv.getTypeface(), Typeface.BOLD);
 	   		tv.setTypeface(typeface);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH
+        		|| Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            getActionBar().setNavigationMode(android.app.ActionBar.NAVIGATION_MODE_LIST);
+            getActionBar().setDisplayShowHomeEnabled(false);
+            getActionBar().setDisplayShowTitleEnabled(false);
+            getActionBar().setListNavigationCallbacks(homeAdapter, 
+            		new android.app.ActionBar.OnNavigationListener(){
+
+						@Override
+						public boolean onNavigationItemSelected(
+								int itemPosition, long itemId) {
+							Log.d(TAG + ".onNavigationItemSelected(...)", 
+									"- itemPosition: " + itemPosition + " - itemId: " + itemId);
+							if(selectedSubSystem == SubSystem.valueOf(itemPosition)) return false;
+							Aplicacion.INSTANCIA.setSelectedSubsystem(SubSystem.valueOf(itemPosition));
+							return false;
+						}});
+            if(Aplicacion.INSTANCIA != null) {
+            	getActionBar().setSelectedNavigationItem(selectedSubSystem.getPosition());
+            }
+        } else {
+
         }
     }
 	
@@ -330,15 +351,6 @@ public class FragmentTabsPager extends SherlockFragmentActivity
 		}
 	}
     
-	
-	@Override
-	public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-		Log.d(TAG + ".onNavigationItemSelected(...)", 
-				"- itemPosition: " + itemPosition + " - itemId: " + itemId);
-		if(selectedSubSystem == SubSystem.valueOf(itemPosition)) return false;
-		Aplicacion.INSTANCIA.setSelectedSubsystem(SubSystem.valueOf(itemPosition));
-		return false;
-	}
 
 	@Override
 	public void onChangeSubSystem(SubSystem subSystem) {

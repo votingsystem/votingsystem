@@ -118,7 +118,7 @@ public class UserCertRequestForm extends FragmentActivity
     
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
-        setTheme(Aplicacion.THEME);
+        
     	super.onCreate(savedInstanceState);
         Log.d(TAG + ".onCreate(...) ", " - onCreate - ");
         setContentView(R.layout.user_cert_request_form); 

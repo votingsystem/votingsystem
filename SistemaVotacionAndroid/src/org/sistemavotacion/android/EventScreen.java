@@ -111,7 +111,7 @@ public class EventScreen extends FragmentActivity
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-        setTheme(Aplicacion.THEME);
+        
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.event_screen);
 		evento = Aplicacion.INSTANCIA.getEventoSeleccionado();

@@ -62,8 +62,6 @@ public class Aplicacion extends FragmentActivity {
 	public enum Estado {CON_CERTIFICADO, CON_CSR, SIN_CSR}
 	
 
-	//public static final int THEME = R.style.Theme_Sherlock_Light_DarkActionBar;
-	public static final int THEME = R.style.Theme_Sherlock;
 	
 	public static final String PREFS_ESTADO              = "estado";
 	public static final String PREFS_ID_SOLICTUD_CSR     = "idSolicitudCSR";
@@ -160,7 +158,6 @@ public class Aplicacion extends FragmentActivity {
     
     @Override protected void onCreate(Bundle savedInstanceState) {
         Log.i(TAG + ".onCreate(...)", " - onCreate - ");
-    	setTheme(Aplicacion.THEME);
     	super.onCreate(savedInstanceState);  
         if (Intent.ACTION_SEARCH.equals(getIntent().getAction())) {
             String query = getIntent().getStringExtra(SearchManager.QUERY);

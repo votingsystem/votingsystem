@@ -27,5 +27,4 @@
     android:voicePromptText="@string/search_invoke"
 
     android:searchSuggestAuthority="org.sistemavotacion.util.SuggestionProvider"
-    android:searchSuggestSelection=" ? "
-/>
+    android:searchSuggestSelection=" ? "/>

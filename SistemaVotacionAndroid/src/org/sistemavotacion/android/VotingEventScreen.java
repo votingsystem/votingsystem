@@ -102,7 +102,7 @@ public class VotingEventScreen extends FragmentActivity
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Log.d(TAG + ".onCreate(...)", " --- onCreate");
-        setTheme(Aplicacion.THEME);
+        
 		super.onCreate(savedInstanceState);		
 		if(Aplicacion.INSTANCIA == null) return; 
 		if (Aplicacion.Estado.CON_CERTIFICADO.equals(Aplicacion.INSTANCIA.getEstado())) {

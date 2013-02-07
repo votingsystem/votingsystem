@@ -23,13 +23,6 @@ import org.sistemavotacion.util.HttpHelper;
 import org.sistemavotacion.util.ServerPaths;
 import org.sistemavotacion.util.SubSystem;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.app.SherlockListFragment;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.SubMenu;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.SearchManager;
@@ -37,6 +30,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -47,15 +41,22 @@ import android.support.v4.content.Loader;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.webkit.WebView.FindListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.TextView;
 
-public class EventListFragmentLoader extends SherlockFragmentActivity {
+public class EventListFragmentLoader extends FragmentActivity {
 	
 	public static final String TAG = "EventListFragmentLoader";
 	
@@ -100,7 +101,7 @@ public class EventListFragmentLoader extends SherlockFragmentActivity {
 
     }
     
-    public static class EventListFragment extends SherlockListFragment
+    public static class EventListFragment extends ListFragment
 			implements LoaderManager.LoaderCallbacks<List<EventEntry>> {
 		
 		EventListAdapter mAdapter = null;
@@ -148,72 +149,81 @@ public class EventListFragmentLoader extends SherlockFragmentActivity {
 		
 
 		@Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {	
-			Log.d(TAG +  "onCreateOptionsMenu(..)", " +++++++++++++++++++++++++++++");
-			menu.add(MENU_SEARCH_TITLE).setIcon(android.R.drawable.ic_menu_search)
-			.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
-			/*inflater.inflate(R.menu.main, menu);
-			menu.findItem(R.id.reload);
-			menu.findItem(R.id.get_cert);
-			menu.findItem(R.id.receipt_list);*/
-			SubMenu subMenu1 = menu.addSubMenu("");
-	        subMenu1.add(getString(R.string.menu_actualizar));
-	        subMenu1.add(getString(R.string.menu_solicitar_certificado));
-	        subMenu1.add(getString(R.string.menu_receipt_list));	
-	        subMenu1.getItem(0).setIcon(R.drawable.reload_32);
-	        subMenu1.getItem(1).setIcon(R.drawable.signature_ok_32);
-	        subMenu1.getItem(2).setIcon(R.drawable.receipt_32);   
-
-	        Intent intentRefresh =  new Intent(getActivity(), FragmentTabsPager.class);
-	        Intent intentReceiptList = new Intent(getActivity(), VoteReceiptListScreen.class);
-	        Log.d(TAG +  " EventListFragment.onCreateOptionsMenu", " **** Aplicacion.INSTANCIA.getEstado(): " 
-	        		+ Aplicacion.INSTANCIA.getEstado());
-
-	        subMenu1.getItem(0).setIntent(intentRefresh);
-	        subMenu1.getItem(2).setIntent(intentReceiptList);
-	        MenuItem subMenu1Item = subMenu1.getItem();
-	        subMenu1Item.setIcon(android.R.drawable.ic_menu_more);
-	        subMenu1Item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+			Log.d(TAG +  "onCreateOptionsMenu(..)", " onCreateOptionsMenu - onCreateOptionsMenu");			
+			inflater.inflate(R.menu.main, menu);
+	        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH ||
+	        		Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+				 // Associate searchable configuration with the SearchView
+			    SearchManager searchManager =
+			           (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
+			    SearchView searchView =
+			            (SearchView) menu.findItem(R.id.action_search);
+			    searchView.setSearchableInfo(
+			            searchManager.getSearchableInfo(getActivity().getComponentName()));
+	        	//1 -> index of documents menu item on main.xml
+	        	menu.getItem(1).setVisible(false);
+	        }
 		}
 		
 		@Override public boolean onOptionsItemSelected(MenuItem item) {
 			Log.d(TAG +  ".EventListFragment.onOptionsItemSelected", 
 					" - Title: " + item.getTitle() + " - ItemId: " + item.getItemId());
+			Intent intent = null;
 			if(MENU_SEARCH_TITLE.equals(item.getTitle()))
 				getActivity().onSearchRequested();
-			if(getString(R.string.menu_solicitar_certificado).equals(item.getTitle())) {
-				Intent intent = null;
-          	  	switch(Aplicacion.INSTANCIA.getEstado()) {
-			    	case SIN_CSR:
-			    		intent = new Intent(getActivity(), Aplicacion.class);
-			    		break;
-			    	case CON_CSR:
-			    		intent = new Intent(getActivity(), UserCertResponseForm.class);
-			    		break;
-			    	case CON_CERTIFICADO:
-						AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
-			    		builder.setTitle(getString(R.string.
-			    				menu_solicitar_certificado));
-			    		builder.setMessage(Html.fromHtml(
-			    				getString(R.string.request_cert_again_msg)));
-			    		builder.setPositiveButton(getString(
-			    				R.string.ok_button), new DialogInterface.OnClickListener() {
-			    		            public void onClick(DialogInterface dialog, int whichButton) {
-			    		            	Intent intent = new Intent(getActivity(), UserCertRequestForm.class);
-			    		            	intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			    		            	startActivity(intent);
-			    		            }
-			    					});
-			    		builder.setNegativeButton(getString(
-			    				R.string.cancelar_button), null);
-			    		builder.show();
-			    		return true;
-          	  	}
-          	  	if(intent != null) {
-	          	  	intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-	            	startActivity(intent);
-          	  	}
-			};
-	        return false;
+			switch (item.getItemId()) { 
+				case R.id.action_search:
+					getActivity().onSearchRequested();
+					break;
+				case R.id.votings:
+					Aplicacion.INSTANCIA.setSelectedSubsystem(SubSystem.VOTING);
+					break;
+				case R.id.manifests:
+					Aplicacion.INSTANCIA.setSelectedSubsystem(SubSystem.MANIFESTS);
+					break;
+				case R.id.claims:
+					Aplicacion.INSTANCIA.setSelectedSubsystem(SubSystem.CLAIMS);
+					break;	
+				case R.id.reload:
+					intent =  new Intent(getActivity(), FragmentTabsPager.class);
+					break;
+				case R.id.get_cert:
+	          	  	switch(Aplicacion.INSTANCIA.getEstado()) {
+				    	case SIN_CSR:
+				    		intent = new Intent(getActivity(), Aplicacion.class);
+				    		break;
+				    	case CON_CSR:
+				    		intent = new Intent(getActivity(), UserCertResponseForm.class);
+				    		break;
+				    	case CON_CERTIFICADO:
+							AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
+				    		builder.setTitle(getString(R.string.
+				    				menu_solicitar_certificado));
+				    		builder.setMessage(Html.fromHtml(
+				    				getString(R.string.request_cert_again_msg)));
+				    		builder.setPositiveButton(getString(
+				    				R.string.ok_button), new DialogInterface.OnClickListener() {
+				    		            public void onClick(DialogInterface dialog, int whichButton) {
+				    		            	Intent intent = new Intent(getActivity(), UserCertRequestForm.class);
+				    		            	intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				    		            	startActivity(intent);
+				    		            }
+				    					});
+				    		builder.setNegativeButton(getString(
+				    				R.string.cancelar_button), null);
+				    		builder.show();
+	          	  	}
+					break;	
+				case R.id.receipt_list:
+					intent = new Intent(getActivity(), VoteReceiptListScreen.class);
+					break;						
+			
+			}
+      	  	if(intent != null) {
+          	  	intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            	startActivity(intent);
+      	  	}
+	        return true;
 		};
 		
 		@Override public void onListItemClick(ListView l, View v, int position, long id) {

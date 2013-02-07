@@ -58,7 +58,6 @@
     <string name="query_hint_lbl">Buscar...</string>
     <string name="search_hint">Buscar...</string>
    	
-	<string name="cancel_vote_lbl">Anular voto</string>
 	<string name="guardar_recibo_voto_label">Guardar recibo</string>
 	<string name="remove_receipt_lbl">Borrar recibo</string>
 	<string name="remove_receipt_msg">¿Seguro que desea borrar recibo?</string>
@@ -130,7 +129,7 @@
     <string name="canceling_vote_caption">Anulando voto</string>
     <string name="canceling_access_request_msg">Problemas con el servicio, por favor inténtelo mas tarde.</string>
     <string name="no_receipts">No tiene guardado ningún recibo</string>
-
+    <string name="options_lbl">Opciones</string>
     
     <string name="solicitud_certificado_usuario_activity_text">No dispone de ningún 
         certificado con el que poder acceder a los servicios. Para poder votar debe solicitar
@@ -150,7 +149,6 @@
    <string name="access_request_repeated_msg"><![CDATA[
         <a href="%1$s">Pulse aquí</a> para acceder a la solicitud que le impide volver a votar sobre este asunto]]></string>
 
-   <string name="cert_install_error_msg">Error instalando certificado de usuario</string>
     <string name="cert_install_error_msg">Error instalando certificado de usuario</string>
     <string name="resultado_solicitud_certificado_activity_ok">El certificado se
         ha importado correctamente.</string>
@@ -161,6 +159,7 @@
         en las instalaciones que se le indiquen para verificar su identidad.<br/>
         ¿Desea continuar?]]></string>
     
+    <string name="documents_lbl">Documentos</string>
     
     <string name="request_user_cert_error_msg">Error comprobando el estado de la solicitud</string>
     <string name="cancelar_label">Cancelar</string>
@@ -181,7 +180,6 @@
 	<string name="msg_lbl">Mensaje</string>   
 	<string name="operacion_ok_msg">Operación completada con éxito</string> 
 	<string name="receipt_file_saved_msg">Documento incorporado a la lista de recibos</string> 
-	<string name="cert_not_found_caption">Aplicación sin certificado de usuario</string> 
 	<string name="certificado_no_encontrado_msg">No tiene instalado ningún certificado con el que poder firmar la solicitud.</string>    
 	<string name="user_cert_request_form_message_label">Cada vez que vote se le pedirá el código PIN que introducirá a continuación. Recuerde, si lo olvida tendrá que pedir otro certificado para poder votar.</string>    
 	<string name="error_password_msg">Contraseña inválida</string>
