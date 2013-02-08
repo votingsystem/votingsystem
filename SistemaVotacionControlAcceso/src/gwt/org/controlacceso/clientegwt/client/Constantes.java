@@ -71,7 +71,8 @@ public interface Constantes extends Messages{
 	String administracionDocumentoLabel();
     String herramientaValidacionLabel();
 	
-	
+    String mensajeVotoRepetido();
+    
 	String mensajeNavegadorSinJava();
     String captionNavegadorSinJava();
 	String asuntoAsociarCentroControl();

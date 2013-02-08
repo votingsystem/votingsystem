@@ -296,6 +296,10 @@ public class UserCertRequestForm extends FragmentActivity
 
 	@Override public void setPin(String pin) {
 		Log.d(TAG + ".setPin(...) ", " --- pin");
+		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+	    Fragment prev = getSupportFragmentManager().findFragmentByTag("pinDialog");
+	    if (prev != null) ft.remove(prev);
+	    ft.addToBackStack(null);
 		password = pin;
 		if(password == null) return;
 		sendCsrRequest();

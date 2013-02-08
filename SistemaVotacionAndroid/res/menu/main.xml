@@ -3,67 +3,67 @@
     <item android:id="@+id/action_search"
           android:icon="@android:drawable/ic_menu_search"
           android:title="@string/searchLabel"
-	  android:showAsAction="collapseActionView|ifRoom"
+	      android:showAsAction="collapseActionView|ifRoom"
           android:actionViewClass="android.widget.SearchView" />
 
-    <item
-        android:id="@+id/documents"
-        android:orderInCategory="10"
-        android:showAsAction="ifRoom"
-        android:icon="@drawable/view_detailed_32"
-	android:text="@string/documents_lbl"
-        android:title="@string/documents_lbl">
-	<menu>
-	    <item
-		android:id="@+id/votings"
-		android:orderInCategory="10"
-		android:showAsAction="ifRoom"
-		android:icon="@drawable/poll_32"
-		android:title="@string/voting_drop_down_lbl"/>
-	   <item
-		android:id="@+id/manifests"
-		android:orderInCategory="20"
-		android:showAsAction="never"
-		android:icon="@drawable/manifest_32"
-		android:title="@string/manifiests_drop_down_lbl"/>
-	   <item
-		android:id="@+id/claims"
-		android:orderInCategory="30"
-		android:showAsAction="never"
-		android:icon="@drawable/filenew_32"
-		android:title="@string/claims_drop_down_lbl"/>
-       </menu> 
-
+    
+   <item android:id="@+id/documents"
+         android:orderInCategory="10"
+         android:showAsAction="ifRoom"
+         android:icon="@drawable/password_32"
+	     android:text="@string/documents_lbl"
+         android:title="@string/documents_lbl">
+		 <menu>
+		    <item
+			android:id="@+id/votings"
+	  		android:orderInCategory="10"
+			android:showAsAction="ifRoom"
+			android:icon="@drawable/poll_32"
+			android:title="@string/voting_drop_down_lbl"/>
+		   <item
+			android:id="@+id/manifests"
+			android:orderInCategory="20"
+			android:showAsAction="never"
+			android:icon="@drawable/manifest_32"
+			android:title="@string/manifiests_drop_down_lbl"/>
+		   <item
+			android:id="@+id/claims"
+			android:orderInCategory="30"
+			android:showAsAction="never"
+			android:icon="@drawable/filenew_32"
+			android:title="@string/claims_drop_down_lbl"/>
+        </menu> 
     </item>
 
-    <item
-        android:id="@+id/options"
+    
+     <item
+        android:id="@+id/operations"
         android:orderInCategory="10"
         android:showAsAction="ifRoom"
-        android:icon="@drawable/view_detailed_32"
-	android:text="@string/options_lbl"
-        android:title="@string/options_lbl">
-	   <item
-		android:id="@+id/reload"
-		android:orderInCategory="30"
-		android:showAsAction="never"
-		android:icon="@drawable/reload_32"
-		android:title="@string/menu_actualizar">
-	    </item>
-	   <item
-		android:id="@+id/get_cert"
-		android:orderInCategory="20"
-		android:showAsAction="never"
-		android:icon="@drawable/signature_ok_32"
-		android:title="@string/menu_solicitar_certificado"/>
-	   <item
-		android:id="@+id/receipt_list"
-		android:orderInCategory="30"
-		android:showAsAction="never"
-		android:icon="@drawable/receipt_32"
-		android:title="@string/menu_receipt_list"/>
-
-   </item>
-
+        android:icon="@drawable/ic_menu_more"
+		android:text="@string/operations_lbl"
+        android:title="@string/operations_lbl">
+		<menu>   
+		   <item
+			android:id="@+id/reload"
+			android:orderInCategory="30"
+			android:showAsAction="never"
+			android:icon="@drawable/reload_32"
+			android:title="@string/menu_actualizar">
+		    </item>
+		   <item
+			android:id="@+id/get_cert"
+			android:orderInCategory="20"
+			android:showAsAction="never"
+			android:icon="@drawable/signature_ok_32"
+			android:title="@string/menu_solicitar_certificado"/>
+		   <item
+			android:id="@+id/receipt_list"
+			android:orderInCategory="30"
+			android:showAsAction="never"
+			android:icon="@drawable/receipt_32"
+			android:title="@string/menu_receipt_list"/>
+	    </menu> 
+    </item>
 
 </menu> 

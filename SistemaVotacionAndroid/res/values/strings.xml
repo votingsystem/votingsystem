@@ -78,8 +78,10 @@
 	
 	<string name="nif_error">NIF con errores. Por favor vuelva a intentarlo</string>
 	<string name="searchLabel">Buscar</string>
+	<string name="app_unstable_msg">La aplicación tiene errores graves, por favor, vuelva a instalarla</string>
 	
 	<string name="vote_cert_request_error_msg">No existe ningún certificado de voto</string>
+    <string name="operations_lbl">Operaciones</string>
     <string name="app_name">Votaciones</string>
     <string name="request_cert_msg">Tramitando solicitud</string>
     <string name="alert_exception_caption">Excepción!</string>
@@ -92,6 +94,7 @@
     <string name="vote_msg_subject">[VOTO]</string>
     <string name="cancel_vote_msg_subject">[ANULACION VOTO]</string>
     <string name="canceled_lbl">ANULADO</string>
+
 
     <string name="cancel_vote_result_msg">Su voto para el asunto \'%1$s\' ha sido anulado.
 	Puede volver votar de nuevo.</string>
@@ -146,7 +149,11 @@
     <string name="vote_repeated_msg"><![CDATA[Ya había enviado un voto para la convocatoria \'%1$s\' en el que 
         había elegido la opción \'%2$s\']]></string>
         
-   <string name="access_request_repeated_msg"><![CDATA[
+    <string name="access_request_repeated_msg"><![CDATA[Usted ya ha votado en el asunto \'%1$s\' <br/><br/>
+	Puede consultar la solicitud anterior visitando <a href="%2$s">este enlace</a>]]></string>
+    <string name="access_request_repeated_caption">Error, voto repetido</string>
+
+   <string name="access_request_repeated_url_msg"><![CDATA[
         <a href="%1$s">Pulse aquí</a> para acceder a la solicitud que le impide volver a votar sobre este asunto]]></string>
 
     <string name="cert_install_error_msg">Error instalando certificado de usuario</string>

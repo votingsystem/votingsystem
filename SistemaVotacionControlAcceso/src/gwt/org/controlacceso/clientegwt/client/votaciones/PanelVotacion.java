@@ -241,9 +241,8 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
 					dialogoAnulacionSolicitud.show();
 				} else if(MensajeClienteFirmaJso.SC_CANCELADO == mensaje.getCodigoEstado()) {
 				} else {
-					setMessage(Constantes.INSTANCIA.mensajeError(
-							mensaje.getMensaje()));
 					if(MensajeClienteFirmaJso.SC_ERROR_VOTO_REPETIDO == mensaje.getCodigoEstado()) {
+						setMessage(Constantes.INSTANCIA.mensajeVotoRepetido());
 						if(mensaje.getEvento() != null && 
 								mensaje.getEvento().getVotante() != null) {
 							enlaceJustificante.setVisible(true);
@@ -252,6 +251,9 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
 									mensaje.getEvento().getId()));
 							enlaceJustificante.setText(Constantes.INSTANCIA.solicitudAccesoRepetida());
 						}
+					} else {
+						setMessage(Constantes.INSTANCIA.mensajeError(
+								mensaje.getMensaje()));
 					}
 				}
 				break;

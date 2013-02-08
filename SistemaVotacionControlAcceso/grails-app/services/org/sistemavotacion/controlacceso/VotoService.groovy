@@ -55,7 +55,7 @@ class VotoService {
 			tipo:Tipo.VOTO_VALIDADO_CONTROL_ACCESO, valido:true, evento:evento)
 		multifirmaControlAcceso.save()
 		smimeMessage.setMessageID("${localServerURL}/mensajeSMIME/obtener?id=${multifirmaControlAcceso.id}")
-		smimeMessage.setTo(infoVoto.hashCertificadoVotoBase64)	
+		smimeMessage.setTo(infoVoto.hashCertificadoVotoBase64)
 		
 		MimeMessage multiFirmaMimeMessage = firmaService.generarMultifirma(
 			smimeMessage, "[VOTO_VALIDADO_CONTROL_ACCESO]")

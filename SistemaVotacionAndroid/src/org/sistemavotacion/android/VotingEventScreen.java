@@ -97,7 +97,7 @@ public class VotingEventScreen extends FragmentActivity
 	private Button cancelVoteButton;
 	private VotingService votingService = null;
 	private SignService signService = null;
-
+    private CertNotFoundDialog certDialog = null;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -141,6 +141,21 @@ public class VotingEventScreen extends FragmentActivity
         operation = Operation.VOTE;
         evento = Aplicacion.INSTANCIA.getEventoSeleccionado();
         setEventScreen(evento);
+	}
+	
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+		if(certDialog != null && certDialog.isVisible()) {
+			Log.d(TAG + ".onSaveInstanceState(...) ",  " - mostrando certDialog");
+		} else {
+			Log.d(TAG + ".onSaveInstanceState(...) ",  " - sin mostrar certDialog");
+			if(evento != null) evento.setOpcionSeleccionada(null);
+		}
+	}
+	
+	@Override
+	public void onRestoreInstanceState(Bundle savedInstanceState) {		
+		Log.d(TAG + ".onRestoreInstanceState(...) ", " -- onRestoreInstanceState --");
 	}
 	
 	@Override public boolean onOptionsItemSelected(MenuItem item) {  
@@ -290,9 +305,10 @@ public class VotingEventScreen extends FragmentActivity
 			linearLayout.addView(opcionButton, paramsButton);		
 
 		}	
-		if(event.getOpcionSeleccionada() != null) 
+		if(event.getOpcionSeleccionada() != null) {
+			Log.d(TAG + ".setEventScreen", " --- Tiene seleccionada la opcion: " +event.getOpcionSeleccionada().getContenido() );
 			processSelectedOption(event.getOpcionSeleccionada());
-		else Log.d(TAG + ".setEventScreen", "Opción seleccionada nula");
+		} else Log.d(TAG + ".setEventScreen", "Opción seleccionada nula");
 	}
 	
 	private void processSelectedOption(OpcionDeEvento opcionSeleccionada) {
@@ -330,7 +346,7 @@ public class VotingEventScreen extends FragmentActivity
     };
     
 	private void showCertNotFoundDialog() {
-		CertNotFoundDialog certDialog = new CertNotFoundDialog();
+		certDialog = new CertNotFoundDialog();
 		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 	    Fragment prev = getSupportFragmentManager().findFragmentByTag(Aplicacion.CERT_NOT_FOUND_DIALOG_ID);
 	    if (prev != null) {
@@ -400,6 +416,26 @@ public class VotingEventScreen extends FragmentActivity
 			cancelVoteButton.setEnabled(true);
         }
 
+	}
+	
+	private void showHtmlMessage(String caption, String message) {
+		Log.d(TAG + ".showMessage(...) ", " - caption: " 
+				+ caption + "  - showMessage: " + message);
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
+        /*TextView contenidoTextView = new TextView(getApplicationContext());
+        contenidoTextView.setMovementMethod(LinkMovementMethod.getInstance());
+        contenidoTextView.setPadding(20, 20, 20, 20);
+    	contenidoTextView.setText(Html.fromHtml(message));
+        contenidoTextView.setMovementMethod(LinkMovementMethod.getInstance());
+		AlertDialog.Builder builder= new AlertDialog.Builder(this);
+		builder.setTitle(caption).setView(contenidoTextView).show();*/
+		AlertDialog alertDialog= new AlertDialog.Builder(this).
+				setTitle(caption).setMessage(Html.fromHtml(message)).create();
+		alertDialog.show();
+		((TextView)alertDialog.findViewById(android.R.id.message)).
+			setMovementMethod(LinkMovementMethod.getInstance());
 	}
 	
 	private void showMessage(String caption, String message) {
@@ -500,8 +536,15 @@ public class VotingEventScreen extends FragmentActivity
 				+ statusCode + " - msg: " + msg);
 		String caption  = null;
 		if(Respuesta.SC_OK != statusCode) {
-			caption = getString(R.string.error_lbl) + " " 
-					+ new Integer(statusCode).toString();
+			if(Respuesta.SC_ERROR_VOTO_REPETIDO == statusCode) {
+				caption = getString(R.string.access_request_repeated_caption);
+				showHtmlMessage(caption, getString(
+						R.string.access_request_repeated_msg, evento.getAsunto(), msg));
+				return;
+			} else {
+				caption = getString(R.string.error_lbl) + " " 
+						+ new Integer(statusCode).toString();	
+			}
 		} else caption = getString(R.string.msg_lbl);
 		showMessage(caption, msg);
 	}

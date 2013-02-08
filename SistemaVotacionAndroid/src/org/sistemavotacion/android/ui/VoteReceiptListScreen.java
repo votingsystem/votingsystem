@@ -94,6 +94,7 @@ public class VoteReceiptListScreen extends FragmentActivity
 			getActionBar().setTitle(getString(R.string.receipt_list_screen_caption));
 			getActionBar().setLogo(R.drawable.receipt_32);
 		} catch(NoSuchMethodError ex) {
+			setTitle(getString(R.string.receipt_list_screen_caption));
 			Log.d(TAG + ".onCreate(...)", " --- android api 11 I doesn't have method 'setLogo'");
 		}  
         final ListView listView = (ListView) findViewById(R.id.listView);

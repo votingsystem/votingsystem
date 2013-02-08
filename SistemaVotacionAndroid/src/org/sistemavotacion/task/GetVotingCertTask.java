@@ -47,6 +47,9 @@ public class GetVotingCertTask extends AsyncTask<String, Void, Integer> {
             if (Respuesta.SC_OK == response.getStatusLine().getStatusCode()) {
                 pkcs10WrapperClient.initSigner(EntityUtils.toByteArray(
                 		response.getEntity()), VOTE_SIGN_MECHANISM);
+            } else if(Respuesta.SC_ERROR_VOTO_REPETIDO == 
+            		response.getStatusLine().getStatusCode()) {
+            	message = EntityUtils.toString(response.getEntity());
             } else {
             	message = response.getStatusLine().toString();
             }

@@ -106,7 +106,7 @@ public class EventListFragmentLoader extends FragmentActivity {
 		
 		EventListAdapter mAdapter = null;
 		EnumTab enumTab = null;
-		SubSystem subSystem = null;
+		SubSystem subSystem = SubSystem.VOTING;
         String queryStr = null;
         int offset = 0;
 		
@@ -114,7 +114,7 @@ public class EventListFragmentLoader extends FragmentActivity {
 			super.onCreate(savedInstanceState);
 	        Bundle args = getArguments();
 	        String enumTabStr = null;
-	        String subSystemStr = null;
+	        String subSystemStr = "";
 	        if (args != null) {
 	        	enumTabStr = args.getString("enumTab");
 	        	if(enumTabStr != null) enumTab = EnumTab.valueOf(enumTabStr);
@@ -123,6 +123,9 @@ public class EventListFragmentLoader extends FragmentActivity {
 	        	queryStr = args.getString(SearchManager.QUERY);
 	        	offset = args.getInt("offset");
 	        }
+	        if(Aplicacion.INSTANCIA == null)
+	        	getActivity().setTitle(subSystemStr);
+	        else getActivity().setTitle(Aplicacion.INSTANCIA.getSubsystemDesc(subSystem));
 	        setHasOptionsMenu(true);
 	        Log.d(TAG +  ".EventListFragment.onCreate(..)", " - enumTab: " + enumTab + 
 	        		" - subSystem: " + subSystem + " - queryStr: " + queryStr);
@@ -157,7 +160,7 @@ public class EventListFragmentLoader extends FragmentActivity {
 			    SearchManager searchManager =
 			           (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
 			    SearchView searchView =
-			            (SearchView) menu.findItem(R.id.action_search);
+			            (SearchView) menu.findItem(R.id.action_search).getActionView();
 			    searchView.setSearchableInfo(
 			            searchManager.getSearchableInfo(getActivity().getComponentName()));
 	        	//1 -> index of documents menu item on main.xml

@@ -76,11 +76,10 @@ class SolicitudAccesoService {
                     if (solicitudAcceso){
                             log.debug("El usuario ya ha Votado - id solicitud previa: " + solicitudAcceso.id)//
                             mensajeSMIME.tipo = Tipo.SOLICITUD_ACCESO_REPETIDA
+							String msg = "${grailsApplication.config.grails.serverURL}/mensajeSMIME/obtener?id=${solicitudAcceso.mensajeSMIME.id}"
                             respuesta = new Respuesta(tipo:Tipo.SOLICITUD_ACCESO_REPETIDA,
 								solicitudAcceso:solicitudAcceso, 
-								codigoEstado:Respuesta.SC_ERROR_VOTO_REPETIDO, 
-								mensaje:messageSource.getMessage('error.VotoRepetido', 
-                                        [usuario.getNif(), eventoVotacion.asunto].toArray() , locale))
+								codigoEstado:Respuesta.SC_ERROR_VOTO_REPETIDO, mensaje:msg)
                     } else {//es el hash único?
                         mensajeJSON = JSON.parse(smimeMessage.getSignedContent())
                         log.debug("validandoSolicitud - mensajeJSON: ${mensajeJSON}"  )

@@ -172,7 +172,7 @@ public class VotingService extends Service implements TaskListener {
 							+ ": " + ex.getMessage();
 					setException(msg);
 				}
-	        } else setException(response);
+	        } else voteProcessListener.setMsg(statusCode, response);
 		}
 		
     	@Override public void setException(String exceptionMsg) {
@@ -354,6 +354,7 @@ public class VotingService extends Service implements TaskListener {
 			}
 		} else if(task instanceof GetVotingCertTask) {
 			GetVotingCertTask getVotingCertTask = (GetVotingCertTask)task;
+			Log.d(TAG + ".showTaskResult(...)", " - statuscode: " + getVotingCertTask.getStatusCode());
 	        if(Respuesta.SC_OK == getVotingCertTask.getStatusCode()) {
 		        try {
 		            String votoJSON = DeObjetoAJSON.obtenerVotoParaEventoJSON(event);
@@ -371,11 +372,8 @@ public class VotingService extends Service implements TaskListener {
 					voteProcessListener.setMsg(Respuesta.SC_ERROR_EJECUCION, 
 							e.getMessage());
 				}	
-	        } else if(Respuesta.SC_ERROR_VOTO_REPETIDO == getVotingCertTask.getStatusCode()) {
-	        	voteProcessListener.setMsg(Respuesta.SC_ERROR_EJECUCION,
-	        			getString(R.string.error_vote_repeated_msg));
 	        } else {
-	        	voteProcessListener.setMsg(Respuesta.SC_ERROR_EJECUCION,
+	        	voteProcessListener.setMsg(getVotingCertTask.getStatusCode(),
 	        			getVotingCertTask.getMessage());
 	        }
 		}

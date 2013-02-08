@@ -64,9 +64,15 @@ public class UserCertResponseForm extends FragmentActivity
 	
 	public static final String TAG = "UserCertResponseForm";
 	
+	
 	private ProgressDialog progressDialog = null;
 	private GetDataTask getDataTask = null;
+	private String CSR_SIGNED = "csrSigned";
 	private String csrFirmado = null;
+	private String SCREEN_MESSAGE = "screenMessage";
+	private String screenMessage = null;
+	private boolean isCertStateChecked = false;
+	private String CERT_CHECKED = "isCertStateChecked";
     private Button goAppButton;
     private Button insertPinButton;
     private Button requestCertButton;
@@ -80,8 +86,9 @@ public class UserCertResponseForm extends FragmentActivity
 	        if (progressDialog != null && progressDialog.isShowing()) {
 	            progressDialog.dismiss();
 	        }
+	        setCertStateChecked(true);
 	        if (Respuesta.SC_OK == statusCode) {
-	        	csrFirmado = response;
+	        	setCsrFirmado(response);
 	        	setMessage(getString(R.string.cert_downloaded_msg));
 	            insertPinButton.setVisibility(View.VISIBLE);
 	        } else {
@@ -132,7 +139,6 @@ public class UserCertResponseForm extends FragmentActivity
             }
         });
         requestCertButton = (Button) findViewById(R.id.request_cert_button);
-        //requestCertButton.setVisibility(View.GONE);
         requestCertButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             	Intent intent = null;
@@ -151,27 +157,76 @@ public class UserCertResponseForm extends FragmentActivity
           	  	}
             }
         });
-
-        progressDialog = ProgressDialog.show(
-        		UserCertResponseForm.this,
-        		getString(R.string.connecting_caption),
-        		getString(R.string.cert_state_msg), true,
-	            true, new DialogInterface.OnCancelListener() {
-	                @Override
-	                public void onCancel(DialogInterface dialog) { 
-	                	/*if (getDataTask != null) {
-	                		getDataTask.cancel(true);
-	                	}*/
-	                }
-            });
-    	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-    	Long idSolicitudCSR = settings.getLong(PREFS_ID_SOLICTUD_CSR, -1);
-    	Log.d(TAG + ".onCreate() ", "idSolicitudCSR: " + idSolicitudCSR);	
-        getDataTask = new GetDataTask(solicitudCertificadoListener);
-        getDataTask.execute(ServerPaths.getURLSolicitudCertificadoUsuario(
-    			CONTROL_ACCESO_URL, String.valueOf(idSolicitudCSR)));
+        if(savedInstanceState != null) 
+        	isCertStateChecked = savedInstanceState.getBoolean(CERT_CHECKED, false);
+        Log.d(TAG + ".onCreate() ", " --- savedInstanceState: " + isCertStateChecked);	
+        checkCertState();
     }
     
+    private void checkCertState () {
+  	  	switch(Aplicacion.INSTANCIA.getEstado()) {
+	    	case SIN_CSR:
+	    		Intent intent = new Intent(getApplicationContext(), Aplicacion.class);
+	    		startActivity(intent);
+	    		break;
+	    	case CON_CSR:
+	    		if(isCertStateChecked) break;
+	        	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+	        	Long idSolicitudCSR = settings.getLong(PREFS_ID_SOLICTUD_CSR, -1);
+	        	if(idSolicitudCSR < 0) {
+	    			setMessage(getString(R.string.app_unstable_msg));
+	        		return;
+	        	} 
+	        	Log.d(TAG + ".checkCertState() ", "- idSolicitudCSR: " + idSolicitudCSR);	
+	            progressDialog = ProgressDialog.show(
+	            		UserCertResponseForm.this,
+	            		getString(R.string.connecting_caption),
+	            		getString(R.string.cert_state_msg), true,
+	    	            true, new DialogInterface.OnCancelListener() {
+	    	                @Override
+	    	                public void onCancel(DialogInterface dialog) { 
+	    	                	/*if (getDataTask != null) {
+	    	                		getDataTask.cancel(true);
+	    	                	}*/
+	    	                }
+	                });
+	            getDataTask = new GetDataTask(solicitudCertificadoListener);
+	            getDataTask.execute(ServerPaths.getURLSolicitudCertificadoUsuario(
+	        			CONTROL_ACCESO_URL, String.valueOf(idSolicitudCSR)));
+	    		break;
+  	  	}
+    	
+    }
+    
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+		Log.d(TAG + ".onRestoreInstanceState(...) ", " ------ onSaveInstanceState -------");
+		savedInstanceState.putBoolean(CERT_CHECKED, isCertStateChecked);
+		savedInstanceState.putString(CSR_SIGNED, csrFirmado);
+		savedInstanceState.putString(SCREEN_MESSAGE, screenMessage);
+	}
+	
+	private void setCertStateChecked(boolean isChecked) {
+		isCertStateChecked = isChecked;
+	}
+	
+	private void setCsrFirmado (String csrFirmado) {
+		this.csrFirmado = csrFirmado;
+	}
+    
+	@Override
+	public void onRestoreInstanceState(Bundle savedInstanceState) {		
+		Log.d(TAG + ".onRestoreInstanceState(...) ", " ------ onRestoreInstanceState -------");
+		setMessage(savedInstanceState.getString(SCREEN_MESSAGE));
+		csrFirmado = savedInstanceState.getString(CSR_SIGNED);
+		isCertStateChecked = savedInstanceState.getBoolean(CERT_CHECKED, false);
+		if(isCertStateChecked) {
+			if(csrFirmado != null)
+				insertPinButton.setVisibility(View.VISIBLE);
+			else goAppButton.setVisibility(View.VISIBLE);
+		}
+	}
+	
 	@Override public boolean onOptionsItemSelected(MenuItem item) {  
 		Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
 		switch (item.getItemId()) {        
@@ -227,6 +282,7 @@ public class UserCertResponseForm extends FragmentActivity
     
     private void setMessage(String message) {
 		Log.d(TAG + ".setMessage(...) ", " - message: " + message);
+		this.screenMessage = message;
     	TextView contenidoTextView = (TextView) findViewById(R.id.text);
     	contenidoTextView.setText(Html.fromHtml(message));
         contenidoTextView.setMovementMethod(LinkMovementMethod.getInstance());
@@ -252,7 +308,6 @@ public class UserCertResponseForm extends FragmentActivity
 			} else {
 				setMessage(getString(
 						R.string.cert_install_error_msg));
-				requestCertButton.setVisibility(View.VISIBLE);
 			}
 		} else {
 			setMessage(getString(
