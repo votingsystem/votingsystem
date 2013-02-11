@@ -388,26 +388,13 @@ public class VotingEventScreen extends FragmentActivity
 		}
 	}
 
-	private void processCancelVote(char[] password) {
-		JSONObject jsonObject = new JSONObject();
-		try {
-			jsonObject.put("origenHashCertificadoVoto", 
-					receipt.getVoto().getOrigenHashCertificadoVoto());
-			jsonObject.put("hashCertificadoVotoBase64", 
-					receipt.getVoto().getHashCertificadoVotoBase64());
-			jsonObject.put("origenHashSolicitudAcceso", 
-					receipt.getVoto().getOrigenHashSolicitudAcceso());
-			jsonObject.put("hashSolicitudAccesoBase64", 
-					receipt.getVoto().getHashSolicitudAccesoBase64());	
-		} catch(Exception ex) {
-			ex.printStackTrace();
-		}
-        String signatureContent = jsonObject.toString();     
+	private void processCancelVote(char[] password) { 
         String subject = getString(R.string.cancel_vote_msg_subject); 
         String serverURL = ServerPaths.getURLAnulacionVoto(Aplicacion.CONTROL_ACCESO_URL);
 		cancelVoteButton.setEnabled(false);
         try {
-    		if(signService != null) signService.processSignature(signatureContent, subject, serverURL, this, 
+    		if(signService != null) signService.processSignature(
+    				receipt.getVoto().getCancelVoteData(), subject, serverURL, this, 
     				true, keyStoreBytes, password);	
         } catch(Exception ex) {
         	ex.printStackTrace();

@@ -15,6 +15,7 @@ dependencies {
 	archives ('org.apache.httpcomponents:httpmime:4.2.2') {
 		exclude module: 'httpcore'
 	}
+	archives ('com.google.android:support-v4:r7')
 }
 
 task antDebugInstall(dependsOn:'cleanAndroid') << {
@@ -40,7 +41,7 @@ task cleanAndroid << {
 	}
 }
 
-task releaseUnSigned(dependsOn:'cleanAndroid') <<  {
+task releaseUnSigned(dependsOn:['classes']) <<  {
 	ProcessBuilder pb = new ProcessBuilder("ant", "release");
 	pb.directory(projectDir);
 	Process proc = pb.start();
@@ -140,5 +141,6 @@ def getDevelopmentServerIP() {
 	}
 }
 
-release.dependsOn checkDependencies
+classes.dependsOn cleanAndroid
+release.dependsOn checkDependencies, classes
 antDebugInstall.dependsOn checkDependencies

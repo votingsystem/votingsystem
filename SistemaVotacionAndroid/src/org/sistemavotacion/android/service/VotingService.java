@@ -205,18 +205,7 @@ public class VotingService extends Service implements TaskListener {
 		}
     };
     
-	private void processCancelVote(char[] password) throws JSONException {
-		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("origenHashCertificadoVoto", 
-        		event.getOrigenHashCertificadoVoto());
-		jsonObject.put("hashCertificadoVotoBase64", 
-        		event.getHashCertificadoVotoBase64());
-		jsonObject.put("origenHashSolicitudAcceso", 
-        		event.getOrigenHashSolicitudAcceso());
-		jsonObject.put("hashSolicitudAccesoBase64", 
-        		event.getHashSolicitudAccesoBase64());
-        
-        String signatureContent = jsonObject.toString();     
+	private void processCancelVote(char[] password) throws JSONException {   
         String subject = getString(R.string.cancel_vote_msg_subject); 
         try {
     		SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
@@ -226,8 +215,8 @@ public class VotingService extends Service implements TaskListener {
             if (Aplicacion.getUsuario() != null) usuario = Aplicacion.getUsuario().getNif();
             signedFile = signedMailGenerator.genFile(usuario, 
     				Aplicacion.getControlAcceso().getNombreNormalizado(), 
-    				signatureContent, subject, null, SignedMailGenerator.Type.USER, 
-    				signedFile);
+    				event.getCancelVoteData(), subject, null, 
+    				SignedMailGenerator.Type.USER, signedFile);
     		setTimeStampedDocument(TIMESTAMP_CANCEL_ACCESS_REQUEST, signedFile, TIMESTAMP_VOTE_HASH);
         } catch(Exception ex) {
         	ex.printStackTrace();

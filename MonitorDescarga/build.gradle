@@ -27,8 +27,8 @@ task signJar {
 	
 }
 
-
-jar.dependsOn cleanCompileJava
+classes.dependsOn cleanCompileJava
+jar.dependsOn classes
 signJar.dependsOn jar
 install.dependsOn signJar
 

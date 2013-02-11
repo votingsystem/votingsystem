@@ -500,6 +500,19 @@ public class Evento implements Serializable {
     	return this;
     }
     
+    public String getCancelVoteData() throws JSONException {
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("origenHashCertificadoVoto", 
+        		getOrigenHashCertificadoVoto());
+		jsonObject.put("hashCertificadoVotoBase64", 
+        		getHashCertificadoVotoBase64());
+		jsonObject.put("origenHashSolicitudAcceso", 
+        		getOrigenHashSolicitudAcceso());
+		jsonObject.put("hashSolicitudAccesoBase64", 
+        		getHashSolicitudAccesoBase64());
+        return jsonObject.toString(); 
+    }
+    
     /**
      * @param hashSolicitudAccesoBase64 the hashSolicitudAccesoBase64 to set
      */

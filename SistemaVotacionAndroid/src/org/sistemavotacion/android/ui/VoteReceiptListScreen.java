@@ -295,27 +295,14 @@ public class VoteReceiptListScreen extends FragmentActivity
 		builder.setTitle(caption).setMessage(message).show();
 	}
     
-	private void processCancelVote(char[] password) {
-		JSONObject jsonObject = new JSONObject();
-		try {
-			jsonObject.put("origenHashCertificadoVoto", operationReceipt.
-	        		getVoto().getOrigenHashCertificadoVoto());
-			jsonObject.put("hashCertificadoVotoBase64", operationReceipt.
-	        		getVoto().getHashCertificadoVotoBase64());
-			jsonObject.put("origenHashSolicitudAcceso", operationReceipt.
-	        		getVoto().getOrigenHashSolicitudAcceso());
-			jsonObject.put("hashSolicitudAccesoBase64", operationReceipt.
-	        		getVoto().getHashSolicitudAccesoBase64());
-		} catch(Exception ex) {
-			ex.printStackTrace();
-		}
-        String signatureContent = jsonObject.toString();     
+	private void processCancelVote(char[] password) {   
         String subject = getString(R.string.cancel_vote_msg_subject); 
         String serverURL = ServerPaths.getURLAnulacionVoto(Aplicacion.CONTROL_ACCESO_URL);
         try {
 			FileInputStream fis = openFileInput(KEY_STORE_FILE);
 			byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
-    		if(signService != null) signService.processSignature(signatureContent, subject, serverURL, this, 
+    		if(signService != null) signService.processSignature(operationReceipt.
+	        		getVoto().getCancelVoteData(), subject, serverURL, this, 
     				true, keyStoreBytes, password);	
         } catch(Exception ex) {
 			ex.printStackTrace();
