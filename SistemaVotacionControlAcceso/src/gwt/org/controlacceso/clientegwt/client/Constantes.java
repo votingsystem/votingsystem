@@ -39,6 +39,8 @@ public interface Constantes extends Messages{
     String finalizadoLabel();
     String canceladoLabel();
     
+    String confirmarEleccionLabel();
+    
     String tipoCampoLabelOpciones();
     String tipoCampoLabelCamposReclamacion();
     
@@ -47,6 +49,8 @@ public interface Constantes extends Messages{
     String accessRequestCanceledMsg();
 	
 	String centroControlNotSelected();
+	
+	String publishingDocument();
 	
 	String documentoSinOpciones();
 	

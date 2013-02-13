@@ -2,6 +2,8 @@ package org.controlacceso.clientegwt.client.reclamaciones;
 
 import java.util.logging.Logger;
 import org.controlacceso.clientegwt.client.Constantes;
+import org.controlacceso.clientegwt.client.dialogo.ConfirmacionListener;
+import org.controlacceso.clientegwt.client.dialogo.DialogoConfirmacion;
 import org.controlacceso.clientegwt.client.modelo.CampoDeEventoJso;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -9,14 +11,16 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
-public class PanelCampoReclamacion extends Composite {
+public class PanelCampoReclamacion extends Composite implements ConfirmacionListener {
 	
     private static Logger logger = Logger.getLogger("PanelCampoReclamacion");
 
@@ -30,7 +34,7 @@ public class PanelCampoReclamacion extends Composite {
         String valorContenidoTextBox();
     }
 	
-    @UiField Image borrarImage;
+    @UiField PushButton borrarOpcionButton;
     @UiField EditorStyle style;
     @UiField Label contenidoLabel;
     @UiField TextBox valorContenidoTextBox;
@@ -49,17 +53,12 @@ public class PanelCampoReclamacion extends Composite {
 		switch(modo) {
 			case CREAR:
 				valorContenidoTextBox.setVisible(false);
-				borrarImage.addClickHandler(new ClickHandler(){
-					@Override
-					public void onClick(ClickEvent event) {
-						borrarCampoReclamacion();
-					}});
 				break;
 			case EDITAR:
-				borrarImage.setVisible(false);
+				borrarOpcionButton.setVisible(false);
 				break;
 		}
-		contenidoLabel.setText(campo.getContenido());
+		contenidoLabel.setText(" - " + campo.getContenido());
 		this.campo = campo;
 		this.panelCampos = panelCampos;
 	}
@@ -68,14 +67,6 @@ public class PanelCampoReclamacion extends Composite {
 	public CampoDeEventoJso getCampoReclamacion() {
 		if(modo == Modo.EDITAR) campo.setContenido(valorContenidoTextBox.getText());
 		return campo;
-	}
-
-	private void borrarCampoReclamacion() {
-		if(enabled) {
-			if(Window.confirm(Constantes.INSTANCIA.confirmarBorradoOpcion())){
-				panelCampos.borrarCampo(campo);
-			}
-		}
 	}
 
 	public void setEnabled(boolean camposEnabled) {
@@ -93,4 +84,15 @@ public class PanelCampoReclamacion extends Composite {
 		}
 	}
 
+	@UiHandler("borrarOpcionButton")
+    void handleBorrarOpcionButton(ClickEvent e) {
+		DialogoConfirmacion dialogoConfirmacion = new DialogoConfirmacion(null, this);
+		dialogoConfirmacion.show(Constantes.INSTANCIA.confirmarBorradoOpcion());
+	}
+
+
+	@Override
+	public void confirmed(Integer id) {
+		panelCampos.borrarCampo(campo);
+	}
 }

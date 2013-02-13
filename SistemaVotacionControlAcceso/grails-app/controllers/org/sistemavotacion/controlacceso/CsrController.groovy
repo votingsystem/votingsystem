@@ -4,7 +4,9 @@ import org.sistemavotacion.util.*;
 import org.sistemavotacion.seguridad.*
 import org.sistemavotacion.smime.SMIMEMessageWrapper
 import org.sistemavotacion.controlacceso.modelo.*;
+import java.security.KeyStore
 import java.security.cert.X509Certificate;
+import java.security.cert.Certificate
 import grails.converters.JSON;
 
 class CsrController {
@@ -39,7 +41,28 @@ class CsrController {
 				response.status = 200
 				ByteArrayInputStream bais = new ByteArrayInputStream(certificado.contenido)
 				X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
-				byte[] pemCert = CertUtil.fromX509CertToPEM (certX509)
+				
+				
+				def rutaAlmacenClaves = getAbsolutePath("${grailsApplication.config.SistemaVotacion.rutaAlmacenClaves}")
+				File keyStoreFile = new File(rutaAlmacenClaves);
+				String aliasClaves = grailsApplication.config.SistemaVotacion.aliasClavesFirma
+				String password = grailsApplication.config.SistemaVotacion.passwordClavesFirma
+				KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(
+					FileUtils.getBytesFromFile(keyStoreFile), password.toCharArray());
+				Certificate[] certsServer =  keyStore.getCertificateChain(aliasClaves);
+				
+				List<X509Certificate> certs =new ArrayList<X509Certificate>();
+				certs.add(certX509);
+				for(Certificate cert : certsServer) {
+					certs.add((X509Certificate)cert);
+				}
+				
+				log.debug("certs.size(): " + certs.size())
+				
+				
+				byte[] pemCert = CertUtil.fromX509CertCollectionToPEM(certs)
+				
+				//byte[] pemCert = CertUtil.fromX509CertToPEM (certX509)
 				response.setContentType("text/plain")
 				response.contentLength = pemCert.length
 				response.outputStream <<  pemCert
@@ -53,6 +76,12 @@ class CsrController {
 		response.status = 404
 		render message(code: "csr.solicitudNoValidada")
 		return false
+	}
+	
+	public String getAbsolutePath(String filePath){
+		String prefijo = "${grailsApplication.mainContext.getResource('.')?.getFile()}"
+		String sufijo =filePath.startsWith(File.separator)? filePath : File.separator + filePath;
+		return "${prefijo}${sufijo}";
 	}
 	
 	def guardarValidacion() { 

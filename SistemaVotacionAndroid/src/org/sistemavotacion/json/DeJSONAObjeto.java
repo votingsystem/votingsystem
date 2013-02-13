@@ -68,7 +68,7 @@ public class DeJSONAObjeto {
             evento.setDateCreated(DateUtils.getDateFromString(eventoJSON.getString("fechaCreacion")));
         if (eventoJSON.has("fechaInicio"))
             evento.setFechaInicio(DateUtils.getDateFromString(eventoJSON.getString("fechaInicio")));
-        if (eventoJSON.has("fechaFin"))
+        if (eventoJSON.has("fechaFin") && !eventoJSON.isNull("fechaFin"))
             evento.setFechaFin(DateUtils.getDateFromString(eventoJSON.getString("fechaFin")));
         evento.setFirmado(Boolean.FALSE);
         if (eventoJSON.has("controlAcceso") && 

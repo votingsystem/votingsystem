@@ -1,19 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical" >
+    android:layout_height="fill_parent">
 
-<WebView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/webview"
-    android:layout_width="fill_parent"
-    android:layout_height="363dp" />
-
-<Button
-    android:id="@+id/aceptar_button"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Enviar mensaje a aplicación" />
+	<WebView
+	    xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:id="@+id/webview"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent" />
 
 </LinearLayout>

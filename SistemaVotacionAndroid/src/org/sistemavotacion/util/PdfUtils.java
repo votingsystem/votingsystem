@@ -2,14 +2,14 @@ package org.sistemavotacion.util;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import org.sistemavotacion.seguridad.KeyStoreUtil;
+
 import android.content.Context;
+import android.util.Log;
+
 import com.itextpdf.text.Anchor;
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.BaseColor;
@@ -27,10 +27,9 @@ import com.itextpdf.text.Section;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.PdfSignatureAppearance;
-import android.util.Log;
+import com.itextpdf.text.pdf.PdfStamper;
+import com.itextpdf.text.pdf.PdfWriter;
 
 
 public class PdfUtils {

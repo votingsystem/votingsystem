@@ -19,6 +19,7 @@ public final class MensajeClienteFirmaJso extends JavaScriptObject {
         MENSAJE_HERRAMIENTA_VALIDACION, MENSAJE_CIERRE_HERRAMIENTA_VALIDACION}
 	
     public static final int SC_OK = 200;
+    public static final int SC_PING = 0;
     public static final int SC_ERROR_PETICION = 400;
     public static final int SC_ERROR_VOTO_REPETIDO = 470;
     public static final int SC_ERROR_EJECUCION = 500;
@@ -166,6 +167,10 @@ public final class MensajeClienteFirmaJso extends JavaScriptObject {
 
 	public final native String setRespuestaConRecibo(boolean value) /*-{
 		this.respuestaConRecibo = value;
+	}-*/;
+	
+	public final native String setSessionId(String value) /*-{
+		this.sessionId = value;
 	}-*/;
 	
 	public static native JavaScriptObject createMensajeCancelacionEvento(

@@ -11,36 +11,48 @@ public class GetDataTask extends AsyncTask<String, Void, String> {
 
 	public static final String TAG = "GetDataTask";
 	
-    private DataListener listener = null;
+	private Integer id;
+    private TaskListener listener = null;
     private Exception exception = null;
+    private String message = null;
     private int statusCode = Respuesta.SC_ERROR_PETICION;
     
-    public GetDataTask(DataListener listener) {
+    public GetDataTask(Integer id, TaskListener listener) {
+    	this.id = id;
     	this.listener = listener;
     }
 	
 	@Override
 	protected String doInBackground(String... urls) {
         Log.d(TAG + ".doInBackground", " - url: " + urls[0]);
-        String result = null;  
         try {
             HttpResponse response = HttpHelper.obtenerInformacion(urls[0]);
             statusCode = response.getStatusLine().getStatusCode();
-            result = EntityUtils.toString(response.getEntity());
+            message = EntityUtils.toString(response.getEntity());
         } catch (Exception ex) {
-        	Log.e(TAG + ".doInBackground", ex.getMessage(), ex);
+        	ex.printStackTrace();
         	exception = ex;
         }
-        return result;
+        return message;
 	}
 	
     @Override
     protected void onPostExecute(String data) {
-    	Log.d(TAG + ".onPostExecute", " - data: " + data);
-    	
-    	if(data != null)listener.updateData(statusCode, data);
-    	else if(exception != null) 
-    		listener.setException(exception.getMessage());
+    	Log.d(TAG + ".onPostExecute", " - statusCode: " + statusCode);
+    	listener.showTaskResult(this);
     }
-
+    
+    public Integer getId() {
+    	return id;
+    }
+    
+    public int getStatusCode() {
+    	return statusCode;
+    }
+    
+	public String getMessage() {
+		if(exception != null) return exception.getMessage();
+		return message;
+	}
+	
 }

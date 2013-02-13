@@ -44,6 +44,7 @@ public class Operation {
         
     }
     
+    public static final int SC_PING = 0;
     public static final int SC_OK = 200;
     public static final int SC_ERROR_PETICION = 400;
     public static final int SC_ERROR_VOTO_REPETIDO = 470;
@@ -64,6 +65,7 @@ public class Operation {
     private Boolean respuestaConRecibo = false;
     private JSONObject contenidoFirma; 
     private Evento evento;
+    private String sessionId;
     private String[] args;
 
     
@@ -105,6 +107,14 @@ public class Operation {
      */
     public String getUrlTimeStampServer() {
         return urlTimeStampServer;
+    }
+    
+    public String getSessionId() {
+        return sessionId;
+    }
+    
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 
     /**
@@ -242,7 +252,7 @@ public class Operation {
     }
 
     public static Operation parse (String operacionStr) throws JSONException, ParseException {
-		Log.d(TAG + ".dataServerListener.updateData() ", "data: " + operacionStr);
+		Log.d(TAG + ".parse(...) ", "operacionStr: " + operacionStr);
         if(operacionStr == null) return null;
         Operation operacion = new Operation();
         JSONObject operacionJSON = new JSONObject(operacionStr);
@@ -290,6 +300,9 @@ public class Operation {
         if (operacionJSON.has("emailSolicitante")) {
             operacion.setEmailSolicitante(operacionJSON.getString("emailSolicitante"));
         }
+        if (operacionJSON.has("sessionId")) {
+        	operacion.setSessionId(operacionJSON.getString("sessionId"));
+        }
         return operacion;
     }
 
@@ -303,10 +316,11 @@ public class Operation {
         if(asuntoMensajeFirmado != null) jsonObject.put("asuntoMensajeFirmado", urlEnvioDocumento);
         if(nombreDestinatarioFirma != null) jsonObject.put("nombreDestinatarioFirma", nombreDestinatarioFirma);
         if(respuestaConRecibo != null) jsonObject.put("respuestaConRecibo", respuestaConRecibo);
-         if(urlTimeStampServer != null) jsonObject.put("urlTimeStampServer", urlTimeStampServer);
+        if(urlTimeStampServer != null) jsonObject.put("urlTimeStampServer", urlTimeStampServer);
         if(args != null) jsonObject.put("args", args);
+        if(sessionId != null) jsonObject.put("sessionId", sessionId);
         
-        if(evento != null) jsonObject.put("evento", evento.obtenerJSON());
+        if(evento != null) jsonObject.put("evento", evento.toJSON());
         return jsonObject;
     }
     

@@ -33,6 +33,7 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -45,10 +46,9 @@ import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.modelo.Tipo;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.sistemavotacion.smime.SignedMailGenerator;
-import org.sistemavotacion.task.DataListener;
-import org.sistemavotacion.task.FileListener;
 import org.sistemavotacion.task.GetFileTask;
 import org.sistemavotacion.task.SendFileTask;
+import org.sistemavotacion.task.TaskListener;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.PdfUtils;
@@ -78,36 +78,17 @@ import android.widget.TextView;
 import com.itextpdf.text.pdf.PdfReader;
 
 public class EventScreen extends FragmentActivity 
-	implements CertPinDialogListener {
+	implements CertPinDialogListener, TaskListener {
 	
 	public static final String TAG = "EventScreen";
 	
     private Button firmarEnviarButton;
-    private Evento evento;
+    private Evento evento =  null;
+    private char[] password = null;
     private Map<Long, EditText> mapaCamposReclamacion;
     private ProgressDialog progressDialog = null;
     private AsyncTask runningTask = null;
-    byte[] keyStoreBytes = null;
-    
-    DataListener<String> sendFileListener = new DataListener<String>() {
-
-    	@Override public void updateData(int codigoEstado, String data) {
-			Log.d(TAG + ".sendFileListener.updateData(...) ", " - data: " + data);
-	        if (progressDialog != null && progressDialog.isShowing()) {
-	            progressDialog.dismiss();
-	        }
-
-	        if(Respuesta.SC_OK == codigoEstado) {
-	        	showMessage(getString(R.string.operacion_ok_msg), null);
-	        } else showMessage(getString(R.string.error_lbl), data);
-		}
-		
-    	@Override public void setException(String exceptionMsg) {
-			Log.d(TAG + ".sendFileListener.setException() ", "exceptionMsg: " + exceptionMsg);	
-	        showMessage(getString(R.string.error_lbl), exceptionMsg);
-	        firmarEnviarButton.setEnabled(true);
-		}
-    };
+    private byte[] keyStoreBytes = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -255,7 +236,7 @@ public class EventScreen extends FragmentActivity
 		simimeSignedFile = signedMailGenerator.genFile(usuario, 
 				Aplicacion.getControlAcceso().getNombreNormalizado(), signatureContent, 
 				asunto, null, SignedMailGenerator.Type.USER, simimeSignedFile);
-        SendFileTask enviarArchivoTask = new SendFileTask(sendFileListener, simimeSignedFile);
+        SendFileTask enviarArchivoTask = new SendFileTask(null, this, simimeSignedFile);
         runningTask = enviarArchivoTask;
         enviarArchivoTask.execute(urlEnvio);
 	}
@@ -264,44 +245,9 @@ public class EventScreen extends FragmentActivity
 		try {
 	    	if(evento.getTipo().equals(Tipo.EVENTO_FIRMA)) {
 		        firmarEnviarButton.setEnabled(false);
-		        FileListener pdfSigner = new FileListener () {
-		    		@Override
-		    		public void porcessFileData(byte[] fileData) {
-		    			File root = Environment.getExternalStorageDirectory();
-		    			File pdfFirmadoFile = new File(root, 
-		    					Aplicacion.MANIFEST_FILE_NAME + "_" + evento.getEventoId() +".pdf");
-		    	        PdfReader pdfFile;
-		    	        try {
-			    	        pdfFile = new PdfReader(fileData);
-			            	KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
-			                PrivateKey key = (PrivateKey)keyStore.getKey(ALIAS_CERT_USUARIO, password);
-			                Certificate[] chain = keyStore.getCertificateChain(ALIAS_CERT_USUARIO);
-			    			PdfUtils.firmar(pdfFile, new FileOutputStream(pdfFirmadoFile), key, chain);
-			    	        SendFileTask enviarArchivoTask = new SendFileTask(sendFileListener, pdfFirmadoFile);
-			    	        runningTask = enviarArchivoTask.execute(ServerPaths.getURLPDFManifestCollector(
-			    	        		CONTROL_ACCESO_URL, evento.getEventoId()));
-		    	        } catch (IOException ex) {
-		    				Log.e(TAG + ".firmarEnviarVoto(...)", "Exception: " + ex.getMessage());
-		    				showMessage(getString(R.string.error_lbl), 
-		    						getString(R.string.pin_error_msg));
-		    		        firmarEnviarButton.setEnabled(true);
-		    			} catch (Exception ex) {
-		    				Log.e(TAG + ".firmarEnviarVoto(...)", "Exception: " + ex.getMessage());
-		    				showMessage(getString(R.string.error_lbl), ex.getMessage());
-		    			}
-		    		}
-
-		    		@Override
-		    		public void setException(String exceptionMsg) {
-		    			Log.d(TAG + ".fileListener.setException() ", "exceptionMsg: " + exceptionMsg);	
-		    	        showMessage(getString(R.string.error_lbl), exceptionMsg);
-		    		}};
-
-	    		GetFileTask getFileTask = new GetFileTask(pdfSigner);
-	    		runningTask = getFileTask.execute(ServerPaths.getURLPDFManifest(
+		        this.password = password;
+	    		runningTask = new GetFileTask(null, this).execute(ServerPaths.getURLPDFManifest(
 		    			CONTROL_ACCESO_URL, evento.getEventoId()));
-
-				
 	    	} else {
 		        firmarEnviarButton.setEnabled(false);
 		        firmarEnviarSMIME(password);
@@ -437,5 +383,54 @@ public class EventScreen extends FragmentActivity
 	        firmarEnviar(pin.toCharArray());
 		} 
 	}
-	
+
+	@Override
+	public void processTaskMessages(List<String> messages, AsyncTask task) { }
+
+	@Override
+	public void showTaskResult(AsyncTask task) {
+		if(task instanceof GetFileTask) {
+			GetFileTask getFileTask = (GetFileTask)task;
+			if(Respuesta.SC_OK == getFileTask.getStatusCode()) {
+    			File root = Environment.getExternalStorageDirectory();
+    			File pdfFirmadoFile = new File(root, 
+    					Aplicacion.MANIFEST_FILE_NAME + "_" + evento.getEventoId() +".pdf");
+    	        PdfReader pdfFile;
+    	        try {
+	    	        pdfFile = new PdfReader(getFileTask.getFileData());
+	            	KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
+	                PrivateKey key = (PrivateKey)keyStore.getKey(ALIAS_CERT_USUARIO, password);
+	                Certificate[] chain = keyStore.getCertificateChain(ALIAS_CERT_USUARIO);
+	    			PdfUtils.firmar(pdfFile, new FileOutputStream(pdfFirmadoFile), key, chain);
+	    	        SendFileTask enviarArchivoTask = new SendFileTask(null, this, pdfFirmadoFile);
+	    	        runningTask = enviarArchivoTask.execute(ServerPaths.getURLPDFManifestCollector(
+	    	        		CONTROL_ACCESO_URL, evento.getEventoId()));
+    	        } catch (IOException ex) {
+    				ex.printStackTrace();
+    				showMessage(getString(R.string.error_lbl), 
+    						getString(R.string.pin_error_msg));
+    		        firmarEnviarButton.setEnabled(true);
+    			} catch (Exception ex) {
+    				ex.printStackTrace();
+    				showMessage(getString(R.string.error_lbl), ex.getMessage());
+    			}
+			} else {
+				showMessage(getString(R.string.error_lbl), getFileTask.getMessage());
+			}
+			
+		} else if(task instanceof SendFileTask) {
+			SendFileTask sendFileTask = (SendFileTask)task;
+	        if (progressDialog != null && progressDialog.isShowing()) {
+	            progressDialog.dismiss();
+	        }
+	        if(Respuesta.SC_OK == sendFileTask.getStatusCode()) {
+	        	showMessage(getString(R.string.operacion_ok_msg), null);
+	        } else {
+	        	showMessage(getString(R.string.error_lbl), sendFileTask.getMessage());
+	        	firmarEnviarButton.setEnabled(true);
+	        } 
+		}
+		
+	}
+
 }

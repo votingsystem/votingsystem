@@ -2,18 +2,24 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:style type='org.controlacceso.clientegwt.client.reclamaciones.PanelCampoReclamacion.EditorStyle'>
-		.mainPanel { height: 30px; padding:1px; margin-bottom:15px;}
-		.imgBorrarOpcion {margin: 2px 3px 0px 0px; cursor: pointer; cursor: hand;}
-		.contenidoLabel {font-size: 16px; margin-top: 3px;}
+		.mainPanel { height: 50px; padding:0px 0px 0px 40px; }
+		.contenidoLabel {font-size: 26px; margin: 0px 10px 0px 10px;}
 		.valorContenidoTextBox{margin-left: 20px; margin-top: 7px; border: 1px solid #02227a; width:300px}
     	.errorTextBox {border-color: red;}
 	</ui:style>
 	<ui:with field='res' type='org.controlacceso.clientegwt.client.Recursos'/>
+	<ui:image field='borrarOpcion' src="../BotonBorrarOpcion.png"/>
 	<g:VerticalPanel styleName="{style.mainPanel}">
-	    <g:HorizontalPanel styleName="{style.mainPanel}">
-            <g:Image resource='{res.cancel_16x16}' styleName="{style.imgBorrarOpcion}"  ui:field="borrarImage"/>
-			<g:Label styleName="{style.contenidoLabel}" ui:field="contenidoLabel"/>
-	    </g:HorizontalPanel>
-		<g:TextBox styleName="{style.valorContenidoTextBox}" ui:field="valorContenidoTextBox"/>
+	<g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
+    	<g:VerticalPanel>   	
+		    <g:HorizontalPanel>
+	  			<g:PushButton ui:field='borrarOpcionButton'>
+					<g:upFace image='{borrarOpcion}'/>
+				</g:PushButton>
+				<g:Label styleName="{style.contenidoLabel}" ui:field="contenidoLabel"/>
+		    </g:HorizontalPanel>
+			<g:TextBox styleName="{style.valorContenidoTextBox}" ui:field="valorContenidoTextBox"/>
+		</g:VerticalPanel>
+	</g:cell>
 	</g:VerticalPanel>
 </ui:UiBinder>

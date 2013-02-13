@@ -38,6 +38,8 @@ public interface Recursos extends ClientBundle {
 	ImageResource botonReclamar();
 	@Source("BotonPendiente.png")
 	ImageResource botonPendiente();
+	@Source("BotonPendiente.png")
+	ImageResource borrarOpcion();
 	@Source("signature-bad_16x16.png")
 	ImageResource signatureBad_16x16();
 	@Source("view_detailed_16x16.png")

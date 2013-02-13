@@ -570,8 +570,8 @@ public class Evento implements Serializable {
 		return DeJSONAObjeto.obtenerEvento(jsonObject);
 	}
 	
-	public String obtenerJSON() throws JSONException {
-		return DeObjetoAJSON.obtenerEventoJSONString(this);
+	public JSONObject toJSON() throws JSONException {
+		return DeObjetoAJSON.obtenerEventoJSON(this);
 	}
 	
 	public void setEstado(String estado) {

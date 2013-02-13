@@ -7,6 +7,8 @@ class AppController {
 
     def index() { }
 		
+	def editor() { }
+	
 	def clienteAndroid() {
 		log.debug("*** Si llega aqui mostrar mensaje app market browserToken: ${params.browserToken}" )
 		if(params.boolean('androidClientLoaded'))

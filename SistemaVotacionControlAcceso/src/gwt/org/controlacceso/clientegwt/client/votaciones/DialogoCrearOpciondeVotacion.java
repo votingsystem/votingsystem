@@ -14,6 +14,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
@@ -43,6 +44,7 @@ public class DialogoCrearOpciondeVotacion {
     @UiField Label messageLabel;
     @UiField TextBox contenidoTextBox;
     @UiField EditorStyle style;
+    @UiField FormPanel formPanel;
     OpcionDeEventoJso opcionCreada;
     PanelPublicacionVotacion panelPublicacionVotacion;
     
@@ -51,6 +53,7 @@ public class DialogoCrearOpciondeVotacion {
 	public DialogoCrearOpciondeVotacion() {
         uiBinder.createAndBindUi(this);
         messagePanel.setVisible(false);
+        formPanel.setVisible(false);
         contenidoTextBox.addKeyDownHandler(sh);
 	}
 

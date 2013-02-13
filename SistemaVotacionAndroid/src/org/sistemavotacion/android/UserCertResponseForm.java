@@ -27,14 +27,15 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+import java.util.List;
 
 import org.sistemavotacion.android.ui.CertPinDialog;
 import org.sistemavotacion.android.ui.CertPinDialogListener;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
-import org.sistemavotacion.task.DataListener;
 import org.sistemavotacion.task.GetDataTask;
+import org.sistemavotacion.task.TaskListener;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.ServerPaths;
 
@@ -46,6 +47,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
@@ -60,13 +62,12 @@ import android.widget.TextView;
 
 
 public class UserCertResponseForm extends FragmentActivity 
-	implements CertPinDialogListener {
+	implements CertPinDialogListener, TaskListener {
 	
 	public static final String TAG = "UserCertResponseForm";
 	
 	
 	private ProgressDialog progressDialog = null;
-	private GetDataTask getDataTask = null;
 	private String CSR_SIGNED = "csrSigned";
 	private String csrFirmado = null;
 	private String SCREEN_MESSAGE = "screenMessage";
@@ -76,41 +77,6 @@ public class UserCertResponseForm extends FragmentActivity
     private Button goAppButton;
     private Button insertPinButton;
     private Button requestCertButton;
-	    
-    DataListener<String> solicitudCertificadoListener = 
-    		new DataListener<String>() {
-
-		@Override
-		public void updateData(int statusCode, String response) {
-			Log.d(TAG + ".solicitudCertificadoListener.updateData(...) ", "response: " + response);
-	        if (progressDialog != null && progressDialog.isShowing()) {
-	            progressDialog.dismiss();
-	        }
-	        setCertStateChecked(true);
-	        if (Respuesta.SC_OK == statusCode) {
-	        	setCsrFirmado(response);
-	        	setMessage(getString(R.string.cert_downloaded_msg));
-	            insertPinButton.setVisibility(View.VISIBLE);
-	        } else {
-	        	String certificationAddresses = ServerPaths.
-	        			getURLCertificationAddresses(Aplicacion.CONTROL_ACCESO_URL);
-	        	setMessage(getString(R.string.
-	        			resultado_solicitud_certificado_activity, 
-	        			certificationAddresses));
-	        	goAppButton.setVisibility(View.VISIBLE);
-	        }
-		}
-	
-		@Override
-		public void setException(String exceptionMsg) {
-			Log.d(TAG + ".solicitudCertificadoListener.setException(...) ", " - exceptionMsg: " + exceptionMsg);	
-	        if (progressDialog != null && progressDialog.isShowing()) {
-	            progressDialog.dismiss();
-	        }
-	        showException(getString(
-	        		R.string.request_user_cert_error_msg));
-		}
-    };
     
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -190,8 +156,7 @@ public class UserCertResponseForm extends FragmentActivity
 	    	                	}*/
 	    	                }
 	                });
-	            getDataTask = new GetDataTask(solicitudCertificadoListener);
-	            getDataTask.execute(ServerPaths.getURLSolicitudCertificadoUsuario(
+	            new GetDataTask(null, this).execute(ServerPaths.getURLSolicitudCertificadoUsuario(
 	        			CONTROL_ACCESO_URL, String.valueOf(idSolicitudCSR)));
 	    		break;
   	  	}
@@ -200,7 +165,7 @@ public class UserCertResponseForm extends FragmentActivity
     
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
-		Log.d(TAG + ".onRestoreInstanceState(...) ", " ------ onSaveInstanceState -------");
+		Log.d(TAG + ".onSaveInstanceState(...) ", " ------ onSaveInstanceState -------");
 		savedInstanceState.putBoolean(CERT_CHECKED, isCertStateChecked);
 		savedInstanceState.putString(CSR_SIGNED, csrFirmado);
 		savedInstanceState.putString(SCREEN_MESSAGE, screenMessage);
@@ -264,6 +229,10 @@ public class UserCertResponseForm extends FragmentActivity
 			KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
 			PrivateKey privateKey = (PrivateKey)keyStore.getKey(ALIAS_CERT_USUARIO, password);
 	        Collection<X509Certificate> certificados = CertUtil.fromPEMChainToX509Certs(csrFirmado.getBytes());
+	        Log.d(TAG + ".actualizarKeyStore(...)", " - certificados.size(): " + certificados.size());
+	        for(X509Certificate cert:certificados) {
+	        	Log.d(TAG + ".actualizarKeyStore(...)", " ************************** cert.toString(): " + cert.toString());
+	        }
 	        X509Certificate[] arrayCerts = new X509Certificate[certificados.size()];
 	        certificados.toArray(arrayCerts);
 	        keyStore.setKeyEntry(ALIAS_CERT_USUARIO, privateKey, password, arrayCerts);
@@ -314,6 +283,39 @@ public class UserCertResponseForm extends FragmentActivity
 					R.string.cert_install_error_msg));
 		} 
 		goAppButton.setVisibility(View.VISIBLE);
+	}
+
+	@Override
+	public void processTaskMessages(List<String> messages, AsyncTask task) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void showTaskResult(AsyncTask task) {
+		Log.d(TAG + ".showTaskResult(...)", " - task: " + task.getClass());
+		if(task instanceof GetDataTask) {
+			GetDataTask getDataTask = (GetDataTask)task;
+			Log.d(TAG + ".showTaskResult(...)", " - GetDataTask - statuscode: " + getDataTask.getStatusCode());
+	        if (progressDialog != null && progressDialog.isShowing()) {
+	            progressDialog.dismiss();
+	        }
+	        setCertStateChecked(true);
+	        if (Respuesta.SC_OK == getDataTask.getStatusCode()) {
+	        	setCsrFirmado(getDataTask.getMessage());
+	        	setMessage(getString(R.string.cert_downloaded_msg));
+	            insertPinButton.setVisibility(View.VISIBLE);
+	        } else if(Respuesta.SC_NOT_FOUND == getDataTask.getStatusCode()) {
+	        	String certificationAddresses = ServerPaths.
+	        			getURLCertificationAddresses(Aplicacion.CONTROL_ACCESO_URL);
+	        	setMessage(getString(R.string.
+	        			resultado_solicitud_certificado_activity, 
+	        			certificationAddresses));
+	        	goAppButton.setVisibility(View.VISIBLE);
+	        } else showException(getString(
+	        		R.string.request_user_cert_error_msg));
+		}
+		
 	}
 	
 }

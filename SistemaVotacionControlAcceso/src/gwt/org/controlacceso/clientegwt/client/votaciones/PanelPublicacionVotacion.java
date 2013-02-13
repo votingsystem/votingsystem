@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import org.controlacceso.clientegwt.client.Constantes;
 import org.controlacceso.clientegwt.client.HistoryToken;
 import org.controlacceso.clientegwt.client.PuntoEntrada;
+import org.controlacceso.clientegwt.client.PuntoEntradaEditor;
 import org.controlacceso.clientegwt.client.Recursos;
 import org.controlacceso.clientegwt.client.dialogo.DialogoOperacionEnProgreso;
 import org.controlacceso.clientegwt.client.evento.BusEventos;
@@ -37,10 +38,9 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -65,9 +65,12 @@ public class PanelPublicacionVotacion extends Composite implements
         String errorTextBox();
         String textBox();
         String richTextArea();
+        String submitButtonsPanel();
+        String buttonContainerPanelAndroid();
     }
 
-	@UiField HTML pageTitle;
+	@UiField HorizontalPanel pageTitle;
+	@UiField HorizontalPanel submitButtonsPanel;
     @UiField EditorStyle style;
     @UiField VerticalPanel mainPanel;
     @UiField Label messageLabel;
@@ -86,7 +89,7 @@ public class PanelPublicacionVotacion extends Composite implements
     @UiField PopUpLabel labelCentrosControl;
     @UiField Label imageInfoLabel;
     @UiField PanelPublicacionOpcionesVotacion panelOpciones;
-
+    @UiField VerticalPanel piePagina;
     
     RichTextArea richTextArea;
     PopupCentrosDeControl popUpCentrosDeControl;
@@ -117,9 +120,26 @@ public class PanelPublicacionVotacion extends Composite implements
 		imageInfoLabel.addClickHandler(new ClickHandler() {	
 			@Override
 			public void onClick(ClickEvent event) {
+				if(PuntoEntradaEditor.INSTANCIA != null) {
+					logger.info(" --- Funcionalidad deshabilitada para clientes android --- ");
+					return;
+				}
 				mostrarPopUpCentroDeControl(event.getClientX(), event.getClientY());
 		}});
-		setInfoServidor(PuntoEntrada.INSTANCIA.servidor);
+		if(PuntoEntrada.INSTANCIA != null)
+			setInfoServidor(PuntoEntrada.INSTANCIA.servidor);
+		else if(PuntoEntradaEditor.INSTANCIA != null)
+			setInfoServidor(PuntoEntradaEditor.INSTANCIA.servidor);
+		if(PuntoEntradaEditor.INSTANCIA != null && 
+				PuntoEntradaEditor.INSTANCIA.getAndroidClientLoaded()) {
+			piePagina.setVisible(false);
+			pageTitle.setVisible(false);
+			cerrarButton.setVisible(false);
+			
+			MensajeClienteFirmaJso mensaje = MensajeClienteFirmaJso.create();
+			mensaje.setCodigoEstado(MensajeClienteFirmaJso.SC_PING);
+			//Browser.setAndroidClientMessage(mensaje.toJSONString());
+		}
 	}
 		
     private void setInfoServidor(ActorConIPJso controlAcceso) {
@@ -159,10 +179,16 @@ public class PanelPublicacionVotacion extends Composite implements
     	mensajeClienteFirma.setAsuntoMensajeFirmado(
     			Constantes.INSTANCIA.asuntoPublicarVotacion());		
     	mensajeClienteFirma.setRespuestaConRecibo(true);
-    	setWidgetsStatePublicando(true);
-    	Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
+    	mensajeClienteFirma.setUrlTimeStampServer(ServerPaths.getUrlTimeStampServer());
+		if(PuntoEntradaEditor.INSTANCIA != null && 
+				PuntoEntradaEditor.INSTANCIA.getAndroidClientLoaded()) {
+			Browser.setAndroidClientMessage(mensajeClienteFirma.toJSONString());
+    	} else {
+    		setWidgetsStatePublicando(true);
+    		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
+    	}
     }
-    
+	
     @UiHandler("cerrarButton")
     void handleCancelButton(ClickEvent e) {
     	if(Window.confirm(Constantes.INSTANCIA.salirSinSalvarConfirmLabel())) {
@@ -174,9 +200,6 @@ public class PanelPublicacionVotacion extends Composite implements
     void handleAnyadirOpcionButton(ClickEvent e) {
     	DialogoCrearOpciondeVotacion dialogoOpcion = new DialogoCrearOpciondeVotacion(this);
     	dialogoOpcion.show();
-    	OpcionDeEventoJso opcionCreada = dialogoOpcion.getOpcionCreada();
-    	if(opcionCreada != null) logger.info("Recojo opción: " + opcionCreada.getContenido());
-    	else logger.info("Sin opción");
     }
     
     protected void anyadirOpcionDeVotacion(OpcionDeEventoJso opcion) {
@@ -194,11 +217,20 @@ public class PanelPublicacionVotacion extends Composite implements
 		listaCentrosControl.setEnabled(!publicando);
 		panelOpciones.setEnabled(!publicando);
 		if(publicando) {
-			if(dialogoProgreso == null) dialogoProgreso = new DialogoOperacionEnProgreso();
-			dialogoProgreso.show();
+			if(PuntoEntradaEditor.INSTANCIA != null && 
+					PuntoEntradaEditor.INSTANCIA.getAndroidClientLoaded()) {
+				Browser.showProgressDialog(Constantes.INSTANCIA.publishingDocument());
+			} else {
+				if(dialogoProgreso == null) dialogoProgreso = new DialogoOperacionEnProgreso();
+				dialogoProgreso.show();
+			}
 		} else {
-			if(dialogoProgreso == null) dialogoProgreso = new DialogoOperacionEnProgreso();
-			dialogoProgreso.hide();
+			if(PuntoEntradaEditor.INSTANCIA != null && 
+					PuntoEntradaEditor.INSTANCIA.getAndroidClientLoaded()) {
+				MensajeClienteFirmaJso mensaje = MensajeClienteFirmaJso.create();
+				mensaje.setCodigoEstado(MensajeClienteFirmaJso.SC_PING);
+				Browser.setAndroidClientMessage(mensaje.toJSONString());
+			} else if(dialogoProgreso != null) dialogoProgreso.hide();
 		}
 	}
     
@@ -257,14 +289,20 @@ public class PanelPublicacionVotacion extends Composite implements
 		return true;
 	}
 	
+
 	private void setMessage (String message) {
 		if(message == null || "".equals(message)) messagePanel.setVisible(false);
 		else {
-			messageLabel.setText(message);
-			messagePanel.setVisible(true);
+			if(PuntoEntradaEditor.INSTANCIA != null && 
+					PuntoEntradaEditor.INSTANCIA.getAndroidClientLoaded()) {
+				Browser.setAndroidMsg(message);
+			} else {
+				messageLabel.setText(message);
+		    	messagePanel.setVisible(true);
+			}
 		}
 	}
-    
+
     private class SubmitHandler implements KeyDownHandler {
 		@Override
 		public void onKeyDown(KeyDownEvent event) {
@@ -294,7 +332,6 @@ public class PanelPublicacionVotacion extends Composite implements
 			default:
 				break;
 		}
-		
 	}
 	
 	private void mostrarPopUpCentroDeControl(int clientX, int clientY) {
@@ -317,7 +354,6 @@ public class PanelPublicacionVotacion extends Composite implements
 			    case Event.ONMOUSEOUT:
 			    	break;
 			}
-
 		}
 		
 	}
@@ -326,7 +362,6 @@ public class PanelPublicacionVotacion extends Composite implements
 	public void procesarMensaje(EventoGWTMensajeAplicacion evento) {
 		if(evento.token.equals(HistoryToken.OBTENIDA_INFO_SERVIDOR))
 			setInfoServidor((ActorConIPJso) evento.contenidoMensaje);
-		
 	}
 
 }

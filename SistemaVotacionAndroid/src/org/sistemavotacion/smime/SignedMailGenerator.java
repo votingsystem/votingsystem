@@ -24,6 +24,7 @@ import javax.mail.internet.MimeMultipart;
 
 import org.bouncycastle2.asn1.ASN1EncodableVector;
 import org.bouncycastle2.asn1.cms.AttributeTable;
+import org.bouncycastle2.asn1.cms.SignerInfo;
 import org.bouncycastle2.asn1.smime.SMIMECapabilitiesAttribute;
 import org.bouncycastle2.asn1.smime.SMIMECapability;
 import org.bouncycastle2.asn1.smime.SMIMECapabilityVector;
@@ -106,6 +107,7 @@ public class SignedMailGenerator {
         jcaSignerInfoGeneratorBuilder.setSignedAttributeGenerator(new AttributeTable(signedAttrs));
         SignerInfoGenerator signerInfoGenerator = jcaSignerInfoGeneratorBuilder.build(
         		signatureMechanism, key, (X509Certificate)chain[0]);
+
         smimeSignedGenerator.addSignerInfoGenerator(signerInfoGenerator);
         // add our pool of certs and cerls (if any) to go with the signature
         smimeSignedGenerator.addCertificates(certs);

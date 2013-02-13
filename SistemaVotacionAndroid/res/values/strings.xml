@@ -29,8 +29,18 @@
     <string name="unknown_drop_down_lbl">Sistema desconocido</string>
     <string name="subject_lbl">Asunto</string>
     <string name="menuSync">Sincronizar</string>
+
+    <string name="publish_voting_caption">Publicando votación</string>
+    <string name="publish_claim_caption">Publicando reclamación</string>
+    <string name="publish_manifest_caption">Publicando manifiesto</string>
     
-    
+    <string name="publish_document_lbl">Publicar documento</string>
+    <string name="publish_voting_lbl">Publicar votación</string>
+    <string name="publish_manifest_lbl">Publicar manifiesto</string>
+    <string name="publish_claim_lbl">Publicar reclamación</string>
+    <string name="loading_html_msg">Cargando página, por favor espere</string>
+
+    <string name="pdf_signed_by_lbl">Firmado electrónicamente por</string>
     
     <string name="ASOCIAR_CENTRO_CONTROL_SMIME">Asociando Centro de Control </string>
     <string name="CAMBIO_ESTADO_CENTRO_CONTROL_SMIME">Cambiando estado de Centro de Control</string>

@@ -1,12 +1,12 @@
 package org.controlacceso.clientegwt.client.util;
 
 import java.util.logging.Logger;
+
 import org.controlacceso.clientegwt.client.PuntoEntrada;
-import org.controlacceso.clientegwt.client.modelo.EventoSistemaVotacionJso;
 import org.controlacceso.clientegwt.client.modelo.MensajeClienteFirmaJso;
+
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
 
 /**
 * @author jgzornoza
@@ -53,6 +53,21 @@ public class Browser {
 			PuntoEntrada.INSTANCIA.setMensajeClienteFirmaPendiente(mensajeClienteFirma);	
 		}
 	}
+	
+    
+	public static native void setAndroidClientMessage(String msg) /*-{
+		$wnd.setVotingWebAppMessage(msg);
+	}-*/;
+	
+	
+	public static native void showProgressDialog(String msg) /*-{
+		$wnd.showProgressDialog(msg);
+	}-*/;
+	
+	
+	public static native void setAndroidMsg(String msg) /*-{
+		$wnd.setMessage(msg);
+	}-*/;
 	
 	private static native String ejecutarNativeOperacionClienteFirma(
 			String idFrameClienteFirma, String operacionJSONStr) /*-{

@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.json.JSONObject;
 import org.sistemavotacion.android.db.VoteReceiptDBHelper;
 import org.sistemavotacion.android.service.SignService;
 import org.sistemavotacion.android.service.SignServiceListener;

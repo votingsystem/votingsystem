@@ -33,7 +33,6 @@ import org.sistemavotacion.seguridad.PKCS10WrapperClient;
 import org.sistemavotacion.seguridad.TimeStampWrapper;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
-import org.sistemavotacion.task.DataListener;
 import org.sistemavotacion.task.GetTimeStampTask;
 import org.sistemavotacion.task.GetVotingCertTask;
 import org.sistemavotacion.task.SendFileTask;
@@ -63,6 +62,8 @@ public class VotingService extends Service implements TaskListener {
     private static final int TIMESTAMP_VOTE                  = 1;
     private static final int TIMESTAMP_CANCEL_ACCESS_REQUEST = 2;
 	
+    private static final int VOTE_REQUEST                    = 3;
+    private static final int CANCEL_ACCESS_REQUEST           = 4;
     
     private Evento event;
     private VotingServiceListener voteProcessListener;
@@ -114,97 +115,7 @@ public class VotingService extends Service implements TaskListener {
         		R.string.low_memory_msg), 300);
     }
     
-    DataListener<String> voteListener = new DataListener<String>() {
 
-    	@Override public void updateData(int statusCode, String response) {
-			Log.d(TAG + ".voteListener.updateData(...) ",	" --- statusCode: " + statusCode);
-	        if (Respuesta.SC_OK == statusCode) {
-                try {
-					SMIMEMessageWrapper votoValidado = new SMIMEMessageWrapper(null,
-							new ByteArrayInputStream(response.getBytes()), null);
-					VoteReceipt receipt = new VoteReceipt(Respuesta.SC_OK, votoValidado, event);
-					voteProcessListener.proccessReceipt(receipt);
-					
-					NotificationManager notificationManager =
-						    (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-					Intent intent = new Intent(VotingService.this, VotingEventScreen.class);
-					AppData.INSTANCE.putReceipt(StringUtils.getCadenaNormalizada(
-							receipt.getEventoURL()), receipt);
-					intent.putExtra(VotingEventScreen.RECEIPT_KEY_PROP_NAME, 
-							StringUtils.getCadenaNormalizada(receipt.getEventoURL()));
-				    PendingIntent pIntent = PendingIntent.getActivity(
-				    		VotingService.this, 0, intent, 0);
-				    NotificationCompat.Builder notBuilder = new NotificationCompat.Builder(VotingService.this)
-			        	.setContentTitle(event.getAsunto())
-			        	.setContentText(getString(R.string.voted_lbl) + ": " + event.getOpcionSeleccionada().
-			        		getContenido()).setSmallIcon(R.drawable.poll_48)
-			        .setContentIntent(pIntent);
-				    Notification notification = notBuilder.getNotification();
-				    
-				    
-					/*Intent intentSaveVote = new Intent(VotingService.this, VotingEventScreen.class);
-					intentSaveVote.putExtra(VotingEventScreen.INTENT_EXTRA_DIALOG_PROP_NAME, 
-							VotingEventScreen.Operation.SAVE_VOTE);
-					Intent intentCancelVote = new Intent(VotingService.this, VotingEventScreen.class);
-					intentCancelVote.putExtra(VotingEventScreen.INTENT_EXTRA_DIALOG_PROP_NAME, 
-							VotingEventScreen.Operation.CANCEL_VOTE);
-				    PendingIntent pIntent = PendingIntent.getActivity(
-				    		VotingService.this, 0, intent, 0);
-				    PendingIntent pIntentSaveVote = PendingIntent.getActivity(
-				    		VotingService.this, 0, intentSaveVote, 0);
-				    PendingIntent pIntentCancelVote = PendingIntent.getActivity(
-				    		VotingService.this, 0, intentCancelVote, 0);
-
-				    Notification noti = new Notification.Builder(VotingService.this)
-				        .setContentTitle(event.getAsunto())
-				        .setContentText(getString(R.string.voted_lbl) + ": " + event.getOpcionSeleccionada().
-				        		getContenido()).setSmallIcon(R.drawable.poll_22x22)
-				        .setContentIntent(pIntent)
-				        .addAction(R.drawable.cancel_22x22, getString(R.string.cancel_vote_lbl), pIntent)
-				        .addAction(R.drawable.filesave_22x22, getString(R.string.save_receipt_lbl), pIntent).build();*/
-				    // Hide the notification after its selected
-				    notification.flags |= Notification.FLAG_AUTO_CANCEL;
-				  //notificationManager.notify(/* id */, notification);
-				    notificationManager.notify(receipt.initNotificationId(), notification);
-				} catch (Exception ex) {
-					Log.e(TAG + ".voteListener.updateData(...)", ex.getMessage(), ex);
-					String msg = getString(R.string.receipt_error_msg) 
-							+ ": " + ex.getMessage();
-					setException(msg);
-				}
-	        } else voteProcessListener.setMsg(statusCode, response);
-		}
-		
-    	@Override public void setException(String exceptionMsg) {
-			Log.d(TAG + ".voteListener.setException(...) ", " - exceptionMsg: " + exceptionMsg);
-			voteProcessListener.setMsg(Respuesta.SC_ERROR_EJECUCION, exceptionMsg);
-		}
-    };
-    
-    DataListener<String> cancelAccessListener = new DataListener<String>() {
-
-    	@Override public void updateData(int statusCode, String response) {
-			Log.d(TAG + ".sendFileListener.updateData(...) ",	" --- statusCode: " + statusCode);
-	        if (Respuesta.SC_OK == statusCode) {
-                try {
-                	SMIMEMessageWrapper receipt = new SMIMEMessageWrapper(null,
-							new ByteArrayInputStream(response.getBytes()), null);
-                	voteProcessListener.setMsg(Respuesta.SC_ERROR_EJECUCION, getString(R.string.canceling_access_request_msg));
-				} catch (Exception ex) {
-					Log.e(TAG + ".sendFileListener.updateData(...)", ex.getMessage(), ex);
-					String msg = getString(R.string.receipt_error_msg) 
-							+ ": " + ex.getMessage();
-					setException(msg);
-				}
-	        } else setException(response);
-		}
-		
-    	@Override public void setException(String exceptionMsg) {
-			Log.d(TAG + ".sendFileListener.setException(...) ", " - exceptionMsg: " + exceptionMsg);
-			voteProcessListener.setMsg(Respuesta.SC_ERROR_EJECUCION, exceptionMsg);
-		}
-    };
-    
 	private void processCancelVote(char[] password) throws JSONException {   
         String subject = getString(R.string.cancel_vote_msg_subject); 
         try {
@@ -315,13 +226,13 @@ public class VotingService extends Service implements TaskListener {
 			        		getURLSolicitudAcceso(CONTROL_ACCESO_URL));
 					break;
 				case TIMESTAMP_VOTE:
-					runningTask = new SendFileTask(voteListener, 
+					runningTask = new SendFileTask(VOTE_REQUEST, this, 
 		            		timeStampedDocument.setTimeStampToken(
 		            		timeStampWrapper)).execute(ServerPaths.getURLVoto(
 			    			event.getCentroControl().getServerURL()));
 					break;
 				case TIMESTAMP_CANCEL_ACCESS_REQUEST:
-					runningTask = new SendFileTask(cancelAccessListener, 
+					runningTask = new SendFileTask(CANCEL_ACCESS_REQUEST, this, 
 							timeStampedDocument.setTimeStampToken(
 							timeStampWrapper)).execute(
 							ServerPaths.getURLAnulacionVoto(Aplicacion.CONTROL_ACCESO_URL));
@@ -365,7 +276,85 @@ public class VotingService extends Service implements TaskListener {
 	        	voteProcessListener.setMsg(getVotingCertTask.getStatusCode(),
 	        			getVotingCertTask.getMessage());
 	        }
+		} else if(task instanceof SendFileTask) {
+			SendFileTask sendFileTask = (SendFileTask)task;
+			Log.d(TAG + ".showTaskResult(...)", " sendFileTask - statuscode: " + sendFileTask.getStatusCode());
+			if(Respuesta.SC_OK == sendFileTask.getStatusCode()) {
+				switch(sendFileTask.getId()) {
+				case VOTE_REQUEST:
+	                try {
+						SMIMEMessageWrapper votoValidado = new SMIMEMessageWrapper(null,
+								new ByteArrayInputStream(sendFileTask.getMessage().getBytes()), null);
+						VoteReceipt receipt = new VoteReceipt(Respuesta.SC_OK, votoValidado, event);
+						voteProcessListener.proccessReceipt(receipt);
+						
+						NotificationManager notificationManager =
+							    (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+						Intent intent = new Intent(VotingService.this, VotingEventScreen.class);
+						AppData.INSTANCE.putReceipt(StringUtils.getCadenaNormalizada(
+								receipt.getEventoURL()), receipt);
+						intent.putExtra(VotingEventScreen.RECEIPT_KEY_PROP_NAME, 
+								StringUtils.getCadenaNormalizada(receipt.getEventoURL()));
+					    PendingIntent pIntent = PendingIntent.getActivity(
+					    		VotingService.this, 0, intent, 0);
+					    NotificationCompat.Builder notBuilder = new NotificationCompat.Builder(VotingService.this)
+				        	.setContentTitle(event.getAsunto())
+				        	.setContentText(getString(R.string.voted_lbl) + ": " + event.getOpcionSeleccionada().
+				        		getContenido()).setSmallIcon(R.drawable.poll_48)
+				        .setContentIntent(pIntent);
+					    Notification notification = notBuilder.getNotification();
+					    
+					    
+						/*Intent intentSaveVote = new Intent(VotingService.this, VotingEventScreen.class);
+						intentSaveVote.putExtra(VotingEventScreen.INTENT_EXTRA_DIALOG_PROP_NAME, 
+								VotingEventScreen.Operation.SAVE_VOTE);
+						Intent intentCancelVote = new Intent(VotingService.this, VotingEventScreen.class);
+						intentCancelVote.putExtra(VotingEventScreen.INTENT_EXTRA_DIALOG_PROP_NAME, 
+								VotingEventScreen.Operation.CANCEL_VOTE);
+					    PendingIntent pIntent = PendingIntent.getActivity(
+					    		VotingService.this, 0, intent, 0);
+					    PendingIntent pIntentSaveVote = PendingIntent.getActivity(
+					    		VotingService.this, 0, intentSaveVote, 0);
+					    PendingIntent pIntentCancelVote = PendingIntent.getActivity(
+					    		VotingService.this, 0, intentCancelVote, 0);
+
+					    Notification noti = new Notification.Builder(VotingService.this)
+					        .setContentTitle(event.getAsunto())
+					        .setContentText(getString(R.string.voted_lbl) + ": " + event.getOpcionSeleccionada().
+					        		getContenido()).setSmallIcon(R.drawable.poll_22)
+					        .setContentIntent(pIntent)
+					        .addAction(R.drawable.cancel_22x22, getString(R.string.cancel_vote_lbl), pIntent)
+					        .addAction(R.drawable.filesave_22x22, getString(R.string.save_receipt_lbl), pIntent).build();*/
+					    // Hide the notification after its selected
+					    notification.flags |= Notification.FLAG_AUTO_CANCEL;
+					  //notificationManager.notify(/* id */, notification);
+					    notificationManager.notify(receipt.initNotificationId(), notification);
+					} catch (Exception ex) {
+						ex.printStackTrace();
+						String msg = getString(R.string.receipt_error_msg) 
+								+ ": " + ex.getMessage();
+						voteProcessListener.setMsg(Respuesta.SC_ERROR_EJECUCION, msg);
+					}
+					break;
+				case CANCEL_ACCESS_REQUEST:
+					try {
+	                	SMIMEMessageWrapper receipt = new SMIMEMessageWrapper(null,
+								new ByteArrayInputStream(sendFileTask.getMessage().getBytes()), null);
+	                	voteProcessListener.setMsg(Respuesta.SC_OK, getString(R.string.canceling_access_request_msg));
+					} catch (Exception ex) {
+						ex.printStackTrace();
+						String msg = getString(R.string.receipt_error_msg) 
+								+ ": " + ex.getMessage();
+						voteProcessListener.setMsg(Respuesta.SC_ERROR_EJECUCION, msg);
+					}
+					break;
+				default:
+					Log.d(TAG + ".showTaskResult(...)", " Unknown SendFileTask id: " + sendFileTask.getId());
+				}
+			} else {
+				voteProcessListener.setMsg(sendFileTask.getStatusCode(), sendFileTask.getMessage());
+			}
 		}
 	}
-
+    
 }

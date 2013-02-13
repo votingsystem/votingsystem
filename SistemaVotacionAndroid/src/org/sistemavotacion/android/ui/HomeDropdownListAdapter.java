@@ -61,17 +61,17 @@ public class HomeDropdownListAdapter extends BaseAdapter {
 	        	case ACTION_VOTING:
 	        		itemSubject.setText(Aplicacion.INSTANCIA.
 	        				getSubsystemDesc(SubSystem.VOTING));
-	        		imgView.setImageResource(R.drawable.poll_32);
+	        		imgView.setImageResource(R.drawable.poll_22);
 	        		break;
 	        	case ACTION_MANIFEST:
 	        		itemSubject.setText(Aplicacion.INSTANCIA.
 	        				getSubsystemDesc(SubSystem.MANIFESTS));
-	        		imgView.setImageResource(R.drawable.manifest_32);
+	        		imgView.setImageResource(R.drawable.manifest_22);
 	        		break;
 	        	case ACTION_CLAIM:
 	        		itemSubject.setText(Aplicacion.INSTANCIA.
 	        				getSubsystemDesc(SubSystem.CLAIMS));
-	        		imgView.setImageResource(R.drawable.filenew_32);
+	        		imgView.setImageResource(R.drawable.filenew_22);
 	        		break;
 	        	default:
 	        		imgView.setImageResource(R.drawable.machine);

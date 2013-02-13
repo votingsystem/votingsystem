@@ -1,5 +1,7 @@
 package org.sistemavotacion.util;
 
+import org.sistemavotacion.android.WebActivity;
+
 public class ServerPaths {
 
 	public static final String sufijoURLCadenaCertificacion = "certificado/cadenaCertificacion";
@@ -111,6 +113,23 @@ public class ServerPaths {
     	return result + "?max="+ max + "&offset=" + offset  + path;
     }
     
+    public static String getURLPublish (
+    		String serverURL, WebActivity.Screen screen) {
+    	String param = null;
+    	switch(screen) {
+	    	case PUBLISH_CLAIM:
+	    		param = "claim";
+	    		break;
+	    	case PUBLISH_MANIFEST:
+	    		param = "manifest";
+	    		break;
+	    	case PUBLISH_VOTING:
+	    		param = "vote";
+	    		break;
+    	}
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "app/editor?androidClientLoaded=true&editor=" + param;        
+    }
     
     public static String getURLInfoServidor (String serverURL) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";

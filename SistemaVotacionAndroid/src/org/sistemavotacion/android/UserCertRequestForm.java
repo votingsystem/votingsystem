@@ -28,6 +28,7 @@ import java.io.FileOutputStream;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import org.sistemavotacion.android.ui.CertPinDialog;
@@ -36,8 +37,8 @@ import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.sistemavotacion.seguridad.PKCS10WrapperClient;
-import org.sistemavotacion.task.DataListener;
 import org.sistemavotacion.task.SendDataTask;
+import org.sistemavotacion.task.TaskListener;
 import org.sistemavotacion.util.ServerPaths;
 import org.sistemavotacion.util.StringUtils;
 
@@ -47,6 +48,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -68,7 +70,7 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 public class UserCertRequestForm extends FragmentActivity 
-		implements CertPinDialogListener {
+		implements CertPinDialogListener, TaskListener {
 
 	public static final String TAG = "UserCertRequestForm";
 	
@@ -79,42 +81,6 @@ public class UserCertRequestForm extends FragmentActivity
     private String deviceId = null;
     private PKCS10WrapperClient pkcs10WrapperClient;
     private EditText nifText;
-	
-    DataListener<String> envioCsrListener =new DataListener<String>() {
-
-    	@Override
-		public void updateData(int statusCode, String response) {
-			Log.d(TAG + ".envioCsrListener.updateData() ", response);
-	        if (progressDialog != null && progressDialog.isShowing()) {
-	            progressDialog.dismiss();
-	        }
-	        if(Respuesta.SC_OK == statusCode) {
-	        	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-		        SharedPreferences.Editor editor = settings.edit();
-		        Long idSolictud = Long.valueOf(response);
-		        editor.putLong(PREFS_ID_SOLICTUD_CSR, idSolictud);
-		        editor.commit();
-		        Aplicacion.setEstado(Aplicacion.Estado.CON_CSR);
-	        	Intent intent = new Intent(getApplicationContext(), 
-	        			UserCertResponseForm.class);
-	        	startActivity(intent);
-	        } else {
-	        	setException(response);
-	        }
-		}
-	
-		@Override
-		public void setException(String exceptionMsg) {
-			Log.d(TAG + ".envioCsrListener.setException() ", " - exceptionMsg: " + exceptionMsg);	
-	        if (progressDialog != null && progressDialog.isShowing()) {
-	            progressDialog.dismiss();
-	        }
-			AlertDialog.Builder builder= new AlertDialog.Builder(UserCertRequestForm.this);
-			builder.setTitle(R.string.alert_exception_caption).setMessage(exceptionMsg)
-				.setPositiveButton("OK", null).show();
-		}
-    };
-    
     
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -249,7 +215,7 @@ public class UserCertRequestForm extends FragmentActivity
 			Log.e(TAG + "solicitarButton.onClick(...)", " e.getMessage(): " + e.getMessage());
 			manejarExcepcion(e.getMessage());
 		}
-    	new SendDataTask(envioCsrListener, csr).execute(ServerPaths.getURLSolicitudCSRUsuario(
+    	new SendDataTask(null, this, csr).execute(ServerPaths.getURLSolicitudCSRUsuario(
     			Aplicacion.CONTROL_ACCESO_URL));
     }
     
@@ -304,5 +270,40 @@ public class UserCertRequestForm extends FragmentActivity
 		if(password == null) return;
 		sendCsrRequest();
 	}
+
+	@Override
+	public void processTaskMessages(List<String> messages, AsyncTask task) {
+		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public void showTaskResult(AsyncTask task) {
+		Log.d(TAG + ".showTaskResult(...)", " - task: " + task.getClass());
+		if(task instanceof SendDataTask) {
+			SendDataTask sendDataTask = (SendDataTask)task;
+			Log.d(TAG + ".showTaskResult(...)", " - sendDataTask - statuscode: " + sendDataTask.getStatusCode());
+	        if (progressDialog != null && progressDialog.isShowing()) {
+	            progressDialog.dismiss();
+	        }
+	        if(Respuesta.SC_OK == sendDataTask.getStatusCode()) {
+	        	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+		        SharedPreferences.Editor editor = settings.edit();
+		        Long idSolictud = Long.valueOf(sendDataTask.getMessage());
+		        editor.putLong(PREFS_ID_SOLICTUD_CSR, idSolictud);
+		        editor.commit();
+		        Aplicacion.setEstado(Aplicacion.Estado.CON_CSR);
+	        	Intent intent = new Intent(getApplicationContext(), 
+	        			UserCertResponseForm.class);
+	        	startActivity(intent);
+	        } else {
+				AlertDialog.Builder builder= new AlertDialog.Builder(UserCertRequestForm.this);
+				builder.setTitle(R.string.alert_exception_caption).setMessage(sendDataTask.getMessage())
+					.setPositiveButton("OK", null).show();
+	        }
+		}
+		
+	}
+
+
 }

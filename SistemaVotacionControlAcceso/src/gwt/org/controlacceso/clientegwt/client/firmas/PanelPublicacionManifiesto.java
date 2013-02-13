@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import org.controlacceso.clientegwt.client.Constantes;
 import org.controlacceso.clientegwt.client.HistoryToken;
 import org.controlacceso.clientegwt.client.PuntoEntrada;
+import org.controlacceso.clientegwt.client.PuntoEntradaEditor;
 import org.controlacceso.clientegwt.client.dialogo.DialogoOperacionEnProgreso;
 import org.controlacceso.clientegwt.client.dialogo.ErrorDialog;
 import org.controlacceso.clientegwt.client.evento.BusEventos;
@@ -37,6 +38,7 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.RichTextArea;
@@ -58,9 +60,13 @@ public class PanelPublicacionManifiesto extends Composite
         String errorTextBox();
         String textBox();
         String richTextArea();
+        String buttonContainerPanel();
+        String buttonContainerPanelAndroid();
     }
     
-	@UiField HTML pageTitle;
+	@UiField HorizontalPanel pageTitle;
+	@UiField HorizontalPanel buttonContainerPanel;
+    @UiField VerticalPanel piePagina;
     @UiField EditorStyle style;
     @UiField VerticalPanel mainPanel;
     @UiField VerticalPanel messagePanel;
@@ -81,6 +87,8 @@ public class PanelPublicacionManifiesto extends Composite
 
 
     public PanelPublicacionManifiesto() {
+		initGetEditorDataJS(this);
+		initUpdateEditorDataJS(this);
     	richTextArea = new RichTextArea();
         richTextToolbar = new RichTextToolbar (richTextArea);
         initWidget(uiBinder.createAndBindUi(this));
@@ -90,9 +98,23 @@ public class PanelPublicacionManifiesto extends Composite
         titulo.addKeyDownHandler(sh);
         this.evento = EventoSistemaVotacionJso.create();
         messagePanel.setVisible(false);
-        controlAcceso = PuntoEntrada.INSTANCIA.servidor;
+        if(PuntoEntrada.INSTANCIA != null)
+        	controlAcceso = PuntoEntrada.INSTANCIA.servidor;
         BusEventos.addHandler(EventoGWTMensajeClienteFirma.TYPE, this);
         BusEventos.addHandler(EventoGWTMensajeAplicacion.TYPE, this);
+		if(PuntoEntradaEditor.INSTANCIA != null && 
+				PuntoEntradaEditor.INSTANCIA.getAndroidClientLoaded()) {
+			piePagina.setVisible(false);
+			pageTitle.setVisible(false);
+			cerrarButton.setVisible(false);
+			
+			buttonContainerPanel.setStyleName(style.buttonContainerPanel(), false);
+			buttonContainerPanel.setStyleName(style.buttonContainerPanelAndroid(), true);
+			
+			MensajeClienteFirmaJso mensaje = MensajeClienteFirmaJso.create();
+			mensaje.setCodigoEstado(MensajeClienteFirmaJso.SC_PING);
+			Browser.setAndroidClientMessage(mensaje.toJSONString());
+		}
     }
 
     @UiHandler("aceptarButton")
@@ -121,11 +143,20 @@ public class PanelPublicacionManifiesto extends Composite
 		cerrarButton.setEnabled(!publicando);
 		fechaFinalDateBox.setEnabled(!publicando);
 		if(publicando) {
-			if(dialogoProgreso == null) dialogoProgreso = new DialogoOperacionEnProgreso();
-			dialogoProgreso.show();
+			if(PuntoEntradaEditor.INSTANCIA != null && 
+					PuntoEntradaEditor.INSTANCIA.getAndroidClientLoaded()) {
+				Browser.showProgressDialog(Constantes.INSTANCIA.publishingDocument());
+			} else {
+				if(dialogoProgreso == null) dialogoProgreso = new DialogoOperacionEnProgreso();
+				dialogoProgreso.show();
+			}
 		} else {
-			if(dialogoProgreso == null) dialogoProgreso = new DialogoOperacionEnProgreso();
-			dialogoProgreso.hide();
+			if(PuntoEntradaEditor.INSTANCIA != null && 
+					PuntoEntradaEditor.INSTANCIA.getAndroidClientLoaded()) {
+				MensajeClienteFirmaJso mensaje = MensajeClienteFirmaJso.create();
+				mensaje.setCodigoEstado(MensajeClienteFirmaJso.SC_PING);
+				Browser.setAndroidClientMessage(mensaje.toJSONString());
+			} else if(dialogoProgreso != null) dialogoProgreso.hide();
 		}
 	}
     
@@ -158,8 +189,13 @@ public class PanelPublicacionManifiesto extends Composite
 	private void setMessage (String message) {
 		if(message == null || "".equals(message)) messagePanel.setVisible(false);
 		else {
-			messageLabel.setText(message);
-	    	messagePanel.setVisible(true);
+			if(PuntoEntradaEditor.INSTANCIA != null && 
+					PuntoEntradaEditor.INSTANCIA.getAndroidClientLoaded()) {
+				Browser.setAndroidMsg(message);
+			} else {
+				messageLabel.setText(message);
+		    	messagePanel.setVisible(true);
+			}
 		}
 	}
 	
@@ -191,7 +227,13 @@ public class PanelPublicacionManifiesto extends Composite
             	mensajeClienteFirma.setAsuntoMensajeFirmado(
             			Constantes.INSTANCIA.asuntoPublicarManifiesto());		
             	mensajeClienteFirma.setRespuestaConRecibo(false);
-        		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
+        		if(PuntoEntradaEditor.INSTANCIA != null && 
+        				PuntoEntradaEditor.INSTANCIA.getAndroidClientLoaded()) {
+        			Browser.setAndroidClientMessage(mensajeClienteFirma.toJSONString());
+        			setWidgetsStatePublicando(false);
+            	} else {
+            		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
+            	}
             	return;
         	} else {
         		setWidgetsStatePublicando(false);
@@ -238,5 +280,50 @@ public class PanelPublicacionManifiesto extends Composite
 		if(evento.token.equals(HistoryToken.OBTENIDA_INFO_SERVIDOR))
 			this.controlAcceso = (ActorConIPJso) evento.contenidoMensaje;
 	}
+	
+	public void updateEditorData(String editorData) {
+		logger.info(" -- updateEditorData - editorData: " + editorData);
+		MensajeClienteFirmaJso mensaje = MensajeClienteFirmaJso.getMensajeClienteFirma(editorData);
+		if(mensaje != null && mensaje.getEvento() != null) {
+			logger.info(" -- asunto: " + evento.getAsunto());
+			logger.info(" -- contenido: " + evento.getContenido());
+			logger.info(" -- fecha fin: " + evento.getFechaFin());
+			if(evento.getAsunto() != null)
+				titulo.setText(evento.getAsunto());
+			if(evento.getContenido() != null)
+				richTextArea.setHTML(evento.getContenido());
+			if(evento.getFechaFin() != null)
+				fechaFinalDateBox.setValue(evento.getFechaFin());
+		}
+	}
+	
+	public void getEditorData(String sessionId) {
+		logger.info(" -- getEditorData - sessionId: " + sessionId);
+		EventoSistemaVotacionJso evento = EventoSistemaVotacionJso.create();
+		evento.setAsunto(titulo.getText());
+		evento.setContenido(richTextToolbar.getHTML());
+		evento.setFechaFin(fechaFinalDateBox.getValue());
+		MensajeClienteFirmaJso mensaje = MensajeClienteFirmaJso.create();
+		mensaje.setEvento(evento);
+		mensaje.setSessionId(sessionId);
+		setEditorData(mensaje.toJSONString());
+	}
+	
+	public static native void setEditorData(String msg) /*-{
+		$wnd.setEditorData(msg);
+	}-*/;	
+	
+    private native void initGetEditorDataJS (PanelPublicacionManifiesto panelPub) /*-{
+		$wnd.getEditorData = function (sessionId) {
+	    	return panelPub.@org.controlacceso.clientegwt.client.firmas.PanelPublicacionManifiesto::getEditorData(Ljava/lang/String;)(sessionId);
+		};
+	}-*/;
+    
+    private native void initUpdateEditorDataJS (PanelPublicacionManifiesto panelPub) /*-{
+		$wnd.updateEditorData = function (editorData) {
+	    	return panelPub.@org.controlacceso.clientegwt.client.firmas.PanelPublicacionManifiesto::updateEditorData(Ljava/lang/String;)(editorData);
+		};
+	}-*/;
+    
 	
 }

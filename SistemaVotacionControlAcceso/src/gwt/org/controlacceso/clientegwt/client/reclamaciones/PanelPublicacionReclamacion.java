@@ -5,6 +5,9 @@ import java.util.logging.Logger;
 import org.controlacceso.clientegwt.client.Constantes;
 import org.controlacceso.clientegwt.client.HistoryToken;
 import org.controlacceso.clientegwt.client.PuntoEntrada;
+import org.controlacceso.clientegwt.client.PuntoEntradaEditor;
+import org.controlacceso.clientegwt.client.dialogo.ConfirmacionListener;
+import org.controlacceso.clientegwt.client.dialogo.DialogoConfirmacion;
 import org.controlacceso.clientegwt.client.dialogo.DialogoOperacionEnProgreso;
 import org.controlacceso.clientegwt.client.evento.BusEventos;
 import org.controlacceso.clientegwt.client.evento.EventoGWTMensajeClienteFirma;
@@ -35,7 +38,7 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.RichTextArea;
@@ -45,7 +48,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
 
 
-public class PanelPublicacionReclamacion extends Composite implements EventoGWTMensajeClienteFirma.Handler {
+public class PanelPublicacionReclamacion extends Composite 
+	implements EventoGWTMensajeClienteFirma.Handler, ConfirmacionListener {
 	
     private static Logger logger = Logger.getLogger("PanelPublicacionReclamacion");
 
@@ -56,9 +60,13 @@ public class PanelPublicacionReclamacion extends Composite implements EventoGWTM
         String errorTextBox();
         String textBox();
         String richTextArea();
+        String submitButtonsPanel();
+        String buttonContainerPanelAndroid();
     }
 
-	@UiField HTML pageTitle;
+	@UiField HorizontalPanel pageTitle;
+	@UiField HorizontalPanel submitButtonsPanel;
+    @UiField VerticalPanel piePagina;
     @UiField EditorStyle style;
     @UiField VerticalPanel messagePanel;
     @UiField Label messageLabel;
@@ -93,6 +101,18 @@ public class PanelPublicacionReclamacion extends Composite implements EventoGWTM
         labelCampoReclamacion.setListener(handler);
         permisoSolicitudBackupCheckbox.setValue(Boolean.TRUE);
         BusEventos.addHandler(EventoGWTMensajeClienteFirma.TYPE, this);
+		if(PuntoEntradaEditor.INSTANCIA != null && 
+				PuntoEntradaEditor.INSTANCIA.getAndroidClientLoaded()) {
+			piePagina.setVisible(false);
+			pageTitle.setVisible(false);
+			cerrarButton.setVisible(false);
+			submitButtonsPanel.setStyleName(style.submitButtonsPanel(), false);
+			submitButtonsPanel.setStyleName(style.buttonContainerPanelAndroid(), true);
+			
+			MensajeClienteFirmaJso mensaje = MensajeClienteFirmaJso.create();
+			mensaje.setCodigoEstado(MensajeClienteFirmaJso.SC_PING);
+			Browser.setAndroidClientMessage(mensaje.toJSONString());
+		}
     }
     
 	class LabelCamporeclamacionEventHandler implements EventListener {
@@ -129,22 +149,33 @@ public class PanelPublicacionReclamacion extends Composite implements EventoGWTM
 				MensajeClienteFirmaJso.SC_PROCESANDO);
 		mensajeClienteFirma.setUrlEnvioDocumento(ServerPaths.
 				getUrlPublicacionReclamacion());
-		mensajeClienteFirma.setNombreDestinatarioFirma(
-				PuntoEntrada.INSTANCIA.servidor.getNombre());
     	mensajeClienteFirma.setAsuntoMensajeFirmado(
     			Constantes.INSTANCIA.asuntoPublicarReclamacion());
     	mensajeClienteFirma.setContenidoFirma(evento);
     	mensajeClienteFirma.setRespuestaConRecibo(true);
-		setWidgetsStatePublicando(true);
-		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
+		if(PuntoEntradaEditor.INSTANCIA != null && 
+				PuntoEntradaEditor.INSTANCIA.getAndroidClientLoaded()) {
+    		mensajeClienteFirma.setNombreDestinatarioFirma(
+    				PuntoEntradaEditor.INSTANCIA.servidor.getNombre());
+			Browser.setAndroidClientMessage(mensajeClienteFirma.toJSONString());
+    	} else {
+    		mensajeClienteFirma.setNombreDestinatarioFirma(
+    				PuntoEntrada.INSTANCIA.servidor.getNombre());
+    		setWidgetsStatePublicando(true);
+    		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
+    	}
     }
     
     @UiHandler("cerrarButton")
     void handleCancelButton(ClickEvent e) {
-    	if(Window.confirm(Constantes.INSTANCIA.salirSinSalvarConfirmLabel())) {
-        	History.newItem(HistoryToken.RECLAMACIONES.toString());
-		}
+    	DialogoConfirmacion dialogoConfirmacion = new DialogoConfirmacion(null, this);
+    	dialogoConfirmacion.show(Constantes.INSTANCIA.salirSinSalvarConfirmLabel());
     }
+    
+	@Override
+	public void confirmed(Integer id) {
+		History.newItem(HistoryToken.RECLAMACIONES.toString());
+	}
     
 	private boolean isValidForm() {
 		setMessage(null);
@@ -171,15 +202,20 @@ public class PanelPublicacionReclamacion extends Composite implements EventoGWTM
 		}
 		return true;
 	}
-    
+
 	private void setMessage (String message) {
 		if(message == null || "".equals(message)) messagePanel.setVisible(false);
 		else {
-	    	messageLabel.setText(message);
-	    	messagePanel.setVisible(true);
+			if(PuntoEntradaEditor.INSTANCIA != null && 
+					PuntoEntradaEditor.INSTANCIA.getAndroidClientLoaded()) {
+				Browser.setAndroidMsg(message);
+			} else {
+				messageLabel.setText(message);
+		    	messagePanel.setVisible(true);
+			}
 		}
 	}
-    
+	
 	private void setWidgetsStatePublicando(boolean publicando) {
 		titulo.setEnabled(!publicando);
 		richTextArea.setEnabled(!publicando);
@@ -190,11 +226,20 @@ public class PanelPublicacionReclamacion extends Composite implements EventoGWTM
 		fechaLimiteDateBox.setEnabled(!publicando);
 		panelCampos.setEnabled(!publicando);
 		if(publicando) {
-			if(dialogoProgreso == null) dialogoProgreso = new DialogoOperacionEnProgreso();
-			dialogoProgreso.show();
+			if(PuntoEntradaEditor.INSTANCIA != null && 
+					PuntoEntradaEditor.INSTANCIA.getAndroidClientLoaded()) {
+				Browser.showProgressDialog(Constantes.INSTANCIA.publishingDocument());
+			} else {
+				if(dialogoProgreso == null) dialogoProgreso = new DialogoOperacionEnProgreso();
+				dialogoProgreso.show();
+			}
 		} else {
-			if(dialogoProgreso == null) dialogoProgreso = new DialogoOperacionEnProgreso();
-			dialogoProgreso.hide();
+			if(PuntoEntradaEditor.INSTANCIA != null && 
+					PuntoEntradaEditor.INSTANCIA.getAndroidClientLoaded()) {
+				MensajeClienteFirmaJso mensaje = MensajeClienteFirmaJso.create();
+				mensaje.setCodigoEstado(MensajeClienteFirmaJso.SC_PING);
+				Browser.setAndroidClientMessage(mensaje.toJSONString());
+			} else if(dialogoProgreso != null) dialogoProgreso.hide();
 		}
 	}
     

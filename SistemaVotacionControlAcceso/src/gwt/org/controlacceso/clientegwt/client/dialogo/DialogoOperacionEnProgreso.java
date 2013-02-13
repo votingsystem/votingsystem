@@ -53,7 +53,8 @@ public class DialogoOperacionEnProgreso implements EventoGWTMensajeClienteFirma.
         BusEventos.addHandler(
         		EventoGWTMensajeClienteFirma.TYPE, this);
         dialogBox.setText(Constantes.INSTANCIA.dialogoProgresoCaption());
-        if(!PuntoEntrada.INSTANCIA.isClienteFirmaCargado()) {
+        if(PuntoEntrada.INSTANCIA != null && 
+        		!PuntoEntrada.INSTANCIA.isClienteFirmaCargado()) {
             if(Browser.isChrome()) {
             	textoChrome = new HTML(
             			Constantes.INSTANCIA.cargaAppletTextoChrome());

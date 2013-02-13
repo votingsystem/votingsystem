@@ -11,39 +11,61 @@ public class GetFileTask extends AsyncTask<String, Void, String> {
 
 	public static final String TAG = "GetFileTask";
 	
-    private FileListener listener = null;
+	private Integer id = null;
+	private TaskListener listener = null;
     private Exception exception = null;
     private byte[] fileData = null;
-    int statusCode = Respuesta.SC_ERROR_PETICION;  
+    int statusCode = Respuesta.SC_ERROR_PETICION; 
+    private String message = null;
+    private String documentUrl = null;
     
-    public GetFileTask(FileListener listener) {
+    public GetFileTask(Integer id, TaskListener listener) {
+    	this.id = id;
     	this.listener = listener;
     }
 	
 	@Override
 	protected String doInBackground(String... urls) {
-        Log.d(TAG + ".doInBackground(...)", " - url: " + urls[0]);
-        String result = null;
+		documentUrl = urls[0];
+        Log.d(TAG + ".doInBackground(...)", " - documentUrl: " + documentUrl);
         try {
             HttpResponse response = HttpHelper.getFile(urls[0]);
             statusCode = response.getStatusLine().getStatusCode();
             if(Respuesta.SC_OK == statusCode) 
             	fileData = EntityUtils.toByteArray(response.getEntity());
-            else result = EntityUtils.toString(response.getEntity());
+            else message = EntityUtils.toString(response.getEntity());
         } catch (Exception ex) {
-        	Log.e(TAG + ".doInBackground", ex.getMessage(), ex);
+        	ex.printStackTrace();
         	exception = ex;
         }
-        return result;
+        return message;
 	}
 	
     @Override
     protected void onPostExecute(String result) {
     	Log.d(TAG + ".onPostExecute(...)", " - statusCode: " + statusCode);
-        if(Respuesta.SC_OK == statusCode) listener.porcessFileData(fileData);
-    	else if(exception != null) 
-    		listener.setException(exception.getMessage());
-    	else listener.setException(result);
+    	listener.showTaskResult(this);
     }
 
+	public Integer getId() {
+		return id;
+	}
+	
+    public byte[] getFileData() {
+    	return fileData;
+    }
+    
+    public int getStatusCode() {
+    	return statusCode;
+    }
+    
+	public String getMessage() {
+		if(exception != null) return exception.getMessage();
+		return message;
+	}
+	
+	public String getDocumentUrl() {
+		return documentUrl;
+	}
+	
 }

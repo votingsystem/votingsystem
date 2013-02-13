@@ -19,15 +19,19 @@ package org.sistemavotacion.json;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sistemavotacion.android.Aplicacion;
-import org.sistemavotacion.modelo.*;
-import org.sistemavotacion.smime.CMSUtils;
-import org.sistemavotacion.util.*;
+import org.sistemavotacion.modelo.CampoDeEvento;
+import org.sistemavotacion.modelo.Comentario;
+import org.sistemavotacion.modelo.DatosBusqueda;
+import org.sistemavotacion.modelo.Evento;
+import org.sistemavotacion.modelo.Mensaje;
+import org.sistemavotacion.modelo.OpcionDeEvento;
+import org.sistemavotacion.util.DateUtils;
+import org.sistemavotacion.util.ServerPaths;
 
 import android.util.Log;
 
@@ -44,8 +48,12 @@ public class DeObjetoAJSON {
     	JSONObject jsonObject = new JSONObject();
     	jsonObject.put("asunto", evento.getAsunto());
     	jsonObject.put("contenido", evento.getContenido());
-    	jsonObject.put("fechaInicio", DateUtils.getStringFromDate(evento.getFechaInicio()));
-    	jsonObject.put("fechaFin", DateUtils.getStringFromDate(evento.getFechaFin()));
+    	if(evento.getFechaInicio() != null)
+    		jsonObject.put("fechaInicio", 
+    				DateUtils.getStringFromDate(evento.getFechaInicio()));
+    	if(evento.getFechaFin() != null)
+    		jsonObject.put("fechaFin", 
+    				DateUtils.getStringFromDate(evento.getFechaFin()));
         if (evento.getTipo() != null) jsonObject.put("tipoEvento", evento.getTipo().toString()); 
         if (evento.getEventoId() != null) jsonObject.put("eventoId", evento.getEventoId()); 
         if (evento.getEtiquetas() != null) {

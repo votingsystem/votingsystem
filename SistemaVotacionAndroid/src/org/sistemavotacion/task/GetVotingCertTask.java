@@ -11,7 +11,6 @@ import org.apache.http.util.EntityUtils;
 import org.sistemavotacion.android.R;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.PKCS10WrapperClient;
-import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.smime.SignedMailGenerator.Type;
 import org.sistemavotacion.util.HttpHelper;
 import android.os.AsyncTask;

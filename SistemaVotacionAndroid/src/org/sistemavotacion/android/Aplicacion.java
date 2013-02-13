@@ -29,9 +29,10 @@ import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Consulta;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Operation;
+import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.modelo.Usuario;
-import org.sistemavotacion.task.DataListener;
 import org.sistemavotacion.task.GetDataTask;
+import org.sistemavotacion.task.TaskListener;
 import org.sistemavotacion.util.ServerPaths;
 import org.sistemavotacion.util.StringUtils;
 import org.sistemavotacion.util.SubSystem;
@@ -45,6 +46,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
@@ -55,12 +57,14 @@ import android.widget.Button;
 import android.widget.Toast;
 
 
-public class Aplicacion extends FragmentActivity {
+public class Aplicacion extends FragmentActivity implements TaskListener {
 	
 	public static final String TAG = "Aplicacion";
 	
 	public enum Estado {CON_CERTIFICADO, CON_CSR, SIN_CSR}
 	
+	private static final int EVENT_REQUEST = 1;
+	private static final int CHECK_CONNECTION_REQUEST = 2;
 
 	
 	public static final String PREFS_ESTADO              = "estado";
@@ -105,55 +109,6 @@ public class Aplicacion extends FragmentActivity {
     public static Aplicacion INSTANCIA; 
     private Operation operation = null;
     private SharedPreferences settings;
-    
-    DataListener<String> serverDataListener = new DataListener<String>() {
-
-		@Override public void updateData(int codigoEstado, String data) {
-			Log.d(TAG + ".serverDataListener.updateData() ", "data: " + data);
-			try {
-				controlAcceso = DeJSONAObjeto.obtenerActorConIP(
-						data, ActorConIP.Tipo.CONTROL_ACCESO);
-			} catch (Exception e) {
-				Log.e(TAG + ".serverDataListener.updateData() ", e.getMessage(), e);
-			    showMessage(getString(R.string.error_lbl), e.getMessage());
-			}
-			
-		}
-
-		@Override public void setException(final String exceptionMsg) {
-			Log.d(TAG + ".serverDataListener.manejarExcepcion(...) ", 
-					" -- exceptionMsg: " + exceptionMsg);	
-		    showMessage(getString(R.string.error_lbl), exceptionMsg);
-		}
-	};
-	
-    DataListener<String> eventDataListener = new DataListener<String>() {
-
-		@Override public void updateData(int codigoEstado, String data) {
-			Log.d(TAG + ".eventDataListener.updateData(...) ", 
-					" - codigoEstado: " + codigoEstado);
-			try {
-				Consulta consulta =  DeJSONAObjeto.obtenerConsultaEventos(data);
-				if(consulta.getEventos() != null && consulta.getEventos().size() > 0) {
-					eventoSeleccionado = consulta.getEventos().iterator().next();
-					eventoSeleccionado.setOpcionSeleccionada(operation.
-							getEvento().getOpcionSeleccionada());
-					operation.setEvento(eventoSeleccionado);	
-				}
-				processOperation(operation);
-			} catch (Exception e) {
-				Log.e(TAG + ".eventDataListener.updateData() ", e.getMessage(), e);
-				showMessage(getString(R.string.error_lbl), e.getMessage());
-			}
-			
-		}
-
-		@Override public void setException(final String exceptionMsg) {
-			Log.d(TAG + ".eventDataListener.manejarExcepcion(...) ", 
-					" -- exceptionMsg: " + exceptionMsg);	
-			showMessage(getString(R.string.error_lbl), exceptionMsg);
-		}
-	};
 	
     
     @Override protected void onCreate(Bundle savedInstanceState) {
@@ -209,7 +164,7 @@ public class Aplicacion extends FragmentActivity {
             }
             operation.setTipo(browserToken.trim());
             if(operation.getEvento() != null) {
-            	new GetDataTask(eventDataListener).execute(operation.getEvento().getURL());
+            	new GetDataTask(EVENT_REQUEST, this).execute(operation.getEvento().getURL());
             }
             return;
         }
@@ -224,7 +179,8 @@ public class Aplicacion extends FragmentActivity {
     
     public void checkConnection() {
     	if (controlAcceso == null) 
-    		new GetDataTask(serverDataListener).execute(ServerPaths.getURLInfoServidor(CONTROL_ACCESO_URL));
+    		new GetDataTask(CHECK_CONNECTION_REQUEST, this).
+    			execute(ServerPaths.getURLInfoServidor(CONTROL_ACCESO_URL));
     }
 
     private void setActivityState() {
@@ -456,4 +412,49 @@ public class Aplicacion extends FragmentActivity {
         editor.commit();
 	}
 
+	@Override
+	public void processTaskMessages(List<String> messages, AsyncTask task) { }
+
+	@Override
+	public void showTaskResult(AsyncTask task) {
+		Log.d(TAG + ".showTaskResult(...)", " - task: " + task.getClass());
+		if(task instanceof GetDataTask) {
+			GetDataTask getDataTask = (GetDataTask)task;
+			Log.d(TAG + ".showTaskResult(...)", " - GetDataTask - statuscode: " + getDataTask.getStatusCode());
+			switch(getDataTask.getId()) {
+				case EVENT_REQUEST:
+					if(Respuesta.SC_OK == getDataTask.getStatusCode()) {
+						try {
+							Consulta consulta =  DeJSONAObjeto.obtenerConsultaEventos(getDataTask.getMessage());
+							if(consulta.getEventos() != null && consulta.getEventos().size() > 0) {
+								eventoSeleccionado = consulta.getEventos().iterator().next();
+								eventoSeleccionado.setOpcionSeleccionada(operation.
+										getEvento().getOpcionSeleccionada());
+								operation.setEvento(eventoSeleccionado);	
+							}
+							processOperation(operation);
+						} catch (Exception ex) {
+							ex.printStackTrace();
+							showMessage(getString(R.string.error_lbl), ex.getMessage());
+						}
+					} else showMessage(getString(R.string.error_lbl), getDataTask.getMessage());
+					break;
+				case CHECK_CONNECTION_REQUEST:
+					if(Respuesta.SC_OK == getDataTask.getStatusCode()) {
+						try {
+							controlAcceso = DeJSONAObjeto.obtenerActorConIP(
+									getDataTask.getMessage(), ActorConIP.Tipo.CONTROL_ACCESO);
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						    showMessage(getString(R.string.error_lbl), ex.getMessage());
+						}
+					} else showMessage(getString(R.string.error_lbl), getDataTask.getMessage());
+					break;
+				default:
+					Log.d(TAG, "Unknown GetDataTask id: " + getDataTask.getId());
+			}
+		}
+		
+	}
+	
 }

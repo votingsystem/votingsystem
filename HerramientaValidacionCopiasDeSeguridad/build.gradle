@@ -57,7 +57,18 @@ signJar.dependsOn buildVotingApplet
 install.dependsOn signJar
 
 
+project.ext {
+	mainClass = "org.sistemavotacion.AppletFirma"
+  }
 
+sourceSets {
+	main {
+	  //to override the defaults:
+	  //output.resourcesDir = "$buildDir/classes"
+	  output.classesDir   = "$buildDir/classes"
+	}
+}
+  
 
 
 

@@ -338,7 +338,6 @@ class FirmaService {
 	public Respuesta validarCertificacionFirmantes(
 			SMIMEMessageWrapper messageWrapper, Locale locale) {
 		Set<Usuario> firmantes = messageWrapper.getFirmantes();
-		inicializar()
 		log.debug("*** validarCertificacionFirmantes - firmantes.size(): " +
 			" ${firmantes.size()} - trustedCerts.size(): ${trustedCerts.size()}")
 		if(firmantes.size() == 0) return new Respuesta(
@@ -365,6 +364,7 @@ class FirmaService {
 	}
 			
 	public Set<X509Certificate> getTrustedCerts(){
+		if (firmadoraValidaciones == null) inicializar()
 		return trustedCerts
 	}
 

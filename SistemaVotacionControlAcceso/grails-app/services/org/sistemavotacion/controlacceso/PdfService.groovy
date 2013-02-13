@@ -2,6 +2,7 @@ package org.sistemavotacion.controlacceso
 
 import org.sistemavotacion.controlacceso.modelo.*
 
+import org.bouncycastle.util.encoders.Base64;
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONElement
 import com.itextpdf.text.pdf.PdfReader;
@@ -69,7 +70,8 @@ class PdfService {
 		log.debug "aliasClaves: ${aliasClaves} - chain.length:${chain.length}"
 		keyStoreCertifcadosConfianza = KeyStore.getInstance("JKS");
 		keyStoreCertifcadosConfianza.load(null, null);
-		Set<X509Certificate> trustedCerts = firmaService.trustedCerts
+		Set<X509Certificate> trustedCerts = firmaService.getTrustedCerts()
+		log.debug "trustedCerts.size: ${trustedCerts.size()}"
 		for(X509Certificate certificate:trustedCerts) {
 			keyStoreCertifcadosConfianza.setCertificateEntry(
 				certificate.getSubjectDN().toString(), certificate);
@@ -79,6 +81,10 @@ class PdfService {
 	public Respuesta validarFirma (byte[] pdfFirmado, Evento evento, 
 		Documento.Estado tipoDocumento, Locale locale) {
 		log.debug "validarFirma - tipoDocumento: ${tipoDocumento.toString()} - pdfFirmado.length: ${pdfFirmado.length}"
+		
+		def fos = new FileOutputStream('/home/jgzornoza/111.pdf')
+		fos.write(pdfFirmado);
+		
 		Date todayDate = DateUtils.getTodayDate()
 		if(tipoDocumento.equals(Documento.Estado.FIRMA_DE_MANIFIESTO)) {
 			if(todayDate.compareTo(evento.fechaFin) > 0)
@@ -105,12 +111,13 @@ class PdfService {
 				out.write(buffer, 0, n);
 			out.close();
 			ip.close();*/
-			PdfPKCS7 pk = acroFields.verifySignature(name);
+			PdfPKCS7 pk = acroFields.verifySignature(name, "BC");
+			log.debug("Hash verified -> ${pk.verify()}");
 			X509Certificate signingCert = pk.getSigningCertificate();
 			Usuario usu = Usuario.getUsuario(signingCert);
 			Usuario usuario = Usuario.findWhere(nif:usu.nif)
 			if(!usuario) usuario = usu.save()
-			log.debug("usuario: " + usuario.getDescription());
+			log.debug("usuario: ${usuario.getDescription()} - NIF: ${usu.nif}");
 			log.debug("Subject: " + PdfPKCS7.getSubjectFields(pk.getSigningCertificate()));
 			String mensajeValidacionDocumento = "Firma verificada"
 			switch(tipoDocumento) {

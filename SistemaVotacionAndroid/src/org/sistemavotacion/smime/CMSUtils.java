@@ -31,6 +31,7 @@ import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import org.bouncycastle2.asn1.DERNull;
 import org.bouncycastle2.asn1.ASN1EncodableVector;
 import org.bouncycastle2.asn1.ASN1InputStream;
 import org.bouncycastle2.asn1.ASN1Object;
@@ -47,6 +48,7 @@ import org.bouncycastle2.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle2.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.asn1.teletrust.TeleTrusTObjectIdentifiers;
+import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.asn1.x509.CertificateList;
 import org.bouncycastle2.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle2.asn1.x509.X509CertificateStructure;
@@ -325,6 +327,12 @@ public class CMSUtils {
         byte[] resultDigest =  sha.digest( cadenaOrigen.getBytes() );
         return new String(Base64.encode(resultDigest));
     }
-    
+
+    public static AlgorithmIdentifier fixAlgID(AlgorithmIdentifier algId) {
+        if (algId.getParameters() == null) {
+            return new AlgorithmIdentifier(algId.getObjectId(), DERNull.INSTANCE);
+        }
+        return algId;
+    }
     
 }

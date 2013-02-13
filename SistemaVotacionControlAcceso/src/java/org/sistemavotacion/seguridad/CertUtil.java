@@ -189,6 +189,17 @@ public class CertUtil {
         bOut.close();
         return bOut.toByteArray();
     }
+    
+    public static byte[] fromX509CertCollectionToPEM (Collection<X509Certificate> certificates) throws IOException {
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        PEMWriter pemWrt = new PEMWriter(new OutputStreamWriter(bOut));
+        for(X509Certificate certificate:certificates) {
+        	pemWrt.writeObject(certificate);
+        }
+        pemWrt.close();
+        bOut.close();
+        return bOut.toByteArray();
+    }
 
     public static X509Certificate fromPEMToX509Cert (byte[] pemFileBytes) throws Exception {
         InputStream in = new ByteArrayInputStream(pemFileBytes);
