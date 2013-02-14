@@ -338,10 +338,11 @@ class FirmaService {
 	public Respuesta validarCertificacionFirmantes(
 			SMIMEMessageWrapper messageWrapper, Locale locale) {
 		Set<Usuario> firmantes = messageWrapper.getFirmantes();
-		log.debug("*** validarCertificacionFirmantes - firmantes.size(): " +
-			" ${firmantes.size()} - trustedCerts.size(): ${trustedCerts.size()}")
+		if(!trustedCerts) inicializar();
 		if(firmantes.size() == 0) return new Respuesta(
 			codigoEstado:400, mensaje:"Documento sin firmantes")
+		log.debug("*** validarCertificacionFirmantes - firmantes.size(): " +
+			" ${firmantes.size()} - trustedCerts.size(): ${trustedCerts.size()}")
 		for(Usuario usuario: firmantes) {			 
 			try {
 				PKIXCertPathValidatorResult pkixResult = CertUtil.verifyCertificate(

@@ -8,11 +8,14 @@
         android:id="@+id/asunto_evento"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:textSize="25sp"
+        android:gravity="center"
+        android:textSize="30sp"
+        android:textColor="#33b5e5"
         android:onClick="onClickSubject"
 		android:clickable="true"
         android:text="@string/label_evento" />
+   
+   
     <View
         android:layout_width="fill_parent"
         android:layout_height="1dp"
@@ -33,6 +36,7 @@
 					android:id="@+id/contenido_evento"
 					android:layout_width="fill_parent"
 					android:layout_height="fill_parent" 
+					android:textSize="20sp" 
 					android:layout_weight="1.0"/>
 
 				<Button

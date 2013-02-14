@@ -24,7 +24,7 @@
     	.editorPanel {width: 100%; height:100%; margin-top: 10px;}
 		.boton { margin: 2px; cursor:pointer;}
 		.buttonPanel { margin: 10px; margin-top: 5px; width:100%;}
-		.buttonContainerPanelAndroid {margin-left: auto; margin-right: auto;}
+		.buttonContainerPanelAndroid {margin-left: auto; margin-right: auto; width: 100%;}
 		.submitButtonsPanel {float: right;}
 		.optionsPanel {border: 1px solid #02227a; padding: 3px; margin-top: 3px; margin-bottom: 4px;}
 		.optionsPanelContainer {margin-top: 7px; margin-BOTTOM: 5px; padding-right: 15px; padding-left: 15px;}

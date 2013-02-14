@@ -34,6 +34,8 @@ class ReclamacionService {
             contenido:smimeMessage.getBytes(), usuario:usuario, evento:eventoReclamacion)
         if (!eventoReclamacion) {
             codigoEstado = 400
+			mensaje = messageSource.getMessage('error.EventoNoEncontrado', 
+                    [mensajeJSON.id].toArray() , locale)
             tipoRespuesta = Tipo.EVENTO_NO_ENCONTRADO
             mensajeSMIME.setTipo(Tipo.FIRMA_ERROR_EVENTO_NO_ENCONTRADO)
         } else {

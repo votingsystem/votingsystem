@@ -64,7 +64,7 @@ class ControlAccesoFilters {
                         if (smimeMessageReq && smimeMessageReq.isValidSignature()) {
                             log.debug "firma valida"
 							if(!"${controllerName}".equals("voto")) {
-								log.debug "%%%%%%%%%%% Controlador de firma - validando con CA de sistema"
+								log.debug " ------ Controlador de firma - validando con CA de sistema"
 								Respuesta respuestaValidacionCa = firmaService.
 									validarCertificacionFirmantes(smimeMessageReq, request.getLocale())
 								if(200 != respuestaValidacionCa.codigoEstado) {

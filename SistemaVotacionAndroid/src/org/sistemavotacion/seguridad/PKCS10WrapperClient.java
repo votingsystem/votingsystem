@@ -63,7 +63,8 @@ public class PKCS10WrapperClient {
     
     public PKCS10WrapperClient(int keySize, String keyName, 
             String sigName, String provider, String nif, String email,
-            String telefono, String deviceId) throws NoSuchAlgorithmException, 
+            String telefono, String deviceId, String givenName, String surName) 
+            		throws NoSuchAlgorithmException, 
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(keyName, provider);
         keyPairGenerator.initialize(keySize, new SecureRandom());
@@ -73,11 +74,13 @@ public class PKCS10WrapperClient {
         if (email != null) principal.append(", OU=email:" + email);
         if (telefono != null) principal.append(", OU=telefono:" + telefono);
         if (deviceId != null) principal.append(", OU=deviceId:" + deviceId);
+        if (givenName != null) principal.append(", GIVENNAME=" + givenName);
+        if (surName != null) principal.append(", SURNAME=" + surName);
         X500Principal subject = new X500Principal(principal.toString()); 
         csr = new PKCS10CertificationRequest( SIGNATURE_ALGORITHM, 
                 subject, keyPair.getPublic(), null, keyPair.getPrivate(), provider);
     }
-    
+
     public static PKCS10WrapperClient buildCSRVoto (int keySize, String keyName, 
             String sigName, String provider, String controlAccesoURL, String eventoId,
             String hashCertificadoVotoHEX) throws NoSuchAlgorithmException, 
@@ -88,10 +91,10 @@ public class PKCS10WrapperClient {
     
     public static PKCS10WrapperClient buildCSRUsuario (int keySize, String keyName, 
             String sigName, String provider, String nif, String email,
-            String telefono, String deviceId) throws NoSuchAlgorithmException, 
+            String telefono, String deviceId, String givenName, String surName) throws NoSuchAlgorithmException, 
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
     	return new PKCS10WrapperClient(keySize, keyName, sigName, provider,
-    			nif, email, telefono, deviceId);
+    			nif, email, telefono, deviceId, givenName, surName);
     }
     
     /**

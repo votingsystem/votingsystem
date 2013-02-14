@@ -101,7 +101,7 @@ public class SignTimestampSendPDFTask extends AsyncTask<String, Void, String>
         	File timeStampedSignedFile = signWithTimestamp(pdfReader, signedFile, 
         			signerCert, signerPrivatekey, signerCertsChain);
 	        new SendFileTask(null, this, timeStampedSignedFile).execute(urlSignedDocument);
-        	Log.d(TAG + ".signWithTimestamp(...)", " -sending timeStampedSignedFile");
+        	Log.d(TAG + ".signWithTimestamp(...)", " -sending PDF file timeStamped and signed");
         }catch (Exception ex) {
 			ex.printStackTrace();
 			exception = ex;
@@ -236,7 +236,6 @@ public class SignTimestampSendPDFTask extends AsyncTask<String, Void, String>
     @Override
     protected void onPostExecute(String result) {
     	Log.d(TAG + ".onPostExecute(...)", " - statusCode: " + statusCode);
-    	listener.showTaskResult(this);
     }
     
     public int getStatusCode() {
@@ -257,15 +256,17 @@ public class SignTimestampSendPDFTask extends AsyncTask<String, Void, String>
 	}
 
 	@Override
-	public void processTaskMessages(List<String> messages, AsyncTask task) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void processTaskMessages(List<String> messages, AsyncTask task) { }
 
 	@Override
 	public void showTaskResult(AsyncTask task) {
+		Log.d(TAG + ".showTaskResult(...)", " - task: " + task.getClass());
 		if(task instanceof SendFileTask) {
-			
+			SendFileTask sendFileTask = (SendFileTask)task;
+			Log.d(TAG + ".showTaskResult(...)", " - sendFileTask: " + sendFileTask.getStatusCode());
+			statusCode = sendFileTask.getStatusCode();
+			message = sendFileTask.getMessage();
+	    	listener.showTaskResult(this);
 		}
 		
 	}

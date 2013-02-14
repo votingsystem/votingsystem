@@ -27,6 +27,7 @@ import static org.sistemavotacion.android.Aplicacion.SIG_NAME;
 import java.io.FileOutputStream;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.text.Normalizer;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -81,6 +82,8 @@ public class UserCertRequestForm extends FragmentActivity
     private String deviceId = null;
     private PKCS10WrapperClient pkcs10WrapperClient;
     private EditText nifText;
+    private EditText givennameText;
+    private EditText surnameText;
     
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -102,7 +105,12 @@ public class UserCertRequestForm extends FragmentActivity
             	Intent intent = new Intent(getApplicationContext(), FragmentTabsPager.class);
             	startActivity(intent);
             }
-        });      
+        });    
+        
+        givennameText = (EditText)findViewById(R.id.given_name_edit);
+        surnameText = (EditText)findViewById(R.id.surname_edit);
+
+        
         nifText = (EditText)findViewById(R.id.nif_edit);
         nifText.setOnEditorActionListener(new OnEditorActionListener(){
 			@Override
@@ -177,23 +185,29 @@ public class UserCertRequestForm extends FragmentActivity
       	}
     }
     
-    private ProgressDialog getProgressDialog(String dialogMessage) {
+    private void showProgressDialog(String dialogMessage) {
         if (progressDialog == null) 
         	progressDialog = new ProgressDialog(UserCertRequestForm.this);
     	progressDialog.setMessage(dialogMessage);
     	progressDialog.setIndeterminate(true);
     	progressDialog.setCancelable(false);
-        return progressDialog;
+        progressDialog.show();
     }
     
     private void sendCsrRequest() {
-        progressDialog = getProgressDialog(getString(R.string.request_cert_msg));
-        progressDialog.show(); 
+        showProgressDialog(getString(R.string.request_cert_msg));
         String csr = null;
     	try {
+    		String givenName = Normalizer.normalize(
+    				givennameText.getText().toString().toUpperCase(), Normalizer.Form.NFD);
+    		givenName  = givenName.replaceAll("[^\\p{ASCII}]", "");
+    		String surname = Normalizer.normalize(
+    				 surnameText.getText().toString().toUpperCase(), Normalizer.Form.NFD);
+    		surname  = surname.replaceAll("[^\\p{ASCII}]", "");
+    		String nif = StringUtils.validarNIF(nifText.getText().toString().toUpperCase());
 			pkcs10WrapperClient = PKCS10WrapperClient.buildCSRUsuario (KEY_SIZE, SIG_NAME, 
-			        SIGNATURE_ALGORITHM, PROVIDER, nifText.getText().toString(), email, telefono, deviceId);
-	        String privateKeyPEMString = pkcs10WrapperClient.getPrivateKeyPEMString();
+			        SIGNATURE_ALGORITHM, PROVIDER, nif, email, telefono, deviceId, givenName, surname);
+	        //String privateKeyPEMString = pkcs10WrapperClient.getPrivateKeyPEMString();
 	        csr = new String(pkcs10WrapperClient.getPEMEncodedRequestCSR());
 	        /*X509Certificate cert = CertUtil.generateV1RootCert(pkcs10WrapperClient.getKeyPair(), 
 	        		System.currentTimeMillis(), 
@@ -211,6 +225,7 @@ public class UserCertRequestForm extends FragmentActivity
 	        FileOutputStream fos = openFileOutput(KEY_STORE_FILE, Context.MODE_PRIVATE);
 	        fos.write(keyStoreBytes);
 	        fos.close();
+	        Aplicacion.setEstado(Aplicacion.Estado.CON_CSR);
 		} catch (Exception e) {
 			Log.e(TAG + "solicitarButton.onClick(...)", " e.getMessage(): " + e.getMessage());
 			manejarExcepcion(e.getMessage());
@@ -219,11 +234,26 @@ public class UserCertRequestForm extends FragmentActivity
     			Aplicacion.CONTROL_ACCESO_URL));
     }
     
+    
+	private void showMessage(String caption, String message) {
+		Log.d(TAG + ".showMessage(...) ", " - caption: " 
+				+ caption + "  - showMessage: " + message);
+		AlertDialog.Builder builder= new AlertDialog.Builder(this);
+		builder.setTitle(caption).setMessage(message).show();
+	}
+    
     private boolean validarFormulario () {
-    	Log.d(TAG + ".validarFormulario", "");
+    	Log.d(TAG + ".validarFormulario", " - validarFormulario");
     	if(StringUtils.validarNIF(nifText.getText().toString()) == null) {
-    		Toast.makeText(UserCertRequestForm.this, 
-            		R.string.nif_error, Toast.LENGTH_LONG).show();
+    		showMessage(getString(R.string.error_lbl), getString(R.string.nif_error));
+    		return false;
+    	}
+    	if("".equals(givennameText.getText().toString().trim()) ){
+    		showMessage(getString(R.string.error_lbl), getString(R.string.givenname_missing_msg));
+    		return false;
+    	} 
+    	if("".equals(surnameText.getText().toString().trim()) ){
+    		showMessage(getString(R.string.error_lbl), getString(R.string.surname_missing_msg));
     		return false;
     	}
     	TelephonyManager telephonyManager = (TelephonyManager)
@@ -279,13 +309,10 @@ public class UserCertRequestForm extends FragmentActivity
 
 	@Override
 	public void showTaskResult(AsyncTask task) {
-		Log.d(TAG + ".showTaskResult(...)", " - task: " + task.getClass());
+		Log.d(TAG + ".showTaskResult(...)", " ------ return from task: " + task.getClass());
 		if(task instanceof SendDataTask) {
 			SendDataTask sendDataTask = (SendDataTask)task;
-			Log.d(TAG + ".showTaskResult(...)", " - sendDataTask - statuscode: " + sendDataTask.getStatusCode());
-	        if (progressDialog != null && progressDialog.isShowing()) {
-	            progressDialog.dismiss();
-	        }
+			Log.d(TAG + ".showTaskResult(...)", " ---- sendDataTask - statuscode: " + sendDataTask.getStatusCode());
 	        if(Respuesta.SC_OK == sendDataTask.getStatusCode()) {
 	        	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		        SharedPreferences.Editor editor = settings.edit();
@@ -297,6 +324,7 @@ public class UserCertRequestForm extends FragmentActivity
 	        			UserCertResponseForm.class);
 	        	startActivity(intent);
 	        } else {
+	            if (progressDialog != null) progressDialog.dismiss();
 				AlertDialog.Builder builder= new AlertDialog.Builder(UserCertRequestForm.this);
 				builder.setTitle(R.string.alert_exception_caption).setMessage(sendDataTask.getMessage())
 					.setPositiveButton("OK", null).show();

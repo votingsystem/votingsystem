@@ -311,9 +311,9 @@ public class UserCertResponseForm extends FragmentActivity
 	        	setMessage(getString(R.string.
 	        			resultado_solicitud_certificado_activity, 
 	        			certificationAddresses));
-	        	goAppButton.setVisibility(View.VISIBLE);
 	        } else showException(getString(
 	        		R.string.request_user_cert_error_msg));
+	        goAppButton.setVisibility(View.VISIBLE);
 		}
 		
 	}

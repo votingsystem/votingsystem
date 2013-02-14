@@ -359,7 +359,6 @@ public class VoteReceiptListScreen extends FragmentActivity
     	if (!Aplicacion.Estado.CON_CERTIFICADO.equals(Aplicacion.INSTANCIA.getEstado())) {
     		Log.d(TAG + "- firmarEnviarButton -", " mostrando dialogo certificado no encontrado");
     		showCertNotFoundDialog();
-    		return;
     	} else {
     		showPinScreen(getString(R.string.cancel_vote_msg));
     	} 

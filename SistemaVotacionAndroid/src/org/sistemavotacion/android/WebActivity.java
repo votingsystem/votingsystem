@@ -25,12 +25,15 @@ import java.util.UUID;
 
 import org.sistemavotacion.android.service.PublishService;
 import org.sistemavotacion.android.service.PublishServiceListener;
+import org.sistemavotacion.android.ui.CertNotFoundDialog;
 import org.sistemavotacion.android.ui.CertPinDialog;
 import org.sistemavotacion.android.ui.CertPinDialogListener;
 import org.sistemavotacion.modelo.Operation;
+import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.ServerPaths;
+import org.sistemavotacion.util.SubSystem;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -62,8 +65,6 @@ public class WebActivity extends FragmentActivity implements WebSessionListener,
 	
 	private static WebView svWebView;
 	private String serverURL = null;
-	private String urlDocument = null;
-	private String urlSignedDocument = null;
 
 	private Screen screen;
 	private JavaScriptInterface javaScriptInterface;
@@ -71,6 +72,7 @@ public class WebActivity extends FragmentActivity implements WebSessionListener,
     private ProgressDialog progressDialog = null;
     private static List<String> pendingOperations = new ArrayList<String>();
 	private PublishService publishService = null;
+	private Operation pendingOperation;
 	
 	ServiceConnection publishServiceConnection = new ServiceConnection() {
 
@@ -88,7 +90,7 @@ public class WebActivity extends FragmentActivity implements WebSessionListener,
 		}
 	};
 
-	private void unbindSignService() {
+	private void unbindPublishService() {
 		Log.d(TAG + ".unbindSignService()", "--- unbindSignService");
 		if(publishService != null)	unbindService(publishServiceConnection);
 	}
@@ -145,7 +147,7 @@ public class WebActivity extends FragmentActivity implements WebSessionListener,
     @Override protected void onDestroy() {
         super.onDestroy();
     	Log.d(TAG + ".onDestroy()", " - onDestroy");
-    	unbindSignService();
+    	unbindPublishService();
     };
     
 	private void showMsg(String caption, String msg) {
@@ -225,19 +227,24 @@ public class WebActivity extends FragmentActivity implements WebSessionListener,
 		Intent publishServiceIntent = new Intent(this, PublishService.class);
 		startService(publishServiceIntent);
 		bindService(publishServiceIntent, publishServiceConnection, BIND_AUTO_CREATE);
-		switch(operation.getTipo()) {
-			case PUBLICACION_MANIFIESTO_PDF:
-				urlDocument = operation.getUrlDocumento();
-				urlSignedDocument = operation.getUrlEnvioDocumento();
-				showPinScreen(null);
-				break;
-			case PUBLICACION_VOTACION_SMIME:
-				break;
-				default:
-					Log.d(TAG + ".processOperation(...) ", " --- unknown operation: " + operation.getTipo().toString());
-		}
+		this.pendingOperation = operation;
+		if (!Aplicacion.Estado.CON_CERTIFICADO.equals(Aplicacion.INSTANCIA.getEstado())) {
+    		Log.d(TAG + ".processOperation(...)", " - Cert Not Found - ");
+    		showCertNotFoundDialog();
+    	} else showPinScreen(null);
 	}
 	
+	private void showCertNotFoundDialog() {
+		Log.d(TAG + ".showCertNotFoundDialog(...)", " - showCertNotFoundDialog - ");
+		CertNotFoundDialog certDialog = new CertNotFoundDialog();
+		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+	    Fragment prev = getSupportFragmentManager().findFragmentByTag(Aplicacion.CERT_NOT_FOUND_DIALOG_ID);
+	    if (prev != null) {
+	        ft.remove(prev);
+	    }
+	    ft.addToBackStack(null);
+	    certDialog.show(ft, Aplicacion.CERT_NOT_FOUND_DIALOG_ID);
+	}
 	
 	@Override
 	public void updateEditorData(Operation editorData) {
@@ -288,10 +295,52 @@ public class WebActivity extends FragmentActivity implements WebSessionListener,
 		builder.setTitle(caption).setMessage(message).show();
 	}
 	
+    private void showProgressDialog(String dialogMessage) {
+        if (progressDialog == null) 
+        	progressDialog = new ProgressDialog(this);
+    	progressDialog.setMessage(dialogMessage);
+    	progressDialog.setIndeterminate(true);
+    	progressDialog.setCancelable(false);
+        progressDialog.show();
+    }
+    
 	@Override
 	public void setPublishServiceMsg(int statusCode, String msg) {
     	Log.d(TAG + ".setPublishServiceMsg(...) ", " - statusCode: " + statusCode);
-		
+    	String resultMsg = null;
+    	String resultCaption = null;
+    	SubSystem selectedSubsystem = null;
+    	if(Respuesta.SC_OK == statusCode) {
+    		resultCaption = getString(R.string.operacion_ok_msg);
+			switch(pendingOperation.getTipo()) {
+				case PUBLICACION_MANIFIESTO_PDF:
+					resultMsg = getString(R.string.publish_manifest_OK_prefix_msg);
+					selectedSubsystem = SubSystem.MANIFESTS;
+					break;
+				case PUBLICACION_RECLAMACION_SMIME:
+					resultMsg = getString(R.string.publish_claim_OK_prefix_msg);
+					selectedSubsystem = SubSystem.CLAIMS;
+					break;
+				case PUBLICACION_VOTACION_SMIME:
+					resultMsg = getString(R.string.publish_voting_OK_prefix_msg);
+					selectedSubsystem = SubSystem.VOTING;
+					break;
+			}
+			final SubSystem subSystem = selectedSubsystem;
+			resultMsg = resultMsg + " " + getString(R.string.publish_document_OK_sufix_msg);	   
+	    	new AlertDialog.Builder(this).setTitle(resultCaption).setMessage(resultMsg)
+			.setPositiveButton(R.string.ok_button, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					Aplicacion.INSTANCIA.setSelectedSubsystem(subSystem);
+			    	Intent intent = new Intent(getApplicationContext(), FragmentTabsPager.class);
+			    	startActivity(intent);
+				}
+			}).show();
+		} else {
+			resultCaption = getString(R.string.publish_document_ERROR_msg);
+			resultMsg = msg;
+			showMessage(resultCaption, resultMsg);
+		}	
 	}
 
 	@Override
@@ -304,18 +353,23 @@ public class WebActivity extends FragmentActivity implements WebSessionListener,
 	public void setPin(String pin) {
 		Log.d(TAG + ".setPin(...) ", " - setPin ");
 		if(pin != null) {
+			byte[] keyStoreBytes = null;
 	        try {
-				FileInputStream fis = openFileInput(KEY_STORE_FILE);
-				byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
-	    		if(publishService != null) publishService.publishPDF(urlDocument, urlSignedDocument, this, 
-	    				keyStoreBytes, pin.toCharArray());
-	    		else Log.d(TAG + ".publishService(...) ", " - publishService null ");
+	        	FileInputStream fis = openFileInput(KEY_STORE_FILE);
+				keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
+
 	        } catch(Exception ex) {
 				ex.printStackTrace();
 				showMessage(getString(R.string.error_lbl), 
 						getString(R.string.pin_error_msg));
 	        }
-
+	        if(publishService != null) {
+	        	showProgressDialog(getString(R.string.publishing_document_msg));
+	        	publishService.publishDocument(
+		        		pendingOperation, keyStoreBytes, pin.toCharArray(), this);
+	        } else {
+	        	Log.d(TAG + ".publishService(...) ", " - publishService null ");
+	        } 
 		} 
 	}
 	

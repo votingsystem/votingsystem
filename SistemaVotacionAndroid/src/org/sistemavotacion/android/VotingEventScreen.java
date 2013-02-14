@@ -317,7 +317,6 @@ public class VotingEventScreen extends FragmentActivity
     	if (!Aplicacion.Estado.CON_CERTIFICADO.equals(Aplicacion.INSTANCIA.getEstado())) {
     		Log.d(TAG + "- firmarEnviarButton -", " mostrando dialogo certificado no encontrado");
     		showCertNotFoundDialog();
-    		return;
     	} else {
     		String contenido = opcionSeleccionada.getContenido().length() > SELECTED_OPTION_MAX_LENGTH ?
 				 opcionSeleccionada.getContenido().substring(0, SELECTED_OPTION_MAX_LENGTH) + 
@@ -545,6 +544,8 @@ public class VotingEventScreen extends FragmentActivity
 			caption = getString(R.string.error_lbl) + " " 
 					+ new Integer(statusCode).toString();
 			cancelVoteButton.setEnabled(true);
+		} else {
+			caption = getString(R.string.operacion_ok_msg);
 		}
 		showMessage(caption, msg);
 	}
@@ -599,14 +600,14 @@ public class VotingEventScreen extends FragmentActivity
 
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
-			Log.d(TAG + ".signingServiceConnection.onServiceDisconnected()", 
-					" - signingServiceConnection.onServiceDisconnected");
+			Log.d(TAG + ".signServiceConnection.onServiceDisconnected()", 
+					" - signServiceConnection.onServiceDisconnected");
 		}
 
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
-			Log.d(TAG + ".signingServiceConnection.onServiceConnected()", 
-					" - signingServiceConnection.onServiceConnected");
+			Log.d(TAG + ".signServiceConnection.onServiceConnected()", 
+					" - signServiceConnection.onServiceConnected");
 			signService = ((SignService.SignServiceBinder) service).getBinder();
 		}
 	};

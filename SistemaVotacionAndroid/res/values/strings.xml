@@ -33,7 +33,15 @@
     <string name="publish_voting_caption">Publicando votación</string>
     <string name="publish_claim_caption">Publicando reclamación</string>
     <string name="publish_manifest_caption">Publicando manifiesto</string>
-    
+    <string name="publishing_document_msg">Publicando documento</string>   
+
+    <string name="publish_claim_OK_prefix_msg">La reclamación</string>
+    <string name="publish_voting_OK_prefix_msg">La votación</string>
+    <string name="publish_manifest_OK_prefix_msg">El manifiesto</string>
+
+    <string name="publish_document_OK_sufix_msg">se ha publicado correctamente</string>    
+    <string name="publish_document_ERROR_msg">Error publicando el documento</string>    
+
     <string name="publish_document_lbl">Publicar documento</string>
     <string name="publish_voting_lbl">Publicar votación</string>
     <string name="publish_manifest_lbl">Publicar manifiesto</string>
@@ -61,6 +69,15 @@
     <string name="open_voting_tab_lbl">ABIERTAS</string>
     <string name="pending_voting_tab_lbl">PENDIENTES</string>
     <string name="closed_voting_tab_lbl">CERRADAS</string>
+
+    <string name="open_claim_tab_lbl">ABIERTAS</string>
+    <string name="pending_claim_tab_lbl">PENDIENTES</string>
+    <string name="closed_claim_tab_lbl">CERRADAS</string>
+
+    <string name="open_manifest_tab_lbl">ABIERTOS</string>
+    <string name="pending_manifest_tab_lbl">PENDIENTES</string>
+    <string name="closed_manifest_tab_lbl">CERRADOS</string>
+
     <string name="unknown_tab_lbl">... DESCONOCIDO ...</string>
     
 
@@ -87,6 +104,8 @@
 	<string name="repeat_password">Vuelva a introducir el código PIN</string>
 	
 	<string name="nif_error">NIF con errores. Por favor vuelva a intentarlo</string>
+	<string name="givenname_missing_msg">Introduzca el nombre</string>
+	<string name="surname_missing_msg">Introduzca los apellidos</string>
 	<string name="searchLabel">Buscar</string>
 	<string name="app_unstable_msg">La aplicación tiene errores graves, por favor, vuelva a instalarla</string>
 	
@@ -202,5 +221,11 @@
 	<string name="error_password_msg">Contraseña inválida</string>
 	<string name="error_vote_repeated_msg">Error, voto repetido</string>
 	<string name="connection_error_msg">Error de conexión</string>
+
+   <string name="timestamp_connection_error_msg">Error conectando con el servicio de sellado de tiempo</string>
+	
+	<string name="given_name_lbl">Nombre</string>
+	<string name="surname_lbl">Apellidos</string>
+
 	
 </resources>

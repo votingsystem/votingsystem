@@ -1,8 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+      	android:id="@+id/scroll" 
+    	android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
+    
+    <TextView
+        android:id="@+id/given_name_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dip"
+        android:layout_marginRight="20dip"
+        android:layout_marginTop="40dp"
+        android:gravity="center_vertical|center_horizontal"
+        android:text="@string/given_name_lbl"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <EditText
+        android:id="@+id/given_name_edit"
+        android:layout_height="wrap_content"
+        android:layout_width="300dp"
+        android:layout_marginLeft="20dip"
+        android:layout_marginRight="20dip"
+        android:singleLine="true"
+        android:imeOptions="actionNext"
+        android:nextFocusDown="@+id/solicitar_button" 
+        android:gravity="center_vertical|center_horizontal">
+        	<requestFocus />
+      </EditText>
+      
+     <TextView
+        android:id="@+id/surname_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dip"
+        android:layout_marginRight="20dip"
+        android:layout_marginTop="40dp"
+        android:gravity="center_vertical|center_horizontal"
+        android:text="@string/surname_lbl"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+             
+    <EditText
+        android:id="@+id/surname_edit"
+        android:layout_height="wrap_content"
+        android:layout_width="300dp"
+        android:layout_marginLeft="20dip"
+        android:layout_marginRight="20dip"
+        android:singleLine="true"
+        android:imeOptions="actionNext"
+        android:nextFocusDown="@+id/solicitar_button" 
+        android:gravity="center_vertical|center_horizontal">
+      </EditText>
     
     <TextView
         android:id="@+id/nif_view"
@@ -11,7 +63,7 @@
         android:layout_marginLeft="20dip"
         android:layout_marginRight="20dip"
         android:layout_marginTop="40dp"
-        android:gravity="left"
+        android:gravity="center_vertical|center_horizontal"
         android:text="@string/nif_label"
         android:textAppearance="?android:attr/textAppearanceMedium" />
             
@@ -21,10 +73,10 @@
         android:layout_width="240dp"
         android:layout_marginLeft="20dip"
         android:layout_marginRight="20dip"
-        android:imeOptions="actionDone"
+        android:singleLine="true"
+        android:imeOptions="actionNext"
         android:nextFocusDown="@+id/solicitar_button" 
-        android:gravity="fill_horizontal">
-        	<requestFocus />
+        android:gravity="center_vertical|center_horizontal">
       </EditText>
         
 	<TextView
@@ -35,7 +87,7 @@
         android:layout_marginRight="20dip"
         android:layout_marginTop="15dip"
         android:text="@string/user_cert_request_form_message_label"
-        android:gravity="left"
+        android:gravity="center_vertical|center_horizontal"
         android:textAppearance="?android:attr/textAppearanceMedium" />
     
    	<LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content"
@@ -66,3 +118,4 @@
     </LinearLayout>
     
 </LinearLayout>
+</ScrollView>

@@ -77,14 +77,6 @@ public class FragmentTabsPager extends FragmentActivity
         	homeAdapter = new HomeDropdownListAdapter(this);   	
         }
         
-
-        
-        
-
-        
-
-        
-        
         setContentView(R.layout.fragment_tabs_pager);
         TextView searchTextView = (TextView) findViewById(R.id.search_query);
         mTabHost = (TabHost)findViewById(android.R.id.tabhost);
@@ -131,13 +123,13 @@ public class FragmentTabsPager extends FragmentActivity
         }
         
         mTabsAdapter.addTab(mTabHost.newTabSpec(
-        		EnumTab.OPEN.toString()).setIndicator(getTabDesc(EnumTab.OPEN)),
+        		EnumTab.OPEN.toString()).setIndicator(getTabDesc(EnumTab.OPEN, selectedSubSystem)),
         		EventListFragmentLoader.EventListFragment.class, openBundle);
         mTabsAdapter.addTab(mTabHost.newTabSpec(
-        		EnumTab.PENDING.toString()).setIndicator(getTabDesc(EnumTab.PENDING)),
+        		EnumTab.PENDING.toString()).setIndicator(getTabDesc(EnumTab.PENDING, selectedSubSystem)),
         		EventListFragmentLoader.EventListFragment.class, pendingBundle);
         mTabsAdapter.addTab(mTabHost.newTabSpec(
-        		EnumTab.CLOSED.toString()).setIndicator(getTabDesc(EnumTab.CLOSED)),
+        		EnumTab.CLOSED.toString()).setIndicator(getTabDesc(EnumTab.CLOSED, selectedSubSystem)),
         		EventListFragmentLoader.EventListFragment.class, closedBundle);
         
         TabWidget tabs = (TabWidget)findViewById(android.R.id.tabs);
@@ -173,7 +165,7 @@ public class FragmentTabsPager extends FragmentActivity
             	getActionBar().setSelectedNavigationItem(selectedSubSystem.getPosition());
             }
         } else {
-
+        	Log.d(TAG + ".onNavigationItemSelected(...)", " --- pre Honeycomb device");
         }
     }
 	
@@ -338,17 +330,66 @@ public class FragmentTabsPager extends FragmentActivity
         }
     }
     
-	public String getTabDesc (EnumTab tab) {
-		switch(tab) {
-			case CLOSED:
-				return getString(R.string.closed_voting_tab_lbl);
-			case OPEN:
-				return getString(R.string.open_voting_tab_lbl);
-			case PENDING:
-				return getString(R.string.pending_voting_tab_lbl);
-			default: 
-				return getString(R.string.unknown_tab_lbl);
+	public String getTabDesc (EnumTab tab, SubSystem selectedSubsystem) {
+		String result = tab + " - " + selectedSubsystem;
+		if(selectedSubsystem == null) {
+			switch(tab) {
+				case CLOSED:
+					return getString(R.string.closed_voting_tab_lbl);
+				case OPEN:
+					return getString(R.string.open_voting_tab_lbl);
+				case PENDING:
+					return getString(R.string.pending_voting_tab_lbl);
+				default: 
+					Log.d(TAG, " - selectedSubsystem: " + selectedSubsystem 
+							+ " - unknown tab: " + tab);
+			}
+		} else {
+			switch(selectedSubsystem) {
+				case CLAIMS:
+					switch(tab) {
+						case CLOSED:
+							return getString(R.string.closed_claim_tab_lbl);
+						case OPEN:
+							return getString(R.string.open_claim_tab_lbl);
+						case PENDING:
+							return getString(R.string.pending_claim_tab_lbl);
+						default: 
+							Log.d(TAG, " - selectedSubsystem: " + selectedSubsystem 
+									+ " - unknown tab: " + tab);
+					}
+					break;
+				case MANIFESTS:
+					switch(tab) {
+						case CLOSED:
+							return getString(R.string.closed_manifest_tab_lbl);
+						case OPEN:
+							return getString(R.string.open_manifest_tab_lbl);
+						case PENDING:
+							return getString(R.string.pending_manifest_tab_lbl);
+						default: 
+							Log.d(TAG, " - selectedSubsystem: " + selectedSubsystem 
+									+ " - unknown tab: " + tab);
+					}
+					break;
+				case VOTING:
+					switch(tab) {
+						case CLOSED:
+							return getString(R.string.closed_voting_tab_lbl);
+						case OPEN:
+							return getString(R.string.open_voting_tab_lbl);
+						case PENDING:
+							return getString(R.string.pending_voting_tab_lbl);
+						default: 
+							Log.d(TAG, " - selectedSubsystem: " + selectedSubsystem 
+									+ " - unknown tab: " + tab);
+					}
+					break;
+				default:
+					Log.d(TAG, " - unknown selectedSubsystem: " + selectedSubsystem);
+			}
 		}
+		return result;
 	}
     
 

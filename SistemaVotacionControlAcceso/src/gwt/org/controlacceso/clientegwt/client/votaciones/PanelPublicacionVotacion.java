@@ -135,10 +135,12 @@ public class PanelPublicacionVotacion extends Composite implements
 			piePagina.setVisible(false);
 			pageTitle.setVisible(false);
 			cerrarButton.setVisible(false);
+			submitButtonsPanel.setStyleName(style.submitButtonsPanel(), false);
+			submitButtonsPanel.setStyleName(style.buttonContainerPanelAndroid(), true);
 			
 			MensajeClienteFirmaJso mensaje = MensajeClienteFirmaJso.create();
 			mensaje.setCodigoEstado(MensajeClienteFirmaJso.SC_PING);
-			//Browser.setAndroidClientMessage(mensaje.toJSONString());
+			Browser.setAndroidClientMessage(mensaje.toJSONString());
 		}
 	}
 		

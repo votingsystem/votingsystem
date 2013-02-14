@@ -16,27 +16,20 @@
 
 package org.sistemavotacion.android;
 
-import static org.sistemavotacion.android.Aplicacion.ALIAS_CERT_USUARIO;
 import static org.sistemavotacion.android.Aplicacion.ASUNTO_MENSAJE_FIRMA_DOCUMENTO;
 import static org.sistemavotacion.android.Aplicacion.CONTROL_ACCESO_URL;
 import static org.sistemavotacion.android.Aplicacion.KEY_STORE_FILE;
 import static org.sistemavotacion.android.Aplicacion.MAX_SUBJECT_SIZE;
-import static org.sistemavotacion.android.Aplicacion.SIGNATURE_ALGORITHM;
-import static org.sistemavotacion.android.Aplicacion.SIGNED_PART_EXTENSION;
-import static org.sistemavotacion.android.Aplicacion.getFile;
 
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.cert.Certificate;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.sistemavotacion.android.service.SignService;
+import org.sistemavotacion.android.service.SignServiceListener;
+import org.sistemavotacion.android.ui.CertNotFoundDialog;
 import org.sistemavotacion.android.ui.CertPinDialog;
 import org.sistemavotacion.android.ui.CertPinDialogListener;
 import org.sistemavotacion.json.DeObjetoAJSON;
@@ -44,30 +37,25 @@ import org.sistemavotacion.modelo.CampoDeEvento;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.modelo.Tipo;
-import org.sistemavotacion.seguridad.KeyStoreUtil;
-import org.sistemavotacion.smime.SignedMailGenerator;
-import org.sistemavotacion.task.GetFileTask;
-import org.sistemavotacion.task.SendFileTask;
-import org.sistemavotacion.task.TaskListener;
+import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
-import org.sistemavotacion.util.PdfUtils;
 import org.sistemavotacion.util.ServerPaths;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Environment;
+import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -75,20 +63,19 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
-import com.itextpdf.text.pdf.PdfReader;
 
 public class EventScreen extends FragmentActivity 
-	implements CertPinDialogListener, TaskListener {
+	implements CertPinDialogListener, SignServiceListener {
 	
 	public static final String TAG = "EventScreen";
 	
     private Button firmarEnviarButton;
     private Evento evento =  null;
-    private char[] password = null;
     private Map<Long, EditText> mapaCamposReclamacion;
     private ProgressDialog progressDialog = null;
-    private AsyncTask runningTask = null;
-    private byte[] keyStoreBytes = null;
+	private Intent signServiceIntent = null;
+	private SignService signService = null;
+	private byte[] keyStoreBytes = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -184,6 +171,7 @@ public class EventScreen extends FragmentActivity
 				break;
 		}
 	}
+
 	
 	@Override public boolean onOptionsItemSelected(MenuItem item) {  
 		Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
@@ -198,13 +186,13 @@ public class EventScreen extends FragmentActivity
 		}
 	}
 	
-    @Override public boolean onCreateOptionsMenu(Menu menu) {
+    /*@Override public boolean onCreateOptionsMenu(Menu menu) {
     	Intent intent = new Intent(this, FragmentTabsPager.class);
         menu.add(getString(R.string.panel_principal_lbl)).setIntent(intent)
             .setIcon(R.drawable.password_22x22)
             .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
         return true;
-    }
+    }*/
 	
 	public void onClickSubject(View v) {
 		Log.d(TAG + ".onClickSubject(...)", " - onClickSubject");
@@ -217,75 +205,15 @@ public class EventScreen extends FragmentActivity
 		}
 	} 
 	
-	private void firmarEnviarSMIME(char[] password) throws Exception {
-		String asunto = ASUNTO_MENSAJE_FIRMA_DOCUMENTO + evento.getAsunto();
-        String usuario = null;
-        if (Aplicacion.getUsuario() != null) usuario = Aplicacion.getUsuario().getNif();
-        String urlEnvio = null;
-        if (evento.getTipo().equals(Tipo.EVENTO_FIRMA)) {
-        	urlEnvio = ServerPaths.getURLEventoFirmado(CONTROL_ACCESO_URL);
-        } else if (evento.getTipo().equals(Tipo.EVENTO_RECLAMACION)) {
-        	urlEnvio = ServerPaths.getURLReclamacion(CONTROL_ACCESO_URL);
-        }
-		SignedMailGenerator signedMailGenerator = new SignedMailGenerator(keyStoreBytes, 
-				ALIAS_CERT_USUARIO, password, SIGNATURE_ALGORITHM);
-		String signatureContent = DeObjetoAJSON.obtenerFirmaParaEventoJSON(evento);
-		
-        File simimeSignedFile = getFile("signedFile_" + 
-        		evento.getId() + SIGNED_PART_EXTENSION);
-		simimeSignedFile = signedMailGenerator.genFile(usuario, 
-				Aplicacion.getControlAcceso().getNombreNormalizado(), signatureContent, 
-				asunto, null, SignedMailGenerator.Type.USER, simimeSignedFile);
-        SendFileTask enviarArchivoTask = new SendFileTask(null, this, simimeSignedFile);
-        runningTask = enviarArchivoTask;
-        enviarArchivoTask.execute(urlEnvio);
-	}
-	
-	private void firmarEnviar(final char[] password) {    
-		try {
-	    	if(evento.getTipo().equals(Tipo.EVENTO_FIRMA)) {
-		        firmarEnviarButton.setEnabled(false);
-		        this.password = password;
-	    		runningTask = new GetFileTask(null, this).execute(ServerPaths.getURLPDFManifest(
-		    			CONTROL_ACCESO_URL, evento.getEventoId()));
-	    	} else {
-		        firmarEnviarButton.setEnabled(false);
-		        firmarEnviarSMIME(password);
-	    	} 
-		} catch (IOException ex) {
-			Log.e(TAG + ".firmarEnviarVoto(...)", "Exception: " + ex.getMessage());
-			showMessage(getString(R.string.error_lbl), 
-					getString(R.string.pin_error_msg));
-	        firmarEnviarButton.setEnabled(true);
-		} catch (Exception ex) {
-			Log.e(TAG + ".firmarEnviarVoto(...)", "Exception: " + ex.getMessage());
-			showMessage(getString(R.string.error_lbl), ex.getMessage());
-		}
-        
-	}
-	
 	private void showCertNotFoundDialog() {
-    	AlertDialog.Builder builder= new AlertDialog.Builder(EventScreen.this);
-		builder.setTitle(getString(R.string.error_lbl))
-			.setMessage(Html.fromHtml(getString(R.string.certificado_no_encontrado_msg)))
-			.setPositiveButton(R.string.solicitar_label, new DialogInterface.OnClickListener() {
-	            public void onClick(DialogInterface dialog, int whichButton) {
-	            	Intent intent = null;
-	          	  	switch(Aplicacion.INSTANCIA.getEstado()) {
-	          	  		case CON_CSR:
-	          	  			intent = new Intent(getApplicationContext(), UserCertResponseForm.class);
-	          	  			break;
-	          	  		case SIN_CSR:
-	          	  			intent = new Intent(getApplicationContext(), UserCertRequestForm.class);
-	          	  			break;
-	          	  	}
-	          	  	if(intent != null) {
-		          	  	intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		            	startActivity(intent);
-	          	  	}
-	            }
-				})
-			.setNegativeButton(R.string.cancelar_button, null).show();
+		CertNotFoundDialog certDialog = new CertNotFoundDialog();
+		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+	    Fragment prev = getSupportFragmentManager().findFragmentByTag(Aplicacion.CERT_NOT_FOUND_DIALOG_ID);
+	    if (prev != null) {
+	        ft.remove(prev);
+	    }
+	    ft.addToBackStack(null);
+	    certDialog.show(ft, Aplicacion.CERT_NOT_FOUND_DIALOG_ID);
 	}
 	
 	private void showEmptyFieldsDialog() {
@@ -366,70 +294,115 @@ public class EventScreen extends FragmentActivity
 	    }
 	    ft.addToBackStack(null);
 	    pinDialog.show(ft, "pinDialog");
+    	signServiceIntent = new Intent(this, SignService.class);
+		startService(signServiceIntent);
+		bindService(signServiceIntent, signServiceConnection, BIND_AUTO_CREATE);
     }
 
 	@Override public void setPin(final String pin) {
+		Log.d(TAG + ".setPin(...)", " --- setPin"); 
 		if(pin != null) {
-	        progressDialog = ProgressDialog.show(EventScreen.this, 
-	        		getString(R.string.back_to_cancel_lbl), 
+	        progressDialog = ProgressDialog.show(this, 
+	        		getString(R.string.sending_data_caption), 
 	        		getString(R.string.sending_data_lbl), true,
 		            true, new DialogInterface.OnCancelListener() {
 		                @Override
 		                public void onCancel(DialogInterface dialog) { 
 		                	Log.d(TAG + ".ProgressDialog", "cancelando tarea"); 
-		                	if(runningTask != null) runningTask.cancel(true);
+		                	//if(runningTask != null) runningTask.cancel(true);
 		                }
 	        		});
-	        firmarEnviar(pin.toCharArray());
+			try {
+		    	if(evento.getTipo().equals(Tipo.EVENTO_FIRMA)) {
+		    		if(signService != null) {
+		    			signService.processTimestampedPDFSignature(
+		    					ServerPaths.getURLPDFManifest(CONTROL_ACCESO_URL, evento.getEventoId()),
+		    					ServerPaths.getURLPDFManifestCollector(CONTROL_ACCESO_URL, evento.getEventoId()), 
+		    					keyStoreBytes, pin.toCharArray(), this);
+		    		} else Log.d(TAG + ".setPin(...)", " --- signService nulo"); 
+		    	} else {
+		    		String subject = ASUNTO_MENSAJE_FIRMA_DOCUMENTO + evento.getAsunto();
+		    		String urlToSendSignedDocument = null;
+		            if (evento.getTipo().equals(Tipo.EVENTO_FIRMA)) {
+		            	urlToSendSignedDocument = ServerPaths.getURLEventoFirmado(CONTROL_ACCESO_URL);
+		            } else if (evento.getTipo().equals(Tipo.EVENTO_RECLAMACION)) {
+		            	urlToSendSignedDocument = ServerPaths.getURLReclamacion(CONTROL_ACCESO_URL);
+		            }
+		            String signatureContent = DeObjetoAJSON.obtenerFirmaParaEventoJSON(evento);
+		            boolean isWithSignedReceipt = false;
+		    		signService.processSignature(signatureContent, subject, urlToSendSignedDocument, 
+		    				this, isWithSignedReceipt, keyStoreBytes, pin.toCharArray());		    		
+		    	} 
+		    	firmarEnviarButton.setEnabled(false);
+			} catch (IOException ex) {
+				ex.printStackTrace();
+				showMessage(getString(R.string.error_lbl), 
+						getString(R.string.pin_error_msg));
+		        firmarEnviarButton.setEnabled(true);
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				showMessage(getString(R.string.error_lbl), ex.getMessage());
+				firmarEnviarButton.setEnabled(true);
+			}
 		} 
 	}
 
-	@Override
-	public void processTaskMessages(List<String> messages, AsyncTask task) { }
+	
+    @Override protected void onDestroy() {
+        super.onDestroy();
+    	Log.d(TAG + ".onDestroy()", " - onDestroy");
+    	unbindSignService();
+    };
+	
+	private void unbindSignService() {
+		Log.d(TAG + ".unbindSignService()", "--- unbindSignService");
+		//if(signServiceConnection != null && signServiceIntent != null) 
+		if(signService != null)	unbindService(signServiceConnection);
+	}
+	
+	private void stopSignService() {
+		Log.d(TAG + ".stopSignService()", "--- stopSignService");
+		if(signServiceConnection != null && signServiceIntent != null) 
+			stopService(signServiceIntent);
+	}
+	
+	ServiceConnection signServiceConnection = new ServiceConnection() {
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			Log.d(TAG + ".signServiceConnection.onServiceDisconnected()", 
+					" - signServiceConnection.onServiceDisconnected");
+		}
+
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			Log.d(TAG + ".signServiceConnection.onServiceConnected()", 
+					" - signServiceConnection.onServiceConnected");
+			signService = ((SignService.SignServiceBinder) service).getBinder();
+		}
+	};
 
 	@Override
-	public void showTaskResult(AsyncTask task) {
-		if(task instanceof GetFileTask) {
-			GetFileTask getFileTask = (GetFileTask)task;
-			if(Respuesta.SC_OK == getFileTask.getStatusCode()) {
-    			File root = Environment.getExternalStorageDirectory();
-    			File pdfFirmadoFile = new File(root, 
-    					Aplicacion.MANIFEST_FILE_NAME + "_" + evento.getEventoId() +".pdf");
-    	        PdfReader pdfFile;
-    	        try {
-	    	        pdfFile = new PdfReader(getFileTask.getFileData());
-	            	KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
-	                PrivateKey key = (PrivateKey)keyStore.getKey(ALIAS_CERT_USUARIO, password);
-	                Certificate[] chain = keyStore.getCertificateChain(ALIAS_CERT_USUARIO);
-	    			PdfUtils.firmar(pdfFile, new FileOutputStream(pdfFirmadoFile), key, chain);
-	    	        SendFileTask enviarArchivoTask = new SendFileTask(null, this, pdfFirmadoFile);
-	    	        runningTask = enviarArchivoTask.execute(ServerPaths.getURLPDFManifestCollector(
-	    	        		CONTROL_ACCESO_URL, evento.getEventoId()));
-    	        } catch (IOException ex) {
-    				ex.printStackTrace();
-    				showMessage(getString(R.string.error_lbl), 
-    						getString(R.string.pin_error_msg));
-    		        firmarEnviarButton.setEnabled(true);
-    			} catch (Exception ex) {
-    				ex.printStackTrace();
-    				showMessage(getString(R.string.error_lbl), ex.getMessage());
-    			}
-			} else {
-				showMessage(getString(R.string.error_lbl), getFileTask.getMessage());
-			}
-			
-		} else if(task instanceof SendFileTask) {
-			SendFileTask sendFileTask = (SendFileTask)task;
-	        if (progressDialog != null && progressDialog.isShowing()) {
-	            progressDialog.dismiss();
-	        }
-	        if(Respuesta.SC_OK == sendFileTask.getStatusCode()) {
-	        	showMessage(getString(R.string.operacion_ok_msg), null);
-	        } else {
-	        	showMessage(getString(R.string.error_lbl), sendFileTask.getMessage());
-	        	firmarEnviarButton.setEnabled(true);
-	        } 
+	public void setSignServiceMsg(int statusCode, String msg) {
+		Log.d(TAG + ".setSignServiceMsg()", "--- statusCode: " 
+				+ statusCode + " - msg: " + msg);
+		String caption  = null;
+		if(Respuesta.SC_OK != statusCode) {
+			//caption = getString(R.string.error_lbl) + " " + new Integer(statusCode).toString();
+			caption = getString(R.string.error_lbl);
+			firmarEnviarButton.setEnabled(true);
+		} else {
+			caption = getString(R.string.operacion_ok_msg);
 		}
+		showMessage(caption, msg);
+	}
+
+	@Override
+	public void proccessReceipt(SMIMEMessageWrapper receipt) {
+		Log.d(TAG + ".proccessReceipt()", "--- proccessReceipt ");
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
 		
 	}
 

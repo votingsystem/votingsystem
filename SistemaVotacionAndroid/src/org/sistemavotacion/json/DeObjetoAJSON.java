@@ -157,6 +157,7 @@ public class DeObjetoAJSON {
             controlAccesoMap.put("nombre", evento.getControlAcceso().getNombre());
             map.put("controlAcceso", controlAccesoMap);
         }
+        map.put("id", evento.getEventoId());
         map.put("eventoId", evento.getEventoId());
         map.put("asunto", evento.getAsunto());
         map.put("contenido", evento.getContenido());
