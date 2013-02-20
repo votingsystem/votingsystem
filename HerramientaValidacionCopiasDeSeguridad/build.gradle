@@ -34,7 +34,7 @@ task buildVotingApplet(type:VotingSystemApplet) {
 				   'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/HerramientaValidacionCopiasDeSeguridad',
 				   'provider': 'GruposP2P',
 				   'Extension-Name': 'HerramientaValidacionCopiasDeSeguridad',
-				   'Implementation-Title': 'HerramientaValidacionCopiasDeSeguridad',
+				   'Implementation-Title': 'HerramientaValidacionCopiasDeSeguridad'
 				   //'Class-Path': configurations.runtime.collect { it.name }.join(' ')
 	}
 }
