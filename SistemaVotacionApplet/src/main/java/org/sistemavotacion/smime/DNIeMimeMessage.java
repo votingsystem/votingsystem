@@ -43,7 +43,7 @@ import org.bouncycastle.x509.PKIXCertPathReviewer;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class DNIeMimeMessage extends MimeMessage {
     
@@ -261,7 +261,7 @@ public class DNIeMimeMessage extends MimeMessage {
                 int i = 0;
                 while (certIt.hasNext()) {
                     X509Certificate cert = (X509Certificate) certIt.next();
-                    logger.debug("Certificate " + i + "========");
+                    logger.debug("Certificate " + i + " ---------- ");
                     logger.debug("Issuer: " + cert.getIssuerDN().getName());
                     logger.debug("Subject: " + cert.getSubjectDN().getName());
                     logger.debug("Errors:");

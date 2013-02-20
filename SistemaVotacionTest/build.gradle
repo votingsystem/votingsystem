@@ -2,21 +2,24 @@ version = '0.5.0'
 
 apply plugin: 'java'
 apply plugin: 'groovy'
+apply plugin: 'maven'
 
 repositories {
 	mavenLocal()
 	mavenCentral()
  }
 
-ext.groovyVersion = '2.1.0'
+ext {
+  mainClass = "org.sistemavotacion.test.MainFrame"
+}
 
 dependencies {
 	
 	compile project(':HerramientaValidacionCopiasDeSeguridad')
 	
-	compile 'org.codehaus.groovy:groovy-all:2.1.0'
+	compile "org.codehaus.groovy:groovy-all:${groovyVersion}"
 	
-	groovy "org.codehaus.groovy:groovy:$ext.groovyVersion"
+	groovy "org.codehaus.groovy:groovy:${groovyVersion}"
 	
 	compile ('org.apache.httpcomponents:httpmime:4.2.2',
 		'org.apache.httpcomponents:httpclient:4.1.2',
@@ -64,11 +67,6 @@ task runApp(dependsOn: buildJar) << { task ->
         throw new RuntimeException('exec failed') 
     } 
 } 
-
-project.ext {
-  //mainClass = "org.sistemavotacion.test.MainFrame"
-  mainClass = "org.sistemavotacion.test.KeyStoreHelper"
-}
  
 
 sourceSets {

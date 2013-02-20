@@ -99,7 +99,8 @@ public class PKCS10WrapperClient {
     }
     
     public void initSigner (byte[] csrFirmada) throws Exception {
-        Collection<X509Certificate> certificados = CertUtil.fromPEMChainToX509Certs(csrFirmada);
+        Collection<X509Certificate> certificados = 
+                CertUtil.fromPEMToX509CertCollection(csrFirmada);
         logger.debug("Número certificados en cadena: " + certificados.size());
         X509Certificate[] arrayCerts = new X509Certificate[certificados.size()];
         certificados.toArray(arrayCerts);

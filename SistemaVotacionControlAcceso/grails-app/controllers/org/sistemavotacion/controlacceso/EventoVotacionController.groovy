@@ -11,7 +11,7 @@ import org.sistemavotacion.smime.SMIMEMessageWrapper
 import org.sistemavotacion.util.*
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 class EventoVotacionController {
 
@@ -27,10 +27,13 @@ class EventoVotacionController {
         flash.respuesta = eventoVotacionService.guardarEvento(
 			params.smimeMessageReq, request.getLocale())
 		if (200 == flash.respuesta.codigoEstado) {
-			Respuesta respuestaNotificacion = httpService.notificarInicializacionDeEvento(
-				flash.respuesta.evento.centroControl, flash.respuesta.mensajeSMIMEValidado.contenido)
+			String initCentroControlEventURL = "${flash.respuesta.evento.centroControl.serverURL}" + 
+				"${grailsApplication.config.SistemaVotacion.sufijoURLInicializacionEvento}"
+			Respuesta respuestaNotificacion = httpService.sendSignedMessage(
+				initCentroControlEventURL, flash.respuesta.mensajeSMIMEValidado.contenido)
 			if(200 != respuestaNotificacion.codigoEstado) {
-				log.debug("Problemas notificando evento '${flash.respuesta.evento.id}' al Centro de Control - codigo estado:${respuestaNotificacion.codigoEstado} - mensaje: ${respuestaNotificacion.mensaje}")	
+				log.debug("Problemas notificando evento '${flash.respuesta.evento.id}' al Centro de " + 
+					"Control - codigo estado:${respuestaNotificacion.codigoEstado} - mensaje: ${respuestaNotificacion.mensaje}")	
 				Evento evento = flash.respuesta.evento;
 				evento.estado = Evento.Estado.ACTORES_PENDIENTES_NOTIFICACION
 				Evento.withTransaction { evento.save() }

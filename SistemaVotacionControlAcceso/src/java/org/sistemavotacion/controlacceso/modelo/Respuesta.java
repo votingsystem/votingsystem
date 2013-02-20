@@ -9,7 +9,7 @@ import org.sistemavotacion.smime.SMIMEMessageWrapper;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class Respuesta {
     

@@ -2,16 +2,14 @@ package org.sistemavotacion.test.tarea;
 
 import java.util.List;
 import javax.swing.SwingWorker;
-import org.sistemavotacion.modelo.Respuesta;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public interface LanzadorWorker {
     
-    public void process(List<String> messages);
-    public void mostrarMensaje(String mensaje);
-    public void mostrarResultadoOperacion(SwingWorker worker, Respuesta get);
+    public void process(List<String> messages, SwingWorker worker);
+    public void mostrarResultadoOperacion(SwingWorker worker);
     
 }

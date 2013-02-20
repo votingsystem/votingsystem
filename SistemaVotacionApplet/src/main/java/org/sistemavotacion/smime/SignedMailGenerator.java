@@ -36,7 +36,7 @@ import org.bouncycastle.cms.SignerInfoGenerator;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class SignedMailGenerator {
 

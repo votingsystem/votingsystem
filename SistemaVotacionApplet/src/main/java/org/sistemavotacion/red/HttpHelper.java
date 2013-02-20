@@ -99,7 +99,8 @@ public class HttpHelper {
         logger.debug("----------------------------------------");
         HttpEntity entity = response.getEntity();
         if (200 == response.getStatusLine().getStatusCode()) {
-            certificados = CertUtil.fromPEMChainToX509Certs(EntityUtils.toByteArray(entity));
+            certificados = 
+                    CertUtil.fromPEMToX509CertCollection(EntityUtils.toByteArray(entity));
         }
         return certificados;
     }

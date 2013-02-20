@@ -12,12 +12,12 @@ import javax.security.auth.x500.X500PrivateCredential;
 
 import org.apache.log4j.PropertyConfigurator;
 import org.sistemavotacion.modelo.ActorConIP;
-import org.sistemavotacion.modelo.ActorConIP.Tipo;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
+import org.sistemavotacion.test.util.NifUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +28,10 @@ import org.slf4j.LoggerFactory;
 public class ContextoPruebas {
     
     private static Logger logger = LoggerFactory.getLogger(ContextoPruebas.class);
+    
+    public static final int KEY_SIZE = 1024;
+    public static final String SIG_NAME = "RSA";
+    public static final String PROVIDER = "BC";
     
     public static ContextoPruebas INSTANCIA;
     private static KeyStore keyStoreRaizAutoridad;
@@ -82,6 +86,7 @@ public class ContextoPruebas {
 
     public static ContextoPruebas inicializar () throws Exception {
         if (INSTANCIA == null) {
+            INSTANCIA = new ContextoPruebas();
             Properties props = new Properties();
             try {
                 props.load(Thread.currentThread().getContextClassLoader()
@@ -93,7 +98,7 @@ public class ContextoPruebas {
             org.sistemavotacion.Contexto.inicializar();
             inicializarAutoridadCertificadora();
             usuarioPruebas = new Usuario();
-            usuarioPruebas.setNif("1A");
+            usuarioPruebas.setNif(NifUtils.getNif(1));
             usuarioPruebas.setNombre("José García");
             usuarioPruebas.setEmail("jgzornoza@gmail.com");
             usuarioPruebas.setKeyStore(inicializarCertificadoUsuario(usuarioPruebas));
@@ -134,6 +139,13 @@ public class ContextoPruebas {
     public static ActorConIP getControlAcceso() {
         return controlAcceso;
     }
+    
+    public String getUrlControlAccesoCertChain() {
+        logger.debug(" --- getUrlControlAccesoCertChain --- ");
+        return controlAcceso.getServerURL() + "/certificado/cadenaCertificacion";
+    }
+    
+    
 
     /**
      * @param aActorConIP the controlAcceso to set

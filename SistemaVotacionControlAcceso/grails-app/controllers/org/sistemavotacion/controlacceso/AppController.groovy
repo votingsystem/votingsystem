@@ -1,11 +1,12 @@
 package org.sistemavotacion.controlacceso
 
 import java.net.URLEncoder;
+import org.sistemavotacion.controlacceso.modelo.Certificado
 import grails.converters.JSON
 
 class AppController {
 
-    def index() { }
+	def index() { }
 		
 	def editor() { }
 	
@@ -21,8 +22,9 @@ class AppController {
 			String msg = URLEncoder.encode("${params.msg}", "UTF-8")
 			uri = "${uri}&msg=${msg}"
 			log.debug("msg: ${msg}")
-		} 
+		}
 		redirect(uri:uri)
 		return
 	}
+	
 }

@@ -1,8 +1,9 @@
 package org.sistemavotacion.centrocontrol.modelo;
 
+
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public enum Tipo {
     
@@ -43,6 +44,7 @@ public enum Tipo {
     EVENTO_FIRMA_VALIDADO(""),
     EVENTO_FIRMA_ERROR(""),
     EVENTO_FIRMA_FINALIZADO(""),
+    EVENTO_CANCELADO_ERROR(""),
     //FIRMA
     FIRMA_EVENTO_CON_ERRORES(""),
     FIRMA_EVENTO_FIRMA(""),
@@ -60,6 +62,8 @@ public enum Tipo {
     
     //EVENTO
     EVENTO_NO_ENCONTRADO(""),
+    EVENTO_BORRADO_DE_SISTEMA(""),
+    EVENTO_CANCELADO(""),
                              
     //USUARIO
     HISTORICO_USUARIO(""), 
@@ -102,4 +106,15 @@ public enum Tipo {
         return this.mensaje;
     }
     
+    public static Tipo getTipoEnFuncionEstado(EventoVotacion.Estado estadoEvento) {
+    	switch(estadoEvento) {
+	    	case BORRADO_DE_SISTEMA:
+	    		return EVENTO_BORRADO_DE_SISTEMA;
+	    	case CANCELADO:
+	    		return EVENTO_CANCELADO;
+			default:
+				return INDEFINIDO;
+    	}
+    	
+    }
 }

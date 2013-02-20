@@ -891,7 +891,7 @@ public class SignedMailValidator {
                 int i = 0;
                 while (certIt.hasNext()) {
                     X509Certificate cert = (X509Certificate) certIt.next();
-                    logger.debug("Certificate " + i + "========");
+                    logger.debug("Certificate " + i + " ------------ ");
                     logger.debug("Issuer: " + cert.getIssuerDN().getName());
                     logger.debug("Subject: " + cert.getSubjectDN().getName());
                     logger.debug("Errors:");

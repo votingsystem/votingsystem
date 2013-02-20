@@ -2,7 +2,7 @@ package org.controlacceso.clientegwt.client.util;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;

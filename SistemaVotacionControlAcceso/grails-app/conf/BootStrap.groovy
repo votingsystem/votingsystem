@@ -4,21 +4,24 @@ import grails.converters.JSON
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 class BootStrap {
 
-    def firmaService
-	def timeStampService
+	
+	def firmaService
 	def pdfService
-
+	def timeStampService
+	
     def init = { servletContext ->
         JSON.registerObjectMarshaller(Date) {
             return it?.format("yyyy-MM-dd' 'HH:mm:ss")
         }
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-        //firmaService.inicializar()
-		//pdfService.inicializar()
+		//We call it here because InitializingBean method interface is called before GORM plugin
+		firmaService.afterPropertiesSet()
+		pdfService.afterPropertiesSet()
+		timeStampService.afterPropertiesSet()
     }
 	
     def destroy = {}

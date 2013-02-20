@@ -16,6 +16,7 @@ import org.controlacceso.clientegwt.client.util.Browser;
 import org.controlacceso.clientegwt.client.util.RequestHelper;
 import org.controlacceso.clientegwt.client.util.ServerPaths;
 import org.controlacceso.clientegwt.client.util.StringUtils;
+import org.sistemavotacion.controlacceso.modelo.Respuesta;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -177,9 +178,17 @@ public class PuntoEntrada implements EntryPoint {
 	    		case PUBLICACION_MANIFIESTO_PDF:
 	    			break;
 	    		case ASOCIAR_CENTRO_CONTROL_SMIME:
-	    			if(200 == mensajeClienteFirma.getCodigoEstado()) {
+	    			if(Respuesta.SC_OK == mensajeClienteFirma.getCodigoEstado()) {
 	    		    	RequestHelper.doGet(ServerPaths.getInfoServidorPath(), 
 	    		    			new ServerRequestInfoCallback());
+	    			}
+	    			break;
+	    		case CANCELAR_EVENTO:
+	    			if(Respuesta.SC_OK == mensajeClienteFirma.getCodigoEstado()) {
+	    				if(PanelCentral.INSTANCIA != null) {
+	    					History.newItem(PanelCentral.INSTANCIA.getSistemaSeleccionado().toString());
+	    			        History.fireCurrentHistoryState();
+	    				}
 	    			}
 	    			break;
 	    		default:

@@ -139,10 +139,10 @@ public class UserCertResponseForm extends FragmentActivity
 	    		if(isCertStateChecked) break;
 	        	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 	        	Long idSolicitudCSR = settings.getLong(PREFS_ID_SOLICTUD_CSR, -1);
-	        	if(idSolicitudCSR < 0) {
+	        	/*if(idSolicitudCSR < 0) {
 	    			setMessage(getString(R.string.app_unstable_msg));
 	        		return;
-	        	} 
+	        	} */
 	        	Log.d(TAG + ".checkCertState() ", "- idSolicitudCSR: " + idSolicitudCSR);	
 	            progressDialog = ProgressDialog.show(
 	            		UserCertResponseForm.this,
@@ -300,11 +300,11 @@ public class UserCertResponseForm extends FragmentActivity
 	        if (progressDialog != null && progressDialog.isShowing()) {
 	            progressDialog.dismiss();
 	        }
-	        setCertStateChecked(true);
 	        if (Respuesta.SC_OK == getDataTask.getStatusCode()) {
 	        	setCsrFirmado(getDataTask.getMessage());
 	        	setMessage(getString(R.string.cert_downloaded_msg));
 	            insertPinButton.setVisibility(View.VISIBLE);
+		        setCertStateChecked(true);
 	        } else if(Respuesta.SC_NOT_FOUND == getDataTask.getStatusCode()) {
 	        	String certificationAddresses = ServerPaths.
 	        			getURLCertificationAddresses(Aplicacion.CONTROL_ACCESO_URL);

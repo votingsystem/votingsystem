@@ -9,7 +9,7 @@ import org.sistemavotacion.smime.*
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 class EventoController {
 
@@ -273,20 +273,18 @@ class EventoController {
   
   
    def guardarCancelacion= {
-		   SMIMEMessageWrapper smimeMessageReq = params.smimeMessageReq;
-		   if(params.smimeMessageReq) {
-			   Respuesta respuesta = eventoService.cancelarEvento(
-				   params.smimeMessageReq, request.getLocale());
-			   if(respuesta) {
-				   response.status = respuesta.codigoEstado;
-				   log.debug("respuesta.mensaje: ${respuesta.mensaje}")
-				   render respuesta.mensaje;
-				   return false
-			   }
-		   }
-		   response.status = 400;
-		   render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"]);
-		   return false;
+	   SMIMEMessageWrapper smimeMessageReq = params.smimeMessageReq;
+	   if(params.smimeMessageReq) {
+		   Respuesta respuesta = eventoService.cancelarEvento(
+			   params.smimeMessageReq, request.getLocale());
+		   response.status = respuesta.codigoEstado;
+		   log.debug("statuscode: ${respuesta.codigoEstado} - mensaje: ${respuesta.mensaje}")
+		   render respuesta.mensaje;
+		   return false
+	   }
+	   response.status = 400;
+	   render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"]);
+	   return false;
    }
 
    def comprobarFechas = {

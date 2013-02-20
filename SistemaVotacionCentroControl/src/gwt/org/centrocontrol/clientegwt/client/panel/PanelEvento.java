@@ -125,6 +125,8 @@ public class PanelEvento extends Composite {
 	
 	private EventoSistemaVotacionJso.Estado 
 			comprobarFechasEvento (EventoSistemaVotacionJso evento) {
+		if(evento.getEstadoEnumValue() == EventoSistemaVotacionJso.Estado.CANCELADO) 
+			return EventoSistemaVotacionJso.Estado.CANCELADO;
 		EventoSistemaVotacionJso.Estado estado = null;
 	    Date fecha = DateUtils.getTodayDate();
 	    if (fecha.after(evento.getFechaFin())) estado = EventoSistemaVotacionJso.Estado.FINALIZADO;

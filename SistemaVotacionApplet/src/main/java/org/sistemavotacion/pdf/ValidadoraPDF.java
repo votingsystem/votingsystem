@@ -26,7 +26,7 @@ public class ValidadoraPDF {
     public static void main (String[] args) throws FileNotFoundException, IOException, Exception{
         //comprobarFirmas("/home/jgzornoza/Documentos/orangeFirmadoDNIeTimeStamped.pdf");
         
-        PdfReader reader = new PdfReader("/home/jgzornoza/.AppletFirmaSistemaVotacion/temp/FirmaManifiesto.pdf");
+        PdfReader reader = new PdfReader("/home/jgzornoza/111.pdf");
         verificarTimeStamp(reader);
         
     }

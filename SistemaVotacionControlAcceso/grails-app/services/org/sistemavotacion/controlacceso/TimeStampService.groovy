@@ -39,8 +39,9 @@ import org.sistemavotacion.seguridad.*
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.sistemavotacion.util.*;
+import org.springframework.beans.factory.InitializingBean
 
-
+//class TimeStampService implements InitializingBean {
 class TimeStampService {
 	
 	def grailsApplication
@@ -75,10 +76,10 @@ class TimeStampService {
 			"RIPEMD160":TSPAlgorithms.RIPEMD160,
 			"RIPEMD256":TSPAlgorithms.RIPEMD256
 		];
-
-		
-	void inicializar() {
-		log.debug("inicializar");
+	
+	//@Override
+	public void afterPropertiesSet() throws Exception {
+		log.debug(" - afterPropertiesSet - afterPropertiesSet - afterPropertiesSet");
 		sernoGenerator = SernoGenerator.instance(messageSource);
 		def rutaAlmacenClaves = getAbsolutePath("${grailsApplication.config.SistemaVotacion.rutaAlmacenClaves}")
 		File keyStoreFile = new File(rutaAlmacenClaves);
@@ -148,7 +149,6 @@ class TimeStampService {
 		log.debug("processRequest")
 		if(!timeStampRequestBytes) return
 		try {
-			if(!timeStampResponseGen) inicializar()
 			String timeStampRequestStr = new String(Base64.encode(timeStampRequestBytes));
 			TimeStampRequest timeStampRequest = new TimeStampRequest(timeStampRequestBytes)
 			final Date date = DateUtils.getTodayDate();

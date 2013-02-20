@@ -31,7 +31,7 @@ import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.bouncycastle.asn1.smime.SMIMECapability;
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class SignedMailGenerator {
 

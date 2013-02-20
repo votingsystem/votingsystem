@@ -10,14 +10,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
-public class ObtenerInfoServidorWorker extends SwingWorker<Respuesta, String> {
+public class ObtenerInfoServidorWorker extends SwingWorker<String, String> {
     
     private static Logger logger = LoggerFactory.getLogger(ObtenerInfoServidorWorker.class);
 
     private String urlInfoServidor;
     private LanzadorWorker lanzadorWorker;
+    private String message = null;
+    private int statusCode = Respuesta.SC_ERROR_EJECUCION;
+    
     
     public ObtenerInfoServidorWorker(String urlInfoServidor, LanzadorWorker lanzadorWorker) {
         this.urlInfoServidor = urlInfoServidor;
@@ -27,36 +30,38 @@ public class ObtenerInfoServidorWorker extends SwingWorker<Respuesta, String> {
     @Override//on the EDT
     protected void done() {
         try {
-            lanzadorWorker.mostrarResultadoOperacion(this, get());
+        	message = get();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-            Respuesta respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
-            lanzadorWorker.mostrarResultadoOperacion(this, respuesta);
+            message = "Problemas de conexión con el Control de Acceso: " + ex.getMessage();
+        } finally {
+        	lanzadorWorker.mostrarResultadoOperacion(this);
         }
     }
     
     @Override//on the EDT
     protected void process(List<String> messages) {
-        lanzadorWorker.process(messages);
+        lanzadorWorker.process(messages, this);
     }
     
     @Override
-    protected Respuesta doInBackground() throws Exception {
-        logger.debug("doInBackground - urlInfoServidor: " + urlInfoServidor);        
-        Respuesta respuesta = new Respuesta();
-        try {
-            HttpResponse response = Contexto.getHttpHelper().obtenerArchivo(
-                    urlInfoServidor);
-            respuesta.setCodigoEstado(response.getStatusLine().getStatusCode());
-            respuesta.setMensaje(EntityUtils.toString(response.getEntity()));
-            EntityUtils.consume(response.getEntity());
-        } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            String mensajeError = "Problemas de conexión con el Control de Acceso: "
-                    + ex.getMessage();
-            respuesta = new Respuesta(Respuesta.SC_ERROR, mensajeError);
-        }
-        return respuesta;
+    protected String doInBackground() throws Exception {
+        logger.debug("doInBackground - urlInfoServidor: " + urlInfoServidor);   
+        String result = null;
+        HttpResponse response = Contexto.getHttpHelper().obtenerArchivo(
+                urlInfoServidor);
+        statusCode = response.getStatusLine().getStatusCode();
+        result = EntityUtils.toString(response.getEntity());
+        EntityUtils.consume(response.getEntity());
+        return result;
+    }
+    
+	public String getMessage() {
+		return message;
+	}
+    
+    public int getStatusCode() {
+    	return statusCode;
     }
     
 }

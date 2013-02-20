@@ -15,11 +15,11 @@ import org.sistemavotacion.test.modelo.InfoVoto;
 import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import static org.sistemavotacion.test.ContextoPruebas.*;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class LanzadoraSolicitudAcceso  implements Callable<InfoVoto> {
     
@@ -52,8 +52,8 @@ public class LanzadoraSolicitudAcceso  implements Callable<InfoVoto> {
                 + ContextoPruebas.ANULACION_FILE + infoVoto.getVoto().getEventoId() + 
                 "_usu" + infoVoto.getFrom() + ".json");
         FileUtils.copy(anuladorVotoTemp, anuladorVoto);
-        PKCS10WrapperClient wrapperClient = new PKCS10WrapperClient(
-                1024, "RSA", "SHA1withRSA", "BC", 
+        PKCS10WrapperClient wrapperClient = new PKCS10WrapperClient(KEY_SIZE, SIG_NAME, 
+                VOTE_SIGN_MECHANISM, PROVIDER, 
                 infoVoto.getVoto().getControlAcceso().getServerURL(), 
                 infoVoto.getVoto().getEventoId().toString(),
                 infoVoto.getVoto().getHashCertificadoVotoHex());

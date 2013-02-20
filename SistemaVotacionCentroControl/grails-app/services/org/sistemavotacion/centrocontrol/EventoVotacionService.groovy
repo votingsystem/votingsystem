@@ -18,6 +18,7 @@ import org.sistemavotacion.seguridad.cms.*
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.seguridad.*;
 import java.security.cert.X509Certificate;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import grails.converters.JSON
@@ -28,7 +29,7 @@ import java.util.Locale;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 * */
 class EventoVotacionService {
 	
@@ -40,7 +41,9 @@ class EventoVotacionService {
 	def subscripcionService
     def grailsApplication  
 	def httpService
+	def etiquetaService
 	
+	List<String> administradoresSistema
 	
 	Respuesta salvarEvento(SMIMEMessageWrapper smimeMessage, 
 		ControlAcceso controlAcceso, Locale locale) {		
@@ -66,7 +69,7 @@ class EventoVotacionService {
 			X509Certificate cert = CertUtil.fromPEMToX509Cert(mensajeJSON.usuario?.bytes)
 			usuario = Usuario.getUsuario(cert);
 			Respuesta respuestaUsuario = subscripcionService.comprobarUsuario(usuario, locale)
-			if(200 != respuestaUsuario.codigoEstado) return respuestaUsuario
+			if(Respuesta.SC_OK != respuestaUsuario.codigoEstado) return respuestaUsuario
 		}
 		def evento = new EventoVotacion(tipo:tipoMensaje, eventoVotacionId:mensajeJSON.id,
 			asunto:mensajeJSON.asunto, cadenaCertificacionControlAcceso:cadenaCertificacion,
@@ -93,11 +96,11 @@ class EventoVotacionService {
 		}
 		if (mensajeJSON.opciones) salvarOpciones(evento, mensajeJSON)
 		if (mensajeJSON.etiquetas) {
-			Set<Etiqueta> etiquetas = salvarEtiquetas(mensajeJSON.etiquetas)
+			Set<Etiqueta> etiquetas = etiquetaService.guardarEtiquetas(mensajeJSON.etiquetas)
 			evento.setEtiquetaSet(etiquetas)
-			evento.save()
 		}
-		return new Respuesta(codigoEstado:200, fecha:DateUtils.getTodayDate(),
+		evento.save()
+		return new Respuesta(codigoEstado:Respuesta.SC_OK, fecha:DateUtils.getTodayDate(),
 				tipo:Tipo.EVENTO_INICIALIZADO,	mensajeSMIME:mensajeMime,
 				evento:evento, smimeMessage:smimeMessage)
 	}
@@ -112,24 +115,6 @@ class EventoVotacionService {
         return opcionesSet
     }
 
-    Set<Etiqueta> salvarEtiquetas(JSONArray etiquetas) {
-		log.debug("guardarEtiquetas - etiquetas: ${etiquetas}")
-		def etiquetaSet = etiquetas.collect { etiquetaItem ->
-			if ("".equals(etiquetaItem)) return null
-			etiquetaItem = etiquetaItem.toLowerCase().trim()
-			def etiqueta = Etiqueta.findByNombre(etiquetaItem)
-			if (etiqueta) {
-				etiqueta.frecuencia +=1
-				etiqueta.save()
-			} else {
-				etiqueta = new Etiqueta(nombre:etiquetaItem, frecuencia:1)
-				etiqueta.save()
-			}
-			return etiqueta
-		}
-		return etiquetaSet
-    }
-    
 	EventoVotacion.Estado obtenerEstadoEvento (EventoVotacion evento) {
 		EventoVotacion.Estado estado
 		Date fecha = DateUtils.getTodayDate()
@@ -143,8 +128,12 @@ class EventoVotacionService {
 	
 	Respuesta comprobarFechasEvento (EventoVotacion evento, Locale locale) {
 		log.debug("comprobarFechasEvento")
+		if(evento.estado && evento.estado == EventoVotacion.Estado.CANCELADO) {
+			return new Respuesta(codigoEstado:Respuesta.SC_OK, evento:evento)
+		}
 		if(evento.fechaInicio.after(evento.fechaFin)) {
-			return new Respuesta(codigoEstado:400, mensaje:messageSource.getMessage(
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+				mensaje:messageSource.getMessage(
                 'error.fechaInicioAfterFechaFinalMsg', null, locale) )
 		}
 		Date fecha = DateUtils.getTodayDate()
@@ -169,6 +158,68 @@ class EventoVotacionService {
 			}
 		}
 		return new Respuesta(codigoEstado:200, evento:evento)
+	}
+	
+	public Respuesta cancelarEvento(SMIMEMessageWrapper smimeMessage, Locale locale) {
+		log.debug("cancelarEvento - mensaje: ${smimeMessage.getSignedContent()}")
+		def mensajeJSON = JSON.parse(smimeMessage.getSignedContent())
+		Respuesta respuestaUsuario = subscripcionService.comprobarUsuario(smimeMessage, locale)
+		Usuario usuario = respuestaUsuario.usuario
+		MensajeSMIME mensajeSMIME
+		EventoVotacion evento
+		Respuesta respuesta
+		if (mensajeJSON.eventoId &&
+				mensajeJSON.estado && ((EventoVotacion.Estado.CANCELADO ==
+					EventoVotacion.Estado.valueOf(mensajeJSON.estado)) ||
+					(EventoVotacion.Estado.BORRADO_DE_SISTEMA ==
+					EventoVotacion.Estado.valueOf(mensajeJSON.estado)))) {
+				EventoVotacion.withTransaction {
+					evento = EventoVotacion.findWhere(id:mensajeJSON.eventoId?.longValue(),
+						estado:EventoVotacion.Estado.ACTIVO)
+					if (evento) {
+						log.debug(" ----- cancelarEvento - nif firmante: ${smimeMessage.firmante?.nif}")
+						 if(evento.usuario?.nif.equals(smimeMessage.firmante?.nif) ||
+							isUserAdmin(smimeMessage.firmante?.nif)){
+								log.debug("Usuario con privilegios para cancelar evento")
+								evento.estado = EventoVotacion.Estado.valueOf(mensajeJSON.estado)
+								evento.save()
+								mensajeSMIME = new MensajeSMIME(usuario:usuario,
+									tipo:Tipo.getTipoEnFuncionEstado(evento.estado),
+									valido:smimeMessage.isValidSignature(),
+									contenido:smimeMessage.getBytes(), evento:evento)
+								mensajeSMIME.save();
+								String mensajeRespuesta;
+								switch(evento.estado) {
+									case EventoVotacion.Estado.CANCELADO:
+										 mensajeRespuesta = messageSource.getMessage('evento.cancelado',
+											 [mensajeJSON?.eventoId].toArray(), locale)
+										 break;
+									 case EventoVotacion.Estado.BORRADO_DE_SISTEMA:
+										 mensajeRespuesta = messageSource.getMessage('evento.borrado',
+											 [mensajeJSON?.eventoId].toArray(), locale)
+										 break;
+									 
+								}
+								respuesta = new Respuesta(
+									codigoEstado:Respuesta.SC_OK, mensaje: mensajeRespuesta)
+						 } else {
+							 respuesta = new Respuesta(codigoEstado:400, mensaje: messageSource.getMessage(
+								 'csr.usuarioNoAutorizado', 
+								 [smimeMessage.firmante?.nif].toArray(), locale))
+						 }
+					}
+					mensajeSMIME = new MensajeSMIME(tipo:Tipo.EVENTO_CANCELADO_ERROR,
+						usuario:usuario, valido:smimeMessage.isValidSignature(),
+						contenido:smimeMessage.getBytes(), evento:evento)
+					mensajeSMIME.save();
+				}
+		}
+		if(!respuesta) {
+			respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION, 
+				mensaje:messageSource.getMessage('evento.datosCancelacionError', 
+				[mensajeJSON?.eventoId,	mensajeJSON.estado].toArray(), locale))
+		}
+		return respuesta
 	}
 
 	public Map optenerEventoVotacionJSONMap(EventoVotacion eventoItem) {
@@ -196,5 +247,14 @@ class EventoVotacionService {
 				return [id:opcion.id, contenido:opcion.contenido,
 				opcionDeEventoId:opcion.opcionDeEventoId]}
 		return eventoMap
+	}
+	
+	boolean isUserAdmin(String nif) {
+		log.debug("isUserAdmin - nif: ${nif}")
+		if(!administradoresSistema) {
+			administradoresSistema = Arrays.asList(
+			"${grailsApplication.config.SistemaVotacion.adminsDNI}".split(","))
+		}
+		return administradoresSistema.contains(nif)
 	}
 }

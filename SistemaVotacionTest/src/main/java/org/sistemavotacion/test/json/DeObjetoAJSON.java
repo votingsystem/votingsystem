@@ -70,7 +70,7 @@ public class DeObjetoAJSON {
                 JSONObject camposJSON = (JSONObject) JSONSerializer.toJSON(campoMap);
                 jsonArray.element(camposJSON);
             }
-            jsonObject.put("campos", jsonArray);
+            jsonObject.put("opciones", jsonArray);
         }
         if (evento.getCardinalidadDeOpciones() != null) map.put("cardinalidad", 
         		evento.getCardinalidadDeOpciones().toString()); 
@@ -144,7 +144,7 @@ public class DeObjetoAJSON {
                 JSONObject camposJSON = (JSONObject) JSONSerializer.toJSON(campoMap);
                 jsonArray.element(camposJSON);
             }
-            jsonObject.put("campos", jsonArray);
+            jsonObject.put("opciones", jsonArray);
         }
         return jsonObject.toString();
     }

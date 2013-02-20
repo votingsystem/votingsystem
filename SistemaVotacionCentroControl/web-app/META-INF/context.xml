@@ -7,7 +7,7 @@
         username="UsuarioVotacion"
         password="UsuarioVotacion"
         driverClassName="org.postgresql.Driver"
-        url="jdbc:postgresql://localhost:5432/SistemaVotacionControlAcceso"
+        url="jdbc:postgresql://localhost:5432/SistemaVotacionCentroControl"
         validationQuery="select 1"/>
 
 </Context>

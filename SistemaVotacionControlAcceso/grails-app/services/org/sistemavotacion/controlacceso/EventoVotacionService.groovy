@@ -17,7 +17,7 @@ import java.security.cert.X509Certificate;
 import java.util.Locale;
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 class EventoVotacionService {	
 
@@ -64,7 +64,7 @@ class EventoVotacionService {
 			byte[] cadenaCertificacion;
 			if (200 == respuesta.codigoEstado) {
 				evento.cadenaCertificacionCentroControl = respuesta.cadenaCertificacion
-				log.debug("evento.cadenaCertificacionCentroControl: ${evento.cadenaCertificacionCentroControl}")
+				log.debug("Obtenida cadena de certificacion del CentroControl para el evento: ${evento.id}")
 			} else {
 				respuesta.mensaje =  messageSource.getMessage('http.ErrorObteniendoCadenaCertificacion', null, locale) + 
 					" - " + evento.centroControl.serverURL + " - " + respuesta.mensaje
@@ -92,9 +92,10 @@ class EventoVotacionService {
 			nombre:grailsApplication.config.SistemaVotacion.NombreControlAcceso] as JSONObject
 		if (mensajeJSON.etiquetas) {
 			Set<Etiqueta> etiquetaSet = etiquetaService.guardarEtiquetas(mensajeJSON.etiquetas)
-			evento.setEtiquetaSet(etiquetaSet)
+			if(etiquetaSet) evento.setEtiquetaSet(etiquetaSet)
 		} 
 		evento = evento.save()
+		log.debug(" ------ Guardando Votación: ${evento.id}")
 		mensajeJSON.id = evento.id
 		mensajeJSON.fechaCreacion = DateUtils.getStringFromDate(evento.dateCreated)
 		mensajeJSON.tipo = tipo
@@ -103,7 +104,6 @@ class EventoVotacionService {
 			mensajeJSON.certCAVotacion = new String(
 				CertUtil.fromX509CertToPEM (respuestaClaves.certificado))
 		}
-		
 		File cadenaCertificacion = grailsApplication.mainContext.getResource(
 			grailsApplication.config.SistemaVotacion.rutaCadenaCertificacion).getFile();
 		mensajeJSON.cadenaCertificacion = new String(cadenaCertificacion.getBytes())

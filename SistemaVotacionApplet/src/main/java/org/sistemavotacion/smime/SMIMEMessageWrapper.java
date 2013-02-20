@@ -15,6 +15,9 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.security.InvalidAlgorithmParameterException;
+import java.security.cert.CertPathValidatorException;
+import java.security.cert.Certificate;
+import java.security.cert.PKIXCertPathChecker;
 import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.util.Collection;
@@ -45,6 +48,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import javax.activation.CommandMap;
+import javax.activation.MailcapCommandMap;
+import javax.mail.util.SharedByteArrayInputStream;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.sistemavotacion.modelo.Firmante;
@@ -56,6 +62,7 @@ import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
@@ -67,6 +74,7 @@ import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.sistemavotacion.modelo.Usuario;
+import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.worker.TimeStampWorker;
 
@@ -78,6 +86,17 @@ public class SMIMEMessageWrapper extends MimeMessage {
     
     private static Logger logger = LoggerFactory.getLogger(SMIMEMessageWrapper.class);
 
+    static {
+        MailcapCommandMap mc = (MailcapCommandMap)CommandMap.getDefaultCommandMap();
+
+        mc.addMailcap("text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain");
+        mc.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html");
+        mc.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
+        mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true");
+        mc.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822");
+
+        CommandMap.setDefaultCommandMap(mc);
+    }
 
     private String messageId;
     private String fileName;
@@ -121,12 +140,35 @@ public class SMIMEMessageWrapper extends MimeMessage {
     private void initSMIMEMessage() throws IOException, MessagingException, 
             CMSException, SMIMEException, Exception{
         if (getContent() instanceof BASE64DecoderStream) {
+            logger.debug("content instanceof BASE64DecoderStream");
             smimeSigned = new SMIMESigned(this); 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ((CMSProcessable)smimeSigned.getSignedContent()).write(baos);
             signedContent = baos.toString(); 
+        } else if(getContent() instanceof SharedByteArrayInputStream){ 
+            logger.debug("content instanceof SharedByteArrayInputStream");
+            
+
+            MimeMessage cmsg = new MimeMessage(session, 
+                    (SharedByteArrayInputStream)getContent());
+            logger.debug(" - isMimeType multipart: " + 
+                    cmsg.isMimeType("multipart/*"));
+
+            logger.debug(" - MimeMessage getContent getClass: " + 
+                    cmsg.getContent().getClass());
+            
+            
+            
+            
+            
+            
+            smimeSigned = new SMIMESigned(this); 
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ((CMSProcessable)smimeSigned.getSignedContent()).write(baos);
+            signedContent = baos.toString();
         } else {
             smimeSigned = new SMIMESigned((MimeMultipart)getContent());
+            logger.debug("content instanceof MimeMultipart");
             MimeBodyPart content = smimeSigned.getContent();
             Object  cont = content.getContent();
             if (cont instanceof String) {
@@ -499,6 +541,10 @@ public class SMIMEMessageWrapper extends MimeMessage {
     
     public SignedMailValidator.ValidationResult verify(
             PKIXParameters params) throws Exception {
+        
+        SVCertExtensionChecker checker = new SVCertExtensionChecker();
+        params.addCertPathChecker(checker);   
+        
         SignedMailValidator validator = new SignedMailValidator(this, params);
         // iterate over all signatures and print results
         Iterator it = validator.getSignerInformationStore().getSigners().iterator();
@@ -510,9 +556,8 @@ public class SMIMEMessageWrapper extends MimeMessage {
             result = validator.getValidationResult(signer);
             if (result.isValidSignature()){
                 logger.debug("isValidSignature");
-            }
-            else {
-                logger.debug("sigInvalid");
+            } else {
+                logger.debug(" --- sigInvalid --- ");
                 logger.debug("Errors:");
                 Iterator errorsIt = result.getErrors().iterator();
                 while (errorsIt.hasNext()) {
@@ -549,19 +594,22 @@ public class SMIMEMessageWrapper extends MimeMessage {
                 int i = 0;
                 while (certIt.hasNext()) {
                     X509Certificate cert = (X509Certificate) certIt.next();
-                    logger.debug("Certificate " + i + "========");
+                    logger.debug("Certificate " + i + " -------------------- ");
                     logger.debug("Issuer: " + cert.getIssuerDN().getName());
                     logger.debug("Subject: " + cert.getSubjectDN().getName());
-                    logger.debug("Errors:");
                     errorsIt = review.getErrors(i).iterator();
-                    while (errorsIt.hasNext())  {
-                        logger.debug( errorsIt.next().toString());
+                    if(errorsIt.hasNext()) {
+                        logger.debug("Errors:");
+                        while (errorsIt.hasNext())  {
+                            logger.debug( errorsIt.next().toString());
+                        }
                     }
-                    // notifications
-                    logger.debug("Notifications:");
                     notificationsIt = review.getNotifications(i).iterator();
-                    while (notificationsIt.hasNext()) {
-                        logger.debug(notificationsIt.next().toString());
+                    if(notificationsIt.hasNext()) {
+                        logger.debug("Notifications:");
+                        while (notificationsIt.hasNext()) {
+                            logger.debug(notificationsIt.next().toString());
+                        }
                     }
                     i++;
                 }
@@ -569,6 +617,40 @@ public class SMIMEMessageWrapper extends MimeMessage {
         }
         return result;
     }
+    
+    	//To bypass id_kp_timeStamping ExtendedKeyUsage exception
+	private static class SVCertExtensionChecker extends PKIXCertPathChecker {
+		
+		Set supportedExtensions;
+		
+		SVCertExtensionChecker() {
+			supportedExtensions = new HashSet();
+			supportedExtensions.add(X509Extensions.ExtendedKeyUsage);
+		}
+		
+		public void init(boolean forward) throws CertPathValidatorException {
+		 //To change body of implemented methods use File | Settings | File Templates.
+	    }
+
+		public boolean isForwardCheckingSupported(){
+			return true;
+		}
+
+		public Set getSupportedExtensions()	{
+			return null;
+		}
+
+		public void check(Certificate cert, Collection<String> unresolvedCritExts)
+				throws CertPathValidatorException {
+			for(String ext : unresolvedCritExts) {
+				if(X509Extensions.ExtendedKeyUsage.toString().equals(ext)) {
+					logger.debug("------------- ExtendedKeyUsage removed from validation");
+					unresolvedCritExts.remove(ext);
+				}
+			}
+		}
+
+	}
     
     
 }

@@ -32,11 +32,16 @@ task buildVotingApplet(type:VotingSystemApplet) {
 		attributes 'Main-Class': 'org.sistemavotacion.herramientavalidacion.AppletHerramienta',
 				   'SplashScreen-Image':'resources/images/cert_100x108.png',
 				   'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/HerramientaValidacionCopiasDeSeguridad',
-				   'provider': 'GruposP2P'
+				   'provider': 'GruposP2P',
+				   'Extension-Name': 'HerramientaValidacionCopiasDeSeguridad',
+				   'Implementation-Title': 'HerramientaValidacionCopiasDeSeguridad',
+				   //'Class-Path': configurations.runtime.collect { it.name }.join(' ')
 	}
 }
 
 task signJar {
+	
+	
 	doLast {
 		ant.signjar(keystore: "$rootProject.projectDir/mockDnie.jks",
 			storepass:rootProject.keyStorePassword,

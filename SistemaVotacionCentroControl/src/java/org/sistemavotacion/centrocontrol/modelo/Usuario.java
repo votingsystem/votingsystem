@@ -21,7 +21,7 @@ import java.security.cert.X509Certificate;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 @Entity
 @Table(name="Usuario")
@@ -35,16 +35,16 @@ public class Usuario implements Serializable {
     @Column(name="nif", unique=true, nullable=false)
     private String nif;
 
-    @Column(name="nombre", nullable=false)
+    @Column(name="nombre")
     private String nombre;
     
-    @Column(name="primerApellido", nullable=false)
+    @Column(name="primerApellido")
     private String primerApellido;
     
-    @Column(name="pais", nullable=false)
+    @Column(name="pais")
     private String pais;
 
-    @Column(name="cn", nullable=false)
+    @Column(name="cn")
     private String cn;
     
     @Column(name="telefono" )

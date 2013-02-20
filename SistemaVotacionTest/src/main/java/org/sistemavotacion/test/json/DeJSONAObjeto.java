@@ -79,8 +79,10 @@ public class DeJSONAObjeto {
              for (int i = 0; i< jsonArray.size(); i++) {
                 jsonObject = jsonArray.getJSONObject(i);
                 OpcionEvento campo = new OpcionEvento();
-                campo.setId(jsonObject.getLong("id"));
-                campo.setContenido(jsonObject.getString("contenido"));
+                if(eventoJSON.containsKey("id"))
+                    campo.setId(jsonObject.getLong("id"));
+                if(eventoJSON.containsKey("contenido"))
+                    campo.setContenido(jsonObject.getString("contenido"));
                 campos.add(campo);
              }
             evento.setOpciones(campos);

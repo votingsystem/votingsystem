@@ -327,6 +327,7 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
 	}
 	
 	private void mostraEstadisticas(EstadisticaJso estadistica) {
+		logger.info("mostraEstadisticas: " + estadistica.toJSONString());
 		panelGraficoVotacion.mostraEstadisticas(evento, estadistica, this);
 		panelGraficoVotacion.setVisible(true);
 	}

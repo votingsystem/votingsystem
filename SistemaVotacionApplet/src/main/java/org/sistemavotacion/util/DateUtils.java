@@ -64,8 +64,7 @@ public class DateUtils {
 	    calendar.clear();
 	    calendar.set(gregorianCalendar.get(Calendar.YEAR),
 	    		gregorianCalendar.get(Calendar.MONTH),
-	    		gregorianCalendar.get(Calendar.DAY_OF_MONTH + nextDayFromToday));
-	    System.out.println("calendar: " + calendar.getTime());
+	    		gregorianCalendar.get(Calendar.DAY_OF_MONTH) + nextDayFromToday);
         return calendar.getTime();
     }
     /**

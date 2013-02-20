@@ -9,21 +9,24 @@ import java.util.Locale;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
-class EventoService {	
+class EventoService {
 		
-    static transactional = true
+	static transactional = true
 	
 	List<String> administradoresSistema
 	def messageSource
 	def subscripcionService
 	def grailsApplication
-
+	def httpService
 
 	
 	Respuesta comprobarFechasEvento (Evento evento, Locale locale) {
 		log.debug("comprobarFechasEvento")
+		if(evento.estado && evento.estado == Evento.Estado.CANCELADO) {
+			return new Respuesta(codigoEstado:200, evento:evento)
+		}
 		if(evento.fechaInicio.after(evento.fechaFin)) {
 			return new Respuesta(codigoEstado:400, mensaje:messageSource.getMessage(
 				'error.fechaInicioAfterFechaFinalMsg', null, locale) )
@@ -51,17 +54,17 @@ class EventoService {
 		}
 		return new Respuesta(codigoEstado:200, evento:evento)
 	}
-    
+	
    Evento.Estado obtenerEstadoEvento (Evento evento) {
-        Evento.Estado estado
-        Date fecha = DateUtils.getTodayDate()
-        if (fecha.after(evento.fechaFin)) estado = Evento.Estado.FINALIZADO
-        if (fecha.after(evento.fechaInicio) && fecha.before(evento.fechaFin))   
-            estado = Evento.Estado.ACTIVO
-        if (fecha.before(evento.fechaInicio))  estado = Evento.Estado.PENDIENTE_COMIENZO
-        log.debug("obtenerEstadoEvento - estado ${estado.toString()}")
-        return estado
-    }
+		Evento.Estado estado
+		Date fecha = DateUtils.getTodayDate()
+		if (fecha.after(evento.fechaFin)) estado = Evento.Estado.FINALIZADO
+		if (fecha.after(evento.fechaInicio) && fecha.before(evento.fechaFin))
+			estado = Evento.Estado.ACTIVO
+		if (fecha.before(evento.fechaInicio))  estado = Evento.Estado.PENDIENTE_COMIENZO
+		log.debug("obtenerEstadoEvento - estado ${estado.toString()}")
+		return estado
+	}
 	
 	boolean isUserAdmin(String nif) {
 		if(!administradoresSistema) {
@@ -85,7 +88,7 @@ class EventoService {
 					(Evento.Estado.BORRADO_DE_SISTEMA ==
 					Evento.Estado.valueOf(mensajeJSON.estado)))) {
 				Evento.withTransaction {
-					evento = Evento.findWhere(id:mensajeJSON.eventoId?.longValue(), 
+					evento = Evento.findWhere(id:mensajeJSON.eventoId?.longValue(),
 						estado:Evento.Estado.ACTIVO)
 					if (evento) {
 						 if(evento.usuario?.nif.equals(smimeMessage.firmante?.nif) ||
@@ -101,17 +104,32 @@ class EventoService {
 								String mensajeRespuesta;
 								switch(evento.estado) {
 									case Evento.Estado.CANCELADO:
-									 	mensajeRespuesta = messageSource.getMessage('evento.cancelado', 
+										 mensajeRespuesta = messageSource.getMessage('evento.cancelado',
 											 [mensajeJSON?.eventoId].toArray(), locale)
-									 	break;
+										 break;
 									 case Evento.Estado.BORRADO_DE_SISTEMA:
 										 mensajeRespuesta = messageSource.getMessage('evento.borrado',
 											 [mensajeJSON?.eventoId].toArray(), locale)
 										 break;
 									 
-								 }
-								 respuesta = new Respuesta(codigoEstado:200, mensaje: mensajeRespuesta)
-								 return
+								}
+								if(evento instanceof EventoVotacion) {
+									String centroControlUrl = ((EventoVotacion)evento).getCentroControl().serverURL
+									while(centroControlUrl.endsWith("/")) {
+										centroControlUrl = centroControlUrl.substring(0, centroControlUrl.length() - 1)
+									}
+									String cancelCentroCentrolEventURL = centroControlUrl + "/eventoVotacion/guardarCancelacion"
+									Respuesta respuestaCentroControl =	httpService.sendSignedMessage(cancelCentroCentrolEventURL,
+												smimeMessage.getBytes());
+									if(Respuesta.SC_OK == respuestaCentroControl.codigoEstado) {
+										mensajeRespuesta = mensajeRespuesta + " - " +
+											messageSource.getMessage('centroControl.notificado',
+											[centroControlUrl].toArray(), locale)
+									} else mensajeRespuesta = mensajeRespuesta + " - " +
+											messageSource.getMessage('centroControl.problemaNotificando',
+											[centroControlUrl].toArray(), locale)
+								}
+								respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK, mensaje: mensajeRespuesta)
 						 } else {
 							 respuesta = new Respuesta(codigoEstado:400, mensaje: messageSource.getMessage(
 								 'csr.usuarioNoAutorizado', null, locale))
@@ -131,6 +149,7 @@ class EventoService {
 	}
 
 	public Map optenerEventoVotacionJSONMap(EventoVotacion eventoItem) {
+		log.debug("eventoItem: ${eventoItem.id} - estado ${eventoItem.estado}")
 		def eventoMap = [id: eventoItem.id, fechaCreacion: eventoItem.dateCreated,
 			URL:"${grailsApplication.config.grails.serverURL}/evento/obtener?id=${eventoItem.id}",
 			solicitudPublicacionURL:"${grailsApplication.config.grails.serverURL}/eventoVotacion/firmado?id=${eventoItem.id}",

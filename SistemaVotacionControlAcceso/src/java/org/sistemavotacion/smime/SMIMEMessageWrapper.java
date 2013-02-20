@@ -56,7 +56,7 @@ import org.sistemavotacion.seguridad.PKIXCertPathReviewer;
 import org.sistemavotacion.controlacceso.modelo.*;
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class SMIMEMessageWrapper extends MimeMessage {
 	
@@ -442,7 +442,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
                 int i = 0;
                 while (certIt.hasNext()) {
                     X509Certificate cert = (X509Certificate) certIt.next();
-                    logger.debug("Certificate " + i + "========");
+                    logger.debug("Certificate " + i + " ----------- ");
                     logger.debug("Issuer: " + cert.getIssuerDN().getName());
                     logger.debug("Subject: " + cert.getSubjectDN().getName());
                     logger.debug("Errors:");
@@ -515,7 +515,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
                 int i = 0;
                 while (certIt.hasNext()) {
                     X509Certificate cert = (X509Certificate) certIt.next();
-                    logger.debug("Certificate " + i + "========");
+                    logger.debug("Certificate " + i + " ------------ ");
                     logger.debug("Issuer: " + cert.getIssuerDN().getName());
                     logger.debug("Subject: " + cert.getSubjectDN().getName());
                     logger.debug("Errors:");

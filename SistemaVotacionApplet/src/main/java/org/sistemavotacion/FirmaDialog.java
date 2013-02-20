@@ -419,8 +419,7 @@ public class FirmaDialog extends JDialog implements WorkerListener {
 
     
     @Override public void showResult(SwingWorker worker, Respuesta respuesta) {
-        mostrarPantallaEnvio(false);
-        logger.debug("mostrarResultadoOperacion - respuesta.codigoEstado: " 
+        logger.debug("showResult - respuesta.codigoEstado: " 
                     + respuesta.getCodigoEstado());
         if(worker instanceof TimeStampWorker) {
             if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
@@ -429,10 +428,12 @@ public class FirmaDialog extends JDialog implements WorkerListener {
                             (TimeStampWorker)worker));
                 } catch (Exception ex) {
                     logger.error(ex.getMessage(), ex);
+                    mostrarPantallaEnvio(false);
                     MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
                     errorDialog.setMessage(ex.getMessage(), getString("errorLbl"));
                 }
             } else {
+                mostrarPantallaEnvio(false);
                 MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
                 errorDialog.setMessage(respuesta.getMensaje(), getString("errorLbl"));
             }
@@ -442,6 +443,7 @@ public class FirmaDialog extends JDialog implements WorkerListener {
             if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
                 processDocument(((PDFSignerDNIeWorker)worker).getSignedAndTimeStampedPDF());
             } else {
+                mostrarPantallaEnvio(false);
                 MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
                 errorDialog.setMessage(respuesta.getMensaje(), getString("errorLbl"));
             }
@@ -453,6 +455,7 @@ public class FirmaDialog extends JDialog implements WorkerListener {
                 bytesDocumento = respuesta.getBytesArchivo();
                 pack();
             } else {
+                mostrarPantallaEnvio(false);
                 dispose();
                 appletFirma.responderCliente(respuesta.getCodigoEstado(), 
                         getString("errorDescragandoDocumento") + " - " + respuesta.getMensaje());
@@ -469,6 +472,7 @@ public class FirmaDialog extends JDialog implements WorkerListener {
                 respuesta.setOperacion(operacion);
                 resultadoFirmaDialog.mostrarMensaje(respuesta);*/
             } else {
+                mostrarPantallaEnvio(false);
                 appletFirma.responderCliente(
                         respuesta.getCodigoEstado(), respuesta.getMensaje());
             }

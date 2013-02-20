@@ -8,7 +8,7 @@ import com.google.gwt.json.client.JSONObject;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public final class InfoServidorJso extends JavaScriptObject {
 	

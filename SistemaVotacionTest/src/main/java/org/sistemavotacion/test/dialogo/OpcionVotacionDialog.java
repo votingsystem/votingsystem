@@ -6,9 +6,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
-
 import org.sistemavotacion.modelo.OpcionEvento;
 import org.sistemavotacion.test.ContextoPruebas;
+import org.sistemavotacion.test.MainFrame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -16,6 +18,8 @@ import org.sistemavotacion.test.ContextoPruebas;
  */
 public class OpcionVotacionDialog extends javax.swing.JDialog implements KeyListener {
     
+    private static Logger logger = LoggerFactory.getLogger(OpcionVotacionDialog.class);
+        
     private OpcionEvento opcionEvento;
     int maximaLongitudCampo = ContextoPruebas.MAXIMALONGITUDCAMPO;
     private Border normalTextBorder;
@@ -25,10 +29,10 @@ public class OpcionVotacionDialog extends javax.swing.JDialog implements KeyList
         super(parent, modal);
         initComponents();
         setLocationRelativeTo(null);  
-        initComponents();
-        normalTextBorder = editorPane.getBorder();
-        editorPane.addKeyListener(this);
-        mensajePanel.setVisible(false);
+        normalTextBorder = textArea.getBorder();
+        setTitle("Añadir opción de votación");
+        textArea.addKeyListener(this);
+        mostrarMensajeUsuario(null);
         pack();
     }
 
@@ -44,10 +48,11 @@ public class OpcionVotacionDialog extends javax.swing.JDialog implements KeyList
         mensajePanel = new javax.swing.JPanel();
         mensajeLabel = new javax.swing.JLabel();
         closeLabel = new javax.swing.JLabel();
-        scrollPane = new javax.swing.JScrollPane();
-        editorPane = new javax.swing.JEditorPane();
         cerrarButton = new javax.swing.JButton();
         anyadirButton = new javax.swing.JButton();
+        scrollPane = new javax.swing.JScrollPane();
+        textArea = new javax.swing.JTextArea();
+        jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -73,7 +78,7 @@ public class OpcionVotacionDialog extends javax.swing.JDialog implements KeyList
             mensajePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mensajePanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(mensajeLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 334, Short.MAX_VALUE)
+                .addComponent(mensajeLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 395, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(closeLabel))
         );
@@ -87,8 +92,6 @@ public class OpcionVotacionDialog extends javax.swing.JDialog implements KeyList
                 .addComponent(closeLabel)
                 .addGap(0, 0, Short.MAX_VALUE))
         );
-
-        scrollPane.setViewportView(editorPane);
 
         cerrarButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/cancel_16x16.png"))); // NOI18N
         cerrarButton.setText("Cerrar");
@@ -106,37 +109,44 @@ public class OpcionVotacionDialog extends javax.swing.JDialog implements KeyList
             }
         });
 
+        textArea.setColumns(20);
+        textArea.setRows(5);
+        scrollPane.setViewportView(textArea);
+
+        jLabel1.setText("Contenido que figurará en la opción:");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(mensajePanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(scrollPane)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                    .addGroup(layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(anyadirButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cerrarButton)))
+                        .addComponent(cerrarButton))
+                    .addComponent(scrollPane)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
-            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(mensajePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(58, Short.MAX_VALUE)
-                .addComponent(scrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(mensajePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(scrollPane)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cerrarButton)
                     .addComponent(anyadirButton))
                 .addContainerGap())
-            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(layout.createSequentialGroup()
-                    .addComponent(mensajePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGap(0, 158, Short.MAX_VALUE)))
         );
 
         pack();
@@ -157,7 +167,7 @@ public class OpcionVotacionDialog extends javax.swing.JDialog implements KeyList
             return;
         }
         opcionEvento = new OpcionEvento();
-        opcionEvento.setContenido(editorPane.getText());
+        opcionEvento.setContenido(textArea.getText());
         this.dispose();
     }//GEN-LAST:event_anyadirButtonActionPerformed
 
@@ -244,13 +254,15 @@ public class OpcionVotacionDialog extends javax.swing.JDialog implements KeyList
     
     public boolean validarFormulario() {
         boolean errores = false;
-        if (editorPane.getText().trim() == null ||
-                "".equals(editorPane.getText().trim())) {
+        logger.debug(" - validarFormulario - textArea.getText(): " + textArea.getText());
+        
+        if (textArea.getText().trim() == null ||
+                "".equals(textArea.getText().trim())) {
             mostrarMensajeUsuario("<html>El campo no puede ir vacío</html>");
-            editorPane.setBorder(new LineBorder(Color.RED,2));
+            textArea.setBorder(new LineBorder(Color.RED,2));
             errores = true;
         } else {
-            if (editorPane.getText().length() > maximaLongitudCampo) {
+            if (textArea.getText().length() > maximaLongitudCampo) {
                 mostrarMensajeUsuario("<html>El campo no puede tener "
                         + "una tamaño de más de " + maximaLongitudCampo +
                         " caracteres</html>");
@@ -260,7 +272,7 @@ public class OpcionVotacionDialog extends javax.swing.JDialog implements KeyList
         if (errores) {
             return false;
         } else mostrarMensajeUsuario(null);
-            editorPane.setBorder(normalTextBorder);
+            textArea.setBorder(normalTextBorder);
         return true;
     }
     
@@ -268,9 +280,10 @@ public class OpcionVotacionDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JButton anyadirButton;
     private javax.swing.JButton cerrarButton;
     private javax.swing.JLabel closeLabel;
-    private javax.swing.JEditorPane editorPane;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel mensajeLabel;
     private javax.swing.JPanel mensajePanel;
     private javax.swing.JScrollPane scrollPane;
+    private javax.swing.JTextArea textArea;
     // End of variables declaration//GEN-END:variables
 }

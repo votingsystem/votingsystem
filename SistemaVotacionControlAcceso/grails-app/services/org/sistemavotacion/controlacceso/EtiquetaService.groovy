@@ -5,7 +5,7 @@ import org.sistemavotacion.controlacceso.modelo.*;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 class EtiquetaService {
 	
@@ -13,18 +13,23 @@ class EtiquetaService {
 
 	Set<Etiqueta> guardarEtiquetas(JSONArray etiquetas) {
 		log.debug("guardarEtiquetas - etiquetas: ${etiquetas}")
-		def etiquetaSet = etiquetas.collect { etiquetaItem ->
-			if ("".equals(etiquetaItem)) return null
+		def etiquetaSet  
+		etiquetas.collect { etiquetaItem ->
+			if (!etiquetaItem || "".equals(etiquetaItem)) return null
+			if(!etiquetaSet) etiquetaSet = new HashSet<Etiqueta>()
 			etiquetaItem = etiquetaItem.toLowerCase().trim()
-			def etiqueta = Etiqueta.findByNombre(etiquetaItem)
-			if (etiqueta) {
-				etiqueta.frecuencia +=1
-				etiqueta.save()
-			} else {
-				etiqueta = new Etiqueta(nombre:etiquetaItem, frecuencia:1)
-				etiqueta.save()
+			def etiqueta
+			Etiqueta.withTransaction {
+				etiqueta = Etiqueta.findByNombre(etiquetaItem)
+				if (etiqueta) {
+					etiqueta.frecuencia +=1
+					etiqueta.save(flush: true)
+				} else {
+					etiqueta = new Etiqueta(nombre:etiquetaItem, frecuencia:1)
+					etiqueta.save(flush: true)
+				}
 			}
-			return etiqueta
+			etiquetaSet.add(etiqueta);
 		}
 		return etiquetaSet
 	}

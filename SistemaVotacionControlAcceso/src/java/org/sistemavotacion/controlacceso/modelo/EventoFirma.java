@@ -14,7 +14,7 @@ import org.hibernate.search.annotations.Indexed;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 @Entity
 @Table(name="EventoFirma")

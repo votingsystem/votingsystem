@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class InfoErroresDialog extends JDialog implements HyperlinkListener  {
     

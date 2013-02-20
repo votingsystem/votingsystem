@@ -2,7 +2,7 @@
 <div>
   	<p>Servicios relacionados con los <b>Eventos de votación</b>.</p>
   	<h3>Métodos soportados</h3>
-    <p>- <u>POST</u> - <a href="${grailsApplication.config.grails.serverURL}/eventoVotacion/inicializarEvento">/eventoVotacion/inicializarEvento</a><br/>
+    <p>- <u>POST</u> - <a href="${grailsApplication.config.grails.serverURL}/eventoVotacion/guardarEvento">/eventoVotacion/guardarEvento</a><br/>
       <b>Parámetros:</b><br/>
        - <u>archivoFirmado</u>: El <b>Evento de Votación</b> que se desea dar de alta en el sistema.<br/>
          <b>Respuesta:</b><br/>

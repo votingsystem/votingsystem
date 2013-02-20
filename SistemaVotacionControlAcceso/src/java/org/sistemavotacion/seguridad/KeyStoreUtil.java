@@ -13,7 +13,7 @@ import javax.security.auth.x500.X500PrivateCredential;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class KeyStoreUtil {
     

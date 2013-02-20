@@ -24,7 +24,7 @@ import javax.persistence.ManyToOne;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 * Clase para tratar los mensajes firmados recibidos en el servidor
 */
 @Entity

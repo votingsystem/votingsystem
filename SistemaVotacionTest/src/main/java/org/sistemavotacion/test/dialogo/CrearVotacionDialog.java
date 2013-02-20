@@ -566,23 +566,32 @@ public class CrearVotacionDialog extends JDialog implements KeyListener, Lanzado
     }
     
     @Override
-    public void process(List<String> messages) {  }
+    public void process(List<String> messages, SwingWorker worker) {  }
 
     @Override
-    public void mostrarMensaje(String mensaje) {  }
-
-    @Override
-    public void mostrarResultadoOperacion(SwingWorker worker, Respuesta respuesta) {
+    public void mostrarResultadoOperacion(SwingWorker worker) {
+    	logger.debug(" === mostrarResultadoOperacion - worker: " + worker.getClass());
         if(worker instanceof EnviarMultipartEntityWorker) {
-            logger.debug("Recibida respuesta de publicación - CodigoEstado: " 
-                    + respuesta.getCodigoEstado()); 
-            if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+        	EnviarMultipartEntityWorker multipartEntityWorker = (EnviarMultipartEntityWorker)worker;
+            logger.debug(" === mostrarResultadoOperacion - EnviarMultipartEntityWorker - statusCode: " 
+        	+ multipartEntityWorker.getStatusCode());
+
+
+            if(Respuesta.SC_OK == multipartEntityWorker.getStatusCode()) {
                 try {
+                    
+                    FileUtils.copyStreamToFile(new ByteArrayInputStream(
+                    multipartEntityWorker.getMessage().getBytes()), 
+                    new File("/home/jgzornoza/ReciboRespuesta"));
+                    
                     SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(null, 
-                                new ByteArrayInputStream(respuesta.getMensaje().getBytes()),"ReciboRespuesta");
+                            new ByteArrayInputStream(multipartEntityWorker.getMessage().getBytes()), 
+                            "ReciboRespuesta");
                     PKIXParameters params = Contexto.getHttpHelper()
-                            .obtenerPKIXParametersDeServidor(ContextoPruebas.getControlAcceso().getServerURL());
+                            .obtenerPKIXParametersDeServidor(
+                            ContextoPruebas.INSTANCIA.getUrlControlAccesoCertChain());
                     dnieMimeMessage.verify(params);
+                    logger.debug("--- dnieMimeMessage.getSignedContent(): " + dnieMimeMessage.getSignedContent());
                     evento = DeJSONAObjeto.obtenerEvento(dnieMimeMessage.getSignedContent());
                     logger.debug("Respuesta - Evento ID: " + evento.getEventoId());
                     
@@ -596,7 +605,7 @@ public class CrearVotacionDialog extends JDialog implements KeyListener, Lanzado
                 }
             } else {
                 mostrarPantallaEnvio(false);
-                mostrarMensajeUsuario("ERROR - " + respuesta.getMensaje());
+                mostrarMensajeUsuario("ERROR - " + multipartEntityWorker.getMessage());
             }
         }
     }

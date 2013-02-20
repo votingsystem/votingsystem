@@ -10,7 +10,7 @@ import java.util.Locale;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 * */
 class SubscripcionService {	
 		
@@ -22,11 +22,18 @@ class SubscripcionService {
 	
 	Respuesta guardarUsuario(Usuario usuario, Locale locale) {
 		log.debug "guardarUsuario - usuario: ${usuario.nif}"
-		if(!usuario.nif) {
-			String mensajeError = messageSource.getMessage(
-				'susbcripcion.errorDatosUsuario', null, locale)
-			return new Respuesta(codigoEstado:400, mensaje:mensajeError)
+		if (!usuario) {
+			response.status = 400
+			render message(code: "csr.solicitudNoEncontrada", args: ["nif: ${nifValidado}"])
+			return false
 		}
+		String nifValidado = org.sistemavotacion.util.StringUtils.validarNIF(usuario.nif)
+		if(!nifValidado) {
+			String mensajeError = messageSource.getMessage(
+				'susbcripcion.errorNifUsuario', [usuario.nif].toArray(), locale)
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:mensajeError)
+		}
+		usuario.nif = nifValidado
 		X509Certificate certificadoUsu = usuario.getCertificate()
 		def usuarioDB = Usuario.findWhere(nif:usuario.getNif().toUpperCase())
 		if (!usuarioDB) {
@@ -69,6 +76,20 @@ class SubscripcionService {
 		Usuario usuario = Usuario.findByNif(checkedUsuario?.nif?.toUpperCase())
 		if (usuario) return new Respuesta(codigoEstado:200, usuario:usuario)
 		return guardarUsuario(checkedUsuario, locale)
+	}
+	
+	Respuesta comprobarUsuario(SMIMEMessageWrapper smimeMessage, Locale locale) {
+		def nif = smimeMessage.getFirmante()?.nif
+		log.debug "comprobarUsuario - ${nif}"
+		if(!nif) {
+			String mensajeError = messageSource.getMessage(
+				'susbcripcion.errorNifUsuario', [nif].toArray(), locale)
+			return new Respuesta(
+				codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:mensajeError)
+		}
+		def usuario = Usuario.findWhere(nif:nif.toUpperCase())
+		if (usuario) return new Respuesta(codigoEstado:Respuesta.SC_OK, usuario:usuario)
+		return guardarUsuario(smimeMessage.getFirmante(), locale)
 	}
 
 	ControlAcceso comprobarControlAcceso(String serverURL) {

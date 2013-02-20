@@ -93,13 +93,12 @@ class HttpService {
 		}
 		return respuesta
 	}
-
-	Respuesta notificarInicializacionDeEvento (ActorConIP actorConIP, byte[] mensaje) {
-		def urlInicializacion = "${actorConIP.serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLInicializacionEvento}"
-		log.debug("notificarInicializacionDeEvento - urlInicializacion:${urlInicializacion}")
+	
+	Respuesta sendSignedMessage(String messageUrl, byte[] mensaje) {
+		log.debug(" - sendSignedMessage:${messageUrl}")
 		String nombreEntidadFirmada = grailsApplication.config.SistemaVotacion.nombreEntidadFirmada
-		def httpBuilder = new HTTPBuilder(urlInicializacion);
-		def respuesta = new Respuesta()
+		def httpBuilder = new HTTPBuilder(messageUrl);
+		def respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION)
 		try {
 			httpBuilder.request(POST) {request ->
 				requestContentType = ContentType.URLENC
@@ -117,16 +116,14 @@ class HttpService {
 						String mensajeRespuesta = "${reader}"
 						log.error "***** Error: ${resp.statusLine}"
 						log.error "***** mensajeRespuesta: ${mensajeRespuesta}"
-						respuesta = new Respuesta(mensaje:mensajeRespuesta,
-							codigoEstado:resp.statusLine.statusCode)
+						respuesta.mensaje = mensajeRespuesta
+						respuesta.codigoEstado = resp.statusLine.statusCode
 				}
 			}
 		} catch(SocketTimeoutException ste) {
 			log.error(ste.getMessage(), ste)
-			return new Respuesta(mensaje:ste.getMessage(),
-				codigoEstado:400)
-		}
-		return respuesta;
+			respuesta.mensaje = ste.getMessage()
+		} finally {return respuesta;}
 	}
 	
 	ConcurrentHashMap notificarActoresInicializacionDeEvento (byte[] mensaje,

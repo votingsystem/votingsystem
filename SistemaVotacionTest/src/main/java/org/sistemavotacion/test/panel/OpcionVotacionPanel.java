@@ -7,7 +7,7 @@ import org.sistemavotacion.modelo.OpcionEvento;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class OpcionVotacionPanel extends javax.swing.JPanel {
     

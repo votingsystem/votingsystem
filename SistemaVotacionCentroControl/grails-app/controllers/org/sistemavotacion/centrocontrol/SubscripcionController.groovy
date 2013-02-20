@@ -13,7 +13,7 @@ import com.sun.syndication.feed.synd.*;
 import com.sun.syndication.io.SyndFeedOutput;
 /**
  * @author jgzornoza
- * Licencia: http://bit.ly/j9jZQH
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
  *
  * Mecanismo de feeds basado en:
  * http://blogs.bytecode.com.au/glen/2006/12/22/generating-rss-feeds-with-grails-and-rome.html

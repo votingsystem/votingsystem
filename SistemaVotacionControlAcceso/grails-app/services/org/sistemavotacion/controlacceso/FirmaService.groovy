@@ -7,6 +7,7 @@ import java.util.Properties;
 import javax.mail.Header;
 import javax.mail.Session;
 import javax.mail.internet.MimeMultipart;
+import org.springframework.beans.factory.InitializingBean
 import org.sistemavotacion.util.*
 import org.sistemavotacion.controlacceso.modelo.*
 import org.sistemavotacion.seguridad.*
@@ -18,6 +19,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import java.security.KeyStore
 import java.security.PrivateKey
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.Set;
@@ -30,21 +32,24 @@ import org.bouncycastle.asn1.pkcs.CertificationRequestInfo
 import org.bouncycastle.asn1.x509.X509Extensions
 import java.util.Locale;
 
+//class FirmaService implements InitializingBean {
 class FirmaService {
 
 	
 	private SignedMailGenerator firmadoraValidaciones;
 	static Set<X509Certificate> trustedCerts;
 	static HashMap<Long, Certificado> trustedCertsHashMap;
-	private static HashMap<Long, Set<X509Certificate>> eventTrustedCertsHashMap;
+	private static HashMap<Long, Set<X509Certificate>> eventTrustedCertsHashMap = 
+		new HashMap<Long, Set<X509Certificate>>();
 	def grailsApplication;
 	def messageSource
 	def csrService;
-		
-	public void inicializar() {
-		log.debug "inicializar"
-		eventTrustedCertsHashMap = new HashMap<Long, Set<X509Certificate>>()
-		def rutaAlmacenClaves = getAbsolutePath("${grailsApplication.config.SistemaVotacion.rutaAlmacenClaves}")
+	
+	//@Override
+	public void afterPropertiesSet() throws Exception {
+		log.debug(" - afterPropertiesSet - ")
+		def rutaAlmacenClaves = getAbsolutePath(
+			"${grailsApplication.config.SistemaVotacion.rutaAlmacenClaves}")
 		File keyStore = new File(rutaAlmacenClaves);
 		String aliasClaves = grailsApplication.config.SistemaVotacion.aliasClavesFirma
 		String password = grailsApplication.config.SistemaVotacion.passwordClavesFirma
@@ -86,9 +91,12 @@ class FirmaService {
 					FileUtils.getBytesFromFile(caFile)));
 			}
 			for(X509Certificate certificate:trustedCerts) {
-				log.debug " --- Importado certificado -- SubjectDN: ${certificate?.getSubjectDN()} - número serie:${certificate?.getSerialNumber()?.longValue()}"
-				Certificado certificado = Certificado.findByNumeroSerie(
-					certificate.getSerialNumber().longValue())
+				long numSerie = certificate.getSerialNumber().longValue()
+				log.debug " --- Importado certificado -- SubjectDN: ${certificate?.getSubjectDN()} --- número serie:${numSerie}"
+				Certificado certificado = null
+				Certificado.withTransaction {
+					certificado = Certificado.findWhere(numeroSerie:numSerie)
+				}
 				if(!certificado) {
 					boolean esRaiz = CertUtil.isSelfSigned(certificate)
 					certificado = new Certificado(esRaiz:esRaiz, tipo:Certificado.Tipo.AUTORIDAD_CERTIFICADORA,
@@ -121,7 +129,7 @@ class FirmaService {
 	def obtenerCadenaFirmada (String fromUser, String toUser, String textoAFirmar,
 			String asunto, Header header, Type signerType) {
 		log.debug "obtenerCadenaFirmada - textoAFirmar: ${textoAFirmar}"
-		String resultado = getFirmadoraValidaciones().genString(fromUser, toUser, textoAFirmar,
+		String resultado = firmadoraValidaciones.genString(fromUser, toUser, textoAFirmar,
 			asunto, header, SignedMailGenerator.Type.ACESS_CONTROL)
 		return resultado
 	}
@@ -143,7 +151,7 @@ class FirmaService {
 	public synchronized MimeMessage generarMultifirma (
 			final SMIMEMessageWrapper smimeMessage, String mailSubject) {
 		log.debug("generarMultifirma - From:"  + smimeMessage.getFrom());
-		MimeMessage multifirma = getFirmadoraValidaciones().genMultiSignedMessage(smimeMessage, mailSubject); 
+		MimeMessage multifirma = firmadoraValidaciones.genMultiSignedMessage(smimeMessage, mailSubject); 
 		return multifirma
 	}
 			
@@ -243,40 +251,41 @@ class FirmaService {
 		return userCert
 	}
 	
-	private SignedMailGenerator getFirmadoraValidaciones() {
-		if (firmadoraValidaciones == null) inicializar()
-		return firmadoraValidaciones
-	}
-	
 	/*
 	 * Método para poder añadir certificados de confianza en las pruebas de carga.
 	 * El procedimiento para añadir una autoridad certificadora consiste en 
 	 * añadir el certificado en formato pem en el directorio ./WEB-INF/cms
 	 */
-	public Respuesta addCertificateAuthority (byte[] caPEM)  {
+	public Respuesta addCertificateAuthority (byte[] caPEM, Locale locale)  {
 		log.debug("addCertificateAuthority");
-		if(!caPEM) 
-			return new Respuesta(codigoEstado:400, mensaje:"Certificado nulo")
+		if(!caPEM) return new Respuesta(codigoEstado:400, mensaje:
+				messageSource.getMessage('error.nullCertificate', null, locale))
 		try {
-			X509Certificate certificadoX509 = CertUtil.fromPEMToX509Cert(caPEM)
-			trustedCerts.add(certificadoX509)
-			Certificado certificado = Certificado.findByNumeroSerie(
-				certificadoX509?.getSerialNumber()?.longValue())
-			if(!certificado) {
-				boolean esRaiz = CertUtil.isSelfSigned(certificadoX509)
-				certificado = new Certificado(esRaiz:esRaiz, 
-					tipo:Certificado.Tipo.AUTORIDAD_CERTIFICADORA_TEST,
-					estado:Certificado.Estado.OK,
-					contenido:certificadoX509.getEncoded(),
-					numeroSerie:certificadoX509.getSerialNumber().longValue(),
-					validoDesde:certificadoX509.getNotBefore(),
-					validoHasta:certificadoX509.getNotAfter())
-				certificado.save()
-				trustedCertsHashMap.put(certificadoX509?.getSerialNumber()?.longValue(), certificado)
-				log.debug "Almacenada CA de pruebas con id:'${certificado?.id}'"
-			} else log.debug "CA de pruebas con id de certificado: ${certificado?.id}"
+			Collection<X509Certificate> certX509CertCollection = CertUtil.fromPEMToX509CertCollection(caPEM)
+			for(X509Certificate cert: certX509CertCollection) {
+				log.debug(" ------- addCertificateAuthority - adding cert: ${cert.getSubjectDN()}" );
+				Certificado certificado = null
+				Certificado.withTransaction {
+					certificado = Certificado.findByNumeroSerie(
+						cert?.getSerialNumber()?.longValue())
+					if(!certificado) {
+						boolean esRaiz = CertUtil.isSelfSigned(cert)
+						certificado = new Certificado(esRaiz:esRaiz,
+							tipo:Certificado.Tipo.AUTORIDAD_CERTIFICADORA_TEST,
+							estado:Certificado.Estado.OK,
+							contenido:cert.getEncoded(),
+							numeroSerie:cert.getSerialNumber()?.longValue(),
+							validoDesde:cert.getNotBefore(),
+							validoHasta:cert.getNotAfter())
+						certificado.save()
+						trustedCertsHashMap.put(cert?.getSerialNumber()?.longValue(), certificado)
+					}
+				} 
+				trustedCerts.addAll(certX509CertCollection)
+				log.debug "Almacenada Autoridad Certificadora de pruebas con id:'${certificado?.id}'"
+			}
 			return new Respuesta(codigoEstado:200, 
-				mensaje:"Certificado de CA de pruebas añadido a la lista de confianza")
+				mensaje:messageSource.getMessage('cert.newCACertMsg', null, locale))
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
 			return new Respuesta(codigoEstado:400, mensaje:ex.getMessage())
@@ -292,8 +301,8 @@ class FirmaService {
 		SMIMEMessageWrapper messageWrapper, EventoVotacion evento) {
 		Set<Usuario> firmantes = messageWrapper.getFirmantes();
 		if(firmantes.size() == 0) return new Respuesta(
-			codigoEstado:400, mensaje:"Documento sin firmantes")
-		if(!eventTrustedCertsHashMap) inicializar();
+			codigoEstado:400, mensaje:
+			messageSource.getMessage('error.documentWithoutSigners', null, locale))
 		Set<X509Certificate> eventTrustedCerts = eventTrustedCertsHashMap.get(evento?.id)
 		if(!eventTrustedCerts) {
 			Certificado certificadoCAEvento = Certificado.findWhere(
@@ -331,18 +340,17 @@ class FirmaService {
 		return new Respuesta(codigoEstado:200)
 	}
 
-	public Respuesta checkTimeStamps() {
+	public Respuesta checkTimeStamps() {//TODO
 		
 	}
 		
 	public Respuesta validarCertificacionFirmantes(
 			SMIMEMessageWrapper messageWrapper, Locale locale) {
 		Set<Usuario> firmantes = messageWrapper.getFirmantes();
-		if(!trustedCerts) inicializar();
 		if(firmantes.size() == 0) return new Respuesta(
-			codigoEstado:400, mensaje:"Documento sin firmantes")
-		log.debug("*** validarCertificacionFirmantes - firmantes.size(): " +
-			" ${firmantes.size()} - trustedCerts.size(): ${trustedCerts.size()}")
+			codigoEstado:400, mensaje:
+			messageSource.getMessage('error.documentWithoutSigners', null, locale))
+		log.debug("*** validarCertificacionFirmantes - firmantes.size(): ${firmantes.size()}")
 		for(Usuario usuario: firmantes) {			 
 			try {
 				PKIXCertPathValidatorResult pkixResult = CertUtil.verifyCertificate(
@@ -363,10 +371,6 @@ class FirmaService {
 		}
 		return new Respuesta(codigoEstado:200)
 	}
-			
-	public Set<X509Certificate> getTrustedCerts(){
-		if (firmadoraValidaciones == null) inicializar()
-		return trustedCerts
-	}
+
 
 }

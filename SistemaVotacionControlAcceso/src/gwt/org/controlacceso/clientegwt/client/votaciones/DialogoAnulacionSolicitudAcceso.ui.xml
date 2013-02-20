@@ -4,7 +4,7 @@
 	xmlns:svUtil="urn:import:org.controlacceso.clientegwt.client.util">
 	<ui:style>
    		.textPanel {margin: 15px 20px 15px 20px; width:500px;}
-		.boton { margin: 2px; cursor:pointer;}
+		.boton { margin: 3px; cursor:pointer;}
 		.buttonPanel { float: right; margin: 10px; margin-top: 15px;}
 		.texto{font-size: 14px; font-weight:bold; }
 	</ui:style>
@@ -25,10 +25,12 @@
 	      			<g:PushButton ui:field='cancelButton'>
    						<g:upFace image='{cerrar}'/>
  					</g:PushButton>
-	      			<g:PushButton  ui:field='anularSolicitudButton'>
+ 				</g:HorizontalPanel>
+ 				<g:HorizontalPanel styleName="{style.boton}">
+   	      			<g:PushButton ui:field='anularSolicitudButton'>
    						<g:upFace image='{anular}'/>
  					</g:PushButton>
-				</g:HorizontalPanel>
+			    </g:HorizontalPanel>
 			</g:HorizontalPanel>
 		</g:VerticalPanel>
 	</g:DialogBox>

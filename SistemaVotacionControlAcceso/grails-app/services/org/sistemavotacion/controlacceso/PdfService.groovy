@@ -43,7 +43,9 @@ import org.sistemavotacion.seguridad.*
 import org.springframework.context.ApplicationContext;
 import org.sistemavotacion.util.*;
 import java.util.Locale;
+import org.springframework.beans.factory.InitializingBean
 
+//class PdfService implements InitializingBean {
 class PdfService {
 	
 	
@@ -57,9 +59,11 @@ class PdfService {
 	private KeyStore keyStoreCertifcadosConfianza
 	private PrivateKey key;
 	private Certificate[] chain;
-		
-	void inicializar() {
-		log.debug "inicializar"
+	
+	
+	//@Override
+	public void afterPropertiesSet() throws Exception {
+		log.debug "afterPropertiesSet - afterPropertiesSet - afterPropertiesSet"
 		def rutaAlmacenClaves = getAbsolutePath("${grailsApplication.config.SistemaVotacion.rutaAlmacenClaves}")
 		File keyStoreFile = new File(rutaAlmacenClaves);
 		String aliasClaves = grailsApplication.config.SistemaVotacion.aliasClavesFirma
@@ -92,7 +96,6 @@ class PdfService {
 				mensaje:"La fecha actual '${DateUtils.getStringFromDate(todayDate)}' es posterior a la fecha " +
 				"límite de recogida de firmas '${DateUtils.getStringFromDate(evento.fechaFin)}'")
 		}
-		if (!keyStoreCertifcadosConfianza) inicializar();
 		PdfReader reader = new PdfReader(pdfFirmado);
 		Documento documento;
 		AcroFields acroFields = reader.getAcroFields();
@@ -249,7 +252,6 @@ class PdfService {
 		String asunto = form.getField("asunto");
 		String email = form.getField("email");
 		if(!email) return new Respuesta(codigoEstado:400, mensaje:"ERROR - Solicitud sin email")
-		if (!keyStoreCertifcadosConfianza) inicializar();
 		log.debug "eventoId: ${eventoId} - asunto: ${asunto} - email: ${email}"
 		Documento documento;
 		SolicitudCopia solicitudCopia;
@@ -344,7 +346,6 @@ class PdfService {
 	}
 	
 	public Respuesta firmar(PdfReader reader, String reason, String location, Documento documento) throws Exception {
-		if (!key) inicializar();
 		Respuesta respuesta
 		try {
 			File file = File.createTempFile("pdfFirmadoServidor", ".pdf")
@@ -369,7 +370,6 @@ class PdfService {
 	}
 	
 	public Respuesta firmarBloquear(PdfReader reader, String reason, String location, Documento documento) throws Exception {
-		if (!key) inicializar();
 		Respuesta respuesta
 		try {
 			File file = File.createTempFile("pdfFirmadoServidor", ".pdf")
@@ -398,11 +398,6 @@ class PdfService {
 		log.debug "getAbsolutePath - filePath: ${filePath}"
 		//def resources = grailsApplication.mainContext.getResource('/WEB-INF/resources').file
 		"${grailsApplication.mainContext.getResource(filePath).getFile()}"
-	}
-	
-	private KeyStore getKeyStore() {
-		if (keyStore == null) inicializar()
-		return keyStore
 	}
 	
 	public static void concatenate2PDF(PdfReader reader1, PdfReader reader2,

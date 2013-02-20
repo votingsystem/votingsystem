@@ -12,7 +12,7 @@ import java.util.Set;
 import grails.util.Environment
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 class CertificadoController {
 	
@@ -143,9 +143,8 @@ class CertificadoController {
 			log.debug msg
 			render msg
 			return false
-		} else {
-			log.debug "Entorno de TEST"
 		}
+		log.debug "Environment --- TEST ---"
 		def msg = message(code: "CertificadoController.certificadoCA_Usuario.msg")
 		log.debug "${msg}"
 		log.debug "Environment.current: " + Environment.current
@@ -159,11 +158,10 @@ class CertificadoController {
 			log.debug msg
 			render msg
 			return false
-		} else {
-			log.debug "Entorno de TEST"
 		}
+		log.debug "Environment --- TEST ---"
 		Respuesta respuesta = firmaService.addCertificateAuthority(
-			params.archivoFirmado?.getBytes())
+			params.archivoFirmado?.getBytes(), request.getLocale())
 		log.debug("addCertificateAuthority - codigo estado: ${respuesta.codigoEstado} - mensaje: ${respuesta.mensaje}")
 		response.status = respuesta.codigoEstado
 		render respuesta.mensaje

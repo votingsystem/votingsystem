@@ -48,7 +48,7 @@ public class ValidateSignatureFromCsrSignedCert {
     }
     
     private static PKIXParameters obtenerPKIXParametersFromFile(String rutaArchivoCadenaVerif) throws Exception {
-       Collection<X509Certificate> certificados = CertUtil.fromPEMChainToX509Certs(
+       Collection<X509Certificate> certificados = CertUtil.fromPEMToX509CertCollection(
     		   FileUtils.getBytesFromFile(new File(rutaArchivoCadenaVerif)));
         Set<TrustAnchor> anchors = new HashSet<TrustAnchor>();
         for (X509Certificate certificado:certificados) {

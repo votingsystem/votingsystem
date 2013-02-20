@@ -107,7 +107,7 @@ public class CsrTest {
     public static void generarAlmacenClavesFirmaVoto (byte[] cadeCert) {
         try {  
             Collection<X509Certificate> certificados = 
-            		CertUtil.fromPEMChainToX509Certs(cadeCert);
+            		CertUtil.fromPEMToX509CertCollection(cadeCert);
             logger.debug("Número certificados en cadena: " + certificados.size());
             X509Certificate[] arrayCerts = new X509Certificate[certificados.size()];
             certificados.toArray(arrayCerts);

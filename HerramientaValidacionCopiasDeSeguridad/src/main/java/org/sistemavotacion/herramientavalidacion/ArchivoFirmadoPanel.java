@@ -3,18 +3,17 @@ package org.sistemavotacion.herramientavalidacion;
 import static org.sistemavotacion.herramientavalidacion.AppletHerramienta.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.List;
+import java.util.Properties;
+import javax.mail.Session;
+import javax.mail.internet.MimeMessage;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
-import javax.swing.SwingWorker;
-import org.bouncycastle.tsp.TimeStampRequest;
-import org.sistemavotacion.modelo.Respuesta;
+import org.bouncycastle.mail.smime.SMIMESignedParser;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
+//import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.util.FileUtils;
-import org.sistemavotacion.worker.WorkerListener;
-import org.sistemavotacion.worker.TimeStampWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -58,13 +57,22 @@ public class ArchivoFirmadoPanel extends JPanel {
                 resultadoFirmaButton.setIcon(new ImageIcon(getClass().
                         getResource("/resources/images/signature-ok_16x16.png")));
                 
+            
+            /*Properties props = new Properties();
+            Session session = Session.getDefaultInstance(props);
+            //MimeMessage mimeMessage = new SMIMEMessageWrapper(session, new FileInputStream(file), file.getName());
+            
+            Session s = Session.getDefaultInstance(new Properties());
+            MimeMessage mimeMessage = new MimeMessage(s, new FileInputStream(file));
+            //this(session, new FileInputStream(file), file.getName());
+            SMIMESignedParser signedParser = new SMIMESignedParser(mimeMessage);*/
 
-                if(smimeMessageWraper.hasTimeStampToken()) {
+                /*if(smimeMessageWraper.hasTimeStampToken()) {
                     logger.debug(" --- Tiene sello de tiempo --- ");
-                }
+                }*/
                 
                 
-                
+
             } else {
                 resultadoFirmaButton.setText("<html><b>" + 
                         getString("signatureERRORLabel") + "</b><html>");
@@ -72,7 +80,7 @@ public class ArchivoFirmadoPanel extends JPanel {
                         getResource("/resources/images/signature-bad_16x16.png")));
             }
             informacionFirmadaEditorPane.setText(smimeMessageWraper.getSignedContent());
-            if (smimeMessageWraper.getFirmantes() != null && 
+            /*if (smimeMessageWraper.getFirmantes() != null && 
                     smimeMessageWraper.getFirmantes().size() > 0) {
                 if (smimeMessageWraper.getFirmantes().size() == 1) firmantesLabel.setText(
                         "<html>" + getString("documentWithLbl") + " <b>1</b> " + 
@@ -81,7 +89,7 @@ public class ArchivoFirmadoPanel extends JPanel {
                         "<html>" + getString("documentWithLbl") + " <b>" 
                         +  smimeMessageWraper.getFirmantes().size() + "</b> "
                         + getString("signersLbl") + "<html>");
-            }
+            }*/
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             resultadoFirmaButton.setText("<html><b>" + 
@@ -171,7 +179,7 @@ public class ArchivoFirmadoPanel extends JPanel {
             }*/
             FirmantesDialog firmantesDialog = new FirmantesDialog(
                     AppletHerramienta.INSTANCIA.getFrame(), true);
-            firmantesDialog.mostrarInformacion(smimeMessageWraper.getFirmantes());
+            //firmantesDialog.mostrarInformacion(smimeMessageWraper.getFirmantes());
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
         }

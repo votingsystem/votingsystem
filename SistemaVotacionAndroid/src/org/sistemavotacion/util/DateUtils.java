@@ -54,10 +54,9 @@ public class DateUtils {
 	    Calendar calendar = Calendar.getInstance(); // today
 	    Calendar gregorianCalendar = new GregorianCalendar(); 
 	    calendar.clear();
-            int dayOfMonth = gregorianCalendar.get(Calendar.DAY_OF_MONTH) + nextDayFromToday;
 	    calendar.set(gregorianCalendar.get(Calendar.YEAR),
 	    		gregorianCalendar.get(Calendar.MONTH),
-	    		dayOfMonth);
+	    		gregorianCalendar.get(Calendar.DAY_OF_MONTH) + nextDayFromToday);
         return calendar.getTime();
     }
     /**

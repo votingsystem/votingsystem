@@ -24,6 +24,7 @@ import org.sistemavotacion.test.panel.VotacionesPanel;
 import org.sistemavotacion.test.tarea.EnviarMultipartEntityWorker;
 import org.sistemavotacion.test.tarea.LanzadorWorker;
 import org.sistemavotacion.test.tarea.ObtenerInfoServidorWorker;
+import org.sistemavotacion.test.util.NifUtils;
 import org.sistemavotacion.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -483,26 +484,24 @@ public class MainFrame extends JFrame  implements KeyListener, FocusListener, La
     
     
     @Override
-    public void process(List<String> messages) {
+    public void process(List<String> messages, SwingWorker worker) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void mostrarMensaje(String mensaje) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void mostrarResultadoOperacion(SwingWorker worker, Respuesta respuesta) {
-        logger.debug("mostrarResultadoOperacion - Codigo estado respuesta: " + respuesta.getCodigoEstado()); 
+    public void mostrarResultadoOperacion(SwingWorker worker) {
+        logger.debug("mostrarResultadoOperacion - worker: " + worker.getClass()); 
         if(worker instanceof ObtenerInfoServidorWorker) {
+            ObtenerInfoServidorWorker obtenerInfoServidorWorker = (ObtenerInfoServidorWorker) worker;
+            logger.debug("mostrarResultadoOperacion - obtenerInfoServidorWorker: " 
+                            + obtenerInfoServidorWorker.getStatusCode()); 
             estado = Estado.DESCONECTADO;
             infoServidorButton.setIcon(null);
             infoServidorButton.setText("Conectar");
             infoServidorButton.setIcon(new ImageIcon(getClass().getResource("/images/pair_16x16.png")));            
-            if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+            if(Respuesta.SC_OK == obtenerInfoServidorWorker.getStatusCode()) {
                 try {
-                    ActorConIP actorConIP = DeJSONAObjeto.obtenerActorConIP(respuesta.getMensaje());
+                    ActorConIP actorConIP = DeJSONAObjeto.obtenerActorConIP(obtenerInfoServidorWorker.getMessage());
                     if(!(ActorConIP.Tipo.CONTROL_ACCESO == actorConIP.getTipo())) {
                         mostrarMensajeUsuario("El servidor no es un Control de Acceso");
                         controlAccesoTextField.setBorder(new LineBorder(Color.RED,2));
@@ -512,7 +511,21 @@ public class MainFrame extends JFrame  implements KeyListener, FocusListener, La
                     controlAccesoTextField.setBorder(normalTextBorder);
                     controlAcceso = actorConIP;
                     ContextoPruebas.setControlAcceso(controlAcceso);
-                    if(ActorConIP.EnvironmentMode.TEST.equals(
+                    
+                    VotacionesPanel.INSTANCIA.setControlAcceso(controlAcceso);
+                    byte[] caPemCertificateBytes = CertUtil.fromX509CertToPEM (
+                            ContextoPruebas.getCertificadoRaizAutoridad());
+                    String caPemCertificate = new String(caPemCertificateBytes);
+                    String urlAnyadirCertificadoCA = ContextoPruebas.getURLAnyadirCertificadoCA(
+                            controlAcceso.getServerURL());
+                            estado = Estado.CONECTANDO;
+                    infoServidorButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/loading.gif")));
+                    infoServidorButton.setText("Añadiendo Autoridad Certificadora");
+                    tareaEnEjecucion = new EnviarMultipartEntityWorker(
+                            caPemCertificate, urlAnyadirCertificadoCA, this);
+                    tareaEnEjecucion.execute();
+                    /*TODO JJGZ
+                     * if(ActorConIP.EnvironmentMode.TEST.equals(
                             controlAcceso.getEnvironmentMode())) {
                         VotacionesPanel.INSTANCIA.setControlAcceso(controlAcceso);
                         byte[] caPemCertificateBytes = CertUtil.fromX509CertToPEM (
@@ -528,34 +541,38 @@ public class MainFrame extends JFrame  implements KeyListener, FocusListener, La
                         tareaEnEjecucion.execute();
                     } else {
                         mostrarMensajeUsuario("Para poder hacer las pruebas el servidor tiene que ser arrancado en modo TEST");
-                    }
+                    }*/
                 } catch(Exception ex) {
                     logger.error(ex.getMessage(), ex);
                     mostrarMensajeUsuario(ex.getMessage());
                 }
-            } else if (Respuesta.SC_NOT_FOUND == respuesta.getCodigoEstado()) { 
+            } else if (Respuesta.SC_NOT_FOUND == obtenerInfoServidorWorker.getStatusCode()) { 
                 mostrarMensajeUsuario("Página no encontrada");
             } else {
-                String mensaje = "Error";
-                if(!"".equals(respuesta.getMensaje())) 
-                    mensaje = respuesta.getMensaje();
+                String mensaje = "Error - " + obtenerInfoServidorWorker.getMessage();
                 mostrarMensajeUsuario(mensaje);
             }
         }
         else if(worker instanceof EnviarMultipartEntityWorker) {
-            estado = Estado.DESCONECTADO;
-            estado = Estado.CONECTADO_CONTROL_ACCESO;
-            infoServidorButton.setText("Información del servidor");
-            infoServidorButton.setIcon(new ImageIcon(getClass()
-                            .getResource("/images/information-white.png")));
-            if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+            EnviarMultipartEntityWorker multipartEntityWorker = (EnviarMultipartEntityWorker)worker;
+            logger.debug("mostrarResultadoOperacion - multipartEntityWorker - statusCode: " 
+                + multipartEntityWorker.getStatusCode()); 
+            if(Respuesta.SC_OK == multipartEntityWorker.getStatusCode()) {
+                infoServidorButton.setText("Información del servidor");
+                infoServidorButton.setIcon(new ImageIcon(getClass()
+                        .getResource("/images/information-white.png")));
+                estado = Estado.CONECTADO_CONTROL_ACCESO;
                 tabbedPane.setVisible(true);
                 pack();
             } else {
-                String mensaje = "Error añadiendo Autoridad Certificadora de pruebas";
-                if(!"".equals(respuesta.getMensaje())) 
-                    mensaje = respuesta.getMensaje();
+                estado = Estado.DESCONECTADO;
+                infoServidorButton.setText("Conectar");
+                infoServidorButton.setIcon(new ImageIcon(getClass().getResource("/images/pair_16x16.png")));
+                String mensaje = "Error añadiendo Autoridad Certificadora de pruebas - " + 
+                		multipartEntityWorker.getMessage();
                 mostrarMensajeUsuario(mensaje);
+                logger.debug("mostrarResultadoOperacion - multipartEntityWorker - message: " 
+                    + multipartEntityWorker.getMessage());
             } 
         }
     }

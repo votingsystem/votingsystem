@@ -1,6 +1,6 @@
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 grails.servlet.version = "2.5" // Change depending on target container compliance (2.5 or 3.0)
 grails.project.class.dir = "target/classes"
@@ -42,6 +42,7 @@ grails.project.dependency.resolution = {
 			'org.bouncycastle:bcmail-jdk16:1.46',
 			'org.bouncycastle:bcpg-jdk16:1.46',
 			'javax.mail:mail:1.4.1',
+			'com.sun.mail:dsn:1.4.3',
 			'javax.activation:activation:1.1.1',
 			'org.hibernate:hibernate-search:3.4.2.Final',
 			'com.itextpdf:itextpdf:5.1.3',

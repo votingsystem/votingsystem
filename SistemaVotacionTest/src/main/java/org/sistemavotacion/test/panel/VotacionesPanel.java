@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class VotacionesPanel extends JPanel 
     implements LanzadorWorker, HyperlinkListener {
@@ -511,19 +511,11 @@ public class VotacionesPanel extends JPanel
     }
     
     @Override
-    public void process(List<String> messages) {
-
-    }
+    public void process(List<String> messages, SwingWorker worker) { }
 
     @Override
-    public void mostrarMensaje(String mensaje) {
-
-    }
-
-    @Override
-    public void mostrarResultadoOperacion(SwingWorker worker, Respuesta respuesta) {
-        logger.debug("mostrarResultadoOperacion - Codigo estado respuesta: " + respuesta.getCodigoEstado()); 
-
+    public void mostrarResultadoOperacion(SwingWorker worker) {
+        logger.debug("mostrarResultadoOperacion - Codigo estado respuesta: " + worker.getState()); 
     }
     
     public void prepararPanelParaLanzarSimulacion() {

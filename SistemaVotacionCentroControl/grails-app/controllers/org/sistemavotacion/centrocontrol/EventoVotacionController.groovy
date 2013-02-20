@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest
 import org.springframework.web.multipart.MultipartFile;
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 * */
 class EventoVotacionController {
 
@@ -22,60 +22,15 @@ class EventoVotacionController {
 	
 	def index = {}
 	
-	def inicializarEvento = {
-		Respuesta respuesta
-		SMIMEMessageWrapper smimeMessageReq
-		if (!(request instanceof MultipartHttpServletRequest)) {
-				log.debug "------------- La petición no es instancia de MultipartHttpServletRequest ------------"
-				flash.respuesta = new Respuesta(codigoEstado:400,
-						tipo: Tipo.PETICION_SIN_ARCHIVO)
-				forward controller: "error400", action: "procesar"
-				return false
-		}
-		try {
-			MultipartFile multipartFile = ((MultipartHttpServletRequest) request)?.getFile(
-				grailsApplication.config.SistemaVotacion.nombreEntidadFirmada);
-			//ValidationResult validationResult
-			if (multipartFile?.getBytes() != null) {
-				try {
-					smimeMessageReq = SMIMEMessageWrapper.build(
-							new ByteArrayInputStream(multipartFile?.getBytes()), null)
-				} catch (Exception ex) {
-					flash.respuesta = new Respuesta(mensaje:ex.getMessage(),
-						codigoEstado:500, tipo: Tipo.PETICION_CON_ERRORES)
-					forward controller: "error500", action: "procesar"   
-					return false
-				}
-				if (smimeMessageReq && smimeMessageReq.isValidSignature) {
-					log.debug "firma valida"
-					String serverURL = smimeMessageReq.getHeader("serverURL")[0]
-					ControlAcceso controlAcceso = subscripcionService.comprobarControlAcceso(serverURL)					
-					//TODO validar con la cadena de certificacion -> validationResult = smimeMessageReq.verify(pkixParams);
-					respuesta = eventoVotacionService.salvarEvento(
-						smimeMessageReq, controlAcceso, request.getLocale())
-				} else {
-					log.debug "firma erronea"
-					flash.respuesta = new Respuesta(codigoEstado:400,
-						tipo: Tipo.FIRMA_EVENTO_CON_ERRORES)
-					forward controller: "error400", action: "procesar"
-					return false
-				}
-			} else {
-				log.debug ("params.archivoFirmado: ${params.archivoFirmado}" )
-				log.debug "Peticion sin archivo"
-				flash.respuesta = new Respuesta(codigoEstado:400,
-						tipo: Tipo.PETICION_SIN_ARCHIVO)
-				forward controller: "error400", action: "procesar"   
-				return false
-			}
-		} catch (Exception ex) {
-			log.error (ex.getMessage(), ex)
-			flash.respuesta = new Respuesta(mensaje:ex.getMessage(),
-			codigoEstado:500, tipo: Tipo.PETICION_CON_ERRORES)
-			forward controller: "error500", action: "procesar"   
-			return false
-		}
-		render respuesta.getMap() as JSON
+	def guardarEvento = {
+		String serverURL = params.smimeMessageReq.getHeader("serverURL")[0]
+		ControlAcceso controlAcceso = subscripcionService.comprobarControlAcceso(serverURL)
+		//TODO validar con la cadena de certificacion -> validationResult = smimeMessageReq.verify(pkixParams);
+		Respuesta respuesta = eventoVotacionService.salvarEvento(
+			params.smimeMessageReq, controlAcceso, request.getLocale())
+		log.debug("statusCode: ${respuesta.codigoEstado} - mensaje: ${respuesta.mensaje}")
+		response.status = respuesta.codigoEstado
+		render respuesta.mensaje
 		return false
 	}
         
@@ -262,5 +217,20 @@ class EventoVotacionController {
 		response.status = respuesta.codigoEstado
 		render respuesta?.evento?.estado?.toString()
 		return false
+	}
+	
+	def guardarCancelacion= {
+	   SMIMEMessageWrapper smimeMessageReq = params.smimeMessageReq;
+	   if(params.smimeMessageReq) {
+		   Respuesta respuesta = eventoVotacionService.cancelarEvento(
+			   params.smimeMessageReq, request.getLocale());
+		   response.status = respuesta.codigoEstado;
+		   log.debug("statuscode: ${respuesta.codigoEstado} - mensaje: ${respuesta.mensaje}")
+		   render respuesta.mensaje;
+		   return false
+	   }
+	   response.status = 400;
+	   render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"]);
+	   return false;
 	}
 }
