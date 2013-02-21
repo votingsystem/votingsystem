@@ -153,7 +153,6 @@ class FirmaService {
 	public Respuesta validarCertificacionCertificadoVoto(
 		X509Certificate certificadoVoto, EventoVotacion evento, Locale locale) {
 		Set<X509Certificate> trustedPollingCerts = new HashSet<X509Certificate>()
-		if(!trustedPollingCertsHashMap) inicializar();
 		X509Certificate certCAEvento = trustedPollingCertsHashMap.get(evento?.id)
 		if(!certCAEvento) {
 			Certificado certificadoCAEvento = Certificado.findWhere(
@@ -219,13 +218,12 @@ class FirmaService {
 	public File obtenerArchivoFirmado (String fromUser, String toUser, String textoAFirmar,
 		String asunto, Header header, Type signerType) {
 		log.debug "obtenerArchivoFirmado - textoAFirmar: ${textoAFirmar}"
-		File resultado = getSignedMailGenerator().genFile(fromUser, toUser, textoAFirmar,
+		File resultado = signedMailGenerator.genFile(fromUser, toUser, textoAFirmar,
 			asunto, header, SignedMailGenerator.Type.ACESS_CONTROL)
 		return resultado
 	}
 	
 	public File getCadenaCertificacion() {
-		if(!cadenaCertificacion) inicializar();
 		return cadenaCertificacion;
 	}
 		
@@ -253,13 +251,8 @@ class FirmaService {
 	
 	public synchronized MimeMessage generarMultifirma (SMIMEMessageWrapper smimeMessage, String mailSubject) {
 		log.debug("generarMultifirma "  + smimeMessage.getFrom());
-		MimeMessage multifirma = getSignedMailGenerator().genMultiSignedMessage(smimeMessage, mailSubject); 
+		MimeMessage multifirma = signedMailGenerator.genMultiSignedMessage(smimeMessage, mailSubject); 
 		return multifirma
-	}
-	
-	public SignedMailGenerator getSignedMailGenerator () {
-		if (signedMailGenerator == null) inicializar()
-		return signedMailGenerator
 	}
 	
 	public String getAbsolutePath(String filePath){

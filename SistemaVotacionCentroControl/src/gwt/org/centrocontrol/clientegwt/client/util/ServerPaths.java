@@ -94,7 +94,7 @@ public class ServerPaths {
     
     public static String getUrlTimeStampServer (String controlAccesoUrl) {
     	if (!controlAccesoUrl.endsWith("/")) controlAccesoUrl = controlAccesoUrl + "/";
-    	return controlAccesoUrl + "evento/guardarCancelacion";
+    	return controlAccesoUrl + "timeStamp/obtener";
     }
 
     public static String getUrlSolicitudAccesoPorNif (

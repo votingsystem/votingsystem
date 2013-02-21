@@ -24,7 +24,7 @@ class VotoController {
     def testAsync = {
 		log.debug "Arranco controlador"
 		def aCtx = startAsync()
-		aCtx.setTimeout(5000);
+		aCtx.setTimeout(Respuesta.SC_ERROR_EJECUCION0);
 		//aCtx.complete()		
 		render "Todo ok"
 	}
@@ -34,7 +34,7 @@ class VotoController {
 		params.smimeMessageReq.initVoto() 
         Respuesta respuesta = votoService.validarFirmaUsuario(
         	params.smimeMessageReq, request.getLocale())
-        if (200 == respuesta.codigoEstado) {
+        if (Respuesta.SC_OK== respuesta.codigoEstado) {
 			def ctx = startAsync()
 			ctx.setTimeout(10000);
 			MimeMessage smimeMessage = params.smimeMessageReq
@@ -43,27 +43,27 @@ class VotoController {
 				 return votoService.enviarVoto_A_ControlAcceso(smimeMessage, eventoVotacion)
 			}
             respuesta = future.get()
-            if (200  == respuesta?.codigoEstado) {
-				ctx.response.status = 200
+            if (Respuesta.SC_OK == respuesta?.codigoEstado) {
+				ctx.response.status = Respuesta.SC_OK
 				ctx.response.contentLength = respuesta.voto.mensajeSMIME.contenido.length
 				ctx.response.setContentType("text/plain")
 				ctx.response.outputStream <<  respuesta.voto.mensajeSMIME.contenido
 				ctx.response.outputStream.flush()
             } else {
-				codigoEstado = respuesta? respuesta.codigoEstado:500
+				codigoEstado = respuesta? respuesta.codigoEstado:Respuesta.SC_ERROR_EJECUCION
 				forward controller: "error${codigoEstado}", action: "procesar"
 				return false
             }				
 			ctx.complete();
-        } else if (409 == respuesta.codigoEstado){
-            response.status = 409
+        } else if (Respuesta.SC_ERROR_VOTO_REPETIDO == respuesta.codigoEstado){
+            response.status = Respuesta.SC_ERROR_VOTO_REPETIDO
 			response.contentLength = respuesta.voto.mensajeSMIME.contenido.length
 			response.setContentType("text/plain")
 			response.outputStream <<  respuesta.voto.mensajeSMIME.contenido
 			response.outputStream.flush()
             return false
         } else {
-			codigoEstado = respuesta? respuesta.codigoEstado:500
+			codigoEstado = respuesta? respuesta.codigoEstado:Respuesta.SC_ERROR_EJECUCION
 			forward controller: "error${codigoEstado}", action: "procesar"
             return false
         }
@@ -72,12 +72,11 @@ class VotoController {
 		params.smimeMessageReq.initVoto()
 		Respuesta respuesta = votoService.validarFirmaUsuario(
 			params.smimeMessageReq, request.getLocale())
-		if (200 == respuesta.codigoEstado) {
+		if (Respuesta.SC_OK== respuesta.codigoEstado) {
 			MimeMessage smimeMessage = params.smimeMessageReq
-			EventoVotacion eventoVotacion = respuesta.evento
-			respuesta = votoService.enviarVoto_A_ControlAcceso(smimeMessage, eventoVotacion)
-			if (200  == respuesta?.codigoEstado) {
-				response.status = 200
+			respuesta = votoService.enviarVoto_A_ControlAcceso(smimeMessage, respuesta.evento)
+			if (Respuesta.SC_OK == respuesta?.codigoEstado) {
+				response.status = Respuesta.SC_OK
 				response.contentLength = respuesta.voto.mensajeSMIME.contenido.length
 				response.setContentType("text/plain")
 				response.outputStream <<  respuesta.voto.mensajeSMIME.contenido
@@ -86,19 +85,19 @@ class VotoController {
 				log.debug "----- Error enviando voto a Control de Acceso - Código estado:'${respuesta?.codigoEstado}'"
 				respuesta.mensaje =  "Error enviando voto a Control de Acceso - ${respuesta.mensaje}"
 				flash.respuesta = respuesta
-				String codigoEstado = respuesta? respuesta.codigoEstado:500
+				String codigoEstado = respuesta? respuesta.codigoEstado:Respuesta.SC_ERROR_EJECUCION
 				forward controller: "error${codigoEstado}", action: "procesar"
 				return false
 			}
-		} else if (409 == respuesta.codigoEstado){
-			response.status = 409
+		} else if (Respuesta.SC_ERROR_VOTO_REPETIDO == respuesta.codigoEstado){
+			response.status = Respuesta.SC_ERROR_VOTO_REPETIDO
 			response.contentLength = respuesta.voto.mensajeSMIME.contenido.length
 			response.setContentType("text/plain")
 			response.outputStream <<  respuesta.voto.mensajeSMIME.contenido
 			response.outputStream.flush()
 			return false
 		} else {
-			log.debug "----- respuesta.codigo: ${respuesta.codigoEstado} - mensaje:'${respuesta?.mensaje}'"
+			log.debug "----- statusCode: ${respuesta.codigoEstado} - mensaje:'${respuesta?.mensaje}'"
 			response.status = respuesta?.codigoEstado
 			render respuesta?.mensaje
 			return false
@@ -116,7 +115,7 @@ class VotoController {
 				certificado = Certificado.findWhere(hashCertificadoVotoBase64:hashCertificadoVotoBase64)
 			}
 			if(!certificado) {
-				response.status = 404
+				response.status = Respuesta.SC_NOT_FOUND
 				render message(code: 'certificado.certificadoHexNotFound',
 					args:[params.hashCertificadoVotoHex])
 				return false
@@ -134,7 +133,7 @@ class VotoController {
 					votoSMIMEURL:"${grailsApplication.config.grails.serverURL}/mensajeSMIME/obtener?id=${voto.mensajeSMIME.id}"]
 			}
 			if(!voto) {
-				response.status = 404
+				response.status = Respuesta.SC_NOT_FOUND
 				render message(code: 'voto.votoConCertNotFound',
 					args:[params.hashCertificadoVotoHex])
 				return false
@@ -147,16 +146,14 @@ class VotoController {
 				}
 				votoMap.anuladorURL="${grailsApplication.config.grails.serverURL}/mensajeSMIME/obtener?id=${anuladorVoto?.mensajeSMIME?.id}"
 			}
-			response.status = 200
+			response.status = Respuesta.SC_OK
 			response.setContentType("application/json")
 			render votoMap as JSON
 			return false
 		}
-		response.status = 400
+		response.status = Respuesta.SC_ERROR_PETICION
 		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false
-		
-		
-		
 	}
+	
 }

@@ -52,7 +52,7 @@ public class OpcionVotacionDialog extends javax.swing.JDialog implements KeyList
         anyadirButton = new javax.swing.JButton();
         scrollPane = new javax.swing.JScrollPane();
         textArea = new javax.swing.JTextArea();
-        jLabel1 = new javax.swing.JLabel();
+        msgLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -113,7 +113,7 @@ public class OpcionVotacionDialog extends javax.swing.JDialog implements KeyList
         textArea.setRows(5);
         scrollPane.setViewportView(textArea);
 
-        jLabel1.setText("Contenido que figurará en la opción:");
+        msgLabel.setText("Contenido que figurará en la opción:");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -130,7 +130,7 @@ public class OpcionVotacionDialog extends javax.swing.JDialog implements KeyList
                         .addComponent(cerrarButton))
                     .addComponent(scrollPane)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1)
+                        .addComponent(msgLabel)
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -139,9 +139,9 @@ public class OpcionVotacionDialog extends javax.swing.JDialog implements KeyList
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addComponent(mensajePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(jLabel1)
+                .addComponent(msgLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 11, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(scrollPane)
+                .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cerrarButton)
@@ -280,9 +280,9 @@ public class OpcionVotacionDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JButton anyadirButton;
     private javax.swing.JButton cerrarButton;
     private javax.swing.JLabel closeLabel;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel mensajeLabel;
     private javax.swing.JPanel mensajePanel;
+    private javax.swing.JLabel msgLabel;
     private javax.swing.JScrollPane scrollPane;
     private javax.swing.JTextArea textArea;
     // End of variables declaration//GEN-END:variables

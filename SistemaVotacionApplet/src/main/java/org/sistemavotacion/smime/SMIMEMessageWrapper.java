@@ -14,15 +14,12 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.Certificate;
 import java.security.cert.PKIXCertPathChecker;
 import java.security.cert.PKIXParameters;
-import java.security.cert.TrustAnchor;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Random;
 import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
@@ -40,7 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
@@ -74,8 +70,8 @@ import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.sistemavotacion.modelo.Usuario;
-import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.util.DateUtils;
+import org.sistemavotacion.util.StringUtils;
 import org.sistemavotacion.worker.TimeStampWorker;
 
 /**
@@ -115,7 +111,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
     
     private SMIMEMessageWrapper(Session session) throws MessagingException {
         super(session);
-        fileName =  RandomLowerString(System.currentTimeMillis(), 7);
+        fileName =  StringUtils.RandomLowerString(System.currentTimeMillis(), 7);
         setDisposition("attachment; fileName=" + fileName + SIGNED_PART_EXTENSION);
         contentType = "application/x-pkcs7-mime; smime-type=signed-data; name=" + fileName 
         		+ SIGNED_PART_EXTENSION;
@@ -147,21 +143,6 @@ public class SMIMEMessageWrapper extends MimeMessage {
             signedContent = baos.toString(); 
         } else if(getContent() instanceof SharedByteArrayInputStream){ 
             logger.debug("content instanceof SharedByteArrayInputStream");
-            
-
-            MimeMessage cmsg = new MimeMessage(session, 
-                    (SharedByteArrayInputStream)getContent());
-            logger.debug(" - isMimeType multipart: " + 
-                    cmsg.isMimeType("multipart/*"));
-
-            logger.debug(" - MimeMessage getContent getClass: " + 
-                    cmsg.getContent().getClass());
-            
-            
-            
-            
-            
-            
             smimeSigned = new SMIMESigned(this); 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ((CMSProcessable)smimeSigned.getSignedContent()).write(baos);
@@ -223,19 +204,6 @@ public class SMIMEMessageWrapper extends MimeMessage {
             addFrom(addresses);
             updateMessageID(); 
     }
-	
-    public static String RandomLowerString(long seed, int size) {
-        StringBuffer tmp = new StringBuffer();
-        Random random = new Random(seed);
-        for (int i = 0; i < size; i++) {
-            long newSeed = random.nextLong();
-            int currInt = (int) (26 * random.nextFloat());
-            currInt += 97;
-            random = new Random(newSeed);
-            tmp.append((char) currInt);
-        }
-        return tmp.toString();
-    }
 
     /**
      * @return the signedContent
@@ -256,43 +224,6 @@ public class SMIMEMessageWrapper extends MimeMessage {
      */
     public SMIMESigned getSmimeSigned() {
         return smimeSigned;
-    }
-
-
-    /**
-     * verify that the sig is correct and that it was generated when the 
-     * certificate was current(assuming the cert is contained in the message).
-     */
-    public static boolean isValidSignature(SMIMESigned smimeSigned) throws Exception {
-        // certificates and crls passed in the signature
-        Store certs = smimeSigned.getCertificates();
-        // SignerInfo blocks which contain the signatures
-        SignerInformationStore  signers = smimeSigned.getSignerInfos();
-        logger.debug("signers.size(): " + signers.size());;
-        Iterator it = signers.getSigners().iterator();
-        boolean result = false;
-        // check each signer
-        while (it.hasNext()) {
-            SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certs.getMatches(signer.getSID());
-            logger.debug("Collection matches: " + certCollection.size());
-            Iterator        certIt = certCollection.iterator();
-            X509Certificate cert = new JcaX509CertificateConverter()
-                    .setProvider(SIGN_PROVIDER).getCertificate(
-                    (X509CertificateHolder)certIt.next());
-            logger.debug("cert.getSubjectDN(): " + cert.getSubjectDN());
-            logger.debug("cert.getNotBefore(): " + cert.getNotBefore());
-            logger.debug("cert.getNotAfter(): " + cert.getNotAfter());
-            if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().
-                    setProvider(SIGN_PROVIDER).build(cert))){
-                logger.debug("signature verified");
-                result = true;
-            } else {
-                logger.debug("signature failed!");
-                result = false;
-            }
-        }
-        return result;
     }
     
     public boolean isValidSignature() {
@@ -489,25 +420,6 @@ public class SMIMEMessageWrapper extends MimeMessage {
             logger.error(ex.getMessage(), ex);
         } 
     }
-    
-    
-    public static PKIXParameters getPKIXParameters (X509Certificate... certs) 
-            throws InvalidAlgorithmParameterException{
-        return getPKIXParameters(Arrays.asList(certs));
-    }
-    
-    public static PKIXParameters getPKIXParameters (Collection<X509Certificate> certs) 
-            throws InvalidAlgorithmParameterException{
-        Set<TrustAnchor> anchors = new HashSet<TrustAnchor>();
-        for(X509Certificate cert:certs) {
-            TrustAnchor anchor = new TrustAnchor(cert, null);
-            anchors.add(anchor);
-        }
-        PKIXParameters params = new PKIXParameters(anchors);
-        params.setRevocationEnabled(false); // tell system do not chec CRL's
-        return params;
-    }
-  
     
     public File copyContentToFile (File destFile) throws IOException, MessagingException {
         FileOutputStream fos = new FileOutputStream(destFile);

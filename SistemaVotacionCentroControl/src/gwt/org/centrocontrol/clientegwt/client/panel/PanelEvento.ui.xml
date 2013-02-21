@@ -12,8 +12,8 @@
 		.pendienteAbrirLabel{color:#fba131; font-weight:bold;}
 		.canceladoLabel{color:#cc1606; font-weight:bold;}
 		.finalizadoLabel{color:#cc1606; font-weight:bold;}
-		.autorLabel {font-size: 12px;}
-		.comienzoLabel{font-size: 12px;margin:5px 0px 0px 0px;}
+		.autorLabel {font-size: 12px; margin: 0px 0px 0px 10px;}
+		.comienzoLabel{font-size: 12px;margin:5px 0px 0px 10px;}
 		.duracionLabel{font-size: 12px; font-weight: bold; margin:5px 0px 0px 10px;}
 		.estadoLabel{margin: 3px 10px 0px 10px; float:right; font-size: 16px;}
 		.bodyPanel {width:100%, margin:0px 10px 0px 10px;}

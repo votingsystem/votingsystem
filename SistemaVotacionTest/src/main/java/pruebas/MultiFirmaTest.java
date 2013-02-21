@@ -8,6 +8,7 @@ import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
 import javax.mail.BodyPart;
@@ -16,8 +17,14 @@ import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.SignerInformation;
+import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.mail.smime.SMIMESigned;
+import org.bouncycastle.util.Store;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
@@ -33,6 +40,8 @@ import org.slf4j.LoggerFactory;
 public class MultiFirmaTest {
         
     private static Logger logger = (Logger) LoggerFactory.getLogger(MultiFirmaTest.class);
+    
+    public static final String PROVIDER = "BC";
     
     public static final String keyAlias1 = "aliascertfirmado";
     public static final String password1 = "PemPass";
@@ -114,7 +123,8 @@ public class MultiFirmaTest {
             //PKIXParameters params = obtenerPKIXParametersFromFile(pathCadenaCertVerisign);
             byte[] bytes = FileUtils.getBytesFromFile(new File(multiFirmaFilePath));
             SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(null,new ByteArrayInputStream(bytes), null);
-            boolean isValidSignature = SMIMEMessageWrapper.isValidSignature(dnieMimeMessage.getSmimeSigned());            
+            
+            boolean isValidSignature = dnieMimeMessage.isValidSignature();          
             logger.debug("dnieMimeMessage.getSignedContent(): '" + dnieMimeMessage.getSignedContent() + "'");
             logger.debug("isValidSignature: " + isValidSignature);
             /*DNIeMimeMessage dnieMimeMessage = DNIeMimeMessage.build(new ByteArrayInputStream(bytes), null);
@@ -171,7 +181,7 @@ public class MultiFirmaTest {
         //SMIMESigned smimeSigned = new SMIMESigned(null);
         //Store certs = smimeSigned.getCertificates();
         //Collection certCollection = certs.getMatches(signer.getSID());
-        boolean isValidSignature = SMIMEMessageWrapper.isValidSignature(smimeSigned);
+        boolean isValidSignature = isValidSignature(smimeSigned);
         logger.debug("isValidSignature: " + isValidSignature);
         
         //DNIeSignedMailValidator signedMailValidator = new DNIeSignedMailValidator(clonedMessage, params);
@@ -195,13 +205,51 @@ public class MultiFirmaTest {
         //clonedMessage.writeTo(System.out);
 
         SMIMESigned smimeSigned = new SMIMESigned(mimeMultipart);
-        boolean isValidSignature = SMIMEMessageWrapper.isValidSignature(smimeSigned);
+        
+        
+        boolean isValidSignature = isValidSignature(smimeSigned);
         logger.debug("isValidSignature: " + isValidSignature);
         //
 
         //DNIeSignedMailValidator signedMailValidator = new DNIeSignedMailValidator(clonedMessage, params);
         //return DNIeMimeMessage.verify(signedMailValidator);
         return null;
+    }
+    
+       /**
+     * verify that the sig is correct and that it was generated when the 
+     * certificate was current(assuming the cert is contained in the message).
+     */
+    public static boolean isValidSignature(SMIMESigned smimeSigned) throws Exception {
+        // certificates and crls passed in the signature
+        Store certs = smimeSigned.getCertificates();
+        // SignerInfo blocks which contain the signatures
+        SignerInformationStore  signers = smimeSigned.getSignerInfos();
+        logger.debug("signers.size(): " + signers.size());;
+        Iterator it = signers.getSigners().iterator();
+        boolean result = false;
+        // check each signer
+        while (it.hasNext()) {
+            SignerInformation   signer = (SignerInformation)it.next();
+            Collection          certCollection = certs.getMatches(signer.getSID());
+            logger.debug("Collection matches: " + certCollection.size());
+            Iterator        certIt = certCollection.iterator();
+            X509Certificate cert = new JcaX509CertificateConverter()
+                    .setProvider(PROVIDER).getCertificate(
+                    (X509CertificateHolder)certIt.next());
+            logger.debug("cert.getSubjectDN(): " + cert.getSubjectDN());
+            logger.debug("cert.getNotBefore(): " + cert.getNotBefore());
+            logger.debug("cert.getNotAfter(): " + cert.getNotAfter());
+            if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().
+                    setProvider(PROVIDER).build(cert))){
+                logger.debug("signature verified");
+                result = true;
+            } else {
+                logger.debug("signature failed!");
+                result = false;
+            }
+        }
+        return result;
     }
     
     private static ValidationResult validarFirma(

@@ -83,7 +83,7 @@ public class SignedMailGenerator {
         Store certs = new JcaCertStore(certList);
         smimeSignedGenerator = new SMIMESignedGenerator();
         SimpleSignerInfoGeneratorBuilder signerInfoGeneratorBuilder =  new SimpleSignerInfoGeneratorBuilder();
-        signerInfoGeneratorBuilder.setProvider(SIGN_PROVIDER);
+        signerInfoGeneratorBuilder.setProvider(PROVIDER);
         signerInfoGeneratorBuilder.setSignedAttributeGenerator(new AttributeTable(signedAttrs));
         SignerInfoGenerator signerInfoGenerator = signerInfoGeneratorBuilder.build(
                 signatureMechanism, key, (X509Certificate)chain[0]);
@@ -151,10 +151,10 @@ public class SignedMailGenerator {
          smimeSignedGenerator.getGeneratedDigests();
          //MimeMultipart mimeMultipart = smimeSignedGenerator.generate(body, type.toString() + SIGNED_PART_EXTENSION);
         // MimeMultipart mimeMultipart = smimeSignedGenerator.generate(
-         //        dnieMimeMessage, SIGN_PROVIDER,
+         //        dnieMimeMessage, PROVIDER,
            //      type.toString() + SIGNED_PART_EXTENSION);
-         MimeMultipart mimeMultipart = smimeSignedGenerator.generate(body, SIGN_PROVIDER);
-         //MimeMultipart mimeMultipart = smimeSignedGenerator.generate(body, SIGN_PROVIDER, signatureMechanism);
+         MimeMultipart mimeMultipart = smimeSignedGenerator.generate(body, PROVIDER);
+         //MimeMultipart mimeMultipart = smimeSignedGenerator.generate(body, PROVIDER, signatureMechanism);
          return mimeMultipart;
      }
     

@@ -48,7 +48,7 @@ public class ValidateSignedWithKeyStore {
             		null, new ByteArrayInputStream(bytes), null);
             ValidationResult validationResult = null;
             if (dnieMimeMessage != null) {
-                logger.debug("signatura valida?" + SMIMEMessageWrapper.isValidSignature(dnieMimeMessage.getSmimeSigned()));
+                logger.debug("signatura valida?" + dnieMimeMessage.isValidSignature());
                 logger.debug("Contenido: " + dnieMimeMessage.getSignedContent());
                 validationResult = dnieMimeMessage.verify(params);
                 logger.debug("validationResult.isVerifiedSignature: " + validationResult.isVerifiedSignature());

@@ -99,7 +99,7 @@ public class Certificado implements Serializable {
     
     public Certificado () {}
     
-    public Certificado (X509Certificate certificate) {
+    public void setSigningCert(X509Certificate certificate) {
     	String subjectDN = certificate.getSubjectDN().getName();
     	logger.debug("Certificado - subjectDN: " +subjectDN);
     	if(subjectDN.split("OU=eventoId:").length > 1) {
@@ -119,7 +119,6 @@ public class Certificado implements Serializable {
 					hexConverter.unmarshal(hashCertificadoVotoHEX));
     	}
     }
-    
     
     /**
      * @return the contenido

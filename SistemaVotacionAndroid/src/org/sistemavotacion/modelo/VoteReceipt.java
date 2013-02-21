@@ -119,7 +119,7 @@ public class VoteReceipt {
     }
     
     private void comprobarRecibo () throws Exception {
-        if (409 == codigoEstado) {//voto repetido
+        if (Respuesta.SC_ERROR_VOTO_REPETIDO == codigoEstado) {//voto repetido
             esValido = true; 
             mensaje = getAppString(R.string.vote_repeated_msg, 
             		voto.getAsunto(), voto.getOpcionSeleccionada().getContenido());

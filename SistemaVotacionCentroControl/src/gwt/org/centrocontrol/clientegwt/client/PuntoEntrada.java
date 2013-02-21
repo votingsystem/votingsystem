@@ -15,6 +15,7 @@ import org.centrocontrol.clientegwt.client.util.Browser;
 import org.centrocontrol.clientegwt.client.util.RequestHelper;
 import org.centrocontrol.clientegwt.client.util.ServerPaths;
 import org.centrocontrol.clientegwt.client.util.StringUtils;
+import org.sistemavotacion.centrocontrol.modelo.Respuesta;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -206,7 +207,7 @@ public class PuntoEntrada implements EntryPoint {
 	    		case PUBLICACION_MANIFIESTO_PDF:
 	    			break;
 	    		case ASOCIAR_CENTRO_CONTROL_SMIME:
-	    			if(200 == mensajeClienteFirma.getCodigoEstado()) {
+	    			if(Respuesta.SC_OK== mensajeClienteFirma.getCodigoEstado()) {
 	    		    	RequestHelper.doGet(ServerPaths.getInfoServidorPath(), 
 	    		    			new ServerRequestInfoCallback());
 	    			}

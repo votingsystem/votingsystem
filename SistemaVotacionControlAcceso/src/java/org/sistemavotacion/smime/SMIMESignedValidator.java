@@ -3,70 +3,103 @@ package org.sistemavotacion.smime;
 import com.sun.mail.util.BASE64DecoderStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.cert.X509Certificate;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Iterator;
+
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+
+import org.bouncycastle.asn1.ASN1UTCTime;
+import org.bouncycastle.asn1.DERUTCTime;
+import org.bouncycastle.asn1.cms.Attribute;
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.CMSAttributes;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessable;
+import org.bouncycastle.cms.SignerInformation;
+import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.mail.smime.SMIMEException;
 import org.bouncycastle.mail.smime.SMIMESigned;
+import org.bouncycastle.util.Store;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author jgzornoza
  */
-public class SMIMESignedValidator {
+public class SMIMESignedValidator { 
     
-    public static void validate (MimeMessage msg) throws IOException, 
-            MessagingException, CMSException, SMIMEException {
-        MimeMultipart mimeMultipart;
-        SMIMESigned smimeSigned;
-        if (msg.getContent() instanceof BASE64DecoderStream) {
-            smimeSigned = new SMIMESigned(msg); 
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ((CMSProcessable)smimeSigned.getSignedContent()).write(baos);
-   
-
-        } else {
-            smimeSigned = new SMIMESigned((MimeMultipart)msg.getContent());
-            MimeBodyPart content = smimeSigned.getContent();
-        } 
-
-            
-         /*   
-            System.out.println("Content:");
-            Object  cont = content.getContent();
-            if (cont instanceof String) {
-                System.out.println("Is String:" + (String)cont);
+    private static Logger logger = LoggerFactory.getLogger(SMIMESignedValidator.class);
+	
+    private static final String BC = BouncyCastleProvider.PROVIDER_NAME;
+    
+    /**
+     * verify that the sig is correct and that it was generated when the 
+     * certificate was current(assuming the cert is contained in the message).
+     */
+    public static boolean isValidSignature(SMIMESigned smimeSigned) throws Exception {
+        // certificates and crls passed in the signature
+        Store certs = smimeSigned.getCertificates();
+        // SignerInfo blocks which contain the signatures
+        SignerInformationStore  signers = smimeSigned.getSignerInfos();
+        logger.debug("signers.size(): " + signers.size());
+        Collection c = signers.getSigners();
+        Iterator it = c.iterator();
+        boolean result = false;
+        // check each signer
+        while (it.hasNext()) {
+            SignerInformation   signer = (SignerInformation)it.next();
+            Collection          certCollection = certs.getMatches(signer.getSID());
+            logger.debug("Collection matches: " + certCollection.size());
+            Iterator        certIt = certCollection.iterator();
+            X509Certificate cert = new JcaX509CertificateConverter().setProvider(BC)
+                    .getCertificate((X509CertificateHolder)certIt.next());
+            logger.debug("SubjectDN: " + cert.getSubjectDN() + 
+          		  " - Not before: " + cert.getNotBefore() + " - Not after: " + cert.getNotAfter() 
+          		  + " - SigningTime: " + getSigningTime(signer));
+            if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert))){
+                logger.debug("signature verified");
+                result = true;
+            } else {
+                logger.debug("signature failed!");
+                result = false;
             }
-
-            else if (cont instanceof Multipart){
-                Multipart   mp = (Multipart)cont;
-                int count = mp.getCount();
-                for (int i = 0; i < count; i++) {
-                    BodyPart    m = mp.getBodyPart(i);
-                    Object      part = m.getContent();
-
-                    System.out.println("Part " + i);
-                    System.out.println("---------------------------");
-
-                    if (part instanceof String) {
-                        System.out.println((String)part);
-                    }
-                    else  {
-                        System.out.println("can't print...");
-                    }
-                }
-            }
-
-            System.out.println("Status:");
-
-            verify(smimeSigned);
-        
-        } catch (Exception ex) {
-            Logger.getLogger(CreateSignedMail.class.getName()).log(Level.SEVERE, null, ex);
-        }*/
+        }
+        return result;
     }
     
+    
+    public static Date getSigningTime(SignerInformation signerInformation) {
+        AttributeTable signedAttr = signerInformation.getSignedAttributes(); 
+        Attribute signingTime = signedAttr.get(CMSAttributes.signingTime); 
+        if (signingTime != null) { 
+        	try {
+                Enumeration en = signingTime.getAttrValues().getObjects(); 
+                while (en.hasMoreElements()) { 
+                        Object obj = en.nextElement(); 
+                        if (obj instanceof ASN1UTCTime) { 
+                                ASN1UTCTime asn1Time = (ASN1UTCTime) obj; 
+                                return asn1Time.getDate();
+                        } else if (obj instanceof DERUTCTime) { 
+                                DERUTCTime derTime = (DERUTCTime) obj; 
+                                return derTime.getDate();
+                        } 
+                } 
+        	} catch(Exception ex) {
+        		logger.error(ex.getMessage(), ex);
+        	}
+        }
+		return null; 
+    }
+	    
 }

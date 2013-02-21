@@ -17,6 +17,7 @@ import org.sistemavotacion.smime.CMSUtils;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.modelo.InfoVoto;
 import org.sistemavotacion.test.panel.VotacionesPanel;
+import org.sistemavotacion.test.util.NifUtils;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
@@ -29,6 +30,8 @@ import org.slf4j.LoggerFactory;
 public class Votacion implements ActionListener {
     
     private static Logger logger = LoggerFactory.getLogger(Votacion.class);
+    
+    public static final int MAX_PENDING_REESPONSES = 10;
     
     private static ExecutorService votacionExecutor;
 
@@ -126,14 +129,17 @@ public class Votacion implements ActionListener {
             timer.start();
         } else {
             do {
-                lanzarSolicitudAcceso(idUsuario++);
+                if((solicitudesEnviadas.get() - votosRecogidos.get()) < 
+                        MAX_PENDING_REESPONSES) {
+                    lanzarSolicitudAcceso(idUsuario++);
+                } else Thread.sleep(500);
             } while (idUsuario < numeroUsuarios.get() + idUsuarioInicial);
         }
     }
      
      public void lanzarSolicitudAcceso (int numUsu) throws Exception {
         Evento voto = prepararVoto(evento);
-        InfoVoto infoVoto = new InfoVoto(voto, String.valueOf(numUsu));
+        InfoVoto infoVoto = new InfoVoto(voto,NifUtils.getNif(numUsu));
         solicitudesCompletionService.submit(new LanzadoraSolicitudAcceso(infoVoto));
         solicitudesEnviadas.getAndIncrement();
         VotacionesPanel.INSTANCIA.actualizarContadorSolicitudes(

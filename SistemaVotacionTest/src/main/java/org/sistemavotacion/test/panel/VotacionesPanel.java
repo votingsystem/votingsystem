@@ -1,7 +1,9 @@
 package org.sistemavotacion.test.panel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.HyperlinkEvent;
@@ -36,6 +38,7 @@ public class VotacionesPanel extends JPanel
     private String erroresEnVotos;
     private Votacion votacion;
     public static VotacionesPanel INSTANCIA;
+    private HashMap<String, ActorConIP> hashMapActores = null;
     
     /**
      * Creates new form VotacionesPanel
@@ -382,9 +385,10 @@ public class VotacionesPanel extends JPanel
 
     private void infoServidorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_infoServidorButtonActionPerformed
         logger.debug("infoServidorButtonActionPerformed ");
+        ActorConIP selectedControlCenter  = 
+                hashMapActores.get((String)centrosDeControlComboBox.getSelectedItem());
         InfoServidorDialog infoServidorDialog = new InfoServidorDialog(
-                MainFrame.INSTANCIA.getFrames()[0], false, 
-                (ActorConIP)centrosDeControlComboBox.getSelectedItem());
+                MainFrame.INSTANCIA.getFrames()[0], false, selectedControlCenter);
                 infoServidorDialog.setVisible(true);
     }//GEN-LAST:event_infoServidorButtonActionPerformed
 
@@ -487,12 +491,19 @@ public class VotacionesPanel extends JPanel
     public void setControlAcceso(ActorConIP controlAcceso) {
         if(controlAcceso.getCentrosDeControl() != null  &&
                 controlAcceso.getCentrosDeControl().size() >0) {
-            ArrayListComboBoxModel comboBoxModel = new  ArrayListComboBoxModel(
-                    new ArrayList(controlAcceso.getCentrosDeControl()));
+            hashMapActores = new HashMap<String, ActorConIP>();
+            ArrayList centrosControlList = new ArrayList();
+            Set<ActorConIP> centrosControl = controlAcceso.getCentrosDeControl();
+            for(ActorConIP centroControl : centrosControl) {
+                centrosControlList.add(centroControl.getServerURL());
+                hashMapActores.put(centroControl.getServerURL(), centroControl);
+            }
+            ArrayListComboBoxModel comboBoxModel = new ArrayListComboBoxModel(centrosControlList);
             centrosDeControlComboBox.setModel(comboBoxModel);
             centrosDeControlComboBox.setSelectedIndex(0);
-            ContextoPruebas.setCentroControl((ActorConIP)
+            ActorConIP centroControlSelected = hashMapActores.get((String)
                     centrosDeControlComboBox.getSelectedItem());
+            ContextoPruebas.setCentroControl(centroControlSelected);
             urlCentroControlPanel.setVisible(true);
             publicacionConvocatoriaPanel.setVisible(true);
         }
@@ -542,10 +553,10 @@ public class VotacionesPanel extends JPanel
     
     public class ArrayListComboBoxModel extends AbstractListModel implements ComboBoxModel {
         
-        private ActorConIP selectedItem;
-        private ArrayList<ActorConIP> centrosControl;
+        private String selectedItem;
+        private ArrayList<String> centrosControl;
 
-        public ArrayListComboBoxModel(ArrayList<ActorConIP> centrosControl) {
+        public ArrayListComboBoxModel(ArrayList<String> centrosControl) {
             this.centrosControl = centrosControl;
         }
 
@@ -554,7 +565,7 @@ public class VotacionesPanel extends JPanel
         }
 
         public void setSelectedItem(Object newValue) {
-            selectedItem = (ActorConIP)newValue;
+            selectedItem = (String)newValue;
         }
 
         public int getSize() {

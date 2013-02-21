@@ -450,12 +450,12 @@ public class FirmaDialog extends JDialog implements WorkerListener {
             return;
         }
         if(worker instanceof ObtenerArchivoWorker) {
-           logger.debug("mostrarResultadoOperacion - ObtenerArchivoWorker");
+            logger.debug("mostrarResultadoOperacion - ObtenerArchivoWorker");
+            mostrarPantallaEnvio(false);
             if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {    
                 bytesDocumento = respuesta.getBytesArchivo();
                 pack();
             } else {
-                mostrarPantallaEnvio(false);
                 dispose();
                 appletFirma.responderCliente(respuesta.getCodigoEstado(), 
                         getString("errorDescragandoDocumento") + " - " + respuesta.getMensaje());

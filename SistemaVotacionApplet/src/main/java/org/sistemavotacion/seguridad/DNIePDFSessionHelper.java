@@ -53,6 +53,7 @@ import java.util.List;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.sistemavotacion.Contexto;
+import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.smime.CMSUtils;
 import org.sistemavotacion.util.FileUtils;
@@ -129,7 +130,7 @@ public class DNIePDFSessionHelper extends CMSSignedGenerator {
             ByteArrayInputStream bais = new ByteArrayInputStream(out.toByteArray());
             MessageDigest softwareDigestEngine = MessageDigest.getInstance(PDF_SIGNATURE_DIGEST);
             int bytesRead;
-            byte[] dataBuffer = new byte[4096];
+            byte[] dataBuffer = new byte[Respuesta.SC_ERROR_VOTO_REPETIDO];
             while ((bytesRead = bais.read(dataBuffer)) >= 0) {
               softwareDigestEngine.update(dataBuffer, 0, bytesRead);
             }

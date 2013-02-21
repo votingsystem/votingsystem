@@ -6,7 +6,6 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import javax.security.auth.x500.X500PrivateCredential;
-import org.sistemavotacion.Contexto;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
@@ -22,38 +21,8 @@ public class KeyStoreHelper {
     
     private static X500PrivateCredential mockRaizDNIe;
     
-    public static void main(String args[]) throws Exception {
-    	//arg[0] -> root file
-    	//arg[1] -> 
-        Contexto.inicializar();
-        
-        crearMockServidoresVotacion();
-        crearMockRaizDNIe();
-        File file = File.createTempFile("mockDnie", ".jks");
-        crearMockDNIe("1234567A", new File("/home/jgzornoza/github/recursos/mockDnie.jks"));
-    }
-    
-    public static void test() throws Exception {
-        Contexto.inicializar();
-        
-        crearMockServidoresVotacion();
-        crearMockRaizDNIe();
-        File file = File.createTempFile("mockDnie", ".jks");
-        crearMockDNIe("1234567A", new File("/home/jgzornoza/github/recursos/mockDnie.jks"));
-    }
-    
-    public static void crearMockServidoresVotacion() throws Exception {
-        File rootFileDir = new File("/home/jgzornoza/github/recursos/SistemaVotacion/");
-        rootFileDir.mkdirs();
-        File rootFile = new File("/home/jgzornoza/github/recursos/SistemaVotacion/root.jks");
-        X500PrivateCredential rootCredential = crearMockUsuarioVotacion("1234567B", rootFile);
-        File controlAccesoFile = new File("/home/jgzornoza/github/recursos/SistemaVotacion/ControlAcceso.jks");
-        crearMockServidorVotacion(controlAccesoFile, rootCredential, 
-                "CN=Control Acceso, SERIALNUMBER=1111111111A", "ClavesControlAcceso");
-        File centroControlFile = new File("/home/jgzornoza/github/recursos/SistemaVotacion/CentroControl.jks");
-        crearMockServidorVotacion(centroControlFile, rootCredential, 
-                "CN=Centro Control, SERIALNUMBER=2222222222B", "ClavesCentroControl");
-    }
+    public static void main(String args[]) throws Exception { }
+
     
     public static KeyStore crearMockRaizDNIe() throws Exception {
         return KeyStoreUtil.createRootKeyStore(ContextoPruebas.COMIEZO_VALIDEZ_CERT, 
@@ -82,7 +51,8 @@ public class KeyStoreHelper {
         X500PrivateCredential rootCredential = obtenerMockRaizDNIePrivateCredential();
         KeyStore keyStore = KeyStoreUtil.createActorKeyStore(ContextoPruebas.COMIEZO_VALIDEZ_CERT,
                 ContextoPruebas.PERIODO_VALIDEZ_CERT, ContextoPruebas.PASSWORD.toCharArray(),
-                ContextoPruebas.END_ENTITY_ALIAS, rootCredential, "CN=Usuario Sistema de Votación, SERIALNUMBER=" + userID); 
+                ContextoPruebas.END_ENTITY_ALIAS, rootCredential, 
+                "GIVENNAME=NombreDe" + userID + " ,SURNAME=ApellidoDe" + userID + ", SERIALNUMBER=" + userID); 
         byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, ContextoPruebas.PASSWORD.toCharArray());
         FileUtils.copyStreamToFile(new ByteArrayInputStream(keyStoreBytes),file);
         return keyStore;
@@ -93,7 +63,7 @@ public class KeyStoreHelper {
         KeyStore keyStore = KeyStoreUtil.createActorKeyStore(ContextoPruebas.COMIEZO_VALIDEZ_CERT,
                 ContextoPruebas.PERIODO_VALIDEZ_CERT, ContextoPruebas.PASSWORD.toCharArray(),
                 ContextoPruebas.END_ENTITY_ALIAS, rootCredential, 
-                "CN=Usuario " + userID + " Sistema de Votación, SERIALNUMBER=" + userID); 
+                "GIVENNAME=NombreDe" + userID + " ,SURNAME=ApellidoDe" + userID + ", SERIALNUMBER=" + userID); 
         byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, ContextoPruebas.PASSWORD.toCharArray());
         FileUtils.copyStreamToFile(new ByteArrayInputStream(keyStoreBytes),file);
         return keyStore;
@@ -103,7 +73,8 @@ public class KeyStoreHelper {
         X500PrivateCredential rootCredential = obtenerMockRaizDNIePrivateCredential();
         KeyStore keyStore = KeyStoreUtil.createActorKeyStore(ContextoPruebas.COMIEZO_VALIDEZ_CERT,
                 ContextoPruebas.PERIODO_VALIDEZ_CERT, ContextoPruebas.PASSWORD.toCharArray(),
-                ContextoPruebas.END_ENTITY_ALIAS, rootCredential, "CN=Usuario Sistema de Votación, SERIALNUMBER=" + userID); 
+                ContextoPruebas.END_ENTITY_ALIAS, rootCredential, 
+                "GIVENNAME=NombreDe" + userID + " ,SURNAME=ApellidoDe" + userID + ", SERIALNUMBER=" + userID); 
         byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, ContextoPruebas.PASSWORD.toCharArray());
         FileUtils.copyStreamToFile(new ByteArrayInputStream(keyStoreBytes),file);
         return rootCredential;

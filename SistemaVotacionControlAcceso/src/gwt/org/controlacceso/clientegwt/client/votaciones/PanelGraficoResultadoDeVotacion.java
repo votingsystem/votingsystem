@@ -74,8 +74,10 @@ public class PanelGraficoResultadoDeVotacion extends Composite implements Solici
 				@Override
 				public void onClick(ClickEvent event) {
 					boolean conCopiaSeguridad = false;
-					if(DateUtils.getTodayDate().after(evento.getFechaFin())) 
+					if(DateUtils.getTodayDate().after(evento.getFechaInicio()) 
+							&& !evento.isActive()) {
 						conCopiaSeguridad = true;
+					}
 					PopupEstadisticasVotacion popupEstadisticasVotacion = 
 							new PopupEstadisticasVotacion(estadisticasControlAcceso, INSTANCIA, conCopiaSeguridad);
 					popupEstadisticasVotacion.setPopupPosition(event.getClientX(), event.getClientY() - 300);

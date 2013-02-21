@@ -15,7 +15,7 @@
 			padding:10px 10px 10px 10px;}
 		.pageTitle {margin: 20px 0px 0px 0px; font-size: 20px; font-weight: bold;
 			width: 100%; border-bottom: 1px dotted; color:#02227a;}
-		.autorPanel {margin: 0px 0px 0px 15px; float:left;}
+		.autorPanel {margin: 0px 0px 0px 15px;}
 		.autorLabel {margin: 7px 0px 0px 3px;}
 	    .date {margin-left: 15px; font-weight: bold; width:180px;}
  	    .textBox {margin-left: 10px; margin-top: 7px; border: 1px solid #02227a; width:300px}
@@ -72,14 +72,16 @@
 								<g:Label styleName="{style.fechaLabel}" text="{constantes.fechaLimiteVotoslabel}"/>
 								<g:Label ui:field="fechaLimiteLabel" styleName="{style.datosLabel}"/>
 							</g:HorizontalPanel>
-       			   			<g:HorizontalPanel ui:field='autorPanel' styleName="{style.autorPanel}">
-								<g:Label styleName="{style.publicadoPorlabel}" text="{constantes.publicadoPorlabel}"/>
-								<g:Label ui:field="autorLabel" styleName="{style.autorLabel}"/>
-							</g:HorizontalPanel>
 							<svUtil:PopUpLabel ui:field="administracionDocumentoLabel"  text='{constantes.administracionDocumentoLabel}'
 					    		styleName="{style.administracionDocumentoLabel}" />
 					    </g:HorizontalPanel>
 						<g:VerticalPanel ui:field='contenidoPanel' styleName="{style.contenidoPanel}" width="100%" height="300px"/>
+						<g:cell horizontalAlignment="ALIGN_RIGHT"  width="100%">
+       			   			<g:HorizontalPanel ui:field='autorPanel' styleName="{style.autorPanel}">
+								<g:Label styleName="{style.publicadoPorlabel}" text="{constantes.publicadoPorlabel}"/>
+								<g:Label ui:field="autorLabel" styleName="{style.autorLabel}"/>
+							</g:HorizontalPanel>
+						</g:cell>
 				   		<g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
 							<g:Label ui:field='estatusCentroControlLabel' styleName="{style.estatusCentroControlLabel}"/>
 						</g:cell>

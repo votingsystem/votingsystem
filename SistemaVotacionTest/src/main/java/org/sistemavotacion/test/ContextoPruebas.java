@@ -130,7 +130,7 @@ public class ContextoPruebas {
          return KeyStoreUtil.createActorKeyStore(COMIEZO_VALIDEZ_CERT,
                 PERIODO_VALIDEZ_CERT, PASSWORD.toCharArray(),
                 END_ENTITY_ALIAS, privateCredentialRaizAutoridad, 
-                "CN=Usuario Sistema de Votación, SERIALNUMBER=" + usuario.getNif()); 
+                "GIVENNAME=NombreUsuarioTest, SURNAME=AppelidosUsuarioTest, SERIALNUMBER=" + usuario.getNif()); 
     }
 
     /**
@@ -343,20 +343,20 @@ public class ContextoPruebas {
         privateCredentialMockRaizDNIe = aPrivateCredentialMockRaizDNIe;
     }
 
-    public static String getUserDirPath (String userId) {
+    public static String getUserDirPath (String userNIF) {
         String resultPath = APPDIR;
-        while (userId.length() > 0) {
-            String subPath = userId.substring(0, 1);
-            userId = userId.substring(1);
+        while (userNIF.length() > 0) {
+            String subPath = userNIF.substring(0, 1);
+            userNIF = userNIF.substring(1);
             resultPath = resultPath.concat(subPath + File.separator);
         }
         return resultPath;
     }
         
-    public static String getUserKeyStorePath (String userId) {
-        String userDirPath = getUserDirPath(userId);
+    public static String getUserKeyStorePath (String userNIF) {
+        String userDirPath = getUserDirPath(userNIF);
         new File(userDirPath).mkdirs();
-        return  userDirPath + PREFIJO_USER_JKS + userId + SUFIJO_USER_JKS;
+        return  userDirPath + PREFIJO_USER_JKS + userNIF + SUFIJO_USER_JKS;
     }
 
     /**

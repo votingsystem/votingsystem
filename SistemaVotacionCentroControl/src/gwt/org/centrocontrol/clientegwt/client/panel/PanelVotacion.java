@@ -28,6 +28,8 @@ import org.centrocontrol.clientegwt.client.util.PopUpLabel;
 import org.centrocontrol.clientegwt.client.util.RequestHelper;
 import org.centrocontrol.clientegwt.client.util.ServerPaths;
 import org.centrocontrol.clientegwt.client.util.StringUtils;
+import org.sistemavotacion.centrocontrol.modelo.Respuesta;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.http.client.Request;
@@ -256,7 +258,7 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
 				break;
 			case ANULAR_VOTO:
 				setWidgetsStateFirmando(false);
-				if(200 == mensaje.getCodigoEstado()) {
+				if(Respuesta.SC_OK== mensaje.getCodigoEstado()) {
 					setMessage(Constantes.INSTANCIA.mensajeAnulacionVotoOK());
 				} else {
 					setMessage(Constantes.INSTANCIA.mensajeError(
@@ -278,7 +280,7 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
 				break;
 			case SOLICITUD_COPIA_SEGURIDAD:
 				setWidgetsStateFirmando(false);
-				if(200 == mensaje.getCodigoEstado()) {
+				if(Respuesta.SC_OK== mensaje.getCodigoEstado()) {
 					setMessage(Constantes.INSTANCIA.mensajeSolicitudCopiaSeguridadOK());
 				} else {
 					setMessage(Constantes.INSTANCIA.mensajeError(

@@ -78,7 +78,7 @@ public class DNIeSignedMailGenerator {
             } else throw ex;
         }
         SimpleSignerInfoGeneratorBuilder dnieSignerInfoGeneratorBuilder =  new SimpleSignerInfoGeneratorBuilder();
-        dnieSignerInfoGeneratorBuilder = dnieSignerInfoGeneratorBuilder.setProvider(SIGN_PROVIDER);
+        dnieSignerInfoGeneratorBuilder = dnieSignerInfoGeneratorBuilder.setProvider(PROVIDER);
         dnieSignerInfoGeneratorBuilder.setSignedAttributeGenerator(new AttributeTable(signedAttrs));
         SignerInfoGenerator signerInfoGenerator = dnieSignerInfoGeneratorBuilder.build(
                 DNIe_SIGN_MECHANISM, null, DNIeSessionHelper.getCertificadoUsuario(), dnieContentSigner);

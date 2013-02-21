@@ -49,13 +49,13 @@ class VotoService {
 		InformacionVoto infoVoto = smimeMessageUsu.informacionVoto
 		String certServerURL = StringUtils.checkURL(infoVoto.controlAccesoURL)
 		ControlAcceso controlAcceso = ControlAcceso.findWhere(serverURL:certServerURL)
-		if (!controlAcceso) return new Respuesta(codigoEstado:400, mensaje:
+		if (!controlAcceso) return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:
 				messageSource.getMessage('validacionVoto.errorEmisorDesconocido', null, locale)) 
 		EventoVotacion evento = EventoVotacion.findWhere(controlAcceso:controlAcceso,
 			eventoVotacionId:infoVoto.getEventoId())
 		if (!evento) {
 			log.debug ("No se ha encontrado evento con id '${infoVoto?.getEventoId()}' para el control de acceso '${certServerURL}'")
-			return new Respuesta(codigoEstado:400, mensaje:messageSource.getMessage(
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:messageSource.getMessage(
 				'validacionVoto.convocatoriaDesconocida', null, locale))
 		}
 		Certificado certificado = Certificado.findWhere(
@@ -64,28 +64,24 @@ class VotoService {
 		if (certificado) {
 			log.error("Voto repetido - hashCertificadoVotoBase64:${infoVoto.hashCertificadoVotoBase64}")
 			Voto voto = Voto.findWhere(certificado:certificado)
-			return new Respuesta(codigoEstado:409, voto:voto)
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_VOTO_REPETIDO, voto:voto)
 		}
 		X509Certificate certificadoFirma = 
 			smimeMessageUsu.getFirmante()?.getCertificate()
 		Respuesta respuestaValidacionCert = firmaService.
 				validarCertificacionCertificadoVoto(certificadoFirma, evento, locale)
-		if(200 != respuestaValidacionCert.codigoEstado) {
+		if(Respuesta.SC_OK != respuestaValidacionCert.codigoEstado) {
 			log.error("Error validando el certificado del voto")
 			return respuestaValidacionCert
 		} 
-        certificado = new Certificado(certificadoFirma)
 		log.debug ("certificadoFirma.getSubjectDN(): ${certificadoFirma.getSubjectDN()}")
-		certificado.esRaiz = false
-		certificado.estado = Certificado.Estado.OK;
-		certificado.tipo = Certificado.Tipo.VOTO;
-		certificado.contenido = certificadoFirma.getEncoded()
-		certificado.numeroSerie = certificadoFirma.getSerialNumber().longValue()
-		certificado.eventoVotacion = evento
-		certificado.validoDesde = certificadoFirma.getNotBefore()
-		certificado.validoHasta = certificadoFirma.getNotAfter()
+        certificado = new Certificado(esRaiz:false, estado: Certificado.Estado.OK, 
+			tipo:Certificado.Tipo.VOTO, contenido:certificadoFirma.getEncoded(), 
+			numeroSerie:certificadoFirma.getSerialNumber().longValue(), eventoVotacion:evento,
+			validoDesde:certificadoFirma.getNotBefore(), validoHasta:certificadoFirma.getNotAfter())
+		certificado.setSigningCert(certificadoFirma)
 		certificado.save()
-		return new Respuesta(codigoEstado:200, evento:evento)
+		return new Respuesta(codigoEstado:Respuesta.SC_OK, evento:evento)
 	}
 	
 	Respuesta validarFirmaControlAcceso(SMIMEMessageWrapper smimeMessageCA) {
@@ -105,7 +101,8 @@ class VotoService {
 	
     synchronized Respuesta enviarVoto_A_ControlAcceso (MimeMessage smimeMessage,
             EventoVotacion eventoVotacion) {
-        log.debug ("enviarVoto_A_ControlAcceso")
+		String urlVotosControlAcceso = "${eventoVotacion.controlAcceso.serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLNotificacionVotoControlAcceso}"
+        log.debug ("enviarVoto_A_ControlAcceso - urlVotosControlAcceso: ${urlVotosControlAcceso}")
 		String localServerURL = grailsApplication.config.grails.serverURL
 		
 		MensajeSMIME multifirmaCentroControl = new MensajeSMIME(
@@ -123,9 +120,8 @@ class VotoService {
 
 		multifirmaCentroControl.contenido = multiSignedMessageBytes
 		multifirmaCentroControl.save();
-        String urlVotosControlAcceso = "${eventoVotacion.controlAcceso.serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLNotificacionVotoControlAcceso}"
         Respuesta respuestaControlAcceso = httpService.enviarMensaje(urlVotosControlAcceso, multiSignedMessageBytes)
-		if (200 == respuestaControlAcceso.codigoEstado) {
+		if (Respuesta.SC_OK == respuestaControlAcceso.codigoEstado) {
 			SMIMEMessageWrapper smimeMessageCA = SMIMEMessageWrapper.build(
 				new ByteArrayInputStream(respuestaControlAcceso.mensaje.getBytes()),
 				null, SMIMEMessageWrapper.Tipo.VOTO);
@@ -138,7 +134,7 @@ class VotoService {
 		log.debug ("validarFirmas")
 		Respuesta respuesta = firmaService.
 				validarCertificacionFirmantesVoto(smimeMessageCA, eventoVotacion)
-		if(200 != respuesta.codigoEstado) return respuesta
+		if(Respuesta.SC_OK != respuesta.codigoEstado) return respuesta
 		String localServerURL = grailsApplication.config.grails.serverURL
 		InformacionVoto infoVoto = smimeMessageCA.informacionVoto
 		MensajeSMIME mensajeSMIME = new MensajeSMIME(valido:true,
@@ -163,7 +159,7 @@ class VotoService {
 			mensaje = "No existe ninguna opción con identificador '${String.valueOf(votoJSON.opcionSeleccionadaId)}'"
 		if (mensaje) {
 			log.error(mensaje)
-			return new Respuesta (codigoEstado:400, mensaje:mensaje)
+			return new Respuesta (codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:mensaje)
 		}
 		mensajeSMIME.save()
 		Voto voto = new Voto(opcionDeEvento:opcionSeleccionada,
@@ -172,7 +168,7 @@ class VotoService {
 		voto.save()
 		certificado.estado = Certificado.Estado.UTILIZADO;
 		certificado.save();
-		return new Respuesta(codigoEstado:200, voto:voto)
+		return new Respuesta(codigoEstado:Respuesta.SC_OK, voto:voto)
 	}
 			
 			
@@ -197,14 +193,17 @@ class VotoService {
 		def hashCertificadoVoto = CMSUtils.obtenerHashBase64(origenHashCertificadoVoto, 
 			"${grailsApplication.config.SistemaVotacion.votingHashAlgorithm}")
 		if (!hashCertificadoVotoBase64.equals(hashCertificadoVoto))
-				return new Respuesta(codigoEstado:400, mensaje:messageSource.getMessage(
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+					mensaje:messageSource.getMessage(
 					'anulacionVoto.errorEnHashCertificado', null, locale))
 		def certificado = Certificado.findWhere(hashCertificadoVotoBase64:hashCertificadoVotoBase64)
 		if (!certificado)
-				return new Respuesta(codigoEstado:400, mensaje:messageSource.getMessage(
-					'anulacionVoto.errorCertificadoNoEncontrado', null, locale))
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+				mensaje:messageSource.getMessage(
+				'anulacionVoto.errorCertificadoNoEncontrado', null, locale))
 		def voto = Voto.findWhere(certificado:certificado)
-		if(!voto) return new Respuesta(codigoEstado:400, mensaje:messageSource.getMessage(
+		if(!voto) return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+			mensaje:messageSource.getMessage(
 			'anulacionVoto.errorVotoNoEncontrado', null, locale))
 		MensajeSMIME mensajeSMIME = new MensajeSMIME(tipo:Tipo.ANULADOR_VOTO, 
 			contenido:smimeMessage.getBytes(), valido:true, eventoVotacion:voto.eventoVotacion)
@@ -221,7 +220,7 @@ class VotoService {
 			mensajeSMIME:mensajeSMIME)
 		anuladorVoto.save();
 		log.debug("anuladorVoto.id: ${anuladorVoto.id}")
-		return new Respuesta(codigoEstado:200)
+		return new Respuesta(codigoEstado:Respuesta.SC_OK)
 	}
  
 }

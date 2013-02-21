@@ -153,12 +153,15 @@ class CertificadoController {
 	}
 
 	def addCertificateAuthority = {
-		if(!Environment.TEST.equals(Environment.current)) {
+		//===== 
+		/*if(!Environment.TEST.equals(Environment.current)) {
 			def msg = message(code: "msg.servicioEntornoTest")
 			log.debug msg
+			response.status = Respuesta.SC_ERROR_PETICION
 			render msg
 			return false
-		}
+		}*/
+		//=====
 		log.debug "Environment --- TEST ---"
 		Respuesta respuesta = firmaService.addCertificateAuthority(
 			params.archivoFirmado?.getBytes(), request.getLocale())

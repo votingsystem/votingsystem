@@ -9,6 +9,7 @@ import java.io.OutputStreamWriter;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -31,6 +32,7 @@ import java.security.cert.TrustAnchor;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
@@ -297,6 +299,24 @@ public class CertUtil {
                 (Collection<X509Certificate>) certificateFactory.generateCertificates(inputStream);
         X509Certificate cert = certificateChain.iterator().next();
         return cert;
+    }
+
+        
+    public static PKIXParameters getPKIXParameters (X509Certificate... certs) 
+            throws InvalidAlgorithmParameterException{
+        return getPKIXParameters(Arrays.asList(certs));
+    }
+    
+    public static PKIXParameters getPKIXParameters (Collection<X509Certificate> certs) 
+            throws InvalidAlgorithmParameterException{
+        Set<TrustAnchor> anchors = new HashSet<TrustAnchor>();
+        for(X509Certificate cert:certs) {
+            TrustAnchor anchor = new TrustAnchor(cert, null);
+            anchors.add(anchor);
+        }
+        PKIXParameters params = new PKIXParameters(anchors);
+        params.setRevocationEnabled(false); // tell system do not chec CRL's
+        return params;
     }
 
     /**

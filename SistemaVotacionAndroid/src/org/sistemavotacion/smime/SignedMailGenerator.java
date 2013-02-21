@@ -45,7 +45,7 @@ public class SignedMailGenerator {
     public enum Type {USER, ACESS_CONTROL, CONTROL_CENTER}
     
     public static final String NOMBRE_ARCHIVO_FIRMADO = "EventoEnviado";
-    public static final String SIGN_PROVIDER = "BC";
+    public static final String PROVIDER = "BC";
     public static final String SIGNED_PART_EXTENSION = ".p7s";
     
     private SMIMESignedGenerator smimeSignedGenerator = null;
@@ -103,7 +103,7 @@ public class SignedMailGenerator {
         // will be generated as part of the signature. The encryption algorithm
         // used is taken from the key - in this RSA with PKCS1Padding
         JcaSimpleSignerInfoGeneratorBuilder jcaSignerInfoGeneratorBuilder =  new JcaSimpleSignerInfoGeneratorBuilder();
-        jcaSignerInfoGeneratorBuilder = jcaSignerInfoGeneratorBuilder.setProvider(SIGN_PROVIDER);
+        jcaSignerInfoGeneratorBuilder = jcaSignerInfoGeneratorBuilder.setProvider(PROVIDER);
         jcaSignerInfoGeneratorBuilder.setSignedAttributeGenerator(new AttributeTable(signedAttrs));
         SignerInfoGenerator signerInfoGenerator = jcaSignerInfoGeneratorBuilder.build(
         		signatureMechanism, key, (X509Certificate)chain[0]);
@@ -176,10 +176,10 @@ public class SignedMailGenerator {
          smimeSignedGenerator.getGeneratedDigests();
          //MimeMultipart mimeMultipart = smimeSignedGenerator.generate(body, type.toString() + SIGNED_PART_EXTENSION);
         // MimeMultipart mimeMultipart = smimeSignedGenerator.generate(
-         //        dnieMimeMessage, SIGN_PROVIDER,
+         //        dnieMimeMessage, PROVIDER,
            //      type.toString() + SIGNED_PART_EXTENSION);
          MimeMultipart mimeMultipart = smimeSignedGenerator.generate(
-        		 body, SIGN_PROVIDER, Aplicacion.SIGNATURE_ALGORITHM);
+        		 body, PROVIDER, Aplicacion.SIGNATURE_ALGORITHM);
          return mimeMultipart;
      }
     

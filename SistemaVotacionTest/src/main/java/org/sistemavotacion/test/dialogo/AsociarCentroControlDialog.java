@@ -357,13 +357,16 @@ public class AsociarCentroControlDialog
                     centroControlTextField.setBorder(normalTextBorder);
                     centroControl = actorConIP;
                     estado = Estado.CONECTADO_CENTRO_CONTROL;
-                    if(ActorConIP.EnvironmentMode.TEST.equals(
+                    
+                    
+                    firmarEnviarSolicitudAsociacionCentroControl();
+                    /* ====== if(ActorConIP.EnvironmentMode.TEST.equals(
                             centroControl.getEnvironmentMode())) {
                         firmarEnviarSolicitudAsociacionCentroControl();
                     } else {
                          mostrarMensajeUsuario(
                                  "Para poder hacer las pruebas el servidor tiene que ser arrancado en modo TEST");
-                    }
+                    }*/
                 } catch(Exception ex) {
                     logger.error(ex.getMessage(), ex);
                     infoServidorButton.setIcon(new javax.swing.ImageIcon(

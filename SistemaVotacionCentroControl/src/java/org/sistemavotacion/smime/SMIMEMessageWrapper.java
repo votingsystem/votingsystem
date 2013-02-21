@@ -1,6 +1,5 @@
 package org.sistemavotacion.smime;
 
-import com.sun.mail.util.BASE64DecoderStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -14,37 +13,42 @@ import java.io.Writer;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
+import java.security.cert.X509Certificate;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Random;
-import javax.mail.Address;
+import java.util.Set;
+
+import javax.activation.CommandMap;
+import javax.activation.MailcapCommandMap;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessable;
+import org.bouncycastle.cms.CMSVerifierCertificateNotValidException;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.mail.smime.SMIMEException;
 import org.bouncycastle.mail.smime.SMIMESigned;
 import org.bouncycastle.util.Store;
+import org.sistemavotacion.centrocontrol.modelo.*;
+import org.sistemavotacion.seguridad.PKIXCertPathReviewer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.security.cert.X509Certificate;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.sistemavotacion.seguridad.PKIXCertPathReviewer;
-import org.sistemavotacion.centrocontrol.modelo.*;
+
+import com.sun.mail.util.BASE64DecoderStream;
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
@@ -55,6 +59,18 @@ public class SMIMEMessageWrapper extends MimeMessage {
     
     private static Logger logger = LoggerFactory.getLogger(SMIMEMessageWrapper.class);
     
+    static {
+        MailcapCommandMap mc = (MailcapCommandMap)CommandMap.getDefaultCommandMap();
+
+        mc.addMailcap("text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain");
+        mc.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html");
+        mc.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
+        mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true");
+        mc.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822");
+
+        CommandMap.setDefaultCommandMap(mc);
+    }
+    
     private static final String BC = BouncyCastleProvider.PROVIDER_NAME;
     public static final String SIGNED_FILE_EXTENSION = "p7m";
 
@@ -64,12 +80,12 @@ public class SMIMEMessageWrapper extends MimeMessage {
     private String signedContent;
     private SMIMESigned smimeSigned = null;
     private SignedMailValidator.ValidationResult validationResult = null;
-    private boolean isValidSignature = false;
-    
+
 	private Set<Usuario> firmantes = new HashSet<Usuario>();
 	private Usuario firmante;
 	private Tipo tipoMensaje = Tipo.INDEFINIDO;
 	private InformacionVoto informacionVoto;
+	private boolean isValidSignature = false;
     
     public SMIMEMessageWrapper(Session session) throws MessagingException {
         super(session);
@@ -83,12 +99,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
         //Properties props = System.getProperties();
         //return new DNIeMimeMessage (Session.getDefaultInstance(props, null), fileInputStream);
         SMIMEMessageWrapper dnieMimeMessage = null;
-        try {
-            dnieMimeMessage = new SMIMEMessageWrapper (null, inputStream, name, tipo);
-        } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            return null;
-        } 
+        dnieMimeMessage = new SMIMEMessageWrapper (null, inputStream, name, tipo);
         return dnieMimeMessage;
     }
     
@@ -97,6 +108,11 @@ public class SMIMEMessageWrapper extends MimeMessage {
     	return build(inputStream, name, Tipo.INDEFINIDO);
     }
 
+    public SMIMEMessageWrapper (Session session, InputStream inputStream, String fileName) 
+    		throws IOException, MessagingException, CMSException, SMIMEException, Exception {
+    	this(session, inputStream, fileName, Tipo.INDEFINIDO);
+    } 
+    
     public SMIMEMessageWrapper (Session session, InputStream inputStream, String fileName, Tipo tipo) 
             throws IOException, MessagingException, CMSException, SMIMEException, Exception {
         super(session, inputStream);
@@ -168,13 +184,6 @@ public class SMIMEMessageWrapper extends MimeMessage {
             saveChanges();
     }
 
-    public void updateMessageID(String nifUsuario) throws MessagingException {
-            messageId = fileName + "@" + nifUsuario;
-            Address[] addresses = {new InternetAddress(nifUsuario)};
-            addFrom(addresses);
-            updateMessageID(); 
-    }
-	
     public static String RandomLowerString(long seed, int size) {
         StringBuffer tmp = new StringBuffer();
         Random random = new Random(seed);
@@ -208,42 +217,45 @@ public class SMIMEMessageWrapper extends MimeMessage {
     public SMIMESigned getSmimeSigned() {
         return smimeSigned;
     }
-
-
-    /**
-     * verify that the sig is correct and that it was generated when the 
-     * certificate was current(assuming the cert is contained in the message).
-     */
-    public static boolean isValidSignature(SMIMESigned smimeSigned) throws Exception {
+    
+    public boolean isValidSignatureCAVerified(SMIMESigned smimeSigned) throws Exception {
         // certificates and crls passed in the signature
         Store certs = smimeSigned.getCertificates();
         // SignerInfo blocks which contain the signatures
         SignerInformationStore  signers = smimeSigned.getSignerInfos();
-        logger.debug("signers.size(): " + signers.size());;
+        logger.debug("signers.size(): " + signers.size());
         Collection c = signers.getSigners();
         Iterator it = c.iterator();
-        boolean result = false;
-        // check each signer
-        while (it.hasNext()) {
+        boolean result = true;
+        while (it.hasNext() && result) {// check each signer
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certs.getMatches(signer.getSID());
-            logger.debug("Collection matches: " + certCollection.size());
-            Iterator        certIt = certCollection.iterator();
+            Collection certCollection = certs.getMatches(signer.getSID());
+            Iterator certIt = certCollection.iterator();
             X509Certificate cert = new JcaX509CertificateConverter().setProvider(BC)
                     .getCertificate((X509CertificateHolder)certIt.next());
             logger.debug("cert.getSubjectDN(): " + cert.getSubjectDN());
-            if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert))){
-                logger.debug("signature verified");
-                result = true;
-            } else {
-                logger.debug("signature failed!");
-                result = false;
-            }
+            result = verifySignerCert(signer, cert);
         }
         return result;
     }
     
-    public boolean isValidSignature() throws Exception {
+	private boolean verifySignerCert(SignerInformation signer, X509Certificate cert) {
+    	boolean result = false;
+        try {
+        	if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert))){
+                logger.debug("signature verified");
+                result = true;
+            } else {logger.debug("signature failed!");}
+        } catch(CMSVerifierCertificateNotValidException ex) {
+        	logger.debug("-----> cert.getNotBefore(): " + cert.getNotBefore());
+        	logger.debug("-----> cert.getNotAfter(): " + cert.getNotAfter());
+    		logger.error(ex.getMessage(), ex);
+        } finally {
+        	return result;
+        }
+    }
+    
+    public boolean isValidSignature()  {
     	return isValidSignature;
     }
     
@@ -251,7 +263,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
      * verify that the sig is correct and that it was generated when the 
      * certificate was current(assuming the cert is contained in the message).
      */
-    private boolean checkSignature() throws Exception {
+    private void checkSignature() throws Exception {
         // certificates and crls passed in the signature
         Store certs = smimeSigned.getCertificates();
         // SignerInfo blocks which contain the signatures
@@ -259,9 +271,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
         logger.debug("signers.size(): " + signers.size());;
         Collection c = signers.getSigners();
         Iterator it = c.iterator();
-        boolean result = false;
-        // check each signer
-        while (it.hasNext()) {
+        while (it.hasNext()) {// check each signer
             SignerInformation   signer = (SignerInformation)it.next();
             Collection          certCollection = certs.getMatches(signer.getSID());
             logger.debug("Collection matches: " + certCollection.size());
@@ -270,20 +280,17 @@ public class SMIMEMessageWrapper extends MimeMessage {
                     .getCertificate((X509CertificateHolder)certIt.next());
             Usuario usuario = Usuario.getUsuario(cert);
             firmantes.add(usuario);
-            setFirmante(usuario);
+            this.firmante = usuario;
             logger.debug("cert.getSubjectDN(): " + cert.getSubjectDN());
-            if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert))){
-                logger.debug("signature verified");
-                result = true;
-            } else {
-                logger.debug("signature failed!");
-                result = false;
-            }
+            isValidSignature = verifySignerCert(signer, cert);
+            if(!isValidSignature) return;
         }
-        isValidSignature = result;
-        return result;
     }
     
+    /**
+     * verify that the sig is correct and that it was generated when the 
+     * certificate was current(assuming the cert is contained in the message).
+     */
     public void initVoto() throws Exception {
         // certificates and crls passed in the signature
         Store certs = smimeSigned.getCertificates();
@@ -293,9 +300,8 @@ public class SMIMEMessageWrapper extends MimeMessage {
         logger.debug("initVoto() - signers.size(): " + signers.size());
         Collection c = signers.getSigners();
         Iterator it = c.iterator();
-        boolean result = false;
-        // check each signer
-        while (it.hasNext()) {
+        boolean result = true;
+        while (it.hasNext() && result) {// check each signer
             SignerInformation   signer = (SignerInformation)it.next();
             Collection          certCollection = certs.getMatches(signer.getSID());
             logger.debug("Collection matches: " + certCollection.size());
@@ -307,13 +313,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
             if (cert.getSubjectDN().toString().contains("OU=hashCertificadoVotoHEX:")) {
             	informacionVoto.setCertificadoVoto(cert);
             } else {informacionVoto.setCertificadoCentroControl(cert);}
-            if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert))){
-                logger.debug("signature verified");
-                result = true;
-            } else {
-                logger.debug("signature failed!");
-                result = false;
-            }
+            result = verifySignerCert(signer, cert);            
         }
         isValidSignature = result;
     }
@@ -382,7 +382,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
                 int i = 0;
                 while (certIt.hasNext()) {
                     X509Certificate cert = (X509Certificate) certIt.next();
-                    logger.debug("Certificate " + i + " ------------- ");
+                    logger.debug("Certificate " + i + " ----------- ");
                     logger.debug("Issuer: " + cert.getIssuerDN().getName());
                     logger.debug("Subject: " + cert.getSubjectDN().getName());
                     logger.debug("Errors:");
@@ -455,7 +455,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
                 int i = 0;
                 while (certIt.hasNext()) {
                     X509Certificate cert = (X509Certificate) certIt.next();
-                    logger.debug("Certificate " + i + " ----------- ");
+                    logger.debug("Certificate " + i + " ------------ ");
                     logger.debug("Issuer: " + cert.getIssuerDN().getName());
                     logger.debug("Subject: " + cert.getSubjectDN().getName());
                     logger.debug("Errors:");
@@ -475,11 +475,11 @@ public class SMIMEMessageWrapper extends MimeMessage {
         }
         return result;
     }
-    
+
     public Set<Usuario> getFirmantes() {
     	return firmantes;
     }
-
+    
     /**
      * @return the validationResult
      */
@@ -504,10 +504,6 @@ public class SMIMEMessageWrapper extends MimeMessage {
 
 	public Usuario getFirmante() {
 		return firmante;
-	}
-
-	public void setFirmante(Usuario firmante) {
-		this.firmante = firmante;
 	}
 	
     public byte[] getBytes () throws IOException, MessagingException {

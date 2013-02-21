@@ -2,7 +2,7 @@ package org.sistemavotacion.smime;
 
 import static org.sistemavotacion.android.Aplicacion.DEFAULT_SIGNED_FILE_NAME;
 import static org.sistemavotacion.android.Aplicacion.SIGNED_PART_EXTENSION;
-import static org.sistemavotacion.android.Aplicacion.SIGN_PROVIDER;
+import static org.sistemavotacion.android.Aplicacion.PROVIDER;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -264,7 +264,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
     				"Collection matches: " + certCollection.size());
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = new JcaX509CertificateConverter()
-                    .setProvider(SIGN_PROVIDER).getCertificate(
+                    .setProvider(PROVIDER).getCertificate(
                     (X509CertificateHolder)certIt.next());
     		Log.d(TAG + ".isValidSignature(...) ", 
     				"cert.getSubjectDN(): " + cert.getSubjectDN());
@@ -275,7 +275,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
     		
 
             if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().
-                    setProvider(SIGN_PROVIDER).build(cert))){
+                    setProvider(PROVIDER).build(cert))){
         		Log.d(TAG + ".isValidSignature(...) ", "signature verified"); 
                 result = true;
             } else {
@@ -326,7 +326,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
             Log.d(TAG, "Collection matches: " + certCollection.size());
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = new JcaX509CertificateConverter()
-                    .setProvider(SIGN_PROVIDER).getCertificate(
+                    .setProvider(PROVIDER).getCertificate(
                     (X509CertificateHolder)certIt.next());
 
             firmante.setUsuario(Usuario.getUsuario(cert));
@@ -334,7 +334,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
             firmantes.add(firmante);
             Log.d(TAG, "cert.getSubjectDN(): " + cert.getSubjectDN());
             SignerInformationVerifier siv = new JcaSimpleSignerInfoVerifierBuilder().
-                    setProvider(SIGN_PROVIDER).build(cert);
+                    setProvider(PROVIDER).build(cert);
             if (signer.verify(siv)){
                 Log.d(TAG, "signature verified");
                 result = true;
@@ -347,9 +347,9 @@ public class SMIMEMessageWrapper extends MimeMessage {
             String digestParamsStr = new String(Base64.encode(hash));
             Log.d(TAG, " -- digestParamsStr: " + digestParamsStr);
             
-            // boolean cmsVerifyDigest = CMSUtils.verifyDigest(signer, cert, SIGN_PROVIDER);
+            // boolean cmsVerifyDigest = CMSUtils.verifyDigest(signer, cert, PROVIDER);
             // Log.d(TAG, " -- cmsVerifyDigest: " + cmsVerifyDigest);
-            // boolean cmsVerifySignature = CMSUtils.verifySignature(signer, cert, SIGN_PROVIDER);
+            // boolean cmsVerifySignature = CMSUtils.verifySignature(signer, cert, PROVIDER);
             // Log.d(TAG, " -- cmsVerifySignature: " + cmsVerifySignature);
         }
         return result;

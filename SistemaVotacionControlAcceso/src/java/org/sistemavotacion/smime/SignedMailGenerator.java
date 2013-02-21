@@ -42,7 +42,7 @@ public class SignedMailGenerator {
     public static final String NOMBRE_ARCHIVO_FIRMADO = "EventoEnviado";
     public static final String NOMBRE_ARCHIVO_MULTIFIRMA = "MultiFirma";
     public static final String SIGN_MECHANISM = "SHA256withRSA";
-    public static final String SIGN_PROVIDER = "BC";
+    public static final String PROVIDER = "BC";
     public static final String SIGNED_PART_EXTENSION = ".p7s";
     
     private SMIMESignedGenerator smimeSignedGenerator = null;
@@ -73,7 +73,7 @@ public class SignedMailGenerator {
         // will be generated as part of the signature. The encryption algorithm
         // used is taken from the key - in this RSA with PKCS1Padding
         JcaSimpleSignerInfoGeneratorBuilder jcaSignerInfoGeneratorBuilder =  new JcaSimpleSignerInfoGeneratorBuilder();
-        jcaSignerInfoGeneratorBuilder = jcaSignerInfoGeneratorBuilder.setProvider(SIGN_PROVIDER);
+        jcaSignerInfoGeneratorBuilder = jcaSignerInfoGeneratorBuilder.setProvider(PROVIDER);
         jcaSignerInfoGeneratorBuilder.setSignedAttributeGenerator(new AttributeTable(signedAttrs));
         signerInfoGenerator = jcaSignerInfoGeneratorBuilder.build(SIGN_MECHANISM, key, (X509Certificate)chain[0]);
         smimeSignedGenerator = new SMIMESignedGenerator();
@@ -147,9 +147,9 @@ public class SignedMailGenerator {
          smimeSignedGenerator.getGeneratedDigests();
          //MimeMultipart mimeMultipart = smimeSignedGenerator.generate(body, type.toString() + SIGNED_PART_EXTENSION);
         // MimeMultipart mimeMultipart = smimeSignedGenerator.generate(
-         //        dnieMimeMessage, SIGN_PROVIDER,
+         //        dnieMimeMessage, PROVIDER,
            //      type.toString() + SIGNED_PART_EXTENSION);
-         //MimeMultipart mimeMultipart = smimeSignedGenerator.generate(body, SIGN_PROVIDER, SIGN_MECHANISM);
+         //MimeMultipart mimeMultipart = smimeSignedGenerator.generate(body, PROVIDER, SIGN_MECHANISM);
          MimeMultipart mimeMultipart = smimeSignedGenerator.generate(body, NOMBRE_ARCHIVO_MULTIFIRMA);
          return mimeMultipart;
      }

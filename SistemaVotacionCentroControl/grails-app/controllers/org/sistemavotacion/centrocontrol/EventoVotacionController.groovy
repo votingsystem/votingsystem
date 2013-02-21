@@ -35,7 +35,7 @@ class EventoVotacionController {
 	}
         
     def obtener = {
-		def eventoList = []
+		List eventoList = []
 		def eventosMap = new HashMap()
 		eventosMap.eventos = new HashMap()
 		eventosMap.eventos.votaciones = []
@@ -45,14 +45,13 @@ class EventoVotacionController {
 					if (evento) eventoList << evento;
 				}
 			}
-			if (eventoList.size() == 0) {
-					response.status = 404 //Not Found
+			if (eventoList.isEmpty()) {
+					response.status = Respuesta.SC_NOT_FOUND
 					render message(code: 'eventoVotacion.eventoNotFound', args:[params.ids])
 					return
 			}
 		} else {
 			params.sort = "fechaInicio"
-			log.debug " -Params: " + params
 			EventoVotacion.Estado estadoEvento
 			if(params.estadoEvento) estadoEvento = EventoVotacion.Estado.valueOf(params.estadoEvento)
 			EventoVotacion.withTransaction {
@@ -88,7 +87,7 @@ class EventoVotacionController {
         if (params.long('eventoVotacionId') && params.controlAccesoServerURL) {
 			ControlAcceso controlAcceso = ActorConIP.findWhere(serverURL:params.controlAccesoServerURL)
 			if (!controlAcceso) {
-				response.status = 404
+				response.status = Respuesta.SC_NOT_FOUND
 				render message(code: 'eventoVotacion.controlAccesoNotFound', args:[params.controlAccesoServerURL])
 				return false
 			}
@@ -136,16 +135,16 @@ class EventoVotacionController {
                     votosMap.opciones.add(opcionMap)
                     
                 }
-                response.status = 200
+                response.status = Respuesta.SC_OK
 				response.setContentType("application/json")
 				render votosMap as JSON
                 return false
             }
-            response.status = 404
+            response.status = Respuesta.SC_NOT_FOUND
             render message(code: 'eventoVotacion.eventoNotFound', args:[params.id])
             return false
         }
-        response.status = 400
+        response.status = Respuesta.SC_ERROR_PETICION
 		render (view: 'index')
         return false
     }
@@ -160,7 +159,7 @@ class EventoVotacionController {
 		} else if(params.long('eventoVotacionId') && params.controlAccesoServerURL) {
 			ControlAcceso controlAcceso = ActorConIP.findWhere(serverURL:params.controlAccesoServerURL)
 			if (!controlAcceso) {
-				response.status = 404
+				response.status = Respuesta.SC_NOT_FOUND
 				render message(code: 'eventoVotacion.controlAccesoNotFound', args:[params.controlAccesoServerURL])
 				return false
 			}
@@ -169,12 +168,12 @@ class EventoVotacionController {
 					controlAcceso:controlAcceso)
 			}
 		} else {
-			response.status = 400
+			response.status = Respuesta.SC_ERROR_PETICION
 			render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
 			return false
 		}
         if (eventoVotacion) {
-            response.status = 200
+            response.status = Respuesta.SC_OK
             def estadisticasMap = new HashMap()
 			estadisticasMap.opciones = []
             estadisticasMap.id = eventoVotacion.id
@@ -195,7 +194,7 @@ class EventoVotacionController {
 			else render estadisticasMap as JSON
             return false
         }
-        response.status = 404
+        response.status = Respuesta.SC_NOT_FOUND
         render message(code: 'evento.eventoNotFound', args:[params.eventoVotacionId])
         return false
     }
@@ -208,7 +207,7 @@ class EventoVotacionController {
 			} 
 		}
 		if(!eventoVotacion) {
-			response.status = 404 //Not Found
+			response.status = Respuesta.SC_NOT_FOUND
 			render message(code: 'eventoVotacion.eventoNotFound', args:[params.id])
 			return
 		}
@@ -229,7 +228,7 @@ class EventoVotacionController {
 		   render respuesta.mensaje;
 		   return false
 	   }
-	   response.status = 400;
+	   response.status = Respuesta.SC_ERROR_PETICION;
 	   render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"]);
 	   return false;
 	}

@@ -30,6 +30,7 @@ import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.smime.DNIeContentSigner;
 import org.sistemavotacion.smime.DNIeSessionHelper;
 import org.sistemavotacion.smime.SimpleSignerInfoGeneratorBuilder;
+import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +79,8 @@ public class CreateDNIeSignedMail {
             dnieContentSigner.setPkcs11Session(sesion);
 
             SimpleSignerInfoGeneratorBuilder dnieSignerInfoGeneratorBuilder =  new SimpleSignerInfoGeneratorBuilder();
-            dnieSignerInfoGeneratorBuilder = dnieSignerInfoGeneratorBuilder.setProvider("BC");
+            dnieSignerInfoGeneratorBuilder = dnieSignerInfoGeneratorBuilder.
+                    setProvider(ContextoPruebas.PROVIDER);
             dnieSignerInfoGeneratorBuilder.setSignedAttributeGenerator(new AttributeTable(signedAttrs));
             SignerInfoGenerator signerInfoGenerator = dnieSignerInfoGeneratorBuilder.build(
                     "SHA1withRSA", null, sessionHelper.getCertificadoUsuario(), dnieContentSigner);

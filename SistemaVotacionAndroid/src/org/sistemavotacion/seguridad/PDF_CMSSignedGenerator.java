@@ -175,7 +175,7 @@ public class PDF_CMSSignedGenerator extends CMSSignedGenerator {
         String signatureHashStr = Base64.encodeToString(signatureHash, Base64.DEFAULT);
     	
         JcaSimpleSignerInfoGeneratorBuilder jcaSignerInfoGeneratorBuilder =  new JcaSimpleSignerInfoGeneratorBuilder();
-        jcaSignerInfoGeneratorBuilder = jcaSignerInfoGeneratorBuilder.setProvider(Aplicacion.SIGN_PROVIDER);
+        jcaSignerInfoGeneratorBuilder = jcaSignerInfoGeneratorBuilder.setProvider(Aplicacion.PROVIDER);
         jcaSignerInfoGeneratorBuilder.setSignedAttributeGenerator(attributeTable);
         jcaSignerInfoGeneratorBuilder.setUnsignedAttributeGenerator(unsAttr);
         SignerInfoGenerator signerInfoGenerator = jcaSignerInfoGeneratorBuilder.build(

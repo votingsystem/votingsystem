@@ -40,6 +40,7 @@ import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.PKIXCertPathReviewer;
+import org.sistemavotacion.util.StringUtils;
 
 /**
 * @author jgzornoza
@@ -58,11 +59,10 @@ public class DNIeMimeMessage extends MimeMessage {
     private String contentType;
     private String signedContent;
     private SMIMESigned smimeSigned = null;
-    private DNIeSignedMailValidator.ValidationResult validationResult = null;
 
     protected DNIeMimeMessage(Session session) throws MessagingException {
         super(session);
-        fileName =  RandomLowerString(System.currentTimeMillis(), 7);
+        fileName =  StringUtils.RandomLowerString(System.currentTimeMillis(), 7);
         setDisposition("attachment; fileName=" + fileName + ".p7m");
         contentType = "application/x-pkcs7-mime; smime-type=signed-data; name=" + fileName + ".p7m";
     }
@@ -131,19 +131,6 @@ public class DNIeMimeMessage extends MimeMessage {
             addFrom(addresses);
             updateMessageID(); 
     }
-	
-    public static String RandomLowerString(long seed, int size) {
-        StringBuffer tmp = new StringBuffer();
-        Random random = new Random(seed);
-        for (int i = 0; i < size; i++) {
-            long newSeed = random.nextLong();
-            int currInt = (int) (26 * random.nextFloat());
-            currInt += 97;
-            random = new Random(newSeed);
-            tmp.append((char) currInt);
-        }
-        return tmp.toString();
-    }
 
     /**
      * @return the signedContent
@@ -195,18 +182,6 @@ public class DNIeMimeMessage extends MimeMessage {
             }
         }
         return result;
-    }
-    
-    public static PKIXParameters getPKIXParameters (X509Certificate... certs) 
-            throws InvalidAlgorithmParameterException{
-        Set<TrustAnchor> anchors = new HashSet<TrustAnchor>();
-        for(X509Certificate cert:certs) {
-            TrustAnchor anchor = new TrustAnchor(cert, null);
-            anchors.add(anchor);
-        }
-        PKIXParameters params = new PKIXParameters(anchors);
-        params.setRevocationEnabled(false); // tell system do not chec CRL's
-        return params;
     }
     
     public DNIeSignedMailValidator.ValidationResult verify(
@@ -279,15 +254,8 @@ public class DNIeMimeMessage extends MimeMessage {
                 }
             }
         }
-        validationResult = result;
         return result;
     }
 
-    /**
-     * @return the validationResult
-     */
-    public DNIeSignedMailValidator.ValidationResult getValidationResult() {
-        return validationResult;
-    }
     
 }

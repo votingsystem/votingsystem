@@ -99,7 +99,7 @@ class SubscripcionService {
 		if (!controlAcceso) {
 			String urlInfoControlAcceso = "${serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLInfoServidor}"
 			Respuesta respuesta = httpService.obtenerInfoActorConIP(urlInfoControlAcceso, new ControlAcceso())
-			if (200 == respuesta.codigoEstado) {
+			if (Respuesta.SC_OK== respuesta.codigoEstado) {
 				controlAcceso = respuesta.actorConIP
 				controlAcceso.save()
 			} else return null

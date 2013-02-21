@@ -41,7 +41,7 @@ class SubscripcionController {
 				def urlInfoControlAcceso = "${serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLInfoServidor}"
 				Respuesta respuesta = httpService.obtenerInfoActorConIP(urlInfoControlAcceso, new ControlAcceso())
 				response.status = respuesta.codigoEstado
-				if (200 == respuesta.codigoEstado) {					
+				if (Respuesta.SC_OK== respuesta.codigoEstado) {					
 					mensaje = "Asociado ControlAcceso con URL: '${actorConIP.serverURL}'"
 					ControlAcceso actorConIP = respuesta.actorConIP
 					actorConIP.save()

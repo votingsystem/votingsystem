@@ -50,7 +50,7 @@ class BuscadorController {
 		Usuario usuario
 		Respuesta comprobacionUsuario = subscripcionService.comprobarUsuario(
 			params.smimeMessageReq?.getFirmante(), request.getLocale())
-		if(200 == comprobacionUsuario.codigoEstado) usuario = comprobacionUsuario.usuario
+		if(Respuesta.SC_OK== comprobacionUsuario.codigoEstado) usuario = comprobacionUsuario.usuario
 		if (administradores.contains(usuario?.nif)) {
 			log.debug "Usuario en la lista de administradoreas, reindexando"
 			FullTextSession fullTextSession = Search.getFullTextSession(sessionFactory.currentSession);

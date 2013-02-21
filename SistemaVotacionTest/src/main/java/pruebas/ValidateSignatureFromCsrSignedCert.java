@@ -36,7 +36,7 @@ public class ValidateSignatureFromCsrSignedCert {
             		null, new ByteArrayInputStream(bytes), null);
             ValidationResult validationResult = null;
             if (dnieMimeMessage != null) {
-                System.out.println("signatura valida?" + SMIMEMessageWrapper.isValidSignature(dnieMimeMessage.getSmimeSigned()));
+                System.out.println("signatura valida?" + dnieMimeMessage.isValidSignature());
                 System.out.println("Contenido: " + dnieMimeMessage.getSignedContent());
                 validationResult = dnieMimeMessage.verify(params);
                 System.out.println("validationResult.isVerifiedSignature: " + validationResult.isVerifiedSignature());
