@@ -14,17 +14,24 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://raw.github.com/jgzornoza/SistemaVotacionAppletFirma/master/licencia.txt
 */
-public class EnviarSolicitudControlAccesoWorker extends SwingWorker<Respuesta, String> {
+public class EnviarSolicitudControlAccesoWorker extends SwingWorker<Integer, String> 
+        implements VotingSystemWorker {
     
     private static Logger logger = LoggerFactory.getLogger(EnviarSolicitudControlAccesoWorker.class);
 
     private String urlSolicitudAcceso;
-    private WorkerListener workerListener;
+    private VotingSystemWorkerListener workerListener;
     private File solicitudAcceso;
     private PKCS10WrapperClient pkcs10WrapperClient;
+    private Integer id = null;
+    private int statusCode = Respuesta.SC_ERROR;
+    private String message = null;
+    private Exception exception = null;
     
-    public EnviarSolicitudControlAccesoWorker(File solicitudAcceso,
-            String urlSolicitudAcceso, PKCS10WrapperClient pkcs10WrapperClient, WorkerListener workerListener) {
+    public EnviarSolicitudControlAccesoWorker(Integer id, File solicitudAcceso,
+            String urlSolicitudAcceso, PKCS10WrapperClient pkcs10WrapperClient, 
+            VotingSystemWorkerListener workerListener) {
+        this.id = id;
         this.solicitudAcceso = solicitudAcceso;
         this.workerListener = workerListener;
         this.urlSolicitudAcceso = urlSolicitudAcceso;
@@ -34,31 +41,46 @@ public class EnviarSolicitudControlAccesoWorker extends SwingWorker<Respuesta, S
     @Override//on the EDT
     protected void done() {
         try {
-            workerListener.showResult(this, get());
+            statusCode = get();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-            Respuesta respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
-            workerListener.showResult(this, respuesta);
+            exception = ex;
+        } finally {
+            workerListener.showResult(this);
         }
     }
     
-    @Override
-    protected Respuesta doInBackground() throws Exception {
+    @Override protected Integer doInBackground() throws Exception {
         logger.debug("doInBackground - urlSolicitudAcceso: " + urlSolicitudAcceso 
                 + " - solicitudAcceso: " + solicitudAcceso.getAbsolutePath());
-        Respuesta respuesta = null;
         HttpResponse response = Contexto.getHttpHelper().enviarSolicitudAcceso(
                 pkcs10WrapperClient.getPEMEncodedRequestCSR(), solicitudAcceso,
                 urlSolicitudAcceso);
-        if (Respuesta.SC_OK == response.getStatusLine().getStatusCode()) {
+        statusCode = response.getStatusLine().getStatusCode();
+        if (Respuesta.SC_OK == statusCode) {
             pkcs10WrapperClient.initSigner(EntityUtils.toByteArray(response.getEntity()));
-            respuesta = new Respuesta(Respuesta.SC_OK, pkcs10WrapperClient);
         } else {
-            respuesta = new Respuesta(response.getStatusLine().getStatusCode(), 
-                    EntityUtils.toString(response.getEntity()));
+            message = EntityUtils.toString(response.getEntity());
         }
         EntityUtils.consume(response.getEntity());
-        return respuesta;
+        return statusCode;
+    }
+    
+    public PKCS10WrapperClient getPKCS10WrapperClient() {
+        return pkcs10WrapperClient;
+    }
+
+    @Override public String getMessage() {
+        if(exception != null) return exception.getMessage();
+        else return message;
+    }
+
+    @Override public int getId() {
+        return this.id;
+    }
+
+    @Override public int getStatusCode() {
+        return statusCode;
     }
     
 }

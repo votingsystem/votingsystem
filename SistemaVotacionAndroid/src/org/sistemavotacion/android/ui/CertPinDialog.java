@@ -111,7 +111,7 @@ public class CertPinDialog extends DialogFragment implements OnKeyListener {
         		getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(getDialog().
         		getCurrentFocus().getWindowToken(), 0);
-    	getDialog().dismiss();
+        onDestroyView();
 		listener.setPin(pin);
     }
 

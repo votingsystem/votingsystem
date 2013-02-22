@@ -147,7 +147,7 @@ public class VoteReceiptListScreen extends FragmentActivity
 		} catch(Exception ex) {
 			ex.printStackTrace();
 		}
-		dimissOptionsDialog();
+		dismissOptionsDialog();
 		adapter.setData(voteReceiptList);
 		adapter.notifyDataSetChanged();
 		adapter.setNotifyOnChange (true);
@@ -364,7 +364,7 @@ public class VoteReceiptListScreen extends FragmentActivity
     	} 
 	}
 	
-	private void dimissOptionsDialog() {
+	private void dismissOptionsDialog() {
 		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 		DialogFragment prev = (DialogFragment) getSupportFragmentManager().findFragmentByTag(OPTIONS_DIALOG_ID);
 	    if(prev != null) {

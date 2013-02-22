@@ -152,6 +152,7 @@ class TimeStampService {
 			String timeStampRequestStr = new String(Base64.encode(timeStampRequestBytes));
 			TimeStampRequest timeStampRequest = new TimeStampRequest(timeStampRequestBytes)
 			final Date date = DateUtils.getTodayDate();
+			if(!sernoGenerator) afterPropertiesSet()
 			final BigInteger serialNumber = sernoGenerator.getSerialNumber();
 			log.debug("processRequest - serialNumber: '${serialNumber.longValue()}'" );
 			final TimeStampResponse timeStampResponse = timeStampResponseGen.generate(
@@ -167,6 +168,7 @@ class TimeStampService {
 				return new Respuesta(codigoEstado:Respuesta.SC_OK,
 					timeStampToken:token.getEncoded())
 			} else {
+				log.debug("processRequest - request without token")
 				new SelloTiempo(serialNumber:serialNumber?.longValue(),
 					reason:timeStampResponse?.getStatusString(),
 					estado:SelloTiempo.Estado.ERRORES,

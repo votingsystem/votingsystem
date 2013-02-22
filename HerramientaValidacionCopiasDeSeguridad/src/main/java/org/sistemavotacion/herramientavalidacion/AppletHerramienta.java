@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.Security;
+import java.text.MessageFormat;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import javax.activation.CommandMap;
@@ -14,6 +15,7 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import netscape.javascript.JSObject;
 import org.apache.log4j.PropertyConfigurator;
+import static org.sistemavotacion.Contexto.getString;
 import org.sistemavotacion.herramientavalidacion.Operacion;
 import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
@@ -45,6 +47,8 @@ public class AppletHerramienta extends JApplet {
         
     public void init() {
         logger.debug("init");
+        
+        
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 logger.debug("ShutdownHook - ShutdownHook - ShutdownHook");
@@ -53,37 +57,6 @@ public class AppletHerramienta extends JApplet {
         //creating this applet's GUI.
         try {
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-           // FileUtils.addDirToSystemClasspath("/home/jgzornoza/backup/SistemaVotacion_PreGradle_local/HerramientaValidacionCopiasDeSeguridad/target/HerramientaValidacion-jar-with-dependencies/META-INF");
-            
-     /*       
-        MailcapCommandMap _mailcap = (MailcapCommandMap)CommandMap
-                .getDefaultCommandMap();
-
-
-        _mailcap.addMailcap("text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain");
-        _mailcap.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html");
-        _mailcap.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
-        _mailcap.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true");
-        _mailcap.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822");
-        
-       		
-		
-		
-		
-	
-        //originalMap = CommandMap.getDefaultCommandMap();
-        CommandMap.setDefaultCommandMap(_mailcap);
-        logger.debug(" --- setUp CommandMap --- ");*/
-            
-        /*CommandMap defaultMap = CommandMap.getDefaultCommandMap();
-
-        FileInputStream fis = new FileInputStream(new File(
-                "/home/jgzornoza/backup/SistemaVotacion_PreGradle_local/HerramientaValidacionCopiasDeSeguridad/target/HerramientaValidacion-jar-with-dependencies/META-INF/mailcap"));
-        MailcapCommandMap myMap = new MailcapCommandMap(fis);
-        logger.debug(" --- MailcapCommandMap set --- ");
-        //myMap.addMailcap("text/plain;;    x-java-content-handler=" + DummyTextHandler.class.getName());
-        //myMap.addMailcap("multipart/*;;    x-java-content-handler=" + DummyMultipartHandler.class.getName());*/
-        //CommandMap.setDefaultCommandMap(_mailcap);
             
             javax.swing.SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
@@ -176,6 +149,12 @@ public class AppletHerramienta extends JApplet {
     public static String getString(String key) {
         return resourceBundle.getString(key);
     }
+    
+    public static String getString(String key, Object... arguments) {
+        String pattern = getString(key);
+        return MessageFormat.format(pattern, arguments);
+    }
+
 
     public static void main (String[] args) { 
         logger.info("Arrancando aplicación");

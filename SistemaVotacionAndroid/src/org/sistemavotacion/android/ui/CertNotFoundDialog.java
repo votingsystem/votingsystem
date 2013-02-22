@@ -45,7 +45,7 @@ public class CertNotFoundDialog  extends DialogFragment {
         /*Button cancelVoteButton = (Button) view.findViewById(R.id.cancel_button);
         cancelVoteButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-            	getDialog().dismiss();
+            	onDestroyView();
             }  
         });*/
         Button openReceiptButton = (Button) view.findViewById(R.id.get_cert_button);

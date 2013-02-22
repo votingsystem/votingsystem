@@ -30,21 +30,28 @@ import org.sistemavotacion.worker.EnviarDocumentoFirmadoWorker;
 import org.sistemavotacion.worker.ObtenerArchivoWorker;
 import org.sistemavotacion.worker.PDFSignerDNIeWorker;
 import org.sistemavotacion.worker.TimeStampWorker;
-import org.sistemavotacion.worker.WorkerListener;
+import org.sistemavotacion.worker.VotingSystemWorkerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.itextpdf.text.pdf.PdfReader;
+import org.sistemavotacion.worker.VotingSystemWorker;
 
 /**
 * @author jgzornoza
 * Licencia: https://raw.github.com/jgzornoza/SistemaVotacionAppletFirma/master/licencia.txt
 */
-public class FirmaDialog extends JDialog implements WorkerListener {
+public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private static Logger logger = LoggerFactory.getLogger(FirmaDialog.class);
+    private static Logger logger = LoggerFactory.getLogger(FirmaDialog.class);
+    
+    private static final int PDF_SIGNER_DNIE_WORKER          = 0;
+    private static final int ENVIAR_DOCUMENTO_FIRMADO_WORKER = 1;
+    private static final int OBTENER_ARCHIVO_WORKER          = 2;
+    private static final int TIME_STAMP_WORKER               = 3;
+
     
     private byte[] bytesDocumento;
     private volatile boolean mostrandoPantallaEnvio = false;
@@ -108,7 +115,7 @@ public class FirmaDialog extends JDialog implements WorkerListener {
         logger.debug("obtnerePDFFirma - urlDocumento: " + urlDocumento);
         progressLabel.setText("<html>" + getString("obteniendoDocumento") +"</html>");
         mostrarPantallaEnvio(true);
-        new ObtenerArchivoWorker(urlDocumento, this).execute();
+        new ObtenerArchivoWorker(OBTENER_ARCHIVO_WORKER, urlDocumento, this).execute();
         setVisible(true);
     }
     
@@ -129,8 +136,6 @@ public class FirmaDialog extends JDialog implements WorkerListener {
         pack();
     }
 
-
-    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -286,8 +291,8 @@ public class FirmaDialog extends JDialog implements WorkerListener {
         final String finalPassword = password;
         mostrarPantallaEnvio(true);
         progressLabel.setText("<html>" + getString("progressLabel")+ "</html>");
-        final EnviarDocumentoFirmadoWorker lanzador = new EnviarDocumentoFirmadoWorker(null, 
-            operacion.getUrlEnvioDocumento(), this);
+        final EnviarDocumentoFirmadoWorker lanzador = new EnviarDocumentoFirmadoWorker(
+                ENVIAR_DOCUMENTO_FIRMADO_WORKER, operacion.getUrlEnvioDocumento(), this);
         tareaEnEjecucion = lanzador;
         Runnable runnable = new Runnable() {
             public void run() {  
@@ -319,10 +324,9 @@ public class FirmaDialog extends JDialog implements WorkerListener {
                                 operacion.getTipo().getNombreArchivoEnDisco());
                             PdfReader readerManifiesto = new PdfReader(bytesDocumento);
                             if(IS_TIME_STAMPED_SIGNATURE) {
-                                Integer id = null;
                                 String reason = null;
                                 String location = null;
-                                new PDFSignerDNIeWorker(id, 
+                                new PDFSignerDNIeWorker(PDF_SIGNER_DNIE_WORKER, 
                                         appletFirma.getOperacionEnCurso().getUrlTimeStampServer(),
                                         INSTANCIA, reason, location, finalPassword.toCharArray(), 
                                         readerManifiesto, documentoFirmado).execute();
@@ -418,65 +422,66 @@ public class FirmaDialog extends JDialog implements WorkerListener {
     }
 
     
-    @Override public void showResult(SwingWorker worker, Respuesta respuesta) {
-        logger.debug("showResult - respuesta.codigoEstado: " 
-                    + respuesta.getCodigoEstado());
-        if(worker instanceof TimeStampWorker) {
-            if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
-                try {
-                    processDocument(timeStampedDocument.setTimeStampToken(
-                            (TimeStampWorker)worker));
-                } catch (Exception ex) {
-                    logger.error(ex.getMessage(), ex);
+    @Override public void showResult(VotingSystemWorker worker) {
+        logger.debug("showResult - worker: " + worker.getClass() + 
+                " - statusCode: " + worker.getStatusCode());
+        switch(worker.getId()) {
+            case PDF_SIGNER_DNIE_WORKER:
+                if(Respuesta.SC_OK == worker.getStatusCode()) {
+                    processDocument(((PDFSignerDNIeWorker)worker).getSignedAndTimeStampedPDF());
+                } else {
                     mostrarPantallaEnvio(false);
                     MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                    errorDialog.setMessage(ex.getMessage(), getString("errorLbl"));
+                    errorDialog.setMessage(worker.getMessage(), getString("errorLbl"));
                 }
-            } else {
+                break;
+            case OBTENER_ARCHIVO_WORKER:
                 mostrarPantallaEnvio(false);
-                MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                errorDialog.setMessage(respuesta.getMensaje(), getString("errorLbl"));
-            }
-            return;
-        }
-        if(worker instanceof PDFSignerDNIeWorker) {
-            if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
-                processDocument(((PDFSignerDNIeWorker)worker).getSignedAndTimeStampedPDF());
-            } else {
-                mostrarPantallaEnvio(false);
-                MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                errorDialog.setMessage(respuesta.getMensaje(), getString("errorLbl"));
-            }
-            return;
-        }
-        if(worker instanceof ObtenerArchivoWorker) {
-            logger.debug("mostrarResultadoOperacion - ObtenerArchivoWorker");
-            mostrarPantallaEnvio(false);
-            if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {    
-                bytesDocumento = respuesta.getBytesArchivo();
-                pack();
-            } else {
+                if (Respuesta.SC_OK == worker.getStatusCode()) {    
+                    bytesDocumento =((ObtenerArchivoWorker)worker).getBytesArchivo();
+                    pack();
+                } else {
+                    dispose();
+                    appletFirma.responderCliente(worker.getStatusCode(), 
+                            getString("errorDescragandoDocumento") + " - " + worker.getMessage());
+                }
+                break;
+            case ENVIAR_DOCUMENTO_FIRMADO_WORKER:
                 dispose();
-                appletFirma.responderCliente(respuesta.getCodigoEstado(), 
-                        getString("errorDescragandoDocumento") + " - " + respuesta.getMensaje());
-            }
-        } else if (worker instanceof EnviarDocumentoFirmadoWorker) {
-            logger.debug("mostrarResultadoOperacion - EnviarArchivoFirmadoWorker");
-            dispose();
-            if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
-                appletFirma.responderCliente(
-                        respuesta.getCodigoEstado(), null);
-                /*ResultadoFirmaDialog resultadoFirmaDialog =
-                        new ResultadoFirmaDialog(parentFrame, true);
-                respuesta.setArchivo(documentoFirmado);
-                respuesta.setOperacion(operacion);
-                resultadoFirmaDialog.mostrarMensaje(respuesta);*/
-            } else {
-                mostrarPantallaEnvio(false);
-                appletFirma.responderCliente(
-                        respuesta.getCodigoEstado(), respuesta.getMensaje());
-            }
+                if (Respuesta.SC_OK == worker.getStatusCode()) {
+                    appletFirma.responderCliente(worker.getStatusCode(), null);
+                    /*ResultadoFirmaDialog resultadoFirmaDialog =
+                            new ResultadoFirmaDialog(parentFrame, true);
+                    respuesta.setArchivo(documentoFirmado);
+                    respuesta.setOperacion(operacion);
+                    resultadoFirmaDialog.mostrarMensaje(respuesta);*/
+                } else {
+                    mostrarPantallaEnvio(false);
+                    appletFirma.responderCliente(
+                            worker.getStatusCode(), worker.getMessage());
+                }
+                break;
+            case TIME_STAMP_WORKER:
+                if(Respuesta.SC_OK == worker.getStatusCode()) {
+                    try {
+                        processDocument(timeStampedDocument.setTimeStampToken(
+                                (TimeStampWorker)worker));
+                    } catch (Exception ex) {
+                        logger.error(ex.getMessage(), ex);
+                        mostrarPantallaEnvio(false);
+                        MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
+                        errorDialog.setMessage(ex.getMessage(), getString("errorLbl"));
+                    }
+                } else {
+                    mostrarPantallaEnvio(false);
+                    MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
+                    errorDialog.setMessage(worker.getMessage(), getString("errorLbl"));
+                }
+                break;
+            default:
+                logger.debug("*** UNKNOWN WORKER ID: '" + worker.getId() + "'");
         }
+
     }
 
 }

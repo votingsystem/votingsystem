@@ -8,7 +8,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.security.KeyStore;
 import java.text.MessageFormat;
 import java.util.List;
@@ -28,9 +27,10 @@ import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.StringUtils;
 import org.sistemavotacion.util.VotacionHelper;
 import org.sistemavotacion.worker.EnviarSolicitudControlAccesoWorker;
-import org.sistemavotacion.worker.WorkerListener;
+import org.sistemavotacion.worker.VotingSystemWorkerListener;
 import org.sistemavotacion.worker.NotificarVotoWorker;
 import org.sistemavotacion.worker.TimeStampWorker;
+import org.sistemavotacion.worker.VotingSystemWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,12 +38,15 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://raw.github.com/jgzornoza/SistemaVotacionAppletFirma/master/licencia.txt
 */
-public class VotacionDialog extends JDialog implements WorkerListener {
+public class VotacionDialog extends JDialog implements VotingSystemWorkerListener {
 
     private static Logger logger = LoggerFactory.getLogger(VotacionDialog.class);
     
     private static final int TIMESTAMP_ACCESS_REQUEST = 0;
     private static final int TIMESTAMP_VOTE           = 1;
+    private static final int ACCESS_REQUEST_WORKER    = 2;
+    private static final int NOTIFICAR_VOTO_WORKER    = 3;
+    
 
     private volatile boolean mostrandoPantallaEnvio = false;
     private Frame parentFrame;
@@ -314,7 +317,8 @@ public class VotacionDialog extends JDialog implements WorkerListener {
                 if(IS_TIME_STAMPED_SIGNATURE) {
                     setTimeStampedDocument(accessRequest, TIMESTAMP_ACCESS_REQUEST, TIMESTAMP_DNIe_HASH);
                 } else {
-                    tareaEnEjecucion = new EnviarSolicitudControlAccesoWorker(accessRequest, 
+                    tareaEnEjecucion = new EnviarSolicitudControlAccesoWorker(
+                            ACCESS_REQUEST_WORKER, accessRequest, 
                         votoEvento.getUrlSolicitudAcceso(), pkcs10WrapperClient, this);
                     tareaEnEjecucion.execute();
                 }
@@ -348,8 +352,9 @@ public class VotacionDialog extends JDialog implements WorkerListener {
             if(IS_TIME_STAMPED_SIGNATURE) {
                 setTimeStampedDocument(votoFirmado, TIMESTAMP_VOTE, TIMESTAMP_VOTE_HASH);
             } else {
-                tareaEnEjecucion = new NotificarVotoWorker(votoEvento, 
-                    votoEvento.getUrlRecolectorVotosCentroControl(), votoFirmado, this);
+                tareaEnEjecucion = new NotificarVotoWorker(NOTIFICAR_VOTO_WORKER,
+                    votoEvento, votoEvento.getUrlRecolectorVotosCentroControl(), 
+                    votoFirmado, this);
                 tareaEnEjecucion.execute();
             }
         } catch (Exception ex) {
@@ -379,50 +384,17 @@ public class VotacionDialog extends JDialog implements WorkerListener {
         progressLabel.setText(messages.toArray().toString());
     }
     
-    @Override public void showResult(SwingWorker worker, Respuesta respuesta) {
+    @Override public void showResult(VotingSystemWorker worker) {
         mostrarPantallaEnvio(false);
-        logger.debug("mostrarResultadoOperacion - respuesta.codigoEstado: " 
-                    + respuesta.getCodigoEstado());
-        if(worker instanceof TimeStampWorker) {
-            processTimeStampResponse(((TimeStampWorker)worker), respuesta);
-            return;
-        }
-        if(worker instanceof EnviarSolicitudControlAccesoWorker) {
-            logger.debug("mostrarResultadoOperacion - EnviarSolicitudControlAccesoWorker");
-            if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {  
-                notificarCentroControl(respuesta.getPkcs10WrapperClient(), votoEvento);
-            } else {
-                appletFirma.responderCliente(
-                        respuesta.getCodigoEstado(), respuesta.getMensaje());
-                dispose();
-            }
-        } else if(worker instanceof NotificarVotoWorker) {
-            logger.debug("mostrarResultadoOperacion - NotificarVotoWorker - " + 
-                    respuesta.getCodigoEstado());
-            ReciboVoto recibo = new ReciboVoto();
-            if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {   
-                recibo = respuesta.getReciboVoto();
-                appletFirma.responderCliente(
-                        respuesta.getCodigoEstado(), null);
-            } else {
-                logger.error("Esto no debería pasar nunca!!! -- Error enviando voto: " +
-                        respuesta.getMensaje());
-                appletFirma.responderCliente(Operacion.SC_ERROR_ENVIO_VOTO, null);
-            }
-            recibo.setVoto(votoEvento);
-            VotacionHelper.addRecibo(votoEvento.getHashCertificadoVotoBase64(), recibo);
-            dispose();
-        }
-    }
-    
-    
-    private void processTimeStampResponse(TimeStampWorker worker, Respuesta respuesta) {
+        logger.debug("showResult - worker: " + worker.getClass() 
+                + " - statusCode:" + worker.getStatusCode());
         switch(worker.getId()) {
             case TIMESTAMP_ACCESS_REQUEST:
-                if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
                         tareaEnEjecucion = new EnviarSolicitudControlAccesoWorker(
-                        		timeStampedDocument.setTimeStampToken(worker), votoEvento.
+                                ACCESS_REQUEST_WORKER, timeStampedDocument.
+                                setTimeStampToken((TimeStampWorker)worker), votoEvento.
                                 getUrlSolicitudAcceso(), pkcs10WrapperClient, this);
                         tareaEnEjecucion.execute();
                     } catch (Exception ex) {
@@ -432,15 +404,25 @@ public class VotacionDialog extends JDialog implements WorkerListener {
                     }
                 } else {
                     MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                    errorDialog.setMessage(respuesta.getMensaje(), getString("errorLbl"));
+                    errorDialog.setMessage(worker.getMessage(), getString("errorLbl"));
+                }
+                break;
+            case ACCESS_REQUEST_WORKER:
+                if (Respuesta.SC_OK == worker.getStatusCode()) {  
+                    notificarCentroControl(((EnviarSolicitudControlAccesoWorker)worker).
+                        getPKCS10WrapperClient(), votoEvento);
+                } else {
+                    appletFirma.responderCliente(worker.getStatusCode(), worker.getMessage());
+                    dispose();
                 }
                 break;
             case TIMESTAMP_VOTE:
-                if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
-                        tareaEnEjecucion = new NotificarVotoWorker(votoEvento, 
+                        tareaEnEjecucion = new NotificarVotoWorker(
+                            NOTIFICAR_VOTO_WORKER, votoEvento, 
                             votoEvento.getUrlRecolectorVotosCentroControl(), 
-                            timeStampedDocument.setTimeStampToken(worker), this);
+                            timeStampedDocument.setTimeStampToken((TimeStampWorker)worker), this);
                             tareaEnEjecucion.execute();
                     } catch (Exception ex) {
                         logger.error(ex.getMessage(), ex);
@@ -449,11 +431,26 @@ public class VotacionDialog extends JDialog implements WorkerListener {
                     }
                 } else {
                     MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                    errorDialog.setMessage(respuesta.getMensaje(), getString("errorLbl"));
+                    errorDialog.setMessage(worker.getMessage(), getString("errorLbl"));
                 }
                 break;
+            case NOTIFICAR_VOTO_WORKER:
+                ReciboVoto recibo = new ReciboVoto();
+                if (Respuesta.SC_OK == worker.getStatusCode()) {   
+                    recibo = ((NotificarVotoWorker)worker).getReciboVoto();
+                    appletFirma.responderCliente(worker.getStatusCode(), null);
+                } else {
+                    logger.error("Esto no debería pasar nunca!!! -- Error enviando voto: " +
+                            worker.getMessage());
+                    appletFirma.responderCliente(Operacion.SC_ERROR_ENVIO_VOTO, null);
+                }
+                recibo.setVoto(votoEvento);
+                VotacionHelper.addRecibo(votoEvento.getHashCertificadoVotoBase64(), recibo);
+                dispose();
+                break;
         }
-    }    
+
+    } 
     
     private String getMensajeVotacion(String asunto, String opcionSeleccionada) {
         String pattern = getString("mensajeVotacion");

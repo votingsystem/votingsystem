@@ -11,6 +11,7 @@ import java.util.Set;
 import javax.security.auth.x500.X500PrivateCredential;
 
 import org.apache.log4j.PropertyConfigurator;
+import org.bouncycastle.tsp.TSPAlgorithms;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Usuario;
@@ -33,6 +34,9 @@ public class ContextoPruebas {
     public static final String SIG_NAME = "RSA";
     public static final String PROVIDER = "BC";
     
+    public static final String TIMESTAMP_HASH = TSPAlgorithms.SHA1;
+    public static final String TIMESTAMP_VOTE_HASH = TSPAlgorithms.SHA512;
+    
     public static ContextoPruebas INSTANCIA;
     private static KeyStore keyStoreRaizAutoridad;
     private static Usuario usuarioPruebas;
@@ -46,6 +50,7 @@ public class ContextoPruebas {
     
     private static Evento evento = null;
     
+    public static final String DNIe_SIGN_MECHANISM = "SHA1withRSA";
     public static final String VOTE_SIGN_MECHANISM = "SHA512withRSA";
     public static final String DIGEST_ALG = "SHA512";
     
@@ -60,6 +65,7 @@ public class ContextoPruebas {
     public static String ANULACION_FILE = "Anulador_";
     public static String ANULACION_FIRMADA_FILE = "AnuladorFirmado_";
     public static String RECIBO_FILE = "ReciboVoto_";
+    public static String VOTE_FILE = "Vote_";
     
     public static long COMIEZO_VALIDEZ_CERT = System.currentTimeMillis();
     public static final int PERIODO_VALIDEZ_ALMACEN_RAIZ = 2000000000;//En producción durará lo que dure una votación
@@ -302,8 +308,6 @@ public class ContextoPruebas {
     public static void setSimulacionConTiempos(boolean aSimulacionConTiempos) {
         simulacionConTiempos = aSimulacionConTiempos;
     }
-    
-    
 
     /**
      * @return the evento
@@ -373,45 +377,58 @@ public class ContextoPruebas {
         idUsuario = idUsu;
     }
 
-	public static String getURLInfoServidor(String urlServidor) {
-		return urlServidor + "/infoServidor/obtener";
-	}
+    public static String getURLInfoServidor(String serverURL) {
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "infoServidor/obtener";
+    }
 
-	public static String getURLEventoParaVotar(String serverURL, Long eventoId) {
-		return serverURL + "/eventoVotacion/obtener?id=" +eventoId;
-	}
+    public static String getURLEventoParaVotar(String serverURL, Long eventoId) {
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "eventoVotacion/obtener?id=" +eventoId;
+    }
 
-	public static String getURLAnyadirCertificadoCA(String serverURL) {
-		return serverURL + "/certificado/addCertificateAuthority";
-	}
+    public static String getURLAnyadirCertificadoCA(String serverURL) {
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "certificado/addCertificateAuthority";
+    }
 
-	public static String getURLAsociarActorConIP (String serverURL, ActorConIP.Tipo tipoActor) {
+    public static String getURLAsociarActorConIP (String serverURL, ActorConIP.Tipo tipoActor) {
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         String sufijoURL = null;
         switch(tipoActor) {
             case CONTROL_ACCESO:
-                sufijoURL = "/subscripcion/guardarAsociacionConControlAcceso";
+                sufijoURL = "subscripcion/guardarAsociacionConControlAcceso";
                 break;
             case CENTRO_CONTROL:
-                sufijoURL = "/subscripcion/guardarAsociacionConCentroControl";
+                sufijoURL = "subscripcion/guardarAsociacionConCentroControl";
                 break;
         }
         return serverURL + sufijoURL;
     }
 
-	public static String getURLGuardarEventoParaVotar(String serverURL) {
-		return serverURL + "/eventoVotacion/guardarAdjuntandoValidacion";
-	}
+    public static String getURLGuardarEventoParaVotar(String serverURL) {
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "eventoVotacion/guardarAdjuntandoValidacion";
+    }
 
-	public static String getURLAnulacionVoto(String serverURL) {
-		return serverURL + "/anuladorVoto/guardarAdjuntandoValidacion";
-	}
+    public static String getURLAnulacionVoto(String serverURL) {
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "anuladorVoto/guardarAdjuntandoValidacion";
+    }
 
-	public static String getURLSolicitudAcceso(String serverURL) {
-		return serverURL + "/solicitudAcceso/procesar";
-	}
+    public static String getURLSolicitudAcceso(String serverURL) {
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "solicitudAcceso/procesar";
+    }
 
-	public static String getURLVoto(String serverURL) {
-		return serverURL + "/voto/guardarAdjuntandoValidacion";
-	}
+    public static String getURLVoto(String serverURL) {
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "voto/guardarAdjuntandoValidacion";
+    }
+
+    public static String getUrlTimeStampServer(String serverURL) {
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "timeStamp/obtener";
+    }
 
 }

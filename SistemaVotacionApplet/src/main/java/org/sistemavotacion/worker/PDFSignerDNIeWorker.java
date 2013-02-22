@@ -11,7 +11,6 @@ import com.itextpdf.text.pdf.PdfSignatureAppearance;
 import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.PdfString;
 import com.itextpdf.text.pdf.PdfWriter;
-import iaik.pkcs.pkcs11.Mechanism;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -41,7 +40,6 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.cms.CMSAttributeTableGenerationException;
 import org.bouncycastle.cms.CMSAttributeTableGenerator;
 import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.tsp.TSPAlgorithms;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
@@ -57,7 +55,8 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://raw.github.com/jgzornoza/SistemaVotacionAppletFirma/master/licencia.txt
 */
-public class PDFSignerDNIeWorker extends SwingWorker<Respuesta, String>  {
+public class PDFSignerDNIeWorker extends SwingWorker<Integer, String>  
+        implements VotingSystemWorker {
     
     private static Logger logger = LoggerFactory.getLogger(PDFSignerDNIeWorker.class);
 
@@ -65,7 +64,7 @@ public class PDFSignerDNIeWorker extends SwingWorker<Respuesta, String>  {
     private String urlTimeStampServer;
     private String location;
     private String reason;
-    private WorkerListener workerListener;
+    private VotingSystemWorkerListener workerListener;
     private TimeStampToken timeStampToken = null;
     private Attribute timeStampAsAttribute = null;
     private AttributeTable timeStampAsAttributeTable = null;
@@ -74,9 +73,12 @@ public class PDFSignerDNIeWorker extends SwingWorker<Respuesta, String>  {
     private PdfReader pdfReader;
     private File signedFile;
     private byte[] bytesDocumento;
+    private int statusCode = Respuesta.SC_ERROR;
+    private String message = null;
+    private Exception exception = null;
     
     public PDFSignerDNIeWorker(Integer id, String urlTimeStampServer, 
-            WorkerListener workerListener, String reason, String location, char[] password,
+            VotingSystemWorkerListener workerListener, String reason, String location, char[] password,
             PdfReader reader, File signedFile)
             throws NoSuchAlgorithmException, NoSuchAlgorithmException, 
             NoSuchAlgorithmException, NoSuchProviderException, IOException, Exception {
@@ -94,10 +96,7 @@ public class PDFSignerDNIeWorker extends SwingWorker<Respuesta, String>  {
         workerListener.process(messages);
     }
     
-    @Override
-    protected Respuesta doInBackground() throws Exception {
-        final Respuesta respuesta = new Respuesta();
-
+    @Override protected Integer doInBackground() throws Exception {
         DNIePDFSessionHelper sessionHelper = new DNIePDFSessionHelper(password, DNIe_SESSION_MECHANISM);
         Certificate[] certs = sessionHelper.getCertificateChain();
         PdfStamper stp = PdfStamper.createSignature(pdfReader, 
@@ -167,8 +166,7 @@ public class PDFSignerDNIeWorker extends SwingWorker<Respuesta, String>  {
                         }
                    } catch(Exception ex) {
                         logger.error(ex.getMessage(), ex);
-                        respuesta.setCodigoEstado(Respuesta.SC_ERROR);
-                        respuesta.setMensaje(ex.getMessage());
+                        exception = ex;
                    }
                     return attributeTable;
                 }
@@ -189,25 +187,40 @@ public class PDFSignerDNIeWorker extends SwingWorker<Respuesta, String>  {
         System.arraycopy(pk, 0, outc, 0, pk.length);
         dic2.put(PdfName.CONTENTS, new PdfString(outc).setHexWriting(true));
         sap.close(dic2);
-        respuesta.setCodigoEstado(Respuesta.SC_OK);
-        return respuesta;
+        return Respuesta.SC_OK;
     }
 
     
     @Override//on the EDT
     protected void done() {
         try {
-            workerListener.showResult(this, get());
+            statusCode = get();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-            Respuesta respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
-            workerListener.showResult(this, respuesta);
+            exception =  ex;
+        } finally {
+             workerListener.showResult(this);
         }
     }
     
     public File getSignedAndTimeStampedPDF() {
         return signedFile;
     }
-    
 
+    @Override
+    public String getMessage() {
+        if(exception != null) return exception.getMessage();
+        else return message;
+    }
+
+    @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public int getStatusCode() {
+        return statusCode;
+    }
+    
 }

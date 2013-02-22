@@ -27,6 +27,9 @@ import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.sistemavotacion.seguridad.CertUtil;
 
 /**
@@ -43,7 +46,10 @@ public class HttpHelper {
     public HttpHelper () {
         cm = new ThreadSafeClientConnManager();
         cm.setMaxTotal(50);
-        httpclient = new DefaultHttpClient(cm);
+        // set the connection timeout value to 30 seconds (30000 milliseconds)
+        final HttpParams httpParams = new BasicHttpParams();
+        HttpConnectionParams.setConnectionTimeout(httpParams, 30000);
+        httpclient = new DefaultHttpClient(cm, httpParams);
     }
     
     public void shutdown () {

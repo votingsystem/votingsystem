@@ -96,7 +96,7 @@ public class ReceiptOptionsDialog  extends DialogFragment {
 	    				R.string.ok_button), new DialogInterface.OnClickListener() {
 	    		            public void onClick(DialogInterface dialog, int whichButton) {
 	    		            	listener.removeReceipt(receipt);
-	    		            	getDialog().dismiss();
+	    		            	onDestroyView();
 	    		            }
 	    					});
 	    		builder.setNegativeButton(getString(

@@ -90,8 +90,13 @@ task setAndroidEnv << {
 	//env.each{println it} 
 	String androidHome= env['ANDROID_HOME']
 	if(!androidHome) throw new RuntimeException('Android SDK not Found you must install -> http://developer.android.com/sdk/index.html')
-	String developmentServerIP = getDevelopmentServerIP()
+	String serverIP
 	
+	if(rootProject.hasProperty("SERVER_IP")) {
+		serverIP = "$rootProject.SERVER_IP"
+	} else serverIP = getDevelopmentServerIP()
+
+	println " -------------> serverIP: ${serverIP}"
 	
 	java.util.Properties props = new Properties();
 	String lastIp = null
@@ -101,7 +106,7 @@ task setAndroidEnv << {
 	}
 	
 	def controlAccesoURL = "$rootProject.controlAccesoProtocol://" + 
-		"${developmentServerIP}:$rootProject.controlAccesoPort" + 
+		"${serverIP}:$rootProject.controlAccesoPort" + 
 		"$rootProject.controlAccesoPath";
 	println("controlAccesoURL: $controlAccesoURL")
 	ant.delete(file:"assets/VotingSystem.properties")
@@ -112,15 +117,15 @@ task setAndroidEnv << {
 		value:controlAccesoURL)
 	ant.replace(file:"assets/VotingSystem.properties",
 		token:"[DEVELOPMENT_IP]",
-		value:developmentServerIP)
+		value:serverIP)
 	
 	if(lastIp) {//other way
 		File manifest = file("AndroidManifest.xml");
 		String manifestContent = manifest.text;
 		manifestContent = manifestContent.replaceAll(
-			"android:host=\"${lastIp}\"", "android:host=\"${developmentServerIP}\"")
+			"android:host=\"${lastIp}\"", "android:host=\"${serverIP}\"")
 		manifest.write(manifestContent);
-		println "last development IP: ${lastIp} - new development IP: ${developmentServerIP}"
+		println "last development IP: ${lastIp} - new development IP: ${serverIP}"
 	}
 }
 

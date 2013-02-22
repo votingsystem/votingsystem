@@ -399,10 +399,9 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
         boolean resultado = true;
         try {
             if (file.length() > AppletHerramienta.MAXIMO_TAMANYO_ARCHIVO_EN_BYTES) {
-                logger.debug("El tama�o del archivo excede el l�mite de la "
-                        + "aplicaci�n - file.length(): " + file.length() 
-                        + " bytes" + " - L�mite de la aplicaci�n: " + 
-                        AppletHerramienta.MAXIMO_TAMANYO_ARCHIVO_EN_BYTES + " bytes");
+                String message = AppletHerramienta.getString("fileSizeExceededMsg", 
+                        file.length() , AppletHerramienta.MAXIMO_TAMANYO_ARCHIVO_EN_BYTES);
+
                 resultado = false;
             }
         } catch (Exception ex) {

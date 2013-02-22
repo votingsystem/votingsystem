@@ -23,6 +23,7 @@ public class Respuesta<T> {
     
     public static final int SC_OK = 200;
     public static final int SC_OK_ANULACION_SOLICITUD_ACCESO = 270;
+    public static final int SC_REQUEST_TIMEOUT = 408;
     public static final int SC_ERROR_PETICION = 400;
     public static final int SC_NOT_FOUND = 404;
     public static final int SC_ERROR_VOTO_REPETIDO = 470;

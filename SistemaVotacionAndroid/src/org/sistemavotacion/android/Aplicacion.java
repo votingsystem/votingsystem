@@ -76,7 +76,7 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
     public static final String NOMBRE_ARCHIVO_BYTE_ARRAY = "byteArray";
     public static final String SIGNED_PART_EXTENSION     = ".p7m";
     public static final String DEFAULT_SIGNED_FILE_NAME  = "smimeMessage";
-    public static final String SIGN_PROVIDER             = "BC";
+    public static final String PROVIDER             = "BC";
     public static final String SERVER_URL_EXTRA_PROP_NAME= "serverURL";
     public static final int KEY_SIZE = 1024;
     public static final int EVENTS_PAGE_SIZE = 30;
@@ -86,7 +86,6 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
     public static final String SIG_NAME = "RSA";
     public static final String SIGNATURE_ALGORITHM = "SHA256WithRSA";
     public static final String VOTE_SIGN_MECHANISM = "SHA256withRSA";
-    public static final String PROVIDER = "BC";
     public static final String ALIAS_CERT_USUARIO = "CertificadoUsuario";
     public static final String KEY_STORE_FILE = "keyStoreFile.p12";
     
@@ -131,7 +130,9 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
             props.load(getAssets().open("VotingSystem.properties"));
             if(props != null) {
             	String controlAccesoURL = props.getProperty("CONTROL_ACCESO_URL");
-            	if(controlAccesoURL != null) CONTROL_ACCESO_URL = controlAccesoURL;
+            	if(controlAccesoURL != null) {
+            		CONTROL_ACCESO_URL = controlAccesoURL;
+            	} else Log.d(TAG + ".onCreate()", " - CONTROL_ACCESO_URL in VotingSystem.properties is NULL");
             	Log.d(TAG + ".onCreate()", " - controlAccesoURL: " + controlAccesoURL);
             }
         } catch (IOException ex) {

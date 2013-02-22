@@ -13,6 +13,7 @@ import javax.swing.Timer;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.OpcionEvento;
 import org.sistemavotacion.modelo.ReciboVoto;
+import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.smime.CMSUtils;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.modelo.InfoVoto;
@@ -151,7 +152,7 @@ public class Votacion implements ActionListener {
             logger.debug("Lanzando voto");
             Future<InfoVoto> f = solicitudesCompletionService.take();
             final InfoVoto infoVoto = f.get();
-            if (200 == infoVoto.getCodigoEstado()) {
+            if (Respuesta.SC_OK == infoVoto.getCodigoEstado()) {
                 solicitudesValidas.getAndIncrement();
                 votosCompletionService.submit(new LanzadoraVoto(infoVoto));
                 votosEnviados.getAndIncrement();
