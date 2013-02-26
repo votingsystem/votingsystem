@@ -4,6 +4,8 @@ import java.io.File;
 import java.security.KeyStore;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.apache.http.HttpResponse;
 import org.apache.http.conn.ConnectionPoolTimeoutException;
 import org.apache.http.util.EntityUtils;
@@ -36,6 +38,8 @@ public class LanzadoraSolicitudAcceso
 
     private InfoVoto infoVoto;
     private SMIMEMessageWrapper timeStampedDocument;
+    private final CountDownLatch timeStampLatch = new CountDownLatch(1); // just one time
+
     
     public LanzadoraSolicitudAcceso (InfoVoto infoVoto) 
             throws Exception {
@@ -47,7 +51,7 @@ public class LanzadoraSolicitudAcceso
     public InfoVoto call() throws Exception { 
         File file = new File(ContextoPruebas.getUserKeyStorePath(infoVoto.getFrom()));
         KeyStore mockDnie = KeyStoreHelper.crearMockDNIe(infoVoto.getFrom(), file,
-                ContextoPruebas.getPrivateCredentialMockRaizDNIe());
+                ContextoPruebas.getPrivateCredentialRaizAutoridad());
         logger.info("userID: " + infoVoto.getFrom() + " - Creado directorio: " + file.getAbsolutePath());
         String asuntoMensaje = ContextoPruebas.ASUNTO_MENSAJE_SOLICITUD_ACCESO 
                         + infoVoto.getVoto().getEventoId();
@@ -79,9 +83,8 @@ public class LanzadoraSolicitudAcceso
                     ContextoPruebas.getControlAcceso().getServerURL(),infoVoto.getVoto()),
                 asuntoMensaje, null, SignedMailGenerator.Type.USER, solicitudAcceso); 
         TimeStampWorker timeStampWorker = getTimeStampedDocument(solicitudAcceso);
-        while(!timeStampWorker.isDone()) {
-            //logger.debug("----- Waiting for timeStampWorker - timeStampWorker -timeStampWorker");
-        } if(Respuesta.SC_OK != timeStampWorker.getStatusCode()) {
+        timeStampWorker.get(30, TimeUnit.SECONDS);
+        if(Respuesta.SC_OK != timeStampWorker.getStatusCode()) {
             infoVoto.setCodigoEstado(timeStampWorker.getStatusCode());
             infoVoto.setMensaje(timeStampWorker.getMessage());
             return infoVoto;
@@ -140,7 +143,8 @@ public class LanzadoraSolicitudAcceso
 
     @Override
     public void showResult(VotingSystemWorker vsw) {
-        
+        timeStampLatch.countDown();
+
     }
 
     

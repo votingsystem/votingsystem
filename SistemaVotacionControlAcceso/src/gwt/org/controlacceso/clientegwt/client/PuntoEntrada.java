@@ -75,6 +75,7 @@ public class PuntoEntrada implements EntryPoint {
         initObtenerOperacionJS(this);
         History.fireCurrentHistoryState();
         clienteFirmaFrame = new NamedFrame(Constantes.ID_FRAME_APPLET);
+        
         logger.info("--- isJavaAvailable: " + isJavaAvailable());
         if(!isJavaAvailable() && Browser.isPC()) {
         	ErrorDialog errorDialog = new ErrorDialog();

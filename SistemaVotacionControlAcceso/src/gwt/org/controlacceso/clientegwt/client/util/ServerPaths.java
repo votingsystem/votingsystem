@@ -51,6 +51,10 @@ public class ServerPaths {
 	public static String getUrlManifiestos() {
 		return getApplicationPath() + "eventoFirma/obtenerManifiestos";
 	}
+	
+	public static String getUrlValidationToolJar () {
+		return getApplicationPath() + "applet/HerramientaValidacion.jar";
+	}
     
     public static String getUrlEvento (int id) {
     	return getApplicationPath() + "evento/obtener?id=" + id;

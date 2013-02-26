@@ -19,7 +19,7 @@ class VotoController {
 		SMIMEMessageWrapper smimeMessageReq = SMIMEMessageWrapper.build(
 						new ByteArrayInputStream(multipartFile?.getBytes()), 
 						null, SMIMEMessageWrapper.Tipo.VOTO);
-		Respuesta respuesta = votoService.validarFirmas(smimeMessageReq)
+		Respuesta respuesta = votoService.validarFirmas(smimeMessageReq, request.getLocale())
 		if (200 == respuesta.codigoEstado) {
 			response.status = 200
 			response.contentLength = respuesta.voto.mensajeSMIME.contenido.length

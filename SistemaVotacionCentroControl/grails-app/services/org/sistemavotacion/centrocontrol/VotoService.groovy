@@ -58,6 +58,11 @@ class VotoService {
 			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:messageSource.getMessage(
 				'validacionVoto.convocatoriaDesconocida', null, locale))
 		}
+		if(evento.estado != EventoVotacion.Estado.ACTIVO) {
+			log.debug ("Recibido voto para evento cerrado - evento id: '${evento.id}'")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:messageSource.getMessage(
+				'validacionVoto.eventClosed', [evento.asunto].toArray(), locale))
+		}
 		Certificado certificado = Certificado.findWhere(
 			hashCertificadoVotoBase64:infoVoto.hashCertificadoVotoBase64,
 			estado:Certificado.Estado.UTILIZADO)
@@ -100,8 +105,9 @@ class VotoService {
 	
 	
     synchronized Respuesta enviarVoto_A_ControlAcceso (MimeMessage smimeMessage,
-            EventoVotacion eventoVotacion) {
-		String urlVotosControlAcceso = "${eventoVotacion.controlAcceso.serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLNotificacionVotoControlAcceso}"
+            EventoVotacion eventoVotacion, Locale locale) {
+		String urlVotosControlAcceso = "${eventoVotacion.controlAcceso.serverURL}" + 
+			"${grailsApplication.config.SistemaVotacion.sufijoURLNotificacionVotoControlAcceso}"
         log.debug ("enviarVoto_A_ControlAcceso - urlVotosControlAcceso: ${urlVotosControlAcceso}")
 		String localServerURL = grailsApplication.config.grails.serverURL
 		
@@ -113,7 +119,7 @@ class VotoService {
 		smimeMessage.setTo("${eventoVotacion.controlAcceso.serverURL}")
 				
         MimeMessage multiSignedMessage = firmaService.generarMultifirma(
-            smimeMessage, "[VOTO_VALIDADO_CENTRO_CONTROL]")
+            smimeMessage, messageSource.getMessage('validacionVoto.smimeMessageSubject', null, locale))
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         multiSignedMessage.writeTo(out);
 		byte[] multiSignedMessageBytes = out.toByteArray()

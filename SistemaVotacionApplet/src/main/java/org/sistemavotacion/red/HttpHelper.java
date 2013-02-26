@@ -135,7 +135,6 @@ public class HttpHelper {
         checkConnections();
         logger.debug("enviarArchivoFirmado - lanzando: " + serverURL);        
         HttpPost httpPost = new HttpPost(serverURL);
-        logger.debug("enviarArchivoFirmado - lanzando: " + httpPost.getURI());
         FileBody fileBody = new FileBody(archivoFirmado);
         MultipartEntity reqEntity = new MultipartEntity();
         reqEntity.addPart(Contexto.NOMBRE_ARCHIVO_ENVIADO_FIRMADO, fileBody);

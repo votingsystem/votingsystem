@@ -35,12 +35,13 @@ class SolicitudAccesoService {
 		SMIMEMessageWrapper smimeMessage;
 		try {
 			smimeMessage = new SMIMEMessageWrapper(null, bais, null);
+			firmaService.validarCertificacionFirmantes(smimeMessage, locale)
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
-			return new Respuesta(codigoEstado:400, mensaje:ex.getMessage())
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:ex.getMessage())
 		}
 		Respuesta respuestaUsuario = subscripcionService.comprobarUsuario(smimeMessage, locale)
-		if(200 != respuestaUsuario.codigoEstado) {
+		if(Respuesta.SC_OK != respuestaUsuario.codigoEstado) {
 			response.status = respuestaUsuario.codigoEstado
 			render respuestaUsuario.mensaje
 			return false
@@ -60,8 +61,8 @@ class SolicitudAccesoService {
             if (eventoVotacion) {
 				mensajeSMIME.evento = eventoVotacion
 				log.debug("eventoVotacion - ${eventoVotacion.id}")
-				if (!eventoVotacion.estaAbierto()) {
-					return new Respuesta(codigoEstado:400, 
+				if (!eventoVotacion.isOpen()) {
+					return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
 						mensaje:messageSource.getMessage('evento.mensajeCerrado', null, locale))	
 				}
                 if (!smimeMessage.isValidSignature()) {
@@ -69,7 +70,7 @@ class SolicitudAccesoService {
                     mensajeSMIME.tipo = Tipo.SOLICITUD_ACCESO_FALLO
 					mensajeSMIME.motivo = msg
                     respuesta = new Respuesta(tipo:Tipo.SOLICITUD_ACCESO_FALLO,
-                            codigoEstado:400, mensaje:msg)
+                            codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg)
                 } else {//Ha votado el usuario?
                     solicitudAcceso = SolicitudAcceso.findWhere(usuario:usuario, 
                             eventoVotacion:eventoVotacion, estado:Tipo.OK)
@@ -90,7 +91,7 @@ class SolicitudAccesoService {
                         if (hashSolicitudAccesoRepetido) {
                                 mensajeSMIME.tipo = Tipo.SOLICITUD_ACCESO_FALLO_HASH_REPETIDO
                                 respuesta = new Respuesta(tipo:Tipo.SOLICITUD_ACCESO_FALLO_HASH_REPETIDO,
-                                        codigoEstado:400, mensaje:messageSource.getMessage('error.HashRepetido', null, locale))
+                                        codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:messageSource.getMessage('error.HashRepetido', null, locale))
                         } else {//Todo OK
                             mensajeSMIME.tipo = Tipo.SOLICITUD_ACCESO
 							log.debug("usuario: ${usuario.nif}")
@@ -99,7 +100,7 @@ class SolicitudAccesoService {
 								hashSolicitudAccesoBase64:hashSolicitudAccesoBase64, 
 								eventoVotacion:eventoVotacion)
                             respuesta = new Respuesta(tipo:Tipo.SOLICITUD_ACCESO,
-                                    codigoEstado:200, evento:eventoVotacion, solicitudAcceso:solicitudAcceso)
+                                    codigoEstado:Respuesta.SC_OK, evento:eventoVotacion, solicitudAcceso:solicitudAcceso)
                         }
                     }
                 }   
@@ -107,7 +108,7 @@ class SolicitudAccesoService {
             } else {
 				log.debug("Evento no encontrado")
 				mensajeSMIME.tipo = Tipo.SOLICITUD_ACCESO_FALLO
-				respuesta = new Respuesta(codigoEstado:400, 
+				respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
 						mensaje:messageSource.getMessage( 'error.EventoNoEncontrado', 
 						[idEventoVotacion].toArray(), locale))
 			}
@@ -117,7 +118,7 @@ class SolicitudAccesoService {
 			mensajeSMIME.tipo = Tipo.SOLICITUD_ACCESO_FALLO
 			mensajeSMIME.motivo = msg
 			respuesta = new Respuesta(tipo:Tipo.SOLICITUD_ACCESO_FALLO,
-					codigoEstado:400, mensaje:messageSource.getMessage('mime.asunto.SolicitudAccesoError', 
+					codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:messageSource.getMessage('mime.asunto.SolicitudAccesoError', 
 					[asunto].toArray(), locale))
         }
         if(mensajeSMIME) mensajeSMIME.save();

@@ -42,8 +42,6 @@ public class Votacion implements ActionListener {
     private static ExecutorService votosExecutor;
     private static CompletionService<InfoVoto> votosCompletionService;
     
-    private boolean lanzadaValidacionRecibos = false;
-    
     private static AtomicLong numeroUsuarios;
     
     private static AtomicLong solicitudesEnviadas;
@@ -99,7 +97,7 @@ public class Votacion implements ActionListener {
             @Override
             public void run() {
                 try {
-                    logger.debug("Lanzado hilo de solicitudes");
+                    logger.debug(" ******************** Lanzado hilo de solicitudes");
                     lanzarSolicitudesAcceso();                    
                 } catch (Exception ex) {
                     logger.error(ex.getMessage(), ex);
@@ -110,13 +108,24 @@ public class Votacion implements ActionListener {
             @Override
             public void run() {
                 try {
-                    logger.debug("Lanzado hilo de votos");
+                    logger.debug(" ******************** Lanzado hilo de votos");
                     lanzarVotos();
                 } catch (Exception ex) {
                     logger.error(ex.getMessage(), ex);
                 }
             }
-        });       
+        });
+        votacionExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    logger.debug(" ******************** Lanzado hilo validación de recibos");
+                    validarRecibos();
+                } catch (Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                }
+            }
+        });
     }
     
      public void lanzarSolicitudesAcceso () throws Exception {
@@ -158,20 +167,6 @@ public class Votacion implements ActionListener {
                 votosEnviados.getAndIncrement();
                 VotacionesPanel.INSTANCIA.actualizarContadorVotosLanzados(
                   new Long(votosEnviados.get()).intValue());
-                if(!lanzadaValidacionRecibos) {
-                        votacionExecutor.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                logger.debug("Lanzado hilo validación de recibos");
-                                validarRecibos();
-                            } catch (Exception ex) {
-                                logger.error(ex.getMessage(), ex);
-                            }
-                        }
-                    });
-                    lanzadaValidacionRecibos = true;
-                }
             } else {
                 solicitudesConError.getAndIncrement();
                  VotacionesPanel.INSTANCIA.actualizarContadorSolicitudesError(

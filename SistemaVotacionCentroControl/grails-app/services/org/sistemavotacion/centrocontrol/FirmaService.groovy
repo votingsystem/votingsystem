@@ -224,6 +224,7 @@ class FirmaService {
 	}
 	
 	public File getCadenaCertificacion() {
+		if(!cadenaCertificacion) inicializar()
 		return cadenaCertificacion;
 	}
 		
@@ -250,7 +251,7 @@ class FirmaService {
 	}
 	
 	public synchronized MimeMessage generarMultifirma (SMIMEMessageWrapper smimeMessage, String mailSubject) {
-		log.debug("generarMultifirma "  + smimeMessage.getFrom());
+		log.debug("generarMultifirma - from: "  + smimeMessage.getFrom() + " - subject: " + mailSubject);
 		MimeMessage multifirma = signedMailGenerator.genMultiSignedMessage(smimeMessage, mailSubject); 
 		return multifirma
 	}

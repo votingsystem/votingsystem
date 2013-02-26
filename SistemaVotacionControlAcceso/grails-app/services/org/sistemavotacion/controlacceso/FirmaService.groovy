@@ -107,14 +107,14 @@ class FirmaService {
 						validoHasta:certificate.getNotAfter())
 					certificado.save()
 					log.debug " -- Almacenada CA con id:'${certificado?.id}'"
-				} else log.debug " --certificado: ${certificado?.id}"
+				}
 				trustedCertsHashMap.put(certificate?.getSerialNumber()?.longValue(), certificado)
 			}
 			log.debug("trustedCerts.size(): ${trustedCerts?.size()}")
-			return new Respuesta(codigoEstado:200, mensaje:"Importadas Autoridades Certificadoras")
+			return new Respuesta(codigoEstado:Respuesta.SC_OK, mensaje:"Importadas Autoridades Certificadoras")
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex)
-			return new Respuesta(codigoEstado:400, mensaje:ex.getMessage())
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:ex.getMessage())
 		}
 	}
 	
@@ -129,6 +129,7 @@ class FirmaService {
 	def obtenerCadenaFirmada (String fromUser, String toUser, String textoAFirmar,
 			String asunto, Header header, Type signerType) {
 		log.debug "obtenerCadenaFirmada - textoAFirmar: ${textoAFirmar}"
+		if(!firmadoraValidaciones) afterPropertiesSet()
 		String resultado = firmadoraValidaciones.genString(fromUser, toUser, textoAFirmar,
 			asunto, header, SignedMailGenerator.Type.ACESS_CONTROL)
 		return resultado
@@ -151,6 +152,7 @@ class FirmaService {
 	public synchronized MimeMessage generarMultifirma (
 			final SMIMEMessageWrapper smimeMessage, String mailSubject) {
 		log.debug("generarMultifirma - From:"  + smimeMessage.getFrom());
+		if(!firmadoraValidaciones) afterPropertiesSet()
 		MimeMessage multifirma = firmadoraValidaciones.genMultiSignedMessage(smimeMessage, mailSubject); 
 		return multifirma
 	}
@@ -158,7 +160,7 @@ class FirmaService {
 	public Respuesta firmarCertificadoVoto (byte[] csr, Evento evento, Locale locale) {
 		log.debug("firmarCertificadoVoto - evento: ${evento?.id}");
 		Respuesta respuesta = csrService.validarCSRVoto(csr, evento, locale)
-		if(200 != respuesta.codigoEstado) return respuesta
+		if(Respuesta.SC_OK != respuesta.codigoEstado) return respuesta
 		AlmacenClaves almacenClaves = evento.getAlmacenClaves()
 		//TODO
 		KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(almacenClaves.bytes, 
@@ -169,7 +171,7 @@ class FirmaService {
 		PKCS10WrapperServer pkcs10wrapper = new PKCS10WrapperServer(privateKeySigner, certSigner);
 		byte[] certificadoFirmado = pkcs10wrapper.firmarValidandoCsr(csr, evento.fechaInicio, evento.fechaFin)
 		if (!certificadoFirmado) {
-			return new Respuesta(codigoEstado:400, tipo:Tipo.ERROR_VALIDANDO_CSR)	
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, tipo:Tipo.ERROR_VALIDANDO_CSR)	
 		} else {
 		    X509Certificate certificate = getVoteCert(certificadoFirmado)
 			SolicitudCSRVoto solicitudCSR = new SolicitudCSRVoto(
@@ -183,7 +185,7 @@ class FirmaService {
 				solicitudCSRVoto:solicitudCSR, tipo:Certificado.Tipo.VOTO,
 				hashCertificadoVotoBase64:respuesta.hashCertificadoVotoBase64)
 			certificado.save()
-			return new Respuesta(codigoEstado:200,firmaCSR:certificadoFirmado)
+			return new Respuesta(codigoEstado:Respuesta.SC_OK,firmaCSR:certificadoFirmado)
 		}
 	}
 	
@@ -207,7 +209,8 @@ class FirmaService {
 		byte[] certificadoFirmado = pkcs10wrapper.firmarValidandoCsr(
 			solicitudCSR.contenido, today, today_plus_year.getTime())
 		if (!certificadoFirmado) {
-			return new Respuesta(codigoEstado:400, mensaje:Tipo.ERROR_VALIDANDO_CSR.toString())
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+				mensaje:Tipo.ERROR_VALIDANDO_CSR.toString())
 		} else {
 			X509Certificate certificate = getUserCert(certificadoFirmado)
 			solicitudCSR.estado = SolicitudCSRUsuario.Estado.OK
@@ -217,7 +220,7 @@ class FirmaService {
 				contenido:certificate.getEncoded(), usuario:solicitudCSR.usuario, estado:Certificado.Estado.OK,
 				solicitudCSRUsuario:solicitudCSR, tipo:Certificado.Tipo.USUARIO, valido:true)
 			certificado.save()
-			return new Respuesta(codigoEstado:200)
+			return new Respuesta(codigoEstado:Respuesta.SC_OK)
 		}
 	}
 	
@@ -258,8 +261,8 @@ class FirmaService {
 	 */
 	public Respuesta addCertificateAuthority (byte[] caPEM, Locale locale)  {
 		log.debug("addCertificateAuthority");
-		if(!caPEM) return new Respuesta(codigoEstado:400, mensaje:
-				messageSource.getMessage('error.nullCertificate', null, locale))
+		if(!caPEM) return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+			mensaje: messageSource.getMessage('error.nullCertificate', null, locale))
 		try {
 			Collection<X509Certificate> certX509CertCollection = CertUtil.fromPEMToX509CertCollection(caPEM)
 			for(X509Certificate cert: certX509CertCollection) {
@@ -284,11 +287,11 @@ class FirmaService {
 				trustedCerts.addAll(certX509CertCollection)
 				log.debug "Almacenada Autoridad Certificadora de pruebas con id:'${certificado?.id}'"
 			}
-			return new Respuesta(codigoEstado:200, 
+			return new Respuesta(codigoEstado:Respuesta.SC_OK, 
 				mensaje:messageSource.getMessage('cert.newCACertMsg', null, locale))
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
-			return new Respuesta(codigoEstado:400, mensaje:ex.getMessage())
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:ex.getMessage())
 		}
 	}
 	
@@ -301,14 +304,14 @@ class FirmaService {
 		SMIMEMessageWrapper messageWrapper, EventoVotacion evento) {
 		Set<Usuario> firmantes = messageWrapper.getFirmantes();
 		if(firmantes.size() == 0) return new Respuesta(
-			codigoEstado:400, mensaje:
+			codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:
 			messageSource.getMessage('error.documentWithoutSigners', null, locale))
 		Set<X509Certificate> eventTrustedCerts = eventTrustedCertsHashMap.get(evento?.id)
 		if(!eventTrustedCerts) {
 			Certificado certificadoCAEvento = Certificado.findWhere(
 				eventoVotacion:evento, estado:Certificado.Estado.OK,
 				tipo:Certificado.Tipo.RAIZ_VOTOS)
-			if(!certificadoCAEvento) return new Respuesta(codigoEstado:400,
+			if(!certificadoCAEvento) return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
 				mensaje:"La Autoridad Certificadora del evento '${evento.id}' no esta dada de alta")				
 			X509Certificate certCAEvento = CertUtil.loadCertificateFromStream (
 				new ByteArrayInputStream(certificadoCAEvento.contenido))
@@ -332,12 +335,12 @@ class FirmaService {
 						"- numserie: " + certCaResult?.getSerialNumber()?.longValue());
 			} catch (Exception ex) {
 				log.error(ex.getMessage(), ex)
-				return new Respuesta(codigoEstado:400, mensaje:
-					"Error validando Certificación del certificado" + 
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+					mensaje:"Error validando Certificación del certificado" + 
 					" '${usuario.getCertificate().getSubjectDN()?.toString()}'")
 			}
 		}
-		return new Respuesta(codigoEstado:200)
+		return new Respuesta(codigoEstado:Respuesta.SC_OK)
 	}
 
 	public Respuesta checkTimeStamps() {//TODO
@@ -348,7 +351,7 @@ class FirmaService {
 			SMIMEMessageWrapper messageWrapper, Locale locale) {
 		Set<Usuario> firmantes = messageWrapper.getFirmantes();
 		if(firmantes.size() == 0) return new Respuesta(
-			codigoEstado:400, mensaje:
+			codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:
 			messageSource.getMessage('error.documentWithoutSigners', null, locale))
 		log.debug("*** validarCertificacionFirmantes - firmantes.size(): ${firmantes.size()}")
 		for(Usuario usuario: firmantes) {			 
@@ -362,14 +365,14 @@ class FirmaService {
 				        "- numserie: " + certCaResult?.getSerialNumber()?.longValue());
 			} catch (CertPathValidatorException ex) {
 				log.error(ex.getMessage(), ex)
-				return new Respuesta(codigoEstado:400, mensaje:
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:
 					messageSource.getMessage('error.caUnknown', null, locale))
 			} catch (Exception ex) {
 				log.error(ex.getMessage(), ex)
-				return new Respuesta(codigoEstado:400, mensaje:ex.getMessage())
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:ex.getMessage())
 			}
 		}
-		return new Respuesta(codigoEstado:200)
+		return new Respuesta(codigoEstado:Respuesta.SC_OK)
 	}
 
 

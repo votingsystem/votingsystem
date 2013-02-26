@@ -400,12 +400,6 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
         logger.debug("Hora: " + ContextoPruebas.getHorasDuracionVotacion() + 
                 " - Minuto: " + ContextoPruebas.getMinutosDuracionVotacion());
         ContextoPruebas.setEvento(evento);
-        try {
-            ContextoPruebas.setPrivateCredentialMockRaizDNIe(
-                    KeyStoreHelper.obtenerMockRaizDNIePrivateCredential());
-        } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-        }
         VotacionesPanel.INSTANCIA.prepararPanelParaLanzarSimulacion();
         dispose();
     }//GEN-LAST:event_aceptarButtonActionPerformed

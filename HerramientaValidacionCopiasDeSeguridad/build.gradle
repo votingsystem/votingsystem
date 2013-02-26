@@ -30,7 +30,7 @@ dependencies {
 task buildVotingApplet(type:VotingSystemApplet) {
 	manifest {
 		attributes 'Main-Class': 'org.sistemavotacion.herramientavalidacion.AppletHerramienta',
-				   'SplashScreen-Image':'resources/images/cert_100x108.png',
+				   'SplashScreen-Image':'resources/images/password_128.png',
 				   'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/HerramientaValidacionCopiasDeSeguridad',
 				   'provider': 'GruposP2P',
 				   'Extension-Name': 'HerramientaValidacionCopiasDeSeguridad',

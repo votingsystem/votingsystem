@@ -25,10 +25,11 @@ class EventoService {
 	Respuesta comprobarFechasEvento (Evento evento, Locale locale) {
 		log.debug("comprobarFechasEvento")
 		if(evento.estado && evento.estado == Evento.Estado.CANCELADO) {
-			return new Respuesta(codigoEstado:200, evento:evento)
+			return new Respuesta(codigoEstado:Respuesta.SC_OK, evento:evento)
 		}
 		if(evento.fechaInicio.after(evento.fechaFin)) {
-			return new Respuesta(codigoEstado:400, mensaje:messageSource.getMessage(
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+				mensaje:messageSource.getMessage(
 				'error.fechaInicioAfterFechaFinalMsg', null, locale) )
 		}
 		Date fecha = DateUtils.getTodayDate()
@@ -52,7 +53,7 @@ class EventoService {
 				evento.save()
 			}
 		}
-		return new Respuesta(codigoEstado:200, evento:evento)
+		return new Respuesta(codigoEstado:Respuesta.SC_OK, evento:evento)
 	}
 	
    Evento.Estado obtenerEstadoEvento (Evento evento) {
@@ -131,18 +132,26 @@ class EventoService {
 								}
 								respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK, mensaje: mensajeRespuesta)
 						 } else {
-							 respuesta = new Respuesta(codigoEstado:400, mensaje: messageSource.getMessage(
+							 respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+								 mensaje: messageSource.getMessage(
 								 'csr.usuarioNoAutorizado', null, locale))
 						 }
+					} else {
+						String msg = messageSource.getMessage('evento.eventoNotFound',
+											 [mensajeJSON?.eventoId].toArray(), locale) 
+						log.debug(msg)
+						mensajeSMIME = new MensajeSMIME(tipo:Tipo.EVENTO_CANCELADO_ERROR,
+							usuario:usuario, valido:smimeMessage.isValidSignature(),
+							contenido:smimeMessage.getBytes(), motivo:msg)
+						mensajeSMIME.save();
+						respuesta = new Respuesta(
+							codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg)
 					}
-					mensajeSMIME = new MensajeSMIME(tipo:Tipo.EVENTO_CANCELADO_ERROR,
-						usuario:usuario, valido:smimeMessage.isValidSignature(),
-						contenido:smimeMessage.getBytes(), evento:evento)
-					mensajeSMIME.save();
 				}
 		}
 		if(!respuesta) {
-			respuesta = new Respuesta(codigoEstado:400, mensaje:messageSource.getMessage(
+			respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+				mensaje:messageSource.getMessage(
 				'evento.datosCancelacionError', [mensajeJSON?.eventoId,	mensajeJSON.estado].toArray(), locale))
 		}
 		return respuesta

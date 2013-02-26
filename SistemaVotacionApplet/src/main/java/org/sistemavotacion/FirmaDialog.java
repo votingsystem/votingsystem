@@ -398,7 +398,7 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
         final Operacion operacion = appletFirma.getOperacionEnCurso();
         try {
         	timeStampedDocument = new SMIMEMessageWrapper(null, document);
-            new TimeStampWorker(null, operacion.getUrlTimeStampServer(),
+            new TimeStampWorker(TIME_STAMP_WORKER, operacion.getUrlTimeStampServer(),
                     this, timeStampedDocument.getTimeStampRequest(timeStampRequestAlg)).execute();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
@@ -409,16 +409,16 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
     private void processDocument(File document) {
         if(document == null) return;
         final Operacion operacion = appletFirma.getOperacionEnCurso();
-        final EnviarDocumentoFirmadoWorker lanzador = new EnviarDocumentoFirmadoWorker(null, 
-            operacion.getUrlEnvioDocumento(), this);
+        final EnviarDocumentoFirmadoWorker lanzador = new EnviarDocumentoFirmadoWorker(
+                ENVIAR_DOCUMENTO_FIRMADO_WORKER, operacion.getUrlEnvioDocumento(), this);
         lanzador.setDocumentoEnviado(document).execute();
         document.deleteOnExit();
     }
     
     
     @Override  public void process(List<String> messages) {
-        logger.debug(" - process: " + messages.toArray().toString());
-        progressLabel.setText(messages.toArray().toString());
+        logger.debug(" - process: " + messages.iterator().next());
+        progressLabel.setText(messages.iterator().next());
     }
 
     

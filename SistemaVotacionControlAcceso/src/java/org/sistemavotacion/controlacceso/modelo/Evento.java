@@ -265,10 +265,12 @@ public class Evento implements Serializable {
 		this.mensajeSMIMESet = mensajeSMIMESet;
 	}
         
-	public boolean estaAbierto() {
+	public boolean isOpen() {
+		boolean result = false;
 		Date todayDate = DateUtils.getTodayDate();
-		if (todayDate.after(fechaInicio) && todayDate.before(fechaFin)) return true;
-		else return false;
+		if (todayDate.after(fechaInicio) && todayDate.before(fechaFin)) result = true;
+		if(estado == Estado.CANCELADO || estado == Estado.BORRADO_DE_SISTEMA ) result = false;
+		return result;
 	}
 
 	public byte[] getPdf() {

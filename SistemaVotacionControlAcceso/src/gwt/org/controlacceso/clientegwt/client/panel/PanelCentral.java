@@ -6,6 +6,8 @@ import java.util.logging.Logger;
 
 import org.controlacceso.clientegwt.client.Constantes;
 import org.controlacceso.clientegwt.client.HistoryToken;
+import org.controlacceso.clientegwt.client.PuntoEntrada;
+import org.controlacceso.clientegwt.client.PuntoEntradaEditor;
 import org.controlacceso.clientegwt.client.dialogo.DialogoCargaHerramientaValidacion;
 import org.controlacceso.clientegwt.client.dialogo.ErrorDialog;
 import org.controlacceso.clientegwt.client.evento.BusEventos;
@@ -45,6 +47,7 @@ import com.google.gwt.user.client.ui.NamedFrame;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.*;
 
 public class PanelCentral extends Composite implements ValueChangeHandler<String>, 
 		EventoGWTConsultaEventos.Handler, EventoGWTConsultaEvento.Handler {
@@ -208,7 +211,8 @@ public class PanelCentral extends Composite implements ValueChangeHandler<String
     }
     
     public void cargarHerramientaValidacion () {
-    	if(herramientaPublicacionFrame != null) {
+    	Window.open(ServerPaths.getUrlValidationToolJar(), "", "");
+    	/*if(herramientaPublicacionFrame != null) {
     		RootPanel.get("uiBody").remove(herramientaPublicacionFrame);
     	} else {
     		herramientaPublicacionFrame = new NamedFrame(
@@ -220,10 +224,12 @@ public class PanelCentral extends Composite implements ValueChangeHandler<String
     	DialogoCargaHerramientaValidacion dialogoCarga = new DialogoCargaHerramientaValidacion();
     	dialogoCarga.show();    	
         RootPanel.get("uiBody").add(herramientaPublicacionFrame);
+        logger.info(" - cargarHerramientaValidacion - ServerPaths.getUrlFrameHerramientaValidacion(): " + ServerPaths.getUrlFrameHerramientaValidacion());
         DOM.setElementAttribute(herramientaPublicacionFrame.getElement(), "id", 
-        		herramientaPublicacionFrame.getName());
+        		herramientaPublicacionFrame.getName());*/
     }
-    
+
+
     public void lanzarBusqueda(DatosBusquedaJso datosBusqueda) {
     	if(sistemaSeleccionado == null) {
     		History.newItem(HistoryToken.VOTACIONES.toString());

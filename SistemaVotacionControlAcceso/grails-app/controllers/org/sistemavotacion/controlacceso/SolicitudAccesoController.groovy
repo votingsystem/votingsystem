@@ -25,18 +25,18 @@ class SolicitudAccesoController {
 				solicitudAcceso = SolicitudAcceso.get(params.id)
 			}
             if (solicitudAcceso) {
-                    response.status = 200
+                    response.status = Respuesta.SC_OK
                     response.contentLength = solicitudAcceso.mensajeSMIME?.contenido?.length
                     response.setContentType("text/plain")
                     response.outputStream <<  solicitudAcceso.mensajeSMIME?.contenido
                     response.outputStream.flush()
                     return false
             }
-            response.status = 404
+            response.status = Respuesta.SC_NOT_FOUND
             render  message(code: 'anulacionVoto.errorSolicitudNoEncontrada')
             return false
         }
-        response.status = 400
+        response.status = Respuesta.SC_ERROR_PETICION
         render message(code: 'error.PeticionIncorrecta')
         return false
     }
@@ -52,13 +52,13 @@ class SolicitudAccesoController {
 				respuesta = solicitudAccesoService.validarSolicitud(
 					solicitudAccesoMultipartFile.getBytes(), request.getLocale())
 				solicitudAcceso = respuesta.solicitudAcceso
-				if (200 == respuesta.codigoEstado) {
+				if (Respuesta.SC_OK == respuesta.codigoEstado) {
 					MultipartFile solicitudCsrFile = multipartFileMap.remove(
 						grailsApplication.config.SistemaVotacion.nombreSolicitudCSR)
 					Respuesta respuestaValidacionCSR = firmaService.firmarCertificadoVoto(solicitudCsrFile.getBytes(), 
 						respuesta.evento, request.getLocale())
 					respuesta = respuestaValidacionCSR
-					if (200 == respuestaValidacionCSR.codigoEstado) {
+					if (Respuesta.SC_OK == respuestaValidacionCSR.codigoEstado) {
 						response.contentLength = respuestaValidacionCSR.firmaCSR.length
 						response.setContentType("application/octet-stream")
 						response.outputStream << respuestaValidacionCSR.firmaCSR
@@ -77,14 +77,17 @@ class SolicitudAccesoController {
 				if(!mensaje || "".equals(mensaje)) {
 					mensaje = message(code: 'error.PeticionIncorrecta')
 				}
-				flash.respuesta = new Respuesta(mensaje:mensaje,
-					codigoEstado:500, tipo: Tipo.PETICION_CON_ERRORES)
-				forward controller: "error500", action: "procesar"
+				respuesta = new Respuesta(mensaje:mensaje,
+					codigoEstado:Respuesta.SC_ERROR_EJECUCION, tipo: Tipo.PETICION_CON_ERRORES)
+			} finally {
+				response.status = respuesta.codigoEstado
+				render respuesta?.mensaje
+				return false;
 			}
-			response.status = respuesta.codigoEstado
-			render respuesta?.mensaje
-			return false;
         }	
+		response.status = Respuesta.SC_ERROR_PETICION
+		render message(code: 'error.PeticionIncorrecta')
+		return false
     }
     
     def encontrar = {
@@ -96,19 +99,19 @@ class SolicitudAccesoController {
             SolicitudAcceso solicitudAcceso = SolicitudAcceso.findWhere(hashSolicitudAccesoBase64:
                 hashSolicitudAccesoBase64)
             if (solicitudAcceso) {
-                response.status = 200
+                response.status = Respuesta.SC_OK
                 response.contentLength = solicitudAcceso.contenido.length
                 response.setContentType("text/plain")
                 response.outputStream <<  solicitudAcceso.contenido
                 response.outputStream.flush()
                 return false  
             }
-            response.status = 404
+            response.status = Respuesta.SC_NOT_FOUND
             render message(code: 'error.solicitudAccesoNotFound', 
                 args:[params.hashSolicitudAccesoHex])
             return false
         }
-        response.status = 400
+        response.status = Respuesta.SC_ERROR_PETICION
         render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
         return false
     }
@@ -120,7 +123,7 @@ class SolicitudAccesoController {
 				evento =  EventoVotacion.get(params.eventoId)
 			}
 			if(!evento) {
-				response.status = 404 //Not Found
+				response.status = Respuesta.SC_NOT_FOUND
 				render message(code: 'evento.eventoNotFound', args:[params.eventoId])
 				return
 			}
@@ -129,7 +132,7 @@ class SolicitudAccesoController {
 				usuario =  Usuario.findByNif(params.nif)
 			}
 			if(!usuario) {
-				response.status = 404 //Not Found
+				response.status = Respuesta.SC_NOT_FOUND
 				render message(code: 'usuario.nifNoEncontrado', args:[params.nif])
 				return
 			}
@@ -139,18 +142,18 @@ class SolicitudAccesoController {
 					usuario: usuario, eventoVotacion:evento)
 			}
 			if(!solicitudAcceso) {
-				response.status = 404 //Not Found
+				response.status = Respuesta.SC_NOT_FOUND
 				render message(code: 'error.nifSinSolicitudAcceso', args:[params.eventoId, params.nif])
 				return
 			}
-			response.status = 200
+			response.status = Respuesta.SC_OK
 			response.contentLength = solicitudAcceso.mensajeSMIME?.contenido.length
 			response.setContentType("text/plain")
 			response.outputStream <<  solicitudAcceso.mensajeSMIME?.contenido
 			response.outputStream.flush()
 			return false
 		}
-		response.status = 400
+		response.status = Respuesta.SC_ERROR_PETICION
 		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false
 	}

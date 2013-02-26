@@ -40,7 +40,8 @@ class VotoController {
 			MimeMessage smimeMessage = params.smimeMessageReq
 			EventoVotacion eventoVotacion = respuesta.evento
 			def future = callAsync {
-				 return votoService.enviarVoto_A_ControlAcceso(smimeMessage, eventoVotacion)
+				 return votoService.enviarVoto_A_ControlAcceso(
+				 smimeMessage, eventoVotacion, request.getLocale())
 			}
             respuesta = future.get()
             if (Respuesta.SC_OK == respuesta?.codigoEstado) {
@@ -74,7 +75,8 @@ class VotoController {
 			params.smimeMessageReq, request.getLocale())
 		if (Respuesta.SC_OK== respuesta.codigoEstado) {
 			MimeMessage smimeMessage = params.smimeMessageReq
-			respuesta = votoService.enviarVoto_A_ControlAcceso(smimeMessage, respuesta.evento)
+			respuesta = votoService.enviarVoto_A_ControlAcceso(
+				smimeMessage, respuesta.evento, request.getLocale())
 			if (Respuesta.SC_OK == respuesta?.codigoEstado) {
 				response.status = Respuesta.SC_OK
 				response.contentLength = respuesta.voto.mensajeSMIME.contenido.length

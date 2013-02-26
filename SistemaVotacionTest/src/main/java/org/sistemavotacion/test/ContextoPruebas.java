@@ -46,8 +46,6 @@ public class ContextoPruebas {
     private static ActorConIP centroControl;
     private static ActorConIP controlAcceso;
     
-    private static X500PrivateCredential privateCredentialMockRaizDNIe;
-    
     private static Evento evento = null;
     
     public static final String DNIe_SIGN_MECHANISM = "SHA1withRSA";
@@ -323,13 +321,6 @@ public class ContextoPruebas {
         evento = aEvento;
     }
 
-    /**
-     * @return the privateCredentialMockRaizDNIe
-     */
-    public static X500PrivateCredential getPrivateCredentialMockRaizDNIe() {
-        return privateCredentialMockRaizDNIe;
-    }
-    
     public static void crearNivelesDeDirectorios (
             int numDirsPorNivel, String baseDir, int nivel) {
         if (nivel == 0) return;
@@ -338,13 +329,6 @@ public class ContextoPruebas {
             file.mkdirs();
             crearNivelesDeDirectorios(numDirsPorNivel, file.getAbsolutePath(), nivel-1);
         }
-    }
-
-    /**
-     * @param aPrivateCredentialMockRaizDNIe the privateCredentialMockRaizDNIe to set
-     */
-    public static void setPrivateCredentialMockRaizDNIe(X500PrivateCredential aPrivateCredentialMockRaizDNIe) {
-        privateCredentialMockRaizDNIe = aPrivateCredentialMockRaizDNIe;
     }
 
     public static String getUserDirPath (String userNIF) {

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.http.HttpResponse;
@@ -55,9 +56,8 @@ public class LanzadoraVoto
                 infoVoto.getVoto().getCentroControl().getServerURL());
         ReciboVoto reciboVoto = null;
         TimeStampWorker timeStampWorker = getTimeStampedDocument(votoFirmado);
-        while(!timeStampWorker.isDone()) {
-            //logger.debug("----- Waiting for timeStampWorker - timeStampWorker -timeStampWorker");
-        } if(Respuesta.SC_OK != timeStampWorker.getStatusCode()) {
+        timeStampWorker.get(30, TimeUnit.SECONDS);
+        if(Respuesta.SC_OK != timeStampWorker.getStatusCode()) {
             infoVoto.setMensaje(timeStampWorker.getMessage());
             reciboVoto = new ReciboVoto(
                     timeStampWorker.getStatusCode(),timeStampWorker.getMessage());

@@ -87,8 +87,7 @@ public class DialogoSolicitudEmail {
 			contenidoTextBox.setStyleName(style.textBox(), false);
 			contenidoTextBox.setStyleName(style.errorTextBox(), true);
 			return false;
-		} 
-		else {
+		} else {
 			contenidoTextBox.setStyleName(style.textBox(), true);
 			contenidoTextBox.setStyleName(style.errorTextBox(), false);
 		}

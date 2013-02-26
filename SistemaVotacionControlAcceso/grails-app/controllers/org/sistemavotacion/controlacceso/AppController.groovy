@@ -6,7 +6,8 @@ import grails.converters.JSON
 
 class AppController {
 
-	def index() { }
+	def index() { 
+	}
 		
 	def editor() { }
 	
