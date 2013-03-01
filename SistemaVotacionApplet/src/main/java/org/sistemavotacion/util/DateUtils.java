@@ -157,6 +157,22 @@ public class DateUtils {
         String time =  hours + ":" + minutes + ":" + seconds;
         return time;
     }
+    
+    /**
+     *  elapsed time in hours/minutes/seconds/milliseconds
+     * @return String
+     */
+    public static String getElapsedTimeHoursMinutesMillisFromMilliseconds(long milliseconds) {
+        String format = String.format("%%0%dd", 2);
+        String millisecondsFormat = String.format("%%0%dd", 3);
+        long elapsedTime = milliseconds / 1000;
+        String milliSeconds = String.format(millisecondsFormat, milliseconds % 1000);
+        String seconds = String.format(format, elapsedTime % 60);
+        String minutes = String.format(format, (elapsedTime % 3600) / 60);
+        String hours = String.format(format, elapsedTime / 3600);
+        String time =  hours + ":" + minutes + ":" + seconds + ":" + milliSeconds;
+        return time;
+    }
 
     public static final String getFechaYYYYMMDD () {
         Date date = new Date();

@@ -63,6 +63,11 @@ public class StringUtils {
 	    return letra.toString(); 
     }
     
+    public static String getCadenaNormalizada (String cadena) {
+        if(cadena == null) return null;
+        else return cadena.replaceAll("[\\/:.]", ""); 
+    }
+    
     public static String validarNIF(String nif) {
     	if(nif == null) return null;
     	nif  = nif.toUpperCase();

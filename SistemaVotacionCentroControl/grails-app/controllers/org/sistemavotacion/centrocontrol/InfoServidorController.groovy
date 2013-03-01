@@ -18,7 +18,7 @@ class InfoServidorController {
 	
     def obtener = {
         HashMap infoServidor = new HashMap()
-        infoServidor.nombre = grailsApplication.config.SistemaVotacion.NombreCentroControl
+        infoServidor.nombre = grailsApplication.config.SistemaVotacion.serverName
 		infoServidor.tipoServidor = Tipo.CENTRO_CONTROL.toString()
         infoServidor.serverURL = grailsApplication.config.grails.serverURL
         infoServidor.urlBlog = grailsApplication.config.SistemaVotacion.urlBlog

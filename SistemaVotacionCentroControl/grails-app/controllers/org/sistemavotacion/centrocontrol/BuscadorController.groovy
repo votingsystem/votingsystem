@@ -159,7 +159,7 @@ class BuscadorController {
 			eventoMap.opciones = eventoItem.opciones?.collect {opcion ->
 							return [id:opcion.id, contenido:opcion.contenido]}
 			def centroControlMap = [serverURL:grailsApplication.config.grails.serverURL,
-					nombre:grailsApplication.config.SistemaVotacion.NombreCentroControl]
+					nombre:grailsApplication.config.SistemaVotacion.serverName]
 			centroControlMap.informacionVotosURL = "${grailsApplication.config.grails.serverURL}/eventoVotacion/obtenerVotos?eventoVotacionId=${eventoItem.eventoVotacionId}&controlAccesoServerURL=${eventoItem.controlAcceso.serverURL}"
 			eventoMap.centroControl = centroControlMap
 			eventoMap.url = eventoItem.url

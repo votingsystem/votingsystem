@@ -37,9 +37,9 @@ public class GetVotingCertTask extends AsyncTask<String, Void, Integer> {
 	
 	@Override
 	protected Integer doInBackground(String... urls) {
-        Log.d(TAG + ".doInBackground", "");
+		String url = urls[0];
+        Log.d(TAG + ".doInBackground", " - doInBackground - url:" + url);
         try {
-        	String url = urls[0];
             HttpResponse response = HttpHelper.enviarSolicitudAcceso(
             		pkcs10WrapperClient.getPEMEncodedRequestCSR(), solicitudAcceso, url);
             statusCode = response.getStatusLine().getStatusCode();

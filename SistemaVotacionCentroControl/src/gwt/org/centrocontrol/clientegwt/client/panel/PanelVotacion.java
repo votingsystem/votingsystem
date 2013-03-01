@@ -28,7 +28,6 @@ import org.centrocontrol.clientegwt.client.util.PopUpLabel;
 import org.centrocontrol.clientegwt.client.util.RequestHelper;
 import org.centrocontrol.clientegwt.client.util.ServerPaths;
 import org.centrocontrol.clientegwt.client.util.StringUtils;
-import org.sistemavotacion.centrocontrol.modelo.Respuesta;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -49,7 +48,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-
+import org.centrocontrol.clientegwt.client.modelo.Respuesta;
 
 public class PanelVotacion extends Composite implements SolicitanteEmail, ContenedorOpciones,
 	 EventoGWTConsultaEvento.Handler, EventoGWTMensajeClienteFirma.Handler {

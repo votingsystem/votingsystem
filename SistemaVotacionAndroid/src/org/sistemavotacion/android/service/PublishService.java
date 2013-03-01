@@ -41,16 +41,10 @@ import com.itextpdf.text.pdf.PdfReader;
 public class PublishService extends Service implements TaskListener {
 	
 	public static final String TAG = "PublishService";
-	
-    private static final int TIMESTAMP_PUBLISH_CLAIM_DOCUMENT     = 0;
-    private static final int TIMESTAMP_PUBLISH_VOTE_DOCUMENT      = 1;
-    
+
     private PublishServiceListener serviceListener;
     private AsyncTask runningTask = null;
-    private SMIMEMessageWrapper timeStampedDocument;
     private Operation pendingOperation;
-    private byte[] keyStoreBytes;
-    private char[] password;
 
 	private IBinder iBinder = new PublishServiceBinder();
 	
@@ -104,26 +98,11 @@ public class PublishService extends Service implements TaskListener {
 		Log.d(TAG + ".onStartCommand(...) ", " - flags: " + flags + " - startId: " + startId);
         return super.onStartCommand(intent, flags, startId);
     }
-
-    private void setTimeStampedDocument(int timeStampOperation, File document,  
-            String timeStamprequestAlg) {
-        if(document == null) return;
-        try {
-        	timeStampedDocument = new SMIMEMessageWrapper(null, document);
-        	runningTask = new GetTimeStampTask(timeStampOperation, 
-        			timeStampedDocument.getTimeStampRequest(timeStamprequestAlg), this).execute(
-        			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
-        } catch (Exception ex) {
-			Log.e(TAG + ".setTimeStampedDocument(...)", ex.getMessage(), ex);
-        }
-    }
     
     public void publishDocument (Operation operation,
     		byte[] keyStoreBytes, char[] password, 
     		PublishServiceListener serviceListener) {
     	Log.d(TAG + ".publishDocument(...)", " - operation: " + operation.getTipo());
-    	this.keyStoreBytes = keyStoreBytes;
-    	this.password = password;
     	this.pendingOperation = operation;
     	this.serviceListener = serviceListener;
     	String usuario = null;
@@ -138,10 +117,36 @@ public class PublishService extends Service implements TaskListener {
                 signedMailGenerator = new SignedMailGenerator(
     					keyStoreBytes, ALIAS_CERT_USUARIO, password, SIGNATURE_ALGORITHM);
             }
+            GetTimeStampTask timeStampTask = null;
+            SMIMEMessageWrapper timeStampedDocument = null;
     		switch(pendingOperation.getTipo()) {
 				case PUBLICACION_MANIFIESTO_PDF:
-					runningTask = new GetFileTask(null, this).execute(
+					GetFileTask getFileTask = (GetFileTask)new GetFileTask(null, this).execute(
 							pendingOperation.getUrlDocumento());
+					if(Respuesta.SC_OK == getFileTask.get()) {
+						try {
+							PdfReader pdfFile = new PdfReader(getFileTask.getFileData());
+							File pdfFirmadoFile = File.createTempFile("pdfSignedDocument", ".pdf");
+							pdfFirmadoFile.deleteOnExit();
+							Log.d(TAG + ".showTaskResult(...)", " - pdfFirmadoFile path: " + pdfFirmadoFile.getAbsolutePath());
+							KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
+							PrivateKey signerPrivatekey = (PrivateKey)keyStore.getKey(ALIAS_CERT_USUARIO, password);
+							X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(ALIAS_CERT_USUARIO);
+							Certificate[] signerCertsChain = keyStore.getCertificateChain(ALIAS_CERT_USUARIO);
+							SignTimestampSendPDFTask signTimestampSendPDFTask = (SignTimestampSendPDFTask) 
+									new SignTimestampSendPDFTask(this, null, ServerPaths.getURLTimeStampService(
+									CONTROL_ACCESO_URL), null, null, signerCert, signerPrivatekey, signerCertsChain, 
+									pdfFile, pdfFirmadoFile, this).execute(pendingOperation.getUrlEnvioDocumento());
+							signTimestampSendPDFTask.get();
+					    	serviceListener.setPublishServiceMsg(signTimestampSendPDFTask.getStatusCode(), 
+									signTimestampSendPDFTask.getMessage());
+						} catch(Exception ex) {
+							ex.printStackTrace();
+						}
+					} else {
+						serviceListener.setPublishServiceMsg(
+								getFileTask.getStatusCode(), getFileTask.getMessage());
+					}
 					break;
 				case PUBLICACION_VOTACION_SMIME:
 			        signedFile = signedMailGenerator.genFile(usuario, 
@@ -149,8 +154,19 @@ public class PublishService extends Service implements TaskListener {
 							operation.getContenidoFirma().toString(), 
 							operation.getAsuntoMensajeFirmado(), null, SignedMailGenerator.Type.USER, 
 							signedFile);
-					setTimeStampedDocument(
-							TIMESTAMP_PUBLISH_VOTE_DOCUMENT, signedFile, TIMESTAMP_VOTE_HASH);
+			        timeStampedDocument = new SMIMEMessageWrapper(null, signedFile);
+			        timeStampTask = (GetTimeStampTask) new GetTimeStampTask(null, 
+			    			timeStampedDocument.getTimeStampRequest(TIMESTAMP_VOTE_HASH), this).execute(
+			    			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
+			        if(Respuesta.SC_OK == timeStampTask.get()) {
+			        	runningTask = new SendFileTask(null, this, 
+								timeStampedDocument.setTimeStampToken(timeStampTask)).
+								execute(pendingOperation.getUrlEnvioDocumento());
+			        } else {
+						String msg = getString(R.string.timestamp_connection_error_msg) 
+								+ " - " + timeStampTask.getMessage();
+						serviceListener.setPublishServiceMsg(timeStampTask.getStatusCode(), msg);
+			        }
 					break;
 				case PUBLICACION_RECLAMACION_SMIME:
 			        signedFile = signedMailGenerator.genFile(usuario, 
@@ -158,8 +174,19 @@ public class PublishService extends Service implements TaskListener {
 							operation.getContenidoFirma().toString(), 
 							operation.getAsuntoMensajeFirmado(), null, SignedMailGenerator.Type.USER, 
 							signedFile);
-					setTimeStampedDocument(
-							TIMESTAMP_PUBLISH_CLAIM_DOCUMENT, signedFile, TIMESTAMP_VOTE_HASH);
+			        timeStampedDocument = new SMIMEMessageWrapper(null, signedFile);
+			        timeStampTask = (GetTimeStampTask) new GetTimeStampTask(null, 
+			    			timeStampedDocument.getTimeStampRequest(TIMESTAMP_VOTE_HASH), this).execute(
+			    			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
+			        if(Respuesta.SC_OK == timeStampTask.get()) {
+			        	runningTask = new SendFileTask(null, this, 
+								timeStampedDocument.setTimeStampToken(
+								timeStampTask)).execute(pendingOperation.getUrlEnvioDocumento());
+			        } else {
+						String msg = getString(R.string.timestamp_connection_error_msg) 
+								+ " - " + timeStampTask.getMessage();
+						serviceListener.setPublishServiceMsg(timeStampTask.getStatusCode(), msg);
+			        }
 					break;				
 					default:
 						Log.d(TAG + ".processOperation(...) ", " --- unknown operation: " + pendingOperation.getTipo().toString());
@@ -178,64 +205,7 @@ public class PublishService extends Service implements TaskListener {
 	@Override
 	public void showTaskResult(AsyncTask task) {
 		Log.d(TAG + ".showTaskResult(...)", " - task: " + task.getClass());
-		if(task instanceof GetTimeStampTask) {
-			GetTimeStampTask timeStampTask = (GetTimeStampTask)task;
-			if(Respuesta.SC_OK == timeStampTask.getStatusCode()) {
-				try {
-					switch(timeStampTask.getId()) {
-						case TIMESTAMP_PUBLISH_CLAIM_DOCUMENT:
-							runningTask = new SendFileTask(null, this, 
-									timeStampedDocument.setTimeStampToken(
-									timeStampTask)).execute(pendingOperation.getUrlEnvioDocumento());
-							break;
-						case TIMESTAMP_PUBLISH_VOTE_DOCUMENT:
-							runningTask = new SendFileTask(null, this, 
-									timeStampedDocument.setTimeStampToken(
-									timeStampTask)).execute(pendingOperation.getUrlEnvioDocumento());
-							break;
-					}
-				} catch (Exception ex) {
-					ex.printStackTrace();
-					serviceListener.setPublishServiceMsg(
-							Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
-				};
-			} else {
-				String msg = getString(R.string.timestamp_connection_error_msg) 
-						+ " - " + timeStampTask.getMessage();
-				serviceListener.setPublishServiceMsg(timeStampTask.getStatusCode(), msg);
-			}
-		} else if(task instanceof GetFileTask) {
-			GetFileTask getFileTask = (GetFileTask)task;
-			if(Respuesta.SC_OK == getFileTask.getStatusCode()) {
-				try {
-					PdfReader pdfFile = new PdfReader(getFileTask.getFileData());
-					File pdfFirmadoFile = File.createTempFile("pdfSignedDocument", ".pdf");
-					pdfFirmadoFile.deleteOnExit();
-					Log.d(TAG + ".showTaskResult(...)", " - pdfFirmadoFile path: " + pdfFirmadoFile.getAbsolutePath());
-					KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
-					PrivateKey signerPrivatekey = (PrivateKey)keyStore.getKey(ALIAS_CERT_USUARIO, password);
-					X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(ALIAS_CERT_USUARIO);
-					Certificate[] signerCertsChain = keyStore.getCertificateChain(ALIAS_CERT_USUARIO);
-					
-			    	runningTask = new SignTimestampSendPDFTask(this, null,
-			    			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL), null, null, signerCert,
-			    			signerPrivatekey, signerCertsChain, pdfFile, pdfFirmadoFile, this).execute(
-			    			pendingOperation.getUrlEnvioDocumento());
-				} catch(Exception ex) {
-					ex.printStackTrace();
-				}
-			} else {
-				serviceListener.setPublishServiceMsg(
-						getFileTask.getStatusCode(), getFileTask.getMessage());
-			}
-			
-		} else if(task instanceof SignTimestampSendPDFTask) {
-			SignTimestampSendPDFTask signTimestampSendPDFTask = (SignTimestampSendPDFTask)task;
-			Log.d(TAG + ".showTaskResult(...)", " - SignTimestampSendPDFTask status code: " 
-					+ signTimestampSendPDFTask.getStatusCode());
-			serviceListener.setPublishServiceMsg(signTimestampSendPDFTask.getStatusCode(), 
-					signTimestampSendPDFTask.getMessage());
-		} else if(task instanceof SendFileTask) {
+		if(task instanceof SendFileTask) {
 			SendFileTask sendFileTask = (SendFileTask)task;
 			Log.d(TAG + ".showTaskResult(...)", " - sendFileTask - statusCode: " 
 					+ sendFileTask.getStatusCode());

@@ -15,7 +15,6 @@ import org.centrocontrol.clientegwt.client.util.Browser;
 import org.centrocontrol.clientegwt.client.util.RequestHelper;
 import org.centrocontrol.clientegwt.client.util.ServerPaths;
 import org.centrocontrol.clientegwt.client.util.StringUtils;
-import org.sistemavotacion.centrocontrol.modelo.Respuesta;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -30,6 +29,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.NamedFrame;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import org.centrocontrol.clientegwt.client.modelo.Respuesta;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.

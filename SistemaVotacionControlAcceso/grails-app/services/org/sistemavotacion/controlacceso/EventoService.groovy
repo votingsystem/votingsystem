@@ -174,7 +174,7 @@ class EventoService {
 			fechaFin:eventoItem.getFechaFin()]
 		if(eventoItem.usuario) eventoMap.usuario = "${eventoItem.usuario?.nombre} ${eventoItem.usuario?.primerApellido}"
 		def controlAccesoMap = [serverURL:grailsApplication.config.grails.serverURL,
-				nombre:grailsApplication.config.SistemaVotacion.NombreControlAcceso]
+				nombre:grailsApplication.config.SistemaVotacion.serverName]
 		eventoMap.controlAcceso = controlAccesoMap
 		eventoMap.opciones = eventoItem.opciones?.collect {opcion ->
 				return [id:opcion.id, contenido:opcion.contenido]}
@@ -222,7 +222,7 @@ class EventoService {
 			eventoMap.numeroFirmas = Firma.countByEventoAndTipo(eventoItem, Tipo.FIRMA_EVENTO_RECLAMACION)
 		}
 		def controlAccesoMap = [serverURL:grailsApplication.config.grails.serverURL,
-				nombre:grailsApplication.config.SistemaVotacion.NombreControlAcceso]
+				nombre:grailsApplication.config.SistemaVotacion.serverName]
 		eventoMap.controlAcceso = controlAccesoMap
 		eventoMap.campos = eventoItem.camposEvento?.collect {campoItem ->
 				return [id:campoItem.id, contenido:campoItem.contenido]}

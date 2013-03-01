@@ -105,7 +105,7 @@ public class LanzadoraSolicitudAcceso
             return infoVoto;
         }
         infoVoto.setCodigoEstado(response.getStatusLine().getStatusCode());
-        if (200 == response.getStatusLine().getStatusCode()) {
+        if (Respuesta.SC_OK == response.getStatusLine().getStatusCode()) {
             wrapperClient.initSigner(EntityUtils.toByteArray(response.getEntity()));;
         } else {
             infoVoto.setCodigoEstado(response.getStatusLine().getStatusCode());
@@ -125,7 +125,6 @@ public class LanzadoraSolicitudAcceso
             timeStampedDocument = new SMIMEMessageWrapper(null,document);
             String urlTimeStampServer = ContextoPruebas.getUrlTimeStampServer(
                     ContextoPruebas.getControlAcceso().getServerURL());
-            TimeStampRequest timeStampRequest = timeStampedDocument.getTimeStampRequest(TIMESTAMP_HASH);
             timeStampWorker = new TimeStampWorker(null, urlTimeStampServer,
                     this, timeStampedDocument.getTimeStampRequest(TIMESTAMP_HASH));
             timeStampWorker.execute();

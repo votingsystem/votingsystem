@@ -59,6 +59,11 @@ public class StringUtils {
         return new String(salida.toByteArray(), "UTF-8");
     }
     
+    public static String getCadenaNormalizada (String cadena) {
+        if(cadena == null) return null;
+        else return cadena.replaceAll("[\\/:.]", ""); 
+    }
+    
     // sacado de http://felinfo.blogspot.com.es/2010/12/calcular-la-letra-del-dni-con-java.html
     public static String calculaLetraNIF(int dni) {
 	    String juegoCaracteres="TRWAGMYFPDXBNJZSQVHLCKET";

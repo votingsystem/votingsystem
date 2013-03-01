@@ -21,6 +21,7 @@ import org.sistemavotacion.test.modelo.SolicitudAcceso;
 import org.sistemavotacion.test.panel.DigitalClockPanel;
 import org.sistemavotacion.test.simulacion.LanzadoraAnulacionSolicitudAcceso;
 import org.sistemavotacion.test.util.FileNameFilter;
+import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,6 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
     
     private MensajeDialog mensajeDialog;
     private static long comienzo;
-    private static long duracion;
     private StringBuilder erroresAnulaciones = new StringBuilder("<html>");
     private SwingWorker tareaEnEjecucion;
     private Evento evento;
@@ -303,11 +303,12 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
     }// </editor-fold>//GEN-END:initComponents
 
     private void explicacionTecnicaButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_explicacionTecnicaButtonActionPerformed
-        String theString = new Scanner(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream("AnularVoto.html")).useDelimiter("\\A").next();
+        //String theString = new Scanner(Thread.currentThread().getContextClassLoader()
+        //        .getResourceAsStream("AnularVoto.html")).useDelimiter("\\A").next();
+        String msg = ContextoPruebas.getString("cancelVoteDetailsMsg");
         mensajeDialog = new MensajeDialog(MainFrame.INSTANCIA.getFrames()[0], true,
                 new Dimension(600, 400));
-        mensajeDialog.setMessage(theString, "Anulación de votos");
+        mensajeDialog.setMessage(msg, ContextoPruebas.getString("cancelVoteCaption"));
     }//GEN-LAST:event_explicacionTecnicaButtonActionPerformed
 
     private void cerrarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cerrarButtonActionPerformed
@@ -397,11 +398,10 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
             logger.debug("Comprobando respuesta");
             Future<Respuesta> f = anulacionSolicitudesCompletionService.take();
             final Respuesta respuesta = f.get();
-            if(200 == respuesta.getCodigoEstado()) {
+            if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
                 logger.debug("Anulación correcta");
-                anulacionesEnviadasOK.getAndIncrement();
                 actualizarContadorSolicitudesOK(
-                        new Long(anulacionesEnviadasOK.get()).intValue());
+                        new Long(anulacionesEnviadasOK.incrementAndGet()).intValue());
             } else {
                 logger.debug("Error anulando Solicitud - " + respuesta.getMensaje());
                 SolicitudAcceso solicitud = (SolicitudAcceso) respuesta.getObjeto();
@@ -424,7 +424,8 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
     }
     
     private void finalizarAnulacion () {
-        duracion = System.currentTimeMillis() - comienzo;
+        String duracion = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
+                            System.currentTimeMillis() - comienzo);
         logger.debug("Duración: " + duracion);
         digitalClockPanel.stop();
         mostarPantallaEnvio(false);

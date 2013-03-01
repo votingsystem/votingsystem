@@ -77,11 +77,8 @@ class SolicitudAccesoController {
 				if(!mensaje || "".equals(mensaje)) {
 					mensaje = message(code: 'error.PeticionIncorrecta')
 				}
-				respuesta = new Respuesta(mensaje:mensaje,
-					codigoEstado:Respuesta.SC_ERROR_EJECUCION, tipo: Tipo.PETICION_CON_ERRORES)
-			} finally {
-				response.status = respuesta.codigoEstado
-				render respuesta?.mensaje
+				response.status = Respuesta.SC_ERROR_EJECUCION
+				render mensaje
 				return false;
 			}
         }	

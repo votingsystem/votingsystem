@@ -89,7 +89,7 @@ class EventoVotacionService {
             mensajeJSON.opciones = arrayOpciones
         } 
         mensajeJSON.controlAcceso = [serverURL:grailsApplication.config.grails.serverURL, 
-			nombre:grailsApplication.config.SistemaVotacion.NombreControlAcceso] as JSONObject
+			nombre:grailsApplication.config.SistemaVotacion.serverName] as JSONObject
 		if (mensajeJSON.etiquetas) {
 			Set<Etiqueta> etiquetaSet = etiquetaService.guardarEtiquetas(mensajeJSON.etiquetas)
 			if(etiquetaSet) evento.setEtiquetaSet(etiquetaSet)

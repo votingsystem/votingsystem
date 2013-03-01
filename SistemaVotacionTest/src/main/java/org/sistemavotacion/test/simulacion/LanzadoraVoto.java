@@ -50,7 +50,8 @@ public class LanzadoraVoto
         File votoFirmado = new File(ContextoPruebas.getUserDirPath(infoVoto.getFrom())
                         + ContextoPruebas.VOTE_FILE + infoVoto.getVoto().getEventoId() + ".p7m");
         votoFirmado = infoVoto.getPkcs10WrapperClient().genSignedFile(
-                infoVoto.getFrom(), infoVoto.getVoto().getControlAcceso().getNombreNormalizado(),
+                infoVoto.getVoto().getHashCertificadoVotoBase64(), 
+                infoVoto.getVoto().getControlAcceso().getNombreNormalizado(),
                 votoJSON, "[VOTO]", null, SignedMailGenerator.Type.USER, votoFirmado);
         String urlVoto = ContextoPruebas.getURLVoto(
                 infoVoto.getVoto().getCentroControl().getServerURL());

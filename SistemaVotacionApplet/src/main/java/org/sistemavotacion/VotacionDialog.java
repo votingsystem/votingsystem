@@ -345,7 +345,7 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
                 directorioArchivoVoto.getAbsolutePath() 
                 + File.separator + getString("TIMESTAMPED_VOTE_SMIME_FILE"));
         try {
-            votoFirmado = pkcs10WrapperClient.genSignedFile(Contexto.getUsuario().getNif(), 
+            votoFirmado = pkcs10WrapperClient.genSignedFile(votoEvento.getHashCertificadoVotoBase64(), 
                     StringUtils.getCadenaNormalizada(votoEvento.getCentroControl().getNombre()),
                     votoJSON, getString("asuntoVoto"), null, 
                     SignedMailGenerator.Type.USER, votoFirmado);

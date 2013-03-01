@@ -70,7 +70,7 @@ class EventoReclamacionService {
             campo.save();
             arrayCampos.add(new JSONObject([id:campo.id, contenido:campo.contenido]))
         }
-        mensajeJSON.controlAcceso = [serverURL:grailsApplication.config.grails.serverURL, nombre:grailsApplication.config.SistemaVotacion.NombreControlAcceso]  as JSONObject
+        mensajeJSON.controlAcceso = [serverURL:grailsApplication.config.grails.serverURL, nombre:grailsApplication.config.SistemaVotacion.serverName]  as JSONObject
         mensajeJSON.campos = arrayCampos
         log.debug("guardarEvento - mensajeValidado: ${mensajeJSON.toString()}")
         String mensajeValidado = firmaService.obtenerCadenaFirmada(mensajeJSON.toString(),

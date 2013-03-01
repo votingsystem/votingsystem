@@ -1,5 +1,7 @@
 package org.sistemavotacion.centrocontrol
 
+import javax.mail.Address;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import org.sistemavotacion.centrocontrol.modelo.*
 import org.sistemavotacion.utils.StringUtils;
@@ -116,6 +118,8 @@ class VotoService {
 		multifirmaCentroControl.save()
 		
 		smimeMessage.setMessageID("${localServerURL}/mensajeSMIME/obtener?id=${multifirmaCentroControl.id}")
+		smimeMessage.setFrom(new InternetAddress(
+			grailsApplication.config.SistemaVotacion.serverName.replaceAll(" ", "")))
 		smimeMessage.setTo("${eventoVotacion.controlAcceso.serverURL}")
 				
         MimeMessage multiSignedMessage = firmaService.generarMultifirma(

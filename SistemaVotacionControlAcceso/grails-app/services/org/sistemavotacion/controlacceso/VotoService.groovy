@@ -7,6 +7,7 @@ import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.utils.StringUtils;
 import grails.converters.JSON;
 import java.util.Locale;
+import javax.mail.internet.InternetAddress;
 
 class VotoService {
 	
@@ -66,7 +67,9 @@ class VotoService {
 			tipo:Tipo.VOTO_VALIDADO_CONTROL_ACCESO, valido:true, evento:evento)
 		multifirmaControlAcceso.save()
 		smimeMessage.setMessageID("${localServerURL}/mensajeSMIME/obtener?id=${multifirmaControlAcceso.id}")
-		smimeMessage.setTo(infoVoto.hashCertificadoVotoBase64)
+		smimeMessage.setFrom(new InternetAddress(
+			grailsApplication.config.SistemaVotacion.serverName.replaceAll(" ", "")))
+		smimeMessage.setTo(evento.centroControl.serverURL)
 
 		MimeMessage multiFirmaMimeMessage = firmaService.generarMultifirma(
 			smimeMessage, messageSource.getMessage(
@@ -82,7 +85,7 @@ class VotoService {
 		voto.save()
 		certificado.estado = Certificado.Estado.UTILIZADO;
 		certificado.save();
-		return new Respuesta(codigoEstado:200, voto:voto)
+		return new Respuesta(codigoEstado:Respuesta.SC_OK, voto:voto)
     }
 	
 	public synchronized Respuesta validarAnulacion (SMIMEMessageWrapper smimeMessage, Locale locale) {
@@ -94,7 +97,7 @@ class VotoService {
 		def hashSolicitudAccesoBase64 = anulacionJSON.hashSolicitudAccesoBase64
 		if(!origenHashCertificadoVoto || !hashCertificadoVotoBase64 || 
 			!origenHashSolicitudAcceso || !hashSolicitudAccesoBase64) {
-			return new Respuesta(codigoEstado:400,
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
 				mensaje:messageSource.getMessage('anulacionVoto.dataError', null, locale))
 		}
 		
@@ -104,27 +107,27 @@ class VotoService {
 			"${grailsApplication.config.SistemaVotacion.votingHashAlgorithm}")
 		Tipo tipoPeticion = Tipo.ANULADOR_VOTO
 		EventoVotacion eventoVotacion
-		int codigoEstado = 400
+		int codigoEstado = Respuesta.SC_ERROR_PETICION
 		if (!hashSolicitudAccesoBase64.equals(hashSolicitud))
-				return new Respuesta(codigoEstado:400, mensaje:messageSource.getMessage(
-					'anulacionVoto.errorEnHashSolcitud', null, locale))
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:messageSource.getMessage(
+					'anulacionVoto.accessRequestHashError', null, locale))
 		def solicitudAcceso = SolicitudAcceso.findWhere(hashSolicitudAccesoBase64:hashSolicitudAccesoBase64)
 		if (!solicitudAcceso) 
-				return new Respuesta(codigoEstado:400, mensaje:messageSource.getMessage(
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:messageSource.getMessage(
 					'anulacionVoto.errorSolicitudNoEncontrada', null, locale))
 		if(solicitudAcceso.estado.equals(SolicitudAcceso.Estado.ANULADO)) {
 			return new Respuesta(codigoEstado:Respuesta.SC_ANULACION_REPETIDA, mensaje:messageSource.getMessage(
 				'anulacionVoto.errorSolicitudAnulada', null, locale))
 		}	
 		if (!hashCertificadoVotoBase64.equals(hashCertificadoVoto))
-				return new Respuesta(codigoEstado:400, mensaje:messageSource.getMessage(
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:messageSource.getMessage(
 					'anulacionVoto.errorEnHashCertificado', null, locale))
 		def solicitudCSR = SolicitudCSRVoto.findWhere(hashCertificadoVotoBase64:hashCertificadoVotoBase64)
 		if (!solicitudCSR)
-				return new Respuesta(codigoEstado:400, mensaje:messageSource.getMessage(
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:messageSource.getMessage(
 					'anulacionVoto.errorSNoEncontrada', null, locale))
 		def certificado = Certificado.findWhere(hashCertificadoVotoBase64:hashCertificadoVotoBase64)
-		if (!certificado) return new Respuesta(codigoEstado:400, mensaje:messageSource.
+		if (!certificado) return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:messageSource.
 			getMessage('anulacionVoto.errorSolicitudCSRNoEncontrada', null, locale))
 		else eventoVotacion = certificado.eventoVotacion
 		def voto = Voto.findWhere(certificado:certificado)
@@ -181,7 +184,7 @@ class VotoService {
 		Respuesta respuestaCentroControl = httpService.enviarMensaje(urlAnulacionVoto, 
 			anuladorVoto.mensajeSMIME.contenido)
 		log.debug ("enviarAnulacion_A_CentroControl - respuesta : '${respuestaCentroControl.codigoEstado}' ")
-		if (200 == respuestaCentroControl.codigoEstado) {
+		if (Respuesta.SC_OK == respuestaCentroControl.codigoEstado) {
 			anuladorVoto.estado = AnuladorVoto.Estado.NOTIFICADO
 			anuladorVoto.merge()
 		}

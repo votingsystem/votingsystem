@@ -4,6 +4,9 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.security.KeyStore;
 import java.security.cert.PKIXParameters;
+import java.security.cert.TrustAnchor;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
@@ -59,15 +62,22 @@ public class LanzadoraAnulacionSolicitudAcceso  implements Callable<Respuesta> {
         HttpResponse response = Contexto.getHttpHelper().enviarArchivoFirmado(
             anulador, ContextoPruebas.getURLAnulacionVoto(
             		ContextoPruebas.getControlAcceso().getServerURL()));
-        if (200 == response.getStatusLine().getStatusCode()) {                    
+        if (Respuesta.SC_OK == response.getStatusLine().getStatusCode()) {                    
             PKIXParameters params = Contexto.getHttpHelper()
                     .obtenerPKIXParametersDeServidor(
-            		ContextoPruebas.getControlAcceso().getServerURL());
+            		ContextoPruebas.INSTANCIA.getUrlControlAccesoCertChain());
+            TrustAnchor anchorUserCert = new TrustAnchor(
+                    ContextoPruebas.getCertificadoRaizAutoridad(), null);
+            Set<TrustAnchor> anchors = new HashSet<TrustAnchor>();
+            anchors.add(anchorUserCert);
+            anchors.addAll(params.getTrustAnchors());
+            PKIXParameters pkixParams = new PKIXParameters(anchors);
+            pkixParams.setRevocationEnabled(false);
             SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(null,
                     new ByteArrayInputStream(EntityUtils.toByteArray(response.getEntity())),
                     "ReciboAnulacionVoto");
             respuesta = new Respuesta(response.getStatusLine().getStatusCode(), 
-                    dnieMimeMessage, params);
+                    dnieMimeMessage, pkixParams);
         } else {
             respuesta = new Respuesta(
                     response.getStatusLine().getStatusCode(), 

@@ -20,15 +20,14 @@ class VotoController {
 						new ByteArrayInputStream(multipartFile?.getBytes()), 
 						null, SMIMEMessageWrapper.Tipo.VOTO);
 		Respuesta respuesta = votoService.validarFirmas(smimeMessageReq, request.getLocale())
-		if (200 == respuesta.codigoEstado) {
-			response.status = 200
+		response.status = respuesta.codigoEstado
+		if (Respuesta.SC_OK == respuesta.codigoEstado) {
 			response.contentLength = respuesta.voto.mensajeSMIME.contenido.length
 			response.setContentType("text/plain")
 			response.outputStream <<  respuesta.voto.mensajeSMIME.contenido
 			response.outputStream.flush()
 			return false
 		}
-		response.status = 400
 		render respuesta.mensaje
 		return false
 	}

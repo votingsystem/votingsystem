@@ -100,7 +100,7 @@ class SubscripcionController {
 			entradas.add(entrada);
 		}
 		String tituloSubscripcionVotaciones = "${message(code: 'subscripcion.tituloSubscripcionVotaciones')}" +
-		" -${grailsApplication.config.SistemaVotacion.NombreCentroControl}-"
+		" -${grailsApplication.config.SistemaVotacion.serverName}-"
 		SyndFeed feed = new SyndFeedImpl(feedType: feedType,
 				title: tituloSubscripcionVotaciones,
 				link: "${grailsApplication.config.grails.serverURL}/app/index#VOTACIONES",

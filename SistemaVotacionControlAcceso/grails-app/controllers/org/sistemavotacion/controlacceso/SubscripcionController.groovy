@@ -112,7 +112,7 @@ class SubscripcionController {
 			entradas.add(entrada);
 		}
 		String tituloSubscripcionReclamaciones = "${message(code: 'subscripcion.tituloSubscripcionReclamaciones')}" +
-		" -${grailsApplication.config.SistemaVotacion.NombreControlAcceso}-"
+		" -${grailsApplication.config.SistemaVotacion.serverName}-"
 		SyndFeed feed = new SyndFeedImpl(feedType: feedType,
 				title: tituloSubscripcionReclamaciones,
 				link: "${grailsApplication.config.grails.serverURL}/app/index#RECLAMACIONES",
@@ -150,7 +150,7 @@ class SubscripcionController {
 			entradas.add(entrada);
 		}
 		String tituloSubscripcionVotaciones = "${message(code: 'subscripcion.tituloSubscripcionVotaciones')}" +
-		" -${grailsApplication.config.SistemaVotacion.NombreControlAcceso}-"
+		" -${grailsApplication.config.SistemaVotacion.serverName}-"
 		SyndFeed feed = new SyndFeedImpl(feedType: feedType,
 				title: tituloSubscripcionVotaciones,
 				link: "${grailsApplication.config.grails.serverURL}/app/index#VOTACIONES",
@@ -185,7 +185,7 @@ class SubscripcionController {
 			entradas.add(entrada);
 		}
 		String tituloSubscripcionManifiestos = "${message(code: 'subscripcion.tituloSubscripcionManifiestos')}" +
-		" -${grailsApplication.config.SistemaVotacion.NombreControlAcceso}-"
+		" -${grailsApplication.config.SistemaVotacion.serverName}-"
 		SyndFeed feed = new SyndFeedImpl(feedType: feedType, 
 				title: tituloSubscripcionManifiestos,
 				link: "${grailsApplication.config.grails.serverURL}/app/index#MANIFIESTOS",

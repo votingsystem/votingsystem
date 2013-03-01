@@ -5,13 +5,17 @@ import java.io.IOException;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
+import java.text.MessageFormat;
+import java.util.Enumeration;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.Set;
 
 import javax.security.auth.x500.X500PrivateCredential;
 
 import org.apache.log4j.PropertyConfigurator;
 import org.bouncycastle.tsp.TSPAlgorithms;
+import static org.sistemavotacion.herramientavalidacion.AppletHerramienta.getString;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Usuario;
@@ -29,6 +33,8 @@ import org.slf4j.LoggerFactory;
 public class ContextoPruebas {
     
     private static Logger logger = LoggerFactory.getLogger(ContextoPruebas.class);
+    
+    public static String locale = "es";
     
     public static final int KEY_SIZE = 1024;
     public static final String SIG_NAME = "RSA";
@@ -50,7 +56,7 @@ public class ContextoPruebas {
     
     public static final String DNIe_SIGN_MECHANISM = "SHA1withRSA";
     public static final String VOTE_SIGN_MECHANISM = "SHA512withRSA";
-    public static final String DIGEST_ALG = "SHA512";
+    public static final String DIGEST_ALG = "SHA256";
     
     public static final String PREFIJO_USER_JKS = "usuario_"; 
     public static final String SUFIJO_USER_JKS = ".jks"; 
@@ -84,11 +90,12 @@ public class ContextoPruebas {
     private static Integer minutosDuracionVotacion;
     private static boolean votacionAleatoria = true;
     private static boolean simulacionConTiempos = false;
-
+    private static ResourceBundle resourceBundle;
 
     private ContextoPruebas () { }
 
     public static ContextoPruebas inicializar () throws Exception {
+        logger.debug(" --- inicializar --- ");
         if (INSTANCIA == null) {
             INSTANCIA = new ContextoPruebas();
             Properties props = new Properties();
@@ -106,10 +113,20 @@ public class ContextoPruebas {
             usuarioPruebas.setNombre("José García");
             usuarioPruebas.setEmail("jgzornoza@gmail.com");
             usuarioPruebas.setKeyStore(inicializarCertificadoUsuario(usuarioPruebas));
+            resourceBundle = ResourceBundle.getBundle("messagesTest_" + locale);
         }
         return INSTANCIA;
     }
     
+    public static String getString(String key) {
+        return resourceBundle.getString(key);
+    }    
+    
+    public static String getString(String key, Object... arguments) {
+        String pattern = getString(key);
+        return MessageFormat.format(pattern, arguments);
+    }
+
     private static void inicializarAutoridadCertificadora() {
         try {
             File rutaMockRaiz = File.createTempFile("MockRaiz", ".jks");

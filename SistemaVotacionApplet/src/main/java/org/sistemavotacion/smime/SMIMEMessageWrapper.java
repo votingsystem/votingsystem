@@ -453,7 +453,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
     
     public SignedMailValidator.ValidationResult verify(
             PKIXParameters params) throws Exception {
-        
+        logger.debug("verify");
         SVCertExtensionChecker checker = new SVCertExtensionChecker();
         params.addCertPathChecker(checker);   
         

@@ -185,13 +185,12 @@ public class Votacion implements ActionListener {
     }
 
     public void validarRecibos () throws Exception {
-        int numVoto = 1;
         do {
             try {
                 Future<InfoVoto> f = votosCompletionService.take();
                 InfoVoto infoVoto = f.get();
-                votosRecogidos.getAndIncrement();
-                VotacionesPanel.INSTANCIA.actualizarContadorVotosValidados(numVoto++);    
+                VotacionesPanel.INSTANCIA.actualizarContadorVotosValidados(
+                        new Long(votosRecogidos.incrementAndGet()).intValue());    
                 ReciboVoto reciboVoto = infoVoto.getReciboVoto();
                 if (200 == reciboVoto.getCodigoEstado()) {
                     votosValidos.getAndIncrement();
