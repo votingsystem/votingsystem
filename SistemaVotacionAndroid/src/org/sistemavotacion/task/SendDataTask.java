@@ -7,7 +7,7 @@ import org.sistemavotacion.util.HttpHelper;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class SendDataTask extends AsyncTask<String, Void, String> {
+public class SendDataTask extends AsyncTask<String, Void, Integer> {
 
 	public static final String TAG = "SendDataTask";
 	
@@ -25,7 +25,7 @@ public class SendDataTask extends AsyncTask<String, Void, String> {
     }
 	
 	@Override
-	protected String doInBackground(String... urls) {
+	protected Integer doInBackground(String... urls) {
         Log.d(TAG + ".doInBackground(...)", " - url:" + urls[0]);
         try {
             HttpResponse response = HttpHelper.sendData(data, urls[0]); 
@@ -35,12 +35,12 @@ public class SendDataTask extends AsyncTask<String, Void, String> {
         	ex.printStackTrace();
         	exception = ex;
         }
-        return message;
+        return statusCode;
 	}
 	
     @Override
-    protected void onPostExecute(String data) {
-    	Log.d(TAG + ".onPostExecute", " - data: " + data);
+    protected void onPostExecute(Integer data) {
+    	Log.d(TAG + ".onPostExecute", " - statusCode: " + data);
     	listener.showTaskResult(this);
     }
 

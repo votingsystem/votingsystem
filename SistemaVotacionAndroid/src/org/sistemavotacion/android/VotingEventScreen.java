@@ -87,7 +87,6 @@ public class VotingEventScreen extends FragmentActivity
     private Evento evento;
     private VoteReceipt receipt;
     private ProgressDialog progressDialog = null;
-    private AsyncTask runningTask = null;
     private List<Button> optionButtons = null;
     byte[] keyStoreBytes = null;
 	private Intent votingServiceIntent = null;
@@ -484,7 +483,7 @@ public class VotingEventScreen extends FragmentActivity
 		                @Override
 		                public void onCancel(DialogInterface dialog) { 
 		                	Log.d(TAG + ".ProgressDialog", "cancelando tarea"); 
-		                	if(runningTask != null) runningTask.cancel(true);
+		                	//if(runningTask != null) runningTask.cancel(true);
 		                }
 	        		});
 	        switch(operation) {

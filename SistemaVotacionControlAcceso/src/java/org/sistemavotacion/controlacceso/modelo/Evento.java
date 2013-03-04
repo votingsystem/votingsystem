@@ -122,6 +122,10 @@ public class Evento implements Serializable {
     private Date fechaFin;
     
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(name="fechaCancelacion", length=23)
+    private Date dateCanceled;
+    
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name="fechaCreacion", length=23)
     private Date dateCreated;
 
@@ -295,5 +299,13 @@ public class Evento implements Serializable {
 
 	public void setEtiquetaSet(Set<Etiqueta> etiquetaSet) {
 		this.etiquetaSet = etiquetaSet;
+	}
+
+	public Date getDateCanceled() {
+		return dateCanceled;
+	}
+
+	public void setDateCanceled(Date dateCanceled) {
+		this.dateCanceled = dateCanceled;
 	}
 }

@@ -43,6 +43,7 @@ public class Respuesta {
 	private Voto voto;
 	private File file;
     private X509Certificate certificado;
+    private Certificado certificadoDB;
     private byte[] cadenaCertificacion;
     private byte[] timeStampToken;
     private ActorConIP actorConIP;
@@ -288,6 +289,14 @@ public class Respuesta {
 
 	public void setTimeStampToken(byte[] timeStampToken) {
 		this.timeStampToken = timeStampToken;
+	}
+
+	public Certificado getCertificadoDB() {
+		return certificadoDB;
+	}
+
+	public void setCertificadoDB(Certificado certificadoDB) {
+		this.certificadoDB = certificadoDB;
 	}
 
 }

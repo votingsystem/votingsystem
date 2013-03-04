@@ -6,21 +6,33 @@
         	#content a{margin: 0px 100px 0px 0px;}
         	#contentText {margin: 40px 0px 0px 0px;}
         </style>
-        <link rel="stylesheet" href="${resource(dir:'css',file:'tabmenu.css')}" />
     </head>
     <body>
- 		<ul id="tabmenu">
-			<li><a class="active" href="informacion">${message(code: 'infoLabel', null)}</a></li>
-			<li><a href="listaServicios">${message(code: 'servicesListLabel', null)}</a></li>
-			<li><a href="datosAplicacion">${message(code: 'appDataLabel', null)}</a></li>
-		</ul>
+   	    
+   	    <div class="container">
+    
+	    <div class="navbar">   
+			<div class="navbar-inner">
+			    <div class="container">
+			 		<ul class="nav">
+						<li class="active"><a href="informacion">${message(code: 'infoLabel', null)}</a></li>
+						<li><a href="listaServicios">${message(code: 'servicesListLabel', null)}</a></li>
+						<li><a href="datosAplicacion">${message(code: 'appDataLabel', null)}</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
 		
-		<div id="content" role="main">
-            <h1><a href="${grailsApplication.config.grails.serverURL}/app/index">${message(code: 'mainPageLabel', null)}</a>
-            <a href="https://github.com/jgzornoza/SistemaVotacion/tree/master/SistemaVotacionCentroControl">${message(code: 'sourceCodeLabel', null)}</a>
-            <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Centro-de-Control">${message(code: 'wikiLabel', null)}</a></h1>
+		<div id="content" class="content" role="main">
+           <div class="mainLinkContainer">
+	        	<div class="mainLink"><a href="${grailsApplication.config.grails.serverURL}/app/index">${message(code: 'mainPageLabel', null)}</a></div>
+	            <div class="mainLink"><a href="https://github.com/jgzornoza/SistemaVotacion/tree/master/SistemaVotacionCentroControl">${message(code: 'sourceCodeLabel', null)}</a></div>
+	            <div class="mainLink"><a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Centro-de-Control">${message(code: 'wikiLabel', null)}</a></div>
+           </div>
             <p id="contentText">${message(code: 'urlMatch', null)}: <b>${grailsApplication.config.grails.serverURL}</b></p>
 		</div>
 		
+		</div>
+				
 	</body>
 </html>

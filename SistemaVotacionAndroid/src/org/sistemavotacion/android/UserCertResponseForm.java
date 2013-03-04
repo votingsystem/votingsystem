@@ -156,9 +156,32 @@ public class UserCertResponseForm extends FragmentActivity
 	    	                	}*/
 	    	                }
 	                });
-	            new GetDataTask(null, this).execute(ServerPaths.getURLSolicitudCertificadoUsuario(
-	        			CONTROL_ACCESO_URL, String.valueOf(idSolicitudCSR)));
-	    		break;
+	            try {
+	            	GetDataTask getDataTask = (GetDataTask)new GetDataTask(null, this).execute(ServerPaths.getURLSolicitudCertificadoUsuario(
+		        			CONTROL_ACCESO_URL, String.valueOf(idSolicitudCSR)));
+	            	getDataTask.get();
+	            	if (progressDialog != null && progressDialog.isShowing()) {
+			            progressDialog.dismiss();
+			        }
+	            	Log.d(TAG + ".checkCertState() ", "- getDataTask - statusCode: " + getDataTask.getStatusCode());	
+	            	if (Respuesta.SC_OK == getDataTask.getStatusCode()) {
+			        	setCsrFirmado(getDataTask.getMessage());
+			        	setMessage(getString(R.string.cert_downloaded_msg));
+			            insertPinButton.setVisibility(View.VISIBLE);
+				        setCertStateChecked(true);
+			        } else if(Respuesta.SC_NOT_FOUND == getDataTask.getStatusCode()) {
+			        	String certificationAddresses = ServerPaths.
+			        			getURLCertificationAddresses(Aplicacion.CONTROL_ACCESO_URL);
+			        	setMessage(getString(R.string.
+			        			resultado_solicitud_certificado_activity, 
+			        			certificationAddresses));
+			        } else showException(getString(
+			        		R.string.request_user_cert_error_msg));
+			        goAppButton.setVisibility(View.VISIBLE);
+	            } catch(Exception ex) {
+	            	ex.printStackTrace();
+	            	showException(ex.getMessage());
+	            }
   	  	}
     	
     }
@@ -286,36 +309,8 @@ public class UserCertResponseForm extends FragmentActivity
 	}
 
 	@Override
-	public void processTaskMessages(List<String> messages, AsyncTask task) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void processTaskMessages(List<String> messages, AsyncTask task) {  }
 
-	@Override
-	public void showTaskResult(AsyncTask task) {
-		Log.d(TAG + ".showTaskResult(...)", " - task: " + task.getClass());
-		if(task instanceof GetDataTask) {
-			GetDataTask getDataTask = (GetDataTask)task;
-			Log.d(TAG + ".showTaskResult(...)", " - GetDataTask - statuscode: " + getDataTask.getStatusCode());
-	        if (progressDialog != null && progressDialog.isShowing()) {
-	            progressDialog.dismiss();
-	        }
-	        if (Respuesta.SC_OK == getDataTask.getStatusCode()) {
-	        	setCsrFirmado(getDataTask.getMessage());
-	        	setMessage(getString(R.string.cert_downloaded_msg));
-	            insertPinButton.setVisibility(View.VISIBLE);
-		        setCertStateChecked(true);
-	        } else if(Respuesta.SC_NOT_FOUND == getDataTask.getStatusCode()) {
-	        	String certificationAddresses = ServerPaths.
-	        			getURLCertificationAddresses(Aplicacion.CONTROL_ACCESO_URL);
-	        	setMessage(getString(R.string.
-	        			resultado_solicitud_certificado_activity, 
-	        			certificationAddresses));
-	        } else showException(getString(
-	        		R.string.request_user_cert_error_msg));
-	        goAppButton.setVisibility(View.VISIBLE);
-		}
-		
-	}
+	@Override public void showTaskResult(AsyncTask task) { }
 	
 }

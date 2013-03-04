@@ -27,14 +27,22 @@ class SubscripcionService {
 		log.debug "guardarUsuario - usuario: ${usuario.nif} - CertificadoCA: ${usuario.getCertificadoCA()?.id}"
 		if(!usuario.nif) {
 			String mensajeError = messageSource.getMessage('susbcripcion.errorDatosUsuario', null, locale)
-			return new Respuesta(codigoEstado:400, mensaje:mensajeError)
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:mensajeError)
 		}
 		X509Certificate certificadoUsu = usuario.getCertificate()
-		def usuarioDB = Usuario.findWhere(nif:usuario.getNif().toUpperCase())
+		String nifValidado = org.sistemavotacion.util.StringUtils.validarNIF(usuario.nif)
+		if(!nifValidado) {
+			String mensajeError = messageSource.getMessage(
+				'susbcripcion.errorNifUsuario', [usuario.nif].toArray(), locale)
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:mensajeError)
+		}
+		usuario.nif = nifValidado
+		def usuarioDB = Usuario.findWhere(nif:nifValidado.toUpperCase())
+		Certificado certificado = null;
 		if (!usuarioDB) {
 			usuarioDB = usuario.save();
 			if (usuario.getCertificate()) {
-				Certificado certificado = new Certificado(usuario:usuario,
+				certificado = new Certificado(usuario:usuario,
 					contenido:usuario.getCertificate()?.getEncoded(),
 					numeroSerie:usuario.getCertificate()?.getSerialNumber()?.longValue(),
 					estado:Certificado.Estado.OK, tipo:Certificado.Tipo.USUARIO,
@@ -44,12 +52,12 @@ class SubscripcionService {
 				certificado.save();
 			}
 		} else {
-			def certificadoDB = Certificado.findWhere(
+			certificado = Certificado.findWhere(
 				usuario:usuarioDB, estado:Certificado.Estado.OK)
-			if (!certificadoDB?.numeroSerie == certificadoUsu.getSerialNumber()?.longValue()) {
-				certificadoDB.estado = Certificado.Estado.ANULADO
-				certificadoDB.save()
-				Certificado certificado = new Certificado(usuario:usuarioDB,
+			if (!certificado?.numeroSerie == certificadoUsu.getSerialNumber()?.longValue()) {
+				certificado.estado = Certificado.Estado.ANULADO
+				certificado.save()
+				certificado = new Certificado(usuario:usuarioDB,
 					contenido:certificadoUsu?.getEncoded(), estado:Certificado.Estado.OK,
 					numeroSerie:certificadoUsu?.getSerialNumber()?.longValue(),
 					certificadoAutoridad:usuario.getCertificadoCA(),
@@ -58,7 +66,7 @@ class SubscripcionService {
 				certificado.save();
 			}
 		}
-		return new Respuesta(codigoEstado:200, usuario:usuarioDB)
+		return new Respuesta(codigoEstado:200, usuario:usuarioDB, certificadoDB:certificado)
 	}
         
 	Respuesta comprobarUsuario(SMIMEMessageWrapper smimeMessage, Locale locale) {

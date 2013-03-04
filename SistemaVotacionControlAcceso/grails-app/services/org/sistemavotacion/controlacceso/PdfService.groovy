@@ -45,6 +45,7 @@ import org.sistemavotacion.util.*;
 import java.util.Locale;
 import org.springframework.beans.factory.InitializingBean
 
+
 //class PdfService implements InitializingBean {
 class PdfService {
 	
@@ -56,55 +57,58 @@ class PdfService {
 	def mailSenderService
 	def firmaService
 	def messageSource
-	private KeyStore keyStoreCertifcadosConfianza
+	def subscripcionService
+	private KeyStore trustedCertsKeyStore
 	private PrivateKey key;
 	private Certificate[] chain;
 	
 	
-	//@Override
+	//@Override 
 	public void afterPropertiesSet() throws Exception {
 		log.debug "afterPropertiesSet - afterPropertiesSet - afterPropertiesSet"
 		def rutaAlmacenClaves = getAbsolutePath("${grailsApplication.config.SistemaVotacion.rutaAlmacenClaves}")
 		File keyStoreFile = new File(rutaAlmacenClaves);
 		String aliasClaves = grailsApplication.config.SistemaVotacion.aliasClavesFirma
 		String password = grailsApplication.config.SistemaVotacion.passwordClavesFirma
-		KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(FileUtils.getBytesFromFile(keyStoreFile), password.toCharArray());
+		KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(
+			FileUtils.getBytesFromFile(keyStoreFile), password.toCharArray());
 		key = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray());
 		chain = keyStore.getCertificateChain(aliasClaves);
 		log.debug "aliasClaves: ${aliasClaves} - chain.length:${chain.length}"
-		keyStoreCertifcadosConfianza = KeyStore.getInstance("JKS");
-		keyStoreCertifcadosConfianza.load(null, null);
-		Set<X509Certificate> trustedCerts = firmaService.getTrustedCerts()
-		log.debug "trustedCerts.size: ${trustedCerts.size()}"
-		for(X509Certificate certificate:trustedCerts) {
-			keyStoreCertifcadosConfianza.setCertificateEntry(
+		trustedCertsKeyStore = KeyStore.getInstance("JKS");
+		trustedCertsKeyStore.load(null, null);
+		Set<X509Certificate> trustedCertsSet = firmaService.getTrustedCerts()
+		log.debug "trustedCerts.size: ${trustedCertsSet.size()}"
+		for(X509Certificate certificate:trustedCertsSet) {
+			trustedCertsKeyStore.setCertificateEntry(
 				certificate.getSubjectDN().toString(), certificate);
 		}
 	}
 	
 	public Respuesta validarFirma (byte[] pdfFirmado, Evento evento, 
 		Documento.Estado tipoDocumento, Locale locale) {
-		log.debug "validarFirma - tipoDocumento: ${tipoDocumento.toString()} - pdfFirmado.length: ${pdfFirmado.length}"
-		
-		def fos = new FileOutputStream('/home/jgzornoza/111.pdf')
-		fos.write(pdfFirmado);
-		
+		log.debug "validarFirma - tipoDocumento: ${tipoDocumento.toString()} " + 
+			"- pdfFirmado.length: ${pdfFirmado.length}"
+
 		Date todayDate = DateUtils.getTodayDate()
 		if(tipoDocumento.equals(Documento.Estado.FIRMA_DE_MANIFIESTO)) {
 			if(todayDate.compareTo(evento.fechaFin) > 0)
-			return new Respuesta(codigoEstado:400,
-				mensaje:"La fecha actual '${DateUtils.getStringFromDate(todayDate)}' es posterior a la fecha " +
-				"límite de recogida de firmas '${DateUtils.getStringFromDate(evento.fechaFin)}'")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+				mensaje:messageSource.getMessage('documentDateErrorMsg', 
+				[DateUtils.getStringFromDate(todayDate), DateUtils.getStringFromDate(evento.fechaFin)].toArray(), locale))
 		}
 		PdfReader reader = new PdfReader(pdfFirmado);
 		Documento documento;
 		AcroFields acroFields = reader.getAcroFields();
 		ArrayList<String> names = acroFields.getSignatureNames();
-		Respuesta respuesta = new Respuesta(codigoEstado:400, mensaje:"Documento sin firmas");
+		Respuesta respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+			mensaje:messageSource.getMessage('error.documentWithoutSigners', null, locale));
 		for (String name : names) {
-			respuesta = new Respuesta(codigoEstado:200);
-			log.debug("Signature name: " + name + " - covers whole document:" + acroFields.signatureCoversWholeDocument(name));
-			//log.debug("Document revision: " + acroFields.getRevision(name) + " of " + acroFields.getTotalRevisions());
+			respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK);
+			log.debug("Signature name: " + name + " - covers whole document:" + 
+				acroFields.signatureCoversWholeDocument(name));
+			//log.debug("Document revision: " + acroFields.getRevision(name) + 
+			//" of " + acroFields.getTotalRevisions());
 			// Start revision extraction
 			/*FileOutputStream out = new FileOutputStream("revision_" + acroFields.getRevision(name) + ".pdf");
 			byte buffer[] = new byte[8192];
@@ -117,54 +121,54 @@ class PdfService {
 			PdfPKCS7 pk = acroFields.verifySignature(name, "BC");
 			log.debug("Hash verified -> ${pk.verify()}");
 			X509Certificate signingCert = pk.getSigningCertificate();
-			Usuario usu = Usuario.getUsuario(signingCert);
-			Usuario usuario = Usuario.findWhere(nif:usu.nif)
-			if(!usuario) usuario = usu.save()
-			log.debug("usuario: ${usuario.getDescription()} - NIF: ${usu.nif}");
+			Usuario usuario = Usuario.getUsuario(signingCert);
 			log.debug("Subject: " + PdfPKCS7.getSubjectFields(pk.getSigningCertificate()));
-			String mensajeValidacionDocumento = "Firma verificada"
-			switch(tipoDocumento) {
-				case Documento.Estado.MANIFIESTO:
-					documento = Documento.findWhere(evento:evento, estado:Documento.Estado.MANIFIESTO_VALIDADO)
-					if(documento)
-						mensajeValidacionDocumento = "El el manifiesto con asunto '${evento.asunto}' ya había sido publicado por el usuario con NIF ${documento.usuario?.nif}"
-					else mensajeValidacionDocumento = "Recibida solicitud de publicación del manifiesto '${evento.asunto}' por parte del usuario con NIF '${usuario.nif}'"
-					break;
-				case Documento.Estado.FIRMA_DE_MANIFIESTO:
-					documento = Documento.findWhere(evento:evento, usuario:usuario, estado:Documento.Estado.FIRMA_MANIFIESTO_VALIDADA)
-					if(documento)
-						mensajeValidacionDocumento = "El usuario con NIF '${usuario.nif}' ya había firmado el manifiesto con asunto '${evento.asunto}'" +
-							" el día ${DateUtils.getStringFromDate(documento.dateCreated)}"
-					else mensajeValidacionDocumento = "Recibida firma del manifiesto '${evento.asunto}' por parte del usuario con NIF '${usuario.nif}'"
-					break;
-			}
-			if(documento) {
-				log.debug(mensajeValidacionDocumento)
-				return new Respuesta(codigoEstado:400, mensaje:mensajeValidacionDocumento);
-			}
-			Calendar cal = pk.getSignDate();
+			Calendar signDate = pk.getSignDate();
 			X509Certificate[] pkc = (X509Certificate[])pk.getSignCertificateChain();
 			TimeStampToken ts = pk.getTimeStampToken();
-			Object[] fails = PdfPKCS7.verifyCertificates(pkc, keyStoreCertifcadosConfianza, null, cal);
+			if(!trustedCertsKeyStore) afterPropertiesSet();
+			Object[] fails = PdfPKCS7.verifyCertificates(pkc, trustedCertsKeyStore, null, signDate);
 			Certificado certificado = Certificado.findWhere(numeroSerie:signingCert.getSerialNumber()?.longValue())
 			if (!certificado) {
 				String subject = PdfPKCS7.getSubjectFields(pk.getSigningCertificate())
 				Certificado certificadoCA
 				for(X509Certificate certificate : pkc) {
 					log.debug("Comprobando cadena cert - Num. serie: ${certificate?.getSerialNumber()?.longValue()}")
-					if(signingCert.getSerialNumber()?.longValue() != 
+					if(signingCert.getSerialNumber()?.longValue() !=
 						certificate.getSerialNumber()?.longValue()) {
 						log.debug("Num. serie CA de pdf: ${certificate?.getSerialNumber()?.longValue()} - ${certificate.getSubjectDN().toString()}")
 						certificadoCA = firmaService.getCertificadoCA(certificate.getSerialNumber()?.longValue())
 						log.debug("CertificadoCA id: ${certificadoCA?.id}")
+						usuario.setCertificadoCA(certificadoCA);
 					}
 				}
-				certificado = new Certificado(usuario:usuario,
-					numeroSerie:signingCert.getSerialNumber()?.longValue(),
-					contenido:signingCert.getEncoded(), tipo:Certificado.Tipo.USUARIO, 
-					certificadoAutoridad:certificadoCA,
-					validoDesde:signingCert.getNotBefore(), 
-					validoHasta:signingCert.getNotAfter())
+				Respuesta respuestaValidacionUsu = subscripcionService.guardarUsuario(usuario, locale);
+				if(Respuesta.SC_OK != respuestaValidacionUsu.codigoEstado) return respuestaValidacionUsu;
+				usuario = respuestaValidacionUsu.usuario;
+				certificado = respuestaValidacionUsu.certificadoDB;
+			} else usuario = certificado.usuario;
+			String mensajeValidacionDocumento = messageSource.getMessage('signatureVerified', null, locale)
+			switch(tipoDocumento) {
+				case Documento.Estado.MANIFIESTO:
+					documento = Documento.findWhere(evento:evento, estado:Documento.Estado.MANIFIESTO_VALIDADO)
+					if(documento)
+						mensajeValidacionDocumento = messageSource.getMessage('pdfManifestRepeated', 
+							[evento.asunto, documento.usuario?.nif].toArray(), locale)
+					else mensajeValidacionDocumento = messageSource.getMessage('pdfManifestOK', 
+						[evento.asunto, usuario?.nif].toArray(), locale)
+					break;
+				case Documento.Estado.FIRMA_DE_MANIFIESTO:
+					documento = Documento.findWhere(evento:evento, usuario:usuario, estado:Documento.Estado.FIRMA_MANIFIESTO_VALIDADA)
+					if(documento)
+						mensajeValidacionDocumento = messageSource.getMessage('pdfSignatureManifestRepeated',
+						[usuario.nif, evento.asunto, DateUtils.getStringFromDate(documento.dateCreated)].toArray(), locale)
+					else mensajeValidacionDocumento = messageSource.getMessage('pdfSignatureManifestOK',
+						[evento.asunto, usuario.nif].toArray(), locale)
+					break;
+			}
+			if(documento) {
+				log.debug(mensajeValidacionDocumento)
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:mensajeValidacionDocumento);
 			}
 			if (fails == null) {
 				certificado.estado = Certificado.Estado.OK
@@ -179,13 +183,12 @@ class PdfService {
 					String notBefore = DateUtils.getStringFromDate(cert.getNotBefore())
 					log.debug("Cert: ${cert.getSubjectDN()} - NotBefore: ${notBefore} - NotAfter: ${notAfter}")
 				}
-				return new Respuesta (codigoEstado:400, mensaje:
+				return new Respuesta (codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:
 					messageSource.getMessage('error.caUnknown', null, locale))
 			}
-			
 			if (ts != null) {
 				boolean impr = pk.verifyTimestampImprint();
-				cal = pk.getTimeStampDate();
+				signDate= pk.getTimeStampDate();
 			}
 			documento = new Documento(evento:evento, pdf:pdfFirmado, usuario:usuario)
 			if(pk.verify()) {
@@ -201,12 +204,13 @@ class PdfService {
 			} else {
 				log.debug("Documento modificado");
 				documento.estado = Documento.Estado.MODIFICADO
-				respuesta = new Respuesta (codigoEstado:400, mensaje:"Documento modificado")
+				respuesta = new Respuesta (codigoEstado:Respuesta.SC_ERROR_PETICION, 
+					mensaje:messageSource.getMessage('pdfSignedDocumentError', null, locale))
 			}
 			documento.save()
 			
-			/*log.debug("Keystore type : " + keyStoreCertifcadosConfianza.getType());
-			Enumeration e = keyStoreCertifcadosConfianza.aliases();
+			/*log.debug("Keystore type : " + trustedCertsKeyStore.getType());
+			Enumeration e = trustedCertsKeyStore.aliases();
 			while(e.hasMoreElements()) {
 				String alias = (String)e.nextElement();
 				log.debug("alias : " + alias);	
@@ -223,8 +227,9 @@ class PdfService {
 				log.debug("OCSP signature verifies: " + ocsp.verify(cert.getPublicKey(), "BC"));
 				log.debug("OCSP revocation refers to this certificate: " + pk.isRevocationValid());
 			}*/
-			if(200 == respuesta.codigoEstado) {
-				respuesta = new Respuesta(codigoEstado:200, mensaje:mensajeValidacionDocumento, documento:documento)
+			if(Respuesta.SC_OK == respuesta.codigoEstado) {
+				respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK, 
+					mensaje:mensajeValidacionDocumento, documento:documento)
 				if(Documento.Estado.MANIFIESTO.equals(tipoDocumento)) {
 					log.debug "Salvando usuario en Evento"
 					evento.estado = Evento.Estado.ACTIVO
@@ -246,21 +251,26 @@ class PdfService {
 		PdfReader reader = new PdfReader(solicitudCopiaFirmada);
 		AcroFields form = reader.getAcroFields();
 		String eventoId = form.getField("eventoId");
-		if(!eventoId) return new Respuesta(codigoEstado:400, mensaje:"ERROR - Solicitud sin identificador de evento")
+		if(!eventoId) return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+			mensaje:messageSource.getMessage('backupRequestEventWithoutIdErrorMsg', null, locale))
 		def evento = Evento.get(new Long(eventoId))
-		if(!evento) return new Respuesta(codigoEstado:400, mensaje:"ERROR - No existe ningún evento con id ${eventoId}")
+		if(!evento) return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+			mensaje:messageSource.getMessage('backupRequestEventIdErrorMsg', [eventoId].toArray(), locale))
 		String asunto = form.getField("asunto");
 		String email = form.getField("email");
-		if(!email) return new Respuesta(codigoEstado:400, mensaje:"ERROR - Solicitud sin email")
+		if(!email) return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+			mensaje:messageSource.getMessage('backupRequestEmailMissingErrorMsg', null, locale))
 		log.debug "eventoId: ${eventoId} - asunto: ${asunto} - email: ${email}"
 		Documento documento;
 		SolicitudCopia solicitudCopia;
 		AcroFields acroFields = reader.getAcroFields();
 		ArrayList<String> names = acroFields.getSignatureNames();
-		Respuesta respuesta = new Respuesta(codigoEstado:400, mensaje:"Documento sin firmas");
+		Respuesta respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+			mensaje:messageSource.getMessage('error.documentWithoutSigners', null, locale));
 		for (String name : names) {
-			respuesta = new Respuesta(codigoEstado:200);
-			log.debug("Signature name: " + name + " - covers whole document:" + acroFields.signatureCoversWholeDocument(name));
+			respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK);
+			log.debug("Signature name: " + name + " - covers whole document:" + 
+				acroFields.signatureCoversWholeDocument(name));
 			PdfPKCS7 pk = acroFields.verifySignature(name);
 			X509Certificate signingCert = pk.getSigningCertificate();
 			Usuario usu = Usuario.getUsuario(signingCert);
@@ -268,14 +278,14 @@ class PdfService {
 			if(!usuario) usuario = usu.save()
 			log.debug("usuario: " + usuario.getDescription());
 			log.debug("Subject: " + PdfPKCS7.getSubjectFields(pk.getSigningCertificate()));
-			String mensajeValidacionDocumento = "Firma verificada"
-			Calendar cal = pk.getSignDate();
+			String mensajeValidacionDocumento = messageSource.getMessage('signatureVerified', null, locale)
+			Calendar signDate = pk.getSignDate();
 			X509Certificate[] pkc = (X509Certificate[])pk.getSignCertificateChain();
 			TimeStampToken ts = pk.getTimeStampToken();
 			if (ts != null) {
 				boolean impr = pk.verifyTimestampImprint();
-				cal = pk.getTimeStampDate();
-				log.debug("Timestamp imprint verifies: " + impr + " - Timestamp date: " + cal);
+				signDate= pk.getTimeStampDate();
+				log.debug("Timestamp imprint verifies: " + impr + " - Timestamp date: " + signDate);
 			}
 			documento = new Documento(evento:evento, pdf:solicitudCopiaFirmada, usuario:usuario, email:email)
 			if(pk.verify()) {
@@ -284,10 +294,11 @@ class PdfService {
 			} else {
 				log.debug("Documento modificado");
 				documento.estado = Documento.Estado.MODIFICADO
-				respuesta = new Respuesta (codigoEstado:400, mensaje:"Documento modificado")
+				respuesta = new Respuesta (codigoEstado:Respuesta.SC_ERROR_PETICION, 
+					mensaje:messageSource.getMessage('pdfSignedDocumentError', null, locale))
 			}
 			documento.save()
-			Object[] fails = PdfPKCS7.verifyCertificates(pkc, keyStoreCertifcadosConfianza, null, cal);
+			Object[] fails = PdfPKCS7.verifyCertificates(pkc, trustedCertsKeyStore, null, signDate);
 			Certificado certificado = Certificado.findWhere(numeroSerie:signingCert.getSerialNumber().longValue())
 			if (!certificado) {
 				String subject = PdfPKCS7.getSubjectFields(pk.getSigningCertificate())
@@ -302,7 +313,7 @@ class PdfService {
 				certificado.estado = Certificado.Estado.CON_ERRORES
 				certificado.save()
 				log.debug("Certificado '${certificado.id}' con fallos: ${fails[1]}");
-				respuesta = new Respuesta (codigoEstado:400, mensaje:
+				respuesta = new Respuesta (codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:
 					messageSource.getMessage('error.caUnknown', null, locale))
 			}
 			/*BasicOCSPResp ocsp = pk.getOcsp();
@@ -315,8 +326,9 @@ class PdfService {
 				log.debug("OCSP signature verifies: " + ocsp.verify(cert.getPublicKey(), "BC"));
 				log.debug("OCSP revocation refers to this certificate: " + pk.isRevocationValid());
 			}*/
-			if(200 == respuesta.codigoEstado) {
-				respuesta = new Respuesta(codigoEstado:200, mensaje:"Consulte las instrucciones enviadas a la dirección ${email}")
+			if(Respuesta.SC_OK == respuesta.codigoEstado) {
+				respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK,
+					mensaje:messageSource.getMessage('backupRequestOKMsg', [email].toArray(), locale))
 				runAsync { 
 					Respuesta respuestaGeneracionBackup
 					if(evento instanceof EventoFirma) {
@@ -329,7 +341,7 @@ class PdfService {
 						log.debug("---> EventoVotacion")
 						respuestaGeneracionBackup = eventoVotacionService.generarCopiaRespaldo((EventoVotacion)evento, locale)
 					}
-					if(200 == respuestaGeneracionBackup?.codigoEstado) {
+					if(Respuesta.SC_OK == respuestaGeneracionBackup?.codigoEstado) {
 						File archivoCopias = respuestaGeneracionBackup.file
 						solicitudCopia = new SolicitudCopia(filePath:archivoCopias.getAbsolutePath(),
 							documento:documento, email:email, numeroCopias:respuestaGeneracionBackup.cantidad)
@@ -361,21 +373,23 @@ class PdfService {
 			if (stp != null) stp.close();
 			documento.pdf = file.getBytes()
 			documento.save()
-			respuesta = new Respuesta(codigoEstado:200, file:file)
+			respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK, file:file)
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex)
-			return new Respuesta(codigoEstado:400, mensaje:ex.getMessage())
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:ex.getMessage())
 		}
 		return respuesta
 	}
 	
-	public Respuesta firmarBloquear(PdfReader reader, String reason, String location, Documento documento) throws Exception {
+	public Respuesta firmarBloquear(PdfReader reader, String reason, 
+			String location, Documento documento) throws Exception {
 		Respuesta respuesta
 		try {
 			File file = File.createTempFile("pdfFirmadoServidor", ".pdf")
 			file.deleteOnExit();
 			FileOutputStream outputStream = new FileOutputStream(file)
-			PdfStamper stp = PdfStamper.createSignature(reader, outputStream, '\0' as char, null, true);
+			PdfStamper stp = PdfStamper.createSignature(
+				reader, outputStream, '\0' as char, null, true);
 			stp.setEncryption(null, null,PdfWriter.ALLOW_PRINTING, false);
 			PdfSignatureAppearance signatureAppearance = stp.getSignatureAppearance();
 			signatureAppearance.setCrypto(key, chain, null, PdfSignatureAppearance.WINCER_SIGNED);
@@ -386,10 +400,10 @@ class PdfService {
 			if (stp != null) stp.close();
 			documento.pdf = file.getBytes()
 			documento.save()
-			respuesta = new Respuesta(codigoEstado:200, file:file)
+			respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK, file:file)
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex)
-			return new Respuesta(codigoEstado:400, mensaje:ex.getMessage())
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:ex.getMessage())
 		}
 		return respuesta
 	}

@@ -115,6 +115,7 @@ public class PanelFirmaManifiesto extends Composite implements SolicitanteEmail,
 		mensajeClienteFirma.setUrlDocumento(ServerPaths.
 				getUrlPDFManifiesto(evento.getId()));
 		mensajeClienteFirma.setRespuestaConRecibo(false);
+		mensajeClienteFirma.setEvento(evento);
 		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
 		if(!Browser.isAndroid()) setWidgetsStateFirmando(true);
     }

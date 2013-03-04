@@ -62,9 +62,6 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
 	public static final String TAG = "Aplicacion";
 	
 	public enum Estado {CON_CERTIFICADO, CON_CSR, SIN_CSR}
-	
-	private static final int EVENT_REQUEST = 1;
-	private static final int CHECK_CONNECTION_REQUEST = 2;
 
 	
 	public static final String PREFS_ESTADO              = "estado";
@@ -165,8 +162,24 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
             }
             operation.setTipo(browserToken.trim());
             if(operation.getEvento() != null) {
-            	new GetDataTask(EVENT_REQUEST, this).execute(operation.getEvento().getURL());
-            }
+            	try {
+                	GetDataTask getDataTask = (GetDataTask)new GetDataTask(null, this).execute(operation.getEvento().getURL());
+                	Log.d(TAG + ".onCreate(...)", " - getDataTask - statusCode: " + getDataTask.get());
+                	if(Respuesta.SC_OK == getDataTask.getStatusCode()) {
+                		Consulta consulta =  DeJSONAObjeto.obtenerConsultaEventos(getDataTask.getMessage());
+						if(consulta.getEventos() != null && consulta.getEventos().size() > 0) {
+							eventoSeleccionado = consulta.getEventos().iterator().next();
+							eventoSeleccionado.setOpcionSeleccionada(operation.
+									getEvento().getOpcionSeleccionada());
+							operation.setEvento(eventoSeleccionado);	
+						}
+						processOperation(operation);
+                	} else showMessage(getString(R.string.error_lbl), getDataTask.getMessage());
+            	} catch(Exception ex) {
+            		ex.printStackTrace();
+            		showMessage(getString(R.string.error_lbl), ex.getMessage());
+            	}
+            } else Log.d(TAG + ".onCreate(...)", " - operation with event null - ");
             return;
         }
     	setActivityState();
@@ -179,9 +192,24 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
     }
     
     public void checkConnection() {
-    	if (controlAcceso == null) 
-    		new GetDataTask(CHECK_CONNECTION_REQUEST, this).
-    			execute(ServerPaths.getURLInfoServidor(CONTROL_ACCESO_URL));
+    	if (controlAcceso == null) {
+    		try {
+        		GetDataTask getDataTask = (GetDataTask) new GetDataTask(null, this).
+        				execute(ServerPaths.getURLInfoServidor(CONTROL_ACCESO_URL));
+    			if(Respuesta.SC_OK == getDataTask.get()) {
+    				try {
+    					controlAcceso = DeJSONAObjeto.obtenerActorConIP(
+    							getDataTask.getMessage(), ActorConIP.Tipo.CONTROL_ACCESO);
+    				} catch (Exception ex) {
+    					ex.printStackTrace();
+    				    showMessage(getString(R.string.error_lbl), ex.getMessage());
+    				}
+    			} else showMessage(getString(R.string.error_lbl), getDataTask.getMessage());
+    		} catch(Exception ex) {
+    			ex.printStackTrace();
+    			showMessage(getString(R.string.error_lbl), ex.getMessage());
+    		}
+    	}
     }
 
     private void setActivityState() {
@@ -233,6 +261,7 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
     	Log.d(TAG + ".processOperation(...)", "- operation: " + 
     			operation.getTipo() + " - estado: " + estado);
     	Intent intent = null;
+    	setEventoSeleccionado(operation.getEvento());
     	if(Estado.CON_CERTIFICADO == estado) {
     		switch(operation.getTipo()) {
 		        case VOTAR:
@@ -419,43 +448,6 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
 	@Override
 	public void showTaskResult(AsyncTask task) {
 		Log.d(TAG + ".showTaskResult(...)", " - task: " + task.getClass());
-		if(task instanceof GetDataTask) {
-			GetDataTask getDataTask = (GetDataTask)task;
-			Log.d(TAG + ".showTaskResult(...)", " - GetDataTask - statuscode: " + getDataTask.getStatusCode());
-			switch(getDataTask.getId()) {
-				case EVENT_REQUEST:
-					if(Respuesta.SC_OK == getDataTask.getStatusCode()) {
-						try {
-							Consulta consulta =  DeJSONAObjeto.obtenerConsultaEventos(getDataTask.getMessage());
-							if(consulta.getEventos() != null && consulta.getEventos().size() > 0) {
-								eventoSeleccionado = consulta.getEventos().iterator().next();
-								eventoSeleccionado.setOpcionSeleccionada(operation.
-										getEvento().getOpcionSeleccionada());
-								operation.setEvento(eventoSeleccionado);	
-							}
-							processOperation(operation);
-						} catch (Exception ex) {
-							ex.printStackTrace();
-							showMessage(getString(R.string.error_lbl), ex.getMessage());
-						}
-					} else showMessage(getString(R.string.error_lbl), getDataTask.getMessage());
-					break;
-				case CHECK_CONNECTION_REQUEST:
-					if(Respuesta.SC_OK == getDataTask.getStatusCode()) {
-						try {
-							controlAcceso = DeJSONAObjeto.obtenerActorConIP(
-									getDataTask.getMessage(), ActorConIP.Tipo.CONTROL_ACCESO);
-						} catch (Exception ex) {
-							ex.printStackTrace();
-						    showMessage(getString(R.string.error_lbl), ex.getMessage());
-						}
-					} else showMessage(getString(R.string.error_lbl), getDataTask.getMessage());
-					break;
-				default:
-					Log.d(TAG, "Unknown GetDataTask id: " + getDataTask.getId());
-			}
-		}
-		
 	}
 	
 }

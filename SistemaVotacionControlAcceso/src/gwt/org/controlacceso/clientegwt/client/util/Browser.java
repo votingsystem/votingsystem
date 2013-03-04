@@ -41,7 +41,8 @@ public class Browser {
 		mensajeClienteFirma.setUrlTimeStampServer(ServerPaths.getUrlTimeStampServer());
 		if(isAndroid()) {
 			//to avoid URI too large
-			mensajeClienteFirma.getEvento().setContenido(null);
+			if(mensajeClienteFirma.getEvento() != null) 
+				mensajeClienteFirma.getEvento().setContenido(null);
 			String encodedMsg = getEncodedString(mensajeClienteFirma.toJSONString());
 			String url = ServerPaths.getUrlClienteAndroid() + "?browserToken=" 
 	    			+ History.getToken() + "&serverURL=" + ServerPaths.getApplicationPath() 

@@ -2,14 +2,21 @@
     <head>
         <title>${message(code: 'nombreServidorLabel', null)}</title>
         <meta name="layout" content="main" />
-        <link rel="stylesheet" href="${resource(dir:'css',file:'tabmenu.css')}" />
     </head>
     <body>
- 		<ul id="tabmenu">
-			<li><a href="informacion">${message(code: 'infoLabel', null)}</a></li>
-			<li><a href="listaServicios">${message(code: 'servicesListLabel', null)}</a></li>
-			<li><a class="active" href="datosAplicacion">${message(code: 'appDataLabel', null)}</a></li>
-		</ul>
+   	    <div class="container">
+    
+	    <div class="navbar">   
+			<div class="navbar-inner">
+			    <div class="container">
+			 		<ul class="nav">
+						<li><a href="informacion">${message(code: 'infoLabel', null)}</a></li>
+						<li><a href="listaServicios">${message(code: 'servicesListLabel', null)}</a></li>
+						<li class="active"><a href="datosAplicacion">${message(code: 'appDataLabel', null)}</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
     
 		<div id="status" role="complementary">
 			<h1>${message(code: 'appLabel', null)}</h1>
@@ -40,5 +47,8 @@
 				</ul>
 			</div>
 		</div>
+		
+		</div>
+		
 	</body>
 </html>

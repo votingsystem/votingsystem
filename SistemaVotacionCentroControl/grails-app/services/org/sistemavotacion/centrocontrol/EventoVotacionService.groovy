@@ -182,6 +182,7 @@ class EventoVotacionService {
 							isUserAdmin(smimeMessage.firmante?.nif)){
 								log.debug("Usuario con privilegios para cancelar evento")
 								evento.estado = EventoVotacion.Estado.valueOf(mensajeJSON.estado)
+								evento.dateCanceled = new Date(System.currentTimeMillis());
 								evento.save()
 								mensajeSMIME = new MensajeSMIME(usuario:usuario,
 									tipo:Tipo.getTipoEnFuncionEstado(evento.estado),

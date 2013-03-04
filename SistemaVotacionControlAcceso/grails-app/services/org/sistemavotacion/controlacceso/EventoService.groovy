@@ -96,6 +96,7 @@ class EventoService {
 							isUserAdmin(smimeMessage.firmante?.nif)){
 								log.debug("Usuario con privilegios para cancelar evento")
 								evento.estado = Evento.Estado.valueOf(mensajeJSON.estado)
+								evento.dateCanceled = new Date(System.currentTimeMillis());
 								evento.save()
 								mensajeSMIME = new MensajeSMIME(usuario:usuario,
 									tipo:Tipo.getTipoEnFuncionEstado(evento.estado),
@@ -189,6 +190,7 @@ class EventoService {
 	
 	public Map optenerEventoFirmaJSONMap(EventoFirma eventoItem) {
 		def eventoMap = [id: eventoItem.id, fechaCreacion: eventoItem.dateCreated,
+			URL:"${grailsApplication.config.grails.serverURL}/evento/obtener?id=${eventoItem.id}",
 			urlPDF:"${grailsApplication.config.grails.serverURL}/documento/obtenerManifiesto?id=${eventoItem.id}",
 			asunto:eventoItem.asunto, contenido: eventoItem.contenido,
 			etiquetas:eventoItem.etiquetaSet?.collect {etiqueta ->

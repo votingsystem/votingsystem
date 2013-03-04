@@ -2,7 +2,9 @@
 <html>
     <head>
         <title><g:layoutTitle default="${message(code: 'nombreServidorLabel', null)}"/></title>
-        <link rel="stylesheet" href="${resource(dir:'css',file:'main.css')}" />
+        <link rel="stylesheet" href="${resource(dir:'css',file:'bootstrap.css')}" />
+        <link rel="stylesheet" href="${resource(dir:'css',file:'bootstrap-responsive.css')}" />
+        <link rel="stylesheet" href="${resource(dir:'css',file:'appData.css')}" />
         <link rel="shortcut icon" href="${resource(dir:'images',file:'favicon.ico')}" type="image/x-icon" />
       <style type="text/css" media="screen">
         #encabezado {background: #eaf4ff; color: #333333;}
@@ -36,15 +38,17 @@
         <g:javascript library="application" />
     </head>
     <body>
-                <div id="encabezado">
-                  <div id="tituloEncabezado" class="tituloEncabezado" role="banner"><a href="${grailsApplication.config.grails.serverURL}">
-                  		${message(code: 'nombreServidorLabel', null)}</a></div>
-                </div>
-		<g:layoutBody/>
-		<div class="pieDePagina" role="contentinfo">
-        	<a href="mailto:${grailsApplication.config.SistemaVotacion.emailAdmin}">${message(code: 'emailLabel', null)}</a>
-        </div>
-		<div id="spinner" class="spinner" style="display:none;"><g:message code="spinner.alt" default="Loading&hellip;"/></div>
-		<g:javascript library="application"/>
+         <div class="container">
+	        <div role="banner">
+	        <a class="headerTitle" href="${grailsApplication.config.grails.serverURL}">${message(code: 'nombreServidorLabel', null)}</a></div>
+			<g:layoutBody/>
+
+				<div class="footer" role="contentinfo">
+					<hr/>
+		        	<a href="mailto:${grailsApplication.config.SistemaVotacion.emailAdmin}">${message(code: 'emailLabel', null)}</a>
+		        </div>
+
+			<div id="spinner" class="spinner" style="display:none;"><g:message code="spinner.alt" default="Loading&hellip;"/></div>
+		</div>
     </body>
 </html>

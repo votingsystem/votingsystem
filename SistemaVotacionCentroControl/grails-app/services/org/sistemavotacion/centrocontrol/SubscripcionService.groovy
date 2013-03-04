@@ -21,7 +21,7 @@ class SubscripcionService {
 	def httpService
 	
 	Respuesta guardarUsuario(Usuario usuario, Locale locale) {
-		log.debug "guardarUsuario - usuario: ${usuario.nif}"
+		log.debug "--- guardarUsuario - usuario: ${usuario.nif}"
 		if (!usuario) {
 			response.status = 400
 			render message(code: "csr.solicitudNoEncontrada", args: ["nif: ${nifValidado}"])

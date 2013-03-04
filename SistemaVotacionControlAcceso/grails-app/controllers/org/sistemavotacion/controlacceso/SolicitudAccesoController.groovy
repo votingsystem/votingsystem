@@ -68,6 +68,10 @@ class SolicitudAccesoController {
 						if (solicitudAcceso)
 							solicitudAccesoService.rechazarSolicitud(solicitudAcceso)
 					}
+				} else {
+					response.status = respuesta.codigoEstado
+					render respuesta?.mensaje
+					return false;
 				}
 			} catch (Exception ex) {
 				log.error (ex.getMessage(), ex)

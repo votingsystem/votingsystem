@@ -129,6 +129,10 @@ public class EventoVotacion implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="fechaActualizacion", length=23)
     private Date lastUpdated;
+    
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name="fechaCancelacion", length=23)
+    private Date dateCanceled;
 
     public Tipo getTipo() {
         return tipo;
@@ -313,5 +317,13 @@ public class EventoVotacion implements Serializable {
 
 	public void setCertificados(Set<Certificado> certificados) {
 		this.certificados = certificados;
+	}
+	
+	public Date getDateCanceled() {
+		return dateCanceled;
+	}
+
+	public void setDateCanceled(Date dateCanceled) {
+		this.dateCanceled = dateCanceled;
 	}
 }

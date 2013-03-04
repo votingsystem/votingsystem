@@ -68,7 +68,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-import android.widget.Toast;
 
 public class UserCertRequestForm extends FragmentActivity 
 		implements CertPinDialogListener, TaskListener {
@@ -226,18 +225,43 @@ public class UserCertRequestForm extends FragmentActivity
 	        fos.write(keyStoreBytes);
 	        fos.close();
 	        Aplicacion.setEstado(Aplicacion.Estado.CON_CSR);
-		} catch (Exception e) {
-			Log.e(TAG + "solicitarButton.onClick(...)", " e.getMessage(): " + e.getMessage());
-			manejarExcepcion(e.getMessage());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			showMessage(getString(R.string.error_lbl), ex.getMessage());
 		}
-    	new SendDataTask(null, this, csr).execute(ServerPaths.getURLSolicitudCSRUsuario(
-    			Aplicacion.CONTROL_ACCESO_URL));
+    	try {
+    		SendDataTask sendDataTask = (SendDataTask) new SendDataTask(null, this, csr).execute(ServerPaths.getURLSolicitudCSRUsuario(
+        			Aplicacion.CONTROL_ACCESO_URL));
+			Log.d(TAG + ".sendCsrRequest(...)", " - sendCsrRequest - sendDataTask - statuscode: " + sendDataTask.get());
+	        if(Respuesta.SC_OK == sendDataTask.getStatusCode()) {
+	        	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+		        SharedPreferences.Editor editor = settings.edit();
+		        Long idSolictud = Long.valueOf(sendDataTask.getMessage());
+		        editor.putLong(PREFS_ID_SOLICTUD_CSR, idSolictud);
+		        editor.commit();
+		        Aplicacion.setEstado(Aplicacion.Estado.CON_CSR);
+	        	Intent intent = new Intent(getApplicationContext(), 
+	        			UserCertResponseForm.class);
+	        	startActivity(intent);
+	        } else {
+	            if (progressDialog != null) progressDialog.dismiss();
+				AlertDialog.Builder builder= new AlertDialog.Builder(UserCertRequestForm.this);
+				builder.setTitle(R.string.alert_exception_caption).setMessage(sendDataTask.getMessage())
+					.setPositiveButton("OK", null).show();
+	        }
+    	} catch(Exception ex) {
+    		ex.printStackTrace();
+			showMessage(getString(R.string.error_lbl), ex.getMessage());
+    	}
+
     }
-    
     
 	private void showMessage(String caption, String message) {
 		Log.d(TAG + ".showMessage(...) ", " - caption: " 
 				+ caption + "  - showMessage: " + message);
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
 		AlertDialog.Builder builder= new AlertDialog.Builder(this);
 		builder.setTitle(caption).setMessage(message).show();
 	}
@@ -282,14 +306,7 @@ public class UserCertRequestForm extends FragmentActivity
 	    ft.addToBackStack(null);
 	    pinDialog.show(ft, "pinDialog");
     }
-
-	public void manejarExcepcion(String exMessage) {
-		Log.d(TAG + ".manejarExcepcion(...) ", "Message:" + exMessage);
-		AlertDialog.Builder builder= new AlertDialog.Builder(this);
-		builder.setTitle(getString(R.string.alert_exception_caption))
-			.setMessage(exMessage).setPositiveButton("OK", null).show();
-	}
-
+	
 	@Override public void setPin(String pin) {
 		Log.d(TAG + ".setPin(...) ", " --- pin");
 		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
@@ -302,36 +319,8 @@ public class UserCertRequestForm extends FragmentActivity
 	}
 
 	@Override
-	public void processTaskMessages(List<String> messages, AsyncTask task) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void processTaskMessages(List<String> messages, AsyncTask task) { }
 
-	@Override
-	public void showTaskResult(AsyncTask task) {
-		Log.d(TAG + ".showTaskResult(...)", " ------ return from task: " + task.getClass());
-		if(task instanceof SendDataTask) {
-			SendDataTask sendDataTask = (SendDataTask)task;
-			Log.d(TAG + ".showTaskResult(...)", " ---- sendDataTask - statuscode: " + sendDataTask.getStatusCode());
-	        if(Respuesta.SC_OK == sendDataTask.getStatusCode()) {
-	        	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-		        SharedPreferences.Editor editor = settings.edit();
-		        Long idSolictud = Long.valueOf(sendDataTask.getMessage());
-		        editor.putLong(PREFS_ID_SOLICTUD_CSR, idSolictud);
-		        editor.commit();
-		        Aplicacion.setEstado(Aplicacion.Estado.CON_CSR);
-	        	Intent intent = new Intent(getApplicationContext(), 
-	        			UserCertResponseForm.class);
-	        	startActivity(intent);
-	        } else {
-	            if (progressDialog != null) progressDialog.dismiss();
-				AlertDialog.Builder builder= new AlertDialog.Builder(UserCertRequestForm.this);
-				builder.setTitle(R.string.alert_exception_caption).setMessage(sendDataTask.getMessage())
-					.setPositiveButton("OK", null).show();
-	        }
-		}
-		
-	}
-
+	@Override public void showTaskResult(AsyncTask task) { }
 
 }
