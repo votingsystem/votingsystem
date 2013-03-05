@@ -16,7 +16,9 @@
 
 package org.sistemavotacion.android.ui;
 
+import org.sistemavotacion.android.Aplicacion;
 import org.sistemavotacion.android.R;
+import org.sistemavotacion.util.HttpHelper;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -24,6 +26,7 @@ import android.content.DialogInterface.OnKeyListener;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -32,6 +35,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class CertPinDialog extends DialogFragment implements OnKeyListener {
 
@@ -91,7 +95,7 @@ public class CertPinDialog extends DialogFragment implements OnKeyListener {
     	Log.d(TAG + ".onConfigurationChanged(...) ", " - onConfigurationChanged");
     }
     
-    private void setPin(String pin) {
+    private void setPin(final String pin) {
     	if(withPasswordConfirm) {
     		if(firstPin == null) {
     			firstPin = pin;
@@ -111,8 +115,15 @@ public class CertPinDialog extends DialogFragment implements OnKeyListener {
         		getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(getDialog().
         		getCurrentFocus().getWindowToken(), 0);
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.remove(this);
+        ft.commit();
         onDestroyView();
-		listener.setPin(pin);
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() { 
+            	listener.setPin(pin); 
+            }
+        });
     }
 
 

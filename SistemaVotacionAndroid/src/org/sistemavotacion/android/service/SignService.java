@@ -159,9 +159,6 @@ public class SignService extends Service implements TaskListener {
     	    			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL), null, null, signerCert,
     	    			signerPrivatekey, signerCertsChain, pdfFile, pdfFirmadoFile, this).execute(
     	    			urlToSendSignedDocument);
-    			signTimestampSendPDFTask.get();
-    			signServiceListener.setSignServiceMsg(signTimestampSendPDFTask.getStatusCode(), 
-    					signTimestampSendPDFTask.getMessage());
     		} catch(Exception ex) {
     			ex.printStackTrace();
     			signServiceListener.setSignServiceMsg(Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
@@ -226,6 +223,15 @@ public class SignService extends Service implements TaskListener {
 	
 	
 	@Override
-	public void showTaskResult(AsyncTask task) { }
+	public void showTaskResult(AsyncTask task) { 
+		Log.d(TAG + ".processSignature(...)", " - processSignature - " + task.getClass());
+		if(task instanceof SignTimestampSendPDFTask) {
+			SignTimestampSendPDFTask signTimestampSendPDFTask= (SignTimestampSendPDFTask)task;
+			Log.d(TAG + ".processSignature(...)", " - statusCode: " 
+					+ signTimestampSendPDFTask.getStatusCode());    			
+			signServiceListener.setSignServiceMsg(signTimestampSendPDFTask.getStatusCode(), 
+	    					signTimestampSendPDFTask.getMessage());
+		}
+	}
 
 }

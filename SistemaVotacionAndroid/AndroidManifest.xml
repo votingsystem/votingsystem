@@ -36,14 +36,14 @@
                        android:resource="@xml/searchable" />
             
            	<intent-filter>    
-		       	<data android:scheme="http" android:host="192.168.1.4"/>
+		       	<data android:scheme="http" android:host="192.168.1.6"/>
 	       	    <data android:path="/SistemaVotacionCentroControl/app/clienteAndroid"/>
 		        <action android:name="android.intent.action.VIEW" />
 		        <category android:name="android.intent.category.DEFAULT"/>  
      		    <category android:name="android.intent.category.BROWSABLE" />
 	        </intent-filter>
 		    <intent-filter>    
-		       	<data android:scheme="http" android:host="192.168.1.4"/>
+		       	<data android:scheme="http" android:host="192.168.1.6"/>
 	       	    <data android:path="/SistemaVotacionControlAcceso/app/clienteAndroid"/>
 		        <action android:name="android.intent.action.VIEW" />
 		        <category android:name="android.intent.category.DEFAULT"/>  
@@ -71,7 +71,7 @@
         <activity android:name="org.sistemavotacion.android.UserCertResponseForm" android:noHistory="true"/>
         
         <activity android:name="org.sistemavotacion.android.WebActivity" android:label="@string/app_name"
-            android:screenOrientation="landscape"/>
+            android:screenOrientation="landscape" android:noHistory="true"/>
         
         <activity android:name="org.sistemavotacion.android.ui.VoteReceiptListScreen" android:label="@string/app_name"/>
            

@@ -327,7 +327,7 @@ public class WebActivity extends FragmentActivity implements WebSessionListener,
 					break;
 			}
 			final SubSystem subSystem = selectedSubsystem;
-			resultMsg = resultMsg + " " + getString(R.string.publish_document_OK_sufix_msg);	   
+			resultMsg = resultMsg + " " + getString(R.string.publish_document_OK_sufix_msg);	
 	    	new AlertDialog.Builder(this).setTitle(resultCaption).setMessage(resultMsg)
 			.setPositiveButton(R.string.ok_button, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {

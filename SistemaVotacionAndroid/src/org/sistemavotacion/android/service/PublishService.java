@@ -137,9 +137,6 @@ public class PublishService extends Service implements TaskListener {
 									new SignTimestampSendPDFTask(this, null, ServerPaths.getURLTimeStampService(
 									CONTROL_ACCESO_URL), null, null, signerCert, signerPrivatekey, signerCertsChain, 
 									pdfFile, pdfFirmadoFile, this).execute(pendingOperation.getUrlEnvioDocumento());
-							signTimestampSendPDFTask.get();
-					    	serviceListener.setPublishServiceMsg(signTimestampSendPDFTask.getStatusCode(), 
-									signTimestampSendPDFTask.getMessage());
 						} catch(Exception ex) {
 							ex.printStackTrace();
 						}
@@ -226,8 +223,14 @@ public class PublishService extends Service implements TaskListener {
 				}
 	        } else serviceListener.setPublishServiceMsg(
 	        		sendFileTask.getStatusCode(), sendFileTask.getMessage());
+		} else if(task instanceof SignTimestampSendPDFTask) {
+			SignTimestampSendPDFTask signTimestampSendPDFTask = (SignTimestampSendPDFTask)task;
+			Log.d(TAG + ".showTaskResult(...)", " - statusCode: " 
+					+ signTimestampSendPDFTask.getStatusCode());
+			serviceListener.setPublishServiceMsg(signTimestampSendPDFTask.getStatusCode(), 
+					signTimestampSendPDFTask.getMessage());
 		}
-		 
+    	
 		
 	}
 

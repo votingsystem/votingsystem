@@ -42,6 +42,8 @@ public class SendFileTask extends AsyncTask<String, Void, Integer> {
     @Override
     protected void onPostExecute(Integer data) {
     	Log.d(TAG + ".onPostExecute", " - statuscode: " + data);
+    	if(Respuesta.SC_OK != data)
+    		Log.d(TAG + ".onPostExecute", " - message: " + message);
     	listener.showTaskResult(this);
     }
     
