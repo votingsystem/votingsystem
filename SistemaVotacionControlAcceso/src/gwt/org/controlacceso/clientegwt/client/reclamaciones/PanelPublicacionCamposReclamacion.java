@@ -52,6 +52,7 @@ public class PanelPublicacionCamposReclamacion extends Composite {
 	public boolean isValidForm() {
 		if(modo == Modo.CREAR) return true; 
 		if(listaPanelesCampo != null && listaPanelesCampo.size() > 0) {
+			logger.info("listaPanelesCampo.size(): " + listaPanelesCampo.size());
 			for(PanelCampoReclamacion panelCampo:listaPanelesCampo) {
 				if(!panelCampo.isValidForm()) return false;
 			}
@@ -61,11 +62,11 @@ public class PanelPublicacionCamposReclamacion extends Composite {
 	
 	private void refrescarCampos(boolean camposEnabled) {
 		panelContenedor.clear();
+		listaPanelesCampo = new ArrayList<PanelCampoReclamacion>();
 		if(campos == null || campos.size() == 0) {
 			panelLabel.setVisible(false);
 			return;
 		} else panelLabel.setVisible(true);
-		listaPanelesCampo = new ArrayList<PanelCampoReclamacion>();
 		for(CampoDeEventoJso opcion:campos) {
 			PanelCampoReclamacion panelOpcion = new PanelCampoReclamacion(
 					opcion, modo, this);

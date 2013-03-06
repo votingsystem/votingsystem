@@ -40,6 +40,9 @@ public class Documento implements java.io.Serializable {
      @Lob @Column(name="pdf")
      private byte[] pdf;
      @Temporal(TemporalType.TIMESTAMP)
+     @Column(name="signDate", length=23)
+     private Date signDate;
+     @Temporal(TemporalType.TIMESTAMP)
      @Column(name="fechaCreacion", length=23)
      private Date dateCreated;
      @Temporal(TemporalType.TIMESTAMP)
@@ -57,7 +60,16 @@ public class Documento implements java.io.Serializable {
 	public void setId(Long id) {
 		this.id = id;
 	}
+	
+	public Date getSignDate() {
+		return signDate;
+	}
 
+
+	public void setSignDate(Date signDate) {
+		this.signDate = signDate;
+	}
+	
 	public Date getDateCreated() {
 		return dateCreated;
 	}

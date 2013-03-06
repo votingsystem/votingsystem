@@ -5,9 +5,9 @@
 		.mainPanel {
 			border-top:1pt solid #3E125F; width: 700px;
 		}
-		.panelLabel {font-size: 14px; font-weight:bold;   text-decoration: underline;
-			position:relative; left:15px; top:4px; color:#02227a;}
-		.panelContenedorOpciones {margin: 5px 0px 0px 15px;}
+		.panelLabel {font-size: 18px; font-weight:bold;   text-decoration: underline;
+			position:relative; left:15px; top:4px; color:#4c4c4c;}
+		.panelContenedorOpciones {margin: 15px 0px 0px 15px;}
 	</ui:style>
 	<ui:with field='constantes' type='org.controlacceso.clientegwt.client.Constantes'/>	
 	<g:VerticalPanel styleName="{style.mainPanel}">

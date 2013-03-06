@@ -168,7 +168,8 @@ class EventoService {
 			etiquetas:eventoItem.etiquetaSet?.collect {etiqueta ->
 						return [id:etiqueta.id, contenido:etiqueta.nombre]},
 			duracion:DateUtils.getElapsedTime(eventoItem.getFechaInicio(),
-			eventoItem.getFechaFin()),
+				eventoItem.getFechaFin()),
+			copiaSeguridadDisponible:eventoItem.copiaSeguridadDisponible,
 			estado:eventoItem.estado.toString(),
 			informacionVotosURL:"${grailsApplication.config.grails.serverURL}/evento/informacionVotos?id=${eventoItem.id}",
 			fechaInicio:eventoItem.getFechaInicio(),
@@ -198,6 +199,7 @@ class EventoService {
 			duracion:DateUtils.getElapsedTime(eventoItem.getFechaInicio(),
 			eventoItem.getFechaFin()),
 			estado:eventoItem.estado.toString(),
+			copiaSeguridadDisponible:eventoItem.copiaSeguridadDisponible,
 			fechaInicio:eventoItem.getFechaInicio(),
 			fechaFin:eventoItem.getFechaFin()]
 		if(eventoItem.usuario) eventoMap.usuario = "${eventoItem.usuario?.nombre} ${eventoItem.usuario?.primerApellido}"
@@ -214,6 +216,7 @@ class EventoService {
 			asunto:eventoItem.asunto, contenido:eventoItem.contenido,
 			etiquetas:eventoItem.etiquetaSet?.collect {etiqueta ->
 						return [id:etiqueta.id, contenido:etiqueta.nombre]},
+			copiaSeguridadDisponible:eventoItem.copiaSeguridadDisponible,
 			duracion:DateUtils.getElapsedTime(eventoItem.getFechaInicio(),
 			eventoItem.getFechaFin()),
 			estado:eventoItem.estado.toString(),

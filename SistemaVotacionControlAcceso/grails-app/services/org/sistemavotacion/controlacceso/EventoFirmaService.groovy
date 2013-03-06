@@ -37,11 +37,8 @@ class EventoFirmaService {
         else tipoMensaje = Tipo.EVENTO_FIRMA_ERROR
         def mensajeJSON = JSON.parse(smimeMessage.getSignedContent())
         Respuesta respuestaUsuario = subscripcionService.comprobarUsuario(smimeMessage, locale)
-		if(200 != respuestaUsuario.codigoEstado) {
-			response.status = respuestaUsuario.codigoEstado
-			render respuestaUsuario.mensaje
-			return false
-		}
+		if(Respuesta.SC_OK != respuestaUsuario.codigoEstado) 
+			return respuestaUsuario
 		Usuario usuario = respuestaUsuario.usuario
         EventoFirma evento = new EventoFirma(usuario:usuario,
                 asunto:mensajeJSON.asunto,
@@ -51,8 +48,10 @@ class EventoFirmaService {
                 fechaFin: new Date().parse(
 					"yyyy-MM-dd HH:mm:ss", mensajeJSON.fechaFin))
         evento = evento.save()
-        evento.url = "${grailsApplication.config.grails.serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLEventoFirmaValidado}${evento.id}"
-        mensajeJSON.controlAcceso = [serverURL:grailsApplication.config.grails.serverURL, nombre:grailsApplication.config.SistemaVotacion.serverName] as JSONObject
+        evento.url = "${grailsApplication.config.grails.serverURL}" + 
+			"${grailsApplication.config.SistemaVotacion.sufijoURLEventoFirmaValidado}${evento.id}"
+        mensajeJSON.controlAcceso = [serverURL:grailsApplication.config.grails.serverURL, 
+			nombre:grailsApplication.config.SistemaVotacion.serverName] as JSONObject
         if (mensajeJSON.etiquetas) {
 			Set<Etiqueta> etiquetaSet = etiquetaService.guardarEtiquetas(mensajeJSON.etiquetas)
 			evento.setEtiquetaSet(etiquetaSet)
@@ -75,23 +74,9 @@ class EventoFirmaService {
         mensajeSMIMEValidado.save();
         evento.estado = eventoService.obtenerEstadoEvento(evento)
         evento = evento.save()
-        return new Respuesta(codigoEstado:200, fecha:DateUtils.getTodayDate(),
+        return new Respuesta(codigoEstado:Respuesta.SC_OK, fecha:DateUtils.getTodayDate(),
                 mensajeSMIME:mensajeSMIME, evento:evento, usuario:usuario, 
                 mensajeSMIMEValidado:mensajeSMIMEValidado, smimeMessage:smimeMessage)
-    }
-	
-    public void generarCopiasDeRespaldo () {
-        log.debug("generarCopiasDeRespaldo")
-        EventoFirma.findAll().collect {evento ->
-            generarCopiaRespaldo(evento, null)
-        }
-    }
-	
-    public File generarCopiaRespaldo (Long eventoId) {
-        log.debug("generarCopiaRespaldo - eventoId: ${eventoId}")
-        EventoFirma evento = EventoFirma.get (eventoId)
-        if (!evento) return null
-        return generarCopiaRespaldo(evento, null)
     }
 	
 	public Respuesta generarCopiaRespaldo(EventoFirma evento, Locale locale) {
@@ -101,15 +86,20 @@ class EventoFirmaService {
 			def firmasRecibidas = Documento.findAllWhere(evento:evento,
 				estado:Documento.Estado.FIRMA_MANIFIESTO_VALIDADA)
 			def fecha = DateUtils.getDirStringFromDate(DateUtils.getTodayDate())
-			def basedir = "${grailsApplication.config.SistemaVotacion.baseRutaCopiaRespaldo}/${fecha}/CopiaSeguridadDeManifiesto_${evento.id}"
+			String zipNamePrefix = messageSource.getMessage('manifestBackupFileName', null, locale);
+			def basedir = "${grailsApplication.config.SistemaVotacion.baseRutaCopiaRespaldo}/" + 
+					"${fecha}/${zipNamePrefix}_${evento.id}"
 			new File(basedir).mkdirs()
 			int i = 0
-			def metaInformacionMap = [numeroFirmas:firmasRecibidas.size(), asunto:evento.asunto]
+			def metaInformacionMap = [numeroFirmas:firmasRecibidas.size(),
+				URL:"${grailsApplication.config.grails.serverURL}/evento/obtener?id=${evento.id}",
+				tipoEvento:Tipo.EVENTO_FIRMA.toString(), asunto:evento.asunto]
 			String metaInformacionJSON = metaInformacionMap as JSON
 			File metaInformacionFile = new File("${basedir}/meta.inf")
 			metaInformacionFile.write(metaInformacionJSON)
+			String fileNamePrefix = messageSource.getMessage('manifestSignatureLbl', null, locale);
 			firmasRecibidas.each { firma ->
-				File pdfFile = new File("${basedir}/${i}.pdf")
+				File pdfFile = new File("${basedir}/${fileNamePrefix}_${i}.pdf")
 				FileOutputStream fos = new FileOutputStream(pdfFile);
 				fos.write(firma.pdf);
 				fos.close();
@@ -117,30 +107,12 @@ class EventoFirmaService {
 			}
 			def ant = new AntBuilder()
 			ant.zip(destfile: "${basedir}.zip", basedir: basedir)
-			respuesta = new Respuesta(codigoEstado:200, cantidad:firmasRecibidas.size(), file:new File("${basedir}.zip"))
-		} else respuesta = new Respuesta(codigoEstado:400, mensaje:messageSource.getMessage(
-			'evento.eventoNotFound', [evento.id].toArray(), locale))
+			respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK, 
+				cantidad:firmasRecibidas.size(), file:new File("${basedir}.zip"))
+		} else respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+				mensaje:messageSource.getMessage(
+				'evento.eventoNotFound', [evento.id].toArray(), locale))
 		return respuesta
 	}
-	
-    public File obtenerCopiaRespaldo(Long eventoId) {
-        log.debug("obtenerCopiaRespaldo - eventoId: ${eventoId}")
-        EventoFirma evento = EventoFirma.get(eventoId)
-        if (!evento) return null
-        return obtenerCopiaRespaldo(evento)
-    }
-	
-    public File obtenerCopiaRespaldo(Evento evento) {
-        if (!evento) return null
-        def fecha = DateUtils.getShortStringFromDate(DateUtils.getTodayDate())
-        def baseRuta = "${grailsApplication.config.SistemaVotacion.baseRutaCopiaRespaldo}"
-        def basedir = "${baseRuta}/${fecha}/EventoFirma_${evento.id}"
-        if (new File(basedir).mkdirs()) {
-            fecha = DateUtils.getShortStringFromDate(DateUtils.getYesterdayDate())
-            basedir = "${baseRuta}/${fecha}/EventoFirma_${evento.id}"
-        }
-        def copiaRespaldo = new File("${basedir}.zip")
-        return copiaRespaldo
-    }
-	
+
 }

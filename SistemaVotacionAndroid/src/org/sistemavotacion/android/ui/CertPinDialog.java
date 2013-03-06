@@ -16,9 +16,7 @@
 
 package org.sistemavotacion.android.ui;
 
-import org.sistemavotacion.android.Aplicacion;
 import org.sistemavotacion.android.R;
-import org.sistemavotacion.util.HttpHelper;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -26,7 +24,6 @@ import android.content.DialogInterface.OnKeyListener;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -35,7 +32,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class CertPinDialog extends DialogFragment implements OnKeyListener {
 
@@ -70,7 +66,7 @@ public class CertPinDialog extends DialogFragment implements OnKeyListener {
     	Log.d(TAG + ".onCreateView(...) ", " - onCreateView -");
         View view = inflater.inflate(R.layout.cert_pin_dialog, container, false);
         msgTextView = (TextView) view.findViewById(R.id.msg);
-        userPinEditText = (EditText)view.findViewById(R.id.user_pin);
+        userPinEditText = (EditText)view.findViewById(R.id.user_pin);;
         getDialog().setTitle(getString(R.string.pin_dialog_Caption));
         if(getArguments().getString("message") == null || 
         		"".equals(getArguments().getString("message"))) {
@@ -115,15 +111,9 @@ public class CertPinDialog extends DialogFragment implements OnKeyListener {
         		getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(getDialog().
         		getCurrentFocus().getWindowToken(), 0);
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.remove(this);
-        ft.commit();
-        onDestroyView();
-        getActivity().runOnUiThread(new Runnable() {
-            public void run() { 
-            	listener.setPin(pin); 
-            }
-        });
+        //onDestroyView();
+        getDialog().dismiss();
+        listener.setPin(pin);
     }
 
 

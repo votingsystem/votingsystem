@@ -1,0 +1,31 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+		.messagePanel{width: 100%; margin-bottom:10px;}
+	    .messageLabel {font-size: 16px; font-weight: bold; 
+			margin-top: 12px; margin-bottom: 12px; text-align: center;}
+   		.mainPanel {padding: 15px; }
+		.boton { margin: 2px; cursor:pointer;}
+		.buttonPanel { float: right; margin-top: 15px;}
+		.texto{}
+	</ui:style>
+	<ui:image field='aceptar' src="../BotonAceptar.png"/>
+	<ui:with field='constantes' type='org.controlacceso.clientegwt.client.Constantes'/>	
+	<g:DialogBox ui:field="dialogBox" autoHide="false" modal="true" glassEnabled="true" animationEnabled="true"
+	    text="{constantes.operationResultCaption}" width="400px">
+		<g:VerticalPanel styleName="{style.mainPanel}">
+       		<g:VerticalPanel ui:field="messagePanel" styleName="{style.messagePanel}">
+				<g:Label ui:field="messageLabel" styleName="{style.messageLabel}"></g:Label>
+			</g:VerticalPanel>
+			<g:HorizontalPanel styleName="{style.buttonPanel}">
+   				<g:HorizontalPanel styleName="{style.boton}">
+	      			<g:PushButton  ui:field='aceptarButton'>
+	  						<g:upFace image='{aceptar}'/>
+						</g:PushButton>
+				</g:HorizontalPanel>		
+			</g:HorizontalPanel>
+		</g:VerticalPanel>
+	</g:DialogBox>
+	
+</ui:UiBinder> 

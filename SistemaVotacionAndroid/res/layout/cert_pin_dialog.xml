@@ -9,11 +9,10 @@
         android:id="@+id/msg"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
         android:paddingLeft="10dp"
         android:layout_gravity="center"
         android:textSize="25sp" />
-    
+   
     <EditText
         android:id="@+id/user_pin"
         android:layout_height="wrap_content"
@@ -26,5 +25,5 @@
         android:textAppearance="?android:attr/textAppearanceMedium" >
         	<requestFocus />
       </EditText>
-
+    
 </LinearLayout>

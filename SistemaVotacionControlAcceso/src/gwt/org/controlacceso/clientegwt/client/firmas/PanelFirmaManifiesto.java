@@ -5,6 +5,7 @@ import org.controlacceso.clientegwt.client.Constantes;
 import org.controlacceso.clientegwt.client.HistoryToken;
 import org.controlacceso.clientegwt.client.PuntoEntrada;
 import org.controlacceso.clientegwt.client.dialogo.DialogoOperacionEnProgreso;
+import org.controlacceso.clientegwt.client.dialogo.DialogoResultadoFirma;
 import org.controlacceso.clientegwt.client.dialogo.PopupAdministrarDocumento;
 import org.controlacceso.clientegwt.client.dialogo.PopupSolicitudCopiaSeguridad;
 import org.controlacceso.clientegwt.client.dialogo.SolicitanteEmail;
@@ -198,9 +199,9 @@ public class PanelFirmaManifiesto extends Composite implements SolicitanteEmail,
 					panelInfoDocumento.setStyleName(style.panelInfoDocumentoOver(), true);
 					break;
 			    case Event.ONMOUSEOUT:
-			    	if(!DOM.isOrHasChild(getElement(), DOM.eventGetToElement(event))) {
+			    	/*if(!DOM.isOrHasChild(getElement(), DOM.eventGetToElement(event))) {
 			    		popUpSolicitudCopiaSeguridad.hide();
-			    	}
+			    	}*/
 			    	labelInfoDocumento.setStyleName(style.labelInfoDocumentoOver(), false);
 			    	panelInfoDocumento.setStyleName(style.panelInfoDocumentoOver(), false);
 			    	break;
@@ -208,7 +209,6 @@ public class PanelFirmaManifiesto extends Composite implements SolicitanteEmail,
 		}
 		
 	}
-	
 	
 	private void setWidgetsStateFirmando(boolean publicando) {
 		aceptarButton.setEnabled(!publicando);
@@ -267,6 +267,8 @@ public class PanelFirmaManifiesto extends Composite implements SolicitanteEmail,
 			case FIRMA_MANIFIESTO_PDF:
 				setWidgetsStateFirmando(false);
 				if(200 == mensaje.getCodigoEstado()) {
+					DialogoResultadoFirma dialogo = new DialogoResultadoFirma();
+					dialogo.show(Constantes.INSTANCIA.operationResultMsg(evento.getAsunto()));
 			    	History.newItem(HistoryToken.MANIFIESTOS.toString());
 				} else {
 					setMessage(Constantes.INSTANCIA.mensajeError(

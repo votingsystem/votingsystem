@@ -5,6 +5,7 @@ import org.controlacceso.clientegwt.client.Constantes;
 import org.controlacceso.clientegwt.client.HistoryToken;
 import org.controlacceso.clientegwt.client.PuntoEntrada;
 import org.controlacceso.clientegwt.client.dialogo.DialogoOperacionEnProgreso;
+import org.controlacceso.clientegwt.client.dialogo.DialogoResultadoFirma;
 import org.controlacceso.clientegwt.client.dialogo.PopupAdministrarDocumento;
 import org.controlacceso.clientegwt.client.dialogo.PopupSolicitudCopiaSeguridad;
 import org.controlacceso.clientegwt.client.dialogo.SolicitanteEmail;
@@ -211,7 +212,10 @@ public class PanelFirmaReclamacion extends Composite implements SolicitanteEmail
   		public void onBrowserEvent(Event event) {
   			switch(DOM.eventGetType(event)) {
   				case Event.ONCLICK:
-  					mostrarPopupSolicitudCopiaSeguridad(event.getClientX(), event.getClientY());
+  					if(evento.getCopiaSeguridadDisponible()) {
+  						mostrarPopupSolicitudCopiaSeguridad(
+  								event.getClientX(), event.getClientY());
+  					} 
   					break;
 				case Event.ONMOUSEOVER:
 					labelInfoDocumento.setStyleName(style.labelInfoDocumentoOver(), true);
@@ -270,6 +274,8 @@ public class PanelFirmaReclamacion extends Composite implements SolicitanteEmail
 			case FIRMA_RECLAMACION_SMIME:
 				setWidgetsStateFirmando(false);
 				if(200 == mensaje.getCodigoEstado()) {
+					DialogoResultadoFirma dialogo = new DialogoResultadoFirma();
+					dialogo.show(Constantes.INSTANCIA.operationResultMsg(evento.getAsunto()));
 			    	History.newItem(HistoryToken.RECLAMACIONES.toString());
 				} else if(0 == mensaje.getCodigoEstado()) {} 
 				else {

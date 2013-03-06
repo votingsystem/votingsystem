@@ -274,6 +274,7 @@ public interface Constantes extends Messages{
     
     String eventoCanceladoOK();
     String eventoBorradoOK();
-        
+    String operationResultCaption();  
+    String operationResultMsg(String value);
         
 }

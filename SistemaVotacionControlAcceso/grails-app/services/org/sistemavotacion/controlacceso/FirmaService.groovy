@@ -74,6 +74,12 @@ class FirmaService {
 		inicializarAutoridadesCertificadoras();
 	}
 	
+	public Set<X509Certificate> getTrustedCerts() {
+		if(!trustedCerts || trustedCerts.size() == 0) afterPropertiesSet();
+		log.debug "getTrustedCerts - trustedCerts.size(): ${trustedCerts.size()}"
+		return trustedCerts;
+	}
+	
 	def inicializarAutoridadesCertificadoras() { 
 		try {
 			trustedCertsHashMap = new HashMap<Long, Certificado>();

@@ -41,7 +41,7 @@ class EventoVotacionService {
         else tipo = Tipo.EVENTO_VOTACION_ERROR
         def mensajeJSON = JSON.parse(smimeMessage.getSignedContent())
         Respuesta respuestaUsuario = subscripcionService.comprobarUsuario(smimeMessage, locale)
-		if(200 != respuestaUsuario.codigoEstado) return respuestaUsuario
+		if(Respuesta.SC_OK != respuestaUsuario.codigoEstado) return respuestaUsuario
 		Usuario usuario = respuestaUsuario.usuario
         MensajeSMIME mensajeSMIME = new MensajeSMIME(tipo:tipo,
                 usuario:usuario, valido:isValidSignature,
@@ -62,7 +62,7 @@ class EventoVotacionService {
 			evento.save(flush:true)
 			Respuesta respuesta = httpService.obtenerCadenaCertificacion(evento.centroControl.serverURL, locale);
 			byte[] cadenaCertificacion;
-			if (200 == respuesta.codigoEstado) {
+			if (Respuesta.SC_OK == respuesta.codigoEstado) {
 				evento.cadenaCertificacionCentroControl = respuesta.cadenaCertificacion
 				log.debug("Obtenida cadena de certificacion del CentroControl para el evento: ${evento.id}")
 			} else {
@@ -72,10 +72,11 @@ class EventoVotacionService {
 			}				
         } else if (!(mensajeJSON.centroControl) || !centroControl){
 			log.debug("solicitud sin centro de control")
-            codigoEstado = 400
+            codigoEstado = Respuesta.SC_ERROR_PETICION
             mensajeSMIME.setTipo(Tipo.EVENTO_VOTACION_SIN_CENTRO_CONTROL)
 			mensajeSMIME.save();
-			return new Respuesta(codigoEstado:400, mensaje:"solicitud sin centro de control")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+				mensaje:messageSource.getMessage('error.requestWithoutControlCenter', null, locale))
         }
 		evento.save(flush:true)
         evento.url = "${grailsApplication.config.grails.serverURL}" + 
@@ -123,7 +124,7 @@ class EventoVotacionService {
                 contenido:mensajeValidado.getBytes())
         mensajeSMIMEValidado.save();
 		
-        return new Respuesta(codigoEstado:200, fecha:DateUtils.getTodayDate(),
+        return new Respuesta(codigoEstado:Respuesta.SC_OK, fecha:DateUtils.getTodayDate(),
                 mensajeSMIME:mensajeSMIME, evento:evento, usuario:usuario, 
                 mensajeSMIMEValidado:mensajeSMIMEValidado, smimeMessage:smimeMessage)
     }
@@ -135,12 +136,14 @@ class EventoVotacionService {
 			def votosContabilizados = Voto.findAllByEventoVotacionAndEstado(evento, Voto.Estado.OK)
 			def solicitudesAcceso =  SolicitudAcceso.findAllByEventoVotacionAndEstado(evento, SolicitudAcceso.Estado.OK)
 			def fecha = DateUtils.getShortStringFromDate(DateUtils.getTodayDate())
-			def basedir = "${grailsApplication.config.SistemaVotacion.baseRutaCopiaRespaldo}/${fecha}/EventoVotacion_${evento.id}"
+			String zipNamePrefix = messageSource.getMessage('votingBackupFileName', null, locale);
+			def basedir = "${grailsApplication.config.SistemaVotacion.baseRutaCopiaRespaldo}" + 
+				"/${fecha}/${zipNamePrefix}_${evento.id}"
 			new File(basedir).mkdirs()
 			int i = 0
 			def metaInformacionMap = [numeroVotos:votosContabilizados.size(),
 				solicitudesAcceso:solicitudesAcceso.size(),
-				URL:"${grailsApplication.config.grails.serverURL}/evento?id=${evento.id}",
+				URL:"${grailsApplication.config.grails.serverURL}/evento/obtener?id=${evento.id}",
 				tipoEvento:Tipo.EVENTO_VOTACION.toString(), asunto:evento.asunto]
 			String metaInformacionJSON = metaInformacionMap as JSON
 			File metaInformacionFile = new File("${basedir}/meta.inf")
@@ -169,8 +172,8 @@ class EventoVotacionService {
 			}
 			def ant = new AntBuilder()
 			ant.zip(destfile: "${basedir}.zip", basedir: basedir)
-			respuesta = new Respuesta(codigoEstado:200, cantidad:votosContabilizados?.size(), file:new File("${basedir}.zip"))
-		} else respuesta = new Respuesta(codigoEstado:400, mensaje:messageSource.getMessage(
+			respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK, cantidad:votosContabilizados?.size(), file:new File("${basedir}.zip"))
+		} else respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:messageSource.getMessage(
 			'evento.eventoNotFound', [evento.id].toArray(), locale))
 		return respuesta
 	}

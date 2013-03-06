@@ -36,6 +36,7 @@ import com.itextpdf.text.pdf.PdfSignatureAppearance;
 import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.draw.LineSeparator
 import com.itextpdf.text.*
+import org.bouncycastle.cms.SignerId
 import org.bouncycastle.ocsp.BasicOCSPResp
 import org.bouncycastle.tsp.TimeStampToken
 import org.bouncycastle.tsp.TimeStampTokenInfo
@@ -125,7 +126,7 @@ class PdfService {
 			log.debug("Subject: " + PdfPKCS7.getSubjectFields(pk.getSigningCertificate()));
 			Calendar signDate = pk.getSignDate();
 			X509Certificate[] pkc = (X509Certificate[])pk.getSignCertificateChain();
-			TimeStampToken ts = pk.getTimeStampToken();
+			TimeStampToken timeStampToken = pk.getTimeStampToken();
 			if(!trustedCertsKeyStore) afterPropertiesSet();
 			Object[] fails = PdfPKCS7.verifyCertificates(pkc, trustedCertsKeyStore, null, signDate);
 			Certificado certificado = Certificado.findWhere(numeroSerie:signingCert.getSerialNumber()?.longValue())
@@ -186,11 +187,18 @@ class PdfService {
 				return new Respuesta (codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:
 					messageSource.getMessage('error.caUnknown', null, locale))
 			}
-			if (ts != null) {
+			if (timeStampToken != null) {
 				boolean impr = pk.verifyTimestampImprint();
 				signDate= pk.getTimeStampDate();
+				log.debug(" ---timeStampToken - verifyTimestampImprint: ${impr} - signDate:${signDate.getTime()}" );
+				TimeStampTokenInfo tsInfo= timeStampToken.getTimeStampInfo();
+				SignerId signer_id = timeStampToken.getSID();
+				BigInteger cert_serial_number = signer_id.getSerialNumber();
+				log.debug(" ---timeStampToken - Generation time " + tsInfo.getGenTime());
+				log.debug(" ---timeStampToken - Signer ID serial " + signer_id.getSerialNumber());
+				log.debug(" ---timeStampToken - Signer ID issuer " + signer_id.getIssuerAsString());
 			}
-			documento = new Documento(evento:evento, pdf:pdfFirmado, usuario:usuario)
+			documento = new Documento(evento:evento, pdf:pdfFirmado, usuario:usuario, signDate:signDate?.getTime())
 			if(pk.verify()) {
 				log.debug("Documento sin modificaciones");
 				switch(tipoDocumento) {
@@ -256,6 +264,8 @@ class PdfService {
 		def evento = Evento.get(new Long(eventoId))
 		if(!evento) return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
 			mensaje:messageSource.getMessage('backupRequestEventIdErrorMsg', [eventoId].toArray(), locale))
+		if(!evento.copiaSeguridadDisponible) return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+			mensaje:messageSource.getMessage('eventWithoutBackup', [evento.asunto].toArray(), locale))
 		String asunto = form.getField("asunto");
 		String email = form.getField("email");
 		if(!email) return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 

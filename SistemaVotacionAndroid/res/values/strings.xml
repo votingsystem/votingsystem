@@ -30,6 +30,7 @@
     <string name="subject_lbl">Asunto</string>
     <string name="menuSync">Sincronizar</string>
 
+    <string name="processing_lbl">Procesando</string>
     <string name="publish_voting_caption">Publicando votación</string>
     <string name="publish_claim_caption">Publicando reclamación</string>
     <string name="publish_manifest_caption">Publicando manifiesto</string>

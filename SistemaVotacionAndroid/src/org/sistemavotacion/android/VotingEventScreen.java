@@ -51,8 +51,8 @@ import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -375,8 +375,6 @@ public class VotingEventScreen extends FragmentActivity
 		try {
 			setOptionButtonsEnabled(false);
 			if(votingService != null) votingService.processVote(evento, this, keyStoreBytes, password);	
-			//VotacionHelper.procesarVoto(getApplicationContext(), evento, this, 
-			//		keyStoreBytes, password);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			showMessage(getString(R.string.error_lbl), 
@@ -467,6 +465,7 @@ public class VotingEventScreen extends FragmentActivity
 	    pinDialog.show(ft, CertPinDialog.TAG);
     }
 
+    
 	@Override public void setPin(final String pin) {
 		Log.d(TAG + ".setPin()", "--- setPin - operation: " + operation);
 		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
@@ -474,31 +473,57 @@ public class VotingEventScreen extends FragmentActivity
 	    if (prev != null) {
 	        ft.remove(prev);
 	    }
-	    ft.addToBackStack(null);
-		if(pin != null) {
-	        progressDialog = ProgressDialog.show(VotingEventScreen.this, 
-	        		getString(R.string.sending_data_caption), 
-	        		getString(R.string.sending_data_lbl), true,
-		            true, new DialogInterface.OnCancelListener() {
-		                @Override
-		                public void onCancel(DialogInterface dialog) { 
-		                	Log.d(TAG + ".ProgressDialog", "cancelando tarea"); 
-		                	//if(runningTask != null) runningTask.cancel(true);
-		                }
-	        		});
-	        switch(operation) {
-	        	case VOTE:
-	        		firmarEnviarVoto(pin.toCharArray());
-	        		break;
-	        	case CANCEL_VOTE:
-	        		processCancelVote(pin.toCharArray());
-	        		break;
-	        	default:
-	        		Log.d(TAG + ".setPin(...)", "--- unknown operation:" + operation);
-	        }
-	        
-		}
+	    ft.commit();
+    	if(pin == null) {
+    		Log.d(TAG + ".setPin()", "--- setPin - pin null");
+    		return;
+    	} 
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				//repaint main view
+				getWindow().getDecorView().findViewById(
+						android.R.id.content).invalidate();
+		        progressDialog = ProgressDialog.show(VotingEventScreen.this, 
+		        		getString(R.string.sending_data_caption), 
+		        		getString(R.string.sending_data_lbl), true,
+			            true, new DialogInterface.OnCancelListener() {
+			                @Override
+			                public void onCancel(DialogInterface dialog) { 
+			                	Log.d(TAG + ".ProgressDialog", "cancelando tarea"); 
+			                	//if(runningTask != null) runningTask.cancel(true);
+			                }
+		        		});
+			}
+		});
+
+		Runnable processPinTask = new Runnable() {
+			public void run() {
+				Log.d(TAG + ".processPinTask()", 
+						"--- processPinTask - processPinTask ");
+				runOnUiThread(new Runnable() {
+					@Override public void run() {
+						switch(operation) {
+							case VOTE:
+								firmarEnviarVoto(pin.toCharArray());
+								break;
+							case CANCEL_VOTE:
+								processCancelVote(pin.toCharArray());
+								break;
+							default:
+								Log.d(TAG + ".processPinTask(...)", 
+										"--- unknown operation:" + operation);
+						}
+					}
+				});
+			}
+		};
+			
+		Handler mHandler = new Handler();
+		mHandler.removeCallbacks(processPinTask);
+        mHandler.postDelayed(processPinTask, 100);
 	}
+	
 
 	@Override
 	public void proccessReceipt(VoteReceipt receipt) {
@@ -610,5 +635,5 @@ public class VotingEventScreen extends FragmentActivity
 			signService = ((SignService.SignServiceBinder) service).getBinder();
 		}
 	};
-	
+
 }

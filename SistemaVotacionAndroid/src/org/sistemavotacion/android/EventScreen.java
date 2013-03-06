@@ -49,6 +49,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -288,12 +289,12 @@ public class EventScreen extends FragmentActivity
     private void showPinScreen(String message) {
     	CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
 		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-	    Fragment prev = getSupportFragmentManager().findFragmentByTag("pinDialog");
+	    Fragment prev = getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
 	    if (prev != null) {
 	        ft.remove(prev);
 	    }
 	    ft.addToBackStack(null);
-	    pinDialog.show(ft, "pinDialog");
+	    pinDialog.show(ft, CertPinDialog.TAG);
     	signServiceIntent = new Intent(this, SignService.class);
 		startService(signServiceIntent);
 		bindService(signServiceIntent, signServiceConnection, BIND_AUTO_CREATE);
@@ -301,50 +302,81 @@ public class EventScreen extends FragmentActivity
 
 	@Override public void setPin(final String pin) {
 		Log.d(TAG + ".setPin(...)", " --- setPin"); 
-		if(pin != null) {
-	        progressDialog = ProgressDialog.show(this, 
-	        		getString(R.string.sending_data_caption), 
-	        		getString(R.string.sending_data_lbl), true,
-		            true, new DialogInterface.OnCancelListener() {
-		                @Override
-		                public void onCancel(DialogInterface dialog) { 
-		                	Log.d(TAG + ".ProgressDialog", "cancelando tarea"); 
-		                	//if(runningTask != null) runningTask.cancel(true);
-		                }
-	        		});
-			try {
-		    	if(evento.getTipo().equals(Tipo.EVENTO_FIRMA)) {
-		    		if(signService != null) {
-		    			signService.processTimestampedPDFSignature(
-		    					ServerPaths.getURLPDFManifest(CONTROL_ACCESO_URL, evento.getEventoId()),
-		    					ServerPaths.getURLPDFManifestCollector(CONTROL_ACCESO_URL, evento.getEventoId()), 
-		    					keyStoreBytes, pin.toCharArray(), this);
-		    		} else Log.d(TAG + ".setPin(...)", " --- signService nulo"); 
-		    	} else {
-		    		String subject = ASUNTO_MENSAJE_FIRMA_DOCUMENTO + evento.getAsunto();
-		    		String urlToSendSignedDocument = null;
-		            if (evento.getTipo().equals(Tipo.EVENTO_FIRMA)) {
-		            	urlToSendSignedDocument = ServerPaths.getURLEventoFirmado(CONTROL_ACCESO_URL);
-		            } else if (evento.getTipo().equals(Tipo.EVENTO_RECLAMACION)) {
-		            	urlToSendSignedDocument = ServerPaths.getURLReclamacion(CONTROL_ACCESO_URL);
-		            }
-		            String signatureContent = DeObjetoAJSON.obtenerFirmaParaEventoJSON(evento);
-		            boolean isWithSignedReceipt = false;
-		    		signService.processSignature(signatureContent, subject, urlToSendSignedDocument, 
-		    				this, isWithSignedReceipt, keyStoreBytes, pin.toCharArray());		    		
-		    	} 
-		    	firmarEnviarButton.setEnabled(false);
-			} catch (IOException ex) {
-				ex.printStackTrace();
-				showMessage(getString(R.string.error_lbl), 
-						getString(R.string.pin_error_msg));
-		        firmarEnviarButton.setEnabled(true);
-			} catch (Exception ex) {
-				ex.printStackTrace();
-				showMessage(getString(R.string.error_lbl), ex.getMessage());
-				firmarEnviarButton.setEnabled(true);
+		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+	    Fragment prev = getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
+	    if (prev != null) {
+	        ft.remove(prev);
+	    }
+	    ft.commit();
+    	if(pin == null) {
+    		Log.d(TAG + ".setPin()", "--- setPin - pin null");
+    		return;
+    	} 
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				//repaint main view
+				getWindow().getDecorView().findViewById(
+						android.R.id.content).invalidate();
+		        progressDialog = ProgressDialog.show(EventScreen.this, 
+		        		getString(R.string.sending_data_caption), 
+		        		getString(R.string.sending_data_lbl), true,
+			            true, new DialogInterface.OnCancelListener() {
+			                @Override
+			                public void onCancel(DialogInterface dialog) { 
+			                	Log.d(TAG + ".ProgressDialog", "cancelando tarea"); 
+			                	//if(runningTask != null) runningTask.cancel(true);
+			                }
+		        		});
 			}
-		} 
+		});
+
+		Runnable processPinTask = new Runnable() {
+			public void run() {
+				Log.d(TAG + ".processPinTask()", 
+						"--- processPinTask - processPinTask ");
+				runOnUiThread(new Runnable() {
+					@Override public void run() {
+						try {
+					    	if(evento.getTipo().equals(Tipo.EVENTO_FIRMA)) {
+					    		if(signService != null) {
+					    			signService.processTimestampedPDFSignature(
+					    					ServerPaths.getURLPDFManifest(CONTROL_ACCESO_URL, evento.getEventoId()),
+					    					ServerPaths.getURLPDFManifestCollector(CONTROL_ACCESO_URL, evento.getEventoId()), 
+					    					keyStoreBytes, pin.toCharArray(), EventScreen.this);
+					    		} else Log.d(TAG + ".setPin(...)", " --- signService nulo"); 
+					    	} else {
+					    		String subject = ASUNTO_MENSAJE_FIRMA_DOCUMENTO + evento.getAsunto();
+					    		String urlToSendSignedDocument = null;
+					            if (evento.getTipo().equals(Tipo.EVENTO_FIRMA)) {
+					            	urlToSendSignedDocument = ServerPaths.getURLEventoFirmado(CONTROL_ACCESO_URL);
+					            } else if (evento.getTipo().equals(Tipo.EVENTO_RECLAMACION)) {
+					            	urlToSendSignedDocument = ServerPaths.getURLReclamacion(CONTROL_ACCESO_URL);
+					            }
+					            String signatureContent = DeObjetoAJSON.obtenerFirmaParaEventoJSON(evento);
+					            boolean isWithSignedReceipt = false;
+					    		signService.processSignature(signatureContent, subject, urlToSendSignedDocument, 
+					    				EventScreen.this, isWithSignedReceipt, keyStoreBytes, pin.toCharArray());		    		
+					    	} 
+					    	firmarEnviarButton.setEnabled(false);
+						} catch (IOException ex) {
+							ex.printStackTrace();
+							showMessage(getString(R.string.error_lbl), 
+									getString(R.string.pin_error_msg));
+					        firmarEnviarButton.setEnabled(true);
+						} catch (Exception ex) {
+							ex.printStackTrace();
+							showMessage(getString(R.string.error_lbl), ex.getMessage());
+							firmarEnviarButton.setEnabled(true);
+						}
+					}
+				});
+			}
+		};
+			
+		Handler mHandler = new Handler();
+		mHandler.removeCallbacks(processPinTask);
+        mHandler.postDelayed(processPinTask, 100);
 	}
 
 	

@@ -28,7 +28,8 @@ public class VotingResultDialog  extends DialogFragment {
         Bundle args = new Bundle();
         votingResultDialog.setReciboVoto(reciboVoto);
         args.putString("caption", caption);
-        String msg = reciboVoto.getMensaje();
+        String msg = null;
+        if(reciboVoto != null) msg = reciboVoto.getMensaje();
         if(msg != null && msg.length() > MAX_MSG_LENGTH)
         	msg = msg.substring(0, MAX_MSG_LENGTH) + "...";
         args.putString("message", msg);
