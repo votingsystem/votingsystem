@@ -4,7 +4,7 @@
 	<ui:style>
 		.messagePanel{width: 100%; margin-bottom:10px;}
 	    .messageLabel {font-size: 16px; font-weight: bold; 
-			margin-top: 12px; margin-bottom: 12px; text-align: center;}
+			margin: 12px 0px 12px 0px; text-align: center;}
    		.mainPanel {padding: 15px; }
 		.boton { margin: 2px; cursor:pointer;}
 		.buttonPanel { float: right; margin-top: 15px;}

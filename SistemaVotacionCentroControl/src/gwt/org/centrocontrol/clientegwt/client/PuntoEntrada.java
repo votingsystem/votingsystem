@@ -9,6 +9,7 @@ import org.centrocontrol.clientegwt.client.evento.EventoGWTMensajeAplicacion;
 import org.centrocontrol.clientegwt.client.evento.EventoGWTMensajeClienteFirma;
 import org.centrocontrol.clientegwt.client.modelo.ActorConIPJso;
 import org.centrocontrol.clientegwt.client.modelo.MensajeClienteFirmaJso;
+import org.centrocontrol.clientegwt.client.modelo.Respuesta;
 import org.centrocontrol.clientegwt.client.panel.PanelCentral;
 import org.centrocontrol.clientegwt.client.panel.PanelEncabezado;
 import org.centrocontrol.clientegwt.client.util.Browser;
@@ -29,7 +30,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.NamedFrame;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import org.centrocontrol.clientegwt.client.modelo.Respuesta;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -207,7 +207,7 @@ public class PuntoEntrada implements EntryPoint {
 	    		case PUBLICACION_MANIFIESTO_PDF:
 	    			break;
 	    		case ASOCIAR_CENTRO_CONTROL_SMIME:
-	    			if(Respuesta.SC_OK== mensajeClienteFirma.getCodigoEstado()) {
+	    			if(Respuesta.SC_OK == mensajeClienteFirma.getCodigoEstado()) {
 	    		    	RequestHelper.doGet(ServerPaths.getInfoServidorPath(), 
 	    		    			new ServerRequestInfoCallback());
 	    			}

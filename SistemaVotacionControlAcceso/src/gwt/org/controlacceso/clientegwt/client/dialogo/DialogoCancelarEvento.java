@@ -19,6 +19,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
@@ -112,7 +113,7 @@ public class DialogoCancelarEvento implements EventoGWTMensajeClienteFirma.Handl
     		estadoEvento = EventoSistemaVotacionJso.Estado.BORRADO_DE_SISTEMA;
     	}
     	JavaScriptObject contenidoFirma = MensajeClienteFirmaJso.
-    			createMensajeCancelacionEvento(evento.getId(), estadoEvento.toString());
+    			createMensajeCancelacionEvento(evento.getUrl(), estadoEvento.toString());
 		MensajeClienteFirmaJso mensajeClienteFirma = MensajeClienteFirmaJso.create(null, 
 				Operacion.CANCELAR_EVENTO.toString(), 
 				MensajeClienteFirmaJso.SC_PROCESANDO);

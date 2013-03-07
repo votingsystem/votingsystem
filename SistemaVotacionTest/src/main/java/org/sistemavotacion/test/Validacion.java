@@ -18,7 +18,7 @@ public class Validacion {
     
     private static Logger logger = LoggerFactory.getLogger(Validacion.class);
     
-    public static String DIRECTORIO_RAIZ = "/home/jgzornoza/temp/archivoConfirma" ;
+    public static String DIRECTORIO_RAIZ = ContextoPruebas.APPDIR + "temp/archivoConfirma" ;
     public static final int TAMANYO_COLA = 1000;
     
     private static Executor validacionExecutor = Executors.newCachedThreadPool();

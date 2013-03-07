@@ -2,11 +2,15 @@ package org.sistemavotacion.test;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.PrivateKey;
+import java.security.cert.PKIXParameters;
+import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.text.MessageFormat;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -15,6 +19,7 @@ import javax.security.auth.x500.X500PrivateCredential;
 
 import org.apache.log4j.PropertyConfigurator;
 import org.bouncycastle.tsp.TSPAlgorithms;
+import org.sistemavotacion.Contexto;
 import static org.sistemavotacion.herramientavalidacion.AppletHerramienta.getString;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Evento;
@@ -73,12 +78,14 @@ public class ContextoPruebas {
     
     public static long COMIEZO_VALIDEZ_CERT = System.currentTimeMillis();
     public static final int PERIODO_VALIDEZ_ALMACEN_RAIZ = 2000000000;//En producción durará lo que dure una votación
-     public static final int PERIODO_VALIDEZ_CERT = 2000000000;
+    public static final int PERIODO_VALIDEZ_CERT = 2000000000;
 
-	public static final int MAXIMALONGITUDCAMPO = 255;
+    public static final int MAXIMALONGITUDCAMPO = 255;
 
-    public static final String ASUNTO_MENSAJE_SOLICITUD_ACCESO = "[SOLICITUD ACCESO]-";
-	public static final String ASUNTO_MENSAJE_ANULACION_SOLICITUD_ACCESO = "[SOLICITUD ACCESO]-";
+    public static final String ASUNTO_MENSAJE_SOLICITUD_ACCESO 
+            = "[SOLICITUD ACCESO]-";
+    public static final String ASUNTO_MENSAJE_ANULACION_SOLICITUD_ACCESO 
+            = "[ANULACION SOLICITUD ACCESO]-";
     
     public static String BASEDIR =  System.getProperty("user.home");
     public static String APPDIR =  FileUtils.BASEDIR + File.separator 
@@ -91,12 +98,14 @@ public class ContextoPruebas {
     private static boolean votacionAleatoria = true;
     private static boolean simulacionConTiempos = false;
     private static ResourceBundle resourceBundle;
+    private PKIXParameters sessionPKIXParams = null;
 
     private ContextoPruebas () { }
 
     public static ContextoPruebas inicializar () throws Exception {
         logger.debug(" --- inicializar --- ");
         if (INSTANCIA == null) {
+            new File(APPDIR).mkdirs();
             INSTANCIA = new ContextoPruebas();
             Properties props = new Properties();
             try {
@@ -166,6 +175,22 @@ public class ContextoPruebas {
         return controlAcceso.getServerURL() + "/certificado/cadenaCertificacion";
     }
     
+    public PKIXParameters getSessionPKIXParameters() 
+            throws InvalidAlgorithmParameterException, Exception {
+        logger.debug(" --- getSessionPKIXParameters --- ");
+        if(sessionPKIXParams == null) {
+            PKIXParameters params = Contexto.getHttpHelper()
+                    .obtenerPKIXParametersDeServidor(getUrlControlAccesoCertChain());
+            TrustAnchor anchorUserCert = 
+                    new TrustAnchor(getCertificadoRaizAutoridad(), null);
+            Set<TrustAnchor> anchors = new HashSet<TrustAnchor>();
+            anchors.add(anchorUserCert);
+            anchors.addAll(params.getTrustAnchors());
+            sessionPKIXParams = new PKIXParameters(anchors);
+            sessionPKIXParams.setRevocationEnabled(false);
+        }
+        return sessionPKIXParams;
+    }
     
 
     /**

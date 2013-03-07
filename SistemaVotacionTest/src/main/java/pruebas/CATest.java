@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.seguridad.CertUtil;
+import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,8 @@ public class CATest {
     }
     
     public static void fromCrtToPEM () throws Exception {
-        File crtCertFile  = new File("/home/jgzornoza/Descargas/ACDNIE001-SHA1.crt");
+        File crtCertFile  = new File(
+                ContextoPruebas.APPDIR + "temp/ACDNIE001-SHA1.crt");
         X509Certificate crtCert = CertUtil.loadCertificateFromStream(new FileInputStream(crtCertFile));
         logger.debug("crtCert: " + crtCert.getSubjectDN().toString()+
                 "- numserie: " + crtCert.getSerialNumber().longValue());

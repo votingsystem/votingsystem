@@ -57,6 +57,8 @@ class EventoVotacionService {
 				Evento.Cardinalidad.valueOf(mensajeJSON.cardinalidad)
         else evento.cardinalidadOpciones = Evento.Cardinalidad.UNA
 		evento.save()
+		evento.url = "${grailsApplication.config.grails.serverURL}" +
+			"${grailsApplication.config.SistemaVotacion.sufijoURLEventoVotacion}${evento.id}"
         if (mensajeJSON.centroControl) {
             evento.centroControl = subscripcionService.comprobarCentroControl(mensajeJSON.centroControl.serverURL)
 			evento.save(flush:true)
@@ -100,6 +102,7 @@ class EventoVotacionService {
 		mensajeJSON.id = evento.id
 		mensajeJSON.fechaCreacion = DateUtils.getStringFromDate(evento.dateCreated)
 		mensajeJSON.tipo = tipo
+		mensajeJSON.URL = evento.url
 		Respuesta respuestaClaves = almacenClavesService.generar(evento)
 		if(Respuesta.SC_OK == respuestaClaves.codigoEstado) {
 			mensajeJSON.certCAVotacion = new String(

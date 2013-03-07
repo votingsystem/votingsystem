@@ -257,7 +257,7 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
 				break;
 			case ANULAR_VOTO:
 				setWidgetsStateFirmando(false);
-				if(Respuesta.SC_OK== mensaje.getCodigoEstado()) {
+				if(Respuesta.SC_OK == mensaje.getCodigoEstado()) {
 					setMessage(Constantes.INSTANCIA.mensajeAnulacionVotoOK());
 				} else {
 					setMessage(Constantes.INSTANCIA.mensajeError(
@@ -279,7 +279,7 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
 				break;
 			case SOLICITUD_COPIA_SEGURIDAD:
 				setWidgetsStateFirmando(false);
-				if(Respuesta.SC_OK== mensaje.getCodigoEstado()) {
+				if(mensaje.getCodigoEstado() == Respuesta.SC_OK) {
 					setMessage(Constantes.INSTANCIA.mensajeSolicitudCopiaSeguridadOK());
 				} else {
 					setMessage(Constantes.INSTANCIA.mensajeError(

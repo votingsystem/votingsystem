@@ -281,11 +281,11 @@ public final class EventoSistemaVotacionJso extends JavaScriptObject {
 	}-*/;
 
 	public final native String getUrl() /*-{
-		return this.url;
+		return this.URL;
 	}-*/;
 
 	public final native void setUrl(String value) /*-{
-		this.url = value;
+		this.URL = value;
 	}-*/;
 
 
@@ -391,7 +391,6 @@ public final class EventoSistemaVotacionJso extends JavaScriptObject {
 	}
 	
 	public boolean checkDate() {
-		
 		Date fechaActual = DateUtils.getTodayDate();
 		if(fechaActual.after(getFechaInicio()) && fechaActual.before(getFechaFin()))
 			return true;

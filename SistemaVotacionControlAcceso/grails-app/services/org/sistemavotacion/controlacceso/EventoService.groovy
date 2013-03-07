@@ -83,13 +83,13 @@ class EventoService {
 		MensajeSMIME mensajeSMIME
 		Evento evento
 		Respuesta respuesta
-		if (mensajeJSON.eventoId &&
+		if (mensajeJSON.eventURL &&
 				mensajeJSON.estado && ((Evento.Estado.CANCELADO ==
 					Evento.Estado.valueOf(mensajeJSON.estado)) ||
 					(Evento.Estado.BORRADO_DE_SISTEMA ==
 					Evento.Estado.valueOf(mensajeJSON.estado)))) {
 				Evento.withTransaction {
-					evento = Evento.findWhere(id:mensajeJSON.eventoId?.longValue(),
+					evento = Evento.findWhere(url:mensajeJSON.eventURL,
 						estado:Evento.Estado.ACTIVO)
 					if (evento) {
 						 if(evento.usuario?.nif.equals(smimeMessage.firmante?.nif) ||
@@ -161,7 +161,7 @@ class EventoService {
 	public Map optenerEventoVotacionJSONMap(EventoVotacion eventoItem) {
 		log.debug("eventoItem: ${eventoItem.id} - estado ${eventoItem.estado}")
 		def eventoMap = [id: eventoItem.id, fechaCreacion: eventoItem.dateCreated,
-			URL:"${grailsApplication.config.grails.serverURL}/evento/obtener?id=${eventoItem.id}",
+			URL:eventoItem.url,
 			solicitudPublicacionURL:"${grailsApplication.config.grails.serverURL}/eventoVotacion/firmado?id=${eventoItem.id}",
 			solicitudPublicacionValidadaURL:"${grailsApplication.config.grails.serverURL}/eventoVotacion/validado?id=${eventoItem.id}",
 			asunto:eventoItem.asunto, contenido:eventoItem.contenido,
@@ -191,7 +191,7 @@ class EventoService {
 	
 	public Map optenerEventoFirmaJSONMap(EventoFirma eventoItem) {
 		def eventoMap = [id: eventoItem.id, fechaCreacion: eventoItem.dateCreated,
-			URL:"${grailsApplication.config.grails.serverURL}/evento/obtener?id=${eventoItem.id}",
+			URL:eventoItem.url,
 			urlPDF:"${grailsApplication.config.grails.serverURL}/documento/obtenerManifiesto?id=${eventoItem.id}",
 			asunto:eventoItem.asunto, contenido: eventoItem.contenido,
 			etiquetas:eventoItem.etiquetaSet?.collect {etiqueta ->
@@ -210,7 +210,7 @@ class EventoService {
 	
 	public Map optenerEventoReclamacionJSONMap(EventoReclamacion eventoItem) {
 		def eventoMap = [id: eventoItem.id, fechaCreacion: eventoItem.dateCreated,
-			URL:"${grailsApplication.config.grails.serverURL}/evento/obtener?id=${eventoItem.id}",
+			URL:eventoItem.url,
 			solicitudPublicacionURL:"${grailsApplication.config.grails.serverURL}/eventoReclamacion/firmado?id=${eventoItem.id}",
 			solicitudPublicacionValidadaURL:"${grailsApplication.config.grails.serverURL}/eventoReclamacion/validado?id=${eventoItem.id}",
 			asunto:eventoItem.asunto, contenido:eventoItem.contenido,

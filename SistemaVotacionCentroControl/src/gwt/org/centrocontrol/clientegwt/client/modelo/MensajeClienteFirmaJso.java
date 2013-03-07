@@ -161,8 +161,8 @@ public final class MensajeClienteFirmaJso extends JavaScriptObject {
 	}-*/;
 	
 	public static native JavaScriptObject createMensajeCancelacionEvento(
-			int eventoId, String estado) /*-{
-		return {eventoId: eventoId, estado: estado};
+			String eventURL, String estado) /*-{
+		return {eventURL: eventURL, estado: estado};
 	}-*/;
 
 	public final native String getUrlTimeStampServer() /*-{

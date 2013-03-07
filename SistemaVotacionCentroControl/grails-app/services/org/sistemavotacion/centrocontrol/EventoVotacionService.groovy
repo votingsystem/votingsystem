@@ -57,7 +57,6 @@ class EventoVotacionService {
 			valido:smimeMessage.isValidSignature, 
 			contenido:smimeMessage.getBytes())
 		MensajeSMIME.withTransaction {mensajeMime.save();}
-		String urlEvento = "${controlAcceso.serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLEventoVotacion}${mensajeJSON.id}"
 		X509Certificate certCAVotacion
 		if(mensajeJSON.certCAVotacion)
 			certCAVotacion = CertUtil.fromPEMToX509Cert(mensajeJSON.certCAVotacion?.bytes)
@@ -74,7 +73,7 @@ class EventoVotacionService {
 		def evento = new EventoVotacion(tipo:tipoMensaje, eventoVotacionId:mensajeJSON.id,
 			asunto:mensajeJSON.asunto, cadenaCertificacionControlAcceso:cadenaCertificacion,
 			contenido:mensajeJSON.contenido, mensajeMime:mensajeMime, 
-			url:urlEvento, controlAcceso:controlAcceso, usuario:usuario,
+			url:mensajeJSON.URL, controlAcceso:controlAcceso, usuario:usuario,
 			fechaInicio:DateUtils.getDateFromString(mensajeJSON.fechaInicio),
 			fechaFin:DateUtils.getDateFromString(mensajeJSON.fechaFin))
 		evento.estado = obtenerEstadoEvento(evento)
@@ -168,13 +167,13 @@ class EventoVotacionService {
 		MensajeSMIME mensajeSMIME
 		EventoVotacion evento
 		Respuesta respuesta
-		if (mensajeJSON.eventoId &&
+		if (mensajeJSON.eventURL &&
 				mensajeJSON.estado && ((EventoVotacion.Estado.CANCELADO ==
 					EventoVotacion.Estado.valueOf(mensajeJSON.estado)) ||
 					(EventoVotacion.Estado.BORRADO_DE_SISTEMA ==
 					EventoVotacion.Estado.valueOf(mensajeJSON.estado)))) {
 				EventoVotacion.withTransaction {
-					evento = EventoVotacion.findWhere(id:mensajeJSON.eventoId?.longValue(),
+					evento = EventoVotacion.findWhere(url:mensajeJSON.eventURL,
 						estado:EventoVotacion.Estado.ACTIVO)
 					if (evento) {
 						log.debug(" ----- cancelarEvento - nif firmante: ${smimeMessage.firmante?.nif}")

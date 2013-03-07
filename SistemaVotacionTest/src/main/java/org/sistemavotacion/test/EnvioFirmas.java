@@ -76,7 +76,7 @@ public class EnvioFirmas {
     
     public static void lanzarFirmas (Evento documento) throws Exception {
         logger.info("Lanzado hilo de firmas");
-        params = getPKIXParameters(ContextoPruebas.getControlAcceso().getServerURL());
+        params = ContextoPruebas.INSTANCIA.getSessionPKIXParameters();
         for (int numUsu = 0; numUsu < numeroUsuarios.get(); numUsu++) {
             InfoFirma infoFirma = new InfoFirma(documento, String.valueOf(numUsu));
             firmasCompletionService.submit(new LanzadoraFirma(infoFirma));
@@ -115,25 +115,6 @@ public class EnvioFirmas {
         firmasExecutor.shutdown();
         envioFirmasExecutor.shutdown();
     }
-    
-    private static PKIXParameters getPKIXParameters(String serverUrl) {
-    	String urlCerts = serverUrl + "/certificado/cadenaCertificacion";
-    	PKIXParameters params = null;
-    	try {
-			Collection<X509Certificate> certs =  Contexto.getHttpHelper().obtenerCadenaCertificacionDeServidor(urlCerts);
-	        Set<TrustAnchor> anchors = new HashSet<TrustAnchor>();
-	        for (X509Certificate certificado:certs) {
-	            TrustAnchor anchorCertificado = new TrustAnchor(certificado, null);
-	            anchors.add(anchorCertificado);
-	        }
-	        params = new PKIXParameters(anchors);
-	        params.setRevocationEnabled(false); // tell system do not check CRL's
-		} catch (Exception ex) {
-			logger.error(ex.getMessage(), ex);
-		}
-    	return params; 
-    }
-    
 
    public static String obtenerFirmaParaEventoJSON(Evento evento) {
         logger.debug("obtenerFirmaParaEventoJSON");

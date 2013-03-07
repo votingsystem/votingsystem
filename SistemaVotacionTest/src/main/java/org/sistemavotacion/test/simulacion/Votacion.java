@@ -32,7 +32,7 @@ public class Votacion implements ActionListener {
     
     private static Logger logger = LoggerFactory.getLogger(Votacion.class);
     
-    public static final int MAX_PENDING_REESPONSES = 10;
+    public static final int MAX_PENDING_RESPONSES = 10;
     
     private static ExecutorService votacionExecutor;
 
@@ -140,7 +140,7 @@ public class Votacion implements ActionListener {
         } else {
             do {
                 if((solicitudesEnviadas.get() - votosRecogidos.get()) < 
-                        MAX_PENDING_REESPONSES) {
+                        MAX_PENDING_RESPONSES) {
                     lanzarSolicitudAcceso(idUsuario++);
                 } else Thread.sleep(500);
             } while (idUsuario < numeroUsuarios.get() + idUsuarioInicial);

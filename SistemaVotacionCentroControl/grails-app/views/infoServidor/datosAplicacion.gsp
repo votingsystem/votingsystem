@@ -39,7 +39,7 @@
 		</div>
 		<div id="content">
 			<div id="controller-list" role="navigation">
-				<h2>${message(code: 'controllersLabel', null)}:</h2>
+				<h4>${message(code: 'controllersLabel', null)}:</h4>
 				<ul>
 					<g:each var="c" in="${grailsApplication.controllerClasses.sort { it.fullName } }">
 						<li class="controller"><g:link controller="${c.logicalPropertyName}">${c.fullName}</g:link></li>

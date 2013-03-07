@@ -582,15 +582,12 @@ public class CrearVotacionDialog extends JDialog implements KeyListener, Lanzado
                     
                     FileUtils.copyStreamToFile(new ByteArrayInputStream(
                     multipartEntityWorker.getMessage().getBytes()), 
-                    new File("/home/jgzornoza/ReciboRespuesta"));
-                    
+                    new File(ContextoPruebas.APPDIR + "VotingPublishReceipt"));
                     SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(null, 
                             new ByteArrayInputStream(multipartEntityWorker.getMessage().getBytes()), 
-                            "ReciboRespuesta");
-                    PKIXParameters params = Contexto.getHttpHelper()
-                            .obtenerPKIXParametersDeServidor(
-                            ContextoPruebas.INSTANCIA.getUrlControlAccesoCertChain());
-                    dnieMimeMessage.verify(params);
+                            "VotingPublishReceipt");
+                    dnieMimeMessage.verify(
+                            ContextoPruebas.INSTANCIA.getSessionPKIXParameters());
                     logger.debug("--- dnieMimeMessage.getSignedContent(): " + dnieMimeMessage.getSignedContent());
                     evento = DeJSONAObjeto.obtenerEvento(dnieMimeMessage.getSignedContent());
                     logger.debug("Respuesta - Evento ID: " + evento.getEventoId());

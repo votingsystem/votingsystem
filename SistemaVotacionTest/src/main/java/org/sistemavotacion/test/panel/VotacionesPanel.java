@@ -386,7 +386,7 @@ public class VotacionesPanel extends JPanel
     private void infoServidorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_infoServidorButtonActionPerformed
         logger.debug("infoServidorButtonActionPerformed ");
         ActorConIP selectedControlCenter  = 
-                hashMapActores.get((String)centrosDeControlComboBox.getSelectedItem());
+                hashMapActores.get(centrosDeControlComboBox.getSelectedItem());
         InfoServidorDialog infoServidorDialog = new InfoServidorDialog(
                 MainFrame.INSTANCIA.getFrames()[0], false, selectedControlCenter);
                 infoServidorDialog.setVisible(true);
@@ -399,7 +399,9 @@ public class VotacionesPanel extends JPanel
     }//GEN-LAST:event_asociarCentroControlButtonActionPerformed
 
     private void centrosDeControlComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_centrosDeControlComboBoxActionPerformed
-
+        ActorConIP centroControl = 
+                hashMapActores.get(centrosDeControlComboBox.getSelectedItem());
+        ContextoPruebas.setCentroControl(centroControl);
     }//GEN-LAST:event_centrosDeControlComboBoxActionPerformed
 
     private void publicarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_publicarButtonActionPerformed

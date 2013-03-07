@@ -8,7 +8,8 @@
 		.buttonPanel { float: right; margin: 10px; margin-top: 15px;}
 		.mensajeSeleccion {font-size: 15px; margin-bottom:15px;}
 		.textoCheckBox{font-size: 14px;}
-		.textoMensaje {margin-bottom: 15px; font-size: 14px;}
+		.textoMensaje {font-size: 16px; font-weight: bold; 
+			margin: 12px 0px 12px 0px; text-align: center;}
 		.indeterminate {margin: 20px 50px 20px 50px;}
 	</ui:style>
 	<ui:image field='siguientePaso' src="../BotonSiguientePaso.png"/>

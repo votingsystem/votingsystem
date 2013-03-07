@@ -63,21 +63,11 @@ public class LanzadoraAnulacionSolicitudAcceso  implements Callable<Respuesta> {
             anulador, ContextoPruebas.getURLAnulacionVoto(
             		ContextoPruebas.getControlAcceso().getServerURL()));
         if (Respuesta.SC_OK == response.getStatusLine().getStatusCode()) {                    
-            PKIXParameters params = Contexto.getHttpHelper()
-                    .obtenerPKIXParametersDeServidor(
-            		ContextoPruebas.INSTANCIA.getUrlControlAccesoCertChain());
-            TrustAnchor anchorUserCert = new TrustAnchor(
-                    ContextoPruebas.getCertificadoRaizAutoridad(), null);
-            Set<TrustAnchor> anchors = new HashSet<TrustAnchor>();
-            anchors.add(anchorUserCert);
-            anchors.addAll(params.getTrustAnchors());
-            PKIXParameters pkixParams = new PKIXParameters(anchors);
-            pkixParams.setRevocationEnabled(false);
             SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(null,
                     new ByteArrayInputStream(EntityUtils.toByteArray(response.getEntity())),
                     "ReciboAnulacionVoto");
             respuesta = new Respuesta(response.getStatusLine().getStatusCode(), 
-                    dnieMimeMessage, pkixParams);
+                    dnieMimeMessage, ContextoPruebas.INSTANCIA.getSessionPKIXParameters());
         } else {
             respuesta = new Respuesta(
                     response.getStatusLine().getStatusCode(), 

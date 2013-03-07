@@ -71,8 +71,7 @@ public class EnvioFirmasPDF {
     
     public static void lanzarFirmas (Evento documento) throws Exception {
         logger.info("Lanzado hilo de firmas");
-        params = Contexto.getHttpHelper().obtenerPKIXParametersDeServidor(
-                ContextoPruebas.getControlAcceso().getServerURL());
+        params = ContextoPruebas.INSTANCIA.getSessionPKIXParameters();
         for (int numUsu = 0; numUsu < numeroUsuarios.get(); numUsu++) {
             InfoFirma infoFirma = new InfoFirma(documento, String.valueOf(numUsu));
             firmasCompletionService.submit(new LanzadoraFirma(infoFirma));

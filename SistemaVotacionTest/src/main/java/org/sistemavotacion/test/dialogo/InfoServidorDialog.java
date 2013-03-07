@@ -29,7 +29,8 @@ public class InfoServidorDialog extends JDialog implements HyperlinkListener  {
         setLocationRelativeTo(null);
         if(actorConIP == null) return;
         StringBuilder tituloPanelHTML = new StringBuilder("<html><b>");
-        StringBuilder tituloPanel = null;
+        StringBuilder tituloPanel =  new StringBuilder("");
+        logger.info(" --- actorConIP.getTipo(): " + actorConIP.getTipo());
         if(actorConIP.getTipo() == ActorConIP.Tipo.CONTROL_ACCESO) {
             tituloPanelHTML.append("Control de Acceso: </b>");
             tituloPanel = new StringBuilder("Control de Acceso - ");

@@ -32,7 +32,8 @@
 		.botonSolicitarCopia {float:left; cursor:pointer;  margin-top:3px;}
 		.buttonPanel { margin: 0px 100px 0px 10px; width:100%;}
 		.submitButtonsPanel {float: right;}
-		.opcionesLabel{font-size: 20px; font-weight:bold; color:#02227a; margin-top:22px;}
+		.opcionesLabel{font-size: 20px; font-weight:bold; color:#4c4c4c; 
+			text-decoration:underline; margin:22px 0px 10px 0px;}
 		.labelInfoDocumento{font-size: 18px; font-weight:bold; color:#3a7f35;}
 		.administracionDocumentoLabel {cursor: pointer; cursor: hand; font-size: 10px; font-weight:bold; 
 			float:right; margin:6px 0px 0px 0px; color: #2a7fd4;}

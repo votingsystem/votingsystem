@@ -12,6 +12,7 @@ import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.sistemavotacion.seguridad.PKCS10WrapperClient;
 import org.sistemavotacion.seguridad.PKCS10WrapperServer;
+import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,7 @@ public class CsrTest {
     
     private static Logger logger = (Logger) LoggerFactory.getLogger(CsrTest.class);
     
-    public static final String directorioBase = "/home/jgzornoza/git/recursos/csr/";
+    public static final String directorioBase = ContextoPruebas.APPDIR + "temp/csr/";
     
     public static String cadenaVerisign = directorioBase + "cadenaVerisign.pem";
     
@@ -128,7 +129,7 @@ public class CsrTest {
                 "rootAlias", "endEntityAlias", "CN=dummy_Dnie, OU=DNIE_CA", "CN=Usuario dnie, SERIALNUMBER=07553172H"); 
         byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, password.toCharArray());
         FileUtils.copyStreamToFile(new ByteArrayInputStream(keyStoreBytes), 
-                new File("/home/jgzornoza/git/recursos/dni_keystore/dni.jks"));
+                new File(ContextoPruebas.APPDIR + "temp/dni.jks"));
     }
 
 }

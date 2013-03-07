@@ -49,7 +49,7 @@ class EventoFirmaService {
 					"yyyy-MM-dd HH:mm:ss", mensajeJSON.fechaFin))
         evento = evento.save()
         evento.url = "${grailsApplication.config.grails.serverURL}" + 
-			"${grailsApplication.config.SistemaVotacion.sufijoURLEventoFirmaValidado}${evento.id}"
+			"${grailsApplication.config.SistemaVotacion.sufijoURLEventoFirma}${evento.id}"
         mensajeJSON.controlAcceso = [serverURL:grailsApplication.config.grails.serverURL, 
 			nombre:grailsApplication.config.SistemaVotacion.serverName] as JSONObject
         if (mensajeJSON.etiquetas) {

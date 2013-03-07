@@ -384,6 +384,19 @@ public final class EventoSistemaVotacionJso extends JavaScriptObject {
 	}
 	
 	public boolean isActive() {
+		boolean result = false;
+		switch (getEstadoEnumValue()) {
+			case ACTIVO:
+				result = checkDate();
+				break;
+			case PENDIENTE_COMIENZO:
+				result = checkDate();
+				break;
+		}
+		return result;
+	}
+	
+	public boolean checkDate() {
 		Date fechaActual = DateUtils.getTodayDate();
 		if(fechaActual.after(getFechaInicio()) && fechaActual.before(getFechaFin()))
 			return true;

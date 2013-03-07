@@ -73,6 +73,8 @@ class EventoFirmaController {
 					contenido:eventoJSON.contenido,
 					fechaFin:new Date().parse("yyyy-MM-dd HH:mm:ss", eventoJSON.fechaFin))
 				evento.save()
+				evento.url = "${grailsApplication.config.grails.serverURL}" +
+					"${grailsApplication.config.SistemaVotacion.sufijoURLEventoFirma}${evento.id}"
 				runAsync {
 					ByteArrayOutputStream bytes = pdfRenderingService.render(
 						template: "/eventoFirma/pdf", model:[evento:evento])

@@ -13,6 +13,7 @@ import org.sistemavotacion.Contexto;
 import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailValidator.ValidationResult;
+import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,10 +29,10 @@ public class ValidateSignedWithKeyStore {
     private static Logger logger = (Logger) LoggerFactory.getLogger(MultiFirmaTest.class);
     
     //public static String cadenaCA = "/host/temp/cadenaVerisign.pem";
-    public static String cadenaCA = "/home/jgzornoza/.atemp/cadenaCert.pem";
+    public static String cadenaCA = ContextoPruebas.APPDIR + "temp/cadenaCert.pem";
     
-    //public static String signedFilePath = "/home/jgzornoza/.atemp/mensajeSMIME.txt";
-    public static String signedFilePath = "/home/jgzornoza/temp/user.p7s";
+    //public static String signedFilePath = ContextoPruebas.APPDIR + "temp/mensajeSMIME.txt";
+    public static String signedFilePath = ContextoPruebas.APPDIR + "temp/user.p7s";
          
     public static void main(String args[]) {
         validateMultiSignedMail();

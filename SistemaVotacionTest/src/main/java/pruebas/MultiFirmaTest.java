@@ -45,19 +45,25 @@ public class MultiFirmaTest {
     
     public static final String keyAlias1 = "aliascertfirmado";
     public static final String password1 = "PemPass";
-    public static final String keyStorePath1 = "/host/temp/KeyStoreFirmaVoto.jks";
+    public static final String keyStorePath1 =  
+            ContextoPruebas.APPDIR + "temp/KeyStoreFirmaVoto.jks";
     
     public static final String keyAlias2 = "clavessistemavotacion";
     public static final String password2 = "PemPass";
-    public static final String keyStorePath2 = "/host/temp/KeyStoreVerisign.jks";
+    public static final String keyStorePath2 =  
+            ContextoPruebas.APPDIR + "temp/KeyStoreVerisign.jks";
     
-    public static final String filePath1 = "/host/temp/firmaConCSR";
+    public static final String filePath1 =  
+            ContextoPruebas.APPDIR + "temp/firmaConCSR";
     //public static final String multiFirmaFilePath = "/host/temp/multifirma";
     
-    public static final String multiFirmaFilePath = "/home/jgzornoza/Descargas/EventoEnviadoMultifirma.p7m";
+    public static final String multiFirmaFilePath = 
+            ContextoPruebas.APPDIR + "temp/EventoEnviadoMultifirma.p7m";
     
-    public static final String pathCadenaCertCSR = "/host/temp/cadenaCSR.pem";
-    public static final String pathCadenaCertVerisign = "/host/temp/cadenaVerisign.pem";
+    public static final String pathCadenaCertCSR =  
+            ContextoPruebas.APPDIR + "temp/cadenaCSR.pem";
+    public static final String pathCadenaCertVerisign =  
+            ContextoPruebas.APPDIR + "temp/cadenaVerisign.pem";
     
     public static void main (String[] args) throws Exception {
         Contexto.inicializar();

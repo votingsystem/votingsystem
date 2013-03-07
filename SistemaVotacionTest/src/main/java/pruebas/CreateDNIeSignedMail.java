@@ -42,7 +42,8 @@ public class CreateDNIeSignedMail {
     
     private static Logger logger = (Logger) LoggerFactory.getLogger(CsrTest.class);  
     
-    private static final String directorioBase = "/home/jgzornoza/git/recursos/dnie/";
+    private static final String directorioBase = 
+            ContextoPruebas.APPDIR + "temp" + File.separator;
 
     public static void main(String args[]) {
         String nombreArchivoFirmado = directorioBase + "archivo" + 1;

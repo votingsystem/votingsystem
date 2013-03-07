@@ -50,9 +50,9 @@ class EventoReclamacionService {
 		if(mensajeJSON.fechaInicio) evento.fechaInicio = new Date().parse(
 					"yyyy-MM-dd HH:mm:ss", mensajeJSON.fechaInicio)
 		else evento.fechaInicio = DateUtils.getTodayDate();
-        evento.url = "${grailsApplication.config.grails.serverURL}" + 
-			"${grailsApplication.config.SistemaVotacion.sufijoURLEventoReclamacionValidado}${evento.id}"
         evento = evento.save()
+		evento.url = "${grailsApplication.config.grails.serverURL}" +
+			"${grailsApplication.config.SistemaVotacion.sufijoURLEventoReclamacion}${evento.id}"
         if (mensajeJSON.etiquetas) {
 			Set<Etiqueta> etiquetaSet = etiquetaService.guardarEtiquetas(mensajeJSON.etiquetas)
 			evento.setEtiquetaSet(etiquetaSet)
@@ -84,7 +84,8 @@ class EventoReclamacionService {
                 contenido:mensajeValidado.getBytes())
         mensajeSMIMEValidado.save();
         evento.estado = eventoService.obtenerEstadoEvento(evento)
-        if(mensajeJSON.cardinalidad) evento.cardinalidadRepresentaciones = Evento.Cardinalidad.valueOf(mensajeJSON.cardinalidad)
+        if(mensajeJSON.cardinalidad) evento.cardinalidadRepresentaciones = 
+				Evento.Cardinalidad.valueOf(mensajeJSON.cardinalidad)
         else evento.cardinalidadRepresentaciones = Evento.Cardinalidad.UNA
         evento = evento.save()
         return new Respuesta(codigoEstado:Respuesta.SC_OK, fecha:DateUtils.getTodayDate(),

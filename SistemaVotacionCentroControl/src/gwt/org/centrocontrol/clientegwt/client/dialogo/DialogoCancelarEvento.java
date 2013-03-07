@@ -112,8 +112,7 @@ public class DialogoCancelarEvento implements EventoGWTMensajeClienteFirma.Handl
     		estadoEvento = EventoSistemaVotacionJso.Estado.BORRADO_DE_SISTEMA;
     	}
     	JavaScriptObject contenidoFirma = MensajeClienteFirmaJso.
-    			createMensajeCancelacionEvento(new Integer(
-    					evento.getEventoVotacionId()), estadoEvento.toString());
+    			createMensajeCancelacionEvento(evento.getUrl(), estadoEvento.toString());
 		MensajeClienteFirmaJso mensajeClienteFirma = MensajeClienteFirmaJso.create(null, 
 				Operacion.CANCELAR_EVENTO.toString(), 
 				MensajeClienteFirmaJso.SC_PROCESANDO);

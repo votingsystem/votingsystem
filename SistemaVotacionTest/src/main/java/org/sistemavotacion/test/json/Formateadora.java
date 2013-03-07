@@ -38,7 +38,8 @@ public class Formateadora {
         logger.debug("obtenerInfoServidor - actorConIP: " + actorConIP.getNombre()); 
         if (actorConIP == null) return null;
         StringBuilder result = new StringBuilder("<html>");
-        result.append("<b>Tipo de servidor: </b>").append(actorConIP.getTipo().getMensaje());
+        if(actorConIP.getTipo() != null)
+            result.append("<b>Tipo de servidor: </b>").append(actorConIP.getTipo().getMensaje());
         result.append("<br/><b>Nombre: </b>").append(actorConIP.getNombre());
         if(actorConIP.getEstado() != null) {
             result.append("<br/><b>Estado: </b>" 

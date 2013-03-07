@@ -20,6 +20,7 @@ import org.sistemavotacion.test.json.DeJSONAObjeto;
 import org.sistemavotacion.test.modelo.SolicitudAcceso;
 import org.sistemavotacion.test.panel.DigitalClockPanel;
 import org.sistemavotacion.test.simulacion.LanzadoraAnulacionSolicitudAcceso;
+import static org.sistemavotacion.test.simulacion.Votacion.MAX_PENDING_RESPONSES;
 import org.sistemavotacion.test.util.FileNameFilter;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
@@ -42,7 +43,8 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
     private SwingWorker tareaEnEjecucion;
     private Evento evento;
     private Estado estado = Estado.RECOGIENDO_DATOS;
-    private final ExecutorService solicitudesExecutor;
+    private static ExecutorService operationExecutor;
+    private static ExecutorService solicitudesExecutor;
     private static CompletionService<Respuesta> anulacionSolicitudesCompletionService;
     private static AtomicLong anulacionesEnviadas;
     private static AtomicLong anulacionesEnviadasOK;
@@ -58,6 +60,7 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
         progressBar.setIndeterminate(true);
         progressBarPanel.setVisible(false);
         contadorPanel.setVisible(false);
+        operationExecutor = Executors.newFixedThreadPool(5);
         solicitudesExecutor = Executors.newFixedThreadPool(100);
         erroresAnulacionButton.setVisible(false);
         anulacionSolicitudesCompletionService = 
@@ -344,7 +347,7 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
         progressLabel.setText("Leyendo solicitudes en el sistema de ficheros");
         Collection<File> solicitudes = FileNameFilter.getFilesFromDirectoryTree(
                 new File(ContextoPruebas.APPDIR), nombreArchivoSolicitud);
-        logger.debug("Encontrados archivos '" + solicitudes.size() + "' solicitudes"
+        logger.debug("Encontradas '" + solicitudes.size() + "' solicitudes"
                 + "  para el evento '" +  evento.getEventoId() + "'");
         List<SolicitudAcceso> solicitudesAcceso =  obtenerSolicitudesAcceso(solicitudes);
         lanzarOperacion(solicitudesAcceso);
@@ -358,10 +361,10 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
     }//GEN-LAST:event_erroresAnulacionButtonActionPerformed
 
     public void lanzarOperacion(final List<SolicitudAcceso> solicitudesAcceso) {
-        logger.debug("lanzarVotacion");
+        logger.debug("lanzarAnulacion");
         comienzo = System.currentTimeMillis();
         erroresAnulacionButton.setVisible(false);
-        logger.debug("Encontradas solicitudes '" + solicitudesAcceso.size() + "' solicitudes"
+        logger.debug("Encontradas '" + solicitudesAcceso.size() + "' solicitudes"
                 + "  para el evento '" +  evento.getEventoId() + "'");  
         progressLabel.setText("Anulando " + solicitudesAcceso.size() + " solicitudes de acceso");
         estado = Estado.ANULANDO_VOTOS;
@@ -375,12 +378,23 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
         actualizarContadorSolicitudesError(
                 new Long(anulacionesEnviadasERROR.get()).intValue());
         erroresAnulaciones = new StringBuilder("<html>");
-        solicitudesExecutor.execute(new Runnable() {
+        operationExecutor.execute(new Runnable() {
             @Override
             public void run() {
                 try {
                     logger.debug("Lanzado hilo de anulaciones de solicitudes de acceso");
                     lanzarAnulacionesSolicitudesAcceso(solicitudesAcceso); 
+                } catch (Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                }
+            }
+
+        });
+        operationExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    logger.debug("Lanzado hilo de comprobación de respuestas");
                     comprobarRespuestas(solicitudesAcceso.size());
                 } catch (Exception ex) {
                     logger.error(ex.getMessage(), ex);
@@ -503,14 +517,17 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
     public void lanzarAnulacionesSolicitudesAcceso (
             List<SolicitudAcceso> solicitudesAcceso) throws Exception {
         for(SolicitudAcceso solicitud : solicitudesAcceso) {
+            while(anulacionesEnviadas.get() - (anulacionesEnviadasOK.get() + 
+                    anulacionesEnviadasERROR.get()) > MAX_PENDING_RESPONSES ) {}
             lanzarAnulacionSolicitudAcceso(solicitud);
         }
     }
     
     public void lanzarAnulacionSolicitudAcceso (SolicitudAcceso solicitud) throws Exception {
-        anulacionSolicitudesCompletionService.submit(new LanzadoraAnulacionSolicitudAcceso(solicitud));
-        anulacionesEnviadas.getAndIncrement();
-        actualizarContadorSolicitudes(new Long(anulacionesEnviadas.get()).intValue());
+        anulacionSolicitudesCompletionService.submit(
+                new LanzadoraAnulacionSolicitudAcceso(solicitud));
+        actualizarContadorSolicitudes(
+                new Long(anulacionesEnviadas.incrementAndGet()).intValue());
      }
     
     private List<SolicitudAcceso> obtenerSolicitudesAcceso(Collection<File> archivos) {
