@@ -5,7 +5,7 @@
 		.messagePanel{width: 100%; margin-bottom:10px;}
 	    .messageLabel {font-size: 16px; font-weight: bold; 
 			margin: 12px 0px 12px 0px; text-align: center;}
-   		.mainPanel {padding: 15px; }
+   		.mainPanel {padding: 15px; width: 100%;}
 		.boton { margin: 2px; cursor:pointer;}
 		.buttonPanel { float: right; margin-top: 15px;}
 		.texto{}

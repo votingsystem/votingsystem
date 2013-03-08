@@ -57,7 +57,7 @@ class EventoVotacionController {
             }
             if (eventoList.size() == 0) {
                     response.status = 404 //Not Found
-                    render message(code: 'evento.eventoNotFound', args:[params.ids])
+                    render message(code: 'eventNotFound', args:[params.ids])
                     return
             }
         } else {
@@ -129,7 +129,7 @@ class EventoVotacionController {
                 return false
             }
             response.status = 404
-            render message(code: 'evento.eventoNotFound', args:[params.id])
+            render message(code: 'eventNotFound', args:[params.id])
             return false
         }
         response.status = 400
@@ -159,7 +159,7 @@ class EventoVotacionController {
             }
             if (!evento || !mensajeSMIME) {
                 response.status = 404
-                render message(code: 'evento.eventoNotFound', args:[params.ids])
+                render message(code: 'eventNotFound', args:[params.ids])
                 return false
             }
         }
@@ -189,7 +189,7 @@ class EventoVotacionController {
 				}
 			}
 			response.status = 404
-			render message(code: 'evento.eventoNotFound', args:[params.ids])
+			render message(code: 'eventNotFound', args:[params.ids])
 			return false
 		}
 		response.status = 400
@@ -206,7 +206,7 @@ class EventoVotacionController {
 				eventoVotacion = EventoVotacion.get(mensajeJSON.eventoId)
 				if (!eventoVotacion) {
 					response.status = 404
-					render message(code: 'evento.eventoNotFound', args:[mensajeJSON.eventoId])
+					render message(code: 'eventNotFound', args:[mensajeJSON.eventoId])
 					return false
 				}
 			} else {
@@ -227,9 +227,10 @@ class EventoVotacionController {
 			response.outputStream.flush()
 			return false
 		} else {
-			flash.respuesta = new Respuesta(tipo: Tipo.ERROR_DE_SISTEMA,
-				mensaje:message(code: 'error.SinCopiaRespaldo'),codigoEstado:500)
-			forward controller: "error500", action: "procesar"
+			log.error (message(code: 'error.SinCopiaRespaldo'))
+			response.status = Respuesta.SC_ERROR_EJECUCION
+			render message(code: 'error.SinCopiaRespaldo')
+			return false
 		}
 	}
 

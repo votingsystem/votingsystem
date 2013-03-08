@@ -111,7 +111,7 @@ class EventoFirmaService {
 				cantidad:firmasRecibidas.size(), file:new File("${basedir}.zip"))
 		} else respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
 				mensaje:messageSource.getMessage(
-				'evento.eventoNotFound', [evento.id].toArray(), locale))
+				'eventNotFound', [evento.id].toArray(), locale))
 		return respuesta
 	}
 

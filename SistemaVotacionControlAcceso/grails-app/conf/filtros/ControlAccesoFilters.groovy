@@ -41,7 +41,7 @@ class ControlAccesoFilters {
                 log.debug "----------------- filter - guardar - before ------------------------------------"
                 if (!(request instanceof MultipartHttpServletRequest)) {
                     log.debug "------------- La petición no es instancia de MultipartHttpServletRequest ------------"
-					response.status = 400
+					response.status = Respuesta.SC_ERROR_PETICION
 					render(Tipo.PETICION_SIN_ARCHIVO.toString())
 					return false
                 }
@@ -57,7 +57,7 @@ class ControlAccesoFilters {
 									new ByteArrayInputStream(multipartFile?.getBytes()), null)
                         } catch (Exception ex) {
                             log.error (ex.getMessage(), ex)
-							response.status = 400
+							response.status = Respuesta.SC_ERROR_PETICION
 							render(ex.getMessage())
 							return false
                         } 
@@ -67,7 +67,7 @@ class ControlAccesoFilters {
 								log.debug " ------ Controlador de firma - validando con CA de sistema"
 								Respuesta respuestaValidacionCa = firmaService.
 									validarCertificacionFirmantes(smimeMessageReq, request.getLocale())
-								if(200 != respuestaValidacionCa.codigoEstado) {
+								if(Respuesta.SC_OK != respuestaValidacionCa.codigoEstado) {
 									response.status = respuestaValidacionCa.codigoEstado
 									render(respuestaValidacionCa.mensaje)
 									return false
@@ -77,19 +77,19 @@ class ControlAccesoFilters {
                             return
                         } else {
                             log.debug "firma erronea"
-							response.status = 400
+							response.status = Respuesta.SC_ERROR_PETICION
 							render(Tipo.FIRMA_EVENTO_CON_ERRORES.toString())
 							return false
                         }
                     } else {
                         log.debug "Peticion sin archivo"
-						response.status = 400
+						response.status = Respuesta.SC_ERROR_PETICION
 						render(Tipo.PETICION_SIN_ARCHIVO.toString())
 						return false
                     }
                 } catch (Exception ex) {
                     log.error (ex.getMessage(), ex)
-					response.status = 400
+					response.status = Respuesta.SC_ERROR_PETICION
 					render(ex.getMessage())
 					return false                   
                 }
@@ -102,7 +102,7 @@ class ControlAccesoFilters {
                 def codigoEstado = flash.respuesta?.codigoEstado
                 log.debug "-----------------  filter - AdjuntandoValidacion - after - status: ${codigoEstado}-----------------------------------"
                 response.status = codigoEstado
-                if (200 == flash.respuesta.codigoEstado) {
+                if (Respuesta.SC_OK == flash.respuesta.codigoEstado) {
 					MensajeSMIME mensajeSMIMEValidado = flash.respuesta.mensajeSMIMEValidado
 					if (mensajeSMIMEValidado) {
 						response.contentLength = mensajeSMIMEValidado.contenido.length

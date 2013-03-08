@@ -6,9 +6,9 @@
 		.messagePanel{width: 100%; border:1pt solid #cc1606; margin-bottom:10px;}
 	    .messageLabel {color: #cc1606; font-size: 16px; font-weight: bold; 
 			margin-top: 12px; margin-bottom: 12px; text-align: center;}    	
-		.errorTextBox {border: 1px solid red;}
+		.errorTextBox {margin: 7px 0px 0px 3px; border: 1px solid red; width:350px;}
 		.texto{}
- 	    .textBox {margin-left: 3px; margin-top: 5px; border: 1px solid #02227a; width:350px;}
+ 	    .textBox {margin: 7px 0px 0px 3px; border: 1px solid #02227a; width:350px;}
 		.boton { margin: 2px; cursor:pointer;}
 		.buttonPanel { float: right; margin-top: 15px;}
 	</ui:style>

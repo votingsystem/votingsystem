@@ -138,7 +138,7 @@ class EventoService {
 								 'csr.usuarioNoAutorizado', null, locale))
 						 }
 					} else {
-						String msg = messageSource.getMessage('evento.eventoNotFound',
+						String msg = messageSource.getMessage('eventNotFound',
 											 [mensajeJSON?.eventoId].toArray(), locale) 
 						log.debug(msg)
 						mensajeSMIME = new MensajeSMIME(tipo:Tipo.EVENTO_CANCELADO_ERROR,

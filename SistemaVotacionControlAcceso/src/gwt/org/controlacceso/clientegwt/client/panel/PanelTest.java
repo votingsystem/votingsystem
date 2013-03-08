@@ -6,6 +6,7 @@ import org.controlacceso.clientegwt.client.Constantes;
 import org.controlacceso.clientegwt.client.HistoryToken;
 import org.controlacceso.clientegwt.client.HtmlTemplates;
 import org.controlacceso.clientegwt.client.PuntoEntrada;
+import org.controlacceso.clientegwt.client.dialogo.DialogoResultadoFirma;
 import org.controlacceso.clientegwt.client.dialogo.ErrorDialog;
 import org.controlacceso.clientegwt.client.modelo.MensajeClienteFirmaJso;
 import org.controlacceso.clientegwt.client.modelo.MensajeClienteFirmaJso.Operacion;
@@ -63,7 +64,8 @@ public class PanelTest extends Composite {
         			PuntoEntrada.INSTANCIA.servidor.getNombre());
     		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
     	} else {
-    		Window.alert("Es cliente NO es android");
+			DialogoResultadoFirma dialogo = new DialogoResultadoFirma();
+			dialogo.show(Constantes.INSTANCIA.clienteNoAndroid());
     	}
 	}
     

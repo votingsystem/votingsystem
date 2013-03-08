@@ -109,7 +109,7 @@ class SolicitudAccesoService {
 				log.debug("Evento no encontrado")
 				mensajeSMIME.tipo = Tipo.SOLICITUD_ACCESO_FALLO
 				respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
-						mensaje:messageSource.getMessage( 'error.EventoNoEncontrado', 
+						mensaje:messageSource.getMessage( 'eventNotFound', 
 						[idEventoVotacion].toArray(), locale))
 			}
         } else {

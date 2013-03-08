@@ -26,7 +26,7 @@ class EventoReclamacionController {
             }
             if (eventoList.size() == 0) {
                     response.status = 404 //Not Found
-                    render message(code: 'evento.eventoNotFound', args:[params.ids])
+                    render message(code: 'eventNotFound', args:[params.ids])
                     return
             }
         } else {
@@ -80,7 +80,7 @@ class EventoReclamacionController {
             }
             if (!evento || !mensajeSMIME) {
                 response.status = 404
-                render message(code: 'evento.eventoNotFound', args:[params.ids])
+                render message(code: 'eventNotFound', args:[params.ids])
                 return false
             }
         }
@@ -109,7 +109,7 @@ class EventoReclamacionController {
 				}
 			}
 			response.status = 404
-			render message(code: 'evento.eventoNotFound', args:[params.ids])
+			render message(code: 'eventNotFound', args:[params.ids])
 			return false
 		}
 		response.status = 400
@@ -123,10 +123,10 @@ class EventoReclamacionController {
             flash.respuesta = eventoReclamacionService.guardarEvento(
 				params.smimeMessageReq, request.getLocale())
         } catch (Exception ex) {
-            log.error (ex.getMessage(), ex)
-            flash.respuesta = new Respuesta(mensaje:ex.getMessage(),
-                codigoEstado:500, tipo: Tipo.ERROR_DE_SISTEMA)
-			forward controller: "error500", action: "procesar"       
+			log.error (ex.getMessage(), ex)
+			response.status = Respuesta.SC_ERROR_EJECUCION
+			render ex.getMessage()
+			return false      
         }
     }
 	
@@ -153,7 +153,7 @@ class EventoReclamacionController {
                 return false
             }
             response.status = 404
-            render message(code: 'evento.eventoNotFound', args:[params.ids])
+            render message(code: 'eventNotFound', args:[params.ids])
             return false
         }
         response.status = 400
@@ -169,7 +169,7 @@ class EventoReclamacionController {
                 eventoReclamacion = EventoReclamacion.get(mensajeJSON.eventoId)
                 if (!eventoReclamacion) {
                     response.status = 404
-                    render message(code: 'evento.eventoNotFound', args:[mensajeJSON.eventoId])
+                    render message(code: 'eventNotFound', args:[mensajeJSON.eventoId])
                     return false
                 }  
             } else {

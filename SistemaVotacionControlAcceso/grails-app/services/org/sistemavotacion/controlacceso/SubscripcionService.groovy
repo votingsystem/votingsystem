@@ -66,7 +66,7 @@ class SubscripcionService {
 				certificado.save();
 			}
 		}
-		return new Respuesta(codigoEstado:200, usuario:usuarioDB, certificadoDB:certificado)
+		return new Respuesta(codigoEstado:Respuesta.SC_OK, usuario:usuarioDB, certificadoDB:certificado)
 	}
         
 	Respuesta comprobarUsuario(SMIMEMessageWrapper smimeMessage, Locale locale) {
@@ -74,10 +74,10 @@ class SubscripcionService {
 		log.debug "comprobarUsuario - ${nif}"
 		if(!nif) {
 			String mensajeError = messageSource.getMessage('susbcripcion.errorDatosUsuario', null, locale)
-			return new Respuesta(codigoEstado:400, mensaje:mensajeError)
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:mensajeError)
 		}
 		def usuario = Usuario.findWhere(nif:nif.toUpperCase())
-		if (usuario) return new Respuesta(codigoEstado:200,usuario:usuario)
+		if (usuario) return new Respuesta(codigoEstado:Respuesta.SC_OK,usuario:usuario)
 		return guardarUsuario(smimeMessage.getFirmante(), locale)
 	}
 	
@@ -86,12 +86,12 @@ class SubscripcionService {
 		log.debug "comprobarDispositivo - nif:${nif} - telefono:${telefono} - email:${email} - deviceId:${deviceId}"
 		if(!nif || !deviceId) {
 			log.debug "Sin datos"
-			return new Respuesta(codigoEstado:400, mensaje:
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:
 				messageSource.getMessage('error.requestWithoutData', null, locale))
 		}
 		String nifValidado = org.sistemavotacion.util.StringUtils.validarNIF(nif)
 		if(!nifValidado) {
-			return new Respuesta(codigoEstado:400, mensaje:
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:
 				messageSource.getMessage('error.errorNif', [nif].toArray(), locale))
 		}
 		Usuario usuario = Usuario.findWhere(nif:nifValidado)
@@ -101,7 +101,7 @@ class SubscripcionService {
 		Dispositivo dispositivo = Dispositivo.findWhere(deviceId:deviceId)
 		if (!dispositivo || (dispositivo.usuario.id != usuario.id)) dispositivo = new Dispositivo(usuario:usuario, telefono:telefono, email:email, 
 			deviceId:deviceId).save()
-		return new Respuesta(codigoEstado:200, usuario:usuario, dispositivo:dispositivo)
+		return new Respuesta(codigoEstado:Respuesta.SC_OK, usuario:usuario, dispositivo:dispositivo)
 	}
     
 	CentroControl comprobarCentroControl(String serverURL) {
@@ -111,7 +111,7 @@ class SubscripcionService {
         if (!centroControl) {
             String urlInfoCentroControl = "${serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLInfoServidor}"
 			Respuesta respuesta = httpService.obtenerInfoActorConIP(urlInfoCentroControl, new CentroControl())
-			if (200 == respuesta.codigoEstado) {
+			if (Respuesta.SC_OK == respuesta.codigoEstado) {
 				centroControl = respuesta.actorConIP
 				centroControl.save()
 			} else return null
@@ -147,23 +147,22 @@ class SubscripcionService {
 			CentroControl actorConIP = CentroControl.findWhere(serverURL:serverURL)
 			if (actorConIP) {
 				tipoMensaje = Tipo.SOLICITUD_ASOCIACION_CON_ACTOR_REPETIDO
-				respuesta = new Respuesta(codigoEstado:400,
+				respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
 					mensaje: messageSource.getMessage('susbcripcion.centroControlYaAsociado', [actorConIP.nombre].toArray(), locale))
 			} else {
 				tipoMensaje = Tipo.SOLICITUD_ASOCIACION
 				def urlInfoCentroControl = "${serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLInfoServidor}"
 				try {
 					respuesta = httpService.obtenerInfoActorConIP(urlInfoCentroControl, new CentroControl())
-					if (200 == respuesta.codigoEstado) {
-						log.debug("codigoEstado 200")
+					if (Respuesta.SC_OK == respuesta.codigoEstado) {
 						actorConIP = respuesta.actorConIP
 						if (Tipo.CENTRO_CONTROL.equals(actorConIP.tipoServidor)) {
 							actorConIP.save()
-							respuesta = new Respuesta(codigoEstado:200,
+							respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK,
 								mensaje: messageSource.getMessage('susbcripcion.centroControlAsociado', [actorConIP.nombre].toArray(), locale))
 						} else {
 							tipoMensaje = Tipo.SOLICITUD_ASOCIACION_CON_ERRORES
-							respuesta = new Respuesta(codigoEstado:400,
+							respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
 								mensaje:message(code: 'susbcripcion.actorNoCentroControl',
 									args:[actorConIP.serverURL]))
 						}
@@ -174,15 +173,14 @@ class SubscripcionService {
 					}
 				} catch (ConnectException ex) {
 					log.error(ex.getMessage(), ex)
-					flash.respuesta = new Respuesta(codigoEstado:400, tipo: Tipo.ERROR_CONEXION_CON_ACTOR,
+					return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, tipo: Tipo.ERROR_CONEXION_CON_ACTOR,
 						mensaje: messageSource.getMessage('error.errorConexionActor',
 							["Centro de Control", serverURL, ex.getMessage()].toArray(), locale))
-					forward controller: "error400", action: "procesar"
 				}
 			}
 		} else {
 			tipoMensaje = Tipo.SOLICITUD_ASOCIACION_CON_ERRORES
-			respuesta = new Respuesta(codigoEstado:400,
+			respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
 				mensaje:messageSource.getMessage('error.PeticionIncorrectaHTML', 
 					["${grailsApplication.config.grails.serverURL}/${params.controller}"].toArray(), locale))
 		}

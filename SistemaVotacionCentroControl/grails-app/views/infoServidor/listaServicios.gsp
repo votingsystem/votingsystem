@@ -21,8 +21,6 @@
 			<g:include controller="anuladorVoto" />
 			<g:include controller="buscador" />
 			<g:include controller="certificado" />
-			<g:include controller="error400" />
-			<g:include controller="error500" />
 			<g:include controller="eventoVotacion" />
 			<g:include controller="subscripcion" />
 			<g:include controller="voto" />

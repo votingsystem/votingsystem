@@ -24,10 +24,13 @@ class EventoFirmaController {
 	
 	def validarPDF() {
 		if (params.long('id')) {
-			EventoFirma evento = EventoFirma.get(params.id)
+			EventoFirma evento = null;
+			Evento.withTransaction{
+				evento = EventoFirma.get(params.id)
+			}			 
 			if(!evento) {
-				response.status = 400
-				render "El evento '${params.id}' no existe"
+				response.status = Respuesta.SC_ERROR_PETICION;
+				render message(code:'eventNotFound', args:["${params.id}"]) 
 				return false
 			}
 			try {
@@ -37,7 +40,7 @@ class EventoFirmaController {
 				if (multipartFile?.getBytes() != null || params.archivoFirmado) {
 					Respuesta respuesta = pdfService.validarFirma(multipartFile.getBytes(),
 						evento, Documento.Estado.MANIFIESTO, request.getLocale())
-					if (200 != respuesta.codigoEstado) {
+					if (Respuesta.SC_OK != respuesta.codigoEstado) {
 						log.debug "Problema en la recepción del archivo - ${respuesta.mensaje}"
 					}
 					response.status = respuesta.codigoEstado
@@ -46,12 +49,12 @@ class EventoFirmaController {
 				}
 			} catch (Exception ex) {
 				log.error (ex.getMessage(), ex)
-				response.status = 400
+				response.status = Respuesta.SC_ERROR_PETICION
 				render(ex.getMessage())
 				return false
 			}
 		}
-		response.status = 400
+		response.status = Respuesta.SC_ERROR_PETICION
 		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false
 	}
@@ -78,9 +81,11 @@ class EventoFirmaController {
 				runAsync {
 					ByteArrayOutputStream bytes = pdfRenderingService.render(
 						template: "/eventoFirma/pdf", model:[evento:evento])
-					evento.pdf = bytes.toByteArray()
-					evento.refresh()
-					evento.save()
+					Evento.withTransaction{
+						evento.pdf = bytes.toByteArray()
+						evento.save()
+						log.debug "Generado PDF de evento ${evento.id}"
+					}
 				}
 				log.debug "Salvado evento ${evento.id}"
 				//render(view:"publicarPDF")
@@ -89,30 +94,40 @@ class EventoFirmaController {
 			}
 		} catch (Exception ex) {
 			log.error (ex.getMessage(), ex)
-			flash.respuesta = new Respuesta(mensaje:ex.getMessage(),
-				codigoEstado:500, tipo: Tipo.ERROR_DE_SISTEMA)
-			forward controller: "error500", action: "procesar"
+			response.status = Respuesta.SC_ERROR_EJECUCION
+			render ex.getMessage()
+			return false 
 		}
 	}
 	
 	def obtenerPDF = {
 		if (params.long('id')) {
-			EventoFirma evento = EventoFirma.get(params.id)
+			EventoFirma evento
+			Evento.withTransaction{
+				evento = EventoFirma.get(params.id)
+			}
 			if(!evento) {
-				render "El evento '${params.id}' no existe"
+				render message(code:'eventNotFound', args:["${params.id}"]) 
 				return false
 			}
 			response.setHeader("Content-disposition", "attachment; filename=manifiesto.pdf")
 			response.contentType = "application/pdf"
-			if( evento.pdf)
+			if(evento.pdf)
 				response.outputStream << evento.pdf // Performing a binary stream copy
 			else {
-				renderPdf(template: "/eventoFirma/pdf", model:[evento:evento])
+				ByteArrayOutputStream bytes = pdfRenderingService.render(
+					template: "/eventoFirma/pdf", model:[evento:evento])
+				Evento.withTransaction{
+					evento.pdf = bytes.toByteArray()
+					evento.save()
+					log.debug "Generado PDF de evento ${evento.id}"
+				}
+				response.outputStream << evento.pdf // Performing a binary stream copy
 			}
 			response.outputStream.flush()
 			return false
 		}
-		response.status = 400
+		response.status = Respuesta.SC_ERROR_PETICION
 		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false
 	}
@@ -121,13 +136,13 @@ class EventoFirmaController {
 		if (params.long('id')) {
 			EventoFirma evento = EventoFirma.get(params.id)
 			if(!evento) {
-				render "El evento '${params.id}' no existe"
+				render message(code:'eventNotFound', args:["${params.id}"]) 
 				return false
 			}
 			render evento.contenido
 			return false
 		}
-		response.status = 400
+		response.status = Respuesta.SC_ERROR_PETICION
 		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false
 	}
@@ -136,7 +151,7 @@ class EventoFirmaController {
 		if (params.long('id')) {
 			EventoFirma evento = EventoFirma.get(params.id)
 			if(!evento) {
-				render "El evento '${params.id}' no existe"
+				render message(code:'eventNotFound', args:["${params.id}"]) 
 				return false
 			}
 			def eventoMap = [id:evento.id, asunto: evento.asunto, contenido:evento.contenido,
@@ -145,7 +160,7 @@ class EventoFirmaController {
 			render eventoMap as JSON
 			return false
 		}
-		response.status = 400
+		response.status = Respuesta.SC_ERROR_PETICION
 		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false
 	}
@@ -160,8 +175,8 @@ class EventoFirmaController {
 				   if (evento) eventoList << evento;
 		   }
 		   if (eventoList.size() == 0) {
-			   response.status = 404 //Not Found
-			   render message(code: 'evento.eventoNotFound', args:[params.ids])
+			   response.status = Respuesta.SC_NOT_FOUND //Not Found
+			   render message(code: 'eventNotFound', args:[params.ids])
 			   return
 		   }
 	   } else {
@@ -204,9 +219,9 @@ class EventoFirmaController {
 				params.smimeMessageReq, request.getLocale())
 		} catch (Exception ex) {
 			log.error (ex.getMessage(), ex)
-			flash.respuesta = new Respuesta(mensaje:ex.getMessage(),
-				codigoEstado:500, tipo: Tipo.ERROR_DE_SISTEMA)
-			forward controller: "error500", action: "procesar"
+			response.status = Respuesta.SC_ERROR_EJECUCION
+			render ex.getMessage()
+			return false 
 		}
 	}
 	
@@ -216,7 +231,7 @@ class EventoFirmaController {
 			if (!params.evento) eventoFirma = EventoFirma.get(params.id)
 			else eventoFirma = params.evento
 			if (eventoFirma) {
-				response.status = 200
+				response.status = Respuesta.SC_OK
 				def estadisticasMap = new HashMap()
 				estadisticasMap.id = eventoFirma.id
 				estadisticasMap.tipo = Tipo.EVENTO_FIRMA.toString()
@@ -232,11 +247,11 @@ class EventoFirmaController {
 				render estadisticasMap as JSON
 				return false
 			}
-			response.status = 404
-			render message(code: 'evento.eventoNotFound', args:[params.ids])
+			response.status = Respuesta.SC_NOT_FOUND
+			render message(code: 'eventNotFound', args:[params.ids])
 			return false
 		}
-		response.status = 400
+		response.status = Respuesta.SC_ERROR_PETICION
 		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false
 	}
@@ -250,12 +265,12 @@ class EventoFirmaController {
 			if (params.long('eventoId')) {
 				eventoFirma = EventoFirma.get(mensajeJSON.eventoId)
 				if (!eventoFirma) {
-					response.status = 404
-					render message(code: 'evento.eventoNotFound', args:[mensajeJSON.eventoId])
+					response.status = Respuesta.SC_NOT_FOUND
+					render message(code: 'eventNotFound', args:[mensajeJSON.eventoId])
 					return false
 				}
 			} else {
-				response.status = 400
+				response.status = Respuesta.SC_ERROR_PETICION
 				render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
 				return false
 			}
@@ -271,9 +286,10 @@ class EventoFirmaController {
 			response.outputStream.flush()
 			return false
 		} else {
-			flash.respuesta = new Respuesta(tipo: Tipo.ERROR_DE_SISTEMA,
-				mensaje:message(code: 'error.SinCopiaRespaldo'),codigoEstado:500)
-			forward controller: "error500", action: "procesar"
+			log.error (message(code: 'error.SinCopiaRespaldo'))
+			response.status = Respuesta.SC_ERROR_EJECUCION
+			render message(code: 'error.SinCopiaRespaldo')
+			return false
 		}
 	}
 

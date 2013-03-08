@@ -49,9 +49,8 @@ class CentroControlFilters {
 				log.debug "----------------- filter - guardar - before ------------------------------------"
 				if (!(request instanceof MultipartHttpServletRequest)) {
 					log.debug "------------- La petición no es instancia de MultipartHttpServletRequest ------------"
-					flash.respuesta = new Respuesta(codigoEstado:400,
-						tipo: Tipo.PETICION_SIN_ARCHIVO)
-					forward controller: "error400", action: "procesar"   
+					response.status = Respuesta.SC_ERROR_PETICION
+					render(Tipo.PETICION_SIN_ARCHIVO.toString())
 					return false
 				}
 				try {
@@ -65,9 +64,8 @@ class CentroControlFilters {
 									new ByteArrayInputStream(multipartFile?.getBytes()), null)
 						} catch (Exception ex) {
 							log.error (ex.getMessage(), ex)
-							flash.respuesta = new Respuesta(mensaje:ex.getMessage(),
-								codigoEstado:500, tipo: Tipo.PETICION_CON_ERRORES)
-							forward controller: "error500", action: "procesar"   
+							response.status = Respuesta.SC_ERROR_EJECUCION
+							render(ex.getMessage())
 							return false
 						}
 						if (smimeMessageReq.isValidSignature()) {
@@ -75,24 +73,22 @@ class CentroControlFilters {
 							params.smimeMessageReq = smimeMessageReq
 							return
 						} else {
-							log.debug "firma erronea"
-							flash.respuesta = new Respuesta(codigoEstado:400,
-								tipo: Tipo.FIRMA_EVENTO_CON_ERRORES)
-							forward controller: "error400", action: "procesar"   
+							log.debug "Error ${Respuesta.SC_ERROR_PETICION} - firma erronea"
+							response.status = Respuesta.SC_ERROR_PETICION
+							render(ex.getMessage()) 
 							return false
 						}
 					} else {
-						log.debug "Peticion sin archivo"
-						flash.respuesta = new Respuesta(codigoEstado:400,
-							tipo: Tipo.PETICION_SIN_ARCHIVO)
-						forward controller: "error400", action: "procesar"   
+						log.debug "Error ${Respuesta.SC_ERROR_PETICION} - Peticion sin archivo"
+						response.status = Respuesta.SC_ERROR_PETICION
+						render(Tipo.PETICION_SIN_ARCHIVO.toString())
 						return false
 					}
 				} catch (Exception ex) {
 					log.error (ex.getMessage(), ex)
-					flash.respuesta = new Respuesta(mensaje:ex.getMessage(),
-					codigoEstado:500, tipo: Tipo.PETICION_CON_ERRORES)
-					forward controller: "error500", action: "procesar"   
+					response.status = Respuesta.SC_ERROR_EJECUCION
+					render(ex.getMessage())
+					return false 
 					return false
 				}
 			}

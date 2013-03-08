@@ -32,8 +32,8 @@ class EventoController {
 				}
 			}
             if (eventoList.size() == 0) {
-                    response.status = 404 //Not Found
-                    render message(code: 'evento.eventoNotFound', args:[params.ids])
+                    response.status = Respuesta.SC_NOT_FOUND
+                    render message(code: 'eventNotFound', args:[params.ids])
                     return
             }
         } else {
@@ -76,9 +76,9 @@ class EventoController {
 				params.smimeMessageReq, request.getLocale())
         } catch (Exception ex) {
             log.error (ex.getMessage(), ex)
-            flash.respuesta = new Respuesta(mensaje:ex.getMessage(),
-                codigoEstado:500, tipo: Tipo.ERROR_DE_SISTEMA)
-    		forward controller: "error500", action: "procesar"        
+			response.status = Respuesta.SC_ERROR_EJECUCION
+			render ex.getMessage()
+			return false       
         }
     }
     
@@ -94,11 +94,11 @@ class EventoController {
 				if (evento instanceof EventoReclamacion) forward(controller:"eventoReclamacion",action:"estadisticas")
 				if (evento instanceof EventoVotacion) forward(controller:"eventoVotacion",action:"estadisticas")
 			}
-			response.status = 404
-			render message(code: 'evento.eventoNotFound', args:[params.id])
+			response.status = Respuesta.SC_NOT_FOUND
+			render message(code: 'eventNotFound', args:[params.id])
 			return false
 		}
-		response.status = 400
+		response.status = Respuesta.SC_ERROR_PETICION
 		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false  
     }
@@ -110,16 +110,19 @@ class EventoController {
                 Evento evento = Evento.get(mensajeJSON.eventoId)
                 if (evento) {
                     params.evento = evento
-                    if (evento instanceof EventoFirma) forward(controller:"eventoFirma",action:"guardarSolicitudCopiaRespaldo")
-                    if (evento instanceof EventoReclamacion) forward(controller:"eventoReclamacion",action:"guardarSolicitudCopiaRespaldo")
-                    if (evento instanceof EventoVotacion) forward(controller:"eventoVotacion",action:"guardarSolicitudCopiaRespaldo")
+                    if (evento instanceof EventoFirma) forward(
+						controller:"eventoFirma",action:"guardarSolicitudCopiaRespaldo")
+                    if (evento instanceof EventoReclamacion) forward(
+						controller:"eventoReclamacion",action:"guardarSolicitudCopiaRespaldo")
+                    if (evento instanceof EventoVotacion) forward(
+						controller:"eventoVotacion",action:"guardarSolicitudCopiaRespaldo")
                     return false
                 }
-                response.status = 404
-                render message(code: 'evento.eventoNotFound', args:[mensajeJSON.eventoId])
+                response.status = Respuesta.SC_NOT_FOUND
+                render message(code: 'eventNotFound', args:[mensajeJSON.eventoId])
                 return false
             }
-            response.status = 400
+            response.status = Respuesta.SC_ERROR_PETICION
             render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
             return false
     }
@@ -131,8 +134,8 @@ class EventoController {
 				evento = Evento.get(params.id)
 			}
             if (!evento || !(evento instanceof EventoVotacion)) {
-                response.status = 404
-                render message(code: 'evento.eventoNotFound', args:[params.id])
+                response.status = Respuesta.SC_NOT_FOUND
+                render message(code: 'eventNotFound', args:[params.id])
                 return false
             }
             def informacionVotosMap = new HashMap()
@@ -182,20 +185,24 @@ class EventoController {
 				def votoMap = [id:voto.id, opcionSeleccionadaId:voto.opcionDeEvento.id,
 					estado:voto.estado.toString(),
 					hashCertificadoVotoBase64:voto.certificado.hashCertificadoVotoBase64,
-					certificadoURL:"${grailsApplication.config.grails.serverURL}/certificado/certificadoDeVoto?hashCertificadoVotoHex=${hashCertificadoVotoHex}",
-					votoURL:"${grailsApplication.config.grails.serverURL}/mensajeSMIME/obtener?id=${voto.mensajeSMIME.id}"]
+					certificadoURL:"${grailsApplication.config.grails.serverURL}/certificado" + 
+						"/certificadoDeVoto?hashCertificadoVotoHex=${hashCertificadoVotoHex}",
+					votoURL:"${grailsApplication.config.grails.serverURL}/mensajeSMIME" + 
+						"/obtener?id=${voto.mensajeSMIME.id}"]
 				if(Voto.Estado.ANULADO.equals(voto.estado)) {
 					AnuladorVoto anuladorVoto = AnuladorVoto.findWhere(voto:voto)
-					votoMap.anuladorURL="${grailsApplication.config.grails.serverURL}/mensajeSMIME/obtener?id=${anuladorVoto?.mensajeSMIME?.id}"
+					votoMap.anuladorURL="${grailsApplication.config.grails.serverURL}" + 
+						"/mensajeSMIME/obtener?id=${anuladorVoto?.mensajeSMIME?.id}"
 				}
 				informacionVotosMap.votos.add(votoMap)
 			}
-            response.status = 200
+            response.status = Respuesta.SC_OK
             response.setContentType("application/json")
             render informacionVotosMap as JSON
         }
-        response.status = 400
-        render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
+        response.status = Respuesta.SC_ERROR_PETICION
+        render message(code: 'error.PeticionIncorrectaHTML', 
+			args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
         return false  
     }
     
@@ -203,8 +210,8 @@ class EventoController {
         if (params.long('id')) {
             EventoFirma evento = EventoFirma.get(params.id)
             if (!evento) {
-                response.status = 404
-                render message(code: 'evento.eventoNotFound', args:[params.id])
+                response.status = Respuesta.SC_NOT_FOUND
+                render message(code: 'eventNotFound', args:[params.id])
                 return false
             }
             def informacionFirmasMap = new HashMap()
@@ -215,20 +222,23 @@ class EventoController {
 			}
             informacionFirmasMap.numeroFirmas = firmas.size()
             informacionFirmasMap.asuntoEvento = evento.asunto
-            informacionFirmasMap.eventoURL = "${grailsApplication.config.grails.serverURL}/evento/obtener?id=${evento.id}"
+            informacionFirmasMap.eventoURL = 
+				"${grailsApplication.config.grails.serverURL}/evento/obtener?id=${evento.id}"
             informacionFirmasMap.firmas = []
             firmas.collect { firma ->
                 def firmaMap = [id:firma.id, fechaCreacion:firma.dateCreated,
                 usuario:firma.usuario.nif,
-                firmaURL:"${grailsApplication.config.grails.serverURL}/documento/obtenerFirmaManifiesto?id=${firma.id}"]
+                firmaURL:"${grailsApplication.config.grails.serverURL}/documento" + 
+					"/obtenerFirmaManifiesto?id=${firma.id}"]
                 informacionFirmasMap.firmas.add(firmaMap)
             }
-            response.status = 200
+            response.status = Respuesta.SC_OK
             response.setContentType("application/json")
             render informacionFirmasMap as JSON
         }
-        response.status = 400
-        render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
+        response.status = Respuesta.SC_ERROR_PETICION
+        render message(code: 'error.PeticionIncorrectaHTML', 
+			args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
         return false  
     } 
     
@@ -236,8 +246,8 @@ class EventoController {
         if (params.long('id')) {
             EventoReclamacion evento = EventoReclamacion.get(params.id)
             if (!evento) {
-                response.status = 404
-                render message(code: 'evento.eventoNotFound', args:[params.id])
+                response.status = Respuesta.SC_NOT_FOUND
+                render message(code: 'eventNotFound', args:[params.id])
                 return false
             }
             def informacionReclamacionMap = new HashMap()
@@ -245,16 +255,20 @@ class EventoController {
 			Firma.withTransaction {
 				firmas = Firma.findAllWhere(evento:evento, tipo:Tipo.FIRMA_EVENTO_RECLAMACION)
 			}
-			log.debug("count: " + Firma.findAllWhere(evento:evento, tipo:Tipo.FIRMA_EVENTO_RECLAMACION).size())
+			log.debug("count: " + Firma.findAllWhere(
+				evento:evento, tipo:Tipo.FIRMA_EVENTO_RECLAMACION).size())
             informacionReclamacionMap.numeroFirmas = firmas.size()
             informacionReclamacionMap.asuntoEvento = evento.asunto
-            informacionReclamacionMap.eventoURL = "${grailsApplication.config.grails.serverURL}/evento/obtener?id=${evento.id}"
+            informacionReclamacionMap.eventoURL = 
+				"${grailsApplication.config.grails.serverURL}/evento/obtener?id=${evento.id}"
             informacionReclamacionMap.firmas = []
             firmas.collect { firma ->
                 def firmaMap = [id:firma.id, fechaCreacion:firma.dateCreated,
                 usuario:firma.usuario.nif,
-                firmaReclamacionURL:"${grailsApplication.config.grails.serverURL}/mensajeSMIME/obtener?id=${firma.mensajeSMIME.id}",
-                reciboFirmaReclamacionURL:"${grailsApplication.config.grails.serverURL}/mensajeSMIME/obtenerReciboReclamacion?id=${firma.mensajeSMIME?.id}"]
+                firmaReclamacionURL:"${grailsApplication.config.grails.serverURL}/mensajeSMIME" + 
+					"/obtener?id=${firma.mensajeSMIME.id}",
+                reciboFirmaReclamacionURL:"${grailsApplication.config.grails.serverURL}/mensajeSMIME" +
+					"/obtenerReciboReclamacion?id=${firma.mensajeSMIME?.id}"]
                 def valoresCampos = ValorCampoDeEvento.findAllWhere(firma:firma)
                 firmaMap.campos = []
                 valoresCampos.collect { valorCampo ->
@@ -262,12 +276,13 @@ class EventoController {
                 }
                 informacionReclamacionMap.firmas.add(firmaMap)
             }
-            response.status = 200
+            response.status = Respuesta.SC_OK
             response.setContentType("application/json")
             render informacionReclamacionMap as JSON
         }
-        response.status = 400
-        render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
+        response.status = Respuesta.SC_ERROR_PETICION
+        render message(code: 'error.PeticionIncorrectaHTML', 
+			args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
         return false  
     }
   
@@ -282,8 +297,9 @@ class EventoController {
 		   render respuesta.mensaje;
 		   return false
 	   }
-	   response.status = 400;
-	   render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"]);
+	   response.status = Respuesta.SC_ERROR_PETICION;
+	   render message(code: 'error.PeticionIncorrectaHTML', 
+		   args:["${grailsApplication.config.grails.serverURL}/${params.controller}"]);
 	   return false;
    }
 
@@ -295,8 +311,8 @@ class EventoController {
 		   }
 	   }
 	   if(!evento) {
-		   response.status = 404 //Not Found
-		   render message(code: 'evento.eventoNotFound', args:[params.id])
+		   response.status = Respuesta.SC_NOT_FOUND
+		   render message(code: 'eventNotFound', args:[params.id])
 		   return
 	   }
 	   Respuesta respuesta = eventoService.comprobarFechasEvento(evento, request.getLocale())

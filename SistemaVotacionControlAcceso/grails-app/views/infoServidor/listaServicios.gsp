@@ -25,8 +25,6 @@
 			<g:include controller="anuladorVoto" />
 			<g:include controller="buscador" />
 			<g:include controller="documento" />
-			<g:include controller="error400" />
-			<g:include controller="error500" />
 			<g:include controller="evento" />
 			<g:include controller="eventoReclamacion" />
 			<g:include controller="eventoVotacion" />

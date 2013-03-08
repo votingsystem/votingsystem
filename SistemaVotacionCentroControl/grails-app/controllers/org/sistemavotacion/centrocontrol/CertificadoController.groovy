@@ -15,7 +15,7 @@ class CertificadoController {
 
 	def firmaService
 
-	def index = {}
+	def index = { }
 
 	def cadenaCertificacion = {
 		try {
@@ -24,9 +24,9 @@ class CertificadoController {
 			return
 		} catch (Exception ex) {
 			log.error (ex.getMessage(), ex)
-			flash.respuesta = new Respuesta(mensaje:ex.getMessage(),
-				codigoEstado:500, tipo: Tipo.ERROR_DE_SISTEMA)
-			forward controller: "error500", action: "procesar"
+			response.status = Respuesta.SC_ERROR_EJECUCION
+			render ex.getMessage()
+			return false 
 		}
 	}
 	

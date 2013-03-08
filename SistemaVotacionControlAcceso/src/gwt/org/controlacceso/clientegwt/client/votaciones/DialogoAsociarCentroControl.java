@@ -3,6 +3,7 @@ package org.controlacceso.clientegwt.client.votaciones;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.controlacceso.clientegwt.client.Constantes;
+import org.controlacceso.clientegwt.client.dialogo.DialogoResultadoFirma;
 import org.controlacceso.clientegwt.client.evento.BusEventos;
 import org.controlacceso.clientegwt.client.evento.EventoGWTMensajeClienteFirma;
 import org.controlacceso.clientegwt.client.modelo.InfoServidorJso;
@@ -10,6 +11,7 @@ import org.controlacceso.clientegwt.client.modelo.MensajeClienteFirmaJso;
 import org.controlacceso.clientegwt.client.modelo.Tipo;
 import org.controlacceso.clientegwt.client.util.Browser;
 import org.controlacceso.clientegwt.client.util.ServerPaths;
+import org.sistemavotacion.controlacceso.modelo.Respuesta;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -162,10 +164,14 @@ public class DialogoAsociarCentroControl implements EventoGWTMensajeClienteFirma
 			urlCentroControlTextBox.setEnabled(true);
 	    	comprobarConexion.setEnabled(true);
 	    	asociarButton.setEnabled(true);
-			if(200 == mensaje.getCodigoEstado()) {
+			if(Respuesta.SC_OK == mensaje.getCodigoEstado()) {
 				dialogBox.hide();
-				Window.alert(Constantes.INSTANCIA.asociacionCentroControlOK());
-			} else Window.alert(Constantes.INSTANCIA.asociacionCentroControlError());
+				DialogoResultadoFirma dialogo = new DialogoResultadoFirma();
+				dialogo.show(Constantes.INSTANCIA.asociacionCentroControlOK());
+			} else {
+				DialogoResultadoFirma dialogo = new DialogoResultadoFirma();
+				dialogo.show(Constantes.INSTANCIA.asociacionCentroControlError());
+			}
 		}
 		
 	}

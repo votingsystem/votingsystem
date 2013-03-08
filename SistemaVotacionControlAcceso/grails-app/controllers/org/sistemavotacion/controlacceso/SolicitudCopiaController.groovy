@@ -16,12 +16,12 @@ class SolicitudCopiaController {
 		if (params.long('id')) {
 			SolicitudCopia solicitud = SolicitudCopia.get(params.id)
 			if(!solicitud) {
-				response.status = 400
+				response.status = Respuesta.SC_ERROR_PETICION
 				render message(code: 'solicitudCopia.noEncontrada', args:[params.id]) 
 				return false
 			}
 			if(!solicitud.filePath) {
-				response.status = 400
+				response.status = Respuesta.SC_ERROR_PETICION
 				render "La solicitud con id '${params.id}' ya ha sido descargada, solicite otra copia"
 				return false
 			}
@@ -39,12 +39,13 @@ class SolicitudCopiaController {
 				copiaRespaldo.delete()
 				return false
 			} else {
-				flash.respuesta = new Respuesta(tipo: Tipo.ERROR_DE_SISTEMA,
-					mensaje:message(code: 'error.SinCopiaRespaldo'),codigoEstado:500)
-				forward controller: "error500", action: "procesar"
+				log.error (message(code: 'error.SinCopiaRespaldo'))
+				response.status = Respuesta.SC_ERROR_EJECUCION
+				render message(code: 'error.SinCopiaRespaldo')
+				return false
 			}
 		}
-		response.status = 400
+		response.status = Respuesta.SC_ERROR_PETICION
 		render message(code: 'error.PeticionIncorrectaHTML', 
 			args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false
@@ -58,7 +59,7 @@ class SolicitudCopiaController {
 			if (multipartFile?.getBytes() != null || params.archivoFirmado) {
 				Respuesta respuesta = pdfService.validarSolicitudCopia(
 					multipartFile.getBytes(), request.getLocale())
-				if (200 != respuesta.codigoEstado) {
+				if (Respuesta.SC_OK != respuesta.codigoEstado) {
 					log.debug "Problemas procesando solicitud de copia de seguridad - ${respuesta.mensaje}"
 				}
 				response.status = respuesta.codigoEstado
@@ -67,7 +68,7 @@ class SolicitudCopiaController {
 			}
 		} catch (Exception ex) {
 			log.error (ex.getMessage(), ex)
-			response.status = 400
+			response.status = Respuesta.SC_ERROR_PETICION
 			render(ex.getMessage())
 			return false
 		}
@@ -82,7 +83,7 @@ class SolicitudCopiaController {
 				if(solicitud) solicitudPDF = solicitud.documento.pdf
 			}
 			if(!solicitud) {
-				response.status = 400
+				response.status = Respuesta.SC_ERROR_PETICION
 				render message(code: 'solicitudCopia.noEncontrada', args:[params.id]) 
 				return false
 			}
@@ -93,7 +94,7 @@ class SolicitudCopiaController {
 			response.outputStream.flush()
 			return false
 		}
-		response.status = 400
+		response.status = Respuesta.SC_ERROR_PETICION
 		render message(code: 'error.PeticionIncorrectaHTML', 
 			args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false

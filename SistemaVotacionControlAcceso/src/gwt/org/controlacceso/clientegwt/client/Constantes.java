@@ -41,6 +41,8 @@ public interface Constantes extends Messages{
     
     String confirmarEleccionLabel();
     
+    String clienteNoAndroid();
+    
     String tipoCampoLabelOpciones();
     String tipoCampoLabelCamposReclamacion();
     

@@ -25,15 +25,15 @@ class CertificadoController {
 		try {
 			File cadenaCertificacion = grailsApplication.mainContext.getResource(
 				grailsApplication.config.SistemaVotacion.rutaCadenaCertificacion).getFile();
-			response.status = 200
+			response.status = Respuesta.SC_OK
 			response.outputStream << cadenaCertificacion.getBytes() // Performing a binary stream copy
 			response.outputStream.flush()
-			return
+			return false
 		} catch (Exception ex) {
 			log.error (ex.getMessage(), ex)
-			flash.respuesta = new Respuesta(mensaje:ex.getMessage(),
-				codigoEstado:500, tipo: Tipo.ERROR_DE_SISTEMA)
-			forward controller: "error500", action: "procesar"
+			response.status = Respuesta.SC_ERROR_EJECUCION
+			render ex.getMessage()
+			return false
 		}
 	}
 
@@ -49,7 +49,7 @@ class CertificadoController {
 					hashCertificadoVotoBase64)
 			}
 			if (certificado) {
-				response.status = 200
+				response.status = Respuesta.SC_OK
 				ByteArrayInputStream bais = new ByteArrayInputStream(certificado.contenido)
 				X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
 				byte[] pemCert = CertUtil.fromX509CertToPEM (certX509)
@@ -59,12 +59,12 @@ class CertificadoController {
 				response.outputStream.flush()
 				return false
 			}
-			response.status = 404
+			response.status = Respuesta.SC_NOT_FOUND
 			render message(code: 'certificado.certificadoHexNotFound',
 				args:[params.hashCertificadoVotoHex])
 			return false
 		}
-		response.status = 400
+		response.status = Respuesta.SC_ERROR_PETICION
 		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false
 	}
@@ -74,7 +74,7 @@ class CertificadoController {
 		if (params.long('usuarioId')) {
 			Usuario usuario = Usuario.get(params.long('usuarioId'))
 			if(!usuario) {
-				response.status = 400
+				response.status = Respuesta.SC_ERROR_PETICION
 				render message(code: 'error.UsuarioNoEncontrado', args:[params.usuarioId])
 				return false
 			}
@@ -85,7 +85,7 @@ class CertificadoController {
 			}
 			log.debug("certificado: ${certificado.id}")
 			if (certificado) {
-				response.status = 200
+				response.status = Respuesta.SC_OK
 				ByteArrayInputStream bais = new ByteArrayInputStream(certificado.contenido)
 				X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
 				byte[] pemCert = CertUtil.fromX509CertToPEM (certX509)
@@ -95,12 +95,12 @@ class CertificadoController {
 				response.outputStream.flush()
 				return false
 			}
-			response.status = 404
+			response.status = Respuesta.SC_NOT_FOUND
 			render message(code: 'error.UsuarioSinCertificado',
 				args:[params.usuarioId])
 			return false
 		}
-		response.status = 400
+		response.status = Respuesta.SC_ERROR_PETICION
 		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false
 	}
@@ -118,7 +118,7 @@ class CertificadoController {
 					certificadoCA = Certificado.findWhere(
 						eventoVotacion:eventoVotacion, tipo:Certificado.Tipo.RAIZ_VOTOS)
 				}
-				response.status = 200
+				response.status = Respuesta.SC_OK
 				ByteArrayInputStream bais = new ByteArrayInputStream(certificadoCA.contenido)
 				X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
 				byte[] pemCert = CertUtil.fromX509CertToPEM (certX509)
@@ -128,11 +128,11 @@ class CertificadoController {
 				response.outputStream.flush()
 				return false
 			}
-			response.status = 404
-			render message(code: 'evento.eventoNotFound', args:[params.idEvento])
+			response.status = Respuesta.SC_NOT_FOUND
+			render message(code: 'eventNotFound', args:[params.idEvento])
 			return false
 		}
-		response.status = 400
+		response.status = Respuesta.SC_ERROR_PETICION
 		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false
 	}

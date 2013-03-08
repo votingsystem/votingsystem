@@ -10,6 +10,7 @@ import org.controlacceso.clientegwt.client.PuntoEntrada;
 import org.controlacceso.clientegwt.client.PuntoEntradaEditor;
 import org.controlacceso.clientegwt.client.Recursos;
 import org.controlacceso.clientegwt.client.dialogo.DialogoOperacionEnProgreso;
+import org.controlacceso.clientegwt.client.dialogo.DialogoResultadoFirma;
 import org.controlacceso.clientegwt.client.evento.BusEventos;
 import org.controlacceso.clientegwt.client.evento.EventoGWTMensajeAplicacion;
 import org.controlacceso.clientegwt.client.evento.EventoGWTMensajeClienteFirma;
@@ -321,7 +322,8 @@ public class PanelPublicacionVotacion extends Composite implements
 			case PUBLICACION_VOTACION_SMIME:
 				dialogoProgreso.hide();
 				if(MensajeClienteFirmaJso.SC_OK == mensaje.getCodigoEstado()) {
-					Window.alert(Constantes.INSTANCIA.publicacionVotacionOK());
+					DialogoResultadoFirma dialogo = new DialogoResultadoFirma();
+					dialogo.show(Constantes.INSTANCIA.publicacionVotacionOK());
 					History.newItem(HistoryToken.VOTACIONES.toString());
 				} else if (MensajeClienteFirmaJso.SC_CANCELADO== mensaje.getCodigoEstado()) {
 					setWidgetsStatePublicando(false);

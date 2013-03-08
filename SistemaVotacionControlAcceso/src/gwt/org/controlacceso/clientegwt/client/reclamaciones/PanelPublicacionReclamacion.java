@@ -9,6 +9,7 @@ import org.controlacceso.clientegwt.client.PuntoEntradaEditor;
 import org.controlacceso.clientegwt.client.dialogo.ConfirmacionListener;
 import org.controlacceso.clientegwt.client.dialogo.DialogoConfirmacion;
 import org.controlacceso.clientegwt.client.dialogo.DialogoOperacionEnProgreso;
+import org.controlacceso.clientegwt.client.dialogo.DialogoResultadoFirma;
 import org.controlacceso.clientegwt.client.evento.BusEventos;
 import org.controlacceso.clientegwt.client.evento.EventoGWTMensajeClienteFirma;
 import org.controlacceso.clientegwt.client.modelo.CampoDeEventoJso;
@@ -267,7 +268,8 @@ public class PanelPublicacionReclamacion extends Composite
 			case PUBLICACION_RECLAMACION_SMIME:
 				setWidgetsStatePublicando(false);
 				if(MensajeClienteFirmaJso.SC_OK == mensaje.getCodigoEstado()) {
-					Window.alert(Constantes.INSTANCIA.publicacionReclamacionOK());
+					DialogoResultadoFirma dialogo = new DialogoResultadoFirma();
+					dialogo.show(Constantes.INSTANCIA.publicacionReclamacionOK());
 			    	History.newItem(HistoryToken.RECLAMACIONES.toString());
 				} else if (MensajeClienteFirmaJso.SC_CANCELADO== mensaje.getCodigoEstado()) {
 				} else {

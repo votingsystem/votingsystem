@@ -125,7 +125,7 @@ class SolicitudAccesoController {
 			}
 			if(!evento) {
 				response.status = Respuesta.SC_NOT_FOUND
-				render message(code: 'evento.eventoNotFound', args:[params.eventoId])
+				render message(code: 'eventNotFound', args:[params.eventoId])
 				return
 			}
 			Usuario usuario
