@@ -1,29 +1,106 @@
-<u><h3>Certificados</h3></u>
+
+<u><h3> Servicio de Certificados </h3></u>
+
+<p> Servicios relacionados con los certificados manejados por la aplicación </p>
+
+
+<h4>URLs de servicio</h4>
 <div>
-  	<p>Claves públicas de certificados empleados por la aplicación.</p>
-  	<h3>Métodos soportados</h3>
-    <p>- <u>GET</u> - <a href="${grailsApplication.config.grails.serverURL}/certificado/cadenaCertificacion">/certificado/cadenaCertificacion</a><br/>
-      <b>Respuesta:</b><br/>
-         La cadena de certificación del <b>certificado</b> que el servidor emplea para firmar documentos.
-    </p>
-    <p>- <u>GET</u> - <a href="${grailsApplication.config.grails.serverURL}/certificado/raizDNIe">/certificado/raizDNIe</a><br/>
-      <b>Respuesta:</b><br/>
-         La clave pública del certificado raíz del <b>DNI español</b>.
-    </p>    
-    <p>- <u>GET</u> - <a href="${grailsApplication.config.grails.serverURL}/certificado/certificadoDeVoto">/certificado/certificadoDeVoto</a><br/>
-      <b>Parámetros:</b><br/>
-      - <u>hashCertificadoVotoHex</u>: Hash en hexadecimal del 
-      <a href="https://github.com/jgzornoza/SistemaVotacionClientePublicacion/wiki/Certificado-de-voto">Certificado de Voto</a>.<br/>
-      <b>Respuesta:</b><br/>
-         La clave pública del <a href="https://github.com/jgzornoza/SistemaVotacionClientePublicacion/wiki/Certificado-de-voto">Certificado de Voto</a>.
-    </p>     
-    <p>- <u>GET</u> - <a href="${grailsApplication.config.grails.serverURL}/certificado/certificadoCA_DeEvento">/certificado/certificadoCA_DeEvento</a><br/>
-      <b>Parámetros:</b><br/>
-      - <u>idEvento</u>: Identificador del evento en la base de datos del <b>Centro de Control</b>.<br/>
-      <b>Respuesta:</b><br/>
-         La clave pública del certificado usado como certificado raíz en el evento</a>.
-    </p>  
-	<HR>
+
+<p>
+- <u>GET</u> - 
+<a href="http://192.168.1.5:8080/SistemaVotacionCentroControl/certificado/index">/certificado/index</a><br/>  	
+
+</p>
+	
+</p>
+
+
+
+<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/certificado'.</p>
+
+<HR>
+
+<p>
+- <u>GET</u> - 
+<a href="http://192.168.1.5:8080/SistemaVotacionCentroControl/certificado/certificadoUsuario">/certificado/certificadoUsuario</a><br/>  	
+Servicio de consulta de certificados de usuario. <br/>
+</p>
+	
+	<p><b>Parámetros:</b><br/>
+
+		
+		- <u>usuarioId</u>:  Obligatorio. El identificador en la base de datos del usuario.<br/>
+		
+</p>
+	
+</p>
+
+
+
+<p><b>Respuesta:</b><br/>El certificado en formato PEM.</p>
+
+<HR>
+
+<p>
+- <u>GET</u> - 
+<a href="http://192.168.1.5:8080/SistemaVotacionCentroControl/certificado/certificadoCA_DeEvento">/certificado/certificadoCA_DeEvento</a><br/>  	
+Servicio de consulta de los certificados emisores de certificados de voto para una votación. <br/>
+</p>
+	
+	<p><b>Parámetros:</b><br/>
+
+		
+		- <u>idEvento</u>:  el identificador de la votación que se desea consultar.<br/>
+		
+		- <u>controlAccesoId</u>:  el identificador en la base de datos del control de acceso en el 		  que se publicó la votación.<br/>
+		
+</p>
+	
+</p>
+
+
+
+<p><b>Respuesta:</b><br/>Devuelve la cadena de certificación, en formato PEM, con la que se generan los 			certificados de los votos.</p>
+
+<HR>
+
+<p>
+- <u>GET</u> - 
+<a href="http://192.168.1.5:8080/SistemaVotacionCentroControl/certificado/cadenaCertificacion">/certificado/cadenaCertificacion</a><br/>  	
+
+</p>
+	
+</p>
+
+
+
+<p><b>Respuesta:</b><br/>La cadena de certificación del servidor</p>
+
+<HR>
+
+<p>
+- <u>GET</u> - 
+<a href="http://192.168.1.5:8080/SistemaVotacionCentroControl/certificado/certificadoDeVoto">/certificado/certificadoDeVoto</a><br/>  	
+Servicio de consulta de certificados de voto. <br/>
+</p>
+	
+	<p><b>Parámetros:</b><br/>
+
+		
+		- <u>hashCertificadoVotoHex</u>:  Obligatorio. Hash en hexadecimal asociado al          certificado de voto que se desea consultar.<br/>
+		
+</p>
+	
+</p>
+
+
+
+<p><b>Respuesta:</b><br/>El certificado en formato PEM.</p>
+
+<HR>
+
+
 </div>
 
 

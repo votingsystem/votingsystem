@@ -8,6 +8,9 @@ import org.springframework.context.ApplicationContext;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.security.cert.X509Certificate;
 /**
+* @infoController Servicio de Certificados
+* @descController Servicios relacionados con los certificados manejados por la aplicación
+* 
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 * */
@@ -15,9 +18,17 @@ class CertificadoController {
 
 	def firmaService
 
-	def index = { }
+	/**
+	 * @httpMethod GET
+	 * @return Información sobre los servicios que tienen como url base '/certificado'.
+	 */
+	def index () { }
 
-	def cadenaCertificacion = {
+	/**
+	 * @httpMethod GET
+	 * @return La cadena de certificación del servidor
+	 */
+	def cadenaCertificacion () {
 		try {
 			response.outputStream << firmaService.getCadenaCertificacion().getBytes()
 			response.outputStream.flush()
@@ -30,7 +41,15 @@ class CertificadoController {
 		}
 	}
 	
-	def certificadoDeVoto = {
+	/**
+	 * Servicio de consulta de certificados de voto.
+	 *
+	 * @param	hashCertificadoVotoHex Obligatorio. Hash en hexadecimal asociado al
+	 *          certificado de voto que se desea consultar.
+	 * @httpMethod GET
+	 * @return El certificado en formato PEM.
+	 */
+	def certificadoDeVoto () {
 		if (params.hashCertificadoVotoHex) {
 			HexBinaryAdapter hexConverter = new HexBinaryAdapter();
 			String hashCertificadoVotoBase64 = new String(
@@ -42,7 +61,7 @@ class CertificadoController {
 					hashCertificadoVotoBase64)
 			}
 			if (certificado) {
-				response.status = 200
+				response.status = Respuesta.SC_OK
 				ByteArrayInputStream bais = new ByteArrayInputStream(certificado.contenido)
 				X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
 				byte[] pemCert = CertUtil.fromX509CertToPEM (certX509)
@@ -52,22 +71,30 @@ class CertificadoController {
 				response.outputStream.flush()
 				return false
 			}
-			response.status = 404
+			response.status = Respuesta.SC_NOT_FOUND
 			render message(code: 'certificado.certificadoHexNotFound',
 				args:[params.hashCertificadoVotoHex])
 			return false
 		}
-		response.status = 400
-		render message(code: 'error.PeticionIncorrecta')
+		response.status = Respuesta.SC_ERROR_PETICION
+		render message(code: 'error.PeticionIncorrectaHTML', args:
+			["${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false
 	}
 	
-	def certificadoUsuario = {
+	/**
+	 * Servicio de consulta de certificados de usuario.
+	 *
+	 * @param	usuarioId Obligatorio. El identificador en la base de datos del usuario.
+	 * @httpMethod GET
+	 * @return El certificado en formato PEM.
+	 */
+	def certificadoUsuario () {
 		def usuarioId
 		if (params.int('usuarioId')) {
 			Usuario usuario = Usuario.get(params.int('usuarioId'))
 			if(!usuario) {
-				response.status = 400
+				response.status = Respuesta.SC_ERROR_PETICION
 				render message(code: 'error.UsuarioNoEncontrado', args:[params.usuarioId])
 				return false
 			}
@@ -77,7 +104,7 @@ class CertificadoController {
 					estado:Certificado.Estado.OK)
 			}
 			if (certificado) {
-				response.status = 200
+				response.status = Respuesta.SC_OK
 				ByteArrayInputStream bais = new ByteArrayInputStream(certificado.contenido)
 				X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
 				byte[] pemCert = CertUtil.fromX509CertToPEM (certX509)
@@ -87,22 +114,34 @@ class CertificadoController {
 				response.outputStream.flush()
 				return false
 			}
-			response.status = 404
+			response.status = Respuesta.SC_NOT_FOUND
 			render message(code: 'error.UsuarioSinCertificado',
 				args:[params.usuarioId])
 			return false
 		}
-		response.status = 400
-		render message(code: 'error.PeticionIncorrecta')
+		response.status = Respuesta.SC_ERROR_PETICION
+		render message(code: 'error.PeticionIncorrectaHTML', args:
+			["${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false
 	}
 	
-	def certificadoCA_DeEvento = {
+	/**
+	 * Servicio de consulta de los certificados emisores de certificados
+	 * de voto para una votación.
+	 * 
+	 * @httpMethod GET
+	 * @param idEvento el identificador de la votación que se desea consultar.
+	 * @param controlAccesoId el identificador en la base de datos del control de acceso en el 
+	 * 		  que se publicó la votación.
+	 * @return Devuelve la cadena de certificación, en formato PEM, con la que se generan los 
+	 * 			certificados de los votos.
+	 */
+	def certificadoCA_DeEvento () {
 		if (params.long('idEvento') && params.long('controlAccesoId')){
 			log.debug "certificadoCA_DeEvento - idEvento: '${params.idEvento}' - controlAccesoId: '${params.controlAccesoId}'"
 			ControlAcceso controlAcceso = ControlAcceso.get(params.controlAccesoId)
 			if(!controlAcceso) {
-				response.status = 404
+				response.status = Respuesta.SC_NOT_FOUND
 				render message(code: 'controlAccesoNotFound', args:[params.controlAccesoId])
 				return false 
 			}
@@ -111,7 +150,7 @@ class CertificadoController {
 				eventoVotacion = EventoVotacion.get(params.idEvento)
 			}
 			if(!eventoVotacion) {
-				response.status = 404
+				response.status = Respuesta.SC_NOT_FOUND
 				render  message(code: 'eventoVotacion.eventoNotFound', args:[params.idEvento])
 				return false
 			}
@@ -122,7 +161,7 @@ class CertificadoController {
 						actorConIP:controlAcceso, esRaiz:true)
 				}
 				if(certificadoCA) {
-					response.status = 200
+					response.status = Respuesta.SC_OK
 					ByteArrayInputStream bais = new ByteArrayInputStream(certificadoCA.contenido)
 					X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
 					byte[] pemCert = CertUtil.fromX509CertToPEM (certX509)
@@ -134,7 +173,7 @@ class CertificadoController {
 				}
 			}
 		}
-		response.status = 400
+		response.status = Respuesta.SC_ERROR_PETICION
 		render (view:"index")
 		return false
 	}

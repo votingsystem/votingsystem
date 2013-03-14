@@ -10,18 +10,12 @@
     <body>
    	    
    	    <div class="container">
-    
-	    <div class="navbar">   
-			<div class="navbar-inner">
-			    <div class="container">
-			 		<ul class="nav">
-						<li class="active"><a href="informacion">${message(code: 'infoLabel', null)}</a></li>
-						<li><a href="listaServicios">${message(code: 'servicesListLabel', null)}</a></li>
-						<li><a href="datosAplicacion">${message(code: 'appDataLabel', null)}</a></li>
-					</ul>
-				</div>
-			</div>
-		</div>
+   	    
+	   <ul class="nav nav-tabs">
+			<li class="active"><a href="informacion">${message(code: 'infoLabel', null)}</a></li>
+			<li><a href="listaServicios">${message(code: 'servicesListLabel', null)}</a></li>
+			<li><a href="datosAplicacion">${message(code: 'appDataLabel', null)}</a></li>
+		</ul>
 		
 		<div id="content" class="content" role="main">
            <div class="mainLinkContainer">

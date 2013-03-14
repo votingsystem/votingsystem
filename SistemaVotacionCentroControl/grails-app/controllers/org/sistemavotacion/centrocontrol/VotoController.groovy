@@ -10,14 +10,21 @@ import javax.mail.internet.MimeMessage
 import org.sistemavotacion.centrocontrol.modelo.*
 import grails.converters.JSON
 /**
-* @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
-* */
+ * @infoController Servicio de Votos
+ * @descController Servicio que procesa los votos recibidos.
+ * 
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ * */
 class VotoController {
 
     def votoService
     def httpService
 	
+	/**
+	 * @httpMethod GET
+	 * @return Información sobre los servicios que tienen como url base '/voto'.
+	 */
 	def index = { }
 	
 	/*
@@ -69,6 +76,15 @@ class VotoController {
             return false
         }
     }*/
+	
+	/**
+	 * Servicio que recoge los votos enviados por los usuarios.
+	 *
+	 * @httpMethod POST
+	 * @param archivoFirmado	Obligatorio. El voto firmado por el 
+	 *        <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Certificado-de-voto">certificado de Voto.</a>
+	 * @return  <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Recibo-de-Voto">El recibo del voto.</a>  
+	 */
 	def guardarAdjuntandoValidacion = {
 		params.smimeMessageReq.initVoto()
 		Respuesta respuesta = votoService.validarFirmaUsuario(
@@ -106,6 +122,13 @@ class VotoController {
 		}
 	}
 	
+	/**
+	 * Servicio que devuelve la información de un voto a partir del  
+	 * hash asociado al mismo
+	 * @httpMethod GET
+	 * @param hashCertificadoVotoHex	Obligatorio. Hash en hexadecimal asociado al voto. 
+	 * @return La información del voto solicitado en formato JSON.
+	 */
 	def obtener() {
 		if (params.hashCertificadoVotoHex) {
 			HexBinaryAdapter hexConverter = new HexBinaryAdapter();

@@ -1,15 +1,97 @@
-<u><h3>Controlador servidor de Applets</h3></u>
+
+<u><h3>applet</h3></u>
+
+
+
+
+<h4>URLs de servicio</h4>
 <div>
-  	<p>Servicio que lanza los <a href="http://es.wikipedia.org/wiki/Java_applet">Applets Java</a> que utiliza la aplicación para firmar documentos.</p>
-  	<h3>Métodos soportados</h3>
-    <p>- <u>GET</u> - <a href="${grailsApplication.config.grails.serverURL}/applet/cliente">/applet/cliente</a><br/>
-	    <b>Respuesta:</b><br/>
-	    Devuelve el Applet que utiliza la aplicación para hacer firmar en navegadores con máquina virtual Java.
-    </p>     	
-    <p>- <u>GET</u> - <a href="${grailsApplication.config.grails.serverURL}/applet/jnlp">/applet/jnlp</a><br/>
-      <b>Parámetros:</b><br/>
-         <b>Respuesta:</b><br/>
-         El archivo JNLP que utiliza el Applet para descargar los archivos que necesita.
-    </p>
+
+<p>
+
+<a href="http://192.168.1.5:8080/SistemaVotacionCentroControl/applet/index">/applet/index</a><br/>  	
+
+</p>
+	
+</p>
+
+
+
+
+
+<HR>
+
+<p>
+
+<a href="http://192.168.1.5:8080/SistemaVotacionCentroControl/applet/herramientaValidacion">/applet/herramientaValidacion</a><br/>  	
+
+</p>
+	
+</p>
+
+
+
+
+
+<HR>
+
+<p>
+
+<a href="http://192.168.1.5:8080/SistemaVotacionCentroControl/applet/jnlpHerramienta">/applet/jnlpHerramienta</a><br/>  	
+
+</p>
+	
+</p>
+
+
+
+
+
+<HR>
+
+<p>
+
+<a href="http://192.168.1.5:8080/SistemaVotacionCentroControl/applet/jnlpCliente">/applet/jnlpCliente</a><br/>  	
+
+</p>
+	
+</p>
+
+
+
+
+
+<HR>
+
+<p>
+
+<a href="http://192.168.1.5:8080/SistemaVotacionCentroControl/applet/cliente">/applet/cliente</a><br/>  	
+
+</p>
+	
+</p>
+
+
+
+
+
+<HR>
+
+<p>
+
+<a href="http://192.168.1.5:8080/SistemaVotacionCentroControl/applet/prueba">/applet/prueba</a><br/>  	
+
+</p>
+	
+</p>
+
+
+
+
+
+<HR>
+
+
 </div>
+
 

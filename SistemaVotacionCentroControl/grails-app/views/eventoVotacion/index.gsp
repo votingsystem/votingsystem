@@ -1,45 +1,161 @@
-<u><h3>Eventos Votación</h3></u>
+
+<u><h3> Votaciones </h3></u>
+
+<p> Servicios relacionados con las votaciones publicadas en el servidor. </p>
+
+
+<h4>URLs de servicio</h4>
 <div>
-  	<p>Servicios relacionados con los <b>Eventos de votación</b>.</p>
-  	<h3>Métodos soportados</h3>
-    <p>- <u>POST</u> - <a href="${grailsApplication.config.grails.serverURL}/eventoVotacion/guardarEvento">/eventoVotacion/guardarEvento</a><br/>
-      <b>Parámetros:</b><br/>
-       - <u>archivoFirmado</u>: El <b>Evento de Votación</b> que se desea dar de alta en el sistema.<br/>
-         <b>Respuesta:</b><br/>
-         Si todo es correcto devolverá una respuesta HTTP con código de estado 200.
-    </p>
-   <HR/>
-    <p>- <u>GET</u> - <a href="${grailsApplication.config.grails.serverURL}/eventoVotacion/obtener">/eventoVotacion/obtener</a><br/>
-         <b>Respuesta:</b><br/>
-         Lista en formato JSON con los <b>Eventos de Votación</b> dados de alta en el sistema.
-    </p>
-    <HR/>
-    <p>- <u>GET</u> - <a href="${grailsApplication.config.grails.serverURL}/eventoVotacion/obtenerVotos">/eventoVotacion/obtenerVotos</a><br/>
-         Método que devuelve la información sobre los votos recogidos por un evento<br/>
-         <b>Parámetros:</b><br/>
-         - <u>controlAccesoServerURL</u>: La URL del <b>Control de Acceso</b> en el que el evento fue dado de alta.<br/>
-         - <u>eventoVotacionId</u>: El identificador del Evento de Votación.<br/>         
-         <b>Respuesta:</b><br/>
-         Lista en formato JSON con los <b>votos</b> asociados a la consulta.
-    </p> 
-    <HR/>
-   	<p>- <u>GET</u> - <a href="${grailsApplication.config.grails.serverURL}/eventoVotacion/estadisticas">/eventoVotacion/estadisticas</a><br/>
-	<b>Parámetros:</b><br/>
-	Para identificar el evento consultado debe proporcionar el id del mismo en la base de datos del <b>Centro de Control</b>, o <br/>
-	la url del <b>Control de Acceso</b> y el id en la base de datos del <b>Control de Acceso</b>. <br/>
-    - <u>id</u>: El identificador del evento en la base de datos del centro de control.<br/>
-    - <u>eventoVotacionId</u>: El identificador del evento en la base de datos del <b>Centro de Control</b>.<br/>
-    - <u>controlAccesoServerURL</u>:La url del <b>Control de Acceso</b>.<br/>
-    <b>Respuesta:</b><br/>
-         Documento en formato JSON con las estadísitcas de una votación.
-    </p>     
-  	<HR/>
-    <p>- <u>GET</u> - <a href="${grailsApplication.config.grails.serverURL}/eventoVotacion/comprobarFechas">/eventoVotacion/comprobarFechas</a><br/>
-         Método que devuelve el estado de un evento<br/>
-         <b>Parámetros:</b><br/>
-         - <u>id</u>: El id del evento que se desea comprobar.<br/>     
-         <b>Respuesta:</b><br/>
-         Cadena que representa el estado del evento
-    </p>  
-    <HR/> 	
+
+<p>
+- <u>GET</u> - 
+<a href="http://192.168.1.5:8080/SistemaVotacionCentroControl/eventoVotacion/index">/eventoVotacion/index</a><br/>  	
+
+</p>
+	
+</p>
+
+
+
+<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/eventoVotacion'.</p>
+
+<HR>
+
+<p>
+- <u>POST</u> - 
+<a href="http://192.168.1.5:8080/SistemaVotacionCentroControl/eventoVotacion/guardarCancelacion">/eventoVotacion/guardarCancelacion</a><br/>  	
+Servicio de cancelación de votaciones <br/>
+</p>
+	
+	<p><b>Parámetros:</b><br/>
+
+		
+		- <u>archivoFirmado</u>:  Obligatorio. Archivo con los datos de la votación que se desea cancelar 			firmado por el Control de Acceso que publicó la votación y por 			el usuario que la publicó o un administrador de sistema.<br/>
+		
+</p>
+	
+</p>
+
+
+
+
+
+<HR>
+
+<p>
+- <u>GET</u> - 
+<a href="http://192.168.1.5:8080/SistemaVotacionCentroControl/eventoVotacion/estadisticas">/eventoVotacion/estadisticas</a><br/>  	
+Servicio que ofrece datos de recuento de una votación. <br/>
+</p>
+	
+	<p><b>Parámetros:</b><br/>
+
+		
+		- <u>controlAccesoServerURL</u>:   Obligatorio. URL del Control de Acceso en el que se publicó el documento<br/>
+		
+		- <u>eventoVotacionId</u>: 	Obligatorio. Identificador de la votación en la base de datos                          del Control de Acceso<br/>
+		
+</p>
+	
+</p>
+
+
+
+<p><b>Respuesta:</b><br/>Información en formato JSON de las estadísticas de una votación.</p>
+
+<HR>
+
+<p>
+- <u>GET</u> - 
+<a href="http://192.168.1.5:8080/SistemaVotacionCentroControl/eventoVotacion/obtener">/eventoVotacion/obtener</a><br/>  	
+Servicio de consulta de las votaciones publicadas. <br/>
+</p>
+	
+	<p><b>Parámetros:</b><br/>
+
+		
+		- <u>id</u>:   Opcional. El identificador en la base de datos del documento que se 			  desee consultar.<br/>
+		
+		- <u>max</u>: 	Opcional (por defecto 20). Número máximo de documentos que 		  devuelve la consulta (tamaño de la página).<br/>
+		
+		- <u>offset</u>: 	Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.<br/>
+		
+</p>
+	
+</p>
+
+
+
+<p><b>Respuesta:</b><br/>Información de las votaciones paginada y en formato JSON.</p>
+
+<HR>
+
+<p>
+- <u>GET</u> - 
+<a href="http://192.168.1.5:8080/SistemaVotacionCentroControl/eventoVotacion/obtenerVotos">/eventoVotacion/obtenerVotos</a><br/>  	
+Servicio de consulta de los votos <br/>
+</p>
+	
+	<p><b>Parámetros:</b><br/>
+
+		
+		- <u>controlAccesoServerURL</u>:   Obligatorio. URL del Control de Acceso en el que se publicó el documento.<br/>
+		
+		- <u>eventoVotacionId</u>: 	Obligatorio. Identificador de la votación en la base de datos                          del Control de Acceso.<br/>
+		
+</p>
+	
+</p>
+
+
+
+<p><b>Respuesta:</b><br/>Información en formato JSON de los votos recibidos en la votación solicitada.</p>
+
+<HR>
+
+<p>
+- <u>POST</u> - 
+<a href="http://192.168.1.5:8080/SistemaVotacionCentroControl/eventoVotacion/guardarEvento">/eventoVotacion/guardarEvento</a><br/>  	
+Servicio que da de alta las votaciones. <br/>
+</p>
+	
+	<p><b>Parámetros:</b><br/>
+
+		
+		- <u>archivoFirmado</u>:  Obligatorio. Archivo con los datos de la votación firmado 		  por el usuario que la publica y el Control de Acceso en la que se publica.<br/>
+		
+</p>
+	
+</p>
+
+
+
+
+
+<HR>
+
+<p>
+- <u>GET</u> - 
+<a href="http://192.168.1.5:8080/SistemaVotacionCentroControl/eventoVotacion/comprobarFechas">/eventoVotacion/comprobarFechas</a><br/>  	
+Servicio que comprueba las fechas de una votación <br/>
+</p>
+	
+	<p><b>Parámetros:</b><br/>
+
+		
+		- <u>id</u>:   Obligatorio. El identificador de la votación en la base de datos.<br/>
+		
+</p>
+	
+</p>
+
+
+
+
+
+<HR>
+
+
 </div>
+
+

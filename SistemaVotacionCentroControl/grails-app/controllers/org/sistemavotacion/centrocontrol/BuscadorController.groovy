@@ -18,31 +18,43 @@ import org.hibernate.search.Search;
 import org.sistemavotacion.util.*;
 import org.apache.lucene.search.Sort;
 
-
+/**
+ * @infoController Búsquedas
+ * @descController Servicios de búsqueda sobre los datos generados por la aplicación
+ *
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ * */
 class BuscadorController {
 
    SearchHelper searchHelper;
    def subscripcionService
    def sessionFactory
    
+   /**
+	* @httpMethod GET
+	* @return Información sobre los servicios que tienen como url base '/buscador'
+	*/
    def index = {}
-	
-   def hibernateProperties
    
-   def hibernate = {
-	  render hibernateProperties as JSON
-	  return false
-   }
-   
+   /**
+    * Servicio que reindexa el motor de búsqueda
+	* @httpMethod GET
+	*/
    def reindex = {
 		log.debug "Usuario en la lista de administradoreas, reindexando"
 		FullTextSession fullTextSession = Search.getFullTextSession(sessionFactory.currentSession);
 		fullTextSession.createIndexer().startAndWait()
-		response.status = 200
-		render "Reindexación OK"
+		response.status = Respuesta.SC_OK
+		render message(code: 'reindexOKMsg')
 		return false
 	}
    
+   /**
+	* Servicio que reindexa los datos del motor de búsqueda
+	* @param archivoFirmado Obligatorio. Solicitud firmada por un administrador de sistema.
+	* @httpMethod GET
+	*/
 	def guardarReindex = { 
 		SMIMEMessageWrapper smimeMessageReq = params.smimeMessageReq
 		List<String> administradores = Arrays.asList(
@@ -55,18 +67,25 @@ class BuscadorController {
 			log.debug "Usuario en la lista de administradoreas, reindexando"
 			FullTextSession fullTextSession = Search.getFullTextSession(sessionFactory.currentSession);
 			fullTextSession.createIndexer().startAndWait()
-			response.status = 200
-			render "Reindexación OK"
+			response.status = Respuesta.SC_OK
+			render message(code: 'reindexOKMsg') 
 		} else {
 			log.debug message(code: 'error.UsuarioNoAdministrador')
-			respuesta = new Respuesta(codigoEstado:400,
-				mensaje:message(code: 'error.UsuarioNoAdministrador'), tipo: Tipo.ERROR)
-			response.status = 400
-			render "ERROR"
+			response.status = Respuesta.SC_ERROR_PETICION
+			render message(code: 'error.UsuarioNoAdministrador')
 		}
 		return false
 	}
 	
+	/**
+	 * Servicio que busca la cadena de texto recibida entre las votaciones publicadas.
+	 * 
+	 * @param consultaTexto Obligatorio. Texto de la búsqueda.
+	 * @param max Opcional (por defecto 20). Número máximo de documentos que 
+	 * 		  devuelve la consulta (tamaño de la página).
+	 * @param offset Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.
+	 * @httpMethod GET
+	 */
     def evento = {
         def eventosVotacionMap = new HashMap()
 		if (!params.consultaTexto) {
@@ -84,6 +103,12 @@ class BuscadorController {
         render eventosVotacionMap as JSON
     }
 	
+	/**
+	 * @httpMethod POST
+	 * @param consulta Documento JSON con los parámetros de la consulta:<br/><code>
+	 * 		  {conReclamaciones:true, conVotaciones:true, textQuery:ipsum, conManifiestos:true}</code>
+	 * @return Una lista en formato JSON con los documentos que cumplen el criterio de la búsqueda.
+	 */
 	def consultaJSON() {
 		String consulta = StringUtils.getStringFromInputStream(request.getInputStream())
 		log.debug("consulta: ${consulta}")
@@ -170,6 +195,15 @@ class BuscadorController {
 		return false
 	}
 	
+	/**
+	 * Servicio que busca los eventos que tienen la etiqueta que se
+	 * pasa como parámetro.
+	 * @param etiqueta Obligatorio. Texto de la etiqueta.
+	 * @param max Opcional (por defecto 20). Número máximo de documentos que
+	 * 		  devuelve la consulta (tamaño de la página).
+	 * @param offset Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.
+	 * @httpMethod GET
+	 */
 	def eventoPorEtiqueta = {
 		def eventosMap = new HashMap()
 		if (!params.etiqueta) {
@@ -178,9 +212,10 @@ class BuscadorController {
 		}
 		def etiqueta = Etiqueta.findByNombre(params.etiqueta)
 		if (etiqueta) {
-			eventosMap.eventos = EtiquetaEvento.findAllByEtiqueta(etiqueta).collect { etiquetaEvento ->
+			eventosMap.eventos = EtiquetaEvento.findAllByEtiqueta(etiqueta,
+				 [max: params.max, offset: params.offset]).collect { etiquetaEvento ->
 				return [id: etiquetaEvento.eventoVotacion.id, 
-					URL:"${grailsApplication.config.grails.serverURL}/eventoVotacion?id=${etiquetaEvento.eventoVotacion.id}",
+					URL:"${grailsApplication.config.grails.serverURL}/eventoVotacion/obtener?id=${etiquetaEvento.eventoVotacion.id}",
 					asunto:etiquetaEvento.eventoVotacion.asunto, 
 					contenido: etiquetaEvento?.eventoVotacion?.contenido]
 			} 

@@ -9,10 +9,14 @@ import org.sistemavotacion.util.DateUtils;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import org.springframework.web.multipart.MultipartHttpServletRequest
 import org.springframework.web.multipart.MultipartFile;
+
 /**
-* @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
-* */
+ * @infoController Votaciones
+ * @descController Servicios relacionados con las votaciones publicadas en el servidor.
+ * 
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ * */
 class EventoVotacionController {
 
     def eventoVotacionService
@@ -20,8 +24,19 @@ class EventoVotacionController {
 	def httpService
 	def grailsApplication
 	
+	/**
+	 * @httpMethod GET
+	 * @return Información sobre los servicios que tienen como url base '/eventoVotacion'.
+	 */
 	def index = {}
 	
+	/**
+	 * Servicio que da de alta las votaciones.
+	 * 
+	 * @httpMethod POST
+	 * @param archivoFirmado Obligatorio. Archivo con los datos de la votación firmado
+	 * 		  por el usuario que la publica y el Control de Acceso en la que se publica.
+	 */
 	def guardarEvento = {
 		String serverURL = params.smimeMessageReq.getHeader("serverURL")[0]
 		ControlAcceso controlAcceso = subscripcionService.comprobarControlAcceso(serverURL)
@@ -34,6 +49,17 @@ class EventoVotacionController {
 		return false
 	}
         
+	/**
+	 * Servicio de consulta de las votaciones publicadas.
+	 * 
+	 * @param id  Opcional. El identificador en la base de datos del documento que se
+	 * 			  desee consultar.
+	 * @param max	Opcional (por defecto 20). Número máximo de documentos que
+	 * 		  devuelve la consulta (tamaño de la página).
+	 * @param offset	Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.
+	 * @httpMethod GET
+	 * @return Información de las votaciones paginada y en formato JSON.
+	 */
     def obtener = {
 		List eventoList = []
 		def eventosMap = new HashMap()
@@ -83,6 +109,15 @@ class EventoVotacionController {
         return false
 	}
 
+	/**
+	 * Servicio de consulta de los votos
+	 *
+	 * @param controlAccesoServerURL  Obligatorio. URL del Control de Acceso en el que se publicó el documento.
+	 * @param eventoVotacionId	Obligatorio. Identificador de la votación en la base de datos 
+	 *                          del Control de Acceso.
+	 * @httpMethod GET
+	 * @return Información en formato JSON de los votos recibidos en la votación solicitada.
+	 */
     def obtenerVotos = {
         if (params.long('eventoVotacionId') && params.controlAccesoServerURL) {
 			ControlAcceso controlAcceso = ActorConIP.findWhere(serverURL:params.controlAccesoServerURL)
@@ -148,8 +183,16 @@ class EventoVotacionController {
 		render (view: 'index')
         return false
     }
-	
 
+	/**
+	 * Servicio que ofrece datos de recuento de una votación.
+	 *
+	 * @param controlAccesoServerURL  Obligatorio. URL del Control de Acceso en el que se publicó el documento
+	 * @param eventoVotacionId	Obligatorio. Identificador de la votación en la base de datos
+	 *                          del Control de Acceso
+	 * @httpMethod GET
+	 * @return Información en formato JSON de las estadísticas de una votación.
+	 */
     def estadisticas = {
 		EventoVotacion eventoVotacion
 		if (params.long('id')) {
@@ -199,6 +242,12 @@ class EventoVotacionController {
         return false
     }
 
+	/**
+	 * Servicio que comprueba las fechas de una votación
+	 *
+	 * @param id  Obligatorio. El identificador de la votación en la base de datos.
+	 * @httpMethod GET
+	 */
     def comprobarFechas = {
 		EventoVotacion eventoVotacion
 		if (params.long('id')) {
@@ -218,6 +267,14 @@ class EventoVotacionController {
 		return false
 	}
 	
+	/**
+	 * Servicio de cancelación de votaciones 
+	 *
+	 * @param	archivoFirmado Obligatorio. Archivo con los datos de la votación que se desea cancelar 
+	 * 			firmado por el Control de Acceso que publicó la votación y por
+	 * 			el usuario que la publicó o un administrador de sistema.
+	 * @httpMethod POST
+	 */
 	def guardarCancelacion= {
 	   SMIMEMessageWrapper smimeMessageReq = params.smimeMessageReq;
 	   if(params.smimeMessageReq) {

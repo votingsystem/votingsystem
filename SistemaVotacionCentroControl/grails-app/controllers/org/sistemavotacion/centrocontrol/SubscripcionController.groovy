@@ -12,6 +12,10 @@ import com.sun.syndication.feed.module.content.ContentModuleImpl
 import com.sun.syndication.feed.synd.*;
 import com.sun.syndication.io.SyndFeedOutput;
 /**
+ * @infoController Subscripciones
+ * @descController Servicios relacionados con los feeds generados por la aplicación y
+ * 				   con la asociación de Controles de Acceso.
+ * 
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
  *
@@ -24,8 +28,18 @@ class SubscripcionController {
 
 	def supportedFormats = [ "rss_0.90", "rss_0.91", "rss_0.92", "rss_0.93", "rss_0.94", "rss_1.0", "rss_2.0", "atom_0.3"]
 	
+	/**
+	 * @httpMethod GET
+	 * @return Información sobre los servicios que tienen como url base '/subscripcion'.
+	 */
 	def index = {}
 	
+	/**
+	 * Servicio que da de alta Controles de Acceso.
+	 *
+	 * @httpMethod POST
+	 * @param archivoFirmado Obligatorio. Archivo con los datos del control de acceso que se desea dar de alta.
+	 */
     def guardarAsociacionConControlAcceso = {
 		SMIMEMessageWrapper smimeMessageReq = params.smimeMessageReq
 		log.debug("guardarAsociacionConControlAcceso - mensaje: ${smimeMessageReq.getSignedContent()}")
@@ -56,6 +70,13 @@ class SubscripcionController {
         return false		
     }
 	
+	/**
+	 * 
+	 * @httpMethod GET
+	 * @param	feedType Opcional. Formatos de feed soportados rss_0.90, rss_0.91, rss_0.92, 
+	 * 			rss_0.93, rss_0.94, rss_1.0, rss_2.0, atom_0.3
+	 * @return Información sobre los servicios que tienen como url base '/subscripcion'.
+	 */
 	def votaciones() {
 		if(params.feedType && supportedFormats.contains(params.feedType)) {
 			render(text: obtenerEntradasVotaciones(params.feedType),
@@ -75,7 +96,7 @@ class SubscripcionController {
 		}
 	}
 	
-	def obtenerEntradasVotaciones(feedType) {
+	private String obtenerEntradasVotaciones(feedType) {
 		def votaciones
 		EventoVotacion.withTransaction {
 			votaciones = EventoVotacion.findAllWhere(estado:EventoVotacion.Estado.ACTIVO,
