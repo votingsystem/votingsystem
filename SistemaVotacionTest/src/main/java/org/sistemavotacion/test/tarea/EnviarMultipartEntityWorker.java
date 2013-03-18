@@ -22,6 +22,7 @@ public class EnviarMultipartEntityWorker extends SwingWorker<String, String> {
     private String cadenaEnviada;
     private Exception exception = null;
     private String message = null;
+    private String fileParamName = null;
     private int statusCode = Respuesta.SC_ERROR;
     
     public EnviarMultipartEntityWorker(File archivoEnviado, String urlDestino, 
@@ -42,6 +43,10 @@ public class EnviarMultipartEntityWorker extends SwingWorker<String, String> {
         this.archivoEnviado = archivoEnviado;
     }
     
+    public void setFileParamName(String fileParamName) {
+        this.fileParamName = fileParamName;
+    }
+    
     @Override//on the EDT
     protected void done() {	
         try {
@@ -60,8 +65,15 @@ public class EnviarMultipartEntityWorker extends SwingWorker<String, String> {
         String result = null;
         HttpResponse response = null;
         logger.debug("--- cadenaEnviada: " + cadenaEnviada);
-        if(archivoEnviado != null) response = Contexto.getHttpHelper().
-                enviarArchivoFirmado(archivoEnviado, urlDestino);
+        if(archivoEnviado != null) {
+        	if(fileParamName != null) {
+        		response = Contexto.getHttpHelper().
+                        sendFile(archivoEnviado, urlDestino, fileParamName);
+        	} else {
+            	response = Contexto.getHttpHelper().
+                        enviarArchivoFirmado(archivoEnviado, urlDestino);	
+        	}
+        }
         else if (cadenaEnviada != null) {
             logger.debug("--- Enviando cadena firmada");
             response = Contexto.getHttpHelper().

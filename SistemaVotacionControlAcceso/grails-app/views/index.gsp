@@ -1,5 +1,5 @@
 <html>
 <head>
-<meta HTTP-EQUIV="REFRESH" content="0; url=app/index">
+<meta HTTP-EQUIV="REFRESH" content="0; url=app/home">
 </head>
 </html>

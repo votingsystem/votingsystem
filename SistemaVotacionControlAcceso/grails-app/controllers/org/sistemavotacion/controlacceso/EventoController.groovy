@@ -8,17 +8,35 @@ import org.sistemavotacion.util.*
 import org.sistemavotacion.smime.*
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 /**
-* @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
-*/
+ * @infoController Eventos
+ * @descController Servicios relacionados con los eventos del sistema.
+ * 
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ */
 class EventoController {
 
     def eventoVotacionService
     def eventoService
 
+	/**
+	 * @httpMethod GET
+	 * @return Información sobre los servicios que tienen como url base '/evento'.
+	 */
 	def index() { }
 	
-    def obtener = {
+	/**
+	 * @httpMethod GET
+	 * @param id Opcional. El identificador del evento en la base de datos. Si no se pasa ningún id 
+	 *        la consulta se hará entre todos los eventos.
+	 * @param max Opcional (por defecto 20). Número máximo de documentos que 
+	 * 		  devuelve la consulta (tamaño de la página).
+	 * @param offset Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.
+	 * @param order Opcional, posibles valores 'asc', 'desc'(por defecto). Orden en que se muestran los
+	 *        resultados según la fecha de creación.
+	 * @return Página con manifiestos en formato JSON que cumplen con el criterio de búsqueda.
+	 */
+    def obtener () {
         def eventoList = []
         def eventosMap = new HashMap()
         eventosMap.eventos = new HashMap()
@@ -43,13 +61,19 @@ class EventoController {
 			}
             eventosMap.offset = params.long('offset')
         }
-        eventosMap.numeroTotalEventosEnSistema = Evento.countByEstadoOrEstadoOrEstadoOrEstado(Evento.Estado.ACTIVO,
+		log.debug "params: ${params}"
+		
+        eventosMap.numeroTotalEventosEnSistema = Evento.
+				   countByEstadoOrEstadoOrEstadoOrEstado(Evento.Estado.ACTIVO,
 				   Evento.Estado.CANCELADO, Evento.Estado.FINALIZADO, Evento.Estado.PENDIENTE_COMIENZO)
-        eventosMap.numeroTotalEventosFirmaEnSistema = EventoFirma.countByEstadoOrEstadoOrEstadoOrEstado(Evento.Estado.ACTIVO,
+        eventosMap.numeroTotalEventosFirmaEnSistema = EventoFirma.
+				   countByEstadoOrEstadoOrEstadoOrEstado(Evento.Estado.ACTIVO,
 				   Evento.Estado.CANCELADO, Evento.Estado.FINALIZADO, Evento.Estado.PENDIENTE_COMIENZO)
-        eventosMap.numeroTotalEventosReclamacionEnSistema = EventoReclamacion.countByEstadoOrEstadoOrEstadoOrEstado(Evento.Estado.ACTIVO,
+        eventosMap.numeroTotalEventosReclamacionEnSistema = EventoReclamacion.
+				   countByEstadoOrEstadoOrEstadoOrEstado(Evento.Estado.ACTIVO,
 				   Evento.Estado.CANCELADO, Evento.Estado.FINALIZADO, Evento.Estado.PENDIENTE_COMIENZO)
-        eventosMap.numeroTotalEventosVotacionEnSistema = EventoVotacion.countByEstadoOrEstadoOrEstadoOrEstado(Evento.Estado.ACTIVO,
+        eventosMap.numeroTotalEventosVotacionEnSistema = EventoVotacion.
+				   countByEstadoOrEstadoOrEstadoOrEstado(Evento.Estado.ACTIVO,
 				   Evento.Estado.CANCELADO, Evento.Estado.FINALIZADO, Evento.Estado.PENDIENTE_COMIENZO)
         eventosMap.numeroEventosEnPeticion = eventoList.size()
         eventoList.collect {eventoItem ->
@@ -69,8 +93,15 @@ class EventoController {
         render eventosMap as JSON
     }
     
-    
-    def guardarAdjuntandoValidacion = {
+	/**
+	 * Servicio para publicar votaciones.
+	 * 
+	 * @httpMethod POST
+	 * @param archivoFirmado Archivo firmado en formato SMIME en cuyo contenido se
+	 *        encuentra la votación que se desea publicar en formato HTML.
+	 * @return Recibo que consiste en el archivo firmado recibido con la firma añadida del servidor.
+	 */
+    def guardarAdjuntandoValidacion () {
         try {
             params.respuesta = eventoVotacionService.guardarEvento(
 				params.smimeMessageReq, request.getLocale())
@@ -82,7 +113,14 @@ class EventoController {
         }
     }
     
-    def estadisticas = {
+	/**
+	 * Servicio que devuelve estadísticas asociadas a un evento.
+	 *
+	 * @httpMethod GET
+	 * @param id Identificador en la base de datos del evento que se desea consultar.
+	 * @return Estadísticas asociadas al evento que se desea consultar en formato JSON.
+	 */
+    def estadisticas () {
 		if (params.long('id')) {
 			Evento evento
 			Evento.withTransaction {
@@ -99,11 +137,20 @@ class EventoController {
 			return false
 		}
 		response.status = Respuesta.SC_ERROR_PETICION
-		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
+		render message(code: 'error.PeticionIncorrectaHTML', args:[
+			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false  
     }
     
-    def guardarSolicitudCopiaRespaldo = {
+	/**
+	 * Servicio que devuelve los archivos relacionados con un evento.
+	 *
+	 * @httpMethod POST
+	 * @param archivoFirmado Archivo firmado en formato SMIME con los datos del
+	 * 		  evento origen de la copia de seguridad.
+	 * @return Archivo zip con los archivos relacionados con un evento.
+	 */
+    def guardarSolicitudCopiaRespaldo () {
 		SMIMEMessageWrapper smimeMessageReq = params.smimeMessageReq
         def mensajeJSON = JSON.parse(smimeMessageReq.getSignedContent())
             if (params.long('eventoId')) {
@@ -127,7 +174,14 @@ class EventoController {
             return false
     }
     
-    def informacionVotos = {
+	/**
+	 * Servicio que devuelve información sobre la actividad de una votación
+	 *
+	 * @httpMethod GET
+	 * @param id Obligatorio. El identificador de la votación en la base de datos.
+	 * @return Información sobre los votos y solicitudes de acceso de una votación en formato JSON.
+	 */
+    def informacionVotos () {
         if (params.long('id')) {
 			Evento evento
 			Evento.withTransaction {
@@ -141,13 +195,17 @@ class EventoController {
             def informacionVotosMap = new HashMap()
 			def solicitudesOk, solicitudesAnuladas;
 			SolicitudAcceso.withTransaction {
-				solicitudesOk = SolicitudAcceso.findAllWhere(estado:Tipo.OK, eventoVotacion:evento)
-				solicitudesAnuladas = SolicitudAcceso.findAllWhere(estado:Tipo.ANULADO, eventoVotacion:evento)
+				solicitudesOk = SolicitudAcceso.findAllWhere(
+					estado:Tipo.OK, eventoVotacion:evento)
+				solicitudesAnuladas = SolicitudAcceso.findAllWhere(
+					estado:Tipo.ANULADO, eventoVotacion:evento)
 			}
 			def solicitudesCSROk, solicitudesCSRAnuladas;
 			SolicitudCSRVoto.withTransaction {
-				solicitudesCSROk = SolicitudCSRVoto.findAllWhere(estado:SolicitudCSRVoto.Estado.OK, eventoVotacion:evento)
-				solicitudesCSRAnuladas = SolicitudCSRVoto.findAllWhere(estado:SolicitudCSRVoto.Estado.ANULADA, eventoVotacion:evento)
+				solicitudesCSROk = SolicitudCSRVoto.findAllWhere(
+					estado:SolicitudCSRVoto.Estado.OK, eventoVotacion:evento)
+				solicitudesCSRAnuladas = SolicitudCSRVoto.findAllWhere(
+					estado:SolicitudCSRVoto.Estado.ANULADA, eventoVotacion:evento)
 			}
             informacionVotosMap.numeroTotalSolicitudes = evento.solicitudesAcceso.size()
             informacionVotosMap.numeroSolicitudes_OK = solicitudesOk.size()
@@ -155,7 +213,8 @@ class EventoController {
             informacionVotosMap.numeroTotalCSRs = evento.solicitudesCSR.size()
             informacionVotosMap.numeroSolicitudesCSR_OK = solicitudesCSROk.size()
 			informacionVotosMap.solicitudesCSRAnuladas = solicitudesCSRAnuladas.size()
-			informacionVotosMap.certificadoRaizEvento = "${grailsApplication.config.grails.serverURL}/certificado/certificadoCA_DeEvento?idEvento=${params.id}"
+			informacionVotosMap.certificadoRaizEvento = "${grailsApplication.config.grails.serverURL}" + 
+				"/certificado/certificadoCA_DeEvento?idEvento=${params.id}"
             informacionVotosMap.solicitudesAcceso = []
 			informacionVotosMap.votos = []
 			informacionVotosMap.opciones = []
@@ -164,10 +223,12 @@ class EventoController {
                 estado:solicitud.estado.toString(), 
                 hashSolicitudAccesoBase64:solicitud.hashSolicitudAccesoBase64,
                 usuario:solicitud.usuario.nif,
-                solicitudAccesoURL:"${grailsApplication.config.grails.serverURL}/mensajeSMIME/obtener?id=${solicitud?.mensajeSMIME?.id}"]
+                solicitudAccesoURL:"${grailsApplication.config.grails.serverURL}/mensajeSMIME" + 
+					"/obtener?id=${solicitud?.mensajeSMIME?.id}"]
 				if(SolicitudAcceso.Estado.ANULADO.equals(solicitud.estado)) {
 					AnuladorVoto anuladorVoto = AnuladorVoto.findWhere(solicitudAcceso:solicitud)
-					solicitudMap.anuladorURL="${grailsApplication.config.grails.serverURL}/mensajeSMIME/obtener?id=${anuladorVoto?.mensajeSMIME?.id}"
+					solicitudMap.anuladorURL="${grailsApplication.config.grails.serverURL}" + 
+						"/mensajeSMIME/obtener?id=${anuladorVoto?.mensajeSMIME?.id}"
 				} 
                 informacionVotosMap.solicitudesAcceso.add(solicitudMap)
             }
@@ -205,8 +266,15 @@ class EventoController {
 			args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
         return false  
     }
-    
-   def informacionFirmas = {
+	
+	/**
+	 * Servicio que devuelve información sobre la actividad de una acción de recogida de firmas
+	 *
+	 * @httpMethod GET
+	 * @param id Obligatorio. El identificador del manifiesto en la base de datos.
+	 * @return Información sobre las firmas recibidas en formato JSON.
+	 */
+    def informacionFirmas () {
         if (params.long('id')) {
             EventoFirma evento = EventoFirma.get(params.id)
             if (!evento) {
@@ -242,7 +310,14 @@ class EventoController {
         return false  
     } 
     
-   def informacionFirmasReclamacion = {
+	/**
+	 * Servicio que devuelve información sobre la actividad de una acción de reclamación
+	 *
+	 * @httpMethod GET
+	 * @param id Obligatorio. El identificador de la reclamación la base de datos.
+	 * @return Información sobre las reclamaciones recibidas en formato JSON.
+	 */
+    def informacionFirmasReclamacion () {
         if (params.long('id')) {
             EventoReclamacion evento = EventoReclamacion.get(params.id)
             if (!evento) {
@@ -286,8 +361,15 @@ class EventoController {
         return false  
     }
   
-  
-   def guardarCancelacion= {
+	/**
+	 * Servicio que cancela eventos
+	 *
+	 * @httpMethod POST
+	 * @param archivoFirmado Obligatorio. Archivo con los datos del evento que se desea 
+	 * cancelar firmado por el usuario que publicó o un administrador de sistema.
+	 * @return Si todo va bien devuelve un código de estado HTTP 200.
+	 */
+   def guardarCancelacion() {
 	   SMIMEMessageWrapper smimeMessageReq = params.smimeMessageReq;
 	   if(params.smimeMessageReq) {
 		   Respuesta respuesta = eventoService.cancelarEvento(
@@ -303,7 +385,14 @@ class EventoController {
 	   return false;
    }
 
-   def comprobarFechas = {
+   /**
+	* Servicio que comprueba las fechas de un evento
+	*
+	* @param id  Obligatorio. El identificador del evento en la base de datos.
+	* @httpMethod GET
+	* @return Si todo va bien devuelve un código de estado HTTP 200.
+	*/
+   def comprobarFechas () {
 	   Evento evento
 	   if (params.long('id')) {
 		   Evento.withTransaction {

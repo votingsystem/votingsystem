@@ -61,7 +61,7 @@ public class ServerPaths {
     }
     
     public static String getUrlAppVotacion () {
-    	return getApplicationPath() + "app/index";
+    	return getApplicationPath() + "app/home";
     }
     
     public static String getUrlPublicarPDF () {

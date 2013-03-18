@@ -1,4 +1,4 @@
-package org.sistemavotacion.docs;
+package org.sistemavotacion.doc;
 
 import java.util.HashMap;
 import java.util.Map;

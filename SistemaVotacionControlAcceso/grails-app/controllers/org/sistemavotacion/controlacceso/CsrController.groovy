@@ -9,14 +9,35 @@ import java.security.cert.X509Certificate;
 import java.security.cert.Certificate
 import grails.converters.JSON;
 
+/**
+ * @infoController Validación de solicitudes de certificación
+ * @descController Servicios relacionados con validación y firma de certificados.
+ *
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ */
 class CsrController {
 
 	def csrService
 	def subscripcionService
 	def firmaService
 	
+	/**
+	 * @httpMethod GET
+	 * @return Información sobre los servicios que tienen como url base '/csr'.
+	 */
     def index() { }
 	
+	
+	/**
+	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS)<br/>
+	 * Servicio para la creación de certificados de usuario.
+	 * 
+	 * @httpMethod POST
+	 * @param csr Solicitud de certificación con los datos de usuario.
+	 * @return Si todo es correcto devuelve un código de estado HTTP 200 y el identificador 
+	 *         de la solicitud en la base de datos.
+	 */
 	def solicitar() {
 		String consulta = StringUtils.getStringFromInputStream(request.getInputStream())
 		if (!consulta) {
@@ -29,6 +50,14 @@ class CsrController {
 		return false;
 	}
 	
+	/**
+	 * Servicio que devuelve las solicitudes de certificados firmadas una vez que
+	 * se ha validado la identidad del usuario.
+	 *
+	 * @httpMethod GET
+	 * @param idSolicitudCSR Identificador de la solicitud de certificación enviada previamente por el usuario.
+	 * @return Si el sistema ha validado al usuario devuelve la solicitud de certificación firmada.
+	 */
 	def obtener() { 
 		SolicitudCSRUsuario solicitudCSR
 		SolicitudCSRUsuario.withTransaction {
@@ -38,7 +67,7 @@ class CsrController {
 		if (solicitudCSR) {
 			def certificado = Certificado.findWhere(solicitudCSRUsuario:solicitudCSR)
 			if (certificado) {
-				response.status = 200
+				response.status = Respuesta.SC_OK
 				ByteArrayInputStream bais = new ByteArrayInputStream(certificado.contenido)
 				X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
 				
@@ -69,28 +98,43 @@ class CsrController {
 				response.outputStream.flush()
 				return false
 			}
-			response.status = 404
+			response.status = Respuesta.SC_NOT_FOUND
 			render message(code: "csr.ErrorGeneracionCert")
 			return false
 		} 
-		response.status = 404
+		response.status = Respuesta.SC_NOT_FOUND
 		render message(code: "csr.solicitudNoValidada")
 		return false
 	}
 	
-	public String getAbsolutePath(String filePath){
+	private String getAbsolutePath(String filePath){
 		String prefijo = "${grailsApplication.mainContext.getResource('.')?.getFile()}"
 		String sufijo =filePath.startsWith(File.separator)? filePath : File.separator + filePath;
 		return "${prefijo}${sufijo}";
 	}
 	
+	/**
+	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS).
+	 *
+	 * Servicio que firma solicitudes de certificación de usuario.<br/>
+	 *
+	 * TODO - Hacer las validaciones sólo sobre solicitudes firmadas electrónicamente
+	 * por personal dado de alta en la base de datos.
+	 *
+	 * @httpMethod POST
+	 * @param archivoFirmado Archivo firmado en formato SMIME en cuyo contenido 
+	 * se encuentran los datos de la solicitud que se desea validar.
+	 * <code>{deviceId:"000000000000000", telefono:"15555215554", nif:"1R" }</code>
+	 * 
+	 * @return Si todo es correcto devuelve un código de estado HTTP 200.
+	 */
 	def guardarValidacion() { 
 		SMIMEMessageWrapper smimeMessageReq = params.smimeMessageReq
 		List<String> administradores = Arrays.asList(
 			grailsApplication.config.SistemaVotacion.adminsDNI.split(","))
 		Respuesta respuestaUsuario = subscripcionService.comprobarUsuario(
 			params.smimeMessageReq, request.getLocale())
-		if(200 != respuestaUsuario.codigoEstado) {
+		if(Respuesta.SC_OK != respuestaUsuario.codigoEstado) {
 			response.status = respuestaUsuario.codigoEstado
 			render respuestaUsuario.mensaje
 			return false
@@ -101,26 +145,27 @@ class CsrController {
 			String msg = message(code: "csr.usuarioAutorizado", args: [usuario.nif])
 			Dispositivo dispositivo = Dispositivo.findWhere(deviceId: docValidacionJSON.deviceId)
 			if (!dispositivo?.usuario) {
-				response.status = 400
+				response.status = Respuesta.SC_ERROR_PETICION
 				render message(code: "csr.solicitudNoEncontrada", args: [smimeMessageReq.getSignedContent()])
 				return false
 			}
 			if(dispositivo.usuario.nif != usuario.nif) {
-				log.debug "Usuario con nif:'${usuario.nif}' intentando validar dispositivo:'${dispositivo.id}' con nif:'${dispositivo.usuario.nif}'"
+				log.debug "Usuario con nif:'${usuario.nif}' intentando validar dispositivo:" + 
+					"'${dispositivo.id}' con nif:'${dispositivo.usuario.nif}'"
 				render message(code: "csr.usuarioNoAutorizado")
 				return false
 			}
 			SolicitudCSRUsuario solicitudCSR = SolicitudCSRUsuario.findWhere(usuario:dispositivo.usuario,
 				estado:SolicitudCSRUsuario.Estado.PENDIENTE_APROVACION);
 			if (!solicitudCSR) {
-				response.status = 400
+				response.status = Respuesta.SC_ERROR_PETICION
 				render message(code: "csr.usuarioSinSolicitud", args: [usuarioMovil.nif])
 				return false
 			}
 			Respuesta respuestaValidacionCSR = firmaService.firmarCertificadoUsuario(
 				solicitudCSR, request.getLocale())
-			if (200 == respuestaValidacionCSR.codigoEstado) {
-				response.status = 200
+			if (Respuesta.SC_OK == respuestaValidacionCSR.codigoEstado) {
+				response.status = Respuesta.SC_OK
 				render message(code: "csr.generacionCertOK")
 			} else {
 				response.status = respuestaValidacionCSR.codigoEstado
@@ -130,64 +175,26 @@ class CsrController {
 		} else {
 			String msg = message(code: "csr.usuarioNoAutorizado", args: [usuario.nif])
 			log.debug msg
-			response.status = 400
+			response.status = Respuesta.SC_ERROR_PETICION
 			render msg
 			return false
 		}
 	}
 	
-	//def guardarSolicitudInformacion() {
-	def solicitudInformacion() {
-		/*SMIMEMessageWrapper smimeMessageReq = params.smimeMessageReq
-		Respuesta respuestaUsuario = subscripcionService.comprobarUsuario(
-			params.smimeMessageReq, request.getLocale())
-		if(200 != respuestaUsuario.codigoEstado) {
-			response.status = respuestaUsuario.codigoEstado
-			render respuestaUsuario.mensaje
-			return false
-		}
-		Usuario usuario = respuestaUsuario.usuario*/
-		Usuario usuario = Usuario.get(params.id)
-		def informacionMap = [usuarioId:usuario?.id, nif:usuario?.nif]
-		informacionMap.solicitudesCSR = []
-		informacionMap.certificados = []
-		//TODO test
-		def solicitudesCSRList = SolicitudCSRVoto.
-			findAllByUsuarioAndHashCertificadoVotoBase64IsNull(usuario)
-		solicitudesCSRList.collect {solicitudItem ->
-			def solicitudesCSRMap = [id:solicitudItem.id, estado:solicitudItem.estado?.toString(),
-				fechaSolicitud:solicitudItem.dateCreated]
-			if (solicitudItem.dispositivo) {
-				def dispositivo = solicitudItem.dispositivo
-				solicitudesCSRMap.deviceIdDispositivo = dispositivo.deviceId
-				if(dispositivo.email) solicitudesCSRMap.emailDispositivo = dispositivo.email
-				if(dispositivo.telefono) solicitudesCSRMap.telefonoDispositivo = dispositivo.telefono
-			}
-			if (SolicitudCSRVoto.Estado.OK.equals(solicitudItem.estado)) {
-				Certificado certificado = Certificado.findWhere(solicitudCSR:solicitudItem)
-				solicitudesCSRMap.numeroSerieCertificado = certificado.numeroSerie
-				solicitudesCSRMap.estadoCertificado = certificado.estado.toString()
-				solicitudesCSRMap.fechaEmisionCertificado = certificado.dateCreated
-			}
-			informacionMap.solicitudesCSR.add(solicitudesCSRMap)
-		}
-		def certificadosList = Certificado.findAllWhere(usuario:usuario, solicitudCSR:null)
-		certificadosList.collect {certificadoItem ->
-			def certificadoMap = [id:certificadoItem.id, 
-				numeroSerie: certificadoItem.numeroSerie, estado:certificadoItem.estado.toString(), 
-				fechaEmision: certificadoItem.dateCreated]
-			informacionMap.certificados.add(certificadoMap)
-		}
-		response.setContentType("application/json")
-		render informacionMap as JSON
-	}
-	
-	//'{deviceId:"000000000000000", telefono:"15555215554", nif:"30" }'
-	//TODO: este servicio sólo existe para hacer pruebas, no debe estar en un entorno de producción real!!!
+	/**
+	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS).
+	 * 
+	 * Servicio que firma solicitudes de certificación de usuario.<br/>
+	 * 
+	 * @httpMethod POST
+	 * @param userIfo Documento JSON con los datos del usuario 
+	 * <code>{deviceId:"000000000000000", telefono:"15555215554", nif:"1R" }</code>
+	 * @return Si todo es correcto devuelve un código de estado HTTP 200.
+	 */
 	def validar() {
 		String consulta = StringUtils.getStringFromInputStream(request.getInputStream())
 		if (!consulta) {
-			response.status = 400
+			response.status = Respuesta.SC_ERROR_PETICION
 			render(view:"index")
 			return false	
 		}
@@ -195,15 +202,16 @@ class CsrController {
 		def consultaJSON = JSON.parse(consulta)
 		Dispositivo dispositivo = Dispositivo.findByDeviceId(consultaJSON?.deviceId?.trim())
 		if (!dispositivo) {
-			response.status = 400
-			render message(code: "csr.solicitudNoEncontrada", args: ["deviceId: ${consultaJSON?.deviceId}"])
+			response.status = Respuesta.SC_ERROR_PETICION
+			render message(code: "csr.solicitudNoEncontrada", args: 
+				["deviceId: ${consultaJSON?.deviceId}"])
 			return false
 		}
 		Usuario usuario
 		String nifValidado = StringUtils.validarNIF(consultaJSON?.nif)
 		if(nifValidado) usuario = Usuario.findByNif(nifValidado)
 		if (!usuario) {
-			response.status = 400
+			response.status = Respuesta.SC_ERROR_PETICION
 			render message(code: "csr.solicitudNoEncontrada", args: ["nif: ${nifValidado}"])
 			return false
 		}
@@ -213,14 +221,14 @@ class CsrController {
 				dispositivo, usuario, SolicitudCSRUsuario.Estado.PENDIENTE_APROVACION);
 		}
 		if (!solicitudCSR) {
-			response.status = 400
+			response.status = Respuesta.SC_ERROR_PETICION
 			render message(code: "csr.solicitudNoEncontrada", args: [consulta])
 			return false
 		}
 		Respuesta respuestaValidacionCSR = firmaService.firmarCertificadoUsuario(
 			solicitudCSR, request.getLocale())
-		if (200 == respuestaValidacionCSR.codigoEstado) {
-			response.status = 200
+		if (Respuesta.SC_OK == respuestaValidacionCSR.codigoEstado) {
+			response.status = Respuesta.SC_OK
 			render message(code: "csr.generacionCertOK")
 		} else {
 			response.status = respuestaValidacionCSR.codigoEstado
@@ -229,7 +237,19 @@ class CsrController {
 		return false
 	}
 	
-	//TODO servicio para anular certificados de usuario
+	/**
+	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS).
+	 * 
+	 * Servicio que anula solicitudes de certificación de usuario.<br/>
+	 * 
+	 * TODO - IMPLEMETAR. Hacer las validaciones sólo sobre solicitudes 
+	 * firmadas electrónicamente por personal dado de alta en la base de datos.
+	 * 
+	 * @httpMethod POST
+	 * @param userIfo Documento JSON con los datos del usuario 
+	 * <code>{deviceId:"000000000000000", telefono:"15555215554", nif:"1R" }</code>
+	 * @return Si todo es correcto devuelve un código de estado HTTP 200.
+	 */
 	def anular() {
 		String consulta = StringUtils.getStringFromInputStream(request.getInputStream())
 		if (!consulta) {

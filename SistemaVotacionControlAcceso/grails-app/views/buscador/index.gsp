@@ -1,25 +1,164 @@
-<u><h3>Búsquedas</h3></u>
+
+
+<u><h3 class="controllerInfoHeader">Búsquedas</h3></u>
+
+
+	 Servicios de búsqueda sobre los datos generados por la aplicación
+ 
+  
+
+
 <div>
-  	Búsquedas sobre la información del servidor.
-  	<h4>Métodos soportados</h4>
-    <p>- <u>POST</u> - <a href="${grailsApplication.config.grails.serverURL}/buscador/guardarReindex">/buscador/guardarReindex</a><br/>
-      <b>Parámetros:</b><br/>
-       - <u>archivoFirmado</u>: Documento en formato <b>S/MIME</b> firmado por el <b>DNI electrónico</b> de un administrador del sistema.<br/>
-         <b>Respuesta:</b><br/>
-         Si todo es correcto hará una indexación desde cero de todos los documentos y devolverá una respuesta HTTP con código de estado 200.
-    </p>
-    <p>- <u>POST</u> - <a href="${grailsApplication.config.grails.serverURL}/buscador/consultaJSON">/buscador/consultaJSON</a><br/>
-      <b>Parámetros:</b><br/>
-       - Documento <b>JSON</b> con los parámetros de la consulta: <br/>
-       <code>{conVotaciones:true, textQuery:prueba}</code><br/>
-         <b>Respuesta:</b><br/>
-         Una lista en formato <b>JSON</b> con los documentos que cumplan el criterio de la búsqueda.
-    </p>
-    <p>- <u>POST</u> - <a href="${grailsApplication.config.grails.serverURL}/buscador/eventoPorEtiqueta">/buscador/eventoPorEtiqueta</a><br/>
-      <b>Parámetros:</b><br/>
-       - <u>etiqueta</u>: El valor de la <b>etiqueta</b> que se desee buscar<br/>
-         <b>Respuesta:</b><br/>
-         Una lista en formato <b>JSON</b> con los documentos que tengan asociada la etiqueta.
-    </p>
+
 	<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${grailsApplication.config.grails.serverURL}/buscador/index">/buscador/index</a><br/>
+				
+	 <br/>
+			</p>
+			<div class="params_result_div">
+			
+			</p>
+	
+			
+				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/buscador'</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>POST</u> - 
+				<a href="${grailsApplication.config.grails.serverURL}/buscador/consultaJSON">/buscador/consultaJSON</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+				<p>
+					<b>Parámetros:</b><br/>
+					
+						<u>consulta</u>:  Documento JSON con los parámetros de la consulta:<br/><code>
+	  		  {conReclamaciones:true, conVotaciones:true, textQuery:ipsum, conManifiestos:true}</code><br/>
+					
+				</p>
+			
+			</p>
+	
+			
+				<p><b>Respuesta:</b><br/>Una lista en formato JSON con los documentos que cumplen el criterio de la búsqueda.</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${grailsApplication.config.grails.serverURL}/buscador/reindex">/buscador/reindex</a><br/>
+				
+	 (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS). 
+	 Servicio que reindexa el motor de búsqueda
+	 <br/>
+			</p>
+			<div class="params_result_div">
+			
+			</p>
+	
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${grailsApplication.config.grails.serverURL}/buscador/evento">/buscador/evento</a><br/>
+				
+	  Servicio que busca la cadena de texto recibida entre las votaciones publicadas.
+	 
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+				<p>
+					<b>Parámetros:</b><br/>
+					
+						<u>max</u>:  Opcional (por defecto 20). Número máximo de documentos que
+	  		  devuelve la consulta (tamaño de la página).<br/>
+					
+						<u>consultaTexto</u>:  Obligatorio. Texto de la búsqueda.<br/>
+					
+						<u>offset</u>:  Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.<br/>
+					
+				</p>
+			
+			</p>
+	
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>POST</u> - 
+				<a href="${grailsApplication.config.grails.serverURL}/buscador/guardarReindex">/buscador/guardarReindex</a><br/>
+				
+	 Servicio que reindexa los datos del motor de búsqueda
+	 <br/>
+			</p>
+			<div class="params_result_div">
+			
+				<p>
+					<b>Parámetros:</b><br/>
+					
+						<u>archivoFirmado</u>:  Obligatorio. Solicitud firmada por un administrador de sistema.<br/>
+					
+				</p>
+			
+			</p>
+	
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${grailsApplication.config.grails.serverURL}/buscador/eventoPorEtiqueta">/buscador/eventoPorEtiqueta</a><br/>
+				
+	  Servicio que busca los eventos que tienen la etiqueta que se
+	  pasa como parámetro.
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+				<p>
+					<b>Parámetros:</b><br/>
+					
+						<u>max</u>:  Opcional (por defecto 20). Número máximo de documentos que
+	  		  devuelve la consulta (tamaño de la página).<br/>
+					
+						<u>offset</u>:  Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.<br/>
+					
+						<u>etiqueta</u>:  Obligatorio. Texto de la etiqueta.<br/>
+					
+				</p>
+			
+			</p>
+	
+			
+			</div>
+		<HR>
+	
+
 </div>
+
+

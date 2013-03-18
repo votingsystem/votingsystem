@@ -1,31 +1,185 @@
-<u><h3>Certificados</h3></u>
+
+
+<u><h3 class="controllerInfoHeader">Servicio de Certificados</h3></u>
+
+
+	 Servicios relacionados con los certificados manejados por la aplicación
+ 
+ 
+
+
 <div>
-  	<p>Claves públicas de certificados empleados por la aplicación.</p>
-  	<h3>Métodos soportados</h3>
-    <p>- <u>GET</u> - <a href="${grailsApplication.config.grails.serverURL}/certificado/cadenaCertificacion">/certificado/cadenaCertificacion</a><br/>
-      <b>Respuesta:</b><br/>
-         La cadena de certificación del <b>certificado</b> que el servidor emplea para firmar documentos.
-    </p>
-    <p>- <u>GET</u> - <a href="${grailsApplication.config.grails.serverURL}/certificado/raizDNIe">/certificado/raizDNIe</a><br/>
-      <b>Respuesta:</b><br/>
-         La clave pública del certificado raíz del <b>DNI español</b>.
-    </p>    
-    <p>- <u>GET</u> - <a href="${grailsApplication.config.grails.serverURL}/certificado/certificadoDeVoto">/certificado/certificadoDeVoto</a><br/>
-      <b>Parámetros:</b><br/>
-      - <u>hashCertificadoVotoHex</u>: Hash en hexadecimal del 
-      <a href="https://github.com/jgzornoza/SistemaVotacionClientePublicacion/wiki/Certificado-de-voto">Certificado de Voto</a>.<br/>
-      <b>Respuesta:</b><br/>
-         La clave pública del <a href="https://github.com/jgzornoza/SistemaVotacionClientePublicacion/wiki/Certificado-de-voto">Certificado de Voto</a>.
-    </p> 
-      <p>- <u>GET</u> - <a href="${grailsApplication.config.grails.serverURL}/certificado/certificadoCA_DeEvento">/certificado/certificadoCA_DeEvento</a><br/>
-      <b>Parámetros:</b><br/>
-      - <u>idEvento</u>: El identificador del evento cuyo certificado raíz se pretende obtener.<br/>
-      <b>Respuesta:</b><br/>
-         La clave pública del <b>certificado raíz</b> empleado para firmar los
-		<a href="https://github.com/jgzornoza/SistemaVotacionClientePublicacion/wiki/Certificado-de-voto">Certificados de Voto</a>
-		del evento.
-    </p>       
+
 	<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${grailsApplication.config.grails.serverURL}/certificado/trustedCerts">/certificado/trustedCerts</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			</p>
+	
+			
+				<p><b>Respuesta:</b><br/>Los certificados en formato PEM de las Autoridades Certificadoras en las que
+	          confía la aplicación.</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${grailsApplication.config.grails.serverURL}/certificado/index">/certificado/index</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			</p>
+	
+			
+				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/certificado'.</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${grailsApplication.config.grails.serverURL}/certificado/certificadoUsuario">/certificado/certificadoUsuario</a><br/>
+				
+	  Servicio de consulta de certificados de usuario.
+	 
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+				<p>
+					<b>Parámetros:</b><br/>
+					
+						<u>usuarioId</u>:  Obligatorio. El identificador en la base de datos del usuario.<br/>
+					
+				</p>
+			
+			</p>
+	
+			
+				<p><b>Respuesta:</b><br/>El certificado en formato PEM.</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${grailsApplication.config.grails.serverURL}/certificado/certificadoCA_DeEvento">/certificado/certificadoCA_DeEvento</a><br/>
+				
+	  Servicio de consulta de los certificados emisores de certificados
+	  de voto para una votación.
+	 
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+				<p>
+					<b>Parámetros:</b><br/>
+					
+						<u>idEvento</u>:  el identificador de la votación que se desea consultar.<br/>
+					
+				</p>
+			
+			</p>
+	
+			
+				<p><b>Respuesta:</b><br/>Devuelve la cadena de certificación, en formato PEM, con la que se generan los
+	  			certificados de los votos.</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${grailsApplication.config.grails.serverURL}/certificado/cadenaCertificacion">/certificado/cadenaCertificacion</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			</p>
+	
+			
+				<p><b>Respuesta:</b><br/>La cadena de certificación en formato PEM del servidor</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${grailsApplication.config.grails.serverURL}/certificado/certificadoDeVoto">/certificado/certificadoDeVoto</a><br/>
+				
+	  Servicio de consulta de certificados de voto.
+	 
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+				<p>
+					<b>Parámetros:</b><br/>
+					
+						<u>hashCertificadoVotoHex</u>:  Obligatorio. Hash en hexadecimal asociado al
+	           certificado de voto que se desea consultar.<br/>
+					
+				</p>
+			
+			</p>
+	
+			
+				<p><b>Respuesta:</b><br/>El certificado en formato PEM.</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>POST</u> - 
+				<a href="${grailsApplication.config.grails.serverURL}/certificado/addCertificateAuthority">/certificado/addCertificateAuthority</a><br/>
+				
+	  (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS). Servicio que añade Autoridades de Confianza.<br/>
+	  Sirve para poder validar los certificados enviados en las simulaciones.
+	  
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+				<p>
+					<b>Parámetros:</b><br/>
+					
+						<u>pemCertificate</u>:  certificado en formato PEM de la Autoridad de Confianza que se desea añadir.<br/>
+					
+				</p>
+			
+			</p>
+	
+			
+				<p><b>Respuesta:</b><br/>Si todo va bien devuelve un código de estado HTTP 200.</p>
+			
+			</div>
+		<HR>
+	
+
 </div>
 
 

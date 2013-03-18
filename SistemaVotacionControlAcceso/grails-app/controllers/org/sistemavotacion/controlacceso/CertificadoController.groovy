@@ -4,13 +4,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.sistemavotacion.seguridad.*
 import org.sistemavotacion.controlacceso.modelo.*
-import org.springframework.context.ApplicationContext;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.security.cert.X509Certificate;
 import java.util.Set;
-
-import grails.util.Environment
+import grails.util.*
 /**
+* @infoController Servicio de Certificados
+* @descController Servicios relacionados con los certificados manejados por la aplicación
+* 
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
@@ -19,9 +20,17 @@ class CertificadoController {
 	def grailsApplication
 	def firmaService
 
-	def index = { }
+	/**
+	 * @httpMethod GET
+	 * @return Información sobre los servicios que tienen como url base '/certificado'.
+	 */
+	def index () { }
 	
-	def cadenaCertificacion = {
+	/**
+	 * @httpMethod GET
+	 * @return La cadena de certificación en formato PEM del servidor
+	 */
+	def cadenaCertificacion () {
 		try {
 			File cadenaCertificacion = grailsApplication.mainContext.getResource(
 				grailsApplication.config.SistemaVotacion.rutaCadenaCertificacion).getFile();
@@ -37,7 +46,15 @@ class CertificadoController {
 		}
 	}
 
-	def certificadoDeVoto = {
+	/**
+	 * Servicio de consulta de certificados de voto.
+	 *
+	 * @param	hashCertificadoVotoHex Obligatorio. Hash en hexadecimal asociado al
+	 *          certificado de voto que se desea consultar.
+	 * @httpMethod GET
+	 * @return El certificado en formato PEM.
+	 */
+	def certificadoDeVoto () {
 		if (params.hashCertificadoVotoHex) {
 			HexBinaryAdapter hexConverter = new HexBinaryAdapter();
 			String hashCertificadoVotoBase64 = new String(
@@ -69,7 +86,14 @@ class CertificadoController {
 		return false
 	}
 	
-	def certificadoUsuario = {
+	/**
+	 * Servicio de consulta de certificados de usuario.
+	 *
+	 * @param	usuarioId Obligatorio. El identificador en la base de datos del usuario.
+	 * @httpMethod GET
+	 * @return El certificado en formato PEM.
+	 */
+	def certificadoUsuario () {
 		def usuarioId
 		if (params.long('usuarioId')) {
 			Usuario usuario = Usuario.get(params.long('usuarioId'))
@@ -105,7 +129,16 @@ class CertificadoController {
 		return false
 	}
 	
-	def certificadoCA_DeEvento = {
+	/**
+	 * Servicio de consulta de los certificados emisores de certificados
+	 * de voto para una votación.
+	 *
+	 * @httpMethod GET
+	 * @param idEvento el identificador de la votación que se desea consultar.
+	 * @return Devuelve la cadena de certificación, en formato PEM, con la que se generan los
+	 * 			certificados de los votos.
+	 */
+	def certificadoCA_DeEvento () {
 		if (params.int('idEvento')) {
 			EventoVotacion eventoVotacion;
 			EventoVotacion.withTransaction {
@@ -136,23 +169,16 @@ class CertificadoController {
 		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false
 	}
-	
-	def certificadoCA_Usuario = {
-		if(!Environment.TEST.equals(Environment.current)) {
-			def msg = message(code: "CertificadoController.certificadoCA_Usuario.msg")
-			log.debug msg
-			render msg
-			return false
-		}
-		log.debug "Environment --- TEST ---"
-		def msg = message(code: "CertificadoController.certificadoCA_Usuario.msg")
-		log.debug "${msg}"
-		log.debug "Environment.current: " + Environment.current
-		render Environment.current
-		return false
-	}
 
-	def addCertificateAuthority = {
+	/**
+	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS). Servicio que añade Autoridades de Confianza.<br/>
+	 * Sirve para poder validar los certificados enviados en las simulaciones.
+	 * 
+	 * @httpMethod POST
+	 * @param pemCertificate certificado en formato PEM de la Autoridad de Confianza que se desea añadir.
+	 * @return Si todo va bien devuelve un código de estado HTTP 200.
+	 */
+	def addCertificateAuthority () {
 		//===== 
 		/*if(!Environment.TEST.equals(Environment.current)) {
 			def msg = message(code: "msg.servicioEntornoTest")
@@ -164,14 +190,19 @@ class CertificadoController {
 		//=====
 		log.debug "Environment --- TEST ---"
 		Respuesta respuesta = firmaService.addCertificateAuthority(
-			params.archivoFirmado?.getBytes(), request.getLocale())
+			params.pemCertificate?.getBytes(), request.getLocale())
 		log.debug("addCertificateAuthority - codigo estado: ${respuesta.codigoEstado} - mensaje: ${respuesta.mensaje}")
 		response.status = respuesta.codigoEstado
 		render respuesta.mensaje
 		return false
 	}
 
-	def trustedCerts = {
+	/**
+	 * @httpMethod GET
+	 * @return Los certificados en formato PEM de las Autoridades Certificadoras en las que
+	 *         confía la aplicación.
+	 */
+	def trustedCerts () {
 		Set<X509Certificate> trustedCerts = firmaService.getTrustedCerts()
 		log.debug("number trustedCerts: ${trustedCerts.size()}")
 		response.setContentType("text/plain")

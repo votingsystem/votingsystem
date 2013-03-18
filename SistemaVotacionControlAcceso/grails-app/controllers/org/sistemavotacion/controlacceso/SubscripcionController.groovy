@@ -9,6 +9,10 @@ import grails.converters.JSON
 
 
 /**
+ * @infoController Subscripciones
+ * @descController Servicios relacionados con los feeds generados por la aplicación y
+ * 				   con la asociación de Centros de Control.
+ * 
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
  * 
@@ -22,9 +26,19 @@ class SubscripcionController {
 	
 	def supportedFormats = [ "rss_0.90", "rss_0.91", "rss_0.92", "rss_0.93", "rss_0.94", "rss_1.0", "rss_2.0", "atom_0.3"]
 	
+	/**
+	 * @httpMethod GET
+	 * @return Información sobre los servicios que tienen como url base '/subscripcion'.
+	 */
 	def index() { }
        
-    def  guardarAsociacionConCentroControl = { 
+	/**
+	 * Servicio que da de alta Centros de Control.
+	 *
+	 * @httpMethod POST
+	 * @param archivoFirmado Obligatorio. Archivo con los datos del Centro de Control que se desea dar de alta.
+	 */
+    def  guardarAsociacionConCentroControl () { 
 		Respuesta respuesta = subscripcionService.asociarCentroControl(
 			params.smimeMessageReq, request.getLocale())
         response.status = respuesta.codigoEstado
@@ -33,6 +47,12 @@ class SubscripcionController {
         return false	
     }
 	
+	/**
+	 * @httpMethod GET
+	 * @param	feedType Opcional. Formatos de feed soportados rss_0.90, rss_0.91, rss_0.92, 
+	 * 			rss_0.93, rss_0.94, rss_1.0, rss_2.0, atom_0.3. Por defecto se sirve atom 1.0.
+	 * @return Información en el formato solicitado sobre las reclamaciones publicadas.
+	 */
 	def reclamaciones() {
 		if(params.feedType && supportedFormats.contains(params.feedType)) {
 			render(text: obtenerEntradasReclamaciones(params.feedType),
@@ -52,6 +72,12 @@ class SubscripcionController {
 		}
 	}
 	
+	/**
+	 * @httpMethod GET
+	 * @param	feedType Opcional. Formatos de feed soportados rss_0.90, rss_0.91, rss_0.92,
+	 * 			rss_0.93, rss_0.94, rss_1.0, rss_2.0, atom_0.3. Por defecto se sirve atom 1.0.
+	 * @return Información en el formato solicitado sobre las votaciones publicadas.
+	 */
 	def votaciones() {
 		if(params.feedType && supportedFormats.contains(params.feedType)) {
 			render(text: obtenerEntradasVotaciones(params.feedType),
@@ -71,6 +97,12 @@ class SubscripcionController {
 		}
 	}
 	
+	/**
+	 * @httpMethod GET
+	 * @param	feedType Opcional. Formatos de feed soportados rss_0.90, rss_0.91, rss_0.92,
+	 * 			rss_0.93, rss_0.94, rss_1.0, rss_2.0, atom_0.3. Por defecto se sirve atom 1.0.
+	 * @return Información en el formato solicitado sobre los manifiestos publicados.
+	 */
     def manifiestos() {
 		if(params.feedType && supportedFormats.contains(params.feedType)) {
 			render(text: obtenerEntradasManifiestos(params.feedType), 
@@ -90,7 +122,7 @@ class SubscripcionController {
 		}
 	}
 	
-	def obtenerEntradasReclamaciones(feedType) {
+	private String obtenerEntradasReclamaciones(feedType) {
 		def reclamaciones = EventoReclamacion.findAllWhere(estado:Evento.Estado.ACTIVO,
 			[max: 30, sort: "dateCreated", order: "desc"])
 		def entradas = []
@@ -115,7 +147,7 @@ class SubscripcionController {
 		" -${grailsApplication.config.SistemaVotacion.serverName}-"
 		SyndFeed feed = new SyndFeedImpl(feedType: feedType,
 				title: tituloSubscripcionReclamaciones,
-				link: "${grailsApplication.config.grails.serverURL}/app/index#RECLAMACIONES",
+				link: "${grailsApplication.config.grails.serverURL}/app/home#RECLAMACIONES",
 				description: message(code: 'subscripcion.descripcionSubscripcionReclamaciones'),
 				entries: entradas);
 		StringWriter writer = new StringWriter();
@@ -125,7 +157,7 @@ class SubscripcionController {
 		return writer.toString();
 	}
 	
-	def obtenerEntradasVotaciones(feedType) {
+	private String obtenerEntradasVotaciones(feedType) {
 		def votaciones
 		EventoVotacion.withTransaction {
 			votaciones = EventoVotacion.findAllWhere(estado:Evento.Estado.ACTIVO,
@@ -153,7 +185,7 @@ class SubscripcionController {
 		" -${grailsApplication.config.SistemaVotacion.serverName}-"
 		SyndFeed feed = new SyndFeedImpl(feedType: feedType,
 				title: tituloSubscripcionVotaciones,
-				link: "${grailsApplication.config.grails.serverURL}/app/index#VOTACIONES",
+				link: "${grailsApplication.config.grails.serverURL}/app/home#VOTACIONES",
 				description: message(code: 'subscripcion.descripcionSubscripcionVotaciones'),
 				entries: entradas);
 		StringWriter writer = new StringWriter();
@@ -163,9 +195,12 @@ class SubscripcionController {
 		return writer.toString();
 	}
 
-	def obtenerEntradasManifiestos(feedType) {
-		def manfiestos = EventoFirma.findAllWhere(estado:Evento.Estado.ACTIVO, 
-			[max: 30, sort: "dateCreated", order: "desc"])
+	private String obtenerEntradasManifiestos(feedType) {
+		def manfiestos
+		EventoFirma.withTransaction {
+			manfiestos = EventoFirma.findAllWhere(estado:Evento.Estado.ACTIVO,
+				[max: 30, sort: "dateCreated", order: "desc"])
+		}
 		def entradas = []
 		manfiestos.each { manifiesto ->
 			String contenido = manifiesto.contenido
@@ -188,7 +223,7 @@ class SubscripcionController {
 		" -${grailsApplication.config.SistemaVotacion.serverName}-"
 		SyndFeed feed = new SyndFeedImpl(feedType: feedType, 
 				title: tituloSubscripcionManifiestos,
-				link: "${grailsApplication.config.grails.serverURL}/app/index#MANIFIESTOS",
+				link: "${grailsApplication.config.grails.serverURL}/app/home#MANIFIESTOS",
 				description: message(code: 'subscripcion.descripcionSubscripcionManifiestos'),
 				entries: entradas);
 		StringWriter writer = new StringWriter();

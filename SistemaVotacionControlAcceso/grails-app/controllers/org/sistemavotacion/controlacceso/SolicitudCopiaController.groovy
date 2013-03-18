@@ -6,12 +6,32 @@ import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.multipart.MultipartHttpServletRequest
 import grails.converters.JSON
 
+
+/**
+ * @infoController Solicitud de copias de seguridad
+ * @descController Servicios que gestiona solicitudes de copias de seguridad.
+ *
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ */
 class SolicitudCopiaController {
 	
 	def pdfService
 
+	/**
+	 * @httpMethod GET
+	 * @return Información sobre los servicios que tienen como url base '/solicitudCopia'.
+	 */
 	def index() {}
 	
+	/**
+	 * Servicio que proporciona la copia de seguridad a partir de la URL que se envía
+	 * al solicitante en el mail de confirmación que recibe al enviar la solicitud.
+	 * 
+	 * @httpMethod GET
+	 * @param id Obligatorio. El identificador de la solicitud de copia de seguridad la base de datos.
+	 * @return Archivo zip con la copia de seguridad.
+	 */
 	def obtener() {
 		if (params.long('id')) {
 			SolicitudCopia solicitud = SolicitudCopia.get(params.id)
@@ -22,7 +42,7 @@ class SolicitudCopiaController {
 			}
 			if(!solicitud.filePath) {
 				response.status = Respuesta.SC_ERROR_PETICION
-				render "La solicitud con id '${params.id}' ya ha sido descargada, solicite otra copia"
+				render message(code: 'backupDownloadedMsg', args:[params.id]) 
 				return false
 			}
 			File copiaRespaldo = new File(solicitud.filePath)
@@ -51,6 +71,14 @@ class SolicitudCopiaController {
 		return false
 	}
 	
+	/**
+	 * Servicio que recibe solicitudes de copias de seguridad
+	 *
+	 * @httpMethod POST
+	 * @param signedPDF Archivo PDF con los datos de la copia de seguridad.
+	 * @return Si todo va bien devuelve un código de estado HTTP 200. Y el solicitante recibirá un
+	 *         email con información para poder obtener la copia de seguridad.
+	 */
 	def validarSolicitud() {
 		try {
 			String nombreArchivo = ((MultipartHttpServletRequest) request)?.getFileNames()?.next();
@@ -74,13 +102,20 @@ class SolicitudCopiaController {
 		}
 	}
 	
+	/**
+	 * Servicio que proporciona copias de las solicitudes de copias de seguridad recibidas.
+	 *
+	 * @httpMethod GET
+	 * @param id Obligatorio. El identificador de la solicitud de copia de seguridad la base de datos.
+	 * @return El PDF en el que se solicita la copia de seguridad.
+	 */
 	def obtenerSolicitud() {
 		if (params.long('id')) {
 			SolicitudCopia solicitud
 			byte[] solicitudPDF
 			SolicitudCopia.withTransaction {
 				solicitud = SolicitudCopia.get(params.id)
-				if(solicitud) solicitudPDF = solicitud.documento.pdf
+				if(solicitud) solicitudPDF = solicitud.documento?.pdf
 			}
 			if(!solicitud) {
 				response.status = Respuesta.SC_ERROR_PETICION

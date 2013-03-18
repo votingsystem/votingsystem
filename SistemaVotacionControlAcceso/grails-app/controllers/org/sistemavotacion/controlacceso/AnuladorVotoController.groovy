@@ -3,13 +3,24 @@ package org.sistemavotacion.controlacceso
 import javax.mail.internet.MimeMessage
 import org.sistemavotacion.controlacceso.modelo.*;
 
+/**
+ * @infoController Anulación de votos
+ * @descController Servicios relacionados con la anulación de votos.
+ *
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ */
 class AnuladorVotoController {
 	
 	def votoService
 
+	/**
+	 * @httpMethod GET
+	 * @return Información sobre los servicios que tienen como url base '/anuladorVoto'.
+	 */
 	def index() { }
 	/*
-	def guardarAdjuntandoValidacionAsync = {
+	def guardarAdjuntandoValidacionAsync () {
 		Respuesta respuesta = votoService.validarAnulacion(params.smimeMessageReq)
 		log.debug (respuesta.codigoEstado + " - mensaje: ${respuesta.mensaje}")
 		if (200 == respuesta.codigoEstado) {
@@ -40,7 +51,14 @@ class AnuladorVotoController {
 	}*/
 	
 	
-    def guardarAdjuntandoValidacion = {
+	/**
+	 * Servicio que anula votos.
+	 * 
+	 * @httpMethod POST
+	 * @param archivoFirmado El <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Anulador-de-voto">anulador de voto</a>.
+	 * @return Recibo que consiste en el archivo firmado recibido con la firma añadida del servidor.
+	 */
+    def guardarAdjuntandoValidacion () {
 		Respuesta respuesta = votoService.validarAnulacion(params.smimeMessageReq, request.getLocale())
 		log.debug (respuesta.codigoEstado + " - mensaje: ${respuesta.mensaje}")
         if (Respuesta.SC_OK == respuesta.codigoEstado) {

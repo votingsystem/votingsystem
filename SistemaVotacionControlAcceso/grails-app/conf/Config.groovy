@@ -1,7 +1,8 @@
 import java.net.*;
 
-// locations to search for config files that get merged into the main config
-// config files can either be Java properties files or ConfigSlurper scripts
+// locations to search for config files that get merged into the main config;
+// config files can be ConfigSlurper scripts, Java properties files, or classes
+// in the classpath in ConfigSlurper format
 
 // grails.config.locations = [ "classpath:${appName}-config.properties",
 //                             "classpath:${appName}-config.groovy",
@@ -11,36 +12,38 @@ import java.net.*;
 // if (System.properties["${appName}.config.location"]) {
 //    grails.config.locations << "file:" + System.properties["${appName}.config.location"]
 // }
+
 grails.config.locations = [ "classpath:app-config.properties"]
 
  if(System.properties["${appName}.config.location"]) {
 	grails.config.locations << "file:" + System.properties["${appName}.config.location"]
  }
- 
 
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
 grails.mime.use.accept.header = false
-grails.mime.types = [ html: ['text/html','application/xhtml+xml'],
-                      xml: ['text/xml', 'application/xml'],
-                      text: 'text/plain',
-                      js: 'text/javascript',
-                      rss: 'application/rss+xml',
-                      atom: 'application/atom+xml',
-                      css: 'text/css',
-                      csv: 'text/csv',
-                      all: '*/*',
-                      json: ['application/json','text/json'],
-                      form: 'application/x-www-form-urlencoded',
-                      multipartForm: 'multipart/form-data'
-                    ]
+grails.mime.types = [
+    all:           '*/*',
+    atom:          'application/atom+xml',
+    css:           'text/css',
+    csv:           'text/csv',
+    form:          'application/x-www-form-urlencoded',
+    html:          ['text/html','application/xhtml+xml'],
+    js:            'text/javascript',
+    json:          ['application/json', 'text/json'],
+    multipartForm: 'multipart/form-data',
+    rss:           'application/rss+xml',
+    text:          'text/plain',
+    xml:           ['text/xml', 'application/xml']
+]
+
+grails.resources.adhoc.excludes = ['**/gwt/**']
 
 // URL Mapping Cache Max Size, defaults to 5000
 //grails.urlmapping.cache.maxsize = 1000
 
 // What URL patterns should be processed by the resources plugin
 grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*']
-
 
 // The default codec used to encode data with ${}
 grails.views.default.codec = "none" // none, html, base64
@@ -63,41 +66,30 @@ grails.web.disable.multipart=false
 // request parameters to mask when logging exceptions
 grails.exceptionresolver.params.exclude = ['password']
 
-// enable query caching by default
-grails.hibernate.cache.queries = true
+// configure auto-caching of queries by default (if false you can cache individual queries with 'cache: true')
+grails.hibernate.cache.queries = false
 
 // set per-environment serverURL stem for creating absolute links
 environments {
     production {
-        //grails.serverURL = "http://sistemavotacioncontrolacceso.cloudfoundry.com/${appName}"
-		grails.serverURL = "http://sistemavotacioncontrolacceso.cloudfoundry.com"
+	//grails.serverURL = "http://sistemavotacioncontrolacceso.cloudfoundry.com"
+	grails.logging.jul.usebridge = false
+	String localIP = getDevelopmentServerIP();
+	//=====
+	//grails.serverURL = "http://${localIP}:8080/${appName}"
+	grails.serverURL = "http://sistemavotacioncontrolacceso.cloudfoundry.com"
     }
     development {
-		String localIP = getDevelopmentServerIP();
+	grails.logging.jul.usebridge = false
+	String localIP = getDevelopmentServerIP();
         grails.serverURL = "http://${localIP}:8080/${appName}"
     }
     test {
-        //grails.serverURL = "http://sistemavotacioncontrolacceso.cloudfoundry.com"
-		grails.serverURL = "http://localhost:8080/${appName}"
+	grails.logging.jul.usebridge = true	
+	String localIP = getDevelopmentServerIP();
+        grails.serverURL = "http://${localIP}:8080/${appName}"
     }
 
-}
-
-def getDevelopmentServerIP() {
-	Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
-	for (NetworkInterface netint : Collections.list(nets)){
-		Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
-		for (InetAddress inetAddress : Collections.list(inetAddresses)) {
-			if(inetAddress.isSiteLocalAddress()) {
-				String inetAddressStr = inetAddress.toString();
-				while(inetAddressStr.startsWith("/"))
-					inetAddressStr = inetAddressStr.substring(1)
-				log.debug("Setting development address to: ${inetAddressStr}")
-				return inetAddressStr
-			}
-			
-		}
-	}
 }
 
 // log4j configuration
@@ -119,7 +111,9 @@ log4j = {
     debug  'org.sistemavotacion','filtros',
            'grails.app',
            'grails.plugins',
-           'org.springframework.security'
+           'org.springframework.security',
+		   'org.apache.catalina.core',
+		   'com.itextpdf.text.*'
 		   
     error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
            'org.codehaus.groovy.grails.web.pages', //  GSP
@@ -136,6 +130,23 @@ log4j = {
 
 }
 
+def getDevelopmentServerIP() {
+	Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
+	for (NetworkInterface netint : Collections.list(nets)){
+		Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
+		for (InetAddress inetAddress : Collections.list(inetAddresses)) {
+			if(inetAddress.isSiteLocalAddress()) {
+				String inetAddressStr = inetAddress.toString();
+				while(inetAddressStr.startsWith("/"))
+					inetAddressStr = inetAddressStr.substring(1)
+				log.debug("Setting development address to: ${inetAddressStr}")
+				return inetAddressStr
+			}
+			
+		}
+	}
+}
+
 grails {
 	mail {
 		host = "smtp.gmail.com"
@@ -149,6 +160,7 @@ grails {
 
 	}
 }
+
 
 grails.war.copyToWebApp = { args ->
 	fileset(dir:"WEB-INF/cms") {

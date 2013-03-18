@@ -521,9 +521,11 @@ public class MainFrame extends JFrame  implements KeyListener, FocusListener, La
                             estado = Estado.CONECTANDO;
                     infoServidorButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/loading.gif")));
                     infoServidorButton.setText("Añadiendo Autoridad Certificadora");
-                    tareaEnEjecucion = new EnviarMultipartEntityWorker(
+                    EnviarMultipartEntityWorker sendFileWorker = new EnviarMultipartEntityWorker(
                             caPemCertificate, urlAnyadirCertificadoCA, this);
-                    tareaEnEjecucion.execute();
+            		sendFileWorker.setFileParamName("pemCertificate");
+            		sendFileWorker.execute();
+                    tareaEnEjecucion = sendFileWorker;
                     /*TODO JJGZ
                      * if(ActorConIP.EnvironmentMode.TEST.equals(
                             controlAcceso.getEnvironmentMode())) {

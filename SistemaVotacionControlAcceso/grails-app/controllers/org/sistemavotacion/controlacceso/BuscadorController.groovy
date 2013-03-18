@@ -17,6 +17,13 @@ import org.hibernate.search.Search;
 import org.sistemavotacion.util.*;
 import org.apache.lucene.search.Sort;
 
+/**
+ * @infoController Búsquedas
+ * @descController Servicios de búsqueda sobre los datos generados por la aplicación
+ *
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ * */
 class BuscadorController {
 
    SearchHelper searchHelper;
@@ -26,10 +33,18 @@ class BuscadorController {
    
    def grailsApplication
 
+   /**
+	* @httpMethod GET
+	* @return Información sobre los servicios que tienen como url base '/buscador'
+	*/
    def index() { }
    
-   
-   def reindex = {
+   /**
+	* (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS). 
+	* Servicio que reindexa el motor de búsqueda
+	* @httpMethod GET
+	*/
+   def reindex () {
 	   log.debug "Usuario en la lista de administradores, reindexando"
 	   FullTextSession fullTextSession = Search.getFullTextSession(sessionFactory.currentSession);
 	   fullTextSession.createIndexer().startAndWait()
@@ -38,7 +53,12 @@ class BuscadorController {
 	   return false
    }
    
-	def guardarReindex = { 
+   /**
+	* Servicio que reindexa los datos del motor de búsqueda
+	* @param archivoFirmado Obligatorio. Solicitud firmada por un administrador de sistema.
+	* @httpMethod POST
+	*/
+	def guardarReindex () { 
 		SMIMEMessageWrapper smimeMessageReq = params.smimeMessageReq
 		List<String> administradores = Arrays.asList(
 			grailsApplication.config.SistemaVotacion.adminsDNI.split(","))
@@ -66,7 +86,16 @@ class BuscadorController {
 		return false
 	}
 	
-    def evento = {
+	/**
+	 * Servicio que busca la cadena de texto recibida entre las votaciones publicadas.
+	 *
+	 * @param consultaTexto Obligatorio. Texto de la búsqueda.
+	 * @param max Opcional (por defecto 20). Número máximo de documentos que
+	 * 		  devuelve la consulta (tamaño de la página).
+	 * @param offset Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.
+	 * @httpMethod GET
+	 */
+    def evento () {
         def eventosMap = new HashMap()
 		if (!params.consultaTexto) {
 			render message(code: 'busqueda.faltaParametroConsultaTexto')
@@ -82,7 +111,12 @@ class BuscadorController {
         render eventosMap as JSON
     }
 
-	
+	/**
+	 * @httpMethod POST
+	 * @param consulta Documento JSON con los parámetros de la consulta:<br/><code>
+	 * 		  {conReclamaciones:true, conVotaciones:true, textQuery:ipsum, conManifiestos:true}</code>
+	 * @return Una lista en formato JSON con los documentos que cumplen el criterio de la búsqueda.
+	 */
 	def consultaJSON() {
 		String consulta = StringUtils.getStringFromInputStream(request.getInputStream())
 		log.debug("consulta: ${consulta} - offset:${params.offset} - max: ${params.max}")
@@ -192,7 +226,16 @@ class BuscadorController {
 		return false
 	}
 	
-	def eventoPorEtiqueta = {
+	/**
+	 * Servicio que busca los eventos que tienen la etiqueta que se
+	 * pasa como parámetro.
+	 * @param etiqueta Obligatorio. Texto de la etiqueta.
+	 * @param max Opcional (por defecto 20). Número máximo de documentos que
+	 * 		  devuelve la consulta (tamaño de la página).
+	 * @param offset Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.
+	 * @httpMethod GET
+	 */
+	def eventoPorEtiqueta () {
 		def eventosMap = new HashMap()
 		if (!params.etiqueta) {
 			render message(code: 'busqueda.faltaParametroEtiqueta')
@@ -200,7 +243,8 @@ class BuscadorController {
 		}
 		def etiqueta = Etiqueta.findByNombre(params.etiqueta)
 		if (etiqueta) {
-			eventosMap.eventos = EtiquetaEvento.findAllByEtiqueta(etiqueta).collect { etiquetaEvento ->
+			eventosMap.eventos = EtiquetaEvento.findAllByEtiqueta(etiqueta,
+				[max: params.max, offset: params.offset]).collect { etiquetaEvento ->
 				return [id: etiquetaEvento.evento.id, 
 					URL:"${grailsApplication.config.grails.serverURL}/evento?id=${etiquetaEvento.evento.id}",
 					asunto:etiquetaEvento?.evento?.asunto, 

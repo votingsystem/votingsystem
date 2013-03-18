@@ -9,10 +9,14 @@ import org.sistemavotacion.controlacceso.modelo.*
 import grails.converters.JSON
 import org.sistemavotacion.smime.SMIMEMessageWrapper
 import org.sistemavotacion.util.*
+
 /**
-* @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
-*/
+ * @infoController Votaciones
+ * @descController Servicios relacionados con la publicación de votaciones.
+ * 
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ */
 class EventoVotacionController {
 
     def eventoVotacionService
@@ -21,30 +25,54 @@ class EventoVotacionController {
 	def notificacionService
 	def httpService
     
+	/**
+	 * @httpMethod GET
+	 * @return Información sobre los servicios que tienen como url base '/eventoVotacion'.
+	 */
 	def index() { }
 	
-    def guardarAdjuntandoValidacion = {
+	/**
+	 * Servicio para publicar votaciones.
+	 *
+	 * @httpMethod POST
+	 * @param archivoFirmado Archivo firmado en formato SMIME en cuyo contenido se
+	 *        encuentra la votación que se desea publicar en formato HTML.
+	 * @return Recibo que consiste en el archivo firmado recibido con la firma añadida del servidor.
+	 */
+    def guardarAdjuntandoValidacion () {
         flash.respuesta = eventoVotacionService.guardarEvento(
 			params.smimeMessageReq, request.getLocale())
-		if (200 == flash.respuesta.codigoEstado) {
+		if (Respuesta.SC_OK == flash.respuesta.codigoEstado) {
 			String initCentroControlEventURL = "${flash.respuesta.evento.centroControl.serverURL}" + 
 				"${grailsApplication.config.SistemaVotacion.sufijoURLInicializacionEvento}"
 			Respuesta respuestaNotificacion = httpService.sendSignedMessage(
 				initCentroControlEventURL, flash.respuesta.mensajeSMIMEValidado.contenido)
-			if(200 != respuestaNotificacion.codigoEstado) {
+			if(Respuesta.SC_OK != respuestaNotificacion.codigoEstado) {
 				log.debug("Problemas notificando evento '${flash.respuesta.evento.id}' al Centro de " + 
-					"Control - codigo estado:${respuestaNotificacion.codigoEstado} - mensaje: ${respuestaNotificacion.mensaje}")	
+					"Control - codigo estado:${respuestaNotificacion.codigoEstado}" +
+					" - mensaje: ${respuestaNotificacion.mensaje}")	
 				Evento evento = flash.respuesta.evento;
 				evento.estado = Evento.Estado.ACTORES_PENDIENTES_NOTIFICACION
 				Evento.withTransaction { evento.save() }
-				flash.respuesta = new Respuesta(codigoEstado:400, 
+				flash.respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
 					mensaje:message(code: 'http.errorConectandoCentroControl'))
 			} 
 		}
 		return false 
     }
     
-    def obtener = {
+	/**
+	 * @httpMethod GET
+	 * @param id Opcional. El identificador de la votación en la base de datos. Si no se pasa ningún id
+	 *        la consulta se hará entre todos las votaciones.
+	 * @param max Opcional (por defecto 20). Número máximo de votaciones que
+	 * 		  devuelve la consulta (tamaño de la página).
+	 * @param offset Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.
+	 * @param order Opcional, posibles valores 'asc', 'desc'(por defecto). Orden en que se muestran los
+	 *        resultados según la fecha de inicio.
+	 * @return Página con votaciones en formato JSON que cumplen con el criterio de búsqueda.
+	 */
+    def obtener () {
         def eventoList = []
         def eventosMap = new HashMap()
         eventosMap.eventos = new HashMap()
@@ -56,7 +84,7 @@ class EventoVotacionController {
 				}
             }
             if (eventoList.size() == 0) {
-                    response.status = 404 //Not Found
+                    response.status = Respuesta.SC_NOT_FOUND
                     render message(code: 'eventNotFound', args:[params.ids])
                     return
             }
@@ -79,8 +107,9 @@ class EventoVotacionController {
 				} else {
 					eventoList =  EventoVotacion.findAllByEstadoOrEstadoOrEstadoOrEstado(Evento.Estado.ACTIVO,
 						   Evento.Estado.CANCELADO, Evento.Estado.FINALIZADO, Evento.Estado.PENDIENTE_COMIENZO, params)
-					eventosMap.numeroTotalEventosVotacionEnSistema = EventoVotacion.countByEstadoOrEstadoOrEstadoOrEstado(Evento.Estado.ACTIVO,
-						Evento.Estado.CANCELADO, Evento.Estado.FINALIZADO, Evento.Estado.PENDIENTE_COMIENZO)
+					eventosMap.numeroTotalEventosVotacionEnSistema = 
+							EventoVotacion.countByEstadoOrEstadoOrEstadoOrEstado(Evento.Estado.ACTIVO,
+							Evento.Estado.CANCELADO, Evento.Estado.FINALIZADO, Evento.Estado.PENDIENTE_COMIENZO)
 				}
 			}
             eventosMap.offset = params.long('offset')
@@ -93,7 +122,14 @@ class EventoVotacionController {
         render eventosMap as JSON
     }
 
-    def estadisticas = {
+	/**
+	 * Servicio que devuelve estadísticas asociadas a una votación.
+	 *
+	 * @httpMethod GET
+	 * @param id Obligatorio. Identificador en la base de datos de la votación que se desea consultar.
+	 * @return Estadísticas asociadas a la votación que se desea consultar en formato JSON.
+	 */
+    def estadisticas () {
         if (params.long('id')) {
             EventoVotacion eventoVotacion
             if (!params.evento) {
@@ -103,7 +139,7 @@ class EventoVotacionController {
 			} 
             else eventoVotacion = params.evento
             if (eventoVotacion) {
-                response.status = 200
+                response.status = Respuesta.SC_OK
                 def estadisticasMap = new HashMap()
 				estadisticasMap.opciones = []
                 estadisticasMap.id = eventoVotacion.id
@@ -128,16 +164,26 @@ class EventoVotacionController {
 	            else render estadisticasMap as JSON
                 return false
             }
-            response.status = 404
+            response.status = Respuesta.SC_NOT_FOUND
             render message(code: 'eventNotFound', args:[params.id])
             return false
         }
-        response.status = 400
-        render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
+        response.status = Respuesta.SC_ERROR_PETICION
+        render message(code: 'error.PeticionIncorrectaHTML', args:[
+			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
         return false
     }
     
-    def validado = {
+	/**
+	 * Servicio que proporciona una copia de la votación publicada con la firma
+	 * añadida del servidor.
+	 *
+	 * @httpMethod GET
+	 * @param id Obligatorio. El identificador de la votación en la base de datos.
+	 * @return Archivo SMIME de la publicación de la votación firmada por el usuario que
+	 *         la publicó y el servidor.
+	 */
+    def validado () {
         if (params.long('id')) {
 			def evento
 			Evento.withTransaction {
@@ -149,7 +195,7 @@ class EventoVotacionController {
 					mensajeSMIME = MensajeSMIME.findWhere(evento:evento, tipo: Tipo.EVENTO_VOTACION_VALIDADO)
 				}
                 if (mensajeSMIME) {
-                        response.status = 200
+                        response.status = Respuesta.SC_OK
                         response.contentLength = mensajeSMIME.contenido.length
                         //response.setContentType("text/plain")
                         response.outputStream <<  mensajeSMIME.contenido
@@ -158,17 +204,26 @@ class EventoVotacionController {
                 }
             }
             if (!evento || !mensajeSMIME) {
-                response.status = 404
+                response.status = Respuesta.SC_NOT_FOUND
                 render message(code: 'eventNotFound', args:[params.ids])
                 return false
             }
         }
-        response.status = 400
-        render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
+        response.status = Respuesta.SC_ERROR_PETICION
+        render message(code: 'error.PeticionIncorrectaHTML', args:[
+			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
         return false
     }
 	
-	def firmado = {
+	/**
+	 * Servicio que proporciona una copia de la votación publicada.
+	 *
+	 * @httpMethod GET
+	 * @param id Obligatorio. El identificador de la votación en la base de datos.
+	 * @return Archivo SMIME de la publicación de la votación firmada por el usuario
+	 *         que la publicó.
+	 */
+	def firmado () {
 		if (params.long('id')) {
 			def evento
 			Evento.withTransaction {
@@ -180,7 +235,7 @@ class EventoVotacionController {
 					mensajeSMIME = MensajeSMIME.findWhere(evento:evento, tipo: Tipo.EVENTO_VOTACION)
 				}
 				if (mensajeSMIME) {
-					response.status = 200
+					response.status = Respuesta.SC_OK
 					response.contentLength = mensajeSMIME.contenido.length
 					response.setContentType("text/plain")
 					response.outputStream <<  mensajeSMIME.contenido
@@ -188,16 +243,25 @@ class EventoVotacionController {
 					return false
 				}
 			}
-			response.status = 404
+			response.status = Respuesta.SC_NOT_FOUND
 			render message(code: 'eventNotFound', args:[params.ids])
 			return false
 		}
-		response.status = 400
-		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
+		response.status = Respuesta.SC_ERROR_PETICION
+		render message(code: 'error.PeticionIncorrectaHTML', args:[
+			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false
 	}
 	
-	def guardarSolicitudCopiaRespaldo = {
+	/**
+	 * Servicio que devuelve los votos y las solicitudes de acceso recibidas en una votación.
+	 *
+	 * @httpMethod POST
+	 * @param archivoFirmado Archivo firmado en formato SMIME con los datos de la
+	 * 		  votación origen de la copia de seguridad.
+	 * @return Archivo zip con los archivos relacionados con la votación.
+	 */
+	def guardarSolicitudCopiaRespaldo () {
 		EventoVotacion eventoVotacion
 		if (!params.evento) {
 			SMIMEMessageWrapper smimeMessage= params.smimeMessageReq
@@ -205,13 +269,14 @@ class EventoVotacionController {
 			if (params.long('eventoId')) {
 				eventoVotacion = EventoVotacion.get(mensajeJSON.eventoId)
 				if (!eventoVotacion) {
-					response.status = 404
+					response.status = Respuesta.SC_NOT_FOUND
 					render message(code: 'eventNotFound', args:[mensajeJSON.eventoId])
 					return false
 				}
 			} else {
-				response.status = 400
-				render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
+				response.status = Respuesta.SC_ERROR_PETICION
+				render message(code: 'error.PeticionIncorrectaHTML', args:[
+					"${grailsApplication.config.grails.serverURL}/${params.controller}"])
 				return false
 			}
 		} else eventoVotacion = params.evento

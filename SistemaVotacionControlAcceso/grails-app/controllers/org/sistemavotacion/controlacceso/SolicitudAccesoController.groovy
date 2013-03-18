@@ -7,6 +7,9 @@ import org.springframework.web.multipart.MultipartFile;
 import grails.converters.JSON
 
 /**
+ * @infoController Solicitudes de acceso
+ * @descController Servicios relacionados con las solicitudes de acceso recibidas en una votación.
+ * 
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
@@ -16,9 +19,19 @@ class SolicitudAccesoController {
 	def firmaService
 	def csrService
 
-	def index = {}
+	/**
+	 * @httpMethod GET
+	 * @return Información sobre los servicios que tienen como url base '/solicitudAcceso'.
+	 */
+	def index () {}
 	
-    def obtener = {
+	/**
+	 * @httpMethod GET
+	 * @param id Opcional. El identificador de la solicitud de acceso en la base de datos.
+	 * @return <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Solicitud-de-acceso">
+	 * 			La solicitud de acceso</a> solicitada.
+	 */
+    def obtener () {
         if (params.long('id')) {
 			def solicitudAcceso
 			SolicitudAcceso.withTransaction {
@@ -41,7 +54,16 @@ class SolicitudAccesoController {
         return false
     }
 
-    def procesar = { 
+	/**
+	 * Servicio que valida las <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Solicitud-de-acceso">
+	 * solicitudes de acceso</a> recibidas en una votación.
+	 *
+	 * @httpMethod POST
+	 * @param archivoFirmado Obligatorio. La solicitud de acceso.
+	 * @param csr Obligatorio. La solicitud de certificado de voto.
+	 * @return La solicitud de certificado de voto firmada.
+	 */
+    def procesar () { 
         String nombreEntidadFirmada = grailsApplication.config.SistemaVotacion.nombreEntidadFirmada;
 		SolicitudAcceso solicitudAcceso;
 		Respuesta respuesta;
@@ -91,7 +113,13 @@ class SolicitudAccesoController {
 		return false
     }
     
-    def encontrar = {
+	/**
+	 * @httpMethod GET
+	 * @param hashSolicitudAccesoHex Obligatorio. Hash en formato hexadecimal asociado
+	 *        a la solicitud de acceso.
+	 * @return La solicitud de acceso asociada al hash.
+	 */
+    def encontrar () {
         if (params.hashSolicitudAccesoHex) {
             HexBinaryAdapter hexConverter = new HexBinaryAdapter();
             String hashSolicitudAccesoBase64 = new String(
@@ -113,11 +141,18 @@ class SolicitudAccesoController {
             return false
         }
         response.status = Respuesta.SC_ERROR_PETICION
-        render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
+        render message(code: 'error.PeticionIncorrectaHTML', args:[
+			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
         return false
     }
 	
-	def encontrarPorNif = {
+	/**
+	 * @httpMethod GET
+	 * @param eventoId Obligatorio. El identificador de la votación en la base de datos.
+	 * @param nif Obligatorio. El nif del solicitante.
+	 * @return La solicitud de acceso asociada al nif y el evento.
+	 */
+	def encontrarPorNif () {
 		if(params.nif && params.long('eventoId')) {
 			EventoVotacion evento
 			EventoVotacion.withTransaction {

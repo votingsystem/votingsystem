@@ -5,25 +5,19 @@
     </head>
     <body>
    	    <div class="container">
-    
-	    <div class="navbar">   
-			<div class="navbar-inner">
-			    <div class="container">
-			 		<ul class="nav">
-						<li><a href="informacion">${message(code: 'infoLabel', null)}</a></li>
-						<li><a href="listaServicios">${message(code: 'servicesListLabel', null)}</a></li>
-						<li class="active"><a href="datosAplicacion">${message(code: 'appDataLabel', null)}</a></li>
-					</ul>
-				</div>
-			</div>
-		</div>
+   	    
+	    <ul class="nav nav-tabs">
+			<li><a href="informacion"><g:message code="infoLabel"/></a></li>
+			<li><a href="listaServicios"><g:message code="serviceURLSMsg"/></a></li>
+			<li class="active"><a href="datosAplicacion"><g:message code="appDataLabel"/></a></li>
+		</ul>	
     
 		<div id="status" role="complementary">
 			<h1>${message(code: 'appLabel', null)}</h1>
 			<ul>
 				<li>${message(code: 'appVersionLabel', null)}: <g:meta name="app.version"/></li>
 				<li>${message(code: 'grailsVersionLabel', null)}: <g:meta name="app.grails.version"/></li>
-				<li>${message(code: 'groovyVersionLabel', null)}: ${org.codehaus.groovy.runtime.InvokerHelper.getVersion()}</li>
+				<li>${message(code: 'groovyVersionLabel', null)}: ${GroovySystem.getVersion()}</li>
 				<li>${message(code: 'jvmVersionLabel', null)}: ${System.getProperty('java.version')}</li>
 				<li>${message(code: 'controllersLabel', null)}: ${grailsApplication.controllerClasses.size()}</li>
 				<li>${message(code: 'domainsLabel', null)}: ${grailsApplication.domainClasses.size()}</li>

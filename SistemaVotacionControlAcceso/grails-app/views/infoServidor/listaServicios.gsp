@@ -5,17 +5,12 @@
     </head>
     <body>
     <div class="container">
-	    <div class="navbar">   
-			<div class="navbar-inner">
-			    <div class="container">
-			 		<ul class="nav">
-						<li><a href="informacion">${message(code: 'infoLabel', null)}</a></li>
-						<li class="active"><a href="listaServicios">${message(code: 'servicesListLabel', null)}</a></li>
-						<li><a href="datosAplicacion">${message(code: 'appDataLabel', null)}</a></li>
-					</ul>
-				</div>
-			</div>
-		</div>
+    
+ 		<ul class="nav nav-tabs">
+			<li><a href="informacion"><g:message code="infoLabel"/></a></li>
+			<li class="active"><a href="listaServicios"><g:message code="serviceURLSMsg"/></a></li>
+			<li><a href="datosAplicacion"><g:message code="appDataLabel"/></a></li>
+		</ul>
 		
 		<div id="content" role="main">
 			<g:include controller="infoServidor" />
