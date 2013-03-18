@@ -28,7 +28,7 @@ class EventoVotacionController {
 	 * @httpMethod GET
 	 * @return Información sobre los servicios que tienen como url base '/eventoVotacion'.
 	 */
-	def index = {}
+	def index () {}
 	
 	/**
 	 * Servicio que da de alta las votaciones.
@@ -37,7 +37,7 @@ class EventoVotacionController {
 	 * @param archivoFirmado Obligatorio. Archivo con los datos de la votación firmado
 	 * 		  por el usuario que la publica y el Control de Acceso en la que se publica.
 	 */
-	def guardarEvento = {
+	def guardarEvento () {
 		String serverURL = params.smimeMessageReq.getHeader("serverURL")[0]
 		ControlAcceso controlAcceso = subscripcionService.comprobarControlAcceso(serverURL)
 		//TODO validar con la cadena de certificacion -> validationResult = smimeMessageReq.verify(pkixParams);
@@ -60,7 +60,7 @@ class EventoVotacionController {
 	 * @httpMethod GET
 	 * @return Información de las votaciones paginada y en formato JSON.
 	 */
-    def obtener = {
+    def obtener () {
 		List eventoList = []
 		def eventosMap = new HashMap()
 		eventosMap.eventos = new HashMap()
@@ -118,7 +118,7 @@ class EventoVotacionController {
 	 * @httpMethod GET
 	 * @return Información en formato JSON de los votos recibidos en la votación solicitada.
 	 */
-    def obtenerVotos = {
+    def obtenerVotos () {
         if (params.long('eventoVotacionId') && params.controlAccesoServerURL) {
 			ControlAcceso controlAcceso = ActorConIP.findWhere(serverURL:params.controlAccesoServerURL)
 			if (!controlAcceso) {
@@ -193,7 +193,7 @@ class EventoVotacionController {
 	 * @httpMethod GET
 	 * @return Información en formato JSON de las estadísticas de una votación.
 	 */
-    def estadisticas = {
+    def estadisticas () {
 		EventoVotacion eventoVotacion
 		if (params.long('id')) {
             EventoVotacion.withTransaction {
@@ -248,7 +248,7 @@ class EventoVotacionController {
 	 * @param id  Obligatorio. El identificador de la votación en la base de datos.
 	 * @httpMethod GET
 	 */
-    def comprobarFechas = {
+    def comprobarFechas () {
 		EventoVotacion eventoVotacion
 		if (params.long('id')) {
             EventoVotacion.withTransaction {
@@ -275,7 +275,7 @@ class EventoVotacionController {
 	 * 			el usuario que la publicó o un administrador de sistema.
 	 * @httpMethod POST
 	 */
-	def guardarCancelacion= {
+	def guardarCancelacion() {
 	   SMIMEMessageWrapper smimeMessageReq = params.smimeMessageReq;
 	   if(params.smimeMessageReq) {
 		   Respuesta respuesta = eventoVotacionService.cancelarEvento(

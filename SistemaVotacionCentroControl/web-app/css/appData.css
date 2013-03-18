@@ -104,3 +104,13 @@
 	     	text-align: center;
 	     	line-height: 0.1;
 	     }
+   	     .controllerInfoHeader {
+	     	color: #4c4c4c;
+	     }
+	     	     .params_result_div {
+	     	margin:0px 0px 0px 20px;
+	     }
+	     .serviceURLS {
+	     	margin:10px 0px 20px 200px;
+	     	color: #4c4c4c;
+	     }

@@ -1,68 +1,71 @@
 
-<u><h3> Aplicación </h3></u>
 
-<p> Servicios de acceso a la aplicación web principal </p>
+<u><h3 class="controllerInfoHeader">Aplicación</h3></u>
 
 
-<h4>URLs de servicio</h4>
+	 Servicios de acceso a la aplicación web principal 
+ 
+  
+
+
 <div>
 
-<p>
-- <u>GET</u> - 
-<a href="http://192.168.1.5:8080/SistemaVotacionCentroControl/app/generateRestDoc">/app/generateRestDoc</a><br/>  	
-
-</p>
+	<HR>
 	
-</p>
-
-
-
-<p><b>Respuesta:</b><br/>Genera la documentación sobre los servicios REST</p>
-
-<HR>
-
-<p>
-- <u>GET</u> - 
-<a href="http://192.168.1.5:8080/SistemaVotacionCentroControl/app/home">/app/home</a><br/>  	
-
-</p>
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${grailsApplication.config.grails.serverURL}/app/home">/app/home</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			</p>
 	
-</p>
-
-
-
-<p><b>Respuesta:</b><br/>La página principal de la aplicación web de votación.</p>
-
-<HR>
-
-<p>
-- <u>GET</u> - 
-<a href="http://192.168.1.5:8080/SistemaVotacionCentroControl/app/index">/app/index</a><br/>  	
-
-</p>
+			
+				<p><b>Respuesta:</b><br/>La página principal de la aplicación web de votación.</p>
+			
+			</div>
+		<HR>
 	
-</p>
-
-
-
-<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/app'</p>
-
-<HR>
-
-<p>
-- <u>GET</u> - 
-<a href="http://192.168.1.5:8080/SistemaVotacionCentroControl/app/clienteAndroid">/app/clienteAndroid</a><br/>  	
-
-</p>
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${grailsApplication.config.grails.serverURL}/app/index">/app/index</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			</p>
 	
-</p>
-
-
-
-<p><b>Respuesta:</b><br/>La página principal de la aplicación web de votación con parámetros de utilidad 		   para una sesión con cliente Android.</p>
-
-<HR>
-
+			
+				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/app'</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${grailsApplication.config.grails.serverURL}/app/clienteAndroid">/app/clienteAndroid</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			</p>
+	
+			
+				<p><b>Respuesta:</b><br/>Parámetros de configuración de Hibernate</p>
+			
+			</div>
+		<HR>
+	
 
 </div>
 

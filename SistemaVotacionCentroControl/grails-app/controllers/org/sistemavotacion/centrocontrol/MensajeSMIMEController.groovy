@@ -16,14 +16,14 @@ class MensajeSMIMEController {
 	 * @httpMethod GET
 	 * @return Información sobre los servicios que tienen como url base '/mensajeSMIME'
 	 */
-	def index = {}
+	def index () {}
 	
 	/**
 	 * @httpMethod GET
 	 * @param id	Obligatorio. Identificador del mensaje en la base de datos
 	 * @return El mensaje solicitado.
 	 */
-    def obtener = {
+    def obtener () {
         if (params.long('id')) {
             def mensajeSMIME;
 			MensajeSMIME.withTransaction {

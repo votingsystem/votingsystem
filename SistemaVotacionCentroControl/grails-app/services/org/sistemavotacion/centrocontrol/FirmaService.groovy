@@ -45,7 +45,7 @@ class FirmaService {
 		trustedPollingCertsHashMap = new HashMap<Long, X509Certificate>()
 		eventTrustedCertsHashMap = new HashMap<Long, Set<X509Certificate>>()
 		cadenaCertificacion = grailsApplication.mainContext.getResource(
-			grailsApplication.config.SistemaVotacion.rutaCadenaCertificacion).getFile();
+			grailsApplication.config.SistemaVotacion.rutaCadenaCertificacion)?.getFile();
 		File keyStore = grailsApplication.mainContext.getResource(
 			grailsApplication.config.SistemaVotacion.rutaAlmacenClaves).getFile()
 		String aliasClaves = grailsApplication.config.SistemaVotacion.aliasClavesFirma

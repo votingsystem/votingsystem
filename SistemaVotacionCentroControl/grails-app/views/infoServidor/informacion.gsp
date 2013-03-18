@@ -11,15 +11,15 @@
    	    
    	    <div class="container">
    	    
-	   <ul class="nav nav-tabs">
-			<li class="active"><a href="informacion">${message(code: 'infoLabel', null)}</a></li>
-			<li><a href="listaServicios">${message(code: 'servicesListLabel', null)}</a></li>
-			<li><a href="datosAplicacion">${message(code: 'appDataLabel', null)}</a></li>
-		</ul>
+    	 <ul class="nav nav-tabs">
+			<li class="active"><a href="informacion"><g:message code="infoLabel"/></a></li>
+			<li><a href="listaServicios"><g:message code="serviceURLSMsg"/></a></li>
+			<li><a href="datosAplicacion"><g:message code="appDataLabel"/></a></li>
+		</ul>	
 		
 		<div id="content" class="content" role="main">
            <div class="mainLinkContainer">
-	        	<div class="mainLink"><a href="${grailsApplication.config.grails.serverURL}/app/index">${message(code: 'mainPageLabel', null)}</a></div>
+	        	<div class="mainLink"><a href="${grailsApplication.config.grails.serverURL}/app/home">${message(code: 'mainPageLabel', null)}</a></div>
 	            <div class="mainLink"><a href="https://github.com/jgzornoza/SistemaVotacion/tree/master/SistemaVotacionCentroControl">${message(code: 'sourceCodeLabel', null)}</a></div>
 	            <div class="mainLink"><a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Centro-de-Control">${message(code: 'wikiLabel', null)}</a></div>
            </div>

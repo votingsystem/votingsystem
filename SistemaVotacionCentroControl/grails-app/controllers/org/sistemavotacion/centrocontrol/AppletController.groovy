@@ -9,20 +9,20 @@ class AppletController {
 	
 	def index() { }
 	
-	def cliente = { }
+	def cliente () { }
 	
-	def herramientaValidacion = { }
+	def herramientaValidacion () { }
 	
-	def prueba = {
+	def prueba () {
 		render RCU.getLocale(request)
 		return false;
 	}
 	
-	def jnlpCliente = {
+	def jnlpCliente () {
 		render (view:"jnlpCliente", contentType: "application/x-java-jnlp-file")
 	}
 	
-	def jnlpHerramienta = {
+	def jnlpHerramienta () {
 		render (view:"jnlpHerramienta", contentType: "application/x-java-jnlp-file")
 	}
 	

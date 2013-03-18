@@ -35,13 +35,14 @@ class BuscadorController {
 	* @httpMethod GET
 	* @return Información sobre los servicios que tienen como url base '/buscador'
 	*/
-   def index = {}
+   def index () {}
    
    /**
+    * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS). 
     * Servicio que reindexa el motor de búsqueda
 	* @httpMethod GET
 	*/
-   def reindex = {
+   def reindex () {
 		log.debug "Usuario en la lista de administradoreas, reindexando"
 		FullTextSession fullTextSession = Search.getFullTextSession(sessionFactory.currentSession);
 		fullTextSession.createIndexer().startAndWait()
@@ -53,9 +54,9 @@ class BuscadorController {
    /**
 	* Servicio que reindexa los datos del motor de búsqueda
 	* @param archivoFirmado Obligatorio. Solicitud firmada por un administrador de sistema.
-	* @httpMethod GET
+	* @httpMethod POST
 	*/
-	def guardarReindex = { 
+	def guardarReindex () { 
 		SMIMEMessageWrapper smimeMessageReq = params.smimeMessageReq
 		List<String> administradores = Arrays.asList(
 			grailsApplication.config.SistemaVotacion.adminsDNI.split(","))
@@ -86,7 +87,7 @@ class BuscadorController {
 	 * @param offset Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.
 	 * @httpMethod GET
 	 */
-    def evento = {
+    def evento () {
         def eventosVotacionMap = new HashMap()
 		if (!params.consultaTexto) {
 			render(view: "index")
@@ -204,7 +205,7 @@ class BuscadorController {
 	 * @param offset Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.
 	 * @httpMethod GET
 	 */
-	def eventoPorEtiqueta = {
+	def eventoPorEtiqueta () {
 		def eventosMap = new HashMap()
 		if (!params.etiqueta) {
 			render(view:"index")

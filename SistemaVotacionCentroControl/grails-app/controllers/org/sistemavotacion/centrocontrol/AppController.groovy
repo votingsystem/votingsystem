@@ -29,28 +29,12 @@ class AppController {
 	 */
 	def home() {
 	}
-
-	/**
-	 * @httpMethod GET
-	 * @return Genera la documentación sobre los servicios REST
-	 */
-	/**/def generateRestDoc() {
-		Respuesta respuesta = restDocumentationService.generateDocs()
-		response.status = respuesta.codigoEstado
-		String msg = respuesta.mensaje
-		if(!msg) {
-			if(Respuesta.SC_OK == respuesta.codigoEstado) msg = "OK"
-			else msg = "ERROR"
-		}
-		render msg
-		return false
-	}
 	
 	/**
 	 * @httpMethod GET
 	 * @return Parámetros de configuración de Hibernate 
 	 */
-	/*def hibernate = {
+	/*def hibernate () {
 		render hibernateProperties as JSON
 		return false
 	}*/

@@ -32,7 +32,7 @@ class SubscripcionController {
 	 * @httpMethod GET
 	 * @return Información sobre los servicios que tienen como url base '/subscripcion'.
 	 */
-	def index = {}
+	def index () {}
 	
 	/**
 	 * Servicio que da de alta Controles de Acceso.
@@ -40,7 +40,7 @@ class SubscripcionController {
 	 * @httpMethod POST
 	 * @param archivoFirmado Obligatorio. Archivo con los datos del control de acceso que se desea dar de alta.
 	 */
-    def guardarAsociacionConControlAcceso = {
+    def guardarAsociacionConControlAcceso () {
 		SMIMEMessageWrapper smimeMessageReq = params.smimeMessageReq
 		log.debug("guardarAsociacionConControlAcceso - mensaje: ${smimeMessageReq.getSignedContent()}")
         def mensajeJSON = JSON.parse(smimeMessageReq.getSignedContent())
@@ -49,14 +49,14 @@ class SubscripcionController {
 			ControlAcceso controlAcceso = ControlAcceso.findWhere(serverURL:serverURL)
 			String mensaje
 			if (controlAcceso) {
-				response.status = 400
-				mensaje = "Ya existe un 'Control de Acceso' con URL:'actorConIP.serverURL'"	
+				response.status = Respuesta.SC_ERROR_PETICION
+				mensaje = message(code: 'controlCenterAlreadyAssociatedMsg', args:[controlAcceso.serverURL]) 
 			} else {
 				def urlInfoControlAcceso = "${serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLInfoServidor}"
 				Respuesta respuesta = httpService.obtenerInfoActorConIP(urlInfoControlAcceso, new ControlAcceso())
 				response.status = respuesta.codigoEstado
 				if (Respuesta.SC_OK== respuesta.codigoEstado) {					
-					mensaje = "Asociado ControlAcceso con URL: '${actorConIP.serverURL}'"
+					mensaje = message(code: 'controlCenterAssociatedMsg', args:[urlInfoControlAcceso]) 
 					ControlAcceso actorConIP = respuesta.actorConIP
 					actorConIP.save()
 				} else mensaje = respuesta.mensaje
@@ -65,7 +65,7 @@ class SubscripcionController {
             render mensaje
             return false
         } 
-        response.status = 400
+        response.status = Respuesta.SC_ERROR_PETICION
         render message(code: 'error.PeticionIncorrecta')
         return false		
     }
@@ -74,8 +74,8 @@ class SubscripcionController {
 	 * 
 	 * @httpMethod GET
 	 * @param	feedType Opcional. Formatos de feed soportados rss_0.90, rss_0.91, rss_0.92, 
-	 * 			rss_0.93, rss_0.94, rss_1.0, rss_2.0, atom_0.3
-	 * @return Información sobre los servicios que tienen como url base '/subscripcion'.
+	 * 			rss_0.93, rss_0.94, rss_1.0, rss_2.0, atom_0.3. Por defecto se sirve atom 1.0.
+	 * @return Información en el formato solicitado sobre las votaciones publicadas.
 	 */
 	def votaciones() {
 		if(params.feedType && supportedFormats.contains(params.feedType)) {
@@ -109,7 +109,8 @@ class SubscripcionController {
 			if(votacion.usuario) {
 				author = "${votacion.usuario.nombre} ${votacion.usuario.primerApellido}"
 			}
-			String urlVotacion = "${grailsApplication.config.grails.serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLVotar}" + votacion.id
+			String urlVotacion = "${grailsApplication.config.grails.serverURL}" +
+				"${grailsApplication.config.SistemaVotacion.sufijoURLVotar}" + votacion.id
 			String accion = message(code: 'subscripcion.votar')
 			 //if(contenido?.length() > 500) contenido = contenido.substring(0, 500)
 			String contenidoFeed = "<p>${contenido}</p>" +
@@ -124,7 +125,7 @@ class SubscripcionController {
 		" -${grailsApplication.config.SistemaVotacion.serverName}-"
 		SyndFeed feed = new SyndFeedImpl(feedType: feedType,
 				title: tituloSubscripcionVotaciones,
-				link: "${grailsApplication.config.grails.serverURL}/app/index#VOTACIONES",
+				link: "${grailsApplication.config.grails.serverURL}/app/home#VOTACIONES",
 				description: message(code: 'subscripcion.descripcionSubscripcionVotaciones'),
 				entries: entradas);
 		StringWriter writer = new StringWriter();

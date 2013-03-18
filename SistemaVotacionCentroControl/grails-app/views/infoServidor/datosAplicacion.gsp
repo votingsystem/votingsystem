@@ -7,9 +7,9 @@
      	<div class="container">
     
    	    <ul class="nav nav-tabs">
-			<li><a href="informacion">${message(code: 'infoLabel', null)}</a></li>
-			<li><a href="listaServicios">${message(code: 'servicesListLabel', null)}</a></li>
-			<li class="active"><a href="datosAplicacion">${message(code: 'appDataLabel', null)}</a></li>
+			<li><a href="informacion"><g:message code="infoLabel"/></a></li>
+			<li><a href="listaServicios"><g:message code="serviceURLSMsg"/></a></li>
+			<li class="active"><a href="datosAplicacion"><g:message code="appDataLabel"/></a></li>
 		</ul>
     
 		<div id="status" role="complementary">

@@ -3,28 +3,25 @@ package org.sistemavotacion.centrocontrol
 import java.util.List;
 import java.util.Map;
 
-import groovy.text.GStringTemplateEngine;
-import groovy.text.Template;
-import groovy.text.TemplateEngine;
-
 import java.util.HashMap;
-import java.util.Map;
 
-import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
-import org.codehaus.groovy.tools.groovydoc.ClasspathResourceManager
+import org.codehaus.groovy.ast.builder.AstBuilder
 import org.codehaus.groovy.tools.groovydoc.FileOutputTool
+import org.codehaus.groovy.tools.groovydoc.GroovyDocTool
 import org.codehaus.groovy.tools.groovydoc.OutputTool
-import org.springframework.core.io.Resource
-import org.codehaus.groovy.grails.commons.ControllerArtefactHandler;
+import org.codehaus.groovy.tools.groovydoc.SimpleGroovyMethodDoc
+import org.codehaus.groovy.tools.groovydoc.SimpleGroovyRootDoc
 
 import org.codehaus.groovy.grails.commons.DefaultGrailsControllerClass
 import org.codehaus.groovy.grails.commons.GrailsControllerClass
 import org.sistemavotacion.centrocontrol.modelo.Respuesta
-import org.sistemavotacion.docs.CommentDoc
-import org.sistemavotacion.docs.ControllerDoc
+import org.sistemavotacion.doc.*
 import org.sistemavotacion.util.*;
-import groovy.text.Template;
-import groovy.text.TemplateEngine;
+
+import groovy.io.FileType
+import grails.util.Environment
+import org.codehaus.groovy.control.CompilePhase
+
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
@@ -34,113 +31,111 @@ class RestDocumentationService {
 	public static final List classTokens = ["@infoController", "@descController", "@author"]
 	public static final List methodTokens = ["@httpMethod", "@param", "@return"]
 
-	private File controllerDocTemplateFile = new File("." + File.separator + "grails-app" +
-		File.separator + "views" + File.separator + "templates" + File.separator + 
-		"restControllerDoc.html")
-	
 	def grailsApplication
-	File controllersBaseDir = new File("." + File.separator + "grails-app" + 
+	grails.gsp.PageRenderer groovyPageRenderer
+	
+	File controllersBaseDir = new File("." + File.separator + "grails-app" +
 		File.separator + "controllers")
 	File controllerDocViewBaseDir = new File("." + File.separator + "grails-app" +
 		File.separator + "views")
 	
+	
 	public Respuesta generateDocs() {
-		try {
-			grailsApplication.controllerClasses?.each { controller ->//DefaultGrailsControllerClass
-				ControllerDoc controllerDoc = new ControllerDoc(controller,
-					controllerDocViewBaseDir.absolutePath, grailsApplication.config.grails.serverURL);
-				//if(!"app".equals(controllerDoc.getLogicalPropertyName())) return
-				
-				log.debug("controllerDoc: ${controllerDoc.controllerDocFilePath}")
-				controller.uris?.each { actionURI ->
-					if(actionURI.indexOf("/**") == -1) {
-						String actionMethodName= controller.getMethodActionName(actionURI)
-						controllerDoc.addControllerAction(actionMethodName, actionURI)
-						log.debug("actionMethodName: ${actionMethodName} - actionURI: ${actionURI}")
-					}
+		log.debug(" --- generateDocs")
+		Map<String, Set> controllerToActionsMap  = new HashMap<String, Set>()
+		grailsApplication.controllerClasses?.each { controller ->//DefaultGrailsControllerClass
+			Set<String> methodSet = new HashSet<String>()
+			controller.uris?.each { actionURI ->
+				if(actionURI.indexOf("/**") == -1) {
+					String actionMethodName= controller.getMethodActionName(actionURI)
+					methodSet.add(actionMethodName)
 				}
-				log.debug("controllerActions.size(): ${controllerDoc.getControllerActions()?.size()}")
-				parseController(controllerDoc);
-				if(!controllerDoc.isPluginController) controllerDoc.generateDoc(controllerDocTemplateFile);
 			}
-		}catch(Exception ex) {
-			log.error(ex.getMessage(), ex)
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION, mensaje:ex.getMessage())
+			log.debug("controller: ${controller.getLogicalPropertyName()} - Actions number: ${methodSet?.size()}")
+			controllerToActionsMap.put(controller.getLogicalPropertyName(), methodSet)
+		}
+		List fileNames = new ArrayList()
+		GroovyDocTool docTool = new GroovyDocTool("")
+		SimpleGroovyRootDoc rootDoc = docTool.getRootDoc()
+		controllersBaseDir.eachFileRecurse (FileType.FILES) { file ->
+			println("--- Controller file.path: ${file.path}")
+			fileNames << file.path
+		}
+		/*File file = new File("/home/jgzornoza/github/SistemaVotacion/SistemaVotacionCentroControl/grails-app/controllers/org/sistemavotacion/centrocontrol/InfoServidorController.groovy")
+		if(!file.exists()) {
+			log.debug("El archivo no existe")
+			
+		}
+		fileNames << file.path*/
+		docTool.add(fileNames)
+		rootDoc.classes().each {//SimpleGroovyClassDoc
+			ControllerDoc controllerDoc = new ControllerDoc(it.name());
+			if(it.methods()?.length == 0) return;
+			Set<String> actionSet = controllerToActionsMap.get(controllerDoc.logicalPropertyName)
+			String controllerBaseURI = "/${controllerDoc.logicalPropertyName}"
+			parseControllerComment(controllerDoc, it.getRawCommentText())
+			log.debug("----Controller: ${it.name()} - Number of methods: ${it.methods().length}" +
+				" - Number of actions: ${actionSet?.size()}")
+			it.methods().each { method -> //SimpleGroovyMethodDoc
+				if(!actionSet.contains(method.name())) {
+					log.debug("--- method ${method.name()} is not a controller Action")
+					return
+				} else log.debug("--- Adding Action: ${method.name()}")
+				ControllerActionDoc controllerActionDoc =
+					new ControllerActionDoc(method.name(), "$controllerBaseURI/${method.name()}");
+				controllerDoc.addControllerAction(method.name(), controllerActionDoc)
+				controllerActionDoc.commentDoc = parseActionComment(method.getRawCommentText())
+			}
+			if(actionSet.size() != controllerDoc.getControllerActions()?.size()) {
+				log.error("ERROR - Controller: ${it.name()} - actionSet.size(): ${actionSet.size()} - " +
+					" - controllerDoc.getControllerActions().size(): ${controllerDoc.getControllerActions().size()}")
+			}
+			generateDoc(controllerDoc);
 		}
 		return new Respuesta(codigoEstado:Respuesta.SC_OK)
 	}
-
-	private void parseController(ControllerDoc controllerDoc) {
-		String controllerPath = controllersBaseDir.absolutePath  + File.separator + 
-			controllerDoc.getReferenceInstance().class.getName().replace(".", "/") + ".groovy";
-		log.debug(" --- parseController - controllerPath: ${controllerPath}")
-		File controlleFile = new File(controllerPath)
-		if(!controlleFile.exists()) {
-			log.debug("Plugin controller")
-			controllerDoc.isPluginController = true;
-			return
+	
+	private void generateDoc(ControllerDoc controllerDoc) {
+		log.debug(" --- generateDoc")
+		String renderedSrc = groovyPageRenderer.render (
+			view:"/templates/restControllerDoc", model: [controllerDoc: controllerDoc]);
+		FileOutputTool output = new FileOutputTool();
+		String fs = File.separator
+		output.writeToOutput("${controllerDocViewBaseDir.absolutePath}${fs}${controllerDoc.logicalPropertyName}" +
+			"${fs}index.gsp", renderedSrc);
+	}
+	
+	private String cleanComment(String comment) {
+		if(!comment || "".equals(comment)) return comment;
+		String[] commentLines = comment.split(System.getProperty("line.separator"));
+		String finalComment = ""
+		commentLines.each {
+			it = it.replace('*', '').replace("\n", "<br/>").trim()
+			finalComment = finalComment.concat(it)
 		}
-		def idx = 0
-		int beginCommentIndex;
-		int endCommentIndex;
-		boolean isCommentLine = false
-		String comment = ""
-		controlleFile.eachLine{ line ->
-			line = line.replace("/**/", "")
-		    idx++
-			beginCommentIndex = line.indexOf("/**")
-			endCommentIndex = line.indexOf("*/")
-			if(isCommentLine && endCommentIndex == -1) {
-				comment = (comment + line.trim()).replace('*', '').replace("\n", "<br/>").trim();
-				return;
+		return finalComment
+	}
+	
+	private Map<String, Integer> getMethodsLineNumberMap(File controlleFile) {
+		log.debug("getMethodsLineNumberMap")
+		String fileString = new String(FileUtils.getBytesFromFile(controlleFile))
+		def ast = new AstBuilder().buildFromString(CompilePhase.INSTRUCTION_SELECTION, false, fileString)
+		Map<String, Integer> result = new HashMap<String, Integer>();
+		ast[1].methods.each {//MethodNode
+			log.debug("--- methods: ${it.name} - lineNumber: ${it.lineNumber}")
+			result.put(it.name, it.lineNumber)
+			it.getAnnotations().each {annotation ->
+				log.debug("annotation: ${annotation}")
 			}
-			if(isCommentLine && endCommentIndex >= 0) {
-				comment = comment + line.substring(0, endCommentIndex).trim();
-				line = line.substring(endCommentIndex)
-				isCommentLine = false
-			}
-			if(!isCommentLine && beginCommentIndex >= 0) {
-				if(endCommentIndex >= 0) {
-					comment = line.substring(beginCommentIndex, endCommentIndex).trim();
-					line.replace(comment, "");
-					log.debug">>>>>> line ${line} - comment:${comment}"
-				} else {
-					isCommentLine = true;
-					comment = line.substring(beginCommentIndex).replace("/*", "").trim();
-					line = line.substring(0, beginCommentIndex)
-				}
-			}
-			comment = comment.replace('*', '').replace("\n", "<br/>").trim()
-			if(!line || line.length() == 0) return
-			if(line.contains("class ${controllerDoc.getNaturalName()}")) {
-				parseControllerComment(controllerDoc, comment)
-				comment = "";
-			}
-			controllerDoc.controllerActions.each{controllerActionDoc ->
-		        //TODO
-				if(line.contains("def ${controllerActionDoc.method}")
-					&& line.contains("{")){
-					int methodDefIdx = line.indexOf("def ${controllerActionDoc.method}") 
-					int nextCharIdx = methodDefIdx + "def ${controllerActionDoc.method}".length()
-					Character nextChar = line.substring(nextCharIdx, nextCharIdx + 1)
-					if(Character.isLetter(nextChar)) {
-						log.debug("---- buscando 'def ${controllerActionDoc.method}' Saltando liena ${line}")
-						return
-					}
-					
-					log.debug("method: def ${controllerActionDoc.method} - lineNumber: ${idx} - comment:${comment}")
-					controllerActionDoc.lineNumber = idx;
-					controllerActionDoc.commentDoc = parseActionComment(comment)
-					comment = "";
-		        }
-		    }
 		}
+		return result;
 	}
 	
 	private void parseControllerComment(
 		ControllerDoc controllerDoc, String comment) {
 		log.debug(" --- parseControllerComment: ${comment}")
 		if(!comment || "".equals(comment)) return;
+		comment = comment.replace("*", "");
 		String nextToken = getNextToken(comment, classTokens)
 		while(nextToken) {
 			int tokenIdx = comment.indexOf(nextToken)
@@ -151,17 +146,17 @@ class RestDocumentationService {
 			if("@infoController".equals(lastToken)) {
 				if(!nextToken) {
 					controllerDoc.infoController =
-						comment.substring(tokenIdx + "@infoController".length())
+						comment.substring(tokenIdx + "@infoController".length()).trim()
 				} else {
 					nexTokenIdx = comment.indexOf(nextToken)
 					controllerDoc.infoController =	comment.substring(
-						tokenIdx + "@infoController".length(), nexTokenIdx)
+						tokenIdx + "@infoController".length(), nexTokenIdx).trim()
 					comment = comment.substring(nexTokenIdx)
 				}
 			} else if("@descController".equals(lastToken)) {
 				if(!nextToken) {
 					controllerDoc.descController =
-						comment.substring(tokenIdx + "@descController".length())
+						comment.substring(tokenIdx + "@descController".length()).trim()
 				} else {
 					nexTokenIdx = comment.indexOf(nextToken)
 					controllerDoc.descController =	comment.substring(
@@ -178,9 +173,10 @@ class RestDocumentationService {
 	}
 	
 	private CommentDoc parseActionComment(String comment) {
-		log.debug(" --- parseActionComment: ${comment}")
+		log.debug(" --- parseActionComment --- ")
 		CommentDoc commentDoc = new CommentDoc()
 		if(!comment || "".equals(comment)) return commentDoc;
+		comment = comment.replace("*", "");
 		String nextToken = getNextToken(comment, methodTokens)
 		int tokenIdx
 		if(!nextToken) {
@@ -195,7 +191,7 @@ class RestDocumentationService {
 		while(nextToken) {
 			String lastToken = nextToken
 			nextToken = getNextToken(comment, methodTokens)
-			log.debug(" *** lastToken: '${lastToken}' - nextToken: ${nextToken} - comment: '${comment}'")
+			//log.debug(" *** lastToken: '${lastToken}' - nextToken: ${nextToken} - comment: '${comment}'")
 			if(!nextToken) {
 				tokenText = comment.trim()
 				comment = ""

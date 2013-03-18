@@ -146,6 +146,22 @@ public class HttpHelper {
         return response;
     }
     
+    public HttpResponse sendFile (File file, 
+    		String serverURL, String fileParamName) throws IOException {
+        checkConnections();
+        logger.debug("enviarArchivoFirmado - lanzando: " + serverURL);        
+        HttpPost httpPost = new HttpPost(serverURL);
+        FileBody fileBody = new FileBody(file);
+        MultipartEntity reqEntity = new MultipartEntity();
+        reqEntity.addPart(fileParamName, fileBody);
+        httpPost.setEntity(reqEntity);
+        HttpResponse response = httpclient.execute(httpPost);
+        logger.debug("----------------------------------------");
+        logger.debug(response.getStatusLine().toString());
+        logger.debug("----------------------------------------");
+        return response;
+    }
+    
     public HttpResponse enviarSolicitudAcceso(byte[] solicitudCSR, 
             File solicitudAccesoSMIME, String serverURL) throws IOException {
         checkConnections();

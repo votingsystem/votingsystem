@@ -12,45 +12,42 @@ import grails.util.Environment
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
  * */
-class InfoServidorController {
-
-	public enum Estado {SUSPENDIDO, ACTIVO, INACTIVO}
-	
+class InfoServidorController {	
 	/**
 	 * @httpMethod GET
 	 * @return Información sobre los servicios que tienen como url base '/infoServidor'
 	 */
-	def index = { }
+	def index () { }
 	
 	/**
 	 * @httpMethod GET
 	 * @return La lista de servicios de la aplicación
 	 */
-	def listaServicios = { }
+	def listaServicios () { }
 	
 	/**
 	 * @httpMethod GET
 	 * @return Datos de las versiones de algunos componentes de la aplicación  
 	 */
-	def datosAplicacion = { }
+	def datosAplicacion () { }
 	
 	/**
 	 * @httpMethod GET
 	 * @return Información general de la aplicación
 	 */
-	def informacion = { }
+	def informacion () { }
 	
 	/**
 	 * @httpMethod GET
 	 * @return Datos en formato JSON de la aplicación
 	 */
-    def obtener = {
+    def obtener () {
         HashMap infoServidor = new HashMap()
         infoServidor.nombre = grailsApplication.config.SistemaVotacion.serverName
 		infoServidor.tipoServidor = Tipo.CENTRO_CONTROL.toString()
         infoServidor.serverURL = grailsApplication.config.grails.serverURL
         infoServidor.urlBlog = grailsApplication.config.SistemaVotacion.urlBlog
-        infoServidor.estado = Estado.ACTIVO.toString()
+        infoServidor.estado = ActorConIP.Estado.ACTIVO.toString()
 		infoServidor.environmentMode = Environment.current.toString()
 		def sufijoURLCadenaCertificacion = grailsApplication.config.SistemaVotacion.sufijoURLCadenaCertificacion
 		infoServidor.cadenaCertificacionURL = "${grailsApplication.config.grails.serverURL}${sufijoURLCadenaCertificacion}"
