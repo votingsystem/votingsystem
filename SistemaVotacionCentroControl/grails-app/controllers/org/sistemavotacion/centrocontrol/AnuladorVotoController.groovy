@@ -18,7 +18,9 @@ class AnuladorVotoController {
 	 * @httpMethod GET
 	 * @return Información sobre los servicios que tienen como url base '/anuladorVoto'
 	 */
-	def index () { }
+	def index() { 
+		redirect action: "restDoc"
+	}
 	
 	/**
 	 * @httpMethod POST

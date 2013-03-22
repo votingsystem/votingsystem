@@ -25,10 +25,10 @@ class VotoController {
 	 * @httpMethod GET
 	 * @return Información sobre los servicios que tienen como url base '/voto'.
 	 */
-	def index () { }
-	
+	def index() { 
+		redirect action: "restDoc"
+	}
 
-	
 	/**
 	 * Servicio que recoge los votos enviados por los usuarios.
 	 *
@@ -79,7 +79,7 @@ class VotoController {
 	 * hash asociado al mismo
 	 * @httpMethod GET
 	 * @param hashCertificadoVotoHex	Obligatorio. Hash en hexadecimal asociado al voto. 
-	 * @return La información del voto solicitado en formato JSON.
+	 * @return Documento JSON con la información del voto solicitado.
 	 */
 	def obtener() {
 		if (params.hashCertificadoVotoHex) {

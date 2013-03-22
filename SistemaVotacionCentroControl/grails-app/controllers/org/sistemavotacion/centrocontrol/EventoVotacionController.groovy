@@ -28,7 +28,9 @@ class EventoVotacionController {
 	 * @httpMethod GET
 	 * @return Información sobre los servicios que tienen como url base '/eventoVotacion'.
 	 */
-	def index () {}
+	def index() { 
+		redirect action: "restDoc"
+	}
 	
 	/**
 	 * Servicio que da de alta las votaciones.
@@ -58,7 +60,7 @@ class EventoVotacionController {
 	 * 		  devuelve la consulta (tamaño de la página).
 	 * @param offset	Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.
 	 * @httpMethod GET
-	 * @return Información de las votaciones paginada y en formato JSON.
+	 * @return Documento JSON con las votaciones que cumplen el criterio de búsqueda.
 	 */
     def obtener () {
 		List eventoList = []
@@ -116,7 +118,7 @@ class EventoVotacionController {
 	 * @param eventoVotacionId	Obligatorio. Identificador de la votación en la base de datos 
 	 *                          del Control de Acceso.
 	 * @httpMethod GET
-	 * @return Información en formato JSON de los votos recibidos en la votación solicitada.
+	 * @return Documento JSON con la lista de votos recibidos por la votación solicitada.
 	 */
     def obtenerVotos () {
         if (params.long('eventoVotacionId') && params.controlAccesoServerURL) {
@@ -191,7 +193,7 @@ class EventoVotacionController {
 	 * @param eventoVotacionId	Obligatorio. Identificador de la votación en la base de datos
 	 *                          del Control de Acceso
 	 * @httpMethod GET
-	 * @return Información en formato JSON de las estadísticas de una votación.
+	 * @return Documento JSON con estadísticas de la votación solicitada.
 	 */
     def estadisticas () {
 		EventoVotacion eventoVotacion

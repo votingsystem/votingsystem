@@ -13,16 +13,16 @@ import org.sistemavotacion.centrocontrol.modelo.Respuesta
 class AppController {
 
 	def grailsApplication
-	def restDocumentationService
 	def hibernateProperties
 	
 	/**
 	 * @httpMethod GET
 	 * @return Información sobre los servicios que tienen como url base '/app'
 	 */
-	def index() {
+	def index() { 
+		redirect action: "restDoc"
 	}
-	
+
 	/**
 	 * @httpMethod GET
 	 * @return La página principal de la aplicación web de votación.

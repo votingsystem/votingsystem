@@ -19,7 +19,8 @@ import org.sistemavotacion.smime.SignedMailValidator.ValidationResult;
 * */
 class CentroControlFilters {
 
-    def grailsApplication    
+    def grailsApplication 
+	def messageSource
 
     def filters = {
         String nombreEntidadFirmada = grailsApplication.config.SistemaVotacion.nombreEntidadFirmada;
@@ -50,7 +51,8 @@ class CentroControlFilters {
 				if (!(request instanceof MultipartHttpServletRequest)) {
 					log.debug "------------- La petición no es instancia de MultipartHttpServletRequest ------------"
 					response.status = Respuesta.SC_ERROR_PETICION
-					render(Tipo.PETICION_SIN_ARCHIVO.toString())
+					render(messageSource.getMessage(
+						'evento.peticionSinArchivo', null, request.getLocale()))
 					return false
 				}
 				try {
@@ -81,7 +83,8 @@ class CentroControlFilters {
 					} else {
 						log.debug "Error ${Respuesta.SC_ERROR_PETICION} - Peticion sin archivo"
 						response.status = Respuesta.SC_ERROR_PETICION
-						render(Tipo.PETICION_SIN_ARCHIVO.toString())
+						render(messageSource.getMessage(
+							'evento.peticionSinArchivo', null, request.getLocale()))
 						return false
 					}
 				} catch (Exception ex) {
@@ -89,7 +92,6 @@ class CentroControlFilters {
 					response.status = Respuesta.SC_ERROR_EJECUCION
 					render(ex.getMessage())
 					return false 
-					return false
 				}
 			}
 

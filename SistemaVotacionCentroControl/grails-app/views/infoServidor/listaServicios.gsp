@@ -13,15 +13,7 @@
 		</ul>
 
 		<div id="content" role="main">
-			<g:include controller="mensajeSMIME" />
-			<g:include controller="eventoVotacion" />
-			<g:include controller="voto" />
-			<g:include controller="infoServidor" />
-			<g:include controller="app" />
-			<g:include controller="anuladorVoto" />
-			<g:include controller="buscador" />
-			<g:include controller="certificado" />
-			<g:include controller="subscripcion" />
+			<g:include controller="restDoc"/>
 		</div>
 	</div>		
 	</body>

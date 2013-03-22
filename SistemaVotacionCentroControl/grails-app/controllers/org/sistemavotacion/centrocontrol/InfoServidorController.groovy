@@ -17,7 +17,9 @@ class InfoServidorController {
 	 * @httpMethod GET
 	 * @return Información sobre los servicios que tienen como url base '/infoServidor'
 	 */
-	def index () { }
+	def index() { 
+		redirect action: "restDoc"
+	}
 	
 	/**
 	 * @httpMethod GET
@@ -39,7 +41,7 @@ class InfoServidorController {
 	
 	/**
 	 * @httpMethod GET
-	 * @return Datos en formato JSON de la aplicación
+	 * @return Documento JSON con datos de la aplicación
 	 */
     def obtener () {
         HashMap infoServidor = new HashMap()

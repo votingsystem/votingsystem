@@ -32,7 +32,9 @@ class SubscripcionController {
 	 * @httpMethod GET
 	 * @return Información sobre los servicios que tienen como url base '/subscripcion'.
 	 */
-	def index () {}
+	def index() { 
+		redirect action: "restDoc"
+	}
 	
 	/**
 	 * Servicio que da de alta Controles de Acceso.

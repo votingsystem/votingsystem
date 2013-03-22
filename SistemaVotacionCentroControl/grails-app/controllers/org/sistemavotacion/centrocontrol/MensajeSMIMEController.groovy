@@ -16,7 +16,9 @@ class MensajeSMIMEController {
 	 * @httpMethod GET
 	 * @return Información sobre los servicios que tienen como url base '/mensajeSMIME'
 	 */
-	def index () {}
+	def index() { 
+		redirect action: "restDoc"
+	}
 	
 	/**
 	 * @httpMethod GET
