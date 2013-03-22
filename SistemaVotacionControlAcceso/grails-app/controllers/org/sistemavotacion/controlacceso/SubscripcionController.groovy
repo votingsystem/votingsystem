@@ -30,7 +30,9 @@ class SubscripcionController {
 	 * @httpMethod GET
 	 * @return Información sobre los servicios que tienen como url base '/subscripcion'.
 	 */
-	def index() { }
+	def index() { 
+		redirect action: "restDoc"
+	}
        
 	/**
 	 * Servicio que da de alta Centros de Control.
@@ -42,7 +44,7 @@ class SubscripcionController {
 		Respuesta respuesta = subscripcionService.asociarCentroControl(
 			params.smimeMessageReq, request.getLocale())
         response.status = respuesta.codigoEstado
-		if (200 == respuesta.codigoEstado) render respuesta.getMap() as JSON
+		if (Respuesta.SC_OK == respuesta.codigoEstado) render respuesta.getMap() as JSON
 		else render respuesta.mensaje
         return false	
     }

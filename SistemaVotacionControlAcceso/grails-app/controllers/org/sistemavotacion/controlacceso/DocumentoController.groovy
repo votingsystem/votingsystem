@@ -15,7 +15,9 @@ class DocumentoController {
 	 * @httpMethod GET
 	 * @return Información sobre los servicios que tienen como url base '/documento'.
 	 */
-    def index() { }
+	def index() { 
+		redirect action: "restDoc"
+	}
 	
 	/**
 	 * @httpMethod GET

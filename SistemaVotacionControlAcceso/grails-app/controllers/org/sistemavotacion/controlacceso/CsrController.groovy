@@ -26,7 +26,9 @@ class CsrController {
 	 * @httpMethod GET
 	 * @return Información sobre los servicios que tienen como url base '/csr'.
 	 */
-    def index() { }
+	def index() { 
+		redirect action: "restDoc"
+	}
 	
 	
 	/**

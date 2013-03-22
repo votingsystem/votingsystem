@@ -23,7 +23,9 @@ class EventoController {
 	 * @httpMethod GET
 	 * @return Información sobre los servicios que tienen como url base '/evento'.
 	 */
-	def index() { }
+	def index() { 
+		redirect action: "restDoc"
+	}
 	
 	/**
 	 * @httpMethod GET
@@ -34,7 +36,7 @@ class EventoController {
 	 * @param offset Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.
 	 * @param order Opcional, posibles valores 'asc', 'desc'(por defecto). Orden en que se muestran los
 	 *        resultados según la fecha de creación.
-	 * @return Página con manifiestos en formato JSON que cumplen con el criterio de búsqueda.
+	 * @return Documento JSON con los manifiestos que cumplen con el criterio de búsqueda.
 	 */
     def obtener () {
         def eventoList = []
@@ -118,7 +120,7 @@ class EventoController {
 	 *
 	 * @httpMethod GET
 	 * @param id Identificador en la base de datos del evento que se desea consultar.
-	 * @return Estadísticas asociadas al evento que se desea consultar en formato JSON.
+	 * @return Documento JSON con estadísticas asociadas al evento consultado.
 	 */
     def estadisticas () {
 		if (params.long('id')) {
@@ -179,7 +181,7 @@ class EventoController {
 	 *
 	 * @httpMethod GET
 	 * @param id Obligatorio. El identificador de la votación en la base de datos.
-	 * @return Información sobre los votos y solicitudes de acceso de una votación en formato JSON.
+	 * @return Documento JSON con información sobre los votos y solicitudes de acceso de una votación.
 	 */
     def informacionVotos () {
         if (params.long('id')) {
@@ -272,7 +274,7 @@ class EventoController {
 	 *
 	 * @httpMethod GET
 	 * @param id Obligatorio. El identificador del manifiesto en la base de datos.
-	 * @return Información sobre las firmas recibidas en formato JSON.
+	 * @return Documento JSON con información sobre las firmas recibidas por el manifiesto solicitado.
 	 */
     def informacionFirmas () {
         if (params.long('id')) {
@@ -315,7 +317,7 @@ class EventoController {
 	 *
 	 * @httpMethod GET
 	 * @param id Obligatorio. El identificador de la reclamación la base de datos.
-	 * @return Información sobre las reclamaciones recibidas en formato JSON.
+	 * @return Documento JSON con información sobre las firmas recibidas por la reclamación solicitada.
 	 */
     def informacionFirmasReclamacion () {
         if (params.long('id')) {

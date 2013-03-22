@@ -16,9 +16,15 @@ class TimeStampController {
 	
 	def timeStampService
 
-    def index() { }
+	/**
+	 * @httpMethod GET
+	 * @return Información sobre los servicios que tienen como url base '/timeStamp'.
+	 */
+	def index() { 
+		redirect action: "restDoc"
+	}
 		
-	def prueba() {
+	/*def prueba() {
 		TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
 		String pueba = "prueba"
 		//reqgen.setReqPolicy(m_sPolicyOID);
@@ -34,8 +40,15 @@ class TimeStampController {
 		//log.debug("timeStampRequestStr : ${timeStampRequestStr}")
 		render timeStampService.processRequest(timeStampRequest.getEncoded(), null).codigoEstado
 		return
-	}
+	}*/
 	
+	/**
+	 * Servicio de generación de sellos de tiempo.
+	 * 
+	 * @httpMethod POST
+	 * @param timeStampRequest Solicitud de sellado de tiempo en formato RFC 3161.
+	 * @return Si todo es correcto un sello de tiempo en formato RFC 3161.
+	 */
 	def obtener() {
 		try {
 			Map multipartFileMap = ((MultipartHttpServletRequest) request)?.getFileMap()
@@ -59,6 +72,14 @@ class TimeStampController {
 		return
 	}
 	
+	/**
+	 * Servicio que devuelve un sello de tiempo previamente generado y guardado en la base de datos.
+	 * 
+	 * @httpMethod GET
+	 * @param serialNumber Número de serie del sello de tiempo.
+	 *  
+	 * @return El sello de tiempo en formato RFC 3161.
+	 */
 	def getBySerialNumber() {
 		if(params.long('serialNumber')) {
 			SelloTiempo selloDeTiempo

@@ -37,7 +37,9 @@ class BuscadorController {
 	* @httpMethod GET
 	* @return Información sobre los servicios que tienen como url base '/buscador'
 	*/
-   def index() { }
+	def index() { 
+		redirect action: "restDoc"
+	}
    
    /**
 	* (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS). 
@@ -115,7 +117,7 @@ class BuscadorController {
 	 * @httpMethod POST
 	 * @param consulta Documento JSON con los parámetros de la consulta:<br/><code>
 	 * 		  {conReclamaciones:true, conVotaciones:true, textQuery:ipsum, conManifiestos:true}</code>
-	 * @return Una lista en formato JSON con los documentos que cumplen el criterio de la búsqueda.
+	 * @return Documento JSON con la lista de eventos que cumplen el criterio de la búsqueda.
 	 */
 	def consultaJSON() {
 		String consulta = StringUtils.getStringFromInputStream(request.getInputStream())

@@ -24,14 +24,13 @@ import org.sistemavotacion.utils.*
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
  * */
 class AppController {
-	
-	def restDocumentationService
 
 	/**
 	 * @httpMethod GET
 	 * @return Información sobre los servicios que tienen como url base '/app'.
 	 */
 	def index() { 
+		redirect action: "restDoc"
 	}
 
 	/**

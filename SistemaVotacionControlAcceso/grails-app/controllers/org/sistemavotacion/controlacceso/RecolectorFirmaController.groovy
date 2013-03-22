@@ -22,7 +22,9 @@ class RecolectorFirmaController {
 	 * @httpMethod GET
 	 * @return Información sobre los servicios que tienen como url base '/recolectorFirma'.
 	 */
-	def index() { }
+	def index() { 
+		redirect action: "restDoc"
+	}
 	
 	/**
 	 * Servicio que valida firmas recibidas en documentos PDF

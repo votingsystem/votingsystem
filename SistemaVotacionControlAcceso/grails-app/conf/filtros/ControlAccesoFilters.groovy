@@ -15,6 +15,7 @@ class ControlAccesoFilters {
 
     def firmaService
     def grailsApplication
+	def messageSource
 
     def filters = {
         String nombreEntidadFirmada = grailsApplication.config.SistemaVotacion.nombreEntidadFirmada;
@@ -42,7 +43,8 @@ class ControlAccesoFilters {
                 if (!(request instanceof MultipartHttpServletRequest)) {
                     log.debug "------------- La petición no es instancia de MultipartHttpServletRequest ------------"
 					response.status = Respuesta.SC_ERROR_PETICION
-					render(Tipo.PETICION_SIN_ARCHIVO.toString())
+					render(messageSource.getMessage(
+						'evento.peticionSinArchivo', null, request.getLocale()))
 					return false
                 }
 				log.debug("--------------- controllerName: ${controllerName}")
@@ -78,13 +80,16 @@ class ControlAccesoFilters {
                         } else {
                             log.debug "firma erronea"
 							response.status = Respuesta.SC_ERROR_PETICION
-							render(Tipo.FIRMA_EVENTO_CON_ERRORES.toString())
+							render(messageSource.getMessage(
+								'signatureErrorMsg', null, request.getLocale()))
 							return false
                         }
                     } else {
-                        log.debug "Peticion sin archivo"
+						String msg = messageSource.getMessage(
+							'evento.peticionSinArchivo', null, request.getLocale())
+                        log.debug msg
 						response.status = Respuesta.SC_ERROR_PETICION
-						render(Tipo.PETICION_SIN_ARCHIVO.toString())
+						render(msg)
 						return false
                     }
                 } catch (Exception ex) {
@@ -111,8 +116,8 @@ class ControlAccesoFilters {
 						response.outputStream.flush()
 						return false
 					} else {
-						flash.respuesta.tipo = Tipo.ERROR_FIRMANDO_VALIDACION
-						render flash.respuesta.getMap() as JSON
+						if (flash?.respuesta?.mensaje) render flash.respuesta.mensaje
+						else render "ERROR"
 						return false
 					}
                 } else {

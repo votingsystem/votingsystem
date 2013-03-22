@@ -19,7 +19,9 @@ class RecolectorReclamacionController {
 	 * @httpMethod GET
 	 * @return Información sobre los servicios que tienen como url base '/recolectorReclamacion'.
 	 */
-	def index() { }
+	def index() { 
+		redirect action: "restDoc"
+	}
 	
 	/**
 	 * Servicio que valida reclamaciones recibidas en documentos SMIME

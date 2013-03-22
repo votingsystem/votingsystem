@@ -21,7 +21,9 @@ class ActorConIPController {
 	 * @httpMethod GET
 	 * @return Información sobre los servicios que tienen como url base '/actorConIP'.
 	 */
-	def index() { }
+	def index() { 
+		redirect action: "restDoc"
+	}
 	
 	/**
 	 * Servicio que da de baja un actor.

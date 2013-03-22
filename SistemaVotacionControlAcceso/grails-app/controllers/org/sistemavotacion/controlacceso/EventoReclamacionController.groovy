@@ -20,7 +20,9 @@ class EventoReclamacionController {
 	 * @httpMethod GET
 	 * @return Información sobre los servicios que tienen como url base '/eventoReclamacion'.
 	 */
-	def index() { }
+	def index() { 
+		redirect action: "restDoc"
+	}
 	
 	/**
 	 * @httpMethod GET
@@ -31,7 +33,7 @@ class EventoReclamacionController {
 	 * @param offset Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.
 	 * @param order Opcional, posibles valores 'asc', 'desc'(por defecto). Orden en que se muestran los
 	 *        resultados según la fecha de inicio.
-	 * @return Página con manifiestos en formato JSON que cumplen con el criterio de búsqueda.
+	 * @return Documento JSON con los manifiestos que cumplen con el criterio de búsqueda.
 	 */
     def obtener () {
         def eventoList = []
@@ -182,7 +184,7 @@ class EventoReclamacionController {
 	 *
 	 * @httpMethod GET
 	 * @param id Obligatorio. Identificador en la base de datos de la reclamación que se desea consultar.
-	 * @return Estadísticas asociadas a la reclamación que se desea consultar en formato JSON.
+	 * @return Documento JSON con las estadísticas asociadas a la reclamación solicitada.
 	 */
     def estadisticas () {
         if (params.int('id')) {

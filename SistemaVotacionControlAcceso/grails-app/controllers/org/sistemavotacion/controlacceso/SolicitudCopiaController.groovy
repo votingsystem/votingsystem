@@ -22,7 +22,9 @@ class SolicitudCopiaController {
 	 * @httpMethod GET
 	 * @return Información sobre los servicios que tienen como url base '/solicitudCopia'.
 	 */
-	def index() {}
+	def index() { 
+		redirect action: "restDoc"
+	}
 	
 	/**
 	 * Servicio que proporciona la copia de seguridad a partir de la URL que se envía

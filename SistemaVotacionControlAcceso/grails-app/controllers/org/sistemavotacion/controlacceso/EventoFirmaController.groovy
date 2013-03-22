@@ -28,7 +28,9 @@ class EventoFirmaController {
 	 * @httpMethod GET
 	 * @return Información sobre los servicios que tienen como url base '/eventoFirma'.
 	 */
-	def index() { }
+	def index() { 
+		redirect action: "restDoc"
+	}
 	
 	/**
 	 * Servicio que valida los manifiestos que se desean publicar. <br/>
@@ -191,7 +193,7 @@ class EventoFirmaController {
 	/**
 	 * @httpMethod GET
 	 * @param id Obligatorio. El identificador del manifiesto en la base de datos.
-	 * @return Información del manifiesto en formato JSON.
+	 * @return Documento JSON con información del manifiesto solicitado.
 	 */
 	def obtener () {
 		if (params.long('id')) {
@@ -218,7 +220,7 @@ class EventoFirmaController {
 	 * @param offset Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.
 	 * @param order Opcional, posibles valores 'asc', 'desc'(por defecto). Orden en que se muestran los
 	 *        resultados según la fecha de inicio.
-	 * @return Página con manifiestos en formato JSON que cumplen con el criterio de búsqueda.
+	 * @return Documento JSON con los manifiestos que cumplen con el criterio de búsqueda.
 	 */
 	def obtenerManifiestos () {
 		def eventoList = []
@@ -302,7 +304,7 @@ class EventoFirmaController {
 	 * 
 	 * @httpMethod GET
 	 * @param id Identificador en la base de datos del manifiesto que se desea consultar.
-	 * @return Estadísticas asociadas al manifiesto que se desea consultar en formato JSON.
+	 * @return Documento JSON con las estadísticas asociadas al manifiesto solicitado.
 	 */
 	def estadisticas () {
 		if (params.long('id')) {

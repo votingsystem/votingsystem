@@ -3,9 +3,30 @@ package org.sistemavotacion.controlacceso
 import java.net.URLEncoder;
 import grails.converters.JSON
 
+/**
+ * @infoController Android app Controller
+ * @descController Controlador que sirve la aplicación para clientes Android.
+ *
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ */
 class AndroidController {
 
-	//This is for the problem sending the raw file in Cloudfoundry
+	/**
+	 * @httpMethod GET
+	 * @return Información sobre los servicios que tienen como url base '/actorConIP'.
+	 */
+	def index() {
+		redirect action: "restDoc"
+	}
+	
+	/**
+	 * Este servicio surgió para resolver un problema que surgió en un servicio de hosting.
+	 * No era posible acceder al archivo de la aplicación diréctamente.
+	 * 
+	 * @httpMethod GET
+	 * @return La aplicación de votación para clientes Android.
+	 */
     def app() { 
 		response.setHeader("Content-disposition", "attachment; filename=SistemaVotacion.apk")
 		response.contentType = "application/vnd.android.package-archive";
@@ -18,6 +39,5 @@ class AndroidController {
 		response.outputStream.flush()
 		return
 	}
-		
-	
+			
 }

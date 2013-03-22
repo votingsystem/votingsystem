@@ -22,7 +22,9 @@ class VotoController {
 	 * @httpMethod GET
 	 * @return Información sobre los servicios que tienen como url base '/voto'.
 	 */
-	def index() { }
+	def index() { 
+		redirect action: "restDoc"
+	}
 	
 	/**
 	 * Servicio que recoge los votos enviados por lo Centrols de Control
