@@ -42,19 +42,26 @@ task runApp << { task ->
 	}
 }
 
+ext {
+	grailsRestDocPluginVersion = "0.3"
+}
+
 task installGrailsRestDocPlugin << { task ->
 	ProcessBuilder pb;
 	Process proc;
-	if(!file('../GrailsRestDocPlugin-0.2/grails-rest-doc-plugin-0.2.zip').exists()) {
-		if(!file('../GrailsRestDocPlugin-0.2').exists()) {
-			String fileURL = "https://github.com/jgzornoza/GrailsRestDocPlugin/archive/v0.2.zip"
+	println grailsRestDocPluginVersion
+	if(!file("../GrailsRestDocPlugin-${grailsRestDocPluginVersion}/" + 
+		"grails-rest-doc-plugin-${grailsRestDocPluginVersion}.zip").exists()) {
+		if(!file('../GrailsRestDocPlugin-${grailsRestDocPluginVersion}').exists()) {
+			String fileURL = "https://github.com/jgzornoza/GrailsRestDocPlugin/" + 
+				"archive/v${grailsRestDocPluginVersion}.zip"
 			println "--- downloading ${fileURL}"
 			ant.get(src:fileURL,
-				dest:"../GrailsRestDocPlugin-0.2.zip")
-			ant.unzip(src:"../GrailsRestDocPlugin-0.2.zip", dest:"..")
+				dest:"../GrailsRestDocPlugin-${grailsRestDocPluginVersion}.zip")
+			ant.unzip(src:"../GrailsRestDocPlugin-${grailsRestDocPluginVersion}.zip", dest:"..")
 		}
 		pb = new ProcessBuilder("grails", "package-plugin");
-		pb.directory(new File("../GrailsRestDocPlugin-0.2"));
+		pb.directory(new File("../GrailsRestDocPlugin-${grailsRestDocPluginVersion}"));
 		proc = pb.start();
 		proc.consumeProcessErrorStream(System.err)
 		proc.consumeProcessOutputStream(System.out)
@@ -63,7 +70,8 @@ task installGrailsRestDocPlugin << { task ->
 		}
 	}
 	pb  = new ProcessBuilder("grails", "install-plugin", 
-		"../GrailsRestDocPlugin-0.2/grails-rest-doc-plugin-0.2.zip");
+		"../GrailsRestDocPlugin-${grailsRestDocPluginVersion}/" + 
+			"grails-rest-doc-plugin-${grailsRestDocPluginVersion}.zip");
 	pb.directory(new File("."));
 	proc = pb.start();
 	proc.consumeProcessErrorStream(System.err)
@@ -72,6 +80,17 @@ task installGrailsRestDocPlugin << { task ->
 		throw new RuntimeException('install-plugin GrailsRestDocPlugin failed')
 	}
 	announce.announce("GrailsRestDocPlugin installed", "local")
+}
+
+task generateRestDocs(dependsOn:['installGrailsRestDocPlugin']) << {task ->
+	ProcessBuilder pb  = new ProcessBuilder("grails", "generate-rest-docs");
+	pb.directory(new File("."));
+	Process proc = pb.start();
+	proc.consumeProcessErrorStream(System.err)
+	proc.consumeProcessOutputStream(System.out)
+	if (proc.waitFor() != 0) {
+		throw new RuntimeException('GrailsRestDocPlugin - generate-rest-docs - failed')
+	}
 }
 
 task war(dependsOn:['copyApps', 'installGrailsRestDocPlugin']) << {task ->
