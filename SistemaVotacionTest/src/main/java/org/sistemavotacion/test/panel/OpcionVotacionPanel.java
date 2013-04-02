@@ -60,7 +60,8 @@ public class OpcionVotacionPanel extends javax.swing.JPanel {
         opcionLabel = new javax.swing.JLabel();
         numeroVotosTextField = new javax.swing.JTextField();
 
-        numeroVotosTextField.setText(" ");
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/sistemavotacion/test/panel/Bundle"); // NOI18N
+        numeroVotosTextField.setText(bundle.getString("OpcionVotacionPanel.numeroVotosTextField.text")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);

@@ -13,7 +13,7 @@
 	     }
         </style>
 
-<u><h3 class="controllerInfoHeader">Android app Controller</h3></u>
+<h3 class="controllerInfoHeader"><u>Android app Controller</u></h3>
 
  Controlador que sirve la aplicación para clientes Android.
  
@@ -36,10 +36,48 @@
 			</p>
 			<div class="params_result_div">
 			
-			</p>
-	
+			
+			
+			
+			
+			
+			
+			
+				
+			
+			
+			 
+			
 			
 				<p><b>Respuesta:</b><br/>La aplicación de votación para clientes Android.</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/android/index">/android/index</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+			
+			
+				
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/actorConIP'.</p>
 			
 			</div>
 		<HR>

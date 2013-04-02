@@ -13,7 +13,7 @@
 	     }
         </style>
 
-<u><h3 class="controllerInfoHeader">Mensajes firmados</h3></u>
+<h3 class="controllerInfoHeader"><u>Mensajes firmados</u></h3>
 
  Servicios relacionados con los mensajes firmados manejados por la
                   aplicación.
@@ -34,10 +34,55 @@
 			</p>
 			<div class="params_result_div">
 			
-			</p>
-	
+			
+			
+			
+			
+			
+			
+			
+				
+			
+			
+			 
+			
 			
 				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/mensajeSMIME'</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/mensajeSMIME/obtener">/mensajeSMIME/obtener</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+				<p>
+					<b>Parámetros:</b><br/>
+					
+						<u>id</u>: Obligatorio. Identificador del mensaje en la base de datos<br/>
+					
+				</p>
+			
+			
+			
+				
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>El mensaje solicitado.</p>
 			
 			</div>
 		<HR>
@@ -54,15 +99,25 @@
 			</p>
 			<div class="params_result_div">
 			
+			
+			
+			
+			
+			
 				<p>
 					<b>Parámetros:</b><br/>
 					
-						<u>id</u>: 	Obligatorio. Identificador del mensaje de publicación en la base de datos<br/>
+						<u>id</u>: Obligatorio. Identificador del mensaje de publicación en la base de datos<br/>
 					
 				</p>
 			
-			</p>
-	
+			
+			
+				
+			
+			
+			 
+			
 			
 				<p><b>Respuesta:</b><br/>El recibo.</p>
 			
@@ -81,42 +136,27 @@
 			</p>
 			<div class="params_result_div">
 			
+			
+			
+			
+			
+			
 				<p>
 					<b>Parámetros:</b><br/>
 					
-						<u>id</u>: 	Obligatorio. Identificador del mensaje de publicación en la base de datos<br/>
+						<u>id</u>: Obligatorio. Identificador del mensaje de publicación en la base de datos<br/>
 					
 				</p>
 			
-			</p>
-	
+			
+			
+				
+			
+			
+			 
+			
 			
 				<p><b>Respuesta:</b><br/>El recibo.</p>
-			
-			</div>
-		<HR>
-	
-		
-		
-			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/mensajeSMIME/obtener">/mensajeSMIME/obtener</a><br/>
-				
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-				<p>
-					<b>Parámetros:</b><br/>
-					
-						<u>id</u>: 	Obligatorio. Identificador del mensaje en la base de datos<br/>
-					
-				</p>
-			
-			</p>
-	
-			
-				<p><b>Respuesta:</b><br/>El mensaje solicitado.</p>
 			
 			</div>
 		<HR>

@@ -27,11 +27,41 @@
 		
 			<p>
 				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/app/clienteAndroid">/app/clienteAndroid</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+			
+			
+				
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>Parámetros de configuración de Hibernate</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
 				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/app/home">/app/home</a><br/>
 				
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -64,6 +94,8 @@
 			
 			
 			
+			
+			
 				
 			
 			
@@ -78,32 +110,6 @@
 		
 		
 			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/app/clienteAndroid">/app/clienteAndroid</a><br/>
-				
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			
-			
-			
-			
-			
-				
-			
-			
-			 
-			
-			
-				<p><b>Respuesta:</b><br/>Parámetros de configuración de Hibernate</p>
-			
-			</div>
-		<HR>
-	
-		
-		
-			<p>
 				
 				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/app/prueba">/app/prueba</a><br/>
 				
@@ -111,6 +117,15 @@
 			</p>
 			<div class="params_result_div">
 			
+			
+			
+			
+				<p>
+					<b>Tipos de contenido:</b><br/>
+					
+						<u>pdf</u>: blim blim vlim<br/>
+					
+				</p>
 			
 			
 			

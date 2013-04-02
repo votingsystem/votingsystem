@@ -79,7 +79,8 @@ public class DigitalClockPanel extends JPanel implements ActionListener {
 
         setBackground(java.awt.Color.white);
 
-        timeLabel.setText("00:00:00");
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/sistemavotacion/test/panel/Bundle"); // NOI18N
+        timeLabel.setText(bundle.getString("DigitalClockPanel.timeLabel.text")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);

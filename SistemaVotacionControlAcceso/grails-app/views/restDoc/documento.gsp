@@ -13,7 +13,7 @@
 	     }
         </style>
 
-<u><h3 class="controllerInfoHeader">Documentos</h3></u>
+<h3 class="controllerInfoHeader"><u>Documentos</u></h3>
 
  Servicios relacionados con PDFs.
  
@@ -33,8 +33,18 @@
 			</p>
 			<div class="params_result_div">
 			
-			</p>
-	
+			
+			
+			
+			
+			
+			
+			
+				
+			
+			
+			 
+			
 			
 				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/documento'.</p>
 			
@@ -51,15 +61,25 @@
 			</p>
 			<div class="params_result_div">
 			
+			
+			
+			
+			
+			
 				<p>
 					<b>Parámetros:</b><br/>
 					
-						<u>id</u>:  El identificador del documento en la base de datos.<br/>
+						<u>id</u>: El identificador del documento en la base de datos.<br/>
 					
 				</p>
 			
-			</p>
-	
+			
+			
+				
+			
+			
+			 
+			
 			
 				<p><b>Respuesta:</b><br/>El documento PDF asociado al identificador.</p>
 			
@@ -76,15 +96,25 @@
 			</p>
 			<div class="params_result_div">
 			
+			
+			
+			
+			
+			
 				<p>
 					<b>Parámetros:</b><br/>
 					
-						<u>id</u>:  El identificador del manifiesto en la base de datos.<br/>
+						<u>id</u>: El identificador del manifiesto en la base de datos.<br/>
 					
 				</p>
 			
-			</p>
-	
+			
+			
+				
+			
+			
+			 
+			
 			
 				<p><b>Respuesta:</b><br/>El manifiesto en formato PDF.</p>
 			

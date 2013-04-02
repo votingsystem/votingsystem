@@ -27,12 +27,49 @@
 		
 		
 			<p>
+				- <u>POST</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/subscripcion/guardarAsociacionConControlAcceso">/subscripcion/guardarAsociacionConControlAcceso</a><br/>
+				
+	  Servicio que da de alta Controles de Acceso.
+	 
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+				<p>
+					<b>Parámetros:</b><br/>
+					
+						<u>archivoFirmado</u>: Obligatorio. Archivo con los datos del control de acceso que se desea dar de alta.<br/>
+					
+				</p>
+			
+			
+			
+				
+			
+			
+			 
+			
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
 				- <u>GET</u> - 
 				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/subscripcion/index">/subscripcion/index</a><br/>
 				
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -64,6 +101,8 @@
 			
 			
 			
+			
+			
 				<p>
 					<b>Parámetros:</b><br/>
 					
@@ -81,39 +120,6 @@
 			
 			
 				<p><b>Respuesta:</b><br/>Información en el formato solicitado sobre las votaciones publicadas.</p>
-			
-			</div>
-		<HR>
-	
-		
-		
-			<p>
-				- <u>POST</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/subscripcion/guardarAsociacionConControlAcceso">/subscripcion/guardarAsociacionConControlAcceso</a><br/>
-				
-	  Servicio que da de alta Controles de Acceso.
-	 
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			
-			
-			
-				<p>
-					<b>Parámetros:</b><br/>
-					
-						<u>archivoFirmado</u>: Obligatorio. Archivo con los datos del control de acceso que se desea dar de alta.<br/>
-					
-				</p>
-			
-			
-			
-				
-			
-			
-			 
-			
 			
 			</div>
 		<HR>

@@ -65,10 +65,11 @@ public class InfoServidorDialog extends JDialog implements HyperlinkListener  {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        nombreServidorLabel.setText(" ");
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/sistemavotacion/test/dialogo/Bundle"); // NOI18N
+        nombreServidorLabel.setText(bundle.getString("InfoServidorDialog.nombreServidorLabel.text")); // NOI18N
 
         cerrarButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/cancel_16x16.png"))); // NOI18N
-        cerrarButton.setText("Cerrar");
+        cerrarButton.setText(bundle.getString("InfoServidorDialog.cerrarButton.text")); // NOI18N
         cerrarButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cerrarButtonActionPerformed(evt);
@@ -88,9 +89,9 @@ public class InfoServidorDialog extends JDialog implements HyperlinkListener  {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 361, Short.MAX_VALUE)
+                        .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(cerrarButton))
-                    .addComponent(nombreServidorLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 433, Short.MAX_VALUE)
+                    .addComponent(nombreServidorLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(scrollPane))
                 .addContainerGap())
         );

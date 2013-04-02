@@ -27,11 +27,13 @@
 		
 			<p>
 				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/certificado/index">/certificado/index</a><br/>
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/certificado/cadenaCertificacion">/certificado/cadenaCertificacion</a><br/>
 				
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -44,42 +46,7 @@
 			 
 			
 			
-				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/certificado'.</p>
-			
-			</div>
-		<HR>
-	
-		
-		
-			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/certificado/certificadoUsuario">/certificado/certificadoUsuario</a><br/>
-				
-	  Servicio de consulta de certificados de usuario.
-	 
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			
-			
-			
-				<p>
-					<b>Parámetros:</b><br/>
-					
-						<u>usuarioId</u>: Obligatorio. El identificador en la base de datos del usuario.<br/>
-					
-				</p>
-			
-			
-			
-				
-			
-			
-			 
-			
-			
-				<p><b>Respuesta:</b><br/>El certificado en formato PEM.</p>
+				<p><b>Respuesta:</b><br/>La cadena de certificación del servidor</p>
 			
 			</div>
 		<HR>
@@ -96,6 +63,8 @@
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -128,32 +97,6 @@
 		
 			<p>
 				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/certificado/cadenaCertificacion">/certificado/cadenaCertificacion</a><br/>
-				
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			
-			
-			
-			
-			
-				
-			
-			
-			 
-			
-			
-				<p><b>Respuesta:</b><br/>La cadena de certificación del servidor</p>
-			
-			</div>
-		<HR>
-	
-		
-		
-			<p>
-				- <u>GET</u> - 
 				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/certificado/certificadoDeVoto">/certificado/certificadoDeVoto</a><br/>
 				
 	  Servicio de consulta de certificados de voto.
@@ -161,6 +104,8 @@
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -182,6 +127,71 @@
 			
 			
 				<p><b>Respuesta:</b><br/>El certificado en formato PEM.</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/certificado/certificadoUsuario">/certificado/certificadoUsuario</a><br/>
+				
+	  Servicio de consulta de certificados de usuario.
+	 
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+				<p>
+					<b>Parámetros:</b><br/>
+					
+						<u>usuarioId</u>: Obligatorio. El identificador en la base de datos del usuario.<br/>
+					
+				</p>
+			
+			
+			
+				
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>El certificado en formato PEM.</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/certificado/index">/certificado/index</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+			
+			
+				
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/certificado'.</p>
 			
 			</div>
 		<HR>

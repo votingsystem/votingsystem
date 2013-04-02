@@ -15,7 +15,7 @@ def controllerActions = controllerDoc?.controllerActions %>
 	     }
         </style>
 
-<u><h3 class="controllerInfoHeader">${controllerDoc?.getInfoController()}</h3></u>
+<h3 class="controllerInfoHeader"><u>${controllerDoc?.getInfoController()}</u></h3>
 
 <g:if test="${controllerDescription}">${controllerDescription}</g:if>
 
@@ -24,7 +24,12 @@ def controllerActions = controllerDoc?.controllerActions %>
 	<HR>
 	<g:each in="${controllerActions}">
 		<% def commentDoc = it?.commentDoc
-		   def paramsMap = commentDoc?.paramsMap		   
+		   def paramsMap = commentDoc?.paramsMap
+		   def eTagsMap = commentDoc?.getETagsMap()
+		   def requestHeaderMap = commentDoc?.getRequestHeaderMap()
+		   def responseHeaderMap = commentDoc?.getResponseHeaderMap()
+		   def contentTypeMap = commentDoc?.getContentTypeMap()
+		   def urlSufixMap = commentDoc?.getUrlSufixMap()
 	       def httpMethod = commentDoc?.httpMethod?.toUpperCase()
 	       def description = commentDoc?.description
 	       def result = commentDoc?.result%>
@@ -35,16 +40,61 @@ def controllerActions = controllerDoc?.controllerActions %>
 				<g:if test="${description}">${description}<br/></g:if>
 			</p>
 			<div class="params_result_div">
-			<g:if test="${paramsMap}">
+			
+			<g:if test="${urlSufixMap}">
 				<p>
-					<b><g:message code="paramsMsg"/>:</b><br/>
-					<g:each in="${paramsMap?.keySet()}">
-						<u>${it}</u>: ${paramsMap.get(it)}<br/>
+					<b><g:message code="urlSufixMsg"/>:</b><br/>
+					<g:each in="${urlSufixMap?.keySet()}" var="sufixKey">
+						<u>${sufixKey}</u>: ${urlSufixMap.get(sufixKey)}<br/>
 					</g:each>
 				</p>
 			</g:if>
-			</p>
-	
+			
+			<g:if test="${contentTypeMap}">
+				<p>
+					<b><g:message code="contentTypeMsg"/>:</b><br/>
+					<g:each in="${contentTypeMap?.keySet()}" var="contentTypeKey">
+						<u>${contentTypeKey}</u>: ${contentTypeMap.get(contentTypeKey)}<br/>
+					</g:each>
+				</p>
+			</g:if>
+			
+			<g:if test="${paramsMap}">
+				<p>
+					<b><g:message code="paramsMsg"/>:</b><br/>
+					<g:each in="${paramsMap?.keySet()}" var="paramKey">
+						<u>${paramKey}</u>: ${paramsMap.get(paramKey)}<br/>
+					</g:each>
+				</p>
+			</g:if>
+			
+			<g:if test="${eTagsMap}">
+				<p>
+					<b><g:message code="eTagsMsg"/>:</b><br/>
+					<g:each in="${eTagsMap?.keySet()}" var="etagKey">
+						<u>${etagKey}</u>: ${eTagsMap.get(etagKey)}<br/>
+					</g:each>
+				</p>
+			</g:if>
+				
+			<g:if test="${requestHeaderMap}">
+				<p>
+					<b><g:message code="requestHeaderMsg"/>:</b><br/>
+					<g:each in="${requestHeaderMap?.keySet()}"  var="requestHeaderKey">
+						<u>${requestHeaderKey}</u>: ${requestHeaderMap.get(requestHeaderKey)}<br/>
+					</g:each>
+				</p>
+			</g:if>
+			
+			<g:if test="${responseHeaderMap}">
+				<p>
+					<b><g:message code="responseHeaderMsg"/>:</b><br/>
+					<g:each in="${responseHeaderMap?.keySet()}"  var="responseHeaderKey">
+						<u>${responseHeaderKey}</u>: ${responseHeaderMap.get(responseHeaderKey)}<br/>
+					</g:each>
+				</p>
+			</g:if> 
+			
 			<g:if test="${result}">
 				<p><b><g:message code="responseMsg"/>:</b><br/>${result}</p>
 			</g:if>

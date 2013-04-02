@@ -80,15 +80,16 @@ public class AsociarCentroControlDialog
         closeLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Asociar Centro de Control");
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/sistemavotacion/test/dialogo/Bundle"); // NOI18N
+        setTitle(bundle.getString("AsociarCentroControlDialog.title")); // NOI18N
 
-        centroControlLabel.setText("URL Centro de Control:");
-        centroControlLabel.setToolTipText("Para hacer las pruebas de carga debe proporcionar la URL de un Centro de Control arrancado en modo TEST");
+        centroControlLabel.setText(bundle.getString("AsociarCentroControlDialog.centroControlLabel.text")); // NOI18N
+        centroControlLabel.setToolTipText(bundle.getString("AsociarCentroControlDialog.centroControlLabel.toolTipText")); // NOI18N
 
-        centroControlTextField.setText(" ");
+        centroControlTextField.setText(bundle.getString("AsociarCentroControlDialog.centroControlTextField.text")); // NOI18N
 
         infoServidorButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/pair_16x16.png"))); // NOI18N
-        infoServidorButton.setText("Asociar");
+        infoServidorButton.setText(bundle.getString("AsociarCentroControlDialog.infoServidorButton.text")); // NOI18N
         infoServidorButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 asociarServidorButtonActionPerformed(evt);
@@ -120,7 +121,7 @@ public class AsociarCentroControlDialog
         );
 
         cerrarButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/cancel_16x16.png"))); // NOI18N
-        cerrarButton.setText("Cerrar");
+        cerrarButton.setText(bundle.getString("AsociarCentroControlDialog.cerrarButton.text")); // NOI18N
         cerrarButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cerrarButtonActionPerformed(evt);
@@ -132,11 +133,11 @@ public class AsociarCentroControlDialog
         mensajeLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 15)); // NOI18N
         mensajeLabel.setForeground(java.awt.Color.red);
         mensajeLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        mensajeLabel.setText("Hola");
+        mensajeLabel.setText(bundle.getString("AsociarCentroControlDialog.mensajeLabel.text")); // NOI18N
 
         closeLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         closeLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/close.gif"))); // NOI18N
-        closeLabel.setText(" ");
+        closeLabel.setText(bundle.getString("AsociarCentroControlDialog.closeLabel.text")); // NOI18N
         closeLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 closeLabelcloseMensajeUsuario(evt);

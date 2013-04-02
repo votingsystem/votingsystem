@@ -28,6 +28,7 @@ def controllerActions = controllerDoc?.controllerActions %>
 		   def eTagsMap = commentDoc?.getETagsMap()
 		   def requestHeaderMap = commentDoc?.getRequestHeaderMap()
 		   def responseHeaderMap = commentDoc?.getResponseHeaderMap()
+		   def contentTypeMap = commentDoc?.getContentTypeMap()
 		   def urlSufixMap = commentDoc?.getUrlSufixMap()
 	       def httpMethod = commentDoc?.httpMethod?.toUpperCase()
 	       def description = commentDoc?.description
@@ -45,6 +46,15 @@ def controllerActions = controllerDoc?.controllerActions %>
 					<b><g:message code="urlSufixMsg"/>:</b><br/>
 					<g:each in="${urlSufixMap?.keySet()}" var="sufixKey">
 						<u>${sufixKey}</u>: ${urlSufixMap.get(sufixKey)}<br/>
+					</g:each>
+				</p>
+			</g:if>
+			
+			<g:if test="${contentTypeMap}">
+				<p>
+					<b><g:message code="contentTypeMsg"/>:</b><br/>
+					<g:each in="${contentTypeMap?.keySet()}" var="contentTypeKey">
+						<u>${contentTypeKey}</u>: ${contentTypeMap.get(contentTypeKey)}<br/>
 					</g:each>
 				</p>
 			</g:if>

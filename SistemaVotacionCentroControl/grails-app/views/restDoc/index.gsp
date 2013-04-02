@@ -45,6 +45,8 @@
 			
 			
 			
+			
+			
 				<p>
 					<b>Parámetros:</b><br/>
 					
@@ -83,6 +85,8 @@
 			
 			
 			
+			
+			
 			 
 			
 			
@@ -111,11 +115,41 @@
 		
 			<p>
 				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/app/clienteAndroid">/app/clienteAndroid</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>Parámetros de configuración de Hibernate</p>
+			
+			</div>
+		<HR >
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
 				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/app/home">/app/home</a><br/>
 				
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -151,36 +185,12 @@
 			
 			
 			
+			
+			
 			 
 			
 			
 				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/app'</p>
-			
-			</div>
-		<HR >
-	
-		
-		
-			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/app/clienteAndroid">/app/clienteAndroid</a><br/>
-				
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			 
-			
-			
-				<p><b>Respuesta:</b><br/>Parámetros de configuración de Hibernate</p>
 			
 			</div>
 		<HR >
@@ -195,6 +205,15 @@
 			</p>
 			<div class="params_result_div">
 			
+			
+			
+			
+				<p>
+					<b>Tipos de contenido:</b><br/>
+					
+						<u>pdf</u>: blim blim vlim<br/>
+					
+				</p>
 			
 			
 			
@@ -229,7 +248,7 @@
 		
 			<p>
 				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/applet/index">/applet/index</a><br/>
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/applet/cliente">/applet/cliente</a><br/>
 				
 	  <br/>
 			</p>
@@ -243,37 +262,12 @@
 			
 			
 			
-			 
-			
-			
-				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/applet'.</p>
-			
-			</div>
-		<HR >
-	
-		
-		
-			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/applet/jnlpHerramienta">/applet/jnlpHerramienta</a><br/>
-				
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			
-			
-			
-			
-			
-			
 			
 			
 			 
 			
 			
-				<p><b>Respuesta:</b><br/>Archivo JNLP con los datos del Applet de la herramienta de validación de archivos firmados
-	          y copias de seguridad.</p>
+				<p><b>Respuesta:</b><br/>Página HTML que sirve para cargar el Applet principal de firma.</p>
 			
 			</div>
 		<HR >
@@ -296,11 +290,41 @@
 			
 			
 			
+			
+			
 			 
 			
 			
 				<p><b>Respuesta:</b><br/>Página HTML que sirve para cargar el Applet principal de la herramienta de validación
 	  		   de archivos firmados y de copias de seguridad.</p>
+			
+			</div>
+		<HR >
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/applet/index">/applet/index</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/applet'.</p>
 			
 			</div>
 		<HR >
@@ -323,6 +347,8 @@
 			
 			
 			
+			
+			
 			 
 			
 			
@@ -335,7 +361,7 @@
 		
 			<p>
 				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/applet/cliente">/applet/cliente</a><br/>
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/applet/jnlpHerramienta">/applet/jnlpHerramienta</a><br/>
 				
 	  <br/>
 			</p>
@@ -349,10 +375,13 @@
 			
 			
 			
+			
+			
 			 
 			
 			
-				<p><b>Respuesta:</b><br/>Página HTML que sirve para cargar el Applet principal de firma.</p>
+				<p><b>Respuesta:</b><br/>Archivo JNLP con los datos del Applet de la herramienta de validación de archivos firmados
+	          y copias de seguridad.</p>
 			
 			</div>
 		<HR color='#4c4c4c'>
@@ -376,38 +405,14 @@
 		
 		
 			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/buscador/index">/buscador/index</a><br/>
-				
-	 <br/>
-			</p>
-			<div class="params_result_div">
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			 
-			
-			
-				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/buscador'</p>
-			
-			</div>
-		<HR >
-	
-		
-		
-			<p>
 				- <u>POST</u> - 
 				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/buscador/consultaJSON">/buscador/consultaJSON</a><br/>
 				
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -437,32 +442,6 @@
 		
 			<p>
 				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/buscador/reindex">/buscador/reindex</a><br/>
-				
-     (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS). 
-     Servicio que reindexa el motor de búsqueda
-	 <br/>
-			</p>
-			<div class="params_result_div">
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			 
-			
-			
-			</div>
-		<HR >
-	
-		
-		
-			<p>
-				- <u>GET</u> - 
 				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/buscador/evento">/buscador/evento</a><br/>
 				
 	  Servicio que busca la cadena de texto recibida entre las votaciones publicadas.
@@ -470,6 +449,8 @@
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -500,6 +481,46 @@
 		
 		
 			<p>
+				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/buscador/eventoPorEtiqueta">/buscador/eventoPorEtiqueta</a><br/>
+				
+	  Servicio que busca los eventos que tienen la etiqueta que se
+	  pasa como parámetro.
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+				<p>
+					<b>Parámetros:</b><br/>
+					
+						<u>max</u>: Opcional (por defecto 20). Número máximo de documentos que
+	  		  devuelve la consulta (tamaño de la página).<br/>
+					
+						<u>offset</u>: Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.<br/>
+					
+						<u>etiqueta</u>: Obligatorio. Texto de la etiqueta.<br/>
+					
+				</p>
+			
+			
+			
+			
+			
+			
+			 
+			
+			
+			</div>
+		<HR >
+	
+		
+		
+			<p>
 				- <u>POST</u> - 
 				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/buscador/guardarReindex">/buscador/guardarReindex</a><br/>
 				
@@ -507,6 +528,8 @@
 	 <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -533,28 +556,46 @@
 		
 			<p>
 				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/buscador/eventoPorEtiqueta">/buscador/eventoPorEtiqueta</a><br/>
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/buscador/index">/buscador/index</a><br/>
 				
-	  Servicio que busca los eventos que tienen la etiqueta que se
-	  pasa como parámetro.
-	  <br/>
+	 <br/>
 			</p>
 			<div class="params_result_div">
 			
 			
 			
 			
-				<p>
-					<b>Parámetros:</b><br/>
-					
-						<u>max</u>: Opcional (por defecto 20). Número máximo de documentos que
-	  		  devuelve la consulta (tamaño de la página).<br/>
-					
-						<u>offset</u>: Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.<br/>
-					
-						<u>etiqueta</u>: Obligatorio. Texto de la etiqueta.<br/>
-					
-				</p>
+			
+			
+			
+			
+			
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/buscador'</p>
+			
+			</div>
+		<HR >
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/buscador/reindex">/buscador/reindex</a><br/>
+				
+     (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS). 
+     Servicio que reindexa el motor de búsqueda
+	 <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
 			
 			
 			
@@ -587,7 +628,7 @@
 		
 			<p>
 				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/certificado/index">/certificado/index</a><br/>
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/certificado/cadenaCertificacion">/certificado/cadenaCertificacion</a><br/>
 				
 	  <br/>
 			</p>
@@ -601,45 +642,12 @@
 			
 			
 			
-			 
-			
-			
-				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/certificado'.</p>
-			
-			</div>
-		<HR >
-	
-		
-		
-			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/certificado/certificadoUsuario">/certificado/certificadoUsuario</a><br/>
-				
-	  Servicio de consulta de certificados de usuario.
-	 
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			
-			
-			
-				<p>
-					<b>Parámetros:</b><br/>
-					
-						<u>usuarioId</u>: Obligatorio. El identificador en la base de datos del usuario.<br/>
-					
-				</p>
-			
-			
-			
-			
 			
 			
 			 
 			
 			
-				<p><b>Respuesta:</b><br/>El certificado en formato PEM.</p>
+				<p><b>Respuesta:</b><br/>La cadena de certificación del servidor</p>
 			
 			</div>
 		<HR >
@@ -656,6 +664,8 @@
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -688,32 +698,6 @@
 		
 			<p>
 				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/certificado/cadenaCertificacion">/certificado/cadenaCertificacion</a><br/>
-				
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			 
-			
-			
-				<p><b>Respuesta:</b><br/>La cadena de certificación del servidor</p>
-			
-			</div>
-		<HR >
-	
-		
-		
-			<p>
-				- <u>GET</u> - 
 				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/certificado/certificadoDeVoto">/certificado/certificadoDeVoto</a><br/>
 				
 	  Servicio de consulta de certificados de voto.
@@ -721,6 +705,8 @@
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -742,6 +728,71 @@
 			
 			
 				<p><b>Respuesta:</b><br/>El certificado en formato PEM.</p>
+			
+			</div>
+		<HR >
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/certificado/certificadoUsuario">/certificado/certificadoUsuario</a><br/>
+				
+	  Servicio de consulta de certificados de usuario.
+	 
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+				<p>
+					<b>Parámetros:</b><br/>
+					
+						<u>usuarioId</u>: Obligatorio. El identificador en la base de datos del usuario.<br/>
+					
+				</p>
+			
+			
+			
+			
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>El certificado en formato PEM.</p>
+			
+			</div>
+		<HR >
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/certificado/index">/certificado/index</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/certificado'.</p>
 			
 			</div>
 		<HR color='#4c4c4c'>
@@ -766,35 +817,9 @@
 		
 			<p>
 				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/eventoVotacion/index">/eventoVotacion/index</a><br/>
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/eventoVotacion/comprobarFechas">/eventoVotacion/comprobarFechas</a><br/>
 				
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			 
-			
-			
-				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/eventoVotacion'.</p>
-			
-			</div>
-		<HR >
-	
-		
-		
-			<p>
-				- <u>POST</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/eventoVotacion/guardarCancelacion">/eventoVotacion/guardarCancelacion</a><br/>
-				
-	  Servicio de cancelación de votaciones 
+	  Servicio que comprueba las fechas de una votación
 	 
 	  <br/>
 			</p>
@@ -803,12 +828,12 @@
 			
 			
 			
+			
+			
 				<p>
 					<b>Parámetros:</b><br/>
 					
-						<u>archivoFirmado</u>: Obligatorio. Archivo con los datos de la votación que se desea cancelar 
-	  			firmado por el Control de Acceso que publicó la votación y por
-	  			el usuario que la publicó o un administrador de sistema.<br/>
+						<u>id</u>: Obligatorio. El identificador de la votación en la base de datos.<br/>
 					
 				</p>
 			
@@ -834,6 +859,8 @@
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -864,10 +891,10 @@
 		
 		
 			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/eventoVotacion/obtenerVotos">/eventoVotacion/obtenerVotos</a><br/>
+				- <u>POST</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/eventoVotacion/guardarCancelacion">/eventoVotacion/guardarCancelacion</a><br/>
 				
-	  Servicio de consulta de los votos
+	  Servicio de cancelación de votaciones 
 	 
 	  <br/>
 			</p>
@@ -876,13 +903,14 @@
 			
 			
 			
+			
+			
 				<p>
 					<b>Parámetros:</b><br/>
 					
-						<u>controlAccesoServerURL</u>: Obligatorio. URL del Control de Acceso en el que se publicó el documento.<br/>
-					
-						<u>eventoVotacionId</u>: Obligatorio. Identificador de la votación en la base de datos 
-	                           del Control de Acceso.<br/>
+						<u>archivoFirmado</u>: Obligatorio. Archivo con los datos de la votación que se desea cancelar 
+	  			firmado por el Control de Acceso que publicó la votación y por
+	  			el usuario que la publicó o un administrador de sistema.<br/>
 					
 				</p>
 			
@@ -894,7 +922,69 @@
 			 
 			
 			
-				<p><b>Respuesta:</b><br/>Documento JSON con la lista de votos recibidos por la votación solicitada.</p>
+			</div>
+		<HR >
+	
+		
+		
+			<p>
+				- <u>POST</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/eventoVotacion/guardarEvento">/eventoVotacion/guardarEvento</a><br/>
+				
+	  Servicio que da de alta las votaciones.
+	  
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+				<p>
+					<b>Parámetros:</b><br/>
+					
+						<u>archivoFirmado</u>: Obligatorio. Archivo con los datos de la votación firmado
+	  		  por el usuario que la publica y el Control de Acceso en la que se publica.<br/>
+					
+				</p>
+			
+			
+			
+			
+			
+			
+			 
+			
+			
+			</div>
+		<HR >
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/eventoVotacion/index">/eventoVotacion/index</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/eventoVotacion'.</p>
 			
 			</div>
 		<HR >
@@ -910,6 +1000,8 @@
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -943,44 +1035,10 @@
 		
 		
 			<p>
-				- <u>POST</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/eventoVotacion/guardarEvento">/eventoVotacion/guardarEvento</a><br/>
-				
-	  Servicio que da de alta las votaciones.
-	  
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			
-			
-			
-				<p>
-					<b>Parámetros:</b><br/>
-					
-						<u>archivoFirmado</u>: Obligatorio. Archivo con los datos de la votación firmado
-	  		  por el usuario que la publica y el Control de Acceso en la que se publica.<br/>
-					
-				</p>
-			
-			
-			
-			
-			
-			
-			 
-			
-			
-			</div>
-		<HR >
-	
-		
-		
-			<p>
 				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/eventoVotacion/comprobarFechas">/eventoVotacion/comprobarFechas</a><br/>
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/eventoVotacion/obtenerVotos">/eventoVotacion/obtenerVotos</a><br/>
 				
-	  Servicio que comprueba las fechas de una votación
+	  Servicio de consulta de los votos
 	 
 	  <br/>
 			</p>
@@ -989,10 +1047,15 @@
 			
 			
 			
+			
+			
 				<p>
 					<b>Parámetros:</b><br/>
 					
-						<u>id</u>: Obligatorio. El identificador de la votación en la base de datos.<br/>
+						<u>controlAccesoServerURL</u>: Obligatorio. URL del Control de Acceso en el que se publicó el documento.<br/>
+					
+						<u>eventoVotacionId</u>: Obligatorio. Identificador de la votación en la base de datos 
+	                           del Control de Acceso.<br/>
 					
 				</p>
 			
@@ -1003,6 +1066,8 @@
 			
 			 
 			
+			
+				<p><b>Respuesta:</b><br/>Documento JSON con la lista de votos recibidos por la votación solicitada.</p>
 			
 			</div>
 		<HR color='#4c4c4c'>
@@ -1027,6 +1092,34 @@
 		
 			<p>
 				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/infoServidor/datosAplicacion">/infoServidor/datosAplicacion</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>Datos de las versiones de algunos componentes de la aplicación</p>
+			
+			</div>
+		<HR >
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
 				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/infoServidor/index">/infoServidor/index</a><br/>
 				
 	  <br/>
@@ -1041,36 +1134,12 @@
 			
 			
 			
+			
+			
 			 
 			
 			
 				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/infoServidor'</p>
-			
-			</div>
-		<HR >
-	
-		
-		
-			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/infoServidor/listaServicios">/infoServidor/listaServicios</a><br/>
-				
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			 
-			
-			
-				<p><b>Respuesta:</b><br/>La lista de servicios de la aplicación</p>
 			
 			</div>
 		<HR >
@@ -1093,10 +1162,40 @@
 			
 			
 			
+			
+			
 			 
 			
 			
 				<p><b>Respuesta:</b><br/>Información general de la aplicación</p>
+			
+			</div>
+		<HR >
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/infoServidor/listaServicios">/infoServidor/listaServicios</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>La lista de servicios de la aplicación</p>
 			
 			</div>
 		<HR >
@@ -1119,36 +1218,12 @@
 			
 			
 			
+			
+			
 			 
 			
 			
 				<p><b>Respuesta:</b><br/>Documento JSON con datos de la aplicación</p>
-			
-			</div>
-		<HR >
-	
-		
-		
-			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/infoServidor/datosAplicacion">/infoServidor/datosAplicacion</a><br/>
-				
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			 
-			
-			
-				<p><b>Respuesta:</b><br/>Datos de las versiones de algunos componentes de la aplicación</p>
 			
 			</div>
 		<HR color='#4c4c4c'>
@@ -1188,6 +1263,8 @@
 			
 			
 			
+			
+			
 			 
 			
 			
@@ -1205,6 +1282,8 @@
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -1249,12 +1328,49 @@
 		
 		
 			<p>
+				- <u>POST</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/subscripcion/guardarAsociacionConControlAcceso">/subscripcion/guardarAsociacionConControlAcceso</a><br/>
+				
+	  Servicio que da de alta Controles de Acceso.
+	 
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+				<p>
+					<b>Parámetros:</b><br/>
+					
+						<u>archivoFirmado</u>: Obligatorio. Archivo con los datos del control de acceso que se desea dar de alta.<br/>
+					
+				</p>
+			
+			
+			
+			
+			
+			
+			 
+			
+			
+			</div>
+		<HR >
+	
+		
+		
+			<p>
 				- <u>GET</u> - 
 				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/subscripcion/index">/subscripcion/index</a><br/>
 				
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -1286,6 +1402,8 @@
 			
 			
 			
+			
+			
 				<p>
 					<b>Parámetros:</b><br/>
 					
@@ -1303,39 +1421,6 @@
 			
 			
 				<p><b>Respuesta:</b><br/>Información en el formato solicitado sobre las votaciones publicadas.</p>
-			
-			</div>
-		<HR >
-	
-		
-		
-			<p>
-				- <u>POST</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/subscripcion/guardarAsociacionConControlAcceso">/subscripcion/guardarAsociacionConControlAcceso</a><br/>
-				
-	  Servicio que da de alta Controles de Acceso.
-	 
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			
-			
-			
-				<p>
-					<b>Parámetros:</b><br/>
-					
-						<u>archivoFirmado</u>: Obligatorio. Archivo con los datos del control de acceso que se desea dar de alta.<br/>
-					
-				</p>
-			
-			
-			
-			
-			
-			
-			 
-			
 			
 			</div>
 		<HR color='#4c4c4c'>
@@ -1359,32 +1444,6 @@
 		
 		
 			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/voto/index">/voto/index</a><br/>
-				
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			 
-			
-			
-				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/voto'.</p>
-			
-			</div>
-		<HR >
-	
-		
-		
-			<p>
 				- <u>POST</u> - 
 				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/voto/guardarAdjuntandoValidacion">/voto/guardarAdjuntandoValidacion</a><br/>
 				
@@ -1393,6 +1452,8 @@
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -1422,6 +1483,34 @@
 		
 			<p>
 				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/voto/index">/voto/index</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/voto'.</p>
+			
+			</div>
+		<HR >
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
 				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/voto/obtener">/voto/obtener</a><br/>
 				
 	  Servicio que devuelve la información de un voto a partir del  
@@ -1429,6 +1518,8 @@
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			

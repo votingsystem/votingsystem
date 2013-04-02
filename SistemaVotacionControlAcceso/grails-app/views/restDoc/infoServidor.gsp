@@ -13,7 +13,7 @@
 	     }
         </style>
 
-<u><h3 class="controllerInfoHeader">Información de la aplicación</h3></u>
+<h3 class="controllerInfoHeader"><u>Información de la aplicación</u></h3>
 
  Servicios que ofrecen datos sobre la aplicación
  
@@ -22,96 +22,6 @@
 <div>
 
 	<HR>
-	
-		
-		
-			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/infoServidor/index">/infoServidor/index</a><br/>
-				
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			</p>
-	
-			
-				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/infoServidor'</p>
-			
-			</div>
-		<HR>
-	
-		
-		
-			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/infoServidor/listaServicios">/infoServidor/listaServicios</a><br/>
-				
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			</p>
-	
-			
-				<p><b>Respuesta:</b><br/>La lista de servicios de la aplicación</p>
-			
-			</div>
-		<HR>
-	
-		
-		
-			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/infoServidor/informacion">/infoServidor/informacion</a><br/>
-				
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			</p>
-	
-			
-				<p><b>Respuesta:</b><br/>Información general de la aplicación</p>
-			
-			</div>
-		<HR>
-	
-		
-		
-			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/infoServidor/obtener">/infoServidor/obtener</a><br/>
-				
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			</p>
-	
-			
-				<p><b>Respuesta:</b><br/>Documento JSON con datos de la aplicación</p>
-			
-			</div>
-		<HR>
-	
-		
-		
-			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/infoServidor/datosAplicacion">/infoServidor/datosAplicacion</a><br/>
-				
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			</p>
-	
-			
-				<p><b>Respuesta:</b><br/>Datos de las versiones de algunos componentes de la aplicación</p>
-			
-			</div>
-		<HR>
 	
 		
 		
@@ -127,11 +37,161 @@
 			</p>
 			<div class="params_result_div">
 			
-			</p>
-	
+			
+			
+			
+			
+			
+			
+			
+				
+			
+			
+			 
+			
 			
 				<p><b>Respuesta:</b><br/>Direcciones a las que tendrían que ir los usuarios para poder obtener un certificado
 	  		   de identificación.</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/infoServidor/datosAplicacion">/infoServidor/datosAplicacion</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+			
+			
+				
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>Datos de las versiones de algunos componentes de la aplicación</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/infoServidor/index">/infoServidor/index</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+			
+			
+				
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/infoServidor'</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/infoServidor/informacion">/infoServidor/informacion</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+			
+			
+				
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>Información general de la aplicación</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/infoServidor/listaServicios">/infoServidor/listaServicios</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+			
+			
+				
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>La lista de servicios de la aplicación</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/infoServidor/obtener">/infoServidor/obtener</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+			
+			
+				
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>Documento JSON con datos de la aplicación</p>
 			
 			</div>
 		<HR>

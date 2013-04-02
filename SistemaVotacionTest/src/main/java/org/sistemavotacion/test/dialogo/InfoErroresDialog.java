@@ -52,13 +52,14 @@ public class InfoErroresDialog extends JDialog implements HyperlinkListener  {
         editorPane = new javax.swing.JEditorPane();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Lista de errores");
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/sistemavotacion/test/dialogo/Bundle"); // NOI18N
+        setTitle(bundle.getString("InfoErroresDialog.title")); // NOI18N
         setPreferredSize(new java.awt.Dimension(600, 450));
 
-        tipoErrorLabel.setText(" ");
+        tipoErrorLabel.setText(bundle.getString("InfoErroresDialog.tipoErrorLabel.text")); // NOI18N
 
         cerrarButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/cancel_16x16.png"))); // NOI18N
-        cerrarButton.setText("Cerrar");
+        cerrarButton.setText(bundle.getString("InfoErroresDialog.cerrarButton.text")); // NOI18N
         cerrarButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cerrarButtonActionPerformed(evt);

@@ -24,6 +24,16 @@ class AppController {
 	}
 
 	/**
+	 * @contentType pdf blim blim vlim
+	 * @return Información sobre los servicios que tienen como url base '/app'
+	 */
+	def prueba() {
+		String pathToImage1 = g.resource(controller: 'app')
+		render pathToImage1
+		return false
+	}
+
+	/**
 	 * @httpMethod GET
 	 * @return La página principal de la aplicación web de votación.
 	 */

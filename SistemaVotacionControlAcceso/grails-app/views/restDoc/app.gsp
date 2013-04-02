@@ -13,7 +13,7 @@
 	     }
         </style>
 
-<u><h3 class="controllerInfoHeader">Aplicación</h3></u>
+<h3 class="controllerInfoHeader"><u>Aplicación</u></h3>
 
  Servicios de acceso a la aplicación web principal
  
@@ -27,14 +27,81 @@
 		
 			<p>
 				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/app/clienteAndroid">/app/clienteAndroid</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+			
+			
+				
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>La página principal de la aplicación web de votación con parámetros de utilidad
+	  		   para una sesión con cliente Android.</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/app/editor">/app/editor</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+			
+			
+				
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>Página que sirve el editor de documentos que se emplea en las aplicaciones Android.</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
 				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/app/home">/app/home</a><br/>
 				
 	  <br/>
 			</p>
 			<div class="params_result_div">
 			
-			</p>
-	
+			
+			
+			
+			
+			
+			
+			
+				
+			
+			
+			 
+			
 			
 				<p><b>Respuesta:</b><br/>La página principal de la aplicación web de votación.</p>
 			
@@ -51,47 +118,20 @@
 			</p>
 			<div class="params_result_div">
 			
-			</p>
-	
+			
+			
+			
+			
+			
+			
+			
+				
+			
+			
+			 
+			
 			
 				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/app'.</p>
-			
-			</div>
-		<HR>
-	
-		
-		
-			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/app/editor">/app/editor</a><br/>
-				
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			</p>
-	
-			
-				<p><b>Respuesta:</b><br/>Página que sirve el editor de documentos que se emplea en las aplicaciones Android.</p>
-			
-			</div>
-		<HR>
-	
-		
-		
-			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/app/clienteAndroid">/app/clienteAndroid</a><br/>
-				
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			</p>
-	
-			
-				<p><b>Respuesta:</b><br/>La página principal de la aplicación web de votación con parámetros de utilidad
-	  		   para una sesión con cliente Android.</p>
 			
 			</div>
 		<HR>

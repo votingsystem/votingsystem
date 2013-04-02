@@ -13,7 +13,7 @@
 	     }
         </style>
 
-<u><h3 class="controllerInfoHeader">Servicio de Votos</h3></u>
+<h3 class="controllerInfoHeader"><u>Servicio de Votos</u></h3>
 
  Servicio que procesa los votos recibidos.
  
@@ -33,8 +33,18 @@
 			</p>
 			<div class="params_result_div">
 			
-			</p>
-	
+			
+			
+			
+			
+			
+			
+			
+				
+			
+			
+			 
+			
 			
 				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/voto'.</p>
 			
@@ -53,17 +63,27 @@
 			</p>
 			<div class="params_result_div">
 			
+			
+			
+			
+			
+			
 				<p>
 					<b>Parámetros:</b><br/>
 					
-						<u>archivoFirmado</u>: 	Obligatorio. El voto firmado por el
+						<u>archivoFirmado</u>: Obligatorio. El voto firmado por el
 	         <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Certificado-de-voto">certificado de Voto.</a>
 	         y el certificado del Centro de Control.<br/>
 					
 				</p>
 			
-			</p>
-	
+			
+			
+				
+			
+			
+			 
+			
 			
 				<p><b>Respuesta:</b><br/><a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Recibo-de-Voto">El recibo del voto.</a></p>
 			

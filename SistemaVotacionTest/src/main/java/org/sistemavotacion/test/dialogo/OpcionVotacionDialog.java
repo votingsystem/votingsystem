@@ -61,11 +61,12 @@ public class OpcionVotacionDialog extends javax.swing.JDialog implements KeyList
         mensajeLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 15)); // NOI18N
         mensajeLabel.setForeground(java.awt.Color.red);
         mensajeLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        mensajeLabel.setText("Hola");
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/sistemavotacion/test/dialogo/Bundle"); // NOI18N
+        mensajeLabel.setText(bundle.getString("OpcionVotacionDialog.mensajeLabel.text")); // NOI18N
 
         closeLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         closeLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/close.gif"))); // NOI18N
-        closeLabel.setText(" ");
+        closeLabel.setText(bundle.getString("OpcionVotacionDialog.closeLabel.text")); // NOI18N
         closeLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 closeLabelcloseMensajeUsuario(evt);
@@ -94,7 +95,7 @@ public class OpcionVotacionDialog extends javax.swing.JDialog implements KeyList
         );
 
         cerrarButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/cancel_16x16.png"))); // NOI18N
-        cerrarButton.setText("Cerrar");
+        cerrarButton.setText(bundle.getString("OpcionVotacionDialog.cerrarButton.text")); // NOI18N
         cerrarButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cerrarButtonActionPerformed(evt);
@@ -102,7 +103,7 @@ public class OpcionVotacionDialog extends javax.swing.JDialog implements KeyList
         });
 
         anyadirButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/accept_16x16.png"))); // NOI18N
-        anyadirButton.setText("Añadir");
+        anyadirButton.setText(bundle.getString("OpcionVotacionDialog.anyadirButton.text")); // NOI18N
         anyadirButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 anyadirButtonActionPerformed(evt);
@@ -113,7 +114,7 @@ public class OpcionVotacionDialog extends javax.swing.JDialog implements KeyList
         textArea.setRows(5);
         scrollPane.setViewportView(textArea);
 
-        msgLabel.setText("Contenido que figurará en la opción:");
+        msgLabel.setText(bundle.getString("OpcionVotacionDialog.msgLabel.text")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);

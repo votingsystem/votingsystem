@@ -72,7 +72,8 @@ public class SeleccionArchivosDialog extends javax.swing.JDialog {
         eventoLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Solicitudes en directorios de pruebas");
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/sistemavotacion/test/dialogo/Bundle"); // NOI18N
+        setTitle(bundle.getString("SeleccionArchivosDialog.title")); // NOI18N
 
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
@@ -86,7 +87,7 @@ public class SeleccionArchivosDialog extends javax.swing.JDialog {
         );
 
         cerrarButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/cancel_16x16.png"))); // NOI18N
-        cerrarButton.setText("Cerrar");
+        cerrarButton.setText(bundle.getString("SeleccionArchivosDialog.cerrarButton.text")); // NOI18N
         cerrarButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cerrarButtonActionPerformed(evt);
@@ -94,14 +95,14 @@ public class SeleccionArchivosDialog extends javax.swing.JDialog {
         });
 
         aceptarButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/accept_16x16.png"))); // NOI18N
-        aceptarButton.setText("Aceptar");
+        aceptarButton.setText(bundle.getString("SeleccionArchivosDialog.aceptarButton.text")); // NOI18N
         aceptarButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 aceptarButtonActionPerformed(evt);
             }
         });
 
-        eventoLabel.setText(" ");
+        eventoLabel.setText(bundle.getString("SeleccionArchivosDialog.eventoLabel.text")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);

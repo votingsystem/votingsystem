@@ -110,10 +110,11 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
         erroresAnulacionButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Anulación de votos");
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/sistemavotacion/test/dialogo/Bundle"); // NOI18N
+        setTitle(bundle.getString("AnularVotosDialog.title")); // NOI18N
 
         explicacionTecnicaButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/information-white.png"))); // NOI18N
-        explicacionTecnicaButton.setText("Fundamentos técnicos del procedimiento");
+        explicacionTecnicaButton.setText(bundle.getString("AnularVotosDialog.explicacionTecnicaButton.text")); // NOI18N
         explicacionTecnicaButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 explicacionTecnicaButtonActionPerformed(evt);
@@ -121,16 +122,16 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
         });
 
         cerrarButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/cancel_16x16.png"))); // NOI18N
-        cerrarButton.setText("Cerrar");
+        cerrarButton.setText(bundle.getString("AnularVotosDialog.cerrarButton.text")); // NOI18N
         cerrarButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cerrarButtonActionPerformed(evt);
             }
         });
 
-        asuntoLabel.setText(" ");
+        asuntoLabel.setText(bundle.getString("AnularVotosDialog.asuntoLabel.text")); // NOI18N
 
-        progressLabel.setText(" ");
+        progressLabel.setText(bundle.getString("AnularVotosDialog.progressLabel.text")); // NOI18N
 
         javax.swing.GroupLayout progressBarPanelLayout = new javax.swing.GroupLayout(progressBarPanel);
         progressBarPanel.setLayout(progressBarPanelLayout);
@@ -154,7 +155,7 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
         );
 
         anularTodosButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/CancelAll_16x16.png"))); // NOI18N
-        anularTodosButton.setText("Anular todos los votos de la simulación");
+        anularTodosButton.setText(bundle.getString("AnularVotosDialog.anularTodosButton.text")); // NOI18N
         anularTodosButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 anularTodosButtonActionPerformed(evt);
@@ -162,7 +163,7 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
         });
 
         seleccionarIdDeListaButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/select_16x16.png"))); // NOI18N
-        seleccionarIdDeListaButton.setText("Seleccionar solicitud acceso ");
+        seleccionarIdDeListaButton.setText(bundle.getString("AnularVotosDialog.seleccionarIdDeListaButton.text")); // NOI18N
         seleccionarIdDeListaButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 seleccionarIdDeListaButtonActionPerformed(evt);
@@ -192,16 +193,16 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
         contadorPanel.setBackground(java.awt.Color.white);
         contadorPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        contadorSolicitudesLabel.setText("<html><b>Lanzada anulación: </b>0</html>");
+        contadorSolicitudesLabel.setText(bundle.getString("AnularVotosDialog.contadorSolicitudesLabel.text")); // NOI18N
 
-        contadorSolicitudesErrorLabel.setText("<html><b>Errores: </b>0</html>");
+        contadorSolicitudesErrorLabel.setText(bundle.getString("AnularVotosDialog.contadorSolicitudesErrorLabel.text")); // NOI18N
 
-        contadorSolicitudesOKLabel.setText("<html><b>Operaciones con éxito: </b>0</html>");
+        contadorSolicitudesOKLabel.setText(bundle.getString("AnularVotosDialog.contadorSolicitudesOKLabel.text")); // NOI18N
 
         timePanel.setBackground(java.awt.Color.white);
 
         timeLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
-        timeLabel.setText("Duración operacion:");
+        timeLabel.setText(bundle.getString("AnularVotosDialog.timeLabel.text")); // NOI18N
 
         javax.swing.GroupLayout timePanelLayout = new javax.swing.GroupLayout(timePanel);
         timePanel.setLayout(timePanelLayout);
@@ -252,7 +253,7 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
         );
 
         erroresAnulacionButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/error.png"))); // NOI18N
-        erroresAnulacionButton.setText("Errores en anulaciones");
+        erroresAnulacionButton.setText(bundle.getString("AnularVotosDialog.erroresAnulacionButton.text")); // NOI18N
         erroresAnulacionButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 erroresAnulacionButtonActionPerformed(evt);

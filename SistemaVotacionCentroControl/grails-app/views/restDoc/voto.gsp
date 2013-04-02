@@ -26,32 +26,6 @@
 		
 		
 			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/voto/index">/voto/index</a><br/>
-				
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			
-			
-			
-			
-			
-				
-			
-			
-			 
-			
-			
-				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/voto'.</p>
-			
-			</div>
-		<HR>
-	
-		
-		
-			<p>
 				- <u>POST</u> - 
 				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/voto/guardarAdjuntandoValidacion">/voto/guardarAdjuntandoValidacion</a><br/>
 				
@@ -60,6 +34,8 @@
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -89,6 +65,34 @@
 		
 			<p>
 				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/voto/index">/voto/index</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+			
+			
+				
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/voto'.</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
 				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/voto/obtener">/voto/obtener</a><br/>
 				
 	  Servicio que devuelve la información de un voto a partir del  
@@ -96,6 +100,8 @@
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			

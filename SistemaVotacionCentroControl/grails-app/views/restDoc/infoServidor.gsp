@@ -27,11 +27,41 @@
 		
 			<p>
 				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/infoServidor/datosAplicacion">/infoServidor/datosAplicacion</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+			
+			
+				
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>Datos de las versiones de algunos componentes de la aplicación</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
 				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/infoServidor/index">/infoServidor/index</a><br/>
 				
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -53,37 +83,13 @@
 		
 			<p>
 				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/infoServidor/listaServicios">/infoServidor/listaServicios</a><br/>
-				
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			
-			
-			
-			
-			
-				
-			
-			
-			 
-			
-			
-				<p><b>Respuesta:</b><br/>La lista de servicios de la aplicación</p>
-			
-			</div>
-		<HR>
-	
-		
-		
-			<p>
-				- <u>GET</u> - 
 				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/infoServidor/informacion">/infoServidor/informacion</a><br/>
 				
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -105,11 +111,41 @@
 		
 			<p>
 				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/infoServidor/listaServicios">/infoServidor/listaServicios</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+			
+			
+				
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>La lista de servicios de la aplicación</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
 				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/infoServidor/obtener">/infoServidor/obtener</a><br/>
 				
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -123,32 +159,6 @@
 			
 			
 				<p><b>Respuesta:</b><br/>Documento JSON con datos de la aplicación</p>
-			
-			</div>
-		<HR>
-	
-		
-		
-			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/infoServidor/datosAplicacion">/infoServidor/datosAplicacion</a><br/>
-				
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			
-			
-			
-			
-			
-				
-			
-			
-			 
-			
-			
-				<p><b>Respuesta:</b><br/>Datos de las versiones de algunos componentes de la aplicación</p>
 			
 			</div>
 		<HR>

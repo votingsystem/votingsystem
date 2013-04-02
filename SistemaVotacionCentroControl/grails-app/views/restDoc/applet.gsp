@@ -25,11 +25,13 @@
 		
 			<p>
 				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/applet/index">/applet/index</a><br/>
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/applet/cliente">/applet/cliente</a><br/>
 				
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -42,34 +44,7 @@
 			 
 			
 			
-				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/applet'.</p>
-			
-			</div>
-		<HR>
-	
-		
-		
-			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/applet/jnlpHerramienta">/applet/jnlpHerramienta</a><br/>
-				
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			
-			
-			
-			
-			
-				
-			
-			
-			 
-			
-			
-				<p><b>Respuesta:</b><br/>Archivo JNLP con los datos del Applet de la herramienta de validación de archivos firmados
-	          y copias de seguridad.</p>
+				<p><b>Respuesta:</b><br/>Página HTML que sirve para cargar el Applet principal de firma.</p>
 			
 			</div>
 		<HR>
@@ -83,6 +58,8 @@
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -105,11 +82,41 @@
 		
 			<p>
 				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/applet/index">/applet/index</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+			
+			
+				
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/applet'.</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
 				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/applet/jnlpCliente">/applet/jnlpCliente</a><br/>
 				
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -131,11 +138,13 @@
 		
 			<p>
 				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/applet/cliente">/applet/cliente</a><br/>
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/applet/jnlpHerramienta">/applet/jnlpHerramienta</a><br/>
 				
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -148,7 +157,8 @@
 			 
 			
 			
-				<p><b>Respuesta:</b><br/>Página HTML que sirve para cargar el Applet principal de firma.</p>
+				<p><b>Respuesta:</b><br/>Archivo JNLP con los datos del Applet de la herramienta de validación de archivos firmados
+	          y copias de seguridad.</p>
 			
 			</div>
 		<HR>

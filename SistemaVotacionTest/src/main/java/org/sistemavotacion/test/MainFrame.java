@@ -99,10 +99,11 @@ public class MainFrame extends JFrame  implements KeyListener, FocusListener, La
         comoAuditarMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Aplicación de pruebas del sistema de votación");
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/sistemavotacion/test/Bundle"); // NOI18N
+        setTitle(bundle.getString("MainFrame.title")); // NOI18N
 
-        controlAccesoLabel.setText("URL Control de Acceso:");
-        controlAccesoLabel.setToolTipText("Para hacer las pruebas de carga debe proporcionar la URL de un Control de Acceso arrancado en modo TEST");
+        controlAccesoLabel.setText(bundle.getString("MainFrame.controlAccesoLabel.text")); // NOI18N
+        controlAccesoLabel.setToolTipText(bundle.getString("MainFrame.controlAccesoLabel.toolTipText")); // NOI18N
 
         controlAccesoTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -110,10 +111,10 @@ public class MainFrame extends JFrame  implements KeyListener, FocusListener, La
             }
         });
 
-        estadoControlAccesoLabel.setText(" ");
+        estadoControlAccesoLabel.setText(bundle.getString("MainFrame.estadoControlAccesoLabel.text")); // NOI18N
 
         infoServidorButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/pair_16x16.png"))); // NOI18N
-        infoServidorButton.setText("Conectar");
+        infoServidorButton.setText(bundle.getString("MainFrame.infoServidorButton.text")); // NOI18N
         infoServidorButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 infoServidorButtonActionPerformed(evt);
@@ -156,10 +157,10 @@ public class MainFrame extends JFrame  implements KeyListener, FocusListener, La
         );
         votacionesTabPanelLayout.setVerticalGroup(
             votacionesTabPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(votacionesPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 375, Short.MAX_VALUE)
+            .addComponent(votacionesPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 391, Short.MAX_VALUE)
         );
 
-        tabbedPane.addTab("Sistema de votación", votacionesTabPanel);
+        tabbedPane.addTab(bundle.getString("MainFrame.votacionesTabPanel.TabConstraints.tabTitle"), votacionesTabPanel); // NOI18N
 
         javax.swing.GroupLayout firmasPanel1Layout = new javax.swing.GroupLayout(firmasPanel1);
         firmasPanel1.setLayout(firmasPanel1Layout);
@@ -169,21 +170,21 @@ public class MainFrame extends JFrame  implements KeyListener, FocusListener, La
         );
         firmasPanel1Layout.setVerticalGroup(
             firmasPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 375, Short.MAX_VALUE)
+            .addGap(0, 391, Short.MAX_VALUE)
         );
 
-        tabbedPane.addTab("Sistema de recogida de firmas", firmasPanel1);
+        tabbedPane.addTab(bundle.getString("MainFrame.firmasPanel1.TabConstraints.tabTitle"), firmasPanel1); // NOI18N
 
         mensajePanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         mensajeLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 15)); // NOI18N
         mensajeLabel.setForeground(java.awt.Color.red);
         mensajeLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        mensajeLabel.setText("Mensaje para el usuario");
+        mensajeLabel.setText(bundle.getString("MainFrame.mensajeLabel.text")); // NOI18N
 
         closeLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         closeLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/close.gif"))); // NOI18N
-        closeLabel.setText(" ");
+        closeLabel.setText(bundle.getString("MainFrame.closeLabel.text")); // NOI18N
         closeLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 closeMensajeUsuario(evt);
@@ -211,13 +212,13 @@ public class MainFrame extends JFrame  implements KeyListener, FocusListener, La
                 .addGap(0, 0, Short.MAX_VALUE))
         );
 
-        mensajeLabel.getAccessibleContext().setAccessibleName(" ");
+        mensajeLabel.getAccessibleContext().setAccessibleName(bundle.getString("MainFrame.mensajeLabel.AccessibleContext.accessibleName")); // NOI18N
 
-        archivoMenu.setText("Archivo");
+        archivoMenu.setText(bundle.getString("MainFrame.archivoMenu.text")); // NOI18N
 
         salirMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, java.awt.event.InputEvent.CTRL_MASK));
         salirMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/exit_16x16.png"))); // NOI18N
-        salirMenuItem.setText("Salir");
+        salirMenuItem.setText(bundle.getString("MainFrame.salirMenuItem.text")); // NOI18N
         salirMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 salirMenuItemActionPerformed(evt);
@@ -226,7 +227,7 @@ public class MainFrame extends JFrame  implements KeyListener, FocusListener, La
         archivoMenu.add(salirMenuItem);
 
         abrirArchivoMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/fileopen16x16.png"))); // NOI18N
-        abrirArchivoMenuItem.setText("Abrir archivo firmado");
+        abrirArchivoMenuItem.setText(bundle.getString("MainFrame.abrirArchivoMenuItem.text")); // NOI18N
         abrirArchivoMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 abrirArchivoMenuItemActionPerformed(evt);
@@ -236,10 +237,10 @@ public class MainFrame extends JFrame  implements KeyListener, FocusListener, La
 
         menuBar.add(archivoMenu);
 
-        ayudaMenu.setText("Ayuda");
+        ayudaMenu.setText(bundle.getString("MainFrame.ayudaMenu.text")); // NOI18N
 
         informacionSistemaMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/information-white.png"))); // NOI18N
-        informacionSistemaMenuItem.setText("Información del sistema");
+        informacionSistemaMenuItem.setText(bundle.getString("MainFrame.informacionSistemaMenuItem.text")); // NOI18N
         informacionSistemaMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 informacionSistemaMenuItemActionPerformed(evt);
@@ -248,7 +249,7 @@ public class MainFrame extends JFrame  implements KeyListener, FocusListener, La
         ayudaMenu.add(informacionSistemaMenuItem);
 
         razonesMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/information-white.png"))); // NOI18N
-        razonesMenuItem.setText("Razones para un sistema de votación online");
+        razonesMenuItem.setText(bundle.getString("MainFrame.razonesMenuItem.text")); // NOI18N
         razonesMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 razonesMenuItemActionPerformed(evt);
@@ -257,7 +258,7 @@ public class MainFrame extends JFrame  implements KeyListener, FocusListener, La
         ayudaMenu.add(razonesMenuItem);
 
         comoAuditarMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/information-white.png"))); // NOI18N
-        comoAuditarMenuItem.setText("¿Cómo se auditan los resultados?");
+        comoAuditarMenuItem.setText(bundle.getString("MainFrame.comoAuditarMenuItem.text")); // NOI18N
         comoAuditarMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 comoAuditarMenuItemActionPerformed(evt);
@@ -287,11 +288,11 @@ public class MainFrame extends JFrame  implements KeyListener, FocusListener, La
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(urlsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tabbedPane)
+                .addComponent(tabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 434, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
-        tabbedPane.getAccessibleContext().setAccessibleName("");
+        tabbedPane.getAccessibleContext().setAccessibleName(bundle.getString("MainFrame.tabbedPane.AccessibleContext.accessibleName")); // NOI18N
 
         pack();
     }// </editor-fold>//GEN-END:initComponents

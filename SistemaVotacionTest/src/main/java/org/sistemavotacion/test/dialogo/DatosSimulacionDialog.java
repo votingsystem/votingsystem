@@ -115,17 +115,18 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
         closePanelLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Datos de la simulación");
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/sistemavotacion/test/dialogo/Bundle"); // NOI18N
+        setTitle(bundle.getString("DatosSimulacionDialog.title")); // NOI18N
 
-        asuntoConvocatoriaLabel.setText(" ");
+        asuntoConvocatoriaLabel.setText(bundle.getString("DatosSimulacionDialog.asuntoConvocatoriaLabel.text")); // NOI18N
 
-        numVotodLabel.setText("Número de votos a lanzar:");
+        numVotodLabel.setText(bundle.getString("DatosSimulacionDialog.numVotodLabel.text")); // NOI18N
 
-        numVotosTextField.setText(" ");
+        numVotosTextField.setText(bundle.getString("DatosSimulacionDialog.numVotosTextField.text")); // NOI18N
 
         valorVotosPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        votosAleatoriosRadioButton.setText("Introducir el valor de los votos de forma aleatoria");
+        votosAleatoriosRadioButton.setText(bundle.getString("DatosSimulacionDialog.votosAleatoriosRadioButton.text")); // NOI18N
         votosAleatoriosRadioButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 votosAleatoriosRadioButtonActionPerformed(evt);
@@ -143,7 +144,7 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
             .addGap(0, 66, Short.MAX_VALUE)
         );
 
-        numVotosManualRadioButton.setText("Especificar manualmente el número de votos de cada opción");
+        numVotosManualRadioButton.setText(bundle.getString("DatosSimulacionDialog.numVotosManualRadioButton.text")); // NOI18N
         numVotosManualRadioButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 numVotosManualRadioButtonActionPerformed(evt);
@@ -179,29 +180,29 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
 
         tiempoVotacionPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        tiempoMaquinaRadioButton.setText("Hacer la simulación a la velocidad que permita la máquina de pruebas");
+        tiempoMaquinaRadioButton.setText(bundle.getString("DatosSimulacionDialog.tiempoMaquinaRadioButton.text")); // NOI18N
         tiempoMaquinaRadioButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 tiempoMaquinaRadioButtonActionPerformed(evt);
             }
         });
 
-        introduccionManualTiempoRadioButton.setText("Introducir manualmente el tiempo empleado en la simulación");
+        introduccionManualTiempoRadioButton.setText(bundle.getString("DatosSimulacionDialog.introduccionManualTiempoRadioButton.text")); // NOI18N
         introduccionManualTiempoRadioButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 introduccionManualTiempoRadioButtonActionPerformed(evt);
             }
         });
 
-        duracionSimulacionLabel.setText("Duración de la simulación:");
+        duracionSimulacionLabel.setText(bundle.getString("DatosSimulacionDialog.duracionSimulacionLabel.text")); // NOI18N
 
         horasComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23" }));
 
-        horasLabel.setText("horas");
+        horasLabel.setText(bundle.getString("DatosSimulacionDialog.horasLabel.text")); // NOI18N
 
         minutosComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59" }));
 
-        minutosLabel.setText("minutos");
+        minutosLabel.setText(bundle.getString("DatosSimulacionDialog.minutosLabel.text")); // NOI18N
 
         javax.swing.GroupLayout tiempoPanelLayout = new javax.swing.GroupLayout(tiempoPanel);
         tiempoPanel.setLayout(tiempoPanelLayout);
@@ -258,7 +259,7 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
         );
 
         cerrarButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/cancel_16x16.png"))); // NOI18N
-        cerrarButton.setText("Cerrar");
+        cerrarButton.setText(bundle.getString("DatosSimulacionDialog.cerrarButton.text")); // NOI18N
         cerrarButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cerrarButtonActionPerformed(evt);
@@ -266,7 +267,7 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
         });
 
         aceptarButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/accept_16x16.png"))); // NOI18N
-        aceptarButton.setText("Aceptar");
+        aceptarButton.setText(bundle.getString("DatosSimulacionDialog.aceptarButton.text")); // NOI18N
         aceptarButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 aceptarButtonActionPerformed(evt);
@@ -278,7 +279,7 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
         mensajeValidacionLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 
         closePanelLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/close.gif"))); // NOI18N
-        closePanelLabel.setText(" ");
+        closePanelLabel.setText(bundle.getString("DatosSimulacionDialog.closePanelLabel.text")); // NOI18N
         closePanelLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 closePanelLabelcloseMensajeUsuario(evt);

@@ -26,38 +26,14 @@
 		
 		
 			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/buscador/index">/buscador/index</a><br/>
-				
-	 <br/>
-			</p>
-			<div class="params_result_div">
-			
-			
-			
-			
-			
-			
-				
-			
-			
-			 
-			
-			
-				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/buscador'</p>
-			
-			</div>
-		<HR>
-	
-		
-		
-			<p>
 				- <u>POST</u> - 
 				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/buscador/consultaJSON">/buscador/consultaJSON</a><br/>
 				
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -87,32 +63,6 @@
 		
 			<p>
 				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/buscador/reindex">/buscador/reindex</a><br/>
-				
-     (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS). 
-     Servicio que reindexa el motor de búsqueda
-	 <br/>
-			</p>
-			<div class="params_result_div">
-			
-			
-			
-			
-			
-			
-				
-			
-			
-			 
-			
-			
-			</div>
-		<HR>
-	
-		
-		
-			<p>
-				- <u>GET</u> - 
 				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/buscador/evento">/buscador/evento</a><br/>
 				
 	  Servicio que busca la cadena de texto recibida entre las votaciones publicadas.
@@ -120,6 +70,8 @@
 	  <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -150,6 +102,46 @@
 		
 		
 			<p>
+				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/buscador/eventoPorEtiqueta">/buscador/eventoPorEtiqueta</a><br/>
+				
+	  Servicio que busca los eventos que tienen la etiqueta que se
+	  pasa como parámetro.
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+				<p>
+					<b>Parámetros:</b><br/>
+					
+						<u>max</u>: Opcional (por defecto 20). Número máximo de documentos que
+	  		  devuelve la consulta (tamaño de la página).<br/>
+					
+						<u>offset</u>: Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.<br/>
+					
+						<u>etiqueta</u>: Obligatorio. Texto de la etiqueta.<br/>
+					
+				</p>
+			
+			
+			
+				
+			
+			
+			 
+			
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
 				- <u>POST</u> - 
 				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/buscador/guardarReindex">/buscador/guardarReindex</a><br/>
 				
@@ -157,6 +149,8 @@
 	 <br/>
 			</p>
 			<div class="params_result_div">
+			
+			
 			
 			
 			
@@ -183,28 +177,46 @@
 		
 			<p>
 				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/buscador/eventoPorEtiqueta">/buscador/eventoPorEtiqueta</a><br/>
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/buscador/index">/buscador/index</a><br/>
 				
-	  Servicio que busca los eventos que tienen la etiqueta que se
-	  pasa como parámetro.
-	  <br/>
+	 <br/>
 			</p>
 			<div class="params_result_div">
 			
 			
 			
 			
-				<p>
-					<b>Parámetros:</b><br/>
-					
-						<u>max</u>: Opcional (por defecto 20). Número máximo de documentos que
-	  		  devuelve la consulta (tamaño de la página).<br/>
-					
-						<u>offset</u>: Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.<br/>
-					
-						<u>etiqueta</u>: Obligatorio. Texto de la etiqueta.<br/>
-					
-				</p>
+			
+			
+			
+			
+				
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/buscador'</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/buscador/reindex">/buscador/reindex</a><br/>
+				
+     (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS). 
+     Servicio que reindexa el motor de búsqueda
+	 <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
 			
 			
 			

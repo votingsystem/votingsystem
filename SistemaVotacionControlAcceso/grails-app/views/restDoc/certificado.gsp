@@ -13,7 +13,7 @@
 	     }
         </style>
 
-<u><h3 class="controllerInfoHeader">Servicio de Certificados</h3></u>
+<h3 class="controllerInfoHeader"><u>Servicio de Certificados</u></h3>
 
  Servicios relacionados con los certificados manejados por la aplicación
  
@@ -26,63 +26,65 @@
 		
 		
 			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/certificado/trustedCerts">/certificado/trustedCerts</a><br/>
+				- <u>POST</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/certificado/addCertificateAuthority">/certificado/addCertificateAuthority</a><br/>
 				
+	  (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS). Servicio que añade Autoridades de Confianza.<br/>
+	  Sirve para poder validar los certificados enviados en las simulaciones.
+	  
 	  <br/>
 			</p>
 			<div class="params_result_div">
 			
-			</p>
-	
 			
-				<p><b>Respuesta:</b><br/>Los certificados en formato PEM de las Autoridades Certificadoras en las que
-	          confía la aplicación.</p>
 			
-			</div>
-		<HR>
-	
-		
-		
-			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/certificado/index">/certificado/index</a><br/>
-				
-	  <br/>
-			</p>
-			<div class="params_result_div">
 			
-			</p>
-	
 			
-				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/certificado'.</p>
-			
-			</div>
-		<HR>
-	
-		
-		
-			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/certificado/certificadoUsuario">/certificado/certificadoUsuario</a><br/>
-				
-	  Servicio de consulta de certificados de usuario.
-	 
-	  <br/>
-			</p>
-			<div class="params_result_div">
 			
 				<p>
 					<b>Parámetros:</b><br/>
 					
-						<u>usuarioId</u>:  Obligatorio. El identificador en la base de datos del usuario.<br/>
+						<u>pemCertificate</u>: certificado en formato PEM de la Autoridad de Confianza que se desea añadir.<br/>
 					
 				</p>
 			
-			</p>
-	
 			
-				<p><b>Respuesta:</b><br/>El certificado en formato PEM.</p>
+			
+				
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>Si todo va bien devuelve un código de estado HTTP 200.</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/certificado/cadenaCertificacion">/certificado/cadenaCertificacion</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+			
+			
+				
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>La cadena de certificación en formato PEM del servidor</p>
 			
 			</div>
 		<HR>
@@ -100,36 +102,28 @@
 			</p>
 			<div class="params_result_div">
 			
+			
+			
+			
+			
+			
 				<p>
 					<b>Parámetros:</b><br/>
 					
-						<u>idEvento</u>:  el identificador de la votación que se desea consultar.<br/>
+						<u>idEvento</u>: el identificador de la votación que se desea consultar.<br/>
 					
 				</p>
 			
-			</p>
-	
+			
+			
+				
+			
+			
+			 
+			
 			
 				<p><b>Respuesta:</b><br/>Devuelve la cadena de certificación, en formato PEM, con la que se generan los
 	  			certificados de los votos.</p>
-			
-			</div>
-		<HR>
-	
-		
-		
-			<p>
-				- <u>GET</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/certificado/cadenaCertificacion">/certificado/cadenaCertificacion</a><br/>
-				
-	  <br/>
-			</p>
-			<div class="params_result_div">
-			
-			</p>
-	
-			
-				<p><b>Respuesta:</b><br/>La cadena de certificación en formato PEM del servidor</p>
 			
 			</div>
 		<HR>
@@ -146,16 +140,26 @@
 			</p>
 			<div class="params_result_div">
 			
+			
+			
+			
+			
+			
 				<p>
 					<b>Parámetros:</b><br/>
 					
-						<u>hashCertificadoVotoHex</u>:  Obligatorio. Hash en hexadecimal asociado al
+						<u>hashCertificadoVotoHex</u>: Obligatorio. Hash en hexadecimal asociado al
 	           certificado de voto que se desea consultar.<br/>
 					
 				</p>
 			
-			</p>
-	
+			
+			
+				
+			
+			
+			 
+			
 			
 				<p><b>Respuesta:</b><br/>El certificado en formato PEM.</p>
 			
@@ -165,27 +169,93 @@
 		
 		
 			<p>
-				- <u>POST</u> - 
-				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/certificado/addCertificateAuthority">/certificado/addCertificateAuthority</a><br/>
+				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/certificado/certificadoUsuario">/certificado/certificadoUsuario</a><br/>
 				
-	  (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS). Servicio que añade Autoridades de Confianza.<br/>
-	  Sirve para poder validar los certificados enviados en las simulaciones.
-	  
+	  Servicio de consulta de certificados de usuario.
+	 
 	  <br/>
 			</p>
 			<div class="params_result_div">
 			
+			
+			
+			
+			
+			
 				<p>
 					<b>Parámetros:</b><br/>
 					
-						<u>pemCertificate</u>:  certificado en formato PEM de la Autoridad de Confianza que se desea añadir.<br/>
+						<u>usuarioId</u>: Obligatorio. El identificador en la base de datos del usuario.<br/>
 					
 				</p>
 			
-			</p>
-	
 			
-				<p><b>Respuesta:</b><br/>Si todo va bien devuelve un código de estado HTTP 200.</p>
+			
+				
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>El certificado en formato PEM.</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/certificado/index">/certificado/index</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+			
+			
+				
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>Información sobre los servicios que tienen como url base '/certificado'.</p>
+			
+			</div>
+		<HR>
+	
+		
+		
+			<p>
+				- <u>GET</u> - 
+				<a href="${request.scheme}://${request.serverName}:${request.serverPort}${request.getContextPath()}/certificado/trustedCerts">/certificado/trustedCerts</a><br/>
+				
+	  <br/>
+			</p>
+			<div class="params_result_div">
+			
+			
+			
+			
+			
+			
+			
+			
+				
+			
+			
+			 
+			
+			
+				<p><b>Respuesta:</b><br/>Los certificados en formato PEM de las Autoridades Certificadoras en las que
+	          confía la aplicación.</p>
 			
 			</div>
 		<HR>

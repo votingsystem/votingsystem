@@ -19,7 +19,7 @@ grails.project.source.level = 1.6
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
-		excludes 'bcprov-jdk15', 'bcpg-jdk15'// 'bcprov-jdk14', 'bcmail-jdk14'
+		excludes 'bcprov-jdk15', 'bcpg-jdk15', 'bcprov-jdk14', 'bcmail-jdk14'
     }
     log "error" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     checksums true // Whether to verify checksums on resolve
@@ -44,6 +44,12 @@ grails.project.dependency.resolution = {
 
     dependencies {
 		// specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
+		compile("org.xhtmlrenderer:core-renderer:R8")
+		compile("com.lowagie:itext:2.1.0")
+		test("org.apache.pdfbox:pdfbox:1.0.0") {
+			exclude 'jempbox'
+			exported = false
+		}
 		compile('org.codehaus.groovy.modules.http-builder:http-builder:0.5.1',
 			'org.apache.httpcomponents:httpmime:4.1',
 			'org.bouncycastle:bcprov-jdk16:1.46',
@@ -85,5 +91,6 @@ grails.project.dependency.resolution = {
         runtime ":database-migration:1.3.2"
 
         compile ':cache:1.0.1'
+		compile ":rendering:0.4.3"
     }
 }
