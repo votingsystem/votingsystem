@@ -61,7 +61,7 @@ task installGrailsRestDocPlugin << { task ->
 			ant.unzip(src:"../GrailsRestDocPlugin-${grailsRestDocPluginVersion}.zip", dest:"..")
 		}
 		pb = new ProcessBuilder("grails", "package-plugin");
-		pb.directory(new File("../GrailsRestDocPlugin-${grailsRestDocPluginVersion}"));
+		pb.directory(file("../GrailsRestDocPlugin-${grailsRestDocPluginVersion}"));
 		proc = pb.start();
 		proc.consumeProcessErrorStream(System.err)
 		proc.consumeProcessOutputStream(System.out)
@@ -72,7 +72,7 @@ task installGrailsRestDocPlugin << { task ->
 	pb  = new ProcessBuilder("grails", "install-plugin", 
 		"../GrailsRestDocPlugin-${grailsRestDocPluginVersion}/" + 
 			"grails-rest-doc-plugin-${grailsRestDocPluginVersion}.zip");
-	pb.directory(new File("."));
+	pb.directory(file("."));
 	proc = pb.start();
 	proc.consumeProcessErrorStream(System.err)
 	proc.consumeProcessOutputStream(System.out)
