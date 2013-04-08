@@ -69,6 +69,7 @@ import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.io.Streams;
+import org.sistemavotacion.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -579,9 +580,9 @@ public class CMSUtils {
                 .append("<br/><b>Número de serie del certificado: </b>")
                 .append(certificado.getSerialNumber().toString())
                 .append("<br/><b>Valido desde: </b>")
-                .append(certificado.getNotBefore())
+                .append(DateUtils.getStringFromDate(certificado.getNotBefore()))
                 .append("<br/><b>Valido hasta: </b>")
-                .append(certificado.getNotAfter())
+                .append(DateUtils.getStringFromDate(certificado.getNotAfter()))
                 .append("<br/></html>");
         return infoCertificado.toString();
     }

@@ -15,13 +15,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
-import org.sistemavotacion.herramientavalidacion.AppletHerramienta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/HerramientaValidacionCopiasDeSeguridad/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class ClosableTabbedPane extends JTabbedPane {
     

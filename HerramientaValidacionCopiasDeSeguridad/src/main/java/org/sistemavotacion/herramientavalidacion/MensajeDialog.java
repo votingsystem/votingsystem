@@ -1,14 +1,13 @@
 package org.sistemavotacion.herramientavalidacion;
 
 import java.awt.Frame;
-import javax.swing.JFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author jgzornoza
- */
+* @author jgzornoza
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+*/
 public class MensajeDialog extends javax.swing.JDialog {
 
     private static Logger logger = LoggerFactory.getLogger(MensajeDialog.class);

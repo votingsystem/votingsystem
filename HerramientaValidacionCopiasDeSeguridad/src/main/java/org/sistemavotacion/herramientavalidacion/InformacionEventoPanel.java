@@ -7,14 +7,13 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import org.sistemavotacion.herramientavalidacion.MetaInfoDeEvento;
 import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/HerramientaValidacionCopiasDeSeguridad/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class InformacionEventoPanel extends javax.swing.JPanel {
     

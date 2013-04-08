@@ -35,15 +35,6 @@
                       <Component id="checkBox" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Component id="firmanteScrollPane" alignment="0" max="32767" attributes="0"/>
-                  <Group type="102" alignment="0" attributes="0">
-                      <Component id="algoritmoFirmaLabel" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="valorAlgoritmoFirmaLabel" min="-2" pref="126" max="-2" attributes="0"/>
-                      <EmptySpace min="-2" pref="40" max="-2" attributes="0"/>
-                      <Component id="fechaFirmaLabel" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="valorFechaFirmaLabel" max="32767" attributes="0"/>
-                  </Group>
                   <Component id="firmaBase64TextField" alignment="0" max="32767" attributes="0"/>
                   <Component id="hashBase64Label" alignment="0" min="-2" max="-2" attributes="0"/>
                   <Component id="firmaLabel" alignment="0" min="-2" max="-2" attributes="0"/>
@@ -53,7 +44,23 @@
                   <Component id="firmaBase64Label" alignment="0" min="-2" max="-2" attributes="0"/>
                   <Component id="hashHexadecimalLabel" alignment="0" min="-2" max="-2" attributes="0"/>
                   <Component id="textoScrollPane" alignment="1" max="32767" attributes="0"/>
-                  <Component id="jLabel2" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="algoritmoFirmaLabel" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="valorAlgoritmoFirmaLabel" min="-2" pref="126" max="-2" attributes="0"/>
+                          </Group>
+                          <Component id="jLabel2" alignment="0" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace min="-2" pref="40" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                          <Component id="timeStampButton" max="32767" attributes="0"/>
+                          <Component id="fechaFirmaLabel" alignment="1" max="32767" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="valorFechaFirmaLabel" max="32767" attributes="0"/>
+                  </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -74,7 +81,10 @@
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="timeStampButton" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="firmanteScrollPane" min="-2" pref="138" max="-2" attributes="0"/>
               <EmptySpace max="32767" attributes="0"/>
@@ -248,6 +258,23 @@
         </Property>
         <Property name="name" type="java.lang.String" value="checkBox" noResource="true"/>
       </Properties>
+    </Component>
+    <Component class="javax.swing.JButton" name="timeStampButton">
+      <Properties>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/resources/images/history_16x16.png"/>
+        </Property>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="org/sistemavotacion/herramientavalidacion/Bundle.properties" key="FirmantePanel.timeStampButton.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+        </Property>
+        <Property name="actionCommand" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="org/sistemavotacion/herramientavalidacion/Bundle.properties" key="FirmantePanel.timeStampButton.actionCommand" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+        </Property>
+        <Property name="name" type="java.lang.String" value="timeStampButton" noResource="true"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="timeStampButtonActionPerformed"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>

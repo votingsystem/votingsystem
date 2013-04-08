@@ -154,7 +154,8 @@ class TimeStampService {
 			final Date date = DateUtils.getTodayDate();
 			if(!sernoGenerator) afterPropertiesSet()
 			final BigInteger serialNumber = sernoGenerator.getSerialNumber();
-			log.debug("processRequest - serialNumber: '${serialNumber.longValue()}'" );
+			log.debug("processRequest - serialNumber: '${serialNumber.longValue()}'" + 
+				" - CertReq: ${timeStampRequest.getCertReq()}");
 			final TimeStampResponse timeStampResponse = timeStampResponseGen.generate(
 					timeStampRequest, serialNumber, date);
 			//timeStampResponse.validate(timeStampRequest)
@@ -211,36 +212,4 @@ class TimeStampService {
 		return acceptedExtensions;
 	}
 	
-	private static class MyChecker
-	extends PKIXCertPathChecker
- {
-	 private static int count;
-
-	 public void init(boolean forward)
-	 throws CertPathValidatorException
-	 {
-		 //To change body of implemented methods use File | Settings | File Templates.
-	 }
-
-	 public boolean isForwardCheckingSupported()
-	 {
-		 return true;
-	 }
-
-	 public Set getSupportedExtensions()
-	 {
-		 return null;
-	 }
-
-	 public void check(Certificate cert, Collection unresolvedCritExts)
-	 throws CertPathValidatorException
-	 {
-		 count++;
-	 }
-
-	 public int getCount()
-	 {
-		return count;
-	 }
- }
 }

@@ -6,7 +6,7 @@ import org.sistemavotacion.modelo.Tipo;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/HerramientaValidacionCopiasDeSeguridad/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class MetaInfoDeEvento {
 

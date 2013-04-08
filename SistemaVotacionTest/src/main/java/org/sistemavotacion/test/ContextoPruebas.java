@@ -9,18 +9,14 @@ import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.text.MessageFormat;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
-
 import javax.security.auth.x500.X500PrivateCredential;
-
 import org.apache.log4j.PropertyConfigurator;
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.sistemavotacion.Contexto;
-import static org.sistemavotacion.herramientavalidacion.AppletHerramienta.getString;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Usuario;

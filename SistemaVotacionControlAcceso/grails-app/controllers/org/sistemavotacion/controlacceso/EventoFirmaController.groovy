@@ -92,7 +92,7 @@ class EventoFirmaController {
 	 */
 	def publicarPDF () {
 		try {
-			String eventoStr = StringUtils.getStringFromInputStream(request.getInputStream())
+			String eventoStr = "${request.getInputStream()}"
 			log.debug "evento: ${eventoStr}"
 			if (!eventoStr) {
 				render(view:"index")

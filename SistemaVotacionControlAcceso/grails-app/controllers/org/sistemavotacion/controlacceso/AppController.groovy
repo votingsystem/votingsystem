@@ -1,6 +1,7 @@
 package org.sistemavotacion.controlacceso
 
 import java.net.URLEncoder;
+import java.security.KeyStore
 import org.sistemavotacion.controlacceso.modelo.Certificado
 import org.sistemavotacion.controlacceso.modelo.Respuesta
 import grails.converters.JSON
@@ -25,6 +26,14 @@ import org.sistemavotacion.utils.*
  * */
 class AppController {
 
+	def firmaService;
+	def grailsApplication;
+	
+	def prueba() { 
+		firmaService.checkCancelledCerts()
+		return false;
+	} 
+	
 	/**
 	 * @httpMethod GET
 	 * @return Información sobre los servicios que tienen como url base '/app'.

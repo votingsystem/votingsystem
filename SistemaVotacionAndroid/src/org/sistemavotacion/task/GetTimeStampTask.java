@@ -1,5 +1,6 @@
 package org.sistemavotacion.task;
 
+import java.math.BigInteger;
 import java.util.Hashtable;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
@@ -42,8 +43,10 @@ public class GetTimeStampTask extends AsyncTask<String, Void, Integer>
 		this.listener = listener;
 		this.digest = digest;
         TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
+        reqgen.setCertReq(true);
+        BigInteger nonce = BigInteger.valueOf(System.currentTimeMillis());
         //reqgen.setReqPolicy(m_sPolicyOID);
-        this.timeStampRequest = reqgen.generate(timeStampRequestAlg, digest);
+        this.timeStampRequest = reqgen.generate(timeStampRequestAlg, digest, nonce);
     }
     
     public GetTimeStampTask(Integer id, TimeStampRequest timeStampRequest, 
@@ -55,7 +58,8 @@ public class GetTimeStampTask extends AsyncTask<String, Void, Integer>
 	
 	@Override
 	protected Integer doInBackground(String... urls) {
-        Log.d(TAG + ".doInBackground", "TimeStamp server: " + urls[0]);
+        Log.d(TAG + ".doInBackground", "TimeStamp server: " + urls[0] + 
+        		" --- CertReq: " + timeStampRequest.getCertReq());
         try {
             HttpResponse response = HttpHelper.sendByteArray(
             		timeStampRequest.getEncoded(), urls[0]);

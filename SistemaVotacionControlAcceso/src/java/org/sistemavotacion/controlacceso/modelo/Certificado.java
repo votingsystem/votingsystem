@@ -108,6 +108,10 @@ public class Certificado implements Serializable {
     @Column(name="validoHasta", length=23, insertable=true)
     private Date validoHasta;
     
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name="cancelDate", length=23, insertable=true)
+    private Date cancelDate;
+    
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="certificadoAutoridad")
     private Set<Certificado> certificadoAutorizadoSet = new HashSet<Certificado>(0);  
 
@@ -331,6 +335,14 @@ public class Certificado implements Serializable {
 
 	public void setSolicitudCSRUsuario(SolicitudCSRUsuario solicitudCSRUsuario) {
 		this.solicitudCSRUsuario = solicitudCSRUsuario;
+	}
+
+	public Date getCancelDate() {
+		return cancelDate;
+	}
+
+	public void setCancelDate(Date cancelDate) {
+		this.cancelDate = cancelDate;
 	}
 
 }

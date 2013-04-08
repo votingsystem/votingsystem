@@ -2,7 +2,10 @@ package org.sistemavotacion.herramientavalidacion;
 
 import javax.swing.text.html.parser.ParserDelegator;
 
-
+/**
+* @author jgzornoza
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+*/
 public class AcercaDePanel extends javax.swing.JPanel {
 
     /**

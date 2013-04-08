@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://raw.github.com/jgzornoza/SistemaVotacionAppletFirma/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class FirmantesDialog extends JDialog {
     

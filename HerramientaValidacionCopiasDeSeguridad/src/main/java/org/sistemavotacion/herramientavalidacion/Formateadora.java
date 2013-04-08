@@ -58,8 +58,6 @@ public class Formateadora {
                 append(evento.getFechaInicioStr() + "<br/>");
         if(evento.getFechaFinStr() != null) result.append("<b>" + fechaFinLabel + "</b>: ").
                 append(evento.getFechaFinStr() + "<br/>");  
-        if(evento.getFechaFinStr() != null) result.append("<b>" + fechaFinLabel + "</b>: ").
-                append(evento.getFechaFinStr() + "<br/>"); 
         if(evento.getUrl() != null) result.append("<b>" + urlLabel + "</b>: ").
                 append(evento.getUrl() + "<br/>"); 
         if(evento.getHashSolicitudAccesoBase64() != null) result.append("<b>" + 

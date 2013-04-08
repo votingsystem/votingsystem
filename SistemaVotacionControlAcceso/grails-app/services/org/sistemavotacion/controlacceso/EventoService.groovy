@@ -159,7 +159,7 @@ class EventoService {
 	}
 
 	public Map optenerEventoVotacionJSONMap(EventoVotacion eventoItem) {
-		log.debug("eventoItem: ${eventoItem.id} - estado ${eventoItem.estado}")
+		//log.debug("eventoItem: ${eventoItem.id} - estado ${eventoItem.estado}")
 		def eventoMap = [id: eventoItem.id, fechaCreacion: eventoItem.dateCreated,
 			URL:eventoItem.url,
 			solicitudPublicacionURL:"${grailsApplication.config.grails.serverURL}/eventoVotacion/firmado?id=${eventoItem.id}",
@@ -190,6 +190,7 @@ class EventoService {
 	}
 	
 	public Map optenerEventoFirmaJSONMap(EventoFirma eventoItem) {
+		//log.debug("eventoItem: ${eventoItem.id} - estado ${eventoItem.estado}")
 		def eventoMap = [id: eventoItem.id, fechaCreacion: eventoItem.dateCreated,
 			URL:eventoItem.url,
 			urlPDF:"${grailsApplication.config.grails.serverURL}/documento/obtenerManifiesto?id=${eventoItem.id}",
@@ -209,6 +210,7 @@ class EventoService {
 	}
 	
 	public Map optenerEventoReclamacionJSONMap(EventoReclamacion eventoItem) {
+		//log.debug("eventoItem: ${eventoItem.id} - estado ${eventoItem.estado}")
 		def eventoMap = [id: eventoItem.id, fechaCreacion: eventoItem.dateCreated,
 			URL:eventoItem.url,
 			solicitudPublicacionURL:"${grailsApplication.config.grails.serverURL}/eventoReclamacion/firmado?id=${eventoItem.id}",

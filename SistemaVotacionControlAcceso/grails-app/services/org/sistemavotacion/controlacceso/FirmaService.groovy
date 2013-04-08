@@ -15,6 +15,8 @@ import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.smime.SignedMailGenerator.Type;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import java.security.KeyStore
@@ -113,6 +115,14 @@ class FirmaService {
 						validoHasta:certificate.getNotAfter())
 					certificado.save()
 					log.debug " -- Almacenada CA con id:'${certificado?.id}'"
+				} else {
+					if(Certificado.Estado.ANULADO == certificado.estado) {
+						log.debug "El certificado.id '${certificado.id}' ${certificate.subjectDN} " + 
+							" - Pasa de ANULADO a OK" 
+						certificado.estado = Certificado.Estado.OK;
+						certificado.save()
+						//grailsApplication.mainContext.close()
+					}
 				}
 				trustedCertsHashMap.put(certificate?.getSerialNumber()?.longValue(), certificado)
 			}
@@ -123,6 +133,58 @@ class FirmaService {
 			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:ex.getMessage())
 		}
 	}
+	
+	def checkCancelledCerts () {
+		log.debug "checkCancelledCerts - checkCancelledCerts"
+		String caDirPath = getAbsolutePath("${grailsApplication.config.SistemaVotacion.rutaDirectorioArchivosCA}")
+		String cancelSufix = "${grailsApplication.config.SistemaVotacion.cancelSufix}".toUpperCase()
+		log.debug ("caDirPath: ${caDirPath} - cancelSufix: ${cancelSufix}")
+		new File(caDirPath).eachFile() { file ->
+			String fileName = file.getName().toUpperCase()
+			if(fileName.endsWith(cancelSufix)) {
+				int idx = fileName.indexOf(cancelSufix)
+				fileName = fileName.substring(0, idx);
+				if(fileName.endsWith("JKS")) {
+					log.debug ("--- cancelando JKS -> " + fileName)
+					KeyStore ks = KeyStore.getInstance("JKS");
+					String password = grailsApplication.config.SistemaVotacion.passwordClavesFirma
+					String aliasClaves = grailsApplication.config.SistemaVotacion.aliasClavesFirma
+					ks.load(new FileInputStream(file), password.toCharArray());
+					java.security.cert.Certificate[] chain = ks.getCertificateChain(aliasClaves);				
+					for (int i = 0; i < chain.length; i++) {
+						X509Certificate cert = chain[i]
+						cancelCert(cert.getSerialNumber().longValue())
+					}
+					file.delete();
+				} else if (fileName.endsWith("PEM")) {
+					log.debug ("--- cancelando PEM -> " + fileName)
+					Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(
+						FileUtils.getBytesFromFile(file))
+					for (X509Certificate cert :certificates) {
+						cancelCert(cert.getSerialNumber().longValue())
+					}
+					file.delete();
+				}
+			}
+		}
+	}
+	
+	private void cancelCert(long numSerieCert) {
+		log.debug "cancelCert - numSerieCert: ${numSerieCert}"
+		Certificado.withTransaction {
+			Certificado certificado = Certificado.findWhere(numeroSerie:numSerieCert)
+			if(certificado) {
+				log.debug "Comprobando certificado.id '${certificado?.id}'  --- "
+				if(Certificado.Estado.OK == certificado.estado) {
+					certificado.cancelDate = new Date(System.currentTimeMillis());
+					certificado.estado = Certificado.Estado.ANULADO;
+					certificado.save()
+					log.debug "cancelado certificado '${certificado?.id}'"
+				} else log.debug "El certificado.id '${certificado?.id}' ya estaba cancelado"
+			} else log.debug "No hay ningún certificado con num. serie '${numSerieCert}'"
+		}
+	}
+	
 	
 	def obtenerArchivoFirmado (String fromUser, String toUser, String textoAFirmar,
 			String asunto, Header header, Type signerType) {

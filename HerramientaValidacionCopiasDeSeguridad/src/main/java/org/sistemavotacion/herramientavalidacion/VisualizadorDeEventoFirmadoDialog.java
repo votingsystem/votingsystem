@@ -18,9 +18,6 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.filechooser.FileFilter;
-import org.sistemavotacion.Contexto;
-import org.sistemavotacion.herramientavalidacion.ArchivoFirmadoPanel;
-import org.sistemavotacion.herramientavalidacion.InformacionEventoPanel;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
@@ -28,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/HerramientaValidacionCopiasDeSeguridad/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemListener {
     

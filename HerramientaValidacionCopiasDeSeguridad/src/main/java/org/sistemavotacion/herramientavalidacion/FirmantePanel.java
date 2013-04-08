@@ -1,16 +1,19 @@
 package org.sistemavotacion.herramientavalidacion;
 
+import java.awt.Frame;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import javax.swing.JFrame;
+import org.bouncycastle.tsp.TimeStampToken;
 import org.sistemavotacion.modelo.Firmante;
 import org.sistemavotacion.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author jgzornoza
- */
+* @author jgzornoza
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+*/
 public class FirmantePanel extends javax.swing.JPanel implements ItemListener {
 
     private static Logger logger = LoggerFactory.getLogger(FirmantePanel.class);
@@ -39,6 +42,7 @@ public class FirmantePanel extends javax.swing.JPanel implements ItemListener {
         hashHexadecimalTextField.setText(firmante.getContentDigestHex());
         firmaBase64TextField.setText(firmante.getFirmaBase64());
         firmaHexadecimalTextField.setText(firmante.getFirmaHex());
+        if(firmante.getTimeStampToken() == null) timeStampButton.setVisible(false);
         itemStateChanged(null);
         checkBox.addItemListener(this);
     }
@@ -75,6 +79,7 @@ public class FirmantePanel extends javax.swing.JPanel implements ItemListener {
         firmanteScrollPane = new javax.swing.JScrollPane();
         firmanteEditorPane = new javax.swing.JEditorPane();
         checkBox = new javax.swing.JCheckBox();
+        timeStampButton = new javax.swing.JButton();
 
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/sistemavotacion/herramientavalidacion/Bundle"); // NOI18N
         jLabel1.setText(bundle.getString("FirmantePanel.jLabel1.text")); // NOI18N
@@ -132,6 +137,16 @@ public class FirmantePanel extends javax.swing.JPanel implements ItemListener {
         checkBox.setText(bundle.getString("FirmantePanel.checkBox.text")); // NOI18N
         checkBox.setName("checkBox"); // NOI18N
 
+        timeStampButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/images/history_16x16.png"))); // NOI18N
+        timeStampButton.setText(bundle.getString("FirmantePanel.timeStampButton.text")); // NOI18N
+        timeStampButton.setActionCommand(bundle.getString("FirmantePanel.timeStampButton.actionCommand")); // NOI18N
+        timeStampButton.setName("timeStampButton"); // NOI18N
+        timeStampButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                timeStampButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -144,14 +159,6 @@ public class FirmantePanel extends javax.swing.JPanel implements ItemListener {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(checkBox))
                     .addComponent(firmanteScrollPane)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(algoritmoFirmaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(valorAlgoritmoFirmaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(40, 40, 40)
-                        .addComponent(fechaFirmaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(valorFechaFirmaLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(firmaBase64TextField)
                     .addComponent(hashBase64Label, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(firmaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -161,7 +168,19 @@ public class FirmantePanel extends javax.swing.JPanel implements ItemListener {
                     .addComponent(firmaBase64Label, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(hashHexadecimalLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(textoScrollPane, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(algoritmoFirmaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(valorAlgoritmoFirmaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(40, 40, 40)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(timeStampButton)
+                            .addComponent(fechaFirmaLabel))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(valorFechaFirmaLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -176,7 +195,9 @@ public class FirmantePanel extends javax.swing.JPanel implements ItemListener {
                         .addComponent(fechaFirmaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(valorFechaFirmaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(timeStampButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(firmanteScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -204,6 +225,22 @@ public class FirmantePanel extends javax.swing.JPanel implements ItemListener {
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
+
+    private void timeStampButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_timeStampButtonActionPerformed
+        TimeStampToken timeStampToken = firmante.getTimeStampToken();
+        if(timeStampToken == null) {
+            logger.debug("TimeStampToken NULL");
+            return;
+        }
+        Frame frame;
+        Frame[] frames = JFrame.getFrames();
+        if(frames.length == 0 || frames[0] == null) frame = new javax.swing.JFrame();
+        else frame = frames[0];
+        TimeStampDialog timeStampDialog = new TimeStampDialog(
+                frame, true, timeStampToken);
+       timeStampDialog.setVisible(true);
+    }//GEN-LAST:event_timeStampButtonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel algoritmoFirmaLabel;
     private javax.swing.JCheckBox checkBox;
@@ -223,6 +260,7 @@ public class FirmantePanel extends javax.swing.JPanel implements ItemListener {
     private javax.swing.JEditorPane textoEditorPane;
     private javax.swing.JLabel textoLabel;
     private javax.swing.JScrollPane textoScrollPane;
+    private javax.swing.JButton timeStampButton;
     private javax.swing.JLabel valorAlgoritmoFirmaLabel;
     private javax.swing.JLabel valorFechaFirmaLabel;
     // End of variables declaration//GEN-END:variables

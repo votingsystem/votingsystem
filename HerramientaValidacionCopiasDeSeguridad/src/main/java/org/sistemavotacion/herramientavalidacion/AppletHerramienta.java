@@ -1,15 +1,11 @@
 package org.sistemavotacion.herramientavalidacion;
 
 import java.awt.Frame;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.Security;
 import java.text.MessageFormat;
 import java.util.Properties;
 import java.util.ResourceBundle;
-import javax.activation.CommandMap;
-import javax.activation.MailcapCommandMap;
 import javax.swing.JApplet;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
@@ -17,14 +13,13 @@ import netscape.javascript.JSObject;
 import org.apache.log4j.PropertyConfigurator;
 import static org.sistemavotacion.Contexto.getString;
 import org.sistemavotacion.herramientavalidacion.Operacion;
-import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/HerramientaValidacionCopiasDeSeguridad/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
 public class AppletHerramienta extends JApplet {
     

@@ -452,6 +452,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
         //String digest = Base64.encodeToString(as.getOctets(), Base64.DEFAULT);
         //Log.d(TAG + ".obtenerSolicitudAcceso(...)", " - digest: " + digest);
         TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
+        reqgen.setCertReq(true);
         //reqgen.setReqPolicy(m_sPolicyOID);
         return reqgen.generate(timeStampRequestAlg, as.getOctets());
     }

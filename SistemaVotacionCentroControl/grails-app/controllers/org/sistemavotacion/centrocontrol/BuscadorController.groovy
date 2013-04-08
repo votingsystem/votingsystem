@@ -113,8 +113,8 @@ class BuscadorController {
 	 * @return Documento JSON con la lista de votaciones que cumplen el criterio de la búsqueda.
 	 */
 	def consultaJSON() {
-		//String consulta = StringUtils.getStringFromInputStream(request.getInputStream())
-		String consulta = params.jsonRequest
+		String consulta = StringUtils.getStringFromInputStream(request.getInputStream())
+		//String consulta = "${request.getInputStream()}"
 		log.debug("consulta: ${consulta}")
 		if (!consulta) {
 			render(view:"index")

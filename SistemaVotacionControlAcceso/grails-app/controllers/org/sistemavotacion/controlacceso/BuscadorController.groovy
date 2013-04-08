@@ -121,6 +121,7 @@ class BuscadorController {
 	 */
 	def consultaJSON() {
 		String consulta = StringUtils.getStringFromInputStream(request.getInputStream())
+		//String consulta = "${request.getInputStream()}"
 		log.debug("consulta: ${consulta} - offset:${params.offset} - max: ${params.max}")
 		if (!consulta) {
 			render(view:"index")

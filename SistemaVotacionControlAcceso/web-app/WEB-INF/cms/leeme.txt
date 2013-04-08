@@ -23,3 +23,12 @@ prefijo 'AC_' al nombre del archivo y poniendo como extensión la cadema '.pem'.
 Generación y configuración del almacén de claves de la aplicación:
 https://github.com/jgzornoza/SistemaVotacion/wiki/Almacenes-de-claves
 
+--------------------------------------------------------------------------------------------
+- Para renovar los certificados del servidor renombrar el archivo ControlAcceso.jks a ControlAcceso.jks_cancelled
+y copiar los nuevos certificados en un almacén de claves JKS con el nombre ControlAcceso.jks.
+
+- Para dar de baja en el sistema los certificados asociados a uno de los archivos del directorio, 
+renombrar el archivo correspondiente añadiendo al final del nombre la cadena "_cancelled"  
+
+- Cada vez que se reinicia el servicio de firmas, se comprueba si existen archivos de certificados cancelados,
+en caso afirmativo actualiza el estado en la base de datos y borra el archivo. 

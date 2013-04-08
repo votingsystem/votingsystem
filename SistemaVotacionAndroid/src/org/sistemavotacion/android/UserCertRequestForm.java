@@ -282,9 +282,9 @@ public class UserCertRequestForm extends FragmentActivity
     	}
     	TelephonyManager telephonyManager = (TelephonyManager)
                 getSystemService(Context.TELEPHONY_SERVICE);
-    	//telefono = telephonyManager.getLine1Number();
+    	telefono = telephonyManager.getLine1Number();
     	//IMSI
-    	telefono = telephonyManager.getSubscriberId();
+    	//telefono = telephonyManager.getSubscriberId();
     	deviceId = telephonyManager.getDeviceId();
     	if(deviceId == null || "".equals(deviceId.trim())) {
     		deviceId = android.os.Build.SERIAL;
