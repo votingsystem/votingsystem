@@ -35,7 +35,8 @@ public class FirmantePanel extends javax.swing.JPanel implements ItemListener {
         this.firmante = firmante;
         valorAlgoritmoFirmaLabel.setText(firmante.getEncryptiontId() + " - " + 
                 firmante.getDigestId());
-        valorFechaFirmaLabel.setText(DateUtils.getStringFromDate(firmante.getFechaFirma()));
+        valorFechaFirmaLabel.setText(DateUtils.
+                getSpanishFormattedStringFromDate(firmante.getFechaFirma()));
         firmanteEditorPane.setText(firmante.getInfoCert());
         textoEditorPane.setText(firmante.getContenidoFirmado());
         hashBase64TextField.setText(firmante.getContentDigestBase64());

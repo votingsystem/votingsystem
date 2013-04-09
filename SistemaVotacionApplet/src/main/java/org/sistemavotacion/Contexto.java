@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.Security;
+import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.tsp.TSPAlgorithms;
@@ -113,9 +114,15 @@ public class Contexto {
     }
     
     public static String getString(String key) {
+        if(resourceBundle == null) resourceBundle = 
+                ResourceBundle.getBundle("messages_" + AppletFirma.locale);
         return resourceBundle.getString(key);
     }
 
+    public static String getString(String key, Object... arguments) {
+        String pattern = getString(key);
+        return MessageFormat.format(pattern, arguments);
+    }
     
     private synchronized void checkFiles () throws Exception {
         logger.debug("checkFiles - checkFiles");

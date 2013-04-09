@@ -6,6 +6,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import javax.swing.JFrame;
+import javax.swing.JSeparator;
 import net.miginfocom.swing.MigLayout;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -31,6 +32,7 @@ public class TimeStampDialog extends javax.swing.JDialog {
 
     TimeStampToken timeStampToken;
             
+    
     public TimeStampDialog(java.awt.Frame parent, 
             boolean modal, TimeStampToken timeStampToken) {
         super(parent, modal);
@@ -48,8 +50,10 @@ public class TimeStampDialog extends javax.swing.JDialog {
         
         SignerId signerId = timeStampToken.getSID();
         BigInteger cert_serial_number = signerId.getSerialNumber();
-        dateTextField.setText(DateUtils.getStringFromDate(tsInfo.getGenTime()));
-        certSignerSerialNumberTextField.setText(signerId.getSerialNumber().toString());
+        dateTextField.setText(DateUtils.
+                getSpanishFormattedStringFromDate(tsInfo.getGenTime()));
+        certSignerSerialNumberTextField.setText(
+                signerId.getSerialNumber().toString());
         certIssuerTextField.setText(signerId.getIssuerAsString());
 
         logger.debug ("signerId.toString(): " + signerId.toString());        
@@ -86,6 +90,8 @@ public class TimeStampDialog extends javax.swing.JDialog {
                     TimeStampCertPanel timeStampCertPanel = 
                             new TimeStampCertPanel(certificate, isSigner);
                     certsPanel.add(timeStampCertPanel, "wrap");
+                    JSeparator separator = new JSeparator();
+                    certsPanel.add(separator, "growx, wrap");
                     logger.debug (" ----- Añadido panel de certificado ----- ");
                 } catch (CertificateException ex) {
                     logger.error(ex.getMessage(), ex);
@@ -98,17 +104,11 @@ public class TimeStampDialog extends javax.swing.JDialog {
         } else {
             certsPanel.setVisible(false);
         }
-
-        /*new JcaSimpleSignerInfoVerifierBuilder().
-                setProvider(BouncyCastleProvider.PROVIDER_NAME).*/
-        
-        GenTimeAccuracy accuracy = tsInfo.getGenTimeAccuracy();
-        
+        //GenTimeAccuracy accuracy = tsInfo.getGenTimeAccuracy();
         //assertEquals(3, accuracy.getSeconds());
         //assertEquals(1, accuracy.getMillis());
         //assertEquals(2, accuracy.getMicros());
-        AttributeTable  table = timeStampToken.getSignedAttributes();
-        //signerId.
+        //AttributeTable  table = timeStampToken.getSignedAttributes();
         pack();
     }
     

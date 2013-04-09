@@ -415,8 +415,8 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
     }
 
     public String getFechaFirmaLabelText (Date date) {
-        String dateString = DateUtils.getStringFromDate(date);
-        return "<html><b>Fecha de la firma:</b> " + dateString + "</html>";
+        return "<html><b>Fecha de la firma:</b> " + 
+                DateUtils.getSpanishFormattedStringFromDate(date) + "</html>";
     }
 
     private File mostrarDialogoAperturaZip () {

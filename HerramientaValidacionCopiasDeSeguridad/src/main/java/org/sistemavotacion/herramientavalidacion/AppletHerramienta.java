@@ -150,7 +150,6 @@ public class AppletHerramienta extends JApplet {
         return MessageFormat.format(pattern, arguments);
     }
 
-
     public static void main (String[] args) { 
         logger.info("Arrancando aplicación");
         modoEjecucion = ModoEjecucion.APLICACION;

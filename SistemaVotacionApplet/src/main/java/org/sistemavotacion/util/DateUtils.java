@@ -121,6 +121,11 @@ public class DateUtils {
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss");
     	return formatter.format(date);
     }
+        
+    public static String getSpanishFormattedStringFromDate (Date date) {
+        DateFormat formatter = new SimpleDateFormat("dd MMM yyyy' 'HH:mm:ss");
+    	return formatter.format(date);
+    }
     
     public static String getDirStringFromDate (Date date) {
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");

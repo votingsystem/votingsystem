@@ -69,6 +69,7 @@ import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.io.Streams;
+import org.sistemavotacion.Contexto;
 import org.sistemavotacion.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -572,19 +573,14 @@ public class CMSUtils {
 
 
    public static String obtenerInfoCertificado (X509Certificate certificado) {
-        StringBuilder infoCertificado = new StringBuilder();
-        infoCertificado.append("<html><b>Asunto: </b>")
-                .append(certificado.getSubjectDN().toString())
-                .append("<br/><b>Emisor del certificado: </b>")
-                .append(certificado.getIssuerDN().toString())
-                .append("<br/><b>Número de serie del certificado: </b>")
-                .append(certificado.getSerialNumber().toString())
-                .append("<br/><b>Valido desde: </b>")
-                .append(DateUtils.getStringFromDate(certificado.getNotBefore()))
-                .append("<br/><b>Valido hasta: </b>")
-                .append(DateUtils.getStringFromDate(certificado.getNotAfter()))
-                .append("<br/></html>");
-        return infoCertificado.toString();
+        return Contexto.getString("certInfoFormattedMsg", 
+                certificado.getSubjectDN().toString(), 
+                certificado.getIssuerDN().toString(),
+                certificado.getSerialNumber().toString(), 
+                DateUtils.getSpanishFormattedStringFromDate(
+                    certificado.getNotBefore()), 
+                DateUtils.getSpanishFormattedStringFromDate(
+                    certificado.getNotAfter()));
     }
    
     public static String getEncryptiontId (String encryptionAlgOID) {

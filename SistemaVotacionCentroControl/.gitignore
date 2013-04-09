@@ -1,0 +1,7 @@
+/searchIndexCentroControl
+/logs
+/target
+/target-eclipse
+*.log
+.settings
+.project
