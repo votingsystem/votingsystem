@@ -66,6 +66,8 @@ grails.project.dependency.resolution = {
 			'com.google.gwt.google-apis:gwt-visualization:1.1.2',
 			//para hacer funcionar AntBuilder en Cloudfoundry
 			'org.apache.ant:ant:1.8.3',
+			//for rendering plugin in production environments
+			'org.springframework:spring-test:3.1.4.RELEASE',
 			'org.apache.ant:ant-launcher:1.8.3'
 			) {
 			excludes 'xalan'

@@ -49,7 +49,7 @@ class EventoFirmaController {
 	def validarPDF() {
 		if (params.long('id')) {
 			EventoFirma evento = null;
-			Evento.withTransaction{
+			EventoFirma.withTransaction{
 				evento = EventoFirma.get(params.id)
 			}			 
 			if(!evento) {

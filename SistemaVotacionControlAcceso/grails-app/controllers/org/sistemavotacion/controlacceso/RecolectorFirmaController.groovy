@@ -35,32 +35,41 @@ class RecolectorFirmaController {
 	 * @return Si todo va bien devuelve un código de estado HTTP 200.
 	 */
 	def validarPDF() { 
-		EventoFirma evento = EventoFirma.get(params.id)
-		if(!evento) {
-			response.status = Respuesta.SC_ERROR_PETICION
-			render "El evento '${params.id}' no existe"
-			return false
-		}
-		try {
-			String nombreArchivo = ((MultipartHttpServletRequest) request)?.getFileNames()?.next();
-			log.debug "Recibido archivo: ${nombreArchivo}"
-			MultipartFile multipartFile = ((MultipartHttpServletRequest) request)?.getFile(nombreArchivo);
-			if (multipartFile?.getBytes() != null || params.archivoFirmado) {
-				Respuesta respuesta = pdfService.validarFirma(multipartFile.getBytes(), 
-					evento, Documento.Estado.FIRMA_DE_MANIFIESTO, request.getLocale())
-				if (Respuesta.SC_OK != respuesta.codigoEstado) {
-					log.debug "Problema en la recepción del archivo - ${respuesta.mensaje}"
-				}
-				response.status = respuesta.codigoEstado
-				render respuesta.mensaje
+		if (params.long('id')) {
+			EventoFirma evento = null;
+			EventoFirma.withTransaction{
+				evento = EventoFirma.get(params.id)
+			}
+			if(!evento) {
+				response.status = Respuesta.SC_ERROR_PETICION
+				render message(code: 'eventNotFound', args:[params.id])
 				return false
 			}
-		} catch (Exception ex) {
-			log.error (ex.getMessage(), ex)
-			response.status = Respuesta.SC_ERROR_PETICION
-			render(ex.getMessage())
-			return false
+			try {
+				String nombreArchivo = ((MultipartHttpServletRequest) request)?.getFileNames()?.next();
+				log.debug "Recibido archivo: ${nombreArchivo}"
+				MultipartFile multipartFile = ((MultipartHttpServletRequest) request)?.getFile(nombreArchivo);
+				if (multipartFile?.getBytes() != null || params.archivoFirmado) {
+					Respuesta respuesta = pdfService.validarFirma(multipartFile.getBytes(),
+						evento, Documento.Estado.FIRMA_DE_MANIFIESTO, request.getLocale())
+					if (Respuesta.SC_OK != respuesta.codigoEstado) {
+						log.debug "Problema en la recepción del archivo - ${respuesta.mensaje}"
+					}
+					response.status = respuesta.codigoEstado
+					render respuesta.mensaje
+					return false
+				}
+			} catch (Exception ex) {
+				log.error (ex.getMessage(), ex)
+				response.status = Respuesta.SC_ERROR_PETICION
+				render(ex.getMessage())
+				return false
+			}
 		}
+		response.status = Respuesta.SC_ERROR_PETICION
+		render message(code: 'error.PeticionIncorrectaHTML', args:[
+			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
+		return false
 	}
 	
 	/**

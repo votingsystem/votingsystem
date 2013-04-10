@@ -44,11 +44,14 @@ import org.sistemavotacion.util.ServerPaths;
 import org.sistemavotacion.util.StringUtils;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -56,7 +59,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.telephony.TelephonyManager;
+import android.text.Html;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -126,7 +131,7 @@ public class UserCertRequestForm extends FragmentActivity
         	// android:imeOptions="actionDone" doesn't work
 			@Override
 			public boolean onKey(View v, int keyCode, KeyEvent event) {
-				Log.d(TAG + ".onKey(...)", " - keyCode: " + keyCode);
+				//Log.d(TAG + ".onKey(...)", " - keyCode: " + keyCode);
 				if (event != null && keyCode == KeyEvent.KEYCODE_ENTER) {
 					processNif();
 					return true;
@@ -179,8 +184,36 @@ public class UserCertRequestForm extends FragmentActivity
   		      Context.INPUT_METHOD_SERVICE);
   		imm.hideSoftInputFromWindow(nifText.getWindowToken(), 0);
       	if (validarFormulario ()) {
-          	showPinScreen(getString(
-          			R.string.keyguard_password_enter_first_pin_code));
+      		
+    		String givenName = Normalizer.normalize(
+    				givennameText.getText().toString().toUpperCase(), Normalizer.Form.NFD);
+    		givenName  = givenName.replaceAll("[^\\p{ASCII}]", "");
+    		String surname = Normalizer.normalize(
+    				 surnameText.getText().toString().toUpperCase(), Normalizer.Form.NFD);
+    		surname  = surname.replaceAll("[^\\p{ASCII}]", "");
+    		String nif = StringUtils.validarNIF(nifText.getText().toString().toUpperCase());
+      		
+      		
+      		
+			AlertDialog.Builder builder= new AlertDialog.Builder(this);
+    		builder.setTitle(getString(R.string.
+    				formulario_solicitud_certificado_label));
+    		builder.setMessage(Html.fromHtml(
+    				getString(R.string.cert_data_confirm_msg, givenName, surname, nif)));
+    		builder.setPositiveButton(getString(
+    				R.string.continue_label), new DialogInterface.OnClickListener() {
+    		            public void onClick(DialogInterface dialog, int whichButton) {
+    		              	showPinScreen(getString(
+    		              			R.string.keyguard_password_enter_first_pin_code));
+    		            }
+    					});
+    		builder.setNegativeButton(getString(
+    				R.string.cancelar_button), null);
+    		//builder.show();
+    		Dialog dialog = builder.create();
+            dialog.show();
+    		TextView textView = ((TextView) dialog.findViewById(android.R.id.message));
+            textView.setGravity(Gravity.CENTER);
       	}
     }
     

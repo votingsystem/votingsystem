@@ -90,7 +90,7 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
     public static final String TIMESTAMP_VOTE_HASH = TSPAlgorithms.SHA256;
     
     public static final String ASUNTO_MENSAJE_FIRMA_DOCUMENTO = "[Firma]-";    
-    public static String CONTROL_ACCESO_URL = "http://192.168.1.4:8080/SistemaVotacionControlAcceso";
+    public static String CONTROL_ACCESO_URL = null;
     public static final String SISTEMA_VOTACION_DIR = "SistemaVotacion";
     
     public static final String CERT_NOT_FOUND_DIALOG_ID      = "certNotFoundDialog";
@@ -119,8 +119,7 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
         	CONTROL_ACCESO_URL = getIntent().getStringExtra(SERVER_URL_EXTRA_PROP_NAME);
         }
     	settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-    	String estadoAplicacion = settings.getString(PREFS_ESTADO, Estado.SIN_CSR.toString());
-    	estado = Estado.valueOf(estadoAplicacion);
+
     	INSTANCIA = this;
     	Properties props = new Properties();
         try {
@@ -135,10 +134,16 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
         } catch (IOException ex) {
         	Log.e(TAG + ".onCreate()", ex.getMessage(), ex);
         }
+    	String estadoAplicacion = settings.getString(
+    			PREFS_ESTADO + "_" + CONTROL_ACCESO_URL, Estado.SIN_CSR.toString());
+    	estado = Estado.valueOf(estadoAplicacion);
         if(Intent.ACTION_VIEW.equals(getIntent().getAction())) {
         	//getIntent().getCategories().contains(Intent.CATEGORY_BROWSABLE);
             final Uri data = getIntent().getData();
             CONTROL_ACCESO_URL = data.getQueryParameter("serverURL");
+            estadoAplicacion = settings.getString(
+        			PREFS_ESTADO + "_" + CONTROL_ACCESO_URL, Estado.SIN_CSR.toString());
+        	estado = Estado.valueOf(estadoAplicacion);
             String eventoId = data.getQueryParameter("eventoId");
             String browserToken = data.getQueryParameter("browserToken");
             String encodedMsg = data.getQueryParameter("msg");
@@ -160,7 +165,8 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
             	Log.d(TAG + ".onCreate(...)", "- msg null");
             	operation = new Operation();
             }
-            operation.setTipo(browserToken.trim());
+            if(browserToken != null)
+            	operation.setTipo(browserToken.trim());
             if(operation.getEvento() != null) {
             	try {
                 	GetDataTask getDataTask = (GetDataTask)new GetDataTask(null, this).execute(operation.getEvento().getURL());
@@ -179,7 +185,15 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
             		ex.printStackTrace();
             		showMessage(getString(R.string.error_lbl), ex.getMessage());
             	}
-            } else Log.d(TAG + ".onCreate(...)", " - operation with event null - ");
+            } else {
+            	Log.d(TAG + ".onCreate(...)", " - operation: " + operation.getTipo());
+            	if(msg != null) {
+            		checkConnection();
+            		Intent intent = new Intent(this, WebActivity.class);
+     			    intent.putExtra(WebActivity.OPERATION_KEY, msg);
+     			    startActivity(intent);
+            	}
+            } 
             return;
         }
     	setActivityState();
@@ -354,6 +368,7 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
 	}
 	
 	public String getSubsystemDesc (SubSystem subsystem) {
+		if(subsystem == null) subsystem = SubSystem.VOTING;
 		switch(subsystem) {
 			case CLAIMS:
 				return getString(R.string.claims_drop_down_lbl);
@@ -438,7 +453,7 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
 		Aplicacion.estado = estado;
     	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(INSTANCIA.getApplicationContext());
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString(PREFS_ESTADO, estado.toString());
+        editor.putString(PREFS_ESTADO + "_" + CONTROL_ACCESO_URL , estado.toString());
         editor.commit();
 	}
 

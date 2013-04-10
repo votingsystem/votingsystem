@@ -19,10 +19,12 @@ package org.sistemavotacion.android;
 import static org.sistemavotacion.android.Aplicacion.KEY_STORE_FILE;
 
 import java.io.FileInputStream;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.json.JSONException;
 import org.sistemavotacion.android.service.PublishService;
 import org.sistemavotacion.android.service.PublishServiceListener;
 import org.sistemavotacion.android.ui.CertNotFoundDialog;
@@ -59,6 +61,7 @@ public class WebActivity extends FragmentActivity implements WebSessionListener,
 	public static final String TAG = "WebActivity";
 	
 	public static final String SCREEN_EXTRA_KEY   = "screenKey";
+	public static final String OPERATION_KEY      = "operationKey";
 	public static final String EDITOR_SESSION_KEY = "editorSessionKey";
 	
 	public enum Screen {PUBLISH_VOTING, PUBLISH_MANIFEST, PUBLISH_CLAIM}
@@ -99,6 +102,14 @@ public class WebActivity extends FragmentActivity implements WebSessionListener,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.web_activity);     
+        String operation = getIntent().getStringExtra(OPERATION_KEY);
+        if(operation!= null) {
+        	try {
+				processOperation(Operation.parse(operation));
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+        }
         String screenValue = getIntent().getStringExtra(SCREEN_EXTRA_KEY);
         String screenTitle = null;
         if(screenValue != null) {
@@ -338,7 +349,7 @@ public class WebActivity extends FragmentActivity implements WebSessionListener,
 			}).show();
 		} else {
 			resultCaption = getString(R.string.publish_document_ERROR_msg);
-			resultMsg = msg;
+			if(msg != null) resultMsg = msg;
 			showMessage(resultCaption, resultMsg);
 		}	
 	}

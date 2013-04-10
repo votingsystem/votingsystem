@@ -167,6 +167,9 @@
     <string name="solicitud_certificado_usuario_activity_text">No dispone de ningún 
         certificado con el que poder acceder a los servicios. Para poder votar debe solicitar
         un certificado de usuario. ¿Desea solicitar el certificado?</string>
+    <string name="cert_data_confirm_msg"><![CDATA[<b>Nombre: </b>%1$s<br/>
+        <b>Apellidos: </b>%2$s<br/>
+        <b>Nif: </b>%3$s]]></string>
     <string name="resultado_solicitud_certificado_activity"><![CDATA[Para poder votar necesita tener
         instalado un certificado.<br/><br/>Usted ya ha solicitado el certificado, ahora hace falta verificar
         su identidad, para ello puede presentarse en cualquiera de <br/><br/>
@@ -200,6 +203,7 @@
     
     <string name="request_user_cert_error_msg">Error comprobando el estado de la solicitud</string>
     <string name="cancelar_label">Cancelar</string>
+    <string name="continue_label">Continuar</string>
     <string name="solicitar_label">Solicitar</string>
     <string name="nif_label">Introduzca su NIF</string>
     <string name="password_label">Contraseña del certificado</string>
