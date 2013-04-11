@@ -96,5 +96,24 @@ public class KeyStoreUtil {
         		endCredential.getCertificate(), rootCredential.getCertificate()});
         return store;
     }
+    
+    /**
+     * Crea un almacén de claves para un emisora de sellos de tiempo
+     */
+    public static KeyStore createTimeStampingKeyStore(
+            long comienzo, int periodoValidez, char[] password, 
+            String endEntityAlias, X500PrivateCredential rootCredential, 
+            String endEntitySubjectDN) throws Exception {
+        KeyStore store = KeyStore.getInstance("JKS");
+        store.load(null, null);
+        X500PrivateCredential endCredential = KeyUtil.createTimeStampingCredential(
+        		rootCredential.getPrivateKey(), rootCredential.getCertificate(), 
+        		comienzo, periodoValidez, endEntityAlias, endEntitySubjectDN);
+        store.setCertificateEntry(rootCredential.getAlias(), rootCredential.getCertificate());
+        store.setKeyEntry(endCredential.getAlias(), endCredential.getPrivateKey(), password, 
+                new Certificate[] { 
+        		endCredential.getCertificate(), rootCredential.getCertificate()});
+        return store;
+    }
 
 }

@@ -86,6 +86,15 @@ public class KeyUtil {
         return new X500PrivateCredential(endCert, endPair.getPrivate(), endEntityAlias);
     }
     
+    public static X500PrivateCredential createTimeStampingCredential(PrivateKey caKey, 
+    		X509Certificate caCert, long comienzo, int periodoValidez, 
+                String endEntityAlias, String endEntitySubjectDN) throws Exception {
+        KeyPair endPair = generateRSAKeyPair();
+        X509Certificate endCert = CertUtil.generateTimeStampingCert(endPair.getPublic(), 
+        		caKey, caCert, comienzo, periodoValidez, endEntitySubjectDN);
+        return new X500PrivateCredential(endCert, endPair.getPrivate(), endEntityAlias);
+    }
+    
     /**
      * Crea un par de claves RSA aleatorio de 1024 bits
      */

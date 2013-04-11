@@ -43,7 +43,8 @@ task genAppsCerts(dependsOn:['SistemaVotacionApplet:classes']) {
 			password:rootProject.keyStorePassword]
 		
 		Map certMap = [file:"$rootProject.projectDir/mockDnie.jks",
-			distinguishedName:rootProject.appCertDN, alias:rootProject.signKeyAlias]
+			distinguishedName:rootProject.appCertDN, alias:rootProject.signKeyAlias,
+			isTimeStampingCert:false]
 		
 		List certs = [certMap]
 		rootProject.certsDataMap.certs = certs
@@ -65,10 +66,12 @@ task genWebAppsCerts(dependsOn:['SistemaVotacionApplet:classes']) {
 			password:"$rootProject.keyStorePassword"]
 		
 		Map controAccesoMap = [file:"$rootProject.projectDir/SistemaVotacionControlAcceso/web-app/WEB-INF/cms/ControlAcceso.jks",
-			distinguishedName:"$rootProject.controlAccesoDN", alias:"$rootProject.controlAccesoCertAlias"]
+			distinguishedName:"$rootProject.controlAccesoDN", alias:"$rootProject.controlAccesoCertAlias",
+			isTimeStampingCert:true]
 		
 		Map centroControMap = [file:"$rootProject.projectDir/SistemaVotacionCentroControl/web-app/WEB-INF/cms/CentroControl.jks",
-			distinguishedName:"$rootProject.centroControlDN", alias:"$rootProject.centroControlCertAlias"]
+			distinguishedName:"$rootProject.centroControlDN", alias:"$rootProject.centroControlCertAlias",
+			isTimeStampingCert:true]
 		
 		List certs = [controAccesoMap, centroControMap]
 		rootProject.certsDataMap.certs = certs

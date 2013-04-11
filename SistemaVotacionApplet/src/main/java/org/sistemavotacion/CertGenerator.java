@@ -24,49 +24,63 @@ public class CertGenerator {
 	
     private static Logger logger = LoggerFactory.getLogger(CertGenerator.class);
 
-	public static String ROOT_ALIAS = "rootAlias";//
-	public static String END_ENTITY_ALIAS = "endEntityAlias";//
+    public static String ROOT_ALIAS = "rootAlias";//
+    public static String END_ENTITY_ALIAS = "endEntityAlias";//
 
 
-	public static long COMIEZO_VALIDEZ_CERT = System.currentTimeMillis();//
-	public static final int PERIODO_VALIDEZ_ALMACEN_RAIZ = 2000000000;//En producción durará lo que dure una votación
-	 public static final int PERIODO_VALIDEZ_CERT = 2000000000;
-	 
-	private File rootCertFile;
-	private String rootSubjectDN;
-	private String password;
+    public static long COMIEZO_VALIDEZ_CERT = System.currentTimeMillis();//
+    public static final int PERIODO_VALIDEZ_ALMACEN_RAIZ = 2000000000;//En producción durará lo que dure una votación
+     public static final int PERIODO_VALIDEZ_CERT = 2000000000;
 
-	
-	X500PrivateCredential rootPrivateCredential;
-	
-	public static void main(String[] args) throws Exception{
-		if(args == null) return;
-		generate(args[0]);
-	}
-	
-	public CertGenerator(File rootCertFile, String rootSubjectDN, 
-			String password) throws Exception {
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-		this.rootCertFile = rootCertFile;
-		this.rootSubjectDN = rootSubjectDN;
-		this.password = password;
-		KeyStore rootKeyStore = KeyStoreUtil.createRootKeyStore(COMIEZO_VALIDEZ_CERT,
-				PERIODO_VALIDEZ_ALMACEN_RAIZ, password.toCharArray(), ROOT_ALIAS,
-				rootCertFile.getAbsolutePath(), rootSubjectDN);
-		X509Certificate rootCertificate = (X509Certificate)rootKeyStore.getCertificate(ROOT_ALIAS);
-		PrivateKey rootPK = (PrivateKey) rootKeyStore.getKey(ROOT_ALIAS, password.toCharArray());
-		rootPrivateCredential =	new X500PrivateCredential(rootCertificate, rootPK, ROOT_ALIAS);
-	}
-	
-	public void genUserKeyStore(String subjectDN, File file, String alias) throws Exception {
-		logger.debug("--- genUserKeyStore - subjectDN: " + subjectDN + 
-				" - file: " + file.getAbsolutePath() + " - alias: " + alias);
-		KeyStore keyStore = KeyStoreUtil.createActorKeyStore(COMIEZO_VALIDEZ_CERT,
-				PERIODO_VALIDEZ_CERT, password.toCharArray(),
-				alias, rootPrivateCredential, subjectDN);
-		byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, password.toCharArray());
-		FileUtils.copyStreamToFile(new ByteArrayInputStream(keyStoreBytes),file);
-	}
+    private File rootCertFile;
+    private String rootSubjectDN;
+    private String password;
+
+
+    X500PrivateCredential rootPrivateCredential;
+
+    public static void main(String[] args) throws Exception{
+        if(args == null) return;
+        generate(args[0]);
+    }
+
+    public CertGenerator(File rootCertFile, String rootSubjectDN, 
+                    String password) throws Exception {
+    Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        this.rootCertFile = rootCertFile;
+        this.rootSubjectDN = rootSubjectDN;
+        this.password = password;
+        KeyStore rootKeyStore = KeyStoreUtil.createRootKeyStore(COMIEZO_VALIDEZ_CERT,
+                        PERIODO_VALIDEZ_ALMACEN_RAIZ, password.toCharArray(), ROOT_ALIAS,
+                        rootCertFile.getAbsolutePath(), rootSubjectDN);
+        X509Certificate rootCertificate = (X509Certificate)rootKeyStore.getCertificate(ROOT_ALIAS);
+        PrivateKey rootPK = (PrivateKey) rootKeyStore.getKey(ROOT_ALIAS, password.toCharArray());
+        rootPrivateCredential =	new X500PrivateCredential(rootCertificate, rootPK, ROOT_ALIAS);
+    }
+
+    public void genUserKeyStore(
+        String subjectDN, File file, String alias) throws Exception {
+        logger.debug("--- genUserKeyStore - subjectDN: " + subjectDN + 
+                        " - file: " + file.getAbsolutePath() + " - alias: " + alias);
+        KeyStore keyStore = KeyStoreUtil.createActorKeyStore(COMIEZO_VALIDEZ_CERT,
+                        PERIODO_VALIDEZ_CERT, password.toCharArray(),
+                        alias, rootPrivateCredential, subjectDN);
+        byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, password.toCharArray());
+        FileUtils.copyStreamToFile(new ByteArrayInputStream(keyStoreBytes),file);
+    }
+
+    public void genTimeStampingKeyStore(
+        String subjectDN, File file, String alias) throws Exception {
+        logger.debug("--- genTimeStampingKeyStore - subjectDN: " + subjectDN + 
+                " - file: " + file.getAbsolutePath() + " - alias: " + alias);
+        KeyStore keyStore = KeyStoreUtil.createTimeStampingKeyStore(
+                COMIEZO_VALIDEZ_CERT, PERIODO_VALIDEZ_CERT, 
+                password.toCharArray(), alias, rootPrivateCredential, subjectDN);
+        byte[] keyStoreBytes = KeyStoreUtil.getBytes(
+                keyStore, password.toCharArray());
+        FileUtils.copyStreamToFile(
+                new ByteArrayInputStream(keyStoreBytes),file);
+    }
 	
     public static void generate (String operacionStr) throws Exception {
         logger.debug("- generate: '" + operacionStr + "'");
@@ -97,6 +111,7 @@ public class CertGenerator {
             	File certFile = null;
             	String distinguishedName = null;
             	String alias = null;
+                boolean isTimeStampingCert = false;
                 if (certData.containsKey("file")) {
                 	certFile = new File(certData.getString("file"));
                 	certFile.createNewFile();
@@ -110,7 +125,16 @@ public class CertGenerator {
                 	alias = certData.getString("alias");
                 } else throw new Exception("Cert: " + certData.toString() + 
                 		" --- Missing arg -> alias");
-                cerGenerator.genUserKeyStore(distinguishedName, certFile, alias);
+                if (certData.containsKey("isTimeStampingCert")) {
+                	isTimeStampingCert = certData.getBoolean("isTimeStampingCert");
+                } else throw new Exception("Cert: " + certData.toString() + 
+                		" --- Missing arg -> isTimeStampingCert");
+                if(isTimeStampingCert) {
+                    cerGenerator.genTimeStampingKeyStore(
+                            distinguishedName, certFile, alias);
+                } else {
+                    cerGenerator.genUserKeyStore(distinguishedName, certFile, alias);
+                }
             }
         }
     }

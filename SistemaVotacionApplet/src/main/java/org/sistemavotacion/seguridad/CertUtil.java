@@ -333,47 +333,77 @@ public class CertUtil {
         certGen.setSubjectDN(new X500Principal(endEntitySubjectDN));
         certGen.setPublicKey(entityKey);
         certGen.setSignatureAlgorithm(SIG_ALGORITHM);        
-        certGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(caCert));
-        certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false, new SubjectKeyIdentifierStructure(entityKey));
-        certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(false));
-        certGen.addExtension(X509Extensions.KeyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment));
+        certGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, 
+                new AuthorityKeyIdentifierStructure(caCert));
+        certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false, 
+                new SubjectKeyIdentifierStructure(entityKey));
+        certGen.addExtension(X509Extensions.BasicConstraints, true, 
+                new BasicConstraints(false));
+        certGen.addExtension(X509Extensions.KeyUsage, true, 
+                new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment));
+        return certGen.generate(caKey, "BC");
+    }
+    
+    /**
+     * Genera un certificado V3 para usarlo como emisor de sellos de tiempo
+     */
+    public static X509Certificate generateTimeStampingCert(PublicKey entityKey, 
+    		PrivateKey caKey, X509Certificate caCert, long comienzo, int periodoValidez,
+                String endEntitySubjectDN) throws Exception {
+        X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
+        certGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()));
+        certGen.setIssuerDN(PrincipalUtil.getSubjectX509Principal(caCert));
+        certGen.setNotBefore(new Date(comienzo));
+        certGen.setNotAfter(new Date(comienzo + periodoValidez));
+        certGen.setSubjectDN(new X500Principal(endEntitySubjectDN));
+        certGen.setPublicKey(entityKey);
+        certGen.setSignatureAlgorithm(SIG_ALGORITHM);        
+        certGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, 
+                new AuthorityKeyIdentifierStructure(caCert));
+        certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false, 
+                new SubjectKeyIdentifierStructure(entityKey));
+        certGen.addExtension(X509Extensions.BasicConstraints, true, 
+                new BasicConstraints(false));
+        certGen.addExtension(X509Extensions.KeyUsage, true, 
+                new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment));
+
         certGen.addExtension(X509Extensions.ExtendedKeyUsage, true,
                 new ExtendedKeyUsage(new DERSequence(KeyPurposeId.id_kp_timeStamping)));
         return certGen.generate(caKey, "BC");
     }
     
-	//To bypass id_kp_timeStamping ExtendedKeyUsage exception
-	private static class SVCertExtensionChecker extends PKIXCertPathChecker {
-		
-		Set supportedExtensions;
-		
-		SVCertExtensionChecker() {
-			supportedExtensions = new HashSet();
-			supportedExtensions.add(X509Extensions.ExtendedKeyUsage);
-		}
-		
-		public void init(boolean forward) throws CertPathValidatorException {
-		 //To change body of implemented methods use File | Settings | File Templates.
-	    }
+    //To bypass id_kp_timeStamping ExtendedKeyUsage exception
+    private static class SVCertExtensionChecker extends PKIXCertPathChecker {
 
-		public boolean isForwardCheckingSupported(){
-			return true;
-		}
+            Set supportedExtensions;
 
-		public Set getSupportedExtensions()	{
-			return null;
-		}
+            SVCertExtensionChecker() {
+                    supportedExtensions = new HashSet();
+                    supportedExtensions.add(X509Extensions.ExtendedKeyUsage);
+            }
 
-		public void check(Certificate cert, Collection<String> unresolvedCritExts)
-				throws CertPathValidatorException {
-			for(String ext : unresolvedCritExts) {
-				if(X509Extensions.ExtendedKeyUsage.toString().equals(ext)) {
-					logger.debug("------------- ExtendedKeyUsage removed from validation");
-					unresolvedCritExts.remove(ext);
-				}
-			}
-		}
+            public void init(boolean forward) throws CertPathValidatorException {
+             //To change body of implemented methods use File | Settings | File Templates.
+        }
 
-	}
+            public boolean isForwardCheckingSupported(){
+                    return true;
+            }
+
+            public Set getSupportedExtensions()	{
+                    return null;
+            }
+
+            public void check(Certificate cert, Collection<String> unresolvedCritExts)
+                            throws CertPathValidatorException {
+                    for(String ext : unresolvedCritExts) {
+                            if(X509Extensions.ExtendedKeyUsage.toString().equals(ext)) {
+                                    logger.debug("------------- ExtendedKeyUsage removed from validation");
+                                    unresolvedCritExts.remove(ext);
+                            }
+                    }
+            }
+
+    }
     
 }

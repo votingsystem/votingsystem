@@ -6,12 +6,13 @@ import org.sistemavotacion.CertGenerator
 
 
 def processCertsDataMap(args) {
-	println "++++++++++++++++++++"
+	println "++++++++++++++++++++ CertGen.processCertsDataMap(...)"
 	def cli = new CliBuilder(usage: 'CertGen.groovy -[h] [certsDataMap]')
 	cli.with {
 		h longOpt: 'help', "certsDataMap -> JSON document with this format -> " + 
 			"{\"rootCertFile\":\"...\",\"rootSubjectDN\":\"...\",\"password\":\"...\"," + 
-			"\"certs\":[{\"file\":\"...\",\"distinguishedName\":\"...\",\"alias\":\"...\"}]}"
+			"\"certs\":[{\"file\":\"...\",\"distinguishedName\":\"...\",\"alias\":\"...\"," + 
+			"\"isTimeStampingCert\":\"...\"}]}"
 	}
 	
 	def options = cli.parse(args)
@@ -41,18 +42,26 @@ def processCertsDataMap(args) {
 	
 	jsonCertsData.certs.each {certData ->
 		if(!certData.file || !certData.distinguishedName
-			|| !certData.alias) {
+			|| !certData.alias || !certData.containsKey("isTimeStampingCert")) {
 			println "certData: ${certData}"
 			if(!certData.file) println "missing file"
 			if(!certData.distinguishedName) println "missing distinguishedName"
 			if(!certData.alias) println "missing alias"
+			if(!certData.isTimeStampingCert) println "missing Time Stamp info"
 			cli.usage(); 
 			return;
 		}
 		File certFile = new File(certData.file);
 		String distinguishedName = certData.distinguishedName;
 		String alias = certData.alias;
-		cerGenerator.genUserKeyStore(distinguishedName, certFile, alias);
+		boolean isTimeStampingCert = certData.isTimeStampingCert
+		if(isTimeStampingCert) {
+			cerGenerator.genTimeStampingKeyStore(
+				distinguishedName, certFile, alias);
+		} else {
+			cerGenerator.genUserKeyStore(
+				distinguishedName, certFile, alias);
+		}
 	}
 }
 
