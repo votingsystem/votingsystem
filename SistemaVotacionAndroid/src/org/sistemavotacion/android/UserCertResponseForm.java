@@ -251,10 +251,11 @@ public class UserCertResponseForm extends FragmentActivity
 			byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
 			KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
 			PrivateKey privateKey = (PrivateKey)keyStore.getKey(ALIAS_CERT_USUARIO, password);
-	        Collection<X509Certificate> certificados = CertUtil.fromPEMChainToX509Certs(csrFirmado.getBytes());
+	        Collection<X509Certificate> certificados = 
+	        		CertUtil.fromPEMToX509CertCollection(csrFirmado.getBytes());
 	        Log.d(TAG + ".actualizarKeyStore(...)", " - certificados.size(): " + certificados.size());
 	        for(X509Certificate cert:certificados) {
-	        	Log.d(TAG + ".actualizarKeyStore(...)", " ************************** cert.toString(): " + cert.toString());
+	        	Log.d(TAG + ".actualizarKeyStore(...)", "************ cert.toString(): " + cert.toString());
 	        }
 	        X509Certificate[] arrayCerts = new X509Certificate[certificados.size()];
 	        certificados.toArray(arrayCerts);

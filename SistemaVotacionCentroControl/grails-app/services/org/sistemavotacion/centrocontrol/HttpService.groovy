@@ -94,8 +94,8 @@ class HttpService {
 			}
 			response.failure = { resp, reader ->
 				log.error "***** Error: ${resp.statusLine}"
-				respuesta = new Respuesta(codigoEstado:resp.statusLine.statusCode)
-				respuesta.mensaje = new String("${reader}")
+				respuesta = new Respuesta(codigoEstado:resp.statusLine.statusCode,
+					mensaje:"${reader}")
 			}
 		}
 		return respuesta;

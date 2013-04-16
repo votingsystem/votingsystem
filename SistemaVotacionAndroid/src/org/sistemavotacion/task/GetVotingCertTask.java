@@ -2,16 +2,20 @@ package org.sistemavotacion.task;
 
 import static org.sistemavotacion.android.Aplicacion.*;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 
 import javax.mail.Header;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
+import org.sistemavotacion.android.Aplicacion;
 import org.sistemavotacion.android.R;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.PKCS10WrapperClient;
+import org.sistemavotacion.smime.EncryptorHelper;
 import org.sistemavotacion.smime.SignedMailGenerator.Type;
+import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.HttpHelper;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -40,8 +44,18 @@ public class GetVotingCertTask extends AsyncTask<String, Void, Integer> {
 		String url = urls[0];
         Log.d(TAG + ".doInBackground", " - doInBackground - url:" + url);
         try {
+        	//File csrFile = File.createTempFile("csrFile", ".csr");
+        	//csrFile.deleteOnExit();
+        	File csrEncryptedFile = File.createTempFile("csrEncryptedFile", ".p7m");
+        	csrEncryptedFile.deleteOnExit();
+        	//FileUtils.copyStreamToFile(new ByteArrayInputStream(
+        	//		pkcs10WrapperClient.getPEMEncodedRequestCSR()), csrFile);
+        	EncryptorHelper.encryptText(pkcs10WrapperClient.getPEMEncodedRequestCSR(), 
+        			csrEncryptedFile, Aplicacion.getControlAcceso().getCertificado());
+        	EncryptorHelper.encryptSMIMEFile(solicitudAcceso, 
+        			Aplicacion.getControlAcceso().getCertificado());
             HttpResponse response = HttpHelper.enviarSolicitudAcceso(
-            		pkcs10WrapperClient.getPEMEncodedRequestCSR(), solicitudAcceso, url);
+            		csrEncryptedFile, solicitudAcceso, url);
             statusCode = response.getStatusLine().getStatusCode();
             if (Respuesta.SC_OK == response.getStatusLine().getStatusCode()) {
                 pkcs10WrapperClient.initSigner(EntityUtils.toByteArray(

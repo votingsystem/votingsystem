@@ -174,6 +174,8 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
         	panelSeleccion.setEnabled(isActive);
         	contenedorOpcionesPanel.add(panelSeleccion);
         }
+    	if(opciones != null && opciones.size() > 0)
+    		actualizarStatusCentroControl(null);
     }
 	
     public void actualizarStatusCentroControl(String text) {

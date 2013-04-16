@@ -181,6 +181,24 @@ public class HttpHelper {
         return response;  
     }
     
+    public HttpResponse enviarSolicitudAcceso(File solicitudCSR, 
+            File solicitudAccesoSMIME, String serverURL) throws IOException {
+        checkConnections();
+        logger.debug("enviarSolicitudAcceso - lanzando: " + serverURL);        
+        HttpPost httpPost = new HttpPost(serverURL);
+        FileBody solicitudBody = new FileBody(solicitudAccesoSMIME);
+        FileBody  csrBody = new FileBody(solicitudCSR);
+        MultipartEntity reqEntity = new MultipartEntity();
+        reqEntity.addPart(Contexto.NOMBRE_ARCHIVO_ENVIADO_FIRMADO, solicitudBody);
+        reqEntity.addPart(Contexto.NOMBRE_ARCHIVO_CSR_ENVIADO, csrBody);
+        httpPost.setEntity(reqEntity);
+        HttpResponse response = httpclient.execute(httpPost);
+        logger.debug("----------------------------------------");
+        logger.debug(response.getStatusLine().toString());
+        logger.debug("----------------------------------------");
+        return response;  
+    }
+    
     public HttpResponse enviarByteArray(byte[] byteArray, String serverURL) throws IOException {
         checkConnections();
         logger.debug("enviarByteArray - lanzando: " + serverURL);

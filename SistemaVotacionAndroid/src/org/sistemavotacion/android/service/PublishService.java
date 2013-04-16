@@ -18,6 +18,8 @@ import org.sistemavotacion.android.R;
 import org.sistemavotacion.modelo.Operation;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
+import org.sistemavotacion.seguridad.VotingSystemKeyStoreException;
+import org.sistemavotacion.smime.EncryptorHelper;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.task.GetFileTask;
@@ -102,7 +104,7 @@ public class PublishService extends Service implements TaskListener {
     public void publishDocument (Operation operation,
     		byte[] keyStoreBytes, char[] password, 
     		PublishServiceListener serviceListener) {
-    	Log.d(TAG + ".publishDocument(...)", " - operation: " + operation.getTipo());
+    	Log.d(TAG + ".publishDocument(...)", " operation: " + operation.getTipo());
     	this.pendingOperation = operation;
     	this.serviceListener = serviceListener;
     	String usuario = null;
@@ -156,8 +158,10 @@ public class PublishService extends Service implements TaskListener {
 			    			timeStampedDocument.getTimeStampRequest(TIMESTAMP_VOTE_HASH), this).execute(
 			    			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
 			        if(Respuesta.SC_OK == timeStampTask.get()) {
-			        	runningTask = new SendFileTask(null, this, 
-								timeStampedDocument.setTimeStampToken(timeStampTask)).
+			        	File fileToEncrypt = timeStampedDocument.setTimeStampToken(timeStampTask);
+			        	EncryptorHelper.encryptSMIMEFile(fileToEncrypt, 
+			        			Aplicacion.getControlAcceso().getCertificado());
+			        	runningTask = new SendFileTask(null, this, fileToEncrypt).
 								execute(pendingOperation.getUrlEnvioDocumento());
 			        } else {
 						String msg = getString(R.string.timestamp_connection_error_msg) 
@@ -176,9 +180,11 @@ public class PublishService extends Service implements TaskListener {
 			    			timeStampedDocument.getTimeStampRequest(TIMESTAMP_VOTE_HASH), this).execute(
 			    			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
 			        if(Respuesta.SC_OK == timeStampTask.get()) {
-			        	runningTask = new SendFileTask(null, this, 
-								timeStampedDocument.setTimeStampToken(
-								timeStampTask)).execute(pendingOperation.getUrlEnvioDocumento());
+			        	File fileToEncrypt = timeStampedDocument.setTimeStampToken(timeStampTask);
+			        	EncryptorHelper.encryptSMIMEFile(fileToEncrypt, 
+			        			Aplicacion.getControlAcceso().getCertificado());
+			            runningTask = new SendFileTask(null, this,
+			            		fileToEncrypt).execute(pendingOperation.getUrlEnvioDocumento());
 			        } else {
 						String msg = getString(R.string.timestamp_connection_error_msg) 
 								+ " - " + timeStampTask.getMessage();
@@ -208,6 +214,10 @@ public class PublishService extends Service implements TaskListener {
 					default:
 						Log.d(TAG + ".processOperation(...) ", " --- unknown operation: " + pendingOperation.getTipo().toString());
 			}
+        } catch(VotingSystemKeyStoreException ex) {
+        	ex.printStackTrace();
+        	serviceListener.setPublishServiceMsg(
+        			Respuesta.SC_ERROR_EJECUCION, getString(R.string.pin_error_msg) );
         } catch(Exception ex) {
         	ex.printStackTrace();
         	serviceListener.setPublishServiceMsg(Respuesta.SC_ERROR_EJECUCION, ex.getMessage());

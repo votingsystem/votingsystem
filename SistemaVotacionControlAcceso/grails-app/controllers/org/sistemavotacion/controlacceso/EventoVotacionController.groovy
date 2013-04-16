@@ -7,6 +7,8 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import org.sistemavotacion.controlacceso.modelo.*
 import grails.converters.JSON
+import java.security.cert.X509Certificate;
+import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.smime.SMIMEMessageWrapper
 import org.sistemavotacion.util.*
 
@@ -24,6 +26,7 @@ class EventoVotacionController {
 	def almacenClavesService
 	def notificacionService
 	def httpService
+	def encryptionService
     
 	/**
 	 * @httpMethod GET
@@ -47,21 +50,49 @@ class EventoVotacionController {
 		if (Respuesta.SC_OK == flash.respuesta.codigoEstado) {
 			String initCentroControlEventURL = "${flash.respuesta.evento.centroControl.serverURL}" + 
 				"${grailsApplication.config.SistemaVotacion.sufijoURLInicializacionEvento}"
+			byte[] cadenaCertificacionCentroControlBytes = 
+				flash.respuesta.evento.cadenaCertificacionCentroControl
+			X509Certificate controlCenterCert = CertUtil.fromPEMToX509CertCollection(
+				cadenaCertificacionCentroControlBytes).iterator().next()
+			if(!controlCenterCert) {
+				String msg = "${message(code: 'controlCenterNullCert')}"
+				log.error msg
+				setEventToPending(flash.respuesta.evento);
+				flash.respuesta = new Respuesta(mensaje:msg,
+					codigoEstado:Respuesta.SC_ERROR_PETICION)
+				return false
+			}
+			Respuesta respuesta = encryptionService.encryptSMIMEMessage(
+					flash.respuesta.mensajeSMIMEValidado.contenido, 
+					controlCenterCert, request.getLocale())
+			if(Respuesta.SC_OK != respuesta.codigoEstado) {
+				String msg = ${message(code: 'error.encryptErrorMsg')}
+				log.error msg
+				setEventToPending(flash.respuesta.evento);
+				flash.respuesta = new Respuesta(mensaje:msg,
+					codigoEstado:Respuesta.SC_ERROR_PETICION)
+				return false
+			}
 			Respuesta respuestaNotificacion = httpService.sendSignedMessage(
-				initCentroControlEventURL, flash.respuesta.mensajeSMIMEValidado.contenido)
+				initCentroControlEventURL, respuesta.messageBytes)
 			if(Respuesta.SC_OK != respuestaNotificacion.codigoEstado) {
 				log.debug("Problemas notificando evento '${flash.respuesta.evento.id}' al Centro de " + 
 					"Control - codigo estado:${respuestaNotificacion.codigoEstado}" +
 					" - mensaje: ${respuestaNotificacion.mensaje}")	
-				Evento evento = flash.respuesta.evento;
-				evento.estado = Evento.Estado.ACTORES_PENDIENTES_NOTIFICACION
-				Evento.withTransaction { evento.save() }
-				flash.respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
-					mensaje:message(code: 'http.errorConectandoCentroControl'))
+				setEventToPending(flash.respuesta.evento);
+				String msg = "${message(code: 'http.errorConectandoCentroControl')} - " + 
+					"${respuestaNotificacion.mensaje}"
+				flash.respuesta = new Respuesta(mensaje:msg, 
+					codigoEstado:Respuesta.SC_ERROR_PETICION)
 			} 
 		}
 		return false 
     }
+	
+	private void setEventToPending(Evento evento) {
+		evento.estado = Evento.Estado.ACTORES_PENDIENTES_NOTIFICACION
+		Evento.withTransaction { evento.save() }
+	}
     
 	/**
 	 * @httpMethod GET
@@ -104,6 +135,7 @@ class EventoVotacionController {
 							Evento.Estado.CANCELADO, Evento.Estado.FINALIZADO)
 					} else {
 						eventoList =  EventoVotacion.findAllByEstado(estadoEvento, params)
+						log.debug " -estadoEvento: " + estadoEvento
 						eventosMap.numeroTotalEventosVotacionEnSistema = EventoVotacion.countByEstado(estadoEvento)
 					}
 				} else {

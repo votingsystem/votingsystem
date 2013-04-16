@@ -148,7 +148,7 @@ public class PKCS10WrapperServer {
     
     public static PKCS10CertificationRequest fromPEMToPKCS10CertificationRequest (
             byte[] csrBytes) throws Exception {
-        PEMReader pemReader = new PEMReader(new StringReader(new String(csrBytes)));
+        PEMReader pemReader = new PEMReader(new StringReader(new String(csrBytes).trim()));
         Object pemObject = null;
         pemObject = pemReader.readObject();
         PKCS10CertificationRequest csr = (PKCS10CertificationRequest)pemObject;

@@ -47,7 +47,8 @@ class EventoVotacionService {
 	
 	Respuesta salvarEvento(SMIMEMessageWrapper smimeMessage, 
 		ControlAcceso controlAcceso, Locale locale) {		
-		log.debug("salvarEvento - mensaje: ${smimeMessage.getSignedContent()}")
+		//log.debug("salvarEvento - mensaje: ${smimeMessage.getSignedContent()}")
+		log.debug(" - salvarEvento")
 		def Tipo tipoMensaje
 		Respuesta respuesta
 		if (smimeMessage.isValidSignature) tipoMensaje = Tipo.EVENTO_VOTACION

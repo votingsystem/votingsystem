@@ -153,7 +153,7 @@ public class PKCS10WrapperClient {
     
     public KeyStore initSigner (byte[] csrFirmada, 
     		String signatureMechanism) throws Exception {
-        Collection<X509Certificate> certificados = CertUtil.fromPEMChainToX509Certs(csrFirmada);
+        Collection<X509Certificate> certificados = CertUtil.fromPEMToX509CertCollection(csrFirmada);
         X509Certificate[] arrayCerts = new X509Certificate[certificados.size()];
         certificados.toArray(arrayCerts);
         signedMailGenerator = new SignedMailGenerator(
@@ -184,7 +184,7 @@ public class PKCS10WrapperClient {
     
     public static KeyStore getKeyStore (byte[] csrFirmada, PrivateKey privateKey, 
     		char[] passwordClaves, String aliasClaves) throws Exception {
-        Collection<X509Certificate> certificados = CertUtil.fromPEMChainToX509Certs(csrFirmada);
+        Collection<X509Certificate> certificados = CertUtil.fromPEMToX509CertCollection(csrFirmada);
     	Log.i("Número certificados en cadena: ", String.valueOf(certificados.size()));
         X509Certificate[] arrayCerts = new X509Certificate[certificados.size()];
         certificados.toArray(arrayCerts);

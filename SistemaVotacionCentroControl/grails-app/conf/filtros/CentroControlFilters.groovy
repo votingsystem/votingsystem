@@ -21,6 +21,7 @@ class CentroControlFilters {
 
     def grailsApplication 
 	def messageSource
+	def encryptionService
 
     def filters = {
         String nombreEntidadFirmada = grailsApplication.config.SistemaVotacion.nombreEntidadFirmada;
@@ -58,18 +59,19 @@ class CentroControlFilters {
 				try {
 					MultipartFile multipartFile = ((MultipartHttpServletRequest) request)?.getFile(nombreEntidadFirmada);
 					if (multipartFile?.getBytes() != null || params.archivoFirmado) {
-						SMIMEMessageWrapper smimeMessageReq
-						try {
-							if (params.archivoFirmado) smimeMessageReq = SMIMEMessageWrapper.build(
-									new ByteArrayInputStream(params.archivoFirmado.getBytes()), null);
-							else smimeMessageReq = SMIMEMessageWrapper.build(
-									new ByteArrayInputStream(multipartFile?.getBytes()), null)
-						} catch (Exception ex) {
-							log.error (ex.getMessage(), ex)
-							response.status = Respuesta.SC_ERROR_EJECUCION
-							render(ex.getMessage())
+						Respuesta respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION)
+						if(multipartFile?.getBytes() != null) {
+							respuesta = encryptionService.decryptSMIMEMessage(
+								multipartFile?.getBytes(), request.getLocale())
+						} else if(params.archivoFirmado)
+							respuesta = encryptionService.decryptSMIMEMessage(
+								params.archivoFirmado.getBytes(), request.getLocale())
+						if(Respuesta.SC_OK != respuesta.codigoEstado) {
+							response.status = respuesta.codigoEstado
+							render respuesta.mensaje
 							return false
 						}
+						SMIMEMessageWrapper smimeMessageReq = respuesta.smimeMessage
 						if (smimeMessageReq.isValidSignature()) {
 							log.debug "firma valida"
 							params.smimeMessageReq = smimeMessageReq

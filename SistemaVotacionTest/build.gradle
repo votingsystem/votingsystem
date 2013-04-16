@@ -52,6 +52,20 @@ classes.dependsOn cleanCompileJava
 buildJar.dependsOn classes
 
 
+task copyKeyTestStores() {
+	if(!file("$rootProject.projectDir/mockDnie.jks").exists()) {
+		tasks.getByPath(':genAppsCerts').execute()
+	}
+	if(!file("$rootProject.projectDir/SistemaVotacionControlAcceso/web-app/WEB-INF/cms/ControlAcceso.jks").exists()) {
+		tasks.getByPath(':genWebAppsCerts').execute()
+	}
+	ant.copy(file:"$rootProject.projectDir/mockDnie.jks",
+		toFile:"src/main/resources/mockDnie.jks")
+	ant.copy(file:"$rootProject.projectDir/SistemaVotacionControlAcceso/web-app/WEB-INF/cms/ControlAcceso.jks",
+		toFile:"src/main/resources/ControlAcceso.jks")
+}
+
+
 task copyToLib(type: Copy) {
 	into "$buildDir/jarDeps/lib"
 	from configurations.runtime

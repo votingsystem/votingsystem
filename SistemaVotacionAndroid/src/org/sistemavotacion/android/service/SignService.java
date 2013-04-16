@@ -19,6 +19,8 @@ import org.sistemavotacion.android.Aplicacion;
 import org.sistemavotacion.android.R;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
+import org.sistemavotacion.seguridad.VotingSystemKeyStoreException;
+import org.sistemavotacion.smime.EncryptorHelper;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.task.GetFileTask;
@@ -174,22 +176,32 @@ public class SignService extends Service implements TaskListener {
     	this.signServiceListener = signServiceListener;
     	String usuario = null;
         if (Aplicacion.getUsuario() != null) usuario = Aplicacion.getUsuario().getNif();
-		SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
-				keyStoreBytes, ALIAS_CERT_USUARIO, password, SIGNATURE_ALGORITHM);
-        File signedFile = File.createTempFile("signedDocument", SIGNED_PART_EXTENSION);
-        signedFile = signedMailGenerator.genFile(usuario, 
-				Aplicacion.getControlAcceso().getNombreNormalizado(), 
-				signatureContent, subject, null, SignedMailGenerator.Type.USER, 
-				signedFile);
+        File signedFile = null;
+        try {
+    		SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
+    				keyStoreBytes, ALIAS_CERT_USUARIO, password, SIGNATURE_ALGORITHM);
+    		signedFile = File.createTempFile("signedDocument", SIGNED_PART_EXTENSION);
+            signedFile = signedMailGenerator.genFile(usuario, 
+    				Aplicacion.getControlAcceso().getNombreNormalizado(), 
+    				signatureContent, subject, null, SignedMailGenerator.Type.USER, 
+    				signedFile);
+        } catch(VotingSystemKeyStoreException ex) {
+        	ex.printStackTrace();
+        	signServiceListener.setSignServiceMsg(
+        			Respuesta.SC_ERROR_EJECUCION, getString(R.string.pin_error_msg));
+        	return;
+        } 
         SMIMEMessageWrapper timeStampedDocument = new SMIMEMessageWrapper(null, signedFile);
         GetTimeStampTask getTimeStampTask = (GetTimeStampTask) new GetTimeStampTask(null, 
     			timeStampedDocument.getTimeStampRequest(TIMESTAMP_VOTE_HASH), this).execute(
     			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
         if(Respuesta.SC_OK == getTimeStampTask.get()) {
         	try {
+            	File fileToEncrypt = timeStampedDocument.setTimeStampToken(getTimeStampTask);
+            	EncryptorHelper.encryptSMIMEFile(fileToEncrypt, 
+            			Aplicacion.getControlAcceso().getCertificado());
         		SendFileTask sendFileTask = (SendFileTask)new SendFileTask(null, this, 
-						timeStampedDocument.setTimeStampToken(getTimeStampTask)).
-						execute(urlToSendSignedDocument);
+        				fileToEncrypt).execute(urlToSendSignedDocument);
         		if (Respuesta.SC_OK == sendFileTask.get()) {
                     try {
                     	if(isWithSignedReceipt) {
@@ -224,10 +236,10 @@ public class SignService extends Service implements TaskListener {
 	
 	@Override
 	public void showTaskResult(AsyncTask task) { 
-		Log.d(TAG + ".processSignature(...)", " - processSignature - " + task.getClass());
+		Log.d(TAG + ".showTaskResult(...)", " - showTaskResult - " + task.getClass());
 		if(task instanceof SignTimestampSendPDFTask) {
 			SignTimestampSendPDFTask signTimestampSendPDFTask= (SignTimestampSendPDFTask)task;
-			Log.d(TAG + ".processSignature(...)", " - statusCode: " 
+			Log.d(TAG + ".showTaskResult(...)", " - statusCode: " 
 					+ signTimestampSendPDFTask.getStatusCode());    			
 			signServiceListener.setSignServiceMsg(signTimestampSendPDFTask.getStatusCode(), 
 	    					signTimestampSendPDFTask.getMessage());

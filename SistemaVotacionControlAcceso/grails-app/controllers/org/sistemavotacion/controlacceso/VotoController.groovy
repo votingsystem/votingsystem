@@ -17,6 +17,7 @@ class VotoController {
 
 	def votoService
 	def grailsApplication
+	def encryptionService
 	
 	/**
 	 * @httpMethod GET
@@ -38,10 +39,24 @@ class VotoController {
     def procesar() { 
 		MultipartFile multipartFile = ((MultipartHttpServletRequest) request)?.getFile(
 			grailsApplication.config.SistemaVotacion.nombreEntidadFirmada);
-		SMIMEMessageWrapper smimeMessageReq = SMIMEMessageWrapper.build(
-						new ByteArrayInputStream(multipartFile?.getBytes()), 
-						null, SMIMEMessageWrapper.Tipo.VOTO);
-		Respuesta respuesta = votoService.validarFirmas(smimeMessageReq, request.getLocale())
+		if(!multipartFile) {
+			String msg = messageSource.getMessage(
+				'evento.peticionSinArchivo', null, request.getLocale())
+			log.debug msg
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg 
+			return false
+		}
+		Respuesta respuesta = encryptionService.decryptSMIMEMessage(
+			multipartFile?.getBytes(), request.getLocale())
+		if(Respuesta.SC_OK != respuesta.codigoEstado) {
+			response.status = respuesta.codigoEstado
+			render respuesta.mensaje
+			return false
+		}
+		SMIMEMessageWrapper smimeMessageReq = respuesta.smimeMessage
+		smimeMessageReq.setTipoMensaje(SMIMEMessageWrapper.Tipo.VOTO)
+	    respuesta = votoService.validarFirmas(smimeMessageReq, request.getLocale())
 		response.status = respuesta.codigoEstado
 		if (Respuesta.SC_OK == respuesta.codigoEstado) {
 			response.contentLength = respuesta.voto.mensajeSMIME.contenido.length

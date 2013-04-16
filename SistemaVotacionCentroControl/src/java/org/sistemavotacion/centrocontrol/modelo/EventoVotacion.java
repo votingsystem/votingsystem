@@ -3,6 +3,8 @@ package org.sistemavotacion.centrocontrol.modelo;
 import static javax.persistence.GenerationType.IDENTITY;
 
 import java.io.Serializable;
+import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -39,6 +41,7 @@ import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.Resolution;
 import org.hibernate.search.annotations.Store;
 import org.hibernate.search.annotations.TokenizerDef;
+import org.sistemavotacion.seguridad.CertUtil;
 
 /**
 * @author jgzornoza
@@ -325,5 +328,12 @@ public class EventoVotacion implements Serializable {
 
 	public void setDateCanceled(Date dateCanceled) {
 		this.dateCanceled = dateCanceled;
+	}
+	
+	public X509Certificate getControlAccesoCert() throws Exception {
+		if(cadenaCertificacionControlAcceso == null) return null;
+		Collection<X509Certificate> controlAccesoCertCollection = 
+				CertUtil.fromPEMToX509CertCollection(cadenaCertificacionControlAcceso);
+		return controlAccesoCertCollection.iterator().next();		
 	}
 }

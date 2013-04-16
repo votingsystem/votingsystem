@@ -19,10 +19,15 @@ package org.sistemavotacion.android;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
+
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.sistemavotacion.json.DeJSONAObjeto;
 import org.sistemavotacion.modelo.ActorConIP;
@@ -31,6 +36,7 @@ import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Operation;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.modelo.Usuario;
+import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.task.GetDataTask;
 import org.sistemavotacion.task.TaskListener;
 import org.sistemavotacion.util.ServerPaths;
@@ -55,6 +61,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
+import java.security.cert.X509Certificate;
 
 
 public class Aplicacion extends FragmentActivity implements TaskListener {
@@ -101,6 +108,7 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
 	private Evento eventoSeleccionado;
 	private static ActorConIP controlAcceso;
 	private static Usuario usuario;
+	private static Map<String, X509Certificate> certsMap = new HashMap<String, X509Certificate>();
     private static Estado estado = Estado.SIN_CSR;
     public static Aplicacion INSTANCIA; 
     private Operation operation = null;
@@ -136,6 +144,7 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
         }
     	String estadoAplicacion = settings.getString(
     			PREFS_ESTADO + "_" + CONTROL_ACCESO_URL, Estado.SIN_CSR.toString());
+    	Log.d(TAG + ".onCreate()", " - checking state: " + PREFS_ESTADO + "_" + CONTROL_ACCESO_URL);
     	estado = Estado.valueOf(estadoAplicacion);
         if(Intent.ACTION_VIEW.equals(getIntent().getAction())) {
         	//getIntent().getCategories().contains(Intent.CATEGORY_BROWSABLE);
@@ -206,7 +215,9 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
     }
     
     public void checkConnection() {
-    	if (controlAcceso == null) {
+    	Log.d(TAG + ".checkConnection() ", " - CONTROL_ACCESO_URL: " + CONTROL_ACCESO_URL);
+    	if (controlAcceso == null || !controlAcceso.getServerURL().
+    			equals(CONTROL_ACCESO_URL)) {
     		try {
         		GetDataTask getDataTask = (GetDataTask) new GetDataTask(null, this).
         				execute(ServerPaths.getURLInfoServidor(CONTROL_ACCESO_URL));
@@ -225,6 +236,46 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
     		}
     	}
     }
+    
+    public void getNetworkCert(String serverURL) throws Exception {
+    	Log.d(TAG + ".getServerCert() ", " - getServerCert - serverURL: " + serverURL);
+    	String serverCertURL = ServerPaths.getURLCadenaCertificacion(serverURL);
+		GetDataTask getDataTask = (GetDataTask) new GetDataTask(null, this).
+				execute(serverCertURL);
+		if(Respuesta.SC_OK == getDataTask.get()) {
+			Collection<X509Certificate> certChain = CertUtil.fromPEMToX509CertCollection(
+					getDataTask.getMessage().getBytes());
+			X509Certificate serverCert = certChain.iterator().next();
+			certsMap.put(serverURL, serverCert);
+		} else Log.d(TAG + ".getServerCert() ", " - Error - server status: " + 
+			getDataTask.getStatusCode() + " - message: " + getDataTask.getMessage());
+    }
+    
+    public X509Certificate getCert(String serverURL) {
+		Log.d(TAG + ".getCert(...)", " - getCert - serverURL: " + serverURL);
+		if(serverURL == null) return null;
+		return certsMap.get(serverURL);
+	}
+    
+    public void checkCert(ActorConIP actorConIP) throws Exception {
+    	Log.d(TAG + ".checkCert(...)", " - checkCert - serverURL: " 
+    			+ actorConIP.getServerURL());
+        if(actorConIP.getCertificado() == null) {
+        	if(actorConIP.getServerURL() == null) {
+        		throw new Exception(" - Missing serverURL param - ");
+        	}
+        	X509Certificate actorCert = getCert(
+        			actorConIP.getServerURL());
+        	if(actorCert == null) {
+        		getNetworkCert(actorConIP.getServerURL());
+			} else actorConIP.setCertificado(actorCert);
+        }
+    }
+	
+	public static void putCert(String serverURL, X509Certificate cert) {
+		Log.d(TAG + ".putCert(...)", " - putCert - serverURL: " + serverURL);
+		certsMap.put(serverURL, cert);
+	}
 
     private void setActivityState() {
     	checkConnection();
@@ -324,6 +375,13 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
 	}
 
 	public void setEventoSeleccionado(Evento eventoSeleccionado) {
+    	try {
+			checkCert(eventoSeleccionado.getCentroControl());
+		} catch (Exception e) {
+			e.printStackTrace();
+			showMessage(getString(R.string.error_lbl), 
+					getString(R.string.CONTROL_CENTER_CONECTION_ERROR_MSG));
+		}
 		this.eventoSeleccionado = eventoSeleccionado;
 	}
 	
@@ -449,14 +507,15 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
     }
     
 	public static void setEstado(Estado estado) {
-		Log.d(TAG + ".setEstado(...)", " - estado: " + estado.toString());
+		Log.d(TAG + ".setEstado(...)", " - estado: " + estado.toString() 
+				+ " - server: " + PREFS_ESTADO + "_" + CONTROL_ACCESO_URL);
 		Aplicacion.estado = estado;
     	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(INSTANCIA.getApplicationContext());
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(PREFS_ESTADO + "_" + CONTROL_ACCESO_URL , estado.toString());
         editor.commit();
 	}
-
+	
 	@Override
 	public void processTaskMessages(List<String> messages, AsyncTask task) { }
 

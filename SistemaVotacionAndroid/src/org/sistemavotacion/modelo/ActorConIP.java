@@ -1,5 +1,6 @@
 package org.sistemavotacion.modelo;
 
+import java.util.Collection;
 import java.util.Date;
 import java.security.cert.X509Certificate;
 
@@ -31,6 +32,7 @@ public class ActorConIP implements java.io.Serializable {
     private String certificadoURL;
     private String certificadoPEM;
     private X509Certificate certificado;
+    private Collection<X509Certificate> certChain;
 
     public void setServerURL(String serverURL) {
             this.serverURL = serverURL;
@@ -177,4 +179,10 @@ public class ActorConIP implements java.io.Serializable {
     public void setCertificado(X509Certificate certificado) {
         this.certificado = certificado;
     }
+	public Collection<X509Certificate> getCertChain() {
+		return certChain;
+	}
+	public void setCertChain(Collection<X509Certificate> certChain) {
+		this.certChain = certChain;
+	}
 }

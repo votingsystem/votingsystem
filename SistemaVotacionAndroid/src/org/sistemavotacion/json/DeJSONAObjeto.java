@@ -17,16 +17,22 @@
 package org.sistemavotacion.json;
 
 import java.io.IOException;
+import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.util.Set;
+
+import org.sistemavotacion.android.R;
 import org.sistemavotacion.modelo.*;
 import org.sistemavotacion.util.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONArray;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+
+import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import android.util.Log;
 
@@ -154,7 +160,7 @@ public class DeJSONAObjeto {
     }
 
        public static ActorConIP obtenerActorConIP(String actorConIPStr, ActorConIP.Tipo tipo) 
-    		   throws JSONException, ParseException {
+    		   throws Exception {
            JSONObject actorConIPJSON = new JSONObject(actorConIPStr);
            JSONObject jsonObject = null;
            ActorConIP actorConIP = null;
@@ -192,6 +198,16 @@ public class DeJSONAObjeto {
                 actorConIP.setServerURL(actorConIPJSON.getString("serverURL"));
            if (actorConIPJSON.has("nombre"))
                 actorConIP.setNombre(actorConIPJSON.getString("nombre"));
+           if (actorConIPJSON.has("cadenaCertificacionPEM")) {
+        	   Collection<X509Certificate> certChain = 
+	        			CertUtil.fromPEMToX509CertCollection(actorConIPJSON.
+	        			getString("cadenaCertificacionPEM").getBytes());
+	        	actorConIP.setCertChain(certChain);
+	        	X509Certificate serverCert = certChain.iterator().next();
+	        	Log.d(TAG + ".obtenerActorConIP(..) ", " - actorConIP Cert: " 
+	        			+ serverCert.getSubjectDN().toString());
+	        	actorConIP.setCertificado(serverCert);
+           }
            return actorConIP;
        }
     

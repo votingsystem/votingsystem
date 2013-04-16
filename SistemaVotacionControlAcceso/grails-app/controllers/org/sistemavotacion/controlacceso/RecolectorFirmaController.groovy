@@ -51,7 +51,7 @@ class RecolectorFirmaController {
 				MultipartFile multipartFile = ((MultipartHttpServletRequest) request)?.getFile(nombreArchivo);
 				if (multipartFile?.getBytes() != null || params.archivoFirmado) {
 					Respuesta respuesta = pdfService.validarFirma(multipartFile.getBytes(),
-						evento, Documento.Estado.FIRMA_DE_MANIFIESTO, request.getLocale())
+						evento, Documento.Estado.FIRMA_DE_MANIFIESTO, request.getLocale(), true)
 					if (Respuesta.SC_OK != respuesta.codigoEstado) {
 						log.debug "Problema en la recepción del archivo - ${respuesta.mensaje}"
 					}

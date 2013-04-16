@@ -154,13 +154,16 @@ public class SMIMEMessageWrapper extends MimeMessage {
              		cont instanceof ByteArrayInputStream){
              	Multipart multipart;
              	if(cont instanceof ByteArrayInputStream) {
-                 	File tempFile = FileUtils.copyStreamToFile(
-                 			(SharedByteArrayInputStream)getContent(), 
-                 			File.createTempFile("signedContent", "json")); 
-                 	FileDataSource fileDataSource = new FileDataSource(tempFile);
-                 	multipart = new MimeMultipart(fileDataSource);
-             	}
-             	else multipart = (Multipart)cont;
+             		if(getContent() instanceof MimeMultipart) {
+             			multipart = (Multipart) getContent();
+             		} else {
+             			File tempFile = FileUtils.copyStreamToFile(
+                     			(SharedByteArrayInputStream)getContent(), 
+                     			File.createTempFile("signedContent", "json")); 
+                     	FileDataSource fileDataSource = new FileDataSource(tempFile);
+                     	multipart = new MimeMultipart(fileDataSource);
+             		}
+             	} else multipart = (Multipart)cont;
                  BodyPart bodyPart = multipart.getBodyPart(0);
                  Object part = bodyPart.getContent();
                  if (part instanceof String) {
@@ -571,7 +574,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
                 int i = 0;
                 while (certIt.hasNext()) {
                     X509Certificate cert = (X509Certificate) certIt.next();
-                    Log.d(TAG, "Certificate " + i + "========");
+                    Log.d(TAG, "Certificate " + i + "-------------------");
                     Log.d(TAG, "Issuer: " + cert.getIssuerDN().getName());
                     Log.d(TAG, "Subject: " + cert.getSubjectDN().getName());
                     Log.d(TAG, "Errors:");

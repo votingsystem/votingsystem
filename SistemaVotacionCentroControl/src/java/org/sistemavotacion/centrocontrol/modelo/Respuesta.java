@@ -38,6 +38,7 @@ public class Respuesta {
 	private Voto voto;
     private X509Certificate certificado;
     private byte[] cadenaCertificacion;
+    private byte[] messageBytes;
     private ActorConIP actorConIP;
 	
 	public Map getMap() throws Exception {
@@ -143,4 +144,12 @@ public class Respuesta {
     	if(tipo != null) return tipo.toString();
 		return null;
     }
+
+	public byte[] getMessageBytes() {
+		return messageBytes;
+	}
+
+	public void setMessageBytes(byte[] messageBytes) {
+		this.messageBytes = messageBytes;
+	}
 }

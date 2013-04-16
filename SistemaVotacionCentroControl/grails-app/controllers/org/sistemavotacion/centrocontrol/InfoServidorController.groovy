@@ -53,6 +53,9 @@ class InfoServidorController {
 		infoServidor.environmentMode = Environment.current.toString()
 		def sufijoURLCadenaCertificacion = grailsApplication.config.SistemaVotacion.sufijoURLCadenaCertificacion
 		infoServidor.cadenaCertificacionURL = "${grailsApplication.config.grails.serverURL}${sufijoURLCadenaCertificacion}"
+		File cadenaCertificacion = grailsApplication.mainContext.getResource(
+			grailsApplication.config.SistemaVotacion.rutaCadenaCertificacion).getFile();
+		infoServidor.cadenaCertificacionPEM = cadenaCertificacion?.text
 		def controlesAcceso = ControlAcceso.getAll()
 		infoServidor.controlesAcceso = []
 		controlesAcceso?.collect {controlAcceso ->

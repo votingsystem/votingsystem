@@ -29,9 +29,11 @@ import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.cms.CMSAttributeTableGenerationException;
 import org.bouncycastle2.cms.CMSAttributeTableGenerator;
 import org.bouncycastle2.cms.CMSSignedData;
+import org.sistemavotacion.android.Aplicacion;
 import org.sistemavotacion.android.R;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.PDF_CMSSignedGenerator;
+import org.sistemavotacion.smime.EncryptorHelper;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.HttpHelper;
@@ -100,8 +102,12 @@ public class SignTimestampSendPDFTask extends AsyncTask<String, Void, String>
         try {
         	File timeStampedSignedFile = signWithTimestamp(pdfReader, signedFile, 
         			signerCert, signerPrivatekey, signerCertsChain);
-	        new SendFileTask(null, this, timeStampedSignedFile).execute(urlSignedDocument);
-        	Log.d(TAG + ".signWithTimestamp(...)", " -sending PDF file timeStamped and signed");
+        	File pdfSignedFile = File.createTempFile("pdfSignedFile", ".eml");
+        	pdfSignedFile.deleteOnExit();
+            EncryptorHelper.encryptFile(timeStampedSignedFile, pdfSignedFile, 
+            		Aplicacion.getControlAcceso().getCertificado());
+	        new SendFileTask(null, this, pdfSignedFile).execute(urlSignedDocument);
+        	Log.d(TAG + ".signWithTimestamp(...)", " - sending PDF file timeStamped and signed");
         }catch (Exception ex) {
 			ex.printStackTrace();
 			exception = ex;
@@ -140,7 +146,6 @@ public class SignTimestampSendPDFTask extends AsyncTask<String, Void, String>
         exc.put(PdfName.CONTENTS, new Integer(csize * 2 + 2));
         String firmante = PdfPKCS7.getSubjectFields((X509Certificate)signerCert).getField("CN").replace("(FIRMA)", "");
         sap.setLayer2Text(context.getString(R.string.pdf_signed_by_lbl) + ":\n" + firmante); 
-
         
         CMSAttributeTableGenerator unsAttr= new CMSAttributeTableGenerator() {
 

@@ -10,6 +10,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -118,6 +119,7 @@ public class SignedMailGenerator {
             String asunto, Header header, Type signerType, File outputFile) throws Exception {
         MimeMessage body = gen(
                 fromUser, toUser, textoAFirmar, asunto, header, signerType);
+        //body.setSentDate(new Date());
         body.writeTo(new FileOutputStream(outputFile));
         return outputFile;
     }

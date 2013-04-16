@@ -46,6 +46,7 @@ public class Respuesta {
     private Certificado certificadoDB;
     private byte[] cadenaCertificacion;
     private byte[] timeStampToken;
+    private byte[] messageBytes;
     private ActorConIP actorConIP;
     private SolicitudCSRVoto solicitudCSR;
     private Dispositivo dispositivo;
@@ -297,6 +298,14 @@ public class Respuesta {
 
 	public void setCertificadoDB(Certificado certificadoDB) {
 		this.certificadoDB = certificadoDB;
+	}
+
+	public byte[] getMessageBytes() {
+		return messageBytes;
+	}
+
+	public void setMessageBytes(byte[] messageBytes) {
+		this.messageBytes = messageBytes;
 	}
 
 }

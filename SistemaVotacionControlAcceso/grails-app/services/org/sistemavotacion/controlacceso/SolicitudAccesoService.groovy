@@ -22,19 +22,27 @@ class SolicitudAccesoService {
     def firmaService
     def grailsApplication
 	def subscripcionService
+	def encryptionService
 
-    def Respuesta validarSolicitud(byte[] textoFirmado, Locale locale) {
-		log.debug("validarSolicitud")
+    def Respuesta validarSolicitud(byte[] textoFirmado, 
+		Locale locale, boolean isEncrypted) {
+		log.debug(" - validarSolicitud")
         def hashSolicitudAccesoBase64
         def tipoRespuesta
         def solicitudAcceso
         def mensajeSMIME
-        def respuesta
         def mensajeJSON
-        ByteArrayInputStream bais = new ByteArrayInputStream(textoFirmado);
-		SMIMEMessageWrapper smimeMessage;
+		Respuesta respuesta = null;
+		SMIMEMessageWrapper smimeMessage = null;
 		try {
-			smimeMessage = new SMIMEMessageWrapper(null, bais, null);
+			if(isEncrypted) {
+				respuesta = encryptionService.decryptSMIMEMessage(textoFirmado, locale)
+				if(Respuesta.SC_OK != respuesta.codigoEstado) return respuesta
+				smimeMessage = respuesta.smimeMessage
+			} else {
+				ByteArrayInputStream bais = new ByteArrayInputStream(textoFirmado);
+				smimeMessage = new SMIMEMessageWrapper(null, bais, null);
+			}
 			firmaService.validarCertificacionFirmantes(smimeMessage, locale)
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
@@ -78,8 +86,7 @@ class SolicitudAccesoService {
                             log.debug("El usuario ya ha Votado - id solicitud previa: " + solicitudAcceso.id)//
                             mensajeSMIME.tipo = Tipo.SOLICITUD_ACCESO_REPETIDA
 							String msg = "${grailsApplication.config.grails.serverURL}/mensajeSMIME/obtener?id=${solicitudAcceso.mensajeSMIME.id}"
-                            respuesta = new Respuesta(tipo:Tipo.SOLICITUD_ACCESO_REPETIDA,
-								solicitudAcceso:solicitudAcceso, 
+                            respuesta = new Respuesta(solicitudAcceso:solicitudAcceso, 
 								codigoEstado:Respuesta.SC_ERROR_VOTO_REPETIDO, mensaje:msg)
                     } else {//es el hash único?
                         mensajeJSON = JSON.parse(smimeMessage.getSignedContent())

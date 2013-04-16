@@ -52,11 +52,10 @@ class VotoController {
 				response.outputStream <<  respuesta.voto.mensajeSMIME.contenido
 				response.outputStream.flush()
 			} else {
-				log.debug "----- Error enviando voto a Control de Acceso - Código estado:'${respuesta?.codigoEstado}'"
-				respuesta.mensaje =  "Error enviando voto a Control de Acceso - ${respuesta.mensaje}"
-				flash.respuesta = respuesta
-				String codigoEstado = respuesta? respuesta.codigoEstado:Respuesta.SC_ERROR_EJECUCION
-				forward controller: "error${codigoEstado}", action: "procesar"
+				log.debug "----- Error sending vote to Access Request Service - statusCode:'${respuesta?.codigoEstado}'" + 
+					"-  message: '${respuesta.mensaje}'"
+				response.status = respuesta.codigoEstado
+				render message(code: 'accessRequestVoteErrorMsg', args:[respuesta.mensaje])
 				return false
 			}
 		} else if (Respuesta.SC_ERROR_VOTO_REPETIDO == respuesta.codigoEstado){

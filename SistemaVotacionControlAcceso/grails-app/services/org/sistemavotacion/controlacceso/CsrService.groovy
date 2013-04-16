@@ -17,6 +17,7 @@ class CsrService {
 	
     public Respuesta validarCSRVoto(byte[] csrPEMBytes, 
 		EventoVotacion evento, Locale locale) {
+		log.debug("validarCSRVoto ")
         PKCS10CertificationRequest csr = PKCS10WrapperServer.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
         CertificationRequestInfo info = csr.getCertificationRequestInfo();
 		String eventoId;

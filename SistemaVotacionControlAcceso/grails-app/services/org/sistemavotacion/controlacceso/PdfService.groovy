@@ -36,7 +36,13 @@ import com.itextpdf.text.pdf.PdfSignatureAppearance;
 import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.draw.LineSeparator
 import com.itextpdf.text.*
+import org.bouncycastle.cms.RecipientId
+import org.bouncycastle.cms.RecipientInformation
+import org.bouncycastle.cms.RecipientInformationStore
 import org.bouncycastle.cms.SignerId
+import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientId
+import org.bouncycastle.mail.smime.SMIMEEnveloped
 import org.bouncycastle.ocsp.BasicOCSPResp
 import org.bouncycastle.tsp.TimeStampToken
 import org.bouncycastle.tsp.TimeStampTokenInfo
@@ -44,6 +50,11 @@ import org.sistemavotacion.seguridad.*
 import org.springframework.context.ApplicationContext;
 import org.sistemavotacion.util.*;
 import java.util.Locale;
+
+import javax.mail.Session;
+import javax.mail.internet.MimeBodyPart
+import javax.mail.internet.MimeMessage
+import org.bouncycastle.mail.smime.SMIMEUtil;
 import org.springframework.beans.factory.InitializingBean
 
 
@@ -59,9 +70,11 @@ class PdfService {
 	def firmaService
 	def messageSource
 	def subscripcionService
+	def encryptionService
 	private KeyStore trustedCertsKeyStore
 	private PrivateKey key;
 	private Certificate[] chain;
+	private Session session
 	
 	
 	//@Override 
@@ -84,13 +97,21 @@ class PdfService {
 			trustedCertsKeyStore.setCertificateEntry(
 				certificate.getSubjectDN().toString(), certificate);
 		}
+		Properties props = System.getProperties();
+		// Get a Session object with the default properties.
+		session = Session.getDefaultInstance(props, null);
 	}
 	
 	public Respuesta validarFirma (byte[] pdfFirmado, Evento evento, 
-		Documento.Estado tipoDocumento, Locale locale) {
+		Documento.Estado tipoDocumento, Locale locale, boolean isSMIMEEncrypted) {
 		log.debug "validarFirma - tipoDocumento: ${tipoDocumento.toString()} " + 
 			"- pdfFirmado.length: ${pdfFirmado.length}"
-
+		Respuesta respuesta = null;
+		if(isSMIMEEncrypted) {
+			respuesta = encryptionService.decryptFile(pdfFirmado, locale)
+			if(Respuesta.SC_OK != respuesta.codigoEstado) return respuesta
+			else pdfFirmado = respuesta.messageBytes
+		} 			
 		Date todayDate = DateUtils.getTodayDate()
 		if(tipoDocumento.equals(Documento.Estado.FIRMA_DE_MANIFIESTO)) {
 			if(todayDate.compareTo(evento.fechaFin) > 0)
@@ -102,7 +123,7 @@ class PdfService {
 		Documento documento;
 		AcroFields acroFields = reader.getAcroFields();
 		ArrayList<String> names = acroFields.getSignatureNames();
-		Respuesta respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+		respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
 			mensaje:messageSource.getMessage('error.documentWithoutSigners', null, locale));
 		for (String name : names) {
 			respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK);
@@ -367,7 +388,8 @@ class PdfService {
 		return respuesta;
 	}
 	
-	public Respuesta firmar(PdfReader reader, String reason, String location, Documento documento) throws Exception {
+	public Respuesta firmar(PdfReader reader, String reason, 
+		String location, Documento documento) throws Exception {
 		Respuesta respuesta
 		try {
 			File file = File.createTempFile("pdfFirmadoServidor", ".pdf")

@@ -46,6 +46,7 @@ class FirmaService {
 	def grailsApplication;
 	def messageSource
 	def csrService;
+	def encryptionService;
 	
 	//@Override
 	public void afterPropertiesSet() throws Exception {
@@ -225,9 +226,16 @@ class FirmaService {
 		return multifirma
 	}
 			
-	public Respuesta firmarCertificadoVoto (byte[] csr, Evento evento, Locale locale) {
-		log.debug("firmarCertificadoVoto - evento: ${evento?.id}");
-		Respuesta respuesta = csrService.validarCSRVoto(csr, evento, locale)
+	public Respuesta firmarCertificadoVoto (byte[] csr, Evento evento, 
+		Locale locale, boolean isEncrypted) {
+		log.debug("firmarCertificadoVoto - evento: ${evento?.id} - isEncrypted: ${isEncrypted}");
+		Respuesta respuesta = null;
+		if(isEncrypted) {
+			respuesta = encryptionService.decryptFile(csr, locale)
+			if(Respuesta.SC_OK != respuesta.codigoEstado) return respuesta
+			else csr = respuesta.messageBytes
+		}
+		respuesta = csrService.validarCSRVoto(csr, evento, locale)
 		if(Respuesta.SC_OK != respuesta.codigoEstado) return respuesta
 		AlmacenClaves almacenClaves = evento.getAlmacenClaves()
 		//TODO
@@ -380,7 +388,8 @@ class FirmaService {
 				eventoVotacion:evento, estado:Certificado.Estado.OK,
 				tipo:Certificado.Tipo.RAIZ_VOTOS)
 			if(!certificadoCAEvento) return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
-				mensaje:"La Autoridad Certificadora del evento '${evento.id}' no esta dada de alta")				
+					mensaje:messageSource.getMessage('eventWithoutCAErrorMsg', 
+					[evento.id].toArray(), locale))				
 			X509Certificate certCAEvento = CertUtil.loadCertificateFromStream (
 				new ByteArrayInputStream(certificadoCAEvento.contenido))
 			eventTrustedCerts = new HashSet<X509Certificate>()
@@ -429,7 +438,7 @@ class FirmaService {
 				TrustAnchor ta = pkixResult.getTrustAnchor();
 				X509Certificate certCaResult = ta.getTrustedCert();
 				usuario.certificadoCA = trustedCertsHashMap.get(certCaResult?.getSerialNumber()?.longValue())
-				log.debug("Certificado de usuario emitido por: " + certCaResult?.getSubjectDN()?.toString()+
+				log.debug("Certificado de usuario emitido por: " + certCaResult?.getSubjectDN()?.toString() +
 				        "- numserie: " + certCaResult?.getSerialNumber()?.longValue());
 			} catch (CertPathValidatorException ex) {
 				log.error(ex.getMessage(), ex)

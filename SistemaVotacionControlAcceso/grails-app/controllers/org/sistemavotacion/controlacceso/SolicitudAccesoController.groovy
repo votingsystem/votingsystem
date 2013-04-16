@@ -74,13 +74,13 @@ class SolicitudAccesoController {
 				Map multipartFileMap = ((MultipartHttpServletRequest) request)?.getFileMap()
 				MultipartFile solicitudAccesoMultipartFile = multipartFileMap.remove(nombreEntidadFirmada)                                
 				respuesta = solicitudAccesoService.validarSolicitud(
-					solicitudAccesoMultipartFile.getBytes(), request.getLocale())
+					solicitudAccesoMultipartFile.getBytes(), request.getLocale(), true)
 				solicitudAcceso = respuesta.solicitudAcceso
 				if (Respuesta.SC_OK == respuesta.codigoEstado) {
 					MultipartFile solicitudCsrFile = multipartFileMap.remove(
 						grailsApplication.config.SistemaVotacion.nombreSolicitudCSR)
 					Respuesta respuestaValidacionCSR = firmaService.firmarCertificadoVoto(solicitudCsrFile.getBytes(), 
-						respuesta.evento, request.getLocale())
+						respuesta.evento, request.getLocale(), true)
 					respuesta = respuestaValidacionCSR
 					if (Respuesta.SC_OK == respuestaValidacionCSR.codigoEstado) {
 						response.contentLength = respuestaValidacionCSR.firmaCSR.length

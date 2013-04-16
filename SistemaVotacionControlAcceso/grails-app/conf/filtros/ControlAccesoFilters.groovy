@@ -14,6 +14,7 @@ import org.sistemavotacion.smime.*
 class ControlAccesoFilters {
 
     def firmaService
+	def encryptionService
     def grailsApplication
 	def messageSource
 
@@ -47,41 +48,39 @@ class ControlAccesoFilters {
 						'evento.peticionSinArchivo', null, request.getLocale()))
 					return false
                 }
-				log.debug("--------------- controllerName: ${controllerName}")
                 try {
-                    MultipartFile multipartFile = ((MultipartHttpServletRequest) request)?.getFile(nombreEntidadFirmada);
+                    MultipartFile multipartFile = ((MultipartHttpServletRequest) 
+						request)?.getFile(nombreEntidadFirmada);
                     if (multipartFile?.getBytes() != null || params.archivoFirmado) {
-						SMIMEMessageWrapper smimeMessageReq
-						try {
-                            if (params.archivoFirmado) smimeMessageReq = SMIMEMessageWrapper.build(
-									new ByteArrayInputStream(params.archivoFirmado.getBytes()), null);
-                            else smimeMessageReq = SMIMEMessageWrapper.build(
-									new ByteArrayInputStream(multipartFile?.getBytes()), null)
-                        } catch (Exception ex) {
-                            log.error (ex.getMessage(), ex)
-							response.status = Respuesta.SC_ERROR_PETICION
-							render(ex.getMessage())
+						Respuesta respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION)
+						if(multipartFile?.getBytes() != null) {
+								respuesta = encryptionService.decryptSMIMEMessage(
+									multipartFile?.getBytes(), request.getLocale())
+						} else if(params.archivoFirmado)
+							respuesta = encryptionService.decryptSMIMEMessage(
+								params.archivoFirmado.getBytes(), request.getLocale())
+						if(Respuesta.SC_OK != respuesta.codigoEstado) {
+							response.status = respuesta.codigoEstado
+							render respuesta.mensaje
 							return false
-                        } 
+						}
+						SMIMEMessageWrapper smimeMessageReq = respuesta.smimeMessage
                         if (smimeMessageReq && smimeMessageReq.isValidSignature()) {
-                            log.debug "firma valida"
-							if(!"${controllerName}".equals("voto")) {
-								log.debug " ------ Controlador de firma - validando con CA de sistema"
-								Respuesta respuestaValidacionCa = firmaService.
+                            log.debug " - signature OK - "
+							Respuesta respuestaValidacionCa = firmaService.
 									validarCertificacionFirmantes(smimeMessageReq, request.getLocale())
-								if(Respuesta.SC_OK != respuestaValidacionCa.codigoEstado) {
-									response.status = respuestaValidacionCa.codigoEstado
-									render(respuestaValidacionCa.mensaje)
-									return false
-								}
-							}
-                            params.smimeMessageReq = smimeMessageReq
+							if(Respuesta.SC_OK != respuestaValidacionCa.codigoEstado) {
+								response.status = respuestaValidacionCa.codigoEstado
+								render respuestaValidacionCa.mensaje
+								return false
+							}  
+							params.smimeMessageReq = smimeMessageReq
                             return
                         } else {
-                            log.debug "firma erronea"
+                            log.debug " - signature ERROR - "
 							response.status = Respuesta.SC_ERROR_PETICION
-							render(messageSource.getMessage(
-								'signatureErrorMsg', null, request.getLocale()))
+							render messageSource.getMessage(
+								'signatureErrorMsg', null, request.getLocale())
 							return false
                         }
                     } else {
@@ -89,13 +88,13 @@ class ControlAccesoFilters {
 							'evento.peticionSinArchivo', null, request.getLocale())
                         log.debug msg
 						response.status = Respuesta.SC_ERROR_PETICION
-						render(msg)
+						render msg
 						return false
                     }
                 } catch (Exception ex) {
                     log.error (ex.getMessage(), ex)
 					response.status = Respuesta.SC_ERROR_PETICION
-					render(ex.getMessage())
+					render ex.getMessage()
 					return false                   
                 }
             }

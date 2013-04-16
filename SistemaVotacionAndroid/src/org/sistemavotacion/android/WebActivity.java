@@ -349,7 +349,7 @@ public class WebActivity extends FragmentActivity implements WebSessionListener,
 			}).show();
 		} else {
 			resultCaption = getString(R.string.publish_document_ERROR_msg);
-			if(msg != null) resultMsg = msg;
+			resultMsg = msg;
 			showMessage(resultCaption, resultMsg);
 		}	
 	}

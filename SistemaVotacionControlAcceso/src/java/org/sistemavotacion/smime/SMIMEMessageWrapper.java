@@ -499,7 +499,10 @@ public class SMIMEMessageWrapper extends MimeMessage {
 		return tipoMensaje;
 	}
 
-	public void setTipoMensaje(Tipo tipoMensaje) {
+	public void setTipoMensaje(Tipo tipoMensaje) throws Exception {
+        if (Tipo.VOTO.equals(tipoMensaje)) {
+        	initVoto();
+        }
 		this.tipoMensaje = tipoMensaje;
 	}
 

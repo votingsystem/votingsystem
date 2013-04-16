@@ -44,8 +44,8 @@ public class ValidarFirma {
     private static X509Certificate certificadoCA;
     
     public static void main(String args[]) {
-            //validarMensajeKeyStoreSinParametros();
-            validarMensajeKeyStore();
+            validarMensajeKeyStoreSinParametros();
+            //validarMensajeKeyStore();
     }
     
     public static void validarMensaje () {
@@ -67,7 +67,7 @@ public class ValidarFirma {
         try {
             Security.addProvider(new BouncyCastleProvider());
             SMIMEMessageWrapper dniemm = new SMIMEMessageWrapper(
-            		null, new FileInputStream("signedKeystore.message"), null);
+            		null, new FileInputStream("/home/jgzornoza/temp/Signedtemp1"), null);
                //DNIeMimeMessage dniemm = DNIeMimeMessage.build(new FileInputStream("C:\\temp\\SistemaVotacionClientePublicacion\\signed.message"));
 
                //logger.debug("signatura valida?" + dniemm.isValidSignature());

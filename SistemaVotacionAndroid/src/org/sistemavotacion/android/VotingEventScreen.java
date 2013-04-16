@@ -20,6 +20,7 @@ import static org.sistemavotacion.android.Aplicacion.KEY_STORE_FILE;
 import static org.sistemavotacion.android.Aplicacion.MAX_SUBJECT_SIZE;
 
 import java.io.FileInputStream;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -138,6 +139,7 @@ public class VotingEventScreen extends FragmentActivity
         }
         operation = Operation.VOTE;
         evento = Aplicacion.INSTANCIA.getEventoSeleccionado();
+        chechControlCenterCert();
         setEventScreen(evento);
 	}
 	
@@ -317,12 +319,25 @@ public class VotingEventScreen extends FragmentActivity
     		Log.d(TAG + "- firmarEnviarButton -", " mostrando dialogo certificado no encontrado");
     		showCertNotFoundDialog();
     	} else {
+    		chechControlCenterCert();
     		String contenido = opcionSeleccionada.getContenido().length() > SELECTED_OPTION_MAX_LENGTH ?
 				 opcionSeleccionada.getContenido().substring(0, SELECTED_OPTION_MAX_LENGTH) + 
 				 "..." : opcionSeleccionada.getContenido();
     		bindService(votingServiceIntent, votingServiceConnection, BIND_AUTO_CREATE);
     		showPinScreen(getString(R.string.option_selected_msg, contenido));
     	} 
+	}
+	
+	private void chechControlCenterCert() {
+        if(evento.getCentroControl().getCertificado() == null) {
+    		try {
+    			Aplicacion.INSTANCIA.checkCert(evento.getCentroControl());
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				showMessage(getString(R.string.error_lbl), 
+						getString(R.string.CONTROL_CENTER_CONECTION_ERROR_MSG));
+			}
+		}
 	}
 	
     @Override public void onResume() {

@@ -43,14 +43,15 @@ class VotoService {
 	def firmaService
     def grailsApplication  
     def httpService
+	def encryptionService
 	
 	Respuesta validarFirmaUsuario(SMIMEMessageWrapper smimeMessageUsu, Locale locale) {
-		log.debug ("validarFirmaUsuario")
 		MensajeSMIME mensajeSMIME = new MensajeSMIME(
 			tipo:Tipo.VOTO,	contenido:smimeMessageUsu.getBytes())
 		InformacionVoto infoVoto = smimeMessageUsu.informacionVoto
 		String certServerURL = StringUtils.checkURL(infoVoto.controlAccesoURL)
 		ControlAcceso controlAcceso = ControlAcceso.findWhere(serverURL:certServerURL)
+		log.debug ("validarFirmaUsuario - certServerURL: ${certServerURL}")
 		if (!controlAcceso) return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:
 				messageSource.getMessage('validacionVoto.errorEmisorDesconocido', null, locale)) 
 		EventoVotacion evento = EventoVotacion.findWhere(controlAcceso:controlAcceso,
@@ -130,13 +131,21 @@ class VotoService {
 
 		multifirmaCentroControl.contenido = multiSignedMessageBytes
 		multifirmaCentroControl.save();
-        Respuesta respuestaControlAcceso = httpService.enviarMensaje(urlVotosControlAcceso, multiSignedMessageBytes)
-		if (Respuesta.SC_OK == respuestaControlAcceso.codigoEstado) {
+		
+		Respuesta respuesta = encryptionService.encryptSMIMEMessage(
+			multiSignedMessageBytes, eventoVotacion.getControlAccesoCert(), locale);
+		if (Respuesta.SC_OK != respuesta.codigoEstado) return respuesta
+		
+		byte[] encryptedMultiSignedMessageBytes = respuesta.messageBytes
+
+        respuesta = httpService.enviarMensaje(
+			urlVotosControlAcceso, encryptedMultiSignedMessageBytes)
+		if (Respuesta.SC_OK == respuesta.codigoEstado) {
 			SMIMEMessageWrapper smimeMessageCA = SMIMEMessageWrapper.build(
-				new ByteArrayInputStream(respuestaControlAcceso.mensaje.getBytes()),
+				new ByteArrayInputStream(respuesta.mensaje.getBytes()),
 				null, SMIMEMessageWrapper.Tipo.VOTO);
 			return validarFirmas(smimeMessageCA, multifirmaCentroControl, eventoVotacion)
-		} else return respuestaControlAcceso
+		} else return respuesta
     }
      
 	synchronized Respuesta validarFirmas(SMIMEMessageWrapper smimeMessageCA,

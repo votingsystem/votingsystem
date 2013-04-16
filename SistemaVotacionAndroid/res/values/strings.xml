@@ -53,6 +53,7 @@
     
     <string name="ASOCIAR_CENTRO_CONTROL_SMIME">Asociando Centro de Control </string>
     <string name="CAMBIO_ESTADO_CENTRO_CONTROL_SMIME">Cambiando estado de Centro de Control</string>
+    <string name="CONTROL_CENTER_CONECTION_ERROR_MSG">Problemas conectando con el centro de control. Por favor, inténtelo mas tarde</string>
     <string name="SOLICITUD_COPIA_SEGURIDAD">Solicitud de copia de seguridad</string>
     <string name="PUBLICACION_MANIFIESTO_PDF">Publicación de documento para recoger firmas</string>
     <string name="FIRMA_MANIFIESTO_PDF">Firma de manifiesto</string>

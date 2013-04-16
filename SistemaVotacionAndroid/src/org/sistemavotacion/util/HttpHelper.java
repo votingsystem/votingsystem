@@ -1,43 +1,45 @@
 package org.sistemavotacion.util;
 
-import java.io.IOException;
-import java.text.ParseException;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import static org.sistemavotacion.android.Aplicacion.NOMBRE_ARCHIVO_BYTE_ARRAY;
+import static org.sistemavotacion.android.Aplicacion.NOMBRE_ARCHIVO_CSR;
+import static org.sistemavotacion.android.Aplicacion.NOMBRE_ARCHIVO_FIRMADO;
+
 import java.io.File;
+import java.io.IOException;
 import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
+import java.security.cert.X509Certificate;
+import java.text.ParseException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
-import java.security.cert.X509Certificate;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.content.ByteArrayBody;
-import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.sistemavotacion.seguridad.CertUtil;
 
-import com.itextpdf.text.pdf.PdfReader;
-
 import android.util.Log;
-import static org.sistemavotacion.android.Aplicacion.*;
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
@@ -112,7 +114,7 @@ public class HttpHelper {
         Log.d(TAG + ".obtenerCadenaCertificacionDeServidor" ,"----------------------------------------");
         HttpEntity entity = response.getEntity();
         if (200 == response.getStatusLine().getStatusCode()) {
-            certificados = CertUtil.fromPEMChainToX509Certs(EntityUtils.toByteArray(entity));
+            certificados = CertUtil.fromPEMToX509CertCollection(EntityUtils.toByteArray(entity));
         }
         return certificados;
     }
@@ -204,6 +206,23 @@ public class HttpHelper {
         Log.d(TAG + ".enviarSolicitudAcceso" ,"----------------------------------------");
         return response;  
     }
+     
+     public static HttpResponse enviarSolicitudAcceso(File solicitudCSR, 
+             File solicitudAccesoSMIME, String serverURL) throws IOException {
+         HttpPost httpPost = new HttpPost(serverURL);
+         Log.d(TAG + ".enviarSolicitudAcceso(...)" , " - serverURL: " + httpPost.getURI());
+         FileBody fileBody = new FileBody(solicitudAccesoSMIME);
+         FileBody  csrBody = new FileBody(solicitudCSR);
+         MultipartEntity reqEntity = new MultipartEntity();
+         reqEntity.addPart(NOMBRE_ARCHIVO_FIRMADO, fileBody);
+         reqEntity.addPart(NOMBRE_ARCHIVO_CSR, csrBody);
+         httpPost.setEntity(reqEntity);
+         HttpResponse response = httpclient.execute(httpPost);
+         Log.d(TAG + ".enviarSolicitudAcceso" ,"----------------------------------------");
+         Log.d(TAG + ".enviarSolicitudAcceso" ,response.getStatusLine().toString());
+         Log.d(TAG + ".enviarSolicitudAcceso" ,"----------------------------------------");
+         return response;  
+     }
      
      public static HttpResponse getFile (String serverURL) throws Exception {
          HttpGet httpget = new HttpGet(serverURL);

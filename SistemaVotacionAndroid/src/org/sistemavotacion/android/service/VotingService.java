@@ -24,6 +24,7 @@ import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.modelo.VoteReceipt;
 import org.sistemavotacion.seguridad.PKCS10WrapperClient;
+import org.sistemavotacion.smime.EncryptorHelper;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.task.GetTimeStampTask;
@@ -196,9 +197,11 @@ public class VotingService extends Service implements TaskListener {
 	            			timeStampedDocument.getTimeStampRequest(TIMESTAMP_VOTE_HASH), this).execute(
 	            			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
 	                if(Respuesta.SC_OK == getTimeStampTask.get()) {
+			        	File fileToEncrypt = timeStampedDocument.setTimeStampToken(getTimeStampTask);
+			        	EncryptorHelper.encryptSMIMEFile(fileToEncrypt, 
+			        			event.getCentroControl().getCertificado());
 	                	SendFileTask sendFileTask = (SendFileTask)new SendFileTask(null, this, 
-			            		timeStampedDocument.setTimeStampToken(
-			            				getTimeStampTask)).execute(ServerPaths.getURLVoto(
+	                			fileToEncrypt).execute(ServerPaths.getURLVoto(
 				    			event.getCentroControl().getServerURL()));
 	                	if(Respuesta.SC_OK == sendFileTask.get()) {
 			                try {

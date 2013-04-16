@@ -45,6 +45,8 @@ import org.bouncycastle2.jcajce.JcaJceHelper;
 import org.bouncycastle2.operator.AsymmetricKeyUnwrapper;
 import org.bouncycastle2.operator.SymmetricKeyUnwrapper;
 
+import android.util.Log;
+
 class EnvelopedDataHelper
 {
     protected static final Map BASE_CIPHER_NAMES = new HashMap();
@@ -428,7 +430,7 @@ class EnvelopedDataHelper
             {
                 try
                 {
-                    // this is reversed as the Sun policy files now allow unlimited strength RSA
+                	// this is reversed as the Sun policy files now allow unlimited strength RSA
                     return helper.createKeyGenerator(cipherName);
                 }
                 catch (NoSuchAlgorithmException e)
