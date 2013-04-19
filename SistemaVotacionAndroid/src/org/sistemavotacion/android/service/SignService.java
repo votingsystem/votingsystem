@@ -20,7 +20,7 @@ import org.sistemavotacion.android.R;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.sistemavotacion.seguridad.VotingSystemKeyStoreException;
-import org.sistemavotacion.smime.EncryptorHelper;
+import org.sistemavotacion.seguridad.EncryptionHelper;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.task.GetFileTask;
@@ -177,6 +177,9 @@ public class SignService extends Service implements TaskListener {
     	String usuario = null;
         if (Aplicacion.getUsuario() != null) usuario = Aplicacion.getUsuario().getNif();
         File signedFile = null;
+		KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
+		PrivateKey signerPrivatekey = (PrivateKey)keyStore.getKey(ALIAS_CERT_USUARIO, password);
+		X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(ALIAS_CERT_USUARIO);
         try {
     		SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
     				keyStoreBytes, ALIAS_CERT_USUARIO, password, SIGNATURE_ALGORITHM);
@@ -198,7 +201,8 @@ public class SignService extends Service implements TaskListener {
         if(Respuesta.SC_OK == getTimeStampTask.get()) {
         	try {
             	File fileToEncrypt = timeStampedDocument.setTimeStampToken(getTimeStampTask);
-            	EncryptorHelper.encryptSMIMEFile(fileToEncrypt, 
+            	EncryptionHelper encryptionHelper = new EncryptionHelper();
+            	encryptionHelper.encryptSMIMEFile(fileToEncrypt, 
             			Aplicacion.getControlAcceso().getCertificado());
         		SendFileTask sendFileTask = (SendFileTask)new SendFileTask(null, this, 
         				fileToEncrypt).execute(urlToSendSignedDocument);

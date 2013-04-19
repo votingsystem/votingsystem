@@ -6,7 +6,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.util.Properties;
+import javax.activation.DataHandler
+import javax.activation.FileDataSource
 import javax.mail.Header;
+import javax.mail.Multipart
 import javax.mail.Session;
 import javax.mail.internet.MimeMultipart;
 import org.springframework.beans.factory.InitializingBean
@@ -39,6 +42,7 @@ import org.bouncycastle.asn1.pkcs.CertificationRequestInfo
 import org.bouncycastle.asn1.x509.X509Extensions
 import java.util.Locale;
 import org.bouncycastle.cms.CMSException
+import org.bouncycastle.cms.Recipient
 import org.bouncycastle.cms.RecipientId;
 import org.bouncycastle.cms.RecipientInformation
 import org.bouncycastle.cms.RecipientInformationStore
@@ -66,6 +70,8 @@ class EncryptionService {
 	private X509Certificate serverCert;
 	private PrivateKey serverPrivateKey;
 	private Session session
+	private RecipientId recId;
+	private Recipient recipient;
 	
 	//@Override
 	public void afterPropertiesSet() throws Exception {
@@ -80,7 +86,8 @@ class EncryptionService {
 		java.security.cert.Certificate[] chain = keyStore.getCertificateChain(aliasClaves);
 		serverCert = (X509Certificate)chain[0]
 		serverPrivateKey = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray())
-		
+		recId = new JceKeyTransRecipientId(serverCert);
+		recipient = new JceKeyTransEnvelopedRecipient(serverPrivateKey).setProvider("BC")
 		Properties props = System.getProperties();
 		// Get a Session object with the default properties.
 		session = Session.getDefaultInstance(props, null);
@@ -93,14 +100,12 @@ class EncryptionService {
 		log.debug(" - decryptMessage - ")
 		//log.debug(" - decryptMessage - message: ${new String(encryptedMessageBytes)}")
 		try {
-			if(!serverCert) afterPropertiesSet();
-			RecipientId recId = new JceKeyTransRecipientId(serverCert);
+			if(!recId) afterPropertiesSet();
 			MimeMessage msg = new MimeMessage(session, new ByteArrayInputStream(encryptedMessageBytes));
-	
 			SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
 		 
 			RecipientInformationStore   recipients = smimeEnveloped.getRecipientInfos();
-			RecipientInformation        recipient = recipients.get(recId);
+			RecipientInformation        recipientInfo = recipients.get(recId);
 	
 			/*RecipientId recipientRID = null;
 			if(recipient.getRID() != null) {
@@ -112,8 +117,7 @@ class EncryptionService {
 			} else log.debug(" -- getRID NULL");
 			MimeBodyPart res = SMIMEUtil.toMimeBodyPart(
 				 recipient.getContent(new JceKeyTransEnvelopedRecipient(serverPrivateKey).setProvider("BC")));*/
-			byte[] messageContentBytes =  recipient.getContent(
-				new JceKeyTransEnvelopedRecipient(serverPrivateKey).setProvider("BC"))
+			byte[] messageContentBytes =  recipientInfo.getContent(recipient)
 			//log.debug(" ------- Message Contents: ${new String(messageContentBytes)}");
 			return new Respuesta(messageBytes:messageContentBytes,
 				codigoEstado:Respuesta.SC_OK);
@@ -141,18 +145,19 @@ class EncryptionService {
 			MimeMessage msg = new MimeMessage(session, new ByteArrayInputStream(encryptedFile));
 			SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
 			RecipientInformationStore   recipients = smimeEnveloped.getRecipientInfos();
-			RecipientInformation        recipient = recipients.get(recId);
-			RecipientId recipientRID = null;
-			if(recipient.getRID() != null) {
-				recipientRID = recipient.getRID();
-				log.debug(" -- recipientRID.getSerialNumber(): " + recipientRID.getSerialNumber());
+			RecipientInformation        recipientInfo = recipients.get(recId);
+			RecipientId recipientId = null;
+			if(recipientInfo.getRID() != null) {
+				recipientId = recipientInfo.getRID();
+				log.debug(" -- recipientId.getSerialNumber(): " + recipientId.getSerialNumber());
 			}
-			MimeBodyPart res = SMIMEUtil.toMimeBodyPart(
-				recipient.getContent(new JceKeyTransEnvelopedRecipient(serverPrivateKey).setProvider("BC")));
+			MimeBodyPart res = SMIMEUtil.toMimeBodyPart(recipientInfo.getContent(recipient));
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			res.writeTo(baos)
+			MimeMessage mimeMessage = new MimeMessage(null,
+				new ByteArrayInputStream(baos.toByteArray()));
 			return new Respuesta(codigoEstado: Respuesta.SC_OK,
-				messageBytes:baos.toByteArray())
+				messageBytes:mimeMessage.getContent())
 		} catch(CMSException ex) {
 			log.error (ex.getMessage(), ex)
 			return new Respuesta(mensaje:messageSource.getMessage(
@@ -224,6 +229,67 @@ class EncryptionService {
 			log.error (ex.getMessage(), ex)
 			return new Respuesta(mensaje:ex.getMessage(),
 				codigoEstado:Respuesta.SC_ERROR_PETICION)
+		}
+	}
+		
+	public Respuesta encryptFile(File fileToEncrypt, File encryptedFile,
+			X509Certificate receiverCert) throws Exception {
+		log.debug(" - encryptFile(...)");
+		try {
+			Properties props = System.getProperties();
+			Session session = Session.getDefaultInstance(props, null);
+			MimeMessage mimeMessage = new MimeMessage(session);
+			MimeBodyPart mimeBodyPart = new MimeBodyPart();
+			FileDataSource fds = new FileDataSource(fileToEncrypt);
+			mimeBodyPart.setDataHandler(new DataHandler(fds));
+			mimeBodyPart.setFileName(fds.getName());
+			Multipart multipart = new MimeMultipart();
+			multipart.addBodyPart(mimeBodyPart);
+			mimeMessage.setContent(multipart);
+			// set the Date: header
+			//mimeMessage.setSentDate(new Date());
+			SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
+			encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
+							receiverCert).setProvider("BC"));
+			/* Encrypt the message */
+			MimeBodyPart encryptedPart = encrypter.generate(mimeMessage,
+					new JceCMSContentEncryptorBuilder(
+					CMSAlgorithm.DES_EDE3_CBC).setProvider("BC").build());
+			encryptedPart.writeTo(new FileOutputStream(encryptedFile));
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+				file:encryptedFile)
+			
+		} catch(Exception ex) {
+			log.error(ex.getMessage(), ex);
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+				mensaje:ex.getMessage())
+		}
+	}
+			
+	public Respuesta encryptText(byte[] text, File encryptedFile,
+				X509Certificate receiverCert) throws Exception {
+		log.debug(" - encryptText(...) - ");
+		try {
+			Properties props = System.getProperties();
+			Session session = Session.getDefaultInstance(props, null);
+			MimeMessage mimeMessage = new MimeMessage(session);
+			mimeMessage.setText(new String(text));
+			// set the Date: header
+			//mimeMessage.setSentDate(new Date());
+			SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
+			encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
+					receiverCert).setProvider("BC"));
+			/* Encrypt the message */
+			MimeBodyPart encryptedPart = encrypter.generate(mimeMessage,
+					new JceCMSContentEncryptorBuilder(
+					CMSAlgorithm.DES_EDE3_CBC).setProvider("BC").build());
+			encryptedPart.writeTo(new FileOutputStream(encryptedFile));
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+				file:encryptedFile)
+		} catch(Exception ex) {
+			log.error(ex.getMessage(), ex);
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+				mensaje:ex.getMessage())
 		}
 	}
 	

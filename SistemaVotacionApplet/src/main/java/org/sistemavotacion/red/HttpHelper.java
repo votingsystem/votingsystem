@@ -23,10 +23,14 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
@@ -41,14 +45,15 @@ public class HttpHelper {
     private static Logger logger = LoggerFactory.getLogger(HttpHelper.class);
     
     private HttpClient httpclient;
-    ThreadSafeClientConnManager cm;
 
     public HttpHelper () {
-        cm = new ThreadSafeClientConnManager();
-        cm.setMaxTotal(50);
-        // set the connection timeout value to 30 seconds (30000 milliseconds)
+        /*SchemeRegistry schemeRegistry = new SchemeRegistry();
+            schemeRegistry.register(
+        new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));*/
+        ClientConnectionManager cm = new PoolingClientConnectionManager();
+        // set the connection timeout value to 15 seconds (15000 milliseconds)
         final HttpParams httpParams = new BasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(httpParams, 30000);
+        HttpConnectionParams.setConnectionTimeout(httpParams, 15000);
         httpclient = new DefaultHttpClient(cm, httpParams);
     }
     
@@ -61,7 +66,6 @@ public class HttpHelper {
     
     public HttpResponse obtenerArchivo (String serverURL) 
             throws IOException, ParseException {
-        checkConnections();
         logger.debug("obtenerArchivo - lanzando: " + serverURL);             
         HttpGet httpget = new HttpGet(serverURL);
         logger.debug("obtenerInformacion - lanzando: " + httpget.getURI());
@@ -71,14 +75,12 @@ public class HttpHelper {
         for (int i = 0; i < headers.length; i++) {
         System.out.println(headers[i]);
         }*/
-        logger.debug("Connections in pool: " + cm.getConnectionsInPool());
         logger.debug(response.getStatusLine().toString());
         logger.debug("----------------------------------------");
         return response;    
     }
     
     public X509Certificate obtenerCertificadoDeServidor (String serverURL) throws Exception {
-        checkConnections();
         logger.debug("obtenerCertificadoDeServidor - lanzando: " + serverURL);           
         HttpGet httpget = new HttpGet(serverURL);
         X509Certificate certificado = null;
@@ -93,8 +95,8 @@ public class HttpHelper {
         return certificado;
     }
     
-    public Collection<X509Certificate> obtenerCadenaCertificacionDeServidor (String serverURL) throws Exception {
-        checkConnections();
+    public Collection<X509Certificate> obtenerCadenaCertificacionDeServidor (
+            String serverURL) throws Exception {
         logger.debug("obtenerCadenaCertificacionDeServidor - lanzando: " + serverURL);   
         HttpGet httpget = new HttpGet(serverURL);
         Collection<X509Certificate> certificados = null;
@@ -132,7 +134,6 @@ public class HttpHelper {
     
     public HttpResponse enviarArchivoFirmado (
             File archivoFirmado, String serverURL) throws IOException {
-        checkConnections();
         logger.debug("enviarArchivoFirmado - lanzando: " + serverURL);        
         HttpPost httpPost = new HttpPost(serverURL);
         FileBody fileBody = new FileBody(archivoFirmado);
@@ -148,7 +149,6 @@ public class HttpHelper {
     
     public HttpResponse sendFile (File file, 
     		String serverURL, String fileParamName) throws IOException {
-        checkConnections();
         logger.debug("enviarArchivoFirmado - lanzando: " + serverURL);        
         HttpPost httpPost = new HttpPost(serverURL);
         FileBody fileBody = new FileBody(file);
@@ -164,7 +164,6 @@ public class HttpHelper {
     
     public HttpResponse enviarSolicitudAcceso(byte[] solicitudCSR, 
             File solicitudAccesoSMIME, String serverURL) throws IOException {
-        checkConnections();
         logger.debug("enviarSolicitudAcceso - lanzando: " + serverURL);        
         HttpPost httpPost = new HttpPost(serverURL);
         FileBody fileBody = new FileBody(solicitudAccesoSMIME);
@@ -183,7 +182,6 @@ public class HttpHelper {
     
     public HttpResponse enviarSolicitudAcceso(File solicitudCSR, 
             File solicitudAccesoSMIME, String serverURL) throws IOException {
-        checkConnections();
         logger.debug("enviarSolicitudAcceso - lanzando: " + serverURL);        
         HttpPost httpPost = new HttpPost(serverURL);
         FileBody solicitudBody = new FileBody(solicitudAccesoSMIME);
@@ -200,7 +198,6 @@ public class HttpHelper {
     }
     
     public HttpResponse enviarByteArray(byte[] byteArray, String serverURL) throws IOException {
-        checkConnections();
         logger.debug("enviarByteArray - lanzando: " + serverURL);
         HttpPost httpPost = new HttpPost(serverURL);
         ByteArrayBody  byteArrayBody = new ByteArrayBody(byteArray, 
@@ -217,7 +214,6 @@ public class HttpHelper {
     
     public HttpResponse enviarCadena (
             String cadenaFirmada, String serverURL) throws IOException {
-        checkConnections();
         logger.debug("enviarCadena - lanzando: " + serverURL);
         HttpPost httpPost = new HttpPost(serverURL);
         StringBody stringBody = new StringBody(cadenaFirmada);
@@ -229,13 +225,6 @@ public class HttpHelper {
         logger.debug(response.getStatusLine().toString());
         logger.debug("----------------------------------------");
         return response;
-    }
-
-    private void checkConnections () {
-        if (cm.getConnectionsInPool() == 0) {
-            logger.debug("No hay conexiones en pool");
-            cm.closeIdleConnections(10, TimeUnit.SECONDS);
-        }
     }
 
 }

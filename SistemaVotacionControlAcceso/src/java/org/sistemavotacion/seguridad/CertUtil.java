@@ -66,7 +66,7 @@ import org.slf4j.LoggerFactory;
 */
 public class CertUtil {
     
-    private static Logger logger = (Logger) LoggerFactory.getLogger(CertUtil.class);
+    private static Logger logger = LoggerFactory.getLogger(CertUtil.class);
     
     public static String ROOT_ALIAS = "root";
     public static String END_ENTITY_ALIAS = "end";

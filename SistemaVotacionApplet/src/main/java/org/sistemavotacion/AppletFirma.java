@@ -10,10 +10,9 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import netscape.javascript.*;
 import static org.sistemavotacion.Contexto.*;
+import org.sistemavotacion.dialogo.PreconditionsCheckerDialog;
 import org.sistemavotacion.modelo.Operacion;
-import org.sistemavotacion.pdf.PdfFormHelper;
 import org.sistemavotacion.util.FileUtils;
-import org.sistemavotacion.util.VotacionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +24,7 @@ public class AppletFirma extends JApplet {
     
     private static Logger logger = LoggerFactory.getLogger(AppletFirma.class);
 
+    public static final String CERT_CHAIN_URL_SUFIX = "certificado/cadenaCertificacion";
     
     public static enum ModoEjecucion {APPLET, APLICACION}
     
@@ -35,7 +35,7 @@ public class AppletFirma extends JApplet {
     public static String locale = "es";
     public static ModoEjecucion modoEjecucion = ModoEjecucion.APPLET;
     
-    private AppletFirma INSTANCIA;
+    public static AppletFirma INSTANCIA;
     
     public AppletFirma() {
         INSTANCIA = this;
@@ -106,6 +106,9 @@ public class AppletFirma extends JApplet {
         return operacionEnCurso;
     }
     
+    /*
+     * Timer that checks pending operations on web client app
+     */
     private void lanzarTimer() {
         recolectorOperaciones =  new Timer(true);
         final JSObject jsObject = JSObject.getWindow(this);
@@ -120,7 +123,7 @@ public class AppletFirma extends JApplet {
                         //logger.debug("Testeando JSObject - respuesta nula");
                     }
                 }
-            }, 0, 4000);
+            }, 0, 1000);
     }
     
         
@@ -186,53 +189,9 @@ public class AppletFirma extends JApplet {
             responderCliente(Operacion.SC_ERROR_PETICION, errorValidacion);
             return;
         }
-        switch(operacionEnCurso.getTipo()) {
-            case GUARDAR_RECIBO_VOTO:
-                Operacion resultado = VotacionHelper.guardarRecibo(
-                        operacionEnCurso.getArgs()[0], frame);
-                responderCliente(resultado.getCodigoEstado(), resultado.getMensaje());
-                break;
-            case ENVIO_VOTO_SMIME:
-                javax.swing.SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        VotacionDialog votacionDialog = new VotacionDialog(
-                                    frame, true, INSTANCIA);
-                        votacionDialog.setVisible(true);
-                    }
-                });    
-                break;
-            case PUBLICACION_MANIFIESTO_PDF:
-            case FIRMA_MANIFIESTO_PDF:
-            case PUBLICACION_RECLAMACION_SMIME:
-            case FIRMA_RECLAMACION_SMIME:
-            case PUBLICACION_VOTACION_SMIME:
-            case CANCELAR_EVENTO:
-            case ASOCIAR_CENTRO_CONTROL_SMIME:
-            case ANULAR_SOLICITUD_ACCESO:
-            case ANULAR_VOTO: 
-                javax.swing.SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        FirmaDialog firmaDialog = new FirmaDialog(frame, true, INSTANCIA);
-                    }
-                });
-                break;
-            case SOLICITUD_COPIA_SEGURIDAD:
-                FirmaDialog firmaDialog = new FirmaDialog(frame, true, INSTANCIA);
-                byte[] bytesPDF = null; 
-                try {
-                    File file = PdfFormHelper.obtenerSolicitudCopia(
-                            operacionEnCurso.getEvento().getEventoId().toString(),
-                            operacionEnCurso.getEvento().getAsunto(), 
-                            operacionEnCurso.getEmailSolicitante());
-                    bytesPDF = FileUtils.getBytesFromFile(file);
-                } catch(Exception ex) {
-                    logger.error(ex.getMessage(), ex);
-                }
-                firmaDialog.inicializarSinDescargarPDF(bytesPDF);
-                break;
-            default:
-                logger.debug("Operación desconocida: " + operacionEnCurso.getTipo().toString());
-        }
+        PreconditionsCheckerDialog preconditionsChecker = 
+                new PreconditionsCheckerDialog(frame, true, operacionEnCurso);
+        preconditionsChecker.setVisible(true);
     }
     
     public static void main (String[] args) { 
@@ -253,6 +212,7 @@ public class AppletFirma extends JApplet {
                         File jsonFile = File.createTempFile("operacion", ".json");
                         FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
                             .getResourceAsStream("testFiles/votingOperation.json"), jsonFile);
+                        //      .getResourceAsStream("testFiles/publishVoting.json"), jsonFile);
                         appletFirma.ejecutarOperacion(FileUtils.getStringFromFile(jsonFile));
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);

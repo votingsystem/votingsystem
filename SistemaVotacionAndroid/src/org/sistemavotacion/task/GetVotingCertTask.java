@@ -4,6 +4,9 @@ import static org.sistemavotacion.android.Aplicacion.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
 
 import javax.mail.Header;
 
@@ -12,8 +15,10 @@ import org.apache.http.util.EntityUtils;
 import org.sistemavotacion.android.Aplicacion;
 import org.sistemavotacion.android.R;
 import org.sistemavotacion.modelo.Respuesta;
+import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.sistemavotacion.seguridad.PKCS10WrapperClient;
-import org.sistemavotacion.smime.EncryptorHelper;
+import org.sistemavotacion.seguridad.EncryptionHelper;
+import org.sistemavotacion.seguridad.VotingSystemKeyStoreException;
 import org.sistemavotacion.smime.SignedMailGenerator.Type;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.HttpHelper;
@@ -30,13 +35,18 @@ public class GetVotingCertTask extends AsyncTask<String, Void, Integer> {
     private Exception exception = null;
     private PKCS10WrapperClient pkcs10WrapperClient;
     private String message = null;
+    private PrivateKey decryptPrivateKey;
+    private X509Certificate decryptCert;
 
     
     public GetVotingCertTask(TaskListener listener, File solicitudAcceso, 
-    		PKCS10WrapperClient pkcs10WrapperClient) {
+    		PKCS10WrapperClient pkcs10WrapperClient, 
+    		X509Certificate decryptCert, PrivateKey decryptPrivateKey) throws Exception {
 		this.solicitudAcceso = solicitudAcceso;
 		this.pkcs10WrapperClient = pkcs10WrapperClient;
 		this.listener = listener;
+		this.decryptPrivateKey = decryptPrivateKey;
+		this.decryptCert = decryptCert;
     }
 	
 	@Override
@@ -50,9 +60,10 @@ public class GetVotingCertTask extends AsyncTask<String, Void, Integer> {
         	csrEncryptedFile.deleteOnExit();
         	//FileUtils.copyStreamToFile(new ByteArrayInputStream(
         	//		pkcs10WrapperClient.getPEMEncodedRequestCSR()), csrFile);
-        	EncryptorHelper.encryptText(pkcs10WrapperClient.getPEMEncodedRequestCSR(), 
+        	EncryptionHelper encryptionHelper = new EncryptionHelper();
+        	encryptionHelper.encryptText(pkcs10WrapperClient.getPEMEncodedRequestCSR(), 
         			csrEncryptedFile, Aplicacion.getControlAcceso().getCertificado());
-        	EncryptorHelper.encryptSMIMEFile(solicitudAcceso, 
+        	encryptionHelper.encryptSMIMEFile(solicitudAcceso, 
         			Aplicacion.getControlAcceso().getCertificado());
             HttpResponse response = HttpHelper.enviarSolicitudAcceso(
             		csrEncryptedFile, solicitudAcceso, url);

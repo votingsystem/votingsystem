@@ -79,6 +79,14 @@ public final class MensajeClienteFirmaJso extends JavaScriptObject {
 		this.urlTimeStampServer = value;
 	}-*/;
 	
+	public final native String getUrlServer() /*-{
+		return this.urlServer;
+	}-*/;
+
+	public final native void setUrlServer(String value) /*-{
+		this.urlServer = value;
+	}-*/;
+	
 	public final native int getCodigoEstado() /*-{
     	return this.codigoEstado;
   	}-*/;

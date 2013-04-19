@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 public class Operacion {
     
     private static Logger logger = LoggerFactory.getLogger(Operacion.class);
-
     
     public static enum Tipo {ASOCIAR_CENTRO_CONTROL_SMIME(
                 getString("ASOCIAR_CENTRO_CONTROL_SMIME")), 
@@ -127,6 +126,7 @@ public class Operacion {
     private String mensaje;
     private String urlDocumento;
     private String urlTimeStampServer;
+    private String urlServer;
     private String urlEnvioDocumento;
     private String nombreDestinatarioFirma;
     private String emailSolicitante;
@@ -179,6 +179,21 @@ public class Operacion {
      */
     public void setUrlTimeStampServer(String urlTimeStampServer) {
         this.urlTimeStampServer = urlTimeStampServer;
+    }
+    
+    
+    /**
+     * @return the urlServerCert
+     */
+    public String getUrlServer() {
+        return urlServer;
+    }
+
+    /**
+     * @param urlServerCert the urlServerCert to set
+     */
+    public void setUrlServer(String urlServer) {
+        this.urlServer = urlServer;
     }
      
     /**
@@ -336,6 +351,9 @@ public class Operacion {
         if (operacionJSON.containsKey("urlTimeStampServer")) {
             operacion.setUrlTimeStampServer(operacionJSON.getString("urlTimeStampServer"));
         }  
+        if (operacionJSON.containsKey("urlServer")) {
+            operacion.setUrlServer(operacionJSON.getString("urlServer"));
+        }
         if (operacionJSON.containsKey("evento")) {
             Evento evento = Evento.parse(operacionJSON.getJSONObject("evento"));
             operacion.setEvento(evento);

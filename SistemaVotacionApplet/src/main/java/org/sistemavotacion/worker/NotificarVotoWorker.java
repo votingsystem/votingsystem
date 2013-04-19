@@ -2,13 +2,18 @@ package org.sistemavotacion.worker;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
 import javax.swing.SwingWorker;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.sistemavotacion.Contexto;
+import org.sistemavotacion.dialogo.PreconditionsCheckerDialog;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.ReciboVoto;
 import org.sistemavotacion.modelo.Respuesta;
+import org.sistemavotacion.seguridad.EncryptionHelper;
+import org.sistemavotacion.seguridad.PKCS10WrapperClient;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,14 +36,20 @@ public class NotificarVotoWorker extends SwingWorker<Integer, String>
     private String message = null;
     private Exception exception = null;
     private ReciboVoto reciboVoto = null;
+    private X509Certificate controlCenterCert = null;
+    private PKCS10WrapperClient pkcs10WrapperClient;
     
     public NotificarVotoWorker(Integer id, Evento evento, String urlServidorRecolectorVotos, 
-            File votoFirmado, VotingSystemWorkerListener workerListener) {
+            File votoFirmado, PKCS10WrapperClient pkcs10WrapperClient, 
+            VotingSystemWorkerListener workerListener) {
         this.id = id;
         this.evento = evento;        
         this.urlServidorRecolectorVotos = urlServidorRecolectorVotos;
         this.workerListener = workerListener;
         this.votoFirmado = votoFirmado;
+        this.pkcs10WrapperClient = pkcs10WrapperClient;
+        this.controlCenterCert = PreconditionsCheckerDialog.getCert(
+                evento.getCentroControl().getServerURL());
     }
             
     @Override//on the EDT
@@ -53,14 +64,23 @@ public class NotificarVotoWorker extends SwingWorker<Integer, String>
         }
     }
     @Override protected Integer doInBackground() throws Exception {
+        EncryptionHelper.encryptSMIMEFile(votoFirmado, controlCenterCert);
         HttpResponse response = Contexto.getHttpHelper().
                 enviarArchivoFirmado(votoFirmado, urlServidorRecolectorVotos);
         statusCode = response.getStatusLine().getStatusCode();
         if (Respuesta.SC_OK == statusCode) {
             byte[] votoValidadoBytes = EntityUtils.toByteArray(response.getEntity());
-            SMIMEMessageWrapper votoValidado = new SMIMEMessageWrapper(null,
-                new ByteArrayInputStream(votoValidadoBytes), null);                        
-            reciboVoto = new ReciboVoto(Respuesta.SC_OK, votoValidado, evento);
+            
+            SMIMEMessageWrapper votoValidado = 
+                    EncryptionHelper.decryptSMIMEMessage(votoValidadoBytes, 
+                    pkcs10WrapperClient.getCertificate(), pkcs10WrapperClient.getPrivateKey());
+            
+            votoValidado.writeTo(System.out);
+            logger.debug("===============================================");
+            
+            /*SMIMEMessageWrapper votoValidado = new SMIMEMessageWrapper(null,
+                new ByteArrayInputStream(votoValidadoBytes), null); */                       
+            reciboVoto = new ReciboVoto(Respuesta.SC_OK, votoValidadoBytes, evento);
         } else {
             message = EntityUtils.toString(response.getEntity());
         }

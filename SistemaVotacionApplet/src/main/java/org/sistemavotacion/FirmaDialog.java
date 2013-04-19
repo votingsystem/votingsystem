@@ -35,6 +35,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.itextpdf.text.pdf.PdfReader;
+import java.util.logging.Level;
+import org.sistemavotacion.dialogo.PreconditionsCheckerDialog;
+import org.sistemavotacion.seguridad.EncryptionHelper;
 import org.sistemavotacion.worker.VotingSystemWorker;
 
 /**
@@ -59,6 +62,7 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
     private SwingWorker tareaEnEjecucion;
     private File documentoFirmado;
     private AppletFirma appletFirma;
+    private Operacion operacion;
     private SMIMEMessageWrapper timeStampedDocument;
     private static FirmaDialog INSTANCIA;
     
@@ -70,10 +74,9 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
         setLocationRelativeTo(null);       
         initComponents();
         INSTANCIA = this;
-        Operacion operacion = appletFirma.getOperacionEnCurso();
+        operacion = appletFirma.getOperacionEnCurso();
         if(operacion != null && operacion.getContenidoFirma() != null) {
-            bytesDocumento = appletFirma.getOperacionEnCurso().
-                    getContenidoFirma().toString().getBytes();
+            bytesDocumento = operacion.getContenidoFirma().toString().getBytes();
         }
         addWindowListener(new WindowAdapter() {
             public void windowClosed(WindowEvent e) {
@@ -281,7 +284,6 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
 
     private void enviarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enviarButtonActionPerformed
         String password = null;
-        final Operacion operacion = appletFirma.getOperacionEnCurso();
         if (Contexto.getDNIePassword() == null) {
             PasswordDialog dialogoPassword = new PasswordDialog (parentFrame, true);
             dialogoPassword.setVisible(true);
@@ -327,7 +329,7 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                                 String reason = null;
                                 String location = null;
                                 new PDFSignerDNIeWorker(PDF_SIGNER_DNIE_WORKER, 
-                                        appletFirma.getOperacionEnCurso().getUrlTimeStampServer(),
+                                        operacion.getUrlTimeStampServer(),
                                         INSTANCIA, reason, location, finalPassword.toCharArray(), 
                                         readerManifiesto, documentoFirmado).execute();
                                 return;
@@ -395,13 +397,14 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
     
     private void setTimeStampDocument(File document, String timeStampRequestAlg) {
         if(document == null) return;
-        final Operacion operacion = appletFirma.getOperacionEnCurso();
         try {
-        	timeStampedDocument = new SMIMEMessageWrapper(null, document);
+            timeStampedDocument = new SMIMEMessageWrapper(null, document);
             new TimeStampWorker(TIME_STAMP_WORKER, operacion.getUrlTimeStampServer(),
                     this, timeStampedDocument.getTimeStampRequest(timeStampRequestAlg)).execute();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
+            appletFirma.responderCliente(
+                    Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
         }
     }
     
@@ -409,10 +412,20 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
     private void processDocument(File document) {
         if(document == null) return;
         final Operacion operacion = appletFirma.getOperacionEnCurso();
-        final EnviarDocumentoFirmadoWorker lanzador = new EnviarDocumentoFirmadoWorker(
+        try {
+            document.deleteOnExit();
+            EncryptionHelper.encryptSMIMEFile(document, 
+                    PreconditionsCheckerDialog.getCert(operacion.getUrlServer()));
+            final EnviarDocumentoFirmadoWorker lanzador = new EnviarDocumentoFirmadoWorker(
                 ENVIAR_DOCUMENTO_FIRMADO_WORKER, operacion.getUrlEnvioDocumento(), this);
-        lanzador.setDocumentoEnviado(document).execute();
-        document.deleteOnExit();
+            lanzador.setDocumentoEnviado(document).execute();
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+            appletFirma.responderCliente(
+                    Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
+            MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
+            errorDialog.setMessage(ex.getMessage(), getString("errorLbl"));
+        }
     }
     
     

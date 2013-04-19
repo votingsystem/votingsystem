@@ -17,8 +17,14 @@ class CsrService {
 	
     public Respuesta validarCSRVoto(byte[] csrPEMBytes, 
 		EventoVotacion evento, Locale locale) {
-		log.debug("validarCSRVoto ")
+		log.debug("validarCSRVoto -")
         PKCS10CertificationRequest csr = PKCS10WrapperServer.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
+		if(!csr) {
+			String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
+			log.error("************ ${msg} ************ csr request: '${new String(csrPEMBytes)}'")
+			return new Respuesta(codigoEstado:400, mensaje:msg)
+		}
+		Respuesta respuesta = new Respuesta(codigoEstado:200)
         CertificationRequestInfo info = csr.getCertificationRequestInfo();
 		String eventoId;
 		String controlAccesoURL;
@@ -26,14 +32,12 @@ class CsrService {
 		String hashCertificadoVotoBase64;
         String subjectDN = info.getSubject().toString();
         log.debug("validarCSRVoto - subject: " + subjectDN)
-		Respuesta respuesta = new Respuesta(codigoEstado:200, tipo: Tipo.OK)
 		if(subjectDN.split("OU=eventoId:").length > 1) {
 			eventoId = subjectDN.split("OU=eventoId:")[1].split(",")[0];
 			if (!eventoId.equals(String.valueOf(evento.getId()))) {
-				respuesta.codigoEstado = 400
-				respuesta.mensaje = messageSource.getMessage('evento.solicitudCsrError', null, locale)
-				log.error(respuesta.mensaje)
-				return respuesta
+				String msg = messageSource.getMessage('evento.solicitudCsrError', null, locale)
+				log.error(msg)
+				return new Respuesta(codigoEstado:400, mensaje:msg)
 			}
 		}
 		if(subjectDN.split("CN=controlAccesoURL:").length > 1) {
@@ -44,11 +48,10 @@ class CsrService {
 			controlAccesoURL = org.sistemavotacion.utils.StringUtils.checkURL(controlAccesoURL)	
 			String serverURL = grailsApplication.config.grails.serverURL
 			if (!serverURL.equals(controlAccesoURL)) {
-				respuesta.codigoEstado = 400
-				respuesta.mensaje = messageSource.getMessage(
+				String msg = messageSource.getMessage(
 					'error.urlControlAccesoWrong', [serverURL, controlAccesoURL].toArray(), locale)
-				log.error(respuesta.mensaje)
-				return respuesta
+				log.error(msg)
+				return new Respuesta(codigoEstado:400, mensaje:msg)
 			}	
 		}
 		if (subjectDN.split("OU=hashCertificadoVotoHEX:").length > 1) {
@@ -61,11 +64,10 @@ class CsrService {
 					hashCertificadoVotoBase64:hashCertificadoVotoBase64)
 				respuesta.hashCertificadoVotoBase64 = hashCertificadoVotoBase64
 				if (solicitudCSR) {
-					respuesta.codigoEstado = 400
-					respuesta.mensaje = messageSource.getMessage(
+					String msg = messageSource.getMessage(
 						'error.hashCertificadoVotoRepetido', [hashCertificadoVotoBase64].toArray(), locale)
-					log.error(respuesta.mensaje)
-					return respuesta
+					log.error(msg)
+					return new Respuesta(codigoEstado:400, mensaje:msg)
 				}
 			} catch (Exception ex) {
 				log.error(ex.getMessage(), ex)

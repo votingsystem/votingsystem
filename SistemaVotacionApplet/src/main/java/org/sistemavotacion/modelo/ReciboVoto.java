@@ -47,6 +47,7 @@ public class ReciboVoto {
     private String controlAccesoServerURL;    
     private boolean esValido = false;
     private SMIMEMessageWrapper smimeMessage;
+    private byte[] encryptedSMIMEMessage;
     private Evento voto;
     
     public ReciboVoto () { }
@@ -72,6 +73,14 @@ public class ReciboVoto {
         	logger.debug("ERROR - contenido del recibo: " + contenidoRecibo);
         }
     }
+        
+    public ReciboVoto (int codigoEstado, byte[] encryptedSMIMEMessage, 
+            Evento voto) throws Exception { 
+        this.encryptedSMIMEMessage = encryptedSMIMEMessage;
+        this.codigoEstado = codigoEstado;
+        this.voto = voto;
+    }
+    
     
     public ReciboVoto (int codigoEstado, SMIMEMessageWrapper votoValidado,
             String opcionSeleccionada) throws Exception { 
@@ -256,6 +265,20 @@ public class ReciboVoto {
      */
     public void setEventoURL(String eventoURL) {
         this.eventoURL = eventoURL;
+    }
+
+    /**
+     * @return the encryptedSMIMEMessage
+     */
+    public byte[] getEncryptedSMIMEMessage() {
+        return encryptedSMIMEMessage;
+    }
+
+    /**
+     * @param encryptedSMIMEMessage the encryptedSMIMEMessage to set
+     */
+    public void setEncryptedSMIMEMessage(byte[] encryptedSMIMEMessage) {
+        this.encryptedSMIMEMessage = encryptedSMIMEMessage;
     }
 	
 }

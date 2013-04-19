@@ -19,7 +19,7 @@ import org.sistemavotacion.modelo.Operation;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.sistemavotacion.seguridad.VotingSystemKeyStoreException;
-import org.sistemavotacion.smime.EncryptorHelper;
+import org.sistemavotacion.seguridad.EncryptionHelper;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.task.GetFileTask;
@@ -121,6 +121,10 @@ public class PublishService extends Service implements TaskListener {
             }
             GetTimeStampTask timeStampTask = null;
             SMIMEMessageWrapper timeStampedDocument = null;
+			KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
+			PrivateKey signerPrivatekey = (PrivateKey)keyStore.getKey(ALIAS_CERT_USUARIO, password);
+			X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(ALIAS_CERT_USUARIO);
+            EncryptionHelper encryptionHelper = new EncryptionHelper();
     		switch(pendingOperation.getTipo()) {
 				case PUBLICACION_MANIFIESTO_PDF:
 					GetFileTask getFileTask = (GetFileTask)new GetFileTask(null, this).execute(
@@ -131,9 +135,6 @@ public class PublishService extends Service implements TaskListener {
 							File pdfFirmadoFile = File.createTempFile("pdfSignedDocument", ".pdf");
 							pdfFirmadoFile.deleteOnExit();
 							Log.d(TAG + ".showTaskResult(...)", " - pdfFirmadoFile path: " + pdfFirmadoFile.getAbsolutePath());
-							KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
-							PrivateKey signerPrivatekey = (PrivateKey)keyStore.getKey(ALIAS_CERT_USUARIO, password);
-							X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(ALIAS_CERT_USUARIO);
 							Certificate[] signerCertsChain = keyStore.getCertificateChain(ALIAS_CERT_USUARIO);
 							SignTimestampSendPDFTask signTimestampSendPDFTask = (SignTimestampSendPDFTask) 
 									new SignTimestampSendPDFTask(this, null, ServerPaths.getURLTimeStampService(
@@ -159,7 +160,7 @@ public class PublishService extends Service implements TaskListener {
 			    			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
 			        if(Respuesta.SC_OK == timeStampTask.get()) {
 			        	File fileToEncrypt = timeStampedDocument.setTimeStampToken(timeStampTask);
-			        	EncryptorHelper.encryptSMIMEFile(fileToEncrypt, 
+			        	encryptionHelper.encryptSMIMEFile(fileToEncrypt,
 			        			Aplicacion.getControlAcceso().getCertificado());
 			        	runningTask = new SendFileTask(null, this, fileToEncrypt).
 								execute(pendingOperation.getUrlEnvioDocumento());
@@ -181,7 +182,7 @@ public class PublishService extends Service implements TaskListener {
 			    			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
 			        if(Respuesta.SC_OK == timeStampTask.get()) {
 			        	File fileToEncrypt = timeStampedDocument.setTimeStampToken(timeStampTask);
-			        	EncryptorHelper.encryptSMIMEFile(fileToEncrypt, 
+			        	encryptionHelper.encryptSMIMEFile(fileToEncrypt, 
 			        			Aplicacion.getControlAcceso().getCertificado());
 			            runningTask = new SendFileTask(null, this,
 			            		fileToEncrypt).execute(pendingOperation.getUrlEnvioDocumento());

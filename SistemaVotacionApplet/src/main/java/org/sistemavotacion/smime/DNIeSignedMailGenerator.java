@@ -54,59 +54,7 @@ public class DNIeSignedMailGenerator {
     public static File genFile(String fromUser, String toUser, String textoAFirmar, 
             char[] password, String asunto, Header header, File resultado) throws Exception {
         MimeMessage body = gen(fromUser, toUser, textoAFirmar,  password, asunto, header);
-        
-        body.writeTo(new FileOutputStream(resultado));
-        
-
-        
-        SMIMEMessageWrapper smimeMessageReq = new SMIMEMessageWrapper(null, resultado);
-        
-        logger.debug("===== Encriptando mensaje");
-        /* Create the encrypter */
-        File controlAccesoPEMFile = new File("/home/jgzornoza/temp/controlAcceso.pem");
-        byte[] pemBytes = FileUtils.getBytesFromFile(controlAccesoPEMFile);
-        Collection<X509Certificate> certChain = CertUtil.fromPEMToX509CertCollection(pemBytes);
-        X509Certificate cert = certChain.iterator().next();
-        
-        SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
-        
-        
-        JceKeyTransRecipientInfoGenerator recipientInfoGenerator = new JceKeyTransRecipientInfoGenerator(cert);
-        
-        
-        encrypter.addRecipientInfoGenerator(recipientInfoGenerator.setProvider("BC"));
-
-        /* Encrypt the message */
-        MimeBodyPart encryptedPart = encrypter.generate(smimeMessageReq,
-            new JceCMSContentEncryptorBuilder(CMSAlgorithm.RC2_CBC).setProvider("BC").build());
-        
-        
-
-        /*
-         * Create a new MimeMessage that contains the encrypted and signed
-         * content
-         */
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        encryptedPart.writeTo(out);
-
-        MimeMessage encryptedMessage = new MimeMessage(null,
-                new ByteArrayInputStream(out.toByteArray()));
-
-        /* Set all original MIME headers in the encrypted message */
-        Enumeration headers = body.getAllHeaderLines();
-        while (headers.hasMoreElements()) {
-            String headerLine = (String)headers.nextElement();
-            /*
-             * Make sure not to override any content-* headers from the
-             * original message
-             */
-            if (!Strings.toLowerCase(headerLine).startsWith("content-"))  {
-                encryptedMessage.addHeaderLine(headerLine);
-            }
-        }
-        encryptedMessage.writeTo(new FileOutputStream(new File("/home/jgzornoza/temp/encripteMessage")));
-        
-        
+        body.writeTo(new FileOutputStream(resultado));        
         return resultado;
     }
           

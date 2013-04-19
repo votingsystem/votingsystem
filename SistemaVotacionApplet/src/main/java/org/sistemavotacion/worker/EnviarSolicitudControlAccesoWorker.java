@@ -5,8 +5,12 @@ import javax.swing.SwingWorker;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.sistemavotacion.Contexto;
+import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Respuesta;
+import org.sistemavotacion.seguridad.EncryptionHelper;
 import org.sistemavotacion.seguridad.PKCS10WrapperClient;
+import java.security.cert.X509Certificate;
+import org.sistemavotacion.dialogo.PreconditionsCheckerDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +23,7 @@ public class EnviarSolicitudControlAccesoWorker extends SwingWorker<Integer, Str
     
     private static Logger logger = LoggerFactory.getLogger(EnviarSolicitudControlAccesoWorker.class);
 
-    private String urlSolicitudAcceso;
+    private Evento evento;
     private VotingSystemWorkerListener workerListener;
     private File solicitudAcceso;
     private PKCS10WrapperClient pkcs10WrapperClient;
@@ -27,14 +31,17 @@ public class EnviarSolicitudControlAccesoWorker extends SwingWorker<Integer, Str
     private int statusCode = Respuesta.SC_ERROR;
     private String message = null;
     private Exception exception = null;
+    private X509Certificate accesRequestServerCert = null;
     
     public EnviarSolicitudControlAccesoWorker(Integer id, File solicitudAcceso,
-            String urlSolicitudAcceso, PKCS10WrapperClient pkcs10WrapperClient, 
+            Evento evento, PKCS10WrapperClient pkcs10WrapperClient, 
             VotingSystemWorkerListener workerListener) {
         this.id = id;
         this.solicitudAcceso = solicitudAcceso;
         this.workerListener = workerListener;
-        this.urlSolicitudAcceso = urlSolicitudAcceso;
+        this.evento = evento;
+        accesRequestServerCert = PreconditionsCheckerDialog.getCert(
+                evento.getControlAcceso().getServerURL());
         this.pkcs10WrapperClient = pkcs10WrapperClient;
     }
     
@@ -51,11 +58,16 @@ public class EnviarSolicitudControlAccesoWorker extends SwingWorker<Integer, Str
     }
     
     @Override protected Integer doInBackground() throws Exception {
-        logger.debug("doInBackground - urlSolicitudAcceso: " + urlSolicitudAcceso 
+        logger.debug("doInBackground - urlSolicitudAcceso: " + evento.getUrlSolicitudAcceso() 
                 + " - solicitudAcceso: " + solicitudAcceso.getAbsolutePath());
+        File csrEncryptedFile = File.createTempFile("csrEncryptedFile", ".p7m");
+        csrEncryptedFile.deleteOnExit();
+        EncryptionHelper.encryptText(pkcs10WrapperClient.getPEMEncodedRequestCSR(), 
+        			csrEncryptedFile, accesRequestServerCert);
+        EncryptionHelper.encryptSMIMEFile(solicitudAcceso, accesRequestServerCert);
+        
         HttpResponse response = Contexto.getHttpHelper().enviarSolicitudAcceso(
-                pkcs10WrapperClient.getPEMEncodedRequestCSR(), solicitudAcceso,
-                urlSolicitudAcceso);
+                csrEncryptedFile, solicitudAcceso, evento.getUrlSolicitudAcceso());
         statusCode = response.getStatusLine().getStatusCode();
         if (Respuesta.SC_OK == statusCode) {
             pkcs10WrapperClient.initSigner(EntityUtils.toByteArray(response.getEntity()));

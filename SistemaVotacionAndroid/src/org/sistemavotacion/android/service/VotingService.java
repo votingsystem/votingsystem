@@ -12,6 +12,10 @@ import static org.sistemavotacion.android.Aplicacion.VOTE_SIGN_MECHANISM;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.List;
 
 import org.json.JSONException;
@@ -20,11 +24,13 @@ import org.sistemavotacion.android.AppData;
 import org.sistemavotacion.android.R;
 import org.sistemavotacion.android.VotingEventScreen;
 import org.sistemavotacion.json.DeObjetoAJSON;
+import org.sistemavotacion.modelo.EncryptedBundle;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.modelo.VoteReceipt;
+import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.sistemavotacion.seguridad.PKCS10WrapperClient;
-import org.sistemavotacion.smime.EncryptorHelper;
+import org.sistemavotacion.seguridad.EncryptionHelper;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.task.GetTimeStampTask;
@@ -165,8 +171,15 @@ public class VotingService extends Service implements TaskListener {
         		event.getEventoId());
         String usuario = null;
         if (Aplicacion.getUsuario() != null) usuario = Aplicacion.getUsuario().getNif();
+		
+    	KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
+        PrivateKey privateKey = (PrivateKey)keyStore.getKey(ALIAS_CERT_USUARIO, password);
+        Certificate[] chain = keyStore.getCertificateChain(ALIAS_CERT_USUARIO);
+        X509Certificate decryptCert = (X509Certificate) chain[0];
 		SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
-				keyStoreBytes, ALIAS_CERT_USUARIO, password, VOTE_SIGN_MECHANISM);
+				privateKey, chain, VOTE_SIGN_MECHANISM);
+        
+        
 		String contenidoFirma = DeObjetoAJSON.obtenerSolicitudAccesoJSON(event);
         File solicitudAcceso = new File(getApplicationContext().getFilesDir(), "accessRequest_" + 
 		        		event.getEventoId() + SIGNED_PART_EXTENSION);
@@ -180,7 +193,8 @@ public class VotingService extends Service implements TaskListener {
     			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
         if(Respuesta.SC_OK == getTimeStampTask.get()) {
         	GetVotingCertTask getVotingCertTask = (GetVotingCertTask)new GetVotingCertTask(this, 
-	        		timeStampedDocument.setTimeStampToken(getTimeStampTask), pkcs10WrapperClient).
+	        		timeStampedDocument.setTimeStampToken(getTimeStampTask), pkcs10WrapperClient,
+	        		decryptCert, privateKey).
 	        		execute(ServerPaths.getURLSolicitudAcceso(CONTROL_ACCESO_URL));
         	if(Respuesta.SC_OK == getVotingCertTask.get()) {
 		        try {
@@ -198,15 +212,24 @@ public class VotingService extends Service implements TaskListener {
 	            			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
 	                if(Respuesta.SC_OK == getTimeStampTask.get()) {
 			        	File fileToEncrypt = timeStampedDocument.setTimeStampToken(getTimeStampTask);
-			        	EncryptorHelper.encryptSMIMEFile(fileToEncrypt, 
+			        	EncryptionHelper encryptionHelper = new EncryptionHelper();
+			        	encryptionHelper.encryptSMIMEFile(fileToEncrypt, 
 			        			event.getCentroControl().getCertificado());
 	                	SendFileTask sendFileTask = (SendFileTask)new SendFileTask(null, this, 
 	                			fileToEncrypt).execute(ServerPaths.getURLVoto(
 				    			event.getCentroControl().getServerURL()));
 	                	if(Respuesta.SC_OK == sendFileTask.get()) {
 			                try {
-								SMIMEMessageWrapper votoValidado = new SMIMEMessageWrapper(null,
-										new ByteArrayInputStream(sendFileTask.getMessage().getBytes()), null);
+			                	EncryptedBundle encryptedBundle = new EncryptedBundle(
+			                			sendFileTask.getMessage().getBytes(), EncryptedBundle.Type.SMIME_MESSAGE);
+			                	encryptedBundle = encryptionHelper.decryptEncryptedBundle(encryptedBundle,
+			                			pkcs10WrapperClient.getCertificate(), pkcs10WrapperClient.getPrivateKey());
+			                	if(Respuesta.SC_OK != encryptedBundle.getStatusCode()) {
+									voteProcessListener.setMsg(
+											Respuesta.SC_ERROR_EJECUCION, encryptedBundle.getMessage());
+									return;
+			                	}
+								SMIMEMessageWrapper votoValidado = encryptedBundle.getDecryptedSMIMEMessage();
 								VoteReceipt receipt = new VoteReceipt(Respuesta.SC_OK, votoValidado, event);
 								voteProcessListener.proccessReceipt(receipt);
 								

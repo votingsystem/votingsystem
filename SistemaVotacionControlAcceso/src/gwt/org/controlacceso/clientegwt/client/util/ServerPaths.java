@@ -191,6 +191,10 @@ public class ServerPaths {
    	 	return getApplicationPath() + "eventoReclamacion/guardarAdjuntandoValidacion";
     }
     
+    public static String getUrlServerCert() {
+    	return getApplicationPath() + "certificado/cadenaCertificacion";
+    }
+    
     public static String getUrlVoto(String serverUrl, String hashHex) {
         if (!serverUrl.endsWith("/")) serverUrl = serverUrl + "/";
     	return serverUrl + "voto/obtener?hashCertificadoVotoHex=" + hashHex;

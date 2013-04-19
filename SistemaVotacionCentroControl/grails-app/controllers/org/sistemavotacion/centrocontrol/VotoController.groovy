@@ -9,6 +9,7 @@ import java.util.HashMap;
 import javax.mail.internet.MimeMessage
 import org.sistemavotacion.centrocontrol.modelo.*
 import grails.converters.JSON
+import java.security.cert.X509Certificate;
 /**
  * @infoController Servicio de Votos
  * @descController Servicio que procesa los votos recibidos.
@@ -20,6 +21,7 @@ class VotoController {
 
     def votoService
     def httpService
+	def encryptionService
 	
 	/**
 	 * @httpMethod GET
@@ -42,18 +44,28 @@ class VotoController {
 		Respuesta respuesta = votoService.validarFirmaUsuario(
 			params.smimeMessageReq, request.getLocale())
 		if (Respuesta.SC_OK== respuesta.codigoEstado) {
+			X509Certificate certificadoVoto = respuesta.certificado
 			MimeMessage smimeMessage = params.smimeMessageReq
 			respuesta = votoService.enviarVoto_A_ControlAcceso(
 				smimeMessage, respuesta.evento, request.getLocale())
 			if (Respuesta.SC_OK == respuesta?.codigoEstado) {
-				response.status = Respuesta.SC_OK
-				response.contentLength = respuesta.voto.mensajeSMIME.contenido.length
 				response.setContentType("text/plain")
-				response.outputStream <<  respuesta.voto.mensajeSMIME.contenido
+				respuesta = encryptionService.encryptSMIMEMessage(
+					respuesta.voto.mensajeSMIME.contenido, certificadoVoto, request.getLocale())
+				if(Respuesta.SC_OK != respuesta?.codigoEstado) {
+					response.status = respuesta.codigoEstado
+					render respuesta.mensaje
+					return false
+				}
+				response.status = Respuesta.SC_OK
+				response.contentLength = respuesta.messageBytes.length
+				response.outputStream <<  respuesta.messageBytes
+				//response.contentLength = respuesta.voto.mensajeSMIME.contenido.length
+				//response.outputStream <<  respuesta.voto.mensajeSMIME.contenido
 				response.outputStream.flush()
 			} else {
-				log.debug "----- Error sending vote to Access Request Service - statusCode:'${respuesta?.codigoEstado}'" + 
-					"-  message: '${respuesta.mensaje}'"
+				log.debug "----- Error sending vote to Access Request Service - " + 
+					"statusCode:'${respuesta?.codigoEstado}' -  message: '${respuesta.mensaje}'"
 				response.status = respuesta.codigoEstado
 				render message(code: 'accessRequestVoteErrorMsg', args:[respuesta.mensaje])
 				return false

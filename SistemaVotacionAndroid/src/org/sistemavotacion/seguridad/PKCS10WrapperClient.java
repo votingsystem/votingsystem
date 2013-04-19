@@ -1,6 +1,5 @@
 package org.sistemavotacion.seguridad;
 
-import static org.sistemavotacion.android.Aplicacion.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -41,6 +40,7 @@ public class PKCS10WrapperClient {
     
     private PKCS10CertificationRequest csr;
     private PrivateKey privateKey;
+    private X509Certificate certificate;
     private KeyPair keyPair;
     private SignedMailGenerator signedMailGenerator;
     private KeyStore keyStore;
@@ -154,6 +154,7 @@ public class PKCS10WrapperClient {
     public KeyStore initSigner (byte[] csrFirmada, 
     		String signatureMechanism) throws Exception {
         Collection<X509Certificate> certificados = CertUtil.fromPEMToX509CertCollection(csrFirmada);
+        certificate = certificados.iterator().next();
         X509Certificate[] arrayCerts = new X509Certificate[certificados.size()];
         certificados.toArray(arrayCerts);
         signedMailGenerator = new SignedMailGenerator(
@@ -194,4 +195,18 @@ public class PKCS10WrapperClient {
         return keyStore;
     }
 
+
+    /**
+     * @return the certificate
+     */
+    public X509Certificate getCertificate() {
+        return certificate;
+    }
+
+    /**
+     * @param certificate the certificate to set
+     */
+    public void setCertificate(X509Certificate certificate) {
+        this.certificate = certificate;
+    }
 }

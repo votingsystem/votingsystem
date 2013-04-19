@@ -39,6 +39,7 @@ public class Browser {
 	public static void ejecutarOperacionClienteFirma(MensajeClienteFirmaJso mensajeClienteFirma) {
 		if(mensajeClienteFirma == null) return;
 		mensajeClienteFirma.setUrlTimeStampServer(ServerPaths.getUrlTimeStampServer());
+    	mensajeClienteFirma.setUrlServer(ServerPaths.getApplicationPath());
 		if(isAndroid()) {
 			//to avoid URI too large
 			if(mensajeClienteFirma.getEvento() != null) 

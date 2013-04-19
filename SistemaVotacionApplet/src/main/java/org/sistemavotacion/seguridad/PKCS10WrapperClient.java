@@ -3,6 +3,8 @@ package org.sistemavotacion.seguridad;
 import static org.sistemavotacion.Contexto.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -12,6 +14,7 @@ import java.io.OutputStreamWriter;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
@@ -36,6 +39,7 @@ public class PKCS10WrapperClient {
 
     private PKCS10CertificationRequest csr;
     private PrivateKey privateKey;
+    private X509Certificate certificate;
     private SignedMailGenerator signedMailGenerator;
     private KeyStore keyStore;
 
@@ -87,7 +91,7 @@ public class PKCS10WrapperClient {
     /**
      * @return the privateKey
      */
-    public PrivateKey getPrivateKey() {
+    public PrivateKey getPrivateKey() throws Exception {
         return privateKey;
     }
 
@@ -102,13 +106,15 @@ public class PKCS10WrapperClient {
         Collection<X509Certificate> certificados = 
                 CertUtil.fromPEMToX509CertCollection(csrFirmada);
         logger.debug("Número certificados en cadena: " + certificados.size());
+        certificate = certificados.iterator().next();
         X509Certificate[] arrayCerts = new X509Certificate[certificados.size()];
         certificados.toArray(arrayCerts);
         signedMailGenerator = new SignedMailGenerator(
                 privateKey, arrayCerts,VOTE_SIGN_MECHANISM);
         keyStore = KeyStore.getInstance("PKCS12");
         keyStore.load(null, null);
-        keyStore.setKeyEntry(ALIAS_CLAVES, privateKey, PASSWORD_CLAVES.toCharArray(), arrayCerts);
+        keyStore.setKeyEntry(ALIAS_CLAVES, privateKey, 
+                PASSWORD_CLAVES.toCharArray(), arrayCerts);
     }
     //(KeyStore keyStore, String keyAlias, char[] password)
     public void initSigner (KeyStore keyStore) throws Exception {
@@ -141,5 +147,19 @@ public class PKCS10WrapperClient {
     public KeyStore getKeyStore() throws Exception {
         if (signedMailGenerator == null) throw new Exception ("signedMailGenerator no inicializado ");
         return keyStore;
+    }
+
+    /**
+     * @return the certificate
+     */
+    public X509Certificate getCertificate() {
+        return certificate;
+    }
+
+    /**
+     * @param certificate the certificate to set
+     */
+    public void setCertificate(X509Certificate certificate) {
+        this.certificate = certificate;
     }
 }

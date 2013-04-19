@@ -81,6 +81,11 @@ public class SignedMailGenerator {
         init(key, chain, signMechanism);
     }
     
+    public SignedMailGenerator(PrivateKey key, Certificate[] chain, 
+    		String signMechanism) throws Exception {
+        init(key, chain, signMechanism);
+    }
+    
     public SignedMailGenerator(PrivateKey privateKey,
 			X509Certificate[] arrayCerts, String signMechanism) 
 					throws CertificateEncodingException, OperatorCreationException {

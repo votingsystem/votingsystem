@@ -233,5 +233,5 @@
 	<string name="given_name_lbl">Nombre</string>
 	<string name="surname_lbl">Apellidos</string>
 
-	
+	<string name="encrypted_message_error_msg">Mensaje con errores de cifrado</string>
 </resources>

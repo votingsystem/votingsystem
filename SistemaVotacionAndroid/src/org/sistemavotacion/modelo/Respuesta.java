@@ -41,6 +41,7 @@ public class Respuesta {
     private Long eventoId;
     private SMIMEMessageWrapper smimeMessage;
     private ActorConIP actorConIP;
+    private byte[] messageBytes;
     
     
     public Respuesta (int codigoEstado, String mensaje, Object objeto) {
@@ -54,10 +55,19 @@ public class Respuesta {
         this.mensaje = mensaje;
     }
     
+    public Respuesta (int codigoEstado, byte[] messageBytes) {
+        this.codigoEstado = codigoEstado;
+        this.messageBytes = messageBytes;
+    }
+    
+    public Respuesta (int codigoEstado) {
+        this.codigoEstado = codigoEstado;
+    }
+    
     public Respuesta (int codigoEstado, 
         SMIMEMessageWrapper recibo, PKIXParameters params) throws Exception {
         this.codigoEstado = codigoEstado;
-        this.smimeMessage = recibo;
+        this.setSmimeMessage(recibo);
         SignedMailValidator.ValidationResult validationResult = recibo.verify(params);        
         if (validationResult.isValidSignature()) {
             JSONObject resultadoJSON = new JSONObject(recibo.getSignedContent());
@@ -73,7 +83,7 @@ public class Respuesta {
     
     public Respuesta (int codigoEstado, SMIMEMessageWrapper recibo) throws Exception {
         this.codigoEstado = codigoEstado;    
-        this.smimeMessage = recibo;
+        this.setSmimeMessage(recibo);
         if (recibo.isValidSignature()) {
             JSONObject resultadoJSON = new JSONObject(
                     recibo.getSignedContent());
@@ -169,9 +179,9 @@ public class Respuesta {
      */
     public File getArchivo() throws IOException, MessagingException {
         File archivoRecibo = null;
-        if (smimeMessage != null) {
+        if (getSmimeMessage() != null) {
             archivoRecibo = new File("recibo");
-            smimeMessage.writeTo(new FileOutputStream(archivoRecibo));
+            getSmimeMessage().writeTo(new FileOutputStream(archivoRecibo));
         }
         return archivoRecibo;
     }
@@ -217,4 +227,20 @@ public class Respuesta {
     public void setObjeto(Object objeto) {
         this.objeto = objeto;
     }
+
+	public byte[] getMessageBytes() {
+		return messageBytes;
+	}
+
+	public void setMessageBytes(byte[] messageBytes) {
+		this.messageBytes = messageBytes;
+	}
+
+	public SMIMEMessageWrapper getSmimeMessage() {
+		return smimeMessage;
+	}
+
+	public void setSmimeMessage(SMIMEMessageWrapper smimeMessage) {
+		this.smimeMessage = smimeMessage;
+	}
 }

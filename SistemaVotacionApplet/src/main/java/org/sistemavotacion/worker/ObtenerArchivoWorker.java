@@ -3,7 +3,9 @@ package org.sistemavotacion.worker;
 import java.util.List;
 import javax.swing.SwingWorker;
 import org.apache.http.HttpResponse;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.util.EntityUtils;
+import org.sistemavotacion.AppletFirma;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.Respuesta;
 import org.slf4j.Logger;
@@ -57,7 +59,13 @@ public class ObtenerArchivoWorker extends SwingWorker<Integer, String>
                 bytesArchivo = EntityUtils.toByteArray(response.getEntity());
             } else message = EntityUtils.toString(response.getEntity());
             EntityUtils.consume(response.getEntity());
-        } catch(Exception ex) {
+        } catch(HttpHostConnectException ex) {
+            logger.error(ex.getMessage(), ex);
+            statusCode = Respuesta.SC_ERROR_EJECUCION;
+            exception = new Exception(Contexto.getString(
+                    "hostConnectionErrorMsg") + " con " + urlArchivo);
+        }catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
             statusCode = Respuesta.SC_ERROR_EJECUCION;
             exception = ex;
         } finally {

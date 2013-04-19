@@ -20,6 +20,7 @@ import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Operacion;
 import org.sistemavotacion.modelo.ReciboVoto;
 import org.sistemavotacion.modelo.Respuesta;
+import org.sistemavotacion.seguridad.EncryptionHelper;
 import org.sistemavotacion.seguridad.PKCS10WrapperClient;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
@@ -57,7 +58,8 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
     private SMIMEMessageWrapper timeStampedDocument;
     PKCS10WrapperClient pkcs10WrapperClient = null;
     
-    public VotacionDialog(java.awt.Frame parent, boolean modal, final AppletFirma appletFirma) {
+    public VotacionDialog(java.awt.Frame parent, 
+            boolean modal, final AppletFirma appletFirma) {
         super(parent, modal);
         this.parentFrame = parent;
         this.appletFirma = appletFirma;
@@ -318,8 +320,8 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
                     setTimeStampedDocument(accessRequest, TIMESTAMP_ACCESS_REQUEST, TIMESTAMP_DNIe_HASH);
                 } else {
                     tareaEnEjecucion = new EnviarSolicitudControlAccesoWorker(
-                            ACCESS_REQUEST_WORKER, accessRequest, 
-                        votoEvento.getUrlSolicitudAcceso(), pkcs10WrapperClient, this);
+                            ACCESS_REQUEST_WORKER, accessRequest, votoEvento, 
+                            pkcs10WrapperClient, this);
                     tareaEnEjecucion.execute();
                 }
             }
@@ -354,7 +356,7 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
             } else {
                 tareaEnEjecucion = new NotificarVotoWorker(NOTIFICAR_VOTO_WORKER,
                     votoEvento, votoEvento.getUrlRecolectorVotosCentroControl(), 
-                    votoFirmado, this);
+                    votoFirmado, pkcs10WrapperClient, this);
                 tareaEnEjecucion.execute();
             }
         } catch (Exception ex) {
@@ -394,8 +396,8 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
                     try {
                         tareaEnEjecucion = new EnviarSolicitudControlAccesoWorker(
                                 ACCESS_REQUEST_WORKER, timeStampedDocument.
-                                setTimeStampToken((TimeStampWorker)worker), votoEvento.
-                                getUrlSolicitudAcceso(), pkcs10WrapperClient, this);
+                                setTimeStampToken((TimeStampWorker)worker), 
+                                votoEvento, pkcs10WrapperClient, this);
                         tareaEnEjecucion.execute();
                     } catch (Exception ex) {
                         logger.error(ex.getMessage(), ex);
@@ -422,7 +424,8 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
                         tareaEnEjecucion = new NotificarVotoWorker(
                             NOTIFICAR_VOTO_WORKER, votoEvento, 
                             votoEvento.getUrlRecolectorVotosCentroControl(), 
-                            timeStampedDocument.setTimeStampToken((TimeStampWorker)worker), this);
+                            timeStampedDocument.setTimeStampToken((TimeStampWorker)worker),
+                            pkcs10WrapperClient, this);
                             tareaEnEjecucion.execute();
                     } catch (Exception ex) {
                         logger.error(ex.getMessage(), ex);
@@ -438,10 +441,14 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
                 ReciboVoto recibo = new ReciboVoto();
                 if (Respuesta.SC_OK == worker.getStatusCode()) {   
                     recibo = ((NotificarVotoWorker)worker).getReciboVoto();
+                    /*
+                    SMIMEMessageWrapper votoValidado = EncryptionHelper.decryptSMIMEMessage(
+                            recibo.getEncryptedSMIMEMessage(), 
+                         PKCS10WrapperClient.getCertificate(), 
+                         PKCS10WrapperClient.getPrivateKey())*/
                     appletFirma.responderCliente(worker.getStatusCode(), null);
                 } else {
-                    logger.error("Esto no debería pasar nunca!!! -- Error enviando voto: " +
-                            worker.getMessage());
+                    logger.error(" - Error enviando voto: " + worker.getMessage());
                     appletFirma.responderCliente(Operacion.SC_ERROR_ENVIO_VOTO, null);
                 }
                 recibo.setVoto(votoEvento);

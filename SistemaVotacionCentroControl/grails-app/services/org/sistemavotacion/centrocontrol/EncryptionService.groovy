@@ -90,7 +90,7 @@ class EncryptionService {
 	 * helper method to decrypt SMIME signed messages
 	 */
 	private Respuesta decryptMessage(byte[] encryptedMessageBytes, Locale locale) {
-		log.debug(" - decryptMessage - ")
+		log.debug(" - decryptMessage - message: ${new String(encryptedMessageBytes)}")
 		//log.debug(" - decryptMessage - message: ${new String(encryptedMessageBytes)}")
 		try {
 			if(!serverCert) afterPropertiesSet();
@@ -119,11 +119,13 @@ class EncryptionService {
 				codigoEstado:Respuesta.SC_OK);
 		} catch(CMSException ex) {
 			log.error (ex.getMessage(), ex)
+			log.debug("==================== ex.getClass(): " + ex.getClass())
 			return new Respuesta(mensaje:messageSource.getMessage(
 				'encryptedMessageErrorMsg', null, locale),
 				codigoEstado:Respuesta.SC_ERROR_PETICION)
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
+			log.debug("@@@@@@@@@@@@@@@@@@@@@@@@@ ex.getClass(): " + ex.getClass())
 			return new Respuesta(mensaje:ex.getMessage(),
 				codigoEstado:Respuesta.SC_ERROR_PETICION)
 		}

@@ -89,7 +89,8 @@ class VotoService {
 			validoDesde:certificadoFirma.getNotBefore(), validoHasta:certificadoFirma.getNotAfter())
 		certificado.setSigningCert(certificadoFirma)
 		certificado.save()
-		return new Respuesta(codigoEstado:Respuesta.SC_OK, evento:evento)
+		return new Respuesta(codigoEstado:Respuesta.SC_OK, evento:evento,
+			certificado:certificadoFirma)
 	}
 	
 	Respuesta validarFirmaControlAcceso(SMIMEMessageWrapper smimeMessageCA) {

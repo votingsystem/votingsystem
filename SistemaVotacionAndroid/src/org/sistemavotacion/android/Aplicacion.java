@@ -61,7 +61,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
-import java.security.cert.X509Certificate;
 
 
 public class Aplicacion extends FragmentActivity implements TaskListener {

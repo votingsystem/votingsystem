@@ -33,7 +33,7 @@ import org.sistemavotacion.android.Aplicacion;
 import org.sistemavotacion.android.R;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.PDF_CMSSignedGenerator;
-import org.sistemavotacion.smime.EncryptorHelper;
+import org.sistemavotacion.seguridad.EncryptionHelper;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.HttpHelper;
@@ -102,11 +102,12 @@ public class SignTimestampSendPDFTask extends AsyncTask<String, Void, String>
         try {
         	File timeStampedSignedFile = signWithTimestamp(pdfReader, signedFile, 
         			signerCert, signerPrivatekey, signerCertsChain);
-        	File pdfSignedFile = File.createTempFile("pdfSignedFile", ".eml");
-        	pdfSignedFile.deleteOnExit();
-            EncryptorHelper.encryptFile(timeStampedSignedFile, pdfSignedFile, 
-            		Aplicacion.getControlAcceso().getCertificado());
-	        new SendFileTask(null, this, pdfSignedFile).execute(urlSignedDocument);
+        	File pdfEncryptedFile = File.createTempFile("pdfEncryptedFile", ".eml");
+        	pdfEncryptedFile.deleteOnExit();
+        	EncryptionHelper encryptionHelper = new EncryptionHelper();
+        	encryptionHelper.encryptFile(timeStampedSignedFile, pdfEncryptedFile, 
+        			Aplicacion.getControlAcceso().getCertificado());
+	        new SendFileTask(null, this, pdfEncryptedFile).execute(urlSignedDocument);
         	Log.d(TAG + ".signWithTimestamp(...)", " - sending PDF file timeStamped and signed");
         }catch (Exception ex) {
 			ex.printStackTrace();

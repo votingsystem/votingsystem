@@ -180,7 +180,7 @@ public class PanelPublicacionVotacion extends Composite implements
     	mensajeClienteFirma.setUrlEnvioDocumento(ServerPaths.getUrlPublicacionVotacion());
     	mensajeClienteFirma.setNombreDestinatarioFirma(controlAcceso.getNombre());
     	mensajeClienteFirma.setAsuntoMensajeFirmado(
-    			Constantes.INSTANCIA.asuntoPublicarVotacion());		
+    			Constantes.INSTANCIA.asuntoPublicarVotacion());	
     	mensajeClienteFirma.setRespuestaConRecibo(true);
     	mensajeClienteFirma.setUrlTimeStampServer(ServerPaths.getUrlTimeStampServer());
 		if(PuntoEntradaEditor.INSTANCIA != null && 

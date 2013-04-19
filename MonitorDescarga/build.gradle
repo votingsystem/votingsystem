@@ -6,7 +6,7 @@ apply plugin: 'maven'
 dependencies { }
 
 
-task buildVotingApplet(type:VotingSystemApplet){
+task buildVotingApplet(type:Jar){
 	manifest {
 		attributes 'Main-Class': 'org.sistemavotacion.MonitorDescarga',
 				   'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/MonitorDescarga'

@@ -4,6 +4,7 @@ import java.util.Hashtable;
 import java.util.List;
 import javax.swing.SwingWorker;
 import org.apache.http.HttpResponse;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.util.EntityUtils;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERObject;
@@ -84,9 +85,14 @@ public class TimeStampWorker extends SwingWorker<String, String>
                 timeStampAsAttributeTable = new AttributeTable(hashTable);
             } else message = EntityUtils.toString(response.getEntity());
             EntityUtils.consume(response.getEntity());
+        } catch(HttpHostConnectException ex){
+            logger.error(ex.getMessage(), ex);
+            statusCode = Respuesta.SC_ERROR_EJECUCION;
+            exception = new Exception(Contexto.getString("hostConnectionErrorMsg")); 
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
             statusCode = Respuesta.SC_ERROR_EJECUCION;
+            exception = ex;
         } finally {return message;}
     }
 
