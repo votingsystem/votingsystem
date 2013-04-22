@@ -355,8 +355,10 @@ public class EventScreen extends FragmentActivity
 					            }
 					            String signatureContent = DeObjetoAJSON.obtenerFirmaParaEventoJSON(evento);
 					            boolean isWithSignedReceipt = false;
+					            boolean isEncryptedResponse = false;
 					    		signService.processSignature(signatureContent, subject, urlToSendSignedDocument, 
-					    				EventScreen.this, isWithSignedReceipt, keyStoreBytes, pin.toCharArray());		    		
+					    				EventScreen.this, isWithSignedReceipt, isEncryptedResponse, 
+					    				keyStoreBytes, pin.toCharArray());		    		
 					    	} 
 					    	firmarEnviarButton.setEnabled(false);
 						} catch (IOException ex) {
@@ -378,7 +380,6 @@ public class EventScreen extends FragmentActivity
 		mHandler.removeCallbacks(processPinTask);
         mHandler.postDelayed(processPinTask, 100);
 	}
-
 	
     @Override protected void onDestroy() {
         super.onDestroy();
@@ -435,6 +436,12 @@ public class EventScreen extends FragmentActivity
         if (progressDialog != null && progressDialog.isShowing()) {
             progressDialog.dismiss();
         }
+		
+	}
+
+	@Override
+	public void proccessEncryptedResponse(byte[] encryptedResponse) {
+		// TODO Auto-generated method stub
 		
 	}
 

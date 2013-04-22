@@ -226,7 +226,8 @@ public class EventListFragmentLoader extends FragmentActivity {
 			
 			}
       	  	if(intent != null) {
-          	  	intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+          	  	//intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+      	  		intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
             	startActivity(intent);
       	  	}
 	        return true;

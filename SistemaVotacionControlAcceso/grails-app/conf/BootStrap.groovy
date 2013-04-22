@@ -13,6 +13,7 @@ class BootStrap {
 	def firmaService
 	def pdfService
 	def timeStampService
+	def encryptionService
 	
     def init = { servletContext ->
         JSON.registerObjectMarshaller(Date) {
@@ -35,6 +36,7 @@ class BootStrap {
 		firmaService.afterPropertiesSet()
 		pdfService.afterPropertiesSet()
 		timeStampService.afterPropertiesSet()
+		encryptionService.afterPropertiesSet()
     }
 	
     def destroy = {}

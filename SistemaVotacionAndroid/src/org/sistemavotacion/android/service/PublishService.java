@@ -124,7 +124,6 @@ public class PublishService extends Service implements TaskListener {
 			KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
 			PrivateKey signerPrivatekey = (PrivateKey)keyStore.getKey(ALIAS_CERT_USUARIO, password);
 			X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(ALIAS_CERT_USUARIO);
-            EncryptionHelper encryptionHelper = new EncryptionHelper();
     		switch(pendingOperation.getTipo()) {
 				case PUBLICACION_MANIFIESTO_PDF:
 					GetFileTask getFileTask = (GetFileTask)new GetFileTask(null, this).execute(
@@ -160,7 +159,7 @@ public class PublishService extends Service implements TaskListener {
 			    			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
 			        if(Respuesta.SC_OK == timeStampTask.get()) {
 			        	File fileToEncrypt = timeStampedDocument.setTimeStampToken(timeStampTask);
-			        	encryptionHelper.encryptSMIMEFile(fileToEncrypt,
+			        	EncryptionHelper.encryptSMIMEFile(fileToEncrypt,
 			        			Aplicacion.getControlAcceso().getCertificado());
 			        	runningTask = new SendFileTask(null, this, fileToEncrypt).
 								execute(pendingOperation.getUrlEnvioDocumento());
@@ -182,7 +181,7 @@ public class PublishService extends Service implements TaskListener {
 			    			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
 			        if(Respuesta.SC_OK == timeStampTask.get()) {
 			        	File fileToEncrypt = timeStampedDocument.setTimeStampToken(timeStampTask);
-			        	encryptionHelper.encryptSMIMEFile(fileToEncrypt, 
+			        	EncryptionHelper.encryptSMIMEFile(fileToEncrypt, 
 			        			Aplicacion.getControlAcceso().getCertificado());
 			            runningTask = new SendFileTask(null, this,
 			            		fileToEncrypt).execute(pendingOperation.getUrlEnvioDocumento());

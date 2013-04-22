@@ -92,66 +92,25 @@ class EncryptionService {
 		// Get a Session object with the default properties.
 		session = Session.getDefaultInstance(props, null);
 	}
-	
-	/**
-	 * helper method to decrypt SMIME signed messages
-	 */
-    private Respuesta decryptMessage(byte[] encryptedMessageBytes, Locale locale) {
-		log.debug(" - decryptMessage - ")
-		//log.debug(" - decryptMessage - message: ${new String(encryptedMessageBytes)}")
-		try {
-			if(!recId) afterPropertiesSet();
-			MimeMessage msg = new MimeMessage(session, new ByteArrayInputStream(encryptedMessageBytes));
-			SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
-		 
-			RecipientInformationStore   recipients = smimeEnveloped.getRecipientInfos();
-			RecipientInformation        recipientInfo = recipients.get(recId);
-	
-			/*RecipientId recipientRID = null;
-			if(recipient.getRID() != null) {
-				recipientRID = recipient.getRID();
-				log.debug(" -- recipientRID.getSerialNumber(): " + recipientRID.getSerialNumber());
-				if(recipient.getRID().getCertificate() != null) {
-					log.debug(" -- recipient: " + recipient.getRID().getCertificate().getSubjectDN().toString());
-				} else log.debug(" -- recipient.getRID().getCertificate() NULL");
-			} else log.debug(" -- getRID NULL");
-			MimeBodyPart res = SMIMEUtil.toMimeBodyPart(
-				 recipient.getContent(new JceKeyTransEnvelopedRecipient(serverPrivateKey).setProvider("BC")));*/
-			byte[] messageContentBytes =  recipientInfo.getContent(recipient)
-			//log.debug(" ------- Message Contents: ${new String(messageContentBytes)}");
-			return new Respuesta(messageBytes:messageContentBytes,
-				codigoEstado:Respuesta.SC_OK);
-		} catch(CMSException ex) {
-			log.error (ex.getMessage(), ex)
-			return new Respuesta(mensaje:messageSource.getMessage(
-				'encryptedMessageErrorMsg', null, locale),
-				codigoEstado:Respuesta.SC_ERROR_PETICION)
-		} catch(Exception ex) {
-			log.error (ex.getMessage(), ex)
-			return new Respuesta(mensaje:ex.getMessage(),
-				codigoEstado:Respuesta.SC_ERROR_PETICION)
-		}
-    }
-	
 	/**
 	 * Method to decrypt files attached to SMIME (not signed) messages 
 	 */
-	public Respuesta decryptFile (byte[] encryptedFile, Locale locale) {
-		log.debug " - decryptFile - "
-		//log.debug "decryptFile - encryptedFile: ${new String(encryptedFile)} "
+	public Respuesta decryptMessage (byte[] encryptedFile, Locale locale) {
+		log.debug " - decryptMessage - "
+		//log.debug "decryptMessage - encryptedFile: ${new String(encryptedFile)} "
 		try {
-			if(!serverCert) afterPropertiesSet()
-			RecipientId     recId = new JceKeyTransRecipientId(serverCert);
-			MimeMessage msg = new MimeMessage(session, new ByteArrayInputStream(encryptedFile));
+			if(getRecipientId() == null) afterPropertiesSet()
+			MimeMessage msg = new MimeMessage(getSession(), 
+				new ByteArrayInputStream(encryptedFile));
 			SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
 			RecipientInformationStore   recipients = smimeEnveloped.getRecipientInfos();
-			RecipientInformation        recipientInfo = recipients.get(recId);
+			RecipientInformation        recipientInfo = recipients.get(getRecipientId());
 			RecipientId recipientId = null;
 			if(recipientInfo.getRID() != null) {
 				recipientId = recipientInfo.getRID();
 				log.debug(" -- recipientId.getSerialNumber(): " + recipientId.getSerialNumber());
 			}
-			MimeBodyPart res = SMIMEUtil.toMimeBodyPart(recipientInfo.getContent(recipient));
+			MimeBodyPart res = SMIMEUtil.toMimeBodyPart(recipientInfo.getContent(getRecipient()));
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			res.writeTo(baos)
 			MimeMessage mimeMessage = new MimeMessage(null,
@@ -236,9 +195,7 @@ class EncryptionService {
 			X509Certificate receiverCert) throws Exception {
 		log.debug(" - encryptFile(...)");
 		try {
-			Properties props = System.getProperties();
-			Session session = Session.getDefaultInstance(props, null);
-			MimeMessage mimeMessage = new MimeMessage(session);
+			MimeMessage mimeMessage = new MimeMessage(getSession());
 			MimeBodyPart mimeBodyPart = new MimeBodyPart();
 			FileDataSource fds = new FileDataSource(fileToEncrypt);
 			mimeBodyPart.setDataHandler(new DataHandler(fds));
@@ -270,10 +227,8 @@ class EncryptionService {
 				X509Certificate receiverCert) throws Exception {
 		log.debug(" - encryptText(...) - ");
 		try {
-			Properties props = System.getProperties();
-			Session session = Session.getDefaultInstance(props, null);
-			MimeMessage mimeMessage = new MimeMessage(session);
-			mimeMessage.setText(new String(text));
+			MimeMessage mimeMessage = new MimeMessage(getSession());
+			mimeMessage.setContent(new String(text), "text/plain");
 			// set the Date: header
 			//mimeMessage.setSentDate(new Date());
 			SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
@@ -293,25 +248,84 @@ class EncryptionService {
 		}
 	}
 	
+	public Respuesta encryptText(byte[] text, 
+			X509Certificate receiverCert) throws Exception {
+			log.debug(" - encryptText(...) - ");
+		try {
+			MimeMessage mimeMessage = new MimeMessage(getSession());
+			mimeMessage.setContent(new String(text), "text/plain");
+			// set the Date: header
+			//mimeMessage.setSentDate(new Date());
+			SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
+			encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
+					receiverCert).setProvider("BC"));
+			/* Encrypt the message */
+			MimeBodyPart encryptedPart = encrypter.generate(mimeMessage,
+					new JceCMSContentEncryptorBuilder(
+					CMSAlgorithm.DES_EDE3_CBC).setProvider("BC").build());
+			ByteArrayOutputStream baos = new ByteArrayOutputStream()
+			encryptedPart.writeTo(baos);
+			return new Respuesta(codigoEstado:Respuesta.SC_OK,
+				messageBytes:baos.toByteArray())
+		} catch(Exception ex) {
+			log.error(ex.getMessage(), ex);
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+				mensaje:ex.getMessage())
+		}
+	}
+				
 	/**
 	 * Method to decrypt SMIME signed messages
 	 */
 	Respuesta decryptSMIMEMessage(byte[] encryptedMessageBytes, Locale locale) {
 		log.debug(" - decryptSMIMEMessage - ")
-		Respuesta respuesta = decryptMessage(encryptedMessageBytes, locale);
-		if(Respuesta.SC_OK != respuesta.codigoEstado) return respuesta;
-		byte[] messageContentBytes = respuesta.messageBytes;
-		SMIMEMessageWrapper smimeMessageReq = null;
+		SMIMEMessageWrapper smimeMessageReq = null
 		try {
+			if(getRecipientId() == null) afterPropertiesSet();
+			MimeMessage msg = new MimeMessage(getSession(), 
+				new ByteArrayInputStream(encryptedMessageBytes));
+	
+			SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
+		 
+			RecipientInformationStore   recipients = smimeEnveloped.getRecipientInfos();
+			RecipientInformation        recipientInfo = recipients.get(getRecipientId());
+			/*RecipientId recipientRID = null;
+			if(recipient.getRID() != null) {
+				recipientRID = recipient.getRID();
+				log.debug(" -- recipientRID.getSerialNumber(): " + recipientRID.getSerialNumber());
+				if(recipient.getRID().getCertificate() != null) {
+					log.debug(" -- recipient: " + recipient.getRID().getCertificate().getSubjectDN().toString());
+				} else log.debug(" -- recipient.getRID().getCertificate() NULL");
+			} else log.debug(" -- getRID NULL");
+			MimeBodyPart res = SMIMEUtil.toMimeBodyPart(
+				 recipient.getContent(new JceKeyTransEnvelopedRecipient(serverPrivateKey).setProvider("BC")));*/
+			byte[] messageContentBytes =  recipientInfo.getContent(getRecipient())
 			smimeMessageReq = SMIMEMessageWrapper.build(
-					new ByteArrayInputStream(messageContentBytes), null);
-		} catch (Exception ex) {
+					new ByteArrayInputStream(messageContentBytes), null);;
+		} catch(CMSException ex) {
+			log.error (ex.getMessage(), ex)
+			return new Respuesta(mensaje:messageSource.getMessage(
+				'encryptedMessageErrorMsg', null, locale),
+				codigoEstado:Respuesta.SC_ERROR_PETICION)
+		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
 			return new Respuesta(mensaje:ex.getMessage(),
 				codigoEstado:Respuesta.SC_ERROR_PETICION)
 		}
-		return new Respuesta(smimeMessage:smimeMessageReq, 
+		return new Respuesta(smimeMessage:smimeMessageReq,
 			codigoEstado:Respuesta.SC_OK)
+	}
+	
+	private Session getSession() {
+		return session
+	}
+	
+	private Recipient getRecipient() {
+		return recipient;	
+	}
+	
+	private RecipientId getRecipientId() {
+		return recId;
 	}
 	
 	public String getAbsolutePath(String filePath){

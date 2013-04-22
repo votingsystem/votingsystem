@@ -27,7 +27,7 @@ import org.sistemavotacion.controlacceso.modelo.Certificado.Estado;
 @Table(name="AnuladorVoto")
 public class AnuladorVoto implements Serializable {
 	
-	public enum Estado {SIN_NOTIFICAR, NOTIFICADO}
+	public enum Estado {SIN_NOTIFICAR, NOTIFICADO, ANULADO}
 	
     private static final long serialVersionUID = 1L;
 

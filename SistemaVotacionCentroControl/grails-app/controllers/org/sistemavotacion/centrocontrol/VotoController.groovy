@@ -46,7 +46,7 @@ class VotoController {
 		if (Respuesta.SC_OK== respuesta.codigoEstado) {
 			X509Certificate certificadoVoto = respuesta.certificado
 			MimeMessage smimeMessage = params.smimeMessageReq
-			respuesta = votoService.enviarVoto_A_ControlAcceso(
+			respuesta = votoService.sendVoteToControlAccess(
 				smimeMessage, respuesta.evento, request.getLocale())
 			if (Respuesta.SC_OK == respuesta?.codigoEstado) {
 				response.setContentType("text/plain")
@@ -164,7 +164,7 @@ class VotoController {
 			 MimeMessage smimeMessage = params.smimeMessageReq
 			 EventoVotacion eventoVotacion = respuesta.evento
 			 def future = callAsync {
-				  return votoService.enviarVoto_A_ControlAcceso(
+				  return votoService.sendVoteToControlAccess(
 				  smimeMessage, eventoVotacion, request.getLocale())
 			 }
 			 respuesta = future.get()

@@ -231,7 +231,7 @@ class FirmaService {
 		log.debug("firmarCertificadoVoto - evento: ${evento?.id} - isEncrypted: ${isEncrypted}");
 		Respuesta respuesta = null;
 		if(isEncrypted) {
-			respuesta = encryptionService.decryptFile(csr, locale)
+			respuesta = encryptionService.decryptMessage(csr, locale)
 			if(Respuesta.SC_OK != respuesta.codigoEstado) return respuesta
 			else csr = respuesta.messageBytes
 		}
@@ -261,7 +261,8 @@ class FirmaService {
 				solicitudCSRVoto:solicitudCSR, tipo:Certificado.Tipo.VOTO,
 				hashCertificadoVotoBase64:respuesta.hashCertificadoVotoBase64)
 			certificado.save()
-			return new Respuesta(codigoEstado:Respuesta.SC_OK,firmaCSR:certificadoFirmado)
+			return new Respuesta(codigoEstado:Respuesta.SC_OK,
+				firmaCSR:certificadoFirmado, certificado:certificate)
 		}
 	}
 	

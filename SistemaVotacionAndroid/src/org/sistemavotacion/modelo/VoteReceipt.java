@@ -1,25 +1,25 @@
 package org.sistemavotacion.modelo;
 
+import static org.sistemavotacion.android.Aplicacion.getAppString;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.ParseException;
+import java.security.PrivateKey;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 
 import javax.mail.MessagingException;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.sistemavotacion.android.R;
 import org.sistemavotacion.json.DeJSONAObjeto;
 import org.sistemavotacion.json.DeObjetoAJSON;
+import org.sistemavotacion.seguridad.PKCS10WrapperClient;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
-import android.util.Log;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import static org.sistemavotacion.android.Aplicacion.getAppString;
+import android.util.Log;
 
 /**
 * @author jgzornoza
@@ -42,7 +42,10 @@ public class VoteReceipt {
     private boolean esValido = false;
     private SMIMEMessageWrapper smimeMessage;
     private SMIMEMessageWrapper cancelVoteReceipt;
+    private byte[] encryptedKey = null;
     private boolean isCanceled = false;
+    private PKCS10WrapperClient pkcs10WrapperClient;
+    private PrivateKey certVotePrivateKey;
     private Evento voto;
     private Date dateCreated;
     private Date dateUpdated;
@@ -329,6 +332,30 @@ public class VoteReceipt {
 
 	public void setCanceled(boolean isCanceled) {
 		this.isCanceled = isCanceled;
+	}
+
+	public byte[] getEncryptedKey() {
+		return encryptedKey;
+	}
+
+	public void setEncryptedKey(byte[] encryptedKey) {
+		this.encryptedKey = encryptedKey;
+	}
+
+	public PKCS10WrapperClient getPkcs10WrapperClient() {
+		return pkcs10WrapperClient;
+	}
+
+	public void setPkcs10WrapperClient(PKCS10WrapperClient pkcs10WrapperClient) {
+		this.pkcs10WrapperClient = pkcs10WrapperClient;
+	}
+
+	public PrivateKey getCertVotePrivateKey() {
+		return certVotePrivateKey;
+	}
+
+	public void setCertVotePrivateKey(PrivateKey certVotePrivateKey) {
+		this.certVotePrivateKey = certVotePrivateKey;
 	}
 	
 }

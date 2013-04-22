@@ -1,19 +1,19 @@
 package org.sistemavotacion.android.ui;
 
+import static org.sistemavotacion.android.Aplicacion.ALIAS_CERT_USUARIO;
 import static org.sistemavotacion.android.Aplicacion.KEY_STORE_FILE;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
-import java.io.IOException;
+import java.security.KeyFactory;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import javax.mail.MessagingException;
-
-import org.bouncycastle2.cms.CMSException;
-import org.bouncycastle2.mail.smime.SMIMEException;
-import org.json.JSONObject;
+import org.bouncycastle2.util.encoders.Base64;
 import org.sistemavotacion.android.Aplicacion;
 import org.sistemavotacion.android.FragmentTabsPager;
 import org.sistemavotacion.android.R;
@@ -22,6 +22,8 @@ import org.sistemavotacion.android.service.SignService;
 import org.sistemavotacion.android.service.SignServiceListener;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.modelo.VoteReceipt;
+import org.sistemavotacion.seguridad.EncryptionHelper;
+import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
@@ -76,7 +78,7 @@ public class VoteReceiptListScreen extends FragmentActivity
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+		Log.d(TAG + ".onCreate(...) ", " - onCreate ");
 		setContentView(R.layout.vote_receipt_list);
 		db = new VoteReceiptDBHelper(this);
 		try {
@@ -161,6 +163,7 @@ public class VoteReceiptListScreen extends FragmentActivity
 	    		Intent intent = new Intent(this, FragmentTabsPager.class);   
 	    		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); 
 	    		startActivity(intent);            
+	    		this.finish();
 	    		return true;        
 	    	default:            
 	    		return super.onOptionsItemSelected(item);    
@@ -301,9 +304,25 @@ public class VoteReceiptListScreen extends FragmentActivity
         try {
 			FileInputStream fis = openFileInput(KEY_STORE_FILE);
 			byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
+			KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
+			PrivateKey signerPrivatekey = (PrivateKey)keyStore.getKey(ALIAS_CERT_USUARIO, password);
+			X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(ALIAS_CERT_USUARIO);
+
+			byte[] base64encodedvoteCertPrivateKey = EncryptionHelper.decryptMessage(
+					 operationReceipt.getEncryptedKey(), signerCert, signerPrivatekey);
+			PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(
+					Base64.decode(base64encodedvoteCertPrivateKey));
+	        KeyFactory kf = KeyFactory.getInstance("RSA");
+	        PrivateKey certPrivKey = kf.generatePrivate(keySpec);
+			operationReceipt.setCertVotePrivateKey(certPrivKey);
+
+			
+            boolean isWithSignedReceipt = true;
+            boolean isEncryptedResponse = true;
+            
     		if(signService != null) signService.processSignature(operationReceipt.
 	        		getVoto().getCancelVoteData(), subject, serverURL, this, 
-    				true, keyStoreBytes, password);	
+	        		isWithSignedReceipt, isEncryptedResponse, keyStoreBytes, password);	
         } catch(Exception ex) {
 			ex.printStackTrace();
 			showMessage(getString(R.string.error_lbl), 
@@ -434,5 +453,19 @@ public class VoteReceiptListScreen extends FragmentActivity
 			e.printStackTrace();
 		} 
 		
+	}
+
+
+	@Override
+	public void proccessEncryptedResponse(byte[] encryptedResponse) {
+		Log.d(TAG + ".proccessEncryptedResponse()", "--- proccessEncryptedResponse ");
+		//This method is called if cancellation process finish OK
+		try {
+			SMIMEMessageWrapper receipt = EncryptionHelper.decryptSMIMEMessage(
+					encryptedResponse, null, operationReceipt.getCertVotePrivateKey());
+			proccessReceipt(receipt);
+		} catch(Exception ex ) {
+			Log.e(TAG + ".guardarReciboButton.setOnClickListener(...) ", ex.getMessage(), ex);
+		}
 	}
 }

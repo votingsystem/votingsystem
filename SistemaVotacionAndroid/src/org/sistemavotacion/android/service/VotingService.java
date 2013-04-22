@@ -11,13 +11,18 @@ import static org.sistemavotacion.android.Aplicacion.TIMESTAMP_VOTE_HASH;
 import static org.sistemavotacion.android.Aplicacion.VOTE_SIGN_MECHANISM;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.OutputStreamWriter;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.List;
 
+import org.bouncycastle2.openssl.PEMWriter;
+import org.bouncycastle2.util.encoders.Base64;
 import org.json.JSONException;
 import org.sistemavotacion.android.Aplicacion;
 import org.sistemavotacion.android.AppData;
@@ -175,10 +180,11 @@ public class VotingService extends Service implements TaskListener {
     	KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
         PrivateKey privateKey = (PrivateKey)keyStore.getKey(ALIAS_CERT_USUARIO, password);
         Certificate[] chain = keyStore.getCertificateChain(ALIAS_CERT_USUARIO);
-        X509Certificate decryptCert = (X509Certificate) chain[0];
+        X509Certificate userCert = (X509Certificate) chain[0];
+        
+        
 		SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
 				privateKey, chain, VOTE_SIGN_MECHANISM);
-        
         
 		String contenidoFirma = DeObjetoAJSON.obtenerSolicitudAccesoJSON(event);
         File solicitudAcceso = new File(getApplicationContext().getFilesDir(), "accessRequest_" + 
@@ -193,8 +199,7 @@ public class VotingService extends Service implements TaskListener {
     			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
         if(Respuesta.SC_OK == getTimeStampTask.get()) {
         	GetVotingCertTask getVotingCertTask = (GetVotingCertTask)new GetVotingCertTask(this, 
-	        		timeStampedDocument.setTimeStampToken(getTimeStampTask), pkcs10WrapperClient,
-	        		decryptCert, privateKey).
+	        		timeStampedDocument.setTimeStampToken(getTimeStampTask), pkcs10WrapperClient).
 	        		execute(ServerPaths.getURLSolicitudAcceso(CONTROL_ACCESO_URL));
         	if(Respuesta.SC_OK == getVotingCertTask.get()) {
 		        try {
@@ -212,8 +217,7 @@ public class VotingService extends Service implements TaskListener {
 	            			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
 	                if(Respuesta.SC_OK == getTimeStampTask.get()) {
 			        	File fileToEncrypt = timeStampedDocument.setTimeStampToken(getTimeStampTask);
-			        	EncryptionHelper encryptionHelper = new EncryptionHelper();
-			        	encryptionHelper.encryptSMIMEFile(fileToEncrypt, 
+			        	EncryptionHelper.encryptSMIMEFile(fileToEncrypt, 
 			        			event.getCentroControl().getCertificado());
 	                	SendFileTask sendFileTask = (SendFileTask)new SendFileTask(null, this, 
 	                			fileToEncrypt).execute(ServerPaths.getURLVoto(
@@ -222,15 +226,25 @@ public class VotingService extends Service implements TaskListener {
 			                try {
 			                	EncryptedBundle encryptedBundle = new EncryptedBundle(
 			                			sendFileTask.getMessage().getBytes(), EncryptedBundle.Type.SMIME_MESSAGE);
-			                	encryptedBundle = encryptionHelper.decryptEncryptedBundle(encryptedBundle,
+			                	encryptedBundle = EncryptionHelper.decryptEncryptedBundle(encryptedBundle,
 			                			pkcs10WrapperClient.getCertificate(), pkcs10WrapperClient.getPrivateKey());
+			                	
 			                	if(Respuesta.SC_OK != encryptedBundle.getStatusCode()) {
 									voteProcessListener.setMsg(
 											Respuesta.SC_ERROR_EJECUCION, encryptedBundle.getMessage());
 									return;
 			                	}
+			                	
 								SMIMEMessageWrapper votoValidado = encryptedBundle.getDecryptedSMIMEMessage();
 								VoteReceipt receipt = new VoteReceipt(Respuesta.SC_OK, votoValidado, event);
+			
+								byte[] base64EncodedKey = Base64.encode(
+										pkcs10WrapperClient.getPrivateKey().getEncoded());
+			                	byte[] encryptedKey = EncryptionHelper.encryptText(base64EncodedKey, userCert);
+			
+			                	receipt.setPkcs10WrapperClient(pkcs10WrapperClient);
+								receipt.setEncryptedKey(encryptedKey);
+								
 								voteProcessListener.proccessReceipt(receipt);
 								
 								NotificationManager notificationManager =
@@ -246,7 +260,7 @@ public class VotingService extends Service implements TaskListener {
 						        	.setContentTitle(event.getAsunto())
 						        	.setContentText(getString(R.string.voted_lbl) + ": " + event.getOpcionSeleccionada().
 						        		getContenido()).setSmallIcon(R.drawable.poll_48)
-						        .setContentIntent(pIntent);
+						        		.setContentIntent(pIntent);
 							    Notification notification = notBuilder.getNotification();
 							    
 							    

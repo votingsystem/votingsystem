@@ -1,12 +1,9 @@
 package org.sistemavotacion.task;
 
-import static org.sistemavotacion.android.Aplicacion.*;
+import static org.sistemavotacion.android.Aplicacion.VOTE_SIGN_MECHANISM;
+import static org.sistemavotacion.android.Aplicacion.getAppString;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.cert.X509Certificate;
 
 import javax.mail.Header;
 
@@ -15,13 +12,11 @@ import org.apache.http.util.EntityUtils;
 import org.sistemavotacion.android.Aplicacion;
 import org.sistemavotacion.android.R;
 import org.sistemavotacion.modelo.Respuesta;
-import org.sistemavotacion.seguridad.KeyStoreUtil;
-import org.sistemavotacion.seguridad.PKCS10WrapperClient;
 import org.sistemavotacion.seguridad.EncryptionHelper;
-import org.sistemavotacion.seguridad.VotingSystemKeyStoreException;
+import org.sistemavotacion.seguridad.PKCS10WrapperClient;
 import org.sistemavotacion.smime.SignedMailGenerator.Type;
-import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.HttpHelper;
+
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -35,18 +30,13 @@ public class GetVotingCertTask extends AsyncTask<String, Void, Integer> {
     private Exception exception = null;
     private PKCS10WrapperClient pkcs10WrapperClient;
     private String message = null;
-    private PrivateKey decryptPrivateKey;
-    private X509Certificate decryptCert;
 
     
     public GetVotingCertTask(TaskListener listener, File solicitudAcceso, 
-    		PKCS10WrapperClient pkcs10WrapperClient, 
-    		X509Certificate decryptCert, PrivateKey decryptPrivateKey) throws Exception {
+    		PKCS10WrapperClient pkcs10WrapperClient) throws Exception {
 		this.solicitudAcceso = solicitudAcceso;
 		this.pkcs10WrapperClient = pkcs10WrapperClient;
 		this.listener = listener;
-		this.decryptPrivateKey = decryptPrivateKey;
-		this.decryptCert = decryptCert;
     }
 	
 	@Override
@@ -60,17 +50,20 @@ public class GetVotingCertTask extends AsyncTask<String, Void, Integer> {
         	csrEncryptedFile.deleteOnExit();
         	//FileUtils.copyStreamToFile(new ByteArrayInputStream(
         	//		pkcs10WrapperClient.getPEMEncodedRequestCSR()), csrFile);
-        	EncryptionHelper encryptionHelper = new EncryptionHelper();
-        	encryptionHelper.encryptText(pkcs10WrapperClient.getPEMEncodedRequestCSR(), 
+        	EncryptionHelper.encryptText(pkcs10WrapperClient.getPEMEncodedRequestCSR(), 
         			csrEncryptedFile, Aplicacion.getControlAcceso().getCertificado());
-        	encryptionHelper.encryptSMIMEFile(solicitudAcceso, 
+        	EncryptionHelper.encryptSMIMEFile(solicitudAcceso, 
         			Aplicacion.getControlAcceso().getCertificado());
             HttpResponse response = HttpHelper.enviarSolicitudAcceso(
             		csrEncryptedFile, solicitudAcceso, url);
             statusCode = response.getStatusLine().getStatusCode();
             if (Respuesta.SC_OK == response.getStatusLine().getStatusCode()) {
-                pkcs10WrapperClient.initSigner(EntityUtils.toByteArray(
-                		response.getEntity()), VOTE_SIGN_MECHANISM);
+                byte[] encryptedData = EntityUtils.toByteArray(response.getEntity());
+                byte[] decryptedData = EncryptionHelper.decryptMessage(
+                        encryptedData, null, pkcs10WrapperClient.getPrivateKey());
+            	
+            	
+                pkcs10WrapperClient.initSigner((decryptedData), VOTE_SIGN_MECHANISM);
             } else if(Respuesta.SC_ERROR_VOTO_REPETIDO == 
             		response.getStatusLine().getStatusCode()) {
             	message = EntityUtils.toString(response.getEntity());

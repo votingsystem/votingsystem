@@ -5,7 +5,7 @@ import grails.util.Environment
 class BootStrap {
 
 	def firmaService
-	
+	def encryptionService
 	
     def init = { servletContext ->
 		JSON.registerObjectMarshaller(Date) {
@@ -13,6 +13,7 @@ class BootStrap {
 		 }
 		 Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 		 firmaService.inicializar()
+		 encryptionService.afterPropertiesSet()
     }
 	
     def destroy = { }

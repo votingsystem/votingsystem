@@ -1,25 +1,14 @@
 package org.sistemavotacion.android.ui;
 
-import static org.sistemavotacion.android.Aplicacion.SIGNED_PART_EXTENSION;
-
-import java.io.File;
-import java.io.FileOutputStream;
-
 import org.sistemavotacion.android.Aplicacion;
 import org.sistemavotacion.android.R;
 import org.sistemavotacion.android.UserCertRequestForm;
 import org.sistemavotacion.android.UserCertResponseForm;
-import org.sistemavotacion.android.service.SignService;
-import org.sistemavotacion.modelo.VoteReceipt;
 
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.text.Html;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v4.app.DialogFragment;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +17,7 @@ import android.widget.TextView;
 
 public class CertNotFoundDialog  extends DialogFragment {
 
-	public static final String TAG = "ReceiptOptionsDialog";
+	public static final String TAG = "CertNotFoundDialog";
 	
 	public static final int MAX_MSG_LENGTH = 400;
 

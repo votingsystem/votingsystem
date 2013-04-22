@@ -1,19 +1,11 @@
 package org.sistemavotacion.android.ui;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 
-import javax.mail.MessagingException;
-
-import org.bouncycastle2.cms.CMSException;
-import org.bouncycastle2.mail.smime.SMIMEException;
 import org.sistemavotacion.android.Aplicacion;
 import org.sistemavotacion.android.R;
-import org.sistemavotacion.android.UserCertRequestForm;
 import org.sistemavotacion.modelo.VoteReceipt;
-import org.sistemavotacion.smime.SMIMEMessageWrapper;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -23,7 +15,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.DialogFragment;
-import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -100,7 +91,11 @@ public class ReceiptOptionsDialog  extends DialogFragment {
 	    		            }
 	    					});
 	    		builder.setNegativeButton(getString(
-	    				R.string.cancelar_button), null);
+	    				R.string.cancelar_button), new DialogInterface.OnClickListener() {
+		            		public void onClick(DialogInterface dialog, int whichButton) {
+		            			removeReceiptButton.setEnabled(true);
+		            		}
+						});
 	    		builder.show();
             }
         });

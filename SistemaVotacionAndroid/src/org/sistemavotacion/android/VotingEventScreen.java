@@ -16,10 +16,14 @@
 
 package org.sistemavotacion.android;
 
+import static org.sistemavotacion.android.Aplicacion.ALIAS_CERT_USUARIO;
 import static org.sistemavotacion.android.Aplicacion.KEY_STORE_FILE;
 import static org.sistemavotacion.android.Aplicacion.MAX_SUBJECT_SIZE;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
+import java.security.KeyStore;
+import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +43,8 @@ import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.OpcionDeEvento;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.modelo.VoteReceipt;
+import org.sistemavotacion.seguridad.EncryptionHelper;
+import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
@@ -403,9 +409,11 @@ public class VotingEventScreen extends FragmentActivity
         String serverURL = ServerPaths.getURLAnulacionVoto(Aplicacion.CONTROL_ACCESO_URL);
 		cancelVoteButton.setEnabled(false);
         try {
+            boolean isWithSignedReceipt = false;
+            boolean isEncryptedResponse = false;
     		if(signService != null) signService.processSignature(
     				receipt.getVoto().getCancelVoteData(), subject, serverURL, this, 
-    				true, keyStoreBytes, password);	
+    				isWithSignedReceipt, isEncryptedResponse, keyStoreBytes, password);	
         } catch(Exception ex) {
         	ex.printStackTrace();
         	showMessage(getString(R.string.error_lbl), 
@@ -553,6 +561,22 @@ public class VotingEventScreen extends FragmentActivity
 		this.receipt = receipt;
         setReceiptScreen(receipt);
 	}
+	
+	@Override
+	public void proccessEncryptedResponse(byte[] encryptedResponse) {
+		Log.d(TAG + ".proccessEncryptedResponse()", "--- proccessEncryptedResponse ");
+		//This method is called if cancellation process finish OK
+		try {
+			byte[] decryptedMessage = EncryptionHelper.decryptFile(
+					encryptedResponse, null, receipt.getPkcs10WrapperClient().getPrivateKey());
+			SMIMEMessageWrapper receipt = new SMIMEMessageWrapper(null,
+					new ByteArrayInputStream(decryptedMessage), null);
+			proccessReceipt(receipt);
+		} catch(Exception ex ) {
+			Log.e(TAG + ".guardarReciboButton.setOnClickListener(...) ", ex.getMessage(), ex);
+		}
+	}
+
 
 	@Override
 	public void setMsg(int statusCode, String msg) {

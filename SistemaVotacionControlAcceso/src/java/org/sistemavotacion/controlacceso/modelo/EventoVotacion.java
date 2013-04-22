@@ -1,6 +1,8 @@
 package org.sistemavotacion.controlacceso.modelo;
 
 import java.io.Serializable;
+import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
@@ -15,6 +17,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
 import org.hibernate.search.annotations.Indexed;
+import org.sistemavotacion.seguridad.CertUtil;
 
 /**
 * @author jgzornoza
@@ -120,6 +123,13 @@ public class EventoVotacion extends Evento implements Serializable {
 			if(opcionId.longValue() == opcion.getId().longValue()) return opcion;
 		}
 		return null;
+	}
+	
+	public X509Certificate getControlCenterCert() throws Exception {
+		if(cadenaCertificacionCentroControl == null) return null;
+		Collection<X509Certificate> controlCenterCertCollection = 
+				CertUtil.fromPEMToX509CertCollection(cadenaCertificacionCentroControl);
+		return controlCenterCertCollection.iterator().next();		
 	}
 	
 }

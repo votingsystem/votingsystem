@@ -30,7 +30,7 @@ class AnuladorVotoController {
 			ctx.setTimeout(10000);
 			AnuladorVoto anuladorVoto = respuesta.anuladorVoto
 			def future = callAsync {
-				 return votoService.enviarAnulacion_A_CentroControl(anuladorVoto)
+				 return votoService.sendVoteCancelationToControlCenter(anuladorVoto)
 			}
 			respuesta = future.get()
 			if (200  == respuesta?.codigoEstado) {
@@ -61,16 +61,23 @@ class AnuladorVotoController {
 	 * @return Recibo que consiste en el archivo firmado recibido con la firma añadida del servidor.
 	 */
     def guardarAdjuntandoValidacion () {
-		Respuesta respuesta = votoService.validarAnulacion(params.smimeMessageReq, request.getLocale())
+		Respuesta respuesta = votoService.validarAnulacion(
+			params.smimeMessageReq, request.getLocale())
 		log.debug (respuesta.codigoEstado + " - mensaje: ${respuesta.mensaje}")
         if (Respuesta.SC_OK == respuesta.codigoEstado) {
 			AnuladorVoto anuladorVoto = respuesta.anuladorVoto
-            respuesta = votoService.enviarAnulacion_A_CentroControl(anuladorVoto)
-            if (200  == respuesta?.codigoEstado) {
+			flash.receiverCert = respuesta.certificado
+            Respuesta controlCenterResponse = votoService.sendVoteCancelationToControlCenter(
+				anuladorVoto, request.getLocale())
+            if (Respuesta.SC_OK == controlCenterResponse?.codigoEstado) {
 				flash.respuesta = new Respuesta(codigoEstado:200,
 					mensajeSMIMEValidado:anuladorVoto.mensajeSMIME)
+				log.debug (" - receiverCert.getSubject: " + flash.receiverCert.getSubjectDN())
+				flash.isEncryptedResponse = true
 				return false
-            }				
+            } else {
+				votoService.cancelVoteCancelation(anuladorVoto)
+			}				
         }
 		flash.respuesta = respuesta
 		return false

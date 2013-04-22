@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.security.Key;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -14,16 +15,16 @@ import java.util.Properties;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
+import javax.crypto.Cipher;
 import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
-import org.bouncycastle2.cms.CMSException;
+import org.bouncycastle2.cms.CMSAlgorithm;
 import org.bouncycastle2.cms.Recipient;
 import org.bouncycastle2.cms.RecipientId;
-import org.bouncycastle2.cms.CMSAlgorithm;
 import org.bouncycastle2.cms.RecipientInformation;
 import org.bouncycastle2.cms.RecipientInformationStore;
 import org.bouncycastle2.cms.SignerInformation;
@@ -37,11 +38,10 @@ import org.bouncycastle2.mail.smime.SMIMEEnvelopedGenerator;
 import org.bouncycastle2.mail.smime.SMIMEUtil;
 import org.bouncycastle2.util.Strings;
 import org.bouncycastle2.util.encoders.Base64;
-import org.sistemavotacion.android.Aplicacion;
 import org.sistemavotacion.modelo.EncryptedBundle;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
-import org.sistemavotacion.android.R;
+
 import android.util.Log;
 
 /**
@@ -52,9 +52,9 @@ public class EncryptionHelper {
 	
 	public static final String TAG = "EncryptionHelper";
 
-	public EncryptionHelper() {	}
+	private  EncryptionHelper() {	}
 	
-	public File encryptSMIMEFile(File fileToEncrypt, 
+	public static File encryptSMIMEFile(File fileToEncrypt, 
 			X509Certificate receiverCert) throws Exception {
 		Log.d(TAG + ".encryptSMIMEFile(...) ", " #### encryptSMIMEFile ");
     	/* Create the encrypter */
@@ -98,7 +98,7 @@ public class EncryptionHelper {
 		return fileToEncrypt;
 	}
 	
-	public File encryptText(byte[] text, File encryptedFile, 
+	public static File encryptText(byte[] text, File encryptedFile, 
 			X509Certificate receiverCert) throws Exception {
 		Log.d(TAG + ".encryptText(...) ", " #### encryptText ");
     	Properties props = System.getProperties();
@@ -118,8 +118,29 @@ public class EncryptionHelper {
 		return encryptedFile;
 	}
 	
+	public static byte[] encryptText(byte[] text, 
+			X509Certificate receiverCert) throws Exception {
+		Log.d(TAG + ".encryptText(...) ", " #### encryptText ");
+    	Properties props = System.getProperties();
+        Session session = Session.getDefaultInstance(props, null);
+        MimeMessage mimeMessage = new MimeMessage(session);
+        mimeMessage.setContent(new String(text), "text/plain");
+        // set the Date: header
+        //mimeMessage.setSentDate(new Date());
+    	SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
+    	encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
+    			receiverCert).setProvider("BC"));
+        /* Encrypt the message */
+        MimeBodyPart encryptedPart = encrypter.generate(mimeMessage,
+                new JceCMSContentEncryptorBuilder(
+                CMSAlgorithm.DES_EDE3_CBC).setProvider("BC").build());
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        encryptedPart.writeTo(baos);
+		return baos.toByteArray();
+	}
 	
-	public File encryptFile(File fileToEncrypt, File encryptedFile, 
+	
+	public static File encryptFile(File fileToEncrypt, File encryptedFile, 
 			X509Certificate receiverCert) throws Exception {
 		Log.d(TAG + ".encryptFile(...) ", " #### encryptFile ");
     	Properties props = System.getProperties();
@@ -148,7 +169,7 @@ public class EncryptionHelper {
 	/**
 	 * Method to decrypt SMIME signed messages
 	 */
-	public SMIMEMessageWrapper decryptSMIMEMessage(byte[] encryptedMessageBytes, 
+	public static SMIMEMessageWrapper decryptSMIMEMessage(byte[] encryptedMessageBytes, 
 			X509Certificate receiverCert, PrivateKey receiverPrivateKey) throws Exception {
 		Log.d(TAG + ".decryptSMIMEMessage(...) ", " #### decryptSMIMEMessage ");
 		byte[] messageContentBytes = decryptMessage(encryptedMessageBytes, 
@@ -162,17 +183,24 @@ public class EncryptionHelper {
 	/**
 	 * helper method to decrypt SMIME signed messages
 	 */
-	public byte[] decryptMessage(byte[] encryptedMessageBytes,
+	public static byte[] decryptMessage(byte[] encryptedMessageBytes,
 			X509Certificate receiverCert, PrivateKey receiverPrivateKey) throws Exception {
 		Log.d(TAG + ".decryptMessage(...) ", " #### decryptMessage ");
-		RecipientId recId = new JceKeyTransRecipientId(receiverCert);
+        RecipientId recId = null;
+        if(receiverCert != null) 
+            recId = new JceKeyTransRecipientId(receiverCert);
 		Recipient recipient = new JceKeyTransEnvelopedRecipient(receiverPrivateKey).setProvider("BC");
 		MimeMessage msg = new MimeMessage(null, 
 				new ByteArrayInputStream(encryptedMessageBytes));
 		SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
-	 
-		RecipientInformationStore   recipients = smimeEnveloped.getRecipientInfos();
-		RecipientInformation        recipientInfo = recipients.get(recId);
+
+        RecipientInformationStore   recipients = smimeEnveloped.getRecipientInfos();
+        RecipientInformation        recipientInfo = null;
+        if(recId != null) recipientInfo = recipients.get(recId);
+        if(recipientInfo == null && recipients.getRecipients().size() == 1) {
+            recipientInfo = (RecipientInformation) 
+                recipients.getRecipients().iterator().next();
+        }
 
 		/*RecipientId recipientRID = null;
 		if(recipient.getRID() != null) {
@@ -190,23 +218,32 @@ public class EncryptionHelper {
 	/**
 	 * Method to decrypt files attached to SMIME (not signed) messages 
 	 */
-	public byte[] decryptFile (byte[] encryptedFile, 
-    		X509Certificate decryptCert, PrivateKey decryptPrivateKey) throws Exception {
+	public static byte[] decryptFile (byte[] encryptedFile, 
+    		X509Certificate receiverCert, PrivateKey receiverPrivateKey) throws Exception {
 		Log.d(TAG + ".decryptFile(...) ", " #### decryptFile ");
-		RecipientId recId = new JceKeyTransRecipientId(decryptCert);
+        RecipientId recId = null;
+        if(receiverCert != null) 
+            recId = new JceKeyTransRecipientId(receiverCert);
 		Recipient recipient = new JceKeyTransEnvelopedRecipient(
-				decryptPrivateKey).setProvider("BC");
+				receiverPrivateKey).setProvider("BC");
 		MimeMessage msg = new MimeMessage(
 				null, new ByteArrayInputStream(encryptedFile));
 		SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
-		RecipientInformationStore recipients = smimeEnveloped.getRecipientInfos();
-		RecipientInformation recipientInfo = recipients.get(recId);
-		RecipientId recipientId = null;
+
+        RecipientInformationStore   recipients = smimeEnveloped.getRecipientInfos();
+        RecipientInformation        recipientInfo = null;
+        if(recId != null) recipientInfo = recipients.get(recId);
+        if(recipientInfo == null && recipients.getRecipients().size() == 1) {
+            recipientInfo = (RecipientInformation) 
+                recipients.getRecipients().iterator().next();
+        }
+        
+		/*RecipientId recipientId = null;
 		if(recipientInfo.getRID() != null) {
 			recipientId = recipientInfo.getRID();
 			Log.d(TAG + ".decryptFile(...) ", " #### recipientId.getSerialNumber(): " 
 					+ recipientId.getSerialNumber());
-		}
+		}*/
 		MimeBodyPart res = SMIMEUtil.toMimeBodyPart(recipientInfo.getContent(recipient));
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		res.writeTo(baos);
@@ -215,7 +252,7 @@ public class EncryptionHelper {
 		return (byte[])mimeMessage.getContent();
 	}
 	
-	public EncryptedBundle decryptEncryptedBundle(EncryptedBundle encryptedBundle, 
+	public static EncryptedBundle decryptEncryptedBundle(EncryptedBundle encryptedBundle, 
 			X509Certificate receiverCert, PrivateKey receiverPrivateKey) throws Exception {
 		byte[] messageBytes = null;
 		switch(encryptedBundle.getType()) {
@@ -251,6 +288,20 @@ public class EncryptionHelper {
 					receiverCert, receiverPrivateKey));
 		}
 		return result;
+	}
+	
+    public static byte[] encryptSymmetric(Key key, byte[] dataBytes) throws Exception {
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+        byte[] encrypted = cipher.doFinal(dataBytes);
+        return encrypted;
+	}
+	
+	public static byte[] decryptSymmetric(Key key, byte[] encryptedDataBytes) throws Exception {
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.DECRYPT_MODE, key);
+        byte[] decryptedData = cipher.doFinal(encryptedDataBytes);
+        return decryptedData;
 	}
 
 }

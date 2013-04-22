@@ -8,6 +8,7 @@ import org.sistemavotacion.utils.StringUtils;
 import grails.converters.JSON;
 import java.util.Locale;
 import javax.mail.internet.InternetAddress;
+import java.security.cert.X509Certificate;
 
 class VotoService {
 	
@@ -15,6 +16,7 @@ class VotoService {
 	def grailsApplication
 	def firmaService
 	def httpService
+	def encryptionService
 	
     synchronized Respuesta validarFirmas(SMIMEMessageWrapper smimeMessage, Locale locale) {
 		log.debug ("validarFirmas")		
@@ -130,6 +132,8 @@ class VotoService {
 		if (!certificado) return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:messageSource.
 			getMessage('anulacionVoto.errorSolicitudCSRNoEncontrada', null, locale))
 		else eventoVotacion = certificado.eventoVotacion
+		ByteArrayInputStream bais = new ByteArrayInputStream(certificado.contenido)
+		X509Certificate voteCertX509 = CertUtil.loadCertificateFromStream (bais)
 		def voto = Voto.findWhere(certificado:certificado)
 		if(voto){
 			voto.estado = Voto.Estado.ANULADO
@@ -175,20 +179,39 @@ class VotoService {
 			eventoVotacion:eventoVotacion,
 			estado:AnuladorVoto.Estado.SIN_NOTIFICAR, voto:voto)
 		anuladorVoto.save();
-		return new Respuesta(codigoEstado:codigoEstado, anuladorVoto:anuladorVoto)
+		return new Respuesta(codigoEstado:codigoEstado, anuladorVoto:anuladorVoto, 
+			certificado:voteCertX509)
 	}
 	
-	public synchronized Respuesta enviarAnulacion_A_CentroControl (AnuladorVoto anuladorVoto) {
+	public synchronized Respuesta sendVoteCancelationToControlCenter (
+		AnuladorVoto anuladorVoto, Locale locale) {
 		String centroControlURL = anuladorVoto.voto.eventoVotacion.centroControl.serverURL
 		String urlAnulacionVoto = "${centroControlURL}${grailsApplication.config.SistemaVotacion.sufijoURLAnulacionVoto}"
-		Respuesta respuestaCentroControl = httpService.enviarMensaje(urlAnulacionVoto, 
-			anuladorVoto.mensajeSMIME.contenido)
-		log.debug ("enviarAnulacion_A_CentroControl - respuesta : '${respuestaCentroControl.codigoEstado}' ")
+		
+		Respuesta respuesta = encryptionService.encryptSMIMEMessage(
+			anuladorVoto.mensajeSMIME.contenido, 
+			anuladorVoto.getEventoVotacion().getControlCenterCert(), locale)
+		if (Respuesta.SC_OK != respuesta.codigoEstado) return respuesta
+		byte[] encryptedMessage = respuesta.messageBytes
+		Respuesta respuestaCentroControl = httpService.enviarMensaje(
+			urlAnulacionVoto, encryptedMessage)
+		log.debug ("sendVoteCancelationToControlCenter - respuesta : '${respuestaCentroControl.codigoEstado}' ")
 		if (Respuesta.SC_OK == respuestaCentroControl.codigoEstado) {
 			anuladorVoto.estado = AnuladorVoto.Estado.NOTIFICADO
 			anuladorVoto.merge()
 		}
 		return respuestaCentroControl
+	}
+		
+	def cancelVoteCancelation(AnuladorVoto anuladorVoto) {
+		log.debug("cancelVoteCancelation - anuladorVoto.id: '${anuladorVoto.id}'")
+		anuladorVoto = anuladorVoto.merge()
+		SolicitudAcceso solicitudAcceso = anuladorVoto.solicitudAcceso
+		solicitudAcceso = solicitudAcceso.merge()
+		solicitudAcceso.estado = SolicitudAcceso.Estado.OK
+		solicitudAcceso.save()
+		anuladorVoto.estado = AnuladorVoto.Estado.ANULADO
+		anuladorVoto.save()
 	}
 	
 }

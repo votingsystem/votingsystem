@@ -1,7 +1,10 @@
 package org.sistemavotacion.controlacceso
 
+import java.security.cert.X509Certificate;
+
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import org.sistemavotacion.controlacceso.modelo.*;
+import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.springframework.web.multipart.MultipartHttpServletRequest
 import org.springframework.web.multipart.MultipartFile;
 import grails.converters.JSON
@@ -18,6 +21,7 @@ class SolicitudAccesoController {
     def solicitudAccesoService
 	def firmaService
 	def csrService
+	def encryptionService
 
 	/**
 	 * @httpMethod GET
@@ -79,13 +83,20 @@ class SolicitudAccesoController {
 				if (Respuesta.SC_OK == respuesta.codigoEstado) {
 					MultipartFile solicitudCsrFile = multipartFileMap.remove(
 						grailsApplication.config.SistemaVotacion.nombreSolicitudCSR)
-					Respuesta respuestaValidacionCSR = firmaService.firmarCertificadoVoto(solicitudCsrFile.getBytes(), 
-						respuesta.evento, request.getLocale(), true)
-					respuesta = respuestaValidacionCSR
+					Respuesta respuestaValidacionCSR = firmaService.
+							firmarCertificadoVoto(solicitudCsrFile.getBytes(), 
+							respuesta.evento, request.getLocale(), true)
 					if (Respuesta.SC_OK == respuestaValidacionCSR.codigoEstado) {
-						response.contentLength = respuestaValidacionCSR.firmaCSR.length
+						respuesta = encryptionService.encryptText(
+							respuestaValidacionCSR.firmaCSR, respuestaValidacionCSR.certificado)
+						if (Respuesta.SC_OK != respuesta.codigoEstado) {
+							response.status = respuesta?.codigoEstado
+							render respuesta?.mensaje
+							return false;
+						}
+						response.contentLength = respuesta.messageBytes.length
 						response.setContentType("application/octet-stream")
-						response.outputStream << respuestaValidacionCSR.firmaCSR
+						response.outputStream << respuesta.messageBytes
 						response.outputStream.flush()
 						return false
 					} else {

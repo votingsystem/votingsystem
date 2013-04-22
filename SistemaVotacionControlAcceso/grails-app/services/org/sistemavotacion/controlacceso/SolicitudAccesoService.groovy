@@ -6,6 +6,8 @@ import java.io.ByteArrayOutputStream
 import javax.mail.internet.MimeMessage;
 import org.sistemavotacion.controlacceso.modelo.*;
 import org.sistemavotacion.smime.*;
+
+import java.security.cert.X509Certificate;
 import java.util.Locale;
 
 /**
@@ -107,7 +109,8 @@ class SolicitudAccesoService {
 								hashSolicitudAccesoBase64:hashSolicitudAccesoBase64, 
 								eventoVotacion:eventoVotacion)
                             respuesta = new Respuesta(tipo:Tipo.SOLICITUD_ACCESO,
-                                    codigoEstado:Respuesta.SC_OK, evento:eventoVotacion, solicitudAcceso:solicitudAcceso)
+                                    codigoEstado:Respuesta.SC_OK, evento:eventoVotacion, 
+									solicitudAcceso:solicitudAcceso, smimeMessage:smimeMessage)
                         }
                     }
                 }   

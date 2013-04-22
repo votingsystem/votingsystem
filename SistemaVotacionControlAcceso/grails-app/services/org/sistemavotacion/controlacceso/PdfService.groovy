@@ -108,7 +108,7 @@ class PdfService {
 			"- pdfFirmado.length: ${pdfFirmado.length}"
 		Respuesta respuesta = null;
 		if(isSMIMEEncrypted) {
-			respuesta = encryptionService.decryptFile(pdfFirmado, locale)
+			respuesta = encryptionService.decryptMessage(pdfFirmado, locale)
 			if(Respuesta.SC_OK != respuesta.codigoEstado) return respuesta
 			else pdfFirmado = respuesta.messageBytes
 		} 			

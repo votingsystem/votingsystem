@@ -171,15 +171,13 @@ public class SignService extends Service implements TaskListener {
     
     public void processSignature(String signatureContent, String subject, 
     		String urlToSendSignedDocument, SignServiceListener signServiceListener, boolean isWithSignedReceipt,
-    		byte[] keyStoreBytes, char[] password) throws Exception {
-    	Log.d(TAG + ".processSignature(...)", " - processSignature - ");
+    		boolean isEncryptedResponse, byte[] keyStoreBytes, char[] password) throws Exception {
+    	Log.d(TAG + ".processSignature(...)", " - processSignature - isWithSignedReceipt: " + 
+    			isWithSignedReceipt + " - isEncryptedResponse: " + isEncryptedResponse);
     	this.signServiceListener = signServiceListener;
     	String usuario = null;
         if (Aplicacion.getUsuario() != null) usuario = Aplicacion.getUsuario().getNif();
         File signedFile = null;
-		KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
-		PrivateKey signerPrivatekey = (PrivateKey)keyStore.getKey(ALIAS_CERT_USUARIO, password);
-		X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(ALIAS_CERT_USUARIO);
         try {
     		SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
     				keyStoreBytes, ALIAS_CERT_USUARIO, password, SIGNATURE_ALGORITHM);
@@ -201,20 +199,26 @@ public class SignService extends Service implements TaskListener {
         if(Respuesta.SC_OK == getTimeStampTask.get()) {
         	try {
             	File fileToEncrypt = timeStampedDocument.setTimeStampToken(getTimeStampTask);
-            	EncryptionHelper encryptionHelper = new EncryptionHelper();
-            	encryptionHelper.encryptSMIMEFile(fileToEncrypt, 
+            	EncryptionHelper.encryptSMIMEFile(fileToEncrypt, 
             			Aplicacion.getControlAcceso().getCertificado());
         		SendFileTask sendFileTask = (SendFileTask)new SendFileTask(null, this, 
         				fileToEncrypt).execute(urlToSendSignedDocument);
         		if (Respuesta.SC_OK == sendFileTask.get()) {
                     try {
-                    	if(isWithSignedReceipt) {
-                    		SMIMEMessageWrapper receipt = new SMIMEMessageWrapper(null,
-        							new ByteArrayInputStream(sendFileTask.getMessage().getBytes()), null);
-                    		signServiceListener.setSignServiceMsg(Respuesta.SC_OK, null);
-                    		signServiceListener.proccessReceipt(receipt);
-                    	} else signServiceListener.setSignServiceMsg(
-                    			sendFileTask.getStatusCode(), getString(R.string.operacion_ok_msg));
+                    	if(isEncryptedResponse) {
+                    		signServiceListener.proccessEncryptedResponse(
+                    				sendFileTask.getMessage().getBytes());
+                    	} else {
+                    		 if(isWithSignedReceipt) {
+                         		SMIMEMessageWrapper receipt = new SMIMEMessageWrapper(null,
+            							new ByteArrayInputStream(sendFileTask.getMessage().getBytes()), null);
+                        		signServiceListener.setSignServiceMsg(Respuesta.SC_OK, null);
+                        		signServiceListener.proccessReceipt(receipt); 
+                    		 } else {
+                    			 signServiceListener.setSignServiceMsg(
+                             			sendFileTask.getStatusCode(), getString(R.string.operacion_ok_msg));
+                    		 }
+                    	}
     				} catch (Exception ex) {
     					ex.printStackTrace();
     					String msg = getString(R.string.receipt_error_msg) 

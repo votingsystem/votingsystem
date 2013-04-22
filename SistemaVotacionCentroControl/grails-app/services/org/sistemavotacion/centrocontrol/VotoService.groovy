@@ -108,11 +108,11 @@ class VotoService {
     }
 	
 	
-    synchronized Respuesta enviarVoto_A_ControlAcceso (MimeMessage smimeMessage,
+    synchronized Respuesta sendVoteToControlAccess (MimeMessage smimeMessage,
             EventoVotacion eventoVotacion, Locale locale) {
 		String urlVotosControlAcceso = "${eventoVotacion.controlAcceso.serverURL}" + 
 			"${grailsApplication.config.SistemaVotacion.sufijoURLNotificacionVotoControlAcceso}"
-        log.debug ("enviarVoto_A_ControlAcceso - urlVotosControlAcceso: ${urlVotosControlAcceso}")
+        log.debug ("sendVoteToControlAccess - urlVotosControlAcceso: ${urlVotosControlAcceso}")
 		String localServerURL = grailsApplication.config.grails.serverURL
 		
 		MensajeSMIME multifirmaCentroControl = new MensajeSMIME(
