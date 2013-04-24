@@ -1,0 +1,4 @@
+{"codigoEstado":700, "args":["ybCe/N4tkZANd5O2f6dxOjrlo0h1rxXeCusVJatXYZMZS1mvndtuq3tPAFiJeoBoIwTyAZ+vZvilWNkASjs6Dw=="], 
+            "operacion":"ANULAR_VOTO", "urlEnvioDocumento":"http://localhost:8080/SistemaVotacionControlAcceso/anuladorVoto/guardarAdjuntandoValidacion", 
+            "nombreDestinatarioFirma":"Primer ControlAcceso", "urlTimeStampServer":"http://localhost:8080/SistemaVotacionControlAcceso/timeStamp/obtener", 
+            "urlServer":"http://localhost:8080/SistemaVotacionControlAcceso/"}

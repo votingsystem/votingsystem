@@ -61,16 +61,28 @@ task genCertsGroovy(dependsOn: ['classes'], type: JavaExec) {
 	
 }
 
-task buildVotingApplet(type:VotingSystemApplet){
+
+jar {
 	manifest {
-		attributes 'Main-Class': 'org.sistemavotacion.Aplicacion',
+		attributes 'Main-Class': 'org.sistemavotacion.AppletFirma',
+				   'SplashScreen-Image':'resources/images/cert_100x108.png',
+				   'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/SistemaVotacionApplet',
+				   'provider': 'GruposP2P'
+	}
+	
+}
+
+task buildVotingApplet(type:VotingSystemApplet){
+
+	manifest {
+		attributes 'Main-Class': 'org.sistemavotacion.AppletFirma',
 				   'SplashScreen-Image':'resources/images/cert_100x108.png',
 				   'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/SistemaVotacionApplet',
 				   'provider': 'GruposP2P'
 	}
 }
 
-task signJar {
+task signJar(dependsOn: ['buildVotingApplet', 'copydeps']) {
 	doLast {
 		ant.signjar(keystore: "$rootProject.projectDir/mockDnie.jks",
 			storepass:rootProject.keyStorePassword,
@@ -83,15 +95,47 @@ task signJar {
 	
 }
 
+task copydeps(type: Copy) {
+	doFirst {
+		def file = file("$buildDir/appletdeps")
+		file.deleteDir()
+		println "${file.path} deleted"
+	}
+	
+	into "$buildDir/appletdeps"
+	def bcJar = project.configurations.runtime.find { 
+		it.name.startsWith("bcprov-") }
+	if(bcJar) ant.copy(file:bcJar, todir:file("$buildDir/appletdeps").path) 
+
+	/*doLast {
+		def bcJars = ["bcprov-jdk16-1.46.jar", "bcmail-jdk16-1.46.jar",
+			"bctsp-jdk16-1.46.jar"]
+		def depFiles = file("$buildDir/appletdeps")
+		depFiles.eachFile() {
+			if(!bcJars.contains(it.name)) {
+				println "signing: " + it.path
+				ant.signjar(keystore: "$rootProject.projectDir/mockDnie.jks",
+					storepass:rootProject.keyStorePassword,
+					alias:rootProject.signKeyAlias,
+					jar:it.path,
+					signedjar:it.path)
+			}
+				
+		}
+	}*/
+
+}
+
+
 project.ext {
   mainClass = "org.sistemavotacion.AppletFirma"
 }
 
 
 classes.dependsOn cleanCompileJava
+jar.dependsOn classes
 buildVotingApplet.dependsOn classes
-signJar.dependsOn buildVotingApplet
-install.dependsOn signJar
+install.dependsOn copydeps
 
 sourceSets {
 	main {

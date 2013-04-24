@@ -2,9 +2,10 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:style>
-		.messagePanel{width: 100%; margin-bottom:10px;}
+		.messagePanel{width: 100%; margin:10px 0px 10px 0px;
+			text-align: center; font-size: 16px;}
 	    .messageLabel {font-size: 16px; font-weight: bold; 
-			margin-top: 12px; margin-bottom: 12px; text-align: center;}
+			margin-top: 12px; margin-bottom: 12px; }
    		.mainPanel {padding: 15px; }
 		.boton { margin: 2px; cursor:pointer;}
 		.buttonPanel { float: right; margin-top: 15px;}
@@ -17,7 +18,6 @@
 	    text="{constantes.confirmarEleccionLabel}">
 		<g:VerticalPanel styleName="{style.mainPanel}">
        		<g:VerticalPanel ui:field="messagePanel" styleName="{style.messagePanel}">
-				<g:Label ui:field="messageLabel" styleName="{style.messageLabel}"></g:Label>
 			</g:VerticalPanel>
 			<g:HorizontalPanel styleName="{style.buttonPanel}">
    				<g:HorizontalPanel styleName="{style.boton}">

@@ -73,14 +73,6 @@ public class ReciboVoto {
         	logger.debug("ERROR - contenido del recibo: " + contenidoRecibo);
         }
     }
-        
-    public ReciboVoto (int codigoEstado, byte[] encryptedSMIMEMessage, 
-            Evento voto) throws Exception { 
-        this.encryptedSMIMEMessage = encryptedSMIMEMessage;
-        this.codigoEstado = codigoEstado;
-        this.voto = voto;
-    }
-    
     
     public ReciboVoto (int codigoEstado, SMIMEMessageWrapper votoValidado,
             String opcionSeleccionada) throws Exception { 

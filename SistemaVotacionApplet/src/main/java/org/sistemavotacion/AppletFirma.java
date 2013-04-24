@@ -177,6 +177,11 @@ public class AppletFirma extends JApplet {
             enviarMensajeAplicacion(operacionEnCurso);
             operacionEnCurso = null;  
         }  
+        if(AppletFirma.ModoEjecucion.APLICACION == 
+                AppletFirma.modoEjecucion){
+            logger.debug(" ------ System.exit(0) ------ ");
+            System.exit(0);
+        }
     }
         
     public void ejecutarOperacion(String operacionJSONStr) {
@@ -211,7 +216,8 @@ public class AppletFirma extends JApplet {
                         appletFirma.start();
                         File jsonFile = File.createTempFile("operacion", ".json");
                         FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
-                            .getResourceAsStream("testFiles/votingOperation.json"), jsonFile);
+                        //    .getResourceAsStream("testFiles/votingOperation.json"), jsonFile);
+                        .getResourceAsStream("testFiles/cancelVote.json"), jsonFile);            
                         //      .getResourceAsStream("testFiles/publishVoting.json"), jsonFile);
                         appletFirma.ejecutarOperacion(FileUtils.getStringFromFile(jsonFile));
                     } catch (Exception e) {
@@ -220,6 +226,11 @@ public class AppletFirma extends JApplet {
                 }
             });
             logger.debug("-- finalizando aplicación --- ");
+            if(AppletFirma.ModoEjecucion.APLICACION == 
+                AppletFirma.modoEjecucion){
+                logger.debug(" ------ System.exit(0) ------ ");
+                System.exit(0);
+            }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }

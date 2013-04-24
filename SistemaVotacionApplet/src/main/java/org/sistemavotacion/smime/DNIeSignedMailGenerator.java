@@ -1,6 +1,5 @@
 package org.sistemavotacion.smime;
 
-import java.io.ByteArrayInputStream;
 import static org.sistemavotacion.Contexto.*;
 import java.io.ByteArrayOutputStream;
 import javax.mail.Header;
@@ -8,10 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import javax.mail.Address;
@@ -27,16 +23,9 @@ import org.bouncycastle.asn1.smime.SMIMECapabilitiesAttribute;
 import org.bouncycastle.asn1.smime.SMIMECapability;
 import org.bouncycastle.asn1.smime.SMIMECapabilityVector;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
-import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.SignerInfoGenerator;
-import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
-import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
-import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
 import org.bouncycastle.util.Store;
-import org.bouncycastle.util.Strings;
 import org.sistemavotacion.Contexto;
-import org.sistemavotacion.seguridad.CertUtil;
-import org.sistemavotacion.util.FileUtils;
 
 /**
 * @author jgzornoza

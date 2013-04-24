@@ -36,6 +36,7 @@ class ControlAccesoFilters {
                 response.setHeader("Cache-Control", "no-store")
                 if(params.id)params.ids = StringUtils.checkIds(params.id)
             }
+			
         }
 
         guardarFilter(action:'guardar', find:true) {
@@ -105,21 +106,41 @@ class ControlAccesoFilters {
             after = {
                 def codigoEstado = flash.respuesta?.codigoEstado
                 log.debug "-----------------  filter - AdjuntandoValidacion - after - status: ${codigoEstado}-----------------------------------"
-                response.status = codigoEstado
                 if (Respuesta.SC_OK == flash.respuesta.codigoEstado) {
 					MensajeSMIME mensajeSMIMEValidado = flash.respuesta.mensajeSMIMEValidado
 					if (mensajeSMIMEValidado) {
-						response.contentLength = mensajeSMIMEValidado.contenido.length
-						response.setContentType("application/octet-stream")
-						response.outputStream << mensajeSMIMEValidado.contenido
-						response.outputStream.flush()
-						return false
+						if(flash.isEncryptedResponse) {
+							Respuesta respuesta =  encryptionService.encryptSMIMEMessage(
+								mensajeSMIMEValidado.contenido, flash.receiverCert, request.getLocale())
+							if(Respuesta.SC_OK == respuesta.codigoEstado) {
+								response.status = codigoEstado
+								response.setContentType("application/octet-stream")
+								response.contentLength = respuesta.messageBytes.length
+								response.outputStream << respuesta.messageBytes
+								response.outputStream.flush()
+								return false
+							} else {
+								log.debug "-----------------  filter - error encrypting response ${respuesta.mensaje}";
+								response.status = respuesta.codigoEstado
+								render respuesta.mensaje
+								return false
+							}
+						} else {
+							response.status = codigoEstado
+							response.setContentType("application/octet-stream")
+							response.contentLength = mensajeSMIMEValidado.contenido.length
+							response.outputStream << mensajeSMIMEValidado.contenido
+							response.outputStream.flush()
+							return false
+						}
 					} else {
+						response.status = Respuesta.SC_ERROR_EJECUCION
 						if (flash?.respuesta?.mensaje) render flash.respuesta.mensaje
 						else render "ERROR"
 						return false
 					}
                 } else {
+					response.status = codigoEstado
 					response.setContentType("text/plain")
 					if (flash?.respuesta?.mensaje) render flash.respuesta.mensaje
 					else render "ERROR"

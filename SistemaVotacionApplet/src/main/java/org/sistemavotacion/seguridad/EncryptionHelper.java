@@ -3,10 +3,8 @@ package org.sistemavotacion.seguridad;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
@@ -15,7 +13,6 @@ import java.util.Properties;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
-import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
@@ -38,9 +35,7 @@ import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
 import org.bouncycastle.mail.smime.SMIMEUtil;
 import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.encoders.Base64;
-import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
-import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -162,7 +157,9 @@ public class EncryptionHelper {
             byte[] encryptedMessageBytes, X509Certificate receiverCert, 
             PrivateKey receiverPrivateKey) throws Exception {
         logger.debug("decryptMessage(...) ");
-        RecipientId recId = new JceKeyTransRecipientId(receiverCert);
+        RecipientId recId = null;
+        if(receiverCert != null) 
+            recId = new JceKeyTransRecipientId(receiverCert);
         Recipient recipient = new JceKeyTransEnvelopedRecipient(
                 receiverPrivateKey).setProvider("BC");
         MimeMessage msg = new MimeMessage(null, 
@@ -170,7 +167,12 @@ public class EncryptionHelper {
         SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
 
         RecipientInformationStore   recipients = smimeEnveloped.getRecipientInfos();
-        RecipientInformation        recipientInfo = recipients.get(recId);
+        RecipientInformation        recipientInfo = null;
+        if(recId != null) recipientInfo = recipients.get(recId);
+        if(recipientInfo == null && recipients.getRecipients().size() == 1) {
+            recipientInfo = (RecipientInformation) 
+                recipients.getRecipients().iterator().next();
+        }
 
         /*RecipientId recipientRID = null;
         if(recipient.getRID() != null) {
@@ -189,18 +191,27 @@ public class EncryptionHelper {
     /**
      * Method to decrypt files attached to SMIME (not signed) messages 
      */
-    public static byte[] decryptFile (byte[] encryptedFile, 
-            X509Certificate decryptCert, PrivateKey decryptPrivateKey) 
+    public static Object decryptFile (byte[] encryptedFile, 
+            X509Certificate receiverCert, PrivateKey receiverPrivateKey) 
             throws Exception {
         logger.debug("decryptFile(...) ");
-        RecipientId recId = new JceKeyTransRecipientId(decryptCert);
+        RecipientId recId = null;
+        if(receiverCert != null) 
+            recId = new JceKeyTransRecipientId(receiverCert);
         Recipient recipient = new JceKeyTransEnvelopedRecipient(
-                        decryptPrivateKey).setProvider("BC");
+                        receiverPrivateKey).setProvider("BC");
         MimeMessage msg = new MimeMessage(
                         null, new ByteArrayInputStream(encryptedFile));
         SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
-        RecipientInformationStore recipients = smimeEnveloped.getRecipientInfos();
-        RecipientInformation recipientInfo = recipients.get(recId);
+        
+        RecipientInformationStore   recipients = smimeEnveloped.getRecipientInfos();
+        RecipientInformation        recipientInfo = null;
+        if(recId != null) recipientInfo = recipients.get(recId);
+        if(recipientInfo == null && recipients.getRecipients().size() == 1) {
+            recipientInfo = (RecipientInformation) 
+                recipients.getRecipients().iterator().next();
+        }
+        
         RecipientId recipientId = null;
         if(recipientInfo.getRID() != null) {
             recipientId = recipientInfo.getRID();
@@ -212,7 +223,7 @@ public class EncryptionHelper {
         res.writeTo(baos);
         MimeMessage mimeMessage = new MimeMessage(null,
                 new ByteArrayInputStream(baos.toByteArray()));
-        return (byte[])mimeMessage.getContent();
+        return mimeMessage.getContent();
     }
     
 	

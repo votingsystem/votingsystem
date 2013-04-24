@@ -69,12 +69,12 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
         votoEvento = appletFirma.getOperacionEnCurso().getEvento();
         addWindowListener(new WindowAdapter() {
             public void windowClosed(WindowEvent e) {
-                logger.debug("FirmaDialog window closed event received");
-                appletFirma.cancelarOperacion();
+                logger.debug("VotacionDialog window closed event received");
             }
 
             public void windowClosing(WindowEvent e) {
-                logger.debug("FirmaDialog window closing event received");
+                logger.debug("VotacionDialog window closing event received");
+                appletFirma.cancelarOperacion();
             }
         });
         //Bug similar to -> http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6993691
@@ -234,6 +234,7 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
             return;
         }
         dispose();
+        appletFirma.cancelarOperacion();
     }//GEN-LAST:event_cerrarButtonActionPerformed
 
     private void enviarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enviarButtonActionPerformed
@@ -387,7 +388,6 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
     }
     
     @Override public void showResult(VotingSystemWorker worker) {
-        mostrarPantallaEnvio(false);
         logger.debug("showResult - worker: " + worker.getClass() 
                 + " - statusCode:" + worker.getStatusCode());
         switch(worker.getId()) {
@@ -405,6 +405,7 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
                         errorDialog.setMessage(ex.getMessage(), getString("errorLbl"));
                     }
                 } else {
+                    mostrarPantallaEnvio(false);
                     MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
                     errorDialog.setMessage(worker.getMessage(), getString("errorLbl"));
                 }
@@ -433,6 +434,7 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
                         errorDialog.setMessage(ex.getMessage(), getString("errorLbl"));
                     }
                 } else {
+                    mostrarPantallaEnvio(false);
                     MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
                     errorDialog.setMessage(worker.getMessage(), getString("errorLbl"));
                 }

@@ -74,13 +74,8 @@ public class NotificarVotoWorker extends SwingWorker<Integer, String>
             SMIMEMessageWrapper votoValidado = 
                     EncryptionHelper.decryptSMIMEMessage(votoValidadoBytes, 
                     pkcs10WrapperClient.getCertificate(), pkcs10WrapperClient.getPrivateKey());
-            
-            votoValidado.writeTo(System.out);
-            logger.debug("===============================================");
-            
-            /*SMIMEMessageWrapper votoValidado = new SMIMEMessageWrapper(null,
-                new ByteArrayInputStream(votoValidadoBytes), null); */                       
-            reciboVoto = new ReciboVoto(Respuesta.SC_OK, votoValidadoBytes, evento);
+                     
+            reciboVoto = new ReciboVoto(Respuesta.SC_OK, votoValidado, evento);
         } else {
             message = EntityUtils.toString(response.getEntity());
         }

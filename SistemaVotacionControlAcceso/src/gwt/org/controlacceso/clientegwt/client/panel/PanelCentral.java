@@ -211,8 +211,8 @@ public class PanelCentral extends Composite implements ValueChangeHandler<String
     }
     
     public void cargarHerramientaValidacion () {
-    	Window.open(ServerPaths.getUrlValidationToolJar(), "", "");
-    	/*if(herramientaPublicacionFrame != null) {
+    	//Window.open(ServerPaths.getUrlValidationTool(), "", "");
+    	if(herramientaPublicacionFrame != null) {
     		RootPanel.get("uiBody").remove(herramientaPublicacionFrame);
     	} else {
     		herramientaPublicacionFrame = new NamedFrame(
@@ -224,9 +224,10 @@ public class PanelCentral extends Composite implements ValueChangeHandler<String
     	DialogoCargaHerramientaValidacion dialogoCarga = new DialogoCargaHerramientaValidacion();
     	dialogoCarga.show();    	
         RootPanel.get("uiBody").add(herramientaPublicacionFrame);
-        logger.info(" - cargarHerramientaValidacion - ServerPaths.getUrlFrameHerramientaValidacion(): " + ServerPaths.getUrlFrameHerramientaValidacion());
+        logger.info(" - cargarHerramientaValidacion - ServerPaths.getUrlFrameHerramientaValidacion(): " 
+        		+ ServerPaths.getUrlFrameHerramientaValidacion());
         DOM.setElementAttribute(herramientaPublicacionFrame.getElement(), "id", 
-        		herramientaPublicacionFrame.getName());*/
+        		herramientaPublicacionFrame.getName());
     }
 
 

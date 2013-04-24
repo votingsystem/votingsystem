@@ -2,13 +2,10 @@ package org.controlacceso.clientegwt.client.votaciones;
 
 import java.util.logging.Logger;
 
-import org.controlacceso.clientegwt.client.PuntoEntrada;
 import org.controlacceso.clientegwt.client.modelo.EventoSistemaVotacionJso;
 import org.controlacceso.clientegwt.client.modelo.MensajeClienteFirmaJso;
 import org.controlacceso.clientegwt.client.modelo.MensajeClienteFirmaJso.Operacion;
 import org.controlacceso.clientegwt.client.util.Browser;
-import org.controlacceso.clientegwt.client.util.ServerPaths;
-
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;

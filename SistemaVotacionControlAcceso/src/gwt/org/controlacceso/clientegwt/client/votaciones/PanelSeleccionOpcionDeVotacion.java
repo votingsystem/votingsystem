@@ -17,10 +17,14 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+
+import org.controlacceso.clientegwt.client.dialogo.ConfirmacionListener;
 import org.controlacceso.clientegwt.client.dialogo.DialogoCargaClienteAndroid;
+import org.controlacceso.clientegwt.client.dialogo.DialogoConfirmacion;
 
 public class PanelSeleccionOpcionDeVotacion extends Composite 
-	implements DialogoCargaClienteAndroid.DialogListener {
+	implements DialogoCargaClienteAndroid.DialogListener, 
+	ConfirmacionListener {
 	
     private static Logger logger = Logger.getLogger("PanelSeleccionOpcionDeVotacion");
 
@@ -64,14 +68,18 @@ public class PanelSeleccionOpcionDeVotacion extends Composite
         	DialogoCargaClienteAndroid dialogoCarga = new DialogoCargaClienteAndroid();
         	dialogoCarga.show(null, this);
     	} else {
-        	if(Window.confirm(Constantes.INSTANCIA.votoConfirmLabel(opcion.getContenido()))) {
-        		contenedorOpciones.procesarOpcionSeleccioda(opcion);
-    		}	
+        	DialogoConfirmacion dialogoOpcion = new DialogoConfirmacion(null, this);
+        	dialogoOpcion.show(Constantes.INSTANCIA.votoConfirmLabel(opcion.getContenido()));
     	}
     }
 
 	@Override
 	public void continueOperation() {
-		contenedorOpciones.procesarOpcionSeleccioda(opcion);
+		contenedorOpciones.procesarOpcionSeleccionada(opcion);
+	}
+
+	@Override
+	public void confirmed(Integer id) {
+		contenedorOpciones.procesarOpcionSeleccionada(opcion);
 	}
 }

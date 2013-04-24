@@ -218,6 +218,7 @@ public interface Constantes extends Messages{
 	String guardarVotoLabel();
 	String votoEnSistemaLabel();
 	String solicitudAccesoRepetida();
+	String cancelVoteServerData();
 	String resultadoVotacionOKCaption();
 	String resultadoVotacionMessage(String asunto, String opcionSeleccionada);
 	String textoPopupVisualizarVotoEnSistema(String urlVoto);
@@ -228,7 +229,7 @@ public interface Constantes extends Messages{
 	String mensajeAnulacionVotoOK();
 	
 	String mensajeGuardarReciboERROR();
-	String mensajeGuardarReciboOK(String rutaArchivo);
+	String mensajeGuardarReciboOK();
 	
     String checkBoxAnularDocumento();
     String checkBoxCancelarDocumento();

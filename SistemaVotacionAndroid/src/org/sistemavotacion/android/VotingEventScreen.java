@@ -409,8 +409,8 @@ public class VotingEventScreen extends FragmentActivity
         String serverURL = ServerPaths.getURLAnulacionVoto(Aplicacion.CONTROL_ACCESO_URL);
 		cancelVoteButton.setEnabled(false);
         try {
-            boolean isWithSignedReceipt = false;
-            boolean isEncryptedResponse = false;
+            boolean isWithSignedReceipt = true;
+            boolean isEncryptedResponse = true;
     		if(signService != null) signService.processSignature(
     				receipt.getVoto().getCancelVoteData(), subject, serverURL, this, 
     				isWithSignedReceipt, isEncryptedResponse, keyStoreBytes, password);	

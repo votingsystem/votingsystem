@@ -8,6 +8,9 @@
   </information>
   <resources>
     <j2se version="1.6+"/>
+    <g:each in="${appletJarDependencies}" var="it">
+    	<jar href="lib/${it}" />  
+    </g:each>
     <jar href="AppletFirma.jar" main="true" />
     <jar href="MonitorDescarga.jar" download="progress" />
   </resources>

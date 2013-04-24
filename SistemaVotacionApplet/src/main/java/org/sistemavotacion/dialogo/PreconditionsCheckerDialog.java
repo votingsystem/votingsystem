@@ -16,13 +16,13 @@ import static org.sistemavotacion.AppletFirma.CERT_CHAIN_URL_SUFIX;
 import org.sistemavotacion.Contexto;
 import static org.sistemavotacion.Contexto.getString;
 import org.sistemavotacion.FirmaDialog;
+import org.sistemavotacion.SaveReceiptDialog;
 import org.sistemavotacion.VotacionDialog;
 import org.sistemavotacion.modelo.Operacion;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.pdf.PdfFormHelper;
 import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.util.FileUtils;
-import org.sistemavotacion.util.VotacionHelper;
 import org.sistemavotacion.worker.ObtenerArchivoWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
@@ -43,7 +43,7 @@ public class PreconditionsCheckerDialog
             new HashMap<String, X509Certificate>();
     private Operacion operacion;
     private AtomicBoolean checking = new AtomicBoolean(true);
-    private boolean preconditionsOK = false;
+    private AtomicBoolean preconditionsOK = new AtomicBoolean(false);
     private String message = "ERROR";
     private Frame frame = null;
     private static final int CHECK_ACCES_CONTROL_CERT = 0;
@@ -66,12 +66,13 @@ public class PreconditionsCheckerDialog
         
         addWindowListener(new WindowAdapter() {
             public void windowClosed(WindowEvent e) {
-                logger.debug(" - window closed event received");
+                logger.debug("PreconditionsCheckerDialog window closed event received");
             }
 
             public void windowClosing(WindowEvent e) {
                 logger.debug(" - window closing event received");
                 dispose();
+                AppletFirma.INSTANCIA.cancelarOperacion();
             }
         });
         Runnable runnable = new Runnable() {
@@ -89,13 +90,29 @@ public class PreconditionsCheckerDialog
     
     public void checkConditions() {
         logger.debug("checkConditions");
+        X509Certificate controlCenterCert = null;
+        X509Certificate accessControlCert = null;
         try {
             switch(operacion.getTipo()) {
                 case ENVIO_VOTO_SMIME:
-                    checkCert(operacion.getEvento().getCentroControl().
-                            getServerURL(), CHECK_CONTROL_CENTER_CERT);
-                    checkCert(operacion.getEvento().getControlAcceso().
+                    controlCenterCert = checkCert(operacion.getEvento().
+                            getCentroControl().getServerURL(), 
+                            CHECK_CONTROL_CENTER_CERT);
+                    if(controlCenterCert != null) {
+                        controlCenterCertChecked = true;
+                    }
+                    accessControlCert = 
+                            checkCert(operacion.getEvento().getControlAcceso().
                             getServerURL(),CHECK_ACCES_CONTROL_CERT);
+                    if(accessControlCert != null) {
+                        accessControlCertChecked = true;
+                        if(controlCenterCertChecked == true) {
+                            preconditionsOK.set(true);
+                            checking.set(false);
+                        } 
+                    }
+                    logger.debug("controlCenterCertChecked: " + controlCenterCertChecked + 
+                            " - accessControlCertChecked: " + accessControlCertChecked);
                     break;
                 case PUBLICACION_MANIFIESTO_PDF:
                 case FIRMA_MANIFIESTO_PDF:
@@ -107,11 +124,16 @@ public class PreconditionsCheckerDialog
                 case ANULAR_SOLICITUD_ACCESO:
                 case ANULAR_VOTO: 
                 case SOLICITUD_COPIA_SEGURIDAD:
-                    checkCert(operacion.getUrlServer(), CHECK_SERVER_CERT);
+                    accessControlCert = checkCert(
+                            operacion.getUrlServer(), CHECK_SERVER_CERT);
+                    if(accessControlCert != null) {
+                        preconditionsOK.set(true);
+                        checking.set(false);
+                    }
                     break;
                 default:
-                    checking.set(true);
-                    preconditionsOK = true;
+                    checking.set(false);
+                    preconditionsOK.set(true);
             }
         } catch(final Exception ex) {
             logger.error(ex.getMessage(), ex);
@@ -124,13 +146,14 @@ public class PreconditionsCheckerDialog
         }
         while(checking.get()){}
         logger.debug("preconditionsOK: " + preconditionsOK);
-        if(preconditionsOK == true) {
+        if(preconditionsOK.get() == true) {
             processOperation();
             dispose();
         } else {
             acceptButton.setVisible(true);
             progressLabel.setText(message);
             progressBar.setVisible(false);
+            waitLabel.setText(" - ERROR - ");
             AppletFirma.INSTANCIA.responderCliente(
                     Operacion.SC_ERROR_EJECUCION, 
                     Contexto.getString("votingPreconditionsErrorMsg", message));
@@ -139,13 +162,16 @@ public class PreconditionsCheckerDialog
     }
     
     private void processOperation() {
-        logger.debug("processOperation");
+        logger.debug("processOperation: " + operacion.getTipo());
         switch(operacion.getTipo()) {
             case GUARDAR_RECIBO_VOTO:
-                Operacion resultado = VotacionHelper.guardarRecibo(
-                        operacion.getArgs()[0], frame);
-                AppletFirma.INSTANCIA.responderCliente(
-                        resultado.getCodigoEstado(), resultado.getMensaje());
+                javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        SaveReceiptDialog saveReceiptDialog = 
+                                new SaveReceiptDialog(frame, true);
+                        saveReceiptDialog.show(operacion.getArgs()[0]);
+                    }
+                });   
                 break;
             case ENVIO_VOTO_SMIME:
                 javax.swing.SwingUtilities.invokeLater(new Runnable() {
@@ -191,13 +217,13 @@ public class PreconditionsCheckerDialog
     }
 
     public static X509Certificate getCert(String serverURL) {
-        logger.debug(".getCert(...)", " - getCert - serverURL: " + serverURL);
+        logger.debug(" - getCert - serverURL: " + serverURL);
         return certsMap.get(serverURL);
     }
      
      
-    public void checkCert(String serverURL, Integer operationId) throws Exception {
-        logger.debug(".checkCert(...)", " - checkCert - serverURL: " + serverURL 
+    public X509Certificate checkCert(String serverURL, Integer operationId) throws Exception {
+        logger.debug(" - checkCert - serverURL: " + serverURL 
                 + " - operationId: " + operationId);
         if(serverURL == null) throw new Exception("Missing cert url");
         X509Certificate cert = certsMap.get(serverURL);
@@ -207,6 +233,7 @@ public class PreconditionsCheckerDialog
             logger.debug(" - getNetworkCert - serverCertURL: " + serverCertURL);
             new ObtenerArchivoWorker(operationId, serverCertURL, this).execute();
         }
+        return cert;
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -221,7 +248,7 @@ public class PreconditionsCheckerDialog
         messagePanel = new javax.swing.JPanel();
         progressLabel = new javax.swing.JLabel();
         progressBar = new javax.swing.JProgressBar();
-        progressLabel1 = new javax.swing.JLabel();
+        waitLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -241,9 +268,9 @@ public class PreconditionsCheckerDialog
 
         progressBar.setIndeterminate(true);
 
-        progressLabel1.setFont(new java.awt.Font("DejaVu Sans", 1, 14)); // NOI18N
-        progressLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        progressLabel1.setText(bundle.getString("PreconditionsCheckerDialog.progressLabel1.text")); // NOI18N
+        waitLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 14)); // NOI18N
+        waitLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        waitLabel.setText(bundle.getString("PreconditionsCheckerDialog.waitLabel.text")); // NOI18N
 
         javax.swing.GroupLayout messagePanelLayout = new javax.swing.GroupLayout(messagePanel);
         messagePanel.setLayout(messagePanelLayout);
@@ -256,7 +283,7 @@ public class PreconditionsCheckerDialog
                     .addGroup(messagePanelLayout.createSequentialGroup()
                         .addGroup(messagePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(progressLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 411, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(progressLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 411, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(waitLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 411, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -265,7 +292,7 @@ public class PreconditionsCheckerDialog
             .addGroup(messagePanelLayout.createSequentialGroup()
                 .addComponent(progressLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(progressLabel1)
+                .addComponent(waitLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -296,6 +323,11 @@ public class PreconditionsCheckerDialog
 
     private void acceptButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_acceptButtonActionPerformed
         dispose();
+        if(AppletFirma.ModoEjecucion.APLICACION == 
+                AppletFirma.modoEjecucion){
+            logger.debug(" ------ System.exit(0) ------ ");
+            System.exit(0);
+        }
     }//GEN-LAST:event_acceptButtonActionPerformed
 
 
@@ -304,7 +336,7 @@ public class PreconditionsCheckerDialog
     private javax.swing.JPanel messagePanel;
     private javax.swing.JProgressBar progressBar;
     private javax.swing.JLabel progressLabel;
-    private javax.swing.JLabel progressLabel1;
+    private javax.swing.JLabel waitLabel;
     // End of variables declaration//GEN-END:variables
 
     @Override
@@ -316,13 +348,13 @@ public class PreconditionsCheckerDialog
          logger.debug(" - setVotingPreconditions - accessControlCertChecked: " + accessControlCertChecked 
                  + " - controlCenterCertChecked: " + controlCenterCertChecked);
         if(accessControlCertChecked == true && controlCenterCertChecked == true) 
-            preconditionsOK = true;
+            preconditionsOK.set(true);
         checking.set(false);
     }
     
     private void setSignPreconditions() {
          logger.debug(" - setSignPreconditions - signCertChecked: " + signCertChecked);
-        if(signCertChecked == true) preconditionsOK = true;
+        if(signCertChecked == true) preconditionsOK.set(true);
         checking.set(false);
     }
     

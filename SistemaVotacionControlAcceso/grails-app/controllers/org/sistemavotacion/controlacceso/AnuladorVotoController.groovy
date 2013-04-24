@@ -1,6 +1,7 @@
 package org.sistemavotacion.controlacceso
 
 import javax.mail.internet.MimeMessage
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import org.sistemavotacion.controlacceso.modelo.*;
 
 /**
@@ -52,6 +53,42 @@ class AnuladorVotoController {
 		}
 	}*/
 	
+	
+	/**
+	 * Servicio que anula votos.
+	 *
+	 * @httpMethod GET
+	 * @param hashCertVoteBase64 El hash en Base64 del certificado del voto anulado.
+	 * @return La anulación firmada por el usuario.
+	 */
+	def obtener () {
+		if(params.hashCertVoteHEX) {
+			HexBinaryAdapter hexConverter = new HexBinaryAdapter();
+			String hashCertificadoVotoBase64 = new String(
+				hexConverter.unmarshal(params.hashCertVoteHEX))
+			log.debug "hashCertificadoVotoBase64: '${hashCertificadoVotoBase64}'"
+			AnuladorVoto anuladorVoto = null
+			AnuladorVoto.withTransaction{
+				anuladorVoto = AnuladorVoto.findWhere(
+					hashCertificadoVotoBase64:hashCertificadoVotoBase64)
+			}
+			if (anuladorVoto) {
+				response.status = Respuesta.SC_OK
+                response.contentLength = anuladorVoto.mensajeSMIME.contenido.length
+                response.setContentType("text/plain")
+                response.outputStream <<  anuladorVoto.mensajeSMIME.contenido
+                response.outputStream.flush()
+				return false
+			}
+			response.status = Respuesta.SC_NOT_FOUND
+			render message(code: 'cancelVoteNotFoundMsg',
+				args:[params.hashCertVoteBase64])
+			return false
+		}
+		response.status = Respuesta.SC_ERROR_PETICION
+		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
+		return false
+	}
 	
 	/**
 	 * Servicio que anula votos.

@@ -1,5 +1,6 @@
 package org.sistemavotacion.worker;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import javax.swing.SwingWorker;
 import org.apache.http.HttpResponse;
@@ -11,6 +12,7 @@ import org.sistemavotacion.seguridad.EncryptionHelper;
 import org.sistemavotacion.seguridad.PKCS10WrapperClient;
 import java.security.cert.X509Certificate;
 import org.sistemavotacion.dialogo.PreconditionsCheckerDialog;
+import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +72,16 @@ public class EnviarSolicitudControlAccesoWorker extends SwingWorker<Integer, Str
                 csrEncryptedFile, solicitudAcceso, evento.getUrlSolicitudAcceso());
         statusCode = response.getStatusLine().getStatusCode();
         if (Respuesta.SC_OK == statusCode) {
-            pkcs10WrapperClient.initSigner(EntityUtils.toByteArray(response.getEntity()));
+            byte[] encryptedData = EntityUtils.toByteArray(response.getEntity());
+            Object decryptedData = EncryptionHelper.decryptMessage(
+                    encryptedData, null, pkcs10WrapperClient.getPrivateKey());
+            byte[] decryptedDataBytes = null;
+            if(decryptedData instanceof byte[]) {
+                decryptedDataBytes = (byte[]) decryptedData;
+            } else if(decryptedData instanceof String) {
+                decryptedDataBytes = ((String)decryptedData).getBytes();
+            }
+            pkcs10WrapperClient.initSigner(decryptedDataBytes); 
         } else {
             message = EntityUtils.toString(response.getEntity());
         }

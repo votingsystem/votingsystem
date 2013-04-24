@@ -2,6 +2,8 @@ package org.controlacceso.clientegwt.client.dialogo;
 
 import java.util.logging.Logger;
 
+import org.controlacceso.clientegwt.client.Constantes;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.resources.client.CssResource;
@@ -9,6 +11,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -29,7 +32,6 @@ public class DialogoConfirmacion {
     @UiField PushButton aceptarButton;
     @UiField PushButton cerrarButton;
     @UiField VerticalPanel messagePanel;
-    @UiField Label messageLabel;
     ConfirmacionListener listener;
     Integer id;
     
@@ -52,12 +54,20 @@ public class DialogoConfirmacion {
     	dialogBox.hide();
     }
     
-    
-    public void show(String message) {
-    	messageLabel.setText(message);
+    public void show(String caption, String message) {
+    	HTML htmlMessage = new HTML(message);
+    	messagePanel.add(htmlMessage);
+    	dialogBox.setText(caption);
     	dialogBox.center();
     	dialogBox.show();
-    	
+    }
+    
+    
+    public void show(String message) {
+    	HTML htmlMessage = new HTML(message);
+    	messagePanel.add(htmlMessage);
+    	dialogBox.center();
+    	dialogBox.show();
     }
 
 }

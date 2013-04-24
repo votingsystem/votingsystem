@@ -116,6 +116,7 @@ class VotoController {
 					hashCertificadoVotoBase64:voto.certificado.hashCertificadoVotoBase64,
 					opcionDeEventoId:voto.opcionDeEvento.opcionDeEventoId,
 					eventoVotacionId:voto.eventoVotacion.eventoVotacionId,
+					eventoVotacionURL:voto.eventoVotacion.url,
 					estado:voto.estado.toString(),
 					certificadoURL:"${grailsApplication.config.grails.serverURL}/certificado/certificadoDeVoto?hashCertificadoVotoHex=${params.hashCertificadoVotoHex}",
 					votoSMIMEURL:"${grailsApplication.config.grails.serverURL}/mensajeSMIME/obtener?id=${voto.mensajeSMIME.id}"]

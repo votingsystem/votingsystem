@@ -26,6 +26,13 @@ task copyApps(dependsOn: [':MonitorDescarga:signJar', ':SistemaVotacionApplet:si
 		appAndroid << rootProject.aplicacionAndroid?.bytes
 	}
 }
+	
+task copyAppletDeps(type: Copy, dependsOn: ['copyApps']) {task ->
+	File depsDir = new File("${projectDir}/web-app/applet/lib");
+	depsDir.mkdirs();
+	into depsDir.path
+	from "${rootProject.projectDir}/SistemaVotacionApplet/build/appletdeps"
+}
 
 task stopApp << {
 	file("${projectDir}/.kill-run-app").createNewFile()
@@ -93,7 +100,7 @@ task generateRestDocs(dependsOn:['installGrailsRestDocPlugin']) << {task ->
 	}
 }
 
-task war(dependsOn:['copyApps', 'installGrailsRestDocPlugin']) << {task ->
+task war(dependsOn:['copyAppletDeps', 'installGrailsRestDocPlugin']) << {task ->
 	ProcessBuilder pb = new ProcessBuilder("grails", "war");
 	pb.directory(projectDir);
 	Process proc = pb.start();

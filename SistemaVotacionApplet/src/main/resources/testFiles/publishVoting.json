@@ -1,0 +1,10 @@
+{"codigoEstado":700, "operacion":"PUBLICACION_VOTACION_SMIME", "contenidoFirma":{"asunto":"viernes 19 abr - 11:48", 
+                "contenido":"Contenido - viernes 19 abr - 11:48", "fechaFin":"2013-04-30 12:00:00", "fechaInicio":"2013-04-15 12:00:00",
+                "opciones":[{"contenido":"si"},{"contenido":"no"},{"contenido":"ninguna de las anteriores"}], 
+                "centroControl":{"id":2, "nombre":"Primer CentroControl", "estado":"ACTIVO", 
+                    "serverURL":"http://192.168.1.5:8081/SistemaVotacionCentroControl", "fechaCreacion":"2013-03-07 10:12:53"}}, 
+            "urlEnvioDocumento":"http://localhost:8080/SistemaVotacionControlAcceso/eventoVotacion/guardarAdjuntandoValidacion", 
+            "nombreDestinatarioFirma":"Primer ControlAcceso", "asuntoMensajeFirmado":"Documento para votación", "respuestaConRecibo":true, 
+            "urlTimeStampServer":"http://localhost:8080/SistemaVotacionControlAcceso/timeStamp/obtener", 
+            "urlServer":"http://localhost:8080/SistemaVotacionControlAcceso/"}
+

@@ -52,8 +52,8 @@ public class ServerPaths {
 		return getApplicationPath() + "eventoFirma/obtenerManifiestos";
 	}
 	
-	public static String getUrlValidationToolJar () {
-		return getApplicationPath() + "applet/HerramientaValidacion.jar";
+	public static String getUrlValidationTool () {
+		return getApplicationPath() + "applet/jnlpHerramienta?gwt=true";
 	}
     
     public static String getUrlEvento (int id) {
@@ -241,6 +241,11 @@ public class ServerPaths {
     public static String getUrlComprobacionFechasEvento(int eventoId) {
         return getApplicationPath() + "evento/comprobarFechas?id=" + eventoId;
     }
+
+	public static String getUrlSolicitudCancelVote(
+			String hashCertificadoVotoBase64) {
+        return getApplicationPath() + "anuladorVoto/obtener?hashCertVoteHEX=" + hashCertificadoVotoBase64;
+	}
     
 
 }

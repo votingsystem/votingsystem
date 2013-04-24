@@ -56,6 +56,8 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
     interface EditorStyle extends CssResource {
         String errorTextBox();
         String textBox();
+        String messageLabel();
+        String linkedMessageLabel();
     }
 
 	@UiField HTML pageTitle;
@@ -64,14 +66,12 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
     @UiField VerticalPanel panelContenidos;
     @UiField HorizontalPanel panelBarrarProgreso;
     @UiField VerticalPanel messagePanel;
-    @UiField Label messageLabel;
     @UiField Label fechaLimiteLabel;
     @UiField VerticalPanel contentPanel;
     @UiField VerticalPanel contenidoPanel;
     @UiField HorizontalPanel autorPanel;
     @UiField Label autorLabel;
     @UiField VerticalPanel contenedorOpcionesPanel;
-    @UiField Anchor enlaceJustificante;
     @UiField PanelGraficoResultadoDeVotacion panelGraficoVotacion;
     @UiField Label opcionesLabel;
 	@UiField Label estatusCentroControlLabel;
@@ -84,13 +84,13 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
     private EventoSistemaVotacionJso evento;
     DialogoOperacionEnProgreso dialogoProgreso;
     public static PanelVotacion INSTANCIA;
+    private String hashCertificadoVotoHEX;
     
     
     public PanelVotacion() {
         initWidget(uiBinder.createAndBindUi(this));
         messagePanel.setVisible(false);
 		administracionDocumentoLabel.setListener(administrarEventoEventListener);
-        enlaceJustificante.setTarget("_blank");
         INSTANCIA = this;
         panelGraficoVotacion.setVisible(false);
         panelContenidos.setVisible(false);
@@ -105,19 +105,36 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
     }
 
     
-	private void setMessage (String message) {
-		if(message == null || "".equals(message)) messagePanel.setVisible(false);
+	private void setMessage (String... messages) {
+		boolean hasMessages = false;
+		if(messages == null || messages.length == 0 ) messagePanel.setVisible(false);
 		else {
-	    	messageLabel.setText(message);
-	    	messagePanel.setVisible(true);	
+			messagePanel.clear();
+			for(String message: messages) {
+				if(null != message) hasMessages = true;
+				Label messageLabel = new Label();
+		    	messageLabel.setText(message);
+				messageLabel.setStyleName(style.messageLabel());
+		    	messagePanel.add(messageLabel);
+			}
+			if(hasMessages) messagePanel.setVisible(true);
+			else messagePanel.setVisible(false);
 		}
+	}
+	
+	private void setLinkedMessage(String text, String url) {
+		Anchor linkedMessage = new Anchor();
+		linkedMessage.setStyleName(style.linkedMessageLabel());
+		linkedMessage.setHref(url);
+		linkedMessage.setText(text);
+		linkedMessage.setTarget("_blank");
+		messagePanel.add(linkedMessage);	
 	}
 
     public void show(EventoSistemaVotacionJso documento) {
     	this.evento = documento;
     	if (documento == null) return;
         messagePanel.setVisible(false);
-        enlaceJustificante.setVisible(false);
         contenidoPanel.clear();
         pageTitle.setHTML(Constantes.INSTANCIA.votacionLabel() + " '" + 
         		StringUtils.partirTexto(evento.getAsunto(), 
@@ -159,12 +176,6 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
         		new ServerRequestEstadisticasCallback());
         panelBarrarProgreso.setVisible(false);
         panelContenidos.setVisible(true);
-    }
-    
-    
-    @UiHandler("enlaceJustificante")
-    void onClickEnlaceJustificante(ClickEvent e) {
-
     }
     
     public void actualizarPanelOpciones(List<OpcionDeEventoJso> opciones, boolean isActive) {
@@ -235,6 +246,7 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
 				setWidgetsStateFirmando(false);
 				if(MensajeClienteFirmaJso.SC_OK == mensaje.getCodigoEstado()) {
 					DialogoResultadoVotacion dialogoResultado = new DialogoResultadoVotacion(mensaje.getEvento());
+					hashCertificadoVotoHEX = mensaje.getEvento().getHashCertificadoVotoHex();
 					dialogoResultado.show();
 				}else if(MensajeClienteFirmaJso.SC_ERROR_ENVIO_VOTO == mensaje.getCodigoEstado()) {
 					DialogoAnulacionSolicitudAcceso dialogoAnulacionSolicitud = 
@@ -246,11 +258,10 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
 						setMessage(Constantes.INSTANCIA.mensajeVotoRepetido());
 						if(mensaje.getEvento() != null && 
 								mensaje.getEvento().getVotante() != null) {
-							enlaceJustificante.setVisible(true);
-							enlaceJustificante.setHref(ServerPaths.getUrlSolicitudAccesoPorNif( 
-									mensaje.getEvento().getVotante().getNif(),
-									mensaje.getEvento().getId()));
-							enlaceJustificante.setText(Constantes.INSTANCIA.solicitudAccesoRepetida());
+							setLinkedMessage(Constantes.INSTANCIA.solicitudAccesoRepetida(), 
+									ServerPaths.getUrlSolicitudAccesoPorNif( 
+											mensaje.getEvento().getVotante().getNif(),
+											mensaje.getEvento().getId()));
 						}
 					} else {
 						setMessage(Constantes.INSTANCIA.mensajeError(
@@ -262,6 +273,9 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
 				setWidgetsStateFirmando(false);
 				if(200 == mensaje.getCodigoEstado()) {
 					setMessage(Constantes.INSTANCIA.mensajeAnulacionVotoOK());
+					setLinkedMessage(Constantes.INSTANCIA.cancelVoteServerData(), 
+							ServerPaths.getUrlSolicitudCancelVote( 
+									hashCertificadoVotoHEX));				
 				} else {
 					setMessage(Constantes.INSTANCIA.mensajeError(
 							Constantes.INSTANCIA.mensajeAnulacionVotoERROR() +
@@ -271,8 +285,8 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
 			case GUARDAR_RECIBO_VOTO:
 				setWidgetsStateFirmando(false);
 				if(MensajeClienteFirmaJso.SC_OK == mensaje.getCodigoEstado()) {
-					setMessage(Constantes.INSTANCIA.mensajeGuardarReciboOK(
-						mensaje.getArgsJsArray().get(0)));
+					setMessage(Constantes.INSTANCIA.mensajeGuardarReciboOK(), 
+							mensaje.getMensaje());
 				} else if(MensajeClienteFirmaJso.SC_CANCELADO == mensaje.getCodigoEstado()) {
 				} else {
 					setMessage(Constantes.INSTANCIA.mensajeError(
@@ -312,7 +326,7 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
 	}
 
 	@Override
-	public void procesarOpcionSeleccioda(OpcionDeEventoJso opcion) {
+	public void procesarOpcionSeleccionada(OpcionDeEventoJso opcion) {
 		MensajeClienteFirmaJso mensajeClienteFirma = MensajeClienteFirmaJso.create(null, 
 				Operacion.ENVIO_VOTO_SMIME.toString(), 
 				MensajeClienteFirmaJso.SC_PROCESANDO);

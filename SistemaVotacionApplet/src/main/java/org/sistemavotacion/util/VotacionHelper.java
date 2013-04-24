@@ -3,18 +3,14 @@ package org.sistemavotacion.util;
 import static org.sistemavotacion.Contexto.*;
 
 import org.sistemavotacion.smime.*;
-import java.awt.Frame;
 import java.io.File;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import javax.mail.Header;
-import javax.swing.JFileChooser;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.sistemavotacion.modelo.Evento;
-import org.sistemavotacion.modelo.Operacion;
 import org.sistemavotacion.modelo.ReciboVoto;
 import org.sistemavotacion.smime.DNIeSignedMailGenerator;
 import org.slf4j.Logger;
@@ -83,49 +79,5 @@ public class VotacionHelper {
         if(mapaRecibos == null || hashCertificadoVotoBase64 == null) return null;
         return mapaRecibos.get(hashCertificadoVotoBase64);
     }
-    
-    public static Operacion guardarRecibo(
-            String hashCertificadoVotoBase64, Frame frame) {
-        Operacion respuesta = new Operacion();
-        frame.setLocationRelativeTo(null);
-        ReciboVoto recibo = getReciboVoto(hashCertificadoVotoBase64);
-        if(recibo != null)  respuesta = guardarRecibo(recibo, frame);
-        else {
-            respuesta.setCodigoEstado(Operacion.SC_ERROR_PETICION);
-            respuesta.setMensaje("No se ha encontrado el recibo para " +
-                        hashCertificadoVotoBase64);
-        }
-        return respuesta;
-    }
-    
        
-    private static Operacion guardarRecibo(ReciboVoto reciboVoto, Frame frame) {
-        String resultado = "Anulada operación";
-        Operacion respuesta = new Operacion(Operacion.SC_CANCELADO);
-        try {
-            final JFileChooser chooser = new JFileChooser();
-            File recibo = reciboVoto.getArchivoRecibo();
-            chooser.setSelectedFile(recibo);
-            int returnVal = chooser.showSaveDialog(frame);
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                File file = chooser.getSelectedFile();
-                if (file.getName().indexOf(".") == -1) {
-                    String fileName = file.getAbsolutePath();
-                    file = new File(fileName);
-                }
-                if (file != null) {
-                    recibo.renameTo(file);
-                    resultado = "Guardado recibo en -> " + file.getAbsolutePath();
-                    respuesta.setCodigoEstado(Operacion.SC_OK);
-                }
-            }
-            recibo.delete();
-        } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-        }
-        respuesta.setMensaje(resultado);
-        logger.debug("- guardarRecibo - resultado: " + respuesta.obtenerJSONStr());
-        return respuesta;
-    }
-    
 }

@@ -86,6 +86,12 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
 
             public void windowClosing(WindowEvent e) {
                 logger.debug("FirmaDialog window closing event received");
+                appletFirma.cancelarOperacion();
+                if(AppletFirma.ModoEjecucion.APLICACION == 
+                        AppletFirma.modoEjecucion){
+                    logger.debug(" ------ System.exit(0) ------ ");
+                    System.exit(0);
+                }
             }
         });
         Operacion.Tipo tipoOperacion = appletFirma.

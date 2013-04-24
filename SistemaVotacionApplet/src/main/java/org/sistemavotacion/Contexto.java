@@ -11,6 +11,8 @@ import java.security.KeyStore;
 import java.security.Security;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
+import javax.activation.CommandMap;
+import javax.activation.MailcapCommandMap;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.sistemavotacion.modelo.Evento;
@@ -72,7 +74,7 @@ public class Contexto {
     public static final String PDF_DIGEST_OID = CMSSignedDataGenerator.DIGEST_SHA1;
 
     //hashing method of the voting data
-    public static final String VOTING_DATA_DIGEST = "SHA512";
+    public static final String VOTING_DATA_DIGEST = "SHA256";
     
     public static final String SIGN_PROVIDER = "BC";
     public static final String DEFAULT_SIGNED_FILE_NAME = "smimeMessage";
@@ -91,6 +93,23 @@ public class Contexto {
     private static PKCS10WrapperClient pkcs10WrapperClient;
     private static Evento voto;
     private static ResourceBundle resourceBundle;
+    
+    
+    static {
+        CommandMap.setDefaultCommandMap(addCommands(CommandMap.getDefaultCommandMap()));
+    }
+
+    private static MailcapCommandMap addCommands(CommandMap cm) {
+        MailcapCommandMap mc = (MailcapCommandMap)cm;
+
+        mc.addMailcap("application/pkcs7-signature;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.pkcs7_signature");
+        mc.addMailcap("application/pkcs7-mime;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.pkcs7_mime");
+        mc.addMailcap("application/x-pkcs7-signature;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.x_pkcs7_signature");
+        mc.addMailcap("application/x-pkcs7-mime;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.x_pkcs7_mime");
+        mc.addMailcap("multipart/signed;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.multipart_signed");
+
+        return mc;
+    }
     
     private Contexto () { }
 

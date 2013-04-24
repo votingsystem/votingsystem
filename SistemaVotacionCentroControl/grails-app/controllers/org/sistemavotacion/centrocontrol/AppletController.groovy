@@ -33,7 +33,16 @@ class AppletController {
 	 * @return Archivo JNLP con los datos del Applet principal de firma.
 	 */
 	def jnlpCliente () {
-		render (view:"jnlpCliente", contentType: "application/x-java-jnlp-file")
+		String depsPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}/applet/lib"
+		log.debug "deps path: ${depsPath}"
+		def appletJarDependencies = []
+		File keyStore = new File(depsPath).eachFile() { file->
+			if(file.path.endsWith(".jar"))
+				appletJarDependencies.add(file.getName()) 
+		}
+
+		render (view:"jnlpCliente", contentType: "application/x-java-jnlp-file", 
+			model: [appletJarDependencies: appletJarDependencies])
 	}
 	
 	/**
@@ -42,7 +51,16 @@ class AppletController {
 	 *         y copias de seguridad.
 	 */
 	def jnlpHerramienta () {
-		render (view:"jnlpHerramienta", contentType: "application/x-java-jnlp-file")
+		String depsPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}/applet/lib"
+		log.debug "deps path: ${depsPath}"
+		def appletJarDependencies = []
+		File keyStore = new File(depsPath).eachFile() { file->
+			if(file.path.endsWith(".jar"))
+				appletJarDependencies.add(file.getName())
+		}
+		
+		render (view:"jnlpHerramienta", contentType: "application/x-java-jnlp-file",
+			model: [appletJarDependencies: appletJarDependencies])
 	}
 	
 }
