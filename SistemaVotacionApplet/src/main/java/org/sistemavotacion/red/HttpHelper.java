@@ -21,6 +21,7 @@ import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.http.conn.ClientConnectionManager;
@@ -138,7 +139,7 @@ public class HttpHelper {
         HttpPost httpPost = new HttpPost(serverURL);
         FileBody fileBody = new FileBody(archivoFirmado);
         MultipartEntity reqEntity = new MultipartEntity();
-        reqEntity.addPart(Contexto.NOMBRE_ARCHIVO_ENVIADO_FIRMADO, fileBody);
+        reqEntity.addPart(Contexto.SMIME_FILE_NAME, fileBody);
         httpPost.setEntity(reqEntity);
         HttpResponse response = httpclient.execute(httpPost);
         logger.debug("----------------------------------------");
@@ -162,33 +163,28 @@ public class HttpHelper {
         return response;
     }
     
-    public HttpResponse enviarSolicitudAcceso(byte[] solicitudCSR, 
-            File solicitudAccesoSMIME, String serverURL) throws IOException {
-        logger.debug("enviarSolicitudAcceso - lanzando: " + serverURL);        
+    public HttpResponse sendMap(
+            Map<String, Object> fileMap, String serverURL) throws Exception {
+        logger.debug("sendFileMap - lanzando: " + serverURL);        
+        if(fileMap == null || fileMap.isEmpty()) throw new Exception(
+                Contexto.getString("requestWithoutFileMapErrorMsg"));
         HttpPost httpPost = new HttpPost(serverURL);
-        FileBody fileBody = new FileBody(solicitudAccesoSMIME);
-        ByteArrayBody  csrBody = new ByteArrayBody(solicitudCSR, 
-                Contexto.NOMBRE_ARCHIVO_CSR_ENVIADO);
+        Set<String> fileNames = fileMap.keySet();
         MultipartEntity reqEntity = new MultipartEntity();
-        reqEntity.addPart(Contexto.NOMBRE_ARCHIVO_ENVIADO_FIRMADO, fileBody);
-        reqEntity.addPart(Contexto.NOMBRE_ARCHIVO_CSR_ENVIADO, csrBody);
-        httpPost.setEntity(reqEntity);
-        HttpResponse response = httpclient.execute(httpPost);
-        logger.debug("----------------------------------------");
-        logger.debug(response.getStatusLine().toString());
-        logger.debug("----------------------------------------");
-        return response;  
-    }
-    
-    public HttpResponse enviarSolicitudAcceso(File solicitudCSR, 
-            File solicitudAccesoSMIME, String serverURL) throws IOException {
-        logger.debug("enviarSolicitudAcceso - lanzando: " + serverURL);        
-        HttpPost httpPost = new HttpPost(serverURL);
-        FileBody solicitudBody = new FileBody(solicitudAccesoSMIME);
-        FileBody  csrBody = new FileBody(solicitudCSR);
-        MultipartEntity reqEntity = new MultipartEntity();
-        reqEntity.addPart(Contexto.NOMBRE_ARCHIVO_ENVIADO_FIRMADO, solicitudBody);
-        reqEntity.addPart(Contexto.NOMBRE_ARCHIVO_CSR_ENVIADO, csrBody);
+        for(String objectName: fileNames){
+            Object objectToSend = fileMap.get(objectName);
+            if(objectToSend instanceof File) {
+                File file = (File)objectToSend;
+                logger.debug("sendFileMap - fileName: " + objectName + 
+                        " - filePath: " + file.getAbsolutePath());  
+                FileBody  fileBody = new FileBody(file);
+                reqEntity.addPart(objectName, fileBody);
+            } else if (objectToSend instanceof byte[]) {
+                byte[] byteArray = (byte[])objectToSend;
+                reqEntity.addPart(
+                        objectName, new ByteArrayBody(byteArray, objectName));
+            }
+        }
         httpPost.setEntity(reqEntity);
         HttpResponse response = httpclient.execute(httpPost);
         logger.debug("----------------------------------------");
@@ -201,9 +197,9 @@ public class HttpHelper {
         logger.debug("enviarByteArray - lanzando: " + serverURL);
         HttpPost httpPost = new HttpPost(serverURL);
         ByteArrayBody  byteArrayBody = new ByteArrayBody(byteArray, 
-                Contexto.NOMBRE_ARCHIVO_ENVIADO_FIRMADO);
+                Contexto.SMIME_FILE_NAME);
         MultipartEntity reqEntity = new MultipartEntity();
-        reqEntity.addPart(Contexto.NOMBRE_ARCHIVO_ENVIADO_FIRMADO, byteArrayBody);
+        reqEntity.addPart(Contexto.SMIME_FILE_NAME, byteArrayBody);
         httpPost.setEntity(reqEntity);
         HttpResponse response = httpclient.execute(httpPost);
         logger.debug("----------------------------------------");
@@ -218,7 +214,7 @@ public class HttpHelper {
         HttpPost httpPost = new HttpPost(serverURL);
         StringBody stringBody = new StringBody(cadenaFirmada);
         MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.STRICT);
-        reqEntity.addPart(Contexto.NOMBRE_ARCHIVO_ENVIADO_FIRMADO, stringBody);
+        reqEntity.addPart(Contexto.SMIME_FILE_NAME, stringBody);
         httpPost.setEntity(reqEntity);
         HttpResponse response = httpclient.execute(httpPost);
         logger.debug("----------------------------------------");

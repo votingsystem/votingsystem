@@ -34,5 +34,7 @@
         <mapping class="org.sistemavotacion.controlacceso.modelo.Dispositivo" />  
         <mapping class="org.sistemavotacion.controlacceso.modelo.SolicitudCopia" />
         <mapping class="org.sistemavotacion.controlacceso.modelo.SelloTiempo" />
+        <mapping class="org.sistemavotacion.controlacceso.modelo.Image" />
+        <mapping class="org.sistemavotacion.controlacceso.modelo.RepresentationDocument" />
     </session-factory>
 </hibernate-configuration>

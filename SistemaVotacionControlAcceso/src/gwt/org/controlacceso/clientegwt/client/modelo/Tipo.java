@@ -20,6 +20,8 @@ public enum Tipo {
     TEMPORALMENTE_FUERA_DE_SERVICIO(""),
     MENSAJE_OK(""),
 	
+    REPRESENTATIVES_PAGE(""),
+    
     //EVENTO_VOTACION
     EVENTO_VOTACION(""),
     EVENTO_VOTACION_ERROR(""),

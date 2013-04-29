@@ -1,2 +1,6 @@
-{"codigoEstado":700,"urlTimeStampServer":"http://localhost:8080/SistemaVotacionControlAcceso/timeStamp/obtener", 
-    "operacion":"PUBLICACION_MANIFIESTO_PDF", "mensaje":null, "urlEnvioDocumento":"http://localhost:8080/SistemaVotacionControlAcceso/eventoFirma/validarPDF?id=44", "urlDocumento":"http://localhost:8080/SistemaVotacionControlAcceso/eventoFirma/obtenerPDF?id=44", "nombreDestinatarioFirma":"Primer ControlAcceso", "asuntoMensajeFirmado":"Solicitud publicación manifiesto", "respuestaConRecibo":false}
+{"codigoEstado":700, "operacion":"PUBLICACION_MANIFIESTO_PDF", "mensaje":null, 
+            "urlEnvioDocumento":"http://localhost:8080/SistemaVotacionControlAcceso/eventoFirma/validarPDF?id=3", 
+            "urlDocumento":"http://localhost:8080/SistemaVotacionControlAcceso/eventoFirma/obtenerPDF?id=3", 
+            "nombreDestinatarioFirma":"Primer ControlAcceso", "asuntoMensajeFirmado":"Solicitud publicación manifiesto", 
+            "respuestaConRecibo":false, "urlTimeStampServer":"http://localhost:8080/SistemaVotacionControlAcceso/timeStamp/obtener", 
+            "urlServer":"http://localhost:8080/SistemaVotacionControlAcceso/"}

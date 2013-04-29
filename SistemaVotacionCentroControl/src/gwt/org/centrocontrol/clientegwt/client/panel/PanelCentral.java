@@ -11,6 +11,7 @@ import org.centrocontrol.clientegwt.client.util.StringUtils;
 import org.centrocontrol.clientegwt.client.dialogo.DialogoCargaHerramientaValidacion;
 import org.centrocontrol.clientegwt.client.dialogo.ErrorDialog;
 import org.centrocontrol.clientegwt.client.modelo.*;
+
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -44,6 +45,7 @@ public class PanelCentral extends Composite implements ValueChangeHandler<String
     private NamedFrame herramientaPublicacionFrame;
     PanelVotacion panelVotacion;
     PanelTest panelTest;
+    HistoryToken sistemaSeleccionado;
     
     public PanelCentral() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -62,6 +64,7 @@ public class PanelCentral extends Composite implements ValueChangeHandler<String
     	if (panelSeleccionado != null) panelSeleccionado.clear();
     	switch(historyToken) {
     		case VOTACIONES:
+    			sistemaSeleccionado = HistoryToken.VOTACIONES;
     			if(panelVotaciones == null) {
     				panelVotaciones = new PanelVotaciones();
     			}
@@ -70,6 +73,7 @@ public class PanelCentral extends Composite implements ValueChangeHandler<String
             	panelSeleccionado.add(selectedPanel);
             	break;
     		case VOTAR:
+    			sistemaSeleccionado = HistoryToken.VOTACIONES;
     			if(panelVotacion == null) {
     				panelVotacion = new PanelVotacion();
     			}
@@ -96,7 +100,7 @@ public class PanelCentral extends Composite implements ValueChangeHandler<String
     				History.newItem(HistoryToken.VOTACIONES.toString());
     			} else panelSeleccionado.add(selectedPanel);
     			cargarHerramientaValidacion();
-            	break;    			
+            	break;  
             default:
             	logger.info(" - Token sin procesar -> " + historyToken.toString());
     	}
@@ -138,6 +142,10 @@ public class PanelCentral extends Composite implements ValueChangeHandler<String
     			null, historyToken, svQueryString.getEstadoEvento());
     	BusEventos.fireEvent(evento);
 		setPanel(historyToken);
+	}
+	
+	public HistoryToken getSistemaSeleccionado () {
+		return sistemaSeleccionado;
 	}
 
 	@Override

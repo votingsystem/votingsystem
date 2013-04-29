@@ -57,7 +57,7 @@ import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
 import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.encoders.Base64;
-
+import javax.mail.BodyPart
 
 /**
  * @author jgzornoza
@@ -115,8 +115,30 @@ class EncryptionService {
 			res.writeTo(baos)
 			MimeMessage mimeMessage = new MimeMessage(null,
 				new ByteArrayInputStream(baos.toByteArray()));
+			Object messageContent = mimeMessage.getContent()
+			byte[] messageContentBytes = null
+			log.debug("messageContent: ${messageContent?.getClass()}")
+			if(messageContent instanceof MimeMultipart) {
+				BodyPart bodyPart = ((MimeMultipart)messageContent).getBodyPart(0)
+				InputStream stream = bodyPart.getInputStream();
+				ByteArrayOutputStream bodyPartOutputStream = new ByteArrayOutputStream();
+				byte[] buf =new byte[1024];
+				int len;
+				while((len = stream.read(buf)) > 0){
+					bodyPartOutputStream.write(buf,0,len);
+				}
+				stream.close();
+				bodyPartOutputStream.close();
+				messageContentBytes = bodyPartOutputStream.toByteArray()
+			} else if(messageContent instanceof byte[]) {
+				messageContentBytes = messageContent
+			} else if(messageContent instanceof String) { 
+				messageContentBytes = ((String)messageContent).getBytes()
+			}
+				
+			log.debug("messageContent: ${messageContent?.getClass()}- ${new String(messageContentBytes)}")
 			return new Respuesta(codigoEstado: Respuesta.SC_OK,
-				messageBytes:mimeMessage.getContent())
+				messageBytes:messageContentBytes)
 		} catch(CMSException ex) {
 			log.error (ex.getMessage(), ex)
 			return new Respuesta(mensaje:messageSource.getMessage(

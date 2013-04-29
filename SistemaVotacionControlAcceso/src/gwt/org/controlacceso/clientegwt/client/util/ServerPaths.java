@@ -1,6 +1,8 @@
 package org.controlacceso.clientegwt.client.util;
 
 import org.controlacceso.clientegwt.client.modelo.EventoSistemaVotacionJso;
+import org.controlacceso.clientegwt.client.modelo.EventoSistemaVotacionJso.Estado;
+
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**
@@ -114,12 +116,9 @@ public class ServerPaths {
     	return getApplicationPath() + "subscripcion/votaciones";
     }
     
-    public static String getUrlEventosVotacion (int max, int offset, 
-    		EventoSistemaVotacionJso.Estado estado) {
-    	String sufix = ""; 
-    	if(estado != null) sufix = "&estadoEvento=" + estado.toString();
-    	return getApplicationPath() + "eventoVotacion/obtener?max=" 
-    		+ max + "&offset=" + offset + sufix;
+    public static String getRepresentativesUrl (int max, int offset) {
+    	return getApplicationPath() + "representative/get?max=" 
+    		+ max + "&offset=" + offset;
     }
     
     
@@ -246,6 +245,25 @@ public class ServerPaths {
 			String hashCertificadoVotoBase64) {
         return getApplicationPath() + "anuladorVoto/obtener?hashCertVoteHEX=" + hashCertificadoVotoBase64;
 	}
+
+	public static String getUrlRepresentativeData() {
+		return getApplicationPath() + "representative/guardar";
+	}
     
+    public static String getUrlEventosVotacion (int max, int offset, 
+    		EventoSistemaVotacionJso.Estado estado) {
+    	String sufix = ""; 
+    	if(estado != null) sufix = "&estadoEvento=" + estado.toString();
+    	return getApplicationPath() + "eventoVotacion/obtener?max=" 
+    		+ max + "&offset=" + offset + sufix;
+    }
+
+	public static String getRepresentativeDetailesMapUrl(int representativeId) {
+		return getApplicationPath() + "representative/detailed?id=" + representativeId;
+	}
+
+	public static String getUrlSelectRepresentative() {
+		return getApplicationPath() + "representative/guardarSelectAdjuntandoValidacion";
+	}
 
 }

@@ -6,6 +6,7 @@ public class SistemaVotacionQueryString {
 
 	private HistoryToken historyToken;
 	private Integer eventoId;
+	private Integer representativeId;
 	private EventoSistemaVotacionJso.Estado estadoEvento;
 	
 	public SistemaVotacionQueryString() {}
@@ -37,6 +38,14 @@ public class SistemaVotacionQueryString {
 	public String toString()  {
 		return "[historyToken: " + historyToken + "- eventoId:" + eventoId 
 				+ " - estadoEvento: " + estadoEvento + "]";
+	}
+
+	public Integer getRepresentativeId() {
+		return representativeId;
+	}
+
+	public void setRepresentativeId(Integer representativeId) {
+		this.representativeId = representativeId;
 	}
 	
 }

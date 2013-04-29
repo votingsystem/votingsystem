@@ -1,0 +1,43 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:b='urn:import:com.google.gwt.user.cellview.client'
+    xmlns:panelSV='urn:import:org.controlacceso.clientegwt.client.panel'>
+    <ui:style>
+		.mainPanel {width: 100%;}
+		.optionsPanel{}
+		.pageTitlePanel {width: 100%; margin-bottom: 20px;}
+		.pageTitle {font-size: 20px; font-weight: bold; margin: 8px 0px 3px 0px; color:#47678e; text-align: center;
+ 			border-bottom: 1px dotted; color:#02227a; }
+		.newRepresentativeButton{margin:0px 5px 0px 5px;}
+		.removeRepresentativeButton{margin:20px 5px 0px 5px;}
+   	</ui:style>
+	<ui:with field='constantes' type='org.controlacceso.clientegwt.client.Constantes'/>
+	<ui:with field='res' type='org.controlacceso.clientegwt.client.Recursos'/>   
+	<ui:image field='newRepresentativeButtonImg' src="NewRepresentativeButton.png"/>	
+	<ui:image field='removeRepresentativeButtonImg' src="RemoveRepresentativeButton.png"/>	
+	
+	<g:VerticalPanel styleName="{style.mainPanel}">
+       	<g:cell horizontalAlignment="ALIGN_CENTER">
+       	    <g:HorizontalPanel ui:field='pageTitle' styleName="{style.pageTitlePanel}">
+				<g:HTML styleName="{style.pageTitle}" 
+			    	HTML='{constantes.representativesConfigPageTitle}'/>
+			</g:HorizontalPanel>
+       	</g:cell>
+
+   		<g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE" width="100%">
+	   		<g:VerticalPanel ui:field='optionsPanel' styleName="{style.optionsPanel}">
+				<g:HorizontalPanel styleName="{style.newRepresentativeButton}">
+	      			<g:PushButton ui:field='newRepresentativeButton'>
+			   			<g:upFace image='{newRepresentativeButtonImg}'/>
+					</g:PushButton>
+				</g:HorizontalPanel>
+				<g:HorizontalPanel styleName="{style.removeRepresentativeButton}">
+	      			<g:PushButton ui:field='removeRepresentativeButton'>
+			   			<g:upFace image='{removeRepresentativeButtonImg}'/>
+					</g:PushButton>
+				</g:HorizontalPanel>			
+			</g:VerticalPanel>
+   		</g:cell>
+	</g:VerticalPanel>
+</ui:UiBinder> 

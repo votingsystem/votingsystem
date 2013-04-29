@@ -56,6 +56,10 @@ public class PanelSubsistemas extends Composite {
 				sistemaFirmasLink.setVisible(true);
 				sistemaReclamacionesLink.setVisible(true);
 				break;	
+			case REPRESENTATIVES_PAGE:
+				sistemaFirmasLink.setVisible(true);
+				sistemaReclamacionesLink.setVisible(true);
+				sistemaVotacionLink.setVisible(true);
 			default:
 				break;
 		}

@@ -37,6 +37,7 @@ class SubscripcionService {
 			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:mensajeError)
 		}
 		usuario.nif = nifValidado
+		usuario.type = Usuario.Type.USER
 		def usuarioDB = Usuario.findWhere(nif:nifValidado.toUpperCase())
 		Certificado certificado = null;
 		if (!usuarioDB) {

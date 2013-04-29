@@ -8,6 +8,7 @@ public interface Constantes extends Messages{
 	public static final Constantes INSTANCIA = GWT.create(Constantes.class);
 	
 	public static final int EVENTS_RANGE = 21;
+	public static final int REPRESENTATIVES_RANGE = 5;
 	public static final int MAX_NUM_CARACTERES_SUBJECT = 100;
     public static final String ID_FRAME_APPLET = "frameClienteFirma";
     public static final String ID_FRAME_HERRAMIENTA_PUBLICACION = "frameHerramientaPublicacion";
@@ -149,6 +150,7 @@ public interface Constantes extends Messages{
 	String piePaginaVotarAndroid();
 	String piePaginaPublicarManifiesto();
 	
+	String representativesLabel();
 	String sistemaVotacionLabel();
 	String opcionesVotacionLabel();
 	String crearOpcionCaption();
@@ -279,5 +281,30 @@ public interface Constantes extends Messages{
     String eventoBorradoOK();
     String operationResultCaption();  
     String operationResultMsg(String value);
-        
+    
+    String newRepresentativeLabel();
+    String headerNewRepresentative();
+    String newRepresentativeImgLabel();
+    String representativeDataMsgSubject();
+    String representativeDataTransferERROR();
+    String representativeDataTransferOK();
+    String representativesConfigPageTitle();
+    String checkRepresentativeMsg();
+    String checkRepresentativeCaption();
+    String nifErrorMsg();
+    String representationsNumberLbl(Integer value);
+    String profileRepresentativeCaption();
+    String representativeHistoryCaption();
+    String selectRepresentativeConfirmMsg(String value);
+    String representativeDataSubject();
+    String selectRepresentativeSubject();
+    
+    String requestRepresentativeVotingHistoryCaption();
+    String requestRepresentativeVotingHistoryMsg();
+    String requestRepresentativeAccreditationsCaption();
+    String requestRepresentativeAccreditationsMsg();
+
+    String requestDateFromLabel();	
+    String requestDateToLabel();	
+    String requestDateLabel();
 }

@@ -1,6 +1,5 @@
 package org.sistemavotacion;
 
-import static org.sistemavotacion.Contexto.IS_TIME_STAMPED_SIGNATURE;
 import static org.sistemavotacion.Contexto.NOMBRE_ARCHIVO_FIRMADO;
 import static org.sistemavotacion.Contexto.TIMESTAMP_DNIe_HASH;
 import static org.sistemavotacion.Contexto.getString;
@@ -11,7 +10,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.List;
 
 import javax.swing.ImageIcon;
@@ -22,11 +20,10 @@ import org.sistemavotacion.dialogo.MensajeDialog;
 import org.sistemavotacion.dialogo.PasswordDialog;
 import org.sistemavotacion.modelo.Operacion;
 import org.sistemavotacion.modelo.Respuesta;
-import org.sistemavotacion.pdf.PDFSignerDNIe;
 import org.sistemavotacion.smime.DNIeSignedMailGenerator;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.util.FileUtils;
-import org.sistemavotacion.worker.EnviarDocumentoFirmadoWorker;
+import org.sistemavotacion.worker.DocumentLauncherWorker;
 import org.sistemavotacion.worker.ObtenerArchivoWorker;
 import org.sistemavotacion.worker.PDFSignerDNIeWorker;
 import org.sistemavotacion.worker.TimeStampWorker;
@@ -35,8 +32,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.itextpdf.text.pdf.PdfReader;
-import java.util.logging.Level;
 import org.sistemavotacion.dialogo.PreconditionsCheckerDialog;
+import static org.sistemavotacion.modelo.Operacion.Tipo.FIRMA_MANIFIESTO_PDF;
+import static org.sistemavotacion.modelo.Operacion.Tipo.PUBLICACION_MANIFIESTO_PDF;
+import static org.sistemavotacion.modelo.Operacion.Tipo.SOLICITUD_COPIA_SEGURIDAD;
 import org.sistemavotacion.seguridad.EncryptionHelper;
 import org.sistemavotacion.worker.VotingSystemWorker;
 
@@ -80,23 +79,20 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
         }
         addWindowListener(new WindowAdapter() {
             public void windowClosed(WindowEvent e) {
-                logger.debug("FirmaDialog window closed event received");
-                appletFirma.cancelarOperacion();
+                logger.debug(" - window closed event received");
             }
 
             public void windowClosing(WindowEvent e) {
-                logger.debug("FirmaDialog window closing event received");
-                appletFirma.cancelarOperacion();
-                if(AppletFirma.ModoEjecucion.APLICACION == 
-                        AppletFirma.modoEjecucion){
-                    logger.debug(" ------ System.exit(0) ------ ");
-                    System.exit(0);
-                }
+                logger.debug(" - window closing event received");
+                dispose();
+                AppletFirma.INSTANCIA.cancelarOperacion();
             }
         });
-        Operacion.Tipo tipoOperacion = appletFirma.
-                getOperacionEnCurso().getTipo();
+        Operacion.Tipo tipoOperacion = operacion.getTipo();
+        logger.debug(" - tipoOperacion: " + tipoOperacion);
         setTitle(tipoOperacion.getCaption());
+        progressBarPanel.setVisible(false);
+        messageLabel.setVisible(false);
         switch(tipoOperacion) {
             case FIRMA_MANIFIESTO_PDF:
             case PUBLICACION_MANIFIESTO_PDF:
@@ -109,14 +105,24 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                 verDocumentoButton.setIcon(new ImageIcon(getClass().
                         getResource("/resources/images/pdf_16x16.png"))); 
                 break;
-            default:
-                logger.debug("No se ha encontrado la operación");
+            case SELECT_REPRESENTATIVE:
+                if(operacion.getContenidoFirma().get("representativeName") != null) {
+                    messageLabel.setText(Contexto.getString("selectedRepresentativeMsg", 
+                            operacion.getContenidoFirma().get("representativeName").toString()));
+                    messageLabel.setVisible(true);
+                }
                 progressBarPanel.setVisible(false);
-                 pack();
+                pack();
+                setVisible(true);
+                break;
+            default:
+                logger.error("######### No se ha encontrado la operación" + 
+                        tipoOperacion);
+                progressBarPanel.setVisible(false);
+                pack();
                 setVisible(true);
                 break;
         }
-        progressBarPanel.setVisible(false);
         pack();
     }
     
@@ -158,6 +164,7 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
         confirmacionPanel = new javax.swing.JPanel();
         mensajeLabel = new javax.swing.JLabel();
         verDocumentoButton = new javax.swing.JButton();
+        messageLabel = new javax.swing.JLabel();
         progressBarPanel = new javax.swing.JPanel();
         progressLabel = new javax.swing.JLabel();
         progressBar = new javax.swing.JProgressBar();
@@ -188,6 +195,9 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
             }
         });
 
+        messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        messageLabel.setText(bundle.getString("FirmaDialog.messageLabel.text")); // NOI18N
+
         javax.swing.GroupLayout confirmacionPanelLayout = new javax.swing.GroupLayout(confirmacionPanel);
         confirmacionPanel.setLayout(confirmacionPanelLayout);
         confirmacionPanelLayout.setHorizontalGroup(
@@ -198,13 +208,16 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                     .addComponent(mensajeLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(confirmacionPanelLayout.createSequentialGroup()
                         .addComponent(verDocumentoButton)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(messageLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         confirmacionPanelLayout.setVerticalGroup(
             confirmacionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(confirmacionPanelLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap()
+                .addComponent(messageLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(mensajeLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(verDocumentoButton)
@@ -258,7 +271,7 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                         .addComponent(cerrarButton))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(confirmacionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 10, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -299,13 +312,14 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
         final String finalPassword = password;
         mostrarPantallaEnvio(true);
         progressLabel.setText("<html>" + getString("progressLabel")+ "</html>");
-        final EnviarDocumentoFirmadoWorker lanzador = new EnviarDocumentoFirmadoWorker(
+        final DocumentLauncherWorker lanzador = new DocumentLauncherWorker(
                 ENVIAR_DOCUMENTO_FIRMADO_WORKER, operacion.getUrlEnvioDocumento(), this);
         tareaEnEjecucion = lanzador;
         Runnable runnable = new Runnable() {
             public void run() {  
                 try {
                     switch(operacion.getTipo()) {
+                        case SELECT_REPRESENTATIVE:
                         case ANULAR_VOTO:
                         case ANULAR_SOLICITUD_ACCESO:
                         case CAMBIO_ESTADO_CENTRO_CONTROL_SMIME:
@@ -320,36 +334,25 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                                 operacion.getContenidoFirma().toString(),
                                 finalPassword.toCharArray(), operacion.getAsuntoMensajeFirmado(), 
                                 documentoFirmado);
-                            if(IS_TIME_STAMPED_SIGNATURE) {                                
                                 setTimeStampDocument(documentoFirmado, TIMESTAMP_DNIe_HASH);
-                                return;
-                            }
-                            break;
+                            return;
                         case SOLICITUD_COPIA_SEGURIDAD:
                         case FIRMA_MANIFIESTO_PDF:
                         case PUBLICACION_MANIFIESTO_PDF:
                             documentoFirmado = new File(FileUtils.APPTEMPDIR +
                                 operacion.getTipo().getNombreArchivoEnDisco());
                             PdfReader readerManifiesto = new PdfReader(bytesDocumento);
-                            if(IS_TIME_STAMPED_SIGNATURE) {
-                                String reason = null;
+                            String reason = null;
                                 String location = null;
                                 new PDFSignerDNIeWorker(PDF_SIGNER_DNIE_WORKER, 
                                         operacion.getUrlTimeStampServer(),
                                         INSTANCIA, reason, location, finalPassword.toCharArray(), 
                                         readerManifiesto, documentoFirmado).execute();
-                                return;
-                            } else {
-                                PDFSignerDNIe.sign(null, null, finalPassword.toCharArray(), 
-                                    readerManifiesto, new FileOutputStream(documentoFirmado));
-                            }
-                            if(documentoFirmado == null) return;
-                            break;
+                            return;
                         default:
                             logger.debug("No se ha encontrado la operación " + operacion.getTipo().toString());
                             break;
                     }
-                    processDocument(documentoFirmado);
                 } catch (Exception ex) {
                     logger.error(ex.getMessage(), ex);
                     mostrarPantallaEnvio(false);
@@ -394,6 +397,7 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
     private javax.swing.JPanel confirmacionPanel;
     private javax.swing.JButton enviarButton;
     private javax.swing.JLabel mensajeLabel;
+    private javax.swing.JLabel messageLabel;
     private javax.swing.JProgressBar progressBar;
     private javax.swing.JPanel progressBarPanel;
     private javax.swing.JLabel progressLabel;
@@ -415,16 +419,32 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
     }
     
     
-    private void processDocument(File document) {
+    private void processSignedDocument(File document) {
         if(document == null) return;
         final Operacion operacion = appletFirma.getOperacionEnCurso();
+        logger.debug(" - processSignedDocument - operation: " + operacion.getTipo());
+        File documentToSend = null;
         try {
             document.deleteOnExit();
-            EncryptionHelper.encryptSMIMEFile(document, 
-                    PreconditionsCheckerDialog.getCert(operacion.getUrlServer()));
-            final EnviarDocumentoFirmadoWorker lanzador = new EnviarDocumentoFirmadoWorker(
-                ENVIAR_DOCUMENTO_FIRMADO_WORKER, operacion.getUrlEnvioDocumento(), this);
-            lanzador.setDocumentoEnviado(document).execute();
+            switch(operacion.getTipo()) {
+                case SOLICITUD_COPIA_SEGURIDAD:
+                case FIRMA_MANIFIESTO_PDF:
+                case PUBLICACION_MANIFIESTO_PDF:
+                    documentToSend = File.createTempFile("pdfEncryptedFile", ".eml");
+                    documentToSend.deleteOnExit();
+                    EncryptionHelper.encryptFile(document, documentToSend, 
+                        PreconditionsCheckerDialog.getCert(operacion.getUrlServer()));
+                    break;
+                default:
+                    EncryptionHelper.encryptSMIMEFile(document, 
+                            PreconditionsCheckerDialog.getCert(operacion.getUrlServer()));
+                    documentToSend = document;
+                    break;
+            }   
+            tareaEnEjecucion = new DocumentLauncherWorker(
+                    ENVIAR_DOCUMENTO_FIRMADO_WORKER, documentToSend, 
+                    operacion.getUrlEnvioDocumento(), this);
+            tareaEnEjecucion.execute();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             appletFirma.responderCliente(
@@ -442,12 +462,14 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
 
     
     @Override public void showResult(VotingSystemWorker worker) {
-        logger.debug("showResult - worker: " + worker.getClass() + 
-                " - statusCode: " + worker.getStatusCode());
+        logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
+                " - worker: " + worker.getClass().getSimpleName() + 
+                " - workerId:" + worker.getId());
         switch(worker.getId()) {
             case PDF_SIGNER_DNIE_WORKER:
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
-                    processDocument(((PDFSignerDNIeWorker)worker).getSignedAndTimeStampedPDF());
+                    processSignedDocument(((PDFSignerDNIeWorker)worker).
+                            getSignedAndTimeStampedPDF());
                 } else {
                     mostrarPantallaEnvio(false);
                     MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
@@ -468,7 +490,8 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
             case ENVIAR_DOCUMENTO_FIRMADO_WORKER:
                 dispose();
                 if (Respuesta.SC_OK == worker.getStatusCode()) {
-                    appletFirma.responderCliente(worker.getStatusCode(), null);
+                    appletFirma.responderCliente(
+                            worker.getStatusCode(), worker.getMessage());
                     /*ResultadoFirmaDialog resultadoFirmaDialog =
                             new ResultadoFirmaDialog(parentFrame, true);
                     respuesta.setArchivo(documentoFirmado);
@@ -483,8 +506,8 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
             case TIME_STAMP_WORKER:
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
-                        processDocument(timeStampedDocument.setTimeStampToken(
-                                (TimeStampWorker)worker));
+                        processSignedDocument(timeStampedDocument.
+                                setTimeStampToken((TimeStampWorker)worker));
                     } catch (Exception ex) {
                         logger.error(ex.getMessage(), ex);
                         mostrarPantallaEnvio(false);

@@ -16,6 +16,7 @@ import static org.sistemavotacion.AppletFirma.CERT_CHAIN_URL_SUFIX;
 import org.sistemavotacion.Contexto;
 import static org.sistemavotacion.Contexto.getString;
 import org.sistemavotacion.FirmaDialog;
+import org.sistemavotacion.RepresentativeDataDialog;
 import org.sistemavotacion.SaveReceiptDialog;
 import org.sistemavotacion.VotacionDialog;
 import org.sistemavotacion.modelo.Operacion;
@@ -114,6 +115,8 @@ public class PreconditionsCheckerDialog
                     logger.debug("controlCenterCertChecked: " + controlCenterCertChecked + 
                             " - accessControlCertChecked: " + accessControlCertChecked);
                     break;
+                case NEW_REPRESENTATIVE:
+                case SELECT_REPRESENTATIVE:
                 case PUBLICACION_MANIFIESTO_PDF:
                 case FIRMA_MANIFIESTO_PDF:
                 case PUBLICACION_RECLAMACION_SMIME:
@@ -132,6 +135,8 @@ public class PreconditionsCheckerDialog
                     }
                     break;
                 default:
+                    logger.error(" ################# UNKNOWN OPERATION -> " +  
+                            operacion.getTipo());
                     checking.set(false);
                     preconditionsOK.set(true);
             }
@@ -173,6 +178,15 @@ public class PreconditionsCheckerDialog
                     }
                 });   
                 break;
+            case NEW_REPRESENTATIVE:
+                javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        RepresentativeDataDialog representativeDialog = 
+                                new RepresentativeDataDialog(frame, true);
+                        representativeDialog.show(operacion);
+                    }
+                });  
+                break;
             case ENVIO_VOTO_SMIME:
                 javax.swing.SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
@@ -182,6 +196,7 @@ public class PreconditionsCheckerDialog
                     }
                 });    
                 break;
+            case SELECT_REPRESENTATIVE:
             case PUBLICACION_MANIFIESTO_PDF:
             case FIRMA_MANIFIESTO_PDF:
             case PUBLICACION_RECLAMACION_SMIME:
@@ -217,8 +232,10 @@ public class PreconditionsCheckerDialog
     }
 
     public static X509Certificate getCert(String serverURL) {
-        logger.debug(" - getCert - serverURL: " + serverURL);
-        return certsMap.get(serverURL);
+        logger.debug("getCert - serverURL: " + serverURL);
+        X509Certificate cert = certsMap.get(serverURL);
+        if(cert != null) logger.debug("retreieving cert from map");
+        return cert;
     }
      
      
@@ -359,13 +376,15 @@ public class PreconditionsCheckerDialog
     }
     
     @Override
-    public void showResult(VotingSystemWorker votingSystemWorker) {
-        logger.debug(" - showResult - ");
+    public void showResult(VotingSystemWorker worker) {
+        logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
+                " - worker: " + worker.getClass().getSimpleName() + 
+                " - workerId:" + worker.getId());
         ObtenerArchivoWorker fileWorker = null;
         try {
-            switch(votingSystemWorker.getId()) {
+            switch(worker.getId()) {
                 case CHECK_ACCES_CONTROL_CERT:
-                    fileWorker = (ObtenerArchivoWorker)votingSystemWorker;
+                    fileWorker = (ObtenerArchivoWorker)worker;
                     if(Respuesta.SC_OK == fileWorker.getStatusCode()) {
                         Collection<X509Certificate> certChain = CertUtil.
                         fromPEMToX509CertCollection(fileWorker.getBytesArchivo());
@@ -380,8 +399,8 @@ public class PreconditionsCheckerDialog
                     if(controlCenterCertChecked != null) setVotingPreconditions();
                     break;
                 case CHECK_CONTROL_CENTER_CERT:
-                    fileWorker = (ObtenerArchivoWorker)votingSystemWorker;
-                    if(Respuesta.SC_OK == votingSystemWorker.getStatusCode()) {
+                    fileWorker = (ObtenerArchivoWorker)worker;
+                    if(Respuesta.SC_OK == worker.getStatusCode()) {
                         Collection<X509Certificate> certChain = CertUtil.
                         fromPEMToX509CertCollection(fileWorker.getBytesArchivo());
                         X509Certificate serverCert = certChain.iterator().next();
@@ -395,8 +414,8 @@ public class PreconditionsCheckerDialog
                     if(accessControlCertChecked != null) setVotingPreconditions();
                     break;
                 case CHECK_SERVER_CERT:
-                    fileWorker = (ObtenerArchivoWorker)votingSystemWorker;
-                    if(Respuesta.SC_OK == votingSystemWorker.getStatusCode()) {
+                    fileWorker = (ObtenerArchivoWorker)worker;
+                    if(Respuesta.SC_OK == worker.getStatusCode()) {
                         Collection<X509Certificate> certChain = CertUtil.
                         fromPEMToX509CertCollection(fileWorker.getBytesArchivo());
                         X509Certificate serverCert = certChain.iterator().next();

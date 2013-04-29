@@ -1,6 +1,5 @@
 package org.sistemavotacion.worker;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import javax.swing.SwingWorker;
 import org.apache.http.HttpResponse;
@@ -11,8 +10,9 @@ import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.EncryptionHelper;
 import org.sistemavotacion.seguridad.PKCS10WrapperClient;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.Map;
 import org.sistemavotacion.dialogo.PreconditionsCheckerDialog;
-import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,10 +20,10 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://raw.github.com/jgzornoza/SistemaVotacionAppletFirma/master/licencia.txt
 */
-public class EnviarSolicitudControlAccesoWorker extends SwingWorker<Integer, String> 
+public class AccessRequestLauncherWorker extends SwingWorker<Integer, String> 
         implements VotingSystemWorker {
     
-    private static Logger logger = LoggerFactory.getLogger(EnviarSolicitudControlAccesoWorker.class);
+    private static Logger logger = LoggerFactory.getLogger(AccessRequestLauncherWorker.class);
 
     private Evento evento;
     private VotingSystemWorkerListener workerListener;
@@ -35,7 +35,7 @@ public class EnviarSolicitudControlAccesoWorker extends SwingWorker<Integer, Str
     private Exception exception = null;
     private X509Certificate accesRequestServerCert = null;
     
-    public EnviarSolicitudControlAccesoWorker(Integer id, File solicitudAcceso,
+    public AccessRequestLauncherWorker(Integer id, File solicitudAcceso,
             Evento evento, PKCS10WrapperClient pkcs10WrapperClient, 
             VotingSystemWorkerListener workerListener) {
         this.id = id;
@@ -68,8 +68,12 @@ public class EnviarSolicitudControlAccesoWorker extends SwingWorker<Integer, Str
         			csrEncryptedFile, accesRequestServerCert);
         EncryptionHelper.encryptSMIMEFile(solicitudAcceso, accesRequestServerCert);
         
-        HttpResponse response = Contexto.getHttpHelper().enviarSolicitudAcceso(
-                csrEncryptedFile, solicitudAcceso, evento.getUrlSolicitudAcceso());
+        Map<String, Object> mapToSend = new HashMap<String, Object>();
+        mapToSend.put(Contexto.CSR_FILE_NAME, csrEncryptedFile);
+        mapToSend.put(Contexto.SMIME_FILE_NAME, solicitudAcceso);
+        
+        HttpResponse response = Contexto.getHttpHelper().sendMap(
+                mapToSend, evento.getUrlSolicitudAcceso());
         statusCode = response.getStatusLine().getStatusCode();
         if (Respuesta.SC_OK == statusCode) {
             byte[] encryptedData = EntityUtils.toByteArray(response.getEntity());

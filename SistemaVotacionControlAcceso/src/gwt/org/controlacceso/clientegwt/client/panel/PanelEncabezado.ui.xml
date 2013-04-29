@@ -26,7 +26,7 @@
         	font-weight: bold;
         	font-size: 12px;
 		}		
-		.panelSubsistemas {margin: 0px 0px 0px 20px; width:140px;}
+		.panelSubsistemas {margin: 0px 0px 4px 20px; width:140px;}
 		.subsistemas {height: 100%;}
 		.buttonPanel { float: right;}		
 		.boton { margin: 5px; cursor:pointer;}	
@@ -34,10 +34,12 @@
 		.listaEstadoAbierto{margin-left:8px; float:left; border:1pt solid #6bad74;}
 		.listaEstadoFinalizado{margin-left:8px; float:left; border:1pt solid #cc1606;}
 		.listaEstadoPendiente{margin-left:8px; float:left; border:1pt solid #fba131;}
+		.representativesPageButton {width:200px; margin:5px 0px 0px 20px;}
 	</ui:style>
 	<ui:image field='publicarManifiesto' src="../BotonPublicarManifiesto.png"/>
 	<ui:image field='publicarReclamacion' src="../BotonPublicarReclamacion.png"/>
 	<ui:image field='publicarVotacion' src="../BotonPublicarVotacion.png"/>
+	<ui:image field='goRepresentativesPageButton' src="../GoRepresentativesPageButton.png"/>	
 	<ui:with field='res' type='org.controlacceso.clientegwt.client.Recursos'/>
 	<ui:with field='constantes' type='org.controlacceso.clientegwt.client.Constantes'/>
 	<g:VerticalPanel styleName="{style.mainPanel}">
@@ -52,10 +54,18 @@
 			</g:HorizontalPanel>
 		</g:HorizontalPanel>
 		<g:HorizontalPanel styleName="{style.subPanel}">
-			<g:HorizontalPanel ui:field='subscripcionesPanel' styleName="{style.subscripcionesPanel}">
-       			<g:Image resource='{res.feedImage}' styleName="{style.feedImage}"/>
-				<g:Anchor ui:field='subscripciones' styleName="{style.subscripciones}"/>
-			</g:HorizontalPanel>
+		    <g:VerticalPanel>
+				<g:HorizontalPanel ui:field='subscripcionesPanel' styleName="{style.subscripcionesPanel}">
+	       			<g:Image resource='{res.feedImage}' styleName="{style.feedImage}"/>
+					<g:Anchor ui:field='subscripciones' styleName="{style.subscripciones}"/>
+				</g:HorizontalPanel>
+				<g:VerticalPanel styleName="{style.representativesPageButton}">
+          			<g:PushButton ui:field='representativesPageButton'>
+		   				<g:upFace image='{goRepresentativesPageButton}'/>
+					</g:PushButton>
+				</g:VerticalPanel>
+		    </g:VerticalPanel>
+
 			<g:HorizontalPanel ui:field='seleccionEstadoPanel' styleName="{style.seleccionEstadoPanel}">
 			    <g:Label styleName="{style.textoSeleccionEstado}" text="{constantes.stateSelectionLabel}"/>
     			<g:ListBox styleName="{style.listaEstados}" 
@@ -65,7 +75,7 @@
 				<g:HorizontalPanel styleName="{style.boton}">
 	      			<g:PushButton ui:field='botonPublicarManifiesto'>
 			   			<g:upFace image='{publicarManifiesto}'/>
-						</g:PushButton>
+					</g:PushButton>
 				</g:HorizontalPanel>
 				<g:HorizontalPanel styleName="{style.boton}">
 	      			<g:PushButton ui:field='botonPublicarReclamacion'>

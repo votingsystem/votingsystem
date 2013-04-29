@@ -2,14 +2,15 @@ package org.sistemavotacion.test.simulacion;
 
 import java.io.File;
 import java.security.KeyStore;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.apache.http.HttpResponse;
 import org.apache.http.conn.ConnectionPoolTimeoutException;
 import org.apache.http.util.EntityUtils;
-import org.bouncycastle.tsp.TimeStampRequest;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.PKCS10WrapperClient;
@@ -90,14 +91,18 @@ public class LanzadoraSolicitudAcceso
             return infoVoto;
         }
         solicitudAcceso = timeStampedDocument.setTimeStampToken(timeStampWorker);
-        logger.debug("call - infoVoto: " + infoVoto.getFrom() + " - Hash Solicitud Acceso: " + infoVoto.getVoto().getHashSolicitudAccesoBase64()
-                + " - Solicitud Acceso: " + solicitudAcceso.getAbsolutePath());
+        logger.debug("call - infoVoto: " + infoVoto.getFrom() + 
+                " - Hash Solicitud Acceso: " + infoVoto.getVoto().getHashSolicitudAccesoBase64() + 
+                " - Solicitud Acceso: " + solicitudAcceso.getAbsolutePath());
         HttpResponse response = null;
         try {
-            response = Contexto.getHttpHelper().enviarSolicitudAcceso(
-                wrapperClient.getPEMEncodedRequestCSR(), solicitudAcceso,
-                ContextoPruebas.getURLSolicitudAcceso(
-                ContextoPruebas.getControlAcceso().getServerURL()));
+            Map objectMap = new HashMap<String, Object>();
+            objectMap.put(Contexto.CSR_FILE_NAME, 
+                    wrapperClient.getPEMEncodedRequestCSR());
+            objectMap.put(Contexto.SMIME_FILE_NAME, solicitudAcceso);
+            response = Contexto.getHttpHelper().sendMap(objectMap, 
+                    ContextoPruebas.getURLSolicitudAcceso(
+                    ContextoPruebas.getControlAcceso().getServerURL()));
         } catch(ConnectionPoolTimeoutException ex) {
             logger.debug("");
             logger.error(ex.getMessage(), ex);
@@ -143,7 +148,6 @@ public class LanzadoraSolicitudAcceso
     @Override
     public void showResult(VotingSystemWorker vsw) {
         timeStampLatch.countDown();
-
     }
 
     

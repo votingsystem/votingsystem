@@ -65,6 +65,7 @@ public class PanelEncabezado extends Composite implements EventoGWTMensajeAplica
     @UiField PushButton botonPublicarManifiesto;
     @UiField PushButton botonPublicarVotacion;
     @UiField PushButton botonPublicarReclamacion; 
+    @UiField PushButton representativesPageButton;
     @UiField HorizontalPanel subscripcionesPanel;
     @UiField HorizontalPanel seleccionEstadoPanel;
     @UiField Anchor subscripciones;
@@ -132,6 +133,9 @@ public class PanelEncabezado extends Composite implements EventoGWTMensajeAplica
 	    	case VOTACIONES:
 	    		History.newItem(HistoryToken.VOTACIONES.toString());
 	    		break;
+	    	case REPRESENTATIVES_PAGE:
+	    		History.newItem(HistoryToken.REPRESENTATIVES_PAGE.toString());
+	    		break;
 	    	default:break;
     	}
     }
@@ -158,6 +162,11 @@ public class PanelEncabezado extends Composite implements EventoGWTMensajeAplica
     	History.newItem(HistoryToken.CREAR_RECLAMACION.toString());
     }
     
+	
+    @UiHandler("representativesPageButton")
+    void onClickRepresentativesButton(ClickEvent e) {
+    	History.newItem(HistoryToken.REPRESENTATIVES_PAGE.toString());
+    }
     
 	private class SubmitListener implements KeyDownHandler {
 		
@@ -225,18 +234,29 @@ public class PanelEncabezado extends Composite implements EventoGWTMensajeAplica
 				subscripcionesPanel.setVisible(false);
 				seleccionEstadoPanel.setVisible(false);
 				actualizarSistema(HistoryToken.VOTACIONES);
+				representativesPageButton.setVisible(false);
 				botonPublicarVotacion.setVisible(false);
 				break;
 			case VOTAR:
 				subscripcionesPanel.setVisible(false);
 				seleccionEstadoPanel.setVisible(false);
 				actualizarSistema(HistoryToken.VOTACIONES);
+				representativesPageButton.setVisible(false);
 				botonPublicarVotacion.setVisible(false);
 				break;	
 			case BUSQUEDAS:
 				isShowingPanelBusquedas = true;
 				break;
-			default: break;
+			case REPRESENTATIVE_CONFIG:
+			case NEW_REPRESENTATIVE:
+			case REPRESENTATIVE_DETAILS:
+			case REPRESENTATIVES_PAGE:
+				subscripcionesPanel.setVisible(false);
+				seleccionEstadoPanel.setVisible(false);
+				actualizarSistema(HistoryToken.REPRESENTATIVES_PAGE);
+				break;				
+			default:
+				logger.info("procesarMensaje - token sin procesar: " + evento.token);
 		}
 		if(isShowingPanelBusquedas == null) isShowingPanelBusquedas = false;
 	}
@@ -316,6 +336,7 @@ public class PanelEncabezado extends Composite implements EventoGWTMensajeAplica
 				botonPublicarManifiesto.setVisible(true);
 				botonPublicarVotacion.setVisible(false);
 				botonPublicarReclamacion.setVisible(false);
+				representativesPageButton.setVisible(false);
 				subscripciones.setHref(ServerPaths.getUrlSubscripcionManifiestos());
 				break;
 			case RECLAMACIONES:
@@ -325,6 +346,7 @@ public class PanelEncabezado extends Composite implements EventoGWTMensajeAplica
 				botonPublicarReclamacion.setVisible(true);
 				botonPublicarVotacion.setVisible(false);
 				botonPublicarManifiesto.setVisible(false);
+				representativesPageButton.setVisible(false);
 				subscripciones.setHref(ServerPaths.getUrlSubscripcionReclamaciones());
 				break;
 			case VOTACIONES:
@@ -333,9 +355,18 @@ public class PanelEncabezado extends Composite implements EventoGWTMensajeAplica
 				subscripciones.setText(Constantes.INSTANCIA.feedsVotacionesLabel());				
 				botonPublicarVotacion.setVisible(true);
 				botonPublicarReclamacion.setVisible(false);
-				botonPublicarManifiesto.setVisible(false);		
+				botonPublicarManifiesto.setVisible(false);	
+				representativesPageButton.setVisible(true);
 				subscripciones.setHref(ServerPaths.getUrlSubscripcionVotaciones());
 				break;
+			case REPRESENTATIVES_PAGE:
+				tipoBusqueda = Tipo.REPRESENTATIVES_PAGE;
+				tituloAnchor.setText(Constantes.INSTANCIA.representativesLabel());			
+				botonPublicarVotacion.setVisible(false);
+				botonPublicarReclamacion.setVisible(false);
+				botonPublicarManifiesto.setVisible(false);
+				representativesPageButton.setVisible(false);
+				break;				
 			default:break;
 		}
 	}

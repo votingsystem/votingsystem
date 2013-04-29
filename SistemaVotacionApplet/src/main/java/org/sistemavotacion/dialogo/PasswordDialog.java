@@ -90,6 +90,7 @@ public class PasswordDialog extends javax.swing.JDialog {
         validationPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         messageLabel.setForeground(new java.awt.Color(215, 43, 13));
+        messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/sistemavotacion/dialogo/Bundle"); // NOI18N
         messageLabel.setText(bundle.getString("PasswordDialog.messageLabel.text")); // NOI18N
 

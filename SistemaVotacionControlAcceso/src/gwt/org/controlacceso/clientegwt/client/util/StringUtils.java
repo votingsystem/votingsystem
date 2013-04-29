@@ -57,6 +57,7 @@ public class StringUtils {
   		svQueryString.setEventoId(getEventoId(queryString));
   		svQueryString.setEstadoEvento(getEstadoEvento(queryString));
   		svQueryString.setHistoryToken(getHistoryToken(queryString));
+  		svQueryString.setRepresentativeId(getRepresentativeId(queryString));
   		return svQueryString;
   	}
   	
@@ -110,6 +111,25 @@ public class StringUtils {
   		return result;
   	}
   	
+  	private static Integer getRepresentativeId(String query) {
+  		Integer result = null;
+  		if(query == null || "".equals(query)) return null;
+  		String representativeId = null;
+  		if(query.contains("&representativeId=")) {
+  			representativeId = query.split("&representativeId=")[1];
+  			if(representativeId.contains("&")) {
+  				representativeId = representativeId.split("&")[0];
+  			}
+			try {
+				result = Integer.valueOf(representativeId);
+			} catch(Exception ex) {
+				logger.log(Level.SEVERE, ex.getMessage(), ex);
+				return null;
+			}
+  		}
+  		return result;
+  	}
+  	
   	private static EventoSistemaVotacionJso.Estado getEstadoEvento(String query) {
   		EventoSistemaVotacionJso.Estado result = null;
   		if(query == null || "".equals(query)) return null;
@@ -150,4 +170,30 @@ public class StringUtils {
   		return result;
   	}
   	
+    // sacado de http://felinfo.blogspot.com.es/2010/12/calcular-la-letra-del-dni-con-java.html
+    public static String calculaLetraNIF(int dni) {
+	    String juegoCaracteres="TRWAGMYFPDXBNJZSQVHLCKET";
+	    int modulo= dni % 23;
+	    Character letra = juegoCaracteres.charAt(modulo);
+	    return letra.toString(); 
+    }
+    
+    public static String validarNIF(String nif) {
+    	if(nif == null) return null;
+    	nif  = nif.toUpperCase();
+    	if(nif.length() < 9) {
+            int numberZeros = 9 - nif.length();
+			for(int i = 0; i < numberZeros ; i++) {
+				nif = "0" + nif;
+			}
+    	}
+    	String number = nif.substring(0, 8);
+        String letter = nif.substring(8, 9);
+        try {
+            if(!letter.equals(calculaLetraNIF(new Integer(number)))) return null;
+            else return nif;
+        } catch (Exception ex) {
+            return null;
+        }
+    }
 }

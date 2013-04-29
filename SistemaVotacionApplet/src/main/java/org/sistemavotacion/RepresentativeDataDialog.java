@@ -1,0 +1,583 @@
+package org.sistemavotacion;
+
+import java.awt.Desktop;
+import java.awt.Frame;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.security.MessageDigest;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.SwingWorker;
+import org.bouncycastle.util.encoders.Base64;
+import org.sistemavotacion.dialogo.MensajeDialog;
+import org.sistemavotacion.dialogo.PasswordDialog;
+import org.sistemavotacion.modelo.Operacion;
+import org.sistemavotacion.modelo.Respuesta;
+import org.sistemavotacion.smime.DNIeSignedMailGenerator;
+import org.sistemavotacion.smime.SMIMEMessageWrapper;
+import org.sistemavotacion.util.FileUtils;
+import org.sistemavotacion.util.ImagePreviewPanel;
+import org.sistemavotacion.worker.TimeStampWorker;
+import org.sistemavotacion.worker.VotingSystemWorker;
+import org.sistemavotacion.worker.VotingSystemWorkerListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static org.sistemavotacion.Contexto.NOMBRE_ARCHIVO_FIRMADO;
+import static org.sistemavotacion.Contexto.TIMESTAMP_DNIe_HASH;
+import static org.sistemavotacion.Contexto.getString;
+import org.sistemavotacion.dialogo.PreconditionsCheckerDialog;
+import org.sistemavotacion.seguridad.EncryptionHelper;
+import org.sistemavotacion.worker.FileMapLauncherWorker;
+
+/**
+* @author jgzornoza
+* Licencia: https://raw.github.com/jgzornoza/SistemaVotacionAppletFirma/master/licencia.txt
+*/
+public class RepresentativeDataDialog extends JDialog 
+        implements VotingSystemWorkerListener {
+    
+    private static Logger logger = LoggerFactory.getLogger(SaveReceiptDialog.class);
+
+    private Frame parentFrame = null;
+    private Operacion operacion = null;
+    private File documentoFirmado;
+    private File selectedImage = null;
+    private SwingWorker tareaEnEjecucion;
+    private SMIMEMessageWrapper timeStampedDocument;
+    private static final int ENVIAR_DOCUMENTO_FIRMADO_WORKER = 0;
+    private static final int TIME_STAMP_WORKER = 1;
+    private static final int MAX_FILE_SIZE_KB = 512;
+    private static final int MAX_FILE_SIZE = 512 * 1024;
+    private AtomicBoolean mostrandoPantallaEnvio = new AtomicBoolean(false);
+        
+    public RepresentativeDataDialog(java.awt.Frame parent, boolean modal) {
+        super(parent, modal);
+        setLocationRelativeTo(null);
+        this.parentFrame = parent;
+        initComponents();
+        parent.setLocationRelativeTo(null);
+        setTitle(Contexto.getString("NEW_REPRESENTATIVE"));
+        validationPanel.setVisible(false);
+        progressBarPanel.setVisible(false);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosed(WindowEvent e) {
+                logger.debug(" - window closed event received");
+            }
+
+            public void windowClosing(WindowEvent e) {
+                logger.debug(" - window closing event received");
+                dispose();
+                AppletFirma.INSTANCIA.cancelarOperacion();
+            }
+        });
+        pack();
+    }
+    
+    public void mostrarPantallaEnvio (boolean visibility) {
+        logger.debug("mostrarPantallaEnvio - " + visibility);
+        mostrandoPantallaEnvio.set(visibility);
+        progressBarPanel.setVisible(visibility);
+        enviarButton.setVisible(!visibility);
+        imagePanel.setVisible(!visibility);
+        confirmacionPanel.setVisible(!visibility);
+        if (mostrandoPantallaEnvio.get()) cerrarButton.setText(getString("cancelar"));
+        else cerrarButton.setText(getString("cerrar"));
+        pack();
+    }
+        
+    private void setMessage (String mensaje) {
+        if (mensaje == null) validationPanel.setVisible(false);
+        else {
+            messageLabel.setText("<html>" + mensaje + "</html>");
+            validationPanel.setVisible(true);
+        }
+        pack();
+    }
+    
+    public void show(Operacion operacion) {
+        this.operacion = operacion;
+        setVisible(true);
+    }
+
+    
+    private void setTimeStampDocument(File document, String timeStampRequestAlg) {
+        if(document == null) return;
+        try {
+            timeStampedDocument = new SMIMEMessageWrapper(null, document);
+            new TimeStampWorker(TIME_STAMP_WORKER, operacion.getUrlTimeStampServer(),
+                    this, timeStampedDocument.getTimeStampRequest(timeStampRequestAlg)).execute();
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+            AppletFirma.INSTANCIA.responderCliente(
+                    Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
+        }
+    }
+    
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        enviarButton = new javax.swing.JButton();
+        cerrarButton = new javax.swing.JButton();
+        confirmacionPanel = new javax.swing.JPanel();
+        mensajeLabel = new javax.swing.JLabel();
+        verDocumentoButton = new javax.swing.JButton();
+        validationPanel = new javax.swing.JPanel();
+        messageLabel = new javax.swing.JLabel();
+        progressBarPanel = new javax.swing.JPanel();
+        progressLabel = new javax.swing.JLabel();
+        progressBar = new javax.swing.JProgressBar();
+        imagePanel = new javax.swing.JPanel();
+        selectImageButton = new javax.swing.JButton();
+        selectedImageLabel = new javax.swing.JLabel();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+
+        enviarButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/images/signature-ok_16x16.png"))); // NOI18N
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/sistemavotacion/Bundle"); // NOI18N
+        enviarButton.setText(bundle.getString("RepresentativeDataDialog.enviarButton.text")); // NOI18N
+        enviarButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                enviarButtonActionPerformed(evt);
+            }
+        });
+
+        cerrarButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/images/cancel_16x16.png"))); // NOI18N
+        cerrarButton.setText(bundle.getString("RepresentativeDataDialog.cerrarButton.text")); // NOI18N
+        cerrarButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cerrarButtonActionPerformed(evt);
+            }
+        });
+
+        confirmacionPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        mensajeLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        mensajeLabel.setText(bundle.getString("RepresentativeDataDialog.mensajeLabel.text")); // NOI18N
+        mensajeLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+
+        verDocumentoButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/images/fileopen16x16.png"))); // NOI18N
+        verDocumentoButton.setText(bundle.getString("RepresentativeDataDialog.verDocumentoButton.text")); // NOI18N
+        verDocumentoButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                verDocumentoButtonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout confirmacionPanelLayout = new javax.swing.GroupLayout(confirmacionPanel);
+        confirmacionPanel.setLayout(confirmacionPanelLayout);
+        confirmacionPanelLayout.setHorizontalGroup(
+            confirmacionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(confirmacionPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(confirmacionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(mensajeLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(confirmacionPanelLayout.createSequentialGroup()
+                        .addComponent(verDocumentoButton)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        confirmacionPanelLayout.setVerticalGroup(
+            confirmacionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(confirmacionPanelLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(mensajeLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(verDocumentoButton)
+                .addContainerGap())
+        );
+
+        validationPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        messageLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
+        messageLabel.setForeground(new java.awt.Color(215, 43, 13));
+        messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        messageLabel.setText(bundle.getString("RepresentativeDataDialog.messageLabel.text")); // NOI18N
+
+        javax.swing.GroupLayout validationPanelLayout = new javax.swing.GroupLayout(validationPanel);
+        validationPanel.setLayout(validationPanelLayout);
+        validationPanelLayout.setHorizontalGroup(
+            validationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(validationPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(messageLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        validationPanelLayout.setVerticalGroup(
+            validationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(validationPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(messageLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        progressLabel.setText(bundle.getString("RepresentativeDataDialog.progressLabel.text")); // NOI18N
+
+        progressBar.setIndeterminate(true);
+
+        javax.swing.GroupLayout progressBarPanelLayout = new javax.swing.GroupLayout(progressBarPanel);
+        progressBarPanel.setLayout(progressBarPanelLayout);
+        progressBarPanelLayout.setHorizontalGroup(
+            progressBarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(progressBarPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(progressBarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(progressLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(progressBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        progressBarPanelLayout.setVerticalGroup(
+            progressBarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(progressBarPanelLayout.createSequentialGroup()
+                .addComponent(progressLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        selectImageButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/images/Group_16x16.png"))); // NOI18N
+        selectImageButton.setText(bundle.getString("RepresentativeDataDialog.selectImageButton.text")); // NOI18N
+        selectImageButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectImageButtonActionPerformed(evt);
+            }
+        });
+
+        selectedImageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        selectedImageLabel.setText(bundle.getString("RepresentativeDataDialog.selectedImageLabel.text")); // NOI18N
+
+        javax.swing.GroupLayout imagePanelLayout = new javax.swing.GroupLayout(imagePanel);
+        imagePanel.setLayout(imagePanelLayout);
+        imagePanelLayout.setHorizontalGroup(
+            imagePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(imagePanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(imagePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(imagePanelLayout.createSequentialGroup()
+                        .addComponent(selectImageButton)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(selectedImageLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        imagePanelLayout.setVerticalGroup(
+            imagePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(imagePanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(selectImageButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(selectedImageLabel)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(confirmacionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(enviarButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cerrarButton)
+                        .addGap(13, 13, 13))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(progressBarPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(imagePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(validationPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addContainerGap())))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(progressBarPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(validationPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(imagePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(confirmacionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(enviarButton)
+                    .addComponent(cerrarButton))
+                .addContainerGap())
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void selectImageButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectImageButtonActionPerformed
+        logger.debug(" - selectImageButtonActionPerformed - ");   
+        try {
+            final JFileChooser chooser = new JFileChooser();
+            ImagePreviewPanel preview = new ImagePreviewPanel();
+            chooser.setAccessory(preview);
+            chooser.addPropertyChangeListener(preview);
+                int returnVal = chooser.showSaveDialog(parentFrame);
+                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    File file = chooser.getSelectedFile();
+                    if ((file != null) &&
+                            file.getName().toLowerCase().endsWith(".jpg") ||
+                            file.getName().toLowerCase().endsWith(".jpeg") ||
+                            file.getName().toLowerCase().endsWith(".gif") ||
+                            file.getName().toLowerCase().endsWith(".png")) {
+                        selectedImage = new File(file.getAbsolutePath());
+                        byte[] imageFileBytes = FileUtils.getBytesFromFile(selectedImage);
+                        logger.debug(" - imageFileBytes.length: " + 
+                                imageFileBytes.length);
+                        if(imageFileBytes.length > MAX_FILE_SIZE) {
+                            logger.debug(" - MAX_FILE_SIZE exceeded ");
+                            setMessage(Contexto.getString("fileSizeExceeded", MAX_FILE_SIZE_KB));
+                            selectedImage = null;
+                            selectedImageLabel.setText(
+                                Contexto.getString("imageNotSelectedMsg"));
+                        } else {
+                            selectedImageLabel.setText(file.getAbsolutePath());
+                            MessageDigest messageDigest = MessageDigest.getInstance(
+                                    Contexto.VOTING_DATA_DIGEST);
+                            byte[] resultDigest =  messageDigest.digest(imageFileBytes);
+                            String base64ResultDigest = new String(Base64.encode(resultDigest));
+                            operacion.getContenidoFirma().put(
+                                 "base64ImageHash", base64ResultDigest);
+                            //String base64RepresentativeEncodedImage = new String(
+                            //        Base64.encode(imageFileBytes));
+                            // operacion.getContenidoFirma().put(
+                            //     "base64RepresentativeEncodedImage", base64RepresentativeEncodedImage);
+                            setMessage(null);
+                        }
+                    } else {
+                        selectedImage = null;
+                        selectedImageLabel.setText(
+                            Contexto.getString("imageNotSelectedMsg"));
+                    } 
+                }
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
+    }//GEN-LAST:event_selectImageButtonActionPerformed
+
+    private void enviarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enviarButtonActionPerformed
+        if(selectedImage == null) {
+            setMessage(Contexto.getString("imageMissingMsg"));
+            return;
+        } else setMessage(null);
+        String password = null;
+        if (Contexto.getDNIePassword() == null) {
+            PasswordDialog dialogoPassword = new PasswordDialog (parentFrame, true);
+            dialogoPassword.setVisible(true);
+            password = dialogoPassword.getPassword();
+            if (password == null) return;
+        }
+        final String finalPassword = password;
+        mostrarPantallaEnvio(true);
+        progressLabel.setText("<html>" + getString("progressLabel")+ "</html>");
+        Runnable runnable = new Runnable() {
+            public void run() {
+                try {
+                    documentoFirmado = new File(FileUtils.APPTEMPDIR + NOMBRE_ARCHIVO_FIRMADO);
+                    documentoFirmado = DNIeSignedMailGenerator.genFile(null,
+                            operacion.getNombreDestinatarioFirmaNormalizado(),
+                            operacion.getContenidoFirma().toString(),
+                            finalPassword.toCharArray(), operacion.getAsuntoMensajeFirmado(),
+                            documentoFirmado);
+                    setTimeStampDocument(documentoFirmado, TIMESTAMP_DNIe_HASH);
+                } catch (Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                    mostrarPantallaEnvio(false);
+                    String mensajeError = null;
+                    if ("CKR_PIN_INCORRECT".equals(ex.getMessage())) {
+                        Contexto.setDNIePassword(null);
+                        mensajeError = getString("MENSAJE_ERROR_PASSWORD");
+                    } else mensajeError = ex.getMessage();
+                    MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
+                    errorDialog.setMessage(mensajeError, getString("errorLbl"));
+                    return;
+                }
+            }
+        };
+        Thread thread = new Thread(runnable);
+        thread.start();
+        pack();
+    }//GEN-LAST:event_enviarButtonActionPerformed
+
+    private void cerrarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cerrarButtonActionPerformed
+        logger.debug("cerrarButtonActionPerformed - mostrandoPantallaEnvio: " 
+                + mostrandoPantallaEnvio);
+        if (mostrandoPantallaEnvio.get()) {
+            if (tareaEnEjecucion != null) tareaEnEjecucion.cancel(true);
+            mostrarPantallaEnvio(false);
+            return;
+        }
+        dispose();
+    }//GEN-LAST:event_cerrarButtonActionPerformed
+
+    private void verDocumentoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_verDocumentoButtonActionPerformed
+        if (!Desktop.isDesktopSupported()) {
+            logger.debug("No hay soporte de escritorio");
+        }
+        Desktop desktop = Desktop.getDesktop();
+        if (!desktop.isSupported(Desktop.Action.BROWSE)) {
+            logger.debug("No se puede editar archivos");
+        }
+        try {
+            File documento = new File(FileUtils.APPTEMPDIR + operacion.
+                    getTipo().getNombreArchivoEnDisco());
+            documento.deleteOnExit();
+            FileUtils.copyStreamToFile(new ByteArrayInputStream(
+                    operacion.getContenidoFirma().toString().getBytes()), documento);
+            logger.info("documento.getAbsolutePath(): " + documento.getAbsolutePath());
+            desktop.open(documento);
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
+    }//GEN-LAST:event_verDocumentoButtonActionPerformed
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(RepresentativeDataDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(RepresentativeDataDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(RepresentativeDataDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(RepresentativeDataDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+
+        /* Create and display the dialog */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                RepresentativeDataDialog dialog = new RepresentativeDataDialog(new javax.swing.JFrame(), true);
+                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+                    @Override
+                    public void windowClosing(java.awt.event.WindowEvent e) {
+                        System.exit(0);
+                    }
+                });
+                dialog.setVisible(true);
+            }
+        });
+    }
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton cerrarButton;
+    private javax.swing.JPanel confirmacionPanel;
+    private javax.swing.JButton enviarButton;
+    private javax.swing.JPanel imagePanel;
+    private javax.swing.JLabel mensajeLabel;
+    private javax.swing.JLabel messageLabel;
+    private javax.swing.JProgressBar progressBar;
+    private javax.swing.JPanel progressBarPanel;
+    private javax.swing.JLabel progressLabel;
+    private javax.swing.JButton selectImageButton;
+    private javax.swing.JLabel selectedImageLabel;
+    private javax.swing.JPanel validationPanel;
+    private javax.swing.JButton verDocumentoButton;
+    // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void process(List<String> messages) {
+        logger.debug(" - process: " + messages.iterator().next());
+        progressLabel.setText(messages.iterator().next());
+    }
+
+    private void processDocument(File document) {
+        if(document == null) return;
+        try {
+            document.deleteOnExit();
+            EncryptionHelper.encryptSMIMEFile(document, 
+                    PreconditionsCheckerDialog.getCert(operacion.getUrlServer()));
+            Map<String, Object> fileMap = new HashMap<String, Object>();
+            fileMap.put(Contexto.SMIME_FILE_NAME, document);
+            fileMap.put(Contexto.IMAGE_FILE_NAME, selectedImage);
+            final FileMapLauncherWorker lanzador = new FileMapLauncherWorker(
+                    ENVIAR_DOCUMENTO_FIRMADO_WORKER, fileMap, 
+                    operacion.getUrlEnvioDocumento(), this);
+            lanzador.execute();
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+            AppletFirma.INSTANCIA.responderCliente(
+                    Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
+            MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
+            errorDialog.setMessage(ex.getMessage(), getString("errorLbl"));
+        }
+    }
+    @Override
+    public void showResult(VotingSystemWorker worker) {
+        logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
+                " - worker: " + worker.getClass().getSimpleName() + 
+                " - workerId:" + worker.getId());
+        switch(worker.getId()) {
+            case ENVIAR_DOCUMENTO_FIRMADO_WORKER:
+                dispose();
+                if (Respuesta.SC_OK == worker.getStatusCode()) {
+                    AppletFirma.INSTANCIA.responderCliente(
+                            worker.getStatusCode(), worker.getMessage());
+                    /*ResultadoFirmaDialog resultadoFirmaDialog =
+                            new ResultadoFirmaDialog(parentFrame, true);
+                    respuesta.setArchivo(documentoFirmado);
+                    respuesta.setOperacion(operacion);
+                    resultadoFirmaDialog.mostrarMensaje(respuesta);*/
+                } else {
+                    mostrarPantallaEnvio(false);
+                    AppletFirma.INSTANCIA.responderCliente(
+                            worker.getStatusCode(), worker.getMessage());
+                }
+                break;
+            case TIME_STAMP_WORKER:
+                if(Respuesta.SC_OK == worker.getStatusCode()) {
+                    try {
+                        processDocument(timeStampedDocument.setTimeStampToken(
+                                (TimeStampWorker)worker));
+                    } catch (Exception ex) {
+                        logger.error(ex.getMessage(), ex);
+                        mostrarPantallaEnvio(false);
+                        MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
+                        errorDialog.setMessage(ex.getMessage(), getString("errorLbl"));
+                    }
+                } else {
+                    mostrarPantallaEnvio(false);
+                    MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
+                    errorDialog.setMessage(worker.getMessage(), getString("errorLbl"));
+                }
+                break;
+            default:
+                logger.debug("*** UNKNOWN WORKER ID: '" + worker.getId() + "'");
+        }
+    }
+}

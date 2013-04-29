@@ -54,7 +54,6 @@ import android.view.MenuItem;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
-
 public class WebActivity extends FragmentActivity implements WebSessionListener, 
 	CertPinDialogListener, PublishServiceListener {
 	

@@ -174,7 +174,7 @@ public class PanelPublicacionReclamacion extends Composite
     }
     
 	@Override
-	public void confirmed(Integer id) {
+	public void confirmed(Integer id, Object param) {
 		History.newItem(HistoryToken.RECLAMACIONES.toString());
 	}
     

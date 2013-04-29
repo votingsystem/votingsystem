@@ -6,9 +6,12 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -56,6 +59,10 @@ public class Usuario implements Serializable {
     @Column(name="deviceId" )
     private String deviceId;
     
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="representativeId")
+    private Usuario representative;  
+    
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="usuario")
     private Set<Certificado> certificados = new HashSet<Certificado>(0);
     
@@ -69,6 +76,7 @@ public class Usuario implements Serializable {
     
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="usuario")
     private Set<EventoVotacion> eventos = new HashSet<EventoVotacion>(0);
+    
     
     @Transient
     private X509Certificate certificate;
@@ -233,6 +241,14 @@ public class Usuario implements Serializable {
 
 	public void setDeviceId(String deviceId) {
 		this.deviceId = deviceId;
+	}
+
+	public Usuario getRepresentative() {
+		return representative;
+	}
+
+	public void setRepresentative(Usuario representative) {
+		this.representative = representative;
 	}
 
 }

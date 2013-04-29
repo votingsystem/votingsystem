@@ -64,7 +64,7 @@ public class PopupAnulacionVoto implements ConfirmacionListener {
 	}
 
 	@Override
-	public void confirmed(Integer id) {
+	public void confirmed(Integer id, Object param) {
 		MensajeClienteFirmaJso mensajeClienteFirma = MensajeClienteFirmaJso.create();
 		mensajeClienteFirma.setArgs(voto.getHashCertificadoVotoBase64());
 		mensajeClienteFirma.setOperacionEnumValue(Operacion.ANULAR_VOTO);

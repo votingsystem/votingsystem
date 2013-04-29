@@ -92,7 +92,7 @@ public class PanelCampoReclamacion extends Composite implements ConfirmacionList
 
 
 	@Override
-	public void confirmed(Integer id) {
+	public void confirmed(Integer id, Object param) {
 		panelCampos.borrarCampo(campo);
 	}
 }

@@ -34,6 +34,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -62,6 +63,7 @@ public class PanelEncabezado extends Composite implements EventoGWTMensajeAplica
     @UiField Anchor subscripciones;
     @UiField ListBox listaEstados;
     @UiField HorizontalPanel seleccionEstadoPanel;
+    @UiField HorizontalPanel optionsPanel;
 
     
     Tipo tipoBusqueda = null;

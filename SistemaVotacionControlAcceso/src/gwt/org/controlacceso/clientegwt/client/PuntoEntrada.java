@@ -10,6 +10,7 @@ import org.controlacceso.clientegwt.client.evento.EventoGWTMensajeAplicacion;
 import org.controlacceso.clientegwt.client.evento.EventoGWTMensajeClienteFirma;
 import org.controlacceso.clientegwt.client.modelo.ActorConIPJso;
 import org.controlacceso.clientegwt.client.modelo.MensajeClienteFirmaJso;
+import org.controlacceso.clientegwt.client.modelo.UsuarioJso;
 import org.controlacceso.clientegwt.client.panel.PanelCentral;
 import org.controlacceso.clientegwt.client.panel.PanelEncabezado;
 import org.controlacceso.clientegwt.client.util.Browser;
@@ -208,7 +209,7 @@ public class PuntoEntrada implements EntryPoint {
     	errorDialog.show(text, body);	
     }
 
-    private class ServerRequestInfoCallback implements RequestCallback {
+	private class ServerRequestInfoCallback implements RequestCallback {
 
         @Override
     	public void onError(Request request, Throwable exception) {

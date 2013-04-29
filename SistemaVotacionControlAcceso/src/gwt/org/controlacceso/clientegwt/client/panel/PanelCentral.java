@@ -1,13 +1,10 @@
 package org.controlacceso.clientegwt.client.panel;
 
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.controlacceso.clientegwt.client.Constantes;
 import org.controlacceso.clientegwt.client.HistoryToken;
-import org.controlacceso.clientegwt.client.PuntoEntrada;
-import org.controlacceso.clientegwt.client.PuntoEntradaEditor;
 import org.controlacceso.clientegwt.client.dialogo.DialogoCargaHerramientaValidacion;
 import org.controlacceso.clientegwt.client.dialogo.ErrorDialog;
 import org.controlacceso.clientegwt.client.evento.BusEventos;
@@ -25,6 +22,10 @@ import org.controlacceso.clientegwt.client.modelo.SistemaVotacionQueryString;
 import org.controlacceso.clientegwt.client.reclamaciones.PanelFirmaReclamacion;
 import org.controlacceso.clientegwt.client.reclamaciones.PanelPublicacionReclamacion;
 import org.controlacceso.clientegwt.client.reclamaciones.PanelReclamaciones;
+import org.controlacceso.clientegwt.client.representatives.NewRepresentativePanel;
+import org.controlacceso.clientegwt.client.representatives.RepresentativeConfigPanel;
+import org.controlacceso.clientegwt.client.representatives.RepresentativeDetailsPanel;
+import org.controlacceso.clientegwt.client.representatives.RepresentativesPanel;
 import org.controlacceso.clientegwt.client.util.RequestHelper;
 import org.controlacceso.clientegwt.client.util.ServerPaths;
 import org.controlacceso.clientegwt.client.util.StringUtils;
@@ -47,7 +48,6 @@ import com.google.gwt.user.client.ui.NamedFrame;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.*;
 
 public class PanelCentral extends Composite implements ValueChangeHandler<String>, 
 		EventoGWTConsultaEventos.Handler, EventoGWTConsultaEvento.Handler {
@@ -74,6 +74,8 @@ public class PanelCentral extends Composite implements ValueChangeHandler<String
     HistoryToken sistemaSeleccionado;
     
     private NamedFrame herramientaPublicacionFrame;
+    private RepresentativesPanel representativesPanel;
+    private SistemaVotacionQueryString svQueryString;
     
     public PanelCentral() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -190,19 +192,52 @@ public class PanelCentral extends Composite implements ValueChangeHandler<String
     			} else panelSeleccionado.add(selectedPanel);
     			cargarHerramientaValidacion();
             	break;
+    		case REPRESENTATIVES_PAGE:
+    			sistemaSeleccionado = HistoryToken.REPRESENTATIVES_PAGE;
+    			if(representativesPanel == null) {
+    				representativesPanel = new RepresentativesPanel();
+    			}
+    			representativesPanel.gotoPage(0, Constantes.REPRESENTATIVES_RANGE);
+    			selectedPanel = representativesPanel;
+            	panelSeleccionado.add(representativesPanel);
+    			break;
+    		case NEW_REPRESENTATIVE:
+    			sistemaSeleccionado = HistoryToken.REPRESENTATIVES_PAGE;
+    			NewRepresentativePanel newRepresentativePanel = new NewRepresentativePanel();
+    			selectedPanel = newRepresentativePanel;
+            	panelSeleccionado.add(newRepresentativePanel);
+    			break;
+    		case REPRESENTATIVE_DETAILS:
+    			sistemaSeleccionado = HistoryToken.REPRESENTATIVES_PAGE;
+    			if(svQueryString != null && svQueryString.getRepresentativeId() != null) {
+        			RepresentativeDetailsPanel representativeDetailsPanel = 
+        					new RepresentativeDetailsPanel(svQueryString.getRepresentativeId());
+        			selectedPanel = representativeDetailsPanel;
+                	panelSeleccionado.add(representativeDetailsPanel);
+    			} else {
+    				logger.info(" - REPRESENTATIVES_PAGE without representativeId");
+    		    	History.newItem(HistoryToken.REPRESENTATIVES_PAGE.toString());
+    			}
+    			break;
+    		case REPRESENTATIVE_CONFIG:
+    			sistemaSeleccionado = HistoryToken.REPRESENTATIVES_PAGE;
+    			RepresentativeConfigPanel representativeConfigPanel = new RepresentativeConfigPanel();
+    			selectedPanel = representativeConfigPanel;
+            	panelSeleccionado.add(representativeConfigPanel);
+    			break;    			
             default:
             	logger.info(" - Token sin procesar -> " + historyToken.toString());
     	}
     	actualizarSusbsistema(sistemaSeleccionado);
     }
     
-
     private void actualizarSusbsistema (HistoryToken seleccion) {
     	if(PanelSubsistemas.INSTANCIA == null) return;
     	switch (seleccion) {
     		case MANIFIESTOS:
     		case RECLAMACIONES:
     		case VOTACIONES:
+    		case REPRESENTATIVES_PAGE:
     			PanelSubsistemas.INSTANCIA.actualizarSistema(seleccion);
     			break;
     		default: break;
@@ -247,7 +282,7 @@ public class PanelCentral extends Composite implements ValueChangeHandler<String
 	public void onValueChange(ValueChangeEvent<String> event) {
 		String historyTokenValue = event.getValue();
 		logger.info(" - onValueChange - historyTokenValue: " + historyTokenValue);
-		SistemaVotacionQueryString svQueryString = StringUtils.getQueryString(historyTokenValue);
+		svQueryString = StringUtils.getQueryString(historyTokenValue);
 		if(svQueryString.getEventoId() != null) {
 			if(eventoSeleccionado == null ||eventoSeleccionado.getId() != 
 					svQueryString.getEventoId().intValue() ) {

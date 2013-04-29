@@ -35,14 +35,13 @@ public class Contexto {
 
     private static Logger logger = LoggerFactory.getLogger(Contexto.class);
 
-    public static boolean IS_TIME_STAMPED_SIGNATURE = true; 
-
     public static final String NOMBRE_ARCHIVO_ALMACEN_CLAVES = "AlmacenClaves.jks";
     public static final String NOMBRE_ARCHIVO_SOLICITUD_ACCESO = "AccessRequest";
     public static final String NOMBRE_ARCHIVO_SOLICITUD_ACCESO_TIMESTAMPED 
             = "AccessRequestTimeStamped";
-    public static final String NOMBRE_ARCHIVO_ENVIADO_FIRMADO = "archivoFirmado";
-    public static final String NOMBRE_ARCHIVO_CSR_ENVIADO = "csr";
+    public static final String SMIME_FILE_NAME = "archivoFirmado";
+    public static final String CSR_FILE_NAME   = "csr";
+    public static final String IMAGE_FILE_NAME   = "image";
     
     public static final String CERT_RAIZ_PATH = "AC_RAIZ_DNIE_SHA1.pem";
     public static final int KEY_SIZE = 1024;

@@ -82,6 +82,14 @@ public class DialogoOperacionEnProgreso implements EventoGWTMensajeClienteFirma.
     	dialogBox.center();
     	dialogBox.show();
     }
+    
+    public void showIndeterminate(String msg) {
+        mainPanel.remove(textPanel);
+        indeterminatePanel.setVisible(true);
+        if(msg != null) indeterminateLabel.setText(msg);
+    	dialogBox.center();
+    	dialogBox.show();
+    }
 
 	@Override
 	public void procesarMensajeClienteFirma(MensajeClienteFirmaJso mensaje) {

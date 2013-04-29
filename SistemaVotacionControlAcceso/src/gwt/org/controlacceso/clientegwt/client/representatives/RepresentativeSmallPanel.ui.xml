@@ -1,0 +1,41 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style type='org.controlacceso.clientegwt.client.representatives.RepresentativeSmallPanel.Style'>
+		.mainPanel{float:left; background-color:#f2f2f2; border: 1px solid #02227a; margin: 10px 5px 5px 10px;
+			-moz-border-radius: 5px; border-radius: 5px;
+			cursor: pointer; cursor: hand; width:340px; height:90px;}	
+		.bodyPanel {margin:0px 10px 0px 0px; width:100%; height:100%;}
+		.representativeNameLabel {font-size: 16px; font-weight:bold; color:#27335e;  margin: 5px 5px 5px 7px;}
+		.userDetailsButton { margin: 5px 10px 5px 5px; cursor:pointer; float:right;}
+		.image {width:85px; height:85px;}
+		.imageWidthLimit {width:85px; margin: 0px 0px 0px 7px;}
+		.imageHeightLimit {height:85px;margin: 0px 0px 0px 7px;}
+		.imagePanel {}
+		.representationsNumber {margin: 0px 0px 0px 7px;}
+	</ui:style>
+	<ui:image field='userDetailsButtonImg' src="UserDetailsButton.png"/>
+	<g:VerticalPanel ui:field='mainPanel' styleName="{style.mainPanel}">
+	 	    <g:HorizontalPanel styleName="{style.bodyPanel}">
+	 	        <g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
+	 	            <g:VerticalPanel ui:field='imagePanel' styleName="{style.imagePanel"/>
+	 	        </g:cell>
+		   		<g:VerticalPanel width="100%">
+	                <g:cell horizontalAlignment="ALIGN_CENTER" >
+	                    <g:VerticalPanel>
+                            <g:Label ui:field='representativeNameLabel' styleName="{style.representativeNameLabel}"/>
+           					<g:Label ui:field='representationsNumber' styleName="{style.representationsNumber}"/>
+	                    </g:VerticalPanel>
+            		</g:cell>
+		   		    
+   					<g:HorizontalPanel styleName="{style.userDetailsButton}">
+	      				<g:PushButton ui:field='userDetailsButton'>
+	  						<g:upFace image='{userDetailsButtonImg}'/>
+						</g:PushButton>
+					</g:HorizontalPanel>
+		   		</g:VerticalPanel>
+			</g:HorizontalPanel>
+	</g:VerticalPanel>
+</ui:UiBinder>
+
+		   				

@@ -1,15 +1,24 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+   	xmlns:dp="urn:import:com.google.gwt.user.datepicker.client"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
-	<ui:style>
-		.messagePanel{width: 100%; margin:10px 0px 10px 0px;
+	<ui:style type='org.controlacceso.clientegwt.client.dialogo.DialogoConfirmacion.Style'>
+		.errorMessagePanel{padding: 7px 12px 7px 12px; margin: 0px 0px 0px 0px; 
+			border: 2px solid #cc1606;}
+	    .errorMessageLabel {color: #cc1606; font-size: 14px; font-weight: bold; 
+			margin: 10px 10px 10px 10px; text-align: center;}
+		.messagePanel{width: 100%; margin:5px 0px 5px 0px;
 			text-align: center; font-size: 16px;}
+		.datePanel {}
 	    .messageLabel {font-size: 16px; font-weight: bold; 
 			margin-top: 12px; margin-bottom: 12px; }
    		.mainPanel {padding: 15px; }
+ 	    .fechaLabel {font-weight: bold; margin: 2px 0px 0px 20px;}
 		.boton { margin: 2px; cursor:pointer;}
 		.buttonPanel { float: right; margin-top: 15px;}
-		.texto{}
+ 	    .dateFromBox {margin: 0px 0px 0px 3px; border: 1px solid #02227a; width:150px}
+		.dateToBox {margin: 0px 0px 0px 3px;border: 1px solid #02227a; width:150px}
+		.errorTextBox {border-color: red;}
 	</ui:style>
 	<ui:image field='aceptar' src="../BotonAceptar.png"/>
 	<ui:image field='cerrar' src="../BotonCancelar.png"/>	
@@ -17,8 +26,18 @@
 	<g:DialogBox ui:field="dialogBox" autoHide="false" modal="true" glassEnabled="true" animationEnabled="true"
 	    text="{constantes.confirmarEleccionLabel}">
 		<g:VerticalPanel styleName="{style.mainPanel}">
-       		<g:VerticalPanel ui:field="messagePanel" styleName="{style.messagePanel}">
-			</g:VerticalPanel>
+		    <g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE" width="100%">
+		        <g:VerticalPanel ui:field="errorMessagePanel" styleName="{style.errorMessagePanel}">
+					<g:Label ui:field="errorMessageLabel" styleName="{style.errorMessageLabel}"/>
+				</g:VerticalPanel>	
+		    </g:cell>
+       		<g:VerticalPanel ui:field="messagePanel" styleName="{style.messagePanel}"/>
+       		<g:HorizontalPanel ui:field="datePanel" styleName="{style.datePanel}">
+       		    <g:Label ui:field="dateFromLabel" styleName="{style.fechaLabel}"/>
+      			<dp:DateBox ui:field="dateFromBox" styleName="{style.dateFromBox}"/>
+      			<g:Label ui:field="dateToLabel" styleName="{style.fechaLabel}"/>
+   				<dp:DateBox ui:field="dateToBox" styleName="{style.dateToBox}"/> 
+       		</g:HorizontalPanel>
 			<g:HorizontalPanel styleName="{style.buttonPanel}">
    				<g:HorizontalPanel styleName="{style.boton}">
 	      			<g:PushButton  ui:field='aceptarButton'>

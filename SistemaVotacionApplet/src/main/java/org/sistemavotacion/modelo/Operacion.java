@@ -51,7 +51,11 @@ public class Operacion {
         GUARDAR_RECIBO_VOTO(
                 getString("GUARDAR_RECIBO_VOTO")),
         MENSAJE_CIERRE_APPLET(
-                getString("MENSAJE_CIERRE_APPLET"));
+                getString("MENSAJE_CIERRE_APPLET")),
+        NEW_REPRESENTATIVE(
+                getString("NEW_REPRESENTATIVE")),
+        SELECT_REPRESENTATIVE(
+                getString("SELECT_REPRESENTATIVE"));
     
         Tipo(String caption) {
             this.caption = caption;

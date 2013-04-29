@@ -163,7 +163,7 @@ public class PanelEvento extends Composite {
 	public void onBrowserEvent(Event event){
 		switch(DOM.eventGetType(event)) {
 			case Event.ONCLICK:
-	    		PanelCentral.INSTANCIA.actualizarEventoSistemaVotacion(evento);
+	    		//PanelCentral.INSTANCIA.actualizarEventoSistemaVotacion(evento);
 	    		switch(evento.getTipoEnumValue()) {
 					case EVENTO_FIRMA:
 			       		History.newItem(HistoryToken.FIRMAR_MANIFIESTO.toString() 

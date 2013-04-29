@@ -7,18 +7,23 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+
+import org.sistemavotacion.controlacceso.modelo.Image.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.security.cert.X509Certificate;
@@ -29,16 +34,21 @@ import java.security.cert.X509Certificate;
 */
 @Entity
 @Table(name="Usuario")
+@DiscriminatorValue("Usuario")
 public class Usuario implements Serializable {
 	
     private static final long serialVersionUID = 1L;
     
     private static Logger logger = LoggerFactory.getLogger(Usuario.class);
+    
+	 public enum Type {USER, REPRESENTATIVE}
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false)
     private Long id;
-    
+	@Enumerated(EnumType.STRING)
+	@Column(name="type", nullable=false)
+	private Type type;
     @Column(name="nif", nullable=false)
     private String nif;
 
@@ -47,6 +57,12 @@ public class Usuario implements Serializable {
     
     @Column(name="primerApellido" )
     private String primerApellido;
+    
+    @Column(name="representativeMessageId" )
+    private MensajeSMIME representativeMessage;
+    
+    @Column(name="info", columnDefinition="TEXT")
+    private String info; 
     
     @Column(name="pais" )
     private String pais;
@@ -60,6 +76,19 @@ public class Usuario implements Serializable {
     @Column(name="cn")
     private String cn;
     
+    @Column(name="representationsNumber")
+    private Integer representationsNumber = 0;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="representativeId")
+    private Usuario representative;  
+    
+    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="representative")
+    private Set<Usuario> represented = new HashSet<Usuario>(0);
+    
+    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="representative")
+    private Set<RepresentationDocument> representations = new HashSet<RepresentationDocument>(0);
+    
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="fechaCreacion", length=23)
     private Date dateCreated;
@@ -67,6 +96,9 @@ public class Usuario implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="fechaActualizacion", length=23)
     private Date lastUpdated;
+    
+    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="usuario")
+    private Set<Image> images = new HashSet<Image>(0);
     
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="usuario")
     private Set<Evento> eventos = new HashSet<Evento>(0);
@@ -271,5 +303,62 @@ public class Usuario implements Serializable {
 	public void setCertificadoCA(Certificado certificadoCA) {
 		this.certificadoCA = certificadoCA;
 	}
+
+	public Usuario getRepresentative() {
+		return representative;
+	}
+
+	public void setRepresentative(Usuario representative) {
+		this.representative = representative;
+	}
+	public Set<Usuario> getRepresented() {
+		return represented;
+	}
+
+	public void setRepresented(Set<Usuario> represented) {
+		this.represented = represented;
+	}
+
+	public Set<RepresentationDocument> getRepresentations() {
+		return representations;
+	}
+
+	public void setRepresentations(Set<RepresentationDocument> representations) {
+		this.representations = representations;
+	}
+ 
 	
+	public Set<Image> getImages() {
+		return images;
+	}
+
+	public void setImages(Set<Image> images) {
+		this.images = images;
+	}
+
+	public Type getType() {
+		return type;
+	}
+
+	public void setType(Type type) {
+		this.type = type;
+	}
+	
+
+	public String getInfo() {
+		return info;
+	}
+
+	public void setInfo(String info) {
+		this.info = info;
+	}
+
+	public Integer getRepresentationsNumber() {
+		return representationsNumber;
+	}
+
+	public void setRepresentationsNumber(Integer representationsNumber) {
+		this.representationsNumber = representationsNumber;
+	}
+
 }

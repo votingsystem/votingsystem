@@ -151,7 +151,7 @@ public class PKCS10WrapperClient {
     	return KeyUtil.getPEMStringFromKey(privateKey);
     }
     
-    public KeyStore initSigner (byte[] csrFirmada, 
+    public void initSigner (byte[] csrFirmada, 
     		String signatureMechanism) throws Exception {
         Collection<X509Certificate> certificados = CertUtil.fromPEMToX509CertCollection(csrFirmada);
         certificate = certificados.iterator().next();
@@ -159,10 +159,10 @@ public class PKCS10WrapperClient {
         certificados.toArray(arrayCerts);
         signedMailGenerator = new SignedMailGenerator(
                 privateKey, arrayCerts, signatureMechanism);
-        keyStore = KeyStore.getInstance("PKCS12");
+        /*keyStore = KeyStore.getInstance("PKCS12");
         keyStore.load(null, null);
         keyStore.setKeyEntry(ALIAS_CLAVES, privateKey, PASSWORD_CLAVES.toCharArray(), arrayCerts);
-        return keyStore;
+        return keyStore;*/
     }
 
     public File genSignedFile(String fromUser, String toUser, String textoAFirmar, 

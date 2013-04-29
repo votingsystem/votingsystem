@@ -79,7 +79,7 @@ public class PanelSeleccionOpcionDeVotacion extends Composite
 	}
 
 	@Override
-	public void confirmed(Integer id) {
+	public void confirmed(Integer id, Object param) {
 		contenedorOpciones.procesarOpcionSeleccionada(opcion);
 	}
 }

@@ -16,10 +16,10 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://raw.github.com/jgzornoza/SistemaVotacionAppletFirma/master/licencia.txt
 */
-public class EnviarDocumentoFirmadoWorker extends SwingWorker<Integer, String> 
+public class DocumentLauncherWorker extends SwingWorker<Integer, String> 
         implements VotingSystemWorker {
     
-    private static Logger logger = LoggerFactory.getLogger(EnviarDocumentoFirmadoWorker.class);
+    private static Logger logger = LoggerFactory.getLogger(DocumentLauncherWorker.class);
 
     private String urlDestino;
     private VotingSystemWorkerListener workerListener;
@@ -29,7 +29,7 @@ public class EnviarDocumentoFirmadoWorker extends SwingWorker<Integer, String>
     private String message = null;
     private Exception exception = null;
     
-    public EnviarDocumentoFirmadoWorker(Integer id, Object documentoEnviado, String urlDestino, 
+    public DocumentLauncherWorker(Integer id, Object documentoEnviado, String urlDestino, 
             VotingSystemWorkerListener workerListener) {
         this.id = id;
         this.documentoEnviado = documentoEnviado;
@@ -37,14 +37,14 @@ public class EnviarDocumentoFirmadoWorker extends SwingWorker<Integer, String>
         this.urlDestino = urlDestino;
     }
     
-    public EnviarDocumentoFirmadoWorker(Integer id, String urlDestino, 
+    public DocumentLauncherWorker(Integer id, String urlDestino, 
             VotingSystemWorkerListener workerListener) {
         this.id = id;
         this.workerListener = workerListener;
         this.urlDestino = urlDestino;
     }
     
-    public EnviarDocumentoFirmadoWorker setDocumentoEnviado(Object documentoEnviado) {
+    public DocumentLauncherWorker setDocumentoEnviado(Object documentoEnviado) {
         this.documentoEnviado = documentoEnviado;
         return this;
     }

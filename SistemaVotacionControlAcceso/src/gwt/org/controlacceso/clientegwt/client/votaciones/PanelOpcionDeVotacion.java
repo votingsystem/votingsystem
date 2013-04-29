@@ -69,7 +69,7 @@ public class PanelOpcionDeVotacion extends Composite implements ConfirmacionList
     	dialogoOpcion.show(Constantes.INSTANCIA.confirmarBorradoOpcion());
 	}
 
-	@Override public void confirmed(Integer id) {
+	@Override public void confirmed(Integer id, Object param) {
 		panelOpciones.borrarOpcion(opcion);
 	}
 
