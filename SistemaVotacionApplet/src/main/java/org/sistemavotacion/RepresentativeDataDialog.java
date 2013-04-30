@@ -430,6 +430,7 @@ public class RepresentativeDataDialog extends JDialog
             return;
         }
         dispose();
+        AppletFirma.INSTANCIA.cancelarOperacion();
     }//GEN-LAST:event_cerrarButtonActionPerformed
 
     private void verDocumentoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_verDocumentoButtonActionPerformed

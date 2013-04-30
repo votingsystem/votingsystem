@@ -304,7 +304,7 @@ public class PanelFirmaManifiesto extends Composite implements SolicitanteEmail,
 	}
 
 	@Override
-	public void procesarEmail(String email) {
+	public void procesarEmail(Integer id, String email) {
 		logger.info("--- procesarEmail");
 		MensajeClienteFirmaJso mensajeClienteFirma = MensajeClienteFirmaJso.create(null, 
 				Operacion.SOLICITUD_COPIA_SEGURIDAD.toString(), 

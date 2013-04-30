@@ -374,7 +374,7 @@ class PdfService {
 					}
 					if(Respuesta.SC_OK == respuestaGeneracionBackup?.codigoEstado) {
 						File archivoCopias = respuestaGeneracionBackup.file
-						solicitudCopia = new SolicitudCopia(filePath:archivoCopias.getAbsolutePath(),
+						solicitudCopia = new SolicitudCopia(filePath:archivoCopias.getAbsolutePath(), type:SolicitudCopia.Type.EVENT,
 							documento:documento, email:email, numeroCopias:respuestaGeneracionBackup.cantidad)
 						SolicitudCopia.withTransaction {
 							solicitudCopia.save()

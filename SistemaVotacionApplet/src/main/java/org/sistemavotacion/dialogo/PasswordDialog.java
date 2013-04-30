@@ -3,39 +3,57 @@ package org.sistemavotacion.dialogo;
 import static org.sistemavotacion.Contexto.*;
 
 import java.awt.Frame;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.text.html.parser.ParserDelegator;
+import org.sistemavotacion.Contexto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author jgzornoza
- */
+* @author jgzornoza
+* Licencia: https://raw.github.com/jgzornoza/SistemaVotacionAppletFirma/master/licencia.txt
+*/
 public class PasswordDialog extends javax.swing.JDialog {
     
     private static Logger logger = LoggerFactory.getLogger(PasswordDialog.class);
 
     private String password;
     Frame parentFrame;
-    
-    /**
-     * Creates new form PasswordDialog
-     */
+    boolean isCapsLockPressed = false;
+            
     public PasswordDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         this.parentFrame = parent;
         initComponents();
-        setLocationRelativeTo(null);
-        //setLocation(200, 100);        
+        setLocationRelativeTo(null);    
         password1Field.addKeyListener(new KeyListener(){
+            boolean shiftPressed = false;
             @Override public void keyPressed(KeyEvent e){
+                if(!shiftPressed) {
+                    if(Character.isUpperCase(e.getKeyChar())) {
+                        setCapsLockState(true);
+                    } else setCapsLockState(false);
+                } else {
+                    if(Character.isUpperCase(e.getKeyChar())) {
+                        setCapsLockState(false);
+                    } else setCapsLockState(true);
+                }
+                
                 if (e.getKeyCode() == KeyEvent.VK_ENTER)
-                aceptarButton.doClick();
+                    aceptarButton.doClick();
+                if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
+                    shiftPressed = true;
+                }
+                
             }
             @Override public void keyTyped(KeyEvent ke) {}
-            @Override public void keyReleased(KeyEvent ke) {}
+            @Override public void keyReleased(KeyEvent ke) {
+                if (ke.getKeyCode() == KeyEvent.VK_SHIFT) {
+                    shiftPressed = false;
+                }
+            }
         });
         password2Field.addKeyListener(new KeyListener(){
             @Override public void keyPressed(KeyEvent e){
@@ -47,19 +65,44 @@ public class PasswordDialog extends javax.swing.JDialog {
         });
         //Bug similar to -> http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6993691
         ParserDelegator workaround = new ParserDelegator();
-        messageLabel.setText(
-                getString("recomendacionDNIE"));
+
         password = null;
         setTitle(getString("passwordDialogCaption"));
+        /*boolean check = false;
+        try {//NOT SUPPORTED IN APPLET
+            check = Toolkit.getDefaultToolkit().
+                getLockingKeyState(KeyEvent.VK_CAPS_LOCK);
+        } catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
+        if(check) changeCapsLockState();
+        else messageLabel.setText(getString("recomendacionDNIE")); */
+        messageLabel.setText(getString("recomendacionDNIE"));
         this.pack();
     }
     
+    private void setCapsLockState (boolean pressed) {
+        this.isCapsLockPressed = pressed;
+        setMessage(null);
+    }
+    
     private void setMessage (String mensaje) {
-        if (mensaje == null) validationPanel.setVisible(false);
-        else {
-            messageLabel.setText(mensaje);
-            validationPanel.setVisible(true);
+        if (mensaje == null) {
+            if(isCapsLockPressed) {
+                messageLabel.setText("<html><b>" + 
+                        Contexto.getString("capsLockKeyPressed") + "</b><br/><br/>" + 
+                        getString("recomendacionDNIE") + "</html>");
+            } else {
+                messageLabel.setText(getString("recomendacionDNIE"));
+            }
+        } else {
+            if(isCapsLockPressed) {
+                messageLabel.setText("<html><b>" + 
+                        Contexto.getString("capsLockKeyPressed") + "</b><br/>" + 
+                        mensaje + "</html>");
+            }  else messageLabel.setText(mensaje);
         }
+        validationPanel.setVisible(true);
         pack();
     }
 

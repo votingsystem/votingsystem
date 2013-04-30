@@ -6,9 +6,9 @@
 		.messagePanel{width: 100%; border:1pt solid #cc1606; margin-bottom:10px;}
 	    .messageLabel {color: #cc1606; font-size: 16px; font-weight: bold; 
 			margin-top: 12px; margin-bottom: 12px; text-align: center;}    	
-		.errorTextBox {border: 1px solid red; width:350px;}
-		.texto{}
- 	    .textBox {margin-left: 3px; margin-top: 5px; border: 1px solid #02227a; width:350px;}
+		.errorTextBox {border: 1px solid red; width:250px;}
+	    .messageInfoLabel {font-size: 16px; text-align: center;}
+ 	    .textBox {margin-left: 3px; margin-top: 5px; border: 1px solid #02227a; width:250px;}
 		.boton { margin: 2px; cursor:pointer;}
 		.buttonPanel { float: right; margin-top: 15px;}
 	</ui:style>
@@ -22,10 +22,12 @@
 				<g:Label ui:field="messageLabel" styleName="{style.messageLabel}"></g:Label>
 			</g:VerticalPanel>
 			<g:VerticalPanel>
-				<g:HTML styleName="{style.texto}" HTML="{constantes.solicitudEmailLabel}"/>
-				<g:HorizontalPanel>
-   					<g:TextBox  ui:field="contenidoTextBox" styleName="{style.textBox}"/>
-				</g:HorizontalPanel>
+				<g:HTML ui:field="emailLabel" styleName="{style.messageInfoLabel}" HTML="{constantes.solicitudEmailLabel}"/>
+	 			 <g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
+     				<g:HorizontalPanel>
+   						<g:TextBox  ui:field="contenidoTextBox" styleName="{style.textBox}"/>
+					</g:HorizontalPanel>
+	 			 </g:cell>
 			</g:VerticalPanel>
 			<g:HorizontalPanel styleName="{style.buttonPanel}">
    				<g:HorizontalPanel styleName="{style.boton}">

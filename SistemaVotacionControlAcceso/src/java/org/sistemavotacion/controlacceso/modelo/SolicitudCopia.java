@@ -4,13 +4,17 @@ import javax.persistence.GeneratedValue;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
 import static javax.persistence.GenerationType.IDENTITY;
 
 @Entity
@@ -19,12 +23,25 @@ public class SolicitudCopia implements java.io.Serializable {
 
 	 private static final long serialVersionUID = 1L;
 	 
+	 public enum Type {EVENT, REPRESENTATIVE_VOTING_HISTORY,
+		 REPRESENTATIVE_ACCREDITATIONS}
+	 
+	 
 	 @Id @GeneratedValue(strategy=IDENTITY)
 	 @Column(name="id", unique=true, nullable=false)
 	 private Long id;
-	 @ManyToOne(fetch=FetchType.LAZY)
-	 @JoinColumn(name="documentoId", nullable=false)
+	 @OneToOne
+	 @JoinColumn(name="documentoId")
 	 private Documento documento;
+     @Enumerated(EnumType.STRING)
+     @Column(name="type", nullable=false)
+     private Type type;
+     @OneToOne
+     @JoinColumn(name="mensajeSMIMEId")
+     private MensajeSMIME mensajeSMIME;
+     @ManyToOne(fetch=FetchType.LAZY)
+     @JoinColumn(name="representativeId")
+     private Usuario representative;
      @Column(name="email") 
      private String email;
      @Column(name="numeroCopias")
@@ -106,6 +123,36 @@ public class SolicitudCopia implements java.io.Serializable {
 
 	public void setNumeroCopias(Long numeroCopias) {
 		this.numeroCopias = numeroCopias;
+	}
+
+
+	public MensajeSMIME getMensajeSMIME() {
+		return mensajeSMIME;
+	}
+
+
+	public void setMensajeSMIME(MensajeSMIME mensajeSMIME) {
+		this.mensajeSMIME = mensajeSMIME;
+	}
+
+
+	public Usuario getRepresentative() {
+		return representative;
+	}
+
+
+	public void setRepresentative(Usuario representative) {
+		this.representative = representative;
+	}
+
+
+	public Type getType() {
+		return type;
+	}
+
+
+	public void setType(Type type) {
+		this.type = type;
 	}
 
 }

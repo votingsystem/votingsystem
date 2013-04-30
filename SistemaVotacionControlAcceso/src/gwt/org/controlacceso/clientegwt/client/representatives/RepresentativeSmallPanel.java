@@ -61,8 +61,6 @@ public class RepresentativeSmallPanel extends Composite implements LoadHandler {
 		image.setUrl(representative.getImageURL());
 		imagePanel.add(image);
 
-		
-		//newWidth, myImageResource.getHeight() * newWidth / myImageResource.getWidth()
 		this.representative = representative;
 		representativeNameLabel.setText(representative.getNombre() + " " + representative.getPrimerApellido());
 		HTML dummyHTML = new HTML();

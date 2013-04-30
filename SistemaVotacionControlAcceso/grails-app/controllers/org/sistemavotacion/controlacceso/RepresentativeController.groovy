@@ -29,6 +29,46 @@ class RepresentativeController {
 	}
 	
 	/**
+	 *
+	 * Servicio que guarda las selecciones de representantes echas por los usuarios
+	 *
+	 * @param archivoFirmado Archivo firmado en formato SMIME en cuyo contenido se
+	 *        encuentra la votación que se desea publicar en formato HTML.
+	 * @httpMethod POST
+	 * @return Mensaje con instrucciones de descarga.
+	 */
+	def guardarAccreditationsRequest() {
+		Respuesta respuesta = representativeService.processAccreditationsRequest(
+			params.smimeMessageReq, request.getLocale())
+		if (Respuesta.SC_OK != respuesta.codigoEstado) {
+			log.debug "Problemas procesando solicitud de copia de seguridad - ${respuesta.mensaje}"
+		}
+		response.status = respuesta.codigoEstado
+		render respuesta.mensaje
+		return false
+	}
+	
+	/**
+	 *
+	 * Servicio que guarda las selecciones de representantes echas por los usuarios
+	 *
+	 * @param archivoFirmado Archivo firmado en formato SMIME en cuyo contenido se
+	 *        encuentra la votación que se desea publicar en formato HTML.
+	 * @httpMethod POST
+	 * @return Mensaje con instrucciones de descarga.
+	 */
+	def guardarVotingHistoryRequest() {
+		Respuesta respuesta = representativeService.precessVotingHistoryRequest(
+			params.smimeMessageReq, request.getLocale())
+		if (Respuesta.SC_OK != respuesta.codigoEstado) {
+			log.debug "Problemas procesando solicitud de copia de seguridad - ${respuesta.mensaje}"
+		}
+		response.status = respuesta.codigoEstado
+		render respuesta.mensaje
+		return false
+	}
+	
+	/**
 	 * 
 	 * Servicio que guarda las selecciones de representantes echas por los usuarios
 	 *
@@ -49,7 +89,9 @@ class RepresentativeController {
 					smimePadre: respuesta.mensajeSMIME,
 					usuario:respuesta.usuario, valido:true,
 					contenido:mensajeValidado.getBytes())
-			mensajeSMIMEValidado.save();
+			MensajeSMIME.withTransaction {
+				mensajeSMIMEValidado.save();
+			}
 			respuesta.mensajeSMIMEValidado = mensajeSMIMEValidado
 		}
 		flash.respuesta = respuesta

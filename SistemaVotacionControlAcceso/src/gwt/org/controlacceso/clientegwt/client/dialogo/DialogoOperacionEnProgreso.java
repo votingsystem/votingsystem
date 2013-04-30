@@ -4,21 +4,25 @@ import java.util.logging.Logger;
 
 import org.controlacceso.clientegwt.client.Constantes;
 import org.controlacceso.clientegwt.client.PuntoEntrada;
+import org.controlacceso.clientegwt.client.Recursos;
 import org.controlacceso.clientegwt.client.evento.BusEventos;
 import org.controlacceso.clientegwt.client.evento.EventoGWTMensajeClienteFirma;
 import org.controlacceso.clientegwt.client.modelo.MensajeClienteFirmaJso;
 import org.controlacceso.clientegwt.client.util.Browser;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArrayString;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -32,16 +36,20 @@ public class DialogoOperacionEnProgreso implements EventoGWTMensajeClienteFirma.
     
     interface DialogoOperacionEnProgresoUiBinder extends UiBinder<Widget, DialogoOperacionEnProgreso> {}
     
-    interface EditorStyle extends CssResource {
+    interface Style extends CssResource {
         String textoChrome();
         String texto();
+        String resultMessage();
     }
 
+    @UiField Style style;
     @UiField Label indeterminateLabel;
     @UiField DialogBox dialogBox;
     @UiField VerticalPanel indeterminatePanel;
     @UiField VerticalPanel mainPanel;
     @UiField VerticalPanel textPanel;
+    @UiField HorizontalPanel buttonPanel;
+    @UiField Image resultImage;
     private HTML textoChrome;
     private HTML textoAdvertencia;
     
@@ -53,6 +61,8 @@ public class DialogoOperacionEnProgreso implements EventoGWTMensajeClienteFirma.
         BusEventos.addHandler(
         		EventoGWTMensajeClienteFirma.TYPE, this);
         dialogBox.setText(Constantes.INSTANCIA.dialogoProgresoCaption());
+        resultImage.setVisible(false);
+        buttonPanel.setVisible(false);
         if(PuntoEntrada.INSTANCIA != null && 
         		!PuntoEntrada.INSTANCIA.isClienteFirmaCargado()) {
             if(Browser.isChrome()) {
@@ -82,6 +92,35 @@ public class DialogoOperacionEnProgreso implements EventoGWTMensajeClienteFirma.
     	dialogBox.center();
     	dialogBox.show();
     }
+    
+    @UiHandler("aceptarButton")
+    void handleCerrarButton(ClickEvent e) {
+    	dialogBox.hide();
+    }
+    
+    
+    public void showFinishMessage(
+    		String caption, String message, Boolean isOk) {
+    	HTML htmlMessage = new HTML(message);
+    	indeterminatePanel.clear();
+    	indeterminatePanel.add(htmlMessage);
+    	buttonPanel.setVisible(true);
+    	dialogBox.setText(caption);
+    	dialogBox.center();
+    	dialogBox.show();
+    	if(isOk != null) {
+    		if(isOk) {
+    			resultImage.setResource(
+    					Recursos.INSTANCIA.accept_32x32());
+    		} else {
+    			resultImage.setResource(
+    					Recursos.INSTANCIA.cancel_32x32());
+    		}
+    		resultImage.setVisible(true);
+    		htmlMessage.setStyleDependentName(style.resultMessage(), true);
+    	}
+    }
+    
     
     public void showIndeterminate(String msg) {
         mainPanel.remove(textPanel);
@@ -118,7 +157,9 @@ public class DialogoOperacionEnProgreso implements EventoGWTMensajeClienteFirma.
 	            indeterminatePanel.setVisible(true);
 				break;
 		}
-		
+		if(MensajeClienteFirmaJso.SC_CANCELADO ==  mensaje.getCodigoEstado()){
+			dialogBox.hide();
+		}
 	}
 	
 	@Override public void onValueChange(ValueChangeEvent<String> event) {

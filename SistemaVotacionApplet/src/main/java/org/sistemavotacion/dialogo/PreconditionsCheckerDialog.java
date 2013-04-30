@@ -115,6 +115,8 @@ public class PreconditionsCheckerDialog
                     logger.debug("controlCenterCertChecked: " + controlCenterCertChecked + 
                             " - accessControlCertChecked: " + accessControlCertChecked);
                     break;
+                case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
+                case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
                 case NEW_REPRESENTATIVE:
                 case SELECT_REPRESENTATIVE:
                 case PUBLICACION_MANIFIESTO_PDF:
@@ -196,6 +198,8 @@ public class PreconditionsCheckerDialog
                     }
                 });    
                 break;
+            case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
+            case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
             case SELECT_REPRESENTATIVE:
             case PUBLICACION_MANIFIESTO_PDF:
             case FIRMA_MANIFIESTO_PDF:
@@ -345,6 +349,7 @@ public class PreconditionsCheckerDialog
             logger.debug(" ------ System.exit(0) ------ ");
             System.exit(0);
         }
+        AppletFirma.INSTANCIA.cancelarOperacion();
     }//GEN-LAST:event_acceptButtonActionPerformed
 
 

@@ -4,6 +4,7 @@ import java.security.MessageDigest
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
+import javax.mail.internet.MimeMessage
 
 import org.bouncycastle.util.encoders.Base64;
 import org.sistemavotacion.controlacceso.modelo.*
@@ -18,6 +19,7 @@ class RepresentativeService {
 	def subscripcionService
 	def messageSource
 	def grailsApplication
+	def mailSenderService
 
 	Respuesta saveUserRepresentative(SMIMEMessageWrapper smimeMessage, Locale locale) {
 		log.debug("saveUserRepresentative -")
@@ -34,8 +36,14 @@ class RepresentativeService {
 				usuario:usuario, valido:true, contenido:smimeMessage.getBytes())
 			if(!representative || Usuario.Type.REPRESENTATIVE != representative.type ||
 				 usuario.nif == representative.nif) {
-				String msg = messageSource.getMessage('representativeNifErrorMsg', 
-					[mensajeJSON.representativeNif].toArray(), locale)
+				String msg = null
+				if(usuario.nif == representative.nif) {
+					msg = messageSource.getMessage('representativeSameUserNifErrorMsg',
+						[mensajeJSON.representativeNif].toArray(), locale)
+				} else {
+					msg = messageSource.getMessage('representativeNifErrorMsg',
+						[mensajeJSON.representativeNif].toArray(), locale)
+				}
 				log.error "${msg} - user nif '${usuario.nif}' - representative nif '${representative.nif}'"
 				mensajeSMIME.motivo = msg
 				mensajeSMIME.valido = false
@@ -51,13 +59,12 @@ class RepresentativeService {
 				representationDocument.cancellationSMIME=mensajeSMIME
 				representationDocument.dateCanceled = new Date(System.currentTimeMillis());
 				representationDocument.representative.representationsNumber--
-				//===== prueba representationDocument.representative.save()
 				representationDocument.save()
 			}
 			representationDocument = new RepresentationDocument(activationSMIME:mensajeSMIME,
 				user:usuario, representative:representative, state:RepresentationDocument.State.OK);
-			representative.representative = representative
-			usuario.representative
+			usuario.representative = representative
+			representative.representationsNumber++
 			representationDocument.save()
 			String resultMsg = messageSource.getMessage('representativeAssociatedMsg',
 				[mensajeJSON.representativeName, usuario.nif].toArray(), locale)
@@ -123,7 +130,6 @@ class RepresentativeService {
 			usuario.setInfo(mensajeJSON.representativeInfo)
 			mensajeSMIME.save()
 			usuario.representativeMessage = mensajeSMIME
-			//====== usuario.save()
 			newImage.save()
 			return new Respuesta(codigoEstado:Respuesta.SC_OK, mensaje:message)
 		} catch(Exception ex) {
@@ -133,6 +139,243 @@ class RepresentativeService {
 		}
 
     }
+
+	
+	private Respuesta getVotingHistoryBackup (Usuario representative, 
+		Date dateFrom, Date dateTo, Locale locale){
+		log.debug("getVotingHistoryBackup - representative: ${representative.id}" + 
+			" - dateFrom: ${dateFrom} - dateTo: ${dateTo}")
+		
+		def dateFromStr = DateUtils.getShortStringFromDate(dateFrom)
+		def dateToStr = DateUtils.getShortStringFromDate(dateTo)
+		
+		String zipNamePrefix = messageSource.getMessage(
+			'representativeHistoryVotingBackupFileName', null, locale);
+		def basedir = "${grailsApplication.config.SistemaVotacion.baseRutaCopiaRespaldo}" +
+			"/RepresentativeHistoryVoting/${dateFromStr}_${dateToStr}/${zipNamePrefix}_${representative.nif}"
+		log.debug("getVotingHistoryBackup - basedir: ${basedir}")
+		File baseDirZipped = new File("${basedir}.zip")
+		File metaInfFile;
+		if(baseDirZipped.exists()) {
+			 metaInfFile = new File("${basedir}/meta.inf")
+			 if(metaInfFile) {
+				 def metaInfJSON = JSON.parse(metaInfFile.text)
+				 return new Respuesta(codigoEstado:Respuesta.SC_OK, file:baseDirZipped,
+					 cantidad:new Integer(metaInfJSON.numberVotes))
+			 }
+		}
+			
+		new File(basedir).mkdirs()
+		String votoFileName = messageSource.getMessage('votoFileName', null, locale)
+		int i = 0
+		log.debug("============= TODO");
+		/*def criteria = RepresentationDocument.createCriteria()
+		def results = criteria.list {
+			eq("state", RepresentationDocument.State.OK)
+			eq("representative", representative)
+			and {
+				le("dateCreated", selectedDate)
+			}
+		}
+		results.each { it ->
+			MensajeSMIME mensajeSMIME = it.activationSMIME
+			ByteArrayInputStream bais = new ByteArrayInputStream(mensajeSMIME.contenido);
+			MimeMessage msg = new MimeMessage(null, bais);
+			File smimeFile = new File("${basedir}/${votoFileName}_${i}")
+			FileOutputStream fos = new FileOutputStream(smimeFile);
+			msg.writeTo(fos);
+			fos.close();
+			i++;
+		}*/
+		def metaInfMap = [numberVotes:i, dateFrom: DateUtils.getStringFromDate(dateFrom),
+			dateTo:DateUtils.getStringFromDate(dateTo),
+			representativeURL:"${grailsApplication.config.grails.serverURL}/representative/detailed?id=${representative.id}"]
+		String metaInfJSONStr = metaInfMap as JSON
+		metaInfFile = new File("${basedir}/meta.inf")
+		metaInfFile.write(metaInfJSONStr)
+		def ant = new AntBuilder()
+		ant.zip(destfile: "${basedir}.zip", basedir: basedir)
+		return new Respuesta(codigoEstado:Respuesta.SC_OK, cantidad:i, file:new File("${basedir}.zip"))
+	}
+		
+	private Respuesta getAccreditationsBackup (Usuario representative,
+		Date selectedDate, Locale locale){
+		log.debug("getAccreditationsBackup - representative: ${representative.id}" +
+			" - selectedDate: ${selectedDate}")
+		def criteria = RepresentationDocument.createCriteria()
+		def results
+		def criteriaCancelled = RepresentationDocument.createCriteria()
+		def cencelledResults
+		Date todayDate = DateUtils.getTodayDate()
+		RepresentationDocument.withTransaction {
+			results = criteria.list {
+				eq("state", RepresentationDocument.State.OK)
+				eq("representative", representative)
+				le("dateCreated", selectedDate)
+			}
+			
+			cencelledResults = criteriaCancelled.list {
+				eq("state", RepresentationDocument.State.CANCELLED)
+				between("dateCanceled", selectedDate, todayDate)
+			}
+		}
+		results.addAll(cencelledResults)
+		
+		def fecha = DateUtils.getShortStringFromDate(DateUtils.getTodayDate())
+		String zipNamePrefix = messageSource.getMessage(
+			'representativeAcreditationsBackupFileName', null, locale);
+		def basedir = "${grailsApplication.config.SistemaVotacion.baseRutaCopiaRespaldo}" +
+			"/AccreditationsBackup/${selectedDate}/${zipNamePrefix}_${representative.nif}"
+		log.debug("getAccreditationsBackup - basedir: ${basedir}")
+		File baseDirZipped = new File("${basedir}.zip")
+		File metaInfFile;
+		if(baseDirZipped.exists()) {
+			 metaInfFile = new File("${basedir}/meta.inf")
+			 if(metaInfFile) {
+				 def metaInfJSON = JSON.parse(metaInfFile.text)
+				 return new Respuesta(codigoEstado:Respuesta.SC_OK, file:baseDirZipped,
+					 cantidad:new Integer(metaInfJSON.numberOfAccreditations))
+			 }
+		}
+		new File(basedir).mkdirs()
+		String accreditationFileName = messageSource.getMessage('accreditationFileName', null, locale)
+		int i = 0
+		results.each { it ->
+			MensajeSMIME mensajeSMIME = it.activationSMIME
+			ByteArrayInputStream bais = new ByteArrayInputStream(mensajeSMIME.contenido);
+			MimeMessage msg = new MimeMessage(null, bais);
+			File smimeFile = new File("${basedir}/${accreditationFileName}_${i}")
+			FileOutputStream fos = new FileOutputStream(smimeFile);
+			msg.writeTo(fos);
+			fos.close();
+			i++;
+		}
+		def metaInfMap = [numberOfAccreditations:i, selectedDate: DateUtils.getStringFromDate(selectedDate),
+			representativeURL:"${grailsApplication.config.grails.serverURL}/representative/detailed?id=${representative.id}"]
+		String metaInfJSONStr = metaInfMap as JSON
+		metaInfFile = new File("${basedir}/meta.inf")
+		metaInfFile.write(metaInfJSONStr)
+		def ant = new AntBuilder()
+		ant.zip(destfile: "${basedir}.zip", basedir: basedir)
+		return new Respuesta(codigoEstado:Respuesta.SC_OK, cantidad:i, file:new File("${basedir}.zip"))
+	}
+	
+	Respuesta precessVotingHistoryRequest(SMIMEMessageWrapper smimeMessage, Locale locale) {
+		log.debug("precessVotingHistoryRequest -")
+		MensajeSMIME mensajeSMIME = null
+		def mensajeJSON
+		try {
+			Tipo tipo = Tipo.REPRESENTATIVE_VOTING_HISTORY_REQUEST 
+			mensajeJSON = JSON.parse(smimeMessage.getSignedContent())
+			Respuesta respuestaUsuario = subscripcionService.comprobarUsuario(smimeMessage, locale)
+			if(respuestaUsuario.codigoEstado != Respuesta.SC_OK) return respuestaUsuario
+			Usuario usuario = respuestaUsuario.usuario
+			mensajeSMIME = new MensajeSMIME(tipo:tipo, usuario:usuario, valido:true,
+				contenido:smimeMessage.getBytes())
+			Usuario representative = Usuario.findWhere(nif:mensajeJSON.representativeNif)
+			if(!representative || Usuario.Type.REPRESENTATIVE != representative.type) {
+				String msg = messageSource.getMessage('representativeNifErrorMsg',
+					[mensajeJSON.representativeNif].toArray(), locale)
+				log.error "${msg} - user nif '${usuario.nif}' - representative nif '${representative.nif}'"
+				mensajeSMIME.motivo = msg
+				mensajeSMIME.valido = false
+				mensajeSMIME.save()
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg)
+			}
+			Date dateFrom = DateUtils.getDateFromString(mensajeJSON.dateFrom)
+			Date dateTo = DateUtils.getDateFromString(mensajeJSON.dateTo)
+			runAsync {
+				Respuesta respuestaGeneracionBackup
+				respuestaGeneracionBackup =getVotingHistoryBackup(representative, dateFrom,  dateTo, locale)
+				if(Respuesta.SC_OK == respuestaGeneracionBackup?.codigoEstado) {
+					File archivoCopias = respuestaGeneracionBackup.file
+					SolicitudCopia solicitudCopia = new SolicitudCopia(
+						filePath:archivoCopias.getAbsolutePath(),
+						type:SolicitudCopia.Type.REPRESENTATIVE_VOTING_HISTORY, 
+						representative:representative,
+						mensajeSMIME:mensajeSMIME, email:mensajeJSON.email, 
+						numeroCopias:respuestaGeneracionBackup.cantidad)
+					log.error("mensajeSMIME: ${mensajeSMIME.id} - ${solicitudCopia.type}");
+					SolicitudCopia.withTransaction {
+						solicitudCopia.save()
+					}
+					mailSenderService.sendRepresentativeVotingHistory(
+						solicitudCopia, mensajeJSON.dateFrom, mensajeJSON.dateTo, locale)
+				} else log.error("Error generando archivo de copias de respaldo");
+			}
+		} catch(Exception ex) {
+			log.error (ex.getMessage(), ex)
+			if(mensajeSMIME) {
+				mensajeSMIME.motivo = ex.getMessage()
+				mensajeSMIME.valido = false;
+				mensajeSMIME.save()
+			}
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION,
+				mensaje:ex.getMessage())
+		}
+		if(mensajeSMIME) mensajeSMIME.save()
+		new Respuesta(codigoEstado:Respuesta.SC_OK,
+			mensaje:messageSource.getMessage('backupRequestOKMsg',
+			[mensajeJSON.email].toArray(), locale))
+	}
+	
+	Respuesta processAccreditationsRequest(SMIMEMessageWrapper smimeMessage, Locale locale) {
+		log.debug("processAccreditationsRequest -")
+		MensajeSMIME mensajeSMIME = null
+		RepresentationDocument representationDocument = null
+		def mensajeJSON
+		try {
+			Tipo tipo = Tipo.REPRESENTATIVE_ACCREDITATIONS_REQUEST
+			mensajeJSON = JSON.parse(smimeMessage.getSignedContent())
+			Respuesta respuestaUsuario = subscripcionService.comprobarUsuario(smimeMessage, locale)
+			if(respuestaUsuario.codigoEstado != Respuesta.SC_OK) return respuestaUsuario
+			Usuario usuario = respuestaUsuario.usuario
+			mensajeSMIME = new MensajeSMIME(tipo:tipo, usuario:usuario, valido:true,
+				contenido:smimeMessage.getBytes())
+			Usuario representative = Usuario.findWhere(nif:mensajeJSON.representativeNif)
+			if(!representative || Usuario.Type.REPRESENTATIVE != representative.type) {
+			   String msg = messageSource.getMessage('representativeNifErrorMsg',
+				   [mensajeJSON.representativeNif].toArray(), locale)
+			   log.error "${msg} - user nif '${usuario.nif}' - representative nif '${representative.nif}'"
+			   mensajeSMIME.motivo = msg
+			   mensajeSMIME.valido = false
+			   mensajeSMIME.save()
+			   return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg)
+		   }
+			Date selectedDate = DateUtils.getDateFromString(mensajeJSON.selectedDate)
+			runAsync {
+					Respuesta respuestaGeneracionBackup = getAccreditationsBackup(
+						representative, selectedDate ,locale)
+					if(Respuesta.SC_OK == respuestaGeneracionBackup?.codigoEstado) {
+						File archivoCopias = respuestaGeneracionBackup.file
+						SolicitudCopia solicitudCopia = new SolicitudCopia(
+							filePath:archivoCopias.getAbsolutePath(),
+							type:SolicitudCopia.Type.REPRESENTATIVE_ACCREDITATIONS,
+							representative:representative,
+							mensajeSMIME:mensajeSMIME, email:mensajeJSON.email,
+							numeroCopias:respuestaGeneracionBackup.cantidad)
+						SolicitudCopia.withTransaction {
+							solicitudCopia.save()
+						}
+						mailSenderService.sendRepresentativeAccreditations(
+							solicitudCopia, mensajeJSON.selectedDate, locale)
+					} else log.error("Error generando archivo de copias de respaldo");
+			}
+		} catch(Exception ex) {
+			log.error (ex.getMessage(), ex)
+			if(mensajeSMIME) {
+				mensajeSMIME.motivo = ex.getMessage()
+				mensajeSMIME.valido = false;
+				mensajeSMIME.save()
+			}
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION,
+				mensaje:ex.getMessage())
+		}
+		if(mensajeSMIME) mensajeSMIME.save()
+		new Respuesta(codigoEstado:Respuesta.SC_OK,
+				mensaje:messageSource.getMessage('backupRequestOKMsg',
+				[mensajeJSON.email].toArray(), locale))
+	}
 		
 	public Map getRepresentativeJSONMap(Usuario usuario) {
 		//log.debug("getRepresentativeJSONMap: ${usuario.id} ")

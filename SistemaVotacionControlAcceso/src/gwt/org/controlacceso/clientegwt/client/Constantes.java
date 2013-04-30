@@ -307,4 +307,12 @@ public interface Constantes extends Messages{
     String requestDateFromLabel();	
     String requestDateToLabel();	
     String requestDateLabel();
+    
+    String emailForVotingHistoryMsg();
+    String emailForVRepresentativeAccreditationsMsg();
+    
+	String backupRequestOK(String email);
+    String selectRepresentativeCaption();
+    String selectRepresentativeOKMsg(String reoresentativeName);
+    	
 }

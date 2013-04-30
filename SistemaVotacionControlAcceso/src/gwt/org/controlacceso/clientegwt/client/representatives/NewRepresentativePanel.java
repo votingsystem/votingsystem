@@ -136,7 +136,7 @@ public class NewRepresentativePanel extends Composite implements
     @UiHandler("cerrarButton")
     void handleCancelButton(ClickEvent e) {
     	if(Window.confirm(Constantes.INSTANCIA.salirSinSalvarConfirmLabel())) {
-        	History.newItem(HistoryToken.VOTACIONES.toString());
+        	History.newItem(HistoryToken.REPRESENTATIVE_CONFIG.toString());
 		}
     }
 	

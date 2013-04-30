@@ -194,8 +194,6 @@ public class PuntoEntrada implements EntryPoint {
 	    			}
 	    			break;
 	    		default:
-	    			logger.info("setClienteFirmaMessage - operación desconocida: " + 
-	    					mensajeClienteFirma.getOperacionEnumValue().toString());
 	    			break;
     		}
     	} catch (Exception exception) {

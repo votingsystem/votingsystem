@@ -9,11 +9,10 @@
 			margin: 10px 10px 10px 10px; text-align: center;}
 		.messagePanel{width: 100%; margin:5px 0px 5px 0px;
 			text-align: center; font-size: 16px;}
-		.datePanel {}
-	    .messageLabel {font-size: 16px; font-weight: bold; 
-			margin-top: 12px; margin-bottom: 12px; }
-   		.mainPanel {padding: 15px; }
- 	    .fechaLabel {font-weight: bold; margin: 2px 0px 0px 20px;}
+		.datePanel {width: 100%;}
+	    .messageLabel {font-size: 16px; text-align: center;}
+   		.mainPanel {padding: 0px 15px 15px 15px; }
+ 	    .fechaLabel {font-size:16px; font-weight: bold; margin: 2px 0px 0px 20px;}
 		.boton { margin: 2px; cursor:pointer;}
 		.buttonPanel { float: right; margin-top: 15px;}
  	    .dateFromBox {margin: 0px 0px 0px 3px; border: 1px solid #02227a; width:150px}
@@ -33,10 +32,18 @@
 		    </g:cell>
        		<g:VerticalPanel ui:field="messagePanel" styleName="{style.messagePanel}"/>
        		<g:HorizontalPanel ui:field="datePanel" styleName="{style.datePanel}">
-       		    <g:Label ui:field="dateFromLabel" styleName="{style.fechaLabel}"/>
-      			<dp:DateBox ui:field="dateFromBox" styleName="{style.dateFromBox}"/>
-      			<g:Label ui:field="dateToLabel" styleName="{style.fechaLabel}"/>
-   				<dp:DateBox ui:field="dateToBox" styleName="{style.dateToBox}"/> 
+       		    <g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE" width="100%">
+	      		    <g:HorizontalPanel>
+		   		        <g:HorizontalPanel>
+		    		        <g:Label ui:field="dateFromLabel" styleName="{style.fechaLabel}"/>
+		     				<dp:DateBox ui:field="dateFromBox" styleName="{style.dateFromBox}"/>
+		       		    </g:HorizontalPanel>
+		   		        <g:HorizontalPanel>
+		    		        <g:Label ui:field="dateToLabel" styleName="{style.fechaLabel}"/>
+		  					<dp:DateBox ui:field="dateToBox" styleName="{style.dateToBox}"/>
+		       		    </g:HorizontalPanel>
+	       		    </g:HorizontalPanel>
+       		    </g:cell>
        		</g:HorizontalPanel>
 			<g:HorizontalPanel styleName="{style.buttonPanel}">
    				<g:HorizontalPanel styleName="{style.boton}">

@@ -266,4 +266,12 @@ public class ServerPaths {
 		return getApplicationPath() + "representative/guardarSelectAdjuntandoValidacion";
 	}
 
+	public static String getUrlRepresentativeVotingHistory() {
+		return getApplicationPath() + "representative/guardarVotingHistoryRequest";
+	}
+
+	public static String getUrlRepresentativeAccreditations() {
+		return getApplicationPath() + "representative/guardarAccreditationsRequest";
+	}
+
 }

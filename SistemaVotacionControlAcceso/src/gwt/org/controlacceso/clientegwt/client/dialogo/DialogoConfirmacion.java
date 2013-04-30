@@ -31,6 +31,7 @@ public class DialogoConfirmacion {
 
     interface Style extends CssResource {
         String errorTextBox();
+        String messageLabel();
     }
 
     @UiField DialogBox dialogBox;
@@ -111,14 +112,16 @@ public class DialogoConfirmacion {
 		} else {
 			dateToBox.setStyleName(style.errorTextBox(), false);
 		}
-		if(dateFromBox.getValue().after(dateToBox.getValue())) {
-			setErrorMessage(Constantes.INSTANCIA.fechaInicioAfterFechaFinalMsg());
-			dateFromBox.setStyleName(style.errorTextBox(), true);
-			dateToBox.setStyleName(style.errorTextBox(), true);
-			return false;
-		} else {
-			dateToBox.setStyleName(style.errorTextBox(), false);
-			dateFromBox.setStyleName(style.errorTextBox(), false);
+		if(isDateToVisible) {
+			if(dateFromBox.getValue().after(dateToBox.getValue())) {
+				setErrorMessage(Constantes.INSTANCIA.fechaInicioAfterFechaFinalMsg());
+				dateFromBox.setStyleName(style.errorTextBox(), true);
+				dateToBox.setStyleName(style.errorTextBox(), true);
+				return false;
+			} else {
+				dateToBox.setStyleName(style.errorTextBox(), false);
+				dateFromBox.setStyleName(style.errorTextBox(), false);
+			}	
 		}
 		return true;
 	}
@@ -150,6 +153,7 @@ public class DialogoConfirmacion {
     
     public void show(String caption, String message) {
     	HTML htmlMessage = new HTML(message);
+    	htmlMessage.setStyleName(style.messageLabel(), true);
     	messagePanel.add(htmlMessage);
     	dialogBox.setText(caption);
     	dialogBox.center();
@@ -159,6 +163,7 @@ public class DialogoConfirmacion {
     
     public void show(String message) {
     	HTML htmlMessage = new HTML(message);
+    	htmlMessage.setStyleName(style.messageLabel(), true);
     	messagePanel.add(htmlMessage);
     	dialogBox.center();
     	dialogBox.show();

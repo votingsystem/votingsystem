@@ -299,6 +299,7 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
             return;
         }
         dispose();
+        appletFirma.cancelarOperacion();
     }//GEN-LAST:event_cerrarButtonActionPerformed
 
     private void enviarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enviarButtonActionPerformed
@@ -319,6 +320,8 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
             public void run() {  
                 try {
                     switch(operacion.getTipo()) {
+                        case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
+                        case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
                         case SELECT_REPRESENTATIVE:
                         case ANULAR_VOTO:
                         case ANULAR_SOLICITUD_ACCESO:

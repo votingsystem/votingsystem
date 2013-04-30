@@ -54,7 +54,7 @@ public class PopupEstadisticasVotacion {
     void handleAnyadirCampoReclamacion(ClickEvent e) {
     	popupPanel.hide();
     	DialogoSolicitudEmail dialogoEmail = 
-    			new DialogoSolicitudEmail(solicitanteEmail);
+    			new DialogoSolicitudEmail(null, solicitanteEmail);
     	dialogoEmail.show();
     }
 	

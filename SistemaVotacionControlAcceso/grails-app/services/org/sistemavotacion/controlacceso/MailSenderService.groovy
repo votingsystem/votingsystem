@@ -47,6 +47,69 @@ class MailSenderService {
 	   }
    }
 	
+	public void sendRepresentativeAccreditations (
+		SolicitudCopia solicitud, String dateStr, Locale locale) {
+		log.debug "sendRepresentativeAccreditations - email:${solicitud.email} - solicitud:${solicitud.id}"
+		String asunto;
+		Usuario userRequest
+		String userRequestName
+		Usuario representative
+		String representativeName
+		String solicitante
+		String urlSolicitud
+		String urlDescarga
+		SolicitudCopia.withTransaction {
+			representative = solicitud.representative
+			userRequest = solicitud.mensajeSMIME?.usuario
+			representativeName = "${representative?.nombre} ${representative?.primerApellido}"
+			userRequestName = "${userRequest?.nombre} ${userRequest?.primerApellido}"
+			urlSolicitud = "${grailsApplication.config.grails.serverURL}/solicitudCopia/obtenerSolicitud?id=${solicitud.id}"
+			urlDescarga = "${grailsApplication.config.grails.serverURL}/solicitudCopia/obtener?id=${solicitud.id}"
+		}
+		String emailSubject = messageSource.getMessage('representativeAccreditationsMailSubject',
+			[representativeName].toArray(), locale)
+		runAsync {
+			mailService.sendMail {
+				to solicitud.email
+				subject emailSubject
+				body(view:"/mail/RepresentativeAccreditationRequestDownloadInstructions", 
+					model:[solicitante:solicitante, dateStr:dateStr,
+					urlSolicitud:urlSolicitud, representative:representativeName, urlDescarga:urlDescarga])
+			}
+		}
+	}
+	
+	public void sendRepresentativeVotingHistory (SolicitudCopia solicitud, 
+		String dateFromStr, String dateToStr, Locale locale) {
+		log.debug "sendRepresentativeVotingHistory - email:${solicitud.email} - solicitud:${solicitud.id}"
+		String asunto;
+		Usuario userRequest
+		String userRequestName
+		Usuario representative
+		String representativeName
+		String solicitante
+		String urlSolicitud
+		String urlDescarga
+		SolicitudCopia.withTransaction {
+			representative = solicitud.representative
+			userRequest = solicitud.mensajeSMIME?.usuario
+			representativeName = "${representative?.nombre} ${representative?.primerApellido}"
+			userRequestName = "${userRequest?.nombre} ${userRequest?.primerApellido}"
+			urlSolicitud = "${grailsApplication.config.grails.serverURL}/solicitudCopia/obtenerSolicitud?id=${solicitud.id}"
+			urlDescarga = "${grailsApplication.config.grails.serverURL}/solicitudCopia/obtener?id=${solicitud.id}"
+		}
+		String emailSubject = messageSource.getMessage('representativeVotingHistoryMailSubject',
+			[representativeName].toArray(), locale)
+		runAsync {
+			mailService.sendMail {
+				to solicitud.email
+				subject emailSubject
+				body(view:"/mail/RepresentativeVotingHistoryDownloadInstructions", 
+					model:[solicitante:solicitante, dateFromStr:dateFromStr, dateToStr:dateToStr,
+					urlSolicitud:urlSolicitud, representative:representativeName, urlDescarga:urlDescarga])
+			}
+		}
+	}
 	
 	def enviarPDFAdjunto(Usuario usuario, String bodyView, byte[] pdfBytes) {
 		log.debug "- enviarOfertaCliente - to usuario:${cliente.email}"

@@ -42,9 +42,11 @@ public class RepresentationDocument {
     @Column(name="state", nullable=false)
     private State state;
     @OneToOne
+    @JoinColumn(name="activationSMIMEId")
     private MensajeSMIME activationSMIME;
 	
     @OneToOne
+    @JoinColumn(name="cancellationSMIMEId")
     private MensajeSMIME cancellationSMIME;
     
     @ManyToOne(fetch=FetchType.LAZY)

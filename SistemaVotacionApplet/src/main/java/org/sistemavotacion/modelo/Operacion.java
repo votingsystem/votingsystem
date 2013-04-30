@@ -54,8 +54,14 @@ public class Operacion {
                 getString("MENSAJE_CIERRE_APPLET")),
         NEW_REPRESENTATIVE(
                 getString("NEW_REPRESENTATIVE")),
-        SELECT_REPRESENTATIVE(
-                getString("SELECT_REPRESENTATIVE"));
+        REPRESENTATIVE_VOTING_HISTORY_REQUEST(
+                getString("REPRESENTATIVE_VOTING_HISTORY_REQUEST")),
+                SELECT_REPRESENTATIVE(
+                getString("SELECT_REPRESENTATIVE")),
+        REPRESENTATIVE_ACCREDITATIONS_REQUEST(
+                getString("REPRESENTATIVE_ACCREDITATIONS_REQUEST"));
+        
+
     
         Tipo(String caption) {
             this.caption = caption;

@@ -6,21 +6,28 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import org.controlacceso.clientegwt.client.Constantes;
+import org.controlacceso.clientegwt.client.HistoryToken;
 import org.controlacceso.clientegwt.client.PuntoEntrada;
 import org.controlacceso.clientegwt.client.PuntoEntradaEditor;
 import org.controlacceso.clientegwt.client.dialogo.ConfirmacionListener;
 import org.controlacceso.clientegwt.client.dialogo.DialogoConfirmacion;
 import org.controlacceso.clientegwt.client.dialogo.DialogoOperacionEnProgreso;
+import org.controlacceso.clientegwt.client.dialogo.DialogoSolicitudEmail;
 import org.controlacceso.clientegwt.client.dialogo.ErrorDialog;
+import org.controlacceso.clientegwt.client.dialogo.SolicitanteEmail;
 import org.controlacceso.clientegwt.client.evento.BusEventos;
 import org.controlacceso.clientegwt.client.evento.EventGWTRepresentativeDetails;
 import org.controlacceso.clientegwt.client.evento.EventoGWTMensajeClienteFirma;
 import org.controlacceso.clientegwt.client.modelo.MensajeClienteFirmaJso;
 import org.controlacceso.clientegwt.client.modelo.UsuarioJso;
+import org.controlacceso.clientegwt.client.modelo.MensajeClienteFirmaJso.Operacion;
 import org.controlacceso.clientegwt.client.util.Browser;
 import org.controlacceso.clientegwt.client.util.DateUtils;
 import org.controlacceso.clientegwt.client.util.RequestHelper;
 import org.controlacceso.clientegwt.client.util.ServerPaths;
+import org.controlacceso.clientegwt.client.votaciones.DialogoAnulacionSolicitudAcceso;
+import org.controlacceso.clientegwt.client.votaciones.DialogoResultadoVotacion;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -30,11 +37,13 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -46,7 +55,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class RepresentativeDetailsPanel extends Composite implements 
 	EventGWTRepresentativeDetails.Handler, EventoGWTMensajeClienteFirma.Handler, 
-	ConfirmacionListener {
+	ConfirmacionListener, SolicitanteEmail {
 	
     private static Logger logger = Logger.getLogger("RepresentativeDetailsPanel");
 
@@ -73,6 +82,11 @@ public class RepresentativeDetailsPanel extends Composite implements
 	
 	private UsuarioJso representative;
     private DialogoOperacionEnProgreso dialogoProgreso;
+    private String dateFromStr = null;
+    private String dateToStr = null;
+    private String selectedDateStr = null;
+    private String email = null;
+    private String representativeName;
 	private static final int CONFIRM_REPRESENTATIVE_SELECTION_DIALOG = 0;
 	private static final int REPRESENTATIVE_VOTING_HISTORY_DIALOG = 1;
 	private static final int REPRESENTATIVE_ACCREDITATIONS_DIALOG = 2;	
@@ -82,12 +96,6 @@ public class RepresentativeDetailsPanel extends Composite implements
 	public RepresentativeDetailsPanel(Integer id) {
 		logger.info("RepresentativeDetailsPanel - representativeId: " + id);
 		initWidget(uiBinder.createAndBindUi(this));
-		//this.representative = PanelCentral.INSTANCIA.getSelectedRepresentative();
-		//if(representative != null) setRepresentativeDetails(representative);
-
-		
-
-
 		//DOM.setStyleAttribute(label.getElement(),"border", "1px solid #00f");
         sinkEvents(Event.ONCLICK);
         //sinkEvents(Event.ONMOUSEOVER);
@@ -113,12 +121,12 @@ public class RepresentativeDetailsPanel extends Composite implements
 	
     @UiHandler("selectRepresentativeButton")
     void handleSelectRepresentativeButton(ClickEvent e) {
-    	String representativeName = representative.getNombre() + " " + 
+    	representativeName = representative.getNombre() + " " + 
     			representative.getPrimerApellido();
     	DialogoConfirmacion dialogoConfirmacion = new DialogoConfirmacion(
     			CONFIRM_REPRESENTATIVE_SELECTION_DIALOG, this);
-    	dialogoConfirmacion.show(Constantes.INSTANCIA.
-    			selectRepresentativeConfirmMsg(representativeName));
+    	dialogoConfirmacion.show(Constantes.INSTANCIA.selectRepresentativeCaption(), 
+    			Constantes.INSTANCIA.selectRepresentativeConfirmMsg(representativeName));
     }
 	
   	
@@ -143,7 +151,6 @@ public class RepresentativeDetailsPanel extends Composite implements
 		if (event.getSelectedItem() == 0) {
 			detailsPanel.setVisible(true);
 			historyPanel.setVisible(false);
-
 		}
 		if (event.getSelectedItem() == 1) {
 			detailsPanel.setVisible(false);
@@ -172,9 +179,50 @@ public class RepresentativeDetailsPanel extends Composite implements
     			requestRepresentativeVotingHistoryMsg());
     }
 	
+    
+    
 	@Override
 	public void procesarMensajeClienteFirma(MensajeClienteFirmaJso mensaje) {
-		logger.info(" - procesarMensajeClienteFirma");
+		logger.info(" - procesarMensajeClienteFirma - mensajeClienteFirma: " + mensaje.toJSONString());
+		switch(mensaje.getOperacionEnumValue()) {
+			case SELECT_REPRESENTATIVE:
+				if(MensajeClienteFirmaJso.SC_OK == mensaje.getCodigoEstado()) {
+					representationsNumber.setText(Constantes.INSTANCIA.representationsNumberLbl(
+							representative.getRepresentationsNumber() + 1));
+					dialogoProgreso.showFinishMessage(Constantes.INSTANCIA.
+							selectRepresentativeCaption(), 
+							Constantes.INSTANCIA.selectRepresentativeOKMsg(representativeName), Boolean.TRUE);
+				} else {
+					dialogoProgreso.showFinishMessage(Constantes.INSTANCIA.
+							selectRepresentativeCaption(), 
+			    			mensaje.getMensaje(), Boolean.FALSE);
+				}
+				break;
+			case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
+				if(MensajeClienteFirmaJso.SC_OK == mensaje.getCodigoEstado()) {
+					dialogoProgreso.showFinishMessage(Constantes.INSTANCIA.
+			    			requestRepresentativeAccreditationsCaption(), 
+			    			Constantes.INSTANCIA.backupRequestOK(email), Boolean.TRUE);
+				} else {
+					dialogoProgreso.showFinishMessage(Constantes.INSTANCIA.
+			    			requestRepresentativeAccreditationsCaption(), 
+			    			mensaje.getMensaje(), Boolean.FALSE);
+				}
+				break;
+			case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
+				if(MensajeClienteFirmaJso.SC_OK == mensaje.getCodigoEstado()) {
+					dialogoProgreso.showFinishMessage(Constantes.INSTANCIA.
+			    			requestRepresentativeVotingHistoryCaption(), 
+			    			Constantes.INSTANCIA.backupRequestOK(email), Boolean.TRUE);
+				} else {
+					dialogoProgreso.showFinishMessage(Constantes.INSTANCIA.
+			    			requestRepresentativeAccreditationsCaption(), 
+			    			mensaje.getMensaje(), Boolean.FALSE);
+				}
+				break;
+			default:
+				break;
+		}
 		
 	}
 	
@@ -206,20 +254,23 @@ public class RepresentativeDetailsPanel extends Composite implements
             	if(response.getStatusCode() == 0) {//Magic Number!!! -> network problem
             		showErrorDialog (Constantes.INSTANCIA.errorLbl() , 
             				Constantes.INSTANCIA.networkERROR());
-            	} else showErrorDialog (String.valueOf(
-            			response.getStatusCode()), response.getText());
+            	} else {
+            		showErrorDialog (String.valueOf(
+                			response.getStatusCode()), response.getText());
+                	History.newItem(HistoryToken.REPRESENTATIVES_PAGE.toString());
+            	} 
             }
         }
 
     }
     
-	private void setAppletMode(boolean publicando) {
+	private void setAppletOperationMode(boolean publicando) {
 		if(publicando) {
 			if(PuntoEntradaEditor.INSTANCIA != null && 
 					PuntoEntradaEditor.INSTANCIA.getAndroidClientLoaded()) {
 				Browser.showProgressDialog(Constantes.INSTANCIA.publishingDocument());
 			} else {
-				if(dialogoProgreso == null) dialogoProgreso = new DialogoOperacionEnProgreso();
+				dialogoProgreso = new DialogoOperacionEnProgreso();
 				dialogoProgreso.show();
 			}
 		} else {
@@ -234,6 +285,7 @@ public class RepresentativeDetailsPanel extends Composite implements
 
 	@Override
 	public void confirmed(Integer confirmDialogId, Object param) {
+		DialogoSolicitudEmail dialogoEmail = null;
 		switch (confirmDialogId) {
 			case CONFIRM_REPRESENTATIVE_SELECTION_DIALOG:
 				logger.info("confirmed representative selection - representativeId: " + 
@@ -260,16 +312,90 @@ public class RepresentativeDetailsPanel extends Composite implements
 		    			Constantes.INSTANCIA.selectRepresentativeSubject());	
 		    	mensajeClienteFirma.setRespuestaConRecibo(true);
 		    	mensajeClienteFirma.setUrlTimeStampServer(ServerPaths.getUrlTimeStampServer());
-				if(!Browser.isAndroid()) setAppletMode(true);
+				if(!Browser.isAndroid()) setAppletOperationMode(true);
 				Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
 				break;
 			case REPRESENTATIVE_VOTING_HISTORY_DIALOG:
+				Date[] dates = (Date[])param;
+				dateFromStr = DateUtils.getStringFromDate(dates[0]) ;
+				dateToStr = DateUtils.getStringFromDate(dates[1]);
+				logger.info("confirmed -VOTING_HISTORY_DIALOG - " + 
+						"dateFromStr: " + dateFromStr + " - dateToStr: " + dateToStr);
+				dialogoEmail = new DialogoSolicitudEmail(REPRESENTATIVE_VOTING_HISTORY_DIALOG, this, 
+		    					Constantes.INSTANCIA.emailForVotingHistoryMsg());
+		    	dialogoEmail.show();
 				break;
 			case REPRESENTATIVE_ACCREDITATIONS_DIALOG:
+				selectedDateStr = DateUtils.getStringFromDate((Date)param);
+				logger.info("confirmed - ACCREDITATIONS_DIALOG - " + 
+						"selectedDateStr: " + selectedDateStr);
+		    	dialogoEmail = new DialogoSolicitudEmail(REPRESENTATIVE_ACCREDITATIONS_DIALOG, this, 
+		    					Constantes.INSTANCIA.emailForVRepresentativeAccreditationsMsg());
+		    	dialogoEmail.show();
 				break;				
 			default:
 				logger.info("confirmed - unknown dialog: " + confirmDialogId);
 		}
 		
+	}
+
+	@Override
+	public void procesarEmail(Integer dialogId, String email) {
+		logger.info("--- procesarEmail");
+		MensajeClienteFirmaJso mensajeClienteFirma = null;
+		JSONObject contenidoFirma = null;
+		this.email = email;
+		switch(dialogId) {
+			case REPRESENTATIVE_ACCREDITATIONS_DIALOG:
+				mensajeClienteFirma = MensajeClienteFirmaJso.create(null, 
+						Operacion.REPRESENTATIVE_ACCREDITATIONS_REQUEST.toString(), 
+						MensajeClienteFirmaJso.SC_PROCESANDO);
+		    	contenidoFirma = new JSONObject();
+		    	contenidoFirma.put("operation", new JSONString(
+		    			Operacion.REPRESENTATIVE_ACCREDITATIONS_REQUEST.toString()));
+		    	contenidoFirma.put("representativeNif", new JSONString(representative.getNif()));
+		    	contenidoFirma.put("representativeName", new JSONString(representative.getNombre() + 
+		    			" " + representative.getPrimerApellido()));
+		    	contenidoFirma.put("selectedDate", new JSONString(selectedDateStr));
+		    	contenidoFirma.put("email", new JSONString(email));
+		    	
+		    	if(PuntoEntrada.INSTANCIA != null &&
+		    			PuntoEntrada.INSTANCIA.servidor != null) {
+		    		mensajeClienteFirma.setNombreDestinatarioFirma(
+		    				PuntoEntrada.INSTANCIA.servidor.getNombre());
+		    	}
+		    	mensajeClienteFirma.setContenidoFirma(contenidoFirma.getJavaScriptObject());
+		    	mensajeClienteFirma.setUrlEnvioDocumento(ServerPaths.getUrlRepresentativeAccreditations());
+				mensajeClienteFirma.setEmailSolicitante(email);
+				break;
+			case REPRESENTATIVE_VOTING_HISTORY_DIALOG:
+				mensajeClienteFirma = MensajeClienteFirmaJso.create(null, 
+						Operacion.REPRESENTATIVE_VOTING_HISTORY_REQUEST.toString(), 
+						MensajeClienteFirmaJso.SC_PROCESANDO);
+				contenidoFirma = new JSONObject();
+		    	contenidoFirma.put("operation", new JSONString(
+		    			Operacion.REPRESENTATIVE_VOTING_HISTORY_REQUEST.toString()));
+		    	contenidoFirma.put("representativeNif", new JSONString(representative.getNif()));
+		    	contenidoFirma.put("representativeName", new JSONString(representative.getNombre() + 
+		    			" " + representative.getPrimerApellido()));
+		    	contenidoFirma.put("dateFrom", new JSONString(dateFromStr));
+		    	contenidoFirma.put("dateTo", new JSONString(dateToStr));
+		    	contenidoFirma.put("email", new JSONString(email));
+		    	
+		    	if(PuntoEntrada.INSTANCIA != null &&
+		    			PuntoEntrada.INSTANCIA.servidor != null) {
+		    		mensajeClienteFirma.setNombreDestinatarioFirma(
+		    				PuntoEntrada.INSTANCIA.servidor.getNombre());
+		    	}
+		    	
+		    	mensajeClienteFirma.setContenidoFirma(contenidoFirma.getJavaScriptObject());
+		    	mensajeClienteFirma.setUrlEnvioDocumento(ServerPaths.getUrlRepresentativeVotingHistory());
+				mensajeClienteFirma.setEmailSolicitante(email);
+				break;
+		}
+		if(mensajeClienteFirma != null) {
+			if(!Browser.isAndroid()) setAppletOperationMode(true);
+			Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
+		}
 	}
 }

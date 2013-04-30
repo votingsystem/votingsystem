@@ -10,10 +10,12 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
@@ -43,21 +45,31 @@ public class DialogoSolicitudEmail {
     @UiField Label messageLabel;
     @UiField TextBox contenidoTextBox;
     @UiField EditorStyle style;
+    @UiField HTML emailLabel;
     SolicitanteEmail solicitanteEmail;
+    private Integer id;
     SubmitHandler sh = new SubmitHandler();
     
-	public DialogoSolicitudEmail(SolicitanteEmail solicitanteEmail) {
+	public DialogoSolicitudEmail(Integer id, SolicitanteEmail solicitanteEmail) {
         uiBinder.createAndBindUi(this);
         messagePanel.setVisible(false);
+        this.id = id;
         contenidoTextBox.addKeyDownHandler(sh);
         this.solicitanteEmail = solicitanteEmail;
+	}
+	
+	public DialogoSolicitudEmail(Integer id, SolicitanteEmail solicitanteEmail, 
+			String message) {
+		this(id, solicitanteEmail);
+		emailLabel.setHTML(message);
 	}
 
 
 	@UiHandler("aceptarButton")
     void handleAceptarButton(ClickEvent e) {
     	if(isValidForm()) {
-    		solicitanteEmail.procesarEmail(contenidoTextBox.getText());
+    		solicitanteEmail.procesarEmail(
+    				id, contenidoTextBox.getText());
     		dialogBox.hide();
     	} 
     }
@@ -77,6 +89,8 @@ public class DialogoSolicitudEmail {
     
 	private boolean isValidForm() {
 		setMessage(null);
+		contenidoTextBox.setStyleName(style.textBox(), true);
+		contenidoTextBox.setStyleName(style.errorTextBox(), false);
 		if (Validator.isTextBoxEmpty(contenidoTextBox)) {
 			setMessage(Constantes.INSTANCIA.emptyFieldException());
 			contenidoTextBox.setStyleName(style.textBox(), false);
@@ -87,9 +101,6 @@ public class DialogoSolicitudEmail {
 			contenidoTextBox.setStyleName(style.textBox(), false);
 			contenidoTextBox.setStyleName(style.errorTextBox(), true);
 			return false;
-		} else {
-			contenidoTextBox.setStyleName(style.textBox(), true);
-			contenidoTextBox.setStyleName(style.errorTextBox(), false);
 		}
 		return true;
 	}
