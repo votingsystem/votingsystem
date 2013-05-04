@@ -31,12 +31,22 @@ class RepresentativeService {
 			Respuesta respuestaUsuario = subscripcionService.comprobarUsuario(smimeMessage, locale)
 			if(respuestaUsuario.codigoEstado != Respuesta.SC_OK) return respuestaUsuario
 			Usuario usuario = respuestaUsuario.usuario
+
 			Usuario representative = Usuario.findWhere(nif:mensajeJSON.representativeNif)
 			mensajeSMIME = new MensajeSMIME(tipo:tipo,
 				usuario:usuario, valido:true, contenido:smimeMessage.getBytes())
+			String msg = null
+			if(Usuario.Type.REPRESENTATIVE == usuario.type) {
+				msg = messageSource.getMessage('userIsRepresentativeErrorMsg', 
+					[usuario.nif].toArray(), locale)
+				log.error "${msg} - user nif '${usuario.nif}' - representative nif '${representative.nif}'"
+				mensajeSMIME.motivo = msg
+				mensajeSMIME.valido = false
+				mensajeSMIME.save()
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg)
+			}
 			if(!representative || Usuario.Type.REPRESENTATIVE != representative.type ||
 				 usuario.nif == representative.nif) {
-				String msg = null
 				if(usuario.nif == representative.nif) {
 					msg = messageSource.getMessage('representativeSameUserNifErrorMsg',
 						[mensajeJSON.representativeNif].toArray(), locale)
@@ -84,13 +94,27 @@ class RepresentativeService {
 	}
 	
     Respuesta saveRepresentativeData(SMIMEMessageWrapper smimeMessage, 
-		byte[] imageBytes, Locale locale) {
-		log.debug("saveRepresentativeData -")
+		Long representaiveId, byte[] imageBytes, Locale locale) {
+		log.debug("saveRepresentativeData - representaiveId: ${representaiveId}")
 		try {
 			Tipo tipo = Tipo.REPRESENTATIVE_DATA
 			def mensajeJSON = JSON.parse(smimeMessage.getSignedContent())
 			Respuesta respuestaUsuario = subscripcionService.comprobarUsuario(smimeMessage, locale)
 			if(respuestaUsuario.codigoEstado != Respuesta.SC_OK) return respuestaUsuario
+			Usuario usuario = respuestaUsuario.usuario
+			if(representaiveId) {
+				Usuario representative = Usuario.get(representaiveId)
+				if(representaiveId) {
+					String representativeName = "${representative.nombre} ${representative.primerApellido}"
+					if(representative.nif != usuario.nif) {
+						String message = messageSource.getMessage('editRepresentativeNifErrorMsg',[
+								usuario.nif, representativeName].toArray(), locale)
+						log.debug message
+						return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+							mensaje:message)
+					}
+				}
+			}
 			String base64ImageHash = mensajeJSON.base64ImageHash
 			MessageDigest messageDigest = MessageDigest.getInstance(
 				grailsApplication.config.SistemaVotacion.votingHashAlgorithm);
@@ -105,22 +129,21 @@ class RepresentativeService {
 			//String base64EncodedImage = mensajeJSON.base64RepresentativeEncodedImage
 			//BASE64Decoder decoder = new BASE64Decoder();
 			//byte[] imageFileBytes = decoder.decodeBuffer(base64EncodedImage);
-			Image image = null
-			Usuario usuario = respuestaUsuario.usuario
+			def images = null
 			MensajeSMIME mensajeSMIME = new MensajeSMIME(tipo:tipo,
 				usuario:usuario, valido:true,
 				contenido:smimeMessage.getBytes())
 			Image.withTransaction {
-				image = Image.findWhere(usuario:usuario)
-			}
-			if(image) {
-				image.type = Image.Type.REPRESENTATIVE_CANCELLED
-				image.save()
+				images = Image.findAllWhere(usuario:usuario)
+				images?.each {
+					it.type = Image.Type.REPRESENTATIVE_CANCELLED
+					it.save()
+				}
 			}
 			Image newImage = new Image(usuario:usuario, mensajeSMIME:mensajeSMIME,
 				type:Image.Type.REPRESENTATIVE, fileBytes:imageBytes)
 			String message = null
-			if(Usuario.Type.USER == usuario.type) {
+			if(Usuario.Type.REPRESENTATIVE != usuario.type) {
 				usuario.type = Usuario.Type.REPRESENTATIVE
 				usuario.representationsNumber = 1;
 				message = messageSource.getMessage('representativeDataCreatedOKMsg', 
@@ -216,6 +239,7 @@ class RepresentativeService {
 			
 			cencelledResults = criteriaCancelled.list {
 				eq("state", RepresentationDocument.State.CANCELLED)
+				le("dateCreated", selectedDate)
 				between("dateCanceled", selectedDate, todayDate)
 			}
 		}
@@ -318,6 +342,109 @@ class RepresentativeService {
 			mensaje:messageSource.getMessage('backupRequestOKMsg',
 			[mensajeJSON.email].toArray(), locale))
 	}
+	
+	def prueba (Usuario usuario) {
+		//(TODO notify users)
+			Usuario.withTransaction {
+				usuario.save()
+				def representedUsers = Usuario.findAllWhere(representative:null)
+				log.debug "representedUsers.size(): ${representedUsers.size()}"
+				representedUsers?.each {
+					log.debug " - checking user - ${it.id}"
+					it.type = Usuario.Type.USER
+					it.representative = usuario
+					it.save()
+				}
+			}
+			def representationDocuments 
+			RepresentationDocument.withTransaction {
+				representationDocuments = RepresentationDocument.findAllWhere(
+					state:RepresentationDocument.State.CANCELLED_BY_REPRESENTATIVE, representative:usuario)
+				//TODO ===== check timestamp
+				Date cancelDate = new Date(System.currentTimeMillis())
+				representationDocuments.each {
+					log.debug " - checking representationDocument - ${it.id}"
+					it.state = RepresentationDocument.State.OK
+					//it.cancellationSMIME = mensajeSMIME
+					it.dateCanceled = cancelDate
+					it.save()
+				}
+			}
+	}
+	
+	Respuesta processUnsubscribeRequest(SMIMEMessageWrapper smimeMessage, Locale locale) {
+		log.debug("processUnsubscribeRequest -")
+		MensajeSMIME mensajeSMIME = null
+		Tipo tipo = Tipo.REPRESENTATIVE_UNSUBSCRIBE_REQUEST
+		def mensajeJSON
+		String message
+		try{
+			mensajeJSON = JSON.parse(smimeMessage.getSignedContent())
+			Tipo operationType = Tipo.valueOf(mensajeJSON.operation)
+			if(Tipo.REPRESENTATIVE_UNSUBSCRIBE_REQUEST != operationType) {
+				message = messageSource.getMessage('operationErrorMsg',
+					[mensajeJSON.operation].toArray(), locale)
+				log.debug message
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+					mensaje:message)
+			}
+			Respuesta respuestaUsuario = subscripcionService.comprobarUsuario(smimeMessage, locale)
+			if(respuestaUsuario.codigoEstado != Respuesta.SC_OK) return respuestaUsuario
+			Usuario usuario = respuestaUsuario.usuario
+			mensajeSMIME = new MensajeSMIME(tipo:tipo, usuario:usuario, valido:true,
+				contenido:smimeMessage.getBytes())
+			if(Usuario.Type.REPRESENTATIVE != usuario.type) {
+				message = messageSource.getMessage('unsubscribeRepresentativeUserErrorMsg',
+					[usuario.nif].toArray(), locale)
+				log.debug message
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:message)
+			}
+			mensajeSMIME.save()
+			//(TODO notify users)
+			Usuario.withTransaction {
+				def representedUsers = Usuario.findAllWhere(representative:usuario)
+				log.debug "representedUsers.size(): ${representedUsers.size()}"
+				representedUsers?.each {
+					log.debug " - checking user - ${it.id}"
+					it.type = Usuario.Type.USER_WITH_CANCELLED_REPRESENTATIVE
+					it.representative = null
+					it.save()
+				}
+			}
+			def representationDocuments 
+			RepresentationDocument.withTransaction {
+				representationDocuments = RepresentationDocument.findAllWhere(
+					state:RepresentationDocument.State.OK, representative:usuario)
+				//TODO ===== check timestamp
+				Date cancelDate = new Date(System.currentTimeMillis())
+				representationDocuments.each {
+					log.debug " - checking representationDocument - ${it.id}"
+					it.state = RepresentationDocument.State.CANCELLED_BY_REPRESENTATIVE
+					it.cancellationSMIME = mensajeSMIME
+					it.dateCanceled = cancelDate
+					it.save()
+				}
+			}
+			usuario.representativeMessage = mensajeSMIME
+			usuario.type = Usuario.Type.EX_REPRESENTATIVE
+			usuario.representationsNumber = 0
+			Usuario.withTransaction  {
+				usuario.save()
+			}
+			return new Respuesta(codigoEstado:Respuesta.SC_OK, mensajeSMIME:mensajeSMIME,
+				usuario:usuario)
+		} catch(Exception ex) {
+			log.error (ex.getMessage(), ex)
+			if(mensajeSMIME) {
+				mensajeSMIME.motivo = ex.getMessage()
+				mensajeSMIME.valido = false;
+				mensajeSMIME.save()
+			}
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION,
+				mensaje:ex.getMessage())
+		}
+	}
+	
 	
 	Respuesta processAccreditationsRequest(SMIMEMessageWrapper smimeMessage, Locale locale) {
 		log.debug("processAccreditationsRequest -")

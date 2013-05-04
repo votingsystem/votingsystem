@@ -1,6 +1,7 @@
 package org.sistemavotacion.controlacceso
 
 import org.sistemavotacion.controlacceso.modelo.*
+import org.sistemavotacion.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.multipart.MultipartHttpServletRequest
 import grails.converters.JSON
@@ -21,28 +22,113 @@ class RepresentativeController {
 		redirect action: "restDoc"
 	}
 	
-	def check() {
-		if(params.nif) {
-			
+	/**
+	 *
+	 * Servicio que sirve para comprobar el representante de un usuario
+	 *
+	 * @param nif NIF del usuario que se desea consultar.
+	 * @httpMethod GET
+	 * @return Documento JSON con información básica del representante asociado 
+	 *         al usuario cuyo nif se pada como parámetro nif
+	 */
+	def getByUserNif() {
+		String nif = StringUtils.validarNIF(params.nif)
+		if(!nif) {
+			response.status = Respuesta.SC_ERROR_PETICION
+			render message(code: 'error.errorNif', args:[params.nif])
+			return false
 		}
-		
+		Usuario usuario = Usuario.findByNif(nif)
+		if(!usuario) {
+			response.status = Respuesta.SC_NOT_FOUND
+			render message(code: 'usuario.nifNoEncontrado', args:[nif])
+			return false
+		}
+		String msg = null
+		if(Usuario.Type.REPRESENTATIVE == usuario.type) { 
+			response.status = Respuesta.SC_NOT_FOUND
+			render message(code: 'userIsRepresentativeMsg', args:[nif])
+			return false
+		}
+		if(!usuario.representative) {
+			response.status = Respuesta.SC_NOT_FOUND
+			if(Usuario.Type.USER_WITH_CANCELLED_REPRESENTATIVE == usuario.type) {
+				msg = message(code: 'userRepresentativeUnsubscribedMsg', args:[nif])
+			} else msg = message(code: 'nifWithoutRepresentative', args:[nif])
+			render msg
+			return false
+		} else {
+			Usuario representative = usuario.representative
+			String name = "${representative.nombre} ${representative.primerApellido}"
+			def resultMap = [representativeId: representative.id, representativeName:name,
+				representativeNIF:representative.nif]
+			render resultMap as JSON
+			return false
+		}
 	}
 	
 	/**
 	 *
-	 * Servicio que guarda las selecciones de representantes echas por los usuarios
+	 * Servicio que sirve para obtener información básica de un representante 
+	 * a partir de su NIF
+	 *
+	 * @param nif NIF del representante que se desea consultar.
+	 * @httpMethod GET
+	 * @return Documento JSON con datos del representante
+	 */
+	def getByNif() {
+		String nif = StringUtils.validarNIF(params.nif)
+		if(!nif) {
+			response.status = Respuesta.SC_ERROR_PETICION
+			render message(code: 'error.errorNif', args:[params.nif])
+			return false
+		}
+		Usuario representative
+		Usuario.withTransaction {
+			representative =  Usuario.findWhere(type:Usuario.Type.REPRESENTATIVE,
+				nif:nif)
+		}
+		if(!representative) {
+			response.status = Respuesta.SC_NOT_FOUND
+			render message(code: 'representativeNifErrorMsg', args:[nif])
+			return false
+		} else {
+			String name = "${representative.nombre} ${representative.primerApellido}"
+			def resultMap = [representativeId: representative.id, representativeName:name,
+				representativeNIF:representative.nif]
+			render resultMap as JSON
+			return false
+		}
+	}
+	
+	/**
+	 *
+	 * Servicio que da de baja un representante
 	 *
 	 * @param archivoFirmado Archivo firmado en formato SMIME en cuyo contenido se
-	 *        encuentra la votación que se desea publicar en formato HTML.
+	 *        encuentra información de la baja
 	 * @httpMethod POST
-	 * @return Mensaje con instrucciones de descarga.
+	 * @return
 	 */
-	def guardarAccreditationsRequest() {
-		Respuesta respuesta = representativeService.processAccreditationsRequest(
+	def guardarUnsubscribeRequestAdjuntandoValidacion() {
+		Respuesta respuesta = representativeService.processUnsubscribeRequest(
 			params.smimeMessageReq, request.getLocale())
-		if (Respuesta.SC_OK != respuesta.codigoEstado) {
-			log.debug "Problemas procesando solicitud de copia de seguridad - ${respuesta.mensaje}"
+		log.debug "guardarUnsubscribeRequest - statusCode: ${respuesta.codigoEstado} - mensaje: ${respuesta.mensaje}"
+		if (Respuesta.SC_OK == respuesta.codigoEstado){
+			byte[] mensajeValidadoBytes = firmaService.generarMultifirmaBytes(
+					params.smimeMessageReq,	message(
+						code:'unsubscribeRepresentativeValidationSubject'))
+			MensajeSMIME mensajeSMIMEValidado = new MensajeSMIME(
+					tipo:Tipo.REPRESENTATIVE_UNSUBSCRIBE_VALIDATION,
+					smimePadre: respuesta.mensajeSMIME,
+					usuario:respuesta.usuario, valido:true,
+					contenido:mensajeValidadoBytes)
+			MensajeSMIME.withTransaction {
+				mensajeSMIMEValidado.save();
+			}
+			respuesta.mensajeSMIMEValidado = mensajeSMIMEValidado
 		}
+		flash.respuesta = respuesta
 		response.status = respuesta.codigoEstado
 		render respuesta.mensaje
 		return false
@@ -53,9 +139,28 @@ class RepresentativeController {
 	 * Servicio que guarda las selecciones de representantes echas por los usuarios
 	 *
 	 * @param archivoFirmado Archivo firmado en formato SMIME en cuyo contenido se
-	 *        encuentra la votación que se desea publicar en formato HTML.
+	 *        encuentra los datos del representante en el que delega el firmante
 	 * @httpMethod POST
-	 * @return Mensaje con instrucciones de descarga.
+	 * @return 
+	 */
+	def guardarAccreditationsRequest() {
+		Respuesta respuesta = representativeService.processAccreditationsRequest(
+			params.smimeMessageReq, request.getLocale())
+		log.debug "guardarAccreditationsRequest - statusCode: ${respuesta.codigoEstado} - mensaje: ${respuesta.mensaje}"
+		response.status = respuesta.codigoEstado
+		render respuesta.mensaje
+		return false
+	}
+	
+	/**
+	 *
+	 * Servicio que guarda las consultas de historiales de votaciones de los
+	 * representantes
+	 *
+	 * @param archivoFirmado Archivo firmado en formato SMIME con los datos
+	 * 		  del representante consultado
+	 * @httpMethod POST
+	 * @return 
 	 */
 	def guardarVotingHistoryRequest() {
 		Respuesta respuesta = representativeService.precessVotingHistoryRequest(
@@ -159,17 +264,6 @@ class RepresentativeController {
         render representativeMap as JSON
 	}
 	
-	def prueba() {
-		response.status =  Respuesta.SC_ERROR_PETICION
-		String msg = message(code: 'imageMissingErrorMsg')
-		log.debug "imageFileName: ${grailsApplication.config.SistemaVotacion.nombreSolicitudCSR}"
-		log.debug "imageFileName: ${grailsApplication.config.SistemaVotacion.imageFileName}"
-		log.debug "ERROR - msg: ${msg}"
-		render msg
-		return false
-	}
-	
-	
     def guardar() { 
 		MultipartFile imageMultipartFile = ((MultipartHttpServletRequest)
 			request)?.getFile("${grailsApplication.config.SistemaVotacion.imageFileName}");
@@ -190,7 +284,7 @@ class RepresentativeController {
 			return false
 		}
 		Respuesta respuesta = representativeService.saveRepresentativeData(
-			params.smimeMessageReq, imageBytes, request.getLocale())
+			params.smimeMessageReq, params.long('id'), imageBytes, request.getLocale())
 		response.status =  respuesta.codigoEstado
 		log.debug "mensaje:${respuesta.mensaje}"
 		render respuesta.mensaje

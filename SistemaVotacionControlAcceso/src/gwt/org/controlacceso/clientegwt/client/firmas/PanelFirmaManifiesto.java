@@ -4,11 +4,11 @@ import java.util.logging.Logger;
 import org.controlacceso.clientegwt.client.Constantes;
 import org.controlacceso.clientegwt.client.HistoryToken;
 import org.controlacceso.clientegwt.client.PuntoEntrada;
+import org.controlacceso.clientegwt.client.dialogo.ConfirmacionListener;
 import org.controlacceso.clientegwt.client.dialogo.DialogoOperacionEnProgreso;
-import org.controlacceso.clientegwt.client.dialogo.DialogoResultadoFirma;
+import org.controlacceso.clientegwt.client.dialogo.ResultDialog;
 import org.controlacceso.clientegwt.client.dialogo.PopupAdministrarDocumento;
 import org.controlacceso.clientegwt.client.dialogo.PopupSolicitudCopiaSeguridad;
-import org.controlacceso.clientegwt.client.dialogo.SolicitanteEmail;
 import org.controlacceso.clientegwt.client.evento.BusEventos;
 import org.controlacceso.clientegwt.client.evento.EventoGWTConsultaEvento;
 import org.controlacceso.clientegwt.client.evento.EventoGWTMensajeClienteFirma;
@@ -43,7 +43,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 
-public class PanelFirmaManifiesto extends Composite implements SolicitanteEmail,
+public class PanelFirmaManifiesto extends Composite implements ConfirmacionListener,
 	 EventoGWTConsultaEvento.Handler, EventoGWTMensajeClienteFirma.Handler {
 	
     private static Logger logger = Logger.getLogger("PanelFirmaManifiesto");
@@ -267,7 +267,7 @@ public class PanelFirmaManifiesto extends Composite implements SolicitanteEmail,
 			case FIRMA_MANIFIESTO_PDF:
 				setWidgetsStateFirmando(false);
 				if(200 == mensaje.getCodigoEstado()) {
-					DialogoResultadoFirma dialogo = new DialogoResultadoFirma();
+					ResultDialog dialogo = new ResultDialog();
 					dialogo.show(Constantes.INSTANCIA.operationResultMsg(evento.getAsunto()));
 			    	History.newItem(HistoryToken.MANIFIESTOS.toString());
 				} else {
@@ -304,16 +304,17 @@ public class PanelFirmaManifiesto extends Composite implements SolicitanteEmail,
 	}
 
 	@Override
-	public void procesarEmail(Integer id, String email) {
-		logger.info("--- procesarEmail");
+	public void confirmed(Integer id, Object param) {
+		logger.info(" - confirmed - email: " + param);
 		MensajeClienteFirmaJso mensajeClienteFirma = MensajeClienteFirmaJso.create(null, 
 				Operacion.SOLICITUD_COPIA_SEGURIDAD.toString(), 
 				MensajeClienteFirmaJso.SC_PROCESANDO);
 		mensajeClienteFirma.setUrlEnvioDocumento(ServerPaths.getUrlSolicitudCopiaSeguridad());
 		mensajeClienteFirma.setEvento(evento);
-		mensajeClienteFirma.setEmailSolicitante(email);
+		mensajeClienteFirma.setEmailSolicitante((String)param);
 		if(!Browser.isAndroid()) setWidgetsStateFirmando(true);
 		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
+		
 	}
 
 

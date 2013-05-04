@@ -5,11 +5,10 @@ import java.util.logging.Logger;
 
 import org.controlacceso.clientegwt.client.Constantes;
 import org.controlacceso.clientegwt.client.HistoryToken;
-import org.controlacceso.clientegwt.client.dialogo.ErrorDialog;
+import org.controlacceso.clientegwt.client.dialogo.ResultDialog;
 import org.controlacceso.clientegwt.client.modelo.UsuarioJso;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.http.client.Request;
@@ -18,7 +17,6 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.History;
@@ -59,12 +57,11 @@ public class RepresentativeSmallPanel extends Composite implements LoadHandler {
 		image.addLoadHandler(this);
 		image.setStyleName(style.image(), true);
 		image.setUrl(representative.getImageURL());
-		imagePanel.add(image);
+		//imagePanel.clear();
+		//imagePanel.add(image);
 
 		this.representative = representative;
 		representativeNameLabel.setText(representative.getNombre() + " " + representative.getPrimerApellido());
-		HTML dummyHTML = new HTML();
-		dummyHTML.setHTML(representative.getInfo());
 		representationsNumber.setText(Constantes.INSTANCIA.representationsNumberLbl(
 				representative.getRepresentationsNumber()));
 
@@ -74,18 +71,13 @@ public class RepresentativeSmallPanel extends Composite implements LoadHandler {
         //sinkEvents(Event.ONMOUSEOUT);
 
 	}
-
-    @UiHandler("userDetailsButton")
-    void onUserDetailsButton(ClickEvent e) {
-    	logger.info(" - onUserDetailsButton: " + representative.getId());
-    	History.newItem(HistoryToken.REPRESENTATIVE_DETAILS.toString()
-    			+ "&representativeId=" +  new Integer(representative.getId()));
-	}
-
+	
 	public void onBrowserEvent(Event event){
 		switch(DOM.eventGetType(event)) {
 			case Event.ONCLICK:
 	    		logger.info("onBrowserEvent - onBrowserEvent");
+	        	History.newItem(HistoryToken.REPRESENTATIVE_DETAILS.toString()
+	        			+ "&representativeId=" +  new Integer(representative.getId()));
 	       		break;
 		}
 	}
@@ -99,9 +91,10 @@ public class RepresentativeSmallPanel extends Composite implements LoadHandler {
 
         @Override
     	public void onError(Request request, Throwable exception) {
-        	new ErrorDialog().show(Constantes.INSTANCIA.exceptionLbl(), 
-        			exception.getMessage());
         	logger.log(Level.SEVERE, exception.getMessage(), exception);
+        	ResultDialog resultDialog = new ResultDialog();
+    		resultDialog.show(Constantes.INSTANCIA.exceptionLbl(), 
+        			exception.getMessage(),Boolean.FALSE);         	
     	}
 
         @Override

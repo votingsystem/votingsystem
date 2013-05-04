@@ -1,10 +1,9 @@
 package org.controlacceso.clientegwt.client.dialogo;
 
 import java.util.logging.Logger;
-
 import org.controlacceso.clientegwt.client.Constantes;
+import org.controlacceso.clientegwt.client.util.StringUtils;
 import org.controlacceso.clientegwt.client.util.Validator;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -16,52 +15,49 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class DialogoSolicitudEmail {
+public class NifDialog {
 	
-    private static Logger logger = Logger.getLogger("DialogoSolicitudEmail");
+    private static Logger logger = Logger.getLogger("NifDialog");
 	
-    private static DialogoSolicitudEmailUiBinder uiBinder = 
-    		GWT.create(DialogoSolicitudEmailUiBinder.class);
+    private static NifDialogUiBinder uiBinder = 
+    		GWT.create(NifDialogUiBinder.class);
    
 
-    interface EditorStyle extends CssResource {
+    interface Style extends CssResource {
         String errorTextBox();
-        String textBox();
+        String nifTextBox();
+        String errorMessageLabel();
     }
 
-    interface DialogoSolicitudEmailUiBinder extends UiBinder<Widget, DialogoSolicitudEmail> {}
+    interface NifDialogUiBinder extends UiBinder<Widget, NifDialog> {}
 
 
     @UiField DialogBox dialogBox;
     @UiField PushButton aceptarButton;
     @UiField PushButton cerrarButton;
-    @UiField VerticalPanel messagePanel;
-    @UiField Label messageLabel;
-    @UiField TextBox contenidoTextBox;
-    @UiField EditorStyle style;
-    @UiField HTML emailLabel;
+    @UiField VerticalPanel errorMessagePanel;
+    @UiField HTML errorMessageLabel;
+    @UiField TextBox nifTextBox;
+    @UiField Style style;
+    @UiField HTML messageLabel;
     ConfirmacionListener confirmacionListener;
     private Integer id;
     SubmitHandler sh = new SubmitHandler();
     
-	public DialogoSolicitudEmail(Integer id, ConfirmacionListener confirmacionListener) {
+	public NifDialog(Integer id, ConfirmacionListener confirmacionListener,
+			String caption, String message) {
         uiBinder.createAndBindUi(this);
-        messagePanel.setVisible(false);
+        errorMessagePanel.setVisible(false);
         this.id = id;
-        contenidoTextBox.addKeyDownHandler(sh);
+        nifTextBox.addKeyDownHandler(sh);
         this.confirmacionListener = confirmacionListener;
-	}
-	
-	public DialogoSolicitudEmail(Integer id, ConfirmacionListener confirmacionListener, 
-			String message) {
-		this(id, confirmacionListener);
-		emailLabel.setHTML(message);
+        if(message != null) messageLabel.setHTML(message);
+        if(caption != null) dialogBox.setText(caption);
 	}
 
 
@@ -69,7 +65,7 @@ public class DialogoSolicitudEmail {
     void handleAceptarButton(ClickEvent e) {
     	if(isValidForm()) {
     		confirmacionListener.confirmed(
-    				id, contenidoTextBox.getText());
+    				id, nifTextBox.getText());
     		dialogBox.hide();
     	} 
     }
@@ -81,36 +77,36 @@ public class DialogoSolicitudEmail {
     
     
     public void show() {
-    	contenidoTextBox.setText("");
+    	nifTextBox.setText("");
     	dialogBox.center();
     	dialogBox.show();
     	
     }
     
 	private boolean isValidForm() {
-		setMessage(null);
-		contenidoTextBox.setStyleName(style.textBox(), true);
-		contenidoTextBox.setStyleName(style.errorTextBox(), false);
-		if (Validator.isTextBoxEmpty(contenidoTextBox)) {
-			setMessage(Constantes.INSTANCIA.emptyFieldException());
-			contenidoTextBox.setStyleName(style.textBox(), false);
-			contenidoTextBox.setStyleName(style.errorTextBox(), true);
+		setErrorMessage(null);
+		nifTextBox.setStyleName(style.errorTextBox(), false);
+		if (Validator.isTextBoxEmpty(nifTextBox)) {
+			setErrorMessage(Constantes.INSTANCIA.emptyFieldException());
+			nifTextBox.setStyleName(style.errorTextBox(), true);
 			return false;
-		} if (!Validator.isValidEmail(contenidoTextBox.getText())) {
-			setMessage(Constantes.INSTANCIA.mensajeErrorEmail());
-			contenidoTextBox.setStyleName(style.textBox(), false);
-			contenidoTextBox.setStyleName(style.errorTextBox(), true);
+		}
+		String nif = StringUtils.validarNIF(nifTextBox.getText());
+		if (null == nif) {
+			setErrorMessage(Constantes.INSTANCIA.nifErrorMsg());
+			nifTextBox.setStyleName(style.errorTextBox(), true);
 			return false;
 		}
 		return true;
 	}
 	
-	private void setMessage (String message) {
+	private void setErrorMessage (String message) {
 		if(message == null || "".equals(message)){
-			messagePanel.setVisible(false);
+			errorMessagePanel.setVisible(false);
 		} else {
-	    	messageLabel.setText(message);
-	    	messagePanel.setVisible(true);
+			errorMessageLabel.setHTML(message);
+			errorMessageLabel.setStyleName(style.errorMessageLabel(), true);
+			errorMessagePanel.setVisible(true);
 		}
 	}
     

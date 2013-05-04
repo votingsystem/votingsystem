@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 import org.controlacceso.clientegwt.client.Constantes;
 import org.controlacceso.clientegwt.client.HistoryToken;
 import org.controlacceso.clientegwt.client.dialogo.DialogoCargaHerramientaValidacion;
-import org.controlacceso.clientegwt.client.dialogo.ErrorDialog;
+import org.controlacceso.clientegwt.client.dialogo.ResultDialog;
 import org.controlacceso.clientegwt.client.evento.BusEventos;
 import org.controlacceso.clientegwt.client.evento.EventoGWTConsultaEvento;
 import org.controlacceso.clientegwt.client.evento.EventoGWTConsultaEventos;
@@ -92,6 +92,7 @@ public class PanelCentral extends Composite implements ValueChangeHandler<String
     	}
     	logger.info("setPanel: " + historyToken.toString());
     	if (panelSeleccionado != null) panelSeleccionado.clear();
+    	NewRepresentativePanel newRepresentativePanel = null;
     	switch(historyToken) {
     		case VOTACIONES:
     			sistemaSeleccionado = HistoryToken.VOTACIONES;
@@ -203,15 +204,31 @@ public class PanelCentral extends Composite implements ValueChangeHandler<String
     			break;
     		case NEW_REPRESENTATIVE:
     			sistemaSeleccionado = HistoryToken.REPRESENTATIVES_PAGE;
-    			NewRepresentativePanel newRepresentativePanel = new NewRepresentativePanel();
+    			newRepresentativePanel = new NewRepresentativePanel();
+    			newRepresentativePanel.setEditorMode(
+    					NewRepresentativePanel.EditorMode.NEW, null);
     			selectedPanel = newRepresentativePanel;
             	panelSeleccionado.add(newRepresentativePanel);
+    			break;
+    		case EDIT_REPRESENTATIVE:
+    			sistemaSeleccionado = HistoryToken.REPRESENTATIVES_PAGE;
+    			if(svQueryString != null && svQueryString.getRepresentativeId() != null) { 
+        			newRepresentativePanel = new NewRepresentativePanel();
+        			newRepresentativePanel.setEditorMode(
+        					NewRepresentativePanel.EditorMode.EDIT, svQueryString.getRepresentativeId());
+        			selectedPanel = newRepresentativePanel;
+                	panelSeleccionado.add(newRepresentativePanel);
+    			} else {
+    				logger.info(" - EDIT_REPRESENTATIVE without representativeId");
+    		    	History.newItem(HistoryToken.REPRESENTATIVES_PAGE.toString());
+    			}
     			break;
     		case REPRESENTATIVE_DETAILS:
     			sistemaSeleccionado = HistoryToken.REPRESENTATIVES_PAGE;
     			if(svQueryString != null && svQueryString.getRepresentativeId() != null) {
-        			RepresentativeDetailsPanel representativeDetailsPanel = 
-        					new RepresentativeDetailsPanel(svQueryString.getRepresentativeId());
+    				RepresentativeDetailsPanel representativeDetailsPanel = 
+    						new RepresentativeDetailsPanel(
+							svQueryString.getRepresentativeId());    				
         			selectedPanel = representativeDetailsPanel;
                 	panelSeleccionado.add(representativeDetailsPanel);
     			} else {
@@ -323,17 +340,17 @@ public class PanelCentral extends Composite implements ValueChangeHandler<String
 		return eventoSeleccionado;
 	}
     
-    private void showErrorDialog (String text, String body) {
-    	ErrorDialog errorDialog = new ErrorDialog();
-    	errorDialog.show(text, body);	
+    private void showErrorDialog (String caption, String message) {
+    	ResultDialog resultDialog = new ResultDialog();
+		resultDialog.show(caption, message,Boolean.FALSE);  
     }
-	
+    
     private class ServerRequestEventCallback implements RequestCallback {
 
         @Override
         public void onError(Request request, Throwable exception) {
-        	new ErrorDialog().show (Constantes.INSTANCIA.exceptionLbl(), 
-        			exception.getMessage());                
+        	showErrorDialog(Constantes.INSTANCIA.exceptionLbl(), 
+        			exception.getMessage());            
         }
 
         @Override

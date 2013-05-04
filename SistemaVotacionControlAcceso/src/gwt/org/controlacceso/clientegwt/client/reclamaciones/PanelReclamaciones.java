@@ -3,7 +3,7 @@ package org.controlacceso.clientegwt.client.reclamaciones;
 import java.util.List;
 import java.util.logging.Logger;
 import org.controlacceso.clientegwt.client.Constantes;
-import org.controlacceso.clientegwt.client.dialogo.ErrorDialog;
+import org.controlacceso.clientegwt.client.dialogo.ResultDialog;
 import org.controlacceso.clientegwt.client.modelo.ConsultaEventosSistemaVotacionJso;
 import org.controlacceso.clientegwt.client.modelo.EventoSistemaVotacionJso;
 import org.controlacceso.clientegwt.client.modelo.EventosSistemaVotacionJso;
@@ -70,10 +70,10 @@ public class PanelReclamaciones extends Composite implements BarraNavegacion.Lis
         }
 
     }
-    
-    private void showErrorDialog (String text, String body) {
-    	ErrorDialog errorDialog = new ErrorDialog();
-    	errorDialog.show(text, body);	
+
+    private void showErrorDialog (String caption, String message) {
+    	ResultDialog resultDialog = new ResultDialog();
+		resultDialog.show(caption, message,Boolean.FALSE);  
     }
 
 	public void recepcionConsultaEventos(ConsultaEventosSistemaVotacionJso consulta) {

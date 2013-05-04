@@ -225,6 +225,18 @@ class FirmaService {
 		MimeMessage multifirma = firmadoraValidaciones.genMultiSignedMessage(smimeMessage, mailSubject); 
 		return multifirma
 	}
+		
+	public synchronized byte[] generarMultifirmaBytes (
+			final SMIMEMessageWrapper smimeMessage, String mailSubject) {
+		log.debug("generarMultifirmaBytes - From:"  + smimeMessage.getFrom());
+		if(!firmadoraValidaciones) afterPropertiesSet()
+		MimeMessage multifirma = firmadoraValidaciones.genMultiSignedMessage(smimeMessage, mailSubject);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		multifirma.writeTo(baos);
+		byte[] result = baos.toByteArray()
+		baos.close()
+		return result;
+	}
 			
 	public Respuesta firmarCertificadoVoto (byte[] csr, Evento evento, 
 		Locale locale, boolean isEncrypted) {

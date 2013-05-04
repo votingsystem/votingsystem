@@ -2,7 +2,7 @@ package org.controlacceso.clientegwt.client.votaciones;
 
 import java.util.logging.Logger;
 import org.controlacceso.clientegwt.client.dialogo.DialogoSolicitudEmail;
-import org.controlacceso.clientegwt.client.dialogo.SolicitanteEmail;
+import org.controlacceso.clientegwt.client.dialogo.ConfirmacionListener;
 import org.controlacceso.clientegwt.client.modelo.EstadisticaJso;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -26,7 +26,7 @@ public class PopupEstadisticasVotacion {
 
     @UiField(provided = true) DecoratedPopupPanel popupPanel;
     @UiField PushButton solicitarCopiaSeguridadButton;
-    SolicitanteEmail solicitanteEmail;
+    ConfirmacionListener confirmacionListener;
 	@UiField Label numSolicitudesAcceso;
 	@UiField Label numSolicitudesAccesoOK;
 	@UiField Label numSolicitudesAccesoANULADAS;
@@ -36,10 +36,10 @@ public class PopupEstadisticasVotacion {
 	@UiField HTML mensajeSolicitudCopiaSeguridadVotacionAbierta;
     
 	public PopupEstadisticasVotacion(EstadisticaJso estadisticas, 
-			SolicitanteEmail solicitanteCopiaSeguridad, boolean puedeSolicitarCopias) {
+			ConfirmacionListener solicitanteCopiaSeguridad, boolean puedeSolicitarCopias) {
 		popupPanel = new DecoratedPopupPanel(true);
         uiBinder.createAndBindUi(this);
-        this.solicitanteEmail = solicitanteCopiaSeguridad;
+        this.confirmacionListener = solicitanteCopiaSeguridad;
 	    numSolicitudesAcceso.setText(new Integer(estadisticas.getNumeroSolicitudesDeAcceso()).toString());
 	    numSolicitudesAccesoOK.setText(new Integer(estadisticas.getNumeroSolicitudesDeAccesoOK()).toString());
 	    numSolicitudesAccesoANULADAS.setText(new Integer(estadisticas.getNumeroSolicitudesDeAccesoANULADAS()).toString());
@@ -54,7 +54,7 @@ public class PopupEstadisticasVotacion {
     void handleAnyadirCampoReclamacion(ClickEvent e) {
     	popupPanel.hide();
     	DialogoSolicitudEmail dialogoEmail = 
-    			new DialogoSolicitudEmail(null, solicitanteEmail);
+    			new DialogoSolicitudEmail(null, confirmacionListener);
     	dialogoEmail.show();
     }
 	

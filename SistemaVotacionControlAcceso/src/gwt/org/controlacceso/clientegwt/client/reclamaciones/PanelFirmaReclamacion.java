@@ -4,11 +4,11 @@ import java.util.logging.Logger;
 import org.controlacceso.clientegwt.client.Constantes;
 import org.controlacceso.clientegwt.client.HistoryToken;
 import org.controlacceso.clientegwt.client.PuntoEntrada;
+import org.controlacceso.clientegwt.client.dialogo.ConfirmacionListener;
 import org.controlacceso.clientegwt.client.dialogo.DialogoOperacionEnProgreso;
-import org.controlacceso.clientegwt.client.dialogo.DialogoResultadoFirma;
+import org.controlacceso.clientegwt.client.dialogo.ResultDialog;
 import org.controlacceso.clientegwt.client.dialogo.PopupAdministrarDocumento;
 import org.controlacceso.clientegwt.client.dialogo.PopupSolicitudCopiaSeguridad;
-import org.controlacceso.clientegwt.client.dialogo.SolicitanteEmail;
 import org.controlacceso.clientegwt.client.evento.BusEventos;
 import org.controlacceso.clientegwt.client.evento.EventoGWTConsultaEvento;
 import org.controlacceso.clientegwt.client.evento.EventoGWTMensajeClienteFirma;
@@ -44,7 +44,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 
-public class PanelFirmaReclamacion extends Composite implements SolicitanteEmail,
+public class PanelFirmaReclamacion extends Composite implements ConfirmacionListener,
 	EventoGWTConsultaEvento.Handler, EventoGWTMensajeClienteFirma.Handler {
 	
     private static Logger logger = Logger.getLogger("PanelFirmaReclamacion");
@@ -274,7 +274,7 @@ public class PanelFirmaReclamacion extends Composite implements SolicitanteEmail
 			case FIRMA_RECLAMACION_SMIME:
 				setWidgetsStateFirmando(false);
 				if(200 == mensaje.getCodigoEstado()) {
-					DialogoResultadoFirma dialogo = new DialogoResultadoFirma();
+					ResultDialog dialogo = new ResultDialog();
 					dialogo.show(Constantes.INSTANCIA.operationResultMsg(evento.getAsunto()));
 			    	History.newItem(HistoryToken.RECLAMACIONES.toString());
 				} else if(0 == mensaje.getCodigoEstado()) {} 
@@ -318,10 +318,10 @@ public class PanelFirmaReclamacion extends Composite implements SolicitanteEmail
 			panelInfoDocumento.setVisible(true);	
 		}
 	}
-	
+
 	@Override
-	public void procesarEmail(Integer id, String email) {
-		logger.info("--- procesarEmail");
+	public void confirmed(Integer id, Object param) {
+		logger.info("--- confirmed - email: " + param);
 		MensajeClienteFirmaJso mensajeClienteFirma = MensajeClienteFirmaJso.create(null, 
 				Operacion.SOLICITUD_COPIA_SEGURIDAD.toString(), 
 				MensajeClienteFirmaJso.SC_PROCESANDO);
@@ -329,7 +329,7 @@ public class PanelFirmaReclamacion extends Composite implements SolicitanteEmail
 		mensajeClienteFirma.setEvento(PanelCentral.INSTANCIA.getEventoSeleccionado());
     	mensajeClienteFirma.setNombreDestinatarioFirma(
     			PuntoEntrada.INSTANCIA.servidor.getNombre());
-		mensajeClienteFirma.setEmailSolicitante(email);
+		mensajeClienteFirma.setEmailSolicitante((String)param);
 		if(!Browser.isAndroid()) setWidgetsStateFirmando(true);
 		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
 	}

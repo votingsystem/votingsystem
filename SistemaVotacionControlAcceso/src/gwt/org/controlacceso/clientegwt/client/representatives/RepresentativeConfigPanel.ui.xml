@@ -7,15 +7,16 @@
 		.mainPanel {width: 100%;}
 		.optionsPanel{}
 		.pageTitlePanel {width: 100%; margin-bottom: 20px;}
-		.pageTitle {font-size: 20px; font-weight: bold; margin: 8px 0px 3px 0px; color:#47678e; text-align: center;
- 			border-bottom: 1px dotted; color:#02227a; }
-		.newRepresentativeButton{margin:0px 5px 0px 5px;}
-		.removeRepresentativeButton{margin:20px 5px 0px 5px;}
+		.pageTitle {font-size: 20px; font-weight: bold; margin: 8px 0px 3px 0px; color:#47678e; text-align: center;}
+		.newRepresentativeButton{margin:0px 5px 0px 5px;width: 310px;}
+		.removeRepresentativeButton{margin:20px 5px 0px 5px;width: 310px;}
+		.editRepresentativeButton{margin:20px 5px 0px 5px;width: 310px;}
    	</ui:style>
 	<ui:with field='constantes' type='org.controlacceso.clientegwt.client.Constantes'/>
 	<ui:with field='res' type='org.controlacceso.clientegwt.client.Recursos'/>   
 	<ui:image field='newRepresentativeButtonImg' src="NewRepresentativeButton.png"/>	
 	<ui:image field='removeRepresentativeButtonImg' src="RemoveRepresentativeButton.png"/>	
+	<ui:image field='editRepresentativeButtonImg' src="EditRepresentativeButton.png"/>	
 	
 	<g:VerticalPanel styleName="{style.mainPanel}">
        	<g:cell horizontalAlignment="ALIGN_CENTER">
@@ -36,7 +37,12 @@
 	      			<g:PushButton ui:field='removeRepresentativeButton'>
 			   			<g:upFace image='{removeRepresentativeButtonImg}'/>
 					</g:PushButton>
-				</g:HorizontalPanel>			
+				</g:HorizontalPanel>
+   				<g:HorizontalPanel styleName="{style.editRepresentativeButton}">
+	      			<g:PushButton ui:field='editRepresentativeButton'>
+			   			<g:upFace image='{editRepresentativeButtonImg}'/>
+					</g:PushButton>
+				</g:HorizontalPanel>		
 			</g:VerticalPanel>
    		</g:cell>
 	</g:VerticalPanel>

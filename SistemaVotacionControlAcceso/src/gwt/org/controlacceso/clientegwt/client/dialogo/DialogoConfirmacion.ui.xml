@@ -15,8 +15,8 @@
  	    .fechaLabel {font-size:16px; font-weight: bold; margin: 2px 0px 0px 20px;}
 		.boton { margin: 2px; cursor:pointer;}
 		.buttonPanel { float: right; margin-top: 15px;}
- 	    .dateFromBox {margin: 0px 0px 0px 3px; border: 1px solid #02227a; width:150px}
-		.dateToBox {margin: 0px 0px 0px 3px;border: 1px solid #02227a; width:150px}
+ 	    .dateFromBox {font-size:16px; margin: 0px 0px 0px 3px; border: 1px solid #02227a; width:200px}
+		.dateToBox {font-size:16px; margin: 0px 0px 0px 3px;border: 1px solid #02227a; width:200px}
 		.errorTextBox {border-color: red;}
 	</ui:style>
 	<ui:image field='aceptar' src="../BotonAceptar.png"/>

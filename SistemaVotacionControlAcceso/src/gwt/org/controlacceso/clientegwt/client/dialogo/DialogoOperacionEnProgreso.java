@@ -40,6 +40,7 @@ public class DialogoOperacionEnProgreso implements EventoGWTMensajeClienteFirma.
         String textoChrome();
         String texto();
         String resultMessage();
+        String messageLabel();
     }
 
     @UiField Style style;
@@ -100,25 +101,26 @@ public class DialogoOperacionEnProgreso implements EventoGWTMensajeClienteFirma.
     
     
     public void showFinishMessage(
-    		String caption, String message, Boolean isOk) {
+    		String caption, String message, Boolean isOK) {
     	HTML htmlMessage = new HTML(message);
+    	htmlMessage.setStyleName(style.messageLabel(), true);
     	indeterminatePanel.clear();
     	indeterminatePanel.add(htmlMessage);
     	buttonPanel.setVisible(true);
     	dialogBox.setText(caption);
     	dialogBox.center();
-    	dialogBox.show();
-    	if(isOk != null) {
-    		if(isOk) {
+    	if(isOK != null) {
+    		if(isOK) {
     			resultImage.setResource(
-    					Recursos.INSTANCIA.accept_32x32());
+    					Recursos.INSTANCIA.accept_48x48());
     		} else {
     			resultImage.setResource(
-    					Recursos.INSTANCIA.cancel_32x32());
+    					Recursos.INSTANCIA.cancel_48x48());
     		}
     		resultImage.setVisible(true);
-    		htmlMessage.setStyleDependentName(style.resultMessage(), true);
     	}
+    	htmlMessage.setStyleDependentName(style.resultMessage(), true);
+    	dialogBox.show();
     }
     
     

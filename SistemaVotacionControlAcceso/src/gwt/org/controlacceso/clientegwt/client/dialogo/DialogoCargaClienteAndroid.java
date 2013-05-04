@@ -25,15 +25,13 @@ public class DialogoCargaClienteAndroid implements ValueChangeHandler<String>{
 	
     private static DialogoCargaClienteAndroidUiBinder uiBinder = GWT.create(DialogoCargaClienteAndroidUiBinder.class);
     
-    public interface DialogListener {public void continueOperation();}
-    
     interface DialogoCargaClienteAndroidUiBinder extends UiBinder<Widget, DialogoCargaClienteAndroid> {}
 
     @UiField VerticalPanel textPanel;
     @UiField DialogBox dialogBox;
     @UiField PushButton aceptarButton;
     @UiField HTML userMsg;
-    DialogListener dialogListener;
+    ConfirmacionListener confirmacionListener;
     public static DialogoCargaClienteAndroid INSTANCIA;
     
 	public DialogoCargaClienteAndroid() {
@@ -45,14 +43,14 @@ public class DialogoCargaClienteAndroid implements ValueChangeHandler<String>{
     @UiHandler("aceptarButton")
     void handleCloseButton(ClickEvent e) {
     	dialogBox.hide();
-    	if(dialogListener != null) dialogListener.continueOperation();
+    	if(confirmacionListener != null) confirmacionListener.confirmed(null, null);
     }
     
     public void hide() {
     	dialogBox.hide();
     }
     
-    public void show(String urlAction, DialogListener dialogListener) {
+    public void show(String urlAction, ConfirmacionListener confirmacionListener) {
     	logger.info("- urlAction: " + urlAction);
     	if(urlAction != null) {
             userMsg.setHTML(Constantes.INSTANCIA.cargaClienteAndroidMsg(
@@ -61,7 +59,7 @@ public class DialogoCargaClienteAndroid implements ValueChangeHandler<String>{
             userMsg.setHTML(Constantes.INSTANCIA.androidOperationMsg(
             		ServerPaths.getUrlAppAndroid()));
     	}
-    	this.dialogListener = dialogListener;
+    	this.confirmacionListener = confirmacionListener;
     	dialogBox.center();
     	dialogBox.show();
     	

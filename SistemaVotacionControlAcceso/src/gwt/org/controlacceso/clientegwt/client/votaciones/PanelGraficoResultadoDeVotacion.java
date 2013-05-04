@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.controlacceso.clientegwt.client.Constantes;
+import org.controlacceso.clientegwt.client.dialogo.ConfirmacionListener;
 import org.controlacceso.clientegwt.client.dialogo.PopupSolicitudCopiaSeguridad;
-import org.controlacceso.clientegwt.client.dialogo.SolicitanteEmail;
 import org.controlacceso.clientegwt.client.modelo.EstadisticaJso;
 import org.controlacceso.clientegwt.client.modelo.EventoSistemaVotacionJso;
 import org.controlacceso.clientegwt.client.modelo.MensajeClienteFirmaJso;
@@ -40,7 +40,7 @@ import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.events.SelectHandler;
 import com.google.gwt.visualization.client.visualizations.corechart.PieChart;
 
-public class PanelGraficoResultadoDeVotacion extends Composite implements SolicitanteEmail {
+public class PanelGraficoResultadoDeVotacion extends Composite implements ConfirmacionListener {
 	
     private static Logger logger = Logger.getLogger("PanelGraficoResultadoDeVotacion");
 
@@ -224,18 +224,19 @@ public class PanelGraficoResultadoDeVotacion extends Composite implements Solici
 		}
 		
 	}
-	
+
 	@Override
-	public void procesarEmail(Integer id, String email) {
-		logger.info("--- procesarEmail");
+	public void confirmed(Integer id, Object param) {
+		logger.info("- confirmed - email: " + param);
 		MensajeClienteFirmaJso mensajeClienteFirma = MensajeClienteFirmaJso.create(null, 
 				Operacion.SOLICITUD_COPIA_SEGURIDAD.toString(), 
 				MensajeClienteFirmaJso.SC_PROCESANDO);
 		mensajeClienteFirma.setUrlEnvioDocumento(ServerPaths.getUrlSolicitudCopiaSeguridad());
 		mensajeClienteFirma.setEvento(evento);
-		mensajeClienteFirma.setEmailSolicitante(email);
+		mensajeClienteFirma.setEmailSolicitante((String)param);
 		if(!Browser.isAndroid()) PanelVotacion.INSTANCIA.setWidgetsStateFirmando(true);
 		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
+		
 	}
 
 	

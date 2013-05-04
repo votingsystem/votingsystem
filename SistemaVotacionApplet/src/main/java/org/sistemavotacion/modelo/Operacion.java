@@ -59,7 +59,9 @@ public class Operacion {
                 SELECT_REPRESENTATIVE(
                 getString("SELECT_REPRESENTATIVE")),
         REPRESENTATIVE_ACCREDITATIONS_REQUEST(
-                getString("REPRESENTATIVE_ACCREDITATIONS_REQUEST"));
+                getString("REPRESENTATIVE_ACCREDITATIONS_REQUEST")),
+        REPRESENTATIVE_UNSUBSCRIBE_REQUEST(
+                getString("REPRESENTATIVE_UNSUBSCRIBE_REQUEST"));
         
 
     

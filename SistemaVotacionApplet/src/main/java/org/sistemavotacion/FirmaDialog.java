@@ -320,6 +320,7 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
             public void run() {  
                 try {
                     switch(operacion.getTipo()) {
+                        case REPRESENTATIVE_UNSUBSCRIBE_REQUEST:
                         case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
                         case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
                         case SELECT_REPRESENTATIVE:

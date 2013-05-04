@@ -61,7 +61,7 @@ public final class UsuarioJso extends JavaScriptObject {
 		else return this.representationsNumber;
 	}-*/;
 	
-	public final native String getInfoURLf() /*-{
+	public final native String getInfoURL() /*-{
 		return this.infoURL;
 	}-*/;
 	

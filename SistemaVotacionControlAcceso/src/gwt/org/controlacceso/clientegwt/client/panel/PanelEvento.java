@@ -7,8 +7,8 @@ import java.util.logging.Logger;
 import org.controlacceso.clientegwt.client.Constantes;
 import org.controlacceso.clientegwt.client.HistoryToken;
 import org.controlacceso.clientegwt.client.Recursos;
-import org.controlacceso.clientegwt.client.dialogo.ErrorDialog;
 import org.controlacceso.clientegwt.client.dialogo.PopupInfoEvento;
+import org.controlacceso.clientegwt.client.dialogo.ResultDialog;
 import org.controlacceso.clientegwt.client.modelo.EventoSistemaVotacionJso;
 import org.controlacceso.clientegwt.client.util.DateUtils;
 import org.controlacceso.clientegwt.client.util.RequestHelper;
@@ -205,8 +205,9 @@ public class PanelEvento extends Composite {
 
         @Override
     	public void onError(Request request, Throwable exception) {
-        	new ErrorDialog().show(Constantes.INSTANCIA.exceptionLbl(), 
-        			exception.getMessage());
+        	ResultDialog resultDialog = new ResultDialog();
+    		resultDialog.show(Constantes.INSTANCIA.exceptionLbl(), 
+        			exception.getMessage(),Boolean.FALSE);  
         	logger.log(Level.SEVERE, exception.getMessage(), exception);
     	}
 

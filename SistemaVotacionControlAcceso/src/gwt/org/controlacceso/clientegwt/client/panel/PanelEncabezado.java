@@ -249,6 +249,7 @@ public class PanelEncabezado extends Composite implements EventoGWTMensajeAplica
 				break;
 			case REPRESENTATIVE_CONFIG:
 			case NEW_REPRESENTATIVE:
+			case EDIT_REPRESENTATIVE:
 			case REPRESENTATIVE_DETAILS:
 			case REPRESENTATIVES_PAGE:
 				subscripcionesPanel.setVisible(false);

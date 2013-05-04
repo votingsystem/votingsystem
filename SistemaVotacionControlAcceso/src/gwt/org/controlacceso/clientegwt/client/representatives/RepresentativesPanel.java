@@ -5,7 +5,9 @@ import java.util.logging.Logger;
 
 import org.controlacceso.clientegwt.client.Constantes;
 import org.controlacceso.clientegwt.client.HistoryToken;
-import org.controlacceso.clientegwt.client.dialogo.ErrorDialog;
+import org.controlacceso.clientegwt.client.dialogo.ConfirmacionListener;
+import org.controlacceso.clientegwt.client.dialogo.NifDialog;
+import org.controlacceso.clientegwt.client.dialogo.ResultDialog;
 import org.controlacceso.clientegwt.client.modelo.RepresentativesMapJso;
 import org.controlacceso.clientegwt.client.modelo.UsuarioJso;
 import org.controlacceso.clientegwt.client.panel.BarraNavegacion;
@@ -17,6 +19,9 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -28,7 +33,7 @@ import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class RepresentativesPanel extends Composite 
-	implements BarraNavegacion.Listener{
+	implements BarraNavegacion.Listener, ConfirmacionListener {
 
     private static Logger logger = Logger.getLogger("RepresentativesPanel");
 
@@ -42,6 +47,7 @@ public class RepresentativesPanel extends Composite
     @UiField PushButton checkRepresentativeButton;
     @UiField PushButton representativeConfigButton;
  
+    private String userNif = null;
 
     private static RepresentativesPanelUiBinder uiBinder = GWT.create(RepresentativesPanelUiBinder.class);
 
@@ -63,11 +69,13 @@ public class RepresentativesPanel extends Composite
     
     @UiHandler("checkRepresentativeButton")
     void onClickCheckRepresentativeButton(ClickEvent e) {
-    	CheckRepresentativeDialog checkDialogo = new CheckRepresentativeDialog();
-    	checkDialogo.show();
+    	NifDialog nifDialog = new NifDialog(CHECK_REPRESENTATIVE, this, 
+    			Constantes.INSTANCIA.checkRepresentativeCaption(),
+    			Constantes.INSTANCIA.checkRepresentativeMsg());
+    	nifDialog.show();
 	}
     
-    private class ServerRequestCallback implements RequestCallback {
+    private class RepresentativesRequestCallback implements RequestCallback {
 
         @Override
         public void onError(Request request, Throwable exception) {
@@ -93,8 +101,8 @@ public class RepresentativesPanel extends Composite
     }
     
     private void showErrorDialog (String text, String body) {
-    	ErrorDialog errorDialog = new ErrorDialog();
-    	errorDialog.show(text, body);	
+		ResultDialog resultDialog = new ResultDialog();
+		resultDialog.show(text, body, Boolean.FALSE);	
     }
 
 	public void updateRepresentativesMap(RepresentativesMapJso representativesMap) {
@@ -121,16 +129,65 @@ public class RepresentativesPanel extends Composite
 	    }
 		panelBarrarProgreso.setVisible(false);
 		representativesPanel.setVisible(true);
+		barraNavegacion.setVisible(true);
 	}
 
 	@Override
 	public void gotoPage(int offset, int range) {
 		logger.info("--- gotoPage ---");
 		RequestHelper.doGet(ServerPaths.getRepresentativesUrl(range, offset), 
-				new ServerRequestCallback());
+				new RepresentativesRequestCallback());
 		panelBarrarProgreso.setVisible(true);
 		representativesPanel.setVisible(false);
+		barraNavegacion.setVisible(false);
 	}
 
+	@Override
+	public void confirmed(Integer id, Object param) {
+		logger.info(" - confirmed + id: " + id + " - param: " + param);
+		switch(id) {
+			case CHECK_REPRESENTATIVE:
+				logger.info(" - Lanzando comprobación de representante " + param);
+				userNif = (String)param;
+				RequestHelper.doGet(ServerPaths.getRepresentativeByUserNif(userNif), 
+						new RepresentativeCheckRequestCallback());
+				break;
+		}
+	}
+
+    public class RepresentativeCheckRequestCallback implements RequestCallback {
+
+        @Override
+        public void onError(Request request, Throwable exception) {
+        	showErrorDialog(Constantes.INSTANCIA.exceptionLbl(), 
+        			exception.getMessage());                
+        }
+
+        @Override
+        public void onResponseReceived(Request request, Response response) {
+			ResultDialog resultDialog = new ResultDialog();
+            if (response.getStatusCode() == Response.SC_OK) {
+            	logger.info("response.getText(): " + response.getText());
+            	JSONValue jsonValue = JSONParser.parseLenient(response.getText());
+            	JSONObject jsonObj = jsonValue.isObject();
+            	Double representativeId = jsonObj.get("representativeId").isNumber().doubleValue();
+            	String representativeName = jsonObj.get("representativeName").isString().stringValue();
+            	String representativeURL = ServerPaths.getRepresentativeDetailsUrl(representativeId.intValue());
+            	resultDialog.show(null, Constantes.INSTANCIA.checkrepresentativeResultMessage(
+            			userNif, representativeURL, representativeName), Boolean.TRUE);
+            } else {
+            	logger.info("ERROR: " +response.getStatusCode() 
+            			+ " - message: " + response.getText());
+            	if(response.getStatusCode() == 0) {//Magic Number!!! -> network problem
+            		resultDialog.show(Constantes.INSTANCIA.errorLbl() , 
+            				Constantes.INSTANCIA.networkERROR(), Boolean.FALSE);
+            	} else {
+            		resultDialog.show(Constantes.INSTANCIA.errorLbl(), 
+            				response.getText(), Boolean.FALSE);
+            	} 
+            }
+        }
+
+    }
 
 }

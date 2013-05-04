@@ -55,7 +55,6 @@ class MailSenderService {
 		String userRequestName
 		Usuario representative
 		String representativeName
-		String solicitante
 		String urlSolicitud
 		String urlDescarga
 		SolicitudCopia.withTransaction {
@@ -73,8 +72,8 @@ class MailSenderService {
 				to solicitud.email
 				subject emailSubject
 				body(view:"/mail/RepresentativeAccreditationRequestDownloadInstructions", 
-					model:[solicitante:solicitante, dateStr:dateStr,
-					urlSolicitud:urlSolicitud, representative:representativeName, urlDescarga:urlDescarga])
+					model:[solicitante:userRequestName, dateStr:dateStr, pageTitle:emailSubject,
+						urlSolicitud:urlSolicitud, representative:representativeName, urlDescarga:urlDescarga])
 			}
 		}
 	}
@@ -87,7 +86,6 @@ class MailSenderService {
 		String userRequestName
 		Usuario representative
 		String representativeName
-		String solicitante
 		String urlSolicitud
 		String urlDescarga
 		SolicitudCopia.withTransaction {
@@ -105,8 +103,8 @@ class MailSenderService {
 				to solicitud.email
 				subject emailSubject
 				body(view:"/mail/RepresentativeVotingHistoryDownloadInstructions", 
-					model:[solicitante:solicitante, dateFromStr:dateFromStr, dateToStr:dateToStr,
-					urlSolicitud:urlSolicitud, representative:representativeName, urlDescarga:urlDescarga])
+					model:[solicitante:userRequestName, dateFromStr:dateFromStr, dateToStr:dateToStr,
+						pageTitle:emailSubject,	urlSolicitud:urlSolicitud, representative:representativeName, urlDescarga:urlDescarga])
 			}
 		}
 	}

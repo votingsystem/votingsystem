@@ -23,8 +23,7 @@ import org.controlacceso.clientegwt.client.dialogo.DialogoCargaClienteAndroid;
 import org.controlacceso.clientegwt.client.dialogo.DialogoConfirmacion;
 
 public class PanelSeleccionOpcionDeVotacion extends Composite 
-	implements DialogoCargaClienteAndroid.DialogListener, 
-	ConfirmacionListener {
+	implements ConfirmacionListener {
 	
     private static Logger logger = Logger.getLogger("PanelSeleccionOpcionDeVotacion");
 
@@ -72,11 +71,6 @@ public class PanelSeleccionOpcionDeVotacion extends Composite
         	dialogoOpcion.show(Constantes.INSTANCIA.votoConfirmLabel(opcion.getContenido()));
     	}
     }
-
-	@Override
-	public void continueOperation() {
-		contenedorOpciones.procesarOpcionSeleccionada(opcion);
-	}
 
 	@Override
 	public void confirmed(Integer id, Object param) {

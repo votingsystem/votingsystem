@@ -22,7 +22,7 @@ public class PopupSolicitudCopiaSeguridad {
 
     @UiField(provided = true) DecoratedPopupPanel popupPanel;
     @UiField PushButton solicitarCopiaSeguridadButton;
-    SolicitanteEmail solicitanteEmail;
+    ConfirmacionListener confirmacionListener;
     
 	public PopupSolicitudCopiaSeguridad() {
 		popupPanel = new DecoratedPopupPanel(true);
@@ -33,7 +33,7 @@ public class PopupSolicitudCopiaSeguridad {
     void handleAnyadirCampoReclamacion(ClickEvent e) {
     	popupPanel.hide();
     	DialogoSolicitudEmail dialogoEmail = 
-    			new DialogoSolicitudEmail(null, solicitanteEmail);
+    			new DialogoSolicitudEmail(null, confirmacionListener);
     	dialogoEmail.show();
     }
 	
@@ -42,9 +42,9 @@ public class PopupSolicitudCopiaSeguridad {
 		popupPanel.setPopupPosition(clientX, clientY);
 	}
 
-    public PopupSolicitudCopiaSeguridad(SolicitanteEmail solicitanteCopiaSeguridad) {
+    public PopupSolicitudCopiaSeguridad(ConfirmacionListener solicitanteCopiaSeguridad) {
     	this();
-		this.solicitanteEmail = solicitanteCopiaSeguridad;
+		this.confirmacionListener = solicitanteCopiaSeguridad;
 	}
 
 	public void setPopupPosition(int clientX, int clientY) {

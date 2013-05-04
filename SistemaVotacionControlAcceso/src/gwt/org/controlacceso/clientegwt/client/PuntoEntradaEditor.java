@@ -3,7 +3,7 @@ package org.controlacceso.clientegwt.client;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.controlacceso.clientegwt.client.dialogo.ErrorDialog;
+import org.controlacceso.clientegwt.client.dialogo.ResultDialog;
 import org.controlacceso.clientegwt.client.evento.BusEventos;
 import org.controlacceso.clientegwt.client.evento.EventoGWTMensajeAplicacion;
 import org.controlacceso.clientegwt.client.firmas.PanelPublicacionManifiesto;
@@ -97,17 +97,18 @@ public class PuntoEntradaEditor implements EntryPoint {
     	return resultado;
     }
     
-    private void showErrorDialog (String text, String body) {
-    	ErrorDialog errorDialog = new ErrorDialog();
-    	errorDialog.show(text, body);	
+    private void showErrorDialog (String caption, String message) {
+    	ResultDialog resultDialog = new ResultDialog();
+		resultDialog.show(caption, message,Boolean.FALSE);  
     }
 	
     private class ServerRequestInfoCallback implements RequestCallback {
 
         @Override
     	public void onError(Request request, Throwable exception) {
-        	new ErrorDialog().show("Exception", exception.getMessage());
         	logger.log(Level.SEVERE, exception.getMessage(), exception);
+        	showErrorDialog(Constantes.INSTANCIA.exceptionLbl(), 
+        			exception.getMessage());
     	}
 
         @Override

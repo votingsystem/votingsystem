@@ -5,10 +5,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.controlacceso.clientegwt.client.Constantes;
 import org.controlacceso.clientegwt.client.PuntoEntrada;
+import org.controlacceso.clientegwt.client.dialogo.ConfirmacionListener;
 import org.controlacceso.clientegwt.client.dialogo.DialogoOperacionEnProgreso;
-import org.controlacceso.clientegwt.client.dialogo.ErrorDialog;
 import org.controlacceso.clientegwt.client.dialogo.PopupAdministrarDocumento;
-import org.controlacceso.clientegwt.client.dialogo.SolicitanteEmail;
+import org.controlacceso.clientegwt.client.dialogo.ResultDialog;
 import org.controlacceso.clientegwt.client.evento.BusEventos;
 import org.controlacceso.clientegwt.client.evento.EventoGWTConsultaEvento;
 import org.controlacceso.clientegwt.client.evento.EventoGWTMensajeClienteFirma;
@@ -25,14 +25,12 @@ import org.controlacceso.clientegwt.client.util.RequestHelper;
 import org.controlacceso.clientegwt.client.util.ServerPaths;
 import org.controlacceso.clientegwt.client.util.StringUtils;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
@@ -45,7 +43,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 
-public class PanelVotacion extends Composite implements SolicitanteEmail, ContenedorOpciones,
+public class PanelVotacion extends Composite implements ConfirmacionListener, ContenedorOpciones,
 	 EventoGWTConsultaEvento.Handler, EventoGWTMensajeClienteFirma.Handler {
 	
     private static Logger logger = Logger.getLogger("PanelVotacion");
@@ -308,23 +306,6 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
 		
 	}
 
-
-
-	@Override
-	public void procesarEmail(Integer id, String email) {
-		logger.info("--- procesarEmail");
-		MensajeClienteFirmaJso mensajeClienteFirma = MensajeClienteFirmaJso.create(null, 
-				Operacion.SOLICITUD_COPIA_SEGURIDAD.toString(), 
-				MensajeClienteFirmaJso.SC_PROCESANDO);
-		mensajeClienteFirma.setUrlEnvioDocumento(ServerPaths.getUrlSolicitudCopiaSeguridad());
-		mensajeClienteFirma.setEvento(evento);
-		mensajeClienteFirma.setEmailSolicitante(email);
-    	mensajeClienteFirma.setNombreDestinatarioFirma(
-    			PuntoEntrada.INSTANCIA.servidor.getNombre());
-    	if(!Browser.isAndroid()) setWidgetsStateFirmando(true);
-		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
-	}
-
 	@Override
 	public void procesarOpcionSeleccionada(OpcionDeEventoJso opcion) {
 		MensajeClienteFirmaJso mensajeClienteFirma = MensajeClienteFirmaJso.create(null, 
@@ -351,8 +332,9 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
 
         @Override
         public void onError(Request request, Throwable exception) {
-        	new ErrorDialog().show (Constantes.INSTANCIA.exceptionLbl(), 
-        			exception.getMessage());                
+        	ResultDialog resultDialog = new ResultDialog();
+    		resultDialog.show(Constantes.INSTANCIA.exceptionLbl(), 
+        			exception.getMessage(),Boolean.FALSE);             
         }
 
         @Override
@@ -373,8 +355,9 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
 
         @Override
         public void onError(Request request, Throwable exception) {
-        	new ErrorDialog().show (Constantes.INSTANCIA.exceptionLbl(), 
-        			exception.getMessage());                
+        	ResultDialog resultDialog = new ResultDialog();
+    		resultDialog.show(Constantes.INSTANCIA.exceptionLbl(), 
+        			exception.getMessage(),Boolean.FALSE);            
         }
 
         @Override
@@ -388,5 +371,21 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
         }
 
     }
+
+	@Override
+	public void confirmed(Integer id, Object param) {
+		logger.info("- confirmed - id: " + id + " - email: " + param);
+		MensajeClienteFirmaJso mensajeClienteFirma = MensajeClienteFirmaJso.create(null, 
+				Operacion.SOLICITUD_COPIA_SEGURIDAD.toString(), 
+				MensajeClienteFirmaJso.SC_PROCESANDO);
+		mensajeClienteFirma.setUrlEnvioDocumento(ServerPaths.getUrlSolicitudCopiaSeguridad());
+		mensajeClienteFirma.setEvento(evento);
+		mensajeClienteFirma.setEmailSolicitante((String)param);
+    	mensajeClienteFirma.setNombreDestinatarioFirma(
+    			PuntoEntrada.INSTANCIA.servidor.getNombre());
+    	if(!Browser.isAndroid()) setWidgetsStateFirmando(true);
+		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
+		
+	}
 
 }

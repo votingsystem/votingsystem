@@ -8,8 +8,7 @@ import org.controlacceso.clientegwt.client.HistoryToken;
 import org.controlacceso.clientegwt.client.PuntoEntrada;
 import org.controlacceso.clientegwt.client.PuntoEntradaEditor;
 import org.controlacceso.clientegwt.client.dialogo.DialogoOperacionEnProgreso;
-import org.controlacceso.clientegwt.client.dialogo.DialogoResultadoFirma;
-import org.controlacceso.clientegwt.client.dialogo.ErrorDialog;
+import org.controlacceso.clientegwt.client.dialogo.ResultDialog;
 import org.controlacceso.clientegwt.client.evento.BusEventos;
 import org.controlacceso.clientegwt.client.evento.EventoGWTMensajeAplicacion;
 import org.controlacceso.clientegwt.client.evento.EventoGWTMensajeClienteFirma;
@@ -207,8 +206,9 @@ public class PanelPublicacionManifiesto extends Composite
 		@Override
     	public void onError(Request request, Throwable exception) {
 			setWidgetsStatePublicando(false);
-        	new ErrorDialog().show(Constantes.INSTANCIA.exceptionLbl(), 
-        			exception.getMessage());
+	    	ResultDialog resultDialog = new ResultDialog();
+			resultDialog.show(Constantes.INSTANCIA.exceptionLbl(), 
+					exception.getMessage(), Boolean.FALSE);  
         	logger.log(Level.SEVERE, exception.getMessage());
         	aceptarButton.setEnabled(true);
     	}
@@ -260,7 +260,7 @@ public class PanelPublicacionManifiesto extends Composite
 			case PUBLICACION_MANIFIESTO_PDF:
 				dialogoProgreso.hide();
 				if(200 == mensaje.getCodigoEstado()) {
-					DialogoResultadoFirma dialogo = new DialogoResultadoFirma();
+					ResultDialog dialogo = new ResultDialog();
 					dialogo.show(Constantes.INSTANCIA.publicacionManifiestoOK());
 			    	History.newItem(HistoryToken.MANIFIESTOS.toString());
 				} else if (MensajeClienteFirmaJso.SC_CANCELADO== mensaje.getCodigoEstado()) {

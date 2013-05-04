@@ -36,7 +36,10 @@ class SolicitudCopiaController {
 	 */
 	def obtener() {
 		if (params.long('id')) {
-			SolicitudCopia solicitud = SolicitudCopia.get(params.id)
+			SolicitudCopia solicitud
+			SolicitudCopia.withTransaction {
+				solicitud = SolicitudCopia.get(params.id)
+			}
 			if(!solicitud) {
 				response.status = Respuesta.SC_ERROR_PETICION
 				render message(code: 'solicitudCopia.noEncontrada', args:[params.id]) 
@@ -114,20 +117,28 @@ class SolicitudCopiaController {
 	def obtenerSolicitud() {
 		if (params.long('id')) {
 			SolicitudCopia solicitud
-			byte[] solicitudPDF
+			byte[] solicitudBytes
 			SolicitudCopia.withTransaction {
 				solicitud = SolicitudCopia.get(params.id)
-				if(solicitud) solicitudPDF = solicitud.documento?.pdf
+				if(solicitud) {
+					if(solicitud.documento) {//has PDF
+						//response.setHeader("Content-disposition", "attachment; filename=manifiesto.pdf")
+						response.contentType = "application/pdf"
+						solicitudBytes = solicitud.documento?.pdf
+					} else {//has SMIME
+						response.contentType = "text/plain"
+						solicitudBytes = solicitud.mensajeSMIME?.contenido
+					}
+				} 
 			}
 			if(!solicitud) {
 				response.status = Respuesta.SC_ERROR_PETICION
 				render message(code: 'solicitudCopia.noEncontrada', args:[params.id]) 
 				return false
 			}
-			//response.setHeader("Content-disposition", "attachment; filename=manifiesto.pdf")
-			response.contentType = "application/pdf"
-			response.setHeader("Content-Length", "${solicitudPDF.length}")
-			response.outputStream << solicitudPDF // Performing a binary stream copy
+
+			response.setHeader("Content-Length", "${solicitudBytes.length}")
+			response.outputStream << solicitudBytes // Performing a binary stream copy
 			response.outputStream.flush()
 			return false
 		}

@@ -315,4 +315,15 @@ public interface Constantes extends Messages{
     String selectRepresentativeCaption();
     String selectRepresentativeOKMsg(String reoresentativeName);
     	
+    String solicitudNifLabel();
+    String checkrepresentativeResultMessage(String nif, 
+    		String representativeDetailsURL, String representativeName);
+    
+    String editRepresentativeCaption();
+    String editRepresentativeHeader(String representativeName);
+    String editRepresentativeMsg();
+    
+    String unsubscribeRepresentativeCaption();
+    String unsubscribeRepresentativeMsg();
+    String unsubscribeRepresentativeSubject();
 }

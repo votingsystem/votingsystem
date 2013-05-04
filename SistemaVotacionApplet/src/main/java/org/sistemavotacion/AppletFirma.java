@@ -221,7 +221,8 @@ public class AppletFirma extends JApplet {
                         //      .getResourceAsStream("testFiles/publishVoting.json"), jsonFile);
                         //.getResourceAsStream("testFiles/newRepresentative.json"), jsonFile);            
                         //.getResourceAsStream("testFiles/publishManifest.json"), jsonFile);
-                        .getResourceAsStream("testFiles/selectRepresentative.json"), jsonFile);
+                        //.getResourceAsStream("testFiles/selectRepresentative.json"), jsonFile);
+                        .getResourceAsStream("testFiles/unsubscribeRepresentative.json"), jsonFile);        
                         appletFirma.ejecutarOperacion(FileUtils.getStringFromFile(jsonFile));
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);

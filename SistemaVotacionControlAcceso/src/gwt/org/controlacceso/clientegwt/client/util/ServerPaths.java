@@ -246,8 +246,12 @@ public class ServerPaths {
         return getApplicationPath() + "anuladorVoto/obtener?hashCertVoteHEX=" + hashCertificadoVotoBase64;
 	}
 
-	public static String getUrlRepresentativeData() {
-		return getApplicationPath() + "representative/guardar";
+	public static String getUrlRepresentativeData(Integer representativeId) {
+		if(representativeId != null) {
+			return getApplicationPath() + "representative/guardar?id=" + representativeId;
+		} else {
+			return getApplicationPath() + "representative/guardar";
+		}
 	}
     
     public static String getUrlEventosVotacion (int max, int offset, 
@@ -258,8 +262,12 @@ public class ServerPaths {
     		+ max + "&offset=" + offset + sufix;
     }
 
-	public static String getRepresentativeDetailesMapUrl(int representativeId) {
+	public static String getRepresentativeDetailsMapUrl(int representativeId) {
 		return getApplicationPath() + "representative/detailed?id=" + representativeId;
+	}
+	
+	public static String getRepresentativeDetailsUrl(int representativeId) {
+		return getApplicationPath() + "app/home#REPRESENTATIVE_DETAILS&representativeId=" + representativeId;
 	}
 
 	public static String getUrlSelectRepresentative() {
@@ -274,4 +282,16 @@ public class ServerPaths {
 		return getApplicationPath() + "representative/guardarAccreditationsRequest";
 	}
 
+	public static String getRepresentativeByUserNif(String param) {
+		return getApplicationPath() + "representative/getByUserNif?nif=" + param;
+	}
+	
+	public static String getRepresentativeByNif(String param) {
+		return getApplicationPath() + "representative/getByNif?nif=" + param;
+	}
+
+	public static String getUrlUnsubscribeRepresentative() {
+		return getApplicationPath() + "representative/guardarUnsubscribeRequestAdjuntandoValidacion";
+	}
+	
 }

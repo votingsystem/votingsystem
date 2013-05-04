@@ -3,7 +3,7 @@ package org.controlacceso.clientegwt.client.votaciones;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.controlacceso.clientegwt.client.Constantes;
-import org.controlacceso.clientegwt.client.dialogo.DialogoResultadoFirma;
+import org.controlacceso.clientegwt.client.dialogo.ResultDialog;
 import org.controlacceso.clientegwt.client.evento.BusEventos;
 import org.controlacceso.clientegwt.client.evento.EventoGWTMensajeClienteFirma;
 import org.controlacceso.clientegwt.client.modelo.InfoServidorJso;
@@ -166,10 +166,10 @@ public class DialogoAsociarCentroControl implements EventoGWTMensajeClienteFirma
 	    	asociarButton.setEnabled(true);
 			if(Respuesta.SC_OK == mensaje.getCodigoEstado()) {
 				dialogBox.hide();
-				DialogoResultadoFirma dialogo = new DialogoResultadoFirma();
+				ResultDialog dialogo = new ResultDialog();
 				dialogo.show(Constantes.INSTANCIA.asociacionCentroControlOK());
 			} else {
-				DialogoResultadoFirma dialogo = new DialogoResultadoFirma();
+				ResultDialog dialogo = new ResultDialog();
 				dialogo.show(Constantes.INSTANCIA.asociacionCentroControlError());
 			}
 		}

@@ -41,7 +41,7 @@ public class Usuario implements Serializable {
     
     private static Logger logger = LoggerFactory.getLogger(Usuario.class);
     
-	 public enum Type {USER, REPRESENTATIVE}
+	 public enum Type {USER, REPRESENTATIVE, USER_WITH_CANCELLED_REPRESENTATIVE, EX_REPRESENTATIVE}
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false)
@@ -359,6 +359,14 @@ public class Usuario implements Serializable {
 
 	public void setRepresentationsNumber(Integer representationsNumber) {
 		this.representationsNumber = representationsNumber;
+	}
+
+	public MensajeSMIME getRepresentativeMessage() {
+		return representativeMessage;
+	}
+
+	public void setRepresentativeMessage(MensajeSMIME representativeMessage) {
+		this.representativeMessage = representativeMessage;
 	}
 
 }

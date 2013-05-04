@@ -2,12 +2,10 @@ package org.controlacceso.clientegwt.client.panel;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.controlacceso.clientegwt.client.Constantes;
-import org.controlacceso.clientegwt.client.HistoryToken;
-import org.controlacceso.clientegwt.client.HtmlTemplates;
 import org.controlacceso.clientegwt.client.PuntoEntrada;
-import org.controlacceso.clientegwt.client.dialogo.DialogoResultadoFirma;
-import org.controlacceso.clientegwt.client.dialogo.ErrorDialog;
+import org.controlacceso.clientegwt.client.dialogo.ResultDialog;
 import org.controlacceso.clientegwt.client.modelo.MensajeClienteFirmaJso;
 import org.controlacceso.clientegwt.client.modelo.MensajeClienteFirmaJso.Operacion;
 import org.controlacceso.clientegwt.client.util.Browser;
@@ -16,21 +14,14 @@ import org.controlacceso.clientegwt.client.util.ServerPaths;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Hyperlink;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class PanelTest extends Composite {
@@ -64,7 +55,7 @@ public class PanelTest extends Composite {
         			PuntoEntrada.INSTANCIA.servidor.getNombre());
     		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
     	} else {
-			DialogoResultadoFirma dialogo = new DialogoResultadoFirma();
+			ResultDialog dialogo = new ResultDialog();
 			dialogo.show(Constantes.INSTANCIA.clienteNoAndroid());
     	}
 	}
@@ -92,7 +83,9 @@ public class PanelTest extends Composite {
 
         @Override
         public void onError(Request request, Throwable exception) {
-        	new ErrorDialog().show (Constantes.INSTANCIA.exceptionLbl(), exception.getMessage());                
+        	ResultDialog resultDialog = new ResultDialog();
+    		resultDialog.show(Constantes.INSTANCIA.exceptionLbl(), 
+    				exception.getMessage(),Boolean.FALSE); 
         }
 
         @Override

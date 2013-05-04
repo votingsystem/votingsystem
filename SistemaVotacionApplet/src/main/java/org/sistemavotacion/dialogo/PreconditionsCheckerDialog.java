@@ -115,6 +115,7 @@ public class PreconditionsCheckerDialog
                     logger.debug("controlCenterCertChecked: " + controlCenterCertChecked + 
                             " - accessControlCertChecked: " + accessControlCertChecked);
                     break;
+                case REPRESENTATIVE_UNSUBSCRIBE_REQUEST:
                 case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
                 case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
                 case NEW_REPRESENTATIVE:
@@ -198,6 +199,7 @@ public class PreconditionsCheckerDialog
                     }
                 });    
                 break;
+            case REPRESENTATIVE_UNSUBSCRIBE_REQUEST:
             case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
             case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
             case SELECT_REPRESENTATIVE:
@@ -231,7 +233,7 @@ public class PreconditionsCheckerDialog
                 firmaDialog.inicializarSinDescargarPDF(bytesPDF);
                 break;
             default:
-                logger.debug("Operación desconocida: " + operacion.getTipo().toString());
+                logger.debug("################# UNKNOWN OPERATION -> " + operacion.getTipo().toString());
         }
     }
 

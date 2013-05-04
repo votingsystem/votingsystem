@@ -118,12 +118,10 @@ class ControlAccesoFilters {
 								response.contentLength = respuesta.messageBytes.length
 								response.outputStream << respuesta.messageBytes
 								response.outputStream.flush()
-								return false
 							} else {
 								log.debug "-----------------  filter - error encrypting response ${respuesta.mensaje}";
 								response.status = respuesta.codigoEstado
 								render respuesta.mensaje
-								return false
 							}
 						} else {
 							response.status = codigoEstado
@@ -131,20 +129,17 @@ class ControlAccesoFilters {
 							response.contentLength = mensajeSMIMEValidado.contenido.length
 							response.outputStream << mensajeSMIMEValidado.contenido
 							response.outputStream.flush()
-							return false
 						}
 					} else {
 						response.status = Respuesta.SC_ERROR_EJECUCION
 						if (flash?.respuesta?.mensaje) render flash.respuesta.mensaje
 						else render "ERROR"
-						return false
 					}
                 } else {
 					response.status = codigoEstado
 					response.setContentType("text/plain")
 					if (flash?.respuesta?.mensaje) render flash.respuesta.mensaje
 					else render "ERROR"
-					return false
                 }
             }
 

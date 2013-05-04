@@ -2,6 +2,7 @@ package org.sistemavotacion.controlacceso.modelo;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -27,9 +28,9 @@ import org.slf4j.LoggerFactory;
 */
 @Entity
 @Table(name="RepresentationDocument")
-public class RepresentationDocument {
+public class RepresentationDocument implements Serializable {
 	
-	public enum State {OK, CANCELLED, ERROR}
+	public enum State {OK, CANCELLED, CANCELLED_BY_REPRESENTATIVE, ERROR}
 	
     private static final long serialVersionUID = 1L;
     
@@ -123,5 +124,13 @@ public class RepresentationDocument {
 
 	public void setState(State state) {
 		this.state = state;
+	}
+
+	public Usuario getUser() {
+		return user;
+	}
+
+	public void setUser(Usuario user) {
+		this.user = user;
 	}
 }

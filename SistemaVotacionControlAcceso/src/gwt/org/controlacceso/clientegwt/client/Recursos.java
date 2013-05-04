@@ -46,10 +46,10 @@ public interface Recursos extends ClientBundle {
 	ImageResource view_detailed_16x16();
 	@Source("filesave_16x16.png")
 	ImageResource filesave_16x16();
-	@Source("accept_32x32.png")
-	ImageResource accept_32x32();
-	@Source("cancel_32x32.png")
-	ImageResource cancel_32x32();
+	@Source("accept_48x48.png")
+	ImageResource accept_48x48();
+	@Source("cancel_48x48.png")
+	ImageResource cancel_48x48();
 	
 	@Source("documentacion.html")
     TextResource documentacion();
