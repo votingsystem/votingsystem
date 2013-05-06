@@ -102,6 +102,8 @@ public class DialogoOperacionEnProgreso implements EventoGWTMensajeClienteFirma.
     
     public void showFinishMessage(
     		String caption, String message, Boolean isOK) {
+    	logger.info("showFinishMessage - caption: " + caption + 
+    			" - message: " + message + " - isOk:" + isOK);
     	HTML htmlMessage = new HTML(message);
     	htmlMessage.setStyleName(style.messageLabel(), true);
     	indeterminatePanel.clear();
@@ -136,20 +138,6 @@ public class DialogoOperacionEnProgreso implements EventoGWTMensajeClienteFirma.
 	public void procesarMensajeClienteFirma(MensajeClienteFirmaJso mensaje) {
 		logger.info(" - procesarMensajeClienteFirma - mensajeClienteFirma: " + mensaje.toJSONString());
 		switch(mensaje.getOperacionEnumValue()) {
-			case MENSAJE_MONITOR_DESCARGA_APPLET:
-	            mainPanel.remove(textPanel);
-	            indeterminatePanel.setVisible(true);
-	            JsArrayString arrayString;
-	            String percentDownloaded;
-	            if((arrayString = mensaje.getArgsJsArray()) != null && 
-	            		(percentDownloaded = arrayString.get(0)) != null) {
-	            	if("100".equals(percentDownloaded)) {
-	            		indeterminateLabel.setText(Constantes.INSTANCIA.arrancandoClienteFirmaLabel());
-	            	} else {
-	            		indeterminateLabel.setText(Constantes.INSTANCIA.porcentajeDescargaLabel(percentDownloaded));
-	            	}
-	            }
-				break;
 			case MENSAJE_HERRAMIENTA_VALIDACION:
 				dialogBox.hide();
 				break;

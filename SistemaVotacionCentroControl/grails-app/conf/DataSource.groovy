@@ -7,8 +7,8 @@ dataSource {
 	driverClassName = "org.postgresql.Driver"
 	// dialect = org.hibernate.dialect.PostgreSQLDialect
 	dialect = net.sf.hibernate.dialect.PostgreSQLDialect
-	username = "UsuarioVotacion"
-	password = "UsuarioVotacion"
+	username = "usuariovotacion"
+	password = "usuariovotacion"
 }
 
 hibernate {

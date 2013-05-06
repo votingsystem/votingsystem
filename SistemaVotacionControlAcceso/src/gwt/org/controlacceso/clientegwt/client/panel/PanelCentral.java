@@ -263,7 +263,6 @@ public class PanelCentral extends Composite implements ValueChangeHandler<String
     }
     
     public void cargarHerramientaValidacion () {
-    	//Window.open(ServerPaths.getUrlValidationTool(), "", "");
     	if(herramientaPublicacionFrame != null) {
     		RootPanel.get("uiBody").remove(herramientaPublicacionFrame);
     	} else {

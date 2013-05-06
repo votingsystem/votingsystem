@@ -5,7 +5,7 @@ import java.security.cert.X509Certificate;
 
 /**
 * @author jgzornoza
-* Licencia: https://raw.github.com/jgzornoza/SistemaVotacionAppletFirma/master/licencia.txt
+* Licencia: https://raw.github.com/jgzornoza/SistemaVotacion/master/licencia.txt
 */
 public class Usuario {
 

@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://raw.github.com/jgzornoza/SistemaVotacionAppletFirma/master/licencia.txt
+* Licencia: https://raw.github.com/jgzornoza/SistemaVotacion/master/licencia.txt
 */
 public class AccessRequestLauncherWorker extends SwingWorker<Integer, String> 
         implements VotingSystemWorker {

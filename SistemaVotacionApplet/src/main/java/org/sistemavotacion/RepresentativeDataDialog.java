@@ -38,7 +38,7 @@ import org.sistemavotacion.worker.FileMapLauncherWorker;
 
 /**
 * @author jgzornoza
-* Licencia: https://raw.github.com/jgzornoza/SistemaVotacionAppletFirma/master/licencia.txt
+* Licencia: https://raw.github.com/jgzornoza/SistemaVotacion/master/licencia.txt
 */
 public class RepresentativeDataDialog extends JDialog 
         implements VotingSystemWorkerListener {

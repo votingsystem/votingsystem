@@ -118,8 +118,7 @@ class EventoFirmaController {
 						log.debug "Generado PDF de evento ${evento.id}"
 					}
 				}
-				log.debug "Salvado evento ${evento.id}"
-				//render(view:"publicarPDF")
+				log.debug "Saved evento ${evento.id}"
 				render evento.id
 				return false
 			}

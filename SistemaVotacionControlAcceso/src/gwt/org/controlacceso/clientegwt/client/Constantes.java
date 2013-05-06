@@ -39,6 +39,8 @@ public interface Constantes extends Messages{
     String abiertoLabel();
     String finalizadoLabel();
     String canceladoLabel();
+    String downloadAppErrorMsg();
+    
     
     String confirmarEleccionLabel();
     

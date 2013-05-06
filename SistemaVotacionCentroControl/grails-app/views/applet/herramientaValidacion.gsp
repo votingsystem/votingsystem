@@ -1,3 +1,8 @@
+   <% def jarArchives = "HerramientaValidacion.jar"
+	appletJarDependencies.each {
+		jarArchives = jarArchives.concat(",lib/${it}")
+	}
+   %>
 <!DOCTYPE html>
 <html>
     <head>
@@ -15,18 +20,11 @@
    	    </script>
     </head>
     <body>
-        <script src="${resource(dir:'js',file:'deployJava.js')}"></script>
-		<script>
-			var attributes = {id: 'appletHerramienta', 
-        	code:'org.sistemavotacion.herramientavalidacion.AppletHerramienta', mayscript:'true',
-            	width:600, height:170} ;
-		    <g:if test="${params.gwt}">
-        		var parameters = {jnlp_href: 'jnlpHerramienta?gwt=true' } ;
-        	</g:if>
-        	<g:else>
-        		var parameters = {jnlp_href: 'jnlpHerramienta' } ;
-        	</g:else>
-        	deployJava.runApplet(attributes, parameters, '1.6');
-    	</script>
+		<APPLET CODEBASE="${grailsApplication.config.grails.serverURL}/applet" 
+     		CODE="org.sistemavotacion.herramientavalidacion.AppletHerramienta" 
+     		ARCHIVE="${jarArchives}" 
+     		HEIGHT=200
+     		WIDTH=600> 
+		</APPLET>
     </body>
 </html>

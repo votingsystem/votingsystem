@@ -44,7 +44,7 @@ public class AcercaDePanel extends javax.swing.JPanel {
 
         jLabel3.setText("<html><b>1.0</b></html>");
 
-        jLabel5.setText("<html><b>https://github.com/jgzornoza/SistemaVotacionAppletFirma</b></html>");
+        jLabel5.setText("<html><b>https://github.com/jgzornoza/SistemaVotacion</b></html>");
 
         jLabel7.setText("<html><b>www.gruposp2p.org</b></html>");
 

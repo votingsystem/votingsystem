@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JApplet;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
-import netscape.javascript.*;
 import static org.sistemavotacion.Contexto.*;
 import org.sistemavotacion.dialogo.PreconditionsCheckerDialog;
 import org.sistemavotacion.modelo.Operacion;
@@ -39,10 +38,11 @@ public class AppletFirma extends JApplet {
     
     public AppletFirma() {
         INSTANCIA = this;
+        logger.debug("AppletFirma");
     }
         
     public void init() {
-        logger.debug("init");
+        logger.debug("------ init");
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 logger.debug("ShutdownHook - ShutdownHook - ShutdownHook");
@@ -60,23 +60,26 @@ public class AppletFirma extends JApplet {
                         getContentPane().add(acercaDePanel);
                         getContentPane().repaint();
                     } catch (Exception e) {
-                        logger.error(e.getMessage(), e);
+                        e.printStackTrace();
+                        //logger.error(e.getMessage(), e);
                     }
                 }
             });
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            //logger.error(ex.getMessage(), ex);
         }
     }
         
     public void start() {
-        logger.debug("start");
+        logger.debug("start - java version: " + 
+                System.getProperty("java.version"));
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 try {
                     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
                 } catch (Exception e) {
-                    logger.error(e.getMessage(), e);
+                    //logger.error(e.getMessage(), e);
+                    e.printStackTrace();
                 }
             }
         });
@@ -111,7 +114,8 @@ public class AppletFirma extends JApplet {
      */
     private void lanzarTimer() {
         recolectorOperaciones =  new Timer(true);
-        final JSObject jsObject = JSObject.getWindow(this);
+        final netscape.javascript.JSObject jsObject = 
+                netscape.javascript.JSObject.getWindow(this);
         recolectorOperaciones.scheduleAtFixedRate(
             new TimerTask(){
                 public void run() { 
@@ -149,10 +153,12 @@ public class AppletFirma extends JApplet {
         try {
             if(AppletFirma.modoEjecucion == AppletFirma.ModoEjecucion.APPLET) {
                 Object[] args = {operacion.obtenerJSONStr()};
-                Object object = JSObject.getWindow(this).call("setClienteFirmaMessage", args);
+                Object object = netscape.javascript.JSObject.getWindow(this).
+                        call("setClienteFirmaMessage", args);
             } else logger.debug("---------------> enviado mensaje de aplicación");
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            //logger.error(e.getMessage(), e);
+            e.printStackTrace();
         }
     }
     
@@ -190,7 +196,7 @@ public class AppletFirma extends JApplet {
         this.operacionEnCurso = Operacion.parse(operacionJSONStr);
         String errorValidacion = operacionEnCurso.getErrorValidacion();
         if(errorValidacion != null) {
-            logger.info("ejecutarOperacion - errorValidacion: " + errorValidacion);
+            logger.debug("ejecutarOperacion - errorValidacion: " + errorValidacion);
             responderCliente(Operacion.SC_ERROR_PETICION, errorValidacion);
             return;
         }
@@ -199,13 +205,13 @@ public class AppletFirma extends JApplet {
         preconditionsChecker.setVisible(true);
     }
     
-    public static void main (String[] args) { 
-        logger.info("Arrancando aplicación");
+    /*public static void main (String[] args) { 
+        
         modoEjecucion = ModoEjecucion.APLICACION;
         Operacion ope = new Operacion();
         String[] argus = {"hola"};
         ope.setArgs(argus);
-        logger.info("ope: " + ope.obtenerJSONStr());
+        logger.debug("ope: " + ope.obtenerJSONStr());
         try {
             Contexto.inicializar();
             javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
@@ -238,6 +244,6 @@ public class AppletFirma extends JApplet {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
-    }
+    }*/
     
 }

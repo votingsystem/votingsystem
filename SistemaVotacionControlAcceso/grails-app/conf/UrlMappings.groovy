@@ -6,11 +6,6 @@ class UrlMappings {
 
 	static mappings = {
 		
-		/*"/applet/appletFirma.jnlp" {
-			controller = "applet"
-			action = "jnlpCliente"
-		}*/
-		
 		"/$controller/$action?/$id?"{
 			constraints {
 				// apply constraints here

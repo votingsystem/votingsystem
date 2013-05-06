@@ -9,7 +9,6 @@
  		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
  		<meta name="viewport" content="width=device-width" />
  		<meta name="HandheldFriendly" content="true" />
- 		<script src="${resource(dir:'js',file:'deployJava.js')}"></script>
   		<script type="text/javascript" 
   				src="${resource(dir: 'gwt/org.controlacceso.clientegwt.PuntoEntradaEditor', 
 				file: 'org.controlacceso.clientegwt.PuntoEntradaEditor.nocache.js')}">

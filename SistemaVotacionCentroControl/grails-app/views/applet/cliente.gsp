@@ -1,3 +1,8 @@
+   <% def jarArchives = "AppletFirma.jar"
+	appletJarDependencies?.each {
+		jarArchives = jarArchives.concat(",lib/${it}")
+	}
+   %>
 <!DOCTYPE html>
 <html>
     <head>
@@ -15,13 +20,11 @@
    	    </script>
     </head>
     <body>
-        <script src="${resource(dir:'js',file:'deployJava.js')}"></script>
-		<script>
-			var attributes = {id: 'appletFirma', 
-        	code:'org.sistemavotacion.AppletFirma', mayscript:'true',
-            	width:600, height:170} ;
-        	var parameters = {jnlp_href: 'jnlpCliente' } ;
-        	deployJava.runApplet(attributes, parameters, '1.6');
-    	</script>
+		<APPLET CODEBASE="${grailsApplication.config.grails.serverURL}/applet" 
+     		CODE="org.sistemavotacion.AppletFirma" 
+     		ARCHIVE="${jarArchives}" 
+     		HEIGHT=200
+     		WIDTH=600> 
+		</APPLET>
     </body>
 </html>

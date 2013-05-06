@@ -38,8 +38,6 @@ public class Operacion {
                 getString("PUBLICACION_VOTACION_SMIME")), 
         ENVIO_VOTO_SMIME(
                 getString("ENVIO_VOTO_SMIME")),
-        MENSAJE_MONITOR_DESCARGA_APPLET(
-                getString("MENSAJE_MONITOR_DESCARGA_APPLET")), 
         MENSAJE_APPLET(
                 getString("MENSAJE_APPLET")), 
         ANULAR_VOTO(
