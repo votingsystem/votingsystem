@@ -8,7 +8,7 @@ import org.springframework.web.servlet.support.RequestContextUtils as RCU
 class AppletController {
 	
 	/**
-	 * @httpMethod GET
+	 * @httpMethod [GET]
 	 * @return Información sobre los servicios que tienen como url base '/applet'.
 	 */
 	def index() { 
@@ -16,13 +16,13 @@ class AppletController {
 	}
 	
 	/**
-	 * @httpMethod GET
+	 * @httpMethod [GET]
 	 * @return Página HTML que sirve para cargar el Applet principal de firma.
 	 */
 	def cliente () { }
 	
 	/**
-	 * @httpMethod GET
+	 * @httpMethod [GET]
 	 * @return Página HTML que sirve para cargar el Applet principal de la herramienta de validación
 	 * 		   de archivos firmados y de copias de seguridad.
 	 */

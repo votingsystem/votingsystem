@@ -42,14 +42,12 @@
 				<g:Anchor styleName='{style.busquedaLink}' text="{constantes.busquedaAvanzadaLabel}" ui:field='busquedaAvanzada'/>
 			</g:HorizontalPanel>
 		</g:HorizontalPanel>
-		<g:HorizontalPanel ui:field='optionsPanel'>
-    		<g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE" width ="100%">
-	   		    <g:HorizontalPanel ui:field='seleccionEstadoPanel' styleName="{style.seleccionEstadoPanel}">
-				    <g:Label styleName="{style.textoSeleccionEstado}" text="{constantes.stateSelectionLabel}"/>
-	    			<g:ListBox styleName="{style.listaEstados}" 
-				    	ui:field="listaEstados" visibleItemCount='1'/>
-				</g:HorizontalPanel>
-			</g:cell>
-		</g:HorizontalPanel>
+   		<g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE" width ="1000px">
+   		    <g:HorizontalPanel ui:field='seleccionEstadoPanel' styleName="{style.seleccionEstadoPanel}">
+			    <g:Label styleName="{style.textoSeleccionEstado}" text="{constantes.stateSelectionLabel}"/>
+    			<g:ListBox styleName="{style.listaEstados}" 
+			    	ui:field="listaEstados" visibleItemCount='1'/>
+			</g:HorizontalPanel>
+		</g:cell>
 	</g:VerticalPanel>
 </ui:UiBinder>

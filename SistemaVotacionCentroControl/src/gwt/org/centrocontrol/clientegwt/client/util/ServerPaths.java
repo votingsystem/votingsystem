@@ -11,7 +11,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 public class ServerPaths {
 
     public static String getInfoServidorPath () {
-    	return getApplicationPath() + "infoServidor/obtener";
+    	return getApplicationPath() + "infoServidor";
     } 
 	
     public static String getApplicationPath () {
@@ -33,14 +33,14 @@ public class ServerPaths {
 
     
     public static String getUrlEventoVotacion (int id) {
-    	return getApplicationPath() + "eventoVotacion/obtener?id=" + id;
+    	return getApplicationPath() + "eventoVotacion/" + id;
     }
     
     public static String getUrlEventosVotacion (int max, int offset, 
     		EventoSistemaVotacionJso.Estado estado) {
     	String sufix = ""; 
     	if(estado != null) sufix = "&estadoEvento=" + estado.toString();
-    	return getApplicationPath() + "eventoVotacion/obtener?max=" 
+    	return getApplicationPath() + "eventoVotacion?max=" 
     		+ max + "&offset=" + offset + sufix;
     }
 
@@ -50,7 +50,7 @@ public class ServerPaths {
     }
     
     public static String getUrlDatosAplicacion () {
-   	 	return getApplicationPath() + "infoServidor/informacion";
+   	 	return getApplicationPath() + "infoServidor";
     }
     
     //redirect the browser to the given url
@@ -94,55 +94,55 @@ public class ServerPaths {
     
     public static String getUrlTimeStampServer (String controlAccesoUrl) {
     	if (!controlAccesoUrl.endsWith("/")) controlAccesoUrl = controlAccesoUrl + "/";
-    	return controlAccesoUrl + "timeStamp/obtener";
+    	return controlAccesoUrl + "timeStamp";
     }
 
+    ///solicitudAcceso/evento/$eventoId/nif/$nif
     public static String getUrlSolicitudAccesoPorNif (
     		String controlAccesoUrl, String nif, int eventoId) {
     	if (!controlAccesoUrl.endsWith("/")) controlAccesoUrl = controlAccesoUrl + "/";
-    	return controlAccesoUrl + "solicitudAcceso/encontrarPorNif?nif=" + nif +
-    			"&eventoId=" + eventoId;
+    	return controlAccesoUrl + "solicitudAcceso/evento/" + eventoId + "/nif/" + nif;
     }
 
     public static String getUrlEstadisticas (int eventoId) {
-   	 	return getApplicationPath() + "eventoVotacion/estadisticas?id=" + eventoId;
+   	 	return getApplicationPath() + "eventoVotacion/" + eventoId + "/estadisticas";
     }
     
     public static String getUrlEstadisticasControlAcceso (String serverUrl, String eventoId) {
         if (!serverUrl.endsWith("/")) serverUrl = serverUrl + "/";
-   	 	return serverUrl + "eventoVotacion/estadisticas?id=" + eventoId;
+   	 	return serverUrl + "eventoVotacion/" + eventoId + "/estadisticas";
     }
 
     public static String getUrlSolicitudCopiaSeguridad () {
-    	return getApplicationPath() + "solicitudCopia/validarSolicitud";
+    	return getApplicationPath() + "solicitudCopia";
     }
 
 
     public static String getUrlSolicitudAcceso (String controlAccesoUrl) {
     	if (!controlAccesoUrl.endsWith("/")) controlAccesoUrl = controlAccesoUrl + "/";
-    	return controlAccesoUrl + "solicitudAcceso/procesar";
+    	return controlAccesoUrl + "solicitudAcceso";
     }
 
     public static String getUrlVotoCentroControl () {
-    	return getApplicationPath() + "voto/guardarAdjuntandoValidacion";
+    	return getApplicationPath() + "voto";
     }
 
     public static String getUrlCancelarEvento (String controlAccesoUrl) {
     	if (!controlAccesoUrl.endsWith("/")) controlAccesoUrl = controlAccesoUrl + "/";
-   	 	return controlAccesoUrl + "evento/guardarCancelacion";
+   	 	return controlAccesoUrl + "evento/cancelled";
     }
 
     public static String getUrlVoto(String hashHex) {
-        return getApplicationPath() + "voto/obtener?hashCertificadoVotoHex=" + hashHex;
+        return getApplicationPath() + "voto/hashHex/" + hashHex;
     }
 
     public static String getURLAnulacionVoto(String controlAccesoUrl) {
     	if (!controlAccesoUrl.endsWith("/")) controlAccesoUrl = controlAccesoUrl + "/";
-    	return getApplicationPath() + "anuladorVoto/guardarAdjuntandoValidacion";
+    	return getApplicationPath() + "anuladorVoto";
     }
     
     public static String getUrlComprobacionFechasEvento(int eventoId) {
-        return getApplicationPath() + "eventoVotacion/comprobarFechas?id=" + eventoId;
+        return getApplicationPath() + "eventoVotacion/" + eventoId + "/comprobarFechas" ;
     }
     
     public static String getUrlClienteAndroid () {
@@ -152,5 +152,6 @@ public class ServerPaths {
     public static String getUrlAppAndroid () {
    	 	return getApplicationPath() + "android/SistemaVotacion.apk";
     }
+
     
 }

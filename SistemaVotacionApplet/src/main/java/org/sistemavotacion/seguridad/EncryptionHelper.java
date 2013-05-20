@@ -80,12 +80,12 @@ public class EncryptionHelper {
                 encryptedMessage.addHeaderLine(headerLine);
             }
         }
-        SignerInformationStore  signers = 
+        /*SignerInformationStore  signers = 
                         msgToEncrypt.getSmimeSigned().getSignerInfos();
         Iterator<SignerInformation> it = signers.getSigners().iterator();
         byte[] digestBytes = it.next().getContentDigest();//method can only be called after verify.
         String digestStr = new String(Base64.encode(digestBytes));
-        encryptedMessage.addHeaderLine("SignedMessageDigest: " + digestStr);
+        encryptedMessage.addHeaderLine("SignedMessageDigest: " + digestStr);*/
         encryptedMessage.writeTo(new FileOutputStream(fileToEncrypt));
                 return fileToEncrypt;
     }

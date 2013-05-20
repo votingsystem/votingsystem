@@ -161,7 +161,8 @@ public class PublishService extends Service implements TaskListener {
 			        	File fileToEncrypt = timeStampedDocument.setTimeStampToken(timeStampTask);
 			        	EncryptionHelper.encryptSMIMEFile(fileToEncrypt,
 			        			Aplicacion.getControlAcceso().getCertificado());
-			        	runningTask = new SendFileTask(null, this, fileToEncrypt).
+			        	runningTask = new SendFileTask(null, this, fileToEncrypt, 
+			        			Aplicacion.SIGNED_AND_ENCRYPTED_CONTENT_TYPE).
 								execute(pendingOperation.getUrlEnvioDocumento());
 			        } else {
 						String msg = getString(R.string.timestamp_connection_error_msg) 
@@ -183,15 +184,16 @@ public class PublishService extends Service implements TaskListener {
 			        	File fileToEncrypt = timeStampedDocument.setTimeStampToken(timeStampTask);
 			        	EncryptionHelper.encryptSMIMEFile(fileToEncrypt, 
 			        			Aplicacion.getControlAcceso().getCertificado());
-			            runningTask = new SendFileTask(null, this,
-			            		fileToEncrypt).execute(pendingOperation.getUrlEnvioDocumento());
+			            runningTask = new SendFileTask(null, this, fileToEncrypt, 
+			            		Aplicacion.SIGNED_AND_ENCRYPTED_CONTENT_TYPE).
+			            		execute(pendingOperation.getUrlEnvioDocumento());
 			        } else {
 						String msg = getString(R.string.timestamp_connection_error_msg) 
 								+ " - " + timeStampTask.getMessage();
 						serviceListener.setPublishServiceMsg(timeStampTask.getStatusCode(), msg);
 			        }
 					break;	
-				case ASOCIAR_CENTRO_CONTROL_SMIME:
+				case ASOCIAR_CENTRO_CONTROL:
 			        signedFile = signedMailGenerator.genFile(usuario, 
 							Aplicacion.getControlAcceso().getNombreNormalizado(), 
 							operation.getContenidoFirma().toString(), 
@@ -202,8 +204,8 @@ public class PublishService extends Service implements TaskListener {
 			    			timeStampedDocument.getTimeStampRequest(TIMESTAMP_VOTE_HASH), this).execute(
 			    			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
 			        if(Respuesta.SC_OK == timeStampTask.get()) {
-			        	runningTask = new SendFileTask(null, this, 
-								timeStampedDocument.setTimeStampToken(timeStampTask)).
+			        	runningTask = new SendFileTask(null, this, timeStampedDocument.
+			        			setTimeStampToken(timeStampTask), Aplicacion.SIGNED_CONTENT_TYPE).
 								execute(pendingOperation.getUrlEnvioDocumento());
 			        } else {
 						String msg = getString(R.string.timestamp_connection_error_msg) 

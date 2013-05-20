@@ -2,6 +2,7 @@ package org.sistemavotacion.controlacceso
 
 import org.sistemavotacion.controlacceso.modelo.*;
 import org.sistemavotacion.util.FileUtils;
+import grails.converters.JSON
 
 /**
  * @infoController Recogida de reclamaciones
@@ -12,34 +13,41 @@ import org.sistemavotacion.util.FileUtils;
  */
 class RecolectorReclamacionController {
 
-    def eventoReclamacionService
 	def reclamacionService
         
 	/**
-	 * @httpMethod GET
-	 * @return Información sobre los servicios que tienen como url base '/recolectorReclamacion'.
-	 */
-	def index() { 
-		redirect action: "restDoc"
-	}
-	
-	/**
 	 * Servicio que valida reclamaciones recibidas en documentos SMIME
 	 *
-	 * @httpMethod POST
-	 * @param archivoFirmado Obligatorio. Documento SMIME firmado con la reclamación.
-	 * @return El archivo SMIME recibido con la firma añadida del servidor.
+	 * @httpMethod [POST]
+	 * @serviceURL [/recolectorReclamacion]
+	 * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] Obligatorio. 
+	 *                     Documento SMIME firmado con la reclamación.
+	 * @responseContentType [application/x-pkcs7-signature]. Recibo firmado por el sistema.
+	 * @return  Recibo que consiste en el documento recibido con la firma añadida del servidor.
 	 */
-    def guardarAdjuntandoValidacion () {
+	def index() { 
+		MensajeSMIME mensajeSMIMEReq = flash.mensajeSMIMEReq
+		if(!mensajeSMIMEReq) {
+			String msg = message(code:'evento.peticionSinArchivo')
+			log.error msg
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
+			return false
+		}
         try {
-            flash.respuesta = reclamacionService.guardar(
-				params.smimeMessageReq, request.getLocale())
+            Respuesta respuesta = reclamacionService.guardar(
+				mensajeSMIMEReq, request.getLocale())
+			if (Respuesta.SC_OK == respuesta?.codigoEstado) {
+				response.contentType = "${grailsApplication.config.pkcs7SignedContentType}"
+			}	
+			flash.respuesta = respuesta
         } catch (Exception ex) {
             log.error (ex.getMessage(), ex)
-            flash.respuesta = new Respuesta(tipo:Tipo.ERROR_DE_SISTEMA,
-                codigoEstado:Respuesta.SC_ERROR_EJECUCION, mensaje:Tipo.ERROR_DE_SISTEMA.toString())
+			flash.respuesta = new Respuesta(Respuesta.SC_ERROR_PETICION, 
+				mensaje:message(code:'signClaimErrorMessage'), 
+				tipo:Tipo.FIRMA_EVENTO_RECLAMACION_ERROR)
         }
-    }
+	}
 	
 
 }

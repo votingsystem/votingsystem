@@ -23,9 +23,6 @@ public class SolicitudCopia implements java.io.Serializable {
 
 	 private static final long serialVersionUID = 1L;
 	 
-	 public enum Type {EVENT, REPRESENTATIVE_VOTING_HISTORY,
-		 REPRESENTATIVE_ACCREDITATIONS}
-	 
 	 
 	 @Id @GeneratedValue(strategy=IDENTITY)
 	 @Column(name="id", unique=true, nullable=false)
@@ -35,7 +32,7 @@ public class SolicitudCopia implements java.io.Serializable {
 	 private Documento documento;
      @Enumerated(EnumType.STRING)
      @Column(name="type", nullable=false)
-     private Type type;
+     private Tipo type;
      @OneToOne
      @JoinColumn(name="mensajeSMIMEId")
      private MensajeSMIME mensajeSMIME;
@@ -146,12 +143,12 @@ public class SolicitudCopia implements java.io.Serializable {
 	}
 
 
-	public Type getType() {
+	public Tipo getType() {
 		return type;
 	}
 
 
-	public void setType(Type type) {
+	public void setType(Tipo type) {
 		this.type = type;
 	}
 

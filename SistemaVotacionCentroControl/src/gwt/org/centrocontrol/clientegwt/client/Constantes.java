@@ -61,6 +61,10 @@ public interface Constantes extends Messages{
         String endToLabel();
         String remainLabel();
 
+        String requestDateFromLabel();	
+        String requestDateToLabel();	
+        String requestDateLabel();
+        
         String stateSelectionLabel();
         String allVotingsListboxOption();
         String onlyOpenVotingsListboxOption();
@@ -215,7 +219,7 @@ public interface Constantes extends Messages{
 		String mensajeAnulacionVotoOK();
 	
 		String mensajeGuardarReciboERROR();
-		String mensajeGuardarReciboOK(String rutaArchivo);
+		String mensajeGuardarReciboOK();
                 
         String numSolicitudesAccesoLabel();
         String numSolicitudesAccesoOKLabel();
@@ -257,5 +261,8 @@ public interface Constantes extends Messages{
         
         String eventoCanceladoOK();
         String eventoBorradoOK();
-        
+
+		String mensajeVotoRepetido();
+        String fechaInicioAfterFechaFinalMsg();
+        String confirmarEleccionLabel();
 }

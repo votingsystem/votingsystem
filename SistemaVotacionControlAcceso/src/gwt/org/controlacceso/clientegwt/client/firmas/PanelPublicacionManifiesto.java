@@ -223,7 +223,7 @@ public class PanelPublicacionManifiesto extends Composite
         		mensajeClienteFirma.setUrlEnvioDocumento(ServerPaths.
         				getUrlValidacionPDFPendientePublicacion(evento.getId()));
         		mensajeClienteFirma.setUrlDocumento(ServerPaths.
-        				getUrlPDFManifiesto(evento.getId()));
+        				getUrlManifiesto(evento.getId()));
         		mensajeClienteFirma.setNombreDestinatarioFirma(controlAcceso.getNombre());
             	mensajeClienteFirma.setAsuntoMensajeFirmado(
             			Constantes.INSTANCIA.asuntoPublicarManifiesto());		

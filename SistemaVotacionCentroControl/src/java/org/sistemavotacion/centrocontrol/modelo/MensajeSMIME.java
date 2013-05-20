@@ -1,10 +1,15 @@
 package org.sistemavotacion.centrocontrol.modelo;
 
 import static javax.persistence.GenerationType.IDENTITY;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.mail.MessagingException;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,6 +26,11 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
+
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.mail.smime.SMIMEException;
+import org.sistemavotacion.smime.SMIMEMessageWrapper;
 
 /**
 * @author jgzornoza
@@ -47,14 +57,12 @@ public class MensajeSMIME implements Serializable {
     @JoinColumn(name="usuarioId")
     private Usuario usuario;
     
-    @OneToOne(mappedBy="mensajeMime")
-    private EventoVotacion eventoVotacion;
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="eventoId")
+    private EventoVotacion evento;
     
     @OneToOne(mappedBy="mensajeSMIME")
     private Voto voto;
-    
-    //@OneToOne(mappedBy="mensajeSMIME")
-    //private AnuladorVoto anuladorVoto;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="smimePadreId")
@@ -70,8 +78,23 @@ public class MensajeSMIME implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="fechaActualizacion", length=23, insertable=true)
     private Date lastUpdated;
+    
+    
+    @Column(name="motivo", columnDefinition="TEXT") 
+    private String motivo;
+    
+    //To avoid repeated messages
+    @Column(name="base64ContentDigest") 
+    private String base64ContentDigest;
+    
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="smimePadre")
     private Set<MensajeSMIME> smimeHijosSet = new HashSet<MensajeSMIME>(0);  
+    
+    @Transient
+    private transient SMIMEMessageWrapper smimeMessage;
+    
+    @Transient
+    private Set<Usuario> signers;
     /**
      * @return the contenido
      */
@@ -142,14 +165,6 @@ public class MensajeSMIME implements Serializable {
         this.lastUpdated = lastUpdated;
     }
 
-	public void setEventoVotacion(EventoVotacion eventoVotacion) {
-		this.eventoVotacion = eventoVotacion;
-	}
-
-	public EventoVotacion getEventoVotacion() {
-		return eventoVotacion;
-	}
-
 	public void setTipo(Tipo tipo) {
 		this.tipo = tipo;
 	}
@@ -188,6 +203,51 @@ public class MensajeSMIME implements Serializable {
 
 	public void setSmimePadre(MensajeSMIME smimePadre) {
 		this.smimePadre = smimePadre;
+	}
+
+	public String getMotivo() {
+		return motivo;
+	}
+
+	public void setMotivo(String motivo) {
+		this.motivo = motivo;
+	}
+
+	public String getBase64ContentDigest() {
+		return base64ContentDigest;
+	}
+
+	public void setBase64ContentDigest(String base64ContentDigest) {
+		this.base64ContentDigest = base64ContentDigest;
+	}
+
+	public Set<Usuario> getSigners() {
+		return signers;
+	}
+
+	public void setSigners(Set<Usuario> signers) {
+		this.signers = signers;
+	}
+
+	public SMIMEMessageWrapper getSmimeMessage() throws Exception {
+		if(smimeMessage == null && contenido != null) {
+			smimeMessage = new SMIMEMessageWrapper(
+				new ByteArrayInputStream(contenido));
+		}
+		return smimeMessage;
+	}
+
+	public void setSmimeMessage(SMIMEMessageWrapper smimeMessage) throws IOException, MessagingException {
+		this.smimeMessage = smimeMessage;
+		this.contenido = smimeMessage.getBytes();
+	}
+
+	public EventoVotacion getEvento() {
+		return evento;
+	}
+
+	public void setEvento(EventoVotacion evento) {
+		this.evento = evento;
 	}
 
 }

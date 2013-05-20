@@ -3,7 +3,7 @@
     xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:b='urn:import:com.google.gwt.user.cellview.client'
     xmlns:panelSV='urn:import:org.controlacceso.clientegwt.client.panel'>
-    <ui:style>
+	<ui:style>
 		.mainPanel {width: 100%;}
 		.optionsPanel{}
 		.pageTitlePanel {width: 100%; margin-bottom: 20px;}
@@ -25,7 +25,6 @@
 			    	HTML='{constantes.representativesConfigPageTitle}'/>
 			</g:HorizontalPanel>
        	</g:cell>
-
    		<g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE" width="100%">
 	   		<g:VerticalPanel ui:field='optionsPanel' styleName="{style.optionsPanel}">
 				<g:HorizontalPanel styleName="{style.newRepresentativeButton}">

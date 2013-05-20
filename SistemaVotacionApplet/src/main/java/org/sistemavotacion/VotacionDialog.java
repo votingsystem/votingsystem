@@ -161,6 +161,7 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
                 .addContainerGap())
         );
 
+        progressLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         progressLabel.setText(bundle.getString("VotacionDialog.progressLabel.text")); // NOI18N
 
         progressBar.setIndeterminate(true);
@@ -179,8 +180,8 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
         progressBarPanelLayout.setVerticalGroup(
             progressBarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(progressBarPanelLayout.createSequentialGroup()
-                .addComponent(progressLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(progressLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -270,8 +271,10 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
                     appletFirma.getOperacionEnCurso().getTipo().
                     getNombreArchivoEnDisco());
             documento.deleteOnExit();
+            String accessRequest = VotacionHelper.
+                    obtenerSolicitudAccesoJSONStr(votoEvento);
             FileUtils.copyStreamToFile(new ByteArrayInputStream(
-                    votoEvento.obtenerSolicitudAccesoJSONStr().getBytes()), documento);
+                    accessRequest.getBytes()), documento);
             logger.info("documento.getAbsolutePath(): " + documento.getAbsolutePath());
             desktop.open(documento);
         } catch (Exception ex) {
@@ -337,7 +340,7 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
         progressLabel.setText("<html><b>" + 
                 getString("notificandoCentroControlLabel") +"</b></html>");
         mostrarPantallaEnvio(true);
-        String votoJSON = votoEvento.obtenerVotoJSONStr();
+        String votoJSON = VotacionHelper.obtenerVotoJSONStr(votoEvento);
         File votoFirmado = new File (
                 directorioArchivoVoto.getAbsolutePath() 
                 + File.separator + getString("TIMESTAMPED_VOTE_SMIME_FILE"));

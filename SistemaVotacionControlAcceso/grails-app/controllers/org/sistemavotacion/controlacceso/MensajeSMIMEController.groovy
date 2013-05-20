@@ -14,102 +14,55 @@ import org.sistemavotacion.controlacceso.modelo.*;
 class MensajeSMIMEController {
 	
 	/**
-	 * @httpMethod GET
-	 * @return Información sobre los servicios que tienen como url base '/mensajeSMIME'
-	 */
-	def index() { 
-		redirect action: "restDoc"
-	}
-	
-	/**
-	 * @httpMethod GET
-	 * @param id	Obligatorio. Identificador del mensaje en la base de datos
+	 * @httpMethod [GET]
+	 * @serviceURL [/mensajeSMIME/$id] 
+	 * @param [id]	Obligatorio. Identificador del mensaje en la base de datos
 	 * @return El mensaje solicitado.
 	 */
-    def obtener () {
-        if (params.long('id')) {
-            def mensajeSMIME
-			MensajeSMIME.withTransaction{
-				mensajeSMIME = MensajeSMIME.get(params.id)
-			}
-            if (mensajeSMIME) {
-                response.status = Respuesta.SC_OK
-                response.contentLength = mensajeSMIME.contenido.length
-                response.setContentType("text/plain")
-                response.outputStream <<  mensajeSMIME.contenido
-                response.outputStream.flush()
-                return false
-            }
-            response.status = Respuesta.SC_NOT_FOUND
-            render message(code: 'mensajeSMIME.eventoNoEncontrado', args:[params.ids])
+	def index() { 
+        def mensajeSMIME
+		MensajeSMIME.withTransaction{
+			mensajeSMIME = MensajeSMIME.get(params.long('id'))
+		}
+        if (mensajeSMIME) {
+            response.status = Respuesta.SC_OK
+            response.contentLength = mensajeSMIME.contenido.length
+            response.setContentType("text/plain")
+            response.outputStream <<  mensajeSMIME.contenido
+            response.outputStream.flush()
             return false
         }
-        response.status = Respuesta.SC_ERROR_PETICION
-        render message(code: 'error.PeticionIncorrectaHTML', args:[
-			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
+        response.status = Respuesta.SC_NOT_FOUND
+        render message(code: 'mensajeSMIME.eventoNoEncontrado', args:[params.id])
         return false
-    }
-	
-	/**
-	 * Servicio que devuelve el recibo con el que respondió el servidor al publicar un manifiesto.
-	 *
-	 * @httpMethod GET
-	 * @param id	Obligatorio. Identificador del mensaje de publicación en la base de datos
-	 * @return El recibo.
-	 */
-	def obtenerReciboFirma () {
-		if (params.long('id')) {
-			def mensajeSMIMEPadre = MensajeSMIME.get(params.id)
-			if (mensajeSMIMEPadre) {
-				def mensajeSMIME = MensajeSMIME.findWhere(smimePadre:mensajeSMIMEPadre,
-					tipo: Tipo.FIRMA_VALIDADA)
-				if (mensajeSMIME) {
-					response.status = Respuesta.SC_OK
-					response.contentLength = mensajeSMIME.contenido.length
-					response.setContentType("text/plain")
-					response.outputStream <<  mensajeSMIME.contenido
-					response.outputStream.flush()
-					return false
-				}
-			}
-			response.status = Respuesta.SC_NOT_FOUND
-			render message(code: 'mensajeSMIME.eventoNoEncontrado', args:[params.smimePadreId])
-			return false
-		}
-		response.status = Respuesta.SC_ERROR_PETICION
-		render message(code: 'error.PeticionIncorrectaHTML', args:[
-			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
-		return false
 	}
 	
+	
 	/**
-	 * Servicio que devuelve el recibo con el que respondió el servidor al publicar una reclamación.
+	 * Servicio que devuelve el recibo con el que respondió el servidor al un mensaje
 	 * 
-	 * @httpMethod GET
-	 * @param id	Obligatorio. Identificador del mensaje de publicación en la base de datos
-	 * @return El recibo.
+	 * @httpMethod [GET]
+	 * @serviceURL [/mensajeSMIME/recibo/$requestMessageId] 
+	 * @param [requestMessageId] Obligatorio. Identificador del mensaje origen del recibo 
+	 *                         en la base de datos
+	 * @return El recibo asociado al mensaje pasado como parámetro.
 	 */
-	def obtenerReciboReclamacion () {
-		if (params.long('id')) {
-			def mensajeSMIMEPadre = MensajeSMIME.get(params.id)
-			if (mensajeSMIMEPadre) {
-				def mensajeSMIME = MensajeSMIME.findWhere(smimePadre:mensajeSMIMEPadre,
-					tipo: Tipo.FIRMA_EVENTO_RECLAMACION_VALIDADA)
-				if (mensajeSMIME) {
-					response.status = Respuesta.SC_OK
-					response.contentLength = mensajeSMIME.contenido.length
-					response.setContentType("text/plain")
-					response.outputStream <<  mensajeSMIME.contenido
-					response.outputStream.flush()
-					return false
-				}
+	def recibo() {
+		def mensajeSMIMEPadre = MensajeSMIME.get(params.long('requestMessageId'))
+		if (mensajeSMIMEPadre) {
+			def mensajeSMIME = MensajeSMIME.findWhere(smimePadre:mensajeSMIMEPadre,
+				tipo: Tipo.RECIBO)
+			if (mensajeSMIME) {
+				response.status = Respuesta.SC_OK
+				response.contentLength = mensajeSMIME.contenido.length
+				response.setContentType("text/plain")
+				response.outputStream <<  mensajeSMIME.contenido
+				response.outputStream.flush()
+				return false
 			}
-			response.status = Respuesta.SC_NOT_FOUND
-			render message(code: 'mensajeSMIME.eventoNoEncontrado', args:[params.smimePadreId])
-			return false
 		}
-		response.status = Respuesta.SC_ERROR_PETICION
-		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
+		response.status = Respuesta.SC_NOT_FOUND
+		render message(code: 'mensajeSMIME.eventoNoEncontrado', args:[params.smimePadreId])
 		return false
 	}
 	

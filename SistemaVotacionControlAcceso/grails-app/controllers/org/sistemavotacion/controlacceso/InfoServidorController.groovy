@@ -16,36 +16,11 @@ class InfoServidorController {
     def firmaService
     
 	/**
-	 * @httpMethod GET
-	 * @return Información sobre los servicios que tienen como url base '/infoServidor'
-	 */
-	def index() { 
-		redirect action: "restDoc"
-	}
-	
-	/**
-	 * @httpMethod GET
-	 * @return La lista de servicios de la aplicación
-	 */
-	def listaServicios () { }
-	
-	/**
-	 * @httpMethod GET
-	 * @return Datos de las versiones de algunos componentes de la aplicación
-	 */
-	def datosAplicacion () { }
-	
-	/**
-	 * @httpMethod GET
-	 * @return Información general de la aplicación
-	 */
-	def informacion () { }
-	
-	/**
-	 * @httpMethod GET
+	 * @httpMethod [GET]
+	 * @responseContentType [application/json]
 	 * @return Documento JSON con datos de la aplicación
 	 */
-    def obtener () {
+	def index() { 
         HashMap infoServidor = new HashMap()
         infoServidor.centrosDeControl = []
         infoServidor.nombre = grailsApplication.config.SistemaVotacion.serverName
@@ -68,14 +43,33 @@ class InfoServidorController {
 		infoServidor.cadenaCertificacionPEM = cadenaCertificacion?.text
 		if (params.callback) render "${params.callback}(${infoServidor as JSON})"
         else render infoServidor as JSON
-    }
+	}
+	
+	/**
+	 * @httpMethod [GET]
+	 * @return La lista de servicios de la aplicación
+	 */
+	def listaServicios () { }
+	
+	/**
+	 * @httpMethod [GET]
+	 * @return Datos de las versiones de algunos componentes de la aplicación
+	 */
+	def datosAplicacion () { }
+	
+	/**
+	 * @httpMethod [GET]
+	 * @return Información general de la aplicación
+	 */
+	def informacion () { }
+	
 	
 	/**
 	 * <br/><u>SERVICIO DE PRUEBAS - DATOS FICTICIOS</u>. El esquema actual de certificación en plataformas
 	 * Android pasa por que el usuario tenga que identificarse en un centro autorizado
 	 * para poder instalar en su dispositivo el certificado de identificación.
 	 *
-	 * @httpMethod GET
+	 * @httpMethod [GET]
 	 * @return Direcciones a las que tendrían que ir los usuarios para poder obtener un certificado
 	 * 		   de identificación.
 	 */

@@ -27,13 +27,16 @@ public class DocumentLauncherWorker extends SwingWorker<Integer, String>
     private Integer id = null;
     private int statusCode = Respuesta.SC_ERROR;
     private String message = null;
+    private String documentContentType = null;
     private Exception exception = null;
     
-    public DocumentLauncherWorker(Integer id, Object documentoEnviado, String urlDestino, 
+    public DocumentLauncherWorker(Integer id, Object documentoEnviado, 
+            String documentContentType, String urlDestino, 
             VotingSystemWorkerListener workerListener) {
         this.id = id;
         this.documentoEnviado = documentoEnviado;
         this.workerListener = workerListener;
+        this.documentContentType = documentContentType;
         this.urlDestino = urlDestino;
     }
     
@@ -44,8 +47,10 @@ public class DocumentLauncherWorker extends SwingWorker<Integer, String>
         this.urlDestino = urlDestino;
     }
     
-    public DocumentLauncherWorker setDocumentoEnviado(Object documentoEnviado) {
+    public DocumentLauncherWorker setDocumentoEnviado(Object documentoEnviado,
+            String documentContentType) {
         this.documentoEnviado = documentoEnviado;
+        this.documentContentType = documentContentType;
         return this;
     }
     
@@ -67,14 +72,11 @@ public class DocumentLauncherWorker extends SwingWorker<Integer, String>
         workerListener.process(Arrays.asList(msg));
         HttpResponse response = null;
         if(documentoEnviado instanceof File) {
-            response = Contexto.getHttpHelper().enviarArchivoFirmado(
-                (File)documentoEnviado, urlDestino);
+            response = Contexto.getHttpHelper().sendFile((File)documentoEnviado, 
+                    documentContentType, urlDestino);
         } else if(documentoEnviado instanceof byte[]) {
-            response = Contexto.getHttpHelper().enviarByteArray(
-                (byte[])documentoEnviado, urlDestino);
-        } else if(documentoEnviado instanceof String) { 
-            response = Contexto.getHttpHelper().enviarCadena(
-                (String)documentoEnviado, urlDestino);
+            response = Contexto.getHttpHelper().sendByteArray(
+                (byte[])documentoEnviado, null, urlDestino);
         }
         statusCode = response.getStatusLine().getStatusCode();
         message = EntityUtils.toString(response.getEntity());

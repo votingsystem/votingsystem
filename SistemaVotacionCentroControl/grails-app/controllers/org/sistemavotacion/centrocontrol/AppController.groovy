@@ -16,7 +16,7 @@ class AppController {
 	def hibernateProperties
 	
 	/**
-	 * @httpMethod GET
+	 * @httpMethod [GET]
 	 * @return Información sobre los servicios que tienen como url base '/app'
 	 */
 	def index() { 
@@ -34,14 +34,14 @@ class AppController {
 	}
 
 	/**
-	 * @httpMethod GET
+	 * @httpMethod [GET]
 	 * @return La página principal de la aplicación web de votación.
 	 */
 	def home() {
 	}
 	
 	/**
-	 * @httpMethod GET
+	 * @httpMethod [GET]
 	 * @return Parámetros de configuración de Hibernate 
 	 */
 	/*def hibernate () {
@@ -50,7 +50,7 @@ class AppController {
 	}*/
 	
 	/**
-	 * @httpMethod GET
+	 * @httpMethod [GET]
 	 * @return La página principal de la aplicación web de votación con parámetros de utilidad
 	 * 		   para una sesión con cliente Android.
 	 */

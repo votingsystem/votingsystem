@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 @Table(name="Certificado")
 public class Certificado implements Serializable {
 	
-    public enum Estado {OK, CON_ERRORES, ANULADO, UTILIZADO}
+    public enum Estado {OK, CON_ERRORES, ANULADO}
 
     public enum Tipo {RAIZ_VOTOS, VOTO, USUARIO, AUTORIDAD_CERTIFICADORA}
     
@@ -95,19 +95,21 @@ public class Certificado implements Serializable {
     private String eventoId;
     
     @Transient
+    private String representativeURL;
+    
+    @Transient
     private String serverURL;
     
     public Certificado () {}
     
     public void setSigningCert(X509Certificate certificate) {
     	String subjectDN = certificate.getSubjectDN().getName();
-    	logger.debug("Certificado - subjectDN: " +subjectDN);
+    	//logger.debug("Certificado - subjectDN: " +subjectDN);
     	if(subjectDN.split("OU=eventoId:").length > 1) {
     		setEventoId(subjectDN.split("OU=eventoId:")[1].split(",")[0]);
     	}
     	if(subjectDN.split("CN=controlAccesoURL:").length > 1) {
     		String parte = subjectDN.split("CN=controlAccesoURL:")[1];
-    		logger.debug("Certificado - parte: " + parte);
     		if (parte.split(",").length > 1) {
     			serverURL = parte.split(",")[0];
     		} else serverURL = parte;
@@ -117,6 +119,12 @@ public class Certificado implements Serializable {
             HexBinaryAdapter hexConverter = new HexBinaryAdapter();     
 			hashCertificadoVotoBase64 = new String(
 					hexConverter.unmarshal(hashCertificadoVotoHEX));
+    	}
+    	if(subjectDN.split("OU=RepresentativeURL:").length > 1) {
+    		String parte = subjectDN.split("OU=RepresentativeURL:")[1];
+    		if (parte.split(",").length > 1) {
+    			representativeURL = parte.split(",")[0];
+    		} else representativeURL = parte;
     	}
     }
     
@@ -280,6 +288,14 @@ public class Certificado implements Serializable {
 
 	public void setValidoHasta(Date validoHasta) {
 		this.validoHasta = validoHasta;
+	}
+
+	public String getRepresentativeURL() {
+		return representativeURL;
+	}
+
+	public void setRepresentativeURL(String representativeURL) {
+		this.representativeURL = representativeURL;
 	}
 
 }

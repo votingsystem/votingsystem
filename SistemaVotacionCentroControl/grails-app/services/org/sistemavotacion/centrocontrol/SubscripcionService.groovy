@@ -20,24 +20,30 @@ class SubscripcionService {
     def grailsApplication  
 	def httpService
 	
-	Respuesta guardarUsuario(Usuario usuario, Locale locale) {
-		log.debug "--- guardarUsuario - usuario: ${usuario.nif}"
-		if (!usuario) {
-			response.status = 400
-			render message(code: "csr.solicitudNoEncontrada", args: ["nif: ${nifValidado}"])
-			return false
+	Respuesta checkUser(Usuario usuario, Locale locale) {
+		log.debug "- checkUser - usuario '${usuario.nif}'"
+		String msg
+		if(!usuario?.nif) {
+			msg = messageSource.getMessage(
+				'susbcripcion.errorDatosUsuario', null, locale)
+			log.error("- checkUser - ${msg}")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+				mensaje:msg, tipo:Tipo.USER_ERROR)
 		}
 		String nifValidado = org.sistemavotacion.util.StringUtils.validarNIF(usuario.nif)
 		if(!nifValidado) {
-			String mensajeError = messageSource.getMessage(
-				'susbcripcion.errorNifUsuario', [usuario.nif].toArray(), locale)
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:mensajeError)
+			msg = messageSource.getMessage('susbcripcion.errorNifUsuario', 
+				[usuario.nif].toArray(), locale)
+			log.error("- checkUser - ${msg}")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+				mensaje:msg, tipo:Tipo.USER_ERROR)
 		}
 		usuario.nif = nifValidado
 		X509Certificate certificadoUsu = usuario.getCertificate()
 		def usuarioDB = Usuario.findWhere(nif:usuario.getNif().toUpperCase())
 		if (!usuarioDB) {
 			usuarioDB = usuario.save();
+			log.debug "- checkUser - NEW USER -> ${usuario.nif} - id '${usuarioDB.id}'"
 			if (usuario.getCertificate()) {
 				Certificado certificado = new Certificado(usuario:usuario,
 					contenido:usuario.getCertificate()?.getEncoded(),
@@ -46,54 +52,30 @@ class SubscripcionService {
 					validoDesde:usuario.getCertificate()?.getNotBefore(),
 					validoHasta:usuario.getCertificate()?.getNotAfter())
 				certificado.save();
+				log.debug "- checkUser - NEW USER CERT -> id '${certificado.id}'"
 			}
 		} else {
-			def certificadoDB = Certificado.findWhere(
+			Certificado certificado = Certificado.findWhere(
 				usuario:usuarioDB, estado:Certificado.Estado.OK)
-			if (!certificadoDB?.numeroSerie == certificadoUsu.getSerialNumber()?.longValue()) {
-				certificadoDB.estado = Certificado.Estado.ANULADO
-				certificadoDB.save()
-				Certificado certificado = new Certificado(usuario:usuarioDB,
+			if (!certificado?.numeroSerie == certificadoUsu.getSerialNumber()?.longValue()) {
+				certificado.estado = Certificado.Estado.ANULADO
+				certificado.save()
+				log.debug "- checkUser - CANCELLED user cert id '${certificado.id}'"
+				certificado = new Certificado(usuario:usuarioDB,
 					contenido:certificadoUsu?.getEncoded(), estado:Certificado.Estado.OK,
 					numeroSerie:certificadoUsu?.getSerialNumber()?.longValue(),
 					certificadoAutoridad:usuario.getCertificadoCA(),
 					validoDesde:usuario.getCertificate()?.getNotBefore(),
 					validoHasta:usuario.getCertificate()?.getNotAfter())
 				certificado.save();
+				log.debug "- checkUser - UPDATED user cert -> id '${certificado.id}'"
 			}
 		}
-		return new Respuesta(codigoEstado:200, usuario:usuarioDB)
-	}
-	
-	
-	Respuesta comprobarUsuario(Usuario checkedUsuario, Locale locale) {
-		log.debug "comprobarUsuario - ${checkedUsuario?.nif}"
-		if(!checkedUsuario?.nif) {
-			String mensajeError = messageSource.getMessage(
-				'susbcripcion.errorDatosUsuario', null, locale)
-			return new Respuesta(codigoEstado:400, mensaje:mensajeError)
-		}
-		Usuario usuario = Usuario.findByNif(checkedUsuario?.nif?.toUpperCase())
-		if (usuario) return new Respuesta(codigoEstado:200, usuario:usuario)
-		return guardarUsuario(checkedUsuario, locale)
-	}
-	
-	Respuesta comprobarUsuario(SMIMEMessageWrapper smimeMessage, Locale locale) {
-		def nif = smimeMessage.getFirmante()?.nif
-		log.debug "comprobarUsuario - ${nif}"
-		if(!nif) {
-			String mensajeError = messageSource.getMessage(
-				'susbcripcion.errorNifUsuario', [nif].toArray(), locale)
-			return new Respuesta(
-				codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:mensajeError)
-		}
-		def usuario = Usuario.findWhere(nif:nif.toUpperCase())
-		if (usuario) return new Respuesta(codigoEstado:Respuesta.SC_OK, usuario:usuario)
-		return guardarUsuario(smimeMessage.getFirmante(), locale)
+		return new Respuesta(codigoEstado:Respuesta.SC_OK, usuario:usuarioDB)
 	}
 
-	ControlAcceso comprobarControlAcceso(String serverURL) {
-		log.debug "---comprobarControlAcceso - serverURL:${serverURL}"
+	ControlAcceso checkAccessControl(String serverURL) {
+		log.debug "---checkAccessControl - serverURL:${serverURL}"
 		serverURL = StringUtils.checkURL(serverURL)
 		ControlAcceso controlAcceso = ControlAcceso.findWhere(serverURL:serverURL)
 		if (!controlAcceso) {

@@ -5,6 +5,7 @@ import java.io.File;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import javax.swing.SwingWorker;
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.sistemavotacion.Contexto;
@@ -66,9 +67,21 @@ public class NotificarVotoWorker extends SwingWorker<Integer, String>
     @Override protected Integer doInBackground() throws Exception {
         EncryptionHelper.encryptSMIMEFile(votoFirmado, controlCenterCert);
         HttpResponse response = Contexto.getHttpHelper().
-                enviarArchivoFirmado(votoFirmado, urlServidorRecolectorVotos);
+                sendFile(votoFirmado, Contexto.SIGNED_AND_ENCRYPTED_CONTENT_TYPE, 
+                urlServidorRecolectorVotos);
         statusCode = response.getStatusLine().getStatusCode();
         if (Respuesta.SC_OK == statusCode) {
+            
+            String respresentativeNIF = null;
+            Header[] headers = response.getHeaders("representativeNIF");
+            if(headers != null) {
+                for(Header header:headers) {
+                    logger.debug("========= header.getValue(): " + header.getValue());
+                    respresentativeNIF = header.getValue();
+                    
+                }
+            }
+            
             byte[] votoValidadoBytes = EntityUtils.toByteArray(response.getEntity());
             
             SMIMEMessageWrapper votoValidado = 

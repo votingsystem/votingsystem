@@ -21,7 +21,7 @@ import org.sistemavotacion.test.dialogo.MensajeDialog;
 import org.sistemavotacion.test.json.DeJSONAObjeto;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.test.panel.VotacionesPanel;
-import org.sistemavotacion.test.tarea.EnviarMultipartEntityWorker;
+import org.sistemavotacion.test.tarea.FileSenderWorker;
 import org.sistemavotacion.test.tarea.LanzadorWorker;
 import org.sistemavotacion.test.tarea.ObtenerInfoServidorWorker;
 import org.sistemavotacion.test.util.NifUtils;
@@ -522,9 +522,9 @@ public class MainFrame extends JFrame  implements KeyListener, FocusListener, La
                             estado = Estado.CONECTANDO;
                     infoServidorButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/loading.gif")));
                     infoServidorButton.setText("Añadiendo Autoridad Certificadora");
-                    EnviarMultipartEntityWorker sendFileWorker = new EnviarMultipartEntityWorker(
-                            caPemCertificate, urlAnyadirCertificadoCA, this);
-            		sendFileWorker.setFileParamName("pemCertificate");
+                    FileSenderWorker sendFileWorker = new FileSenderWorker(
+                            caPemCertificate,"pemCertificate", 
+                            urlAnyadirCertificadoCA, this);
             		sendFileWorker.execute();
                     tareaEnEjecucion = sendFileWorker;
                     /*TODO JJGZ
@@ -556,8 +556,8 @@ public class MainFrame extends JFrame  implements KeyListener, FocusListener, La
                 mostrarMensajeUsuario(mensaje);
             }
         }
-        else if(worker instanceof EnviarMultipartEntityWorker) {
-            EnviarMultipartEntityWorker multipartEntityWorker = (EnviarMultipartEntityWorker)worker;
+        else if(worker instanceof FileSenderWorker) {
+            FileSenderWorker multipartEntityWorker = (FileSenderWorker)worker;
             logger.debug("mostrarResultadoOperacion - multipartEntityWorker - statusCode: " 
                 + multipartEntityWorker.getStatusCode()); 
             if(Respuesta.SC_OK == multipartEntityWorker.getStatusCode()) {

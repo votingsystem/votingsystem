@@ -19,7 +19,7 @@ public class Operation {
 
 	public static final String TAG = "Operacion";
     
-    public static enum Tipo {ASOCIAR_CENTRO_CONTROL_SMIME, 
+    public static enum Tipo {ASOCIAR_CENTRO_CONTROL, 
         CAMBIO_ESTADO_CENTRO_CONTROL_SMIME, 
         SOLICITUD_COPIA_SEGURIDAD, 
         PUBLICACION_MANIFIESTO_PDF, 

@@ -14,36 +14,12 @@ import grails.util.Environment
  * */
 class InfoServidorController {	
 	/**
-	 * @httpMethod GET
-	 * @return Información sobre los servicios que tienen como url base '/infoServidor'
-	 */
-	def index() { 
-		redirect action: "restDoc"
-	}
-	
-	/**
-	 * @httpMethod GET
-	 * @return La lista de servicios de la aplicación
-	 */
-	def listaServicios () { }
-	
-	/**
-	 * @httpMethod GET
-	 * @return Datos de las versiones de algunos componentes de la aplicación  
-	 */
-	def datosAplicacion () { }
-	
-	/**
-	 * @httpMethod GET
-	 * @return Información general de la aplicación
-	 */
-	def informacion () { }
-	
-	/**
-	 * @httpMethod GET
+	 * @httpMethod [GET]
+	 * @serviceURL [/infoServidor]
+	 * @responseContentType [application/json]
 	 * @return Documento JSON con datos de la aplicación
 	 */
-    def obtener () {
+	def index() { 
         HashMap infoServidor = new HashMap()
         infoServidor.nombre = grailsApplication.config.SistemaVotacion.serverName
 		infoServidor.tipoServidor = Tipo.CENTRO_CONTROL.toString()
@@ -63,7 +39,28 @@ class InfoServidorController {
 				estado:controlAcceso.estado.toString()]
 			infoServidor.controlesAcceso.add(controlesAccesoMap)
 		}
+
 		if (params.callback) render "${params.callback}(${infoServidor as JSON})"
         else render infoServidor as JSON
-    }
+	}
+	
+	/**
+	 * @httpMethod [GET]
+	 * @return La lista de servicios de la aplicación
+	 */
+	def listaServicios () { }
+	
+	/**
+	 * @httpMethod [GET]
+	 * @return Datos de las versiones de algunos componentes de la aplicación  
+	 */
+	def datosAplicacion () { }
+	
+	/**
+	 * @httpMethod [GET]
+	 * @return Información general de la aplicación
+	 */
+	def informacion () { }
+	
+
 }

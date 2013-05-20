@@ -97,10 +97,12 @@ public class LanzadoraSolicitudAcceso
         HttpResponse response = null;
         try {
             Map objectMap = new HashMap<String, Object>();
+            String accessRequestFileName = "accessRequest:" + 
+                Contexto.SIGNED_AND_ENCRYPTED_CONTENT_TYPE;
             objectMap.put(Contexto.CSR_FILE_NAME, 
                     wrapperClient.getPEMEncodedRequestCSR());
-            objectMap.put(Contexto.SMIME_FILE_NAME, solicitudAcceso);
-            response = Contexto.getHttpHelper().sendMap(objectMap, 
+            objectMap.put(accessRequestFileName, solicitudAcceso);
+            response = Contexto.getHttpHelper().sendObjectMap(objectMap, 
                     ContextoPruebas.getURLSolicitudAcceso(
                     ContextoPruebas.getControlAcceso().getServerURL()));
         } catch(ConnectionPoolTimeoutException ex) {

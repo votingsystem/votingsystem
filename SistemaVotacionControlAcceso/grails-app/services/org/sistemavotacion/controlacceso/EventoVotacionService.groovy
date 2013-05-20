@@ -2,6 +2,8 @@ package org.sistemavotacion.controlacceso
 
 import java.io.File;
 import java.util.Date;
+import java.util.Set;
+
 import javax.persistence.Column;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -30,97 +32,137 @@ class EventoVotacionService {
 	def almacenClavesService
 	def httpService
 	def messageSource
+	def encryptionService
 
-    Respuesta guardarEvento(SMIMEMessageWrapper smimeMessage, Locale locale) {
-        log.debug("guardarEvento - mensaje: ${smimeMessage.getSignedContent()}")
-        Tipo tipo = Tipo.EVENTO_VOTACION
-        def mensajeJSON = JSON.parse(smimeMessage.getSignedContent())
-        Respuesta respuestaUsuario = subscripcionService.comprobarUsuario(smimeMessage, locale)
-		if(Respuesta.SC_OK != respuestaUsuario.codigoEstado) return respuestaUsuario
-		Usuario usuario = respuestaUsuario.usuario
-        MensajeSMIME mensajeSMIME = new MensajeSMIME(tipo:tipo,
-                usuario:usuario, valido:true,
-                contenido:smimeMessage.getBytes()) 
-        EventoVotacion evento = new EventoVotacion(asunto:mensajeJSON.asunto, 
-            contenido:mensajeJSON.contenido, usuario:usuario,
-                fechaInicio: new Date().parse(
-					"yyyy-MM-dd HH:mm:ss", mensajeJSON.fechaInicio),
-                fechaFin: new Date().parse(
-					"yyyy-MM-dd HH:mm:ss", mensajeJSON.fechaFin))
-        evento.estado = eventoService.obtenerEstadoEvento(evento)
-        if(mensajeJSON.cardinalidad) evento.cardinalidadOpciones = 
-				Evento.Cardinalidad.valueOf(mensajeJSON.cardinalidad)
-        else evento.cardinalidadOpciones = Evento.Cardinalidad.UNA
-		evento.save()
-		evento.url = "${grailsApplication.config.grails.serverURL}" +
-			"${grailsApplication.config.SistemaVotacion.sufijoURLEventoVotacion}${evento.id}"
-        if (mensajeJSON.centroControl) {
-            evento.centroControl = subscripcionService.comprobarCentroControl(mensajeJSON.centroControl.serverURL)
-			evento.save(flush:true)
-			Respuesta respuesta = httpService.obtenerCadenaCertificacion(evento.centroControl.serverURL, locale);
-			byte[] cadenaCertificacion;
-			if (Respuesta.SC_OK == respuesta.codigoEstado) {
-				evento.cadenaCertificacionCentroControl = respuesta.cadenaCertificacion
-				log.debug("Obtenida cadena de certificacion del CentroControl para el evento: ${evento.id}")
-			} else {
-				respuesta.mensaje =  messageSource.getMessage('http.ErrorObteniendoCadenaCertificacion', null, locale) + 
-					" - " + evento.centroControl.serverURL + " - " + respuesta.mensaje
-				return respuesta
-			}				
-        } else {
-			log.debug("solicitud sin centro de control")
-            mensajeSMIME.setTipo(Tipo.EVENTO_VOTACION_SIN_CENTRO_CONTROL)
-			mensajeSMIME.save();
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
-				mensaje:messageSource.getMessage('error.requestWithoutControlCenter', null, locale))
-        }
-		evento.save(flush:true)
-        if (mensajeJSON.opciones) {
-            def opciones = opcionDeEventoService.guardarOpciones(evento, mensajeJSON.opciones)
-            JSONArray arrayOpciones = new JSONArray()
-            opciones.collect { opcion ->
-                    arrayOpciones.add([id:opcion.id, contenido:opcion.contenido] as JSONObject  )
-            }
-            mensajeJSON.opciones = arrayOpciones
-        } 
-        mensajeJSON.controlAcceso = [serverURL:grailsApplication.config.grails.serverURL, 
-			nombre:grailsApplication.config.SistemaVotacion.serverName] as JSONObject
-		if (mensajeJSON.etiquetas) {
-			Set<Etiqueta> etiquetaSet = etiquetaService.guardarEtiquetas(mensajeJSON.etiquetas)
-			if(etiquetaSet) evento.setEtiquetaSet(etiquetaSet)
-		} 
-		evento = evento.save()
-		log.debug(" ------ Guardando Votación: ${evento.id}")
-		mensajeJSON.id = evento.id
-		mensajeJSON.fechaCreacion = DateUtils.getStringFromDate(evento.dateCreated)
-		mensajeJSON.tipo = tipo
-		mensajeJSON.URL = evento.url
-		Respuesta respuestaClaves = almacenClavesService.generar(evento)
-		if(Respuesta.SC_OK != respuestaClaves.codigoEstado) return respuestaClaves;
-		mensajeJSON.certCAVotacion = new String(
-			CertUtil.fromX509CertToPEM (respuestaClaves.certificado))
-		File cadenaCertificacion = grailsApplication.mainContext.getResource(
-			grailsApplication.config.SistemaVotacion.rutaCadenaCertificacion).getFile();
-		mensajeJSON.cadenaCertificacion = new String(cadenaCertificacion.getBytes())
-		
-		X509Certificate certUsuX509 = smimeMessage.getFirmante().getCertificate()
-		mensajeJSON.usuario = new String(CertUtil.fromX509CertToPEM (certUsuX509))
-		
-        Header header = new Header ("serverURL", "${grailsApplication.config.grails.serverURL}");
-        String mensajeValidado = firmaService.obtenerCadenaFirmada(mensajeJSON.toString(),
-			messageSource.getMessage('mime.asunto.EventoVotacionValidado', null, locale), header)
-        
-        mensajeSMIME.evento = evento
-        mensajeSMIME.save(flush:true);
-        MensajeSMIME mensajeSMIMEValidado = new MensajeSMIME(tipo:Tipo.EVENTO_VOTACION_VALIDADO,
-				evento:evento, smimePadre:mensajeSMIME,
-                usuario:usuario, valido:true,
-                contenido:mensajeValidado.getBytes())
-        mensajeSMIMEValidado.save();
-		
-        return new Respuesta(codigoEstado:Respuesta.SC_OK, fecha:DateUtils.getTodayDate(),
-                mensajeSMIME:mensajeSMIME, evento:evento, usuario:usuario, 
-                mensajeSMIMEValidado:mensajeSMIMEValidado, smimeMessage:smimeMessage)
+    Respuesta saveEvent(MensajeSMIME mensajeSMIMEReq, Locale locale) {
+		EventoVotacion evento = null
+		Usuario firmante = mensajeSMIMEReq.getUsuario()
+		log.debug("saveEvent - firmante: ${firmante?.nif}")
+		String msg = null
+		Respuesta respuesta = null
+		try {		
+			String documentStr = mensajeSMIMEReq.getSmimeMessage()?.getSignedContent()
+			def mensajeJSON = JSON.parse(documentStr)
+			if (!mensajeJSON.centroControl || !mensajeJSON.centroControl.serverURL) {
+				msg = messageSource.getMessage(
+						'error.requestWithoutControlCenter', null, locale)
+				log.error "saveEvent - DATA ERROR - ${msg}" 
+				return new Respuesta(tipo:Tipo.EVENTO_VOTACION_ERROR,
+						mensaje:msg, codigoEstado:Respuesta.SC_ERROR_PETICION)
+			}
+			evento = new EventoVotacion(asunto:mensajeJSON.asunto,
+				contenido:mensajeJSON.contenido, usuario:firmante,
+					fechaInicio: new Date().parse(
+						"yyyy-MM-dd HH:mm:ss", mensajeJSON.fechaInicio),
+					fechaFin: new Date().parse(
+						"yyyy-MM-dd HH:mm:ss", mensajeJSON.fechaFin))
+			respuesta = subscripcionService.checkControlCenter(
+				mensajeJSON.centroControl.serverURL)
+			if(Respuesta.SC_OK != respuesta.codigoEstado) {
+				log.error "saveEvent - CHECKING CONTROL CENTER ERROR - ${respuesta.mensaje}"
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+					mensaje:respuesta.mensaje, tipo:Tipo.EVENTO_VOTACION_ERROR)
+			}  
+			evento.centroControl = respuesta.centroControl
+			evento.cadenaCertificacionCentroControl = respuesta.centroControl.cadenaCertificacion
+			X509Certificate controlCenterCert = evento.centroControl.certificadoX509
+			respuesta = eventoService.setEventDatesState(evento,locale)
+			if(Respuesta.SC_OK != respuesta.codigoEstado) {
+				log.error "saveEvent - EVENT DATES ERROR - ${respuesta.mensaje}"
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+					mensaje:respuesta.mensaje, tipo:Tipo.EVENTO_VOTACION_ERROR)
+			} 
+			if(mensajeJSON.cardinalidad) evento.cardinalidadOpciones =
+					Evento.Cardinalidad.valueOf(mensajeJSON.cardinalidad)
+			else evento.cardinalidadOpciones = Evento.Cardinalidad.UNA
+			mensajeJSON.controlAcceso = [serverURL:grailsApplication.config.grails.serverURL,
+				nombre:grailsApplication.config.SistemaVotacion.serverName] as JSONObject
+			if (mensajeJSON.etiquetas) {
+				Set<Etiqueta> etiquetaSet = etiquetaService.guardarEtiquetas(mensajeJSON.etiquetas)
+				if(etiquetaSet) evento.setEtiquetaSet(etiquetaSet)
+			}
+			EventoVotacion.withTransaction {
+				evento.save()
+			}
+			if (mensajeJSON.opciones) {
+				Set<OpcionDeEvento> opciones = opcionDeEventoService.guardarOpciones(evento, mensajeJSON.opciones)
+				JSONArray arrayOpciones = new JSONArray()
+				opciones.each { opcion ->
+						arrayOpciones.add([id:opcion.id, contenido:opcion.contenido] as JSONObject  )
+				}
+				mensajeJSON.opciones = arrayOpciones
+			}
+			log.debug(" ------ Saved voting event '${evento.id}'")
+			mensajeJSON.id = evento.id
+			mensajeJSON.URL = "${grailsApplication.config.grails.serverURL}/eventoVotacion/${evento.id}"
+			mensajeJSON.fechaCreacion = DateUtils.getStringFromDate(evento.dateCreated)
+			mensajeJSON.tipo = Tipo.EVENTO_VOTACION
+			respuesta = almacenClavesService.generar(evento)
+			if(Respuesta.SC_OK != respuesta.codigoEstado) {
+				log.error "saveEvent - ERROR GENERATING EVENT KEYSTRORE- ${respuesta.mensaje}"
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+					mensaje:respuesta.mensaje, tipo:Tipo.EVENTO_VOTACION_ERROR, evento:evento)
+			} 
+			mensajeJSON.certCAVotacion = new String(
+				CertUtil.fromX509CertToPEM (respuesta.certificado))
+			File cadenaCertificacion = grailsApplication.mainContext.getResource(
+				grailsApplication.config.SistemaVotacion.rutaCadenaCertificacion).getFile();
+			mensajeJSON.cadenaCertificacion = new String(cadenaCertificacion.getBytes())
+			
+			X509Certificate certUsuX509 = firmante.getCertificate()
+			mensajeJSON.usuario = new String(CertUtil.fromX509CertToPEM (certUsuX509))
+
+			String controCenterEventsURL = "${evento.centroControl.serverURL}" +
+				"${grailsApplication.config.SistemaVotacion.sufijoURLInicializacionEvento}"
+
+			Header header = new Header ("serverURL", "${grailsApplication.config.grails.serverURL}");
+			String fromUser = grailsApplication.config.SistemaVotacion.serverName
+			String toUser = evento.centroControl.getNombre()
+			String subject = messageSource.getMessage('mime.asunto.EventoVotacionValidado', null, locale)			
+			byte[] smimeMessageRespBytes = firmaService.getSignedMimeMessage(
+				fromUser, toUser, mensajeJSON.toString(), subject, header)
+	
+			Respuesta encryptResponse = encryptionService.encryptSMIMEMessage(
+					smimeMessageRespBytes, controlCenterCert, locale)
+			if(Respuesta.SC_OK != encryptResponse.codigoEstado) {
+				evento.estado = Evento.Estado.ACTORES_PENDIENTES_NOTIFICACION
+				Evento.withTransaction {
+					evento.save()
+				}
+				log.error "saveEvent - ERROR ENCRYPTING MSG - ${encryptResponse.mensaje}"
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+					mensaje:encryptResponse.mensaje, , evento:evento, 
+					tipo:Tipo.EVENTO_VOTACION_ERROR)
+			}
+			String contentType = "${grailsApplication.config.pkcs7SignedContentType};" +
+				"${grailsApplication.config.pkcs7EncryptedContentType}"
+			Respuesta respuestaNotificacion = httpService.sendMessage(
+				encryptResponse.messageBytes, contentType, controCenterEventsURL)
+			if(Respuesta.SC_OK != respuestaNotificacion.codigoEstado) {
+				evento.estado = Evento.Estado.ACTORES_PENDIENTES_NOTIFICACION
+				Evento.withTransaction {
+					evento.save()
+				}
+				msg = messageSource.getMessage('controCenterCommunicationErrorMsg', 
+					[respuestaNotificacion.mensaje].toArray(), locale)	
+				log.error "saveEvent - ERROR NOTIFYING CONTROL CENTER - ${msg}"
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+					mensaje:msg, tipo:Tipo.EVENTO_VOTACION_ERROR, evento:evento)
+			}
+			MensajeSMIME mensajeSMIMEResp = new MensajeSMIME(tipo:Tipo.RECIBO,
+				smimePadre:mensajeSMIMEReq, evento:evento, valido:true,
+				contenido:smimeMessageRespBytes)
+			MensajeSMIME.withTransaction {
+				mensajeSMIMEResp.save()
+			}
+			return new Respuesta(codigoEstado:Respuesta.SC_OK, evento:evento,
+					tipo:Tipo.EVENTO_VOTACION, mensajeSMIME:mensajeSMIMEResp)
+		} catch(Exception ex) {
+			log.error (ex.getMessage(), ex)
+			msg = messageSource.getMessage('publishVotingErrorMessage', null, locale)
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION,
+				mensaje:msg, tipo:Tipo.EVENTO_VOTACION_ERROR, evento:evento)
+		}
     }
     
 	public Respuesta generarCopiaRespaldo (EventoVotacion evento, Locale locale) {
@@ -137,7 +179,7 @@ class EventoVotacionService {
 			int i = 0
 			def metaInformacionMap = [numeroVotos:votosContabilizados.size(),
 				solicitudesAcceso:solicitudesAcceso.size(),
-				URL:"${grailsApplication.config.grails.serverURL}/evento/obtener?id=${evento.id}",
+				URL:"${grailsApplication.config.grails.serverURL}/evento/${evento.id}",
 				tipoEvento:Tipo.EVENTO_VOTACION.toString(), asunto:evento.asunto]
 			String metaInformacionJSON = metaInformacionMap as JSON
 			File metaInformacionFile = new File("${basedir}/meta.inf")

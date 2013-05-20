@@ -2,6 +2,7 @@ package org.sistemavotacion.controlacceso.modelo;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -16,7 +17,7 @@ import javax.persistence.TemporalType;
 
 @Entity
 @Table(name="AlmacenClaves")
-public class AlmacenClaves {
+public class AlmacenClaves implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	 

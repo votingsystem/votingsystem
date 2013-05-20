@@ -48,7 +48,7 @@
 					</g:HorizontalPanel>
 				</g:HorizontalPanel>
 			</g:VerticalPanel>
-			<g:VerticalPanel ui:field="panelResultadoOperacion" width="100%" >
+			<g:VerticalPanel ui:field="panelResultadoOperacion" width="550px" >
 				<g:HTML ui:field='resultadoOperacionMessage' styleName="{style.textoMensaje}"/>
 				<g:HorizontalPanel styleName="{style.buttonPanel}">
 					<g:HorizontalPanel styleName="{style.boton}">

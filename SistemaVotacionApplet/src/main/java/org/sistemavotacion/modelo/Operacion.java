@@ -3,6 +3,7 @@ package org.sistemavotacion.modelo;
 import static org.sistemavotacion.Contexto.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -20,8 +21,9 @@ public class Operacion {
     
     private static Logger logger = LoggerFactory.getLogger(Operacion.class);
     
-    public static enum Tipo {ASOCIAR_CENTRO_CONTROL_SMIME(
-                getString("ASOCIAR_CENTRO_CONTROL_SMIME")), 
+    public static enum Tipo {
+        ASOCIAR_CENTRO_CONTROL(
+                getString("ASOCIAR_CENTRO_CONTROL")), 
         CAMBIO_ESTADO_CENTRO_CONTROL_SMIME(
                 getString("CAMBIO_ESTADO_CENTRO_CONTROL_SMIME")), 
         SOLICITUD_COPIA_SEGURIDAD(
@@ -54,12 +56,12 @@ public class Operacion {
                 getString("NEW_REPRESENTATIVE")),
         REPRESENTATIVE_VOTING_HISTORY_REQUEST(
                 getString("REPRESENTATIVE_VOTING_HISTORY_REQUEST")),
-                SELECT_REPRESENTATIVE(
-                getString("SELECT_REPRESENTATIVE")),
+        REPRESENTATIVE_SELECTION(
+                getString("REPRESENTATIVE_SELECTION")),
         REPRESENTATIVE_ACCREDITATIONS_REQUEST(
                 getString("REPRESENTATIVE_ACCREDITATIONS_REQUEST")),
-        REPRESENTATIVE_UNSUBSCRIBE_REQUEST(
-                getString("REPRESENTATIVE_UNSUBSCRIBE_REQUEST"));
+        REPRESENTATIVE_REVOKE(
+                getString("REPRESENTATIVE_REVOKE"));
         
 
     
@@ -80,9 +82,9 @@ public class Operacion {
         public String getNombreArchivoEnDisco() {
             String resultado = null;
             switch(this) {
-                case ASOCIAR_CENTRO_CONTROL_SMIME:
+                case ASOCIAR_CENTRO_CONTROL:
                     resultado = 
-                        getString("ASOCIAR_CENTRO_CONTROL_SMIME_FILE");
+                        getString("ASOCIAR_CENTRO_CONTROL");
                     break;
                 case CAMBIO_ESTADO_CENTRO_CONTROL_SMIME:
                     resultado = 
@@ -143,6 +145,7 @@ public class Operacion {
     private String asuntoMensajeFirmado;
     private Boolean respuestaConRecibo = false;
     private JSONObject contenidoFirma; 
+    private String contentType;
     private Evento evento;
     private String[] args;
 
@@ -308,6 +311,19 @@ public class Operacion {
     }
     
     /**
+     * @param contentType the contentType to set
+     */
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+    
+    /**
+     * @return the contentType
+     */
+    public String getContentType() {
+        return contentType;
+    }
+    /**
      * @return the nombreDestinatarioFirma
      */
     public String getNombreDestinatarioFirma() {
@@ -368,8 +384,16 @@ public class Operacion {
             Evento evento = Evento.parse(operacionJSON.getJSONObject("evento"));
             operacion.setEvento(evento);
         }  
-        if (operacionJSON.containsKey("contenidoFirma")) 
-             operacion.setContenidoFirma(operacionJSON.getJSONObject("contenidoFirma"));
+        if (operacionJSON.containsKey("contenidoFirma")) {
+            JSONObject contenidoJSONObject = operacionJSON.getJSONObject("contenidoFirma");
+            //to avoid process repeated messages on servers
+            contenidoJSONObject.put("UUID", UUID.randomUUID().toString());
+            operacion.setContenidoFirma(contenidoJSONObject);
+        }
+             
+        if(operacionJSON.containsKey("contentType")) {
+            operacion.setContentType(operacionJSON.getString("contentType"));
+        }
         if (operacionJSON.containsKey("nombreDestinatarioFirma")) {
             operacion.setNombreDestinatarioFirma(operacionJSON.getString("nombreDestinatarioFirma"));
         }
@@ -392,7 +416,7 @@ public class Operacion {
         if(tipo != null) map.put("operacion", tipo.toString());
         if(urlDocumento != null) map.put("urlDocumento", urlDocumento);
         if(urlEnvioDocumento != null) map.put("urlEnvioDocumento", urlEnvioDocumento);
-        if(asuntoMensajeFirmado != null) map.put("asuntoMensajeFirmado", urlEnvioDocumento);
+        if(asuntoMensajeFirmado != null) map.put("asuntoMensajeFirmado", asuntoMensajeFirmado);
         if(nombreDestinatarioFirma != null) map.put("nombreDestinatarioFirma", nombreDestinatarioFirma);
         if(respuestaConRecibo != null) map.put("respuestaConRecibo", respuestaConRecibo);
          if(urlTimeStampServer != null) map.put("urlTimeStampServer", urlTimeStampServer);
@@ -463,7 +487,7 @@ public class Operacion {
                 if(VotacionHelper.getReciboVoto(args[0]) == null)
                     return 
                         getString("errorReciboNoEncontrado") + " " + args[0];
-                contenidoFirma = VotacionHelper.obtenerAnuladorDeVotoJSON(args[0]);
+                contenidoFirma = VotacionHelper.obtenerAnuladorDeVotoSesion(args[0]);
                 break;
             case SOLICITUD_COPIA_SEGURIDAD:
                 if(evento == null || evento.getEventoId() == null) return 

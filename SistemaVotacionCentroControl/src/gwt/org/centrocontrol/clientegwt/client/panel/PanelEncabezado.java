@@ -63,7 +63,6 @@ public class PanelEncabezado extends Composite implements EventoGWTMensajeAplica
     @UiField Anchor subscripciones;
     @UiField ListBox listaEstados;
     @UiField HorizontalPanel seleccionEstadoPanel;
-    @UiField HorizontalPanel optionsPanel;
 
     
     Tipo tipoBusqueda = null;

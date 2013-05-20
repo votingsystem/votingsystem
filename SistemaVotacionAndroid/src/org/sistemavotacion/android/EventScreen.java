@@ -348,11 +348,7 @@ public class EventScreen extends FragmentActivity
 					    	} else {
 					    		String subject = ASUNTO_MENSAJE_FIRMA_DOCUMENTO + evento.getAsunto();
 					    		String urlToSendSignedDocument = null;
-					            if (evento.getTipo().equals(Tipo.EVENTO_FIRMA)) {
-					            	urlToSendSignedDocument = ServerPaths.getURLEventoFirmado(CONTROL_ACCESO_URL);
-					            } else if (evento.getTipo().equals(Tipo.EVENTO_RECLAMACION)) {
-					            	urlToSendSignedDocument = ServerPaths.getURLReclamacion(CONTROL_ACCESO_URL);
-					            }
+					    		urlToSendSignedDocument = ServerPaths.getURLReclamacion(CONTROL_ACCESO_URL);
 					            String signatureContent = DeObjetoAJSON.obtenerFirmaParaEventoJSON(evento);
 					            boolean isWithSignedReceipt = false;
 					            boolean isEncryptedResponse = false;

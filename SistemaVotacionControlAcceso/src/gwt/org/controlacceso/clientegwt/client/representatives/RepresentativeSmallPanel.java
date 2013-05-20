@@ -57,8 +57,8 @@ public class RepresentativeSmallPanel extends Composite implements LoadHandler {
 		image.addLoadHandler(this);
 		image.setStyleName(style.image(), true);
 		image.setUrl(representative.getImageURL());
-		//imagePanel.clear();
-		//imagePanel.add(image);
+		imagePanel.clear();
+		imagePanel.add(image);
 
 		this.representative = representative;
 		representativeNameLabel.setText(representative.getNombre() + " " + representative.getPrimerApellido());

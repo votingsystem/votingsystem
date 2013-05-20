@@ -6,6 +6,7 @@ import static groovyx.net.http.Method.*
 import java.security.cert.X509Certificate;
 import org.sistemavotacion.centrocontrol.modelo.*
 import org.sistemavotacion.seguridad.*;
+import org.apache.http.entity.ByteArrayEntity
 import org.apache.http.entity.mime.content.*
 import org.apache.http.entity.mime.MultipartEntity
 
@@ -73,32 +74,36 @@ class HttpService {
 		}
 		return respuesta
 	}
-	
-	public Respuesta enviarMensaje (String destURL, byte[] bytesMensaje) {
-		def httpBuilder = new HTTPBuilder(destURL);
-		log.debug "enviarMensaje - destURL: '${destURL}'"
-		Respuesta respuesta
-		httpBuilder.request(POST) {request ->
-			requestContentType = ContentType.URLENC
-			MultipartEntity entity = new MultipartEntity();
-			ByteArrayBody  fileBody = new ByteArrayBody(bytesMensaje,
-				grailsApplication.config.SistemaVotacion.nombreEntidadFirmada);
-			entity.addPart(grailsApplication.config.SistemaVotacion.nombreEntidadFirmada, fileBody);
-			request.entity = entity
-			request.getParams().setParameter("http.connection.timeout", new Integer(10000));
-			request.getParams().setParameter("http.socket.timeout", new Integer(10000));
-			response.'200' = { resp, reader ->
-				log.debug "***** OK: ${resp.statusLine}"
-				respuesta = new Respuesta(codigoEstado:resp.statusLine.statusCode)
-				respuesta.mensaje = new String("${reader}")
+
+	Respuesta sendMessage(byte[] message, String contentType, String serverURL) {
+		log.debug(" - sendMessage:${serverURL} - contentType: ${contentType}")
+		def httpBuilder = new HTTPBuilder(serverURL);
+		def respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION)
+		try {
+			httpBuilder.request(POST) {request ->
+				ByteArrayEntity byteArrayEntity = new ByteArrayEntity(message)
+				byteArrayEntity.setContentType(contentType)
+				request.entity = byteArrayEntity
+				request.getParams().setParameter("http.connection.timeout", new Integer(10000));
+				request.getParams().setParameter("http.socket.timeout", new Integer(10000));
+				response.'200' = { resp, reader ->
+						log.debug "***** OK: ${resp.statusLine}"
+						respuesta = new Respuesta(codigoEstado:resp.statusLine.statusCode)
+						respuesta.mensaje = new String("${reader}")
+				}
+				response.failure = { resp, reader ->
+						String mensajeRespuesta = new String("${reader}")
+						log.error "***** Error: ${resp.statusLine}"
+						log.error "***** mensajeRespuesta: ${mensajeRespuesta}"
+						respuesta.mensaje = mensajeRespuesta
+						respuesta.codigoEstado = resp.statusLine.statusCode
+				}
 			}
-			response.failure = { resp, reader ->
-				log.error "***** Error: ${resp.statusLine}"
-				respuesta = new Respuesta(codigoEstado:resp.statusLine.statusCode,
-					mensaje:"${reader}")
-			}
+		} catch(SocketTimeoutException ste) {
+			log.error(ste.getMessage(), ste)
+			respuesta.mensaje = ste.getMessage()
 		}
 		return respuesta;
 	}
-
+	
 }

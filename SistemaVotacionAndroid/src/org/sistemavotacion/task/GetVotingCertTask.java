@@ -1,9 +1,11 @@
 package org.sistemavotacion.task;
 
-import static org.sistemavotacion.android.Aplicacion.VOTE_SIGN_MECHANISM;
+import static org.sistemavotacion.android.Aplicacion.*;
 import static org.sistemavotacion.android.Aplicacion.getAppString;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.mail.Header;
 
@@ -54,8 +56,14 @@ public class GetVotingCertTask extends AsyncTask<String, Void, Integer> {
         			csrEncryptedFile, Aplicacion.getControlAcceso().getCertificado());
         	EncryptionHelper.encryptSMIMEFile(solicitudAcceso, 
         			Aplicacion.getControlAcceso().getCertificado());
-            HttpResponse response = HttpHelper.enviarSolicitudAcceso(
-            		csrEncryptedFile, solicitudAcceso, url);
+        	
+            String accessRequestFileName = ACCESS_REQUEST_FILE_NAME + ":" + 
+                    SIGNED_AND_ENCRYPTED_CONTENT_TYPE;
+            Map<String, Object> mapToSend = new HashMap<String, Object>();
+            mapToSend.put(CSR_FILE_NAME, csrEncryptedFile);
+            mapToSend.put(accessRequestFileName, solicitudAcceso);
+        	
+            HttpResponse response = HttpHelper.sendObjectMap(mapToSend, url);
             statusCode = response.getStatusLine().getStatusCode();
             if (Respuesta.SC_OK == response.getStatusLine().getStatusCode()) {
                 byte[] encryptedData = EntityUtils.toByteArray(response.getEntity());

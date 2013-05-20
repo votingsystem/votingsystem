@@ -3,8 +3,8 @@ package org.sistemavotacion.controlacceso.modelo;
 import java.io.File;
 import java.security.cert.X509Certificate;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Set;
+
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 
 /**
@@ -26,14 +26,13 @@ public class Respuesta {
     
     private int codigoEstado;
     private int cantidad;
-	private Tipo tipo = Tipo.ERROR; 
+	private Tipo tipo = Tipo.OK; 
 	private Date fecha;
 	private String mensaje;
-	private Map<String, Object> datos;
 	private MensajeSMIME mensajeSMIME;
-	private MensajeSMIME mensajeSMIMEValidado;
 	private Evento evento;
 	private Usuario usuario;
+	private Set<Usuario> usuarios;
 	private SMIMEMessageWrapper smimeMessage;
 	private SolicitudAcceso solicitudAcceso;
 	private AnuladorVoto anuladorVoto;
@@ -48,65 +47,10 @@ public class Respuesta {
     private byte[] timeStampToken;
     private byte[] messageBytes;
     private ActorConIP actorConIP;
+    private CentroControl centroControl;
     private SolicitudCSRVoto solicitudCSR;
     private Dispositivo dispositivo;
     private Documento documento;
-	
-	public Map getMap() throws Exception {
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("codigoEstado", getCodigoEstado());
-		map.put("tipoRespuesta", getTipo().toString());
-		map.put("datos", getDatos());
-		//TODO
-		if(getMensaje() == null) setMensaje(getTipo().getMensaje());
-		map.put("mensaje", getMensaje());
-		return map;
-	}
-	
-	public Tipo getTipo () {
-		if (tipo != null) return tipo;
-		switch (getCodigoEstado()) {
-			case 200:
-				tipo = Tipo.OK;
-				break;
-			case 201:
-				tipo = Tipo.OK;
-				break;
-		}
-		return tipo;
-	}
-	
-	public Map<String, Object> getDatos () throws Exception {
-		if (datos != null) return datos;
-		Map<String, Object> datos = new HashMap<String, Object>();
-		if(getMensajeSMIME() != null) {
-			datos.put("Fecha", getMensajeSMIME().getDateCreated());
-			datos.put("TipoDePeticion", getMensajeSMIME().getTipo().toString());
-			datos.put("MensajeId", getMensajeSMIME().getId());
-			if (getSmimeMessage() != null && getSmimeMessage().isValidSignature()) {
-				switch(getMensajeSMIME().getTipo()) {
-					case EVENTO_VOTACION:
-						datos.put("ResultadoOperacion", "OK");
-						break;
-					case EVENTO_VOTACION_ERROR:
-						datos.put("ResultadoOperacion", "ERROR");
-						break;
-				}
-			} else datos.put("ResultadoOperacion", "ERROR");
-		}
-		if(getUsuario() != null) datos.put("Remitente", getUsuario().getNif());
-		if(getSmimeMessage() != null) datos.put("MensajeRecibido", getSmimeMessage().getSignedContent());
-		if (getEvento() != null) datos.put("eventoId", getEvento().getId());
-		return datos;
-	}
-
-	public MensajeSMIME getMensajeSMIMEValidado() {
-		return mensajeSMIMEValidado;
-	}
-
-	public void setMensajeSMIMEValidado(MensajeSMIME mensajeSMIMEValidado) {
-		this.mensajeSMIMEValidado = mensajeSMIMEValidado;
-	}
 
 	public String getAsunto() {
 		return asunto;
@@ -232,10 +176,6 @@ public class Respuesta {
 		this.tipo = tipo;
 	}
 
-	public void setDatos(Map<String, Object> datos) {
-		this.datos = datos;
-	}
-
 	public AnuladorVoto getAnuladorVoto() {
 		return anuladorVoto;
 	}
@@ -306,6 +246,26 @@ public class Respuesta {
 
 	public void setMessageBytes(byte[] messageBytes) {
 		this.messageBytes = messageBytes;
+	}
+
+	public Tipo getTipo() {
+		return tipo;
+	}
+
+	public Set<Usuario> getUsuarios() {
+		return usuarios;
+	}
+
+	public void setUsuarios(Set<Usuario> usuarios) {
+		this.usuarios = usuarios;
+	}
+
+	public CentroControl getCentroControl() {
+		return centroControl;
+	}
+
+	public void setCentroControl(CentroControl centroControl) {
+		this.centroControl = centroControl;
 	}
 
 }

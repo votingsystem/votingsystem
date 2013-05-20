@@ -23,27 +23,33 @@ class SubscripcionService {
 	def messageSource
 	def httpService
 	
-	Respuesta guardarUsuario(Usuario usuario, Locale locale) {
-		log.debug "guardarUsuario - usuario: ${usuario.nif} - CertificadoCA: ${usuario.getCertificadoCA()?.id}"
+	Respuesta checkUser(Usuario usuario, Locale locale) {
+		log.debug "checkUser - user  '${usuario.nif}'"
+		String msg
 		if(!usuario.nif) {
-			String mensajeError = messageSource.getMessage('susbcripcion.errorDatosUsuario', null, locale)
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:mensajeError)
+			msg = messageSource.getMessage('susbcripcion.errorDatosUsuario', null, locale)
+			log.error("- checkUser - ${msg}")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+				mensaje:msg, tipo:Tipo.USER_ERROR)
 		}
 		X509Certificate certificadoUsu = usuario.getCertificate()
 		String nifValidado = org.sistemavotacion.util.StringUtils.validarNIF(usuario.nif)
 		if(!nifValidado) {
-			String mensajeError = messageSource.getMessage(
-				'susbcripcion.errorNifUsuario', [usuario.nif].toArray(), locale)
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:mensajeError)
+			msg = messageSource.getMessage('susbcripcion.errorNifUsuario', 
+				[usuario.nif].toArray(), locale)
+			log.error("- checkUser - ${msg}")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+				mensaje:msg, tipo:Tipo.USER_ERROR)
 		}
 		usuario.nif = nifValidado
 		usuario.type = Usuario.Type.USER
-		def usuarioDB = Usuario.findWhere(nif:nifValidado.toUpperCase())
+		Usuario usuarioDB = Usuario.findWhere(nif:nifValidado.toUpperCase())
 		Certificado certificado = null;
 		if (!usuarioDB) {
 			usuarioDB = usuario.save();
+			log.debug "- checkUser - NEW USER -> ${usuario.nif} - id '${usuarioDB.id}'"
 			if (usuario.getCertificate()) {
-				certificado = new Certificado(usuario:usuario,
+				certificado = new Certificado(usuario:usuarioDB,
 					contenido:usuario.getCertificate()?.getEncoded(),
 					numeroSerie:usuario.getCertificate()?.getSerialNumber()?.longValue(),
 					estado:Certificado.Estado.OK, tipo:Certificado.Tipo.USUARIO,
@@ -51,6 +57,7 @@ class SubscripcionService {
 					validoDesde:usuario.getCertificate()?.getNotBefore(),
 					validoHasta:usuario.getCertificate()?.getNotAfter())
 				certificado.save();
+				log.debug "- checkUser - NEW USER CERT -> id '${certificado.id}'"
 			}
 		} else {
 			certificado = Certificado.findWhere(
@@ -58,6 +65,7 @@ class SubscripcionService {
 			if (!certificado?.numeroSerie == certificadoUsu.getSerialNumber()?.longValue()) {
 				certificado.estado = Certificado.Estado.ANULADO
 				certificado.save()
+				log.debug "- checkUser - CANCELLED user cert id '${certificado.id}'"
 				certificado = new Certificado(usuario:usuarioDB,
 					contenido:certificadoUsu?.getEncoded(), estado:Certificado.Estado.OK,
 					numeroSerie:certificadoUsu?.getSerialNumber()?.longValue(),
@@ -65,21 +73,13 @@ class SubscripcionService {
 					validoDesde:usuario.getCertificate()?.getNotBefore(),
 					validoHasta:usuario.getCertificate()?.getNotAfter())
 				certificado.save();
+				log.debug "- checkUser - UPDATED user cert -> id '${certificado.id}'"
 			}
+			usuarioDB.setCertificadoCA(usuario.getCertificadoCA())
+			usuarioDB.setCertificate(usuario.getCertificate())
+			usuarioDB.setTimeStampToken(usuario.getTimeStampToken())
 		}
 		return new Respuesta(codigoEstado:Respuesta.SC_OK, usuario:usuarioDB, certificadoDB:certificado)
-	}
-        
-	Respuesta comprobarUsuario(SMIMEMessageWrapper smimeMessage, Locale locale) {
-		def nif = smimeMessage.getFirmante()?.nif
-		log.debug "comprobarUsuario - ${nif}"
-		if(!nif) {
-			String mensajeError = messageSource.getMessage('susbcripcion.errorDatosUsuario', null, locale)
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:mensajeError)
-		}
-		def usuario = Usuario.findWhere(nif:nif.toUpperCase())
-		if (usuario) return new Respuesta(codigoEstado:Respuesta.SC_OK,usuario:usuario)
-		return guardarUsuario(smimeMessage.getFirmante(), locale)
 	}
 	
 	Respuesta comprobarDispositivo(String nif, String telefono, String email, 
@@ -105,94 +105,125 @@ class SubscripcionService {
 		return new Respuesta(codigoEstado:Respuesta.SC_OK, usuario:usuario, dispositivo:dispositivo)
 	}
     
-	CentroControl comprobarCentroControl(String serverURL) {
-        log.debug "comprobarCentroControl - serverURL:${serverURL}"
+	Respuesta checkControlCenter(String serverURL) {
+        log.debug "checkControlCenter - serverURL:${serverURL}"
+		String msg = null
         serverURL = StringUtils.checkURL(serverURL)
-        CentroControl centroControl = CentroControl.findWhere(serverURL:serverURL)
-        if (!centroControl) {
-            String urlInfoCentroControl = "${serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLInfoServidor}"
-			Respuesta respuesta = httpService.obtenerInfoActorConIP(urlInfoCentroControl, new CentroControl())
-			if (Respuesta.SC_OK == respuesta.codigoEstado) {
-				centroControl = respuesta.actorConIP
-				centroControl.save()
-			} else return null
-        } else return centroControl
-	}
-	
-	public ActorConIP obtenerInfoActorConIP (String urlInfo, ActorConIP actorConIP) {
-		log.debug "obtenerInfoActorConIP - urlInfo: ${urlInfo}"
-		def infoActorHTTPBuilder = new HTTPBuilder(urlInfo);
-		infoActorHTTPBuilder.request(Method.GET) { req ->
-			response.'200' = { resp, reader ->
-				log.debug "***** OK: ${resp.statusLine}"
-				actorConIP.nombre = reader.nombre
-				actorConIP.serverURL = reader.serverURL
-				actorConIP.estado = ActorConIP.Estado.valueOf(reader.estado)
-				actorConIP.tipoServidor = Tipo.valueOf(reader.tipoServidor)
-			}
-			response.failure = { resp ->
-				log.error "***** ERROR: ${resp.statusLine}"
-				return null
+		String urlInfoCentroControl = "${serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLInfoServidor}"
+		CentroControl centroControl = null
+		CentroControl centroControlDB = CentroControl.findWhere(serverURL:serverURL)
+		Certificado controlCenterCert = null
+		X509Certificate x509controlCenterCertDB = null
+		byte[] certChainBytes = null
+		if(centroControlDB) {
+			controlCenterCert = Certificado.findWhere(actorConIP:centroControlDB,
+				estado:Certificado.Estado.OK)
+			if(controlCenterCert) {
+				ByteArrayInputStream bais = new ByteArrayInputStream(controlCenterCert.contenido)
+				x509controlCenterCertDB = CertUtil.loadCertificateFromStream (bais) 
 			}
 		}
-		return actorConIP
+		Respuesta respuesta = httpService.obtenerInfoActorConIP(urlInfoCentroControl)
+		if (Respuesta.SC_OK == respuesta.codigoEstado) {
+			ActorConIP actorConIP = respuesta.actorConIP
+			if (!Tipo.CENTRO_CONTROL.equals(actorConIP.tipoServidor)) {
+				msg = message(code: 'susbcripcion.actorNoCentroControl',
+					args:[actorConIP.serverURL])
+				log.error("checkControlCenter - ERROR - ${msg}")
+				return new Respuesta(mensaje:msg, codigoEstado:Respuesta.SC_ERROR_PETICION)
+			}
+			centroControl = new CentroControl(nombre:actorConIP.nombre,
+						serverURL:actorConIP.serverURL, 
+						cadenaCertificacion:actorConIP.cadenaCertificacion,
+						estado:actorConIP.estado)
+			if(!centroControlDB) {
+				centroControlDB = centroControl.save()
+				log.debug("checkControlCenter - SAVED ACTOR_CON_IP  ${centroControlDB.id}")
+			}
+			certChainBytes = centroControl.cadenaCertificacion
+			X509Certificate x509controlCenterCert = CertUtil.
+				fromPEMToX509CertCollection(certChainBytes).iterator().next()
+			if(controlCenterCert) { 
+				if(x509controlCenterCert.getSerialNumber().longValue() !=
+					x509controlCenterCertDB.getSerialNumber().longValue()) {
+					controlCenterCert.estado = Certificado.Estado.ANULADO
+					x509controlCenterCertDB = null
+					controlCenterCert.save()
+					log.debug("checkControlCenter - CANCELLING Certificado  ${controlCenterCert.id}")
+				}
+			} 
+			if(!x509controlCenterCertDB) {		
+				controlCenterCert = new Certificado(
+					actorConIP:centroControlDB,
+					contenido:x509controlCenterCert?.getEncoded(),
+					numeroSerie:x509controlCenterCert?.getSerialNumber()?.longValue(),
+					estado:Certificado.Estado.OK, tipo:Certificado.Tipo.ACTOR_CON_IP,
+					validoDesde:x509controlCenterCert?.getNotBefore(),
+					validoHasta:x509controlCenterCert?.getNotAfter())
+				controlCenterCert.save();
+				log.debug("checkControlCenter - added Certificado  ${controlCenterCert.id}")
+			}
+			centroControlDB.certificadoX509 = x509controlCenterCert
+			centroControlDB.cadenaCertificacion = certChainBytes
+			return new Respuesta(codigoEstado:Respuesta.SC_OK,
+				mensaje:msg,  centroControl:centroControlDB)
+		} else {
+			msg = messageSource.getMessage('http.errorConectandoCentroControl', null, locale)
+			log.error("checkControlCenter - ERROR CONECTANDO CONTROL CENTER - ${msg}")
+			return new Respuesta(mensaje:msg, codigoEstado:Respuesta.SC_ERROR_PETICION)
+		}
 	}
 
-	public Respuesta asociarCentroControl(SMIMEMessageWrapper smimeMessage, Locale locale) {
-		log.debug("asociarCentroControl - mensaje: ${smimeMessage.getSignedContent()}")
-		def mensajeJSON = JSON.parse(smimeMessage.getSignedContent())
-		Respuesta respuesta
-		Tipo tipoMensaje
-		if (mensajeJSON.serverURL) {
-			String serverURL = StringUtils.checkURL(mensajeJSON.serverURL)
-			CentroControl actorConIP = CentroControl.findWhere(serverURL:serverURL)
-			if (actorConIP) {
-				tipoMensaje = Tipo.SOLICITUD_ASOCIACION_CON_ACTOR_REPETIDO
-				respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
-					mensaje: messageSource.getMessage('susbcripcion.centroControlYaAsociado', [actorConIP.nombre].toArray(), locale))
+
+	public Respuesta asociarCentroControl(MensajeSMIME mensajeSMIMEReq, Locale locale) {
+		log.debug("asociarCentroControl")
+		SMIMEMessageWrapper smimeMessageReq = mensajeSMIMEReq.getSmimeMessage()
+		Usuario firmante = mensajeSMIMEReq.getUsuario()
+		String msg = null;
+		String serverURL = null;
+		try {
+			def mensajeJSON = JSON.parse(smimeMessageReq.getSignedContent())
+			if (!mensajeJSON.serverURL || !mensajeJSON.operation ||
+				(Tipo.ASOCIAR_CENTRO_CONTROL != Tipo.valueOf(mensajeJSON.operation))) {
+				msg = messageSource.getMessage('documentWithErrorsMsg',null, locale)
+				log.error("asociarCentroControl - ERROR DATA - ${msg}")
+				return new Respuesta(mensaje:msg, tipo:Tipo.ASOCIAR_CENTRO_CONTROL_ERROR, 
+					codigoEstado:Respuesta.SC_ERROR_PETICION)
 			} else {
-				tipoMensaje = Tipo.SOLICITUD_ASOCIACION
-				def urlInfoCentroControl = "${serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLInfoServidor}"
-				try {
-					respuesta = httpService.obtenerInfoActorConIP(urlInfoCentroControl, new CentroControl())
-					if (Respuesta.SC_OK == respuesta.codigoEstado) {
-						actorConIP = respuesta.actorConIP
-						if (Tipo.CENTRO_CONTROL.equals(actorConIP.tipoServidor)) {
-							actorConIP.save()
-							respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK,
-								mensaje: messageSource.getMessage('susbcripcion.centroControlAsociado', [actorConIP.nombre].toArray(), locale))
-						} else {
-							tipoMensaje = Tipo.SOLICITUD_ASOCIACION_CON_ERRORES
-							respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
-								mensaje:message(code: 'susbcripcion.actorNoCentroControl',
-									args:[actorConIP.serverURL]))
-						}
+				serverURL = StringUtils.checkURL(mensajeJSON.serverURL)
+				while (serverURL.endsWith("/")){
+					serverURL = serverURL.substring(0, serverURL.length()-1)
+				}
+				CentroControl centroControl = CentroControl.findWhere(serverURL:serverURL)
+				if (centroControl) {
+					msg = messageSource.getMessage('susbcripcion.centroControlYaAsociado',
+						[actorConIP.nombre].toArray(), locale)
+					log.error("asociarCentroControl- CONTROL CENTER ALREADY ASSOCIATED - ${msg}")
+					return new Respuesta(mensaje:msg,
+						codigoEstado:Respuesta.SC_ERROR_PETICION,
+						tipo:Tipo.ASOCIAR_CENTRO_CONTROL_ERROR)
+				} else {
+					Respuesta respuesta = checkControlCenter(serverURL)
+					if (Respuesta.SC_OK != respuesta.codigoEstado) {
+						log.error("asociarCentroControl- ERROR CHECKING CONTROL CENTER - ${respuesta.mensaje}")
+						return new Respuesta(mensaje:respuesta.mensaje,
+							codigoEstado:Respuesta.SC_ERROR_PETICION,
+							tipo:Tipo.ASOCIAR_CENTRO_CONTROL_ERROR)
 					} else {
-						tipoMensaje = Tipo.ERROR_CONEXION_CON_ACTOR
-						respuesta.mensaje = message(code: 'error.errorConexionActor',
-							args:["Centro de Control", serverURL, respuesta.mensaje])
+						msg =  messageSource.getMessage('susbcripcion.centroControlAsociado',
+							[respuesta.centroControl.nombre].toArray(), locale)
+						return new Respuesta(mensaje: msg,
+							codigoEstado:Respuesta.SC_OK,
+							tipo:Tipo.ASOCIAR_CENTRO_CONTROL)
 					}
-				} catch (ConnectException ex) {
-					log.error(ex.getMessage(), ex)
-					return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, tipo: Tipo.ERROR_CONEXION_CON_ACTOR,
-						mensaje: messageSource.getMessage('error.errorConexionActor',
-							["Centro de Control", serverURL, ex.getMessage()].toArray(), locale))
 				}
 			}
-		} else {
-			tipoMensaje = Tipo.SOLICITUD_ASOCIACION_CON_ERRORES
-			respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
-				mensaje:messageSource.getMessage('error.PeticionIncorrectaHTML', 
-					["${grailsApplication.config.grails.serverURL}/${params.controller}"].toArray(), locale))
+		} catch (Exception ex) {
+			log.error(ex.getMessage(), ex)
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+				mensaje: messageSource.getMessage('error.errorConexionActor',
+					[serverURL, ex.getMessage()].toArray(), locale),
+				tipo:Tipo.ASOCIAR_CENTRO_CONTROL_ERROR)
 		}
-		Respuesta respuestaUsuario = comprobarUsuario(smimeMessage, locale)
-		Usuario usuario = respuestaUsuario.usuario
-		MensajeSMIME mensajeSMIME = new MensajeSMIME(tipo:tipoMensaje,
-				usuario:usuario, valido:smimeMessage.isValidSignature(),
-				contenido:smimeMessage.getBytes())
-		MensajeSMIME.withTransaction {
-			mensajeSMIME.save();
-		}
-		return respuesta;
 	}
 }

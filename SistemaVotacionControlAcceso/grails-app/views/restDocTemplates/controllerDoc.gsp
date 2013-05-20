@@ -28,16 +28,26 @@ def controllerActions = controllerDoc?.controllerActions %>
 		   def eTagsMap = commentDoc?.getETagsMap()
 		   def requestHeaderMap = commentDoc?.getRequestHeaderMap()
 		   def responseHeaderMap = commentDoc?.getResponseHeaderMap()
-		   def contentTypeMap = commentDoc?.getContentTypeMap()
+		   def requestContentTypeMap = commentDoc?.getRequestContentTypeMap()
+		   def responseContentTypeMap = commentDoc?.getResponseContentTypeMap()
 		   def urlSufixMap = commentDoc?.getUrlSufixMap()
 	       def httpMethod = commentDoc?.httpMethod?.toUpperCase()
 	       def description = commentDoc?.description
-	       def result = commentDoc?.result%>
+	       def result = commentDoc?.result
+		   List serviceUrlList
+	       if(commentDoc.getServiceUrlList().size() > 0) 
+		   		serviceUrlList = commentDoc.getServiceUrlList()
+		   else {
+			   serviceUrlList = new ArrayList();
+			   serviceUrlList.add(it?.uri)
+		   }  %>
 		
 			<p>
-				<g:if test="${httpMethod}">- <u>${httpMethod}</u> - </g:if>
-				<a href="${escapedServerURLStr}${it?.uri}">${it?.uri}</a><br/>
 				<g:if test="${description}">${description}<br/></g:if>
+				<g:each in="${serviceUrlList}" var="serviceURL">
+					<g:if test="${httpMethod}">- <u>${httpMethod}</u> - </g:if>
+					<a href="${escapedServerURLStr}${serviceURL}">${serviceURL}</a><br/>
+				</g:each>
 			</p>
 			<div class="params_result_div">
 			
@@ -50,20 +60,30 @@ def controllerActions = controllerDoc?.controllerActions %>
 				</p>
 			</g:if>
 			
-			<g:if test="${contentTypeMap}">
-				<p>
-					<b><g:message code="contentTypeMsg"/>:</b><br/>
-					<g:each in="${contentTypeMap?.keySet()}" var="contentTypeKey">
-						<u>${contentTypeKey}</u>: ${contentTypeMap.get(contentTypeKey)}<br/>
-					</g:each>
-				</p>
-			</g:if>
-			
 			<g:if test="${paramsMap}">
 				<p>
 					<b><g:message code="paramsMsg"/>:</b><br/>
 					<g:each in="${paramsMap?.keySet()}" var="paramKey">
 						<u>${paramKey}</u>: ${paramsMap.get(paramKey)}<br/>
+					</g:each>
+				</p>
+			</g:if>
+			
+						
+			<g:if test="${requestContentTypeMap}">
+				<p>
+					<b><g:message code="requestContentTypeMsg"/>:</b><br/>
+					<g:each in="${requestContentTypeMap?.keySet()}" var="requestContentTypeKey">
+						<u>${requestContentTypeKey}</u>: ${requestContentTypeMap.get(requestContentTypeKey)}<br/>
+					</g:each>
+				</p>
+			</g:if>
+			
+			<g:if test="${responseContentTypeMap}">
+				<p>
+					<b><g:message code="responseContentTypeMsg"/>:</b><br/>
+					<g:each in="${responseContentTypeMap?.keySet()}" var="responseContentTypeKey">
+						<u>${responseContentTypeKey}</u>: ${responseContentTypeMap.get(responseContentTypeKey)}<br/>
 					</g:each>
 				</p>
 			</g:if>

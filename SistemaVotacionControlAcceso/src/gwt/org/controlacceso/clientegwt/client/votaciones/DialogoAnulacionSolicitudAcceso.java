@@ -30,6 +30,7 @@ public class DialogoAnulacionSolicitudAcceso implements EventoGWTMensajeClienteF
 
     @UiField PushButton anularSolicitudButton;
     @UiField PushButton cancelButton;
+    @UiField PushButton aceptarButton;
     @UiField HTML cancelAccessRequestMsg;
     @UiField HTML accessRequestCanceledMsg;
     
@@ -41,6 +42,7 @@ public class DialogoAnulacionSolicitudAcceso implements EventoGWTMensajeClienteF
 	public DialogoAnulacionSolicitudAcceso(EventoSistemaVotacionJso voto) {
         uiBinder.createAndBindUi(this);
         this.voto = voto;
+        aceptarButton.setVisible(false);
         accessRequestCanceledMsg.setVisible(false);
         BusEventos.addHandler(
         		EventoGWTMensajeClienteFirma.TYPE, this);
@@ -63,6 +65,11 @@ public class DialogoAnulacionSolicitudAcceso implements EventoGWTMensajeClienteF
     	dialogBox.hide();
     }
     
+    @UiHandler("aceptarButton")
+    void handleAcceptButton(ClickEvent e) {
+    	dialogBox.hide();
+    }
+    
     public void hide() {
     	dialogBox.hide();
     }
@@ -82,6 +89,12 @@ public class DialogoAnulacionSolicitudAcceso implements EventoGWTMensajeClienteF
 			        accessRequestCanceledMsg.setVisible(true);
 			        cancelAccessRequestMsg.setVisible(false);
 			        cancelButton.setVisible(true);
+				} else if(MensajeClienteFirmaJso.SC_ANULACION_REPETIDA == mensaje.getCodigoEstado()){
+			        accessRequestCanceledMsg.setVisible(true);
+			        accessRequestCanceledMsg.setHTML(mensaje.getMensaje());
+			        cancelAccessRequestMsg.setVisible(false);
+			        cancelButton.setVisible(false);
+			        aceptarButton.setVisible(true);
 				} else {
 					anularSolicitudButton.setVisible(true);
 				}

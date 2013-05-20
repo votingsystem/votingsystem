@@ -55,7 +55,7 @@ public class FileMapLauncherWorker extends SwingWorker<Integer, String>
         String msg = "<html><b>" + getString("connectionMsg") + "...</b></html>";
         workerListener.process(Arrays.asList(msg));
         HttpResponse response = Contexto.getHttpHelper().
-                sendMap(fileMap, serverURL);
+                sendObjectMap(fileMap, serverURL);
         statusCode = response.getStatusLine().getStatusCode();
         message = EntityUtils.toString(response.getEntity());
         logger.debug("doInBackground - message: " + message);

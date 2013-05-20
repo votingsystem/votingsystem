@@ -15,7 +15,6 @@ import org.sistemavotacion.centrocontrol.modelo.*
 import org.sistemavotacion.seguridad.*
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
-import org.sistemavotacion.smime.SignedMailGenerator.Type;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
@@ -130,20 +129,12 @@ class EncryptionService {
 	/**
 	 * Method to encrypt SMIME signed messages
 	 */
-	Respuesta encryptSMIMEMessage(byte[] smimeMessage, 
+	Respuesta encryptSMIMEMessage(byte[] bytesToEncrypt, 
 		X509Certificate receiverCert, Locale locale) throws Exception {
 		log.debug(" - encryptSMIMEMessage(...) ");
-		/* Create the encrypter */
-		SMIMEMessageWrapper msgToEncrypt = null;
 		try {
-			msgToEncrypt = SMIMEMessageWrapper.build(
-					new ByteArrayInputStream(smimeMessage), null);
-		} catch (Exception ex) {
-			log.error (ex.getMessage(), ex)
-			return new Respuesta(mensaje:ex.getMessage(),
-				codigoEstado:Respuesta.SC_ERROR_PETICION)
-		}
-		try {
+			SMIMEMessageWrapper msgToEncrypt = new SMIMEMessageWrapper(
+					new ByteArrayInputStream(bytesToEncrypt));
 			SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
 			encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
 				receiverCert).setProvider("BC"));
@@ -172,12 +163,12 @@ class EncryptionService {
 				}
 			}
 		
-			SignerInformationStore  signers =
+			/*SignerInformationStore  signers =
 				msgToEncrypt.getSmimeSigned().getSignerInfos();
 			Iterator<SignerInformation> it = signers.getSigners().iterator();
 			byte[] digestBytes = it.next().getContentDigest();//method can only be called after verify.
 			String digestStr = new String(Base64.encode(digestBytes));
-			encryptedMessage.addHeaderLine("SignedMessageDigest: " + digestStr);
+			encryptedMessage.addHeaderLine("SignedMessageDigest: " + digestStr);*/
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			encryptedMessage.writeTo(baos);
 			return new Respuesta(messageBytes:baos.toByteArray(),
@@ -199,6 +190,9 @@ class EncryptionService {
 			if(getRecipientId() == null) afterPropertiesSet();
 			MimeMessage msg = new MimeMessage(getSession(), 
 				new ByteArrayInputStream(encryptedMessageBytes));
+			
+			//String encryptedMessageBytesStr = new String(encryptedMessageBytes);
+			//log.debug("decryptSMIMEMessage - encryptedMessageBytesStr: " + encryptedMessageBytesStr)
 	
 			SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
 		 
@@ -217,8 +211,9 @@ class EncryptionService {
 				 recipient.getContent(new JceKeyTransEnvelopedRecipient(serverPrivateKey).setProvider("BC")));*/
 			byte[] messageContentBytes =  recipientInfo.getContent(getRecipient())
 			//log.debug(" ------- Message Contents: ${new String(messageContentBytes)}");
-			smimeMessageReq = SMIMEMessageWrapper.build(
-					new ByteArrayInputStream(messageContentBytes), null);;
+			
+			smimeMessageReq = new SMIMEMessageWrapper(
+					new ByteArrayInputStream(messageContentBytes));
 		} catch(CMSException ex) {
 			log.error (ex.getMessage(), ex)
 			return new Respuesta(mensaje:messageSource.getMessage(

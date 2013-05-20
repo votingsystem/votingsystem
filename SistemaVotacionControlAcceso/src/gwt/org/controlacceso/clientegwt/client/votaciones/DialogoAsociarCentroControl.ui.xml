@@ -12,7 +12,7 @@
 		.panelInferior { width:100%; margin: 15px 10px 0px 10px ;}
 		.buttonPanel { float:right; margin-right:10px;}
 		.texto{}
-		.textBox {border:1pt solid #3E125F; margin-top: 7px; width:300px;}
+		.textBox {border:1pt solid #3E125F; margin-top: 7px; width:360px;}
 		.panelUrl {vertical-align:middle;}
 		.indeterminatePanel {float:left; margin-top:6px;}
 		.indeterminateLabel {font-size: 14px; margin:2px 3px 0px 0px; color:#47678e;}
@@ -23,7 +23,7 @@
 	<ui:with field='res' type='org.controlacceso.clientegwt.client.Recursos'/>
 	<ui:with field='constantes' type='org.controlacceso.clientegwt.client.Constantes'/>
 	<g:DialogBox ui:field="dialogBox" autoHide="false" modal="true" 
-	    glassEnabled="true" animationEnabled="true" width="500px">
+	    glassEnabled="true" animationEnabled="true" width="600px">
 		<g:caption><b>Asociar Centro de Control</b></g:caption>
 		<g:VerticalPanel styleName="{style.mainPanel}">
     		<g:VerticalPanel ui:field="messagePanel" styleName="{style.messagePanel}">

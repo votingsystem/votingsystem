@@ -1,8 +1,6 @@
 package org.controlacceso.clientegwt.client.util;
 
 import org.controlacceso.clientegwt.client.modelo.EventoSistemaVotacionJso;
-import org.controlacceso.clientegwt.client.modelo.EventoSistemaVotacionJso.Estado;
-
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**
@@ -12,7 +10,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 public class ServerPaths {
 
     public static String getInfoServidorPath () {
-    	return getApplicationPath() + "infoServidor/obtener";
+    	return getApplicationPath() + "infoServidor";
     } 
 	
     public static String getApplicationPath () {
@@ -47,36 +45,28 @@ public class ServerPaths {
     }
     
     public static String getUrlEventos (int max, int offset) {
-    	 return getApplicationPath() + "evento/obtener?max=" + max + "&offset=" + offset;
+    	 return getApplicationPath() + "evento?max=" + max + "&offset=" + offset;
     }
-    
-	public static String getUrlManifiestos() {
-		return getApplicationPath() + "eventoFirma/obtenerManifiestos";
-	}
 
     public static String getUrlEvento (int id) {
-    	return getApplicationPath() + "evento/obtener?id=" + id;
+    	return getApplicationPath() + "evento/" + id;
     }
     
     public static String getUrlAppVotacion () {
     	return getApplicationPath() + "app/home";
     }
     
-    public static String getUrlPublicarPDF () {
-   	 	return getApplicationPath() + "eventoFirma/publicarPDF";
-    }
-    
     public static String getUrlTimeStampServer () {
-   	 	return getApplicationPath() + "timeStamp/obtener";
+   	 	return getApplicationPath() + "timeStamp";
     }
 
     public static String getUrlSolicitudAcceso () {
-    	return getApplicationPath() + "solicitudAcceso/procesar";
+    	return getApplicationPath() + "solicitudAcceso";
     }
     
     public static String getUrlVotoCentroControl (String serverUrl) {
         if (!serverUrl.endsWith("/")) serverUrl = serverUrl + "/";
-    	return serverUrl + "voto/guardarAdjuntandoValidacion";
+    	return serverUrl + "voto";
     }
     
     public static String getUrlFrameClienteFirma () {
@@ -88,16 +78,11 @@ public class ServerPaths {
     }
     
     public static String getUrlSolicitudCopiaSeguridad () {
-    	return getApplicationPath() + "solicitudCopia/validarSolicitud";
+    	return getApplicationPath() + "solicitudCopia";
     }
     
     public static String getUrlSolicitudAccesoPorNif (String nif, int eventoId) {
-    	return getApplicationPath() + "solicitudAcceso/encontrarPorNif?nif=" + nif +
-    			"&eventoId=" + eventoId;
-    }
-    
-    public static String getUrlManifiesto (String id) {
-    	return getApplicationPath() + "eventoFirma/obtener?id=" + id;
+    	return getApplicationPath() + "solicitudAcceso/evento/" + eventoId + "/nif/" + nif;
     }
     
     public static String getUrlSubscripcionManifiestos () {
@@ -113,7 +98,7 @@ public class ServerPaths {
     }
     
     public static String getRepresentativesUrl (int max, int offset) {
-    	return getApplicationPath() + "representative/get?max=" 
+    	return getApplicationPath() + "representative?max=" 
     		+ max + "&offset=" + offset;
     }
     
@@ -122,68 +107,78 @@ public class ServerPaths {
     		EventoSistemaVotacionJso.Estado estado) {
     	String sufix = ""; 
     	if(estado != null) sufix = "&estadoEvento=" + estado.toString();
-   	 	return getApplicationPath() + "eventoReclamacion/obtener?max=" 
+   	 	return getApplicationPath() + "eventoReclamacion?max=" 
     			+ max + "&offset=" + offset  + sufix;
-    }
-    
-    public static String getUrlEventosFirma (int max, int offset, 
-    		EventoSistemaVotacionJso.Estado estado) {
-    	String sufix = ""; 
-    	if(estado != null) sufix = "&estadoEvento=" + estado.toString();
-   	 	return getApplicationPath() + "eventoFirma/obtenerManifiestos?max=" 
-    			+ max + "&offset=" + offset  + sufix;
-    }
-    
-    public static String getUrlEstadisticasEventoFirma (int eventoId) {
-   	 	return getApplicationPath() + "eventoFirma/estadisticas?id=" + eventoId;
     }
     
     public static String getUrlEstadisticasEventoReclamacion (int eventoId) {
-   	 	return getApplicationPath() + "eventoReclamacion/estadisticas?id=" + eventoId;
+   	 	return getApplicationPath() + "eventoReclamacion/" + eventoId  + "/estadisticas";
     }
     
     public static String getUrlEstadisticasEventoReclamacion (String serverURL, int eventoId) {
-   	 	return serverURL + "eventoReclamacion/estadisticas?id=" + eventoId;
+   	 	return serverURL + "eventoReclamacion/" + eventoId  + "/estadisticas";
     }
     
     public static String getUrlEstadisticasEventoVotacion (int eventoId) {
-   	 	return getApplicationPath() + "eventoVotacion/estadisticas?id=" + eventoId;
+   	 	return getApplicationPath() + "eventoVotacion/" + eventoId  + "/estadisticas";
     }
     
     public static String getUrlDatosAplicacion () {
    	 	return getApplicationPath() + "infoServidor/informacion";
     }
     
-    public static String getUrlPDFManifiesto (int eventoId) {
-   	 	return getApplicationPath() + "eventoFirma/obtenerPDF?id=" + eventoId;
+    public static String getUrlManifiesto (Integer id) {
+    	return getApplicationPath() + "eventoFirma/" + id;
     }
     
+    public static String getUrlPublicarPDF () {
+   	 	return getApplicationPath() + "eventoFirma";
+    }
+    
+	public static String getUrlManifiestos() {
+		return getApplicationPath() + "eventoFirma";
+	}
+	
+    public static String getUrlEstadisticasEventoFirma (int eventoId) {
+   	 	return getApplicationPath() + "eventoFirma/" + eventoId + "/estadisticas";
+    }
+    
+    
+    public static String getUrlEventosFirma (int max, int offset, 
+    		EventoSistemaVotacionJso.Estado estado) {
+    	String sufix = ""; 
+    	if(estado != null) sufix = "&estadoEvento=" + estado.toString();
+   	 	return getApplicationPath() + "eventoFirma?max=" 
+    			+ max + "&offset=" + offset  + sufix;
+    }
+
+    
     public static String getUrlValidacionPDFPendientePublicacion (int eventoId) {
-   	 	return getApplicationPath() + "eventoFirma/validarPDF?id=" + eventoId;
+   	 	return getApplicationPath() + "eventoFirma/" + eventoId;
     }
     
     public static String getUrlRecolectorFirmaPDF (int eventoId) {
-   	 	return getApplicationPath() + "recolectorFirma/validarPDF?id=" + eventoId;
+   	 	return getApplicationPath() + "recolectorFirma/" + eventoId;
     }
     
     public static String getUrlRecolectorReclamaciones () {
-   	 	return getApplicationPath() + "recolectorReclamacion/guardarAdjuntandoValidacion";
+   	 	return getApplicationPath() + "recolectorReclamacion";
     }
     
     public static String getUrlCancelarEvento () {
-   	 	return getApplicationPath() + "evento/guardarCancelacion";
+   	 	return getApplicationPath() + "evento/cancelled";
     }
     
     public static String getUrlAsociacionCentroControl () {
-   	 	return getApplicationPath() + "subscripcion/guardarAsociacionConCentroControl";
+   	 	return getApplicationPath() + "subscripcion";
     }
 
     public static String getUrlPublicacionVotacion () {
-   	 	return getApplicationPath() + "eventoVotacion/guardarAdjuntandoValidacion";
+   	 	return getApplicationPath() + "eventoVotacion";
     }
     
     public static String getUrlPublicacionReclamacion () {
-   	 	return getApplicationPath() + "eventoReclamacion/guardarAdjuntandoValidacion";
+   	 	return getApplicationPath() + "eventoReclamacion";
     }
     
     public static String getUrlServerCert() {
@@ -192,11 +187,11 @@ public class ServerPaths {
     
     public static String getUrlVoto(String serverUrl, String hashHex) {
         if (!serverUrl.endsWith("/")) serverUrl = serverUrl + "/";
-    	return serverUrl + "voto/obtener?hashCertificadoVotoHex=" + hashHex;
+    	return serverUrl + "voto/hashHex/" + hashHex;
     }
     
     public static String getURLAnulacionVoto() {
-    	return getApplicationPath() + "anuladorVoto/guardarAdjuntandoValidacion";
+    	return getApplicationPath() + "anuladorVoto";
     }
     
     public static native void redirect(String url)/*-{
@@ -234,32 +229,28 @@ public class ServerPaths {
     }
     
     public static String getUrlComprobacionFechasEvento(int eventoId) {
-        return getApplicationPath() + "evento/comprobarFechas?id=" + eventoId;
+        return getApplicationPath() + "evento/" + eventoId + "/comprobarFechas";
     }
 
 	public static String getUrlSolicitudCancelVote(
-			String hashCertificadoVotoBase64) {
-        return getApplicationPath() + "anuladorVoto/obtener?hashCertVoteHEX=" + hashCertificadoVotoBase64;
+			String hashCertificadoVotoHEX) {
+        return getApplicationPath() + "anuladorVoto/" + hashCertificadoVotoHEX;
 	}
 
-	public static String getUrlRepresentativeData(Integer representativeId) {
-		if(representativeId != null) {
-			return getApplicationPath() + "representative/guardar?id=" + representativeId;
-		} else {
-			return getApplicationPath() + "representative/guardar";
-		}
+	public static String getUrlRepresentativeData() {
+		return getApplicationPath() + "representative";
 	}
     
     public static String getUrlEventosVotacion (int max, int offset, 
     		EventoSistemaVotacionJso.Estado estado) {
     	String sufix = ""; 
     	if(estado != null) sufix = "&estadoEvento=" + estado.toString();
-    	return getApplicationPath() + "eventoVotacion/obtener?max=" 
+    	return getApplicationPath() + "eventoVotacion?max=" 
     		+ max + "&offset=" + offset + sufix;
     }
 
 	public static String getRepresentativeDetailsMapUrl(int representativeId) {
-		return getApplicationPath() + "representative/detailed?id=" + representativeId;
+		return getApplicationPath() + "representative/" + representativeId;
 	}
 	
 	public static String getRepresentativeDetailsUrl(int representativeId) {
@@ -267,27 +258,27 @@ public class ServerPaths {
 	}
 
 	public static String getUrlSelectRepresentative() {
-		return getApplicationPath() + "representative/guardarSelectAdjuntandoValidacion";
+		return getApplicationPath() + "representative/userSelection";
 	}
 
 	public static String getUrlRepresentativeVotingHistory() {
-		return getApplicationPath() + "representative/guardarVotingHistoryRequest";
+		return getApplicationPath() + "representative/history";
 	}
 
 	public static String getUrlRepresentativeAccreditations() {
-		return getApplicationPath() + "representative/guardarAccreditationsRequest";
+		return getApplicationPath() + "representative/accreditations";
 	}
 
 	public static String getRepresentativeByUserNif(String param) {
-		return getApplicationPath() + "representative/getByUserNif?nif=" + param;
+		return getApplicationPath() + "user/" + param + "/representative";
 	}
 	
 	public static String getRepresentativeByNif(String param) {
-		return getApplicationPath() + "representative/getByNif?nif=" + param;
+		return getApplicationPath() + "representative/nif/" + param;
 	}
 
 	public static String getUrlUnsubscribeRepresentative() {
-		return getApplicationPath() + "representative/guardarUnsubscribeRequestAdjuntandoValidacion";
+		return getApplicationPath() + "representative/revoke";
 	}
 	
 }

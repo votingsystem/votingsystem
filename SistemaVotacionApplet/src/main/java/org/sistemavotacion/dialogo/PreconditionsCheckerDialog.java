@@ -115,18 +115,18 @@ public class PreconditionsCheckerDialog
                     logger.debug("controlCenterCertChecked: " + controlCenterCertChecked + 
                             " - accessControlCertChecked: " + accessControlCertChecked);
                     break;
-                case REPRESENTATIVE_UNSUBSCRIBE_REQUEST:
+                case REPRESENTATIVE_REVOKE:
                 case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
                 case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
                 case NEW_REPRESENTATIVE:
-                case SELECT_REPRESENTATIVE:
+                case REPRESENTATIVE_SELECTION:
                 case PUBLICACION_MANIFIESTO_PDF:
                 case FIRMA_MANIFIESTO_PDF:
                 case PUBLICACION_RECLAMACION_SMIME:
                 case FIRMA_RECLAMACION_SMIME:
                 case PUBLICACION_VOTACION_SMIME:
                 case CANCELAR_EVENTO:
-                case ASOCIAR_CENTRO_CONTROL_SMIME:
+                case ASOCIAR_CENTRO_CONTROL:
                 case ANULAR_SOLICITUD_ACCESO:
                 case ANULAR_VOTO: 
                 case SOLICITUD_COPIA_SEGURIDAD:
@@ -199,17 +199,17 @@ public class PreconditionsCheckerDialog
                     }
                 });    
                 break;
-            case REPRESENTATIVE_UNSUBSCRIBE_REQUEST:
+            case REPRESENTATIVE_REVOKE:
             case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
             case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
-            case SELECT_REPRESENTATIVE:
+            case REPRESENTATIVE_SELECTION:
             case PUBLICACION_MANIFIESTO_PDF:
             case FIRMA_MANIFIESTO_PDF:
             case PUBLICACION_RECLAMACION_SMIME:
             case FIRMA_RECLAMACION_SMIME:
             case PUBLICACION_VOTACION_SMIME:
             case CANCELAR_EVENTO:
-            case ASOCIAR_CENTRO_CONTROL_SMIME:
+            case ASOCIAR_CENTRO_CONTROL:
             case ANULAR_SOLICITUD_ACCESO:
             case ANULAR_VOTO: 
                 javax.swing.SwingUtilities.invokeLater(new Runnable() {
@@ -254,7 +254,7 @@ public class PreconditionsCheckerDialog
             if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
             String serverCertURL = serverURL + CERT_CHAIN_URL_SUFIX;
             logger.debug(" - getNetworkCert - serverCertURL: " + serverCertURL);
-            new ObtenerArchivoWorker(operationId, serverCertURL, this).execute();
+            new ObtenerArchivoWorker(operationId, serverCertURL, null, this).execute();
         }
         return cert;
     }

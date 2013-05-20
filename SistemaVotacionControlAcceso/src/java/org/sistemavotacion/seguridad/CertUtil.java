@@ -30,6 +30,7 @@ import java.security.cert.TrustAnchor;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
@@ -101,9 +102,9 @@ public class CertUtil {
         certGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()));
         certGen.setIssuerDN(x509Principal);
         certGen.setNotBefore(fechaIncio);
-        logger.debug("fechaIncio: " + fechaIncio.toString());
         certGen.setNotAfter(fechaFin);
-        logger.debug("fechaFin: " + fechaFin.toString());
+        logger.debug("fechaIncio: " + fechaIncio.toString() + 
+        		" - fechaFin: " + fechaFin.toString());
         certGen.setSubjectDN(x509Principal);
         certGen.setPublicKey(pair.getPublic());
         certGen.setSignatureAlgorithm(SIG_ALGORITHM);
@@ -255,10 +256,10 @@ public class CertUtil {
         params.setRevocationEnabled(checkCRL); // if false tell system do not check CRL's
         CertPathValidator certPathValidator
             = CertPathValidator.getInstance("PKIX","BC");
-        List<Certificate> certificates = new ArrayList<Certificate>();
-        certificates.add(cert);
+        //List<Certificate> certificates = new ArrayList<Certificate>();
+        //certificates.add(cert);
         CertificateFactory certFact = CertificateFactory.getInstance("X.509");
-        CertPath certPath = certFact.generateCertPath(certificates);
+        CertPath certPath = certFact.generateCertPath(Arrays.asList(cert));
         CertPathValidatorResult result = certPathValidator.validate(certPath, params);
         // Get the CA used to validate this path
         //PKIXCertPathValidatorResult pkixResult = (PKIXCertPathValidatorResult)result;

@@ -12,74 +12,63 @@ import java.util.Locale;
 
 class ReclamacionService {
 	
-	
-	def subscripcionService
 	def firmaService
 	def grailsApplication
 	def messageSource
 
-     Respuesta guardar (SMIMEMessageWrapper smimeMessage, Locale locale) {
-        log.debug("guardarFirmaEvento - mensaje: ${smimeMessage.getSignedContent()}")
-        Firma firma
-        def codigoEstado
-        def tipoRespuesta
-        def mensaje
-		MensajeSMIME mensajeSMIMEValidado
+     Respuesta guardar (MensajeSMIME mensajeSMIMEReq, Locale locale) {
+        log.debug("guardar -")
+        def msg
+		SMIMEMessageWrapper smimeMessage = mensajeSMIMEReq.getSmimeMessage()
         def mensajeJSON = JSON.parse(smimeMessage.getSignedContent())
-        Respuesta respuestaUsuario = subscripcionService.comprobarUsuario(smimeMessage, locale)
-		if(200 != respuestaUsuario.codigoEstado) return respuestaUsuario
-		Usuario usuario = respuestaUsuario.usuario
+		Usuario usuario = mensajeSMIMEReq.getUsuario()
         EventoReclamacion eventoReclamacion = EventoReclamacion.get(mensajeJSON.id)
-        MensajeSMIME mensajeSMIME = new MensajeSMIME(valido:smimeMessage.isValidSignature(),
-            contenido:smimeMessage.getBytes(), usuario:usuario, evento:eventoReclamacion)
         if (!eventoReclamacion) {
-            codigoEstado = 400
-			mensaje = messageSource.getMessage('eventNotFound', 
+			msg = messageSource.getMessage('eventNotFound', 
                     [mensajeJSON.id].toArray() , locale)
-            tipoRespuesta = Tipo.EVENTO_NO_ENCONTRADO
-            mensajeSMIME.setTipo(Tipo.FIRMA_ERROR_EVENTO_NO_ENCONTRADO)
+			log.debug("guardar - ${msg}")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg,
+				tipo:Tipo.FIRMA_EVENTO_RECLAMACION_ERROR)
         } else {
-            firma = Firma.findWhere(evento:eventoReclamacion, usuario:usuario)
+            Firma firma = Firma.findWhere(evento:eventoReclamacion, usuario:usuario)
             if (!firma || Evento.Cardinalidad.MULTIPLES.equals(
                     eventoReclamacion.cardinalidadRepresentaciones)) {
-                log.debug("Firma correcta - usuario: ${usuario.nif}")
+                log.debug("guardar - claim signature OK - signer: ${usuario.nif}")
                 firma = new Firma(usuario:usuario, evento:eventoReclamacion, 
-					tipo:Tipo.FIRMA_EVENTO_RECLAMACION)
-                mensajeSMIME.setTipo(Tipo.FIRMA_EVENTO_RECLAMACION)
-                codigoEstado = 200
+					tipo:Tipo.FIRMA_EVENTO_RECLAMACION, mensajeSMIME:mensajeSMIMEReq)
+				firma.save();
+				mensajeJSON.campos?.collect { campoItem ->
+					CampoDeEvento campo = CampoDeEvento.findWhere(id:campoItem.id?.longValue())
+					if (campo) {
+						new ValorCampoDeEvento(valor:campoItem.valor, firma:firma, campoDeEvento:campo).save()
+					}
+				}
+				
+				String fromUser = grailsApplication.config.SistemaVotacion.serverName
+				String toUser = usuario.getNif()
+				String subject = messageSource.getMessage(
+					'mime.asunto.FirmaReclamacionValidada', null, locale)
+
+				SMIMEMessageWrapper smimeMessageResp = firmaService.
+					getMultiSignedMimeMessage (fromUser, toUser, smimeMessage, subject)
+				MensajeSMIME mensajeSMIMEResp = new MensajeSMIME(tipo:Tipo.RECIBO,
+					smimePadre:mensajeSMIMEReq, evento:eventoReclamacion, 
+					valido:true, contenido:smimeMessageResp.getBytes())
+				MensajeSMIME.withTransaction {
+					mensajeSMIMEResp.save()
+				}
+				return new Respuesta(codigoEstado:Respuesta.SC_OK,
+					mensajeSMIME:mensajeSMIMEResp, evento:eventoReclamacion,
+					smimeMessage:smimeMessage, tipo:Tipo.FIRMA_EVENTO_RECLAMACION)
             } else {
-                log.debug("Firma repetida")
-                codigoEstado = 400
-                tipoRespuesta = Tipo.FIRMA_EVENTO_RECLAMACION_REPETIDA
-                mensaje = messageSource.getMessage('eventoReclamacion.firmaRepetida', 
-                    [usuario.nif, eventoReclamacion.asunto].toArray() , locale)
-                mensajeSMIME.setTipo(Tipo.FIRMA_EVENTO_RECLAMACION_REPETIDA)
+				msg = messageSource.getMessage('eventoReclamacion.firmaRepetida',
+					[usuario.nif, eventoReclamacion.asunto].toArray() , locale)
+                log.error("guardar - ${msg} - signer: ${usuario.nif}")
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+					evento:eventoReclamacion, mensaje:msg,
+					tipo:Tipo.FIRMA_EVENTO_RECLAMACION_ERROR)
             }
         }
-		mensajeSMIME.save();
-        if(firma && codigoEstado == 200) {
-            firma.mensajeSMIME = mensajeSMIME
-            firma.save();
-            mensajeJSON.campos?.collect { campoItem ->
-                CampoDeEvento campo = CampoDeEvento.findWhere(id:campoItem.id?.longValue())
-                if (campo) {
-                    new ValorCampoDeEvento(valor:campoItem.valor, firma:firma, campoDeEvento:campo).save()
-                }
-            }
-			String asuntoMultiFirmaMimeMessage = messageSource.getMessage(
-				'mime.asunto.FirmaReclamacionValidada', null, locale)
-			MimeMessage multiFirmaMimeMessage =firmaService.generarMultifirma (
-				smimeMessage, asuntoMultiFirmaMimeMessage)
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			multiFirmaMimeMessage.writeTo(baos);
-			mensajeSMIMEValidado = new MensajeSMIME(tipo:Tipo.FIRMA_EVENTO_RECLAMACION_VALIDADA,
-				smimePadre:mensajeSMIME, evento:eventoReclamacion,
-				usuario:usuario, valido:true, contenido:baos.toByteArray())
-			mensajeSMIMEValidado.save();
-        }
-        return new Respuesta(codigoEstado:codigoEstado, tipo:tipoRespuesta, mensaje:mensaje,
-            fecha:DateUtils.getTodayDate(), mensajeSMIME:mensajeSMIME, evento:eventoReclamacion,
-            usuario:usuario, smimeMessage:smimeMessage, mensajeSMIMEValidado:mensajeSMIMEValidado)
     }
 	 
 }

@@ -21,7 +21,7 @@ import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.MainFrame;
 import org.sistemavotacion.test.json.DeJSONAObjeto;
 import org.sistemavotacion.test.json.DeObjetoAJSON;
-import org.sistemavotacion.test.tarea.EnviarMultipartEntityWorker;
+import org.sistemavotacion.test.tarea.FileSenderWorker;
 import org.sistemavotacion.test.tarea.LanzadorWorker;
 import org.sistemavotacion.test.tarea.ObtenerInfoServidorWorker;
 import org.sistemavotacion.util.FileUtils;
@@ -310,7 +310,7 @@ public class AsociarCentroControlDialog
                     ContextoPruebas.getControlAcceso().getNombreNormalizado(), 
                     documentoAsociacion, "Solicitud Asociacion de Centro de Control", null, SignedMailGenerator.Type.USER);
             mimeMessage.writeTo(new FileOutputStream(solicitudAsociacion));
-            tareaEnEjecucion= new EnviarMultipartEntityWorker(solicitudAsociacion, 
+            tareaEnEjecucion= new FileSenderWorker(solicitudAsociacion, 
                     ContextoPruebas.getURLAsociarActorConIP(
                     ContextoPruebas.getControlAcceso().getServerURL(), ActorConIP.Tipo.CENTRO_CONTROL), this);
             tareaEnEjecucion.execute();            
@@ -381,8 +381,8 @@ public class AsociarCentroControlDialog
                 infoServidorButton.setText("Asociar");
             }
         }
-        if(worker instanceof EnviarMultipartEntityWorker) {
-        	EnviarMultipartEntityWorker multipartEntityWorker = (EnviarMultipartEntityWorker)worker;
+        if(worker instanceof FileSenderWorker) {
+        	FileSenderWorker multipartEntityWorker = (FileSenderWorker)worker;
         	logger.debug(" --- mostrarResultadoOperacion - EnviarMultipartEntityWorker"); 
             if(Respuesta.SC_OK == multipartEntityWorker.getStatusCode()) {
                 estado = Estado.CENTRO_CONTROL_ASOCIADO;

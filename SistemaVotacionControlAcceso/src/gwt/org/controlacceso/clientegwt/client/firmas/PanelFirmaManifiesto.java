@@ -114,7 +114,9 @@ public class PanelFirmaManifiesto extends Composite implements ConfirmacionListe
 		mensajeClienteFirma.setNombreDestinatarioFirma(
 				PuntoEntrada.INSTANCIA.servidor.getNombre());
 		mensajeClienteFirma.setUrlDocumento(ServerPaths.
-				getUrlPDFManifiesto(evento.getId()));
+				getUrlManifiesto(evento.getId()));
+		mensajeClienteFirma.setContentType(
+				Constantes.PDF_SIGNED_AND_ENCRYPTED_CONTENT_TYPE);
 		mensajeClienteFirma.setRespuestaConRecibo(false);
 		mensajeClienteFirma.setEvento(evento);
 		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
@@ -266,7 +268,7 @@ public class PanelFirmaManifiesto extends Composite implements ConfirmacionListe
 		switch(mensaje.getOperacionEnumValue()) {
 			case FIRMA_MANIFIESTO_PDF:
 				setWidgetsStateFirmando(false);
-				if(200 == mensaje.getCodigoEstado()) {
+				if(MensajeClienteFirmaJso.SC_OK == mensaje.getCodigoEstado()) {
 					ResultDialog dialogo = new ResultDialog();
 					dialogo.show(Constantes.INSTANCIA.operationResultMsg(evento.getAsunto()));
 			    	History.newItem(HistoryToken.MANIFIESTOS.toString());
@@ -279,7 +281,7 @@ public class PanelFirmaManifiesto extends Composite implements ConfirmacionListe
 				break;
 			case SOLICITUD_COPIA_SEGURIDAD:
 				setWidgetsStateFirmando(false);
-				if(200 == mensaje.getCodigoEstado()) {
+				if(MensajeClienteFirmaJso.SC_OK == mensaje.getCodigoEstado()) {
 					setMessage(Constantes.INSTANCIA.mensajeSolicitudCopiaSeguridadOK());
 				} else {
 					setMessage(Constantes.INSTANCIA.mensajeError(

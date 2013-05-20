@@ -16,6 +16,8 @@ import org.sistemavotacion.controlacceso.modelo.Respuesta;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.jsonp.client.JsonpRequestBuilder;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -75,8 +77,15 @@ public class DialogoAsociarCentroControl implements EventoGWTMensajeClienteFirma
     	MensajeClienteFirmaJso mensajeClienteFirma = MensajeClienteFirmaJso.create();
     	mensajeClienteFirma.setCodigoEstado(MensajeClienteFirmaJso.SC_PROCESANDO);
     	mensajeClienteFirma.setOperacion(MensajeClienteFirmaJso.Operacion.
-    			ASOCIAR_CENTRO_CONTROL_SMIME.toString());
-    	mensajeClienteFirma.setContenidoFirma(crearContenidoFirma(infoServidorJso.getServerURL()));
+    			ASOCIAR_CENTRO_CONTROL.toString());
+    	JSONObject contenidoFirma = new JSONObject();
+    	contenidoFirma.put("serverURL", new JSONString(infoServidorJso.getServerURL()));
+    	contenidoFirma.put("operation", new JSONString(MensajeClienteFirmaJso.
+    			Operacion.ASOCIAR_CENTRO_CONTROL.toString()));
+    	mensajeClienteFirma.setContenidoFirma(contenidoFirma.getJavaScriptObject());
+    	
+    	
+    	
     	mensajeClienteFirma.setUrlEnvioDocumento(ServerPaths.getUrlAsociacionCentroControl());
     	mensajeClienteFirma.setNombreDestinatarioFirma(infoServidorJso.getNombre());
     	mensajeClienteFirma.setAsuntoMensajeFirmado(
@@ -93,9 +102,9 @@ public class DialogoAsociarCentroControl implements EventoGWTMensajeClienteFirma
     	comprobarConexion.setEnabled(false);
     	setIndeterminateProgressBarMessage(Constantes.INSTANCIA.conectandoConServidor());
     	String url = urlCentroControlTextBox.getText();
-    	if(!url.endsWith("infoServidor/obtener")) {
+    	if(!url.endsWith("infoServidor")) {
     		if(!url.endsWith("/")) url = url + "/";
-    		url = url + "infoServidor/obtener";
+    		url = url + "infoServidor";
     	}
     	getJson(url);
     }
@@ -151,16 +160,11 @@ public class DialogoAsociarCentroControl implements EventoGWTMensajeClienteFirma
 	    });
     }
     
-
-	public static native JavaScriptObject crearContenidoFirma(String value) /*-{
-		return {serverURL: value};
-	}-*/;
-
 	@Override
 	public void procesarMensajeClienteFirma(MensajeClienteFirmaJso mensaje) {
 		logger.info("procesarMensajeClienteFirma - Operacion: " + mensaje.getOperacion() +
 				" - Codigo Estado: " + mensaje.getCodigoEstado());
-		if(MensajeClienteFirmaJso.Operacion.ASOCIAR_CENTRO_CONTROL_SMIME == mensaje.getOperacionEnumValue()) {
+		if(MensajeClienteFirmaJso.Operacion.ASOCIAR_CENTRO_CONTROL == mensaje.getOperacionEnumValue()) {
 			urlCentroControlTextBox.setEnabled(true);
 	    	comprobarConexion.setEnabled(true);
 	    	asociarButton.setEnabled(true);

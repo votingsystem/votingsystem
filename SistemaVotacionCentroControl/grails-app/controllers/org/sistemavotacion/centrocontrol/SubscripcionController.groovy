@@ -29,22 +29,23 @@ class SubscripcionController {
 	def supportedFormats = [ "rss_0.90", "rss_0.91", "rss_0.92", "rss_0.93", "rss_0.94", "rss_1.0", "rss_2.0", "atom_0.3"]
 	
 	/**
-	 * @httpMethod GET
-	 * @return Información sobre los servicios que tienen como url base '/subscripcion'.
-	 */
-	def index() { 
-		redirect action: "restDoc"
-	}
-	
-	/**
 	 * Servicio que da de alta Controles de Acceso.
 	 *
-	 * @httpMethod POST
-	 * @param archivoFirmado Obligatorio. Archivo con los datos del control de acceso que se desea dar de alta.
+	 * @httpMethod [POST]
+	 * @serviceURL [/subscripcion]
+	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. 
+	 *					Dcoumento con los datos del control de acceso que se desea dar de alta.
 	 */
-    def guardarAsociacionConControlAcceso () {
-		SMIMEMessageWrapper smimeMessageReq = params.smimeMessageReq
-		log.debug("guardarAsociacionConControlAcceso - mensaje: ${smimeMessageReq.getSignedContent()}")
+	def index() { 
+		MensajeSMIME mensajeSMIME = flash.mensajeSMIMEReq
+		if(!mensajeSMIME) {
+			String msg = message(code:'evento.peticionSinArchivo')
+			log.error msg
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
+			return false
+		}
+		SMIMEMessageWrapper smimeMessageReq = mensajeSMIME.getSmimeMessage()
         def mensajeJSON = JSON.parse(smimeMessageReq.getSignedContent())
         if (mensajeJSON.serverURL) {
             String serverURL = StringUtils.checkURL(mensajeJSON.serverURL)
@@ -57,7 +58,7 @@ class SubscripcionController {
 				def urlInfoControlAcceso = "${serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLInfoServidor}"
 				Respuesta respuesta = httpService.obtenerInfoActorConIP(urlInfoControlAcceso, new ControlAcceso())
 				response.status = respuesta.codigoEstado
-				if (Respuesta.SC_OK== respuesta.codigoEstado) {					
+				if (Respuesta.SC_OK == respuesta.codigoEstado) {					
 					mensaje = message(code: 'controlCenterAssociatedMsg', args:[urlInfoControlAcceso]) 
 					ControlAcceso actorConIP = respuesta.actorConIP
 					actorConIP.save()
@@ -69,14 +70,15 @@ class SubscripcionController {
         } 
         response.status = Respuesta.SC_ERROR_PETICION
         render message(code: 'error.PeticionIncorrecta')
-        return false		
-    }
+        return false	
+	}
 	
 	/**
-	 * 
-	 * @httpMethod GET
-	 * @param	feedType Opcional. Formatos de feed soportados rss_0.90, rss_0.91, rss_0.92, 
+	 * @httpMethod [GET]
+	 * @serviceURL [/subscripcion/votaciones/$feedType]
+	 * @param	[feedType] Opcional. Formatos de feed soportados rss_0.90, rss_0.91, rss_0.92,
 	 * 			rss_0.93, rss_0.94, rss_1.0, rss_2.0, atom_0.3. Por defecto se sirve atom 1.0.
+	 * @requestContentType [text/xml]
 	 * @return Información en el formato solicitado sobre las votaciones publicadas.
 	 */
 	def votaciones() {

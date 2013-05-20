@@ -18,7 +18,6 @@ import org.sistemavotacion.controlacceso.modelo.*
 import org.sistemavotacion.seguridad.*
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
-import org.sistemavotacion.smime.SignedMailGenerator.Type;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
@@ -64,14 +63,15 @@ import javax.mail.BodyPart
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
  */
 class EncryptionService {
+
 	
 	def grailsApplication;
 	def messageSource
 	private X509Certificate serverCert;
 	private PrivateKey serverPrivateKey;
 	private Session session
-	private RecipientId recId;
 	private Recipient recipient;
+	private RecipientId recId;
 	
 	//@Override
 	public void afterPropertiesSet() throws Exception {
@@ -85,8 +85,8 @@ class EncryptionService {
 		keyStore.load(new FileInputStream(keyStoreFile), password.toCharArray());
 		java.security.cert.Certificate[] chain = keyStore.getCertificateChain(aliasClaves);
 		serverCert = (X509Certificate)chain[0]
+		recId = new JceKeyTransRecipientId(serverCert)
 		serverPrivateKey = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray())
-		recId = new JceKeyTransRecipientId(serverCert);
 		recipient = new JceKeyTransEnvelopedRecipient(serverPrivateKey).setProvider("BC")
 		Properties props = System.getProperties();
 		// Get a Session object with the default properties.
@@ -98,8 +98,8 @@ class EncryptionService {
 	public Respuesta decryptMessage (byte[] encryptedFile, Locale locale) {
 		log.debug " - decryptMessage - "
 		//log.debug "decryptMessage - encryptedFile: ${new String(encryptedFile)} "
+		if(getRecipientId() == null) afterPropertiesSet()
 		try {
-			if(getRecipientId() == null) afterPropertiesSet()
 			MimeMessage msg = new MimeMessage(getSession(), 
 				new ByteArrayInputStream(encryptedFile));
 			SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
@@ -108,7 +108,7 @@ class EncryptionService {
 			RecipientId recipientId = null;
 			if(recipientInfo.getRID() != null) {
 				recipientId = recipientInfo.getRID();
-				log.debug(" -- recipientId.getSerialNumber(): " + recipientId.getSerialNumber());
+				log.debug(" - decryptMessage - recipientId.getSerialNumber(): " + recipientId.getSerialNumber());
 			}
 			MimeBodyPart res = SMIMEUtil.toMimeBodyPart(recipientInfo.getContent(getRecipient()));
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -117,7 +117,7 @@ class EncryptionService {
 				new ByteArrayInputStream(baos.toByteArray()));
 			Object messageContent = mimeMessage.getContent()
 			byte[] messageContentBytes = null
-			log.debug("messageContent: ${messageContent?.getClass()}")
+			//log.debug("messageContent class: ${messageContent?.getClass()}")
 			if(messageContent instanceof MimeMultipart) {
 				BodyPart bodyPart = ((MimeMultipart)messageContent).getBodyPart(0)
 				InputStream stream = bodyPart.getInputStream();
@@ -135,8 +135,6 @@ class EncryptionService {
 			} else if(messageContent instanceof String) { 
 				messageContentBytes = ((String)messageContent).getBytes()
 			}
-				
-			log.debug("messageContent: ${messageContent?.getClass()}- ${new String(messageContentBytes)}")
 			return new Respuesta(codigoEstado: Respuesta.SC_OK,
 				messageBytes:messageContentBytes)
 		} catch(CMSException ex) {
@@ -151,23 +149,22 @@ class EncryptionService {
 		}
 	}
 	
-	/**
+	
+	private RecipientId getRecipientId() {
+		return recId;
+	}
+	
+	/** 
 	 * Method to encrypt SMIME signed messages
 	 */
-	Respuesta encryptSMIMEMessage(byte[] smimeMessage, 
+	Respuesta encryptSMIMEMessage(byte[] bytesToEncrypt, 
 		X509Certificate receiverCert, Locale locale) throws Exception {
 		log.debug(" - encryptSMIMEMessage(...) ");
-	    /* Create the encrypter */
-		SMIMEMessageWrapper msgToEncrypt = null;
 		try {
-			msgToEncrypt = SMIMEMessageWrapper.build(
-					new ByteArrayInputStream(smimeMessage), null);
-		} catch (Exception ex) {
-			log.error (ex.getMessage(), ex)
-			return new Respuesta(mensaje:ex.getMessage(),
-				codigoEstado:Respuesta.SC_ERROR_PETICION)
-		}
-		try {
+			SMIMEMessageWrapper msgToEncrypt = new SMIMEMessageWrapper(
+					new ByteArrayInputStream(bytesToEncrypt));
+			//String str1 = new String(msgToEncrypt.getBytes())
+			//log.debug(" - encryptSMIMEMessage(...) str1: " + str1);
 			SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
 			encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
 				receiverCert).setProvider("BC"));
@@ -195,20 +192,20 @@ class EncryptionService {
 					encryptedMessage.addHeaderLine(headerLine);
 				}
 			}
-		
-			SignerInformationStore  signers =
+			/*SignerInformationStore  signers =
 				msgToEncrypt.getSmimeSigned().getSignerInfos();
 			Iterator<SignerInformation> it = signers.getSigners().iterator();
 			byte[] digestBytes = it.next().getContentDigest();//method can only be called after verify.
 			String digestStr = new String(Base64.encode(digestBytes));
-			encryptedMessage.addHeaderLine("SignedMessageDigest: " + digestStr);
+			encryptedMessage.addHeaderLine("SignedMessageDigest: " + digestStr);*/
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			encryptedMessage.writeTo(baos);
 			return new Respuesta(messageBytes:baos.toByteArray(),
 				codigoEstado:Respuesta.SC_OK);
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
-			return new Respuesta(mensaje:ex.getMessage(),
+			return new Respuesta(mensaje:messageSource.getMessage(
+				'error.encryptErrorMsg', null, locale),
 				codigoEstado:Respuesta.SC_ERROR_PETICION)
 		}
 	}
@@ -302,15 +299,16 @@ class EncryptionService {
 	Respuesta decryptSMIMEMessage(byte[] encryptedMessageBytes, Locale locale) {
 		log.debug(" - decryptSMIMEMessage - ")
 		SMIMEMessageWrapper smimeMessageReq = null
+		RecipientInformationStore recipients = null;
+		RecipientInformation recipientInfo = null
+		if(getRecipientId() == null) afterPropertiesSet()
 		try {
-			if(getRecipientId() == null) afterPropertiesSet();
 			MimeMessage msg = new MimeMessage(getSession(), 
 				new ByteArrayInputStream(encryptedMessageBytes));
-	
-			SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
-		 
-			RecipientInformationStore   recipients = smimeEnveloped.getRecipientInfos();
-			RecipientInformation        recipientInfo = recipients.get(getRecipientId());
+			SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);		 
+			recipients = smimeEnveloped.getRecipientInfos();
+			recipientInfo = recipients.get(getRecipientId());
+
 			/*RecipientId recipientRID = null;
 			if(recipient.getRID() != null) {
 				recipientRID = recipient.getRID();
@@ -322,16 +320,21 @@ class EncryptionService {
 			MimeBodyPart res = SMIMEUtil.toMimeBodyPart(
 				 recipient.getContent(new JceKeyTransEnvelopedRecipient(serverPrivateKey).setProvider("BC")));*/
 			byte[] messageContentBytes =  recipientInfo.getContent(getRecipient())
-			smimeMessageReq = SMIMEMessageWrapper.build(
-					new ByteArrayInputStream(messageContentBytes), null);;
-		} catch(CMSException ex) {
-			log.error (ex.getMessage(), ex)
-			return new Respuesta(mensaje:messageSource.getMessage(
-				'encryptedMessageErrorMsg', null, locale),
-				codigoEstado:Respuesta.SC_ERROR_PETICION)
+			//String messageContentBytesStr = new String(messageContentBytes)
+			smimeMessageReq = new SMIMEMessageWrapper(
+					new ByteArrayInputStream(messageContentBytes));
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
-			return new Respuesta(mensaje:ex.getMessage(),
+			log.error(" ---> Expected recipient Info: ${getRecipientId()}")
+			Iterator iterator = recipients.recipients.iterator()
+			while(iterator.hasNext()) {
+				RecipientInformation msgRecInfo = iterator.next();
+				log.error("Msg recipient Info: ${msgRecInfo.getRID()}")
+			}
+			String msg = new String(encryptedMessageBytes);
+			log.debug(" - decryptSMIMEMessage - msg: '${msg}'");
+			return new Respuesta(mensaje:messageSource.getMessage(
+				'encryptedMessageErrorMsg', null, locale),
 				codigoEstado:Respuesta.SC_ERROR_PETICION)
 		}
 		return new Respuesta(smimeMessage:smimeMessageReq,
@@ -344,10 +347,6 @@ class EncryptionService {
 	
 	private Recipient getRecipient() {
 		return recipient;	
-	}
-	
-	private RecipientId getRecipientId() {
-		return recId;
 	}
 	
 	public String getAbsolutePath(String filePath){

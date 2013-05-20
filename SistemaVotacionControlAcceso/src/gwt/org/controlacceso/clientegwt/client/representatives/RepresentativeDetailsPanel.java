@@ -188,7 +188,7 @@ public class RepresentativeDetailsPanel extends Composite implements
 	public void procesarMensajeClienteFirma(MensajeClienteFirmaJso mensaje) {
 		logger.info(" - procesarMensajeClienteFirma - mensajeClienteFirma: " + mensaje.toJSONString());
 		switch(mensaje.getOperacionEnumValue()) {
-			case SELECT_REPRESENTATIVE:
+			case REPRESENTATIVE_SELECTION:
 				if(MensajeClienteFirmaJso.SC_OK == mensaje.getCodigoEstado()) {
 					representationsNumber.setText(Constantes.INSTANCIA.representationsNumberLbl(
 							representative.getRepresentationsNumber() + 1));
@@ -196,7 +196,6 @@ public class RepresentativeDetailsPanel extends Composite implements
 							selectRepresentativeCaption(), 
 							Constantes.INSTANCIA.selectRepresentativeOKMsg(representativeName), Boolean.TRUE);
 				} else {
-					logger.info(" ======= dialogoProgreso: " + dialogoProgreso);
 					dialogoProgreso.showFinishMessage(Constantes.INSTANCIA.
 							selectRepresentativeCaption(), 
 			    			mensaje.getMensaje(), Boolean.FALSE);
@@ -300,10 +299,10 @@ public class RepresentativeDetailsPanel extends Composite implements
 		    	mensajeClienteFirma = MensajeClienteFirmaJso.create();
 		    	mensajeClienteFirma.setCodigoEstado(MensajeClienteFirmaJso.SC_PROCESANDO);
 		    	mensajeClienteFirma.setOperacion(MensajeClienteFirmaJso.Operacion.
-		    			SELECT_REPRESENTATIVE.toString());
+		    			REPRESENTATIVE_SELECTION.toString());
 		    	contenidoFirma = new JSONObject();
 		    	contenidoFirma.put("operation", new JSONString(MensajeClienteFirmaJso.Operacion.
-		    			SELECT_REPRESENTATIVE.toString()));
+		    			REPRESENTATIVE_SELECTION.toString()));
 		    	contenidoFirma.put("representativeNif", new JSONString(representative.getNif()));
 		    	contenidoFirma.put("representativeName", new JSONString(representative.getNombre() + 
 		    			" " + representative.getPrimerApellido()));

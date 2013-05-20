@@ -10,7 +10,7 @@ import com.google.gwt.json.client.JSONObject;
 */
 public final class MensajeClienteFirmaJso extends JavaScriptObject {
 	
-    public static enum Operacion {ASOCIAR_CENTRO_CONTROL_SMIME, 
+    public static enum Operacion {ASOCIAR_CENTRO_CONTROL, 
         CAMBIO_ESTADO_CENTRO_CONTROL_SMIME, SOLICITUD_COPIA_SEGURIDAD, 
         PUBLICACION_MANIFIESTO_PDF, FIRMA_MANIFIESTO_PDF, PUBLICACION_RECLAMACION_SMIME,
         FIRMA_RECLAMACION_SMIME, PUBLICACION_VOTACION_SMIME, ENVIO_VOTO_SMIME,
@@ -20,6 +20,7 @@ public final class MensajeClienteFirmaJso extends JavaScriptObject {
 	
     public static final int SC_OK = 200;
     public static final int SC_ERROR_PETICION = 400;
+    public static final int SC_ANULACION_REPETIDA = 471;
     public static final int SC_ERROR_VOTO_REPETIDO = 470;
     public static final int SC_ERROR_EJECUCION = 500;
     public static final int SC_PROCESANDO = 700;

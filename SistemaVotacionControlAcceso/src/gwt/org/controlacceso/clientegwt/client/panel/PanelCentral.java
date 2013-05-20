@@ -356,19 +356,9 @@ public class PanelCentral extends Composite implements ValueChangeHandler<String
         public void onResponseReceived(Request request, Response response) {
             if (response.getStatusCode() == Response.SC_OK) {
             	logger.info("response.getText(): " + response.getText());
-                ConsultaEventosSistemaVotacionJso consulta = 
-                		ConsultaEventosSistemaVotacionJso.create(response.getText());
-                EventosSistemaVotacionJso eventos = consulta.getEventos();
-                if(eventos == null) return;
-                List<EventoSistemaVotacionJso> listaEventos = eventos.getEventosList();
-        	    if (listaEventos != null && (listaEventos.size() > 0)) {
-        	    	eventoSeleccionado = listaEventos.iterator().next();
-        	    	BusEventos.fireEvent(new EventoGWTConsultaEvento(eventoSeleccionado));
-                } else {
-                	if(sistemaSeleccionado != null) 
-                		History.newItem(sistemaSeleccionado.toString());
-                	else History.newItem(HistoryToken.VOTACIONES.toString());
-                }
+            	EventoSistemaVotacionJso eventoSeleccionado = 
+            			EventoSistemaVotacionJso.create(response.getText());
+            	BusEventos.fireEvent(new EventoGWTConsultaEvento(eventoSeleccionado));
             } else {
             	if(response.getStatusCode() == 0) {//Magic Number!!! -> network problem
             		showErrorDialog (Constantes.INSTANCIA.errorLbl() , 

@@ -4,7 +4,8 @@
 	<ui:style type='org.controlacceso.clientegwt.client.reclamaciones.PanelCampoReclamacion.EditorStyle'>
 		.mainPanel { height: 50px; padding:0px 0px 0px 40px; }
 		.contenidoLabel {font-size: 26px; margin: 0px 10px 0px 10px;}
-		.valorContenidoTextBox{margin-left: 20px; margin-top: 7px; border: 1px solid #02227a; width:300px}
+		.valorContenidoTextBox{margin-left: 20px; margin-top: 7px; border: 1px solid #02227a;
+			font-size: 20px; width:300px}
     	.errorTextBox {border-color: red;}
 	</ui:style>
 	<ui:with field='res' type='org.controlacceso.clientegwt.client.Recursos'/>

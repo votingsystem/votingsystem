@@ -45,6 +45,7 @@ grails.project.dependency.resolution = {
 			'org.bouncycastle:bcprov-jdk16:1.46',
 			'org.bouncycastle:bcmail-jdk16:1.46',
 			'org.bouncycastle:bcpg-jdk16:1.46',
+			'org.bouncycastle:bctsp-jdk16:1.46',
 			'joda-time:joda-time:2.1',
 			'org.rometools:rome-modules:1.0',
 			'com.google.gwt.google-apis:gwt-visualization:1.1.2',

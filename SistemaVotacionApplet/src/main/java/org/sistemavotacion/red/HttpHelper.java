@@ -10,6 +10,8 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.FileEntity;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.util.EntityUtils;
 import org.sistemavotacion.Contexto;
@@ -20,14 +22,12 @@ import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.StringBody;
@@ -67,9 +67,8 @@ public class HttpHelper {
     
     public HttpResponse obtenerArchivo (String serverURL) 
             throws IOException, ParseException {
-        logger.debug("obtenerArchivo - lanzando: " + serverURL);             
+        logger.debug("obtenerArchivo - serverURL: " + serverURL);             
         HttpGet httpget = new HttpGet(serverURL);
-        logger.debug("obtenerInformacion - lanzando: " + httpget.getURI());
         HttpResponse response = httpclient.execute(httpget);
         logger.debug("----------------------------------------");
         /*Header[] headers = response.getAllHeaders();
@@ -82,7 +81,7 @@ public class HttpHelper {
     }
     
     public X509Certificate obtenerCertificadoDeServidor (String serverURL) throws Exception {
-        logger.debug("obtenerCertificadoDeServidor - lanzando: " + serverURL);           
+        logger.debug("obtenerCertificadoDeServidor - serverURL: " + serverURL);           
         HttpGet httpget = new HttpGet(serverURL);
         X509Certificate certificado = null;
         HttpResponse response = httpclient.execute(httpget);
@@ -98,7 +97,7 @@ public class HttpHelper {
     
     public Collection<X509Certificate> obtenerCadenaCertificacionDeServidor (
             String serverURL) throws Exception {
-        logger.debug("obtenerCadenaCertificacionDeServidor - lanzando: " + serverURL);   
+        logger.debug("obtenerCadenaCertificacionDeServidor - serverURL: " + serverURL);   
         HttpGet httpget = new HttpGet(serverURL);
         Collection<X509Certificate> certificados = null;
         logger.debug("obtenerCertificadoDeServidor - lanzando: " + httpget.getURI());
@@ -133,39 +132,50 @@ public class HttpHelper {
         return anchors;
     }
     
-    public HttpResponse enviarArchivoFirmado (
+    /*public HttpResponse enviarArchivoFirmado (
             File archivoFirmado, String serverURL) throws IOException {
         logger.debug("enviarArchivoFirmado - lanzando: " + serverURL);        
         HttpPost httpPost = new HttpPost(serverURL);
         FileBody fileBody = new FileBody(archivoFirmado);
-        MultipartEntity reqEntity = new MultipartEntity();
+        /*MultipartEntity reqEntity = new MultipartEntity();
+        logger.debug("enviarArchivoFirmado - reqEntity.getContentType().getValue(): " + reqEntity.getContentType().getValue());   
         reqEntity.addPart(Contexto.SMIME_FILE_NAME, fileBody);
         httpPost.setEntity(reqEntity);
-        HttpResponse response = httpclient.execute(httpPost);
+        httpPost.addHeader(new BasicHeader(
+                "Content-Type", "application/x-pkcs7-signature, application/x-pkcs7-mime, "
+                + reqEntity.getContentType().getValue()));*/
+        /*FileEntity entity;
+        entity = new FileEntity(archivoFirmado, ContentType.create(
+                "application/x-pkcs7-signature, application/x-pkcs7-mime"));
+         httpPost.setEntity(entity);
+        HttpResponse response = httpclient.execute(httpPost); 
         logger.debug("----------------------------------------");
         logger.debug(response.getStatusLine().toString());
         logger.debug("----------------------------------------");
-        return response;
-    }
+        return response;*/
+    //}
     
-    public HttpResponse sendFile (File file, 
-    		String serverURL, String fileParamName) throws IOException {
-        logger.debug("enviarArchivoFirmado - lanzando: " + serverURL);        
+    public HttpResponse sendFile (File file, String contentType, 
+            String serverURL) throws IOException {
+        logger.debug("sendFile - contentType: " + contentType + 
+                " - serverURL: " + serverURL);        
         HttpPost httpPost = new HttpPost(serverURL);
-        FileBody fileBody = new FileBody(file);
-        MultipartEntity reqEntity = new MultipartEntity();
-        reqEntity.addPart(fileParamName, fileBody);
-        httpPost.setEntity(reqEntity);
+        FileEntity entity = new FileEntity(file, ContentType.create(contentType));
+        httpPost.setEntity(entity);
         HttpResponse response = httpclient.execute(httpPost);
         logger.debug("----------------------------------------");
         logger.debug(response.getStatusLine().toString());
-        logger.debug("----------------------------------------");
+        logger.debug("----------------------------------------"); 
+        
+        ContentType.create(
+                "application/x-pkcs7-signature, application/x-pkcs7-mime");
+        
         return response;
     }
     
-    public HttpResponse sendMap(
+    public HttpResponse sendObjectMap(
             Map<String, Object> fileMap, String serverURL) throws Exception {
-        logger.debug("sendFileMap - lanzando: " + serverURL);        
+        logger.debug("sendObjectMap - serverURL: " + serverURL);        
         if(fileMap == null || fileMap.isEmpty()) throw new Exception(
                 Contexto.getString("requestWithoutFileMapErrorMsg"));
         HttpPost httpPost = new HttpPost(serverURL);
@@ -193,14 +203,15 @@ public class HttpHelper {
         return response;  
     }
     
-    public HttpResponse enviarByteArray(byte[] byteArray, String serverURL) throws IOException {
-        logger.debug("enviarByteArray - lanzando: " + serverURL);
+    public HttpResponse sendByteArray(byte[] byteArray, String contentType,
+            String serverURL) throws IOException {
+        logger.debug("sendByteArray - serverURL: " + serverURL);
         HttpPost httpPost = new HttpPost(serverURL);
-        ByteArrayBody  byteArrayBody = new ByteArrayBody(byteArray, 
-                Contexto.SMIME_FILE_NAME);
-        MultipartEntity reqEntity = new MultipartEntity();
-        reqEntity.addPart(Contexto.SMIME_FILE_NAME, byteArrayBody);
-        httpPost.setEntity(reqEntity);
+        ByteArrayEntity entity = null;
+        if(contentType != null) {
+            entity = new ByteArrayEntity(byteArray,  ContentType.create(contentType));
+        } else entity = new ByteArrayEntity(byteArray); 
+        httpPost.setEntity(entity);
         HttpResponse response = httpclient.execute(httpPost);
         logger.debug("----------------------------------------");
         logger.debug(response.getStatusLine().toString());
@@ -208,13 +219,13 @@ public class HttpHelper {
         return response;  
     }
     
-    public HttpResponse enviarCadena (
-            String cadenaFirmada, String serverURL) throws IOException {
-        logger.debug("enviarCadena - lanzando: " + serverURL);
+    public HttpResponse sendString (String stringToSend, 
+            String paramName, String serverURL) throws IOException {
+        logger.debug("sendString - serverURL: " + serverURL);
         HttpPost httpPost = new HttpPost(serverURL);
-        StringBody stringBody = new StringBody(cadenaFirmada);
+        StringBody stringBody = new StringBody(stringToSend);
         MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.STRICT);
-        reqEntity.addPart(Contexto.SMIME_FILE_NAME, stringBody);
+        reqEntity.addPart(paramName, stringBody);
         httpPost.setEntity(reqEntity);
         HttpResponse response = httpclient.execute(httpPost);
         logger.debug("----------------------------------------");
@@ -223,4 +234,22 @@ public class HttpHelper {
         return response;
     }
 
+    public static void main(String[] args) throws IOException, Exception {
+        HttpHelper httpHelper = new HttpHelper();
+        /*HttpResponse response = httpHelper.sendByteArray("hola".getBytes(),
+                "http://localhost:8080/SistemaVotacionControlAcceso/timeStamp");*/
+        /*HttpResponse response = httpHelper.sendFile(
+                new File("/home/jgzornoza/emailPDF"), 
+                "application/x-pkcs7-signature, application/x-pkcs7-mime",
+                "http://localhost:8080/SistemaVotacionControlAcceso/prueba");*/
+        Map<String, Object> mapToSend = new HashMap<String, Object>();
+        mapToSend.put("def", new File("/home/jgzornoza/emailPDF"));
+        mapToSend.put("solicitudAcceso:" + Contexto.ENCRYPTED_CONTENT_TYPE, 
+                new File("/home/jgzornoza/caldecott.log"));
+        
+        HttpResponse response = Contexto.getHttpHelper().sendObjectMap(
+                mapToSend, "http://localhost:8080/SistemaVotacionControlAcceso/prueba");
+        String message = EntityUtils.toString(response.getEntity());
+        logger.debug("message: " + message);
+    }
 }

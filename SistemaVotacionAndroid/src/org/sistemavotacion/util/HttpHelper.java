@@ -1,9 +1,6 @@
 package org.sistemavotacion.util;
 
-import static org.sistemavotacion.android.Aplicacion.NOMBRE_ARCHIVO_BYTE_ARRAY;
-import static org.sistemavotacion.android.Aplicacion.NOMBRE_ARCHIVO_CSR;
-import static org.sistemavotacion.android.Aplicacion.NOMBRE_ARCHIVO_FIRMADO;
-
+import static org.sistemavotacion.android.Aplicacion.*;
 import java.io.File;
 import java.io.IOException;
 import java.security.cert.PKIXParameters;
@@ -12,6 +9,7 @@ import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.http.HttpEntity;
@@ -23,6 +21,7 @@ import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.entity.FileEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
@@ -133,32 +132,17 @@ public class HttpHelper {
         return params;       
     }    
     
-    public static HttpResponse sendFile (File file, String serverURL) throws IOException {
+    public static HttpResponse sendFile (File file, 
+    		String contentType, String serverURL) throws IOException {
         HttpPost httpPost = new HttpPost(serverURL);
         Log.d(TAG + ".sendFile(...)" , " - serverURL: " + httpPost.getURI() 
         		+ " - file: " + file.getAbsolutePath());
-        FileBody fileBody = new FileBody(file);
-        MultipartEntity reqEntity = new MultipartEntity();
-        reqEntity.addPart(NOMBRE_ARCHIVO_FIRMADO, fileBody);
-        httpPost.setEntity(reqEntity);
+        FileEntity entity = new FileEntity(file, contentType);
+        httpPost.setEntity(entity);
         HttpResponse response = httpclient.execute(httpPost);
         Log.d(TAG + ".sendFile" , "----------------------------------------");
         Log.d(TAG + ".sendFile" , response.getStatusLine().toString());
         Log.d(TAG + ".sendFile" , "----------------------------------------");
-        return response;
-    }
-    
-    public static HttpResponse sendSignedData (String cadenaFirmada, String serverURL) throws IOException {
-        HttpPost httpPost = new HttpPost(serverURL);
-        Log.d(TAG + ".sendSignedData(...)" ," - serverURL: " + httpPost.getURI());
-        StringBody stringBody = new StringBody(cadenaFirmada);
-        MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.STRICT);
-        reqEntity.addPart(NOMBRE_ARCHIVO_FIRMADO, stringBody);
-        httpPost.setEntity(reqEntity);
-        HttpResponse response = httpclient.execute(httpPost);
-        Log.d(TAG + ".sendSignedData" ,"----------------------------------------");
-        Log.d(TAG + ".sendSignedData" ,response.getStatusLine().toString());
-        Log.d(TAG + ".sendSignedData" ,"----------------------------------------");
         return response;
     }
     
@@ -189,16 +173,52 @@ public class HttpHelper {
         return response;  
     }
     
+    public static HttpResponse sendObjectMap(Map<String, Object> fileMap, 
+    		String serverURL) throws Exception {
+    	Log.d(TAG + ".sendObjectMap(...)", " - serverURL:" + serverURL);        
+        if(fileMap == null || fileMap.isEmpty()) throw new Exception(
+        		"requestWithoutFileMapErrorMsg");
+        HttpPost httpPost = new HttpPost(serverURL);
+        Set<String> fileNames = fileMap.keySet();
+        MultipartEntity reqEntity = new MultipartEntity();
+        for(String objectName: fileNames){
+            Object objectToSend = fileMap.get(objectName);
+            if(objectToSend instanceof File) {
+                File file = (File)objectToSend;
+                Log.d(TAG + ".sendObjectMap(...)", " - fileName: " + objectName + 
+                        " - filePath: " + file.getAbsolutePath());  
+                FileBody  fileBody = new FileBody(file);
+                reqEntity.addPart(objectName, fileBody);
+            } else if (objectToSend instanceof byte[]) {
+                byte[] byteArray = (byte[])objectToSend;
+                reqEntity.addPart(
+                        objectName, new ByteArrayBody(byteArray, objectName));
+            }
+        }
+        httpPost.setEntity(reqEntity);
+        HttpResponse response = httpclient.execute(httpPost);
+        Log.d(TAG + ".sendObjectMap(...)" ,"----------------------------------------");
+        Log.d(TAG + ".sendObjectMap(...)" , response.getStatusLine().toString());
+        Log.d(TAG + ".sendObjectMap(...)" ,"----------------------------------------");
+        return response;  
+    }
+    
+    /*
      public static HttpResponse enviarSolicitudAcceso(byte[] solicitudCSR, 
             File solicitudAccesoSMIME, String serverURL) throws IOException {
         HttpPost httpPost = new HttpPost(serverURL);
         Log.d(TAG + ".enviarSolicitudAcceso(...)" , " - serverURL: " + httpPost.getURI());
         FileBody fileBody = new FileBody(solicitudAccesoSMIME);
         ByteArrayBody  csrBody = new ByteArrayBody(solicitudCSR, 
-                NOMBRE_ARCHIVO_CSR);
+                CSR_FILE_NAME);
         MultipartEntity reqEntity = new MultipartEntity();
-        reqEntity.addPart(NOMBRE_ARCHIVO_FIRMADO, fileBody);
-        reqEntity.addPart(NOMBRE_ARCHIVO_CSR, csrBody);
+        
+        String accessRequestFileName = ACCESS_REQUEST_FILE_NAME + ":" + 
+                 SIGNED_AND_ENCRYPTED_CONTENT_TYPE;
+        
+        
+        reqEntity.addPart(accessRequestFileName, fileBody);
+        reqEntity.addPart(CSR_FILE_NAME, csrBody);
         httpPost.setEntity(reqEntity);
         HttpResponse response = httpclient.execute(httpPost);
         Log.d(TAG + ".enviarSolicitudAcceso" ,"----------------------------------------");
@@ -214,15 +234,17 @@ public class HttpHelper {
          FileBody fileBody = new FileBody(solicitudAccesoSMIME);
          FileBody  csrBody = new FileBody(solicitudCSR);
          MultipartEntity reqEntity = new MultipartEntity();
-         reqEntity.addPart(NOMBRE_ARCHIVO_FIRMADO, fileBody);
-         reqEntity.addPart(NOMBRE_ARCHIVO_CSR, csrBody);
+         String accessRequestFileName = ACCESS_REQUEST_FILE_NAME + ":" + 
+                 SIGNED_AND_ENCRYPTED_CONTENT_TYPE;
+         reqEntity.addPart(accessRequestFileName, fileBody);
+         reqEntity.addPart(CSR_FILE_NAME, csrBody);
          httpPost.setEntity(reqEntity);
          HttpResponse response = httpclient.execute(httpPost);
          Log.d(TAG + ".enviarSolicitudAcceso" ,"----------------------------------------");
          Log.d(TAG + ".enviarSolicitudAcceso" ,response.getStatusLine().toString());
          Log.d(TAG + ".enviarSolicitudAcceso" ,"----------------------------------------");
          return response;  
-     }
+     }*/
      
      public static HttpResponse getFile (String serverURL) throws Exception {
          HttpGet httpget = new HttpGet(serverURL);

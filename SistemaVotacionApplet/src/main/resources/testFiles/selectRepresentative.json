@@ -1,6 +1,6 @@
 {"codigoEstado":700, "operacion":"SELECT_REPRESENTATIVE", 
             "contenidoFirma":{"operation":"SELECT_REPRESENTATIVE", "representativeNif":"0A", "representativeName":"JOSE JAVIER GARCIA"}, 
-            "urlEnvioDocumento":"http://localhost:8080/SistemaVotacionControlAcceso/representative/guardarSelectAdjuntandoValidacion", 
+            "urlEnvioDocumento":"http://localhost:8080/SistemaVotacionControlAcceso/representative/userSelection", 
             "nombreDestinatarioFirma":"Primer ControlAcceso", "asuntoMensajeFirmado":"Datosl del representante seleccionado", 
-            "respuestaConRecibo":true, "urlTimeStampServer":"http://localhost:8080/SistemaVotacionControlAcceso/timeStamp/obtener", 
+            "respuestaConRecibo":true, "urlTimeStampServer":"http://localhost:8080/SistemaVotacionControlAcceso/timeStamp", 
             "urlServer":"http://localhost:8080/SistemaVotacionControlAcceso/"}

@@ -8,6 +8,7 @@ import org.sistemavotacion.seguridad.*;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.util.*;
 import org.sistemavotacion.controlacceso.modelo.*;
+
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.*
 import java.io.File;
@@ -24,73 +25,73 @@ class EventoReclamacionService {
     static transactional = true
 
     def etiquetaService
-    def subscripcionService
     def firmaService
     def eventoService
     def grailsApplication
 	def messageSource
 	
 
-    Respuesta guardarEvento(SMIMEMessageWrapper smimeMessage, Locale locale) {		
-        log.debug("guardarEvento - mensaje: ${smimeMessage.getSignedContent()}")
-        Tipo tipoMensaje
-        if (smimeMessage.isValidSignature()) tipoMensaje = Tipo.EVENTO_RECLAMACION
-        else tipoMensaje = Tipo.EVENTO_FIRMA_ERROR
-        def mensajeJSON = JSON.parse(smimeMessage.getSignedContent())
-		Respuesta respuestaUsuario = subscripcionService.comprobarUsuario(smimeMessage, locale)
-		if(Respuesta.SC_OK != respuestaUsuario.codigoEstado) 
-			return respuestaUsuario
-		Usuario usuario = respuestaUsuario.usuario
-        EventoReclamacion evento = new EventoReclamacion(usuario:usuario,
-                asunto:mensajeJSON.asunto,
-                contenido:mensajeJSON.contenido,
-				copiaSeguridadDisponible:mensajeJSON.copiaSeguridadDisponible,
-                fechaFin: new Date().parse(
-					"yyyy-MM-dd HH:mm:ss", mensajeJSON.fechaFin))
-		if(mensajeJSON.fechaInicio) evento.fechaInicio = new Date().parse(
-					"yyyy-MM-dd HH:mm:ss", mensajeJSON.fechaInicio)
-		else evento.fechaInicio = DateUtils.getTodayDate();
-        evento = evento.save()
-		evento.url = "${grailsApplication.config.grails.serverURL}" +
-			"${grailsApplication.config.SistemaVotacion.sufijoURLEventoReclamacion}${evento.id}"
-        if (mensajeJSON.etiquetas) {
-			Set<Etiqueta> etiquetaSet = etiquetaService.guardarEtiquetas(mensajeJSON.etiquetas)
-			evento.setEtiquetaSet(etiquetaSet)
-			evento.save()
-		} 
-		mensajeJSON.id = evento.id
-        mensajeJSON.fechaCreacion = DateUtils.getStringFromDate(evento.dateCreated) 
-        mensajeJSON.tipo = tipoMensaje
-        def camposValidados = []
-        JSONArray arrayCampos = new JSONArray()
-        mensajeJSON.campos?.collect { campoItem ->
-            def campo = new CampoDeEvento(evento:evento, contenido:campoItem.contenido)
-            campo.save();
-            arrayCampos.add(new JSONObject([id:campo.id, contenido:campo.contenido]))
-        }
-        mensajeJSON.controlAcceso = [serverURL:grailsApplication.config.grails.serverURL, 
-			nombre:grailsApplication.config.SistemaVotacion.serverName]  as JSONObject
-        mensajeJSON.campos = arrayCampos
-        log.debug("guardarEvento - mensajeValidado: ${mensajeJSON.toString()}")
-        String mensajeValidado = firmaService.obtenerCadenaFirmada(mensajeJSON.toString(),
-			messageSource.getMessage('mime.asunto.EventoReclamacionValidado', null, locale))
-		MensajeSMIME mensajeSMIME = new MensajeSMIME(tipo:tipoMensaje,
-			usuario:usuario, valido:smimeMessage.isValidSignature(),
-			contenido:smimeMessage.getBytes(),evento:evento)
-		mensajeSMIME.save();
-		MensajeSMIME mensajeSMIMEValidado = new MensajeSMIME(tipo:Tipo.EVENTO_RECLAMACION_VALIDADO,
-				smimePadre:mensajeSMIME, evento:evento,
-                usuario:usuario, valido:smimeMessage.isValidSignature(),
-                contenido:mensajeValidado.getBytes())
-        mensajeSMIMEValidado.save();
-        evento.estado = eventoService.obtenerEstadoEvento(evento)
-        if(mensajeJSON.cardinalidad) evento.cardinalidadRepresentaciones = 
+    Respuesta saveEvent(MensajeSMIME mensajeSMIMEReq, Locale locale) {		
+		EventoReclamacion evento
+		try {
+			Usuario firmante = mensajeSMIMEReq.getUsuario()
+			String documentStr = mensajeSMIMEReq.getSmimeMessage().getSignedContent()
+			log.debug("saveEvent - firmante: ${firmante.nif} - documentStr: ${documentStr}")
+			def mensajeJSON = JSON.parse(documentStr)
+			evento = new EventoReclamacion(usuario:firmante,
+					asunto:mensajeJSON.asunto, contenido:mensajeJSON.contenido,
+					copiaSeguridadDisponible:mensajeJSON.copiaSeguridadDisponible,
+					fechaFin: new Date().parse(
+						"yyyy-MM-dd HH:mm:ss", mensajeJSON.fechaFin))
+			if(mensajeJSON.cardinalidad) evento.cardinalidadRepresentaciones =
 				Evento.Cardinalidad.valueOf(mensajeJSON.cardinalidad)
-        else evento.cardinalidadRepresentaciones = Evento.Cardinalidad.UNA
-        evento = evento.save()
-        return new Respuesta(codigoEstado:Respuesta.SC_OK, fecha:DateUtils.getTodayDate(),
-                mensajeSMIME:mensajeSMIME, evento:evento, usuario:usuario, 
-                mensajeSMIMEValidado:mensajeSMIMEValidado, smimeMessage:smimeMessage)
+			else evento.cardinalidadRepresentaciones = Evento.Cardinalidad.UNA
+			if(mensajeJSON.fechaInicio) evento.fechaInicio = new Date().parse(
+						"yyyy-MM-dd HH:mm:ss", mensajeJSON.fechaInicio)
+			else evento.fechaInicio = DateUtils.getTodayDate();
+			Respuesta respuesta = eventoService.setEventDatesState(evento, locale)
+			if(Respuesta.SC_OK != respuesta.codigoEstado) return respuesta 
+			evento = respuesta.evento.save()
+			if (mensajeJSON.etiquetas) {
+				Set<Etiqueta> etiquetaSet = etiquetaService.guardarEtiquetas(mensajeJSON.etiquetas)
+				evento.setEtiquetaSet(etiquetaSet)
+			}
+			mensajeJSON.id = evento.id
+			mensajeJSON.fechaCreacion = DateUtils.getStringFromDate(evento.dateCreated)
+			mensajeJSON.tipo = Tipo.EVENTO_RECLAMACION
+			def camposValidados = []
+			JSONArray arrayCampos = new JSONArray()
+			mensajeJSON.campos?.collect { campoItem ->
+				def campo = new CampoDeEvento(evento:evento, contenido:campoItem.contenido)
+				campo.save();
+				arrayCampos.add(new JSONObject([id:campo.id, contenido:campo.contenido]))
+			}
+			mensajeJSON.controlAcceso = [serverURL:grailsApplication.config.grails.serverURL,
+				nombre:grailsApplication.config.SistemaVotacion.serverName]  as JSONObject
+			mensajeJSON.campos = arrayCampos
+			
+			String fromUser = grailsApplication.config.SistemaVotacion.serverName
+			String toUser = firmante.getNif()
+			String subject = messageSource.getMessage(
+					'mime.asunto.EventoReclamacionValidado', null, locale)
+			
+			byte[] smimeMessageRespBytes = firmaService.getSignedMimeMessage(
+				fromUser, toUser,  mensajeJSON.toString(), subject, null)
+			
+			MensajeSMIME mensajeSMIMEResp = new MensajeSMIME(tipo:Tipo.RECIBO,
+				smimePadre:mensajeSMIMEReq, evento:evento,
+				valido:true, contenido:smimeMessageRespBytes)
+			MensajeSMIME.withTransaction {
+				mensajeSMIMEResp.save()
+			}
+			return new Respuesta(codigoEstado:Respuesta.SC_OK, evento:evento,
+				mensajeSMIME:mensajeSMIMEResp, tipo:Tipo.EVENTO_RECLAMACION)
+		} catch(Exception ex) {
+			log.error (ex.getMessage(), ex)
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION,
+				mensaje:messageSource.getMessage('publishClaimErrorMessage', null, locale), 
+				tipo:Tipo.EVENTO_RECLAMACION_ERROR, evento:evento)
+		}
     }
 
     public Respuesta generarCopiaRespaldo (EventoReclamacion evento, Locale locale) {
@@ -105,7 +106,7 @@ class EventoReclamacionService {
             new File(basedir).mkdirs()
 			int i = 0
 			def metaInformacionMap = [numeroFirmas:firmasRecibidas.size(),
-				URL:"${grailsApplication.config.grails.serverURL}/evento/obtener?id=${evento.id}",
+				URL:"${grailsApplication.config.grails.serverURL}/evento/${evento.id}",
 				tipoEvento:Tipo.EVENTO_RECLAMACION.toString(), asunto:evento.asunto]
 			String metaInformacionJSON = metaInformacionMap as JSON
 			File metaInformacionFile = new File("${basedir}/meta.inf")

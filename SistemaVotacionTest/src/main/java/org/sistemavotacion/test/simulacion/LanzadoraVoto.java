@@ -66,8 +66,8 @@ public class LanzadoraVoto
             return infoVoto;
         }
         //logger.info("Lanzando voto a " + urlVoto);
-        HttpResponse response = Contexto.getHttpHelper().enviarArchivoFirmado(
-                    votoFirmado, urlVoto);
+        HttpResponse response = Contexto.getHttpHelper().sendFile(
+                    votoFirmado, Contexto.SIGNED_CONTENT_TYPE, urlVoto);
         
         infoVoto.setCodigoEstado(response.getStatusLine().getStatusCode());
         if (200 == response.getStatusLine().getStatusCode()) {

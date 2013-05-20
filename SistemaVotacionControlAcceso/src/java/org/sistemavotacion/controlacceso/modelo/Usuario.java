@@ -17,13 +17,12 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
-import org.sistemavotacion.controlacceso.modelo.Image.Type;
+import org.bouncycastle.tsp.TimeStampToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.security.cert.X509Certificate;
@@ -110,10 +109,13 @@ public class Usuario implements Serializable {
     private Set<Dispositivo> dispositivo = new HashSet<Dispositivo>(0);
     
     @Transient
-    private X509Certificate certificate;
+    private transient X509Certificate certificate;
     
     @Transient
-    private Certificado certificadoCA;
+    private transient Certificado certificadoCA;
+    
+    @Transient
+    private transient TimeStampToken timeStampToken;
 
    /**
      * @return the id
@@ -175,7 +177,6 @@ public class Usuario implements Serializable {
     	Usuario usuario = new Usuario();
     	usuario.setCertificate(certificate);
     	String subjectDN = certificate.getSubjectDN().getName();
-    	logger.debug("getUsuario: " +subjectDN);
     	if (subjectDN.contains("C="))
     		usuario.setPais(subjectDN.split("C=")[1].split(",")[0]);
     	if (subjectDN.contains("SERIALNUMBER="))
@@ -367,6 +368,14 @@ public class Usuario implements Serializable {
 
 	public void setRepresentativeMessage(MensajeSMIME representativeMessage) {
 		this.representativeMessage = representativeMessage;
+	}
+
+	public TimeStampToken getTimeStampToken() {
+		return timeStampToken;
+	}
+
+	public void setTimeStampToken(TimeStampToken timeStampToken) {
+		this.timeStampToken = timeStampToken;
 	}
 
 }

@@ -524,7 +524,10 @@ public class RepresentativeDataDialog extends JDialog
             EncryptionHelper.encryptSMIMEFile(document, 
                     PreconditionsCheckerDialog.getCert(operacion.getUrlServer()));
             Map<String, Object> fileMap = new HashMap<String, Object>();
-            fileMap.put(Contexto.SMIME_FILE_NAME, document);
+            String representativeDataFileName = 
+                    Contexto.REPRESENTATIVE_DATA_FILE_NAME + ":" + 
+                    Contexto.SIGNED_AND_ENCRYPTED_CONTENT_TYPE;
+            fileMap.put(representativeDataFileName, document);
             fileMap.put(Contexto.IMAGE_FILE_NAME, selectedImage);
             final FileMapLauncherWorker lanzador = new FileMapLauncherWorker(
                     ENVIAR_DOCUMENTO_FIRMADO_WORKER, fileMap, 

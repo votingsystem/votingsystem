@@ -39,7 +39,7 @@ public class Certificado implements Serializable {
     public enum Estado {OK, CON_ERRORES, ANULADO, UTILIZADO}
     
     public enum Tipo {RAIZ_VOTOS, VOTO, USUARIO, AUTORIDAD_CERTIFICADORA,
-    	AUTORIDAD_CERTIFICADORA_TEST}
+    	AUTORIDAD_CERTIFICADORA_TEST, ACTOR_CON_IP}
 
     private static final long serialVersionUID = 1L;
     
@@ -118,6 +118,8 @@ public class Certificado implements Serializable {
     @Transient
     private String eventoId;
     
+    @Transient
+    private String representativeURL;
 
     @Transient
     private String serverURL;
@@ -143,8 +145,13 @@ public class Certificado implements Serializable {
 			hashCertificadoVotoBase64 = new String(
 					hexConverter.unmarshal(hashCertificadoVotoHEX));
     	}
+    	if(subjectDN.split("OU=RepresentativeURL:").length > 1) {
+    		String parte = subjectDN.split("OU=RepresentativeURL:")[1];
+    		if (parte.split(",").length > 1) {
+    			setRepresentativeURL(parte.split(",")[0]);
+    		} else setRepresentativeURL(parte);
+    	}
     }
-    
     
     /**
      * @return the contenido
@@ -343,6 +350,14 @@ public class Certificado implements Serializable {
 
 	public void setCancelDate(Date cancelDate) {
 		this.cancelDate = cancelDate;
+	}
+
+	public String getRepresentativeURL() {
+		return representativeURL;
+	}
+
+	public void setRepresentativeURL(String representativeURL) {
+		this.representativeURL = representativeURL;
 	}
 
 }

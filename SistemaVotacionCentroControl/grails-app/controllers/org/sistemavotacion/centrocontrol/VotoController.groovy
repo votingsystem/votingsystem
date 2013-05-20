@@ -23,80 +23,78 @@ class VotoController {
     def httpService
 	def encryptionService
 	
-	/**
-	 * @httpMethod GET
-	 * @return Información sobre los servicios que tienen como url base '/voto'.
-	 */
-	def index() { 
-		redirect action: "restDoc"
-	}
-
+	
 	/**
 	 * Servicio que recoge los votos enviados por los usuarios.
 	 *
-	 * @httpMethod POST
-	 * @param archivoFirmado	Obligatorio. El voto firmado por el 
+	 * @httpMethod [POST]
+	 * @serviceURL [/voto]
+	 * @contentType [application/x-pkcs7-signature,application/x-pkcs7-mime] Obligatorio. El archivo de voto firmado por el
 	 *        <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Certificado-de-voto">certificado de Voto.</a>
-	 * @return  <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Recibo-de-Voto">El recibo del voto.</a>  
+	 * @return  <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Recibo-de-Voto">El recibo del voto.</a>
 	 */
-	def guardarAdjuntandoValidacion () {
-		params.smimeMessageReq.initVoto()
-		Respuesta respuesta = votoService.validarFirmaUsuario(
-			params.smimeMessageReq, request.getLocale())
-		if (Respuesta.SC_OK== respuesta.codigoEstado) {
-			X509Certificate certificadoVoto = respuesta.certificado
-			MimeMessage smimeMessage = params.smimeMessageReq
-			respuesta = votoService.sendVoteToControlAccess(
-				smimeMessage, respuesta.evento, request.getLocale())
-			if (Respuesta.SC_OK == respuesta?.codigoEstado) {
-				response.setContentType("text/plain")
-				respuesta = encryptionService.encryptSMIMEMessage(
-					respuesta.voto.mensajeSMIME.contenido, certificadoVoto, request.getLocale())
-				if(Respuesta.SC_OK != respuesta?.codigoEstado) {
-					response.status = respuesta.codigoEstado
-					render respuesta.mensaje
-					return false
-				}
-				response.status = Respuesta.SC_OK
-				response.contentLength = respuesta.messageBytes.length
-				response.outputStream <<  respuesta.messageBytes
-				//response.contentLength = respuesta.voto.mensajeSMIME.contenido.length
-				//response.outputStream <<  respuesta.voto.mensajeSMIME.contenido
-				response.outputStream.flush()
-			} else {
-				log.debug "----- Error sending vote to Access Request Service - " + 
-					"statusCode:'${respuesta?.codigoEstado}' -  message: '${respuesta.mensaje}'"
-				response.status = respuesta.codigoEstado
-				render message(code: 'accessRequestVoteErrorMsg', args:[respuesta.mensaje])
-				return false
-			}
-		} else if (Respuesta.SC_ERROR_VOTO_REPETIDO == respuesta.codigoEstado){
-			response.status = Respuesta.SC_ERROR_VOTO_REPETIDO
-			response.contentLength = respuesta.voto.mensajeSMIME.contenido.length
-			response.setContentType("text/plain")
-			response.outputStream <<  respuesta.voto.mensajeSMIME.contenido
-			response.outputStream.flush()
-			return false
-		} else {
-			log.debug "----- statusCode: ${respuesta.codigoEstado} - mensaje:'${respuesta?.mensaje}'"
-			response.status = respuesta?.codigoEstado
-			render respuesta?.mensaje
+	def index() {
+		MensajeSMIME mensajeSMIMEReq = flash.mensajeSMIMEReq
+		if(!mensajeSMIMEReq) {
+			String msg = message(code:'evento.peticionSinArchivo')
+			log.error msg
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
 			return false
 		}
+		Respuesta respuesta = votoService.validateVote(
+			mensajeSMIMEReq, request.getLocale())
+		if (Respuesta.SC_OK == respuesta.codigoEstado) {
+			X509Certificate certificadoVoto = respuesta.certificado
+			flash.receiverCert = certificadoVoto
+			if(mensajeSMIMEReq.getUsuario())
+				response.addHeader("representativeNIF", mensajeSMIMEReq.getUsuario().nif)
+			response.setContentType("${grailsApplication.config.pkcs7SignedContentType};" +
+				"${grailsApplication.config.pkcs7EncryptedContentType}")
+		}
+		flash.respuesta = respuesta
+	}
+	
+	/**
+	 * Servicio que devuelve la información de un voto a partir del identificador
+	 * del mismo en la base de datos
+	 * @httpMethod [GET]
+	 * @serviceURL [/voto/${id}]
+	 * @param [id] Obligatorio. Identificador del voto en la base de datos
+	 * @responseContentType [application/json]
+	 * @return Documento JSON con la información del voto solicitado.
+	 */
+	def get() {
+		Voto voto
+		Map  votoMap
+		Voto.withTransaction {
+			voto = Voto.get(params.long('id'))
+			if(voto) votoMap = votoService.getVotoMap(voto)
+		}
+		if(!voto) {
+			response.status = Respuesta.SC_NOT_FOUND
+			render message(code: 'voteNotFound', args:[params.id])
+			return false
+		}
+
+		render votoMap as JSON
+		return false
 	}
 	
 	/**
 	 * Servicio que devuelve la información de un voto a partir del  
 	 * hash asociado al mismo
-	 * @httpMethod GET
-	 * @param hashCertificadoVotoHex	Obligatorio. Hash en hexadecimal asociado al voto. 
+	 * @httpMethod [GET]
+	 * @serviceURL [/voto/hashHex/$hashHex] 
+	 * @param [hashHex] Obligatorio. Hash en hexadecimal asociado al voto. 
+	 * @responseContentType [application/json]
 	 * @return Documento JSON con la información del voto solicitado.
 	 */
-	def obtener() {
-		if (params.hashCertificadoVotoHex) {
+	def hashCertificadoVotoHex() { 
+		if (params.hashHex) {
 			HexBinaryAdapter hexConverter = new HexBinaryAdapter();
 			String hashCertificadoVotoBase64 = new String(
-				hexConverter.unmarshal(params.hashCertificadoVotoHex))
+				hexConverter.unmarshal(params.hashHex))
 			log.debug "hashCertificadoVotoBase64: ${hashCertificadoVotoBase64}"
 			Certificado certificado
 			Certificado.withTransaction {
@@ -105,26 +103,19 @@ class VotoController {
 			if(!certificado) {
 				response.status = Respuesta.SC_NOT_FOUND
 				render message(code: 'certificado.certificadoHexNotFound',
-					args:[params.hashCertificadoVotoHex])
+					args:[params.hashHex])
 				return false
 			}
 			Voto voto
 			def votoMap
 			Voto.withTransaction {
 				voto = Voto.findWhere(certificado:certificado)
-				votoMap = [id:voto.id,
-					hashCertificadoVotoBase64:voto.certificado.hashCertificadoVotoBase64,
-					opcionDeEventoId:voto.opcionDeEvento.opcionDeEventoId,
-					eventoVotacionId:voto.eventoVotacion.eventoVotacionId,
-					eventoVotacionURL:voto.eventoVotacion.url,
-					estado:voto.estado.toString(),
-					certificadoURL:"${grailsApplication.config.grails.serverURL}/certificado/certificadoDeVoto?hashCertificadoVotoHex=${params.hashCertificadoVotoHex}",
-					votoSMIMEURL:"${grailsApplication.config.grails.serverURL}/mensajeSMIME/obtener?id=${voto.mensajeSMIME.id}"]
+				votoMap = votoService.getVotoMap(voto)
 			}
 			if(!voto) {
 				response.status = Respuesta.SC_NOT_FOUND
 				render message(code: 'voto.votoConCertNotFound',
-					args:[params.hashCertificadoVotoHex])
+					args:[params.hashHex])
 				return false
 			}
 			 
@@ -133,7 +124,7 @@ class VotoController {
 				AnuladorVoto.withTransaction {
 					anuladorVoto = AnuladorVoto.findWhere(voto:voto)
 				}
-				votoMap.anuladorURL="${grailsApplication.config.grails.serverURL}/mensajeSMIME/obtener?id=${anuladorVoto?.mensajeSMIME?.id}"
+				votoMap.anuladorURL="${grailsApplication.config.grails.serverURL}/mensajeSMIME/${anuladorVoto?.mensajeSMIME?.id}"
 			}
 			response.status = Respuesta.SC_OK
 			response.setContentType("application/json")
@@ -141,9 +132,10 @@ class VotoController {
 			return false
 		}
 		response.status = Respuesta.SC_ERROR_PETICION
-		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
+		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
 		return false
 	}
+
 	
 	/*
 	 def testAsync () {
@@ -154,15 +146,14 @@ class VotoController {
 		 render "Todo ok"
 	 }
 	 
-	 def guardarAdjuntandoValidacion () {
+	 def post () {
 		 String codigoEstado
-		 params.smimeMessageReq.initVoto()
 		 Respuesta respuesta = votoService.validarFirmaUsuario(
-			 params.smimeMessageReq, request.getLocale())
+			 flash.smimeMessageReq, request.getLocale())
 		 if (Respuesta.SC_OK== respuesta.codigoEstado) {
 			 def ctx = startAsync()
 			 ctx.setTimeout(10000);
-			 MimeMessage smimeMessage = params.smimeMessageReq
+			 MimeMessage smimeMessage = flash.smimeMessageReq
 			 EventoVotacion eventoVotacion = respuesta.evento
 			 def future = callAsync {
 				  return votoService.sendVoteToControlAccess(

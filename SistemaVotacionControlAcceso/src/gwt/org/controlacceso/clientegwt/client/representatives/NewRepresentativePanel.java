@@ -13,6 +13,7 @@ import org.controlacceso.clientegwt.client.evento.EventoGWTMensajeAplicacion;
 import org.controlacceso.clientegwt.client.evento.EventoGWTMensajeClienteFirma;
 import org.controlacceso.clientegwt.client.modelo.ActorConIPJso;
 import org.controlacceso.clientegwt.client.modelo.MensajeClienteFirmaJso;
+import org.controlacceso.clientegwt.client.modelo.Tipo;
 import org.controlacceso.clientegwt.client.modelo.UsuarioJso;
 import org.controlacceso.clientegwt.client.util.Browser;
 import org.controlacceso.clientegwt.client.util.RequestHelper;
@@ -150,11 +151,10 @@ public class NewRepresentativePanel extends Composite implements
     			NEW_REPRESENTATIVE.toString());
     	JSONObject contenidoFirma = new JSONObject();
     	contenidoFirma.put("representativeInfo", new JSONString(richTextArea.getHTML()));
+    	contenidoFirma.put("operation", new JSONString(Tipo.REPRESENTATIVE_DATA.toString()));
     	mensajeClienteFirma.setContenidoFirma(contenidoFirma.getJavaScriptObject());
     	String urlDocument = null;
-    	if(editorMode == EditorMode.EDIT && usuario != null) {
-    		urlDocument = ServerPaths.getUrlRepresentativeData(usuario.getId());
-    	} else urlDocument = ServerPaths.getUrlRepresentativeData(null);
+    	urlDocument = ServerPaths.getUrlRepresentativeData();
     	mensajeClienteFirma.setUrlEnvioDocumento(urlDocument);
     	mensajeClienteFirma.setNombreDestinatarioFirma(controlAcceso.getNombre());
     	mensajeClienteFirma.setAsuntoMensajeFirmado(

@@ -60,7 +60,10 @@ public class ActorConIP implements Serializable {
     private Tipo tipoServidor;
     
     @Transient
-    private X509Certificate certificadoX509;
+    private transient X509Certificate certificadoX509;
+    
+    @Transient
+    private transient byte[] cadenaCertificacion;
     
     @Transient
     private Certificado certificado;
@@ -175,4 +178,12 @@ public class ActorConIP implements Serializable {
     public void setTipoServidor(Tipo tipoServidor) {
         this.tipoServidor = tipoServidor;
     }
+
+	public byte[] getCadenaCertificacion() {
+		return cadenaCertificacion;
+	}
+
+	public void setCadenaCertificacion(byte[] cadenaCertificacion) {
+		this.cadenaCertificacion = cadenaCertificacion;
+	}
 }

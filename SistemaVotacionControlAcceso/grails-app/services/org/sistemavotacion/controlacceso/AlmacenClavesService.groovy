@@ -25,14 +25,13 @@ class AlmacenClavesService {
 		AlmacenClaves almacenClavesPrevio = AlmacenClaves.findWhere(
 			activo:Boolean.TRUE, evento:evento)
 		if (almacenClavesPrevio) {
-			log.debug ("Ya se había generado el almacén de claves de CA del evento: '${evento.getId()}'")
-			respuesta = new Respuesta(codigoEstado:400)
-			return respuesta
+			log.error ("Ya se había generado el almacén de claves de CA del evento: '${evento.getId()}'")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION)
 		} 
 		//String password = (1..7).inject("") { a, b -> a += ('a'..'z')[new Random().nextFloat() * 26 as int] }.toUpperCase()
-		//TODO
+		//TODO ====== crypto token
 		String password = "${grailsApplication.config.SistemaVotacion.passwordClavesFirma}"
-		String eventoUrl = "${grailsApplication.config.grails.serverURL}/evento/obtener?id=${evento.id}";
+		String eventoUrl = "${grailsApplication.config.grails.serverURL}/evento/${evento.id}";
 		String strSubjectDNRoot = "CN=eventoUrl:${eventoUrl}, OU=Votaciones";
 		String aliasClavesFirma = grailsApplication.config.SistemaVotacion.aliasClavesFirma
 		KeyStore keyStore = KeyStoreUtil.createRootKeyStore(evento.fechaInicio,
@@ -52,8 +51,8 @@ class AlmacenClavesService {
 			validoHasta:evento.fechaFin,
 			bytes: KeyStoreUtil.getBytes(keyStore, password.toCharArray()))
 		almacenClaves.save()
-		respuesta = new Respuesta(codigoEstado:200, certificado:cert)
-		log.debug ("Generado almacén de claves '${almacenClaves.getId()}' para el evento '${evento.getId()}'")
+		respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK, certificado:cert)
+		log.debug ("Saved AlmacenClaves '${almacenClaves.getId()}' for event '${evento.getId()}'")
 		return respuesta
     }
 	

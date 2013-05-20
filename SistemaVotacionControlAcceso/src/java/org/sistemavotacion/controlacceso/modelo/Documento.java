@@ -14,6 +14,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+
+import org.bouncycastle.tsp.TimeStampToken;
+
 import static javax.persistence.GenerationType.IDENTITY;
 
 @Entity
@@ -23,7 +27,8 @@ public class Documento implements java.io.Serializable {
 	 private static final long serialVersionUID = 1L;
 	 
 	 public enum Estado {MANIFIESTO, MANIFIESTO_VALIDADO, FIRMA_DE_MANIFIESTO, 
-		 FIRMA_MANIFIESTO_VALIDADA, CON_ERRORES, MODIFICADO, SOLICITUD_COPIA}
+		 FIRMA_MANIFIESTO_VALIDADA, CON_ERRORES, MODIFICADO, SOLICITUD_COPIA,
+		 VALIDADO}
 	 
 	 @Id @GeneratedValue(strategy=IDENTITY)
 	 @Column(name="id", unique=true, nullable=false)
@@ -48,6 +53,9 @@ public class Documento implements java.io.Serializable {
      @Temporal(TemporalType.TIMESTAMP)
      @Column(name="lastUpdated", length=23)
      private Date lastUpdated;
+     
+     @Transient
+     private TimeStampToken timeStampToken;
      
      public Documento() { }
 
@@ -125,6 +133,16 @@ public class Documento implements java.io.Serializable {
 
 	public void setUsuario(Usuario usuario) {
 		this.usuario = usuario;
+	}
+
+
+	public TimeStampToken getTimeStampToken() {
+		return timeStampToken;
+	}
+
+
+	public void setTimeStampToken(TimeStampToken timeStampToken) {
+		this.timeStampToken = timeStampToken;
 	}
 
 

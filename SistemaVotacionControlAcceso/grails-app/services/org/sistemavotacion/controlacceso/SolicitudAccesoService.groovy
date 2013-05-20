@@ -4,9 +4,10 @@ import grails.converters.JSON;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream
 import javax.mail.internet.MimeMessage;
+
+import org.codehaus.groovy.grails.web.json.JSONObject;
 import org.sistemavotacion.controlacceso.modelo.*;
 import org.sistemavotacion.smime.*;
-
 import java.security.cert.X509Certificate;
 import java.util.Locale;
 
@@ -23,117 +24,103 @@ class SolicitudAccesoService {
 	def messageSource
     def firmaService
     def grailsApplication
-	def subscripcionService
 	def encryptionService
-
-    def Respuesta validarSolicitud(byte[] textoFirmado, 
-		Locale locale, boolean isEncrypted) {
-		log.debug(" - validarSolicitud")
-        def hashSolicitudAccesoBase64
-        def tipoRespuesta
-        def solicitudAcceso
-        def mensajeSMIME
-        def mensajeJSON
-		Respuesta respuesta = null;
-		SMIMEMessageWrapper smimeMessage = null;
+	
+	//{"operation":"SOLICITUD_ACCESO","hashSolicitudAccesoBase64":"...",
+	// "eventId":"..","eventURL":"...","UUID":"..."}
+	private Respuesta checkAccessRequestJSONData(JSONObject accessDataJSON, Locale locale) {
+		int status = Respuesta.SC_ERROR_PETICION
+		Tipo tipoRespuesta = Tipo.SOLICITUD_ACCESO_ERROR
+		org.bouncycastle.tsp.TimeStampToken tms;
+		String msg
 		try {
-			if(isEncrypted) {
-				respuesta = encryptionService.decryptSMIMEMessage(textoFirmado, locale)
-				if(Respuesta.SC_OK != respuesta.codigoEstado) return respuesta
-				smimeMessage = respuesta.smimeMessage
-			} else {
-				ByteArrayInputStream bais = new ByteArrayInputStream(textoFirmado);
-				smimeMessage = new SMIMEMessageWrapper(null, bais, null);
-			}
-			firmaService.validarCertificacionFirmantes(smimeMessage, locale)
+			Tipo operationType = Tipo.valueOf(accessDataJSON.operation)
+			if (accessDataJSON.eventId && accessDataJSON.eventURL &&
+				accessDataJSON.hashSolicitudAccesoBase64 && 
+				(Tipo.SOLICITUD_ACCESO == operationType)) {
+				status = Respuesta.SC_OK
+			} else msg = messageSource.getMessage('accessRequestWithErrorsMsg', null, locale)
 		} catch(Exception ex) {
-			log.error (ex.getMessage(), ex)
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:ex.getMessage())
+			log.error(ex.getMessage(), ex)
+			msg = messageSource.getMessage('accessRequestWithErrorsMsg', null, locale)
 		}
-		Respuesta respuestaUsuario = subscripcionService.comprobarUsuario(smimeMessage, locale)
-		if(Respuesta.SC_OK != respuestaUsuario.codigoEstado) {
-			response.status = respuestaUsuario.codigoEstado
-			render respuestaUsuario.mensaje
-			return false
-		}
-		Usuario usuario = respuestaUsuario.usuario
-		mensajeSMIME = new MensajeSMIME(usuario:usuario,
-			valido:smimeMessage.isValidSignature(),	contenido:smimeMessage.getBytes())
-		String asunto = smimeMessage.getSubject() 
-        String idEventoVotacion
-		String etiquetaAsunto = messageSource.getMessage('mime.asunto.SolicitudAcceso', null, locale)
-		log.debug("etiquetaAsunto - ${etiquetaAsunto}")
-        if (asunto?.trim().contains(etiquetaAsunto)) {
-            String[] cadenasAsunto = asunto.split("-");
-            idEventoVotacion = cadenasAsunto[1].trim()
-			log.debug("idEventoVotacion - ${idEventoVotacion}")
-            def eventoVotacion = EventoVotacion.findById(Long.valueOf(idEventoVotacion))
-            if (eventoVotacion) {
-				mensajeSMIME.evento = eventoVotacion
-				log.debug("eventoVotacion - ${eventoVotacion.id}")
-				if (!eventoVotacion.isOpen()) {
-					return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
-						mensaje:messageSource.getMessage('evento.mensajeCerrado', null, locale))	
-				}
-                if (!smimeMessage.isValidSignature()) {
-					String msg = messageSource.getMessage('error.FirmaConErrores', null, locale)
-                    mensajeSMIME.tipo = Tipo.SOLICITUD_ACCESO_FALLO
-					mensajeSMIME.motivo = msg
-                    respuesta = new Respuesta(tipo:Tipo.SOLICITUD_ACCESO_FALLO,
-                            codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg)
-                } else {//Ha votado el usuario?
-                    solicitudAcceso = SolicitudAcceso.findWhere(usuario:usuario, 
-                            eventoVotacion:eventoVotacion, estado:Tipo.OK)
-                    if (solicitudAcceso){
-                            log.debug("El usuario ya ha Votado - id solicitud previa: " + solicitudAcceso.id)//
-                            mensajeSMIME.tipo = Tipo.SOLICITUD_ACCESO_REPETIDA
-							String msg = "${grailsApplication.config.grails.serverURL}/mensajeSMIME/obtener?id=${solicitudAcceso.mensajeSMIME.id}"
-                            respuesta = new Respuesta(solicitudAcceso:solicitudAcceso, 
-								codigoEstado:Respuesta.SC_ERROR_VOTO_REPETIDO, mensaje:msg)
-                    } else {//es el hash único?
-                        mensajeJSON = JSON.parse(smimeMessage.getSignedContent())
-                        log.debug("validandoSolicitud - mensajeJSON: ${mensajeJSON}"  )
-                        hashSolicitudAccesoBase64 = mensajeJSON.hashSolicitudAccesoBase64
-                        boolean hashSolicitudAccesoRepetido = (SolicitudAcceso.findWhere(
-                                hashSolicitudAccesoBase64:hashSolicitudAccesoBase64) != null)
-                        log.debug("hashSolicitudAccesoRepetido: ${hashSolicitudAccesoRepetido}")
-                        if (hashSolicitudAccesoRepetido) {
-                                mensajeSMIME.tipo = Tipo.SOLICITUD_ACCESO_FALLO_HASH_REPETIDO
-                                respuesta = new Respuesta(tipo:Tipo.SOLICITUD_ACCESO_FALLO_HASH_REPETIDO,
-                                        codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:messageSource.getMessage('error.HashRepetido', null, locale))
-                        } else {//Todo OK
-                            mensajeSMIME.tipo = Tipo.SOLICITUD_ACCESO
-							log.debug("usuario: ${usuario.nif}")
-							solicitudAcceso = new SolicitudAcceso(usuario:usuario,
-								mensajeSMIME:mensajeSMIME, estado: SolicitudAcceso.Estado.OK,
-								hashSolicitudAccesoBase64:hashSolicitudAccesoBase64, 
-								eventoVotacion:eventoVotacion)
-                            respuesta = new Respuesta(tipo:Tipo.SOLICITUD_ACCESO,
-                                    codigoEstado:Respuesta.SC_OK, evento:eventoVotacion, 
-									solicitudAcceso:solicitudAcceso, smimeMessage:smimeMessage)
-                        }
-                    }
-                }   
-                
-            } else {
-				log.debug("Evento no encontrado")
-				mensajeSMIME.tipo = Tipo.SOLICITUD_ACCESO_FALLO
-				respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
-						mensaje:messageSource.getMessage( 'eventNotFound', 
-						[idEventoVotacion].toArray(), locale))
+		if(Respuesta.SC_OK == status) tipoRespuesta = Tipo.SOLICITUD_ACCESO
+		else log.error("checkAccessRequestJSONData - msg: ${msg} - data:${accessDataJSON.toString()}")
+		return new Respuesta(codigoEstado:status, mensaje:msg, tipo:tipoRespuesta)
+	}
+	
+    Respuesta saveRequest(MensajeSMIME mensajeSMIMEReq, Locale locale) {
+		Usuario firmante = mensajeSMIMEReq.getUsuario()
+		log.debug("saveRequest - firmante: ${firmante.nif}")
+		SMIMEMessageWrapper smimeMessageReq = mensajeSMIMEReq.getSmimeMessage()
+		String msg
+        try {
+			def mensajeJSON = JSON.parse(smimeMessageReq.getSignedContent())
+			Respuesta respuesta = checkAccessRequestJSONData(mensajeJSON, locale)
+			if(Respuesta.SC_OK !=  respuesta.codigoEstado) return respuesta
+			def hashSolicitudAccesoBase64
+			def tipoRespuesta
+			def solicitudAcceso
+			def eventoVotacion
+			EventoVotacion.withTransaction {
+				eventoVotacion = EventoVotacion.findById(Long.valueOf(mensajeJSON.eventId))
 			}
-        } else {
-			String msg = "Error - asunto recibido: '${asunto}' - asunto requerido: '${etiquetaAsunto}'"  
-			log.debug(msg)
-			mensajeSMIME.tipo = Tipo.SOLICITUD_ACCESO_FALLO
-			mensajeSMIME.motivo = msg
-			respuesta = new Respuesta(tipo:Tipo.SOLICITUD_ACCESO_FALLO,
-					codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:messageSource.getMessage('mime.asunto.SolicitudAccesoError', 
-					[asunto].toArray(), locale))
-        }
-        if(mensajeSMIME) mensajeSMIME.save();
-        if(solicitudAcceso) solicitudAcceso.save();
-        return respuesta
+			if (eventoVotacion) {
+				if (!eventoVotacion.isOpen()) {
+					msg = messageSource.getMessage('evento.mensajeCerrado', null, locale)
+					log.error("- saveRequest - EVENT CLOSED - ${msg}")
+					return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+						tipo:Tipo.SOLICITUD_ACCESO_ERROR, mensaje:msg)
+				}
+				SolicitudAcceso.withTransaction {
+					solicitudAcceso = SolicitudAcceso.findWhere(usuario:firmante,
+						eventoVotacion:eventoVotacion, estado:Tipo.OK)
+				}
+				if (solicitudAcceso){//Ha votado el usuario?
+						msg = "${grailsApplication.config.grails.serverURL}/mensajeSMIME/${solicitudAcceso.mensajeSMIME.id}"
+						log.error("- saveRequest - ACCESS REQUEST ERROR - ${msg}")
+						return new Respuesta(solicitudAcceso:solicitudAcceso, 
+							tipo:Tipo.SOLICITUD_ACCESO_ERROR, mensaje:msg, evento:eventoVotacion,
+							codigoEstado:Respuesta.SC_ERROR_VOTO_REPETIDO)
+				} else {//es el hash único?
+					hashSolicitudAccesoBase64 = mensajeJSON.hashSolicitudAccesoBase64
+					boolean hashSolicitudAccesoRepetido = (SolicitudAcceso.findWhere(
+							hashSolicitudAccesoBase64:hashSolicitudAccesoBase64) != null)
+					if (hashSolicitudAccesoRepetido) {
+						msg = messageSource.getMessage('error.HashRepetido', null, locale)
+						log.error("- saveRequest -ACCESS REQUEST HAS REPEATED -> ${hashSolicitudAccesoBase64} - ${msg}")
+						return new Respuesta(tipo:Tipo.SOLICITUD_ACCESO_ERROR, mensaje:msg,
+								codigoEstado:Respuesta.SC_ERROR_PETICION, evento:eventoVotacion)
+					} else {//Todo OK
+						solicitudAcceso = new SolicitudAcceso(usuario:firmante,
+							mensajeSMIME:mensajeSMIMEReq,
+							estado: SolicitudAcceso.Estado.OK,
+							hashSolicitudAccesoBase64:hashSolicitudAccesoBase64,
+							eventoVotacion:eventoVotacion)
+						SolicitudAcceso.withTransaction {
+							if (!solicitudAcceso.save()) {
+								solicitudAcceso.errors.each { log.error("- saveRequest - ERROR - ${it}")}
+							}
+						}
+						return new Respuesta(tipo:Tipo.SOLICITUD_ACCESO,
+								codigoEstado:Respuesta.SC_OK, evento:eventoVotacion,
+								solicitudAcceso:solicitudAcceso)
+					}
+				}
+			} else {
+				msg = messageSource.getMessage( 'eventNotFound',
+							[mensajeJSON.eventId].toArray(), locale)
+				log.error("- saveRequest - Event Id not found - > ${mensajeJSON.eventId} - ${msg}")
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+						tipo:Tipo.SOLICITUD_ACCESO_ERROR, mensaje:msg)
+			}
+		}catch(Exception ex) {
+			log.error (ex.getMessage(), ex)
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION,
+					tipo:Tipo.SOLICITUD_ACCESO_ERROR,
+					mensaje:messageSource.getMessage(
+					'accessRequestWithErrorsMsg', null, locale))
+		}
     }
 	
 	def rechazarSolicitud(SolicitudAcceso solicitudAcceso) {

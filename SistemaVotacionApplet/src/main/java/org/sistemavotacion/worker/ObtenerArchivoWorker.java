@@ -5,7 +5,6 @@ import javax.swing.SwingWorker;
 import org.apache.http.HttpResponse;
 import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.util.EntityUtils;
-import org.sistemavotacion.AppletFirma;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.Respuesta;
 import org.slf4j.Logger;
@@ -28,7 +27,7 @@ public class ObtenerArchivoWorker extends SwingWorker<Integer, String>
     private Exception exception = null;
     private byte[] bytesArchivo = null;
 
-    public ObtenerArchivoWorker(Integer id, String urlArchivo, 
+    public ObtenerArchivoWorker(Integer id, String urlArchivo, String contentType,
             VotingSystemWorkerListener workerListener) {
         this.id = id;
         this.urlArchivo = urlArchivo;

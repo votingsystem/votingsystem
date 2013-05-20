@@ -33,7 +33,7 @@ import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.json.DeJSONAObjeto;
 import org.sistemavotacion.test.json.DeObjetoAJSON;
 import org.sistemavotacion.test.panel.VotacionesPanel;
-import org.sistemavotacion.test.tarea.EnviarMultipartEntityWorker;
+import org.sistemavotacion.test.tarea.FileSenderWorker;
 import org.sistemavotacion.test.tarea.LanzadorWorker;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
@@ -398,7 +398,7 @@ public class CrearVotacionDialog extends JDialog implements KeyListener, Lanzado
                     ContextoPruebas.getControlAcceso().getNombreNormalizado(), 
                     eventoParaPublicar, "Solicitud Publicación convocatoria", null, SignedMailGenerator.Type.USER);
             mimeMessage.writeTo(new FileOutputStream(solicitudAsociacion));
-            tareaEnEjecucion= new EnviarMultipartEntityWorker(solicitudAsociacion, 
+            tareaEnEjecucion= new FileSenderWorker(solicitudAsociacion, 
                     ContextoPruebas.getURLGuardarEventoParaVotar(
                     ContextoPruebas.getControlAcceso().getServerURL()), this);
             tareaEnEjecucion.execute(); 
@@ -571,8 +571,8 @@ public class CrearVotacionDialog extends JDialog implements KeyListener, Lanzado
     @Override
     public void mostrarResultadoOperacion(SwingWorker worker) {
     	logger.debug(" === mostrarResultadoOperacion - worker: " + worker.getClass());
-        if(worker instanceof EnviarMultipartEntityWorker) {
-        	EnviarMultipartEntityWorker multipartEntityWorker = (EnviarMultipartEntityWorker)worker;
+        if(worker instanceof FileSenderWorker) {
+        	FileSenderWorker multipartEntityWorker = (FileSenderWorker)worker;
             logger.debug(" === mostrarResultadoOperacion - EnviarMultipartEntityWorker - statusCode: " 
         	+ multipartEntityWorker.getStatusCode());
 

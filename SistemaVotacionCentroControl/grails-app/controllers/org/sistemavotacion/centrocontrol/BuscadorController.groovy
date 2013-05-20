@@ -32,89 +32,114 @@ class BuscadorController {
    def sessionFactory
    
    /**
-	* @httpMethod GET
-	* @return Información sobre los servicios que tienen como url base '/buscador'
+    * ==================================================
+	* (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS). 
+	* ==================================================
+	* Servicio que reindexa el motor de búsqueda
+	* @httpMethod [GET]
 	*/
-	def index() { 
-		redirect action: "restDoc"
-	}
+   def reindexTest () {
+	   log.debug "==== Usuario en la lista de administradores, reindexando"
+	   FullTextSession fullTextSession = Search.getFullTextSession(sessionFactory.currentSession);
+	   fullTextSession.createIndexer().startAndWait()
+	   response.status = Respuesta.SC_OK
+	   render "OK"
+	   return false
+   }
    
    /**
-    * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS). 
-    * Servicio que reindexa el motor de búsqueda
-	* @httpMethod GET
+	* Servicio que reindexa los datos del motor de búsqueda.
+	* 
+	* @httpMethod [POST]
+	* @requestContentType [application/x-pkcs7-signature] Obligatorio. Documento firmado 
+	*             en formato SMIME con los datos de la solicitud de reindexación.
 	*/
-   def reindex () {
-		log.debug "Usuario en la lista de administradoreas, reindexando"
-		FullTextSession fullTextSession = Search.getFullTextSession(sessionFactory.currentSession);
-		fullTextSession.createIndexer().startAndWait()
-		response.status = Respuesta.SC_OK
-		render message(code: 'reindexOKMsg')
-		return false
-	}
-   
-   /**
-	* Servicio que reindexa los datos del motor de búsqueda
-	* @param archivoFirmado Obligatorio. Solicitud firmada por un administrador de sistema.
-	* @httpMethod POST
-	*/
-	def guardarReindex () { 
-		SMIMEMessageWrapper smimeMessageReq = params.smimeMessageReq
-		List<String> administradores = Arrays.asList(
-			grailsApplication.config.SistemaVotacion.adminsDNI.split(","))
-		Usuario usuario
-		Respuesta comprobacionUsuario = subscripcionService.comprobarUsuario(
-			params.smimeMessageReq?.getFirmante(), request.getLocale())
-		if(Respuesta.SC_OK== comprobacionUsuario.codigoEstado) usuario = comprobacionUsuario.usuario
-		if (administradores.contains(usuario?.nif)) {
-			log.debug "Usuario en la lista de administradoreas, reindexando"
-			FullTextSession fullTextSession = Search.getFullTextSession(sessionFactory.currentSession);
-			fullTextSession.createIndexer().startAndWait()
-			response.status = Respuesta.SC_OK
-			render message(code: 'reindexOKMsg') 
-		} else {
-			log.debug message(code: 'error.UsuarioNoAdministrador')
+	def reindex () { 
+		try {
+			MensajeSMIME mensajeSMIME = flash.mensajeSMIMEReq
+			if(!mensajeSMIME) {
+				String msg = message(code:'evento.peticionSinArchivo')
+				log.error msg
+				response.status = Respuesta.SC_ERROR_PETICION
+				render msg
+				return false
+			}
+			def requestJSON = JSON.parse(mensajeSMIME.getSmimeMessage().getSignedContent())
+			Tipo operacion = Tipo.valueOf(requestJSON.operacion)
+			String msg
+			if(Tipo.SOLICITUD_INDEXACION != operacion) {
+				msg = message(code:'operationErrorMsg',
+					args:[operacion.toString()])
+				response.status = Respuesta.SC_ERROR_PETICION
+				log.debug("ERROR - ${msg}")
+				render msg
+				return false
+			}
+			List<String> administradores = Arrays.asList(
+				grailsApplication.config.SistemaVotacion.adminsDNI.split(","))
+			Usuario usuario = mensajeSMIME.getUsuario()
+			if (administradores.contains(usuario.nif)) {
+				log.debug "Usuario en la lista de administradores, reindexando"
+				FullTextSession fullTextSession = Search.getFullTextSession(sessionFactory.currentSession);
+				fullTextSession.createIndexer().startAndWait()
+				flash.respuesta = new Respuesta(tipo:Tipo.SOLICITUD_INDEXACION,
+					codigoEstado:Respuesta.Respuesta.SC_ERROR_PETICION)
+				response.status = Respuesta.SC_OK
+				render "OK"
+			} else {
+				log.debug "Usuario no esta en la lista de administradores, petición denegada"
+				msg = message(code: 'adminIdentificationErrorMsg', [usuario.nif])
+				flash.respuesta = new Respuesta(codigoEstado:Respuesta.Respuesta.SC_ERROR_PETICION,
+					tipo:Tipo.SOLICITUD_INDEXACION_ERROR, mensaje:msg)
+				response.status = Respuesta.SC_ERROR_PETICION
+				render msg
+			}
+			return false
+		} catch(Exception ex) {
+			log.error (ex.getMessage(), ex)
+			flash.respuesta = new Respuesta(codigoEstado:Respuesta.Respuesta.SC_ERROR_PETICION,
+				tipo:Tipo.SOLICITUD_INDEXACION_ERROR, mensaje:ex.getMessage())
 			response.status = Respuesta.SC_ERROR_PETICION
-			render message(code: 'error.UsuarioNoAdministrador')
+			render ex.getMessage()
+			return false
 		}
-		return false
 	}
 	
 	/**
 	 * Servicio que busca la cadena de texto recibida entre las votaciones publicadas.
-	 * 
-	 * @param consultaTexto Obligatorio. Texto de la búsqueda.
-	 * @param max Opcional (por defecto 20). Número máximo de documentos que 
+	 *
+	 * @httpMethod [GET]
+	 * @param [consultaTexto] Opcional. Texto de la búsqueda.
+	 * @param [max] Opcional (por defecto 20). Número máximo de documentos que
 	 * 		  devuelve la consulta (tamaño de la página).
-	 * @param offset Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.
-	 * @httpMethod GET
+	 * @param [offset] Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.
+	 * @responseContentType [application/json]
 	 */
     def evento () {
         def eventosVotacionMap = new HashMap()
-		if (!params.consultaTexto) {
-			render(view: "index")
-			return
-		}
-        List<EventoVotacion> eventos = searchHelper.findByFullText(EventoVotacion.class,
-            ['asunto', 'contenido']  as String[], params.consultaTexto, params.offset, params.max);
-        log.debug("eventos votacion: ${eventos.size()}")
-		eventosVotacionMap.eventos = eventos.collect {evento ->
-                return [id: evento.id, asunto: evento.asunto, 
-					contenido:evento.contenido,
-					URL:"${grailsApplication.config.grails.serverURL}/eventoVotacion?id=${evento.id}"]
+		if (params.consultaTexto) {
+			List<EventoVotacion> eventos = searchHelper.findByFullText(EventoVotacion.class,
+				['asunto', 'contenido']  as String[], params.consultaTexto, params.offset, params.max);
+			log.debug("eventos votacion: ${eventos.size()}")
+			eventosVotacionMap.eventos = eventos.collect {evento ->
+					return [id: evento.id, asunto: evento.asunto,
+						contenido:evento.contenido,
+						URL:"${grailsApplication.config.grails.serverURL}/eventoVotacion/${evento.id}"]
+			}
         }
         render eventosVotacionMap as JSON
+		return false
     }
 	
 	/**
-	 * @httpMethod POST
-	 * @param consulta Obligatorio. Documento JSON con los parámetros de la consulta:<br/><code>
+	 * @httpMethod [POST]
+	 * @requestContentType [application/json] Documento JSON con los parámetros de la consulta:<br/><code>
 	 * 		  {conReclamaciones:true, conVotaciones:true, textQuery:ipsum, conManifiestos:true}</code>
-	 * @return Documento JSON con la lista de votaciones que cumplen el criterio de la búsqueda.
+	 * @responseContentType [application/json]
+	 * @return Documento JSON con la lista de eventos que cumplen el criterio de la búsqueda.
 	 */
 	def consultaJSON() {
-		String consulta = StringUtils.getStringFromInputStream(request.getInputStream())
-		//String consulta = "${request.getInputStream()}"
+		String consulta = "${request.getInputStream()}"
 		log.debug("consulta: ${consulta}")
 		if (!consulta) {
 			render(view:"index")
@@ -171,7 +196,7 @@ class BuscadorController {
 		eventosVotacion.collect {eventoItem ->
 			def eventoItemId = eventoItem.id
 			def eventoMap = [id: eventoItem.id, fechaCreacion: eventoItem.dateCreated,
-					URL:"${grailsApplication.config.grails.serverURL}/evento?id=${eventoItem.id}",
+					URL:"${grailsApplication.config.grails.serverURL}/evento/${eventoItem.id}",
 					asunto:eventoItem.asunto, contenido:eventoItem.contenido,
 					etiquetas:eventoItem.etiquetaSet?.collect {etiquetaItem ->
 							return [id:etiquetaItem.id, contenido:etiquetaItem.nombre]},
@@ -189,7 +214,7 @@ class BuscadorController {
 							return [id:opcion.id, contenido:opcion.contenido]}
 			def centroControlMap = [serverURL:grailsApplication.config.grails.serverURL,
 					nombre:grailsApplication.config.SistemaVotacion.serverName]
-			centroControlMap.informacionVotosURL = "${grailsApplication.config.grails.serverURL}/eventoVotacion/obtenerVotos?eventoVotacionId=${eventoItem.eventoVotacionId}&controlAccesoServerURL=${eventoItem.controlAcceso.serverURL}"
+			centroControlMap.informacionVotosURL = "${grailsApplication.config.grails.serverURL}/eventoVotacion/votes?eventAccessControlURL=${eventoItem.url}"
 			eventoMap.centroControl = centroControlMap
 			eventoMap.url = eventoItem.url
 			eventosMap.eventos.votaciones.add(eventoMap)
@@ -206,7 +231,8 @@ class BuscadorController {
 	 * @param max Opcional (por defecto 20). Número máximo de documentos que
 	 * 		  devuelve la consulta (tamaño de la página).
 	 * @param offset Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.
-	 * @httpMethod GET
+	 * @responseContentType [application/json]
+	 * @httpMethod [GET]
 	 */
 	def eventoPorEtiqueta () {
 		def eventosMap = new HashMap()
@@ -219,7 +245,7 @@ class BuscadorController {
 			eventosMap.eventos = EtiquetaEvento.findAllByEtiqueta(etiqueta,
 				 [max: params.max, offset: params.offset]).collect { etiquetaEvento ->
 				return [id: etiquetaEvento.eventoVotacion.id, 
-					URL:"${grailsApplication.config.grails.serverURL}/eventoVotacion/obtener?id=${etiquetaEvento.eventoVotacion.id}",
+					URL:"${grailsApplication.config.grails.serverURL}/eventoVotacion/${etiquetaEvento.eventoVotacion.id}",
 					asunto:etiquetaEvento.eventoVotacion.asunto, 
 					contenido: etiquetaEvento?.eventoVotacion?.contenido]
 			} 

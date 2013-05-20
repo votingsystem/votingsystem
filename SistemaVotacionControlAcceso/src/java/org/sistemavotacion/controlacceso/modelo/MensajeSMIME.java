@@ -1,6 +1,8 @@
 package org.sistemavotacion.controlacceso.modelo;
 
 import static javax.persistence.GenerationType.IDENTITY;
+
+import java.io.ByteArrayInputStream;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
@@ -22,6 +24,9 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
+
+import org.sistemavotacion.smime.SMIMEMessageWrapper;
 
 
 /**
@@ -71,6 +76,10 @@ public class MensajeSMIME implements Serializable {
     
     @Column(name="motivo", columnDefinition="TEXT") 
     private String motivo;
+    
+    //To avoid repeated messages
+    @Column(name="base64ContentDigest", unique=true) 
+    private String base64ContentDigest;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="fechaActualizacion", length=23, insertable=true)
@@ -78,7 +87,10 @@ public class MensajeSMIME implements Serializable {
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="smimePadre")
     private Set<MensajeSMIME> smimeHijosSet = new HashSet<MensajeSMIME>(0);  
 
-
+    @Transient
+    private transient SMIMEMessageWrapper smimeMessage;
+    @Transient
+    private transient Set<Usuario> signers;
     /**
      * @return the contenido
      */
@@ -211,6 +223,34 @@ public class MensajeSMIME implements Serializable {
 
 	public void setMotivo(String motivo) {
 		this.motivo = motivo;
+	}
+
+	public String getBase64ContentDigest() {
+		return base64ContentDigest;
+	}
+
+	public void setBase64ContentDigest(String base64ContentDigest) {
+		this.base64ContentDigest = base64ContentDigest;
+	}
+	
+	public SMIMEMessageWrapper getSmimeMessage() throws Exception {
+		if(smimeMessage == null && contenido != null) {
+			smimeMessage = new SMIMEMessageWrapper(
+				new ByteArrayInputStream(contenido));
+		}
+		return smimeMessage;
+	}
+
+	public void setSmimeMessage(SMIMEMessageWrapper smimeMessage) {
+		this.smimeMessage = smimeMessage;
+	}
+
+	public Set<Usuario> getSigners() {
+		return signers;
+	}
+
+	public void setSigners(Set<Usuario> signers) {
+		this.signers = signers;
 	}
 
 

@@ -1,6 +1,6 @@
-{"codigoEstado":700, "operacion":"REPRESENTATIVE_UNSUBSCRIBE_REQUEST", 
-            "contenidoFirma":{"operation":"REPRESENTATIVE_UNSUBSCRIBE_REQUEST"}, 
-            "urlEnvioDocumento":"http://localhost:8080/SistemaVotacionControlAcceso/representative/guardarUnsubscribeRequestAdjuntandoValidacion", 
+{"codigoEstado":700, "operacion":"REPRESENTATIVE_REVOKE", 
+            "contenidoFirma":{"operation":"REPRESENTATIVE_REVOKE"}, 
+            "urlEnvioDocumento":"http://localhost:8080/SistemaVotacionControlAcceso/representative/revoke", 
             "nombreDestinatarioFirma":"Primer ControlAcceso", "asuntoMensajeFirmado":"Dar de baja representante", 
-            "respuestaConRecibo":true, "urlTimeStampServer":"http://localhost:8080/SistemaVotacionControlAcceso/timeStamp/obtener", 
+            "respuestaConRecibo":true, "urlTimeStampServer":"http://localhost:8080/SistemaVotacionControlAcceso/timeStamp", 
             "urlServer":"http://localhost:8080/SistemaVotacionControlAcceso/"}

@@ -19,11 +19,10 @@ import grails.converters.JSON;
 class CsrController {
 
 	def csrService
-	def subscripcionService
 	def firmaService
 	
 	/**
-	 * @httpMethod GET
+	 * @httpMethod [GET]
 	 * @return Información sobre los servicios que tienen como url base '/csr'.
 	 */
 	def index() { 
@@ -35,15 +34,17 @@ class CsrController {
 	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS)<br/>
 	 * Servicio para la creación de certificados de usuario.
 	 * 
-	 * @httpMethod POST
+	 * @httpMethod [POST]
 	 * @param csr Solicitud de certificación con los datos de usuario.
 	 * @return Si todo es correcto devuelve un código de estado HTTP 200 y el identificador 
 	 *         de la solicitud en la base de datos.
 	 */
 	def solicitar() {
-		String consulta = StringUtils.getStringFromInputStream(request.getInputStream())
+		String consulta = "${request.getInputStream()}"
 		if (!consulta) {
-			render(view:"index")
+			response.status = Respuesta.SC_ERROR_PETICION
+			render message(code: 'error.PeticionIncorrectaHTML', args:[
+				"${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
 			return false
 		}
 		Respuesta respuesta = csrService.validarCSRUsuario(consulta.getBytes(), request.getLocale())
@@ -56,7 +57,7 @@ class CsrController {
 	 * Servicio que devuelve las solicitudes de certificados firmadas una vez que
 	 * se ha validado la identidad del usuario.
 	 *
-	 * @httpMethod GET
+	 * @httpMethod [GET]
 	 * @param idSolicitudCSR Identificador de la solicitud de certificación enviada previamente por el usuario.
 	 * @return Si el sistema ha validado al usuario devuelve la solicitud de certificación firmada.
 	 */
@@ -123,26 +124,28 @@ class CsrController {
 	 * TODO - Hacer las validaciones sólo sobre solicitudes firmadas electrónicamente
 	 * por personal dado de alta en la base de datos.
 	 *
-	 * @httpMethod POST
-	 * @param archivoFirmado Archivo firmado en formato SMIME en cuyo contenido 
+	 * @httpMethod [POST]
+	 * @requestContentType [application/x-pkcs7-signature] Obligatorio. Documento 
+	 * firmadoArchivo firmado en formato SMIME en cuyo contenido 
 	 * se encuentran los datos de la solicitud que se desea validar.
 	 * <code>{deviceId:"000000000000000", telefono:"15555215554", nif:"1R" }</code>
 	 * 
 	 * @return Si todo es correcto devuelve un código de estado HTTP 200.
 	 */
-	def guardarValidacion() { 
-		SMIMEMessageWrapper smimeMessageReq = params.smimeMessageReq
-		List<String> administradores = Arrays.asList(
-			grailsApplication.config.SistemaVotacion.adminsDNI.split(","))
-		Respuesta respuestaUsuario = subscripcionService.comprobarUsuario(
-			params.smimeMessageReq, request.getLocale())
-		if(Respuesta.SC_OK != respuestaUsuario.codigoEstado) {
-			response.status = respuestaUsuario.codigoEstado
-			render respuestaUsuario.mensaje
+	def validacion() { 
+		MensajeSMIME mensajeSMIME = flash.mensajeSMIMEReq
+		if(!mensajeSMIME) {
+			String msg = message(code:'evento.peticionSinArchivo')
+			log.error msg
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
 			return false
 		}
-		Usuario usuario = respuestaUsuario.usuario
-		def docValidacionJSON = JSON.parse(smimeMessageReq.getSignedContent())
+		List<String> administradores = Arrays.asList(
+			grailsApplication.config.SistemaVotacion.adminsDNI.split(","))
+		Usuario usuario = mensajeSMIME.getUsuario()
+		def docValidacionJSON = JSON.parse(mensajeSMIME.getSmimeMessage().getSignedContent())
+		SMIMEMessageWrapper smimeMessageReq = mensajeSMIME.getSmimeMessage()
 		if (administradores.contains(usuario.nif) || usuario.nif.equals(docValidacionJSON.nif)) {
 			String msg = message(code: "csr.usuarioAutorizado", args: [usuario.nif])
 			Dispositivo dispositivo = Dispositivo.findWhere(deviceId: docValidacionJSON.deviceId)
@@ -176,7 +179,7 @@ class CsrController {
 			return false
 		} else {
 			String msg = message(code: "csr.usuarioNoAutorizado", args: [usuario.nif])
-			log.debug msg
+			log.error msg
 			response.status = Respuesta.SC_ERROR_PETICION
 			render msg
 			return false
@@ -184,17 +187,19 @@ class CsrController {
 	}
 	
 	/**
-	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS).
+     * ==================================================
+	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS). 
+	 * ==================================================
 	 * 
 	 * Servicio que firma solicitudes de certificación de usuario.<br/>
 	 * 
-	 * @httpMethod POST
-	 * @param userIfo Documento JSON con los datos del usuario 
+	 * @httpMethod [POST]
+	 * @requestContentType [application/json] Documento JSON con los datos del usuario 
 	 * <code>{deviceId:"000000000000000", telefono:"15555215554", nif:"1R" }</code>
 	 * @return Si todo es correcto devuelve un código de estado HTTP 200.
 	 */
 	def validar() {
-		String consulta = StringUtils.getStringFromInputStream(request.getInputStream())
+		String consulta = "${request.getInputStream()}"
 		if (!consulta) {
 			response.status = Respuesta.SC_ERROR_PETICION
 			render(view:"index")
@@ -237,28 +242,6 @@ class CsrController {
 			render respuestaValidacionCSR.mensaje
 		}
 		return false
-	}
-	
-	/**
-	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS).
-	 * 
-	 * Servicio que anula solicitudes de certificación de usuario.<br/>
-	 * 
-	 * TODO - IMPLEMETAR. Hacer las validaciones sólo sobre solicitudes 
-	 * firmadas electrónicamente por personal dado de alta en la base de datos.
-	 * 
-	 * @httpMethod POST
-	 * @param userIfo Documento JSON con los datos del usuario 
-	 * <code>{deviceId:"000000000000000", telefono:"15555215554", nif:"1R" }</code>
-	 * @return Si todo es correcto devuelve un código de estado HTTP 200.
-	 */
-	def anular() {
-		String consulta = StringUtils.getStringFromInputStream(request.getInputStream())
-		if (!consulta) {
-			render(view:"index")
-			return false
-		}
-		
 	}
 	
 }

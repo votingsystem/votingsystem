@@ -21,10 +21,11 @@ class CsrService {
         PKCS10CertificationRequest csr = PKCS10WrapperServer.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
 		if(!csr) {
 			String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
-			log.error("************ ${msg} ************ csr request: '${new String(csrPEMBytes)}'")
-			return new Respuesta(codigoEstado:400, mensaje:msg)
+			log.error("- validarCSRVoto - ERROR  ${msg}")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg)
 		}
-		Respuesta respuesta = new Respuesta(codigoEstado:200)
+		
+		Respuesta respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK)
         CertificationRequestInfo info = csr.getCertificationRequestInfo();
 		String eventoId;
 		String controlAccesoURL;
@@ -36,10 +37,11 @@ class CsrService {
 			eventoId = subjectDN.split("OU=eventoId:")[1].split(",")[0];
 			if (!eventoId.equals(String.valueOf(evento.getId()))) {
 				String msg = messageSource.getMessage('evento.solicitudCsrError', null, locale)
-				log.error(msg)
-				return new Respuesta(codigoEstado:400, mensaje:msg)
+				log.error("- validarCSRVoto - ERROR - ${msg}")
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg)
 			}
 		}
+		
 		if(subjectDN.split("CN=controlAccesoURL:").length > 1) {
 			String parte = subjectDN.split("CN=controlAccesoURL:")[1];
 			if (parte.split(",").length > 1) {
@@ -50,8 +52,8 @@ class CsrService {
 			if (!serverURL.equals(controlAccesoURL)) {
 				String msg = messageSource.getMessage(
 					'error.urlControlAccesoWrong', [serverURL, controlAccesoURL].toArray(), locale)
-				log.error(msg)
-				return new Respuesta(codigoEstado:400, mensaje:msg)
+				log.error("- validarCSRVoto - ERROR - ${msg}")
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg)
 			}	
 		}
 		if (subjectDN.split("OU=hashCertificadoVotoHEX:").length > 1) {
@@ -66,12 +68,12 @@ class CsrService {
 				if (solicitudCSR) {
 					String msg = messageSource.getMessage(
 						'error.hashCertificadoVotoRepetido', [hashCertificadoVotoBase64].toArray(), locale)
-					log.error(msg)
-					return new Respuesta(codigoEstado:400, mensaje:msg)
+					log.error("- validarCSRVoto - ERROR - ${msg}")
+					return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg)
 				}
 			} catch (Exception ex) {
 				log.error(ex.getMessage(), ex)
-				return new Respuesta(codigoEstado:400, mensaje:ex.getMessage())
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:ex.getMessage())
 			}
 		}
 		return respuesta
@@ -118,7 +120,7 @@ class CsrService {
 				contenido:csrPEMBytes, usuario:respuesta.usuario,
 				dispositivo:respuesta.dispositivo).save()
 		}
-		if(solicitudCSR) return new Respuesta(codigoEstado:200, mensaje:solicitudCSR.id)
-		else return new Respuesta(codigoEstado:400)
+		if(solicitudCSR) return new Respuesta(codigoEstado:Respuesta.SC_OK, mensaje:solicitudCSR.id)
+		else return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION)
 	}
 }

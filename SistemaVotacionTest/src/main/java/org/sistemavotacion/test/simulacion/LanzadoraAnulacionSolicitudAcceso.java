@@ -59,8 +59,8 @@ public class LanzadoraAnulacionSolicitudAcceso  implements Callable<Respuesta> {
                 DeObjetoAJSON.obtenerAnuladorDeVotoJSON(solicitudAcceso),
                 asuntoMensaje, null, SignedMailGenerator.Type.USER, anulador); 
         }
-        HttpResponse response = Contexto.getHttpHelper().enviarArchivoFirmado(
-            anulador, ContextoPruebas.getURLAnulacionVoto(
+        HttpResponse response = Contexto.getHttpHelper().sendFile(
+            anulador, Contexto.SIGNED_CONTENT_TYPE, ContextoPruebas.getURLAnulacionVoto(
             		ContextoPruebas.getControlAcceso().getServerURL()));
         if (Respuesta.SC_OK == response.getStatusLine().getStatusCode()) {                    
             SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(null,

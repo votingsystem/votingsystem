@@ -1,0 +1,9 @@
+{"codigoEstado":700, "operacion":"PUBLICACION_RECLAMACION_SMIME", "mensaje":null, 
+            "urlEnvioDocumento":"http://localhost:8080/SistemaVotacionControlAcceso/eventoReclamacion", 
+            "asuntoMensajeFirmado":"Solicitud publicación reclamación", 
+            "contenidoFirma":{"asunto":"asunto reclamación - 11:04", "contenido":"contenido reclamación - 11:04", "fechaFin":"2013-05-31 12:00:00", "cardinalidad":"MULTIPLES", "copiaSeguridadDisponible":true, 
+                "campos":[{"contenido":"cantidad solicitada"}],
+                "etiquetas":["etiqueta1", "etiqueta2", "la puerta del tio'l coche"]}, "respuestaConRecibo":true, 
+            "nombreDestinatarioFirma":"Primer ControlAcceso", 
+            "urlTimeStampServer":"http://localhost:8080/SistemaVotacionControlAcceso/timeStamp", 
+            "urlServer":"http://localhost:8080/SistemaVotacionControlAcceso/"}

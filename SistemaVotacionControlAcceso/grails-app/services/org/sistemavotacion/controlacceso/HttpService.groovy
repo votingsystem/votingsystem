@@ -3,6 +3,9 @@ package org.sistemavotacion.controlacceso
 import groovyx.net.http.*
 import static groovyx.net.http.ContentType.*
 import static groovyx.net.http.Method.*
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.cert.X509Certificate;
 import java.util.Set;
 import org.sistemavotacion.controlacceso.modelo.*
@@ -11,10 +14,13 @@ import java.util.concurrent.Executors
 import java.util.concurrent.Executor
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
+import org.apache.http.entity.ByteArrayEntity
 import org.apache.http.entity.mime.content.ByteArrayBody
 import org.apache.http.entity.mime.MultipartEntity
 import org.codehaus.groovy.grails.web.json.*
 import java.util.Locale;
+
+import javax.persistence.Transient;
 
 class HttpService {
 	
@@ -66,7 +72,7 @@ class HttpService {
 		return respuesta
 	}
 	
-	public Respuesta obtenerInfoActorConIP (String urlInfo, ActorConIP actorConIP) {
+	public Respuesta obtenerInfoActorConIP (String urlInfo) {
 		log.debug "obtenerInfoActorConIP - urlInfo: ${urlInfo}"
 		Respuesta respuesta
 		try {
@@ -74,12 +80,13 @@ class HttpService {
 			infoActorHTTPBuilder.request(Method.GET) { req ->
 				response.'200' = { resp, reader ->
 					log.debug "***** OK: ${resp.statusLine}"
-					actorConIP.nombre = reader.nombre
-					actorConIP.serverURL = reader.serverURL
-					actorConIP.estado = ActorConIP.Estado.valueOf(reader.estado)
-					actorConIP.tipoServidor = Tipo.valueOf(reader.tipoServidor)
-					respuesta = new Respuesta(codigoEstado:resp.statusLine.statusCode)
-					respuesta.actorConIP = actorConIP
+					ActorConIP actorConIP = new ActorConIP(nombre:reader.nombre,
+						serverURL:reader.serverURL, 
+						cadenaCertificacion:reader.cadenaCertificacionPEM?.getBytes(),
+						estado:ActorConIP.Estado.valueOf(reader.estado),
+						tipoServidor:Tipo.valueOf(reader.tipoServidor))
+					respuesta = new Respuesta(actorConIP:actorConIP,
+						codigoEstado:resp.statusLine.statusCode)
 				}
 				response.failure = { resp ->
 					log.error "***** ERROR: ${resp.statusLine}"
@@ -89,41 +96,39 @@ class HttpService {
 			}
 		} catch (Exception ex) {
 			log.error (ex.getMessage(), ex)
-			return new Respuesta(codigoEstado:500, mensaje:ex.getMessage())
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+				mensaje:ex.getMessage())
 		}
 		return respuesta
 	}
 	
-	Respuesta sendSignedMessage(String messageUrl, byte[] mensaje) {
-		log.debug(" - sendSignedMessage:${messageUrl}")
-		String nombreEntidadFirmada = grailsApplication.config.SistemaVotacion.nombreEntidadFirmada
-		def httpBuilder = new HTTPBuilder(messageUrl);
+	Respuesta sendMessage(byte[] message, String contentType, String serverURL) {
+		log.debug(" - sendMessage:${serverURL} - contentType: ${contentType}")
+		def httpBuilder = new HTTPBuilder(serverURL);
 		def respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION)
 		try {
 			httpBuilder.request(POST) {request ->
-				requestContentType = ContentType.URLENC
-				MultipartEntity entity = new MultipartEntity();
-				ByteArrayBody  fileBody = new ByteArrayBody(mensaje, nombreEntidadFirmada);
-				entity.addPart(nombreEntidadFirmada, fileBody);
-				request.entity = entity
+				ByteArrayEntity byteArrayEntity = new ByteArrayEntity(message)
+				byteArrayEntity.setContentType(contentType)
+				request.entity = byteArrayEntity
 				request.getParams().setParameter("http.connection.timeout", new Integer(10000));
 				request.getParams().setParameter("http.socket.timeout", new Integer(10000));
 				response.'200' = { resp, reader ->
-						log.debug "***** OK: ${resp.statusLine}"
-						respuesta.codigoEstado = resp.statusLine.statusCode
+					log.debug "***** OK: ${resp.statusLine}"
+					respuesta = new Respuesta(codigoEstado:resp.statusLine.statusCode)
+					respuesta.mensaje = reader.text
 				}
 				response.failure = { resp, reader ->
-						String mensajeRespuesta = "${reader}"
-						log.error "***** Error: ${resp.statusLine}"
-						log.error "***** mensajeRespuesta: ${mensajeRespuesta}"
-						respuesta.mensaje = mensajeRespuesta
-						respuesta.codigoEstado = resp.statusLine.statusCode
+					log.error "***** Error: ${resp.statusLine}"
+					respuesta = new Respuesta(codigoEstado:resp.statusLine.statusCode)
+					respuesta.mensaje = new String("${reader}")
 				}
 			}
 		} catch(SocketTimeoutException ste) {
 			log.error(ste.getMessage(), ste)
 			respuesta.mensaje = ste.getMessage()
-		} finally {return respuesta;}
+		}
+		return respuesta;
 	}
 	
 	ConcurrentHashMap notificarActoresInicializacionDeEvento (byte[] mensaje,
@@ -150,30 +155,5 @@ class HttpService {
 		return mapaRespuestas
 	}
 			
-	public Respuesta enviarMensaje (String destURL, byte[] bytesMensaje) {
-		def httpBuilder = new HTTPBuilder(destURL);
-		log.debug "enviarMensaje - destURL: '${destURL}'"
-		Respuesta respuesta
-		httpBuilder.request(POST) {request ->
-			requestContentType = ContentType.URLENC
-			MultipartEntity entity = new MultipartEntity();
-			ByteArrayBody  fileBody = new ByteArrayBody(bytesMensaje,
-				grailsApplication.config.SistemaVotacion.nombreEntidadFirmada);
-			entity.addPart(grailsApplication.config.SistemaVotacion.nombreEntidadFirmada, fileBody);
-			request.entity = entity
-			log.debug "***** Lanzada solicitudFirmada: "
-			response.'200' = { resp, reader ->
-				log.debug "***** OK: ${resp.statusLine}"
-				respuesta = new Respuesta(codigoEstado:resp.statusLine.statusCode)
-				respuesta.mensaje = new String("${reader}")
-			}
-			response.failure = { resp, reader ->
-				log.error "***** Error: ${resp.statusLine}"
-				respuesta = new Respuesta(codigoEstado:resp.statusLine.statusCode)
-				respuesta.mensaje = new String("${reader}")
-			}
-		}
-		return respuesta;
-	}
 	
 }

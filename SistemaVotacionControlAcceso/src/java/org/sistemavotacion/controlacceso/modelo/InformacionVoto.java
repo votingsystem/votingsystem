@@ -1,7 +1,12 @@
 package org.sistemavotacion.controlacceso.modelo;
 
 import java.security.cert.X509Certificate;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
+
+import org.bouncycastle.tsp.TimeStampToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,11 +19,12 @@ public class InformacionVoto {
 	private String eventoId;
 	private String controlAccesoURL;
 	private String eventoURL;
+	private String representativeURL;
 	private String opcionSeleccionadaId;
 	private X509Certificate certificadoVoto;
-	private X509Certificate certificadoCentroControl;
-	private X509Certificate certificadoControlAcceso;
-	
+	private TimeStampToken voteTimeStampToken;
+	private Set<X509Certificate> serverCerts = new HashSet<X509Certificate>();
+	private Certificado certificado;
 	
 	public String getHashCertificadoVotoHEX() {
 		return hashCertificadoVotoHEX;
@@ -57,31 +63,25 @@ public class InformacionVoto {
 		this.opcionSeleccionadaId = opcionSeleccionadaId;
 	}
 
-	public X509Certificate getCertificadoCentroControl() {
-		return certificadoCentroControl;
+	public Set<X509Certificate> getServerCerts() {
+		return serverCerts;
 	}
-	public void setCertificadoCentroControl(X509Certificate certificadoCentroControl) {
-		this.certificadoCentroControl = certificadoCentroControl;
+	public void addServerCert(X509Certificate cert) {
+		this.serverCerts.add(cert);
 	}
-	public X509Certificate getCertificadoControlAcceso() {
-		return certificadoControlAcceso;
-	}
-	public void setCertificadoControlAcceso(X509Certificate certificadoControlAcceso) {
-		this.certificadoControlAcceso = certificadoControlAcceso;
-	}
+	
 	public X509Certificate getCertificadoVoto() {
 		return certificadoVoto;
 	}
 	public void setCertificadoVoto(X509Certificate certificadoVoto) {
 		this.certificadoVoto = certificadoVoto;
     	String subjectDN = certificadoVoto.getSubjectDN().getName();
-    	logger.debug("setCertificadoVoto - subjectDN: " +subjectDN);
+    	//logger.debug("setCertificadoVoto - subjectDN: " +subjectDN);
     	if(subjectDN.split("OU=eventoId:").length > 1) {
     		setEventoId(subjectDN.split("OU=eventoId:")[1].split(",")[0]);
     	}
     	if(subjectDN.split("CN=controlAccesoURL:").length > 1) {
     		String parte = subjectDN.split("CN=controlAccesoURL:")[1];
-    		logger.debug("Certificado - parte: " + parte);
     		if (parte.split(",").length > 1) {
     			controlAccesoURL = parte.split(",")[0];
     		} else controlAccesoURL = parte;
@@ -92,5 +92,30 @@ public class InformacionVoto {
 			hashCertificadoVotoBase64 = new String(
 					hexConverter.unmarshal(hashCertificadoVotoHEX));
     	}
+    	if(subjectDN.split("OU=RepresentativeURL:").length > 1) {
+    		String parte = subjectDN.split("OU=RepresentativeURL:")[1];
+    		if (parte.split(",").length > 1) {
+    			setRepresentativeURL(parte.split(",")[0]);
+    		} else setRepresentativeURL(parte);
+    	}
 	}
+	public TimeStampToken getVoteTimeStampToken() {
+		return voteTimeStampToken;
+	}
+	public void setVoteTimeStampToken(TimeStampToken voteTimeStampToken) {
+		this.voteTimeStampToken = voteTimeStampToken;
+	}
+	public Certificado getCertificado() {
+		return certificado;
+	}
+	public void setCertificado(Certificado certificado) {
+		this.certificado = certificado;
+	}
+	public String getRepresentativeURL() {
+		return representativeURL;
+	}
+	public void setRepresentativeURL(String representativeURL) {
+		this.representativeURL = representativeURL;
+	}
+
 }

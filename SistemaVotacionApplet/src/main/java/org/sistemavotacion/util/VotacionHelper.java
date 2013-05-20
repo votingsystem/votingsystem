@@ -12,6 +12,7 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.ReciboVoto;
+import org.sistemavotacion.modelo.Tipo;
 import org.sistemavotacion.smime.DNIeSignedMailGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,31 +45,71 @@ public class VotacionHelper {
         String asuntoMensaje = 
                 ASUNTO_MENSAJE_SOLICITUD_ACCESO + voto.getEventoId();
         File solicitudAcceso = DNIeSignedMailGenerator.genFile("",
-                NOMBRE_DESTINATARIO, voto.obtenerSolicitudAccesoJSONStr(),
+                NOMBRE_DESTINATARIO, obtenerSolicitudAccesoJSONStr(voto),
                 password.toCharArray(), asuntoMensaje, resultado);
         return solicitudAcceso;
     }
-    
-    public static String obtenerAnuladorDeVotoJSONStr(String hashCertificadoVotoBase64) {
-        logger.debug("obtenerAnuladorDeVotoJSONStr");
-        JSONObject jsonObject = obtenerAnuladorDeVotoJSON(hashCertificadoVotoBase64);
-        if(jsonObject == null) return null;
+        
+    public static String obtenerSolicitudAccesoJSONStr(Evento voto) {
+        logger.debug("obtenerSolicitudAccesoJSONStr");
+        JSONObject jsonObject = obtenerSolicitudAccesoJSON(voto);        
         return jsonObject.toString();
     }
     
-    public static JSONObject obtenerAnuladorDeVotoJSON(String hashCertificadoVotoBase64) {
-        logger.debug("obtenerAnuladorDeVotoJSON");
+    public static String obtenerVotoJSONStr(Evento voto) {
+        logger.debug("obtenerVotoJSONStr");
+        if(voto == null) return null;
+        return obtenerVotoJSON(voto).toString();
+    }
+    
+    public static JSONObject obtenerVotoJSON(Evento voto) {
+        logger.debug("obtenerVotoJSON");
+        if(voto == null) return null;
+        Map map = new HashMap();
+        map.put("operation", Tipo.VOTO.toString());
+        map.put("eventoURL", voto.getUrl());
+        map.put("opcionSeleccionadaId", voto.getOpcionSeleccionada().getId());
+        map.put("opcionSeleccionadaContenido", voto.getOpcionSeleccionada().getContenido());
+        map.put("UUID", UUID.randomUUID().toString());
+        JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);
+        return jsonObject;
+    }
+    
+    public static JSONObject obtenerAnuladorDeVotoSesion(
+            String hashCertificadoVotoBase64) {
+        logger.debug("obtenerAnuladorDeVotoSesion");
         if(mapaRecibos == null) return null;
         ReciboVoto recibo = mapaRecibos.get(hashCertificadoVotoBase64);
         if(recibo == null) return null;
         Evento voto = recibo.getVoto();
+        return obtenerAnuladorDeVotoJSON(voto);
+    } 
+    
+    public static JSONObject obtenerAnuladorDeVotoJSON(Evento voto) {
+        logger.debug("obtenerAnuladorDeVotoJSON");
+        if(voto == null) return null;
         Map map = new HashMap();
+        map.put("operation", Tipo.ANULADOR_VOTO.toString());
         map.put("origenHashCertificadoVoto", voto.getOrigenHashCertificadoVoto());
         map.put("hashCertificadoVotoBase64", voto.getHashCertificadoVotoBase64());
         map.put("origenHashSolicitudAcceso", voto.getOrigenHashSolicitudAcceso());
         map.put("hashSolicitudAccesoBase64", voto.getHashSolicitudAccesoBase64());
+        map.put("UUID", UUID.randomUUID().toString());
         return (JSONObject) JSONSerializer.toJSON(map);
     }
+        
+    public static JSONObject obtenerSolicitudAccesoJSON(Evento voto) {
+        logger.debug("obtenerSolicitudAccesoJSON");
+        Map map = new HashMap();
+        map.put("operation", Tipo.SOLICITUD_ACCESO.toString());
+        map.put("eventId", voto.getEventoId());
+        map.put("eventURL", voto.getUrl());
+        map.put("hashSolicitudAccesoBase64", voto.getHashSolicitudAccesoBase64());
+        map.put("UUID", UUID.randomUUID().toString());
+        JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);        
+        return jsonObject;
+    }
+
     
     public static void addRecibo(String hashCertificadoVotoBase64, ReciboVoto recibo) {
         if(mapaRecibos == null) mapaRecibos = new HashMap<String, ReciboVoto>();

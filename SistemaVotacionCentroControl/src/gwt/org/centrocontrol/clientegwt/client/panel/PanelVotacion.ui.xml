@@ -6,22 +6,21 @@
 	xmlns:dp="urn:import:com.google.gwt.user.datepicker.client">
 	<ui:style type='org.centrocontrol.clientegwt.client.panel.PanelVotacion.EditorStyle'>
     	.mainPanel{padding: 0px 20px 0px 20px;}
-		.messagePanel{padding: 7px 12px 7px 12px; margin: 12px 50px 12px 12px; 
+		.messagePanel{padding: 7px 12px 7px 12px; margin: 12px 20px 12px 20px; 
 			border: 2px solid #cc1606;}
 	    .messageLabel {color: #cc1606; font-size: 16px; font-weight: bold; margin: 10px 10px 10px 10px; text-align: center;}
-		.enlaceJustificante {font-size: 12px; font-weight: bold; 
-				margin: 0px 0px 0px 10px; text-align: center;}	
+		.linkedMessageLabel {font-size: 12px; font-weight: bold; 
+				margin: 0px 0px 0px 10px; text-align: center;width:100%;}	
 		.htmlMessagePanel{ margin: 0px 0px 20px 10px; background-color:#f2f2f2;
 			padding:10px 10px 10px 10px;}
-		.pageTitlePanel {width: 100%; border-bottom: 1px dotted; color:#02227a;}
-		.pageTitle {margin: 20px 0px 0px 0px; font-size: 20px; 
-			font-weight: bold; text-align: center;}
+		.pageTitle {margin: 20px 0px 0px 0px; font-size: 20px; font-weight: bold;
+			width: 100%; border-bottom: 1px dotted; color:#02227a;}
 		.autorPanel {margin: 0px 0px 0px 15px;}
 		.autorLabel {margin: 7px 0px 0px 3px;}
 	    .date {margin-left: 15px; font-weight: bold; width:180px;}
  	    .textBox {margin-left: 10px; margin-top: 7px; border: 1px solid #02227a; width:300px}
- 	    .datosLabel {margin-top: 7px;margin-left: 3px;}
-		.publicadoPorlabel {font-weight: bold; margin-top: 7px;margin-left: 20px; width:100px;}
+ 	    .datosLabel {margin: 7px 0px 0px 3px;}
+		.publicadoPorlabel {font-weight: bold; margin: 7px 0px 0px 0px;}
  	    .fechaLabel {font-weight: bold; margin-top: 7px;margin-left: 20px;}
 		.cargandoLabel {font-weight: bold; margin-top: 20px; margin-left: 20px;font-size: 16px;}
     	.errorTextBox {border-color: red;}
@@ -35,8 +34,10 @@
 		.opcionesLabel{font-size: 20px; font-weight:bold; color:#4c4c4c; 
 			text-decoration:underline; margin:22px 0px 10px 0px;}
 		.labelInfoDocumento{font-size: 18px; font-weight:bold; color:#3a7f35;}
+		.estatusCentroControlLabel {color: #cc1606; font-weight:bold; font-size:20px; 
+				margin:10px 0px 10px 0px; text-decoration:underline;}
 		.administracionDocumentoLabel {cursor: pointer; cursor: hand; font-size: 10px; font-weight:bold; 
-			float:right; margin:6px 0px 0px 0px; color: #2a7fd4;}
+			float:right; margin:8px 0px 0px 0px; color: #2a7fd4;}
 		.panelInfoDocumento {border:1pt solid #3a7f35; margin-top:0px; 
 			padding:3px 10px 3px 10px; float: left; margin-right:0px;
 			-moz-border-radius: 5px; border-radius: 5px; cursor: pointer; cursor: hand;}
@@ -57,16 +58,11 @@
 				    </g:cell>
 			    </g:HorizontalPanel>
 			    <g:VerticalPanel ui:field="panelContenidos" width="100%" >
-					<g:HorizontalPanel styleName="{style.pageTitlePanel}">
-					    <g:cell horizontalAlignment="ALIGN_CENTER">
-					        <g:HTML ui:field='pageTitle' styleName="{style.pageTitle}"/>
-					    </g:cell>
-					</g:HorizontalPanel>
+			        <g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
+						<g:HTML ui:field='pageTitle' styleName="{style.pageTitle}"/>
+		        	</g:cell>
 				    <g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE" width="100%">
-				        <g:VerticalPanel ui:field="messagePanel" styleName="{style.messagePanel}">
-							<g:Label ui:field="messageLabel" styleName="{style.messageLabel}"/>
-							<g:Anchor ui:field='enlaceJustificante' styleName="{style.enlaceJustificante}"/>
-						</g:VerticalPanel>	
+				        <g:VerticalPanel ui:field="messagePanel" styleName="{style.messagePanel}"/>
 				    </g:cell>
 					<g:VerticalPanel ui:field='contentPanel' width="100%" height="100%">
 					    <g:HorizontalPanel width="100%">

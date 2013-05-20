@@ -1,9 +1,15 @@
 package org.sistemavotacion.controlacceso
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Locale;
+
 import org.sistemavotacion.controlacceso.modelo.*;
 import org.sistemavotacion.util.FileUtils;
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.multipart.MultipartHttpServletRequest
+
+import com.itextpdf.text.Document;
 
 /**
  * @infoController Recogida de firmas
@@ -16,49 +22,35 @@ class RecolectorFirmaController {
 	
     def eventoFirmaService
 	def recolectorFirmaService
-	def pdfService
-	
-	/**
-	 * @httpMethod GET
-	 * @return Información sobre los servicios que tienen como url base '/recolectorFirma'.
-	 */
-	def index() { 
-		redirect action: "restDoc"
-	}
 	
 	/**
 	 * Servicio que valida firmas recibidas en documentos PDF
 	 *
-	 * @httpMethod POST
-	 * @param signedPDF Obligatorio. PDF con el documento firmado.
-	 * @param id Obligatorio. El identificador en la base de datos del manifiesto que se está firmando.
+	 * @httpMethod [POST]
+     * @serviceURL [/recolectorFirma/$id]
+	 * @param [id] Obligatorio. El identificador en la base de datos del manifiesto que se está firmando.
+     * @requestContentType [application/pdf,application/x-pkcs7-signature] Obligatorio. El archivo PDF con la firma.
 	 * @return Si todo va bien devuelve un código de estado HTTP 200.
 	 */
-	def validarPDF() { 
-		if (params.long('id')) {
+	def index() {
+		Documento documento = flash.pdfDocument
+		if(params.long(id) && documento &&	
+			documento.estado == Documento.Estado.VALIDADO) {
 			EventoFirma evento = null;
 			EventoFirma.withTransaction{
-				evento = EventoFirma.get(params.id)
+				evento = EventoFirma.get(params.long(id))
 			}
 			if(!evento) {
 				response.status = Respuesta.SC_ERROR_PETICION
-				render message(code: 'eventNotFound', args:[params.id])
+				render message(code: 'manifestNotFound', args:[params.id])
 				return false
 			}
 			try {
-				String nombreArchivo = ((MultipartHttpServletRequest) request)?.getFileNames()?.next();
-				log.debug "Recibido archivo: ${nombreArchivo}"
-				MultipartFile multipartFile = ((MultipartHttpServletRequest) request)?.getFile(nombreArchivo);
-				if (multipartFile?.getBytes() != null || params.archivoFirmado) {
-					Respuesta respuesta = pdfService.validarFirma(multipartFile.getBytes(),
-						evento, Documento.Estado.FIRMA_DE_MANIFIESTO, request.getLocale(), true)
-					if (Respuesta.SC_OK != respuesta.codigoEstado) {
-						log.debug "Problema en la recepción del archivo - ${respuesta.mensaje}"
-					}
-					response.status = respuesta.codigoEstado
-					render respuesta.mensaje
-					return false
-				}
+				Respuesta respuesta = recolectorFirmaService.saveManifestSignature(
+					documento, evento, request.getLocale())
+				response.status = respuesta.codigoEstado
+				render respuesta.mensaje
+				return false
 			} catch (Exception ex) {
 				log.error (ex.getMessage(), ex)
 				response.status = Respuesta.SC_ERROR_PETICION
@@ -72,34 +64,4 @@ class RecolectorFirmaController {
 		return false
 	}
 	
-	/**
-	 * Servicio que valida firmas recibidas en documentos SMIME
-	 *
-	 * @httpMethod POST
-	 * @param archivoFirmado Obligatorio. Documento SMIME firmado.
-	 * @return El archivo SMIME recibido con la firma añadida del servidor.
-	 */
-    def guardarAdjuntandoValidacion () {
-        try {
-            flash.respuesta = recolectorFirmaService.guardar(
-				params.smimeMessageReq, request.getLocale())
-        } catch (Exception ex) {
-            log.error (ex.getMessage(), ex)
-            flash.respuesta = new Respuesta(tipo:Tipo.ERROR_DE_SISTEMA,
-                codigoEstado:Respuesta.SC_ERROR_EJECUCION, mensaje:Tipo.ERROR_DE_SISTEMA.toString())
-        }
-    }
-	
-	/* TODO
-	 * def guardarAdjuntandoValidacionAsync () {
-		try {
-			flash.respuesta = recolectorFirmaService.guardarAsync(params.smimeMessageReq)
-		} catch (Exception ex) {
-			log.error (ex.getMessage(), ex)
-			flash.respuesta = new Respuesta(tipo:Tipo.ERROR_DE_SISTEMA,
-				codigoEstado:Respuesta.SC_ERROR_EJECUCION, mensaje:Tipo.ERROR_DE_SISTEMA.toString())
-		}
-	}*/
-	
-
 }

@@ -11,6 +11,8 @@ import org.controlacceso.clientegwt.client.dialogo.DialogoConfirmacion;
 import org.controlacceso.clientegwt.client.dialogo.DialogoOperacionEnProgreso;
 import org.controlacceso.clientegwt.client.dialogo.NifDialog;
 import org.controlacceso.clientegwt.client.dialogo.ResultDialog;
+import org.controlacceso.clientegwt.client.evento.BusEventos;
+import org.controlacceso.clientegwt.client.evento.EventoGWTMensajeClienteFirma;
 import org.controlacceso.clientegwt.client.modelo.MensajeClienteFirmaJso;
 import org.controlacceso.clientegwt.client.util.Browser;
 import org.controlacceso.clientegwt.client.util.RequestHelper;
@@ -33,7 +35,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class RepresentativeConfigPanel extends Composite implements ConfirmacionListener {
+public class RepresentativeConfigPanel extends Composite implements ConfirmacionListener, 
+		EventoGWTMensajeClienteFirma.Handler{
 
     private static Logger logger = Logger.getLogger("RepresentativeConfigPanel");
 
@@ -42,7 +45,7 @@ public class RepresentativeConfigPanel extends Composite implements Confirmacion
     private DialogoOperacionEnProgreso dialogoProgreso;
     
 	private static final int EDIT_REPRESENTATIVE_DIALOG = 0;
-	private static final int UNSUBSCRIBE_REPRESENTATIVE = 1;
+	private static final int REVOKE_REPRESENTATIVE = 1;
 
     private static RepresentativeConfigPanelUiBinder uiBinder = 
     		GWT.create(RepresentativeConfigPanelUiBinder.class);
@@ -52,6 +55,8 @@ public class RepresentativeConfigPanel extends Composite implements Confirmacion
 
     public RepresentativeConfigPanel() {
     	initWidget(uiBinder.createAndBindUi(this));
+        BusEventos.addHandler(
+        		EventoGWTMensajeClienteFirma.TYPE, this);
     }
 
     @UiHandler("newRepresentativeButton")
@@ -70,7 +75,7 @@ public class RepresentativeConfigPanel extends Composite implements Confirmacion
     @UiHandler("removeRepresentativeButton")
     void onClickRemoveRepresentativeButton(ClickEvent e) {
     	DialogoConfirmacion dialogoConfirmacion = new DialogoConfirmacion(
-    			UNSUBSCRIBE_REPRESENTATIVE, this);
+    			REVOKE_REPRESENTATIVE, this);
     	dialogoConfirmacion.show(
     			Constantes.INSTANCIA.unsubscribeRepresentativeCaption(), 
     			Constantes.INSTANCIA.unsubscribeRepresentativeMsg());
@@ -93,15 +98,15 @@ public class RepresentativeConfigPanel extends Composite implements Confirmacion
 				RequestHelper.doGet(ServerPaths.getRepresentativeByNif(representativeNif), 
 						new RepresentativeCheckRequestCallback());
 				break;
-			case UNSUBSCRIBE_REPRESENTATIVE:
-				logger.info("confirmed UNSUBSCRIBE_REPRESENTATIVE");
+			case REVOKE_REPRESENTATIVE:
+				logger.info("confirmed REVOKE_REPRESENTATIVE");
 		    	mensajeClienteFirma = MensajeClienteFirmaJso.create();
 		    	mensajeClienteFirma.setCodigoEstado(MensajeClienteFirmaJso.SC_PROCESANDO);
 		    	mensajeClienteFirma.setOperacion(MensajeClienteFirmaJso.Operacion.
-		    			REPRESENTATIVE_UNSUBSCRIBE_REQUEST.toString());
+		    			REPRESENTATIVE_REVOKE.toString());
 		    	contenidoFirma = new JSONObject();
 		    	contenidoFirma.put("operation", new JSONString(MensajeClienteFirmaJso.Operacion.
-		    			REPRESENTATIVE_UNSUBSCRIBE_REQUEST.toString()));
+		    			REPRESENTATIVE_REVOKE.toString()));
 		    	mensajeClienteFirma.setContenidoFirma(contenidoFirma.getJavaScriptObject());
 		    	mensajeClienteFirma.setUrlEnvioDocumento(
 		    			ServerPaths.getUrlUnsubscribeRepresentative());
@@ -173,5 +178,19 @@ public class RepresentativeConfigPanel extends Composite implements Confirmacion
         }
 
     }
+
+	@Override
+	public void procesarMensajeClienteFirma(MensajeClienteFirmaJso mensaje) {
+		logger.info(" - procesarMensajeClienteFirma === " + mensaje.getOperacionEnumValue());
+		boolean result = Boolean.FALSE;
+		switch(mensaje.getOperacionEnumValue()) {
+			case REPRESENTATIVE_REVOKE:
+				if(MensajeClienteFirmaJso.SC_OK == mensaje.getCodigoEstado()) result = Boolean.TRUE;
+				dialogoProgreso.showFinishMessage(Constantes.INSTANCIA.
+						unsubscribeRepresentativeCaption(), 
+		    			mensaje.getMensaje(), result);
+				break;
+		}
+	}
 
 }

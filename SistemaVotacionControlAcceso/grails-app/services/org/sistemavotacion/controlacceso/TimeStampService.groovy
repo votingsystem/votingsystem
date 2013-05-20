@@ -23,6 +23,7 @@ import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.*;
 import org.bouncycastle.asn1.*;
+import org.bouncycastle.cert.CertUtils;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
 import org.bouncycastle.cms.CMSSignedData
 import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder
@@ -33,7 +34,10 @@ import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder
 import org.bouncycastle.tsp.*;
 import org.sistemavotacion.seguridad.TimeStampResponseGenerator
 import static org.bouncycastle.tsp.TSPAlgorithms.*
+
 import org.bouncycastle.util.Store;
+import org.bouncycastle.cms.SignerInformationVerifier;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.seguridad.*
 import org.springframework.beans.BeansException;
@@ -59,6 +63,8 @@ class TimeStampService {
 
 	private SernoGenerator sernoGenerator
 	private org.sistemavotacion.seguridad.TimeStampResponseGenerator timeStampResponseGen;
+	private SignerInformationVerifier timeStampSignerInfoVerifier
+	private byte[] signingCertBytes
 
 	private static List ACCEPTEDPOLICIES = ["1.2.3", "1.2.4"];
 	private static List ACCEPTEDEXTENSIONS = [];
@@ -89,6 +95,12 @@ class TimeStampService {
 			FileUtils.getBytesFromFile(keyStoreFile), password.toCharArray());
 		PrivateKey signingKey = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray());
 		X509Certificate signingCert = keyStore.getCertificate(aliasClaves)
+		
+		signingCertBytes = CertUtil.fromX509CertToPEM (signingCert)
+		
+		timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().
+			setProvider(BC).build(signingCert);
+		
 		Certificate[] chain = keyStore.getCertificateChain(aliasClaves);
 		Store certs = new JcaCertStore(Arrays.asList(chain));
 		JcaSignerInfoGeneratorBuilder infoGeneratorBuilder = new JcaSignerInfoGeneratorBuilder(
@@ -105,6 +117,11 @@ class TimeStampService {
 				getAcceptedAlgorithms(), getAcceptedPolicies(),
 				getAcceptedExtensions())
 	}
+	
+	public byte[] getSigningCert() {
+		log.debug("getSigningCerts");
+		return signingCertBytes
+	}
 			
 	public String getAbsolutePath(String filePath){
 		String prefijo = "${grailsApplication.mainContext.getResource('.')?.getFile()}"
@@ -114,7 +131,7 @@ class TimeStampService {
 	
 	/*Method to Tests*/
 	void inicializarTest() {
-		log.debug("TimeStampService - inicializarTest");
+		log.debug("inicializarTest");
 		sernoGenerator = SernoGenerator.instance(messageSource);
 		String authorityDN = "O=Sistema de Votación, C=ES";
 		KeyPair authorityKP = TSPTestUtil.makeKeyPair();
@@ -146,14 +163,19 @@ class TimeStampService {
 	
 	public Respuesta processRequest(byte[] timeStampRequestBytes,
 			Locale locale) throws Exception {
-		log.debug("processRequest")
-		if(!timeStampRequestBytes) return
+		if(!timeStampRequestBytes) {
+			String msg = messageSource.getMessage('timestampAccessRequestNullMsg', null, locale)
+			log.debug("processRequest - ${msg}"); 
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+				mensaje:msg)
+		}
 		try {
-			String timeStampRequestStr = new String(Base64.encode(timeStampRequestBytes));
+			//String timeStampRequestStr = new String(Base64.encode(timeStampRequestBytes));
+			//log.debug("processRequest - timeStampRequestStr: ${timeStampRequestStr}")
 			TimeStampRequest timeStampRequest = new TimeStampRequest(timeStampRequestBytes)
 			final Date date = DateUtils.getTodayDate();
 			if(!sernoGenerator) afterPropertiesSet()
-			final BigInteger serialNumber = sernoGenerator.getSerialNumber();
+			final BigInteger serialNumber = getSernoGenerator().getSerialNumber();
 			log.debug("processRequest - serialNumber: '${serialNumber.longValue()}'" + 
 				" - CertReq: ${timeStampRequest.getCertReq()}");
 			final TimeStampResponse timeStampResponse = timeStampResponseGen.generate(
@@ -183,6 +205,20 @@ class TimeStampService {
 				mensaje:messageSource.getMessage('error.timeStampGeneration', null, locale))
 		}
 	}
+		
+	public Respuesta validate(TimeStampToken  tsToken, Locale locale) {
+		log.debug("validate")
+		try {
+			tsToken.validate(timeStampSignerInfoVerifier)
+			return new Respuesta(codigoEstado:Respuesta.SC_OK)
+		}catch(Exception ex) {
+			log.debug("validate - token issuer: ${tsToken?.getSID()?.getIssuer()}")
+			log.error(ex.getMessage(), ex)
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+				mensaje:messageSource.getMessage('timeStampErrorMsg', null, locale))
+		}
+	}
+		
 			
 	public byte[] getTimeStampRequest(byte[] digest)
 			throws TSPException, IOException, Exception  {
@@ -199,6 +235,9 @@ class TimeStampService {
 		return acceptedAlgorithms;
 	}
 
+	private SernoGenerator getSernoGenerator() {
+		return sernoGenerator
+	}
 
 	private Set<String> getAcceptedPolicies() {
 		Set<String> acceptedPolicies = ACCEPTEDPOLICIES?.collect {return it}

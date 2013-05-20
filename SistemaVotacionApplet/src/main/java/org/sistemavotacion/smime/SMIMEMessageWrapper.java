@@ -103,6 +103,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
     private boolean isValidSignature = false;
     
     private Set<Firmante> firmantes;
+    private String contentDigestStr;
 
     
     public Set<Firmante> getFirmantes() {
@@ -213,6 +214,13 @@ public class SMIMEMessageWrapper extends MimeMessage {
     }
 
     /**
+     * @return the contentDigestStr
+     */
+    public String getContentDigestStr() {
+        return contentDigestStr;
+    }
+    
+    /**
      * @param signedContent the signedContent to set
      */
     public void setSignedContent(String signedContent) {
@@ -241,11 +249,11 @@ public class SMIMEMessageWrapper extends MimeMessage {
         SignerInformationStore  signers = smimeSigned.getSignerInfos();
         logger.debug("signers.size(): " + signers.size());
         Iterator<SignerInformation> it = signers.getSigners().iterator();
-        boolean result = false;
+        boolean isVerificationOK = false;
         // check each signer
         firmantes = new HashSet<Firmante>();
         while (it.hasNext()) {
-        	logger.debug("-------------- signer -------------------");
+            logger.debug("-------------- signer -------------------");
             SignerInformation   signer = it.next();
             AttributeTable  attributes = signer.getSignedAttributes();
             DERUTCTime time = null;
@@ -253,14 +261,14 @@ public class SMIMEMessageWrapper extends MimeMessage {
             firmante.setSigner(signer);
             firmante.setContenidoFirmado(getSignedContent());
             byte[] hash = null;
+            String hashStr = null;
             if (attributes != null) {
                 Attribute signingTimeAttribute = attributes.get(CMSAttributes.signingTime);
                 time = (DERUTCTime) signingTimeAttribute.getAttrValues().getObjectAt(0);
                 firmante.setFechaFirma(time.getDate());
                 Attribute messageDigestAttribute = attributes.get( CMSAttributes.messageDigest );
                 hash = ((ASN1OctetString)messageDigestAttribute.getAttrValues().getObjectAt(0)).getOctets();
-                String hashStr = new String(Base64.encode(hash));
-                logger.debug(" -- hashStr: " + hashStr);
+                hashStr = new String(Base64.encode(hash));
             }   
             Collection certCollection = certs.getMatches(signer.getSID());
             logger.debug("Collection matches: " + certCollection.size());
@@ -277,11 +285,17 @@ public class SMIMEMessageWrapper extends MimeMessage {
                     setProvider(SIGN_PROVIDER).build(cert);
             if (signer.verify(siv)){
                 logger.debug("signature verified");
-                result = true;
                 firmante.setTimeStampToken(checkTimeStampToken(signer));//method can only be called after verify.
+                isVerificationOK = true;
+                if(contentDigestStr == null) contentDigestStr = hashStr;
+                else if(!contentDigestStr.equals(hashStr)) {
+                    logger.debug("ERROR contentDigestStr: " + contentDigestStr + 
+                            " - hashStr: " + hashStr);
+                    return false;
+                }
             } else {
                 logger.debug("signature failed!");
-                result = false;
+                return false;
             }
             //byte[] digestParams = signer.getDigestAlgParams();
             //String digestParamsStr = new String(Base64.encode(digestParams));
@@ -294,7 +308,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
             //boolean cmsVerifySignature = CMSUtils.verifySignature(signer, cert, SIGN_PROVIDER);
             //logger.debug(" -- cmsVerifySignature: " + cmsVerifySignature);
         }
-        return result;
+        return isVerificationOK;
     }
     
     
@@ -360,8 +374,8 @@ public class SMIMEMessageWrapper extends MimeMessage {
                 SignerInformation updatedSigner = null;
                 if(attributeTable == null) {
                     logger.debug("setTimeStampToken - sigenr without UnsignedAttributes - actualizando token");
-                    updatedSigner = 
-                            signer.replaceUnsignedAttributes(signer, timeStampWorker.getTimeStampTokenAsAttributeTable());
+                    updatedSigner = signer.replaceUnsignedAttributes(
+                            signer, timeStampWorker.getTimeStampTokenAsAttributeTable());
                     newSigners.add(updatedSigner);
                 } else {
                     logger.debug("setTimeStampToken - signer with UnsignedAttributes - actualizando token");
@@ -387,7 +401,10 @@ public class SMIMEMessageWrapper extends MimeMessage {
     public TimeStampRequest getTimeStampRequest(String timeStampRequestAlg) {
         SignerInformation signerInformation = ((SignerInformation)
                         smimeSigned.getSignerInfos().getSigners().iterator().next());
-        if(signerInformation == null) return null;
+        if(signerInformation == null) {
+            logger.debug("signerInformation null");
+            return null;
+        } 
         AttributeTable table = signerInformation.getSignedAttributes();
         Attribute hash = table.get(CMSAttributes.messageDigest);
         ASN1OctetString as = ((ASN1OctetString)hash.getAttrValues().getObjectAt(0));

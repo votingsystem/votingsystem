@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import org.controlacceso.clientegwt.client.modelo.CampoDeEventoJso;
 import org.controlacceso.clientegwt.client.reclamaciones.PanelCampoReclamacion.Modo;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -21,7 +22,7 @@ public class PanelPublicacionCamposReclamacion extends Composite {
 			.create(PanelPublicacionCamposReclamacionUiBinder.class);
 
 	interface PanelPublicacionCamposReclamacionUiBinder extends UiBinder<Widget, PanelPublicacionCamposReclamacion> {	}
-
+	
 	@UiField VerticalPanel panelContenedor;
 	@UiField Label panelLabel;
 	

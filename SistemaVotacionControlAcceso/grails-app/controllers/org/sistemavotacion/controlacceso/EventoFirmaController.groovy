@@ -1,8 +1,6 @@
 package org.sistemavotacion.controlacceso
 
 import java.util.Map;
-
-import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.controlacceso.modelo.*
 import grails.converters.JSON
 import org.sistemavotacion.util.*
@@ -20,119 +18,50 @@ class EventoFirmaController {
 
 	def eventoFirmaService
 	def pdfRenderingService
-	def pdfService
 	def eventoService
 	def htmlService
 	
-	/**
-	 * @httpMethod GET
-	 * @return Información sobre los servicios que tienen como url base '/eventoFirma'.
-	 */
-	def index() { 
-		redirect action: "restDoc"
-	}
 	
 	/**
-	 * Servicio que valida los manifiestos que se desean publicar. <br/>
-	 * La publicación de manifiestos se produce en dos fases. En la primera
-	 * se envía a '/eventoFirma/publicarPDF' el manifiesto en formato HTML, el servidor 
-	 * lo valida y si todo es correcto genera el PDF y envía al programa cliente el identificador 
-	 * del manifiesto en la base de datos. El programa cliente puede descargarse con ese
-	 * identificador el PDF firmarlo y enviarlo a este servicio.
-	 * 
-	 * @httpMethod POST
-	 * @param signedPDF Obligatorio. PDF con el manifiesto que se desea publicar firmado
-	 *        por el autor.
-	 * @param id Obligatorio. El identificador en la base de datos del manifiesto. 
-	 * @return Si todo va bien devuelve un código de estado HTTP 200.
+	 * @httpMethod [GET]
+     * @serviceURL [/eventoFirma/$id]	 
+	 * @param [id] Opcional. El identificador del manifiesto en la base de datos.
+	 * @responseContentType [application/json]
+	 * @return Documento JSON con información del manifiesto solicitado.
 	 */
-	def validarPDF() {
-		if (params.long('id')) {
-			EventoFirma evento = null;
-			EventoFirma.withTransaction{
-				evento = EventoFirma.get(params.id)
-			}			 
-			if(!evento) {
-				response.status = Respuesta.SC_ERROR_PETICION;
-				render message(code:'eventNotFound', args:["${params.id}"]) 
-				return false
-			}
-			try {
-				String pdfFirmado = ((MultipartHttpServletRequest) request)?.getFileNames()?.next();
-				log.debug "Recibido archivo: ${pdfFirmado}"
-				MultipartFile multipartFile = ((MultipartHttpServletRequest) request)?.getFile(pdfFirmado);
-				if (multipartFile?.getBytes() != null || params.archivoFirmado) {
-					Respuesta respuesta = pdfService.validarFirma(multipartFile.getBytes(),
-						evento, Documento.Estado.MANIFIESTO, request.getLocale(), true)
-					if (Respuesta.SC_OK != respuesta.codigoEstado) {
-						log.debug "Problema en la recepción del archivo - ${respuesta.mensaje}"
-					}
-					response.status = respuesta.codigoEstado
-					render respuesta.mensaje
-					return false
-				}
-			} catch (Exception ex) {
-				log.error (ex.getMessage(), ex)
-				response.status = Respuesta.SC_ERROR_PETICION
-				render(ex.getMessage())
-				return false
-			}
+	def index() { 
+		if(request.contentType?.contains("application/pdf")) {
+			flash.forwarded = true
+			forward action: "obtenerPDF"
+			return false
 		}
-		response.status = Respuesta.SC_ERROR_PETICION
-		render message(code: 'error.PeticionIncorrectaHTML', args:[
-			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
+		if(params.long('id')) {
+			EventoFirma evento
+			EventoFirma.withTransaction {
+				evento = EventoFirma.get(params.long('id'))
+			}
+			if(!evento) {
+				response.status = Respuesta.SC_NOT_FOUND
+				render message(code:'eventNotFound', args:["${params.id}"])
+				return false
+			}
+			def eventoMap = eventoService.optenerEventoFirmaJSONMap(evento)
+			render eventoMap as JSON
+			return false
+		}
+		flash.forwarded = true
+		forward action: "obtenerManifiestos"
 		return false
 	}
 	
 	/**
-	 * @httpMethod POST
-	 * @param htmlManifest Manifiesto que se desea publicar en formato HTML.
-	 * @return Si todo va bien devuelve un código de estado HTTP 200 con el identificador
-	 * del nuevo manifiesto en la base de datos en el cuerpo del mensaje.
-	 */
-	def publicarPDF () {
-		try {
-			String eventoStr = "${request.getInputStream()}"
-			log.debug "evento: ${eventoStr}"
-			if (!eventoStr) {
-				render(view:"index")
-				return false
-			} else {
-				def eventoJSON = JSON.parse(eventoStr)
-				log.debug "eventoJSON.contenido: ${eventoJSON.contenido}"
-				eventoJSON.contenido = htmlService.prepareHTMLToPDF(eventoJSON.contenido.getBytes())
-				EventoFirma evento = new EventoFirma(asunto:eventoJSON.asunto,
-					fechaInicio:DateUtils.todayDate,
-					estado: Evento.Estado.PENDIENTE_DE_FIRMA,
-					contenido:eventoJSON.contenido,
-					fechaFin:new Date().parse("yyyy-MM-dd HH:mm:ss", eventoJSON.fechaFin))
-				evento.save()
-				evento.url = "${grailsApplication.config.grails.serverURL}" +
-					"${grailsApplication.config.SistemaVotacion.sufijoURLEventoFirma}${evento.id}"
-				runAsync {
-					ByteArrayOutputStream bytes = pdfRenderingService.render(
-						template: "/eventoFirma/pdf", model:[evento:evento])
-					Evento.withTransaction{
-						evento.pdf = bytes.toByteArray()
-						evento.save()
-						log.debug "Generado PDF de evento ${evento.id}"
-					}
-				}
-				log.debug "Saved evento ${evento.id}"
-				render evento.id
-				return false
-			}
-		} catch (Exception ex) {
-			log.error (ex.getMessage(), ex)
-			response.status = Respuesta.SC_ERROR_EJECUCION
-			render ex.getMessage()
-			return false 
-		}
-	}
-	
-	/**
-	 * @httpMethod GET
-	 * @param id El identificador del manifiesto en la base de datos.
+	 * Servicio que devuelve el PDF que se tienen que firmar para publicar un 
+	 * manifiesto.
+	 * 
+	 * @httpMethod [GET]
+     * @serviceURL [/eventoFirma/$id]	
+	 * @responseContentType [application/pdf] 
+	 * @param [id] Obligatorio. El identificador del manifiesto en la base de datos.
 	 * @return El manifiesto en formato PDF.
 	 */
 	def obtenerPDF () {
@@ -142,7 +71,7 @@ class EventoFirmaController {
 				evento = EventoFirma.get(params.id)
 			}
 			if(!evento) {
-				render message(code:'eventNotFound', args:["${params.id}"]) 
+				render message(code:'eventNotFound', args:["${params.id}"])
 				return false
 			}
 			response.setHeader("Content-disposition", "attachment; filename=manifiesto.pdf")
@@ -167,10 +96,122 @@ class EventoFirmaController {
 			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false
 	}
+
+	
+	def post() {
+		if(request.contentType?.contains("application/pdf")) {
+			flash.forwarded = true
+			forward action: "validarPDF"
+			return false
+		} else {
+			flash.forwarded = true
+			forward action: "publicarPDF"
+			return false
+		}
+	}
 	
 	/**
-	 * @httpMethod GET
-	 * @param id el identificador del manifiesto en la base de datos.
+	 * Servicio que valida los manifiestos que se desean publicar. <br/>
+	 * La publicación de manifiestos se produce en dos fases. En la primera
+	 * se envía a '/eventoFirma/publicarPDF' el manifiesto en formato HTML, el servidor 
+	 * lo valida y si todo es correcto genera el PDF y envía al programa cliente el identificador 
+	 * del manifiesto en la base de datos. El programa cliente puede descargarse con ese
+	 * identificador el PDF firmarlo y enviarlo a este servicio.
+	 * 
+	 * @httpMethod [POST]
+     * @serviceURL [/eventoFirma/$id]
+     * @requestContentType [application/pdf,application/x-pkcs7-signature] Obligatorio. El archivo PDF con 
+     * 				el manifiesto que se desea publicar firmado por el autor.
+	 * @param [id] Obligatorio. El identificador en la base de datos del manifiesto. 
+	 * @return Si todo va bien devuelve un código de estado HTTP 200.
+	 */
+	def validarPDF() {
+		Documento documento = flash.pdfDocument
+		if (params.long('id') && documento &&
+			documento.estado == Documento.Estado.VALIDADO) {
+			EventoFirma evento = null;
+			EventoFirma.withTransaction{
+				evento = EventoFirma.get(params.id)
+			}			 
+			if(!evento) {
+				response.status = Respuesta.SC_ERROR_PETICION;
+				render message(code:'eventNotFound', args:["${params.id}"]) 
+				return false
+			}
+			if(evento.estado != Evento.Estado.PENDIENTE_DE_FIRMA) {
+				response.status = Respuesta.SC_ERROR_PETICION;
+				render message(code:'manifestNotPending', args:["${params.id}"])
+				return false
+			}
+			try {
+				Respuesta respuesta = eventoFirmaService.saveManifest(documento,
+					evento, Documento.Estado.MANIFIESTO, request.getLocale(), true)
+				response.status = respuesta.codigoEstado
+				render respuesta.mensaje
+				return false
+			} catch (Exception ex) {
+				log.error (ex.getMessage(), ex)
+				response.status = Respuesta.SC_ERROR_PETICION
+				render(ex.getMessage())
+				return false
+			}
+		}
+		response.status = Respuesta.SC_ERROR_PETICION
+		render message(code: 'error.PeticionIncorrectaHTML', args:[
+			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
+		return false
+	}
+	
+	/**
+	 * @httpMethod [POST]
+     * @serviceURL [/eventoFirma]	 
+	 * @param [htmlManifest] Manifiesto que se desea publicar en formato HTML.
+	 * @return Si todo va bien devuelve un código de estado HTTP 200 con el identificador
+	 * del nuevo manifiesto en la base de datos en el cuerpo del mensaje.
+	 */
+	def publicarPDF () {
+		try {
+			String eventoStr = "${request.getInputStream()}"
+			if (!eventoStr) {
+				response.status = Respuesta.SC_ERROR_PETICION
+				render message(code: 'error.PeticionIncorrectaHTML', args:[
+					"${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
+				return false
+			} else {
+				def eventoJSON = JSON.parse(eventoStr)
+				log.debug "eventoJSON.contenido: ${eventoJSON.contenido}"
+				eventoJSON.contenido = htmlService.prepareHTMLToPDF(eventoJSON.contenido.getBytes())
+				EventoFirma evento = new EventoFirma(asunto:eventoJSON.asunto,
+					fechaInicio:DateUtils.todayDate,
+					estado: Evento.Estado.PENDIENTE_DE_FIRMA,
+					contenido:eventoJSON.contenido,
+					fechaFin:new Date().parse("yyyy-MM-dd HH:mm:ss", eventoJSON.fechaFin))
+				evento.save()
+				evento.url = "${grailsApplication.config.grails.serverURL}/eventoFirma/${evento.id}"
+				runAsync {
+					ByteArrayOutputStream bytes = pdfRenderingService.render(
+						template: "/eventoFirma/pdf", model:[evento:evento])
+					Evento.withTransaction{
+						evento.pdf = bytes.toByteArray()
+						evento.save()
+						log.debug "Generado PDF de evento ${evento.id}"
+					}
+				}
+				log.debug "Saved evento ${evento.id}"
+				render evento.id
+				return false
+			}
+		} catch (Exception ex) {
+			log.error (ex.getMessage(), ex)
+			response.status = Respuesta.SC_ERROR_EJECUCION
+			render ex.getMessage()
+			return false 
+		}
+	}
+	
+	/**
+	 * @httpMethod [GET]
+	 * @param [id] el identificador del manifiesto en la base de datos.
 	 * @return El manifiesto en formato HTML.
 	 */
 	def obtenerHtml () {
@@ -190,35 +231,16 @@ class EventoFirmaController {
 	}
 	
 	/**
-	 * @httpMethod GET
-	 * @param id Obligatorio. El identificador del manifiesto en la base de datos.
-	 * @return Documento JSON con información del manifiesto solicitado.
-	 */
-	def obtener () {
-		if (params.long('id')) {
-			EventoFirma evento = EventoFirma.get(params.id)
-			if(!evento) {
-				render message(code:'eventNotFound', args:["${params.id}"]) 
-				return false
-			}
-			def eventoMap = eventoService.optenerEventoFirmaJSONMap(evento)
-			render eventoMap as JSON
-			return false
-		}
-		response.status = Respuesta.SC_ERROR_PETICION
-		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
-		return false
-	}
-	
-	/**
-	 * @httpMethod GET
-	 * @param max Opcional (por defecto 20). Número máximo de documentos que 
+	 * @httpMethod [GET]
+     * @serviceURL [/eventoFirma]	 
+	 * @param [max] Opcional (por defecto 20). Número máximo de documentos que 
 	 * 		  devuelve la consulta (tamaño de la página).
-	 * @param estadoEvento Opcional, posibles valores 'ACTIVO','CANCELADO', 'FINALIZADO', 'PENDIENTE_COMIENZO'.
+	 * @param [estadoEvento] Opcional, posibles valores 'ACTIVO','CANCELADO', 'FINALIZADO', 'PENDIENTE_COMIENZO'.
 	 * 		               El estado de los eventos que se desea consultar.
-	 * @param offset Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.
-	 * @param order Opcional, posibles valores 'asc', 'desc'(por defecto). Orden en que se muestran los
+	 * @param [offset] Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.
+	 * @param [order] Opcional, posibles valores 'asc', 'desc'(por defecto). Orden en que se muestran los
 	 *        resultados según la fecha de inicio.
+	 * @responseContentType [application/json]
 	 * @return Documento JSON con los manifiestos que cumplen con el criterio de búsqueda.
 	 */
 	def obtenerManifiestos () {
@@ -226,15 +248,19 @@ class EventoFirmaController {
 		def consultaMap = new HashMap()
 		consultaMap.eventos = new HashMap()
 		def firmas = []
-		if (params.ids?.size() > 0) {
-			EventoFirma.getAll(params.ids).collect {evento ->
-				   if (evento) eventoList << evento;
-		   }
-		   if (eventoList.size() == 0) {
-			   response.status = Respuesta.SC_NOT_FOUND //Not Found
-			   render message(code: 'eventNotFound', args:[params.ids])
-			   return
-		   }
+		if (params.long('id')) {
+			EventoFirma evento = null
+			EventoFirma.withTransaction {
+				evento = EventoFirma.get(params.long('id'))
+			}
+			if(!evento) {
+				response.status = Respuesta.SC_NOT_FOUND
+				render message(code: 'eventNotFound', args:[params.id])
+				return false
+			} else {
+				render eventoService.optenerEventoJSONMap(evento) as JSON
+				return false
+			}
 	   } else {
 		   params.sort = "fechaInicio"
 		   //params.order="dwefeasc"
@@ -279,41 +305,98 @@ class EventoFirmaController {
 	   render consultaMap as JSON
 	}
 	
+	
 	/**
-	 * (EN DESUSO)
-	 * @httpMethod POST
-	 * @param archivoFirmado Archivo firmado en formato SMIME en cuyo contenido se 
-	 *        encuentra el manifiesto que se desea publicar en formato HTML.
-	 * @return Recibo que consiste en el archivo firmado recibido con la firma añadida del servidor.
+	 * Servicio que proporciona acceso a lo documentos PDF firmados por los usuarios 
+	 * enviados para publicar manifiestos.
+	 *
+	 * @httpMethod [GET]
+     * @serviceURL [/eventoFirma/firmado/$id]	
+	 * @param [id] El identificador del manifiesto en la base de datos.
+	 * @return El manifiesto en formato PDF.
 	 */
-	def guardarAdjuntandoValidacion () {
-		try {
-			flash.respuesta = eventoFirmaService.guardarEvento(
-				params.smimeMessageReq, request.getLocale())
-		} catch (Exception ex) {
-			log.error (ex.getMessage(), ex)
-			response.status = Respuesta.SC_ERROR_EJECUCION
-			render ex.getMessage()
-			return false 
+	def firmado () {
+		EventoFirma evento = EventoFirma.get(params.long('id'))
+		if(!evento) {
+			response.status = Respuesta.SC_NOT_FOUND
+			render message(code: 'eventNotFound', args:[params.id])
+			return false
 		}
+		Documento documento
+		Documento.withTransaction {
+			documento = Documento.findWhere(evento:evento, estado:Documento.Estado.MANIFIESTO_VALIDADO)
+		}
+		if(!documento) {
+			response.status = Respuesta.SC_NOT_FOUND
+			render message(code: 'validatedManifestNotFoundErrorMsg', args:[params.id])
+			return false
+		}
+		//response.setHeader("Content-disposition", "attachment; filename=manifiesto.pdf")
+		response.contentType = "application/pdf"
+		response.setHeader("Content-Length", "${documento.pdf.length}")
+		response.outputStream << documento.pdf // Performing a binary stream copy
+		response.outputStream.flush()
+	}
+	
+	/**
+	 * Servicio que devuelve información sobre la actividad de una acción de recogida de firmas
+	 *
+	 * @httpMethod [GET]
+	 * @serviceURL [/eventoFirma/$id/informacionFirmas]
+	 * @param [id] Obligatorio. El identificador del manifiesto en la base de datos.
+	 * @responseContentType [application/json]
+	 * @return Documento JSON con información sobre las firmas recibidas por el manifiesto solicitado.
+	 */
+	def informacionFirmas () {
+		EventoFirma evento
+		EventoFirma.withTransaction {
+			evento = EventoFirma.get(params.id)
+		}
+		if (!evento) {
+			response.status = Respuesta.SC_NOT_FOUND
+			render message(code: 'eventNotFound', args:[params.id])
+			return false
+		}
+		def informacionFirmasMap = new HashMap()
+		def firmas
+		Documento.withTransaction {
+			firmas = Documento.findAllWhere(evento:evento,
+				estado:Documento.Estado.FIRMA_MANIFIESTO_VALIDADA)
+		}
+		informacionFirmasMap.numeroFirmas = firmas.size()
+		informacionFirmasMap.asuntoEvento = evento.asunto
+		informacionFirmasMap.eventoURL =
+			"${grailsApplication.config.grails.serverURL}/evento/${evento.id}"
+		informacionFirmasMap.firmas = []
+		firmas.collect { firma ->
+			def firmaMap = [id:firma.id, fechaCreacion:firma.dateCreated,
+			usuario:firma.usuario.nif,
+			firmaURL:"${grailsApplication.config.grails.serverURL}/documento" +
+				"/obtenerFirmaManifiesto?id=${firma.id}"]
+			informacionFirmasMap.firmas.add(firmaMap)
+		}
+		response.status = Respuesta.SC_OK
+		render informacionFirmasMap as JSON
 	}
 	
 	/**
 	 * Servicio que devuelve estadísticas asociadas a un manifiesto.
 	 * 
-	 * @httpMethod GET
-	 * @param id Identificador en la base de datos del manifiesto que se desea consultar.
+	 * @httpMethod [GET]
+	 * @serviceURL [/eventoFirma/$id/estadisticas]
+	 * @param [id] Identificador en la base de datos del manifiesto que se desea consultar.
+	 * @responseContentType [application/json]
 	 * @return Documento JSON con las estadísticas asociadas al manifiesto solicitado.
 	 */
 	def estadisticas () {
 		if (params.long('id')) {
 			EventoFirma eventoFirma
-			if (!params.evento) {
+			if (!flash.evento) { 
 				EventoFirma.withTransaction {
 					eventoFirma = EventoFirma.get(params.id)
 				}
 			} 
-			else eventoFirma = params.evento
+			else eventoFirma = flash.evento //forwarded from /evento/estadisticas
 			if (eventoFirma) {
 				def estadisticasMap = eventoService.optenerEventoFirmaJSONMap(eventoFirma)
 				estadisticasMap.numeroFirmas = Documento.countByEventoAndEstado(
@@ -321,71 +404,19 @@ class EventoFirmaController {
 				estadisticasMap.informacionFirmasURL = "${grailsApplication.config.grails.serverURL}" +
 					"/evento/informacionFirmas?id=${eventoFirma.id}"
 				estadisticasMap.URL = "${grailsApplication.config.grails.serverURL}" + 
-					"/evento/obtener?id=${eventoFirma.id}"
+					"/evento/${eventoFirma.id}"
 				response.status = Respuesta.SC_OK
 				render estadisticasMap as JSON
 				return false
 			}
 			response.status = Respuesta.SC_NOT_FOUND
-			render message(code: 'eventNotFound', args:[params.ids])
+			render message(code: 'eventNotFound', args:[params.id])
 			return false
 		}
 		response.status = Respuesta.SC_ERROR_PETICION
 		render message(code: 'error.PeticionIncorrectaHTML', args:[
 			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false
-	}
-
-	/**
-	 * Servicio que devuelve todas las firmas recibidas por un manifiesto.
-	 *
-	 * @httpMethod POST
-	 * @param archivoFirmado Archivo firmado en formato SMIME con los datos del
-	 * 		  manifiesto origen de la copia de seguridad.
-	 * @return Archivo zip con todas las firmas que ha recibido el manifiesto consultado.
-	 */
-	def guardarSolicitudCopiaRespaldo () {
-		EventoFirma eventoFirma
-		if (!params.evento) {
-			SMIMEMessageWrapper smimeMessage= params.smimeMessageReq
-			def mensajeJSON = JSON.parse(smimeMessage.getSignedContent())
-			if (params.long('eventoId')) {
-				eventoFirma = EventoFirma.get(mensajeJSON.eventoId)
-				if (!eventoFirma) {
-					response.status = Respuesta.SC_NOT_FOUND
-					render message(code: 'eventNotFound', args:[mensajeJSON.eventoId])
-					return false
-				}
-			} else {
-				response.status = Respuesta.SC_ERROR_PETICION
-				render message(code: 'error.PeticionIncorrectaHTML', args:[
-					"${grailsApplication.config.grails.serverURL}/${params.controller}"])
-				return false
-			}
-		} else eventoFirma = params.evento
-		Respuesta respuesta = eventoFirmaService.generarCopiaRespaldo(
-			eventoFirma, request.getLocale())
-		File copiaRespaldo = null
-		if(Respuesta.SC_OK == respuesta.codigoEstado) {
-			copiaRespaldo = respuesta.file
-		} 
-		if (copiaRespaldo != null) {
-			def bytesCopiaRespaldo = FileUtils.getBytesFromFile(copiaRespaldo)
-			response.contentLength = bytesCopiaRespaldo.length
-			response.setHeader("Content-disposition", "filename=${copiaRespaldo.getName()}")
-			response.setHeader("NombreArchivo", "${copiaRespaldo.getName()}")
-			response.setContentType("application/octet-stream")
-			response.outputStream << bytesCopiaRespaldo
-			response.outputStream.flush()
-			return false
-		} else {
-			String msg = respuesta?.mensaje
-			log.error (message(code: 'error.SinCopiaRespaldo') + " - ${msg}")
-			response.status = respuesta.codigoEstado
-			if(!msg) msg = message(code: 'error.SinCopiaRespaldo')
-			render msg
-			return false
-		}
 	}
 
 }

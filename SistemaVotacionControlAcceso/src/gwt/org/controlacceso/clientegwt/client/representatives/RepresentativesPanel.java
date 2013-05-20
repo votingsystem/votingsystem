@@ -106,7 +106,6 @@ public class RepresentativesPanel extends Composite
     }
 
 	public void updateRepresentativesMap(RepresentativesMapJso representativesMap) {
-		logger.info("- updateRepresentativesMap - ");
         barraNavegacion.addListener(this, representativesMap.getOffset(), 
         		Constantes.REPRESENTATIVES_RANGE, 
         		representativesMap.getRepresentativesTotalNumber());

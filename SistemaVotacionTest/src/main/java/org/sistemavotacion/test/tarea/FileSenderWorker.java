@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
-public class EnviarMultipartEntityWorker extends SwingWorker<String, String> {
+public class FileSenderWorker extends SwingWorker<String, String> {
     
-    private static Logger logger = LoggerFactory.getLogger(EnviarMultipartEntityWorker.class);
+    private static Logger logger = LoggerFactory.getLogger(FileSenderWorker.class);
 
     private String urlDestino;
     private LanzadorWorker lanzadorWorker;
@@ -22,29 +22,26 @@ public class EnviarMultipartEntityWorker extends SwingWorker<String, String> {
     private String cadenaEnviada;
     private Exception exception = null;
     private String message = null;
-    private String fileParamName = null;
+    private String paramName = null;
     private int statusCode = Respuesta.SC_ERROR;
     
-    public EnviarMultipartEntityWorker(File archivoEnviado, String urlDestino, 
+    public FileSenderWorker(File archivoEnviado, String urlDestino, 
             LanzadorWorker lanzadorWorker) {
         this.archivoEnviado = archivoEnviado;
         this.lanzadorWorker = lanzadorWorker;
         this.urlDestino = urlDestino;
     }
     
-    public EnviarMultipartEntityWorker(String cadenaEnviada, String urlDestino, 
-            LanzadorWorker lanzadorWorker) {
+    public FileSenderWorker(String cadenaEnviada, String paramName, 
+            String urlDestino, LanzadorWorker lanzadorWorker) {
         this.cadenaEnviada = cadenaEnviada;
         this.lanzadorWorker = lanzadorWorker;
+        this.paramName = paramName;
         this.urlDestino = urlDestino;
     }
     
     public void setFile(File archivoEnviado) {
         this.archivoEnviado = archivoEnviado;
-    }
-    
-    public void setFileParamName(String fileParamName) {
-        this.fileParamName = fileParamName;
     }
     
     @Override//on the EDT
@@ -66,18 +63,12 @@ public class EnviarMultipartEntityWorker extends SwingWorker<String, String> {
         HttpResponse response = null;
         logger.debug("--- cadenaEnviada: " + cadenaEnviada);
         if(archivoEnviado != null) {
-        	if(fileParamName != null) {
-        		response = Contexto.getHttpHelper().
-                        sendFile(archivoEnviado, urlDestino, fileParamName);
-        	} else {
-            	response = Contexto.getHttpHelper().
-                        enviarArchivoFirmado(archivoEnviado, urlDestino);	
-        	}
+            Contexto.getHttpHelper().sendFile(archivoEnviado, null, urlDestino);
         }
         else if (cadenaEnviada != null) {
             logger.debug("--- Enviando cadena firmada");
-            response = Contexto.getHttpHelper().
-                enviarCadena(cadenaEnviada, urlDestino);
+            response = Contexto.getHttpHelper().sendString(
+                    cadenaEnviada, paramName, urlDestino);
         } 
         statusCode =response.getStatusLine().getStatusCode();
         result = EntityUtils.toString(response.getEntity());

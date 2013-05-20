@@ -4,9 +4,6 @@ import java.security.cert.X509Certificate;
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import org.sistemavotacion.controlacceso.modelo.*;
-import org.sistemavotacion.smime.SMIMEMessageWrapper;
-import org.springframework.web.multipart.MultipartHttpServletRequest
-import org.springframework.web.multipart.MultipartFile;
 import grails.converters.JSON
 
 /**
@@ -24,20 +21,13 @@ class SolicitudAccesoController {
 	def encryptionService
 
 	/**
-	 * @httpMethod GET
-	 * @return Información sobre los servicios que tienen como url base '/solicitudAcceso'.
-	 */
-	def index() { 
-		redirect action: "restDoc"
-	}
-	
-	/**
-	 * @httpMethod GET
-	 * @param id Opcional. El identificador de la solicitud de acceso en la base de datos.
+	 * @httpMethod [GET]
+	 * @serviceURL [/solicitudAcceso/$id]
+	 * @param [id] Obligatorio. El identificador de la solicitud de acceso en la base de datos.
 	 * @return <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Solicitud-de-acceso">
 	 * 			La solicitud de acceso</a> solicitada.
 	 */
-    def obtener () {
+    def index () {
         if (params.long('id')) {
 			def solicitudAcceso
 			SolicitudAcceso.withTransaction {
@@ -64,79 +54,75 @@ class SolicitudAccesoController {
 	 * Servicio que valida las <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Solicitud-de-acceso">
 	 * solicitudes de acceso</a> recibidas en una votación.
 	 *
-	 * @httpMethod POST
-	 * @param archivoFirmado Obligatorio. La solicitud de acceso.
-	 * @param csr Obligatorio. La solicitud de certificado de voto.
+	 * @httpMethod [POST]
+	 * @serviceURL [/solicitudAcceso]
+	 * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] La solicitud de acceso.
+	 * @param [csr] Obligatorio. La solicitud de certificado de voto.
 	 * @return La solicitud de certificado de voto firmada.
 	 */
-    def procesar () { 
-        String nombreEntidadFirmada = grailsApplication.config.SistemaVotacion.nombreEntidadFirmada;
+    def processFileMap () {
+		MensajeSMIME mensajeSMIMEReq = flash[
+			grailsApplication.config.SistemaVotacion.accessRequestFileName]
+		if(!mensajeSMIMEReq) {
+			String msg = message(code:'evento.peticionSinArchivo')
+			log.error msg
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
+			return false
+		}
+		flash.mensajeSMIMEReq = mensajeSMIMEReq
 		SolicitudAcceso solicitudAcceso;
-		Respuesta respuesta;
-        if (request instanceof MultipartHttpServletRequest) {
-			try {
-				Map multipartFileMap = ((MultipartHttpServletRequest) request)?.getFileMap()
-				MultipartFile solicitudAccesoMultipartFile = multipartFileMap.remove(nombreEntidadFirmada)                                
-				respuesta = solicitudAccesoService.validarSolicitud(
-					solicitudAccesoMultipartFile.getBytes(), request.getLocale(), true)
-				solicitudAcceso = respuesta.solicitudAcceso
-				if (Respuesta.SC_OK == respuesta.codigoEstado) {
-					MultipartFile solicitudCsrFile = multipartFileMap.remove(
-						grailsApplication.config.SistemaVotacion.nombreSolicitudCSR)
-					Respuesta respuestaValidacionCSR = firmaService.
-							firmarCertificadoVoto(solicitudCsrFile.getBytes(), 
-							respuesta.evento, request.getLocale(), true)
-					if (Respuesta.SC_OK == respuestaValidacionCSR.codigoEstado) {
-						respuesta = encryptionService.encryptText(
-							respuestaValidacionCSR.firmaCSR, respuestaValidacionCSR.certificado)
-						if (Respuesta.SC_OK != respuesta.codigoEstado) {
-							response.status = respuesta?.codigoEstado
-							render respuesta?.mensaje
-							return false;
-						}
-						response.contentLength = respuesta.messageBytes.length
-						response.setContentType("application/octet-stream")
-						response.outputStream << respuesta.messageBytes
-						response.outputStream.flush()
-						return false
-					} else {
-						if (solicitudAcceso)
-							solicitudAccesoService.rechazarSolicitud(solicitudAcceso)
-					}
-				} else {
-					response.status = respuesta.codigoEstado
-					render respuesta?.mensaje
-					return false;
-				}
-			} catch (Exception ex) {
-				log.error (ex.getMessage(), ex)
-				if (solicitudAcceso)
-					solicitudAccesoService.rechazarSolicitud(solicitudAcceso)
-				String mensaje = ex.getMessage();
-				if(!mensaje || "".equals(mensaje)) {
-					mensaje = message(code: 'error.PeticionIncorrecta')
-				}
-				response.status = Respuesta.SC_ERROR_EJECUCION
-				render mensaje
+		Respuesta respuesta = solicitudAccesoService.saveRequest(
+			mensajeSMIMEReq, request.getLocale())
+		EventoVotacion evento = respuesta.evento
+		if (Respuesta.SC_OK == respuesta.codigoEstado) {
+			solicitudAcceso = respuesta.solicitudAcceso
+			byte[] csrRequest = flash[
+				grailsApplication.config.SistemaVotacion.nombreSolicitudCSR]
+			Respuesta encryptResponse = encryptionService.decryptMessage(csrRequest, request.getLocale())
+			if(Respuesta.SC_OK != encryptResponse.codigoEstado) {
+				respuesta.tipo = Tipo.SOLICITUD_ACCESO_ERROR;
+				respuesta.mensaje = encryptResponse.mensaje
+				flash.respuesta = respuesta
 				return false;
 			}
-        }	
-		response.status = Respuesta.SC_ERROR_PETICION
-		render message(code: 'error.PeticionIncorrecta')
-		return false
+			Usuario representative = null
+			if(solicitudAcceso.usuario.type == Usuario.Type.REPRESENTATIVE) {
+				representative = solicitudAcceso.usuario
+			}
+			Respuesta respuestaValidacionCSR = firmaService.
+					firmarCertificadoVoto(encryptResponse.messageBytes, 
+					evento, representative, request.getLocale())
+			if (Respuesta.SC_OK == respuestaValidacionCSR.codigoEstado) {
+				respuesta.tipo = Tipo.SOLICITUD_ACCESO;
+				flash.respuesta = respuesta
+				flash.responseBytes = respuestaValidacionCSR.firmaCSR
+				flash.receiverCert = respuestaValidacionCSR.certificado
+				response.setContentType("multipart/encrypted")
+				return false
+			} else {
+				respuesta.tipo = Tipo.SOLICITUD_ACCESO_ERROR;
+				respuesta.mensaje = respuestaValidacionCSR.mensaje
+				flash.respuesta = respuesta
+				if (solicitudAcceso) solicitudAccesoService.
+					rechazarSolicitud(solicitudAcceso)
+					
+			}
+		} else flash.respuesta = respuesta
     }
     
 	/**
-	 * @httpMethod GET
-	 * @param hashSolicitudAccesoHex Obligatorio. Hash en formato hexadecimal asociado
+	 * @httpMethod [GET]
+	 * @serviceURL [/solicitudAcceso/hashHex/$hashHex]
+	 * @param [hashHex] Obligatorio. Hash en formato hexadecimal asociado
 	 *        a la solicitud de acceso.
 	 * @return La solicitud de acceso asociada al hash.
 	 */
-    def encontrar () {
-        if (params.hashSolicitudAccesoHex) {
+    def hashHex () {
+        if (params.hashHex) {
             HexBinaryAdapter hexConverter = new HexBinaryAdapter();
             String hashSolicitudAccesoBase64 = new String(
-				hexConverter.unmarshal(params.hashSolicitudAccesoHex))
+				hexConverter.unmarshal(params.hashHex))
             log.debug "hashSolicitudAccesoBase64: ${hashSolicitudAccesoBase64}"
             SolicitudAcceso solicitudAcceso = SolicitudAcceso.findWhere(hashSolicitudAccesoBase64:
                 hashSolicitudAccesoBase64)
@@ -150,7 +136,7 @@ class SolicitudAccesoController {
             }
             response.status = Respuesta.SC_NOT_FOUND
             render message(code: 'error.solicitudAccesoNotFound', 
-                args:[params.hashSolicitudAccesoHex])
+                args:[params.hashHex])
             return false
         }
         response.status = Respuesta.SC_ERROR_PETICION
@@ -160,9 +146,10 @@ class SolicitudAccesoController {
     }
 	
 	/**
-	 * @httpMethod GET
-	 * @param eventoId Obligatorio. El identificador de la votación en la base de datos.
-	 * @param nif Obligatorio. El nif del solicitante.
+	 * @httpMethod [GET]
+	 * @serviceURL [/solicitudAcceso/evento/$eventoId/nif/$nif]
+	 * @param [eventoId] Obligatorio. El identificador de la votación en la base de datos.
+	 * @param [nif] Obligatorio. El nif del solicitante.
 	 * @return La solicitud de acceso asociada al nif y el evento.
 	 */
 	def encontrarPorNif () {
@@ -203,7 +190,7 @@ class SolicitudAccesoController {
 			return false
 		}
 		response.status = Respuesta.SC_ERROR_PETICION
-		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
+		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
 		return false
 	}
 

@@ -23,11 +23,9 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
 import org.apache.solr.analysis.HTMLStripCharFilterFactory;
 import org.apache.solr.analysis.StandardTokenizerFactory;
 import org.hibernate.search.annotations.Analyzer;
@@ -91,8 +89,8 @@ public class EventoVotacion implements Serializable {
     private String asunto;
     @Column(name="url")
     private String url;
-    @OneToOne
-    private MensajeSMIME mensajeMime;
+    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="evento")
+    private Set<MensajeSMIME> mensajeSMIMESet = new HashSet<MensajeSMIME>(0); 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="usuarioId")
     private Usuario usuario; 
@@ -211,14 +209,6 @@ public class EventoVotacion implements Serializable {
 		return etiquetaSet;
 	}
 
-	public void setMensajeMime(MensajeSMIME mensajeMime) {
-		this.mensajeMime = mensajeMime;
-	}
-
-	public MensajeSMIME getMensajeMime() {
-		return mensajeMime;
-	}
-
 	public void setUsuario(Usuario usuario) {
 		this.usuario = usuario;
 	}
@@ -335,5 +325,13 @@ public class EventoVotacion implements Serializable {
 		Collection<X509Certificate> controlAccesoCertCollection = 
 				CertUtil.fromPEMToX509CertCollection(cadenaCertificacionControlAcceso);
 		return controlAccesoCertCollection.iterator().next();		
+	}
+
+	public Set<MensajeSMIME> getMensajeSMIMESet() {
+		return mensajeSMIMESet;
+	}
+
+	public void setMensajeSMIMESet(Set<MensajeSMIME> mensajeSMIMESet) {
+		this.mensajeSMIMESet = mensajeSMIMESet;
 	}
 }

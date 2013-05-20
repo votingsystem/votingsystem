@@ -13,16 +13,18 @@ import org.sistemavotacion.controlacceso.modelo.*
 import org.sistemavotacion.seguridad.*
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
-import org.sistemavotacion.smime.SignedMailGenerator.Type;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
 import java.security.cert.CertPathValidatorException
@@ -30,23 +32,40 @@ import java.security.cert.PKIXCertPathValidatorResult
 import java.security.cert.TrustAnchor
 import java.security.cert.X509Certificate;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.mail.smime.SMIMESigned
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo
 import org.bouncycastle.asn1.x509.X509Extensions
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cms.CMSVerifierCertificateNotValidException;
+import org.bouncycastle.cms.SignerInformation;
+import org.bouncycastle.cms.SignerInformationVerifier
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
+import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.util.Store;
+
 import java.util.Locale;
 
 //class FirmaService implements InitializingBean {
 class FirmaService {
 
+	private static final String BC = BouncyCastleProvider.PROVIDER_NAME;
 	
-	private SignedMailGenerator firmadoraValidaciones;
+	private SignedMailGenerator signedMailGenerator;
 	static Set<X509Certificate> trustedCerts;
 	static HashMap<Long, Certificado> trustedCertsHashMap;
+	private X509Certificate localServerCertSigner;
 	private static HashMap<Long, Set<X509Certificate>> eventTrustedCertsHashMap = 
+		new HashMap<Long, Set<X509Certificate>>();
+	private static HashMap<Long, Set<X509Certificate>> eventValidationTrustedCertsHashMap =
 		new HashMap<Long, Set<X509Certificate>>();
 	def grailsApplication;
 	def messageSource
 	def csrService;
 	def encryptionService;
+	def subscripcionService
+	def timeStampService
 	
 	//@Override
 	public void afterPropertiesSet() throws Exception {
@@ -56,25 +75,37 @@ class FirmaService {
 		File keyStore = new File(rutaAlmacenClaves);
 		String aliasClaves = grailsApplication.config.SistemaVotacion.aliasClavesFirma
 		String password = grailsApplication.config.SistemaVotacion.passwordClavesFirma
-		firmadoraValidaciones = new SignedMailGenerator(FileUtils.getBytesFromFile(keyStore), 
+		signedMailGenerator = new SignedMailGenerator(FileUtils.getBytesFromFile(keyStore), 
 			aliasClaves, password.toCharArray());
 		KeyStore ks = KeyStore.getInstance("JKS");
 		ks.load(new FileInputStream(keyStore), password.toCharArray());
 		java.security.cert.Certificate[] chain = ks.getCertificateChain(aliasClaves);
 		byte[] pemCertsArray
+		trustedCerts = new HashSet<X509Certificate>()
 		for (int i = 0; i < chain.length; i++) {
-			log.debug " --- Importando certificado --- ${i} -- SubjectDN: ${chain[i].getSubjectDN()}"
+			log.debug " --- inicializar - Adding local kesystore cert '${i}' -> 'SubjectDN: ${chain[i].getSubjectDN()}'"
+			trustedCerts.add(chain[i])
 			if(!pemCertsArray) pemCertsArray = CertUtil.fromX509CertToPEM (chain[i])
 			else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtil.fromX509CertToPEM (chain[i]))
 		}
 		
-		trustedCerts = new HashSet<X509Certificate>()
-		X509Certificate localServerCertSigner = (X509Certificate) ks.getCertificate(aliasClaves);
+		localServerCertSigner = (X509Certificate) ks.getCertificate(aliasClaves);
 		trustedCerts.add(localServerCertSigner)
 		
 		def rutaCadenaCertificacion = getAbsolutePath("${grailsApplication.config.SistemaVotacion.rutaCadenaCertificacion}")
 		FileUtils.copyStreamToFile(new ByteArrayInputStream(pemCertsArray), new File(rutaCadenaCertificacion))
 		inicializarAutoridadesCertificadoras();
+	}
+	
+	public boolean isSystemSignedMessage(Set<Usuario> signers) {
+		boolean result = false
+		log.debug "isSystemSignedMessage - localServerCert num. serie: ${localServerCertSigner.getSerialNumber().longValue()}"
+		signers.each {
+			long signerId = ((Usuario)it).getCertificate().getSerialNumber().longValue()
+			log.debug " --- num serie signer: ${signerId}"
+			if(signerId == localServerCertSigner.getSerialNumber().longValue()) result = true;
+		}
+		return result
 	}
 	
 	public Set<X509Certificate> getTrustedCerts() {
@@ -186,78 +217,73 @@ class FirmaService {
 		}
 	}
 	
-	
-	def obtenerArchivoFirmado (String fromUser, String toUser, String textoAFirmar,
-			String asunto, Header header, Type signerType) {
-		log.debug "obtenerArchivoFirmado - textoAFirmar: ${textoAFirmar}"
-		File resultado = firmadoraValidaciones.genFile(fromUser, toUser, textoAFirmar,
-			asunto, header, SignedMailGenerator.Type.ACESS_CONTROL)
-		return resultado
-	}
-	
-	def obtenerCadenaFirmada (String fromUser, String toUser, String textoAFirmar,
-			String asunto, Header header, Type signerType) {
-		log.debug "obtenerCadenaFirmada - textoAFirmar: ${textoAFirmar}"
-		if(!firmadoraValidaciones) afterPropertiesSet()
-		String resultado = firmadoraValidaciones.genString(fromUser, toUser, textoAFirmar,
-			asunto, header, SignedMailGenerator.Type.ACESS_CONTROL)
-		return resultado
-	}
-			
-	def obtenerCadenaFirmada (String textoAFirmar, String asunto) {
-		log.debug "obtenerCadenaFirmada - textoAFirmar: ${textoAFirmar}"
-		String resultado = obtenerCadenaFirmada(null, null, textoAFirmar,
-			asunto, null, SignedMailGenerator.Type.ACESS_CONTROL)
-		return resultado
-	}
-	
-	def obtenerCadenaFirmada (String textoAFirmar, String asunto, Header header) {
-		log.debug "obtenerCadenaFirmada - textoAFirmar: ${textoAFirmar}"
-		String resultado = obtenerCadenaFirmada(null, null, textoAFirmar,
-			asunto, header, SignedMailGenerator.Type.ACESS_CONTROL)
-		return resultado
-	}
-	
-	public synchronized MimeMessage generarMultifirma (
-			final SMIMEMessageWrapper smimeMessage, String mailSubject) {
-		log.debug("generarMultifirma - From:"  + smimeMessage.getFrom());
-		if(!firmadoraValidaciones) afterPropertiesSet()
-		MimeMessage multifirma = firmadoraValidaciones.genMultiSignedMessage(smimeMessage, mailSubject); 
-		return multifirma
+	public File obtenerArchivoFirmado (String fromUser, String toUser,
+		String textToSign, String subject, Header header) {
+		log.debug "obtenerArchivoFirmado - textoAFirmar: ${textToSign}"
+		if(signedMailGenerator == null) afterPropertiesSet()
+		MimeMessage mimeMessage = getSignedMailGenerator().genMimeMessage(
+			fromUser, toUser, textToSign, subject, header)
+		File resultFile = File.createTempFile("smime", "p7m");
+		resultFile.deleteOnExit();
+		mimeMessage.writeTo(new FileOutputStream(resultFile));
+		return resultFile
 	}
 		
-	public synchronized byte[] generarMultifirmaBytes (
-			final SMIMEMessageWrapper smimeMessage, String mailSubject) {
-		log.debug("generarMultifirmaBytes - From:"  + smimeMessage.getFrom());
-		if(!firmadoraValidaciones) afterPropertiesSet()
-		MimeMessage multifirma = firmadoraValidaciones.genMultiSignedMessage(smimeMessage, mailSubject);
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		multifirma.writeTo(baos);
-		byte[] result = baos.toByteArray()
-		baos.close()
-		return result;
-	}
-			
-	public Respuesta firmarCertificadoVoto (byte[] csr, Evento evento, 
-		Locale locale, boolean isEncrypted) {
-		log.debug("firmarCertificadoVoto - evento: ${evento?.id} - isEncrypted: ${isEncrypted}");
-		Respuesta respuesta = null;
-		if(isEncrypted) {
-			respuesta = encryptionService.decryptMessage(csr, locale)
-			if(Respuesta.SC_OK != respuesta.codigoEstado) return respuesta
-			else csr = respuesta.messageBytes
+	public byte[] getSignedMimeMessage (String fromUser, String toUser,
+		String textToSign, String subject, Header header) {
+		log.debug "getSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
+		if(signedMailGenerator == null) afterPropertiesSet()
+		if(fromUser) {
+			fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
 		}
-		respuesta = csrService.validarCSRVoto(csr, evento, locale)
+		if(toUser) {
+			toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
+		}
+		MimeMessage mimeMessage = getSignedMailGenerator().
+			genMimeMessage(fromUser, toUser, textToSign, subject, header)
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		mimeMessage.writeTo(baos);
+		baos.close();
+		return baos.toByteArray();
+	}
+		
+	public synchronized SMIMEMessageWrapper getMultiSignedMimeMessage (
+		String fromUser, String toUser,	final SMIMEMessageWrapper smimeMessage, String subject) {
+		log.debug("getMultiSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'");
+		if(!signedMailGenerator) afterPropertiesSet()
+		if(fromUser) {
+			fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
+			smimeMessage.setFrom(new InternetAddress(fromUser))
+		} 
+		if(toUser) {
+			toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
+			smimeMessage.setTo(toUser)
+		}
+		SMIMEMessageWrapper multifirma = getSignedMailGenerator().
+				genMultiSignedMessage(smimeMessage, subject);
+		return multifirma
+	}
+
+	public Respuesta firmarCertificadoVoto (byte[] csr, Evento evento, 
+		Usuario representative, Locale locale) {
+		log.debug("firmarCertificadoVoto - evento: ${evento?.id}");
+		Respuesta respuesta = csrService.validarCSRVoto(csr, evento, locale)
 		if(Respuesta.SC_OK != respuesta.codigoEstado) return respuesta
 		AlmacenClaves almacenClaves = evento.getAlmacenClaves()
-		//TODO
+		//TODO ==== vote keystore -- this is for developement
 		KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(almacenClaves.bytes, 
 			grailsApplication.config.SistemaVotacion.passwordClavesFirma.toCharArray());
 		PrivateKey privateKeySigner = (PrivateKey)keyStore.getKey(almacenClaves.keyAlias, 
 			grailsApplication.config.SistemaVotacion.passwordClavesFirma.toCharArray());
 		X509Certificate certSigner = (X509Certificate) keyStore.getCertificate(almacenClaves.keyAlias);
-		PKCS10WrapperServer pkcs10wrapper = new PKCS10WrapperServer(privateKeySigner, certSigner);
-		byte[] certificadoFirmado = pkcs10wrapper.firmarValidandoCsr(csr, evento.fechaInicio, evento.fechaFin)
+		String representativeURL = null
+		if(representative && representative.type == Usuario.Type.REPRESENTATIVE) 
+			representativeURL = "OU=RepresentativeURL:http://localhost:8080/SistemaVotacionControlAcceso/representative/${representative.id}"
+		
+		//representativeNIF = "OU=RepresentativeURL:${representative.nif}"
+		byte[] certificadoFirmado = PKCS10WrapperServer.firmarValidandoCsr(
+			csr, representativeURL, privateKeySigner, certSigner, 
+			evento.fechaInicio, evento.fechaFin)
 		if (!certificadoFirmado) {
 			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, tipo:Tipo.ERROR_VALIDANDO_CSR)	
 		} else {
@@ -270,7 +296,7 @@ class FirmaService {
 			solicitudCSR.save()					
 			Certificado certificado = new Certificado(numeroSerie:certificate.getSerialNumber().longValue(),
 				contenido:certificate.getEncoded(), eventoVotacion:evento, estado:Certificado.Estado.OK,
-				solicitudCSRVoto:solicitudCSR, tipo:Certificado.Tipo.VOTO,
+				solicitudCSRVoto:solicitudCSR, tipo:Certificado.Tipo.VOTO, usuario:representative,
 				hashCertificadoVotoBase64:respuesta.hashCertificadoVotoBase64)
 			certificado.save()
 			return new Respuesta(codigoEstado:Respuesta.SC_OK,
@@ -289,14 +315,14 @@ class FirmaService {
 		PrivateKey privateKeySigner = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray());
 		X509Certificate certSigner = (X509Certificate) keyStore.getCertificate(aliasClaves);
 		
-		log.debug("certSigner:${certSigner}");
-		
-		PKCS10WrapperServer pkcs10wrapper = new PKCS10WrapperServer(privateKeySigner, certSigner);
+		log.debug("firmarCertificadoUsuario - certSigner:${certSigner}");
+
 		Date today = Calendar.getInstance().getTime();
 		Calendar today_plus_year = Calendar.getInstance();
 		today_plus_year.add(Calendar.YEAR, 1);
-		byte[] certificadoFirmado = pkcs10wrapper.firmarValidandoCsr(
-			solicitudCSR.contenido, today, today_plus_year.getTime())
+		byte[] certificadoFirmado = PKCS10WrapperServer.firmarValidandoCsr(
+				solicitudCSR.contenido, null, privateKeySigner, 
+				certSigner, today, today_plus_year.getTime())
 		if (!certificadoFirmado) {
 			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
 				mensaje:Tipo.ERROR_VALIDANDO_CSR.toString())
@@ -388,82 +414,214 @@ class FirmaService {
 		log.debug("getCertificadoCA - numSerie: '${numSerie}'")
 		return trustedCertsHashMap.get(numSerie)
 	}
-	
-	public Respuesta validarCertificacionFirmantesVoto(
-		SMIMEMessageWrapper messageWrapper, EventoVotacion evento) {
-		Set<Usuario> firmantes = messageWrapper.getFirmantes();
-		if(firmantes.size() == 0) return new Respuesta(
-			codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:
-			messageSource.getMessage('error.documentWithoutSigners', null, locale))
-		Set<X509Certificate> eventTrustedCerts = eventTrustedCertsHashMap.get(evento?.id)
-		if(!eventTrustedCerts) {
-			Certificado certificadoCAEvento = Certificado.findWhere(
-				eventoVotacion:evento, estado:Certificado.Estado.OK,
-				tipo:Certificado.Tipo.RAIZ_VOTOS)
-			if(!certificadoCAEvento) return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
-					mensaje:messageSource.getMessage('eventWithoutCAErrorMsg', 
-					[evento.id].toArray(), locale))				
-			X509Certificate certCAEvento = CertUtil.loadCertificateFromStream (
-				new ByteArrayInputStream(certificadoCAEvento.contenido))
-			eventTrustedCerts = new HashSet<X509Certificate>()
-			Collection<X509Certificate> centroControlCerts = CertUtil.
-				fromPEMToX509CertCollection (evento.cadenaCertificacionCentroControl)
-			eventTrustedCerts.addAll(centroControlCerts)
-			eventTrustedCerts.add(certCAEvento)
-			eventTrustedCertsHashMap.put(evento.id, eventTrustedCerts)
-		}
-		log.debug("validarCertificacionFirmantesVoto - firmantes.size():" + 
-			" ${firmantes.size()} - eventTrustedCerts.size(): ${eventTrustedCerts.size()}")
-		for(Usuario usuario: firmantes) {
-			log.debug("Validando firmante ${usuario.getCertificate().getSubjectDN()}")
-			try {
-				PKIXCertPathValidatorResult pkixResult = CertUtil.verifyCertificate(
-					usuario.getCertificate(), eventTrustedCerts, false)
-				TrustAnchor ta = pkixResult.getTrustAnchor();
-				X509Certificate certCaResult = ta.getTrustedCert();
-				log.debug("certCaResult: " + certCaResult?.getSubjectDN()?.toString()+
-						"- numserie: " + certCaResult?.getSerialNumber()?.longValue());
-			} catch (Exception ex) {
-				log.error(ex.getMessage(), ex)
-				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
-					mensaje:"Error validando Certificación del certificado" + 
-					" '${usuario.getCertificate().getSubjectDN()?.toString()}'")
-			}
-		}
-		return new Respuesta(codigoEstado:Respuesta.SC_OK)
-	}
-
-	public Respuesta checkTimeStamps() {//TODO
 		
+	public Respuesta validateSMIME(
+		SMIMEMessageWrapper messageWrapper, Locale locale) {
+		log.debug("validateSMIME -")
+		MensajeSMIME mensajeSMIME = MensajeSMIME.findWhere(base64ContentDigest:messageWrapper.getContentDigestStr())
+		if(mensajeSMIME) {
+			String message = messageSource.getMessage('smimeDigestRepeatedErrorMsg', 
+				[messageWrapper.getContentDigestStr()].toArray(), locale)
+			log.error("validateSMIME - ${message}")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:message)
+		} 
+		return validateSignersCertificate(messageWrapper, locale)
 	}
 		
-	public Respuesta validarCertificacionFirmantes(
+	public Respuesta validateSignersCertificate(
 			SMIMEMessageWrapper messageWrapper, Locale locale) {
 		Set<Usuario> firmantes = messageWrapper.getFirmantes();
-		if(firmantes.size() == 0) return new Respuesta(
+		if(firmantes.isEmpty()) return new Respuesta(
 			codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:
 			messageSource.getMessage('error.documentWithoutSigners', null, locale))
-		log.debug("*** validarCertificacionFirmantes - firmantes.size(): ${firmantes.size()}")
+		log.debug("validateSignersCertificate - number of signers: ${firmantes.size()}")
+		Set<Usuario> checkedSigners = new HashSet<Usuario>()
 		for(Usuario usuario: firmantes) {			 
 			try {
 				PKIXCertPathValidatorResult pkixResult = CertUtil.verifyCertificate(
 					usuario.getCertificate(), trustedCerts, false)
 				TrustAnchor ta = pkixResult.getTrustAnchor();
 				X509Certificate certCaResult = ta.getTrustedCert();
-				usuario.certificadoCA = trustedCertsHashMap.get(certCaResult?.getSerialNumber()?.longValue())
-				log.debug("Certificado de usuario emitido por: " + certCaResult?.getSubjectDN()?.toString() +
+				usuario.certificadoCA = trustedCertsHashMap.get(
+					certCaResult?.getSerialNumber()?.longValue())
+				log.debug("validateSignersCertificate - Certificado de usuario emitido por: " + 
+						certCaResult?.getSubjectDN()?.toString() +
 				        "- numserie: " + certCaResult?.getSerialNumber()?.longValue());
+				Respuesta respuesta = subscripcionService.checkUser(usuario, locale)
+				if(Respuesta.SC_OK != respuesta.codigoEstado) return respuesta
+				if(usuario.getTimeStampToken() != null) {
+					log.debug("validateSignersCertificate - signature with timestamp")
+					Respuesta timestampValidationResp = timeStampService.validate(
+						usuario.getTimeStampToken(), locale)
+					if(Respuesta.SC_OK != timestampValidationResp.codigoEstado) {
+						log.error("validateSignersCertificate - TIMESTAMP ERROR - ${timestampValidationResp.mensaje}")
+						return timestampValidationResp
+					}
+				}
+				checkedSigners.add(respuesta.usuario)
 			} catch (CertPathValidatorException ex) {
 				log.error(ex.getMessage(), ex)
 				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:
 					messageSource.getMessage('error.caUnknown', null, locale))
 			} catch (Exception ex) {
 				log.error(ex.getMessage(), ex)
-				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:ex.getMessage())
+				return new Respuesta(
+					codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:ex.getMessage())
 			}
 		}
-		return new Respuesta(codigoEstado:Respuesta.SC_OK)
+		return new Respuesta(codigoEstado:Respuesta.SC_OK,
+			smimeMessage:messageWrapper, usuarios:checkedSigners)
+	}                    
+
+	public Respuesta validateSMIMEVote(
+		SMIMEMessageWrapper messageWrapper, Locale locale) {
+		log.debug("validateSMIMEVote -")
+		MensajeSMIME mensajeSMIME = MensajeSMIME.findWhere(base64ContentDigest:messageWrapper.getContentDigestStr())
+		if(mensajeSMIME) {
+			String msg = messageSource.getMessage('smimeDigestRepeatedErrorMsg',
+				[messageWrapper.getContentDigestStr()].toArray(), locale)
+			log.error("validateSMIMEVote - ${msg}")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg)
+		}
+		return validateVoteCerts(messageWrapper, locale)
 	}
-
-
+		
+	public Respuesta validateVoteCerts(SMIMEMessageWrapper smimeMessageReq, Locale locale) {
+		Set<Usuario> firmantes = smimeMessageReq.getFirmantes();
+		String msg
+		Respuesta respuesta
+		EventoVotacion evento
+		if(firmantes.isEmpty()) {
+			msg = messageSource.getMessage('error.documentWithoutSigners', null, locale)
+			log.error ("validateVoteCerts - ERROR SIGNERS - ${msg}")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+				mensaje:msg, tipo:Tipo.VOTO_CON_ERRORES)
+		}
+		InformacionVoto infoVoto = smimeMessageReq.informacionVoto
+		String localServerURL = grailsApplication.config.grails.serverURL
+		String voteAccessControlURL = infoVoto.controlAccesoURL
+		while(voteAccessControlURL.endsWith("/")) {
+			voteAccessControlURL = voteAccessControlURL.substring(0, requestURL.length() - 1)
+		}
+		if (!localServerURL.equals(voteAccessControlURL)) {
+			msg = messageSource.getMessage('validacionVoto.errorCert', 
+				[voteAccessControlURL, localServerURL].toArray(), locale)
+			log.error ("validateVoteCerts - ERROR SERVER URL - ${msg}")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg, 
+				tipo:Tipo.VOTO_CON_ERRORES)
+		}
+		evento = EventoVotacion.get(Long.valueOf(infoVoto.getEventoId()))
+		if (!evento)  {
+			msg = messageSource.getMessage('validacionVoto.eventoNotFound', 
+				[infoVoto.getEventoId()].toArray(), locale)
+			log.error ("validateVoteCerts - ERROR EVENT NOT FOUND - ${msg}")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg,
+				tipo:Tipo.VOTO_CON_ERRORES)
+		}
+		if(evento.estado != Evento.Estado.ACTIVO) {
+			msg = messageSource.getMessage('validacionVoto.eventClosed', 
+				[evento.asunto].toArray(), locale)
+			log.error ("validateVoteCerts - ERROR EVENT '${evento.id}' STATE -> ${evento.estado}")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg,
+				tipo:Tipo.VOTO_CON_ERRORES, evento:evento)
+		}
+		Certificado certificado = Certificado.findWhere(
+			hashCertificadoVotoBase64:infoVoto.hashCertificadoVotoBase64,
+			estado:Certificado.Estado.OK)
+		if (!certificado) {
+			msg = messageSource.getMessage(
+				'validacionVoto.errorHash', [infoVoto.hashCertificadoVotoBase64].toArray(), locale)
+			log.error ("validateVoteCerts - ERROR CERT '${msg}'")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg,
+				tipo:Tipo.VOTO_CON_ERRORES, evento:evento)
+		}
+		smimeMessageReq.informacionVoto.setCertificado(certificado)
+		Set<X509Certificate> eventTrustedCerts = eventTrustedCertsHashMap.get(evento?.id)
+		if(!eventTrustedCerts) {
+			Certificado certificadoCAEvento = Certificado.findWhere(
+				eventoVotacion:evento, estado:Certificado.Estado.OK,
+				tipo:Certificado.Tipo.RAIZ_VOTOS)
+			if(!certificadoCAEvento) {
+				msg = messageSource.getMessage('eventWithoutCAErrorMsg',
+					[evento.id].toArray(), locale)
+				log.error ("validateVoteCerts - ERROR EVENT CA CERT -> '${msg}'")
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+					mensaje:msg, tipo:Tipo.VOTO_CON_ERRORES, evento:evento)
+			} 
+			X509Certificate certCAEvento = CertUtil.loadCertificateFromStream (
+				new ByteArrayInputStream(certificadoCAEvento.contenido))
+			eventTrustedCerts = new HashSet<X509Certificate>()
+			eventTrustedCerts.add(certCAEvento)
+			eventTrustedCertsHashMap.put(evento.id, eventTrustedCerts)
+		}
+		//Vote validation
+		PKIXCertPathValidatorResult pkixResult;
+		TrustAnchor ta;
+		X509Certificate certCaResult;
+		X509Certificate checkedCert = infoVoto.getCertificadoVoto()
+		try {
+			pkixResult = CertUtil.verifyCertificate(
+				checkedCert, eventTrustedCerts, false)
+			ta = pkixResult.getTrustAnchor();
+			certCaResult = ta.getTrustedCert();
+			log.debug("validateVoteCerts - vote cert -> CA Result: " + certCaResult?.getSubjectDN()?.toString()+
+					"- numserie: " + certCaResult?.getSerialNumber()?.longValue());
+		} catch (Exception ex) {
+			log.error(ex.getMessage(), ex)
+			msg = messageSource.getMessage('certValidationErrorMsg',
+					[checkedCert.getSubjectDN()?.toString()].toArray(), locale)
+			log.error ("validateVoteCerts - ERROR VOTE CERT VALIDATION -> '${msg}'")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+				mensaje:msg, tipo:Tipo.VOTO_CON_ERRORES, evento:evento)
+		}
+		Respuesta timestampValidationResp = timeStampService.validate(
+			infoVoto.getVoteTimeStampToken(), locale)
+		if(Respuesta.SC_OK != timestampValidationResp.codigoEstado) {
+			log.error("validateVoteCerts - ERROR TIMESTAMP VOTE VALIDATION -> '${timestampValidationResp.mensaje}'")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+				mensaje:timestampValidationResp.mensaje, 
+				tipo:Tipo.VOTO_CON_ERRORES, evento:evento)
+		}
+		Date timestampDate = infoVoto.getVoteTimeStampToken().getTimeStampInfo().getGenTime()
+		if(!timestampDate.after(evento.fechaInicio) &&
+			!timestampDate.before(evento.fechaFin)) {
+			String dateRangeStr = "[${eventoVotacion.fechaInicio} - ${eventoVotacion.fechaFin}]"
+			msg = messageSource.getMessage('timestampDateErrorMsg',
+				[timestampDate, dateRangeStr].toArray(), locale)
+			log.debug("validateVoteCerts - ERROR TIMESTAMP DATE - ${msg}")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+				mensaje:msg, tipo:Tipo.VOTO_CON_ERRORES, evento:evento)
+		}
+		//Control Center cert validation
+		eventTrustedCerts = eventValidationTrustedCertsHashMap.get(evento?.id)
+		if(!eventTrustedCerts) {
+			eventTrustedCerts = new HashSet<X509Certificate>()
+			Collection<X509Certificate> centroControlCerts = CertUtil.
+				fromPEMToX509CertCollection (evento.cadenaCertificacionCentroControl)
+			eventTrustedCerts.addAll(centroControlCerts)
+			eventValidationTrustedCertsHashMap.put(evento.id, eventTrustedCerts)
+		}
+		checkedCert = infoVoto.getServerCerts()?.iterator()?.next()
+		try {
+			pkixResult = CertUtil.verifyCertificate(
+				checkedCert, eventTrustedCerts, false)
+			ta = pkixResult.getTrustAnchor();
+			certCaResult = ta.getTrustedCert();
+			log.debug("validateVoteCerts - Control Center cert -> CA Result: " + certCaResult?.getSubjectDN()?.toString() +
+					"- numserie: " + certCaResult?.getSerialNumber()?.longValue());
+		} catch (Exception ex) {
+			log.error(ex.getMessage(), ex)
+			msg = messageSource.getMessage('certValidationErrorMsg',
+					[checkedCert.getSubjectDN()?.toString()].toArray(), locale)
+			log.error ("validateVoteCerts - ERROR CONTROL CENTER CERT VALIDATION -> '${msg}'")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+				mensaje:msg, tipo:Tipo.VOTO_CON_ERRORES, evento:evento)
+		}
+		return new Respuesta(codigoEstado:Respuesta.SC_OK, evento:evento,
+			smimeMessage:smimeMessageReq, tipo:Tipo.VOTO_VALIDADO_CENTRO_CONTROL)
+	}
+	
+	private SignedMailGenerator getSignedMailGenerator() {
+		return signedMailGenerator
+	}
 }

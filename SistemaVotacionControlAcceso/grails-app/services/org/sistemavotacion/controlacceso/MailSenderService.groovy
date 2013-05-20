@@ -32,8 +32,8 @@ class MailSenderService {
 			asuntoEvento = solicitud.documento?.evento?.asunto
 			if(asuntoEvento) asunto = (asuntoEvento.length() > 90)?asuntoEvento.substring(0, 90) + "...":asuntoEvento
 			solicitante = "${solicitud.documento?.usuario?.nombre} ${solicitud.documento?.usuario?.primerApellido}"
-			urlSolicitud = "${grailsApplication.config.grails.serverURL}/solicitudCopia/obtenerSolicitud?id=${solicitud.id}"
-			urlDescarga = "${grailsApplication.config.grails.serverURL}/solicitudCopia/obtener?id=${solicitud.id}"
+			urlSolicitud = "${grailsApplication.config.grails.serverURL}/solicitudCopia/${solicitud.id}"
+			urlDescarga = "${grailsApplication.config.grails.serverURL}/solicitudCopia/download/${solicitud.id}"
 		}
 		log.debug "solicitante:${solicitante} - urlSolicitud:${urlSolicitud} - urlDescarga:${urlDescarga}"
 		String asuntoEmail = messageSource.getMessage('mailSenderService.asuntoMailDescargaCopiaSeguridad', null, locale)
@@ -62,8 +62,8 @@ class MailSenderService {
 			userRequest = solicitud.mensajeSMIME?.usuario
 			representativeName = "${representative?.nombre} ${representative?.primerApellido}"
 			userRequestName = "${userRequest?.nombre} ${userRequest?.primerApellido}"
-			urlSolicitud = "${grailsApplication.config.grails.serverURL}/solicitudCopia/obtenerSolicitud?id=${solicitud.id}"
-			urlDescarga = "${grailsApplication.config.grails.serverURL}/solicitudCopia/obtener?id=${solicitud.id}"
+			urlSolicitud = "${grailsApplication.config.grails.serverURL}/solicitudCopia/${solicitud.id}"
+			urlDescarga = "${grailsApplication.config.grails.serverURL}/solicitudCopia/download/${solicitud.id}"
 		}
 		String emailSubject = messageSource.getMessage('representativeAccreditationsMailSubject',
 			[representativeName].toArray(), locale)
@@ -93,8 +93,8 @@ class MailSenderService {
 			userRequest = solicitud.mensajeSMIME?.usuario
 			representativeName = "${representative?.nombre} ${representative?.primerApellido}"
 			userRequestName = "${userRequest?.nombre} ${userRequest?.primerApellido}"
-			urlSolicitud = "${grailsApplication.config.grails.serverURL}/solicitudCopia/obtenerSolicitud?id=${solicitud.id}"
-			urlDescarga = "${grailsApplication.config.grails.serverURL}/solicitudCopia/obtener?id=${solicitud.id}"
+			urlSolicitud = "${grailsApplication.config.grails.serverURL}/solicitudCopia/${solicitud.id}"
+			urlDescarga = "${grailsApplication.config.grails.serverURL}/solicitudCopia/download/${solicitud.id}"
 		}
 		String emailSubject = messageSource.getMessage('representativeVotingHistoryMailSubject',
 			[representativeName].toArray(), locale)

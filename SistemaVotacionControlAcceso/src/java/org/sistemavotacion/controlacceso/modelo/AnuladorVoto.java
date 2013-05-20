@@ -16,8 +16,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
 
 import org.sistemavotacion.controlacceso.modelo.Certificado.Estado;
+import org.sistemavotacion.smime.SMIMEMessageWrapper;
 
 /**
 * @author jgzornoza
@@ -27,7 +29,7 @@ import org.sistemavotacion.controlacceso.modelo.Certificado.Estado;
 @Table(name="AnuladorVoto")
 public class AnuladorVoto implements Serializable {
 	
-	public enum Estado {SIN_NOTIFICAR, NOTIFICADO, ANULADO}
+	public enum Estado {SIN_NOTIFICAR, NOTIFICADO, ANULADO, ERROR}
 	
     private static final long serialVersionUID = 1L;
 
@@ -163,5 +165,6 @@ public class AnuladorVoto implements Serializable {
 	public void setEstado(Estado estado) {
 		this.estado = estado;
 	}
+
 
 }

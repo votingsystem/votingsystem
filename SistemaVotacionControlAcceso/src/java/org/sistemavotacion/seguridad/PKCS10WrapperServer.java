@@ -26,44 +26,31 @@ import org.bouncycastle.openssl.PEMReader;
 public class PKCS10WrapperServer {
     
     private static Logger logger = LoggerFactory.getLogger(PKCS10WrapperServer.class);
-
-    static public String MSG_FALLO_VERIFICACION = "Fallo en la verificación de CSR";
-    
-    private PrivateKey caKey;
-    private X509Certificate caCert;
-    
-    public PKCS10WrapperServer(PrivateKey caKey, X509Certificate caCert) {  
-        this.caKey = caKey;
-        this.caCert = caCert;
-    }
-
-    public byte[] firmarValidandoCsr (byte[] csrPEMBytes, Date fechaInicio, Date fechaFin) throws Exception {
-        PKCS10CertificationRequest csr = fromPEMToPKCS10CertificationRequest(csrPEMBytes);
-        if (!csr.verify() && validarCsr(csr)!= null) {
-            logger.error(MSG_FALLO_VERIFICACION);
-            return null;
-        }
-        byte[] cadenaCertificacion = obtenerCadenaCertificacion(csr, caKey,
-                caCert, fechaInicio, fechaFin);
-        return cadenaCertificacion;
-    }
     
     /**
      * Genera un certificado V3 para usarlo como certificado de usuario final
      */
-    private byte[] obtenerCadenaCertificacion(PKCS10CertificationRequest csr, 
-            PrivateKey caKey, X509Certificate caCert, Date fechaInicio, Date fechaFin) 
-            throws Exception {       
-        String strSubjectDN = validarCsr(csr);
+    public static byte[] firmarValidandoCsr(byte[] csrPEMBytes, String organizationalUnit,
+    		PrivateKey caKey, X509Certificate caCert, Date fechaInicio, Date fechaFin) 
+            throws Exception {     	
+    	PKCS10CertificationRequest csr = fromPEMToPKCS10CertificationRequest(csrPEMBytes);
+    	String strSubjectDN = csr.getCertificationRequestInfo().getSubject().toString();
+        if (!csr.verify() || strSubjectDN == null) {
+            logger.error("firmarValidandoCsr - ERROR VERIFYING");
+            return null;
+        }
+        if(organizationalUnit != null) {
+        	strSubjectDN = organizationalUnit + "," + strSubjectDN;
+        }
+        logger.debug("============ strSubjectDN: " + strSubjectDN);
         X509Certificate issuedCert = CertUtil.generateV3EndEntityCertFromCsr(
-                csr, caKey, caCert, fechaInicio, fechaFin, strSubjectDN);
+                csr, caKey, caCert, fechaInicio, fechaFin, "" + strSubjectDN);
         byte[] issuedCertPemBytes = CertUtil.fromX509CertToPEM(issuedCert);
         byte[] caCertPemBytes = CertUtil.fromX509CertToPEM(caCert);
-        byte[] c = new byte[issuedCertPemBytes.length + caCertPemBytes.length];
-        //System.arraycopy(Object src, int srcPos, Object dest, int destPos, int length) 
-        System.arraycopy(issuedCertPemBytes, 0, c, 0, issuedCertPemBytes.length);
-        System.arraycopy(caCertPemBytes, 0, c, issuedCertPemBytes.length, caCertPemBytes.length);
-        return c;
+        byte[] resultCsr = new byte[issuedCertPemBytes.length + caCertPemBytes.length];
+        System.arraycopy(issuedCertPemBytes, 0, resultCsr, 0, issuedCertPemBytes.length);
+        System.arraycopy(caCertPemBytes, 0, resultCsr, issuedCertPemBytes.length, caCertPemBytes.length);
+        return resultCsr;
     }
     
         
@@ -138,13 +125,6 @@ public class PKCS10WrapperServer {
     	PKCS10CertificationRequest csr = fromPEMToPKCS10CertificationRequest(csrPEMBytes);
     	return getX509ExtensionsFromCsr(csr);
     }
-     
-    private String validarCsr (PKCS10CertificationRequest csr) {
-        logger.debug("validarCsr - subject: " + csr.getCertificationRequestInfo().getSubject());
-        String result = null;
-        result = csr.getCertificationRequestInfo().getSubject().toString();
-        return result;
-    }
     
     public static PKCS10CertificationRequest fromPEMToPKCS10CertificationRequest (
             byte[] csrBytes) throws Exception {
@@ -152,6 +132,7 @@ public class PKCS10WrapperServer {
         Object pemObject = null;
         pemObject = pemReader.readObject();
         PKCS10CertificationRequest csr = (PKCS10CertificationRequest)pemObject;
+        pemReader.close();
         return csr;
     }
 

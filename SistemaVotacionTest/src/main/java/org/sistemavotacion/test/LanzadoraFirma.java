@@ -52,8 +52,8 @@ public class LanzadoraFirma  implements Callable<InfoFirma> {
                 asuntoMensaje, null, SignedMailGenerator.Type.USER, docFirmado); 
             String urlRecepcionFirmas = infoFirma.getEvento().getControlAcceso().getServerURL() + 
             		"/recolectorFirma/guardarAdjuntandoValidacion"; 
-            HttpResponse response = Contexto.getHttpHelper().enviarArchivoFirmado(
-                    docFirmado, urlRecepcionFirmas);
+            HttpResponse response = Contexto.getHttpHelper().sendFile(
+                    docFirmado, Contexto.SIGNED_CONTENT_TYPE, urlRecepcionFirmas);
             if (200 == response.getStatusLine().getStatusCode()) {
                 SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(null,
                         new ByteArrayInputStream(EntityUtils.toByteArray(response.getEntity())),

@@ -3,6 +3,7 @@ package org.sistemavotacion.centrocontrol
 import javax.mail.Address;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import org.sistemavotacion.centrocontrol.modelo.*
 import org.sistemavotacion.utils.StringUtils;
 import grails.converters.JSON
@@ -45,59 +46,109 @@ class VotoService {
     def httpService
 	def encryptionService
 	
-	Respuesta validarFirmaUsuario(SMIMEMessageWrapper smimeMessageUsu, Locale locale) {
-		MensajeSMIME mensajeSMIME = new MensajeSMIME(
-			tipo:Tipo.VOTO,	contenido:smimeMessageUsu.getBytes())
-		InformacionVoto infoVoto = smimeMessageUsu.informacionVoto
-		String certServerURL = StringUtils.checkURL(infoVoto.controlAccesoURL)
-		ControlAcceso controlAcceso = ControlAcceso.findWhere(serverURL:certServerURL)
-		log.debug ("validarFirmaUsuario - certServerURL: ${certServerURL}")
-		if (!controlAcceso) return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:
-				messageSource.getMessage('validacionVoto.errorEmisorDesconocido', null, locale)) 
-		EventoVotacion evento = EventoVotacion.findWhere(controlAcceso:controlAcceso,
-			eventoVotacionId:infoVoto.getEventoId())
-		if (!evento) {
-			log.debug ("No se ha encontrado evento con id '${infoVoto?.getEventoId()}' para el control de acceso '${certServerURL}'")
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:messageSource.getMessage(
-				'validacionVoto.convocatoriaDesconocida', null, locale))
-		}
-		if(evento.estado != EventoVotacion.Estado.ACTIVO) {
-			log.debug ("Recibido voto para evento cerrado - evento id: '${evento.id}'")
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:messageSource.getMessage(
-				'validacionVoto.eventClosed', [evento.asunto].toArray(), locale))
-		}
-		Certificado certificado = Certificado.findWhere(
-			hashCertificadoVotoBase64:infoVoto.hashCertificadoVotoBase64,
-			estado:Certificado.Estado.UTILIZADO)
-		if (certificado) {
-			log.error("Voto repetido - hashCertificadoVotoBase64:${infoVoto.hashCertificadoVotoBase64}")
-			Voto voto = Voto.findWhere(certificado:certificado)
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_VOTO_REPETIDO, voto:voto)
-		}
-		X509Certificate certificadoFirma = 
-			smimeMessageUsu.getFirmante()?.getCertificate()
-		Respuesta respuestaValidacionCert = firmaService.
-				validarCertificacionCertificadoVoto(certificadoFirma, evento, locale)
-		if(Respuesta.SC_OK != respuestaValidacionCert.codigoEstado) {
-			log.error("Error validando el certificado del voto")
-			return respuestaValidacionCert
-		} 
-		log.debug ("certificadoFirma.getSubjectDN(): ${certificadoFirma.getSubjectDN()}")
-        certificado = new Certificado(esRaiz:false, estado: Certificado.Estado.OK, 
-			tipo:Certificado.Tipo.VOTO, contenido:certificadoFirma.getEncoded(), 
-			numeroSerie:certificadoFirma.getSerialNumber().longValue(), eventoVotacion:evento,
-			validoDesde:certificadoFirma.getNotBefore(), validoHasta:certificadoFirma.getNotAfter())
-		certificado.setSigningCert(certificadoFirma)
-		certificado.save()
-		return new Respuesta(codigoEstado:Respuesta.SC_OK, evento:evento,
-			certificado:certificadoFirma)
-	}
 	
-	Respuesta validarFirmaControlAcceso(SMIMEMessageWrapper smimeMessageCA) {
-		X509Certificate certificadoFirma = smimeMessageCA.getFirmante().getCertificate()
-		log.debug ("certificadoFirma.getSubjectDN(): ${certificadoFirma.getSubjectDN()}")
-		//TODO
-		return new Respuesta()
+	Respuesta validateVote(MensajeSMIME mensajeSMIMEReq, Locale locale) {
+		log.debug ("validateVote - ")
+		EventoVotacion evento = mensajeSMIMEReq.evento
+		String msg
+		try {
+			SMIMEMessageWrapper smimeMessageReq = mensajeSMIMEReq.getSmimeMessage()
+			def votoJSON = JSON.parse(smimeMessageReq.getSignedContent())
+			OpcionDeEvento opcionSeleccionada = OpcionDeEvento.findWhere(
+				opcionDeEventoId:String.valueOf(votoJSON.opcionSeleccionadaId))
+			if (!opcionSeleccionada || (opcionSeleccionada.eventoVotacion.id != evento.id)) {
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+						mensaje:messageSource.getMessage('votingOptionNotFound',
+						[votoJSON.opcionSeleccionadaId, evento.id].toArray(), locale))
+			}
+			
+			X509Certificate certificadoFirma = smimeMessageReq.getFirmante()?.getCertificate()
+			Certificado certificado = new Certificado(esRaiz:false, estado: Certificado.Estado.OK,
+				tipo:Certificado.Tipo.VOTO, contenido:certificadoFirma.getEncoded(),
+				usuario:mensajeSMIMEReq.usuario, numeroSerie:certificadoFirma.getSerialNumber().longValue(), 
+				eventoVotacion:evento, validoDesde:certificadoFirma.getNotBefore(), 
+				validoHasta:certificadoFirma.getNotAfter())
+			certificado.setSigningCert(certificadoFirma)
+			certificado.save()
+			
+			String urlVotosControlAcceso = "${evento.controlAcceso.serverURL}" +
+				"${grailsApplication.config.SistemaVotacion.sufijoURLNotificacionVotoControlAcceso}"
+			String localServerURL = grailsApplication.config.grails.serverURL
+			
+			String signedVoteDigest = smimeMessageReq.getContentDigestStr()
+			
+			
+			String fromUser = grailsApplication.config.SistemaVotacion.serverName
+			String toUser = evento.controlAcceso.serverURL
+			String subject = messageSource.getMessage(
+				'validacionVoto.smimeMessageSubject', null, locale)
+			smimeMessageReq.setMessageID("${localServerURL}/mensajeSMIME/${mensajeSMIMEReq.id}")
+
+
+			SMIMEMessageWrapper smimeVoteValidation = firmaService.
+					getMultiSignedMimeMessage(fromUser, toUser, smimeMessageReq, subject)
+			
+			Respuesta encryptResponse = encryptionService.encryptSMIMEMessage(
+				smimeVoteValidation.getBytes(), evento.getControlAccesoCert(), locale);
+			if (Respuesta.SC_OK != encryptResponse.codigoEstado) {
+				log.error("validateVote - encryptResponse ERROR - > ${encryptResponse.mensaje}")
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION,
+					tipo:Tipo.VOTO_CON_ERRORES, evento:evento, mensaje:encryptResponse.mensaje)
+			} 
+			
+			mensajeSMIMEReq.tipo = Tipo.VOTO_VALIDADO_CENTRO_CONTROL
+			mensajeSMIMEReq.contenido = smimeVoteValidation.getBytes()
+			mensajeSMIMEReq.save();
+					
+			byte[] encryptResponseBytes = encryptResponse.messageBytes
+			//String encryptResponseStr = new String(encryptResponseBytes)
+			//log.debug(" - encryptResponseStr: ${encryptResponseStr}")
+			
+			String contentType = "${grailsApplication.config.pkcs7SignedContentType};" +
+				"${grailsApplication.config.pkcs7EncryptedContentType}"
+			Respuesta respuesta = httpService.sendMessage(encryptResponseBytes,
+				contentType, urlVotosControlAcceso)
+			if (Respuesta.SC_OK == respuesta.codigoEstado) {
+				SMIMEMessageWrapper smimeMessageResp = new SMIMEMessageWrapper(
+					new ByteArrayInputStream(respuesta.mensaje.getBytes()));
+				if(!smimeMessageResp.getContentDigestStr().equals(signedVoteDigest)) {
+					log.error("validateVote - ERROR digest del voto enviado: " + signedVoteDigest +
+						" - digest del voto recibido: " + smimeMessageResp.getContentDigestStr())
+					return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION, 
+						tipo:Tipo.VOTO_CON_ERRORES, evento:evento, mensaje:messageSource.
+						getMessage('voteContentErrorMsg', null, locale))
+				}
+				respuesta = firmaService.validateVoteValidationCerts(smimeMessageResp, evento, locale)
+				if(Respuesta.SC_OK != respuesta.codigoEstado) {
+					log.error("validateVote - validateVoteValidationCerts ERROR - > ${respuesta.mensaje}")
+					return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION,
+						tipo:Tipo.VOTO_CON_ERRORES, evento:evento, mensaje:respuesta.mensaje)
+				} 
+				mensajeSMIMEReq.tipo = Tipo.VOTO_VALIDADO_CONTROL_ACCESO
+				mensajeSMIMEReq.contenido = smimeMessageResp.getBytes()
+				MensajeSMIME mensajeSMIMEResp = mensajeSMIMEReq
+				MensajeSMIME.withTransaction {
+					mensajeSMIMEResp.save()
+				}
+				Voto voto = new Voto(opcionDeEvento:opcionSeleccionada,
+					eventoVotacion:evento, estado:Voto.Estado.OK,
+					certificado:certificado, mensajeSMIME:mensajeSMIMEResp)
+				voto.save()
+				return new Respuesta(codigoEstado:Respuesta.SC_OK, evento:evento, 
+					tipo:Tipo.VOTO_VALIDADO_CONTROL_ACCESO,
+					certificado:certificadoFirma, mensajeSMIME:mensajeSMIMEResp)
+			} else {
+				msg = message(code: 'accessRequestVoteErrorMsg', args:[respuesta.mensaje])
+				log.error("validateVote - ${msg}")
+				return new Respuesta(Respuesta.SC_ERROR_PETICION, 
+					tipo:Tipo.VOTO_CON_ERRORES, mensaje:msg)
+			}
+		} catch(Exception ex) {
+			log.error (ex.getMessage(), ex)
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION,
+				mensaje:messageSource.getMessage('voteErrorMsg', null, locale), 
+				tipo:Tipo.VOTO_CON_ERRORES, evento:evento)
+		}
 	}
     
     def obtenerAsuntoEvento(byte[] signedDataBytes) {
@@ -106,91 +157,6 @@ class VotoService {
         MimeMessage email = new MimeMessage(null, bais);
         return email.getSubject()
     }
-	
-	
-    synchronized Respuesta sendVoteToControlAccess (MimeMessage smimeMessage,
-            EventoVotacion eventoVotacion, Locale locale) {
-		String urlVotosControlAcceso = "${eventoVotacion.controlAcceso.serverURL}" + 
-			"${grailsApplication.config.SistemaVotacion.sufijoURLNotificacionVotoControlAcceso}"
-        log.debug ("sendVoteToControlAccess - urlVotosControlAcceso: ${urlVotosControlAcceso}")
-		String localServerURL = grailsApplication.config.grails.serverURL
-		
-		MensajeSMIME multifirmaCentroControl = new MensajeSMIME(
-			tipo:Tipo.VOTO_VALIDADO_CENTRO_CONTROL, valido:true)
-		multifirmaCentroControl.save()
-		
-		smimeMessage.setMessageID("${localServerURL}/mensajeSMIME/obtener?id=${multifirmaCentroControl.id}")
-		smimeMessage.setFrom(new InternetAddress(
-			grailsApplication.config.SistemaVotacion.serverName.replaceAll(" ", "")))
-		smimeMessage.setTo("${eventoVotacion.controlAcceso.serverURL}")
-				
-        MimeMessage multiSignedMessage = firmaService.generarMultifirma(
-            smimeMessage, messageSource.getMessage('validacionVoto.smimeMessageSubject', null, locale))
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        multiSignedMessage.writeTo(out);
-		byte[] multiSignedMessageBytes = out.toByteArray()
-
-		multifirmaCentroControl.contenido = multiSignedMessageBytes
-		multifirmaCentroControl.save();
-		
-		Respuesta respuesta = encryptionService.encryptSMIMEMessage(
-			multiSignedMessageBytes, eventoVotacion.getControlAccesoCert(), locale);
-		if (Respuesta.SC_OK != respuesta.codigoEstado) return respuesta
-		
-		byte[] encryptedMultiSignedMessageBytes = respuesta.messageBytes
-
-        respuesta = httpService.enviarMensaje(
-			urlVotosControlAcceso, encryptedMultiSignedMessageBytes)
-		if (Respuesta.SC_OK == respuesta.codigoEstado) {
-			SMIMEMessageWrapper smimeMessageCA = SMIMEMessageWrapper.build(
-				new ByteArrayInputStream(respuesta.mensaje.getBytes()),
-				null, SMIMEMessageWrapper.Tipo.VOTO);
-			return validarFirmas(smimeMessageCA, multifirmaCentroControl, eventoVotacion)
-		} else return respuesta
-    }
-     
-	synchronized Respuesta validarFirmas(SMIMEMessageWrapper smimeMessageCA,
-		MensajeSMIME multifirmaCentroControl, EventoVotacion eventoVotacion) {
-		log.debug ("validarFirmas")
-		Respuesta respuesta = firmaService.
-				validarCertificacionFirmantesVoto(smimeMessageCA, eventoVotacion)
-		if(Respuesta.SC_OK != respuesta.codigoEstado) return respuesta
-		String localServerURL = grailsApplication.config.grails.serverURL
-		InformacionVoto infoVoto = smimeMessageCA.informacionVoto
-		MensajeSMIME mensajeSMIME = new MensajeSMIME(valido:true,
-			contenido:smimeMessageCA.getBytes(), 
-			smimePadre:multifirmaCentroControl,
-			tipo:Tipo.VOTO_VALIDADO_CONTROL_ACCESO)
-		String mensaje
-		EventoVotacion evento = EventoVotacion.findWhere(
-			eventoVotacionId:String.valueOf(infoVoto.getEventoId()))
-		if (!evento) mensaje = 
-			"El evento con id '${infoVoto.getEventoId()}' no esta dado de alta en este servidor"
-		mensajeSMIME.eventoVotacion = evento
-		Certificado certificado = Certificado.findWhere(
-			hashCertificadoVotoBase64:infoVoto.hashCertificadoVotoBase64,
-			estado:Certificado.Estado.OK)
-		if (!certificado)
-			mensaje = "El hash '${infoVoto.hashCertificadoVotoBase64}' no es válido"
-		def votoJSON = JSON.parse(smimeMessageCA.getSignedContent())
-		OpcionDeEvento opcionSeleccionada = OpcionDeEvento.findWhere(
-			opcionDeEventoId:String.valueOf(votoJSON.opcionSeleccionadaId))
-		if (!opcionSeleccionada)
-			mensaje = "No existe ninguna opción con identificador '${String.valueOf(votoJSON.opcionSeleccionadaId)}'"
-		if (mensaje) {
-			log.error(mensaje)
-			return new Respuesta (codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:mensaje)
-		}
-		mensajeSMIME.save()
-		Voto voto = new Voto(opcionDeEvento:opcionSeleccionada,
-			eventoVotacion:evento, estado:Voto.Estado.OK,
-			certificado:certificado, mensajeSMIME:mensajeSMIME)
-		voto.save()
-		certificado.estado = Certificado.Estado.UTILIZADO;
-		certificado.save();
-		return new Respuesta(codigoEstado:Respuesta.SC_OK, voto:voto)
-	}
-			
 			
     EventoVotacion obtenerEventoAsociado(String asunto) {
         log.debug "obtenerEventoAsociado - asunto del Token: ${asunto}"
@@ -205,42 +171,120 @@ class VotoService {
         }
         return eventoVotacion
     }
-	public synchronized Respuesta validarAnulacion (SMIMEMessageWrapper smimeMessage, Locale locale) {
-		log.debug ("validarAnulacion")
-		def anulacionJSON = JSON.parse(smimeMessage.getSignedContent())
-		def origenHashCertificadoVoto = anulacionJSON.origenHashCertificadoVoto
-		def hashCertificadoVotoBase64 = anulacionJSON.hashCertificadoVotoBase64
-		def hashCertificadoVoto = CMSUtils.obtenerHashBase64(origenHashCertificadoVoto, 
-			"${grailsApplication.config.SistemaVotacion.votingHashAlgorithm}")
-		if (!hashCertificadoVotoBase64.equals(hashCertificadoVoto))
-				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+	
+	public synchronized Respuesta processCancel (
+			MensajeSMIME mensajeSMIMEReq, Locale locale) {
+		log.debug ("processCancel")
+		EventoVotacion evento
+		SMIMEMessageWrapper smimeMessageReq = mensajeSMIMEReq.getSmimeMessage()
+		String msg
+		try {
+			def anulacionJSON = JSON.parse(smimeMessageReq.getSignedContent())
+			def origenHashCertificadoVoto = anulacionJSON.origenHashCertificadoVoto
+			def hashCertificadoVotoBase64 = anulacionJSON.hashCertificadoVotoBase64
+			def hashCertificadoVoto = CMSUtils.obtenerHashBase64(origenHashCertificadoVoto,
+				"${grailsApplication.config.SistemaVotacion.votingHashAlgorithm}")
+			if (!hashCertificadoVotoBase64.equals(hashCertificadoVoto))
+					return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+						mensaje:messageSource.getMessage(
+						'anulacionVoto.errorEnHashCertificado', null, locale))
+			AnuladorVoto anuladorVoto = AnuladorVoto.findWhere(
+				hashCertificadoVotoBase64:hashCertificadoVotoBase64) 
+			if(anuladorVoto) {
+				String voteURL = "${grailsApplication.config.grails.serverURL}/voto/${anuladorVoto.voto.id}"
+				return new Respuesta(codigoEstado:Respuesta.SC_ANULACION_REPETIDA,
+					mensajeSMIME:anuladorVoto.mensajeSMIME, tipo:Tipo.ANULADOR_VOTO_ERROR,
+					mensaje:messageSource.getMessage('voteAlreadyCancelled', 
+						[voteURL].toArray(), locale), evento:anuladorVoto.eventoVotacion)
+			}
+			def certificado = Certificado.findWhere(hashCertificadoVotoBase64:hashCertificadoVotoBase64)
+			if (!certificado)
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+					tipo:Tipo.ANULADOR_VOTO_ERROR,
 					mensaje:messageSource.getMessage(
-					'anulacionVoto.errorEnHashCertificado', null, locale))
-		def certificado = Certificado.findWhere(hashCertificadoVotoBase64:hashCertificadoVotoBase64)
-		if (!certificado)
-				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
-				mensaje:messageSource.getMessage(
-				'anulacionVoto.errorCertificadoNoEncontrado', null, locale))
-		def voto = Voto.findWhere(certificado:certificado)
-		if(!voto) return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
-			mensaje:messageSource.getMessage(
-			'anulacionVoto.errorVotoNoEncontrado', null, locale))
-		MensajeSMIME mensajeSMIME = new MensajeSMIME(tipo:Tipo.ANULADOR_VOTO, 
-			contenido:smimeMessage.getBytes(), valido:true, eventoVotacion:voto.eventoVotacion)
-		mensajeSMIME.save()
-		log.debug("mensajeSMIME.id: ${mensajeSMIME.id}")
-		voto.estado = Voto.Estado.ANULADO
-		voto.save()
-		certificado.estado = Certificado.Estado.ANULADO
-		certificado.save()
-		AnuladorVoto anuladorVoto = new AnuladorVoto(voto:voto, 
-			certificado:certificado, eventoVotacion:voto.eventoVotacion,
-			origenHashCertificadoVotoBase64:origenHashCertificadoVoto,
-			hashCertificadoVotoBase64:hashCertificadoVotoBase64,
-			mensajeSMIME:mensajeSMIME)
-		anuladorVoto.save();
-		log.debug("anuladorVoto.id: ${anuladorVoto.id}")
-		return new Respuesta(codigoEstado:Respuesta.SC_OK)
+					'anulacionVoto.errorCertificadoNoEncontrado', null, locale))
+			def voto = Voto.findWhere(certificado:certificado)
+			if(!voto) return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+					tipo:Tipo.ANULADOR_VOTO_ERROR,
+					mensaje:messageSource.getMessage(
+					'anulacionVoto.errorVotoNoEncontrado', null, locale))
+			evento = voto.eventoVotacion
+
+			voto.estado = Voto.Estado.ANULADO
+			voto.save()
+			certificado.estado = Certificado.Estado.ANULADO
+			certificado.save()
+			
+			String fromUser = grailsApplication.config.SistemaVotacion.serverName
+			String toUser = mensajeSMIMEReq.getUsuario()?.getNif()
+			String subject = messageSource.getMessage(
+				'mime.asunto.anulacionVotoValidada', null, locale)
+
+			SMIMEMessageWrapper smimeMessageResp = firmaService.
+					getMultiSignedMimeMessage(fromUser, toUser, smimeMessageReq, subject)
+					
+			MensajeSMIME mensajeSMIMEResp = new MensajeSMIME(valido:true,
+				smimeMessage:smimeMessageResp, smimePadre:mensajeSMIMEReq,
+				evento:evento, tipo:Tipo.RECIBO)
+			
+			mensajeSMIMEResp.save()
+			if (!mensajeSMIMEResp.save()) {
+			    mensajeSMIMEResp.errors.each { 
+					msg = "${msg} - ${it}"
+					log.error("processCancel - ${it}")
+				}
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+					tipo:Tipo.ANULADOR_VOTO_ERROR, mensaje:msg, evento:evento)
+			}
+			
+			anuladorVoto = new AnuladorVoto(voto:voto,
+				certificado:certificado, eventoVotacion:evento,
+				origenHashCertificadoVotoBase64:origenHashCertificadoVoto,
+				hashCertificadoVotoBase64:hashCertificadoVotoBase64,
+				mensajeSMIME:mensajeSMIMEResp)
+			if (!anuladorVoto.save()) {
+			    anuladorVoto.errors.each {
+					msg = "${msg} - ${it}" 
+					log.error("processCancel - ${it}")
+				}
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+					tipo:Tipo.ANULADOR_VOTO_ERROR, mensaje:msg, evento:evento)
+			} else {
+				log.debug("processCancel - anuladorVoto.id: ${anuladorVoto.id}")
+				return new Respuesta(codigoEstado:Respuesta.SC_OK, evento:evento,
+					mensajeSMIME:mensajeSMIMEResp, tipo:Tipo.ANULADOR_VOTO)
+			}			
+		}catch(Exception ex) {
+			log.error (ex.getMessage(), ex)
+			return new Respuesta(mensaje:messageSource.getMessage(evento:evento,
+				'error.encryptErrorMsg', null, locale), codigoEstado:Respuesta.SC_ERROR_PETICION)
+		}
+	}
+			
+	public Map getVotoMap(Voto voto) {
+		if(!voto) return [:]
+		HexBinaryAdapter hexConverter = new HexBinaryAdapter();
+		String hashHex = hexConverter.marshal(
+			voto.certificado?.hashCertificadoVotoBase64?.getBytes());
+		Map votoMap = [id:voto.id,
+			hashCertificadoVotoBase64:voto.certificado.hashCertificadoVotoBase64,
+			opcionDeEventoId:voto.opcionDeEvento.opcionDeEventoId,
+			eventoVotacionId:voto.eventoVotacion.eventoVotacionId,
+			eventoVotacionURL:voto.eventoVotacion?.url,
+			estado:voto?.estado?.toString(),
+			certificadoURL:"${grailsApplication.config.grails.serverURL}/certificado/voto/hashHex/${hashHex}",
+			votoSMIMEURL:"${grailsApplication.config.grails.serverURL}/mensajeSMIME/${voto.mensajeSMIME.id}"]
+		if(Voto.Estado.ANULADO == voto?.estado) {
+			votoMap.anulacionURL="${grailsApplication.config.grails.serverURL}/anuladorVoto/voto/${voto.id}"
+		}
+		return votoMap
 	}
  
+	public Map getAnuladorVotoMap(AnuladorVoto anulador) {
+		if(!anulador) return [:]
+		Map anuladorMap = [id:anulador.id,
+			votoURL:"${grailsApplication.config.grails.serverURL}/voto/${anulador.voto.id}",
+			anuladorSMIMEURL:"${grailsApplication.config.grails.serverURL}/mensajeSMIME/${anulador.mensajeSMIME.id}"]
+		return anuladorMap
+	}
 }

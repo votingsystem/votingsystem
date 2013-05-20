@@ -19,15 +19,7 @@ class CertificadoController {
 	def firmaService
 
 	/**
-	 * @httpMethod GET
-	 * @return Información sobre los servicios que tienen como url base '/certificado'.
-	 */
-	def index() { 
-		redirect action: "restDoc"
-	}
-
-	/**
-	 * @httpMethod GET
+	 * @httpMethod [GET]
 	 * @return La cadena de certificación del servidor
 	 */
 	def cadenaCertificacion () {
@@ -45,17 +37,19 @@ class CertificadoController {
 	
 	/**
 	 * Servicio de consulta de certificados de voto.
+	 * 
+	 * @httpMethod [GET]
+	 * @serviceURL [/certificado/voto/$hashHex] 
 	 *
-	 * @param	hashCertificadoVotoHex Obligatorio. Hash en hexadecimal asociado al
-	 *          certificado de voto que se desea consultar.
-	 * @httpMethod GET
-	 * @return El certificado en formato PEM.
+	 * @param	[hashHex] Obligatorio. Hash en hexadecimal asociado al
+	 *          certificado del voto consultado.
+	 * @return El certificado de voto en formato PEM.
 	 */
-	def certificadoDeVoto () {
-		if (params.hashCertificadoVotoHex) {
+	def voto () {
+		if (params.hashHex) {
 			HexBinaryAdapter hexConverter = new HexBinaryAdapter();
 			String hashCertificadoVotoBase64 = new String(
-				hexConverter.unmarshal(params.hashCertificadoVotoHex))
+				hexConverter.unmarshal(params.hashHex))
 			log.debug "hashCertificadoVotoBase64: ${hashCertificadoVotoBase64}"
 			def certificado
 			Certificado.withTransaction {
@@ -75,7 +69,7 @@ class CertificadoController {
 			}
 			response.status = Respuesta.SC_NOT_FOUND
 			render message(code: 'certificado.certificadoHexNotFound',
-				args:[params.hashCertificadoVotoHex])
+				args:[params.hashHex])
 			return false
 		}
 		response.status = Respuesta.SC_ERROR_PETICION
@@ -87,80 +81,62 @@ class CertificadoController {
 	/**
 	 * Servicio de consulta de certificados de usuario.
 	 *
-	 * @param	usuarioId Obligatorio. El identificador en la base de datos del usuario.
-	 * @httpMethod GET
+	 * @httpMethod [GET]
+	 * @serviceURL [/certificado/usuario/$userId] 
+	 * @param [userId] Obligatorio. El identificador en la base de datos del usuario.	 
 	 * @return El certificado en formato PEM.
 	 */
-	def certificadoUsuario () {
-		def usuarioId
-		if (params.int('usuarioId')) {
-			Usuario usuario = Usuario.get(params.int('usuarioId'))
-			if(!usuario) {
-				response.status = Respuesta.SC_ERROR_PETICION
-				render message(code: 'error.UsuarioNoEncontrado', args:[params.usuarioId])
-				return false
-			}
-			def certificado
-			Certificado.withTransaction {
-				certificado = Certificado.findWhere(usuario:usuario, 
-					estado:Certificado.Estado.OK)
-			}
-			if (certificado) {
-				response.status = Respuesta.SC_OK
-				ByteArrayInputStream bais = new ByteArrayInputStream(certificado.contenido)
-				X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
-				byte[] pemCert = CertUtil.fromX509CertToPEM (certX509)
-				response.setContentType("text/plain")
-				response.contentLength = pemCert.length
-				response.outputStream <<  pemCert
-				response.outputStream.flush()
-				return false
-			}
-			response.status = Respuesta.SC_NOT_FOUND
-			render message(code: 'error.UsuarioSinCertificado',
-				args:[params.usuarioId])
+	def usuario () {
+		Usuario usuario = Usuario.get(params.long('userId'))
+		if(!usuario) {
+			response.status = Respuesta.SC_ERROR_PETICION
+			render message(code: 'error.UsuarioNoEncontrado', args:[params.userId])
 			return false
 		}
-		response.status = Respuesta.SC_ERROR_PETICION
-		render message(code: 'error.PeticionIncorrectaHTML', args:
-			["${grailsApplication.config.grails.serverURL}/${params.controller}"])
+		def certificado
+		Certificado.withTransaction {
+			certificado = Certificado.findWhere(usuario:usuario, 
+				estado:Certificado.Estado.OK)
+		}
+		if (certificado) {
+			response.status = Respuesta.SC_OK
+			ByteArrayInputStream bais = new ByteArrayInputStream(certificado.contenido)
+			X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
+			byte[] pemCert = CertUtil.fromX509CertToPEM (certX509)
+			response.setContentType("text/plain")
+			response.contentLength = pemCert.length
+			response.outputStream <<  pemCert
+			response.outputStream.flush()
+			return false
+		}
+		response.status = Respuesta.SC_NOT_FOUND
+		render message(code: 'error.UsuarioSinCertificado',
+			args:[params.userId])
 		return false
 	}
 	
 	/**
-	 * Servicio de consulta de los certificados emisores de certificados
-	 * de voto para una votación.
+	 * Servicio de consulta de los certificados con los que se firman los 
+	 * certificados de los voto en una votación.
 	 * 
-	 * @httpMethod GET
-	 * @param idEvento el identificador de la votación que se desea consultar.
-	 * @param controlAccesoId el identificador en la base de datos del control de acceso en el 
-	 * 		  que se publicó la votación.
+	 * @httpMethod [GET]
+	 * @serviceURL [/certificado/eventCA] 
+     * @param [eventAccessControlURL] Opcional. La url en el Control de Acceso  del evento 
+     *        cuyos votos fueron emitidos por el certificado consultado.
 	 * @return Devuelve la cadena de certificación, en formato PEM, con la que se generan los 
 	 * 			certificados de los votos.
 	 */
-	def certificadoCA_DeEvento () {
-		if (params.long('idEvento') && params.long('controlAccesoId')){
-			log.debug "certificadoCA_DeEvento - idEvento: '${params.idEvento}' - controlAccesoId: '${params.controlAccesoId}'"
-			ControlAcceso controlAcceso = ControlAcceso.get(params.controlAccesoId)
-			if(!controlAcceso) {
-				response.status = Respuesta.SC_NOT_FOUND
-				render message(code: 'controlAccesoNotFound', args:[params.controlAccesoId])
-				return false 
-			}
-			EventoVotacion eventoVotacion
+	def eventCA () {
+		EventoVotacion eventoVotacion
+		if (params.eventAccessControlURL){
 			EventoVotacion.withTransaction {
-				eventoVotacion = EventoVotacion.get(params.idEvento)
+				eventoVotacion = EventoVotacion.findWhere(url:params.eventAccessControlURL)
 			}
-			if(!eventoVotacion) {
-				response.status = Respuesta.SC_NOT_FOUND
-				render  message(code: 'eventoVotacion.eventoNotFound', args:[params.idEvento])
-				return false
-			}
-			if (eventoVotacion && controlAcceso) {
+			if (eventoVotacion) {
 				Certificado certificadoCA
 				Certificado.withTransaction {
 					certificadoCA = Certificado.findWhere(eventoVotacion:eventoVotacion,
-						actorConIP:controlAcceso, esRaiz:true)
+						actorConIP:eventoVotacion.controlAcceso, esRaiz:true)
 				}
 				if(certificadoCA) {
 					response.status = Respuesta.SC_OK
@@ -175,8 +151,8 @@ class CertificadoController {
 				}
 			}
 		}
-		response.status = Respuesta.SC_ERROR_PETICION
-		render (view:"index")
+		response.status = Respuesta.SC_NOT_FOUND
+		render  message(code: 'eventoByURLNotFound', args:[params.eventAccessControlURL])
 		return false
 	}
 }

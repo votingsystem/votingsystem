@@ -46,7 +46,7 @@ task runApp << { task ->
 }
 
 ext {
-	grailsRestDocPluginVersion = "0.3"
+	grailsRestDocPluginVersion = "0.4"
 }
 
 task installGrailsRestDocPlugin << { task ->

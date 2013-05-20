@@ -124,7 +124,8 @@ public class SignService extends Service implements TaskListener {
                 Certificate[] chain = keyStore.getCertificateChain(ALIAS_CERT_USUARIO);
     			PdfUtils.firmar(pdfReader, new FileOutputStream(pdfFirmadoFile), key, chain);
     	        SendFileTask sendFileTask = (SendFileTask) new SendFileTask(
-    	        		null, this, pdfFirmadoFile).execute(urlToSendSignedDocument);
+    	        		null, this, pdfFirmadoFile, Aplicacion.PDF_SIGNED_CONTENT_TYPE).
+    	        		execute(urlToSendSignedDocument);
     	        if(Respuesta.SC_OK == sendFileTask.get()) {
     	        	signServiceListener.setSignServiceMsg(
                 			sendFileTask.getStatusCode(), getString(R.string.operacion_ok_msg));
@@ -202,7 +203,8 @@ public class SignService extends Service implements TaskListener {
             	EncryptionHelper.encryptSMIMEFile(fileToEncrypt, 
             			Aplicacion.getControlAcceso().getCertificado());
         		SendFileTask sendFileTask = (SendFileTask)new SendFileTask(null, this, 
-        				fileToEncrypt).execute(urlToSendSignedDocument);
+        				fileToEncrypt, Aplicacion.SIGNED_AND_ENCRYPTED_CONTENT_TYPE).
+        				execute(urlToSendSignedDocument);
         		if (Respuesta.SC_OK == sendFileTask.get()) {
                     try {
                     	if(isEncryptedResponse) {

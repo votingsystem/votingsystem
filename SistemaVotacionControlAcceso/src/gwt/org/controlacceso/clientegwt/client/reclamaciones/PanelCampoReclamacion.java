@@ -65,7 +65,7 @@ public class PanelCampoReclamacion extends Composite implements ConfirmacionList
     
 
 	public CampoDeEventoJso getCampoReclamacion() {
-		if(modo == Modo.EDITAR) campo.setContenido(valorContenidoTextBox.getText());
+		if(modo == Modo.EDITAR) campo.setValor(valorContenidoTextBox.getText());
 		return campo;
 	}
 

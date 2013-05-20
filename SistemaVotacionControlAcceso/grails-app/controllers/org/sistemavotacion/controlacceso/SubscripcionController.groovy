@@ -24,35 +24,41 @@ class SubscripcionController {
     
     def subscripcionService
 	
-	def supportedFormats = [ "rss_0.90", "rss_0.91", "rss_0.92", "rss_0.93", "rss_0.94", "rss_1.0", "rss_2.0", "atom_0.3"]
+	def supportedFormats = [ "rss_0.90", "rss_0.91", "rss_0.92", "rss_0.93", 
+		"rss_0.94", "rss_1.0", "rss_2.0", "atom_0.3"]
 	
-	/**
-	 * @httpMethod GET
-	 * @return Información sobre los servicios que tienen como url base '/subscripcion'.
-	 */
-	def index() { 
-		redirect action: "restDoc"
-	}
-       
 	/**
 	 * Servicio que da de alta Centros de Control.
 	 *
-	 * @httpMethod POST
-	 * @param archivoFirmado Obligatorio. Archivo con los datos del Centro de Control que se desea dar de alta.
+	 * @httpMethod [POST]
+	 * @serviceURL [/subscripcion]
+	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. 
+	 *					Archivo con los datos del Centro de Control que se desea dar de alta.
 	 */
-    def  guardarAsociacionConCentroControl () { 
+	def index() { 
+		MensajeSMIME mensajeSMIME = flash.mensajeSMIMEReq
+		if(!mensajeSMIME) {
+			String msg = message(code:'evento.peticionSinArchivo')
+			log.error msg
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
+			return false
+		}
 		Respuesta respuesta = subscripcionService.asociarCentroControl(
-			params.smimeMessageReq, request.getLocale())
-        response.status = respuesta.codigoEstado
-		if (Respuesta.SC_OK == respuesta.codigoEstado) render respuesta.getMap() as JSON
-		else render respuesta.mensaje
-        return false	
-    }
+			mensajeSMIME, request.getLocale())
+		flash.respuesta = respuesta
+		if(Respuesta.SC_OK == respuesta.codigoEstado) {
+			render respuesta.mensaje
+		}
+	}
+
 	
 	/**
-	 * @httpMethod GET
-	 * @param	feedType Opcional. Formatos de feed soportados rss_0.90, rss_0.91, rss_0.92, 
+	 * @httpMethod [GET]
+	 * @serviceURL [/subscripcion/reclamaciones/$feedType]
+	 * @param	[feedType] Opcional. Formatos de feed soportados rss_0.90, rss_0.91, rss_0.92, 
 	 * 			rss_0.93, rss_0.94, rss_1.0, rss_2.0, atom_0.3. Por defecto se sirve atom 1.0.
+	 * @requestContentType [text/xml]
 	 * @return Información en el formato solicitado sobre las reclamaciones publicadas.
 	 */
 	def reclamaciones() {
@@ -75,9 +81,11 @@ class SubscripcionController {
 	}
 	
 	/**
-	 * @httpMethod GET
-	 * @param	feedType Opcional. Formatos de feed soportados rss_0.90, rss_0.91, rss_0.92,
+	 * @httpMethod [GET]
+	 * @serviceURL [/subscripcion/votaciones/$feedType]
+	 * @param	[feedType] Opcional. Formatos de feed soportados rss_0.90, rss_0.91, rss_0.92,
 	 * 			rss_0.93, rss_0.94, rss_1.0, rss_2.0, atom_0.3. Por defecto se sirve atom 1.0.
+	 * @requestContentType [text/xml]
 	 * @return Información en el formato solicitado sobre las votaciones publicadas.
 	 */
 	def votaciones() {
@@ -100,9 +108,11 @@ class SubscripcionController {
 	}
 	
 	/**
-	 * @httpMethod GET
-	 * @param	feedType Opcional. Formatos de feed soportados rss_0.90, rss_0.91, rss_0.92,
+	 * @httpMethod [GET]
+	 * @serviceURL [/subscripcion/manifiestos/$feedType]
+	 * @param	[feedType] Opcional. Formatos de feed soportados rss_0.90, rss_0.91, rss_0.92,
 	 * 			rss_0.93, rss_0.94, rss_1.0, rss_2.0, atom_0.3. Por defecto se sirve atom 1.0.
+	 * @requestContentType [text/xml]
 	 * @return Información en el formato solicitado sobre los manifiestos publicados.
 	 */
     def manifiestos() {

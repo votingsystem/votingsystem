@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
@@ -271,36 +272,6 @@ public class Evento {
         return evento;
     }
     
-    public JSONObject obtenerSolicitudAccesoJSON() {
-        logger.debug("obtenerSolicitudAccesoJSON");
-        Map map = new HashMap();
-        map.put("eventoURL", url);
-        map.put("hashSolicitudAccesoBase64", hashSolicitudAccesoBase64);
-        JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);        
-        return jsonObject;
-    }
-    
-    public String obtenerSolicitudAccesoJSONStr() {
-        logger.debug("obtenerSolicitudAccesoJSONStr");
-        JSONObject jsonObject = obtenerSolicitudAccesoJSON();        
-        return jsonObject.toString();
-    }
-    
-    public String obtenerVotoJSONStr() {
-        logger.debug("obtenerVotoJSONStr");
-        return obtenerVotoJSON().toString();
-    }
-    
-    public JSONObject obtenerVotoJSON() {
-        logger.debug("obtenerVotoJSON");
-        Map map = new HashMap();
-        map.put("eventoURL", url);
-        map.put("opcionSeleccionadaId", opcionSeleccionada.getId());
-        map.put("opcionSeleccionadaContenido", opcionSeleccionada.getContenido());
-        JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);
-        return jsonObject;
-    }
-    
     public JSONObject obtenerJSON() {
         logger.debug("obtenerJSON");
         Map map = new HashMap();
@@ -344,21 +315,6 @@ public class Evento {
         if (base64Str == null) return null;
         HexBinaryAdapter hexConverter = new HexBinaryAdapter();        
         return hexConverter.marshal(base64Str.getBytes());
-    }
-    
-    public String obtenerAnuladorDeVotoJSONStr() {
-        logger.debug("obtenerAnuladorDeVotoJSON "+ 
-                " - origenHashCertificadoVoto: " + origenHashCertificadoVoto + 
-                " - hashCertificadoVotoBase64: " + hashCertificadoVotoBase64 + 
-                " - origenHashSolicitudAcceso: " + origenHashSolicitudAcceso +
-                " - hashSolicitudAccesoBase64: " + hashSolicitudAccesoBase64);
-        Map map = new HashMap();
-        map.put("origenHashCertificadoVoto", origenHashCertificadoVoto);
-        map.put("hashCertificadoVotoBase64", hashCertificadoVotoBase64);
-        map.put("origenHashSolicitudAcceso", origenHashSolicitudAcceso);
-        map.put("hashSolicitudAccesoBase64", hashSolicitudAccesoBase64);
-        JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);
-        return jsonObject.toString();
     }
 
     /**

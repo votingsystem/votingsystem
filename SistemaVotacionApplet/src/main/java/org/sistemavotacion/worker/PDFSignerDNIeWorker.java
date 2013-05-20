@@ -142,8 +142,10 @@ public class PDFSignerDNIeWorker extends SwingWorker<Integer, String>
                         //reqgen.setReqPolicy(m_sPolicyOID);
                         timeStampRequest = reqgen.generate(TIMESTAMP_PDF_HASH, digest);
                         
-                        HttpResponse response = Contexto.getInstancia().getHttpHelper().
-                            enviarByteArray(timeStampRequest.getEncoded(), urlTimeStampServer);
+                        HttpResponse response = Contexto.getInstancia().
+                                getHttpHelper().sendByteArray(
+                                timeStampRequest.getEncoded(), "timestamp-query", 
+                                urlTimeStampServer);
                         
                         if (Respuesta.SC_OK == response.getStatusLine().getStatusCode()) {
                             byte[] bytesToken = EntityUtils.toByteArray(response.getEntity());

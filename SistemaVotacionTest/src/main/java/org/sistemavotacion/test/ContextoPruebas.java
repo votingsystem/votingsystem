@@ -430,27 +430,27 @@ public class ContextoPruebas {
 
     public static String getURLGuardarEventoParaVotar(String serverURL) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
-        return serverURL + "eventoVotacion/guardarAdjuntandoValidacion";
+        return serverURL + "eventoVotacion";
     }
 
     public static String getURLAnulacionVoto(String serverURL) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
-        return serverURL + "anuladorVoto/guardarAdjuntandoValidacion";
+        return serverURL + "anuladorVoto";
     }
 
     public static String getURLSolicitudAcceso(String serverURL) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
-        return serverURL + "solicitudAcceso/procesar";
+        return serverURL + "solicitudAcceso";
     }
 
     public static String getURLVoto(String serverURL) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
-        return serverURL + "voto/guardarAdjuntandoValidacion";
+        return serverURL + "voto";
     }
 
     public static String getUrlTimeStampServer(String serverURL) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
-        return serverURL + "timeStamp/obtener";
+        return serverURL + "timeStamp";
     }
 
 }

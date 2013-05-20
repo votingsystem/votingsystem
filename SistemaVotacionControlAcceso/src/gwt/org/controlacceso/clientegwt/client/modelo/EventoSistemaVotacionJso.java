@@ -203,7 +203,7 @@ public final class EventoSistemaVotacionJso extends JavaScriptObject {
 		if(camposList == null || camposList.size() == 0) return;
 		JsArray<CampoDeEventoJso> jsArray = (JsArray<CampoDeEventoJso>) JavaScriptObject.createArray();
 		int i = 0;
-		for(CampoDeEventoJso campoJso : (List<CampoDeEventoJso>)camposList) {
+		for(CampoDeEventoJso campoJso : camposList) {
 			jsArray.set(i++, campoJso);
 		}
 		setCampoDeEventoJsArray(jsArray);	

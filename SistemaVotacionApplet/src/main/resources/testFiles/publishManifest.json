@@ -2,5 +2,5 @@
             "urlEnvioDocumento":"http://localhost:8080/SistemaVotacionControlAcceso/eventoFirma/validarPDF?id=3", 
             "urlDocumento":"http://localhost:8080/SistemaVotacionControlAcceso/eventoFirma/obtenerPDF?id=3", 
             "nombreDestinatarioFirma":"Primer ControlAcceso", "asuntoMensajeFirmado":"Solicitud publicación manifiesto", 
-            "respuestaConRecibo":false, "urlTimeStampServer":"http://localhost:8080/SistemaVotacionControlAcceso/timeStamp/obtener", 
+            "respuestaConRecibo":false, "urlTimeStampServer":"http://localhost:8080/SistemaVotacionControlAcceso/timeStamp", 
             "urlServer":"http://localhost:8080/SistemaVotacionControlAcceso/"}

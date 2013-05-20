@@ -177,7 +177,7 @@ public class PuntoEntrada implements EntryPoint {
 	    			break;
 	    		case PUBLICACION_MANIFIESTO_PDF:
 	    			break;
-	    		case ASOCIAR_CENTRO_CONTROL_SMIME:
+	    		case ASOCIAR_CENTRO_CONTROL:
 	    			if(Respuesta.SC_OK == mensajeClienteFirma.getCodigoEstado()) {
 	    		    	RequestHelper.doGet(ServerPaths.getInfoServidorPath(), 
 	    		    			new ServerRequestInfoCallback());

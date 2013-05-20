@@ -1,11 +1,12 @@
 package org.sistemavotacion.controlacceso
 
+import grails.converters.JSON
 import javax.mail.internet.MimeMessage
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import org.sistemavotacion.controlacceso.modelo.*;
 
 /**
- * @infoController Anulación de votos
+ * @infoController Anulación de votos ======
  * @descController Servicios relacionados con la anulación de votos.
  *
  * @author jgzornoza
@@ -14,17 +15,75 @@ import org.sistemavotacion.controlacceso.modelo.*;
 class AnuladorVotoController {
 	
 	def votoService
-
+	
+	
 	/**
-	 * @httpMethod GET
-	 * @return Información sobre los servicios que tienen como url base '/anuladorVoto'.
+	 * Servicio de consulta de votos anulados.
+	 *
+	 * @httpMethod [GET]
+	 * @serviceURL [/anuladorVoto/$hashHex]
+	 * @param [hashHex] El hash en Hexadecimal del certificado del voto anulado.
+	 * @return La anulación de voto firmada por el usuario.
 	 */
-	def index() { 
-		redirect action: "restDoc"
+	def index () {
+		if(params.hashHex) {
+			HexBinaryAdapter hexConverter = new HexBinaryAdapter();
+			String hashCertificadoVotoBase64 = new String(
+				hexConverter.unmarshal(params.hashHex))
+			log.debug "hashCertificadoVotoBase64: '${hashCertificadoVotoBase64}'"
+			AnuladorVoto anuladorVoto = null
+			AnuladorVoto.withTransaction{
+				anuladorVoto = AnuladorVoto.findWhere(
+					hashCertificadoVotoBase64:hashCertificadoVotoBase64)
+			}
+			if(!anuladorVoto) {
+				response.status = Respuesta.SC_NOT_FOUND
+				render message(code: 'voteNotFound', args:[params.id])
+			} else {
+				Map anuladorvotoMap = votoService.getAnuladorVotoMap(anuladorVoto)
+				render anuladorvotoMap as JSON
+			}
+		} else {
+			response.status = Respuesta.SC_ERROR_PETICION
+			render message(code: 'error.PeticionIncorrectaHTML', args:[
+				"${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
+		}
+		return false
 	}
+	
+	/**
+	 * Servicio que anula votos.
+	 * 
+     * @httpMethod [POST]
+	 * @serviceURL [/anuladorVoto]
+	 * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] Documento correspondiente al 
+	 *              <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Anulador-de-voto">anulador de voto</a>
+	 * 				firmado y cifrado	 
+     * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] 
+	 * @return Recibo que consiste en el archivo firmado recibido con la firma añadida del servidor. La respuesta viaja cifrada.
+	 */
+    def post () {
+		MensajeSMIME mensajeSMIMEReq = flash.mensajeSMIMEReq
+		if(!mensajeSMIMEReq) {
+			String msg = message(code:'evento.peticionSinArchivo')
+			log.error msg
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
+			return false
+		}
+		flash.receiverCert = mensajeSMIMEReq.getUsuario().getCertificate()
+		Respuesta respuesta = votoService.processCancel(mensajeSMIMEReq, request.getLocale())
+		if (Respuesta.SC_OK == respuesta.codigoEstado) {
+			response.setContentType("${grailsApplication.config.pkcs7SignedContentType};" + 
+				"${grailsApplication.config.pkcs7EncryptedContentType}")		
+        }
+		flash.respuesta = respuesta
+    }
+	
+	
 	/*
-	def guardarAdjuntandoValidacionAsync () {
-		Respuesta respuesta = votoService.validarAnulacion(params.smimeMessageReq)
+	def postAsync () {
+		Respuesta respuesta = votoService.validarAnulacion(flash.smimeMessageReq)
 		log.debug (respuesta.codigoEstado + " - mensaje: ${respuesta.mensaje}")
 		if (200 == respuesta.codigoEstado) {
 			def ctx = startAsync()
@@ -53,71 +112,37 @@ class AnuladorVotoController {
 		}
 	}*/
 	
-	
 	/**
-	 * Servicio que anula votos.
-	 *
-	 * @httpMethod GET
-	 * @param hashCertVoteBase64 El hash en Base64 del certificado del voto anulado.
-	 * @return La anulación firmada por el usuario.
+	 * Servicio que devuelve la información de la anulación de un voto a partir del
+	 * identifiacador del voto en la base de datos
+	 * @httpMethod [GET]
+	 * @serviceURL [/anuladorVoto/voto/${id}]
+	 * @param [id] Obligatorio. Identificador del voto en la base de datos
+	 * @responseContentType [application/json]
+	 * @return Documento JSON con la información del voto solicitado.
 	 */
-	def obtener () {
-		if(params.hashCertVoteHEX) {
-			HexBinaryAdapter hexConverter = new HexBinaryAdapter();
-			String hashCertificadoVotoBase64 = new String(
-				hexConverter.unmarshal(params.hashCertVoteHEX))
-			log.debug "hashCertificadoVotoBase64: '${hashCertificadoVotoBase64}'"
-			AnuladorVoto anuladorVoto = null
-			AnuladorVoto.withTransaction{
-				anuladorVoto = AnuladorVoto.findWhere(
-					hashCertificadoVotoBase64:hashCertificadoVotoBase64)
-			}
-			if (anuladorVoto) {
-				response.status = Respuesta.SC_OK
-                response.contentLength = anuladorVoto.mensajeSMIME.contenido.length
-                response.setContentType("text/plain")
-                response.outputStream <<  anuladorVoto.mensajeSMIME.contenido
-                response.outputStream.flush()
-				return false
-			}
+	def get() {
+		Voto voto
+		Map  anuladorvotoMap
+		Voto.withTransaction {
+			voto = Voto.get(params.long('id'))
+		}
+		if(!voto) {
 			response.status = Respuesta.SC_NOT_FOUND
-			render message(code: 'cancelVoteNotFoundMsg',
-				args:[params.hashCertVoteBase64])
+			render message(code: 'voteNotFound', args:[params.id])
 			return false
 		}
-		response.status = Respuesta.SC_ERROR_PETICION
-		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
+		AnuladorVoto anulador
+		AnuladorVoto.withTransaction {
+			anulador = AnuladorVoto.findWhere(voto:voto)
+		}
+		if(!anulador) {
+			response.status = Respuesta.SC_NOT_FOUND
+			render message(code: 'voteNotFound', args:[params.id])
+		} else {
+			anuladorvotoMap = votoService.getAnuladorVotoMap(anulador)
+			render anuladorvotoMap as JSON
+		}
 		return false
 	}
-	
-	/**
-	 * Servicio que anula votos.
-	 * 
-	 * @httpMethod POST
-	 * @param archivoFirmado El <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Anulador-de-voto">anulador de voto</a>.
-	 * @return Recibo que consiste en el archivo firmado recibido con la firma añadida del servidor.
-	 */
-    def guardarAdjuntandoValidacion () {
-		Respuesta respuesta = votoService.validarAnulacion(
-			params.smimeMessageReq, request.getLocale())
-		log.debug (respuesta.codigoEstado + " - mensaje: ${respuesta.mensaje}")
-        if (Respuesta.SC_OK == respuesta.codigoEstado) {
-			AnuladorVoto anuladorVoto = respuesta.anuladorVoto
-			flash.receiverCert = respuesta.certificado
-            Respuesta controlCenterResponse = votoService.sendVoteCancelationToControlCenter(
-				anuladorVoto, request.getLocale())
-            if (Respuesta.SC_OK == controlCenterResponse?.codigoEstado) {
-				flash.respuesta = new Respuesta(codigoEstado:200,
-					mensajeSMIMEValidado:anuladorVoto.mensajeSMIME)
-				log.debug (" - receiverCert.getSubject: " + flash.receiverCert.getSubjectDN())
-				flash.isEncryptedResponse = true
-				return false
-            } else {
-				votoService.cancelVoteCancelation(anuladorVoto)
-			}				
-        }
-		flash.respuesta = respuesta
-		return false
-    }
-	
 }

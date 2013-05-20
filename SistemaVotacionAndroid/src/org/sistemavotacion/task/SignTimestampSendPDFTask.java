@@ -106,7 +106,8 @@ public class SignTimestampSendPDFTask extends AsyncTask<String, Void, String>
         	pdfEncryptedFile.deleteOnExit();
         	EncryptionHelper.encryptFile(timeStampedSignedFile, pdfEncryptedFile, 
         			Aplicacion.getControlAcceso().getCertificado());
-	        new SendFileTask(null, this, pdfEncryptedFile).execute(urlSignedDocument);
+	        new SendFileTask(null, this, pdfEncryptedFile, 
+	        		Aplicacion.PDF_CONTENT_TYPE).execute(urlSignedDocument);
         	Log.d(TAG + ".signWithTimestamp(...)", " - sending PDF file timeStamped and signed");
         }catch (Exception ex) {
 			ex.printStackTrace();

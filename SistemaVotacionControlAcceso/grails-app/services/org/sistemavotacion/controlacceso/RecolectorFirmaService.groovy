@@ -2,6 +2,9 @@ package org.sistemavotacion.controlacceso
 
 import java.io.FileOutputStream;
 import grails.converters.JSON
+
+import org.sistemavotacion.controlacceso.modelo.Documento;
+import org.sistemavotacion.controlacceso.modelo.Evento;
 import org.sistemavotacion.controlacceso.modelo.Respuesta;
 import org.sistemavotacion.smime.*;
 import org.sistemavotacion.seguridad.*;
@@ -17,59 +20,30 @@ class RecolectorFirmaService {
 	def firmaService
 	def subscripcionService
 	
-	synchronized Respuesta guardar (SMIMEMessageWrapper smimeMessage, Locale locale) {
-		log.debug("guardarFirmaEvento - mensaje: ${smimeMessage.getSignedContent()}")
-		def firma
-		def codigoEstado
-		def mensaje
-		MensajeSMIME mensajeSMIMEValidado
-		def mensajeJSON = JSON.parse(smimeMessage.getSignedContent())
-		Respuesta respuestaUsuario = subscripcionService.comprobarUsuario(smimeMessage, locale)
-		if(200 != respuestaUsuario.codigoEstado) return respuestaUsuario
-		Usuario usuario = respuestaUsuario.usuario
-		EventoFirma eventoFirma = EventoFirma.get(mensajeJSON.eventoId)
-		def mensajeSMIME = new MensajeSMIME(valido:smimeMessage.isValidSignature(),
-			contenido:smimeMessage.getBytes(), usuario:usuario, evento:eventoFirma)
-		if (!eventoFirma) {
-			codigoEstado = 400
-			mensaje = messageSource.getMessage('error.EventoFirmaNoEncontrado',
-					[mensajeJSON.eventoId].toArray(), locale) 
-			mensajeSMIME.setTipo(Tipo.FIRMA_ERROR_EVENTO_NO_ENCONTRADO)
+	
+	public Respuesta saveManifestSignature(Documento pdfDocument, Evento event, Locale locale) {
+		log.debug "saveManifestSignature - pdfDocument.id: ${pdfDocument.id} - event: ${event.id}";
+		Documento documento = Documento.findWhere(evento:event, usuario:pdfDocument.usuario,
+			estado:Documento.Estado.FIRMA_MANIFIESTO_VALIDADA)
+		String mensajeValidacionDocumento
+		if(documento) {
+			mensajeValidacionDocumento = messageSource.getMessage(
+					'pdfSignatureManifestRepeated',	[usuario.nif, evento.asunto, DateUtils.
+					getStringFromDate(documento.dateCreated)].toArray(), locale)
+			log.debug ("saveManifestSignature - ${mensajeValidacionDocumento}")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+				mensaje:mensajeValidacionDocumento)
 		} else {
-			firma = Firma.findWhere(evento:eventoFirma, usuario:usuario)
-			if (!firma) {
-				log.debug("Firma correcta - eventoId: ${eventoFirma?.id}")
-				firma = new Firma(usuario:usuario, evento:eventoFirma,
-					tipo:Tipo.FIRMA_EVENTO_FIRMA)
-				mensajeSMIME.setTipo(Tipo.FIRMA_EVENTO_FIRMA)
-				codigoEstado = 200
-			} else {
-				log.debug("Firma repetida")
-				codigoEstado = 400
-				mensaje = messageSource.getMessage('eventoFirma.firmaRepetida',
-					[usuario.nif, eventoFirma.asunto].toArray(), locale)
-				mensajeSMIME.setTipo(Tipo.FIRMA_EVENTO_FIRMA_REPETIDA)
-			}
+			pdfDocument.evento = event;
+			pdfDocument.estado = Documento.Estado.FIRMA_MANIFIESTO_VALIDADA
+			pdfDocument.save()
+			mensajeValidacionDocumento = messageSource.getMessage(
+				'pdfSignatureManifestOK',[event.asunto, pdfDocument.usuario.nif].toArray(), locale)
+			log.debug ("saveManifestSignature - ${mensajeValidacionDocumento}")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+				mensaje:mensajeValidacionDocumento)
 		}
-		mensajeSMIME.save();
-		if(firma && codigoEstado == 200) {
-			firma.mensajeSMIME = mensajeSMIME
-			firma.save();
-			String asuntoMultiFirmaMimeMessage = messageSource.getMessage('mime.asunto.FirmaValidada', null, locale)
-			MimeMessage multiFirmaMimeMessage =firmaService.generarMultifirma (
-				smimeMessage, asuntoMultiFirmaMimeMessage)
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			multiFirmaMimeMessage.writeTo(baos);
-			mensajeSMIMEValidado = new MensajeSMIME(tipo:Tipo.FIRMA_VALIDADA,
-				smimePadre:mensajeSMIME, evento:eventoFirma,
-				usuario:usuario, valido:true, contenido:baos.toByteArray())
-			mensajeSMIMEValidado.save();
-		}
-		return new Respuesta(codigoEstado:codigoEstado, mensaje:mensaje,
-			fecha:DateUtils.getTodayDate(), mensajeSMIME:mensajeSMIME, evento:eventoFirma,
-			usuario:usuario, smimeMessage:smimeMessage, mensajeSMIMEValidado:mensajeSMIMEValidado)
 	}
-	
-	
+
 	
 }

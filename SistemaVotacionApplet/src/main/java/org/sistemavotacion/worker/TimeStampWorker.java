@@ -1,7 +1,9 @@
 package org.sistemavotacion.worker;
 
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 import javax.swing.SwingWorker;
 import org.apache.http.HttpResponse;
 import org.apache.http.conn.HttpHostConnectException;
@@ -13,9 +15,11 @@ import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.tsp.TSPAlgorithms;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
+import org.bouncycastle.util.encoders.Base64;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.Respuesta;
 import org.slf4j.Logger;
@@ -68,7 +72,7 @@ public class TimeStampWorker extends SwingWorker<String, String>
     @Override protected String doInBackground() throws Exception {
         try {
             HttpResponse response = Contexto.getInstancia().getHttpHelper().
-                    enviarByteArray(timeStampRequest.getEncoded(), urlArchivo);
+                sendByteArray(timeStampRequest.getEncoded(), "timestamp-query", urlArchivo);
             statusCode = response.getStatusLine().getStatusCode();
             if (Respuesta.SC_OK == statusCode) {
                 bytesToken = EntityUtils.toByteArray(response.getEntity());

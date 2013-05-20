@@ -112,8 +112,10 @@ public class DialogoCancelarEvento implements EventoGWTMensajeClienteFirma.Handl
     	} else if(checkBoxAnularDocumento.getValue()) {
     		estadoEvento = EventoSistemaVotacionJso.Estado.BORRADO_DE_SISTEMA;
     	}
+    	//String operationStr, String accessControlURLValue , String id, String estado
     	JavaScriptObject contenidoFirma = MensajeClienteFirmaJso.
-    			createMensajeCancelacionEvento(evento.getUrl(), estadoEvento.toString());
+    			createMensajeCancelacionEvento(Operacion.CANCELAR_EVENTO.toString(), 
+				PuntoEntrada.INSTANCIA.servidor.getServerURL(), String.valueOf(evento.getId()), estadoEvento.toString());
 		MensajeClienteFirmaJso mensajeClienteFirma = MensajeClienteFirmaJso.create(null, 
 				Operacion.CANCELAR_EVENTO.toString(), 
 				MensajeClienteFirmaJso.SC_PROCESANDO);
@@ -125,10 +127,6 @@ public class DialogoCancelarEvento implements EventoGWTMensajeClienteFirma.Handl
 		mensajeClienteFirma.setContenidoFirma(contenidoFirma);
 		mensajeClienteFirma.setRespuestaConRecibo(false);
 		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
-    }
-    
-    public void hide() {
-    	dialogBox.hide();
     }
     
     public void show() {
@@ -153,8 +151,11 @@ public class DialogoCancelarEvento implements EventoGWTMensajeClienteFirma.Handl
 			    	}
 			        panelResultadoOperacion.setVisible(true);
 			        return;
+				} else {
+					panelBarrarProgreso.setVisible(false);
+					resultadoOperacionMessage.setHTML(mensaje.getMensaje());
+					panelResultadoOperacion.setVisible(true);
 				}
-				hide();
 				break;
 			default:
 				break;

@@ -124,7 +124,8 @@ public class VotingService extends Service implements TaskListener {
         			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
             if(Respuesta.SC_OK == getTimeStampTask.get()) {
             	SendFileTask sendFileTask = (SendFileTask)new SendFileTask(null, this, 
-							timeStampedDocument.setTimeStampToken(getTimeStampTask)).execute(
+							timeStampedDocument.setTimeStampToken(getTimeStampTask), 
+							Aplicacion.SIGNED_CONTENT_TYPE).execute(
 							ServerPaths.getURLAnulacionVoto(Aplicacion.CONTROL_ACCESO_URL));
             	 if(Respuesta.SC_OK == sendFileTask.get()) {
  					try {
@@ -220,7 +221,8 @@ public class VotingService extends Service implements TaskListener {
 			        	EncryptionHelper.encryptSMIMEFile(fileToEncrypt, 
 			        			event.getCentroControl().getCertificado());
 	                	SendFileTask sendFileTask = (SendFileTask)new SendFileTask(null, this, 
-	                			fileToEncrypt).execute(ServerPaths.getURLVoto(
+	                			fileToEncrypt, Aplicacion.SIGNED_AND_ENCRYPTED_CONTENT_TYPE).
+	                			execute(ServerPaths.getURLVoto(
 				    			event.getCentroControl().getServerURL()));
 	                	if(Respuesta.SC_OK == sendFileTask.get()) {
 			                try {

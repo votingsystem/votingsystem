@@ -35,7 +35,7 @@ class AppController {
 	} 
 	
 	/**
-	 * @httpMethod GET
+	 * @httpMethod [GET]
 	 * @return Información sobre los servicios que tienen como url base '/app'.
 	 */
 	def index() { 
@@ -43,20 +43,20 @@ class AppController {
 	}
 
 	/**
-	 * @httpMethod GET
+	 * @httpMethod [GET]
 	 * @return La página principal de la aplicación web de votación.
 	 */
 	def home() { }
 		
 	/**
-	 * @httpMethod GET
+	 * @httpMethod [GET]
 	 * @return Página que sirve el editor de documentos que se emplea en las aplicaciones Android.
 	 */
 	def editor() { }
 
 	
 	/**
-	 * @httpMethod GET
+	 * @httpMethod [GET]
 	 * @return La página principal de la aplicación web de votación con parámetros de utilidad
 	 * 		   para una sesión con cliente Android.
 	 */

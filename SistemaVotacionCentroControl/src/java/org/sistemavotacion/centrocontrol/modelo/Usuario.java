@@ -1,14 +1,18 @@
 package org.sistemavotacion.centrocontrol.modelo;
 
+import static javax.persistence.GenerationType.IDENTITY;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -17,6 +21,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+import org.bouncycastle.tsp.TimeStampToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,9 +38,16 @@ public class Usuario implements Serializable {
     private static final long serialVersionUID = 1L;
     
     private static Logger logger = LoggerFactory.getLogger(Usuario.class);
+    
+	public enum Type {USER, REPRESENTATIVE, USER_WITH_CANCELLED_REPRESENTATIVE, EX_REPRESENTATIVE}
 
-    @Id
-    @Column(name="nif", unique=true, nullable=false)
+    @Id @GeneratedValue(strategy=IDENTITY)
+    @Column(name="id", unique=true, nullable=false)
+    private Long id;
+	@Enumerated(EnumType.STRING)
+	@Column(name="type", nullable=false)
+	private Type type = Type.USER;
+    @Column(name="nif", unique=true)
     private String nif;
 
     @Column(name="nombre")
@@ -59,6 +71,12 @@ public class Usuario implements Serializable {
     @Column(name="deviceId" )
     private String deviceId;
     
+    @Column(name="representationsNumber")
+    private Integer representationsNumber = 0;
+    
+    @Column(name="url" )
+    private String url;
+    
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="representativeId")
     private Usuario representative;  
@@ -79,8 +97,14 @@ public class Usuario implements Serializable {
     
     
     @Transient
-    private X509Certificate certificate;
-
+    private transient X509Certificate certificate;
+    
+    @Transient
+    private transient Certificado certificadoCA;
+    
+    @Transient
+    private transient TimeStampToken timeStampToken;
+    
    /**
      * @return the id
      */
@@ -141,7 +165,6 @@ public class Usuario implements Serializable {
     	Usuario usuario = new Usuario();
     	usuario.setCertificate(certificate);
     	String subjectDN = certificate.getSubjectDN().getName();
-    	logger.debug("getUsuario: " + subjectDN);
     	if (subjectDN.contains("C="))
     		usuario.setPais(subjectDN.split("C=")[1].split(",")[0]);
     	if (subjectDN.contains("SERIALNUMBER="))
@@ -251,4 +274,51 @@ public class Usuario implements Serializable {
 		this.representative = representative;
 	}
 
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Certificado getCertificadoCA() {
+		return certificadoCA;
+	}
+
+	public void setCertificadoCA(Certificado certificadoCA) {
+		this.certificadoCA = certificadoCA;
+	}
+
+	public TimeStampToken getTimeStampToken() {
+		return timeStampToken;
+	}
+
+	public void setTimeStampToken(TimeStampToken timeStampToken) {
+		this.timeStampToken = timeStampToken;
+	}
+
+	public Type getType() {
+		return type;
+	}
+
+	public void setType(Type type) {
+		this.type = type;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public Integer getRepresentationsNumber() {
+		return representationsNumber;
+	}
+
+	public void setRepresentationsNumber(Integer representationsNumber) {
+		this.representationsNumber = representationsNumber;
+	}
 }

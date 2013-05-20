@@ -115,7 +115,7 @@ public class CreateEncryptedMessage {
                 encryptedMessage.addHeaderLine(headerLine);
             }
         }
-        encryptedMessage.addHeaderLine("SignedMessageDigest: " + digestStr);
+        //encryptedMessage.addHeaderLine("SignedMessageDigest: " + digestStr);
         File encryptedMessageFile = new File(encryptedMessagePath);
         logger.debug(" ------ encryptedMessageFile path:" + encryptedMessageFile.getAbsolutePath());
         encryptedMessage.writeTo(new FileOutputStream(encryptedMessageFile));

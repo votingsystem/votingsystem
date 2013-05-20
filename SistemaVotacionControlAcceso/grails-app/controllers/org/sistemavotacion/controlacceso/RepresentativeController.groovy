@@ -2,69 +2,63 @@ package org.sistemavotacion.controlacceso
 
 import org.sistemavotacion.controlacceso.modelo.*
 import org.sistemavotacion.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile
-import org.springframework.web.multipart.MultipartHttpServletRequest
 import grails.converters.JSON
 
 class RepresentativeController {
 
 	def representativeService
 	def firmaService
+	def grailsApplication
 	
 	private static final int MAX_FILE_SIZE_KB = 512;
 	private static final int MAX_FILE_SIZE = 512 * 1024;
+
 	
 	/**
-	 * @httpMethod GET
-	 * @return Información sobre los servicios que tienen como url base '/representative'.
+	 * Servicio de consulta de representantes
+	 *
+	 * @httpMethod [GET]
+	 * @serviceURL [/representative/$id?]
+	 * @param [id] Opcional. El identificador del representante en la base de datos.
+	 * @responseContentType [application/json]
 	 */
 	def index() {
-		redirect action: "restDoc"
-	}
-	
-	/**
-	 *
-	 * Servicio que sirve para comprobar el representante de un usuario
-	 *
-	 * @param nif NIF del usuario que se desea consultar.
-	 * @httpMethod GET
-	 * @return Documento JSON con información básica del representante asociado 
-	 *         al usuario cuyo nif se pada como parámetro nif
-	 */
-	def getByUserNif() {
-		String nif = StringUtils.validarNIF(params.nif)
-		if(!nif) {
-			response.status = Respuesta.SC_ERROR_PETICION
-			render message(code: 'error.errorNif', args:[params.nif])
-			return false
-		}
-		Usuario usuario = Usuario.findByNif(nif)
-		if(!usuario) {
-			response.status = Respuesta.SC_NOT_FOUND
-			render message(code: 'usuario.nifNoEncontrado', args:[nif])
-			return false
-		}
-		String msg = null
-		if(Usuario.Type.REPRESENTATIVE == usuario.type) { 
-			response.status = Respuesta.SC_NOT_FOUND
-			render message(code: 'userIsRepresentativeMsg', args:[nif])
-			return false
-		}
-		if(!usuario.representative) {
-			response.status = Respuesta.SC_NOT_FOUND
-			if(Usuario.Type.USER_WITH_CANCELLED_REPRESENTATIVE == usuario.type) {
-				msg = message(code: 'userRepresentativeUnsubscribedMsg', args:[nif])
-			} else msg = message(code: 'nifWithoutRepresentative', args:[nif])
-			render msg
+		def representativeList = []
+		def representativeMap = new HashMap()
+		//eventosMap.eventos = new HashMap()
+		representativeMap.representatives = []
+		if (params.long('id')) {
+			Usuario representative
+			Usuario.withTransaction {
+				representative = Usuario.findWhere(id:params.long('id'),
+					type:Usuario.Type.REPRESENTATIVE)
+			}
+			if (representative) {
+				representativeMap = representativeService.
+					getRepresentativeDetailedJSONMap(representative)
+				render representativeMap as JSON
+			} else {
+				String msg = message(code:'representativeIdErrorMsg', args:[params.id])
+				log.debug msg
+				render msg
+			}
 			return false
 		} else {
-			Usuario representative = usuario.representative
-			String name = "${representative.nombre} ${representative.primerApellido}"
-			def resultMap = [representativeId: representative.id, representativeName:name,
-				representativeNIF:representative.nif]
-			render resultMap as JSON
-			return false
+			params.sort = "representationsNumber"
+			log.debug " -Params: " + params
+			Usuario.withTransaction {
+				representativeList = Usuario.findAllByType(Usuario.Type.REPRESENTATIVE, params)
+			}
+			representativeMap.offset = params.long('offset')
 		}
+
+		representativeMap.representativesTotalNumber = Usuario.
+				   countByType(Usuario.Type.REPRESENTATIVE)
+		representativeMap.numberRepresentativesInRequest = representativeList.size()
+		representativeList.collect {representative ->
+				representativeMap.representatives.add(representativeService.getRepresentativeJSONMap(representative))
+		}
+		render representativeMap as JSON
 	}
 	
 	/**
@@ -72,8 +66,10 @@ class RepresentativeController {
 	 * Servicio que sirve para obtener información básica de un representante 
 	 * a partir de su NIF
 	 *
-	 * @param nif NIF del representante que se desea consultar.
-	 * @httpMethod GET
+	 * @httpMethod [GET]
+	 * @serviceURL [/representative/nif/$nif]
+	 * @param [nif] NIF del representante que se desea consultar.
+	 * @responseContentType [application/json]
 	 * @return Documento JSON con datos del representante
 	 */
 	def getByNif() {
@@ -105,234 +101,203 @@ class RepresentativeController {
 	 *
 	 * Servicio que da de baja un representante
 	 *
-	 * @param archivoFirmado Archivo firmado en formato SMIME en cuyo contenido se
-	 *        encuentra información de la baja
-	 * @httpMethod POST
-	 * @return
+	 * @httpMethod [POST]
+	 * @serviceURL [/representative/revoke]
+	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. Documento firmado 
+	 *                     en formato SMIME con los datos de la baja.
+	 * @responseContentType [application/x-pkcs7-signature] Obligatorio. Recibo firmado por el sistema.
+	 * 
 	 */
-	def guardarUnsubscribeRequestAdjuntandoValidacion() {
-		Respuesta respuesta = representativeService.processUnsubscribeRequest(
-			params.smimeMessageReq, request.getLocale())
-		log.debug "guardarUnsubscribeRequest - statusCode: ${respuesta.codigoEstado} - mensaje: ${respuesta.mensaje}"
-		if (Respuesta.SC_OK == respuesta.codigoEstado){
-			byte[] mensajeValidadoBytes = firmaService.generarMultifirmaBytes(
-					params.smimeMessageReq,	message(
-						code:'unsubscribeRepresentativeValidationSubject'))
-			MensajeSMIME mensajeSMIMEValidado = new MensajeSMIME(
-					tipo:Tipo.REPRESENTATIVE_UNSUBSCRIBE_VALIDATION,
-					smimePadre: respuesta.mensajeSMIME,
-					usuario:respuesta.usuario, valido:true,
-					contenido:mensajeValidadoBytes)
-			MensajeSMIME.withTransaction {
-				mensajeSMIMEValidado.save();
-			}
-			respuesta.mensajeSMIMEValidado = mensajeSMIMEValidado
+	def revoke() {
+		MensajeSMIME mensajeSMIME = flash.mensajeSMIMEReq
+		if(!mensajeSMIME) {
+			String msg = message(code:'evento.peticionSinArchivo')
+			log.debug msg
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
+			return false
 		}
+		Respuesta respuesta = representativeService.
+			processRevoke(mensajeSMIME, request.getLocale())
 		flash.respuesta = respuesta
-		response.status = respuesta.codigoEstado
-		render respuesta.mensaje
-		return false
+		if (Respuesta.SC_OK == respuesta.codigoEstado){
+			response.contentType = "${grailsApplication.config.pkcs7SignedContentType}"
+		}
 	}
 	
 	/**
 	 *
-	 * Servicio que guarda las selecciones de representantes echas por los usuarios
-	 *
-	 * @param archivoFirmado Archivo firmado en formato SMIME en cuyo contenido se
-	 *        encuentra los datos del representante en el que delega el firmante
-	 * @httpMethod POST
-	 * @return 
+	 * Servicio que tramita solicitudes de información sobre las acreditaciones que tiene
+	 * un representante. 
+	 * El solicitante debe proporcionar una dirección de email en la que recibirá 
+	 * instrucciones de descarga de las acreditaciones en vigor del representante.
+	 * 
+	 * @httpMethod [POST]
+	 * @serviceURL [/representative/accreditations]
+	 * 
+	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. 
+	 * 					   Documento firmado en formato SMIME con los datos de la solicitud
 	 */
-	def guardarAccreditationsRequest() {
+	def accreditations() {
+		MensajeSMIME mensajeSMIME = flash.mensajeSMIMEReq
+		if(!mensajeSMIME) {
+			String msg = message(code:'evento.peticionSinArchivo')
+			log.debug msg
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
+			return false
+		}
 		Respuesta respuesta = representativeService.processAccreditationsRequest(
-			params.smimeMessageReq, request.getLocale())
-		log.debug "guardarAccreditationsRequest - statusCode: ${respuesta.codigoEstado} - mensaje: ${respuesta.mensaje}"
-		response.status = respuesta.codigoEstado
-		render respuesta.mensaje
-		return false
+			mensajeSMIME, request.getLocale())
+		flash.respuesta = respuesta
+		if (Respuesta.SC_OK == respuesta.codigoEstado){
+			render respuesta.mensaje
+		}
 	}
 	
 	/**
 	 *
 	 * Servicio que guarda las consultas de historiales de votaciones de los
 	 * representantes
-	 *
-	 * @param archivoFirmado Archivo firmado en formato SMIME con los datos
-	 * 		  del representante consultado
-	 * @httpMethod POST
+	 *                     
+	 * @httpMethod [POST]
+	 * @serviceURL [/representative/history]
+	 * 
+	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. 
+	 *                     Documento en formato SMIME con los datos del representante consultado.
 	 * @return 
 	 */
-	def guardarVotingHistoryRequest() {
-		Respuesta respuesta = representativeService.precessVotingHistoryRequest(
-			params.smimeMessageReq, request.getLocale())
-		if (Respuesta.SC_OK != respuesta.codigoEstado) {
-			log.debug "Problemas procesando solicitud de copia de seguridad - ${respuesta.mensaje}"
+	def history() {
+		MensajeSMIME mensajeSMIME = flash.mensajeSMIMEReq
+		if(!mensajeSMIME) {
+			String msg = message(code:'evento.peticionSinArchivo')
+			log.debug msg
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
+			return false
 		}
-		response.status = respuesta.codigoEstado
-		render respuesta.mensaje
-		return false
+		Respuesta respuesta = representativeService.processVotingHistoryRequest(
+			mensajeSMIME, request.getLocale())
+		flash.respuesta = respuesta
+		if (Respuesta.SC_OK == respuesta.codigoEstado){
+			render respuesta.mensaje
+		}
 	}
 	
 	/**
 	 * 
 	 * Servicio que guarda las selecciones de representantes echas por los usuarios
 	 *
-	 * @param archivoFirmado Archivo firmado en formato SMIME en cuyo contenido se
-	 *        encuentra la votación que se desea publicar en formato HTML.
-	 * @httpMethod POST
-	 * @return Recibo que consiste en el archivo firmado enviado por el usuario con la firma añadida del servidor.
+	 * @httpMethod [POST]
+	 * @serviceURL [/representative/userSelection]
+	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. Documento firmado
+	 *                     por el usuario que está eligiendo el representante.
+	 * @responseContentType [application/x-pkcs7-signature] Recibo firmado por el sistema.
+	 * @return Recibo que consiste en el documento enviado por el usuario con la firma añadida del servidor.
 	 */
-	def guardarSelectAdjuntandoValidacion() {
-		Respuesta respuesta = representativeService.saveUserRepresentative(
-			params.smimeMessageReq, request.getLocale())
-		if (Respuesta.SC_OK == respuesta.codigoEstado){
-			String mensajeValidado = firmaService.obtenerCadenaFirmada(
-				params.smimeMessageReq.getSignedContent(),
-				message(code:'representativeSelectValidationSubject'), null)
-			MensajeSMIME mensajeSMIMEValidado = new MensajeSMIME(
-					tipo:Tipo.REPRESENTATIVE_SELECTION_VALIDATION,
-					smimePadre: respuesta.mensajeSMIME,
-					usuario:respuesta.usuario, valido:true,
-					contenido:mensajeValidado.getBytes())
-			MensajeSMIME.withTransaction {
-				mensajeSMIMEValidado.save();
-			}
-			respuesta.mensajeSMIMEValidado = mensajeSMIMEValidado
-		}
-		flash.respuesta = respuesta
-		return false
-	}
-	
-	def detailed() {
-		if (params.long('id')) {
-			Usuario representative
-			Usuario.withTransaction {
-				representative = Usuario.get(params.long('id'))
-			}
-			if (Usuario.Type.REPRESENTATIVE == representative?.type) {
-				response.setContentType("application/json")
-				def representativeMap = representativeService.getRepresentativeDetailedJSONMap(representative)
-				render representativeMap as JSON
-				return false
-			} else {
-				response.status = Respuesta.SC_NOT_FOUND
-				String msg = "User ${params.id} isn't representative"
-				log.debug msg
-				render msg
-				return false
-			}
-		}
-		response.status = Respuesta.SC_ERROR_PETICION
-		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
-		return false
-	}
-	
-	def get() {
-        def representativeList = []
-        def representativeMap = new HashMap()
-        //eventosMap.eventos = new HashMap()
-        representativeMap.representatives = []
-        if (params.ids?.size() > 0) {
-				Usuario.withTransaction {
-					Usuario.getAll(params.ids).collect {usuario ->
-						if (Usuario.Type.REPRESENTATIVE == usuario.type) {
-							representativeList << usuario;
-						} else log.debug "User ${usuario.id} insn't representative"
-				}
-            }
-            if (representativeList.size() == 0) {
-                    response.status = Respuesta.SC_NOT_FOUND
-                    render message(code: 'representativeNotFound', args:[params.ids])
-                    return
-            }
-        } else {
-			params.sort = "representationsNumber"
-			log.debug " -Params: " + params
-			Usuario.withTransaction {
-				representativeList = Usuario.findAllByType(Usuario.Type.REPRESENTATIVE, params)
-			}
-            representativeMap.offset = params.long('offset')
-        }
-
-	    representativeMap.representativesTotalNumber = Usuario.
-				   countByType(Usuario.Type.REPRESENTATIVE)
-        representativeMap.numberRepresentativesInRequest = representativeList.size()
-        representativeList.collect {representative ->
-				representativeMap.representatives.add(representativeService.getRepresentativeJSONMap(representative))
-        }
-        response.setContentType("application/json")
-        render representativeMap as JSON
-	}
-	
-    def guardar() { 
-		MultipartFile imageMultipartFile = ((MultipartHttpServletRequest)
-			request)?.getFile("${grailsApplication.config.SistemaVotacion.imageFileName}");
-		byte[] imageBytes = imageMultipartFile?.getBytes()
-		if(!imageBytes) {
-			response.status =  Respuesta.SC_ERROR_PETICION
-			String msg = message(code: 'imageMissingErrorMsg')
-			log.debug "ERROR - msg: ${msg}"
+	def userSelection() {
+		MensajeSMIME mensajeSMIME = flash.mensajeSMIMEReq
+		if(!mensajeSMIME) {
+			String msg = message(code:'evento.peticionSinArchivo')
+			log.debug msg
+			response.status = Respuesta.SC_ERROR_PETICION
 			render msg
 			return false
 		}
-		if(imageBytes && imageBytes.length > MAX_FILE_SIZE) {
+		Respuesta respuesta = representativeService.saveUserRepresentative(
+			mensajeSMIME, request.getLocale())
+		flash.respuesta = respuesta
+		if (Respuesta.SC_OK == respuesta.codigoEstado){
+			response.contentType = "${grailsApplication.config.pkcs7SignedContentType}"
+		}
+	}
+	
+	/**
+	 * Servicio que valida las solicitudes de representación
+	 *
+	 * @httpMethod [POST]
+	 * @serviceURL [/representative]
+	 * @param [image] Obligatorio. La imagen asociada al representante.
+	 * @param [representativeData] Obligatorio. Los datos del representante firmados en un archivo SMIME.
+	 * @requestContentType [image/gif] Posible tipo de contenido asociado al parámetro 'image' 
+	 * @requestContentType [image/jpeg] Posible tipo de contenido asociado al parámetro 'image' 
+	 * @requestContentType [image/png] Posible tipo de contenido asociado al parámetro 'image' 
+	 * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] El tipo de contenido 
+	 * 					   asociado a los datos del representante. 
+	 */
+    def processFileMap() { 
+		byte[] imageBytes = flash[grailsApplication.config.SistemaVotacion.imageFileName]
+		MensajeSMIME mensajeSMIMEReq = flash[
+			grailsApplication.config.SistemaVotacion.representativeDataFileName]
+		if(!mensajeSMIMEReq || !imageBytes) {
+			String msg
+			if(!imageBytes) msg = message(code: 'imageMissingErrorMsg')
+			else msg = message(code: 'representativeDataMissingErrorMsg')
+			log.error "processFileMap - ERROR - msg: ${msg}"
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
+			return false
+		}
+		flash.mensajeSMIMEReq = mensajeSMIMEReq
+		if(imageBytes.length > MAX_FILE_SIZE) {
 			response.status =  Respuesta.SC_ERROR_PETICION
 			String msg = message(code: 'imageSizeExceededMsg', 
 				args:[imageBytes.length/1024, MAX_FILE_SIZE_KB])
-			log.debug "ERROR - msg: ${msg}"
-			render msg
-			return false
-		}
-		Respuesta respuesta = representativeService.saveRepresentativeData(
-			params.smimeMessageReq, params.long('id'), imageBytes, request.getLocale())
-		response.status =  respuesta.codigoEstado
-		log.debug "mensaje:${respuesta.mensaje}"
-		render respuesta.mensaje
-		return false
-		
-	}
-	
-	def info() {
-		if (params.long('id')) {
-			Usuario representative 
-			Usuario.withTransaction {
-				representative = Usuario.get(params.long('id'))
-			}
-			if (Usuario.Type.REPRESENTATIVE == representative?.type) {
-				render representative.info;
-				return false
-			} else {
-				String msg = "User ${representative?.id} isn't representative"
-				log.debug msg
-				render msg
-				return false
+			log.error "processFileMap - ERROR - msg: ${msg}"
+			flash.respuesta = new Respuesta(mensaje:msg,
+				codigoEstado:Respuesta.SC_ERROR_PETICION,
+				tipo:Tipo.REPRESENTATIVE_DATA_ERROR)
+		} else {
+			Respuesta respuesta = representativeService.saveRepresentativeData(
+				mensajeSMIMEReq, imageBytes, request.getLocale())
+			flash.respuesta = respuesta
+			if(Respuesta.SC_OK == respuesta.codigoEstado) {
+				render respuesta.mensaje
 			}
 		}
-		response.status = Respuesta.SC_ERROR_PETICION
-		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
-		return false
 	}
-	
+
+	/**
+	 * Servicio que devuelve la imagen asociada a un representante
+	 * 
+	 * @httpMethod [GET]
+	 * @serviceURL [/representative/image/$id]
+     * @serviceURL [/representative/$representativeId/image]
+	 * @param [id] Obligatorio. El id de La imagen en la base de datos.
+	 * @param [representativeId] Obligatorio. El id del representante en la base de datos.
+	 */
 	def image() {
-		if (params.long('id')) {
-			Image image;
+		Image image;
+		String msg
+		if(params.long('id')) {
 			Image.withTransaction{
 				image = Image.get(params.long('id'))
 			}
-			if (image) {
-				response.status = Respuesta.SC_OK
-				//response.setContentType("text/plain")
-				response.contentLength = image.fileBytes.length
-				response.outputStream <<  image.fileBytes
-				response.outputStream.flush()
-				return false
+			if(!image) msg = message(code:'imageNotFound', args:[params.id])
+		} else if(params.long('representativeId')) {
+			Usuario representative
+			Usuario.withTransaction {
+				representative = Usuario.get(params.long('representativeId'))
 			}
-			response.status = Respuesta.SC_NOT_FOUND
-			render "No se he encontrado la imagen con id ${params.id}"
+			if (Usuario.Type.REPRESENTATIVE == representative?.type) {
+				image = Image.findWhere(usuario:representative, 
+					type:Image.Type.REPRESENTATIVE)
+				if(!image) msg = message(code:'representativeWithoutImageErrorMsg', args:[params.representativeId])
+			} else {
+				msg = message(code:'representativeIdErrorMsg', args[params.representativeId])
+			}
+		}
+		if (image) {
+			response.status = Respuesta.SC_OK
+			//response.setContentType("text/plain")
+			response.contentLength = image.fileBytes.length
+			response.outputStream <<  image.fileBytes
+			response.outputStream.flush()
 			return false
 		}
-		response.status = Respuesta.SC_ERROR_PETICION
-		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
+		response.status = Respuesta.SC_NOT_FOUND
+		log.debug msg
+		render msg
 		return false
 	}
 	

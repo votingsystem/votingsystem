@@ -10,19 +10,20 @@ import com.google.gwt.json.client.JSONObject;
 */
 public final class MensajeClienteFirmaJso extends JavaScriptObject {
 	
-    public static enum Operacion {ASOCIAR_CENTRO_CONTROL_SMIME, 
+    public static enum Operacion {ASOCIAR_CENTRO_CONTROL, 
         CAMBIO_ESTADO_CENTRO_CONTROL_SMIME, SOLICITUD_COPIA_SEGURIDAD, 
         PUBLICACION_MANIFIESTO_PDF, FIRMA_MANIFIESTO_PDF, PUBLICACION_RECLAMACION_SMIME,
         FIRMA_RECLAMACION_SMIME, PUBLICACION_VOTACION_SMIME, ENVIO_VOTO_SMIME,
         MENSAJE_APPLET, MENSAJE_CIERRE_APPLET, GUARDAR_RECIBO_VOTO, ANULAR_VOTO, 
         ANULAR_SOLICITUD_ACCESO, CANCELAR_EVENTO, 
         MENSAJE_HERRAMIENTA_VALIDACION, MENSAJE_CIERRE_HERRAMIENTA_VALIDACION,
-        NEW_REPRESENTATIVE, SELECT_REPRESENTATIVE, REPRESENTATIVE_VOTING_HISTORY_REQUEST,
-        REPRESENTATIVE_ACCREDITATIONS_REQUEST, REPRESENTATIVE_UNSUBSCRIBE_REQUEST}
+        NEW_REPRESENTATIVE, REPRESENTATIVE_SELECTION, REPRESENTATIVE_VOTING_HISTORY_REQUEST,
+        REPRESENTATIVE_ACCREDITATIONS_REQUEST, REPRESENTATIVE_REVOKE}
 	
     public static final int SC_OK = 200;
     public static final int SC_PING = 0;
     public static final int SC_ERROR_PETICION = 400;
+    public static final int SC_ANULACION_REPETIDA = 471;
     public static final int SC_ERROR_VOTO_REPETIDO = 470;
     public static final int SC_ERROR_EJECUCION = 500;
     public static final int SC_ERROR_ENVIO_VOTO = 570;
@@ -72,6 +73,14 @@ public final class MensajeClienteFirmaJso extends JavaScriptObject {
 	public final native void setMensaje(String value) /*-{
 		this.mensaje = value;
 	}-*/;
+	
+	public final native void setContentType(String value) /*-{
+		this.contentType = value;
+	}-*/;	
+	
+	public final native String getContentType() /*-{
+		return this.contentType;
+	}-*/;	
 	
 	public final native String getUrlTimeStampServer() /*-{
 		return this.urlTimeStampServer;
@@ -184,8 +193,8 @@ public final class MensajeClienteFirmaJso extends JavaScriptObject {
 	}-*/;
 	
 	public static native JavaScriptObject createMensajeCancelacionEvento(
-			String eventURL, String estado) /*-{
-		return {eventURL: eventURL, estado: estado};
+			String operationStr, String accessControlURLValue , String id, String estado) /*-{
+		return {operation:operationStr, accessControlURL:accessControlURLValue, eventId: id, estado: estado};
 	}-*/;
 
 }

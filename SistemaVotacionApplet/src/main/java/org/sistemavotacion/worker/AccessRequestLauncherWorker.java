@@ -68,11 +68,13 @@ public class AccessRequestLauncherWorker extends SwingWorker<Integer, String>
         			csrEncryptedFile, accesRequestServerCert);
         EncryptionHelper.encryptSMIMEFile(solicitudAcceso, accesRequestServerCert);
         
+        String accessRequestFileName = Contexto.ACCESS_REQUEST_FILE_NAME + ":" + 
+                Contexto.SIGNED_AND_ENCRYPTED_CONTENT_TYPE;
         Map<String, Object> mapToSend = new HashMap<String, Object>();
         mapToSend.put(Contexto.CSR_FILE_NAME, csrEncryptedFile);
-        mapToSend.put(Contexto.SMIME_FILE_NAME, solicitudAcceso);
+        mapToSend.put(accessRequestFileName, solicitudAcceso);
         
-        HttpResponse response = Contexto.getHttpHelper().sendMap(
+        HttpResponse response = Contexto.getHttpHelper().sendObjectMap(
                 mapToSend, evento.getUrlSolicitudAcceso());
         statusCode = response.getStatusLine().getStatusCode();
         if (Respuesta.SC_OK == statusCode) {

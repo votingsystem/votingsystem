@@ -9,6 +9,7 @@ dataSource {
 	dialect = net.sf.hibernate.dialect.PostgreSQLDialect
 	username = "usuariovotacion"
 	password = "usuariovotacion"
+	//dataSource.logSql = true
 }
 
 hibernate {

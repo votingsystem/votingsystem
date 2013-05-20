@@ -24,6 +24,7 @@ import org.sistemavotacion.seguridad.PKCS10WrapperClient;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.OSValidator;
 import org.sistemavotacion.util.StringUtils;
+import org.sistemavotacion.util.VotacionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,9 +40,11 @@ public class Contexto {
     public static final String NOMBRE_ARCHIVO_SOLICITUD_ACCESO = "AccessRequest";
     public static final String NOMBRE_ARCHIVO_SOLICITUD_ACCESO_TIMESTAMPED 
             = "AccessRequestTimeStamped";
-    public static final String SMIME_FILE_NAME = "archivoFirmado";
     public static final String CSR_FILE_NAME   = "csr";
     public static final String IMAGE_FILE_NAME   = "image";
+    public static final String REPRESENTATIVE_DATA_FILE_NAME = "representativeData";
+    
+    public static final String ACCESS_REQUEST_FILE_NAME   = "accessRequest";
     
     public static final String CERT_RAIZ_PATH = "AC_RAIZ_DNIE_SHA1.pem";
     public static final int KEY_SIZE = 1024;
@@ -82,6 +85,18 @@ public class Contexto {
     public static final String SIGNED_PART_EXTENSION = ".p7m";
     
     public static final String OCSP_DNIE_URL = "http://ocsp.dnie.es";
+    
+    public static final String PDF_CONTENT_TYPE       = "application/pdf";
+    public static final String SIGNED_CONTENT_TYPE = "application/x-pkcs7-signature";
+    public static final String ENCRYPTED_CONTENT_TYPE = "application/x-pkcs7-mime";
+    public static final String SIGNED_AND_ENCRYPTED_CONTENT_TYPE = 
+            SIGNED_CONTENT_TYPE + "," + ENCRYPTED_CONTENT_TYPE;
+    public static final String PDF_SIGNED_AND_ENCRYPTED_CONTENT_TYPE = 
+            PDF_CONTENT_TYPE + "," +  SIGNED_CONTENT_TYPE + ";" + ENCRYPTED_CONTENT_TYPE;    
+    public static final String PDF_SIGNED_CONTENT_TYPE = 
+    		PDF_CONTENT_TYPE + "," + SIGNED_CONTENT_TYPE;     
+    public static final String PDF_ENCRYPTED_CONTENT_TYPE = 
+    		PDF_CONTENT_TYPE + "," + ENCRYPTED_CONTENT_TYPE; 
     
     private static Contexto instancia;
     private static Usuario usuario;
@@ -215,12 +230,11 @@ public class Contexto {
         directorioArchivoVoto.mkdirs();
         File archivoVoto = new File (directorioArchivoVoto.getAbsolutePath() 
                 + File.separator + Operacion.Tipo.ENVIO_VOTO_SMIME.getNombreArchivoEnDisco());
-        InputStream is = new ByteArrayInputStream(
-                votoEvento.obtenerVotoJSONStr().getBytes());
+        String votoStr = VotacionHelper.obtenerVotoJSONStr(votoEvento);
+        InputStream is = new ByteArrayInputStream(votoStr.getBytes());
         FileUtils.copyStreamToFile(is, archivoVoto);
     }
 
-    
     public static String getRutaArchivosVoto(Evento evento, String nif) {
         String ruta = FileUtils.APPVOTODIR + StringUtils.getCadenaNormalizada(
                 evento.getControlAcceso().getServerURL()) +

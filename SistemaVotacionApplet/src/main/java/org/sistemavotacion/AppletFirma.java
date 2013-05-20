@@ -163,8 +163,7 @@ public class AppletFirma extends JApplet {
     }
     
     public void responderCliente(int codigoEstado, String mensaje) {
-        logger.debug("responderCliente - codigoEstado: " + codigoEstado + 
-                    " - mensaje: " + mensaje);
+        logger.debug("responderCliente - codigoEstado: " + codigoEstado);
         if(operacionEnCurso == null) {
             logger.debug("responderCliente ---> No hay ninguna operación en curso");
             return;
@@ -205,7 +204,7 @@ public class AppletFirma extends JApplet {
         preconditionsChecker.setVisible(true);
     }
     
-    /*public static void main (String[] args) { 
+    public static void main (String[] args) { 
         
         modoEjecucion = ModoEjecucion.APLICACION;
         Operacion ope = new Operacion();
@@ -222,13 +221,7 @@ public class AppletFirma extends JApplet {
                         appletFirma.start();
                         File jsonFile = File.createTempFile("operacion", ".json");
                         FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
-                         //   .getResourceAsStream("testFiles/votingOperation.json"), jsonFile);
-                        //.getResourceAsStream("testFiles/cancelVote.json"), jsonFile);            
-                        //      .getResourceAsStream("testFiles/publishVoting.json"), jsonFile);
-                        //.getResourceAsStream("testFiles/newRepresentative.json"), jsonFile);            
-                        //.getResourceAsStream("testFiles/publishManifest.json"), jsonFile);
-                        //.getResourceAsStream("testFiles/selectRepresentative.json"), jsonFile);
-                        .getResourceAsStream("testFiles/unsubscribeRepresentative.json"), jsonFile);        
+                            .getResourceAsStream("testFiles/votingOperation.json"), jsonFile);        
                         appletFirma.ejecutarOperacion(FileUtils.getStringFromFile(jsonFile));
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
@@ -244,6 +237,6 @@ public class AppletFirma extends JApplet {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
-    }*/
+    }
     
 }

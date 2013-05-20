@@ -88,9 +88,7 @@ public class Evento implements Serializable {
     @Field(index=Index.TOKENIZED, store=Store.YES)
     private Estado estado;
     @OneToOne(mappedBy="evento")
-    private AlmacenClaves almacenClaves; 
-    @Column(name="url")
-    private String url;    
+    private AlmacenClaves almacenClaves;   
     @Lob @Column(name="pdf")
     private byte[] pdf;    
     @ManyToOne(fetch=FetchType.LAZY)
@@ -223,21 +221,6 @@ public class Evento implements Serializable {
     public void setEstado(Estado estado) {
         this.estado = estado;
     }
-  
-
-    /**
-     * @return the url
-     */
-    public String getUrl() {
-        return url;
-    }
-
-    /**
-     * @param url the url to set
-     */
-    public void setUrl(String url) {
-        this.url = url;
-    }
 
     /**
      * @return the centroControl
@@ -274,6 +257,12 @@ public class Evento implements Serializable {
 		Date todayDate = DateUtils.getTodayDate();
 		if (todayDate.after(fechaInicio) && todayDate.before(fechaFin)) result = true;
 		if(estado == Estado.CANCELADO || estado == Estado.BORRADO_DE_SISTEMA ) result = false;
+		return result;
+	}
+	
+	public boolean isActiveDate(Date date) {
+		boolean result = false;
+		if (date.after(fechaInicio) && date.before(fechaFin)) result = true;
 		return result;
 	}
 

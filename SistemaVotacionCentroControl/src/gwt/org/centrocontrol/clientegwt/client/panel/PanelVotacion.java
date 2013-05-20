@@ -61,6 +61,8 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
     interface EditorStyle extends CssResource {
         String errorTextBox();
         String textBox();
+        String messageLabel();
+        String linkedMessageLabel();
     }
 
 	@UiField HTML pageTitle;
@@ -69,14 +71,12 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
     @UiField VerticalPanel panelContenidos;
     @UiField HorizontalPanel panelBarrarProgreso;
     @UiField VerticalPanel messagePanel;
-    @UiField Label messageLabel;
     @UiField Label fechaLimiteLabel;
     @UiField VerticalPanel contentPanel;
     @UiField VerticalPanel contenidoPanel;
     @UiField HorizontalPanel autorPanel;
     @UiField Label autorLabel;
     @UiField VerticalPanel contenedorOpcionesPanel;
-    @UiField Anchor enlaceJustificante;
     @UiField PanelGraficoResultadoDeVotacion panelGraficoVotacion;
     @UiField Label opcionesLabel;
     
@@ -96,7 +96,6 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
         initWidget(uiBinder.createAndBindUi(this));
         messagePanel.setVisible(false);
 		administracionDocumentoLabel.setListener(administrarEventoEventListener);
-        enlaceJustificante.setTarget("_blank");
         INSTANCIA = this;
         panelGraficoVotacion.setVisible(false);
         panelContenidos.setVisible(false);
@@ -110,20 +109,11 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
         		EventoGWTMensajeClienteFirma.TYPE, this);
     }
 
-    
-	private void setMessage (String message) {
-		if(message == null || "".equals(message)) messagePanel.setVisible(false);
-		else {
-			messageLabel.setText(message);
-	    	messagePanel.setVisible(true);	
-		}
-	}
 
     public void show(EventoSistemaVotacionJso documento) {
     	this.evento = documento;
     	if (documento == null) return;
         messagePanel.setVisible(false);
-        enlaceJustificante.setVisible(false);
         contenidoPanel.clear();
         pageTitle.setHTML(Constantes.INSTANCIA.votacionLabel() + " '" + 
         		StringUtils.partirTexto(evento.getAsunto(), 
@@ -169,12 +159,22 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
         panelContenidos.setVisible(true);
     }
     
-    
-    @UiHandler("enlaceJustificante")
-    void onClickEnlaceJustificante(ClickEvent e) {
-
-    }
-    
+	private void setMessage (String... messages) {
+		boolean hasMessages = false;
+		if(messages == null || messages.length == 0 ) messagePanel.setVisible(false);
+		else {
+			messagePanel.clear();
+			for(String message: messages) {
+				if(null != message) hasMessages = true;
+				Label messageLabel = new Label();
+		    	messageLabel.setText(message);
+				messageLabel.setStyleName(style.messageLabel());
+		    	messagePanel.add(messageLabel);
+			}
+			if(hasMessages) messagePanel.setVisible(true);
+			else messagePanel.setVisible(false);
+		}
+	}
 	
 	public void setWidgetsStateFirmando(boolean publicando) {
 		if(publicando) {
@@ -216,6 +216,15 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
   		}
   	}
   	
+	private void setLinkedMessage(String text, String url) {
+		Anchor linkedMessage = new Anchor();
+		linkedMessage.setStyleName(style.linkedMessageLabel());
+		linkedMessage.setHref(url);
+		linkedMessage.setText(text);
+		linkedMessage.setTarget("_blank");
+		messagePanel.add(linkedMessage);	
+	}
+	
   	private void mostrarPopupAdministrarEvento(int clientX, int clientY) {
   		if(popupAdministrarDocumento == null) {
   			evento.setTipoEnumValue(Tipo.EVENTO_VOTACION);
@@ -240,18 +249,19 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
 					dialogoAnulacionSolicitud.show();
 				}else if(MensajeClienteFirmaJso.SC_CANCELADO == mensaje.getCodigoEstado()) {
 				} else {
-					setMessage(Constantes.INSTANCIA.mensajeError(
-							mensaje.getMensaje()));
 					if(MensajeClienteFirmaJso.SC_ERROR_VOTO_REPETIDO == mensaje.getCodigoEstado()) {
+						setMessage(Constantes.INSTANCIA.mensajeVotoRepetido());
 						if(mensaje.getEvento() != null && 
 								mensaje.getEvento().getVotante() != null) {
-							enlaceJustificante.setVisible(true);
-							enlaceJustificante.setHref(ServerPaths.getUrlSolicitudAccesoPorNif( 
-									evento.getControlAcceso().getServerURL(),
-									mensaje.getEvento().getVotante().getNif(),
-									mensaje.getEvento().getId()));
-							enlaceJustificante.setText(Constantes.INSTANCIA.solicitudAccesoRepetida());
+							setLinkedMessage(Constantes.INSTANCIA.solicitudAccesoRepetida(), 
+									ServerPaths.getUrlSolicitudAccesoPorNif( 
+											evento.getControlAcceso().getServerURL(),
+											mensaje.getEvento().getVotante().getNif(),
+											mensaje.getEvento().getId()));
 						}
+					} else {
+						setMessage(Constantes.INSTANCIA.mensajeError(
+								mensaje.getMensaje()));
 					}
 				}
 				break;
@@ -268,8 +278,8 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
 			case GUARDAR_RECIBO_VOTO:
 				setWidgetsStateFirmando(false);
 				if(MensajeClienteFirmaJso.SC_OK == mensaje.getCodigoEstado()) {
-					setMessage(Constantes.INSTANCIA.mensajeGuardarReciboOK(
-						mensaje.getArgsJsArray().get(0)));
+					setMessage(Constantes.INSTANCIA.mensajeGuardarReciboOK(), 
+							mensaje.getMensaje());
 				} else if(MensajeClienteFirmaJso.SC_CANCELADO == mensaje.getCodigoEstado()) {
 				} else {
 					setMessage(Constantes.INSTANCIA.mensajeError(

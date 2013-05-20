@@ -1,7 +1,6 @@
 package org.sistemavotacion.controlacceso
 
 import org.sistemavotacion.controlacceso.modelo.*
-
 import grails.converters.JSON
 import org.sistemavotacion.util.*
 /**
@@ -15,40 +14,38 @@ class EventoReclamacionController {
 
     def eventoReclamacionService
     def eventoService
+	def firmaService
 	
 	/**
-	 * @httpMethod GET
-	 * @return Información sobre los servicios que tienen como url base '/eventoReclamacion'.
-	 */
-	def index() { 
-		redirect action: "restDoc"
-	}
-	
-	/**
-	 * @httpMethod GET
-	 * @param id Opcional. El identificador de la reclamación en la base de datos. Si no se pasa ningún 
+	 * @httpMethod [GET]
+	 * @param [id] Opcional. El identificador de la reclamación en la base de datos. Si no se pasa ningún 
 	 *        id la consulta se hará entre todos las reclamaciones.
-	 * @param max Opcional (por defecto 20). Número máximo de reclamaciones que
+	 * @param [max] Opcional (por defecto 20). Número máximo de reclamaciones que
 	 * 		  devuelve la consulta (tamaño de la página).
-	 * @param offset Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.
-	 * @param order Opcional, posibles valores 'asc', 'desc'(por defecto). Orden en que se muestran los
+	 * @param [offset] Opcional (por defecto 0). Indice a partir del cual se pagina el resultado.
+	 * @param [order] Opcional, posibles valores 'asc', 'desc'(por defecto). Orden en que se muestran los
 	 *        resultados según la fecha de inicio.
+	 * @responseContentType [application/json]
 	 * @return Documento JSON con los manifiestos que cumplen con el criterio de búsqueda.
 	 */
-    def obtener () {
+    def index () {
         def eventoList = []
         def eventosMap = new HashMap()
         eventosMap.eventos = new HashMap()
         eventosMap.eventos.reclamaciones = []
-        if (params.ids?.size() > 0) {
-             EventoReclamacion.getAll(params.ids).collect {evento ->
-                    if (evento) eventoList << evento;
-            }
-            if (eventoList.size() == 0) {
-                    response.status = Respuesta.SC_NOT_FOUND
-                    render message(code: 'eventNotFound', args:[params.ids])
-                    return
-            }
+        if (params.long('id')) {
+			EventoReclamacion evento = null
+			EventoReclamacion.withTransaction {
+				evento = EventoReclamacion.get(params.long('id'))
+			}
+			if(!evento) {
+				response.status = Respuesta.SC_NOT_FOUND
+				render message(code: 'eventNotFound', args:[params.id])
+				return false
+			} else {
+				render eventoService.optenerEventoJSONMap(evento) as JSON
+				return false
+			}
         } else {
 			params.sort = "fechaInicio"
 			log.debug " -Params: " + params
@@ -85,187 +82,193 @@ class EventoReclamacionController {
     }
     
 	/**
-	 * Servicio que proporciona una copia de la reclamación publicada con la firma
-	 * añadida del servidor.
+	 * Servicio que proporciona el recibo con el que el sistema
+	 * respondió a una solicitud de publicación de reclamación.
 	 * 
-	 * @httpMethod GET
-	 * @param id Obligatorio. El identificador de la reclamación en la base de datos.
-	 * @return Archivo SMIME de la publicación de la reclamación firmada por el usuario que
-	 *         la publicó y el servidor.
+	 * @httpMethod [GET]
+	 * @serviceURL [/eventoReclamacion/${id}/validado]
+	 * @param [id] Obligatorio. El identificador de la reclamación en la base de datos.
+	 * @return Documento SMIME con el recibo.
 	 */
     def validado () {
-        if (params.int('id')) {
-            def evento = Evento.get(params.id)
-            MensajeSMIME mensajeSMIME
-            if (evento) {
-				MensajeSMIME.withTransaction {
-					mensajeSMIME = MensajeSMIME.findWhere(evento:evento, 
-						tipo: Tipo.EVENTO_RECLAMACION_VALIDADO)
+        def evento = Evento.get(params.long('id'))
+        MensajeSMIME mensajeSMIME
+        if (evento) {
+			MensajeSMIME.withTransaction {
+				List results = MensajeSMIME.withCriteria {
+					createAlias("smimePadre", "smimePadre")
+					eq("smimePadre.evento", evento)
+					eq("smimePadre.tipo", Tipo.EVENTO_RECLAMACION)
 				}
-                if (mensajeSMIME) {
-                        response.status = Respuesta.SC_OK
-                        response.contentLength = mensajeSMIME.contenido.length
-                        //response.setContentType("text/plain")
-                        response.outputStream <<  mensajeSMIME.contenido
-                        response.outputStream.flush()
-                        return false
-                }
-            }
-            if (!evento || !mensajeSMIME) {
-                response.status = Respuesta.SC_NOT_FOUND
-                render message(code: 'eventNotFound', args:[params.ids])
-                return false
+				mensajeSMIME = results.iterator().next()
+			}
+            if (mensajeSMIME) {
+                    response.status = Respuesta.SC_OK
+                    response.contentLength = mensajeSMIME.contenido.length
+                    //response.setContentType("text/plain")
+                    response.outputStream <<  mensajeSMIME.contenido
+                    response.outputStream.flush()
+                    return false
             }
         }
-        response.status = Respuesta.SC_ERROR_PETICION
-        render message(code: 'error.PeticionIncorrectaHTML', 
-			args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
-        return false
+        if (!evento || !mensajeSMIME) {
+            response.status = Respuesta.SC_NOT_FOUND
+            render message(code: 'eventNotFound', args:[params.id])
+            return false
+        }
     }
     
 	/**
 	 * Servicio que proporciona una copia de la reclamación publicada.
 	 *
-	 * @httpMethod GET
-	 * @param id Obligatorio. El identificador de la reclamación en la base de datos.
-	 * @return Archivo SMIME de la publicación de la reclamación firmada por el usuario 
-	 *         que la publicó.
+	 * @httpMethod [GET]
+	 * @serviceURL [/eventoReclamacion/${id}/firmado]
+	 * @param [id] Obligatorio. El identificador de la reclamación en la base de datos.
+	 * @return Documento SMIME con la solicitud de publicación de la reclamación.
 	 */
 	def firmado () {
-		if (params.int('id')) {
-			def evento = Evento.get(params.id)
-			if (evento) {
-				MensajeSMIME mensajeSMIME
-				MensajeSMIME.withTransaction {
-					mensajeSMIME = MensajeSMIME.findWhere(evento:evento, tipo:
-						Tipo.EVENTO_RECLAMACION)
-				}
-				if (mensajeSMIME) {
-					response.status = Respuesta.SC_OK
-					response.contentLength = mensajeSMIME.contenido.length
-					response.setContentType("text/plain")
-					response.outputStream <<  mensajeSMIME.contenido
-					response.outputStream.flush()
-					return false
-				}
+		def evento = Evento.get(params.long('id'))
+		if (evento) {
+			MensajeSMIME mensajeSMIME
+			MensajeSMIME.withTransaction {
+				mensajeSMIME = MensajeSMIME.findWhere(evento:evento, tipo:
+					Tipo.EVENTO_RECLAMACION)
 			}
-			response.status = Respuesta.SC_NOT_FOUND
-			render message(code: 'eventNotFound', args:[params.ids])
-			return false
+			if (mensajeSMIME) {
+				response.status = Respuesta.SC_OK
+				response.contentLength = mensajeSMIME.contenido.length
+				response.setContentType("text/plain")
+				response.outputStream <<  mensajeSMIME.contenido
+				response.outputStream.flush()
+				return false
+			}
 		}
-		response.status = Respuesta.SC_ERROR_PETICION
-		render message(code: 'error.PeticionIncorrectaHTML', 
-			args:["${grailsApplication.config.grails.serverURL}/${params.controller}"])
+		response.status = Respuesta.SC_NOT_FOUND
+		render message(code: 'eventNotFound', args:[params.id])
 		return false
 	}
     
 	/**
-	 * Servicio para publicar votaciones.
+	 * Servicio para publicar reclamaciones.
 	 *
-	 * @httpMethod POST
-	 * @param archivoFirmado Archivo firmado en formato SMIME en cuyo contenido se
+	 * @httpMethod [POST]
+	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. 
+	 *                     Documento en formato SMIME  en cuyo contenido se
 	 *        encuentra la reclamación que se desea publicar en formato HTML.
-	 * @return Recibo que consiste en el archivo firmado recibido con la firma añadida del servidor.
+	 * @responseContentType [application/x-pkcs7-signature] Obligatorio. Recibo firmado por el sistema.
+	 * @return Recibo que consiste en el documento SMIME recibido con la firma añadida del servidor.
 	 */
-    def guardarAdjuntandoValidacion () {
+    def post () {
+		MensajeSMIME mensajeSMIMEReq = flash.mensajeSMIMEReq
+		if(!mensajeSMIMEReq) {
+			String msg = message(code:'evento.peticionSinArchivo')
+			log.error msg
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
+			return false
+		}
         try {
-            flash.respuesta = eventoReclamacionService.guardarEvento(
-				params.smimeMessageReq, request.getLocale())
+			Respuesta respuesta = eventoReclamacionService.saveEvent(
+				mensajeSMIMEReq, request.getLocale())
+			if(Respuesta.SC_OK == respuesta.codigoEstado) {
+				response.setContentType("application/x-pkcs7-signature")
+			} 
+			flash.respuesta = respuesta
         } catch (Exception ex) {
 			log.error (ex.getMessage(), ex)
-			response.status = Respuesta.SC_ERROR_EJECUCION
-			render ex.getMessage()
-			return false      
+			flash.respuesta = new Respuesta(
+				codigoEstado:Respuesta.SC_ERROR_PETICION,
+				mensaje:message(code:'publishClaimErrorMessage'), 
+				tipo:Tipo.EVENTO_RECLAMACION_ERROR)
         }
     }
 	
 	/**
-	 * Servicio que devuelve estadísticas asociadas a una reclamción.
+	 * Servicio que devuelve estadísticas asociadas a una reclamación.
 	 *
-	 * @httpMethod GET
-	 * @param id Obligatorio. Identificador en la base de datos de la reclamación que se desea consultar.
+	 * @httpMethod [GET]
+	 * @serviceURL [/eventoReclamacion/$id/estadisticas]
+	 * @param [id] Obligatorio. Identificador en la base de datos de la reclamación que se desea consultar.
+	 * @responseContentType [application/json]
 	 * @return Documento JSON con las estadísticas asociadas a la reclamación solicitada.
 	 */
     def estadisticas () {
-        if (params.int('id')) {
-            EventoReclamacion eventoReclamacion
-            if (!params.evento) eventoReclamacion = EventoReclamacion.get(params.id)
-            else eventoReclamacion = params.evento
-            if (eventoReclamacion) {
-                response.status = Respuesta.SC_OK
-                def estadisticasMap = new HashMap()
-                estadisticasMap.id = eventoReclamacion.id
-                estadisticasMap.tipo = Tipo.EVENTO_RECLAMACION.toString()
-                estadisticasMap.numeroFirmas = eventoReclamacion.firmas.size()
-                estadisticasMap.estado =  eventoReclamacion.estado.toString()
-                estadisticasMap.usuario = eventoReclamacion.usuario.getNif()
-                estadisticasMap.fechaInicio = eventoReclamacion.getFechaInicio()
-                estadisticasMap.fechaFin = eventoReclamacion.getFechaFin()
-                estadisticasMap.solicitudPublicacionURL = "${grailsApplication.config.grails.serverURL}" +
-					"/eventoReclamacion/firmado?id=${eventoReclamacion.id}"
-                estadisticasMap.solicitudPublicacionValidadaURL = "${grailsApplication.config.grails.serverURL}" + 
-					"/eventoVotacion/validado?id=${eventoReclamacion.id}"
-				estadisticasMap.informacionFirmasReclamacionURL = "${grailsApplication.config.grails.serverURL}" + 
-					"/evento/informacionFirmasReclamacion?id=${eventoReclamacion.id}"
-				estadisticasMap.URL = "${grailsApplication.config.grails.serverURL}/evento" + 
-					"/obtener?id=${eventoReclamacion.id}"
-				render estadisticasMap as JSON
-                return false
-            }
-            response.status = Respuesta.SC_NOT_FOUND
-            render message(code: 'eventNotFound', args:[params.ids])
+        EventoReclamacion eventoReclamacion
+		if (!flash.evento) {
+			EventoReclamacion.withTransaction {
+				eventoReclamacion = EventoReclamacion.get(params.long('id'))
+			}
+		} else eventoReclamacion = flash.evento
+        if (eventoReclamacion) {
+            response.status = Respuesta.SC_OK
+            def estadisticasMap = new HashMap()
+            estadisticasMap.id = eventoReclamacion.id
+            estadisticasMap.tipo = Tipo.EVENTO_RECLAMACION.toString()
+            estadisticasMap.numeroFirmas = eventoReclamacion.firmas.size()
+            estadisticasMap.estado =  eventoReclamacion.estado.toString()
+            estadisticasMap.usuario = eventoReclamacion.usuario.getNif()
+            estadisticasMap.fechaInicio = eventoReclamacion.getFechaInicio()
+            estadisticasMap.fechaFin = eventoReclamacion.getFechaFin()
+            estadisticasMap.solicitudPublicacionURL = "${grailsApplication.config.grails.serverURL}" +
+				"/eventoReclamacion/${eventoReclamacion.id}/firmado"
+            estadisticasMap.solicitudPublicacionValidadaURL = "${grailsApplication.config.grails.serverURL}" + 
+				"/eventoReclamacion/${eventoReclamacion.id}/validado"
+			estadisticasMap.informacionFirmasReclamacionURL = "${grailsApplication.config.grails.serverURL}" + 
+				"/eventoReclamacion/${eventoReclamacion.id}/informacionFirmas"
+			estadisticasMap.URL = "${grailsApplication.config.grails.serverURL}/evento/${eventoReclamacion.id}"
+			render estadisticasMap as JSON
             return false
         }
-        response.status = Respuesta.SC_ERROR_PETICION
-        render message(code: 'error.PeticionIncorrectaHTML', args:[
-			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
+        response.status = Respuesta.SC_NOT_FOUND
+        render message(code: 'eventNotFound', args:[params.id])
         return false
     }
-    
+
+	
 	/**
-	 * Servicio que devuelve las firmas recibidas por una reclamación.
+	 * Servicio que devuelve información sobre la actividad de una acción de reclamación
 	 *
-	 * @httpMethod POST
-	 * @param archivoFirmado Archivo firmado en formato SMIME con los datos de la
-	 * 		  reclamación origen de la copia de seguridad.
-	 * @return Archivo zip con los archivos relacionados con la reclamación.
+	 * @httpMethod [GET]
+	 * @serviceURL [/eventoReclamacion/$id/informacionFirmas]
+	 * @param [id] Obligatorio. El identificador de la reclamación la base de datos.
+	 * @responseContentType [application/json]
+	 * @return Documento JSON con información sobre las firmas recibidas por la reclamación solicitada.
 	 */
-    def guardarSolicitudCopiaRespaldo () {
-        EventoReclamacion eventoReclamacion
-        if (!params.evento) {
-            def mensajeJSON = JSON.parse(params.smimeMessageReq.getSignedContent())
-            if (params.int('eventoId')) {
-                eventoReclamacion = EventoReclamacion.get(mensajeJSON.eventoId)
-                if (!eventoReclamacion) {
-                    response.status = Respuesta.SC_NOT_FOUND
-                    render message(code: 'eventNotFound', args:[mensajeJSON.eventoId])
-                    return false
-                }  
-            } else {
-                response.status = Respuesta.SC_ERROR_PETICION
-                render message(code: 'error.PeticionIncorrectaHTML', args:[
-					"${grailsApplication.config.grails.serverURL}/${params.controller}"])
-                return false
-            }
-        } else eventoReclamacion = params.evento
-        File copiaRespaldo = eventoReclamacionService.generarCopiaRespaldo(
-			eventoReclamacion, request.getLocale())
-        if (copiaRespaldo != null) {
-            def bytesCopiaRespaldo = FileUtils.getBytesFromFile(copiaRespaldo)
-            response.contentLength = bytesCopiaRespaldo.length
-            response.setHeader("Content-disposition", "filename=${copiaRespaldo.getName()}")
-            response.setHeader("NombreArchivo", "${copiaRespaldo.getName()}")
-            response.setContentType("application/octet-stream")
-            response.outputStream << bytesCopiaRespaldo
-            response.outputStream.flush()
-            return false
-        } else {
-            Respuesta respuesta = new Respuesta(tipo: Tipo.OK,
-                mensaje:message(code: 'error.SinCopiaRespaldo'),codigoEstado:Respuesta.SC_OK)
-            response.setContentType("application/json")
-            render respuesta.getMap() as JSON
-            return false
-        }
-    }
-    
+	def informacionFirmas () {
+		EventoReclamacion evento = EventoReclamacion.get(params.id)
+		if (!evento) {
+			response.status = Respuesta.SC_NOT_FOUND
+			render message(code: 'eventNotFound', args:[params.id])
+			return false
+		}
+		def informacionReclamacionMap = new HashMap()
+		List<Firma> firmas
+		Firma.withTransaction {
+			firmas = Firma.findAllWhere(evento:evento, tipo:Tipo.FIRMA_EVENTO_RECLAMACION)
+		}
+		log.debug("count: " + Firma.findAllWhere(
+			evento:evento, tipo:Tipo.FIRMA_EVENTO_RECLAMACION).size())
+		informacionReclamacionMap.numeroFirmas = firmas.size()
+		informacionReclamacionMap.asuntoEvento = evento.asunto
+		informacionReclamacionMap.eventoURL =
+			"${grailsApplication.config.grails.serverURL}/evento/${evento.id}"
+		informacionReclamacionMap.firmas = []
+		firmas.collect { firma ->
+			def firmaMap = [id:firma.id, fechaCreacion:firma.dateCreated,
+			usuario:firma.usuario.nif,
+			firmaReclamacionURL:"${grailsApplication.config.grails.serverURL}/mensajeSMIME" +
+				"/obtener?id=${firma.mensajeSMIME.id}",
+			reciboFirmaReclamacionURL:"${grailsApplication.config.grails.serverURL}/mensajeSMIME" +
+				"/recibo/${firma.mensajeSMIME?.id}"]
+			def valoresCampos = ValorCampoDeEvento.findAllWhere(firma:firma)
+			firmaMap.campos = []
+			valoresCampos.collect { valorCampo ->
+				firmaMap.campos.add([campo:valorCampo.campoDeEvento.contenido, valor:valorCampo.valor])
+			}
+			informacionReclamacionMap.firmas.add(firmaMap)
+		}
+		response.status = Respuesta.SC_OK
+		response.setContentType("application/json")
+		render informacionReclamacionMap as JSON
+	}
 }
