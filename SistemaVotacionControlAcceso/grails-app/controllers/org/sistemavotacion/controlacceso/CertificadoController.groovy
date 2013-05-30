@@ -164,9 +164,10 @@ class CertificadoController {
 			return false
 		}*/
 		//=====
-		log.debug "==== Environment --- TEST ---"
+		log.debug "===============****¡¡¡¡¡ TEST Environment !!!!!****=================== "
+		firmaService.deleteTestCerts()
 		Respuesta respuesta = firmaService.addCertificateAuthority(
-			params.pemCertificate?.getBytes(), request.getLocale())
+			"${request.getInputStream()}".getBytes(), request.getLocale())
 		log.debug("addCertificateAuthority - codigo estado: ${respuesta.codigoEstado} - mensaje: ${respuesta.mensaje}")
 		response.status = respuesta.codigoEstado
 		render respuesta.mensaje
@@ -188,5 +189,12 @@ class CertificadoController {
 		}
 		response.outputStream.flush()
 		return false
+	}
+	
+	def deleteTestCerts() {
+		Respuesta respuesta = firmaService.deleteTestCerts()
+		if(respuesta.codigoEstado == Respuesta.SC_OK) {
+			render "OK"
+		} else render "ERROR"
 	}
 }

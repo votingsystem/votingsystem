@@ -8,6 +8,7 @@ import java.security.cert.X509Certificate;
 import java.util.Collection;
 import javax.security.auth.x500.X500PrivateCredential;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMReader;
 import org.bouncycastle.openssl.PEMWriter;
 
@@ -102,6 +103,30 @@ public class KeyUtil {
         KeyPairGenerator kpGen = KeyPairGenerator.getInstance("RSA", "BC");
         kpGen.initialize(1024, new SecureRandom());
         return kpGen.generateKeyPair();
-}
+    }
     
+    public static byte[] getPEMBytesFromKey(Key key) throws Exception {
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        PEMWriter pemWrt = new PEMWriter(new OutputStreamWriter(bOut));
+        pemWrt.writeObject(key);
+        pemWrt.close();
+        bOut.close();
+        return bOut.toByteArray();
+    }
+    
+    public static PrivateKey fromPEMToRSAPrivateKey(File file) throws Exception {
+        Security.addProvider(new BouncyCastleProvider());
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        KeyPair kp = (KeyPair) new PEMReader(br).readObject();
+        return kp.getPrivate();
+    }
+    
+    public static PublicKey fromPEMToRSAPublicKey(File file) throws Exception {
+        Security.addProvider(new BouncyCastleProvider());
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        KeyPair kp = (KeyPair) new PEMReader(br).readObject();
+        return kp.getPublic();
+    }
+    
+
 }

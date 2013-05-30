@@ -3,6 +3,7 @@ package org.sistemavotacion.controlacceso
 import org.sistemavotacion.controlacceso.modelo.*
 import org.sistemavotacion.util.StringUtils;
 import grails.converters.JSON
+import org.sistemavotacion.util.DateUtils;
 
 class RepresentativeController {
 
@@ -44,7 +45,6 @@ class RepresentativeController {
 			}
 			return false
 		} else {
-			params.sort = "representationsNumber"
 			log.debug " -Params: " + params
 			Usuario.withTransaction {
 				representativeList = Usuario.findAllByType(Usuario.Type.REPRESENTATIVE, params)
@@ -109,7 +109,7 @@ class RepresentativeController {
 	 * 
 	 */
 	def revoke() {
-		MensajeSMIME mensajeSMIME = flash.mensajeSMIMEReq
+		MensajeSMIME mensajeSMIME = params.mensajeSMIMEReq
 		if(!mensajeSMIME) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.debug msg
@@ -119,7 +119,7 @@ class RepresentativeController {
 		}
 		Respuesta respuesta = representativeService.
 			processRevoke(mensajeSMIME, request.getLocale())
-		flash.respuesta = respuesta
+		params.respuesta = respuesta
 		if (Respuesta.SC_OK == respuesta.codigoEstado){
 			response.contentType = "${grailsApplication.config.pkcs7SignedContentType}"
 		}
@@ -139,7 +139,7 @@ class RepresentativeController {
 	 * 					   Documento firmado en formato SMIME con los datos de la solicitud
 	 */
 	def accreditations() {
-		MensajeSMIME mensajeSMIME = flash.mensajeSMIMEReq
+		MensajeSMIME mensajeSMIME = params.mensajeSMIMEReq
 		if(!mensajeSMIME) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.debug msg
@@ -149,7 +149,7 @@ class RepresentativeController {
 		}
 		Respuesta respuesta = representativeService.processAccreditationsRequest(
 			mensajeSMIME, request.getLocale())
-		flash.respuesta = respuesta
+		params.respuesta = respuesta
 		if (Respuesta.SC_OK == respuesta.codigoEstado){
 			render respuesta.mensaje
 		}
@@ -168,7 +168,7 @@ class RepresentativeController {
 	 * @return 
 	 */
 	def history() {
-		MensajeSMIME mensajeSMIME = flash.mensajeSMIMEReq
+		MensajeSMIME mensajeSMIME = params.mensajeSMIMEReq
 		if(!mensajeSMIME) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.debug msg
@@ -178,7 +178,7 @@ class RepresentativeController {
 		}
 		Respuesta respuesta = representativeService.processVotingHistoryRequest(
 			mensajeSMIME, request.getLocale())
-		flash.respuesta = respuesta
+		params.respuesta = respuesta
 		if (Respuesta.SC_OK == respuesta.codigoEstado){
 			render respuesta.mensaje
 		}
@@ -196,7 +196,7 @@ class RepresentativeController {
 	 * @return Recibo que consiste en el documento enviado por el usuario con la firma añadida del servidor.
 	 */
 	def userSelection() {
-		MensajeSMIME mensajeSMIME = flash.mensajeSMIMEReq
+		MensajeSMIME mensajeSMIME = params.mensajeSMIMEReq
 		if(!mensajeSMIME) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.debug msg
@@ -206,7 +206,7 @@ class RepresentativeController {
 		}
 		Respuesta respuesta = representativeService.saveUserRepresentative(
 			mensajeSMIME, request.getLocale())
-		flash.respuesta = respuesta
+		params.respuesta = respuesta
 		if (Respuesta.SC_OK == respuesta.codigoEstado){
 			response.contentType = "${grailsApplication.config.pkcs7SignedContentType}"
 		}
@@ -226,8 +226,8 @@ class RepresentativeController {
 	 * 					   asociado a los datos del representante. 
 	 */
     def processFileMap() { 
-		byte[] imageBytes = flash[grailsApplication.config.SistemaVotacion.imageFileName]
-		MensajeSMIME mensajeSMIMEReq = flash[
+		byte[] imageBytes = params[grailsApplication.config.SistemaVotacion.imageFileName]
+		MensajeSMIME mensajeSMIMEReq = params[
 			grailsApplication.config.SistemaVotacion.representativeDataFileName]
 		if(!mensajeSMIMEReq || !imageBytes) {
 			String msg
@@ -238,19 +238,19 @@ class RepresentativeController {
 			render msg
 			return false
 		}
-		flash.mensajeSMIMEReq = mensajeSMIMEReq
+		params.mensajeSMIMEReq = mensajeSMIMEReq
 		if(imageBytes.length > MAX_FILE_SIZE) {
 			response.status =  Respuesta.SC_ERROR_PETICION
 			String msg = message(code: 'imageSizeExceededMsg', 
 				args:[imageBytes.length/1024, MAX_FILE_SIZE_KB])
 			log.error "processFileMap - ERROR - msg: ${msg}"
-			flash.respuesta = new Respuesta(mensaje:msg,
+			params.respuesta = new Respuesta(mensaje:msg,
 				codigoEstado:Respuesta.SC_ERROR_PETICION,
 				tipo:Tipo.REPRESENTATIVE_DATA_ERROR)
 		} else {
 			Respuesta respuesta = representativeService.saveRepresentativeData(
 				mensajeSMIMEReq, imageBytes, request.getLocale())
-			flash.respuesta = respuesta
+			params.respuesta = respuesta
 			if(Respuesta.SC_OK == respuesta.codigoEstado) {
 				render respuesta.mensaje
 			}
@@ -263,7 +263,7 @@ class RepresentativeController {
 	 * @httpMethod [GET]
 	 * @serviceURL [/representative/image/$id]
      * @serviceURL [/representative/$representativeId/image]
-	 * @param [id] Obligatorio. El id de La imagen en la base de datos.
+	 * @param [id] Obligatorio. El id de la imagen en la base de datos.
 	 * @param [representativeId] Obligatorio. El id del representante en la base de datos.
 	 */
 	def image() {
@@ -301,4 +301,63 @@ class RepresentativeController {
 		return false
 	}
 	
+	/**
+	 * Servicio que devuelve la copia de seguridad en formato zip con los datos de los 
+	 * representantes en el momento en el que ha finalizado una votación.
+	 * 
+	 * Este archivo se utiliza para hacer los recuentos definitivos.
+	 *
+	 * @httpMethod [GET]
+	 * @serviceURL [/representative/accreditationsBackupForEvent/$id]
+	 * @param [id] Obligatorio. El id del evento en la base de datos del Control de Acceso
+	 * 							en que se publicó
+	 * @return El archivo zip con todos los datos necesarios para establecer el valor 
+	 * del voto de los representates en el momento en que finaliza una votación.
+	 */
+	def accreditationsBackupForEvent() {
+		log.debug("getAccreditationsBackupForEvent - event: ${event.id}")
+		EventoVotacion event = null
+		EventoVotacion.withTransaction {
+			event = EventoVotacion.getAt(params.long('id'))
+		}
+		String msg = null
+		if(!event) {
+			msg = message(code: 'eventNotFound')
+			log.error "accreditationsBackupForEvent - ERROR - msg: ${msg}"
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
+			return false
+		}
+		if(event.fechaFin.after(new Date(System.currentTimeMillis()))) {
+			msg = message(code: 'eventDateNotFinished')
+			log.error "accreditationsBackupForEvent - ERROR - msg: ${msg}"
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
+			return false
+		}
+		
+		def datePathPart = DateUtils.getShortStringFromDate(event.fechaFin)
+		def basedir = "${grailsApplication.config.SistemaVotacion.accreditationsForEventBackupDir}" +
+			"/${datePathPart}/Event_${event.id}"
+		File baseDirZipped = new File("${basedir}.zip")
+		File metaInfFile;
+		if(baseDirZipped.exists()) {
+			 metaInfFile = new File("${basedir}/meta.inf")
+			 log.debug("getAccreditationsBackupForEvent - backup file already exists")
+			 if(metaInfFile) {
+				 def metaInfJSON = JSON.parse(metaInfFile.text)
+				 response.setContentType("application/zip")
+				 byte[] fileBytes = baseDirZipped.getBytes()
+				 response.contentLength = fileBytes.length
+				 response.outputStream <<  fileBytes
+				 response.outputStream.flush()
+				 return false
+			 }
+		} else {
+		
+		}
+		representativeService.getAccreditationsBackupForEvent(
+			event, request.getLocale())
+		
+	}
 }

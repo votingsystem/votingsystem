@@ -4,7 +4,6 @@ import static javax.persistence.GenerationType.IDENTITY;
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -113,7 +112,7 @@ public class Certificado implements Serializable {
     private Date cancelDate;
     
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="certificadoAutoridad")
-    private Set<Certificado> certificadoAutorizadoSet = new HashSet<Certificado>(0);  
+    private Set<Certificado> certificadoAutorizadoSet;  
 
     @Transient
     private String eventoId;

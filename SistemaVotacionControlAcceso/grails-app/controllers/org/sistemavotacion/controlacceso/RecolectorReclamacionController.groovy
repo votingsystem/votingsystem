@@ -26,7 +26,7 @@ class RecolectorReclamacionController {
 	 * @return  Recibo que consiste en el documento recibido con la firma añadida del servidor.
 	 */
 	def index() { 
-		MensajeSMIME mensajeSMIMEReq = flash.mensajeSMIMEReq
+		MensajeSMIME mensajeSMIMEReq = params.mensajeSMIMEReq
 		if(!mensajeSMIMEReq) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
@@ -40,10 +40,10 @@ class RecolectorReclamacionController {
 			if (Respuesta.SC_OK == respuesta?.codigoEstado) {
 				response.contentType = "${grailsApplication.config.pkcs7SignedContentType}"
 			}	
-			flash.respuesta = respuesta
+			params.respuesta = respuesta
         } catch (Exception ex) {
             log.error (ex.getMessage(), ex)
-			flash.respuesta = new Respuesta(Respuesta.SC_ERROR_PETICION, 
+			params.respuesta = new Respuesta(Respuesta.SC_ERROR_PETICION, 
 				mensaje:message(code:'signClaimErrorMessage'), 
 				tipo:Tipo.FIRMA_EVENTO_RECLAMACION_ERROR)
         }

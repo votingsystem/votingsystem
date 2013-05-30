@@ -4,7 +4,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.*;
@@ -17,8 +19,8 @@ import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.smime.CMSUtils;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.modelo.InfoVoto;
+import org.sistemavotacion.test.modelo.UserBaseData;
 import org.sistemavotacion.test.panel.VotacionesPanel;
-import org.sistemavotacion.test.util.NifUtils;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
@@ -28,68 +30,102 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
-public class Votacion implements ActionListener {
+public class Votacion implements ActionListener, Simulator {
     
     private static Logger logger = LoggerFactory.getLogger(Votacion.class);
     
     public static final int MAX_PENDING_RESPONSES = 10;
     
     private static ExecutorService votacionExecutor;
-
-    private final ExecutorService solicitudesExecutor;
-    private static CompletionService<InfoVoto> solicitudesCompletionService;
     
     private static ExecutorService votosExecutor;
     private static CompletionService<InfoVoto> votosCompletionService;
+
     
-    private static AtomicLong numeroUsuarios;
-    
-    private static AtomicLong solicitudesEnviadas;
-    private static AtomicLong solicitudesValidas;
-    private static AtomicLong solicitudesConError;
     private static AtomicLong votosEnviados;
     private static AtomicLong votosRecogidos;
-    private static AtomicLong votosValidos;
+    private static AtomicLong solicitudesConError;
     private static AtomicLong votosConError;
+    private static AtomicLong votosValidos;
+    
 
     private static long comienzo;
     private static long duracion;
-    private Evento evento;
     
     HashMap<Long, OpcionEvento> mapaOpciones = new HashMap<Long, OpcionEvento>();
     
     private Timer timer;
-    private int idUsuario;
-    private int idUsuarioInicial;
     private static StringBuilder erroresEnSolicitudes;
-    private static StringBuilder erroresEnVotos;
+    private static StringBuilder erroresEnVotos;    
+    private UserBaseData userBaseData = null;
     
-    public Votacion(Evento evento) {
-        this.evento = evento;
-        for (OpcionEvento opcion : evento.getOpciones()) {
+    private int numberOfElectors = 0;
+    private List<String> electorList = null;
+    
+    private SimulationListener simulationListener;
+    
+    public Votacion(UserBaseData userBaseData, SimulationListener simulationListener) {
+        this.userBaseData = userBaseData;
+        this.simulationListener = simulationListener;
+        for (OpcionEvento opcion : userBaseData.getEvento().getOpciones()) {
             mapaOpciones.put(opcion.getId(), opcion);
         }
-        idUsuario = ContextoPruebas.getIdUsuario();
-        logger.debug("idUsuario: " + idUsuario);
-        idUsuarioInicial = ContextoPruebas.getIdUsuario();
-        numeroUsuarios = new AtomicLong(ContextoPruebas.getNumeroTotalDeVotosParaLanzar());
-        votacionExecutor = Executors.newFixedThreadPool(5);
-        solicitudesExecutor = Executors.newFixedThreadPool(100);
-        solicitudesCompletionService =
-            new ExecutorCompletionService<InfoVoto>(solicitudesExecutor);
+        votacionExecutor = Executors.newFixedThreadPool(10);
         votosExecutor = Executors.newFixedThreadPool(100);
         votosCompletionService = new ExecutorCompletionService<InfoVoto>(votosExecutor);
-        solicitudesEnviadas = new AtomicLong();
-        solicitudesValidas = new AtomicLong();
         solicitudesConError = new AtomicLong();
         votosEnviados = new AtomicLong();
         votosRecogidos = new AtomicLong();
         votosValidos = new AtomicLong();
         votosConError = new AtomicLong();
+        electorList = getElectorList(userBaseData);
+        numberOfElectors = electorList.size();
     }
     
-    public void lanzarVotacion() {
-        logger.debug("lanzarVotacion");
+    private List<String> getElectorList(UserBaseData userBaseData) {
+        int totalNumberElectors = userBaseData.getNumberElectors();
+        List<String> result = new ArrayList<String>(totalNumberElectors);
+        
+        List<String> representativesList = new ArrayList<String>(userBaseData.getRepresentativeNifList());
+        int numberVotesRep = userBaseData.getNumVotesRepresentatives();
+        if(numberVotesRep > 0 && !representativesList.isEmpty()) {
+            for(int i = 0; i < numberVotesRep; i++) {
+                int randomRep = new Random().nextInt(representativesList.size());
+                result.add(representativesList.remove(randomRep));
+            }
+            logger.debug("Added '" + numberVotesRep + "' representatives to elector list");
+        }
+
+        
+        List<String> userWithRepresentativesList = new ArrayList<String>(
+                userBaseData.getUsersWithRepresentativeList());
+        int numberVotesUserWithRepresentative = userBaseData.getNumVotesUsersWithRepresentative();
+        if(numberVotesUserWithRepresentative > 0 && !userWithRepresentativesList.isEmpty()) {
+            for(int i = 0; i < numberVotesUserWithRepresentative; i++) {
+                int randomUser = new Random().nextInt(userWithRepresentativesList.size());
+                result.add(userWithRepresentativesList.remove(randomUser));
+            }
+            logger.debug("Added '" + numberVotesUserWithRepresentative + "' " + 
+                    "users WITH representatives to elector list");
+        }
+
+            
+        List<String> userWithoutRepresentativesList = new ArrayList<String>(
+                userBaseData.getUsersWithoutRepresentativeList());
+        int numberVotesUserWithoutRepresentative = userBaseData.getNumVotesUsersWithoutRepresentative();
+        if(numberVotesUserWithoutRepresentative > 0 && !userWithoutRepresentativesList.isEmpty()) {
+            for(int i = 0; i < numberVotesUserWithoutRepresentative; i++) {
+                int randomUser = new Random().nextInt(userWithoutRepresentativesList.size());
+                result.add(userWithoutRepresentativesList.remove(randomUser));
+            }
+            logger.debug("Added '" + numberVotesUserWithoutRepresentative + "' " + 
+                    "users WITHOUT representatives to elector list");
+        }
+        return result;
+    }
+    
+    public void init() {
+        logger.debug("lanzarVotacion - total number of electors: " +  numberOfElectors);
         comienzo = System.currentTimeMillis();
         erroresEnSolicitudes = new StringBuilder("<html>");
         erroresEnVotos = new StringBuilder("<html>");
@@ -97,8 +133,7 @@ public class Votacion implements ActionListener {
             @Override
             public void run() {
                 try {
-                    logger.debug(" ******************** Lanzado hilo de solicitudes");
-                    lanzarSolicitudesAcceso();                    
+                    beginElection();                    
                 } catch (Exception ex) {
                     logger.error(ex.getMessage(), ex);
                 }
@@ -108,19 +143,7 @@ public class Votacion implements ActionListener {
             @Override
             public void run() {
                 try {
-                    logger.debug(" ******************** Lanzado hilo de votos");
-                    lanzarVotos();
-                } catch (Exception ex) {
-                    logger.error(ex.getMessage(), ex);
-                }
-            }
-        });
-        votacionExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    logger.debug(" ******************** Lanzado hilo validación de recibos");
-                    validarRecibos();
+                    validateReceipts();
                 } catch (Exception ex) {
                     logger.error(ex.getMessage(), ex);
                 }
@@ -128,71 +151,51 @@ public class Votacion implements ActionListener {
         });
     }
     
-     public void lanzarSolicitudesAcceso () throws Exception {
-        if(ContextoPruebas.isSimulacionConTiempos()) {
-            Long milisegundosHoras = 1000 * 60 * 60 * new Long(ContextoPruebas.getHorasDuracionVotacion());
-            Long milisegundosMinutos = 1000 * 60 * new Long(ContextoPruebas.getMinutosDuracionVotacion()); 
+    public void beginElection () throws Exception {
+        logger.debug(" ******* beginElection");
+        if(userBaseData.isSimulacionConTiempos()) {
+            Long milisegundosHoras = 1000 * 60 * 60 * new Long(userBaseData.getHorasDuracionVotacion());
+            Long milisegundosMinutos = 1000 * 60 * new Long(userBaseData.getMinutosDuracionVotacion()); 
             Long totalMilisegundosSimulacion = milisegundosHoras + milisegundosMinutos;
-            Long intervaloLanzamiento = totalMilisegundosSimulacion/ContextoPruebas.getNumeroTotalDeVotosParaLanzar();
+            Long intervaloLanzamiento = totalMilisegundosSimulacion/numberOfElectors;
             timer = new Timer(intervaloLanzamiento.intValue(), this);
             timer.setRepeats(true);
             timer.start();
         } else {
-            do {
-                if((solicitudesEnviadas.get() - votosRecogidos.get()) < 
+            while(!electorList.isEmpty()) {
+                if((votosEnviados.get() - votosRecogidos.get()) < 
                         MAX_PENDING_RESPONSES) {
-                    lanzarSolicitudAcceso(idUsuario++);
+                    int randomElector = new Random().nextInt(electorList.size());
+                    lanzarSolicitudAcceso(electorList.remove(randomElector));
                 } else Thread.sleep(500);
-            } while (idUsuario < numeroUsuarios.get() + idUsuarioInicial);
+            }
         }
-    }
+    }   
      
-     public void lanzarSolicitudAcceso (int numUsu) throws Exception {
-        Evento voto = prepararVoto(evento);
-        InfoVoto infoVoto = new InfoVoto(voto,NifUtils.getNif(numUsu));
-        solicitudesCompletionService.submit(new LanzadoraSolicitudAcceso(infoVoto));
-        solicitudesEnviadas.getAndIncrement();
-        VotacionesPanel.INSTANCIA.actualizarContadorSolicitudes(
-            new Long(solicitudesEnviadas.get()).intValue());
-     }
-    
-    public void lanzarVotos () throws Exception {
-        for (int v = 0; v < numeroUsuarios.get(); v++) {
-            logger.debug("Lanzando voto");
-            Future<InfoVoto> f = solicitudesCompletionService.take();
-            final InfoVoto infoVoto = f.get();
-            if (Respuesta.SC_OK == infoVoto.getCodigoEstado()) {
-                solicitudesValidas.getAndIncrement();
-                votosCompletionService.submit(new LanzadoraVoto(infoVoto));
-                votosEnviados.getAndIncrement();
+    public void lanzarSolicitudAcceso (String nif) throws Exception {
+        Evento voto = prepararVoto(userBaseData.getEvento());
+        InfoVoto infoVoto = new InfoVoto(voto, nif);
+        votosCompletionService.submit(new LanzadoraVoto(infoVoto));
+        votosEnviados.getAndIncrement();
+        if(VotacionesPanel.INSTANCIA != null)
                 VotacionesPanel.INSTANCIA.actualizarContadorVotosLanzados(
-                  new Long(votosEnviados.get()).intValue());
-            } else {
-                solicitudesConError.getAndIncrement();
-                 VotacionesPanel.INSTANCIA.actualizarContadorSolicitudesError(
-                         new Long(solicitudesConError.get()).intValue());
-                String mensaje = "SOLICITUD CON ERROR - Usuario: " + infoVoto.getFrom() 
-                        + " - Mensaje de Servidor: " + infoVoto.getMensaje();
-                logger.error(mensaje);
-                infoVoto.setErrorControlAcceso(true);
-                erroresEnSolicitudes.append(mensaje + "<br/>");
-            }   
-        }
-        logger.debug("Lanzados todos los votos - solicitudes validas: " + solicitudesValidas.get() 
-                + " - solicitudes con error: " + solicitudesConError.get());
-        if(ContextoPruebas.getNumeroTotalDeVotosParaLanzar() == solicitudesConError.get())
-            finalizarVotacion();
+                new Long(votosEnviados.get()).intValue());
     }
 
-    public void validarRecibos () throws Exception {
-        do {
+
+    public void validateReceipts () throws Exception {
+        logger.debug("******** validateReceipts");
+        while (numberOfElectors > votosRecogidos.get()) {
             try {
                 Future<InfoVoto> f = votosCompletionService.take();
+                votosRecogidos.getAndIncrement();
                 InfoVoto infoVoto = f.get();
-                VotacionesPanel.INSTANCIA.actualizarContadorVotosValidados(
-                        new Long(votosRecogidos.incrementAndGet()).intValue());    
-                ReciboVoto reciboVoto = infoVoto.getReciboVoto();
-                if (200 == reciboVoto.getCodigoEstado()) {
+                if(VotacionesPanel.INSTANCIA != null)
+                        VotacionesPanel.INSTANCIA.actualizarContadorVotosValidados(
+                        new Long(votosRecogidos.get()).intValue());    
+                
+                if (Respuesta.SC_OK == infoVoto.getCodigoEstado()) {
+                    ReciboVoto reciboVoto = infoVoto.getReciboVoto();
                     votosValidos.getAndIncrement();
                     File recibo = new File(ContextoPruebas.getUserDirPath(infoVoto.getFrom())
                         + ContextoPruebas.RECIBO_FILE + infoVoto.getVoto().getEventoId() + ".p7m");
@@ -200,36 +203,46 @@ public class Votacion implements ActionListener {
                     logger.debug("OK - Recibo de voto en " + recibo.getAbsolutePath());
                 } else {
                     String mensaje = "Voto CON ERROR - Usuario: " + infoVoto.getFrom() 
-                            + " - Mensaje de Servidor: " + infoVoto.getMensaje()
+                            + " - Msg: " + infoVoto.getMensaje()
                             + " - Hash certificado: " + infoVoto.getVoto().getHashCertificadoVotoHex();
-                    erroresEnVotos.append(mensaje + "<br/>");
-                    votosConError.getAndIncrement();
-                    VotacionesPanel.INSTANCIA.actualizarContadorVotosError(
-                            new Long(votosConError.get()).intValue());
                     logger.error(mensaje);
+                    switch(infoVoto.getError()) {
+                        case ACCESS_REQUEST:
+                            solicitudesConError.getAndIncrement();
+                            if(VotacionesPanel.INSTANCIA != null)
+                                VotacionesPanel.INSTANCIA.actualizarContadorSolicitudesError(
+                                new Long(solicitudesConError.get()).intValue());
+                            break;
+                        case VOTE:
+                            votosConError.getAndIncrement();
+                            if(VotacionesPanel.INSTANCIA != null)
+                                VotacionesPanel.INSTANCIA.actualizarContadorVotosError(
+                                new Long(votosConError.get()).intValue());
+                            erroresEnVotos.append(mensaje + "<br/>");
+                            break;
+                    }
+
                 }
             } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);
                 votosConError.getAndIncrement();
-                continue;
             }
-        } while (ContextoPruebas.getNumeroTotalDeVotosParaLanzar() >
-                (votosRecogidos.get() + solicitudesConError.get()));
+        }
         finalizarVotacion();
     }
     
     public void finalizarVotacion() {
         duracion = System.currentTimeMillis() - comienzo;
-        logger.debug("finalizarVotacion - Apagando ejecutores");
+        logger.debug("finalizarVotacion - shutdown executors");
         if(timer != null) timer.stop();
-        ContextoPruebas.setIdUsuario(idUsuario);
         votacionExecutor.shutdownNow();
-        solicitudesExecutor.shutdownNow();
+        //solicitudesExecutor.shutdownNow();
         votosExecutor.shutdownNow(); 
         mostrarEstadisticas();
     }
         
-    public Evento prepararVoto (Evento evento) throws NoSuchAlgorithmException {
+    public synchronized Evento prepararVoto (Evento evento) 
+            throws NoSuchAlgorithmException {
         Evento voto = new Evento();
         voto.setAsunto(evento.getAsunto());
         voto.setCentroControl(evento.getCentroControl());
@@ -237,12 +250,14 @@ public class Votacion implements ActionListener {
         voto.setControlAcceso(evento.getControlAcceso());
         voto.setEventoId(evento.getEventoId());
         voto.setOpciones(evento.getOpciones());
-        voto.setOrigenHashSolicitudAcceso(UUID.randomUUID().toString());
+        String origenHashSolicitudAcceso = UUID.randomUUID().toString();
+        voto.setOrigenHashSolicitudAcceso(origenHashSolicitudAcceso);
         voto.setHashSolicitudAccesoBase64(CMSUtils.getHashBase64(
-            voto.getOrigenHashSolicitudAcceso(), ContextoPruebas.DIGEST_ALG));
-        voto.setOrigenHashCertificadoVoto(UUID.randomUUID().toString());
+            origenHashSolicitudAcceso, ContextoPruebas.DIGEST_ALG));
+        String origenHashCertificadoVoto = UUID.randomUUID().toString();
+        voto.setOrigenHashCertificadoVoto(origenHashCertificadoVoto);
         voto.setHashCertificadoVotoBase64(CMSUtils.getHashBase64(
-            voto.getOrigenHashCertificadoVoto(), ContextoPruebas.DIGEST_ALG));  
+            origenHashCertificadoVoto, ContextoPruebas.DIGEST_ALG));  
         voto.setOpcionSeleccionada(mapaOpciones.get(
         		getRandomOpcionSeleccionadaId(voto)));
         return voto;
@@ -255,14 +270,10 @@ public class Votacion implements ActionListener {
         return opcionDeEvento.getId();
     }
     
-    private static void mostrarEstadisticas () {
+    private void mostrarEstadisticas () {
         StringBuilder result = new StringBuilder("<html>");
         result.append("<b>Duración: </b>" + 
                 DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(duracion));
-        logger.info("Solicitudes enviadas: " + solicitudesEnviadas.get());
-        result.append("<br/><b>Solicitudes enviadas: </b>" + solicitudesEnviadas.get());
-        logger.info("Solicitudes validas: " + solicitudesValidas.get());
-        result.append("<br/><b>Solicitudes validas: </b>" + solicitudesValidas.get());
         logger.info("Solicitudes con error: " + solicitudesConError.get());
         result.append("<br/><b>Solicitudes con error: </b>" + solicitudesConError.get());
         logger.info("Votos enviados: " + votosEnviados.get());
@@ -279,22 +290,26 @@ public class Votacion implements ActionListener {
         if(votosConError.get() > 0) {
             mensajeErroresEnVotos = erroresEnVotos.toString();
         }
-        VotacionesPanel.INSTANCIA.mostrarResultadosSimulacion(
+        if(VotacionesPanel.INSTANCIA != null)
+                VotacionesPanel.INSTANCIA.mostrarResultadosSimulacion(
                 result.toString(), mensajeErroresEnSolicitudes, mensajeErroresEnVotos);
+        if(simulationListener != null) 
+            simulationListener.setSimulationResult(this, result.toString());
     }
 
     @Override
     public void actionPerformed(ActionEvent ae) {
         if (ae.getSource().equals(timer)) {
-            try {
-                if(numeroUsuarios.get() >= idUsuario - idUsuarioInicial)
-                    lanzarSolicitudAcceso(idUsuario++);
-                else timer.stop();
-            } catch (Exception ex) {
-                logger.error(ex.getMessage(), ex);
-            }
+            if(!electorList.isEmpty()) {
+                try {
+                    int randomElector = new Random().nextInt(electorList.size());
+                    lanzarSolicitudAcceso(electorList.remove(randomElector));
+                } catch (Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                }
+            } else timer.stop();
         }
     }
-
+    
     
 }

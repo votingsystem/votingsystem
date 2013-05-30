@@ -6,9 +6,7 @@ import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -79,6 +77,8 @@ public class EventoVotacion implements Serializable {
     @Column(name="contenido", columnDefinition="TEXT")
     @Analyzer(definition = "customAnalyzer")
     private String contenido; 
+    @Column(name="metaInf", columnDefinition="TEXT")
+    private String metaInf = "{}"; 
     @Lob @Column(name="cadenaCertificacionControlAcceso")
     private byte[] cadenaCertificacionControlAcceso;
     @ManyToOne(fetch=FetchType.LAZY)
@@ -90,14 +90,14 @@ public class EventoVotacion implements Serializable {
     @Column(name="url")
     private String url;
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="evento")
-    private Set<MensajeSMIME> mensajeSMIMESet = new HashSet<MensajeSMIME>(0); 
+    private Set<MensajeSMIME> mensajeSMIMESet; 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="usuarioId")
     private Usuario usuario; 
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="eventoVotacion")
-    private Set<Certificado> certificados = new HashSet<Certificado>(0);       
+    private Set<Certificado> certificados;       
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="eventoVotacion")
-    private Set<OpcionDeEvento> opciones = new HashSet<OpcionDeEvento>(0);
+    private Set<OpcionDeEvento> opciones;
     //Owning Entity side of the relationship
     @JoinTable(name="EtiquetaEvento", 
         joinColumns = { 
@@ -109,7 +109,7 @@ public class EventoVotacion implements Serializable {
     @ManyToMany
     private Set<Etiqueta> etiquetaSet;
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="eventoVotacion")
-    private Set<Voto> votos = new HashSet<Voto>(0);  
+    private Set<Voto> votos;  
     
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="fechaInicio", length=23)
@@ -333,5 +333,13 @@ public class EventoVotacion implements Serializable {
 
 	public void setMensajeSMIMESet(Set<MensajeSMIME> mensajeSMIMESet) {
 		this.mensajeSMIMESet = mensajeSMIMESet;
+	}
+
+	public String getMetaInf() {
+		return metaInf;
+	}
+
+	public void setMetaInf(String metaInf) {
+		this.metaInf = metaInf;
 	}
 }

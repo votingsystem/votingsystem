@@ -9,6 +9,6 @@ import java.util.List;
 public interface VotingSystemWorkerListener {
     
     public void process(List<String> messages);
-    public void showResult(VotingSystemWorker votingSystemWorker);
+    public void showResult(VotingSystemWorker worker);
     
 }

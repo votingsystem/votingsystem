@@ -1,11 +1,8 @@
 package org.sistemavotacion.worker;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Map;
 import javax.swing.SwingWorker;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
 import org.sistemavotacion.Contexto;
 import static org.sistemavotacion.Contexto.getString;
 import org.sistemavotacion.modelo.Respuesta;
@@ -26,9 +23,8 @@ public class FileMapLauncherWorker extends SwingWorker<Integer, String>
     private VotingSystemWorkerListener workerListener;
     private Map<String, Object> fileMap;
     private Integer id = null;
-    private int statusCode = Respuesta.SC_ERROR;
-    private String message = null;
     private Exception exception = null;
+    private Respuesta respuesta = null;
     
     public FileMapLauncherWorker(Integer id, Map<String, Object> fileMap, String serverURL, 
             VotingSystemWorkerListener workerListener) {
@@ -41,7 +37,7 @@ public class FileMapLauncherWorker extends SwingWorker<Integer, String>
     @Override//on the EDT
     protected void done() {
         try {
-            statusCode = get();
+            get();
         }catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             exception = ex;
@@ -54,19 +50,20 @@ public class FileMapLauncherWorker extends SwingWorker<Integer, String>
         logger.debug("doInBackground - serverURL: " + serverURL);
         String msg = "<html><b>" + getString("connectionMsg") + "...</b></html>";
         workerListener.process(Arrays.asList(msg));
-        HttpResponse response = Contexto.getHttpHelper().
+        respuesta = Contexto.getHttpHelper().
                 sendObjectMap(fileMap, serverURL);
-        statusCode = response.getStatusLine().getStatusCode();
-        message = EntityUtils.toString(response.getEntity());
-        logger.debug("doInBackground - message: " + message);
-        EntityUtils.consume(response.getEntity());
-        return statusCode;
+        return respuesta.getCodigoEstado();
     }
 
+    public byte[] getBytesResponse() {
+        if(respuesta != null) return respuesta.getBytesArchivo();
+        else return null;
+    }
+    
     @Override
     public String getMessage() {
         if(exception != null) return exception.getMessage();
-        else return message;
+        else return respuesta.getMensaje();
     }
 
     @Override
@@ -76,6 +73,7 @@ public class FileMapLauncherWorker extends SwingWorker<Integer, String>
 
     @Override
     public int getStatusCode() {
-        return statusCode;
+        if(respuesta == null) return respuesta.SC_ERROR_EJECUCION;
+        return respuesta.getCodigoEstado();
     }
 }

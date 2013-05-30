@@ -3,6 +3,7 @@ package org.sistemavotacion.controlacceso.modelo;
 import java.io.File;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
@@ -25,7 +26,6 @@ public class Respuesta {
     public static final int SC_CANCELADO = 0;
     
     private int codigoEstado;
-    private int cantidad;
 	private Tipo tipo = Tipo.OK; 
 	private Date fecha;
 	private String mensaje;
@@ -51,6 +51,8 @@ public class Respuesta {
     private SolicitudCSRVoto solicitudCSR;
     private Dispositivo dispositivo;
     private Documento documento;
+    private Map datos;
+    private Object data;
 
 	public String getAsunto() {
 		return asunto;
@@ -216,14 +218,6 @@ public class Respuesta {
 		this.file = file;
 	}
 
-	public int getCantidad() {
-		return cantidad;
-	}
-
-	public void setCantidad(int cantidad) {
-		this.cantidad = cantidad;
-	}
-
 	public byte[] getTimeStampToken() {
 		return timeStampToken;
 	}
@@ -266,6 +260,22 @@ public class Respuesta {
 
 	public void setCentroControl(CentroControl centroControl) {
 		this.centroControl = centroControl;
+	}
+
+	public Map getDatos() {
+		return datos;
+	}
+
+	public void setDatos(Map datos) {
+		this.datos = datos;
+	}
+
+	public Object getData() {
+		return data;
+	}
+
+	public void setData(Object data) {
+		this.data = data;
 	}
 
 }

@@ -6,7 +6,6 @@ import com.sun.mail.util.BASE64DecoderStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,6 +42,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.Set;
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
@@ -76,7 +76,7 @@ import org.sistemavotacion.worker.TimeStampWorker;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class SMIMEMessageWrapper extends MimeMessage {
     
@@ -96,26 +96,26 @@ public class SMIMEMessageWrapper extends MimeMessage {
 
     private String messageId;
     private String fileName;
-    private File file;
     private String contentType;
     private String signedContent;
     private SMIMESigned smimeSigned = null;
     private boolean isValidSignature = false;
     
     private Set<Firmante> firmantes;
-    private String contentDigestStr;
-
+    private static Properties props = System.getProperties();
+    // Get a Session object with the default properties.
+    private static Session defaultSession = Session.getDefaultInstance(props, null);
     
     public Set<Firmante> getFirmantes() {
         return firmantes;
     }
     
-    private SMIMEMessageWrapper(Session session) throws MessagingException {
+    public SMIMEMessageWrapper(Session session) throws MessagingException {
         super(session);
         fileName =  StringUtils.RandomLowerString(System.currentTimeMillis(), 7);
         setDisposition("attachment; fileName=" + fileName + SIGNED_PART_EXTENSION);
-        contentType = "application/x-pkcs7-mime; smime-type=signed-data; name=" + fileName 
-        		+ SIGNED_PART_EXTENSION;
+        contentType = "application/x-pkcs7-mime; smime-type=signed-data; name=" 
+                + fileName + SIGNED_PART_EXTENSION;
     }
 
     public SMIMEMessageWrapper (Session session, InputStream inputStream, String fileName) 
@@ -128,12 +128,6 @@ public class SMIMEMessageWrapper extends MimeMessage {
         initSMIMEMessage();
     }
 
-    public SMIMEMessageWrapper (Session session, File file) throws IOException, 
-    		MessagingException, CMSException, SMIMEException, Exception {
-    	this(session, new FileInputStream(file), file.getName());
-    	this.file = file;
-    }
-    
     private void initSMIMEMessage() throws IOException, MessagingException, 
             CMSException, SMIMEException, Exception{
         if (getContent() instanceof BASE64DecoderStream) {
@@ -186,19 +180,14 @@ public class SMIMEMessageWrapper extends MimeMessage {
                 signedContent = stringBuilder.toString();
             }
         }
-        isValidSignature = checkSignature(); 
+        checkSignature(); 
     }
     
     @Override
     public void updateMessageID() throws MessagingException {
             setHeader("Message-ID", messageId);
     }
-
-    public void setContent (byte[] content) throws MessagingException {
-            setContent(content, contentType);
-            saveChanges();
-    }
-
+ 
     public void updateMessageID(String nifUsuario) throws MessagingException {
             messageId = getFileName() + "@" + nifUsuario;
             Address[] addresses = {new InternetAddress(nifUsuario)};
@@ -211,13 +200,6 @@ public class SMIMEMessageWrapper extends MimeMessage {
      */
     public String getSignedContent() {
         return signedContent;
-    }
-
-    /**
-     * @return the contentDigestStr
-     */
-    public String getContentDigestStr() {
-        return contentDigestStr;
     }
     
     /**
@@ -242,14 +224,14 @@ public class SMIMEMessageWrapper extends MimeMessage {
      * verify that the sig is correct and that it was generated when the 
      * certificate was current(assuming the cert is contained in the message).
      */
-    private boolean checkSignature() throws Exception {
+    private void checkSignature() throws Exception {
         // certificates and crls passed in the signature
         Store certs = smimeSigned.getCertificates();
         // SignerInfo blocks which contain the signatures
         SignerInformationStore  signers = smimeSigned.getSignerInfos();
         logger.debug("signers.size(): " + signers.size());
         Iterator<SignerInformation> it = signers.getSigners().iterator();
-        boolean isVerificationOK = false;
+        isValidSignature = false;
         // check each signer
         firmantes = new HashSet<Firmante>();
         while (it.hasNext()) {
@@ -260,7 +242,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
             Firmante firmante = new Firmante();
             firmante.setSigner(signer);
             firmante.setContenidoFirmado(getSignedContent());
-            byte[] hash = null;
+            /*byte[] hash = null;
             String hashStr = null;
             if (attributes != null) {
                 Attribute signingTimeAttribute = attributes.get(CMSAttributes.signingTime);
@@ -269,34 +251,26 @@ public class SMIMEMessageWrapper extends MimeMessage {
                 Attribute messageDigestAttribute = attributes.get( CMSAttributes.messageDigest );
                 hash = ((ASN1OctetString)messageDigestAttribute.getAttrValues().getObjectAt(0)).getOctets();
                 hashStr = new String(Base64.encode(hash));
-            }   
+            }*/   
             Collection certCollection = certs.getMatches(signer.getSID());
             logger.debug("Collection matches: " + certCollection.size());
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = new JcaX509CertificateConverter()
                     .setProvider(SIGN_PROVIDER).getCertificate(
                     (X509CertificateHolder)certIt.next());
-
+            SignerInformationVerifier siv = new JcaSimpleSignerInfoVerifierBuilder().
+                    setProvider(SIGN_PROVIDER).build(cert);
+            isValidSignature  = signer.verify(siv);
+            if(!isValidSignature) {
+                logger.debug("signature verified");
+                return;
+            } 
             firmante.setUsuario(Usuario.getUsuario(cert));
             firmante.setCert(cert);
             firmantes.add(firmante);
+            firmante.setTimeStampToken(checkTimeStampToken(signer));//method can only be called after verify.
             logger.debug("cert.getSubjectDN(): " + cert.getSubjectDN());
-            SignerInformationVerifier siv = new JcaSimpleSignerInfoVerifierBuilder().
-                    setProvider(SIGN_PROVIDER).build(cert);
-            if (signer.verify(siv)){
-                logger.debug("signature verified");
-                firmante.setTimeStampToken(checkTimeStampToken(signer));//method can only be called after verify.
-                isVerificationOK = true;
-                if(contentDigestStr == null) contentDigestStr = hashStr;
-                else if(!contentDigestStr.equals(hashStr)) {
-                    logger.debug("ERROR contentDigestStr: " + contentDigestStr + 
-                            " - hashStr: " + hashStr);
-                    return false;
-                }
-            } else {
-                logger.debug("signature failed!");
-                return false;
-            }
+
             //byte[] digestParams = signer.getDigestAlgParams();
             //String digestParamsStr = new String(Base64.encode(digestParams));
             //logger.debug(" -- digestParamsStr: " + digestParamsStr);
@@ -308,7 +282,6 @@ public class SMIMEMessageWrapper extends MimeMessage {
             //boolean cmsVerifySignature = CMSUtils.verifySignature(signer, cert, SIGN_PROVIDER);
             //logger.debug(" -- cmsVerifySignature: " + cmsVerifySignature);
         }
-        return isVerificationOK;
     }
     
     
@@ -344,21 +317,21 @@ public class SMIMEMessageWrapper extends MimeMessage {
                 cal.setTime(timeStampToken.getTimeStampInfo().getGenTime());
                 logger.debug("checkTimeStampToken - timeStampToken - fecha: " 
                         +  DateUtils.getStringFromDate(cal.getTime()));
-                logger.debug("checkTimeStampToken - digestStr: " + digestStr);
-                logger.debug("checkTimeStampToken - timeStampToken - hashTokenStr: " +  hashTokenStr);
+                //logger.debug("checkTimeStampToken - digestStr: " + digestStr);
+                //logger.debug("checkTimeStampToken - timeStampToken - hashTokenStr: " +  hashTokenStr);
                 return timeStampToken;
             }
         } else logger.debug(" --- without unsignedAttributes"); 
         return timeStampToken;
     }
     
-    public File setTimeStampToken(TimeStampWorker timeStampWorker) throws Exception {
+    public void setTimeStampToken(TimeStampWorker timeStampWorker) throws Exception {
         if(timeStampWorker == null || timeStampWorker.getTimeStampToken() == null) 
             throw new Exception("NULL_TIME_STAMP_TOKEN");
         TimeStampToken timeStampToken = timeStampWorker.getTimeStampToken();
         byte[] hashTokenBytes = timeStampToken.getTimeStampInfo().getMessageImprintDigest();
         String hashTokenStr = new String(Base64.encode(hashTokenBytes));
-        logger.debug("setTimeStampToken - timeStampToken - hashTokenStr: " +  hashTokenStr);
+        //logger.debug("setTimeStampToken - timeStampToken - hashTokenStr: " +  hashTokenStr);
         SignerInformationStore  signers = smimeSigned.getSignerInfos();
         Iterator<SignerInformation> it = signers.getSigners().iterator();
         List<SignerInformation> newSigners = new ArrayList<SignerInformation>();
@@ -373,7 +346,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
                 AttributeTable attributeTable = signer.getUnsignedAttributes();
                 SignerInformation updatedSigner = null;
                 if(attributeTable == null) {
-                    logger.debug("setTimeStampToken - sigenr without UnsignedAttributes - actualizando token");
+                    logger.debug("setTimeStampToken - signer without UnsignedAttributes - actualizando token");
                     updatedSigner = signer.replaceUnsignedAttributes(
                             signer, timeStampWorker.getTimeStampTokenAsAttributeTable());
                     newSigners.add(updatedSigner);
@@ -389,13 +362,10 @@ public class SMIMEMessageWrapper extends MimeMessage {
                 }
             } else newSigners.add(signer);
         }
-        logger.debug("setTimeStampToken - num. firmantes: " + newSigners.size());
+        //logger.debug("setTimeStampToken - num. firmantes: " + newSigners.size());
         SignerInformationStore newSignersStore = new SignerInformationStore(newSigners);
         CMSSignedData cmsdata = smimeSigned.replaceSigners(smimeSigned, newSignersStore);
         replaceSigners(cmsdata);
-        if(file != null) writeTo(new FileOutputStream(file));
-        else logger.debug("File null!!!");
-        return file;
     }
     
     public TimeStampRequest getTimeStampRequest(String timeStampRequestAlg) {
@@ -417,12 +387,12 @@ public class SMIMEMessageWrapper extends MimeMessage {
     
 
     private void replaceSigners(CMSSignedData cmsdata) throws Exception {
+        logger.debug("replaceSigners");
         SMIMESignedGenerator gen = 
                 new SMIMESignedGenerator();
         gen.addAttributeCertificates(cmsdata.getAttributeCertificates());
         gen.addCertificates(cmsdata.getCertificates());
         gen.addSigners(cmsdata.getSignerInfos());
-
         MimeMultipart mimeMultipart = gen.generate(smimeSigned.getContent(), 
                 smimeSigned.getContent().getFileName());
         setContent(mimeMultipart, mimeMultipart.getContentType());
@@ -430,7 +400,8 @@ public class SMIMEMessageWrapper extends MimeMessage {
     }
     
     @Override public void saveChanges() throws MessagingException {
-        super.saveChanges();
+        logger.debug("saveChanges");
+        super.saveChanges(); 
         try {
             initSMIMEMessage();
         } catch(Exception ex) {

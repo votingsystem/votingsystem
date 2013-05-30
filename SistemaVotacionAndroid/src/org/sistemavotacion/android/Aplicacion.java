@@ -68,26 +68,14 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
 	public static final String TAG = "Aplicacion";
 	
 	public enum Estado {CON_CERTIFICADO, CON_CSR, SIN_CSR}
-	
-	public static final String PDF_CONTENT_TYPE       = "application/pdf";
-    public static final String SIGNED_CONTENT_TYPE    = "application/x-pkcs7-signature";
-    public static final String ENCRYPTED_CONTENT_TYPE = "application/x-pkcs7-mime";
-    public static final String SIGNED_AND_ENCRYPTED_CONTENT_TYPE = 
-            SIGNED_CONTENT_TYPE + "," + ENCRYPTED_CONTENT_TYPE;
-    public static final String PDF_SIGNED_AND_ENCRYPTED_CONTENT_TYPE = 
-    		PDF_CONTENT_TYPE + "," + 
-            SIGNED_CONTENT_TYPE + "," + ENCRYPTED_CONTENT_TYPE;    
-    public static final String PDF_SIGNED_CONTENT_TYPE = 
-    		PDF_CONTENT_TYPE + "," + SIGNED_CONTENT_TYPE;     
-    public static final String PDF_ENCRYPTED_CONTENT_TYPE = 
-    		PDF_CONTENT_TYPE + "," + ENCRYPTED_CONTENT_TYPE;      
+
 	
 	public static final String PREFS_ESTADO              = "estado";
 	public static final String PREFS_ID_SOLICTUD_CSR     = "idSolicitudCSR";
 	public static final String PREFS_ID_APLICACION       = "idAplicacion";
 	public static final String MANIFEST_FILE_NAME        = "Manifest";
-    public static final String CSR_FILE_NAME             = "csr";
-    public static final String ACCESS_REQUEST_FILE_NAME  = "accessRequest";
+    public static final String NOMBRE_ARCHIVO_FIRMADO    = "archivoFirmado";
+    public static final String NOMBRE_ARCHIVO_CSR        = "csr";
     public static final String NOMBRE_ARCHIVO_BYTE_ARRAY = "byteArray";
     public static final String SIGNED_PART_EXTENSION     = ".p7m";
     public static final String DEFAULT_SIGNED_FILE_NAME  = "smimeMessage";

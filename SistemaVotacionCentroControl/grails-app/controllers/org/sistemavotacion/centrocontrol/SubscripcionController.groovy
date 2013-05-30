@@ -37,7 +37,7 @@ class SubscripcionController {
 	 *					Dcoumento con los datos del control de acceso que se desea dar de alta.
 	 */
 	def index() { 
-		MensajeSMIME mensajeSMIME = flash.mensajeSMIMEReq
+		MensajeSMIME mensajeSMIME = params.mensajeSMIMEReq
 		if(!mensajeSMIME) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg

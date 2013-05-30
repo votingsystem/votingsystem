@@ -1,6 +1,5 @@
 package org.sistemavotacion;
 
-import static org.sistemavotacion.Contexto.NOMBRE_ARCHIVO_FIRMADO;
 import static org.sistemavotacion.Contexto.TIMESTAMP_DNIe_HASH;
 import static org.sistemavotacion.Contexto.getString;
 
@@ -23,7 +22,7 @@ import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.smime.DNIeSignedMailGenerator;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.util.FileUtils;
-import org.sistemavotacion.worker.DocumentLauncherWorker;
+import org.sistemavotacion.worker.DocumentSenderWorker;
 import org.sistemavotacion.worker.ObtenerArchivoWorker;
 import org.sistemavotacion.worker.PDFSignerDNIeWorker;
 import org.sistemavotacion.worker.TimeStampWorker;
@@ -32,17 +31,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.qrcode.ByteArray;
-import java.io.IOException;
-import java.util.logging.Level;
-import javax.mail.MessagingException;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.mail.smime.SMIMEException;
+import java.io.FileOutputStream;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
 import org.sistemavotacion.dialogo.PreconditionsCheckerDialog;
 import static org.sistemavotacion.modelo.Operacion.Tipo.FIRMA_MANIFIESTO_PDF;
 import static org.sistemavotacion.modelo.Operacion.Tipo.PUBLICACION_MANIFIESTO_PDF;
 import static org.sistemavotacion.modelo.Operacion.Tipo.SOLICITUD_COPIA_SEGURIDAD;
-import org.sistemavotacion.seguridad.EncryptionHelper;
+import org.sistemavotacion.seguridad.Encryptor;
 import org.sistemavotacion.worker.VotingSystemWorker;
 
 /**
@@ -60,15 +56,13 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
     private static final int OBTENER_ARCHIVO_WORKER          = 2;
     private static final int TIME_STAMP_WORKER               = 3;
 
-    
     private byte[] bytesDocumento;
     private volatile boolean mostrandoPantallaEnvio = false;
     private Frame parentFrame;
     private SwingWorker tareaEnEjecucion;
-    private File documentoFirmado;
     private AppletFirma appletFirma;
     private Operacion operacion;
-    private SMIMEMessageWrapper timeStampedDocument;
+    private SMIMEMessageWrapper documentSMIME;
     private static FirmaDialog INSTANCIA;
     
     public FirmaDialog(Frame parent, boolean modal, final AppletFirma appletFirma) {
@@ -336,26 +330,28 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                         case PUBLICACION_RECLAMACION_SMIME:
                         case CANCELAR_EVENTO:
                         case PUBLICACION_VOTACION_SMIME:
-                        	documentoFirmado = new File(FileUtils.APPTEMPDIR + NOMBRE_ARCHIVO_FIRMADO);
-                            documentoFirmado = DNIeSignedMailGenerator.genFile(null,
-                                operacion.getNombreDestinatarioFirmaNormalizado(),
-                                operacion.getContenidoFirma().toString(),
-                                finalPassword.toCharArray(), operacion.getAsuntoMensajeFirmado(), 
-                                documentoFirmado);
-                                setTimeStampDocument(documentoFirmado, TIMESTAMP_DNIe_HASH);
+                            //File documentoFirmado = new File(FileUtils.APPTEMPDIR + NOMBRE_ARCHIVO_FIRMADO);
+                            documentSMIME = DNIeSignedMailGenerator.
+                                    genMimeMessage(null, operacion.getNombreDestinatarioFirmaNormalizado(),
+                                    operacion.getContenidoFirma().toString(),
+                                    finalPassword.toCharArray(), operacion.getAsuntoMensajeFirmado(), null);                            
+                            new TimeStampWorker(TIME_STAMP_WORKER, operacion.getUrlTimeStampServer(),
+                                INSTANCIA, documentSMIME.getTimeStampRequest(TIMESTAMP_DNIe_HASH),
+                                PreconditionsCheckerDialog.getTimeStampCert(operacion.getUrlServer())).execute();
                             return;
                         case SOLICITUD_COPIA_SEGURIDAD:
                         case FIRMA_MANIFIESTO_PDF:
                         case PUBLICACION_MANIFIESTO_PDF:
-                            documentoFirmado = new File(FileUtils.APPTEMPDIR +
+                            File documentoFirmado = new File(FileUtils.APPTEMPDIR +
                                 operacion.getTipo().getNombreArchivoEnDisco());
+                            documentoFirmado.deleteOnExit();
                             PdfReader readerManifiesto = new PdfReader(bytesDocumento);
                             String reason = null;
-                                String location = null;
-                                new PDFSignerDNIeWorker(PDF_SIGNER_DNIE_WORKER, 
-                                        operacion.getUrlTimeStampServer(),
-                                        INSTANCIA, reason, location, finalPassword.toCharArray(), 
-                                        readerManifiesto, documentoFirmado).execute();
+                            String location = null;
+                            new PDFSignerDNIeWorker(PDF_SIGNER_DNIE_WORKER, 
+                                    operacion.getUrlTimeStampServer(),
+                                    INSTANCIA, reason, location, finalPassword.toCharArray(), 
+                                    readerManifiesto, documentoFirmado).execute();
                             return;
                         default:
                             logger.debug("No se ha encontrado la operación " + operacion.getTipo().toString());
@@ -413,48 +409,20 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
     // End of variables declaration//GEN-END:variables
 
     
-    private void setTimeStampDocument(File document, String timeStampRequestAlg) {
-        if(document == null) return;
-        try {
-            timeStampedDocument = new SMIMEMessageWrapper(null, document);
-            new TimeStampWorker(TIME_STAMP_WORKER, operacion.getUrlTimeStampServer(),
-                    this, timeStampedDocument.getTimeStampRequest(timeStampRequestAlg)).execute();
-        } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            appletFirma.responderCliente(
-                    Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
-        }
-    }
-    
     /*
      * Method invoked when document is timestamped
      */
-    private void processSignedDocument(File document) {
+    private void processSMIME(SMIMEMessageWrapper document) {
         if(document == null) return;
-        final Operacion operacion = appletFirma.getOperacionEnCurso();
-        logger.debug(" - processSignedDocument - operation: " + operacion.getTipo());
-        File documentToSend = null;
+        logger.debug(" - processSMIME - operation: " + operacion.getTipo());
         try {
-            document.deleteOnExit();
-            String contentType = null;
-            switch(operacion.getTipo()) {
-                case SOLICITUD_COPIA_SEGURIDAD:
-                case FIRMA_MANIFIESTO_PDF:
-                case PUBLICACION_MANIFIESTO_PDF:
-                    documentToSend = File.createTempFile("pdfEncryptedFile", ".eml");
-                    documentToSend.deleteOnExit();
-                    EncryptionHelper.encryptFile(document, documentToSend, 
-                        PreconditionsCheckerDialog.getCert(operacion.getUrlServer()));
-                    contentType = Contexto.PDF_SIGNED_AND_ENCRYPTED_CONTENT_TYPE;
-                    break;
-                default:
-                    EncryptionHelper.encryptSMIMEFile(document, 
-                            PreconditionsCheckerDialog.getCert(operacion.getUrlServer()));
-                    contentType = Contexto.SIGNED_AND_ENCRYPTED_CONTENT_TYPE;
-                    documentToSend = document;
-                    break;
-            }   
-            tareaEnEjecucion = new DocumentLauncherWorker(
+            File documentToSend = File.createTempFile("encryptedFile", ".p7s");
+            documentToSend.deleteOnExit();
+            String contentType = Contexto.SIGNED_AND_ENCRYPTED_CONTENT_TYPE;
+            MimeMessage mimeMessage = Encryptor.encryptSMIME(document, 
+                    PreconditionsCheckerDialog.getCert(operacion.getUrlServer()));
+            mimeMessage.writeTo(new FileOutputStream(documentToSend));
+            tareaEnEjecucion = new DocumentSenderWorker(
                     ENVIAR_DOCUMENTO_FIRMADO_WORKER, documentToSend, contentType,
                     operacion.getUrlEnvioDocumento(), this);
             tareaEnEjecucion.execute();
@@ -467,6 +435,31 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
         }
     }
     
+    /*
+     * Method invoked when pdf document is timestamped
+     */
+    private void processPDF(File document) {
+        try {
+            File documentToSend = File.createTempFile("pdfEncryptedFile", ".eml");
+            document.deleteOnExit();
+
+            MimeBodyPart mimeBodyPart = Encryptor.encryptFile(document, 
+                    PreconditionsCheckerDialog.getCert(operacion.getUrlServer()));
+            mimeBodyPart.writeTo(new FileOutputStream(documentToSend));
+
+            String contentType = Contexto.PDF_SIGNED_AND_ENCRYPTED_CONTENT_TYPE;
+            tareaEnEjecucion = new DocumentSenderWorker(
+                    ENVIAR_DOCUMENTO_FIRMADO_WORKER, documentToSend, contentType,
+                    operacion.getUrlEnvioDocumento(), this);
+            tareaEnEjecucion.execute();
+        } catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
+            appletFirma.responderCliente(
+                    Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
+            MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
+            errorDialog.setMessage(ex.getMessage(), getString("errorLbl"));
+        }
+    }
     
     @Override  public void process(List<String> messages) {
         logger.debug(" - process: " + messages.iterator().next());
@@ -481,7 +474,7 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
         switch(worker.getId()) {
             case PDF_SIGNER_DNIE_WORKER:
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
-                    processSignedDocument(((PDFSignerDNIeWorker)worker).
+                    processPDF(((PDFSignerDNIeWorker)worker).
                             getSignedAndTimeStampedPDF());
                 } else {
                     mostrarPantallaEnvio(false);
@@ -533,8 +526,8 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
             case TIME_STAMP_WORKER:
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
-                        processSignedDocument(timeStampedDocument.
-                                setTimeStampToken((TimeStampWorker)worker));
+                        documentSMIME.setTimeStampToken((TimeStampWorker)worker);
+                        processSMIME(documentSMIME);
                     } catch (Exception ex) {
                         logger.error(ex.getMessage(), ex);
                         mostrarPantallaEnvio(false);

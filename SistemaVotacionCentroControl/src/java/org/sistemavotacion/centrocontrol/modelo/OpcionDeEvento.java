@@ -1,7 +1,6 @@
 package org.sistemavotacion.centrocontrol.modelo;
 
 import java.io.Serializable;
-import java.util.HashSet;
 import java.util.Set;
 import static javax.persistence.GenerationType.IDENTITY;
 import javax.persistence.CascadeType;
@@ -37,7 +36,7 @@ public class OpcionDeEvento implements Serializable {
     @Column(name="contenido", length=10000, nullable=false)
     private String contenido;
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="opcionDeEvento")
-    private Set<Voto> votos = new HashSet<Voto>(0);
+    private Set<Voto> votos;
     
     public OpcionDeEvento () {}
 

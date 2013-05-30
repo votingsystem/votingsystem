@@ -121,4 +121,21 @@ public class RestHelper {
     	return response;
     }    
     
+    public static HttpResponse enviarSolicitudAcceso(byte[] solicitudCSR, 
+            File solicitudAccesoSMIME, String serverURL) throws IOException {
+        HttpPost httpPost = new HttpPost(serverURL);
+        Log.d(CLASSTAG + ".enviarSolicitudAcceso" , " - url: " + serverURL);
+              
+        FileBody fileBody = new FileBody(solicitudAccesoSMIME);
+        ByteArrayBody  csrBody = new ByteArrayBody(solicitudCSR, NOMBRE_ARCHIVO_CSR);
+        MultipartEntity reqEntity = new MultipartEntity();
+        reqEntity.addPart(NOMBRE_ARCHIVO_FIRMADO, fileBody);
+        reqEntity.addPart(NOMBRE_ARCHIVO_CSR, csrBody);
+        httpPost.setEntity(reqEntity);
+        HttpResponse response = httpClient.execute(httpPost);
+        Log.d(CLASSTAG + ".enviarSolicitudAcceso" , "------------------");
+        Log.d(CLASSTAG + ".enviarSolicitudAcceso" , response.getStatusLine().toString());
+        Log.d(CLASSTAG + ".enviarSolicitudAcceso" , "------------------");
+        return response;  
+    }
 }

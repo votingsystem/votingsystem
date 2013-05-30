@@ -88,19 +88,19 @@ public class EncryptionHelper {
             }
         }
         
-        /*SignerInformationStore  signers = 
+        SignerInformationStore  signers = 
         		msgToEncrypt.getSmimeSigned().getSignerInfos();
         Iterator<SignerInformation> it = signers.getSigners().iterator();
         byte[] digestBytes = it.next().getContentDigest();//method can only be called after verify.
         String digestStr = new String(Base64.encode(digestBytes));
-        encryptedMessage.addHeaderLine("SignedMessageDigest: " + digestStr);*/
+        encryptedMessage.addHeaderLine("SignedMessageDigest: " + digestStr);
         encryptedMessage.writeTo(new FileOutputStream(fileToEncrypt));
 		return fileToEncrypt;
 	}
 	
-	public static File encryptText(byte[] text, File encryptedFile, 
+	public static File encryptMessage(byte[] text, File encryptedFile, 
 			X509Certificate receiverCert) throws Exception {
-		Log.d(TAG + ".encryptText(...) ", " #### encryptText ");
+		Log.d(TAG + ".encryptMessage(...) ", " #### encryptMessage ");
     	Properties props = System.getProperties();
         Session session = Session.getDefaultInstance(props, null);
         MimeMessage mimeMessage = new MimeMessage(session);
@@ -118,9 +118,9 @@ public class EncryptionHelper {
 		return encryptedFile;
 	}
 	
-	public static byte[] encryptText(byte[] text, 
+	public static byte[] encryptMessage(byte[] text, 
 			X509Certificate receiverCert) throws Exception {
-		Log.d(TAG + ".encryptText(...) ", " #### encryptText ");
+		Log.d(TAG + ".encryptMessage(...) ", " #### encryptMessage ");
     	Properties props = System.getProperties();
         Session session = Session.getDefaultInstance(props, null);
         MimeMessage mimeMessage = new MimeMessage(session);

@@ -8,6 +8,8 @@ import org.sistemavotacion.utils.StringUtils;
 import org.springframework.web.multipart.MultipartHttpServletRequest
 import org.springframework.web.multipart.MultipartFile;
 import grails.converters.JSON
+
+import javax.mail.Header;
 import javax.servlet.http.HttpServletRequest
 import org.sistemavotacion.controlacceso.modelo.*
 import org.sistemavotacion.smime.*
@@ -42,33 +44,42 @@ class ControlAccesoFilters {
                 if(!params.sort) params.sort = "dateCreated"
                 if(!params.order) params.order = "desc"
                 response.setHeader("Cache-Control", "no-store")
-				flash.respuesta = null
-				flash.mensajeSMIMEReq = null
-				flash.smimeMessageReq = null
-				flash.receiverCert = null
-				flash.responseBytes = null
-				flash.forwarded = null
-				flash.pdfDocument = null
+				params.mensajeSMIMEReq = null
+				params.receiverCert = null
+				params.responseBytes = null
+				params.requestBytes = null
+				params.forwarded = null
+				params.pdfDocument = null
+				params.respuesta = null
             }
 			after = {
-				MensajeSMIME mensajeSMIME = flash.mensajeSMIMEReq
-				Respuesta respuesta = flash.respuesta
+				MensajeSMIME mensajeSMIME = params.mensajeSMIMEReq
+				
+				
+				Respuesta respuesta = params.respuesta
 				if(mensajeSMIME && respuesta){
-					boolean operationOK = (Respuesta.SC_OK == respuesta.codigoEstado)
-					mensajeSMIME.evento = respuesta.evento
-					mensajeSMIME.valido = operationOK
-					mensajeSMIME.motivo = respuesta.mensaje
-					mensajeSMIME.tipo = respuesta.tipo
 					MensajeSMIME.withTransaction {
-							mensajeSMIME.save()
+						mensajeSMIME = mensajeSMIME.merge()
+						boolean operationOK = (Respuesta.SC_OK == respuesta.codigoEstado)
+						mensajeSMIME.evento = respuesta.evento
+						mensajeSMIME.valido = operationOK
+						mensajeSMIME.motivo = respuesta.mensaje
+						mensajeSMIME.tipo = respuesta.tipo
+						mensajeSMIME.save(flush:true)
 					}
 					log.debug "paramsCheck - after - saved MensajeSMIME '${mensajeSMIME.id}' -> '${mensajeSMIME.tipo}'"
 				}
 				if(response?.contentType?.contains("multipart/encrypted")) {
 					log.debug "---- paramsCheck - after - ENCRYPTED PLAIN TEXT"
-					if(flash.responseBytes && flash.receiverCert) {
-						Respuesta encryptResponse =  encryptionService.encryptText(
-							flash.responseBytes, flash.receiverCert)
+					if(params.responseBytes && (params.receiverCert || params.receiverPublicKey)) {
+						Respuesta encryptResponse = null
+						if(params.receiverPublicKey) {
+							encryptResponse =  encryptionService.encryptMessage(
+								params.responseBytes, params.receiverPublicKey)
+						} else if(params.receiverCert) {
+							encryptResponse =  encryptionService.encryptToCMS(
+								params.responseBytes, params.receiverCert)
+						}
 						if (Respuesta.SC_OK != encryptResponse.codigoEstado) {
 							response.status = respuesta?.codigoEstado
 							render respuesta?.mensaje
@@ -80,7 +91,7 @@ class ControlAccesoFilters {
 							return false
 						}
 					} else {
-						log.debug "---- paramsCheck - after - ERROR - ENCRYPTED PLAIN TEXT"
+						log.error "---- paramsCheck - after - ERROR - ENCRYPTED PLAIN TEXT"
 					}
 				}
 				if(respuesta && Respuesta.SC_OK != respuesta.codigoEstado) {
@@ -88,6 +99,7 @@ class ControlAccesoFilters {
 					log.error "**** paramsCheck - after - respuesta - mensaje: ${respuesta.mensaje}"
 					response.status = respuesta.codigoEstado
 					render respuesta.mensaje
+					
 					return false
 				}
 				log.debug "---- paramsCheck - after - status: ${response.status} - contentType: ${response.contentType}"
@@ -129,7 +141,15 @@ class ControlAccesoFilters {
 								}
 								smimeMessageReq = respuesta.smimeMessage
 							} else {
-								log.debug "---- filemapFilter - before - file: ${fileName} -> ENCRYPTED - TODO"
+								log.debug "---- filemapFilter - before - file: ${fileName} -> ENCRYPTED "
+								respuesta = encryptionService.decryptMessage(
+									fileMap.get(key)?.getBytes(), request.getLocale())
+								if(Respuesta.SC_OK != respuesta.codigoEstado) {
+									response.status = respuesta.codigoEstado
+									render respuesta.mensaje
+									return false
+								}
+								params[fileName] = respuesta.messageBytes
 							} 
 						} else if(contentType.contains("application/x-pkcs7-signature")) {
 							log.debug "---- filemapFilter - before - file: ${fileName} -> SIGNED"
@@ -144,17 +164,19 @@ class ControlAccesoFilters {
 								return false
 							}
 						}
-						respuesta = processSMIMERequest(smimeMessageReq, params, request)
-						if(Respuesta.SC_OK == respuesta.codigoEstado) {
-							flash[fileName] = respuesta.mensajeSMIME
-						} else {
-							flash[fileName] = null
-							response.status = respuesta?.codigoEstado
-							render respuesta?.mensaje
-							return false
+						if(smimeMessageReq) {
+							respuesta = processSMIMERequest(smimeMessageReq, params, request)
+							if(Respuesta.SC_OK == respuesta.codigoEstado) {
+								params[fileName] = respuesta.mensajeSMIME
+							} else {
+								params[fileName] = null
+								response.status = respuesta?.codigoEstado
+								render respuesta?.mensaje
+								return false
+							}
 						}
 					} else {
-						flash[key] = fileMap.get(key)?.getBytes()
+						params[key] = fileMap.get(key)?.getBytes()
 						log.debug "---- filemapFilter - before - file: ${key} -> PLAIN"
 					}
 					
@@ -165,7 +187,7 @@ class ControlAccesoFilters {
 		
 		pkcs7DocumentsFilter(controller:'*', action:'*') {
 			before = {
-				if(flash.forwarded) {
+				if(params.forwarded) {
 					log.debug("---- pkcs7DocumentsFilter - before - REQUEST FORWARDED- BYPASS PKCS7 FILTER");
 					return;
 				}
@@ -198,30 +220,25 @@ class ControlAccesoFilters {
 									render respuesta.mensaje
 									return false
 								}
-								respuesta = pdfService.checkSignature(
-									respuesta.messageBytes, request.getLocale())
-								if(Respuesta.SC_OK != respuesta.codigoEstado) {
-									log.debug "---- pkcs7DocumentsFilter - before  - PDF SIGNATURE ERROR"
-									response.status = respuesta.codigoEstado
-									render respuesta.mensaje
-									return false
-								}
-								flash.pdfDocument = respuesta.documento
+								requestBytes = respuesta.messageBytes
 							} else {
 								log.debug "---- pkcs7DocumentsFilter - before  -> PDF ENCRYPTED - TODO"	
 							}
 						} else if(request?.contentType?.contains("application/x-pkcs7-signature")) {
 							log.debug "---- pkcs7DocumentsFilter - before  - PDF SIGNED"
-							respuesta = pdfService.checkSignature(
+						} else {
+							log.debug "---- pkcs7DocumentsFilter - before  - PLAIN PDF - TODO"
+							requestBytes = null
+						} 
+						if(requestBytes) respuesta = pdfService.checkSignature(
 								requestBytes, request.getLocale())
-							if(Respuesta.SC_OK != respuesta.codigoEstado) {
-								log.debug "---- pkcs7DocumentsFilter - before  - PDF SIGNATURE ERROR"
-								response.status = respuesta.codigoEstado
-								render respuesta.mensaje
-								return false
-							}
-							flash.pdfDocument = respuesta.documento
+						if(Respuesta.SC_OK != respuesta.codigoEstado) {
+							log.debug "---- pkcs7DocumentsFilter - before  - PDF SIGNATURE ERROR"
+							response.status = respuesta.codigoEstado
+							render respuesta.mensaje
+							return false
 						}
+						params.pdfDocument = respuesta.documento
 					} else {
 						if(request?.contentType?.contains("application/x-pkcs7-mime")) {
 							if(request?.contentType?.contains("application/x-pkcs7-signature")) {
@@ -235,7 +252,16 @@ class ControlAccesoFilters {
 								}
 								smimeMessageReq = respuesta.smimeMessage
 							} else {
-								log.debug "---- pkcs7DocumentsFilter - ENCRYPTED - TODO"
+								log.debug "---- pkcs7DocumentsFilter - ENCRYPTED -TODO"
+								respuesta =  encryptionService.decryptMessage(
+									requestBytes, request.getLocale())
+								if(Respuesta.SC_OK != respuesta.codigoEstado) {
+									response.status = respuesta.codigoEstado
+									render respuesta.mensaje
+									return false
+								}
+								params.requestBytes = respuesta.messageBytes
+								return
 							}
 						} else if(request?.contentType?.contains("application/x-pkcs7-signature")) {
 							log.debug "---- pkcs7DocumentsFilter - before - SIGNED"
@@ -252,7 +278,8 @@ class ControlAccesoFilters {
 						}
 						respuesta = processSMIMERequest(smimeMessageReq, params, request)
 						if(Respuesta.SC_OK == respuesta.codigoEstado) { 
-							flash.mensajeSMIMEReq = respuesta.mensajeSMIME
+							params.mensajeSMIMEReq = respuesta.mensajeSMIME
+							params.mensajeSMIMEReq = respuesta.mensajeSMIME
 							return
 						} else {
 							response.status = respuesta?.codigoEstado
@@ -270,11 +297,11 @@ class ControlAccesoFilters {
 					log.debug "---- pkcs7DocumentsFilter - after - BYPASS PKCS7 FILTER"
 					return
 				}
-				Respuesta respuesta = flash.respuesta
+				Respuesta respuesta = params.respuesta
 				MensajeSMIME mensajeSMIME = respuesta.mensajeSMIME
 				if(mensajeSMIME) {
 					byte[] smimeResponseBytes = mensajeSMIME?.contenido
-					X509Certificate encryptionReceiverCert = flash.receiverCert
+					X509Certificate encryptionReceiverCert = params.receiverCert
 					if(response?.contentType?.contains("application/x-pkcs7-mime")) {
 						if(response?.contentType?.contains("application/x-pkcs7-signature")) {
 							log.debug "---- pkcs7DocumentsFilter - after - SIGNED AND ENCRYPTED RESPONSE"
@@ -286,10 +313,11 @@ class ControlAccesoFilters {
 								response.outputStream << encryptResponse.messageBytes
 								response.outputStream.flush()
 							} else {
-								log.debug "---- pkcs7DocumentsFilter - error encrypting response ${encryptResponse.mensaje}";
+								log.error "---- pkcs7DocumentsFilter - error encrypting response ${encryptResponse.mensaje}";
 								mensajeSMIME.valido = false
 								mensajeSMIME.motivo = encryptResponse.mensaje
 								mensajeSMIME.save()
+								response.contentType = "text/plain"
 								response.status = encryptResponse.codigoEstado
 								render encryptResponse.mensaje
 							}

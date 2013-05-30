@@ -99,7 +99,7 @@ class EventoVotacionController {
 	 * 		  por el usuario que la publica y el Control de Acceso en el que se publica.
 	 */
 	def post () {
-		MensajeSMIME mensajeSMIME = flash.mensajeSMIMEReq
+		MensajeSMIME mensajeSMIME = params.mensajeSMIMEReq
 		if(!mensajeSMIME) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
@@ -283,7 +283,7 @@ class EventoVotacionController {
 	 * @httpMethod [POST]
 	 */
 	def cancelled() {
-		MensajeSMIME mensajeSMIMEReq = flash.mensajeSMIMEReq
+		MensajeSMIME mensajeSMIMEReq = params.mensajeSMIMEReq
 		if(!mensajeSMIMEReq) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
@@ -297,6 +297,6 @@ class EventoVotacionController {
 			response.status = Respuesta.SC_OK
 			response.setContentType("${grailsApplication.config.pkcs7SignedContentType}")
 		}
-		flash.respuesta = respuesta
+		params.respuesta = respuesta
 	}
 }

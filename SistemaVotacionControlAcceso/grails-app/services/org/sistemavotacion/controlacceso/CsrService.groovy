@@ -22,10 +22,9 @@ class CsrService {
 		if(!csr) {
 			String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
 			log.error("- validarCSRVoto - ERROR  ${msg}")
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg)
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg,
+				tipo:Tipo.SOLICITUD_ACCESO_ERROR)
 		}
-		
-		Respuesta respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK)
         CertificationRequestInfo info = csr.getCertificationRequestInfo();
 		String eventoId;
 		String controlAccesoURL;
@@ -38,7 +37,8 @@ class CsrService {
 			if (!eventoId.equals(String.valueOf(evento.getId()))) {
 				String msg = messageSource.getMessage('evento.solicitudCsrError', null, locale)
 				log.error("- validarCSRVoto - ERROR - ${msg}")
-				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg)
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+					mensaje:msg, tipo:Tipo.SOLICITUD_ACCESO_ERROR)
 			}
 		}
 		
@@ -53,7 +53,8 @@ class CsrService {
 				String msg = messageSource.getMessage(
 					'error.urlControlAccesoWrong', [serverURL, controlAccesoURL].toArray(), locale)
 				log.error("- validarCSRVoto - ERROR - ${msg}")
-				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg)
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+					mensaje:msg, tipo:Tipo.SOLICITUD_ACCESO_ERROR)
 			}	
 		}
 		if (subjectDN.split("OU=hashCertificadoVotoHEX:").length > 1) {
@@ -64,19 +65,21 @@ class CsrService {
 				log.debug("hashCertificadoVotoBase64: ${hashCertificadoVotoBase64}")
 				SolicitudCSRVoto solicitudCSR = SolicitudCSRVoto.findWhere(
 					hashCertificadoVotoBase64:hashCertificadoVotoBase64)
-				respuesta.hashCertificadoVotoBase64 = hashCertificadoVotoBase64
 				if (solicitudCSR) {
 					String msg = messageSource.getMessage(
 						'error.hashCertificadoVotoRepetido', [hashCertificadoVotoBase64].toArray(), locale)
-					log.error("- validarCSRVoto - ERROR - ${msg}")
-					return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg)
+					log.error("- validarCSRVoto - ERROR - solicitudCSR previa: ${solicitudCSR.id} - ${msg}")
+					return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+						mensaje:msg, tipo:Tipo.SOLICITUD_ACCESO_ERROR)
 				}
 			} catch (Exception ex) {
 				log.error(ex.getMessage(), ex)
-				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:ex.getMessage())
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+					mensaje:ex.getMessage(), tipo:Tipo.SOLICITUD_ACCESO_ERROR)
 			}
 		}
-		return respuesta
+		return new Respuesta(codigoEstado:Respuesta.SC_OK, tipo:Tipo.SOLICITUD_ACCESO,
+			data:csr.getPublicKey(),hashCertificadoVotoBase64:hashCertificadoVotoBase64)
     }
 	
 	public Respuesta validarCSRUsuario(byte[] csrPEMBytes, Locale locale) {

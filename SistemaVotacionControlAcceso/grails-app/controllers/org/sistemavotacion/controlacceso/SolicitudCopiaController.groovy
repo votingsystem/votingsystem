@@ -35,7 +35,7 @@ class SolicitudCopiaController {
 	 */
 	def index() { 
 		try {
-			Documento documento = flash.pdfDocument
+			Documento documento = params.pdfDocument
 			if (documento && documento.estado == Documento.Estado.VALIDADO) {
 				PdfReader reader = new PdfReader(documento.pdf);
 				AcroFields form = reader.getAcroFields();
@@ -86,7 +86,7 @@ class SolicitudCopiaController {
 						File archivoCopias = respuestaGeneracionBackup.file
 						SolicitudCopia solicitudCopia = new SolicitudCopia(
 							filePath:archivoCopias.getAbsolutePath(), type:Tipo.EVENTO,
-							documento:documento, email:email, numeroCopias:respuestaGeneracionBackup.cantidad)
+							documento:documento, email:email, numeroCopias:respuestaGeneracionBackup.datos.cantidad)
 						SolicitudCopia.withTransaction {
 							solicitudCopia.save()
 						}
@@ -136,7 +136,7 @@ class SolicitudCopiaController {
 		}
 		File copiaRespaldo = new File(solicitud.filePath)
 		if (copiaRespaldo != null) {
-			def bytesCopiaRespaldo = FileUtils.getBytesFromFile(copiaRespaldo)
+			def bytesCopiaRespaldo = copiaRespaldo.getBytes()
 			response.contentLength = bytesCopiaRespaldo.length
 			response.setHeader("Content-disposition", "filename=${copiaRespaldo.getName()}")
 			response.setHeader("NombreArchivo", "${copiaRespaldo.getName()}")

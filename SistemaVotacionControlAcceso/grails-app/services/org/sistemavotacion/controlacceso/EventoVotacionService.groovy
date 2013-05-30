@@ -33,6 +33,7 @@ class EventoVotacionService {
 	def httpService
 	def messageSource
 	def encryptionService
+	def representativeService
 
     Respuesta saveEvent(MensajeSMIME mensajeSMIMEReq, Locale locale) {
 		EventoVotacion evento = null
@@ -165,54 +166,115 @@ class EventoVotacionService {
 		}
     }
     
-	public Respuesta generarCopiaRespaldo (EventoVotacion evento, Locale locale) {
+	public synchronized Respuesta generarCopiaRespaldo (EventoVotacion evento, Locale locale) {
 		log.debug("generarCopiaRespaldo - eventoId: ${evento.id}")
 		Respuesta respuesta;
-		if (evento) {
-			def votosContabilizados = Voto.findAllByEventoVotacionAndEstado(evento, Voto.Estado.OK)
-			def solicitudesAcceso =  SolicitudAcceso.findAllByEventoVotacionAndEstado(evento, SolicitudAcceso.Estado.OK)
+		String msg = null
+		try {
+			Date currentDate = new Date(System.currentTimeMillis())
+			if (!evento?.fechaFin.before(currentDate)) { 
+				msg = messageSource.getMessage('eventDateNotFinished', null, locale)
+				log.error("generarCopiaRespaldo - DATE ERROR  ${msg} - " + 
+					"fecha actual '{evento.currentDate}' fecha final evento '${evento.fechaFin}'")
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+					mensaje:msg, tipo:Tipo.BACKUP_GEN_ERROR)
+			}
+			respuesta = representativeService.getAccreditationsBackupForEvent(evento, locale)
+			if(Respuesta.SC_OK != respuesta.codigoEstado) {
+				log.error("generarCopiaRespaldo - REPRESENTATIVE DATA GEN ERROR  ${respuesta.mensaje}")
+				return respuesta
+			}
+			def ant = new AntBuilder()
+			def basedir = "${grailsApplication.config.SistemaVotacion.baseRutaCopiaRespaldo}" +
+				"/${fecha}/${zipNamePrefix}_${evento.id}"
+			File baseDirZip = new File("${basedir}.zip")
+			if(baseDirZip.exists()) {
+				log.debug("generarCopiaRespaldo - backup file already exists")
+				return new Respuesta(codigoEstado:Respuesta.SC_OK,file:baseDirZip)
+			}
+			new File(basedir).mkdirs()
+			
+			File representativeZipReport = new File("${basedir}/representativesReport.zip")
+			ant.copy(file: respuesta.file, toFile: representativeZipReport)
+			
+			File representativesReportZip = respuesta.file
+			List<Voto> votes = null
+			//all votes from non representatives
+			Voto.withTransaction {
+				def criteria = Voto.createCriteria()
+				votes = criteria.list {
+					createAlias("certificado", "certificado")
+					eq("evento", evento)
+					eq("estado", Voto.Estado.OK)
+					isNull("certificado.usuario")
+				}
+			}
+			List<SolicitudAcceso> solicitudesAcceso = null
+			solicitudesAcceso.withTransaction {
+				def criteria = solicitudesAcceso.createCriteria()
+				solicitudesAcceso = criteria.list {
+					createAlias("usuario", "usuario")
+					eq("evento", evento)
+					eq("estado", SolicitudAcceso.Estado.OK)
+					/*or {
+						eq("usuario.type", Usuario.Type.USER)
+						eq("usuario.type", Usuario.Type.USER_WITH_CANCELLED_REPRESENTATIVE)
+						eq("usuario.type", Usuario.Type.EX_REPRESENTATIVE)
+					}*/
+					not {
+						eq("usuario.type", Usuario.Type.REPRESENTATIVE)
+					}
+				}
+			}
 			def fecha = DateUtils.getShortStringFromDate(DateUtils.getTodayDate())
 			String zipNamePrefix = messageSource.getMessage('votingBackupFileName', null, locale);
-			def basedir = "${grailsApplication.config.SistemaVotacion.baseRutaCopiaRespaldo}" + 
-				"/${fecha}/${zipNamePrefix}_${evento.id}"
-			new File(basedir).mkdirs()
-			int i = 0
-			def metaInformacionMap = [numeroVotos:votosContabilizados.size(),
+
+			
+			def metaInformacionMap = [numeroVotos:votes.size(),
 				solicitudesAcceso:solicitudesAcceso.size(),
-				URL:"${grailsApplication.config.grails.serverURL}/evento/${evento.id}",
+				URL:"${grailsApplication.config.grails.serverURL}/eventoVotacion/${evento.id}",
 				tipoEvento:Tipo.EVENTO_VOTACION.toString(), asunto:evento.asunto]
+			
+
+			def eventMetaInfJSON = JSON.parse(evento.metaInf)
+			
 			String metaInformacionJSON = metaInformacionMap as JSON
+			eventMetaInfJSON.userVotesReport = metaInformacionJSON
+			
+			evento.metaInf = eventMetaInfJSON.toString()
+			Evento.withTransaction {
+				event.save()
+			}
+			
+			String usersDataBaseDir = "${basedir}/users"
+			
 			File metaInformacionFile = new File("${basedir}/meta.inf")
 			metaInformacionFile.write(metaInformacionJSON)
 			String votoFileName = messageSource.getMessage('votoFileName', null, locale)
 			String solicitudAccesoFileName = messageSource.getMessage('solicitudAccesoFileName', null, locale)
-			votosContabilizados.each { voto ->
+			String votesBaseDir="${usersDataBaseDir}/votes"
+			votes.each { voto ->
 				MensajeSMIME mensajeSMIME = voto.mensajeSMIME
-				ByteArrayInputStream bais = new ByteArrayInputStream(mensajeSMIME.contenido);
-				MimeMessage msg = new MimeMessage(null, bais);
-				File smimeFile = new File("${basedir}/${votoFileName}_${i}")
-				FileOutputStream fos = new FileOutputStream(smimeFile);
-				msg.writeTo(fos);
-				fos.close();
-				i++;
+				File smimeFile = new File("${votesBaseDir}/${votoFileName}_${voto.id}")
+				smimeFile.setBytes(mensajeSMIME.contenido)
 			}
+			String accessRequestBaseDir="${usersDataBaseDir}/accessRequest"
 			solicitudesAcceso.each { solicitud ->
 				MensajeSMIME mensajeSMIME = solicitud.mensajeSMIME
-				ByteArrayInputStream bais = new ByteArrayInputStream(mensajeSMIME.contenido);
-				MimeMessage msg = new MimeMessage(null, bais);
-				File smimeFile = new File("${basedir}/${solicitudAccesoFileName}_${i}")
-				FileOutputStream fos = new FileOutputStream(smimeFile);
-				msg.writeTo(fos);
-				fos.close();
-				i++;
+				File smimeFile = new File("${accessRequestBaseDir}/${solicitudAccesoFileName}_${solicitud.usuario.nif}")
+				smimeFile.setBytes(mensajeSMIME.contenido)
 			}
-			def ant = new AntBuilder()
-			ant.zip(destfile: "${basedir}.zip", basedir: basedir)
-			respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK, cantidad:votosContabilizados?.size(), file:new File("${basedir}.zip"))
-		} else respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:messageSource.getMessage(
-			'eventNotFound', [evento.id].toArray(), locale))
-		return respuesta
+
+			ant.zip(destfile: baseDirZip, basedir: basedir)
+			Map datos = [cantidad:votes?.size()]
+			return new Respuesta(codigoEstado:Respuesta.SC_OK, datos:datos, file:baseDirZip)
+		} catch(Exception ex) {
+			log.error(ex.getMessage(), ex)
+			msg =  messageSource.getMessage('error.backupGenericErrorMsg', null, locale)
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION, 
+				mensaje:msg, tipo:Tipo.BACKUP_GEN_ERROR)
+		}
+
 	}
 	
 }
-

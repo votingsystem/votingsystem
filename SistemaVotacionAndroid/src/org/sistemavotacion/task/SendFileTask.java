@@ -17,22 +17,19 @@ public class SendFileTask extends AsyncTask<String, Void, Integer> {
     private File file = null;
     private Exception exception = null;
     private String message = null;
-    private String contentType = null;
     private int statusCode = Respuesta.SC_ERROR_PETICION;
     
-    public SendFileTask(Integer id, TaskListener listener, 
-    		File file, String contentType) {
+    public SendFileTask(Integer id, TaskListener listener, File file) {
     	this.id = id;
 		this.listener = listener;
 		this.file = file;
-		this.contentType = contentType;
     }
 	
 	@Override
 	protected Integer doInBackground(String... urls) {
         Log.d(TAG + ".doInBackground", " - doInBackground - url: " + urls[0]);
         try {
-            HttpResponse response = HttpHelper.sendFile(file, contentType, urls[0]);
+            HttpResponse response = HttpHelper.sendFile(file, urls[0]);
             statusCode = response.getStatusLine().getStatusCode();
             message = EntityUtils.toString(response.getEntity());
         } catch (Exception ex) {

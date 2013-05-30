@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import net.sf.json.JSONArray;
+import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.sistemavotacion.modelo.ActorConIP;
@@ -19,11 +20,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class DeJSONAObjeto {
     
     private static Logger logger = LoggerFactory.getLogger(DeJSONAObjeto.class);
+    
+    private static JSONNull jsonNull = JSONNull.getInstance();
     
     public static Evento obtenerEvento(String eventoStr) throws ParseException {
         return obtenerEvento((JSONObject)JSONSerializer.toJSON(eventoStr));
@@ -102,13 +105,13 @@ public class DeJSONAObjeto {
         if (eventoJSON.containsKey("centroControl")) {
             jsonObject = eventoJSON.getJSONObject("centroControl");
             ActorConIP centroControl = new ActorConIP();
-            centroControl.setId(jsonObject.getLong("id"));
+            if(jsonObject.containsKey("id") && !jsonNull.equals(jsonObject.get("id")))
+                centroControl.setId(jsonObject.getLong("id"));
             centroControl.setServerURL(jsonObject.getString("serverURL"));
             centroControl.setNombre(jsonObject.getString("nombre"));
             evento.setCentroControl(centroControl);
         }
         return evento;
-
     }
     
     public static ActorConIP obtenerActorConIP(String actorConIPStr) throws ParseException {
@@ -153,6 +156,25 @@ public class DeJSONAObjeto {
              actorConIP.setServerURL(actorConIPJSON.getString("serverURL"));
         if (actorConIPJSON.containsKey("nombre"))
              actorConIP.setNombre(actorConIPJSON.getString("nombre"));
+        if (actorConIPJSON.containsKey("cadenaCertificacionPEM")) {
+            try {
+                actorConIP.setCadenaCertificacionPEM(actorConIPJSON.getString(
+                        "cadenaCertificacionPEM"));
+            } catch(Exception ex) {
+                logger.error(ex.getMessage(), ex);
+            }
+            
+        }
+        if (actorConIPJSON.containsKey("timeStampCertPEM")) {
+            try {
+                actorConIP.setTimeStampCertPEM(actorConIPJSON.getString(
+                        "timeStampCertPEM"));
+            } catch(Exception ex) {
+                logger.error(ex.getMessage(), ex);
+            }
+            
+        }
+
         return actorConIP;
     }
 

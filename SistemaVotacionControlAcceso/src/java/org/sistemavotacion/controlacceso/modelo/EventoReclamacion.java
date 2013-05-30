@@ -1,7 +1,6 @@
 package org.sistemavotacion.controlacceso.modelo;
 
 import java.io.Serializable;
-import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.DiscriminatorValue;
@@ -32,10 +31,10 @@ public class EventoReclamacion extends Evento implements Serializable {
     private Cardinalidad cardinalidadRepresentaciones = Cardinalidad.UNA;   
     
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="evento")
-    private Set<Firma> firmas = new HashSet<Firma>(0);
+    private Set<Firma> firmas;
     
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="evento")
-    private Set<CampoDeEvento> camposEvento = new HashSet<CampoDeEvento>(0);
+    private Set<CampoDeEvento> camposEvento;
 
     public void setFirmas(Set<Firma> firmas) {
         this.firmas = firmas;

@@ -2,21 +2,18 @@ package org.sistemavotacion.test.panel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Evento;
-import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.MainFrame;
 import org.sistemavotacion.test.dialogo.*;
+import org.sistemavotacion.test.simulacion.SimulationListener;
+import org.sistemavotacion.test.simulacion.Simulator;
 import org.sistemavotacion.test.simulacion.Votacion;
-import org.sistemavotacion.test.tarea.LanzadorWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,14 +21,14 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
-public class VotacionesPanel extends JPanel 
-    implements LanzadorWorker, HyperlinkListener {
+public class VotacionesPanel extends JPanel implements 
+        HyperlinkListener, SimulationListener {
     
     private static Logger logger = LoggerFactory.getLogger(VotacionesPanel.class);
+
     
     public enum Estado {SIMULACION, RECOGIDA_DATOS}
-    
-    private Border normalTextBorder;
+
     private Evento evento;
     private Estado estado = Estado.RECOGIDA_DATOS;
     private String erroresSolicitudes;
@@ -45,7 +42,6 @@ public class VotacionesPanel extends JPanel
      */
     public VotacionesPanel() {
         initComponents();
-        normalTextBorder = new JTextField().getBorder();
         urlCentroControlPanel.setVisible(false);
         publicacionConvocatoriaPanel.setVisible(false);
         datosSimulacionPanel.setVisible(false);
@@ -70,6 +66,7 @@ public class VotacionesPanel extends JPanel
         publicacionConvocatoriaPanel = new javax.swing.JPanel();
         mensajePublicacionLabel = new javax.swing.JLabel();
         publicarButton = new javax.swing.JButton();
+        createUserBaseButton = new javax.swing.JButton();
         datosSimulacionPanel = new javax.swing.JPanel();
         infoEventoButton = new javax.swing.JButton();
         datosSimulacionButton = new javax.swing.JButton();
@@ -78,7 +75,6 @@ public class VotacionesPanel extends JPanel
         erroresSolicitudesButton = new javax.swing.JButton();
         erroresVotosButton = new javax.swing.JButton();
         contadorPanel = new javax.swing.JPanel();
-        contadorSolicitudesLabel = new javax.swing.JLabel();
         contadorSolicitudesErrorLabel = new javax.swing.JLabel();
         contadorVotosLabel = new javax.swing.JLabel();
         contadorVotosValidadosLabel = new javax.swing.JLabel();
@@ -94,13 +90,22 @@ public class VotacionesPanel extends JPanel
         infoServidorButton = new javax.swing.JButton();
         asociarCentroControlButton = new javax.swing.JButton();
 
-        mensajePublicacionLabel.setText("Para hacer las pruebas tiene que publicar la convocatoria");
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/sistemavotacion/test/panel/Bundle"); // NOI18N
+        mensajePublicacionLabel.setText(bundle.getString("VotacionesPanel.mensajePublicacionLabel.text")); // NOI18N
 
         publicarButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/publish.png"))); // NOI18N
-        publicarButton.setText("Publicar convocatoria de elección");
+        publicarButton.setText(bundle.getString("VotacionesPanel.publicarButton.text")); // NOI18N
         publicarButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 publicarButtonActionPerformed(evt);
+            }
+        });
+
+        createUserBaseButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Group_16x16.png"))); // NOI18N
+        createUserBaseButton.setText(bundle.getString("VotacionesPanel.createUserBaseButton.text")); // NOI18N
+        createUserBaseButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                createUserBaseButtonActionPerformed(evt);
             }
         });
 
@@ -112,8 +117,11 @@ public class VotacionesPanel extends JPanel
                 .addContainerGap()
                 .addGroup(publicacionConvocatoriaPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(mensajePublicacionLabel)
-                    .addComponent(publicarButton))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(publicacionConvocatoriaPanelLayout.createSequentialGroup()
+                        .addComponent(publicarButton)
+                        .addGap(18, 18, 18)
+                        .addComponent(createUserBaseButton)))
+                .addContainerGap(467, Short.MAX_VALUE))
         );
         publicacionConvocatoriaPanelLayout.setVerticalGroup(
             publicacionConvocatoriaPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -121,12 +129,14 @@ public class VotacionesPanel extends JPanel
                 .addContainerGap()
                 .addComponent(mensajePublicacionLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(publicarButton)
+                .addGroup(publicacionConvocatoriaPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(publicarButton)
+                    .addComponent(createUserBaseButton))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         infoEventoButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/information-white.png"))); // NOI18N
-        infoEventoButton.setText("Información de la convocatoria");
+        infoEventoButton.setText(bundle.getString("VotacionesPanel.infoEventoButton.text")); // NOI18N
         infoEventoButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 infoEventoButtonActionPerformed(evt);
@@ -134,17 +144,17 @@ public class VotacionesPanel extends JPanel
         });
 
         datosSimulacionButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/edit_16x16.png"))); // NOI18N
-        datosSimulacionButton.setText("Introducir datos de la simulación");
+        datosSimulacionButton.setText(bundle.getString("VotacionesPanel.datosSimulacionButton.text")); // NOI18N
         datosSimulacionButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 datosSimulacionButtonActionPerformed(evt);
             }
         });
 
-        asuntoConvocatoriaLabel.setText(" ");
+        asuntoConvocatoriaLabel.setText(bundle.getString("VotacionesPanel.asuntoConvocatoriaLabel.text")); // NOI18N
 
         lanzarSimulacionButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/gnome-run.png"))); // NOI18N
-        lanzarSimulacionButton.setText("Lanzar simulación");
+        lanzarSimulacionButton.setText(bundle.getString("VotacionesPanel.lanzarSimulacionButton.text")); // NOI18N
         lanzarSimulacionButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 lanzarSimulacionButtonActionPerformed(evt);
@@ -152,7 +162,7 @@ public class VotacionesPanel extends JPanel
         });
 
         erroresSolicitudesButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/error.png"))); // NOI18N
-        erroresSolicitudesButton.setText("Errores en solicitudes de acceso");
+        erroresSolicitudesButton.setText(bundle.getString("VotacionesPanel.erroresSolicitudesButton.text")); // NOI18N
         erroresSolicitudesButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 erroresSolicitudesButtonActionPerformed(evt);
@@ -160,7 +170,7 @@ public class VotacionesPanel extends JPanel
         });
 
         erroresVotosButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/error.png"))); // NOI18N
-        erroresVotosButton.setText("Errores en votos");
+        erroresVotosButton.setText(bundle.getString("VotacionesPanel.erroresVotosButton.text")); // NOI18N
         erroresVotosButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 erroresVotosButtonActionPerformed(evt);
@@ -170,20 +180,18 @@ public class VotacionesPanel extends JPanel
         contadorPanel.setBackground(java.awt.Color.white);
         contadorPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        contadorSolicitudesLabel.setText("<html><b>Lanzada solicitud: </b>0</html>");
+        contadorSolicitudesErrorLabel.setText(bundle.getString("VotacionesPanel.contadorSolicitudesErrorLabel.text")); // NOI18N
 
-        contadorSolicitudesErrorLabel.setText("<html><b>Solicitudes con error: </b>0</html>");
+        contadorVotosLabel.setText(bundle.getString("VotacionesPanel.contadorVotosLabel.text")); // NOI18N
 
-        contadorVotosLabel.setText("<html><b>Lanzado voto: </b>0</html>");
+        contadorVotosValidadosLabel.setText(bundle.getString("VotacionesPanel.contadorVotosValidadosLabel.text")); // NOI18N
 
-        contadorVotosValidadosLabel.setText("<html><b>Recolectado voto: </b>0</html>\"");
-
-        contadorVotosErrorLabel.setText("<html><b>Votos con error: </b>0</html>\"");
+        contadorVotosErrorLabel.setText(bundle.getString("VotacionesPanel.contadorVotosErrorLabel.text")); // NOI18N
 
         timePanel.setBackground(java.awt.Color.white);
 
         timeLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
-        timeLabel.setText("Duración simulacion:");
+        timeLabel.setText(bundle.getString("VotacionesPanel.timeLabel.text")); // NOI18N
 
         javax.swing.GroupLayout timePanelLayout = new javax.swing.GroupLayout(timePanel);
         timePanel.setLayout(timePanelLayout);
@@ -211,14 +219,12 @@ public class VotacionesPanel extends JPanel
             .addGroup(contadorPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(contadorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(contadorSolicitudesLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 271, Short.MAX_VALUE)
-                    .addGroup(contadorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(contadorVotosValidadosLabel, javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(contadorVotosLabel, javax.swing.GroupLayout.Alignment.LEADING))
+                    .addComponent(contadorVotosValidadosLabel)
+                    .addComponent(contadorVotosLabel)
                     .addComponent(contadorSolicitudesErrorLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 271, Short.MAX_VALUE)
                     .addComponent(timePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(contadorVotosErrorLabel))
-                .addContainerGap(703, Short.MAX_VALUE))
+                .addContainerGap(729, Short.MAX_VALUE))
         );
         contadorPanelLayout.setVerticalGroup(
             contadorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -226,20 +232,18 @@ public class VotacionesPanel extends JPanel
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(timePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(contadorSolicitudesLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(contadorSolicitudesErrorLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(contadorVotosLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(contadorVotosValidadosLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(contadorSolicitudesErrorLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(contadorVotosErrorLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(24, 24, 24))
+                .addGap(58, 58, 58))
         );
 
         anularVotosButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/gtk-cancel.png"))); // NOI18N
-        anularVotosButton.setText("Anular votos");
+        anularVotosButton.setText(bundle.getString("VotacionesPanel.anularVotosButton.text")); // NOI18N
         anularVotosButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 anularVotosButtonActionPerformed(evt);
@@ -286,17 +290,18 @@ public class VotacionesPanel extends JPanel
                     .addComponent(lanzarSimulacionButton)
                     .addComponent(anularVotosButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(contadorPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(contadorPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(datosSimulacionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(erroresSolicitudesButton)
-                    .addComponent(erroresVotosButton)))
+                    .addComponent(erroresVotosButton))
+                .addContainerGap())
         );
 
         centroControlPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        centroControlLabel.setText("Centro de Control asociado:");
-        centroControlLabel.setToolTipText("Para hacer las pruebas de carga debe proporcionar la URL de un Centro de Control arrancado en modo TEST");
+        centroControlLabel.setText(bundle.getString("VotacionesPanel.centroControlLabel.text")); // NOI18N
+        centroControlLabel.setToolTipText(bundle.getString("VotacionesPanel.centroControlLabel.toolTipText")); // NOI18N
 
         centrosDeControlComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "" }));
         centrosDeControlComboBox.addActionListener(new java.awt.event.ActionListener() {
@@ -306,7 +311,7 @@ public class VotacionesPanel extends JPanel
         });
 
         infoServidorButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/information-white.png"))); // NOI18N
-        infoServidorButton.setText("Información del servidor");
+        infoServidorButton.setText(bundle.getString("VotacionesPanel.infoServidorButton.text")); // NOI18N
         infoServidorButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 infoServidorButtonActionPerformed(evt);
@@ -335,7 +340,7 @@ public class VotacionesPanel extends JPanel
         );
 
         asociarCentroControlButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/pair_16x16.png"))); // NOI18N
-        asociarCentroControlButton.setText("Asociar Centro de Control");
+        asociarCentroControlButton.setText(bundle.getString("VotacionesPanel.asociarCentroControlButton.text")); // NOI18N
         asociarCentroControlButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 asociarCentroControlButtonActionPerformed(evt);
@@ -373,13 +378,12 @@ public class VotacionesPanel extends JPanel
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(centroControlPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(publicacionConvocatoriaPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(datosSimulacionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(datosSimulacionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -399,8 +403,8 @@ public class VotacionesPanel extends JPanel
     }//GEN-LAST:event_asociarCentroControlButtonActionPerformed
 
     private void centrosDeControlComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_centrosDeControlComboBoxActionPerformed
-        ActorConIP centroControl = 
-                hashMapActores.get(centrosDeControlComboBox.getSelectedItem());
+        ActorConIP centroControl = hashMapActores.get(
+                centrosDeControlComboBox.getSelectedItem());
         ContextoPruebas.setCentroControl(centroControl);
     }//GEN-LAST:event_centrosDeControlComboBoxActionPerformed
 
@@ -417,9 +421,17 @@ public class VotacionesPanel extends JPanel
     }//GEN-LAST:event_infoEventoButtonActionPerformed
 
     private void datosSimulacionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_datosSimulacionButtonActionPerformed
-        DatosSimulacionDialog datosSimulacionDialog = new DatosSimulacionDialog(
-                MainFrame.INSTANCIA.getFrames()[0], false, evento);
-        datosSimulacionDialog.setVisible(true);
+        if(ContextoPruebas.getUserBaseData() == null) {
+            MensajeDialog errorDialog = new MensajeDialog(
+                    MainFrame.INSTANCIA.getFrames()[0], true);
+            errorDialog.setMessage(ContextoPruebas.getString("userBaseDataNotFoundErrorMsg"), 
+                ContextoPruebas.getString("errorLbl"));
+        } else {
+            DatosSimulacionDialog datosSimulacionDialog = new DatosSimulacionDialog(
+                    MainFrame.INSTANCIA.getFrames()[0], false, evento,
+                    ContextoPruebas.getUserBaseData());   
+            datosSimulacionDialog.setVisible(true);
+        }
     }//GEN-LAST:event_datosSimulacionButtonActionPerformed
 
     private void lanzarSimulacionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lanzarSimulacionButtonActionPerformed
@@ -431,13 +443,12 @@ public class VotacionesPanel extends JPanel
                 lanzarSimulacionButton.setText("Parar simulación");
                 erroresSolicitudesButton.setVisible(false);
                 erroresVotosButton.setVisible(false);
-                actualizarContadorSolicitudes(0);
                 actualizarContadorSolicitudesError(0);
                 actualizarContadorVotosLanzados(0);
                 actualizarContadorVotosValidados(0);
                 actualizarContadorVotosError(0);
-                votacion = new Votacion(evento);
-                votacion.lanzarVotacion();
+                votacion = new Votacion(ContextoPruebas.getUserBaseData(), this);
+                votacion.init();
                 digitalClockPanel.start(DigitalClockPanel.Mode.STOPWATCH);
                 break;
             case SIMULACION:
@@ -490,6 +501,12 @@ public class VotacionesPanel extends JPanel
         anularVotosDialog.setVisible(true);
     }//GEN-LAST:event_anularVotosButtonActionPerformed
 
+    private void createUserBaseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createUserBaseButtonActionPerformed
+        UserBaseDialog userBaseDialog = new UserBaseDialog(
+                MainFrame.INSTANCIA.getFrames()[0], false);
+        userBaseDialog.setVisible(true);
+    }//GEN-LAST:event_createUserBaseButtonActionPerformed
+
     public void setControlAcceso(ActorConIP controlAcceso) {
         if(controlAcceso.getCentrosDeControl() != null  &&
                 controlAcceso.getCentrosDeControl().size() >0) {
@@ -521,14 +538,6 @@ public class VotacionesPanel extends JPanel
         asuntoConvocatoriaLabel.setVisible(true);
         datosSimulacionPanel.setVisible(true);
         MainFrame.INSTANCIA.packMainFrame();
-    }
-    
-    @Override
-    public void process(List<String> messages, SwingWorker worker) { }
-
-    @Override
-    public void mostrarResultadoOperacion(SwingWorker worker) {
-        logger.debug("mostrarResultadoOperacion - Codigo estado respuesta: " + worker.getState()); 
     }
     
     public void prepararPanelParaLanzarSimulacion() {
@@ -603,25 +612,6 @@ public class VotacionesPanel extends JPanel
             }
         }).start();
         
-    }
-    
-    public void actualizarContadorSolicitudes(final int numSolicitud) {
-        if(SwingUtilities.isEventDispatchThread()) {
-            contadorSolicitudesLabel.setText("<html><b>Lanzada solicitud: </b>"
-                     + numSolicitud + "</html>");
-        } else {
-            try {
-                SwingUtilities.invokeAndWait(new Runnable() {
-                    @Override
-                    public void run() {
-                        contadorSolicitudesLabel.setText("<html><b>Lanzada solicitud: </b>"
-                        + numSolicitud + "</html>");
-                    }
-                });
-            } catch (Exception ex) {
-                logger.error(ex.getMessage(), ex);
-            }
-        }
     }
     
     public void actualizarContadorSolicitudesError(final int numSolicitud) {
@@ -702,6 +692,22 @@ public class VotacionesPanel extends JPanel
         }
     }
     
+    
+    @Override
+    public void setSimulationMessage(String message) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setSimulationErrorMessage(String message) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setSimulationResult(Simulator simulator, Object data) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton anularVotosButton;
     private javax.swing.JButton asociarCentroControlButton;
@@ -711,10 +717,10 @@ public class VotacionesPanel extends JPanel
     private javax.swing.JComboBox centrosDeControlComboBox;
     private javax.swing.JPanel contadorPanel;
     private javax.swing.JLabel contadorSolicitudesErrorLabel;
-    private javax.swing.JLabel contadorSolicitudesLabel;
     private javax.swing.JLabel contadorVotosErrorLabel;
     private javax.swing.JLabel contadorVotosLabel;
     private javax.swing.JLabel contadorVotosValidadosLabel;
+    private javax.swing.JButton createUserBaseButton;
     private javax.swing.JButton datosSimulacionButton;
     private javax.swing.JPanel datosSimulacionPanel;
     private org.sistemavotacion.test.panel.DigitalClockPanel digitalClockPanel;

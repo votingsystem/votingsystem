@@ -88,6 +88,12 @@ public class KeyUtil {
         return new X500PrivateCredential(endCert, endPair.getPrivate(), endEntityAlias);
     }
     
+    public static PrivateKey fromPEMToRSAPrivateKey(File file) throws Exception {
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        KeyPair kp = (KeyPair) new PEMReader(br).readObject();
+        return kp.getPrivate();
+    }
+    
     /**
      * Crea un par de claves RSA aleatorio de 1024 bits
      */

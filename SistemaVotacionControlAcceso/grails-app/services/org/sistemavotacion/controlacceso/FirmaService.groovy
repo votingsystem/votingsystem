@@ -21,6 +21,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import java.security.KeyStore
 import java.security.PrivateKey
+import java.security.PublicKey
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -66,6 +67,20 @@ class FirmaService {
 	def encryptionService;
 	def subscripcionService
 	def timeStampService
+	boolean testMode = false
+	
+	public Respuesta deleteTestCerts () {
+		log.debug(" - deleteTestCerts - ")
+		def certificadosTest = null 
+		Certificado.withTransaction {
+			certificadosTest = Certificado.findAllWhere(tipo:Certificado.Tipo.AUTORIDAD_CERTIFICADORA_TEST);
+			certificadosTest.each {
+				it.delete()
+			} 
+		}
+		
+		return new Respuesta(codigoEstado:Respuesta.SC_OK)
+	}
 	
 	//@Override
 	public void afterPropertiesSet() throws Exception {
@@ -93,7 +108,7 @@ class FirmaService {
 		trustedCerts.add(localServerCertSigner)
 		
 		def rutaCadenaCertificacion = getAbsolutePath("${grailsApplication.config.SistemaVotacion.rutaCadenaCertificacion}")
-		FileUtils.copyStreamToFile(new ByteArrayInputStream(pemCertsArray), new File(rutaCadenaCertificacion))
+		new File(rutaCadenaCertificacion).setBytes(pemCertsArray)
 		inicializarAutoridadesCertificadoras();
 	}
 	
@@ -109,8 +124,9 @@ class FirmaService {
 	}
 	
 	public Set<X509Certificate> getTrustedCerts() {
-		if(!trustedCerts || trustedCerts.size() == 0) afterPropertiesSet();
-		log.debug "getTrustedCerts - trustedCerts.size(): ${trustedCerts.size()}"
+		if(!trustedCerts || trustedCerts.isEmpty()) {
+			afterPropertiesSet()
+		}
 		return trustedCerts;
 	}
 	
@@ -126,11 +142,12 @@ class FirmaService {
 					return fileName.startsWith("AC_") && fileName.endsWith(".pem");
 				}
 			  });
+		   Set<X509Certificate> fileSystemCerts = new HashSet<X509Certificate>()
 			for(File caFile:acFiles) {
-				trustedCerts.addAll(CertUtil.fromPEMToX509CertCollection(
+				fileSystemCerts.addAll(CertUtil.fromPEMToX509CertCollection(
 					FileUtils.getBytesFromFile(caFile)));
 			}
-			for(X509Certificate certificate:trustedCerts) {
+			for(X509Certificate certificate:fileSystemCerts) {
 				long numSerie = certificate.getSerialNumber().longValue()
 				log.debug " --- Importado certificado -- SubjectDN: ${certificate?.getSubjectDN()} --- número serie:${numSerie}"
 				Certificado certificado = null
@@ -156,8 +173,27 @@ class FirmaService {
 						//grailsApplication.mainContext.close()
 					}
 				}
-				trustedCertsHashMap.put(certificate?.getSerialNumber()?.longValue(), certificado)
+				
 			}
+			
+			Certificado.withTransaction {
+				def criteria = Certificado.createCriteria()
+				def trustedCertsDB = criteria.list {
+					eq("estado", Certificado.Estado.OK)
+					or {
+						eq("tipo",	Certificado.Tipo.AUTORIDAD_CERTIFICADORA)
+						eq("tipo", Certificado.Tipo.AUTORIDAD_CERTIFICADORA_TEST)
+					}
+				}
+				trustedCertsDB.each { certificado ->
+					ByteArrayInputStream bais = new ByteArrayInputStream(certificado.contenido)
+					X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
+					
+					trustedCerts.add(certX509)
+					trustedCertsHashMap.put(certX509?.getSerialNumber()?.longValue(), certificado)
+				}
+			}
+
 			log.debug("trustedCerts.size(): ${trustedCerts?.size()}")
 			return new Respuesta(codigoEstado:Respuesta.SC_OK, mensaje:"Importadas Autoridades Certificadoras")
 		} catch(Exception ex) {
@@ -220,7 +256,6 @@ class FirmaService {
 	public File obtenerArchivoFirmado (String fromUser, String toUser,
 		String textToSign, String subject, Header header) {
 		log.debug "obtenerArchivoFirmado - textoAFirmar: ${textToSign}"
-		if(signedMailGenerator == null) afterPropertiesSet()
 		MimeMessage mimeMessage = getSignedMailGenerator().genMimeMessage(
 			fromUser, toUser, textToSign, subject, header)
 		File resultFile = File.createTempFile("smime", "p7m");
@@ -232,7 +267,6 @@ class FirmaService {
 	public byte[] getSignedMimeMessage (String fromUser, String toUser,
 		String textToSign, String subject, Header header) {
 		log.debug "getSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'"
-		if(signedMailGenerator == null) afterPropertiesSet()
 		if(fromUser) {
 			fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
 		}
@@ -250,7 +284,6 @@ class FirmaService {
 	public synchronized SMIMEMessageWrapper getMultiSignedMimeMessage (
 		String fromUser, String toUser,	final SMIMEMessageWrapper smimeMessage, String subject) {
 		log.debug("getMultiSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'");
-		if(!signedMailGenerator) afterPropertiesSet()
 		if(fromUser) {
 			fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
 			smimeMessage.setFrom(new InternetAddress(fromUser))
@@ -269,6 +302,7 @@ class FirmaService {
 		log.debug("firmarCertificadoVoto - evento: ${evento?.id}");
 		Respuesta respuesta = csrService.validarCSRVoto(csr, evento, locale)
 		if(Respuesta.SC_OK != respuesta.codigoEstado) return respuesta
+		PublicKey requestPublicKey = (PublicKey)respuesta.data
 		AlmacenClaves almacenClaves = evento.getAlmacenClaves()
 		//TODO ==== vote keystore -- this is for developement
 		KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(almacenClaves.bytes, 
@@ -299,7 +333,7 @@ class FirmaService {
 				solicitudCSRVoto:solicitudCSR, tipo:Certificado.Tipo.VOTO, usuario:representative,
 				hashCertificadoVotoBase64:respuesta.hashCertificadoVotoBase64)
 			certificado.save()
-			return new Respuesta(codigoEstado:Respuesta.SC_OK,
+			return new Respuesta(codigoEstado:Respuesta.SC_OK, data:requestPublicKey,
 				firmaCSR:certificadoFirmado, certificado:certificate)
 		}
 	}
@@ -418,13 +452,14 @@ class FirmaService {
 	public Respuesta validateSMIME(
 		SMIMEMessageWrapper messageWrapper, Locale locale) {
 		log.debug("validateSMIME -")
-		MensajeSMIME mensajeSMIME = MensajeSMIME.findWhere(base64ContentDigest:messageWrapper.getContentDigestStr())
+		log.debug("validateSMIME ======================================")
+		/*MensajeSMIME mensajeSMIME = MensajeSMIME.findWhere(base64ContentDigest:messageWrapper.getContentDigestStr())
 		if(mensajeSMIME) {
 			String message = messageSource.getMessage('smimeDigestRepeatedErrorMsg', 
 				[messageWrapper.getContentDigestStr()].toArray(), locale)
 			log.error("validateSMIME - ${message}")
 			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:message)
-		} 
+		} */
 		return validateSignersCertificate(messageWrapper, locale)
 	}
 		
@@ -439,7 +474,7 @@ class FirmaService {
 		for(Usuario usuario: firmantes) {			 
 			try {
 				PKIXCertPathValidatorResult pkixResult = CertUtil.verifyCertificate(
-					usuario.getCertificate(), trustedCerts, false)
+					usuario.getCertificate(), getTrustedCerts(), false)
 				TrustAnchor ta = pkixResult.getTrustAnchor();
 				X509Certificate certCaResult = ta.getTrustedCert();
 				usuario.certificadoCA = trustedCertsHashMap.get(
@@ -453,6 +488,7 @@ class FirmaService {
 					log.debug("validateSignersCertificate - signature with timestamp")
 					Respuesta timestampValidationResp = timeStampService.validate(
 						usuario.getTimeStampToken(), locale)
+					log.debug("validateSignersCertificate - timestampValidationResp - codigoEstado:${timestampValidationResp.codigoEstado} - mensaje:${timestampValidationResp.mensaje}")
 					if(Respuesta.SC_OK != timestampValidationResp.codigoEstado) {
 						log.error("validateSignersCertificate - TIMESTAMP ERROR - ${timestampValidationResp.mensaje}")
 						return timestampValidationResp
@@ -622,6 +658,7 @@ class FirmaService {
 	}
 	
 	private SignedMailGenerator getSignedMailGenerator() {
+		if(signedMailGenerator == null) afterPropertiesSet()
 		return signedMailGenerator
 	}
 }

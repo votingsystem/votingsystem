@@ -31,7 +31,7 @@ class VotoController {
 	 * @return  <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Recibo-de-Voto">El recibo del voto.</a>
 	 */
     def post() { 
-		MensajeSMIME mensajeSMIMEReq = flash.mensajeSMIMEReq
+		MensajeSMIME mensajeSMIMEReq = params.mensajeSMIMEReq
 		if(!mensajeSMIMEReq) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
@@ -43,10 +43,10 @@ class VotoController {
 			mensajeSMIMEReq, request.getLocale())
 		if (Respuesta.SC_OK == respuesta.codigoEstado) {
 			X509Certificate controlCenterCert = respuesta.certificado
-			flash.receiverCert = controlCenterCert
+			params.receiverCert = controlCenterCert
 			response.setContentType("application/x-pkcs7-signature")
 		}
-		flash.respuesta = respuesta
+		params.respuesta = respuesta
 	}
 	
 	/**

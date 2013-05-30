@@ -2,7 +2,6 @@ package org.sistemavotacion.test.modelo;
 
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.ReciboVoto;
-import org.sistemavotacion.seguridad.PKCS10WrapperClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,36 +11,24 @@ import org.slf4j.LoggerFactory;
 */
 public class InfoVoto {
     
+    public enum Error {ACCESS_REQUEST, VOTE}
+    
     private static Logger logger = LoggerFactory.getLogger(InfoVoto.class);
 
     private int codigoEstado = 400;
     private String mensaje;
     
-    private PKCS10WrapperClient pkcs10WrapperClient;
     private Evento voto;
     private String from;
     private String userPath;
     private ReciboVoto reciboVoto;
+    private Error error = null;
     private boolean errorControlAcceso = false;
 
     
     public InfoVoto(Evento evento, String from) {
         this.voto = evento;
         this.from = from;
-    }
-    
-    /**
-     * @return the pkcs10WrapperClient
-     */
-    public PKCS10WrapperClient getPkcs10WrapperClient() {
-        return pkcs10WrapperClient;
-    }
-
-    /**
-     * @param pkcs10WrapperClient the pkcs10WrapperClient to set
-     */
-    public void setPkcs10WrapperClient(PKCS10WrapperClient pkcs10WrapperClient) {
-        this.pkcs10WrapperClient = pkcs10WrapperClient;
     }
 
     /**
@@ -140,6 +127,20 @@ public class InfoVoto {
      */
     public void setErrorControlAcceso(boolean errorControlAcceso) {
         this.errorControlAcceso = errorControlAcceso;
+    }
+
+    /**
+     * @return the error
+     */
+    public Error getError() {
+        return error;
+    }
+
+    /**
+     * @param error the error to set
+     */
+    public void setError(Error error) {
+        this.error = error;
     }
  
 }

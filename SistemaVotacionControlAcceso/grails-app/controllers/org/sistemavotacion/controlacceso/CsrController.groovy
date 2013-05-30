@@ -133,7 +133,7 @@ class CsrController {
 	 * @return Si todo es correcto devuelve un código de estado HTTP 200.
 	 */
 	def validacion() { 
-		MensajeSMIME mensajeSMIME = flash.mensajeSMIMEReq
+		MensajeSMIME mensajeSMIME = params.mensajeSMIMEReq
 		if(!mensajeSMIME) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg

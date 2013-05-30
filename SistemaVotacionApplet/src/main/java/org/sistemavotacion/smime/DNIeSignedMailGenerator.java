@@ -1,12 +1,9 @@
 package org.sistemavotacion.smime;
 
 import static org.sistemavotacion.Contexto.*;
-import java.io.ByteArrayOutputStream;
 import javax.mail.Header;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -15,9 +12,7 @@ import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import javax.mail.internet.MimeUtility;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.smime.SMIMECapabilitiesAttribute;
@@ -35,29 +30,11 @@ import org.sistemavotacion.Contexto;
 public class DNIeSignedMailGenerator {
 
     private static Logger logger = LoggerFactory.getLogger(DNIeSignedMailGenerator.class); 
-          
-    public static File genFile(String fromUser, String toUser, String textoAFirmar, 
-            char[] password, String asunto, File resultado) throws Exception {
-    	return genFile(fromUser, toUser, textoAFirmar, password, asunto, null, resultado);
-    }
+
     
-    public static File genFile(String fromUser, String toUser, String textoAFirmar, 
-            char[] password, String asunto, Header header, File resultado) throws Exception {
-        MimeMessage body = gen(fromUser, toUser, textoAFirmar,  password, asunto, header);
-        body.writeTo(new FileOutputStream(resultado));        
-        return resultado;
-    }
-          
-    public static String genString(String fromUser, String toUser, String textoAFirmar, 
-            char[] password, String asunto, Header header) throws Exception {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        MimeMessage body = gen(fromUser, toUser, textoAFirmar,  password, asunto, header);
-        body.writeTo(baos);
-        return new String(baos.toByteArray());
-    }
-    
-     private static MimeMessage gen(String fromUser, String toUser, String textoAFirmar, 
-            char[] password, String asunto, Header header) throws Exception {
+     public static SMIMEMessageWrapper genMimeMessage(String fromUser, String toUser, 
+             String textoAFirmar, char[] password, String asunto, 
+             Header header) throws Exception {
         if (asunto == null) asunto = "";
         if (textoAFirmar == null) textoAFirmar = "";
         ASN1EncodableVector         signedAttrs = new ASN1EncodableVector();
@@ -106,7 +83,8 @@ public class DNIeSignedMailGenerator {
         if (Contexto.getUsuario() != null) usuario = Contexto.getUsuario().getNif();
         Address fromUserAddress = new InternetAddress(usuario);
         Address toUserAddress = new InternetAddress(toUser.replace(" ", ""));
-        MimeMessage body = new MimeMessage(session);
+
+        SMIMEMessageWrapper body = new SMIMEMessageWrapper(session);
         if (header != null) body.setHeader(header.getName(), header.getValue());
         body.setHeader("Content-Type", "text/plain; charset=UTF-8");
         body.setFrom(fromUserAddress);

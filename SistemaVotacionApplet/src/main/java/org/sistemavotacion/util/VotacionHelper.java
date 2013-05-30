@@ -4,10 +4,12 @@ import static org.sistemavotacion.Contexto.*;
 
 import org.sistemavotacion.smime.*;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import javax.mail.internet.MimeMessage;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.sistemavotacion.modelo.Evento;
@@ -39,17 +41,7 @@ public class VotacionHelper {
             evento.getOrigenHashCertificadoVoto(), VOTING_DATA_DIGEST));         
         return evento;
     }
-   
-    public static File obtenerSolicitudAcceso (Evento voto, 
-            String password, File resultado) throws NoSuchAlgorithmException, Exception {
-        String asuntoMensaje = 
-                ASUNTO_MENSAJE_SOLICITUD_ACCESO + voto.getEventoId();
-        File solicitudAcceso = DNIeSignedMailGenerator.genFile("",
-                NOMBRE_DESTINATARIO, obtenerSolicitudAccesoJSONStr(voto),
-                password.toCharArray(), asuntoMensaje, resultado);
-        return solicitudAcceso;
-    }
-        
+    
     public static String obtenerSolicitudAccesoJSONStr(Evento voto) {
         logger.debug("obtenerSolicitudAccesoJSONStr");
         JSONObject jsonObject = obtenerSolicitudAccesoJSON(voto);        

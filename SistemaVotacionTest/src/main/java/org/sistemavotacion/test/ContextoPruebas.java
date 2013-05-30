@@ -21,6 +21,7 @@ import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
+import org.sistemavotacion.test.modelo.UserBaseData;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.test.util.NifUtils;
@@ -29,10 +30,10 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class ContextoPruebas {
-    
+     
     private static Logger logger = LoggerFactory.getLogger(ContextoPruebas.class);
     
     public static String locale = "es";
@@ -40,9 +41,7 @@ public class ContextoPruebas {
     public static final int KEY_SIZE = 1024;
     public static final String SIG_NAME = "RSA";
     public static final String PROVIDER = "BC";
-    
-    public static final String TIMESTAMP_HASH = TSPAlgorithms.SHA1;
-    public static final String TIMESTAMP_VOTE_HASH = TSPAlgorithms.SHA512;
+
     
     public static ContextoPruebas INSTANCIA;
     private static KeyStore keyStoreRaizAutoridad;
@@ -54,6 +53,7 @@ public class ContextoPruebas {
     private static ActorConIP controlAcceso;
     
     private static Evento evento = null;
+    private static UserBaseData userBaseData = null;
     
     public static final String DNIe_SIGN_MECHANISM = "SHA1withRSA";
     public static final String VOTE_SIGN_MECHANISM = "SHA512withRSA";
@@ -78,6 +78,12 @@ public class ContextoPruebas {
 
     public static final int MAXIMALONGITUDCAMPO = 255;
 
+    public static final String ASUNTO_MENSAJE_ALTA_REPRESENTANTE 
+            = "[ALTA REPRESENTANTE]";
+    public static final String ASUNTO_TEST_TIMESTAMP = "[TIMESTAMP_TEST]";
+    
+    public static final String ASUNTO_MENSAJE_DELEGACION_REPRESENTANTE 
+            = "[DELEGACION REPRESENTANTE]";
     public static final String ASUNTO_MENSAJE_SOLICITUD_ACCESO 
             = "[SOLICITUD ACCESO]-";
     public static final String ASUNTO_MENSAJE_ANULACION_SOLICITUD_ACCESO 
@@ -86,14 +92,9 @@ public class ContextoPruebas {
     public static String BASEDIR =  System.getProperty("user.home");
     public static String APPDIR =  FileUtils.BASEDIR + File.separator 
             + "DatosSimulacionVotacion"  + File.separator;    
-    
-    private static int idUsuario = 0;
-    private static Integer numeroTotalDeVotosParaLanzar;
-    private static Integer horasDuracionVotacion;
-    private static Integer minutosDuracionVotacion;
-    private static boolean votacionAleatoria = true;
-    private static boolean simulacionConTiempos = false;
+
     private static ResourceBundle resourceBundle;
+
     private PKIXParameters sessionPKIXParams = null;
 
     private ContextoPruebas () { }
@@ -274,76 +275,6 @@ public class ContextoPruebas {
         usuarioPruebas = aUsuarioPruebas;
     }
 
-    /**
-     * @return the numeroTotalDeVotosParaLanzar
-     */
-    public static Integer getNumeroTotalDeVotosParaLanzar() {
-        return numeroTotalDeVotosParaLanzar;
-    }
-
-    /**
-     * @param aNumeroTotalDeVotosParaLanzar the numeroTotalDeVotosParaLanzar to set
-     */
-    public static void setNumeroTotalDeVotosParaLanzar(Integer aNumeroTotalDeVotosParaLanzar) {
-        numeroTotalDeVotosParaLanzar = aNumeroTotalDeVotosParaLanzar;
-    }
-
-    /**
-     * @return the horasDuracionVotacion
-     */
-    public static Integer getHorasDuracionVotacion() {
-        return horasDuracionVotacion;
-    }
-
-    /**
-     * @param aHorasDuracionVotacion the horasDuracionVotacion to set
-     */
-    public static void setHorasDuracionVotacion(Integer aHorasDuracionVotacion) {
-        horasDuracionVotacion = aHorasDuracionVotacion;
-    }
-
-    /**
-     * @return the minutosDuracionVotacion
-     */
-    public static Integer getMinutosDuracionVotacion() {
-        return minutosDuracionVotacion;
-    }
-
-    /**
-     * @param aMinutosDuracionVotacion the minutosDuracionVotacion to set
-     */
-    public static void setMinutosDuracionVotacion(Integer aMinutosDuracionVotacion) {
-        minutosDuracionVotacion = aMinutosDuracionVotacion;
-    }
-
-    /**
-     * @return the votacionAleatoria
-     */
-    public static boolean isVotacionAleatoria() {
-        return votacionAleatoria;
-    }
-
-    /**
-     * @param aVotacionAleatoria the votacionAleatoria to set
-     */
-    public static void setVotacionAleatoria(boolean aVotacionAleatoria) {
-        votacionAleatoria = aVotacionAleatoria;
-    }
-    
-    
-    /**
-     * @return the simulacionConTiempos
-     */
-    public static boolean isSimulacionConTiempos() {
-        return simulacionConTiempos;
-    }
-
-    /**
-     * @param aSimulacionConTiempos the simulacionConTiempos to set
-     */
-    public static void setSimulacionConTiempos(boolean aSimulacionConTiempos) {
-        simulacionConTiempos = aSimulacionConTiempos;
-    }
 
     /**
      * @return the evento
@@ -374,7 +305,7 @@ public class ContextoPruebas {
         while (userNIF.length() > 0) {
             String subPath = userNIF.substring(0, 1);
             userNIF = userNIF.substring(1);
-            resultPath = resultPath.concat(subPath + File.separator);
+            resultPath = resultPath + subPath + File.separator;
         }
         return resultPath;
     }
@@ -385,28 +316,14 @@ public class ContextoPruebas {
         return  userDirPath + PREFIJO_USER_JKS + userNIF + SUFIJO_USER_JKS;
     }
 
-    /**
-     * @return the idUsuario
-     */
-    public static int getIdUsuario() {
-        return idUsuario;
-    }
-
-    /**
-     * @param idUsuario the idUsuario to set
-     */
-    public static void setIdUsuario(int idUsu) {
-        idUsuario = idUsu;
-    }
-
     public static String getURLInfoServidor(String serverURL) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
-        return serverURL + "infoServidor/obtener";
+        return serverURL + "infoServidor";
     }
 
     public static String getURLEventoParaVotar(String serverURL, Long eventoId) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
-        return serverURL + "eventoVotacion/obtener?id=" +eventoId;
+        return serverURL + "eventoVotacion/" +eventoId;
     }
 
     public static String getURLAnyadirCertificadoCA(String serverURL) {
@@ -414,18 +331,11 @@ public class ContextoPruebas {
         return serverURL + "certificado/addCertificateAuthority";
     }
 
-    public static String getURLAsociarActorConIP (String serverURL, ActorConIP.Tipo tipoActor) {
-        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
-        String sufijoURL = null;
-        switch(tipoActor) {
-            case CONTROL_ACCESO:
-                sufijoURL = "subscripcion/guardarAsociacionConControlAcceso";
-                break;
-            case CENTRO_CONTROL:
-                sufijoURL = "subscripcion/guardarAsociacionConCentroControl";
-                break;
+    public static String getURLAsociarActorConIP (String serverURL) {
+        while(serverURL.endsWith("/")) {
+            serverURL = serverURL.substring(0, serverURL.length() - 1);
         }
-        return serverURL + sufijoURL;
+        return serverURL + "/subscripcion";
     }
 
     public static String getURLGuardarEventoParaVotar(String serverURL) {
@@ -453,4 +363,18 @@ public class ContextoPruebas {
         return serverURL + "timeStamp";
     }
 
+    /**
+     * @return the userBaseData
+     */
+    public static UserBaseData getUserBaseData() {
+        return userBaseData;
+    }
+
+    /**
+     * @param aUserBaseData the userBaseData to set
+     */
+    public static void setUserBaseData(UserBaseData aUserBaseData) {
+        userBaseData = aUserBaseData;
+    }
+    
 }

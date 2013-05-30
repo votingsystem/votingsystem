@@ -28,7 +28,7 @@ class AnuladorVotoController {
 	 * @return Recibo firmado con el certificado del servidor
 	 */
 	def index() { 
-		MensajeSMIME mensajeSMIMEReq = flash.mensajeSMIMEReq
+		MensajeSMIME mensajeSMIMEReq = params.mensajeSMIMEReq
 		if(!mensajeSMIMEReq) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
@@ -45,13 +45,13 @@ class AnuladorVotoController {
 		}		
 		Collection<X509Certificate> certColl = CertUtil.fromPEMToX509CertCollection(certChainBytes)
 		X509Certificate receiverCert = certColl.iterator().next()
-		flash.receiverCert = receiverCert
+		params.receiverCert = receiverCert
 		if(Respuesta.SC_OK == respuesta.codigoEstado || 
 			Respuesta.SC_ANULACION_REPETIDA == respuesta.codigoEstado) {
 			response.setContentType("${grailsApplication.config.pkcs7SignedContentType};" + 
 				"${grailsApplication.config.pkcs7EncryptedContentType}")
 		}
-		flash.respuesta =  respuesta
+		params.respuesta =  respuesta
 	}
 	
 

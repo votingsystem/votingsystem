@@ -33,7 +33,7 @@ class RecolectorFirmaController {
 	 * @return Si todo va bien devuelve un código de estado HTTP 200.
 	 */
 	def index() {
-		Documento documento = flash.pdfDocument
+		Documento documento = params.pdfDocument
 		if(params.long(id) && documento &&	
 			documento.estado == Documento.Estado.VALIDADO) {
 			EventoFirma evento = null;

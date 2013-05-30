@@ -13,6 +13,7 @@ import net.sf.json.JSONSerializer;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.OpcionEvento;
+import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.test.modelo.InfoFirma;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
@@ -80,8 +81,7 @@ public class EnvioFirmasPDF {
         for (int v = 0; v < numeroUsuarios.get(); v++) {
             Future<InfoFirma> f = firmasCompletionService.take();
             InfoFirma infoFirma = f.get();
-            if (200 == infoFirma.getRespuesta().getCodigoEstado() &&
-                    infoFirma.getRespuesta().isValidSignature()) {
+            if (Respuesta.SC_OK == infoFirma.getRespuesta().getCodigoEstado()) {
                 String rutaRecibo = ContextoPruebas.getUserDirPath(infoFirma.getFrom()) +
                         infoFirma.getRespuesta().getArchivo().getName();
                 FileUtils.copyFileToFile(infoFirma.getRespuesta().getArchivo(), 

@@ -46,11 +46,12 @@ public class PKCS10WrapperServer {
         X509Certificate issuedCert = CertUtil.generateV3EndEntityCertFromCsr(
                 csr, caKey, caCert, fechaInicio, fechaFin, "" + strSubjectDN);
         byte[] issuedCertPemBytes = CertUtil.fromX509CertToPEM(issuedCert);
-        byte[] caCertPemBytes = CertUtil.fromX509CertToPEM(caCert);
-        byte[] resultCsr = new byte[issuedCertPemBytes.length + caCertPemBytes.length];
-        System.arraycopy(issuedCertPemBytes, 0, resultCsr, 0, issuedCertPemBytes.length);
-        System.arraycopy(caCertPemBytes, 0, resultCsr, issuedCertPemBytes.length, caCertPemBytes.length);
-        return resultCsr;
+        //byte[] caCertPemBytes = CertUtil.fromX509CertToPEM(caCert);
+        //byte[] resultCsr = new byte[issuedCertPemBytes.length + caCertPemBytes.length];
+        //System.arraycopy(issuedCertPemBytes, 0, resultCsr, 0, issuedCertPemBytes.length);
+        //System.arraycopy(caCertPemBytes, 0, resultCsr, issuedCertPemBytes.length, caCertPemBytes.length);
+        //return resultCsr;
+        return issuedCertPemBytes;
     }
     
         

@@ -2,9 +2,11 @@ package org.sistemavotacion.controlacceso
 
 import java.security.cert.X509Certificate;
 
+import javax.crypto.spec.SecretKeySpec
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import org.sistemavotacion.controlacceso.modelo.*;
 import grails.converters.JSON
+import org.bouncycastle.util.encoders.Base64;
 
 /**
  * @infoController Solicitudes de acceso
@@ -20,6 +22,7 @@ class SolicitudAccesoController {
 	def csrService
 	def encryptionService
 
+	
 	/**
 	 * @httpMethod [GET]
 	 * @serviceURL [/solicitudAcceso/$id]
@@ -61,7 +64,7 @@ class SolicitudAccesoController {
 	 * @return La solicitud de certificado de voto firmada.
 	 */
     def processFileMap () {
-		MensajeSMIME mensajeSMIMEReq = flash[
+		MensajeSMIME mensajeSMIMEReq = params[
 			grailsApplication.config.SistemaVotacion.accessRequestFileName]
 		if(!mensajeSMIMEReq) {
 			String msg = message(code:'evento.peticionSinArchivo')
@@ -70,45 +73,46 @@ class SolicitudAccesoController {
 			render msg
 			return false
 		}
-		flash.mensajeSMIMEReq = mensajeSMIMEReq
+		params.mensajeSMIMEReq = mensajeSMIMEReq
 		SolicitudAcceso solicitudAcceso;
 		Respuesta respuesta = solicitudAccesoService.saveRequest(
 			mensajeSMIMEReq, request.getLocale())
 		EventoVotacion evento = respuesta.evento
 		if (Respuesta.SC_OK == respuesta.codigoEstado) {
 			solicitudAcceso = respuesta.solicitudAcceso
-			byte[] csrRequest = flash[
+			byte[] csrRequest = params[
 				grailsApplication.config.SistemaVotacion.nombreSolicitudCSR]
-			Respuesta encryptResponse = encryptionService.decryptMessage(csrRequest, request.getLocale())
-			if(Respuesta.SC_OK != encryptResponse.codigoEstado) {
-				respuesta.tipo = Tipo.SOLICITUD_ACCESO_ERROR;
-				respuesta.mensaje = encryptResponse.mensaje
-				flash.respuesta = respuesta
-				return false;
-			}
 			Usuario representative = null
 			if(solicitudAcceso.usuario.type == Usuario.Type.REPRESENTATIVE) {
 				representative = solicitudAcceso.usuario
 			}
 			Respuesta respuestaValidacionCSR = firmaService.
-					firmarCertificadoVoto(encryptResponse.messageBytes, 
+					firmarCertificadoVoto(csrRequest, 
 					evento, representative, request.getLocale())
 			if (Respuesta.SC_OK == respuestaValidacionCSR.codigoEstado) {
 				respuesta.tipo = Tipo.SOLICITUD_ACCESO;
-				flash.respuesta = respuesta
-				flash.responseBytes = respuestaValidacionCSR.firmaCSR
-				flash.receiverCert = respuestaValidacionCSR.certificado
+				params.respuesta = respuesta
+				params.responseBytes = respuestaValidacionCSR.firmaCSR
+				params.receiverCert = respuestaValidacionCSR.certificado
+				params.receiverPublicKey = respuestaValidacionCSR.data
 				response.setContentType("multipart/encrypted")
+				
+				
+				/*response.contentLength = respuestaValidacionCSR.firmaCSR.length
+				response.outputStream << respuestaValidacionCSR.firmaCSR
+				response.outputStream.flush()*/
+				return false
+				
 				return false
 			} else {
 				respuesta.tipo = Tipo.SOLICITUD_ACCESO_ERROR;
 				respuesta.mensaje = respuestaValidacionCSR.mensaje
-				flash.respuesta = respuesta
+				params.respuesta = respuesta
 				if (solicitudAcceso) solicitudAccesoService.
 					rechazarSolicitud(solicitudAcceso)
 					
 			}
-		} else flash.respuesta = respuesta
+		} else params.respuesta = respuesta
     }
     
 	/**

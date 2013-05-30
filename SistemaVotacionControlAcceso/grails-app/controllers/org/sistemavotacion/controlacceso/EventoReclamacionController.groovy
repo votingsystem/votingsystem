@@ -159,7 +159,7 @@ class EventoReclamacionController {
 	 * @return Recibo que consiste en el documento SMIME recibido con la firma añadida del servidor.
 	 */
     def post () {
-		MensajeSMIME mensajeSMIMEReq = flash.mensajeSMIMEReq
+		MensajeSMIME mensajeSMIMEReq = params.mensajeSMIMEReq
 		if(!mensajeSMIMEReq) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
@@ -173,10 +173,10 @@ class EventoReclamacionController {
 			if(Respuesta.SC_OK == respuesta.codigoEstado) {
 				response.setContentType("application/x-pkcs7-signature")
 			} 
-			flash.respuesta = respuesta
+			params.respuesta = respuesta
         } catch (Exception ex) {
 			log.error (ex.getMessage(), ex)
-			flash.respuesta = new Respuesta(
+			params.respuesta = new Respuesta(
 				codigoEstado:Respuesta.SC_ERROR_PETICION,
 				mensaje:message(code:'publishClaimErrorMessage'), 
 				tipo:Tipo.EVENTO_RECLAMACION_ERROR)
@@ -194,11 +194,11 @@ class EventoReclamacionController {
 	 */
     def estadisticas () {
         EventoReclamacion eventoReclamacion
-		if (!flash.evento) {
+		if (!params.evento) {
 			EventoReclamacion.withTransaction {
 				eventoReclamacion = EventoReclamacion.get(params.long('id'))
 			}
-		} else eventoReclamacion = flash.evento
+		} else eventoReclamacion = params.evento
         if (eventoReclamacion) {
             response.status = Respuesta.SC_OK
             def estadisticasMap = new HashMap()

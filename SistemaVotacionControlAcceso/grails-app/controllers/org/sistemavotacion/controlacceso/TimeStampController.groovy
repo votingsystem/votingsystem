@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest
+import java.util.concurrent.atomic.AtomicBoolean
 
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.bouncycastle.tsp.TimeStampRequest;
@@ -15,10 +16,14 @@ import org.sistemavotacion.controlacceso.modelo.SelloTiempo
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.multipart.MultipartHttpServletRequest
 import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.tsp.TSPException
+import org.bouncycastle.tsp.TSPValidationException 
 
 class TimeStampController {
 	
 	def timeStampService
+	
+	int maxNumAttempts = 3
 
 	/**
 	 * Servicio de generación de sellos de tiempo.
@@ -34,14 +39,48 @@ class TimeStampController {
 	def index() {
 		try {
 			byte[] timeStampRequestBytes = getStringFromInputStream(request.getInputStream()) 
-			Respuesta respuesta = timeStampService.processRequest(
-				timeStampRequestBytes, request.getLocale())
+			int attempts = 0
+			AtomicBoolean pending = new AtomicBoolean(Boolean.TRUE)
+			Respuesta respuesta = null
+			while(pending.get()) {
+				try {
+					respuesta = timeStampService.processRequest(
+						timeStampRequestBytes, request.getLocale())
+					pending.set(false)
+				} catch(TSPException ex) {
+					log.error(ex.getMessage(), ex)
+					if(attempts < maxNumAttempts) {
+						attempts++;
+					} else {
+						log.debug(" ---- consumidos los tres intentos")
+						pending.set(false)
+						respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+							mensaje:message(code: 'error.timeStampGeneration'))
+					} 
+				} catch(TSPValidationException ex) {
+					log.error(ex.getMessage(), ex)
+					if(attempts < maxNumAttempts) {
+						attempts++;
+					} else {
+						log.debug(" ---- consumidos los tres intentos")
+						pending.set(false)
+						respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+							mensaje:message(code: 'error.timeStampGeneration'))
+					}
+				}catch(Exception ex) {
+					respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+						mensaje:message(code: 'error.timeStampGeneration'))
+				}
+			}
+
 			response.status = respuesta.codigoEstado
 			if(Respuesta.SC_OK == respuesta.codigoEstado) {
 				response.contentType = "application/timestamp-response"
 				response.outputStream << respuesta.timeStampToken // Performing a binary stream copy
 				//response.outputStream.flush()
-			} else render respuesta.mensaje
+			} else {
+				render respuesta.mensaje
+			} 
 			return false
 		} catch(Exception ex) {
 			log.debug (ex.getMessage(), ex)

@@ -94,7 +94,7 @@ class EventoReclamacionService {
 		}
     }
 
-    public Respuesta generarCopiaRespaldo (EventoReclamacion evento, Locale locale) {
+    public synchronized Respuesta generarCopiaRespaldo (EventoReclamacion evento, Locale locale) {
         log.debug("generarCopiaRespaldo - eventoId: ${evento.id}")
 		Respuesta respuesta;
         if (evento) {
@@ -115,18 +115,15 @@ class EventoReclamacionService {
 			
             firmasRecibidas.each { firma ->
                 MensajeSMIME mensajeSMIME = firma.mensajeSMIME
-                ByteArrayInputStream bais = new ByteArrayInputStream(mensajeSMIME.contenido);
-                MimeMessage msg = new MimeMessage(null, bais);
                 File smimeFile = new File("${basedir}/${fileNamePrefix}_${i}")
-                FileOutputStream fos = new FileOutputStream(smimeFile);
-                msg.writeTo(fos);
-                fos.close();
+				smimeFile.setBytes(mensajeSMIME.contenido)
 				i++;
             }
             def ant = new AntBuilder()
             ant.zip(destfile: "${basedir}.zip", basedir: basedir)
+			Map datos = [cantidad:firmasRecibidas.size()]
 			respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK, 
-				cantidad:firmasRecibidas.size(), file:new File("${basedir}.zip"))
+				datos:datos, file:new File("${basedir}.zip"))
         } else respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:
 				messageSource.getMessage('evento.peticionSinEvento', null, locale))
 		return respuesta

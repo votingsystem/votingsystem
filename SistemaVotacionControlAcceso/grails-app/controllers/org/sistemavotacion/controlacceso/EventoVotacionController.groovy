@@ -110,7 +110,7 @@ class EventoVotacionController {
 	 * @return Recibo que consiste en el archivo firmado recibido con la firma añadida del servidor.
 	 */
     def post () {
-		MensajeSMIME mensajeSMIME = flash.mensajeSMIMEReq
+		MensajeSMIME mensajeSMIME = params.mensajeSMIMEReq
 		if(!mensajeSMIME) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
@@ -120,7 +120,7 @@ class EventoVotacionController {
 		}
         Respuesta respuesta = eventoVotacionService.saveEvent(
 			mensajeSMIME, request.getLocale())
-		flash.respuesta = respuesta
+		params.respuesta = respuesta
 		if (Respuesta.SC_OK == respuesta.codigoEstado) {
 			response.contentType = grailsApplication.config.pkcs7SignedContentType
 		}
@@ -138,12 +138,12 @@ class EventoVotacionController {
     def estadisticas () {
         if (params.long('id')) {
             EventoVotacion eventoVotacion
-            if (!flash.evento) {
+            if (!params.evento) {
 				EventoVotacion.withTransaction {
 					eventoVotacion = EventoVotacion.get(params.id)
 				}
 			} 
-            else eventoVotacion = flash.evento
+            else eventoVotacion = params.evento
             if (eventoVotacion) {
                 response.status = Respuesta.SC_OK
                 def estadisticasMap = new HashMap()

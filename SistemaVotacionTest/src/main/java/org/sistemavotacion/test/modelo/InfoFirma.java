@@ -1,5 +1,6 @@
 package org.sistemavotacion.test.modelo;
 
+import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.modelo.Evento;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -186,7 +186,7 @@ class SubscripcionService {
 			if (!mensajeJSON.serverURL || !mensajeJSON.operation ||
 				(Tipo.ASOCIAR_CENTRO_CONTROL != Tipo.valueOf(mensajeJSON.operation))) {
 				msg = messageSource.getMessage('documentWithErrorsMsg',null, locale)
-				log.error("asociarCentroControl - ERROR DATA - ${msg}")
+				log.error("asociarCentroControl - ERROR DATA - ${msg} -> ${smimeMessageReq.getSignedContent()}")
 				return new Respuesta(mensaje:msg, tipo:Tipo.ASOCIAR_CENTRO_CONTROL_ERROR, 
 					codigoEstado:Respuesta.SC_ERROR_PETICION)
 			} else {
@@ -212,7 +212,9 @@ class SubscripcionService {
 					} else {
 						msg =  messageSource.getMessage('susbcripcion.centroControlAsociado',
 							[respuesta.centroControl.nombre].toArray(), locale)
+						log.debug(msg)
 						return new Respuesta(mensaje: msg,
+							centroControl:respuesta.centroControl,
 							codigoEstado:Respuesta.SC_OK,
 							tipo:Tipo.ASOCIAR_CENTRO_CONTROL)
 					}

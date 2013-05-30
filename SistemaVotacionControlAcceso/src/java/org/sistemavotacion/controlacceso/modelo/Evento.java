@@ -3,7 +3,6 @@ package org.sistemavotacion.controlacceso.modelo;
 import static javax.persistence.GenerationType.IDENTITY;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -77,6 +76,8 @@ public class Evento implements Serializable {
     @Column(name="contenido", columnDefinition="TEXT")
     @Analyzer(definition = "customAnalyzer")
     private String contenido; 
+    @Column(name="metaInf", columnDefinition="TEXT")
+    private String metaInf = "{}"; 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="centroControlId")
     private CentroControl centroControl;    
@@ -107,7 +108,7 @@ public class Evento implements Serializable {
     @ManyToMany
     private Set<Etiqueta> etiquetaSet;
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="evento")
-    private Set<MensajeSMIME> mensajeSMIMESet = new HashSet<MensajeSMIME>(0); 
+    private Set<MensajeSMIME> mensajeSMIMESet; 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="fechaInicio", length=23, nullable=false)
     @Field(index = Index.UN_TOKENIZED, store = Store.YES)
@@ -296,5 +297,13 @@ public class Evento implements Serializable {
 
 	public void setDateCanceled(Date dateCanceled) {
 		this.dateCanceled = dateCanceled;
+	}
+
+	public String getMetaInf() {
+		return metaInf;
+	}
+
+	public void setMetaInf(String metaInf) {
+		this.metaInf = metaInf;
 	}
 }

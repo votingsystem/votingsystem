@@ -5,3 +5,5 @@ GrailsRestDocPlugin-0.3.zip
 .settings
 .project
 
+/build/
+/SistemaVotacionAndroid/build/

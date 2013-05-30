@@ -6,9 +6,7 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import javax.swing.JDialog;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
@@ -16,7 +14,7 @@ import net.miginfocom.swing.MigLayout;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.OpcionEvento;
 import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.test.KeyStoreHelper;
+import org.sistemavotacion.test.modelo.UserBaseData;
 import org.sistemavotacion.test.panel.OpcionVotacionPanel;
 import org.sistemavotacion.test.panel.VotacionesPanel;
 import org.slf4j.Logger;
@@ -32,25 +30,27 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
         
     private Evento evento = null;
     private Border normalTextBorder;
+    private UserBaseData userBaseData = null;
     private List<OpcionVotacionPanel> panelesOpciones = new ArrayList<OpcionVotacionPanel>();
 
-    public DatosSimulacionDialog(Frame parent, boolean modal, Evento evento) {
+    public DatosSimulacionDialog(Frame parent, boolean modal, 
+            Evento evento, UserBaseData userBaseData) {
         super(parent, modal);
         initComponents();
         setLocationRelativeTo(null);
         this.evento = evento;
+        this.userBaseData = userBaseData;                    
         if(evento != null) {
             asuntoConvocatoriaLabel.setText("<html><b>Asunto de la convocatoria: </b>"
                 + evento.getAsunto() + "<html>");
         }
-        numVotosTextField.addKeyListener(this);
         opcionesPanel.setVisible(false);
         tiempoPanel.setVisible(false);
         numVotosButtonGroup.add(votosAleatoriosRadioButton);
         numVotosButtonGroup.add(numVotosManualRadioButton);
         tiempoVotacionButtonGroup.add(tiempoMaquinaRadioButton);
         tiempoVotacionButtonGroup.add(introduccionManualTiempoRadioButton);
-        normalTextBorder = numVotosTextField.getBorder();
+        normalTextBorder = userBaseEditorPane.getBorder();
         votosAleatoriosRadioButton.setSelected(true);
         tiempoMaquinaRadioButton.setSelected(true);
         opcionesPanel.setLayout(new MigLayout());
@@ -61,26 +61,27 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
             panelesOpciones.add(opcionVotacionPanel);
         }
         validacionPanel.setVisible(false);
-        if(ContextoPruebas.getNumeroTotalDeVotosParaLanzar() != null) {
-            numVotosTextField.setText(ContextoPruebas.getNumeroTotalDeVotosParaLanzar().toString());
-            if(ContextoPruebas.isVotacionAleatoria()) {
-                votosAleatoriosRadioButton.setSelected(true);
-            } else {
-                numVotosManualRadioButton.setSelected(true);
-                opcionesPanel.setVisible(true);
-            }
-            if(ContextoPruebas.isSimulacionConTiempos()) {
-                introduccionManualTiempoRadioButton.setSelected(true);
-                tiempoPanel.setVisible(true);
-                horasComboBox.setSelectedIndex(ContextoPruebas.getHorasDuracionVotacion());
-                minutosComboBox.setSelectedIndex(ContextoPruebas.getMinutosDuracionVotacion());
-            } else {
-                tiempoMaquinaRadioButton.setSelected(true);
-            }
+        if(userBaseData.isVotacionAleatoria()) {
+            votosAleatoriosRadioButton.setSelected(true);
+        } else {
+            numVotosManualRadioButton.setSelected(true);
+            opcionesPanel.setVisible(true);
         }
+        if(userBaseData.isSimulacionConTiempos()) {
+            introduccionManualTiempoRadioButton.setSelected(true);
+            tiempoPanel.setVisible(true);
+            horasComboBox.setSelectedIndex(userBaseData.getHorasDuracionVotacion());
+            minutosComboBox.setSelectedIndex(userBaseData.getMinutosDuracionVotacion());
+        } else {
+            tiempoMaquinaRadioButton.setSelected(true);
+        }
+        userBaseEditorPane.setContentType("text/html");
+        userBaseEditorPane.setEditable(false); 
+        userBaseEditorPane.setText(userBaseData.toHtml());
         pack();
     }
 
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -93,8 +94,6 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
         numVotosButtonGroup = new javax.swing.ButtonGroup();
         tiempoVotacionButtonGroup = new javax.swing.ButtonGroup();
         asuntoConvocatoriaLabel = new javax.swing.JLabel();
-        numVotodLabel = new javax.swing.JLabel();
-        numVotosTextField = new javax.swing.JTextField();
         valorVotosPanel = new javax.swing.JPanel();
         votosAleatoriosRadioButton = new javax.swing.JRadioButton();
         opcionesPanel = new javax.swing.JPanel();
@@ -113,16 +112,17 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
         validacionPanel = new javax.swing.JPanel();
         mensajeValidacionLabel = new javax.swing.JLabel();
         closePanelLabel = new javax.swing.JLabel();
+        userBasePanel = new javax.swing.JPanel();
+        userBaseScrollPane = new javax.swing.JScrollPane();
+        userBaseEditorPane = new javax.swing.JEditorPane();
+        userBaseLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/sistemavotacion/test/dialogo/Bundle"); // NOI18N
         setTitle(bundle.getString("DatosSimulacionDialog.title")); // NOI18N
 
         asuntoConvocatoriaLabel.setText(bundle.getString("DatosSimulacionDialog.asuntoConvocatoriaLabel.text")); // NOI18N
-
-        numVotodLabel.setText(bundle.getString("DatosSimulacionDialog.numVotodLabel.text")); // NOI18N
-
-        numVotosTextField.setText(bundle.getString("DatosSimulacionDialog.numVotosTextField.text")); // NOI18N
+        asuntoConvocatoriaLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
 
         valorVotosPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
@@ -304,6 +304,35 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
                 .addGap(0, 0, Short.MAX_VALUE))
         );
 
+        userBasePanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        userBaseScrollPane.setViewportView(userBaseEditorPane);
+
+        userBaseLabel.setText(bundle.getString("DatosSimulacionDialog.userBaseLabel.text")); // NOI18N
+
+        javax.swing.GroupLayout userBasePanelLayout = new javax.swing.GroupLayout(userBasePanel);
+        userBasePanel.setLayout(userBasePanelLayout);
+        userBasePanelLayout.setHorizontalGroup(
+            userBasePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(userBasePanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(userBasePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(userBaseScrollPane)
+                    .addGroup(userBasePanelLayout.createSequentialGroup()
+                        .addComponent(userBaseLabel)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        userBasePanelLayout.setVerticalGroup(
+            userBasePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, userBasePanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(userBaseLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(userBaseScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 136, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -311,20 +340,16 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(asuntoConvocatoriaLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(valorVotosPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(tiempoVotacionPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(numVotodLabel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(numVotosTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(aceptarButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cerrarButton))
-                    .addComponent(validacionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(asuntoConvocatoriaLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(validacionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(userBasePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -334,11 +359,9 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
                 .addComponent(validacionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(asuntoConvocatoriaLabel)
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(numVotodLabel)
-                    .addComponent(numVotosTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(userBasePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(valorVotosPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(tiempoVotacionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -346,7 +369,7 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cerrarButton)
                     .addComponent(aceptarButton))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
@@ -383,9 +406,8 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
 
     private void aceptarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aceptarButtonActionPerformed
         if(!validarFormulario()) return;
-        ContextoPruebas.setNumeroTotalDeVotosParaLanzar(new Integer(numVotosTextField.getText().trim()));
-        ContextoPruebas.setVotacionAleatoria(votosAleatoriosRadioButton.isSelected());
-        ContextoPruebas.setSimulacionConTiempos(introduccionManualTiempoRadioButton.isSelected());
+        userBaseData.setVotacionAleatoria(votosAleatoriosRadioButton.isSelected());
+        userBaseData.setSimulacionConTiempos(introduccionManualTiempoRadioButton.isSelected());
         if(numVotosManualRadioButton.isSelected()) {
             List<OpcionEvento> opciones = new ArrayList<OpcionEvento>();
             for(OpcionVotacionPanel opcionVotacionPanel : panelesOpciones) {
@@ -395,12 +417,15 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
             evento.setOpciones(opciones);
         }
         if(introduccionManualTiempoRadioButton.isSelected()) {
-            ContextoPruebas.setHorasDuracionVotacion(horasComboBox.getSelectedIndex());
-            ContextoPruebas.setMinutosDuracionVotacion(minutosComboBox.getSelectedIndex());
+            userBaseData.setHorasDuracionVotacion(horasComboBox.getSelectedIndex());
+            userBaseData.setMinutosDuracionVotacion(minutosComboBox.getSelectedIndex());
         }
-        logger.debug("Hora: " + ContextoPruebas.getHorasDuracionVotacion() + 
-                " - Minuto: " + ContextoPruebas.getMinutosDuracionVotacion());
+        logger.debug("Hora: " + userBaseData.getHorasDuracionVotacion() + 
+                " - Minuto: " + userBaseData.getMinutosDuracionVotacion());
+        
+        userBaseData.setEvento(evento);
         ContextoPruebas.setEvento(evento);
+        ContextoPruebas.setUserBaseData(userBaseData);
         VotacionesPanel.INSTANCIA.prepararPanelParaLanzarSimulacion();
         dispose();
     }//GEN-LAST:event_aceptarButtonActionPerformed
@@ -409,22 +434,6 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
         boolean errores = false;
         opcionesPanel.setBorder(normalTextBorder);
         tiempoPanel.setBorder(normalTextBorder);
-        numVotosTextField.setBorder(normalTextBorder);
-        Integer numTotalVotos = null;
-        if (numVotosTextField.getText() == null ||
-                "".equals(numVotosTextField.getText().trim())) {
-            mensajeValidacionLabel.setText("<html>El campo no puede ir vacío</html>");
-            numVotosTextField.setBorder(new LineBorder(Color.RED,2));
-            errores = true;
-        } else if (numVotosTextField.getText().trim().length() > 0) {
-            try{
-                numTotalVotos = new Integer(numVotosTextField.getText().trim());
-            } catch (Exception ex) {
-                mensajeValidacionLabel.setText("<html>El valor debe ser numérico</html>");
-                numVotosTextField.setBorder(new LineBorder(Color.RED,2));
-                errores = true;
-            }
-        }
         if(numVotosManualRadioButton.isSelected()) {
             Integer sumaVotosOpciones = 0;
             for(OpcionVotacionPanel opcionVotacionPanel : panelesOpciones) {
@@ -438,12 +447,6 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
                     opcionVotacionPanel.setError(false);
                     sumaVotosOpciones += opcion.getNumeroVotos();
                 }
-            }
-            if(numTotalVotos!= null && 
-                    sumaVotosOpciones.intValue() != numTotalVotos.intValue()) {
-                errores = true;
-                mensajeValidacionLabel.setText("La suma de votos de las opciones no coincide con el total");
-                numVotosTextField.setBorder(new LineBorder(Color.RED,2));
             }
         }
         validacionPanel.setVisible(errores);
@@ -462,55 +465,7 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
         pack();
     }
     
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /*
-         * Set the Nimbus look and feel
-         */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /*
-         * If Nimbus (introduced in Java SE 6) is not available, stay with the
-         * default look and feel. For details see
-         * http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(DatosSimulacionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(DatosSimulacionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(DatosSimulacionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(DatosSimulacionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
 
-        /*
-         * Create and display the dialog
-         */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
-            public void run() {
-                DatosSimulacionDialog dialog = new DatosSimulacionDialog(new javax.swing.JFrame(), true, null);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton aceptarButton;
     private javax.swing.JLabel asuntoConvocatoriaLabel;
@@ -523,15 +478,17 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
     private javax.swing.JLabel mensajeValidacionLabel;
     private javax.swing.JComboBox minutosComboBox;
     private javax.swing.JLabel minutosLabel;
-    private javax.swing.JLabel numVotodLabel;
     private javax.swing.ButtonGroup numVotosButtonGroup;
     private javax.swing.JRadioButton numVotosManualRadioButton;
-    private javax.swing.JTextField numVotosTextField;
     private javax.swing.JPanel opcionesPanel;
     private javax.swing.JRadioButton tiempoMaquinaRadioButton;
     private javax.swing.JPanel tiempoPanel;
     private javax.swing.ButtonGroup tiempoVotacionButtonGroup;
     private javax.swing.JPanel tiempoVotacionPanel;
+    private javax.swing.JEditorPane userBaseEditorPane;
+    private javax.swing.JLabel userBaseLabel;
+    private javax.swing.JPanel userBasePanel;
+    private javax.swing.JScrollPane userBaseScrollPane;
     private javax.swing.JPanel validacionPanel;
     private javax.swing.JPanel valorVotosPanel;
     private javax.swing.JRadioButton votosAleatoriosRadioButton;

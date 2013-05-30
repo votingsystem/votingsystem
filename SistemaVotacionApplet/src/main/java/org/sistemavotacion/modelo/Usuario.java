@@ -25,6 +25,12 @@ public class Usuario {
 
     private X509Certificate certificate;
 
+    public Usuario() { }
+    
+    public Usuario(String nif) {
+        this.nif = nif;
+    }
+    
    /**
      * @return the id
      */

@@ -72,6 +72,13 @@ public class Respuesta<T> {
         this.mensaje = mensaje;
     }
         
+    public Respuesta (int codigoEstado, String mensaje, byte[] bytesArchivo) {
+        this.codigoEstado = codigoEstado;
+        this.mensaje = mensaje;
+        this.bytesArchivo = bytesArchivo;
+    }
+    
+        
     public Respuesta (int codigoEstado, PKCS10WrapperClient pkcs10WrapperClient) {
         this.codigoEstado = codigoEstado;
         this.pkcs10WrapperClient = pkcs10WrapperClient;
@@ -139,7 +146,7 @@ public class Respuesta<T> {
      * @return the codigoEstadoHTTP
      */
     public int getCodigoEstado() {
-        return codigoEstado;
+        return codigoEstado; 
     }
 
     /**

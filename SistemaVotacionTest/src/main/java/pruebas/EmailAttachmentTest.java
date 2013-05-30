@@ -29,7 +29,13 @@ public class EmailAttachmentTest {
         //props.put("mail.transport.protocol", "smtp");
 
         Session mailSession = Session.getDefaultInstance(props, null);
-        InputStream source = new FileInputStream("/home/jgzornoza/emailPDF");
+        
+        File fileInput = File.createTempFile("emailAttachment", "");
+        fileInput.deleteOnExit();
+        FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
+            .getResourceAsStream("testFiles/emailPDF"), fileInput); 
+        
+        InputStream source = new FileInputStream(fileInput);
         MimeMessage message = new MimeMessage(mailSession, source);
         Multipart multipart = (Multipart) message.getContent();
         //logger.debug(multipart.getCount());
@@ -40,7 +46,7 @@ public class EmailAttachmentTest {
             BodyPart bodyPart = multipart.getBodyPart(i);
             InputStream stream = bodyPart.getInputStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(stream));
-            File pdfFile = new File("/home/jgzornoza/pdfFile.pdf");
+            File pdfFile = new File("./pdfFile.pdf");
             FileUtils.copyStreamToFile(stream, pdfFile);
             
             /*while (br.ready()) {

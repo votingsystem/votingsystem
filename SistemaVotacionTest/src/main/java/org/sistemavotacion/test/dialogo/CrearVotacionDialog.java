@@ -30,26 +30,29 @@ import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
+import org.sistemavotacion.test.MainFrame;
 import org.sistemavotacion.test.json.DeJSONAObjeto;
 import org.sistemavotacion.test.json.DeObjetoAJSON;
 import org.sistemavotacion.test.panel.VotacionesPanel;
-import org.sistemavotacion.test.tarea.FileSenderWorker;
-import org.sistemavotacion.test.tarea.LanzadorWorker;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
+import org.sistemavotacion.worker.DocumentSenderWorker;
+import org.sistemavotacion.worker.VotingSystemWorker;
+import org.sistemavotacion.worker.VotingSystemWorkerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class CrearVotacionDialog extends JDialog implements KeyListener, LanzadorWorker {
+public class CrearVotacionDialog extends JDialog implements 
+           KeyListener, VotingSystemWorkerListener {
 
     private static Logger logger = LoggerFactory.getLogger(CrearVotacionDialog.class);
-
-    private Pattern pattern;
-    private Matcher matcher;    
+    
+    private static final int PUBLISH_DOCUMENT_WORKER          = 0;
+   
     private static final String IPADDRESS_PATTERN = 
 		"^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
 		"([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
@@ -390,18 +393,22 @@ public class CrearVotacionDialog extends JDialog implements KeyListener, Lanzado
                 ContextoPruebas.getUsuarioPruebas().getKeyStore(),
                 ContextoPruebas.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
                 ContextoPruebas.VOTE_SIGN_MECHANISM);
-                File solicitudAsociacion = new File(FileUtils.APPTEMPDIR 
+            File eventToPublish = new File(FileUtils.APPTEMPDIR 
                 + "SolicitudPublicacionConvocatoria");
+            logger.debug("publishing event: " + eventToPublish.getAbsolutePath());
             String eventoParaPublicar = DeObjetoAJSON.obtenerEventoJSON(evento);
             MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(
                     ContextoPruebas.getUsuarioPruebas().getEmail(), 
                     ContextoPruebas.getControlAcceso().getNombreNormalizado(), 
-                    eventoParaPublicar, "Solicitud Publicación convocatoria", null, SignedMailGenerator.Type.USER);
-            mimeMessage.writeTo(new FileOutputStream(solicitudAsociacion));
-            tareaEnEjecucion= new FileSenderWorker(solicitudAsociacion, 
+                    eventoParaPublicar, "Solicitud Publicación convocatoria",
+                    null);
+            mimeMessage.writeTo(new FileOutputStream(eventToPublish));
+            tareaEnEjecucion = new DocumentSenderWorker(
+                    PUBLISH_DOCUMENT_WORKER, eventToPublish, 
+                    Contexto.SIGNED_CONTENT_TYPE,
                     ContextoPruebas.getURLGuardarEventoParaVotar(
                     ContextoPruebas.getControlAcceso().getServerURL()), this);
-            tareaEnEjecucion.execute(); 
+            tareaEnEjecucion.execute();
             mostrarPantallaEnvio(true);
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
@@ -565,48 +572,6 @@ public class CrearVotacionDialog extends JDialog implements KeyListener, Lanzado
         pack();
     }
     
-    @Override
-    public void process(List<String> messages, SwingWorker worker) {  }
-
-    @Override
-    public void mostrarResultadoOperacion(SwingWorker worker) {
-    	logger.debug(" === mostrarResultadoOperacion - worker: " + worker.getClass());
-        if(worker instanceof FileSenderWorker) {
-        	FileSenderWorker multipartEntityWorker = (FileSenderWorker)worker;
-            logger.debug(" === mostrarResultadoOperacion - EnviarMultipartEntityWorker - statusCode: " 
-        	+ multipartEntityWorker.getStatusCode());
-
-
-            if(Respuesta.SC_OK == multipartEntityWorker.getStatusCode()) {
-                try {
-                    
-                    FileUtils.copyStreamToFile(new ByteArrayInputStream(
-                    multipartEntityWorker.getMessage().getBytes()), 
-                    new File(ContextoPruebas.APPDIR + "VotingPublishReceipt"));
-                    SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(null, 
-                            new ByteArrayInputStream(multipartEntityWorker.getMessage().getBytes()), 
-                            "VotingPublishReceipt");
-                    dnieMimeMessage.verify(
-                            ContextoPruebas.INSTANCIA.getSessionPKIXParameters());
-                    logger.debug("--- dnieMimeMessage.getSignedContent(): " + dnieMimeMessage.getSignedContent());
-                    evento = DeJSONAObjeto.obtenerEvento(dnieMimeMessage.getSignedContent());
-                    logger.debug("Respuesta - Evento ID: " + evento.getEventoId());
-                    
-                    VotacionesPanel.INSTANCIA.cargarEvento(evento);
-                    dispose();
-                } catch (Exception ex) {
-                    logger.error(ex.getMessage(), ex);
-                    MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                    errorDialog.setMessage(ex.getMessage(), "Error");
-                    dispose();
-                }
-            } else {
-                mostrarPantallaEnvio(false);
-                mostrarMensajeUsuario("ERROR - " + multipartEntityWorker.getMessage());
-            }
-        }
-    }
-    
     public void mostrarMensajeUsuario(String mensaje) {
         if(mensaje == null) {
             validacionPanel.setVisible(false);
@@ -615,6 +580,55 @@ public class CrearVotacionDialog extends JDialog implements KeyListener, Lanzado
             validacionPanel.setVisible(true);
         }
         pack();
+    }
+
+    @Override
+    public void process(List<String> messages) {
+        String message = null;
+        for(String msg: messages) {
+            message = message + "<br/>";
+        }
+        if(message != null && !"".equals(message)) 
+            mensajeValidacionLabel.setText(message);
+    }
+
+    @Override
+    public void showResult(VotingSystemWorker worker) {
+        logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
+                " - worker: " + worker.getClass().getSimpleName() + 
+                " - workerId:" + worker.getId());
+        switch(worker.getId()) {
+            case PUBLISH_DOCUMENT_WORKER:
+                if(Respuesta.SC_OK == worker.getStatusCode()) {
+                    try {
+                        byte[] responseBytes = worker.getMessage().getBytes();
+                        FileUtils.copyStreamToFile(new ByteArrayInputStream(responseBytes), 
+                            new File(ContextoPruebas.APPDIR + "VotingPublishReceipt"));
+                        SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(null, 
+                                new ByteArrayInputStream(responseBytes), 
+                                "VotingPublishReceipt");
+                        dnieMimeMessage.verify(
+                                ContextoPruebas.INSTANCIA.getSessionPKIXParameters());
+                        logger.debug("--- dnieMimeMessage.getSignedContent(): " + dnieMimeMessage.getSignedContent());
+                        evento = DeJSONAObjeto.obtenerEvento(dnieMimeMessage.getSignedContent());
+                        logger.debug("Respuesta - Evento ID: " + evento.getEventoId());
+
+                        MainFrame.INSTANCIA.cargarCentroControl(
+                                ContextoPruebas.getCentroControl().getServerURL());
+                        VotacionesPanel.INSTANCIA.cargarEvento(evento);
+                        dispose();
+                    } catch (Exception ex) {
+                        logger.error(ex.getMessage(), ex);
+                        MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
+                        errorDialog.setMessage(ex.getMessage(), "Error");
+                        dispose();
+                    }
+                } else {
+                    mostrarPantallaEnvio(false);
+                    mostrarMensajeUsuario("ERROR - " + worker.getMessage());
+                }
+                break;
+        }
     }
     
 }

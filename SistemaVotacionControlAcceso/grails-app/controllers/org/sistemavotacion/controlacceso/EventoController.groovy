@@ -103,7 +103,7 @@ class EventoController {
 			evento = Evento.get(params.id)
 		}
 		if (evento) {
-			flash.evento = evento
+			params.evento = evento
 			if (evento instanceof EventoFirma) forward(controller:"eventoFirma",action:"estadisticas")
 			if (evento instanceof EventoReclamacion) forward(controller:"eventoReclamacion",action:"estadisticas")
 			if (evento instanceof EventoVotacion) forward(controller:"eventoVotacion",action:"estadisticas")
@@ -123,7 +123,7 @@ class EventoController {
 	 * @return Si todo va bien devuelve un código de estado HTTP 200.
 	 */
    def cancelled() {
-		MensajeSMIME mensajeSMIMEReq = flash.mensajeSMIMEReq
+		MensajeSMIME mensajeSMIMEReq = params.mensajeSMIMEReq
 		if(!mensajeSMIMEReq) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
@@ -137,7 +137,7 @@ class EventoController {
 			response.status = Respuesta.SC_OK
 			response.setContentType("${grailsApplication.config.pkcs7SignedContentType}")
 	    }
-	    flash.respuesta = respuesta
+	    params.respuesta = respuesta
    }
 
    /**

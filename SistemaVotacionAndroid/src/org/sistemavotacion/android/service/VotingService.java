@@ -124,8 +124,7 @@ public class VotingService extends Service implements TaskListener {
         			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
             if(Respuesta.SC_OK == getTimeStampTask.get()) {
             	SendFileTask sendFileTask = (SendFileTask)new SendFileTask(null, this, 
-							timeStampedDocument.setTimeStampToken(getTimeStampTask), 
-							Aplicacion.SIGNED_CONTENT_TYPE).execute(
+							timeStampedDocument.setTimeStampToken(getTimeStampTask)).execute(
 							ServerPaths.getURLAnulacionVoto(Aplicacion.CONTROL_ACCESO_URL));
             	 if(Respuesta.SC_OK == sendFileTask.get()) {
  					try {
@@ -221,8 +220,7 @@ public class VotingService extends Service implements TaskListener {
 			        	EncryptionHelper.encryptSMIMEFile(fileToEncrypt, 
 			        			event.getCentroControl().getCertificado());
 	                	SendFileTask sendFileTask = (SendFileTask)new SendFileTask(null, this, 
-	                			fileToEncrypt, Aplicacion.SIGNED_AND_ENCRYPTED_CONTENT_TYPE).
-	                			execute(ServerPaths.getURLVoto(
+	                			fileToEncrypt).execute(ServerPaths.getURLVoto(
 				    			event.getCentroControl().getServerURL()));
 	                	if(Respuesta.SC_OK == sendFileTask.get()) {
 			                try {
@@ -242,7 +240,7 @@ public class VotingService extends Service implements TaskListener {
 			
 								byte[] base64EncodedKey = Base64.encode(
 										pkcs10WrapperClient.getPrivateKey().getEncoded());
-			                	byte[] encryptedKey = EncryptionHelper.encryptText(base64EncodedKey, userCert);
+			                	byte[] encryptedKey = EncryptionHelper.encryptMessage(base64EncodedKey, userCert);
 			
 			                	receipt.setPkcs10WrapperClient(pkcs10WrapperClient);
 								receipt.setEncryptedKey(encryptedKey);

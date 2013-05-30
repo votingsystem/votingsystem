@@ -78,7 +78,7 @@ class FirmaService {
 			else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtil.fromX509CertToPEM (chain[i]))
 		}
 		def rutaCadenaCertificacion = getAbsolutePath("${grailsApplication.config.SistemaVotacion.rutaCadenaCertificacion}")
-		FileUtils.copyStreamToFile(new ByteArrayInputStream(pemCertsArray), new File(rutaCadenaCertificacion))
+		new File(rutaCadenaCertificacion).setBytes(pemCertsArray)
 		inicializarAutoridadesCertificadoras();
 	}
 	
@@ -427,7 +427,6 @@ class FirmaService {
 		MimeMessage mimeMessage = getSignedMailGenerator().genMimeMessage(
 			fromUser, toUser, textToSign, subject, header)
 		File resultFile = File.createTempFile("smime", "p7m");
-		resultFile.deleteOnExit();
 		mimeMessage.writeTo(new FileOutputStream(resultFile));
 		return resultFile
 	}

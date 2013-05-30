@@ -5,7 +5,6 @@ import static javax.persistence.GenerationType.IDENTITY;
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -85,7 +84,7 @@ public class MensajeSMIME implements Serializable {
     @Column(name="fechaActualizacion", length=23, insertable=true)
     private Date lastUpdated;
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="smimePadre")
-    private Set<MensajeSMIME> smimeHijosSet = new HashSet<MensajeSMIME>(0);  
+    private Set<MensajeSMIME> smimeHijosSet;  
 
     @Transient
     private transient SMIMEMessageWrapper smimeMessage;

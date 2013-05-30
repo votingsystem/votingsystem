@@ -14,6 +14,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
+import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.smime.SignedMailGenerator;
@@ -21,11 +22,12 @@ import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.MainFrame;
 import org.sistemavotacion.test.json.DeJSONAObjeto;
 import org.sistemavotacion.test.json.DeObjetoAJSON;
-import org.sistemavotacion.test.tarea.FileSenderWorker;
-import org.sistemavotacion.test.tarea.LanzadorWorker;
-import org.sistemavotacion.test.tarea.ObtenerInfoServidorWorker;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.StringUtils;
+import org.sistemavotacion.worker.DocumentSenderWorker;
+import org.sistemavotacion.worker.InfoGetterWorker;
+import org.sistemavotacion.worker.VotingSystemWorker;
+import org.sistemavotacion.worker.VotingSystemWorkerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,11 +36,86 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
 */
-public class AsociarCentroControlDialog 
-    extends JDialog implements LanzadorWorker, KeyListener {
+public class AsociarCentroControlDialog extends JDialog implements 
+        VotingSystemWorkerListener, KeyListener {
 
     private static Logger logger = LoggerFactory.getLogger(AsociarCentroControlDialog.class);
 
+    private static final int INFO_GETTER_WORKER                       = 0;
+    private static final int ASSOCIATE_CONTROL_CENTER_WORKER          = 1;
+
+    @Override
+    public void process(List<String> messages) {
+        String msg = null;
+        for(String message : messages) {
+            if(msg == null ) msg = message;
+            else msg = msg + "<br/>" + message; 
+        }
+        mostrarMensajeUsuario(msg);
+    }
+
+    @Override
+    public void showResult(VotingSystemWorker worker) {
+        logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
+                " - worker: " + worker.getClass().getSimpleName() + 
+                " - workerId:" + worker.getId());
+        switch(worker.getId()) {
+            case INFO_GETTER_WORKER:
+            if(Respuesta.SC_OK == worker.getStatusCode()) {
+                try {
+                    ActorConIP actorConIP = DeJSONAObjeto.obtenerActorConIP(
+                    		worker.getMessage());
+                    if(actorConIP.getTipo() != ActorConIP.Tipo.CENTRO_CONTROL) {
+                        mostrarMensajeUsuario("El servidor no es un Centro de Control");
+                        centroControlTextField.setBorder(new LineBorder(Color.RED,2));
+                        infoServidorButton.setIcon(null);
+                        infoServidorButton.setText("Asociar");
+                        estado = Estado.DESCONECTADO;
+                        return;
+                    }
+                    mostrarMensajeUsuario(null);
+                    centroControlTextField.setBorder(normalTextBorder);
+                    centroControl = actorConIP;
+                    estado = Estado.CONECTADO_CENTRO_CONTROL;
+                    
+                    
+                    firmarEnviarSolicitudAsociacionCentroControl();
+                    /* ====== if(ActorConIP.EnvironmentMode.TEST.equals(
+                            centroControl.getEnvironmentMode())) {
+                        firmarEnviarSolicitudAsociacionCentroControl();
+                    } else {
+                         mostrarMensajeUsuario(
+                                 "Para poder hacer las pruebas el servidor tiene que ser arrancado en modo TEST");
+                    }*/
+                } catch(Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                    infoServidorButton.setIcon(new javax.swing.ImageIcon(
+                            getClass().getResource("/images/pair_16x16.png")));
+                    infoServidorButton.setText("Asociar");
+                    mostrarMensajeUsuario(ex.getMessage());
+                }
+            } else {
+                mostrarMensajeUsuario(worker.getMessage());
+                infoServidorButton.setIcon(null);
+                infoServidorButton.setText("Asociar");
+            }
+            break;
+            case ASSOCIATE_CONTROL_CENTER_WORKER:
+                if(Respuesta.SC_OK == worker.getStatusCode()) {
+                    estado = Estado.CENTRO_CONTROL_ASOCIADO;
+                    infoServidorButton.setText("Información del servidor");
+                    infoServidorButton.setIcon(new ImageIcon(getClass()
+                            .getResource("/images/information-white.png")));
+                    MainFrame.INSTANCIA.cargarControlAcceso();
+                    dispose();
+                } else {
+                    mostrarMensajeUsuario(worker.getMessage());
+                    infoServidorButton.setIcon(null);
+                    infoServidorButton.setText("Asociar");
+                }
+                break;
+        }
+    }
     
     public enum Estado {DESCONECTADO, CONECTANDO, CONECTADO_CENTRO_CONTROL, 
     ASOCIANDO_CENTRO_CONTROL, CENTRO_CONTROL_ASOCIADO;}
@@ -197,12 +274,14 @@ public class AsociarCentroControlDialog
             case DESCONECTADO:
                 logger.debug("Conectando con Control Acceso");
                 estado = Estado.CONECTANDO;
-                infoServidorButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/loading.gif")));
+                infoServidorButton.setIcon(new javax.swing.ImageIcon(getClass().
+                        getResource("/images/loading.gif")));
                 infoServidorButton.setText("Conectando");
                 String urlServidor = StringUtils.prepararURL(
                         centroControlTextField.getText().trim());
                 String urlInfoServidor = ContextoPruebas.getURLInfoServidor(urlServidor);
-                tareaEnEjecucion = new ObtenerInfoServidorWorker(urlInfoServidor, this);
+                tareaEnEjecucion = new InfoGetterWorker(INFO_GETTER_WORKER,
+                    urlInfoServidor, this);
                 tareaEnEjecucion.execute();
                 centroControlTextField.setText(centroControlTextField.getText().trim());
                 break;
@@ -308,12 +387,14 @@ public class AsociarCentroControlDialog
             MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(
                     ContextoPruebas.getUsuarioPruebas().getEmail(), 
                     ContextoPruebas.getControlAcceso().getNombreNormalizado(), 
-                    documentoAsociacion, "Solicitud Asociacion de Centro de Control", null, SignedMailGenerator.Type.USER);
+                    documentoAsociacion, "Solicitud Asociacion de Centro de Control", null);
             mimeMessage.writeTo(new FileOutputStream(solicitudAsociacion));
-            tareaEnEjecucion= new FileSenderWorker(solicitudAsociacion, 
+            tareaEnEjecucion = new DocumentSenderWorker(
+                    ASSOCIATE_CONTROL_CENTER_WORKER, solicitudAsociacion, 
+                    Contexto.SIGNED_CONTENT_TYPE,
                     ContextoPruebas.getURLAsociarActorConIP(
-                    ContextoPruebas.getControlAcceso().getServerURL(), ActorConIP.Tipo.CENTRO_CONTROL), this);
-            tareaEnEjecucion.execute();            
+                    ContextoPruebas.getControlAcceso().getServerURL()), this);
+            tareaEnEjecucion.execute();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             infoServidorButton.setIcon(null);
@@ -331,74 +412,7 @@ public class AsociarCentroControlDialog
         }
         pack();
     }
-    
-    @Override
-    public void process(List<String> messages,SwingWorker worker) { }
 
-
-    @Override
-    public void mostrarResultadoOperacion(SwingWorker worker) {
-    	logger.debug(" --- mostrarResultadoOperacion - worker: " + worker.getClass()); 
-        if(worker instanceof ObtenerInfoServidorWorker) {
-        	logger.debug(" --- mostrarResultadoOperacion - ObtenerInfoServidorWorker"); 
-        	ObtenerInfoServidorWorker obtenerInfoServidorWorker = (ObtenerInfoServidorWorker)worker;
-            if(Respuesta.SC_OK == obtenerInfoServidorWorker.getStatusCode()) {
-                try {
-                    ActorConIP actorConIP = DeJSONAObjeto.obtenerActorConIP(
-                    		obtenerInfoServidorWorker.getMessage());
-                    if(actorConIP.getTipo() != ActorConIP.Tipo.CENTRO_CONTROL) {
-                        mostrarMensajeUsuario("El servidor no es un Centro de Control");
-                        centroControlTextField.setBorder(new LineBorder(Color.RED,2));
-                        infoServidorButton.setIcon(null);
-                        infoServidorButton.setText("Asociar");
-                        estado = Estado.DESCONECTADO;
-                        return;
-                    }
-                    mostrarMensajeUsuario(null);
-                    centroControlTextField.setBorder(normalTextBorder);
-                    centroControl = actorConIP;
-                    estado = Estado.CONECTADO_CENTRO_CONTROL;
-                    
-                    
-                    firmarEnviarSolicitudAsociacionCentroControl();
-                    /* ====== if(ActorConIP.EnvironmentMode.TEST.equals(
-                            centroControl.getEnvironmentMode())) {
-                        firmarEnviarSolicitudAsociacionCentroControl();
-                    } else {
-                         mostrarMensajeUsuario(
-                                 "Para poder hacer las pruebas el servidor tiene que ser arrancado en modo TEST");
-                    }*/
-                } catch(Exception ex) {
-                    logger.error(ex.getMessage(), ex);
-                    infoServidorButton.setIcon(new javax.swing.ImageIcon(
-                            getClass().getResource("/images/pair_16x16.png")));
-                    infoServidorButton.setText("Asociar");
-                    mostrarMensajeUsuario(ex.getMessage());
-                }
-            } else {
-                mostrarMensajeUsuario(obtenerInfoServidorWorker.getMessage());
-                infoServidorButton.setIcon(null);
-                infoServidorButton.setText("Asociar");
-            }
-        }
-        if(worker instanceof FileSenderWorker) {
-        	FileSenderWorker multipartEntityWorker = (FileSenderWorker)worker;
-        	logger.debug(" --- mostrarResultadoOperacion - EnviarMultipartEntityWorker"); 
-            if(Respuesta.SC_OK == multipartEntityWorker.getStatusCode()) {
-                estado = Estado.CENTRO_CONTROL_ASOCIADO;
-                infoServidorButton.setText("Información del servidor");
-                infoServidorButton.setIcon(new ImageIcon(getClass()
-                        .getResource("/images/information-white.png")));
-                MainFrame.INSTANCIA.cargarControlAcceso();
-                dispose();
-            } else {
-                mostrarMensajeUsuario(multipartEntityWorker.getMessage());
-                infoServidorButton.setIcon(null);
-                infoServidorButton.setText("Asociar");
-            }
-        }
-    }
-    
     @Override
     public void keyTyped(KeyEvent ke) { }
 

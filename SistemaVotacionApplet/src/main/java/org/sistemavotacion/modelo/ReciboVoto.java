@@ -50,7 +50,7 @@ public class ReciboVoto {
     private byte[] encryptedSMIMEMessage;
     private Evento voto;
     
-    public ReciboVoto () { }
+    public ReciboVoto () {  }
     
     public ReciboVoto (int codigoEstado, String mensaje) { 
         this.codigoEstado = codigoEstado;

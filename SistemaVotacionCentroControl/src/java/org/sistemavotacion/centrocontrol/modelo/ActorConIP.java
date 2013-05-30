@@ -3,7 +3,6 @@ package org.sistemavotacion.centrocontrol.modelo;
 import static javax.persistence.GenerationType.IDENTITY;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -77,7 +76,7 @@ public class ActorConIP implements Serializable {
     public Date lastUpdated;
 
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="actorConIP")
-    private Set<Certificado> certificados = new HashSet<Certificado>(0);
+    private Set<Certificado> certificados;
     
     public void setDateCreated(Date dateCreated) {
         this.dateCreated = dateCreated;

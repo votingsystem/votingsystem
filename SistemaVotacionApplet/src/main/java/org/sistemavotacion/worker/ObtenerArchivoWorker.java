@@ -52,7 +52,7 @@ public class ObtenerArchivoWorker extends SwingWorker<Integer, String>
     @Override protected Integer doInBackground() throws Exception {
         try {
             HttpResponse response = Contexto.getInstancia().getHttpHelper().
-                    obtenerArchivo(urlArchivo);
+                    getInfo(urlArchivo);
             statusCode = response.getStatusLine().getStatusCode();
             if (Respuesta.SC_OK == statusCode) {
                 bytesArchivo = EntityUtils.toByteArray(response.getEntity());

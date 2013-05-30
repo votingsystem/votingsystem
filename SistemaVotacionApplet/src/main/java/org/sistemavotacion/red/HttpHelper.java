@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.content.ByteArrayBody;
@@ -35,6 +36,7 @@ import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.CertUtil;
 
 /**
@@ -65,9 +67,9 @@ public class HttpHelper {
         }
     }
     
-    public HttpResponse obtenerArchivo (String serverURL) 
+    public HttpResponse getInfo (String serverURL) 
             throws IOException, ParseException {
-        logger.debug("obtenerArchivo - serverURL: " + serverURL);             
+        logger.debug("getInfo - serverURL: " + serverURL);             
         HttpGet httpget = new HttpGet(serverURL);
         HttpResponse response = httpclient.execute(httpget);
         logger.debug("----------------------------------------");
@@ -77,6 +79,7 @@ public class HttpHelper {
         }*/
         logger.debug(response.getStatusLine().toString());
         logger.debug("----------------------------------------");
+        //httpget.releaseConnection();
         return response;    
     }
     
@@ -89,9 +92,11 @@ public class HttpHelper {
         logger.debug(response.getStatusLine().toString());
         logger.debug("----------------------------------------");
         HttpEntity entity = response.getEntity();
-        if (200 == response.getStatusLine().getStatusCode()) {
+        if (Respuesta.SC_OK == response.getStatusLine().getStatusCode()) {
             certificado = CertUtil.fromPEMToX509Cert(EntityUtils.toByteArray(entity));
         }
+        EntityUtils.consume(response.getEntity());
+        httpget.releaseConnection();
         return certificado;
     }
     
@@ -106,10 +111,12 @@ public class HttpHelper {
         logger.debug(response.getStatusLine().toString());
         logger.debug("----------------------------------------");
         HttpEntity entity = response.getEntity();
-        if (200 == response.getStatusLine().getStatusCode()) {
-            certificados = 
-                    CertUtil.fromPEMToX509CertCollection(EntityUtils.toByteArray(entity));
+        if (Respuesta.SC_OK == response.getStatusLine().getStatusCode()) {
+            certificados = CertUtil.fromPEMToX509CertCollection(
+                    EntityUtils.toByteArray(entity));
         }
+        EntityUtils.consume(response.getEntity());
+        httpget.releaseConnection();
         return certificados;
     }
    
@@ -131,125 +138,131 @@ public class HttpHelper {
         }
         return anchors;
     }
+
     
-    /*public HttpResponse enviarArchivoFirmado (
-            File archivoFirmado, String serverURL) throws IOException {
-        logger.debug("enviarArchivoFirmado - lanzando: " + serverURL);        
-        HttpPost httpPost = new HttpPost(serverURL);
-        FileBody fileBody = new FileBody(archivoFirmado);
-        /*MultipartEntity reqEntity = new MultipartEntity();
-        logger.debug("enviarArchivoFirmado - reqEntity.getContentType().getValue(): " + reqEntity.getContentType().getValue());   
-        reqEntity.addPart(Contexto.SMIME_FILE_NAME, fileBody);
-        httpPost.setEntity(reqEntity);
-        httpPost.addHeader(new BasicHeader(
-                "Content-Type", "application/x-pkcs7-signature, application/x-pkcs7-mime, "
-                + reqEntity.getContentType().getValue()));*/
-        /*FileEntity entity;
-        entity = new FileEntity(archivoFirmado, ContentType.create(
-                "application/x-pkcs7-signature, application/x-pkcs7-mime"));
-         httpPost.setEntity(entity);
-        HttpResponse response = httpclient.execute(httpPost); 
-        logger.debug("----------------------------------------");
-        logger.debug(response.getStatusLine().toString());
-        logger.debug("----------------------------------------");
-        return response;*/
-    //}
-    
-    public HttpResponse sendFile (File file, String contentType, 
+    public Respuesta sendFile (File file, String contentType, 
             String serverURL) throws IOException {
         logger.debug("sendFile - contentType: " + contentType + 
-                " - serverURL: " + serverURL);        
-        HttpPost httpPost = new HttpPost(serverURL);
-        FileEntity entity = new FileEntity(file, ContentType.create(contentType));
-        httpPost.setEntity(entity);
-        HttpResponse response = httpclient.execute(httpPost);
-        logger.debug("----------------------------------------");
-        logger.debug(response.getStatusLine().toString());
-        logger.debug("----------------------------------------"); 
-        
-        ContentType.create(
-                "application/x-pkcs7-signature, application/x-pkcs7-mime");
-        
-        return response;
-    }
-    
-    public HttpResponse sendObjectMap(
-            Map<String, Object> fileMap, String serverURL) throws Exception {
-        logger.debug("sendObjectMap - serverURL: " + serverURL);        
-        if(fileMap == null || fileMap.isEmpty()) throw new Exception(
-                Contexto.getString("requestWithoutFileMapErrorMsg"));
-        HttpPost httpPost = new HttpPost(serverURL);
-        Set<String> fileNames = fileMap.keySet();
-        MultipartEntity reqEntity = new MultipartEntity();
-        for(String objectName: fileNames){
-            Object objectToSend = fileMap.get(objectName);
-            if(objectToSend instanceof File) {
-                File file = (File)objectToSend;
-                logger.debug("sendFileMap - fileName: " + objectName + 
-                        " - filePath: " + file.getAbsolutePath());  
-                FileBody  fileBody = new FileBody(file);
-                reqEntity.addPart(objectName, fileBody);
-            } else if (objectToSend instanceof byte[]) {
-                byte[] byteArray = (byte[])objectToSend;
-                reqEntity.addPart(
-                        objectName, new ByteArrayBody(byteArray, objectName));
-            }
+                " - serverURL: " + serverURL); 
+        Respuesta respuesta = null;
+        try {
+            HttpPost httpPost = new HttpPost(serverURL);
+            FileEntity entity = new FileEntity(file, ContentType.create(contentType));
+            httpPost.setEntity(entity);
+            HttpResponse response = httpclient.execute(httpPost);
+            logger.debug("----------------------------------------");
+            logger.debug(response.getStatusLine().toString());
+            logger.debug("----------------------------------------"); 
+            byte[] responseBytes =  EntityUtils.toByteArray(response.getEntity());
+            respuesta = new Respuesta(response.getStatusLine().getStatusCode(),
+                    new String(responseBytes), responseBytes);
+            EntityUtils.consume(response.getEntity());
+            httpPost.releaseConnection();
+        } catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
+            respuesta = new Respuesta(Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
         }
-        httpPost.setEntity(reqEntity);
-        HttpResponse response = httpclient.execute(httpPost);
-        logger.debug("----------------------------------------");
-        logger.debug(response.getStatusLine().toString());
-        logger.debug("----------------------------------------");
-        return response;  
+        return respuesta;
     }
-    
-    public HttpResponse sendByteArray(byte[] byteArray, String contentType,
-            String serverURL) throws IOException {
-        logger.debug("sendByteArray - serverURL: " + serverURL);
-        HttpPost httpPost = new HttpPost(serverURL);
-        ByteArrayEntity entity = null;
-        if(contentType != null) {
-            entity = new ByteArrayEntity(byteArray,  ContentType.create(contentType));
-        } else entity = new ByteArrayEntity(byteArray); 
-        httpPost.setEntity(entity);
-        HttpResponse response = httpclient.execute(httpPost);
-        logger.debug("----------------------------------------");
-        logger.debug(response.getStatusLine().toString());
-        logger.debug("----------------------------------------");
-        return response;  
-    }
-    
-    public HttpResponse sendString (String stringToSend, 
+        
+        
+    public Respuesta sendString (String stringToSend, 
             String paramName, String serverURL) throws IOException {
         logger.debug("sendString - serverURL: " + serverURL);
-        HttpPost httpPost = new HttpPost(serverURL);
-        StringBody stringBody = new StringBody(stringToSend);
-        MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.STRICT);
-        reqEntity.addPart(paramName, stringBody);
-        httpPost.setEntity(reqEntity);
-        HttpResponse response = httpclient.execute(httpPost);
-        logger.debug("----------------------------------------");
-        logger.debug(response.getStatusLine().toString());
-        logger.debug("----------------------------------------");
-        return response;
+        Respuesta respuesta = null;
+        try {
+            HttpPost httpPost = new HttpPost(serverURL);
+            StringBody stringBody = new StringBody(stringToSend);
+            MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.STRICT);
+            reqEntity.addPart(paramName, stringBody);
+            httpPost.setEntity(reqEntity);
+            HttpResponse response = httpclient.execute(httpPost);
+            logger.debug("----------------------------------------");
+            logger.debug(response.getStatusLine().toString());
+            logger.debug("----------------------------------------");
+            httpPost.releaseConnection();
+        } catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
+            respuesta = new Respuesta(Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
+        }
+        return respuesta;
+    }
+    
+    public Respuesta sendByteArray(byte[] byteArray, String contentType,
+            String serverURL) throws IOException {
+        logger.debug("sendByteArray - serverURL: " + serverURL);
+        Respuesta respuesta = null;
+        try {
+            HttpPost httpPost = new HttpPost(serverURL);
+            ByteArrayEntity entity = null;
+            if(contentType != null) {
+                entity = new ByteArrayEntity(byteArray,  ContentType.create(contentType));
+            } else entity = new ByteArrayEntity(byteArray); 
+            httpPost.setEntity(entity);
+            HttpResponse response = httpclient.execute(httpPost);
+            logger.debug("----------------------------------------");
+            logger.debug(response.getStatusLine().toString());
+            logger.debug("----------------------------------------");
+            byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
+            respuesta = new Respuesta(response.getStatusLine().getStatusCode(),
+                    new String(responseBytes), responseBytes);
+            EntityUtils.consume(response.getEntity());
+            httpPost.releaseConnection();
+        } catch(HttpHostConnectException ex){
+            logger.error(ex.getMessage(), ex);
+            respuesta = new Respuesta(Respuesta.SC_ERROR_EJECUCION,
+                    Contexto.getString("hostConnectionErrorMsg"));
+        } catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
+            respuesta = new Respuesta(Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
+        } 
+        return respuesta;
+    }
+    
+    
+    public Respuesta sendObjectMap(
+            Map<String, Object> fileMap, String serverURL) throws Exception {
+        logger.debug("sendObjectMap - serverURL: " + serverURL); 
+        Respuesta respuesta = null;
+        try {
+            if(fileMap == null || fileMap.isEmpty()) throw new Exception(
+                Contexto.getString("requestWithoutFileMapErrorMsg"));
+            HttpPost httpPost = new HttpPost(serverURL);
+            Set<String> fileNames = fileMap.keySet();
+            MultipartEntity reqEntity = new MultipartEntity();
+            for(String objectName: fileNames){
+                Object objectToSend = fileMap.get(objectName);
+                if(objectToSend instanceof File) {
+                    File file = (File)objectToSend;
+                    logger.debug("sendFileMap - fileName: " + objectName + 
+                            " - filePath: " + file.getAbsolutePath());  
+                    FileBody  fileBody = new FileBody(file);
+                    reqEntity.addPart(objectName, fileBody);
+                } else if (objectToSend instanceof byte[]) {
+                    byte[] byteArray = (byte[])objectToSend;
+                    reqEntity.addPart(
+                            objectName, new ByteArrayBody(byteArray, objectName));
+                }
+            }
+            httpPost.setEntity(reqEntity);
+            HttpResponse response = httpclient.execute(httpPost);     
+            logger.debug("----------------------------------------");
+            logger.debug(response.getStatusLine().toString());
+            logger.debug("----------------------------------------");
+            byte[] responseBytes =  EntityUtils.toByteArray(response.getEntity());
+            respuesta = new Respuesta(response.getStatusLine().getStatusCode(),
+                    new String(responseBytes), responseBytes);
+            EntityUtils.consume(response.getEntity());
+            httpPost.releaseConnection();
+        } catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
+            respuesta = new Respuesta(Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
+        }
+        return respuesta;  
     }
 
+
     public static void main(String[] args) throws IOException, Exception {
-        HttpHelper httpHelper = new HttpHelper();
-        /*HttpResponse response = httpHelper.sendByteArray("hola".getBytes(),
-                "http://localhost:8080/SistemaVotacionControlAcceso/timeStamp");*/
-        /*HttpResponse response = httpHelper.sendFile(
-                new File("/home/jgzornoza/emailPDF"), 
-                "application/x-pkcs7-signature, application/x-pkcs7-mime",
-                "http://localhost:8080/SistemaVotacionControlAcceso/prueba");*/
-        Map<String, Object> mapToSend = new HashMap<String, Object>();
-        mapToSend.put("def", new File("/home/jgzornoza/emailPDF"));
-        mapToSend.put("solicitudAcceso:" + Contexto.ENCRYPTED_CONTENT_TYPE, 
-                new File("/home/jgzornoza/caldecott.log"));
-        
-        HttpResponse response = Contexto.getHttpHelper().sendObjectMap(
-                mapToSend, "http://localhost:8080/SistemaVotacionControlAcceso/prueba");
-        String message = EntityUtils.toString(response.getEntity());
-        logger.debug("message: " + message);
     }
+    
 }

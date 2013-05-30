@@ -63,7 +63,7 @@ class AnuladorVotoController {
 	 * @return Recibo que consiste en el archivo firmado recibido con la firma añadida del servidor. La respuesta viaja cifrada.
 	 */
     def post () {
-		MensajeSMIME mensajeSMIMEReq = flash.mensajeSMIMEReq
+		MensajeSMIME mensajeSMIMEReq = params.mensajeSMIMEReq
 		if(!mensajeSMIMEReq) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
@@ -71,20 +71,19 @@ class AnuladorVotoController {
 			render msg
 			return false
 		}
-		flash.receiverCert = mensajeSMIMEReq.getUsuario().getCertificate()
+		params.receiverCert = mensajeSMIMEReq.getUsuario().getCertificate()
 		Respuesta respuesta = votoService.processCancel(mensajeSMIMEReq, request.getLocale())
 		if (Respuesta.SC_OK == respuesta.codigoEstado) {
 			response.setContentType("${grailsApplication.config.pkcs7SignedContentType};" + 
 				"${grailsApplication.config.pkcs7EncryptedContentType}")		
         }
-		flash.respuesta = respuesta
+		params.respuesta = respuesta
     }
 	
 	
 	/*
 	def postAsync () {
-		Respuesta respuesta = votoService.validarAnulacion(flash.smimeMessageReq)
-		log.debug (respuesta.codigoEstado + " - mensaje: ${respuesta.mensaje}")
+		Respuesta respuesta = votoService.validarAnulacion(params.mensajeSMIMEReq)
 		if (200 == respuesta.codigoEstado) {
 			def ctx = startAsync()
 			ctx.setTimeout(10000);
@@ -95,21 +94,14 @@ class AnuladorVotoController {
 			respuesta = future.get()
 			if (200  == respuesta?.codigoEstado) {
 				ctx.response.status = 200
-				ctx.response.contentLength = anuladorVoto.mensajeSMIME.contenido.length
 				ctx.response.setContentType("text/plain")
+				ctx.response.contentLength = anuladorVoto.mensajeSMIME.contenido.length
 				ctx.response.outputStream <<  anuladorVoto.mensajeSMIME.contenido
 				ctx.response.outputStream.flush()
-			} else {
-				String codigoEstado = respuesta? respuesta.codigoEstado:500
-				forward controller: "error${codigoEstado}", action: "procesar"
-				return false
 			}
 			ctx.complete();
-		} else {
-			String codigoEstado = respuesta? respuesta.codigoEstado:500
-			forward controller: "error${codigoEstado}", action: "procesar"
-			return false
 		}
+		params.respuesta = respuesta
 	}*/
 	
 	/**

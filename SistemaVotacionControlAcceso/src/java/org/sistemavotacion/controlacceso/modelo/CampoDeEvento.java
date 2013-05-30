@@ -2,7 +2,6 @@ package org.sistemavotacion.controlacceso.modelo;
 
 import java.io.Serializable;
 import static javax.persistence.GenerationType.IDENTITY;
-import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -33,7 +32,7 @@ public class CampoDeEvento implements Serializable {
     private String contenido;
 
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="campoDeEvento")
-    private Set<ValorCampoDeEvento> valores = new HashSet<ValorCampoDeEvento>(0);
+    private Set<ValorCampoDeEvento> valores;
     
     public CampoDeEvento () {}
 

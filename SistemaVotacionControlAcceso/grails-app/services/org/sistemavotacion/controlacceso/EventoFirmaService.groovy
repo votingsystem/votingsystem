@@ -55,7 +55,7 @@ class EventoFirmaService {
 
 	}
 
-	public Respuesta generarCopiaRespaldo(EventoFirma evento, Locale locale) {
+	public synchronized Respuesta generarCopiaRespaldo(EventoFirma evento, Locale locale) {
 		log.debug("generarCopiaRespaldo - eventoId: ${evento.id}")
 		Respuesta respuesta;
 		if (evento) {
@@ -76,15 +76,14 @@ class EventoFirmaService {
 			String fileNamePrefix = messageSource.getMessage('manifestSignatureLbl', null, locale);
 			firmasRecibidas.each { firma ->
 				File pdfFile = new File("${basedir}/${fileNamePrefix}_${i}.pdf")
-				FileOutputStream fos = new FileOutputStream(pdfFile);
-				fos.write(firma.pdf);
-				fos.close();
+				pdfFile.setBytes(firma.pdf)
 				i++;
 			}
 			def ant = new AntBuilder()
 			ant.zip(destfile: "${basedir}.zip", basedir: basedir)
+			Map datos = [cantidad:firmasRecibidas.size()]
 			respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK, 
-				cantidad:firmasRecibidas.size(), file:new File("${basedir}.zip"))
+				datos:datos, file:new File("${basedir}.zip"))
 		} else respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
 				mensaje:messageSource.getMessage(
 				'eventNotFound', [evento.id].toArray(), locale))

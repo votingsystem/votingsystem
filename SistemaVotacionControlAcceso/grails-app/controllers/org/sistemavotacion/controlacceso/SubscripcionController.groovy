@@ -23,6 +23,7 @@ class SubscripcionController {
 	
     
     def subscripcionService
+	def usuarioService
 	
 	def supportedFormats = [ "rss_0.90", "rss_0.91", "rss_0.92", "rss_0.93", 
 		"rss_0.94", "rss_1.0", "rss_2.0", "atom_0.3"]
@@ -36,7 +37,7 @@ class SubscripcionController {
 	 *					Archivo con los datos del Centro de Control que se desea dar de alta.
 	 */
 	def index() { 
-		MensajeSMIME mensajeSMIME = flash.mensajeSMIMEReq
+		MensajeSMIME mensajeSMIME = params.mensajeSMIMEReq
 		if(!mensajeSMIME) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
@@ -46,9 +47,11 @@ class SubscripcionController {
 		}
 		Respuesta respuesta = subscripcionService.asociarCentroControl(
 			mensajeSMIME, request.getLocale())
-		flash.respuesta = respuesta
+		params.respuesta = respuesta
 		if(Respuesta.SC_OK == respuesta.codigoEstado) {
-			render respuesta.mensaje
+			CentroControl controlCenter = respuesta.centroControl
+			Map controlCenterMap = usuarioService.getControlCenterMap(controlCenter)
+			render controlCenterMap as JSON
 		}
 	}
 

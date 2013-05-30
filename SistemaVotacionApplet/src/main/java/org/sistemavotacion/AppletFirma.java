@@ -23,7 +23,8 @@ public class AppletFirma extends JApplet {
     
     private static Logger logger = LoggerFactory.getLogger(AppletFirma.class);
 
-    public static final String CERT_CHAIN_URL_SUFIX = "certificado/cadenaCertificacion";
+    //public static final String CERT_CHAIN_URL_SUFIX = "certificado/cadenaCertificacion";
+    public static final String SERVER_INFO_URL_SUFIX = "infoServidor";
     
     public static enum ModoEjecucion {APPLET, APLICACION}
     
@@ -220,6 +221,7 @@ public class AppletFirma extends JApplet {
                         AppletFirma appletFirma = new AppletFirma();
                         appletFirma.start();
                         File jsonFile = File.createTempFile("operacion", ".json");
+                        jsonFile.deleteOnExit();
                         FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
                             .getResourceAsStream("testFiles/votingOperation.json"), jsonFile);        
                         appletFirma.ejecutarOperacion(FileUtils.getStringFromFile(jsonFile));

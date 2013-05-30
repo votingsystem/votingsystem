@@ -8,7 +8,7 @@ public interface Constantes extends Messages{
 	public static final Constantes INSTANCIA = GWT.create(Constantes.class);
 	
 	public static final int EVENTS_RANGE = 21;
-	public static final int REPRESENTATIVES_RANGE = 5;
+	public static final int REPRESENTATIVES_RANGE = 15;
 	public static final int MAX_NUM_CARACTERES_SUBJECT = 100;
     public static final String ID_FRAME_APPLET = "frameClienteFirma";
     public static final String ID_FRAME_HERRAMIENTA_PUBLICACION = "frameHerramientaPublicacion";

@@ -2,14 +2,10 @@ package org.sistemavotacion.test.simulacion;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.security.KeyStore;
-import java.security.cert.PKIXParameters;
-import java.security.cert.TrustAnchor;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.Callable;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
+import javax.mail.internet.MimeMessage;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
@@ -18,7 +14,6 @@ import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.json.DeObjetoAJSON;
 import org.sistemavotacion.test.modelo.SolicitudAcceso;
-import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,27 +49,24 @@ public class LanzadoraAnulacionSolicitudAcceso  implements Callable<Respuesta> {
                 + ContextoPruebas.ANULACION_FIRMADA_FILE + solicitudAcceso.getEventoId() + 
                 "_usu" + solicitudAcceso.getUserNif() + ".p7m");;
         synchronized(this) {
-             anulador = signedMailGenerator.genFile(solicitudAcceso.getUserNif(), 
+            MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(
+               solicitudAcceso.getUserNif(), 
                 ContextoPruebas.getControlAcceso().getNombreNormalizado(), 
                 DeObjetoAJSON.obtenerAnuladorDeVotoJSON(solicitudAcceso),
-                asuntoMensaje, null, SignedMailGenerator.Type.USER, anulador); 
+                asuntoMensaje, null);
+            mimeMessage.writeTo(new FileOutputStream(anulador));
         }
-        HttpResponse response = Contexto.getHttpHelper().sendFile(
-            anulador, Contexto.SIGNED_CONTENT_TYPE, ContextoPruebas.getURLAnulacionVoto(
-            		ContextoPruebas.getControlAcceso().getServerURL()));
-        if (Respuesta.SC_OK == response.getStatusLine().getStatusCode()) {                    
+        respuesta = Contexto.getHttpHelper().sendFile(anulador, 
+                Contexto.SIGNED_CONTENT_TYPE, ContextoPruebas.getURLAnulacionVoto(
+                ContextoPruebas.getControlAcceso().getServerURL()));
+        if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {                    
             SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(null,
-                    new ByteArrayInputStream(EntityUtils.toByteArray(response.getEntity())),
+                    new ByteArrayInputStream(respuesta.getMensaje().getBytes()),
                     "ReciboAnulacionVoto");
-            respuesta = new Respuesta(response.getStatusLine().getStatusCode(), 
+            respuesta = new Respuesta(respuesta.getCodigoEstado(), 
                     dnieMimeMessage, ContextoPruebas.INSTANCIA.getSessionPKIXParameters());
-        } else {
-            respuesta = new Respuesta(
-                    response.getStatusLine().getStatusCode(), 
-                    EntityUtils.toString(response.getEntity()));
         }
         respuesta.setObjeto(solicitudAcceso);
-        EntityUtils.consume(response.getEntity());
         return respuesta;
     }
 

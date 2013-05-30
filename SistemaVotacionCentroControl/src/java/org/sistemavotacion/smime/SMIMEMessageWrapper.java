@@ -193,17 +193,17 @@ public class SMIMEMessageWrapper extends MimeMessage {
         return signedContent;
     }
     
-
     /**
+     * Digest for storing unique MensajeSMIME in database 
      * @return the contentDigestStr
      * @throws NoSuchAlgorithmException 
      */
     public String getContentDigestStr() throws NoSuchAlgorithmException {
-        MessageDigest sha = MessageDigest.getInstance("SHA256");
-        byte[] resultDigest =  sha.digest(signedContent.getBytes() );
+        MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+        byte[] resultDigest =  messageDigest.digest(signedContent.getBytes());
         return new String(Base64.encode(resultDigest));
     }
-
+    
     /**
      * @param signedContent the signedContent to set
      */
@@ -481,8 +481,8 @@ public class SMIMEMessageWrapper extends MimeMessage {
                 Calendar cal = new GregorianCalendar();
                 cal.setTime(timeStampToken.getTimeStampInfo().getGenTime());
                 logger.debug("checkTimeStampToken - timeStampToken - fecha: " +  cal.getTime());
-                logger.debug("checkTimeStampToken - digestStr: " + digestStr 
-                		+ " - digestTokenStr " + digestTokenStr);
+                //logger.debug("checkTimeStampToken - digestStr: " + digestStr 
+                //		+ " - digestTokenStr " + digestTokenStr);
                 return timeStampToken;
             }
         } else logger.debug("checkTimeStampToken - without unsignedAttributes"); 

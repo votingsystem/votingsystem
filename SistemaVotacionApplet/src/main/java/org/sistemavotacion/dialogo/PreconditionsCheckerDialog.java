@@ -11,14 +11,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JDialog;
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
 import org.sistemavotacion.AppletFirma;
-import static org.sistemavotacion.AppletFirma.CERT_CHAIN_URL_SUFIX;
+import static org.sistemavotacion.AppletFirma.SERVER_INFO_URL_SUFIX;
 import org.sistemavotacion.Contexto;
 import static org.sistemavotacion.Contexto.getString;
 import org.sistemavotacion.FirmaDialog;
 import org.sistemavotacion.RepresentativeDataDialog;
 import org.sistemavotacion.SaveReceiptDialog;
 import org.sistemavotacion.VotacionDialog;
+import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Operacion;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.pdf.PdfFormHelper;
@@ -40,8 +43,8 @@ public class PreconditionsCheckerDialog
     private static Logger logger = 
             LoggerFactory.getLogger(PreconditionsCheckerDialog.class);
 
-    private static Map<String, X509Certificate> certsMap = 
-            new HashMap<String, X509Certificate>();
+    private static Map<String, ActorConIP> actorMap = 
+            new HashMap<String, ActorConIP>();
     private Operacion operacion;
     private AtomicBoolean checking = new AtomicBoolean(true);
     private AtomicBoolean preconditionsOK = new AtomicBoolean(false);
@@ -239,24 +242,40 @@ public class PreconditionsCheckerDialog
 
     public static X509Certificate getCert(String serverURL) {
         logger.debug("getCert - serverURL: " + serverURL);
-        X509Certificate cert = certsMap.get(serverURL);
-        if(cert != null) logger.debug("retreieving cert from map");
-        return cert;
+        ActorConIP actorConIp = actorMap.get(serverURL);
+        if(actorConIp != null)  return actorConIp.getCertificate();
+        else {
+            logger.debug("getTimeStampCert - null");
+            return null;
+        }
     }
      
+    public static X509Certificate getTimeStampCert(String serverURL) {
+        logger.debug("getTimeStampCert - serverURL: " + serverURL);
+        ActorConIP actorConIp = actorMap.get(serverURL);
+        if(actorConIp != null) {
+            X509Certificate cert = actorConIp.getTimeStampCert();
+            return cert;
+        } 
+        else {
+            logger.debug("getTimeStampCert - null");
+            return null;
+        }
+        
+    }
      
     public X509Certificate checkCert(String serverURL, Integer operationId) throws Exception {
         logger.debug(" - checkCert - serverURL: " + serverURL 
                 + " - operationId: " + operationId);
         if(serverURL == null) throw new Exception("Missing cert url");
-        X509Certificate cert = certsMap.get(serverURL);
-        if(cert == null) {
+        ActorConIP actorConIp = actorMap.get(serverURL);
+        if(actorConIp == null) {
             if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
-            String serverCertURL = serverURL + CERT_CHAIN_URL_SUFIX;
-            logger.debug(" - getNetworkCert - serverCertURL: " + serverCertURL);
-            new ObtenerArchivoWorker(operationId, serverCertURL, null, this).execute();
-        }
-        return cert;
+            String serverInfoURL = serverURL + SERVER_INFO_URL_SUFIX;
+            logger.debug(" - getNetworkCert - serverInfoURL: " + serverInfoURL);
+            new ObtenerArchivoWorker(operationId, serverInfoURL, null, this).execute();
+            return null;
+        } else return actorConIp.getCertificate();
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -393,11 +412,10 @@ public class PreconditionsCheckerDialog
                 case CHECK_ACCES_CONTROL_CERT:
                     fileWorker = (ObtenerArchivoWorker)worker;
                     if(Respuesta.SC_OK == fileWorker.getStatusCode()) {
-                        Collection<X509Certificate> certChain = CertUtil.
-                        fromPEMToX509CertCollection(fileWorker.getBytesArchivo());
-                        X509Certificate serverCert = certChain.iterator().next();
-                        certsMap.put(operacion.getEvento().getControlAcceso().
-                                getServerURL(), serverCert);
+                        JSONObject actorConIPJSON = (JSONObject) JSONSerializer.
+                                toJSON(new String(fileWorker.getBytesArchivo()));
+                        ActorConIP actorConIP = ActorConIP.parse(actorConIPJSON);
+                        actorMap.put(operacion.getUrlServer(), actorConIP);
                         accessControlCertChecked = true;                        
                     } else {
                         accessControlCertChecked = false;
@@ -405,14 +423,14 @@ public class PreconditionsCheckerDialog
                     } 
                     if(controlCenterCertChecked != null) setVotingPreconditions();
                     break;
-                case CHECK_CONTROL_CENTER_CERT:
+                case CHECK_CONTROL_CENTER_CERT: 
                     fileWorker = (ObtenerArchivoWorker)worker;
                     if(Respuesta.SC_OK == worker.getStatusCode()) {
-                        Collection<X509Certificate> certChain = CertUtil.
-                        fromPEMToX509CertCollection(fileWorker.getBytesArchivo());
-                        X509Certificate serverCert = certChain.iterator().next();
-                        certsMap.put(operacion.getEvento().getCentroControl().
-                                getServerURL(), serverCert);
+                        JSONObject actorConIPJSON = (JSONObject) JSONSerializer.
+                                toJSON(new String(fileWorker.getBytesArchivo()));
+                        ActorConIP actorConIP = ActorConIP.parse(actorConIPJSON);
+                        actorMap.put(operacion.getEvento().getCentroControl().
+                                getServerURL(), actorConIP);
                         controlCenterCertChecked = true;
                     } else {
                         controlCenterCertChecked = false;
@@ -423,10 +441,11 @@ public class PreconditionsCheckerDialog
                 case CHECK_SERVER_CERT:
                     fileWorker = (ObtenerArchivoWorker)worker;
                     if(Respuesta.SC_OK == worker.getStatusCode()) {
-                        Collection<X509Certificate> certChain = CertUtil.
-                        fromPEMToX509CertCollection(fileWorker.getBytesArchivo());
-                        X509Certificate serverCert = certChain.iterator().next();
-                        certsMap.put(operacion.getUrlServer(), serverCert);
+                        JSONObject actorConIPJSON = (JSONObject) JSONSerializer.
+                                toJSON(new String(fileWorker.getBytesArchivo()));
+                        ActorConIP actorConIP = ActorConIP.parse(actorConIPJSON);
+                        actorMap.put(operacion.getUrlServer(), actorConIP);
+                        logger.debug("==== actor map : " + operacion.getUrlServer());
                         signCertChecked = true;
                     } else {
                         signCertChecked = false;

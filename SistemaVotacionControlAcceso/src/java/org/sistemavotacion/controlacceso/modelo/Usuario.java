@@ -54,6 +54,9 @@ public class Usuario implements Serializable {
     @Column(name="nombre" )
     private String nombre;
     
+    @Column(name="metaInf", columnDefinition="TEXT")
+    private String metaInf = "{\"representationsNumber\"=0}"; 
+    
     @Column(name="primerApellido" )
     private String primerApellido;
     
@@ -75,18 +78,15 @@ public class Usuario implements Serializable {
     @Column(name="cn")
     private String cn;
     
-    @Column(name="representationsNumber")
-    private Integer representationsNumber = 0;
-    
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="representativeId")
     private Usuario representative;  
     
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="representative")
-    private Set<Usuario> represented = new HashSet<Usuario>(0);
+    private Set<Usuario> represented;
     
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="representative")
-    private Set<RepresentationDocument> representations = new HashSet<RepresentationDocument>(0);
+    private Set<RepresentationDocument> representations;
     
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="fechaCreacion", length=23)
@@ -97,16 +97,16 @@ public class Usuario implements Serializable {
     private Date lastUpdated;
     
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="usuario")
-    private Set<Image> images = new HashSet<Image>(0);
+    private Set<Image> images;
     
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="usuario")
-    private Set<Evento> eventos = new HashSet<Evento>(0);
+    private Set<Evento> eventos;
     
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="usuario")
-    private Set<Certificado> certificados = new HashSet<Certificado>(0);
+    private Set<Certificado> certificados;
     
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="usuario")
-    private Set<Dispositivo> dispositivo = new HashSet<Dispositivo>(0);
+    private Set<Dispositivo> dispositivo;
     
     @Transient
     private transient X509Certificate certificate;
@@ -354,14 +354,6 @@ public class Usuario implements Serializable {
 		this.info = info;
 	}
 
-	public Integer getRepresentationsNumber() {
-		return representationsNumber;
-	}
-
-	public void setRepresentationsNumber(Integer representationsNumber) {
-		this.representationsNumber = representationsNumber;
-	}
-
 	public MensajeSMIME getRepresentativeMessage() {
 		return representativeMessage;
 	}
@@ -376,6 +368,14 @@ public class Usuario implements Serializable {
 
 	public void setTimeStampToken(TimeStampToken timeStampToken) {
 		this.timeStampToken = timeStampToken;
+	}
+
+	public String getMetaInf() {
+		return metaInf;
+	}
+
+	public void setMetaInf(String metaInf) {
+		this.metaInf = metaInf;
 	}
 
 }

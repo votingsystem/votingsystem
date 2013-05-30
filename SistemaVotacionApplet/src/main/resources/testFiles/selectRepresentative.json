@@ -1,6 +1,1 @@
-{"codigoEstado":700, "operacion":"SELECT_REPRESENTATIVE", 
-            "contenidoFirma":{"operation":"SELECT_REPRESENTATIVE", "representativeNif":"0A", "representativeName":"JOSE JAVIER GARCIA"}, 
-            "urlEnvioDocumento":"http://localhost:8080/SistemaVotacionControlAcceso/representative/userSelection", 
-            "nombreDestinatarioFirma":"Primer ControlAcceso", "asuntoMensajeFirmado":"Datosl del representante seleccionado", 
-            "respuestaConRecibo":true, "urlTimeStampServer":"http://localhost:8080/SistemaVotacionControlAcceso/timeStamp", 
-            "urlServer":"http://localhost:8080/SistemaVotacionControlAcceso/"}
+{"codigoEstado":700, "operacion":"REPRESENTATIVE_SELECTION", "contenidoFirma":{"operation":"REPRESENTATIVE_SELECTION", "representativeNif":"00008003E", "representativeName":"NombreDe8003E ApellidoDe8003E"}, "urlEnvioDocumento":"http://localhost:8080/SistemaVotacionControlAcceso/representative/userSelection", "nombreDestinatarioFirma":"Primer ControlAcceso", "asuntoMensajeFirmado":"Datos del representante seleccionado", "respuestaConRecibo":true, "urlTimeStampServer":"http://localhost:8080/SistemaVotacionControlAcceso/timeStamp", "urlServer":"http://192.168.2.45:8080/SistemaVotacionControlAcceso"}

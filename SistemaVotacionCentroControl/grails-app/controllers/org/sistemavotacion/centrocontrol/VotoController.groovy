@@ -34,7 +34,7 @@ class VotoController {
 	 * @return  <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Recibo-de-Voto">El recibo del voto.</a>
 	 */
 	def index() {
-		MensajeSMIME mensajeSMIMEReq = flash.mensajeSMIMEReq
+		MensajeSMIME mensajeSMIMEReq = params.mensajeSMIMEReq
 		if(!mensajeSMIMEReq) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
@@ -46,13 +46,13 @@ class VotoController {
 			mensajeSMIMEReq, request.getLocale())
 		if (Respuesta.SC_OK == respuesta.codigoEstado) {
 			X509Certificate certificadoVoto = respuesta.certificado
-			flash.receiverCert = certificadoVoto
+			params.receiverCert = certificadoVoto
 			if(mensajeSMIMEReq.getUsuario())
 				response.addHeader("representativeNIF", mensajeSMIMEReq.getUsuario().nif)
 			response.setContentType("${grailsApplication.config.pkcs7SignedContentType};" +
 				"${grailsApplication.config.pkcs7EncryptedContentType}")
 		}
-		flash.respuesta = respuesta
+		params.respuesta = respuesta
 	}
 	
 	/**
@@ -147,13 +147,13 @@ class VotoController {
 	 }
 	 
 	 def post () {
-		 String codigoEstado
+	 	 MimeMessage smimeMessageReq = params.smimeMessageReq
 		 Respuesta respuesta = votoService.validarFirmaUsuario(
-			 flash.smimeMessageReq, request.getLocale())
+			 smimeMessageReq, request.getLocale())
 		 if (Respuesta.SC_OK== respuesta.codigoEstado) {
 			 def ctx = startAsync()
 			 ctx.setTimeout(10000);
-			 MimeMessage smimeMessage = flash.smimeMessageReq
+			 
 			 EventoVotacion eventoVotacion = respuesta.evento
 			 def future = callAsync {
 				  return votoService.sendVoteToControlAccess(
@@ -162,26 +162,18 @@ class VotoController {
 			 respuesta = future.get()
 			 if (Respuesta.SC_OK == respuesta?.codigoEstado) {
 				 ctx.response.status = Respuesta.SC_OK
+				 ctx.response.setContentType("${grailsApplication.config.pkcs7SignedContentType};" +
+					"${grailsApplication.config.pkcs7EncryptedContentType}")
 				 ctx.response.contentLength = respuesta.voto.mensajeSMIME.contenido.length
-				 ctx.response.setContentType("text/plain")
 				 ctx.response.outputStream <<  respuesta.voto.mensajeSMIME.contenido
 				 ctx.response.outputStream.flush()
-			 } else {
-				 codigoEstado = respuesta? respuesta.codigoEstado:Respuesta.SC_ERROR_EJECUCION
-				 forward controller: "error${codigoEstado}", action: "procesar"
-				 return false
-			 }
+			 } 
 			 ctx.complete();
 		 } else if (Respuesta.SC_ERROR_VOTO_REPETIDO == respuesta.codigoEstado){
 			 response.status = Respuesta.SC_ERROR_VOTO_REPETIDO
 			 response.contentLength = respuesta.voto.mensajeSMIME.contenido.length
-			 response.setContentType("text/plain")
 			 response.outputStream <<  respuesta.voto.mensajeSMIME.contenido
 			 response.outputStream.flush()
-			 return false
-		 } else {
-			 codigoEstado = respuesta? respuesta.codigoEstado:Respuesta.SC_ERROR_EJECUCION
-			 forward controller: "error${codigoEstado}", action: "procesar"
 			 return false
 		 }
 	 }*/

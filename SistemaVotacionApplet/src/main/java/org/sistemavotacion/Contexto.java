@@ -98,6 +98,9 @@ public class Contexto {
     public static final String PDF_ENCRYPTED_CONTENT_TYPE = 
     		PDF_CONTENT_TYPE + "," + ENCRYPTED_CONTENT_TYPE; 
     
+    public static final int MAX_FILE_SIZE_KB = 512;
+    public static final int MAX_FILE_SIZE = 512 * 1024;
+    
     private static Contexto instancia;
     private static Usuario usuario;
     private static String DNIePassword;
@@ -187,38 +190,6 @@ public class Contexto {
             //Se resetea contexto para nuevo usuario
             usuario = usu;
         }
-    }
-    
-    /**
-     * @return the pkcs10WrapperClient
-     */
-    public static PKCS10WrapperClient initPkcs10WrapperClient(Evento evento) throws Exception{
-        pkcs10WrapperClient = new PKCS10WrapperClient(KEY_SIZE, SIG_NAME, 
-                VOTE_SIGN_MECHANISM, PROVIDER, evento.getControlAcceso().getServerURL(), 
-                evento.getEventoId().toString() , evento.getHashCertificadoVotoHex());
-        return pkcs10WrapperClient;
-    }
-
-    public static KeyStore getKeyStoreVoto(Evento evento, String nif) throws Exception {
-        logger.debug("getKeyStoreVoto - documento.getEventoId(): " + evento.getEventoId());
-        File directorioAlmacen = new File (getRutaArchivosVoto(evento, nif)); 
-        directorioAlmacen.mkdirs();
-        File archivoAlmacen = new File (getRutaArchivosVoto(evento, nif) + 
-                NOMBRE_ARCHIVO_ALMACEN_CLAVES);
-        boolean archivoCreado = false;            
-        try {
-            archivoCreado = archivoAlmacen.createNewFile();
-        } catch (IOException ex) {
-            logger.error(ex.getMessage(), ex);
-        }
-        if (!archivoCreado && archivoAlmacen.length()> 0) {
-            logger.debug("El usuario '" + nif + "'"+ " ya había solicitado un almacén para el evento."
-                    + "Obteniendo '" + archivoAlmacen.getAbsolutePath() + "' del sistema de ficheros");
-            almacenClaves = KeyStoreUtil.getKeyStoreFromFile(
-                    archivoAlmacen.getAbsolutePath(), PASSWORD_CLAVES.toCharArray());
-            voto = evento;
-        } else return null;
-        return almacenClaves;
     }
     
     /**

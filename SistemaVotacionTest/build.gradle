@@ -81,7 +81,23 @@ task runApp(dependsOn: buildJar) << { task ->
         throw new RuntimeException('exec failed') 
     } 
 } 
- 
+
+task runVoting(dependsOn: ['classes'], type: JavaExec) {
+	
+	
+	doFirst {
+		File simulationDataFile = file('simulationData.json')
+		
+		println "${simulationDataFile.text}"
+		
+		args simulationDataFile.text
+		//args "-h"
+		main = 'org.sistemavotacion.test.simulacion.HeadlessSimulation'
+		classpath = sourceSets.main.runtimeClasspath
+	}
+	
+}
+
 
 sourceSets {
 	main {

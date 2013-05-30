@@ -24,7 +24,7 @@ public class ValidadoraPDF {
     
     
     public static void main (String[] args) throws FileNotFoundException, IOException, Exception{
-        /*PdfReader reader = new PdfReader("/home/jgzornoza/111.pdf");
+        /*PdfReader reader = new PdfReader("./111.pdf");
         verificarTimeStamp(reader);*/
     }
     

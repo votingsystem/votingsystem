@@ -1,10 +1,12 @@
 package org.sistemavotacion.modelo;
 
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
+import org.sistemavotacion.seguridad.CertUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +60,8 @@ public class ActorConIP {
     private String certificadoURL;
     private String informacionVotosURL;
     private Set<ActorConIP> centrosDeControl;
+    private X509Certificate certificate = null;
+    private X509Certificate timeStampCert = null;
 
     /**
      * @return the id
@@ -133,6 +137,20 @@ public class ActorConIP {
         this.informacionVotosURL = informacionVotosURL;
     }
     
+    /**
+     * @param cadenaCertificacionPEM la cadena de certifcación del actor en formato PEM
+     */
+    public void setCadenaCertificacionPEM(String cadenaCertificacionPEM) throws Exception {
+        certificate = CertUtil.fromPEMToX509CertCollection(
+                    cadenaCertificacionPEM.getBytes()).iterator().next();
+    }
+     
+    public void setTimeStampCertPEM(String timeStampPEM) throws Exception {
+        timeStampCert = CertUtil.fromPEMToX509CertCollection(
+                    timeStampPEM.getBytes()).iterator().next();
+    }
+    
+    
     public static ActorConIP parse (String actorConIPStr) {
         if(actorConIPStr == null) return null;
         JSONObject eventoJSON = (JSONObject)JSONSerializer.toJSON(actorConIPStr);
@@ -145,7 +163,26 @@ public class ActorConIP {
         if(actorConIPJSON.containsKey("id")) actorConIP.setId(actorConIPJSON.getLong("id"));
         if(actorConIPJSON.containsKey("serverURL")) actorConIP.setServerURL(actorConIPJSON.getString("serverURL"));
         if(actorConIPJSON.containsKey("nombre")) actorConIP.setNombre(actorConIPJSON.getString("nombre"));
-        if(actorConIPJSON.containsKey("informacionVotosURL")) actorConIP.setInformacionVotosURL(actorConIPJSON.getString("informacionVotosURL"));
+        if(actorConIPJSON.containsKey("informacionVotosURL")) actorConIP.
+                setInformacionVotosURL(actorConIPJSON.getString("informacionVotosURL"));
+        if (actorConIPJSON.containsKey("cadenaCertificacionPEM")) {
+            try {
+                actorConIP.setCadenaCertificacionPEM(actorConIPJSON.getString(
+                        "cadenaCertificacionPEM"));
+            } catch(Exception ex) {
+                logger.error(ex.getMessage(), ex);
+            }
+            
+        }
+        if (actorConIPJSON.containsKey("timeStampCertPEM")) {
+            try {
+                actorConIP.setTimeStampCertPEM(actorConIPJSON.getString(
+                        "timeStampCertPEM"));
+            } catch(Exception ex) {
+                logger.error(ex.getMessage(), ex);
+            }
+            
+        }
         return actorConIP;
     }
     
@@ -198,4 +235,31 @@ public class ActorConIP {
 		this.certificadoURL = certificadoURL;
 	}
 
+    /**
+     * @return the certificate
+     */
+    public X509Certificate getCertificate() {
+        return certificate;
+    }
+
+    /**
+     * @param certificate the certificate to set
+     */
+    public void setCertificate(X509Certificate certificate) {
+        this.certificate = certificate;
+    }
+
+    /**
+     * @return the timeStampCert
+     */
+    public X509Certificate getTimeStampCert() {
+        return timeStampCert;
+    }
+
+    /**
+     * @param timeStampCert the timeStampCert to set
+     */
+    public void setTimeStampCert(X509Certificate timeStampCert) {
+        this.timeStampCert = timeStampCert;
+    }
 }

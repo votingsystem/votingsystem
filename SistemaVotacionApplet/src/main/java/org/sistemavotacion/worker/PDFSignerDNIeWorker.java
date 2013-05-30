@@ -28,8 +28,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import javax.swing.SwingWorker;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -142,13 +140,13 @@ public class PDFSignerDNIeWorker extends SwingWorker<Integer, String>
                         //reqgen.setReqPolicy(m_sPolicyOID);
                         timeStampRequest = reqgen.generate(TIMESTAMP_PDF_HASH, digest);
                         
-                        HttpResponse response = Contexto.getInstancia().
+                        Respuesta respuesta = Contexto.getInstancia().
                                 getHttpHelper().sendByteArray(
                                 timeStampRequest.getEncoded(), "timestamp-query", 
                                 urlTimeStampServer);
                         
-                        if (Respuesta.SC_OK == response.getStatusLine().getStatusCode()) {
-                            byte[] bytesToken = EntityUtils.toByteArray(response.getEntity());
+                        if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                            byte[] bytesToken =respuesta.getBytesArchivo();
                             timeStampToken = new TimeStampToken(
                                 new CMSSignedData(bytesToken));
                             

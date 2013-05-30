@@ -1,14 +1,11 @@
 package org.sistemavotacion.controlacceso.modelo;
 
-import static javax.persistence.GenerationType.IDENTITY;
-
 import java.io.IOException;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
@@ -29,9 +26,7 @@ public class SelloTiempo {
 	
 	public enum Estado {OK, ANULADO, ERRORES}
 	
-    @Id @GeneratedValue(strategy=IDENTITY)
-    @Column(name="id", unique=true, nullable=false)
-    private Long id;
+    @Id
     @Column(name="serialNumber", unique=true, nullable=false)
     private Long serialNumber;
     @Column(name="timeStampRequestBytes")

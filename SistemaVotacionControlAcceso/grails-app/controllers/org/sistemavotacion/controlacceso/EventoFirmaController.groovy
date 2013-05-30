@@ -31,7 +31,7 @@ class EventoFirmaController {
 	 */
 	def index() { 
 		if(request.contentType?.contains("application/pdf")) {
-			flash.forwarded = true
+			params.forwarded = true
 			forward action: "obtenerPDF"
 			return false
 		}
@@ -49,7 +49,7 @@ class EventoFirmaController {
 			render eventoMap as JSON
 			return false
 		}
-		flash.forwarded = true
+		params.forwarded = true
 		forward action: "obtenerManifiestos"
 		return false
 	}
@@ -100,11 +100,11 @@ class EventoFirmaController {
 	
 	def post() {
 		if(request.contentType?.contains("application/pdf")) {
-			flash.forwarded = true
+			params.forwarded = true
 			forward action: "validarPDF"
 			return false
 		} else {
-			flash.forwarded = true
+			params.forwarded = true
 			forward action: "publicarPDF"
 			return false
 		}
@@ -126,7 +126,7 @@ class EventoFirmaController {
 	 * @return Si todo va bien devuelve un código de estado HTTP 200.
 	 */
 	def validarPDF() {
-		Documento documento = flash.pdfDocument
+		Documento documento = params.pdfDocument
 		if (params.long('id') && documento &&
 			documento.estado == Documento.Estado.VALIDADO) {
 			EventoFirma evento = null;
@@ -187,7 +187,6 @@ class EventoFirmaController {
 					contenido:eventoJSON.contenido,
 					fechaFin:new Date().parse("yyyy-MM-dd HH:mm:ss", eventoJSON.fechaFin))
 				evento.save()
-				evento.url = "${grailsApplication.config.grails.serverURL}/eventoFirma/${evento.id}"
 				runAsync {
 					ByteArrayOutputStream bytes = pdfRenderingService.render(
 						template: "/eventoFirma/pdf", model:[evento:evento])
@@ -391,12 +390,12 @@ class EventoFirmaController {
 	def estadisticas () {
 		if (params.long('id')) {
 			EventoFirma eventoFirma
-			if (!flash.evento) { 
+			if (!params.evento) { 
 				EventoFirma.withTransaction {
 					eventoFirma = EventoFirma.get(params.id)
 				}
 			} 
-			else eventoFirma = flash.evento //forwarded from /evento/estadisticas
+			else eventoFirma = params.evento //forwarded from /evento/estadisticas
 			if (eventoFirma) {
 				def estadisticasMap = eventoService.optenerEventoFirmaJSONMap(eventoFirma)
 				estadisticasMap.numeroFirmas = Documento.countByEventoAndEstado(

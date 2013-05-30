@@ -50,18 +50,17 @@ class CentroControlFilters {
                 if(!params.sort) params.sort = "dateCreated"
                 if(!params.order) params.order = "desc"
                 response.setHeader("Cache-Control", "no-store")
-				flash.respuesta = null
-				flash.mensajeSMIMEReq = null
-				flash.smimeMessageReq = null
-				flash.receiverCert = null
-				flash.responseBytes = null
-				flash.forwarded = null
-				flash.pdfDocument = null
+				params.respuesta = null
+				params.mensajeSMIMEReq = null
+				params.receiverCert = null
+				params.responseBytes = null
+				params.forwarded = null
+				params.pdfDocument = null
             }
 			
 			after = {
-				MensajeSMIME mensajeSMIME = flash.mensajeSMIMEReq
-				Respuesta respuesta = flash.respuesta
+				MensajeSMIME mensajeSMIME = params.mensajeSMIMEReq
+				Respuesta respuesta = params.respuesta
 				if(mensajeSMIME && respuesta) {
 					boolean operationOK = (Respuesta.SC_OK == respuesta.codigoEstado)
 					mensajeSMIME.evento = respuesta.evento
@@ -69,9 +68,29 @@ class CentroControlFilters {
 					mensajeSMIME.motivo = respuesta.mensaje
 					mensajeSMIME.tipo = respuesta.tipo
 					MensajeSMIME.withTransaction {
-							mensajeSMIME.save()
+						mensajeSMIME.save(flush:true)
 					}
+					params.mensajeSMIMEReq = null
 					log.debug "paramsCheck - after - saved MensajeSMIME '${mensajeSMIME.id}' -> '${mensajeSMIME.tipo}'"
+				}
+				if(response?.contentType?.contains("multipart/encrypted")) {
+					log.debug "---- paramsCheck - after - ENCRYPTED PLAIN TEXT"
+					if(params.responseBytes && params.receiverCert) {
+						Respuesta encryptResponse =  encryptionService.encryptMessage(
+							params.responseBytes, params.receiverCert)
+						if (Respuesta.SC_OK != encryptResponse.codigoEstado) {
+							response.status = respuesta?.codigoEstado
+							render respuesta?.mensaje
+							return false
+						} else {
+							response.contentLength = encryptResponse.messageBytes.length
+							response.outputStream << encryptResponse.messageBytes
+							response.outputStream.flush()
+							return false
+						}
+					} else {
+						log.error "---- paramsCheck - after - ERROR - ENCRYPTED PLAIN TEXT"
+					}
 				}
 				if(respuesta && Respuesta.SC_OK != respuesta.codigoEstado) {
 					log.error "**** paramsCheck - after - respuesta - status: ${respuesta.codigoEstado} - contentType: ${response.contentType}"
@@ -86,7 +105,7 @@ class CentroControlFilters {
 		
 		pkcs7DocumentsFilter(controller:'*', action:'*') {
 			before = {
-				if(flash.forwarded) {
+				if(params.forwarded) {
 					log.debug("---- pkcs7DocumentsFilter - before - REQUEST FORWARDED- BYPASS PKCS7 FILTER");
 					return;
 				}
@@ -137,7 +156,7 @@ class CentroControlFilters {
 					}
 					respuesta = processSMIMERequest(smimeMessageReq, params, request)
 					if(Respuesta.SC_OK == respuesta.codigoEstado) {
-						flash.mensajeSMIMEReq = respuesta.mensajeSMIME
+						params.mensajeSMIMEReq = respuesta.mensajeSMIME
 						return
 					} else {
 						response.status = respuesta?.codigoEstado
@@ -150,15 +169,15 @@ class CentroControlFilters {
 			after = {
 				if((!response?.contentType?.contains("application/x-pkcs7-signature") &&
 					!response?.contentType?.contains("application/x-pkcs7-mime")) ||
-					flash.bypassPKCS7Filter) {
+					params.bypassPKCS7Filter) {
 					log.debug "---- pkcs7DocumentsFilter - after - BYPASS PKCS7 FILTER"
 					return
 				}
-				Respuesta respuesta = flash.respuesta
+				Respuesta respuesta = params.respuesta
 				MensajeSMIME mensajeSMIME = respuesta?.mensajeSMIME
 				if(mensajeSMIME) {
 					byte[] smimeResponseBytes = mensajeSMIME.contenido
-					X509Certificate encryptionReceiverCert = flash.receiverCert 
+					X509Certificate encryptionReceiverCert = params.receiverCert 
 					if(response?.contentType?.contains("application/x-pkcs7-mime")) {
 						if(response?.contentType?.contains("application/x-pkcs7-signature")) {
 							log.debug "---- pkcs7DocumentsFilter - after - SIGNED AND ENCRYPTED RESPONSE"
@@ -174,6 +193,7 @@ class CentroControlFilters {
 								mensajeSMIME.valido = false
 								mensajeSMIME.motivo = encryptResponse.mensaje
 								mensajeSMIME.save()
+								response.contentType = "text/plain"
 								response.status = encryptResponse.codigoEstado
 								render encryptResponse.mensaje
 							}

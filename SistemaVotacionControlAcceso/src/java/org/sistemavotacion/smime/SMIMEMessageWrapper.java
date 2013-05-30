@@ -82,7 +82,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
     }
     
     private static final String BC = BouncyCastleProvider.PROVIDER_NAME;
-    public static final String SIGNED_FILE_EXTENSION = "p7m";
+    public static final String SIGNED_FILE_EXTENSION = "p7s";
 
     private String messageId;
     private String contentType;
@@ -201,12 +201,13 @@ public class SMIMEMessageWrapper extends MimeMessage {
     }
 
     /**
+     * Digest for storing unique MensajeSMIME in database 
      * @return the contentDigestStr
      * @throws NoSuchAlgorithmException 
      */
     public String getContentDigestStr() throws NoSuchAlgorithmException {
-        MessageDigest sha = MessageDigest.getInstance("SHA256");
-        byte[] resultDigest =  sha.digest(signedContent.getBytes() );
+        MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+        byte[] resultDigest =  messageDigest.digest(signedContent.getBytes());
         return new String(Base64.encode(resultDigest));
     }
     
@@ -487,8 +488,8 @@ public class SMIMEMessageWrapper extends MimeMessage {
                 Calendar cal = new GregorianCalendar();
                 cal.setTime(timeStampToken.getTimeStampInfo().getGenTime());
                 logger.debug("checkTimeStampToken - timeStampToken - fecha: " +  cal.getTime());
-                logger.debug("checkTimeStampToken - digestStr: " + digestStr 
-                		+ " - digestTokenStr " + digestTokenStr);
+                //logger.debug("checkTimeStampToken - digestStr: " + digestStr 
+                //		+ " - digestTokenStr " + digestTokenStr);
                 return timeStampToken;
             }
         } else logger.debug("checkTimeStampToken - without unsignedAttributes"); 

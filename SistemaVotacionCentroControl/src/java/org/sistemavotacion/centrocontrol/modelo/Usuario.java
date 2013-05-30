@@ -4,7 +4,6 @@ import static javax.persistence.GenerationType.IDENTITY;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -71,9 +70,6 @@ public class Usuario implements Serializable {
     @Column(name="deviceId" )
     private String deviceId;
     
-    @Column(name="representationsNumber")
-    private Integer representationsNumber = 0;
-    
     @Column(name="url" )
     private String url;
     
@@ -82,7 +78,7 @@ public class Usuario implements Serializable {
     private Usuario representative;  
     
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="usuario")
-    private Set<Certificado> certificados = new HashSet<Certificado>(0);
+    private Set<Certificado> certificados;
     
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="fechaCreacion", length=23)
@@ -93,7 +89,7 @@ public class Usuario implements Serializable {
     private Date lastUpdated;
     
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="usuario")
-    private Set<EventoVotacion> eventos = new HashSet<EventoVotacion>(0);
+    private Set<EventoVotacion> eventos;
     
     
     @Transient
@@ -314,11 +310,4 @@ public class Usuario implements Serializable {
 		this.url = url;
 	}
 
-	public Integer getRepresentationsNumber() {
-		return representationsNumber;
-	}
-
-	public void setRepresentationsNumber(Integer representationsNumber) {
-		this.representationsNumber = representationsNumber;
-	}
 }

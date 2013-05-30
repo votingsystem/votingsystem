@@ -174,6 +174,7 @@ public class MensajeDialog extends JDialog implements HyperlinkListener {
     
     public void setMessage (String mensajeError, String tituloVentana) {
         if (tituloVentana != null) setTitle(tituloVentana);
+        setLocationRelativeTo(null);   
         mensajePane.setText(mensajeError);
         mensajePane.updateUI();
         setVisible(true);

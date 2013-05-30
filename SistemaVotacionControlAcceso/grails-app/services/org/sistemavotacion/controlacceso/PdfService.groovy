@@ -128,7 +128,6 @@ class PdfService {
 			Calendar signDate = pk.getSignDate();
 			X509Certificate[] pkc = (X509Certificate[])pk.getSignCertificateChain();
 			TimeStampToken timeStampToken = pk.getTimeStampToken();
-			if(!trustedCertsKeyStore) afterPropertiesSet();
 			Object[] fails = PdfPKCS7.verifyCertificates(pkc, getTrustedCertsKeyStore(), null, signDate);
 			if(fails != null) {
 				log.debug("checkSignature - fails - Cert '${signingCert.getSerialNumber()?.longValue()}' has fails: ${fails[1]}" );
@@ -247,6 +246,7 @@ class PdfService {
 	}
 	
     public KeyStore getTrustedCertsKeyStore() {
+		if(!trustedCertsKeyStore) afterPropertiesSet();
 		return trustedCertsKeyStore;
 	}
 			

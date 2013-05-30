@@ -264,6 +264,14 @@ class UrlMappings {
 			}
 		}
 		
+		"/representative/accreditationsBackupForEvent/$id" {
+			controller = "representative"
+			action = "accreditationsBackupForEvent"
+			constraints {
+				id(matches:/\d*/)
+			}
+		} 
+		
 		"/solicitudAcceso" {
 			controller = "solicitudAcceso"
 			action = [POST:"processFileMap"]

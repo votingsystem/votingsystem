@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
@@ -30,6 +31,7 @@ public class DeObjetoAJSON {
         map.put("contenido", evento.getContenido());
         map.put("fechaInicio", DateUtils.getStringFromDate(evento.getFechaInicio()));
         map.put("fechaFin", DateUtils.getStringFromDate(evento.getFechaFin()));
+        map.put("UUID", UUID.randomUUID().toString());
         if (evento.getTipo() != null) map.put("tipoEvento", evento.getTipo().toString()); 
         if (evento.getEventoId() != null) map.put("eventoId", evento.getEventoId()); 
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON( map );
@@ -80,7 +82,7 @@ public class DeObjetoAJSON {
             opcionSeleccionadaMap.put("contenido", evento.getOpcionSeleccionada().getContenido());
             JSONObject opcionSeleccionadaJSON = (JSONObject) JSONSerializer.toJSON( opcionSeleccionadaMap );
             jsonObject.put("opcionSeleccionada", opcionSeleccionadaJSON);
-        } 
+        }
         logger.debug("obtenerEventoJSON - jsonObject.toString(): " + jsonObject.toString());
         return jsonObject.toString();    
     }
@@ -92,6 +94,7 @@ public class DeObjetoAJSON {
                 ContextoPruebas.getControlAcceso().getServerURL(), 
                 evento.getEventoId()));
         map.put("opcionSeleccionadaId", evento.getOpcionSeleccionada().getId());
+        map.put("UUID", UUID.randomUUID().toString());
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);
         return jsonObject.toString();
     }
@@ -107,6 +110,7 @@ public class DeObjetoAJSON {
         map.put("hashCertificadoVotoBase64", evento.getHashCertificadoVotoBase64());
         map.put("origenHashSolicitudAcceso", evento.getOrigenHashSolicitudAcceso());
         map.put("hashSolicitudAccesoBase64", evento.getHashSolicitudAccesoBase64());
+        map.put("UUID", UUID.randomUUID().toString());
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);
         return jsonObject.toString();
     }
@@ -118,6 +122,7 @@ public class DeObjetoAJSON {
         map.put("hashCertificadoVotoBase64", solicitud.getHashCertificadoVotoBase64());
         map.put("origenHashSolicitudAcceso", solicitud.getOrigenHashSolicitudAcceso());
         map.put("hashSolicitudAccesoBase64", solicitud.getHashSolicitudAccesoBase64());
+        map.put("UUID", UUID.randomUUID().toString());
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);
         return jsonObject.toString();
     }
@@ -132,6 +137,7 @@ public class DeObjetoAJSON {
         map.put("eventoId", evento.getEventoId());
         map.put("asunto", evento.getAsunto());
         map.put("contenido", evento.getContenido());
+        map.put("UUID", UUID.randomUUID().toString());
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON( map );
         if (evento.getOpciones() != null) {
             List<OpcionEvento> opciones = evento.getOpciones();
@@ -152,15 +158,24 @@ public class DeObjetoAJSON {
     public static String obtenerSolicitudAccesoJSON(String serverURL, Evento evento) {
         logger.debug("obtenerSolicitudAccesoJSON");
         Map map = new HashMap();
-        map.put("eventoURL", ContextoPruebas.getURLEventoParaVotar(
+        map.put("operation","SOLICITUD_ACCESO");
+        map.put("eventId", evento.getEventoId());
+        map.put("eventURL", ContextoPruebas.getURLEventoParaVotar(
                 serverURL, evento.getEventoId()));
+        map.put("UUID", UUID.randomUUID().toString());
         map.put("hashSolicitudAccesoBase64", evento.getHashSolicitudAccesoBase64());
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON( map );        
-         return jsonObject.toString();
+        return jsonObject.toString();
     }
     
     public static String obtenerDocumentoAsociacionJSON(String serverURL) {
-        return "{serverURL:\""+ serverURL.trim() +"\"}";
+        logger.debug("obtenerDocumentoAsociacionJSON");
+        Map map = new HashMap();
+        map.put("serverURL", serverURL.trim());
+        map.put("UUID", UUID.randomUUID().toString());
+        map.put("operation", "ASOCIAR_CENTRO_CONTROL");
+        JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON( map );        
+        return jsonObject.toString();
     }
     
 

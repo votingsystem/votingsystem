@@ -75,20 +75,20 @@ class SolicitudAccesoService {
 				SolicitudAcceso.withTransaction {
 					solicitudAcceso = SolicitudAcceso.findWhere(usuario:firmante,
 						eventoVotacion:eventoVotacion, estado:Tipo.OK)
-				}
+				}/*
 				if (solicitudAcceso){//Ha votado el usuario?
 						msg = "${grailsApplication.config.grails.serverURL}/mensajeSMIME/${solicitudAcceso.mensajeSMIME.id}"
-						log.error("- saveRequest - ACCESS REQUEST ERROR - ${msg}")
-						return new Respuesta(solicitudAcceso:solicitudAcceso, 
+						log.error("- saveRequest ==============- ACCESS REQUEST ERROR - ${msg}")
+						/*return new Respuesta(solicitudAcceso:solicitudAcceso, 
 							tipo:Tipo.SOLICITUD_ACCESO_ERROR, mensaje:msg, evento:eventoVotacion,
-							codigoEstado:Respuesta.SC_ERROR_VOTO_REPETIDO)
-				} else {//es el hash único?
+							codigoEstado:Respuesta.SC_ERROR_VOTO_REPETIDO)*/
+				//} else {//es el hash único?*/
 					hashSolicitudAccesoBase64 = mensajeJSON.hashSolicitudAccesoBase64
 					boolean hashSolicitudAccesoRepetido = (SolicitudAcceso.findWhere(
 							hashSolicitudAccesoBase64:hashSolicitudAccesoBase64) != null)
 					if (hashSolicitudAccesoRepetido) {
 						msg = messageSource.getMessage('error.HashRepetido', null, locale)
-						log.error("- saveRequest -ACCESS REQUEST HAS REPEATED -> ${hashSolicitudAccesoBase64} - ${msg}")
+						log.error("- saveRequest -ERROR ACCESS REQUEST HAS REPEATED -> ${hashSolicitudAccesoBase64} - ${msg}")
 						return new Respuesta(tipo:Tipo.SOLICITUD_ACCESO_ERROR, mensaje:msg,
 								codigoEstado:Respuesta.SC_ERROR_PETICION, evento:eventoVotacion)
 					} else {//Todo OK
@@ -106,7 +106,7 @@ class SolicitudAccesoService {
 								codigoEstado:Respuesta.SC_OK, evento:eventoVotacion,
 								solicitudAcceso:solicitudAcceso)
 					}
-				}
+				//}
 			} else {
 				msg = messageSource.getMessage( 'eventNotFound',
 							[mensajeJSON.eventId].toArray(), locale)

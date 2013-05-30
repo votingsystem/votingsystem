@@ -22,6 +22,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import java.security.KeyStore
 import java.security.PrivateKey
+import java.security.PublicKey;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -96,7 +97,6 @@ class EncryptionService {
 		log.debug " - decryptMessage - "
 		//log.debug "decryptMessage - encryptedFile: ${new String(encryptedFile)} "
 		try {
-			if(getRecipientId() == null) afterPropertiesSet()
 			MimeMessage msg = new MimeMessage(getSession(), 
 				new ByteArrayInputStream(encryptedFile));
 			SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
@@ -122,6 +122,36 @@ class EncryptionService {
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
 			return new Respuesta(codigoEstado: Respuesta.SC_ERROR_PETICION,
+				mensaje:ex.getMessage())
+		}
+	}
+	
+	public Respuesta encryptMessage(byte[] bytesToEncrypt,
+		PublicKey publicKey) throws Exception {
+				log.debug("--- - encryptMessage(...) - ");
+		try {
+			MimeBodyPart mimeMessage = new MimeBodyPart();
+			mimeMessage.setText(new String(bytesToEncrypt));
+
+			// set the Date: header
+			//mimeMessage.setSentDate(new Date());
+			SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
+			encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
+					"".getBytes(), publicKey).setProvider(BC));
+			/* Encrypt the message */
+			MimeBodyPart encryptedPart = encrypter.generate(mimeMessage,
+					new JceCMSContentEncryptorBuilder(
+					CMSAlgorithm.DES_EDE3_CBC).setProvider(BC).build());
+			ByteArrayOutputStream baos = new ByteArrayOutputStream()
+			encryptedPart.writeTo(baos);
+			byte[] result = baos.toByteArray()
+			baos.close();
+			
+			return new Respuesta(codigoEstado:Respuesta.SC_OK,
+				messageBytes:result)
+		} catch(Exception ex) {
+			log.error(ex.getMessage(), ex);
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
 				mensaje:ex.getMessage())
 		}
 	}
@@ -187,7 +217,6 @@ class EncryptionService {
 		log.debug(" - decryptSMIMEMessage - ")
 		SMIMEMessageWrapper smimeMessageReq = null
 		try {
-			if(getRecipientId() == null) afterPropertiesSet();
 			MimeMessage msg = new MimeMessage(getSession(), 
 				new ByteArrayInputStream(encryptedMessageBytes));
 			
@@ -238,6 +267,7 @@ class EncryptionService {
 	}
 	
 	private RecipientId getRecipientId() {
+		if(recId == null) afterPropertiesSet()
 		return recId;
 	}
 	

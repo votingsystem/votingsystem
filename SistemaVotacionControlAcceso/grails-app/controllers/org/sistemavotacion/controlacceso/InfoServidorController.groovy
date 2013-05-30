@@ -14,6 +14,7 @@ import grails.util.Environment
 class InfoServidorController {
     
     def firmaService
+	def timeStampService
     
 	/**
 	 * @httpMethod [GET]
@@ -41,6 +42,8 @@ class InfoServidorController {
 		File cadenaCertificacion = grailsApplication.mainContext.getResource(
 			grailsApplication.config.SistemaVotacion.rutaCadenaCertificacion).getFile();
 		infoServidor.cadenaCertificacionPEM = cadenaCertificacion?.text
+		infoServidor.timeStampCertPEM = new String(timeStampService.getSigningCert())
+		
 		if (params.callback) render "${params.callback}(${infoServidor as JSON})"
         else render infoServidor as JSON
 	}

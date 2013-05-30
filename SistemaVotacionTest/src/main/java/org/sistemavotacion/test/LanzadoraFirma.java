@@ -2,16 +2,15 @@ package org.sistemavotacion.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.security.KeyStore;
 import java.util.concurrent.Callable;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
+import javax.mail.internet.MimeMessage;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.modelo.InfoFirma;
-import org.sistemavotacion.test.modelo.Respuesta;
-import org.sistemavotacion.util.FileUtils;
+import org.sistemavotacion.modelo.Respuesta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,25 +45,21 @@ public class LanzadoraFirma  implements Callable<InfoFirma> {
             String rutaDocFirmado = ContextoPruebas.getUserDirPath(infoFirma.getFrom()) +
                     "archivoFirmado";            
             File docFirmado = new File(rutaDocFirmado);           
-            docFirmado = signedMailGenerator.genFile(infoFirma.getFrom(), 
+            MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(infoFirma.getFrom(), 
                 infoFirma.getEvento().getControlAcceso().getNombreNormalizado(), 
                 EnvioFirmas.obtenerFirmaParaEventoJSON(infoFirma.getEvento()),
-                asuntoMensaje, null, SignedMailGenerator.Type.USER, docFirmado); 
+                asuntoMensaje, null); 
+            mimeMessage.writeTo(new FileOutputStream(docFirmado));
             String urlRecepcionFirmas = infoFirma.getEvento().getControlAcceso().getServerURL() + 
             		"/recolectorFirma/guardarAdjuntandoValidacion"; 
-            HttpResponse response = Contexto.getHttpHelper().sendFile(
+            respuesta = Contexto.getHttpHelper().sendFile(
                     docFirmado, Contexto.SIGNED_CONTENT_TYPE, urlRecepcionFirmas);
-            if (200 == response.getStatusLine().getStatusCode()) {
+            if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
                 SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(null,
-                        new ByteArrayInputStream(EntityUtils.toByteArray(response.getEntity())),
+                        new ByteArrayInputStream(respuesta.getMensaje().getBytes()),
                         docFirmado.getName());
-                respuesta = new Respuesta(
-                    response.getStatusLine().getStatusCode(), dnieMimeMessage);
-            } else {
-                respuesta = new Respuesta(response.getStatusLine().getStatusCode(),
-                    EntityUtils.toString(response.getEntity()));
+                respuesta = new Respuesta(respuesta.getCodigoEstado(), dnieMimeMessage);
             }
-            EntityUtils.consume(response.getEntity());
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
         }

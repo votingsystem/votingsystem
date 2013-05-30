@@ -2,14 +2,9 @@ package org.sistemavotacion.test;
 
 import java.io.File;
 import java.security.cert.PKIXParameters;
-import java.security.cert.TrustAnchor;
-import java.security.cert.X509Certificate;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 import net.sf.json.JSONArray;
@@ -17,6 +12,7 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.Evento;
+import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.modelo.OpcionEvento;
 import org.sistemavotacion.test.modelo.InfoFirma;
 import org.sistemavotacion.util.DateUtils;
@@ -85,8 +81,7 @@ public class EnvioFirmas {
         for (int v = 0; v < numeroUsuarios.get(); v++) {
             Future<InfoFirma> f = firmasCompletionService.take();
             InfoFirma infoFirma = f.get();
-            if (200 == infoFirma.getRespuesta().getCodigoEstado() &&
-                    infoFirma.getRespuesta().isValidSignature()) {
+            if (Respuesta.SC_OK == infoFirma.getRespuesta().getCodigoEstado()) {
                 String rutaRecibo = ContextoPruebas.getUserDirPath(infoFirma.getFrom()) +
                         infoFirma.getRespuesta().getArchivo().getName();
                 FileUtils.copyFileToFile(infoFirma.getRespuesta().getArchivo(), 

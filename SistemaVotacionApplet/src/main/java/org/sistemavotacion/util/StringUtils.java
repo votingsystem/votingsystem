@@ -55,16 +55,15 @@ public class StringUtils {
     }
     
     public static String prepararURL(String url) {
-        String resultado;
-        if(url.contains("http:")) {
+        String resultado = null;
+        if(url.contains("http://")) {
             resultado = url;
         } else {
-            resultado = "http://".concat(url);
+            resultado = "http://" + url;
         }
         while(resultado.endsWith("/")) {
-            resultado = resultado.substring(0, url.length() -1);
+            resultado = resultado.substring(0, resultado.length() -1);
         }
-        logger.debug("resultado: '" + resultado.trim() + "'");
         return resultado.trim();
     }
 

@@ -56,7 +56,7 @@ class BuscadorController {
 	*/
 	def reindex () { 
 		try {
-			MensajeSMIME mensajeSMIME = flash.mensajeSMIMEReq
+			MensajeSMIME mensajeSMIME = params.mensajeSMIMEReq
 			if(!mensajeSMIME) {
 				String msg = message(code:'evento.peticionSinArchivo')
 				log.error msg
@@ -82,14 +82,14 @@ class BuscadorController {
 				log.debug "Usuario en la lista de administradores, reindexando"
 				FullTextSession fullTextSession = Search.getFullTextSession(sessionFactory.currentSession);
 				fullTextSession.createIndexer().startAndWait()
-				flash.respuesta = new Respuesta(tipo:Tipo.SOLICITUD_INDEXACION,
+				params.respuesta = new Respuesta(tipo:Tipo.SOLICITUD_INDEXACION,
 					codigoEstado:Respuesta.Respuesta.SC_ERROR_PETICION)
 				response.status = Respuesta.SC_OK
 				render "OK"
 			} else {
 				log.debug "Usuario no esta en la lista de administradores, petición denegada"
 				msg = message(code: 'adminIdentificationErrorMsg', [usuario.nif])
-				flash.respuesta = new Respuesta(codigoEstado:Respuesta.Respuesta.SC_ERROR_PETICION,
+				params.respuesta = new Respuesta(codigoEstado:Respuesta.Respuesta.SC_ERROR_PETICION,
 					tipo:Tipo.SOLICITUD_INDEXACION_ERROR, mensaje:msg)
 				response.status = Respuesta.SC_ERROR_PETICION
 				render msg
@@ -97,7 +97,7 @@ class BuscadorController {
 			return false
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
-			flash.respuesta = new Respuesta(codigoEstado:Respuesta.Respuesta.SC_ERROR_PETICION,
+			params.respuesta = new Respuesta(codigoEstado:Respuesta.Respuesta.SC_ERROR_PETICION,
 				tipo:Tipo.SOLICITUD_INDEXACION_ERROR, mensaje:ex.getMessage())
 			response.status = Respuesta.SC_ERROR_PETICION
 			render ex.getMessage()

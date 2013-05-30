@@ -3,7 +3,6 @@ package org.sistemavotacion.controlacceso.modelo;
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -38,15 +37,15 @@ public class EventoVotacion extends Evento implements Serializable {
     @Column(name="cardinalidadOpciones")
     private Cardinalidad cardinalidadOpciones = Cardinalidad.UNA; 
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="eventoVotacion")
-    private Set<Certificado> certificados = new HashSet<Certificado>(0);    
+    private Set<Certificado> certificados;    
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="eventoVotacion")
-    private Set<OpcionDeEvento> opciones = new HashSet<OpcionDeEvento>(0);
+    private Set<OpcionDeEvento> opciones;
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="eventoVotacion")
-    private Set<SolicitudAcceso> solicitudesAcceso = new HashSet<SolicitudAcceso>(0);
+    private Set<SolicitudAcceso> solicitudesAcceso;
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="eventoVotacion")
-    private Set<SolicitudCSRVoto> solicitudesCSR = new HashSet<SolicitudCSRVoto>(0);
+    private Set<SolicitudCSRVoto> solicitudesCSR;
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="eventoVotacion")
-    private Set<Voto> votos = new HashSet<Voto>(0);
+    private Set<Voto> votos;
     /**
      * @return the opciones
      */

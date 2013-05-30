@@ -2,9 +2,6 @@ package org.sistemavotacion.seguridad;
 
 import static org.sistemavotacion.Contexto.*;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -12,12 +9,9 @@ import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.io.OutputStreamWriter;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import javax.security.auth.x500.X500Principal;
@@ -27,7 +21,8 @@ import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.bouncycastle.openssl.PEMWriter;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import javax.mail.Header;
-import org.sistemavotacion.smime.SignedMailGenerator.Type;
+import org.sistemavotacion.smime.SMIMEMessageWrapper;
+import org.sistemavotacion.util.VotingSystemKeyGenerator;
 
 /**
  * 'Client side' PKCS10 wrapper class for the BouncyCastle 
@@ -40,18 +35,18 @@ public class PKCS10WrapperClient {
 
     private PKCS10CertificationRequest csr;
     private PrivateKey privateKey;
+    private PublicKey publicKey;
     private X509Certificate certificate;
     private SignedMailGenerator signedMailGenerator;
     private KeyStore keyStore;
 
-    public PKCS10WrapperClient(int keySize, String keyName, 
+    public PKCS10WrapperClient(int keySize, String keyName,
             String sigName, String provider, String controlAccesoURL, String eventoId,
             String hashCertificadoVotoHEX) throws NoSuchAlgorithmException, 
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(keyName, provider);
-        keyPairGenerator.initialize(keySize, new SecureRandom());
-        KeyPair keyPair = keyPairGenerator.genKeyPair();
+        KeyPair keyPair = VotingSystemKeyGenerator.getInstancia().genKeyPair();
         privateKey = keyPair.getPrivate();
+        publicKey = keyPair.getPublic();
         X500Principal subject = new X500Principal(
                 "CN=controlAccesoURL:" + controlAccesoURL + 
                 ", OU=eventoId:" + eventoId +
@@ -59,7 +54,7 @@ public class PKCS10WrapperClient {
         csr = new PKCS10CertificationRequest(VOTE_SIGN_MECHANISM, 
                 subject, keyPair.getPublic(), null, keyPair.getPrivate(), provider);
     }
-    
+
     /**
      * @return The DER encoded byte array.
      */
@@ -103,10 +98,11 @@ public class PKCS10WrapperClient {
         this.privateKey = privateKey;
     }
     
-    public void initSigner (byte[] csrFirmada) throws Exception {
+    public boolean initSigner (byte[] csrFirmada) throws Exception {
         Collection<X509Certificate> certificados = 
                 CertUtil.fromPEMToX509CertCollection(csrFirmada);
         logger.debug("Número certificados en cadena: " + certificados.size());
+        if(certificados.isEmpty()) return false;
         certificate = certificados.iterator().next();
         X509Certificate[] arrayCerts = new X509Certificate[certificados.size()];
         certificados.toArray(arrayCerts);
@@ -116,6 +112,7 @@ public class PKCS10WrapperClient {
         keyStore.load(null, null);
         keyStore.setKeyEntry(ALIAS_CLAVES, privateKey, 
                 PASSWORD_CLAVES.toCharArray(), arrayCerts);
+        return true;
     }
     //(KeyStore keyStore, String keyAlias, char[] password)
     public void initSigner (KeyStore keyStore) throws Exception {
@@ -124,22 +121,12 @@ public class PKCS10WrapperClient {
                 PASSWORD_CLAVES.toCharArray(),VOTE_SIGN_MECHANISM);
     }
     
-    public String genSignedString(String fromUser, String toUser, String textoAFirmar, 
-            String asunto, Header header, Type signerType) throws Exception {
+    public SMIMEMessageWrapper genMimeMessage(String fromUser, String toUser, String textoAFirmar, 
+            String asunto, Header header) throws Exception {
         if (signedMailGenerator == null) 
         	throw new Exception ("signedMailGenerator no inicializado ");
-        String result = signedMailGenerator.genString(
-                fromUser, toUser, textoAFirmar, asunto, header, signerType);
-        return result;
-    }
-    
-    public File genSignedFile(String fromUser, String toUser, String textoAFirmar, 
-            String asunto, Header header, Type signerType, File output) throws Exception {
-        if (signedMailGenerator == null) 
-        	throw new Exception ("signedMailGenerator no inicializado ");
-        File result = signedMailGenerator.genFile(fromUser, toUser, 
-        		textoAFirmar, asunto, header, signerType, output);
-        return result;
+        return signedMailGenerator.genMimeMessage(
+                fromUser, toUser, textoAFirmar, asunto, header);
     }
 
     /**
@@ -162,5 +149,19 @@ public class PKCS10WrapperClient {
      */
     public void setCertificate(X509Certificate certificate) {
         this.certificate = certificate;
+    }
+
+    /**
+     * @return the publicKey
+     */
+    public PublicKey getPublicKey() {
+        return publicKey;
+    }
+
+    /**
+     * @param publicKey the publicKey to set
+     */
+    public void setPublicKey(PublicKey publicKey) {
+        this.publicKey = publicKey;
     }
 }

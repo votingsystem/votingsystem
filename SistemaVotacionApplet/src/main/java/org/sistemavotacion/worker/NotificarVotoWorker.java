@@ -1,19 +1,15 @@
 package org.sistemavotacion.worker;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.security.PrivateKey;
+import java.io.FileOutputStream;
 import java.security.cert.X509Certificate;
+import javax.mail.internet.MimeMessage;
 import javax.swing.SwingWorker;
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
 import org.sistemavotacion.Contexto;
-import org.sistemavotacion.dialogo.PreconditionsCheckerDialog;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.ReciboVoto;
 import org.sistemavotacion.modelo.Respuesta;
-import org.sistemavotacion.seguridad.EncryptionHelper;
+import org.sistemavotacion.seguridad.Encryptor;
 import org.sistemavotacion.seguridad.PKCS10WrapperClient;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.slf4j.Logger;
@@ -30,33 +26,32 @@ public class NotificarVotoWorker extends SwingWorker<Integer, String>
 
     private String urlServidorRecolectorVotos;
     private VotingSystemWorkerListener workerListener;
-    private File votoFirmado;
+    private SMIMEMessageWrapper votoFirmado;
     private Evento evento;
     private Integer id = null;
-    private int statusCode = Respuesta.SC_ERROR;
-    private String message = null;
     private Exception exception = null;
     private ReciboVoto reciboVoto = null;
+    private Respuesta respuesta = null;
     private X509Certificate controlCenterCert = null;
     private PKCS10WrapperClient pkcs10WrapperClient;
     
-    public NotificarVotoWorker(Integer id, Evento evento, String urlServidorRecolectorVotos, 
-            File votoFirmado, PKCS10WrapperClient pkcs10WrapperClient, 
+    public NotificarVotoWorker(Integer id, Evento evento,  
+            String urlServidorRecolectorVotos, X509Certificate controlCenterCert, 
+            SMIMEMessageWrapper smimeDocument, PKCS10WrapperClient pkcs10WrapperClient, 
             VotingSystemWorkerListener workerListener) {
         this.id = id;
         this.evento = evento;        
         this.urlServidorRecolectorVotos = urlServidorRecolectorVotos;
         this.workerListener = workerListener;
-        this.votoFirmado = votoFirmado;
+        this.votoFirmado = smimeDocument;
         this.pkcs10WrapperClient = pkcs10WrapperClient;
-        this.controlCenterCert = PreconditionsCheckerDialog.getCert(
-                evento.getCentroControl().getServerURL());
+        this.controlCenterCert = controlCenterCert;
     }
             
     @Override//on the EDT
     protected void done() {
         try {
-            statusCode = get();
+            get();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             exception = ex;
@@ -65,35 +60,23 @@ public class NotificarVotoWorker extends SwingWorker<Integer, String>
         }
     }
     @Override protected Integer doInBackground() throws Exception {
-        EncryptionHelper.encryptSMIMEFile(votoFirmado, controlCenterCert);
-        HttpResponse response = Contexto.getHttpHelper().
-                sendFile(votoFirmado, Contexto.SIGNED_AND_ENCRYPTED_CONTENT_TYPE, 
+        MimeMessage encryptedMessage = Encryptor.encryptSMIME(
+                votoFirmado, controlCenterCert);
+        File encryptedVote = File.createTempFile("EncryptedVote", ".p7s");
+        encryptedMessage.writeTo(new FileOutputStream(encryptedVote));
+        
+        respuesta = Contexto.getHttpHelper().sendFile(encryptedVote, 
+                Contexto.SIGNED_AND_ENCRYPTED_CONTENT_TYPE, 
                 urlServidorRecolectorVotos);
-        statusCode = response.getStatusLine().getStatusCode();
-        if (Respuesta.SC_OK == statusCode) {
-            
-            String respresentativeNIF = null;
-            Header[] headers = response.getHeaders("representativeNIF");
-            if(headers != null) {
-                for(Header header:headers) {
-                    logger.debug("========= header.getValue(): " + header.getValue());
-                    respresentativeNIF = header.getValue();
-                    
-                }
-            }
-            
-            byte[] votoValidadoBytes = EntityUtils.toByteArray(response.getEntity());
-            
-            SMIMEMessageWrapper votoValidado = 
-                    EncryptionHelper.decryptSMIMEMessage(votoValidadoBytes, 
-                    pkcs10WrapperClient.getCertificate(), pkcs10WrapperClient.getPrivateKey());
+        if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+            byte[] votoValidadoBytes = respuesta.getBytesArchivo();
+            SMIMEMessageWrapper votoValidado = Encryptor.decryptSMIMEMessage(
+                    votoValidadoBytes, pkcs10WrapperClient.getPublicKey(), 
+                    pkcs10WrapperClient.getPrivateKey());
                      
             reciboVoto = new ReciboVoto(Respuesta.SC_OK, votoValidado, evento);
-        } else {
-            message = EntityUtils.toString(response.getEntity());
         }
-        EntityUtils.consume(response.getEntity());   
-        return statusCode;
+        return respuesta.getCodigoEstado();
     }
 
     public ReciboVoto getReciboVoto() {
@@ -103,7 +86,8 @@ public class NotificarVotoWorker extends SwingWorker<Integer, String>
     @Override
     public String getMessage() {
         if(exception != null) return exception.getMessage();
-        else return message;
+        else if(respuesta != null) return respuesta.getMensaje();
+        else return null;
     }
 
     @Override
@@ -113,7 +97,8 @@ public class NotificarVotoWorker extends SwingWorker<Integer, String>
 
     @Override
     public int getStatusCode() {
-        return statusCode;
+        if(respuesta == null) return Respuesta.SC_ERROR_EJECUCION;
+        else return respuesta.getCodigoEstado();
     }
     
 }

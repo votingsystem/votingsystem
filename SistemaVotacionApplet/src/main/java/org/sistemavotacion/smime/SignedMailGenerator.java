@@ -2,14 +2,11 @@ package org.sistemavotacion.smime;
 
 import static org.sistemavotacion.Contexto.*;
 
-import java.io.ByteArrayOutputStream;
 import java.security.cert.CertificateEncodingException;
 import javax.mail.Header;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -33,7 +30,6 @@ import org.bouncycastle.util.Store;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.bouncycastle.asn1.smime.SMIMECapability;
 import org.bouncycastle.cms.SignerInfoGenerator;
-import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
@@ -41,8 +37,6 @@ import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
 public class SignedMailGenerator {
 
     private static Logger logger = LoggerFactory.getLogger(SignedMailGenerator.class);
-    
-    public enum Type {USER, ACESS_CONTROL, CONTROL_CENTER}
         
     private SMIMESignedGenerator smimeSignedGenerator = null;
     // Get a Session object and create the mail message
@@ -61,7 +55,7 @@ public class SignedMailGenerator {
             char[] password, String signatureMechanism) throws Exception {
         PrivateKey key = (PrivateKey)keyStore.getKey(keyAlias, password);
         Certificate[] chain = keyStore.getCertificateChain(keyAlias);
-        init(key, chain, signatureMechanism);
+        init(key, chain, signatureMechanism);  
     }
     
     public SignedMailGenerator(PrivateKey key, Certificate[] chain, 
@@ -92,40 +86,16 @@ public class SignedMailGenerator {
         smimeSignedGenerator.addCertificates(certs);
     }
     
-    public File genFile(String fromUser, String toUser, String textoAFirmar, 
-            String asunto, Header header, Type signerType, File output) throws Exception {
-        MimeMessage body = gen(
-                fromUser, toUser, textoAFirmar, asunto, header, signerType);
-        body.writeTo(new FileOutputStream(output));
-        return output;
-    }
-          
-    public String genString(String fromUser, String toUser, String textoAFirmar, 
-            String asunto, Header header, Type signerType) throws Exception {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        MimeMessage body = gen(
-                fromUser, toUser, textoAFirmar, asunto, header, signerType);
-        body.writeTo(baos);
-        return new String(baos.toByteArray());
-    }
-    
-    public MimeMessage genMimeMessage(String fromUser, String toUser, String textoAFirmar, 
-            String asunto, Header header, Type signerType) throws Exception {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        MimeMessage body = gen(
-                fromUser, toUser, textoAFirmar, asunto, header, signerType);
-        return body;
-    }
-    
-    private MimeMessage gen(String fromUser, String toUser, String textoAFirmar, 
-            String asunto, Header header, Type signerType) throws Exception {
+    public SMIMEMessageWrapper genMimeMessage(String fromUser, String toUser, 
+            String textoAFirmar, String asunto, Header header) throws Exception {
         if (asunto == null) asunto = "";
         if (textoAFirmar == null) textoAFirmar = "";
         MimeBodyPart msg = new MimeBodyPart();
         msg.setText(textoAFirmar);
-        MimeMultipart mimeMultipart = smimeSignedGenerator.generate(msg, 
-                signerType.toString() + ".p7s");
-        MimeMessage body = new MimeMessage(session);
+        MimeMultipart mimeMultipart = smimeSignedGenerator.generate(msg, "smime.p7s");
+        
+        
+        SMIMEMessageWrapper body = new SMIMEMessageWrapper(session);
         if (header != null) body.setHeader(header.getName(), header.getValue());
         if (fromUser != null && !"".equals(fromUser)) {
         	Address fromUserAddress = new InternetAddress(fromUser);
@@ -143,7 +113,7 @@ public class SignedMailGenerator {
     
 
      public MimeMultipart genMimeMultipart(MimeBodyPart body, 
-             SMIMEMessageWrapper dnieMimeMessage, Type type, String signatureMechanism) throws Exception {
+             SMIMEMessageWrapper dnieMimeMessage, String signatureMechanism) throws Exception {
          smimeSignedGenerator.addSigners(dnieMimeMessage.getSmimeSigned().getSignerInfos());
          smimeSignedGenerator.addAttributeCertificates(dnieMimeMessage.getSmimeSigned().getAttributeCertificates());
          smimeSignedGenerator.addCertificates(dnieMimeMessage.getSmimeSigned().getCertificates());
