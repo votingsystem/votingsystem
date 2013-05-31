@@ -216,6 +216,7 @@ public class PanelPublicacionManifiesto extends Composite
         @Override
     	public void onResponseReceived(Request request, Response response) {
         	if (response.getStatusCode() == Response.SC_OK) {
+        		//logger.info(" response.getText(): " + response.getText());
         		evento.setId(new Integer(response.getText()));
         		MensajeClienteFirmaJso mensajeClienteFirma = MensajeClienteFirmaJso.create(null, 
         				Operacion.PUBLICACION_MANIFIESTO_PDF.toString(), 

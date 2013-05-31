@@ -10,18 +10,18 @@ import static org.sistemavotacion.Contexto.getString;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.modelo.UserBaseData;
-import org.sistemavotacion.test.simulacion.CreacionBaseUsuarios;
-import org.sistemavotacion.test.simulacion.SimulationListener;
-import org.sistemavotacion.test.simulacion.Simulator;
+import org.sistemavotacion.test.simulation.UserBaseDataSimulator;
+import org.sistemavotacion.test.simulation.SimulatorListener;
+import org.sistemavotacion.test.simulation.Simulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class UserBaseDialog extends JDialog 
-    implements SimulationListener<UserBaseData> {
+    implements SimulatorListener<UserBaseData> {
 
     private static Logger logger = LoggerFactory.getLogger(UserBaseDialog.class);  
     
@@ -29,7 +29,7 @@ public class UserBaseDialog extends JDialog
     private static final int TIME_STAMP_WORKER = 1;
     
     private Border normalTextBorder;
-    private CreacionBaseUsuarios creacionBaseUsuarios = null;
+    private UserBaseDataSimulator creacionBaseUsuarios = null;
     private Frame parentFrame;
     private List<String> errors = null;
     MensajeDialog errorDialog = null;
@@ -240,7 +240,7 @@ public class UserBaseDialog extends JDialog
         userBasePanel.setVisible(false);
         progressBarPanel.setVisible(true);
         pack();
-        creacionBaseUsuarios = new CreacionBaseUsuarios(
+        creacionBaseUsuarios = new UserBaseDataSimulator(
                userBaseData, this);
         creacionBaseUsuarios.lanzar();
     }//GEN-LAST:event_createUsersButtonActionPerformed

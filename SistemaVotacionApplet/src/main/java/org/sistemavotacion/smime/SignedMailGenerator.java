@@ -32,7 +32,7 @@ import org.bouncycastle.asn1.smime.SMIMECapability;
 import org.bouncycastle.cms.SignerInfoGenerator;
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class SignedMailGenerator {
 

@@ -11,7 +11,7 @@ import java.security.cert.X509Certificate;
  * @descController Servicio que procesa los votos recibidos.
  *
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  * */
 class VotoController {
 
@@ -30,7 +30,7 @@ class VotoController {
 	 * @responseContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] 
 	 * @return  <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Recibo-de-Voto">El recibo del voto.</a>
 	 */
-    def post() { 
+    def save() { 
 		MensajeSMIME mensajeSMIMEReq = params.mensajeSMIMEReq
 		if(!mensajeSMIMEReq) {
 			String msg = message(code:'evento.peticionSinArchivo')

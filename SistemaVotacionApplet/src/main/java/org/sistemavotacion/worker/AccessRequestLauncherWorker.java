@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://raw.github.com/jgzornoza/SistemaVotacion/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class AccessRequestLauncherWorker extends SwingWorker<Respuesta, String> 
         implements VotingSystemWorker {
@@ -42,16 +42,13 @@ public class AccessRequestLauncherWorker extends SwingWorker<Respuesta, String>
     private PKCS10WrapperClient pkcs10WrapperClient;
     private Integer id = null;
     private Respuesta respuesta = null;
-    private Exception exception = null;
     private X509Certificate accesRequestServerCert = null;
-    private String fromNIF;
     
     public AccessRequestLauncherWorker(Integer id,
             SMIMEMessageWrapper solicitudAcceso,
             Evento evento, X509Certificate accesRequestServerCert, 
             VotingSystemWorkerListener workerListener) throws Exception {
         this.id = id;
-        if(evento.getUsuario() != null) this.fromNIF = evento.getUsuario().getNif();
         this.solicitudAcceso = solicitudAcceso;
         this.workerListener = workerListener;
         this.evento = evento;
@@ -63,19 +60,15 @@ public class AccessRequestLauncherWorker extends SwingWorker<Respuesta, String>
                 evento.getHashCertificadoVotoHex());
     }
     
-    @Override//on the EDT
-    protected void done() {
+    @Override protected void done() {//on the EDT
         try {
-            get();
-        } catch (Exception ex) {
+            respuesta = get();
+        }catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-            exception = ex;
-        } finally {
-            workerListener.showResult(this);
-        }
+            respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+        } 
+        workerListener.showResult(this);
     }
-    
-    
     
     @Override protected Respuesta doInBackground() throws Exception {
         logger.debug("doInBackground - urlSolicitudAcceso: " + 
@@ -88,6 +81,7 @@ public class AccessRequestLauncherWorker extends SwingWorker<Respuesta, String>
         MimeMessage mimeMessage = Encryptor.encryptSMIME(
                 solicitudAcceso, accesRequestServerCert);
         File accessrequestEncryptedFile = File.createTempFile("accessRequest", ".p7m");
+        accessrequestEncryptedFile.deleteOnExit();
         mimeMessage.writeTo(new FileOutputStream(accessrequestEncryptedFile));
         
         String csrFileName = Contexto.CSR_FILE_NAME + ":" + 
@@ -108,11 +102,7 @@ public class AccessRequestLauncherWorker extends SwingWorker<Respuesta, String>
                     pkcs10WrapperClient.getPublicKey(), 
                     pkcs10WrapperClient.getPrivateKey());
             //logger.debug("decryptedData: " + new String(decryptedData));
-            try {
-                pkcs10WrapperClient.initSigner(decryptedData);
-            } catch(Exception ex) {
-                logger.error(ex.getMessage() + " - from " + fromNIF , ex);
-            }
+            pkcs10WrapperClient.initSigner(decryptedData);
         }
         return respuesta;
     }
@@ -145,8 +135,7 @@ public class AccessRequestLauncherWorker extends SwingWorker<Respuesta, String>
     }
 
     @Override public String getMessage() {
-        if(exception != null) return exception.getMessage();
-        else if(respuesta != null) return respuesta.getMensaje();
+        if(respuesta != null) return respuesta.getMensaje();
         else return null;
     }
 
@@ -154,12 +143,13 @@ public class AccessRequestLauncherWorker extends SwingWorker<Respuesta, String>
         return this.id;
     }
 
-    @Override public int getStatusCode() {
-        if(respuesta == null) {
-            logger.debug("response null");
-            return  Respuesta.SC_ERROR;
-        } 
+    @Override  public int getStatusCode() {
+        if(respuesta == null) return Respuesta.SC_ERROR;
         else return respuesta.getCodigoEstado();
+    }
+    
+    @Override public Respuesta getRespuesta() {
+        return respuesta;
     }
     
 }

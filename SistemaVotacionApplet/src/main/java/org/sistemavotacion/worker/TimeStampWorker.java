@@ -30,9 +30,9 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://raw.github.com/jgzornoza/SistemaVotacion/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class TimeStampWorker extends SwingWorker<String, String> 
+public class TimeStampWorker extends SwingWorker<Respuesta, String> 
         implements VotingSystemWorker {
     
     private static Logger logger = LoggerFactory.getLogger(TimeStampWorker.class);
@@ -45,9 +45,7 @@ public class TimeStampWorker extends SwingWorker<String, String>
     private AttributeTable timeStampAsAttributeTable = null;
     private TimeStampRequest timeStampRequest = null;
     private byte[] bytesToken = null;
-    private int statusCode = Respuesta.SC_ERROR;
-    private String message = null;
-    private Exception exception = null;
+    private Respuesta respuesta = null;
         
     private X509Certificate timeStampCert = null;
     private SignerInformationVerifier timeStampSignerInfoVerifier;
@@ -78,15 +76,11 @@ public class TimeStampWorker extends SwingWorker<String, String>
                 setProvider(BC).build(timeStampCert); 
     }
     
-    public int getId() {
-        return this.id;
-    }
-    
-    @Override protected String doInBackground() throws Exception {
-        Respuesta respuesta = Contexto.getInstancia().getHttpHelper().
+ 
+    @Override protected Respuesta doInBackground() throws Exception {
+        respuesta = Contexto.getInstancia().getHttpHelper().
             sendByteArray(timeStampRequest.getEncoded(), "timestamp-query", urlArchivo);
-        statusCode = respuesta.getCodigoEstado();
-        if (Respuesta.SC_OK == statusCode) {
+        if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
             bytesToken = respuesta.getBytesArchivo();
             
             timeStampToken = new TimeStampToken(
@@ -103,18 +97,18 @@ public class TimeStampWorker extends SwingWorker<String, String>
             hashTable.put(PKCSObjectIdentifiers.
                         id_aa_signatureTimeStampToken, timeStampAsAttribute);
             timeStampAsAttributeTable = new AttributeTable(hashTable);
-        } else message = respuesta.getMensaje();
-        return message;
+        }
+        return respuesta;
     }
 
-    @Override//on the EDT
-    protected void done() {
-        try { 
-            get();
-        } catch (Exception ex) {
+    @Override protected void done() {//on the EDT
+        try {
+            respuesta = get();
+        }catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-            exception = ex;
-        } finally {workerListener.showResult(this);}
+            respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+        } 
+        workerListener.showResult(this);
     }
     
     @Override//on the EDT
@@ -161,13 +155,22 @@ public class TimeStampWorker extends SwingWorker<String, String>
         return digestToken;
     }
     
-    @Override public String getMessage() {
-        if(exception != null) return exception.getMessage();
-        else return message;
+   @Override public String getMessage() {
+        if(respuesta == null) return null;
+        else return respuesta.getMensaje();
     }
 
-    @Override public int getStatusCode() {
-        return statusCode;
+    @Override public int getId() {
+        return this.id;
+    }
+
+    @Override  public int getStatusCode() {
+        if(respuesta == null) return Respuesta.SC_ERROR;
+        else return respuesta.getCodigoEstado();
+    }
+    
+    @Override public Respuesta getRespuesta() {
+        return respuesta;
     }
 
 }

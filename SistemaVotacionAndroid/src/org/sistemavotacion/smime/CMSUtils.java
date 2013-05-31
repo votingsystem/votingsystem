@@ -59,7 +59,7 @@ import org.bouncycastle2.util.io.Streams;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class CMSUtils {
 

@@ -21,7 +21,7 @@ import org.apache.lucene.search.Sort;
  * @descController Servicios de búsqueda sobre los datos generados por la aplicación
  *
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  * */
 class BuscadorController {
 

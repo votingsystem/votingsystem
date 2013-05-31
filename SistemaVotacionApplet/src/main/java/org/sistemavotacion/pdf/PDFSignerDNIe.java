@@ -61,7 +61,7 @@ public class PDFSignerDNIe {
         exc.put(PdfName.CONTENTS, new Integer(csize * 2 + 2));
         sap.preClose(exc);
         MessageDigest md = MessageDigest.getInstance(PDF_SIGNATURE_DIGEST);
-        CMSSignedData signedData = sessionHelper.obtenerCMSSignedData(
+        CMSSignedData signedData = sessionHelper.genSignedData(
                 md.digest(FileUtils.getBytesFromInputStream(sap.getRangeStream())), null);
         //ValidadoraCMS validadora = new ValidadoraCMS(sessionHelper.certificadoCA);
         //logger.info("validadora.isValid(signedData): " + validadora.isValid(signedData));
@@ -149,7 +149,7 @@ public class PDFSignerDNIe {
         MessageDigest md = MessageDigest.getInstance(PDF_SIGNATURE_DIGEST);
         byte[] signatureHash = md.digest(FileUtils.getBytesFromInputStream(sap.getRangeStream()));
         
-        CMSSignedData signedData = sessionHelper.obtenerCMSSignedData(signatureHash, unsAttr);
+        CMSSignedData signedData = sessionHelper.genSignedData(signatureHash, unsAttr);
         //ValidadoraCMS validadora = new ValidadoraCMS(sessionHelper.certificadoCA);
         //logger.info("validadora.isValid(signedData): " + validadora.isValid(signedData));
 

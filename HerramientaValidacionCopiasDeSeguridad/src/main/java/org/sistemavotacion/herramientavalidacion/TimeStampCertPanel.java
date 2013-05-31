@@ -7,7 +7,7 @@ import org.sistemavotacion.smime.CMSUtils;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class TimeStampCertPanel extends javax.swing.JPanel {
 

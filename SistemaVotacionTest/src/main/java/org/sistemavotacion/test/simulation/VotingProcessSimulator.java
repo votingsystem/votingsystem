@@ -1,4 +1,4 @@
-package org.sistemavotacion.test.simulacion;
+package org.sistemavotacion.test.simulation;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -49,10 +49,10 @@ import org.slf4j.LoggerFactory;
 * 4)- Initialice user base data
 * 5)- When finishes user base data initilization, 'setSimulationResult' inits simulation 
 */
-public class HeadlessSimulation implements SimulationListener, 
+public class VotingProcessSimulator implements SimulatorListener, 
         VotingSystemWorkerListener{
     
-    private static Logger logger = LoggerFactory.getLogger(HeadlessSimulation.class);
+    private static Logger logger = LoggerFactory.getLogger(VotingProcessSimulator.class);
     
     public enum Simulation {VOTING, ACCESS_REQUEST}
     
@@ -69,7 +69,7 @@ public class HeadlessSimulation implements SimulationListener,
     
     private final CountDownLatch countDownLatch = new CountDownLatch(1); // just one time
     
-    public HeadlessSimulation(SimulationData simulationData) {
+    public VotingProcessSimulator(SimulationData simulationData) {
         this.simulationData = simulationData;
         this.userBaseData = simulationData.getUserBaseData();
         try {
@@ -99,21 +99,22 @@ public class HeadlessSimulation implements SimulationListener,
     @Override
     public void setSimulationResult(Simulator simulator, Object data) {
         logger.debug("data: " + data + " - simulator: " + simulator.getClass());
-        if(simulator instanceof CreacionBaseUsuarios) {
-            UserBaseData ubs = (UserBaseData)data;
-            ubs.setEvento(evento);
+        if(simulator instanceof UserBaseDataSimulator) {
+            UserBaseData ubd = (UserBaseData)data;
+            ubd.setEvento(evento);
+            simulationData.setUserBaseData(ubd);
             switch(simulation) {
                 case ACCESS_REQUEST:
-                    AccessRequest accessRequest = new AccessRequest(ubs, this);
+                    AccessRequestSimulator accessRequest = new AccessRequestSimulator(simulationData, this);
                     accessRequest.init();
                     break;
                 case VOTING:
-                    Votacion votacion = new Votacion(ubs, this);
+                    VotingSimulator votacion = new VotingSimulator(simulationData, this);
                     votacion.init();
                     break;
             }
 
-        } else if (simulator instanceof Votacion) {
+        } else if (simulator instanceof VotingSimulator) {
             logger.debug("data: " + data);
             countDownLatch.countDown();
         }
@@ -124,8 +125,8 @@ public class HeadlessSimulation implements SimulationListener,
     
     
     private void inicializarBaseUsuarios(){
-        final CreacionBaseUsuarios creacionBaseUsuarios = 
-            new  CreacionBaseUsuarios(userBaseData, this);
+        final UserBaseDataSimulator creacionBaseUsuarios = 
+            new  UserBaseDataSimulator(userBaseData, this);
         creacionBaseUsuarios.lanzar();
     }
     
@@ -133,22 +134,21 @@ public class HeadlessSimulation implements SimulationListener,
         logger.debug("setupAccesControl");
         String urlServidor = StringUtils.prepararURL(controlAccessServerURL);
         String urlInfoServidor = ContextoPruebas.getURLInfoServidor(urlServidor);
-        new InfoGetterWorker(ACCESS_CONTROL_GETTER_WORKER,
-                urlInfoServidor, this).execute();
+        new InfoGetterWorker(ACCESS_CONTROL_GETTER_WORKER, urlInfoServidor, 
+                null, this).execute();
     }
     
     private void setupControlCenter(String urlCentroControl){
         logger.debug("setupControlCenter");
         String urlServidor = StringUtils.prepararURL(urlCentroControl);
         String urlInfoServidor = ContextoPruebas.getURLInfoServidor(urlServidor);
-        new InfoGetterWorker(CONTROL_CENTER_GETTER_WORKER,
-                urlInfoServidor, this).execute();
+        new InfoGetterWorker(CONTROL_CENTER_GETTER_WORKER, urlInfoServidor, 
+                null, this).execute();
     }
     
     private void publishEvent() {
         logger.debug("publishEvent");
         try {
-            SignedMailGenerator signedMailGenerator = null;
             
             DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date date = new Date(System.currentTimeMillis());
@@ -177,12 +177,12 @@ public class HeadlessSimulation implements SimulationListener,
             evento.setOpciones(opcionesDeEvento);
             
             evento.setCentroControl(ContextoPruebas.getCentroControl());
-            signedMailGenerator = new SignedMailGenerator(
+            SignedMailGenerator signedMailGenerator =  new SignedMailGenerator(
                 ContextoPruebas.getUsuarioPruebas().getKeyStore(),
                 ContextoPruebas.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
                 ContextoPruebas.VOTE_SIGN_MECHANISM);
-            File eventToPublish = new File(FileUtils.APPTEMPDIR 
-                + "SolicitudPublicacionConvocatoria");
+            File eventToPublish = File.createTempFile("eventToPublish", ".json"); 
+            eventToPublish.deleteOnExit();
             logger.debug("publishing event: " + eventToPublish.getAbsolutePath());
             String eventoParaPublicar = DeObjetoAJSON.obtenerEventoJSON(evento);
             MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(
@@ -198,6 +198,7 @@ public class HeadlessSimulation implements SimulationListener,
                     ContextoPruebas.getControlAcceso().getServerURL()), this).execute();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
+            countDownLatch.countDown();
         }
     }
     
@@ -209,6 +210,7 @@ public class HeadlessSimulation implements SimulationListener,
                     ContextoPruebas.VOTE_SIGN_MECHANISM);
             File solicitudAsociacion = File.createTempFile(
                     "SolicitudAsociacion", ".p7s");
+            solicitudAsociacion.deleteOnExit();
             String documentoAsociacion = DeObjetoAJSON.obtenerDocumentoAsociacionJSON(
             		simulationData.getControlCenterURL());
             MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(
@@ -223,6 +225,7 @@ public class HeadlessSimulation implements SimulationListener,
                     ContextoPruebas.getControlAcceso().getServerURL()), this).execute();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
+            countDownLatch.countDown();
         }
     }
     
@@ -287,14 +290,14 @@ public class HeadlessSimulation implements SimulationListener,
                         byte[] responseBytes = worker.getMessage().getBytes();
                         FileUtils.copyStreamToFile(new ByteArrayInputStream(responseBytes), 
                             new File(ContextoPruebas.APPDIR + "VotingPublishReceipt"));
-                        SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(null, 
+                        SMIMEMessageWrapper mimeMessage = new SMIMEMessageWrapper(null, 
                                 new ByteArrayInputStream(responseBytes), 
                                 "VotingPublishReceipt");
-                        dnieMimeMessage.verify(
+                        mimeMessage.verify(
                                 ContextoPruebas.INSTANCIA.getSessionPKIXParameters());
-                        logger.debug("--- dnieMimeMessage.getSignedContent(): " 
-                                + dnieMimeMessage.getSignedContent());
-                        evento = DeJSONAObjeto.obtenerEvento(dnieMimeMessage.getSignedContent());
+                        logger.debug("--- mimeMessage.getSignedContent(): " 
+                                + mimeMessage.getSignedContent());
+                        evento = DeJSONAObjeto.obtenerEvento(mimeMessage.getSignedContent());
                         logger.debug("Respuesta - Evento ID: " + evento.getEventoId());
                         inicializarBaseUsuarios();
                     } catch (Exception ex) {
@@ -370,12 +373,15 @@ public class HeadlessSimulation implements SimulationListener,
             if(args[1] != null) simulation = Simulation.valueOf(args[1]);
         } else {
             simulation = Simulation.VOTING;
-            File jsonFile = File.createTempFile("headlesSimulation", ".json");
+            File jsonFile = File.createTempFile("VotingProcessSimulation", ".json");
+            jsonFile.deleteOnExit();
             FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
-                            .getResourceAsStream("testFiles/simulationData.json"), jsonFile); 
+                            .getResourceAsStream("simulatorFiles/votingSimulationData.json"), jsonFile); 
             simulationData = SimulationData.parse(FileUtils.getStringFromFile(jsonFile));
+            logger.debug("Simulation for Access Control: " + simulationData.getAccessControlURL());
+            
         }
-        HeadlessSimulation simuHelper = new HeadlessSimulation(simulationData);
+        VotingProcessSimulator simuHelper = new VotingProcessSimulator(simulationData);
         simuHelper.init();
     }
 }

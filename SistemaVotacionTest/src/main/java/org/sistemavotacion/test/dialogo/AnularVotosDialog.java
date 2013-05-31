@@ -19,8 +19,7 @@ import org.sistemavotacion.test.MainFrame;
 import org.sistemavotacion.test.json.DeJSONAObjeto;
 import org.sistemavotacion.test.modelo.SolicitudAcceso;
 import org.sistemavotacion.test.panel.DigitalClockPanel;
-import org.sistemavotacion.test.simulacion.LanzadoraAnulacionSolicitudAcceso;
-import static org.sistemavotacion.test.simulacion.Votacion.MAX_PENDING_RESPONSES;
+import org.sistemavotacion.test.simulation.launcher.CancelAccessRequestLauncher;
 import org.sistemavotacion.test.util.FileNameFilter;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
@@ -29,13 +28,15 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class AnularVotosDialog extends JDialog implements SelectorArchivosListener {
     
     private static Logger logger = LoggerFactory.getLogger(AnularVotosDialog.class);
     
     public enum Estado {RECOGIENDO_DATOS, ANULANDO_VOTOS}
+    
+    private static final int MAX_PENDING_RESPONSES = 10;
     
     private MensajeDialog mensajeDialog;
     private static long comienzo;
@@ -526,7 +527,7 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
     
     public void lanzarAnulacionSolicitudAcceso (SolicitudAcceso solicitud) throws Exception {
         anulacionSolicitudesCompletionService.submit(
-                new LanzadoraAnulacionSolicitudAcceso(solicitud));
+                new CancelAccessRequestLauncher(solicitud));
         actualizarContadorSolicitudes(
                 new Long(anulacionesEnviadas.incrementAndGet()).intValue());
      }

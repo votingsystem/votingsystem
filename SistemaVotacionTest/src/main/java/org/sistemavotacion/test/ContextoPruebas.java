@@ -135,11 +135,9 @@ public class ContextoPruebas {
 
     private static void inicializarAutoridadCertificadora() {
         try {
-            File rutaMockRaiz = File.createTempFile("MockRaiz", ".jks");
             keyStoreRaizAutoridad = KeyStoreUtil.createRootKeyStore(
                      COMIEZO_VALIDEZ_CERT, PERIODO_VALIDEZ_ALMACEN_RAIZ, 
                      PASSWORD.toCharArray(), ROOT_ALIAS, 
-                     rutaMockRaiz.getAbsolutePath(), 
                      "CN=Autoridad Certificadora Pruebas - " + 
                      DateUtils.getStringFromDate(DateUtils.getTodayDate()) +
                      ", OU=DNIE_CA");
@@ -342,13 +340,28 @@ public class ContextoPruebas {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         return serverURL + "eventoVotacion";
     }
+    
+    public static String getManifestServiceURL(String serverURL) {
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "eventoFirma";
+    }
+    
+    public static String getClaimServiceURL(String serverURL) {
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "eventoReclamacion";
+    }
+    
+    public static String getSignManifestURL(String serverURL) {
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "recolectorFirma";
+    }
 
     public static String getURLAnulacionVoto(String serverURL) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         return serverURL + "anuladorVoto";
     }
 
-    public static String getURLSolicitudAcceso(String serverURL) {
+    public static String getURLAccessRequest(String serverURL) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         return serverURL + "solicitudAcceso";
     }
@@ -363,6 +376,16 @@ public class ContextoPruebas {
         return serverURL + "timeStamp";
     }
 
+    public static String getUrlSubmitClaims(String serverURL) {
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "recolectorReclamacion";
+    }
+    
+    public static String getUrlrepresentativeDelegation(String serverURL) {
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "representative/userSelection";
+    }
+    
     /**
      * @return the userBaseData
      */

@@ -1,8 +1,9 @@
-package org.sistemavotacion.test.simulacion;
+package org.sistemavotacion.test.simulation;
 
+import java.io.File;
+import org.sistemavotacion.test.simulation.launcher.TimeStampLauncher;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -12,12 +13,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 import org.sistemavotacion.modelo.ActorConIP;
-import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.json.DeJSONAObjeto;
+import org.sistemavotacion.modelo.Respuesta;
+import org.sistemavotacion.test.modelo.SimulationData;
 import org.sistemavotacion.test.util.NifUtils;
-import org.sistemavotacion.test.worker.EncryptorWorker;
 import org.sistemavotacion.util.DateUtils;
+import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.worker.InfoGetterWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
@@ -25,12 +27,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author jgzornoza
- */
-public class EncryptionSimulation implements VotingSystemWorkerListener {
+* @author jgzornoza
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+*/
+public class TimeStampSimulator implements VotingSystemWorkerListener {
         
-    private static Logger logger = LoggerFactory.getLogger(EncryptionSimulation.class);
+    private static Logger logger = LoggerFactory.getLogger(TimeStampSimulator.class);
     
     public static final int MAX_PENDING_RESPONSES = 10;
         
@@ -45,27 +47,31 @@ public class EncryptionSimulation implements VotingSystemWorkerListener {
     private int solicitudesERROR = 0;
     
     private static long comienzo;
+    private SimulationData simulatioData;
     
     List<String> representativeNifList = new ArrayList<String>();
     
     private final CountDownLatch countDownLatch = new CountDownLatch(1); // just one time
-    private String requestURL = null;
+    
 
-    public EncryptionSimulation(Long numSolicitudes, 
-            String urlInfoServidor, String requestURL) {
-        logger.debug("numeroSolicitudes '" + numSolicitudes + "'");
-        this.requestURL = requestURL;
-        new InfoGetterWorker(null, urlInfoServidor, this).execute();
+    public TimeStampSimulator(SimulationData simulatioData) {
+        logger.debug("numeroSolicitudes '" + simulatioData.getNumberOfRequests() + "'" + 
+                " - timeStamp server: " + simulatioData.getTimeStampServerURL());
+        this.simulatioData = simulatioData;
+        String serverInfoURL = simulatioData.getAccessControlURL() + "/infoServidor";
+        new InfoGetterWorker(null, serverInfoURL, null, this).execute();
+        
         solicitudesEnviadas = new AtomicLong(0);
         solicitudesRecogidas = new AtomicLong(0);
-        numeroSolicitudes =  new AtomicLong(numSolicitudes);
+        numeroSolicitudes =  new AtomicLong(simulatioData.getNumberOfRequests());
         requestExecutor = Executors.newFixedThreadPool(1000);
         requestCompletionService = new ExecutorCompletionService<Respuesta>(requestExecutor);
+        
     }
     
-    public void init() throws InterruptedException {
-        logger.debug("init - await to get server info"); 
-        countDownLatch.await(); // 
+    public void lanzar() throws InterruptedException {
+        logger.debug("lanzar"); 
+        countDownLatch.await();
         comienzo = System.currentTimeMillis();
         requestExecutor.execute(new Runnable() {
             @Override
@@ -88,10 +94,9 @@ public class EncryptionSimulation implements VotingSystemWorkerListener {
             }
         });
     }
-
     
     public void lanzarSolicitudes () throws Exception {
-        logger.debug("**************** lanzarSolicitudes");
+        logger.debug("****************lanzarSolicitudes");
         if(numeroSolicitudes.get() == 0) {
             logger.debug("lanzarSolicitudes - SIN PETICIONES PENDIENTES");
             return;
@@ -99,9 +104,10 @@ public class EncryptionSimulation implements VotingSystemWorkerListener {
         do {
             if((solicitudesEnviadas.get() - solicitudesRecogidas.get()) < 
                     MAX_PENDING_RESPONSES) {
-                requestCompletionService.submit(new EncryptorSender(
-                        NifUtils.getNif(new Long(solicitudesEnviadas.
-                        getAndIncrement()).intValue()), requestURL));
+                requestCompletionService.submit(new TimeStampLauncher(
+                        NifUtils.getNif(new Long(
+                        solicitudesEnviadas.getAndIncrement()).intValue()),
+                        simulatioData.getTimeStampServerURL()));
                 logger.debug("lanzarSolicitudes - lanzada -> " + solicitudesEnviadas.get());
             } else Thread.sleep(500);
         } while (solicitudesEnviadas.get() < numeroSolicitudes.get());
@@ -113,12 +119,11 @@ public class EncryptionSimulation implements VotingSystemWorkerListener {
         for (int v = 0; v < numeroSolicitudes.get(); v++) {
             Future<Respuesta> f = requestCompletionService.take();
             final Respuesta respuesta = f.get();
-            logger.debug("Respuesta '" + v + "' statusCode: " + 
-                    respuesta.getCodigoEstado());
+            logger.debug("Respuesta solicitud sello tiempo '" + v + "' statusCode: " + 
+                    respuesta.getCodigoEstado() + " - mensaje: " + respuesta.getMensaje());
             if(respuesta.getCodigoEstado() == Respuesta.SC_OK) {
                 solicitudesOK++;
             } else {
-                logger.debug(" - ERROR msg: " + respuesta.getMensaje());
                 solicitudesERROR++;
                 finalizar();
             }
@@ -135,6 +140,29 @@ public class EncryptionSimulation implements VotingSystemWorkerListener {
         logger.debug("solicitudesOK: " + solicitudesOK);
         logger.debug("solicitudesERROR: " + solicitudesERROR);
         requestExecutor.shutdownNow();
+    }
+    
+    public static void main(String[] args) {
+        try {
+            ContextoPruebas.inicializar();
+            SimulationData simulationData = null;
+            if(args != null && args.length > 0) {
+                logger.debug("args[0]");
+                simulationData = SimulationData.parse(args[0]);
+            } else {
+                File jsonFile = File.createTempFile("TimeStampSimulation", ".json");
+                jsonFile.deleteOnExit();
+                FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
+                            .getResourceAsStream("simulatorFiles/timeStampSimulationData.json"), jsonFile); 
+                simulationData = SimulationData.parse(FileUtils.getStringFromFile(jsonFile));
+                logger.debug("Simulation for timestamp server: " + 
+                        simulationData.getTimeStampServerURL());
+            }
+            TimeStampSimulator pruebasSellosDeTiempo = new TimeStampSimulator(simulationData);
+            pruebasSellosDeTiempo.lanzar();
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
     }
 
     @Override
@@ -157,69 +185,5 @@ public class EncryptionSimulation implements VotingSystemWorkerListener {
         }
     }
     
-    public class EncryptorSender implements Callable<Respuesta>, 
-        VotingSystemWorkerListener {
     
-        private static final int ENCRYPTOR_WORKER = 1;
-
-
-        private String requestNIF;
-        private Respuesta respuesta;
-
-        private final CountDownLatch countDownLatch = new CountDownLatch(1); // just one time
-        private String serverURL = null;
-
-
-        public EncryptorSender (String requestNIF, String serverURL) 
-                throws Exception {
-            this.requestNIF = requestNIF;
-            this.serverURL = serverURL;
-        }
-
-        @Override
-        public Respuesta call() throws Exception {
-            new EncryptorWorker(ENCRYPTOR_WORKER, requestNIF, serverURL, this,
-                    ContextoPruebas.getControlAcceso().getCertificate()).execute();
-            countDownLatch.await();
-            return getResult();
-        }
-
-        @Override
-        public void process(List<String> messages) {
-            for(String message : messages)  {
-                logger.debug("process -> " + message);
-            }
-        }
-
-        @Override
-        public void showResult(VotingSystemWorker worker) {
-            logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-             " - worker: " + worker.getClass().getSimpleName() + 
-             " - workerId:" + worker.getId());
-            respuesta = new Respuesta();
-            respuesta.setCodigoEstado(worker.getStatusCode());
-            respuesta.setMensaje(worker.getMessage());
-            countDownLatch.countDown();
-        }
-
-        private Respuesta getResult() {
-            return respuesta;
-        }
-    }
-
-    
-        public static void main(String[] args) throws InterruptedException {
-        try {
-            ContextoPruebas.inicializar();
-        } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-        }
-        String urlServidor = "http://localhost:8080/SistemaVotacionControlAcceso/infoServidor";
-        String requestURL = "http://localhost:8080/SistemaVotacionControlAcceso/encryptor";
-
-        EncryptionSimulation encryptionSimulation = new EncryptionSimulation(
-                new Long(50), urlServidor, requestURL);
-        encryptionSimulation.init();
-        
-    }
 }

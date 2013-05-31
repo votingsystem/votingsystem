@@ -12,7 +12,7 @@ import javax.security.auth.x500.X500PrivateCredential;
 
 /**
 * @author jgzornoza
-* Licencia: https://raw.github.com/jgzornoza/SistemaVotacion/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class KeyStoreUtil {
     
@@ -66,7 +66,7 @@ public class KeyStoreUtil {
      * Crea un almacén de claves para la Autoridad Certificadora
      */
     public static KeyStore createRootKeyStore(long comienzo, int periodoValidez, 
-    		char[] password, String rootAlias, String filePath, String strSubjectDN) throws Exception {
+    		char[] password, String rootAlias, String strSubjectDN) throws Exception {
         KeyStore store = KeyStore.getInstance("JKS");
         store.load(null, null);
         X500PrivateCredential rootCredential = KeyUtil.createRootCredential(
@@ -75,7 +75,6 @@ public class KeyStoreUtil {
         		rootCredential.getAlias(), rootCredential.getCertificate());
         store.setKeyEntry(rootCredential.getAlias(), rootCredential.getPrivateKey(), password, 
                 new Certificate[] {rootCredential.getCertificate()});
-        if (filePath != null) store.store(new FileOutputStream(new File(filePath)), password);
         return store;
     } 
     

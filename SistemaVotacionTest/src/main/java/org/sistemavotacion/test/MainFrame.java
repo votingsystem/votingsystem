@@ -380,7 +380,7 @@ public class MainFrame extends JFrame  implements KeyListener,
         controlAccesoTextField.setText(urlServidor);
         String urlInfoServidor = ContextoPruebas.getURLInfoServidor(urlServidor);
         tareaEnEjecucion = new InfoGetterWorker(ACCESS_CONTROL_GETTER_WORKER,
-                urlInfoServidor, this);
+                urlInfoServidor, null,this);
         tareaEnEjecucion.execute();
     }
     
@@ -388,7 +388,7 @@ public class MainFrame extends JFrame  implements KeyListener,
         String urlServidor = StringUtils.prepararURL(urlCentroControl);
         String urlInfoServidor = ContextoPruebas.getURLInfoServidor(urlServidor);
         tareaEnEjecucion = new InfoGetterWorker(CONTROL_CENTER_GETTER_WORKER,
-                urlInfoServidor, this);
+                urlInfoServidor, null, this);
         tareaEnEjecucion.execute();
         controlAccesoTextField.setText(controlAccesoTextField.getText().trim());
     }

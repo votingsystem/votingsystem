@@ -1,5 +1,6 @@
-package org.sistemavotacion.test.simulacion;
+package org.sistemavotacion.test.simulation;
 
+import org.sistemavotacion.test.simulation.launcher.AccessRequestLauncher;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.security.NoSuchAlgorithmException;
@@ -19,6 +20,7 @@ import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.smime.CMSUtils;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.modelo.InfoVoto;
+import org.sistemavotacion.test.modelo.SimulationData;
 import org.sistemavotacion.test.modelo.UserBaseData;
 import org.sistemavotacion.util.DateUtils;
 import org.slf4j.Logger;
@@ -26,15 +28,13 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 * 
 * Simulation to test only access requests.
 */
-public class AccessRequest implements ActionListener, Simulator {
+public class AccessRequestSimulator implements ActionListener, Simulator {
     
-    private static Logger logger = LoggerFactory.getLogger(AccessRequest.class);
-    
-    public static final int MAX_PENDING_RESPONSES = 4;
+    private static Logger logger = LoggerFactory.getLogger(AccessRequestSimulator.class);
     
     private static ExecutorService simulatorExecutor;
     
@@ -46,26 +46,27 @@ public class AccessRequest implements ActionListener, Simulator {
     private static AtomicLong requestsFinished;
     private static AtomicLong requestsERROR;
     private static AtomicLong requestsOK;
-    
 
     private static long begin;
-    private static long end;
     
     HashMap<Long, OpcionEvento> optionsMap = new HashMap<Long, OpcionEvento>();
     
     private Timer timer;
     private static StringBuilder errorsLog;
     private UserBaseData userBaseData = null;
+    private SimulationData simulationData = null;
     
     private int numberRequests = 0;
     private List<String> electorList = null;
     
-    private SimulationListener simulationListener;
+    private SimulatorListener simulationListener;
     
     private AtomicBoolean done = new AtomicBoolean(true);
     
-    public AccessRequest(UserBaseData userBaseData, SimulationListener simulationListener) {
-        this.userBaseData = userBaseData; 
+    public AccessRequestSimulator(SimulationData simulationData, 
+            SimulatorListener simulationListener) {
+        this.userBaseData = simulationData.getUserBaseData(); 
+        this.simulationData = simulationData;
         this.simulationListener = simulationListener;
         for (OpcionEvento opcion : userBaseData.getEvento().getOpciones()) {
             optionsMap.put(opcion.getId(), opcion);
@@ -163,8 +164,8 @@ public class AccessRequest implements ActionListener, Simulator {
         } else {
              
             while(!electorList.isEmpty()) {
-                if((requestsERROR.get() - requestsFinished.get()) < 
-                        MAX_PENDING_RESPONSES) {
+                if((requests.get() - requestsFinished.get()) < 
+                        simulationData.getMaxPendingResponses()) {
                     int randomElector = new Random().nextInt(electorList.size());
                     lanzarSolicitudAcceso(electorList.remove(randomElector));
                 } else Thread.sleep(1000);
@@ -214,12 +215,27 @@ public class AccessRequest implements ActionListener, Simulator {
     }
     
     public void finalizarVotacion() {
-        end = System.currentTimeMillis() - begin;
+        long duration = System.currentTimeMillis() - begin;
         logger.debug("FINISH - shutdown executors");
         if(timer != null) timer.stop();
         simulatorExecutor.shutdownNow();
         accessRequestExecutor.shutdownNow(); 
-        mostrarEstadisticas();
+        StringBuilder result = new StringBuilder("<html>");
+        result.append("<b>Duración: </b>" + 
+                DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(duration));
+        logger.info("Solicitudes con error: " + requestsERROR.get());
+        result.append("<br/><b>Solicitudes con error: </b>" + requestsERROR.get());
+        logger.info("Solicitudes enviadas: " + requests.get());
+        result.append("<br/><b>Solicitudes enviadas: </b>" + requestsERROR.get());
+        logger.info("Solicitudes OK: " + requestsOK.get());
+        result.append("<br/><b>Solicitudes OK: </b>" + requestsOK.get());
+        String errorsMessage = null;
+        if(requestsERROR.get() > 0) {
+            errorsMessage = errorsLog.toString();
+            logger.error("ERRORS: " + errorsMessage);
+        }
+        if(simulationListener != null) 
+            simulationListener.setSimulationResult(this, errorsMessage);
         System.exit(0);
     }
         
@@ -248,25 +264,6 @@ public class AccessRequest implements ActionListener, Simulator {
         OpcionEvento opcionDeEvento = (OpcionEvento) evento.getOpciones().toArray()[item];
         return opcionDeEvento.getId();
     }
-    
-    private void mostrarEstadisticas () {
-        StringBuilder result = new StringBuilder("<html>");
-        result.append("<b>Duración: </b>" + 
-                DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(end));
-        logger.info("Solicitudes con error: " + requestsERROR.get());
-        result.append("<br/><b>Solicitudes con error: </b>" + requestsERROR.get());
-        logger.info("Solicitudes enviadas: " + requests.get());
-        result.append("<br/><b>Solicitudes enviadas: </b>" + requestsERROR.get());
-        logger.info("Solicitudes OK: " + requestsOK.get());
-        result.append("<br/><b>Solicitudes OK: </b>" + requestsOK.get());
-        String errorsMessage = null;
-        if(requestsERROR.get() > 0) {
-            errorsMessage = errorsLog.toString();
-            logger.error("ERRORS: " + errorsMessage);
-        }
-        if(simulationListener != null) 
-            simulationListener.setSimulationResult(this, errorsMessage);
-    }
 
     @Override
     public void actionPerformed(ActionEvent ae) {
@@ -288,10 +285,6 @@ public class AccessRequest implements ActionListener, Simulator {
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
         }
-        String urlServidor = "http://localhost:8080/SistemaVotacionControlAcceso/infoServidor";
-        PruebasSellosDeTiempo pruebasSellosDeTiempo = new PruebasSellosDeTiempo(
-                new Long(5000), urlServidor);
-        pruebasSellosDeTiempo.lanzar();
         
     }
     

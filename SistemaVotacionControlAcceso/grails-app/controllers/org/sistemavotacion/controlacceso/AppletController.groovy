@@ -9,7 +9,7 @@ import org.springframework.web.servlet.support.RequestContextUtils as RCU
  * @descController Servicios relacionados con los applets de la aplicación.
  *
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
 class AppletController {
 	

@@ -13,7 +13,7 @@ import org.bouncycastle.util.encoders.Base64;
  * @descController Servicios relacionados con las solicitudes de acceso recibidas en una votación.
  * 
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 class SolicitudAccesoController {
     

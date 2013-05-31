@@ -123,7 +123,7 @@ public class PublishService extends Service implements TaskListener {
             SMIMEMessageWrapper timeStampedDocument = null;
 			KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
 			PrivateKey signerPrivatekey = (PrivateKey)keyStore.getKey(ALIAS_CERT_USUARIO, password);
-			X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(ALIAS_CERT_USUARIO);
+			//X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(ALIAS_CERT_USUARIO);
     		switch(pendingOperation.getTipo()) {
 				case PUBLICACION_MANIFIESTO_PDF:
 					GetFileTask getFileTask = (GetFileTask)new GetFileTask(null, this).execute(
@@ -137,7 +137,7 @@ public class PublishService extends Service implements TaskListener {
 							Certificate[] signerCertsChain = keyStore.getCertificateChain(ALIAS_CERT_USUARIO);
 							SignTimestampSendPDFTask signTimestampSendPDFTask = (SignTimestampSendPDFTask) 
 									new SignTimestampSendPDFTask(this, null, ServerPaths.getURLTimeStampService(
-									CONTROL_ACCESO_URL), null, null, signerCert, signerPrivatekey, signerCertsChain, 
+									CONTROL_ACCESO_URL), null, null, signerPrivatekey, signerCertsChain, 
 									pdfFile, pdfFirmadoFile, this).execute(pendingOperation.getUrlEnvioDocumento());
 						} catch(Exception ex) {
 							ex.printStackTrace();

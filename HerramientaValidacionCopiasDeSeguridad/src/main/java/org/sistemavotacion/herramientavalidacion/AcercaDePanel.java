@@ -4,7 +4,7 @@ import javax.swing.text.html.parser.ParserDelegator;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class AcercaDePanel extends javax.swing.JPanel {
 

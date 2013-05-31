@@ -5,7 +5,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.security.cert.X509Certificate;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,9 +24,8 @@ import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Operacion;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.pdf.PdfFormHelper;
-import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.util.FileUtils;
-import org.sistemavotacion.worker.ObtenerArchivoWorker;
+import org.sistemavotacion.worker.InfoGetterWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
 import org.slf4j.Logger;
@@ -35,25 +33,28 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://raw.github.com/jgzornoza/SistemaVotacion/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class PreconditionsCheckerDialog 
         extends JDialog implements VotingSystemWorkerListener {
     
-    private static Logger logger = 
-            LoggerFactory.getLogger(PreconditionsCheckerDialog.class);
+    private static Logger logger = LoggerFactory.getLogger(
+            PreconditionsCheckerDialog.class);
+    
+        
+    private static final int CHECK_ACCES_CONTROL_CERT = 0;
+    private static final int CHECK_CONTROL_CENTER_CERT = 1;
+    private static final int CHECK_SERVER_CERT = 2;
 
-    private static Map<String, ActorConIP> actorMap = 
-            new HashMap<String, ActorConIP>();
+    private static Map<String, ActorConIP> actorMap = new HashMap<String, ActorConIP>();
     private Operacion operacion;
     private AtomicBoolean checking = new AtomicBoolean(true);
     private AtomicBoolean preconditionsOK = new AtomicBoolean(false);
     private String message = "ERROR";
     private Frame frame = null;
-    private static final int CHECK_ACCES_CONTROL_CERT = 0;
+
+    
     private Boolean accessControlCertChecked = null;
-    private static final int CHECK_CONTROL_CENTER_CERT = 1;
-    private static final int CHECK_SERVER_CERT = 2;
     private Boolean controlCenterCertChecked = null;
     private Boolean signCertChecked = null;
     
@@ -83,8 +84,8 @@ public class PreconditionsCheckerDialog
             public void run() { 
                 try {
                     checkConditions();
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } catch (Exception ex) {
+                    logger.error(ex.getMessage(), ex);
                 } 
             }
         };
@@ -273,7 +274,7 @@ public class PreconditionsCheckerDialog
             if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
             String serverInfoURL = serverURL + SERVER_INFO_URL_SUFIX;
             logger.debug(" - getNetworkCert - serverInfoURL: " + serverInfoURL);
-            new ObtenerArchivoWorker(operationId, serverInfoURL, null, this).execute();
+            new InfoGetterWorker(operationId, serverInfoURL, null, this).execute();
             return null;
         } else return actorConIp.getCertificate();
     }
@@ -406,50 +407,51 @@ public class PreconditionsCheckerDialog
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
                 " - worker: " + worker.getClass().getSimpleName() + 
                 " - workerId:" + worker.getId());
-        ObtenerArchivoWorker fileWorker = null;
+        InfoGetterWorker infoWorker = null;
         try {
             switch(worker.getId()) {
                 case CHECK_ACCES_CONTROL_CERT:
-                    fileWorker = (ObtenerArchivoWorker)worker;
-                    if(Respuesta.SC_OK == fileWorker.getStatusCode()) {
+                    infoWorker = (InfoGetterWorker)worker;
+                    if(Respuesta.SC_OK == worker.getStatusCode()) {
                         JSONObject actorConIPJSON = (JSONObject) JSONSerializer.
-                                toJSON(new String(fileWorker.getBytesArchivo()));
+                                toJSON(infoWorker.getMessage());
                         ActorConIP actorConIP = ActorConIP.parse(actorConIPJSON);
                         actorMap.put(operacion.getUrlServer(), actorConIP);
                         accessControlCertChecked = true;                        
                     } else {
                         accessControlCertChecked = false;
-                        message = fileWorker.getMessage();
+                        message = infoWorker.getMessage();
                     } 
                     if(controlCenterCertChecked != null) setVotingPreconditions();
+                    logger.debug("CHECK_ACCES_CONTROL_CERT - url: " + operacion.getUrlServer());
                     break;
                 case CHECK_CONTROL_CENTER_CERT: 
-                    fileWorker = (ObtenerArchivoWorker)worker;
+                    infoWorker = (InfoGetterWorker)worker;
                     if(Respuesta.SC_OK == worker.getStatusCode()) {
                         JSONObject actorConIPJSON = (JSONObject) JSONSerializer.
-                                toJSON(new String(fileWorker.getBytesArchivo()));
+                                toJSON(infoWorker.getMessage());
                         ActorConIP actorConIP = ActorConIP.parse(actorConIPJSON);
                         actorMap.put(operacion.getEvento().getCentroControl().
                                 getServerURL(), actorConIP);
                         controlCenterCertChecked = true;
                     } else {
                         controlCenterCertChecked = false;
-                        message = fileWorker.getMessage();
+                        message = infoWorker.getMessage();
                     } 
                     if(accessControlCertChecked != null) setVotingPreconditions();
                     break;
                 case CHECK_SERVER_CERT:
-                    fileWorker = (ObtenerArchivoWorker)worker;
+                    infoWorker = (InfoGetterWorker)worker;
                     if(Respuesta.SC_OK == worker.getStatusCode()) {
                         JSONObject actorConIPJSON = (JSONObject) JSONSerializer.
-                                toJSON(new String(fileWorker.getBytesArchivo()));
+                                toJSON(infoWorker.getMessage());
                         ActorConIP actorConIP = ActorConIP.parse(actorConIPJSON);
                         actorMap.put(operacion.getUrlServer(), actorConIP);
-                        logger.debug("==== actor map : " + operacion.getUrlServer());
+                        logger.debug("CHECK_SERVER_CERT - url: " + operacion.getUrlServer());
                         signCertChecked = true;
                     } else {
                         signCertChecked = false;
-                        message = fileWorker.getMessage();
+                        message = infoWorker.getMessage();
                     } 
                     setSignPreconditions();
                     break;

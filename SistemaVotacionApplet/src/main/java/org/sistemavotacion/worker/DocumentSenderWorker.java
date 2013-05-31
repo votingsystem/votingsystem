@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://raw.github.com/jgzornoza/SistemaVotacion/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class DocumentSenderWorker extends SwingWorker<Integer, String> 
+public class DocumentSenderWorker extends SwingWorker<Respuesta, String> 
         implements VotingSystemWorker {
     
     private static Logger logger = LoggerFactory.getLogger(DocumentSenderWorker.class);
@@ -22,12 +22,9 @@ public class DocumentSenderWorker extends SwingWorker<Integer, String>
     private String urlDestino;
     private VotingSystemWorkerListener workerListener;
     private Object documentoEnviado;
+    private Respuesta respuesta = null;
     private Integer id = null;
-    private int statusCode = Respuesta.SC_ERROR;
-    private String message = null;
-    private byte[] messageBytes = null;
     private String documentContentType = null;
-    private Exception exception = null;
     
     public DocumentSenderWorker(Integer id, Object documentoEnviado, 
             String documentContentType, String urlDestino, 
@@ -53,23 +50,20 @@ public class DocumentSenderWorker extends SwingWorker<Integer, String>
         return this;
     }
     
-    @Override//on the EDT
-    protected void done() {
+    @Override protected void done() {//on the EDT
         try {
-            statusCode = get();
+            respuesta = get();
         }catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-            exception = ex;
-        } finally {
-            workerListener.showResult(this);
-        }
+            respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+        } 
+        workerListener.showResult(this);
     }
     
-    @Override protected Integer doInBackground() throws Exception {
+    @Override protected Respuesta doInBackground() throws Exception {
         logger.debug("doInBackground - urlDestino: " + urlDestino);
         String msg = "<html><b>" + getString("connectionMsg") + "...</b></html>";
         workerListener.process(Arrays.asList(msg));
-        Respuesta respuesta = null;
         if(documentoEnviado instanceof File) {
             respuesta = Contexto.getHttpHelper().sendFile((File)documentoEnviado, 
                     documentContentType, urlDestino);
@@ -77,31 +71,30 @@ public class DocumentSenderWorker extends SwingWorker<Integer, String>
             respuesta = Contexto.getHttpHelper().sendByteArray(
                 (byte[])documentoEnviado, null, urlDestino);
         }
-        statusCode = respuesta.getCodigoEstado();
-        message = respuesta.getMensaje();
-        messageBytes = respuesta.getBytesArchivo();
-        return statusCode;
+        return respuesta;
     }
 
     public byte[] getMessageBytes() {
-        return messageBytes;
+        if(respuesta == null) return null;
+        else return respuesta.getBytesArchivo();
     }
     
-    
-    @Override
-    public String getMessage() {
-        if(exception != null) return exception.getMessage();
-        else return message;
+    @Override public String getMessage() {
+        if(respuesta == null) return null;
+        else return respuesta.getMensaje();
     }
 
-    @Override
-    public int getId() {
+    @Override public int getId() {
         return this.id;
     }
 
-    @Override
-    public int getStatusCode() {
-        return statusCode;
+    @Override public int getStatusCode() {
+        if(respuesta == null) return Respuesta.SC_ERROR;
+        else return respuesta.getCodigoEstado();
+    }
+    
+    @Override public Respuesta getRespuesta() {
+        return respuesta;
     }
     
 }

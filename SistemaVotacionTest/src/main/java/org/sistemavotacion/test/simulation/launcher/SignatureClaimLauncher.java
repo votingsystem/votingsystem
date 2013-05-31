@@ -1,4 +1,4 @@
-package org.sistemavotacion.test.simulacion;
+package org.sistemavotacion.test.simulation.launcher;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,7 +21,6 @@ import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.KeyStoreHelper;
-import org.sistemavotacion.test.MainFrame;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.util.StringUtils;
 import org.sistemavotacion.worker.DocumentSenderWorker;
@@ -33,60 +32,57 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class LanzadoraDelegacionRepresentante implements Callable<Respuesta>, 
+public class SignatureClaimLauncher implements Callable<Respuesta>, 
         VotingSystemWorkerListener {
     
-    private static Logger logger = LoggerFactory.getLogger(LanzadoraDelegacionRepresentante.class);
+    private static Logger logger = LoggerFactory.getLogger(SignatureClaimLauncher.class);
 
     private static final int ENVIAR_DOCUMENTO_FIRMADO_WORKER = 0;
-    private static final int TIME_STAMP_WORKER = 1;
+    private static final int TIME_STAMP_WORKER               = 1;
     
     private final CountDownLatch countDownLatch = new CountDownLatch(1); // just one time
     
-    private SMIMEMessageWrapper representativeDelegationSMIME;
-    private String userNIF;
-    private String representativeNIF;
+    private SMIMEMessageWrapper signedClaimSMIME;
+    private String nif;
     
-    private String urlTimeStampServer = "http://localhost:8080/SistemaVotacionControlAcceso/timeStamp";
-    private String urlDelegacionRepresentante = "http://localhost:8080/SistemaVotacionControlAcceso/representative/userSelection";
-
+    private String urlTimeStampServer = null;
+    private String submitClaimsURL = null;
+    private Long eventId = null;
+    
     private Respuesta respuesta;
-            
-    
-    public LanzadoraDelegacionRepresentante (String userNIF, 
-            String representativeNIF) throws Exception {
-        this.userNIF = userNIF;
-        this.representativeNIF = representativeNIF;
-         logger.info("userNIF: " + userNIF + " - representativeNIF: " + representativeNIF);
+        
+    public SignatureClaimLauncher (String nif, Long eventId)  throws Exception {
+        this.nif = nif;
+        this.eventId = eventId;
+        urlTimeStampServer = ContextoPruebas.getUrlTimeStampServer(
+                ContextoPruebas.getControlAcceso().getServerURL());
+        submitClaimsURL = ContextoPruebas.getUrlSubmitClaims(
+                ContextoPruebas.getControlAcceso().getServerURL());
     }
     
     
-    @Override
-    public Respuesta call() throws Exception {
+    @Override public Respuesta call() throws Exception {
         Respuesta respuesta = null;
-        File file = new File(ContextoPruebas.getUserKeyStorePath(userNIF));
-        KeyStore mockDnie = KeyStoreHelper.crearMockDNIe(userNIF, file,
+        File file = new File(ContextoPruebas.getUserKeyStorePath(nif));
+        KeyStore mockDnie = KeyStoreHelper.crearMockDNIe(nif, file,
                 ContextoPruebas.getPrivateCredentialRaizAutoridad());
-        logger.info("userNIF: " + userNIF + " mockDnie:" + file.getAbsolutePath());
-        String delegationDataJSON = getDelegationDataJSON(representativeNIF);
-        
-        //==
-        /*File documentoFirmado = new File(ContextoPruebas.getUserKeyStorePath(userNIF)
-                + "DelegacionRep_usu" + userNIF + ".p7s");
-        File documentoFirmado = File.createTempFile("DelegacionRep_usu" + userNIF, ".p7s");*/
+        logger.info("nif: " + nif + " - mockDnie: " + file.getAbsolutePath());
+
         ActorConIP controlAcceso = ContextoPruebas.getControlAcceso();
         String toUser = StringUtils.getCadenaNormalizada(controlAcceso.getNombre());
+        
+        String claimDataStr = getClaimDataJSON(eventId);
         
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, 
                 ContextoPruebas.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
                 ContextoPruebas.DNIe_SIGN_MECHANISM);
-        representativeDelegationSMIME = signedMailGenerator.genMimeMessage(
-                userNIF, toUser, delegationDataJSON, ContextoPruebas.
-                ASUNTO_MENSAJE_DELEGACION_REPRESENTANTE , null);        
+        signedClaimSMIME = signedMailGenerator.genMimeMessage(
+                nif, toUser, claimDataStr,
+                ContextoPruebas.ASUNTO_MENSAJE_ALTA_REPRESENTANTE , null);
         new TimeStampWorker(TIME_STAMP_WORKER, urlTimeStampServer,
-                    this, representativeDelegationSMIME.getTimeStampRequest(TIMESTAMP_DNIe_HASH),
+                    this, signedClaimSMIME.getTimeStampRequest(TIMESTAMP_DNIe_HASH),
                     ContextoPruebas.getControlAcceso().getTimeStampCert()).execute();
         countDownLatch.await();
         return getResult();
@@ -104,20 +100,22 @@ public class LanzadoraDelegacionRepresentante implements Callable<Respuesta>,
   
             new DocumentSenderWorker(ENVIAR_DOCUMENTO_FIRMADO_WORKER, document, 
                     Contexto.SIGNED_AND_ENCRYPTED_CONTENT_TYPE,
-                    urlDelegacionRepresentante, this).execute();
+                    submitClaimsURL, this).execute();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
+            respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+            countDownLatch.countDown();
         }
     }
-    
-    /**
-     *{"operation":"", "representativeNif":"", "representativeName":"NombreDe11B ApellidoDe11B"}, "urlEnvioDocumento":"http://localhost:8080/SistemaVotacionControlAcceso/representative/userSelection", "nombreDestinatarioFirma":"Primer ControlAcceso", "asuntoMensajeFirmado":"Datos del representante seleccionado", "respuestaConRecibo":true, "urlTimeStampServer":"http://localhost:8080/SistemaVotacionControlAcceso/timeStamp", "urlServer":"http://192.168.2.45:8080/SistemaVotacionControlAcceso"}
-     */
-    public static String getDelegationDataJSON(String representativeNif) {
+
+        
+    public static String getRepresentativeDataJSON(String nif,
+            String imageDigestStr) {
         logger.debug("getRepresentativeDataJSOn - ");
         Map map = new HashMap();
-        map.put("operation", "REPRESENTATIVE_SELECTION");
-        map.put("representativeNif", representativeNif);
+        map.put("operation", "REPRESENTATIVE_DATA");
+        map.put("representativeInfo", " --- contenido del representante -" + nif);
+        map.put("base64ImageHash", imageDigestStr);
         map.put("UUID", UUID.randomUUID().toString());
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);
         return jsonObject.toString();
@@ -133,34 +131,28 @@ public class LanzadoraDelegacionRepresentante implements Callable<Respuesta>,
     @Override
     public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-         " - user:" + userNIF + "' -> representative: '" + representativeNIF +"'" +
-         " - worker: " + worker.getClass().getSimpleName()) ;
+        " - nif: " + nif +
+        " - worker: " + worker.getClass().getSimpleName());
         switch(worker.getId()) {
             case ENVIAR_DOCUMENTO_FIRMADO_WORKER:
-                respuesta = new Respuesta();
-                respuesta.setCodigoEstado(worker.getStatusCode());
+                respuesta = worker.getRespuesta();
                 if (Respuesta.SC_OK == worker.getStatusCode()) {
-                    respuesta.setMensaje(userNIF);
-                } else {
-                    logger.debug("- showResult - ERROR DELEGANDO EN REPRESENTANTE");
-                    respuesta.setMensaje(worker.getMessage());
+                    respuesta.setMensaje(nif);
                 }
                 countDownLatch.countDown();
                 break;
             case TIME_STAMP_WORKER:
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
-                        representativeDelegationSMIME.setTimeStampToken((TimeStampWorker)worker);
-                        processDocument(representativeDelegationSMIME);
+                        signedClaimSMIME.setTimeStampToken((TimeStampWorker)worker);
+                        processDocument(signedClaimSMIME);
                     } catch (Exception ex) {
                         logger.error(ex.getMessage(), ex);
                     }
                 } else {
                     String msg = "showResult - ERROR obteniendo sello de tiempo";
                     logger.debug(msg); 
-                    respuesta = new Respuesta();
-                    respuesta.setCodigoEstado(worker.getStatusCode());
-                    respuesta.setMensaje(msg);
+                    respuesta = new Respuesta(worker.getStatusCode(), msg);
                     countDownLatch.countDown();
                 }
                 break;
@@ -169,7 +161,16 @@ public class LanzadoraDelegacionRepresentante implements Callable<Respuesta>,
         }
     }
 
-
+    public static String getClaimDataJSON(Long eventId) {
+        logger.debug("getRepresentativeDataJSOn - ");
+        Map map = new HashMap();
+        map.put("operation", "FIRMA_RECLAMACION_SMIME");
+        map.put("id", eventId);
+        map.put("UUID", UUID.randomUUID().toString());
+        JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);
+        return jsonObject.toString();
+    }
+    
     private Respuesta getResult() {
         return respuesta;
     }

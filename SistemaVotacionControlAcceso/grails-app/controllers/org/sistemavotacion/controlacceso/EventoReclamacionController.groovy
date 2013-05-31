@@ -8,7 +8,7 @@ import org.sistemavotacion.util.*
  * @descController Servicios relacionados con la publicación de reclamaciones.
  *
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
 class EventoReclamacionController {
 
@@ -158,7 +158,7 @@ class EventoReclamacionController {
 	 * @responseContentType [application/x-pkcs7-signature] Obligatorio. Recibo firmado por el sistema.
 	 * @return Recibo que consiste en el documento SMIME recibido con la firma añadida del servidor.
 	 */
-    def post () {
+    def save () {
 		MensajeSMIME mensajeSMIMEReq = params.mensajeSMIMEReq
 		if(!mensajeSMIMEReq) {
 			String msg = message(code:'evento.peticionSinArchivo')

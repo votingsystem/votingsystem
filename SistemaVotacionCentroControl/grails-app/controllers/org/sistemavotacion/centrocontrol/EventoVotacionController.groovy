@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
  * @descController Servicios relacionados con las votaciones publicadas en el servidor.
  * 
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  * */
 class EventoVotacionController {
 
@@ -98,7 +98,7 @@ class EventoVotacionController {
 	 * @contentType [application/x-pkcs7-signature] Obligatorio. El archivo con los datos de la votación firmado
 	 * 		  por el usuario que la publica y el Control de Acceso en el que se publica.
 	 */
-	def post () {
+	def save () {
 		MensajeSMIME mensajeSMIME = params.mensajeSMIMEReq
 		if(!mensajeSMIME) {
 			String msg = message(code:'evento.peticionSinArchivo')

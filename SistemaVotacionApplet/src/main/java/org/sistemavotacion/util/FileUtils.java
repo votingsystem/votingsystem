@@ -10,6 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -19,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://raw.github.com/jgzornoza/SistemaVotacion/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class FileUtils {
 
@@ -63,10 +64,18 @@ public class FileUtils {
        return copyStreamToFile(fs, outputFile);
     }
 
+   public static File copyStringToFile(String string, File file) 
+           throws FileNotFoundException {
+       PrintWriter out = new PrintWriter(file);
+       out.write(string);
+       out.close();
+       return file;
+   }
+   
     public static File copyStreamToFile(InputStream entrada, File outputFile)
          throws Exception {
         OutputStream salida = new FileOutputStream(outputFile);
-        byte[] buf =new byte[1024];
+        byte[] buf =new byte[4096];
         int len;
         while((len = entrada.read(buf)) > 0){
             salida.write(buf,0,len);

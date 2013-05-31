@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://raw.github.com/jgzornoza/SistemaVotacion/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class VotacionDialog extends JDialog implements VotingSystemWorkerListener {
 
@@ -304,8 +304,6 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
     private void lanzarVoto(String password) {
         KeyStore keyStore = null;
         try {
-            /*File accessRequest = File.createTempFile(
-                NOMBRE_ARCHIVO_SOLICITUD_ACCESO_TIMESTAMPED, SIGNED_PART_EXTENSION);*/
             
             String fromUser = "Elector";
             String asuntoMensaje = ASUNTO_MENSAJE_SOLICITUD_ACCESO + 

@@ -54,7 +54,7 @@ import org.bouncycastle.util.encoders.Base64;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class CMSUtils {
 

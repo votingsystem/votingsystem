@@ -1,5 +1,6 @@
-package org.sistemavotacion.test.simulacion;
+package org.sistemavotacion.test.simulation;
 
+import org.sistemavotacion.test.simulation.launcher.VotingLauncher;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -19,6 +20,7 @@ import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.smime.CMSUtils;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.modelo.InfoVoto;
+import org.sistemavotacion.test.modelo.SimulationData;
 import org.sistemavotacion.test.modelo.UserBaseData;
 import org.sistemavotacion.test.panel.VotacionesPanel;
 import org.sistemavotacion.util.DateUtils;
@@ -28,29 +30,24 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class Votacion implements ActionListener, Simulator {
+public class VotingSimulator implements ActionListener, Simulator {
     
-    private static Logger logger = LoggerFactory.getLogger(Votacion.class);
-    
-    public static final int MAX_PENDING_RESPONSES = 10;
+    private static Logger logger = LoggerFactory.getLogger(VotingSimulator.class);
     
     private static ExecutorService votacionExecutor;
     
     private static ExecutorService votosExecutor;
     private static CompletionService<InfoVoto> votosCompletionService;
-
     
     private static AtomicLong votosEnviados;
     private static AtomicLong votosRecogidos;
     private static AtomicLong solicitudesConError;
     private static AtomicLong votosConError;
     private static AtomicLong votosValidos;
-    
-
+   
     private static long comienzo;
-    private static long duracion;
     
     HashMap<Long, OpcionEvento> mapaOpciones = new HashMap<Long, OpcionEvento>();
     
@@ -58,14 +55,21 @@ public class Votacion implements ActionListener, Simulator {
     private static StringBuilder erroresEnSolicitudes;
     private static StringBuilder erroresEnVotos;    
     private UserBaseData userBaseData = null;
+    private SimulationData simulationData = null;
     
     private int numberOfElectors = 0;
     private List<String> electorList = null;
     
-    private SimulationListener simulationListener;
+    private SimulatorListener simulationListener;
     
-    public Votacion(UserBaseData userBaseData, SimulationListener simulationListener) {
-        this.userBaseData = userBaseData;
+    public VotingSimulator(UserBaseData userBaseData, SimulatorListener simulationListener) {
+
+    }
+
+    VotingSimulator(SimulationData simulationData, 
+            VotingProcessSimulator simulationListener) {
+        this.simulationData = simulationData;
+        this.userBaseData = simulationData.getUserBaseData();
         this.simulationListener = simulationListener;
         for (OpcionEvento opcion : userBaseData.getEvento().getOpciones()) {
             mapaOpciones.put(opcion.getId(), opcion);
@@ -164,7 +168,7 @@ public class Votacion implements ActionListener, Simulator {
         } else {
             while(!electorList.isEmpty()) {
                 if((votosEnviados.get() - votosRecogidos.get()) < 
-                        MAX_PENDING_RESPONSES) {
+                        simulationData.getMaxPendingResponses()) {
                     int randomElector = new Random().nextInt(electorList.size());
                     lanzarSolicitudAcceso(electorList.remove(randomElector));
                 } else Thread.sleep(500);
@@ -175,7 +179,7 @@ public class Votacion implements ActionListener, Simulator {
     public void lanzarSolicitudAcceso (String nif) throws Exception {
         Evento voto = prepararVoto(userBaseData.getEvento());
         InfoVoto infoVoto = new InfoVoto(voto, nif);
-        votosCompletionService.submit(new LanzadoraVoto(infoVoto));
+        votosCompletionService.submit(new VotingLauncher(infoVoto));
         votosEnviados.getAndIncrement();
         if(VotacionesPanel.INSTANCIA != null)
                 VotacionesPanel.INSTANCIA.actualizarContadorVotosLanzados(
@@ -232,13 +236,37 @@ public class Votacion implements ActionListener, Simulator {
     }
     
     public void finalizarVotacion() {
-        duracion = System.currentTimeMillis() - comienzo;
+        long duracion = System.currentTimeMillis() - comienzo;
         logger.debug("finalizarVotacion - shutdown executors");
         if(timer != null) timer.stop();
         votacionExecutor.shutdownNow();
         //solicitudesExecutor.shutdownNow();
         votosExecutor.shutdownNow(); 
-        mostrarEstadisticas();
+        StringBuilder result = new StringBuilder("<html>");
+        String durationStr = DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(duracion);
+        logger.info("Duration: " + durationStr);
+        result.append("<b>Duración: </b>" + durationStr);
+        logger.info("Solicitudes con error: " + solicitudesConError.get());
+        result.append("<br/><b>Solicitudes con error: </b>" + solicitudesConError.get());
+        logger.info("Votos enviados: " + votosEnviados.get());
+        result.append("<br/><b>Votos enviados: </b>" + votosEnviados.get());
+        logger.info("Votos validos: " + votosValidos.get());
+        result.append("<br/><b>Votos validos: </b>" + votosValidos.get());
+        logger.info("Votos con error: " + votosConError.get());
+        result.append("<br/><b>Votos con error: </b>" + votosConError.get());
+        String mensajeErroresEnSolicitudes = null;
+        String mensajeErroresEnVotos = null;
+        if(solicitudesConError.get() > 0) {
+            mensajeErroresEnSolicitudes = erroresEnSolicitudes.toString();
+        }
+        if(votosConError.get() > 0) {
+            mensajeErroresEnVotos = erroresEnVotos.toString();
+        }
+        if(VotacionesPanel.INSTANCIA != null)
+                VotacionesPanel.INSTANCIA.mostrarResultadosSimulacion(
+                result.toString(), mensajeErroresEnSolicitudes, mensajeErroresEnVotos);
+        if(simulationListener != null) 
+            simulationListener.setSimulationResult(this, result.toString());
     }
         
     public synchronized Evento prepararVoto (Evento evento) 
@@ -269,33 +297,7 @@ public class Votacion implements ActionListener, Simulator {
         OpcionEvento opcionDeEvento = (OpcionEvento) evento.getOpciones().toArray()[item];
         return opcionDeEvento.getId();
     }
-    
-    private void mostrarEstadisticas () {
-        StringBuilder result = new StringBuilder("<html>");
-        result.append("<b>Duración: </b>" + 
-                DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(duracion));
-        logger.info("Solicitudes con error: " + solicitudesConError.get());
-        result.append("<br/><b>Solicitudes con error: </b>" + solicitudesConError.get());
-        logger.info("Votos enviados: " + votosEnviados.get());
-        result.append("<br/><b>Votos enviados: </b>" + votosEnviados.get());
-        logger.info("Votos validos: " + votosValidos.get());
-        result.append("<br/><b>Votos validos: </b>" + votosValidos.get());
-        logger.info("Votos con error: " + votosConError.get());
-        result.append("<br/><b>Votos con error: </b>" + votosConError.get());
-        String mensajeErroresEnSolicitudes = null;
-        String mensajeErroresEnVotos = null;
-        if(solicitudesConError.get() > 0) {
-            mensajeErroresEnSolicitudes = erroresEnSolicitudes.toString();
-        }
-        if(votosConError.get() > 0) {
-            mensajeErroresEnVotos = erroresEnVotos.toString();
-        }
-        if(VotacionesPanel.INSTANCIA != null)
-                VotacionesPanel.INSTANCIA.mostrarResultadosSimulacion(
-                result.toString(), mensajeErroresEnSolicitudes, mensajeErroresEnVotos);
-        if(simulationListener != null) 
-            simulationListener.setSimulationResult(this, result.toString());
-    }
+
 
     @Override
     public void actionPerformed(ActionEvent ae) {

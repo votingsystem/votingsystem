@@ -10,7 +10,7 @@ import grails.util.Environment
  * @descController Servicios que ofrecen datos sobre la aplicación
  *
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  * */
 class InfoServidorController {	
 	/**

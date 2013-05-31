@@ -31,7 +31,7 @@ class UrlMappings {
 		
 		"/eventoVotacion"{
 			controller = "eventoVotacion"
-			action = [POST:"post"]
+			action = [POST:"save"]
 		}
 		
 		"/eventoVotacion/$id?"{

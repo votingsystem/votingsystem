@@ -1,4 +1,4 @@
-package org.sistemavotacion.test.simulacion;
+package org.sistemavotacion.test.simulation.launcher;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -23,7 +23,6 @@ import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.KeyStoreHelper;
-import org.sistemavotacion.test.MainFrame;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.StringUtils;
@@ -36,12 +35,12 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class LanzadoraAltaRepresentante implements Callable<Respuesta>, 
+public class RepresentingRequestLauncher implements Callable<Respuesta>, 
         VotingSystemWorkerListener {
     
-    private static Logger logger = LoggerFactory.getLogger(LanzadoraAltaRepresentante.class);
+    private static Logger logger = LoggerFactory.getLogger(RepresentingRequestLauncher.class);
 
     private static final int ENVIAR_DOCUMENTO_FIRMADO_WORKER = 0;
     private static final int TIME_STAMP_WORKER = 1;
@@ -57,10 +56,11 @@ public class LanzadoraAltaRepresentante implements Callable<Respuesta>,
     private File selectedImage;
     private Respuesta respuesta;
         
-    public LanzadoraAltaRepresentante (String representativeNIF) 
+    public RepresentingRequestLauncher (String representativeNIF) 
             throws Exception {
         this.representativeNIF = representativeNIF;
-        urlTimeStampServer = ContextoPruebas.getControlAcceso().getServerURL() + "/timeStamp";
+        urlTimeStampServer = ContextoPruebas.getUrlTimeStampServer(
+                ContextoPruebas.getControlAcceso().getServerURL());
         urlAltaRepresentante = ContextoPruebas.getControlAcceso().getServerURL() + "/representative";
     }
     
@@ -85,11 +85,7 @@ public class LanzadoraAltaRepresentante implements Callable<Respuesta>,
         String base64ResultDigestStr = new String(Base64.encode(resultDigest));
         String representativeDataJSON = getRepresentativeDataJSON(
                 representativeNIF, base64ResultDigestStr);
-        
-        /*File documentoFirmado = new File(ContextoPruebas.getUserKeyStorePath(representativeNIF)
-                + "AltaRepresentante_usu" + representativeNIF + ".p7s");
-        File documentoFirmado = File.createTempFile("AltaRepresentante_usu" + 
-                representativeNIF , ".p7s");*/
+
         ActorConIP controlAcceso = ContextoPruebas.getControlAcceso();
         String toUser = StringUtils.getCadenaNormalizada(controlAcceso.getNombre());
         
@@ -127,6 +123,8 @@ public class LanzadoraAltaRepresentante implements Callable<Respuesta>,
                     fileMap,urlAltaRepresentante, this).execute();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
+            respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+            countDownLatch.countDown();
         }
     }
 
@@ -178,9 +176,7 @@ public class LanzadoraAltaRepresentante implements Callable<Respuesta>,
                 } else {
                     String msg = "showResult - ERROR obteniendo sello de tiempo";
                     logger.debug(msg); 
-                    respuesta = new Respuesta();
-                    respuesta.setCodigoEstado(worker.getStatusCode());
-                    respuesta.setMensaje(msg);
+                    respuesta = new Respuesta(worker.getStatusCode(), msg);
                     countDownLatch.countDown();
                 }
                 break;

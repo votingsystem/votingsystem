@@ -17,7 +17,7 @@ import com.sun.syndication.io.SyndFeedOutput;
  * 				   con la asociación de Controles de Acceso.
  * 
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  *
  * Mecanismo de feeds basado en:
  * http://blogs.bytecode.com.au/glen/2006/12/22/generating-rss-feeds-with-grails-and-rome.html

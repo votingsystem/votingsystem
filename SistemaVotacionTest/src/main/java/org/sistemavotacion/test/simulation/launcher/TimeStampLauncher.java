@@ -1,7 +1,6 @@
-package org.sistemavotacion.test.simulacion;
+package org.sistemavotacion.test.simulation.launcher;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.security.KeyStore;
 import java.util.HashMap;
 import java.util.List;
@@ -9,7 +8,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
-import javax.mail.internet.MimeMessage;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -31,19 +29,19 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class LanzadoraSelloTiempo implements Callable<Respuesta>, 
+public class TimeStampLauncher implements Callable<Respuesta>, 
         VotingSystemWorkerListener {
     
-    private static Logger logger = LoggerFactory.getLogger(LanzadoraSelloTiempo.class);
+    private static Logger logger = LoggerFactory.getLogger(TimeStampLauncher.class);
 
     private static final int TIME_STAMP_WORKER = 1;
     
     private SMIMEMessageWrapper documentSMIME;
     private String requestNIF;
     
-    private String urlTimeStampServer = "http://localhost:8080/SistemaVotacionControlAcceso/timeStamp";
+    private String urlTimeStampServer;
     
     private Respuesta respuesta;
         
@@ -56,9 +54,10 @@ public class LanzadoraSelloTiempo implements Callable<Respuesta>,
     
     private static final String BC = BouncyCastleProvider.PROVIDER_NAME;
     
-    public LanzadoraSelloTiempo (String requestNIF) 
+    public TimeStampLauncher (String requestNIF, String urlTimeStampServer) 
             throws Exception {
         this.requestNIF = requestNIF;
+        this.urlTimeStampServer = urlTimeStampServer;
     }
         
     @Override
@@ -69,10 +68,7 @@ public class LanzadoraSelloTiempo implements Callable<Respuesta>,
         KeyStore mockDnie = KeyStoreHelper.crearMockDNIe(requestNIF, file,
                 ContextoPruebas.getPrivateCredentialRaizAutoridad());
         logger.info("requestNIF: " + requestNIF + " - Dirs: " + file.getAbsolutePath());
-        
-        /*File documentoFirmado = File.createTempFile(
-                "TimeStampTest" + requestNIF, ".p7s");
-        documentoFirmado.deleteOnExit();*/
+
         ActorConIP controlAcceso = ContextoPruebas.getControlAcceso();
         String toUser = StringUtils.getCadenaNormalizada(controlAcceso.getNombre());
         

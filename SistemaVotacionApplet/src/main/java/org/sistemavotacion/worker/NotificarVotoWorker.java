@@ -17,9 +17,9 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://raw.github.com/jgzornoza/SistemaVotacion/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class NotificarVotoWorker extends SwingWorker<Integer, String> 
+public class NotificarVotoWorker extends SwingWorker<Respuesta, String> 
         implements VotingSystemWorker {
     
     private static Logger logger = LoggerFactory.getLogger(NotificarVotoWorker.class);
@@ -29,7 +29,6 @@ public class NotificarVotoWorker extends SwingWorker<Integer, String>
     private SMIMEMessageWrapper votoFirmado;
     private Evento evento;
     private Integer id = null;
-    private Exception exception = null;
     private ReciboVoto reciboVoto = null;
     private Respuesta respuesta = null;
     private X509Certificate controlCenterCert = null;
@@ -48,21 +47,21 @@ public class NotificarVotoWorker extends SwingWorker<Integer, String>
         this.controlCenterCert = controlCenterCert;
     }
             
-    @Override//on the EDT
-    protected void done() {
+    @Override protected void done() {//on the EDT
         try {
-            get();
-        } catch (Exception ex) {
+            respuesta = get();
+        }catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-            exception = ex;
-        } finally {
-            workerListener.showResult(this);
-        }
+            respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+        } 
+        workerListener.showResult(this);
     }
-    @Override protected Integer doInBackground() throws Exception {
+    
+    @Override protected Respuesta doInBackground() throws Exception {
         MimeMessage encryptedMessage = Encryptor.encryptSMIME(
                 votoFirmado, controlCenterCert);
         File encryptedVote = File.createTempFile("EncryptedVote", ".p7s");
+        encryptedVote.deleteOnExit();
         encryptedMessage.writeTo(new FileOutputStream(encryptedVote));
         
         respuesta = Contexto.getHttpHelper().sendFile(encryptedVote, 
@@ -76,29 +75,29 @@ public class NotificarVotoWorker extends SwingWorker<Integer, String>
                      
             reciboVoto = new ReciboVoto(Respuesta.SC_OK, votoValidado, evento);
         }
-        return respuesta.getCodigoEstado();
+        return respuesta;
     }
 
     public ReciboVoto getReciboVoto() {
         return reciboVoto;
     }
-    
-    @Override
-    public String getMessage() {
-        if(exception != null) return exception.getMessage();
-        else if(respuesta != null) return respuesta.getMensaje();
-        else return null;
+
+   @Override public String getMessage() {
+        if(respuesta == null) return null;
+        else return respuesta.getMensaje();
     }
 
-    @Override
-    public int getId() {
+    @Override public int getId() {
         return this.id;
     }
 
-    @Override
-    public int getStatusCode() {
-        if(respuesta == null) return Respuesta.SC_ERROR_EJECUCION;
+    @Override  public int getStatusCode() {
+        if(respuesta == null) return Respuesta.SC_ERROR;
         else return respuesta.getCodigoEstado();
+    }
+    
+    @Override public Respuesta getRespuesta() {
+        return respuesta;
     }
     
 }

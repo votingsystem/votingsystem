@@ -1,7 +1,7 @@
 @font-face {
       src: url(../fonts/arial.ttf);
       -fs-pdf-font-embed: embed;
-      -fs-pdf-font-encoding: cp1250;
+      -fs-pdf-font-encoding: ISO-8859-1;
     }
     
     @page {

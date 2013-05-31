@@ -24,7 +24,7 @@ import javax.xml.transform.OutputKeys
 import org.cyberneko.html.filters.ElementRemover
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 class HtmlService {
 

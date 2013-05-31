@@ -11,7 +11,7 @@ import org.bouncycastle2.openssl.PEMReader;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class KeyUtil {
     

@@ -14,7 +14,7 @@ import grails.converters.JSON
  * @descController Servicios que gestiona solicitudes de copias de seguridad.
  *
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
 class SolicitudCopiaController {
 	

@@ -1,0 +1,17 @@
+{"accessControlURL":"http://localhost:8080/SistemaVotacionControlAcceso",
+ "controlCenterURL":"http://localhost:8081/SistemaVotacionCentroControl",
+ "timeStampServerURL":"http://localhost:8080/SistemaVotacionControlAcceso/timeStamp",
+ "maxPendingResponses":10,
+ "userBaseData":{
+        "userIndex":1,
+        "numRepresentatives":0,                
+        "numUsersWithoutRepresentative":5,
+        "numVotesUsersWithoutRepresentative":5, 
+        "numUsersWithRepresentative":0, 
+        "numVotesUsersWithRepresentative":0}
+}
+
+
+
+
+    

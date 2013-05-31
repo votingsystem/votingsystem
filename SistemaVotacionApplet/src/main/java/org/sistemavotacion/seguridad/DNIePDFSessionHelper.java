@@ -61,7 +61,12 @@ import org.sistemavotacion.util.OSValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DNIePDFSessionHelper extends CMSSignedGenerator {
+/**
+* @author jgzornoza
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+*/
+public class DNIePDFSessionHelper extends CMSSignedGenerator 
+    implements VotingSystemCMSSignedGenerator {
 
     private static Logger logger = 
             LoggerFactory.getLogger(DNIePDFSessionHelper.class);
@@ -387,7 +392,7 @@ public class DNIePDFSessionHelper extends CMSSignedGenerator {
         return new String(out.toByteArray());
     }*/
 
-    public CMSSignedData obtenerCMSSignedData(byte[] contentBytes, 
+    public CMSSignedData genSignedData(byte[] contentBytes, 
             CMSAttributeTableGenerator unsAttr) throws Exception {
         signerInfs = new ArrayList();
         SignerInf signerInf = new SignerInf(

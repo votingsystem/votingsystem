@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class AsociarCentroControlDialog extends JDialog implements 
         VotingSystemWorkerListener, KeyListener {
@@ -281,7 +281,7 @@ public class AsociarCentroControlDialog extends JDialog implements
                         centroControlTextField.getText().trim());
                 String urlInfoServidor = ContextoPruebas.getURLInfoServidor(urlServidor);
                 tareaEnEjecucion = new InfoGetterWorker(INFO_GETTER_WORKER,
-                    urlInfoServidor, this);
+                    urlInfoServidor, null, this);
                 tareaEnEjecucion.execute();
                 centroControlTextField.setText(centroControlTextField.getText().trim());
                 break;

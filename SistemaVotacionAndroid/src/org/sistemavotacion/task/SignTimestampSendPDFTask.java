@@ -29,6 +29,7 @@ import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.cms.CMSAttributeTableGenerationException;
 import org.bouncycastle2.cms.CMSAttributeTableGenerator;
 import org.bouncycastle2.cms.CMSSignedData;
+import org.bouncycastle2.cms.CMSSignedDataGenerator;
 import org.sistemavotacion.android.Aplicacion;
 import org.sistemavotacion.android.R;
 import org.sistemavotacion.modelo.Respuesta;
@@ -59,10 +60,14 @@ public class SignTimestampSendPDFTask extends AsyncTask<String, Void, String>
 
 	public static final String TAG = "SignTimestampSendPDFTask";
 	
-    public static final PdfName PDF_SIGNATURE_NAME = PdfName.ADBE_PKCS7_SHA1;
+    public static final PdfName PDF_SIGNATURE_NAME     = PdfName.ADBE_PKCS7_SHA1;
     public static final String PDF_SIGNATURE_DIGEST    = "SHA1";
-    public static final String TIMESTAMP_PDF_HASH = TSPAlgorithms.SHA1;
+    public static final String PDF_SIGNATURE_MECHANISM = "SHA1withRSA";
+    public static final String TIMESTAMP_PDF_HASH      = TSPAlgorithms.SHA1;
+    public static final String PDF_DIGEST_OID          = CMSSignedDataGenerator.DIGEST_SHA1;
 	
+
+    
     private Integer id;
 	private TaskListener listener = null;
     private Exception exception = null;
@@ -78,19 +83,19 @@ public class SignTimestampSendPDFTask extends AsyncTask<String, Void, String>
     
     X509Certificate signerCert;
     PrivateKey signerPrivatekey;
-    Certificate[] signerCertsChain;
+    Certificate[] signerCertChain;
     
     public SignTimestampSendPDFTask(Context context, Integer id, String urlTimeStampServer, 
-    		String reason, String location, X509Certificate signerCert, PrivateKey signerPrivatekey, 
-    		Certificate[] signerCertsChain, PdfReader reader, File signedFile, TaskListener listener) {
+    		String reason, String location, PrivateKey signerPrivatekey, 
+    		Certificate[] signerCertChain, PdfReader reader, File signedFile, TaskListener listener) {
     	this.context = context;
     	this.id = id;
     	this.urlTimeStampServer = urlTimeStampServer;
     	this.reason = reason;
     	this.location = location;
-    	this.signerCert = signerCert;
+    	this.signerCert = (X509Certificate) signerCertChain[0];
     	this.signerPrivatekey = signerPrivatekey;
-    	this.signerCertsChain = signerCertsChain;
+    	this.signerCertChain = signerCertChain;
     	this.pdfReader = reader;
     	this.signedFile = signedFile;
     	this.listener = listener;
@@ -101,7 +106,7 @@ public class SignTimestampSendPDFTask extends AsyncTask<String, Void, String>
 		String urlSignedDocument = urls[0];
         try {
         	File timeStampedSignedFile = signWithTimestamp(pdfReader, signedFile, 
-        			signerCert, signerPrivatekey, signerCertsChain);
+        			signerCert, signerPrivatekey, signerCertChain);
         	File pdfEncryptedFile = File.createTempFile("pdfEncryptedFile", ".eml");
         	pdfEncryptedFile.deleteOnExit();
         	EncryptionHelper.encryptFile(timeStampedSignedFile, pdfEncryptedFile, 
@@ -117,10 +122,11 @@ public class SignTimestampSendPDFTask extends AsyncTask<String, Void, String>
 	
     public File signWithTimestamp(PdfReader pdfReader, File signedFile, 
     		X509Certificate signerCert, PrivateKey signerPrivatekey, 
-    		Certificate[] signerCertsChain) throws Exception {
-        Log.d(TAG + ".signWithTimestamp(...)", " - certsChain.length: " + signerCertsChain.length);
-        PDF_CMSSignedGenerator signedGenerator = new PDF_CMSSignedGenerator(PDF_SIGNATURE_DIGEST);
-
+    		Certificate[] signerCertChain) throws Exception {
+        Log.d(TAG + ".signWithTimestamp(...)", " - certsChain.length: " + signerCertChain.length);
+        PDF_CMSSignedGenerator signedGenerator = new PDF_CMSSignedGenerator(signerPrivatekey,
+        		signerCertChain, PDF_SIGNATURE_MECHANISM, PDF_SIGNATURE_DIGEST, PDF_DIGEST_OID);
+        
         PdfStamper stp = PdfStamper.createSignature(pdfReader, 
                 new FileOutputStream(signedFile), '\0');
         stp.setEncryption(null, null,PdfWriter.ALLOW_PRINTING, false);
@@ -129,7 +135,7 @@ public class SignTimestampSendPDFTask extends AsyncTask<String, Void, String>
         
         
         if(location != null) sap.setLocation(location);
-        sap.setCrypto(null, signerCertsChain, null, PdfSignatureAppearance.WINCER_SIGNED);
+        sap.setCrypto(null, signerCertChain, null, PdfSignatureAppearance.WINCER_SIGNED);
         if(reason != null) sap.setReason(reason);
         //java.util.Calendar cal = java.util.Calendar.getInstance();
         //sap.setSignDate(cal);
@@ -144,7 +150,13 @@ public class SignTimestampSendPDFTask extends AsyncTask<String, Void, String>
         HashMap exc = new HashMap();
         //Nota del javadoc -> due to the hex string coding this size should be byte_size*2+2.
         exc.put(PdfName.CONTENTS, new Integer(csize * 2 + 2));
-        String firmante = PdfPKCS7.getSubjectFields((X509Certificate)signerCert).getField("CN").replace("(FIRMA)", "");
+        String firmante = PdfPKCS7.getSubjectFields((X509Certificate)signerCert).getField("CN");
+        
+        if(firmante != null && firmante.contains("(FIRMA)")) {
+            firmante = firmante.replace("(FIRMA)", "");
+        } else firmante = getNifUsuario(((X509Certificate)signerCertChain[0]));
+        
+        
         sap.setLayer2Text(context.getString(R.string.pdf_signed_by_lbl) + ":\n" + firmante); 
         
         CMSAttributeTableGenerator unsAttr= new CMSAttributeTableGenerator() {
@@ -200,8 +212,8 @@ public class SignTimestampSendPDFTask extends AsyncTask<String, Void, String>
         MessageDigest md = MessageDigest.getInstance(PDF_SIGNATURE_DIGEST);
         byte[] signatureHash = md.digest(FileUtils.getBytesFromInputStream(sap.getRangeStream()));
         
-        CMSSignedData signedData = signedGenerator.obtenerCMSSignedData(signatureHash, 
-        		unsAttr, signerPrivatekey, signerCert, signerCertsChain);
+        CMSSignedData signedData = signedGenerator.genSignedData(
+        		signatureHash, unsAttr);
 
         /*CertStore certStore = signedData.getCertificatesAndCRLs("Collection", "BC"); 
         SignerInformationStore signers = signedData.getSignerInfos(); 
@@ -238,6 +250,11 @@ public class SignTimestampSendPDFTask extends AsyncTask<String, Void, String>
         stp.close();
      }
 	
+    public static String getNifUsuario (X509Certificate certificate) {
+    	String subjectDN = certificate.getSubjectDN().getName();
+    	return subjectDN.split("SERIALNUMBER=")[1].split(",")[0];
+    }
+    
     @Override
     protected void onPostExecute(String result) {
     	Log.d(TAG + ".onPostExecute(...)", " - statusCode: " + statusCode);

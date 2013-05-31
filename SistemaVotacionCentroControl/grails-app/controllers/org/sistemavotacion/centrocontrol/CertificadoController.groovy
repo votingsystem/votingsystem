@@ -12,7 +12,7 @@ import java.security.cert.X509Certificate;
 * @descController Servicios relacionados con los certificados manejados por la aplicación
 * 
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 * */
 class CertificadoController {
 

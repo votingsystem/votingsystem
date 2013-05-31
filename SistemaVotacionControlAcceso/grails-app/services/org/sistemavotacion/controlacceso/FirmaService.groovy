@@ -55,6 +55,7 @@ class FirmaService {
 	
 	private SignedMailGenerator signedMailGenerator;
 	static Set<X509Certificate> trustedCerts;
+	private KeyStore trustedCertsKeyStore
 	static HashMap<Long, Certificado> trustedCertsHashMap;
 	private X509Certificate localServerCertSigner;
 	private static HashMap<Long, Set<X509Certificate>> eventTrustedCertsHashMap = 
@@ -128,6 +129,21 @@ class FirmaService {
 			afterPropertiesSet()
 		}
 		return trustedCerts;
+	}
+	
+	public KeyStore getTrustedCertsKeyStore() {
+		if(!trustedCertsKeyStore ||
+			trustedCertsKeyStore.size() != trustedCerts.size()) {
+			trustedCertsKeyStore = KeyStore.getInstance("JKS");
+			trustedCertsKeyStore.load(null, null);
+			Set<X509Certificate> trustedCertsSet = getTrustedCerts()
+			log.debug "trustedCerts.size: ${trustedCertsSet.size()}"
+			for(X509Certificate certificate:trustedCertsSet) {
+				trustedCertsKeyStore.setCertificateEntry(
+					certificate.getSubjectDN().toString(), certificate);
+			}
+		}
+		return trustedCertsKeyStore;
 	}
 	
 	def inicializarAutoridadesCertificadoras() { 

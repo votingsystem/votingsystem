@@ -5,7 +5,7 @@ import com.google.gwt.json.client.JSONObject;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public final class ConsultaEventosSistemaVotacionJso extends JavaScriptObject {
 	

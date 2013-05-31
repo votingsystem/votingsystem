@@ -38,7 +38,6 @@ import org.bouncycastle2.cms.CMSException;
 import org.bouncycastle2.cms.CMSProcessable;
 import org.bouncycastle2.cms.CMSProcessableByteArray;
 import org.bouncycastle2.cms.CMSSignedData;
-import org.bouncycastle2.cms.CMSSignedDataGenerator;
 import org.bouncycastle2.cms.CMSSignedGenerator;
 import org.bouncycastle2.cms.DefaultSignedAttributeTableGenerator;
 import org.bouncycastle2.cms.SignerInfoGenerator;
@@ -53,23 +52,28 @@ import android.util.Log;
 public class PDF_CMSSignedGenerator extends CMSSignedGenerator {
 	
 	public static final String TAG = "PDF_CMSSignedGenerator";
+	
+	public static String CERT_STORE_TYPE = "Collection";
+               
+    private PrivateKey privateKey = null;
+    private X509Certificate userCert = null;
+    private Certificate[] signerCertChain = null;
+    private String signatureMechanism = null;
+    private String pdfDigestObjectIdentifier = null;
+    private String signatureDigestAlg = null;
 
-    public static final String PDF_DIGEST_OID          = CMSSignedDataGenerator.DIGEST_SHA1;;
-    public static final String PDF_SIGNATURE_MECHANISM = "SHA1withRSA";
-    public static final String PDF_SIGNATURE_DIGEST    = "SHA1";
-    public static String CERT_STORE_TYPE = "Collection";
-
-    public static X509Certificate certificadoUsuario = null;
-    public static X509Certificate certificadoIntermedio = null;
-    public static X509Certificate certificadoCA = null;
-            
-    private String pdfSignatureDigest = null;
-
-    public PDF_CMSSignedGenerator (String pdfSignatureDigest) throws Exception {
-    	this.pdfSignatureDigest = pdfSignatureDigest;
+    public PDF_CMSSignedGenerator (PrivateKey privateKey,
+            Certificate[] signerCertChain, String signatureMechanism, 
+            String signatureDigestAlg, String pdfDigestObjectIdentifier) throws Exception {
+        this.privateKey = privateKey;
+        this.signerCertChain = signerCertChain;
+        this.signatureMechanism = signatureMechanism;
+        this.pdfDigestObjectIdentifier = pdfDigestObjectIdentifier;
+        this.signatureDigestAlg = signatureDigestAlg;
+        this.userCert = (X509Certificate) signerCertChain[0];
     }
 
-    public CMSSignedData generarCMSSignedData(String eContentType,
+    private CMSSignedData genCMSSignedData(String eContentType,
             CMSProcessable content, boolean encapsulate, Provider sigProvider,
             boolean addDefaultAttributes, List<SignerInfo> signerInfoList)
             throws NoSuchAlgorithmException, CMSException, Exception {
@@ -140,9 +144,8 @@ public class PDF_CMSSignedGenerator extends CMSSignedGenerator {
         return new CMSSignedData(content, contentInfo);
     }
 
-    public CMSSignedData obtenerCMSSignedData(byte[] signatureHash, 
-            CMSAttributeTableGenerator unsAttr, PrivateKey privateKey, 
-            X509Certificate certificadoUsuario, Certificate[] signerCertsChain) throws Exception {
+    public CMSSignedData genSignedData(byte[] signatureHash, 
+            CMSAttributeTableGenerator unsAttr) throws Exception {
     	
         CMSProcessable content = new CMSProcessableByteArray(signatureHash);
         ByteArrayOutputStream out = null;
@@ -153,7 +156,7 @@ public class PDF_CMSSignedGenerator extends CMSSignedGenerator {
         }
 
         ByteArrayInputStream bais = new ByteArrayInputStream(out.toByteArray());
-        MessageDigest softwareDigestEngine = MessageDigest.getInstance(PDF_SIGNATURE_DIGEST);
+        MessageDigest softwareDigestEngine = MessageDigest.getInstance(signatureDigestAlg);
         int bytesRead;
         byte[] dataBuffer = new byte[4096];
         while ((bytesRead = bais.read(dataBuffer)) >= 0) {
@@ -162,14 +165,14 @@ public class PDF_CMSSignedGenerator extends CMSSignedGenerator {
         byte[] hash = softwareDigestEngine.digest();
     	
         CertStore certsAndCRLs = CertStore.getInstance(CERT_STORE_TYPE,
-                new CollectionCertStoreParameters(Arrays.asList(signerCertsChain)), Aplicacion.PROVIDER);
+                new CollectionCertStoreParameters(Arrays.asList(signerCertChain)), Aplicacion.PROVIDER);
         addCertificatesAndCRLs(certsAndCRLs);
     	
     	CMSAttributeTableGenerator sAttr = new DefaultSignedAttributeTableGenerator();
     	
         ASN1ObjectIdentifier contentTypeOID = new ASN1ObjectIdentifier(CMSSignedGenerator.DATA);
         Map parameters = getBaseParameters(contentTypeOID, 
-        		new AlgorithmIdentifier(new DERObjectIdentifier(PDF_DIGEST_OID), new DERNull()), hash);
+        		new AlgorithmIdentifier(new DERObjectIdentifier(pdfDigestObjectIdentifier), new DERNull()), hash);
         AttributeTable attributeTable = sAttr.getAttributes(Collections.unmodifiableMap(parameters));
     	
         String signatureHashStr = Base64.encodeToString(signatureHash, Base64.DEFAULT);
@@ -179,24 +182,21 @@ public class PDF_CMSSignedGenerator extends CMSSignedGenerator {
         jcaSignerInfoGeneratorBuilder.setSignedAttributeGenerator(attributeTable);
         jcaSignerInfoGeneratorBuilder.setUnsignedAttributeGenerator(unsAttr);
         SignerInfoGenerator signerInfoGenerator = jcaSignerInfoGeneratorBuilder.build(
-        		PDF_SIGNATURE_MECHANISM, privateKey, certificadoUsuario);
+        		signatureMechanism, privateKey, userCert);
     	
         SignerInfo signerInfo = signerInfoGenerator.generate(contentTypeOID);
     	
         List<SignerInfo> signerInfoList = new ArrayList<SignerInfo>();
         signerInfoList.add(signerInfo);
 
-        Log.d(TAG, " -- certificadoUsuario: " + certificadoUsuario.getSubjectDN().getName());
-        CMSSignedData signedData = generarCMSSignedData(CMSSignedGenerator.DATA, 
+        Log.d(TAG, " -- certificadoUsuario: " + userCert.getSubjectDN().getName());
+        CMSSignedData signedData = genCMSSignedData(CMSSignedGenerator.DATA, 
                 content, true, CMSUtils.getProvider("BC"), true, signerInfoList);
         //END SIGNED PKCS7
         return signedData;
     }
 
-    public static String getNifUsuario (X509Certificate certificate) {
-    	String subjectDN = certificate.getSubjectDN().getName();
-    	return subjectDN.split("SERIALNUMBER=")[1].split(",")[0];
-    }
+
 
 
 }

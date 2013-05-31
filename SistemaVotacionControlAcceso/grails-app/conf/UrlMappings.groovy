@@ -1,6 +1,6 @@
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 class UrlMappings {
 
@@ -86,12 +86,12 @@ class UrlMappings {
 		
 		"/eventoFirma" {
 			controller = "eventoFirma"
-			action = [POST:"post"]
+			action = [POST:"save"]
 		}
 		
 		"/eventoFirma/$id" {
 			controller = "eventoFirma"
-			action = [GET:"index"]
+			action = [GET:"index", POST:"save"]
 			constraints {
 				id(matches:/\d*/)
 			}
@@ -124,7 +124,7 @@ class UrlMappings {
 		
 		"/eventoReclamacion" {
 			controller = "eventoReclamacion"
-			action = [POST:"post"]
+			action = [POST:"save"]
 		}
 
 		"/eventoReclamacion/$id?" {
@@ -169,7 +169,7 @@ class UrlMappings {
 		
 		"/eventoVotacion" {
 			controller = "eventoVotacion"
-			action = [POST:"post"]
+			action = [POST:"save"]
 		}
 		
 		"/eventoVotacion/$id?" {
@@ -338,7 +338,7 @@ class UrlMappings {
 				
 		"/voto" {
 			controller = "voto"
-			action = [POST:"post"]
+			action = [POST:"save"]
 		}
 		
 		

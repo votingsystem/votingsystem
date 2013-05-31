@@ -29,7 +29,9 @@ import java.util.Set;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.Header;
 import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MinimalField;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
@@ -41,7 +43,7 @@ import org.sistemavotacion.seguridad.CertUtil;
 
 /**
 * @author jgzornoza
-* Licencia: https://raw.github.com/jgzornoza/SistemaVotacion/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class HttpHelper {
     
@@ -67,20 +69,32 @@ public class HttpHelper {
         }
     }
     
-    public HttpResponse getInfo (String serverURL) 
+    public Respuesta getInfo (String serverURL, String contentType) 
             throws IOException, ParseException {
-        logger.debug("getInfo - serverURL: " + serverURL);             
-        HttpGet httpget = new HttpGet(serverURL);
-        HttpResponse response = httpclient.execute(httpget);
-        logger.debug("----------------------------------------");
-        /*Header[] headers = response.getAllHeaders();
-        for (int i = 0; i < headers.length; i++) {
-        System.out.println(headers[i]);
-        }*/
-        logger.debug(response.getStatusLine().toString());
-        logger.debug("----------------------------------------");
-        //httpget.releaseConnection();
-        return response;    
+        logger.debug("getInfo - serverURL: " + serverURL + " - contentType: " 
+                + contentType);  
+        Respuesta respuesta = null;
+        try {
+            HttpGet httpget = new HttpGet(serverURL);
+            if(contentType != null) httpget.setHeader("Content-Type", contentType);
+            HttpResponse response = httpclient.execute(httpget);
+            logger.debug("----------------------------------------");
+            /*Header[] headers = response.getAllHeaders();
+            for (int i = 0; i < headers.length; i++) {
+            System.out.println(headers[i]);
+            }*/
+            logger.debug(response.getStatusLine().toString());
+            logger.debug("----------------------------------------");
+            byte[] responseBytes =  EntityUtils.toByteArray(response.getEntity());
+            respuesta = new Respuesta(response.getStatusLine().getStatusCode(),
+                        new String(responseBytes), responseBytes);
+            EntityUtils.consume(response.getEntity());
+            httpget.releaseConnection();
+        } catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
+            respuesta = new Respuesta(Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
+        }
+        return respuesta;
     }
     
     public X509Certificate obtenerCertificadoDeServidor (String serverURL) throws Exception {

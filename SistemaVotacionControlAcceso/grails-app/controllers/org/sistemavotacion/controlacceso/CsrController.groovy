@@ -14,7 +14,7 @@ import grails.converters.JSON;
  * @descController Servicios relacionados con validación y firma de certificados.
  *
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
 class CsrController {
 

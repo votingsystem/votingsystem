@@ -17,7 +17,7 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
  * @descController Servicios relacionados con la publicación de votaciones.
  * 
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
 class EventoVotacionController {
 
@@ -109,7 +109,7 @@ class EventoVotacionController {
 	 * 
 	 * @return Recibo que consiste en el archivo firmado recibido con la firma añadida del servidor.
 	 */
-    def post () {
+    def save () {
 		MensajeSMIME mensajeSMIME = params.mensajeSMIMEReq
 		if(!mensajeSMIME) {
 			String msg = message(code:'evento.peticionSinArchivo')

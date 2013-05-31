@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
@@ -38,12 +39,15 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.cms.CMSAttributeTableGenerationException;
 import org.bouncycastle.cms.CMSAttributeTableGenerator;
 import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.DNIePDFSessionHelper;
+import org.sistemavotacion.seguridad.PDF_CMSSignedGenerator;
+import org.sistemavotacion.seguridad.VotingSystemCMSSignedGenerator;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
@@ -51,52 +55,72 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://raw.github.com/jgzornoza/SistemaVotacion/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class PDFSignerDNIeWorker extends SwingWorker<Integer, String>  
+public class PDFSignerWorker extends SwingWorker<Respuesta, String>  
         implements VotingSystemWorker {
     
-    private static Logger logger = LoggerFactory.getLogger(PDFSignerDNIeWorker.class);
+    private static Logger logger = LoggerFactory.getLogger(PDFSignerWorker.class);
 
+    public static final String PDF_SIGNATURE_MECHANISM = "SHA1withRSA";
+    public static final String PDF_DIGEST_OID = CMSSignedDataGenerator.DIGEST_SHA1;
+    public static final String PDF_SIGNATURE_DIGEST    = "SHA1";
+    
     private Integer id;
+    private Respuesta respuesta = null;    
     private String urlTimeStampServer;
     private String location;
     private String reason;
     private VotingSystemWorkerListener workerListener;
     private TimeStampToken timeStampToken = null;
-    private Attribute timeStampAsAttribute = null;
-    private AttributeTable timeStampAsAttributeTable = null;
     private TimeStampRequest timeStampRequest = null;
     private char[] password;
     private PdfReader pdfReader;
     private File signedFile;
-    private byte[] bytesDocumento;
-    private int statusCode = Respuesta.SC_ERROR;
-    private String message = null;
-    private Exception exception = null;
+    private PrivateKey signerPrivatekey;
+    //private X509Certificate userCert;
+    private Certificate[] signerCertChain;
+    private VotingSystemCMSSignedGenerator systemSignedGenerator = null;
     
-    public PDFSignerDNIeWorker(Integer id, String urlTimeStampServer, 
-            VotingSystemWorkerListener workerListener, String reason, String location, char[] password,
-            PdfReader reader, File signedFile)
+    public PDFSignerWorker(Integer id, String urlTimeStampServer, 
+            VotingSystemWorkerListener workerListener, String reason, String location, 
+            char[] password, PdfReader reader, PrivateKey signerPrivatekey,
+            Certificate[] signerCertChain)
             throws NoSuchAlgorithmException, NoSuchAlgorithmException, 
             NoSuchAlgorithmException, NoSuchProviderException, IOException, Exception {
         this.id = id;
+        this.signerPrivatekey = signerPrivatekey;
+        this.signerCertChain = signerCertChain;
+        //this.userCert = userCert;
         this.urlTimeStampServer = urlTimeStampServer;
         this.workerListener = workerListener;  
         this.location = location;
         this.password = password;
         this.pdfReader = reader;
         this.reason = reason;
-        this.signedFile = signedFile;
+        this.signerCertChain = signerCertChain;
+        this.signedFile = File.createTempFile("signedPDF", ".pdf");
+        signedFile.deleteOnExit();
     }
     
     @Override public void process(List<String> messages) {
         workerListener.process(messages);
     }
     
-    @Override protected Integer doInBackground() throws Exception {
-        DNIePDFSessionHelper sessionHelper = new DNIePDFSessionHelper(password, DNIe_SESSION_MECHANISM);
-        Certificate[] certs = sessionHelper.getCertificateChain();
+    @Override protected Respuesta doInBackground() throws Exception {
+        if(signerPrivatekey != null && signerCertChain != null) {
+            logger.debug("Generating PrivateKey VotingSystemSignedGenerator");
+            PDF_CMSSignedGenerator signedGenerator = new PDF_CMSSignedGenerator(
+                    signerPrivatekey, signerCertChain, PDF_SIGNATURE_MECHANISM, 
+                    PDF_SIGNATURE_DIGEST, PDF_DIGEST_OID);
+            systemSignedGenerator = signedGenerator;
+        } else {
+            logger.debug("Generating smartcard VotingSystemSignedGenerator");
+            DNIePDFSessionHelper sessionHelper = new DNIePDFSessionHelper(password, DNIe_SESSION_MECHANISM);
+            signerCertChain = sessionHelper.getCertificateChain();
+            systemSignedGenerator = sessionHelper;
+        }
+        
         PdfStamper stp = PdfStamper.createSignature(pdfReader, 
                 new FileOutputStream(signedFile), '\0');
         stp.setEncryption(null, null,PdfWriter.ALLOW_PRINTING, false);
@@ -105,7 +129,7 @@ public class PDFSignerDNIeWorker extends SwingWorker<Integer, String>
         
         
         if(location != null) sap.setLocation(location);
-        sap.setCrypto(null, certs, null, PdfSignatureAppearance.WINCER_SIGNED);
+        sap.setCrypto(null, signerCertChain, null, PdfSignatureAppearance.WINCER_SIGNED);
         if(reason != null) sap.setReason(reason);
         //java.util.Calendar cal = java.util.Calendar.getInstance();
         //sap.setSignDate(cal);
@@ -113,16 +137,20 @@ public class PDFSignerDNIeWorker extends SwingWorker<Integer, String>
         sap.setAcro6Layers(true);
         final PdfSignature dic = new PdfSignature(PdfName.ADOBE_PPKLITE, PDF_SIGNATURE_NAME);
         //dic.setDate(new PdfDate(sap.getSignDate()));
-        dic.setName(PdfPKCS7.getSubjectFields((X509Certificate)certs[0]).getField("CN"));
-        logger.debug("signAndTimestamp - Firmante: " + PdfPKCS7.getSubjectFields((X509Certificate)certs[0]).getField("CN"));
+        dic.setName(PdfPKCS7.getSubjectFields((X509Certificate)signerCertChain[0]).getField("CN"));
+        logger.debug("signAndTimestamp - Firmante: " + PdfPKCS7.getSubjectFields(
+                (X509Certificate)signerCertChain[0]).getField("CN"));
         sap.setCryptoDictionary(dic);
         int csize = 10000;
         HashMap exc = new HashMap();
         //Nota del javadoc -> due to the hex string coding this size should be byte_size*2+2.
         exc.put(PdfName.CONTENTS, new Integer(csize * 2 + 2));
-        String firmante = PdfPKCS7.getSubjectFields((X509Certificate)certs[0]).getField("CN").replace("(FIRMA)", "");
+        String firmante = PdfPKCS7.getSubjectFields((X509Certificate)signerCertChain[0]).
+                getField("CN");
+        if(firmante != null && firmante.contains("(FIRMA)")) {
+            firmante = firmante.replace("(FIRMA)", "");
+        } else firmante = getNifUsuario(((X509Certificate)signerCertChain[0]));
         sap.setLayer2Text(getString("signedByPDFLabel") + ":\n" + firmante); 
-
         
         CMSAttributeTableGenerator unsAttr= new CMSAttributeTableGenerator() {
 
@@ -166,7 +194,7 @@ public class PDFSignerDNIeWorker extends SwingWorker<Integer, String>
                         }
                    } catch(Exception ex) {
                         logger.error(ex.getMessage(), ex);
-                        exception = ex;
+                        respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
                    }
                     return attributeTable;
                 }
@@ -177,8 +205,8 @@ public class PDFSignerDNIeWorker extends SwingWorker<Integer, String>
         MessageDigest md = MessageDigest.getInstance(PDF_SIGNATURE_DIGEST);
         byte[] signatureHash = md.digest(FileUtils.getBytesFromInputStream(sap.getRangeStream()));
         
-        CMSSignedData signedData = sessionHelper.obtenerCMSSignedData(signatureHash, unsAttr);
-        //ValidadoraCMS validadora = new ValidadoraCMS(sessionHelper.certificadoCA);
+        CMSSignedData signedData = systemSignedGenerator.genSignedData(signatureHash, unsAttr);
+        //ValidadoraCMS validadora = new ValidadoraCMS(certificadoCA);
         //logger.info("validadora.isValid(signedData): " + validadora.isValid(signedData));
 
         byte[] pk = signedData.getEncoded();
@@ -187,40 +215,44 @@ public class PDFSignerDNIeWorker extends SwingWorker<Integer, String>
         System.arraycopy(pk, 0, outc, 0, pk.length);
         dic2.put(PdfName.CONTENTS, new PdfString(outc).setHexWriting(true));
         sap.close(dic2);
-        return Respuesta.SC_OK;
+        respuesta = new Respuesta(Respuesta.SC_OK);
+        return respuesta;
     }
-
     
-    @Override//on the EDT
-    protected void done() {
+    public static String getNifUsuario (X509Certificate certificate) {
+    	String subjectDN = certificate.getSubjectDN().getName();
+    	return subjectDN.split("SERIALNUMBER=")[1].split(",")[0];
+    }
+    
+    @Override protected void done() {//on the EDT
         try {
-            statusCode = get();
-        } catch (Exception ex) {
+            respuesta = get();
+        }catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-            exception =  ex;
-        } finally {
-             workerListener.showResult(this);
-        }
+            respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+        } 
+        workerListener.showResult(this);
     }
     
     public File getSignedAndTimeStampedPDF() {
         return signedFile;
     }
 
-    @Override
-    public String getMessage() {
-        if(exception != null) return exception.getMessage();
-        else return message;
+   @Override public String getMessage() {
+        if(respuesta == null) return null;
+        else return respuesta.getMensaje();
     }
 
-    @Override
-    public int getId() {
-        return id;
+    @Override public int getId() {
+        return this.id;
     }
 
-    @Override
-    public int getStatusCode() {
-        return statusCode;
+    @Override  public int getStatusCode() {
+        if(respuesta == null) return Respuesta.SC_ERROR;
+        else return respuesta.getCodigoEstado();
     }
     
+    @Override public Respuesta getRespuesta() {
+        return respuesta;
+    }
 }

@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class FileMapLauncherWorker extends SwingWorker<Integer, String> 
+public class FileMapLauncherWorker extends SwingWorker<Respuesta, String> 
         implements VotingSystemWorker {
     
         
@@ -23,7 +23,6 @@ public class FileMapLauncherWorker extends SwingWorker<Integer, String>
     private VotingSystemWorkerListener workerListener;
     private Map<String, Object> fileMap;
     private Integer id = null;
-    private Exception exception = null;
     private Respuesta respuesta = null;
     
     public FileMapLauncherWorker(Integer id, Map<String, Object> fileMap, String serverURL, 
@@ -34,46 +33,44 @@ public class FileMapLauncherWorker extends SwingWorker<Integer, String>
         this.serverURL = serverURL;
     }
         
-    @Override//on the EDT
-    protected void done() {
+    @Override protected void done() {//on the EDT
         try {
-            get();
+            respuesta = get();
         }catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-            exception = ex;
-        } finally {
-            workerListener.showResult(this);
-        }
+            respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+        } 
+        workerListener.showResult(this);
     }
     
-    @Override protected Integer doInBackground() throws Exception {
+    @Override protected Respuesta doInBackground() throws Exception {
         logger.debug("doInBackground - serverURL: " + serverURL);
         String msg = "<html><b>" + getString("connectionMsg") + "...</b></html>";
         workerListener.process(Arrays.asList(msg));
-        respuesta = Contexto.getHttpHelper().
-                sendObjectMap(fileMap, serverURL);
-        return respuesta.getCodigoEstado();
+        return Contexto.getHttpHelper().sendObjectMap(fileMap, serverURL);
     }
 
-    public byte[] getBytesResponse() {
-        if(respuesta != null) return respuesta.getBytesArchivo();
-        else return null;
+    public byte[] getMessageBytes() {
+        if(respuesta == null) return null;
+        else return respuesta.getBytesArchivo();
     }
     
-    @Override
-    public String getMessage() {
-        if(exception != null) return exception.getMessage();
+    @Override public String getMessage() {
+        if(respuesta == null) return null;
         else return respuesta.getMensaje();
     }
 
-    @Override
-    public int getId() {
+    @Override public int getId() {
         return this.id;
     }
 
-    @Override
-    public int getStatusCode() {
-        if(respuesta == null) return respuesta.SC_ERROR_EJECUCION;
-        return respuesta.getCodigoEstado();
+    @Override public int getStatusCode() {
+        if(respuesta == null) return Respuesta.SC_ERROR;
+        else return respuesta.getCodigoEstado();
     }
+    
+    @Override public Respuesta getRespuesta() {
+        return respuesta;
+    }
+    
 }

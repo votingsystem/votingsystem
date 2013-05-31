@@ -1,10 +1,10 @@
-package org.sistemavotacion.test.simulacion;
+package org.sistemavotacion.test.simulation;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public interface SimulationListener<T> {
+public interface SimulatorListener<T> {
     
     public void setSimulationMessage(String message);
     public void setSimulationErrorMessage(String message);

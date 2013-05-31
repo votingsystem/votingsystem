@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://raw.github.com/jgzornoza/SistemaVotacion/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class EncryptorWorker extends SwingWorker<Respuesta, String> 
         implements VotingSystemWorker {
@@ -36,7 +36,6 @@ public class EncryptorWorker extends SwingWorker<Respuesta, String>
     private String urlRequest;
     private Respuesta respuesta = new Respuesta(Respuesta.SC_ERROR);
     private VotingSystemWorkerListener workerListener;
-    private Exception exception = null;
         
     private X509Certificate serverCert = null;
     
@@ -59,10 +58,6 @@ public class EncryptorWorker extends SwingWorker<Respuesta, String>
         this.publicKey = keyPair.getPublic();
     }
     
-    public int getId() {
-        return this.id;
-    }
-    
     @Override protected Respuesta doInBackground() throws Exception {
         File encryptedFile = File.createTempFile("csrEncryptedFile", ".p7m");
         encryptedFile.deleteOnExit();
@@ -81,14 +76,14 @@ public class EncryptorWorker extends SwingWorker<Respuesta, String>
         return respuesta;
     }
 
-    @Override//on the EDT
-    protected void done() {
-        try { 
-            get();
-        } catch (Exception ex) {
+    @Override protected void done() {//on the EDT
+        try {
+            respuesta = get();
+        }catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-            exception = ex;
-        } finally {workerListener.showResult(this);}
+            respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+        } 
+        workerListener.showResult(this);
     }
     
     @Override//on the EDT
@@ -120,14 +115,23 @@ public class EncryptorWorker extends SwingWorker<Respuesta, String>
         }
         return result;
     }
-    
-    @Override public String getMessage() {
-        if(exception != null) return exception.getMessage();
+
+   @Override public String getMessage() {
+        if(respuesta == null) return null;
         else return respuesta.getMensaje();
     }
 
-    @Override public int getStatusCode() {
-        return respuesta.getCodigoEstado();
+    @Override public int getId() {
+        return this.id;
+    }
+
+    @Override  public int getStatusCode() {
+        if(respuesta == null) return Respuesta.SC_ERROR;
+        else return respuesta.getCodigoEstado();
+    }
+    
+    @Override public Respuesta getRespuesta() {
+        return respuesta;
     }
 
 }

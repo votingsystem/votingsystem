@@ -14,7 +14,7 @@ import org.bouncycastle.openssl.PEMWriter;
 
 /**
 * @author jgzornoza
-* Licencia: https://raw.github.com/jgzornoza/SistemaVotacion/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class KeyUtil {
     

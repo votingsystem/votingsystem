@@ -22,7 +22,7 @@ import org.sistemavotacion.utils.*
  * @descController Servicios de acceso a la aplicación web principal
  *
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  * */
 class AppController {
 

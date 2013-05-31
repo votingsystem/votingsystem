@@ -3,13 +3,10 @@ package org.sistemavotacion.test.modelo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-import net.sf.json.JSON;
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Respuesta;
-import static org.sistemavotacion.test.modelo.SimulationData.parse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -441,8 +438,6 @@ public class UserBaseData {
             userBaseData.setUserIndex(dataJSON.getInt("userIndex"));
         }                
         if (dataJSON.containsKey("numRepresentatives")) {
-            logger.debug("dataJSON.get(\"numRepresentatives\").getClass(): " + dataJSON.get("numRepresentatives").getClass());
-            
             userBaseData.setNumRepresentatives(dataJSON.getInt("numRepresentatives"));
         }
         if (dataJSON.containsKey("numUsersWithoutRepresentative")) {

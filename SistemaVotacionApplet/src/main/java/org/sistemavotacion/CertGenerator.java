@@ -2,6 +2,7 @@ package org.sistemavotacion;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Security;
@@ -51,8 +52,9 @@ public class CertGenerator {
         this.rootSubjectDN = rootSubjectDN;
         this.password = password;
         KeyStore rootKeyStore = KeyStoreUtil.createRootKeyStore(COMIEZO_VALIDEZ_CERT,
-                        PERIODO_VALIDEZ_ALMACEN_RAIZ, password.toCharArray(), ROOT_ALIAS,
-                        rootCertFile.getAbsolutePath(), rootSubjectDN);
+                        PERIODO_VALIDEZ_ALMACEN_RAIZ, password.toCharArray(), 
+                        ROOT_ALIAS, rootSubjectDN);
+        rootKeyStore.store(new FileOutputStream(rootCertFile),  password.toCharArray());
         X509Certificate rootCertificate = (X509Certificate)rootKeyStore.getCertificate(ROOT_ALIAS);
         PrivateKey rootPK = (PrivateKey) rootKeyStore.getKey(ROOT_ALIAS, password.toCharArray());
         rootPrivateCredential =	new X500PrivateCredential(rootCertificate, rootPK, ROOT_ALIAS);

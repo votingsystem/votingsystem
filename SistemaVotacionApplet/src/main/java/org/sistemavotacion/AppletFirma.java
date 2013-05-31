@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://raw.github.com/jgzornoza/SistemaVotacionAppletFirma/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class AppletFirma extends JApplet {
     
@@ -209,8 +209,8 @@ public class AppletFirma extends JApplet {
         
         modoEjecucion = ModoEjecucion.APLICACION;
         Operacion ope = new Operacion();
-        String[] argus = {"hola"};
-        ope.setArgs(argus);
+        String[] _args = {""};
+        ope.setArgs(_args);
         logger.debug("ope: " + ope.obtenerJSONStr());
         try {
             Contexto.inicializar();
@@ -223,7 +223,7 @@ public class AppletFirma extends JApplet {
                         File jsonFile = File.createTempFile("operacion", ".json");
                         jsonFile.deleteOnExit();
                         FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
-                            .getResourceAsStream("testFiles/votingOperation.json"), jsonFile);        
+                            .getResourceAsStream("testFiles/publishClaim.json"), jsonFile);        
                         appletFirma.ejecutarOperacion(FileUtils.getStringFromFile(jsonFile));
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);

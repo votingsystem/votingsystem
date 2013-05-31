@@ -1,4 +1,4 @@
-package org.sistemavotacion.test.simulacion;
+package org.sistemavotacion.test.simulation.launcher;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -11,11 +11,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
-import static org.sistemavotacion.Contexto.TIMESTAMP_DNIe_HASH;
-import static org.sistemavotacion.Contexto.TIMESTAMP_VOTE_HASH;
 import org.sistemavotacion.modelo.Evento;
-import org.sistemavotacion.modelo.ReciboVoto;
-import org.sistemavotacion.modelo.Respuesta;
+import org.sistemavotacion.modelo.Respuesta; 
+import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.seguridad.PKCS10WrapperClient;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
@@ -25,26 +23,20 @@ import org.sistemavotacion.test.modelo.InfoVoto;
 import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.sistemavotacion.test.ContextoPruebas.*;
 import org.sistemavotacion.worker.AccessRequestLauncherWorker;
-import org.sistemavotacion.worker.NotificarVotoWorker;
-import org.sistemavotacion.worker.TimeStampWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class LanzadoraVoto 
+public class AccessRequestLauncher 
     implements Callable<InfoVoto>, VotingSystemWorkerListener {
     
-    private static Logger logger = LoggerFactory.getLogger(LanzadoraVoto.class);
+    private static Logger logger = LoggerFactory.getLogger(AccessRequestLauncher.class);
 
-    private static final int TIMESTAMP_ACCESS_REQUEST = 0;
-    private static final int TIMESTAMP_VOTE           = 1;
-    private static final int ACCESS_REQUEST_WORKER    = 2;
-    private static final int NOTIFICAR_VOTO_WORKER    = 3;
+    private static final int ACCESS_REQUEST_WORKER    = 1;
     
     private InfoVoto infoVoto;
     private SMIMEMessageWrapper documentSMIME;
@@ -54,11 +46,13 @@ public class LanzadoraVoto
     private String urlTimeStampServer = null;
     private String urlAccessRequest = null;
         
-    public LanzadoraVoto (InfoVoto infoVoto) 
+    public AccessRequestLauncher (InfoVoto infoVoto) 
             throws Exception {
         this.infoVoto = infoVoto; 
-        urlTimeStampServer = ContextoPruebas.getControlAcceso().getServerURL() + "/timeStamp";
-        urlAccessRequest = ContextoPruebas.getControlAcceso().getServerURL() + "/solicitudAcceso";
+        urlTimeStampServer = ContextoPruebas.getUrlTimeStampServer(
+                ContextoPruebas.getControlAcceso().getServerURL());
+        urlAccessRequest = ContextoPruebas.getURLAccessRequest(
+                ContextoPruebas.getControlAcceso().getServerURL());
         infoVoto.getVoto().setUrlSolicitudAcceso(urlAccessRequest);
     }
     
@@ -66,6 +60,7 @@ public class LanzadoraVoto
         return infoVoto;
     }
     
+    SignedMailGenerator signedMailGenerator;
     
     @Override
     public InfoVoto call() throws Exception { 
@@ -86,7 +81,9 @@ public class LanzadoraVoto
                 "_usu" + infoVoto.getFrom() + ".json");
         FileUtils.copyStreamToFile(new ByteArrayInputStream(
                 anuladorVotoStr.getBytes()), anuladorVoto);
-        SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnieBytes, 
+
+        
+        signedMailGenerator = new SignedMailGenerator(mockDnieBytes, 
                 ContextoPruebas.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
                 ContextoPruebas.DNIe_SIGN_MECHANISM);
         documentSMIME = signedMailGenerator.genMimeMessage(infoVoto.getFrom(), 
@@ -95,10 +92,12 @@ public class LanzadoraVoto
                     ContextoPruebas.getControlAcceso().getServerURL(),infoVoto.getVoto()),
                 asuntoMensaje, null);
         //mimeMessage.writeTo(new FileOutputStream(solicitudAcceso));
-        
-        new TimeStampWorker(TIMESTAMP_ACCESS_REQUEST, urlTimeStampServer,
-                    this, documentSMIME.getTimeStampRequest(TIMESTAMP_DNIe_HASH),
-                    ContextoPruebas.getControlAcceso().getTimeStampCert()).execute();
+        X509Certificate accesRequestCert = ContextoPruebas.
+                        getControlAcceso().getCertificate();
+        infoVoto.getVoto().setUrlRecolectorVotosCentroControl(anuladorVotoStr);
+        Usuario usuario = new Usuario(infoVoto.getFrom());
+        new AccessRequestLauncherWorker(ACCESS_REQUEST_WORKER, 
+                documentSMIME, infoVoto.getVoto(), accesRequestCert, this).execute();
         
         countDownLatch.await();
         return getInfoVoto();
@@ -112,31 +111,6 @@ public class LanzadoraVoto
                 " - workerId:" + worker.getId());
         infoVoto.setCodigoEstado(worker.getStatusCode());
         switch(worker.getId()) {
-            case TIMESTAMP_ACCESS_REQUEST:
-                if(Respuesta.SC_OK == worker.getStatusCode()) {
-                    try {
-                        documentSMIME.setTimeStampToken((TimeStampWorker)worker);
-                        X509Certificate accesRequestCert = ContextoPruebas.
-                                getControlAcceso().getCertificate();
-                        new AccessRequestLauncherWorker(ACCESS_REQUEST_WORKER, 
-                                documentSMIME, infoVoto.getVoto(), 
-                                accesRequestCert, this).execute();
-                    } catch (Exception ex) {
-                        logger.error(ex.getMessage(), ex);
-                        infoVoto.setCodigoEstado(Respuesta.SC_ERROR_EJECUCION);
-                        infoVoto.setError(InfoVoto.Error.ACCESS_REQUEST);
-                        infoVoto.setMensaje(ex.getMessage());
-                        countDownLatch.countDown();
-                    }
-                } else {
-                    String msg = "ERROR obteniendo sello de tiempo de solicitud" +
-                            "de acceso " + worker.getMessage();
-                    logger.error(msg);
-                    infoVoto.setError(InfoVoto.Error.ACCESS_REQUEST);
-                    infoVoto.setMensaje(msg);
-                    countDownLatch.countDown();
-                }
-                break;
             case ACCESS_REQUEST_WORKER:
                 if (Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
@@ -147,60 +121,20 @@ public class LanzadoraVoto
                                 infoVoto.getVoto().getHashCertificadoVotoBase64(), 
                                 infoVoto.getVoto().getControlAcceso().getNombreNormalizado(),
                                 votoJSON, "[VOTO]", null);
-                        new TimeStampWorker(TIMESTAMP_VOTE, urlTimeStampServer,
-                            this, documentSMIME.getTimeStampRequest(TIMESTAMP_VOTE_HASH),
-                            ContextoPruebas.getControlAcceso().getTimeStampCert()).execute();
                     } catch(Exception ex) {
                         logger.error(ex.getMessage(), ex);
                         infoVoto.setCodigoEstado(Respuesta.SC_ERROR_EJECUCION);
                         infoVoto.setError(InfoVoto.Error.ACCESS_REQUEST);
                         infoVoto.setMensaje(ex.getMessage());
-                        countDownLatch.countDown();
+                        
                     }
+                    
                 } else {
                     String msg = "ERROR enviando solicitud de acceso " + worker.getMessage();
                     logger.error(msg);
-                    infoVoto.setError(InfoVoto.Error.ACCESS_REQUEST);
-                    infoVoto.setMensaje(msg);
-                    countDownLatch.countDown();
                 }
-                break;                
-            case TIMESTAMP_VOTE:
-                if(Respuesta.SC_OK == worker.getStatusCode()) {
-                    try {
-                        documentSMIME.setTimeStampToken((TimeStampWorker)worker);
-                        X509Certificate serverCert = ContextoPruebas.getCentroControl().getCertificate();
-                        String urlVoto = ContextoPruebas.getURLVoto(
-                            infoVoto.getVoto().getCentroControl().getServerURL());            
-                        new NotificarVotoWorker(NOTIFICAR_VOTO_WORKER, 
-                                infoVoto.getVoto(), urlVoto, serverCert, documentSMIME, 
-                                wrapperClient, this).execute();
-                    } catch (Exception ex) {
-                        logger.error(ex.getMessage(), ex);
-                        infoVoto.setCodigoEstado(Respuesta.SC_ERROR_EJECUCION);
-                        infoVoto.setError(InfoVoto.Error.VOTE);
-                        infoVoto.setMensaje(ex.getMessage());
-                        countDownLatch.countDown();
-                    }
-                } else {
-                    String msg = "showResult - ERROR TIMESTAMP_VOTE - " + worker.getMessage();
-                    logger.debug(msg); 
-                    infoVoto.setError(InfoVoto.Error.VOTE);
-                    infoVoto.setMensaje(msg);
-                    countDownLatch.countDown();
-                }
-                break;       
-            case NOTIFICAR_VOTO_WORKER:
-                if (Respuesta.SC_OK == worker.getStatusCode()) {   
-                    ReciboVoto recibo = ((NotificarVotoWorker)worker).getReciboVoto();
-                    infoVoto.setReciboVoto(recibo);
-                    //VotacionHelper.addRecibo(infoVoto.getVoto().getHashCertificadoVotoBase64(), recibo);
-                } else {
-                    infoVoto.setMensaje(worker.getMessage());
-                    infoVoto.setError(InfoVoto.Error.VOTE);
-                } 
                 countDownLatch.countDown();
-                break;
+                break;                    
             default:
                 logger.debug("*** UNKNOWN WORKER ID: '" + worker.getId() + "'");
         }

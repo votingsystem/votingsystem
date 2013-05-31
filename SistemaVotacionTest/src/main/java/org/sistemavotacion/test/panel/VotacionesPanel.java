@@ -11,18 +11,18 @@ import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.MainFrame;
 import org.sistemavotacion.test.dialogo.*;
-import org.sistemavotacion.test.simulacion.SimulationListener;
-import org.sistemavotacion.test.simulacion.Simulator;
-import org.sistemavotacion.test.simulacion.Votacion;
+import org.sistemavotacion.test.simulation.SimulatorListener;
+import org.sistemavotacion.test.simulation.Simulator;
+import org.sistemavotacion.test.simulation.VotingSimulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class VotacionesPanel extends JPanel implements 
-        HyperlinkListener, SimulationListener {
+        HyperlinkListener, SimulatorListener {
     
     private static Logger logger = LoggerFactory.getLogger(VotacionesPanel.class);
 
@@ -33,7 +33,7 @@ public class VotacionesPanel extends JPanel implements
     private Estado estado = Estado.RECOGIDA_DATOS;
     private String erroresSolicitudes;
     private String erroresEnVotos;
-    private Votacion votacion;
+    private VotingSimulator votacion;
     public static VotacionesPanel INSTANCIA;
     private HashMap<String, ActorConIP> hashMapActores = null;
     
@@ -447,7 +447,7 @@ public class VotacionesPanel extends JPanel implements
                 actualizarContadorVotosLanzados(0);
                 actualizarContadorVotosValidados(0);
                 actualizarContadorVotosError(0);
-                votacion = new Votacion(ContextoPruebas.getUserBaseData(), this);
+                votacion = new VotingSimulator(ContextoPruebas.getUserBaseData(), this);
                 votacion.init();
                 digitalClockPanel.start(DigitalClockPanel.Mode.STOPWATCH);
                 break;

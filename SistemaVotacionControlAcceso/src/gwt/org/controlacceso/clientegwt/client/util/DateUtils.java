@@ -2,7 +2,7 @@ package org.controlacceso.clientegwt.client.util;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 import java.util.Date;
 import com.google.gwt.i18n.client.DateTimeFormat;

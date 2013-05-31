@@ -2,7 +2,7 @@ package org.centrocontrol.clientegwt.client.util;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;

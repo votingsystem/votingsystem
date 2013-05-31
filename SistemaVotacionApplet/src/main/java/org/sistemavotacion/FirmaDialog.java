@@ -23,8 +23,8 @@ import org.sistemavotacion.smime.DNIeSignedMailGenerator;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.worker.DocumentSenderWorker;
-import org.sistemavotacion.worker.ObtenerArchivoWorker;
-import org.sistemavotacion.worker.PDFSignerDNIeWorker;
+import org.sistemavotacion.worker.InfoGetterWorker;
+import org.sistemavotacion.worker.PDFSignerWorker;
 import org.sistemavotacion.worker.TimeStampWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ import org.sistemavotacion.worker.VotingSystemWorker;
 
 /**
 * @author jgzornoza
-* Licencia: https://raw.github.com/jgzornoza/SistemaVotacion/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
 
@@ -53,7 +53,7 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
     
     private static final int PDF_SIGNER_DNIE_WORKER          = 0;
     private static final int ENVIAR_DOCUMENTO_FIRMADO_WORKER = 1;
-    private static final int OBTENER_ARCHIVO_WORKER          = 2;
+    private static final int INFO_GETTER_WORKER          = 2;
     private static final int TIME_STAMP_WORKER               = 3;
 
     private byte[] bytesDocumento;
@@ -127,10 +127,10 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
     }
     
     public void obtenerPDFFirma (String urlDocumento) {
-        logger.debug("obtnerePDFFirma - urlDocumento: " + urlDocumento);
+        logger.debug("obtnerPDFFirma - urlDocumento: " + urlDocumento);
         progressLabel.setText("<html>" + getString("obteniendoDocumento") +"</html>");
         mostrarPantallaEnvio(true);
-        new ObtenerArchivoWorker(OBTENER_ARCHIVO_WORKER, urlDocumento, 
+        new InfoGetterWorker(INFO_GETTER_WORKER, urlDocumento, 
                 Contexto.PDF_CONTENT_TYPE, this).execute();
         setVisible(true);
     }
@@ -342,16 +342,13 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                         case SOLICITUD_COPIA_SEGURIDAD:
                         case FIRMA_MANIFIESTO_PDF:
                         case PUBLICACION_MANIFIESTO_PDF:
-                            File documentoFirmado = new File(FileUtils.APPTEMPDIR +
-                                operacion.getTipo().getNombreArchivoEnDisco());
-                            documentoFirmado.deleteOnExit();
                             PdfReader readerManifiesto = new PdfReader(bytesDocumento);
                             String reason = null;
                             String location = null;
-                            new PDFSignerDNIeWorker(PDF_SIGNER_DNIE_WORKER, 
+                            new PDFSignerWorker(PDF_SIGNER_DNIE_WORKER, 
                                     operacion.getUrlTimeStampServer(),
                                     INSTANCIA, reason, location, finalPassword.toCharArray(), 
-                                    readerManifiesto, documentoFirmado).execute();
+                                    readerManifiesto, null, null).execute();
                             return;
                         default:
                             logger.debug("No se ha encontrado la operación " + operacion.getTipo().toString());
@@ -474,7 +471,7 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
         switch(worker.getId()) {
             case PDF_SIGNER_DNIE_WORKER:
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
-                    processPDF(((PDFSignerDNIeWorker)worker).
+                    processPDF(((PDFSignerWorker)worker).
                             getSignedAndTimeStampedPDF());
                 } else {
                     mostrarPantallaEnvio(false);
@@ -482,10 +479,11 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                     errorDialog.setMessage(worker.getMessage(), getString("errorLbl"));
                 }
                 break;
-            case OBTENER_ARCHIVO_WORKER:
+            case INFO_GETTER_WORKER:
                 mostrarPantallaEnvio(false);
                 if (Respuesta.SC_OK == worker.getStatusCode()) {    
-                    bytesDocumento =((ObtenerArchivoWorker)worker).getBytesArchivo();
+                    bytesDocumento =((InfoGetterWorker)worker).getRespuesta().
+                            getBytesArchivo();
                     pack();
                 } else {
                     dispose();

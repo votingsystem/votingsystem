@@ -1,5 +1,7 @@
-package org.sistemavotacion.test.simulacion;
+package org.sistemavotacion.test.simulation;
 
+import org.sistemavotacion.test.simulation.launcher.RepresentingRequestLauncher;
+import org.sistemavotacion.test.simulation.launcher.RepresentativeDelegationLauncher;
 import java.io.File;
 import java.security.KeyStore;
 import java.util.ArrayList;
@@ -22,12 +24,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author jgzornoza
- */
-public class CreacionBaseUsuarios implements Simulator {
+* @author jgzornoza
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+*/
+public class UserBaseDataSimulator implements Simulator {
     
-    private static Logger logger = LoggerFactory.getLogger(CreacionBaseUsuarios.class);
+    private static Logger logger = LoggerFactory.getLogger(UserBaseDataSimulator.class);
     
     public static final int MAX_PENDING_RESPONSES = 10;
         
@@ -45,7 +47,7 @@ public class CreacionBaseUsuarios implements Simulator {
     private static long comienzo;
     private static long duracion;
     
-    SimulationListener<UserBaseData> simulationListener;
+    SimulatorListener<UserBaseData> simulationListener;
     
     private UserBaseData userBaseData;
     
@@ -56,8 +58,8 @@ public class CreacionBaseUsuarios implements Simulator {
     List<String> userWithoutRepresentativeList = new ArrayList<String>();
     
 
-    public CreacionBaseUsuarios(UserBaseData userBaseData, 
-            SimulationListener<UserBaseData> simulationListener) {
+    public UserBaseDataSimulator(UserBaseData userBaseData, 
+            SimulatorListener<UserBaseData> simulationListener) {
         logger.debug("numRepresentatives '" + userBaseData.getNumRepresentatives() + 
             "' - Users with representative '" + userBaseData.getNumUsersWithRepresentative() + 
             "' - Users without representative '" + userBaseData.getNumUsersWithoutRepresentative());
@@ -138,7 +140,7 @@ public class CreacionBaseUsuarios implements Simulator {
         do {
             if((altasEnviadas.get() - altasRecogidas.get()) < 
                     MAX_PENDING_RESPONSES) {
-                requestCompletionService.submit(new LanzadoraAltaRepresentante(
+                requestCompletionService.submit(new RepresentingRequestLauncher(
                         NifUtils.getNif(new Long(userBaseData.
                         getAndIncrementUserIndex()).intValue())));
                 altasEnviadas.getAndIncrement();
@@ -165,7 +167,7 @@ public class CreacionBaseUsuarios implements Simulator {
                             "userBaseWithouRepresentativesErrorMsg"));
                     break;
                 } 
-                requestCompletionService.submit(new LanzadoraDelegacionRepresentante(
+                requestCompletionService.submit(new RepresentativeDelegationLauncher(
                         userNIF, representativeNIF));
                 delegacionesEnviadas.getAndIncrement();
             } else Thread.sleep(500);

@@ -1,6 +1,6 @@
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 
 grails.servlet.version = "3.0" // Change depending on target container compliance (2.5 or 3.0)

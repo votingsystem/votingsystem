@@ -71,7 +71,6 @@ class PdfService {
 	def messageSource
 	def subscripcionService
 	def encryptionService
-	private KeyStore trustedCertsKeyStore
 	private PrivateKey key;
 	private Certificate[] chain;
 	private Session session
@@ -89,14 +88,6 @@ class PdfService {
 		key = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray());
 		chain = keyStore.getCertificateChain(aliasClaves);
 		log.debug "aliasClaves: ${aliasClaves} - chain.length:${chain.length}"
-		trustedCertsKeyStore = KeyStore.getInstance("JKS");
-		trustedCertsKeyStore.load(null, null);
-		Set<X509Certificate> trustedCertsSet = firmaService.getTrustedCerts()
-		log.debug "trustedCerts.size: ${trustedCertsSet.size()}"
-		for(X509Certificate certificate:trustedCertsSet) {
-			trustedCertsKeyStore.setCertificateEntry(
-				certificate.getSubjectDN().toString(), certificate);
-		}
 		Properties props = System.getProperties();
 		// Get a Session object with the default properties.
 		session = Session.getDefaultInstance(props, null);
@@ -128,7 +119,10 @@ class PdfService {
 			Calendar signDate = pk.getSignDate();
 			X509Certificate[] pkc = (X509Certificate[])pk.getSignCertificateChain();
 			TimeStampToken timeStampToken = pk.getTimeStampToken();
-			Object[] fails = PdfPKCS7.verifyCertificates(pkc, getTrustedCertsKeyStore(), null, signDate);
+			
+			KeyStore keyStore = firmaService.getTrustedCertsKeyStore()
+			
+			Object[] fails = PdfPKCS7.verifyCertificates(pkc, keyStore, null, signDate);
 			if(fails != null) {
 				log.debug("checkSignature - fails - Cert '${signingCert.getSerialNumber()?.longValue()}' has fails: ${fails[1]}" );
 				for(X509Certificate cert:pkc) {
@@ -243,11 +237,6 @@ class PdfService {
 			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:ex.getMessage())
 		}
 		return respuesta
-	}
-	
-    public KeyStore getTrustedCertsKeyStore() {
-		if(!trustedCertsKeyStore) afterPropertiesSet();
-		return trustedCertsKeyStore;
 	}
 			
 	public String getAbsolutePath(String filePath){

@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: http://bit.ly/j9jZQH
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 * */
 public class NifUtils {
 	
@@ -27,7 +27,8 @@ public class NifUtils {
     }
     
     public static String getNif(int number) {
-        return String.valueOf(number) + calculaLetraNIF(number);
+        String nif = String.valueOf(number) + calculaLetraNIF(number);
+        return validarNIF(nif);
     }
     
     // sacado de http://felinfo.blogspot.com.es/2010/12/calcular-la-letra-del-dni-con-java.html
@@ -57,4 +58,10 @@ public class NifUtils {
         }
     }
     
+    public static void main(String[] args) {
+        
+        for(int i = 0; i <10; i++) {
+            logger.debug("Numero " + i + " -> nif: " + validarNIF(getNif(i)));
+        }
+    }
 }

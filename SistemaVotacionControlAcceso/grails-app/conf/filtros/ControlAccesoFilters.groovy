@@ -17,7 +17,7 @@ import org.springframework.web.multipart.support.DefaultMultipartHttpServletRequ
 import org.springframework.web.servlet.FlashMap;
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 * 
 */
 class ControlAccesoFilters {
@@ -48,8 +48,6 @@ class ControlAccesoFilters {
 				params.receiverCert = null
 				params.responseBytes = null
 				params.requestBytes = null
-				params.forwarded = null
-				params.pdfDocument = null
 				params.respuesta = null
             }
 			after = {
@@ -187,8 +185,10 @@ class ControlAccesoFilters {
 		
 		pkcs7DocumentsFilter(controller:'*', action:'*') {
 			before = {
-				if(params.forwarded) {
+				log.debug("---- pkcs7DocumentsFilter - before -")
+				if(flash.forwarded) {
 					log.debug("---- pkcs7DocumentsFilter - before - REQUEST FORWARDED- BYPASS PKCS7 FILTER");
+					flash.forwarded = null
 					return;
 				}
 				//Content-Type: application/x-pkcs7-signature, application/x-pkcs7-mime -> signed and encrypted
@@ -225,7 +225,7 @@ class ControlAccesoFilters {
 								log.debug "---- pkcs7DocumentsFilter - before  -> PDF ENCRYPTED - TODO"	
 							}
 						} else if(request?.contentType?.contains("application/x-pkcs7-signature")) {
-							log.debug "---- pkcs7DocumentsFilter - before  - PDF SIGNED"
+							log.debug "---- pkcs7DocumentsFilter - before  - PDF SIGNED - TODO"
 						} else {
 							log.debug "---- pkcs7DocumentsFilter - before  - PLAIN PDF - TODO"
 							requestBytes = null

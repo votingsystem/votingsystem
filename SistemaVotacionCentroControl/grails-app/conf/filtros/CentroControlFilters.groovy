@@ -22,7 +22,7 @@ import java.util.Map;
 import org.sistemavotacion.smime.SignedMailValidator.ValidationResult;
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 * 
 * */
 class CentroControlFilters {
@@ -54,7 +54,6 @@ class CentroControlFilters {
 				params.mensajeSMIMEReq = null
 				params.receiverCert = null
 				params.responseBytes = null
-				params.forwarded = null
 				params.pdfDocument = null
             }
 			
@@ -105,8 +104,9 @@ class CentroControlFilters {
 		
 		pkcs7DocumentsFilter(controller:'*', action:'*') {
 			before = {
-				if(params.forwarded) {
+				if(flash.forwarded) {
 					log.debug("---- pkcs7DocumentsFilter - before - REQUEST FORWARDED- BYPASS PKCS7 FILTER");
+					flash.forwarded = null
 					return;
 				}
 				//Content-Type: application/x-pkcs7-signature, application/x-pkcs7-mime -> signed and encrypted

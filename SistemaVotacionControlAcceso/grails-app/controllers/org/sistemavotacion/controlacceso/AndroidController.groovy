@@ -8,7 +8,7 @@ import grails.converters.JSON
  * @descController Controlador que sirve la aplicación para clientes Android.
  *
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
 class AndroidController {
 

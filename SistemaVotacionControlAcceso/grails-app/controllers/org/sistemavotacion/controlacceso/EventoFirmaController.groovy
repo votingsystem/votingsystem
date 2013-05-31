@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest
  * @descController Servicios relacionados con la publicación de manifiestos.
  *
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
 class EventoFirmaController {
 
@@ -31,7 +31,6 @@ class EventoFirmaController {
 	 */
 	def index() { 
 		if(request.contentType?.contains("application/pdf")) {
-			params.forwarded = true
 			forward action: "obtenerPDF"
 			return false
 		}
@@ -49,7 +48,7 @@ class EventoFirmaController {
 			render eventoMap as JSON
 			return false
 		}
-		params.forwarded = true
+		flash.forwarded = true
 		forward action: "obtenerManifiestos"
 		return false
 	}
@@ -65,6 +64,7 @@ class EventoFirmaController {
 	 * @return El manifiesto en formato PDF.
 	 */
 	def obtenerPDF () {
+		log.debug("obtenerPDF - ${params.id}")
 		if (params.long('id')) {
 			EventoFirma evento
 			Evento.withTransaction{
@@ -98,13 +98,12 @@ class EventoFirmaController {
 	}
 
 	
-	def post() {
+	def save() {
 		if(request.contentType?.contains("application/pdf")) {
-			params.forwarded = true
+			flash.forwarded = Boolean.TRUE
 			forward action: "validarPDF"
 			return false
 		} else {
-			params.forwarded = true
 			forward action: "publicarPDF"
 			return false
 		}
@@ -145,7 +144,7 @@ class EventoFirmaController {
 			}
 			try {
 				Respuesta respuesta = eventoFirmaService.saveManifest(documento,
-					evento, Documento.Estado.MANIFIESTO, request.getLocale(), true)
+					evento, request.getLocale())
 				response.status = respuesta.codigoEstado
 				render respuesta.mensaje
 				return false
@@ -187,14 +186,12 @@ class EventoFirmaController {
 					contenido:eventoJSON.contenido,
 					fechaFin:new Date().parse("yyyy-MM-dd HH:mm:ss", eventoJSON.fechaFin))
 				evento.save()
-				runAsync {
-					ByteArrayOutputStream bytes = pdfRenderingService.render(
+				ByteArrayOutputStream bytes = pdfRenderingService.render(
 						template: "/eventoFirma/pdf", model:[evento:evento])
-					Evento.withTransaction{
-						evento.pdf = bytes.toByteArray()
-						evento.save()
-						log.debug "Generado PDF de evento ${evento.id}"
-					}
+				Evento.withTransaction{
+					evento.pdf = bytes.toByteArray()
+					evento.save()
+					log.debug "Generado PDF de evento ${evento.id}"
 				}
 				log.debug "Saved evento ${evento.id}"
 				render evento.id

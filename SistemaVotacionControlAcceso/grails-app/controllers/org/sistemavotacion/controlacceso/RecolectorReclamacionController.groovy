@@ -9,7 +9,7 @@ import grails.converters.JSON
  * @descController Servicios relacionados con la recogida de reclamaciones.
  *
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
 class RecolectorReclamacionController {
 

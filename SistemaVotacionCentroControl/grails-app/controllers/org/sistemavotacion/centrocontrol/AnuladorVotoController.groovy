@@ -14,7 +14,7 @@ import org.sistemavotacion.seguridad.CertUtil
  * @descController Servicios que permiten anular los votos de una votación
  *
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  * */
 class AnuladorVotoController {
 	

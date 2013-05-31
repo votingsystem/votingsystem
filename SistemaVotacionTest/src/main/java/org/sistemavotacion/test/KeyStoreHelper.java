@@ -13,37 +13,30 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class KeyStoreHelper {
 
     private static Logger logger = LoggerFactory.getLogger(KeyStoreHelper.class);
     
-    private static X500PrivateCredential mockRaizDNIe;
-    
     public static void main(String args[]) throws Exception { }
 
     
     public static KeyStore crearMockRaizDNIe() throws Exception {
-        return KeyStoreUtil.createRootKeyStore(ContextoPruebas.COMIEZO_VALIDEZ_CERT, 
+        KeyStore keyStore = KeyStoreUtil.createRootKeyStore(ContextoPruebas.COMIEZO_VALIDEZ_CERT, 
                 ContextoPruebas.PERIODO_VALIDEZ_ALMACEN_RAIZ, 
                 ContextoPruebas.PASSWORD.toCharArray(), ContextoPruebas.ROOT_ALIAS, 
-                File.createTempFile("mockRaiz", ".jks").getAbsolutePath(), 
                 "CN=Autoridad Certificadora Sistema de Votación, OU=DNIE_CA");
+        return keyStore;
     }
     
     public static X500PrivateCredential obtenerMockRaizDNIePrivateCredential() throws Exception {
-        if (mockRaizDNIe != null) return mockRaizDNIe;
-        //logger.debug("Inicializando mock raiz dnie en ->" + RUTA_MOCK_RAIZ_DNIE);
-        //File mockRaizDNIeFile = new File(RUTA_MOCK_RAIZ_DNIE);
-        File mockRaizDNIeFile = File.createTempFile("mockRaiz", ".jks");
         KeyStore rootKeyStore = crearMockRaizDNIe();
         X509Certificate rootCertificate = (X509Certificate)rootKeyStore.getCertificate(ContextoPruebas.ROOT_ALIAS);
         PrivateKey rootPK = (PrivateKey) rootKeyStore.getKey(ContextoPruebas.ROOT_ALIAS, 
                 ContextoPruebas.PASSWORD.toCharArray());
-        mockRaizDNIe = new X500PrivateCredential(
+        X500PrivateCredential mockRaizDNIe = new X500PrivateCredential(
             rootCertificate,rootPK,ContextoPruebas.ROOT_ALIAS);
-        //X509Certificate rootCert = (X509Certificate)rootKeyStore.getCertificate(ContextoPruebas.ROOT_ALIAS);
         return mockRaizDNIe;
     }
 

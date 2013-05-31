@@ -1,0 +1,19 @@
+{"accessControlURL":"http://localhost:8080/SistemaVotacionControlAcceso",
+  "controlCenterURL":"http://localhost:8081/SistemaVotacionCentroControl",
+  "timeStampServerURL":"http://localhost:8080/SistemaVotacionControlAcceso/timeStamp",
+  "maxPendingResponses":10,
+   "numberOfRequests":5,
+  "htmlContent":"<span style=\"color: green;\">Una fresca mañana de mayo<\/span><br/><span style=\"font-weight: bold;\">Probando varios tipos de letra<\/span><br/><span style=\"color: blue;\">Para <span style=\"color: red;\">comprobar<\/span> la firmas de PDFs<\/span><br/>",
+    "userBaseData":{
+        "userIndex":1,
+        "numRepresentatives":0,                
+        "numUsersWithoutRepresentative":5,
+        "numVotesUsersWithoutRepresentative":5, 
+        "numUsersWithRepresentative":0, 
+        "numVotesUsersWithRepresentative":0}
+}
+
+
+
+
+    

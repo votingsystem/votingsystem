@@ -15,6 +15,13 @@ public class SimulationData {
     
     private String accessControlURL = null;
     private String controlCenterURL = null;
+    private String timeStampServerURL = null;
+    
+    private Integer numberOfRequests = null;
+    private Integer maxPendingResponses = null;
+    
+    private String htmlContent = null;
+    
     private UserBaseData userBaseData = null;
 
     /**
@@ -67,6 +74,18 @@ public class SimulationData {
         if (dataJSON.containsKey("controlCenterURL")) {
             simulationData.setControlCenterURL(dataJSON.getString("controlCenterURL"));
         }  
+        if (dataJSON.containsKey("htmlContent")) {
+            simulationData.setHtmlContent(dataJSON.getString("htmlContent"));
+        }
+        if (dataJSON.containsKey("timeStampServerURL")) {
+            simulationData.setTimeStampServerURL(dataJSON.getString("timeStampServerURL"));
+        }
+        if (dataJSON.containsKey("numberOfRequests")) {
+            simulationData.setNumberOfRequests(dataJSON.getInt("numberOfRequests"));
+        }
+        if (dataJSON.containsKey("maxPendingResponses")) {
+            simulationData.setMaxPendingResponses(dataJSON.getInt("maxPendingResponses"));
+        }
         return simulationData;
     }
 
@@ -82,6 +101,62 @@ public class SimulationData {
      */
     public void setUserBaseData(UserBaseData userBaseData) {
         this.userBaseData = userBaseData;
+    }
+
+    /**
+     * @return the htmlContent
+     */
+    public String getHtmlContent() {
+        return htmlContent;
+    }
+
+    /**
+     * @param htmlContent the htmlContent to set
+     */
+    public void setHtmlContent(String htmlContent) {
+        this.htmlContent = htmlContent;
+    }
+
+    /**
+     * @return the timeStampServerURL
+     */
+    public String getTimeStampServerURL() {
+        return timeStampServerURL;
+    }
+
+    /**
+     * @param timeStampServerURL the timeStampServerURL to set
+     */
+    public void setTimeStampServerURL(String timeStampServerURL) {
+        this.timeStampServerURL = timeStampServerURL;
+    }
+
+    /**
+     * @return the numberOfRequests
+     */
+    public Integer getNumberOfRequests() {
+        return numberOfRequests;
+    }
+
+    /**
+     * @param numberOfRequests the numberOfRequests to set
+     */
+    public void setNumberOfRequests(Integer numberOfRequests) {
+        this.numberOfRequests = numberOfRequests;
+    }
+
+    /**
+     * @return the maxPendingResponses
+     */
+    public Integer getMaxPendingResponses() {
+        return maxPendingResponses;
+    }
+
+    /**
+     * @param maxPendingResponses the maxPendingResponses to set
+     */
+    public void setMaxPendingResponses(Integer maxPendingResponses) {
+        this.maxPendingResponses = maxPendingResponses;
     }
     
     

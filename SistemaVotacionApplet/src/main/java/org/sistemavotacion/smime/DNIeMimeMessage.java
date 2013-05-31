@@ -44,7 +44,7 @@ import org.sistemavotacion.util.StringUtils;
 
 /**
 * @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class DNIeMimeMessage extends MimeMessage {
     

@@ -16,7 +16,7 @@ import com.itextpdf.text.Document;
  * @descController Servicios relacionados con la recogida de firmas.
  *
  * @author jgzornoza
- * Licencia: https://github.com/jgzornoza/SistemaVotacion/blob/master/licencia.txt
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
 class RecolectorFirmaController {
 	
@@ -34,11 +34,11 @@ class RecolectorFirmaController {
 	 */
 	def index() {
 		Documento documento = params.pdfDocument
-		if(params.long(id) && documento &&	
+		if(params.long('id') && documento &&	
 			documento.estado == Documento.Estado.VALIDADO) {
 			EventoFirma evento = null;
 			EventoFirma.withTransaction{
-				evento = EventoFirma.get(params.long(id))
+				evento = EventoFirma.get(params.long('id'))
 			}
 			if(!evento) {
 				response.status = Respuesta.SC_ERROR_PETICION
