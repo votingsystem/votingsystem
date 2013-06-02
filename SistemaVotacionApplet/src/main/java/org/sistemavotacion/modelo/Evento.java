@@ -1,15 +1,19 @@
 package org.sistemavotacion.modelo;
 
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
+import org.sistemavotacion.smime.CMSUtils;
 import org.sistemavotacion.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +28,8 @@ public class Evento {
     
     public enum CardinalidadDeOpciones { MULTIPLES, UNA}
   
-    private Long eventoId;
+    private Long id; //id of the event in the server
+    private Long eventoId;//id of the event in the Access Control
     private OpcionEvento opcionSeleccionada;
     private List<OpcionEvento> opciones;
     private String asunto;
@@ -51,6 +56,21 @@ public class Evento {
     private Integer numeroTotalFirmas;
     private Integer numeroTotalVotos;
     private Boolean firmado;
+    
+    
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
     
     /**
      * @return the origenHashCertificadoVoto
@@ -130,6 +150,7 @@ public class Evento {
      * @return the eventoId
      */
     public Long getEventoId() {
+        if(eventoId == null) return id;
         return eventoId;
     }
 
@@ -195,87 +216,14 @@ public class Evento {
         return parse(eventoJSON);
     }
     
-   public static Evento parse (JSONObject eventoJSON) {
-        if(eventoJSON == null) return null;
-        Evento evento = new Evento();
-        if(eventoJSON.containsKey("id")) evento.setEventoId(eventoJSON.getLong("id"));
-        if(eventoJSON.containsKey("URL")) evento.setUrl(eventoJSON.getString("URL"));
-        if(eventoJSON.containsKey("centroControl")) {
-            evento.setCentroControl(ActorConIP.parse(eventoJSON.getJSONObject("centroControl")));
-        }        
-        if(eventoJSON.containsKey("controlAcceso")) {
-            evento.setControlAcceso(ActorConIP.parse(eventoJSON.getJSONObject("controlAcceso")));
-        } 
-        if(eventoJSON.containsKey("asunto")) evento.
-                setAsunto(eventoJSON.getString("asunto"));
-        if(eventoJSON.containsKey("hashSolicitudAccesoBase64")) evento.
-            setHashSolicitudAccesoBase64(eventoJSON.getString("hashSolicitudAccesoBase64"));
-        if(eventoJSON.containsKey("opcionSeleccionadaId")) {
-            OpcionEvento opcion = new OpcionEvento();
-            opcion.setId(eventoJSON.getLong("opcionSeleccionadaId"));
-            if(eventoJSON.containsKey("opcionSeleccionadaContenido")) {
-                opcion.setContenido(eventoJSON.getString("opcionSeleccionadaContenido"));
-            }
-            evento.setOpcionSeleccionada(opcion);
-        }
-        if(eventoJSON.containsKey("eventoURL")) evento.setUrl(
-                eventoJSON.getString("eventoURL"));
-        if(eventoJSON.containsKey("urlSolicitudAcceso")) evento.
-                setUrlSolicitudAcceso(eventoJSON.getString("urlSolicitudAcceso"));
-        if(eventoJSON.containsKey("urlRecolectorVotosCentroControl")) evento.
-                setUrlRecolectorVotosCentroControl(eventoJSON.getString("urlRecolectorVotosCentroControl"));
-        if(eventoJSON.containsKey("contenido")) evento.setContenido(
-                eventoJSON.getString("contenido"));   
-        try {
-            if(eventoJSON.containsKey("fechaInicio")) evento.setFechaInicioStr(
-                eventoJSON.getString("fechaInicio")); 
-            if(eventoJSON.containsKey("fechaFin")) evento.setFechaFinStr(
-                eventoJSON.getString("fechaFin")); 
-        } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
-        }
-        if(eventoJSON.containsKey("multiplesFirmas")) evento.setMultiplesFirmas(
-                eventoJSON.getBoolean("multiplesFirmas"));
-        if(eventoJSON.containsKey("cardinalidadDeOpciones")) {
-            evento.setCardinalidadDeOpciones(CardinalidadDeOpciones.valueOf(
-                    eventoJSON.getString("cardinalidadDeOpciones")));
-        }
-        if(eventoJSON.containsKey("campos")) {
-            JSONArray arrayCampos = eventoJSON.getJSONArray("campos");
-            String[] campos =  new String[arrayCampos.size()];
-            for(int i = 0; i < arrayCampos.size(); i++) {
-                campos[i] = arrayCampos.getString(i);
-            }
-            evento.setCampos(campos);
-        }
-        if(eventoJSON.containsKey("opciones")) {
-            JSONArray arrayCampos = eventoJSON.getJSONArray("opciones");
-            List<OpcionEvento> opciones =  new ArrayList<OpcionEvento>();
-            for(int i = 0; i < arrayCampos.size(); i++) {
-                opciones.add(OpcionEvento.parse(arrayCampos.getString(i)));
-            }
-            evento.setOpciones(opciones);
-        }
-        if(eventoJSON.containsKey("opcionSeleccionada")) {
-            evento.setOpcionSeleccionada(OpcionEvento.parse(
-                    eventoJSON.getJSONObject("opcionSeleccionada")));
-        }
-        if(eventoJSON.containsKey("etiquetas")) {
-            JSONArray arrayEtiquetas = eventoJSON.getJSONArray("etiquetas");
-            String[] etiquetas =  new String[arrayEtiquetas.size()];
-            for(int i = 0; i < arrayEtiquetas.size(); i++) {
-                etiquetas[i] = arrayEtiquetas.getString(i);
-            }
-        }    
-        return evento;
-    }
-    
-    public JSONObject obtenerJSON() {
+    public JSONObject toJSON() {
         logger.debug("obtenerJSON");
         Map map = new HashMap();
-        map.put("asunto", asunto);
-        map.put("url", url);
-        map.put("id", eventoId);
+        if(asunto != null) map.put("asunto", asunto);
+        if(contenido != null) map.put("contenido", contenido);
+        if(fechaInicio != null) map.put("fechaInicio", DateUtils.getStringFromDate(fechaInicio));
+        if(fechaFin != null) map.put("fechaFin", DateUtils.getStringFromDate(fechaFin));
+        if(url != null) map.put("url", url);
         if(usuario != null) {
             JSONObject usuarioJSONObject = new JSONObject();
             usuarioJSONObject.put("nif", usuario.getNif());
@@ -295,18 +243,99 @@ public class Evento {
             centroControlJSONObject.put("nombre", centroControl.getNombre());
             map.put("centroControl", centroControlJSONObject);
         }
-        map.put("hashCertificadoVotoBase64", hashCertificadoVotoBase64);
-        map.put("hashCertificadoVotoHex", getBase64ToHexStr(hashCertificadoVotoBase64));
+        if(hashCertificadoVotoBase64 != null) {
+            map.put("hashCertificadoVotoBase64", hashCertificadoVotoBase64);
+            map.put("hashCertificadoVotoHex", getBase64ToHexStr(hashCertificadoVotoBase64));
+        }
+        if(hashSolicitudAccesoBase64 != null) {
+            map.put("hashSolicitudAccesoBase64", hashSolicitudAccesoBase64);
+            map.put("hashSolicitudAccesoHex", getBase64ToHexStr(hashSolicitudAccesoBase64)); 
+        }
+        if (tipo != null) map.put("tipoEvento", tipo.toString()); 
+        if (getEventoId() != null) map.put("eventoId", getEventoId());
+        if (id != null) map.put("id", id);
+        map.put("UUID", UUID.randomUUID().toString());
+        JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);
+        if (etiquetas != null) {
+            JSONArray jsonArray = new JSONArray();
+            for (String etiqueta : etiquetas) {
+                jsonArray.element(etiqueta);
+            }
+            jsonObject.put("etiquetas", jsonArray);
+        }
+        if (centroControl != null) {
+            Map centroControlMap = new HashMap(); 
+            centroControlMap.put("id", centroControl.getId());
+            centroControlMap.put("nombre", centroControl.getNombre());
+            centroControlMap.put("serverURL", centroControl.getServerURL());
+            JSONObject centroControlJSON = (JSONObject) JSONSerializer.toJSON( centroControlMap );
+            jsonObject.put("centroControl", centroControlJSON);
+        }        
+        if (opciones != null && tipo == Tipo.VOTACION) {
+            JSONArray jsonArray = new JSONArray();
+            for (OpcionEvento opcion : opciones) {
+                jsonArray.element(opcion.getContenido());
+            }
+            jsonObject.put("opciones", jsonArray);
+        }
+        if (opciones != null && tipo!= Tipo.VOTACION) {
+            JSONArray jsonArray = new JSONArray();
+            for (OpcionEvento opcion : opciones) {
+                Map campoMap = new HashMap();
+                campoMap.put("contenido", opcion.getContenido());
+                campoMap.put("valor", opcion.getValor());
+                campoMap.put("id", opcion.getId());
+                JSONObject camposJSON = (JSONObject) JSONSerializer.toJSON(campoMap);
+                jsonArray.element(camposJSON);
+            }
+            jsonObject.put("opciones", jsonArray);
+        }
+        if (cardinalidadDeOpciones != null) map.put("cardinalidad", 
+                cardinalidadDeOpciones.toString()); 
+        if (opcionSeleccionada != null) {
+            Map opcionSeleccionadaMap = new HashMap(); 
+            opcionSeleccionadaMap.put("id", opcionSeleccionada.getId());
+            opcionSeleccionadaMap.put("contenido", opcionSeleccionada.getContenido());
+            JSONObject opcionSeleccionadaJSON = (JSONObject) JSONSerializer.toJSON( opcionSeleccionadaMap );
+            jsonObject.put("opcionSeleccionada", opcionSeleccionadaJSON);
+        }     
+        return jsonObject;
+    }
+     
+    public JSONObject getVoteJSON(String eventURL) {
+        logger.debug("getVoteJSON");
+        Map map = new HashMap();
+        map.put("operation","VOTE");
+        map.put("eventoURL", eventURL);
+        map.put("opcionSeleccionadaId", opcionSeleccionada.getId());
+        map.put("UUID", UUID.randomUUID().toString());
+        JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);
+        return jsonObject;
+    }
+    
+    public JSONObject getAccessRequestJSON(String eventURL) {
+        logger.debug("getAccessRequestJSON");
+        Map map = new HashMap();
+        map.put("operation","SOLICITUD_ACCESO");
+        map.put("eventId", getEventoId());
+        map.put("eventURL", eventURL);
+        map.put("UUID", UUID.randomUUID().toString());
         map.put("hashSolicitudAccesoBase64", hashSolicitudAccesoBase64);
-        map.put("hashSolicitudAccesoHex", getBase64ToHexStr(hashSolicitudAccesoBase64));
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);        
         return jsonObject;
     }
-
-    public String obtenerJSONStr() {
-        logger.debug("obtenerJSONStr");
-        JSONObject jsonObject = obtenerJSON();        
-        return jsonObject.toString();
+   
+    
+    public JSONObject getCancelVoteJSON() {
+        logger.debug("getCancelVoteJSON");
+        Map map = new HashMap();
+        map.put("origenHashCertificadoVoto", origenHashCertificadoVoto);
+        map.put("hashCertificadoVotoBase64", hashCertificadoVotoBase64);
+        map.put("origenHashSolicitudAcceso", origenHashSolicitudAcceso);
+        map.put("hashSolicitudAccesoBase64", hashSolicitudAccesoBase64);
+        map.put("UUID", UUID.randomUUID().toString());
+        JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);
+        return jsonObject;
     }
     
     public String getBase64ToHexStr(String base64Str) {
@@ -515,37 +544,193 @@ public class Evento {
         this.usuario = usuario;
     }
 
-	public Integer getNumeroTotalFirmas() {
-		return numeroTotalFirmas;
-	}
+    public Integer getNumeroTotalFirmas() {
+            return numeroTotalFirmas;
+    }
 
-	public void setNumeroTotalFirmas(Integer numeroTotalFirmas) {
-		this.numeroTotalFirmas = numeroTotalFirmas;
-	}
+    public void setNumeroTotalFirmas(Integer numeroTotalFirmas) {
+            this.numeroTotalFirmas = numeroTotalFirmas;
+    }
 
-	public Integer getNumeroTotalVotos() {
-		return numeroTotalVotos;
-	}
+    public Integer getNumeroTotalVotos() {
+            return numeroTotalVotos;
+    }
 
-	public void setNumeroTotalVotos(Integer numeroTotalVotos) {
-		this.numeroTotalVotos = numeroTotalVotos;
-	}
+    public void setNumeroTotalVotos(Integer numeroTotalVotos) {
+            this.numeroTotalVotos = numeroTotalVotos;
+    }
 
-	public Boolean getFirmado() {
-		return firmado;
-	}
+    public Boolean getFirmado() {
+            return firmado;
+    }
 
-	public void setFirmado(Boolean firmado) {
-		this.firmado = firmado;
-	}
+    public void setFirmado(Boolean firmado) {
+            this.firmado = firmado;
+    }
 
-	public Tipo getTipo() {
-		return tipo;
-	}
+    public Tipo getTipo() {
+            return tipo;
+    }
 
-	public void setTipo(Tipo tipo) {
-		this.tipo = tipo;
-	}
+    public void setTipo(Tipo tipo) {
+            this.tipo = tipo;
+    }
 
+        
+    public Evento genRandomVote (String digestAlg)throws NoSuchAlgorithmException {
+        Evento voto = new Evento();
+        voto.setAsunto(asunto);
+        voto.setCentroControl(centroControl);
+        voto.setContenido(contenido);
+        voto.setControlAcceso(controlAcceso);
+        voto.setEventoId(getEventoId());
+        voto.setOpciones(opciones);
+        String origenHashSolicitudAcceso = UUID.randomUUID().toString();
+        voto.setOrigenHashSolicitudAcceso(origenHashSolicitudAcceso);
+        voto.setHashSolicitudAccesoBase64(CMSUtils.getHashBase64(
+            origenHashSolicitudAcceso, digestAlg));
+        String origenHashCertificadoVoto = UUID.randomUUID().toString();
+        voto.setOrigenHashCertificadoVoto(origenHashCertificadoVoto);
+        voto.setHashCertificadoVotoBase64(CMSUtils.getHashBase64(
+            origenHashCertificadoVoto, digestAlg));  
+        voto.setOpcionSeleccionada(getRandomOption());
+        return voto;
+    }
+    
+    public JSONObject getSignatureContentJSON(Evento evento) {
+        logger.debug("obtenerFirmaParaEventoJSON");
+        Map map = new HashMap();
+        Map controlAccesoMap = new HashMap();
+        controlAccesoMap.put("serverURL", controlAcceso.getServerURL());
+        controlAccesoMap.put("nombre", controlAcceso.getNombre());
+        map.put("controlAcceso", controlAccesoMap);
+        map.put("eventoId", getEventoId());
+        map.put("asunto", asunto);
+        map.put("contenido", contenido);
+        map.put("UUID", UUID.randomUUID().toString());
+        JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON( map );
+        if (evento.getOpciones() != null) {
+            List<OpcionEvento> opciones = evento.getOpciones();
+            JSONArray jsonArray = new JSONArray();
+            for (OpcionEvento opcion : opciones) {
+                Map campoMap = new HashMap();
+                campoMap.put("id", opcion.getId());
+                campoMap.put("contenido", opcion.getContenido());
+                campoMap.put("valor", opcion.getValor());
+                JSONObject camposJSON = (JSONObject) JSONSerializer.toJSON(campoMap);
+                jsonArray.element(camposJSON);
+            }
+            jsonObject.put("opciones", jsonArray);
+        }
+        return jsonObject;
+    }
+    
+    private OpcionEvento getRandomOption () {
+        int size = opciones.size();
+        int item = new Random().nextInt(size); // In real life, the Random object should be rather more shared than this
+        return opciones.get(item);
+    }
+    
+    public static Evento parse (JSONObject eventoJSON) {
+        if(eventoJSON == null) return null;
+        Evento evento = null;
+        try {
+            evento = new Evento();
+            if(eventoJSON.containsKey("id")) 
+                evento.setId(eventoJSON.getLong("id"));
+            if(eventoJSON.containsKey("eventoId")) evento.setEventoId(
+                    eventoJSON.getLong("eventoId"));
+            if(eventoJSON.containsKey("URL")) 
+                evento.setUrl(eventoJSON.getString("URL"));
+            if(eventoJSON.containsKey("centroControl")) {
+                evento.setCentroControl(ActorConIP.parse(eventoJSON.
+                        getJSONObject("centroControl")));
+            }        
+            if(eventoJSON.containsKey("controlAcceso")) {
+                evento.setControlAcceso(ActorConIP.parse(
+                        eventoJSON.getJSONObject("controlAcceso")));
+            } 
+            if(eventoJSON.containsKey("asunto")) evento.
+                    setAsunto(eventoJSON.getString("asunto"));
+            if(eventoJSON.containsKey("hashSolicitudAccesoBase64")) evento.
+                setHashSolicitudAccesoBase64(
+                    eventoJSON.getString("hashSolicitudAccesoBase64"));
+            if(eventoJSON.containsKey("opcionSeleccionadaId")) {
+                OpcionEvento opcion = new OpcionEvento();
+                opcion.setId(eventoJSON.getLong("opcionSeleccionadaId"));
+                if(eventoJSON.containsKey("opcionSeleccionadaContenido")) {
+                    opcion.setContenido(
+                            eventoJSON.getString("opcionSeleccionadaContenido"));
+                }
+                evento.setOpcionSeleccionada(opcion);
+            }
+            if(eventoJSON.containsKey("eventoURL")) evento.setUrl(
+                    eventoJSON.getString("eventoURL"));
+            if(eventoJSON.containsKey("urlSolicitudAcceso")) evento.
+                    setUrlSolicitudAcceso(eventoJSON.getString("urlSolicitudAcceso"));
+            if(eventoJSON.containsKey("urlRecolectorVotosCentroControl")) evento.
+                    setUrlRecolectorVotosCentroControl(
+                    eventoJSON.getString("urlRecolectorVotosCentroControl"));
+            if(eventoJSON.containsKey("contenido")) evento.setContenido(
+                    eventoJSON.getString("contenido"));   
+            if(eventoJSON.containsKey("fechaInicio")) evento.setFechaInicioStr(
+                    eventoJSON.getString("fechaInicio")); 
+            if(eventoJSON.containsKey("fechaFin")) evento.setFechaFinStr(
+                    eventoJSON.getString("fechaFin"));
+            if (eventoJSON.containsKey("numeroTotalFirmas"))        
+                evento.setNumeroTotalFirmas(eventoJSON.getInt("numeroTotalFirmas"));
+            if (eventoJSON.containsKey("numeroTotalVotos"))        
+                evento.setNumeroTotalVotos(eventoJSON.getInt("numeroTotalVotos"));
+            
+            if(eventoJSON.containsKey("multiplesFirmas")) evento.setMultiplesFirmas(
+                    eventoJSON.getBoolean("multiplesFirmas"));
+            if(eventoJSON.containsKey("cardinalidadDeOpciones")) {
+                evento.setCardinalidadDeOpciones(CardinalidadDeOpciones.valueOf(
+                        eventoJSON.getString("cardinalidadDeOpciones")));
+            }
+            if (eventoJSON.containsKey("usuario")) {
+                Usuario usuario = new Usuario();
+                usuario.setNombre(eventoJSON.getString("usuario"));
+                evento.setUsuario(usuario);
+            }
+            if(eventoJSON.containsKey("campos")) {
+                List<OpcionEvento> campos = new ArrayList<OpcionEvento>();
+                JSONArray jsonArray = eventoJSON.getJSONArray("campos");
+                 for (int i = 0; i< jsonArray.size(); i++) {
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+                    OpcionEvento campo = new OpcionEvento();
+                    if(eventoJSON.containsKey("id"))
+                        campo.setId(jsonObject.getLong("id"));
+                    if(eventoJSON.containsKey("contenido"))
+                        campo.setContenido(jsonObject.getString("contenido"));
+                    campos.add(campo);
+                 }
+                evento.setOpciones(campos);
+            }
+            if(eventoJSON.containsKey("opciones")) {
+                JSONArray arrayCampos = eventoJSON.getJSONArray("opciones");
+                List<OpcionEvento> opciones =  new ArrayList<OpcionEvento>();
+                for(int i = 0; i < arrayCampos.size(); i++) {
+                    opciones.add(OpcionEvento.parse(arrayCampos.getString(i)));
+                }
+                evento.setOpciones(opciones);
+            }
+            if(eventoJSON.containsKey("opcionSeleccionada")) {
+                evento.setOpcionSeleccionada(OpcionEvento.parse(
+                        eventoJSON.getJSONObject("opcionSeleccionada")));
+            }
+            if(eventoJSON.containsKey("etiquetas")) {
+                JSONArray arrayEtiquetas = eventoJSON.getJSONArray("etiquetas");
+                String[] etiquetas =  new String[arrayEtiquetas.size()];
+                for(int i = 0; i < arrayEtiquetas.size(); i++) {
+                    etiquetas[i] = arrayEtiquetas.getString(i);
+                }
+            }    
+            
+        } catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
+        return evento;
+    }
     
 }

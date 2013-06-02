@@ -120,7 +120,7 @@ public class VotingService extends Service implements TaskListener {
     				SignedMailGenerator.Type.USER, signedFile);
             SMIMEMessageWrapper timeStampedDocument = new SMIMEMessageWrapper(null, signedFile);
             GetTimeStampTask getTimeStampTask = (GetTimeStampTask) new GetTimeStampTask(null, 
-        			timeStampedDocument.getTimeStampRequest(TIMESTAMP_VOTE_HASH), this).execute(
+        			timeStampedDocument.getTimeStampRequest(), this).execute(
         			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
             if(Respuesta.SC_OK == getTimeStampTask.get()) {
             	SendFileTask sendFileTask = (SendFileTask)new SendFileTask(null, this, 
@@ -195,7 +195,7 @@ public class VotingService extends Service implements TaskListener {
 				solicitudAcceso);
         SMIMEMessageWrapper timeStampedDocument = new SMIMEMessageWrapper(null, solicitudAcceso);
         GetTimeStampTask getTimeStampTask = (GetTimeStampTask) new GetTimeStampTask(null, 
-    			timeStampedDocument.getTimeStampRequest(TIMESTAMP_VOTE_HASH), this).execute(
+    			timeStampedDocument.getTimeStampRequest(), this).execute(
     			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
         if(Respuesta.SC_OK == getTimeStampTask.get()) {
         	GetVotingCertTask getVotingCertTask = (GetVotingCertTask)new GetVotingCertTask(this, 
@@ -213,7 +213,7 @@ public class VotingService extends Service implements TaskListener {
 	                        SignedMailGenerator.Type.USER, votoFirmado);
 	                timeStampedDocument = new SMIMEMessageWrapper(null, votoFirmado);
 	                getTimeStampTask = (GetTimeStampTask) new GetTimeStampTask(null, 
-	            			timeStampedDocument.getTimeStampRequest(TIMESTAMP_VOTE_HASH), this).execute(
+	            			timeStampedDocument.getTimeStampRequest(), this).execute(
 	            			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
 	                if(Respuesta.SC_OK == getTimeStampTask.get()) {
 			        	File fileToEncrypt = timeStampedDocument.setTimeStampToken(getTimeStampTask);

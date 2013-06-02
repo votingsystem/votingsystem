@@ -6,7 +6,6 @@ import java.util.List;
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
-import static org.sistemavotacion.Contexto.getString;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.modelo.UserBaseData;
@@ -21,12 +20,9 @@ import org.slf4j.LoggerFactory;
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class UserBaseDialog extends JDialog 
-    implements SimulatorListener<UserBaseData> {
+        implements SimulatorListener<UserBaseData> {
 
     private static Logger logger = LoggerFactory.getLogger(UserBaseDialog.class);  
-    
-    private static final int ENVIAR_DOCUMENTO_FIRMADO_WORKER = 0;
-    private static final int TIME_STAMP_WORKER = 1;
     
     private Border normalTextBorder;
     private UserBaseDataSimulator creacionBaseUsuarios = null;
@@ -228,7 +224,7 @@ public class UserBaseDialog extends JDialog
 
     private void createUsersButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createUsersButtonActionPerformed
         UserBaseData userBaseData = userBasePanel.getData();
-        if(Respuesta.SC_OK != userBaseData.getCodigoEstado()) {
+        if(Respuesta.SC_OK != userBaseData.getStatusCode()) {
             logger.debug("createUsersButtonActionPerformedv - message " 
                     + userBaseData.getMessage());
             setMessage(userBaseData.getMessage());
@@ -247,8 +243,8 @@ public class UserBaseDialog extends JDialog
 
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
         if(progressBarPanel.isVisible()) {
-            creacionBaseUsuarios.finalizar();
-            setSimulationResult(null, creacionBaseUsuarios.getUserBaseData());
+            creacionBaseUsuarios.finish();
+            setSimulationResult(creacionBaseUsuarios);
         } else this.dispose();
     }//GEN-LAST:event_cancelButtonActionPerformed
 
@@ -322,16 +318,64 @@ public class UserBaseDialog extends JDialog
     // End of variables declaration//GEN-END:variables
 
 
+    @Override public void updateSimulationData(UserBaseData data) {
+        if(Respuesta.SC_OK == data.getStatusCode()) {
+            progressLabel.setText(getProgressMessage(data));
+        } else {
+            if(errors == null) {
+                errors = new ArrayList<String>();
+                errorButton.setVisible(true);
+            } 
+            errors.add((String) data.getMessage());
+            errorButton.setText(errors.size() + " errores");
+        }
+    }
 
-    @Override public void setSimulationResult(
-            Simulator simulator, final UserBaseData data) {
-        logger.debug("setResult");
+    private String getProgressMessage(UserBaseData data) {
+        return "<html>" + data.getNumRepresentativeRequestsColected() + " de " 
+                + data.getNumRepresentativeRequests() + 
+                " representantes<br/>"+  data.getNumDelegationRequests() + " de " + 
+                data.getNumDelegationRequestsColected() + " usuarios<html>";
+    }
+    
+        
+    public String operationResultHtml(UserBaseData data) {
+        return new StringBuffer("<html><b>Altas OK:</b>")
+                .append(data.getNumRepresentativeRequestsOK())
+                .append("<br/><b>Altas con error:</b>")
+                .append(data.getNumRepresentativeRequestsERROR())
+                .append("<br/><b>Delegaciones OK:</b>")
+                .append(data.getNumDelegationsOK())
+                .append("<br/><b>Delegaciones ERROR:</b>")
+                .append(data.getNumDelegationsERROR())
+                .append("</html>").toString();
+    }
+        
+    public String getUserBaseDataHtmlResultMsg(UserBaseData userBaseData) {
+        return new StringBuffer("<html><b>Número representantes:</b>")
+                .append(userBaseData.getNumRepresentatives())
+                .append("<br/><b>Número de votos de representantes:</b>")
+                .append(userBaseData.getNumVotesRepresentatives())
+                .append("<br/><b>Número de usuarios representados:</b>")
+                .append(userBaseData.getNumUsersWithRepresentative())
+                .append("<br/><b>Número de votos de usuarios representados:</b>")
+                .append(userBaseData.getNumVotesUsersWithRepresentative())
+                .append("<br/><b>Número de usuarios sin representante:</b>")
+                .append(userBaseData.getNumUsersWithoutRepresentative())
+                .append("<br/><b>Número de votos de usuarios sin representante:</b>")
+                .append(userBaseData.getNumVotesUsersWithoutRepresentative())
+                .append("</html>").toString();
+    }
+
+    @Override
+    public void setSimulationResult(Simulator<UserBaseData> simulator) {
+       logger.debug("setResult");
         userBasePanel.setVisible(true);
         progressBarPanel.setVisible(false);
         createUsersButton.setVisible(false);
-        ContextoPruebas.setUserBaseData(data);
+        ContextoPruebas.setUserBaseData(simulator.getData());
         setMessage(ContextoPruebas.getString("userBaseDataInContextMsg"));
-        final String result = data.operationResultHtml();
+        final String result = getUserBaseDataHtmlResultMsg(simulator.getData());
         try {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
@@ -352,20 +396,4 @@ public class UserBaseDialog extends JDialog
         }*/
         pack();
     }
-
-    @Override public void setSimulationErrorMessage(String message) {
-        if(errors == null) {
-            errors = new ArrayList<String>();
-            errorButton.setVisible(true);
-        } 
-        errors.add(message);
-        errorButton.setText(errors.size() + " errores");
-    }
-
-    @Override
-    public void setSimulationMessage(String message) {
-        progressLabel.setText(message);
-        pack();
-    }
-
 }

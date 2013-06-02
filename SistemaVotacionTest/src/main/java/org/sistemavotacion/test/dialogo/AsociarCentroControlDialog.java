@@ -20,8 +20,6 @@ import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.MainFrame;
-import org.sistemavotacion.test.json.DeJSONAObjeto;
-import org.sistemavotacion.test.json.DeObjetoAJSON;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.StringUtils;
 import org.sistemavotacion.worker.DocumentSenderWorker;
@@ -63,8 +61,7 @@ public class AsociarCentroControlDialog extends JDialog implements
             case INFO_GETTER_WORKER:
             if(Respuesta.SC_OK == worker.getStatusCode()) {
                 try {
-                    ActorConIP actorConIP = DeJSONAObjeto.obtenerActorConIP(
-                    		worker.getMessage());
+                    ActorConIP actorConIP = ActorConIP.parse(worker.getMessage());
                     if(actorConIP.getTipo() != ActorConIP.Tipo.CENTRO_CONTROL) {
                         mostrarMensajeUsuario("El servidor no es un Centro de Control");
                         centroControlTextField.setBorder(new LineBorder(Color.RED,2));
@@ -382,8 +379,8 @@ public class AsociarCentroControlDialog extends JDialog implements
                     ContextoPruebas.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
                     ContextoPruebas.VOTE_SIGN_MECHANISM);
             File solicitudAsociacion = new File(FileUtils.APPTEMPDIR + "SolicitudAsociacion");
-            String documentoAsociacion = DeObjetoAJSON.obtenerDocumentoAsociacionJSON(
-            		centroControl.getServerURL());
+            String documentoAsociacion = ActorConIP.getAssociationDocumentJSON(
+                    centroControl.getServerURL()).toString();
             MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(
                     ContextoPruebas.getUsuarioPruebas().getEmail(), 
                     ContextoPruebas.getControlAcceso().getNombreNormalizado(), 

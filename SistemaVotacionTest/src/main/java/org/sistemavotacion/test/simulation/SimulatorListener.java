@@ -6,8 +6,7 @@ package org.sistemavotacion.test.simulation;
 */
 public interface SimulatorListener<T> {
     
-    public void setSimulationMessage(String message);
-    public void setSimulationErrorMessage(String message);
-    public void setSimulationResult(Simulator simulator, T data);
+    public void updateSimulationData(T data);
+    public void setSimulationResult(Simulator<T> simulator);
     
 }

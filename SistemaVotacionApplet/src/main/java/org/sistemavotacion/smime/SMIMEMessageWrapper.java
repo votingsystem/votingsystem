@@ -368,7 +368,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
         replaceSigners(cmsdata);
     }
     
-    public TimeStampRequest getTimeStampRequest(String timeStampRequestAlg) {
+    public TimeStampRequest getTimeStampRequest() {
         SignerInformation signerInformation = ((SignerInformation)
                         smimeSigned.getSignerInfos().getSigners().iterator().next());
         if(signerInformation == null) {
@@ -378,11 +378,11 @@ public class SMIMEMessageWrapper extends MimeMessage {
         AttributeTable table = signerInformation.getSignedAttributes();
         Attribute hash = table.get(CMSAttributes.messageDigest);
         ASN1OctetString as = ((ASN1OctetString)hash.getAttrValues().getObjectAt(0));
-        //String digest = Base64.encodeToString(as.getOctets(), Base64.DEFAULT);
-        //Log.d(TAG + ".obtenerSolicitudAcceso(...)", " - digest: " + digest);
+        //byte[] digest = Base64.encode(as.getOctets());
+        //logger.debug(" - digest: " + new String(digest));
         TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
         //reqgen.setReqPolicy(m_sPolicyOID);
-        return reqgen.generate(timeStampRequestAlg, as.getOctets());
+        return reqgen.generate(signerInformation.getDigestAlgOID(), as.getOctets());
     }
     
 

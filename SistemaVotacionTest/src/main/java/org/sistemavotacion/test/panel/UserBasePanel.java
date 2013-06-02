@@ -113,7 +113,7 @@ public class UserBasePanel extends javax.swing.JPanel {
         userBaseData.setNumUsersWithoutRepresentative(numUserWithoutRepresentative);
         userBaseData.setNumVotesUsersWithoutRepresentative(numVotesUserWithoutRepresentative);
         
-        userBaseData.setCodigoEstado(Respuesta.SC_OK);
+        userBaseData.setStatusCode(Respuesta.SC_OK);
         
         return userBaseData;
     }

@@ -1,6 +1,5 @@
 package org.sistemavotacion.test.dialogo;
 
-import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
@@ -9,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JDialog;
 import javax.swing.border.Border;
-import javax.swing.border.LineBorder;
 import net.miginfocom.swing.MigLayout;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.OpcionEvento;
@@ -61,13 +59,13 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
             panelesOpciones.add(opcionVotacionPanel);
         }
         validacionPanel.setVisible(false);
-        if(userBaseData.isVotacionAleatoria()) {
+        if(userBaseData.isWithRandomVotes()) {
             votosAleatoriosRadioButton.setSelected(true);
         } else {
             numVotosManualRadioButton.setSelected(true);
             opcionesPanel.setVisible(true);
         }
-        if(userBaseData.isSimulacionConTiempos()) {
+        if(userBaseData.isTimerBased()) {
             introduccionManualTiempoRadioButton.setSelected(true);
             tiempoPanel.setVisible(true);
             horasComboBox.setSelectedIndex(userBaseData.getHorasDuracionVotacion());
@@ -77,10 +75,14 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
         }
         userBaseEditorPane.setContentType("text/html");
         userBaseEditorPane.setEditable(false); 
-        userBaseEditorPane.setText(userBaseData.toHtml());
+        userBaseEditorPane.setText(getUserBaseEditorPaneMsg(userBaseData));
         pack();
     }
 
+    private String getUserBaseEditorPaneMsg(UserBaseData userBaseData) {
+        logger.debug("=========== TODO");
+        return userBaseData.getMessage();
+    }
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -406,8 +408,8 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
 
     private void aceptarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aceptarButtonActionPerformed
         if(!validarFormulario()) return;
-        userBaseData.setVotacionAleatoria(votosAleatoriosRadioButton.isSelected());
-        userBaseData.setSimulacionConTiempos(introduccionManualTiempoRadioButton.isSelected());
+        userBaseData.setWithRandomVotes(votosAleatoriosRadioButton.isSelected());
+        userBaseData.setTimerBased(introduccionManualTiempoRadioButton.isSelected());
         if(numVotosManualRadioButton.isSelected()) {
             List<OpcionEvento> opciones = new ArrayList<OpcionEvento>();
             for(OpcionVotacionPanel opcionVotacionPanel : panelesOpciones) {
@@ -422,8 +424,6 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
         }
         logger.debug("Hora: " + userBaseData.getHorasDuracionVotacion() + 
                 " - Minuto: " + userBaseData.getMinutosDuracionVotacion());
-        
-        userBaseData.setEvento(evento);
         ContextoPruebas.setEvento(evento);
         ContextoPruebas.setUserBaseData(userBaseData);
         VotacionesPanel.INSTANCIA.prepararPanelParaLanzarSimulacion();

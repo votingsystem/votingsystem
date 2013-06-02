@@ -325,7 +325,7 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
             X509Certificate timeStampCert = PreconditionsCheckerDialog.
                     getTimeStampCert(operation.getUrlServer());              
             new TimeStampWorker(TIMESTAMP_ACCESS_REQUEST, operation.getUrlTimeStampServer(),
-                    this, documentSMIME.getTimeStampRequest(TIMESTAMP_DNIe_HASH),
+                    this, documentSMIME.getTimeStampRequest(),
                     timeStampCert).execute();
         } catch (Exception ex) {
             mostrarPantallaEnvio(false);
@@ -357,7 +357,7 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
             X509Certificate timeStampCert = PreconditionsCheckerDialog.
                         getTimeStampCert(operation.getUrlServer());              
             new TimeStampWorker(TIMESTAMP_VOTE, operation.getUrlTimeStampServer(),
-                    this, documentSMIME.getTimeStampRequest(TIMESTAMP_VOTE_HASH),
+                    this, documentSMIME.getTimeStampRequest(),
                     timeStampCert).execute();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);

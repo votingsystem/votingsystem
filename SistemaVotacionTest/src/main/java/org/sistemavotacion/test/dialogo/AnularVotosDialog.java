@@ -16,8 +16,7 @@ import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.MainFrame;
-import org.sistemavotacion.test.json.DeJSONAObjeto;
-import org.sistemavotacion.test.modelo.SolicitudAcceso;
+import org.sistemavotacion.test.modelo.AccessRequestBackup;
 import org.sistemavotacion.test.panel.DigitalClockPanel;
 import org.sistemavotacion.test.simulation.launcher.CancelAccessRequestLauncher;
 import org.sistemavotacion.test.util.FileNameFilter;
@@ -40,7 +39,7 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
     
     private MensajeDialog mensajeDialog;
     private static long comienzo;
-    private StringBuilder erroresAnulaciones = new StringBuilder("<html>");
+    private List<String> errorsList;
     private SwingWorker tareaEnEjecucion;
     private Evento evento;
     private Estado estado = Estado.RECOGIENDO_DATOS;
@@ -335,7 +334,7 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
                 new File(ContextoPruebas.APPDIR), nombreArchivoSolicitud);
         logger.debug("############# Encontradas '" + solicitudesAcceso.size() + "' solicitudes"
                 + "  para el evento '" +  evento.getEventoId() + "'");
-        Collection<SolicitudAcceso> solicitudes = obtenerSolicitudesAcceso(solicitudesAcceso);
+        Collection<AccessRequestBackup> solicitudes = obtenerSolicitudesAcceso(solicitudesAcceso);
         SeleccionArchivosDialog seleccionArchivosDialog = new SeleccionArchivosDialog(
                 MainFrame.INSTANCIA.getFrames()[0], true ,solicitudes, evento, this);
         seleccionArchivosDialog.setVisible(true);
@@ -351,18 +350,23 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
                 new File(ContextoPruebas.APPDIR), nombreArchivoSolicitud);
         logger.debug("Encontradas '" + solicitudes.size() + "' solicitudes"
                 + "  para el evento '" +  evento.getEventoId() + "'");
-        List<SolicitudAcceso> solicitudesAcceso =  obtenerSolicitudesAcceso(solicitudes);
+        List<AccessRequestBackup> solicitudesAcceso =  obtenerSolicitudesAcceso(solicitudes);
         lanzarOperacion(solicitudesAcceso);
     }//GEN-LAST:event_anularTodosButtonActionPerformed
 
     private void erroresAnulacionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_erroresAnulacionButtonActionPerformed
         InfoErroresDialog infoErroresDialog = new InfoErroresDialog(
                 MainFrame.INSTANCIA.getFrames()[0], true, 
-                "Errores en las anulaciones", erroresAnulaciones.toString());
+                "Errores en las anulaciones", errorsList);
         infoErroresDialog.setVisible(true);
     }//GEN-LAST:event_erroresAnulacionButtonActionPerformed
 
-    public void lanzarOperacion(final List<SolicitudAcceso> solicitudesAcceso) {
+    private void addError(String error) {
+        if(errorsList == null) errorsList = new ArrayList<String>();
+        errorsList.add(error);
+    }
+    
+    public void lanzarOperacion(final List<AccessRequestBackup> solicitudesAcceso) {
         logger.debug("lanzarAnulacion");
         comienzo = System.currentTimeMillis();
         erroresAnulacionButton.setVisible(false);
@@ -379,7 +383,6 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
         anulacionesEnviadasERROR = new AtomicLong();
         actualizarContadorSolicitudesError(
                 new Long(anulacionesEnviadasERROR.get()).intValue());
-        erroresAnulaciones = new StringBuilder("<html>");
         operationExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -420,7 +423,7 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
                         new Long(anulacionesEnviadasOK.incrementAndGet()).intValue());
             } else {
                 logger.debug("Error anulando Solicitud - " + respuesta.getMensaje());
-                SolicitudAcceso solicitud = (SolicitudAcceso) respuesta.getObjeto();
+                AccessRequestBackup solicitud = (AccessRequestBackup) respuesta.getData();
                 String mensaje = null;
                 if(solicitud != null) {
                     String usuarioPath = ContextoPruebas.getUserDirPath(solicitud.getUserNif());
@@ -430,7 +433,7 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
                             solicitud.getEventoId() + "' para el usuario " + htmlUsuarioPath + 
                             " - <b>mensaje:</b> " + respuesta.getMensaje() + "<br/>";
                 } else  mensaje = respuesta.getMensaje() + "<br/>";
-                erroresAnulaciones.append(mensaje);
+                addError(mensaje);
                 anulacionesEnviadasERROR.getAndIncrement();
                 actualizarContadorSolicitudesError(
                         new Long(anulacionesEnviadasERROR.get()).intValue());
@@ -445,7 +448,6 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
         logger.debug("Duración: " + duracion);
         digitalClockPanel.stop();
         mostarPantallaEnvio(false);
-        erroresAnulaciones.append("<html/>");
         if(anulacionesEnviadasERROR.get() > 0) {
             erroresAnulacionButton.setVisible(true);
             pack();
@@ -517,28 +519,28 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
     }
         
     public void lanzarAnulacionesSolicitudesAcceso (
-            List<SolicitudAcceso> solicitudesAcceso) throws Exception {
-        for(SolicitudAcceso solicitud : solicitudesAcceso) {
+            List<AccessRequestBackup> solicitudesAcceso) throws Exception {
+        for(AccessRequestBackup solicitud : solicitudesAcceso) {
             while(anulacionesEnviadas.get() - (anulacionesEnviadasOK.get() + 
                     anulacionesEnviadasERROR.get()) > MAX_PENDING_RESPONSES ) {}
-            lanzarAnulacionSolicitudAcceso(solicitud);
+            lanzarAnulacionAccessRequestBackup(solicitud);
         }
     }
     
-    public void lanzarAnulacionSolicitudAcceso (SolicitudAcceso solicitud) throws Exception {
+    public void lanzarAnulacionAccessRequestBackup (AccessRequestBackup solicitud) throws Exception {
         anulacionSolicitudesCompletionService.submit(
                 new CancelAccessRequestLauncher(solicitud));
         actualizarContadorSolicitudes(
                 new Long(anulacionesEnviadas.incrementAndGet()).intValue());
      }
     
-    private List<SolicitudAcceso> obtenerSolicitudesAcceso(Collection<File> archivos) {
-        List<SolicitudAcceso>  solicitudes = new ArrayList<SolicitudAcceso>();
+    private List<AccessRequestBackup> obtenerSolicitudesAcceso(Collection<File> archivos) {
+        List<AccessRequestBackup>  solicitudes = new ArrayList<AccessRequestBackup>();
         for(File archivo:archivos) {
             String anuladorStr = null;
             try {
                 anuladorStr = FileUtils.getStringFromFile(archivo);
-                SolicitudAcceso solicitud = DeJSONAObjeto.obtenerSolicitudAcceso(anuladorStr);
+                AccessRequestBackup solicitud = AccessRequestBackup.parse(anuladorStr);
                 String[] splittedName = archivo.getName().split("_usu");
                 solicitud.setUserNif(splittedName[1].split(".json")[0]);
                 solicitud.setEventoId(archivo.getName().split("_")[1]);
@@ -559,7 +561,7 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
     @Override
     public void setArchivosSeleccionados(Object archivos, Object selector) {
         if(selector instanceof SeleccionArchivosDialog) {
-            List<SolicitudAcceso> solicitudesAcceso =  (List<SolicitudAcceso>) archivos;
+            List<AccessRequestBackup> solicitudesAcceso =  (List<AccessRequestBackup>) archivos;
             if(solicitudesAcceso.size() > 0) {
                 mostarPantallaEnvio(true);
                 digitalClockPanel.start(DigitalClockPanel.Mode.STOPWATCH);

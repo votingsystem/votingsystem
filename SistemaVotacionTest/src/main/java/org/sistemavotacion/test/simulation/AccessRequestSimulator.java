@@ -3,26 +3,18 @@ package org.sistemavotacion.test.simulation;
 import org.sistemavotacion.test.simulation.launcher.AccessRequestLauncher;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 import javax.swing.Timer;
 import org.sistemavotacion.modelo.Evento;
-import org.sistemavotacion.modelo.OpcionEvento;
 import org.sistemavotacion.modelo.ReciboVoto;
 import org.sistemavotacion.modelo.Respuesta;
-import org.sistemavotacion.smime.CMSUtils;
+import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.test.modelo.InfoVoto;
-import org.sistemavotacion.test.modelo.SimulationData;
+import org.sistemavotacion.test.modelo.VotingSimulationData;
 import org.sistemavotacion.test.modelo.UserBaseData;
-import org.sistemavotacion.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,53 +24,39 @@ import org.slf4j.LoggerFactory;
 * 
 * Simulation to test only access requests.
 */
-public class AccessRequestSimulator implements ActionListener, Simulator {
+public class AccessRequestSimulator implements ActionListener, 
+        Simulator<VotingSimulationData> {
     
     private static Logger logger = LoggerFactory.getLogger(AccessRequestSimulator.class);
     
     private static ExecutorService simulatorExecutor;
     
     private static ExecutorService accessRequestExecutor;
-    private static CompletionService<InfoVoto> accessRequestCompletionService;
-
-    
-    private static AtomicLong requests;
-    private static AtomicLong requestsFinished;
-    private static AtomicLong requestsERROR;
-    private static AtomicLong requestsOK;
-
-    private static long begin;
-    
-    HashMap<Long, OpcionEvento> optionsMap = new HashMap<Long, OpcionEvento>();
+    private static CompletionService<Respuesta> accessRequestCompletionService;
     
     private Timer timer;
-    private static StringBuilder errorsLog;
+    private static List<String> errorsList;
     private UserBaseData userBaseData = null;
-    private SimulationData simulationData = null;
+    private VotingSimulationData simulationData = null;
+    private Evento evento = null;
     
     private int numberRequests = 0;
     private List<String> electorList = null;
     
     private SimulatorListener simulationListener;
     
-    private AtomicBoolean done = new AtomicBoolean(true);
+    //private AtomicBoolean done = new AtomicBoolean(true);
     
-    public AccessRequestSimulator(SimulationData simulationData, 
+    public AccessRequestSimulator(VotingSimulationData simulationData, 
             SimulatorListener simulationListener) {
         this.userBaseData = simulationData.getUserBaseData(); 
         this.simulationData = simulationData;
         this.simulationListener = simulationListener;
-        for (OpcionEvento opcion : userBaseData.getEvento().getOpciones()) {
-            optionsMap.put(opcion.getId(), opcion);
-        }
+        this.evento = simulationData.getEvento();
         simulatorExecutor = Executors.newFixedThreadPool(10);
         accessRequestExecutor = Executors.newFixedThreadPool(100);
         accessRequestCompletionService = 
-                new ExecutorCompletionService<InfoVoto>(accessRequestExecutor);
-        requests = new AtomicLong();
-        requestsERROR = new AtomicLong();
-        requestsFinished = new AtomicLong();
-        requestsOK = new AtomicLong();
+                new ExecutorCompletionService<Respuesta>(accessRequestExecutor);
         electorList = getElectorList(userBaseData);
         numberRequests = electorList.size();
     }
@@ -125,10 +103,14 @@ public class AccessRequestSimulator implements ActionListener, Simulator {
         return result;
     }
     
+    private void addErrorMsg(String msg) {
+        if(errorsList == null) errorsList = new ArrayList<String>();
+        errorsList.add(msg);
+    }
+    
     public void init() {
         logger.debug("lanzarVotacion - total number of electors: " +  numberRequests);
-        begin = System.currentTimeMillis();
-        errorsLog = new StringBuilder("");
+        simulationData.setBegin(System.currentTimeMillis());
         simulatorExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -153,7 +135,7 @@ public class AccessRequestSimulator implements ActionListener, Simulator {
     
     public void beginRequests () throws Exception {
         logger.debug(" ******* beginRequests");
-        if(userBaseData.isSimulacionConTiempos()) {
+        if(userBaseData.isTimerBased()) {
             Long milisegundosHoras = 1000 * 60 * 60 * new Long(userBaseData.getHorasDuracionVotacion());
             Long milisegundosMinutos = 1000 * 60 * new Long(userBaseData.getMinutosDuracionVotacion()); 
             Long totalMilisegundosSimulacion = milisegundosHoras + milisegundosMinutos;
@@ -162,9 +144,9 @@ public class AccessRequestSimulator implements ActionListener, Simulator {
             timer.setRepeats(true);
             timer.start();
         } else {
-             
             while(!electorList.isEmpty()) {
-                if((requests.get() - requestsFinished.get()) < 
+                if((simulationData.getNumAccessRequests() - 
+                        simulationData.getNumAccessRequestsColected()) < 
                         simulationData.getMaxPendingResponses()) {
                     int randomElector = new Random().nextInt(electorList.size());
                     lanzarSolicitudAcceso(electorList.remove(randomElector));
@@ -179,91 +161,75 @@ public class AccessRequestSimulator implements ActionListener, Simulator {
     }   
      
     public void lanzarSolicitudAcceso (String nif) throws Exception {
-        Evento voto = prepararVoto(userBaseData.getEvento());
-        InfoVoto infoVoto = new InfoVoto(voto, nif);
-        accessRequestCompletionService.submit(new AccessRequestLauncher(infoVoto));
-        requests.getAndIncrement();
+        Evento voto = evento.genRandomVote(ContextoPruebas.DIGEST_ALG);
+        Usuario usuario = new Usuario(nif);
+        voto.setUsuario(usuario);
+        accessRequestCompletionService.submit(new AccessRequestLauncher(voto));
     }
-
 
     public void validateReceipts () throws Exception {
         logger.debug("******** validateReceipts");
-        while (numberRequests > requestsFinished.get()) {
+        while (numberRequests > simulationData.getNumAccessRequestsColected()) {
             try {
-                Future<InfoVoto> f = accessRequestCompletionService.take();
-                requestsFinished.getAndIncrement();
-                InfoVoto infoVoto = f.get();   
-                
-                if (Respuesta.SC_OK == infoVoto.getCodigoEstado()) {
-                    ReciboVoto reciboVoto = infoVoto.getReciboVoto();
-                    requestsOK.getAndIncrement();
-                    logger.debug("Request OK");
+                Future<Respuesta> f = accessRequestCompletionService.take();
+                Respuesta respuesta = f.get();   
+                String fromNif = respuesta.getEvento().getUsuario().getNif();
+                if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                    ReciboVoto reciboVoto = respuesta.getReciboVoto();
+                    logger.debug("Request OK from nif: " + fromNif);
+                    simulationData.getAndIncrementNumAccessRequestsOK();
                 } else {
-                    requestsERROR.getAndIncrement();
-                    String mensaje = "Request ERROR - Usuario: " + infoVoto.getFrom() 
-                            + " - msg: " + infoVoto.getMensaje();
-                    logger.error(mensaje);
-                    errorsLog.append(mensaje + "\n");
+                    String msg = "Request ERROR - Usuario: " + fromNif + 
+                            " - msg: " + respuesta.getMensaje();
+                    logger.error(msg);
+                    addErrorMsg(msg);
+                    simulationData.getAndIncrementNumAccessRequestsERROR();
                 }
             } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);
-                requestsERROR.getAndIncrement();
+                addErrorMsg(ex.getMessage());
+                simulationData.getAndIncrementNumAccessRequestsERROR();
             }
-            done.set(true);
+            //done.set(true);
         }
-        finalizarVotacion();
+        finish();
     }
     
-    public void finalizarVotacion() {
-        long duration = System.currentTimeMillis() - begin;
-        logger.debug("FINISH - shutdown executors");
+    @Override public VotingSimulationData finish() throws Exception {
+        logger.debug("finish");
+        simulationData.setFinish(System.currentTimeMillis());
         if(timer != null) timer.stop();
         simulatorExecutor.shutdownNow();
         accessRequestExecutor.shutdownNow(); 
-        StringBuilder result = new StringBuilder("<html>");
-        result.append("<b>Duración: </b>" + 
-                DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(duration));
-        logger.info("Solicitudes con error: " + requestsERROR.get());
-        result.append("<br/><b>Solicitudes con error: </b>" + requestsERROR.get());
-        logger.info("Solicitudes enviadas: " + requests.get());
-        result.append("<br/><b>Solicitudes enviadas: </b>" + requestsERROR.get());
-        logger.info("Solicitudes OK: " + requestsOK.get());
-        result.append("<br/><b>Solicitudes OK: </b>" + requestsOK.get());
-        String errorsMessage = null;
-        if(requestsERROR.get() > 0) {
-            errorsMessage = errorsLog.toString();
-            logger.error("ERRORS: " + errorsMessage);
+        if(simulationListener != null) {
+            simulationListener.setSimulationResult(this);
+        } else {
+            logger.debug("--------------- SIMULATION RESULT------------------");
+            logger.info("Duration: " + simulationData.getDurationStr());
+            logger.info("Solicitudes enviadas: " + simulationData.getNumAccessRequests());
+            logger.info("Solicitudes OK: " + simulationData.getNumAccessRequestsOK());
+            logger.info("Solicitudes con error: " + simulationData.getNumAccessRequestsERROR());
+            if(electorList != null && !electorList.isEmpty()) {
+                logger.info("Access Request errors: \n" + 
+                        getFormattedErrorList(electorList));
+            }
+            logger.debug("------------------- FINISHED ----------------------");
+            System.exit(0);
         }
-        if(simulationListener != null) 
-            simulationListener.setSimulationResult(this, errorsMessage);
-        System.exit(0);
+        return simulationData;
     }
         
-    public Evento prepararVoto (Evento evento) throws NoSuchAlgorithmException {
-        Evento voto = new Evento();
-        voto.setAsunto(evento.getAsunto());
-        voto.setCentroControl(evento.getCentroControl());
-        voto.setContenido(evento.getContenido());
-        voto.setControlAcceso(evento.getControlAcceso());
-        voto.setEventoId(evento.getEventoId());
-        voto.setOpciones(evento.getOpciones());
-        voto.setOrigenHashSolicitudAcceso(UUID.randomUUID().toString());
-        voto.setHashSolicitudAccesoBase64(CMSUtils.getHashBase64(
-            voto.getOrigenHashSolicitudAcceso(), ContextoPruebas.DIGEST_ALG));
-        voto.setOrigenHashCertificadoVoto(UUID.randomUUID().toString());
-        voto.setHashCertificadoVotoBase64(CMSUtils.getHashBase64(
-            voto.getOrigenHashCertificadoVoto(), ContextoPruebas.DIGEST_ALG));  
-        voto.setOpcionSeleccionada(optionsMap.get(
-        		getRandomOpcionSeleccionadaId(voto)));
-        return voto;
+    private String getFormattedErrorList(List<String> errorsList) {
+        if(errorsList == null || errorsList.isEmpty()) return null;
+        else {
+            StringBuilder result = new StringBuilder("");
+            for(String error:errorsList) {
+                result.append(error + "\n");
+            }
+            return result.toString();
+        }
     }
     
-    private Long getRandomOpcionSeleccionadaId (Evento evento) {
-        int size = evento.getOpciones().size();
-        int item = new Random().nextInt(size); // In real life, the Random object should be rather more shared than this
-        OpcionEvento opcionDeEvento = (OpcionEvento) evento.getOpciones().toArray()[item];
-        return opcionDeEvento.getId();
-    }
 
     @Override
     public void actionPerformed(ActionEvent ae) {
@@ -278,14 +244,15 @@ public class AccessRequestSimulator implements ActionListener, Simulator {
             } else timer.stop();
         }
     }
-    
-    public static void main(String[] args) throws InterruptedException {
-        try {
-            ContextoPruebas.inicializar();
-        } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-        }
-        
+
+    @Override
+    public VotingSimulationData getData() {
+        return simulationData;
+    }
+
+    @Override
+    public List<String> getErrorsList() {
+        return errorsList;
     }
     
 }

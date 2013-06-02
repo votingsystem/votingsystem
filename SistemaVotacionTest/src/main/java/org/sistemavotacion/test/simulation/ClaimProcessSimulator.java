@@ -3,8 +3,8 @@ package org.sistemavotacion.test.simulation;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -20,7 +20,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
-import javax.mail.internet.MimeMessage;
 import javax.swing.Timer;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.ActorConIP;
@@ -30,17 +29,16 @@ import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.test.json.DeJSONAObjeto;
-import org.sistemavotacion.test.json.DeObjetoAJSON;
-import org.sistemavotacion.test.modelo.SimulationData;
+import org.sistemavotacion.test.modelo.VotingSimulationData;
 import org.sistemavotacion.test.modelo.UserBaseData;
 import org.sistemavotacion.test.simulation.launcher.SignatureClaimLauncher;
-import org.sistemavotacion.test.util.NifUtils;
+import org.sistemavotacion.util.NifUtils;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.StringUtils;
 import org.sistemavotacion.worker.DocumentSenderWorker;
 import org.sistemavotacion.worker.InfoGetterWorker;
+import org.sistemavotacion.worker.TimeStampWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
 import org.slf4j.Logger;
@@ -53,7 +51,6 @@ import org.slf4j.LoggerFactory;
 * 2)- Check if there's a Control Center associated and associated if not.
 * 3)- Publish Event
 * 4)- Initialice user base data
-* 5)- When finishes user base data initilization, 'setSimulationResult' inits simulation 
 */
 public class ClaimProcessSimulator implements 
         VotingSystemWorkerListener, ActionListener {
@@ -79,15 +76,17 @@ public class ClaimProcessSimulator implements
     
     private Evento event = null;
     private UserBaseData userBaseData = null;
-    private SimulationData simulationData = null;
+    private VotingSimulationData simulationData = null;
     
     //private AtomicBoolean done = new AtomicBoolean(true);
     
     private static long begin;
     
+    private SMIMEMessageWrapper signedPublishrequestSMIME;
+    
     private final CountDownLatch countDownLatch = new CountDownLatch(1); // just one time
     
-    public ClaimProcessSimulator(SimulationData simulationData) {
+    public ClaimProcessSimulator(VotingSimulationData simulationData) {
         try {
             ContextoPruebas.inicializar();
         } catch (Exception ex) {
@@ -120,7 +119,7 @@ public class ClaimProcessSimulator implements
     
     public void beginSignatures () throws Exception {
         logger.debug(" ******* beginSignatures");
-        if(userBaseData.isSimulacionConTiempos()) {
+        if(userBaseData.isTimerBased()) {
             Long milisegundosHoras = 1000 * 60 * 60 * new Long(userBaseData.getHorasDuracionVotacion());
             Long milisegundosMinutos = 1000 * 60 * new Long(userBaseData.getMinutosDuracionVotacion()); 
             Long totalMilisegundosSimulacion = milisegundosHoras + milisegundosMinutos;
@@ -176,16 +175,19 @@ public class ClaimProcessSimulator implements
     }
     
     private void finish() {
-        logger.debug("finish");
+        logger.debug("--------------- SIMULATION RESULT----------------------");    
         long duration = System.currentTimeMillis() - begin;
-        String durationStr = DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(duration);
+        String durationStr = DateUtils.
+                getElapsedTimeHoursMinutesFromMilliseconds(duration);
+        String errorsStr = errorsLog.toString();
         logger.info("Duration: " + durationStr);
-        logger.info("Number of projected requests: " + simulationData.getNumberOfRequests());
-        logger.info("Number of finished signatures: " + signaturesFinished.get());
+        logger.info("Number of projected requests: " + 
+                simulationData.getNumberOfRequests());
+        logger.info("Number of completed requests: " + signaturesFinished.get());
         logger.info("Number of signatures OK: " + signaturesOK.get());
         logger.info("Number of signatures ERROR: " + signaturesERROR.get());
-        logger.info("Errors: " + errorsLog.toString());
-        logger.debug("--------------- FINISHED --------------------------");
+        if(!"".equals(errorsStr)) logger.info("Errors: " + errorsStr);
+        logger.debug("------------------- FINISHED --------------------------");
         System.exit(0);
     }
 
@@ -261,24 +263,21 @@ public class ClaimProcessSimulator implements
             event.setFechaFin(dateFinish.getTime());
             event.setContenido("Contenido Manifiesto -> " 
                     + simulationData.getHtmlContent());
-            String eventStr = DeObjetoAJSON.obtenerEventoJSON(event);
-
+            String eventStr = event.toJSON().toString();
+            String subject = ContextoPruebas.getString("publishClaimMsgSubject");
+            
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
                 ContextoPruebas.getUsuarioPruebas().getKeyStore(),
                 ContextoPruebas.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
                 ContextoPruebas.VOTE_SIGN_MECHANISM);
-            File eventToPublish = File.createTempFile("eventToPublish", ".json"); 
-            eventToPublish.deleteOnExit();
-            logger.debug("publishing event: " + eventToPublish.getAbsolutePath());
-            MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(
+            signedPublishrequestSMIME = signedMailGenerator.genMimeMessage(
                     ContextoPruebas.getUsuarioPruebas().getEmail(), 
                     ContextoPruebas.getControlAcceso().getNombreNormalizado(), 
-                    eventStr, "Claim Request",  null);
-            mimeMessage.writeTo(new FileOutputStream(eventToPublish));
-            new DocumentSenderWorker(PUBLISH_CLAIM_WORKER, eventToPublish, 
-                    Contexto.SIGNED_CONTENT_TYPE,
-                    ContextoPruebas.getClaimServiceURL(ContextoPruebas.
-                    getControlAcceso().getServerURL()), this).execute();
+                    eventStr, subject,  null);
+            
+            new TimeStampWorker(TIME_STAMP_WORKER, ContextoPruebas.getUrlTimeStampServer(),
+                    this, signedPublishrequestSMIME.getTimeStampRequest(),
+                    ContextoPruebas.getControlAcceso().getTimeStampCert()).execute();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             countDownLatch.countDown();
@@ -324,7 +323,7 @@ public class ClaimProcessSimulator implements
             case ACCESS_CONTROL_GETTER_WORKER:           
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
-                        ActorConIP controlAcceso = DeJSONAObjeto.obtenerActorConIP(worker.getMessage());
+                        ActorConIP controlAcceso = ActorConIP.parse(worker.getMessage());
                         if(!(ActorConIP.Tipo.CONTROL_ACCESO == controlAcceso.getTipo())) {
                             logger.error("SERVER NOT ACCESS CONTROL");
                             return;
@@ -336,14 +335,36 @@ public class ClaimProcessSimulator implements
                         countDownLatch.countDown();
                     }
                 }else {
-                    String mensaje = "Error - " + worker.getMessage();
-                    logger.error("### ERROR - " + mensaje);
+                    logger.error("### ERROR - " + worker.getMessage());
                     countDownLatch.countDown();
                 }
                 break;
             case CA_CERT_INITIALIZER:
-                publishEvent();
+                if(Respuesta.SC_OK == worker.getStatusCode()) {
+                    publishEvent();
+                } else {
+                    logger.error("### ERROR - " + worker.getMessage());
+                    countDownLatch.countDown();
+                }       
                 break;   
+            case TIME_STAMP_WORKER:
+                if(Respuesta.SC_OK == worker.getStatusCode()) {
+                    try {
+                        signedPublishrequestSMIME.setTimeStampToken((TimeStampWorker)worker);
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        signedPublishrequestSMIME.writeTo(baos);
+                        new DocumentSenderWorker(PUBLISH_CLAIM_WORKER, 
+                                baos.toByteArray(), Contexto.SIGNED_CONTENT_TYPE,
+                                ContextoPruebas.getClaimServiceURL(), this).execute();
+                    } catch (Exception ex) {
+                        logger.error(ex.getMessage(), ex);
+                        countDownLatch.countDown();
+                    }
+                } else {
+                    logger.error("### ERROR - " + worker.getMessage());
+                    countDownLatch.countDown();
+                }
+                break;
             case PUBLISH_CLAIM_WORKER:
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
@@ -357,7 +378,7 @@ public class ClaimProcessSimulator implements
                                 ContextoPruebas.INSTANCIA.getSessionPKIXParameters());
                         logger.debug("--- dnieMimeMessage.getSignedContent(): " 
                                 + dnieMimeMessage.getSignedContent());
-                        event = DeJSONAObjeto.obtenerEvento(dnieMimeMessage.getSignedContent());
+                        event = Evento.parse(dnieMimeMessage.getSignedContent());
                         logger.debug("Respuesta - Evento ID: " + event.getEventoId());
                         launchExecutors();
                     } catch (Exception ex) {
@@ -373,18 +394,17 @@ public class ClaimProcessSimulator implements
     }
     
     
-    
     public static void main(String[] args) throws Exception {
-        SimulationData simulationData = null;
+        VotingSimulationData simulationData = null;
         if(args != null && args.length > 0) {
             logger.debug("args[0]");
-            simulationData = SimulationData.parse(args[0]);
+            simulationData = VotingSimulationData.parse(args[0]);
         } else {
             File jsonFile = File.createTempFile("ClaimProcessSimulation", ".json");
             jsonFile.deleteOnExit();
             FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
                             .getResourceAsStream("simulatorFiles/claimsSimulationData.json"), jsonFile); 
-            simulationData = SimulationData.parse(FileUtils.getStringFromFile(jsonFile));
+            simulationData = VotingSimulationData.parse(FileUtils.getStringFromFile(jsonFile));
         }
         ClaimProcessSimulator simuHelper = new ClaimProcessSimulator(simulationData);
         simuHelper.init();

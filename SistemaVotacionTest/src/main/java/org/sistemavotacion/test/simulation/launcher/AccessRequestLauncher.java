@@ -3,27 +3,20 @@ package org.sistemavotacion.test.simulation.launcher;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Respuesta; 
-import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.seguridad.PKCS10WrapperClient;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.test.json.DeObjetoAJSON;
-import org.sistemavotacion.test.modelo.InfoVoto;
 import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sistemavotacion.worker.AccessRequestLauncherWorker;
+import org.sistemavotacion.worker.TimeStampWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
 
@@ -31,76 +24,61 @@ import org.sistemavotacion.worker.VotingSystemWorkerListener;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class AccessRequestLauncher 
-    implements Callable<InfoVoto>, VotingSystemWorkerListener {
+public class AccessRequestLauncher implements Callable<Respuesta>, 
+        VotingSystemWorkerListener {
     
     private static Logger logger = LoggerFactory.getLogger(AccessRequestLauncher.class);
 
+    private static final int TIME_STAMP_WORKER        = 0;
     private static final int ACCESS_REQUEST_WORKER    = 1;
     
-    private InfoVoto infoVoto;
+    private Respuesta respuesta;
+    private Evento evento;
+    private String nifFrom;
     private SMIMEMessageWrapper documentSMIME;
     private PKCS10WrapperClient wrapperClient;
     private final CountDownLatch countDownLatch = new CountDownLatch(1); // just one time
 
-    private String urlTimeStampServer = null;
     private String urlAccessRequest = null;
         
-    public AccessRequestLauncher (InfoVoto infoVoto) 
-            throws Exception {
-        this.infoVoto = infoVoto; 
-        urlTimeStampServer = ContextoPruebas.getUrlTimeStampServer(
-                ContextoPruebas.getControlAcceso().getServerURL());
+    public AccessRequestLauncher (Evento evento) throws Exception {
+        this.evento = evento; 
+        this.nifFrom = evento.getUsuario().getNif();
         urlAccessRequest = ContextoPruebas.getURLAccessRequest(
                 ContextoPruebas.getControlAcceso().getServerURL());
-        infoVoto.getVoto().setUrlSolicitudAcceso(urlAccessRequest);
+        evento.setUrlSolicitudAcceso(urlAccessRequest);
     }
     
-    private InfoVoto getInfoVoto() {
-        return infoVoto;
-    }
-    
-    SignedMailGenerator signedMailGenerator;
-    
-    @Override
-    public InfoVoto call() throws Exception { 
-        File mockDnieFile = new File(ContextoPruebas.getUserKeyStorePath(infoVoto.getFrom()));
+    @Override public Respuesta call() throws Exception { 
+        File mockDnieFile = new File(ContextoPruebas.getUserKeyStorePath(nifFrom));
         byte[] mockDnieBytes = FileUtils.getBytesFromFile(mockDnieFile);
-        logger.info("userID: " + infoVoto.getFrom() + 
+        logger.info("userID: " + nifFrom + 
                 " - mockDnieFile: " + mockDnieFile.getAbsolutePath());
-        String asuntoMensaje = ContextoPruebas.ASUNTO_MENSAJE_SOLICITUD_ACCESO 
-                        + infoVoto.getVoto().getEventoId();
-        //Header header = new Header (Contexto.NOMBRE_ENCABEZADO_HASH, 
-        //    infoVoto.getVoto().getHashCertificadoVotoBase64());
-        String anuladorVotoStr = null;
-        synchronized(this) {
-             anuladorVotoStr = DeObjetoAJSON.obtenerAnuladorDeVotoJSON(infoVoto.getVoto());
-        }
-        File anuladorVoto = new File(ContextoPruebas.getUserDirPath(infoVoto.getFrom())
-                + ContextoPruebas.ANULACION_FILE + infoVoto.getVoto().getEventoId() + 
-                "_usu" + infoVoto.getFrom() + ".json");
+        String subject = ContextoPruebas.getString("accessRequestMsgSubject") + 
+                evento.getEventoId();
+        
+        String anuladorVotoStr = evento.getCancelVoteJSON().toString();
+        File anuladorVoto = new File(ContextoPruebas.getUserDirPath(nifFrom)
+                + ContextoPruebas.ANULACION_FILE + evento.getEventoId() + 
+                "_usu" + nifFrom + ".json");
         FileUtils.copyStreamToFile(new ByteArrayInputStream(
                 anuladorVotoStr.getBytes()), anuladorVoto);
 
-        
-        signedMailGenerator = new SignedMailGenerator(mockDnieBytes, 
+        SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnieBytes, 
                 ContextoPruebas.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
                 ContextoPruebas.DNIe_SIGN_MECHANISM);
-        documentSMIME = signedMailGenerator.genMimeMessage(infoVoto.getFrom(), 
-                infoVoto.getVoto().getControlAcceso().getNombreNormalizado(), 
-                DeObjetoAJSON.obtenerSolicitudAccesoJSON(
-                    ContextoPruebas.getControlAcceso().getServerURL(),infoVoto.getVoto()),
-                asuntoMensaje, null);
-        //mimeMessage.writeTo(new FileOutputStream(solicitudAcceso));
-        X509Certificate accesRequestCert = ContextoPruebas.
-                        getControlAcceso().getCertificate();
-        infoVoto.getVoto().setUrlRecolectorVotosCentroControl(anuladorVotoStr);
-        Usuario usuario = new Usuario(infoVoto.getFrom());
-        new AccessRequestLauncherWorker(ACCESS_REQUEST_WORKER, 
-                documentSMIME, infoVoto.getVoto(), accesRequestCert, this).execute();
-        
+        String eventURL = ContextoPruebas.getVotingEventURL(evento.getEventoId());
+        String accessRequestStr = evento.getAccessRequestJSON(eventURL).toString();
+        documentSMIME = signedMailGenerator.genMimeMessage(nifFrom, 
+                evento.getControlAcceso().getNombreNormalizado(), 
+                accessRequestStr, subject, null);
+
+        new TimeStampWorker(TIME_STAMP_WORKER, ContextoPruebas.getUrlTimeStampServer(),
+                this, documentSMIME.getTimeStampRequest(), ContextoPruebas.
+                getControlAcceso().getTimeStampCert()).execute();
+
         countDownLatch.await();
-        return getInfoVoto();
+        return getResult();
     }
     
     @Override public void process(List<String> list) { }
@@ -109,29 +87,47 @@ public class AccessRequestLauncher
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
                 " - worker: " + worker.getClass().getSimpleName() + 
                 " - workerId:" + worker.getId());
-        infoVoto.setCodigoEstado(worker.getStatusCode());
+        respuesta = worker.getRespuesta();
         switch(worker.getId()) {
+            case TIME_STAMP_WORKER:
+                if(Respuesta.SC_OK == worker.getStatusCode()) {
+                    try {
+                        documentSMIME.setTimeStampToken((TimeStampWorker)worker);
+                        X509Certificate accesRequestCert = ContextoPruebas.
+                            getControlAcceso().getCertificate();
+                        new AccessRequestLauncherWorker(ACCESS_REQUEST_WORKER, 
+                            documentSMIME, evento, accesRequestCert, this).execute();
+                    } catch (Exception ex) {
+                        logger.error(ex.getMessage(), ex);
+                        respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+                        respuesta.setData("ERROR_ACCESS_REQUEST from: " + nifFrom);
+                        countDownLatch.countDown();
+                    }
+                } else {
+                    respuesta.setData("ERROR_ACCESS_REQUEST from: " + nifFrom);
+                    countDownLatch.countDown();
+                }
+                break;
             case ACCESS_REQUEST_WORKER:
                 if (Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
                         wrapperClient = ((AccessRequestLauncherWorker)worker).
                             getPKCS10WrapperClient();
-                        String votoJSON = obtenerVotoParaEventoJSON(infoVoto.getVoto());
+                        String eventURL = ContextoPruebas.getVotingEventURL(
+                                evento.getEventoId());
+                        String votoJSON = evento.getVoteJSON(eventURL).toString();
+       
                         documentSMIME = wrapperClient.genMimeMessage(
-                                infoVoto.getVoto().getHashCertificadoVotoBase64(), 
-                                infoVoto.getVoto().getControlAcceso().getNombreNormalizado(),
+                                evento.getHashCertificadoVotoBase64(), 
+                                evento.getControlAcceso().getNombreNormalizado(),
                                 votoJSON, "[VOTO]", null);
                     } catch(Exception ex) {
                         logger.error(ex.getMessage(), ex);
-                        infoVoto.setCodigoEstado(Respuesta.SC_ERROR_EJECUCION);
-                        infoVoto.setError(InfoVoto.Error.ACCESS_REQUEST);
-                        infoVoto.setMensaje(ex.getMessage());
-                        
+                        respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+                        respuesta.setData("ERROR_ACCESS_REQUEST from: " + nifFrom);
                     }
-                    
                 } else {
-                    String msg = "ERROR enviando solicitud de acceso " + worker.getMessage();
-                    logger.error(msg);
+                    respuesta.setData("ERROR_ACCESS_REQUEST from: " + nifFrom);
                 }
                 countDownLatch.countDown();
                 break;                    
@@ -139,16 +135,10 @@ public class AccessRequestLauncher
                 logger.debug("*** UNKNOWN WORKER ID: '" + worker.getId() + "'");
         }
     }
-    
-    public String obtenerVotoParaEventoJSON(Evento evento) {
-        logger.debug("obtenerVotoParaEventoJSON");
-        Map map = new HashMap();
-        map.put("eventoURL", ContextoPruebas.getURLEventoParaVotar(
-                ContextoPruebas.getControlAcceso().getServerURL(), 
-                evento.getEventoId()));
-        map.put("opcionSeleccionadaId", evento.getOpcionSeleccionada().getId());
-        map.put("UUID", UUID.randomUUID().toString());
-        JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);
-        return jsonObject.toString();
+        
+    private Respuesta getResult() {
+        respuesta.setEvento(evento);
+        return respuesta;
     }
+    
 }

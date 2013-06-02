@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream
 import javax.mail.internet.MimeMessage;
 
+import org.bouncycastle.tsp.TimeStampToken;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 import org.sistemavotacion.controlacceso.modelo.*;
 import org.sistemavotacion.smime.*;
@@ -68,27 +69,39 @@ class SolicitudAccesoService {
 			if (eventoVotacion) {
 				if (!eventoVotacion.isOpen()) {
 					msg = messageSource.getMessage('evento.mensajeCerrado', null, locale)
-					log.error("- saveRequest - EVENT CLOSED - ${msg}")
+					log.error("saveRequest - EVENT CLOSED - ${msg}")
 					return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
 						tipo:Tipo.SOLICITUD_ACCESO_ERROR, mensaje:msg)
 				}
 				SolicitudAcceso.withTransaction {
 					solicitudAcceso = SolicitudAcceso.findWhere(usuario:firmante,
 						eventoVotacion:eventoVotacion, estado:Tipo.OK)
-				}/*
+				}
 				if (solicitudAcceso){//Ha votado el usuario?
 						msg = "${grailsApplication.config.grails.serverURL}/mensajeSMIME/${solicitudAcceso.mensajeSMIME.id}"
-						log.error("- saveRequest ==============- ACCESS REQUEST ERROR - ${msg}")
-						/*return new Respuesta(solicitudAcceso:solicitudAcceso, 
+						log.error("saveRequest - ACCESS REQUEST ERROR - ${msg}")
+						return new Respuesta(solicitudAcceso:solicitudAcceso, 
 							tipo:Tipo.SOLICITUD_ACCESO_ERROR, mensaje:msg, evento:eventoVotacion,
-							codigoEstado:Respuesta.SC_ERROR_VOTO_REPETIDO)*/
-				//} else {//es el hash único?*/
+							codigoEstado:Respuesta.SC_ERROR_VOTO_REPETIDO)
+				} else {
+					//TimeStamp comes cert validated from filters. Check date
+					respuesta = validateTokenDate(firmante.getTimeStampToken(), 
+						eventoVotacion, locale)
+					log.debug("saveRequest - validateTokenDate status: ${respuesta.codigoEstado}")
+					if(Respuesta.SC_OK != respuesta.codigoEstado) {
+						log.error("saveRequest - ERROR TOKEN DATE VALIDATION -${respuesta.mensaje}")
+						return new Respuesta(solicitudAcceso:solicitudAcceso, 
+							tipo:Tipo.SOLICITUD_ACCESO_ERROR, 
+							mensaje:espuesta.mensaje, evento:eventoVotacion,
+							codigoEstado:Respuesta.SC_ERROR_VOTO_REPETIDO) 
+					}
+					//es el hash único?
 					hashSolicitudAccesoBase64 = mensajeJSON.hashSolicitudAccesoBase64
 					boolean hashSolicitudAccesoRepetido = (SolicitudAcceso.findWhere(
 							hashSolicitudAccesoBase64:hashSolicitudAccesoBase64) != null)
 					if (hashSolicitudAccesoRepetido) {
 						msg = messageSource.getMessage('error.HashRepetido', null, locale)
-						log.error("- saveRequest -ERROR ACCESS REQUEST HAS REPEATED -> ${hashSolicitudAccesoBase64} - ${msg}")
+						log.error("saveRequest -ERROR ACCESS REQUEST HAS REPEATED -> ${hashSolicitudAccesoBase64} - ${msg}")
 						return new Respuesta(tipo:Tipo.SOLICITUD_ACCESO_ERROR, mensaje:msg,
 								codigoEstado:Respuesta.SC_ERROR_PETICION, evento:eventoVotacion)
 					} else {//Todo OK
@@ -106,11 +119,11 @@ class SolicitudAccesoService {
 								codigoEstado:Respuesta.SC_OK, evento:eventoVotacion,
 								solicitudAcceso:solicitudAcceso)
 					}
-				//}
+				}
 			} else {
 				msg = messageSource.getMessage( 'eventNotFound',
 							[mensajeJSON.eventId].toArray(), locale)
-				log.error("- saveRequest - Event Id not found - > ${mensajeJSON.eventId} - ${msg}")
+				log.error("saveRequest - Event Id not found - > ${mensajeJSON.eventId} - ${msg}")
 				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
 						tipo:Tipo.SOLICITUD_ACCESO_ERROR, mensaje:msg)
 			}
@@ -122,6 +135,24 @@ class SolicitudAccesoService {
 					'accessRequestWithErrorsMsg', null, locale))
 		}
     }
+	
+	Respuesta validateTokenDate(TimeStampToken timeStampToken, 
+		Evento evento, Locale locale) {
+		String msg = null;
+		if(!timeStampToken) {
+			msg = messageSource.getMessage('timeStampNullErrorMsg', null, locale)
+			return new Respuesta(codigoEstado:Respuesta.SC_NULL_REQUEST, mensaje:msg)
+		}
+		Date timestampDate = timeStampToken.getTimeStampInfo().getGenTime()
+		if(!timestampDate.after(evento.fechaInicio) &&
+			!timestampDate.before(evento.fechaFin)) {
+			String dateRangeStr = "[${eventoVotacion.fechaInicio} - ${eventoVotacion.fechaFin}]"
+			msg = messageSource.getMessage('timestampDateErrorMsg',
+				[timestampDate, dateRangeStr].toArray(), locale)
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+				mensaje:msg, evento:evento)
+		} else return new Respuesta(codigoEstado:Respuesta.SC_OK);
+	}
 	
 	def rechazarSolicitud(SolicitudAcceso solicitudAcceso) {
 		log.debug("rechazarSolicitud '${solicitudAcceso.id}'")

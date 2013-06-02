@@ -1,4 +1,4 @@
-package org.sistemavotacion.test.json;
+package org.sistemavotacion.test.util;
 
 import java.text.ParseException;
 import java.util.List;
@@ -96,13 +96,15 @@ public class Formateadora {
             }
         }
         if(evento.getEventoId() != null) {
-            String urlConvocatoriaEnControlAcceso = ContextoPruebas.getURLEventoParaVotar(
-                    evento.getControlAcceso().getServerURL(), evento.getEventoId());
-            String urlConvocatoriaEnCentroControl = ContextoPruebas.getURLEventoParaVotar(
+            String urlConvocatoriaEnControlAcceso = ContextoPruebas.
+                    getVotingEventURL(evento.getEventoId());
+            String urlConvocatoriaEnCentroControl = ContextoPruebas.getVotingEventURL(
                     evento.getCentroControl().getServerURL(), evento.getEventoId());
             logger.debug("urlConvocatoriaEnControlAcceso: " + urlConvocatoriaEnControlAcceso);
-            result.append("<br/><b><a href=\"" + urlConvocatoriaEnControlAcceso +"\">URL de los datos de la convocatoria en el Control de Acceso</a></b>");
-            result.append("<br/><b><a href=\"" + urlConvocatoriaEnCentroControl +"\">URL de los datos de la convocatoria en el Centro de Control</a></b>");
+            result.append("<br/><b><a href=\"" + urlConvocatoriaEnControlAcceso +
+                    "\">URL de los datos de la convocatoria en el Control de Acceso</a></b>");
+            result.append("<br/><b><a href=\"" + urlConvocatoriaEnCentroControl +
+                    "\">URL de los datos de la convocatoria en el Centro de Control</a></b>");
         }
         return result.toString();
     }
@@ -122,7 +124,7 @@ public class Formateadora {
         String result = null;
         JSONObject jsonObject = (JSONObject)JSONSerializer.toJSON(cadena);
         if (jsonObject.containsKey("asunto")) {
-            Evento evento = DeJSONAObjeto.obtenerEvento(jsonObject);
+            Evento evento = Evento.parse(jsonObject);
             result = obtenerEvento(evento);
         }
         return result;

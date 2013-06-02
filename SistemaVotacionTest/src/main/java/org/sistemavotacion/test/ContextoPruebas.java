@@ -15,7 +15,6 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import javax.security.auth.x500.X500PrivateCredential;
 import org.apache.log4j.PropertyConfigurator;
-import org.bouncycastle.tsp.TSPAlgorithms;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Evento;
@@ -24,7 +23,7 @@ import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.sistemavotacion.test.modelo.UserBaseData;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
-import org.sistemavotacion.test.util.NifUtils;
+import org.sistemavotacion.util.NifUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,17 +76,6 @@ public class ContextoPruebas {
     public static final int PERIODO_VALIDEZ_CERT = 2000000000;
 
     public static final int MAXIMALONGITUDCAMPO = 255;
-
-    public static final String ASUNTO_MENSAJE_ALTA_REPRESENTANTE 
-            = "[ALTA REPRESENTANTE]";
-    public static final String ASUNTO_TEST_TIMESTAMP = "[TIMESTAMP_TEST]";
-    
-    public static final String ASUNTO_MENSAJE_DELEGACION_REPRESENTANTE 
-            = "[DELEGACION REPRESENTANTE]";
-    public static final String ASUNTO_MENSAJE_SOLICITUD_ACCESO 
-            = "[SOLICITUD ACCESO]-";
-    public static final String ASUNTO_MENSAJE_ANULACION_SOLICITUD_ACCESO 
-            = "[ANULACION SOLICITUD ACCESO]-";
     
     public static String BASEDIR =  System.getProperty("user.home");
     public static String APPDIR =  FileUtils.BASEDIR + File.separator 
@@ -319,7 +307,14 @@ public class ContextoPruebas {
         return serverURL + "infoServidor";
     }
 
-    public static String getURLEventoParaVotar(String serverURL, Long eventoId) {
+    public static String getVotingEventURL(String serverURL, Long eventoId) {
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "eventoVotacion/" +eventoId;
+    }
+        
+    public static String getVotingEventURL(Long eventoId) {
+        if(controlAcceso == null) return null;
+        String serverURL = controlAcceso.getServerURL();
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         return serverURL + "eventoVotacion/" +eventoId;
     }
@@ -341,6 +336,13 @@ public class ContextoPruebas {
         return serverURL + "eventoVotacion";
     }
     
+    public static String getURLGuardarEventoParaVotar() {
+        if(controlAcceso == null) return null;
+        String serverURL = controlAcceso.getServerURL();
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "eventoVotacion";
+    }
+    
     public static String getManifestServiceURL(String serverURL) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         return serverURL + "eventoFirma";
@@ -350,6 +352,14 @@ public class ContextoPruebas {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         return serverURL + "eventoReclamacion";
     }
+       
+    public static String getClaimServiceURL() {        
+        if (controlAcceso == null) return null;
+        String serverURL = controlAcceso.getServerURL();
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "eventoReclamacion";
+    }
+    
     
     public static String getSignManifestURL(String serverURL) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
@@ -365,6 +375,13 @@ public class ContextoPruebas {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         return serverURL + "solicitudAcceso";
     }
+    
+    public static String getURLAccessRequest() {
+        if(controlAcceso == null) return null;
+        String serverURL = controlAcceso.getServerURL();
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "solicitudAcceso";
+    }
 
     public static String getURLVoto(String serverURL) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
@@ -372,6 +389,13 @@ public class ContextoPruebas {
     }
 
     public static String getUrlTimeStampServer(String serverURL) {
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "timeStamp";
+    }
+    
+    public static String getUrlTimeStampServer() {
+        if (controlAcceso == null) return null;
+        String serverURL = controlAcceso.getServerURL();
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         return serverURL + "timeStamp";
     }

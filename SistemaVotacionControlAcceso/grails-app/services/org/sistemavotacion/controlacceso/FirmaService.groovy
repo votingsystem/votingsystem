@@ -468,14 +468,13 @@ class FirmaService {
 	public Respuesta validateSMIME(
 		SMIMEMessageWrapper messageWrapper, Locale locale) {
 		log.debug("validateSMIME -")
-		log.debug("validateSMIME ======================================")
-		/*MensajeSMIME mensajeSMIME = MensajeSMIME.findWhere(base64ContentDigest:messageWrapper.getContentDigestStr())
+		MensajeSMIME mensajeSMIME = MensajeSMIME.findWhere(base64ContentDigest:messageWrapper.getContentDigestStr())
 		if(mensajeSMIME) {
 			String message = messageSource.getMessage('smimeDigestRepeatedErrorMsg', 
 				[messageWrapper.getContentDigestStr()].toArray(), locale)
 			log.error("validateSMIME - ${message}")
 			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:message)
-		} */
+		}
 		return validateSignersCertificate(messageWrapper, locale)
 	}
 		
@@ -502,13 +501,18 @@ class FirmaService {
 				if(Respuesta.SC_OK != respuesta.codigoEstado) return respuesta
 				if(usuario.getTimeStampToken() != null) {
 					log.debug("validateSignersCertificate - signature with timestamp")
-					Respuesta timestampValidationResp = timeStampService.validate(
+					Respuesta timestampValidationResp = timeStampService.validateToken(
 						usuario.getTimeStampToken(), locale)
 					log.debug("validateSignersCertificate - timestampValidationResp - codigoEstado:${timestampValidationResp.codigoEstado} - mensaje:${timestampValidationResp.mensaje}")
 					if(Respuesta.SC_OK != timestampValidationResp.codigoEstado) {
 						log.error("validateSignersCertificate - TIMESTAMP ERROR - ${timestampValidationResp.mensaje}")
 						return timestampValidationResp
 					}
+				} else {
+					String msg = messageSource.getMessage('documentWithoutTimeStampErrorMsg', null, locale)
+					log.error("ERROR - validateSignersCertificate - ${msg}")
+					return new Respuesta(mensaje:msg,
+						codigoEstado:Respuesta.SC_ERROR_PETICION)
 				}
 				checkedSigners.add(respuesta.usuario)
 			} catch (CertPathValidatorException ex) {
@@ -517,8 +521,8 @@ class FirmaService {
 					messageSource.getMessage('error.caUnknown', null, locale))
 			} catch (Exception ex) {
 				log.error(ex.getMessage(), ex)
-				return new Respuesta(
-					codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:ex.getMessage())
+				return new Respuesta(mensaje:ex.getMessage(),
+					codigoEstado:Respuesta.SC_ERROR_PETICION)
 			}
 		}
 		return new Respuesta(codigoEstado:Respuesta.SC_OK,
@@ -626,23 +630,14 @@ class FirmaService {
 			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
 				mensaje:msg, tipo:Tipo.VOTO_CON_ERRORES, evento:evento)
 		}
-		Respuesta timestampValidationResp = timeStampService.validate(
-			infoVoto.getVoteTimeStampToken(), locale)
+		//TimeStamp validation
+		Respuesta timestampValidationResp = timeStampService.validateToken(
+			infoVoto.getVoteTimeStampToken(), evento, locale)
 		if(Respuesta.SC_OK != timestampValidationResp.codigoEstado) {
 			log.error("validateVoteCerts - ERROR TIMESTAMP VOTE VALIDATION -> '${timestampValidationResp.mensaje}'")
 			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
 				mensaje:timestampValidationResp.mensaje, 
 				tipo:Tipo.VOTO_CON_ERRORES, evento:evento)
-		}
-		Date timestampDate = infoVoto.getVoteTimeStampToken().getTimeStampInfo().getGenTime()
-		if(!timestampDate.after(evento.fechaInicio) &&
-			!timestampDate.before(evento.fechaFin)) {
-			String dateRangeStr = "[${eventoVotacion.fechaInicio} - ${eventoVotacion.fechaFin}]"
-			msg = messageSource.getMessage('timestampDateErrorMsg',
-				[timestampDate, dateRangeStr].toArray(), locale)
-			log.debug("validateVoteCerts - ERROR TIMESTAMP DATE - ${msg}")
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
-				mensaje:msg, tipo:Tipo.VOTO_CON_ERRORES, evento:evento)
 		}
 		//Control Center cert validation
 		eventTrustedCerts = eventValidationTrustedCertsHashMap.get(evento?.id)

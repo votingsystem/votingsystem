@@ -30,7 +30,6 @@ import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.sistemavotacion.Contexto.TIMESTAMP_DNIe_HASH;
 import static org.sistemavotacion.Contexto.getString;
 import org.sistemavotacion.dialogo.PreconditionsCheckerDialog;
 import org.sistemavotacion.seguridad.Encryptor;
@@ -387,7 +386,7 @@ public class RepresentativeDataDialog extends JDialog
                             operacion.getContenidoFirma().toString(),
                             finalPassword.toCharArray(), operacion.getAsuntoMensajeFirmado(), null);
                     new TimeStampWorker(TIME_STAMP_WORKER, operacion.getUrlTimeStampServer(),
-                        INSTANCIA, representativeRequestSMIME.getTimeStampRequest(TIMESTAMP_DNIe_HASH),
+                        INSTANCIA, representativeRequestSMIME.getTimeStampRequest(),
                         PreconditionsCheckerDialog.getTimeStampCert(operacion.getUrlServer())).execute();
                 } catch (Exception ex) {
                     logger.error(ex.getMessage(), ex);

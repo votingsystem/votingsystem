@@ -16,7 +16,6 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.bouncycastle.util.encoders.Base64;
 import org.sistemavotacion.Contexto;
-import static org.sistemavotacion.Contexto.TIMESTAMP_DNIe_HASH;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.seguridad.Encryptor;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
@@ -92,11 +91,13 @@ public class RepresentingRequestLauncher implements Callable<Respuesta>,
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, 
                 ContextoPruebas.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
                 ContextoPruebas.DNIe_SIGN_MECHANISM);
+        
+        String subject = ContextoPruebas.getString("representativeRequestMsgSubject");
+
         representativeRequestSMIME = signedMailGenerator.genMimeMessage(
-                representativeNIF, toUser, representativeDataJSON,
-                ContextoPruebas.ASUNTO_MENSAJE_ALTA_REPRESENTANTE , null);
+                representativeNIF, toUser, representativeDataJSON, subject , null);
         new TimeStampWorker(TIME_STAMP_WORKER, urlTimeStampServer,
-                    this, representativeRequestSMIME.getTimeStampRequest(TIMESTAMP_DNIe_HASH),
+                    this, representativeRequestSMIME.getTimeStampRequest(),
                     ContextoPruebas.getControlAcceso().getTimeStampCert()).execute();
         countDownLatch.await();
         return getResult();

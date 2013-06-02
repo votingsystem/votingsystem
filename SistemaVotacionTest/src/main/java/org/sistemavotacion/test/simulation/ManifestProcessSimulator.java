@@ -33,12 +33,10 @@ import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.seguridad.Encryptor;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.test.json.DeJSONAObjeto;
-import org.sistemavotacion.test.json.DeObjetoAJSON;
-import org.sistemavotacion.test.modelo.SimulationData;
+import org.sistemavotacion.test.modelo.VotingSimulationData;
 import org.sistemavotacion.test.modelo.UserBaseData;
 import org.sistemavotacion.test.simulation.launcher.SignatureManifestLauncher;
-import org.sistemavotacion.test.util.NifUtils;
+import org.sistemavotacion.util.NifUtils;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.StringUtils;
@@ -80,7 +78,7 @@ public class ManifestProcessSimulator implements
     
     private Evento event = null;
     private UserBaseData userBaseData = null;
-    private SimulationData simulationData = null;
+    private VotingSimulationData simulationData = null;
 
     private String urlSignManifest = null;
     private String urlPublishManifest = null;
@@ -92,7 +90,7 @@ public class ManifestProcessSimulator implements
     
     private final CountDownLatch countDownLatch = new CountDownLatch(1); // just one time
     
-    public ManifestProcessSimulator(SimulationData simulationData) {
+    public ManifestProcessSimulator(VotingSimulationData simulationData) {
         try {
             ContextoPruebas.inicializar();
         } catch (Exception ex) {
@@ -125,7 +123,7 @@ public class ManifestProcessSimulator implements
     
     public void beginSignatures () throws Exception {
         logger.debug(" ******* beginSignatures");
-        if(userBaseData.isSimulacionConTiempos()) {
+        if(userBaseData.isTimerBased()) {
             Long milisegundosHoras = 1000 * 60 * 60 * new Long(userBaseData.getHorasDuracionVotacion());
             Long milisegundosMinutos = 1000 * 60 * new Long(userBaseData.getMinutosDuracionVotacion()); 
             Long totalMilisegundosSimulacion = milisegundosHoras + milisegundosMinutos;
@@ -154,7 +152,7 @@ public class ManifestProcessSimulator implements
         String location = null;
         PdfReader manifestToSign = new PdfReader(pdfBytes);
         signManifestCompletionService.submit(new SignatureManifestLauncher(nif, 
-                simulationData.getTimeStampServerURL(), urlSignManifest, 
+                ContextoPruebas.getUrlTimeStampServer(), urlSignManifest, 
                 manifestToSign, reason, location));
         signatures.getAndIncrement();        
     }
@@ -185,16 +183,19 @@ public class ManifestProcessSimulator implements
     }
     
     private void finish() {
-        logger.debug("finish");
+        logger.debug("--------------- SIMULATION RESULT----------------------");   
         long duration = System.currentTimeMillis() - begin;
-        String durationStr = DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(duration);
+        String durationStr = DateUtils.
+                getElapsedTimeHoursMinutesFromMilliseconds(duration);
+        String errorsStr = errorsLog.toString();
         logger.info("Duration: " + durationStr);
-        logger.info("Number of projected requests: " + simulationData.getNumberOfRequests());
-        logger.info("Number of finished signatures: " + signaturesFinished.get());
+        logger.info("Number of projected requests: " + 
+                simulationData.getNumberOfRequests());
+        logger.info("Number of completed requests: " + signaturesFinished.get());
         logger.info("Number of signatures OK: " + signaturesOK.get());
         logger.info("Number of signatures ERROR: " + signaturesERROR.get());
-        logger.info("Errors: " + errorsLog.toString());
-        logger.debug("--------------- FINISHED --------------------------");
+        if(!"".equals(errorsStr)) logger.info("Errors: " + errorsStr);
+        logger.debug("------------------- FINISHED --------------------------");
         System.exit(0);
     }
 
@@ -271,7 +272,7 @@ public class ManifestProcessSimulator implements
             event.setFechaFin(dateFinish.getTime());
             event.setContenido("Contenido Manifiesto -> " 
                     + simulationData.getHtmlContent());
-            String eventStr = DeObjetoAJSON.obtenerEventoJSON(event);
+            String eventStr = event.toJSON().toString();
             File manifestToPublish = File.createTempFile("manifestToPublish", ".json");
             manifestToPublish.deleteOnExit();
             FileUtils.copyStringToFile(eventStr, manifestToPublish);
@@ -345,7 +346,7 @@ public class ManifestProcessSimulator implements
             case ACCESS_CONTROL_GETTER_WORKER:           
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
-                        ActorConIP controlAcceso = DeJSONAObjeto.obtenerActorConIP(worker.getMessage());
+                        ActorConIP controlAcceso = ActorConIP.parse(worker.getMessage());
                         if(!(ActorConIP.Tipo.CONTROL_ACCESO == controlAcceso.getTipo())) {
                             logger.error("SERVER NOT ACCESS CONTROL");
                             return;
@@ -399,7 +400,7 @@ public class ManifestProcessSimulator implements
                         Certificate[] signerCertChain = keyStore.getCertificateChain(
                                 ContextoPruebas.END_ENTITY_ALIAS);
                         new PDFSignerWorker(PDF_SIGNER_WORKER, 
-                                simulationData.getTimeStampServerURL(),
+                                ContextoPruebas.getUrlTimeStampServer(),
                                 this, reason, location, null, manifestToSign, 
                                 privateKey, signerCertChain).execute();
                     } catch(Exception ex) {
@@ -433,16 +434,16 @@ public class ManifestProcessSimulator implements
     
     
     public static void main(String[] args) throws Exception {
-        SimulationData simulationData = null;
+        VotingSimulationData simulationData = null;
         if(args != null && args.length > 0) {
             logger.debug("args[0]");
-            simulationData = SimulationData.parse(args[0]);
+            simulationData = VotingSimulationData.parse(args[0]);
         } else {
             File jsonFile = File.createTempFile("ManifestProcessSimulation", ".json");
             jsonFile.deleteOnExit();
             FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
                             .getResourceAsStream("simulatorFiles/manifestSimulationData.json"), jsonFile); 
-            simulationData = SimulationData.parse(FileUtils.getStringFromFile(jsonFile));
+            simulationData = VotingSimulationData.parse(FileUtils.getStringFromFile(jsonFile));
         }
         ManifestProcessSimulator simuHelper = new ManifestProcessSimulator(simulationData);
         simuHelper.init();

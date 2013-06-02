@@ -28,6 +28,7 @@ public class Respuesta<T> {
     public static final int SC_NOT_FOUND = 404;
     public static final int SC_ERROR_VOTO_REPETIDO = 470;
     public static final int SC_ANULACION_REPETIDA = 471;
+    public static final int SC_NULL_REQUEST = 472;
     
     public static final int SC_ERROR_EJECUCION = 500;
     public static final int SC_PROCESANDO = 700;
@@ -38,11 +39,10 @@ public class Respuesta<T> {
     private int codigoEstado;
     private String mensaje;
     private Operacion operacion;
-    private Object objeto;
     private T data;
     private Tipo tipo;
     private Date fecha;
-    private Long eventoId;
+    private Evento evento;
     private SMIMEMessageWrapper smimeMessage;
     private ReciboVoto reciboVoto;
     private PKCS10WrapperClient pkcs10WrapperClient;
@@ -64,7 +64,6 @@ public class Respuesta<T> {
     public Respuesta (int codigoEstado, String mensaje, Object objeto) {
         this.codigoEstado = codigoEstado;
         this.mensaje = mensaje;
-        this.objeto = objeto;
     }
 
     public Respuesta (int codigoEstado, String mensaje) {
@@ -177,34 +176,6 @@ public class Respuesta<T> {
     public Date getFecha() {
             return fecha;
     }
-    
-    /**
-     * @return the eventoId
-     */
-    public Long getEventoId() {
-        return eventoId;
-    }
-
-    /**
-     * @param eventoId the eventoId to set
-     */
-    public void setEventoId(Long eventoId) {
-        this.eventoId = eventoId;
-    }
-
-    /**
-     * @return the objeto
-     */
-    public Object getObjeto() {
-        return objeto;
-    }
-
-    /**
-     * @param objeto the objeto to set
-     */
-    public void setObjeto(Object objeto) {
-        this.objeto = objeto;
-    }
 
     /**
      * @return the pkcs10WrapperClient
@@ -306,5 +277,19 @@ public class Respuesta<T> {
      */
     public void setData(T data) {
         this.data = data;
+    }
+
+    /**
+     * @return the evento
+     */
+    public Evento getEvento() {
+        return evento;
+    }
+
+    /**
+     * @param evento the evento to set
+     */
+    public void setEvento(Evento evento) {
+        this.evento = evento;
     }
 }

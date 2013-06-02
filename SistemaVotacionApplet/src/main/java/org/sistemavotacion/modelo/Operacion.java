@@ -422,7 +422,7 @@ public class Operacion {
          if(urlTimeStampServer != null) map.put("urlTimeStampServer", urlTimeStampServer);
         if(args != null) map.put("args", args);
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);
-        if(evento != null) jsonObject.put("evento", evento.obtenerJSON());
+        if(evento != null) jsonObject.put("evento", evento.toJSON());
         return jsonObject;
     }
     

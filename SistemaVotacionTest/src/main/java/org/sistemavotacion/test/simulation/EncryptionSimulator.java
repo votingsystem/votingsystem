@@ -13,9 +13,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.test.json.DeJSONAObjeto;
 import org.sistemavotacion.test.simulation.launcher.EncryptorLauncher;
-import org.sistemavotacion.test.util.NifUtils;
+import org.sistemavotacion.util.NifUtils;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.worker.InfoGetterWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
@@ -145,7 +144,7 @@ public class EncryptionSimulator implements VotingSystemWorkerListener {
     public void showResult(VotingSystemWorker worker) {         
         if(Respuesta.SC_OK == worker.getStatusCode()) {
             try {
-                ActorConIP actorConIP = DeJSONAObjeto.obtenerActorConIP(worker.getMessage());
+                ActorConIP actorConIP = ActorConIP.parse(worker.getMessage());
                 ContextoPruebas.setControlAcceso(actorConIP);
                 countDownLatch.countDown();
             } catch(Exception ex) {

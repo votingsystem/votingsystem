@@ -12,8 +12,7 @@ import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.test.json.DeObjetoAJSON;
-import org.sistemavotacion.test.modelo.SolicitudAcceso;
+import org.sistemavotacion.test.modelo.AccessRequestBackup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,35 +24,36 @@ public class CancelAccessRequestLauncher  implements Callable<Respuesta> {
     
     private static Logger logger = LoggerFactory.getLogger(CancelAccessRequestLauncher.class);
 
-    private SolicitudAcceso solicitudAcceso;
+    private AccessRequestBackup request;
     
-    public CancelAccessRequestLauncher (SolicitudAcceso solicitudAcceso) 
+    public CancelAccessRequestLauncher (AccessRequestBackup request) 
             throws Exception {
-        this.solicitudAcceso = solicitudAcceso;
+        this.request = request;
     }
     
     
     @Override
     public Respuesta call() throws Exception {
         Respuesta respuesta = null;
-        File file = new File(ContextoPruebas.getUserKeyStorePath(solicitudAcceso.getUserNif()));
+        String nif = request.getUsuario().getNif();
+        File file = new File(ContextoPruebas.getUserKeyStorePath(nif));
         KeyStore mockDnie = KeyStoreUtil.getKeyStoreFromFile(
                 file, ContextoPruebas.PASSWORD.toCharArray());
-        logger.info("userID: " + solicitudAcceso.getUserNif());
+        logger.info("nif: " + nif);
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, 
                 ContextoPruebas.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
                 ContextoPruebas.VOTE_SIGN_MECHANISM);
-        String asuntoMensaje = ContextoPruebas.ASUNTO_MENSAJE_ANULACION_SOLICITUD_ACCESO
-                        + solicitudAcceso.getEventoId();
-        File anulador = new File(ContextoPruebas.getUserDirPath(solicitudAcceso.getUserNif())
-                + ContextoPruebas.ANULACION_FIRMADA_FILE + solicitudAcceso.getEventoId() + 
-                "_usu" + solicitudAcceso.getUserNif() + ".p7m");;
+        String subject = ContextoPruebas.getString("cancelAccessRequestMsgSubject") 
+                + request.getEventoId();
+                        ;
+        File anulador = new File(ContextoPruebas.getUserDirPath(nif) + 
+                ContextoPruebas.ANULACION_FIRMADA_FILE + request.getEventoId() + 
+                "_usu" + nif + ".p7m");;
         synchronized(this) {
             MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(
-               solicitudAcceso.getUserNif(), 
-                ContextoPruebas.getControlAcceso().getNombreNormalizado(), 
-                DeObjetoAJSON.obtenerAnuladorDeVotoJSON(solicitudAcceso),
-                asuntoMensaje, null);
+                nif,  ContextoPruebas.getControlAcceso().getNombreNormalizado(), 
+                request.toJSON().toString(),
+                subject, null);
             mimeMessage.writeTo(new FileOutputStream(anulador));
         }
         respuesta = Contexto.getHttpHelper().sendFile(anulador, 
@@ -66,7 +66,7 @@ public class CancelAccessRequestLauncher  implements Callable<Respuesta> {
             respuesta = new Respuesta(respuesta.getCodigoEstado(), 
                     dnieMimeMessage, ContextoPruebas.INSTANCIA.getSessionPKIXParameters());
         }
-        respuesta.setObjeto(solicitudAcceso);
+        respuesta.setData(request);
         return respuesta;
     }
 

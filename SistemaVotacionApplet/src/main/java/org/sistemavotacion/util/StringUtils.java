@@ -1,5 +1,8 @@
 package org.sistemavotacion.util;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.util.Random;
@@ -67,6 +70,18 @@ public class StringUtils {
         return resultado.trim();
     }
 
+    public static String getStringFromInputStream(InputStream entrada) throws IOException {
+    	ByteArrayOutputStream salida = new ByteArrayOutputStream();
+        byte[] buf =new byte[1024];
+        int len;
+        while((len = entrada.read(buf)) > 0){
+            salida.write(buf,0,len);
+        }
+        salida.close();
+        entrada.close();
+        return new String(salida.toByteArray());
+    }
+    
     public static String RandomLowerString(long seed, int size) {
         StringBuffer tmp = new StringBuffer();
         Random random = new Random(seed);

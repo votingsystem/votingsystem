@@ -66,10 +66,14 @@ public class TimeStampWorker extends SwingWorker<Respuesta, String>
     public TimeStampWorker(Integer id, String urlArchivo, 
             VotingSystemWorkerListener workerListener, 
             TimeStampRequest timeStampRequest, X509Certificate timeStampServerCert) 
-            throws OperatorCreationException {
+            throws OperatorCreationException, Exception {
         this.id = id;
         this.urlArchivo = urlArchivo;
         this.workerListener = workerListener;
+        
+        if(timeStampRequest == null) {
+            throw new Exception("timeStampRequest null");
+        }
         this.timeStampRequest = timeStampRequest;
         this.timeStampCert = timeStampServerCert;
         timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().

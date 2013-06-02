@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
-import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Respuesta;
+import org.sistemavotacion.test.simulation.SimulatorData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,11 +14,11 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class UserBaseData {
+public class UserBaseData implements SimulatorData {
     
     private static Logger logger = LoggerFactory.getLogger(UserBaseData.class);
 
-    private int codigoEstado = Respuesta.SC_ERROR_EJECUCION;
+    private int statusCode = Respuesta.SC_ERROR_EJECUCION;
     private String message = null;
 
     private Integer numRepresentatives = 0;
@@ -31,20 +31,21 @@ public class UserBaseData {
     private Integer numVotesUsersWithRepresentative =  0;
     
 
-    private Integer numAltasOK = 0;
-    private Integer numAltasERROR = 0;
+    private AtomicLong numRepresentativeRequestsOK = new AtomicLong(0);
+    private AtomicLong numRepresentativeRequestssERROR = new AtomicLong(0);
 
-    private Integer numDelegacionesOK = 0;
-    private Integer numDelegacionesERROR = 0;
+    private AtomicLong numDelegationsOK = new AtomicLong(0);
+    private AtomicLong numDelegationsERROR = new AtomicLong(0);
     
-    private static Integer horasDuracionVotacion;
-    private static Integer minutosDuracionVotacion;
+    private final AtomicLong representativeRequests = new AtomicLong(0);
+    private final AtomicLong delegationRequests = new AtomicLong(0);
     
-    private static boolean votacionAleatoria = true;
-    private static boolean simulacionConTiempos = false;
+    private Integer horasDuracionVotacion;
+    private Integer minutosDuracionVotacion;
     
-    private Evento evento = null;
-    
+    private boolean withRandomVotes = true;
+    private boolean timerBased = false;
+
     private AtomicLong userIndex = new AtomicLong(0);
     
     private List<String> representativeNifList = new ArrayList<String>();
@@ -52,54 +53,119 @@ public class UserBaseData {
     private List<String> usersWithRepresentativeList = new ArrayList<String>();
 
     
-    private static long comienzo;
-    private static long duracion;
+    private long begin;
+    private long finish;
+    
+    private String durationStr = null;
+
+    /**
+     * @return the numRepresentativeRequestsOK
+     */
+    public Long getNumDelegationRequestsColected() {
+        return (numDelegationsERROR.get() + numDelegationsOK.get());
+    }
+    
+    /**
+     * @return the numRepresentativeRequestsOK
+     */
+    public Long getNumDelegationRequests() {
+        return delegationRequests.get();
+    }
+    
+    /**
+     * @return the numRepresentativeRequestsOK
+     */
+    public Long getAndIncrementNumDelegationRequests() {
+        return delegationRequests.getAndIncrement();
+    }
+    
+    /**
+     * @return the numRepresentativeRequestsOK
+     */
+    public Long getNumRepresentativeRequests() {
+        return representativeRequests.get();
+    }
+    
+    /**
+     * @return the numRepresentativeRequestsOK
+     */
+    public Long getAndIncrementNumRepresentativeRequests() {
+        return representativeRequests.getAndIncrement();
+    }
+    
+    /**
+     * @return the numRepresentativeRequestsOK
+     */
+    public Long getNumRepresentativeRequestsColected() {
+        return (numRepresentativeRequestsOK.get() + 
+                numRepresentativeRequestssERROR.get());
+    }
+    
+    
+    /**
+     * @return the numRepresentativeRequestsOK
+     */
+    public Long getNumRepresentativeRequestsOK() {
+        return numRepresentativeRequestsOK.get();
+    }
+    
+    /**
+     * @return the numRepresentativeRequestsOK
+     */
+    public Long getAndIncrementNumRepresentativeRequestsOK() {
+        return numRepresentativeRequestsOK.getAndIncrement();
+    }
+
+    /**
+     * @return the numRepresentativeRequestsOK
+     */
+    public Long getNumRepresentativeRequestsERROR() {
+        return numRepresentativeRequestssERROR.get();
+    }
+    
+    /**
+     * @return the numRepresentativeRequestsOK
+     */
+    public Long getAndIncrementNumRepresentativeRequestsERROR() {
+        return numRepresentativeRequestssERROR.get();
+    }
+
+    /**
+     * @return the numRepresentativeRequestsOK
+     */
+    public Long getNumDelegationsOK() {
+        return numDelegationsOK.get();
+    }
+    
+    /**
+     * @return the numRepresentativeRequestsOK
+     */
+    public Long getAndIncrementNumDelegationsOK() {
+        return numDelegationsOK.getAndIncrement();
+    }
+    
+    /**
+     * @return the numRepresentativeRequestsOK
+     */
+    public Long getNumDelegationsERROR() {
+        return numDelegationsERROR.get();
+    }
+    
+    /**
+     * @return the numRepresentativeRequestsOK
+     */
+    public Long getAndIncrementNumDelegationsERROR() {
+        return numDelegationsERROR.getAndIncrement();
+    }
+    
     
     public Integer getNumberElectors() {
         return numVotesRepresentatives + numVotesUsersWithRepresentative + 
                 numVotesUsersWithoutRepresentative;
     }
-    
-    public Integer getNumAltasOK() {
-        return this.numAltasOK;
-    }
-    
-    public Integer getAndIncrementNumAltas() {
-        this.numAltasOK++;
-        return this.numAltasOK;
-    }
-    
-    public Integer getNumAltasERROR() {
-        return this.numAltasERROR;
-    }
-    
-    public Integer getAndIncrementNumAltasERROR() {
-        this.numAltasERROR++;
-        return this.numAltasERROR;
-    }
-    
-    public Integer getNumDelegacionesOK() {
-        return this.numDelegacionesOK;
-    }
-    
-    public Integer getAndIncrementNumDelegacionesOK() {
-        this.numDelegacionesOK++;
-        return this.numDelegacionesOK;
-    }
-    
-    
-    public Integer getNumDelegacionesERROR() {
-        return this.numDelegacionesERROR;
-    }
-    
-    public Integer getAndIncrementNumDelegacionesERROR() {
-        this.numDelegacionesERROR++;
-        return this.numDelegacionesERROR;
-    }
-    
-    
+
     public UserBaseData(int status, String message) {
-        this.codigoEstado = status;
+        this.statusCode = status;
         this.message = message;
     }
     
@@ -133,61 +199,6 @@ public class UserBaseData {
         this.numRepresentatives = numRepresentatives;
     }
 
-
-    /**
-     * @return the duracion
-     */
-    public long getDuracion() {
-        return duracion;
-    }
-
-    /**
-     * @param aDuracion the duracion to set
-     */
-    public void setDuracion(long aDuracion) {
-        duracion = aDuracion;
-    }
-
-    
-    /**
-     * @return the comienzo
-     */
-    public long getComienzo() {
-        return comienzo;
-    }
-
-    /**
-     * @param aComienzo the comienzo to set
-     */
-    public void setComienzo(long aComienzo) {
-        comienzo = aComienzo;
-    }
-    
-    public String operationResultHtml() {
-        return new StringBuffer("<html><b>Altas OK:</b>").append(this.numAltasOK)
-            .append("<br/><b>Altas con error:</b>").append(this.numAltasERROR)
-            .append("<br/><b>Delegaciones OK:</b>").append(this.numDelegacionesOK)
-            .append("<br/><b>Delegaciones ERROR:</b>").append(this.numDelegacionesERROR)
-             .append("</html>").toString();
-    }
-        
-    public String toHtml() {
-        return new StringBuffer("<html><b>Número representantes:</b>")
-                .append(this.numRepresentatives)
-                .append("<br/><b>Número de votos de representantes:</b>")
-                .append(this.numVotesRepresentatives)
-                .append("<br/><b>Número de usuarios representados:</b>")
-                .append(this.numUsersWithRepresentative)
-                .append("<br/><b>Número de votos de usuarios representados:</b>")
-                .append(this.numVotesUsersWithRepresentative)
-                .append("<br/><b>Número de usuarios sin representante:</b>")
-                .append(this.numUsersWithoutRepresentative)
-                .append("<br/><b>Número de votos de usuarios sin representante:</b>")
-                .append(this.numVotesUsersWithoutRepresentative)
-                .append("</html>").toString();
-    }
-    
-
     /**
      * @return the userIndex
      */
@@ -209,19 +220,6 @@ public class UserBaseData {
         this.userIndex = new AtomicLong(userIndex);
     }
 
-    /**
-     * @return the codigoEstado
-     */
-    public int getCodigoEstado() {
-        return codigoEstado;
-    }
-
-    /**
-     * @param codigoEstado the codigoEstado to set
-     */
-    public void setCodigoEstado(int codigoEstado) {
-        this.codigoEstado = codigoEstado;
-    }
 
     /**
      * @return the representativeNifList
@@ -254,74 +252,31 @@ public class UserBaseData {
     }
 
     /**
-     * @return the evento
-     */
-    public Evento getEvento() {
-        return evento;
-    }
-
-    /**
-     * @param evento the evento to set
-     */
-    public void setEvento(Evento evento) {
-        this.evento = evento;
-    }
-
-    /**
      * @return the horasDuracionVotacion
      */
-    public static Integer getHorasDuracionVotacion() {
+    public Integer getHorasDuracionVotacion() {
         return horasDuracionVotacion;
     }
 
     /**
      * @param aHorasDuracionVotacion the horasDuracionVotacion to set
      */
-    public static void setHorasDuracionVotacion(Integer aHorasDuracionVotacion) {
+    public void setHorasDuracionVotacion(Integer aHorasDuracionVotacion) {
         horasDuracionVotacion = aHorasDuracionVotacion;
     }
 
     /**
      * @return the minutosDuracionVotacion
      */
-    public static Integer getMinutosDuracionVotacion() {
+    public Integer getMinutosDuracionVotacion() {
         return minutosDuracionVotacion;
     }
 
     /**
      * @param aMinutosDuracionVotacion the minutosDuracionVotacion to set
      */
-    public static void setMinutosDuracionVotacion(Integer aMinutosDuracionVotacion) {
+    public void setMinutosDuracionVotacion(Integer aMinutosDuracionVotacion) {
         minutosDuracionVotacion = aMinutosDuracionVotacion;
-    }
-
-    /**
-     * @return the votacionAleatoria
-     */
-    public static boolean isVotacionAleatoria() {
-        return votacionAleatoria;
-    }
-
-    /**
-     * @param aVotacionAleatoria the votacionAleatoria to set
-     */
-    public static void setVotacionAleatoria(boolean aVotacionAleatoria) {
-        votacionAleatoria = aVotacionAleatoria;
-    }
-    
-    
-    /**
-     * @return the simulacionConTiempos
-     */
-    public static boolean isSimulacionConTiempos() {
-        return simulacionConTiempos;
-    }
-
-    /**
-     * @param aSimulacionConTiempos the simulacionConTiempos to set
-     */
-    public static void setSimulacionConTiempos(boolean aSimulacionConTiempos) {
-        simulacionConTiempos = aSimulacionConTiempos;
     }
 
     /**
@@ -422,6 +377,21 @@ public class UserBaseData {
         this.usersWithRepresentativeList = usersWithRepresentativeList;
     }
     
+    
+    /**
+     * @return the statusCode
+     */
+    public int getStatusCode() {
+        return statusCode;
+    }
+
+    /**
+     * @param statusCode the statusCode to set
+     */
+    public void setStatusCode(int statusCode) {
+        this.statusCode = statusCode;
+    }
+    
     public static UserBaseData parse (String dataStr) {
         logger.debug("- parse");
         if(dataStr == null) return null;
@@ -459,5 +429,64 @@ public class UserBaseData {
         return userBaseData;
     }
 
+    /**
+     * @return the begin
+     */
+    public long getBegin() {
+        return begin;
+    }
+
+    /**
+     * @param begin the begin to set
+     */
+    public void setBegin(long begin) {
+        this.begin = begin;
+    }
+
+    /**
+     * @return the finish
+     */
+    public long getFinish() {
+        return finish;
+    }
+
+    /**
+     * @param finish the finish to set
+     */
+    public void setFinish(long finish) {
+        this.finish = finish;
+    }
+
+    public String getDurationStr() {
+        return durationStr;
+    }
+
+    /**
+     * @return the timerBased
+     */
+    public boolean isTimerBased() {
+        return timerBased;
+    }
+
+    /**
+     * @param timerBased the timerBased to set
+     */
+    public void setTimerBased(boolean timerBased) {
+        this.timerBased = timerBased;
+    }
+
+    /**
+     * @return the withRandomVotes
+     */
+    public boolean isWithRandomVotes() {
+        return withRandomVotes;
+    }
+
+    /**
+     * @param withRandomVotes the withRandomVotes to set
+     */
+    public void setWithRandomVotes(boolean withRandomVotes) {
+        this.withRandomVotes = withRandomVotes;
+    }
 
 }

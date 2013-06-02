@@ -1,0 +1,12 @@
+package org.sistemavotacion.test.simulation;
+
+/**
+* @author jgzornoza
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+*/
+public interface SimulatorData<T>{
+    
+     public String getMessage();
+     public int getStatusCode();
+     
+}

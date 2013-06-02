@@ -1,6 +1,7 @@
 package org.sistemavotacion.test.simulation;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -27,14 +28,13 @@ import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.test.json.DeJSONAObjeto;
-import org.sistemavotacion.test.json.DeObjetoAJSON;
-import org.sistemavotacion.test.modelo.SimulationData;
+import org.sistemavotacion.test.modelo.VotingSimulationData;
 import org.sistemavotacion.test.modelo.UserBaseData;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.StringUtils;
 import org.sistemavotacion.worker.DocumentSenderWorker;
 import org.sistemavotacion.worker.InfoGetterWorker;
+import org.sistemavotacion.worker.TimeStampWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
 import org.slf4j.Logger;
@@ -49,27 +49,30 @@ import org.slf4j.LoggerFactory;
 * 4)- Initialice user base data
 * 5)- When finishes user base data initilization, 'setSimulationResult' inits simulation 
 */
-public class VotingProcessSimulator implements SimulatorListener, 
-        VotingSystemWorkerListener{
+public class VotingProcessSimulator implements VotingSystemWorkerListener, 
+        SimulatorListener {
     
     private static Logger logger = LoggerFactory.getLogger(VotingProcessSimulator.class);
-    
+
     public enum Simulation {VOTING, ACCESS_REQUEST}
     
     private static final int ACCESS_CONTROL_GETTER_WORKER          = 0;
     private static final int CONTROL_CENTER_GETTER_WORKER          = 1;
-    private static final int CA_CERT_INITIALIZER                   = 2;    
-    private static final int PUBLISH_DOCUMENT_WORKER               = 3;
-    private static final int ASSOCIATE_CONTROL_CENTER_WORKER       = 4;
+    private static final int CA_CERT_INITIALIZER                   = 2;
+    private static final int TIME_STAMP_PUBLISH_WORKER             = 3;
+    private static final int PUBLISH_DOCUMENT_WORKER               = 4;
+    private static final int ASSOCIATE_CONTROL_CENTER_WORKER       = 5;
 
     private static Simulation simulation = Simulation.VOTING;
     private Evento evento = null;
     private UserBaseData userBaseData = null;
-    private SimulationData simulationData = null;
+    private VotingSimulationData simulationData = null;
+        
+    private SMIMEMessageWrapper signedPublishrequestSMIME;
     
     private final CountDownLatch countDownLatch = new CountDownLatch(1); // just one time
     
-    public VotingProcessSimulator(SimulationData simulationData) {
+    public VotingProcessSimulator(VotingSimulationData simulationData) {
         this.simulationData = simulationData;
         this.userBaseData = simulationData.getUserBaseData();
         try {
@@ -90,36 +93,66 @@ public class VotingProcessSimulator implements SimulatorListener,
         }
     }
     
-    @Override
-    public void setSimulationMessage(String message) { }
+    @Override public void updateSimulationData(Object data) {
+        if(data instanceof VotingSimulationData) {
+            VotingSimulationData simulData = (VotingSimulationData)data;
+            logger.debug("updateSimulationData - status: " + simulData.getStatusCode());
+            if(Respuesta.SC_OK == simulData.getStatusCode()) {
+            } else {
+            }
+        } else {
+            
+        }
+    }
 
-    @Override
-    public void setSimulationErrorMessage(String message) {  }
-
-    @Override
-    public void setSimulationResult(Simulator simulator, Object data) {
-        logger.debug("data: " + data + " - simulator: " + simulator.getClass());
+    @Override public void setSimulationResult(Simulator simulator) {
+        logger.debug("Getting response from simulator: " + 
+                simulator.getClass().getSimpleName());
         if(simulator instanceof UserBaseDataSimulator) {
-            UserBaseData ubd = (UserBaseData)data;
-            ubd.setEvento(evento);
+            UserBaseData ubd = ((UserBaseDataSimulator)simulator).getData();
             simulationData.setUserBaseData(ubd);
             switch(simulation) {
                 case ACCESS_REQUEST:
-                    AccessRequestSimulator accessRequest = new AccessRequestSimulator(simulationData, this);
+                    AccessRequestSimulator accessRequest = 
+                            new AccessRequestSimulator(simulationData, this);
                     accessRequest.init();
                     break;
                 case VOTING:
-                    VotingSimulator votacion = new VotingSimulator(simulationData, this);
+                    VotingSimulator votacion = 
+                            new VotingSimulator(simulationData, this);
                     votacion.init();
                     break;
             }
 
-        } else if (simulator instanceof VotingSimulator) {
-            logger.debug("data: " + data);
+        } else if ((simulator instanceof VotingSimulator) ||
+                (simulator instanceof AccessRequestSimulator)) {
+            VotingSimulationData simulData = (VotingSimulationData)simulator.getData();
+            logger.debug("--------------- SIMULATION RESULT------------------"); 
+            logger.info("Duration: " + simulData.getDurationStr());
+            logger.info("Number of requests projected: " + simulData.getNumberOfElectors());
+            logger.info("Number access request ERRORs: " + simulData.getNumAccessRequestsERROR());
+            logger.info("Number of vote requests: " + simulData.getNumVotingRequests());
+            logger.info("Number of votes OK: " +  simulData.getNumVotingRequestsOK());
+            logger.info("Number of votes ERROR: " + simulData.getNumVotingRequestsERROR());
+            List<String> errorList = simulator.getErrorsList();
+            if(errorList != null && !errorList.isEmpty()) {
+                logger.info("Errors list: \n" + getFormattedErrorList(errorList));
+            }
             countDownLatch.countDown();
         }
     }
 
+    private String getFormattedErrorList(List<String> errorsList) {
+        if(errorsList == null || errorsList.isEmpty()) return null;
+        else {
+            StringBuilder result = new StringBuilder("");
+            for(String error:errorsList) {
+                result.append(error + "\n");
+            }
+            return result.toString();
+        }
+    }
+    
     @Override
     public void process(List<String> messages) { }
     
@@ -149,7 +182,6 @@ public class VotingProcessSimulator implements SimulatorListener,
     private void publishEvent() {
         logger.debug("publishEvent");
         try {
-            
             DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date date = new Date(System.currentTimeMillis());
             String dateStr = formatter.format(date);
@@ -181,21 +213,18 @@ public class VotingProcessSimulator implements SimulatorListener,
                 ContextoPruebas.getUsuarioPruebas().getKeyStore(),
                 ContextoPruebas.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
                 ContextoPruebas.VOTE_SIGN_MECHANISM);
-            File eventToPublish = File.createTempFile("eventToPublish", ".json"); 
-            eventToPublish.deleteOnExit();
-            logger.debug("publishing event: " + eventToPublish.getAbsolutePath());
-            String eventoParaPublicar = DeObjetoAJSON.obtenerEventoJSON(evento);
-            MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(
+            String eventoParaPublicar = evento.toJSON().toString();
+            String subject = ContextoPruebas.getString("votingPublishMsgSubject");
+            signedPublishrequestSMIME = signedMailGenerator.genMimeMessage(
                     ContextoPruebas.getUsuarioPruebas().getEmail(), 
                     ContextoPruebas.getControlAcceso().getNombreNormalizado(), 
-                    eventoParaPublicar, "Solicitud Publicación convocatoria",
-                    null);
-            mimeMessage.writeTo(new FileOutputStream(eventToPublish));
-            new DocumentSenderWorker(
-                    PUBLISH_DOCUMENT_WORKER, eventToPublish, 
-                    Contexto.SIGNED_CONTENT_TYPE,
-                    ContextoPruebas.getURLGuardarEventoParaVotar(
-                    ContextoPruebas.getControlAcceso().getServerURL()), this).execute();
+                    eventoParaPublicar, subject, null);
+            
+            new TimeStampWorker(TIME_STAMP_PUBLISH_WORKER, 
+                    ContextoPruebas.getUrlTimeStampServer(),
+                    this, signedPublishrequestSMIME.getTimeStampRequest(),
+                    ContextoPruebas.getControlAcceso().getTimeStampCert()).execute();
+
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             countDownLatch.countDown();
@@ -211,8 +240,8 @@ public class VotingProcessSimulator implements SimulatorListener,
             File solicitudAsociacion = File.createTempFile(
                     "SolicitudAsociacion", ".p7s");
             solicitudAsociacion.deleteOnExit();
-            String documentoAsociacion = DeObjetoAJSON.obtenerDocumentoAsociacionJSON(
-            		simulationData.getControlCenterURL());
+            String documentoAsociacion = ActorConIP.getAssociationDocumentJSON(
+                    simulationData.getControlCenterURL()).toString();
             MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(
                     ContextoPruebas.getUsuarioPruebas().getEmail(), 
                     ContextoPruebas.getControlAcceso().getNombreNormalizado(), 
@@ -251,7 +280,7 @@ public class VotingProcessSimulator implements SimulatorListener,
             case ACCESS_CONTROL_GETTER_WORKER:           
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
-                        ActorConIP controlAcceso = DeJSONAObjeto.obtenerActorConIP(worker.getMessage());
+                        ActorConIP controlAcceso = ActorConIP.parse(worker.getMessage());
                         if(!(ActorConIP.Tipo.CONTROL_ACCESO == controlAcceso.getTipo())) {
                             logger.error("SERVER NOT ACCESS CONTROL");
                             return;
@@ -283,7 +312,25 @@ public class VotingProcessSimulator implements SimulatorListener,
                     logger.error("### ERROR - " + mensaje);
                     countDownLatch.countDown();
                 } 
-                break;                
+                break;     
+            case TIME_STAMP_PUBLISH_WORKER:
+                if(Respuesta.SC_OK == worker.getStatusCode()) {
+                    try {
+                        signedPublishrequestSMIME.setTimeStampToken((TimeStampWorker)worker);
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        signedPublishrequestSMIME.writeTo(baos);
+                        new DocumentSenderWorker(PUBLISH_DOCUMENT_WORKER, 
+                                baos.toByteArray(), Contexto.SIGNED_CONTENT_TYPE,
+                                ContextoPruebas.getURLGuardarEventoParaVotar(), this).execute();
+                    } catch (Exception ex) {
+                        logger.error(ex.getMessage(), ex);
+                        countDownLatch.countDown();
+                    }
+                } else {
+                    logger.error("### ERROR - " + worker.getMessage());
+                    countDownLatch.countDown();
+                }
+                break;
             case PUBLISH_DOCUMENT_WORKER:
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
@@ -297,7 +344,8 @@ public class VotingProcessSimulator implements SimulatorListener,
                                 ContextoPruebas.INSTANCIA.getSessionPKIXParameters());
                         logger.debug("--- mimeMessage.getSignedContent(): " 
                                 + mimeMessage.getSignedContent());
-                        evento = DeJSONAObjeto.obtenerEvento(mimeMessage.getSignedContent());
+                        evento = Evento.parse(mimeMessage.getSignedContent());
+                        simulationData.setEvento(evento);
                         logger.debug("Respuesta - Evento ID: " + evento.getEventoId());
                         inicializarBaseUsuarios();
                     } catch (Exception ex) {
@@ -312,7 +360,7 @@ public class VotingProcessSimulator implements SimulatorListener,
             case ASSOCIATE_CONTROL_CENTER_WORKER:
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
-                        ActorConIP actorConIP = DeJSONAObjeto.obtenerActorConIP(worker.getMessage());
+                        ActorConIP actorConIP = ActorConIP.parse(worker.getMessage());
                         if(ActorConIP.Tipo.CENTRO_CONTROL == actorConIP.getTipo()) {
                             ContextoPruebas.setCentroControl(actorConIP);
                             //Loaded Access Control and Control Center. Now we can publish  
@@ -332,7 +380,7 @@ public class VotingProcessSimulator implements SimulatorListener,
             case CONTROL_CENTER_GETTER_WORKER:
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
-                        ActorConIP actorConIP = DeJSONAObjeto.obtenerActorConIP(worker.getMessage());
+                        ActorConIP actorConIP = ActorConIP.parse(worker.getMessage());
                         if(ActorConIP.Tipo.CENTRO_CONTROL == actorConIP.getTipo()) {
                             ContextoPruebas.setCentroControl(actorConIP);
                             //Loaded Access Control and Control Center. Now we can publish  
@@ -366,10 +414,10 @@ public class VotingProcessSimulator implements SimulatorListener,
     
     
     public static void main(String[] args) throws Exception {
-        SimulationData simulationData = null;
+        VotingSimulationData simulationData = null;
         if(args != null && args.length > 0) {
             logger.debug("args[0]");
-            simulationData = SimulationData.parse(args[0]);
+            simulationData = VotingSimulationData.parse(args[0]);
             if(args[1] != null) simulation = Simulation.valueOf(args[1]);
         } else {
             simulation = Simulation.VOTING;
@@ -377,7 +425,7 @@ public class VotingProcessSimulator implements SimulatorListener,
             jsonFile.deleteOnExit();
             FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
                             .getResourceAsStream("simulatorFiles/votingSimulationData.json"), jsonFile); 
-            simulationData = SimulationData.parse(FileUtils.getStringFromFile(jsonFile));
+            simulationData = VotingSimulationData.parse(FileUtils.getStringFromFile(jsonFile));
             logger.debug("Simulation for Access Control: " + simulationData.getAccessControlURL());
             
         }

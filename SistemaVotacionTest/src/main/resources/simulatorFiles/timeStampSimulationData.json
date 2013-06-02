@@ -1,6 +1,5 @@
 {"accessControlURL":"http://localhost:8080/SistemaVotacionControlAcceso",
- "timeStampServerURL":"http://localhost:8080/SistemaVotacionControlAcceso/timeStamp",
- "numberOfRequests":20,
+ "numberOfRequests":200,
  "maxPendingResponses":10
 }
 

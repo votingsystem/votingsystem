@@ -1,8 +1,6 @@
 package org.sistemavotacion;
 
-import static org.sistemavotacion.Contexto.TIMESTAMP_DNIe_HASH;
 import static org.sistemavotacion.Contexto.getString;
-
 import java.awt.Desktop;
 import java.awt.Frame;
 import java.awt.event.WindowAdapter;
@@ -10,11 +8,9 @@ import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.List;
-
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.SwingWorker;
-
 import org.sistemavotacion.dialogo.MensajeDialog;
 import org.sistemavotacion.dialogo.PasswordDialog;
 import org.sistemavotacion.modelo.Operacion;
@@ -336,7 +332,7 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                                     operacion.getContenidoFirma().toString(),
                                     finalPassword.toCharArray(), operacion.getAsuntoMensajeFirmado(), null);                            
                             new TimeStampWorker(TIME_STAMP_WORKER, operacion.getUrlTimeStampServer(),
-                                INSTANCIA, documentSMIME.getTimeStampRequest(TIMESTAMP_DNIe_HASH),
+                                INSTANCIA, documentSMIME.getTimeStampRequest(),
                                 PreconditionsCheckerDialog.getTimeStampCert(operacion.getUrlServer())).execute();
                             return;
                         case SOLICITUD_COPIA_SEGURIDAD:

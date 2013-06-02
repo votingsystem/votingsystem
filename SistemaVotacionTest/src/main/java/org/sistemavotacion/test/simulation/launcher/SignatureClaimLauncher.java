@@ -14,7 +14,6 @@ import javax.mail.internet.MimeMessage;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.sistemavotacion.Contexto;
-import static org.sistemavotacion.Contexto.TIMESTAMP_DNIe_HASH;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.seguridad.Encryptor;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
@@ -64,35 +63,39 @@ public class SignatureClaimLauncher implements Callable<Respuesta>,
     
     
     @Override public Respuesta call() throws Exception {
-        Respuesta respuesta = null;
-        File file = new File(ContextoPruebas.getUserKeyStorePath(nif));
-        KeyStore mockDnie = KeyStoreHelper.crearMockDNIe(nif, file,
+        try {
+            File file = new File(ContextoPruebas.getUserKeyStorePath(nif));
+            KeyStore mockDnie = KeyStoreHelper.crearMockDNIe(nif, file,
                 ContextoPruebas.getPrivateCredentialRaizAutoridad());
-        logger.info("nif: " + nif + " - mockDnie: " + file.getAbsolutePath());
+            logger.info("nif: " + nif + " - mockDnie: " + file.getAbsolutePath());
 
-        ActorConIP controlAcceso = ContextoPruebas.getControlAcceso();
-        String toUser = StringUtils.getCadenaNormalizada(controlAcceso.getNombre());
-        
-        String claimDataStr = getClaimDataJSON(eventId);
-        
-        SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, 
-                ContextoPruebas.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
-                ContextoPruebas.DNIe_SIGN_MECHANISM);
-        signedClaimSMIME = signedMailGenerator.genMimeMessage(
-                nif, toUser, claimDataStr,
-                ContextoPruebas.ASUNTO_MENSAJE_ALTA_REPRESENTANTE , null);
-        new TimeStampWorker(TIME_STAMP_WORKER, urlTimeStampServer,
-                    this, signedClaimSMIME.getTimeStampRequest(TIMESTAMP_DNIe_HASH),
-                    ContextoPruebas.getControlAcceso().getTimeStampCert()).execute();
-        countDownLatch.await();
+            ActorConIP controlAcceso = ContextoPruebas.getControlAcceso();
+            String toUser = StringUtils.getCadenaNormalizada(controlAcceso.getNombre());
+
+            String claimDataStr = getClaimDataJSON(eventId);
+            String subject = ContextoPruebas.getString("claimMsgSubject");
+            
+            SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
+                    mockDnie, ContextoPruebas.END_ENTITY_ALIAS, 
+                    ContextoPruebas.PASSWORD.toCharArray(),
+                    ContextoPruebas.DNIe_SIGN_MECHANISM);
+            signedClaimSMIME = signedMailGenerator.genMimeMessage(
+                    nif, toUser, claimDataStr, subject, null);
+            new TimeStampWorker(TIME_STAMP_WORKER, urlTimeStampServer,
+                        this, signedClaimSMIME.getTimeStampRequest(),
+                        ContextoPruebas.getControlAcceso().getTimeStampCert()).execute();
+            countDownLatch.await();
+        } catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
+            respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+        }
         return getResult();
     }
     
    private void processDocument(SMIMEMessageWrapper smimeDocument) {
         if(smimeDocument == null) return;
         try {
-            X509Certificate serverCert = ContextoPruebas.getControlAcceso().getCertificate();
-            
+            X509Certificate serverCert = ContextoPruebas.getControlAcceso().getCertificate();     
             MimeMessage mimeMessage = Encryptor.encryptSMIME(smimeDocument, serverCert);
             File document = File.createTempFile("EncryptedAccessRequest", "p7m");
             document.deleteOnExit();
@@ -133,9 +136,9 @@ public class SignatureClaimLauncher implements Callable<Respuesta>,
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
         " - nif: " + nif +
         " - worker: " + worker.getClass().getSimpleName());
+        respuesta = worker.getRespuesta();
         switch(worker.getId()) {
             case ENVIAR_DOCUMENTO_FIRMADO_WORKER:
-                respuesta = worker.getRespuesta();
                 if (Respuesta.SC_OK == worker.getStatusCode()) {
                     respuesta.setMensaje(nif);
                 }
@@ -148,10 +151,11 @@ public class SignatureClaimLauncher implements Callable<Respuesta>,
                         processDocument(signedClaimSMIME);
                     } catch (Exception ex) {
                         logger.error(ex.getMessage(), ex);
+                        respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+                        countDownLatch.countDown();
                     }
                 } else {
                     String msg = "showResult - ERROR obteniendo sello de tiempo";
-                    logger.debug(msg); 
                     respuesta = new Respuesta(worker.getStatusCode(), msg);
                     countDownLatch.countDown();
                 }
@@ -162,7 +166,6 @@ public class SignatureClaimLauncher implements Callable<Respuesta>,
     }
 
     public static String getClaimDataJSON(Long eventId) {
-        logger.debug("getRepresentativeDataJSOn - ");
         Map map = new HashMap();
         map.put("operation", "FIRMA_RECLAMACION_SMIME");
         map.put("id", eventId);
@@ -174,4 +177,5 @@ public class SignatureClaimLauncher implements Callable<Respuesta>,
     private Respuesta getResult() {
         return respuesta;
     }
+
 }

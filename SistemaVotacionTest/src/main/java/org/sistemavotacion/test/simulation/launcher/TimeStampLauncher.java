@@ -13,7 +13,6 @@ import net.sf.json.JSONSerializer;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.encoders.Base64;
-import static org.sistemavotacion.Contexto.TIMESTAMP_DNIe_HASH;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
@@ -75,12 +74,14 @@ public class TimeStampLauncher implements Callable<Respuesta>,
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, 
                 ContextoPruebas.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
                 ContextoPruebas.DNIe_SIGN_MECHANISM);
+        
+        String subject = ContextoPruebas.getString("timeStampMsgSubject");
+        
         documentSMIME = signedMailGenerator.genMimeMessage(
-                requestNIF, toUser, getRequestDataJSON(),
-                ContextoPruebas.ASUNTO_TEST_TIMESTAMP , null);
+                requestNIF, toUser, getRequestDataJSON(), subject , null);
 
         new TimeStampWorker(TIME_STAMP_WORKER, urlTimeStampServer, this, 
-                documentSMIME.getTimeStampRequest(TIMESTAMP_DNIe_HASH),
+                documentSMIME.getTimeStampRequest(),
                 ContextoPruebas.getControlAcceso().getTimeStampCert()).execute();
         
         countDownLatch.await();

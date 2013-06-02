@@ -276,7 +276,7 @@ public class Operacion {
         if(respuestaConRecibo != null) map.put("respuestaConRecibo", respuestaConRecibo);
         if(args != null) map.put("args", args);
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);
-        if(evento != null) jsonObject.put("evento", evento.obtenerJSON());
+        if(evento != null) jsonObject.put("evento", evento.toJSON());
         return jsonObject;
     }
     

@@ -2,15 +2,18 @@ package org.sistemavotacion.test.panel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Evento;
+import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.MainFrame;
 import org.sistemavotacion.test.dialogo.*;
+import org.sistemavotacion.test.modelo.VotingSimulationData;
 import org.sistemavotacion.test.simulation.SimulatorListener;
 import org.sistemavotacion.test.simulation.Simulator;
 import org.sistemavotacion.test.simulation.VotingSimulator;
@@ -22,7 +25,7 @@ import org.slf4j.LoggerFactory;
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class VotacionesPanel extends JPanel implements 
-        HyperlinkListener, SimulatorListener {
+        HyperlinkListener, SimulatorListener<VotingSimulationData> {
     
     private static Logger logger = LoggerFactory.getLogger(VotacionesPanel.class);
 
@@ -31,8 +34,8 @@ public class VotacionesPanel extends JPanel implements
 
     private Evento evento;
     private Estado estado = Estado.RECOGIDA_DATOS;
-    private String erroresSolicitudes;
-    private String erroresEnVotos;
+    private List<String> accessRequestErrorsList;
+    private List<String> votingErrorsList;
     private VotingSimulator votacion;
     public static VotacionesPanel INSTANCIA;
     private HashMap<String, ActorConIP> hashMapActores = null;
@@ -447,7 +450,13 @@ public class VotacionesPanel extends JPanel implements
                 actualizarContadorVotosLanzados(0);
                 actualizarContadorVotosValidados(0);
                 actualizarContadorVotosError(0);
-                votacion = new VotingSimulator(ContextoPruebas.getUserBaseData(), this);
+                
+                logger.error("============= TODO");//TODO
+                VotingSimulationData simulationdata = new VotingSimulationData();
+                simulationdata.setUserBaseData(ContextoPruebas.getUserBaseData());
+                
+                
+                votacion = new VotingSimulator(simulationdata, this);
                 votacion.init();
                 digitalClockPanel.start(DigitalClockPanel.Mode.STOPWATCH);
                 break;
@@ -473,7 +482,11 @@ public class VotacionesPanel extends JPanel implements
                 lanzarSimulacionButton.setIcon(null);
                 lanzarSimulacionButton.setText("Lanzar simulación");
                 lanzarSimulacionButton.setIcon(new ImageIcon(getClass().getResource("/images/gnome-run.png")));
-                if(votacion != null) votacion.finalizarVotacion();
+                try {
+                    if(votacion != null) votacion.finish();
+                } catch(Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                }
                 digitalClockPanel.stop();
                 break;
         }
@@ -484,14 +497,14 @@ public class VotacionesPanel extends JPanel implements
     private void erroresSolicitudesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_erroresSolicitudesButtonActionPerformed
         InfoErroresDialog infoErroresDialog = new InfoErroresDialog(
                 MainFrame.INSTANCIA.getFrames()[0], false, 
-                "Errores en las solicitudes de acceso", erroresSolicitudes);
+                "Errores en las solicitudes de acceso", accessRequestErrorsList);
         infoErroresDialog.setVisible(true);
     }//GEN-LAST:event_erroresSolicitudesButtonActionPerformed
 
     private void erroresVotosButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_erroresVotosButtonActionPerformed
         InfoErroresDialog infoErroresDialog = new InfoErroresDialog(
                 MainFrame.INSTANCIA.getFrames()[0], false, 
-                "Errores en los votos", erroresEnVotos);
+                "Errores en los votos", votingErrorsList);
         infoErroresDialog.setVisible(true);
     }//GEN-LAST:event_erroresVotosButtonActionPerformed
 
@@ -588,32 +601,6 @@ public class VotacionesPanel extends JPanel implements
         }
     }
     
-    public void mostrarResultadosSimulacion(String resultadosSimulacion, 
-            String erroresSolicitudes, String erroresEnVotos) {
-        logger.debug("mostrarResultadosSimulacion - erroresSolicitudes: " + erroresSolicitudes);
-        digitalClockPanel.stop();
-        datosSimulacionButton.setEnabled(true);
-        lanzarSimulacionButton.setIcon(null);
-        lanzarSimulacionButton.setText("Lanzar simulación");
-        anularVotosButton.setVisible(true);
-        estado = Estado.RECOGIDA_DATOS;
-        if(erroresSolicitudes != null) {
-            erroresSolicitudesButton.setVisible(true);
-            this.erroresSolicitudes = erroresSolicitudes;
-        }
-        if(erroresEnVotos != null) {
-            erroresVotosButton.setVisible(true);
-            this.erroresEnVotos = erroresEnVotos;
-        }
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                MainFrame.INSTANCIA.packMainFrame();
-            }
-        }).start();
-        
-    }
-    
     public void actualizarContadorSolicitudesError(final int numSolicitud) {
         if(SwingUtilities.isEventDispatchThread()) {
             contadorSolicitudesErrorLabel.setText(
@@ -692,20 +679,66 @@ public class VotacionesPanel extends JPanel implements
         }
     }
     
+    private void addAccessRequestError(String error) {
+        if(accessRequestErrorsList == null)
+            accessRequestErrorsList = new ArrayList<String>();
+        accessRequestErrorsList.add(error);
+    }
     
-    @Override
-    public void setSimulationMessage(String message) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private void addVotingError(String error) {
+        if(votingErrorsList == null)
+            votingErrorsList = new ArrayList<String>();
+        votingErrorsList.add(error);
+    }
+    
+    @Override public void updateSimulationData(VotingSimulationData data) {
+        if(Respuesta.SC_OK == data.getStatusCode()) {
+        
+        } else {
+            switch(data.getError()) {
+                case ACCESS_REQUES:
+                    addAccessRequestError(data.getMessage());
+                    break;
+                case VOTING:
+                    addVotingError(data.getMessage());
+            }
+        }
+        actualizarContadorSolicitudesError(
+                data.getNumAccessRequestsERROR().intValue());
+        actualizarContadorVotosError(
+                data.getNumVotingRequestsERROR().intValue());
+        actualizarContadorVotosLanzados(
+                data.getNumVotingRequests().intValue());
+        actualizarContadorVotosValidados(
+                data.getNumVotingRequestsColected().intValue());
     }
 
-    @Override
-    public void setSimulationErrorMessage(String message) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 
-    @Override
-    public void setSimulationResult(Simulator simulator, Object data) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    @Override public void setSimulationResult(
+            Simulator<VotingSimulationData> simulator) {
+        logger.debug("setSimulationResult");
+        VotingSimulationData simuData = simulator.getData();
+
+        digitalClockPanel.stop();
+        datosSimulacionButton.setEnabled(true);
+        lanzarSimulacionButton.setIcon(null);
+        lanzarSimulacionButton.setText("Lanzar simulación");
+        anularVotosButton.setVisible(true);
+        estado = Estado.RECOGIDA_DATOS;
+
+        if(accessRequestErrorsList != null && 
+                !accessRequestErrorsList.isEmpty()) {
+            erroresSolicitudesButton.setVisible(true);
+        }
+        if(votingErrorsList != null && !votingErrorsList.isEmpty()) {
+            erroresVotosButton.setVisible(true);
+        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                MainFrame.INSTANCIA.packMainFrame();
+            }
+        }).start();
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables

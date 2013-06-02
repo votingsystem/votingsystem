@@ -9,13 +9,10 @@ import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.security.cert.PKIXParameters;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.mail.internet.MimeMessage;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -31,8 +28,6 @@ import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.MainFrame;
-import org.sistemavotacion.test.json.DeJSONAObjeto;
-import org.sistemavotacion.test.json.DeObjetoAJSON;
 import org.sistemavotacion.test.panel.VotacionesPanel;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
@@ -396,7 +391,7 @@ public class CrearVotacionDialog extends JDialog implements
             File eventToPublish = new File(FileUtils.APPTEMPDIR 
                 + "SolicitudPublicacionConvocatoria");
             logger.debug("publishing event: " + eventToPublish.getAbsolutePath());
-            String eventoParaPublicar = DeObjetoAJSON.obtenerEventoJSON(evento);
+            String eventoParaPublicar = evento.toJSON().toString();
             MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(
                     ContextoPruebas.getUsuarioPruebas().getEmail(), 
                     ContextoPruebas.getControlAcceso().getNombreNormalizado(), 
@@ -610,7 +605,7 @@ public class CrearVotacionDialog extends JDialog implements
                         dnieMimeMessage.verify(
                                 ContextoPruebas.INSTANCIA.getSessionPKIXParameters());
                         logger.debug("--- dnieMimeMessage.getSignedContent(): " + dnieMimeMessage.getSignedContent());
-                        evento = DeJSONAObjeto.obtenerEvento(dnieMimeMessage.getSignedContent());
+                        evento = Evento.parse(dnieMimeMessage.getSignedContent());
                         logger.debug("Respuesta - Evento ID: " + evento.getEventoId());
 
                         MainFrame.INSTANCIA.cargarCentroControl(

@@ -8,7 +8,6 @@ import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
 import javax.swing.*;
@@ -19,7 +18,6 @@ import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.test.dialogo.InfoServidorDialog;
 import org.sistemavotacion.test.dialogo.MensajeDialog;
-import org.sistemavotacion.test.json.DeJSONAObjeto;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.test.panel.VotacionesPanel;
 import org.sistemavotacion.util.StringUtils;
@@ -550,7 +548,7 @@ public class MainFrame extends JFrame  implements KeyListener,
                 infoServidorButton.setIcon(new ImageIcon(getClass().getResource("/images/pair_16x16.png")));            
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
-                        ActorConIP actorConIP = DeJSONAObjeto.obtenerActorConIP(worker.getMessage());
+                        ActorConIP actorConIP = ActorConIP.parse(worker.getMessage());
                         if(!(ActorConIP.Tipo.CONTROL_ACCESO == actorConIP.getTipo())) {
                             mostrarMensajeUsuario("El servidor no es un Control de Acceso");
                             controlAccesoTextField.setBorder(new LineBorder(Color.RED,2));
@@ -609,7 +607,7 @@ public class MainFrame extends JFrame  implements KeyListener,
             case CONTROL_CENTER_GETTER_WORKER:
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
-                        ActorConIP actorConIP = DeJSONAObjeto.obtenerActorConIP(worker.getMessage());
+                        ActorConIP actorConIP = ActorConIP.parse(worker.getMessage());
                         if(!(ActorConIP.Tipo.CENTRO_CONTROL == actorConIP.getTipo())) {
                             mostrarMensajeUsuario("El servidor no es un Centro Control");
                             return;

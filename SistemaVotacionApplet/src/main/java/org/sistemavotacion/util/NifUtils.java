@@ -1,8 +1,5 @@
-package org.sistemavotacion.test.util;
+package org.sistemavotacion.util;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,18 +10,6 @@ import org.slf4j.LoggerFactory;
 public class NifUtils {
 	
     private static Logger logger = LoggerFactory.getLogger(NifUtils.class);
-
-    public static String getStringFromInputStream(InputStream entrada) throws IOException {
-    	ByteArrayOutputStream salida = new ByteArrayOutputStream();
-        byte[] buf =new byte[1024];
-        int len;
-        while((len = entrada.read(buf)) > 0){
-            salida.write(buf,0,len);
-        }
-        salida.close();
-        entrada.close();
-        return new String(salida.toByteArray());
-    }
     
     public static String getNif(int number) {
         String nif = String.valueOf(number) + calculaLetraNIF(number);

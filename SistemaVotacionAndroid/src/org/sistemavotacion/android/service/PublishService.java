@@ -155,7 +155,7 @@ public class PublishService extends Service implements TaskListener {
 							signedFile);
 			        timeStampedDocument = new SMIMEMessageWrapper(null, signedFile);
 			        timeStampTask = (GetTimeStampTask) new GetTimeStampTask(null, 
-			    			timeStampedDocument.getTimeStampRequest(TIMESTAMP_VOTE_HASH), this).execute(
+			    			timeStampedDocument.getTimeStampRequest(), this).execute(
 			    			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
 			        if(Respuesta.SC_OK == timeStampTask.get()) {
 			        	File fileToEncrypt = timeStampedDocument.setTimeStampToken(timeStampTask);
@@ -177,7 +177,7 @@ public class PublishService extends Service implements TaskListener {
 							signedFile);
 			        timeStampedDocument = new SMIMEMessageWrapper(null, signedFile);
 			        timeStampTask = (GetTimeStampTask) new GetTimeStampTask(null, 
-			    			timeStampedDocument.getTimeStampRequest(TIMESTAMP_VOTE_HASH), this).execute(
+			    			timeStampedDocument.getTimeStampRequest(), this).execute(
 			    			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
 			        if(Respuesta.SC_OK == timeStampTask.get()) {
 			        	File fileToEncrypt = timeStampedDocument.setTimeStampToken(timeStampTask);
@@ -199,7 +199,7 @@ public class PublishService extends Service implements TaskListener {
 							signedFile);
 			        timeStampedDocument = new SMIMEMessageWrapper(null, signedFile);
 			        timeStampTask = (GetTimeStampTask) new GetTimeStampTask(null, 
-			    			timeStampedDocument.getTimeStampRequest(TIMESTAMP_VOTE_HASH), this).execute(
+			    			timeStampedDocument.getTimeStampRequest(), this).execute(
 			    			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
 			        if(Respuesta.SC_OK == timeStampTask.get()) {
 			        	runningTask = new SendFileTask(null, this, 

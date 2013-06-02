@@ -42,7 +42,7 @@ class FirmaService {
 	def grailsApplication;
 	def messageSource;
 	def subscripcionService
-	def httpService
+	def timeStampService
 	private File cadenaCertificacion;
 	
 	private SignedMailGenerator signedMailGenerator;
@@ -51,8 +51,6 @@ class FirmaService {
 	private static HashMap<Long, Set<X509Certificate>> eventTrustedCertsHashMap = 
 			new HashMap<Long, Set<X509Certificate>>();
 	private static HashMap<Long, Set<X509Certificate>> eventValidationTrustedCertsHashMap =
-			new HashMap<Long, Set<X509Certificate>>();
-	private static HashMap<Long, SignerInformationVerifier> timeStampVerifiers =
 			new HashMap<Long, Set<X509Certificate>>();
 			
 
@@ -265,23 +263,11 @@ class FirmaService {
 			eventTrustedCerts.add(certCAEvento)
 			eventTrustedCertsHashMap.put(evento.id, eventTrustedCerts)
 		}
-		SignerInformationVerifier timeStampVerifier = timeStampVerifiers.get(evento.controlAcceso.id)
-		if(!timeStampVerifier) {
-			String accessControlURL = evento.controlAcceso.serverURL
-			while(accessControlURL.endsWith("/")) {
-				accessControlURL = accessControlURL.substring(0, requestURL.length() - 1)
-			}
-			accessControlURL = "${accessControlURL}/timeStamp/cert"
-			respuesta = httpService.obtenerCertificado(accessControlURL)
-			if(Respuesta.SC_OK != respuesta.codigoEstado) {
-				msg = messageSource.getMessage('timeStampCertErrorMsg', [accessControlURL].toArray(), locale)
-				log.error("validateVoteCerts - ${msg}")
-				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg)
-			} else {
-				timeStampVerifier = new JcaSimpleSignerInfoVerifierBuilder().
-					setProvider(BC).build(respuesta.certificado)
-				timeStampVerifiers.put(evento.controlAcceso.id, timeStampVerifier)
-			}
+		respuesta = timeStampService.validateToken(
+			infoVoto.getVoteTimeStampToken(), evento, locale)
+		if(Respuesta.SC_OK != respuesta.codigoEstado) {
+			respuesta.tipo = Tipo.VOTO_CON_ERRORES
+			return respuesta
 		}
 		X509Certificate checkedCert = infoVoto.getCertificadoVoto()
 		log.debug("validateVoteCerts - validating vote: ${checkedCert.getSubjectDN()}")
@@ -291,25 +277,7 @@ class FirmaService {
 			TrustAnchor ta = pkixResult.getTrustAnchor();
 			X509Certificate certCaResult = ta.getTrustedCert();
 			log.debug("validateVoteCerts - certCaResult: " + certCaResult?.getSubjectDN()?.toString()+
-					"- numserie: " + certCaResult?.getSerialNumber()?.longValue());
-			try {
-				infoVoto.getVoteTimeStampToken().validate(timeStampVerifier)
-				Date timestampDate = infoVoto.getVoteTimeStampToken().getTimeStampInfo().getGenTime()
-				if(!timestampDate.after(evento.fechaInicio) &&
-					!timestampDate.before(evento.fechaFin)) {
-					String dateRangeStr = "[${eventoVotacion.fechaInicio} - ${eventoVotacion.fechaFin}]"
-					msg = messageSource.getMessage('timestampDateErrorMsg',
-						[timestampDate, dateRangeStr].toArray(), locale)
-					log.debug("validateVoteCerts - ERROR TIMESTAMP DATE - ${msg}")
-					return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
-						mensaje:msg, tipo:Tipo.VOTO_CON_ERRORES, evento:evento)
-				}
-			} catch(Exception ex) {
-				log.error(ex.getMessage(), ex)
-				msg = messageSource.getMessage('timeStampErrorMsg', null, locale)
-				log.error ("validateVoteCerts - msg:{msg} - Event '${evento.id}'")
-				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg)
-			}		
+					"- numserie: " + certCaResult?.getSerialNumber()?.longValue());	
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex)
 			msg = messageSource.getMessage('certValidationErrorMsg',

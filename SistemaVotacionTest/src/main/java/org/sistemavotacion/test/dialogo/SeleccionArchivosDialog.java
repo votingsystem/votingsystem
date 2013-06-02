@@ -9,7 +9,7 @@ import java.util.List;
 import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
 import org.sistemavotacion.modelo.Evento;
-import org.sistemavotacion.test.modelo.SolicitudAcceso;
+import org.sistemavotacion.test.modelo.AccessRequestBackup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +21,7 @@ public class SeleccionArchivosDialog extends javax.swing.JDialog {
         
     private static Logger logger = LoggerFactory.getLogger(SeleccionArchivosDialog.class);
     
-    private Collection<SolicitudAcceso> archivos;
+    private Collection<AccessRequestBackup> archivos;
     private Evento evento;
     private JList listaArchivos;
     private SelectorArchivosListener selectorArchivosListener;
@@ -36,7 +36,7 @@ public class SeleccionArchivosDialog extends javax.swing.JDialog {
     }
     
     public SeleccionArchivosDialog(Frame parent, boolean modal, 
-            Collection<SolicitudAcceso> archivos, Evento evento, 
+            Collection<AccessRequestBackup> archivos, Evento evento, 
             SelectorArchivosListener selectorArchivosListener) {
         this(parent, modal);
         this.archivos = archivos;
@@ -45,11 +45,11 @@ public class SeleccionArchivosDialog extends javax.swing.JDialog {
         eventoLabel.setText("<html><b>Asunto del evento: </b>" + evento.getAsunto() + "<html>");
         setLocationRelativeTo(null);  
         FileListModel listModel = new FileListModel(
-                new ArrayList<SolicitudAcceso>(archivos));
+                new ArrayList<AccessRequestBackup>(archivos));
         listaArchivos = new JList(listModel); 
         listaArchivos.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         listaArchivos.setModel(listModel);
-        listaArchivos.setCellRenderer(new SolicitudAccesoCellRenderer());
+        listaArchivos.setCellRenderer(new AccessRequestBackupCellRenderer());
         JScrollPane listScroller = new JScrollPane(listaArchivos);
         mainPanel.setLayout(new MigLayout());
         mainPanel.add(listScroller);
@@ -143,9 +143,9 @@ public class SeleccionArchivosDialog extends javax.swing.JDialog {
 
     private void aceptarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aceptarButtonActionPerformed
         Object[] archivos = listaArchivos.getSelectedValues();
-        List<SolicitudAcceso> solicitudes = new ArrayList<SolicitudAcceso>();
+        List<AccessRequestBackup> solicitudes = new ArrayList<AccessRequestBackup>();
         for(Object archivo:archivos) {
-            solicitudes.add((SolicitudAcceso)archivo);
+            solicitudes.add((AccessRequestBackup)archivo);
         }
         dispose();
         selectorArchivosListener.setArchivosSeleccionados(solicitudes, this);
@@ -203,11 +203,11 @@ public class SeleccionArchivosDialog extends javax.swing.JDialog {
     
     private class FileListModel extends DefaultListModel {
         
-        List<SolicitudAcceso> solicitudes;
+        List<AccessRequestBackup> solicitudes;
 
-        public FileListModel(List<SolicitudAcceso> solicitudes) {
+        public FileListModel(List<AccessRequestBackup> solicitudes) {
             if(solicitudes != null) this.solicitudes = solicitudes;
-            else this.solicitudes = new ArrayList<SolicitudAcceso>();
+            else this.solicitudes = new ArrayList<AccessRequestBackup>();
         }
         
         @Override
@@ -218,13 +218,13 @@ public class SeleccionArchivosDialog extends javax.swing.JDialog {
         @Override
         public Object getElementAt(int i) {
             logger.debug("Solicitud del usuario '" + solicitudes.get(i).getUserNif() +"'");
-            SolicitudAcceso solicitud = solicitudes.get(i);
+            AccessRequestBackup solicitud = solicitudes.get(i);
             return solicitud;
         }
 
     }
     
-    class SolicitudAccesoCellRenderer implements ListCellRenderer {
+    class AccessRequestBackupCellRenderer implements ListCellRenderer {
   
         protected DefaultListCellRenderer defaultRenderer = new DefaultListCellRenderer();
 
@@ -232,7 +232,7 @@ public class SeleccionArchivosDialog extends javax.swing.JDialog {
             boolean isSelected, boolean cellHasFocus) {
             JLabel renderer = (JLabel) defaultRenderer.getListCellRendererComponent(list, value, index,
                 isSelected, cellHasFocus);            
-            SolicitudAcceso solicitud = (SolicitudAcceso) value;
+            AccessRequestBackup solicitud = (AccessRequestBackup) value;
             renderer.setText(" Solicitud del usuario '" + solicitud.getUserNif() +"' ");
             return renderer;
         }

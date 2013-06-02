@@ -69,7 +69,7 @@ public class DocumentSenderWorker extends SwingWorker<Respuesta, String>
                     documentContentType, urlDestino);
         } else if(documentoEnviado instanceof byte[]) {
             respuesta = Contexto.getHttpHelper().sendByteArray(
-                (byte[])documentoEnviado, null, urlDestino);
+                (byte[])documentoEnviado, documentContentType, urlDestino);
         }
         return respuesta;
     }

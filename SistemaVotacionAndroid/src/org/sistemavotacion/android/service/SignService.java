@@ -195,7 +195,7 @@ public class SignService extends Service implements TaskListener {
         } 
         SMIMEMessageWrapper timeStampedDocument = new SMIMEMessageWrapper(null, signedFile);
         GetTimeStampTask getTimeStampTask = (GetTimeStampTask) new GetTimeStampTask(null, 
-    			timeStampedDocument.getTimeStampRequest(TIMESTAMP_VOTE_HASH), this).execute(
+    			timeStampedDocument.getTimeStampRequest(), this).execute(
     			ServerPaths.getURLTimeStampService(CONTROL_ACCESO_URL));
         if(Respuesta.SC_OK == getTimeStampTask.get()) {
         	try {

@@ -1,9 +1,14 @@
 package org.sistemavotacion.modelo;
 
 import java.security.cert.X509Certificate;
+import java.text.ParseException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.sistemavotacion.seguridad.CertUtil;
@@ -19,37 +24,37 @@ public class ActorConIP {
     private static Logger logger = LoggerFactory.getLogger(ActorConIP.class);
     
     public enum Tipo {CENTRO_CONTROL("Centro de Control"), CONTROL_ACCESO("Control de Acceso");
-	    private String mensaje;
-	    
-	    Tipo(String mensaje) {
-	        this.mensaje = mensaje;
-	    }
-	    public String getMensaje() {
-	        return this.mensaje;
-	    }
-	}
+        private String mensaje;
+
+        Tipo(String mensaje) {
+            this.mensaje = mensaje;
+        }
+        public String getMensaje() {
+            return this.mensaje;
+        }
+    }
 	
-	public enum EnvironmentMode {DEVELOPMENT("Desarrollo"), TEST("Pruebas"), 
-	    PRODUCTION("Producción");
-	    private String mensaje;
-	    EnvironmentMode(String mensaje) {
-	        this.mensaje = mensaje;
-	    }
-	    public String getMensaje() {
-	        return this.mensaje;
-	    }
-	}
+    public enum EnvironmentMode {DEVELOPMENT("Desarrollo"), TEST("Pruebas"), 
+        PRODUCTION("Producción");
+        private String mensaje;
+        EnvironmentMode(String mensaje) {
+            this.mensaje = mensaje;
+        }
+        public String getMensaje() {
+            return this.mensaje;
+        }
+    }
 	
-	public enum Estado {
-	    SUSPENDIDO ("Suspendido"), ACTIVO("Activo"), INACTIVO("Inactivo");
-	    private String mensaje;
-	    Estado(String mensaje) {
-	        this.mensaje = mensaje;
-	    }
-	    public String getMensaje() {
-	        return this.mensaje;
-	    }
-	}       
+    public enum Estado {
+        SUSPENDIDO ("Suspendido"), ACTIVO("Activo"), INACTIVO("Inactivo");
+        private String mensaje;
+        Estado(String mensaje) {
+            this.mensaje = mensaje;
+        }
+        public String getMensaje() {
+            return this.mensaje;
+        }
+    }       
     
     private Long id;
     private String serverURL;
@@ -149,91 +154,38 @@ public class ActorConIP {
         timeStampCert = CertUtil.fromPEMToX509CertCollection(
                     timeStampPEM.getBytes()).iterator().next();
     }
-    
-    
-    public static ActorConIP parse (String actorConIPStr) {
-        if(actorConIPStr == null) return null;
-        JSONObject eventoJSON = (JSONObject)JSONSerializer.toJSON(actorConIPStr);
-        return parse(eventoJSON);
-    }
-    
-    public static ActorConIP parse (JSONObject actorConIPJSON) {
-        if(actorConIPJSON == null) return null;
-        ActorConIP actorConIP = new ActorConIP();       
-        if(actorConIPJSON.containsKey("id")) actorConIP.setId(actorConIPJSON.getLong("id"));
-        if(actorConIPJSON.containsKey("serverURL")) actorConIP.setServerURL(actorConIPJSON.getString("serverURL"));
-        if(actorConIPJSON.containsKey("nombre")) actorConIP.setNombre(actorConIPJSON.getString("nombre"));
-        if(actorConIPJSON.containsKey("informacionVotosURL")) actorConIP.
-                setInformacionVotosURL(actorConIPJSON.getString("informacionVotosURL"));
-        if (actorConIPJSON.containsKey("cadenaCertificacionPEM")) {
-            try {
-                actorConIP.setCadenaCertificacionPEM(actorConIPJSON.getString(
-                        "cadenaCertificacionPEM"));
-            } catch(Exception ex) {
-                logger.error(ex.getMessage(), ex);
-            }
-            
-        }
-        if (actorConIPJSON.containsKey("timeStampCertPEM")) {
-            try {
-                actorConIP.setTimeStampCertPEM(actorConIPJSON.getString(
-                        "timeStampCertPEM"));
-            } catch(Exception ex) {
-                logger.error(ex.getMessage(), ex);
-            }
-            
-        }
-        return actorConIP;
-    }
-    
-    public JSONObject obtenerJSON() {
-        logger.debug("obtenerJSON");
-        Map map = new HashMap();
-        map.put("id", id);
-        map.put("serverURL", serverURL);
-        map.put("nombre", nombre);
-        map.put("informacionVotosURL", informacionVotosURL);
-        JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);        
-        return jsonObject;
-    }
-    
-    public String obtenerJSONStr() {
-        logger.debug("obtenerJSONStr");
-        JSONObject jsonObject = obtenerJSON();        
-        return jsonObject.toString();
+
+    public Estado getEstado() {
+            return estado;
     }
 
-	public Estado getEstado() {
-		return estado;
-	}
+    public void setEstado(Estado estado) {
+            this.estado = estado;
+    }
 
-	public void setEstado(Estado estado) {
-		this.estado = estado;
-	}
+    public Tipo getTipo() {
+            return tipo;
+    }
 
-	public Tipo getTipo() {
-		return tipo;
-	}
+    public void setTipo(Tipo tipo) {
+            this.tipo = tipo;
+    }
 
-	public void setTipo(Tipo tipo) {
-		this.tipo = tipo;
-	}
+    public EnvironmentMode getEnvironmentMode() {
+            return environmentMode;
+    }
 
-	public EnvironmentMode getEnvironmentMode() {
-		return environmentMode;
-	}
+    public void setEnvironmentMode(EnvironmentMode environmentMode) {
+            this.environmentMode = environmentMode;
+    }
 
-	public void setEnvironmentMode(EnvironmentMode environmentMode) {
-		this.environmentMode = environmentMode;
-	}
+    public String getCertificadoURL() {
+            return certificadoURL;
+    }
 
-	public String getCertificadoURL() {
-		return certificadoURL;
-	}
-
-	public void setCertificadoURL(String certificadoURL) {
-		this.certificadoURL = certificadoURL;
-	}
+    public void setCertificadoURL(String certificadoURL) {
+            this.certificadoURL = certificadoURL;
+    }
 
     /**
      * @return the certificate
@@ -261,5 +213,92 @@ public class ActorConIP {
      */
     public void setTimeStampCert(X509Certificate timeStampCert) {
         this.timeStampCert = timeStampCert;
+    }
+    
+    public static JSONObject getAssociationDocumentJSON(String serverURL) {
+        logger.debug("getAssociationDocumentJSON");
+        Map map = new HashMap();
+        map.put("operation", "ASOCIAR_CENTRO_CONTROL");
+        map.put("serverURL", serverURL.trim());
+        map.put("UUID", UUID.randomUUID().toString());
+        JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON( map );        
+        return jsonObject;
+    }
+    
+    public JSONObject obtenerJSON() {
+        logger.debug("obtenerJSON");
+        Map map = new HashMap();
+        map.put("id", id);
+        map.put("serverURL", serverURL);
+        map.put("nombre", nombre);
+        map.put("informacionVotosURL", informacionVotosURL);
+        JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);        
+        return jsonObject;
+    }
+        
+    public static ActorConIP parse (JSONObject actorConIPJSON) throws Exception {
+        if(actorConIPJSON == null) return null;
+        return parse(actorConIPJSON.toString());
+    }
+    
+    public static ActorConIP parse(String actorConIPStr) throws Exception {
+        logger.debug("parse - ActorConIP: " + actorConIPStr);
+        if(actorConIPStr == null) return null;
+        JSONObject actorConIPJSON = (JSONObject) JSONSerializer.toJSON(actorConIPStr);
+        JSONObject jsonObject = null;
+        ActorConIP actorConIP = new ActorConIP();
+        JSONArray jsonArray;
+        if (actorConIPJSON.containsKey("tipoServidor")){
+            ActorConIP.Tipo tipoServidor = ActorConIP.Tipo.valueOf(actorConIPJSON.getString("tipoServidor"));
+            actorConIP.setTipo(tipoServidor);
+             switch (tipoServidor) {
+                 case CENTRO_CONTROL: break;
+                 case CONTROL_ACCESO:
+                     if (actorConIPJSON.getJSONArray("centrosDeControl") != null) {
+                         Set<ActorConIP> centrosDeControl = new HashSet<ActorConIP>();
+                         jsonArray = actorConIPJSON.getJSONArray("centrosDeControl");
+                         for (int i = 0; i< jsonArray.size(); i++) {
+                             jsonObject = jsonArray.getJSONObject(i);
+                             ActorConIP centroControl = new ActorConIP();
+                             centroControl.setNombre(jsonObject.getString("nombre"));
+                             centroControl.setServerURL(jsonObject.getString("serverURL"));
+                             centroControl.setId(jsonObject.getLong("id"));
+                             if (jsonObject.getString("estado") != null) {
+                                 centroControl.setEstado(ActorConIP.Estado.
+                                         valueOf(jsonObject.getString("estado")));
+                             }
+                             centrosDeControl.add(centroControl);
+                         }
+                         actorConIP.setCentrosDeControl(centrosDeControl);
+                     }
+                     break;
+             }   
+        }
+        if(actorConIPJSON.containsKey("id") && !JSONNull.getInstance().
+                equals(actorConIPJSON.get("id"))) actorConIP.setId(
+                actorConIPJSON.getLong("id"));
+        if (actorConIPJSON.containsKey("environmentMode")) {
+            actorConIP.setEnvironmentMode(ActorConIP.EnvironmentMode.valueOf(
+                    actorConIPJSON.getString("environmentMode")));
+        }
+        if (actorConIPJSON.containsKey("cadenaCertificacionURL"))
+             actorConIP.setCertificadoURL(actorConIPJSON.
+                     getString("cadenaCertificacionURL"));
+        if (actorConIPJSON.containsKey("serverURL"))
+             actorConIP.setServerURL(actorConIPJSON.getString("serverURL"));
+        if (actorConIPJSON.containsKey("nombre"))
+             actorConIP.setNombre(actorConIPJSON.getString("nombre"));
+        if(actorConIPJSON.containsKey("informacionVotosURL")) actorConIP.
+                setInformacionVotosURL(actorConIPJSON.
+                getString("informacionVotosURL"));        
+        if (actorConIPJSON.containsKey("cadenaCertificacionPEM")) {
+            actorConIP.setCadenaCertificacionPEM(actorConIPJSON.getString(
+                        "cadenaCertificacionPEM"));
+        }
+        if (actorConIPJSON.containsKey("timeStampCertPEM")) {
+            actorConIP.setTimeStampCertPEM(actorConIPJSON.getString(
+                        "timeStampCertPEM"));
+        }
+        return actorConIP;
     }
 }

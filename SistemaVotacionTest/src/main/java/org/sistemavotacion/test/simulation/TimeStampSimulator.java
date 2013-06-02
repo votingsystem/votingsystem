@@ -14,10 +14,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.test.json.DeJSONAObjeto;
 import org.sistemavotacion.modelo.Respuesta;
-import org.sistemavotacion.test.modelo.SimulationData;
-import org.sistemavotacion.test.util.NifUtils;
+import org.sistemavotacion.test.modelo.VotingSimulationData;
+import org.sistemavotacion.util.NifUtils;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.worker.InfoGetterWorker;
@@ -47,16 +46,16 @@ public class TimeStampSimulator implements VotingSystemWorkerListener {
     private int solicitudesERROR = 0;
     
     private static long comienzo;
-    private SimulationData simulatioData;
+    private VotingSimulationData simulatioData;
     
     List<String> representativeNifList = new ArrayList<String>();
     
     private final CountDownLatch countDownLatch = new CountDownLatch(1); // just one time
     
 
-    public TimeStampSimulator(SimulationData simulatioData) {
+    public TimeStampSimulator(VotingSimulationData simulatioData) {
         logger.debug("numeroSolicitudes '" + simulatioData.getNumberOfRequests() + "'" + 
-                " - timeStamp server: " + simulatioData.getTimeStampServerURL());
+                " - timeStamp server: " + ContextoPruebas.getUrlTimeStampServer());
         this.simulatioData = simulatioData;
         String serverInfoURL = simulatioData.getAccessControlURL() + "/infoServidor";
         new InfoGetterWorker(null, serverInfoURL, null, this).execute();
@@ -107,7 +106,7 @@ public class TimeStampSimulator implements VotingSystemWorkerListener {
                 requestCompletionService.submit(new TimeStampLauncher(
                         NifUtils.getNif(new Long(
                         solicitudesEnviadas.getAndIncrement()).intValue()),
-                        simulatioData.getTimeStampServerURL()));
+                        ContextoPruebas.getUrlTimeStampServer()));
                 logger.debug("lanzarSolicitudes - lanzada -> " + solicitudesEnviadas.get());
             } else Thread.sleep(500);
         } while (solicitudesEnviadas.get() < numeroSolicitudes.get());
@@ -125,38 +124,40 @@ public class TimeStampSimulator implements VotingSystemWorkerListener {
                 solicitudesOK++;
             } else {
                 solicitudesERROR++;
-                finalizar();
+                finish();
             }
             solicitudesRecogidas.getAndIncrement();
         }
-        finalizar();
+        finish();
     }
     
-    public void finalizar() {
-        logger.debug("--------------------- finalizar -----------------------");
+    private void finish() {
+        logger.debug("--------------- SIMULATION RESULT----------------------");    
         long duracion = System.currentTimeMillis() - comienzo;
         String duracionStr = DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(duracion);
         logger.debug("duracionStr: " + duracionStr);
         logger.debug("solicitudesOK: " + solicitudesOK);
         logger.debug("solicitudesERROR: " + solicitudesERROR);
         requestExecutor.shutdownNow();
+        logger.debug("------------------- FINISHED --------------------------");
+        System.exit(0);
     }
     
     public static void main(String[] args) {
         try {
             ContextoPruebas.inicializar();
-            SimulationData simulationData = null;
+            VotingSimulationData simulationData = null;
             if(args != null && args.length > 0) {
                 logger.debug("args[0]");
-                simulationData = SimulationData.parse(args[0]);
+                simulationData = VotingSimulationData.parse(args[0]);
             } else {
                 File jsonFile = File.createTempFile("TimeStampSimulation", ".json");
                 jsonFile.deleteOnExit();
                 FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
                             .getResourceAsStream("simulatorFiles/timeStampSimulationData.json"), jsonFile); 
-                simulationData = SimulationData.parse(FileUtils.getStringFromFile(jsonFile));
+                simulationData = VotingSimulationData.parse(FileUtils.getStringFromFile(jsonFile));
                 logger.debug("Simulation for timestamp server: " + 
-                        simulationData.getTimeStampServerURL());
+                        ContextoPruebas.getUrlTimeStampServer());
             }
             TimeStampSimulator pruebasSellosDeTiempo = new TimeStampSimulator(simulationData);
             pruebasSellosDeTiempo.lanzar();
@@ -174,7 +175,7 @@ public class TimeStampSimulator implements VotingSystemWorkerListener {
     public void showResult(VotingSystemWorker worker) {         
         if(Respuesta.SC_OK == worker.getStatusCode()) {
             try {
-                ActorConIP actorConIP = DeJSONAObjeto.obtenerActorConIP(worker.getMessage());
+                ActorConIP actorConIP = ActorConIP.parse(worker.getMessage());
                 ContextoPruebas.setControlAcceso(actorConIP);
                 countDownLatch.countDown();
             } catch(Exception ex) {

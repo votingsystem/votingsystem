@@ -3,6 +3,7 @@ package org.sistemavotacion.test.dialogo;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.io.File;
+import java.util.List;
 import java.util.Scanner;
 import javax.swing.JDialog;
 import javax.swing.event.HyperlinkEvent;
@@ -25,7 +26,7 @@ public class InfoErroresDialog extends JDialog implements HyperlinkListener  {
      * Creates new form InfoErroresDialog
      */
     public InfoErroresDialog(java.awt.Frame parent, boolean modal, 
-            String tipoError, String mensajeErrores) {
+            String tipoError, List<String> errorsList) {
         super(parent, modal);
         initComponents();
         setLocationRelativeTo(null);
@@ -33,7 +34,13 @@ public class InfoErroresDialog extends JDialog implements HyperlinkListener  {
         editorPane.setContentType("text/html");
         editorPane.setEditable(false);
         tipoErrorLabel.setText("<html><b>" + tipoError + "</b></html>");
-        editorPane.setText(mensajeErrores);
+        StringBuilder erroresAnulaciones = new StringBuilder("");
+        if(errorsList != null && !errorsList.isEmpty()) {
+            for(String error:errorsList) {
+                erroresAnulaciones.append(error + "\n");
+            }
+        }
+        editorPane.setText(erroresAnulaciones.toString());
         pack();
     }
 

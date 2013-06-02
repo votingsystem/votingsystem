@@ -445,7 +445,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
         return file;
     }
     
-    public TimeStampRequest getTimeStampRequest(String timeStampRequestAlg) {
+    public TimeStampRequest getTimeStampRequest() {
         SignerInformation signerInformation = ((SignerInformation)
                         smimeSigned.getSignerInfos().getSigners().iterator().next());
         if(signerInformation == null) return null;
@@ -457,7 +457,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
         TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
         reqgen.setCertReq(true);
         //reqgen.setReqPolicy(m_sPolicyOID);
-        return reqgen.generate(timeStampRequestAlg, as.getOctets());
+        return reqgen.generate(signerInformation.getDigestAlgOID(), as.getOctets());
     }
     
 

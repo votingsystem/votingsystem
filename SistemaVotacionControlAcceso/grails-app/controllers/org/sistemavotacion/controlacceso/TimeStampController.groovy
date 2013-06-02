@@ -68,8 +68,10 @@ class TimeStampController {
 							mensaje:message(code: 'error.timeStampGeneration'))
 					}
 				}catch(Exception ex) {
+					log.error(ex.getMessage(), ex)
 					respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
 						mensaje:message(code: 'error.timeStampGeneration'))
+					pending.set(false)
 				}
 			}
 

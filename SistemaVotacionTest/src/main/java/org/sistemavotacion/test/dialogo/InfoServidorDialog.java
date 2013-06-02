@@ -5,7 +5,7 @@ import javax.swing.JDialog;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import org.sistemavotacion.modelo.ActorConIP;
-import org.sistemavotacion.test.json.Formateadora;
+import org.sistemavotacion.test.util.Formateadora;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

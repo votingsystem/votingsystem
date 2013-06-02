@@ -1,12 +1,9 @@
 package org.sistemavotacion.controlacceso
 
-
 import org.sistemavotacion.controlacceso.modelo.*
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONElement
 import org.bouncycastle.util.encoders.Base64;
-
-
 import com.itextpdf.text.pdf.PdfReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -21,6 +18,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 import java.io.IOException;
@@ -185,38 +183,47 @@ class TimeStampService {
 	public Respuesta processRequest(byte[] timeStampRequestBytes,
 			Locale locale) throws Exception {
 		if(!timeStampRequestBytes) {
-			String msg = messageSource.getMessage('timestampAccessRequestNullMsg', null, locale)
+			String msg = messageSource.getMessage('timestampRequestNullMsg', null, locale)
 			log.debug("processRequest - ${msg}"); 
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
-				mensaje:msg)
+			return new Respuesta(mensaje:msg,
+				codigoEstado:Respuesta.SC_ERROR_PETICION)
 		}
 		//String timeStampRequestStr = new String(Base64.encode(timeStampRequestBytes));
 		//log.debug("processRequest - timeStampRequestStr: ${timeStampRequestStr}")
+		
+		
 		TimeStampRequest timeStampRequest = new TimeStampRequest(timeStampRequestBytes)
 		final Date date = DateUtils.getTodayDate();
 		long numSerie = getSernoGenerator().incrementAndGet()
 		final BigInteger serialNumber = BigInteger.valueOf(numSerie);
 		log.debug("processRequest - serialNumber: '${numSerie}'" +
-			" - CertReq: ${timeStampRequest.getCertReq()}");
-		
+			" - CertReq: ${timeStampRequest.getCertReq()}");	
 		final TimeStampResponse timeStampResponse = getTimeStampResponseGen().generate(
 				timeStampRequest, serialNumber, date);
 		final TimeStampToken token = timeStampResponse.getTimeStampToken();
+		
+		if(!token) {
+			String msg = messageSource.getMessage('timestampRequestNullMsg', null, locale)
+			log.debug("processRequest - ${msg}"); 
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+				mensaje:msg)
+		}
+		
 		SignerInformationVerifier sigVerifier = getTimeStampSignerInfoVerifier()
-			
 		token.validate(sigVerifier)
+		//validate(token, locale)
 		
 		//String tokenStr = new String(Base64.encode(token.getEncoded()));
 		//log.debug("processRequest - tokenStr: '${tokenStr}'");
-		new SelloTiempo(serialNumber:numSerie,
-				tokenBytes:token.getEncoded(), estado:SelloTiempo.Estado.OK,
-				timeStampRequestBytes:timeStampRequestBytes).save()
+		new SelloTiempo(serialNumber:numSerie, tokenBytes:token.getEncoded(), 
+			estado:SelloTiempo.Estado.OK,
+			timeStampRequestBytes:timeStampRequestBytes).save()
 		return new Respuesta(codigoEstado:Respuesta.SC_OK,
 			timeStampToken:token.getEncoded())
 	}
 		
-	public Respuesta validate(TimeStampToken  tsToken, Locale locale) {
-		log.debug("validate")
+	public Respuesta validateToken(TimeStampToken  tsToken, Locale locale) {
+		log.debug("validateToken")
 		String msg = null
 		try {
 			SignerInformationVerifier sigVerifier = getTimeStampSignerInfoVerifier()
@@ -279,6 +286,36 @@ class TimeStampService {
 				" - timeStampSignerInfoVerifier: ${timeStampSignerInfoVerifier?.associatedCertificate?.subject}")
 			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
 				mensaje:messageSource.getMessage('timeStampErrorMsg', null, locale))
+		}
+	}
+	
+	public Respuesta validateToken(TimeStampToken timeStampToken, 
+		Evento evento, Locale locale) throws Exception {
+		log.debug("validateToken - event: ${evento.id}")
+		String msg = null;
+		Respuesta respuesta
+		try {
+			if(!timeStampToken) {
+				msg = messageSource.getMessage('timeStampNullErrorMsg', null, locale)
+				log.error("ERROR - verifyToken - ${msg}")
+				return new Respuesta(codigoEstado:Respuesta.SC_NULL_REQUEST, mensaje:msg)
+			}
+			timeStampToken.validate(getTimeStampSignerInfoVerifier())
+			Date timestampDate = timeStampToken.getTimeStampInfo().getGenTime()
+			if(!timestampDate.after(evento.fechaInicio) &&
+				!timestampDate.before(evento.fechaFin)) {
+				String dateRangeStr = "[${evento.fechaInicio} - ${evento.fechaFin}]"
+				msg = messageSource.getMessage('timestampDateErrorMsg',
+					[timestampDate, dateRangeStr].toArray(), locale)
+				log.debug("validateToken - ERROR TIMESTAMP DATE - Event '${evento.id}' - ${msg}")
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+					mensaje:msg, evento:evento)
+			} else return new Respuesta(codigoEstado:Respuesta.SC_OK);
+		} catch(Exception ex) {
+			log.error(ex.getMessage(), ex)
+			msg = messageSource.getMessage('timeStampErrorMsg', null, locale)
+			log.error ("validateToken - msg:{msg} - Event '${evento.id}'")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg)
 		}
 	}
 			

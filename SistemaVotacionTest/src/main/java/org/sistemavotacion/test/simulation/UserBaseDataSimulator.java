@@ -14,12 +14,11 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicLong;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.test.KeyStoreHelper;
 import org.sistemavotacion.test.modelo.UserBaseData;
-import org.sistemavotacion.test.util.NifUtils;
+import org.sistemavotacion.util.NifUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,29 +26,19 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class UserBaseDataSimulator implements Simulator {
+public class UserBaseDataSimulator implements Simulator<UserBaseData> {
     
     private static Logger logger = LoggerFactory.getLogger(UserBaseDataSimulator.class);
     
     public static final int MAX_PENDING_RESPONSES = 10;
-        
     
     private final ExecutorService requestExecutor;
     private static CompletionService<Respuesta> requestCompletionService;
     
-    private static AtomicLong numeroUsuariosRepresentados;
-    private static AtomicLong numeroRepresentantes;
-    private static AtomicLong altasEnviadas;
-    private static AtomicLong altasRecogidas;
-    private static AtomicLong delegacionesEnviadas;
-    private static AtomicLong delegacionesRecogidas;
-    
-    private static long comienzo;
-    private static long duracion;
-    
     SimulatorListener<UserBaseData> simulationListener;
     
     private UserBaseData userBaseData;
+    private static List<String> errorsList;
     
     private final CountDownLatch countDownLatch = new CountDownLatch(1); // just one time
     
@@ -65,19 +54,13 @@ public class UserBaseDataSimulator implements Simulator {
             "' - Users without representative '" + userBaseData.getNumUsersWithoutRepresentative());
         this.simulationListener = simulationListener;
         this.userBaseData = userBaseData;
-        altasEnviadas = new AtomicLong(0);
-        altasRecogidas = new AtomicLong(0);
-        delegacionesEnviadas = new AtomicLong(0);
-        delegacionesRecogidas = new AtomicLong(0);
-        numeroUsuariosRepresentados = new AtomicLong(userBaseData.getNumUsersWithRepresentative());
-        numeroRepresentantes =  new AtomicLong(userBaseData.getNumRepresentatives());
         requestExecutor = Executors.newFixedThreadPool(1000);
         requestCompletionService = new ExecutorCompletionService<Respuesta>(requestExecutor);
     }
     
     public void lanzar() {
         logger.debug("lanzar");
-        comienzo = System.currentTimeMillis();
+        userBaseData.setBegin(System.currentTimeMillis());
         requestExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -110,6 +93,10 @@ public class UserBaseDataSimulator implements Simulator {
         });
     }
         
+    private void addErrorMsg(String msg) {
+        if(errorsList == null) errorsList = new ArrayList<String>();
+        errorsList.add(msg);
+    }
 
     private void crearMockDNIeUsersWithoutRepresentative() {
         logger.debug("crearMockDNIeUsersWithoutRepresentative - users without representative:" +  
@@ -133,70 +120,75 @@ public class UserBaseDataSimulator implements Simulator {
     
     public void lanzarAltasRepresentantes () throws Exception {
         logger.debug("****************lanzarAltasRepresentantes");
-        if(numeroRepresentantes.get() == 0) {
+        if(userBaseData.getNumRepresentatives() == 0) {
             logger.debug("lanzarAltasRepresentantes - SIN ALTAS PENDIENTES");
             return;
         } 
-        do {
-            if((altasEnviadas.get() - altasRecogidas.get()) < 
+        while (userBaseData.getNumRepresentativeRequests() <= 
+                userBaseData.getNumRepresentatives()){
+            if((userBaseData.getNumRepresentativeRequests() - 
+                    userBaseData.getNumRepresentativeRequestsColected()) < 
                     MAX_PENDING_RESPONSES) {
                 requestCompletionService.submit(new RepresentingRequestLauncher(
                         NifUtils.getNif(new Long(userBaseData.
                         getAndIncrementUserIndex()).intValue())));
-                altasEnviadas.getAndIncrement();
+                userBaseData.getAndIncrementNumRepresentativeRequests();
             } else Thread.sleep(500);
-        } while (altasEnviadas.get() < numeroRepresentantes.get());
+        } 
     }
     
     public void lanzarAltasDelegaciones () throws Exception {
         logger.debug("lanzarAltasDelegaciones - pendientes: " + 
-                numeroUsuariosRepresentados.get());
-        if(numeroUsuariosRepresentados.get() == 0) {
+                userBaseData.getNumUsersWithRepresentative());
+        if(userBaseData.getNumUsersWithRepresentative() == 0) {
             logger.debug("lanzarAltasRepresentantes - pending 0 requests");
             return;
         } 
-        do {
-            if((delegacionesEnviadas.get() - delegacionesRecogidas.get()) < 
+        while (userBaseData.getNumDelegationRequests() <= 
+                userBaseData.getNumUsersWithRepresentative()) {
+            if((userBaseData.getNumDelegationRequests() - 
+                    userBaseData.getNumDelegationRequestsColected()) < 
                     MAX_PENDING_RESPONSES) {
                 String userNIF = NifUtils.getNif(new Long(
                         userBaseData.getAndIncrementUserIndex()).intValue());
                 String representativeNIF = getRandomRepresentative();
                 if(representativeNIF == null) {
-                    userBaseData.setCodigoEstado(Respuesta.SC_ERROR);
+                    userBaseData.setStatusCode(Respuesta.SC_ERROR);
                     userBaseData.setMessage(ContextoPruebas.getString(
                             "userBaseWithouRepresentativesErrorMsg"));
                     break;
                 } 
                 requestCompletionService.submit(new RepresentativeDelegationLauncher(
                         userNIF, representativeNIF));
-                delegacionesEnviadas.getAndIncrement();
+                userBaseData.getAndIncrementNumDelegationRequests();
             } else Thread.sleep(500);
-        } while (delegacionesEnviadas.get() < numeroUsuariosRepresentados.get());
+        }
     }
     
     public void recogerRespuestas() throws InterruptedException, 
             ExecutionException, Exception {
         logger.debug("--------------------- recogerRespuestas ");
-        for (int v = 0; v < numeroRepresentantes.get(); v++) {
+        for (int v = 0; v < userBaseData.getNumRepresentatives(); v++) {
             Future<Respuesta> f = requestCompletionService.take();
             final Respuesta respuesta = f.get();
             logger.debug("Respuesta alta de representante '" + v + "' statusCode: " + 
                     respuesta.getCodigoEstado() + " - mensaje: " + respuesta.getMensaje());
-            altasRecogidas.getAndIncrement();
+            userBaseData.setStatusCode(respuesta.getCodigoEstado());
             if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
                  representativeNifList.add(respuesta.getMensaje());
-                 userBaseData.getAndIncrementNumAltas();
-                 simulationListener.setSimulationMessage(getProgressMessage());
+                 userBaseData.getAndIncrementNumRepresentativeRequestsOK();
             } else {
-                simulationListener.setSimulationErrorMessage(respuesta.getMensaje());
+                userBaseData.setMessage(respuesta.getMensaje());
                 logger.error("ERROR - statusCode: " + respuesta.getCodigoEstado() 
                         + " - msg: " + respuesta.getMensaje());
-                userBaseData.getAndIncrementNumAltasERROR();
-                simulationListener.setSimulationMessage(getProgressMessage());
-                finalizar();
-            } 
-            
+                addErrorMsg(respuesta.getMensaje());
+                userBaseData.getAndIncrementNumRepresentativeRequestsERROR();
+                finish();
+            }
+            simulationListener.updateSimulationData(userBaseData);
         }
+        
+
         requestExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -208,25 +200,24 @@ public class UserBaseDataSimulator implements Simulator {
             }
         });
         logger.debug("Begin to read delegation response results - pending: " + 
-                 numeroUsuariosRepresentados.get());
-        for (int v = 0; v < numeroUsuariosRepresentados.get(); v++) {
+                 userBaseData.getNumUsersWithRepresentative());
+        for (int v = 0; v < userBaseData.getNumUsersWithRepresentative(); v++) {
             Future<Respuesta> f = requestCompletionService.take();
             final Respuesta respuesta = f.get();
             logger.debug("Delegation response '" + v + "' - statusCode:" + 
                     respuesta.getCodigoEstado() + " - msg: " + respuesta.getMensaje());
-            delegacionesRecogidas.getAndIncrement();
             if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
                 userWithRepresentativeList.add(respuesta.getMensaje());
-                userBaseData.getAndIncrementNumDelegacionesOK();
-                simulationListener.setSimulationMessage(getProgressMessage());
+                userBaseData.getAndIncrementNumDelegationsOK();
             } else {
-                userBaseData.getAndIncrementNumDelegacionesERROR();
-                simulationListener.setSimulationMessage(getProgressMessage());
-                simulationListener.setSimulationErrorMessage(respuesta.getMensaje());
-                finalizar();
-            }  
+                userBaseData.setMessage(respuesta.getMensaje());
+                userBaseData.getAndIncrementNumDelegationsERROR();
+            }
+            
+            //TODO defensive copy
+            simulationListener.updateSimulationData(userBaseData);
         }
-        finalizar();
+        finish();
     }
     
     private String getRandomRepresentative() { 
@@ -235,32 +226,29 @@ public class UserBaseDataSimulator implements Simulator {
         return representativeNifList.get(randomSelected);
     }
     
-    public UserBaseData getUserBaseData() {
-        return userBaseData;
-    }
-    
-    public void finalizar() {
+    @Override public UserBaseData finish() {
         try {
             countDownLatch.await();
-            logger.debug("finalizar");
-            duracion = System.currentTimeMillis() - comienzo;
-            userBaseData.setComienzo(comienzo);
-            userBaseData.setDuracion(duracion);
+            logger.debug("finish");
+            userBaseData.setFinish(System.currentTimeMillis());
             userBaseData.setUsersWithRepresentativeList(userWithRepresentativeList);
             userBaseData.setUsersWithoutRepresentativeList(userWithoutRepresentativeList);
             userBaseData.setRepresentativeNifList(representativeNifList);
             requestExecutor.shutdownNow();
-            simulationListener.setSimulationResult(this, userBaseData);
+            simulationListener.setSimulationResult(this);
         } catch (InterruptedException ex) {
             logger.error(ex.getMessage(), ex);
+        } finally {
+            return userBaseData;
         }
     }
 
-    private String getProgressMessage() {
-        return "<html>" + altasRecogidas.get() + " de " + 
-                 numeroRepresentantes.get() + " representantes<br/>"+  
-                 delegacionesRecogidas.get()+ " de " + numeroUsuariosRepresentados.get() + 
-                " usuarios<html>";
+    @Override public UserBaseData getData() {
+        return userBaseData;
+    }
+
+    @Override public List<String> getErrorsList() {
+        return errorsList;
     }
 
 }
