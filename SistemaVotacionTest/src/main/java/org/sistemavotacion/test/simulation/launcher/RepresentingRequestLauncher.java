@@ -21,7 +21,6 @@ import org.sistemavotacion.seguridad.Encryptor;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.test.KeyStoreHelper;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.StringUtils;
@@ -58,20 +57,15 @@ public class RepresentingRequestLauncher implements Callable<Respuesta>,
     public RepresentingRequestLauncher (String representativeNIF) 
             throws Exception {
         this.representativeNIF = representativeNIF;
-        urlTimeStampServer = ContextoPruebas.getUrlTimeStampServer(
-                ContextoPruebas.getControlAcceso().getServerURL());
-        urlAltaRepresentante = ContextoPruebas.getControlAcceso().getServerURL() + "/representative";
+        urlTimeStampServer = ContextoPruebas.INSTANCE.getUrlTimeStampServer();
+        urlAltaRepresentante = ContextoPruebas.INSTANCE.getUrlRepresentativeService();
     }
     
     
     @Override
     public Respuesta call() throws Exception {
         Respuesta respuesta = null;
-        File file = new File(ContextoPruebas.getUserKeyStorePath(representativeNIF));
-        KeyStore mockDnie = KeyStoreHelper.crearMockDNIe(representativeNIF, file,
-                ContextoPruebas.getPrivateCredentialRaizAutoridad());
-        logger.info("representativeNIF: " + representativeNIF + " - mockDnie: " + file.getAbsolutePath());
-        
+        KeyStore mockDnie = ContextoPruebas.INSTANCE.crearMockDNIe(representativeNIF);
         selectedImage = File.createTempFile("representativeImage", ".png");
         logger.info(" - selectedImage.getAbsolutePath(): " + selectedImage.getAbsolutePath());
         selectedImage.deleteOnExit();
@@ -85,20 +79,20 @@ public class RepresentingRequestLauncher implements Callable<Respuesta>,
         String representativeDataJSON = getRepresentativeDataJSON(
                 representativeNIF, base64ResultDigestStr);
 
-        ActorConIP controlAcceso = ContextoPruebas.getControlAcceso();
+        ActorConIP controlAcceso = ContextoPruebas.INSTANCE.getControlAcceso();
         String toUser = StringUtils.getCadenaNormalizada(controlAcceso.getNombre());
         
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, 
-                ContextoPruebas.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
+                ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
                 ContextoPruebas.DNIe_SIGN_MECHANISM);
         
-        String subject = ContextoPruebas.getString("representativeRequestMsgSubject");
+        String subject = ContextoPruebas.INSTANCE.getString("representativeRequestMsgSubject");
 
         representativeRequestSMIME = signedMailGenerator.genMimeMessage(
                 representativeNIF, toUser, representativeDataJSON, subject , null);
         new TimeStampWorker(TIME_STAMP_WORKER, urlTimeStampServer,
                     this, representativeRequestSMIME.getTimeStampRequest(),
-                    ContextoPruebas.getControlAcceso().getTimeStampCert()).execute();
+                    ContextoPruebas.INSTANCE.getControlAcceso().getTimeStampCert()).execute();
         countDownLatch.await();
         return getResult();
     }
@@ -106,7 +100,7 @@ public class RepresentingRequestLauncher implements Callable<Respuesta>,
    private void processDocument(SMIMEMessageWrapper smimeDocument) {
         if(smimeDocument == null) return;
         try {
-            X509Certificate serverCert = ContextoPruebas.getControlAcceso().getCertificate();
+            X509Certificate serverCert = ContextoPruebas.INSTANCE.getControlAcceso().getCertificate();
             Encryptor.encryptSMIME(smimeDocument, serverCert);
             Map<String, Object> fileMap = new HashMap<String, Object>();
             String representativeDataFileName = 

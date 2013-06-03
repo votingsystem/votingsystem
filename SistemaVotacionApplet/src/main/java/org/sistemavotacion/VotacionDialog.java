@@ -8,7 +8,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.text.MessageFormat;
 import java.util.List;
@@ -28,10 +27,6 @@ import org.sistemavotacion.smime.SMIMEMessageWrapper;
 
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.StringUtils;
-import org.sistemavotacion.util.VotacionHelper;
-import static org.sistemavotacion.util.VotacionHelper.ASUNTO_MENSAJE_SOLICITUD_ACCESO;
-import static org.sistemavotacion.util.VotacionHelper.NOMBRE_DESTINATARIO;
-import static org.sistemavotacion.util.VotacionHelper.obtenerSolicitudAccesoJSONStr;
 import org.sistemavotacion.worker.AccessRequestLauncherWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
 import org.sistemavotacion.worker.NotificarVotoWorker;
@@ -101,8 +96,10 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
         progressBarPanel.setVisible(visibility);
         enviarButton.setVisible(!visibility);
         confirmacionPanel.setVisible(!visibility);
-        if (mostrandoPantallaEnvio) cerrarButton.setText(getString("cancelar"));
-        else cerrarButton.setText(getString("cerrar"));
+        if (mostrandoPantallaEnvio) cerrarButton.setText(
+                Contexto.INSTANCE.getString("cancelar"));
+        else cerrarButton.setText(
+                Contexto.INSTANCE.getString("cerrar"));
         pack();
     }
     
@@ -247,12 +244,10 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
 
     private void enviarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enviarButtonActionPerformed
         String password = null;
-        if (Contexto.getDNIePassword() == null) {
-            PasswordDialog dialogoPassword = new PasswordDialog (parentFrame, true);
-            dialogoPassword.setVisible(true);
-            password = dialogoPassword.getPassword();
-            if (password == null) return;
-        }
+        PasswordDialog dialogoPassword = new PasswordDialog (parentFrame, true);
+        dialogoPassword.setVisible(true);
+        password = dialogoPassword.getPassword();
+        if (password == null) return;
         final String finalPassword = password;
         Runnable runnable = new Runnable() {
             public void run() {  
@@ -261,7 +256,8 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
         };
         new Thread(runnable).start();
         mostrarPantallaEnvio(true);
-        progressLabel.setText("<html>" + getString("progressLabel") + "</html>");
+        progressLabel.setText("<html>" + Contexto.INSTANCE.
+                getString("progressLabel") + "</html>");
         pack();       
     }//GEN-LAST:event_enviarButtonActionPerformed
 
@@ -278,8 +274,7 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
                     appletFirma.getOperacionEnCurso().getTipo().
                     getNombreArchivoEnDisco());
             documento.deleteOnExit();
-            String accessRequest = VotacionHelper.
-                    obtenerSolicitudAccesoJSONStr(votoEvento);
+            String accessRequest = votoEvento.getAsunto().toString();
             FileUtils.copyStreamToFile(new ByteArrayInputStream(
                     accessRequest.getBytes()), documento);
             logger.info("documento.getAbsolutePath(): " + documento.getAbsolutePath());
@@ -302,25 +297,18 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
 
     
     private void lanzarVoto(String password) {
-        KeyStore keyStore = null;
         try {
-            
-            String fromUser = "Elector";
+            String fromUser = Contexto.INSTANCE.getString("electorLbl");
             String asuntoMensaje = ASUNTO_MENSAJE_SOLICITUD_ACCESO + 
                 votoEvento.getEventoId();
             documentSMIME = DNIeSignedMailGenerator.genMimeMessage(fromUser, 
-                    NOMBRE_DESTINATARIO, obtenerSolicitudAccesoJSONStr(votoEvento),
+                    NOMBRE_DESTINATARIO, votoEvento.getAccessRequestJSON().toString(),
                     password.toCharArray(), asuntoMensaje, null);
 
             //No se hace la comprobación antes porque no hay usuario en contexto
             //hasta que no se firma al menos una vez
-            votoEvento.setUsuario(Contexto.getUsuario());
-            Contexto.getInstancia().setVoto(votoEvento, Contexto.getUsuario().getNif());
-            /*directorioArchivoVoto = new File (Contexto.
-                    getRutaArchivosVoto(votoEvento, Contexto.getUsuario().getNif()));
-            directorioArchivoVoto.mkdirs();
-            File accessRequest = new File (directorioArchivoVoto.getAbsolutePath() 
-                + File.separator + Contexto.NOMBRE_ARCHIVO_SOLICITUD_ACCESO);*/
+            votoEvento.setUsuario(Contexto.INSTANCE.getUsuario());
+
 
             X509Certificate timeStampCert = PreconditionsCheckerDialog.
                     getTimeStampCert(operation.getUrlServer());              
@@ -332,7 +320,7 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
             logger.error(ex.getMessage(), ex);
             MensajeDialog mensajeDialog = new MensajeDialog(parentFrame,true);
             String errorLanzandoVotoMsg = 
-                    getString("errorLanzandoVotoMsg");
+                    Contexto.INSTANCE.getString("errorLanzandoVotoMsg");
             mensajeDialog.setMessage(errorLanzandoVotoMsg + " - " 
                     + ex.getMessage(), errorLanzandoVotoMsg);
         }
@@ -341,11 +329,11 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
         
     private void notificarCentroControl (PKCS10WrapperClient pkcs10WrapperClient, 
             Evento votoEvento) {
-        progressLabel.setText("<html><b>" + 
-                getString("notificandoCentroControlLabel") +"</b></html>");
+        progressLabel.setText("<html><b>" + Contexto.INSTANCE.getString(
+                "notificandoCentroControlLabel") +"</b></html>");
         mostrarPantallaEnvio(true);
         this.pkcs10WrapperClient = pkcs10WrapperClient;
-        String votoJSON = VotacionHelper.obtenerVotoJSONStr(votoEvento);
+        String votoJSON = votoEvento.getAccessRequestJSON().toString();
         /*File votoFirmado = new File (
                 directorioArchivoVoto.getAbsolutePath() 
                 + File.separator + getString("TIMESTAMPED_VOTE_SMIME_FILE"));*/
@@ -353,7 +341,7 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
             documentSMIME = pkcs10WrapperClient.genMimeMessage(
                     votoEvento.getHashCertificadoVotoBase64(), 
                     StringUtils.getCadenaNormalizada(votoEvento.getCentroControl().getNombre()),
-                    votoJSON, getString("asuntoVoto"), null);
+                    votoJSON, Contexto.INSTANCE.getString("asuntoVoto"), null);
             X509Certificate timeStampCert = PreconditionsCheckerDialog.
                         getTimeStampCert(operation.getUrlServer());              
             new TimeStampWorker(TIMESTAMP_VOTE, operation.getUrlTimeStampServer(),
@@ -362,7 +350,8 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-            errorDialog.setMessage(ex.getMessage(), getString("errorLbl"));
+            errorDialog.setMessage(ex.getMessage(), 
+                    Contexto.INSTANCE.getString("errorLbl"));
         }
     }
     
@@ -390,12 +379,14 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
                     } catch (Exception ex) {
                         logger.error(ex.getMessage(), ex);
                         MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                        errorDialog.setMessage(ex.getMessage(), getString("errorLbl"));
+                        errorDialog.setMessage(ex.getMessage(), 
+                                Contexto.INSTANCE.getString("errorLbl"));
                     }
                 } else {
                     mostrarPantallaEnvio(false);
                     MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                    errorDialog.setMessage(worker.getMessage(), getString("errorLbl"));
+                    errorDialog.setMessage(worker.getMessage(), 
+                            Contexto.INSTANCE.getString("errorLbl"));
                 }
                 break;
             case ACCESS_REQUEST_WORKER:
@@ -422,12 +413,14 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
                     } catch (Exception ex) {
                         logger.error(ex.getMessage(), ex);
                         MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                        errorDialog.setMessage(ex.getMessage(), getString("errorLbl"));
+                        errorDialog.setMessage(ex.getMessage(), 
+                                Contexto.INSTANCE.getString("errorLbl"));
                     }
                 } else {
                     mostrarPantallaEnvio(false);
                     MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                    errorDialog.setMessage(worker.getMessage(), getString("errorLbl"));
+                    errorDialog.setMessage(worker.getMessage(), 
+                            Contexto.INSTANCE.getString("errorLbl"));
                 }
                 break;
             case NOTIFICAR_VOTO_WORKER:
@@ -446,7 +439,8 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
                     appletFirma.responderCliente(Operacion.SC_ERROR_ENVIO_VOTO, null);
                 }
                 recibo.setVoto(votoEvento);
-                VotacionHelper.addRecibo(votoEvento.getHashCertificadoVotoBase64(), recibo);
+                Contexto.INSTANCE.addReceipt(
+                        votoEvento.getHashCertificadoVotoBase64(), recibo);
                 dispose();
                 break;
         }
@@ -454,7 +448,7 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
     } 
     
     private String getMensajeVotacion(String asunto, String opcionSeleccionada) {
-        String pattern = getString("mensajeVotacion");
+        String pattern = Contexto.INSTANCE.getString("mensajeVotacion");
         return MessageFormat.format(pattern, asunto, opcionSeleccionada);
     }
 

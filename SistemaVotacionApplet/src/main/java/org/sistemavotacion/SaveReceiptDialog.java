@@ -5,7 +5,6 @@ import java.io.File;
 import javax.swing.JFileChooser;
 import org.sistemavotacion.modelo.Operacion;
 import org.sistemavotacion.modelo.ReciboVoto;
-import org.sistemavotacion.util.VotacionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,11 +38,11 @@ public class SaveReceiptDialog extends javax.swing.JDialog {
     
     public void guardarRecibo(String hashCertificadoVotoBase64) { 
         logger.debug(" - guardarRecibo - ");
-        ReciboVoto recibo = VotacionHelper.getReciboVoto(hashCertificadoVotoBase64);        
+        ReciboVoto recibo = Contexto.INSTANCE.getReceipt(hashCertificadoVotoBase64);
         Operacion respuesta = new Operacion(Operacion.SC_CANCELADO);
         parentFrame.setLocationRelativeTo(null);
         if(recibo != null) {
-            String resultado = Contexto.getString("operacionCancelada");
+            String resultado = Contexto.INSTANCE.getString("operacionCancelada");
             try {
                 final JFileChooser chooser = new JFileChooser();
                 File reciboFile = recibo.getArchivoRecibo();
@@ -70,7 +69,7 @@ public class SaveReceiptDialog extends javax.swing.JDialog {
         } else {
             logger.debug(" - Receipt Null - ");
             respuesta.setCodigoEstado(Operacion.SC_ERROR_PETICION);
-            respuesta.setMensaje(Contexto.getString(
+            respuesta.setMensaje(Contexto.INSTANCE.getString(
                             "receiptNotFoundMsg", hashCertificadoVotoBase64));
         }
         AppletFirma.INSTANCIA.responderCliente(

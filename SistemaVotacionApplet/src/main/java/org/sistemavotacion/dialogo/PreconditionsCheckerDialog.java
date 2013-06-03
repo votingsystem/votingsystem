@@ -15,7 +15,6 @@ import net.sf.json.JSONSerializer;
 import org.sistemavotacion.AppletFirma;
 import static org.sistemavotacion.AppletFirma.SERVER_INFO_URL_SUFIX;
 import org.sistemavotacion.Contexto;
-import static org.sistemavotacion.Contexto.getString;
 import org.sistemavotacion.FirmaDialog;
 import org.sistemavotacion.RepresentativeDataDialog;
 import org.sistemavotacion.SaveReceiptDialog;
@@ -67,7 +66,7 @@ public class PreconditionsCheckerDialog
         initComponents();
         setLocationRelativeTo(null);  
         acceptButton.setVisible(false);
-        setTitle(getString("preconditionsCheckerDialogCaption"));
+        setTitle(Contexto.INSTANCE.getString("preconditionsCheckerDialogCaption"));
         
         addWindowListener(new WindowAdapter() {
             public void windowClosed(WindowEvent e) {
@@ -152,7 +151,8 @@ public class PreconditionsCheckerDialog
             javax.swing.SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     MensajeDialog errorDialog = new MensajeDialog(frame, true);
-                    errorDialog.setMessage(ex.getMessage(), getString("errorLbl"));
+                    errorDialog.setMessage(ex.getMessage(), 
+                            Contexto.INSTANCE.getString("errorLbl"));
                 }
             });
         }
@@ -168,7 +168,7 @@ public class PreconditionsCheckerDialog
             waitLabel.setText(" - ERROR - ");
             AppletFirma.INSTANCIA.responderCliente(
                     Operacion.SC_ERROR_EJECUCION, 
-                    Contexto.getString("votingPreconditionsErrorMsg", message));
+                    Contexto.INSTANCE.getString("votingPreconditionsErrorMsg", message));
         }
         pack();
     }

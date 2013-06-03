@@ -13,6 +13,7 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
+import static org.sistemavotacion.Contexto.VOTING_DATA_DIGEST;
 import org.sistemavotacion.smime.CMSUtils;
 import org.sistemavotacion.util.DateUtils;
 import org.slf4j.Logger;
@@ -27,6 +28,10 @@ public class Evento {
     private static Logger logger = LoggerFactory.getLogger(Evento.class);
     
     public enum CardinalidadDeOpciones { MULTIPLES, UNA}
+    
+    public enum Estado {ACTIVO, FINALIZADO, CANCELADO, ACTORES_PENDIENTES_NOTIFICACION, PENDIENTE_COMIENZO,
+    	PENDIENTE_DE_FIRMA, BORRADO_DE_SISTEMA}
+    
   
     private Long id; //id of the event in the server
     private Long eventoId;//id of the event in the Access Control
@@ -302,33 +307,35 @@ public class Evento {
         return jsonObject;
     }
      
-    public JSONObject getVoteJSON(String eventURL) {
+    public JSONObject getVoteJSON() {
         logger.debug("getVoteJSON");
         Map map = new HashMap();
-        map.put("operation","VOTE");
-        map.put("eventoURL", eventURL);
+        map.put("operation", Tipo.VOTO.toString());
+        map.put("eventoURL", url);
         map.put("opcionSeleccionadaId", opcionSeleccionada.getId());
+        map.put("opcionSeleccionadaContenido", opcionSeleccionada.getContenido());
         map.put("UUID", UUID.randomUUID().toString());
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);
         return jsonObject;
     }
     
-    public JSONObject getAccessRequestJSON(String eventURL) {
+    public JSONObject getAccessRequestJSON() {
         logger.debug("getAccessRequestJSON");
         Map map = new HashMap();
-        map.put("operation","SOLICITUD_ACCESO");
-        map.put("eventId", getEventoId());
-        map.put("eventURL", eventURL);
+        map.put("operation", Tipo.SOLICITUD_ACCESO.toString());
+        map.put("eventId", eventoId);
+        map.put("eventURL", url);
         map.put("UUID", UUID.randomUUID().toString());
         map.put("hashSolicitudAccesoBase64", hashSolicitudAccesoBase64);
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);        
         return jsonObject;
     }
-   
+    
     
     public JSONObject getCancelVoteJSON() {
         logger.debug("getCancelVoteJSON");
         Map map = new HashMap();
+        map.put("operation", Tipo.ANULADOR_VOTO.toString());
         map.put("origenHashCertificadoVoto", origenHashCertificadoVoto);
         map.put("hashCertificadoVotoBase64", hashCertificadoVotoBase64);
         map.put("origenHashSolicitudAcceso", origenHashSolicitudAcceso);
@@ -337,6 +344,7 @@ public class Evento {
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);
         return jsonObject;
     }
+    
     
     public String getBase64ToHexStr(String base64Str) {
         if (base64Str == null) return null;
@@ -576,7 +584,15 @@ public class Evento {
             this.tipo = tipo;
     }
 
-        
+    public void genVote() throws NoSuchAlgorithmException {  
+        origenHashSolicitudAcceso = UUID.randomUUID().toString();
+        hashSolicitudAccesoBase64 = CMSUtils.getHashBase64(
+            origenHashSolicitudAcceso, VOTING_DATA_DIGEST);
+        origenHashCertificadoVoto = UUID.randomUUID().toString();
+        hashCertificadoVotoBase64 = CMSUtils.getHashBase64(
+            origenHashCertificadoVoto, VOTING_DATA_DIGEST);
+    } 
+    
     public Evento genRandomVote (String digestAlg)throws NoSuchAlgorithmException {
         Evento voto = new Evento();
         voto.setAsunto(asunto);

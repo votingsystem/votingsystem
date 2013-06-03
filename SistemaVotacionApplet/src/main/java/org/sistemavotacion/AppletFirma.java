@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JApplet;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
-import static org.sistemavotacion.Contexto.*;
 import org.sistemavotacion.dialogo.PreconditionsCheckerDialog;
 import org.sistemavotacion.modelo.Operacion;
 import org.sistemavotacion.util.FileUtils;
@@ -52,7 +51,7 @@ public class AppletFirma extends JApplet {
         //Execute a job on the event-dispatching thread:
         //creating this applet's GUI.
         try {
-            Contexto.inicializar();
+            Contexto.INSTANCE.init();
             javax.swing.SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     try {
@@ -92,7 +91,8 @@ public class AppletFirma extends JApplet {
             if(getParameter("locale") != null) locale = getParameter("locale");
         } 
         Operacion operacion = new Operacion(Operacion.SC_PROCESANDO, 
-                Operacion.Tipo.MENSAJE_APPLET, getString("appletInicializado"));
+                Operacion.Tipo.MENSAJE_APPLET, 
+                Contexto.INSTANCE.getString("appletInicializado"));
         enviarMensajeAplicacion(operacion);
     }
 
@@ -178,7 +178,7 @@ public class AppletFirma extends JApplet {
     public void cancelarOperacion () {
         if(operacionEnCurso == null) return;
         else if(operacionEnCurso.getCodigoEstado() == Operacion.SC_PROCESANDO) {
-            operacionEnCurso.setMensaje(getString("operacionCancelada"));
+            operacionEnCurso.setMensaje(Contexto.INSTANCE.getString("operacionCancelada"));
             operacionEnCurso.setCodigoEstado(Operacion.SC_CANCELADO);
             enviarMensajeAplicacion(operacionEnCurso);
             operacionEnCurso = null;  
@@ -213,7 +213,7 @@ public class AppletFirma extends JApplet {
         ope.setArgs(_args);
         logger.debug("ope: " + ope.obtenerJSONStr());
         try {
-            Contexto.inicializar();
+            Contexto.INSTANCE.init();
             javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
                 public void run() {
                     try {

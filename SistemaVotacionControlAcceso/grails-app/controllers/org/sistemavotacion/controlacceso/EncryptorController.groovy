@@ -15,10 +15,20 @@ import grails.converters.JSON;
 import java.io.BufferedReader
 import org.bouncycastle.util.encoders.Base64;
 import java.security.KeyFactory;
+import grails.util.Environment
 
 class EncryptorController {
+	
+	def grailsApplication
 
     def index() { 
+		if(! Environment.TEST.equals(Environment.current)) {
+			String msg = message(code: "msg.servicioEntornoTest")
+			log.error msg
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
+			return false
+		}
 		if(!params.requestBytes) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
@@ -26,7 +36,7 @@ class EncryptorController {
 			render msg
 			return false
 		}
-
+		log.debug "===============****¡¡¡¡¡ TEST Environment !!!!!****=================== "
 		byte[] solicitud = params.requestBytes
 		log.debug(">>>>>>>>>>> Solicitud" + new String(solicitud))
 		

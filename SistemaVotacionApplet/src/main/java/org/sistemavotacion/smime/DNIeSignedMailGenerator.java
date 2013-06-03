@@ -80,7 +80,8 @@ public class DNIeSignedMailGenerator {
         Properties props = System.getProperties();
         Session session = Session.getDefaultInstance(props, null);
         String usuario = null;
-        if (Contexto.getUsuario() != null) usuario = Contexto.getUsuario().getNif();
+        if (Contexto.INSTANCE.getUsuario() != null) usuario = 
+                Contexto.INSTANCE.getUsuario().getNif();
         Address fromUserAddress = new InternetAddress(usuario);
         Address toUserAddress = new InternetAddress(toUser.replace(" ", ""));
 

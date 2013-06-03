@@ -46,7 +46,7 @@ public class InfoGetterWorker extends SwingWorker<Respuesta, String>
     }
     
     @Override protected Respuesta doInBackground() throws Exception{
-        respuesta = Contexto.getInstancia().getHttpHelper().
+        respuesta = Contexto.INSTANCE.getHttpHelper().
                 getInfo(urlArchivo, contentType);
         return respuesta;
     }

@@ -54,11 +54,6 @@ public class MainFrame extends JFrame  implements KeyListener,
      * Creates new form MainFrame
      */
     public MainFrame() {
-        try {
-            ContextoPruebas.inicializar();
-        } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-        }
         initComponents();
                 
         controlAccesoTextField.addFocusListener(this);
@@ -328,7 +323,7 @@ public class MainFrame extends JFrame  implements KeyListener,
                 break;
             case CONECTADO_CONTROL_ACCESO:
                 InfoServidorDialog infoServidorDialog = new InfoServidorDialog(
-                    getFrames()[0], false, ContextoPruebas.getControlAcceso());
+                    getFrames()[0], false, ContextoPruebas.INSTANCE.getControlAcceso());
                 infoServidorDialog.setVisible(true);
                 break;
         }
@@ -549,22 +544,30 @@ public class MainFrame extends JFrame  implements KeyListener,
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
                         ActorConIP actorConIP = ActorConIP.parse(worker.getMessage());
-                        if(!(ActorConIP.Tipo.CONTROL_ACCESO == actorConIP.getTipo())) {
+                        if(ActorConIP.Tipo.CONTROL_ACCESO != actorConIP.getTipo()) {
                             mostrarMensajeUsuario("El servidor no es un Control de Acceso");
                             controlAccesoTextField.setBorder(new LineBorder(Color.RED,2));
+                            return;
+                        }
+                        if(ActorConIP.EnvironmentMode.TEST !=  
+                                controlAcceso.getEnvironmentMode()) {
+                            String msg = "SERVER NOT IN TEST MODE. Server mode:" + 
+                                    controlAcceso.getEnvironmentMode();
+                            logger.error("### ERROR - " + msg);
+                            mostrarMensajeUsuario(msg);
                             return;
                         }
                         mostrarMensajeUsuario(null);
                         controlAccesoTextField.setBorder(normalTextBorder);
                         controlAcceso = actorConIP;
-                        ContextoPruebas.setControlAcceso(controlAcceso);
+                        ContextoPruebas.INSTANCE.setControlAcceso(controlAcceso);
 
                         VotacionesPanel.INSTANCIA.setControlAcceso(controlAcceso);
 
                         byte[] caPemCertificateBytes = CertUtil.fromX509CertToPEM (
-                            ContextoPruebas.getCertificadoRaizAutoridad());
-                        String urlAnyadirCertificadoCA = ContextoPruebas.getURLAnyadirCertificadoCA(
-                        controlAcceso.getServerURL());
+                            ContextoPruebas.INSTANCE.getRootCACert());
+                        String urlAnyadirCertificadoCA = ContextoPruebas.getRootCAServiceURL(
+                            controlAcceso.getServerURL());
                         estado = Estado.CONECTANDO;
                         infoServidorButton.setIcon(new javax.swing.ImageIcon(
                         getClass().getResource("/images/loading.gif")));
@@ -613,7 +616,7 @@ public class MainFrame extends JFrame  implements KeyListener,
                             return;
                         }
                         mostrarMensajeUsuario(null);
-                        ContextoPruebas.setCentroControl(actorConIP);
+                        ContextoPruebas.INSTANCE.setCentroControl(actorConIP);
                     } catch(Exception ex) {
                         String mensaje = "Error Cargando centro Control <br/>" + ex.getMessage();
                         mostrarMensajeUsuario(mensaje);

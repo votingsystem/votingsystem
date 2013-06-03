@@ -11,8 +11,6 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import netscape.javascript.JSObject;
 import org.apache.log4j.PropertyConfigurator;
-import static org.sistemavotacion.Contexto.getString;
-import org.sistemavotacion.herramientavalidacion.Operacion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -99,14 +99,13 @@ public class CertUtil {
      * Genera un certificado V3 para usarlo como certificado raíz de una CA
      */
     public static X509Certificate generateV3RootCert(KeyPair pair, 
-    		long comienzo, int periodoValidez, String strSubjectDN) throws Exception {
+    		long begin, long period, String strSubjectDN) throws Exception {
         X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
-        logger.debug("strSubjectDN: " + strSubjectDN);
         X509Principal x509Principal = new X509Principal(strSubjectDN);          
         certGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()));
         certGen.setIssuerDN(x509Principal);
-        certGen.setNotBefore(new Date(comienzo));
-        certGen.setNotAfter(new Date(comienzo + periodoValidez));
+        certGen.setNotBefore(new Date(begin));
+        certGen.setNotAfter(new Date(begin + period));
         certGen.setSubjectDN(x509Principal);
         certGen.setPublicKey(pair.getPublic());
         certGen.setSignatureAlgorithm(SIG_ALGORITHM);
@@ -323,13 +322,13 @@ public class CertUtil {
      * Genera un certificado V3 para usarlo como certificado de usuario final
      */
     public static X509Certificate generateEndEntityCert(PublicKey entityKey, 
-    		PrivateKey caKey, X509Certificate caCert, long comienzo, int periodoValidez,
-                String endEntitySubjectDN) throws Exception {
+            PrivateKey caKey, X509Certificate caCert, long comienzo, 
+            long period, String endEntitySubjectDN) throws Exception {
         X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
         certGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()));
         certGen.setIssuerDN(PrincipalUtil.getSubjectX509Principal(caCert));
         certGen.setNotBefore(new Date(comienzo));
-        certGen.setNotAfter(new Date(comienzo + periodoValidez));
+        certGen.setNotAfter(new Date(comienzo + period));
         certGen.setSubjectDN(new X500Principal(endEntitySubjectDN));
         certGen.setPublicKey(entityKey);
         certGen.setSignatureAlgorithm(SIG_ALGORITHM);        
@@ -348,13 +347,13 @@ public class CertUtil {
      * Genera un certificado V3 para usarlo como emisor de sellos de tiempo
      */
     public static X509Certificate generateTimeStampingCert(PublicKey entityKey, 
-    		PrivateKey caKey, X509Certificate caCert, long comienzo, int periodoValidez,
+    		PrivateKey caKey, X509Certificate caCert, long begin, long period,
                 String endEntitySubjectDN) throws Exception {
         X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
         certGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()));
         certGen.setIssuerDN(PrincipalUtil.getSubjectX509Principal(caCert));
-        certGen.setNotBefore(new Date(comienzo));
-        certGen.setNotAfter(new Date(comienzo + periodoValidez));
+        certGen.setNotBefore(new Date(begin));
+        certGen.setNotAfter(new Date(begin + period));
         certGen.setSubjectDN(new X500Principal(endEntitySubjectDN));
         certGen.setPublicKey(entityKey);
         certGen.setSignatureAlgorithm(SIG_ALGORITHM);        

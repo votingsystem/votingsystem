@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.sistemavotacion.modelo.Respuesta;
-import org.sistemavotacion.test.simulation.SimulatorData;
+import org.sistemavotacion.test.simulation.SimulationData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,9 +14,9 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class UserBaseData implements SimulatorData {
+public class UserBaseSimulationData extends SimulationData {
     
-    private static Logger logger = LoggerFactory.getLogger(UserBaseData.class);
+    private static Logger logger = LoggerFactory.getLogger(UserBaseSimulationData.class);
 
     private int statusCode = Respuesta.SC_ERROR_EJECUCION;
     private String message = null;
@@ -32,19 +32,16 @@ public class UserBaseData implements SimulatorData {
     
 
     private AtomicLong numRepresentativeRequestsOK = new AtomicLong(0);
-    private AtomicLong numRepresentativeRequestssERROR = new AtomicLong(0);
+    private AtomicLong numRepresentativeRequestsERROR = new AtomicLong(0);
 
     private AtomicLong numDelegationsOK = new AtomicLong(0);
     private AtomicLong numDelegationsERROR = new AtomicLong(0);
     
     private final AtomicLong representativeRequests = new AtomicLong(0);
     private final AtomicLong delegationRequests = new AtomicLong(0);
-    
-    private Integer horasDuracionVotacion;
-    private Integer minutosDuracionVotacion;
+
     
     private boolean withRandomVotes = true;
-    private boolean timerBased = false;
 
     private AtomicLong userIndex = new AtomicLong(0);
     
@@ -52,11 +49,6 @@ public class UserBaseData implements SimulatorData {
     private List<String> usersWithoutRepresentativeList = new ArrayList<String>();
     private List<String> usersWithRepresentativeList = new ArrayList<String>();
 
-    
-    private long begin;
-    private long finish;
-    
-    private String durationStr = null;
 
     /**
      * @return the numRepresentativeRequestsOK
@@ -98,7 +90,7 @@ public class UserBaseData implements SimulatorData {
      */
     public Long getNumRepresentativeRequestsColected() {
         return (numRepresentativeRequestsOK.get() + 
-                numRepresentativeRequestssERROR.get());
+                numRepresentativeRequestsERROR.get());
     }
     
     
@@ -120,14 +112,14 @@ public class UserBaseData implements SimulatorData {
      * @return the numRepresentativeRequestsOK
      */
     public Long getNumRepresentativeRequestsERROR() {
-        return numRepresentativeRequestssERROR.get();
+        return numRepresentativeRequestsERROR.get();
     }
     
     /**
      * @return the numRepresentativeRequestsOK
      */
     public Long getAndIncrementNumRepresentativeRequestsERROR() {
-        return numRepresentativeRequestssERROR.get();
+        return numRepresentativeRequestsERROR.get();
     }
 
     /**
@@ -164,12 +156,12 @@ public class UserBaseData implements SimulatorData {
                 numVotesUsersWithoutRepresentative;
     }
 
-    public UserBaseData(int status, String message) {
+    public UserBaseSimulationData(int status, String message) {
         this.statusCode = status;
         this.message = message;
     }
     
-    public UserBaseData() {}
+    public UserBaseSimulationData() {}
     
     /**
      * @return the message
@@ -249,34 +241,6 @@ public class UserBaseData implements SimulatorData {
         if(representativeNifList != null && !representativeNifList.isEmpty()) 
             result.addAll(representativeNifList);
         return result;
-    }
-
-    /**
-     * @return the horasDuracionVotacion
-     */
-    public Integer getHorasDuracionVotacion() {
-        return horasDuracionVotacion;
-    }
-
-    /**
-     * @param aHorasDuracionVotacion the horasDuracionVotacion to set
-     */
-    public void setHorasDuracionVotacion(Integer aHorasDuracionVotacion) {
-        horasDuracionVotacion = aHorasDuracionVotacion;
-    }
-
-    /**
-     * @return the minutosDuracionVotacion
-     */
-    public Integer getMinutosDuracionVotacion() {
-        return minutosDuracionVotacion;
-    }
-
-    /**
-     * @param aMinutosDuracionVotacion the minutosDuracionVotacion to set
-     */
-    public void setMinutosDuracionVotacion(Integer aMinutosDuracionVotacion) {
-        minutosDuracionVotacion = aMinutosDuracionVotacion;
     }
 
     /**
@@ -392,7 +356,7 @@ public class UserBaseData implements SimulatorData {
         this.statusCode = statusCode;
     }
     
-    public static UserBaseData parse (String dataStr) {
+    public static UserBaseSimulationData parse (String dataStr) {
         logger.debug("- parse");
         if(dataStr == null) return null;
         JSONObject dataJSON = (JSONObject)JSONSerializer.toJSON(dataStr);
@@ -400,10 +364,10 @@ public class UserBaseData implements SimulatorData {
     }
    
     
-    public static UserBaseData parse (JSONObject dataJSON) {
+    public static UserBaseSimulationData parse (JSONObject dataJSON) {
         logger.debug("- parse - json "  + dataJSON.toString());
         if(dataJSON == null) return null;
-        UserBaseData userBaseData = new UserBaseData();
+        UserBaseSimulationData userBaseData = new UserBaseSimulationData();
         if (dataJSON.containsKey("userIndex")) {
             userBaseData.setUserIndex(dataJSON.getInt("userIndex"));
         }                
@@ -427,52 +391,6 @@ public class UserBaseData implements SimulatorData {
                     getInt("numVotesUsersWithRepresentative"));
         }        
         return userBaseData;
-    }
-
-    /**
-     * @return the begin
-     */
-    public long getBegin() {
-        return begin;
-    }
-
-    /**
-     * @param begin the begin to set
-     */
-    public void setBegin(long begin) {
-        this.begin = begin;
-    }
-
-    /**
-     * @return the finish
-     */
-    public long getFinish() {
-        return finish;
-    }
-
-    /**
-     * @param finish the finish to set
-     */
-    public void setFinish(long finish) {
-        this.finish = finish;
-    }
-
-    public String getDurationStr() {
-        return durationStr;
-    }
-
-    /**
-     * @return the timerBased
-     */
-    public boolean isTimerBased() {
-        return timerBased;
-    }
-
-    /**
-     * @param timerBased the timerBased to set
-     */
-    public void setTimerBased(boolean timerBased) {
-        this.timerBased = timerBased;
     }
 
     /**

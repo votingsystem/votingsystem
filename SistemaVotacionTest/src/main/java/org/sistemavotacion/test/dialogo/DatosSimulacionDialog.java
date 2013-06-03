@@ -12,7 +12,7 @@ import net.miginfocom.swing.MigLayout;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.OpcionEvento;
 import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.test.modelo.UserBaseData;
+import org.sistemavotacion.test.modelo.UserBaseSimulationData;
 import org.sistemavotacion.test.panel.OpcionVotacionPanel;
 import org.sistemavotacion.test.panel.VotacionesPanel;
 import org.slf4j.Logger;
@@ -28,11 +28,11 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
         
     private Evento evento = null;
     private Border normalTextBorder;
-    private UserBaseData userBaseData = null;
+    private UserBaseSimulationData userBaseData = null;
     private List<OpcionVotacionPanel> panelesOpciones = new ArrayList<OpcionVotacionPanel>();
 
     public DatosSimulacionDialog(Frame parent, boolean modal, 
-            Evento evento, UserBaseData userBaseData) {
+            Evento evento, UserBaseSimulationData userBaseData) {
         super(parent, modal);
         initComponents();
         setLocationRelativeTo(null);
@@ -68,8 +68,8 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
         if(userBaseData.isTimerBased()) {
             introduccionManualTiempoRadioButton.setSelected(true);
             tiempoPanel.setVisible(true);
-            horasComboBox.setSelectedIndex(userBaseData.getHorasDuracionVotacion());
-            minutosComboBox.setSelectedIndex(userBaseData.getMinutosDuracionVotacion());
+            horasComboBox.setSelectedIndex(userBaseData.getNumHoursProjected());
+            minutosComboBox.setSelectedIndex(userBaseData.getNumMinutesProjected());
         } else {
             tiempoMaquinaRadioButton.setSelected(true);
         }
@@ -79,7 +79,7 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
         pack();
     }
 
-    private String getUserBaseEditorPaneMsg(UserBaseData userBaseData) {
+    private String getUserBaseEditorPaneMsg(UserBaseSimulationData userBaseData) {
         logger.debug("=========== TODO");
         return userBaseData.getMessage();
     }
@@ -419,18 +419,19 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
             evento.setOpciones(opciones);
         }
         if(introduccionManualTiempoRadioButton.isSelected()) {
-            userBaseData.setHorasDuracionVotacion(horasComboBox.getSelectedIndex());
-            userBaseData.setMinutosDuracionVotacion(minutosComboBox.getSelectedIndex());
+            userBaseData.setNumHoursProjected(horasComboBox.getSelectedIndex());
+            userBaseData.setNumMinutesProjected(minutosComboBox.getSelectedIndex());
         }
-        logger.debug("Hora: " + userBaseData.getHorasDuracionVotacion() + 
-                " - Minuto: " + userBaseData.getMinutosDuracionVotacion());
-        ContextoPruebas.setEvento(evento);
-        ContextoPruebas.setUserBaseData(userBaseData);
+      logger.debug("Hora: " + userBaseData.getNumHoursProjected() + 
+                " - Minuto: " + userBaseData.getNumMinutesProjected());
+        ContextoPruebas.INSTANCE.setEvento(evento);
+        ContextoPruebas.INSTANCE.setUserBaseData(userBaseData);
         VotacionesPanel.INSTANCIA.prepararPanelParaLanzarSimulacion();
         dispose();
     }//GEN-LAST:event_aceptarButtonActionPerformed
 
     public boolean validarFormulario() {
+        ContextoPruebas.INSTANCE.setUserBaseData(userBaseData);
         boolean errores = false;
         opcionesPanel.setBorder(normalTextBorder);
         tiempoPanel.setBorder(normalTextBorder);

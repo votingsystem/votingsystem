@@ -1,12 +1,9 @@
 package org.sistemavotacion.dialogo;
 
 import java.awt.Frame;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import org.sistemavotacion.modelo.Respuesta;
-import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

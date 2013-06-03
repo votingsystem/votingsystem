@@ -408,7 +408,7 @@ public class VotacionesPanel extends JPanel implements
     private void centrosDeControlComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_centrosDeControlComboBoxActionPerformed
         ActorConIP centroControl = hashMapActores.get(
                 centrosDeControlComboBox.getSelectedItem());
-        ContextoPruebas.setCentroControl(centroControl);
+        ContextoPruebas.INSTANCE.setCentroControl(centroControl);
     }//GEN-LAST:event_centrosDeControlComboBoxActionPerformed
 
     private void publicarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_publicarButtonActionPerformed
@@ -424,15 +424,15 @@ public class VotacionesPanel extends JPanel implements
     }//GEN-LAST:event_infoEventoButtonActionPerformed
 
     private void datosSimulacionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_datosSimulacionButtonActionPerformed
-        if(ContextoPruebas.getUserBaseData() == null) {
+        if(ContextoPruebas.INSTANCE.getUserBaseData() == null) {
             MensajeDialog errorDialog = new MensajeDialog(
                     MainFrame.INSTANCIA.getFrames()[0], true);
-            errorDialog.setMessage(ContextoPruebas.getString("userBaseDataNotFoundErrorMsg"), 
-                ContextoPruebas.getString("errorLbl"));
+            errorDialog.setMessage(ContextoPruebas.INSTANCE.getString("userBaseDataNotFoundErrorMsg"), 
+                ContextoPruebas.INSTANCE.getString("errorLbl"));
         } else {
             DatosSimulacionDialog datosSimulacionDialog = new DatosSimulacionDialog(
                     MainFrame.INSTANCIA.getFrames()[0], false, evento,
-                    ContextoPruebas.getUserBaseData());   
+                    ContextoPruebas.INSTANCE.getUserBaseData());   
             datosSimulacionDialog.setVisible(true);
         }
     }//GEN-LAST:event_datosSimulacionButtonActionPerformed
@@ -453,7 +453,8 @@ public class VotacionesPanel extends JPanel implements
                 
                 logger.error("============= TODO");//TODO
                 VotingSimulationData simulationdata = new VotingSimulationData();
-                simulationdata.setUserBaseData(ContextoPruebas.getUserBaseData());
+                simulationdata.setUserBaseData(
+                        ContextoPruebas.INSTANCE.getUserBaseData());
                 
                 
                 votacion = new VotingSimulator(simulationdata, this);
@@ -535,7 +536,7 @@ public class VotacionesPanel extends JPanel implements
             centrosDeControlComboBox.setSelectedIndex(0);
             ActorConIP centroControlSelected = hashMapActores.get((String)
                     centrosDeControlComboBox.getSelectedItem());
-            ContextoPruebas.setCentroControl(centroControlSelected);
+            ContextoPruebas.INSTANCE.setCentroControl(centroControlSelected);
             urlCentroControlPanel.setVisible(true);
             publicacionConvocatoriaPanel.setVisible(true);
         }

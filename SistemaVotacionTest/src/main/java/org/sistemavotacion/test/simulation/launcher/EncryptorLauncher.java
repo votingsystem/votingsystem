@@ -40,7 +40,7 @@ public class EncryptorLauncher implements Callable<Respuesta>,
     @Override
     public Respuesta call() throws Exception {
         new EncryptorWorker(ENCRYPTOR_WORKER, requestNIF, serverURL, this,
-                ContextoPruebas.getControlAcceso().getCertificate()).execute();
+                ContextoPruebas.INSTANCE.getControlAcceso().getCertificate()).execute();
         countDownLatch.await();
         return getResult();
     }

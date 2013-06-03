@@ -64,7 +64,7 @@ public class NotificarVotoWorker extends SwingWorker<Respuesta, String>
         encryptedVote.deleteOnExit();
         encryptedMessage.writeTo(new FileOutputStream(encryptedVote));
         
-        respuesta = Contexto.getHttpHelper().sendFile(encryptedVote, 
+        respuesta = Contexto.INSTANCE.getHttpHelper().sendFile(encryptedVote, 
                 Contexto.SIGNED_AND_ENCRYPTED_CONTENT_TYPE, 
                 urlServidorRecolectorVotos);
         if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {

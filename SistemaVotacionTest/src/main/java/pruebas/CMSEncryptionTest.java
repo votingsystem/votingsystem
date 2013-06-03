@@ -11,9 +11,9 @@ import javax.crypto.SecretKey;
 import org.bouncycastle.util.encoders.Base64;
 import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.seguridad.Encryptor;
-import org.sistemavotacion.seguridad.KeyUtil;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.util.FileUtils;
+import org.sistemavotacion.util.VotingSystemKeyGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,14 +35,13 @@ public class CMSEncryptionTest {
     private static String strSubjectDNRoot = "CN=eventoUrl:sistemavotacion.cloudfundry.com, OU=Votaciones";
     
     public static void main(String[] args) throws Exception {
-        ContextoPruebas.inicializar();
         File fileInput = File.createTempFile("pruebaCMS", ".json");
         fileInput.deleteOnExit();
         FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
             .getResourceAsStream("testFiles/votingOperation.json"), fileInput); 
         
         
-        KeyPair rootPair = KeyUtil.generateRSAKeyPair();
+        KeyPair rootPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
         int periodoValidez = new Long(System.currentTimeMillis()).intValue() + 100000000;
     	rootCert = CertUtil.generateV3RootCert(
                 rootPair, System.currentTimeMillis() -1000, periodoValidez, strSubjectDNRoot);

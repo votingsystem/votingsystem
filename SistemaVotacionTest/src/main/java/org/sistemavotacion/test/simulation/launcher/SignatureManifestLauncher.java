@@ -12,7 +12,6 @@ import java.util.concurrent.CountDownLatch;
 import javax.mail.internet.MimeBodyPart;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.test.KeyStoreHelper;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.Encryptor;
 import org.sistemavotacion.worker.DocumentSenderWorker;
@@ -58,16 +57,13 @@ public class SignatureManifestLauncher implements Callable<Respuesta>,
     
     @Override
     public Respuesta call() throws Exception {
-        File file = new File(ContextoPruebas.getUserKeyStorePath(nif));
-        KeyStore mockDnie = KeyStoreHelper.crearMockDNIe(nif, file,
-                ContextoPruebas.getPrivateCredentialRaizAutoridad());
-        logger.info("nif: " + nif + " - mockDnie: " + file.getAbsolutePath());
+        KeyStore mockDnie = ContextoPruebas.INSTANCE.crearMockDNIe(nif);
         
         PrivateKey privateKey = (PrivateKey)mockDnie.getKey(
-                ContextoPruebas.END_ENTITY_ALIAS,
-                ContextoPruebas.PASSWORD.toCharArray());
+                ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS,
+                ContextoPruebas.DEFAULTS.PASSWORD.toCharArray());
         Certificate[] signerCertChain = mockDnie.getCertificateChain(
-                ContextoPruebas.END_ENTITY_ALIAS);
+                ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS);
 
         new PDFSignerWorker(PDF_SIGNER_WORKER, urlTimeStampServer,
                 this, reason, location, null, manifestToSign, 
@@ -101,7 +97,7 @@ public class SignatureManifestLauncher implements Callable<Respuesta>,
                         documentToSend.deleteOnExit();
 
                         MimeBodyPart mimeBodyPart = Encryptor.encryptFile(
-                                signedAndTimeStampedPDF, ContextoPruebas.
+                                signedAndTimeStampedPDF, ContextoPruebas.INSTANCE.
                                 getControlAcceso().getCertificate());
                         mimeBodyPart.writeTo(new FileOutputStream(documentToSend));
                         String contentType = Contexto.PDF_SIGNED_AND_ENCRYPTED_CONTENT_TYPE;

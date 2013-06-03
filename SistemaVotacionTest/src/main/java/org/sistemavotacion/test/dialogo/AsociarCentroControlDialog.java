@@ -375,22 +375,23 @@ public class AsociarCentroControlDialog extends JDialog implements
         estado = Estado.ASOCIANDO_CENTRO_CONTROL;
         try {
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
-                    ContextoPruebas.getUsuarioPruebas().getKeyStore(),
-                    ContextoPruebas.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
+                    ContextoPruebas.INSTANCE.getUserTest().getKeyStore(),
+                    ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS, 
+                    ContextoPruebas.DEFAULTS.PASSWORD.toCharArray(),
                     ContextoPruebas.VOTE_SIGN_MECHANISM);
             File solicitudAsociacion = new File(FileUtils.APPTEMPDIR + "SolicitudAsociacion");
             String documentoAsociacion = ActorConIP.getAssociationDocumentJSON(
                     centroControl.getServerURL()).toString();
             MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(
-                    ContextoPruebas.getUsuarioPruebas().getEmail(), 
-                    ContextoPruebas.getControlAcceso().getNombreNormalizado(), 
+                    ContextoPruebas.INSTANCE.getUserTest().getEmail(), 
+                    ContextoPruebas.INSTANCE.getControlAcceso().getNombreNormalizado(), 
                     documentoAsociacion, "Solicitud Asociacion de Centro de Control", null);
             mimeMessage.writeTo(new FileOutputStream(solicitudAsociacion));
             tareaEnEjecucion = new DocumentSenderWorker(
                     ASSOCIATE_CONTROL_CENTER_WORKER, solicitudAsociacion, 
                     Contexto.SIGNED_CONTENT_TYPE,
                     ContextoPruebas.getURLAsociarActorConIP(
-                    ContextoPruebas.getControlAcceso().getServerURL()), this);
+                    ContextoPruebas.INSTANCE.getControlAcceso().getServerURL()), this);
             tareaEnEjecucion.execute();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);

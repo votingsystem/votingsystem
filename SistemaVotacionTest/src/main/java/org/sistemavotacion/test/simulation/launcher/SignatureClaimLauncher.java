@@ -19,7 +19,6 @@ import org.sistemavotacion.seguridad.Encryptor;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.test.KeyStoreHelper;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.util.StringUtils;
 import org.sistemavotacion.worker.DocumentSenderWorker;
@@ -38,8 +37,8 @@ public class SignatureClaimLauncher implements Callable<Respuesta>,
     
     private static Logger logger = LoggerFactory.getLogger(SignatureClaimLauncher.class);
 
-    private static final int ENVIAR_DOCUMENTO_FIRMADO_WORKER = 0;
-    private static final int TIME_STAMP_WORKER               = 1;
+    private static final int SEND_DOCUMENT_WORKER = 0;
+    private static final int TIME_STAMP_WORKER    = 1;
     
     private final CountDownLatch countDownLatch = new CountDownLatch(1); // just one time
     
@@ -55,35 +54,31 @@ public class SignatureClaimLauncher implements Callable<Respuesta>,
     public SignatureClaimLauncher (String nif, Long eventId)  throws Exception {
         this.nif = nif;
         this.eventId = eventId;
-        urlTimeStampServer = ContextoPruebas.getUrlTimeStampServer(
-                ContextoPruebas.getControlAcceso().getServerURL());
-        submitClaimsURL = ContextoPruebas.getUrlSubmitClaims(
-                ContextoPruebas.getControlAcceso().getServerURL());
+        urlTimeStampServer = ContextoPruebas.INSTANCE.getUrlTimeStampServer();
+        submitClaimsURL = ContextoPruebas.INSTANCE.getUrlSubmitClaims();
     }
     
     
     @Override public Respuesta call() throws Exception {
         try {
-            File file = new File(ContextoPruebas.getUserKeyStorePath(nif));
-            KeyStore mockDnie = KeyStoreHelper.crearMockDNIe(nif, file,
-                ContextoPruebas.getPrivateCredentialRaizAutoridad());
-            logger.info("nif: " + nif + " - mockDnie: " + file.getAbsolutePath());
+            KeyStore mockDnie = ContextoPruebas.INSTANCE.crearMockDNIe(nif);
 
-            ActorConIP controlAcceso = ContextoPruebas.getControlAcceso();
+            ActorConIP controlAcceso = ContextoPruebas.INSTANCE.getControlAcceso();
             String toUser = StringUtils.getCadenaNormalizada(controlAcceso.getNombre());
 
             String claimDataStr = getClaimDataJSON(eventId);
-            String subject = ContextoPruebas.getString("claimMsgSubject");
+            String subject = ContextoPruebas.INSTANCE.getString("claimMsgSubject");
             
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
-                    mockDnie, ContextoPruebas.END_ENTITY_ALIAS, 
+                    mockDnie, ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS, 
                     ContextoPruebas.PASSWORD.toCharArray(),
                     ContextoPruebas.DNIe_SIGN_MECHANISM);
             signedClaimSMIME = signedMailGenerator.genMimeMessage(
                     nif, toUser, claimDataStr, subject, null);
             new TimeStampWorker(TIME_STAMP_WORKER, urlTimeStampServer,
-                        this, signedClaimSMIME.getTimeStampRequest(),
-                        ContextoPruebas.getControlAcceso().getTimeStampCert()).execute();
+                    this, signedClaimSMIME.getTimeStampRequest(),
+                    ContextoPruebas.INSTANCE.getControlAcceso().
+                    getTimeStampCert()).execute();
             countDownLatch.await();
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
@@ -95,13 +90,14 @@ public class SignatureClaimLauncher implements Callable<Respuesta>,
    private void processDocument(SMIMEMessageWrapper smimeDocument) {
         if(smimeDocument == null) return;
         try {
-            X509Certificate serverCert = ContextoPruebas.getControlAcceso().getCertificate();     
+            X509Certificate serverCert = ContextoPruebas.INSTANCE.
+                    getControlAcceso().getCertificate();     
             MimeMessage mimeMessage = Encryptor.encryptSMIME(smimeDocument, serverCert);
             File document = File.createTempFile("EncryptedAccessRequest", "p7m");
             document.deleteOnExit();
             mimeMessage.writeTo(new FileOutputStream(document));
   
-            new DocumentSenderWorker(ENVIAR_DOCUMENTO_FIRMADO_WORKER, document, 
+            new DocumentSenderWorker(SEND_DOCUMENT_WORKER, document, 
                     Contexto.SIGNED_AND_ENCRYPTED_CONTENT_TYPE,
                     submitClaimsURL, this).execute();
         } catch (Exception ex) {
@@ -138,7 +134,7 @@ public class SignatureClaimLauncher implements Callable<Respuesta>,
         " - worker: " + worker.getClass().getSimpleName());
         respuesta = worker.getRespuesta();
         switch(worker.getId()) {
-            case ENVIAR_DOCUMENTO_FIRMADO_WORKER:
+            case SEND_DOCUMENT_WORKER:
                 if (Respuesta.SC_OK == worker.getStatusCode()) {
                     respuesta.setMensaje(nif);
                 }

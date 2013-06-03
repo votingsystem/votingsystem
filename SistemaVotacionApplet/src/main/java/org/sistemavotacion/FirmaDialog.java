@@ -1,6 +1,5 @@
 package org.sistemavotacion;
 
-import static org.sistemavotacion.Contexto.getString;
 import java.awt.Desktop;
 import java.awt.Frame;
 import java.awt.event.WindowAdapter;
@@ -103,7 +102,7 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                 break;
             case REPRESENTATIVE_SELECTION:
                 if(operacion.getContenidoFirma().get("representativeName") != null) {
-                    messageLabel.setText(Contexto.getString("selectedRepresentativeMsg", 
+                    messageLabel.setText(Contexto.INSTANCE.getString("selectedRepresentativeMsg", 
                             operacion.getContenidoFirma().get("representativeName").toString()));
                     messageLabel.setVisible(true);
                 }
@@ -124,7 +123,8 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
     
     public void obtenerPDFFirma (String urlDocumento) {
         logger.debug("obtnerPDFFirma - urlDocumento: " + urlDocumento);
-        progressLabel.setText("<html>" + getString("obteniendoDocumento") +"</html>");
+        progressLabel.setText("<html>" + 
+                Contexto.INSTANCE.getString("obteniendoDocumento") +"</html>");
         mostrarPantallaEnvio(true);
         new InfoGetterWorker(INFO_GETTER_WORKER, urlDocumento, 
                 Contexto.PDF_CONTENT_TYPE, this).execute();
@@ -143,8 +143,9 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
         progressBarPanel.setVisible(visibility);
         enviarButton.setVisible(!visibility);
         confirmacionPanel.setVisible(!visibility);
-        if (mostrandoPantallaEnvio) cerrarButton.setText(getString("cancelar"));
-        else cerrarButton.setText(getString("cerrar"));
+        if (mostrandoPantallaEnvio) cerrarButton.setText(
+                Contexto.INSTANCE.getString("cancelar"));
+        else cerrarButton.setText(Contexto.INSTANCE.getString("cerrar"));
         pack();
     }
 
@@ -301,15 +302,14 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
 
     private void enviarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enviarButtonActionPerformed
         String password = null;
-        if (Contexto.getDNIePassword() == null) {
-            PasswordDialog dialogoPassword = new PasswordDialog (parentFrame, true);
-            dialogoPassword.setVisible(true);
-            password = dialogoPassword.getPassword();
-            if (password == null) return;
-        }
+        PasswordDialog dialogoPassword = new PasswordDialog (parentFrame, true);
+        dialogoPassword.setVisible(true);
+        password = dialogoPassword.getPassword();
+        if (password == null) return;
         final String finalPassword = password;
         mostrarPantallaEnvio(true);
-        progressLabel.setText("<html>" + getString("progressLabel")+ "</html>");
+        progressLabel.setText("<html>" + 
+                Contexto.INSTANCE.getString("progressLabel")+ "</html>");
         Runnable runnable = new Runnable() {
             public void run() {  
                 try {
@@ -326,7 +326,6 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                         case PUBLICACION_RECLAMACION_SMIME:
                         case CANCELAR_EVENTO:
                         case PUBLICACION_VOTACION_SMIME:
-                            //File documentoFirmado = new File(FileUtils.APPTEMPDIR + NOMBRE_ARCHIVO_FIRMADO);
                             documentSMIME = DNIeSignedMailGenerator.
                                     genMimeMessage(null, operacion.getNombreDestinatarioFirmaNormalizado(),
                                     operacion.getContenidoFirma().toString(),
@@ -355,11 +354,11 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                     mostrarPantallaEnvio(false);
                     String mensajeError = null;
                     if ("CKR_PIN_INCORRECT".equals(ex.getMessage())) {
-                        Contexto.setDNIePassword(null);
-                        mensajeError = getString("MENSAJE_ERROR_PASSWORD");
+                        mensajeError = Contexto.INSTANCE.getString("MENSAJE_ERROR_PASSWORD");
                     } else mensajeError = ex.getMessage();
                     MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                    errorDialog.setMessage(mensajeError, getString("errorLbl"));
+                    errorDialog.setMessage(mensajeError, 
+                            Contexto.INSTANCE.getString("errorLbl"));
                     return;
                 }    
             }
@@ -424,7 +423,8 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
             appletFirma.responderCliente(
                     Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
             MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-            errorDialog.setMessage(ex.getMessage(), getString("errorLbl"));
+            errorDialog.setMessage(ex.getMessage(), 
+                    Contexto.INSTANCE.getString("errorLbl"));
         }
     }
     
@@ -450,7 +450,8 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
             appletFirma.responderCliente(
                     Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
             MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-            errorDialog.setMessage(ex.getMessage(), getString("errorLbl"));
+            errorDialog.setMessage(ex.getMessage(), 
+                    Contexto.INSTANCE.getString("errorLbl"));
         }
     }
     
@@ -472,7 +473,8 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                 } else {
                     mostrarPantallaEnvio(false);
                     MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                    errorDialog.setMessage(worker.getMessage(), getString("errorLbl"));
+                    errorDialog.setMessage(worker.getMessage(),
+                            Contexto.INSTANCE.getString("errorLbl"));
                 }
                 break;
             case INFO_GETTER_WORKER:
@@ -484,7 +486,8 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                 } else {
                     dispose();
                     appletFirma.responderCliente(worker.getStatusCode(), 
-                            getString("errorDescragandoDocumento") + " - " + worker.getMessage());
+                            Contexto.INSTANCE.getString(
+                            "errorDescragandoDocumento") + " - " + worker.getMessage());
                 }
                 break;
             case ENVIAR_DOCUMENTO_FIRMADO_WORKER:
@@ -526,12 +529,14 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                         logger.error(ex.getMessage(), ex);
                         mostrarPantallaEnvio(false);
                         MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                        errorDialog.setMessage(ex.getMessage(), getString("errorLbl"));
+                        errorDialog.setMessage(ex.getMessage(), 
+                                Contexto.INSTANCE.getString("errorLbl"));
                     }
                 } else {
                     mostrarPantallaEnvio(false);
                     MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                    errorDialog.setMessage(worker.getMessage(), getString("errorLbl"));
+                    errorDialog.setMessage(worker.getMessage(), 
+                            Contexto.INSTANCE.getString("errorLbl"));
                 }
                 break;
             default:

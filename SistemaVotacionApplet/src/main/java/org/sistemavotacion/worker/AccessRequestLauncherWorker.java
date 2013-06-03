@@ -93,7 +93,7 @@ public class AccessRequestLauncherWorker extends SwingWorker<Respuesta, String>
         mapToSend.put(csrFileName, csrEncryptedFile);
         mapToSend.put(accessRequestFileName, accessrequestEncryptedFile);
         
-        respuesta = Contexto.getHttpHelper().sendObjectMap(
+        respuesta = Contexto.INSTANCE.getHttpHelper().sendObjectMap(
                 mapToSend, evento.getUrlSolicitudAcceso());
         if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
             byte[] encryptedData = respuesta.getBytesArchivo();

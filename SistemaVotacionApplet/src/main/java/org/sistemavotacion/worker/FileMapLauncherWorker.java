@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Map;
 import javax.swing.SwingWorker;
 import org.sistemavotacion.Contexto;
-import static org.sistemavotacion.Contexto.getString;
 import org.sistemavotacion.modelo.Respuesta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,9 +44,10 @@ public class FileMapLauncherWorker extends SwingWorker<Respuesta, String>
     
     @Override protected Respuesta doInBackground() throws Exception {
         logger.debug("doInBackground - serverURL: " + serverURL);
-        String msg = "<html><b>" + getString("connectionMsg") + "...</b></html>";
+        String msg = "<html><b>" + Contexto.INSTANCE.getString(
+                "connectionMsg") + "...</b></html>";
         workerListener.process(Arrays.asList(msg));
-        return Contexto.getHttpHelper().sendObjectMap(fileMap, serverURL);
+        return Contexto.INSTANCE.getHttpHelper().sendObjectMap(fileMap, serverURL);
     }
 
     public byte[] getMessageBytes() {

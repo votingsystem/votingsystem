@@ -39,15 +39,15 @@ public class Formateadora {
         if (actorConIP == null) return null;
         StringBuilder result = new StringBuilder("<html>");
         if(actorConIP.getTipo() != null)
-            result.append("<b>Tipo de servidor: </b>").append(actorConIP.getTipo().getMensaje());
+            result.append("<b>Tipo de servidor: </b>").append(actorConIP.getTipo().toString());
         result.append("<br/><b>Nombre: </b>").append(actorConIP.getNombre());
         if(actorConIP.getEstado() != null) {
             result.append("<br/><b>Estado: </b>" 
-                    + actorConIP.getEstado().getMensaje());
+                    + actorConIP.getEstado().toString());
         }
         if(actorConIP.getEnvironmentMode() != null) {
             result.append("<br/><b>Entorno de ejecución: </b>" 
-                    + actorConIP.getEnvironmentMode().getMensaje());
+                    + actorConIP.getEnvironmentMode().toString());
         }
         result.append("<br/><b><a href=\"" + 
             actorConIP.getServerURL() +"\">URL del servidor</a></b>");
@@ -96,7 +96,7 @@ public class Formateadora {
             }
         }
         if(evento.getEventoId() != null) {
-            String urlConvocatoriaEnControlAcceso = ContextoPruebas.
+            String urlConvocatoriaEnControlAcceso = ContextoPruebas.INSTANCE.
                     getVotingEventURL(evento.getEventoId());
             String urlConvocatoriaEnCentroControl = ContextoPruebas.getVotingEventURL(
                     evento.getCentroControl().getServerURL(), evento.getEventoId());

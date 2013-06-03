@@ -1,7 +1,9 @@
 package org.sistemavotacion.modelo;
 
+import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -11,6 +13,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
+import org.apache.http.util.EntityUtils;
 import org.sistemavotacion.seguridad.CertUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,38 +26,11 @@ public class ActorConIP {
         
     private static Logger logger = LoggerFactory.getLogger(ActorConIP.class);
     
-    public enum Tipo {CENTRO_CONTROL("Centro de Control"), CONTROL_ACCESO("Control de Acceso");
-        private String mensaje;
-
-        Tipo(String mensaje) {
-            this.mensaje = mensaje;
-        }
-        public String getMensaje() {
-            return this.mensaje;
-        }
-    }
+    public enum Tipo {CENTRO_CONTROL, CONTROL_ACCESO;}
 	
-    public enum EnvironmentMode {DEVELOPMENT("Desarrollo"), TEST("Pruebas"), 
-        PRODUCTION("Producción");
-        private String mensaje;
-        EnvironmentMode(String mensaje) {
-            this.mensaje = mensaje;
-        }
-        public String getMensaje() {
-            return this.mensaje;
-        }
-    }
+    public enum EnvironmentMode {DEVELOPMENT, TEST, PRODUCTION; }
 	
-    public enum Estado {
-        SUSPENDIDO ("Suspendido"), ACTIVO("Activo"), INACTIVO("Inactivo");
-        private String mensaje;
-        Estado(String mensaje) {
-            this.mensaje = mensaje;
-        }
-        public String getMensaje() {
-            return this.mensaje;
-        }
-    }       
+    public enum Estado { SUSPENDIDO, ACTIVO, INACTIVO;}       
     
     private Long id;
     private String serverURL;
@@ -67,6 +43,7 @@ public class ActorConIP {
     private Set<ActorConIP> centrosDeControl;
     private X509Certificate certificate = null;
     private X509Certificate timeStampCert = null;
+    private Set<TrustAnchor> trustAnchors = null;
 
     /**
      * @return the id
@@ -148,6 +125,13 @@ public class ActorConIP {
     public void setCadenaCertificacionPEM(String cadenaCertificacionPEM) throws Exception {
         certificate = CertUtil.fromPEMToX509CertCollection(
                     cadenaCertificacionPEM.getBytes()).iterator().next();
+        Collection<X509Certificate> certificates = CertUtil.
+                fromPEMToX509CertCollection(cadenaCertificacionPEM.getBytes());
+        trustAnchors = new HashSet<TrustAnchor>();
+        for (X509Certificate cert:certificates) {
+            TrustAnchor anchorCertificado = new TrustAnchor(cert, null);
+            trustAnchors.add(anchorCertificado);
+        }
     }
      
     public void setTimeStampCertPEM(String timeStampPEM) throws Exception {
@@ -301,4 +285,12 @@ public class ActorConIP {
         }
         return actorConIP;
     }
+
+    /**
+     * @return the trustAnchors
+     */
+    public Set<TrustAnchor> getTrustAnchors() {
+        return trustAnchors;
+    }
+
 }

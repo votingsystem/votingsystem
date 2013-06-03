@@ -1,6 +1,5 @@
 package org.sistemavotacion.test.simulation.launcher;
 
-import java.io.File;
 import java.security.KeyStore;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +16,6 @@ import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.test.KeyStoreHelper;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.util.StringUtils;
 import org.sistemavotacion.worker.TimeStampWorker;
@@ -61,28 +59,24 @@ public class TimeStampLauncher implements Callable<Respuesta>,
         
     @Override
     public Respuesta call() throws Exception {
-        //File file = new File(ContextoPruebas.getUserKeyStorePath(requestNIF));
-        File file = File.createTempFile("TimeStampTestKeyStore" + requestNIF, ".jks");
-        file.deleteOnExit();
-        KeyStore mockDnie = KeyStoreHelper.crearMockDNIe(requestNIF, file,
-                ContextoPruebas.getPrivateCredentialRaizAutoridad());
-        logger.info("requestNIF: " + requestNIF + " - Dirs: " + file.getAbsolutePath());
+        KeyStore mockDnie = ContextoPruebas.INSTANCE.crearMockDNIe(requestNIF);
 
-        ActorConIP controlAcceso = ContextoPruebas.getControlAcceso();
+        ActorConIP controlAcceso = ContextoPruebas.INSTANCE.getControlAcceso();
         String toUser = StringUtils.getCadenaNormalizada(controlAcceso.getNombre());
         
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, 
-                ContextoPruebas.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
+                ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS, 
+                ContextoPruebas.PASSWORD.toCharArray(),
                 ContextoPruebas.DNIe_SIGN_MECHANISM);
         
-        String subject = ContextoPruebas.getString("timeStampMsgSubject");
+        String subject = ContextoPruebas.INSTANCE.getString("timeStampMsgSubject");
         
         documentSMIME = signedMailGenerator.genMimeMessage(
                 requestNIF, toUser, getRequestDataJSON(), subject , null);
 
         new TimeStampWorker(TIME_STAMP_WORKER, urlTimeStampServer, this, 
                 documentSMIME.getTimeStampRequest(),
-                ContextoPruebas.getControlAcceso().getTimeStampCert()).execute();
+                ContextoPruebas.INSTANCE.getControlAcceso().getTimeStampCert()).execute();
         
         countDownLatch.await();
         return getResult();

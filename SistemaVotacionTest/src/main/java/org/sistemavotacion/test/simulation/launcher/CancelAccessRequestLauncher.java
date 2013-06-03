@@ -41,30 +41,31 @@ public class CancelAccessRequestLauncher  implements Callable<Respuesta> {
                 file, ContextoPruebas.PASSWORD.toCharArray());
         logger.info("nif: " + nif);
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, 
-                ContextoPruebas.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
+                ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS, 
+                ContextoPruebas.PASSWORD.toCharArray(),
                 ContextoPruebas.VOTE_SIGN_MECHANISM);
-        String subject = ContextoPruebas.getString("cancelAccessRequestMsgSubject") 
-                + request.getEventoId();
+        String subject = ContextoPruebas.INSTANCE.getString(
+                "cancelAccessRequestMsgSubject") + request.getEventoId();
                         ;
         File anulador = new File(ContextoPruebas.getUserDirPath(nif) + 
                 ContextoPruebas.ANULACION_FIRMADA_FILE + request.getEventoId() + 
-                "_usu" + nif + ".p7m");;
+                "_usu" + nif + ".p7m");
         synchronized(this) {
             MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(
-                nif,  ContextoPruebas.getControlAcceso().getNombreNormalizado(), 
+                nif,  ContextoPruebas.INSTANCE.getControlAcceso().getNombreNormalizado(), 
                 request.toJSON().toString(),
                 subject, null);
             mimeMessage.writeTo(new FileOutputStream(anulador));
         }
-        respuesta = Contexto.getHttpHelper().sendFile(anulador, 
-                Contexto.SIGNED_CONTENT_TYPE, ContextoPruebas.getURLAnulacionVoto(
-                ContextoPruebas.getControlAcceso().getServerURL()));
+        respuesta = Contexto.INSTANCE.getHttpHelper().sendFile(anulador, 
+                Contexto.SIGNED_CONTENT_TYPE, 
+                ContextoPruebas.INSTANCE.getURLAnulacionVoto());
         if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {                    
             SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(null,
                     new ByteArrayInputStream(respuesta.getMensaje().getBytes()),
                     "ReciboAnulacionVoto");
             respuesta = new Respuesta(respuesta.getCodigoEstado(), 
-                    dnieMimeMessage, ContextoPruebas.INSTANCIA.getSessionPKIXParameters());
+                    dnieMimeMessage, ContextoPruebas.INSTANCE.getSessionPKIXParameters());
         }
         respuesta.setData(request);
         return respuesta;

@@ -573,7 +573,7 @@ public class CMSUtils {
 
 
    public static String obtenerInfoCertificado (X509Certificate certificado) {
-        return Contexto.getString("certInfoFormattedMsg", 
+        return Contexto.INSTANCE.getString("certInfoFormattedMsg", 
                 certificado.getSubjectDN().toString(), 
                 certificado.getIssuerDN().toString(),
                 certificado.getSerialNumber().toString(), 

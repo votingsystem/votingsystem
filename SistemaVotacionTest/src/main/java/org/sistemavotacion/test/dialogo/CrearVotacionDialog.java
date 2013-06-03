@@ -383,18 +383,19 @@ public class CrearVotacionDialog extends JDialog implements
             evento.setOpciones(opcionesPanel.obtenerOpciones());
             String[] etiquetas = etiquetasTextField.getText().split(",");
             evento.setEtiquetas(etiquetas);
-            evento.setCentroControl(ContextoPruebas.getCentroControl());
+            evento.setCentroControl(ContextoPruebas.INSTANCE.getCentroControl());
             signedMailGenerator = new SignedMailGenerator(
-                ContextoPruebas.getUsuarioPruebas().getKeyStore(),
-                ContextoPruebas.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
+                ContextoPruebas.INSTANCE.getUserTest().getKeyStore(),
+                ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS, 
+                ContextoPruebas.DEFAULTS.PASSWORD.toCharArray(),
                 ContextoPruebas.VOTE_SIGN_MECHANISM);
             File eventToPublish = new File(FileUtils.APPTEMPDIR 
                 + "SolicitudPublicacionConvocatoria");
             logger.debug("publishing event: " + eventToPublish.getAbsolutePath());
             String eventoParaPublicar = evento.toJSON().toString();
             MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(
-                    ContextoPruebas.getUsuarioPruebas().getEmail(), 
-                    ContextoPruebas.getControlAcceso().getNombreNormalizado(), 
+                    ContextoPruebas.INSTANCE.getUserTest().getEmail(), 
+                    ContextoPruebas.INSTANCE.getControlAcceso().getNombreNormalizado(), 
                     eventoParaPublicar, "Solicitud Publicación convocatoria",
                     null);
             mimeMessage.writeTo(new FileOutputStream(eventToPublish));
@@ -402,7 +403,7 @@ public class CrearVotacionDialog extends JDialog implements
                     PUBLISH_DOCUMENT_WORKER, eventToPublish, 
                     Contexto.SIGNED_CONTENT_TYPE,
                     ContextoPruebas.getURLGuardarEventoParaVotar(
-                    ContextoPruebas.getControlAcceso().getServerURL()), this);
+                    ContextoPruebas.INSTANCE.getControlAcceso().getServerURL()), this);
             tareaEnEjecucion.execute();
             mostrarPantallaEnvio(true);
         } catch (Exception ex) {
@@ -603,13 +604,14 @@ public class CrearVotacionDialog extends JDialog implements
                                 new ByteArrayInputStream(responseBytes), 
                                 "VotingPublishReceipt");
                         dnieMimeMessage.verify(
-                                ContextoPruebas.INSTANCIA.getSessionPKIXParameters());
+                                ContextoPruebas.INSTANCE.getSessionPKIXParameters());
                         logger.debug("--- dnieMimeMessage.getSignedContent(): " + dnieMimeMessage.getSignedContent());
                         evento = Evento.parse(dnieMimeMessage.getSignedContent());
                         logger.debug("Respuesta - Evento ID: " + evento.getEventoId());
 
                         MainFrame.INSTANCIA.cargarCentroControl(
-                                ContextoPruebas.getCentroControl().getServerURL());
+                                ContextoPruebas.INSTANCE.getCentroControl().
+                                getServerURL());
                         VotacionesPanel.INSTANCIA.cargarEvento(evento);
                         dispose();
                     } catch (Exception ex) {

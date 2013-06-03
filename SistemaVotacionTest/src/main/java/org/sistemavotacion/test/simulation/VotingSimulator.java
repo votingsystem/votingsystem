@@ -8,14 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.*;
-import javax.swing.Timer;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.ReciboVoto;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.modelo.VotingSimulationData;
-import org.sistemavotacion.test.modelo.UserBaseData;
+import org.sistemavotacion.test.modelo.UserBaseSimulationData;
 import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,20 +23,18 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class VotingSimulator implements ActionListener, 
-        Simulator<VotingSimulationData> {
+public class VotingSimulator extends  Simulator<VotingSimulationData> 
+        implements ActionListener {
     
     private static Logger logger = LoggerFactory.getLogger(VotingSimulator.class);
     
     private static ExecutorService votacionExecutor;
-    
     private static ExecutorService votosExecutor;
     private static CompletionService<Respuesta> votosCompletionService;
 
-    private Timer timer;
     private static List<String> accessRequestErrorsList;
     private static List<String> voteErrorsList;    
-    private UserBaseData userBaseData = null;
+    private UserBaseSimulationData userBaseData = null;
     private VotingSimulationData simulationData = null;
     private Evento evento;
     
@@ -47,18 +44,16 @@ public class VotingSimulator implements ActionListener,
     
     public VotingSimulator(VotingSimulationData simulationData, 
             SimulatorListener simulationListener) {
+        super(simulationData);
         this.evento = simulationData.getEvento();
         this.userBaseData = simulationData.getUserBaseData();
         this.simulationListener = simulationListener;
-        votacionExecutor = Executors.newFixedThreadPool(10);
-        votosExecutor = Executors.newFixedThreadPool(100);
-        votosCompletionService = new ExecutorCompletionService<Respuesta>(votosExecutor);
         electorList = getElectorList(userBaseData);
         simulationData.setNumberOfElectors(electorList.size());
         this.simulationData = simulationData;
     }
     
-    private List<String> getElectorList(UserBaseData userBaseData) {
+    private List<String> getElectorList(UserBaseSimulationData userBaseData) {
         int totalNumberElectors = userBaseData.getNumberElectors();
         List<String> result = new ArrayList<String>(totalNumberElectors);
         
@@ -98,13 +93,15 @@ public class VotingSimulator implements ActionListener,
         return result;
     }
     
-    public void init() {
+    @Override public void init() {
         logger.debug("lanzarVotacion - total number of electors: " +  
                 simulationData.getNumberOfElectors());
+        votacionExecutor = Executors.newFixedThreadPool(5);
+        votosExecutor = Executors.newFixedThreadPool(100);
+        votosCompletionService = new ExecutorCompletionService<Respuesta>(votosExecutor);
         simulationData.setBegin(System.currentTimeMillis());
         votacionExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
+            @Override public void run() {
                 try {
                     beginElection();                    
                 } catch (Exception ex) {
@@ -113,8 +110,7 @@ public class VotingSimulator implements ActionListener,
             }
         });
         votacionExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
+            @Override public void run() {
                 try {
                     validateReceipts();
                 } catch (Exception ex) {
@@ -126,16 +122,8 @@ public class VotingSimulator implements ActionListener,
     
     public void beginElection () throws Exception {
         logger.debug(" ******* beginElection");
-        if(userBaseData.isTimerBased()) {
-            Long milisegundosHoras = 1000 * 60 * 60 * new Long(userBaseData.getHorasDuracionVotacion());
-            Long milisegundosMinutos = 1000 * 60 * new Long(userBaseData.getMinutosDuracionVotacion()); 
-            Long totalMilisegundosSimulacion = milisegundosHoras + milisegundosMinutos;
-            Long intervaloLanzamiento = totalMilisegundosSimulacion/
-                    simulationData.getNumberOfElectors();
-            timer = new Timer(intervaloLanzamiento.intValue(), this);
-            timer.setRepeats(true);
-            timer.start();
-        } else {
+        if(userBaseData.isTimerBased()) startTimer(this);
+        else {
             while(!electorList.isEmpty()) {
                 if((simulationData.getNumVotingRequests() - 
                         simulationData.getNumVotingRequestsColected()) < 
@@ -227,21 +215,16 @@ public class VotingSimulator implements ActionListener,
                 logger.info("Vote errors: \n" + 
                         getFormattedErrorList(voteErrorsList));
              }            
-            logger.debug("------------------- FINISHED ----------------------");
-            System.exit(0);
+            String errorsMsg = getFormattedErrorList();
+            if(errorsMsg != null) {
+                logger.info(" ************* " + getErrorsList().size() + " ERRORS: \n" + 
+                            errorsMsg);
+            }
+            logger.debug("------------------- FINISHED --------------------------");
+            if(simulationListener == null) System.exit(0);
+            else simulationListener.setSimulationResult(this);
         }
         return simulationData;
-    }
-    
-    private String getFormattedErrorList(List<String> errorsList) {
-        if(errorsList == null || errorsList.isEmpty()) return null;
-        else {
-            StringBuilder result = new StringBuilder("");
-            for(String error:errorsList) {
-                result.append(error + "\n");
-            }
-            return result.toString();
-        }
     }
         
     @Override

@@ -7,15 +7,12 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.X509Certificate;
-
 import javax.security.auth.x500.X500PrivateCredential;
-
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
-
 import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
@@ -30,15 +27,11 @@ public class CertGenerator {
 
 
     public static long COMIEZO_VALIDEZ_CERT = System.currentTimeMillis();//
-    public static final int PERIODO_VALIDEZ_ALMACEN_RAIZ = 2000000000;//En producción durará lo que dure una votación
-     public static final int PERIODO_VALIDEZ_CERT = 2000000000;
+    public static final long PERIODO_VALIDEZ_ALMACEN_RAIZ = 20000000000L;//En producción durará lo que dure una votación
+    public static final long PERIODO_VALIDEZ_CERT = 20000000000L;
 
-    private File rootCertFile;
-    private String rootSubjectDN;
     private String password;
-
-
-    X500PrivateCredential rootPrivateCredential;
+    private X500PrivateCredential rootPrivateCredential;
 
     public static void main(String[] args) throws Exception{
         if(args == null) return;
@@ -48,8 +41,6 @@ public class CertGenerator {
     public CertGenerator(File rootCertFile, String rootSubjectDN, 
                     String password) throws Exception {
     Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-        this.rootCertFile = rootCertFile;
-        this.rootSubjectDN = rootSubjectDN;
         this.password = password;
         KeyStore rootKeyStore = KeyStoreUtil.createRootKeyStore(COMIEZO_VALIDEZ_CERT,
                         PERIODO_VALIDEZ_ALMACEN_RAIZ, password.toCharArray(), 
@@ -60,11 +51,10 @@ public class CertGenerator {
         rootPrivateCredential =	new X500PrivateCredential(rootCertificate, rootPK, ROOT_ALIAS);
     }
 
-    public void genUserKeyStore(
-        String subjectDN, File file, String alias) throws Exception {
+    public void genUserKeyStore(String subjectDN, File file, String alias) throws Exception {
         logger.debug("--- genUserKeyStore - subjectDN: " + subjectDN + 
                         " - file: " + file.getAbsolutePath() + " - alias: " + alias);
-        KeyStore keyStore = KeyStoreUtil.createActorKeyStore(COMIEZO_VALIDEZ_CERT,
+        KeyStore keyStore = KeyStoreUtil.createUserKeyStore(COMIEZO_VALIDEZ_CERT,
                         PERIODO_VALIDEZ_CERT, password.toCharArray(),
                         alias, rootPrivateCredential, subjectDN);
         byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, password.toCharArray());

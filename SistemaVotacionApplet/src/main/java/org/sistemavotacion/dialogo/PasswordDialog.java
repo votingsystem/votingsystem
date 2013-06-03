@@ -1,9 +1,6 @@
 package org.sistemavotacion.dialogo;
 
-import static org.sistemavotacion.Contexto.*;
-
 import java.awt.Frame;
-import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.text.html.parser.ParserDelegator;
@@ -67,7 +64,7 @@ public class PasswordDialog extends javax.swing.JDialog {
         ParserDelegator workaround = new ParserDelegator();
 
         password = null;
-        setTitle(getString("passwordDialogCaption"));
+        setTitle(Contexto.INSTANCE.getString("passwordDialogCaption"));
         /*boolean check = false;
         try {//NOT SUPPORTED IN APPLET
             check = Toolkit.getDefaultToolkit().
@@ -77,7 +74,7 @@ public class PasswordDialog extends javax.swing.JDialog {
         }
         if(check) changeCapsLockState();
         else messageLabel.setText(getString("recomendacionDNIE")); */
-        messageLabel.setText(getString("recomendacionDNIE"));
+        messageLabel.setText(Contexto.INSTANCE.getString("recomendacionDNIE"));
         this.pack();
     }
     
@@ -90,15 +87,18 @@ public class PasswordDialog extends javax.swing.JDialog {
         if (mensaje == null) {
             if(isCapsLockPressed) {
                 messageLabel.setText("<html><b>" + 
-                        Contexto.getString("capsLockKeyPressed") + "</b><br/><br/>" + 
-                        getString("recomendacionDNIE") + "</html>");
+                        Contexto.INSTANCE.getString(
+                        "capsLockKeyPressed") + "</b><br/><br/>" + 
+                        Contexto.INSTANCE.getString(
+                        "recomendacionDNIE") + "</html>");
             } else {
-                messageLabel.setText(getString("recomendacionDNIE"));
+                messageLabel.setText(Contexto.INSTANCE.
+                        getString("recomendacionDNIE"));
             }
         } else {
             if(isCapsLockPressed) {
                 messageLabel.setText("<html><b>" + 
-                        Contexto.getString("capsLockKeyPressed") + "</b><br/>" + 
+                        Contexto.INSTANCE.getString("capsLockKeyPressed") + "</b><br/>" + 
                         mensaje + "</html>");
             }  else messageLabel.setText(mensaje);
         }
@@ -223,21 +223,18 @@ public class PasswordDialog extends javax.swing.JDialog {
         String password1 = new String(password1Field.getPassword());
         String password2 = new String(password2Field.getPassword());
         if("".equals(password1) && "".equals(password1)) {
-            messageLabel.setText(
-                    getString("passwordMissing"));
+            messageLabel.setText(Contexto.INSTANCE.getString("passwordMissing"));
             validationPanel.setVisible(true);
             pack();
             return;
         }
-        messageLabel.setText(
-                getString("recomendacionDNIE"));
+        messageLabel.setText(Contexto.INSTANCE.getString("recomendacionDNIE"));
         pack();
         if (password1.equals(password2)) {
             password = password1;
             this.dispose();
         } else {
-            messageLabel.setText(
-                    getString("passwordError"));
+            messageLabel.setText(Contexto.INSTANCE.getString("passwordError"));
             validationPanel.setVisible(true);
             pack();
             password1Field.setText("");

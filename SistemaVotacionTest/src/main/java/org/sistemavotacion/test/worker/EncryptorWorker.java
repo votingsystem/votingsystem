@@ -53,7 +53,7 @@ public class EncryptorWorker extends SwingWorker<Respuesta, String>
         this.urlRequest = urlRequest;
         this.workerListener = workerListener;
         this.serverCert = serverCert;
-        KeyPair keyPair = VotingSystemKeyGenerator.getInstancia().genKeyPair();
+        KeyPair keyPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
         this.privateKey = keyPair.getPrivate();
         this.publicKey = keyPair.getPublic();
     }
@@ -64,7 +64,7 @@ public class EncryptorWorker extends SwingWorker<Respuesta, String>
         String testJSONstr = getTestJSON(from, publicKey);
         Encryptor.encryptMessage(testJSONstr.getBytes(), encryptedFile, serverCert);
         
-        respuesta = Contexto.getHttpHelper().sendFile(encryptedFile, 
+        respuesta = Contexto.INSTANCE.getHttpHelper().sendFile(encryptedFile, 
                 Contexto.ENCRYPTED_CONTENT_TYPE, urlRequest);
 
         if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {

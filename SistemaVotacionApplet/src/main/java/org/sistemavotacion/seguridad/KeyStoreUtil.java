@@ -4,11 +4,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.security.KeyPair;
 import java.security.KeyStore;
-import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import javax.security.auth.x500.X500PrivateCredential;
+import org.sistemavotacion.util.VotingSystemKeyGenerator;
 
 /**
 * @author jgzornoza
@@ -16,19 +17,22 @@ import javax.security.auth.x500.X500PrivateCredential;
 */
 public class KeyStoreUtil {
     
-    public static KeyStore getKeyStoreFromFile(String filePath, char[] password) throws Exception {
+    public static KeyStore getKeyStoreFromFile(String filePath, 
+            char[] password) throws Exception {
         KeyStore store = KeyStore.getInstance("JKS");
         store.load(new FileInputStream(filePath), password);
         return store;
     }
     
-    public static KeyStore getKeyStoreFromFile(File file, char[] password) throws Exception {
+    public static KeyStore getKeyStoreFromFile(File file, 
+            char[] password) throws Exception {
         KeyStore store = KeyStore.getInstance("JKS");
         store.load(new FileInputStream(file), password);
         return store;
     }
     
-    public static KeyStore getKeyStoreFromBytes(byte[] keyStore, char[] password) throws Exception {
+    public static KeyStore getKeyStoreFromBytes(byte[] keyStore, 
+            char[] password) throws Exception {
         KeyStore store = KeyStore.getInstance("JKS");
         store.load(new ByteArrayInputStream(keyStore), password);
         return store;
@@ -41,36 +45,18 @@ public class KeyStoreUtil {
     }
 
     /**
-     * Crea un almacén de claves que contiene la credencial privada con la cadena de certificados.
-     * Crea certificado raíz.
+     * Create root KeyStore
      */
-    public static KeyStore createKeyStore(long comienzo, int periodoValidez, 
-    		char[] password, String rootAlias, String endEntityAlias, String principal, 
-                String endEntitySubjectDN) throws Exception {
+    public static KeyStore createRootKeyStore(long begin, long period, 
+            char[] password, String rootAlias, String strSubjectDN) throws Exception {
         KeyStore store = KeyStore.getInstance("JKS");
         store.load(null, null);
-        X500PrivateCredential rootCredential = KeyUtil.createRootCredential(
-        		comienzo, periodoValidez, rootAlias, principal);
-        X500PrivateCredential endCredential = KeyUtil.createEndEntityCredential(
-        		rootCredential.getPrivateKey(), rootCredential.getCertificate(), 
-        		comienzo, periodoValidez, endEntityAlias, endEntitySubjectDN);
-        store.setCertificateEntry(
-        		rootCredential.getAlias(), rootCredential.getCertificate());
-        store.setKeyEntry(endCredential.getAlias(), endCredential.getPrivateKey(), password, 
-                new Certificate[] { 
-        		endCredential.getCertificate(), rootCredential.getCertificate()});
-        return store;
-    }
-    
-    /**
-     * Crea un almacén de claves para la Autoridad Certificadora
-     */
-    public static KeyStore createRootKeyStore(long comienzo, int periodoValidez, 
-    		char[] password, String rootAlias, String strSubjectDN) throws Exception {
-        KeyStore store = KeyStore.getInstance("JKS");
-        store.load(null, null);
-        X500PrivateCredential rootCredential = KeyUtil.createRootCredential(
-        		comienzo, periodoValidez, rootAlias, strSubjectDN);
+        KeyPair rootPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
+        X509Certificate rootCert = CertUtil.generateV3RootCert(
+                rootPair, begin, period, strSubjectDN);
+
+        X500PrivateCredential rootCredential = new X500PrivateCredential(
+                rootCert, rootPair.getPrivate(), rootAlias);
         store.setCertificateEntry(
         		rootCredential.getAlias(), rootCredential.getCertificate());
         store.setKeyEntry(rootCredential.getAlias(), rootCredential.getPrivateKey(), password, 
@@ -78,17 +64,21 @@ public class KeyStoreUtil {
         return store;
     } 
     
+    
     /**
-     * Crea un almacén de claves para un Actor
+     * Create user KeyStore
      */
-    public static KeyStore createActorKeyStore(long comienzo, int periodoValidez, char[] password, 
-    		String endEntityAlias, X500PrivateCredential rootCredential, 
-                String endEntitySubjectDN) throws Exception {
+    public static KeyStore createUserKeyStore(long begin, long period, char[] password, 
+            String endEntityAlias, X500PrivateCredential rootCredential, 
+            String endEntitySubjectDN) throws Exception {
         KeyStore store = KeyStore.getInstance("JKS");
         store.load(null, null);
-        X500PrivateCredential endCredential = KeyUtil.createEndEntityCredential(
-        		rootCredential.getPrivateKey(), rootCredential.getCertificate(), 
-        		comienzo, periodoValidez, endEntityAlias, endEntitySubjectDN);
+        KeyPair endPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
+        X509Certificate endCert = CertUtil.generateEndEntityCert(endPair.getPublic(), 
+                rootCredential.getPrivateKey(), rootCredential.getCertificate(), 
+                begin, period, endEntitySubjectDN);
+        X500PrivateCredential endCredential = new X500PrivateCredential(
+                endCert, endPair.getPrivate(), endEntityAlias);
         store.setCertificateEntry(rootCredential.getAlias(), rootCredential.getCertificate());
         store.setKeyEntry(endCredential.getAlias(), endCredential.getPrivateKey(), password, 
                 new Certificate[] { 
@@ -96,18 +86,21 @@ public class KeyStoreUtil {
         return store;
     }
     
+    
     /**
-     * Crea un almacén de claves para un emisora de sellos de tiempo
+     * Create user TimeStampingKeyStore
      */
-    public static KeyStore createTimeStampingKeyStore(
-            long comienzo, int periodoValidez, char[] password, 
-            String endEntityAlias, X500PrivateCredential rootCredential, 
+    public static KeyStore createTimeStampingKeyStore(long begin, long period, 
+            char[] password,  String endEntityAlias, X500PrivateCredential rootCredential, 
             String endEntitySubjectDN) throws Exception {
         KeyStore store = KeyStore.getInstance("JKS");
         store.load(null, null);
-        X500PrivateCredential endCredential = KeyUtil.createTimeStampingCredential(
-        		rootCredential.getPrivateKey(), rootCredential.getCertificate(), 
-        		comienzo, periodoValidez, endEntityAlias, endEntitySubjectDN);
+        KeyPair endPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
+        X509Certificate endCert = CertUtil.generateTimeStampingCert(endPair.getPublic(), 
+                    rootCredential.getPrivateKey(), rootCredential.getCertificate(), 
+                    begin, period, endEntitySubjectDN);
+        X500PrivateCredential endCredential = new X500PrivateCredential(
+                endCert, endPair.getPrivate(), endEntityAlias);
         store.setCertificateEntry(rootCredential.getAlias(), rootCredential.getCertificate());
         store.setKeyEntry(endCredential.getAlias(), endCredential.getPrivateKey(), password, 
                 new Certificate[] { 

@@ -225,7 +225,7 @@ public class HttpHelper {
         } catch(HttpHostConnectException ex){
             logger.error(ex.getMessage(), ex);
             respuesta = new Respuesta(Respuesta.SC_ERROR_EJECUCION,
-                    Contexto.getString("hostConnectionErrorMsg"));
+                    Contexto.INSTANCE.getString("hostConnectionErrorMsg"));
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
             respuesta = new Respuesta(Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
@@ -240,7 +240,7 @@ public class HttpHelper {
         Respuesta respuesta = null;
         try {
             if(fileMap == null || fileMap.isEmpty()) throw new Exception(
-                Contexto.getString("requestWithoutFileMapErrorMsg"));
+                Contexto.INSTANCE.getString("requestWithoutFileMapErrorMsg"));
             HttpPost httpPost = new HttpPost(serverURL);
             Set<String> fileNames = fileMap.keySet();
             MultipartEntity reqEntity = new MultipartEntity();

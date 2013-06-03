@@ -3,8 +3,6 @@ package org.sistemavotacion.test.simulation;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,12 +11,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-import javax.mail.internet.MimeMessage;
-import net.sf.json.JSON;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONNull;
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Evento;
@@ -29,7 +21,7 @@ import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.modelo.VotingSimulationData;
-import org.sistemavotacion.test.modelo.UserBaseData;
+import org.sistemavotacion.test.modelo.UserBaseSimulationData;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.StringUtils;
 import org.sistemavotacion.worker.DocumentSenderWorker;
@@ -49,67 +41,59 @@ import org.slf4j.LoggerFactory;
 * 4)- Initialice user base data
 * 5)- When finishes user base data initilization, 'setSimulationResult' inits simulation 
 */
-public class VotingProcessSimulator implements VotingSystemWorkerListener, 
-        SimulatorListener {
+public class VotingProcessSimulator extends  Simulator<VotingSimulationData>  
+        implements VotingSystemWorkerListener, SimulatorListener {
     
     private static Logger logger = LoggerFactory.getLogger(VotingProcessSimulator.class);
 
     public enum Simulation {VOTING, ACCESS_REQUEST}
     
-    private static final int ACCESS_CONTROL_GETTER_WORKER          = 0;
-    private static final int CONTROL_CENTER_GETTER_WORKER          = 1;
-    private static final int CA_CERT_INITIALIZER                   = 2;
-    private static final int TIME_STAMP_PUBLISH_WORKER             = 3;
-    private static final int PUBLISH_DOCUMENT_WORKER               = 4;
-    private static final int ASSOCIATE_CONTROL_CENTER_WORKER       = 5;
+    private static final int ACCESS_CONTROL_GETTER_WORKER                      = 0;
+    private static final int CONTROL_CENTER_GETTER_WORKER                      = 1;
+    private static final int CA_CERT_INITIALIZER                               = 2;
+    private static final int TIME_STAMP_ASSOCIATE_CONTROL_CENTER_GETTER_WORKER = 3;
+    private static final int TIME_STAMP_PUBLISH_WORKER                         = 4;
+    private static final int PUBLISH_DOCUMENT_WORKER                           = 5;
+    private static final int ASSOCIATE_CONTROL_CENTER_WORKER                   = 6;
 
     private static Simulation simulation = Simulation.VOTING;
     private Evento evento = null;
-    private UserBaseData userBaseData = null;
+    private UserBaseSimulationData userBaseData = null;
     private VotingSimulationData simulationData = null;
         
-    private SMIMEMessageWrapper signedPublishrequestSMIME;
+    private SMIMEMessageWrapper smimeDocument;
     
     private final CountDownLatch countDownLatch = new CountDownLatch(1); // just one time
     
-    public VotingProcessSimulator(VotingSimulationData simulationData) {
+    private SimulatorListener simulationListener;
+    
+    public VotingProcessSimulator(VotingSimulationData simulationData,
+             SimulatorListener simulationListener) {
+        super(simulationData);
         this.simulationData = simulationData;
-        this.userBaseData = simulationData.getUserBaseData();
-        try {
-            ContextoPruebas.inicializar();
-        } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-        }      
+        this.userBaseData = simulationData.getUserBaseData();   
+        this.simulationListener = simulationListener;
     }
     
-    public void init() {
+    @Override public void init() throws Exception {
         try {
-            setupAccesControl(simulationData.getAccessControlURL());
+            String urlInfoServidor = ContextoPruebas.getURLInfoServidor(
+                    StringUtils.prepararURL(simulationData.getAccessControlURL()));
+            new InfoGetterWorker(ACCESS_CONTROL_GETTER_WORKER, urlInfoServidor, 
+                null, this).execute();
             countDownLatch.await();
-            logger.debug("--------------- FINISHED --------------------------");
-            System.exit(0);
         } catch (InterruptedException ex) {
             logger.error(ex.getMessage(), ex);
         }
+        finish();
     }
-    
-    @Override public void updateSimulationData(Object data) {
-        if(data instanceof VotingSimulationData) {
-            VotingSimulationData simulData = (VotingSimulationData)data;
-            logger.debug("updateSimulationData - status: " + simulData.getStatusCode());
-            if(Respuesta.SC_OK == simulData.getStatusCode()) {
-            } else {
-            }
-        } else {
-            
-        }
-    }
+
 
     @Override public void setSimulationResult(Simulator simulator) {
         logger.debug("Getting response from simulator: " + 
                 simulator.getClass().getSimpleName());
         if(simulator instanceof UserBaseDataSimulator) {
-            UserBaseData ubd = ((UserBaseDataSimulator)simulator).getData();
+            UserBaseSimulationData ubd = ((UserBaseDataSimulator)simulator).getData();
             simulationData.setUserBaseData(ubd);
             switch(simulation) {
                 case ACCESS_REQUEST:
@@ -126,49 +110,23 @@ public class VotingProcessSimulator implements VotingSystemWorkerListener,
 
         } else if ((simulator instanceof VotingSimulator) ||
                 (simulator instanceof AccessRequestSimulator)) {
-            VotingSimulationData simulData = (VotingSimulationData)simulator.getData();
-            logger.debug("--------------- SIMULATION RESULT------------------"); 
-            logger.info("Duration: " + simulData.getDurationStr());
-            logger.info("Number of requests projected: " + simulData.getNumberOfElectors());
-            logger.info("Number access request ERRORs: " + simulData.getNumAccessRequestsERROR());
-            logger.info("Number of vote requests: " + simulData.getNumVotingRequests());
-            logger.info("Number of votes OK: " +  simulData.getNumVotingRequestsOK());
-            logger.info("Number of votes ERROR: " + simulData.getNumVotingRequestsERROR());
-            List<String> errorList = simulator.getErrorsList();
-            if(errorList != null && !errorList.isEmpty()) {
-                logger.info("Errors list: \n" + getFormattedErrorList(errorList));
+            this.simulationData = (VotingSimulationData)simulator.getData();
+            addErrorList(simulator.getErrorsList());
+            try {
+                finish();
+            } catch(Exception ex) {
+                logger.error(ex.getMessage(), ex);
             }
-            countDownLatch.countDown();
-        }
-    }
-
-    private String getFormattedErrorList(List<String> errorsList) {
-        if(errorsList == null || errorsList.isEmpty()) return null;
-        else {
-            StringBuilder result = new StringBuilder("");
-            for(String error:errorsList) {
-                result.append(error + "\n");
-            }
-            return result.toString();
         }
     }
     
-    @Override
-    public void process(List<String> messages) { }
+    @Override public void process(List<String> messages) { }
     
     
     private void inicializarBaseUsuarios(){
         final UserBaseDataSimulator creacionBaseUsuarios = 
             new  UserBaseDataSimulator(userBaseData, this);
-        creacionBaseUsuarios.lanzar();
-    }
-    
-    private void setupAccesControl(String controlAccessServerURL){
-        logger.debug("setupAccesControl");
-        String urlServidor = StringUtils.prepararURL(controlAccessServerURL);
-        String urlInfoServidor = ContextoPruebas.getURLInfoServidor(urlServidor);
-        new InfoGetterWorker(ACCESS_CONTROL_GETTER_WORKER, urlInfoServidor, 
-                null, this).execute();
+        creacionBaseUsuarios.init();
     }
     
     private void setupControlCenter(String urlCentroControl){
@@ -185,18 +143,13 @@ public class VotingProcessSimulator implements VotingSystemWorkerListener,
             DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date date = new Date(System.currentTimeMillis());
             String dateStr = formatter.format(date);
-            
-            Calendar today = Calendar.getInstance();
-            Calendar dateInit = Calendar.getInstance();
-            dateInit.add(Calendar.DATE, - 1);
-            Calendar dateFinish  = Calendar.getInstance();
-            dateFinish.add(Calendar.DATE,  30);
+
             
             evento = new Evento();
             evento.setAsunto("Asunto " + dateStr);
             evento.setContenido("Contenido " + dateStr);
-            evento.setFechaInicio(today.getTime());
-            evento.setFechaFin(dateFinish.getTime());
+            evento.setFechaInicio(simulationData.getDateBeginDocument());
+            evento.setFechaFin(simulationData.getDateFinishDocument());
   
             List<OpcionEvento> opcionesDeEvento = new ArrayList<OpcionEvento>();
             OpcionEvento opcionDeEvento1 = new OpcionEvento();
@@ -208,22 +161,23 @@ public class VotingProcessSimulator implements VotingSystemWorkerListener,
 
             evento.setOpciones(opcionesDeEvento);
             
-            evento.setCentroControl(ContextoPruebas.getCentroControl());
+            evento.setCentroControl(ContextoPruebas.INSTANCE.getCentroControl());
             SignedMailGenerator signedMailGenerator =  new SignedMailGenerator(
-                ContextoPruebas.getUsuarioPruebas().getKeyStore(),
-                ContextoPruebas.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
+                ContextoPruebas.INSTANCE.getUserTest().getKeyStore(),
+                ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS, 
+                ContextoPruebas.PASSWORD.toCharArray(),
                 ContextoPruebas.VOTE_SIGN_MECHANISM);
             String eventoParaPublicar = evento.toJSON().toString();
-            String subject = ContextoPruebas.getString("votingPublishMsgSubject");
-            signedPublishrequestSMIME = signedMailGenerator.genMimeMessage(
-                    ContextoPruebas.getUsuarioPruebas().getEmail(), 
-                    ContextoPruebas.getControlAcceso().getNombreNormalizado(), 
+            String subject = ContextoPruebas.INSTANCE.getString("votingPublishMsgSubject");
+            smimeDocument = signedMailGenerator.genMimeMessage(
+                    ContextoPruebas.INSTANCE.getUserTest().getEmail(), 
+                    ContextoPruebas.INSTANCE.getControlAcceso().getNombreNormalizado(), 
                     eventoParaPublicar, subject, null);
             
             new TimeStampWorker(TIME_STAMP_PUBLISH_WORKER, 
-                    ContextoPruebas.getUrlTimeStampServer(),
-                    this, signedPublishrequestSMIME.getTimeStampRequest(),
-                    ContextoPruebas.getControlAcceso().getTimeStampCert()).execute();
+                    ContextoPruebas.INSTANCE.getUrlTimeStampServer(),
+                    this, smimeDocument.getTimeStampRequest(),
+                    ContextoPruebas.INSTANCE.getControlAcceso().getTimeStampCert()).execute();
 
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
@@ -234,72 +188,117 @@ public class VotingProcessSimulator implements VotingSystemWorkerListener,
     private void associateControlCenter() {
         try {
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
-                    ContextoPruebas.getUsuarioPruebas().getKeyStore(),
-                    ContextoPruebas.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
+                    ContextoPruebas.INSTANCE.getUserTest().getKeyStore(),
+                    ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS, 
+                    ContextoPruebas.PASSWORD.toCharArray(),
                     ContextoPruebas.VOTE_SIGN_MECHANISM);
-            File solicitudAsociacion = File.createTempFile(
-                    "SolicitudAsociacion", ".p7s");
-            solicitudAsociacion.deleteOnExit();
             String documentoAsociacion = ActorConIP.getAssociationDocumentJSON(
                     simulationData.getControlCenterURL()).toString();
-            MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(
-                    ContextoPruebas.getUsuarioPruebas().getEmail(), 
-                    ContextoPruebas.getControlAcceso().getNombreNormalizado(), 
+            smimeDocument = signedMailGenerator.genMimeMessage(
+                    ContextoPruebas.INSTANCE.getUserTest().getEmail(), 
+                    ContextoPruebas.INSTANCE.getControlAcceso().getNombreNormalizado(), 
                     documentoAsociacion, "Solicitud Asociacion de Centro de Control", null);
-            mimeMessage.writeTo(new FileOutputStream(solicitudAsociacion));
-            new DocumentSenderWorker(
-                    ASSOCIATE_CONTROL_CENTER_WORKER, solicitudAsociacion, 
-                    Contexto.SIGNED_CONTENT_TYPE,
-                    ContextoPruebas.getURLAsociarActorConIP(
-                    ContextoPruebas.getControlAcceso().getServerURL()), this).execute();
+   
+            new TimeStampWorker(TIME_STAMP_ASSOCIATE_CONTROL_CENTER_GETTER_WORKER, 
+                    ContextoPruebas.INSTANCE.getUrlTimeStampServer(),
+                    this, smimeDocument.getTimeStampRequest(),
+                    ContextoPruebas.INSTANCE.getControlAcceso().getTimeStampCert()).execute();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             countDownLatch.countDown();
         }
     }
     
-    private void initilizeAuthorityCert() {
-        try {
-            byte[] caPemCertificateBytes = CertUtil.fromX509CertToPEM (
-                ContextoPruebas.getCertificadoRaizAutoridad());
-            String urlAnyadirCertificadoCA = ContextoPruebas.getURLAnyadirCertificadoCA(
-                ContextoPruebas.getControlAcceso().getServerURL());
-            new DocumentSenderWorker(CA_CERT_INITIALIZER, 
-                caPemCertificateBytes, null, urlAnyadirCertificadoCA, this).execute();
-        } catch (IOException ex) {
-            logger.error(ex.getMessage(), ex);
+    @Override public VotingSimulationData getData() {
+        return simulationData;
+    }
+
+    @Override public VotingSimulationData finish() throws Exception {
+        if(simulationListener != null) {           
+            simulationListener.setSimulationResult(this);
+        } else {
+            logger.debug("--------------- SIMULATION RESULT------------------");
+            logger.info("Duration: " + simulationData.getDurationStr());
+            logger.info("Number of requests projected: " + simulationData.getNumberOfElectors());
+            logger.info("Number access request ERRORs: " + simulationData.getNumAccessRequestsERROR());
+            logger.info("Number of vote requests: " + simulationData.getNumVotingRequests());
+            logger.info("Number of votes OK: " +  simulationData.getNumVotingRequestsOK());
+            logger.info("Number of votes ERROR: " + simulationData.getNumVotingRequestsERROR());    
+            String errorsMsg = getFormattedErrorList();
+            if(errorsMsg != null) {
+                logger.info(" ************* " + getErrorsList().size() + " ERRORS: \n" + 
+                            errorsMsg);
+            }
+            logger.debug("------------------- FINISHED --------------------------");
+            System.exit(0);
+        }
+        return simulationData;
+    }
+    
+
+    @Override public void updateSimulationData(SimulationData data) {
+        if(data instanceof VotingSimulationData) {
+            VotingSimulationData simulData = (VotingSimulationData)data;
+            logger.debug("updateSimulationData - status: " + simulData.getStatusCode());
+            if(Respuesta.SC_OK == simulData.getStatusCode()) {
+            } else {
+            }
+        } else {
+            
         }
     }
     
-    @Override
-    public void showResult(VotingSystemWorker worker) {
+    private String checkActor(ActorConIP actorConIP, ActorConIP.Tipo tipo) {
+        String result = null;
+        if(tipo != actorConIP.getTipo()) return "SERVER IS NOT " + tipo.toString();
+        if(ActorConIP.EnvironmentMode.TEST != actorConIP.getEnvironmentMode()) {
+            return "SERVER NOT IN TEST MODE. Server mode:" + actorConIP.getEnvironmentMode();
+        }
+        return null;
+    }
+
+    @Override public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
                 " - worker: " + worker.getClass().getSimpleName() + 
                 " - workerId:" + worker.getId());
+        String msg = null;
         switch(worker.getId()) {
             case ACCESS_CONTROL_GETTER_WORKER:           
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
-                        ActorConIP controlAcceso = ActorConIP.parse(worker.getMessage());
-                        if(!(ActorConIP.Tipo.CONTROL_ACCESO == controlAcceso.getTipo())) {
-                            logger.error("SERVER NOT ACCESS CONTROL");
+                        ActorConIP accessControl = ActorConIP.parse(worker.getMessage());
+                        msg = checkActor(accessControl, ActorConIP.Tipo.CONTROL_ACCESO);
+                        if(msg != null) {
+                            addErrorMsg(msg);
+                            logger.error(msg);
+                            countDownLatch.countDown();
                             return;
                         }
-                        ContextoPruebas.setControlAcceso(controlAcceso);
-                        initilizeAuthorityCert();
+                        ContextoPruebas.INSTANCE.setControlAcceso(accessControl);
+                        //we need to add test Authority Cert to system in order
+                        //to validate signatures
+                        byte[] rootCACertPEMBytes = CertUtil.fromX509CertToPEM (
+                            ContextoPruebas.INSTANCE.getRootCACert());
+                        String rootCAServiceURL = ContextoPruebas.INSTANCE.
+                                getRootCAServiceURL();
+                        new DocumentSenderWorker(CA_CERT_INITIALIZER, 
+                            rootCACertPEMBytes, null, rootCAServiceURL, this).execute();
                     } catch(Exception ex) {
                         logger.error(ex.getMessage(), ex);
+                        msg = "Error GETTING ACCESS CONTROL - " + ex.getMessage();
+                        addErrorMsg(msg);
                         countDownLatch.countDown();
                     }
                 }else {
-                    String mensaje = "Error - " + worker.getMessage();
-                    logger.error("### ERROR - " + mensaje);
+                    msg = "Error GETTING ACCESS CONTROL - " + worker.getMessage();
+                    addErrorMsg(msg);
                     countDownLatch.countDown();
                 }
                 break;
             case CA_CERT_INITIALIZER:
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
-                    Set<ActorConIP> controlCenters = ContextoPruebas.getControlAcceso().getCentrosDeControl();        
+                    Set<ActorConIP> controlCenters = ContextoPruebas.INSTANCE.
+                            getControlAcceso().getCentrosDeControl();        
                     if(controlCenters == null || controlCenters.isEmpty()) {
                         associateControlCenter();
                     } else {
@@ -307,29 +306,75 @@ public class VotingProcessSimulator implements VotingSystemWorkerListener,
                                 next().getServerURL());
                     }
                 } else {
-                    String mensaje = "Error añadiendo Autoridad Certificadora de pruebas - " + 
+                    msg = "Error añadiendo Autoridad Certificadora de pruebas - " + 
                                     worker.getMessage();
-                    logger.error("### ERROR - " + mensaje);
+                    addErrorMsg(msg);
                     countDownLatch.countDown();
                 } 
-                break;     
-            case TIME_STAMP_PUBLISH_WORKER:
+                break;    
+            case TIME_STAMP_ASSOCIATE_CONTROL_CENTER_GETTER_WORKER:
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
-                        signedPublishrequestSMIME.setTimeStampToken((TimeStampWorker)worker);
+                        smimeDocument.setTimeStampToken((TimeStampWorker)worker);
                         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        signedPublishrequestSMIME.writeTo(baos);
-                        new DocumentSenderWorker(PUBLISH_DOCUMENT_WORKER, 
+                        smimeDocument.writeTo(baos);
+                        
+                        new DocumentSenderWorker(ASSOCIATE_CONTROL_CENTER_WORKER, 
                                 baos.toByteArray(), Contexto.SIGNED_CONTENT_TYPE,
-                                ContextoPruebas.getURLGuardarEventoParaVotar(), this).execute();
+                                ContextoPruebas.getURLAsociarActorConIP(
+                                ContextoPruebas.INSTANCE.getControlAcceso().getServerURL()), this).execute();
                     } catch (Exception ex) {
                         logger.error(ex.getMessage(), ex);
+                        addErrorMsg("ERROR WITH ASSOCIATION DOCUMENT TIME STAMP " 
+                                + ex.getMessage());
                         countDownLatch.countDown();
                     }
                 } else {
                     logger.error("### ERROR - " + worker.getMessage());
+                    addErrorMsg("ERROR WITH ASSOCIATION DOCUMENT TIME STAMP " 
+                                + worker.getMessage());
                     countDownLatch.countDown();
                 }
+                
+                break;
+            case ASSOCIATE_CONTROL_CENTER_WORKER:
+                
+                if(Respuesta.SC_OK == worker.getStatusCode()) {
+                    try {
+                        ActorConIP controlCenter = ActorConIP.parse(worker.getMessage());
+                        msg = checkActor(controlCenter, ActorConIP.Tipo.CENTRO_CONTROL);
+                        if(msg == null) {
+                            publishEvent();
+                            return;
+                        } 
+                    } catch(Exception ex) {
+                        logger.error(ex.getMessage(), ex);
+                        msg = "ERROR ASSOCIATING CONTROL CENTER - " + ex.getMessage();
+                    }
+                } else msg = "ERROR ASSOCIATING CONTROL CENTER - " + worker.getMessage();
+                logger.error(msg);
+                addErrorMsg(msg);
+                countDownLatch.countDown();
+                break;                
+            case TIME_STAMP_PUBLISH_WORKER:
+                if(Respuesta.SC_OK == worker.getStatusCode()) {
+                    try {
+                        smimeDocument.setTimeStampToken((TimeStampWorker)worker);
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        smimeDocument.writeTo(baos);
+                        new DocumentSenderWorker(PUBLISH_DOCUMENT_WORKER, 
+                                baos.toByteArray(), Contexto.SIGNED_CONTENT_TYPE,
+                                ContextoPruebas.INSTANCE.getURLGuardarEventoParaVotar(), this).execute();
+                        return;
+                    } catch (Exception ex) {
+                        logger.error(ex.getMessage(), ex);
+                        msg = "ERROR WITH PUBLISH DOCUMENT TIME STAMP " 
+                                + ex.getMessage();
+                    }
+                } else msg = "ERROR WITH PUBLISH DOCUMENT TIME STAMP "  + worker.getMessage();
+                logger.error(msg);
+                addErrorMsg(msg);
+                countDownLatch.countDown();
                 break;
             case PUBLISH_DOCUMENT_WORKER:
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
@@ -341,77 +386,45 @@ public class VotingProcessSimulator implements VotingSystemWorkerListener,
                                 new ByteArrayInputStream(responseBytes), 
                                 "VotingPublishReceipt");
                         mimeMessage.verify(
-                                ContextoPruebas.INSTANCIA.getSessionPKIXParameters());
+                                ContextoPruebas.INSTANCE.getSessionPKIXParameters());
                         logger.debug("--- mimeMessage.getSignedContent(): " 
                                 + mimeMessage.getSignedContent());
                         evento = Evento.parse(mimeMessage.getSignedContent());
                         simulationData.setEvento(evento);
                         logger.debug("Respuesta - Evento ID: " + evento.getEventoId());
                         inicializarBaseUsuarios();
+                        return;
                     } catch (Exception ex) {
                         logger.error(ex.getMessage(), ex);
-                        countDownLatch.countDown();
+                        msg = "ERROR PUBLISHING DOCUMENT " + ex.getMessage();
                     }
-                } else {
-                    logger.error("ERROR - " + worker.getMessage());
-                    countDownLatch.countDown();
-                }
-                break;
-            case ASSOCIATE_CONTROL_CENTER_WORKER:
-                if(Respuesta.SC_OK == worker.getStatusCode()) {
-                    try {
-                        ActorConIP actorConIP = ActorConIP.parse(worker.getMessage());
-                        if(ActorConIP.Tipo.CENTRO_CONTROL == actorConIP.getTipo()) {
-                            ContextoPruebas.setCentroControl(actorConIP);
-                            //Loaded Access Control and Control Center. Now we can publish  
-                            publishEvent();
-                            return;
-                        } else {
-                            logger.error("### ERROR - El servidor no es un Centro Control");
-                        }
-                    } catch(Exception ex) {
-                        logger.error(ex.getMessage(), ex);
-                    }
-                } else {
-                    logger.error("ERROR ASSOCIATING CONTROL CENTER - " + worker.getMessage());
-                }
+                } else msg = "ERROR PUBLISHING DOCUMENT " + worker.getMessage();
+                logger.error(msg);
+                addErrorMsg(msg);
                 countDownLatch.countDown();
                 break;
             case CONTROL_CENTER_GETTER_WORKER:
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
-                        ActorConIP actorConIP = ActorConIP.parse(worker.getMessage());
-                        if(ActorConIP.Tipo.CENTRO_CONTROL == actorConIP.getTipo()) {
-                            ContextoPruebas.setCentroControl(actorConIP);
+                        ActorConIP controlCenter = ActorConIP.parse(worker.getMessage());
+                        msg = checkActor(controlCenter, ActorConIP.Tipo.CENTRO_CONTROL);
+                        if(msg == null) {
+                            ContextoPruebas.INSTANCE.setCentroControl(controlCenter);
                             //Loaded Access Control and Control Center. Now we can publish  
                             publishEvent();
                             return;
-                        } else {
-                            logger.error("### ERROR - El servidor no es un Centro Control");
                         }
                     } catch(Exception ex) {
                         logger.error(ex.getMessage(), ex);
+                        msg = "PROBLEM GETTING CONTROL CENTER:" +  ex.getMessage();
                     }
-                } else {
-                    String mensaje = "Error Cargando centro Control <br/>" + worker.getMessage();
-                    logger.error("### ERROR - " + mensaje);
-                }
-                associateControlCenter();
+                } else msg = "PROBLEM GETTING CONTROL CENTER " + worker.getMessage();
+                logger.error(msg);
+                addErrorMsg(msg);
+                countDownLatch.countDown();
                 break;
         }
     }
-    
-    public static void generate (String operacionStr) throws Exception {
-        logger.debug("- generate: '" + operacionStr + "'");
-        if(operacionStr == null) return;
-        JSON datosJSON = JSONSerializer.toJSON(operacionStr);
-        if(JSONNull.getInstance().equals(datosJSON)) return;
-        JSONObject operacionJSON = null;
-        if(datosJSON instanceof JSONArray) {
-            operacionJSON = ((JSONArray)datosJSON).getJSONObject(0);
-        } else operacionJSON = (JSONObject)datosJSON;
-    }
-    
     
     public static void main(String[] args) throws Exception {
         VotingSimulationData simulationData = null;
@@ -424,12 +437,12 @@ public class VotingProcessSimulator implements VotingSystemWorkerListener,
             File jsonFile = File.createTempFile("VotingProcessSimulation", ".json");
             jsonFile.deleteOnExit();
             FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
-                            .getResourceAsStream("simulatorFiles/votingSimulationData.json"), jsonFile); 
+                    .getResourceAsStream("simulatorFiles/votingSimulationData.json"), jsonFile); 
             simulationData = VotingSimulationData.parse(FileUtils.getStringFromFile(jsonFile));
             logger.debug("Simulation for Access Control: " + simulationData.getAccessControlURL());
-            
         }
-        VotingProcessSimulator simuHelper = new VotingProcessSimulator(simulationData);
+        VotingProcessSimulator simuHelper = new 
+                VotingProcessSimulator(simulationData, null);
         simuHelper.init();
     }
 }

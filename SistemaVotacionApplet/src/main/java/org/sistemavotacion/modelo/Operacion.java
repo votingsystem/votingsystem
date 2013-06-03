@@ -1,6 +1,5 @@
 package org.sistemavotacion.modelo;
 
-import static org.sistemavotacion.Contexto.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -8,8 +7,8 @@ import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
+import org.sistemavotacion.Contexto;
 import org.sistemavotacion.util.StringUtils;
-import org.sistemavotacion.util.VotacionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,45 +22,45 @@ public class Operacion {
     
     public static enum Tipo {
         ASOCIAR_CENTRO_CONTROL(
-                getString("ASOCIAR_CENTRO_CONTROL")), 
+                Contexto.INSTANCE.getString("ASOCIAR_CENTRO_CONTROL")), 
         CAMBIO_ESTADO_CENTRO_CONTROL_SMIME(
-                getString("CAMBIO_ESTADO_CENTRO_CONTROL_SMIME")), 
+                Contexto.INSTANCE.getString("CAMBIO_ESTADO_CENTRO_CONTROL_SMIME")), 
         SOLICITUD_COPIA_SEGURIDAD(
-                getString("SOLICITUD_COPIA_SEGURIDAD")), 
+                Contexto.INSTANCE.getString("SOLICITUD_COPIA_SEGURIDAD")), 
         PUBLICACION_MANIFIESTO_PDF(
-                getString("PUBLICACION_MANIFIESTO_PDF")), 
+                Contexto.INSTANCE.getString("PUBLICACION_MANIFIESTO_PDF")), 
         FIRMA_MANIFIESTO_PDF(
-                getString("FIRMA_MANIFIESTO_PDF")), 
+                Contexto.INSTANCE.getString("FIRMA_MANIFIESTO_PDF")), 
         PUBLICACION_RECLAMACION_SMIME(
-                getString("PUBLICACION_RECLAMACION_SMIME")),
+                Contexto.INSTANCE.getString("PUBLICACION_RECLAMACION_SMIME")),
         FIRMA_RECLAMACION_SMIME(
-                getString("FIRMA_RECLAMACION_SMIME")), 
+                Contexto.INSTANCE.getString("FIRMA_RECLAMACION_SMIME")), 
         PUBLICACION_VOTACION_SMIME(
-                getString("PUBLICACION_VOTACION_SMIME")), 
+                Contexto.INSTANCE.getString("PUBLICACION_VOTACION_SMIME")), 
         ENVIO_VOTO_SMIME(
-                getString("ENVIO_VOTO_SMIME")),
+                Contexto.INSTANCE.getString("ENVIO_VOTO_SMIME")),
         MENSAJE_APPLET(
-                getString("MENSAJE_APPLET")), 
+                Contexto.INSTANCE.getString("MENSAJE_APPLET")), 
         ANULAR_VOTO(
-                getString("ANULAR_VOTO")),
+                Contexto.INSTANCE.getString("ANULAR_VOTO")),
         ANULAR_SOLICITUD_ACCESO(
-                getString("ANULAR_SOLICITUD_ACCESO")),
+                Contexto.INSTANCE.getString("ANULAR_SOLICITUD_ACCESO")),
         CANCELAR_EVENTO(
-                getString("CANCELAR_EVENTO")),
+                Contexto.INSTANCE.getString("CANCELAR_EVENTO")),
         GUARDAR_RECIBO_VOTO(
-                getString("GUARDAR_RECIBO_VOTO")),
+                Contexto.INSTANCE.getString("GUARDAR_RECIBO_VOTO")),
         MENSAJE_CIERRE_APPLET(
-                getString("MENSAJE_CIERRE_APPLET")),
+                Contexto.INSTANCE.getString("MENSAJE_CIERRE_APPLET")),
         NEW_REPRESENTATIVE(
-                getString("NEW_REPRESENTATIVE")),
+                Contexto.INSTANCE.getString("NEW_REPRESENTATIVE")),
         REPRESENTATIVE_VOTING_HISTORY_REQUEST(
-                getString("REPRESENTATIVE_VOTING_HISTORY_REQUEST")),
+                Contexto.INSTANCE.getString("REPRESENTATIVE_VOTING_HISTORY_REQUEST")),
         REPRESENTATIVE_SELECTION(
-                getString("REPRESENTATIVE_SELECTION")),
+                Contexto.INSTANCE.getString("REPRESENTATIVE_SELECTION")),
         REPRESENTATIVE_ACCREDITATIONS_REQUEST(
-                getString("REPRESENTATIVE_ACCREDITATIONS_REQUEST")),
+                Contexto.INSTANCE.getString("REPRESENTATIVE_ACCREDITATIONS_REQUEST")),
         REPRESENTATIVE_REVOKE(
-                getString("REPRESENTATIVE_REVOKE"));
+                Contexto.INSTANCE.getString("REPRESENTATIVE_REVOKE"));
         
 
     
@@ -69,7 +68,9 @@ public class Operacion {
             this.caption = caption;
         }
         
-        Tipo( ) {  }
+        Tipo( ) { 
+            
+        }
         
           
         String caption;
@@ -84,39 +85,39 @@ public class Operacion {
             switch(this) {
                 case ASOCIAR_CENTRO_CONTROL:
                     resultado = 
-                        getString("ASOCIAR_CENTRO_CONTROL");
+                        Contexto.INSTANCE.getString("ASOCIAR_CENTRO_CONTROL");
                     break;
                 case CAMBIO_ESTADO_CENTRO_CONTROL_SMIME:
-                    resultado = 
-                        getString("CAMBIO_ESTADO_CENTRO_CONTROL_SMIME_FILE");
+                    resultado = Contexto.INSTANCE.getString(
+                            "CAMBIO_ESTADO_CENTRO_CONTROL_SMIME_FILE");
                     break;
                 case SOLICITUD_COPIA_SEGURIDAD:
-                    resultado = 
-                        getString("SOLICITUD_COPIA_SEGURIDAD_FILE");
+                    resultado = Contexto.INSTANCE.getString(
+                            "SOLICITUD_COPIA_SEGURIDAD_FILE");
                     break;
                 case PUBLICACION_MANIFIESTO_PDF:
-                    resultado = 
-                        getString("PUBLICACION_MANIFIESTO_PDF_FILE");
+                    resultado = Contexto.INSTANCE.getString(
+                            "PUBLICACION_MANIFIESTO_PDF_FILE");
                     break;
                 case FIRMA_MANIFIESTO_PDF:
-                    resultado = 
-                        getString("FIRMA_MANIFIESTO_PDF_FILE");
+                    resultado = Contexto.INSTANCE.getString(
+                            "FIRMA_MANIFIESTO_PDF_FILE");
                     break;
                 case PUBLICACION_RECLAMACION_SMIME:
-                    resultado = 
-                        getString("PUBLICACION_RECLAMACION_SMIME_FILE");
+                    resultado = Contexto.INSTANCE.getString(
+                            "PUBLICACION_RECLAMACION_SMIME_FILE");
                     break;
                 case FIRMA_RECLAMACION_SMIME:
-                    resultado = 
-                        getString("FIRMA_RECLAMACION_SMIME_FILE");
+                    resultado = Contexto.INSTANCE.getString(
+                            "FIRMA_RECLAMACION_SMIME_FILE");
                     break;
                 case PUBLICACION_VOTACION_SMIME:
-                    resultado = 
-                        getString("PUBLICACION_VOTACION_SMIME_FILE");
+                    resultado = Contexto.INSTANCE.getString(
+                            "PUBLICACION_VOTACION_SMIME_FILE");
                     break;
                 case ENVIO_VOTO_SMIME:
-                    resultado = 
-                        getString("ENVIO_VOTO_SMIME_FILE");
+                    resultado = Contexto.INSTANCE.getString(
+                            "ENVIO_VOTO_SMIME_FILE");
                     break;
                 default:
                     this.toString();
@@ -475,42 +476,42 @@ public class Operacion {
     }
 
     public String getErrorValidacion() {
-        if(tipo == null) return 
-                        getString("errorOperacionNoEncontrada"); 
-        if(codigoEstado == null) return 
-                        getString("errorCodigoEstadoNoEncontrado"); 
+        if(tipo == null) return Contexto.INSTANCE.getString(
+                "errorOperacionNoEncontrada"); 
+        if(codigoEstado == null) return Contexto.INSTANCE.getString(
+                "errorCodigoEstadoNoEncontrado"); 
         switch (tipo) {
             case ANULAR_SOLICITUD_ACCESO:
             case ANULAR_VOTO:
-                if(args[0] == null) return 
-                        getString("errorHashCertificadoVotoBase64NoEncontrado");
-                if(VotacionHelper.getReciboVoto(args[0]) == null)
-                    return 
-                        getString("errorReciboNoEncontrado") + " " + args[0];
-                contenidoFirma = VotacionHelper.obtenerAnuladorDeVotoSesion(args[0]);
+                if(args[0] == null) return Contexto.INSTANCE.getString(
+                        "errorHashCertificadoVotoBase64NoEncontrado");
+                contenidoFirma = Contexto.INSTANCE.getVoteCancelationInSession(args[0]);
+                if(contenidoFirma == null)
+                    return Contexto.INSTANCE.getString(
+                            "errorReciboNoEncontrado") + " " + args[0];
                 break;
             case SOLICITUD_COPIA_SEGURIDAD:
                 if(evento == null || evento.getEventoId() == null) return 
-                        getString("errorDatosEvento");
+                        Contexto.INSTANCE.getString("errorDatosEvento");
                 if(emailSolicitante == null) return 
-                        getString("errorEmail");
+                        Contexto.INSTANCE.getString("errorEmail");
                 break;
             case GUARDAR_RECIBO_VOTO:
                 return null;
             case CANCELAR_EVENTO:
                 if(contenidoFirma == null) return 
-                        getString("errorDatosCancelacionEvento");
+                        Contexto.INSTANCE.getString("errorDatosCancelacionEvento");
                 return null;
             case ENVIO_VOTO_SMIME:
                 try {
-                   evento = VotacionHelper.prepararVoto(evento);
+                   evento.genVote();
                 } catch(Exception ex) {
                     logger.error(ex.getMessage(), ex);
-                    return 
-                        getString("errorPreparandoVoto") + " - " + ex.getMessage();
+                    return Contexto.INSTANCE.getString(
+                            "errorPreparandoVoto") + " - " + ex.getMessage();
                 }
             default:
-                if(nombreDestinatarioFirma == null) return 
+                if(nombreDestinatarioFirma == null) return Contexto.INSTANCE.
                         getString("errorDestinatarioNoEncontrado");
         }
         return null;

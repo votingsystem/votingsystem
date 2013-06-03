@@ -140,11 +140,11 @@ public class MensajeDialog extends javax.swing.JDialog {
         });
     }
     
-    public void setMessage (String mensajeError, String tituloVentana) {
-        logger.debug("--- setMessage - mensajeError: " + mensajeError + 
-                " - tituloVentana: " + tituloVentana);
-        if (tituloVentana != null) setTitle(tituloVentana);
-        if (mensajeError != null) mensajePane.setText(mensajeError);
+    public void setMessage (String message, String caption) {
+        logger.debug("--- setMessage - mensajeError: " + message + 
+                " - tituloVentana: " + caption);
+        if (caption != null) setTitle(caption);
+        if (message != null) mensajePane.setText(message);
         mensajePane.updateUI();
         setVisible(true);
     }

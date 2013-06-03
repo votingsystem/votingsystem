@@ -54,7 +54,7 @@ public class VotingLauncher implements Callable<Respuesta>, VotingSystemWorkerLi
             byte[] mockDnieBytes = FileUtils.getBytesFromFile(mockDnieFile);
             logger.info("userID: " + nifFrom + " - mockDnieFile: " + 
                     mockDnieFile.getAbsolutePath());
-            String asuntoMensaje = ContextoPruebas.getString("voteMsgSubject") + 
+            String asuntoMensaje = ContextoPruebas.INSTANCE.getString("voteMsgSubject") + 
                     evento.getEventoId();
 
             String anuladorVotoStr =  evento.getCancelVoteJSON().toString();
@@ -64,19 +64,19 @@ public class VotingLauncher implements Callable<Respuesta>, VotingSystemWorkerLi
             FileUtils.copyStreamToFile(new ByteArrayInputStream(
                     anuladorVotoStr.getBytes()), anuladorVoto);
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnieBytes, 
-                    ContextoPruebas.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
+                    ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS, 
+                    ContextoPruebas.PASSWORD.toCharArray(),
                     ContextoPruebas.DNIe_SIGN_MECHANISM);
             
-            String eventURL = ContextoPruebas.getVotingEventURL(evento.getEventoId());
-            String accessRequestStr = evento.getAccessRequestJSON(eventURL).toString();
+            String accessRequestStr = evento.getAccessRequestJSON().toString();
             documentSMIME = signedMailGenerator.genMimeMessage(nifFrom, 
                     evento.getControlAcceso().getNombreNormalizado(), 
                     accessRequestStr, asuntoMensaje, null);
 
             new TimeStampWorker(TIMESTAMP_ACCESS_REQUEST, 
-                    ContextoPruebas.getUrlTimeStampServer(),
+                    ContextoPruebas.INSTANCE.getUrlTimeStampServer(),
                     this, documentSMIME.getTimeStampRequest(),
-                    ContextoPruebas.getControlAcceso().getTimeStampCert()).execute();
+                    ContextoPruebas.INSTANCE.getControlAcceso().getTimeStampCert()).execute();
             countDownLatch.await();
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
@@ -97,9 +97,10 @@ public class VotingLauncher implements Callable<Respuesta>, VotingSystemWorkerLi
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
                         documentSMIME.setTimeStampToken((TimeStampWorker)worker);
-                        X509Certificate accesRequestCert = ContextoPruebas.
+                        X509Certificate accesRequestCert = ContextoPruebas.INSTANCE.
                                 getControlAcceso().getCertificate();
-                        evento.setUrlSolicitudAcceso(ContextoPruebas.getURLAccessRequest());
+                        evento.setUrlSolicitudAcceso(
+                                ContextoPruebas.INSTANCE.getURLAccessRequest());
                         new AccessRequestLauncherWorker(ACCESS_REQUEST_WORKER, 
                                 documentSMIME, evento, 
                                 accesRequestCert, this).execute();
@@ -119,18 +120,16 @@ public class VotingLauncher implements Callable<Respuesta>, VotingSystemWorkerLi
                     try {
                         wrapperClient = ((AccessRequestLauncherWorker)worker).
                             getPKCS10WrapperClient();
-                        String eventURL = ContextoPruebas.getVotingEventURL(
-                                evento.getEventoId());
-                        String votoJSON = evento.getVoteJSON(eventURL).toString();
-                        String subject = ContextoPruebas.getString("voteMsgSubject");
+                        String votoJSON = evento.getVoteJSON().toString();
+                        String subject = ContextoPruebas.INSTANCE.getString("voteMsgSubject");
                         documentSMIME = wrapperClient.genMimeMessage(
                                 evento.getHashCertificadoVotoBase64(), 
                                 evento.getControlAcceso().getNombreNormalizado(),
                                 votoJSON, subject, null);
                         new TimeStampWorker(TIMESTAMP_VOTE, 
-                                ContextoPruebas.getUrlTimeStampServer(),
+                                ContextoPruebas.INSTANCE.getUrlTimeStampServer(),
                                 this, documentSMIME.getTimeStampRequest(),
-                                ContextoPruebas.getControlAcceso().getTimeStampCert()).execute();
+                                ContextoPruebas.INSTANCE.getControlAcceso().getTimeStampCert()).execute();
                     } catch(Exception ex) {
                         logger.error(ex.getMessage(), ex);
                         respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
@@ -146,7 +145,8 @@ public class VotingLauncher implements Callable<Respuesta>, VotingSystemWorkerLi
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
                         documentSMIME.setTimeStampToken((TimeStampWorker)worker);
-                        X509Certificate serverCert = ContextoPruebas.getCentroControl().getCertificate();
+                        X509Certificate serverCert = ContextoPruebas.
+                                INSTANCE.getCentroControl().getCertificate();
                         String urlVoto = ContextoPruebas.getURLVoto(
                             evento.getCentroControl().getServerURL());            
                         new NotificarVotoWorker(NOTIFICAR_VOTO_WORKER, 

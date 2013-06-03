@@ -309,10 +309,11 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
     private void explicacionTecnicaButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_explicacionTecnicaButtonActionPerformed
         //String theString = new Scanner(Thread.currentThread().getContextClassLoader()
         //        .getResourceAsStream("AnularVoto.html")).useDelimiter("\\A").next();
-        String msg = ContextoPruebas.getString("cancelVoteDetailsMsg");
+        String msg = ContextoPruebas.INSTANCE.getString("cancelVoteDetailsMsg");
         mensajeDialog = new MensajeDialog(MainFrame.INSTANCIA.getFrames()[0], true,
                 new Dimension(600, 400));
-        mensajeDialog.setMessage(msg, ContextoPruebas.getString("cancelVoteCaption"));
+        mensajeDialog.setMessage(msg, ContextoPruebas.INSTANCE.
+                getString("cancelVoteCaption"));
     }//GEN-LAST:event_explicacionTecnicaButtonActionPerformed
 
     private void cerrarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cerrarButtonActionPerformed

@@ -1,7 +1,5 @@
 package org.sistemavotacion.worker;
 
-import static org.sistemavotacion.Contexto.*;
-
 import java.io.File;
 import java.util.Arrays;
 import javax.swing.SwingWorker;
@@ -62,13 +60,13 @@ public class DocumentSenderWorker extends SwingWorker<Respuesta, String>
     
     @Override protected Respuesta doInBackground() throws Exception {
         logger.debug("doInBackground - urlDestino: " + urlDestino);
-        String msg = "<html><b>" + getString("connectionMsg") + "...</b></html>";
+        String msg = Contexto.INSTANCE.getString("connectionMsg");
         workerListener.process(Arrays.asList(msg));
         if(documentoEnviado instanceof File) {
-            respuesta = Contexto.getHttpHelper().sendFile((File)documentoEnviado, 
+            respuesta = Contexto.INSTANCE.getHttpHelper().sendFile((File)documentoEnviado, 
                     documentContentType, urlDestino);
         } else if(documentoEnviado instanceof byte[]) {
-            respuesta = Contexto.getHttpHelper().sendByteArray(
+            respuesta = Contexto.INSTANCE.getHttpHelper().sendByteArray(
                 (byte[])documentoEnviado, documentContentType, urlDestino);
         }
         return respuesta;

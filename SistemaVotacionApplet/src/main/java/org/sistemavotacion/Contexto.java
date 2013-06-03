@@ -2,29 +2,24 @@ package org.sistemavotacion;
 
 import com.itextpdf.text.pdf.PdfName;
 import iaik.pkcs.pkcs11.Mechanism;
-import iaik.pkcs.pkcs11.wrapper.PKCS11Constants;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyStore;
 import java.security.Security;
 import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
+import net.sf.json.JSONObject;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.sistemavotacion.modelo.Evento;
-import org.sistemavotacion.modelo.Operacion;
+import org.sistemavotacion.modelo.ReciboVoto;
 import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.red.HttpHelper;
-import org.sistemavotacion.seguridad.KeyStoreUtil;
-import org.sistemavotacion.seguridad.PKCS10WrapperClient;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.OSValidator;
 import org.sistemavotacion.util.StringUtils;
-import org.sistemavotacion.util.VotacionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,19 +27,21 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://raw.github.com/jgzornoza/SistemaVotacion/master/licencia.txt
 */
-public class Contexto {
+public enum Contexto {
+    
+    INSTANCE;
 
-    private static Logger logger = LoggerFactory.getLogger(Contexto.class);
+    private Logger logger = LoggerFactory.getLogger(Contexto.class);
 
-    public static final String NOMBRE_ARCHIVO_ALMACEN_CLAVES = "AlmacenClaves.jks";
-    public static final String NOMBRE_ARCHIVO_SOLICITUD_ACCESO = "AccessRequest";
-    public static final String NOMBRE_ARCHIVO_SOLICITUD_ACCESO_TIMESTAMPED 
-            = "AccessRequestTimeStamped";
+
     public static final String CSR_FILE_NAME   = "csr";
     public static final String IMAGE_FILE_NAME   = "image";
     public static final String REPRESENTATIVE_DATA_FILE_NAME = "representativeData";
     
     public static final String ACCESS_REQUEST_FILE_NAME   = "accessRequest";
+    
+    public static final String ASUNTO_MENSAJE_SOLICITUD_ACCESO = "[SOLICITUD ACCESO]-";     
+    public static final String NOMBRE_DESTINATARIO = "Sistema de Votación"; 
     
     public static final String CERT_RAIZ_PATH = "AC_RAIZ_DNIE_SHA1.pem";
     public static final int KEY_SIZE = 1024;
@@ -59,7 +56,6 @@ public class Contexto {
     public static final String LABEL_CLAVE_PRIVADA_AUTENTICACION = "KprivAutenticacion";
     public static final String LABEL_CLAVE_PRIVADA_FIRMA = "KprivFirmaDigital";
         
-    public static String NOMBRE_ARCHIVO_FIRMADO = "EventoEnviado";
     public static final Mechanism DNIe_SESSION_MECHANISM = Mechanism.SHA1_RSA_PKCS;
    // public static final Mechanism DNIe_SESSION_MECHANISM = Mechanism.RSA_X_509;
     public static final String DNIe_SIGN_MECHANISM = "SHA1withRSA";
@@ -101,19 +97,15 @@ public class Contexto {
     public static final int MAX_FILE_SIZE_KB = 512;
     public static final int MAX_FILE_SIZE = 512 * 1024;
     
-    private static Contexto instancia;
-    private static Usuario usuario;
-    private static String DNIePassword;
-    private static KeyStore almacenClaves;
-    private static final HttpHelper httpHelper = new HttpHelper();
-    
-    private static PKCS10WrapperClient pkcs10WrapperClient;
-    private static Evento voto;
-    private static ResourceBundle resourceBundle;
-    
+    private Usuario usuario;
+    private final HttpHelper httpHelper = new HttpHelper();
+    private ResourceBundle resourceBundle;
+    private Map<String, ReciboVoto> receiptMap;
     
     static {
         CommandMap.setDefaultCommandMap(addCommands(CommandMap.getDefaultCommandMap()));
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        
     }
 
     private static MailcapCommandMap addCommands(CommandMap cm) {
@@ -128,46 +120,35 @@ public class Contexto {
         return mc;
     }
     
-    private Contexto () { }
-
-    public static Contexto inicializar () throws Exception {
-        if (instancia == null) {
-            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-            instancia = new Contexto();
-            instancia.checkFiles();
+    private Contexto () { 
+        try {
+            new File(FileUtils.APPDIR).mkdir();
+            new File(FileUtils.APPTEMPDIR).mkdir();
+            File copiaRaizDNI = new File(FileUtils.APPDIR + CERT_RAIZ_PATH);
+            FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(CERT_RAIZ_PATH), copiaRaizDNI);
             OSValidator.initClassPath();
             resourceBundle = ResourceBundle.getBundle("messages_" + AppletFirma.locale);
-        }
-        return instancia;
+        } catch (Exception ex) {
+            LoggerFactory.getLogger(Contexto.class).error(ex.getMessage(), ex);
+        } 
     }
 
-    public static Contexto getInstancia () throws Exception {
-        return inicializar();
-    }
+    public void init(){}
     
-    public static ResourceBundle getResourceBundle() {
+    public ResourceBundle getResourceBundle() {
         return resourceBundle;
     }
     
-    public static String getString(String key) {
+    public String getString(String key) {
         if(resourceBundle == null) resourceBundle = 
                 ResourceBundle.getBundle("messages_" + AppletFirma.locale);
         return resourceBundle.getString(key);
     }
 
-    public static String getString(String key, Object... arguments) {
+    public String getString(String key, Object... arguments) {
         String pattern = getString(key);
         return MessageFormat.format(pattern, arguments);
-    }
-    
-    private synchronized void checkFiles () throws Exception {
-        logger.debug("checkFiles - checkFiles");
-        new File(FileUtils.APPDIR).mkdir();
-        new File(FileUtils.APPTEMPDIR).mkdir();
-        //File directorioBaseDeAplicacion = getApplicactionBaseDirFile();
-        File copiaRaizDNI = new File(FileUtils.APPDIR + CERT_RAIZ_PATH);
-        FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(CERT_RAIZ_PATH), copiaRaizDNI);
     }
 
     public static String getApplicactionBaseDir () {
@@ -182,28 +163,9 @@ public class Contexto {
         return file;
     }
 
-    public static void setUsuario(Usuario usu) {
-    	logger.debug("Poniendo usuario en contexto - usuario: " + usu.getNif());
-        if (usuario == null && usu.getNif() != null 
-                || !usuario.getNif().equals(usu.getNif())) {
-            //getPropiedades().ponerUsuarioEnSesion(usu);
-            //Se resetea contexto para nuevo usuario
-            usuario = usu;
-        }
-    }
-    
-    /**
-     * @param voto the voto to set
-     */
-    public static void setVoto(Evento votoEvento, String nif) throws Exception {
-        voto = votoEvento;
-        File directorioArchivoVoto = new File (getRutaArchivosVoto(voto, nif));
-        directorioArchivoVoto.mkdirs();
-        File archivoVoto = new File (directorioArchivoVoto.getAbsolutePath() 
-                + File.separator + Operacion.Tipo.ENVIO_VOTO_SMIME.getNombreArchivoEnDisco());
-        String votoStr = VotacionHelper.obtenerVotoJSONStr(votoEvento);
-        InputStream is = new ByteArrayInputStream(votoStr.getBytes());
-        FileUtils.copyStreamToFile(is, archivoVoto);
+    public void setUsuario(Usuario usuario) {
+    	logger.debug("setUsuario - nif: " + usuario.getNif());
+        this.usuario = usuario;
     }
 
     public static String getRutaArchivosVoto(Evento evento, String nif) {
@@ -213,22 +175,31 @@ public class Contexto {
         return ruta;
     }
     
-    public static Usuario getUsuario() {
-        //TODO
-        //Usuario usuario = new Usuario();
-        //usuario.setNif("7553172h");
+    public void addReceipt(String hashCertVoteBase64, ReciboVoto receipt) {
+        if(receiptMap == null) receiptMap = new HashMap<String, ReciboVoto>();
+        receiptMap.put(hashCertVoteBase64, receipt);
+    }
+    
+    public ReciboVoto getReceipt(String hashCertVoteBase64) {
+        if(receiptMap == null || hashCertVoteBase64 == null) return null;
+        return receiptMap.get(hashCertVoteBase64);
+    }
+       
+        
+    public JSONObject getVoteCancelationInSession(String hashCertVoteBase64) {
+        logger.debug("getVoteCancelationInSession");
+        if(receiptMap == null) return null;
+        ReciboVoto recibo = receiptMap.get(hashCertVoteBase64);
+        if(recibo == null) return null;
+        Evento voto = recibo.getVoto();
+        return voto.getCancelVoteJSON();
+    } 
+    
+    public Usuario getUsuario() {
         return usuario;
     }
 
-    public static void setDNIePassword(String password) {
-        DNIePassword = password;
-    }
-
-    public static String getDNIePassword() {
-        return DNIePassword;
-    }
-
-    public static HttpHelper getHttpHelper() {
+    public HttpHelper getHttpHelper() {
         return httpHelper;
     }
 

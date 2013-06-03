@@ -1,6 +1,5 @@
 package org.sistemavotacion.smime;
 
-import static org.sistemavotacion.Contexto.*;
 
 import iaik.pkcs.pkcs11.Mechanism;
 import iaik.pkcs.pkcs11.Module;
@@ -16,7 +15,6 @@ import iaik.pkcs.pkcs11.objects.X509PublicKeyCertificate;
 import java.io.FileInputStream;
 import java.security.cert.X509Certificate;
 import java.util.Hashtable;
-import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.seguridad.CertUtil;
@@ -102,7 +100,7 @@ public class DNIeSessionHelper {
                     (X509PublicKeyCertificate)tokenCertificateObjects[0];
                 if (CERT_SIGN.equals(cert.getLabel().toString())) {
                     certificadoUsuario = (X509Certificate)CMSUtils.getCertificate(value);
-                    Contexto.setUsuario(Usuario.getUsuario(certificadoUsuario));
+                    Contexto.INSTANCE.setUsuario(Usuario.getUsuario(certificadoUsuario));
                 } else if (CERT_CA.equals(cert.getLabel().toString())) {
                     certificadoIntermedio = (X509Certificate)CMSUtils.getCertificate(value);
                 }
@@ -112,7 +110,7 @@ public class DNIeSessionHelper {
             logger.error(ex.getMessage(), ex);
             String mensajeError = ex.getMessage();
             if (ex instanceof ArrayIndexOutOfBoundsException) {
-                mensajeError = getString("smartCardReaderErrorMsg");
+                mensajeError = Contexto.INSTANCE.getString("smartCardReaderErrorMsg");
             }
             if ("CKR_DEVICE_ERROR".equals(ex.getMessage()) || 
                     "CKR_CRYPTOKI_ALREADY_INITIALIZED".equals(ex.getMessage()) ||
@@ -120,10 +118,9 @@ public class DNIeSessionHelper {
                 closeSession();
                 return getSession(password, signatureMechanism);
             }
-            if ("CKR_PIN_INCORRECT".equals(ex.getMessage())) {
-                Contexto.setDNIePassword(null);
-            }
-            if ("CKR_HOST_MEMORY".equals(ex.getMessage())) mensajeError = getString("smartCardReaderErrorMsg");
+            if ("CKR_PIN_INCORRECT".equals(ex.getMessage())) { }
+            if ("CKR_HOST_MEMORY".equals(ex.getMessage())) mensajeError = 
+                    Contexto.INSTANCE.getString("smartCardReaderErrorMsg");
             throw new Exception(mensajeError);
         }
         //closeSession();

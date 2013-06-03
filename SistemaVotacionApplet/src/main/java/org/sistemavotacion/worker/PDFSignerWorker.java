@@ -150,7 +150,8 @@ public class PDFSignerWorker extends SwingWorker<Respuesta, String>
         if(firmante != null && firmante.contains("(FIRMA)")) {
             firmante = firmante.replace("(FIRMA)", "");
         } else firmante = getNifUsuario(((X509Certificate)signerCertChain[0]));
-        sap.setLayer2Text(getString("signedByPDFLabel") + ":\n" + firmante); 
+        sap.setLayer2Text(Contexto.INSTANCE.getString(
+                "signedByPDFLabel") + ":\n" + firmante); 
         
         CMSAttributeTableGenerator unsAttr= new CMSAttributeTableGenerator() {
 
@@ -168,7 +169,7 @@ public class PDFSignerWorker extends SwingWorker<Respuesta, String>
                         //reqgen.setReqPolicy(m_sPolicyOID);
                         timeStampRequest = reqgen.generate(TIMESTAMP_PDF_HASH, digest);
                         
-                        Respuesta respuesta = Contexto.getInstancia().
+                        Respuesta respuesta = Contexto.INSTANCE.
                                 getHttpHelper().sendByteArray(
                                 timeStampRequest.getEncoded(), "timestamp-query", 
                                 urlTimeStampServer);

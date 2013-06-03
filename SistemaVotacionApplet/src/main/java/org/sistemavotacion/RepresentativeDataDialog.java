@@ -30,7 +30,6 @@ import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.sistemavotacion.Contexto.getString;
 import org.sistemavotacion.dialogo.PreconditionsCheckerDialog;
 import org.sistemavotacion.seguridad.Encryptor;
 import org.sistemavotacion.worker.FileMapLauncherWorker;
@@ -60,7 +59,7 @@ public class RepresentativeDataDialog extends JDialog
         this.parentFrame = parent;
         initComponents();
         parent.setLocationRelativeTo(null);
-        setTitle(Contexto.getString("NEW_REPRESENTATIVE"));
+        setTitle(Contexto.INSTANCE.getString("NEW_REPRESENTATIVE"));
         validationPanel.setVisible(false);
         progressBarPanel.setVisible(false);
         addWindowListener(new WindowAdapter() {
@@ -85,8 +84,9 @@ public class RepresentativeDataDialog extends JDialog
         enviarButton.setVisible(!visibility);
         imagePanel.setVisible(!visibility);
         confirmacionPanel.setVisible(!visibility);
-        if (mostrandoPantallaEnvio.get()) cerrarButton.setText(getString("cancelar"));
-        else cerrarButton.setText(getString("cerrar"));
+        if (mostrandoPantallaEnvio.get()) cerrarButton.setText(
+                Contexto.INSTANCE.getString("cancelar"));
+        else cerrarButton.setText(Contexto.INSTANCE.getString("cerrar"));
         pack();
     }
         
@@ -332,11 +332,11 @@ public class RepresentativeDataDialog extends JDialog
                                 imageFileBytes.length);
                         if(imageFileBytes.length > Contexto.MAX_FILE_SIZE) {
                             logger.debug(" - MAX_FILE_SIZE exceeded ");
-                            setMessage(Contexto.getString("fileSizeExceeded", 
+                            setMessage(Contexto.INSTANCE.getString("fileSizeExceeded", 
                                     Contexto.MAX_FILE_SIZE_KB));
                             selectedImage = null;
                             selectedImageLabel.setText(
-                                Contexto.getString("imageNotSelectedMsg"));
+                                Contexto.INSTANCE.getString("imageNotSelectedMsg"));
                         } else {
                             selectedImageLabel.setText(file.getAbsolutePath());
                             MessageDigest messageDigest = MessageDigest.getInstance(
@@ -354,7 +354,7 @@ public class RepresentativeDataDialog extends JDialog
                     } else {
                         selectedImage = null;
                         selectedImageLabel.setText(
-                            Contexto.getString("imageNotSelectedMsg"));
+                            Contexto.INSTANCE.getString("imageNotSelectedMsg"));
                     } 
                 }
         } catch (Exception ex) {
@@ -364,23 +364,21 @@ public class RepresentativeDataDialog extends JDialog
 
     private void enviarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enviarButtonActionPerformed
         if(selectedImage == null) {
-            setMessage(Contexto.getString("imageMissingMsg"));
+            setMessage(Contexto.INSTANCE.getString("imageMissingMsg"));
             return;
         } else setMessage(null);
         String password = null;
-        if (Contexto.getDNIePassword() == null) {
-            PasswordDialog dialogoPassword = new PasswordDialog (parentFrame, true);
-            dialogoPassword.setVisible(true);
-            password = dialogoPassword.getPassword();
-            if (password == null) return;
-        }
+        PasswordDialog dialogoPassword = new PasswordDialog (parentFrame, true);
+        dialogoPassword.setVisible(true);
+        password = dialogoPassword.getPassword();
+        if (password == null) return;
         final String finalPassword = password;
         mostrarPantallaEnvio(true);
-        progressLabel.setText("<html>" + getString("progressLabel")+ "</html>");
+        progressLabel.setText("<html>" + Contexto.INSTANCE.getString(
+                "progressLabel")+ "</html>");
         Runnable runnable = new Runnable() {
             public void run() {
                 try {
-                    //File documentoFirmado = new File(FileUtils.APPTEMPDIR + NOMBRE_ARCHIVO_FIRMADO);
                     representativeRequestSMIME = DNIeSignedMailGenerator.genMimeMessage(null,
                             operacion.getNombreDestinatarioFirmaNormalizado(),
                             operacion.getContenidoFirma().toString(),
@@ -393,11 +391,11 @@ public class RepresentativeDataDialog extends JDialog
                     mostrarPantallaEnvio(false);
                     String mensajeError = null;
                     if ("CKR_PIN_INCORRECT".equals(ex.getMessage())) {
-                        Contexto.setDNIePassword(null);
-                        mensajeError = getString("MENSAJE_ERROR_PASSWORD");
+                        mensajeError = Contexto.INSTANCE.getString("MENSAJE_ERROR_PASSWORD");
                     } else mensajeError = ex.getMessage();
                     MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                    errorDialog.setMessage(mensajeError, getString("errorLbl"));
+                    errorDialog.setMessage(mensajeError, 
+                            Contexto.INSTANCE.getString("errorLbl"));
                     return;
                 }
             }
@@ -526,7 +524,8 @@ public class RepresentativeDataDialog extends JDialog
             AppletFirma.INSTANCIA.responderCliente(
                     Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
             MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-            errorDialog.setMessage(ex.getMessage(), getString("errorLbl"));
+            errorDialog.setMessage(ex.getMessage(), 
+                    Contexto.INSTANCE.getString("errorLbl"));
         }
     }
     @Override
@@ -561,12 +560,14 @@ public class RepresentativeDataDialog extends JDialog
                         logger.error(ex.getMessage(), ex);
                         mostrarPantallaEnvio(false);
                         MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                        errorDialog.setMessage(ex.getMessage(), getString("errorLbl"));
+                        errorDialog.setMessage(ex.getMessage(), 
+                                Contexto.INSTANCE.getString("errorLbl"));
                     }
                 } else {
                     mostrarPantallaEnvio(false);
                     MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                    errorDialog.setMessage(worker.getMessage(), getString("errorLbl"));
+                    errorDialog.setMessage(worker.getMessage(), 
+                            Contexto.INSTANCE.getString("errorLbl"));
                 }
                 break;
             default:

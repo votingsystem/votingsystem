@@ -44,8 +44,7 @@ public class AccessRequestLauncher implements Callable<Respuesta>,
     public AccessRequestLauncher (Evento evento) throws Exception {
         this.evento = evento; 
         this.nifFrom = evento.getUsuario().getNif();
-        urlAccessRequest = ContextoPruebas.getURLAccessRequest(
-                ContextoPruebas.getControlAcceso().getServerURL());
+        urlAccessRequest = ContextoPruebas.INSTANCE.getURLAccessRequest();
         evento.setUrlSolicitudAcceso(urlAccessRequest);
     }
     
@@ -54,8 +53,8 @@ public class AccessRequestLauncher implements Callable<Respuesta>,
         byte[] mockDnieBytes = FileUtils.getBytesFromFile(mockDnieFile);
         logger.info("userID: " + nifFrom + 
                 " - mockDnieFile: " + mockDnieFile.getAbsolutePath());
-        String subject = ContextoPruebas.getString("accessRequestMsgSubject") + 
-                evento.getEventoId();
+        String subject = ContextoPruebas.INSTANCE.getString(
+                "accessRequestMsgSubject") + evento.getEventoId();
         
         String anuladorVotoStr = evento.getCancelVoteJSON().toString();
         File anuladorVoto = new File(ContextoPruebas.getUserDirPath(nifFrom)
@@ -65,17 +64,18 @@ public class AccessRequestLauncher implements Callable<Respuesta>,
                 anuladorVotoStr.getBytes()), anuladorVoto);
 
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnieBytes, 
-                ContextoPruebas.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
+                ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS, 
+                ContextoPruebas.PASSWORD.toCharArray(),
                 ContextoPruebas.DNIe_SIGN_MECHANISM);
-        String eventURL = ContextoPruebas.getVotingEventURL(evento.getEventoId());
-        String accessRequestStr = evento.getAccessRequestJSON(eventURL).toString();
+        String accessRequestStr = evento.getAccessRequestJSON().toString();
         documentSMIME = signedMailGenerator.genMimeMessage(nifFrom, 
                 evento.getControlAcceso().getNombreNormalizado(), 
                 accessRequestStr, subject, null);
 
-        new TimeStampWorker(TIME_STAMP_WORKER, ContextoPruebas.getUrlTimeStampServer(),
-                this, documentSMIME.getTimeStampRequest(), ContextoPruebas.
-                getControlAcceso().getTimeStampCert()).execute();
+        new TimeStampWorker(TIME_STAMP_WORKER, 
+                ContextoPruebas.INSTANCE.getUrlTimeStampServer(),
+                this, documentSMIME.getTimeStampRequest(), 
+                ContextoPruebas.INSTANCE.getControlAcceso().getTimeStampCert()).execute();
 
         countDownLatch.await();
         return getResult();
@@ -93,7 +93,7 @@ public class AccessRequestLauncher implements Callable<Respuesta>,
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
                         documentSMIME.setTimeStampToken((TimeStampWorker)worker);
-                        X509Certificate accesRequestCert = ContextoPruebas.
+                        X509Certificate accesRequestCert = ContextoPruebas.INSTANCE.
                             getControlAcceso().getCertificate();
                         new AccessRequestLauncherWorker(ACCESS_REQUEST_WORKER, 
                             documentSMIME, evento, accesRequestCert, this).execute();
@@ -113,10 +113,7 @@ public class AccessRequestLauncher implements Callable<Respuesta>,
                     try {
                         wrapperClient = ((AccessRequestLauncherWorker)worker).
                             getPKCS10WrapperClient();
-                        String eventURL = ContextoPruebas.getVotingEventURL(
-                                evento.getEventoId());
-                        String votoJSON = evento.getVoteJSON(eventURL).toString();
-       
+                        String votoJSON = evento.getVoteJSON().toString();   
                         documentSMIME = wrapperClient.genMimeMessage(
                                 evento.getHashCertificadoVotoBase64(), 
                                 evento.getControlAcceso().getNombreNormalizado(),

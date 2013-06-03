@@ -8,7 +8,7 @@ import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.test.modelo.UserBaseData;
+import org.sistemavotacion.test.modelo.UserBaseSimulationData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +27,7 @@ public class UserBasePanel extends javax.swing.JPanel {
         normalTextBorder = numRepTextField.getBorder();
     }
 
-    public UserBaseData getData() {
+    public UserBaseSimulationData getData() {
         numRepTextField.setBorder(normalTextBorder);
         numVotesRepTextField.setBorder(normalTextBorder);
         
@@ -42,7 +42,7 @@ public class UserBasePanel extends javax.swing.JPanel {
                 numVotesUsersWithRepresentativeTextField, numUsuWithoutRepresentativeTextField,
                 numVotesUsersWithoutRepresentativeTextField);
         
-        UserBaseData userBaseData = checkEmptyFields(textFiels);
+        UserBaseSimulationData userBaseData = checkEmptyFields(textFiels);
         if(userBaseData != null) return userBaseData;
         userBaseData = checkNumericFields(textFiels);
         if(userBaseData != null) return userBaseData;
@@ -64,44 +64,44 @@ public class UserBasePanel extends javax.swing.JPanel {
        
         if(!(userIndex > 0)) {
             userIndexTextField.setBorder(new LineBorder(Color.RED,2));
-            return new UserBaseData(Respuesta.SC_ERROR_PETICION, 
-                        ContextoPruebas.getString("numericFieldErrorMsg"));
+            return new UserBaseSimulationData(Respuesta.SC_ERROR_PETICION, 
+                        ContextoPruebas.INSTANCE.getString("numericFieldErrorMsg"));
         }
         
         if(numVotesRep > numRep) {
             numRepTextField.setBorder(new LineBorder(Color.RED,2));
             numVotesRepTextField.setBorder(new LineBorder(Color.RED,2));
-            return new UserBaseData(Respuesta.SC_ERROR_PETICION, 
-                    ContextoPruebas.getString("numberUserVotesErrorMsg"));
+            return new UserBaseSimulationData(Respuesta.SC_ERROR_PETICION, 
+                    ContextoPruebas.INSTANCE.getString("numberUserVotesErrorMsg"));
         }
         
         if(numVotesUserWithRepresentative > numUserWithRepresentative) {
             numUsuWithRepresentativeTextField.setBorder(new LineBorder(Color.RED,2));
             numVotesUsersWithRepresentativeTextField.setBorder(new LineBorder(Color.RED,2));
-            return new UserBaseData(Respuesta.SC_ERROR_PETICION, 
-                    ContextoPruebas.getString("numberUserVotesErrorMsg"));
+            return new UserBaseSimulationData(Respuesta.SC_ERROR_PETICION, 
+                    ContextoPruebas.INSTANCE.getString("numberUserVotesErrorMsg"));
         }
 
         if(numVotesUserWithoutRepresentative > numUserWithoutRepresentative) {
             numUsuWithoutRepresentativeTextField.setBorder(new LineBorder(Color.RED,2));
             numVotesUsersWithoutRepresentativeTextField.setBorder(new LineBorder(Color.RED,2));
-            return new UserBaseData(Respuesta.SC_ERROR_PETICION, 
-                    ContextoPruebas.getString("numberUserVotesErrorMsg"));
+            return new UserBaseSimulationData(Respuesta.SC_ERROR_PETICION, 
+                    ContextoPruebas.INSTANCE.getString("numberUserVotesErrorMsg"));
         }
         if(!(numRep > 0)) {
             numRepTextField.setBorder(new LineBorder(Color.RED,2));
-            return new UserBaseData(Respuesta.SC_ERROR_PETICION, 
-                    ContextoPruebas.getString("repNumberErrorMsg"));
+            return new UserBaseSimulationData(Respuesta.SC_ERROR_PETICION, 
+                    ContextoPruebas.INSTANCE.getString("repNumberErrorMsg"));
         }
         if(numUserWithRepresentative > 0 && !(numRep > 0)) {
             numUsuWithRepresentativeTextField.setBorder(new LineBorder(Color.RED,2));
             numRepTextField.setBorder(new LineBorder(Color.RED,2));
-            return new UserBaseData(Respuesta.SC_ERROR_PETICION,
-                    ContextoPruebas.getString("repNumberErrorMsg"));
+            return new UserBaseSimulationData(Respuesta.SC_ERROR_PETICION,
+                    ContextoPruebas.INSTANCE.getString("repNumberErrorMsg"));
         }
 
         
-        userBaseData = new UserBaseData();
+        userBaseData = new UserBaseSimulationData();
         userBaseData.setUserIndex(userIndex);
         
         userBaseData.setNumRepresentatives(numRep);
@@ -118,25 +118,25 @@ public class UserBasePanel extends javax.swing.JPanel {
         return userBaseData;
     }
     
-    private UserBaseData checkNumericFields(List<JTextField> textFiels) {
+    private UserBaseSimulationData checkNumericFields(List<JTextField> textFiels) {
         for(JTextField textField:textFiels) {
             try{
                 int numvalue = new Integer(textField.getText().trim());
             } catch (Exception ex) {
                 textField.setBorder(new LineBorder(Color.RED,2));
-                return new UserBaseData(Respuesta.SC_ERROR_PETICION, 
-                        ContextoPruebas.getString("numericFieldErrorMsg"));
+                return new UserBaseSimulationData(Respuesta.SC_ERROR_PETICION, 
+                        ContextoPruebas.INSTANCE.getString("numericFieldErrorMsg"));
             } 
         }
         return null;
     }
     
-    private UserBaseData checkEmptyFields(List<JTextField> textFiels) {
+    private UserBaseSimulationData checkEmptyFields(List<JTextField> textFiels) {
         for(JTextField textField:textFiels) {
             if (textField.getText() == null || "".equals(textField.getText().trim())) {
                 textField.setBorder(new LineBorder(Color.RED,2));
-                return new UserBaseData(Respuesta.SC_ERROR_PETICION, 
-                        ContextoPruebas.getString("emptyFieldErrorMsg"));
+                return new UserBaseSimulationData(Respuesta.SC_ERROR_PETICION, 
+                        ContextoPruebas.INSTANCE.getString("emptyFieldErrorMsg"));
             } 
         }
         return null;

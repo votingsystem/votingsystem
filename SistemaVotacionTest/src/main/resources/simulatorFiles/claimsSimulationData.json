@@ -1,14 +1,9 @@
 {"accessControlURL":"http://localhost:8080/SistemaVotacionControlAcceso",
  "maxPendingResponses":10,
- "numberOfRequests":1,
- "htmlContent":"<span style=\"color: green;\">Una fresca mañana de mayo<\/span><br/><span style=\"font-weight: bold;\">Probando varios tipos de letra<\/span><br/><span style=\"color: blue;\">Para <span style=\"color: red;\">comprobar<\/span> la firmas de PDFs<\/span><br/>",
-    "userBaseData":{
-        "userIndex":1,
-        "numRepresentatives":0,                
-        "numUsersWithoutRepresentative":0,
-        "numVotesUsersWithoutRepresentative":0, 
-        "numUsersWithRepresentative":0, 
-        "numVotesUsersWithRepresentative":0}
+ "numRequestsProjected":1,
+ "dateBeginDocument":"2013-05-25 11:11:11",
+ "dateFinishDocument":"2013-07-26 12:12:12",
+ "htmlContent":"<span style=\"color: green;\">Una fresca mañana de mayo<\/span><br/><span style=\"font-weight: bold;\">Probando varios tipos de letra<\/span><br/><span style=\"color: blue;\">Para <span style=\"color: red;\">comprobar<\/span> la firmas de PDFs<\/span><br/>"
 }
 
 

@@ -82,7 +82,7 @@ public class TimeStampWorker extends SwingWorker<Respuesta, String>
     
  
     @Override protected Respuesta doInBackground() throws Exception {
-        respuesta = Contexto.getInstancia().getHttpHelper().
+        respuesta = Contexto.INSTANCE.getHttpHelper().
             sendByteArray(timeStampRequest.getEncoded(), "timestamp-query", urlArchivo);
         if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
             bytesToken = respuesta.getBytesArchivo();
