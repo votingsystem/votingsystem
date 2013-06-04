@@ -4,10 +4,10 @@ import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JDialog;
 import net.sf.json.JSONObject;
@@ -40,23 +40,21 @@ public class PreconditionsCheckerDialog
     private static Logger logger = LoggerFactory.getLogger(
             PreconditionsCheckerDialog.class);
     
-        
     private static final int CHECK_ACCES_CONTROL_CERT = 0;
     private static final int CHECK_CONTROL_CENTER_CERT = 1;
-    private static final int CHECK_SERVER_CERT = 2;
 
-    private static Map<String, ActorConIP> actorMap = new HashMap<String, ActorConIP>();
+    private static final Map<String, ActorConIP> actorMap = 
+            new HashMap<String, ActorConIP>();
     private Operacion operacion;
-    private AtomicBoolean checking = new AtomicBoolean(true);
+    
+    private final CountDownLatch checkLatch = new CountDownLatch(1);
     private AtomicBoolean preconditionsOK = new AtomicBoolean(false);
-    private String message = "ERROR";
     private Frame frame = null;
-
     
     private Boolean accessControlCertChecked = null;
     private Boolean controlCenterCertChecked = null;
-    private Boolean signCertChecked = null;
     
+    private String message = null;
 
     public PreconditionsCheckerDialog(Frame parent, 
             boolean modal, Operacion operacion) {
@@ -92,28 +90,18 @@ public class PreconditionsCheckerDialog
         pack();
     }
     
-    public void checkConditions() {
+    public void checkConditions() throws InterruptedException {
         logger.debug("checkConditions");
-        X509Certificate controlCenterCert = null;
-        X509Certificate accessControlCert = null;
         try {
             switch(operacion.getTipo()) {
                 case ENVIO_VOTO_SMIME:
-                    controlCenterCert = checkCert(operacion.getEvento().
-                            getCentroControl().getServerURL(), 
-                            CHECK_CONTROL_CENTER_CERT);
-                    if(controlCenterCert != null) {
-                        controlCenterCertChecked = true;
-                    }
-                    accessControlCert = 
-                            checkCert(operacion.getEvento().getControlAcceso().
-                            getServerURL(),CHECK_ACCES_CONTROL_CERT);
-                    if(accessControlCert != null) {
-                        accessControlCertChecked = true;
-                        if(controlCenterCertChecked == true) {
-                            preconditionsOK.set(true);
-                            checking.set(false);
-                        } 
+                    boolean accessControlChecked = checkCert(operacion.getEvento().
+                            getCentroControl().getServerURL(), CHECK_CONTROL_CENTER_CERT);
+                    boolean controlCenterChecked = checkCert(operacion.getEvento().
+                            getControlAcceso().getServerURL(),CHECK_ACCES_CONTROL_CERT);
+                    if(accessControlChecked && accessControlChecked) {
+                        preconditionsOK.set(true);
+                        checkLatch.countDown();
                     }
                     logger.debug("controlCenterCertChecked: " + controlCenterCertChecked + 
                             " - accessControlCertChecked: " + accessControlCertChecked);
@@ -133,17 +121,17 @@ public class PreconditionsCheckerDialog
                 case ANULAR_SOLICITUD_ACCESO:
                 case ANULAR_VOTO: 
                 case SOLICITUD_COPIA_SEGURIDAD:
-                    accessControlCert = checkCert(
-                            operacion.getUrlServer(), CHECK_SERVER_CERT);
-                    if(accessControlCert != null) {
+                    accessControlCertChecked = checkCert(
+                            operacion.getUrlServer(), CHECK_ACCES_CONTROL_CERT);
+                    if(accessControlCertChecked) {
                         preconditionsOK.set(true);
-                        checking.set(false);
+                        checkLatch.countDown();
                     }
                     break;
                 default:
                     logger.error(" ################# UNKNOWN OPERATION -> " +  
                             operacion.getTipo());
-                    checking.set(false);
+                    checkLatch.countDown();
                     preconditionsOK.set(true);
             }
         } catch(final Exception ex) {
@@ -156,19 +144,20 @@ public class PreconditionsCheckerDialog
                 }
             });
         }
-        while(checking.get()){}
+        checkLatch.await();
         logger.debug("preconditionsOK: " + preconditionsOK);
         if(preconditionsOK.get() == true) {
             processOperation();
             dispose();
         } else {
             acceptButton.setVisible(true);
-            progressLabel.setText(message);
+            progressLabel.setText(Contexto.INSTANCE.getString("errorLbl"));
             progressBar.setVisible(false);
-            waitLabel.setText(" - ERROR - ");
+            waitLabel.setText(message);
             AppletFirma.INSTANCIA.responderCliente(
                     Operacion.SC_ERROR_EJECUCION, 
-                    Contexto.INSTANCE.getString("votingPreconditionsErrorMsg", message));
+                    Contexto.INSTANCE.getString("votingPreconditionsErrorMsg", 
+                    Contexto.INSTANCE.getString("errorLbl")));
         }
         pack();
     }
@@ -240,32 +229,8 @@ public class PreconditionsCheckerDialog
                 logger.debug("################# UNKNOWN OPERATION -> " + operacion.getTipo().toString());
         }
     }
-
-    public static X509Certificate getCert(String serverURL) {
-        logger.debug("getCert - serverURL: " + serverURL);
-        ActorConIP actorConIp = actorMap.get(serverURL);
-        if(actorConIp != null)  return actorConIp.getCertificate();
-        else {
-            logger.debug("getTimeStampCert - null");
-            return null;
-        }
-    }
      
-    public static X509Certificate getTimeStampCert(String serverURL) {
-        logger.debug("getTimeStampCert - serverURL: " + serverURL);
-        ActorConIP actorConIp = actorMap.get(serverURL);
-        if(actorConIp != null) {
-            X509Certificate cert = actorConIp.getTimeStampCert();
-            return cert;
-        } 
-        else {
-            logger.debug("getTimeStampCert - null");
-            return null;
-        }
-        
-    }
-     
-    public X509Certificate checkCert(String serverURL, Integer operationId) throws Exception {
+    private boolean checkCert(String serverURL, Integer operationId) throws Exception {
         logger.debug(" - checkCert - serverURL: " + serverURL 
                 + " - operationId: " + operationId);
         if(serverURL == null) throw new Exception("Missing cert url");
@@ -273,10 +238,9 @@ public class PreconditionsCheckerDialog
         if(actorConIp == null) {
             if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
             String serverInfoURL = serverURL + SERVER_INFO_URL_SUFIX;
-            logger.debug(" - getNetworkCert - serverInfoURL: " + serverInfoURL);
             new InfoGetterWorker(operationId, serverInfoURL, null, this).execute();
-            return null;
-        } else return actorConIp.getCertificate();
+            return false;
+        } else return true;
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -323,11 +287,8 @@ public class PreconditionsCheckerDialog
                 .addContainerGap()
                 .addGroup(messagePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(progressBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(messagePanelLayout.createSequentialGroup()
-                        .addGroup(messagePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(progressLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 411, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(waitLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 411, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                    .addComponent(progressLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 468, Short.MAX_VALUE)
+                    .addComponent(waitLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         messagePanelLayout.setVerticalGroup(
@@ -383,23 +344,17 @@ public class PreconditionsCheckerDialog
     private javax.swing.JLabel waitLabel;
     // End of variables declaration//GEN-END:variables
 
-    @Override
-    public void process(List<String> messages) {
+    @Override public void processVotingSystemWorkerMsg(List<String> messages) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     private void setVotingPreconditions() {
-         logger.debug(" - setVotingPreconditions - accessControlCertChecked: " + accessControlCertChecked 
+         logger.debug(" - setVotingPreconditions - accessControlCertChecked: " 
+                 + accessControlCertChecked 
                  + " - controlCenterCertChecked: " + controlCenterCertChecked);
         if(accessControlCertChecked == true && controlCenterCertChecked == true) 
             preconditionsOK.set(true);
-        checking.set(false);
-    }
-    
-    private void setSignPreconditions() {
-         logger.debug(" - setSignPreconditions - signCertChecked: " + signCertChecked);
-        if(signCertChecked == true) preconditionsOK.set(true);
-        checking.set(false);
+        checkLatch.countDown();
     }
     
     @Override
@@ -417,12 +372,21 @@ public class PreconditionsCheckerDialog
                                 toJSON(infoWorker.getMessage());
                         ActorConIP actorConIP = ActorConIP.parse(actorConIPJSON);
                         actorMap.put(operacion.getUrlServer(), actorConIP);
+                        Contexto.INSTANCE.setAccessControl(actorConIP);
                         accessControlCertChecked = true;                        
                     } else {
                         accessControlCertChecked = false;
-                        message = infoWorker.getMessage();
+                        message = Contexto.INSTANCE.getString("checkAccessControlErrorMsg");
                     } 
-                    if(controlCenterCertChecked != null) setVotingPreconditions();
+                    if(operacion.getTipo() == Operacion.Tipo.ENVIO_VOTO_SMIME) {
+                        if(controlCenterCertChecked != null) setVotingPreconditions();
+                        else return;
+                    } else {
+                        if(Respuesta.SC_OK == worker.getStatusCode()) {
+                            preconditionsOK.set(true);
+                        } else preconditionsOK.set(false);
+                        checkLatch.countDown();
+                    }
                     logger.debug("CHECK_ACCES_CONTROL_CERT - url: " + operacion.getUrlServer());
                     break;
                 case CHECK_CONTROL_CENTER_CERT: 
@@ -430,30 +394,16 @@ public class PreconditionsCheckerDialog
                     if(Respuesta.SC_OK == worker.getStatusCode()) {
                         JSONObject actorConIPJSON = (JSONObject) JSONSerializer.
                                 toJSON(infoWorker.getMessage());
-                        ActorConIP actorConIP = ActorConIP.parse(actorConIPJSON);
+                        ActorConIP controlCenter = ActorConIP.parse(actorConIPJSON);
+                        Contexto.INSTANCE.setControlCenter(controlCenter);
                         actorMap.put(operacion.getEvento().getCentroControl().
-                                getServerURL(), actorConIP);
+                                getServerURL(), controlCenter);
                         controlCenterCertChecked = true;
                     } else {
                         controlCenterCertChecked = false;
-                        message = infoWorker.getMessage();
+                        message = Contexto.INSTANCE.getString("checkControlCenterErrorMsg");
                     } 
                     if(accessControlCertChecked != null) setVotingPreconditions();
-                    break;
-                case CHECK_SERVER_CERT:
-                    infoWorker = (InfoGetterWorker)worker;
-                    if(Respuesta.SC_OK == worker.getStatusCode()) {
-                        JSONObject actorConIPJSON = (JSONObject) JSONSerializer.
-                                toJSON(infoWorker.getMessage());
-                        ActorConIP actorConIP = ActorConIP.parse(actorConIPJSON);
-                        actorMap.put(operacion.getUrlServer(), actorConIP);
-                        logger.debug("CHECK_SERVER_CERT - url: " + operacion.getUrlServer());
-                        signCertChecked = true;
-                    } else {
-                        signCertChecked = false;
-                        message = infoWorker.getMessage();
-                    } 
-                    setSignPreconditions();
                     break;
             }
         } catch(Exception ex) {

@@ -11,6 +11,7 @@ import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
+import org.sistemavotacion.smime.SignedMailValidator;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.modelo.AccessRequestBackup;
 import org.slf4j.Logger;
@@ -52,7 +53,7 @@ public class CancelAccessRequestLauncher  implements Callable<Respuesta> {
                 "_usu" + nif + ".p7m");
         synchronized(this) {
             MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(
-                nif,  ContextoPruebas.INSTANCE.getControlAcceso().getNombreNormalizado(), 
+                nif,  ContextoPruebas.INSTANCE.getAccessControl().getNombreNormalizado(), 
                 request.toJSON().toString(),
                 subject, null);
             mimeMessage.writeTo(new FileOutputStream(anulador));
@@ -61,15 +62,18 @@ public class CancelAccessRequestLauncher  implements Callable<Respuesta> {
                 Contexto.SIGNED_CONTENT_TYPE, 
                 ContextoPruebas.INSTANCE.getURLAnulacionVoto());
         if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {                    
-            SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(null,
+            SMIMEMessageWrapper mimeMessage = new SMIMEMessageWrapper(null,
                     new ByteArrayInputStream(respuesta.getMensaje().getBytes()),
                     "ReciboAnulacionVoto");
-            respuesta = new Respuesta(respuesta.getCodigoEstado(), 
-                    dnieMimeMessage, ContextoPruebas.INSTANCE.getSessionPKIXParameters());
+
+            SignedMailValidator.ValidationResult validationResult = mimeMessage.verify(
+                    ContextoPruebas.INSTANCE.getSessionPKIXParameters());        
+            if (!validationResult.isValidSignature()) {
+                logger.error("Error validating receipt");
+            } 
+            respuesta.setData(request);
         }
-        respuesta.setData(request);
         return respuesta;
     }
-
     
 }

@@ -35,11 +35,10 @@ public class UserBasePanel extends javax.swing.JPanel {
         numVotesUsersWithRepresentativeTextField.setBorder(normalTextBorder);
         
         numVotesUsersWithoutRepresentativeTextField.setBorder(normalTextBorder);
-        numUsuWithoutRepresentativeTextField.setBorder(normalTextBorder);
 
         List<JTextField> textFiels = Arrays.asList(userIndexTextField, 
                 numRepTextField, numVotesRepTextField, numUsuWithRepresentativeTextField, 
-                numVotesUsersWithRepresentativeTextField, numUsuWithoutRepresentativeTextField,
+                numVotesUsersWithRepresentativeTextField,
                 numVotesUsersWithoutRepresentativeTextField);
         
         UserBaseSimulationData userBaseData = checkEmptyFields(textFiels);
@@ -56,9 +55,7 @@ public class UserBasePanel extends javax.swing.JPanel {
                 numUsuWithRepresentativeTextField.getText().trim());
         Integer numVotesUserWithRepresentative = new Integer(
                 numVotesUsersWithRepresentativeTextField.getText().trim());
-        
-        Integer numUserWithoutRepresentative = new Integer(
-                numUsuWithoutRepresentativeTextField.getText().trim());
+
         Integer numVotesUserWithoutRepresentative = new Integer(
                 numVotesUsersWithoutRepresentativeTextField.getText().trim());
        
@@ -82,8 +79,8 @@ public class UserBasePanel extends javax.swing.JPanel {
                     ContextoPruebas.INSTANCE.getString("numberUserVotesErrorMsg"));
         }
 
-        if(numVotesUserWithoutRepresentative > numUserWithoutRepresentative) {
-            numUsuWithoutRepresentativeTextField.setBorder(new LineBorder(Color.RED,2));
+        if(numVotesUserWithoutRepresentative < 0) {
+            numVotesUsersWithoutRepresentativeTextField.setBorder(new LineBorder(Color.RED,2));
             numVotesUsersWithoutRepresentativeTextField.setBorder(new LineBorder(Color.RED,2));
             return new UserBaseSimulationData(Respuesta.SC_ERROR_PETICION, 
                     ContextoPruebas.INSTANCE.getString("numberUserVotesErrorMsg"));
@@ -110,7 +107,6 @@ public class UserBasePanel extends javax.swing.JPanel {
         userBaseData.setNumUsersWithRepresentative(numUserWithRepresentative);
         userBaseData.setNumVotesUsersWithRepresentative(numVotesUserWithRepresentative);
         
-        userBaseData.setNumUsersWithoutRepresentative(numUserWithoutRepresentative);
         userBaseData.setNumVotesUsersWithoutRepresentative(numVotesUserWithoutRepresentative);
         
         userBaseData.setStatusCode(Respuesta.SC_OK);
@@ -159,8 +155,6 @@ public class UserBasePanel extends javax.swing.JPanel {
         representativesPanel = new javax.swing.JPanel();
         numUsuWithRepresentativeLabel = new javax.swing.JLabel();
         numUsuWithRepresentativeTextField = new javax.swing.JTextField();
-        numUsuWithoutRepresentativeLabel = new javax.swing.JLabel();
-        numUsuWithoutRepresentativeTextField = new javax.swing.JTextField();
         numVotesUsersWithoutRepresentativeLabel = new javax.swing.JLabel();
         numVotesUsersWithoutRepresentativeTextField = new javax.swing.JTextField();
         numVotesUsersWithRepresentativeLabel = new javax.swing.JLabel();
@@ -230,11 +224,6 @@ public class UserBasePanel extends javax.swing.JPanel {
 
         numUsuWithRepresentativeTextField.setText(bundle.getString("RepresentativesDialog.numUsuTotalTextField.text")); // NOI18N
 
-        numUsuWithoutRepresentativeLabel.setText(bundle.getString("RepresentativesDialog.numUsuWithoutRepresentativeLabel.text")); // NOI18N
-        numUsuWithoutRepresentativeLabel.setVerticalAlignment(javax.swing.SwingConstants.TOP);
-
-        numUsuWithoutRepresentativeTextField.setText(bundle.getString("RepresentativesDialog.numUsuWithoutRepresentativeTextField.text")); // NOI18N
-
         numVotesUsersWithoutRepresentativeLabel.setText(bundle.getString("RepresentativesDialog.numUsuAbstentionLabel.text")); // NOI18N
         numVotesUsersWithoutRepresentativeLabel.setVerticalAlignment(javax.swing.SwingConstants.TOP);
         numVotesUsersWithoutRepresentativeLabel.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
@@ -254,16 +243,19 @@ public class UserBasePanel extends javax.swing.JPanel {
             .addGroup(representativesPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(representativesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(numUsuWithRepresentativeLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(numVotesUsersWithRepresentativeLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(numUsuWithoutRepresentativeLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(numVotesUsersWithoutRepresentativeLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(20, 20, 20)
-                .addGroup(representativesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(numVotesUsersWithoutRepresentativeTextField)
-                    .addComponent(numUsuWithoutRepresentativeTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 208, Short.MAX_VALUE)
-                    .addComponent(numUsuWithRepresentativeTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 208, Short.MAX_VALUE)
-                    .addComponent(numVotesUsersWithRepresentativeTextField))
+                    .addGroup(representativesPanelLayout.createSequentialGroup()
+                        .addGroup(representativesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(numUsuWithRepresentativeLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(numVotesUsersWithRepresentativeLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(21, 21, 21)
+                        .addGroup(representativesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(numUsuWithRepresentativeTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 208, Short.MAX_VALUE)
+                            .addComponent(numVotesUsersWithRepresentativeTextField)))
+                    .addGroup(representativesPanelLayout.createSequentialGroup()
+                        .addComponent(numVotesUsersWithoutRepresentativeLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(numVotesUsersWithoutRepresentativeTextField)
+                        .addGap(2, 2, 2)))
                 .addContainerGap())
         );
         representativesPanelLayout.setVerticalGroup(
@@ -285,19 +277,11 @@ public class UserBasePanel extends javax.swing.JPanel {
                         .addComponent(numVotesUsersWithRepresentativeLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(representativesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(numVotesUsersWithoutRepresentativeLabel)
                     .addGroup(representativesPanelLayout.createSequentialGroup()
-                        .addGap(6, 6, 6)
-                        .addComponent(numUsuWithoutRepresentativeTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(numUsuWithoutRepresentativeLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGroup(representativesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(representativesPanelLayout.createSequentialGroup()
-                        .addGap(15, 15, 15)
-                        .addComponent(numVotesUsersWithoutRepresentativeTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(representativesPanelLayout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(numVotesUsersWithoutRepresentativeLabel)
-                        .addContainerGap())))
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(numVotesUsersWithoutRepresentativeTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         userIndexLabel.setText(bundle1.getString("UserBasePanel.userIndexLabel.text")); // NOI18N
@@ -320,14 +304,14 @@ public class UserBasePanel extends javax.swing.JPanel {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(userIndexTextField)
                     .addComponent(userIndexLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(usersPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(representativesPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(representativesPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -344,8 +328,6 @@ public class UserBasePanel extends javax.swing.JPanel {
     private javax.swing.JTextField numRepTextField;
     private javax.swing.JLabel numUsuWithRepresentativeLabel;
     private javax.swing.JTextField numUsuWithRepresentativeTextField;
-    private javax.swing.JLabel numUsuWithoutRepresentativeLabel;
-    private javax.swing.JTextField numUsuWithoutRepresentativeTextField;
     private javax.swing.JLabel numVotesRepLabel;
     private javax.swing.JTextField numVotesRepTextField;
     private javax.swing.JLabel numVotesUsersWithRepresentativeLabel;

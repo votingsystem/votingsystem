@@ -3,8 +3,8 @@ package org.sistemavotacion.test.simulation.launcher;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.Respuesta;
-import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.simulation.EncryptionSimulator;
 import org.sistemavotacion.test.worker.EncryptorWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
@@ -27,7 +27,7 @@ public class EncryptorLauncher implements Callable<Respuesta>,
     private String requestNIF;
     private Respuesta respuesta;
 
-    private final CountDownLatch countDownLatch = new CountDownLatch(1); // just one time
+    private final CountDownLatch countDownLatch = new CountDownLatch(1);
     private String serverURL = null;
 
 
@@ -40,13 +40,12 @@ public class EncryptorLauncher implements Callable<Respuesta>,
     @Override
     public Respuesta call() throws Exception {
         new EncryptorWorker(ENCRYPTOR_WORKER, requestNIF, serverURL, this,
-                ContextoPruebas.INSTANCE.getControlAcceso().getCertificate()).execute();
+                Contexto.INSTANCE.getAccessControl().getCertificate()).execute();
         countDownLatch.await();
         return getResult();
     }
 
-    @Override
-    public void process(List<String> messages) {
+    @Override public void processVotingSystemWorkerMsg(List<String> messages) {
         for(String message : messages)  {
             logger.debug("process -> " + message);
         }

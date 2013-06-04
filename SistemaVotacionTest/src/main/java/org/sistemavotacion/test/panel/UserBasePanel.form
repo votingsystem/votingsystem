@@ -30,7 +30,7 @@
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace max="32767" attributes="0"/>
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
                   <Component id="userIndexTextField" max="32767" attributes="0"/>
                   <Component id="userIndexLabel" max="32767" attributes="0"/>
@@ -38,7 +38,7 @@
               <EmptySpace max="-2" attributes="0"/>
               <Component id="usersPanel" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="representativesPanel" max="32767" attributes="0"/>
+              <Component id="representativesPanel" min="-2" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -150,17 +150,23 @@
               <Group type="102" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="numUsuWithRepresentativeLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="numVotesUsersWithRepresentativeLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="numUsuWithoutRepresentativeLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="numVotesUsersWithoutRepresentativeLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="numVotesUsersWithoutRepresentativeTextField" max="32767" attributes="0"/>
-                      <Component id="numUsuWithoutRepresentativeTextField" pref="208" max="32767" attributes="0"/>
-                      <Component id="numUsuWithRepresentativeTextField" pref="208" max="32767" attributes="0"/>
-                      <Component id="numVotesUsersWithRepresentativeTextField" max="32767" attributes="0"/>
+                      <Group type="102" attributes="0">
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="numUsuWithRepresentativeLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="numVotesUsersWithRepresentativeLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace min="-2" pref="21" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="numUsuWithRepresentativeTextField" pref="208" max="32767" attributes="0"/>
+                              <Component id="numVotesUsersWithRepresentativeTextField" max="32767" attributes="0"/>
+                          </Group>
+                      </Group>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Component id="numVotesUsersWithoutRepresentativeLabel" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace type="separate" max="-2" attributes="0"/>
+                          <Component id="numVotesUsersWithoutRepresentativeTextField" max="32767" attributes="0"/>
+                          <EmptySpace min="-2" pref="2" max="-2" attributes="0"/>
+                      </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -191,24 +197,13 @@
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" alignment="0" attributes="0">
-                          <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
-                          <Component id="numUsuWithoutRepresentativeTextField" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                      <Component id="numUsuWithoutRepresentativeLabel" alignment="0" min="-2" pref="41" max="-2" attributes="0"/>
-                  </Group>
-                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="numVotesUsersWithoutRepresentativeLabel" max="32767" attributes="0"/>
                       <Group type="102" attributes="0">
-                          <EmptySpace min="-2" pref="15" max="-2" attributes="0"/>
+                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                           <Component id="numVotesUsersWithoutRepresentativeTextField" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="32767" attributes="0"/>
-                      </Group>
-                      <Group type="102" alignment="0" attributes="0">
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Component id="numVotesUsersWithoutRepresentativeLabel" max="32767" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
                       </Group>
                   </Group>
+                  <EmptySpace max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -226,21 +221,6 @@
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
               <ResourceString bundle="org/sistemavotacion/test/dialogo/Bundle.properties" key="RepresentativesDialog.numUsuTotalTextField.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
-            </Property>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JLabel" name="numUsuWithoutRepresentativeLabel">
-          <Properties>
-            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="org/sistemavotacion/test/dialogo/Bundle.properties" key="RepresentativesDialog.numUsuWithoutRepresentativeLabel.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
-            </Property>
-            <Property name="verticalAlignment" type="int" value="1"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JTextField" name="numUsuWithoutRepresentativeTextField">
-          <Properties>
-            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="org/sistemavotacion/test/dialogo/Bundle.properties" key="RepresentativesDialog.numUsuWithoutRepresentativeTextField.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
             </Property>
           </Properties>
         </Component>

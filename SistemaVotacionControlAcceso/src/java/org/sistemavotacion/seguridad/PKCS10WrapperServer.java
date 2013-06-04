@@ -42,7 +42,7 @@ public class PKCS10WrapperServer {
         if(organizationalUnit != null) {
         	strSubjectDN = organizationalUnit + "," + strSubjectDN;
         }
-        logger.debug("============ strSubjectDN: " + strSubjectDN);
+        logger.debug(" - strSubjectDN: " + strSubjectDN);
         X509Certificate issuedCert = CertUtil.generateV3EndEntityCertFromCsr(
                 csr, caKey, caCert, fechaInicio, fechaFin, "" + strSubjectDN);
         byte[] issuedCertPemBytes = CertUtil.fromX509CertToPEM(issuedCert);

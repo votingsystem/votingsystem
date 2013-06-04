@@ -1,11 +1,13 @@
 package org.sistemavotacion.test.modelo;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
-import org.sistemavotacion.modelo.Evento;
+import org.sistemavotacion.modelo.OpcionEvento;
 import org.sistemavotacion.modelo.Respuesta;
-import org.sistemavotacion.test.simulation.SimulationData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,25 +21,31 @@ public class VotingSimulationData extends SimulationData {
     
     public enum Error {ACCESS_REQUES, VOTING};
     
-
     private Error error = null;
-    
     private String controlCenterURL = null;
-    
-    private Integer numberOfElectors = null;
-    private Integer numRequestsProjected = null;
-    private Integer maxPendingResponses = null;
-    
-    private String htmlContent = null;
-    
+    private Integer numOfElectors = null;
     private UserBaseSimulationData userBaseData = null;
-    private Evento evento = null;
 
     private static AtomicLong accessRequestERROR = new AtomicLong(0);
     private static AtomicLong accessRequestOK = new AtomicLong(0);
     
     private static AtomicLong votingRequestERROR = new AtomicLong(0);
     private static AtomicLong votingRequestOK = new AtomicLong(0);
+    
+    public VotingSimulationData() {}
+    
+    public VotingSimulationData(SimulationData simulData) throws Exception {
+        setAccessControlURL(simulData.getAccessControlURL());
+        setEvento(simulData.getEvento());
+        setBegin(simulData.getBegin());
+        setFinish(simulData.getFinish());
+        setMaxPendingResponses(simulData.getMaxPendingResponses());
+        setMessage(simulData.getMessage());
+        setNumHoursProjected(simulData.getNumHoursProjected());
+        setNumMinutesProjected(simulData.getNumMinutesProjected());
+        setNumRequestsProjected(simulData.getNumRequestsProjected());
+        setNumSecondsProjected(simulData.getNumSecondsProjected());
+    }
     
     public Long getNumVotingRequests() {
         return votingRequestERROR.get() + votingRequestOK.get();
@@ -103,17 +111,17 @@ public class VotingSimulationData extends SimulationData {
     }
     
     /**
-     * @return the numberOfElectors
+     * @return the numOfElectors
      */
-    public Integer getNumberOfElectors() {
-        return numberOfElectors;
+    public Integer getNumOfElectors() {
+        return numOfElectors;
     }
 
     /**
-     * @param numberOfElectors the numberOfElectors to set
+     * @param numOfElectors the numOfElectors to set
      */
-    public void setNumberOfElectors(Integer numberOfElectors) {
-        this.numberOfElectors = numberOfElectors;
+    public void setNumOfElectors(Integer numOfElectors) {
+        this.numOfElectors = numOfElectors;
     }
 
     /**
@@ -128,62 +136,6 @@ public class VotingSimulationData extends SimulationData {
      */
     public void setUserBaseData(UserBaseSimulationData userBaseData) {
         this.userBaseData = userBaseData;
-    }
-
-    /**
-     * @return the htmlContent
-     */
-    public String getHtmlContent() {
-        return htmlContent;
-    }
-
-    /**
-     * @param htmlContent the htmlContent to set
-     */
-    public void setHtmlContent(String htmlContent) {
-        this.htmlContent = htmlContent;
-    }
-
-    /**
-     * @return the numberOfRequests
-     */
-    public Integer getNumberOfRequestsProjected() {
-        return numRequestsProjected;
-    }
-
-    /**
-     * @param numberOfRequests the numberOfRequests to set
-     */
-    public void setNumberOfRequestsProjected(Integer numRequestsProjected) {
-        this.numRequestsProjected = numRequestsProjected;
-    }
-
-    /**
-     * @return the maxPendingResponses
-     */
-    public Integer getMaxPendingResponses() {
-        return maxPendingResponses;
-    }
-
-    /**
-     * @param maxPendingResponses the maxPendingResponses to set
-     */
-    public void setMaxPendingResponses(Integer maxPendingResponses) {
-        this.maxPendingResponses = maxPendingResponses;
-    }
-
-    /**
-     * @return the evento
-     */
-    public Evento getEvento() {
-        return evento;
-    }
-
-    /**
-     * @param evento the evento to set
-     */
-    public void setEvento(Evento evento) {
-        this.evento = evento;
     }
     
     /**
@@ -201,37 +153,36 @@ public class VotingSimulationData extends SimulationData {
         this.error = error;
     }
                
-    public static VotingSimulationData parse (String dataStr) {
+    public static VotingSimulationData parse (String dataStr) throws Exception {
         logger.debug("- parse");
         if(dataStr == null) return null;
         JSONObject dataJSON = (JSONObject)JSONSerializer.toJSON(dataStr);
         return parse(dataJSON);
     }
    
-    public static VotingSimulationData parse (JSONObject dataJSON) {
+    public static VotingSimulationData parse (JSONObject dataJSON) throws Exception {
         logger.debug("- parse - json ");
         if(dataJSON == null) return null;
-        VotingSimulationData simulationData = new VotingSimulationData();      
+        VotingSimulationData simulationData = new VotingSimulationData(
+                SimulationData.parse(dataJSON));   
         if (dataJSON.containsKey("userBaseData")) {
-            UserBaseSimulationData userBaseData = UserBaseSimulationData.parse(dataJSON.getJSONObject("userBaseData"));
+            UserBaseSimulationData userBaseData = UserBaseSimulationData.parse(
+                    dataJSON.getJSONObject("userBaseData"));
             simulationData.setUserBaseData(userBaseData);
-        }  
-        if (dataJSON.containsKey("accessControlURL")) {
-            simulationData.setAccessControlURL(dataJSON.getString("accessControlURL"));
-        }  
+        }   
         if (dataJSON.containsKey("controlCenterURL")) {
             simulationData.setControlCenterURL(dataJSON.getString("controlCenterURL"));
-        }  
-        if (dataJSON.containsKey("htmlContent")) {
-            simulationData.setHtmlContent(dataJSON.getString("htmlContent"));
-        }
-        if (dataJSON.containsKey("numRequestsProjected")) {
-            simulationData.setNumberOfRequestsProjected(
-                    dataJSON.getInt("numRequestsProjected"));
-        }
-        if (dataJSON.containsKey("maxPendingResponses")) {
-            simulationData.setMaxPendingResponses(dataJSON.getInt("maxPendingResponses"));
-        }
+        } 
+        if (dataJSON.containsKey("options")) {
+            List<OpcionEvento> eventOptions = new ArrayList<OpcionEvento>();
+            JSONArray jsonArray = dataJSON.getJSONArray("options");
+            for (int i = 0; i< jsonArray.size(); i++) {
+                OpcionEvento campo = new OpcionEvento();
+                campo.setContenido(jsonArray.getString(i));
+                eventOptions.add(campo);
+            }
+            simulationData.getEvento().setOpciones(eventOptions);
+        } 
         return simulationData;
     }
 }

@@ -395,7 +395,7 @@ public class CrearVotacionDialog extends JDialog implements
             String eventoParaPublicar = evento.toJSON().toString();
             MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(
                     ContextoPruebas.INSTANCE.getUserTest().getEmail(), 
-                    ContextoPruebas.INSTANCE.getControlAcceso().getNombreNormalizado(), 
+                    Contexto.INSTANCE.getAccessControl().getNombreNormalizado(), 
                     eventoParaPublicar, "Solicitud Publicación convocatoria",
                     null);
             mimeMessage.writeTo(new FileOutputStream(eventToPublish));
@@ -403,7 +403,7 @@ public class CrearVotacionDialog extends JDialog implements
                     PUBLISH_DOCUMENT_WORKER, eventToPublish, 
                     Contexto.SIGNED_CONTENT_TYPE,
                     ContextoPruebas.getURLGuardarEventoParaVotar(
-                    ContextoPruebas.INSTANCE.getControlAcceso().getServerURL()), this);
+                    Contexto.INSTANCE.getAccessControl().getServerURL()), this);
             tareaEnEjecucion.execute();
             mostrarPantallaEnvio(true);
         } catch (Exception ex) {
@@ -578,8 +578,7 @@ public class CrearVotacionDialog extends JDialog implements
         pack();
     }
 
-    @Override
-    public void process(List<String> messages) {
+    @Override public void processVotingSystemWorkerMsg(List<String> messages) {
         String message = null;
         for(String msg: messages) {
             message = message + "<br/>";

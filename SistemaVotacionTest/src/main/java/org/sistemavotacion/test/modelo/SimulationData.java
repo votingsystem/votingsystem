@@ -1,6 +1,5 @@
-package org.sistemavotacion.test.simulation;
+package org.sistemavotacion.test.modelo;
 
-import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
@@ -28,13 +27,10 @@ public class SimulationData {
     private AtomicLong numRequestsOK = new AtomicLong(0);
     private AtomicLong numRequestsERROR = new AtomicLong(0);
     
-    private Date dateBeginDocument;
-    private Date dateFinishDocument;
+    private Evento evento = null;
     
-    private Long begin;
-    private long finish;
-    
-    private Evento.Estado changeEventStateTo = null;
+    private Long begin = null;
+    private Long finish = null;
     
     private boolean timerBased = false;
     private Integer numHoursProjected;
@@ -42,7 +38,6 @@ public class SimulationData {
     private Integer numSecondsProjected;
     
     private String durationStr = null;
-    private String htmlContent = null;
 
     public SimulationData(int status, String message) {
         this.statusCode = status;
@@ -62,7 +57,7 @@ public class SimulationData {
         logger.debug("- parse - json ");
         if(dataJSON == null) return null;
         SimulationData simulationData = new SimulationData();      
-
+        Evento evento = new Evento();
         if (dataJSON.containsKey("accessControlURL")) {
             simulationData.setAccessControlURL(dataJSON.getString("accessControlURL"));
         }  
@@ -72,19 +67,8 @@ public class SimulationData {
         if (dataJSON.containsKey("maxPendingResponses")) {
             simulationData.setMaxPendingResponses(dataJSON.getInt("maxPendingResponses"));
         }
-        if (dataJSON.containsKey("htmlContent")) {
-            simulationData.setHtmlContent(dataJSON.getString("htmlContent"));
-        }
-        if (dataJSON.containsKey("dateBeginDocument")) {
-            logger.debug(" - dateBeginDocument: " + dataJSON.getString("dateBeginDocument"));
-            Date dateBegin = DateUtils.getDateFromString(dataJSON.
-                    getString("dateBeginDocument"));
-            simulationData.setDateBeginDocument(dateBegin);
-        }
-        if (dataJSON.containsKey("dateFinishDocument")) {
-            Date dateFinish = DateUtils.getDateFromString(dataJSON.
-                    getString("dateFinishDocument"));
-            simulationData.setDateFinishDocument(dateFinish);
+        if (dataJSON.containsKey("event")) {
+            evento = Evento.parse(dataJSON.getJSONObject("event"));
         }
         if(dataJSON.containsKey("timer")) {
             JSONObject timerJSONObject = dataJSON.getJSONObject("timer");
@@ -108,9 +92,11 @@ public class SimulationData {
             }
         }
         if (dataJSON.containsKey("whenFinishChangeEventStateTo")) {
-            String state = dataJSON.getString("whenFinishChangeEventStateTo");
-            simulationData.setChangeEventStateTo(Evento.Estado.valueOf(state));
+            Evento.Estado estado = Evento.Estado.valueOf(
+                    dataJSON.getString("whenFinishChangeEventStateTo"));
+            evento.setNextState(estado);
         }
+        simulationData.setEvento(evento);
         return simulationData;
     }
     
@@ -175,31 +161,32 @@ public class SimulationData {
     /**
      * @return the begin
      */
-    public long getBegin() {
+    public Long getBegin() {
         return begin;
     }
 
     /**
      * @param begin the begin to set
      */
-    public void setBegin(long begin) {
+    public void setBegin(Long begin) {
         this.begin = begin;
     }
 
     /**
      * @return the finish
      */
-    public long getFinish() {
+    public Long getFinish() {
         return finish;
     }
 
     /**
      * @param finish the finish to set
      */
-    public void setFinish(long finish) throws Exception {
-        if(begin == null) throw new Exception("SIMULATION BEGIN NOT SET");
-        long duration = finish - begin;
-        durationStr = DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(duration);
+    public void setFinish(Long finish) throws Exception {
+        if(begin != null) {
+            long duration = finish - begin;
+            durationStr = DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(duration);
+        }
         this.finish = finish;
     }
 
@@ -248,20 +235,6 @@ public class SimulationData {
      */
     public void setNumRequestsProjected(Integer numRequestsProjected) {
         this.numRequestsProjected = numRequestsProjected;
-    }
-
-    /**
-     * @return the htmlContent
-     */
-    public String getHtmlContent() {
-        return htmlContent;
-    }
-
-    /**
-     * @param htmlContent the htmlContent to set
-     */
-    public void setHtmlContent(String htmlContent) {
-        this.htmlContent = htmlContent;
     }
 
     /**
@@ -321,45 +294,17 @@ public class SimulationData {
     }
 
     /**
-     * @return the dateBeginDocument
+     * @return the evento
      */
-    public Date getDateBeginDocument() {
-        return dateBeginDocument;
+    public Evento getEvento() {
+        return evento;
     }
 
     /**
-     * @param dateBeginDocument the dateBeginDocument to set
+     * @param evento the evento to set
      */
-    public void setDateBeginDocument(Date dateBeginDocument) {
-        this.dateBeginDocument = dateBeginDocument;
-    }
-
-    /**
-     * @return the dateFinishDocument
-     */
-    public Date getDateFinishDocument() {
-        return dateFinishDocument;
-    }
-
-    /**
-     * @param dateFinishDocument the dateFinishDocument to set
-     */
-    public void setDateFinishDocument(Date dateFinishDocument) {
-        this.dateFinishDocument = dateFinishDocument;
-    }
-
-    /**
-     * @return the changeEventStateTo
-     */
-    public Evento.Estado getChangeEventStateTo() {
-        return changeEventStateTo;
-    }
-
-    /**
-     * @param changeEventStateTo the changeEventStateTo to set
-     */
-    public void setChangeEventStateTo(Evento.Estado changeEventStateTo) {
-        this.changeEventStateTo = changeEventStateTo;
+    public void setEvento(Evento evento) {
+        this.evento = evento;
     }
 
 }

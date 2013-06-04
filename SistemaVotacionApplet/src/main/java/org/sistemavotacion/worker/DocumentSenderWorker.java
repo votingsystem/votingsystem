@@ -17,7 +17,7 @@ public class DocumentSenderWorker extends SwingWorker<Respuesta, String>
     
     private static Logger logger = LoggerFactory.getLogger(DocumentSenderWorker.class);
 
-    private String urlDestino;
+    private String urlToSendDocument;
     private VotingSystemWorkerListener workerListener;
     private Object documentoEnviado;
     private Respuesta respuesta = null;
@@ -25,20 +25,20 @@ public class DocumentSenderWorker extends SwingWorker<Respuesta, String>
     private String documentContentType = null;
     
     public DocumentSenderWorker(Integer id, Object documentoEnviado, 
-            String documentContentType, String urlDestino, 
+            String documentContentType, String urlToSendDocument, 
             VotingSystemWorkerListener workerListener) {
         this.id = id;
         this.documentoEnviado = documentoEnviado;
         this.workerListener = workerListener;
         this.documentContentType = documentContentType;
-        this.urlDestino = urlDestino;
+        this.urlToSendDocument = urlToSendDocument;
     }
     
-    public DocumentSenderWorker(Integer id, String urlDestino, 
+    public DocumentSenderWorker(Integer id, String urlToSendDocument, 
             VotingSystemWorkerListener workerListener) {
         this.id = id;
         this.workerListener = workerListener;
-        this.urlDestino = urlDestino;
+        this.urlToSendDocument = urlToSendDocument;
     }
     
     public DocumentSenderWorker setDocumentoEnviado(Object documentoEnviado,
@@ -59,15 +59,15 @@ public class DocumentSenderWorker extends SwingWorker<Respuesta, String>
     }
     
     @Override protected Respuesta doInBackground() throws Exception {
-        logger.debug("doInBackground - urlDestino: " + urlDestino);
+        logger.debug("doInBackground - urlToSendDocument: " + urlToSendDocument);
         String msg = Contexto.INSTANCE.getString("connectionMsg");
-        workerListener.process(Arrays.asList(msg));
+        workerListener.processVotingSystemWorkerMsg(Arrays.asList(msg));
         if(documentoEnviado instanceof File) {
             respuesta = Contexto.INSTANCE.getHttpHelper().sendFile((File)documentoEnviado, 
-                    documentContentType, urlDestino);
+                    documentContentType, urlToSendDocument);
         } else if(documentoEnviado instanceof byte[]) {
             respuesta = Contexto.INSTANCE.getHttpHelper().sendByteArray(
-                (byte[])documentoEnviado, documentContentType, urlDestino);
+                (byte[])documentoEnviado, documentContentType, urlToSendDocument);
         }
         return respuesta;
     }

@@ -13,7 +13,6 @@ import java.util.UUID;
 import javax.swing.SwingWorker;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.util.encoders.Base64;
 import org.sistemavotacion.Contexto;
@@ -38,8 +37,6 @@ public class EncryptorWorker extends SwingWorker<Respuesta, String>
     private VotingSystemWorkerListener workerListener;
         
     private X509Certificate serverCert = null;
-    
-    private static final String BC = BouncyCastleProvider.PROVIDER_NAME;
 
     private PrivateKey privateKey;
     private PublicKey publicKey;
@@ -88,7 +85,7 @@ public class EncryptorWorker extends SwingWorker<Respuesta, String>
     
     @Override//on the EDT
     protected void process(List<String> messages) {
-        workerListener.process(messages);
+        workerListener.processVotingSystemWorkerMsg(messages);
     }
 
     public String getTestJSON(String from, PublicKey publicKey) {

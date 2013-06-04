@@ -49,7 +49,7 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
         this.userBaseData = simulationData.getUserBaseData();
         this.simulationListener = simulationListener;
         electorList = getElectorList(userBaseData);
-        simulationData.setNumberOfElectors(electorList.size());
+        simulationData.setNumOfElectors(electorList.size());
         this.simulationData = simulationData;
     }
     
@@ -95,7 +95,7 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
     
     @Override public void init() {
         logger.debug("lanzarVotacion - total number of electors: " +  
-                simulationData.getNumberOfElectors());
+                simulationData.getNumOfElectors());
         votacionExecutor = Executors.newFixedThreadPool(5);
         votosExecutor = Executors.newFixedThreadPool(100);
         votosCompletionService = new ExecutorCompletionService<Respuesta>(votosExecutor);
@@ -103,7 +103,7 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
         votacionExecutor.execute(new Runnable() {
             @Override public void run() {
                 try {
-                    beginElection();                    
+                    launchRequests();                    
                 } catch (Exception ex) {
                     logger.error(ex.getMessage(), ex);
                 }
@@ -112,7 +112,7 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
         votacionExecutor.execute(new Runnable() {
             @Override public void run() {
                 try {
-                    validateReceipts();
+                    readResponses();
                 } catch (Exception ex) {
                     logger.error(ex.getMessage(), ex);
                 }
@@ -120,8 +120,8 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
         });
     }
     
-    public void beginElection () throws Exception {
-        logger.debug(" ******* beginElection");
+    public void launchRequests () throws Exception {
+        logger.debug(" ******* launchRequests");
         if(userBaseData.isTimerBased()) startTimer(this);
         else {
             while(!electorList.isEmpty()) {
@@ -154,9 +154,9 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
         voteErrorsList.add(msg);
     }
         
-    public void validateReceipts () throws Exception {
-        logger.debug("******** validateReceipts");
-        while (simulationData.getNumberOfElectors() > 
+    public void readResponses () throws Exception {
+        logger.debug("******** readResponses");
+        while (simulationData.getNumOfElectors() > 
                 simulationData.getNumVotingRequestsColected()) {
             String nifFrom = null;
             try {
@@ -194,14 +194,14 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
         logger.debug("finish - shutdown executors");
         simulationData.setFinish(System.currentTimeMillis());
         if(timer != null) timer.stop();
-        votacionExecutor.shutdownNow();
-        votosExecutor.shutdownNow(); 
+        if(votacionExecutor != null) votacionExecutor.shutdownNow();
+        if(votosExecutor != null) votosExecutor.shutdownNow(); 
         if(simulationListener != null) {           
             simulationListener.setSimulationResult(this);
         } else {
             logger.debug("--------------- SIMULATION RESULT------------------");
             logger.info("Duration: " + simulationData.getDurationStr());
-            logger.info("Number of requests projected: " + simulationData.getNumberOfElectors());
+            logger.info("Number of requests projected: " + simulationData.getNumOfElectors());
             logger.info("Solicitudes con error: " + simulationData.getNumAccessRequestsERROR());
             logger.info("Votos enviados: " + simulationData.getNumVotingRequests());
             logger.info("Votos validos: " +  simulationData.getNumVotingRequestsOK());

@@ -5,12 +5,8 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.sistemavotacion.seguridad.CertUtil;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.tsp.TSPException;
-import org.bouncycastle.tsp.TSPValidationException;
+import org.sistemavotacion.Contexto;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -183,7 +179,7 @@ public class TimeStampCertFormDialog extends javax.swing.JDialog {
                     + cert.getSubjectDN().toString());
             try {
                 timeStampToken.validate(new JcaSimpleSignerInfoVerifierBuilder().
-                                setProvider(BouncyCastleProvider.PROVIDER_NAME).build(cert));
+                                setProvider(Contexto.PROVIDER).build(cert));
                 validationOK = true;
                 validationCert = cert;
             } catch (Exception ex) {

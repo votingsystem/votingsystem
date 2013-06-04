@@ -42,8 +42,7 @@ public class AsociarCentroControlDialog extends JDialog implements
     private static final int INFO_GETTER_WORKER                       = 0;
     private static final int ASSOCIATE_CONTROL_CENTER_WORKER          = 1;
 
-    @Override
-    public void process(List<String> messages) {
+    @Override public void processVotingSystemWorkerMsg(List<String> messages) {
         String msg = null;
         for(String message : messages) {
             if(msg == null ) msg = message;
@@ -384,14 +383,14 @@ public class AsociarCentroControlDialog extends JDialog implements
                     centroControl.getServerURL()).toString();
             MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(
                     ContextoPruebas.INSTANCE.getUserTest().getEmail(), 
-                    ContextoPruebas.INSTANCE.getControlAcceso().getNombreNormalizado(), 
+                    Contexto.INSTANCE.getAccessControl().getNombreNormalizado(), 
                     documentoAsociacion, "Solicitud Asociacion de Centro de Control", null);
             mimeMessage.writeTo(new FileOutputStream(solicitudAsociacion));
             tareaEnEjecucion = new DocumentSenderWorker(
                     ASSOCIATE_CONTROL_CENTER_WORKER, solicitudAsociacion, 
                     Contexto.SIGNED_CONTENT_TYPE,
                     ContextoPruebas.getURLAsociarActorConIP(
-                    ContextoPruebas.INSTANCE.getControlAcceso().getServerURL()), this);
+                    Contexto.INSTANCE.getAccessControl().getServerURL()), this);
             tareaEnEjecucion.execute();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);

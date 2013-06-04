@@ -6,13 +6,9 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.security.MessageDigest;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.mail.internet.MimeMessage;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.SwingWorker;
@@ -25,14 +21,11 @@ import org.sistemavotacion.smime.DNIeSignedMailGenerator;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.ImagePreviewPanel;
-import org.sistemavotacion.worker.TimeStampWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sistemavotacion.dialogo.PreconditionsCheckerDialog;
-import org.sistemavotacion.seguridad.Encryptor;
-import org.sistemavotacion.worker.FileMapLauncherWorker;
+import org.sistemavotacion.worker.RepresentativeRequestWorker;
 
 /**
 * @author jgzornoza
@@ -43,13 +36,12 @@ public class RepresentativeDataDialog extends JDialog
     
     private static Logger logger = LoggerFactory.getLogger(SaveReceiptDialog.class);
 
+    private static final int REPRESENTATIVE_REQUEST_WORKER = 0;
+    
     private Frame parentFrame = null;
     private Operacion operacion = null;
     private File selectedImage = null;
     private SwingWorker tareaEnEjecucion;
-    private SMIMEMessageWrapper representativeRequestSMIME;
-    private static final int ENVIAR_DOCUMENTO_FIRMADO_WORKER = 0;
-    private static final int TIME_STAMP_WORKER = 1;
     private AtomicBoolean mostrandoPantallaEnvio = new AtomicBoolean(false);
     private RepresentativeDataDialog INSTANCIA = null;
         
@@ -379,13 +371,18 @@ public class RepresentativeDataDialog extends JDialog
         Runnable runnable = new Runnable() {
             public void run() {
                 try {
-                    representativeRequestSMIME = DNIeSignedMailGenerator.genMimeMessage(null,
+                    SMIMEMessageWrapper representativeRequestSMIME = 
+                            DNIeSignedMailGenerator.genMimeMessage(null,
                             operacion.getNombreDestinatarioFirmaNormalizado(),
                             operacion.getContenidoFirma().toString(),
                             finalPassword.toCharArray(), operacion.getAsuntoMensajeFirmado(), null);
-                    new TimeStampWorker(TIME_STAMP_WORKER, operacion.getUrlTimeStampServer(),
-                        INSTANCIA, representativeRequestSMIME.getTimeStampRequest(),
-                        PreconditionsCheckerDialog.getTimeStampCert(operacion.getUrlServer())).execute();
+                    
+                    tareaEnEjecucion = new RepresentativeRequestWorker(
+                            REPRESENTATIVE_REQUEST_WORKER, representativeRequestSMIME,
+                            selectedImage, operacion.getUrlEnvioDocumento(), Contexto.INSTANCE.
+                            getAccessControl().getCertificate(),INSTANCIA);
+                    tareaEnEjecucion.execute();
+           
                 } catch (Exception ex) {
                     logger.error(ex.getMessage(), ex);
                     mostrarPantallaEnvio(false);
@@ -495,79 +492,26 @@ public class RepresentativeDataDialog extends JDialog
     private javax.swing.JButton verDocumentoButton;
     // End of variables declaration//GEN-END:variables
 
-    @Override
-    public void process(List<String> messages) {
+    @Override public void processVotingSystemWorkerMsg(List<String> messages) {
         logger.debug(" - process: " + messages.iterator().next());
         progressLabel.setText(messages.iterator().next());
     }
 
-    private void processDocument(SMIMEMessageWrapper documentSMIME) {
-        if(documentSMIME == null) return;
-        try {
-            File encryptedDocument = File.createTempFile("encryptedDocument", ".p7s");
-            encryptedDocument.deleteOnExit();
-            MimeMessage mimeMessage = Encryptor.encryptSMIME(documentSMIME, 
-                    PreconditionsCheckerDialog.getCert(operacion.getUrlServer()));
-            mimeMessage.writeTo(new FileOutputStream(encryptedDocument));
-            Map<String, Object> fileMap = new HashMap<String, Object>();
-            String representativeDataFileName = 
-                    Contexto.REPRESENTATIVE_DATA_FILE_NAME + ":" + 
-                    Contexto.SIGNED_AND_ENCRYPTED_CONTENT_TYPE;
-            fileMap.put(representativeDataFileName, encryptedDocument);
-            fileMap.put(Contexto.IMAGE_FILE_NAME, selectedImage);
-            final FileMapLauncherWorker lanzador = new FileMapLauncherWorker(
-                    ENVIAR_DOCUMENTO_FIRMADO_WORKER, fileMap, 
-                    operacion.getUrlEnvioDocumento(), this);
-            lanzador.execute();
-        } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            AppletFirma.INSTANCIA.responderCliente(
-                    Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
-            MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-            errorDialog.setMessage(ex.getMessage(), 
-                    Contexto.INSTANCE.getString("errorLbl"));
-        }
-    }
     @Override
     public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
                 " - worker: " + worker.getClass().getSimpleName() + 
                 " - workerId:" + worker.getId());
         switch(worker.getId()) {
-            case ENVIAR_DOCUMENTO_FIRMADO_WORKER:
+            case REPRESENTATIVE_REQUEST_WORKER:
                 dispose();
                 if (Respuesta.SC_OK == worker.getStatusCode()) {
                     AppletFirma.INSTANCIA.responderCliente(
                             worker.getStatusCode(), worker.getMessage());
-                    /*ResultadoFirmaDialog resultadoFirmaDialog =
-                            new ResultadoFirmaDialog(parentFrame, true);
-                    respuesta.setArchivo(documentoFirmado);
-                    respuesta.setOperacion(operacion);
-                    resultadoFirmaDialog.mostrarMensaje(respuesta);*/
                 } else {
                     mostrarPantallaEnvio(false);
                     AppletFirma.INSTANCIA.responderCliente(
                             worker.getStatusCode(), worker.getMessage());
-                }
-                break;
-            case TIME_STAMP_WORKER:
-                if(Respuesta.SC_OK == worker.getStatusCode()) {
-                    try {
-                        representativeRequestSMIME.setTimeStampToken(
-                                (TimeStampWorker)worker);
-                        processDocument(representativeRequestSMIME);
-                    } catch (Exception ex) {
-                        logger.error(ex.getMessage(), ex);
-                        mostrarPantallaEnvio(false);
-                        MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                        errorDialog.setMessage(ex.getMessage(), 
-                                Contexto.INSTANCE.getString("errorLbl"));
-                    }
-                } else {
-                    mostrarPantallaEnvio(false);
-                    MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                    errorDialog.setMessage(worker.getMessage(), 
-                            Contexto.INSTANCE.getString("errorLbl"));
                 }
                 break;
             default:

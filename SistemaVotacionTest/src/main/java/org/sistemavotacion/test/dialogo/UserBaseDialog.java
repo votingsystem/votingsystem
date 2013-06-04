@@ -364,8 +364,6 @@ public class UserBaseDialog extends JDialog
                 .append(userBaseData.getNumUsersWithRepresentative())
                 .append("<br/><b>Número de votos de usuarios representados:</b>")
                 .append(userBaseData.getNumVotesUsersWithRepresentative())
-                .append("<br/><b>Número de usuarios sin representante:</b>")
-                .append(userBaseData.getNumUsersWithoutRepresentative())
                 .append("<br/><b>Número de votos de usuarios sin representante:</b>")
                 .append(userBaseData.getNumVotesUsersWithoutRepresentative())
                 .append("</html>").toString();

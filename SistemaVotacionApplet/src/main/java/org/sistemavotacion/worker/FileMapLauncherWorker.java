@@ -46,7 +46,7 @@ public class FileMapLauncherWorker extends SwingWorker<Respuesta, String>
         logger.debug("doInBackground - serverURL: " + serverURL);
         String msg = "<html><b>" + Contexto.INSTANCE.getString(
                 "connectionMsg") + "...</b></html>";
-        workerListener.process(Arrays.asList(msg));
+        workerListener.processVotingSystemWorkerMsg(Arrays.asList(msg));
         return Contexto.INSTANCE.getHttpHelper().sendObjectMap(fileMap, serverURL);
     }
 

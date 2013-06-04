@@ -9,9 +9,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.encoders.Base64;
+import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
@@ -38,30 +38,23 @@ public class TimeStampLauncher implements Callable<Respuesta>,
     private SMIMEMessageWrapper documentSMIME;
     private String requestNIF;
     
-    private String urlTimeStampServer;
-    
     private Respuesta respuesta;
         
-    private final CountDownLatch countDownLatch = new CountDownLatch(1); // just one time
-    
-        
-    private String digestTokenStr = null;
+    private final CountDownLatch countDownLatch = new CountDownLatch(1);
+
     private String timeStampTokenStr = null;
     private String timeStampRequestStr;
-    
-    private static final String BC = BouncyCastleProvider.PROVIDER_NAME;
     
     public TimeStampLauncher (String requestNIF, String urlTimeStampServer) 
             throws Exception {
         this.requestNIF = requestNIF;
-        this.urlTimeStampServer = urlTimeStampServer;
     }
         
     @Override
     public Respuesta call() throws Exception {
         KeyStore mockDnie = ContextoPruebas.INSTANCE.crearMockDNIe(requestNIF);
 
-        ActorConIP controlAcceso = ContextoPruebas.INSTANCE.getControlAcceso();
+        ActorConIP controlAcceso = Contexto.INSTANCE.getAccessControl();
         String toUser = StringUtils.getCadenaNormalizada(controlAcceso.getNombre());
         
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, 
@@ -74,9 +67,8 @@ public class TimeStampLauncher implements Callable<Respuesta>,
         documentSMIME = signedMailGenerator.genMimeMessage(
                 requestNIF, toUser, getRequestDataJSON(), subject , null);
 
-        new TimeStampWorker(TIME_STAMP_WORKER, urlTimeStampServer, this, 
-                documentSMIME.getTimeStampRequest(),
-                ContextoPruebas.INSTANCE.getControlAcceso().getTimeStampCert()).execute();
+        new TimeStampWorker(TIME_STAMP_WORKER, this, 
+                documentSMIME.getTimeStampRequest()).execute();
         
         countDownLatch.await();
         return getResult();
@@ -91,8 +83,7 @@ public class TimeStampLauncher implements Callable<Respuesta>,
         return jsonObject.toString();
     }
 
-    @Override
-    public void process(List<String> messages) {
+    @Override public void processVotingSystemWorkerMsg(List<String> messages) {
         for(String message : messages)  {
             logger.debug("process -> " + message);
         }
@@ -112,6 +103,7 @@ public class TimeStampLauncher implements Callable<Respuesta>,
                     try {
                         TimeStampToken tst = ((TimeStampWorker)worker).getTimeStampToken();
                         byte[]  digestToken = ((TimeStampWorker)worker).getDigestToken();
+                        String digestTokenStr;
                         if(digestToken != null)
                             digestTokenStr = new String(Base64.encode(digestToken));
                         byte[] timeStampRequestBytes = ((TimeStampWorker)worker).getTimeStampRequest().getEncoded();

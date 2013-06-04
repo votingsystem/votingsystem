@@ -16,7 +16,6 @@ import javax.swing.SwingWorker;
 import javax.swing.text.html.parser.ParserDelegator;
 import org.sistemavotacion.dialogo.MensajeDialog;
 import org.sistemavotacion.dialogo.PasswordDialog;
-import org.sistemavotacion.dialogo.PreconditionsCheckerDialog;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Operacion;
 import org.sistemavotacion.modelo.ReciboVoto;
@@ -27,10 +26,9 @@ import org.sistemavotacion.smime.SMIMEMessageWrapper;
 
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.StringUtils;
-import org.sistemavotacion.worker.AccessRequestLauncherWorker;
+import org.sistemavotacion.worker.AccessRequestWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
-import org.sistemavotacion.worker.NotificarVotoWorker;
-import org.sistemavotacion.worker.TimeStampWorker;
+import org.sistemavotacion.worker.SMIMESignedSenderWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,11 +40,9 @@ import org.slf4j.LoggerFactory;
 public class VotacionDialog extends JDialog implements VotingSystemWorkerListener {
 
     private static Logger logger = LoggerFactory.getLogger(VotacionDialog.class);
-    
-    private static final int TIMESTAMP_ACCESS_REQUEST = 0;
-    private static final int TIMESTAMP_VOTE           = 1;
-    private static final int ACCESS_REQUEST_WORKER    = 2;
-    private static final int NOTIFICAR_VOTO_WORKER    = 3;
+
+    private static final int ACCESS_REQUEST_WORKER    = 0;
+    private static final int VOTING_WORKER            = 1;
     
 
     private volatile boolean mostrandoPantallaEnvio = false;
@@ -54,10 +50,7 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
     private SwingWorker tareaEnEjecucion;
     private Evento votoEvento;
     private AppletFirma appletFirma;
-    private Operacion operation = null;
-    private File directorioArchivoVoto;
-    private SMIMEMessageWrapper documentSMIME;
-    private PKCS10WrapperClient pkcs10WrapperClient;
+    private SMIMEMessageWrapper smimeMessage;
     
     public VotacionDialog(java.awt.Frame parent, 
             boolean modal, final AppletFirma appletFirma) {
@@ -68,7 +61,6 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
         setLocationRelativeTo(null);       
         initComponents();
         votoEvento = appletFirma.getOperacionEnCurso().getEvento();
-        this.operation = appletFirma.getOperacionEnCurso();
         addWindowListener(new WindowAdapter() {
             public void windowClosed(WindowEvent e) {
                 logger.debug("VotacionDialog window closed event received");
@@ -301,7 +293,7 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
             String fromUser = Contexto.INSTANCE.getString("electorLbl");
             String asuntoMensaje = ASUNTO_MENSAJE_SOLICITUD_ACCESO + 
                 votoEvento.getEventoId();
-            documentSMIME = DNIeSignedMailGenerator.genMimeMessage(fromUser, 
+            smimeMessage = DNIeSignedMailGenerator.genMimeMessage(fromUser, 
                     NOMBRE_DESTINATARIO, votoEvento.getAccessRequestJSON().toString(),
                     password.toCharArray(), asuntoMensaje, null);
 
@@ -309,12 +301,12 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
             //hasta que no se firma al menos una vez
             votoEvento.setUsuario(Contexto.INSTANCE.getUsuario());
 
+            X509Certificate accesRequestServerCert = Contexto.INSTANCE.
+                    getAccessControl().getCertificate();
+            tareaEnEjecucion = new AccessRequestWorker(ACCESS_REQUEST_WORKER, 
+                    smimeMessage, votoEvento, accesRequestServerCert, this);
+            tareaEnEjecucion.execute();
 
-            X509Certificate timeStampCert = PreconditionsCheckerDialog.
-                    getTimeStampCert(operation.getUrlServer());              
-            new TimeStampWorker(TIMESTAMP_ACCESS_REQUEST, operation.getUrlTimeStampServer(),
-                    this, documentSMIME.getTimeStampRequest(),
-                    timeStampCert).execute();
         } catch (Exception ex) {
             mostrarPantallaEnvio(false);
             logger.error(ex.getMessage(), ex);
@@ -332,21 +324,24 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
         progressLabel.setText("<html><b>" + Contexto.INSTANCE.getString(
                 "notificandoCentroControlLabel") +"</b></html>");
         mostrarPantallaEnvio(true);
-        this.pkcs10WrapperClient = pkcs10WrapperClient;
-        String votoJSON = votoEvento.getAccessRequestJSON().toString();
-        /*File votoFirmado = new File (
-                directorioArchivoVoto.getAbsolutePath() 
-                + File.separator + getString("TIMESTAMPED_VOTE_SMIME_FILE"));*/
+        String textToSign = votoEvento.getVoteJSON().toString();
         try {
-            documentSMIME = pkcs10WrapperClient.genMimeMessage(
-                    votoEvento.getHashCertificadoVotoBase64(), 
-                    StringUtils.getCadenaNormalizada(votoEvento.getCentroControl().getNombre()),
-                    votoJSON, Contexto.INSTANCE.getString("asuntoVoto"), null);
-            X509Certificate timeStampCert = PreconditionsCheckerDialog.
-                        getTimeStampCert(operation.getUrlServer());              
-            new TimeStampWorker(TIMESTAMP_VOTE, operation.getUrlTimeStampServer(),
-                    this, documentSMIME.getTimeStampRequest(),
-                    timeStampCert).execute();
+            String fromUser = votoEvento.getHashCertificadoVotoBase64();
+            String toUser = StringUtils.getCadenaNormalizada(
+                    votoEvento.getCentroControl().getNombre());
+            String msgSubject = Contexto.INSTANCE.getString("asuntoVoto");
+            smimeMessage = pkcs10WrapperClient.genMimeMessage(fromUser, toUser, 
+                    textToSign, msgSubject, null);
+  
+            //X509Certificate controlCenterCert = Contexto.INSTANCE.
+            //        getControlCenter().getCertificate();
+            
+            String urlVoteService = votoEvento.getUrlRecolectorVotosCentroControl();
+            tareaEnEjecucion = new SMIMESignedSenderWorker(VOTING_WORKER, 
+                    smimeMessage, urlVoteService, pkcs10WrapperClient.
+                    getKeyPair(), null, this);
+            tareaEnEjecucion.execute();
+
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
@@ -355,7 +350,7 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
         }
     }
     
-    @Override  public void process(List<String> messages) {
+    @Override  public void processVotingSystemWorkerMsg(List<String> messages) {
         logger.debug(" - process: " + messages.toArray().toString());
         progressLabel.setText(messages.toArray().toString());
     }
@@ -364,83 +359,40 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
                 " - worker: " + worker.getClass().getSimpleName() + 
                 " - workerId:" + worker.getId());
+        Respuesta respuesta = worker.getRespuesta();
         switch(worker.getId()) {
-            case TIMESTAMP_ACCESS_REQUEST:
-                if(Respuesta.SC_OK == worker.getStatusCode()) {
-                    try {
-                        documentSMIME.setTimeStampToken((TimeStampWorker)worker);
-                        X509Certificate accesRequestServerCert = 
-                                PreconditionsCheckerDialog.getCert(
-                                votoEvento.getControlAcceso().getServerURL());
-                        tareaEnEjecucion = new AccessRequestLauncherWorker(
-                                ACCESS_REQUEST_WORKER, documentSMIME, 
-                                votoEvento, accesRequestServerCert, this);
-                        tareaEnEjecucion.execute();
-                    } catch (Exception ex) {
-                        logger.error(ex.getMessage(), ex);
-                        MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                        errorDialog.setMessage(ex.getMessage(), 
-                                Contexto.INSTANCE.getString("errorLbl"));
-                    }
-                } else {
-                    mostrarPantallaEnvio(false);
-                    MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                    errorDialog.setMessage(worker.getMessage(), 
-                            Contexto.INSTANCE.getString("errorLbl"));
-                }
-                break;
             case ACCESS_REQUEST_WORKER:
                 if (Respuesta.SC_OK == worker.getStatusCode()) {  
-                    notificarCentroControl(((AccessRequestLauncherWorker)worker).
+                    notificarCentroControl(((AccessRequestWorker)worker).
                         getPKCS10WrapperClient(), votoEvento);
                 } else {
-                    appletFirma.responderCliente(
-                            worker.getStatusCode(), worker.getMessage());
+                    appletFirma.responderCliente(worker.getStatusCode(), 
+                            worker.getMessage());
                     dispose();
                 }
                 break;
-            case TIMESTAMP_VOTE:
-                if(Respuesta.SC_OK == worker.getStatusCode()) {
+            case VOTING_WORKER:
+                if (Respuesta.SC_OK == worker.getStatusCode()) {  
                     try {
-                        X509Certificate serverCert = PreconditionsCheckerDialog.getCert(
-                            votoEvento.getCentroControl().getServerURL());
-                        documentSMIME.setTimeStampToken((TimeStampWorker)worker);
-                        tareaEnEjecucion = new NotificarVotoWorker(
-                            NOTIFICAR_VOTO_WORKER, votoEvento, 
-                            votoEvento.getUrlRecolectorVotosCentroControl(), serverCert, 
-                            documentSMIME, pkcs10WrapperClient, this);
-                        tareaEnEjecucion.execute();
+                        SMIMEMessageWrapper validatedVote = respuesta.getSmimeMessage();
+                        ReciboVoto reciboVoto = new ReciboVoto(
+                                Respuesta.SC_OK, validatedVote, votoEvento);
+                        respuesta.setReciboVoto(reciboVoto);
+                        reciboVoto.setVoto(votoEvento);
+                        Contexto.INSTANCE.addReceipt(
+                            votoEvento.getHashCertificadoVotoBase64(), reciboVoto);
+                        appletFirma.responderCliente(
+                            worker.getStatusCode(), worker.getMessage());
                     } catch (Exception ex) {
                         logger.error(ex.getMessage(), ex);
-                        MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                        errorDialog.setMessage(ex.getMessage(), 
-                                Contexto.INSTANCE.getString("errorLbl"));
+                       appletFirma.responderCliente(Operacion.SC_ERROR_ENVIO_VOTO, 
+                            ex.getMessage());
                     }
                 } else {
-                    mostrarPantallaEnvio(false);
-                    MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                    errorDialog.setMessage(worker.getMessage(), 
-                            Contexto.INSTANCE.getString("errorLbl"));
-                }
-                break;
-            case NOTIFICAR_VOTO_WORKER:
-                ReciboVoto recibo = new ReciboVoto();
-                if (Respuesta.SC_OK == worker.getStatusCode()) {   
-                    recibo = ((NotificarVotoWorker)worker).getReciboVoto();
-                    /*
-                    SMIMEMessageWrapper votoValidado = Encryptor.decryptSMIMEMessage(
-                            recibo.getEncryptedSMIMEMessage(), 
-                         PKCS10WrapperClient.getCertificate(), 
-                         PKCS10WrapperClient.getPrivateKey())*/
-                    appletFirma.responderCliente(
-                            worker.getStatusCode(), worker.getMessage());
-                } else {
                     logger.error(" - Error enviando voto: " + worker.getMessage());
-                    appletFirma.responderCliente(Operacion.SC_ERROR_ENVIO_VOTO, null);
+                    appletFirma.responderCliente(Operacion.SC_ERROR_ENVIO_VOTO, 
+                            worker.getMessage());
                 }
-                recibo.setVoto(votoEvento);
-                Contexto.INSTANCE.addReceipt(
-                        votoEvento.getHashCertificadoVotoBase64(), recibo);
                 dispose();
                 break;
         }

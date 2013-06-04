@@ -65,7 +65,7 @@ public enum ContextoPruebas {
     private PrivateKey rootCAPrivateKey;
     private X509Certificate rootCACert;
     private ActorConIP centroControl;
-    private ActorConIP controlAcceso;
+    private ActorConIP accessControl;
     
     private Evento evento = null;
     private UserBaseSimulationData userBaseData = null;
@@ -167,15 +167,15 @@ public enum ContextoPruebas {
     }
 
     /**
-     * @return the controlAcceso
+     * @return the accessControl
      */
-    public ActorConIP getControlAcceso() {
-        return controlAcceso;
+    public ActorConIP getAccessControl() {
+        return accessControl;
     }
     
     public String getUrlControlAccesoCertChain() {
         logger.debug(" --- getUrlControlAccesoCertChain --- ");
-        return controlAcceso.getServerURL() + "/certificado/cadenaCertificacion";
+        return accessControl.getServerURL() + "/certificado/cadenaCertificacion";
     }
     
     private PKIXParameters getSessionPKIXParametersFromWeb() 
@@ -196,10 +196,10 @@ public enum ContextoPruebas {
     
     public PKIXParameters getSessionPKIXParameters() throws Exception {
             logger.debug(" --- getAccessControlPKIXParameters --- ");
-        if(controlAcceso == null) return null;
+        if(accessControl == null) return null;
         if(sessionPKIXParams == null) {
             TrustAnchor anchorTestSession = new TrustAnchor(rootCACert, null);
-            Set<TrustAnchor> anchors = controlAcceso.getTrustAnchors();
+            Set<TrustAnchor> anchors = accessControl.getTrustAnchors();
             anchors.add(anchorTestSession);
             sessionPKIXParams = new PKIXParameters(anchors);
             sessionPKIXParams.setRevocationEnabled(false);
@@ -209,10 +209,11 @@ public enum ContextoPruebas {
     
 
     /**
-     * @param aActorConIP the controlAcceso to set
+     * @param aActorConIP the accessControl to set
      */
     public void setControlAcceso(ActorConIP aActorConIP) {
-        controlAcceso = aActorConIP;
+        accessControl = aActorConIP;
+        Contexto.INSTANCE.setAccessControl(accessControl);
     }
            
     /**
@@ -227,8 +228,8 @@ public enum ContextoPruebas {
      */
     public void setCentroControl(ActorConIP aCentroControl) {
         this.centroControl = aCentroControl;
-        if(controlAcceso == null) return;
-        controlAcceso.getCentrosDeControl().add(centroControl);
+        if(accessControl == null) return;
+        accessControl.getCentrosDeControl().add(centroControl);
     }
 
     /**
@@ -318,8 +319,8 @@ public enum ContextoPruebas {
     }
         
     public String getVotingEventURL(Long eventoId) {
-        if(controlAcceso == null) return null;
-        String serverURL = controlAcceso.getServerURL();
+        if(accessControl == null) return null;
+        String serverURL = accessControl.getServerURL();
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         return serverURL + "eventoVotacion/" +eventoId;
     }
@@ -330,13 +331,22 @@ public enum ContextoPruebas {
     }
     
     public String getRootCAServiceURL() {
-        if(controlAcceso == null) return null;
-        String serverURL = controlAcceso.getServerURL();
+        if(accessControl == null) return null;
+        String serverURL = accessControl.getServerURL();
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         return serverURL + "certificado/addCertificateAuthority";
     }
 
     public static String getURLAsociarActorConIP (String serverURL) {
+        while(serverURL.endsWith("/")) {
+            serverURL = serverURL.substring(0, serverURL.length() - 1);
+        }
+        return serverURL + "/subscripcion";
+    }
+    
+    public String getURLAsociarActorConIP () {
+        if(accessControl == null) return null;
+        String serverURL = accessControl.getServerURL();
         while(serverURL.endsWith("/")) {
             serverURL = serverURL.substring(0, serverURL.length() - 1);
         }
@@ -349,8 +359,8 @@ public enum ContextoPruebas {
     }
     
     public String getURLGuardarEventoParaVotar() {
-        if(controlAcceso == null) return null;
-        String serverURL = controlAcceso.getServerURL();
+        if(accessControl == null) return null;
+        String serverURL = accessControl.getServerURL();
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         return serverURL + "eventoVotacion";
     }
@@ -366,12 +376,18 @@ public enum ContextoPruebas {
     }
        
     public String getClaimServiceURL() {        
-        if (controlAcceso == null) return null;
-        String serverURL = controlAcceso.getServerURL();
+        if (accessControl == null) return null;
+        String serverURL = accessControl.getServerURL();
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         return serverURL + "eventoReclamacion";
     }
     
+    public String getCancelEventURL() {
+        if (accessControl == null) return null;
+        String serverURL = accessControl.getServerURL();
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "evento/cancelled";
+    }
     
     public static String getSignManifestURL(String serverURL) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
@@ -384,8 +400,8 @@ public enum ContextoPruebas {
     }
     
     public String getURLAnulacionVoto() {
-        if (controlAcceso == null) return null;
-        String serverURL = controlAcceso.getServerURL();
+        if (accessControl == null) return null;
+        String serverURL = accessControl.getServerURL();
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         return serverURL + "anuladorVoto";
     }
@@ -395,8 +411,8 @@ public enum ContextoPruebas {
     }
     
     public String getURLAccessRequest() {
-        if(controlAcceso == null) return null;
-        String serverURL = controlAcceso.getServerURL();
+        if(accessControl == null) return null;
+        String serverURL = accessControl.getServerURL();
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         return serverURL + "solicitudAcceso";
     }
@@ -413,15 +429,15 @@ public enum ContextoPruebas {
     
     
     public String getUrlRepresentativeService() {
-        if (controlAcceso == null) return null;
-        String serverURL = controlAcceso.getServerURL();
+        if (accessControl == null) return null;
+        String serverURL = accessControl.getServerURL();
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         return serverURL + "representative";
     }
     
     public String getUrlTimeStampServer() {
-        if (controlAcceso == null) return null;
-        String serverURL = controlAcceso.getServerURL();
+        if (accessControl == null) return null;
+        String serverURL = accessControl.getServerURL();
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         return serverURL + "timeStamp";
     }
@@ -432,8 +448,8 @@ public enum ContextoPruebas {
     }
     
     public String getUrlSubmitClaims() {
-        if (controlAcceso == null) return null;
-        String serverURL = controlAcceso.getServerURL();
+        if (accessControl == null) return null;
+        String serverURL = accessControl.getServerURL();
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         return serverURL + "recolectorReclamacion";
     }
@@ -444,8 +460,8 @@ public enum ContextoPruebas {
     }
     
     public String getUrlrepresentativeDelegation() {
-        if (controlAcceso == null) return null;
-        String serverURL = controlAcceso.getServerURL();
+        if (accessControl == null) return null;
+        String serverURL = accessControl.getServerURL();
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         return serverURL + "representative/userSelection";
     }

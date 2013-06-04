@@ -1,5 +1,6 @@
 package org.sistemavotacion.test.simulation;
 
+import org.sistemavotacion.test.modelo.SimulationData;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;

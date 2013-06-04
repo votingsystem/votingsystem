@@ -1,5 +1,6 @@
 package org.sistemavotacion.test.simulation;
 
+import org.sistemavotacion.test.modelo.SimulationData;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -16,6 +17,7 @@ import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.simulation.launcher.EncryptorLauncher;
+import org.sistemavotacion.test.util.SimulationUtils;
 import org.sistemavotacion.util.NifUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.worker.InfoGetterWorker;
@@ -33,12 +35,14 @@ public class EncryptionSimulator extends Simulator<SimulationData>
         
     private static Logger logger = LoggerFactory.getLogger(EncryptionSimulator.class);
     
+    private static final int ACCESS_CONTROL_GETTER_WORKER = 0;
+    
     private final ExecutorService requestExecutor;
     private static CompletionService<Respuesta> requestCompletionService;
     
     List<String> representativeNifList = new ArrayList<String>();
     
-    private final CountDownLatch countDownLatch = new CountDownLatch(1); // just one time
+    private final CountDownLatch countDownLatch = new CountDownLatch(1);
     private String requestURL = null;
     private SimulationData simulationData = null;
     
@@ -62,7 +66,7 @@ public class EncryptionSimulator extends Simulator<SimulationData>
         String urlInfoServer = ContextoPruebas.getURLInfoServidor(
                 simulationData.getAccessControlURL());
         logger.debug("init - urlInfoServer: " + urlInfoServer);
-        new InfoGetterWorker(null, urlInfoServer, null, this).execute();
+        new InfoGetterWorker(ACCESS_CONTROL_GETTER_WORKER, urlInfoServer, null, this).execute();
         countDownLatch.await();
         finish();
     }
@@ -146,7 +150,7 @@ public class EncryptionSimulator extends Simulator<SimulationData>
         logger.debug("finish");
         simulationData.setFinish(System.currentTimeMillis());
         if(timer != null) timer.stop();
-        requestExecutor.shutdownNow();       
+        if(requestExecutor != null) requestExecutor.shutdownNow();       
         if(simulationListener != null) {           
             simulationListener.setSimulationResult(this);
         } else { 
@@ -167,38 +171,30 @@ public class EncryptionSimulator extends Simulator<SimulationData>
         return simulationData;
     }
 
-    @Override
-    public void process(List<String> messages) { }
+    @Override public void processVotingSystemWorkerMsg(List<String> messages) {}
 
-    @Override
-    public void showResult(VotingSystemWorker worker) {         
+    @Override public void showResult(VotingSystemWorker worker) {  
+        logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
+            " - worker: " + worker.getClass().getSimpleName() + 
+            " - workerId:" + worker.getId());
+        String msg = null;
         if(Respuesta.SC_OK == worker.getStatusCode()) {
             try {
                 ActorConIP accessControl = ActorConIP.parse(worker.getMessage());
-                if(ActorConIP.EnvironmentMode.TEST !=  
-                            accessControl.getEnvironmentMode()) {
-                    String msg = "SERVER NOT IN TEST MODE. Server mode:" + 
-                            accessControl.getEnvironmentMode();
-                    logger.error("### ERROR - " + msg);
-                    addErrorMsg(msg);
-                    countDownLatch.countDown();
+                msg = SimulationUtils.checkActor(accessControl, ActorConIP.Tipo.CONTROL_ACCESO);
+                if(msg == null) {
+                    ContextoPruebas.INSTANCE.setControlAcceso(accessControl);
+                    launchSimulationThreads();
+                    return;
                 }
-                ContextoPruebas.INSTANCE.setControlAcceso(accessControl);
-                launchSimulationThreads();
             } catch(Exception ex) {
                 logger.error(ex.getMessage(), ex);
-                String msg = "ERROR GETTING ACCESS CONTROL INFO:" + 
-                           ex.getMessage(); 
-                logger.error("### ERROR - " + msg);
-                addErrorMsg(msg);
-                countDownLatch.countDown();
+                msg = ex.getMessage(); 
             }
-        } else {
-            String msg = "ERROR GETTING ACCESS CONTROL INFO:" +  worker.getMessage(); 
-            logger.error("### ERROR - " + msg);
-            addErrorMsg(msg);
-            countDownLatch.countDown();
-        }
+        } else msg = worker.getMessage(); 
+        logger.error("###ERROR - ACCESS_CONTROL_GETTER_WORKER: " + msg);
+        addErrorMsg(msg);
+        countDownLatch.countDown();
     }
     
 

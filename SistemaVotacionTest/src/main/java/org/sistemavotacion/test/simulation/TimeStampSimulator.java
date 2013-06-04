@@ -1,5 +1,6 @@
 package org.sistemavotacion.test.simulation;
 
+import org.sistemavotacion.test.modelo.SimulationData;
 import java.io.File;
 import org.sistemavotacion.test.simulation.launcher.TimeStampLauncher;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.concurrent.Future;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.modelo.Respuesta;
+import org.sistemavotacion.test.util.SimulationUtils;
 import org.sistemavotacion.util.NifUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.worker.InfoGetterWorker;
@@ -30,13 +32,15 @@ public class TimeStampSimulator extends Simulator<SimulationData>
         
     private static Logger logger = LoggerFactory.getLogger(TimeStampSimulator.class);
     
+    private static final int ACCESS_CONTROL_GETTER_WORKER  = 0;
+    
     public static final int MAX_PENDING_RESPONSES = 10;
        
     private final ExecutorService requestExecutor;
     private static CompletionService<Respuesta> requestCompletionService;
     
     
-    private final CountDownLatch countDownLatch = new CountDownLatch(1); // just one time
+    private final CountDownLatch countDownLatch = new CountDownLatch(1);
     
     private SimulatorListener simulationListener;
     private SimulationData simulationData;
@@ -54,12 +58,13 @@ public class TimeStampSimulator extends Simulator<SimulationData>
         String serverInfoURL = ContextoPruebas.getURLInfoServidor(
                 simulationData.getAccessControlURL());
         logger.debug("init - serverInfoURL: " + serverInfoURL);
-        new InfoGetterWorker(null, serverInfoURL, null, this).execute();
+        new InfoGetterWorker(ACCESS_CONTROL_GETTER_WORKER, 
+                serverInfoURL, null, this).execute();
         countDownLatch.await();
         finish();
     }
     
-    private void launchBackgroundProcesses() {
+    private void initExecutors() {
         simulationData.setBegin(System.currentTimeMillis());
         requestExecutor.execute(new Runnable() {
             @Override
@@ -84,7 +89,7 @@ public class TimeStampSimulator extends Simulator<SimulationData>
     }
     
     private void launchRequests () throws Exception {
-        logger.debug(" - launchRequests - NumRequestsProjected: " + 
+        logger.debug("--------------- launchRequests - NumRequestsProjected: " + 
                 simulationData.getNumRequestsProjected());
         if(simulationData.getNumRequestsProjected() == 0) {
             logger.debug("launchRequests - WITHOUT REQUESTS PROJECTED");
@@ -106,7 +111,8 @@ public class TimeStampSimulator extends Simulator<SimulationData>
     
     private void readResponses() throws InterruptedException, 
             ExecutionException, Exception {
-        logger.debug("--------------------- readResponses ");
+        logger.debug("---------------- readResponses - NumRequestsProjected: " + 
+                simulationData.getNumRequestsProjected());
         for (int v = 0; v < simulationData.getNumRequestsProjected(); v++) {
             Future<Respuesta> f = requestCompletionService.take();
             final Respuesta respuesta = f.get();
@@ -119,7 +125,7 @@ public class TimeStampSimulator extends Simulator<SimulationData>
                 addErrorMsg(respuesta.getMensaje());
             }
         }
-        finish();
+        countDownLatch.countDown();
     }
     
 
@@ -145,56 +151,59 @@ public class TimeStampSimulator extends Simulator<SimulationData>
         }
     }
 
-    @Override
-    public void process(List<String> messages) { }
+    @Override public void processVotingSystemWorkerMsg(List<String> messages) {}
 
-    @Override
-    public void showResult(VotingSystemWorker worker) {         
-        if(Respuesta.SC_OK == worker.getStatusCode()) {
-            try {
-                ActorConIP accessControl = ActorConIP.parse(worker.getMessage());
-                if(ActorConIP.Tipo.CONTROL_ACCESO != accessControl.getTipo()) {
-                    logger.error("SERVER NOT ACCESS CONTROL");
-                    return;
+    @Override public void showResult(VotingSystemWorker worker) {  
+        switch(worker.getId()) {
+            case ACCESS_CONTROL_GETTER_WORKER:  
+                String msg = null;
+                if(Respuesta.SC_OK == worker.getStatusCode()) {
+                    try {
+                        ActorConIP accessControl = ActorConIP.parse(worker.getMessage());
+                        msg = SimulationUtils.checkActor(
+                                accessControl, ActorConIP.Tipo.CONTROL_ACCESO);
+                        if(msg == null) {
+                            ContextoPruebas.INSTANCE.setControlAcceso(accessControl);
+                            initExecutors();
+                            return;
+                        }
+                    } catch(Exception ex) {
+                        logger.error(ex.getMessage(), ex);
+                        msg = "ERROR GETTING ACCESS REQUEST DATA: " + ex.getMessage();
+                    }
+                } else {
+                    msg = "ERROR GETTING ACCESS REQUEST DATA: " + worker.getMessage();
                 }
-                if(ActorConIP.EnvironmentMode.TEST !=  
-                        accessControl.getEnvironmentMode()) {
-                    String msg = "SERVER NOT IN TEST MODE. Server mode:" + 
-                            accessControl.getEnvironmentMode();
-                    addErrorMsg(msg);
-                    countDownLatch.countDown();
-                    return;
-                }
-                launchBackgroundProcesses();
-            } catch(Exception ex) {
-                logger.error(ex.getMessage(), ex);
-                String msg = "ERROR GETTING ACCESS REQUEST DATA: " + ex.getMessage();
+                logger.error(msg);
                 addErrorMsg(msg);
                 countDownLatch.countDown();
-            }
-        } else {
-            String msg = "ERROR GETTING ACCESS REQUEST DATA: " + worker.getMessage();
-            addErrorMsg(msg);
-            countDownLatch.countDown();
+            break;
         }
+
     }
 
-    @Override
-    public SimulationData getData() {
+    @Override public SimulationData getData() {
         return simulationData;
     }
 
-    @Override
-    public SimulationData finish() throws Exception {
-        logger.debug("--------------- SIMULATION RESULT----------------------");    
+    @Override public SimulationData finish() throws Exception {
         simulationData.setFinish(System.currentTimeMillis());
-        requestExecutor.shutdownNow();
-        logger.debug("duracionStr: " + simulationData.getDurationStr());
-        logger.debug("solicitudesOK: " + simulationData.getNumRequestsOK());
-        logger.debug("solicitudesERROR: " + simulationData.getNumRequestsERROR());
-        logger.debug("------------------- FINISHED --------------------------");
-        if(simulationListener == null) System.exit(0);
-        else simulationListener.setSimulationResult(this);
+        if(requestExecutor != null) requestExecutor.shutdownNow();
+        if(simulationListener != null) {           
+            simulationListener.setSimulationResult(this);
+        } else {
+            logger.debug("--------------- SIMULATION RESULT------------------");
+            logger.debug("duracionStr: " + simulationData.getDurationStr());
+            logger.debug("solicitudesOK: " + simulationData.getNumRequestsOK());
+            logger.debug("solicitudesERROR: " + simulationData.getNumRequestsERROR());  
+            String errorsMsg = getFormattedErrorList();
+            if(errorsMsg != null) {
+                logger.info(" ************* " + getErrorsList().size() + " ERRORS: \n" + 
+                            errorsMsg);
+            }
+            logger.debug("------------------- FINISHED --------------------------");
+            System.exit(0);
+        }
         return simulationData;
     }
     

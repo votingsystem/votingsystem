@@ -1,13 +1,22 @@
 {"accessControlURL":"http://localhost:8080/SistemaVotacionControlAcceso",
  "controlCenterURL":"http://localhost:8081/SistemaVotacionCentroControl",
  "maxPendingResponses":10,
- "dateBeginDocument":"2013-05-25 11:11:11",
- "dateFinishDocument":"2013-07-26 12:12:12",
+ "event":{
+    "opciones":[
+        {"contenido":"si"}, 
+        {"contenido":"depende"}, 
+        {"contenido":"mañana"}],
+    "asunto":"Asunto Votación Pruebas",
+    "contenido":"<span style=\"color: green;\">Una &#241; &#241; &#241; fresca mañana de mayo, practicando con el sistema de votación<\/span><br/><span style=\"font-weight: bold;\">Probando varios tipos de letra<\/span><br/><span style=\"color: blue;\">Para <span style=\"color: red;\">comprobar<\/span> la firmas de PDFs<\/span><br/>",        
+    "fechaInicio":"2013-05-25 11:11:11",
+    "fechaFin":"2013-07-26 12:12:12"
+ },
+ "whenFinishChangeEventStateTo":"FINALIZADO", 
  "userBaseData":{
         "userIndex":1,
-        "numRepresentatives":0,                
-        "numUsersWithoutRepresentative":5,
-        "numVotesUsersWithoutRepresentative":5, 
+        "numRepresentatives":0,     
+        "numVotesRepresentatives":0,
+        "numVotesUsersWithoutRepresentative":17, 
         "numUsersWithRepresentative":0, 
         "numVotesUsersWithRepresentative":0}
 }

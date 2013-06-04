@@ -22,8 +22,8 @@ class EncryptorController {
 	def grailsApplication
 
     def index() { 
-		if(! Environment.TEST.equals(Environment.current)) {
-			String msg = message(code: "msg.servicioEntornoTest")
+		if(! Environment.DEVELOPMENT.equals(Environment.current)) {
+			String msg = message(code: "serviceDevelopmentModeMsg")
 			log.error msg
 			response.status = Respuesta.SC_ERROR_PETICION
 			render msg
@@ -36,14 +36,14 @@ class EncryptorController {
 			render msg
 			return false
 		}
-		log.debug "===============****¡¡¡¡¡ TEST Environment !!!!!****=================== "
+		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		byte[] solicitud = params.requestBytes
-		log.debug(">>>>>>>>>>> Solicitud" + new String(solicitud))
+		//log.debug("Solicitud" + new String(solicitud))
 		
 		def mensajeJSON = JSON.parse(new String(solicitud))
 		
 		if(!mensajeJSON.publicKey) {
-			String msg = "REQUEST WITHOUT PUBLIC KEY"
+			String msg = message(code: "publicKeyMissingErrorMsg")
 			log.error msg
 			response.status = Respuesta.SC_ERROR_PETICION
 			render msg

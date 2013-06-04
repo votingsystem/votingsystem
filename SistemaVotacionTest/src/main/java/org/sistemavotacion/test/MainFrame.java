@@ -13,6 +13,7 @@ import java.util.Scanner;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
+import org.sistemavotacion.Contexto;
 import org.sistemavotacion.herramientavalidacion.VisualizadorDeEventoFirmadoDialog;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.CertUtil;
@@ -323,7 +324,7 @@ public class MainFrame extends JFrame  implements KeyListener,
                 break;
             case CONECTADO_CONTROL_ACCESO:
                 InfoServidorDialog infoServidorDialog = new InfoServidorDialog(
-                    getFrames()[0], false, ContextoPruebas.INSTANCE.getControlAcceso());
+                    getFrames()[0], false, ContextoPruebas.INSTANCE.getAccessControl());
                 infoServidorDialog.setVisible(true);
                 break;
         }
@@ -525,8 +526,7 @@ public class MainFrame extends JFrame  implements KeyListener,
         });
     }
             
-    @Override
-    public void process(List<String> messages) {
+    @Override public void processVotingSystemWorkerMsg(List<String> messages) {
         //mostrarMensajeUsuario(messages.iterator().next());
     }
     

@@ -42,7 +42,7 @@ public class InfoGetterWorker extends SwingWorker<Respuesta, String>
     
     @Override//on the EDT
     protected void process(List<String> messages) {
-        workerListener.process(messages);
+        workerListener.processVotingSystemWorkerMsg(messages);
     }
     
     @Override protected Respuesta doInBackground() throws Exception{

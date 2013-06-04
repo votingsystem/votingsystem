@@ -1,6 +1,6 @@
 package org.sistemavotacion.test.simulation;
 
-import org.sistemavotacion.test.simulation.launcher.RepresentingRequestLauncher;
+import org.sistemavotacion.test.simulation.launcher.RepresentativeRequestLauncher;
 import org.sistemavotacion.test.simulation.launcher.RepresentativeDelegationLauncher;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +36,7 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
     
     private UserBaseSimulationData simulationData;
     
-    private final CountDownLatch countDownLatch = new CountDownLatch(1); // just one time
+    private final CountDownLatch countDownLatch = new CountDownLatch(1);
     
     List<String> representativeNifList = new ArrayList<String>();
     List<String> userWithRepresentativeList = new ArrayList<String>();
@@ -89,8 +89,8 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
 
     private void crearMockDNIeUsersWithoutRepresentative() {
         logger.debug("crearMockDNIeUsersWithoutRepresentative - users without representative:" +  
-                simulationData.getNumUsersWithoutRepresentative());
-        for(int i = 0; i < simulationData.getNumUsersWithoutRepresentative(); i++ ) {
+                simulationData.getNumVotesUsersWithoutRepresentative());
+        for(int i = 0; i < simulationData.getNumVotesUsersWithoutRepresentative(); i++ ) {
             int userIndex = new Long(simulationData.getAndIncrementUserIndex()).intValue();
             try {
                 String userNif = NifUtils.getNif(userIndex);
@@ -100,7 +100,7 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
                 logger.error(ex.getMessage(), ex);
             }
             if((i % 50) == 0) logger.debug("Created " + i + " of " + 
-                    simulationData.getNumUsersWithoutRepresentative() + " mock DNIe certs");
+                    simulationData.getNumVotesUsersWithoutRepresentative() + " mock DNIe certs");
         }
         countDownLatch.countDown();
     }
@@ -117,7 +117,7 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
             if((simulationData.getNumRepresentativeRequests() - 
                     simulationData.getNumRepresentativeRequestsColected()) < 
                     MAX_PENDING_RESPONSES) {
-                requestCompletionService.submit(new RepresentingRequestLauncher(
+                requestCompletionService.submit(new RepresentativeRequestLauncher(
                         NifUtils.getNif(new Long(simulationData.
                         getAndIncrementUserIndex()).intValue())));
                 simulationData.getAndIncrementNumRepresentativeRequests();
@@ -221,7 +221,7 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
         simulationData.setUsersWithRepresentativeList(userWithRepresentativeList);
         simulationData.setUsersWithoutRepresentativeList(userWithoutRepresentativeList);
         simulationData.setRepresentativeNifList(representativeNifList);
-        requestExecutor.shutdownNow();
+        if(requestExecutor != null) requestExecutor.shutdownNow();
         if(simulationListener != null){
             simulationListener.setSimulationResult(this);
         } else {

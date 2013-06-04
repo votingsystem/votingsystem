@@ -155,14 +155,14 @@ class CertificadoController {
 	 * @return Si todo va bien devuelve un código de estado HTTP 200.
 	 */
 	def addCertificateAuthority () {
-		if(!Environment.TEST.equals(Environment.current)) {
-			def msg = message(code: "msg.servicioEntornoTest")
+		if(!Environment.DEVELOPMENT.equals(Environment.current)) {
+			def msg = message(code: "serviceDevelopmentModeMsg")
 			log.error msg
 			response.status = Respuesta.SC_ERROR_PETICION
 			render msg
 			return false
 		}
-		log.debug "===============****¡¡¡¡¡ TEST Environment !!!!!****=================== "
+		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		firmaService.deleteTestCerts()
 		Respuesta respuesta = firmaService.addCertificateAuthority(
 			"${request.getInputStream()}".getBytes(), request.getLocale())

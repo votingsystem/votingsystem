@@ -4,6 +4,7 @@ import com.itextpdf.text.pdf.PdfName;
 import iaik.pkcs.pkcs11.Mechanism;
 import java.io.File;
 import java.security.Security;
+import java.security.cert.X509Certificate;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +13,9 @@ import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
 import net.sf.json.JSONObject;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.tsp.TSPAlgorithms;
+import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.ReciboVoto;
 import org.sistemavotacion.modelo.Usuario;
@@ -46,7 +49,7 @@ public enum Contexto {
     public static final String CERT_RAIZ_PATH = "AC_RAIZ_DNIE_SHA1.pem";
     public static final int KEY_SIZE = 1024;
     public static final String SIG_NAME = "RSA";
-    public static final String PROVIDER = "BC";
+    public static final String PROVIDER = BouncyCastleProvider.PROVIDER_NAME;
     public static final String ALIAS_CLAVES = "certificadovoto";
     public static final String PASSWORD_CLAVES = "certificadovoto";
         
@@ -101,6 +104,8 @@ public enum Contexto {
     private final HttpHelper httpHelper = new HttpHelper();
     private ResourceBundle resourceBundle;
     private Map<String, ReciboVoto> receiptMap;
+    private ActorConIP accessControl;
+    private ActorConIP controlCenter;
     
     static {
         CommandMap.setDefaultCommandMap(addCommands(CommandMap.getDefaultCommandMap()));
@@ -135,6 +140,19 @@ public enum Contexto {
     }
 
     public void init(){}
+    
+    public String getURLTimeStampServer() {
+        if(accessControl == null) return null;
+        String serverURL = accessControl.getServerURL();
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "timeStamp";
+    }
+    
+    public X509Certificate getTimeStampServerCert() {
+        if(accessControl == null) return null;
+        return accessControl.getTimeStampCert();
+    }
+    
     
     public ResourceBundle getResourceBundle() {
         return resourceBundle;
@@ -201,6 +219,34 @@ public enum Contexto {
 
     public HttpHelper getHttpHelper() {
         return httpHelper;
+    }
+
+    /**
+     * @return the accessControl
+     */
+    public ActorConIP getAccessControl() {
+        return accessControl;
+    }
+
+    /**
+     * @param accessControl the accessControl to set
+     */
+    public void setAccessControl(ActorConIP accessControl) {
+        this.accessControl = accessControl;
+    }
+
+    /**
+     * @return the controlCenter
+     */
+    public ActorConIP getControlCenter() {
+        return controlCenter;
+    }
+
+    /**
+     * @param controlCenter the controlCenter to set
+     */
+    public void setControlCenter(ActorConIP controlCenter) {
+        this.controlCenter = controlCenter;
     }
 
 }

@@ -1,5 +1,5 @@
 {"accessControlURL":"http://localhost:8080/SistemaVotacionControlAcceso",
- "numRequestsProjected":200,
+ "numRequestsProjected":50,
  "maxPendingResponses":10
 }
 

@@ -2,7 +2,6 @@ package org.sistemavotacion.modelo;
 
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
-import java.text.ParseException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,7 +12,6 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
-import org.apache.http.util.EntityUtils;
 import org.sistemavotacion.seguridad.CertUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

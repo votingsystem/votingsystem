@@ -204,7 +204,8 @@ public class HttpHelper {
     
     public Respuesta sendByteArray(byte[] byteArray, String contentType,
             String serverURL) throws IOException {
-        logger.debug("sendByteArray - serverURL: " + serverURL);
+        logger.debug("sendByteArray - contentType: " + contentType + 
+                " - serverURL: " + serverURL);
         Respuesta respuesta = null;
         try {
             HttpPost httpPost = new HttpPost(serverURL);

@@ -33,6 +33,7 @@ public class PKCS10WrapperClient {
     private static Logger logger = LoggerFactory.getLogger(PKCS10WrapperClient.class);
 
     private PKCS10CertificationRequest csr;
+    private KeyPair keyPair;
     private PrivateKey privateKey;
     private PublicKey publicKey;
     private X509Certificate certificate;
@@ -42,7 +43,7 @@ public class PKCS10WrapperClient {
             String sigName, String provider, String controlAccesoURL, String eventoId,
             String hashCertificadoVotoHEX) throws NoSuchAlgorithmException, 
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
-        KeyPair keyPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
+        keyPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
         privateKey = keyPair.getPrivate();
         publicKey = keyPair.getPublic();
         X500Principal subject = new X500Principal(
@@ -120,6 +121,20 @@ public class PKCS10WrapperClient {
      */
     public PublicKey getPublicKey() {
         return publicKey;
+    }
+
+    /**
+     * @return the keyPair
+     */
+    public KeyPair getKeyPair() {
+        return keyPair;
+    }
+
+    /**
+     * @param keyPair the keyPair to set
+     */
+    public void setKeyPair(KeyPair keyPair) {
+        this.keyPair = keyPair;
     }
 
 }

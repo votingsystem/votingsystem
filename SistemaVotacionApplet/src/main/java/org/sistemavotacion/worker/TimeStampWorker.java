@@ -2,24 +2,19 @@ package org.sistemavotacion.worker;
 
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.Hashtable;
 import java.util.List;
 import javax.swing.SwingWorker;
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSAttributes;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampToken;
@@ -38,11 +33,9 @@ public class TimeStampWorker extends SwingWorker<Respuesta, String>
     private static Logger logger = LoggerFactory.getLogger(TimeStampWorker.class);
 
     private Integer id;
-    private String urlArchivo;
+    private String urlTimeStampServer;
     private VotingSystemWorkerListener workerListener;
     private TimeStampToken timeStampToken = null;
-    private Attribute timeStampAsAttribute = null;
-    private AttributeTable timeStampAsAttributeTable = null;
     private TimeStampRequest timeStampRequest = null;
     private byte[] bytesToken = null;
     private Respuesta respuesta = null;
@@ -50,57 +43,30 @@ public class TimeStampWorker extends SwingWorker<Respuesta, String>
     private X509Certificate timeStampCert = null;
     private SignerInformationVerifier timeStampSignerInfoVerifier;
     
-    private static final String BC = BouncyCastleProvider.PROVIDER_NAME;
-
-    /*public TimeStampWorker(Integer id, String urlArchivo, 
-            VotingSystemWorkerListener workerListener, byte[] digest, 
-            String timeStampRequestAlg) {
+    public TimeStampWorker(Integer id, VotingSystemWorkerListener workerListener, 
+            TimeStampRequest timeStampRequest) throws OperatorCreationException, 
+            Exception {
         this.id = id;
-        this.urlArchivo = urlArchivo;
+        this.urlTimeStampServer = Contexto.INSTANCE.getURLTimeStampServer();
         this.workerListener = workerListener;
-        TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
-        //reqgen.setReqPolicy(m_sPolicyOID);
-        timeStampRequest = reqgen.generate(timeStampRequestAlg, digest);
-    }*/
-    
-    public TimeStampWorker(Integer id, String urlArchivo, 
-            VotingSystemWorkerListener workerListener, 
-            TimeStampRequest timeStampRequest, X509Certificate timeStampServerCert) 
-            throws OperatorCreationException, Exception {
-        this.id = id;
-        this.urlArchivo = urlArchivo;
-        this.workerListener = workerListener;
-        
+        this.timeStampCert = Contexto.INSTANCE.getTimeStampServerCert();
         if(timeStampRequest == null) {
             throw new Exception("timeStampRequest null");
         }
         this.timeStampRequest = timeStampRequest;
-        this.timeStampCert = timeStampServerCert;
         timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().
-                setProvider(BC).build(timeStampCert); 
+                setProvider(Contexto.PROVIDER).build(timeStampCert); 
     }
-    
  
     @Override protected Respuesta doInBackground() throws Exception {
         respuesta = Contexto.INSTANCE.getHttpHelper().
-            sendByteArray(timeStampRequest.getEncoded(), "timestamp-query", urlArchivo);
+            sendByteArray(timeStampRequest.getEncoded(), 
+            "timestamp-query", urlTimeStampServer);
         if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
             bytesToken = respuesta.getBytesArchivo();
-            
             timeStampToken = new TimeStampToken(
                     new CMSSignedData(bytesToken));
-            
             timeStampToken.validate(timeStampSignerInfoVerifier);
-
-            DERObject derObject = new ASN1InputStream(
-                    timeStampToken.getEncoded()).readObject();
-            DERSet derset = new DERSet(derObject);
-            timeStampAsAttribute = new Attribute(PKCSObjectIdentifiers.
-                            id_aa_signatureTimeStampToken, derset);
-            Hashtable hashTable = new Hashtable();
-            hashTable.put(PKCSObjectIdentifiers.
-                        id_aa_signatureTimeStampToken, timeStampAsAttribute);
-            timeStampAsAttributeTable = new AttributeTable(hashTable);
         }
         return respuesta;
     }
@@ -117,19 +83,11 @@ public class TimeStampWorker extends SwingWorker<Respuesta, String>
     
     @Override//on the EDT
     protected void process(List<String> messages) {
-        workerListener.process(messages);
+        workerListener.processVotingSystemWorkerMsg(messages);
     }
     
     public TimeStampToken getTimeStampToken() {
         return timeStampToken;
-    }
-    
-    public Attribute getTimeStampTokenAsAttribute() {
-        return timeStampAsAttribute;
-    }
-    
-    public AttributeTable getTimeStampTokenAsAttributeTable() {
-        return timeStampAsAttributeTable;
     }
 
     public byte[] getBytesToken() {

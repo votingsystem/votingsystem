@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.sistemavotacion.modelo.Respuesta;
-import org.sistemavotacion.test.simulation.SimulationData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +23,6 @@ public class UserBaseSimulationData extends SimulationData {
     private Integer numRepresentatives = 0;
     private Integer numVotesRepresentatives = 0;
 
-    private Integer numUsersWithoutRepresentative =  0;
     private Integer numVotesUsersWithoutRepresentative =  0;
 
     private Integer numUsersWithRepresentative =  0;
@@ -258,20 +256,6 @@ public class UserBaseSimulationData extends SimulationData {
     }
 
     /**
-     * @return the numUsersWithoutRepresentative
-     */
-    public Integer getNumUsersWithoutRepresentative() {
-        return numUsersWithoutRepresentative;
-    }
-
-    /**
-     * @param numUsersWithoutRepresentative the numUsersWithoutRepresentative to set
-     */
-    public void setNumUsersWithoutRepresentative(Integer numUsersWithoutRepresentative) {
-        this.numUsersWithoutRepresentative = numUsersWithoutRepresentative;
-    }
-
-    /**
      * @return the numVotesUsersWithoutRepresentative
      */
     public Integer getNumVotesUsersWithoutRepresentative() {
@@ -374,9 +358,9 @@ public class UserBaseSimulationData extends SimulationData {
         if (dataJSON.containsKey("numRepresentatives")) {
             userBaseData.setNumRepresentatives(dataJSON.getInt("numRepresentatives"));
         }
-        if (dataJSON.containsKey("numUsersWithoutRepresentative")) {
-            userBaseData.setNumUsersWithoutRepresentative(dataJSON.
-                    getInt("numUsersWithoutRepresentative"));
+        if (dataJSON.containsKey("numVotesRepresentatives")) {
+            userBaseData.setNumVotesRepresentatives(
+                    dataJSON.getInt("numVotesRepresentatives"));
         }
         if (dataJSON.containsKey("numVotesUsersWithoutRepresentative")) {
             userBaseData.setNumVotesUsersWithoutRepresentative(dataJSON.

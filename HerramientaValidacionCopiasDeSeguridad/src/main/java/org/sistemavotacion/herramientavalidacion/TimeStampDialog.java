@@ -8,16 +8,14 @@ import java.util.Collection;
 import javax.swing.JFrame;
 import javax.swing.JSeparator;
 import net.miginfocom.swing.MigLayout;
-import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cms.SignerId;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.tsp.GenTimeAccuracy;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.tsp.TimeStampTokenInfo;
 import org.bouncycastle.util.CollectionStore;
+import org.sistemavotacion.Contexto;
 import org.sistemavotacion.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +73,7 @@ public class TimeStampDialog extends javax.swing.JDialog {
                                 + certificateHolder.getSubject() + 
                                 " - serial number" + certificateHolder.getSerialNumber());
                         timeStampToken.validate(new JcaSimpleSignerInfoVerifierBuilder().
-                            setProvider(BouncyCastleProvider.PROVIDER_NAME).build(certificateHolder));
+                            setProvider(Contexto.PROVIDER).build(certificateHolder));
                         logger.debug ("Validation OK");
                         certValidationButton.setVisible(false);
                         validationOk = true;

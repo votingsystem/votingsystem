@@ -21,6 +21,10 @@ public class Operacion {
     private static Logger logger = LoggerFactory.getLogger(Operacion.class);
     
     public static enum Tipo {
+        SOLICITUD_ACCESO(
+                Contexto.INSTANCE.getString("ANULADOR_VOTO")),
+        ANULADOR_VOTO(
+                Contexto.INSTANCE.getString("SOLICITUD_ACCESO")),
         ASOCIAR_CENTRO_CONTROL(
                 Contexto.INSTANCE.getString("ASOCIAR_CENTRO_CONTROL")), 
         CAMBIO_ESTADO_CENTRO_CONTROL_SMIME(

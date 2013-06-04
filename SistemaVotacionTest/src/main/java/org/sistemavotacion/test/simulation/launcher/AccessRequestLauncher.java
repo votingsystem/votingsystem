@@ -15,8 +15,7 @@ import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sistemavotacion.worker.AccessRequestLauncherWorker;
-import org.sistemavotacion.worker.TimeStampWorker;
+import org.sistemavotacion.worker.AccessRequestWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
 
@@ -29,15 +28,14 @@ public class AccessRequestLauncher implements Callable<Respuesta>,
     
     private static Logger logger = LoggerFactory.getLogger(AccessRequestLauncher.class);
 
-    private static final int TIME_STAMP_WORKER        = 0;
-    private static final int ACCESS_REQUEST_WORKER    = 1;
+    private static final int ACCESS_REQUEST_WORKER = 0;
     
     private Respuesta respuesta;
     private Evento evento;
     private String nifFrom;
-    private SMIMEMessageWrapper documentSMIME;
+    private SMIMEMessageWrapper smimeMessage;
     private PKCS10WrapperClient wrapperClient;
-    private final CountDownLatch countDownLatch = new CountDownLatch(1); // just one time
+    private final CountDownLatch countDownLatch = new CountDownLatch(1); 
 
     private String urlAccessRequest = null;
         
@@ -68,20 +66,20 @@ public class AccessRequestLauncher implements Callable<Respuesta>,
                 ContextoPruebas.PASSWORD.toCharArray(),
                 ContextoPruebas.DNIe_SIGN_MECHANISM);
         String accessRequestStr = evento.getAccessRequestJSON().toString();
-        documentSMIME = signedMailGenerator.genMimeMessage(nifFrom, 
+        smimeMessage = signedMailGenerator.genMimeMessage(nifFrom, 
                 evento.getControlAcceso().getNombreNormalizado(), 
                 accessRequestStr, subject, null);
-
-        new TimeStampWorker(TIME_STAMP_WORKER, 
-                ContextoPruebas.INSTANCE.getUrlTimeStampServer(),
-                this, documentSMIME.getTimeStampRequest(), 
-                ContextoPruebas.INSTANCE.getControlAcceso().getTimeStampCert()).execute();
+        
+        X509Certificate accesRequestCert = ContextoPruebas.INSTANCE.
+            getAccessControl().getCertificate();
+        new AccessRequestWorker(ACCESS_REQUEST_WORKER, 
+                    smimeMessage, evento, accesRequestCert, this).execute();
 
         countDownLatch.await();
         return getResult();
     }
     
-    @Override public void process(List<String> list) { }
+    @Override public void processVotingSystemWorkerMsg(List<String> list) { }
 
     @Override public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
@@ -89,32 +87,13 @@ public class AccessRequestLauncher implements Callable<Respuesta>,
                 " - workerId:" + worker.getId());
         respuesta = worker.getRespuesta();
         switch(worker.getId()) {
-            case TIME_STAMP_WORKER:
-                if(Respuesta.SC_OK == worker.getStatusCode()) {
-                    try {
-                        documentSMIME.setTimeStampToken((TimeStampWorker)worker);
-                        X509Certificate accesRequestCert = ContextoPruebas.INSTANCE.
-                            getControlAcceso().getCertificate();
-                        new AccessRequestLauncherWorker(ACCESS_REQUEST_WORKER, 
-                            documentSMIME, evento, accesRequestCert, this).execute();
-                    } catch (Exception ex) {
-                        logger.error(ex.getMessage(), ex);
-                        respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
-                        respuesta.setData("ERROR_ACCESS_REQUEST from: " + nifFrom);
-                        countDownLatch.countDown();
-                    }
-                } else {
-                    respuesta.setData("ERROR_ACCESS_REQUEST from: " + nifFrom);
-                    countDownLatch.countDown();
-                }
-                break;
             case ACCESS_REQUEST_WORKER:
                 if (Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
-                        wrapperClient = ((AccessRequestLauncherWorker)worker).
+                        wrapperClient = ((AccessRequestWorker)worker).
                             getPKCS10WrapperClient();
                         String votoJSON = evento.getVoteJSON().toString();   
-                        documentSMIME = wrapperClient.genMimeMessage(
+                        smimeMessage = wrapperClient.genMimeMessage(
                                 evento.getHashCertificadoVotoBase64(), 
                                 evento.getControlAcceso().getNombreNormalizado(),
                                 votoJSON, "[VOTO]", null);

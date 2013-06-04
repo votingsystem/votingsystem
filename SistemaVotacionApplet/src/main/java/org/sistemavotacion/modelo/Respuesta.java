@@ -1,15 +1,7 @@
 package org.sistemavotacion.modelo;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.security.cert.PKIXParameters;
-import java.util.Date;
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
-import org.sistemavotacion.seguridad.PKCS10WrapperClient;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
-import org.sistemavotacion.smime.SignedMailValidator;
-import org.sistemavotacion.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,14 +30,11 @@ public class Respuesta<T> {
 
     private int codigoEstado;
     private String mensaje;
-    private Operacion operacion;
     private T data;
     private Tipo tipo;
-    private Date fecha;
     private Evento evento;
     private SMIMEMessageWrapper smimeMessage;
     private ReciboVoto reciboVoto;
-    private PKCS10WrapperClient pkcs10WrapperClient;
     private byte[] bytesArchivo;
     private File archivo;
         
@@ -76,47 +65,7 @@ public class Respuesta<T> {
         this.mensaje = mensaje;
         this.bytesArchivo = bytesArchivo;
     }
-    
-        
-    public Respuesta (int codigoEstado, PKCS10WrapperClient pkcs10WrapperClient) {
-        this.codigoEstado = codigoEstado;
-        this.pkcs10WrapperClient = pkcs10WrapperClient;
-    }
-    
-    public Respuesta (int codigoEstado, 
-        SMIMEMessageWrapper recibo, PKIXParameters params) throws Exception {
-        this.codigoEstado = codigoEstado;
-        this.smimeMessage = recibo;
-        SignedMailValidator.ValidationResult validationResult = recibo.verify(params);        
-        if (validationResult.isValidSignature()) {
-            JSONObject resultadoJSON = (JSONObject)JSONSerializer.toJSON(
-                    recibo.getSignedContent());
-            logger.debug("Respuesta - resultadoJSON: " + resultadoJSON.toString());
-            if (resultadoJSON.containsKey("tipoRespuesta")) 
-                tipo = Tipo.valueOf(resultadoJSON.getString("tipoRespuesta"));
-            if (resultadoJSON.containsKey("fecha"))  
-                fecha = DateUtils.getDateFromString(resultadoJSON.getString("fecha"));
-            if (resultadoJSON.containsKey("mensaje"))
-                mensaje = resultadoJSON.getString("mensaje");
-         } else logger.error(" Error en la validación de la respuesta");
-    }
-    
-    public Respuesta (int codigoEstado, SMIMEMessageWrapper recibo) throws Exception {
-        this.codigoEstado = codigoEstado;    
-        this.smimeMessage = recibo;
-        if (recibo.isValidSignature()) {
-            JSONObject resultadoJSON = (JSONObject)JSONSerializer.toJSON(
-                    recibo.getSignedContent());
-            logger.debug("Respuesta - resultadoJSON: " + resultadoJSON.toString());
-            if (resultadoJSON.containsKey("tipoRespuesta")) 
-                tipo = Tipo.valueOf(resultadoJSON.getString("tipoRespuesta"));
-            if (resultadoJSON.containsKey("fecha"))  
-                fecha = DateUtils.getDateFromString(resultadoJSON.getString("fecha"));
-            if (resultadoJSON.containsKey("mensaje"))
-                mensaje = resultadoJSON.getString("mensaje");
-         } else logger.error(" Error en la validación de la respuesta");
-    }
-    
+
     /**
      * @return the mensaje
      */
@@ -169,27 +118,6 @@ public class Respuesta<T> {
         this.tipo = tipo;
     }
 
-    public void setFecha(Date fecha) {
-            this.fecha = fecha;
-    }
-
-    public Date getFecha() {
-            return fecha;
-    }
-
-    /**
-     * @return the pkcs10WrapperClient
-     */
-    public PKCS10WrapperClient getPkcs10WrapperClient() {
-        return pkcs10WrapperClient;
-    }
-
-    /**
-     * @param pkcs10WrapperClient the pkcs10WrapperClient to set
-     */
-    public void setPkcs10WrapperClient(PKCS10WrapperClient pkcs10WrapperClient) {
-        this.pkcs10WrapperClient = pkcs10WrapperClient;
-    }
 
     /**
      * @return the bytesArchivo
@@ -234,38 +162,6 @@ public class Respuesta<T> {
     }
 
     /**
-     * @return the operacion
-     */
-    public Operacion getOperacion() {
-        return operacion;
-    }
-
-    /**
-     * @param operacion the operacion to set
-     */
-    public void setOperacion(Operacion operacion) {
-        this.operacion = operacion;
-    }
-
-    public String getContenidoRecibo() throws Exception {
-        if(operacion == null || !operacion.isRespuestaConRecibo()
-                || mensaje == null || "".equals(mensaje)) return null;
-        return comprobarRecibo(mensaje.getBytes());
-    }
-        
-    private String comprobarRecibo(byte[] bytesFirmados) throws Exception {
-        SMIMEMessageWrapper smimeMessage = new SMIMEMessageWrapper(null,
-                    new ByteArrayInputStream(bytesFirmados), null);
-        if (smimeMessage.isValidSignature()) {
-            logger.debug("Firma valida - contenido mensaje: " + smimeMessage.getSignedContent());
-            return smimeMessage.getSignedContent();
-        } else {
-            logger.debug("Firma con errores");
-            return null;
-        }  
-    }
-
-    /**
      * @return the data
      */
     public T getData() {
@@ -291,5 +187,30 @@ public class Respuesta<T> {
      */
     public void setEvento(Evento evento) {
         this.evento = evento;
+    }
+    
+    public void appendMessage(String msg) {
+        if(mensaje != null) mensaje = mensaje + "\n" + msg;
+        else mensaje = msg;
+    }
+    
+    public void appendErrorMessage(String msg) {
+        codigoEstado = SC_ERROR_EJECUCION;
+        if(mensaje != null) mensaje = mensaje + " - " + msg;
+        else mensaje = msg;
+    }
+
+    /**
+     * @return the smimeMessage
+     */
+    public SMIMEMessageWrapper getSmimeMessage() {
+        return smimeMessage;
+    }
+
+    /**
+     * @param smimeMessage the smimeMessage to set
+     */
+    public void setSmimeMessage(SMIMEMessageWrapper smimeMessage) {
+        this.smimeMessage = smimeMessage;
     }
 }

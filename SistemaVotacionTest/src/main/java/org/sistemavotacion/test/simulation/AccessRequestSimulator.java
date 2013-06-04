@@ -186,8 +186,8 @@ public class AccessRequestSimulator extends Simulator<VotingSimulationData>
         logger.debug("finish");
         simulationData.setFinish(System.currentTimeMillis());
         if(timer != null) timer.stop();
-        simulatorExecutor.shutdownNow();
-        accessRequestExecutor.shutdownNow(); 
+        if(simulatorExecutor == null) simulatorExecutor.shutdownNow();
+        if(accessRequestExecutor == null) accessRequestExecutor.shutdownNow(); 
         if(simulationListener != null) {
             simulationListener.setSimulationResult(this);
         } else {

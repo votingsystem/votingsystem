@@ -2,6 +2,7 @@ package org.sistemavotacion.modelo;
 
 import java.util.HashMap;
 import java.util.Map;
+import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.slf4j.Logger;
@@ -65,7 +66,10 @@ public class OpcionEvento {
     public static OpcionEvento parse (JSONObject opcionJSON) {
         if(opcionJSON == null) return null;
         OpcionEvento opcion = new OpcionEvento();       
-        if(opcionJSON.containsKey("id")) opcion.setId(opcionJSON.getLong("id"));
+        if(opcionJSON.containsKey("id") && 
+                !JSONNull.getInstance().equals(opcionJSON.get("id"))) {
+            opcion.setId(opcionJSON.getLong("id"));
+        }
         if(opcionJSON.containsKey("contenido")) opcion.setContenido(opcionJSON.getString("contenido"));
         return opcion;
     }

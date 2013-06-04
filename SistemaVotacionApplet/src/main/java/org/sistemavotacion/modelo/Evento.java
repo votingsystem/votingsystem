@@ -36,6 +36,8 @@ public class Evento {
     private Long id; //id of the event in the server
     private Long eventoId;//id of the event in the Access Control
     private OpcionEvento opcionSeleccionada;
+    private Estado estado;
+    private Estado nextState;
     private List<OpcionEvento> opciones;
     private String asunto;
     private String contenido;
@@ -276,14 +278,7 @@ public class Evento {
             JSONObject centroControlJSON = (JSONObject) JSONSerializer.toJSON( centroControlMap );
             jsonObject.put("centroControl", centroControlJSON);
         }        
-        if (opciones != null && tipo == Tipo.VOTACION) {
-            JSONArray jsonArray = new JSONArray();
-            for (OpcionEvento opcion : opciones) {
-                jsonArray.element(opcion.getContenido());
-            }
-            jsonObject.put("opciones", jsonArray);
-        }
-        if (opciones != null && tipo!= Tipo.VOTACION) {
+        if (opciones != null) {
             JSONArray jsonArray = new JSONArray();
             for (OpcionEvento opcion : opciones) {
                 Map campoMap = new HashMap();
@@ -293,7 +288,8 @@ public class Evento {
                 JSONObject camposJSON = (JSONObject) JSONSerializer.toJSON(campoMap);
                 jsonArray.element(camposJSON);
             }
-            jsonObject.put("opciones", jsonArray);
+            if(tipo == Tipo.VOTACION) jsonObject.put("opciones", jsonArray);
+            else jsonObject.put("campos", jsonArray);
         }
         if (cardinalidadDeOpciones != null) map.put("cardinalidad", 
                 cardinalidadDeOpciones.toString()); 
@@ -310,7 +306,7 @@ public class Evento {
     public JSONObject getVoteJSON() {
         logger.debug("getVoteJSON");
         Map map = new HashMap();
-        map.put("operation", Tipo.VOTO.toString());
+        map.put("operation", Operacion.Tipo.ENVIO_VOTO_SMIME.toString());
         map.put("eventoURL", url);
         map.put("opcionSeleccionadaId", opcionSeleccionada.getId());
         map.put("opcionSeleccionadaContenido", opcionSeleccionada.getContenido());
@@ -322,8 +318,9 @@ public class Evento {
     public JSONObject getAccessRequestJSON() {
         logger.debug("getAccessRequestJSON");
         Map map = new HashMap();
-        map.put("operation", Tipo.SOLICITUD_ACCESO.toString());
-        map.put("eventId", eventoId);
+        map.put("operation", Operacion.Tipo.SOLICITUD_ACCESO.toString());
+        if(eventoId != null) map.put("eventId", eventoId);
+        else map.put("eventId", id);
         map.put("eventURL", url);
         map.put("UUID", UUID.randomUUID().toString());
         map.put("hashSolicitudAccesoBase64", hashSolicitudAccesoBase64);
@@ -335,7 +332,7 @@ public class Evento {
     public JSONObject getCancelVoteJSON() {
         logger.debug("getCancelVoteJSON");
         Map map = new HashMap();
-        map.put("operation", Tipo.ANULADOR_VOTO.toString());
+        map.put("operation", Operacion.Tipo.ANULADOR_VOTO.toString());
         map.put("origenHashCertificadoVoto", origenHashCertificadoVoto);
         map.put("hashCertificadoVotoBase64", hashCertificadoVotoBase64);
         map.put("origenHashSolicitudAcceso", origenHashSolicitudAcceso);
@@ -345,6 +342,18 @@ public class Evento {
         return jsonObject;
     }
     
+    public JSONObject getCancelEventJSON(String serverURL, Estado state) {
+        logger.debug("getCancelEventJSON");
+        Map map = new HashMap();
+        map.put("operation", Operacion.Tipo.CANCELAR_EVENTO.toString());
+        map.put("accessControlURL", serverURL);
+        if(eventoId != null) map.put("eventId", eventoId);
+        else map.put("eventId", id);
+        map.put("estado", state.toString());
+        map.put("UUID", UUID.randomUUID().toString());
+        JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);
+        return jsonObject;
+    }
     
     public String getBase64ToHexStr(String base64Str) {
         if (base64Str == null) return null;
@@ -600,6 +609,7 @@ public class Evento {
         voto.setContenido(contenido);
         voto.setControlAcceso(controlAcceso);
         voto.setEventoId(getEventoId());
+        voto.setUrl(url);
         voto.setOpciones(opciones);
         String origenHashSolicitudAcceso = UUID.randomUUID().toString();
         voto.setOrigenHashSolicitudAcceso(origenHashSolicitudAcceso);
@@ -620,7 +630,8 @@ public class Evento {
         controlAccesoMap.put("serverURL", controlAcceso.getServerURL());
         controlAccesoMap.put("nombre", controlAcceso.getNombre());
         map.put("controlAcceso", controlAccesoMap);
-        map.put("eventoId", getEventoId());
+        if(eventoId != null) map.put("eventoId", eventoId);
+        else map.put("eventoId", id);
         map.put("asunto", asunto);
         map.put("contenido", contenido);
         map.put("UUID", UUID.randomUUID().toString());
@@ -679,6 +690,11 @@ public class Evento {
                             eventoJSON.getString("opcionSeleccionadaContenido"));
                 }
                 evento.setOpcionSeleccionada(opcion);
+            }
+            if(eventoJSON.containsKey("estado")) {
+                Evento.Estado estado = Evento.Estado.valueOf(
+                        eventoJSON.getString("estado"));
+                evento.setEstado(estado);
             }
             if(eventoJSON.containsKey("eventoURL")) evento.setUrl(
                     eventoJSON.getString("eventoURL"));
@@ -749,4 +765,32 @@ public class Evento {
         return evento;
     }
     
+    
+    /**
+     * @return the estado
+     */
+    public Estado getEstado() {
+        return estado;
+    }
+
+    /**
+     * @param estado the estado to set
+     */
+    public void setEstado(Estado estado) {
+        this.estado = estado;
+    }
+
+    /**
+     * @return the nextState
+     */
+    public Estado getNextState() {
+        return nextState;
+    }
+
+    /**
+     * @param nextState the nextState to set
+     */
+    public void setNextState(Estado nextState) {
+        this.nextState = nextState;
+    }
 }

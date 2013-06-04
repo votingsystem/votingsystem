@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
@@ -47,12 +48,15 @@ import java.util.Set;
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
 import javax.mail.util.SharedByteArrayInputStream;
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.sistemavotacion.modelo.Firmante;
 import org.sistemavotacion.seguridad.PKIXCertPathReviewer;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERUTCTime;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
@@ -72,7 +76,6 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.StringUtils;
-import org.sistemavotacion.worker.TimeStampWorker;
 
 /**
 * @author jgzornoza
@@ -120,8 +123,6 @@ public class SMIMEMessageWrapper extends MimeMessage {
 
     public SMIMEMessageWrapper (Session session, InputStream inputStream, String fileName) 
             throws IOException, MessagingException, CMSException, SMIMEException, Exception {
-        //Properties props = System.getProperties();
-        //return new DNIeMimeMessage (Session.getDefaultInstance(props, null), fileInputStream);
         super(session, inputStream);
         if (fileName == null) this.fileName = DEFAULT_SIGNED_FILE_NAME; 
         else this.fileName = fileName;
@@ -325,12 +326,21 @@ public class SMIMEMessageWrapper extends MimeMessage {
         return timeStampToken;
     }
     
-    public void setTimeStampToken(TimeStampWorker timeStampWorker) throws Exception {
-        if(timeStampWorker == null || timeStampWorker.getTimeStampToken() == null) 
-            throw new Exception("NULL_TIME_STAMP_TOKEN");
-        TimeStampToken timeStampToken = timeStampWorker.getTimeStampToken();
+    public void setTimeStampToken(TimeStampToken timeStampToken) throws Exception {
+        if(timeStampToken == null ) throw new Exception("NULL_TIME_STAMP_TOKEN");
+        DERObject derObject = new ASN1InputStream(timeStampToken.
+                getEncoded()).readObject();
+        DERSet derset = new DERSet(derObject);
+        Attribute timeStampAsAttribute = new Attribute(PKCSObjectIdentifiers.
+                            id_aa_signatureTimeStampToken, derset);
+        
+        Hashtable hashTable = new Hashtable();
+        hashTable.put(PKCSObjectIdentifiers.
+                        id_aa_signatureTimeStampToken, timeStampAsAttribute);
+        AttributeTable timeStampAsAttributeTable = new AttributeTable(hashTable);
+        
         byte[] hashTokenBytes = timeStampToken.getTimeStampInfo().getMessageImprintDigest();
-        String hashTokenStr = new String(Base64.encode(hashTokenBytes));
+        //String hashTokenStr = new String(Base64.encode(hashTokenBytes));
         //logger.debug("setTimeStampToken - timeStampToken - hashTokenStr: " +  hashTokenStr);
         SignerInformationStore  signers = smimeSigned.getSignerInfos();
         Iterator<SignerInformation> it = signers.getSigners().iterator();
@@ -338,28 +348,23 @@ public class SMIMEMessageWrapper extends MimeMessage {
         while (it.hasNext()) {
             SignerInformation signer = it.next();
             byte[] digestBytes = signer.getContentDigest();//method can only be called after verify.
-            String digestStr = new String(Base64.encode(digestBytes));
-            logger.debug("setTimeStampToken - hash firmante: " +  digestStr + 
-                    " - hash token: " + hashTokenStr);
-            if(hashTokenStr.equals(digestStr)) {
+            //String digestStr = new String(Base64.encode(digestBytes));
+            //logger.debug("setTimeStampToken - hash firmante: " +  digestStr + 
+            //        " - hash token: " + hashTokenStr);
+            if(Arrays.equals(hashTokenBytes, digestBytes)) {
                 logger.debug("setTimeStampToken - firmante");
                 AttributeTable attributeTable = signer.getUnsignedAttributes();
                 SignerInformation updatedSigner = null;
-                if(attributeTable == null) {
-                    logger.debug("setTimeStampToken - signer without UnsignedAttributes - actualizando token");
-                    updatedSigner = signer.replaceUnsignedAttributes(
-                            signer, timeStampWorker.getTimeStampTokenAsAttributeTable());
-                    newSigners.add(updatedSigner);
-                } else {
-                    logger.debug("setTimeStampToken - signer with UnsignedAttributes - actualizando token");
-                    Hashtable hashTable = attributeTable.toHashtable();
+                if(attributeTable != null) {
+                    logger.debug("setTimeStampToken - signer with UnsignedAttributes");
+                    hashTable = attributeTable.toHashtable();
                     hashTable.put(PKCSObjectIdentifiers.
-                            id_aa_signatureTimeStampToken, timeStampWorker.getTimeStampTokenAsAttribute());
+                            id_aa_signatureTimeStampToken, timeStampAsAttribute);
                     attributeTable = new AttributeTable(hashTable);
-                    updatedSigner = signer.replaceUnsignedAttributes(
-                            signer, timeStampWorker.getTimeStampTokenAsAttributeTable());
-                    newSigners.add(updatedSigner);
                 }
+                updatedSigner = signer.replaceUnsignedAttributes(
+                            signer, timeStampAsAttributeTable);
+                newSigners.add(updatedSigner);
             } else newSigners.add(signer);
         }
         //logger.debug("setTimeStampToken - num. firmantes: " + newSigners.size());

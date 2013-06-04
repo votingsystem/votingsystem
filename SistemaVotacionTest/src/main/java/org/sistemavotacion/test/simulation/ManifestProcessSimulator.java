@@ -1,18 +1,18 @@
 package org.sistemavotacion.test.simulation;
 
+import org.sistemavotacion.test.modelo.SimulationData;
 import com.itextpdf.text.pdf.PdfReader;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -22,22 +22,20 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import javax.mail.internet.MimeBodyPart;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.CertUtil;
-import org.sistemavotacion.seguridad.Encryptor;
-import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.simulation.launcher.SignatureManifestLauncher;
+import org.sistemavotacion.test.util.SimulationUtils;
 import org.sistemavotacion.util.NifUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.StringUtils;
 import org.sistemavotacion.worker.DocumentSenderWorker;
 import org.sistemavotacion.worker.InfoGetterWorker;
-import org.sistemavotacion.worker.PDFSignerWorker;
+import org.sistemavotacion.worker.PDFSignedSenderWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
 import org.slf4j.Logger;
@@ -56,8 +54,7 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
     private static final int CA_CERT_INITIALIZER                   = 1;    
     private static final int SEND_DOCUMENT_JSON_WORKER             = 2;
     private static final int MANIFEST_GETTER_WORKER                = 3;
-    private static final int PDF_SIGNER_WORKER                     = 4;
-    private static final int PDF_PUBLISHER_WORKER                  = 5;
+    private static final int PDF_SIGNED_SENDER_WORKER              = 4;
 
     private static ExecutorService simulatorExecutor;
     private static ExecutorService signManifestExecutor;
@@ -74,7 +71,7 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
     
     //private AtomicBoolean done = new AtomicBoolean(true);
     
-    private final CountDownLatch countDownLatch = new CountDownLatch(1); // just one time
+    private final CountDownLatch countDownLatch = new CountDownLatch(1);
     
     private SimulatorListener simulationListener;
     
@@ -129,13 +126,13 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
         String location = null;
         PdfReader manifestToSign = new PdfReader(pdfBytes);
         signManifestCompletionService.submit(new SignatureManifestLauncher(nif, 
-                ContextoPruebas.INSTANCE.getUrlTimeStampServer(), urlSignManifest, 
-                manifestToSign, reason, location));
+            urlSignManifest, manifestToSign, reason, location));
         simulationData.getAndIncrementNumRequests();
     }
     
     private void readResponses() throws Exception {
-        logger.debug("******** readResponses");
+        logger.debug(" - readResponses - NumRequestsProjected: " + 
+                simulationData.getNumRequestsProjected());
         while (simulationData.getNumRequestsProjected() > 
                 simulationData.getNumRequestsColected()) {
             try {
@@ -145,13 +142,13 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
                     simulationData.getAndIncrementNumRequestsOK();
                 } else {
                     simulationData.getAndIncrementNumRequestsERROR();
-                    String msg = "Siganture ERROR - msg: " + respuesta.getMensaje();
+                    String msg = "Signature ERROR - msg: " + respuesta.getMensaje();
                     //logger.error(msg);
                     addErrorMsg(msg);
                 }
             } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);
-                String msg = "Siganture ERROR - msg: " + ex.getMessage();
+                String msg = "Signature ERROR - msg: " + ex.getMessage();
                 addErrorMsg(msg);
                 simulationData.getAndIncrementNumRequestsERROR();
             }
@@ -160,8 +157,7 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
         finish();        
     }
     
-    @Override
-    public void process(List<String> messages) { }
+    @Override public void processVotingSystemWorkerMsg(List<String> messages) {}
     
     
     private void initExecutors(){
@@ -205,27 +201,16 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
     private void publishEvent() {
         logger.debug("publishEvent");
         try {
-            SignedMailGenerator signedMailGenerator = null;
-            
             DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date date = new Date(System.currentTimeMillis());
             String dateStr = formatter.format(date);
-            
-            event = new Evento();
-            event.setAsunto("Asunto Manifiesto -> " + dateStr);
-            
-            event.setFechaInicio(simulationData.getDateBeginDocument());
-            event.setFechaFin(simulationData.getDateFinishDocument());
-            event.setContenido("Contenido Manifiesto -> " 
-                    + simulationData.getHtmlContent());
+            event = simulationData.getEvento();
+            String subject = event.getAsunto()+ " -> " + dateStr;
+            event.setAsunto(subject);
             String eventStr = event.toJSON().toString();
-            File manifestToPublish = File.createTempFile("manifestToPublish", ".json");
-            manifestToPublish.deleteOnExit();
-            FileUtils.copyStringToFile(eventStr, manifestToPublish);
             urlPublishManifest = ContextoPruebas.getManifestServiceURL(
-                    ContextoPruebas.INSTANCE.getControlAcceso().getServerURL());
-            new DocumentSenderWorker(
-                    SEND_DOCUMENT_JSON_WORKER, manifestToPublish, 
+                    Contexto.INSTANCE.getAccessControl().getServerURL());
+            new DocumentSenderWorker(SEND_DOCUMENT_JSON_WORKER, eventStr.getBytes(), 
                     Contexto.JSON_CONTENT_TYPE, urlPublishManifest, this).execute();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
@@ -244,30 +229,7 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
             logger.error(ex.getMessage(), ex);
         }
     }
-    
-    /*
-     * Method invoked when pdf document is timestamped
-     */
-    private void processPDF(File document) {
-        logger.error("processPDF");
-        try {
-            File documentToSend = File.createTempFile("pdfEncryptedFile", ".eml");
-            document.deleteOnExit();
 
-            MimeBodyPart mimeBodyPart = Encryptor.encryptFile(document, 
-                    ContextoPruebas.INSTANCE.getControlAcceso().getCertificate());
-            mimeBodyPart.writeTo(new FileOutputStream(documentToSend));
-            String contentType = Contexto.PDF_SIGNED_AND_ENCRYPTED_CONTENT_TYPE;
-            String urlToSendSignedManifestToPublish = urlPublishManifest + 
-                    File.separator + event.getEventoId();
-            new DocumentSenderWorker(PDF_PUBLISHER_WORKER, documentToSend, 
-                    contentType, urlToSendSignedManifestToPublish, this).execute();
-        } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            countDownLatch.countDown();
-        }
-    }
-    
     @Override
     public void actionPerformed(ActionEvent ae) {
         if (ae.getSource().equals(timer)) {
@@ -287,63 +249,44 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
                 " - worker: " + worker.getClass().getSimpleName() + 
                 " - workerId:" + worker.getId());
+        String msg = null;
         switch(worker.getId()) {
-            case ACCESS_CONTROL_GETTER_WORKER:           
+            case ACCESS_CONTROL_GETTER_WORKER:  
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
                         ActorConIP controlAcceso = ActorConIP.parse(worker.getMessage());
-                        if(ActorConIP.Tipo.CONTROL_ACCESO != controlAcceso.getTipo()) {
-                            String msg = "SERVER NOT ACCESS CONTROL";
-                            logger.error("### ERROR - " + msg);
-                            addErrorMsg(msg);
-                            countDownLatch.countDown();
+                        msg = SimulationUtils.checkActor(controlAcceso, 
+                                ActorConIP.Tipo.CONTROL_ACCESO);
+                        if(msg == null) {
+                            ContextoPruebas.INSTANCE.setControlAcceso(controlAcceso);
+                            initilizeAuthorityCert();
                             return;
                         }
-                        if(ActorConIP.EnvironmentMode.TEST !=  
-                                controlAcceso.getEnvironmentMode()) {
-                            String msg = "SERVER NOT IN TEST MODE. Server mode:" + 
-                                    controlAcceso.getEnvironmentMode();
-                            logger.error("### ERROR - " + msg);
-                            addErrorMsg(msg);
-                            countDownLatch.countDown();
-                            return;
-                        }
-                        ContextoPruebas.INSTANCE.setControlAcceso(controlAcceso);
-                        initilizeAuthorityCert();
                     } catch(Exception ex) {
                         logger.error(ex.getMessage(), ex);
-                        String msg = "ERROR GETTING ACCESS CONTROL DATA: " 
-                                + ex.getMessage();
-                        addErrorMsg(msg);
-                        countDownLatch.countDown();
+                        msg = ex.getMessage();
                     }
-                }else {
-                    String msg = "Error - " + worker.getMessage();
-                    logger.error("### ERROR - " + msg);
-                    addErrorMsg(msg);
-                    countDownLatch.countDown();
-                }
+                }else msg = worker.getMessage();
+                msg = "### ERROR - ACCESS_CONTROL_GETTER_WORKER -" + msg;
                 break;
             case CA_CERT_INITIALIZER:
                 publishEvent();
-                break;         
+                return;        
             case SEND_DOCUMENT_JSON_WORKER:
                 if(Respuesta.SC_OK == worker.getStatusCode()) { 
                     event.setEventoId(Long.valueOf(worker.getMessage()));
                     urlSignManifest = ContextoPruebas.getSignManifestURL(
-                        ContextoPruebas.INSTANCE.getControlAcceso().getServerURL()) + 
+                        Contexto.INSTANCE.getAccessControl().getServerURL()) + 
                         File.separator + worker.getMessage();
                     //manifest PDF has been validated, now we have to download it
                     String pdfURL = ContextoPruebas.getManifestServiceURL(
-                            ContextoPruebas.INSTANCE.getControlAcceso().getServerURL()) + 
+                            Contexto.INSTANCE.getAccessControl().getServerURL()) + 
                             File.separator + worker.getMessage();
                     new InfoGetterWorker(MANIFEST_GETTER_WORKER,
                             pdfURL, Contexto.PDF_CONTENT_TYPE, this).execute();
+                    return;
                 } else {
-                    String msg = "ERROR SENDING JSON DOCUMENT: " + worker.getMessage();
-                    addErrorMsg(msg);
-                    logger.error(msg);
-                    countDownLatch.countDown();
+                    msg = "###ERROR SEND_DOCUMENT_JSON_WORKER: " + worker.getMessage();
                 }
                 break;
             case MANIFEST_GETTER_WORKER:
@@ -362,44 +305,33 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
                                 ContextoPruebas.PASSWORD.toCharArray());
                         Certificate[] signerCertChain = keyStore.getCertificateChain(
                                 ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS);
-                        new PDFSignerWorker(PDF_SIGNER_WORKER, 
-                                ContextoPruebas.INSTANCE.getUrlTimeStampServer(),
-                                this, reason, location, null, manifestToSign, 
-                                privateKey, signerCertChain).execute();
+                        String urlToSendDocument = urlPublishManifest + 
+                            File.separator + event.getEventoId();
+                        X509Certificate destinationCert = Contexto.INSTANCE.
+                                getAccessControl().getCertificate();
+                        
+                        new PDFSignedSenderWorker(PDF_SIGNED_SENDER_WORKER,
+                                urlToSendDocument, reason, location, null,
+                                manifestToSign, privateKey, signerCertChain, 
+                                destinationCert, this).execute();
+                        return;
                     } catch(Exception ex) {
                         logger.error(ex.getMessage(), ex);
-                        String msg = "ERROR GETTING PDF TO PUBLISH: " + worker.getMessage();
-                        addErrorMsg(msg);
-                        countDownLatch.countDown();
+                        msg = ex.getMessage();
                     }
-                } else {
-                    String msg = "ERROR GETTING PDF TO PUBLISH: " + worker.getMessage();
-                    addErrorMsg(msg);
-                    logger.error(msg);
-                    countDownLatch.countDown();
-                }
+                } else msg = worker.getMessage();
+                msg = "### ERROR - MANIFEST_GETTER_WORKER -" + msg;
                 break;  
-            case PDF_SIGNER_WORKER:
-                if(Respuesta.SC_OK == worker.getStatusCode()) { 
-                    processPDF(((PDFSignerWorker)worker).getSignedAndTimeStampedPDF());
-                } else {
-                    String msg = "ERROR SIGNING PDF: " + worker.getMessage();
-                    addErrorMsg(msg);
-                    logger.error(msg);
-                    countDownLatch.countDown();
-                }
-                break;
-            case PDF_PUBLISHER_WORKER:
+            case PDF_SIGNED_SENDER_WORKER:
                 if(Respuesta.SC_OK == worker.getStatusCode()) { 
                     initExecutors();//Manifest published, we now initialize user base data.
-                } else {
-                    String msg = "ERROR PUBLISHING PDF: " + worker.getMessage();
-                    addErrorMsg(msg);
-                    logger.error(msg);
-                    countDownLatch.countDown();
-                }
+                    return;
+                } else msg = "###ERROR PDF_PUBLISHER_WORKER: " + worker.getMessage();
                 break;
         }
+        addErrorMsg(msg);
+        logger.error(msg);
+        countDownLatch.countDown();
     }
 
     public static void main(String[] args) throws Exception {
@@ -427,8 +359,8 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
         logger.debug("finish");
         simulationData.setFinish(System.currentTimeMillis());
         if(timer != null) timer.stop();
-        simulatorExecutor.shutdownNow();
-        signManifestExecutor.shutdownNow();         
+        if(simulatorExecutor != null) simulatorExecutor.shutdownNow();
+        if(signManifestExecutor != null) signManifestExecutor.shutdownNow();         
         if(simulationListener != null) {           
             simulationListener.setSimulationResult(this);
         } else { 

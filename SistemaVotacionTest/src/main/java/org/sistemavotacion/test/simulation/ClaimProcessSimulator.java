@@ -1,15 +1,14 @@
 package org.sistemavotacion.test.simulation;
 
+import org.sistemavotacion.test.modelo.SimulationData;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -23,17 +22,19 @@ import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Respuesta;
+import org.sistemavotacion.modelo.Tipo;
 import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.simulation.launcher.SignatureClaimLauncher;
+import org.sistemavotacion.test.util.SimulationUtils;
 import org.sistemavotacion.util.NifUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.StringUtils;
 import org.sistemavotacion.worker.DocumentSenderWorker;
 import org.sistemavotacion.worker.InfoGetterWorker;
-import org.sistemavotacion.worker.TimeStampWorker;
+import org.sistemavotacion.worker.SMIMESignedSenderWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
 import org.slf4j.Logger;
@@ -54,23 +55,25 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>  implements
     
     private static final int ACCESS_CONTROL_GETTER_WORKER = 0;
     private static final int CA_CERT_INITIALIZER          = 1;    
-    private static final int TIME_STAMP_WORKER            = 3;
-    private static final int PUBLISH_CLAIM_WORKER         = 4;
+    private static final int PUBLISH_CLAIM_WORKER         = 2;
+    private static final int CANCEL_WORKER                = 3;
 
     private static ExecutorService simulatorExecutor;
     private static ExecutorService signClaimExecutor;
     private static CompletionService<Respuesta> signClaimCompletionService;
     
     private Evento event = null;
+    private Evento.Estado nextEventState = null;
     private SimulationData simulationData = null;
     
     //private AtomicBoolean done = new AtomicBoolean(true);
     private List<String> signerList = null;
 
-    private SMIMEMessageWrapper signedPublishrequestSMIME;
+    private SignedMailGenerator signedMailGenerator;
+    private SMIMEMessageWrapper smimeDocument;
     private SimulatorListener simulationListener;
     
-    private final CountDownLatch countDownLatch = new CountDownLatch(1); // just one time
+    private final CountDownLatch countDownLatch = new CountDownLatch(1);
     
     public ClaimProcessSimulator(SimulationData simulationData, 
             SimulatorListener simulationListener) {
@@ -146,20 +149,27 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>  implements
             }
             //done.set(true);
         }
-        finish();        
+        if(nextEventState != null) cancelEvent();
+        else countDownLatch.countDown(); 
     }
 
+    private void cancelEvent() throws Exception {
+            String cancelDataStr = event.getCancelEventJSON(
+                Contexto.INSTANCE.getAccessControl().getServerURL(), 
+                nextEventState).toString();
+        String msgSubject = ContextoPruebas.INSTANCE.getString("cancelClaimMsgSubject");
+        smimeDocument = signedMailGenerator.genMimeMessage(
+                ContextoPruebas.INSTANCE.getUserTest().getEmail(), 
+                Contexto.INSTANCE.getAccessControl().getNombreNormalizado(), 
+                cancelDataStr, msgSubject,  null);
+        new SMIMESignedSenderWorker(CANCEL_WORKER, smimeDocument, 
+                ContextoPruebas.INSTANCE.getCancelEventURL(), null, null, this).execute();
+    }
 
-    @Override
-    public void process(List<String> messages) { }
+    @Override public void processVotingSystemWorkerMsg(List<String> messages) { }
     
     
     private void initExecutors(){
-        if(!(simulationData.getNumRequestsProjected() > 0)) {
-            logger.debug("launchRequests - WITHOUT REQUESTS PROJECTED");
-            countDownLatch.countDown();
-            return;
-        }
         simulatorExecutor = Executors.newFixedThreadPool(5);
         signClaimExecutor = Executors.newFixedThreadPool(100);
         signClaimCompletionService = 
@@ -189,34 +199,33 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>  implements
     
     private void publishEvent() {
         logger.debug("publishEvent");
-        try {
-            
+        try {            
             DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date date = new Date(System.currentTimeMillis());
             String dateStr = formatter.format(date);
-            
-            event = new Evento();
-            event.setAsunto("Asunto Manifiesto -> " + dateStr);
-            
-            event.setFechaInicio(simulationData.getDateBeginDocument());
-            event.setFechaFin(simulationData.getDateFinishDocument());
-            event.setContenido("Contenido Manifiesto -> " 
-                    + simulationData.getHtmlContent());
+            event = simulationData.getEvento();
+            nextEventState = event.getNextState();
+            String claimSubject = event.getAsunto()+ " -> " + dateStr;
+            event.setAsunto(claimSubject);
+            event.setTipo(Tipo.EVENTO_RECLAMACION);
             String eventStr = event.toJSON().toString();
-            String subject = ContextoPruebas.INSTANCE.getString("publishClaimMsgSubject");
-            
-            SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
-                ContextoPruebas.INSTANCE.getUserTest().getKeyStore(),
-                ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS, ContextoPruebas.PASSWORD.toCharArray(),
-                ContextoPruebas.VOTE_SIGN_MECHANISM);
-            signedPublishrequestSMIME = signedMailGenerator.genMimeMessage(
+            String msgSubject = ContextoPruebas.INSTANCE.
+                    getString("publishClaimMsgSubject");
+            signedMailGenerator = new SignedMailGenerator(
+                    ContextoPruebas.INSTANCE.getUserTest().getKeyStore(),
+                    ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS, 
+                    ContextoPruebas.PASSWORD.toCharArray(),
+                    ContextoPruebas.VOTE_SIGN_MECHANISM);
+            smimeDocument = signedMailGenerator.genMimeMessage(
                     ContextoPruebas.INSTANCE.getUserTest().getEmail(), 
-                    ContextoPruebas.INSTANCE.getControlAcceso().getNombreNormalizado(), 
-                    eventStr, subject,  null);
+                    Contexto.INSTANCE.getAccessControl().getNombreNormalizado(), 
+                    eventStr, msgSubject,  null);
             
-            new TimeStampWorker(TIME_STAMP_WORKER, ContextoPruebas.INSTANCE.getUrlTimeStampServer(),
-                    this, signedPublishrequestSMIME.getTimeStampRequest(),
-                    ContextoPruebas.INSTANCE.getControlAcceso().getTimeStampCert()).execute();
+            
+            new SMIMESignedSenderWorker(PUBLISH_CLAIM_WORKER, smimeDocument, 
+                    ContextoPruebas.INSTANCE.getClaimServiceURL(), 
+                    null, null, this).execute();
+
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             countDownLatch.countDown();
@@ -229,7 +238,7 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>  implements
             byte[] rootCACertPemBytes = CertUtil.fromX509CertToPEM (
                 ContextoPruebas.INSTANCE.getRootCACert());
             String urlAnyadirCertificadoCA = ContextoPruebas.getRootCAServiceURL(
-                ContextoPruebas.INSTANCE.getControlAcceso().getServerURL());
+                Contexto.INSTANCE.getAccessControl().getServerURL());
             new DocumentSenderWorker(CA_CERT_INITIALIZER, rootCACertPemBytes, 
                     null, urlAnyadirCertificadoCA, this).execute();
         } catch (IOException ex) {
@@ -242,73 +251,33 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>  implements
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
                 " - worker: " + worker.getClass().getSimpleName() + 
                 " - workerId:" + worker.getId());
+        String msg = null;
         switch(worker.getId()) {
             case ACCESS_CONTROL_GETTER_WORKER:           
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
                         ActorConIP accessControl = ActorConIP.parse(worker.getMessage());
-                        if(ActorConIP.Tipo.CONTROL_ACCESO != accessControl.getTipo()) {
-                            String msg = "SERVER NOT ACCESS CONTROL";
-                            addErrorMsg(msg);
-                            countDownLatch.countDown();
+                        msg = SimulationUtils.checkActor(accessControl, ActorConIP.Tipo.CONTROL_ACCESO);
+                        if(msg == null) {
+                            ContextoPruebas.INSTANCE.setControlAcceso(accessControl);
+                            initilizeAuthorityCert();
                             return;
                         }
-                        if(ActorConIP.EnvironmentMode.TEST !=  
-                                accessControl.getEnvironmentMode()) {
-                            String msg = "SERVER NOT IN TEST MODE. Server mode:" + 
-                                    accessControl.getEnvironmentMode();
-                            addErrorMsg(msg);
-                            countDownLatch.countDown();
-                            return;
-                        }
-                        ContextoPruebas.INSTANCE.setControlAcceso(accessControl);
-                        initilizeAuthorityCert();
+                        
                     } catch(Exception ex) {
                         logger.error(ex.getMessage(), ex);
-                        String msg = "ERROR GETTING DATA FROM ACCESS CONTROL " + 
-                                ex.getMessage();
-                        addErrorMsg(msg);
-                        countDownLatch.countDown();
+                        msg = ex.getMessage();
                     }
-                }else {
-                    String msg = "ERROR GETTING DATA FROM ACCESS CONTROL " + 
-                            worker.getMessage();
-                    logger.error(msg);
-                    addErrorMsg(msg);
-                    countDownLatch.countDown();
-                }
+                } else msg = worker.getMessage();
+                msg = "ACCESS_CONTROL_GETTER_WORKER: " + msg;
                 break;
             case CA_CERT_INITIALIZER:
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     publishEvent();
-                } else {
-                    String msg = "ERROR INICIALIZATING CA CERT - " + worker.getMessage();
-                    logger.error(msg);
-                    addErrorMsg(msg);
-                    countDownLatch.countDown();
-                }       
+                    return;
+                } else msg = worker.getMessage(); 
+                msg = "CA_CERT_INITIALIZER: " + msg;
                 break;   
-            case TIME_STAMP_WORKER:
-                if(Respuesta.SC_OK == worker.getStatusCode()) {
-                    try {
-                        signedPublishrequestSMIME.setTimeStampToken((TimeStampWorker)worker);
-                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        signedPublishrequestSMIME.writeTo(baos);
-                        new DocumentSenderWorker(PUBLISH_CLAIM_WORKER, 
-                                baos.toByteArray(), Contexto.SIGNED_CONTENT_TYPE,
-                                ContextoPruebas.INSTANCE.getClaimServiceURL(), this).execute();
-                    } catch (Exception ex) {
-                        logger.error(ex.getMessage(), ex);
-                        String msg = "ERROR TIMESTAMPING DOCUMENT - " + ex.getMessage();
-                        addErrorMsg(msg);
-                        countDownLatch.countDown();
-                    }
-                } else {
-                    String msg = "ERROR TIMESTAMPING DOCUMENT - " + worker.getMessage();
-                    addErrorMsg(msg);
-                    countDownLatch.countDown();
-                }
-                break;
             case PUBLISH_CLAIM_WORKER:
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
@@ -322,19 +291,28 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>  implements
                                 getSessionPKIXParameters());
                         event = Evento.parse(dnieMimeMessage.getSignedContent());
                         initExecutors();
+                        return;
                     } catch (Exception ex) {
                         logger.error(ex.getMessage(), ex);
-                        String msg = "ERROR TIMESTAMPING DOCUMENT - " + ex.getMessage();
-                        addErrorMsg(msg);
-                        countDownLatch.countDown();
+                        msg = ex.getMessage();
                     }
-                } else {
-                    String msg = "ERROR PUBLISHING DOCUMENT - " + worker.getMessage();
-                    addErrorMsg(msg);
-                    countDownLatch.countDown();
-                }
+                } else msg = worker.getMessage();
+                msg = "PUBLISH_CLAIM_WORKER: " + msg;
                 break;
+            case CANCEL_WORKER:
+                if(Respuesta.SC_OK == worker.getStatusCode()) {
+                    logger.debug("CANCEL_WORKER OK - Event -> " + event.getEventoId() + 
+                            " set to state " + nextEventState.toString());
+                    countDownLatch.countDown();
+                    return;
+                } else msg = "CANCEL_WORKER: " + worker.getMessage();
+                break;
+            default: msg = "UNKNOWN WORKER ID -> " + worker.getId();
         }
+        msg = "### ERROR - " + msg;
+        logger.error(msg);
+        addErrorMsg(msg);
+        countDownLatch.countDown();
     }
 
     @Override public SimulationData getData() {
@@ -345,8 +323,8 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>  implements
         logger.debug("finish");
         simulationData.setFinish(System.currentTimeMillis());
         if(timer != null) timer.stop();
-        simulatorExecutor.shutdownNow();
-        signClaimExecutor.shutdownNow();         
+        if(simulatorExecutor != null)  simulatorExecutor.shutdownNow();
+        if(signClaimExecutor != null)  signClaimExecutor.shutdownNow();         
         if(simulationListener != null) {           
             simulationListener.setSimulationResult(this);
         } else { 
