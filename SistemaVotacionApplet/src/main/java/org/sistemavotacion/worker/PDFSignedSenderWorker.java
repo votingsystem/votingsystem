@@ -1,6 +1,8 @@
 package org.sistemavotacion.worker;
 
+import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.AcroFields;
 import com.itextpdf.text.pdf.PdfDate;
 import com.itextpdf.text.pdf.PdfDictionary;
 import com.itextpdf.text.pdf.PdfName;
@@ -29,6 +31,7 @@ import static org.sistemavotacion.Contexto.*;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import javax.mail.internet.MimeBodyPart;
 import javax.swing.SwingWorker;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -41,7 +44,6 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.cms.CMSAttributeTableGenerationException;
 import org.bouncycastle.cms.CMSAttributeTableGenerator;
 import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
@@ -65,9 +67,6 @@ public class PDFSignedSenderWorker extends SwingWorker<Respuesta, String>
     
     private static Logger logger = LoggerFactory.getLogger(PDFSignedSenderWorker.class);
 
-    public static final String PDF_SIGNATURE_MECHANISM = "SHA1withRSA";
-    public static final String PDF_DIGEST_OID = CMSSignedDataGenerator.DIGEST_SHA1;
-    public static final String PDF_SIGNATURE_DIGEST    = "SHA1";
     
     private Integer id;
     private Respuesta respuesta = null;    
@@ -87,7 +86,8 @@ public class PDFSignedSenderWorker extends SwingWorker<Respuesta, String>
     private VotingSystemCMSSignedGenerator systemSignedGenerator = null;
     
     public PDFSignedSenderWorker(Integer id, String urlToSendDocument,
-            String reason, String location, char[] password, PdfReader reader, PrivateKey signerPrivatekey, 
+            String reason, String location, char[] password, PdfReader reader, 
+            PrivateKey signerPrivatekey, 
             Certificate[] signerCertChain,  X509Certificate destinationCert, 
             VotingSystemWorkerListener workerListener)
             throws NoSuchAlgorithmException, NoSuchAlgorithmException, 
@@ -200,7 +200,7 @@ public class PDFSignedSenderWorker extends SwingWorker<Respuesta, String>
                         }
                    } catch(Exception ex) {
                         logger.error(ex.getMessage(), ex);
-                        respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+                        respuesta.appendErrorMessage(ex.getMessage());
                    }
                     return attributeTable;
                 }
@@ -224,6 +224,7 @@ public class PDFSignedSenderWorker extends SwingWorker<Respuesta, String>
         String contentType = null;
         byte[] bytesToSend = null;
         if(destinationCert != null) {
+            logger.debug("---- with destinationCert -> encrypting response");
             MimeBodyPart mimeBodyPart = Encryptor.encryptFile(signedFile,destinationCert);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             mimeBodyPart.writeTo(baos);
@@ -234,6 +235,7 @@ public class PDFSignedSenderWorker extends SwingWorker<Respuesta, String>
             contentType = Contexto.PDF_SIGNED_CONTENT_TYPE;
             bytesToSend = FileUtils.getBytesFromFile(signedFile);
         }
+
         respuesta = Contexto.INSTANCE.getHttpHelper().sendByteArray(
                 bytesToSend, contentType, urlToSendDocument);
         return respuesta;

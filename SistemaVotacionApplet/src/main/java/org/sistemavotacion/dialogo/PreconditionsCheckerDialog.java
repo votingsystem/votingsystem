@@ -3,7 +3,6 @@ package org.sistemavotacion.dialogo;
 import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +22,6 @@ import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Operacion;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.pdf.PdfFormHelper;
-import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.worker.InfoGetterWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
@@ -99,7 +97,7 @@ public class PreconditionsCheckerDialog
                             getCentroControl().getServerURL(), CHECK_CONTROL_CENTER_CERT);
                     boolean controlCenterChecked = checkCert(operacion.getEvento().
                             getControlAcceso().getServerURL(),CHECK_ACCES_CONTROL_CERT);
-                    if(accessControlChecked && accessControlChecked) {
+                    if(accessControlChecked && controlCenterChecked) {
                         preconditionsOK.set(true);
                         checkLatch.countDown();
                     }
@@ -147,7 +145,11 @@ public class PreconditionsCheckerDialog
         checkLatch.await();
         logger.debug("preconditionsOK: " + preconditionsOK);
         if(preconditionsOK.get() == true) {
-            processOperation();
+            javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    processOperation();
+                }
+            });
             dispose();
         } else {
             acceptButton.setVisible(true);
@@ -155,7 +157,7 @@ public class PreconditionsCheckerDialog
             progressBar.setVisible(false);
             waitLabel.setText(message);
             AppletFirma.INSTANCIA.responderCliente(
-                    Operacion.SC_ERROR_EJECUCION, 
+                    Operacion.SC_ERROR, 
                     Contexto.INSTANCE.getString("votingPreconditionsErrorMsg", 
                     Contexto.INSTANCE.getString("errorLbl")));
         }
@@ -213,20 +215,19 @@ public class PreconditionsCheckerDialog
                 break;
             case SOLICITUD_COPIA_SEGURIDAD:
                 FirmaDialog firmaDialog = new FirmaDialog(frame, true, AppletFirma.INSTANCIA);
-                byte[] bytesPDF = null; 
                 try {
-                    File file = PdfFormHelper.obtenerSolicitudCopia(
+                    byte[] bytesPDF = PdfFormHelper.getBackupRequest(
                             operacion.getEvento().getEventoId().toString(),
                             operacion.getEvento().getAsunto(), 
                             operacion.getEmailSolicitante());
-                    bytesPDF = FileUtils.getBytesFromFile(file);
+                    firmaDialog.inicializarSinDescargarPDF(bytesPDF);
                 } catch(Exception ex) {
                     logger.error(ex.getMessage(), ex);
                 }
-                firmaDialog.inicializarSinDescargarPDF(bytesPDF);
                 break;
             default:
-                logger.debug("################# UNKNOWN OPERATION -> " + operacion.getTipo().toString());
+                logger.debug("################# UNKNOWN OPERATION -> " + 
+                        operacion.getTipo().toString());
         }
     }
      

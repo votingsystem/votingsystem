@@ -3,7 +3,6 @@ package org.sistemavotacion.test.simulation;
 import org.sistemavotacion.test.simulation.launcher.VotingLauncher;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -15,7 +14,6 @@ import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.modelo.VotingSimulationData;
 import org.sistemavotacion.test.modelo.UserBaseSimulationData;
-import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -165,10 +163,7 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
                 nifFrom = respuesta.getEvento().getUsuario().getNif();
                 if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
                     ReciboVoto reciboVoto = respuesta.getReciboVoto();
-                    File recibo = new File(ContextoPruebas.getUserDirPath(nifFrom)
-                        + ContextoPruebas.RECIBO_FILE + respuesta.getEvento().getEventoId() + ".p7m");
-                    FileUtils.copy(reciboVoto.getArchivoRecibo(), recibo);
-                    logger.debug("OK - Recibo de voto en " + recibo.getAbsolutePath());
+                    logger.debug("OK - Recibo de voto en ");
                     simulationData.getAndIncrementNumVotingRequestsOK();
                 } else {
                     String mensaje = "ERROR - Usuario: " + nifFrom + 

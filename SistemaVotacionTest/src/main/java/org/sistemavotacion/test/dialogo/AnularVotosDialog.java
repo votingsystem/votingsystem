@@ -1,21 +1,21 @@
 package org.sistemavotacion.test.dialogo;
 
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Scanner;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import net.sf.json.JSONException;
+import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.test.MainFrame;
 import org.sistemavotacion.test.modelo.AccessRequestBackup;
 import org.sistemavotacion.test.panel.DigitalClockPanel;
 import org.sistemavotacion.test.simulation.launcher.CancelAccessRequestLauncher;
@@ -49,6 +49,7 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
     private static AtomicLong anulacionesEnviadas;
     private static AtomicLong anulacionesEnviadasOK;
     private static AtomicLong anulacionesEnviadasERROR;
+    private Frame parentFrame;
     
     /**
      * Creates new form AnularVotosDialog
@@ -56,6 +57,7 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
     public AnularVotosDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        this.parentFrame = parent;
         setLocationRelativeTo(null);   
         progressBar.setIndeterminate(true);
         progressBarPanel.setVisible(false);
@@ -310,7 +312,7 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
         //String theString = new Scanner(Thread.currentThread().getContextClassLoader()
         //        .getResourceAsStream("AnularVoto.html")).useDelimiter("\\A").next();
         String msg = ContextoPruebas.INSTANCE.getString("cancelVoteDetailsMsg");
-        mensajeDialog = new MensajeDialog(MainFrame.INSTANCIA.getFrames()[0], true,
+        mensajeDialog = new MensajeDialog(parentFrame, true,
                 new Dimension(600, 400));
         mensajeDialog.setMessage(msg, ContextoPruebas.INSTANCE.
                 getString("cancelVoteCaption"));
@@ -330,14 +332,14 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
     }//GEN-LAST:event_cerrarButtonActionPerformed
 
     private void seleccionarIdDeListaButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_seleccionarIdDeListaButtonActionPerformed
-        String nombreArchivoSolicitud = ContextoPruebas.ANULACION_FILE + evento.getEventoId();
+        String nombreArchivoSolicitud = Contexto.CANCEL_VOTE_FILE + evento.getEventoId();
         Collection<File> solicitudesAcceso = FileNameFilter.getFilesFromDirectoryTree(
-                new File(ContextoPruebas.APPDIR), nombreArchivoSolicitud);
+                new File(ContextoPruebas.DEFAULTS.APPDIR), nombreArchivoSolicitud);
         logger.debug("############# Encontradas '" + solicitudesAcceso.size() + "' solicitudes"
                 + "  para el evento '" +  evento.getEventoId() + "'");
         Collection<AccessRequestBackup> solicitudes = obtenerSolicitudesAcceso(solicitudesAcceso);
         SeleccionArchivosDialog seleccionArchivosDialog = new SeleccionArchivosDialog(
-                MainFrame.INSTANCIA.getFrames()[0], true ,solicitudes, evento, this);
+                parentFrame, true ,solicitudes, evento, this);
         seleccionArchivosDialog.setVisible(true);
     }//GEN-LAST:event_seleccionarIdDeListaButtonActionPerformed
 
@@ -345,10 +347,10 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
         mostarPantallaEnvio(true);
         digitalClockPanel.start(DigitalClockPanel.Mode.STOPWATCH);
         contadorPanel.setVisible(true);
-        String nombreArchivoSolicitud = ContextoPruebas.ANULACION_FILE + evento.getEventoId();
+        String nombreArchivoSolicitud = Contexto.CANCEL_VOTE_FILE + evento.getEventoId();
         progressLabel.setText("Leyendo solicitudes en el sistema de ficheros");
         Collection<File> solicitudes = FileNameFilter.getFilesFromDirectoryTree(
-                new File(ContextoPruebas.APPDIR), nombreArchivoSolicitud);
+                new File(ContextoPruebas.DEFAULTS.APPDIR), nombreArchivoSolicitud);
         logger.debug("Encontradas '" + solicitudes.size() + "' solicitudes"
                 + "  para el evento '" +  evento.getEventoId() + "'");
         List<AccessRequestBackup> solicitudesAcceso =  obtenerSolicitudesAcceso(solicitudes);
@@ -357,8 +359,7 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
 
     private void erroresAnulacionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_erroresAnulacionButtonActionPerformed
         InfoErroresDialog infoErroresDialog = new InfoErroresDialog(
-                MainFrame.INSTANCIA.getFrames()[0], true, 
-                "Errores en las anulaciones", errorsList);
+                parentFrame, true, "Errores en las anulaciones", errorsList);
         infoErroresDialog.setVisible(true);
     }//GEN-LAST:event_erroresAnulacionButtonActionPerformed
 
@@ -427,7 +428,8 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
                 AccessRequestBackup solicitud = (AccessRequestBackup) respuesta.getData();
                 String mensaje = null;
                 if(solicitud != null) {
-                    String usuarioPath = ContextoPruebas.getUserDirPath(solicitud.getUserNif());
+                    String usuarioPath = Contexto.getUserDirPath(solicitud.getUserNif(), 
+                            ContextoPruebas.DEFAULTS.APPDIR);
                     String htmlUsuarioPath = "<a href=\"SistemaVotacion:File:" 
                             + usuarioPath + "\">" + solicitud.getUserNif() + "</a>";
                     mensaje = "Error en la anulacion del evento '" + 

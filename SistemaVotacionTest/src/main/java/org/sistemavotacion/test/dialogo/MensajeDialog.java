@@ -213,7 +213,7 @@ public class MensajeDialog extends JDialog implements HyperlinkListener {
         Tipo tipo = Tipo.valueOf(url.split("SistemaVotacion:")[1]);
         String theString = new Scanner(Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream(tipo.getPagina())).useDelimiter("\\A").next();
-        MensajeDialog mensajeDialog = new MensajeDialog(MainFrame.INSTANCIA.getFrames()[0], true,
+        MensajeDialog mensajeDialog = new MensajeDialog(parentFrame, true,
                 new Dimension(800, 700));
         mensajeDialog.setMessage(theString, tipo.getTitulo());
     }

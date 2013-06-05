@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Respuesta;
@@ -47,13 +46,11 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>
 
     public enum Simulation {VOTING, ACCESS_REQUEST}
     
-    private static final int ACCESS_CONTROL_GETTER_WORKER                      = 0;
-    private static final int CONTROL_CENTER_GETTER_WORKER                      = 1;
-    private static final int CA_CERT_INITIALIZER                               = 2;
-    //private static final int TIME_STAMP_ASSOCIATE_CONTROL_CENTER_GETTER_WORKER = 3;
-    //private static final int TIME_STAMP_PUBLISH_WORKER                         = 4;
-    private static final int PUBLISH_DOCUMENT_WORKER                           = 5;
-    private static final int ASSOCIATE_CONTROL_CENTER_WORKER                   = 6;
+    private static final int ACCESS_CONTROL_GETTER_WORKER     = 0;
+    private static final int CONTROL_CENTER_GETTER_WORKER     = 1;
+    private static final int CA_CERT_INITIALIZER              = 2;
+    private static final int PUBLISH_DOCUMENT_WORKER          = 3;
+    private static final int ASSOCIATE_CONTROL_CENTER_WORKER  = 4;
 
     private static Simulation simulation = Simulation.VOTING;
     private Evento evento = null;
@@ -169,10 +166,12 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>
                     ContextoPruebas.VOTE_SIGN_MECHANISM);
             String documentoAsociacion = ActorConIP.getAssociationDocumentJSON(
                     simulationData.getControlCenterURL()).toString();
+            String msgSubject = ContextoPruebas.INSTANCE.getString(
+                "associateControlCenterMsgSubject");
             smimeDocument = signedMailGenerator.genMimeMessage(
                     ContextoPruebas.INSTANCE.getUserTest().getEmail(), 
                     ContextoPruebas.INSTANCE.getAccessControl().getNombreNormalizado(), 
-                    documentoAsociacion, "Solicitud Asociacion de Centro de Control", null);
+                    documentoAsociacion, msgSubject, null);
    
             new SMIMESignedSenderWorker(ASSOCIATE_CONTROL_CENTER_WORKER, 
                     smimeDocument, ContextoPruebas.INSTANCE.getURLAsociarActorConIP(), 
@@ -295,7 +294,7 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>
                     try {
                         byte[] responseBytes = worker.getMessage().getBytes();
                         FileUtils.copyStreamToFile(new ByteArrayInputStream(responseBytes), 
-                            new File(ContextoPruebas.APPDIR + "VotingPublishReceipt"));
+                            new File(ContextoPruebas.DEFAULTS.APPDIR + "VotingPublishReceipt"));
                         SMIMEMessageWrapper mimeMessage = new SMIMEMessageWrapper(null, 
                                 new ByteArrayInputStream(responseBytes), 
                                 "VotingPublishReceipt");

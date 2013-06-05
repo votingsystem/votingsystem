@@ -63,6 +63,7 @@ public class Operacion {
                 Contexto.INSTANCE.getString("REPRESENTATIVE_SELECTION")),
         REPRESENTATIVE_ACCREDITATIONS_REQUEST(
                 Contexto.INSTANCE.getString("REPRESENTATIVE_ACCREDITATIONS_REQUEST")),
+        MENSAJE_HERRAMIENTA_VALIDACION(""),
         REPRESENTATIVE_REVOKE(
                 Contexto.INSTANCE.getString("REPRESENTATIVE_REVOKE"));
         
@@ -133,7 +134,7 @@ public class Operacion {
     public static final int SC_OK = 200;
     public static final int SC_ERROR_PETICION = 400;
     public static final int SC_ERROR_VOTO_REPETIDO = 470;
-    public static final int SC_ERROR_EJECUCION = 500;
+    public static final int SC_ERROR = 500;
     public static final int SC_ERROR_ENVIO_VOTO = 570;
     public static final int SC_PROCESANDO = 700;
     public static final int SC_CANCELADO = 0;

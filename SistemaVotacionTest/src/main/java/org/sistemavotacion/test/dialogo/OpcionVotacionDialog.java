@@ -6,9 +6,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
+import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.OpcionEvento;
-import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.test.MainFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,9 +20,7 @@ public class OpcionVotacionDialog extends javax.swing.JDialog implements KeyList
     private static Logger logger = LoggerFactory.getLogger(OpcionVotacionDialog.class);
         
     private OpcionEvento opcionEvento;
-    int maximaLongitudCampo = ContextoPruebas.MAXIMALONGITUDCAMPO;
     private Border normalTextBorder;
-    
     
     public OpcionVotacionDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
@@ -263,9 +260,9 @@ public class OpcionVotacionDialog extends javax.swing.JDialog implements KeyList
             textArea.setBorder(new LineBorder(Color.RED,2));
             errores = true;
         } else {
-            if (textArea.getText().length() > maximaLongitudCampo) {
+            if (textArea.getText().length() > Contexto.MAXIMALONGITUDCAMPO) {
                 mostrarMensajeUsuario("<html>El campo no puede tener "
-                        + "una tamaño de más de " + maximaLongitudCampo +
+                        + "una tamaño de más de " + Contexto.MAXIMALONGITUDCAMPO +
                         " caracteres</html>");
                 errores = true;
             }

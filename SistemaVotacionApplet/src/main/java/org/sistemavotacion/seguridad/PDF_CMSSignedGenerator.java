@@ -174,7 +174,7 @@ public class PDF_CMSSignedGenerator extends CMSSignedGenerator
     	
         CertStore certsAndCRLs = CertStore.getInstance(CERT_STORE_TYPE,
                 new CollectionCertStoreParameters(Arrays.asList(signerCertChain)), 
-                Contexto.SIGN_PROVIDER);
+                Contexto.PROVIDER);
         addCertificatesAndCRLs(certsAndCRLs);
     	
     	CMSAttributeTableGenerator sAttr = new DefaultSignedAttributeTableGenerator();
@@ -193,7 +193,7 @@ public class PDF_CMSSignedGenerator extends CMSSignedGenerator
         JcaSimpleSignerInfoGeneratorBuilder jcaSignerInfoGeneratorBuilder =  
                 new JcaSimpleSignerInfoGeneratorBuilder();
         jcaSignerInfoGeneratorBuilder = jcaSignerInfoGeneratorBuilder.setProvider(
-                Contexto.SIGN_PROVIDER);
+                Contexto.PROVIDER);
         jcaSignerInfoGeneratorBuilder.setSignedAttributeGenerator(attributeTable);
         jcaSignerInfoGeneratorBuilder.setUnsignedAttributeGenerator(unsAttr);
         SignerInfoGenerator signerInfoGenerator = jcaSignerInfoGeneratorBuilder.build(

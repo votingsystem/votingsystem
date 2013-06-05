@@ -1,5 +1,6 @@
 package org.sistemavotacion.herramientavalidacion;
 
+import org.sistemavotacion.herramientavalidacion.util.Formateadora;
 import java.awt.Frame;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;

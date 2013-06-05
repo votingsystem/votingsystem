@@ -9,7 +9,6 @@ import org.sistemavotacion.modelo.Respuesta;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 import javax.mail.internet.MimeMessage;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerInformationVerifier;
@@ -36,9 +35,7 @@ public class AccessRequestWorker extends SwingWorker<Respuesta, String>
     private static Logger logger = LoggerFactory.getLogger(
             AccessRequestWorker.class);
 
-    private Evento evento;
-    
-    private CountDownLatch timeStampLatch = null;    
+    private Evento evento;   
     private VotingSystemWorkerListener workerListener;
     private SMIMEMessageWrapper smimeMessage;
     private PKCS10WrapperClient pkcs10WrapperClient;
@@ -46,8 +43,7 @@ public class AccessRequestWorker extends SwingWorker<Respuesta, String>
     private Respuesta respuesta = null;
     private X509Certificate destinationCert = null;
     
-    public AccessRequestWorker(Integer id,
-            SMIMEMessageWrapper smimeMessage,
+    public AccessRequestWorker(Integer id, SMIMEMessageWrapper smimeMessage,
             Evento evento, X509Certificate destinationCert, 
             VotingSystemWorkerListener workerListener) throws Exception {
         this.id = id;
@@ -67,7 +63,7 @@ public class AccessRequestWorker extends SwingWorker<Respuesta, String>
             respuesta = get();
         }catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-            respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+            respuesta.appendErrorMessage(ex.getMessage());
         } 
         workerListener.showResult(this);
     }

@@ -6,7 +6,6 @@ import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.net.URL;
-import java.security.Security;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
@@ -16,8 +15,8 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.filechooser.FileFilter;
+import org.sistemavotacion.Contexto;
+import org.sistemavotacion.herramientavalidacion.modelo.SignedFile;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
@@ -36,7 +35,8 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
     private String directorioArchivo;
     private boolean mostrandoPantallaEnvio = false;
     private String mensajeMime;
-    List<File> listaArchivos;
+    private List<SignedFile> signedFileList = new ArrayList<SignedFile>();
+
     private int selectedFileIndex;
     String tituloDialogo;
     
@@ -44,7 +44,7 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
     public void itemStateChanged(ItemEvent ie) {
         ArchivoFirmadoPanel archivoFirmado = 
                 (ArchivoFirmadoPanel)tabbedPane.getSelectedComponent();
-        archivoFirmado.setInformacionConFormato(checkBox.isSelected());
+        archivoFirmado.setContentFormated(checkBox.isSelected());
     }
     
     /**
@@ -242,29 +242,22 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
     }//GEN-LAST:event_cerrarButtonActionPerformed
 
     private void siguienteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_siguienteButtonActionPerformed
-        if (selectedFileIndex == listaArchivos.size() -1)  selectedFileIndex = 0;
+        if (selectedFileIndex == signedFileList.size() -1)  selectedFileIndex = 0;
         else ++selectedFileIndex;
         tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
-        mostrarArchivoDeLista(listaArchivos.get(selectedFileIndex));
+        showSignedFile(signedFileList.get(selectedFileIndex));
     }//GEN-LAST:event_siguienteButtonActionPerformed
 
     private void anteriorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_anteriorButtonActionPerformed
-        if (selectedFileIndex == 0)  selectedFileIndex = listaArchivos.size() -1;
+        if (selectedFileIndex == 0)  selectedFileIndex = signedFileList.size() -1;
         else --selectedFileIndex;
         tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
-        mostrarArchivoDeLista(listaArchivos.get(selectedFileIndex));
+        showSignedFile(signedFileList.get(selectedFileIndex));
     }//GEN-LAST:event_anteriorButtonActionPerformed
 
     private void guardarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guardarButtonActionPerformed
         guardarMensajeMime();
     }//GEN-LAST:event_guardarButtonActionPerformed
-    
-    public File abrirZipConFirmas() {
-        File zipConFirmas = mostrarDialogoAperturaZip();
-        if (zipConFirmas == null) return null;
-        mostrarZipConFirmas(zipConFirmas);
-        return zipConFirmas;
-    }
     
     private void mostrarArchivo (File file) {
         directorioArchivo = file.getParent();
@@ -276,9 +269,10 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
                 tabbedPane.setSelectedIndex(indiceArchivo);
                 return;
             }
-            byte[] bytes = FileUtils.getBytesFromFile(file);
-            ArchivoFirmadoPanel archivoFirmadoPanel = new ArchivoFirmadoPanel(file);
-            archivoFirmadoPanel.setInformacionConFormato(checkBox.isSelected());
+            byte[] fileBytes = FileUtils.getBytesFromFile(file);
+            SignedFile signedFile = new SignedFile(fileBytes, file.getName());
+            ArchivoFirmadoPanel archivoFirmadoPanel = new ArchivoFirmadoPanel(signedFile);
+            archivoFirmadoPanel.setContentFormated(checkBox.isSelected());
             tabbedPane.addTab(file, archivoFirmadoPanel);
             tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
             tabbedPane.setVisible(true);
@@ -289,12 +283,12 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
         }
     }
     
-    private void mostrarArchivoDeLista (File file) {
+    private void showSignedFile (SignedFile signedFile) {
         try {
-            tabbedPane.setTitleAt(1, "<html>" + file.getName() + "&nbsp;&nbsp;&nbsp;&nbsp;</html>");
+            tabbedPane.setTitleAt(1, "<html>" + signedFile.getName() + "&nbsp;&nbsp;&nbsp;&nbsp;</html>");
             ArchivoFirmadoPanel archivoFirmadoPanel = (ArchivoFirmadoPanel) tabbedPane.getComponentAt(1);
-                archivoFirmadoPanel.mostrarArchivo(file);              
-            archivoFirmadoPanel.setInformacionConFormato(checkBox.isSelected());
+                archivoFirmadoPanel.initFileData(signedFile);              
+            archivoFirmadoPanel.setContentFormated(checkBox.isSelected());
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
         }
@@ -320,55 +314,6 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
         setVisible(true);
     }
     
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(VisualizadorDeEventoFirmadoDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(VisualizadorDeEventoFirmadoDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(VisualizadorDeEventoFirmadoDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(VisualizadorDeEventoFirmadoDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                VisualizadorDeEventoFirmadoDialog dialog = 
-                        new VisualizadorDeEventoFirmadoDialog(new javax.swing.JFrame(), true);
-                dialog.setVisible(true);
-                dialog.mensajeLabel.setText("<html><b>Cargando archivo</b></html>");
-                dialog.mostrarPantallaEnvio(true);
-/*                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                //File file =  new File("/home/jj/git/ClienteDNIe/eventoParaVotar");
-                File file =  new File("/home/jj/temp/eventoParaVotar");
-                dialog.inicializar(file);
-                dialog.setVisible(true);*/
-            }
-        });
-    }
-    
     public void guardarMensajeMime () {
         try {
             final JFileChooser chooser = new JFileChooser();
@@ -376,14 +321,11 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = chooser.getSelectedFile();
                 if (file.getName().indexOf(".") == -1) {
-                    String fileName = file.getAbsolutePath() + "."
-                            + FileUtils.SIGNED_FILE_EXTENSION;
-                    file = new File(fileName);
-                    if (file != null) {
-                        FileOutputStream fos = new FileOutputStream(file);
-                        fos.write(mensajeMime.getBytes());
-                        fos.close();
-                    }
+                    String fileName = file.getAbsolutePath() + 
+                            Contexto.SIGNED_PART_EXTENSION;
+                    FileOutputStream fos = new FileOutputStream(new File(fileName));
+                    fos.write(mensajeMime.getBytes());
+                    fos.close();
                 }
             }
         } catch (Exception ex) {
@@ -391,26 +333,32 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
         }
     }
     
-     private boolean comprobarArchivo (File file) {
-        logger.debug("comprobarArchivo");
-        boolean resultado = true;
-        try {
-            if (file.length() > AppletHerramienta.MAXIMO_TAMANYO_ARCHIVO_EN_BYTES) {
-                String message = AppletHerramienta.getString("fileSizeExceededMsg", 
-                        file.length() , AppletHerramienta.MAXIMO_TAMANYO_ARCHIVO_EN_BYTES);
-
-                resultado = false;
-            }
-        } catch (Exception ex) {
-            return false;
+     private String checkFileSize (File file) {
+        logger.debug("checkFileSize");
+        String result = null;
+        if (file.length() > Contexto.SIGNED_MAX_FILE_SIZE) {
+            result = AppletHerramienta.getString("fileSizeExceededMsg", 
+                        file.length() , Contexto.SIGNED_MAX_FILE_SIZE_KB);
         }
-        return resultado;
+        return result;
     }
     
+    private String checkByteArraySize (byte[] signedFileBytes) {
+        logger.debug("checkByteArraySize");
+        String result = null;
+        if (signedFileBytes.length > Contexto.SIGNED_MAX_FILE_SIZE) {
+            result = AppletHerramienta.getString("fileSizeExceededMsg", 
+                        signedFileBytes.length , Contexto.SIGNED_MAX_FILE_SIZE_KB);
+        }
+        return result;
+    }
+     
+     
+     
     private class FiltroCMS implements java.io.FileFilter {
         @Override
         public boolean accept(File file) {
-            return comprobarArchivo(file);
+            return (checkFileSize(file) == null);
         }
     }
 
@@ -419,82 +367,61 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
                 DateUtils.getSpanishFormattedStringFromDate(date) + "</html>";
     }
 
-    private File mostrarDialogoAperturaZip () {
-        File result = null;
+    public void setVisible(File zip) {
+        logger.debug("setVisible - file: " + zip.getAbsolutePath());
         try {
-            final JFileChooser chooser = new JFileChooser();
-            chooser.setFileFilter(new FileFilter() {
-                @Override
-                public boolean accept(File f) {
-                    return f.getName().toLowerCase().endsWith(".zip") || f.isDirectory();
-                }
-
-                public String getDescription() {
-                    return "ZIP Files";
-                }
-            });
-            Frame frame;
-            Frame[] frames = JFrame.getFrames();
-            if(frames.length == 0 || frames[0] == null) frame = new javax.swing.JFrame();
-            else frame = frames[0];
-            int returnVal = chooser.showOpenDialog(frame);
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                result = chooser.getSelectedFile();
-            }
-        } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            return result;
-        }
-        return result;
-    }
-    
-    private void mostrarZipConFirmas(File zip) {
-        logger.debug("mostrarZipConFirmas - file: " + zip.getAbsolutePath());
-        File metaInfFile = null;
-        try {
-            ZipFile zipFile = new ZipFile(zip);
-            new File(FileUtils.APPTEMPDIR + File.separator + 
+            ZipFile backupZip = new ZipFile(zip);
+            new File(Contexto.DEFAULTS.APPTEMPDIR + File.separator + 
                     zip.getName()).mkdirs();
             setTitle(zip.getName());
-            listaArchivos = new ArrayList<File>();
-            Enumeration entries = zipFile.entries();
+            Enumeration entries = backupZip.entries();
             while(entries.hasMoreElements()) {
                 ZipEntry entry = (ZipEntry)entries.nextElement();
-                File archivoDestino = new File(
-                        FileUtils.APPTEMPDIR + File.separator + 
-                        zip.getName() + File.separator + entry.getName());
                 if(entry.isDirectory()) {
-                    archivoDestino.mkdirs();
-                    continue;
-                }
-                FileUtils.copyStreamToFile(
-                        zipFile.getInputStream(entry), archivoDestino);
-                if(comprobarArchivo(archivoDestino)){
-                    if ("meta.inf".equals(entry.getName())) metaInfFile = archivoDestino;
-                    else listaArchivos.add(archivoDestino);
-                }
+                    //archivoDestino.mkdirs();
+                    //continue;
+                } else {
+                    byte[] signedFileBytes = FileUtils.getBytesFromInputStream(
+                        backupZip.getInputStream(entry));
+                    String msg = checkByteArraySize(signedFileBytes);
+                    if(msg == null) {
+                        if ("meta.inf".equals(entry.getName())) {
+                            byte[] metaInfBytes = FileUtils.getBytesFromInputStream(
+                                    backupZip.getInputStream(entry));
+                            InformacionEventoPanel informacionEventoPanel = 
+                                new InformacionEventoPanel(metaInfBytes);
+                            tabbedPane.removeAll();
+                            tabbedPane.addTab("<html><b>" + entry.getName() + 
+                                    "</b>&nbsp;&nbsp;&nbsp;&nbsp;</html>", 
+                                    informacionEventoPanel);
+                        } else {
+                            SignedFile signedFile = new SignedFile(
+                                    signedFileBytes, entry.getName());
+                            signedFileList.add(signedFile);
+                                        
+                            mostrarPantallaEnvio(false);
+                        }
+                    } else {
+                        logger.error("ERROR ZipEntry '" + entry.getName() + "'  -> " + msg);
+                    }
+                }     
             }
-            zipFile.close();
-            mostrarPantallaEnvio(false);
-            InformacionEventoPanel informacionEventoPanel = 
-                new InformacionEventoPanel(metaInfFile);
-            tabbedPane.removeAll();
-            tabbedPane.addTab("<html><b>" + zip.getName() + "</b>&nbsp;&nbsp;&nbsp;&nbsp;</html>", 
-                informacionEventoPanel);
-            logger.debug("Numero archivos en lista: " + listaArchivos.size());
+            backupZip.close();
+            logger.debug("Numero archivos en lista: " + signedFileList.size());
             selectedFileIndex = 0;
-            File primerArchivo = listaArchivos.get(selectedFileIndex++);
-            ArchivoFirmadoPanel archivoFirmadoPanel = new ArchivoFirmadoPanel(primerArchivo);
-            archivoFirmadoPanel.setInformacionConFormato(checkBox.isSelected());
+            SignedFile primerArchivo = signedFileList.get(selectedFileIndex++);
+            ArchivoFirmadoPanel archivoFirmadoPanel = 
+                    new ArchivoFirmadoPanel(primerArchivo);
+            archivoFirmadoPanel.setContentFormated(checkBox.isSelected());
             tabbedPane.addTab(primerArchivo.getName(), archivoFirmadoPanel);
             tabbedPane.setSelectedIndex(0);
             tabbedPane.setVisible(true);
             navegacionPanel.setVisible(true);
         } catch (ZipException ex) {/*
             File directorioArchivo = archivo.getParentFile();
-            listaArchivosCMS = Arrays.asList(directorioArchivo.listFiles(new FiltroCMS()));
-            selectedFileIndex = listaArchivosCMS.indexOf(archivo);
-            if (listaArchivosCMS.size() < 2) habilitarBotones(false);
+            signedFileListCMS = Arrays.asList(directorioArchivo.listFiles(new FiltroCMS()));
+            selectedFileIndex = signedFileListCMS.indexOf(archivo);
+            if (signedFileListCMS.size() < 2) habilitarBotones(false);
             else habilitarBotones(true);
             contexto = Contexto.EXPLORANDO_DIRECTORIO;
             mostrarArchivo(archivo);
@@ -502,7 +429,8 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             mostrarPantallaEnvio(false);
-        }        
+        }   
+        setVisible(true);
     }
 
         

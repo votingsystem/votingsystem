@@ -6,6 +6,7 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Respuesta; 
 import org.sistemavotacion.seguridad.PKCS10WrapperClient;
@@ -47,7 +48,8 @@ public class AccessRequestLauncher implements Callable<Respuesta>,
     }
     
     @Override public Respuesta call() throws Exception { 
-        File mockDnieFile = new File(ContextoPruebas.getUserKeyStorePath(nifFrom));
+        File mockDnieFile = new File(Contexto.getUserKeyStorePath(nifFrom,
+                ContextoPruebas.DEFAULTS.APPDIR));
         byte[] mockDnieBytes = FileUtils.getBytesFromFile(mockDnieFile);
         logger.info("userID: " + nifFrom + 
                 " - mockDnieFile: " + mockDnieFile.getAbsolutePath());
@@ -55,8 +57,9 @@ public class AccessRequestLauncher implements Callable<Respuesta>,
                 "accessRequestMsgSubject") + evento.getEventoId();
         
         String anuladorVotoStr = evento.getCancelVoteJSON().toString();
-        File anuladorVoto = new File(ContextoPruebas.getUserDirPath(nifFrom)
-                + ContextoPruebas.ANULACION_FILE + evento.getEventoId() + 
+        File anuladorVoto = new File(Contexto.getUserDirPath(nifFrom,
+                ContextoPruebas.DEFAULTS.APPDIR)
+                + Contexto.CANCEL_VOTE_FILE + evento.getEventoId() + 
                 "_usu" + nifFrom + ".json");
         FileUtils.copyStreamToFile(new ByteArrayInputStream(
                 anuladorVotoStr.getBytes()), anuladorVoto);

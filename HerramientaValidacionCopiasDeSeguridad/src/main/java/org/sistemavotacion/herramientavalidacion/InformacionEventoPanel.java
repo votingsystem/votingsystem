@@ -1,13 +1,12 @@
 package org.sistemavotacion.herramientavalidacion;
 
+import org.sistemavotacion.modelo.MetaInf;
 import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,21 +35,20 @@ public class InformacionEventoPanel extends javax.swing.JPanel {
         });
     }
     
-    public InformacionEventoPanel(File metaInfFile) {
+    public InformacionEventoPanel(byte[] metaInfBytes) {
         try {
             initComponents();
-            String metaInfoString = FileUtils.getStringFromFile(metaInfFile);
-            MetaInfoDeEvento metaInfo = MetaInfoDeEvento.parse(metaInfoString);
-            valorAsuntoLabel.setText(metaInfo.getAsunto());
+            MetaInf metaInfo = MetaInf.parse(new String(metaInfBytes));
+            valorAsuntoLabel.setText(metaInfo.getSubject());
             String valorTipoEvento = null;
-            switch (metaInfo.getTipoEvento()) {
+            switch (metaInfo.getType()) {
                 case EVENTO_FIRMA:
                     valorTipoEvento = AppletHerramienta.getResourceBundle().
                         getString("manfiestoLabel");
                     documentosFirmadosLabel.setText("<html><b>" + 
                             AppletHerramienta.getResourceBundle().
                             getString("numeroFirmasLabel") + ": </b></html>");
-                    valorNumeroDocumentosLabel.setText(String.valueOf(metaInfo.getNumeroFirmas()));
+                    valorNumeroDocumentosLabel.setText(String.valueOf(metaInfo.getNumSignatures()));
                     break;
                 case EVENTO_RECLAMACION:
                     valorTipoEvento = AppletHerramienta.getResourceBundle().
@@ -58,7 +56,7 @@ public class InformacionEventoPanel extends javax.swing.JPanel {
                     documentosFirmadosLabel.setText("<html><b>" + 
                             AppletHerramienta.getResourceBundle().
                             getString("numeroFirmasLabel") + ": </b></html>");
-                    valorNumeroDocumentosLabel.setText(String.valueOf(metaInfo.getNumeroFirmas()));
+                    valorNumeroDocumentosLabel.setText(String.valueOf(metaInfo.getNumSignatures()));
                     break;
                 case EVENTO_VOTACION:
                     valorTipoEvento = AppletHerramienta.getResourceBundle().
@@ -66,12 +64,12 @@ public class InformacionEventoPanel extends javax.swing.JPanel {
                     documentosFirmadosLabel.setText("<html><b>" + 
                             AppletHerramienta.getResourceBundle().
                             getString("numeroVotosLabel") + ": </b></html>");
-                    valorNumeroDocumentosLabel.setText(String.valueOf(metaInfo.getNumeroVotos()));
+                    valorNumeroDocumentosLabel.setText(String.valueOf(metaInfo.getNumVotes()));
                     solicitudesAccesoLabel.setText("<html><b>" + 
                             AppletHerramienta.getResourceBundle().
                         getString("solicitudesAccesoLabel") + ": </b></html>");
                     valorSolicitudesAccesoLabel.setText(String.valueOf(
-                            metaInfo.getNumeroSolicitudesAcceso()));                            
+                            metaInfo.getNumAccessRequest()));                            
                     break;                    
             }
             tipoEventoLabel.setText("<html><h2> -  " + valorTipoEvento + " -</h2></html>");

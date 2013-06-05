@@ -130,6 +130,29 @@ public class Encryptor {
         encryptedPart.writeTo(new FileOutputStream(encryptedFile));
                 return encryptedFile;
     }
+    
+    public static byte[] encryptMessage(byte[] text, 
+            X509Certificate receiverCert) throws Exception {
+        logger.debug(" - encryptMessage(...) - ");
+        Properties props = System.getProperties();
+        Session session = Session.getDefaultInstance(props, null);
+        MimeMessage mimeMessage = new MimeMessage(session);
+        mimeMessage.setText(new String(text));
+        // set the Date: header
+        //mimeMessage.setSentDate(new Date());
+        SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
+        encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
+                receiverCert).setProvider("BC"));
+        /* Encrypt the message */
+        MimeBodyPart encryptedPart = encrypter.generate(mimeMessage,
+                new JceCMSContentEncryptorBuilder(
+                CMSAlgorithm.DES_EDE3_CBC).setProvider("BC").build());
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        encryptedPart.writeTo(baos);
+        byte[] result = baos.toByteArray();
+        baos.close();
+        return result;
+    }
     	
     /**
      * helper method to decrypt SMIME signed messages

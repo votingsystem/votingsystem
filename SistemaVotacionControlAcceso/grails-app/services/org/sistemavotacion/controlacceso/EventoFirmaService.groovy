@@ -67,9 +67,10 @@ class EventoFirmaService {
 					"${fecha}/${zipNamePrefix}_${evento.id}"
 			new File(basedir).mkdirs()
 			int i = 0
-			def metaInformacionMap = [numeroFirmas:firmasRecibidas.size(),
+			
+			def metaInformacionMap = [numSignatures:firmasRecibidas.size(),
 				URL:"${grailsApplication.config.grails.serverURL}/evento/${evento.id}",
-				tipoEvento:Tipo.EVENTO_FIRMA.toString(), asunto:evento.asunto]
+				type:Tipo.EVENTO_FIRMA.toString(), subject:evento.asunto]
 			String metaInformacionJSON = metaInformacionMap as JSON
 			File metaInformacionFile = new File("${basedir}/meta.inf")
 			metaInformacionFile.write(metaInformacionJSON)
@@ -81,7 +82,7 @@ class EventoFirmaService {
 			}
 			def ant = new AntBuilder()
 			ant.zip(destfile: "${basedir}.zip", basedir: basedir)
-			Map datos = [cantidad:firmasRecibidas.size()]
+			Map datos = [cantidad:firmasRecibidas.size(), type:Tipo.EVENTO_FIRMA]
 			respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK, 
 				datos:datos, file:new File("${basedir}.zip"))
 		} else respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 

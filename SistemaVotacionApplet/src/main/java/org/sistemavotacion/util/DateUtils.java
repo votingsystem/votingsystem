@@ -100,15 +100,6 @@ public class DateUtils {
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
     	return formatter.parse(dateString);
     }
-    
-	public static boolean comprobarFechas (String fechaInicioStr, String fechaFinStr, 
-			Date fechaConsulta) throws ParseException {
-		if (fechaInicioStr == null || fechaFinStr == null) return true;
-		Date fechaInicio = getDateFromString(fechaInicioStr);
-		Date fechaFin = getDateFromString(fechaFinStr);
-		if (fechaConsulta.compareTo(fechaInicio) > 0 && fechaConsulta.compareTo(fechaFin) < 0) return true;
-		else return false;
-	}
 
     /**
      * Método que devuelve un String con formato "yyyy-MM-dd'T'HH:mm:ss a partir de un Date"

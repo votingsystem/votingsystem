@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest
 import com.itextpdf.text.pdf.AcroFields
 import com.itextpdf.text.pdf.PdfReader
 import grails.converters.JSON
-
+import grails.util.*
 
 /**
  * @infoController Solicitud de copias de seguridad
@@ -34,8 +34,10 @@ class SolicitudCopiaController {
 	 *         email con información para poder obtener la copia de seguridad.
 	 */
 	def index() { 
+		
 		try {
-			Documento documento = params.pdfDocument
+			
+			final Documento documento = params.pdfDocument
 			if (documento && documento.estado == Documento.Estado.VALIDADO) {
 				PdfReader reader = new PdfReader(documento.pdf);
 				AcroFields form = reader.getAcroFields();
@@ -45,7 +47,11 @@ class SolicitudCopiaController {
 					render message(code: 'backupRequestEventWithoutIdErrorMsg')
 					return false
 				}
-				def evento = Evento.get(new Long(eventoId))
+				
+				def evento
+				Evento.withTransaction {
+					evento = Evento.get(new Long(eventoId))
+				}
 				if(!evento) {
 					response.status = Respuesta.SC_ERROR_PETICION
 					render message(code:'backupRequestEventIdErrorMsg', [eventoId])
@@ -63,39 +69,60 @@ class SolicitudCopiaController {
 					render  message(code:'backupRequestEmailMissingErrorMsg')
 					return false
 				}
-				documento.evento = evento
-				documento.estado = Documento.Estado.SOLICITUD_COPIA
-				documento.save()
+				Documento.withTransaction {
+					documento.evento = evento
+					documento.estado = Documento.Estado.SOLICITUD_COPIA
+					documento.save(flush:true)
+				}
 				log.debug "backup request - eventoId: ${eventoId} - asunto: ${asunto} - email: ${email}"
-				runAsync {
-					Respuesta respuestaGeneracionBackup
-					if(evento instanceof EventoFirma) {
-						log.debug("---> EventoFirma")
-						respuestaGeneracionBackup = eventoFirmaService.generarCopiaRespaldo(
-							(EventoFirma)evento, request.locale)
-					} else if(evento instanceof EventoReclamacion) {
-						log.debug("---> EventoReclamacion")
-						respuestaGeneracionBackup = eventoReclamacionService.generarCopiaRespaldo(
-							(EventoReclamacion)evento, request.locale)
-					} else if(evento instanceof EventoVotacion) {
-						log.debug("---> EventoVotacion")
-						respuestaGeneracionBackup = eventoVotacionService.generarCopiaRespaldo(
-							(EventoVotacion)evento, request.locale)
-					}
+				Respuesta respuestaGeneracionBackup = null
+				if(params.sync && Environment.DEVELOPMENT.equals(Environment.current)) {
+					respuestaGeneracionBackup = requestBackup(evento, request.locale)
 					if(Respuesta.SC_OK == respuestaGeneracionBackup?.codigoEstado) {
 						File archivoCopias = respuestaGeneracionBackup.file
 						SolicitudCopia solicitudCopia = new SolicitudCopia(
-							filePath:archivoCopias.getAbsolutePath(), type:Tipo.EVENTO,
-							documento:documento, email:email, numeroCopias:respuestaGeneracionBackup.datos.cantidad)
+							filePath:archivoCopias.getAbsolutePath(), 
+							type:respuestaGeneracionBackup.datos.type,
+							documento:documento, email:email, 
+							numeroCopias:respuestaGeneracionBackup.datos.cantidad)
 						SolicitudCopia.withTransaction {
 							solicitudCopia.save()
 						}
-						mailSenderService.sendInstruccionesDescargaCopiaSeguridad(solicitudCopia, request.locale)
-					} else log.error("Error generando archivo de copias de respaldo");
+						params.id = solicitudCopia.id
+						flash.forwarded = Boolean.TRUE
+						forward action: "download"
+					} else {
+						log.error("TEST - error generating backup");
+						response.status = Respuesta.SC_ERROR
+						render "ERROR"
+						return false
+					} 
+				} else {
+					final Evento event = evento
+					final Locale locale = request.locale
+					final String emailRequest = email
+					runAsync {
+						Respuesta backupResponse = requestBackup(event, locale)
+						if(Respuesta.SC_OK == backupResponse?.codigoEstado) {
+							File archivoCopias = backupResponse.file
+							SolicitudCopia solicitudCopia = new SolicitudCopia(
+								filePath:archivoCopias.getAbsolutePath(), 
+								type:backupResponse.datos.type,
+								documento:documento, email:emailRequest, 
+								numeroCopias:backupResponse.datos.cantidad)
+							SolicitudCopia.withTransaction {
+								solicitudCopia.save()
+							}
+							mailSenderService.sendInstruccionesDescargaCopiaSeguridad(solicitudCopia, locale)
+						} else log.error("Error generando archivo de copias de respaldo");
+					}
+					response.status = Respuesta.SC_OK
+					render message(code:'backupRequestOKMsg', args:[email])
+					return false
 				}
-				response.status = Respuesta.SC_OK
-				render message(code:'backupRequestOKMsg', [email])
-				return false
+				
+
+
 			} else {
 				response.status = Respuesta.SC_ERROR_PETICION
 				render message(code: 'error.PeticionIncorrectaHTML', args:[
@@ -108,6 +135,29 @@ class SolicitudCopiaController {
 			render(ex.getMessage())
 			return false
 		}
+	}
+	
+	private void este() {
+		log.debug ("este")
+	}
+	
+	private Respuesta requestBackup(Evento evento, Locale locale) {
+		log.debug ("requestBackup")
+		Respuesta respuestaGeneracionBackup
+		if(evento instanceof EventoFirma) {
+			respuestaGeneracionBackup = eventoFirmaService.generarCopiaRespaldo(
+				(EventoFirma)evento, locale)
+			log.debug("---> EventoFirma")
+		} else if(evento instanceof EventoReclamacion) {
+			log.debug("---> EventoReclamacion")
+			respuestaGeneracionBackup = eventoReclamacionService.generarCopiaRespaldo(
+				(EventoReclamacion)evento,locale)
+		} else if(evento instanceof EventoVotacion) {
+			log.debug("---> EventoVotacion")
+			respuestaGeneracionBackup = eventoVotacionService.generarCopiaRespaldo(
+				(EventoVotacion)evento, locale)
+		}
+		return respuestaGeneracionBackup
 	}
 	
 	/**
@@ -149,7 +199,7 @@ class SolicitudCopiaController {
 			return false
 		} else {
 			log.error (message(code: 'error.SinCopiaRespaldo'))
-			response.status = Respuesta.SC_ERROR_EJECUCION
+			response.status = Respuesta.SC_ERROR
 			render message(code: 'error.SinCopiaRespaldo')
 			return false
 		}

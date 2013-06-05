@@ -117,7 +117,7 @@ class CentroControlFilters {
 					log.debug("---- pkcs7DocumentsFilter - before  - BYPASS PKCS7 FILTER")
 					return
 				} else {
-					requestBytes = "${request.getInputStream()}".getBytes() 
+					requestBytes = getBytesFromInputStream(request.getInputStream()) 
 					//log.debug "---- pkcs7DocumentsFilter - consulta: ${new String(requestBytes)}"
 					Respuesta respuesta
 					if(!requestBytes) {
@@ -210,7 +210,7 @@ class CentroControlFilters {
 							response.outputStream.flush()	
 						} else {
 							response.contentType = "text/plain"
-							response.status = Respuesta.SC_ERROR_EJECUCION
+							response.status = Respuesta.SC_ERROR
 							log.debug "---- pkcs7DocumentsFilter - after - EMPTY SIGNED RESPONSE"
 							render "EMPTY SIGNED RESPONSE"
 						}
@@ -222,6 +222,22 @@ class CentroControlFilters {
 		}
 
     }
+	
+	/*
+	 * requestBytes = "${request.getInputStream()}".getBytes() gives problems
+	 * working with pdf
+	 */
+	public byte[] getBytesFromInputStream(InputStream entrada) throws IOException {
+		ByteArrayOutputStream salida = new ByteArrayOutputStream();
+		byte[] buf =new byte[5120];
+		int len;
+		while((len = entrada.read(buf)) > 0){
+			salida.write(buf,0,len);
+		}
+		salida.close();
+		entrada.close();
+		return salida.toByteArray();
+	}
 	
 	private Respuesta processSMIMERequest(SMIMEMessageWrapper smimeMessageReq,
 		Map params, HttpServletRequest request) {

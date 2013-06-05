@@ -1,10 +1,10 @@
 package org.sistemavotacion.test;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.PrivateKey;
+import java.security.cert.Certificate;
 import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
@@ -24,7 +24,7 @@ import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.sistemavotacion.test.modelo.UserBaseSimulationData;
-import org.sistemavotacion.util.FileUtils;
+import org.sistemavotacion.test.panel.VotacionesPanel;
 import org.sistemavotacion.util.NifUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,23 +41,20 @@ public enum ContextoPruebas {
 
     
     public static class DEFAULTS {
-        private static final String APPDIR =  FileUtils.BASEDIR + File.separator 
-            + "DatosSimulacionVotacion"  + File.separator;  
+        public static final String APPDIR =  Contexto.DEFAULTS.APPDIR + 
+                File.separator + "ContextoPruebas"  + File.separator;  
         private static final String locale =  "es";
         private static final String ROOT_ALIAS = "rootAlias";
         public static final String END_ENTITY_ALIAS = "endEntityAlias";        
         public static final String PASSWORD = "PemPass"; 
         private static final long CERT_VALID_FROM = System.currentTimeMillis();
         private static final long ROOT_KEYSTORE_PERIOD = 20000000000L;
-        private static final long USER_KEYSTORE_PERIOD = 20000000000L;
-        
+        private static final long USER_KEYSTORE_PERIOD = 20000000000L;  
     } 
 
     public static String locale = "es";
-    
     public static final String SIG_NAME = "RSA";
     public static final String PROVIDER = "BC";
-
 
     private KeyStore rootCAKeyStore;
     private Usuario userTest;
@@ -69,32 +66,15 @@ public enum ContextoPruebas {
     
     private Evento evento = null;
     private UserBaseSimulationData userBaseData = null;
+    private VotacionesPanel votacionesPanel = null;
     
     public static final String DNIe_SIGN_MECHANISM = "SHA1withRSA";
     public static final String VOTE_SIGN_MECHANISM = "SHA512withRSA";
     public static final String DIGEST_ALG = "SHA256";
     
-    public static final String PREFIJO_USER_JKS = "usuario_"; 
-    public static final String SUFIJO_USER_JKS = ".jks"; 
-    public static String ROOT_ALIAS = "rootAlias"; 
-    
-    public static String PASSWORD = "PemPass"; 
-    
-    public static String SOLICITUD_FILE = "SolicitudAcceso_";
-    public static String DATOS_VOTO = "DatosVoto_";
-    public static String ANULACION_FILE = "Anulador_";
-    public static String ANULACION_FIRMADA_FILE = "AnuladorFirmado_";
-    public static String RECIBO_FILE = "ReciboVoto_";
-    public static String VOTE_FILE = "Vote_";
-    
-    public static final long PERIODO_VALIDEZ_ALMACEN_RAIZ = 20000000000L;//En producción durará lo que dure una votación
-    
 
-    public static final int MAXIMALONGITUDCAMPO = 255;
-    
-    public static String BASEDIR =  System.getProperty("user.home");
-    public static String APPDIR =  FileUtils.BASEDIR + File.separator 
-            + "DatosSimulacionVotacion"  + File.separator;    
+    public static String ROOT_ALIAS = "rootAlias";     
+    public static String PASSWORD = "PemPass"; 
 
     private ResourceBundle resourceBundle;
 
@@ -105,18 +85,18 @@ public enum ContextoPruebas {
             new File(DEFAULTS.APPDIR).mkdirs();
             Properties props = new Properties();
             props.load(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream("log4jSistemaVotacionTest.properties"));
-
+                .getResourceAsStream("log4jSistemaVotacionTest.properties")); 
             Contexto.INSTANCE.init();
+            resourceBundle = ResourceBundle.getBundle("messagesTest_" + DEFAULTS.locale);
             PropertyConfigurator.configure(props);
             DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss");
             String dateStr = formatter.format(new Date(DEFAULTS.CERT_VALID_FROM));
     
+            String strSubjectDN = getString("rootCASubjectDN", dateStr);
             rootCAKeyStore = KeyStoreUtil.createRootKeyStore(
                      DEFAULTS.CERT_VALID_FROM, DEFAULTS.ROOT_KEYSTORE_PERIOD, 
                      DEFAULTS.PASSWORD.toCharArray(), DEFAULTS.ROOT_ALIAS, 
-                     "CN=Autoridad Certificadora Pruebas - " + dateStr +
-                     ", OU=DNIE_CA");
+                     strSubjectDN);
             rootCACert = (X509Certificate)rootCAKeyStore.
                     getCertificate(DEFAULTS.ROOT_ALIAS);
             rootCAPrivateKey = (PrivateKey)rootCAKeyStore.
@@ -134,26 +114,42 @@ public enum ContextoPruebas {
                     DEFAULTS.END_ENTITY_ALIAS, rootCAPrivateCredential, 
                     "GIVENNAME=NameTestPublisherUser, SURNAME=SurnameTestPublisherUser" + 
                     ", SERIALNUMBER=" + userTest.getNif()); 
-            userTest.setKeyStore(userKeySTore);
-            
-            resourceBundle = ResourceBundle.getBundle("messagesTest_" + DEFAULTS.locale);            
+            userTest.setKeyStore(userKeySTore);           
         } catch (Exception ex) {
             LoggerFactory.getLogger(ContextoPruebas.class).error(ex.getMessage(), ex);
         }
 
     }
-        
+     
+    public void setVotingPanel(VotacionesPanel panel) {
+        this.votacionesPanel = panel;
+    }
+    
+    public PrivateKey getUserTestPrivateKey() throws Exception {
+        PrivateKey key = (PrivateKey)userTest.getKeyStore().getKey(
+                DEFAULTS.END_ENTITY_ALIAS, PASSWORD.toCharArray());
+        return key;
+    }
+    
+    public Certificate[] getUserTestCertificateChain() throws Exception {
+        return userTest.getKeyStore().getCertificateChain(DEFAULTS.END_ENTITY_ALIAS);
+    }
+    
+    /*
+     * ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS, 
+                    ContextoPruebas.PASSWORD.toCharArray()
+     */
+    
     public KeyStore crearMockDNIe(String userNIF) throws Exception {
-        File file = new File(ContextoPruebas.getUserKeyStorePath(userNIF));
-        //logger.info("crearMockDNIe - userNIF: " + userNIF + " mockDnie:" + 
-        //        file.getAbsolutePath());
+        //logger.info("crearMockDNIe - userNIF: " + userNIF);
         KeyStore keyStore = KeyStoreUtil.createUserKeyStore(
                 DEFAULTS.CERT_VALID_FROM, DEFAULTS.USER_KEYSTORE_PERIOD,
                 PASSWORD.toCharArray(), DEFAULTS.END_ENTITY_ALIAS, rootCAPrivateCredential, 
                 "GIVENNAME=NombreDe" + userNIF + " ,SURNAME=ApellidoDe" + userNIF 
                 + ", SERIALNUMBER=" + userNIF); 
         byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, PASSWORD.toCharArray());
-        FileUtils.copyStreamToFile(new ByteArrayInputStream(keyStoreBytes),file);
+        Contexto.copyKeyStoreToUserDir(keyStoreBytes, userNIF, 
+                ContextoPruebas.DEFAULTS.APPDIR);
         return keyStore;
     }
     
@@ -273,6 +269,7 @@ public enum ContextoPruebas {
      */
     public void setEvento(Evento aEvento) {
         evento = aEvento;
+        votacionesPanel.cargarEvento(evento);
     }
 
     public static void crearNivelesDeDirectorios (
@@ -285,23 +282,8 @@ public enum ContextoPruebas {
         }
     }
 
-    public static String getUserDirPath (String userNIF) {
-        String resultPath = APPDIR;
-        int subPathLength = 3;
-        while (userNIF.length() > 0) {
-            if(userNIF.length() <= subPathLength) subPathLength = userNIF.length();
-            String subPath = userNIF.substring(0, subPathLength);
-            userNIF = userNIF.substring(subPathLength);
-            resultPath = resultPath + subPath + File.separator;
-        }
-        return resultPath;
-    }
-        
-    public static String getUserKeyStorePath (String userNIF) {
-        String userDirPath = getUserDirPath(userNIF);
-        new File(userDirPath).mkdirs();
-        return  userDirPath + PREFIJO_USER_JKS + userNIF + SUFIJO_USER_JKS;
-    }
+ 
+
 
     public static String getURLInfoServidor(String serverURL) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
@@ -466,6 +448,12 @@ public enum ContextoPruebas {
         return serverURL + "representative/userSelection";
     }
     
+    public String getUrlBackupEvents() {
+        if (accessControl == null) return null;
+        String serverURL = accessControl.getServerURL();
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "solicitudCopia?sync=true";
+    }
     
     /**
      * @return the userBaseData
@@ -479,6 +467,7 @@ public enum ContextoPruebas {
      */
     public void setUserBaseData(UserBaseSimulationData aUserBaseData) {
         userBaseData = aUserBaseData;
+        votacionesPanel.enableSimulation(true);
     }
     
 }

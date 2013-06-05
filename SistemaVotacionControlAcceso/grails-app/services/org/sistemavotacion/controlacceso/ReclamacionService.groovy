@@ -15,6 +15,7 @@ class ReclamacionService {
 	def firmaService
 	def grailsApplication
 	def messageSource
+	def timeStampService
 
      Respuesta guardar (MensajeSMIME mensajeSMIMEReq, Locale locale) {
         log.debug("guardar -")
@@ -30,6 +31,15 @@ class ReclamacionService {
 			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg,
 				tipo:Tipo.FIRMA_EVENTO_RECLAMACION_ERROR)
         } else {
+			Respuesta timeStampVerification = timeStampService.validateToken(
+				usuario.getTimeStampToken(), eventoReclamacion, locale)
+			if(Respuesta.SC_OK != timeStampVerification.codigoEstado) {
+				log.error("saveManifestSignature - ERROR TIMESTAMP VOTE VALIDATION -> '${timeStampVerification.mensaje}'")
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+					mensaje:timeStampVerification.mensaje,
+					tipo:Tipo.FIRMA_EVENTO_CON_ERRORES, evento:event)
+			}
+		
             Firma firma = Firma.findWhere(evento:eventoReclamacion, usuario:usuario)
             if (!firma || Evento.Cardinalidad.MULTIPLES.equals(
                     eventoReclamacion.cardinalidadRepresentaciones)) {

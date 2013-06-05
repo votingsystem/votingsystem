@@ -262,7 +262,7 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
             logger.debug("No se puede editar archivos");
         }
         try {
-            File documento = new File(FileUtils.APPTEMPDIR +
+            File documento = new File(Contexto.DEFAULTS.APPTEMPDIR +
                     appletFirma.getOperacionEnCurso().getTipo().
                     getNombreArchivoEnDisco());
             documento.deleteOnExit();
@@ -291,11 +291,12 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
     private void lanzarVoto(String password) {
         try {
             String fromUser = Contexto.INSTANCE.getString("electorLbl");
-            String asuntoMensaje = ASUNTO_MENSAJE_SOLICITUD_ACCESO + 
-                votoEvento.getEventoId();
+            String toUser =  votoEvento.getControlAcceso().getNombreNormalizado();
+            String msgSubject = Contexto.INSTANCE.getString(
+                    "accessRequestMsgSubject")  + votoEvento.getEventoId();
             smimeMessage = DNIeSignedMailGenerator.genMimeMessage(fromUser, 
-                    NOMBRE_DESTINATARIO, votoEvento.getAccessRequestJSON().toString(),
-                    password.toCharArray(), asuntoMensaje, null);
+                    toUser, votoEvento.getAccessRequestJSON().toString(),
+                    password.toCharArray(), msgSubject, null);
 
             //No se hace la comprobación antes porque no hay usuario en contexto
             //hasta que no se firma al menos una vez

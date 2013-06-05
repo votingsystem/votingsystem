@@ -53,7 +53,7 @@ public class DocumentSenderWorker extends SwingWorker<Respuesta, String>
             respuesta = get();
         }catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-            respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+            respuesta.appendMessage(ex.getMessage());
         } 
         workerListener.showResult(this);
     }

@@ -156,7 +156,8 @@ public class AppletFirma extends JApplet {
                 Object[] args = {operacion.obtenerJSONStr()};
                 Object object = netscape.javascript.JSObject.getWindow(this).
                         call("setClienteFirmaMessage", args);
-            } else logger.debug("---------------> enviado mensaje de aplicación");
+            } else logger.debug("---> APP EXECUTION MODE: " +  
+                    AppletFirma.modoEjecucion.toString());
         } catch (Exception e) {
             //logger.error(e.getMessage(), e);
             e.printStackTrace();
@@ -223,7 +224,7 @@ public class AppletFirma extends JApplet {
                         File jsonFile = File.createTempFile("operacion", ".json");
                         jsonFile.deleteOnExit();
                         FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
-                            .getResourceAsStream("testFiles/signClaim.json"), jsonFile);        
+                            .getResourceAsStream("testFiles/backupRequest.json"), jsonFile);        
                         appletFirma.ejecutarOperacion(FileUtils.getStringFromFile(jsonFile));
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);

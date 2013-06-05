@@ -16,7 +16,7 @@ public abstract class Simulator<T extends SimulationData> {
     
     private static Logger logger = LoggerFactory.getLogger(Simulator.class);
     
-    private static List<String> errorsList;
+    private List<String> errorsList;
     
     public abstract void init() throws Exception;
     public abstract T getData();

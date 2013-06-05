@@ -78,7 +78,7 @@ class HttpService {
 	Respuesta sendMessage(byte[] message, String contentType, String serverURL) {
 		log.debug(" - sendMessage:${serverURL} - contentType: ${contentType}")
 		def httpBuilder = new HTTPBuilder(serverURL);
-		def respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION)
+		def respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR)
 		try {
 			httpBuilder.request(POST) {request ->
 				ByteArrayEntity byteArrayEntity = new ByteArrayEntity(message)

@@ -141,7 +141,7 @@ class VotoController {
 	 def testAsync () {
 		 log.debug "Arranco controlador"
 		 def aCtx = startAsync()
-		 aCtx.setTimeout(Respuesta.SC_ERROR_EJECUCION0);
+		 aCtx.setTimeout(Respuesta.SC_ERROR0);
 		 //aCtx.complete()
 		 render "Todo ok"
 	 }

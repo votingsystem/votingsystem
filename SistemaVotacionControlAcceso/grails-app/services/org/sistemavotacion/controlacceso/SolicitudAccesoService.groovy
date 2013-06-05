@@ -129,7 +129,7 @@ class SolicitudAccesoService {
 			}
 		}catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION,
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR,
 					tipo:Tipo.SOLICITUD_ACCESO_ERROR,
 					mensaje:messageSource.getMessage(
 					'accessRequestWithErrorsMsg', null, locale))

@@ -267,14 +267,14 @@ class RepresentativeService {
 				msg = messageSource.getMessage('representativeSameUserNifErrorMsg',
 					[requestValidatedNIF].toArray(), locale)
 				log.error("saveUserRepresentative - ERROR SAME USER SELECTION - ${msg}")
-				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION,
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR,
 					mensaje:msg, tipo:Tipo.REPRESENTATIVE_SELECTION_ERROR)
 			}
 			if(!requestValidatedNIF || !mensajeJSON.operation || !mensajeJSON.representativeNif ||
 				(Tipo.REPRESENTATIVE_SELECTION != Tipo.valueOf(mensajeJSON.operation))) {
 				msg = messageSource.getMessage('representativeSelectionDataErrorMsg', null, locale)
 				log.error("saveUserRepresentative - ERROR DATA - ${msg}")
-				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION,
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR,
 					mensaje:msg, tipo:Tipo.REPRESENTATIVE_SELECTION_ERROR)
 			}
 			Usuario representative = Usuario.findWhere(
@@ -325,7 +325,7 @@ class RepresentativeService {
 			log.error (ex.getMessage(), ex)
 			msg = messageSource.getMessage(
 				'representativeSelectErrorMsg', null, locale)
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION,
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR,
 				mensaje:msg, tipo:Tipo.REPRESENTATIVE_SELECTION_ERROR)
 		}
 	}
@@ -406,7 +406,7 @@ class RepresentativeService {
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
 			msg = messageSource.getMessage('representativeDataErrorMsg', null, locale)
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION,
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR,
 				mensaje:msg, tipo:Tipo.REPRESENTATIVE_DATA_ERROR)
 		}
 
@@ -539,7 +539,7 @@ class RepresentativeService {
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
 			msg = messageSource.getMessage('requestErrorMsg', null, locale)
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION,
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR,
 				mensaje:msg, tipo:Tipo.REPRESENTATIVE_VOTING_HISTORY_REQUEST_ERROR)
 		}
 		msg = messageSource.getMessage('backupRequestOKMsg',
@@ -658,7 +658,7 @@ class RepresentativeService {
 			log.error (ex.getMessage(), ex)
 			msg = messageSource.getMessage(
 				'representativeRevokeErrorMsg',null, locale)
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION,
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR,
 				mensaje:msg, tipo:Tipo.REPRESENTATIVE_REVOKE_ERROR)
 		}
 	}
@@ -723,7 +723,7 @@ class RepresentativeService {
 			log.error (ex.getMessage(), ex)
 			msg = messageSource.getMessage('representativeAccreditationRequestErrorMsg', null, locale)
 			return new Respuesta(mensaje:msg,
-				codigoEstado:Respuesta.SC_ERROR_EJECUCION,
+				codigoEstado:Respuesta.SC_ERROR,
 				tipo:Tipo.REPRESENTATIVE_ACCREDITATIONS_REQUEST_ERROR)
 		}
 

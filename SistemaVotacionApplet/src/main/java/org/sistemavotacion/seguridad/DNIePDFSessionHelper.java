@@ -334,7 +334,8 @@ public class DNIePDFSessionHelper extends CMSSignedGenerator
             X509PublicKeyCertificate certificateTemplate = new X509PublicKeyCertificate();
             pkcs11Session.findObjectsInit(certificateTemplate);
             Object[] tokenCertificateObjects;
-            FileInputStream fis =  new FileInputStream(FileUtils.APPDIR + Contexto.CERT_RAIZ_PATH);
+            FileInputStream fis =  new FileInputStream(
+                    Contexto.DEFAULTS.APPDIR + Contexto.CERT_RAIZ_PATH);
             certificadoCA = CertUtil.loadCertificateFromStream(fis);
             chain[2] = certificadoCA;
             while ((tokenCertificateObjects = pkcs11Session.findObjects(1)).length > 0) {

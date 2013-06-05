@@ -135,7 +135,7 @@ public class VotingService extends Service implements TaskListener {
 						ex.printStackTrace();
 						String msg = getString(R.string.receipt_error_msg) 
 								+ ": " + ex.getMessage();
-						voteProcessListener.setMsg(Respuesta.SC_ERROR_EJECUCION, msg);
+						voteProcessListener.setMsg(Respuesta.SC_ERROR, msg);
 					}
             	 } else {
             		 voteProcessListener.setMsg(sendFileTask.getStatusCode(), sendFileTask.getMessage());
@@ -146,7 +146,7 @@ public class VotingService extends Service implements TaskListener {
             }
         } catch(Exception ex) {
         	ex.printStackTrace();
-			voteProcessListener.setMsg(Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
+			voteProcessListener.setMsg(Respuesta.SC_ERROR, ex.getMessage());
         }
 
 	}
@@ -231,7 +231,7 @@ public class VotingService extends Service implements TaskListener {
 			                	
 			                	if(Respuesta.SC_OK != encryptedBundle.getStatusCode()) {
 									voteProcessListener.setMsg(
-											Respuesta.SC_ERROR_EJECUCION, encryptedBundle.getMessage());
+											Respuesta.SC_ERROR, encryptedBundle.getMessage());
 									return;
 			                	}
 			                	
@@ -292,7 +292,7 @@ public class VotingService extends Service implements TaskListener {
 								ex.printStackTrace();
 								String msg = getString(R.string.receipt_error_msg) 
 										+ ": " + ex.getMessage();
-								voteProcessListener.setMsg(Respuesta.SC_ERROR_EJECUCION, msg);
+								voteProcessListener.setMsg(Respuesta.SC_ERROR, msg);
 							}
 	                	} else {
 	                		voteProcessListener.setMsg(sendFileTask.getStatusCode(), 
@@ -301,7 +301,7 @@ public class VotingService extends Service implements TaskListener {
 	                }
 				} catch (Exception ex) {
 					ex.printStackTrace();
-					voteProcessListener.setMsg(Respuesta.SC_ERROR_EJECUCION, 
+					voteProcessListener.setMsg(Respuesta.SC_ERROR, 
 							ex.getMessage());
 				}	
         	} else {

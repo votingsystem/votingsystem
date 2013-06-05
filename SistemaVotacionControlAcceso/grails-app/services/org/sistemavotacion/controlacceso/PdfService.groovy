@@ -95,6 +95,7 @@ class PdfService {
 	
 	public Respuesta checkSignature (byte[] signedPDF, Locale locale) {
 		log.debug "checkSiganture - signedPDF.length: ${signedPDF.length}"
+		
 		Respuesta respuesta = null;
 		PdfReader reader = new PdfReader(signedPDF);
 		Documento documento;
@@ -103,7 +104,6 @@ class PdfService {
 		respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
 			mensaje:messageSource.getMessage('error.documentWithoutSigners', null, locale));
 		for (String name : names) {
-			respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK);
 			log.debug("checkSignature - Signature name: " + name + " - covers whole document:" +
 				acroFields.signatureCoversWholeDocument(name));
 			PdfPKCS7 pk = acroFields.verifySignature(name, "BC");
@@ -143,7 +143,7 @@ class PdfService {
 						certificate.getSerialNumber()?.longValue()) {
 						log.debug("checkSignature - CA: '${certificate?.getSerialNumber()?.longValue()}' - ${certificate.getSubjectDN().toString()}")
 						certificadoCA = firmaService.getCertificadoCA(certificate.getSerialNumber()?.longValue())
-						log.debug("checkSignature - CA id: ${certificadoCA?.id}")
+						//log.debug("checkSignature - CA id: ${certificadoCA?.id}")
 						usuario.setCertificadoCA(certificadoCA);
 					}
 				}
@@ -152,7 +152,7 @@ class PdfService {
 				usuario = respuestaValidacionUsu.usuario;
 				certificado = respuestaValidacionUsu.certificadoDB;
 			} else usuario = certificado.usuario;
-			if (timeStampToken != null) {
+			/*if (timeStampToken != null) {
 				boolean impr = pk.verifyTimestampImprint();
 				signDate= pk.getTimeStampDate();
 				log.debug("checkSignature - timeStampToken - verifyTimestampImprint: ${impr} - signDate:${signDate.getTime()}" );
@@ -160,13 +160,15 @@ class PdfService {
 				SignerId signer_id = timeStampToken.getSID();
 				BigInteger cert_serial_number = signer_id.getSerialNumber();
 				log.debug("checkSignature - timeStampToken - Generation time " + tsInfo.getGenTime());
-				log.debug("checkSignature - timeStampToken - Signer ID serial " + signer_id.getSerialNumber());
+				log.debug("checkSignature - timeStampToken - Signer ID serial " + cert_serial_number);
 				log.debug("checkSignature - timeStampToken - Signer ID issuer " + signer_id.getIssuerAsString());
-			}
+			}*/
 			documento = new Documento(pdf:signedPDF, usuario:usuario, timeStampToken:timeStampToken,
 				signDate:signDate?.getTime(), estado:Documento.Estado.VALIDADO)
-			documento.save()
-			respuesta.documento = documento
+			Documento.withTransaction {
+				documento.save()
+			}
+			respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK, documento:documento);
 			/*BasicOCSPResp ocsp = pk.getOcsp();
 			if (ocsp != null) {
 				// Get a trusted certificate (could have come from a certificate store)

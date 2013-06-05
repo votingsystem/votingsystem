@@ -161,7 +161,7 @@ class EventoVotacionService {
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
 			msg = messageSource.getMessage('publishVotingErrorMessage', null, locale)
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION,
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR,
 				mensaje:msg, tipo:Tipo.EVENTO_VOTACION_ERROR, evento:evento)
 		}
     }
@@ -230,10 +230,10 @@ class EventoVotacionService {
 			String zipNamePrefix = messageSource.getMessage('votingBackupFileName', null, locale);
 
 			
-			def metaInformacionMap = [numeroVotos:votes.size(),
-				solicitudesAcceso:solicitudesAcceso.size(),
+			def metaInformacionMap = [numVotes:votes.size(),
+				numAccessRequest:solicitudesAcceso.size(),
 				URL:"${grailsApplication.config.grails.serverURL}/eventoVotacion/${evento.id}",
-				tipoEvento:Tipo.EVENTO_VOTACION.toString(), asunto:evento.asunto]
+				type:Tipo.EVENTO_VOTACION.toString(), subject:evento.asunto]
 			
 
 			def eventMetaInfJSON = JSON.parse(evento.metaInf)
@@ -266,12 +266,12 @@ class EventoVotacionService {
 			}
 
 			ant.zip(destfile: baseDirZip, basedir: basedir)
-			Map datos = [cantidad:votes?.size()]
+			Map datos = [cantidad:votes?.size(), type:Tipo.EVENTO_VOTACION]
 			return new Respuesta(codigoEstado:Respuesta.SC_OK, datos:datos, file:baseDirZip)
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex)
 			msg =  messageSource.getMessage('error.backupGenericErrorMsg', null, locale)
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION, 
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR, 
 				mensaje:msg, tipo:Tipo.BACKUP_GEN_ERROR)
 		}
 

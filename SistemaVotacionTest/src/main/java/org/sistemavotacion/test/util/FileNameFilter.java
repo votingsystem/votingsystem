@@ -5,6 +5,7 @@ import java.util.Collection;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.sistemavotacion.Contexto;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,7 @@ public class FileNameFilter implements IOFileFilter {
     
     public static void main(String[] args) {
         Collection<File> solicitudes = FileNameFilter.getFilesFromDirectoryTree(
-                new File(ContextoPruebas.APPDIR), ContextoPruebas.ANULACION_FILE);
+                new File(Contexto.DEFAULTS.APPDIR), Contexto.CANCEL_VOTE_FILE);
         logger.debug("Encontradas '" + solicitudes.size() + "' solicitudes");
     }
     

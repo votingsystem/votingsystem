@@ -217,10 +217,10 @@ public class PublishService extends Service implements TaskListener {
         } catch(VotingSystemKeyStoreException ex) {
         	ex.printStackTrace();
         	serviceListener.setPublishServiceMsg(
-        			Respuesta.SC_ERROR_EJECUCION, getString(R.string.pin_error_msg) );
+        			Respuesta.SC_ERROR, getString(R.string.pin_error_msg) );
         } catch(Exception ex) {
         	ex.printStackTrace();
-        	serviceListener.setPublishServiceMsg(Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
+        	serviceListener.setPublishServiceMsg(Respuesta.SC_ERROR, ex.getMessage());
         }
 
     }
@@ -249,7 +249,7 @@ public class PublishService extends Service implements TaskListener {
 					ex.printStackTrace();
 					String msg = getString(R.string.receipt_error_msg) 
 							+ ": " + ex.getMessage();
-					serviceListener.setPublishServiceMsg(Respuesta.SC_ERROR_EJECUCION, msg);
+					serviceListener.setPublishServiceMsg(Respuesta.SC_ERROR, msg);
 				}
 	        } else serviceListener.setPublishServiceMsg(
 	        		sendFileTask.getStatusCode(), sendFileTask.getMessage());

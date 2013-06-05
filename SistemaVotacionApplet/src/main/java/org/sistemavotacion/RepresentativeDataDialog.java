@@ -322,10 +322,10 @@ public class RepresentativeDataDialog extends JDialog
                         byte[] imageFileBytes = FileUtils.getBytesFromFile(selectedImage);
                         logger.debug(" - imageFileBytes.length: " + 
                                 imageFileBytes.length);
-                        if(imageFileBytes.length > Contexto.MAX_FILE_SIZE) {
+                        if(imageFileBytes.length > Contexto.IMAGE_MAX_FILE_SIZE) {
                             logger.debug(" - MAX_FILE_SIZE exceeded ");
                             setMessage(Contexto.INSTANCE.getString("fileSizeExceeded", 
-                                    Contexto.MAX_FILE_SIZE_KB));
+                                    Contexto.IMAGE_MAX_FILE_SIZE_KB));
                             selectedImage = null;
                             selectedImageLabel.setText(
                                 Contexto.INSTANCE.getString("imageNotSelectedMsg"));
@@ -423,7 +423,7 @@ public class RepresentativeDataDialog extends JDialog
             logger.debug("No se puede editar archivos");
         }
         try {
-            File documento = new File(FileUtils.APPTEMPDIR + operacion.
+            File documento = new File(Contexto.DEFAULTS.APPTEMPDIR + operacion.
                     getTipo().getNombreArchivoEnDisco());
             documento.deleteOnExit();
             FileUtils.copyStreamToFile(new ByteArrayInputStream(

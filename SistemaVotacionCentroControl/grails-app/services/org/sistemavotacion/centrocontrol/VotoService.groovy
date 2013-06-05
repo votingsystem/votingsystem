@@ -92,7 +92,7 @@ class VotoService {
 				smimeVoteValidation.getBytes(), evento.getControlAccesoCert(), locale);
 			if (Respuesta.SC_OK != encryptResponse.codigoEstado) {
 				log.error("validateVote - encryptResponse ERROR - > ${encryptResponse.mensaje}")
-				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION,
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR,
 					tipo:Tipo.VOTO_CON_ERRORES, evento:evento, mensaje:encryptResponse.mensaje)
 			} 
 			
@@ -114,14 +114,14 @@ class VotoService {
 				if(!smimeMessageResp.getContentDigestStr().equals(signedVoteDigest)) {
 					log.error("validateVote - ERROR digest del voto enviado: " + signedVoteDigest +
 						" - digest del voto recibido: " + smimeMessageResp.getContentDigestStr())
-					return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION, 
+					return new Respuesta(codigoEstado:Respuesta.SC_ERROR, 
 						tipo:Tipo.VOTO_CON_ERRORES, evento:evento, mensaje:messageSource.
 						getMessage('voteContentErrorMsg', null, locale))
 				}
 				respuesta = firmaService.validateVoteValidationCerts(smimeMessageResp, evento, locale)
 				if(Respuesta.SC_OK != respuesta.codigoEstado) {
 					log.error("validateVote - validateVoteValidationCerts ERROR - > ${respuesta.mensaje}")
-					return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION,
+					return new Respuesta(codigoEstado:Respuesta.SC_ERROR,
 						tipo:Tipo.VOTO_CON_ERRORES, evento:evento, mensaje:respuesta.mensaje)
 				} 
 				mensajeSMIMEReq.tipo = Tipo.VOTO_VALIDADO_CONTROL_ACCESO
@@ -145,7 +145,7 @@ class VotoService {
 			}
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION,
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR,
 				mensaje:messageSource.getMessage('voteErrorMsg', null, locale), 
 				tipo:Tipo.VOTO_CON_ERRORES, evento:evento)
 		}

@@ -5,8 +5,8 @@ import java.io.File;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
+import org.sistemavotacion.Contexto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +18,7 @@ public class Validacion {
     
     private static Logger logger = LoggerFactory.getLogger(Validacion.class);
     
-    public static String DIRECTORIO_RAIZ = ContextoPruebas.APPDIR + "temp/archivoConfirma" ;
+    public static String DIRECTORIO_RAIZ = Contexto.DEFAULTS.APPDIR + "temp/archivoConfirma" ;
     public static final int TAMANYO_COLA = 1000;
     
     private static Executor validacionExecutor = Executors.newCachedThreadPool();

@@ -1,6 +1,7 @@
 package org.sistemavotacion.test.dialogo;
 
 import java.awt.Color;
+import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -17,13 +18,12 @@ import javax.swing.border.LineBorder;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Respuesta;
+import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.test.MainFrame;
-import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.StringUtils;
-import org.sistemavotacion.worker.DocumentSenderWorker;
 import org.sistemavotacion.worker.InfoGetterWorker;
+import org.sistemavotacion.worker.SMIMESignedSenderWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
 import org.slf4j.Logger;
@@ -42,85 +42,14 @@ public class AsociarCentroControlDialog extends JDialog implements
     private static final int INFO_GETTER_WORKER                       = 0;
     private static final int ASSOCIATE_CONTROL_CENTER_WORKER          = 1;
 
-    @Override public void processVotingSystemWorkerMsg(List<String> messages) {
-        String msg = null;
-        for(String message : messages) {
-            if(msg == null ) msg = message;
-            else msg = msg + "<br/>" + message; 
-        }
-        mostrarMensajeUsuario(msg);
-    }
-
-    @Override
-    public void showResult(VotingSystemWorker worker) {
-        logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-                " - worker: " + worker.getClass().getSimpleName() + 
-                " - workerId:" + worker.getId());
-        switch(worker.getId()) {
-            case INFO_GETTER_WORKER:
-            if(Respuesta.SC_OK == worker.getStatusCode()) {
-                try {
-                    ActorConIP actorConIP = ActorConIP.parse(worker.getMessage());
-                    if(actorConIP.getTipo() != ActorConIP.Tipo.CENTRO_CONTROL) {
-                        mostrarMensajeUsuario("El servidor no es un Centro de Control");
-                        centroControlTextField.setBorder(new LineBorder(Color.RED,2));
-                        infoServidorButton.setIcon(null);
-                        infoServidorButton.setText("Asociar");
-                        estado = Estado.DESCONECTADO;
-                        return;
-                    }
-                    mostrarMensajeUsuario(null);
-                    centroControlTextField.setBorder(normalTextBorder);
-                    centroControl = actorConIP;
-                    estado = Estado.CONECTADO_CENTRO_CONTROL;
-                    
-                    
-                    firmarEnviarSolicitudAsociacionCentroControl();
-                    /* ====== if(ActorConIP.EnvironmentMode.TEST.equals(
-                            centroControl.getEnvironmentMode())) {
-                        firmarEnviarSolicitudAsociacionCentroControl();
-                    } else {
-                         mostrarMensajeUsuario(
-                                 "Para poder hacer las pruebas el servidor tiene que ser arrancado en modo TEST");
-                    }*/
-                } catch(Exception ex) {
-                    logger.error(ex.getMessage(), ex);
-                    infoServidorButton.setIcon(new javax.swing.ImageIcon(
-                            getClass().getResource("/images/pair_16x16.png")));
-                    infoServidorButton.setText("Asociar");
-                    mostrarMensajeUsuario(ex.getMessage());
-                }
-            } else {
-                mostrarMensajeUsuario(worker.getMessage());
-                infoServidorButton.setIcon(null);
-                infoServidorButton.setText("Asociar");
-            }
-            break;
-            case ASSOCIATE_CONTROL_CENTER_WORKER:
-                if(Respuesta.SC_OK == worker.getStatusCode()) {
-                    estado = Estado.CENTRO_CONTROL_ASOCIADO;
-                    infoServidorButton.setText("Información del servidor");
-                    infoServidorButton.setIcon(new ImageIcon(getClass()
-                            .getResource("/images/information-white.png")));
-                    MainFrame.INSTANCIA.cargarControlAcceso();
-                    dispose();
-                } else {
-                    mostrarMensajeUsuario(worker.getMessage());
-                    infoServidorButton.setIcon(null);
-                    infoServidorButton.setText("Asociar");
-                }
-                break;
-        }
-    }
-    
     public enum Estado {DESCONECTADO, CONECTANDO, CONECTADO_CENTRO_CONTROL, 
-    ASOCIANDO_CENTRO_CONTROL, CENTRO_CONTROL_ASOCIADO;}
+        ASOCIANDO_CENTRO_CONTROL, CENTRO_CONTROL_ASOCIADO;}
     
     private SwingWorker tareaEnEjecucion;
     private Estado estado = Estado.DESCONECTADO;
-    private ActorConIP centroControl = null;
+    private ActorConIP controlCenter = null;
     private Border normalTextBorder;
-        
+    private Frame parentFrame;
     /**
      * Creates new form AsociarCentroControlDialog
      */
@@ -128,9 +57,10 @@ public class AsociarCentroControlDialog extends JDialog implements
         super(parent, modal);
         initComponents();
         setLocationRelativeTo(null);
+        this.parentFrame = parent;
         normalTextBorder = new JTextField().getBorder();
         mensajePanel.setVisible(false);
-        centroControlTextField.addKeyListener(this);
+        controlCenterTextField.addKeyListener(this);
         pack();
     }
 
@@ -145,7 +75,7 @@ public class AsociarCentroControlDialog extends JDialog implements
 
         urlCentroControlPanel = new javax.swing.JPanel();
         centroControlLabel = new javax.swing.JLabel();
-        centroControlTextField = new javax.swing.JTextField();
+        controlCenterTextField = new javax.swing.JTextField();
         infoServidorButton = new javax.swing.JButton();
         cerrarButton = new javax.swing.JButton();
         mensajePanel = new javax.swing.JPanel();
@@ -159,7 +89,7 @@ public class AsociarCentroControlDialog extends JDialog implements
         centroControlLabel.setText(bundle.getString("AsociarCentroControlDialog.centroControlLabel.text")); // NOI18N
         centroControlLabel.setToolTipText(bundle.getString("AsociarCentroControlDialog.centroControlLabel.toolTipText")); // NOI18N
 
-        centroControlTextField.setText(bundle.getString("AsociarCentroControlDialog.centroControlTextField.text")); // NOI18N
+        controlCenterTextField.setText(bundle.getString("AsociarCentroControlDialog.controlCenterTextField.text")); // NOI18N
 
         infoServidorButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/pair_16x16.png"))); // NOI18N
         infoServidorButton.setText(bundle.getString("AsociarCentroControlDialog.infoServidorButton.text")); // NOI18N
@@ -177,9 +107,9 @@ public class AsociarCentroControlDialog extends JDialog implements
                 .addContainerGap()
                 .addComponent(centroControlLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(centroControlTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 272, Short.MAX_VALUE)
+                .addComponent(controlCenterTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 263, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(infoServidorButton)
+                .addComponent(infoServidorButton, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         urlCentroControlPanelLayout.setVerticalGroup(
@@ -188,7 +118,7 @@ public class AsociarCentroControlDialog extends JDialog implements
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(urlCentroControlPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(centroControlLabel)
-                    .addComponent(centroControlTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(controlCenterTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(infoServidorButton))
                 .addContainerGap())
         );
@@ -246,7 +176,7 @@ public class AsociarCentroControlDialog extends JDialog implements
             .addComponent(urlCentroControlPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(cerrarButton)
+                .addComponent(cerrarButton, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -265,7 +195,7 @@ public class AsociarCentroControlDialog extends JDialog implements
 
     private void asociarServidorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_asociarServidorButtonActionPerformed
         logger.debug("asociarServidorButtonActionPerformed - estado: " + estado.toString());
-        if("".equals(centroControlTextField.getText().trim())) return; 
+        if("".equals(controlCenterTextField.getText().trim())) return; 
         switch(estado) {
             case DESCONECTADO:
                 logger.debug("Conectando con Control Acceso");
@@ -274,12 +204,12 @@ public class AsociarCentroControlDialog extends JDialog implements
                         getResource("/images/loading.gif")));
                 infoServidorButton.setText("Conectando");
                 String urlServidor = StringUtils.prepararURL(
-                        centroControlTextField.getText().trim());
+                        controlCenterTextField.getText().trim());
                 String urlInfoServidor = ContextoPruebas.getURLInfoServidor(urlServidor);
                 tareaEnEjecucion = new InfoGetterWorker(INFO_GETTER_WORKER,
                     urlInfoServidor, null, this);
                 tareaEnEjecucion.execute();
-                centroControlTextField.setText(centroControlTextField.getText().trim());
+                controlCenterTextField.setText(controlCenterTextField.getText().trim());
                 break;
             case CONECTANDO:
                 tareaEnEjecucion.cancel(true);
@@ -295,7 +225,7 @@ public class AsociarCentroControlDialog extends JDialog implements
                 break;
             case CENTRO_CONTROL_ASOCIADO:
                 InfoServidorDialog infoServidorDialog = new InfoServidorDialog(
-                    MainFrame.INSTANCIA.getFrames()[0], false, centroControl);
+                    parentFrame, false, controlCenter);
                 infoServidorDialog.setVisible(true);
                 break;
         }
@@ -361,16 +291,16 @@ public class AsociarCentroControlDialog extends JDialog implements
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel centroControlLabel;
-    private javax.swing.JTextField centroControlTextField;
     private javax.swing.JButton cerrarButton;
     private javax.swing.JLabel closeLabel;
+    private javax.swing.JTextField controlCenterTextField;
     private javax.swing.JButton infoServidorButton;
     private javax.swing.JLabel mensajeLabel;
     private javax.swing.JPanel mensajePanel;
     private javax.swing.JPanel urlCentroControlPanel;
     // End of variables declaration//GEN-END:variables
 
-    private void firmarEnviarSolicitudAsociacionCentroControl() {
+    private void sendAssociationRequest() {
         estado = Estado.ASOCIANDO_CENTRO_CONTROL;
         try {
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
@@ -378,19 +308,19 @@ public class AsociarCentroControlDialog extends JDialog implements
                     ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS, 
                     ContextoPruebas.DEFAULTS.PASSWORD.toCharArray(),
                     ContextoPruebas.VOTE_SIGN_MECHANISM);
-            File solicitudAsociacion = new File(FileUtils.APPTEMPDIR + "SolicitudAsociacion");
+
             String documentoAsociacion = ActorConIP.getAssociationDocumentJSON(
-                    centroControl.getServerURL()).toString();
-            MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(
+                    controlCenter.getServerURL()).toString();
+            String msgSubject = ContextoPruebas.INSTANCE.getString(
+                    "associateControlCenterMsgSubject");
+            SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage(
                     ContextoPruebas.INSTANCE.getUserTest().getEmail(), 
                     Contexto.INSTANCE.getAccessControl().getNombreNormalizado(), 
-                    documentoAsociacion, "Solicitud Asociacion de Centro de Control", null);
-            mimeMessage.writeTo(new FileOutputStream(solicitudAsociacion));
-            tareaEnEjecucion = new DocumentSenderWorker(
-                    ASSOCIATE_CONTROL_CENTER_WORKER, solicitudAsociacion, 
-                    Contexto.SIGNED_CONTENT_TYPE,
-                    ContextoPruebas.getURLAsociarActorConIP(
-                    Contexto.INSTANCE.getAccessControl().getServerURL()), this);
+                    documentoAsociacion, msgSubject, null);
+
+            tareaEnEjecucion = new SMIMESignedSenderWorker(ASSOCIATE_CONTROL_CENTER_WORKER, 
+                    smimeDocument, ContextoPruebas.INSTANCE.getURLAsociarActorConIP(), 
+                    null, null, this);
             tareaEnEjecucion.execute();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
@@ -410,11 +340,9 @@ public class AsociarCentroControlDialog extends JDialog implements
         pack();
     }
 
-    @Override
-    public void keyTyped(KeyEvent ke) { }
+    @Override public void keyTyped(KeyEvent ke) { }
 
-    @Override
-    public void keyPressed(KeyEvent ke) {
+    @Override public void keyPressed(KeyEvent ke) {
         int key = ke.getKeyCode();
         if (key == KeyEvent.VK_ENTER) {
             Toolkit.getDefaultToolkit().beep();
@@ -422,6 +350,83 @@ public class AsociarCentroControlDialog extends JDialog implements
         }
     }
 
-    @Override
-    public void keyReleased(KeyEvent ke) { }
+    @Override public void keyReleased(KeyEvent ke) { }
+    
+
+    @Override public void processVotingSystemWorkerMsg(List<String> messages) {
+        String msg = null;
+        for(String message : messages) {
+            if(msg == null ) msg = message;
+            else msg = msg + "<br/>" + message; 
+        }
+        mostrarMensajeUsuario(msg);
+    }
+
+    @Override public void showResult(VotingSystemWorker worker) {
+        logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
+                " - worker: " + worker.getClass().getSimpleName() + 
+                " - workerId:" + worker.getId());
+        switch(worker.getId()) {
+            case INFO_GETTER_WORKER:
+            if(Respuesta.SC_OK == worker.getStatusCode()) {
+                try {
+                    controlCenter = ActorConIP.parse(worker.getMessage());
+                    if(controlCenter.getTipo() != ActorConIP.Tipo.CENTRO_CONTROL) {
+                        mostrarMensajeUsuario(ContextoPruebas.INSTANCE.
+                                getString("controlCenterErrorMsg"));
+                        controlCenterTextField.setBorder(new LineBorder(Color.RED,2));
+                        infoServidorButton.setIcon(null);
+                        infoServidorButton.setText(ContextoPruebas.INSTANCE.
+                                getString("associateLbl"));
+                        estado = Estado.DESCONECTADO;
+                        return;
+                    }
+                    if(ActorConIP.EnvironmentMode.DEVELOPMENT !=  
+                            controlCenter.getEnvironmentMode()) {
+                        String msg = ContextoPruebas.INSTANCE.getString(
+                                "serverModeErrorMsg", controlCenter.getEnvironmentMode());
+                        logger.error("### ERROR - " + msg);
+                        mostrarMensajeUsuario(msg);
+                        controlCenterTextField.setBorder(new LineBorder(Color.RED,2));
+                        infoServidorButton.setIcon(null);
+                        infoServidorButton.setText(ContextoPruebas.INSTANCE.
+                                getString("associateLbl"));
+                        estado = Estado.DESCONECTADO;                        
+                        return;
+                    }
+                    mostrarMensajeUsuario(null);
+                    controlCenterTextField.setBorder(normalTextBorder);
+                    estado = Estado.CONECTADO_CENTRO_CONTROL;
+                    sendAssociationRequest();
+                } catch(Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                    infoServidorButton.setIcon(new javax.swing.ImageIcon(
+                            getClass().getResource("/images/pair_16x16.png")));
+                    infoServidorButton.setText(ContextoPruebas.INSTANCE.
+                            getString("associateLbl"));
+                    mostrarMensajeUsuario(ex.getMessage());
+                }
+            } else {
+                mostrarMensajeUsuario(worker.getMessage());
+                infoServidorButton.setIcon(null);
+                infoServidorButton.setText("Asociar");
+            }
+            break;
+            case ASSOCIATE_CONTROL_CENTER_WORKER:
+                if(Respuesta.SC_OK == worker.getStatusCode()) {
+                    estado = Estado.CENTRO_CONTROL_ASOCIADO;
+                    infoServidorButton.setText("Información del servidor");
+                    infoServidorButton.setIcon(new ImageIcon(getClass()
+                            .getResource("/images/information-white.png")));
+                    ContextoPruebas.INSTANCE.setCentroControl(controlCenter);
+                    dispose();
+                } else {
+                    mostrarMensajeUsuario(worker.getMessage());
+                    infoServidorButton.setIcon(null);
+                    infoServidorButton.setText("Asociar");
+                }
+                break;
+        }
+    }
+        
 }

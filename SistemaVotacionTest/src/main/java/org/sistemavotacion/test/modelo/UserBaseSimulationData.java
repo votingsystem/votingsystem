@@ -17,7 +17,7 @@ public class UserBaseSimulationData extends SimulationData {
     
     private static Logger logger = LoggerFactory.getLogger(UserBaseSimulationData.class);
 
-    private int statusCode = Respuesta.SC_ERROR_EJECUCION;
+    private int statusCode = Respuesta.SC_ERROR;
     private String message = null;
 
     private Integer numRepresentatives = 0;

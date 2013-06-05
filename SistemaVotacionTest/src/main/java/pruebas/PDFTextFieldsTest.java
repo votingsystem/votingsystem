@@ -5,8 +5,9 @@
  * This example only works with the AGPL version of iText.
  */
 
-package org.sistemavotacion.pdf;
+package pruebas;
 
+import org.sistemavotacion.pdf.*;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
@@ -30,7 +31,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
-public class TextFieldsTest implements PdfPCellEvent {
+public class PDFTextFieldsTest implements PdfPCellEvent {
 
     /** The text field index of a TextField that needs to be added to a cell. */
     protected int tf;
@@ -40,7 +41,7 @@ public class TextFieldsTest implements PdfPCellEvent {
      * Creates a cell event that will add a text field to a cell.
      * @param tf a text field index.
      */
-    public TextFieldsTest(int tf) {
+    public PDFTextFieldsTest(int tf) {
         this.tf = tf;
     }
 
@@ -212,11 +213,11 @@ public class TextFieldsTest implements PdfPCellEvent {
      * @throws DocumentException
      */
     public static void main(String[] args) throws DocumentException, IOException {
-        TextFieldsTest example = new TextFieldsTest(0);
+        PDFTextFieldsTest example = new PDFTextFieldsTest(0);
             /** The resulting PDF. */
         String RESULT1 = "text_fields.pdf";
         /** The resulting PDF. */
-        String RESULT2 = "text_filled.pdf";
+        String RESULT2 = " text_filled.pdf";
         example.createPdf(RESULT1);
         example.manipulatePdf(RESULT1, RESULT2);
     }

@@ -110,7 +110,7 @@ class TimeStampController {
 			response.outputStream <<  signingCertBytes
 			response.outputStream.flush()
 		} else {
-			response.status = Respuesta.SC_ERROR_EJECUCION 
+			response.status = Respuesta.SC_ERROR 
 			render message(code: 'serviceErrorMsg')
 		}
 	}

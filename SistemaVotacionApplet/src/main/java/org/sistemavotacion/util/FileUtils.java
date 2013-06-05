@@ -26,17 +26,7 @@ public class FileUtils {
 
     private static Logger logger = LoggerFactory.getLogger(FileUtils.class);
 
-    public static String TEMPDIR =  System.getProperty("java.io.tmpdir");
-    public static String BASEDIR =  System.getProperty("user.home");
-    public static String APPDIR =  FileUtils.BASEDIR + File.separator + 
-            ".AppletFirmaSistemaVotacion"  + File.separator;
-    public static String APPTEMPDIR =  APPDIR + File.separator + "temp"
-             + File.separator;
-    public static String APPVOTODIR =  APPDIR + File.separator + "votos"
-             + File.separator;
-    //public static String PROPERTIES_FILE = APPDIR  + File.separator + "app.properties";
-    //An smime.p7m file is an encrypted or signed email.
-    public static String SIGNED_FILE_EXTENSION = "p7m";
+
 	
     public static byte[] getBytesFromFile(File file) throws IOException {
         byte[] b = new byte[(int) file.length()];

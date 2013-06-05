@@ -68,7 +68,7 @@ class VotoService {
 				certificado:controlCenterCert, mensajeSMIME:mensajeSMIMEResp)
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION,
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR,
 				mensaje:messageSource.getMessage('voteErrorMsg', null, locale), 
 				tipo:Tipo.VOTO_CON_ERRORES, evento:evento)
 		}

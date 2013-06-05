@@ -36,14 +36,14 @@ public class RepresentativeRequestWorker extends SwingWorker<Respuesta, String>
     
     private File selectedImage;
     private Respuesta respuesta;
-    private String urlService;
+    private String urlToSendDocument;
     
     public RepresentativeRequestWorker(Integer id,
             SMIMEMessageWrapper smimeMessage, File selectedImage, 
-            String urlService, X509Certificate accesRequestServerCert, 
+            String urlToSendDocument, X509Certificate accesRequestServerCert, 
             VotingSystemWorkerListener workerListener) throws Exception {
         this.id = id;
-        this.urlService = urlService;
+        this.urlToSendDocument = urlToSendDocument;
         this.selectedImage = selectedImage;
         this.smimeMessage = smimeMessage;
         this.workerListener = workerListener;
@@ -61,7 +61,7 @@ public class RepresentativeRequestWorker extends SwingWorker<Respuesta, String>
     }
     
     @Override protected Respuesta doInBackground() throws Exception {
-        logger.debug("doInBackground - RepresentativeRequest service: " + urlService);
+        logger.debug("doInBackground - RepresentativeRequest service: " + urlToSendDocument);
                 TimeStampRequest timeStampRequest = smimeMessage.getTimeStampRequest();
         respuesta = Contexto.INSTANCE.getHttpHelper().sendByteArray(
                 timeStampRequest.getEncoded(), "timestamp-query", 
@@ -90,7 +90,7 @@ public class RepresentativeRequestWorker extends SwingWorker<Respuesta, String>
                 fileMap.put(Contexto.IMAGE_FILE_NAME, selectedImage);
 
                 respuesta = Contexto.INSTANCE.getHttpHelper().sendObjectMap(
-                        fileMap, urlService);
+                        fileMap, urlToSendDocument);
             } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);
                 respuesta.appendErrorMessage(ex.getMessage());

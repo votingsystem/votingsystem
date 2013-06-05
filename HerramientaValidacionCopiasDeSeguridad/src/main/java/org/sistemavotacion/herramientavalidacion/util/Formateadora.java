@@ -1,8 +1,9 @@
-package org.sistemavotacion.herramientavalidacion;
+package org.sistemavotacion.herramientavalidacion.util;
 
 import java.text.ParseException;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
+import org.sistemavotacion.herramientavalidacion.AppletHerramienta;
 import org.sistemavotacion.modelo.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -37,7 +37,8 @@ public class CancelAccessRequestLauncher  implements Callable<Respuesta> {
     public Respuesta call() throws Exception {
         Respuesta respuesta = null;
         String nif = request.getUsuario().getNif();
-        File file = new File(ContextoPruebas.getUserKeyStorePath(nif));
+        File file = new File(Contexto.getUserKeyStorePath(nif, 
+                ContextoPruebas.DEFAULTS.APPDIR));
         KeyStore mockDnie = KeyStoreUtil.getKeyStoreFromFile(
                 file, ContextoPruebas.PASSWORD.toCharArray());
         logger.info("nif: " + nif);
@@ -48,8 +49,9 @@ public class CancelAccessRequestLauncher  implements Callable<Respuesta> {
         String subject = ContextoPruebas.INSTANCE.getString(
                 "cancelAccessRequestMsgSubject") + request.getEventoId();
                         ;
-        File anulador = new File(ContextoPruebas.getUserDirPath(nif) + 
-                ContextoPruebas.ANULACION_FIRMADA_FILE + request.getEventoId() + 
+        File anulador = new File(Contexto.getUserDirPath(nif, 
+                ContextoPruebas.DEFAULTS.APPDIR) + 
+                Contexto.CANCEL_VOTE_FILE + request.getEventoId() + 
                 "_usu" + nif + ".p7m");
         synchronized(this) {
             MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(

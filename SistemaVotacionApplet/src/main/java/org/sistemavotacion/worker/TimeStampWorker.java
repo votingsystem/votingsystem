@@ -76,7 +76,7 @@ public class TimeStampWorker extends SwingWorker<Respuesta, String>
             respuesta = get();
         }catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-            respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+            respuesta.appendErrorMessage(ex.getMessage());
         } 
         workerListener.showResult(this);
     }

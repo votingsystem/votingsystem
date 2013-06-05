@@ -16,16 +16,16 @@ public class InfoGetterWorker extends SwingWorker<Respuesta, String>
     
     private static Logger logger = LoggerFactory.getLogger(InfoGetterWorker.class);
 
-    String urlArchivo;
+    String urlDocument;
     VotingSystemWorkerListener workerListener;
     private Integer id = null;
     private Respuesta respuesta = null;
     private String contentType = null;
 
-    public InfoGetterWorker(Integer id, String urlArchivo, String contentType,
+    public InfoGetterWorker(Integer id, String urlDocument, String contentType,
             VotingSystemWorkerListener workerListener) {
         this.id = id;
-        this.urlArchivo = urlArchivo;
+        this.urlDocument = urlDocument;
         this.workerListener = workerListener;
         this.contentType = contentType;
     }
@@ -35,7 +35,7 @@ public class InfoGetterWorker extends SwingWorker<Respuesta, String>
             respuesta = get();
         }catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-            respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+            respuesta.appendErrorMessage(ex.getMessage());
         } 
         workerListener.showResult(this);
     }
@@ -47,7 +47,7 @@ public class InfoGetterWorker extends SwingWorker<Respuesta, String>
     
     @Override protected Respuesta doInBackground() throws Exception{
         respuesta = Contexto.INSTANCE.getHttpHelper().
-                getInfo(urlArchivo, contentType);
+                getInfo(urlDocument, contentType);
         return respuesta;
     }
 

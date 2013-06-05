@@ -134,7 +134,7 @@ public class SignService extends Service implements TaskListener {
     	        }
             } catch (Exception ex) {
     			ex.printStackTrace();
-    			signServiceListener.setSignServiceMsg(Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
+    			signServiceListener.setSignServiceMsg(Respuesta.SC_ERROR, ex.getMessage());
     		}
     	} else signServiceListener.setSignServiceMsg(getFileTask.getStatusCode(), 
 				getFileTask.getMessage());
@@ -164,7 +164,7 @@ public class SignService extends Service implements TaskListener {
     	    			urlToSendSignedDocument);
     		} catch(Exception ex) {
     			ex.printStackTrace();
-    			signServiceListener.setSignServiceMsg(Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
+    			signServiceListener.setSignServiceMsg(Respuesta.SC_ERROR, ex.getMessage());
     		}
     	} else signServiceListener.setSignServiceMsg(getFileTask.getStatusCode(), 
 				getFileTask.getMessage()); 
@@ -190,7 +190,7 @@ public class SignService extends Service implements TaskListener {
         } catch(VotingSystemKeyStoreException ex) {
         	ex.printStackTrace();
         	signServiceListener.setSignServiceMsg(
-        			Respuesta.SC_ERROR_EJECUCION, getString(R.string.pin_error_msg));
+        			Respuesta.SC_ERROR, getString(R.string.pin_error_msg));
         	return;
         } 
         SMIMEMessageWrapper timeStampedDocument = new SMIMEMessageWrapper(null, signedFile);
@@ -224,14 +224,14 @@ public class SignService extends Service implements TaskListener {
     					ex.printStackTrace();
     					String msg = getString(R.string.receipt_error_msg) 
     							+ ": " + ex.getMessage();
-    					signServiceListener.setSignServiceMsg(Respuesta.SC_ERROR_EJECUCION, msg);
+    					signServiceListener.setSignServiceMsg(Respuesta.SC_ERROR, msg);
     				}
     	        } else signServiceListener.setSignServiceMsg(sendFileTask.getStatusCode(), 
     	        		sendFileTask.getMessage());
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				signServiceListener.setSignServiceMsg(
-						Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
+						Respuesta.SC_ERROR, ex.getMessage());
 			};
         } else {
         	signServiceListener.setSignServiceMsg(

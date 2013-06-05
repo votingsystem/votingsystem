@@ -22,11 +22,9 @@ public class Respuesta<T> {
     public static final int SC_ANULACION_REPETIDA = 471;
     public static final int SC_NULL_REQUEST = 472;
     
-    public static final int SC_ERROR_EJECUCION = 500;
+    public static final int SC_ERROR = 500;
     public static final int SC_PROCESANDO = 700;
     public static final int SC_CANCELADO = 0;
-
-    public static final int SC_ERROR = 400;
 
     private int codigoEstado;
     private String mensaje;
@@ -195,7 +193,7 @@ public class Respuesta<T> {
     }
     
     public void appendErrorMessage(String msg) {
-        codigoEstado = SC_ERROR_EJECUCION;
+        codigoEstado = SC_ERROR;
         if(mensaje != null) mensaje = mensaje + " - " + msg;
         else mensaje = msg;
     }
@@ -213,4 +211,6 @@ public class Respuesta<T> {
     public void setSmimeMessage(SMIMEMessageWrapper smimeMessage) {
         this.smimeMessage = smimeMessage;
     }
+
+
 }

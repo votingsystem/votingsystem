@@ -2,6 +2,8 @@ package org.sistemavotacion.test;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Frame;
+import static java.awt.Frame.getFrames;
 import java.awt.Toolkit;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -13,14 +15,13 @@ import java.util.Scanner;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
-import org.sistemavotacion.Contexto;
 import org.sistemavotacion.herramientavalidacion.VisualizadorDeEventoFirmadoDialog;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.test.dialogo.InfoServidorDialog;
 import org.sistemavotacion.test.dialogo.MensajeDialog;
 import org.sistemavotacion.modelo.ActorConIP;
-import org.sistemavotacion.test.panel.VotacionesPanel;
+import org.sistemavotacion.test.util.SimulationUtils;
 import org.sistemavotacion.util.StringUtils;
 import org.sistemavotacion.worker.DocumentSenderWorker;
 import org.sistemavotacion.worker.InfoGetterWorker;
@@ -45,32 +46,27 @@ public class MainFrame extends JFrame  implements KeyListener,
     public enum Estado {CONECTADO_CONTROL_ACCESO , ERROR_CONEXION_CONTROL_ACCESO,
         DESCONECTADO, CONECTANDO;}
     
-    private ActorConIP controlAcceso = null;
     private Estado estado = Estado.DESCONECTADO;
     private SwingWorker tareaEnEjecucion;
-    public static MainFrame INSTANCIA;
     private Border normalTextBorder;
-    
+    private Frame mainFrame;
     /**
      * Creates new form MainFrame
      */
     public MainFrame() {
         initComponents();
-                
         controlAccesoTextField.addFocusListener(this);
         setLocationRelativeTo(null);
         tabbedPane.setVisible(false);
         mensajePanel.setVisible(false);
         normalTextBorder = new JTextField().getBorder();
         controlAccesoTextField.addKeyListener(this);
-        INSTANCIA = this;
+        mainFrame = getFrames()[0];
         pack();
+        votacionesPanel.setMainFrame(this);
+        ContextoPruebas.INSTANCE.setVotingPanel(votacionesPanel);
     }
 
-    public ActorConIP getControlAcceso() {
-        return controlAcceso;
-    }
-    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -341,7 +337,7 @@ public class MainFrame extends JFrame  implements KeyListener,
     private void informacionSistemaMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_informacionSistemaMenuItemActionPerformed
         String theString = new Scanner(Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("InformacionSistema.html")).useDelimiter("\\A").next();
-        MensajeDialog mensajeDialog = new MensajeDialog(INSTANCIA.getFrames()[0], true,
+        MensajeDialog mensajeDialog = new MensajeDialog(mainFrame, true,
                 new Dimension(600, 600));
         mensajeDialog.setMessage(theString, "Información del sistema");
     }//GEN-LAST:event_informacionSistemaMenuItemActionPerformed
@@ -349,7 +345,7 @@ public class MainFrame extends JFrame  implements KeyListener,
     private void razonesMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_razonesMenuItemActionPerformed
         String theString = new Scanner(Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("RazonesParaSistemaVotacionOnline.html")).useDelimiter("\\A").next();
-        MensajeDialog mensajeDialog = new MensajeDialog(INSTANCIA.getFrames()[0], true,
+        MensajeDialog mensajeDialog = new MensajeDialog(mainFrame, true,
                 new Dimension(600, 550));
         mensajeDialog.setMessage(theString, "Razones para un sistema de votación en red");
     }//GEN-LAST:event_razonesMenuItemActionPerformed
@@ -357,7 +353,7 @@ public class MainFrame extends JFrame  implements KeyListener,
     private void abrirArchivoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_abrirArchivoMenuItemActionPerformed
         logger.debug("Abriendo archivo firmado");
         VisualizadorDeEventoFirmadoDialog visualizador =
-                        new VisualizadorDeEventoFirmadoDialog(INSTANCIA.getFrames()[0], false);
+                        new VisualizadorDeEventoFirmadoDialog(mainFrame, false);
         File file = visualizador.abrirArchivoFirmado();
         if (file != null) visualizador.setVisible(true);
     }//GEN-LAST:event_abrirArchivoMenuItemActionPerformed
@@ -543,15 +539,16 @@ public class MainFrame extends JFrame  implements KeyListener,
                 infoServidorButton.setIcon(new ImageIcon(getClass().getResource("/images/pair_16x16.png")));            
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
-                        ActorConIP actorConIP = ActorConIP.parse(worker.getMessage());
-                        if(ActorConIP.Tipo.CONTROL_ACCESO != actorConIP.getTipo()) {
-                            mostrarMensajeUsuario("El servidor no es un Control de Acceso");
+                        ActorConIP controlAcceso = ActorConIP.parse(worker.getMessage());
+                        if(ActorConIP.Tipo.CONTROL_ACCESO != controlAcceso.getTipo()) {
+                            mostrarMensajeUsuario(ContextoPruebas.INSTANCE.
+                                    getString("accessControlErrorMsg"));
                             controlAccesoTextField.setBorder(new LineBorder(Color.RED,2));
                             return;
                         }
-                        if(ActorConIP.EnvironmentMode.TEST !=  
+                        if(ActorConIP.EnvironmentMode.DEVELOPMENT !=  
                                 controlAcceso.getEnvironmentMode()) {
-                            String msg = "SERVER NOT IN TEST MODE. Server mode:" + 
+                            String msg = "SERVER NOT IN DEVELOPMENT MODE. Server mode:" + 
                                     controlAcceso.getEnvironmentMode();
                             logger.error("### ERROR - " + msg);
                             mostrarMensajeUsuario(msg);
@@ -559,11 +556,8 @@ public class MainFrame extends JFrame  implements KeyListener,
                         }
                         mostrarMensajeUsuario(null);
                         controlAccesoTextField.setBorder(normalTextBorder);
-                        controlAcceso = actorConIP;
                         ContextoPruebas.INSTANCE.setControlAcceso(controlAcceso);
-
-                        VotacionesPanel.INSTANCIA.setControlAcceso(controlAcceso);
-
+                        votacionesPanel.setControlAcceso(controlAcceso);
                         byte[] caPemCertificateBytes = CertUtil.fromX509CertToPEM (
                             ContextoPruebas.INSTANCE.getRootCACert());
                         String urlAnyadirCertificadoCA = ContextoPruebas.getRootCAServiceURL(
@@ -573,29 +567,9 @@ public class MainFrame extends JFrame  implements KeyListener,
                         getClass().getResource("/images/loading.gif")));
                         infoServidorButton.setText("Añadiendo Autoridad Certificadora");
                         tareaEnEjecucion = new DocumentSenderWorker(
-                            CA_CERT_INITIALIZER, caPemCertificateBytes, null,
-                        urlAnyadirCertificadoCA, this);
+                                CA_CERT_INITIALIZER, caPemCertificateBytes, null,
+                                urlAnyadirCertificadoCA, this);
                         tareaEnEjecucion.execute(); 
-                        
-  
-                        /*TODO JJGZ
-                         * if(ActorConIP.EnvironmentMode.TEST.equals(
-                                controlAcceso.getEnvironmentMode())) {
-                            VotacionesPanel.INSTANCIA.setControlAcceso(controlAcceso);
-                            byte[] caPemCertificateBytes = CertUtil.fromX509CertToPEM (
-                                    ContextoPruebas.getCertificadoRaizAutoridad());
-                            String caPemCertificate = new String(caPemCertificateBytes);
-                            String urlAnyadirCertificadoCA = ContextoPruebas.getURLAnyadirCertificadoCA(
-                                    controlAcceso.getServerURL());
-                                    estado = Estado.CONECTANDO;
-                            infoServidorButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/loading.gif")));
-                            infoServidorButton.setText("Añadiendo Autoridad Certificadora");
-                            tareaEnEjecucion = new EnviarMultipartEntityWorker(
-                                    caPemCertificate, urlAnyadirCertificadoCA, this);
-                            tareaEnEjecucion.execute();
-                        } else {
-                            mostrarMensajeUsuario("Para poder hacer las pruebas el servidor tiene que ser arrancado en modo TEST");
-                        }*/
                     } catch(Exception ex) {
                         logger.error(ex.getMessage(), ex);
                         mostrarMensajeUsuario(ex.getMessage());

@@ -127,7 +127,8 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>  implements
     }
     
     private void readResponses() throws Exception {
-        logger.debug("******** readResponses");
+        logger.debug(" --- readResponses - NumRequestsProjected: " + 
+                simulationData.getNumRequestsProjected());
         while (simulationData.getNumRequestsProjected() > 
                 simulationData.getNumRequestsColected()) {
             try {
@@ -283,7 +284,7 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>  implements
                     try {
                         byte[] responseBytes = worker.getMessage().getBytes();
                         FileUtils.copyStreamToFile(new ByteArrayInputStream(responseBytes), 
-                            new File(ContextoPruebas.APPDIR + "VotingPublishReceipt"));
+                            new File(ContextoPruebas.DEFAULTS.APPDIR + "VotingPublishReceipt"));
                         SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(null, 
                                 new ByteArrayInputStream(responseBytes), 
                                 "VotingPublishReceipt");

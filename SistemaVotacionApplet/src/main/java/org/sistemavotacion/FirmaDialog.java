@@ -107,7 +107,7 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                 setVisible(true);
                 break;
             default:
-                logger.error("######### No se ha encontrado la operación -> " + 
+                logger.debug("Operation without interfaze details -> " + 
                         tipoOperacion);
                 progressBarPanel.setVisible(false);
                 pack();
@@ -371,7 +371,7 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
             logger.debug("No se puede editar archivos");
         }
         try {
-            File documento = new File(FileUtils.APPTEMPDIR + appletFirma.
+            File documento = new File(Contexto.DEFAULTS.APPTEMPDIR + appletFirma.
                     getOperacionEnCurso().getTipo().getNombreArchivoEnDisco());
             documento.deleteOnExit();
             FileUtils.copyStreamToFile(new ByteArrayInputStream(bytesDocumento), documento);

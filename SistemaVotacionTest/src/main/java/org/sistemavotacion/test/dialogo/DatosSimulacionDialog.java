@@ -14,7 +14,6 @@ import org.sistemavotacion.modelo.OpcionEvento;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.modelo.UserBaseSimulationData;
 import org.sistemavotacion.test.panel.OpcionVotacionPanel;
-import org.sistemavotacion.test.panel.VotacionesPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -422,11 +421,10 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
             userBaseData.setNumHoursProjected(horasComboBox.getSelectedIndex());
             userBaseData.setNumMinutesProjected(minutosComboBox.getSelectedIndex());
         }
-      logger.debug("Hora: " + userBaseData.getNumHoursProjected() + 
+        logger.debug("Hora: " + userBaseData.getNumHoursProjected() + 
                 " - Minuto: " + userBaseData.getNumMinutesProjected());
         ContextoPruebas.INSTANCE.setEvento(evento);
         ContextoPruebas.INSTANCE.setUserBaseData(userBaseData);
-        VotacionesPanel.INSTANCIA.prepararPanelParaLanzarSimulacion();
         dispose();
     }//GEN-LAST:event_aceptarButtonActionPerformed
 

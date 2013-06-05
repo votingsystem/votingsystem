@@ -11,6 +11,7 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import netscape.javascript.JSObject;
 import org.apache.log4j.PropertyConfigurator;
+import org.sistemavotacion.modelo.Operacion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,17 +31,13 @@ public class AppletHerramienta extends JApplet {
     public static ModoEjecucion modoEjecucion = ModoEjecucion.APPLET;
     
     private static ResourceBundle resourceBundle;
-    
     public static AppletHerramienta INSTANCIA;
-    public static int MAXIMO_TAMANYO_ARCHIVO_EN_BYTES = 10000000;
     
-    public AppletHerramienta() {   
-        INSTANCIA = this;
-    }
+    public AppletHerramienta() { }
         
-    public void init() {
+    @Override  public void init() {
         logger.debug("init");
-        
+        INSTANCIA = this;
         
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
@@ -118,10 +115,10 @@ public class AppletHerramienta extends JApplet {
         }
         logger.debug(" - enviarMensajeAplicacion - operación: " + operacion.obtenerJSONStr());
         try {
-            if(AppletHerramienta.modoEjecucion == AppletHerramienta.ModoEjecucion.APPLET) {
+            if(modoEjecucion == AppletHerramienta.ModoEjecucion.APPLET) {
                 Object[] args = {operacion.obtenerJSONStr()};
                 Object object = JSObject.getWindow(this).call("setClienteFirmaMessage", args);
-            } else logger.debug("---------------> enviado mensaje de aplicación");
+            } else logger.debug("---- App in mode -> " + modoEjecucion.toString());
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }

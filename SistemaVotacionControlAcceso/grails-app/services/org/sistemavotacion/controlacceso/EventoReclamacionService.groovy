@@ -88,7 +88,7 @@ class EventoReclamacionService {
 				mensajeSMIME:mensajeSMIMEResp, tipo:Tipo.EVENTO_RECLAMACION)
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION,
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR,
 				mensaje:messageSource.getMessage('publishClaimErrorMessage', null, locale), 
 				tipo:Tipo.EVENTO_RECLAMACION_ERROR, evento:evento)
 		}
@@ -105,9 +105,9 @@ class EventoReclamacionService {
 				"${fecha}/${zipNamePrefix}_${evento.id}"
             new File(basedir).mkdirs()
 			int i = 0
-			def metaInformacionMap = [numeroFirmas:firmasRecibidas.size(),
+			def metaInformacionMap = [numSignatures:firmasRecibidas.size(),
 				URL:"${grailsApplication.config.grails.serverURL}/evento/${evento.id}",
-				tipoEvento:Tipo.EVENTO_RECLAMACION.toString(), asunto:evento.asunto]
+				type:Tipo.EVENTO_RECLAMACION.toString(), subject:evento.asunto]
 			String metaInformacionJSON = metaInformacionMap as JSON
 			File metaInformacionFile = new File("${basedir}/meta.inf")
 			metaInformacionFile.write(metaInformacionJSON)
@@ -121,7 +121,7 @@ class EventoReclamacionService {
             }
             def ant = new AntBuilder()
             ant.zip(destfile: "${basedir}.zip", basedir: basedir)
-			Map datos = [cantidad:firmasRecibidas.size()]
+			Map datos = [cantidad:firmasRecibidas.size(), type:Tipo.EVENTO_RECLAMACION]
 			respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK, 
 				datos:datos, file:new File("${basedir}.zip"))
         } else respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:

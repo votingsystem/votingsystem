@@ -42,8 +42,8 @@ dependencies {
 task buildJar(type:VotingSystemApplet){
 	manifest {
 		attributes 'Main-Class': 'org.sistemavotacion.test.MainFrame',
-				   'url':'https://github.com/jgzornoza/TestSistemaVotacion',
-				   'provider': 'GruposP2P'
+				   'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/SistemaVotacionTest',
+				   'provider': 'VotingSystem'
 	}
 }
 

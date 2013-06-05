@@ -18,7 +18,7 @@ public class Respuesta implements Serializable{
     public static final int SC_ERROR_VOTO_REPETIDO = 470;
     public static final int SC_ANULACION_REPETIDA = 471;
     
-    public static final int SC_ERROR_EJECUCION = 500;
+    public static final int SC_ERROR = 500;
     public static final int SC_PROCESANDO = 700;
     public static final int SC_CANCELADO = 0;
  

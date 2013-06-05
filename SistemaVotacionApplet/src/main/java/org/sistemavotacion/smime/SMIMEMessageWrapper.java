@@ -257,10 +257,10 @@ public class SMIMEMessageWrapper extends MimeMessage {
             logger.debug("Collection matches: " + certCollection.size());
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = new JcaX509CertificateConverter()
-                    .setProvider(SIGN_PROVIDER).getCertificate(
+                    .setProvider(PROVIDER).getCertificate(
                     (X509CertificateHolder)certIt.next());
             SignerInformationVerifier siv = new JcaSimpleSignerInfoVerifierBuilder().
-                    setProvider(SIGN_PROVIDER).build(cert);
+                    setProvider(PROVIDER).build(cert);
             isValidSignature  = signer.verify(siv);
             if(!isValidSignature) {
                 logger.debug("signature verified");
@@ -302,7 +302,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
         //Call this method after isValidSignature()
         TimeStampToken timeStampToken = null;
         byte[] digestBytes = signer.getContentDigest();//method can only be called after verify.
-        String digestStr = new String(Base64.encode(digestBytes));
+        //String digestStr = new String(Base64.encode(digestBytes));
         AttributeTable  unsignedAttributes = signer.getUnsignedAttributes();
         if(unsignedAttributes != null) {
             Attribute timeStampAttribute = unsignedAttributes.get(
@@ -313,10 +313,10 @@ public class SMIMEMessageWrapper extends MimeMessage {
                         new org.bouncycastle.cms.CMSSignedData(dob.getDERObject().getEncoded());
                 timeStampToken = new TimeStampToken(signedData);
                 byte[] hashToken = timeStampToken.getTimeStampInfo().getMessageImprintDigest();
-                String hashTokenStr = new String(Base64.encode(hashToken));
+                //String hashTokenStr = new String(Base64.encode(hashToken));
                 Calendar cal = new GregorianCalendar();
                 cal.setTime(timeStampToken.getTimeStampInfo().getGenTime());
-                logger.debug("checkTimeStampToken - timeStampToken - fecha: " 
+                logger.debug("checkTimeStampToken - timeStampToken date: " 
                         +  DateUtils.getStringFromDate(cal.getTime()));
                 //logger.debug("checkTimeStampToken - digestStr: " + digestStr);
                 //logger.debug("checkTimeStampToken - timeStampToken - hashTokenStr: " +  hashTokenStr);

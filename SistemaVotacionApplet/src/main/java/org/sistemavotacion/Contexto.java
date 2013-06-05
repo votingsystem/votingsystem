@@ -2,6 +2,7 @@ package org.sistemavotacion;
 
 import com.itextpdf.text.pdf.PdfName;
 import iaik.pkcs.pkcs11.Mechanism;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.security.Security;
 import java.security.cert.X509Certificate;
@@ -28,23 +29,45 @@ import org.slf4j.LoggerFactory;
 
 /**
 * @author jgzornoza
-* Licencia: https://raw.github.com/jgzornoza/SistemaVotacion/master/licencia.txt
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public enum Contexto {
     
     INSTANCE;
 
     private Logger logger = LoggerFactory.getLogger(Contexto.class);
+    
+    public static class DEFAULTS {
+        public static String BASEDIR =  System.getProperty("user.home");
+        public static String APPDIR =  BASEDIR + File.separator + 
+                ".VotingSystem"  + File.separator;
+        public static String APPTEMPDIR =  APPDIR + File.separator + "temp"
+             + File.separator;
+    }
 
+    public static String TEMPDIR =  System.getProperty("java.io.tmpdir");
+    
+    
+    public static String CANCEL_VOTE_FILE = "Anulador_";
+    public static final String PREFIJO_USER_JKS = "usuario_"; 
+    public static final String SUFIJO_USER_JKS = ".jks"; 
+    
+    public static String SOLICITUD_FILE = "SolicitudAcceso_";
+    public static String VOTE_FILE = "Vote_";
+    
+    public static String APPVOTODIR =  DEFAULTS.APPDIR + File.separator + 
+            "votes" + File.separator;
+    
+    //An smime.p7m file is an encrypted or signed email.
+    public static final String SIGNED_PART_EXTENSION = ".p7m";
+    
+    public static final int MAXIMALONGITUDCAMPO = 255;
 
     public static final String CSR_FILE_NAME   = "csr";
     public static final String IMAGE_FILE_NAME   = "image";
     public static final String REPRESENTATIVE_DATA_FILE_NAME = "representativeData";
     
-    public static final String ACCESS_REQUEST_FILE_NAME   = "accessRequest";
-    
-    public static final String ASUNTO_MENSAJE_SOLICITUD_ACCESO = "[SOLICITUD ACCESO]-";     
-    public static final String NOMBRE_DESTINATARIO = "Sistema de Votación"; 
+    public static final String ACCESS_REQUEST_FILE_NAME   = "accessRequest";    
     
     public static final String CERT_RAIZ_PATH = "AC_RAIZ_DNIE_SHA1.pem";
     public static final int KEY_SIZE = 1024;
@@ -68,20 +91,18 @@ public enum Contexto {
     
     public static final String TIMESTAMP_VOTE_HASH = TSPAlgorithms.SHA512;
     public static final String VOTE_SIGN_MECHANISM = "SHA512withRSA";
+    public static final String VOTING_DATA_DIGEST = "SHA256";
     
     public static final String PDF_SIGNATURE_DIGEST = "SHA1";
+    public static final String PDF_SIGNATURE_MECHANISM = "SHA1withRSA";
     public static final String TIMESTAMP_PDF_HASH = TSPAlgorithms.SHA1;
     public static final PdfName PDF_SIGNATURE_NAME = PdfName.ADBE_PKCS7_SHA1;
     public static final String PDF_DIGEST_OID = CMSSignedDataGenerator.DIGEST_SHA1;
 
-    //hashing method of the voting data
-    public static final String VOTING_DATA_DIGEST = "SHA256";
-    
-    public static final String SIGN_PROVIDER = "BC";
+
     public static final String DEFAULT_SIGNED_FILE_NAME = "smimeMessage";
     public static String CERT_STORE_TYPE = "Collection";
     
-    public static final String SIGNED_PART_EXTENSION = ".p7m";
     
     public static final String OCSP_DNIE_URL = "http://ocsp.dnie.es";
     public static final String JSON_CONTENT_TYPE    = "application/json";
@@ -97,8 +118,11 @@ public enum Contexto {
     public static final String PDF_ENCRYPTED_CONTENT_TYPE = 
     		PDF_CONTENT_TYPE + "," + ENCRYPTED_CONTENT_TYPE; 
     
-    public static final int MAX_FILE_SIZE_KB = 512;
-    public static final int MAX_FILE_SIZE = 512 * 1024;
+    public static final int IMAGE_MAX_FILE_SIZE_KB = 512;
+    public static final int IMAGE_MAX_FILE_SIZE = IMAGE_MAX_FILE_SIZE_KB * 1024;
+    public static final int SIGNED_MAX_FILE_SIZE_KB = 512;
+    public static final int SIGNED_MAX_FILE_SIZE = SIGNED_MAX_FILE_SIZE_KB * 1024;
+    
     
     private Usuario usuario;
     private final HttpHelper httpHelper = new HttpHelper();
@@ -127,9 +151,9 @@ public enum Contexto {
     
     private Contexto () { 
         try {
-            new File(FileUtils.APPDIR).mkdir();
-            new File(FileUtils.APPTEMPDIR).mkdir();
-            File copiaRaizDNI = new File(FileUtils.APPDIR + CERT_RAIZ_PATH);
+            new File(DEFAULTS.APPDIR).mkdir();
+            new File(DEFAULTS.APPTEMPDIR).mkdir();
+            File copiaRaizDNI = new File(DEFAULTS.APPDIR + CERT_RAIZ_PATH);
             FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream(CERT_RAIZ_PATH), copiaRaizDNI);
             OSValidator.initClassPath();
@@ -187,7 +211,7 @@ public enum Contexto {
     }
 
     public static String getRutaArchivosVoto(Evento evento, String nif) {
-        String ruta = FileUtils.APPVOTODIR + StringUtils.getCadenaNormalizada(
+        String ruta = APPVOTODIR + StringUtils.getCadenaNormalizada(
                 evento.getControlAcceso().getServerURL()) +
                 "-" + nif + "-" + evento.getEventoId() + File.separator;
         return ruta;
@@ -247,6 +271,35 @@ public enum Contexto {
      */
     public void setControlCenter(ActorConIP controlCenter) {
         this.controlCenter = controlCenter;
+    }
+    
+            
+    public static String getUserKeyStorePath (String userNIF, String basePath) {
+        String userDirPath = getUserDirPath(userNIF, basePath);
+        new File(userDirPath).mkdirs();
+        return  userDirPath + PREFIJO_USER_JKS + userNIF + SUFIJO_USER_JKS;
+    }
+    
+    public static File copyKeyStoreToUserDir(byte[] keyStoreBytes, String userNIF,
+            String basePath) throws Exception {
+        String userDirPath = getUserDirPath(userNIF, basePath);
+        File userDir = new File(userDirPath);
+        userDir.mkdirs();
+        File keyStroreFile = new File(userDir.getAbsolutePath() + 
+                PREFIJO_USER_JKS + userNIF + SUFIJO_USER_JKS);
+        FileUtils.copyStreamToFile(new ByteArrayInputStream(keyStoreBytes), keyStroreFile);
+        return keyStroreFile;
+    }
+    
+    public static String getUserDirPath (String userNIF, String basePath) {
+        int subPathLength = 3;
+        while (userNIF.length() > 0) {
+            if(userNIF.length() <= subPathLength) subPathLength = userNIF.length();
+            String subPath = userNIF.substring(0, subPathLength);
+            userNIF = userNIF.substring(subPathLength);
+            basePath = basePath + subPath + File.separator;
+        }
+        return basePath;
     }
 
 }

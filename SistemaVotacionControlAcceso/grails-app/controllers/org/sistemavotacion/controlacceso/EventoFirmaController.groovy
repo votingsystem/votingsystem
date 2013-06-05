@@ -199,7 +199,7 @@ class EventoFirmaController {
 			}
 		} catch (Exception ex) {
 			log.error (ex.getMessage(), ex)
-			response.status = Respuesta.SC_ERROR_EJECUCION
+			response.status = Respuesta.SC_ERROR
 			render ex.getMessage()
 			return false 
 		}

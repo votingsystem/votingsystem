@@ -1,6 +1,8 @@
 package org.sistemavotacion.herramientavalidacion;
 
 import java.io.File;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,11 +133,29 @@ public class DialogoPrincipal extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void abrirZipCopiaRespaldoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_abrirZipCopiaRespaldoButtonActionPerformed
-        logger.debug("Abriendo Zip Con Firmas");
-        VisualizadorDeEventoFirmadoDialog visualizador =
-                new VisualizadorDeEventoFirmadoDialog(parentFrame, false);
-        File file = visualizador.abrirZipConFirmas();
-        if (file != null) visualizador.setVisible(true);
+        logger.debug("abrirZipCopiaRespaldoButtonActionPerformed");
+        try {
+            final JFileChooser chooser = new JFileChooser();
+            chooser.setFileFilter(new FileFilter() {
+                @Override
+                public boolean accept(File f) {
+                    return f.getName().toLowerCase().endsWith(".zip") || f.isDirectory();
+                }
+
+                public String getDescription() {
+                    return "ZIP Files";
+                }
+            });
+            int returnVal = chooser.showOpenDialog(parentFrame);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File result = chooser.getSelectedFile();
+                VisualizadorDeEventoFirmadoDialog visualizador =
+                    new VisualizadorDeEventoFirmadoDialog(parentFrame, false);
+                visualizador.setVisible(result);
+            }
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
     }//GEN-LAST:event_abrirZipCopiaRespaldoButtonActionPerformed
 
     private void abrirArchivoFirmadoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_abrirArchivoFirmadoButtonActionPerformed
@@ -148,51 +168,9 @@ public class DialogoPrincipal extends javax.swing.JDialog {
 
     private void cerrarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cerrarButtonActionPerformed
         dispose();
+        System.exit(0);
     }//GEN-LAST:event_cerrarButtonActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(DialogoPrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(DialogoPrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(DialogoPrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(DialogoPrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
-            public void run() {
-                DialogoPrincipal dialog = new DialogoPrincipal(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton abrirArchivoFirmadoButton;
     private javax.swing.JButton abrirZipCopiaRespaldoButton;

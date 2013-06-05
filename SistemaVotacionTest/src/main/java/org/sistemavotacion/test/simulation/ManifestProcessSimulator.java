@@ -6,7 +6,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
@@ -25,11 +24,14 @@ import java.util.concurrent.Future;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Evento;
+import org.sistemavotacion.modelo.MetaInf;
 import org.sistemavotacion.modelo.Respuesta;
+import org.sistemavotacion.pdf.PdfFormHelper;
 import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.simulation.launcher.SignatureManifestLauncher;
 import org.sistemavotacion.test.util.SimulationUtils;
+import org.sistemavotacion.test.worker.BackupRequestWorker;
 import org.sistemavotacion.util.NifUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.StringUtils;
@@ -55,6 +57,7 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
     private static final int SEND_DOCUMENT_JSON_WORKER             = 2;
     private static final int MANIFEST_GETTER_WORKER                = 3;
     private static final int PDF_SIGNED_SENDER_WORKER              = 4;
+    private static final int BACKUP_REQUEST_WORKER                 = 5;
 
     private static ExecutorService simulatorExecutor;
     private static ExecutorService signManifestExecutor;
@@ -102,7 +105,8 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
     }
     
     public void launchRequests () throws Exception {
-        logger.debug(" ******* launchRequests");
+        logger.debug(" ----------- launchRequests - NumRequestsProjected: " + 
+                simulationData.getNumRequestsProjected());
         if(simulationData.isTimerBased()) startTimer(this);
         else {
             while(!signerList.isEmpty()) {
@@ -131,7 +135,7 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
     }
     
     private void readResponses() throws Exception {
-        logger.debug(" - readResponses - NumRequestsProjected: " + 
+        logger.debug(" -------------- readResponses - NumRequestsProjected: " + 
                 simulationData.getNumRequestsProjected());
         while (simulationData.getNumRequestsProjected() > 
                 simulationData.getNumRequestsColected()) {
@@ -154,8 +158,20 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
             }
             //done.set(true);
         }
-        finish();        
+        if(simulationData.getBackupRequestEmail() != null) requestBackup();
+        else countDownLatch.countDown();       
     }
+    
+    private void requestBackup() throws Exception {
+        logger.debug("requestBackup");
+        byte[] requestBackupPDFBytes = PdfFormHelper.getBackupRequest(
+            event.getEventoId().toString(), event.getAsunto(), 
+                            simulationData.getBackupRequestEmail());
+        new BackupRequestWorker(BACKUP_REQUEST_WORKER, 
+                ContextoPruebas.INSTANCE.getUrlBackupEvents(), 
+                requestBackupPDFBytes, this).execute(); 
+    }
+    
     
     @Override public void processVotingSystemWorkerMsg(List<String> messages) {}
     
@@ -244,8 +260,7 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
         }
     }
     
-    @Override
-    public void showResult(VotingSystemWorker worker) {
+    @Override public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
                 " - worker: " + worker.getClass().getSimpleName() + 
                 " - workerId:" + worker.getId());
@@ -299,12 +314,10 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
                         PdfReader manifestToSign = new PdfReader(pdfBytes);
                         String reason = null;
                         String location = null;
-                        KeyStore keyStore = ContextoPruebas.INSTANCE.getUserTest().getKeyStore();
-                        PrivateKey privateKey = (PrivateKey)keyStore.getKey(
-                                ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS,
-                                ContextoPruebas.PASSWORD.toCharArray());
-                        Certificate[] signerCertChain = keyStore.getCertificateChain(
-                                ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS);
+                        PrivateKey privateKey = ContextoPruebas.INSTANCE.
+                                getUserTestPrivateKey();
+                        Certificate[] signerCertChain = ContextoPruebas.INSTANCE.
+                                getUserTestCertificateChain();
                         String urlToSendDocument = urlPublishManifest + 
                             File.separator + event.getEventoId();
                         X509Certificate destinationCert = Contexto.INSTANCE.
@@ -327,6 +340,21 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
                     initExecutors();//Manifest published, we now initialize user base data.
                     return;
                 } else msg = "###ERROR PDF_PUBLISHER_WORKER: " + worker.getMessage();
+                break;
+            case BACKUP_REQUEST_WORKER:
+                if(Respuesta.SC_OK == worker.getStatusCode()) {
+                    MetaInf metaInf =  (MetaInf) worker.getRespuesta().getData();
+                    logger.debug("BACKUP_REQUEST_WORKER OK - Event -> " + event.getEventoId());
+                    if(metaInf.getErrorsList() != null && 
+                            !metaInf.getErrorsList().isEmpty()) {
+                        addErrorList(metaInf.getErrorsList());
+                    }
+                    logger.debug("------------ META-INF BACKUP ------------");
+                    logger.debug(metaInf.getFormattedInfo());
+                    countDownLatch.countDown();
+                    return;
+                } else msg = "### ERRROR BACKUP_REQUEST_WORKER: " + 
+                        worker.getMessage();
                 break;
         }
         addErrorMsg(msg);

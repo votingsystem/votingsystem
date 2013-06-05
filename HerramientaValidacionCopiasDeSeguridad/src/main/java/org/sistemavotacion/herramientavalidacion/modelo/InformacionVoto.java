@@ -1,4 +1,4 @@
-package org.sistemavotacion.herramientavalidacion;
+package org.sistemavotacion.herramientavalidacion.modelo;
 
 import java.security.cert.X509Certificate;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;

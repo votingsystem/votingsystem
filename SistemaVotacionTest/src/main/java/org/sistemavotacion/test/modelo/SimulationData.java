@@ -1,6 +1,7 @@
 package org.sistemavotacion.test.modelo;
 
 import java.util.concurrent.atomic.AtomicLong;
+import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.sistemavotacion.modelo.Evento;
@@ -17,7 +18,7 @@ public class SimulationData {
     
     private static Logger logger = LoggerFactory.getLogger(SimulationData.class);
 
-    private int statusCode = Respuesta.SC_ERROR_EJECUCION;
+    private int statusCode = Respuesta.SC_ERROR;
     private String message = null;
     private String accessControlURL = null;
     private Integer maxPendingResponses = null;
@@ -38,6 +39,7 @@ public class SimulationData {
     private Integer numSecondsProjected;
     
     private String durationStr = null;
+    private String backupRequestEmail = null;
 
     public SimulationData(int status, String message) {
         this.statusCode = status;
@@ -70,6 +72,11 @@ public class SimulationData {
         if (dataJSON.containsKey("event")) {
             evento = Evento.parse(dataJSON.getJSONObject("event"));
         }
+        if (dataJSON.containsKey("backupRequestEmail") && 
+                !JSONNull.getInstance().equals(dataJSON.getString("backupRequestEmail"))) {
+            String email = dataJSON.getString("backupRequestEmail");
+            if(!"".equals(email)) simulationData.setBackupRequestEmail(email);
+        }
         if(dataJSON.containsKey("timer")) {
             JSONObject timerJSONObject = dataJSON.getJSONObject("timer");
             if(timerJSONObject.containsKey("active")) {
@@ -92,9 +99,12 @@ public class SimulationData {
             }
         }
         if (dataJSON.containsKey("whenFinishChangeEventStateTo")) {
-            Evento.Estado estado = Evento.Estado.valueOf(
+            try {
+                Evento.Estado estado = Evento.Estado.valueOf(
                     dataJSON.getString("whenFinishChangeEventStateTo"));
-            evento.setNextState(estado);
+                evento.setNextState(estado);
+            }catch(Exception ex) { }
+
         }
         simulationData.setEvento(evento);
         return simulationData;
@@ -305,6 +315,20 @@ public class SimulationData {
      */
     public void setEvento(Evento evento) {
         this.evento = evento;
+    }
+
+    /**
+     * @return the backupRequestEmail
+     */
+    public String getBackupRequestEmail() {
+        return backupRequestEmail;
+    }
+
+    /**
+     * @param backupRequestEmail the backupRequestEmail to set
+     */
+    public void setBackupRequestEmail(String backupRequestEmail) {
+        this.backupRequestEmail = backupRequestEmail;
     }
 
 }

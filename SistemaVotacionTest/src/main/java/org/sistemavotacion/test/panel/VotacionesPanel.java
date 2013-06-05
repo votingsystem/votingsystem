@@ -1,5 +1,6 @@
 package org.sistemavotacion.test.panel;
 
+import java.awt.Frame;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,8 +38,9 @@ public class VotacionesPanel extends JPanel implements
     private List<String> accessRequestErrorsList;
     private List<String> votingErrorsList;
     private VotingSimulator votacion;
-    public static VotacionesPanel INSTANCIA;
     private HashMap<String, ActorConIP> hashMapActores = null;
+    private Frame parentFrame = null;
+    private MainFrame mainFrame = null;
     
     /**
      * Creates new form VotacionesPanel
@@ -54,7 +56,11 @@ public class VotacionesPanel extends JPanel implements
         erroresSolicitudesButton.setVisible(false);
         erroresVotosButton.setVisible(false);
         anularVotosButton.setVisible(false);
-        INSTANCIA = this;
+    }
+    
+    public void setMainFrame(MainFrame mainFrame) {
+        this.mainFrame = mainFrame;
+        this.parentFrame = MainFrame.getFrames()[0];
     }
     
     /**
@@ -381,9 +387,8 @@ public class VotacionesPanel extends JPanel implements
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(centroControlPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(18, 18, 18)
                 .addComponent(publicacionConvocatoriaPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(datosSimulacionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -395,13 +400,13 @@ public class VotacionesPanel extends JPanel implements
         ActorConIP selectedControlCenter  = 
                 hashMapActores.get(centrosDeControlComboBox.getSelectedItem());
         InfoServidorDialog infoServidorDialog = new InfoServidorDialog(
-                MainFrame.INSTANCIA.getFrames()[0], false, selectedControlCenter);
+                parentFrame, false, selectedControlCenter);
                 infoServidorDialog.setVisible(true);
     }//GEN-LAST:event_infoServidorButtonActionPerformed
 
     private void asociarCentroControlButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_asociarCentroControlButtonActionPerformed
         AsociarCentroControlDialog asociarCentroControlDialog = 
-                new AsociarCentroControlDialog(MainFrame.INSTANCIA.getFrames()[0], false);
+                new AsociarCentroControlDialog(parentFrame, false);
         asociarCentroControlDialog.setVisible(true);        
     }//GEN-LAST:event_asociarCentroControlButtonActionPerformed
 
@@ -413,25 +418,25 @@ public class VotacionesPanel extends JPanel implements
 
     private void publicarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_publicarButtonActionPerformed
         CrearVotacionDialog crearVotacionDialog = new CrearVotacionDialog(
-                MainFrame.INSTANCIA.getFrames()[0], false);
+                parentFrame, false);
         crearVotacionDialog.setVisible(true);
     }//GEN-LAST:event_publicarButtonActionPerformed
 
     private void infoEventoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_infoEventoButtonActionPerformed
         InfoEventoDialog infoEventoDialog = new InfoEventoDialog(
-                MainFrame.INSTANCIA.getFrames()[0], false, evento);
+                parentFrame, false, evento);
         infoEventoDialog.setVisible(true);
     }//GEN-LAST:event_infoEventoButtonActionPerformed
 
     private void datosSimulacionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_datosSimulacionButtonActionPerformed
         if(ContextoPruebas.INSTANCE.getUserBaseData() == null) {
             MensajeDialog errorDialog = new MensajeDialog(
-                    MainFrame.INSTANCIA.getFrames()[0], true);
+                    parentFrame, true);
             errorDialog.setMessage(ContextoPruebas.INSTANCE.getString("userBaseDataNotFoundErrorMsg"), 
                 ContextoPruebas.INSTANCE.getString("errorLbl"));
         } else {
             DatosSimulacionDialog datosSimulacionDialog = new DatosSimulacionDialog(
-                    MainFrame.INSTANCIA.getFrames()[0], false, evento,
+                    parentFrame, false, evento,
                     ContextoPruebas.INSTANCE.getUserBaseData());   
             datosSimulacionDialog.setVisible(true);
         }
@@ -442,7 +447,8 @@ public class VotacionesPanel extends JPanel implements
             case RECOGIDA_DATOS:
                 estado = Estado.SIMULACION;
                 datosSimulacionButton.setEnabled(false);
-                lanzarSimulacionButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/loading.gif")));
+                lanzarSimulacionButton.setIcon(new javax.swing.ImageIcon(
+                        getClass().getResource("/images/loading.gif")));
                 lanzarSimulacionButton.setText("Parar simulación");
                 erroresSolicitudesButton.setVisible(false);
                 erroresVotosButton.setVisible(false);
@@ -464,7 +470,7 @@ public class VotacionesPanel extends JPanel implements
             case SIMULACION:
                 Object[] opciones = {"Seguir con la simulación",
                         "Cancelar simulación"};
-                int n = JOptionPane.showOptionDialog(MainFrame.INSTANCIA.getFrames()[0],
+                int n = JOptionPane.showOptionDialog(parentFrame,
                     "¿Seguro que desea cancelar la ejecución?",
                     "Confirmar operación",
                     JOptionPane.YES_NO_OPTION,
@@ -492,32 +498,32 @@ public class VotacionesPanel extends JPanel implements
                 break;
         }
         contadorPanel.setVisible(true);
-        MainFrame.INSTANCIA.packMainFrame();
+        if(mainFrame != null)mainFrame.pack();
     }//GEN-LAST:event_lanzarSimulacionButtonActionPerformed
 
     private void erroresSolicitudesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_erroresSolicitudesButtonActionPerformed
         InfoErroresDialog infoErroresDialog = new InfoErroresDialog(
-                MainFrame.INSTANCIA.getFrames()[0], false, 
+                parentFrame, false, 
                 "Errores en las solicitudes de acceso", accessRequestErrorsList);
         infoErroresDialog.setVisible(true);
     }//GEN-LAST:event_erroresSolicitudesButtonActionPerformed
 
     private void erroresVotosButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_erroresVotosButtonActionPerformed
         InfoErroresDialog infoErroresDialog = new InfoErroresDialog(
-                MainFrame.INSTANCIA.getFrames()[0], false, 
+                parentFrame, false, 
                 "Errores en los votos", votingErrorsList);
         infoErroresDialog.setVisible(true);
     }//GEN-LAST:event_erroresVotosButtonActionPerformed
 
     private void anularVotosButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_anularVotosButtonActionPerformed
         AnularVotosDialog anularVotosDialog = new AnularVotosDialog(
-                MainFrame.INSTANCIA.getFrames()[0], false, evento);
+                parentFrame, false, evento);
         anularVotosDialog.setVisible(true);
     }//GEN-LAST:event_anularVotosButtonActionPerformed
 
     private void createUserBaseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createUserBaseButtonActionPerformed
         UserBaseDialog userBaseDialog = new UserBaseDialog(
-                MainFrame.INSTANCIA.getFrames()[0], false);
+                parentFrame, false);
         userBaseDialog.setVisible(true);
     }//GEN-LAST:event_createUserBaseButtonActionPerformed
 
@@ -551,11 +557,11 @@ public class VotacionesPanel extends JPanel implements
                 + evento.getAsunto() + "</html>");
         asuntoConvocatoriaLabel.setVisible(true);
         datosSimulacionPanel.setVisible(true);
-        MainFrame.INSTANCIA.packMainFrame();
+        if(mainFrame != null)mainFrame.pack();
     }
     
-    public void prepararPanelParaLanzarSimulacion() {
-        lanzarSimulacionButton.setVisible(true);
+    public void enableSimulation(boolean enabled) {
+        lanzarSimulacionButton.setVisible(enabled);
     }
 
     @Override
@@ -734,12 +740,12 @@ public class VotacionesPanel extends JPanel implements
         if(votingErrorsList != null && !votingErrorsList.isEmpty()) {
             erroresVotosButton.setVisible(true);
         }
-        new Thread(new Runnable() {
-            @Override
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                MainFrame.INSTANCIA.packMainFrame();
+                if(mainFrame != null)mainFrame.pack();
             }
-        }).start();
+        });
+
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables

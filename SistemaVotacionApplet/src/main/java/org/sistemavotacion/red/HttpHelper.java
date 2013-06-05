@@ -22,16 +22,13 @@ import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.Header;
 import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MinimalField;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
@@ -92,7 +89,7 @@ public class HttpHelper {
             httpget.releaseConnection();
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
-            respuesta = new Respuesta(Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
+            respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
         }
         return respuesta;
     }
@@ -174,7 +171,7 @@ public class HttpHelper {
             httpPost.releaseConnection();
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
-            respuesta = new Respuesta(Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
+            respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
         }
         return respuesta;
     }
@@ -197,7 +194,7 @@ public class HttpHelper {
             httpPost.releaseConnection();
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
-            respuesta = new Respuesta(Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
+            respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
         }
         return respuesta;
     }
@@ -225,11 +222,11 @@ public class HttpHelper {
             httpPost.releaseConnection();
         } catch(HttpHostConnectException ex){
             logger.error(ex.getMessage(), ex);
-            respuesta = new Respuesta(Respuesta.SC_ERROR_EJECUCION,
+            respuesta = new Respuesta(Respuesta.SC_ERROR,
                     Contexto.INSTANCE.getString("hostConnectionErrorMsg"));
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
-            respuesta = new Respuesta(Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
+            respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
         } 
         return respuesta;
     }
@@ -271,7 +268,7 @@ public class HttpHelper {
             httpPost.releaseConnection();
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
-            respuesta = new Respuesta(Respuesta.SC_ERROR_EJECUCION, ex.getMessage());
+            respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
         }
         return respuesta;  
     }

@@ -1,14 +1,12 @@
 package org.sistemavotacion.herramientavalidacion;
 
+import org.sistemavotacion.herramientavalidacion.util.Formateadora;
+import java.awt.Desktop;
 import static org.sistemavotacion.herramientavalidacion.AppletHerramienta.*;
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
-import org.sistemavotacion.smime.SMIMEMessageWrapper;
-//import org.sistemavotacion.smime.SMIMEMessageWrapper;
-import org.sistemavotacion.util.FileUtils;
+import org.sistemavotacion.herramientavalidacion.modelo.SignedFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,54 +18,40 @@ public class ArchivoFirmadoPanel extends JPanel {
     
     private static Logger logger = LoggerFactory.getLogger(ArchivoFirmadoPanel.class);
     
-    SMIMEMessageWrapper smimeMessageWraper;
-    private File file;
- 
+    private SignedFile signedFile;
     
     public ArchivoFirmadoPanel() {
         initComponents();
     }
-        
-    public ArchivoFirmadoPanel(File file) throws Exception {
+    
+    public ArchivoFirmadoPanel(SignedFile signedFile) throws Exception {
         initComponents();
         informacionFirmadaEditorPane.setEditable(false);
-        informacionFirmadaEditorPane.setContentType("text/html");
-        this.file = file;
-        initData();
+        informacionFirmadaEditorPane.setContentType("text/html");        
+        initFileData(signedFile);
     }
-    
-    public void mostrarArchivo (File file) throws Exception {
-        this.file = file;
-        initData();
-    }
-    
-    public void initData() throws IOException, Exception {    
-        byte[] bytes = FileUtils.getBytesFromFile(file);
-        ArchivoFirmadoPanel archivoFirmadoPanel = null;
-        try {
-            smimeMessageWraper = new SMIMEMessageWrapper(null,
-                    new ByteArrayInputStream(bytes), null);
-            if (smimeMessageWraper.isValidSignature()) {
-                resultadoFirmaButton.setText("<html><b>" + 
-                        getString("signatureOKLabel") + "</b><html>");
-                resultadoFirmaButton.setIcon(new ImageIcon(getClass().
-                        getResource("/resources/images/signature-ok_16x16.png")));
-                
-            
-            /*Properties props = new Properties();
-            Session session = Session.getDefaultInstance(props);
-            //MimeMessage mimeMessage = new SMIMEMessageWrapper(session, new FileInputStream(file), file.getName());
-            
-            Session s = Session.getDefaultInstance(new Properties());
-            MimeMessage mimeMessage = new MimeMessage(s, new FileInputStream(file));
-            //this(session, new FileInputStream(file), file.getName());
-            SMIMESignedParser signedParser = new SMIMESignedParser(mimeMessage);*/
 
-                /*if(smimeMessageWraper.hasTimeStampToken()) {
-                    logger.debug(" --- Tiene sello de tiempo --- ");
-                }*/
-                
-                
+    
+    public void initFileData(SignedFile signedFile) throws IOException, Exception {  
+        this.signedFile = signedFile;
+        if(signedFile == null) {
+            logger.debug("initFileData - signedFile null");
+            openPDFButton.setVisible(false);
+            datosFirmadosPanel.setVisible(false);
+            scrollPane.setVisible(false);
+        } else {
+            boolean isPDF = signedFile.isPDF();
+            openPDFButton.setVisible(isPDF);
+            datosFirmadosPanel.setVisible(!isPDF);
+            scrollPane.setVisible(!isPDF);
+        }
+        if(signedFile == null) return;
+        try {
+            if (signedFile.isValidSignature()) {
+                resultadoFirmaButton.setText("<html><b>" + 
+                    getString("signatureOKLabel") + "</b><html>");
+            resultadoFirmaButton.setIcon(new ImageIcon(getClass().
+                    getResource("/resources/images/signature-ok_16x16.png")));
 
             } else {
                 resultadoFirmaButton.setText("<html><b>" + 
@@ -75,17 +59,11 @@ public class ArchivoFirmadoPanel extends JPanel {
                 resultadoFirmaButton.setIcon(new ImageIcon(getClass().
                         getResource("/resources/images/signature-bad_16x16.png")));
             }
-            informacionFirmadaEditorPane.setText(smimeMessageWraper.getSignedContent());
-            /*if (smimeMessageWraper.getFirmantes() != null && 
-                    smimeMessageWraper.getFirmantes().size() > 0) {
-                if (smimeMessageWraper.getFirmantes().size() == 1) firmantesLabel.setText(
-                        "<html>" + getString("documentWithLbl") + " <b>1</b> " + 
-                        getString("signerLbl") + "<html>");
-                else firmantesLabel.setText(
-                        "<html>" + getString("documentWithLbl") + " <b>" 
-                        +  smimeMessageWraper.getFirmantes().size() + "</b> "
-                        + getString("signersLbl") + "<html>");
-            }*/
+            if(!signedFile.isPDF()) {
+                informacionFirmadaEditorPane.setText(signedFile.
+                        getSMIMEMessageWraper().getSignedContent());
+            }
+           
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             resultadoFirmaButton.setText("<html><b>" + 
@@ -93,7 +71,7 @@ public class ArchivoFirmadoPanel extends JPanel {
             resultadoFirmaButton.setIcon(new ImageIcon(getClass().
                         getResource("/resources/images/signature-bad_16x16.png")));
             resultadoFirmaButton.setEnabled(false);
-            informacionFirmadaEditorPane.setText(new String(bytes));
+            informacionFirmadaEditorPane.setText(ex.getMessage());
             return;
         }
     }
@@ -112,6 +90,7 @@ public class ArchivoFirmadoPanel extends JPanel {
         resultadoFirmaButton = new javax.swing.JButton();
         scrollPane = new javax.swing.JScrollPane();
         informacionFirmadaEditorPane = new javax.swing.JEditorPane();
+        openPDFButton = new javax.swing.JButton();
 
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/sistemavotacion/herramientavalidacion/Bundle"); // NOI18N
         firmantesLabel.setText(bundle.getString("ArchivoFirmadoPanel.firmantesLabel.text")); // NOI18N
@@ -147,19 +126,34 @@ public class ArchivoFirmadoPanel extends JPanel {
         informacionFirmadaEditorPane.setBackground(java.awt.Color.white);
         scrollPane.setViewportView(informacionFirmadaEditorPane);
 
+        openPDFButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/images/pdf_16x16.png"))); // NOI18N
+        openPDFButton.setText(bundle.getString("ArchivoFirmadoPanel.openPDFButton.text")); // NOI18N
+        openPDFButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                openPDFButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(datosFirmadosPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(scrollPane)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(openPDFButton)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(datosFirmadosPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(scrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 251, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(openPDFButton)
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -176,46 +170,66 @@ public class ArchivoFirmadoPanel extends JPanel {
             }*/
             FirmantesDialog firmantesDialog = new FirmantesDialog(
                     AppletHerramienta.INSTANCIA.getFrame(), true);
-            firmantesDialog.mostrarInformacion(smimeMessageWraper.getFirmantes());
+            firmantesDialog.mostrarInformacion(signedFile.
+                    getSMIMEMessageWraper().getFirmantes());
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
         }
     }//GEN-LAST:event_resultadoFirmaButtonActionPerformed
 
+    private void openPDFButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openPDFButtonActionPerformed
+        if (!Desktop.isDesktopSupported()) {
+            logger.debug("No hay soporte de escritorio");
+        }
+        Desktop desktop = Desktop.getDesktop();
+        if (!desktop.isSupported(Desktop.Action.BROWSE)) {
+            logger.debug("No se puede editar archivos");
+        }
+        try {
+            logger.info(" openPDFButtonActionPerformed - signedFile: " + 
+                    signedFile.getName());
+            desktop.open(signedFile.getPDFSignedFile());
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
+    }//GEN-LAST:event_openPDFButtonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel datosFirmadosPanel;
     private javax.swing.JLabel firmantesLabel;
     private javax.swing.JEditorPane informacionFirmadaEditorPane;
+    private javax.swing.JButton openPDFButton;
     private javax.swing.JButton resultadoFirmaButton;
     private javax.swing.JScrollPane scrollPane;
     // End of variables declaration//GEN-END:variables
 
-  public void setInformacionConFormato(boolean conFormato) {
+  public void setContentFormated(boolean conFormato) {
         logger.debug("conFormato: " + conFormato);
-        String textoConFormato = null;
-        if (!conFormato) {
+        if(signedFile.isPDF()) return;
+        if (conFormato) {
             try {
-                textoConFormato = Formateadora.procesar(smimeMessageWraper.getSignedContent()); 
-                informacionFirmadaEditorPane.setText(textoConFormato);
+                String formattedText = Formateadora.procesar(signedFile.
+                        getSMIMEMessageWraper().getSignedContent()); 
+                informacionFirmadaEditorPane.setText(formattedText);
             } catch(Exception ex) {
                 logger.error(ex.getMessage(), ex);
-                return;
             }
-        } else informacionFirmadaEditorPane.setText(smimeMessageWraper.getSignedContent());        
+        } else informacionFirmadaEditorPane.setText(signedFile.
+                        getSMIMEMessageWraper().getSignedContent());        
     }
 
     /**
-     * @return the file
+     * @return the signedFile
      */
-    public File getFile() {
-        return file;
+    public SignedFile getSignedFile() {
+        return signedFile;
     }
 
     /**
-     * @param file the file to set
+     * @param signedFile the signedFile to set
      */
-    public void setFile(File file) {
-        this.file = file;
+    public void setSignedFile(SignedFile signedFile) {
+        this.signedFile = signedFile;
     }
 
 

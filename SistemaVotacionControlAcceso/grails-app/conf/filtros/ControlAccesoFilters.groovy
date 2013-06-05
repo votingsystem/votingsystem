@@ -125,7 +125,7 @@ class ControlAccesoFilters {
 						String[] keySplitted = key.split(":")
 						fileName = keySplitted[0]
 						contentType = keySplitted[1]
-						Respuesta respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_EJECUCION)
+						Respuesta respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR)
 						SMIMEMessageWrapper smimeMessageReq
 						if(contentType.contains("application/x-pkcs7-mime")) {
 							if(contentType.contains("application/x-pkcs7-signature")) {
@@ -200,7 +200,7 @@ class ControlAccesoFilters {
 					return
 				} else {
 					//log.debug "---- pkcs7DocumentsFilter - before  - consulta: ${new String(requestBytes)}"
-					requestBytes = "${request.getInputStream()}".getBytes() 
+					requestBytes = getBytesFromInputStream(request.getInputStream())
 					if(!requestBytes) {
 						log.debug "---- pkcs7DocumentsFilter - before  - REQUEST WITHOUT FILE ------------"
 						response.status = Respuesta.SC_ERROR_PETICION
@@ -211,24 +211,19 @@ class ControlAccesoFilters {
 					Respuesta respuesta
 					if(request?.contentType?.contains("application/pdf")) {
 						if(request?.contentType?.contains("application/x-pkcs7-mime")) {
-							if(request?.contentType?.contains("application/x-pkcs7-signature")) {
-								log.debug "---- pkcs7DocumentsFilter - before  -> PDF SIGNED AND ENCRYPTED"
-								respuesta = encryptionService.decryptMessage(requestBytes, request.getLocale())
-								if(Respuesta.SC_OK != respuesta.codigoEstado) {
-									log.debug "---- pkcs7DocumentsFilter - before  - PDF ENCRYPTION ERROR"
-									response.status = respuesta.codigoEstado
-									render respuesta.mensaje
-									return false
-								}
-								requestBytes = respuesta.messageBytes
-							} else {
-								log.debug "---- pkcs7DocumentsFilter - before  -> PDF ENCRYPTED - TODO"	
+							respuesta = encryptionService.decryptMessage(requestBytes, request.getLocale())
+							if(Respuesta.SC_OK != respuesta.codigoEstado) {
+								log.debug "---- pkcs7DocumentsFilter - before  - PDF ENCRYPTION ERROR"
+								response.status = respuesta.codigoEstado
+								render respuesta.mensaje
+								return false
 							}
+							requestBytes = respuesta.messageBytes
 						} else if(request?.contentType?.contains("application/x-pkcs7-signature")) {
-							log.debug "---- pkcs7DocumentsFilter - before  - PDF SIGNED - TODO"
+							log.debug "---- pkcs7DocumentsFilter - before  - PDF SIGNED"
 						} else {
-							log.debug "---- pkcs7DocumentsFilter - before  - PLAIN PDF - TODO"
-							requestBytes = null
+							log.debug "---- pkcs7DocumentsFilter - before  - PLAIN PDF -"
+							params.plainPDFDocument = requestBytes
 						} 
 						if(requestBytes) respuesta = pdfService.checkSignature(
 								requestBytes, request.getLocale())
@@ -334,7 +329,7 @@ class ControlAccesoFilters {
 							response.outputStream.flush()
 						} else {
 							response.contentType = "text/plain"
-							response.status = Respuesta.SC_ERROR_EJECUCION
+							response.status = Respuesta.SC_ERROR
 							log.error "---- pkcs7DocumentsFilter - after - EMPTY SIGNED RESPONSE"
 							render "EMPTY SIGNED RESPONSE"
 						}
@@ -346,6 +341,22 @@ class ControlAccesoFilters {
 		}
 
     }
+	
+	/*
+	 * requestBytes = "${request.getInputStream()}".getBytes() gives problems
+	 * working with pdf
+	 */
+	public byte[] getBytesFromInputStream(InputStream entrada) throws IOException {
+		ByteArrayOutputStream salida = new ByteArrayOutputStream();
+		byte[] buf =new byte[5120];
+		int len;
+		while((len = entrada.read(buf)) > 0){
+			salida.write(buf,0,len);
+		}
+		salida.close();
+		entrada.close();
+		return salida.toByteArray();
+	}
 	
 	private Respuesta processSMIMERequest(SMIMEMessageWrapper smimeMessageReq,
 		Map params, HttpServletRequest request) {

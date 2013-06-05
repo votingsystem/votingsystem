@@ -79,7 +79,6 @@ public class PDFSignerWorker extends SwingWorker<Respuesta, String>
     private File signedFile;
     private PrivateKey signerPrivatekey;
     private Certificate[] signerCertChain;
-    private VotingSystemCMSSignedGenerator systemSignedGenerator = null;
     
     public PDFSignerWorker(Integer id, String reason, String location, 
             char[] password, PdfReader reader, PrivateKey signerPrivatekey,
@@ -105,6 +104,7 @@ public class PDFSignerWorker extends SwingWorker<Respuesta, String>
     }
     
     @Override protected Respuesta doInBackground() throws Exception {
+        VotingSystemCMSSignedGenerator systemSignedGenerator;
         if(signerPrivatekey != null && signerCertChain != null) {
             logger.debug("Generating PrivateKey VotingSystemSignedGenerator");
             PDF_CMSSignedGenerator signedGenerator = new PDF_CMSSignedGenerator(
@@ -192,7 +192,7 @@ public class PDFSignerWorker extends SwingWorker<Respuesta, String>
                         }
                    } catch(Exception ex) {
                         logger.error(ex.getMessage(), ex);
-                        respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+                        respuesta.appendErrorMessage(ex.getMessage());
                    }
                     return attributeTable;
                 }

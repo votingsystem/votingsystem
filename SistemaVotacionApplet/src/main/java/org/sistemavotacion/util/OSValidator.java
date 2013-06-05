@@ -60,7 +60,7 @@ public class OSValidator {
 
     
     public static void initClassPath () throws Exception {
-        FileUtils.deleteDir(new File(FileUtils.APPDIR + LIB_PATH_BASE_DIR));
+        FileUtils.deleteDir(new File(Contexto.DEFAULTS.APPDIR + LIB_PATH_BASE_DIR));
         String dirAddedToSystemClasspath = null;
         String pkcs11LibraryWrapperPath = null;
         String libName = LINUX_LIB;
@@ -95,7 +95,7 @@ public class OSValidator {
             pkcs11LibraryWrapperPath = MACOSX_IAIK_SYSTEM_LIB_PATH;
         }
         File directorioBaseDeAplicacion = Contexto.getApplicactionBaseDirFile();
-        File directorioDestinolibrerias = new File(FileUtils.APPDIR + LIB_PATH_BASE_DIR +
+        File directorioDestinolibrerias = new File(Contexto.DEFAULTS.APPDIR + LIB_PATH_BASE_DIR +
                 dirAddedToSystemClasspath + UUID.randomUUID().toString() + File.separator);
         directorioDestinolibrerias.mkdirs();
         /*if (directorioBaseDeAplicacion.isFile()) { //se esta ejecutando desde jar

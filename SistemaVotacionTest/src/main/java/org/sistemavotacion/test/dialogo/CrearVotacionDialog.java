@@ -53,7 +53,6 @@ public class CrearVotacionDialog extends JDialog implements
 		"([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
 		"([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
 		"([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
-    int maximaLongitudCampoAsunto = ContextoPruebas.MAXIMALONGITUDCAMPO;
     private JFrame parentFrame;
     private boolean mostrandoPantallaEnvio = false;
     private Border normalTextBorder;
@@ -389,8 +388,8 @@ public class CrearVotacionDialog extends JDialog implements
                 ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS, 
                 ContextoPruebas.DEFAULTS.PASSWORD.toCharArray(),
                 ContextoPruebas.VOTE_SIGN_MECHANISM);
-            File eventToPublish = new File(FileUtils.APPTEMPDIR 
-                + "SolicitudPublicacionConvocatoria");
+            File eventToPublish = new File(ContextoPruebas.DEFAULTS.APPDIR + 
+                "SolicitudPublicacionConvocatoria");
             logger.debug("publishing event: " + eventToPublish.getAbsolutePath());
             String eventoParaPublicar = evento.toJSON().toString();
             MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(
@@ -444,10 +443,10 @@ public class CrearVotacionDialog extends JDialog implements
             mensajeValidacionLabel.setText("<html>El campo <b>Asunto</b> no puede ir vacío</html>");
             asuntoTextField.setBorder(new LineBorder(Color.RED,2));
             errores = true;
-        } else if (asuntoTextField.getText().length() > maximaLongitudCampoAsunto) {
+        } else if (asuntoTextField.getText().length() > Contexto.MAXIMALONGITUDCAMPO) {
                 mensajeValidacionLabel.setText("<html>El campo <b>Asunto</b> "
                         + "no puede tener una tamaño de más de "
-                        + maximaLongitudCampoAsunto + " caracteres</html>");
+                        + Contexto.MAXIMALONGITUDCAMPO + " caracteres</html>");
                 asuntoTextField.setBorder(new LineBorder(Color.RED,2));
                 errores = true;
         }
@@ -598,7 +597,7 @@ public class CrearVotacionDialog extends JDialog implements
                     try {
                         byte[] responseBytes = worker.getMessage().getBytes();
                         FileUtils.copyStreamToFile(new ByteArrayInputStream(responseBytes), 
-                            new File(ContextoPruebas.APPDIR + "VotingPublishReceipt"));
+                            new File(ContextoPruebas.DEFAULTS.APPDIR + "VotingPublishReceipt"));
                         SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(null, 
                                 new ByteArrayInputStream(responseBytes), 
                                 "VotingPublishReceipt");
@@ -607,11 +606,7 @@ public class CrearVotacionDialog extends JDialog implements
                         logger.debug("--- dnieMimeMessage.getSignedContent(): " + dnieMimeMessage.getSignedContent());
                         evento = Evento.parse(dnieMimeMessage.getSignedContent());
                         logger.debug("Respuesta - Evento ID: " + evento.getEventoId());
-
-                        MainFrame.INSTANCIA.cargarCentroControl(
-                                ContextoPruebas.INSTANCE.getCentroControl().
-                                getServerURL());
-                        VotacionesPanel.INSTANCIA.cargarEvento(evento);
+                        ContextoPruebas.INSTANCE.setEvento(evento);
                         dispose();
                     } catch (Exception ex) {
                         logger.error(ex.getMessage(), ex);
