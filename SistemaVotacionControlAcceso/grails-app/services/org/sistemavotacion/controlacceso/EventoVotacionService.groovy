@@ -171,11 +171,12 @@ class EventoVotacionService {
 		Respuesta respuesta;
 		String msg = null
 		try {
-			Date currentDate = new Date(System.currentTimeMillis())
-			if (!evento?.fechaFin.before(currentDate)) { 
+			if (evento.isOpen()) {  
 				msg = messageSource.getMessage('eventDateNotFinished', null, locale)
+				String currentDateStr = DateUtils.getStringFromDate(
+					new Date(System.currentTimeMillis()))
 				log.error("generarCopiaRespaldo - DATE ERROR  ${msg} - " + 
-					"fecha actual '{evento.currentDate}' fecha final evento '${evento.fechaFin}'")
+					"fecha actual '${currentDateStr}' fecha final evento '${evento.fechaFin}'")
 				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
 					mensaje:msg, tipo:Tipo.BACKUP_GEN_ERROR)
 			}
@@ -185,8 +186,22 @@ class EventoVotacionService {
 				return respuesta
 			}
 			def ant = new AntBuilder()
-			def basedir = "${grailsApplication.config.SistemaVotacion.baseRutaCopiaRespaldo}" +
-				"/${fecha}/${zipNamePrefix}_${evento.id}"
+			
+			Date selectedDate
+			if(evento.dateCanceled) selectedDate = evento.dateCanceled
+			else selectedDate = evento.fechaFin
+			
+			String datePathPart = DateUtils.getShortStringFromDate(selectedDate)
+			String servicePathPart = messageSource.getMessage('repAccreditationsBackupPartPath',
+					null, locale)
+			def basedirPath = "${grailsApplication.config.SistemaVotacion.baseRutaCopiaRespaldo}" +
+				"/${datePathPart}/Event_${event.id}/${servicePathPart}"
+			
+			
+/*
+
+			def basedirPath = "${grailsApplication.config.SistemaVotacion.baseRutaCopiaRespaldo}" +
+				"/${datePathPart}/${zipNamePrefix}_${evento.id}"*/
 			File baseDirZip = new File("${basedir}.zip")
 			if(baseDirZip.exists()) {
 				log.debug("generarCopiaRespaldo - backup file already exists")

@@ -2,6 +2,7 @@ package org.sistemavotacion.herramientavalidacion;
 
 import org.sistemavotacion.herramientavalidacion.util.Formateadora;
 import java.awt.Desktop;
+import java.awt.Frame;
 import static org.sistemavotacion.herramientavalidacion.AppletHerramienta.*;
 import java.io.IOException;
 import javax.swing.ImageIcon;
@@ -168,8 +169,8 @@ public class ArchivoFirmadoPanel extends JPanel {
                 component = component.getParent();
                 if(component instanceof JFrame) frame = (JFrame)component;
             }*/
-            FirmantesDialog firmantesDialog = new FirmantesDialog(
-                    AppletHerramienta.INSTANCIA.getFrame(), true);
+            Frame frame = Frame.getFrames()[0];
+            FirmantesDialog firmantesDialog = new FirmantesDialog(frame, true);
             firmantesDialog.mostrarInformacion(signedFile.
                     getSMIMEMessageWraper().getFirmantes());
         } catch (Exception ex) {
@@ -188,7 +189,7 @@ public class ArchivoFirmadoPanel extends JPanel {
         try {
             logger.info(" openPDFButtonActionPerformed - signedFile: " + 
                     signedFile.getName());
-            desktop.open(signedFile.getPDFSignedFile());
+            desktop.open(signedFile.getFile());
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
         }

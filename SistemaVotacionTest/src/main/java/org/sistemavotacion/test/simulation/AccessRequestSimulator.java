@@ -182,14 +182,14 @@ public class AccessRequestSimulator extends Simulator<VotingSimulationData>
         finish();
     }
     
-    @Override public VotingSimulationData finish() throws Exception {
+    @Override public void finish() throws Exception {
         logger.debug("finish");
         simulationData.setFinish(System.currentTimeMillis());
         if(timer != null) timer.stop();
         if(simulatorExecutor == null) simulatorExecutor.shutdownNow();
         if(accessRequestExecutor == null) accessRequestExecutor.shutdownNow(); 
         if(simulationListener != null) {
-            simulationListener.setSimulationResult(this);
+            simulationListener.setSimulationResult(simulationData);
         } else {
             logger.debug("--------------- SIMULATION RESULT------------------");
             logger.info("Duration: " + simulationData.getDurationStr());
@@ -203,7 +203,6 @@ public class AccessRequestSimulator extends Simulator<VotingSimulationData>
             logger.debug("------------------- FINISHED ----------------------");
             System.exit(0);
         }
-        return simulationData;
     }
 
     @Override

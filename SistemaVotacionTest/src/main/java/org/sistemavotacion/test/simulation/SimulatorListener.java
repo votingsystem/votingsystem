@@ -9,6 +9,6 @@ import org.sistemavotacion.test.modelo.SimulationData;
 public interface SimulatorListener<T extends SimulationData> {
     
     public void updateSimulationData(T data);
-    public void setSimulationResult(Simulator<T> simulator);
+    public void setSimulationResult(T data);
     
 }

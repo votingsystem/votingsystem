@@ -63,6 +63,8 @@ public enum Tipo {
     CENTRO_CONTROL(""), 
     CONTROL_ACCESO(""),
     
+    AUTORIDAD_CERTIFICADORA_TEST(""),
+    
     
     SOLICITUD_INDEXACION(""),
     SOLICITUD_INDEXACION_ERROR("");

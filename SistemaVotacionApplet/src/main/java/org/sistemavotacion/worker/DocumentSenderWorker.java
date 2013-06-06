@@ -17,27 +17,20 @@ public class DocumentSenderWorker extends SwingWorker<Respuesta, String>
     
     private static Logger logger = LoggerFactory.getLogger(DocumentSenderWorker.class);
 
+    private VotingSystemWorkerType workerType;
     private String urlToSendDocument;
     private VotingSystemWorkerListener workerListener;
     private Object documentoEnviado;
-    private Respuesta respuesta = null;
-    private Integer id = null;
+    private Respuesta respuesta  = new Respuesta(Respuesta.SC_ERROR);
     private String documentContentType = null;
-    
-    public DocumentSenderWorker(Integer id, Object documentoEnviado, 
-            String documentContentType, String urlToSendDocument, 
-            VotingSystemWorkerListener workerListener) {
-        this.id = id;
+
+    public DocumentSenderWorker(VotingSystemWorkerType workerType, 
+            Object documentoEnviado, String documentContentType, 
+            String urlToSendDocument, VotingSystemWorkerListener workerListener) {
+        this.workerType = workerType;
         this.documentoEnviado = documentoEnviado;
         this.workerListener = workerListener;
         this.documentContentType = documentContentType;
-        this.urlToSendDocument = urlToSendDocument;
-    }
-    
-    public DocumentSenderWorker(Integer id, String urlToSendDocument, 
-            VotingSystemWorkerListener workerListener) {
-        this.id = id;
-        this.workerListener = workerListener;
         this.urlToSendDocument = urlToSendDocument;
     }
     
@@ -81,9 +74,11 @@ public class DocumentSenderWorker extends SwingWorker<Respuesta, String>
         if(respuesta == null) return null;
         else return respuesta.getMensaje();
     }
-
-    @Override public int getId() {
-        return this.id;
+        
+    @Override public String getErrorMessage() {
+        if(workerType != null) return "### ERROR - " + workerType + " - msg: " 
+                + respuesta.getMensaje(); 
+        else return "### ERROR - msg: " + respuesta.getMensaje();  
     }
 
     @Override public int getStatusCode() {
@@ -93,6 +88,10 @@ public class DocumentSenderWorker extends SwingWorker<Respuesta, String>
     
     @Override public Respuesta getRespuesta() {
         return respuesta;
+    }
+    
+    @Override public VotingSystemWorkerType getType() {
+        return workerType;
     }
     
 }

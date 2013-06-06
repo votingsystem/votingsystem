@@ -45,8 +45,9 @@ public class NifUtils {
     
     public static void main(String[] args) {
         
-        for(int i = 0; i <10; i++) {
+        /*for(int i = 0; i <10; i++) {
             logger.debug("Numero " + i + " -> nif: " + validarNIF(getNif(i)));
-        }
+        }*/
+        logger.debug("Numero " + 100000000 + " -> nif: " + getNif(1234567));
     }
 }

@@ -22,14 +22,14 @@ public class MetaInf {
     
     public String getFormattedInfo() {
         StringBuilder result = new StringBuilder("");
-        result.append("type: " + getType().toString() + "\n")
-              .append("subject: " + getSubject() + "\n")
-              .append("URL: " + getURL() + "\n");
-        if(numSignatures != null ) result.append("numSignatures: " + 
-                numSignatures + "\n");
-        if(numAccessRequest != null ) result.append("numAccessRequest: " + 
-                numAccessRequest + "\n");
-        if(numVotes != null ) result.append("numVotes: " + numVotes + "\n");
+        result.append("\n type: " + getType().toString())
+              .append("\n subject: " + getSubject())
+              .append("\n URL: " + getURL());
+        if(numSignatures != null ) result.append("\n numSignatures: " + 
+                numSignatures );
+        if(numAccessRequest != null ) result.append("\n numAccessRequest: " + 
+                numAccessRequest);
+        if(numVotes != null ) result.append("\n numVotes: " + numVotes);
         return result.toString();
     }
 			

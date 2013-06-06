@@ -16,7 +16,6 @@ import org.sistemavotacion.test.MainFrame;
 import org.sistemavotacion.test.dialogo.*;
 import org.sistemavotacion.test.modelo.VotingSimulationData;
 import org.sistemavotacion.test.simulation.SimulatorListener;
-import org.sistemavotacion.test.simulation.Simulator;
 import org.sistemavotacion.test.simulation.VotingSimulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +28,6 @@ public class VotacionesPanel extends JPanel implements
         HyperlinkListener, SimulatorListener<VotingSimulationData> {
     
     private static Logger logger = LoggerFactory.getLogger(VotacionesPanel.class);
-
     
     public enum Estado {SIMULACION, RECOGIDA_DATOS}
 
@@ -413,7 +411,7 @@ public class VotacionesPanel extends JPanel implements
     private void centrosDeControlComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_centrosDeControlComboBoxActionPerformed
         ActorConIP centroControl = hashMapActores.get(
                 centrosDeControlComboBox.getSelectedItem());
-        ContextoPruebas.INSTANCE.setCentroControl(centroControl);
+        ContextoPruebas.INSTANCE.setControlCenter(centroControl);
     }//GEN-LAST:event_centrosDeControlComboBoxActionPerformed
 
     private void publicarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_publicarButtonActionPerformed
@@ -542,7 +540,7 @@ public class VotacionesPanel extends JPanel implements
             centrosDeControlComboBox.setSelectedIndex(0);
             ActorConIP centroControlSelected = hashMapActores.get((String)
                     centrosDeControlComboBox.getSelectedItem());
-            ContextoPruebas.INSTANCE.setCentroControl(centroControlSelected);
+            ContextoPruebas.INSTANCE.setControlCenter(centroControlSelected);
             urlCentroControlPanel.setVisible(true);
             publicacionConvocatoriaPanel.setVisible(true);
         }
@@ -721,10 +719,8 @@ public class VotacionesPanel extends JPanel implements
     }
 
 
-    @Override public void setSimulationResult(
-            Simulator<VotingSimulationData> simulator) {
+    @Override public void setSimulationResult(VotingSimulationData simuData) {
         logger.debug("setSimulationResult");
-        VotingSimulationData simuData = simulator.getData();
 
         digitalClockPanel.stop();
         datosSimulacionButton.setEnabled(true);

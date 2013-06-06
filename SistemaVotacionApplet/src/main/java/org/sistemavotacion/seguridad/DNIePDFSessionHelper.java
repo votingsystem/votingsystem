@@ -80,8 +80,7 @@ public class DNIePDFSessionHelper extends CMSSignedGenerator
     public static X509Certificate certificadoCA = null;
             
     private static Certificate[] chain = new Certificate[3];
-    List signerInfs;
-    DNIePDFSessionHelper INSTANCIA;
+    private List signerInfs;
 
     private class SignerInf {
 
@@ -186,9 +185,8 @@ public class DNIePDFSessionHelper extends CMSSignedGenerator
     }
 
     public DNIePDFSessionHelper (char[] password, Mechanism signatureMechanism) throws Exception {
-    	logger.debug("construyendo DNIePDFSessionHelper");
+    	logger.debug("DNIePDFSessionHelper");
         getSession(password, signatureMechanism);
-        INSTANCIA = this;
     }
 
     public static Certificate[] getCertificateChain() {

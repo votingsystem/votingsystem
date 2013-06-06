@@ -7,6 +7,8 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.Map;
 import javax.security.auth.x500.X500PrivateCredential;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
@@ -34,8 +36,14 @@ public class CertGenerator {
     private X500PrivateCredential rootPrivateCredential;
 
     public static void main(String[] args) throws Exception{
-        if(args == null) return;
-        generate(args[0]);
+        if(args == null || args.length == 0) {
+            Map certMap = new HashMap();
+            certMap.put("rootCertFile", "/home/jgzornoza/webAppsRootCert.jks");
+            certMap.put("rootSubjectDN", "CN=rootSUbjectDN");
+            certMap.put("password", "password");
+            JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(certMap);       
+            generate(jsonObject.toString());
+        } else generate(args[0]);
     }
 
     public CertGenerator(File rootCertFile, String rootSubjectDN, 

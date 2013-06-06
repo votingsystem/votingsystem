@@ -9,6 +9,7 @@ import org.sistemavotacion.test.simulation.EncryptionSimulator;
 import org.sistemavotacion.test.worker.EncryptorWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
+import org.sistemavotacion.worker.VotingSystemWorkerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,8 +22,7 @@ public class EncryptorLauncher implements Callable<Respuesta>,
 
     private static Logger logger = LoggerFactory.getLogger(EncryptionSimulator.class);
 
-    private static final int ENCRYPTOR_WORKER = 1;
-
+    public enum Worker implements VotingSystemWorkerType{ENCRYPTOR}
 
     private String requestNIF;
     private Respuesta respuesta;
@@ -39,7 +39,7 @@ public class EncryptorLauncher implements Callable<Respuesta>,
 
     @Override
     public Respuesta call() throws Exception {
-        new EncryptorWorker(ENCRYPTOR_WORKER, requestNIF, serverURL, this,
+        new EncryptorWorker(Worker.ENCRYPTOR, requestNIF, serverURL, this,
                 Contexto.INSTANCE.getAccessControl().getCertificate()).execute();
         countDownLatch.await();
         return getResult();
@@ -54,8 +54,7 @@ public class EncryptorLauncher implements Callable<Respuesta>,
     @Override
     public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-         " - worker: " + worker.getClass().getSimpleName() + 
-         " - workerId:" + worker.getId());
+         " - worker: " + worker);
         respuesta = new Respuesta();
         respuesta.setCodigoEstado(worker.getStatusCode());
         respuesta.setMensaje(worker.getMessage());

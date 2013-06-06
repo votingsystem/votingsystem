@@ -21,6 +21,7 @@ import org.sistemavotacion.util.StringUtils;
 import org.sistemavotacion.worker.SMIMESignedSenderWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
+import org.sistemavotacion.worker.VotingSystemWorkerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +34,8 @@ public class SignatureClaimLauncher implements Callable<Respuesta>,
     
     private static Logger logger = LoggerFactory.getLogger(SignatureClaimLauncher.class);
 
-    private static final int SEND_DOCUMENT_WORKER = 0;
+    public enum Worker implements VotingSystemWorkerType{
+        SEND_DOCUMENT}
     
     private final CountDownLatch countDownLatch = new CountDownLatch(1); 
     
@@ -68,7 +70,7 @@ public class SignatureClaimLauncher implements Callable<Respuesta>,
                     nif, toUser, claimDataStr, subject, null);
             X509Certificate destinationCert = ContextoPruebas.INSTANCE.
                     getAccessControl().getCertificate();  
-            new SMIMESignedSenderWorker(SEND_DOCUMENT_WORKER, 
+            new SMIMESignedSenderWorker(Worker.SEND_DOCUMENT, 
                 smimeMessage, submitClaimsURL, null, destinationCert,this).execute();
 
             countDownLatch.await();
@@ -99,14 +101,14 @@ public class SignatureClaimLauncher implements Callable<Respuesta>,
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
         " - nif: " + nif + " - worker: " + worker.getClass().getSimpleName());
         respuesta = worker.getRespuesta();
-        switch(worker.getId()) {
-            case SEND_DOCUMENT_WORKER:
+        switch((Worker)worker.getType()) {
+            case SEND_DOCUMENT:
                 if (Respuesta.SC_OK == worker.getStatusCode()) {
                     respuesta.setMensaje(nif);
                 } else respuesta.appendErrorMessage(nif);
                 break;
             default:
-                logger.debug("*** UNKNOWN WORKER ID: '" + worker.getId() + "'");
+                logger.debug("*** UNKNOWN WORKER:" + worker);
         }
         countDownLatch.countDown();
     }

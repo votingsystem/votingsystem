@@ -5,10 +5,7 @@ import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.util.List;
-import javax.mail.internet.MimeMessage;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JTextField;
@@ -26,6 +23,7 @@ import org.sistemavotacion.worker.InfoGetterWorker;
 import org.sistemavotacion.worker.SMIMESignedSenderWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
+import org.sistemavotacion.worker.VotingSystemWorkerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,8 +37,8 @@ public class AsociarCentroControlDialog extends JDialog implements
 
     private static Logger logger = LoggerFactory.getLogger(AsociarCentroControlDialog.class);
 
-    private static final int INFO_GETTER_WORKER                       = 0;
-    private static final int ASSOCIATE_CONTROL_CENTER_WORKER          = 1;
+    public enum Worker implements VotingSystemWorkerType{INFO_GETTER,
+        ASSOCIATE_CONTROL_CENTER}
 
     public enum Estado {DESCONECTADO, CONECTANDO, CONECTADO_CENTRO_CONTROL, 
         ASOCIANDO_CENTRO_CONTROL, CENTRO_CONTROL_ASOCIADO;}
@@ -206,7 +204,7 @@ public class AsociarCentroControlDialog extends JDialog implements
                 String urlServidor = StringUtils.prepararURL(
                         controlCenterTextField.getText().trim());
                 String urlInfoServidor = ContextoPruebas.getURLInfoServidor(urlServidor);
-                tareaEnEjecucion = new InfoGetterWorker(INFO_GETTER_WORKER,
+                tareaEnEjecucion = new InfoGetterWorker(Worker.INFO_GETTER,
                     urlInfoServidor, null, this);
                 tareaEnEjecucion.execute();
                 controlCenterTextField.setText(controlCenterTextField.getText().trim());
@@ -318,7 +316,7 @@ public class AsociarCentroControlDialog extends JDialog implements
                     Contexto.INSTANCE.getAccessControl().getNombreNormalizado(), 
                     documentoAsociacion, msgSubject, null);
 
-            tareaEnEjecucion = new SMIMESignedSenderWorker(ASSOCIATE_CONTROL_CENTER_WORKER, 
+            tareaEnEjecucion = new SMIMESignedSenderWorker(Worker.ASSOCIATE_CONTROL_CENTER, 
                     smimeDocument, ContextoPruebas.INSTANCE.getURLAsociarActorConIP(), 
                     null, null, this);
             tareaEnEjecucion.execute();
@@ -364,10 +362,9 @@ public class AsociarCentroControlDialog extends JDialog implements
 
     @Override public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-                " - worker: " + worker.getClass().getSimpleName() + 
-                " - workerId:" + worker.getId());
-        switch(worker.getId()) {
-            case INFO_GETTER_WORKER:
+                " - worker: " + worker.getType());
+        switch((Worker)worker.getType()) {
+            case INFO_GETTER:
             if(Respuesta.SC_OK == worker.getStatusCode()) {
                 try {
                     controlCenter = ActorConIP.parse(worker.getMessage());
@@ -412,13 +409,13 @@ public class AsociarCentroControlDialog extends JDialog implements
                 infoServidorButton.setText("Asociar");
             }
             break;
-            case ASSOCIATE_CONTROL_CENTER_WORKER:
+            case ASSOCIATE_CONTROL_CENTER:
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     estado = Estado.CENTRO_CONTROL_ASOCIADO;
                     infoServidorButton.setText("Información del servidor");
                     infoServidorButton.setIcon(new ImageIcon(getClass()
                             .getResource("/images/information-white.png")));
-                    ContextoPruebas.INSTANCE.setCentroControl(controlCenter);
+                    ContextoPruebas.INSTANCE.setControlCenter(controlCenter);
                     dispose();
                 } else {
                     mostrarMensajeUsuario(worker.getMessage());

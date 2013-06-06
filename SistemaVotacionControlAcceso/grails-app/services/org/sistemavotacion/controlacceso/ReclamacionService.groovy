@@ -37,7 +37,7 @@ class ReclamacionService {
 				log.error("saveManifestSignature - ERROR TIMESTAMP VOTE VALIDATION -> '${timeStampVerification.mensaje}'")
 				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
 					mensaje:timeStampVerification.mensaje,
-					tipo:Tipo.FIRMA_EVENTO_CON_ERRORES, evento:event)
+					tipo:Tipo.FIRMA_EVENTO_CON_ERRORES, evento:eventoReclamacion)
 			}
 		
             Firma firma = Firma.findWhere(evento:eventoReclamacion, usuario:usuario)

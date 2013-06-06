@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.ReciboVoto;
 import org.sistemavotacion.modelo.Respuesta;
@@ -39,6 +40,10 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
     private List<String> electorList = null;
     
     private SimulatorListener simulationListener;
+    
+    //private final CountDownLatch countDownLatch = new CountDownLatch(1);
+    
+    private final AtomicBoolean done = new AtomicBoolean(false);
     
     public VotingSimulator(VotingSimulationData simulationData, 
             SimulatorListener simulationListener) {
@@ -116,6 +121,13 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
                 }
             }
         });
+        
+        while(!done.get()){}
+        try {
+            finish();
+        } catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
     }
     
     public void launchRequests () throws Exception {
@@ -182,17 +194,17 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
                 simulationData.getAndIncrementNumVotingRequestsERROR();
             }
         }
-        finish();
+        done.set(true);
     }
     
-    @Override public VotingSimulationData finish() throws Exception {
+    @Override public void finish() throws Exception {
         logger.debug("finish - shutdown executors");
         simulationData.setFinish(System.currentTimeMillis());
         if(timer != null) timer.stop();
         if(votacionExecutor != null) votacionExecutor.shutdownNow();
         if(votosExecutor != null) votosExecutor.shutdownNow(); 
-        if(simulationListener != null) {           
-            simulationListener.setSimulationResult(this);
+        if(simulationListener != null) {  
+            simulationListener.setSimulationResult(simulationData);
         } else {
             logger.debug("--------------- SIMULATION RESULT------------------");
             logger.info("Duration: " + simulationData.getDurationStr());
@@ -217,9 +229,8 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
             }
             logger.debug("------------------- FINISHED --------------------------");
             if(simulationListener == null) System.exit(0);
-            else simulationListener.setSimulationResult(this);
+            else simulationListener.setSimulationResult(simulationData);
         }
-        return simulationData;
     }
         
     @Override

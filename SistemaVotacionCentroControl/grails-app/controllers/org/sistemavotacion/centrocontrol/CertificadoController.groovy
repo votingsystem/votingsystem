@@ -7,6 +7,7 @@ import org.sistemavotacion.centrocontrol.modelo.*
 import org.springframework.context.ApplicationContext;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.security.cert.X509Certificate;
+import grails.util.*
 /**
 * @infoController Servicio de Certificados
 * @descController Servicios relacionados con los certificados manejados por la aplicación
@@ -153,6 +154,32 @@ class CertificadoController {
 		}
 		response.status = Respuesta.SC_NOT_FOUND
 		render  message(code: 'eventoByURLNotFound', args:[params.eventAccessControlURL])
+		return false
+	}
+	
+	/**
+	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE DESARROLLO). Servicio que añade Autoridades de Confianza.<br/>
+	 * Sirve para poder validar los certificados enviados en las simulaciones.
+	 *
+	 * @httpMethod [POST]
+	 * @param pemCertificate certificado en formato PEM de la Autoridad de Confianza que se desea añadir.
+	 * @return Si todo va bien devuelve un código de estado HTTP 200.
+	 */
+	def addCertificateAuthority () {
+		if(!Environment.DEVELOPMENT.equals(Environment.current)) {
+			def msg = message(code: "serviceDevelopmentModeMsg")
+			log.error msg
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
+			return false
+		}
+		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
+		firmaService.deleteTestCerts()
+		Respuesta respuesta = firmaService.addCertificateAuthority(
+			"${request.getInputStream()}".getBytes(), request.getLocale())
+		log.debug("addCertificateAuthority - status: ${respuesta.codigoEstado} - msg: ${respuesta.mensaje}")
+		response.status = respuesta.codigoEstado
+		render respuesta.mensaje
 		return false
 	}
 }

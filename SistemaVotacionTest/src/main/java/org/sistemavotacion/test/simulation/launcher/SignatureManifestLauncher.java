@@ -14,6 +14,7 @@ import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.worker.PDFSignedSenderWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
+import org.sistemavotacion.worker.VotingSystemWorkerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +27,9 @@ public class SignatureManifestLauncher implements Callable<Respuesta>,
     
     private static Logger logger = LoggerFactory.getLogger(SignatureManifestLauncher.class);
 
-    private static final int PDF_SIGNED_SENDER_WORKER    = 0;
+    public enum Worker implements VotingSystemWorkerType{
+        PDF_SIGNED_SENDER}
+    
     
     private final CountDownLatch countDownLatch = new CountDownLatch(1); // just one time
 
@@ -58,7 +61,7 @@ public class SignatureManifestLauncher implements Callable<Respuesta>,
 
         X509Certificate destinationCert = Contexto.INSTANCE.
                     getAccessControl().getCertificate();
-        new PDFSignedSenderWorker(PDF_SIGNED_SENDER_WORKER,
+        new PDFSignedSenderWorker(Worker.PDF_SIGNED_SENDER,
                 urlToSendDocument, reason, location, null,
                 manifestToSign, privateKey, signerCertChain, 
                 destinationCert, this).execute();
@@ -77,7 +80,7 @@ public class SignatureManifestLauncher implements Callable<Respuesta>,
     @Override
     public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-        " - nif: " + nif + " - worker: " + worker.getClass().getSimpleName());
+        " - nif: " + nif + " - worker: " + worker);
         respuesta = new Respuesta(worker.getStatusCode(), " - from:" + nif + 
                 " - " + worker.getMessage());
         countDownLatch.countDown();

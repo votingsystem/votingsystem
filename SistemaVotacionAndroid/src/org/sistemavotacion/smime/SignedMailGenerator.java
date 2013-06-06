@@ -47,7 +47,7 @@ public class SignedMailGenerator {
     
     public static final String NOMBRE_ARCHIVO_FIRMADO = "EventoEnviado";
     public static final String PROVIDER = "BC";
-    public static final String SIGNED_PART_EXTENSION = ".p7s";
+    public static final String SIGNED_PART_EXTENSION = ".p7m";
     
     private SMIMESignedGenerator smimeSignedGenerator = null;
     // Get a Session object and create the mail message

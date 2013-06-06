@@ -245,7 +245,7 @@ public class UserBaseDialog extends JDialog
         if(progressBarPanel.isVisible()) {
             try {
                 creacionBaseUsuarios.finish();
-                setSimulationResult(creacionBaseUsuarios);
+                setSimulationResult(creacionBaseUsuarios.getData());
             } catch(Exception ex) {
                 logger.error(ex.getMessage(), ex);
             }
@@ -370,14 +370,14 @@ public class UserBaseDialog extends JDialog
     }
 
     @Override
-    public void setSimulationResult(Simulator<UserBaseSimulationData> simulator) {
+    public void setSimulationResult(UserBaseSimulationData data) {
        logger.debug("setResult");
         userBasePanel.setVisible(true);
         progressBarPanel.setVisible(false);
         createUsersButton.setVisible(false);
-        ContextoPruebas.INSTANCE.setUserBaseData(simulator.getData());
+        ContextoPruebas.INSTANCE.setUserBaseData(data);
         setMessage(ContextoPruebas.INSTANCE.getString("userBaseDataInContextMsg"));
-        final String result = getUserBaseDataHtmlResultMsg(simulator.getData());
+        final String result = getUserBaseDataHtmlResultMsg(data);
         try {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override

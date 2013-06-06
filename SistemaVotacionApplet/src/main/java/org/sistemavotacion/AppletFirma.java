@@ -34,12 +34,7 @@ public class AppletFirma extends JApplet {
     public static String locale = "es";
     public static ModoEjecucion modoEjecucion = ModoEjecucion.APPLET;
     
-    public static AppletFirma INSTANCIA;
-    
-    public AppletFirma() {
-        INSTANCIA = this;
-        logger.debug("AppletFirma");
-    }
+    public AppletFirma() { }
         
     public void init() {
         logger.debug("------ init");
@@ -202,7 +197,7 @@ public class AppletFirma extends JApplet {
             return;
         }
         PreconditionsCheckerDialog preconditionsChecker = 
-                new PreconditionsCheckerDialog(frame, true, operacionEnCurso);
+                new PreconditionsCheckerDialog(frame, true, operacionEnCurso, this);
         preconditionsChecker.setVisible(true);
     }
     
@@ -224,7 +219,7 @@ public class AppletFirma extends JApplet {
                         File jsonFile = File.createTempFile("operacion", ".json");
                         jsonFile.deleteOnExit();
                         FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
-                            .getResourceAsStream("testFiles/backupRequest.json"), jsonFile);        
+                            .getResourceAsStream("testFiles/publishManifest.json"), jsonFile);        
                         appletFirma.ejecutarOperacion(FileUtils.getStringFromFile(jsonFile));
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);

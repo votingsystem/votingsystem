@@ -315,10 +315,10 @@ class RepresentativeController {
 	 * del voto de los representates en el momento en que finaliza una votación.
 	 */
 	def accreditationsBackupForEvent() {
-		log.debug("getAccreditationsBackupForEvent - event: ${event.id}")
+		log.debug("getAccreditationsBackupForEvent - event: ${params.id}")
 		EventoVotacion event = null
 		EventoVotacion.withTransaction {
-			event = EventoVotacion.getAt(params.long('id'))
+			event = EventoVotacion.get(params.long('id'))
 		}
 		String msg = null
 		if(!event) {
@@ -328,36 +328,30 @@ class RepresentativeController {
 			render msg
 			return false
 		}
-		if(event.fechaFin.after(new Date(System.currentTimeMillis()))) {
+		if(event.isOpen()) {
 			msg = message(code: 'eventDateNotFinished')
 			log.error "accreditationsBackupForEvent - ERROR - msg: ${msg}"
 			response.status = Respuesta.SC_ERROR_PETICION
 			render msg
 			return false
 		}
+
+		String downloadFileName = message(code:'repAccreditationsBackupForEventFileName',
+			args:[event.id])
+		Respuesta respuesta = representativeService.getAccreditationsBackupForEvent(
+				event, request.getLocale()) 
 		
-		def datePathPart = DateUtils.getShortStringFromDate(event.fechaFin)
-		def basedir = "${grailsApplication.config.SistemaVotacion.accreditationsForEventBackupDir}" +
-			"/${datePathPart}/Event_${event.id}"
-		File baseDirZipped = new File("${basedir}.zip")
-		File metaInfFile;
-		if(baseDirZipped.exists()) {
-			 metaInfFile = new File("${basedir}/meta.inf")
-			 log.debug("getAccreditationsBackupForEvent - backup file already exists")
-			 if(metaInfFile) {
-				 def metaInfJSON = JSON.parse(metaInfFile.text)
-				 response.setContentType("application/zip")
-				 byte[] fileBytes = baseDirZipped.getBytes()
-				 response.contentLength = fileBytes.length
-				 response.outputStream <<  fileBytes
-				 response.outputStream.flush()
-				 return false
-			 }
-		} else {
+		if(Respuesta.SC_OK == respuesta.codigoEstado) {
+			File baseDirZipped = respuesta.file
+			byte[] fileBytes = baseDirZipped.getBytes()
+			response.setHeader("Content-Disposition", "inline; filename='${downloadFileName}'");
+			response.setContentType("application/zip")
+			response.contentLength = fileBytes.length
+			response.outputStream <<  fileBytes
+			response.outputStream.flush()
+		} else params.status = respuesta
 		
-		}
-		representativeService.getAccreditationsBackupForEvent(
-			event, request.getLocale())
 		
 	}
+
 }

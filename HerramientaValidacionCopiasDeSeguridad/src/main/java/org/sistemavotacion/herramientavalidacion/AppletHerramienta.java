@@ -31,14 +31,11 @@ public class AppletHerramienta extends JApplet {
     public static ModoEjecucion modoEjecucion = ModoEjecucion.APPLET;
     
     private static ResourceBundle resourceBundle;
-    public static AppletHerramienta INSTANCIA;
     
     public AppletHerramienta() { }
         
     @Override  public void init() {
         logger.debug("init");
-        INSTANCIA = this;
-        
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 logger.debug("ShutdownHook - ShutdownHook - ShutdownHook");

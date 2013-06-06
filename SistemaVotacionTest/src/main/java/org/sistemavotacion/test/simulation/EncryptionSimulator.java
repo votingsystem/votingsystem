@@ -23,6 +23,7 @@ import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.worker.InfoGetterWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
+import org.sistemavotacion.worker.VotingSystemWorkerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +36,7 @@ public class EncryptionSimulator extends Simulator<SimulationData>
         
     private static Logger logger = LoggerFactory.getLogger(EncryptionSimulator.class);
     
-    private static final int ACCESS_CONTROL_GETTER_WORKER = 0;
+    public enum Worker implements VotingSystemWorkerType{ACCESS_CONTROL_GETTER}
     
     private final ExecutorService requestExecutor;
     private static CompletionService<Respuesta> requestCompletionService;
@@ -66,7 +67,8 @@ public class EncryptionSimulator extends Simulator<SimulationData>
         String urlInfoServer = ContextoPruebas.getURLInfoServidor(
                 simulationData.getAccessControlURL());
         logger.debug("init - urlInfoServer: " + urlInfoServer);
-        new InfoGetterWorker(ACCESS_CONTROL_GETTER_WORKER, urlInfoServer, null, this).execute();
+        new InfoGetterWorker(Worker.ACCESS_CONTROL_GETTER, 
+                urlInfoServer, null, this).execute();
         countDownLatch.await();
         finish();
     }
@@ -146,13 +148,13 @@ public class EncryptionSimulator extends Simulator<SimulationData>
         return simulationData;
     }
         
-    @Override  public SimulationData finish() throws Exception{
+    @Override  public void finish() throws Exception{
         logger.debug("finish");
         simulationData.setFinish(System.currentTimeMillis());
         if(timer != null) timer.stop();
         if(requestExecutor != null) requestExecutor.shutdownNow();       
         if(simulationListener != null) {           
-            simulationListener.setSimulationResult(this);
+            simulationListener.setSimulationResult(simulationData);
         } else { 
             logger.debug("--------------- SIMULATION RESULT----------------------"); 
             simulationData.setFinish(System.currentTimeMillis());
@@ -165,18 +167,16 @@ public class EncryptionSimulator extends Simulator<SimulationData>
                 logger.info(" ************* " + getErrorsList().size() + " ERRORS: \n" + 
                             errorsMsg);
             }
-            logger.debug("------------------- FINISHED --------------------------");
+            logger.debug("--------------- FINISHED --------------------------");
             System.exit(0);
         }
-        return simulationData;
     }
 
     @Override public void processVotingSystemWorkerMsg(List<String> messages) {}
 
     @Override public void showResult(VotingSystemWorker worker) {  
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-            " - worker: " + worker.getClass().getSimpleName() + 
-            " - workerId:" + worker.getId());
+            " - worker: " + worker.getType());
         String msg = null;
         if(Respuesta.SC_OK == worker.getStatusCode()) {
             try {
@@ -191,8 +191,10 @@ public class EncryptionSimulator extends Simulator<SimulationData>
                 logger.error(ex.getMessage(), ex);
                 msg = ex.getMessage(); 
             }
-        } else msg = worker.getMessage(); 
-        logger.error("###ERROR - ACCESS_CONTROL_GETTER_WORKER: " + msg);
+        } 
+        if(msg == null) msg = worker.getErrorMessage();
+        else msg = worker.getErrorMessage() + " - msg: " + msg; 
+        logger.error(msg);
         addErrorMsg(msg);
         countDownLatch.countDown();
     }

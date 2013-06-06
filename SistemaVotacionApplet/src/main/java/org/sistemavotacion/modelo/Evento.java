@@ -63,7 +63,7 @@ public class Evento {
     private Integer numeroTotalFirmas;
     private Integer numeroTotalVotos;
     private Boolean firmado;
-    
+    private Boolean copiaSeguridadDisponible = true;
     
     /**
      * @return the id
@@ -231,6 +231,7 @@ public class Evento {
         if(fechaInicio != null) map.put("fechaInicio", DateUtils.getStringFromDate(fechaInicio));
         if(fechaFin != null) map.put("fechaFin", DateUtils.getStringFromDate(fechaFin));
         if(url != null) map.put("url", url);
+        map.put("copiaSeguridadDisponible", copiaSeguridadDisponible);
         if(usuario != null) {
             JSONObject usuarioJSONObject = new JSONObject();
             usuarioJSONObject.put("nif", usuario.getNif());
@@ -725,6 +726,10 @@ public class Evento {
                 usuario.setNombre(eventoJSON.getString("usuario"));
                 evento.setUsuario(usuario);
             }
+            if (eventoJSON.containsKey("copiaSeguridadDisponible")) {
+                evento.setCopiaSeguridadDisponible(eventoJSON.getBoolean(
+                        "copiaSeguridadDisponible"));
+            }
             if(eventoJSON.containsKey("campos")) {
                 List<OpcionEvento> campos = new ArrayList<OpcionEvento>();
                 JSONArray jsonArray = eventoJSON.getJSONArray("campos");
@@ -792,5 +797,19 @@ public class Evento {
      */
     public void setNextState(Estado nextState) {
         this.nextState = nextState;
+    }
+
+    /**
+     * @return the copiaSeguridadDisponible
+     */
+    public Boolean getCopiaSeguridadDisponible() {
+        return copiaSeguridadDisponible;
+    }
+
+    /**
+     * @param copiaSeguridadDisponible the copiaSeguridadDisponible to set
+     */
+    public void setCopiaSeguridadDisponible(Boolean copiaSeguridadDisponible) {
+        this.copiaSeguridadDisponible = copiaSeguridadDisponible;
     }
 }

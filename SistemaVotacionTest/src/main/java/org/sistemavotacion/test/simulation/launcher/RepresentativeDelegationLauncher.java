@@ -10,7 +10,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
-import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
@@ -20,6 +19,7 @@ import org.sistemavotacion.util.StringUtils;
 import org.sistemavotacion.worker.SMIMESignedSenderWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
+import org.sistemavotacion.worker.VotingSystemWorkerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,9 @@ public class RepresentativeDelegationLauncher implements Callable<Respuesta>,
     private static Logger logger = LoggerFactory.getLogger(
             RepresentativeDelegationLauncher.class);
 
-    private static final int SEND_DOCUMENT_WORKER = 0;
+    
+    public enum Worker implements VotingSystemWorkerType{SEND_DOCUMENT}
+    
     
     private final CountDownLatch countDownLatch = new CountDownLatch(1);
     
@@ -71,7 +73,7 @@ public class RepresentativeDelegationLauncher implements Callable<Respuesta>,
         
         X509Certificate destinationCert = ContextoPruebas.INSTANCE.
                     getAccessControl().getCertificate();
-        new SMIMESignedSenderWorker(SEND_DOCUMENT_WORKER, 
+        new SMIMESignedSenderWorker(Worker.SEND_DOCUMENT, 
                 smimeMessage, urlService, null, destinationCert,this).execute();
 
         countDownLatch.await();
@@ -98,20 +100,20 @@ public class RepresentativeDelegationLauncher implements Callable<Respuesta>,
     public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
          " - user:" + userNIF + "' -> representative: '" + representativeNIF +"'" +
-         " - worker: " + worker.getClass().getSimpleName()) ;
+         " - worker: " + worker.getType()) ;
         respuesta = worker.getRespuesta();
-        switch(worker.getId()) {
-            case SEND_DOCUMENT_WORKER:
+        switch((Worker)worker.getType()) {
+            case SEND_DOCUMENT:
                 if (Respuesta.SC_OK == worker.getStatusCode()) {
                     respuesta.setMensaje(userNIF);
                 } else {
-                    logger.debug("- showResult - ERROR DELEGANDO EN REPRESENTANTE");
-                    respuesta.appendErrorMessage("### ERROR - SEND_DOCUMENT_WORKER");
+                    logger.debug(worker.getErrorMessage());
+                    respuesta.appendErrorMessage(worker.getErrorMessage());
                 }
                 countDownLatch.countDown();
                 break;
             default:
-                logger.debug("*** UNKNOWN WORKER ID: '" + worker.getId() + "'");
+                logger.debug("*** UNKNOWN WORKER: " + worker.getType());
         }
     }
 

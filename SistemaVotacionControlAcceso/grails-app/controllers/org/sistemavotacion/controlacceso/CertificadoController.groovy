@@ -147,7 +147,7 @@ class CertificadoController {
 	}
 
 	/**
-	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS). Servicio que añade Autoridades de Confianza.<br/>
+	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE DESARROLLO). Servicio que añade Autoridades de Confianza.<br/>
 	 * Sirve para poder validar los certificados enviados en las simulaciones.
 	 * 
 	 * @httpMethod [POST]
@@ -166,7 +166,7 @@ class CertificadoController {
 		firmaService.deleteTestCerts()
 		Respuesta respuesta = firmaService.addCertificateAuthority(
 			"${request.getInputStream()}".getBytes(), request.getLocale())
-		log.debug("addCertificateAuthority - codigo estado: ${respuesta.codigoEstado} - mensaje: ${respuesta.mensaje}")
+		log.debug("addCertificateAuthority - status: ${respuesta.codigoEstado} - msg: ${respuesta.mensaje}")
 		response.status = respuesta.codigoEstado
 		render respuesta.mensaje
 		return false

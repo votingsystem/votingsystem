@@ -1,5 +1,6 @@
 package org.sistemavotacion.test.modelo;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
@@ -40,6 +41,8 @@ public class SimulationData {
     
     private String durationStr = null;
     private String backupRequestEmail = null;
+    
+    private List<String> errorsList;
 
     public SimulationData(int status, String message) {
         this.statusCode = status;
@@ -329,6 +332,20 @@ public class SimulationData {
      */
     public void setBackupRequestEmail(String backupRequestEmail) {
         this.backupRequestEmail = backupRequestEmail;
+    }
+
+    /**
+     * @return the errorsList
+     */
+    public List<String> getErrorsList() {
+        return errorsList;
+    }
+
+    /**
+     * @param errorsList the errorsList to set
+     */
+    public void setErrorsList(List<String> errorsList) {
+        this.errorsList = errorsList;
     }
 
 }

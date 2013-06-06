@@ -33,11 +33,11 @@ public class BackupRequestWorker extends SwingWorker<Respuesta<MetaInf>, String>
     
     private static Logger logger = LoggerFactory.getLogger(BackupRequestWorker.class);
     
-    private static final int REQUEST_BACKUP_WORKER      = 0;
+    public enum Worker implements VotingSystemWorkerType{REQUEST_BACKUP}
 
     private final CountDownLatch countDownLatch = new CountDownLatch(1);
     
-    private Integer id;
+    private VotingSystemWorkerType workerType;
     private String urlRequest;
     private Respuesta respuesta = new Respuesta(Respuesta.SC_ERROR);
     private VotingSystemWorkerListener workerListener;
@@ -46,12 +46,11 @@ public class BackupRequestWorker extends SwingWorker<Respuesta<MetaInf>, String>
     private Certificate[] signerCertChain;
     private X509Certificate destinationCert;
     private PdfReader requestBackupPDF = null;
-
     
-    public BackupRequestWorker(Integer id, String urlRequest, 
+    public BackupRequestWorker(VotingSystemWorkerType workerType, String urlRequest, 
             byte[] pdfRequestBytes, VotingSystemWorkerListener workerListener) 
             throws OperatorCreationException {
-        this.id = id;
+        this.workerType = workerType;
         this.urlRequest = ContextoPruebas.INSTANCE.getUrlBackupEvents();
         this.workerListener = workerListener;
         try {
@@ -65,7 +64,7 @@ public class BackupRequestWorker extends SwingWorker<Respuesta<MetaInf>, String>
     }
     
     @Override protected Respuesta doInBackground() throws Exception {
-        new PDFSignedSenderWorker(REQUEST_BACKUP_WORKER, urlRequest, null, null, 
+        new PDFSignedSenderWorker(Worker.REQUEST_BACKUP, urlRequest, null, null, 
                 null, requestBackupPDF, signerPrivateKey, signerCertChain, 
                 null, this).execute();
         countDownLatch.await();
@@ -99,9 +98,9 @@ public class BackupRequestWorker extends SwingWorker<Respuesta<MetaInf>, String>
                                     signedFileBytes, entry.getName());
                             signedFileList.add(signedFile);
                             if(!signedFile.isValidSignature()) {
-                                 msg = "ERROR ZipEntry '" + entry.getName() + "' invalid signature";
+                                 msg = "ERROR ZipEntry -> " + entry.getName();
                                 
-                            } else logger.debug("OK ZipEntry " + entry.getName());
+                            } else logger.debug("OK ZipEntry -> " + entry.getName());
                         }
                     } 
                     if(msg != null){
@@ -145,16 +144,22 @@ public class BackupRequestWorker extends SwingWorker<Respuesta<MetaInf>, String>
         workerListener.processVotingSystemWorkerMsg(messages);
     }
 
-
    @Override public String getMessage() {
         if(respuesta == null) return null;
         else return respuesta.getMensaje();
     }
-
-    @Override public int getId() {
-        return this.id;
+       
+    @Override public String getErrorMessage() {
+        if(workerType != null) return "### ERROR - " + workerType + " - msg: " 
+                + respuesta.getMensaje(); 
+        else return "### ERROR - msg: " + respuesta.getMensaje();  
     }
 
+    @Override public VotingSystemWorkerType getType() {
+        return workerType;
+    }
+
+        
     @Override  public int getStatusCode() {
         if(respuesta == null) return Respuesta.SC_ERROR;
         else return respuesta.getCodigoEstado();
@@ -169,12 +174,11 @@ public class BackupRequestWorker extends SwingWorker<Respuesta<MetaInf>, String>
 
     @Override public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-                " - worker: " + worker.getClass().getSimpleName() + 
-                " - workerId:" + worker.getId());
+                " - worker: " + worker.getType());
         String msg = null;
         respuesta = worker.getRespuesta();
-        switch(worker.getId()) {
-            case REQUEST_BACKUP_WORKER:
+        switch((Worker)worker.getType()) {
+            case REQUEST_BACKUP:
                 if(Respuesta.SC_OK == worker.getStatusCode()) { }
                 break;
             

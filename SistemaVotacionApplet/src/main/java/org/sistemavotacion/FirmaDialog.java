@@ -28,6 +28,7 @@ import static org.sistemavotacion.modelo.Operacion.Tipo.*;
 import org.sistemavotacion.worker.PDFSignedSenderWorker;
 import org.sistemavotacion.worker.SMIMESignedSenderWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
+import org.sistemavotacion.worker.VotingSystemWorkerType;
 
 /**
 * @author jgzornoza
@@ -39,8 +40,9 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
 
     private static Logger logger = LoggerFactory.getLogger(FirmaDialog.class);
 
-    private static final int INFO_GETTER_WORKER      = 0;
-    private static final int SIGNED_SENDER_WORKER    = 1;
+    public enum Worker implements VotingSystemWorkerType{INFO_GETTER,
+        SIGNED_SENDER}
+
 
     private byte[] bytesDocumento;
     private volatile boolean mostrandoPantallaEnvio = false;
@@ -49,7 +51,6 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
     private AppletFirma appletFirma;
     private Operacion operacion;
     private SMIMEMessageWrapper smimeMessage;
-    private static FirmaDialog INSTANCIA;
     
     public FirmaDialog(Frame parent, boolean modal, final AppletFirma appletFirma) {
         super(parent, modal);
@@ -58,7 +59,6 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
         //parentFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);       
         initComponents();
-        INSTANCIA = this;
         operacion = appletFirma.getOperacionEnCurso();
         if(operacion != null && operacion.getContenidoFirma() != null) {
             bytesDocumento = operacion.getContenidoFirma().toString().getBytes();
@@ -71,7 +71,7 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
             public void windowClosing(WindowEvent e) {
                 logger.debug(" - window closing event received");
                 dispose();
-                AppletFirma.INSTANCIA.cancelarOperacion();
+                appletFirma.cancelarOperacion();
             }
         });
         Operacion.Tipo tipoOperacion = operacion.getTipo();
@@ -87,10 +87,9 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                         progressLabel.setText("<html>" + 
                 Contexto.INSTANCE.getString("obteniendoDocumento") +"</html>");
                 mostrarPantallaEnvio(true);
-                tareaEnEjecucion = new InfoGetterWorker(INFO_GETTER_WORKER, 
+                tareaEnEjecucion = new InfoGetterWorker(Worker.INFO_GETTER, 
                         operacion.getUrlDocumento(), Contexto.PDF_CONTENT_TYPE, this);
                 tareaEnEjecucion.execute();
-                setVisible(true);
                 break;             
             case SOLICITUD_COPIA_SEGURIDAD:
                 verDocumentoButton.setIcon(new ImageIcon(getClass().
@@ -103,15 +102,11 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                     messageLabel.setVisible(true);
                 }
                 progressBarPanel.setVisible(false);
-                pack();
-                setVisible(true);
                 break;
             default:
                 logger.debug("Operation without interfaze details -> " + 
                         tipoOperacion);
                 progressBarPanel.setVisible(false);
-                pack();
-                setVisible(true);
                 break;
         }
         pack();
@@ -296,6 +291,7 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
         mostrarPantallaEnvio(true);
         progressLabel.setText("<html>" + 
                 Contexto.INSTANCE.getString("progressLabel")+ "</html>");
+        final VotingSystemWorkerListener workerListener = this;
         Runnable runnable = new Runnable() {
             public void run() {  
                 try {
@@ -320,9 +316,9 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                             destinationCert = Contexto.INSTANCE.
                                 getAccessControl().getCertificate(); 
                             tareaEnEjecucion = new SMIMESignedSenderWorker(
-                                    SIGNED_SENDER_WORKER, smimeMessage, 
+                                    Worker.SIGNED_SENDER, smimeMessage, 
                                     operacion.getUrlEnvioDocumento(), null, 
-                                    destinationCert,INSTANCIA);
+                                    destinationCert, workerListener);
                             tareaEnEjecucion.execute();
                             return;
                         case SOLICITUD_COPIA_SEGURIDAD:
@@ -333,10 +329,11 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                             String location = null;
                             destinationCert = Contexto.INSTANCE.
                                 getAccessControl().getCertificate();
-                            tareaEnEjecucion = new PDFSignedSenderWorker(SIGNED_SENDER_WORKER,
+                            tareaEnEjecucion = new PDFSignedSenderWorker(
+                                    Worker.SIGNED_SENDER,
                                     operacion.getUrlEnvioDocumento(), reason, location, 
                                     finalPassword.toCharArray(), readerManifiesto, 
-                                    null, null, destinationCert, INSTANCIA);
+                                    null, null, destinationCert, workerListener);
                             tareaEnEjecucion.execute();
                             return;
                         default:
@@ -402,10 +399,9 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
     
     @Override public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-                " - worker: " + worker.getClass().getSimpleName() + 
-                " - workerId:" + worker.getId());
-        switch(worker.getId()) {
-            case INFO_GETTER_WORKER:
+                " - worker: " + worker);
+        switch((Worker)worker.getType()) {
+            case INFO_GETTER:
                 mostrarPantallaEnvio(false);
                 if (Respuesta.SC_OK == worker.getStatusCode()) {    
                     bytesDocumento =((InfoGetterWorker)worker).getRespuesta().
@@ -418,7 +414,7 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                     dispose();
                 }
                 break;
-            case SIGNED_SENDER_WORKER:
+            case SIGNED_SENDER:
                 dispose();
                 if (Respuesta.SC_OK == worker.getStatusCode()) {
                     String msg = null;
@@ -444,7 +440,7 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                 }
                 break;
             default:
-                logger.debug("*** UNKNOWN WORKER ID: '" + worker.getId() + "'");
+                logger.debug("*** UNKNOWN WORKER: " + worker);
         }
 
     }

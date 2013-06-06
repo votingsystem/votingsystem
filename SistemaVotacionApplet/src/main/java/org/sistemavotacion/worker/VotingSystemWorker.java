@@ -9,8 +9,8 @@ import org.sistemavotacion.modelo.Respuesta;
 public interface VotingSystemWorker {
     
     public String getMessage();
-    public int getId();
+    public String getErrorMessage();
     public int getStatusCode();
     public Respuesta getRespuesta();
-    
+    public VotingSystemWorkerType getType();
 }

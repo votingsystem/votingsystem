@@ -39,7 +39,6 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.cms.CMSAttributeTableGenerationException;
 import org.bouncycastle.cms.CMSAttributeTableGenerator;
 import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
@@ -62,12 +61,8 @@ public class PDFSignerWorker extends SwingWorker<Respuesta, String>
     
     private static Logger logger = LoggerFactory.getLogger(PDFSignerWorker.class);
 
-    public static final String PDF_SIGNATURE_MECHANISM = "SHA1withRSA";
-    public static final String PDF_DIGEST_OID = CMSSignedDataGenerator.DIGEST_SHA1;
-    public static final String PDF_SIGNATURE_DIGEST    = "SHA1";
-    
-    private Integer id;
-    private Respuesta respuesta = null;    
+    private VotingSystemWorkerType workerType;
+    private Respuesta respuesta = new Respuesta(Respuesta.SC_ERROR); 
     private String urlTimeStampServer;
     private String location;
     private String reason;
@@ -80,12 +75,12 @@ public class PDFSignerWorker extends SwingWorker<Respuesta, String>
     private PrivateKey signerPrivatekey;
     private Certificate[] signerCertChain;
     
-    public PDFSignerWorker(Integer id, String reason, String location, 
-            char[] password, PdfReader reader, PrivateKey signerPrivatekey,
+    public PDFSignerWorker(VotingSystemWorkerType workerType, String reason, 
+            String location, char[] password, PdfReader reader, PrivateKey signerPrivatekey,
             Certificate[] signerCertChain, VotingSystemWorkerListener workerListener)
             throws NoSuchAlgorithmException, NoSuchAlgorithmException, 
             NoSuchAlgorithmException, NoSuchProviderException, IOException, Exception {
-        this.id = id;
+        this.workerType = workerType;
         this.signerPrivatekey = signerPrivatekey;
         this.signerCertChain = signerCertChain;
         this.urlTimeStampServer = Contexto.INSTANCE.getURLTimeStampServer();
@@ -113,7 +108,8 @@ public class PDFSignerWorker extends SwingWorker<Respuesta, String>
             systemSignedGenerator = signedGenerator;
         } else {
             logger.debug("Generating smartcard VotingSystemSignedGenerator");
-            DNIePDFSessionHelper sessionHelper = new DNIePDFSessionHelper(password, DNIe_SESSION_MECHANISM);
+            DNIePDFSessionHelper sessionHelper = new DNIePDFSessionHelper(
+                    password, DNIe_SESSION_MECHANISM);
             signerCertChain = sessionHelper.getCertificateChain();
             systemSignedGenerator = sessionHelper;
         }
@@ -152,7 +148,8 @@ public class PDFSignerWorker extends SwingWorker<Respuesta, String>
         
         CMSAttributeTableGenerator unsAttr= new CMSAttributeTableGenerator() {
 
-                public AttributeTable getAttributes(final Map parameters) throws CMSAttributeTableGenerationException {
+                public AttributeTable getAttributes(final Map parameters) 
+                        throws CMSAttributeTableGenerationException {
                     AttributeTable attributeTable = null;
                     // Gets the signature bytes
                     byte[] signatureBytes = (byte[]) parameters.get(SIGNATURE);
@@ -235,14 +232,16 @@ public class PDFSignerWorker extends SwingWorker<Respuesta, String>
     public File getSignedAndTimeStampedPDF() {
         return signedFile;
     }
+    
+    @Override public String getErrorMessage() {
+        if(workerType != null) return "### ERROR - " + workerType + " - msg: " + 
+                getMessage(); 
+        else return "### ERROR - msg: " + getMessage(); 
+    }
 
    @Override public String getMessage() {
         if(respuesta == null) return null;
         else return respuesta.getMensaje();
-    }
-
-    @Override public int getId() {
-        return this.id;
     }
 
     @Override  public int getStatusCode() {
@@ -252,5 +251,10 @@ public class PDFSignerWorker extends SwingWorker<Respuesta, String>
     
     @Override public Respuesta getRespuesta() {
         return respuesta;
+    }
+
+    @Override
+    public VotingSystemWorkerType getType() {
+        return workerType;
     }
 }

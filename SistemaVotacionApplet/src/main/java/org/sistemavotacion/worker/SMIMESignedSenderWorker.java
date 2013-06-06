@@ -27,27 +27,27 @@ public class SMIMESignedSenderWorker extends SwingWorker<Respuesta, String>
     private static Logger logger = LoggerFactory.getLogger(
             SMIMESignedSenderWorker.class);
 
+    private VotingSystemWorkerType workerType;
     private String urlToSendDocument;
     private VotingSystemWorkerListener workerListener;
-    private Respuesta respuesta = null;
-    private Integer id = null;
-
-
+    private Respuesta respuesta = new Respuesta(Respuesta.SC_ERROR);
     private SMIMEMessageWrapper smimeMessage;
     private X509Certificate destinationCert = null;
     private KeyPair keypair;
+
     
-    public SMIMESignedSenderWorker(Integer id, SMIMEMessageWrapper smimeMessage, 
-            String urlToSendDocument, KeyPair keypair, X509Certificate destinationCert,
+    public SMIMESignedSenderWorker(VotingSystemWorkerType workerType, 
+            SMIMEMessageWrapper smimeMessage, String urlToSendDocument, 
+            KeyPair keypair, X509Certificate destinationCert,
             VotingSystemWorkerListener workerListener) {
-        this.id = id;
+        this.workerType = workerType;
         this.smimeMessage = smimeMessage;
         this.workerListener = workerListener;
         this.urlToSendDocument = urlToSendDocument;
         this.keypair = keypair;
         this.destinationCert = destinationCert;
     }
-
+    
     @Override protected void done() {//on the EDT
         try {
             respuesta = get();
@@ -61,6 +61,10 @@ public class SMIMESignedSenderWorker extends SwingWorker<Respuesta, String>
     @Override protected Respuesta doInBackground() throws Exception {
         logger.debug("doInBackground - urlToSendDocument: " + urlToSendDocument);
         TimeStampRequest timeStampRequest = smimeMessage.getTimeStampRequest();
+        if(timeStampRequest == null) {
+            logger.error("TimeStampRequest null");
+            return new Respuesta(Respuesta.SC_ERROR, "TimeStampRequest null");
+        }
         respuesta = Contexto.INSTANCE.getHttpHelper().sendByteArray(
                 timeStampRequest.getEncoded(), "timestamp-query", 
                 Contexto.INSTANCE.getURLTimeStampServer());
@@ -115,10 +119,6 @@ public class SMIMESignedSenderWorker extends SwingWorker<Respuesta, String>
         else return respuesta.getMensaje();
     }
 
-    @Override public int getId() {
-        return this.id;
-    }
-
     @Override public int getStatusCode() {
         if(respuesta == null) return Respuesta.SC_ERROR;
         else return respuesta.getCodigoEstado();
@@ -126,6 +126,16 @@ public class SMIMESignedSenderWorker extends SwingWorker<Respuesta, String>
     
     @Override public Respuesta getRespuesta() {
         return respuesta;
+    }
+    
+     @Override public String getErrorMessage() {
+        if(workerType != null) return "### ERROR - " + workerType + " - msg: " 
+                + respuesta.getMensaje(); 
+        else return "### ERROR - msg: " + respuesta.getMensaje();  
+    }
+        
+    @Override public VotingSystemWorkerType getType() {
+        return workerType;
     }
 
 }

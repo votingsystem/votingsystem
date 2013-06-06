@@ -27,13 +27,12 @@ import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.test.MainFrame;
-import org.sistemavotacion.test.panel.VotacionesPanel;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.worker.DocumentSenderWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
+import org.sistemavotacion.worker.VotingSystemWorkerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +45,7 @@ public class CrearVotacionDialog extends JDialog implements
 
     private static Logger logger = LoggerFactory.getLogger(CrearVotacionDialog.class);
     
-    private static final int PUBLISH_DOCUMENT_WORKER          = 0;
+    public enum Worker implements VotingSystemWorkerType{PUBLISH_DOCUMENT}
    
     private static final String IPADDRESS_PATTERN = 
 		"^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
@@ -382,7 +381,7 @@ public class CrearVotacionDialog extends JDialog implements
             evento.setOpciones(opcionesPanel.obtenerOpciones());
             String[] etiquetas = etiquetasTextField.getText().split(",");
             evento.setEtiquetas(etiquetas);
-            evento.setCentroControl(ContextoPruebas.INSTANCE.getCentroControl());
+            evento.setCentroControl(ContextoPruebas.INSTANCE.getControlCenter());
             signedMailGenerator = new SignedMailGenerator(
                 ContextoPruebas.INSTANCE.getUserTest().getKeyStore(),
                 ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS, 
@@ -399,7 +398,7 @@ public class CrearVotacionDialog extends JDialog implements
                     null);
             mimeMessage.writeTo(new FileOutputStream(eventToPublish));
             tareaEnEjecucion = new DocumentSenderWorker(
-                    PUBLISH_DOCUMENT_WORKER, eventToPublish, 
+                    Worker.PUBLISH_DOCUMENT, eventToPublish, 
                     Contexto.SIGNED_CONTENT_TYPE,
                     ContextoPruebas.getURLGuardarEventoParaVotar(
                     Contexto.INSTANCE.getAccessControl().getServerURL()), this);
@@ -589,10 +588,9 @@ public class CrearVotacionDialog extends JDialog implements
     @Override
     public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-                " - worker: " + worker.getClass().getSimpleName() + 
-                " - workerId:" + worker.getId());
-        switch(worker.getId()) {
-            case PUBLISH_DOCUMENT_WORKER:
+                " - worker: " + worker.getType());
+        switch((Worker)worker.getType()) {
+            case PUBLISH_DOCUMENT:
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
                         byte[] responseBytes = worker.getMessage().getBytes();

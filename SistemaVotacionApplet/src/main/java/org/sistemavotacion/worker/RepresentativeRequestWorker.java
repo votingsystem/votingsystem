@@ -29,20 +29,20 @@ public class RepresentativeRequestWorker extends SwingWorker<Respuesta, String>
     private static Logger logger = LoggerFactory.getLogger(
             RepresentativeRequestWorker.class);
     
-    private Integer id = null;
+    private VotingSystemWorkerType workerType;
     private SMIMEMessageWrapper smimeMessage;
     private VotingSystemWorkerListener workerListener;
     private X509Certificate accesRequestServerCert = null;
     
     private File selectedImage;
-    private Respuesta respuesta;
+    private Respuesta respuesta = new Respuesta(Respuesta.SC_ERROR);
     private String urlToSendDocument;
     
-    public RepresentativeRequestWorker(Integer id,
+    public RepresentativeRequestWorker(VotingSystemWorkerType workerType,
             SMIMEMessageWrapper smimeMessage, File selectedImage, 
             String urlToSendDocument, X509Certificate accesRequestServerCert, 
             VotingSystemWorkerListener workerListener) throws Exception {
-        this.id = id;
+        this.workerType = workerType;
         this.urlToSendDocument = urlToSendDocument;
         this.selectedImage = selectedImage;
         this.smimeMessage = smimeMessage;
@@ -77,7 +77,7 @@ public class RepresentativeRequestWorker extends SwingWorker<Respuesta, String>
             timeStampToken.validate(timeStampSignerInfoVerifier);
             smimeMessage.setTimeStampToken(timeStampToken);
             try {
-                File encryptedDocument = File.createTempFile("encryptedDocument", ".p7s");
+                File encryptedDocument = File.createTempFile("encryptedDocument", ".p7m");
                 encryptedDocument.deleteOnExit();
                 MimeMessage mimeMessage = Encryptor.encryptSMIME(
                         smimeMessage, accesRequestServerCert);
@@ -103,11 +103,7 @@ public class RepresentativeRequestWorker extends SwingWorker<Respuesta, String>
         if(respuesta != null) return respuesta.getMensaje();
         else return null;
     }
-
-    @Override public int getId() {
-        return this.id;
-    }
-
+    
     @Override  public int getStatusCode() {
         if(respuesta == null) return Respuesta.SC_ERROR;
         else return respuesta.getCodigoEstado();
@@ -115,6 +111,16 @@ public class RepresentativeRequestWorker extends SwingWorker<Respuesta, String>
     
     @Override public Respuesta getRespuesta() {
         return respuesta;
+    }
+
+    @Override public String getErrorMessage() {
+        if(workerType != null) return "### ERROR - " + workerType + " - msg: " 
+                + respuesta.getMensaje(); 
+        else return "### ERROR - msg: " + respuesta.getMensaje();  
+    }
+        
+    @Override public VotingSystemWorkerType getType() {
+        return workerType;
     }
     
 }

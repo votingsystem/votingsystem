@@ -30,6 +30,7 @@ class RepresentativeService {
 	def grailsApplication
 	def mailSenderService
 	def firmaService
+	def filesService
 
 	/*
 	 * Creates backup of the state of all the representatives for a finished event
@@ -37,112 +38,152 @@ class RepresentativeService {
 	private synchronized Respuesta getAccreditationsBackupForEvent (
 			EventoVotacion event, Locale locale){
 		log.debug("getAccreditationsBackupForEvent - event: ${event.id}")
-		def datePathPart = DateUtils.getShortStringFromDate(event.fechaFin)
-		def basedir = "${grailsApplication.config.SistemaVotacion.accreditationsForEventBackupDir}" +
-			"/${datePathPart}/Event_${event.id}"
-		File baseDirZipped = new File("${basedir}.zip")
 		String msg = null
-		if(baseDirZipped.exists()) {
+		if(!event) {
+			msg = messageSource.getMessage('nullParamErrorMsg', null, locale)
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR, mensaje:msg)
+		}
+		if(event.isOpen()) {
+			msg = messageSource.getMessage('eventOpenErrorMsg', 
+				[event.id].toArray(), locale) 			
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR, mensaje:msg)	
+		}
+		
+		Map<String, File> mapFiles = filesService.getBackupFiles(event, 
+			Tipo.REPRESENTATIVE_ACCREDITATIONS, locale)
+		File zipResult   = mapFiles.zipResult
+		File metaInfFile = mapFiles.metaInfFile
+		File filesDir    = mapFiles.filesDir
+		
+		
+		log.debug("zipResult: ${zipResult.absolutePath}")
+		log.debug("metaInfFile: ${metaInfFile.absolutePath}")
+		log.debug("filesDir: ${filesDir.absolutePath}")
+		
+		
+	
+		Date selectedDate
+		if(event.dateCanceled) selectedDate = event.dateCanceled
+		else selectedDate = event.fechaFin
+		
+		
+		log.debug("zipResult path: ${zipResult.absolutePath}")
+		if(zipResult.exists()) {
 			log.debug("getAccreditationsBackupForEvent - backup file already exists")
 			return new Respuesta(codigoEstado:Respuesta.SC_OK,
-				file:baseDirZipped)
+				file:zipResult)
 		}
 		List<Usuario> representatives = null;
 		Usuario.withTransaction {
 			representatives = Usuario.findAllWhere(type:Usuario.Type.REPRESENTATIVE)
 		}
-		File representativesReportFile = new File("${basedir}/representativeReport")
-		String url = null
-		int numberOfRepresentatives = representatives.size()
-		int totalNumberOfRepresented = 0
-		int representedWithVote = 0
-		representatives.each { representative ->
-			url = "${grailsApplication.config.grails.serverURL}/representative/${representative.id}"
-			int numberOfRepresentations = 1
-			RepresentationDocument.withTransaction {
-				def criteria = RepresentationDocument.createCriteria()
-				def representations = criteria.list {
-					eq("representative", representative)
-					le("dateCreated", selectedDate)
-					or {
-						eq("state", RepresentationDocument.State.CANCELLED)
-						eq("state", RepresentationDocument.State.OK)
-					}
-					or {
-						isNull("dateCanceled")
-						gt("dateCanceled", event.fechaFin)
-					}
-				}
-				numberOfRepresentations = representations.totalCount
-			}
-			totalNumberOfRepresented += numberOfRepresentations
-			SolicitudAcceso solicitudAcceso
-			SolicitudAcceso.withTransaction {
-				solicitudAcceso = SolicitudAcceso.findWhere(
-					estado:SolicitudAcceso.Estado.OK, usuario:representative)
-				if(!solicitudAcceso) {
-					msg = messageSource.getMessage('representativeWithoutVote',
-						[representative.id, event.id].toArray(), locale)
-					log.debug("getAccreditationsBackupForEvent - ${msg}")
-					representativesReportFile.append("${representative.id}," +
-						"${representative.nif}, ${url}, ${numberOfRepresentations}," + 
-						"${Estate.WITHOUT_ACCESS_REQUEST.toString()}")
-					return
-				} else {//Representative has voted
-					String representativeBaseDir = "${basedir}/representative_${representative.id}"
-					File smimeFile = new File("${representativeBaseDir}/AccessRequest.p7s")
-					smimeFile.setBytes(solicitudAcceso.mensajeSMIME.contenido)
-					def voteResults
-					File representedReportFile = new File("${representativeBaseDir}/representedReport")
-					Voto.withTransaction {
-						voteResults = Voto.withCriteria {
-							createAlias("certificado", "certificado")
-							//eq("certificado.tipo", Certificado.Tipo.VOTO)
-							eq("certificado.usuario", representative)
-							eq("estado", Voto.Estado.OK)
-						}
-						if(voteResults.isEmpty()) {
-							log.error("getAccreditationsBackupForEvent - Representative ${representative.id} has no vote")
-							representativesReportFile.append("${representative.id}," +
-								"${representative.nif}, ${url}, ${numberOfRepresentations}," + 
-								"${Estate.WITHOUT_VOTE.toString()}")
-						} else {
-							File voteFile = new File("${representativeBaseDir}/Vote.p7s")
-							voteFile.setBytes(voteResults.iterator().next().mensajeSMIME.contenido)
 
-							def representationsDocuments
-							
-							RepresentationDocument.withTransaction {
-								def criteria = RepresentationDocument.createCriteria()
-								representationsDocuments = criteria.list {
-									eq("representative", representative)
-									le("dateCreated", event.fechaFin)
-									or {
-										eq("state", RepresentationDocument.State.CANCELLED)
-										eq("state", RepresentationDocument.State.OK)
+		String url = null
+		int numRepresentatives = representatives.size()
+		log.debug("Number representatives: ${numRepresentatives}")
+		int numberOfRepresented = 0
+		int numRepresentedWithVote = 0
+
+		//Añadir a la lista de representantes los que figuren como activos en la fecha de cnacelacion
+		//del evento
+		
+		if(!representatives.isEmpty()) {
+			File representativesReportFile = mapFiles.representativesReportFile
+			representatives.each { representative ->
+				url = "${grailsApplication.config.grails.serverURL}/representative/${representative.id}"
+				int numberOfRepresentations = 1
+				RepresentationDocument.withTransaction {
+					def criteria = RepresentationDocument.createCriteria()
+					def representations = criteria.list (max: 10000, offset: 0) {
+						eq("representative", representative)
+						le("dateCreated", selectedDate)
+						or {
+							eq("state", RepresentationDocument.State.CANCELLED)
+							eq("state", RepresentationDocument.State.OK)
+						}
+						or {
+							isNull("dateCanceled")
+							gt("dateCanceled", event.fechaFin)
+						}
+					}
+					
+					
+					log.debug "representations.getClass() ${representations.getClass()}"
+					log.debug "Rendering ${representations.size()} representatives of ${representations.totalCount}"
+					numberOfRepresentations = representations.totalCount
+					log.debug("representative '${representative.id}' - numberOfRepresentations:${numberOfRepresentations}")
+				}
+				numberOfRepresented += numberOfRepresentations
+				SolicitudAcceso solicitudAcceso
+				SolicitudAcceso.withTransaction {
+					solicitudAcceso = SolicitudAcceso.findWhere(
+						estado:SolicitudAcceso.Estado.OK, usuario:representative)
+					if(!solicitudAcceso) {
+						msg = messageSource.getMessage('representativeWithoutVote',
+							[representative.id, event.id].toArray(), locale)
+						log.debug("getAccreditationsBackupForEvent - ${msg}")
+						representativesReportFile.append("${representative.id}," +
+							"${representative.nif}, ${url}, ${numberOfRepresentations}," +
+							"${Estate.WITHOUT_ACCESS_REQUEST.toString()}\n")
+						return
+					} else {//Representative has voted
+						String representativeBaseDir = "${filesDir.absolutePath}/representative_${representative.id}"
+						new File(representativeBaseDir).mkdirs()
+						File smimeFile = new File("${representativeBaseDir}/AccessRequest.p7m")
+						smimeFile.setBytes(solicitudAcceso.mensajeSMIME.contenido)
+						def voteResults
+						File representedReportFile = new File("${representativeBaseDir}/representedReport")
+						Voto.withTransaction {
+							voteResults = Voto.withCriteria {
+								createAlias("certificado", "certificado")
+								//eq("certificado.tipo", Certificado.Tipo.VOTO)
+								eq("certificado.usuario", representative)
+								eq("estado", Voto.Estado.OK)
+							}
+							if(voteResults.isEmpty()) {
+								log.error("getAccreditationsBackupForEvent - Representative ${representative.id} has no vote")
+								representativesReportFile.append("${representative.id}," +
+									"${representative.nif}, ${url}, ${numberOfRepresentations}," +
+									"${Estate.WITHOUT_VOTE.toString()}")
+							} else {
+								File voteFile = new File("${representativeBaseDir}/Vote.p7m")
+								voteFile.setBytes(voteResults.iterator().next().mensajeSMIME.contenido)
+	
+								def representationsDocuments
+								
+								RepresentationDocument.withTransaction {
+									def criteria = RepresentationDocument.createCriteria()
+									representationsDocuments = criteria.list {
+										eq("representative", representative)
+										le("dateCreated", event.fechaFin)
+										or {
+											eq("state", RepresentationDocument.State.CANCELLED)
+											eq("state", RepresentationDocument.State.OK)
+										}
+										or {
+											isNull("dateCanceled")
+											gt("dateCanceled", event.fechaFin)
+										}
 									}
-									or {
-										isNull("dateCanceled")
-										gt("dateCanceled", event.fechaFin)
-									}
-								}
-								String representedBaseDir = "${representativeBaseDir}/represented"
-								representationsDocuments.each {representationDocument ->
-									Usuario represented = representationDocument.user
-									File representationDoc = new File("${representedBaseDir}/RepDoc_${represented.id}.p7s")
-									representationDoc.setBytes(representationDocument.activationSMIME.contenido)
-									SolicitudAcceso representedAccessRequest = SolicitudAcceso.findWhere(
-										estado:SolicitudAcceso.Estado.OK, usuario:represented, eventoVotacion:event)
-									if(!representedAccessRequest) {
-										log.error("getAccreditationsBackupForEvent - Represented '${represented.id}' has no vote")
-										representedReportFile.append("${represented.id}," +
-											"${represented.nif}, ${Estate.WITHOUT_ACCESS_REQUEST.toString()}")
-									}else {
-										representedWithVote++
-										File representedAccessRequestFile = new File("${representedBaseDir}/AccessRequest_${represented.id}.p7s")
-										representedAccessRequestFile.setBytes(representedAccessRequest.mensajeSMIME.contenido)
-										representedReportFile.append("${represented.id}," +
-											"${represented.nif}, ${Estate.WITH_VOTE.toString()}")
+									String representedBaseDir = "${representativeBaseDir}/represented"
+									new File(representedBaseDir).mkdirs()
+									representationsDocuments.each {representationDocument ->
+										Usuario represented = representationDocument.user
+										File representationDoc = new File("${representedBaseDir}/RepDoc_${represented.id}.p7m")
+										representationDoc.setBytes(representationDocument.activationSMIME.contenido)
+										SolicitudAcceso representedAccessRequest = SolicitudAcceso.findWhere(
+											estado:SolicitudAcceso.Estado.OK, usuario:represented, eventoVotacion:event)
+										if(!representedAccessRequest) {
+											log.error("getAccreditationsBackupForEvent - Represented '${represented.id}' has no vote")
+											representedReportFile.append("${represented.id}," +
+												"${represented.nif}, ${Estate.WITHOUT_ACCESS_REQUEST.toString()}\n")
+										}else {
+											numRepresentedWithVote++
+											File representedAccessRequestFile = new File("${representedBaseDir}/AccessRequest_${represented.id}.p7m")
+											representedAccessRequestFile.setBytes(representedAccessRequest.mensajeSMIME.contenido)
+											representedReportFile.append("${represented.id}," +
+												"${represented.nif}, ${Estate.WITH_VOTE.toString()}\n")
+										}
 									}
 								}
 							}
@@ -151,31 +192,31 @@ class RepresentativeService {
 				}
 			}
 			
-			def metaInfMap = [eventFinishDate: DateUtils.getStringFromDate(event.fechaFin),
-				eventURl:"${grailsApplication.config.grails.serverURL}/eventoVotacion/${event.id}",
-				numberOfRepresentatives:numberOfRepresentatives, 
-				representedWithVote:representedWithVote,
-				totalNumberOfRepresented:totalNumberOfRepresented]
-				
-			
-			def eventMetaInfJSON = JSON.parse(event.metaInf)
-			
-			def metaInfJSON = metaInfMap as JSON
-			File metaInfFile = new File("${basedir}/meta.inf")
-			
-			eventMetaInfJSON.representativesReport = metaInfJSON
-			
-			event.metaInf = eventMetaInfJSON.toString()
-			Evento.withTransaction {
-				event.save()
-			}
-			metaInfFile.write(metaInfJSON.toString())
-			def ant = new AntBuilder()
-			ant.zip(destfile: baseDirZipped, basedir: basedir)
-			
-			return new Respuesta(codigoEstado:Respuesta.SC_OK, 
-				file:baseDirZipped, datos:metaInfMap)
 		}
+
+		def metaInfMap = [type:Tipo.REPRESENTATIVE_ACCREDITATIONS.toString(),
+			event:event.id,
+			date: DateUtils.getTodayDate(),
+			requestedDate: DateUtils.getStringFromDate(selectedDate),
+			eventURl:"${grailsApplication.config.grails.serverURL}/eventoVotacion/${event.id}",
+			numRepresentatives:numRepresentatives, numRepresentedWithVote:numRepresentedWithVote,
+			numberOfRepresented:numberOfRepresented]
+		def metaInfJSON = metaInfMap as JSON
+
+		def eventMetaInfJSON = JSON.parse(event.metaInf)		
+		eventMetaInfJSON.representativesReport = metaInfJSON		
+		event.metaInf = eventMetaInfJSON.toString()
+		Evento.withTransaction {
+			event.save()
+		}
+		
+		
+		metaInfFile.write(metaInfJSON.toString())
+		def ant = new AntBuilder()
+		ant.zip(destfile: zipResult, basedir: filesDir.absolutePath)
+		
+		return new Respuesta(codigoEstado:Respuesta.SC_OK,
+			file:zipResult, datos:metaInfMap)
 	}
 			
 	private Respuesta getAccreditationsBackup (Usuario representative,
@@ -207,16 +248,16 @@ class RepresentativeService {
 		def basedir = "${grailsApplication.config.SistemaVotacion.baseRutaCopiaRespaldo}" +
 			"/AccreditationsBackup/${selectedDateStr}/${zipNamePrefix}_${representative.nif}"
 		log.debug("getAccreditationsBackup - basedir: ${basedir}")
-		File baseDirZipped = new File("${basedir}.zip")
+		File zipResult = new File("${basedir}.zip")
 		File metaInfFile;
-		if(baseDirZipped.exists()) {
+		if(zipResult.exists()) {
 			 metaInfFile = new File("${basedir}/meta.inf")
 			 if(metaInfFile) {
 				 def metaInfJSON = JSON.parse(metaInfFile.text)
 				 log.debug("getAccreditationsBackup - send previous request")
 				 Map datos = [cantidad:metaInfJSON.numberOfAccreditations]
 				 return new Respuesta(codigoEstado:Respuesta.SC_OK, 
-					 file:baseDirZipped, datos:datos)
+					 file:zipResult, datos:datos)
 			 }
 		}
 		new File(basedir).mkdirs()
@@ -239,10 +280,10 @@ class RepresentativeService {
 		metaInfFile.write(metaInfJSONStr)
 		def ant = new AntBuilder()
 		ant.zip(destfile: "${basedir}.zip", basedir: basedir)
-		baseDirZipped = new File("${basedir}.zip")
-		log.debug("getAccreditationsBackup - destfile.name '${baseDirZipped.name}'")
+		zipResult = new File("${basedir}.zip")
+		log.debug("getAccreditationsBackup - destfile.name '${zipResult.name}'")
 		Map datos = [cantidad:i]
-		return new Respuesta(codigoEstado:Respuesta.SC_OK, datos:datos, file:baseDirZipped)
+		return new Respuesta(codigoEstado:Respuesta.SC_OK, datos:datos, file:zipResult)
 	}
 	
 	//{"operation":"REPRESENTATIVE_SELECTION","representativeNif":"...","representativeName":"...","UUID":"..."}
@@ -426,15 +467,15 @@ class RepresentativeService {
 		def basedir = "${grailsApplication.config.SistemaVotacion.baseRutaCopiaRespaldo}" +
 			"/RepresentativeHistoryVoting/${dateFromStr}_${dateToStr}/${zipNamePrefix}_${representative.nif}"
 		log.debug("getVotingHistoryBackup - basedir: ${basedir}")
-		File baseDirZipped = new File("${basedir}.zip")
+		File zipResult = new File("${basedir}.zip")
 		File metaInfFile;
-		if(baseDirZipped.exists()) {
+		if(zipResult.exists()) {
 			 metaInfFile = new File("${basedir}/meta.inf")
 			 if(metaInfFile) {
 				 def metaInfJSON = JSON.parse(metaInfFile.text)
-				 log.debug("============= getVotingHistoryBackup - ${baseDirZipped.name} already exists");
+				 log.debug("============= getVotingHistoryBackup - ${zipResult.name} already exists");
 				 /*Map datos = [cantidad:metaInfJSON.numberVotes]
-				 return new Respuesta(codigoEstado:Respuesta.SC_OK, file:baseDirZipped,
+				 return new Respuesta(codigoEstado:Respuesta.SC_OK, file:zipResult,
 					 datos:datos)*/
 			 }
 		}

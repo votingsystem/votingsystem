@@ -21,6 +21,7 @@ import org.sistemavotacion.util.StringUtils;
 import org.sistemavotacion.worker.TimeStampWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
+import org.sistemavotacion.worker.VotingSystemWorkerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,8 +34,9 @@ public class TimeStampLauncher implements Callable<Respuesta>,
     
     private static Logger logger = LoggerFactory.getLogger(TimeStampLauncher.class);
 
-    private static final int TIME_STAMP_WORKER = 1;
-    
+    public enum Worker implements VotingSystemWorkerType{
+        TIME_STAMP}
+
     private SMIMEMessageWrapper documentSMIME;
     private String requestNIF;
     
@@ -67,7 +69,7 @@ public class TimeStampLauncher implements Callable<Respuesta>,
         documentSMIME = signedMailGenerator.genMimeMessage(
                 requestNIF, toUser, getRequestDataJSON(), subject , null);
 
-        new TimeStampWorker(TIME_STAMP_WORKER, this, 
+        new TimeStampWorker(Worker.TIME_STAMP, this, 
                 documentSMIME.getTimeStampRequest()).execute();
         
         countDownLatch.await();
@@ -92,12 +94,11 @@ public class TimeStampLauncher implements Callable<Respuesta>,
     @Override
     public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-         " - worker: " + worker.getClass().getSimpleName() + 
-         " - workerId:" + worker.getId());
+         " - worker: " + worker);
         respuesta = new Respuesta();
         respuesta.setCodigoEstado(worker.getStatusCode());
-        switch(worker.getId()) {
-            case TIME_STAMP_WORKER:
+        switch((Worker)worker.getType()) {
+            case TIME_STAMP:
                 if(Respuesta.SC_OK != worker.getStatusCode()) {
                     String msg = "showResult - ERROR obteniendo sello de tiempo";
                     try {
@@ -122,7 +123,7 @@ public class TimeStampLauncher implements Callable<Respuesta>,
                 countDownLatch.countDown();
                 break;
             default:
-                logger.debug("*** UNKNOWN WORKER ID: '" + worker.getId() + "'");
+                logger.debug("*** UNKNOWN WORKER:" + worker.getType());
         }
     }
 

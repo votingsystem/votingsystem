@@ -25,6 +25,7 @@ import org.sistemavotacion.pdf.PdfFormHelper;
 import org.sistemavotacion.worker.InfoGetterWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
+import org.sistemavotacion.worker.VotingSystemWorkerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,8 +39,9 @@ public class PreconditionsCheckerDialog
     private static Logger logger = LoggerFactory.getLogger(
             PreconditionsCheckerDialog.class);
     
-    private static final int CHECK_ACCES_CONTROL_CERT = 0;
-    private static final int CHECK_CONTROL_CENTER_CERT = 1;
+    public enum Worker implements VotingSystemWorkerType{CHECK_ACCES_CONTROL_CERT,
+        CHECK_CONTROL_CENTER_CERT}
+    
 
     private static final Map<String, ActorConIP> actorMap = 
             new HashMap<String, ActorConIP>();
@@ -51,13 +53,14 @@ public class PreconditionsCheckerDialog
     
     private Boolean accessControlCertChecked = null;
     private Boolean controlCenterCertChecked = null;
-    
+    private final AppletFirma appletFirma;
     private String message = null;
 
     public PreconditionsCheckerDialog(Frame parent, 
-            boolean modal, Operacion operacion) {
+            boolean modal, Operacion operacion, final AppletFirma appletFirma) {
         super(parent, modal);
         frame = parent;
+        this.appletFirma = appletFirma;
         this.operacion = operacion;
         initComponents();
         setLocationRelativeTo(null);  
@@ -72,7 +75,7 @@ public class PreconditionsCheckerDialog
             public void windowClosing(WindowEvent e) {
                 logger.debug(" - window closing event received");
                 dispose();
-                AppletFirma.INSTANCIA.cancelarOperacion();
+                appletFirma.cancelarOperacion();
             }
         });
         Runnable runnable = new Runnable() {
@@ -94,9 +97,11 @@ public class PreconditionsCheckerDialog
             switch(operacion.getTipo()) {
                 case ENVIO_VOTO_SMIME:
                     boolean accessControlChecked = checkCert(operacion.getEvento().
-                            getCentroControl().getServerURL(), CHECK_CONTROL_CENTER_CERT);
+                            getCentroControl().getServerURL(), 
+                            Worker.CHECK_CONTROL_CENTER_CERT);
                     boolean controlCenterChecked = checkCert(operacion.getEvento().
-                            getControlAcceso().getServerURL(),CHECK_ACCES_CONTROL_CERT);
+                            getControlAcceso().getServerURL(), 
+                            Worker.CHECK_ACCES_CONTROL_CERT);
                     if(accessControlChecked && controlCenterChecked) {
                         preconditionsOK.set(true);
                         checkLatch.countDown();
@@ -120,7 +125,8 @@ public class PreconditionsCheckerDialog
                 case ANULAR_VOTO: 
                 case SOLICITUD_COPIA_SEGURIDAD:
                     accessControlCertChecked = checkCert(
-                            operacion.getUrlServer(), CHECK_ACCES_CONTROL_CERT);
+                            operacion.getUrlServer(), 
+                            Worker.CHECK_ACCES_CONTROL_CERT);
                     if(accessControlCertChecked) {
                         preconditionsOK.set(true);
                         checkLatch.countDown();
@@ -150,13 +156,12 @@ public class PreconditionsCheckerDialog
                     processOperation();
                 }
             });
-            dispose();
         } else {
             acceptButton.setVisible(true);
             progressLabel.setText(Contexto.INSTANCE.getString("errorLbl"));
             progressBar.setVisible(false);
             waitLabel.setText(message);
-            AppletFirma.INSTANCIA.responderCliente(
+            appletFirma.responderCliente(
                     Operacion.SC_ERROR, 
                     Contexto.INSTANCE.getString("votingPreconditionsErrorMsg", 
                     Contexto.INSTANCE.getString("errorLbl")));
@@ -171,7 +176,8 @@ public class PreconditionsCheckerDialog
                 javax.swing.SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
                         SaveReceiptDialog saveReceiptDialog = 
-                                new SaveReceiptDialog(frame, true);
+                                new SaveReceiptDialog(frame, true, appletFirma);
+                        dispose();
                         saveReceiptDialog.show(operacion.getArgs()[0]);
                     }
                 });   
@@ -180,7 +186,8 @@ public class PreconditionsCheckerDialog
                 javax.swing.SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
                         RepresentativeDataDialog representativeDialog = 
-                                new RepresentativeDataDialog(frame, true);
+                                new RepresentativeDataDialog(frame, true, appletFirma);
+                        dispose();
                         representativeDialog.show(operacion);
                     }
                 });  
@@ -189,7 +196,8 @@ public class PreconditionsCheckerDialog
                 javax.swing.SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
                         VotacionDialog votacionDialog = new VotacionDialog(
-                                    frame, true, AppletFirma.INSTANCIA);
+                                    frame, true, appletFirma);
+                        dispose();
                         votacionDialog.setVisible(true);
                     }
                 });    
@@ -209,21 +217,30 @@ public class PreconditionsCheckerDialog
             case ANULAR_VOTO: 
                 javax.swing.SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
-                        FirmaDialog firmaDialog = new FirmaDialog(frame, true, AppletFirma.INSTANCIA);
+                        FirmaDialog firmaDialog = new FirmaDialog(frame, true, appletFirma);
+                        dispose();
+                        firmaDialog.setVisible(true);
                     }
                 });
                 break;
             case SOLICITUD_COPIA_SEGURIDAD:
-                FirmaDialog firmaDialog = new FirmaDialog(frame, true, AppletFirma.INSTANCIA);
-                try {
-                    byte[] bytesPDF = PdfFormHelper.getBackupRequest(
-                            operacion.getEvento().getEventoId().toString(),
-                            operacion.getEvento().getAsunto(), 
-                            operacion.getEmailSolicitante());
-                    firmaDialog.inicializarSinDescargarPDF(bytesPDF);
-                } catch(Exception ex) {
-                    logger.error(ex.getMessage(), ex);
-                }
+                javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        try {
+                            FirmaDialog firmaDialog = new FirmaDialog(frame, true, appletFirma);
+                            byte[] bytesPDF = PdfFormHelper.getBackupRequest(
+                                    operacion.getEvento().getEventoId().toString(),
+                                    operacion.getEvento().getAsunto(), 
+                                    operacion.getEmailSolicitante());
+                            dispose();
+                            firmaDialog.inicializarSinDescargarPDF(bytesPDF);
+                        } catch(Exception ex) {
+                            logger.error(ex.getMessage(), ex);
+                        }
+                    }
+                });
+                
+
                 break;
             default:
                 logger.debug("################# UNKNOWN OPERATION -> " + 
@@ -231,15 +248,15 @@ public class PreconditionsCheckerDialog
         }
     }
      
-    private boolean checkCert(String serverURL, Integer operationId) throws Exception {
+    private boolean checkCert(String serverURL, Worker worker) throws Exception {
         logger.debug(" - checkCert - serverURL: " + serverURL 
-                + " - operationId: " + operationId);
+                + " - worker: " + worker);
         if(serverURL == null) throw new Exception("Missing cert url");
         ActorConIP actorConIp = actorMap.get(serverURL);
         if(actorConIp == null) {
             if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
             String serverInfoURL = serverURL + SERVER_INFO_URL_SUFIX;
-            new InfoGetterWorker(operationId, serverInfoURL, null, this).execute();
+            new InfoGetterWorker(worker, serverInfoURL, null, this).execute();
             return false;
         } else return true;
     }
@@ -333,7 +350,7 @@ public class PreconditionsCheckerDialog
             logger.debug(" ------ System.exit(0) ------ ");
             System.exit(0);
         }
-        AppletFirma.INSTANCIA.cancelarOperacion();
+        appletFirma.cancelarOperacion();
     }//GEN-LAST:event_acceptButtonActionPerformed
 
 
@@ -361,11 +378,10 @@ public class PreconditionsCheckerDialog
     @Override
     public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-                " - worker: " + worker.getClass().getSimpleName() + 
-                " - workerId:" + worker.getId());
+                " - worker: " + worker);
         InfoGetterWorker infoWorker = null;
         try {
-            switch(worker.getId()) {
+            switch((Worker)worker.getType()) {
                 case CHECK_ACCES_CONTROL_CERT:
                     infoWorker = (InfoGetterWorker)worker;
                     if(Respuesta.SC_OK == worker.getStatusCode()) {

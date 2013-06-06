@@ -5,6 +5,7 @@ import com.itextpdf.text.pdf.PdfPKCS7;
 import com.itextpdf.text.pdf.PdfReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
@@ -106,4 +107,16 @@ public class SignedFile {
         if(name.toLowerCase().endsWith(".pdf")) return true;
         else return false;
     }
+    
+    public byte[] getFileBytes() {
+        return signedFileBytes;
+    }
+    
+    public File getFile() throws Exception {
+        File file = File.createTempFile("signedFile", ".votingSystem");
+        file.deleteOnExit();
+        FileUtils.copyStreamToFile(new ByteArrayInputStream(signedFileBytes), file);
+        return file;
+    }
+        
 }

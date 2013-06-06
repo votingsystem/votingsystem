@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.sistemavotacion.worker.AccessRequestWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
+import org.sistemavotacion.worker.VotingSystemWorkerType;
 
 /**
 * @author jgzornoza
@@ -29,7 +30,7 @@ public class AccessRequestLauncher implements Callable<Respuesta>,
     
     private static Logger logger = LoggerFactory.getLogger(AccessRequestLauncher.class);
 
-    private static final int ACCESS_REQUEST_WORKER = 0;
+    public enum Worker implements VotingSystemWorkerType{ACCESS_REQUEST}
     
     private Respuesta respuesta;
     private Evento evento;
@@ -75,7 +76,7 @@ public class AccessRequestLauncher implements Callable<Respuesta>,
         
         X509Certificate accesRequestCert = ContextoPruebas.INSTANCE.
             getAccessControl().getCertificate();
-        new AccessRequestWorker(ACCESS_REQUEST_WORKER, 
+        new AccessRequestWorker(Worker.ACCESS_REQUEST, 
                     smimeMessage, evento, accesRequestCert, this).execute();
 
         countDownLatch.await();
@@ -86,11 +87,10 @@ public class AccessRequestLauncher implements Callable<Respuesta>,
 
     @Override public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-                " - worker: " + worker.getClass().getSimpleName() + 
-                " - workerId:" + worker.getId());
+                " - worker: " + worker.getType());
         respuesta = worker.getRespuesta();
-        switch(worker.getId()) {
-            case ACCESS_REQUEST_WORKER:
+        switch((Worker)worker.getType()) {
+            case ACCESS_REQUEST:
                 if (Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
                         wrapperClient = ((AccessRequestWorker)worker).
@@ -111,7 +111,7 @@ public class AccessRequestLauncher implements Callable<Respuesta>,
                 countDownLatch.countDown();
                 break;                    
             default:
-                logger.debug("*** UNKNOWN WORKER ID: '" + worker.getId() + "'");
+                logger.debug("*** UNKNOWN WORKER:" + worker.getType());
         }
     }
         

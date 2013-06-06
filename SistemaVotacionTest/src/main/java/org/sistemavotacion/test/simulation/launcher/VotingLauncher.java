@@ -2,6 +2,7 @@ package org.sistemavotacion.test.simulation.launcher;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -21,6 +22,7 @@ import org.sistemavotacion.worker.AccessRequestWorker;
 import org.sistemavotacion.worker.SMIMESignedSenderWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
+import org.sistemavotacion.worker.VotingSystemWorkerType;
 
 /**
 * @author jgzornoza
@@ -29,9 +31,9 @@ import org.sistemavotacion.worker.VotingSystemWorkerListener;
 public class VotingLauncher implements Callable<Respuesta>, VotingSystemWorkerListener {
     
     private static Logger logger = LoggerFactory.getLogger(VotingLauncher.class);
-
-    private static final int ACCESS_REQUEST_WORKER = 0;
-    private static final int VOTING_WORKER         = 1;
+        
+    public enum Worker implements VotingSystemWorkerType{
+        ACCESS_REQUEST, VOTING}
     
     private Respuesta respuesta;
     private Evento evento;
@@ -48,11 +50,7 @@ public class VotingLauncher implements Callable<Respuesta>, VotingSystemWorkerLi
     
     @Override public Respuesta call() {
         try {
-            File mockDnieFile = new File(Contexto.getUserDirPath(nifFrom,
-                    ContextoPruebas.DEFAULTS.APPDIR));
-            byte[] mockDnieBytes = FileUtils.getBytesFromFile(mockDnieFile);
-            logger.info("userID: " + nifFrom + " - mockDnieFile: " + 
-                    mockDnieFile.getAbsolutePath());
+            KeyStore mockDnie = ContextoPruebas.INSTANCE.crearMockDNIe(nifFrom);
             String asuntoMensaje = ContextoPruebas.INSTANCE.getString("voteMsgSubject") + 
                     evento.getEventoId();
 
@@ -63,8 +61,9 @@ public class VotingLauncher implements Callable<Respuesta>, VotingSystemWorkerLi
                     "_usu" + nifFrom + ".json");
             FileUtils.copyStreamToFile(new ByteArrayInputStream(
                     anuladorVotoStr.getBytes()), anuladorVoto);
-            SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnieBytes, 
-                    ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS, 
+            
+            SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
+                    mockDnie, ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS, 
                     ContextoPruebas.PASSWORD.toCharArray(),
                     ContextoPruebas.DNIe_SIGN_MECHANISM);
             
@@ -77,7 +76,7 @@ public class VotingLauncher implements Callable<Respuesta>, VotingSystemWorkerLi
             
             X509Certificate destinationCert = ContextoPruebas.INSTANCE.
                         getAccessControl().getCertificate();            
-            new AccessRequestWorker(ACCESS_REQUEST_WORKER, 
+            new AccessRequestWorker(Worker.ACCESS_REQUEST, 
                     smimeMessage, evento, destinationCert, this).execute();
             
             countDownLatch.await();
@@ -92,12 +91,11 @@ public class VotingLauncher implements Callable<Respuesta>, VotingSystemWorkerLi
 
     @Override public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-                " - worker: " + worker.getClass().getSimpleName() + 
-                " - workerId:" + worker.getId());
+                " - worker: " + worker);
         respuesta = worker.getRespuesta();
         String msg = null;
-        switch(worker.getId()) {
-            case ACCESS_REQUEST_WORKER:
+        switch((Worker)worker.getType()) {
+            case ACCESS_REQUEST:
                 if (Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
                         wrapperClient = ((AccessRequestWorker)worker).
@@ -110,7 +108,7 @@ public class VotingLauncher implements Callable<Respuesta>, VotingSystemWorkerLi
                                 votoJSON, subject, null);
                         String urlVoteService = ContextoPruebas.getURLVoto(
                             evento.getCentroControl().getServerURL()); 
-                        new SMIMESignedSenderWorker(VOTING_WORKER, 
+                        new SMIMESignedSenderWorker(Worker.VOTING, 
                                 smimeMessage, urlVoteService, wrapperClient.
                                 getKeyPair(), null, this).execute();
                         return;
@@ -119,9 +117,9 @@ public class VotingLauncher implements Callable<Respuesta>, VotingSystemWorkerLi
                         respuesta.appendErrorMessage(ex.getMessage());
                     }
                 }
-                respuesta.setData("### ERROR - ACCESS_REQUEST_WORKER from: " + nifFrom);
+                respuesta.setData("### ERROR - ACCESS_REQUEST from: " + nifFrom);
                 break;                     
-            case VOTING_WORKER:
+            case VOTING:
                 if (Respuesta.SC_OK == worker.getStatusCode()) {  
                     try {
                         SMIMEMessageWrapper validatedVote = respuesta.getSmimeMessage();
@@ -134,10 +132,10 @@ public class VotingLauncher implements Callable<Respuesta>, VotingSystemWorkerLi
                         respuesta.appendErrorMessage(ex.getMessage());
                     }
                 }
-                respuesta.setData("### ERROR - VOTING_WORKER from: " + nifFrom);
+                respuesta.setData("### ERROR - VOTING from: " + nifFrom);
                 break;
             default:
-                logger.debug("*** UNKNOWN WORKER ID: '" + worker.getId() + "'");
+                logger.debug("*** UNKNOWN WORKER: " + worker);
         }
         countDownLatch.countDown();
     }

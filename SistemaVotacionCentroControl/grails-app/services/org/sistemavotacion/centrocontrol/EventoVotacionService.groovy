@@ -226,7 +226,7 @@ class EventoVotacionService {
 			byte[] certChainBytes
 			EventoVotacion.withTransaction {
 				evento = EventoVotacion.findWhere(
-					eventoVotacionId:mensajeJSON.eventId,
+					eventoVotacionId:mensajeJSON.eventId?.toString(),
 					estado:EventoVotacion.Estado.ACTIVO)
 				certChainBytes = evento?.cadenaCertificacionControlAcceso
 			}

@@ -42,38 +42,39 @@ class SolicitudCopiaController {
 				PdfReader reader = new PdfReader(documento.pdf);
 				AcroFields form = reader.getAcroFields();
 				String eventoId = form.getField("eventoId");
-				if(!eventoId) {
-					response.status = Respuesta.SC_ERROR_PETICION
-					render message(code: 'backupRequestEventWithoutIdErrorMsg')
+				String msg = null
+				
+				def evento
+				if(eventoId) {
+					Evento.withTransaction {
+						evento = Evento.get(new Long(eventoId))
+					}
+				} else msg = message(code: 'backupRequestEventWithoutIdErrorMsg')
+
+				if(!evento)
+					msg = message(code:'backupRequestEventIdErrorMsg', [eventoId])
+				if(!evento.copiaSeguridadDisponible) 
+					msg = message(code:'eventWithoutBackup', args:[evento.asunto])
+				String asunto = form.getField("asunto");
+				String email = form.getField("email");
+				if(!email) 
+					msg =  message(code:'backupRequestEmailMissingErrorMsg')
+				
+				if(msg) {
+					documento.estado = Documento.Estado.SOLICITUD_COPIA_ERROR 
+				} else documento.estado = Documento.Estado.SOLICITUD_COPIA 
+			
+				Documento.withTransaction {
+					documento.evento = evento
+					documento.save(flush:true)
+				}
+				if(msg) {
+					params.respuesta = new Respuesta(
+						codigoEstado:Respuesta.SC_ERROR_PETICION,
+						mensaje:msg)
 					return false
 				}
 				
-				def evento
-				Evento.withTransaction {
-					evento = Evento.get(new Long(eventoId))
-				}
-				if(!evento) {
-					response.status = Respuesta.SC_ERROR_PETICION
-					render message(code:'backupRequestEventIdErrorMsg', [eventoId])
-					return false
-				}
-				if(!evento.copiaSeguridadDisponible) {
-					response.status = Respuesta.SC_ERROR_PETICION
-					render message(code:'eventWithoutBackup', [evento.asunto])
-					return false
-				}
-				String asunto = form.getField("asunto");
-				String email = form.getField("email");
-				if(!email) {
-					response.status = Respuesta.SC_ERROR_PETICION
-					render  message(code:'backupRequestEmailMissingErrorMsg')
-					return false
-				}
-				Documento.withTransaction {
-					documento.evento = evento
-					documento.estado = Documento.Estado.SOLICITUD_COPIA
-					documento.save(flush:true)
-				}
 				log.debug "backup request - eventoId: ${eventoId} - asunto: ${asunto} - email: ${email}"
 				Respuesta respuestaGeneracionBackup = null
 				if(params.sync && Environment.DEVELOPMENT.equals(Environment.current)) {
@@ -92,9 +93,8 @@ class SolicitudCopiaController {
 						flash.forwarded = Boolean.TRUE
 						forward action: "download"
 					} else {
-						log.error("TEST - error generating backup");
-						response.status = Respuesta.SC_ERROR
-						render "ERROR"
+						log.error("DEVELOPMENT - error generating backup");
+						params.respuesta = respuestaGeneracionBackup
 						return false
 					} 
 				} else {

@@ -41,6 +41,7 @@ public class VotingSimulationData extends SimulationData {
         setFinish(simulData.getFinish());
         setMaxPendingResponses(simulData.getMaxPendingResponses());
         setMessage(simulData.getMessage());
+        setBackupRequestEmail(simulData.getBackupRequestEmail());
         setNumHoursProjected(simulData.getNumHoursProjected());
         setNumMinutesProjected(simulData.getNumMinutesProjected());
         setNumRequestsProjected(simulData.getNumRequestsProjected());

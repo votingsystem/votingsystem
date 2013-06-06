@@ -27,6 +27,7 @@ import org.sistemavotacion.worker.DocumentSenderWorker;
 import org.sistemavotacion.worker.InfoGetterWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
+import org.sistemavotacion.worker.VotingSystemWorkerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,10 +39,9 @@ public class MainFrame extends JFrame  implements KeyListener,
         FocusListener, VotingSystemWorkerListener {
     
     private static Logger logger = LoggerFactory.getLogger(MainFrame.class);
-
-    private static final int ACCESS_CONTROL_GETTER_WORKER          = 0;
-    private static final int CONTROL_CENTER_GETTER_WORKER          = 1;
-    private static final int CA_CERT_INITIALIZER                   = 2;
+    
+    public enum Worker implements VotingSystemWorkerType{
+        ACCESS_CONTROL_GETTER, CONTROL_CENTER_GETTER, CA_CERT_INITIALIZER}
 
     public enum Estado {CONECTADO_CONTROL_ACCESO , ERROR_CONEXION_CONTROL_ACCESO,
         DESCONECTADO, CONECTANDO;}
@@ -369,7 +369,7 @@ public class MainFrame extends JFrame  implements KeyListener,
         String urlServidor = StringUtils.prepararURL(controlAccesoTextField.getText());
         controlAccesoTextField.setText(urlServidor);
         String urlInfoServidor = ContextoPruebas.getURLInfoServidor(urlServidor);
-        tareaEnEjecucion = new InfoGetterWorker(ACCESS_CONTROL_GETTER_WORKER,
+        tareaEnEjecucion = new InfoGetterWorker(Worker.ACCESS_CONTROL_GETTER,
                 urlInfoServidor, null,this);
         tareaEnEjecucion.execute();
     }
@@ -377,7 +377,7 @@ public class MainFrame extends JFrame  implements KeyListener,
     public void cargarCentroControl(String urlCentroControl){
         String urlServidor = StringUtils.prepararURL(urlCentroControl);
         String urlInfoServidor = ContextoPruebas.getURLInfoServidor(urlServidor);
-        tareaEnEjecucion = new InfoGetterWorker(CONTROL_CENTER_GETTER_WORKER,
+        tareaEnEjecucion = new InfoGetterWorker(Worker.CONTROL_CENTER_GETTER,
                 urlInfoServidor, null, this);
         tareaEnEjecucion.execute();
         controlAccesoTextField.setText(controlAccesoTextField.getText().trim());
@@ -529,10 +529,9 @@ public class MainFrame extends JFrame  implements KeyListener,
     @Override
     public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-                " - worker: " + worker.getClass().getSimpleName() + 
-                " - workerId:" + worker.getId());
-        switch(worker.getId()) {
-            case ACCESS_CONTROL_GETTER_WORKER:
+                " - worker: " + worker.getType());
+        switch((Worker)worker.getType()) {
+            case ACCESS_CONTROL_GETTER:
                 estado = Estado.DESCONECTADO;
                 infoServidorButton.setIcon(null);
                 infoServidorButton.setText("Conectar");
@@ -567,7 +566,7 @@ public class MainFrame extends JFrame  implements KeyListener,
                         getClass().getResource("/images/loading.gif")));
                         infoServidorButton.setText("Añadiendo Autoridad Certificadora");
                         tareaEnEjecucion = new DocumentSenderWorker(
-                                CA_CERT_INITIALIZER, caPemCertificateBytes, null,
+                                Worker.CA_CERT_INITIALIZER, caPemCertificateBytes, null,
                                 urlAnyadirCertificadoCA, this);
                         tareaEnEjecucion.execute(); 
                     } catch(Exception ex) {
@@ -581,7 +580,7 @@ public class MainFrame extends JFrame  implements KeyListener,
                     mostrarMensajeUsuario(mensaje);
                 }
                 break;
-            case CONTROL_CENTER_GETTER_WORKER:
+            case CONTROL_CENTER_GETTER:
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
                         ActorConIP actorConIP = ActorConIP.parse(worker.getMessage());
@@ -590,7 +589,7 @@ public class MainFrame extends JFrame  implements KeyListener,
                             return;
                         }
                         mostrarMensajeUsuario(null);
-                        ContextoPruebas.INSTANCE.setCentroControl(actorConIP);
+                        ContextoPruebas.INSTANCE.setControlCenter(actorConIP);
                     } catch(Exception ex) {
                         String mensaje = "Error Cargando centro Control <br/>" + ex.getMessage();
                         mostrarMensajeUsuario(mensaje);

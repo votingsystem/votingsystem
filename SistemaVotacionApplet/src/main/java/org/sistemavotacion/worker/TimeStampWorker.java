@@ -32,21 +32,22 @@ public class TimeStampWorker extends SwingWorker<Respuesta, String>
     
     private static Logger logger = LoggerFactory.getLogger(TimeStampWorker.class);
 
-    private Integer id;
+    private VotingSystemWorkerType workerType;
     private String urlTimeStampServer;
     private VotingSystemWorkerListener workerListener;
     private TimeStampToken timeStampToken = null;
     private TimeStampRequest timeStampRequest = null;
     private byte[] bytesToken = null;
-    private Respuesta respuesta = null;
+    private Respuesta respuesta  = new Respuesta(Respuesta.SC_ERROR);
         
     private X509Certificate timeStampCert = null;
     private SignerInformationVerifier timeStampSignerInfoVerifier;
     
-    public TimeStampWorker(Integer id, VotingSystemWorkerListener workerListener, 
+    public TimeStampWorker(VotingSystemWorkerType workerType, 
+            VotingSystemWorkerListener workerListener, 
             TimeStampRequest timeStampRequest) throws OperatorCreationException, 
             Exception {
-        this.id = id;
+        this.workerType = workerType;
         this.urlTimeStampServer = Contexto.INSTANCE.getURLTimeStampServer();
         this.workerListener = workerListener;
         this.timeStampCert = Contexto.INSTANCE.getTimeStampServerCert();
@@ -122,10 +123,6 @@ public class TimeStampWorker extends SwingWorker<Respuesta, String>
         else return respuesta.getMensaje();
     }
 
-    @Override public int getId() {
-        return this.id;
-    }
-
     @Override  public int getStatusCode() {
         if(respuesta == null) return Respuesta.SC_ERROR;
         else return respuesta.getCodigoEstado();
@@ -134,5 +131,15 @@ public class TimeStampWorker extends SwingWorker<Respuesta, String>
     @Override public Respuesta getRespuesta() {
         return respuesta;
     }
+        
+    @Override public VotingSystemWorkerType getType() {
+        return workerType;
+    }
 
+    @Override public String getErrorMessage() {
+        if(workerType != null) return "### ERROR - " + workerType + " - msg: " 
+                + respuesta.getMensaje(); 
+        else return "### ERROR - msg: " + respuesta.getMensaje();  
+    }
+    
 }

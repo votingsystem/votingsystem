@@ -344,7 +344,6 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
     }
     
     private String checkByteArraySize (byte[] signedFileBytes) {
-        logger.debug("checkByteArraySize");
         String result = null;
         if (signedFileBytes.length > Contexto.SIGNED_MAX_FILE_SIZE) {
             result = AppletHerramienta.getString("fileSizeExceededMsg", 

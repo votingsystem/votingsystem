@@ -61,7 +61,7 @@ public enum ContextoPruebas {
     private X500PrivateCredential rootCAPrivateCredential;
     private PrivateKey rootCAPrivateKey;
     private X509Certificate rootCACert;
-    private ActorConIP centroControl;
+    private ActorConIP controlCenter;
     private ActorConIP accessControl;
     
     private Evento evento = null;
@@ -213,19 +213,19 @@ public enum ContextoPruebas {
     }
            
     /**
-     * @return the centroControl
+     * @return the controlCenter
      */
-    public ActorConIP getCentroControl() {
-        return centroControl;
+    public ActorConIP getControlCenter() {
+        return controlCenter;
     }
 
     /**
-     * @param aCentroControl the centroControl to set
+     * @param aControlCenter the controlCenter to set
      */
-    public void setCentroControl(ActorConIP aCentroControl) {
-        this.centroControl = aCentroControl;
+    public void setControlCenter(ActorConIP aControlCenter) {
+        this.controlCenter = aControlCenter;
         if(accessControl == null) return;
-        accessControl.getCentrosDeControl().add(centroControl);
+        accessControl.getCentrosDeControl().add(controlCenter);
     }
 
     /**
@@ -312,13 +312,20 @@ public enum ContextoPruebas {
         return serverURL + "certificado/addCertificateAuthority";
     }
     
-    public String getRootCAServiceURL() {
+    public String getAccessControlRootCAServiceURL() {
         if(accessControl == null) return null;
         String serverURL = accessControl.getServerURL();
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         return serverURL + "certificado/addCertificateAuthority";
     }
 
+    public String getControlCenterRootCAServiceURL() {
+        if(controlCenter == null) return null;
+        String serverURL = controlCenter.getServerURL();
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "certificado/addCertificateAuthority";
+    }
+    
     public static String getURLAsociarActorConIP (String serverURL) {
         while(serverURL.endsWith("/")) {
             serverURL = serverURL.substring(0, serverURL.length() - 1);

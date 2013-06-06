@@ -28,7 +28,7 @@ public class Documento implements java.io.Serializable {
 	 
 	 public enum Estado {MANIFIESTO, MANIFIESTO_VALIDADO, FIRMA_DE_MANIFIESTO, 
 		 FIRMA_MANIFIESTO_VALIDADA, CON_ERRORES, MODIFICADO, SOLICITUD_COPIA,
-		 VALIDADO}
+		 SOLICITUD_COPIA_ERROR, VALIDADO}
 	 
 	 @Id @GeneratedValue(strategy=IDENTITY)
 	 @Column(name="id", unique=true, nullable=false)

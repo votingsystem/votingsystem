@@ -23,6 +23,7 @@ import org.sistemavotacion.util.StringUtils;
 import org.sistemavotacion.worker.RepresentativeRequestWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
+import org.sistemavotacion.worker.VotingSystemWorkerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +36,8 @@ public class RepresentativeRequestLauncher implements Callable<Respuesta>,
     
     private static Logger logger = LoggerFactory.getLogger(RepresentativeRequestLauncher.class);
 
-    private static final int REPRESENTATIVE_REQUEST_WORKER = 0;
+    public enum Worker implements VotingSystemWorkerType{
+        REPRESENTATIVE_REQUEST}
     
     private final CountDownLatch countDownLatch = new CountDownLatch(1);
 
@@ -82,7 +84,7 @@ public class RepresentativeRequestLauncher implements Callable<Respuesta>,
         
         String urlService = ContextoPruebas.INSTANCE.getUrlRepresentativeService();
         
-        new RepresentativeRequestWorker(REPRESENTATIVE_REQUEST_WORKER, smimeMessage,
+        new RepresentativeRequestWorker(Worker.REPRESENTATIVE_REQUEST, smimeMessage,
                 selectedImage, urlService, ContextoPruebas.INSTANCE.
                 getAccessControl().getCertificate(),this).execute();
                
@@ -111,22 +113,21 @@ public class RepresentativeRequestLauncher implements Callable<Respuesta>,
     @Override
     public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-        " - representativeNIF: " + representativeNIF +
-        " - worker: " + worker.getClass().getSimpleName());
+        " - representativeNIF: " + representativeNIF + " - worker: " + worker);
         respuesta = worker.getRespuesta();
         String msg = null;
-        switch(worker.getId()) {
-            case REPRESENTATIVE_REQUEST_WORKER:
+        switch((Worker)worker.getType()) {
+            case REPRESENTATIVE_REQUEST:
                 if (Respuesta.SC_OK == worker.getStatusCode()) {
                     respuesta.setMensaje(representativeNIF);
                 } else {
-                    msg = "### ERROR - REPRESENTATIVE_REQUEST_WORKER + " + 
+                    msg = "### ERROR - " + worker.getType() + " - msg: " + 
                         worker.getMessage();
                     respuesta.appendErrorMessage(msg);
                 } 
                 break;
             default:
-                logger.debug("*** UNKNOWN WORKER ID: '" + worker.getId() + "'");
+                logger.debug("*** UNKNOWN WORKER: " + worker);
         }
         countDownLatch.countDown();
     }

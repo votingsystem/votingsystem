@@ -35,18 +35,19 @@ public class AccessRequestWorker extends SwingWorker<Respuesta, String>
     private static Logger logger = LoggerFactory.getLogger(
             AccessRequestWorker.class);
 
+    private VotingSystemWorkerType workerType;
     private Evento evento;   
     private VotingSystemWorkerListener workerListener;
     private SMIMEMessageWrapper smimeMessage;
     private PKCS10WrapperClient pkcs10WrapperClient;
-    private Integer id = null;
-    private Respuesta respuesta = null;
+    private Respuesta respuesta  = new Respuesta(Respuesta.SC_ERROR);
     private X509Certificate destinationCert = null;
-    
-    public AccessRequestWorker(Integer id, SMIMEMessageWrapper smimeMessage,
+ 
+    public AccessRequestWorker(VotingSystemWorkerType workerType, 
+            SMIMEMessageWrapper smimeMessage,
             Evento evento, X509Certificate destinationCert, 
             VotingSystemWorkerListener workerListener) throws Exception {
-        this.id = id;
+        this.workerType = workerType;
         this.smimeMessage = smimeMessage;
         this.workerListener = workerListener;
         this.evento = evento;
@@ -128,11 +129,13 @@ public class AccessRequestWorker extends SwingWorker<Respuesta, String>
         if(respuesta != null) return respuesta.getMensaje();
         else return null;
     }
-
-    @Override public int getId() {
-        return this.id;
+    
+    @Override public String getErrorMessage() {
+        if(workerType != null) return "### ERROR - " + workerType + " - msg: " 
+                + respuesta.getMensaje(); 
+        else return "### ERROR - msg: " + respuesta.getMensaje();  
     }
-
+    
     @Override  public int getStatusCode() {
         if(respuesta == null) return Respuesta.SC_ERROR;
         else return respuesta.getCodigoEstado();
@@ -140,6 +143,11 @@ public class AccessRequestWorker extends SwingWorker<Respuesta, String>
     
     @Override public Respuesta getRespuesta() {
         return respuesta;
+    }
+
+    
+    @Override public VotingSystemWorkerType getType() {
+        return workerType;
     }
 
 }

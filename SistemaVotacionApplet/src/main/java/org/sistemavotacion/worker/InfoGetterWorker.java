@@ -16,20 +16,21 @@ public class InfoGetterWorker extends SwingWorker<Respuesta, String>
     
     private static Logger logger = LoggerFactory.getLogger(InfoGetterWorker.class);
 
-    String urlDocument;
-    VotingSystemWorkerListener workerListener;
-    private Integer id = null;
-    private Respuesta respuesta = null;
+    private VotingSystemWorkerType workerType;
+    private String urlDocument;
+    private VotingSystemWorkerListener workerListener;
+    private Respuesta respuesta  = new Respuesta(Respuesta.SC_ERROR);
     private String contentType = null;
-
-    public InfoGetterWorker(Integer id, String urlDocument, String contentType,
+    
+    public InfoGetterWorker(VotingSystemWorkerType workerType, 
+            String urlDocument, String contentType,
             VotingSystemWorkerListener workerListener) {
-        this.id = id;
+        this.workerType = workerType;
         this.urlDocument = urlDocument;
         this.workerListener = workerListener;
         this.contentType = contentType;
     }
-
+    
     @Override protected void done() {//on the EDT
         try {
             respuesta = get();
@@ -55,9 +56,11 @@ public class InfoGetterWorker extends SwingWorker<Respuesta, String>
         if(respuesta == null) return null;
         else return respuesta.getMensaje();
     }
-
-    @Override public int getId() {
-        return this.id;
+       
+    @Override public String getErrorMessage() {
+        if(workerType != null) return "### ERROR - " + workerType + " - msg: " 
+                + respuesta.getMensaje(); 
+        else return "### ERROR - msg: " + respuesta.getMensaje();  
     }
 
     @Override  public int getStatusCode() {
@@ -67,6 +70,10 @@ public class InfoGetterWorker extends SwingWorker<Respuesta, String>
     
     @Override public Respuesta getRespuesta() {
         return respuesta;
+    }
+
+    @Override public VotingSystemWorkerType getType() {
+        return workerType;
     }
     
 }

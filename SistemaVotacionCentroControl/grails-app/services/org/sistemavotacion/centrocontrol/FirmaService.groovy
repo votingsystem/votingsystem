@@ -3,6 +3,7 @@ package org.sistemavotacion.centrocontrol
 import org.bouncycastle.cms.SignerInformationVerifier
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder
 import org.sistemavotacion.centrocontrol.modelo.*
+
 import java.security.cert.CertPathValidatorException
 import java.security.cert.PKIXCertPathValidatorResult
 import java.security.cert.TrustAnchor
@@ -78,6 +79,59 @@ class FirmaService {
 		def rutaCadenaCertificacion = getAbsolutePath("${grailsApplication.config.SistemaVotacion.rutaCadenaCertificacion}")
 		new File(rutaCadenaCertificacion).setBytes(pemCertsArray)
 		inicializarAutoridadesCertificadoras();
+	}
+	
+	public Respuesta deleteTestCerts () {
+		log.debug(" - deleteTestCerts - ")
+		def certificadosTest = null
+		Certificado.withTransaction {
+			certificadosTest = Certificado.findAllWhere(tipo:Certificado.Tipo.AUTORIDAD_CERTIFICADORA_TEST);
+			certificadosTest.each {
+				it.delete()
+			}
+		}
+		return new Respuesta(codigoEstado:Respuesta.SC_OK)
+	}
+	
+	/*
+	 * Método para poder añadir certificados de confianza en las pruebas de carga.
+	 * El procedimiento para añadir una autoridad certificadora consiste en
+	 * añadir el certificado en formato pem en el directorio ./WEB-INF/cms
+	 */
+	public Respuesta addCertificateAuthority (byte[] caPEM, Locale locale)  {
+		log.debug("addCertificateAuthority");
+		if(!caPEM) return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+			mensaje: messageSource.getMessage('error.nullCertificate', null, locale))
+		try {
+			Collection<X509Certificate> certX509CertCollection = CertUtil.fromPEMToX509CertCollection(caPEM)
+			for(X509Certificate cert: certX509CertCollection) {
+				log.debug(" ------- addCertificateAuthority - adding cert: ${cert.getSubjectDN()}" );
+				Certificado certificado = null
+				Certificado.withTransaction {
+					certificado = Certificado.findByNumeroSerie(
+						cert?.getSerialNumber()?.longValue())
+					if(!certificado) {
+						boolean esRaiz = CertUtil.isSelfSigned(cert)
+						certificado = new Certificado(esRaiz:esRaiz,
+							tipo:Certificado.Tipo.AUTORIDAD_CERTIFICADORA_TEST,
+							estado:Certificado.Estado.OK,
+							contenido:cert.getEncoded(),
+							numeroSerie:cert.getSerialNumber()?.longValue(),
+							validoDesde:cert.getNotBefore(),
+							validoHasta:cert.getNotAfter())
+						certificado.save()
+						trustedCertsHashMap.put(cert?.getSerialNumber()?.longValue(), certificado)
+					}
+				}
+				trustedCerts.addAll(certX509CertCollection)
+				log.debug "Almacenada Autoridad Certificadora de pruebas con id:'${certificado?.id}'"
+			}
+			return new Respuesta(codigoEstado:Respuesta.SC_OK,
+				mensaje:messageSource.getMessage('cert.newCACertMsg', null, locale))
+		} catch(Exception ex) {
+			log.error (ex.getMessage(), ex)
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:ex.getMessage())
+		}
 	}
 	
 	def inicializarAutoridadesCertificadoras() {

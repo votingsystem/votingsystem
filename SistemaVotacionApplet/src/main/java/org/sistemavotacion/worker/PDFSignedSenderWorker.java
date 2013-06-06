@@ -1,8 +1,6 @@
 package org.sistemavotacion.worker;
 
-import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.pdf.AcroFields;
 import com.itextpdf.text.pdf.PdfDate;
 import com.itextpdf.text.pdf.PdfDictionary;
 import com.itextpdf.text.pdf.PdfName;
@@ -31,7 +29,6 @@ import static org.sistemavotacion.Contexto.*;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import javax.mail.internet.MimeBodyPart;
 import javax.swing.SwingWorker;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -66,10 +63,9 @@ public class PDFSignedSenderWorker extends SwingWorker<Respuesta, String>
         implements VotingSystemWorker {
     
     private static Logger logger = LoggerFactory.getLogger(PDFSignedSenderWorker.class);
-
     
-    private Integer id;
-    private Respuesta respuesta = null;    
+    private VotingSystemWorkerType workerType;
+    private Respuesta respuesta  = new Respuesta(Respuesta.SC_ERROR);
     private String urlTimeStampServer;
     private String urlToSendDocument;
     private String location;
@@ -85,14 +81,14 @@ public class PDFSignedSenderWorker extends SwingWorker<Respuesta, String>
     private Certificate[] signerCertChain;
     private VotingSystemCMSSignedGenerator systemSignedGenerator = null;
     
-    public PDFSignedSenderWorker(Integer id, String urlToSendDocument,
-            String reason, String location, char[] password, PdfReader reader, 
-            PrivateKey signerPrivatekey, 
+    public PDFSignedSenderWorker(VotingSystemWorkerType workerType, 
+            String urlToSendDocument, String reason, String location, 
+            char[] password, PdfReader reader, PrivateKey signerPrivatekey, 
             Certificate[] signerCertChain,  X509Certificate destinationCert, 
             VotingSystemWorkerListener workerListener)
             throws NoSuchAlgorithmException, NoSuchAlgorithmException, 
             NoSuchAlgorithmException, NoSuchProviderException, IOException, Exception {
-        this.id = id;
+        this.workerType = workerType;
         this.urlToSendDocument = urlToSendDocument;
         this.signerPrivatekey = signerPrivatekey;
         this.signerCertChain = signerCertChain;
@@ -107,6 +103,7 @@ public class PDFSignedSenderWorker extends SwingWorker<Respuesta, String>
         this.signedFile = File.createTempFile("signedPDF", ".pdf");
         signedFile.deleteOnExit();
     }
+
     
     @Override public void process(List<String> messages) {
         workerListener.processVotingSystemWorkerMsg(messages);
@@ -260,13 +257,15 @@ public class PDFSignedSenderWorker extends SwingWorker<Respuesta, String>
         return signedFile;
     }
 
+    @Override public String getErrorMessage() {
+        if(workerType != null) return "### ERROR - " + workerType + " - msg: " 
+                + respuesta.getMensaje(); 
+        else return "### ERROR - msg: " + respuesta.getMensaje();  
+    }
+    
    @Override public String getMessage() {
         if(respuesta == null) return null;
         else return respuesta.getMensaje();
-    }
-
-    @Override public int getId() {
-        return this.id;
     }
 
     @Override  public int getStatusCode() {
@@ -277,4 +276,9 @@ public class PDFSignedSenderWorker extends SwingWorker<Respuesta, String>
     @Override public Respuesta getRespuesta() {
         return respuesta;
     }
+        
+    @Override public VotingSystemWorkerType getType() {
+        return workerType;
+    }
+    
 }

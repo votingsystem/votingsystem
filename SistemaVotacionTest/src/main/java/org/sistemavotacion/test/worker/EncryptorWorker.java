@@ -31,21 +31,19 @@ public class EncryptorWorker extends SwingWorker<Respuesta, String>
     
     private static Logger logger = LoggerFactory.getLogger(EncryptorWorker.class);
 
-    private Integer id;
+    private VotingSystemWorkerType workerType;
     private String urlRequest;
     private Respuesta respuesta = new Respuesta(Respuesta.SC_ERROR);
     private VotingSystemWorkerListener workerListener;
-        
     private X509Certificate serverCert = null;
-
     private PrivateKey privateKey;
     private PublicKey publicKey;
     private String from = null;
     
-    public EncryptorWorker(Integer id, String from, String urlRequest, 
-            VotingSystemWorkerListener workerListener, X509Certificate serverCert) 
+    public EncryptorWorker(VotingSystemWorkerType workerType, String from, 
+            String urlRequest, VotingSystemWorkerListener workerListener, X509Certificate serverCert) 
             throws OperatorCreationException {
-        this.id = id;
+        this.workerType = workerType;
         this.from = from;
         this.urlRequest = urlRequest;
         this.workerListener = workerListener;
@@ -54,6 +52,7 @@ public class EncryptorWorker extends SwingWorker<Respuesta, String>
         this.privateKey = keyPair.getPrivate();
         this.publicKey = keyPair.getPublic();
     }
+    
     
     @Override protected Respuesta doInBackground() throws Exception {
         File encryptedFile = File.createTempFile("csrEncryptedFile", ".p7m");
@@ -118,8 +117,10 @@ public class EncryptorWorker extends SwingWorker<Respuesta, String>
         else return respuesta.getMensaje();
     }
 
-    @Override public int getId() {
-        return this.id;
+    @Override public String getErrorMessage() {
+        if(workerType != null) return "### ERROR - " + workerType + " - msg: " 
+                + respuesta.getMensaje(); 
+        else return "### ERROR - msg: " + respuesta.getMensaje();  
     }
 
     @Override  public int getStatusCode() {
@@ -131,4 +132,9 @@ public class EncryptorWorker extends SwingWorker<Respuesta, String>
         return respuesta;
     }
 
+    @Override public VotingSystemWorkerType getType() {
+        return workerType;
+    }
+
+        
 }

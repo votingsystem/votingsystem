@@ -32,7 +32,8 @@ public class Certificado implements Serializable {
 	
     public enum Estado {OK, CON_ERRORES, ANULADO}
 
-    public enum Tipo {RAIZ_VOTOS, VOTO, USUARIO, AUTORIDAD_CERTIFICADORA}
+    public enum Tipo {RAIZ_VOTOS, VOTO, USUARIO, AUTORIDAD_CERTIFICADORA,
+    	AUTORIDAD_CERTIFICADORA_TEST}
     
     private static final long serialVersionUID = 1L;
     

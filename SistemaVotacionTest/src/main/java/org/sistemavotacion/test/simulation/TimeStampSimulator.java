@@ -20,6 +20,7 @@ import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.worker.InfoGetterWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
+import org.sistemavotacion.worker.VotingSystemWorkerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,9 @@ public class TimeStampSimulator extends Simulator<SimulationData>
         
     private static Logger logger = LoggerFactory.getLogger(TimeStampSimulator.class);
     
-    private static final int ACCESS_CONTROL_GETTER_WORKER  = 0;
+    public enum Worker implements VotingSystemWorkerType{
+        ACCESS_CONTROL_GETTER
+    }
     
     public static final int MAX_PENDING_RESPONSES = 10;
        
@@ -58,7 +61,7 @@ public class TimeStampSimulator extends Simulator<SimulationData>
         String serverInfoURL = ContextoPruebas.getURLInfoServidor(
                 simulationData.getAccessControlURL());
         logger.debug("init - serverInfoURL: " + serverInfoURL);
-        new InfoGetterWorker(ACCESS_CONTROL_GETTER_WORKER, 
+        new InfoGetterWorker(Worker.ACCESS_CONTROL_GETTER, 
                 serverInfoURL, null, this).execute();
         countDownLatch.await();
         finish();
@@ -154,8 +157,8 @@ public class TimeStampSimulator extends Simulator<SimulationData>
     @Override public void processVotingSystemWorkerMsg(List<String> messages) {}
 
     @Override public void showResult(VotingSystemWorker worker) {  
-        switch(worker.getId()) {
-            case ACCESS_CONTROL_GETTER_WORKER:  
+        switch((Worker)worker.getType()) {
+            case ACCESS_CONTROL_GETTER:  
                 String msg = null;
                 if(Respuesta.SC_OK == worker.getStatusCode()) {
                     try {
@@ -186,11 +189,11 @@ public class TimeStampSimulator extends Simulator<SimulationData>
         return simulationData;
     }
 
-    @Override public SimulationData finish() throws Exception {
+    @Override public void finish() throws Exception {
         simulationData.setFinish(System.currentTimeMillis());
         if(requestExecutor != null) requestExecutor.shutdownNow();
         if(simulationListener != null) {           
-            simulationListener.setSimulationResult(this);
+            simulationListener.setSimulationResult(null);
         } else {
             logger.debug("--------------- SIMULATION RESULT------------------");
             logger.debug("duracionStr: " + simulationData.getDurationStr());
@@ -204,7 +207,6 @@ public class TimeStampSimulator extends Simulator<SimulationData>
             logger.debug("------------------- FINISHED --------------------------");
             System.exit(0);
         }
-        return simulationData;
     }
     
 }

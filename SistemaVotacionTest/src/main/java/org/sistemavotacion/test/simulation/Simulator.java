@@ -20,7 +20,7 @@ public abstract class Simulator<T extends SimulationData> {
     
     public abstract void init() throws Exception;
     public abstract T getData();
-    public abstract T finish() throws Exception;
+    public abstract void finish() throws Exception;
         
     private SimulationData simulationData = null;
     public Timer timer = null;

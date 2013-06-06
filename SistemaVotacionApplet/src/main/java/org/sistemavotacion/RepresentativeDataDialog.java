@@ -26,6 +26,7 @@ import org.sistemavotacion.worker.VotingSystemWorkerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sistemavotacion.worker.RepresentativeRequestWorker;
+import org.sistemavotacion.worker.VotingSystemWorkerType;
 
 /**
 * @author jgzornoza
@@ -36,19 +37,23 @@ public class RepresentativeDataDialog extends JDialog
     
     private static Logger logger = LoggerFactory.getLogger(SaveReceiptDialog.class);
 
-    private static final int REPRESENTATIVE_REQUEST_WORKER = 0;
+    public enum Worker implements VotingSystemWorkerType{
+        REPRESENTATIVE_REQUEST}
+
     
     private Frame parentFrame = null;
     private Operacion operacion = null;
     private File selectedImage = null;
     private SwingWorker tareaEnEjecucion;
     private AtomicBoolean mostrandoPantallaEnvio = new AtomicBoolean(false);
-    private RepresentativeDataDialog INSTANCIA = null;
+    private final AppletFirma appletFirma;
         
-    public RepresentativeDataDialog(java.awt.Frame parent, boolean modal) {
+    public RepresentativeDataDialog(Frame parent, boolean modal, 
+            final AppletFirma appletFirma) {
         super(parent, modal);
         setLocationRelativeTo(null);
         this.parentFrame = parent;
+        this.appletFirma = appletFirma;
         initComponents();
         parent.setLocationRelativeTo(null);
         setTitle(Contexto.INSTANCE.getString("NEW_REPRESENTATIVE"));
@@ -62,10 +67,9 @@ public class RepresentativeDataDialog extends JDialog
             public void windowClosing(WindowEvent e) {
                 logger.debug(" - window closing event received");
                 dispose();
-                AppletFirma.INSTANCIA.cancelarOperacion();
+                appletFirma.cancelarOperacion();
             }
         });
-        INSTANCIA = this;
         pack();
     }
     
@@ -368,6 +372,7 @@ public class RepresentativeDataDialog extends JDialog
         mostrarPantallaEnvio(true);
         progressLabel.setText("<html>" + Contexto.INSTANCE.getString(
                 "progressLabel")+ "</html>");
+        final VotingSystemWorkerListener  workerListener = this;
         Runnable runnable = new Runnable() {
             public void run() {
                 try {
@@ -378,9 +383,9 @@ public class RepresentativeDataDialog extends JDialog
                             finalPassword.toCharArray(), operacion.getAsuntoMensajeFirmado(), null);
                     
                     tareaEnEjecucion = new RepresentativeRequestWorker(
-                            REPRESENTATIVE_REQUEST_WORKER, representativeRequestSMIME,
+                            Worker.REPRESENTATIVE_REQUEST, representativeRequestSMIME,
                             selectedImage, operacion.getUrlEnvioDocumento(), Contexto.INSTANCE.
-                            getAccessControl().getCertificate(),INSTANCIA);
+                            getAccessControl().getCertificate(),workerListener);
                     tareaEnEjecucion.execute();
            
                 } catch (Exception ex) {
@@ -411,7 +416,7 @@ public class RepresentativeDataDialog extends JDialog
             return;
         }
         dispose();
-        AppletFirma.INSTANCIA.cancelarOperacion();
+        appletFirma.cancelarOperacion();
     }//GEN-LAST:event_cerrarButtonActionPerformed
 
     private void verDocumentoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_verDocumentoButtonActionPerformed
@@ -435,47 +440,6 @@ public class RepresentativeDataDialog extends JDialog
         }
     }//GEN-LAST:event_verDocumentoButtonActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(RepresentativeDataDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(RepresentativeDataDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(RepresentativeDataDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(RepresentativeDataDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                RepresentativeDataDialog dialog = new RepresentativeDataDialog(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cerrarButton;
     private javax.swing.JPanel confirmacionPanel;
@@ -500,22 +464,21 @@ public class RepresentativeDataDialog extends JDialog
     @Override
     public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-                " - worker: " + worker.getClass().getSimpleName() + 
-                " - workerId:" + worker.getId());
-        switch(worker.getId()) {
-            case REPRESENTATIVE_REQUEST_WORKER:
+                " - worker: " + worker);
+        switch((Worker)worker.getType()) {
+            case REPRESENTATIVE_REQUEST:
                 dispose();
                 if (Respuesta.SC_OK == worker.getStatusCode()) {
-                    AppletFirma.INSTANCIA.responderCliente(
+                    appletFirma.responderCliente(
                             worker.getStatusCode(), worker.getMessage());
                 } else {
                     mostrarPantallaEnvio(false);
-                    AppletFirma.INSTANCIA.responderCliente(
+                    appletFirma.responderCliente(
                             worker.getStatusCode(), worker.getMessage());
                 }
                 break;
             default:
-                logger.debug("*** UNKNOWN WORKER ID: '" + worker.getId() + "'");
+                logger.debug("*** UNKNOWN WORKER: " + worker);
         }
     }
 }

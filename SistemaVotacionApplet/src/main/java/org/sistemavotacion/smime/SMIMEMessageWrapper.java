@@ -143,7 +143,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ((CMSProcessable)smimeSigned.getSignedContent()).write(baos);
             signedContent = baos.toString();
-        } else {
+        } else if(getContent() instanceof MimeMultipart){
             smimeSigned = new SMIMESigned((MimeMultipart)getContent());
             logger.debug("content instanceof MimeMultipart");
             MimeBodyPart content = smimeSigned.getContent();
@@ -374,6 +374,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
     }
     
     public TimeStampRequest getTimeStampRequest() {
+        if(smimeSigned == null) return null;
         SignerInformation signerInformation = ((SignerInformation)
                         smimeSigned.getSignerInfos().getSigners().iterator().next());
         if(signerInformation == null) {

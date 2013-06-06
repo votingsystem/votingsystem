@@ -79,7 +79,7 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
             @Override
             public void run() {
                 try {
-                    crearMockDNIeUsersWithoutRepresentative();                    
+                    createUsersWithoutRepresentative();                    
                 } catch (Exception ex) {
                     logger.error(ex.getMessage(), ex);
                 }
@@ -87,10 +87,11 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
         });
     }
 
-    private void crearMockDNIeUsersWithoutRepresentative() {
-        logger.debug("crearMockDNIeUsersWithoutRepresentative - users without representative:" +  
+    private void createUsersWithoutRepresentative() {
+        logger.debug("createUsersWithoutRepresentative - users without representative:" +  
                 simulationData.getNumVotesUsersWithoutRepresentative());
-        for(int i = 0; i < simulationData.getNumVotesUsersWithoutRepresentative(); i++ ) {
+        for(int i = 1; i <= simulationData.
+                getNumVotesUsersWithoutRepresentative(); i++ ) {
             int userIndex = new Long(simulationData.getAndIncrementUserIndex()).intValue();
             try {
                 String userNif = NifUtils.getNif(userIndex);
@@ -98,6 +99,7 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
                 userWithoutRepresentativeList.add(userNif);
             } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);
+                addErrorMsg(ex.getMessage());
             }
             if((i % 50) == 0) logger.debug("Created " + i + " of " + 
                     simulationData.getNumVotesUsersWithoutRepresentative() + " mock DNIe certs");
@@ -149,7 +151,7 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
                 requestCompletionService.submit(new RepresentativeDelegationLauncher(
                         userNIF, representativeNIF));
                 simulationData.getAndIncrementNumDelegationRequests();
-            } else Thread.sleep(500);
+            } else Thread.sleep(200);
         }
     }
     
@@ -214,7 +216,7 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
         return representativeNifList.get(randomSelected);
     }
     
-    @Override public UserBaseSimulationData finish() throws Exception {
+    @Override public void finish() throws Exception {
         logger.debug("finish");
         countDownLatch.await();
         simulationData.setFinish(System.currentTimeMillis());
@@ -223,7 +225,7 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
         simulationData.setRepresentativeNifList(representativeNifList);
         if(requestExecutor != null) requestExecutor.shutdownNow();
         if(simulationListener != null){
-            simulationListener.setSimulationResult(this);
+            simulationListener.setSimulationResult(simulationData);
         } else {
             logger.debug("--------------- SIMULATION RESULT----------------------");   
             logger.info("Duration: " + simulationData.getDurationStr());
@@ -247,7 +249,6 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
             logger.debug("------------------- FINISHED --------------------------");
             System.exit(0);
         }
-        return simulationData;
     }
 
     @Override public UserBaseSimulationData getData() {

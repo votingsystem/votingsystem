@@ -94,36 +94,20 @@ public class OSValidator {
             dirAddedToSystemClasspath = MACOSX_IAIK_SYSTEM_CLASSPATH;
             pkcs11LibraryWrapperPath = MACOSX_IAIK_SYSTEM_LIB_PATH;
         }
-        File directorioBaseDeAplicacion = Contexto.getApplicactionBaseDirFile();
-        File directorioDestinolibrerias = new File(Contexto.DEFAULTS.APPDIR + LIB_PATH_BASE_DIR +
-                dirAddedToSystemClasspath + UUID.randomUUID().toString() + File.separator);
+        File directorioDestinolibrerias = new File(Contexto.DEFAULTS.APPDIR + 
+                LIB_PATH_BASE_DIR + dirAddedToSystemClasspath + 
+                UUID.randomUUID().toString() + File.separator);
         directorioDestinolibrerias.mkdirs();
-        /*if (directorioBaseDeAplicacion.isFile()) { //se esta ejecutando desde jar
-            JarFile jarFile = new JarFile(directorioBaseDeAplicacion);
-            ZipEntry zipEntry = jarFile.getEntry(pkcs11LibraryWrapperPath);
-        	InputStream in = new BufferedInputStream(jarFile.getInputStream(zipEntry));
-        	File outputFile = new File(FileUtils.APPDIR + zipEntry.getName());
-        	outputFile.createNewFile();
-        	FileUtils.copyStreamToFile(in, outputFile);
-        } else*/ 
-        if (directorioBaseDeAplicacion.isDirectory()){//se esta ejecutando desde directorio classes
-            File archivoLibreria = new File(Contexto.getApplicactionBaseDir() + 
-            		dirAddedToSystemClasspath).listFiles()[0];
-            File copiaArchivoLibreria = new File(directorioDestinolibrerias.
-                    getAbsolutePath() + File.separator + archivoLibreria.getName());
-            FileUtils.copy(archivoLibreria, copiaArchivoLibreria);
-        }  else {//JWS
-        	File outputFile = new File(directorioDestinolibrerias.
-                        getAbsolutePath()  + File.separator+ libName);
-        	outputFile.createNewFile();
-                InputStream in =  Thread.currentThread().getContextClassLoader()
-                        .getResourceAsStream(pkcs11LibraryWrapperPath);
-                if (in == null) {
-                    throw new FileNotFoundException(
-                            "resource " + pkcs11LibraryWrapperPath);
-                }
-                FileUtils.copyStreamToFile(in, outputFile);
+        File outputFile = new File(directorioDestinolibrerias.
+                getAbsolutePath()  + File.separator+ libName);
+        outputFile.createNewFile();
+        InputStream in =  Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(pkcs11LibraryWrapperPath);
+        if (in == null) {
+            throw new FileNotFoundException(
+                    "resource " + pkcs11LibraryWrapperPath);
         }
+        FileUtils.copyStreamToFile(in, outputFile);
         FileUtils.addDirToSystemClasspath(directorioDestinolibrerias.getAbsolutePath());
     }
 

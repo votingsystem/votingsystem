@@ -30,6 +30,7 @@ import org.sistemavotacion.worker.AccessRequestWorker;
 import org.sistemavotacion.worker.VotingSystemWorkerListener;
 import org.sistemavotacion.worker.SMIMESignedSenderWorker;
 import org.sistemavotacion.worker.VotingSystemWorker;
+import org.sistemavotacion.worker.VotingSystemWorkerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,8 +42,8 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
 
     private static Logger logger = LoggerFactory.getLogger(VotacionDialog.class);
 
-    private static final int ACCESS_REQUEST_WORKER    = 0;
-    private static final int VOTING_WORKER            = 1;
+    public enum Worker implements VotingSystemWorkerType{
+        ACCESS_REQUEST, VOTING}
     
 
     private volatile boolean mostrandoPantallaEnvio = false;
@@ -304,7 +305,7 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
 
             X509Certificate accesRequestServerCert = Contexto.INSTANCE.
                     getAccessControl().getCertificate();
-            tareaEnEjecucion = new AccessRequestWorker(ACCESS_REQUEST_WORKER, 
+            tareaEnEjecucion = new AccessRequestWorker(Worker.ACCESS_REQUEST, 
                     smimeMessage, votoEvento, accesRequestServerCert, this);
             tareaEnEjecucion.execute();
 
@@ -338,7 +339,7 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
             //        getControlCenter().getCertificate();
             
             String urlVoteService = votoEvento.getUrlRecolectorVotosCentroControl();
-            tareaEnEjecucion = new SMIMESignedSenderWorker(VOTING_WORKER, 
+            tareaEnEjecucion = new SMIMESignedSenderWorker(Worker.VOTING, 
                     smimeMessage, urlVoteService, pkcs10WrapperClient.
                     getKeyPair(), null, this);
             tareaEnEjecucion.execute();
@@ -358,11 +359,10 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
     
     @Override public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-                " - worker: " + worker.getClass().getSimpleName() + 
-                " - workerId:" + worker.getId());
+                " - worker: " + worker);
         Respuesta respuesta = worker.getRespuesta();
-        switch(worker.getId()) {
-            case ACCESS_REQUEST_WORKER:
+        switch((Worker)worker.getType()) {
+            case ACCESS_REQUEST:
                 if (Respuesta.SC_OK == worker.getStatusCode()) {  
                     notificarCentroControl(((AccessRequestWorker)worker).
                         getPKCS10WrapperClient(), votoEvento);
@@ -372,7 +372,7 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
                     dispose();
                 }
                 break;
-            case VOTING_WORKER:
+            case VOTING:
                 if (Respuesta.SC_OK == worker.getStatusCode()) {  
                     try {
                         SMIMEMessageWrapper validatedVote = respuesta.getSmimeMessage();

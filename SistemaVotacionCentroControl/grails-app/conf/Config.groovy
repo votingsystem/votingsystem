@@ -12,6 +12,7 @@
 // }
 import java.net.*;
 
+grails.converters.default.pretty.print=true
 
 grails.config.locations = [ "classpath:app-config.properties"]
 
@@ -142,6 +143,9 @@ log4j = {
 
 }
 
+grails.plugin.cloudfoundry.username = 'jgzornoza@gmail.com'
+grails.plugin.cloudfoundry.password = 'cloudfoundrysotopo'
+grails.plugin.cloudfoundry.appname = 'SistemaVotacionCentroControl'
 
 grails.war.copyToWebApp = { args ->
 	fileset(dir:"WEB-INF/cms") {
