@@ -40,8 +40,7 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
 
     private static Logger logger = LoggerFactory.getLogger(FirmaDialog.class);
 
-    public enum Worker implements VotingSystemWorkerType{INFO_GETTER,
-        SIGNED_SENDER}
+    public enum Worker implements VotingSystemWorkerType{INFO_GETTER}
 
 
     private byte[] bytesDocumento;
@@ -315,12 +314,12 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                                     finalPassword.toCharArray(), operacion.getAsuntoMensajeFirmado(), null); 
                             destinationCert = Contexto.INSTANCE.
                                 getAccessControl().getCertificate(); 
-                            tareaEnEjecucion = new SMIMESignedSenderWorker(
-                                    Worker.SIGNED_SENDER, smimeMessage, 
-                                    operacion.getUrlEnvioDocumento(), null, 
+                            tareaEnEjecucion = new SMIMESignedSenderWorker(null, 
+                                    smimeMessage, operacion.getUrlEnvioDocumento(), null, 
                                     destinationCert, workerListener);
                             tareaEnEjecucion.execute();
-                            return;
+                            tareaEnEjecucion.get();
+                            break;
                         case SOLICITUD_COPIA_SEGURIDAD:
                         case FIRMA_MANIFIESTO_PDF:
                         case PUBLICACION_MANIFIESTO_PDF:
@@ -329,16 +328,43 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                             String location = null;
                             destinationCert = Contexto.INSTANCE.
                                 getAccessControl().getCertificate();
-                            tareaEnEjecucion = new PDFSignedSenderWorker(
-                                    Worker.SIGNED_SENDER,
+                            tareaEnEjecucion = new PDFSignedSenderWorker(null,
                                     operacion.getUrlEnvioDocumento(), reason, location, 
                                     finalPassword.toCharArray(), readerManifiesto, 
                                     null, null, destinationCert, workerListener);
                             tareaEnEjecucion.execute();
-                            return;
+                            tareaEnEjecucion.get();
+                            break;
                         default:
                             logger.debug("No se ha encontrado la operación " + operacion.getTipo().toString());
                             break;
+                    }
+                    if(tareaEnEjecucion != null) {
+                        Respuesta respuesta = (Respuesta) tareaEnEjecucion.get();
+                        if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                            String msg = null;
+                            if(operacion.isRespuestaConRecibo()) {
+                                try {
+                                    logger.debug("showResult - precessing receipt");
+                                    ByteArrayInputStream bais = new ByteArrayInputStream(
+                                            respuesta.getMensaje().getBytes());
+                                    SMIMEMessageWrapper smimeMessageResp = 
+                                            new SMIMEMessageWrapper(null, bais, null);
+                                    String operationStr = smimeMessageResp.getSignedContent();
+                                    Operacion result = Operacion.parse(operationStr);
+                                    msg = result.getMensaje();
+                                } catch (Exception ex) {
+                                    logger.error(ex.getMessage(), ex);
+                                }
+                            } else msg = respuesta.getMensaje();
+                            appletFirma.responderCliente(respuesta.getCodigoEstado(), msg);
+                            dispose();
+                        } else {
+                            mostrarPantallaEnvio(false);
+                            MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
+                            errorDialog.setMessage(respuesta.getMensaje(), 
+                                    Contexto.INSTANCE.getString("errorLbl"));
+                        }
                     }
                 } catch (Exception ex) {
                     logger.error(ex.getMessage(), ex);
@@ -350,8 +376,7 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                     MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
                     errorDialog.setMessage(mensajeError, 
                             Contexto.INSTANCE.getString("errorLbl"));
-                    return;
-                }    
+                }
             }
         };
         Thread thread = new Thread(runnable);
@@ -399,48 +424,18 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
     
     @Override public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-                " - worker: " + worker);
-        switch((Worker)worker.getType()) {
-            case INFO_GETTER:
-                mostrarPantallaEnvio(false);
-                if (Respuesta.SC_OK == worker.getStatusCode()) {    
-                    bytesDocumento =((InfoGetterWorker)worker).getRespuesta().
-                            getBytesArchivo();
-                    pack();
-                } else {
-                    appletFirma.responderCliente(worker.getStatusCode(), 
-                            Contexto.INSTANCE.getString(
-                            "errorDescragandoDocumento") + " - " + worker.getMessage());
-                    dispose();
-                }
-                break;
-            case SIGNED_SENDER:
-                dispose();
-                if (Respuesta.SC_OK == worker.getStatusCode()) {
-                    String msg = null;
-                    if(operacion.isRespuestaConRecibo()) {
-                        try {
-                            logger.debug("showResult - precessing receipt");
-                            ByteArrayInputStream bais = new ByteArrayInputStream(
-                                    worker.getMessage().getBytes());
-                            SMIMEMessageWrapper smimeMessageResp = 
-                                    new SMIMEMessageWrapper(null, bais, null);
-                            String operationStr = smimeMessageResp.getSignedContent();
-                            Operacion result = Operacion.parse(operationStr);
-                            msg = result.getMensaje();
-                        } catch (Exception ex) {
-                            logger.error(ex.getMessage(), ex);
-                        }
-                    } else msg = worker.getMessage();
-                    appletFirma.responderCliente(worker.getStatusCode(), msg);
-                } else {
-                    mostrarPantallaEnvio(false);
-                    appletFirma.responderCliente(
-                            worker.getStatusCode(), worker.getMessage());
-                }
-                break;
-            default:
-                logger.debug("*** UNKNOWN WORKER: " + worker);
+                " - worker: " + worker.getType());
+        if(worker.getType() == null) return;
+        mostrarPantallaEnvio(false);
+        if (Respuesta.SC_OK == worker.getStatusCode()) {    
+            bytesDocumento =((InfoGetterWorker)worker).getRespuesta().
+                    getBytesArchivo();
+            pack();
+        } else {
+            appletFirma.responderCliente(worker.getStatusCode(), 
+                    Contexto.INSTANCE.getString(
+                    "errorDescragandoDocumento") + " - " + worker.getMessage());
+            dispose();
         }
 
     }

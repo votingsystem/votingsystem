@@ -1,6 +1,6 @@
 package org.sistemavotacion.test.simulation;
 
-import org.sistemavotacion.test.simulation.launcher.AccessRequestLauncher;
+import org.sistemavotacion.test.simulation.callable.AccessRequestor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -26,7 +26,8 @@ import org.slf4j.LoggerFactory;
 public class AccessRequestSimulator extends Simulator<VotingSimulationData> 
         implements ActionListener {
     
-    private static Logger logger = LoggerFactory.getLogger(AccessRequestSimulator.class);
+    private static Logger logger = LoggerFactory.getLogger(
+            AccessRequestSimulator.class);
     
     private static ExecutorService simulatorExecutor;
     
@@ -34,21 +35,18 @@ public class AccessRequestSimulator extends Simulator<VotingSimulationData>
     private static CompletionService<Respuesta> accessRequestCompletionService;
 
     private UserBaseSimulationData userBaseData = null;
-    private VotingSimulationData simulationData = null;
     private Evento evento = null;
     
     private int numberRequests = 0;
     private List<String> electorList = null;
     
     private SimulatorListener simulationListener;
-    
-    //private AtomicBoolean done = new AtomicBoolean(true);
+    private final CountDownLatch countDownLatch = new CountDownLatch(1);
     
     public AccessRequestSimulator(VotingSimulationData simulationData, 
             SimulatorListener simulationListener) {
         super(simulationData);
         this.userBaseData = simulationData.getUserBaseData(); 
-        this.simulationData = simulationData;
         this.simulationListener = simulationListener;
         this.evento = simulationData.getEvento();
         simulatorExecutor = Executors.newFixedThreadPool(5);
@@ -101,30 +99,6 @@ public class AccessRequestSimulator extends Simulator<VotingSimulationData>
         return result;
     }
 
-    public void init() {
-        logger.debug("lanzarVotacion - total number of electors: " +  numberRequests);
-        simulationData.setBegin(System.currentTimeMillis());
-        simulatorExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    launchRequests();                    
-                } catch (Exception ex) {
-                    logger.error(ex.getMessage(), ex);
-                }
-            }
-        });
-        simulatorExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    validateReceipts();
-                } catch (Exception ex) {
-                    logger.error(ex.getMessage(), ex);
-                }
-            }
-        });
-    }
     
     public void launchRequests () throws Exception {
         logger.debug("launchRequests - number of projected requests: " + 
@@ -151,7 +125,7 @@ public class AccessRequestSimulator extends Simulator<VotingSimulationData>
         Evento voto = evento.genRandomVote(ContextoPruebas.DIGEST_ALG);
         Usuario usuario = new Usuario(nif);
         voto.setUsuario(usuario);
-        accessRequestCompletionService.submit(new AccessRequestLauncher(voto));
+        accessRequestCompletionService.submit(new AccessRequestor(voto));
     }
 
     public void validateReceipts () throws Exception {
@@ -179,11 +153,51 @@ public class AccessRequestSimulator extends Simulator<VotingSimulationData>
             }
             //done.set(true);
         }
-        finish();
+        countDownLatch.countDown();
     }
-    
-    @Override public void finish() throws Exception {
-        logger.debug("finish");
+
+
+    @Override
+    public void actionPerformed(ActionEvent ae) {
+        if (ae.getSource().equals(timer)) {
+            if(!electorList.isEmpty()) {
+                try {
+                    int randomElector = new Random().nextInt(electorList.size());
+                    lanzarSolicitudAcceso(electorList.remove(randomElector));
+                } catch (Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                }
+            } else timer.stop();
+        }
+    }
+
+    @Override public VotingSimulationData call() throws Exception {
+        logger.debug("call - total number of electors: " +  numberRequests);
+        simulationData.setBegin(System.currentTimeMillis());
+        simulatorExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    launchRequests();                    
+                } catch (Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                }
+            }
+        });
+        simulatorExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    validateReceipts();
+                } catch (Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                }
+            }
+        });
+        
+        countDownLatch.await();
+        logger.debug("- shutdown executors");        
+
         simulationData.setFinish(System.currentTimeMillis());
         if(timer != null) timer.stop();
         if(simulatorExecutor == null) simulatorExecutor.shutdownNow();
@@ -201,26 +215,9 @@ public class AccessRequestSimulator extends Simulator<VotingSimulationData>
                         getFormattedErrorList(electorList));
             }
             logger.debug("------------------- FINISHED ----------------------");
-            System.exit(0);
         }
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent ae) {
-        if (ae.getSource().equals(timer)) {
-            if(!electorList.isEmpty()) {
-                try {
-                    int randomElector = new Random().nextInt(electorList.size());
-                    lanzarSolicitudAcceso(electorList.remove(randomElector));
-                } catch (Exception ex) {
-                    logger.error(ex.getMessage(), ex);
-                }
-            } else timer.stop();
-        }
-    }
-
-    @Override
-    public VotingSimulationData getData() {
+        
+        
         return simulationData;
     }
 

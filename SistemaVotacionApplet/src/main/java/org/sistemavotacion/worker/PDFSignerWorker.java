@@ -226,7 +226,7 @@ public class PDFSignerWorker extends SwingWorker<Respuesta, String>
             logger.error(ex.getMessage(), ex);
             respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
         } 
-        workerListener.showResult(this);
+        if(workerListener != null) workerListener.showResult(this);
     }
     
     public File getSignedAndTimeStampedPDF() {

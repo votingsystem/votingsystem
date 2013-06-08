@@ -25,6 +25,7 @@ public enum Tipo {
     ANULADOR_VOTO(""),
     ANULADOR_VOTO_ERROR(""),
 
+    BACKUP(""),
     
     //EVENTO_FIRMA
     EVENTO_FIRMA(""),

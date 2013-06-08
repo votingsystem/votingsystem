@@ -1,4 +1,4 @@
-package org.sistemavotacion.test.simulation.launcher;
+package org.sistemavotacion.test.simulation.callable;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -21,13 +21,13 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class CancelAccessRequestLauncher  implements Callable<Respuesta> {
+public class CancelAccessRequestRequestor  implements Callable<Respuesta> {
     
-    private static Logger logger = LoggerFactory.getLogger(CancelAccessRequestLauncher.class);
+    private static Logger logger = LoggerFactory.getLogger(CancelAccessRequestRequestor.class);
 
     private AccessRequestBackup request;
     
-    public CancelAccessRequestLauncher (AccessRequestBackup request) 
+    public CancelAccessRequestRequestor (AccessRequestBackup request) 
             throws Exception {
         this.request = request;
     }

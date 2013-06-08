@@ -16,13 +16,11 @@ import java.util.concurrent.Future;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.test.simulation.launcher.EncryptorLauncher;
+import org.sistemavotacion.test.simulation.callable.EncryptionTester;
 import org.sistemavotacion.test.util.SimulationUtils;
 import org.sistemavotacion.util.NifUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.worker.InfoGetterWorker;
-import org.sistemavotacion.worker.VotingSystemWorker;
-import org.sistemavotacion.worker.VotingSystemWorkerListener;
 import org.sistemavotacion.worker.VotingSystemWorkerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,9 +30,10 @@ import org.slf4j.LoggerFactory;
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
 public class EncryptionSimulator extends Simulator<SimulationData> 
-        implements VotingSystemWorkerListener, ActionListener {
+        implements ActionListener {
         
     private static Logger logger = LoggerFactory.getLogger(EncryptionSimulator.class);
+
     
     public enum Worker implements VotingSystemWorkerType{ACCESS_CONTROL_GETTER}
     
@@ -42,18 +41,15 @@ public class EncryptionSimulator extends Simulator<SimulationData>
     private static CompletionService<Respuesta> requestCompletionService;
     
     List<String> representativeNifList = new ArrayList<String>();
+    private String requestURL = null;
+    private SimulatorListener simulationListener;
     
     private final CountDownLatch countDownLatch = new CountDownLatch(1);
-    private String requestURL = null;
-    private SimulationData simulationData = null;
-    
-    private SimulatorListener simulationListener;
 
     public EncryptionSimulator(SimulationData simulationData, 
             SimulatorListener simulationListener) {
         super(simulationData);
         this.simulationListener = simulationListener;
-        this.simulationData = simulationData;
         logger.debug("NumRequestsProjected:" + simulationData.getNumRequestsProjected());
         this.requestURL = ContextoPruebas.getURLEncryptor(
                 simulationData.getAccessControlURL());
@@ -61,16 +57,6 @@ public class EncryptionSimulator extends Simulator<SimulationData>
         requestExecutor = Executors.newFixedThreadPool(100);
         requestCompletionService = new ExecutorCompletionService<Respuesta>(
                 requestExecutor);
-    }
-
-    @Override public void init() throws Exception { 
-        String urlInfoServer = ContextoPruebas.getURLInfoServidor(
-                simulationData.getAccessControlURL());
-        logger.debug("init - urlInfoServer: " + urlInfoServer);
-        new InfoGetterWorker(Worker.ACCESS_CONTROL_GETTER, 
-                urlInfoServer, null, this).execute();
-        countDownLatch.await();
-        finish();
     }
 
     private void launchSimulationThreads() {
@@ -96,7 +82,6 @@ public class EncryptionSimulator extends Simulator<SimulationData>
                 }
             }
         });
-        //        countDownLatch.await(); //
     }
     
     public void launchRequests () throws Exception {
@@ -116,7 +101,7 @@ public class EncryptionSimulator extends Simulator<SimulationData>
                     logger.debug("launchRequests - WITHOUT REQUESTS PROJECTED");
                     String nifFrom = NifUtils.getNif(simulationData.
                             getAndIncrementNumRequests().intValue());
-                    requestCompletionService.submit(new EncryptorLauncher(
+                    requestCompletionService.submit(new EncryptionTester(
                             nifFrom, requestURL));
                  } else Thread.sleep(300);
             }
@@ -144,63 +129,6 @@ public class EncryptionSimulator extends Simulator<SimulationData>
         countDownLatch.countDown();
     }
     
-    @Override public SimulationData getData() {
-        return simulationData;
-    }
-        
-    @Override  public void finish() throws Exception{
-        logger.debug("finish");
-        simulationData.setFinish(System.currentTimeMillis());
-        if(timer != null) timer.stop();
-        if(requestExecutor != null) requestExecutor.shutdownNow();       
-        if(simulationListener != null) {           
-            simulationListener.setSimulationResult(simulationData);
-        } else { 
-            logger.debug("--------------- SIMULATION RESULT----------------------"); 
-            simulationData.setFinish(System.currentTimeMillis());
-            logger.debug("duracionStr: " + simulationData.getDurationStr());
-            logger.debug("NumRequests: " + simulationData.getNumRequests());
-            logger.debug("NumRequestsOK: " + simulationData.getNumRequestsOK());
-            logger.debug("NumRequestsERROR: " + simulationData.getNumRequestsERROR());
-            String errorsMsg = getFormattedErrorList();
-            if(errorsMsg != null) {
-                logger.info(" ************* " + getErrorsList().size() + " ERRORS: \n" + 
-                            errorsMsg);
-            }
-            logger.debug("--------------- FINISHED --------------------------");
-            System.exit(0);
-        }
-    }
-
-    @Override public void processVotingSystemWorkerMsg(List<String> messages) {}
-
-    @Override public void showResult(VotingSystemWorker worker) {  
-        logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-            " - worker: " + worker.getType());
-        String msg = null;
-        if(Respuesta.SC_OK == worker.getStatusCode()) {
-            try {
-                ActorConIP accessControl = ActorConIP.parse(worker.getMessage());
-                msg = SimulationUtils.checkActor(accessControl, ActorConIP.Tipo.CONTROL_ACCESO);
-                if(msg == null) {
-                    ContextoPruebas.INSTANCE.setControlAcceso(accessControl);
-                    launchSimulationThreads();
-                    return;
-                }
-            } catch(Exception ex) {
-                logger.error(ex.getMessage(), ex);
-                msg = ex.getMessage(); 
-            }
-        } 
-        if(msg == null) msg = worker.getErrorMessage();
-        else msg = worker.getErrorMessage() + " - msg: " + msg; 
-        logger.error(msg);
-        addErrorMsg(msg);
-        countDownLatch.countDown();
-    }
-    
-
-    
     public static void main(String[] args) throws Exception {
         SimulationData simulationData = null;
         if(args != null && args.length > 0) {
@@ -214,11 +142,10 @@ public class EncryptionSimulator extends Simulator<SimulationData>
             simulationData = SimulationData.parse(FileUtils.getStringFromFile(jsonFile));
         }
         EncryptionSimulator simuHelper = new EncryptionSimulator(simulationData, null);
-        simuHelper.init();
+        simuHelper.call();
     }
 
-    @Override
-    public void actionPerformed(ActionEvent ae) {
+    @Override public void actionPerformed(ActionEvent ae) {
         logger.debug("timer numHoursProjected:" + simulationData.getNumHoursProjected() + 
                 "- numMinutesProjected" + simulationData.getNumMinutesProjected() + 
                 " - NumSecondsProjected: " + + simulationData.getNumSecondsProjected());
@@ -228,13 +155,57 @@ public class EncryptionSimulator extends Simulator<SimulationData>
                 String nifFrom = NifUtils.getNif(simulationData.
                         getAndIncrementNumRequests().intValue());
                 try {
-                    requestCompletionService.submit(new EncryptorLauncher(    
+                    requestCompletionService.submit(new EncryptionTester(    
                             nifFrom, requestURL));
                 } catch (Exception ex) {
                     logger.error(ex.getMessage(), ex);
                 }
             } else timer.stop();
         }
+    }
+    
+    @Override public SimulationData call() throws Exception {
+        String urlInfoServer = ContextoPruebas.getURLInfoServidor(
+                simulationData.getAccessControlURL());
+        logger.debug("call - urlInfoServer: " + urlInfoServer);
+        InfoGetterWorker worker = new InfoGetterWorker(null, 
+                urlInfoServer, null, null);
+        worker.execute();
+        worker.get();
+        if(Respuesta.SC_OK == worker.getStatusCode()) {
+            ActorConIP accessControl = ActorConIP.parse(worker.getMessage());
+            String msg = SimulationUtils.checkActor(
+                    accessControl, ActorConIP.Tipo.CONTROL_ACCESO);
+            if(msg == null) {
+                ContextoPruebas.INSTANCE.setControlAcceso(accessControl);
+                launchSimulationThreads();
+            }
+        } else logger.error(worker.getMessage());
+        
+        logger.debug("- await");
+        countDownLatch.await();
+        logger.debug("- call - shutdown executors");   
+        
+
+        simulationData.setFinish(System.currentTimeMillis());
+        if(timer != null) timer.stop();
+        if(requestExecutor != null) requestExecutor.shutdownNow();    
+        logger.debug("--------------- SIMULATION RESULT----------------------"); 
+        simulationData.setFinish(System.currentTimeMillis());
+        logger.debug("duracionStr: " + simulationData.getDurationStr());
+        logger.debug("NumRequests: " + simulationData.getNumRequests());
+        logger.debug("NumRequestsOK: " + simulationData.getNumRequestsOK());
+        logger.debug("NumRequestsERROR: " + simulationData.getNumRequestsERROR());
+        String errorsMsg = getFormattedErrorList();
+        if(errorsMsg != null) {
+            logger.info(" ************* " + getErrorsList().size() + " ERRORS: \n" + 
+                        errorsMsg);
+        }
+        logger.debug("--------------- FINISHED --------------------------");
+        if(simulationListener != null)            
+            simulationListener.setSimulationResult(simulationData);
+        
+        return simulationData;
     }
 
 }

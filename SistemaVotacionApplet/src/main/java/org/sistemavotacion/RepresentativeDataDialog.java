@@ -7,7 +7,6 @@ import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.security.MessageDigest;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -21,26 +20,18 @@ import org.sistemavotacion.smime.DNIeSignedMailGenerator;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.ImagePreviewPanel;
-import org.sistemavotacion.worker.VotingSystemWorker;
-import org.sistemavotacion.worker.VotingSystemWorkerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sistemavotacion.worker.RepresentativeRequestWorker;
-import org.sistemavotacion.worker.VotingSystemWorkerType;
 
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class RepresentativeDataDialog extends JDialog 
-        implements VotingSystemWorkerListener {
+public class RepresentativeDataDialog extends JDialog  {
     
     private static Logger logger = LoggerFactory.getLogger(SaveReceiptDialog.class);
 
-    public enum Worker implements VotingSystemWorkerType{
-        REPRESENTATIVE_REQUEST}
-
-    
     private Frame parentFrame = null;
     private Operacion operacion = null;
     private File selectedImage = null;
@@ -109,8 +100,6 @@ public class RepresentativeDataDialog extends JDialog
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        enviarButton = new javax.swing.JButton();
-        cerrarButton = new javax.swing.JButton();
         confirmacionPanel = new javax.swing.JPanel();
         mensajeLabel = new javax.swing.JLabel();
         verDocumentoButton = new javax.swing.JButton();
@@ -122,29 +111,16 @@ public class RepresentativeDataDialog extends JDialog
         imagePanel = new javax.swing.JPanel();
         selectImageButton = new javax.swing.JButton();
         selectedImageLabel = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        enviarButton = new javax.swing.JButton();
+        cerrarButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-
-        enviarButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/images/signature-ok_16x16.png"))); // NOI18N
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/sistemavotacion/Bundle"); // NOI18N
-        enviarButton.setText(bundle.getString("RepresentativeDataDialog.enviarButton.text")); // NOI18N
-        enviarButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                enviarButtonActionPerformed(evt);
-            }
-        });
-
-        cerrarButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/images/cancel_16x16.png"))); // NOI18N
-        cerrarButton.setText(bundle.getString("RepresentativeDataDialog.cerrarButton.text")); // NOI18N
-        cerrarButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cerrarButtonActionPerformed(evt);
-            }
-        });
 
         confirmacionPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         mensajeLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/sistemavotacion/Bundle"); // NOI18N
         mensajeLabel.setText(bundle.getString("RepresentativeDataDialog.mensajeLabel.text")); // NOI18N
         mensajeLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
 
@@ -199,7 +175,7 @@ public class RepresentativeDataDialog extends JDialog
             validationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(validationPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(messageLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
+                .addComponent(messageLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -247,7 +223,7 @@ public class RepresentativeDataDialog extends JDialog
                 .addGroup(imagePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(imagePanelLayout.createSequentialGroup()
                         .addComponent(selectImageButton)
-                        .addGap(0, 0, Short.MAX_VALUE))
+                        .addGap(0, 147, Short.MAX_VALUE))
                     .addComponent(selectedImageLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -261,29 +237,57 @@ public class RepresentativeDataDialog extends JDialog
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        enviarButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/images/signature-ok_16x16.png"))); // NOI18N
+        enviarButton.setText(bundle.getString("RepresentativeDataDialog.enviarButton.text")); // NOI18N
+        enviarButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                enviarButtonActionPerformed(evt);
+            }
+        });
+
+        cerrarButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/images/cancel_16x16.png"))); // NOI18N
+        cerrarButton.setText(bundle.getString("RepresentativeDataDialog.cerrarButton.text")); // NOI18N
+        cerrarButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cerrarButtonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(enviarButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cerrarButton)
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(enviarButton)
+                    .addComponent(cerrarButton))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(imagePanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(confirmacionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addContainerGap())
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(enviarButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cerrarButton)
-                        .addGap(13, 13, 13))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(progressBarPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addContainerGap())
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(imagePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(validationPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(confirmacionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(progressBarPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(validationPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addContainerGap())))
         );
         layout.setVerticalGroup(
@@ -292,16 +296,14 @@ public class RepresentativeDataDialog extends JDialog
                 .addContainerGap()
                 .addComponent(progressBarPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(validationPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(validationPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(imagePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(confirmacionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(enviarButton)
-                    .addComponent(cerrarButton))
-                .addContainerGap())
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -372,7 +374,6 @@ public class RepresentativeDataDialog extends JDialog
         mostrarPantallaEnvio(true);
         progressLabel.setText("<html>" + Contexto.INSTANCE.getString(
                 "progressLabel")+ "</html>");
-        final VotingSystemWorkerListener  workerListener = this;
         Runnable runnable = new Runnable() {
             public void run() {
                 try {
@@ -382,12 +383,21 @@ public class RepresentativeDataDialog extends JDialog
                             operacion.getContenidoFirma().toString(),
                             finalPassword.toCharArray(), operacion.getAsuntoMensajeFirmado(), null);
                     
-                    tareaEnEjecucion = new RepresentativeRequestWorker(
-                            Worker.REPRESENTATIVE_REQUEST, representativeRequestSMIME,
-                            selectedImage, operacion.getUrlEnvioDocumento(), Contexto.INSTANCE.
-                            getAccessControl().getCertificate(),workerListener);
+                    tareaEnEjecucion = new RepresentativeRequestWorker(null, 
+                            representativeRequestSMIME, selectedImage, 
+                            operacion.getUrlEnvioDocumento(), Contexto.INSTANCE.
+                            getAccessControl().getCertificate(), null);
                     tareaEnEjecucion.execute();
-           
+                    Respuesta respuesta = (Respuesta) tareaEnEjecucion.get();
+                    if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                        appletFirma.responderCliente(
+                                respuesta.getCodigoEstado(), respuesta.getMensaje());
+                    } else {
+                        mostrarPantallaEnvio(false);
+                        appletFirma.responderCliente(
+                                respuesta.getCodigoEstado(), respuesta.getMensaje());
+                    }
+                    dispose();
                 } catch (Exception ex) {
                     logger.error(ex.getMessage(), ex);
                     mostrarPantallaEnvio(false);
@@ -445,6 +455,7 @@ public class RepresentativeDataDialog extends JDialog
     private javax.swing.JPanel confirmacionPanel;
     private javax.swing.JButton enviarButton;
     private javax.swing.JPanel imagePanel;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel mensajeLabel;
     private javax.swing.JLabel messageLabel;
     private javax.swing.JProgressBar progressBar;
@@ -456,29 +467,5 @@ public class RepresentativeDataDialog extends JDialog
     private javax.swing.JButton verDocumentoButton;
     // End of variables declaration//GEN-END:variables
 
-    @Override public void processVotingSystemWorkerMsg(List<String> messages) {
-        logger.debug(" - process: " + messages.iterator().next());
-        progressLabel.setText(messages.iterator().next());
-    }
 
-    @Override
-    public void showResult(VotingSystemWorker worker) {
-        logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-                " - worker: " + worker);
-        switch((Worker)worker.getType()) {
-            case REPRESENTATIVE_REQUEST:
-                dispose();
-                if (Respuesta.SC_OK == worker.getStatusCode()) {
-                    appletFirma.responderCliente(
-                            worker.getStatusCode(), worker.getMessage());
-                } else {
-                    mostrarPantallaEnvio(false);
-                    appletFirma.responderCliente(
-                            worker.getStatusCode(), worker.getMessage());
-                }
-                break;
-            default:
-                logger.debug("*** UNKNOWN WORKER: " + worker);
-        }
-    }
 }

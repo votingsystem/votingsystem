@@ -18,7 +18,7 @@ import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.modelo.AccessRequestBackup;
 import org.sistemavotacion.test.panel.DigitalClockPanel;
-import org.sistemavotacion.test.simulation.launcher.CancelAccessRequestLauncher;
+import org.sistemavotacion.test.simulation.callable.CancelAccessRequestRequestor;
 import org.sistemavotacion.test.util.FileNameFilter;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
@@ -532,7 +532,7 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
     
     public void lanzarAnulacionAccessRequestBackup (AccessRequestBackup solicitud) throws Exception {
         anulacionSolicitudesCompletionService.submit(
-                new CancelAccessRequestLauncher(solicitud));
+                new CancelAccessRequestRequestor(solicitud));
         actualizarContadorSolicitudes(
                 new Long(anulacionesEnviadas.incrementAndGet()).intValue());
      }

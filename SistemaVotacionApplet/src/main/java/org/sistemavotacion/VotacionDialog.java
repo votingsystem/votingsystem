@@ -1,6 +1,5 @@
 package org.sistemavotacion;
 
-import static org.sistemavotacion.Contexto.*;
 
 import java.awt.Desktop;
 import java.awt.Frame;
@@ -9,8 +8,6 @@ import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.security.cert.X509Certificate;
-import java.text.MessageFormat;
-import java.util.List;
 import javax.swing.JDialog;
 import javax.swing.SwingWorker;
 import javax.swing.text.html.parser.ParserDelegator;
@@ -27,10 +24,7 @@ import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.StringUtils;
 import org.sistemavotacion.worker.AccessRequestWorker;
-import org.sistemavotacion.worker.VotingSystemWorkerListener;
 import org.sistemavotacion.worker.SMIMESignedSenderWorker;
-import org.sistemavotacion.worker.VotingSystemWorker;
-import org.sistemavotacion.worker.VotingSystemWorkerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,14 +32,10 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class VotacionDialog extends JDialog implements VotingSystemWorkerListener {
+public class VotacionDialog extends JDialog {
 
     private static Logger logger = LoggerFactory.getLogger(VotacionDialog.class);
-
-    public enum Worker implements VotingSystemWorkerType{
-        ACCESS_REQUEST, VOTING}
     
-
     private volatile boolean mostrandoPantallaEnvio = false;
     private Frame parentFrame;
     private SwingWorker tareaEnEjecucion;
@@ -74,8 +64,10 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
         });
         //Bug similar to -> http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6993691
         ParserDelegator workaround = new ParserDelegator();
-        messageLabel.setText(getMensajeVotacion(votoEvento.getAsunto(), 
-                        votoEvento.getOpcionSeleccionada().getContenido()));
+        
+        messageLabel.setText(Contexto.INSTANCE.getString(
+                "mensajeVotacion", votoEvento.getAsunto(), 
+                votoEvento.getOpcionSeleccionada().getContenido()));
         setTitle(appletFirma.getOperacionEnCurso().
                 getTipo().getCaption());
         progressBarPanel.setVisible(false);
@@ -305,10 +297,19 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
 
             X509Certificate accesRequestServerCert = Contexto.INSTANCE.
                     getAccessControl().getCertificate();
-            tareaEnEjecucion = new AccessRequestWorker(Worker.ACCESS_REQUEST, 
-                    smimeMessage, votoEvento, accesRequestServerCert, this);
+            tareaEnEjecucion = new AccessRequestWorker(null, 
+                    smimeMessage, votoEvento, accesRequestServerCert, null);
             tareaEnEjecucion.execute();
-
+            Respuesta respuesta = (Respuesta) tareaEnEjecucion.get();
+            if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {  
+                notificarCentroControl(((AccessRequestWorker)tareaEnEjecucion).
+                    getPKCS10WrapperClient(), votoEvento);
+            } else {
+                appletFirma.responderCliente(respuesta.getCodigoEstado(), 
+                        respuesta.getMensaje());
+                dispose();
+            }
+            
         } catch (Exception ex) {
             mostrarPantallaEnvio(false);
             logger.error(ex.getMessage(), ex);
@@ -339,70 +340,39 @@ public class VotacionDialog extends JDialog implements VotingSystemWorkerListene
             //        getControlCenter().getCertificate();
             
             String urlVoteService = votoEvento.getUrlRecolectorVotosCentroControl();
-            tareaEnEjecucion = new SMIMESignedSenderWorker(Worker.VOTING, 
+            tareaEnEjecucion = new SMIMESignedSenderWorker(null, 
                     smimeMessage, urlVoteService, pkcs10WrapperClient.
-                    getKeyPair(), null, this);
+                    getKeyPair(), null, null);
             tareaEnEjecucion.execute();
-
+            Respuesta respuesta = (Respuesta) tareaEnEjecucion.get();
+            if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {  
+                try {
+                    SMIMEMessageWrapper validatedVote = respuesta.getSmimeMessage();
+                    ReciboVoto reciboVoto = new ReciboVoto(
+                            Respuesta.SC_OK, validatedVote, votoEvento);
+                    respuesta.setReciboVoto(reciboVoto);
+                    reciboVoto.setVoto(votoEvento);
+                    Contexto.INSTANCE.addReceipt(
+                        votoEvento.getHashCertificadoVotoBase64(), reciboVoto);
+                    appletFirma.responderCliente(
+                        respuesta.getCodigoEstado(), respuesta.getMensaje());
+                } catch (Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                   appletFirma.responderCliente(Operacion.SC_ERROR_ENVIO_VOTO, 
+                        ex.getMessage());
+                }
+            } else {
+                logger.error(" - Error enviando voto: " + respuesta.getMensaje());
+                appletFirma.responderCliente(Operacion.SC_ERROR_ENVIO_VOTO, 
+                        respuesta.getMensaje());
+            }
+            dispose();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
             errorDialog.setMessage(ex.getMessage(), 
                     Contexto.INSTANCE.getString("errorLbl"));
         }
-    }
-    
-    @Override  public void processVotingSystemWorkerMsg(List<String> messages) {
-        logger.debug(" - process: " + messages.toArray().toString());
-        progressLabel.setText(messages.toArray().toString());
-    }
-    
-    @Override public void showResult(VotingSystemWorker worker) {
-        logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-                " - worker: " + worker);
-        Respuesta respuesta = worker.getRespuesta();
-        switch((Worker)worker.getType()) {
-            case ACCESS_REQUEST:
-                if (Respuesta.SC_OK == worker.getStatusCode()) {  
-                    notificarCentroControl(((AccessRequestWorker)worker).
-                        getPKCS10WrapperClient(), votoEvento);
-                } else {
-                    appletFirma.responderCliente(worker.getStatusCode(), 
-                            worker.getMessage());
-                    dispose();
-                }
-                break;
-            case VOTING:
-                if (Respuesta.SC_OK == worker.getStatusCode()) {  
-                    try {
-                        SMIMEMessageWrapper validatedVote = respuesta.getSmimeMessage();
-                        ReciboVoto reciboVoto = new ReciboVoto(
-                                Respuesta.SC_OK, validatedVote, votoEvento);
-                        respuesta.setReciboVoto(reciboVoto);
-                        reciboVoto.setVoto(votoEvento);
-                        Contexto.INSTANCE.addReceipt(
-                            votoEvento.getHashCertificadoVotoBase64(), reciboVoto);
-                        appletFirma.responderCliente(
-                            worker.getStatusCode(), worker.getMessage());
-                    } catch (Exception ex) {
-                        logger.error(ex.getMessage(), ex);
-                       appletFirma.responderCliente(Operacion.SC_ERROR_ENVIO_VOTO, 
-                            ex.getMessage());
-                    }
-                } else {
-                    logger.error(" - Error enviando voto: " + worker.getMessage());
-                    appletFirma.responderCliente(Operacion.SC_ERROR_ENVIO_VOTO, 
-                            worker.getMessage());
-                }
-                dispose();
-                break;
-        }
-
-    } 
-    
-    private String getMensajeVotacion(String asunto, String opcionSeleccionada) {
-        String pattern = Contexto.INSTANCE.getString("mensajeVotacion");
-        return MessageFormat.format(pattern, asunto, opcionSeleccionada);
     }
 
 }

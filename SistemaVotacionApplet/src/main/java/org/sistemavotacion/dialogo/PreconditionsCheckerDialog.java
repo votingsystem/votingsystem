@@ -33,14 +33,14 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class PreconditionsCheckerDialog 
-        extends JDialog implements VotingSystemWorkerListener {
+public class PreconditionsCheckerDialog extends JDialog 
+        implements VotingSystemWorkerListener {
     
     private static Logger logger = LoggerFactory.getLogger(
             PreconditionsCheckerDialog.class);
     
-    public enum Worker implements VotingSystemWorkerType{CHECK_ACCES_CONTROL_CERT,
-        CHECK_CONTROL_CENTER_CERT}
+    public enum Worker implements VotingSystemWorkerType{
+        CHECK_ACCES_CONTROL_CERT, CHECK_CONTROL_CENTER_CERT}
     
 
     private static final Map<String, ActorConIP> actorMap = 
@@ -378,7 +378,7 @@ public class PreconditionsCheckerDialog
     @Override
     public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-                " - worker: " + worker);
+                " - worker: " + worker.getType());
         InfoGetterWorker infoWorker = null;
         try {
             switch((Worker)worker.getType()) {

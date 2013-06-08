@@ -1,4 +1,4 @@
-package org.sistemavotacion.test.simulation.launcher;
+package org.sistemavotacion.test.simulation.callable;
 
 import java.io.File;
 import java.security.KeyStore;
@@ -31,10 +31,10 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class RepresentativeRequestLauncher implements Callable<Respuesta>, 
+public class RepresentativeRequestor implements Callable<Respuesta>, 
         VotingSystemWorkerListener {
     
-    private static Logger logger = LoggerFactory.getLogger(RepresentativeRequestLauncher.class);
+    private static Logger logger = LoggerFactory.getLogger(RepresentativeRequestor.class);
 
     public enum Worker implements VotingSystemWorkerType{
         REPRESENTATIVE_REQUEST}
@@ -45,7 +45,7 @@ public class RepresentativeRequestLauncher implements Callable<Respuesta>,
     private File selectedImage;
     private Respuesta respuesta;
         
-    public RepresentativeRequestLauncher (String representativeNIF) 
+    public RepresentativeRequestor (String representativeNIF) 
             throws Exception {
         this.representativeNIF = representativeNIF;
     }
@@ -113,7 +113,8 @@ public class RepresentativeRequestLauncher implements Callable<Respuesta>,
     @Override
     public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-        " - representativeNIF: " + representativeNIF + " - worker: " + worker);
+        " - representativeNIF: " + representativeNIF + " - worker: " + 
+                worker.getType());
         respuesta = worker.getRespuesta();
         String msg = null;
         switch((Worker)worker.getType()) {
@@ -127,7 +128,7 @@ public class RepresentativeRequestLauncher implements Callable<Respuesta>,
                 } 
                 break;
             default:
-                logger.debug("*** UNKNOWN WORKER: " + worker);
+                logger.debug("*** UNKNOWN WORKER: " + worker.getType());
         }
         countDownLatch.countDown();
     }

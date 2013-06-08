@@ -3,6 +3,8 @@ package org.sistemavotacion.test.dialogo;
 import java.awt.Frame;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
@@ -11,7 +13,7 @@ import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.modelo.UserBaseSimulationData;
 import org.sistemavotacion.test.simulation.UserBaseDataSimulator;
 import org.sistemavotacion.test.simulation.SimulatorListener;
-import org.sistemavotacion.test.simulation.Simulator;
+import org.sistemavotacion.test.simulation.VotingSimulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +30,9 @@ public class UserBaseDialog extends JDialog
     private UserBaseDataSimulator creacionBaseUsuarios = null;
     private Frame parentFrame;
     private List<String> errors = null;
-    MensajeDialog errorDialog = null;
+    private MensajeDialog errorDialog = null;
+    
+    private ExecutorService executorPool = null;
     
     /**
      * Creates new form RepresentativesDialog
@@ -236,16 +240,19 @@ public class UserBaseDialog extends JDialog
         userBasePanel.setVisible(false);
         progressBarPanel.setVisible(true);
         pack();
+        
+                        
+        if(executorPool == null)executorPool = Executors.newFixedThreadPool(3);
         creacionBaseUsuarios = new UserBaseDataSimulator(
-               userBaseData, this);
-        creacionBaseUsuarios.init();
+                       userBaseData, this);
+        executorPool.submit(creacionBaseUsuarios);
+        
     }//GEN-LAST:event_createUsersButtonActionPerformed
 
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
         if(progressBarPanel.isVisible()) {
             try {
-                creacionBaseUsuarios.finish();
-                setSimulationResult(creacionBaseUsuarios.getData());
+                if(executorPool != null) executorPool.shutdown();
             } catch(Exception ex) {
                 logger.error(ex.getMessage(), ex);
             }

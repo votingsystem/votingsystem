@@ -55,7 +55,7 @@ public class SMIMESignedSenderWorker extends SwingWorker<Respuesta, String>
             logger.error(ex.getMessage(), ex);
             respuesta.appendErrorMessage(ex.getMessage());
         } 
-        workerListener.showResult(this);
+        if(workerListener != null) workerListener.showResult(this);
     }
     
     @Override protected Respuesta doInBackground() throws Exception {

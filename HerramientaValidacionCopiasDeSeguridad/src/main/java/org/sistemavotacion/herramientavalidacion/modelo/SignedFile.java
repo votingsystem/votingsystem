@@ -25,13 +25,13 @@ public class SignedFile {
     private String name = null;
     private SMIMEMessageWrapper smimeMessageWraper = null;
     private boolean signatureVerified = false;
-    //private File pdfSignedFile = null;
 
     
     public SignedFile(byte[] signedFileBytes, String name) throws Exception {
         this.name = name;
         this.signedFileBytes = signedFileBytes;
         if(name.toLowerCase().endsWith(".pdf")) {
+            pdf = true;
             PdfReader reader = new PdfReader(signedFileBytes);
             AcroFields acroFields = reader.getAcroFields();
             ArrayList<String> names = acroFields.getSignatureNames();
@@ -59,10 +59,12 @@ public class SignedFile {
                 //if(fails != null) {...}
             }
             
-        } else {
+        } else if(name.toLowerCase().endsWith(".p7m")){
             smimeMessageWraper = new SMIMEMessageWrapper(null,
                 new ByteArrayInputStream(signedFileBytes), null);
             signatureVerified = smimeMessageWraper.isValidSignature();
+        } else {
+            logger.error(" #### UNKNOWN FILE TYPE -> " + name);
         }
     }
     
@@ -104,7 +106,15 @@ public class SignedFile {
     
     public boolean isPDF() {
         if(signedFileBytes == null) return false;
-        if(name.toLowerCase().endsWith(".pdf")) return true;
+        if(name.toLowerCase().endsWith(".pdf") && 
+                signatureVerified) return true;
+        else return false;
+    }
+    
+    public boolean isSMIME() {
+        if(signedFileBytes == null) return false;
+        if(name.toLowerCase().endsWith(".p7m") && 
+                signatureVerified) return true;
         else return false;
     }
     

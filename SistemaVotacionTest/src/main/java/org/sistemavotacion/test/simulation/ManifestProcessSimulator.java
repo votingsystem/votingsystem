@@ -5,7 +5,6 @@ import com.itextpdf.text.pdf.PdfReader;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
@@ -21,26 +20,26 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Evento;
-import org.sistemavotacion.modelo.MetaInf;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.pdf.PdfFormHelper;
 import org.sistemavotacion.seguridad.CertUtil;
+import org.sistemavotacion.smime.SMIMEMessageWrapper;
+import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.test.simulation.launcher.SignatureManifestLauncher;
+import org.sistemavotacion.test.simulation.callable.BackupValidator;
+import org.sistemavotacion.test.simulation.callable.ManifestSigner;
 import org.sistemavotacion.test.util.SimulationUtils;
-import org.sistemavotacion.test.worker.BackupRequestWorker;
 import org.sistemavotacion.util.NifUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.StringUtils;
 import org.sistemavotacion.worker.DocumentSenderWorker;
 import org.sistemavotacion.worker.InfoGetterWorker;
 import org.sistemavotacion.worker.PDFSignedSenderWorker;
-import org.sistemavotacion.worker.VotingSystemWorker;
-import org.sistemavotacion.worker.VotingSystemWorkerListener;
-import org.sistemavotacion.worker.VotingSystemWorkerType;
+import org.sistemavotacion.worker.SMIMESignedSenderWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,15 +48,10 @@ import org.slf4j.LoggerFactory;
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class ManifestProcessSimulator extends Simulator<SimulationData> 
-        implements VotingSystemWorkerListener, ActionListener {
+        implements ActionListener {
     
-    private static Logger logger = LoggerFactory.getLogger(ManifestProcessSimulator.class);
-    
-    public enum Worker implements VotingSystemWorkerType{
-        ACCESS_CONTROL_GETTER, CA_CERT_INITIALIZER, SEND_DOCUMENT_JSON,
-        MANIFEST_GETTER, PDF_SIGNED_SENDER, BACKUP_REQUEST
-    }
-   
+    private static Logger logger = LoggerFactory.getLogger(
+            ManifestProcessSimulator.class);
 
     private static ExecutorService simulatorExecutor;
     private static ExecutorService signManifestExecutor;
@@ -66,42 +60,24 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
     private List<String> signerList = null;
     
     private Evento event = null;
-    private SimulationData simulationData = null;
+    private Evento.Estado nextEventState = null;
 
     private String urlSignManifest = null;
     private String urlPublishManifest = null;
     private byte[] pdfBytes = null;
     
-    //private AtomicBoolean done = new AtomicBoolean(true);
-    
-    private final CountDownLatch countDownLatch = new CountDownLatch(1);
-    
     private SimulatorListener simulationListener;
+    private final CountDownLatch countDownLatch = new CountDownLatch(1);
     
     public ManifestProcessSimulator(SimulationData simulationData,
              SimulatorListener simulationListener) {  
         super(simulationData);
-        this.simulationData = simulationData;
         this.simulationListener = simulationListener;
     }
-    
 
-    public void init() {
-        logger.debug("inits - NumberOfRequestsProjected: " +  
-                simulationData.getNumRequestsProjected());
-        simulationData.setBegin(System.currentTimeMillis());
-        try {
-            String urlServidor = StringUtils.prepararURL(simulationData.getAccessControlURL());
-            String urlInfoServidor = ContextoPruebas.getURLInfoServidor(urlServidor);
-            new InfoGetterWorker(Worker.ACCESS_CONTROL_GETTER, urlInfoServidor, 
-                null, this).execute();            
-            countDownLatch.await();
-            finish();
-        } catch (InterruptedException ex) {
-            logger.error(ex.getMessage(), ex);
-        } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-        }
+    public ManifestProcessSimulator(SimulationData simulationData) {  
+        super(simulationData);
+        this.simulationData = simulationData;
     }
     
     public void launchRequests () throws Exception {
@@ -115,12 +91,7 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
                         simulationData.getMaxPendingResponses()) {
                     int randomSigner = new Random().nextInt(signerList.size());
                     launchSignature(signerList.remove(randomSigner));
-                } else Thread.sleep(1000);
-                /*if(done.get()) {
-                    int randomElector = new Random().nextInt(electorList.size());
-                    lanzarSolicitudAcceso(electorList.remove(randomElector));
-                    done.set(false);
-                } else Thread.sleep(1000);*/
+                } else Thread.sleep(200);
             }
         }
     }   
@@ -129,7 +100,7 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
         String reason = null;
         String location = null;
         PdfReader manifestToSign = new PdfReader(pdfBytes);
-        signManifestCompletionService.submit(new SignatureManifestLauncher(nif, 
+        signManifestCompletionService.submit(new ManifestSigner(nif, 
             urlSignManifest, manifestToSign, reason, location));
         simulationData.getAndIncrementNumRequests();
     }
@@ -156,30 +127,63 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
                 addErrorMsg(msg);
                 simulationData.getAndIncrementNumRequestsERROR();
             }
-            //done.set(true);
         }
-        if(simulationData.getBackupRequestEmail() != null) requestBackup();
-        else countDownLatch.countDown();       
+        if(nextEventState != null) setNextEventState();
+        if(nextEventState != null && simulationData.
+                getBackupRequestEmail() != null) requestBackup();
+        countDownLatch.countDown();    
     }
     
+    private void setNextEventState() throws Exception {
+        logger.debug("setNextEventState");
+        String cancelDataStr = event.getCancelEventJSON(
+            Contexto.INSTANCE.getAccessControl().getServerURL(), 
+            nextEventState).toString();
+        String msgSubject = ContextoPruebas.INSTANCE.getString("cancelClaimMsgSubject");
+        SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
+                ContextoPruebas.INSTANCE.getUserTest().getKeyStore(),
+                ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS, 
+                ContextoPruebas.PASSWORD.toCharArray(),
+                ContextoPruebas.VOTE_SIGN_MECHANISM);
+        SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage(
+                ContextoPruebas.INSTANCE.getUserTest().getEmail(), 
+                Contexto.INSTANCE.getAccessControl().getNombreNormalizado(), 
+                cancelDataStr, msgSubject,  null);
+        SMIMESignedSenderWorker worker = new SMIMESignedSenderWorker(
+                null, smimeDocument, ContextoPruebas.INSTANCE.getCancelEventURL(), 
+                null, null, null);
+        worker.execute();
+        worker.get();//wait
+        if(Respuesta.SC_OK != worker.getStatusCode()) 
+            logger.error(worker.getErrorMessage());
+    }
+
     private void requestBackup() throws Exception {
         logger.debug("requestBackup");
         byte[] requestBackupPDFBytes = PdfFormHelper.getBackupRequest(
             event.getEventoId().toString(), event.getAsunto(), 
                             simulationData.getBackupRequestEmail());
-        new BackupRequestWorker(Worker.BACKUP_REQUEST, 
+        PrivateKey signerPrivateKey = ContextoPruebas.INSTANCE.getUserTestPrivateKey();
+        Certificate[] signerCertChain = ContextoPruebas.INSTANCE.getUserTestCertificateChain();
+        PdfReader requestBackupPDF = new PdfReader(requestBackupPDFBytes);
+        PDFSignedSenderWorker worker = new PDFSignedSenderWorker(null, 
                 ContextoPruebas.INSTANCE.getUrlBackupEvents(), 
-                requestBackupPDFBytes, this).execute(); 
+                null, null, null, requestBackupPDF, signerPrivateKey, 
+                signerCertChain, null, null);
+        worker.execute();
+        Respuesta respuesta = worker.get();
+        if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+            FutureTask<Respuesta> future = new FutureTask<Respuesta>(
+                new BackupValidator(respuesta.getBytesArchivo()));
+            simulatorExecutor.execute(future);
+            respuesta = future.get();
+            logger.debug("BackupRequestWorker - status: " + respuesta.getCodigoEstado());
+        } else logger.error(worker.getErrorMessage());
     }
-    
-    
-    @Override public void processVotingSystemWorkerMsg(List<String> messages) {}
-    
     
     private void initExecutors(){
         if(!(simulationData.getNumRequestsProjected() > 0)) {
             logger.debug("WITHOUT NumberOfRequestsProjected");
-            countDownLatch.countDown();
             return;
         }
         signerList = new ArrayList<String>();
@@ -214,35 +218,78 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
         });
     }
     
-    private void publishEvent() {
-        logger.debug("publishEvent");
-        try {
-            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            Date date = new Date(System.currentTimeMillis());
-            String dateStr = formatter.format(date);
-            event = simulationData.getEvento();
-            String subject = event.getAsunto()+ " -> " + dateStr;
-            event.setAsunto(subject);
-            String eventStr = event.toJSON().toString();
-            urlPublishManifest = ContextoPruebas.getManifestServiceURL(
-                    Contexto.INSTANCE.getAccessControl().getServerURL());
-            new DocumentSenderWorker(Worker.SEND_DOCUMENT_JSON, eventStr.getBytes(), 
-                    Contexto.JSON_CONTENT_TYPE, urlPublishManifest, this).execute();
-        } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-        }
+    private void publishManifest() throws Exception {
+        logger.debug("publishManifest");
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = new Date(System.currentTimeMillis());
+        String dateStr = formatter.format(date);
+        event = simulationData.getEvento();
+        nextEventState = event.getNextState();
+        String subject = event.getAsunto()+ " -> " + dateStr;
+        event.setAsunto(subject);
+        String eventStr = event.toJSON().toString();
+        urlPublishManifest = ContextoPruebas.getManifestServiceURL(
+                Contexto.INSTANCE.getAccessControl().getServerURL());
+        DocumentSenderWorker worker = new DocumentSenderWorker(null, 
+                eventStr.getBytes(), Contexto.JSON_CONTENT_TYPE, 
+                urlPublishManifest, null);
+        worker.execute();
+        worker.get();
+        if(Respuesta.SC_OK == worker.getStatusCode()) { 
+            event.setEventoId(Long.valueOf(worker.getMessage()));
+            urlSignManifest = ContextoPruebas.getSignManifestURL(
+                Contexto.INSTANCE.getAccessControl().getServerURL()) + 
+                File.separator + worker.getMessage();
+            //manifest PDF has been validated, now we have to download it
+            String pdfURL = ContextoPruebas.getManifestServiceURL(
+                    Contexto.INSTANCE.getAccessControl().getServerURL()) + 
+                    File.separator + worker.getMessage();
+            InfoGetterWorker pdfGetterWorker = new InfoGetterWorker(null,
+                    pdfURL, Contexto.PDF_CONTENT_TYPE, null);
+            pdfGetterWorker.execute();
+            Respuesta respuesta = pdfGetterWorker.get();
+            if(Respuesta.SC_OK == respuesta.getCodigoEstado()) { 
+                //if all is OK server responds with the id of the new manifest
+                pdfBytes =respuesta.getBytesArchivo();
+                PdfReader manifestToSign = new PdfReader(pdfBytes);
+                String reason = null;
+                String location = null;
+                PrivateKey privateKey = ContextoPruebas.INSTANCE.
+                        getUserTestPrivateKey();
+                Certificate[] signerCertChain = ContextoPruebas.INSTANCE.
+                        getUserTestCertificateChain();
+                String urlToSendDocument = urlPublishManifest + 
+                    File.separator + event.getEventoId();
+                X509Certificate destinationCert = Contexto.INSTANCE.
+                        getAccessControl().getCertificate();
+                PDFSignedSenderWorker pdfSenderWorker = 
+                        new PDFSignedSenderWorker(null,
+                        urlToSendDocument, reason, location, null,
+                        manifestToSign, privateKey, signerCertChain, 
+                        destinationCert, null);
+                pdfSenderWorker.execute();
+                pdfSenderWorker.get();
+                if(Respuesta.SC_OK == pdfSenderWorker.getStatusCode()) {
+                    initExecutors();//Manifest published, we now initialize user base data.
+                } else logger.error(pdfSenderWorker.getMessage());
+            } else logger.error(pdfGetterWorker.getMessage());
+        } logger.error(worker.getMessage());
     }
 
-    private void initilizeAuthorityCert() {
-        try {
-            byte[] caPemCertificateBytes = CertUtil.fromX509CertToPEM (
-                ContextoPruebas.INSTANCE.getRootCACert());
-            String urlAnyadirCertificadoCA = ContextoPruebas.INSTANCE.
-                    getAccessControlRootCAServiceURL();
-            new DocumentSenderWorker(Worker.CA_CERT_INITIALIZER, 
-                caPemCertificateBytes, null, urlAnyadirCertificadoCA, this).execute();
-        } catch (IOException ex) {
-            logger.error(ex.getMessage(), ex);
+    private void initCA_AccessControl() throws Exception {
+        logger.debug("initCA_AccessControl");
+        //we need to add test Authority Cert to system in order
+        //to validate signatures
+        byte[] rootCACertPEMBytes = CertUtil.fromX509CertToPEM (
+            ContextoPruebas.INSTANCE.getRootCACert());
+        String rootCAServiceURL = ContextoPruebas.INSTANCE.
+                getAccessControlRootCAServiceURL();
+        DocumentSenderWorker worker = new DocumentSenderWorker(null, 
+            rootCACertPEMBytes, null, rootCAServiceURL, null);
+        worker.execute();
+        worker.get();
+        if(Respuesta.SC_OK == worker.getStatusCode()) {
+            publishManifest();
         }
     }
 
@@ -259,107 +306,6 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
             } else timer.stop();
         }
     }
-    
-    @Override public void showResult(VotingSystemWorker worker) {
-        logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-                " - worker: " + worker);
-        String msg = null;
-        switch((Worker)worker.getType()) {
-            case ACCESS_CONTROL_GETTER:  
-                if(Respuesta.SC_OK == worker.getStatusCode()) {
-                    try {
-                        ActorConIP controlAcceso = ActorConIP.parse(worker.getMessage());
-                        msg = SimulationUtils.checkActor(controlAcceso, 
-                                ActorConIP.Tipo.CONTROL_ACCESO);
-                        if(msg == null) {
-                            ContextoPruebas.INSTANCE.setControlAcceso(controlAcceso);
-                            initilizeAuthorityCert();
-                            return;
-                        }
-                    } catch(Exception ex) {
-                        logger.error(ex.getMessage(), ex);
-                        msg = ex.getMessage();
-                    }
-                }else msg = worker.getMessage();
-                msg = "### ERROR - ACCESS_CONTROL_GETTER -" + msg;
-                break;
-            case CA_CERT_INITIALIZER:
-                publishEvent();
-                return;        
-            case SEND_DOCUMENT_JSON:
-                if(Respuesta.SC_OK == worker.getStatusCode()) { 
-                    event.setEventoId(Long.valueOf(worker.getMessage()));
-                    urlSignManifest = ContextoPruebas.getSignManifestURL(
-                        Contexto.INSTANCE.getAccessControl().getServerURL()) + 
-                        File.separator + worker.getMessage();
-                    //manifest PDF has been validated, now we have to download it
-                    String pdfURL = ContextoPruebas.getManifestServiceURL(
-                            Contexto.INSTANCE.getAccessControl().getServerURL()) + 
-                            File.separator + worker.getMessage();
-                    new InfoGetterWorker(Worker.MANIFEST_GETTER,
-                            pdfURL, Contexto.PDF_CONTENT_TYPE, this).execute();
-                    return;
-                } else {
-                    msg = "###ERROR SEND_DOCUMENT_JSON: " + worker.getMessage();
-                }
-                break;
-            case MANIFEST_GETTER:
-                //This is the pdf to publish, but first we have to sign and timestamp it
-                if(Respuesta.SC_OK == worker.getStatusCode()) { 
-                    try {
-                        //if all is OK server responds with the id of the new manifest
-                        pdfBytes =((InfoGetterWorker)worker).getRespuesta().
-                            getBytesArchivo();
-                        PdfReader manifestToSign = new PdfReader(pdfBytes);
-                        String reason = null;
-                        String location = null;
-                        PrivateKey privateKey = ContextoPruebas.INSTANCE.
-                                getUserTestPrivateKey();
-                        Certificate[] signerCertChain = ContextoPruebas.INSTANCE.
-                                getUserTestCertificateChain();
-                        String urlToSendDocument = urlPublishManifest + 
-                            File.separator + event.getEventoId();
-                        X509Certificate destinationCert = Contexto.INSTANCE.
-                                getAccessControl().getCertificate();
-                        
-                        new PDFSignedSenderWorker(Worker.PDF_SIGNED_SENDER,
-                                urlToSendDocument, reason, location, null,
-                                manifestToSign, privateKey, signerCertChain, 
-                                destinationCert, this).execute();
-                        return;
-                    } catch(Exception ex) {
-                        logger.error(ex.getMessage(), ex);
-                        msg = ex.getMessage();
-                    }
-                } else msg = worker.getMessage();
-                msg = "### ERROR - MANIFEST_GETTER -" + msg;
-                break;  
-            case PDF_SIGNED_SENDER:
-                if(Respuesta.SC_OK == worker.getStatusCode()) { 
-                    initExecutors();//Manifest published, we now initialize user base data.
-                    return;
-                } else msg = "###ERROR PDF_PUBLISHER: " + worker.getMessage();
-                break;
-            case BACKUP_REQUEST:
-                if(Respuesta.SC_OK == worker.getStatusCode()) {
-                    MetaInf metaInf =  (MetaInf) worker.getRespuesta().getData();
-                    logger.debug("BACKUP_REQUEST OK - Event -> " + event.getEventoId());
-                    if(metaInf.getErrorsList() != null && 
-                            !metaInf.getErrorsList().isEmpty()) {
-                        addErrorList(metaInf.getErrorsList());
-                    }
-                    logger.debug("------------ META-INF BACKUP ------------");
-                    logger.debug(metaInf.getFormattedInfo());
-                    countDownLatch.countDown();
-                    return;
-                } else msg = "### ERRROR BACKUP_REQUEST: " + 
-                        worker.getMessage();
-                break;
-        }
-        addErrorMsg(msg);
-        logger.error(msg);
-        countDownLatch.countDown();
-    }
 
     public static void main(String[] args) throws Exception {
         SimulationData simulationData = null;
@@ -375,38 +321,61 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
         }
         ManifestProcessSimulator simuHelper = new ManifestProcessSimulator(
                 simulationData, null);
-        simuHelper.init();
+        simuHelper.call();
     }
 
-    @Override public SimulationData getData() {
-        return simulationData;
-    }
 
-    @Override public void finish() throws Exception {
-        logger.debug("finish");
+    @Override
+    public SimulationData call() throws Exception {
+        logger.debug("call - NumberOfRequestsProjected: " +  
+                simulationData.getNumRequestsProjected());
+        simulationData.setBegin(System.currentTimeMillis());
+        String urlServidor = StringUtils.prepararURL(simulationData.getAccessControlURL());
+        String urlInfoServidor = ContextoPruebas.getURLInfoServidor(urlServidor);
+        InfoGetterWorker worker = new InfoGetterWorker(null, urlInfoServidor, 
+            null, null);
+        worker.execute();            
+        worker.get();
+        if(Respuesta.SC_OK == worker.getStatusCode()) {
+            ActorConIP controlAcceso = ActorConIP.parse(worker.getMessage());
+            String msg = SimulationUtils.checkActor(controlAcceso, 
+                    ActorConIP.Tipo.CONTROL_ACCESO);
+            if(msg == null) {
+                ContextoPruebas.INSTANCE.setControlAcceso(controlAcceso);
+                initCA_AccessControl();
+            }
+        } else logger.error(worker.getErrorMessage());
+        
+        
+        countDownLatch.await();
+        logger.debug("- call - shutdown executors");   
+        
         simulationData.setFinish(System.currentTimeMillis());
         if(timer != null) timer.stop();
         if(simulatorExecutor != null) simulatorExecutor.shutdownNow();
-        if(signManifestExecutor != null) signManifestExecutor.shutdownNow();         
-        if(simulationListener != null) {           
-            simulationListener.setSimulationResult(simulationData);
-        } else { 
-            logger.debug("--------------- SIMULATION RESULT----------------------");   
-            simulationData.setFinish(System.currentTimeMillis());
-            logger.info("Duration: " + simulationData.getDurationStr());
-            logger.info("Number of projected requests: " + 
-                    simulationData.getNumRequestsProjected());
-            logger.info("Number of completed requests: " + simulationData.getNumRequests());
-            logger.info("Number of signatures OK: " + simulationData.getNumRequestsOK());
-            logger.info("Number of signatures ERROR: " + simulationData.getNumRequestsERROR());
-            String errorsMsg = getFormattedErrorList();
-            if(errorsMsg != null) {
-                logger.info(" ************* " + getErrorsList().size() + " ERRORS: \n" + 
-                            errorsMsg);
-            }
-            logger.debug("------------------- FINISHED --------------------------");
-            System.exit(0);
+        if(signManifestExecutor != null) signManifestExecutor.shutdownNow(); 
+        
+        logger.debug("--------------- SIMULATION RESULT----------------------");   
+        simulationData.setFinish(System.currentTimeMillis());
+        logger.info("Duration: " + simulationData.getDurationStr());
+        logger.info("Number of projected requests: " + 
+                simulationData.getNumRequestsProjected());
+        logger.info("Number of completed requests: " + simulationData.getNumRequests());
+        logger.info("Number of signatures OK: " + simulationData.getNumRequestsOK());
+        logger.info("Number of signatures ERROR: " + simulationData.getNumRequestsERROR());
+        String errorsMsg = getFormattedErrorList();
+        if(errorsMsg != null) {
+            logger.info(" ************* " + getErrorsList().size() + " ERRORS: \n" + 
+                        errorsMsg);
         }
+        logger.debug("------------------- FINISHED --------------------------");
+        
+        if(simulationListener != null)            
+            simulationListener.setSimulationResult(simulationData);
+        
+        
+        simulationData.setStatusCode(Respuesta.SC_OK);
+        return simulationData;
     }
 
 }

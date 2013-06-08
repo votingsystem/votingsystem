@@ -48,13 +48,11 @@ public class DocumentSenderWorker extends SwingWorker<Respuesta, String>
             logger.error(ex.getMessage(), ex);
             respuesta.appendMessage(ex.getMessage());
         } 
-        workerListener.showResult(this);
+        if(workerListener != null) workerListener.showResult(this);
     }
     
     @Override protected Respuesta doInBackground() throws Exception {
         logger.debug("doInBackground - urlToSendDocument: " + urlToSendDocument);
-        String msg = Contexto.INSTANCE.getString("connectionMsg");
-        workerListener.processVotingSystemWorkerMsg(Arrays.asList(msg));
         if(documentoEnviado instanceof File) {
             respuesta = Contexto.INSTANCE.getHttpHelper().sendFile((File)documentoEnviado, 
                     documentContentType, urlToSendDocument);

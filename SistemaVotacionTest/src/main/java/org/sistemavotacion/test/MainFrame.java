@@ -21,7 +21,6 @@ import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.test.dialogo.InfoServidorDialog;
 import org.sistemavotacion.test.dialogo.MensajeDialog;
 import org.sistemavotacion.modelo.ActorConIP;
-import org.sistemavotacion.test.util.SimulationUtils;
 import org.sistemavotacion.util.StringUtils;
 import org.sistemavotacion.worker.DocumentSenderWorker;
 import org.sistemavotacion.worker.InfoGetterWorker;

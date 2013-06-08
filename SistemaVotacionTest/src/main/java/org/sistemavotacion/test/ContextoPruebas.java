@@ -39,7 +39,6 @@ public enum ContextoPruebas {
     
     private static Logger logger = LoggerFactory.getLogger(ContextoPruebas.class);
 
-    
     public static class DEFAULTS {
         public static final String APPDIR =  Contexto.DEFAULTS.APPDIR + 
                 File.separator + "ContextoPruebas"  + File.separator;  
@@ -120,7 +119,9 @@ public enum ContextoPruebas {
         }
 
     }
-     
+    
+    public void init() { }
+    
     public void setVotingPanel(VotacionesPanel panel) {
         this.votacionesPanel = panel;
     }

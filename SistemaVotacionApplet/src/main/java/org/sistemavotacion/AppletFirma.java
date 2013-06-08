@@ -219,7 +219,7 @@ public class AppletFirma extends JApplet {
                         File jsonFile = File.createTempFile("operacion", ".json");
                         jsonFile.deleteOnExit();
                         FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
-                            .getResourceAsStream("testFiles/publishManifest.json"), jsonFile);        
+                            .getResourceAsStream("testFiles/newRepresentative.json"), jsonFile);        
                         appletFirma.ejecutarOperacion(FileUtils.getStringFromFile(jsonFile));
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);

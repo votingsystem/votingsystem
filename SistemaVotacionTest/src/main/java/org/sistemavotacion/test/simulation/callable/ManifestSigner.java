@@ -1,4 +1,4 @@
-package org.sistemavotacion.test.simulation.launcher;
+package org.sistemavotacion.test.simulation.callable;
 
 import com.itextpdf.text.pdf.PdfReader;
 import java.security.KeyStore;
@@ -22,10 +22,10 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class SignatureManifestLauncher implements Callable<Respuesta>, 
+public class ManifestSigner implements Callable<Respuesta>, 
         VotingSystemWorkerListener {
     
-    private static Logger logger = LoggerFactory.getLogger(SignatureManifestLauncher.class);
+    private static Logger logger = LoggerFactory.getLogger(ManifestSigner.class);
 
     public enum Worker implements VotingSystemWorkerType{
         PDF_SIGNED_SENDER}
@@ -40,7 +40,7 @@ public class SignatureManifestLauncher implements Callable<Respuesta>,
     private PdfReader manifestToSign = null;
     private Respuesta respuesta;
         
-    public SignatureManifestLauncher (String nif, String urlToSendDocument, 
+    public ManifestSigner (String nif, String urlToSendDocument, 
             PdfReader manifestToSign, String reason, String location) throws Exception {
         this.nif = nif;
         this.reason = reason;
@@ -80,7 +80,7 @@ public class SignatureManifestLauncher implements Callable<Respuesta>,
     @Override
     public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-        " - nif: " + nif + " - worker: " + worker);
+        " - nif: " + nif + " - worker: " + worker.getType());
         respuesta = new Respuesta(worker.getStatusCode(), " - from:" + nif + 
                 " - " + worker.getMessage());
         countDownLatch.countDown();

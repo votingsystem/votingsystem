@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
@@ -39,6 +43,8 @@ public class VotacionesPanel extends JPanel implements
     private HashMap<String, ActorConIP> hashMapActores = null;
     private Frame parentFrame = null;
     private MainFrame mainFrame = null;
+    
+    private ExecutorService executorPool = null;
     
     /**
      * Creates new form VotacionesPanel
@@ -460,9 +466,10 @@ public class VotacionesPanel extends JPanel implements
                 simulationdata.setUserBaseData(
                         ContextoPruebas.INSTANCE.getUserBaseData());
                 
-                
+                if(executorPool == null)executorPool = Executors.newFixedThreadPool(3);
                 votacion = new VotingSimulator(simulationdata, this);
-                votacion.init();
+                executorPool.submit(votacion);
+   
                 digitalClockPanel.start(DigitalClockPanel.Mode.STOPWATCH);
                 break;
             case SIMULACION:
@@ -488,7 +495,7 @@ public class VotacionesPanel extends JPanel implements
                 lanzarSimulacionButton.setText("Lanzar simulación");
                 lanzarSimulacionButton.setIcon(new ImageIcon(getClass().getResource("/images/gnome-run.png")));
                 try {
-                    if(votacion != null) votacion.finish();
+                    if(votacion != null) executorPool.shutdown();
                 } catch(Exception ex) {
                     logger.error(ex.getMessage(), ex);
                 }

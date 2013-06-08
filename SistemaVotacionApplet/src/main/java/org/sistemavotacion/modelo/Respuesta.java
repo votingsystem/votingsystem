@@ -43,6 +43,11 @@ public class Respuesta<T> {
         this.codigoEstado = codigoEstado;    
     }
     
+    public Respuesta (int codigoEstado, Evento evento) {
+        this.codigoEstado = codigoEstado;
+        this.evento = evento;
+    }
+    
     public Respuesta (int codigoEstado, ReciboVoto reciboVoto) {
         this.codigoEstado = codigoEstado;
         this.reciboVoto = reciboVoto;

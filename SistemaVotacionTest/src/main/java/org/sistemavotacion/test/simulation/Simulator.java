@@ -4,6 +4,7 @@ import org.sistemavotacion.test.modelo.SimulationData;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import javax.swing.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,20 +13,19 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public abstract class Simulator<T extends SimulationData> {
+public abstract class Simulator<T extends SimulationData> 
+        implements Callable<T> {
     
     private static Logger logger = LoggerFactory.getLogger(Simulator.class);
     
     private List<String> errorsList;
     
-    public abstract void init() throws Exception;
-    public abstract T getData();
-    public abstract void finish() throws Exception;
+    public abstract T call() throws Exception;
         
-    private SimulationData simulationData = null;
+    protected T simulationData = null;
     public Timer timer = null;
     
-    public Simulator(SimulationData simulationData) {
+    public Simulator(T simulationData) {
         this.simulationData = simulationData;
     }
     

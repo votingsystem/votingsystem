@@ -1,4 +1,4 @@
-package org.sistemavotacion.test.simulation.launcher;
+package org.sistemavotacion.test.simulation.callable;
 
 import java.security.KeyStore;
 import java.util.HashMap;
@@ -29,13 +29,12 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class TimeStampLauncher implements Callable<Respuesta>, 
+public class TimeStamper implements Callable<Respuesta>, 
         VotingSystemWorkerListener {
     
-    private static Logger logger = LoggerFactory.getLogger(TimeStampLauncher.class);
+    private static Logger logger = LoggerFactory.getLogger(TimeStamper.class);
 
-    public enum Worker implements VotingSystemWorkerType{
-        TIME_STAMP}
+    public enum Worker implements VotingSystemWorkerType{ TIME_STAMP}
 
     private SMIMEMessageWrapper documentSMIME;
     private String requestNIF;
@@ -47,7 +46,7 @@ public class TimeStampLauncher implements Callable<Respuesta>,
     private String timeStampTokenStr = null;
     private String timeStampRequestStr;
     
-    public TimeStampLauncher (String requestNIF, String urlTimeStampServer) 
+    public TimeStamper (String requestNIF, String urlTimeStampServer) 
             throws Exception {
         this.requestNIF = requestNIF;
     }
@@ -94,7 +93,7 @@ public class TimeStampLauncher implements Callable<Respuesta>,
     @Override
     public void showResult(VotingSystemWorker worker) {
         logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-         " - worker: " + worker);
+         " - worker: " + worker.getType());
         respuesta = new Respuesta();
         respuesta.setCodigoEstado(worker.getStatusCode());
         switch((Worker)worker.getType()) {
