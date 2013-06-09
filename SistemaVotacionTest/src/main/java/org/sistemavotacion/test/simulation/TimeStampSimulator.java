@@ -173,7 +173,7 @@ public class TimeStampSimulator extends Simulator<SimulationData>  {
         logger.debug("solicitudesERROR: " + simulationData.getNumRequestsERROR());  
         String errorsMsg = getFormattedErrorList();
         if(errorsMsg != null) {
-            logger.info(" ************* " + getErrorsList().size() + " ERRORS: \n" + 
+            logger.info(" ************* " + geterrorList().size() + " ERRORS: \n" + 
                         errorsMsg);
         }
         logger.debug("------------------- FINISHED --------------------------");

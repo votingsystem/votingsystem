@@ -31,7 +31,6 @@ public class SignedFile {
         this.name = name;
         this.signedFileBytes = signedFileBytes;
         if(name.toLowerCase().endsWith(".pdf")) {
-            pdf = true;
             PdfReader reader = new PdfReader(signedFileBytes);
             AcroFields acroFields = reader.getAcroFields();
             ArrayList<String> names = acroFields.getSignatureNames();

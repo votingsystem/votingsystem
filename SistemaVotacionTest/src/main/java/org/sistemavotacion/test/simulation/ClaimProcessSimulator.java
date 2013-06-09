@@ -189,6 +189,9 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>
             simulatorExecutor.execute(future);
             respuesta = future.get();
             logger.debug("BackupRequestWorker - status: " + respuesta.getCodigoEstado());
+            if(Respuesta.SC_OK != respuesta.getCodigoEstado()) {
+                addErrorList(respuesta.getErrorList());
+            }
         } else logger.error(worker.getErrorMessage());
     }
     
@@ -337,7 +340,7 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>
         logger.info("Number of signatures ERROR: " + simulationData.getNumRequestsERROR());
         String errorsMsg = getFormattedErrorList();
         if(errorsMsg != null) {
-            logger.info(" ************* " + getErrorsList().size() + " ERRORS: \n" + 
+            logger.info(" ************* " + errorList.size() + " ERRORS: \n" + 
                         errorsMsg);
         }
         logger.debug("------------------ FINISHED -----------------------");

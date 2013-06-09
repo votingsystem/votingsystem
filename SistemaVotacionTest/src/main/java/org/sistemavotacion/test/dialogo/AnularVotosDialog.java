@@ -39,7 +39,7 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
     
     private MensajeDialog mensajeDialog;
     private static long comienzo;
-    private List<String> errorsList;
+    private List<String> errorList;
     private SwingWorker tareaEnEjecucion;
     private Evento evento;
     private Estado estado = Estado.RECOGIENDO_DATOS;
@@ -359,13 +359,13 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
 
     private void erroresAnulacionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_erroresAnulacionButtonActionPerformed
         InfoErroresDialog infoErroresDialog = new InfoErroresDialog(
-                parentFrame, true, "Errores en las anulaciones", errorsList);
+                parentFrame, true, "Errores en las anulaciones", errorList);
         infoErroresDialog.setVisible(true);
     }//GEN-LAST:event_erroresAnulacionButtonActionPerformed
 
     private void addError(String error) {
-        if(errorsList == null) errorsList = new ArrayList<String>();
-        errorsList.add(error);
+        if(errorList == null) errorList = new ArrayList<String>();
+        errorList.add(error);
     }
     
     public void lanzarOperacion(final List<AccessRequestBackup> solicitudesAcceso) {

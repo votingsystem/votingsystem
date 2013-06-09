@@ -18,7 +18,7 @@ public abstract class Simulator<T extends SimulationData>
     
     private static Logger logger = LoggerFactory.getLogger(Simulator.class);
     
-    private List<String> errorsList;
+    protected List<String> errorList;
     
     public abstract T call() throws Exception;
         
@@ -48,40 +48,40 @@ public abstract class Simulator<T extends SimulationData>
     }
     
     protected void addErrorMsg(String msg) {
-        if(errorsList == null) errorsList = new ArrayList<String>();
-        errorsList.add(msg);
+        if(errorList == null) errorList = new ArrayList<String>();
+        errorList.add(msg);
     }
     
     protected void addErrorList(List<String> errors) {
         if(errors == null || errors.isEmpty()) return;
-        if(errorsList == null) errorsList = new ArrayList<String>();
-        errorsList.addAll(errors);
+        if(errorList == null) errorList = new ArrayList<String>();
+        errorList.addAll(errors);
     }
     
     protected String getFormattedErrorList() {
-        if(errorsList == null || errorsList.isEmpty()) return null;
+        if(errorList == null || errorList.isEmpty()) return null;
         else {
             StringBuilder result = new StringBuilder("");
-            for(String error:errorsList) {
+            for(String error:errorList) {
                 result.append(error + "\n");
             }
             return result.toString();
         }
     }
            
-    public String getFormattedErrorList(List<String> errorsList) {
-        if(errorsList == null || errorsList.isEmpty()) return null;
+    public String getFormattedErrorList(List<String> errorList) {
+        if(errorList == null || errorList.isEmpty()) return null;
         else {
             StringBuilder result = new StringBuilder("");
-            for(String error:errorsList) {
+            for(String error:errorList) {
                 result.append(error + "\n");
             }
             return result.toString();
         }
     }
         
-    public List<String> getErrorsList() {
-        return errorsList;
+    public List<String> geterrorList() {
+        return errorList;
     }
     
     

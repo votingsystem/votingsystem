@@ -21,7 +21,8 @@ dependencies {
 	
 	groovy "org.codehaus.groovy:groovy:${groovyVersion}"
 	
-	compile ('org.apache.httpcomponents:httpmime:4.2.4',
+	compile ('org.apache.httpcomponents:httpasyncclient:4.0-beta3',
+		'org.apache.httpcomponents:httpmime:4.2.4',
 		'org.apache.httpcomponents:httpclient:4.2.4',
 		'net.sf.json-lib:json-lib:2.4:jdk15',
 		'org.bouncycastle:bcprov-jdk16:1.46',

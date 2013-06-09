@@ -37,8 +37,8 @@ public class VotacionesPanel extends JPanel implements
 
     private Evento evento;
     private Estado estado = Estado.RECOGIDA_DATOS;
-    private List<String> accessRequestErrorsList;
-    private List<String> votingErrorsList;
+    private List<String> accessRequesterrorList;
+    private List<String> votingerrorList;
     private VotingSimulator votacion;
     private HashMap<String, ActorConIP> hashMapActores = null;
     private Frame parentFrame = null;
@@ -509,14 +509,14 @@ public class VotacionesPanel extends JPanel implements
     private void erroresSolicitudesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_erroresSolicitudesButtonActionPerformed
         InfoErroresDialog infoErroresDialog = new InfoErroresDialog(
                 parentFrame, false, 
-                "Errores en las solicitudes de acceso", accessRequestErrorsList);
+                "Errores en las solicitudes de acceso", accessRequesterrorList);
         infoErroresDialog.setVisible(true);
     }//GEN-LAST:event_erroresSolicitudesButtonActionPerformed
 
     private void erroresVotosButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_erroresVotosButtonActionPerformed
         InfoErroresDialog infoErroresDialog = new InfoErroresDialog(
                 parentFrame, false, 
-                "Errores en los votos", votingErrorsList);
+                "Errores en los votos", votingerrorList);
         infoErroresDialog.setVisible(true);
     }//GEN-LAST:event_erroresVotosButtonActionPerformed
 
@@ -692,15 +692,15 @@ public class VotacionesPanel extends JPanel implements
     }
     
     private void addAccessRequestError(String error) {
-        if(accessRequestErrorsList == null)
-            accessRequestErrorsList = new ArrayList<String>();
-        accessRequestErrorsList.add(error);
+        if(accessRequesterrorList == null)
+            accessRequesterrorList = new ArrayList<String>();
+        accessRequesterrorList.add(error);
     }
     
     private void addVotingError(String error) {
-        if(votingErrorsList == null)
-            votingErrorsList = new ArrayList<String>();
-        votingErrorsList.add(error);
+        if(votingerrorList == null)
+            votingerrorList = new ArrayList<String>();
+        votingerrorList.add(error);
     }
     
     @Override public void updateSimulationData(VotingSimulationData data) {
@@ -736,11 +736,11 @@ public class VotacionesPanel extends JPanel implements
         anularVotosButton.setVisible(true);
         estado = Estado.RECOGIDA_DATOS;
 
-        if(accessRequestErrorsList != null && 
-                !accessRequestErrorsList.isEmpty()) {
+        if(accessRequesterrorList != null && 
+                !accessRequesterrorList.isEmpty()) {
             erroresSolicitudesButton.setVisible(true);
         }
-        if(votingErrorsList != null && !votingErrorsList.isEmpty()) {
+        if(votingerrorList != null && !votingerrorList.isEmpty()) {
             erroresVotosButton.setVisible(true);
         }
         javax.swing.SwingUtilities.invokeLater(new Runnable() {

@@ -4,7 +4,7 @@ import grails.converters.JSON;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream
 import javax.mail.internet.MimeMessage;
-
+import org.sistemavotacion.util.DateUtils;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 import org.sistemavotacion.controlacceso.modelo.*;
@@ -67,7 +67,7 @@ class SolicitudAccesoService {
 				eventoVotacion = EventoVotacion.findById(Long.valueOf(mensajeJSON.eventId))
 			}
 			if (eventoVotacion) {
-				if (!eventoVotacion.isOpen()) {
+				if (!eventoVotacion.isOpen(DateUtils.getTodayDate())) {
 					msg = messageSource.getMessage('evento.mensajeCerrado', null, locale)
 					log.error("saveRequest - EVENT CLOSED - ${msg}")
 					return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,

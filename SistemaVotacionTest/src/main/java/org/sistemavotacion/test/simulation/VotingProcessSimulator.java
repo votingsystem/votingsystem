@@ -83,7 +83,7 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>  {
         logger.info("Number of votes ERROR: " + simulationData.getNumVotingRequestsERROR());    
         String errorsMsg = getFormattedErrorList();
         if(errorsMsg != null) {
-            logger.info(" ************* " + getErrorsList().size() + " ERRORS: \n" + 
+            logger.info(" ************* " + geterrorList().size() + " ERRORS: \n" + 
                         errorsMsg);
         }
         logger.debug("------------------- FINISHED --------------------------");        

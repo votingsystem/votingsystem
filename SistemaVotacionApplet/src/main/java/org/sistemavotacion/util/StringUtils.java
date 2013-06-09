@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Clob;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Random;
 import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialException;
@@ -95,4 +96,14 @@ public class StringUtils {
         return tmp.toString();
     }
     
+    public static String getFormattedErrorList(List<String> errorList) {
+        if(errorList == null || errorList.isEmpty()) return null;
+        else {
+            StringBuilder result = new StringBuilder("\n");
+            for(String error:errorList) {
+                result.append(error + "\n");
+            }
+            return result.toString();
+        }
+    }
 }

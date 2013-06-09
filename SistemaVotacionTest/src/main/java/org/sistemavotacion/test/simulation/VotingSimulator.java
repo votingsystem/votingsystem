@@ -30,8 +30,8 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
     private static ExecutorService votosExecutor;
     private static CompletionService<Respuesta> votosCompletionService;
 
-    private static List<String> accessRequestErrorsList;
-    private static List<String> voteErrorsList;    
+    private static List<String> accessRequesterrorList;
+    private static List<String> voteerrorList;    
     private UserBaseSimulationData userBaseData = null;
     private VotingSimulationData simulationData = null;
     private Evento evento;
@@ -121,15 +121,15 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
     }
 
     private void addAccessRequestErrorMsg(String msg) {
-        if(accessRequestErrorsList == null) 
-            accessRequestErrorsList = new ArrayList<String>();
-        accessRequestErrorsList.add(msg);
+        if(accessRequesterrorList == null) 
+            accessRequesterrorList = new ArrayList<String>();
+        accessRequesterrorList.add(msg);
     }
     
     private void addVotingErrorMsg(String msg) {
-        if(voteErrorsList == null) 
-            voteErrorsList = new ArrayList<String>();
-        voteErrorsList.add(msg);
+        if(voteerrorList == null) 
+            voteerrorList = new ArrayList<String>();
+        voteerrorList.add(msg);
     }
         
     public void readResponses () throws Exception {
@@ -181,15 +181,15 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
     }
 
 
-    @Override public List<String> getErrorsList() {
+    @Override public List<String> geterrorList() {
         List<String> errosList = new ArrayList<String>();
-        if(voteErrorsList != null) {
+        if(voteerrorList != null) {
             errosList.add("------------------ VOTE ERROR LIST -------------\n");
-            errosList.addAll(voteErrorsList);
+            errosList.addAll(voteerrorList);
         } 
-        if(accessRequestErrorsList != null) {
+        if(accessRequesterrorList != null) {
             errosList.add("--------- ACCESS REQUEST ERROR LIST ------------\n");
-            errosList.addAll(accessRequestErrorsList);
+            errosList.addAll(accessRequesterrorList);
         }
         return errosList;
     }
@@ -238,18 +238,18 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
         logger.info("Votos enviados: " + simulationData.getNumVotingRequests());
         logger.info("Votos validos: " +  simulationData.getNumVotingRequestsOK());
         logger.info("Votos con error: " + simulationData.getNumVotingRequestsERROR());
-        if(accessRequestErrorsList != null && 
-                !accessRequestErrorsList.isEmpty()) {
+        if(accessRequesterrorList != null && 
+                !accessRequesterrorList.isEmpty()) {
             logger.info("Access request errors: \n" + 
-                getFormattedErrorList(accessRequestErrorsList));
+                getFormattedErrorList(accessRequesterrorList));
         } 
-         if(voteErrorsList != null && !voteErrorsList.isEmpty()) {
+         if(voteerrorList != null && !voteerrorList.isEmpty()) {
             logger.info("Vote errors: \n" + 
-                    getFormattedErrorList(voteErrorsList));
+                    getFormattedErrorList(voteerrorList));
          }            
         String errorsMsg = getFormattedErrorList();
         if(errorsMsg != null) {
-            logger.info(" ************* " + getErrorsList().size() + " ERRORS: \n" + 
+            logger.info(" ************* " + geterrorList().size() + " ERRORS: \n" + 
                         errorsMsg);
         }
         logger.debug("------------------- FINISHED --------------------------");

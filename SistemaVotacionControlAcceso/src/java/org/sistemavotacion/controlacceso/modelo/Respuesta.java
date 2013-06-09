@@ -5,7 +5,6 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
-
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 
 /**
@@ -52,7 +51,8 @@ public class Respuesta {
     private SolicitudCSRVoto solicitudCSR;
     private Dispositivo dispositivo;
     private Documento documento;
-    private Map datos;
+    private Map metaInf;
+    
     private Object data;
 
 	public String getAsunto() {
@@ -263,13 +263,6 @@ public class Respuesta {
 		this.centroControl = centroControl;
 	}
 
-	public Map getDatos() {
-		return datos;
-	}
-
-	public void setDatos(Map datos) {
-		this.datos = datos;
-	}
 
 	public Object getData() {
 		return data;
@@ -279,4 +272,11 @@ public class Respuesta {
 		this.data = data;
 	}
 
+	public Map getMetaInf() {
+		return metaInf;
+	}
+
+	public void setMetaInf(Map metaInf) {
+		this.metaInf = metaInf;
+	}
 }

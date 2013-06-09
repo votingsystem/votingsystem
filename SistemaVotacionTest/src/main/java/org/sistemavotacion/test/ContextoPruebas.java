@@ -113,7 +113,8 @@ public enum ContextoPruebas {
                     DEFAULTS.END_ENTITY_ALIAS, rootCAPrivateCredential, 
                     "GIVENNAME=NameTestPublisherUser, SURNAME=SurnameTestPublisherUser" + 
                     ", SERIALNUMBER=" + userTest.getNif()); 
-            userTest.setKeyStore(userKeySTore);           
+            userTest.setKeyStore(userKeySTore);    
+            Contexto.INSTANCE.initMultiThreadedHttp();
         } catch (Exception ex) {
             LoggerFactory.getLogger(ContextoPruebas.class).error(ex.getMessage(), ex);
         }

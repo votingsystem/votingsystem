@@ -328,7 +328,7 @@ class RepresentativeController {
 			render msg
 			return false
 		}
-		if(event.isOpen()) {
+		if(event.isOpen(DateUtils.getTodayDate())) {
 			msg = message(code: 'eventDateNotFinished')
 			log.error "accreditationsBackupForEvent - ERROR - msg: ${msg}"
 			response.status = Respuesta.SC_ERROR_PETICION

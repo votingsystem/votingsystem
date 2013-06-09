@@ -365,7 +365,7 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
         logger.info("Number of signatures ERROR: " + simulationData.getNumRequestsERROR());
         String errorsMsg = getFormattedErrorList();
         if(errorsMsg != null) {
-            logger.info(" ************* " + getErrorsList().size() + " ERRORS: \n" + 
+            logger.info(" ************* " + geterrorList().size() + " ERRORS: \n" + 
                         errorsMsg);
         }
         logger.debug("------------------- FINISHED --------------------------");

@@ -21,7 +21,6 @@ import org.sistemavotacion.test.util.SimulationUtils;
 import org.sistemavotacion.util.NifUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.worker.InfoGetterWorker;
-import org.sistemavotacion.worker.VotingSystemWorkerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,9 +32,6 @@ public class EncryptionSimulator extends Simulator<SimulationData>
         implements ActionListener {
         
     private static Logger logger = LoggerFactory.getLogger(EncryptionSimulator.class);
-
-    
-    public enum Worker implements VotingSystemWorkerType{ACCESS_CONTROL_GETTER}
     
     private final ExecutorService requestExecutor;
     private static CompletionService<Respuesta> requestCompletionService;
@@ -198,7 +194,7 @@ public class EncryptionSimulator extends Simulator<SimulationData>
         logger.debug("NumRequestsERROR: " + simulationData.getNumRequestsERROR());
         String errorsMsg = getFormattedErrorList();
         if(errorsMsg != null) {
-            logger.info(" ************* " + getErrorsList().size() + " ERRORS: \n" + 
+            logger.info(" ************* " + errorList.size() + " ERRORS: \n" + 
                         errorsMsg);
         }
         logger.debug("--------------- FINISHED --------------------------");

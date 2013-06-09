@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import org.sistemavotacion.Contexto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,49 +39,60 @@ public class InformacionEventoPanel extends javax.swing.JPanel {
     public InformacionEventoPanel(byte[] metaInfBytes) {
         try {
             initComponents();
-            MetaInf metaInfo = MetaInf.parse(new String(metaInfBytes));
-            valorAsuntoLabel.setText(metaInfo.getSubject());
+            MetaInf metaInf = MetaInf.parse(new String(metaInfBytes));
+            valorAsuntoLabel.setText(metaInf.getSubject());
             String valorTipoEvento = null;
-            switch (metaInfo.getType()) {
+            String eventPathPart = null;
+            switch (metaInf.getType()) {
                 case EVENTO_FIRMA:
                     valorTipoEvento = AppletHerramienta.getResourceBundle().
                         getString("manfiestoLabel");
+                    eventPathPart = "/eventoFirma";
                     documentosFirmadosLabel.setText("<html><b>" + 
                             AppletHerramienta.getResourceBundle().
                             getString("numeroFirmasLabel") + ": </b></html>");
-                    valorNumeroDocumentosLabel.setText(String.valueOf(metaInfo.getNumSignatures()));
+                    valorNumeroDocumentosLabel.setText(String.valueOf(metaInf.getNumSignatures()));
                     break;
                 case EVENTO_RECLAMACION:
                     valorTipoEvento = AppletHerramienta.getResourceBundle().
                         getString("reclamacionLabel");
+                    eventPathPart = "/eventoReclamacion";
                     documentosFirmadosLabel.setText("<html><b>" + 
                             AppletHerramienta.getResourceBundle().
                             getString("numeroFirmasLabel") + ": </b></html>");
-                    valorNumeroDocumentosLabel.setText(String.valueOf(metaInfo.getNumSignatures()));
+                    valorNumeroDocumentosLabel.setText(String.valueOf(metaInf.getNumSignatures()));
                     break;
                 case EVENTO_VOTACION:
                     valorTipoEvento = AppletHerramienta.getResourceBundle().
                         getString("votacionLabel");
+                    eventPathPart = "/eventoVotacion";
                     documentosFirmadosLabel.setText("<html><b>" + 
                             AppletHerramienta.getResourceBundle().
                             getString("numeroVotosLabel") + ": </b></html>");
-                    valorNumeroDocumentosLabel.setText(String.valueOf(metaInfo.getNumVotes()));
+                    valorNumeroDocumentosLabel.setText(String.valueOf(metaInf.getNumVotes()));
                     solicitudesAccesoLabel.setText("<html><b>" + 
                             AppletHerramienta.getResourceBundle().
                         getString("solicitudesAccesoLabel") + ": </b></html>");
                     valorSolicitudesAccesoLabel.setText(String.valueOf(
-                            metaInfo.getNumAccessRequest()));                            
+                            metaInf.getNumAccessRequest()));                            
                     break;                    
             }
             tipoEventoLabel.setText("<html><h2> -  " + valorTipoEvento + " -</h2></html>");
             
-            final String metaInfoURL = metaInfo.getURL();
+            
+            final String metaInfURL = metaInf.getServerURL();
+            if(eventPathPart != null) {
+                metaInfURL.concat(eventPathPart);
+                if(metaInf.getId() != null) metaInfURL.concat(
+                        "/"+ metaInf.getId());
+            }
+            
             valorURLButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     URI uri = null;
                     try {
-                        uri = new URI(metaInfoURL);
+                        uri = new URI(metaInfURL);
                     } catch (URISyntaxException ex) {
                         logger.error(ex.getMessage(), ex);
                     }

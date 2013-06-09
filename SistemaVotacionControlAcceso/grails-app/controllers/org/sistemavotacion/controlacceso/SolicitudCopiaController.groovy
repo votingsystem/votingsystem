@@ -83,9 +83,8 @@ class SolicitudCopiaController {
 						File archivoCopias = respuestaGeneracionBackup.file
 						SolicitudCopia solicitudCopia = new SolicitudCopia(
 							filePath:archivoCopias.getAbsolutePath(), 
-							type:respuestaGeneracionBackup.datos.type,
-							documento:documento, email:email, 
-							numeroCopias:respuestaGeneracionBackup.datos.cantidad)
+							type:respuestaGeneracionBackup.tipo,
+							documento:documento, email:email)
 						SolicitudCopia.withTransaction {
 							solicitudCopia.save()
 						}
@@ -107,9 +106,8 @@ class SolicitudCopiaController {
 							File archivoCopias = backupResponse.file
 							SolicitudCopia solicitudCopia = new SolicitudCopia(
 								filePath:archivoCopias.getAbsolutePath(), 
-								type:backupResponse.datos.type,
-								documento:documento, email:emailRequest, 
-								numeroCopias:backupResponse.datos.cantidad)
+								type:backupResponse.tipo,
+								documento:documento, email:emailRequest)
 							SolicitudCopia.withTransaction {
 								solicitudCopia.save()
 							}
@@ -137,9 +135,6 @@ class SolicitudCopiaController {
 		}
 	}
 	
-	private void este() {
-		log.debug ("este")
-	}
 	
 	private Respuesta requestBackup(Evento evento, Locale locale) {
 		log.debug ("requestBackup")
@@ -158,6 +153,53 @@ class SolicitudCopiaController {
 				(EventoVotacion)evento, locale)
 		}
 		return respuestaGeneracionBackup
+	}
+	
+	def devDownload() {
+		if(!Environment.DEVELOPMENT.equals(Environment.current)) {
+			def msg = message(code: "serviceDevelopmentModeMsg")
+			log.error msg
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
+			return false
+		}
+		Evento event = null
+		Evento.withTransaction {
+			event = Evento.get(params.long('id'))
+		}
+		if(!event) {
+			def msg = message(code: "nullParamErrorMsg")
+			log.error msg
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
+			return false
+		}
+		Respuesta requestBackup = requestBackup(event, request.locale)
+		if(Respuesta.SC_OK == requestBackup?.codigoEstado) {
+			File archivoCopias = requestBackup.file
+			byte[] bytesCopiaRespaldo = archivoCopias.getBytes()
+			String backupFileName = "backup.zip"
+			if(event instanceof EventoVotacion) {
+				backupFileName = message(code:'votingBackupFileName');
+			}
+			if(event instanceof EventoFirma) {
+				backupFileName = message(code:'manifestBackupFileName');
+			}
+			if(event instanceof EventoReclamacion){
+				backupFileName = message(code:'claimBackupFileName');
+			}
+			response.contentLength = bytesCopiaRespaldo.length
+			response.setHeader("Content-disposition", "filename=${backupFileName}.zip")
+			response.setContentType("application/zip")
+			response.outputStream << bytesCopiaRespaldo
+			response.outputStream.flush()
+			return false
+		} else {
+			log.error("DEVELOPMENT - error generating backup");
+			params.respuesta = requestBackup
+			return false
+		}
+		
 	}
 	
 	/**
@@ -185,12 +227,26 @@ class SolicitudCopiaController {
 			return false
 		}
 		File copiaRespaldo = new File(solicitud.filePath)
+
+		String backupFileName = "Backup.zip"
+		switch(solicitud.type) {
+			case Tipo.EVENTO_VOTACION:
+				backupFileName = message(code:'votingBackupFileName');
+			break;
+			case Tipo.EVENTO_RECLAMACION:
+				backupFileName = message(code:'claimBackupFileName');
+			break;
+			case Tipo.EVENTO_FIRMA:
+				backupFileName = message(code:'manifestBackupFileName');
+			break;
+			
+		}
+
 		if (copiaRespaldo != null) {
 			def bytesCopiaRespaldo = copiaRespaldo.getBytes()
 			response.contentLength = bytesCopiaRespaldo.length
-			response.setHeader("Content-disposition", "filename=${copiaRespaldo.getName()}")
-			response.setHeader("NombreArchivo", "${copiaRespaldo.getName()}")
-			response.setContentType("application/octet-stream")
+			response.setHeader("Content-disposition", "filename=${backupFileName}")
+			response.setContentType("application/zip")
 			response.outputStream << bytesCopiaRespaldo
 			response.outputStream.flush()
 			solicitud.filePath = null

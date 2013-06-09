@@ -5,16 +5,11 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.worker.PDFSignedSenderWorker;
-import org.sistemavotacion.worker.VotingSystemWorker;
-import org.sistemavotacion.worker.VotingSystemWorkerListener;
-import org.sistemavotacion.worker.VotingSystemWorkerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,16 +17,9 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class ManifestSigner implements Callable<Respuesta>, 
-        VotingSystemWorkerListener {
+public class ManifestSigner implements Callable<Respuesta> {
     
     private static Logger logger = LoggerFactory.getLogger(ManifestSigner.class);
-
-    public enum Worker implements VotingSystemWorkerType{
-        PDF_SIGNED_SENDER}
-    
-    
-    private final CountDownLatch countDownLatch = new CountDownLatch(1); // just one time
 
     private String nif;
     private String urlToSendDocument = null;
@@ -61,33 +49,17 @@ public class ManifestSigner implements Callable<Respuesta>,
 
         X509Certificate destinationCert = Contexto.INSTANCE.
                     getAccessControl().getCertificate();
-        new PDFSignedSenderWorker(Worker.PDF_SIGNED_SENDER,
+        PDFSignedSenderWorker worker = new PDFSignedSenderWorker(null,
                 urlToSendDocument, reason, location, null,
                 manifestToSign, privateKey, signerCertChain, 
-                destinationCert, this).execute();
-        
-        countDownLatch.await();
-        return getResult();
+                destinationCert, null);
+        worker.execute();
+        respuesta = worker.get();
+        return respuesta;
     }
-
-
-    @Override public void processVotingSystemWorkerMsg(List<String> messages) {
-        for(String message : messages)  {
-            logger.debug("process -> " + message);
-        }
-    }
-
-    @Override
-    public void showResult(VotingSystemWorker worker) {
-        logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-        " - nif: " + nif + " - worker: " + worker.getType());
-        respuesta = new Respuesta(worker.getStatusCode(), " - from:" + nif + 
-                " - " + worker.getMessage());
-        countDownLatch.countDown();
-    }
-
 
     private Respuesta getResult() {
         return respuesta;
     }
+    
 }

@@ -42,7 +42,7 @@ public class SimulationData {
     private String durationStr = null;
     private String backupRequestEmail = null;
     
-    private List<String> errorsList;
+    private List<String> errorList;
 
     public SimulationData(int status, String message) {
         this.statusCode = status;
@@ -335,17 +335,17 @@ public class SimulationData {
     }
 
     /**
-     * @return the errorsList
+     * @return the errorList
      */
-    public List<String> getErrorsList() {
-        return errorsList;
+    public List<String> geterrorList() {
+        return errorList;
     }
 
     /**
-     * @param errorsList the errorsList to set
+     * @param errorList the errorList to set
      */
-    public void setErrorsList(List<String> errorsList) {
-        this.errorsList = errorsList;
+    public void seterrorList(List<String> errorList) {
+        this.errorList = errorList;
     }
 
 }

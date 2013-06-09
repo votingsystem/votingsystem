@@ -29,6 +29,7 @@ class EventoFirmaService {
     def eventoService
     def grailsApplication
 	def messageSource
+	def filesService
 
 	public Respuesta saveManifest(Documento pdfDocument, Evento event, Locale locale) {
 		Documento documento = Documento.findWhere(evento:event, estado:Documento.Estado.MANIFIESTO_VALIDADO)
@@ -58,37 +59,41 @@ class EventoFirmaService {
 	public synchronized Respuesta generarCopiaRespaldo(EventoFirma evento, Locale locale) {
 		log.debug("generarCopiaRespaldo - eventoId: ${evento.id}")
 		Respuesta respuesta;
-		if (evento) {
-			def firmasRecibidas = Documento.findAllWhere(evento:evento,
-				estado:Documento.Estado.FIRMA_MANIFIESTO_VALIDADA)
-			def fecha = DateUtils.getDirStringFromDate(DateUtils.getTodayDate())
-			String zipNamePrefix = messageSource.getMessage('manifestBackupFileName', null, locale);
-			def basedir = "${grailsApplication.config.SistemaVotacion.baseRutaCopiaRespaldo}/" + 
-					"${fecha}/${zipNamePrefix}_${evento.id}"
-			new File(basedir).mkdirs()
-			int i = 0
-			
-			def metaInformacionMap = [numSignatures:firmasRecibidas.size(),
-				URL:"${grailsApplication.config.grails.serverURL}/evento/${evento.id}",
-				type:Tipo.EVENTO_FIRMA.toString(), subject:evento.asunto]
-			String metaInformacionJSON = metaInformacionMap as JSON
-			File metaInformacionFile = new File("${basedir}/meta.inf")
-			metaInformacionFile.write(metaInformacionJSON)
-			String fileNamePrefix = messageSource.getMessage('manifestSignatureLbl', null, locale);
-			firmasRecibidas.each { firma ->
-				File pdfFile = new File("${basedir}/${fileNamePrefix}_${i}.pdf")
-				pdfFile.setBytes(firma.pdf)
-				i++;
-			}
-			def ant = new AntBuilder()
-			ant.zip(destfile: "${basedir}.zip", basedir: basedir)
-			Map datos = [cantidad:firmasRecibidas.size(), type:Tipo.EVENTO_FIRMA]
-			respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK, 
-				datos:datos, file:new File("${basedir}.zip"))
-		} else respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
+		if(!evento) {
+			return respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
 				mensaje:messageSource.getMessage(
 				'eventNotFound', [evento.id].toArray(), locale))
-		return respuesta
+		}
+		def firmasRecibidas = Documento.findAllWhere(evento:evento,
+			estado:Documento.Estado.FIRMA_MANIFIESTO_VALIDADA)
+		
+		Map<String, File> mapFiles = filesService.getBackupFiles(
+			evento, Tipo.EVENTO_FIRMA, locale)
+		File metaInfFile = mapFiles.metaInfFile
+		File filesDir = mapFiles.filesDir
+		File zipResult   = mapFiles.zipResult
+		
+		def metaInfMap = [numSignatures:firmasRecibidas.size()]
+		Evento.withTransaction {
+			evento.updateMetaInf(Tipo.BACKUP, metaInfMap)
+		}
+		metaInfFile.write(evento.metaInf)
+		
+		String fileNamePrefix = messageSource.getMessage('manifestSignatureLbl', 
+			null, locale);
+		int i = 1
+		firmasRecibidas.each { firma ->
+			File pdfFile = new File("${filesDir.absolutePath}/${fileNamePrefix}_${String.format('%08d', i++)}.pdf")
+			pdfFile.setBytes(firma.pdf)
+		}
+		
+		def ant = new AntBuilder()
+		ant.zip(destfile: zipResult, basedir: "${filesDir.absolutePath}") {
+			fileset(dir:"${filesDir}/..", includes: "meta.inf")
+		}
+		
+		return new Respuesta(codigoEstado:Respuesta.SC_OK,
+			file:zipResult, tipo:Tipo.EVENTO_FIRMA) 
 	}
 
 }

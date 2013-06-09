@@ -26,7 +26,7 @@ public class InfoErroresDialog extends JDialog implements HyperlinkListener  {
      * Creates new form InfoErroresDialog
      */
     public InfoErroresDialog(java.awt.Frame parent, boolean modal, 
-            String tipoError, List<String> errorsList) {
+            String tipoError, List<String> errorList) {
         super(parent, modal);
         initComponents();
         this.parentFrame = parent;
@@ -36,8 +36,8 @@ public class InfoErroresDialog extends JDialog implements HyperlinkListener  {
         editorPane.setEditable(false);
         tipoErrorLabel.setText("<html><b>" + tipoError + "</b></html>");
         StringBuilder erroresAnulaciones = new StringBuilder("");
-        if(errorsList != null && !errorsList.isEmpty()) {
-            for(String error:errorsList) {
+        if(errorList != null && !errorList.isEmpty()) {
+            for(String error:errorList) {
                 erroresAnulaciones.append(error + "\n");
             }
         }

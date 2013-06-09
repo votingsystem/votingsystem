@@ -70,6 +70,7 @@ public class Voter implements Callable<Respuesta> {
                     smimeMessage, evento, destinationCert, null);
             accessWorker.execute();
             respuesta = accessWorker.get();
+            respuesta.setEvento(evento);
             if(Respuesta.SC_OK == accessWorker.getStatusCode()) {
                 PKCS10WrapperClient wrapperClient = accessWorker.
                     getPKCS10WrapperClient();
@@ -86,12 +87,13 @@ public class Voter implements Callable<Respuesta> {
                         null, smimeMessage, urlVoteService, wrapperClient.
                         getKeyPair(), null, null);
                 senderWorker.execute();
-                respuesta = senderWorker.get();
+                senderWorker.get();
                 if (Respuesta.SC_OK == senderWorker.getStatusCode()) {  
-                    SMIMEMessageWrapper validatedVote = respuesta.getSmimeMessage();
+                    SMIMEMessageWrapper validatedVote =  senderWorker.
+                            getRespuesta().getSmimeMessage();
                     ReciboVoto reciboVoto = new ReciboVoto(
                                 Respuesta.SC_OK, validatedVote, evento);
-                    respuesta.setEvento(evento);
+                    
                     respuesta.setReciboVoto(reciboVoto);
                 }
             }

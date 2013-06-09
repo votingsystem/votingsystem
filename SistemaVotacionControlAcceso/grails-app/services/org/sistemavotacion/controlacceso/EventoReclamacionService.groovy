@@ -29,6 +29,7 @@ class EventoReclamacionService {
     def eventoService
     def grailsApplication
 	def messageSource
+	def filesService
 	
 
     Respuesta saveEvent(MensajeSMIME mensajeSMIMEReq, Locale locale) {		
@@ -97,36 +98,42 @@ class EventoReclamacionService {
     public synchronized Respuesta generarCopiaRespaldo (EventoReclamacion evento, Locale locale) {
         log.debug("generarCopiaRespaldo - eventoId: ${evento.id}")
 		Respuesta respuesta;
-        if (evento) {
-            def firmasRecibidas = Firma.findAllWhere(evento:evento)
-            def fecha = DateUtils.getShortStringFromDate(DateUtils.getTodayDate())
-			String zipNamePrefix = messageSource.getMessage('claimBackupFileName', null, locale);
-            def basedir = "${grailsApplication.config.SistemaVotacion.baseRutaCopiaRespaldo}/" + 
-				"${fecha}/${zipNamePrefix}_${evento.id}"
-            new File(basedir).mkdirs()
-			int i = 0
-			def metaInformacionMap = [numSignatures:firmasRecibidas.size(),
-				URL:"${grailsApplication.config.grails.serverURL}/evento/${evento.id}",
-				type:Tipo.EVENTO_RECLAMACION.toString(), subject:evento.asunto]
-			String metaInformacionJSON = metaInformacionMap as JSON
-			File metaInformacionFile = new File("${basedir}/meta.inf")
-			metaInformacionFile.write(metaInformacionJSON)
-			String fileNamePrefix = messageSource.getMessage('claimLbl', null, locale);
-			
-            firmasRecibidas.each { firma ->
-                MensajeSMIME mensajeSMIME = firma.mensajeSMIME
-                File smimeFile = new File("${basedir}/${fileNamePrefix}_${i}")
-				smimeFile.setBytes(mensajeSMIME.contenido)
-				i++;
-            }
-            def ant = new AntBuilder()
-            ant.zip(destfile: "${basedir}.zip", basedir: basedir)
-			Map datos = [cantidad:firmasRecibidas.size(), type:Tipo.EVENTO_RECLAMACION]
-			respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK, 
-				datos:datos, file:new File("${basedir}.zip"))
-        } else respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:
+        if (!evento) {
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:
 				messageSource.getMessage('evento.peticionSinEvento', null, locale))
-		return respuesta
+        }
+		
+		Map<String, File> mapFiles = filesService.getBackupFiles(
+			evento, Tipo.EVENTO_RECLAMACION, locale)
+		File metaInfFile = mapFiles.metaInfFile
+		File filesDir = mapFiles.filesDir
+		File zipResult   = mapFiles.zipResult
+		
+
+		
+		def firmasRecibidas = Firma.findAllWhere(evento:evento)		
+		def metaInfMap = [numSignatures:firmasRecibidas.size()]
+		Evento.withTransaction {
+			evento.updateMetaInf(Tipo.BACKUP, metaInfMap)
+		}
+		metaInfFile.write(evento.metaInf)
+		
+		String fileNamePrefix = messageSource.getMessage('claimLbl', null, locale);
+		int i = 0
+		
+		firmasRecibidas.each { firma ->
+			MensajeSMIME mensajeSMIME = firma.mensajeSMIME
+			File smimeFile = new File("${filesDir.absolutePath}/${fileNamePrefix}_${String.format('%08d', i++)}.p7m")
+			smimeFile.setBytes(mensajeSMIME.contenido)
+		}
+		
+		def ant = new AntBuilder()
+		ant.zip(destfile: zipResult, basedir: "${filesDir.absolutePath}") {
+			fileset(dir:"${filesDir}/..", includes: "meta.inf")
+		}
+
+		return new Respuesta(codigoEstado:Respuesta.SC_OK,
+			tipo:Tipo.EVENTO_RECLAMACION, file:zipResult)
     }
 
 }

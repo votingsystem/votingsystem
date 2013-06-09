@@ -41,8 +41,6 @@ public class SolicitudCopia implements java.io.Serializable {
      private Usuario representative;
      @Column(name="email") 
      private String email;
-     @Column(name="numeroCopias")
-	 private Long numeroCopias;
      @Column(name="filePath") 
      private String filePath;
      @Temporal(TemporalType.TIMESTAMP)
@@ -111,17 +109,6 @@ public class SolicitudCopia implements java.io.Serializable {
 	public void setDocumento(Documento documento) {
 		this.documento = documento;
 	}
-
-
-	public Long getNumeroCopias() {
-		return numeroCopias;
-	}
-
-
-	public void setNumeroCopias(Long numeroCopias) {
-		this.numeroCopias = numeroCopias;
-	}
-
 
 	public MensajeSMIME getMensajeSMIME() {
 		return mensajeSMIME;

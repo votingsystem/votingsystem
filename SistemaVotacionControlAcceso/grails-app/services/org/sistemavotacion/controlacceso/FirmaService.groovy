@@ -131,6 +131,35 @@ class FirmaService {
 		return trustedCerts;
 	}
 	
+	public Respuesta getEventTrustedCerts(Evento event, Locale locale) {
+		log.debug("getEventTrustedCerts")
+		if(!event) return null
+		Set<X509Certificate> eventTrustedCerts = eventTrustedCertsHashMap.get(event.id)
+		Respuesta respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK,
+			data:eventTrustedCerts)
+		if(!eventTrustedCerts) {
+			Certificado certificadoCAEvento = Certificado.findWhere(
+				eventoVotacion:event, estado:Certificado.Estado.OK,
+				tipo:Certificado.Tipo.RAIZ_VOTOS)
+			if(!certificadoCAEvento) {
+				String msg = messageSource.getMessage('eventWithoutCAErrorMsg',
+					[event.id].toArray(), locale)
+				log.error ("validateVoteCerts - ERROR EVENT CA CERT -> '${msg}'")
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+					mensaje:msg, tipo:Tipo.VOTO_CON_ERRORES, evento:event)
+			}
+			X509Certificate certCAEvento = CertUtil.loadCertificateFromStream (
+				new ByteArrayInputStream(certificadoCAEvento.contenido))
+			eventTrustedCerts = new HashSet<X509Certificate>()
+			eventTrustedCerts.add(certCAEvento)
+			eventTrustedCertsHashMap.put(event.id, eventTrustedCerts)
+			respuesta.data = eventTrustedCerts
+			
+		} 
+		return respuesta
+	}
+
+	
 	public KeyStore getTrustedCertsKeyStore() {
 		if(!trustedCertsKeyStore ||
 			trustedCertsKeyStore.size() != trustedCerts.size()) {
@@ -592,24 +621,9 @@ class FirmaService {
 				tipo:Tipo.VOTO_CON_ERRORES, evento:evento)
 		}
 		smimeMessageReq.informacionVoto.setCertificado(certificado)
-		Set<X509Certificate> eventTrustedCerts = eventTrustedCertsHashMap.get(evento?.id)
-		if(!eventTrustedCerts) {
-			Certificado certificadoCAEvento = Certificado.findWhere(
-				eventoVotacion:evento, estado:Certificado.Estado.OK,
-				tipo:Certificado.Tipo.RAIZ_VOTOS)
-			if(!certificadoCAEvento) {
-				msg = messageSource.getMessage('eventWithoutCAErrorMsg',
-					[evento.id].toArray(), locale)
-				log.error ("validateVoteCerts - ERROR EVENT CA CERT -> '${msg}'")
-				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
-					mensaje:msg, tipo:Tipo.VOTO_CON_ERRORES, evento:evento)
-			} 
-			X509Certificate certCAEvento = CertUtil.loadCertificateFromStream (
-				new ByteArrayInputStream(certificadoCAEvento.contenido))
-			eventTrustedCerts = new HashSet<X509Certificate>()
-			eventTrustedCerts.add(certCAEvento)
-			eventTrustedCertsHashMap.put(evento.id, eventTrustedCerts)
-		}
+		respuesta = getEventTrustedCerts(evento, locale)
+		if(Respuesta.SC_OK != respuesta.codigoEstado) return respuesta
+		Set<X509Certificate> eventTrustedCerts = (Set<X509Certificate>) respuesta.data
 		//Vote validation
 		PKIXCertPathValidatorResult pkixResult;
 		TrustAnchor ta;

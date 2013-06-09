@@ -20,39 +20,51 @@ class FilesService {
 	def grailsApplication
 	def messageSource
 
- 	public Map<String, File> getBackupFiles(Evento evento, Tipo type, 
+ 	public Map<String, File> getBackupFiles(Evento event, Tipo type, 
 		 	Locale locale){
 		 String servicePathPart = null
 		 Map<String, File> result = new HashMap<String, File>()
+		 String datePathPart = DateUtils.getShortStringFromDate(event.getDateFinish())
+		 String baseDirPath = "${grailsApplication.config.SistemaVotacion.baseRutaCopiaRespaldo}" +
+		 	"/${datePathPart}/Event_${event.id}"
+		 String filesDirPath = null
+		 String zipFilesDirPath = "${baseDirPath}/zip"
+		 new File(zipFilesDirPath).mkdirs()
+		 result.metaInfFile = new File("${baseDirPath}/meta.inf")
 		 switch(type) {
 			 case Tipo.REPRESENTATIVE_ACCREDITATIONS:
 				 servicePathPart = messageSource.getMessage(
 					 'repAccreditationsBackupPartPath', null, locale)
+				 filesDirPath = "${baseDirPath}/files/${servicePathPart}"
+				 new File(filesDirPath).mkdirs()
+				 String reportPathPart = messageSource.getMessage(
+					 'representativeReport', null, locale) 
+				 result.representativesReportFile = new File("${filesDirPath}/${reportPathPart}.csv")
+				 result.filesDir = new File(filesDirPath)
+				 break; 
+			 case Tipo.EVENTO_VOTACION:
+				 servicePathPart = messageSource.getMessage(
+					 'votingBackupPartPath', [event.id].toArray(), locale)
+				 filesDirPath = "${baseDirPath}/files"
+				 result.filesDir = new File(filesDirPath)
 				 break;
+			case Tipo.EVENTO_FIRMA:
+				servicePathPart = messageSource.getMessage(
+					'manifestsBackupPartPath', [event.id].toArray(), locale)
+				result.filesDir = new File("${baseDirPath}/files") 
+				break;
+			case Tipo.EVENTO_RECLAMACION:
+				servicePathPart = messageSource.getMessage(
+					'claimssBackupPartPath', [event.id].toArray(), locale)
+				result.filesDir = new File("${baseDirPath}/files")
+
+				break;
 		     default: 
-			 	log.error("getBackupZipPath - servicePathPart not found for type ${type}")
+			 	log.error("getBackupZipPath - map files not found for type ${type}")
 				return;
 		 }
-		 
-		 Date selectedDate
-		 if(evento.dateCanceled) selectedDate = evento.dateCanceled
-		 else selectedDate = evento.fechaFin
-		 
-		 String datePathPart = DateUtils.getShortStringFromDate(selectedDate)
-		 
-		 String baseDirPath = "${grailsApplication.config.SistemaVotacion.baseRutaCopiaRespaldo}" +
-		 	"/${datePathPart}/Event_${evento.id}"
-		 String filesDirPath = "${baseDirPath}/files/${servicePathPart}"
-		 new File(filesDirPath).mkdirs()
-		 String zipFilesDirPath = "${baseDirPath}/zip"
-		 new File(zipFilesDirPath).mkdirs()
-		 
-		  
-		 
-		 result.zipResult = new File("${zipFilesDirPath}/${servicePathPart}Event_${evento.id}.zip")
-		 result.metaInfFile = new File("${filesDirPath}/meta.inf")
-		 result.filesDir = new File(filesDirPath)
-		 result.representativesReportFile = new File("${filesDirPath}/representativeReport")
+		 if(result.filesDir) result.filesDir.mkdirs();
+		 result.zipResult = new File("${zipFilesDirPath}/${servicePathPart}.zip")
 		 return result
 
 	 }

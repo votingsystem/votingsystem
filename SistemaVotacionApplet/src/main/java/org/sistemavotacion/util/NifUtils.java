@@ -12,7 +12,7 @@ public class NifUtils {
     private static Logger logger = LoggerFactory.getLogger(NifUtils.class);
     
     public static String getNif(int number) {
-        String numberStr = String.format("%09d", number);
+        String numberStr = String.format("%08d", number);
         return numberStr + getNifLetter(number);
     }
     

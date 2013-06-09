@@ -1,8 +1,15 @@
 package org.sistemavotacion.controlacceso.modelo;
 
 import static javax.persistence.GenerationType.IDENTITY;
+import grails.converters.JSON;
+import groovy.util.ConfigObject;
+
 import java.io.Serializable;
+import java.text.ParseException;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -30,6 +37,8 @@ import javax.persistence.EnumType;
 
 import org.apache.solr.analysis.HTMLStripCharFilterFactory;
 import org.apache.solr.analysis.StandardTokenizerFactory;
+import org.codehaus.groovy.grails.commons.ApplicationHolder;
+import org.codehaus.groovy.grails.commons.GrailsApplication;
 import org.hibernate.search.annotations.Analyzer;
 import org.hibernate.search.annotations.AnalyzerDef;
 import org.hibernate.search.annotations.CharFilterDef;
@@ -44,6 +53,7 @@ import org.hibernate.search.annotations.Store;
 import org.hibernate.search.annotations.TokenizerDef;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.StringUtils;
+import org.sistemavotacion.utils.VotingSystemApplicationContex;
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -253,11 +263,12 @@ public class Evento implements Serializable {
 		this.mensajeSMIMESet = mensajeSMIMESet;
 	}
         
-	public boolean isOpen() {
+	public boolean isOpen(Date selectedDate) {
+		if(selectedDate == null) return false;
 		boolean result = false;
-		Date todayDate = DateUtils.getTodayDate();
-		if (todayDate.after(fechaInicio) && todayDate.before(fechaFin)) result = true;
-		if(estado == Estado.CANCELADO || estado == Estado.BORRADO_DE_SISTEMA ) result = false;
+		if (selectedDate.after(fechaInicio) && selectedDate.before(fechaFin)) result = true;
+		if(estado != null && (estado == Estado.CANCELADO || 
+				estado == Estado.BORRADO_DE_SISTEMA)) result = false;
 		return result;
 	}
 	
@@ -305,5 +316,50 @@ public class Evento implements Serializable {
 
 	public void setMetaInf(String metaInf) {
 		this.metaInf = metaInf;
+	}
+	
+	public Date getDateFinish() {
+		if(dateCanceled != null) return dateCanceled;
+		else return dateCreated;
+	}
+	
+	public String updateMetaInf(Tipo type, Map value) throws Exception {
+		Map eventMetaInf = null;
+		if(metaInf == null || "".equals(metaInf)) {
+			if(type == null) {
+				eventMetaInf = value;
+			} else {
+				eventMetaInf = new HashMap();
+				eventMetaInf.put(type.toString(), value);
+			}
+			
+		} else {
+			eventMetaInf = (Map) JSON.parse(metaInf);
+			if(type == null) eventMetaInf.putAll(value);
+			else eventMetaInf.put(type.toString(), value);
+			
+		}
+		if(eventMetaInf != null) {
+			eventMetaInf.put("id", id);
+			eventMetaInf.put("subject", asunto);
+			if(getDateFinish() != null) eventMetaInf.put(
+					"dateFinish", DateUtils.getStringFromDate(getDateFinish()));
+			Set<String> keySet = eventMetaInf.keySet();
+			for(String k: keySet) {
+				if(eventMetaInf.get(k) == null) eventMetaInf.remove(k);
+			}
+			if(this instanceof EventoVotacion) {
+				eventMetaInf.put("type", Tipo.EVENTO_VOTACION.toString());
+			} else if(this instanceof EventoReclamacion) {
+				eventMetaInf.put("type", Tipo.EVENTO_RECLAMACION.toString());
+			} else if(this instanceof EventoFirma) {
+				eventMetaInf.put("type", Tipo.EVENTO_FIRMA.toString());
+			}
+			eventMetaInf.put("serverURL", 
+					((ConfigObject)VotingSystemApplicationContex.
+					getConfig().get("grails")).get("serverURL"));
+			metaInf = new grails.converters.JSON(eventMetaInf).toString();
+		}
+		return metaInf;
 	}
 }

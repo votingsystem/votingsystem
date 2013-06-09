@@ -12,9 +12,11 @@ import java.util.zip.ZipFile;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.MetaInf;
 import org.sistemavotacion.herramientavalidacion.modelo.SignedFile;
+import org.sistemavotacion.herramientavalidacion.modelo.VotingBackupData;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.util.FileUtils;
+import org.sistemavotacion.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,8 +30,6 @@ public class BackupValidator implements Callable<Respuesta> {
     
     private Respuesta respuesta = new Respuesta(Respuesta.SC_ERROR);
     private byte[] backupFileBytes = null;
-    
-    private int numSignatures = 0;
     
     public BackupValidator(byte[] backupFileBytes) 
             throws Exception {
@@ -103,6 +103,12 @@ public class BackupValidator implements Callable<Respuesta> {
     
         
     @Override public Respuesta call() throws Exception {
+        String representativeReportFileName = ContextoPruebas.INSTANCE.
+                getString("representativeReportFileName");
+        String accessRequestFileName = ContextoPruebas.INSTANCE.
+                getString("accessRequestFileName");
+        
+        
         File backupFile = File.createTempFile("backupFile", ".zip");
         backupFile.deleteOnExit();
         FileUtils.copyStreamToFile(new ByteArrayInputStream(backupFileBytes), backupFile);
@@ -110,17 +116,86 @@ public class BackupValidator implements Callable<Respuesta> {
         List<SignedFile> signedFileList = new ArrayList<SignedFile>();
         Enumeration entries = backupZip.entries();
 
-        InputStream inputStream = backupZip.getInputStream(
+                
+        MetaInf metaInf = null;
+        if(backupZip.getEntry("meta.inf") != null) {
+            InputStream inputStream = backupZip.getInputStream(
                 backupZip.getEntry("meta.inf"));
-        byte[] metaInfBytes = FileUtils.getBytesFromInputStream(inputStream);
-        MetaInf metaInf = MetaInf.parse(new String(metaInfBytes));
-        logger.debug("metaInf: " + metaInf.getFormattedInfo());
-        
+            byte[] metaInfBytes = FileUtils.getBytesFromInputStream(inputStream);
+            metaInf = MetaInf.parse(new String(metaInfBytes));
+            logger.debug("metaInf: " + metaInf.getFormattedInfo());
+        } else logger.error(" --- Backup without MetaInf ---");
+
         
         List<String> errorList = new ArrayList<String>();
+        int numFilesOK = 0;
+        
+        VotingBackupData votingBackupData = new VotingBackupData();
         while(entries.hasMoreElements()) {
             ZipEntry entry = (ZipEntry)entries.nextElement();
-            byte[] entryBytes = FileUtils.getBytesFromInputStream(
+            
+            if(entry.isDirectory())  {
+                logger.debug("---------- dir -> " + entry.getName());
+                continue;
+            }
+            
+            if(entry.getName().contains("VotoRepresentante_")) {
+                byte[] signedFileBytes = FileUtils.getBytesFromInputStream(
+                    backupZip.getInputStream(entry));
+                SignedFile signedFile = new SignedFile(
+                    signedFileBytes, entry.getName());
+                votingBackupData.addRepresentativeVote(signedFile);
+            };
+                        
+            if(entry.getName().contains("RepDoc_")) {
+                byte[] repDocBytes = FileUtils.getBytesFromInputStream(
+                    backupZip.getInputStream(entry));
+                SignedFile signedFile = new SignedFile(
+                    repDocBytes, entry.getName());
+                votingBackupData.addRepresentationDoc(signedFile);
+            }
+            
+            if(entry.getName().contains(representativeReportFileName)) {
+                byte[] repReportBytes = FileUtils.getBytesFromInputStream(
+                    backupZip.getInputStream(entry));
+                votingBackupData.setRepresentativeReport(repReportBytes);
+            }
+            
+            if(entry.getName().contains(accessRequestFileName)) {
+                byte[] signedFileBytes = FileUtils.getBytesFromInputStream(
+                    backupZip.getInputStream(entry));
+                SignedFile signedFile = new SignedFile(
+                    signedFileBytes, entry.getName());
+                votingBackupData.addAccessRequests(signedFile);
+            }
+
+            if(entry.getName().contains("accessRequestTrustedCerts.pem")) {
+                byte[] certsBytes = FileUtils.getBytesFromInputStream(
+                    backupZip.getInputStream(entry));
+                votingBackupData.setAccessRequestTrustedCertsBytes(certsBytes);
+            }
+            
+            if(entry.getName().contains("eventTrustedCerts.pem")) {
+                byte[] certsBytes = FileUtils.getBytesFromInputStream(
+                    backupZip.getInputStream(entry));
+                votingBackupData.setEventTrustedCertsBytes(certsBytes);
+            }
+            
+            if(entry.getName().contains("Voto_")) {
+                byte[] signedFileBytes = FileUtils.getBytesFromInputStream(
+                    backupZip.getInputStream(entry));
+                SignedFile signedFile = new SignedFile(
+                    signedFileBytes, entry.getName());
+                votingBackupData.addVote(signedFile);
+            }
+            
+            
+
+            
+
+            
+            
+            /*byte[] entryBytes = FileUtils.getBytesFromInputStream(
                     backupZip.getInputStream(entry));
             if(!entry.isDirectory()) {
                 byte[] signedFileBytes = FileUtils.getBytesFromInputStream(
@@ -135,24 +210,40 @@ public class BackupValidator implements Callable<Respuesta> {
                         if(!signedFile.isValidSignature()) {
                              msg = "ERROR ZipEntry -> " + entry.getName();
 
-                        } else logger.debug("OK ZipEntry -> " + entry.getName());
+                        } else {
+                            numFilesOK++;
+                            logger.debug("OK ZipEntry -> " + entry.getName());
+                        } 
                     } catch(Exception ex) {
-                        logger.error(ex.getMessage() + 
-                                " ERROR ZipEntry -> " + entry.getName(), ex);
+                        msg = " ### ZipEntry -> " + entry.getName() + " - msg: " +
+                                ex.getMessage();
+                        logger.error(msg, ex);
                     }
                 } 
-                if(msg != null){
-                    logger.error(msg);
-                    errorList.add(msg);
-                }
+                if(msg != null) errorList.add(msg);
+            }*/
+        }
+        
+        logger.debug(" ---- FormattedInfo: " + votingBackupData.getFormattedInfo());
+        
+        respuesta.setData(metaInf);
+        if(metaInf != null && !errorList.isEmpty()) {
+            metaInf.setErrorsList(errorList);
+            if(metaInf.getNumSignatures() != numFilesOK) {
+                errorList.add(" ### meta.inf expected '" + metaInf.getNumSignatures() + 
+                        "' signatures - but the file only contains " + 
+                        numFilesOK + " valid signatures");
             }
         }
-        if(metaInf != null && !errorList.isEmpty()) metaInf.setErrorsList(errorList);
-        respuesta.setData(metaInf);
+        
         logger.debug("Backup with " + signedFileList.size() + " files and " + 
                 errorList.size() + " errors");
         backupZip.close();
-        respuesta.setCodigoEstado(Respuesta.SC_OK);
+        if(errorList.isEmpty()) respuesta.setCodigoEstado(Respuesta.SC_OK);
+        else {
+            respuesta.setErrorList(errorList);
+            respuesta.setCodigoEstado(Respuesta.SC_ERROR);
+        }
         return respuesta;
     }
     
@@ -163,12 +254,19 @@ public class BackupValidator implements Callable<Respuesta> {
             logger.debug("args[0]");
             filePath = args[0];
         } else {
-            filePath = "/home/jgzornoza/Descargas/CopiaSeguridadDeManifiesto.zip";
+            //filePath = "/home/jgzornoza/Descargas/CopiaSeguridadDeManifiesto.zip";
+            filePath = "/home/jgzornoza/Descargas/CopiaSeguridadDeVotacion.zip";
         }
         File backupFile = new File(filePath);
         byte[] backupFilebytes = FileUtils.getBytesFromFile(backupFile);
         BackupValidator backupValidator = new BackupValidator(backupFilebytes);
-        backupValidator.call();
+        Respuesta respuesta = backupValidator.call();
+        logger.debug("Respuesta - CodigoEstado: " + respuesta.getCodigoEstado());
+        if(Respuesta.SC_OK != respuesta.getCodigoEstado()) {
+            logger.error("--------- Error List -----------------");
+            logger.error("Num. errors: " + respuesta.getErrorList().size());
+            logger.error(StringUtils.getFormattedErrorList(respuesta.getErrorList()));
+        }
     }
     
 

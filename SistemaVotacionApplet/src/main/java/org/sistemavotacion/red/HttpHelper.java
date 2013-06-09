@@ -47,15 +47,27 @@ public class HttpHelper {
     private static Logger logger = LoggerFactory.getLogger(HttpHelper.class);
     
     private HttpClient httpclient;
+    private PoolingClientConnectionManager cm;
 
     public HttpHelper () {
         /*SchemeRegistry schemeRegistry = new SchemeRegistry();
             schemeRegistry.register(
         new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));*/
-        ClientConnectionManager cm = new PoolingClientConnectionManager();
+        cm = new PoolingClientConnectionManager();
         // set the connection timeout value to 15 seconds (15000 milliseconds)
         final HttpParams httpParams = new BasicHttpParams();
         HttpConnectionParams.setConnectionTimeout(httpParams, 15000);
+        httpclient = new DefaultHttpClient(cm, httpParams);
+        
+    }
+    
+    public synchronized void initMultiThreadedMode() {
+        if(cm != null) cm.shutdown();
+        cm = new PoolingClientConnectionManager();
+        cm.setMaxTotal(200);
+        // set the connection timeout value to 15 seconds (15000 milliseconds)
+        final HttpParams httpParams = new BasicHttpParams();
+        HttpConnectionParams.setConnectionTimeout(httpParams, 20000);
         httpclient = new DefaultHttpClient(cm, httpParams);
     }
     
@@ -71,8 +83,8 @@ public class HttpHelper {
         logger.debug("getInfo - serverURL: " + serverURL + " - contentType: " 
                 + contentType);  
         Respuesta respuesta = null;
+        HttpGet httpget = new HttpGet(serverURL);
         try {
-            HttpGet httpget = new HttpGet(serverURL);
             if(contentType != null) httpget.setHeader("Content-Type", contentType);
             HttpResponse response = httpclient.execute(httpget);
             logger.debug("----------------------------------------");
@@ -90,6 +102,7 @@ public class HttpHelper {
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
             respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+            httpget.abort();
         }
         return respuesta;
     }
@@ -156,8 +169,8 @@ public class HttpHelper {
         logger.debug("sendFile - contentType: " + contentType + 
                 " - serverURL: " + serverURL); 
         Respuesta respuesta = null;
+        HttpPost httpPost = new HttpPost(serverURL);
         try {
-            HttpPost httpPost = new HttpPost(serverURL);
             FileEntity entity = new FileEntity(file, ContentType.create(contentType));
             httpPost.setEntity(entity);
             HttpResponse response = httpclient.execute(httpPost);
@@ -172,6 +185,7 @@ public class HttpHelper {
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
             respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+            httpPost.abort();
         }
         return respuesta;
     }
@@ -181,8 +195,8 @@ public class HttpHelper {
             String paramName, String serverURL) throws IOException {
         logger.debug("sendString - serverURL: " + serverURL);
         Respuesta respuesta = null;
+        HttpPost httpPost = new HttpPost(serverURL);
         try {
-            HttpPost httpPost = new HttpPost(serverURL);
             StringBody stringBody = new StringBody(stringToSend);
             MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.STRICT);
             reqEntity.addPart(paramName, stringBody);
@@ -195,6 +209,7 @@ public class HttpHelper {
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
             respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+            httpPost.abort();
         }
         return respuesta;
     }
@@ -204,8 +219,8 @@ public class HttpHelper {
         logger.debug("sendByteArray - contentType: " + contentType + 
                 " - serverURL: " + serverURL);
         Respuesta respuesta = null;
+        HttpPost httpPost = new HttpPost(serverURL);
         try {
-            HttpPost httpPost = new HttpPost(serverURL);
             ByteArrayEntity entity = null;
             if(contentType != null) {
                 entity = new ByteArrayEntity(byteArray,  ContentType.create(contentType));
@@ -224,9 +239,11 @@ public class HttpHelper {
             logger.error(ex.getMessage(), ex);
             respuesta = new Respuesta(Respuesta.SC_ERROR,
                     Contexto.INSTANCE.getString("hostConnectionErrorMsg"));
+            httpPost.abort();
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
             respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+            httpPost.abort();
         } 
         return respuesta;
     }
@@ -236,10 +253,10 @@ public class HttpHelper {
             Map<String, Object> fileMap, String serverURL) throws Exception {
         logger.debug("sendObjectMap - serverURL: " + serverURL); 
         Respuesta respuesta = null;
-        try {
-            if(fileMap == null || fileMap.isEmpty()) throw new Exception(
+        if(fileMap == null || fileMap.isEmpty()) throw new Exception(
                 Contexto.INSTANCE.getString("requestWithoutFileMapErrorMsg"));
-            HttpPost httpPost = new HttpPost(serverURL);
+        HttpPost httpPost = new HttpPost(serverURL);
+        try {
             Set<String> fileNames = fileMap.keySet();
             MultipartEntity reqEntity = new MultipartEntity();
             for(String objectName: fileNames){
@@ -269,6 +286,7 @@ public class HttpHelper {
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
             respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+            httpPost.abort();
         }
         return respuesta;  
     }

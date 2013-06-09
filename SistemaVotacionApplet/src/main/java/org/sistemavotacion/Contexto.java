@@ -165,6 +165,11 @@ public enum Contexto {
 
     public void init(){}
     
+        
+    public void initMultiThreadedHttp() {
+        httpHelper.initMultiThreadedMode();
+    }
+    
     public String getURLTimeStampServer() {
         if(accessControl == null) return null;
         String serverURL = accessControl.getServerURL();

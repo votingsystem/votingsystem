@@ -18,12 +18,16 @@ public class MetaInf {
     private Date dateFinish;
     private Tipo type;
     private String subject;
+    private String serverURL;
     private Long numSignatures;
     private Long numAccessRequest;    
     private Long numVotes;
-    private Long numRepresentatives;
     private Long numRepresented;
-    private Long numRepresentedWithVote;
+    private Long numRepresentedWithAccessRequest;
+    private Long numRepresentatives;    
+    private Long numRepresentativesWithAccessRequest;
+    private Long numRepresentativesWithVote;
+    
     private List<String> errorsList;
     
     
@@ -38,11 +42,17 @@ public class MetaInf {
                 numAccessRequest);
         if(numVotes != null ) result.append("\n numVotes: " + numVotes);
         if(numRepresentatives != null ) result.append(
-                "\n numRepresentatives: " + numRepresentatives);
+                "\n numRepresentatives: " + numRepresentatives); 
+        if(numRepresentativesWithAccessRequest != null ) result.append(
+                "\n numRepresentativesWithAccessRequest: " + 
+                numRepresentativesWithAccessRequest);  
+        if(numRepresentativesWithVote != null ) result.append(
+                "\n numRepresentativesWithVote: " + 
+                numRepresentativesWithVote); 
         if(numRepresented != null ) result.append(
-                "\n numRepresented: " + numRepresented);   
-        if(numRepresentedWithVote != null ) result.append(
-                "\n numRepresented: " + numRepresentedWithVote);  
+                "\n numRepresented: " + numRepresented); 
+        if(numRepresentedWithAccessRequest != null ) result.append(
+                "\n numRepresentedWithAccessRequest: " + numRepresentedWithAccessRequest);         
         return result.toString();
     }
 			
@@ -56,6 +66,8 @@ public class MetaInf {
             metaInfoDeEvento.setSubject(metaInfoJSON.getString("subject"));   
         if (metaInfoJSON.containsKey("type")) 
             metaInfoDeEvento.setType(Tipo.valueOf(metaInfoJSON.getString("type")));
+        if(metaInfoJSON.containsKey("serverURL")) 
+            metaInfoDeEvento.setServerURL(metaInfoJSON.getString("serverURL"));
         if(metaInfoJSON.containsKey("BACKUP")) {
             JSONObject backupJSON = metaInfoJSON.getJSONObject("BACKUP");
             if(backupJSON.containsKey("numSignatures")) {
@@ -82,10 +94,18 @@ public class MetaInf {
                 metaInfoDeEvento.setNumRepresented(
                         repJSON.getLong("numRepresented"));
             }
-            if(repJSON.containsKey("numRepresentedWithVote")) {
-                metaInfoDeEvento.setNumRepresentedWithVote(
-                        repJSON.getLong("numRepresentedWithVote"));
+            if(repJSON.containsKey("numRepresentedWithAccessRequest")) {
+                metaInfoDeEvento.setNumRepresentedWithAccessRequest(
+                        repJSON.getLong("numRepresentedWithAccessRequest"));
             }
+            if(repJSON.containsKey("numRepresentativesWithAccessRequest")) {
+                metaInfoDeEvento.setNumRepresentativesWithAccessRequest(
+                        repJSON.getLong("numRepresentativesWithAccessRequest"));
+            }
+            if(repJSON.containsKey("numRepresentativesWithVote")) {
+                metaInfoDeEvento.setNumRepresentativesWithVote(
+                        repJSON.getLong("numRepresentativesWithVote"));
+            }            
         }
         return metaInfoDeEvento;
     }
@@ -106,6 +126,7 @@ public class MetaInf {
             return result.toString();
         }
     }
+    
 
     /**
      * @return the numSignatures
@@ -234,20 +255,6 @@ public class MetaInf {
     }
 
     /**
-     * @return the numRepresentedWithVote
-     */
-    public Long getNumRepresentedWithVote() {
-        return numRepresentedWithVote;
-    }
-
-    /**
-     * @param numRepresentedWithVote the numRepresentedWithVote to set
-     */
-    public void setNumRepresentedWithVote(Long numRepresentedWithVote) {
-        this.numRepresentedWithVote = numRepresentedWithVote;
-    }
-
-    /**
      * @return the numRepresented
      */
     public Long getNumRepresented() {
@@ -259,6 +266,62 @@ public class MetaInf {
      */
     public void setNumRepresented(Long numRepresented) {
         this.numRepresented = numRepresented;
+    }
+
+    /**
+     * @return the serverURL
+     */
+    public String getServerURL() {
+        return serverURL;
+    }
+
+    /**
+     * @param serverURL the serverURL to set
+     */
+    public void setServerURL(String serverURL) {
+        this.serverURL = serverURL;
+    }
+
+    /**
+     * @return the numRepresentativesWithAccessRequest
+     */
+    public Long getNumRepresentativesWithAccessRequest() {
+        return numRepresentativesWithAccessRequest;
+    }
+
+    /**
+     * @param numRepresentativesWithAccessRequest the numRepresentativesWithAccessRequest to set
+     */
+    public void setNumRepresentativesWithAccessRequest(Long numRepresentativesWithAccessRequest) {
+        this.numRepresentativesWithAccessRequest = numRepresentativesWithAccessRequest;
+    }
+
+    /**
+     * @return the numRepresentedWithAccessRequest
+     */
+    public Long getNumRepresentedWithAccessRequest() {
+        return numRepresentedWithAccessRequest;
+    }
+
+    /**
+     * @param numRepresentedWithAccessRequest the numRepresentedWithAccessRequest to set
+     */
+    public void setNumRepresentedWithAccessRequest(Long numRepresentedWithAccessRequest) {
+        this.numRepresentedWithAccessRequest = numRepresentedWithAccessRequest;
+    }
+
+    /**
+     * @return the numRepresentativesWithVote
+     */
+    public Long getNumRepresentativesWithVote() {
+        return numRepresentativesWithVote;
+    }
+
+    /**
+     * @param numRepresentativesWithVote the numRepresentativesWithVote to set
+     */
+    public void setNumRepresentativesWithVote(Long numRepresentativesWithVote) {
+        this.numRepresentativesWithVote = numRepresentativesWithVote;
     }
     
 }

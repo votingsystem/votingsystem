@@ -294,11 +294,14 @@ public class PanelVotacion extends Composite implements ConfirmacionListener, Co
 				break;
 			case SOLICITUD_COPIA_SEGURIDAD:
 				setWidgetsStateFirmando(false);
+				ResultDialog resultDialog = new ResultDialog();
 				if(200 == mensaje.getCodigoEstado()) {
-					setMessage(Constantes.INSTANCIA.mensajeSolicitudCopiaSeguridadOK());
+            		resultDialog.show(null, Constantes.INSTANCIA.
+            				mensajeSolicitudCopiaSeguridadOK(), Boolean.TRUE);
+					
 				} else {
-					setMessage(Constantes.INSTANCIA.mensajeError(
-							mensaje.getMensaje()));
+            		resultDialog.show(null, Constantes.INSTANCIA.mensajeError(
+							mensaje.getMensaje()), Boolean.FALSE);
 				}
 			default:
 				break;

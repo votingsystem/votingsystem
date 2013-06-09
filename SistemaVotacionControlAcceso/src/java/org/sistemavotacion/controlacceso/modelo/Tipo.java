@@ -23,8 +23,8 @@ public enum Tipo {
     REPRESENTATIVE_REVOKE_ERROR(""),
     REPRESENTATIVE_ACCREDITATIONS(""),
     
-    BACKUP_GEN_ERROR(""),
-    BACKUP_GEN(""),
+    BACKUP_ERROR(""),
+    BACKUP(""),
     
     REPRESENTATIVE_SELECTION(""),
     REPRESENTATIVE_SELECTION_ERROR(""),
@@ -43,6 +43,7 @@ public enum Tipo {
     EVENTO_VOTACION_FINALIZADO(""),
 
     //VOTO
+    VOTING(""),
     VOTO(""),
     VOTO_CON_ERRORES(""),
     ANULADOR_VOTO(""),

@@ -1,6 +1,8 @@
 package org.sistemavotacion.modelo;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +37,7 @@ public class Respuesta<T> {
     private ReciboVoto reciboVoto;
     private byte[] bytesArchivo;
     private File archivo;
+    private List<String> errorList;
         
     public Respuesta () {  }
     
@@ -215,6 +218,20 @@ public class Respuesta<T> {
      */
     public void setSmimeMessage(SMIMEMessageWrapper smimeMessage) {
         this.smimeMessage = smimeMessage;
+    }
+
+    /**
+     * @return the errorList
+     */
+    public List<String> getErrorList() {
+        return errorList;
+    }
+
+    /**
+     * @param errorList the errorList to set
+     */
+    public void setErrorList(List<String> errorList) {
+        this.errorList = errorList;
     }
 
 

@@ -67,7 +67,7 @@ public class ResultDialog {
     	HTML htmlMessage = new HTML(message);
     	htmlMessage.setStyleName(style.messageLabel(), true);
     	messagePanel.add(htmlMessage);
-    	dialogBox.setText(caption);
+    	if(caption != null) dialogBox.setText(caption);
     	dialogBox.center();
     	if(isOK != null) {
     		if(isOK) {

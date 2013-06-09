@@ -85,7 +85,7 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
             logger.debug("launchRepresentativeRequests - WITHOUT REPRESENTATIVE REQUESTS");
             return;
         } 
-        while (simulationData.getNumRepresentativeRequests() <= 
+        while (simulationData.getNumRepresentativeRequests() < 
                 simulationData.getNumRepresentatives()){
             if((simulationData.getNumRepresentativeRequests() - 
                     simulationData.getNumRepresentativeRequestsColected()) < 
@@ -105,7 +105,7 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
             logger.debug("launchRepresentativeRequests - WITHOUT DELEGATION REQUESTS");
             return;
         } 
-        while (simulationData.getNumDelegationRequests() <= 
+        while (simulationData.getNumDelegationRequests() < 
                 simulationData.getNumUsersWithRepresentative()) {
             if((simulationData.getNumDelegationRequests() - 
                     simulationData.getNumDelegationRequestsColected()) < 
@@ -250,7 +250,7 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
                 simulationData.getNumDelegationsERROR());  
         String errorsMsg = getFormattedErrorList();
         if(errorsMsg != null) {
-            logger.info(" ************* " + getErrorsList().size() + " ERRORS: \n" + 
+            logger.info(" ************* " + geterrorList().size() + " ERRORS: \n" + 
                         errorsMsg);
         }
         logger.debug("-------------------------------------------------------");

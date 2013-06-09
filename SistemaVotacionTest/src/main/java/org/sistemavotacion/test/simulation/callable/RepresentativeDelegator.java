@@ -63,7 +63,7 @@ public class RepresentativeDelegator implements Callable<Respuesta> {
         SMIMESignedSenderWorker senderWorker = new SMIMESignedSenderWorker(null, 
                 smimeMessage, urlService, null, destinationCert,null);
         senderWorker.execute();
-        
+        respuesta = senderWorker.get();
         if (Respuesta.SC_OK == senderWorker.getStatusCode()) {
             respuesta.setMensaje(userNIF);
         } else {
