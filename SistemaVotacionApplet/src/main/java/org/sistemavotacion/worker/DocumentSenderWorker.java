@@ -1,7 +1,6 @@
 package org.sistemavotacion.worker;
 
 import java.io.File;
-import java.util.Arrays;
 import javax.swing.SwingWorker;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.Respuesta;
@@ -82,10 +81,6 @@ public class DocumentSenderWorker extends SwingWorker<Respuesta, String>
     @Override public int getStatusCode() {
         if(respuesta == null) return Respuesta.SC_ERROR;
         else return respuesta.getCodigoEstado();
-    }
-    
-    @Override public Respuesta getRespuesta() {
-        return respuesta;
     }
     
     @Override public VotingSystemWorkerType getType() {

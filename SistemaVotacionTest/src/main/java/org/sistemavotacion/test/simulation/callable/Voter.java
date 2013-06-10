@@ -1,11 +1,8 @@
 package org.sistemavotacion.test.simulation.callable;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Callable;
-import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.ReciboVoto;
 import org.sistemavotacion.modelo.Respuesta;
@@ -13,7 +10,6 @@ import org.sistemavotacion.seguridad.PKCS10WrapperClient;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sistemavotacion.worker.AccessRequestWorker;
@@ -29,7 +25,7 @@ public class Voter implements Callable<Respuesta> {
    
     private Evento evento;
     private String nifFrom;
-    private Respuesta respuesta = new Respuesta(Respuesta.SC_ERROR);
+    private Respuesta respuesta;
         
     public Voter (Evento evento) throws Exception {
         this.evento = evento; 
@@ -87,10 +83,10 @@ public class Voter implements Callable<Respuesta> {
                         null, smimeMessage, urlVoteService, wrapperClient.
                         getKeyPair(), null, null);
                 senderWorker.execute();
-                senderWorker.get();
+                Respuesta respuesta = senderWorker.get();
                 if (Respuesta.SC_OK == senderWorker.getStatusCode()) {  
-                    SMIMEMessageWrapper validatedVote =  senderWorker.
-                            getRespuesta().getSmimeMessage();
+                    SMIMEMessageWrapper validatedVote =  
+                            respuesta.getSmimeMessage();
                     ReciboVoto reciboVoto = new ReciboVoto(
                                 Respuesta.SC_OK, validatedVote, evento);
                     
@@ -98,7 +94,7 @@ public class Voter implements Callable<Respuesta> {
                 }
             }
         } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            logger.error(ex.getMessage() + " - nifFrom: " + nifFrom , ex);
             respuesta.appendErrorMessage(ex.getMessage());
         }
         return respuesta;

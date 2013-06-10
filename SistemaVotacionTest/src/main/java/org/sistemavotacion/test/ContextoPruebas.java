@@ -320,6 +320,14 @@ public enum ContextoPruebas {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         return serverURL + "certificado/addCertificateAuthority";
     }
+     
+    public String getUserCertServiceURL() {
+        if(accessControl == null) return null;
+        String serverURL = accessControl.getServerURL();
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "user";
+    }
+    
 
     public String getControlCenterRootCAServiceURL() {
         if(controlCenter == null) return null;

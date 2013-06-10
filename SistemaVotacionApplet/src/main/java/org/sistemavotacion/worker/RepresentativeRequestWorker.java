@@ -51,12 +51,6 @@ public class RepresentativeRequestWorker extends SwingWorker<Respuesta, String>
     }
     
     @Override protected void done() {//on the EDT
-        try {
-            respuesta = get();
-        }catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            respuesta.appendMessage(ex.getMessage());
-        } 
         if(workerListener != null) workerListener.showResult(this);
     }
     
@@ -96,7 +90,7 @@ public class RepresentativeRequestWorker extends SwingWorker<Respuesta, String>
                 respuesta.appendErrorMessage(ex.getMessage());
             }
         }
-        return getRespuesta();
+        return respuesta;
     }
 
     @Override public String getMessage() {
@@ -107,10 +101,6 @@ public class RepresentativeRequestWorker extends SwingWorker<Respuesta, String>
     @Override  public int getStatusCode() {
         if(respuesta == null) return Respuesta.SC_ERROR;
         else return respuesta.getCodigoEstado();
-    }
-    
-    @Override public Respuesta getRespuesta() {
-        return respuesta;
     }
 
     @Override public String getErrorMessage() {

@@ -2,6 +2,9 @@ package org.sistemavotacion.controlacceso
 
 import grails.converters.JSON
 import java.security.MessageDigest
+import java.security.cert.X509Certificate;
+import java.util.Collection;
+
 import org.sistemavotacion.util.StringUtils;
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.bouncycastle.tsp.TimeStampRequest;
@@ -10,8 +13,12 @@ import org.sistemavotacion.controlacceso.modelo.*
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.multipart.MultipartHttpServletRequest
 import org.bouncycastle.util.encoders.Base64;
+import org.sistemavotacion.seguridad.*
+import grails.util.*
 
 class UserController {
+	
+	def subscripcionService
 
 	/**
 	 *
@@ -59,4 +66,41 @@ class UserController {
 			return false
 		}
 	}
+	
+	/**
+	 *
+	 * Servicio que sirve para añadir usuarios de pruebas.
+	 * SOLO DISPONIBLES EN ENTORNOS DE DESARROLLO.
+	 *
+	 * @httpMethod [POST]
+	 * @serviceURL [/user]
+	 * @param [userCert] Certificado de usuario en formato PEM
+	 * 
+	 * @requestContentType [application/x-x509-ca-cert]
+	 * 
+	 */
+	def save() {
+		if(!Environment.DEVELOPMENT.equals(Environment.current)) {
+			def msg = message(code: "serviceDevelopmentModeMsg")
+			log.error msg
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
+			return false
+		}
+		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
+		String pemCert = "${request.getInputStream()}"
+		Collection<X509Certificate> userCertCollection = CertUtil.fromPEMToX509CertCollection(pemCert.getBytes())
+		X509Certificate userCert = userCertCollection?.toArray()[0]
+		if(userCert) {
+			Usuario usuario = Usuario.getUsuario(userCert);
+			Respuesta respuesta = subscripcionService.checkUser(usuario, request.locale)
+			response.status = respuesta.codigoEstado
+			render respuesta.mensaje
+		} else {
+			response.status = Respuesta.SC_ERROR
+			render message(code:"error.nullCertificate")
+		}
+	}
+	
+	
 }

@@ -6,7 +6,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.sistemavotacion.modelo.MetaInf;
+import org.sistemavotacion.modelo.OpcionEvento;
 import org.sistemavotacion.seguridad.CertUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,63 +29,91 @@ public class VotingBackupData {
     private byte[] accessRequestTrustedCertsBytes;
     private byte[] eventTrustedCertsBytes;
     private byte[] representativeReport;
+    private Map<Long, Integer> optionsMap = new HashMap<Long, Integer>();
     private Collection<X509Certificate> eventTrustedCerts;
     private Collection<X509Certificate> accessRequestTrustedCerts;
     private MetaInf metaInf;    
     
     public String getFormattedInfo() {
-        StringBuilder result = new StringBuilder("\n").append(
-                " - with eventTrustedCerts: " + (eventTrustedCerts != null) + "\n").
-                append(" - with accessRequestTrustedCertsBytes: " + (
-                accessRequestTrustedCertsBytes != null)).append("\n").append(
-                " - with representative report: " + (
-                representativeReport != null)).append("\n").append(
-                " - num. access request: " + accessRequests.size() + "\n" + 
-                " - num. votes users: " + votes.size() + "\n");
         int numRepresentatives = representativesMap.keySet().size();
         int numRepresentativesWithVote = 0;
         int numRepresented = 0;
         Collection<RepresentativeBackupData>  repList = 
                 representativesMap.values();
+        
+        calculateOptionsValues(); 
         for(RepresentativeBackupData rep: repList) {
             if(rep.getVote() != null) numRepresentativesWithVote++;
             numRepresented += rep.getRepresentationDocumentList().size();
+            
+            if(rep.getSelectedOptionId() == null) {
+                logger.debug(" representative: " + rep.getNif() + " has no vote");
+            } else {
+                Integer numVotes = optionsMap.get(rep.getSelectedOptionId()) + 1;
+                optionsMap.put(rep.getSelectedOptionId(), rep.getWeightedVote());
+            }
+            
         }
-        result.append(" - numRepresentativesWithVote: " + numRepresentativesWithVote + 
-                "\n - numRepresented: " + numRepresented + "\n");
+        StringBuilder result = new StringBuilder(
+                "\n - with eventTrustedCerts: " + (eventTrustedCerts != null)).append(
+                "\n - with accessRequestTrustedCertsBytes: " + (
+                    accessRequestTrustedCertsBytes != null)).append(
+                "\n - with representative report: " + (representativeReport != null)).append(
+                "\n - num. representatives: " + numRepresentatives).append(
+                "\n - num. votes representatives: " + numRepresentativesWithVote + 
+                "\n - num. votes users: " + votes.size() + 
+                "\n - num. represented: " + numRepresented).append(
+                "\n - num. access request: " + accessRequests.size());
         
+
+        
+        Set<Long> options = optionsMap.keySet();
+        if(!options.isEmpty()) {
+            result.append("\n Recuento de votos: ");
+            for(Long option: options) {
+                result.append("\n " + metaInf.getOptionContent(option) + " :" +
+                        optionsMap.get(option) + " votes");       
+            }
+        }
         return result.toString();
+    }
+
+    public int calculateVotes() {
+        int numVotes = votes.size();
+        Collection<RepresentativeBackupData>  repList = 
+                representativesMap.values();
+        for(RepresentativeBackupData repData:repList) {
+            numVotes += repData.getWeightedVote();
+        }
+        return numVotes;
     }
     
-    /**
-     *     public String getFormattedInfo() {
-        StringBuilder result = new StringBuilder("");
-        result.append("\n type: " + getType().toString())
-              .append("\n subject: " + getSubject())
-              .append("\n id: " + getId());
-        if(numSignatures != null ) result.append("\n numSignatures: " + 
-                numSignatures );
-        if(numAccessRequest != null ) result.append("\n numAccessRequest: " + 
-                numAccessRequest);
-        if(numVotes != null ) result.append("\n numVotes: " + numVotes);
-        if(numRepresentatives != null ) result.append(
-                "\n numRepresentatives: " + numRepresentatives);
-        if(numRepresented != null ) result.append(
-                "\n numRepresented: " + numRepresented);   
-        if(numRepresentedWithVote != null ) result.append(
-                "\n numRepresented: " + numRepresentedWithVote);  
-        return result.toString();
+    //       
+    //"opcionSeleccionadaId":1, "opcionSeleccionadaContenido":"si"
+    public Map calculateOptionsValues() {
+       
+        List<OpcionEvento> optionList = metaInf.getOptionList();
+        if(optionList == null || optionList.isEmpty()) {
+            logger.debug("Metainf without opions");
+            return null;
+        }
+        for(OpcionEvento option:optionList) {
+            optionsMap.put(option.getId(), new Integer(0));
+        }
+        for(SignedFile vote : votes) {
+            Integer numVotes = optionsMap.get(vote.getSelectedOptionId()) + 1;
+            optionsMap.put(vote.getSelectedOptionId(), numVotes);
+        }
+        return optionsMap;
     }
-     * @param repDoc 
-     */
     
     public void addRepresentationDoc(SignedFile repDoc) {
         if(repDoc == null) {
             logger.debug("addRepresentationDoc - repDoc null");
             return;
         }
-        String[] parts = repDoc.getName().split("RepDoc_");
-        String nif = parts[1].split(".p7m")[0];
+        String[] parts = repDoc.getName().split("representative_");
+        String nif = parts[1].split("/")[0];
         RepresentativeBackupData repBackup = representativesMap.get(nif);
         if(repBackup == null) {
             repBackup = new RepresentativeBackupData(nif);
@@ -247,5 +277,4 @@ public class VotingBackupData {
         this.metaInf = metaInf;
     }
 
-    
 }

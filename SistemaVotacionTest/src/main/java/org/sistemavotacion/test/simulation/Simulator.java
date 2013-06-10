@@ -18,7 +18,7 @@ public abstract class Simulator<T extends SimulationData>
     
     private static Logger logger = LoggerFactory.getLogger(Simulator.class);
     
-    protected List<String> errorList;
+    protected List<String> errorList = new ArrayList<String>();
     
     public abstract T call() throws Exception;
         
@@ -48,18 +48,16 @@ public abstract class Simulator<T extends SimulationData>
     }
     
     protected void addErrorMsg(String msg) {
-        if(errorList == null) errorList = new ArrayList<String>();
         errorList.add(msg);
     }
     
     protected void addErrorList(List<String> errors) {
         if(errors == null || errors.isEmpty()) return;
-        if(errorList == null) errorList = new ArrayList<String>();
         errorList.addAll(errors);
     }
     
     protected String getFormattedErrorList() {
-        if(errorList == null || errorList.isEmpty()) return null;
+        if(errorList.isEmpty()) return null;
         else {
             StringBuilder result = new StringBuilder("");
             for(String error:errorList) {
@@ -70,7 +68,7 @@ public abstract class Simulator<T extends SimulationData>
     }
            
     public String getFormattedErrorList(List<String> errorList) {
-        if(errorList == null || errorList.isEmpty()) return null;
+        if(errorList.isEmpty()) return null;
         else {
             StringBuilder result = new StringBuilder("");
             for(String error:errorList) {

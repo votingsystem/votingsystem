@@ -29,9 +29,27 @@ public class RepresentativeBackupData {
             logger.debug("repDoc null");
             return;
         } 
-        if(representationDocumentList == null) representationDocumentList = 
-                new ArrayList<SignedFile>();
         representationDocumentList.add(repDoc);
+    }
+    
+    public Long getSelectedOptionId() {
+        if(vote == null) {
+            return null;
+        }
+        return vote.getSelectedOptionId();
+    }
+    
+    public int getWeightedVote() {
+        if(vote == null) return getNumVotesOfRepresented();
+        else return representationDocumentList.size();
+    }
+    
+    public int getNumVotesOfRepresented () {
+        int numVotesOfRepresented = 0;
+        for(SignedFile repDoc:representationDocumentList) {
+            if(repDoc.getName().contains("WithRequest_")) numVotesOfRepresented++;
+        }      
+        return numVotesOfRepresented;
     }
     
     

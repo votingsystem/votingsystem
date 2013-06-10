@@ -106,8 +106,10 @@ public enum Contexto {
     
     public static final String OCSP_DNIE_URL = "http://ocsp.dnie.es";
     public static final String JSON_CONTENT_TYPE    = "application/json";
+    
     public static final String PDF_CONTENT_TYPE    = "application/pdf";
     public static final String SIGNED_CONTENT_TYPE = "application/x-pkcs7-signature";
+    public static final String X509_CONTENT_TYPE = "application/x-x509-ca-cert";
     public static final String ENCRYPTED_CONTENT_TYPE = "application/x-pkcs7-mime";
     public static final String SIGNED_AND_ENCRYPTED_CONTENT_TYPE = 
             SIGNED_CONTENT_TYPE + "," + ENCRYPTED_CONTENT_TYPE;

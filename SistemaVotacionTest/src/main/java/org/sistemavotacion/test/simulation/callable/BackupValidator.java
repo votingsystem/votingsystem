@@ -116,13 +116,14 @@ public class BackupValidator implements Callable<Respuesta> {
         List<SignedFile> signedFileList = new ArrayList<SignedFile>();
         Enumeration entries = backupZip.entries();
 
-                
+        VotingBackupData votingBackupData = new VotingBackupData();        
         MetaInf metaInf = null;
         if(backupZip.getEntry("meta.inf") != null) {
             InputStream inputStream = backupZip.getInputStream(
                 backupZip.getEntry("meta.inf"));
             byte[] metaInfBytes = FileUtils.getBytesFromInputStream(inputStream);
             metaInf = MetaInf.parse(new String(metaInfBytes));
+            votingBackupData.setMetaInf(metaInf);
             logger.debug("metaInf: " + metaInf.getFormattedInfo());
         } else logger.error(" --- Backup without MetaInf ---");
 
@@ -130,12 +131,11 @@ public class BackupValidator implements Callable<Respuesta> {
         List<String> errorList = new ArrayList<String>();
         int numFilesOK = 0;
         
-        VotingBackupData votingBackupData = new VotingBackupData();
+        
         while(entries.hasMoreElements()) {
             ZipEntry entry = (ZipEntry)entries.nextElement();
             
             if(entry.isDirectory())  {
-                logger.debug("---------- dir -> " + entry.getName());
                 continue;
             }
             
@@ -226,6 +226,9 @@ public class BackupValidator implements Callable<Respuesta> {
         
         logger.debug(" ---- FormattedInfo: " + votingBackupData.getFormattedInfo());
         
+        votingBackupData.calculateVotes();
+        
+        
         respuesta.setData(metaInf);
         if(metaInf != null && !errorList.isEmpty()) {
             metaInf.setErrorsList(errorList);
@@ -239,7 +242,10 @@ public class BackupValidator implements Callable<Respuesta> {
         logger.debug("Backup with " + signedFileList.size() + " files and " + 
                 errorList.size() + " errors");
         backupZip.close();
-        if(errorList.isEmpty()) respuesta.setCodigoEstado(Respuesta.SC_OK);
+        if(errorList.isEmpty()) {
+            logger.debug("Backup with " + errorList.size() + " errors");
+            respuesta.setCodigoEstado(Respuesta.SC_OK);
+        } 
         else {
             respuesta.setErrorList(errorList);
             respuesta.setCodigoEstado(Respuesta.SC_ERROR);

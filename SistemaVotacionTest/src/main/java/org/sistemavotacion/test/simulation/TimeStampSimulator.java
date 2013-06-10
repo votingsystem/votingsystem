@@ -105,7 +105,7 @@ public class TimeStampSimulator extends Simulator<SimulationData>  {
             Future<Respuesta> f = requestCompletionService.take();
             final Respuesta respuesta = f.get();
             logger.debug("Response '" + v + "' statusCode: " + 
-                    respuesta.getCodigoEstado() + " - msg: " + respuesta.getMensaje());
+                    respuesta.getCodigoEstado());
             if(respuesta.getCodigoEstado() == Respuesta.SC_OK) {
                 simulationData.getAndIncrementNumRequestsOK();
             } else {

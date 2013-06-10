@@ -61,7 +61,6 @@ public class TimeStamper implements Callable<Respuesta> {
                 documentSMIME.getTimeStampRequest());
         worker.execute();
         respuesta = worker.get();
-        
         if(Respuesta.SC_OK != respuesta.getCodigoEstado()) {
             String msg = "showResult - ERROR obteniendo sello de tiempo";
             try {
@@ -95,7 +94,4 @@ public class TimeStamper implements Callable<Respuesta> {
         return jsonObject.toString();
     }
 
-    private Respuesta getResult() {
-        return respuesta;
-    }
 }

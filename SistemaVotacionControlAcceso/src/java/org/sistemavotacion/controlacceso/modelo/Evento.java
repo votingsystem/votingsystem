@@ -6,9 +6,11 @@ import groovy.util.ConfigObject;
 
 import java.io.Serializable;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.CascadeType;
@@ -350,6 +352,16 @@ public class Evento implements Serializable {
 			}
 			if(this instanceof EventoVotacion) {
 				eventMetaInf.put("type", Tipo.EVENTO_VOTACION.toString());
+				EventoVotacion votacion = (EventoVotacion)this;
+				List optionsList = new ArrayList();
+				Set<OpcionDeEvento> opciones = votacion.getOpciones();
+				for(OpcionDeEvento opcion:opciones) {
+					Map optionMap = new HashMap();
+					optionMap.put("id", opcion.getId());
+					optionMap.put("content", opcion.getContenido());
+					optionsList.add(optionMap);
+				}
+				eventMetaInf.put("options", optionsList);
 			} else if(this instanceof EventoReclamacion) {
 				eventMetaInf.put("type", Tipo.EVENTO_RECLAMACION.toString());
 			} else if(this instanceof EventoFirma) {

@@ -117,7 +117,7 @@ public class UserBaseSimulationData extends SimulationData {
      * @return the numRepresentativeRequestsOK
      */
     public Long getAndIncrementNumRepresentativeRequestsERROR() {
-        return numRepresentativeRequestsERROR.get();
+        return numRepresentativeRequestsERROR.getAndIncrement();
     }
 
     /**

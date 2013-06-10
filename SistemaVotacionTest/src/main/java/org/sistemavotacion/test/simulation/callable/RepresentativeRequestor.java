@@ -31,20 +31,15 @@ public class RepresentativeRequestor implements Callable<Respuesta> {
     private static Logger logger = LoggerFactory.getLogger(RepresentativeRequestor.class);
 
     private String representativeNIF;
-    private File selectedImage;
-    private Respuesta respuesta;
         
     public RepresentativeRequestor (String representativeNIF) 
             throws Exception {
         this.representativeNIF = representativeNIF;
     }
     
-    
-    @Override
-    public Respuesta call() throws Exception {
-        Respuesta respuesta = null;
+    @Override  public Respuesta call() throws Exception {
         KeyStore mockDnie = ContextoPruebas.INSTANCE.crearMockDNIe(representativeNIF);
-        selectedImage = File.createTempFile("representativeImage", ".png");
+        File selectedImage = File.createTempFile("representativeImage", ".png");
         logger.info(" - selectedImage.getAbsolutePath(): " + selectedImage.getAbsolutePath());
         selectedImage.deleteOnExit();
         selectedImage =   FileUtils.copyStreamToFile(getClass().
@@ -77,10 +72,10 @@ public class RepresentativeRequestor implements Callable<Respuesta> {
                 smimeMessage, selectedImage, urlService, ContextoPruebas.INSTANCE.
                 getAccessControl().getCertificate(),null);
         worker.execute();
-        respuesta = worker.get();
+        Respuesta respuesta = worker.get();
         if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
             respuesta.setMensaje(representativeNIF);
-        }
+        } else respuesta.appendErrorMessage(" - From nif: " + representativeNIF);
         return respuesta;
     }
    
@@ -96,8 +91,4 @@ public class RepresentativeRequestor implements Callable<Respuesta> {
         return jsonObject.toString();
     }
 
-    private Respuesta getResult() {
-        return respuesta;
-    }
-    
 }

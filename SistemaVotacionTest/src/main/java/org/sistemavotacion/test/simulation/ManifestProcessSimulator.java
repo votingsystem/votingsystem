@@ -22,20 +22,17 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import org.sistemavotacion.Contexto;
-import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.pdf.PdfFormHelper;
-import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
+import org.sistemavotacion.test.simulation.callable.AccessControlInitializer;
 import org.sistemavotacion.test.simulation.callable.BackupValidator;
 import org.sistemavotacion.test.simulation.callable.ManifestSigner;
-import org.sistemavotacion.test.util.SimulationUtils;
 import org.sistemavotacion.util.NifUtils;
 import org.sistemavotacion.util.FileUtils;
-import org.sistemavotacion.util.StringUtils;
 import org.sistemavotacion.worker.DocumentSenderWorker;
 import org.sistemavotacion.worker.InfoGetterWorker;
 import org.sistemavotacion.worker.PDFSignedSenderWorker;
@@ -276,23 +273,6 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
         } logger.error(worker.getMessage());
     }
 
-    private void initCA_AccessControl() throws Exception {
-        logger.debug("initCA_AccessControl");
-        //we need to add test Authority Cert to system in order
-        //to validate signatures
-        byte[] rootCACertPEMBytes = CertUtil.fromX509CertToPEM (
-            ContextoPruebas.INSTANCE.getRootCACert());
-        String rootCAServiceURL = ContextoPruebas.INSTANCE.
-                getAccessControlRootCAServiceURL();
-        DocumentSenderWorker worker = new DocumentSenderWorker(null, 
-            rootCACertPEMBytes, null, rootCAServiceURL, null);
-        worker.execute();
-        worker.get();
-        if(Respuesta.SC_OK == worker.getStatusCode()) {
-            publishManifest();
-        }
-    }
-
     @Override
     public void actionPerformed(ActionEvent ae) {
         if (ae.getSource().equals(timer)) {
@@ -330,22 +310,12 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
         logger.debug("call - NumberOfRequestsProjected: " +  
                 simulationData.getNumRequestsProjected());
         simulationData.setBegin(System.currentTimeMillis());
-        String urlServidor = StringUtils.prepararURL(simulationData.getAccessControlURL());
-        String urlInfoServidor = ContextoPruebas.getURLInfoServidor(urlServidor);
-        InfoGetterWorker worker = new InfoGetterWorker(null, urlInfoServidor, 
-            null, null);
-        worker.execute();            
-        worker.get();
-        if(Respuesta.SC_OK == worker.getStatusCode()) {
-            ActorConIP controlAcceso = ActorConIP.parse(worker.getMessage());
-            String msg = SimulationUtils.checkActor(controlAcceso, 
-                    ActorConIP.Tipo.CONTROL_ACCESO);
-            if(msg == null) {
-                ContextoPruebas.INSTANCE.setControlAcceso(controlAcceso);
-                initCA_AccessControl();
-            }
-        } else logger.error(worker.getErrorMessage());
-        
+        AccessControlInitializer accessControlInitializer = 
+            new AccessControlInitializer(simulationData.getAccessControlURL());
+        Respuesta respuesta = accessControlInitializer.call();
+        if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+             publishManifest();
+        } else logger.error(respuesta.getMensaje());
         
         countDownLatch.await();
         logger.debug("- call - shutdown executors");   

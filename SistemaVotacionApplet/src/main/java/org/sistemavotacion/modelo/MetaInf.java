@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.sistemavotacion.util.DateUtils;
@@ -29,6 +30,8 @@ public class MetaInf {
     private Long numRepresentativesWithVote;
     
     private List<String> errorsList;
+    
+    private List<OpcionEvento> optionList;
     
     
     public String getFormattedInfo() {
@@ -107,6 +110,18 @@ public class MetaInf {
                         repJSON.getLong("numRepresentativesWithVote"));
             }            
         }
+        if(metaInfoJSON.containsKey("options")) {
+            List<OpcionEvento> optionList = new ArrayList<OpcionEvento>();
+            JSONArray optionsJSON = metaInfoJSON.getJSONArray("options");
+            for(int i = 0; i < optionsJSON.size(); i++) {
+                OpcionEvento option = new OpcionEvento();
+                JSONObject optionJSON = optionsJSON.getJSONObject(i);
+                option.setId(optionJSON.getLong("id"));
+                option.setContenido(optionJSON.getString("content"));
+                optionList.add(option);
+            }
+            metaInfoDeEvento.setOptionList(optionList);
+        }
         return metaInfoDeEvento;
     }
         
@@ -127,6 +142,14 @@ public class MetaInf {
         }
     }
     
+    public String getOptionContent(Long optionId) {
+        if(optionId == null) return null;
+        if(optionList == null) return null;
+        for(OpcionEvento option:optionList) {
+            if(option.getId() == optionId) return option.getContenido();
+        }
+        return null;
+    }
 
     /**
      * @return the numSignatures
@@ -322,6 +345,20 @@ public class MetaInf {
      */
     public void setNumRepresentativesWithVote(Long numRepresentativesWithVote) {
         this.numRepresentativesWithVote = numRepresentativesWithVote;
+    }
+
+    /**
+     * @return the optionList
+     */
+    public List<OpcionEvento> getOptionList() {
+        return optionList;
+    }
+
+    /**
+     * @param optionList the optionList to set
+     */
+    public void setOptionList(List<OpcionEvento> optionList) {
+        this.optionList = optionList;
     }
     
 }

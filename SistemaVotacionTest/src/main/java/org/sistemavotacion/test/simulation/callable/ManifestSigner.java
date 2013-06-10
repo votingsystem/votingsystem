@@ -57,9 +57,5 @@ public class ManifestSigner implements Callable<Respuesta> {
         respuesta = worker.get();
         return respuesta;
     }
-
-    private Respuesta getResult() {
-        return respuesta;
-    }
     
 }

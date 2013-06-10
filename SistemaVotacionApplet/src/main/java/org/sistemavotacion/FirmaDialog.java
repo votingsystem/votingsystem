@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 
 import com.itextpdf.text.pdf.PdfReader;
 import java.security.cert.X509Certificate;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import static org.sistemavotacion.modelo.Operacion.Tipo.*;
 import org.sistemavotacion.worker.PDFSignedSenderWorker;
 import org.sistemavotacion.worker.SMIMESignedSenderWorker;
@@ -427,10 +429,14 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                 " - worker: " + worker.getType());
         if(worker.getType() == null) return;
         mostrarPantallaEnvio(false);
-        if (Respuesta.SC_OK == worker.getStatusCode()) {    
-            bytesDocumento =((InfoGetterWorker)worker).getRespuesta().
-                    getBytesArchivo();
-            pack();
+        if (Respuesta.SC_OK == worker.getStatusCode()) { 
+            try {
+                InfoGetterWorker infoWorker = (InfoGetterWorker)worker;
+                bytesDocumento = ((Respuesta)infoWorker.get()).getBytesArchivo();
+                pack();
+            } catch (Exception ex) {
+                logger.error(ex.getMessage(), ex);
+            }
         } else {
             appletFirma.responderCliente(worker.getStatusCode(), 
                     Contexto.INSTANCE.getString(

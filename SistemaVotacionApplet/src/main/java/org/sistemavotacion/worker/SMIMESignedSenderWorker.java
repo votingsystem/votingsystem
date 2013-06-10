@@ -123,11 +123,7 @@ public class SMIMESignedSenderWorker extends SwingWorker<Respuesta, String>
         if(respuesta == null) return Respuesta.SC_ERROR;
         else return respuesta.getCodigoEstado();
     }
-    
-    @Override public Respuesta getRespuesta() {
-        return respuesta;
-    }
-    
+
      @Override public String getErrorMessage() {
         if(workerType != null) return "### ERROR - " + workerType + " - msg: " 
                 + respuesta.getMensaje(); 

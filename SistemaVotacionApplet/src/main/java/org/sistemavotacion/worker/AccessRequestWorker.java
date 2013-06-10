@@ -141,11 +141,6 @@ public class AccessRequestWorker extends SwingWorker<Respuesta, String>
         else return respuesta.getCodigoEstado();
     }
     
-    @Override public Respuesta getRespuesta() {
-        return respuesta;
-    }
-
-    
     @Override public VotingSystemWorkerType getType() {
         return workerType;
     }

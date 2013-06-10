@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeMessage
 
+import org.apache.commons.logging.Log;
 import org.bouncycastle.util.encoders.Base64;
 import org.sistemavotacion.controlacceso.modelo.*
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
@@ -20,6 +21,7 @@ import org.sistemavotacion.util.StringUtils
 
 import grails.converters.JSON
 import sun.misc.BASE64Decoder;
+import org.hibernate.criterion.Projections
 
 class RepresentativeService {
 	
@@ -63,13 +65,17 @@ class RepresentativeService {
 				file:zipResult)
 		}
 		
-		List<MensajeSMIME> representativeRequestMessages = null;
+		def representatives = null;
 		MensajeSMIME.withTransaction {
 			def criteria = MensajeSMIME.createCriteria()
-			representativeRequestMessages = criteria.list (max: 1000000, offset: 0) {
+			representatives = criteria.list (max: 1000000, offset: 0) {
+				projections {
+					distinct("usuario")
+				}
 				eq("tipo", Tipo.REPRESENTATIVE_DATA)
 				le("dateCreated", selectedDate)
 			}
+			
 		}
 
 		int numRepresentatives = 0
@@ -80,11 +86,11 @@ class RepresentativeService {
 		int numTotalVotes = 0
 
 		//Only counts representatives active when event finish
-		if(!representativeRequestMessages.isEmpty()) {
+		if(!representatives.isEmpty()) {
 			File representativesReportFile = mapFiles.representativesReportFile
 			representativesReportFile.write("")
-			representativeRequestMessages.each { message ->
-				Usuario representative = message = message.usuario
+			representatives.each { representative ->
+
 				String representativeBaseDir = "${filesDir.absolutePath}/representative_${representative.nif}"
 				new File(representativeBaseDir).mkdirs()
 
@@ -99,7 +105,7 @@ class RepresentativeService {
 						}
 					}
 					if(revocationMessage) {
-						//representative not active on selected date
+						log.debug("${representative.nif} wasn't active on ${selectedDate}")
 						return
 					}
 				}
@@ -124,17 +130,21 @@ class RepresentativeService {
 					}
 					numRepresented = representationDoc.totalCount
 					numTotalRepresented += numRepresented
+					log.debug("${representative.nif} has ${numRepresented} representations")
 				}
 				representationDoc.each {representationDocument ->
 					Usuario represented = representationDocument.user
-					File representationDocFile = new File("${representativeBaseDir}/RepDoc_${represented.nif}.p7m")
-					representationDocFile.setBytes(representationDocument.activationSMIME.contenido)
 					SolicitudAcceso representedAccessRequest = SolicitudAcceso.findWhere(
 						estado:SolicitudAcceso.Estado.OK, usuario:represented, eventoVotacion:event)
+					String repDocFileName = null 
 					if(representedAccessRequest) {
 						numRepresentedWithAccessRequest++
-					}
+						repDocFileName = "${representativeBaseDir}/WithRequest_RepDoc_${represented.nif}.p7m"
+					} else repDocFileName = "${representativeBaseDir}/RepDoc_${represented.nif}.p7m"
+					File representationDocFile = new File(repDocFileName)
+					representationDocFile.setBytes(representationDocument.activationSMIME.contenido)
 				}
+				log.debug("representative: ${representative.nif} - numRepresentedWithAccessRequest: ${numRepresentedWithAccessRequest}")
 				numTotalRepresentedWithAccessRequest += numRepresentedWithAccessRequest
 				SolicitudAcceso solicitudAcceso = null
 				State state = State.WITHOUT_ACCESS_REQUEST
@@ -147,38 +157,41 @@ class RepresentativeService {
 						state = State.WITH_ACCESS_REQUEST
 					}
 				}
-				if(solicitudAcceso) {
+				def voteResults
+				if(solicitudAcceso?.id) {
 					Voto.withTransaction {
-						def voteResults = Voto.withCriteria {
+						def criteria = Voto.createCriteria()
+						voteResults = criteria.list (offset: 0) {
 							createAlias("certificado", "certificado")
 							eq("certificado.usuario", representative)
 							eq("estado", Voto.Estado.OK)
-						}
-						if(!voteResults.isEmpty()) {
-							state = State.WITH_VOTE
-							numRepresentativesWithVote++
-							numTotalVotes += numRepresented
-						} else {
-							numTotalVotes += numTotalVotes 
+							eq("eventoVotacion", event)
 						}
 					}
 				}
+				if(voteResults && !voteResults.isEmpty()) {
+					state = State.WITH_VOTE
+					numRepresentativesWithVote++
+					numTotalVotes += numRepresented
+				} else {
+					numTotalVotes += numRepresentedWithAccessRequest					
+				}
+				
 				String csvLine = "${representative.nif}, " + 
-					 "numRepresented:${numRepresented}, " +
-					"numRepresentedWithAccessRequest:${numRepresentedWithAccessRequest}, " +
+					 "numRepresented:${String.format('%08d', numRepresented)}, " +
+					"numRepresentedWithAccessRequest:${String.format('%08d', numRepresentedWithAccessRequest)}, " +
 					"${state.toString()}\n"
 				log.debug("csvLine -> ${csvLine}")
 				
 				representativesReportFile.append(csvLine)
 			}//end representative iteration				
 		}
-		
-		
+
 		def metaInfMap = [numRepresentatives:numRepresentatives,
 			numRepresentativesWithAccessRequest:numRepresentativesWithAccessRequest,
 			numRepresentativesWithVote:numRepresentativesWithVote,
 			numRepresentedWithAccessRequest:numTotalRepresentedWithAccessRequest,
-			numRepresented:numTotalRepresented]
+			numRepresented:numTotalRepresented, numTotalVotes:numTotalVotes]
 		Evento.withTransaction {
 			event.updateMetaInf(
 				Tipo.REPRESENTATIVE_ACCREDITATIONS, metaInfMap)
@@ -192,8 +205,6 @@ class RepresentativeService {
 			metaInf:metaInfMap)
 	}
 
-
-	
 			
 	private Respuesta getAccreditationsBackup (Usuario representative,
 		Date selectedDate, Locale locale){
@@ -372,6 +383,7 @@ class RepresentativeService {
 		log.debug("saveRepresentativeData - ")
 		SMIMEMessageWrapper smimeMessageReq = mensajeSMIMEReq.getSmimeMessage()
 		Usuario usuario = mensajeSMIMEReq.getUsuario()
+		log.debug("saveRepresentativeData - usuario: ${usuario.nif}")
 		String msg
 		try {
 			def mensajeJSON = JSON.parse(smimeMessageReq.getSignedContent())
@@ -417,11 +429,22 @@ class RepresentativeService {
 				}
 				newImage.save(flush:true)
 			}
-			log.debug "saveRepresentativeData - user:${usuario.id} - image: ${newImage.id}"
+			
+			MensajeSMIME.withTransaction {
+				def previousMessages = MensajeSMIME.findAllWhere(usuario:usuario,
+					tipo:Tipo.REPRESENTATIVE_DATA)
+				previousMessages?.each {message ->
+					message.tipo = Tipo.REPRESENTATIVE_DATA_OLD
+					message.save()
+				}
+			}
+
+			
+			log.debug "saveRepresentativeData - user:${usuario.nif} - image: ${newImage.id}"
 			return new Respuesta(codigoEstado:Respuesta.SC_OK, mensaje:msg, 
 				tipo:Tipo.REPRESENTATIVE_DATA, mensajeSMIME:mensajeSMIMEReq)
 		} catch(Exception ex) {
-			log.error (ex.getMessage(), ex)
+			log.error ("${ex.getMessage()} - user: ${usuario.nif}", ex)
 			msg = messageSource.getMessage('representativeDataErrorMsg', null, locale)
 			return new Respuesta(codigoEstado:Respuesta.SC_ERROR,
 				mensaje:msg, tipo:Tipo.REPRESENTATIVE_DATA_ERROR)

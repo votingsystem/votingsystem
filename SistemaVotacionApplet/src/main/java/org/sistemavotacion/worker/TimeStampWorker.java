@@ -127,11 +127,7 @@ public class TimeStampWorker extends SwingWorker<Respuesta, String>
         if(respuesta == null) return Respuesta.SC_ERROR;
         else return respuesta.getCodigoEstado();
     }
-    
-    @Override public Respuesta getRespuesta() {
-        return respuesta;
-    }
-        
+ 
     @Override public VotingSystemWorkerType getType() {
         return workerType;
     }

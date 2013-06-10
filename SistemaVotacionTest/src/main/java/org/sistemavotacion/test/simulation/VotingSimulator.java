@@ -157,6 +157,8 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
                         addVotingErrorMsg(mensaje);
                         simulationData.getAndIncrementNumVotingRequestsERROR();
                     }
+                    //=======
+                    break;
                 }
             } catch (Exception ex) {
                 logger.error("ERROR from nif: " + nifFrom + ex.getMessage(), ex);

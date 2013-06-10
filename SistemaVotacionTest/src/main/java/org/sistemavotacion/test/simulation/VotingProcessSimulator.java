@@ -25,6 +25,7 @@ import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.modelo.VotingSimulationData;
 import org.sistemavotacion.test.modelo.UserBaseSimulationData;
+import org.sistemavotacion.test.simulation.callable.AccessControlInitializer;
 import org.sistemavotacion.test.simulation.callable.BackupValidator;
 import org.sistemavotacion.test.util.SimulationUtils;
 import org.sistemavotacion.util.FileUtils;
@@ -54,23 +55,13 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>  {
 
     @Override public VotingSimulationData call() throws Exception {
         logger.debug("call");
-        String urlInfoServidor = ContextoPruebas.getURLInfoServidor(
-                StringUtils.prepararURL(simulationData.getAccessControlURL()));
-        InfoGetterWorker worker = new InfoGetterWorker(
-                null, urlInfoServidor, null, null);
-        worker.execute();
-        worker.get();
-        if(Respuesta.SC_OK == worker.getStatusCode()) {
-            ActorConIP accessControl = ActorConIP.parse(worker.getMessage());
-            String msg = SimulationUtils.checkActor(
-                    accessControl, ActorConIP.Tipo.CONTROL_ACCESO);
-            if(msg == null) {
-                ContextoPruebas.INSTANCE.setControlAcceso(accessControl);
-                initCA_AccessControl();
-            } 
-        } else logger.error(worker.getErrorMessage());
-        
-        
+        AccessControlInitializer accessControlInitializer = 
+                new AccessControlInitializer(simulationData.getAccessControlURL());
+        Respuesta respuesta = accessControlInitializer.call();
+        if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+            initControlCenter();
+        } else logger.error(respuesta.getMensaje());
+                
         countDownLatch.await();
         if(simulatorExecutor != null) simulatorExecutor.shutdown();
         
@@ -120,22 +111,6 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>  {
     }
     
 
-    private void initCA_AccessControl() throws Exception {
-        logger.debug("initCA_AccessControl");
-        //we need to add test Authority Cert to system in order
-        //to validate signatures
-        byte[] rootCACertPEMBytes = CertUtil.fromX509CertToPEM (
-            ContextoPruebas.INSTANCE.getRootCACert());
-        String rootCAServiceURL = ContextoPruebas.INSTANCE.
-                getAccessControlRootCAServiceURL();
-        DocumentSenderWorker worker = new DocumentSenderWorker(null, 
-            rootCACertPEMBytes, null, rootCAServiceURL, null);
-        worker.execute();
-        worker.get();
-        if(Respuesta.SC_OK == worker.getStatusCode()) {
-            initControlCenter();
-        } else logger.error(worker.getErrorMessage());
-    }
     
     private void initControlCenter() throws Exception {
         logger.debug("initControlCenter");

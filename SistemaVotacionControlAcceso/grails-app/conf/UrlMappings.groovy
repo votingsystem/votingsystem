@@ -335,7 +335,12 @@ class UrlMappings {
 			controller = "user"
 			action = [GET:"representative"]
 		}
-				
+		
+		"/user" {
+			controller = "user"
+			action = [POST:"save"]
+		}
+		
 		"/voto" {
 			controller = "voto"
 			action = [POST:"save"]

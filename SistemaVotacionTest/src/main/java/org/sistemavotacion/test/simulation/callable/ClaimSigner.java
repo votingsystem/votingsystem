@@ -83,9 +83,4 @@ public class ClaimSigner implements Callable<Respuesta> {
         return jsonObject.toString();
     }
 
-    
-    private Respuesta getResult() {
-        return respuesta;
-    }
-
 }

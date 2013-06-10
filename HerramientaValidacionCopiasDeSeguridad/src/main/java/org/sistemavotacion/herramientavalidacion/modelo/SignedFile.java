@@ -7,6 +7,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.util.FileUtils;
@@ -127,5 +129,13 @@ public class SignedFile {
         FileUtils.copyStreamToFile(new ByteArrayInputStream(signedFileBytes), file);
         return file;
     }
-        
+
+    public Long getSelectedOptionId() {
+        if(smimeMessageWraper == null) return null;
+        String signedContent = smimeMessageWraper.getSignedContent();
+        JSONObject contentJSON = (JSONObject)JSONSerializer.toJSON(signedContent);
+        if(contentJSON.containsKey("opcionSeleccionadaId")) {
+            return contentJSON.getLong("opcionSeleccionadaId");
+        } else return null;
+    }
 }

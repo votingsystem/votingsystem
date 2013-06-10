@@ -86,8 +86,5 @@ public class EncryptionTester implements Callable<Respuesta> {
         }
         return result;
     }
-    
-    private Respuesta getResult() {
-        return respuesta;
-    }
+
 }
