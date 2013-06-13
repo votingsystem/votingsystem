@@ -423,7 +423,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
     }
     
     public byte[] getBytes () throws IOException, MessagingException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(content.length);
         writeTo(baos);
         byte[] resultado = baos.toByteArray();
         baos.close();

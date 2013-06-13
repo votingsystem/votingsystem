@@ -126,11 +126,9 @@ public class BackupValidator implements Callable<Respuesta> {
             votingBackupData.setMetaInf(metaInf);
             logger.debug("metaInf: " + metaInf.getFormattedInfo());
         } else logger.error(" --- Backup without MetaInf ---");
-
         
         List<String> errorList = new ArrayList<String>();
         int numFilesOK = 0;
-        
         
         while(entries.hasMoreElements()) {
             ZipEntry entry = (ZipEntry)entries.nextElement();
@@ -189,12 +187,6 @@ public class BackupValidator implements Callable<Respuesta> {
                 votingBackupData.addVote(signedFile);
             }
             
-            
-
-            
-
-            
-            
             /*byte[] entryBytes = FileUtils.getBytesFromInputStream(
                     backupZip.getInputStream(entry));
             if(!entry.isDirectory()) {
@@ -223,11 +215,7 @@ public class BackupValidator implements Callable<Respuesta> {
                 if(msg != null) errorList.add(msg);
             }*/
         }
-        
-        logger.debug(" ---- FormattedInfo: " + votingBackupData.getFormattedInfo());
-        
-        votingBackupData.calculateVotes();
-        
+        logger.debug(" ---- Event: " + metaInf.getId() + votingBackupData.getFormattedInfo());
         
         respuesta.setData(metaInf);
         if(metaInf != null && !errorList.isEmpty()) {
@@ -238,7 +226,6 @@ public class BackupValidator implements Callable<Respuesta> {
                         numFilesOK + " valid signatures");
             }
         }
-        
         logger.debug("Backup with " + signedFileList.size() + " files and " + 
                 errorList.size() + " errors");
         backupZip.close();

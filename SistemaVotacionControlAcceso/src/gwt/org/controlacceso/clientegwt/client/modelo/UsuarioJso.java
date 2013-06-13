@@ -55,10 +55,10 @@ public final class UsuarioJso extends JavaScriptObject {
 		return this.urlCertificado;
 	}-*/;
 	
-	public final native int getRepresentationsNumber() /*-{
-		if(this.representationsNumber == null)
+	public final native int getNumRepresentations() /*-{
+		if(this.numRepresentations == null)
 		 	return 0
-		else return this.representationsNumber;
+		else return this.numRepresentations;
 	}-*/;
 	
 	public final native String getInfoURL() /*-{

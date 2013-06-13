@@ -322,7 +322,7 @@ public class Evento implements Serializable {
 	
 	public Date getDateFinish() {
 		if(dateCanceled != null) return dateCanceled;
-		else return dateCreated;
+		else return fechaFin;
 	}
 	
 	public String updateMetaInf(Tipo type, Map value) throws Exception {

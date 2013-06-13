@@ -23,7 +23,6 @@ import org.sistemavotacion.seguridad.*
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;

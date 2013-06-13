@@ -3,18 +3,24 @@ package org.sistemavotacion.utils
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import javax.servlet.ServletContext
-
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.plugins.GrailsPluginManager
+import org.sistemavotacion.smime.SignedMailGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 
-@Singleton class VotingSystemApplicationContex 
-		implements ApplicationContextAware {
+@Singleton class VotingSystemApplicationContex implements ApplicationContextAware{
   
-	private ApplicationContext ctx
+	private static Logger logger = LoggerFactory.
+		getLogger(VotingSystemApplicationContex.class);
+			
 
+	private ApplicationContext ctx
+	
+		
 	@Override public void setApplicationContext(ApplicationContext applicationContext)
 			throws BeansException {
 		ctx = applicationContext	
@@ -25,7 +31,9 @@ import org.springframework.context.ApplicationContextAware
 	}
 	
 	static Object getBean(String name) {
-		getApplicationContext().getBean(name)
+		ApplicationContext ctx = getApplicationContext()
+		if(ctx != null) getApplicationContext().getBean(name)
+		else return null
   	}
 	
 	static GrailsApplication getGrailsApplication() {
@@ -43,6 +51,5 @@ import org.springframework.context.ApplicationContextAware
 	static GrailsPluginManager getPluginManager() {
 		getBean('pluginManager')
 	}
-	
   
 }

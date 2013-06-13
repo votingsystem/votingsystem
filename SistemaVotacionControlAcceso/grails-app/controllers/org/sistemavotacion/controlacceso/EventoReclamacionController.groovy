@@ -91,16 +91,19 @@ class EventoReclamacionController {
 	 * @return Documento SMIME con el recibo.
 	 */
     def validado () {
-        def evento = Evento.get(params.long('id'))
+        def evento
+		Evento.withTransaction {
+			evento = EventoReclamacion.get(params.long('id'))
+		}
         MensajeSMIME mensajeSMIME
-        if (evento) {
+        if (evento?.id) {
 			MensajeSMIME.withTransaction {
 				List results = MensajeSMIME.withCriteria {
 					createAlias("smimePadre", "smimePadre")
 					eq("smimePadre.evento", evento)
 					eq("smimePadre.tipo", Tipo.EVENTO_RECLAMACION)
 				}
-				mensajeSMIME = results.iterator().next()
+				mensajeSMIME = results?.iterator()?.next()
 			}
             if (mensajeSMIME) {
                     response.status = Respuesta.SC_OK
@@ -127,7 +130,10 @@ class EventoReclamacionController {
 	 * @return Documento SMIME con la solicitud de publicación de la reclamación.
 	 */
 	def firmado () {
-		def evento = Evento.get(params.long('id'))
+		def evento
+		Evento.withTransaction {
+			evento = EventoReclamacion.get(params.long('id'))
+		}
 		if (evento) {
 			MensajeSMIME mensajeSMIME
 			MensajeSMIME.withTransaction {

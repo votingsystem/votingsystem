@@ -11,6 +11,7 @@ import org.sistemavotacion.controlacceso.modelo.*;
 import org.sistemavotacion.smime.*;
 import java.security.cert.X509Certificate;
 import java.util.Locale;
+import org.sistemavotacion.utils.VotingSystemApplicationContex
 
 /**
 * @author jgzornoza
@@ -26,6 +27,7 @@ class SolicitudAccesoService {
     def firmaService
     def grailsApplication
 	def encryptionService
+	def statisticsService
 	
 	//{"operation":"SOLICITUD_ACCESO","hashSolicitudAccesoBase64":"...",
 	// "eventId":"..","eventURL":"...","UUID":"..."}
@@ -105,19 +107,34 @@ class SolicitudAccesoService {
 						return new Respuesta(tipo:Tipo.SOLICITUD_ACCESO_ERROR, mensaje:msg,
 								codigoEstado:Respuesta.SC_ERROR_PETICION, evento:eventoVotacion)
 					} else {//Todo OK
-						solicitudAcceso = new SolicitudAcceso(usuario:firmante,
-							mensajeSMIME:mensajeSMIMEReq,
-							estado: SolicitudAcceso.Estado.OK,
-							hashSolicitudAccesoBase64:hashSolicitudAccesoBase64,
-							eventoVotacion:eventoVotacion)
-						SolicitudAcceso.withTransaction {
-							if (!solicitudAcceso.save()) {
-								solicitudAcceso.errors.each { log.error("- saveRequest - ERROR - ${it}")}
-							}
+					
+					VotingEvent votingEvent = null
+					if(Usuario.Type.REPRESENTATIVE == firmante.type) {
+						votingEvent = VotingEvent.ACCESS_REQUEST_REPRESENTATIVE.setData(
+							firmante, eventoVotacion)
+					} else if(firmante.representative) {
+						votingEvent = VotingEvent.ACCESS_REQUEST_USER_WITH_REPRESENTATIVE.setData(
+							firmante, eventoVotacion)
+					} else {
+						votingEvent = VotingEvent.ACCESS_REQUEST.setData(
+							firmante, eventoVotacion)
+					}
+					
+					statisticsService.onApplicationEvent(votingEvent)
+					
+					solicitudAcceso = new SolicitudAcceso(usuario:firmante,
+						mensajeSMIME:mensajeSMIMEReq,
+						estado: SolicitudAcceso.Estado.OK,
+						hashSolicitudAccesoBase64:hashSolicitudAccesoBase64,
+						eventoVotacion:eventoVotacion)
+					SolicitudAcceso.withTransaction {
+						if (!solicitudAcceso.save()) {
+							solicitudAcceso.errors.each { log.error("- saveRequest - ERROR - ${it}")}
 						}
-						return new Respuesta(tipo:Tipo.SOLICITUD_ACCESO,
-								codigoEstado:Respuesta.SC_OK, evento:eventoVotacion,
-								solicitudAcceso:solicitudAcceso)
+					}
+					return new Respuesta(tipo:Tipo.SOLICITUD_ACCESO,
+							codigoEstado:Respuesta.SC_OK, evento:eventoVotacion,
+							solicitudAcceso:solicitudAcceso)
 					}
 				}
 			} else {

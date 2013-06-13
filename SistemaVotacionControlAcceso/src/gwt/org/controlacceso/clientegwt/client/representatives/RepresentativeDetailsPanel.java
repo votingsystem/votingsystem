@@ -65,7 +65,7 @@ public class RepresentativeDetailsPanel extends Composite implements
 	@UiField Label representativeNameLabel;
     @UiField Style style;
 	@UiField Image image;
-	@UiField Label representationsNumber;
+	@UiField Label numRepresentations;
 	@UiField HTMLPanel info;
 	@UiField HorizontalPanel detailsPanel;
 	@UiField HorizontalPanel historyPanel;
@@ -143,9 +143,9 @@ public class RepresentativeDetailsPanel extends Composite implements
 		});
 		representativeNameLabel.setText(representative.getNombre() + 
 				" " + representative.getPrimerApellido());
-		representationsNumber.setText(Constantes.INSTANCIA.
-				representationsNumberLbl(
-				representative.getRepresentationsNumber()));
+		numRepresentations.setText(Constantes.INSTANCIA.
+				numRepresentationsLbl(
+				representative.getNumRepresentations()));
 		info.clear();
 		info.add(new HTML(representative.getInfo()));
 	}
@@ -190,8 +190,8 @@ public class RepresentativeDetailsPanel extends Composite implements
 		switch(mensaje.getOperacionEnumValue()) {
 			case REPRESENTATIVE_SELECTION:
 				if(MensajeClienteFirmaJso.SC_OK == mensaje.getCodigoEstado()) {
-					representationsNumber.setText(Constantes.INSTANCIA.representationsNumberLbl(
-							representative.getRepresentationsNumber() + 1));
+					numRepresentations.setText(Constantes.INSTANCIA.numRepresentationsLbl(
+							representative.getNumRepresentations() + 1));
 					dialogoProgreso.showFinishMessage(Constantes.INSTANCIA.
 							selectRepresentativeCaption(), 
 							Constantes.INSTANCIA.selectRepresentativeOKMsg(representativeName), Boolean.TRUE);

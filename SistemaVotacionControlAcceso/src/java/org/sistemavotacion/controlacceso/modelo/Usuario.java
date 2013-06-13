@@ -55,7 +55,7 @@ public class Usuario implements Serializable {
     private String nombre;
     
     @Column(name="metaInf", columnDefinition="TEXT")
-    private String metaInf = "{\"representationsNumber\"=0}"; 
+    private String metaInf = "{\"numRepresentations\"=0}"; 
     
     @Column(name="primerApellido" )
     private String primerApellido;
@@ -95,6 +95,10 @@ public class Usuario implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="fechaActualizacion", length=23)
     private Date lastUpdated;
+    
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name="representativeRegisterDate", length=23)
+    private Date representativeRegisterDate;
     
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="usuario")
     private Set<Image> images;
@@ -376,6 +380,14 @@ public class Usuario implements Serializable {
 
 	public void setMetaInf(String metaInf) {
 		this.metaInf = metaInf;
+	}
+
+	public Date getRepresentativeRegisterDate() {
+		return representativeRegisterDate;
+	}
+
+	public void setRepresentativeRegisterDate(Date representativeRegisterDate) {
+		this.representativeRegisterDate = representativeRegisterDate;
 	}
 
 }

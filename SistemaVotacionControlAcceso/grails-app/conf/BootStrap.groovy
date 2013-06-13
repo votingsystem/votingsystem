@@ -2,7 +2,7 @@ import java.security.Security;
 import grails.converters.JSON
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
-
+import org.sistemavotacion.controlacceso.modelo.*
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -37,6 +37,13 @@ class BootStrap {
 		pdfService.afterPropertiesSet()
 		timeStampService.afterPropertiesSet()
 		encryptionService.afterPropertiesSet()
+		
+		JSON.registerObjectMarshaller(RepresentativeData) {
+			def returnMap = [:]
+			returnMap['optionSelectedId'] = it.optionSelectedId
+			returnMap['numRepresentations'] = it.numRepresentations
+			return returnMap
+		}
     }
 	
     def destroy = {}

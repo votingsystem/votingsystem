@@ -12,6 +12,8 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import javax.mail.internet.InternetAddress;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import java.security.cert.X509Certificate;
+import org.sistemavotacion.utils.VotingSystemApplicationContex
+
 
 class VotoService {
 	
@@ -20,6 +22,7 @@ class VotoService {
 	def firmaService
 	def httpService
 	def encryptionService
+	def statisticsService
 	
     synchronized Respuesta validateVote(MensajeSMIME mensajeSMIMEReq, Locale locale) {
 		log.debug ("validateVote - ")
@@ -63,6 +66,19 @@ class VotoService {
 			}
 			X509Certificate controlCenterCert = smimeMessageReq.getInformacionVoto()?.
 				getServerCerts()?.iterator()?.next()
+				
+			
+			VotingEvent votingEvent = null
+			if(certificado.usuario?.id) {
+				def userMetaInfJSON = JSON.parse(certificado.usuario.metaInf)
+				votingEvent = VotingEvent.REPRESENTATIVE_VOTE.setData(
+					certificado.usuario, evento, opcionSeleccionada, 
+					userMetaInfJSON.numRepresentations)
+				} else	votingEvent = VotingEvent.VOTE.setData(
+					evento, opcionSeleccionada)
+			
+			statisticsService.onApplicationEvent(votingEvent)
+				
 			return new Respuesta(codigoEstado:Respuesta.SC_OK, evento:evento, 
 				tipo:Tipo.VOTO_VALIDADO_CONTROL_ACCESO,
 				certificado:controlCenterCert, mensajeSMIME:mensajeSMIMEResp)

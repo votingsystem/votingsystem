@@ -2,7 +2,7 @@ package org.sistemavotacion.controlacceso
 
 import java.util.Date;
 import java.util.Locale;
-
+import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.sistemavotacion.controlacceso.modelo.*;
 import org.sistemavotacion.util.DateUtils;
@@ -19,6 +19,8 @@ class FilesService {
 
 	def grailsApplication
 	def messageSource
+	private File statisticsMetaInfBaseDir
+	private String datePathPart
 
  	public Map<String, File> getBackupFiles(Evento event, Tipo type, 
 		 	Locale locale){
@@ -68,6 +70,31 @@ class FilesService {
 		 return result
 
 	 }
-		 
+			 
+	 //Quartz scheduler TODO
+	public void updatePaths() {
+		datePathPart = DateUtils.getShortStringFromDate(DateUtils.getTodayDate())
+		String statisticsMetaInfBaseDirPath = "${grailsApplication.config.SistemaVotacion.statisticsBaseDir}" +
+			"/${datePathPart}"
+		statisticsMetaInfBaseDir = new File(statisticsMetaInfBaseDirPath)
+		statisticsMetaInfBaseDir.mkdirs()
+	}		 
+			 
+	public void updateStatisticsMetaInf(Map metainfMap) {
+		log.debug(" - updateStatisticsMetaInf eventId: ${metainfMap.id}")
+		if(!statisticsMetaInfBaseDir.exists()) updatePaths();	 
+		/*File metaInfFile = new File("${statisticsMetaInfBaseDir.absolutePath}/meta_event_${metainfMap.id}.inf")
+		metaInfFile.write("${metainfMap as JSON}")*/
+		def converter = metainfMap as JSON;
+		converter.render(new java.io.FileWriter("${statisticsMetaInfBaseDir.absolutePath}/meta_event_${metainfMap.id}.inf"));
+	}
+		
+	public File getStatisticsMetaInf(Long eventId) {
+		log.debug("getStatisticsMetaInf eventId: ${eventId}")
+		if(!statisticsMetaInfBaseDir) updatePaths();
+		File metaInfFile = new File("${statisticsMetaInfBaseDir.absolutePath}/meta_event_${eventId}.inf")
+		return metaInfFile
+	}
+	
 }
 

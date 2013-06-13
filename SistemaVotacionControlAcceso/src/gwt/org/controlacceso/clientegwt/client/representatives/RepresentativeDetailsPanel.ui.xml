@@ -7,7 +7,7 @@
 		.bodyPanel {margin:0px 10px 0px 0px;width: 100%;}
 		.representativeNameLabel {font-size: 20px; font-weight:bold; color:#27335e;  
 			margin: 5px 5px 5px 7px;width: 100%;}
-		.representationsNumber {font-size: 16px; font-weight:bold; color:#27335e;
+		.numRepresentations {font-size: 16px; font-weight:bold; color:#27335e;
 			margin: 8px 0px 0px 15px;}
 		.selectRepresentativeButton { margin: 0px 25px 0px 25px; cursor:pointer;}
 		.image {width:120px;margin: 10px 0px 0px 7px;}
@@ -35,7 +35,7 @@
 					</g:PushButton>
 				</g:HorizontalPanel> 	       	    
 				<g:Label ui:field='representativeNameLabel' styleName="{style.representativeNameLabel}"/>
-				<g:Label ui:field='representationsNumber' styleName="{style.representationsNumber}"/>
+				<g:Label ui:field='numRepresentations' styleName="{style.numRepresentations}"/>
 			</g:HorizontalPanel>
    	   	</g:cell>
 

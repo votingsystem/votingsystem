@@ -66,16 +66,13 @@ class RepresentativeService {
 		}
 		
 		def representatives = null;
-		MensajeSMIME.withTransaction {
-			def criteria = MensajeSMIME.createCriteria()
+
+		Usuario.withTransaction {
+			def criteria = Usuario.createCriteria()
 			representatives = criteria.list (max: 1000000, offset: 0) {
-				projections {
-					distinct("usuario")
-				}
-				eq("tipo", Tipo.REPRESENTATIVE_DATA)
-				le("dateCreated", selectedDate)
+				eq("type", 	 Usuario.Type.REPRESENTATIVE)
+				le("representativeRegisterDate", selectedDate)
 			}
-			
 		}
 
 		int numRepresentatives = 0
@@ -83,7 +80,7 @@ class RepresentativeService {
 		int numRepresentativesWithVote = 0
 		int numTotalRepresented = 0
 		int numTotalRepresentedWithAccessRequest = 0
-		int numTotalVotes = 0
+		int numVotesRepresentedByRepresentatives = 0
 
 		//Only counts representatives active when event finish
 		if(!representatives.isEmpty()) {
@@ -112,8 +109,8 @@ class RepresentativeService {
 				//representative active on selected date
 				numRepresentatives++;
 				def representationDoc
-				int numRepresented = 0
-				int numRepresentedWithAccessRequest = 0
+				int numRepresented = 1 //The representative itself
+				int numUsersWithRepresentativeWithAccessRequest = 0
 				RepresentationDocument.withTransaction {
 					def criteria = RepresentationDocument.createCriteria()
 					representationDoc = criteria.list (max: 1000000, offset: 0) {
@@ -138,14 +135,14 @@ class RepresentativeService {
 						estado:SolicitudAcceso.Estado.OK, usuario:represented, eventoVotacion:event)
 					String repDocFileName = null 
 					if(representedAccessRequest) {
-						numRepresentedWithAccessRequest++
+						numUsersWithRepresentativeWithAccessRequest++
 						repDocFileName = "${representativeBaseDir}/WithRequest_RepDoc_${represented.nif}.p7m"
 					} else repDocFileName = "${representativeBaseDir}/RepDoc_${represented.nif}.p7m"
 					File representationDocFile = new File(repDocFileName)
 					representationDocFile.setBytes(representationDocument.activationSMIME.contenido)
 				}
-				log.debug("representative: ${representative.nif} - numRepresentedWithAccessRequest: ${numRepresentedWithAccessRequest}")
-				numTotalRepresentedWithAccessRequest += numRepresentedWithAccessRequest
+				log.debug("representative: ${representative.nif} - numUsersWithRepresentativeWithAccessRequest: ${numUsersWithRepresentativeWithAccessRequest}")
+				numTotalRepresentedWithAccessRequest += numUsersWithRepresentativeWithAccessRequest
 				SolicitudAcceso solicitudAcceso = null
 				State state = State.WITHOUT_ACCESS_REQUEST
 				SolicitudAcceso.withTransaction {
@@ -172,14 +169,12 @@ class RepresentativeService {
 				if(voteResults && !voteResults.isEmpty()) {
 					state = State.WITH_VOTE
 					numRepresentativesWithVote++
-					numTotalVotes += numRepresented
-				} else {
-					numTotalVotes += numRepresentedWithAccessRequest					
+					numVotesRepresentedByRepresentatives += numRepresented - numUsersWithRepresentativeWithAccessRequest
 				}
 				
 				String csvLine = "${representative.nif}, " + 
 					 "numRepresented:${String.format('%08d', numRepresented)}, " +
-					"numRepresentedWithAccessRequest:${String.format('%08d', numRepresentedWithAccessRequest)}, " +
+					"numUsersWithRepresentativeWithAccessRequest:${String.format('%08d', numUsersWithRepresentativeWithAccessRequest)}, " +
 					"${state.toString()}\n"
 				log.debug("csvLine -> ${csvLine}")
 				
@@ -190,8 +185,9 @@ class RepresentativeService {
 		def metaInfMap = [numRepresentatives:numRepresentatives,
 			numRepresentativesWithAccessRequest:numRepresentativesWithAccessRequest,
 			numRepresentativesWithVote:numRepresentativesWithVote,
-			numRepresentedWithAccessRequest:numTotalRepresentedWithAccessRequest,
-			numRepresented:numTotalRepresented, numTotalVotes:numTotalVotes]
+			numUsersWithRepresentativeWithAccessRequest:numTotalRepresentedWithAccessRequest,
+			numRepresented:numTotalRepresented, 
+			numVotesRepresentedByRepresentatives:numVotesRepresentedByRepresentatives]
 		Evento.withTransaction {
 			event.updateMetaInf(
 				Tipo.REPRESENTATIVE_ACCREDITATIONS, metaInfMap)
@@ -320,7 +316,7 @@ class RepresentativeService {
 					
 			Usuario.withTransaction {
 				def userMetaInfJSON = JSON.parse(representative.metaInf)
-				userMetaInfJSON.representationsNumber++
+				userMetaInfJSON.numRepresentations++
 				representative.metaInf = userMetaInfJSON
 				representative = representative.merge()
 				representative.save(flush:true)
@@ -369,7 +365,7 @@ class RepresentativeService {
 				representationDocument.dateCanceled = usuario.getTimeStampToken().
 						getTimeStampInfo().getGenTime();
 				def userMetaInfJSON = JSON.parse(representationDocument.representative.metaInf)
-				userMetaInfJSON.representationsNumber--
+				userMetaInfJSON.numRepresentations--
 				representationDocument.representative.metaInf = userMetaInfJSON
 				representationDocument.save()
 				log.debug("cancelRepresentationDocument - cancelled user '${usuario.nif}' representationDocument ${representationDocument.id}")
@@ -407,8 +403,9 @@ class RepresentativeService {
 				type:Image.Type.REPRESENTATIVE, fileBytes:imageBytes)
 			if(Usuario.Type.REPRESENTATIVE != usuario.type) {
 				usuario.type = Usuario.Type.REPRESENTATIVE
+				usuario.representativeRegisterDate = DateUtils.getTodayDate()
 				def userMetaInfJSON = JSON.parse(usuario.metaInf)
-				userMetaInfJSON.representationsNumber = 1
+				userMetaInfJSON.numRepresentations = 1
 				usuario.metaInf = userMetaInfJSON;
 				usuario.representative = null
 				cancelRepresentationDocument(mensajeSMIMEReq, usuario);				
@@ -587,35 +584,6 @@ class RepresentativeService {
 			tipo:Tipo.REPRESENTATIVE_VOTING_HISTORY_REQUEST, mensaje:msg)
 	}
 	
-	def prueba (Usuario usuario) {
-		//(TODO notify users)
-			Usuario.withTransaction {
-				usuario.save()
-				def representedUsers = Usuario.findAllWhere(representative:null)
-				log.debug "representedUsers.size(): ${representedUsers.size()}"
-				representedUsers?.each {
-					log.debug " - checking user - ${it.id}"
-					it.type = Usuario.Type.USER
-					it.representative = usuario
-					it.save()
-				}
-			}
-			def representationDocuments 
-			RepresentationDocument.withTransaction {
-				representationDocuments = RepresentationDocument.findAllWhere(
-					state:RepresentationDocument.State.CANCELLED_BY_REPRESENTATIVE, representative:usuario)
-				//TODO ===== check timestamp
-				Date cancelDate = new Date(System.currentTimeMillis())
-				representationDocuments.each {
-					log.debug " - checking representationDocument - ${it.id}"
-					it.state = RepresentationDocument.State.OK
-					//it.cancellationSMIME = mensajeSMIME
-					it.dateCanceled = cancelDate
-					it.save()
-				}
-			}
-	}
-	
 	Respuesta processRevoke(MensajeSMIME mensajeSMIMEReq, Locale locale) {
 		String msg = null;
 		SMIMEMessageWrapper smimeMessage = mensajeSMIMEReq.getSmimeMessage();
@@ -666,7 +634,7 @@ class RepresentativeService {
 			usuario.type = Usuario.Type.EX_REPRESENTATIVE
 			
 			def userMetaInfJSON = JSON.parse(usuario.metaInf)
-			userMetaInfJSON.representationsNumber = 0
+			userMetaInfJSON.numRepresentations = 0
 			usuario.metaInf = userMetaInfJSON;
 
 			Usuario.withTransaction  {
@@ -782,7 +750,7 @@ class RepresentativeService {
 		def userMetaInfJSON = JSON.parse(usuario.metaInf)
 		def representativeMap = [id: usuario.id, nif:usuario.nif, infoURL:infoURL, 
 			 representativeMessageURL:representativeMessageURL,
-			 imageURL:imageURL, representationsNumber:userMetaInfJSON?.representationsNumber,
+			 imageURL:imageURL, numRepresentations:userMetaInfJSON?.numRepresentations,
 			 nombre: usuario.nombre, primerApellido:usuario.primerApellido]
 		return representativeMap
 	}

@@ -307,7 +307,7 @@ public interface Constantes extends Messages{
     String checkRepresentativeMsg();
     String checkRepresentativeCaption();
     String nifErrorMsg();
-    String representationsNumberLbl(Integer value);
+    String numRepresentationsLbl(Integer value);
     String profileRepresentativeCaption();
     String representativeHistoryCaption();
     String selectRepresentativeConfirmMsg(String value);

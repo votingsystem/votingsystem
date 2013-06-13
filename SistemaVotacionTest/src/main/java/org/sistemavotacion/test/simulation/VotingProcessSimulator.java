@@ -50,6 +50,19 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>  {
     
     private static Logger logger = LoggerFactory.getLogger(VotingProcessSimulator.class);
     
+    
+    public enum Simulation {VOTING, ACCESS_REQUEST}
+    
+
+    private static Simulation simulation = Simulation.VOTING;
+    private Evento event = null;
+    private Evento.Estado nextEventState = null;
+    private UserBaseSimulationData userBaseData = null;
+    private VotingSimulationData simulationData = null;
+    
+    private SimulatorListener simulationListener;
+    private final SignedMailGenerator signedMailGenerator;
+    
     private final ExecutorService simulatorExecutor;
     private final CountDownLatch countDownLatch = new CountDownLatch(1);
 
@@ -64,8 +77,8 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>  {
                 
         countDownLatch.await();
         if(simulatorExecutor != null) simulatorExecutor.shutdown();
-        
-        logger.debug("--------------- SIMULATION RESULT------------------");
+        logger.debug("--------- SIMULATION RESULT EVENT: " + event.getEventoId() 
+                + " -----------------");
         logger.info("Duration: " + simulationData.getDurationStr());
         logger.info("Number of requests projected: " + simulationData.getNumOfElectors());
         logger.info("Number access request ERRORs: " + simulationData.getNumAccessRequestsERROR());
@@ -82,18 +95,6 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>  {
             simulationListener.setSimulationResult(simulationData);
         return simulationData;
     }
-
-    public enum Simulation {VOTING, ACCESS_REQUEST}
-    
-
-    private static Simulation simulation = Simulation.VOTING;
-    private Evento event = null;
-    private Evento.Estado nextEventState = null;
-    private UserBaseSimulationData userBaseData = null;
-    private VotingSimulationData simulationData = null;
-    
-    private SimulatorListener simulationListener;
-    private final SignedMailGenerator signedMailGenerator;
     
     public VotingProcessSimulator(VotingSimulationData simulationData,
              SimulatorListener simulationListener) throws Exception {

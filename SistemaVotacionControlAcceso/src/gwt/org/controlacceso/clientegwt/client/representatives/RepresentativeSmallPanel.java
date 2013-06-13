@@ -47,7 +47,7 @@ public class RepresentativeSmallPanel extends Composite implements LoadHandler {
 	@UiField VerticalPanel mainPanel;
 	@UiField VerticalPanel imagePanel;
 	private Image image;
-	@UiField Label representationsNumber;
+	@UiField Label numRepresentations;
 	
 	private UsuarioJso representative;
 
@@ -62,8 +62,8 @@ public class RepresentativeSmallPanel extends Composite implements LoadHandler {
 
 		this.representative = representative;
 		representativeNameLabel.setText(representative.getNombre() + " " + representative.getPrimerApellido());
-		representationsNumber.setText(Constantes.INSTANCIA.representationsNumberLbl(
-				representative.getRepresentationsNumber()));
+		numRepresentations.setText(Constantes.INSTANCIA.numRepresentationsLbl(
+				representative.getNumRepresentations()));
 
 		//DOM.setStyleAttribute(label.getElement(),"border", "1px solid #00f");
         sinkEvents(Event.ONCLICK);

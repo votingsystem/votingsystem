@@ -39,9 +39,10 @@ public class RepresentativeBackupData {
         return vote.getSelectedOptionId();
     }
     
-    public int getWeightedVote() {
-        if(vote == null) return getNumVotesOfRepresented();
-        else return representationDocumentList.size();
+    public int getNumVotesRepresentedForEvent() {
+        if(vote == null) return 0;
+        else return representationDocumentList.size() - 
+                getNumVotesOfRepresented() + 1;
     }
     
     public int getNumVotesOfRepresented () {
@@ -50,8 +51,7 @@ public class RepresentativeBackupData {
             if(repDoc.getName().contains("WithRequest_")) numVotesOfRepresented++;
         }      
         return numVotesOfRepresented;
-    }
-    
+    }    
     
     /**
      * @return the accessRequest
@@ -100,6 +100,18 @@ public class RepresentativeBackupData {
      */
     public List<SignedFile> getRepresentationDocumentList() {
         return representationDocumentList;
+    }
+    
+    
+    /**
+     * @return the number of users represented by the representative on this voting.
+     * 
+     * This is the result of total number of representations minus the one who has voted.
+     */
+    public Integer getNumRepresented() {
+        if(representationDocumentList == null) return null;
+        return new Integer(representationDocumentList.size() -
+                getNumVotesOfRepresented());
     }
 
     /**

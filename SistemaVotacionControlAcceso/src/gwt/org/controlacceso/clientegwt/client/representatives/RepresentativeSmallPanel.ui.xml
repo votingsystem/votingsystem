@@ -11,7 +11,7 @@
 		.imageWidthLimit {width:85px; margin: 0px 0px 0px 7px;}
 		.imageHeightLimit {height:85px;margin: 0px 0px 0px 7px;}
 		.imagePanel {}
-		.representationsNumber {margin: 0px 0px 0px 7px;}
+		.numRepresentations {margin: 0px 0px 0px 7px;}
 	</ui:style>
 	<ui:image field='defaultImage' src="Group_128x128.png"/>
 	<g:VerticalPanel ui:field='mainPanel' styleName="{style.mainPanel}">
@@ -25,7 +25,7 @@
 	                <g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE">
 	                    <g:VerticalPanel height="100%">
                             <g:Label ui:field='representativeNameLabel' styleName="{style.representativeNameLabel}"/>
-           					<g:Label ui:field='representationsNumber' styleName="{style.representationsNumber}"/>
+           					<g:Label ui:field='numRepresentations' styleName="{style.numRepresentations}"/>
 	                    </g:VerticalPanel>
             		</g:cell>
 		   		</g:VerticalPanel>

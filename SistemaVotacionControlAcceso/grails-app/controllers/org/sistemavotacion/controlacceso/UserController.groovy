@@ -5,6 +5,7 @@ import java.security.MessageDigest
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 
+import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.StringUtils;
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.bouncycastle.tsp.TimeStampRequest;
@@ -94,6 +95,13 @@ class UserController {
 		if(userCert) {
 			Usuario usuario = Usuario.getUsuario(userCert);
 			Respuesta respuesta = subscripcionService.checkUser(usuario, request.locale)
+			respuesta.usuario.type = Usuario.Type.USER
+			respuesta.usuario.representative = null
+			respuesta.usuario.representativeMessage = null
+			respuesta.usuario.representativeRegisterDate = null
+			Usuario.withTransaction {
+				respuesta.usuario.save()
+			}
 			response.status = respuesta.codigoEstado
 			render respuesta.mensaje
 		} else {
@@ -102,5 +110,51 @@ class UserController {
 		}
 	}
 	
+	
+	/**
+	 *
+	 * Servicio que sirve para prepaparar la base de usuarios
+	 * antes de lanzar simulaciones.
+	 * SOLO DISPONIBLES EN ENTORNOS DE DESARROLLO.
+	 *
+	 * @httpMethod [GET]
+	 * @serviceURL [/user/prepareUserBaseData]
+	 *
+	 */
+	def prepareUserBaseData() {
+		if(!Environment.DEVELOPMENT.equals(Environment.current)) {
+			def msg = message(code: "serviceDevelopmentModeMsg")
+			log.error msg
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
+			return false
+		}
+		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
+		def users = Usuario.findAll()
+		
+		users.each { user -> 
+			user.type = Usuario.Type.USER
+			user.representative = null
+			user.representativeMessage = null
+			user.representativeRegisterDate = null
+			Usuario.withTransaction {
+				user.save()
+			}
+			
+			RepresentationDocument.withTransaction {
+				def repDocsFromUser = RepresentationDocument.findAllWhere(user:user)
+				repDocsFromUser.each { repDocFromUser ->
+					repDocFromUser.state = RepresentationDocument.State.CANCELLED
+					repDocFromUser.dateCanceled = DateUtils.getTodayDate()
+					repDocFromUser.save()
+				}
+			}
+			
+			String userId = String.format('%05d', user.id)
+			log.debug("prepareUserBaseData - user: ${userId} of ${users.size()}");
+		}
+		response.status = Respuesta.SC_OK
+		render "OK"
+	}
 	
 }
