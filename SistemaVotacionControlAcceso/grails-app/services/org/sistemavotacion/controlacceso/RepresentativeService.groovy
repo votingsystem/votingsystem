@@ -125,7 +125,7 @@ class RepresentativeService {
 							gt("dateCanceled", selectedDate)
 						}
 					}
-					numRepresented = representationDoc.totalCount
+					numRepresented = representationDoc.totalCount + 1; //The representative itself
 					numTotalRepresented += numRepresented
 					log.debug("${representative.nif} has ${numRepresented} representations")
 				}
@@ -313,20 +313,20 @@ class RepresentativeService {
 			cancelRepresentationDocument(mensajeSMIMEReq, usuario);
 			representationDocument = new RepresentationDocument(activationSMIME:mensajeSMIMEReq,
 				user:usuario, representative:representative, state:RepresentationDocument.State.OK);
-					
-			Usuario.withTransaction {
-				def userMetaInfJSON = JSON.parse(representative.metaInf)
-				userMetaInfJSON.numRepresentations++
-				representative.metaInf = userMetaInfJSON
-				representative = representative.merge()
-				representative.save(flush:true)
-			}
+			
+			
+			representative.setNumRepresentations(
+				Usuario.countByRepresentative(representative) + 2)//the new user plus the representative itself
 			
 			RepresentationDocument.withTransaction { 
 				usuario.representative = representative
-				representationDocument.save()
+				representationDocument.save(flush:true)
 			}
-			
+
+			/*Usuario.withTransaction {
+				representative.save(flush:true)
+			}*/
+						
 			msg = messageSource.getMessage('representativeAssociatedMsg',
 				[mensajeJSON.representativeName, usuario.nif].toArray(), locale)
 			log.debug "saveUserRepresentative - ${msg}"
@@ -357,21 +357,17 @@ class RepresentativeService {
 	private void cancelRepresentationDocument(MensajeSMIME mensajeSMIMEReq, Usuario usuario) {
 		RepresentationDocument.withTransaction {
 			RepresentationDocument representationDocument = RepresentationDocument.
-			findWhere(user:usuario, state:RepresentationDocument.State.OK)
+				findWhere(user:usuario, state:RepresentationDocument.State.OK)
 			if(representationDocument) {
 				log.debug("cancelRepresentationDocument - User changing representative")
 				representationDocument.state = RepresentationDocument.State.CANCELLED
 				representationDocument.cancellationSMIME = mensajeSMIMEReq
 				representationDocument.dateCanceled = usuario.getTimeStampToken().
 						getTimeStampInfo().getGenTime();
-				def userMetaInfJSON = JSON.parse(representationDocument.representative.metaInf)
-				userMetaInfJSON.numRepresentations--
-				representationDocument.representative.metaInf = userMetaInfJSON
 				representationDocument.save()
 				log.debug("cancelRepresentationDocument - cancelled user '${usuario.nif}' representationDocument ${representationDocument.id}")
 			} else log.debug("cancelRepresentationDocument - user '${usuario.nif}' doesn't have representative")
 		}
-
 	}
 	
     Respuesta saveRepresentativeData(MensajeSMIME mensajeSMIMEReq, 
@@ -404,15 +400,17 @@ class RepresentativeService {
 			if(Usuario.Type.REPRESENTATIVE != usuario.type) {
 				usuario.type = Usuario.Type.REPRESENTATIVE
 				usuario.representativeRegisterDate = DateUtils.getTodayDate()
-				def userMetaInfJSON = JSON.parse(usuario.metaInf)
-				userMetaInfJSON.numRepresentations = 1
-				usuario.metaInf = userMetaInfJSON;
+				usuario.setNumRepresentations(1)
 				usuario.representative = null
 				cancelRepresentationDocument(mensajeSMIMEReq, usuario);				
 				msg = messageSource.getMessage('representativeDataCreatedOKMsg', 
 					[usuario.nombre, usuario.primerApellido].toArray(), locale)
-			} else msg = messageSource.getMessage('representativeDataUpdatedMsg', 
-				[usuario.nombre, usuario.primerApellido].toArray(), locale)
+			} else {
+				def representations = Usuario.countByRepresentative(usuario)
+				msg = messageSource.getMessage('representativeDataUpdatedMsg',
+					[usuario.nombre, usuario.primerApellido].toArray(), locale)
+				usuario.setNumRepresentations(representations + 1)//plus the representative itself
+			} 
 			usuario.setInfo(mensajeJSON.representativeInfo)
 			usuario.representativeMessage = mensajeSMIMEReq
 			Usuario.withTransaction {
@@ -435,7 +433,6 @@ class RepresentativeService {
 					message.save()
 				}
 			}
-
 			
 			log.debug "saveRepresentativeData - user:${usuario.nif} - image: ${newImage.id}"
 			return new Respuesta(codigoEstado:Respuesta.SC_OK, mensaje:msg, 
@@ -446,7 +443,6 @@ class RepresentativeService {
 			return new Respuesta(codigoEstado:Respuesta.SC_ERROR,
 				mensaje:msg, tipo:Tipo.REPRESENTATIVE_DATA_ERROR)
 		}
-
     }
 
 	

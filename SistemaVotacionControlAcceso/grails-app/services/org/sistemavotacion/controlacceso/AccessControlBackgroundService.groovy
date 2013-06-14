@@ -18,5 +18,21 @@ class AccessControlBackgroundService {
 		}
 	}
 	
+	public void checkRepresentativeAccreditations() {
+		def representatives = Usuario.findAllWhere(type:Usuario.Type.REPRESENTATIVE)
+		representatives.each {representative ->
+			def representations = Usuario.countByRepresentative(representative)
+			representative.setNumRepresentations(representations)
+			representative.save()
+			log.debug("checkRepresentativeAccreditations - representative: ${representative.nif} has ${representations} representations")
+		}
+		
+		
+		
+		
+	}
+	
+	
+	//check user.metainf num representations
 }
 

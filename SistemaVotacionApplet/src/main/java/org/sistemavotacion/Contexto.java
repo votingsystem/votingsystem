@@ -36,6 +36,10 @@ public enum Contexto {
     INSTANCE;
 
     private Logger logger = LoggerFactory.getLogger(Contexto.class);
+
+    public void shutdown() {
+        if(httpHelper != null) httpHelper.shutdown();
+    }
     
     public static class DEFAULTS {
         public static String BASEDIR =  System.getProperty("user.home");

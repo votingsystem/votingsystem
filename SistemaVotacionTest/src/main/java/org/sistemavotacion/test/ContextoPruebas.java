@@ -115,6 +115,12 @@ public enum ContextoPruebas {
                     ", SERIALNUMBER=" + userTest.getNif()); 
             userTest.setKeyStore(userKeySTore);    
             Contexto.INSTANCE.initMultiThreadedHttp();
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override public void run() {
+                    logger.debug("------- ContextoPruebas Shutdown Hook -------");
+                    shutdown();
+                }
+            });
         } catch (Exception ex) {
             LoggerFactory.getLogger(ContextoPruebas.class).error(ex.getMessage(), ex);
         }
@@ -122,6 +128,11 @@ public enum ContextoPruebas {
     }
     
     public void init() { }
+    
+    public void shutdown() {
+        logger.debug("shutdown");
+        Contexto.INSTANCE.shutdown();
+    }
     
     public void setVotingPanel(VotacionesPanel panel) {
         this.votacionesPanel = panel;

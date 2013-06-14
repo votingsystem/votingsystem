@@ -138,7 +138,8 @@ class VotoService {
 					tipo:Tipo.VOTO_VALIDADO_CONTROL_ACCESO,
 					certificado:certificadoFirma, mensajeSMIME:mensajeSMIMEResp)
 			} else {
-				msg = message(code: 'accessRequestVoteErrorMsg', args:[respuesta.mensaje])
+				msg = messageSource.getMessage('accessRequestVoteErrorMsg', 
+					[respuesta.mensaje].toArray(), locale)
 				log.error("validateVote - ${msg}")
 				return new Respuesta(Respuesta.SC_ERROR_PETICION, 
 					tipo:Tipo.VOTO_CON_ERRORES, mensaje:msg)

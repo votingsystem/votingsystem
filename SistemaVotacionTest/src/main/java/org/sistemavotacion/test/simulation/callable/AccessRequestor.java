@@ -1,20 +1,29 @@
 package org.sistemavotacion.test.simulation.callable;
 
-import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import javax.mail.internet.MimeMessage;
+import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.cms.SignerInformationVerifier;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
+import org.bouncycastle.tsp.TimeStampRequest;
+import org.bouncycastle.tsp.TimeStampToken;
 import org.sistemavotacion.Contexto;
+import static org.sistemavotacion.Contexto.KEY_SIZE;
+import static org.sistemavotacion.Contexto.PROVIDER;
+import static org.sistemavotacion.Contexto.SIG_NAME;
+import static org.sistemavotacion.Contexto.VOTE_SIGN_MECHANISM;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Respuesta; 
+import org.sistemavotacion.seguridad.Encryptor;
 import org.sistemavotacion.seguridad.PKCS10WrapperClient;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
-import org.sistemavotacion.smime.SignedMailGenerator;
-import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sistemavotacion.worker.AccessRequestWorker;
 
 /**
 * @author jgzornoza
@@ -23,70 +32,80 @@ import org.sistemavotacion.worker.AccessRequestWorker;
 public class AccessRequestor implements Callable<Respuesta> {
     
     private static Logger logger = LoggerFactory.getLogger(AccessRequestor.class);
+
+    private Evento evento;   
+    private SMIMEMessageWrapper smimeMessage;
+    private PKCS10WrapperClient pkcs10WrapperClient;
+    private X509Certificate destinationCert = null;
     
-    private Respuesta respuesta;
-    private Evento evento;
-    private String nifFrom;
-    private String urlAccessRequest = null;
-        
-    public AccessRequestor (Evento evento) throws Exception {
-        this.evento = evento; 
-        this.nifFrom = evento.getUsuario().getNif();
-        urlAccessRequest = ContextoPruebas.INSTANCE.getURLAccessRequest();
-        evento.setUrlSolicitudAcceso(urlAccessRequest);
+    public AccessRequestor (SMIMEMessageWrapper smimeMessage,
+            Evento evento, X509Certificate destinationCert) throws Exception {
+        this.smimeMessage = smimeMessage;
+        this.evento = evento;
+        this.destinationCert = destinationCert;
+        this.pkcs10WrapperClient = new PKCS10WrapperClient(
+                KEY_SIZE, SIG_NAME, VOTE_SIGN_MECHANISM, PROVIDER, 
+                evento.getControlAcceso().getServerURL(), 
+                evento.getEventoId().toString(), 
+                evento.getHashCertificadoVotoHex());
     }
     
-    @Override public Respuesta call() throws Exception { 
-        File mockDnieFile = new File(Contexto.getUserKeyStorePath(nifFrom,
-                ContextoPruebas.DEFAULTS.APPDIR));
-        byte[] mockDnieBytes = FileUtils.getBytesFromFile(mockDnieFile);
-        logger.info("userID: " + nifFrom + 
-                " - mockDnieFile: " + mockDnieFile.getAbsolutePath());
-        String subject = ContextoPruebas.INSTANCE.getString(
-                "accessRequestMsgSubject") + evento.getEventoId();
-        
-        String anuladorVotoStr = evento.getCancelVoteJSON().toString();
-        File anuladorVoto = new File(Contexto.getUserDirPath(nifFrom,
-                ContextoPruebas.DEFAULTS.APPDIR)
-                + Contexto.CANCEL_VOTE_FILE + evento.getEventoId() + 
-                "_usu" + nifFrom + ".json");
-        FileUtils.copyStreamToFile(new ByteArrayInputStream(
-                anuladorVotoStr.getBytes()), anuladorVoto);
+    @Override public Respuesta call() { 
+        logger.debug("call - urlAccessRequest: " + evento.getUrlSolicitudAcceso());
+        try {
+            TimeStampRequest timeStampRequest = smimeMessage.getTimeStampRequest();
+            Respuesta respuesta = Contexto.INSTANCE.getHttpHelper().sendByteArray(
+                    timeStampRequest.getEncoded(), "timestamp-query", 
+                    Contexto.INSTANCE.getURLTimeStampServer());
+            if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                byte[] bytesToken = respuesta.getBytesArchivo();
+                TimeStampToken timeStampToken = new TimeStampToken(
+                        new CMSSignedData(bytesToken));
+                X509Certificate timeStampCert = Contexto.INSTANCE.getTimeStampServerCert();
+                SignerInformationVerifier timeStampSignerInfoVerifier = new 
+                        JcaSimpleSignerInfoVerifierBuilder().
+                    setProvider(Contexto.PROVIDER).build(timeStampCert); 
+                timeStampToken.validate(timeStampSignerInfoVerifier);
+                smimeMessage.setTimeStampToken(timeStampToken);
 
-        SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnieBytes, 
-                ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS, 
-                ContextoPruebas.PASSWORD.toCharArray(),
-                ContextoPruebas.DNIe_SIGN_MECHANISM);
-        String accessRequestStr = evento.getAccessRequestJSON().toString();
-        SMIMEMessageWrapper smimeMessage = signedMailGenerator.genMimeMessage(nifFrom, 
-                evento.getControlAcceso().getNombreNormalizado(), 
-                accessRequestStr, subject, null);
-        
-        X509Certificate accesRequestCert = ContextoPruebas.INSTANCE.
-            getAccessControl().getCertificate();
-        AccessRequestWorker requestWorker = new AccessRequestWorker(
-                null, smimeMessage, evento, accesRequestCert, null);
-        requestWorker.execute();
-        respuesta = requestWorker.get();
-        if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
-            try {
-                PKCS10WrapperClient wrapperClient = requestWorker.
-                        getPKCS10WrapperClient();
-                String votoJSON = evento.getVoteJSON().toString();   
-                smimeMessage = wrapperClient.genMimeMessage(
-                        evento.getHashCertificadoVotoBase64(), 
-                        evento.getControlAcceso().getNombreNormalizado(),
-                        votoJSON, "[VOTO]", null);
-            } catch(Exception ex) {
-                logger.error(ex.getMessage(), ex);
-                respuesta.appendErrorMessage(ex.getMessage());
-                respuesta.setData("ERROR_ACCESS_REQUEST from: " + nifFrom);
+                File csrEncryptedFile = File.createTempFile("csrEncryptedFile", ".p7m");
+                csrEncryptedFile.deleteOnExit();
+                Encryptor.encryptMessage(pkcs10WrapperClient.getPEMEncodedRequestCSR(), 
+                        csrEncryptedFile, destinationCert);
+
+                MimeMessage mimeMessage = Encryptor.encryptSMIME(
+                        smimeMessage, destinationCert);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                mimeMessage.writeTo(baos);
+                baos.close();
+                String csrFileName = Contexto.CSR_FILE_NAME + ":" + 
+                        Contexto.ENCRYPTED_CONTENT_TYPE;
+
+                String accessRequestFileName = Contexto.ACCESS_REQUEST_FILE_NAME + ":" + 
+                        Contexto.SIGNED_AND_ENCRYPTED_CONTENT_TYPE;
+                Map<String, Object> mapToSend = new HashMap<String, Object>();
+                mapToSend.put(csrFileName, csrEncryptedFile);
+                mapToSend.put(accessRequestFileName, baos.toByteArray());
+
+                respuesta = Contexto.INSTANCE.getHttpHelper().
+                        sendObjectMap(mapToSend, evento.getUrlSolicitudAcceso());
+                if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                    byte[] encryptedData = respuesta.getBytesArchivo();
+                    byte[] decryptedData = Encryptor.decryptFile(encryptedData, 
+                            pkcs10WrapperClient.getPublicKey(), 
+                            pkcs10WrapperClient.getPrivateKey());
+                    pkcs10WrapperClient.initSigner(decryptedData);
+                }
             }
-        } else {
-            respuesta.setData("ERROR_ACCESS_REQUEST from: " + nifFrom);
+            return respuesta;
+        } catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
+            return new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
         }
-        respuesta.setEvento(evento);
-        return respuesta;
+    }
+    
+    public PKCS10WrapperClient getPKCS10WrapperClient() {
+        return pkcs10WrapperClient;
     }
     
 }

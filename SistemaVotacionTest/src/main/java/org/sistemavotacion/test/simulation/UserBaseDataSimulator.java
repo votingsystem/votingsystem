@@ -208,6 +208,7 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
                     simulationData.getAndIncrementNumDelegationsOK();
                 } else {
                     simulationData.setMessage(respuesta.getMensaje());
+                    addErrorMsg(respuesta.getMensaje());
                     simulationData.getAndIncrementNumDelegationsERROR();
                 }
 

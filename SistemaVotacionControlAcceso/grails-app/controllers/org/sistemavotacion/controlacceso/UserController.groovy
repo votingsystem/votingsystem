@@ -99,6 +99,7 @@ class UserController {
 			respuesta.usuario.representative = null
 			respuesta.usuario.representativeMessage = null
 			respuesta.usuario.representativeRegisterDate = null
+			respuesta.usuario.metaInf = null
 			Usuario.withTransaction {
 				respuesta.usuario.save()
 			}
@@ -137,6 +138,8 @@ class UserController {
 			user.representative = null
 			user.representativeMessage = null
 			user.representativeRegisterDate = null
+			user.metaInf = null
+			user.info = null
 			Usuario.withTransaction {
 				user.save()
 			}

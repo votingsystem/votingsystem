@@ -320,5 +320,6 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>  {
         VotingProcessSimulator simuHelper = new 
                 VotingProcessSimulator(simulationData, null);
         simuHelper.call();
+        System.exit(0);
     }
 }

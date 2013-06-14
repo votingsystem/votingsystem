@@ -59,25 +59,20 @@ public class AccessRequestWorker extends SwingWorker<Respuesta, String>
                 evento.getHashCertificadoVotoHex());
     }
     
-    @Override protected void done() {//on the EDT
-        try {
-            respuesta = get();
-        }catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            respuesta.appendErrorMessage(ex.getMessage());
-        } 
+    @Override protected void done() {//on the EDT  
         if(workerListener != null) workerListener.showResult(this);
-    }
+    } 
     
     @Override protected Respuesta doInBackground() throws Exception {
         logger.debug("doInBackground - urlSolicitudAcceso: " + 
                 evento.getUrlSolicitudAcceso());
         TimeStampRequest timeStampRequest = smimeMessage.getTimeStampRequest();
-        respuesta = Contexto.INSTANCE.getHttpHelper().sendByteArray(
+        Respuesta timeStampResponse = Contexto.INSTANCE.getHttpHelper().sendByteArray(
                 timeStampRequest.getEncoded(), "timestamp-query", 
                 Contexto.INSTANCE.getURLTimeStampServer());
-        if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
-            byte[] bytesToken = respuesta.getBytesArchivo();
+        setRespuesta(timeStampResponse);
+        if (Respuesta.SC_OK == timeStampResponse.getCodigoEstado()) {
+            byte[] bytesToken = timeStampResponse.getBytesArchivo();
             TimeStampToken timeStampToken = new TimeStampToken(
                     new CMSSignedData(bytesToken));
             X509Certificate timeStampCert = Contexto.INSTANCE.getTimeStampServerCert();
@@ -106,19 +101,27 @@ public class AccessRequestWorker extends SwingWorker<Respuesta, String>
             mapToSend.put(csrFileName, csrEncryptedFile);
             mapToSend.put(accessRequestFileName, baos.toByteArray());
 
-            respuesta = Contexto.INSTANCE.getHttpHelper().sendObjectMap(
-                    mapToSend, evento.getUrlSolicitudAcceso());
-            
-            if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
-                byte[] encryptedData = respuesta.getBytesArchivo();
-
+            Respuesta senderResponse = Contexto.INSTANCE.getHttpHelper().
+                    sendObjectMap(mapToSend, evento.getUrlSolicitudAcceso());
+            setRespuesta(senderResponse);
+            if (Respuesta.SC_OK == senderResponse.getCodigoEstado()) {
+                byte[] encryptedData = senderResponse.getBytesArchivo();
                 byte[] decryptedData = Encryptor.decryptFile(encryptedData, 
                         pkcs10WrapperClient.getPublicKey(), 
                         pkcs10WrapperClient.getPrivateKey());
                 pkcs10WrapperClient.initSigner(decryptedData);
             }
         }
+        return getRespuesta();
+    }
+    
+    public Respuesta getRespuesta() {
         return respuesta;
+    }
+    
+    private void setRespuesta(Respuesta respuesta) {
+        respuesta = new Respuesta(respuesta.getCodigoEstado(), 
+                respuesta.getMensaje());
     }
     
     public PKCS10WrapperClient getPKCS10WrapperClient() {

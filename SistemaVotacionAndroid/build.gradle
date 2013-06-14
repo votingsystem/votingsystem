@@ -8,7 +8,7 @@ apply plugin: 'java'
 
 buildscript {
   repositories { mavenCentral() }
-  dependencies { classpath 'org.ajoberstar:gradle-git:0.2.3' }
+  //dependencies { classpath 'org.ajoberstar:gradle-git:0.2.3' }
 }
 
 dependencies {

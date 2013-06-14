@@ -1,6 +1,6 @@
 package org.sistemavotacion.test.simulation;
 
-import org.sistemavotacion.test.simulation.callable.AccessRequestor;
+import org.sistemavotacion.test.simulation.callable.AccessRequestorTest;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -125,7 +125,7 @@ public class AccessRequestSimulator extends Simulator<VotingSimulationData>
         Evento voto = evento.genRandomVote(ContextoPruebas.DIGEST_ALG);
         Usuario usuario = new Usuario(nif);
         voto.setUsuario(usuario);
-        accessRequestCompletionService.submit(new AccessRequestor(voto));
+        accessRequestCompletionService.submit(new AccessRequestorTest(voto));
     }
 
     public void validateReceipts () throws Exception {

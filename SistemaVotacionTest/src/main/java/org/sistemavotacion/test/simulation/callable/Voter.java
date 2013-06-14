@@ -12,7 +12,6 @@ import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sistemavotacion.worker.AccessRequestWorker;
 import org.sistemavotacion.worker.SMIMESignedSenderWorker;
 
 /**
@@ -25,12 +24,11 @@ public class Voter implements Callable<Respuesta> {
    
     private Evento evento;
     private String nifFrom;
-    private Respuesta respuesta;
         
     public Voter (Evento evento) throws Exception {
         this.evento = evento; 
         nifFrom = evento.getUsuario().getNif();
-        respuesta = new Respuesta(Respuesta.SC_ERROR, evento);
+        
     }
     
     @Override public Respuesta call() {
@@ -62,12 +60,12 @@ public class Voter implements Callable<Respuesta> {
             
             X509Certificate destinationCert = ContextoPruebas.INSTANCE.
                         getAccessControl().getCertificate();            
-            AccessRequestWorker accessWorker = new AccessRequestWorker(null, 
-                    smimeMessage, evento, destinationCert, null);
-            accessWorker.execute();
-            respuesta = accessWorker.get();
+            AccessRequestor accessWorker = new AccessRequestor( 
+                    smimeMessage, evento, destinationCert);
+            
+            Respuesta respuesta = accessWorker.call();
             respuesta.setEvento(evento);
-            if(Respuesta.SC_OK == accessWorker.getStatusCode()) {
+            if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
                 PKCS10WrapperClient wrapperClient = accessWorker.
                     getPKCS10WrapperClient();
                 String votoJSON = evento.getVoteJSON().toString();
@@ -83,21 +81,24 @@ public class Voter implements Callable<Respuesta> {
                         null, smimeMessage, urlVoteService, wrapperClient.
                         getKeyPair(), null, null);
                 senderWorker.execute();
-                Respuesta respuesta = senderWorker.get();
+                Respuesta senderResponse = senderWorker.get();
+                senderResponse.setEvento(evento);
                 if (Respuesta.SC_OK == senderWorker.getStatusCode()) {  
                     SMIMEMessageWrapper validatedVote =  
-                            respuesta.getSmimeMessage();
+                            senderResponse.getSmimeMessage();
                     ReciboVoto reciboVoto = new ReciboVoto(
                                 Respuesta.SC_OK, validatedVote, evento);
                     
-                    respuesta.setReciboVoto(reciboVoto);
+                    senderResponse.setReciboVoto(reciboVoto);
                 }
+                respuesta = senderResponse;
             }
+            return respuesta;
         } catch(Exception ex) {
-            logger.error(ex.getMessage() + " - nifFrom: " + nifFrom , ex);
-            respuesta.appendErrorMessage(ex.getMessage());
-        }
-        return respuesta;
+            String msg = ex.getMessage() + " - nifFrom: " + nifFrom;
+            logger.error(msg , ex);
+            return new Respuesta(Respuesta.SC_ERROR, evento, msg);
+        }  
     }
     
 }

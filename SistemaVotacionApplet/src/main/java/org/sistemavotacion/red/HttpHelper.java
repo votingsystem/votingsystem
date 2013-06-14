@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.entity.ContentType;
@@ -48,6 +49,7 @@ public class HttpHelper {
     
     private HttpClient httpclient;
     private PoolingClientConnectionManager cm;
+    private IdleConnectionEvictor connEvictor;
 
     public HttpHelper () {
         /*SchemeRegistry schemeRegistry = new SchemeRegistry();
@@ -62,9 +64,12 @@ public class HttpHelper {
     }
     
     public synchronized void initMultiThreadedMode() {
+        logger.debug("initMultiThreadedMode");
         if(cm != null) cm.shutdown();
         cm = new PoolingClientConnectionManager();
-        cm.setMaxTotal(200);
+        cm.setMaxTotal(100);
+        connEvictor = new IdleConnectionEvictor(cm);
+        connEvictor.start();
         // set the connection timeout value to 15 seconds (15000 milliseconds)
         final HttpParams httpParams = new BasicHttpParams();
         HttpConnectionParams.setConnectionTimeout(httpParams, 20000);
@@ -72,7 +77,13 @@ public class HttpHelper {
     }
     
     public void shutdown () {
-        try { httpclient.getConnectionManager().shutdown(); } 
+        try { 
+            httpclient.getConnectionManager().shutdown(); 
+            if(connEvictor != null) {
+                connEvictor.shutdown();
+                connEvictor.join();
+            }
+        } 
         catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
         }
@@ -84,9 +95,10 @@ public class HttpHelper {
                 + contentType);  
         Respuesta respuesta = null;
         HttpGet httpget = new HttpGet(serverURL);
+        HttpResponse response = null;
         try {
             if(contentType != null) httpget.setHeader("Content-Type", contentType);
-            HttpResponse response = httpclient.execute(httpget);
+            response = httpclient.execute(httpget);
             logger.debug("----------------------------------------");
             /*Header[] headers = response.getAllHeaders();
             for (int i = 0; i < headers.length; i++) {
@@ -94,15 +106,18 @@ public class HttpHelper {
             }*/
             logger.debug(response.getStatusLine().toString());
             logger.debug("----------------------------------------");
-            byte[] responseBytes =  EntityUtils.toByteArray(response.getEntity());
+            byte[] responseBytes = null;
+            if(Respuesta.SC_OK == response.getStatusLine().getStatusCode()) 
+                responseBytes = EntityUtils.toByteArray(response.getEntity());
             respuesta = new Respuesta(response.getStatusLine().getStatusCode(),
                         new String(responseBytes), responseBytes);
-            EntityUtils.consume(response.getEntity());
-            httpget.releaseConnection();
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
             respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
             httpget.abort();
+        } finally {
+            if(response != null) EntityUtils.consume(response.getEntity());
+            httpget.releaseConnection();
         }
         return respuesta;
     }
@@ -292,7 +307,43 @@ public class HttpHelper {
     }
 
 
-    public static void main(String[] args) throws IOException, Exception {
+    public static class IdleConnectionEvictor extends Thread {
+
+        private final ClientConnectionManager connMgr;
+
+        private volatile boolean shutdown;
+
+        public IdleConnectionEvictor(ClientConnectionManager connMgr) {
+            super();
+            this.connMgr = connMgr;
+        }
+
+        @Override
+        public void run() {
+            try {
+                while (!shutdown) {
+                    synchronized (this) {
+                        wait(3000);
+                        // Close expired connections
+                        connMgr.closeExpiredConnections();
+                        // Optionally, close connections
+                        // that have been idle longer than 5 sec
+                        connMgr.closeIdleConnections(15, TimeUnit.SECONDS);
+                    }
+                }
+            } catch (InterruptedException ex) {
+                logger.error(ex.getMessage(), ex);
+            }
+        }
+
+        public void shutdown() {
+            shutdown = true;
+            synchronized (this) {
+                notifyAll();
+            }
+        }
     }
+        
+    public static void main(String[] args) throws IOException, Exception { }
     
 }

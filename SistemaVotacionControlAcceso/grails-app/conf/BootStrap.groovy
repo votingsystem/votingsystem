@@ -41,7 +41,8 @@ class BootStrap {
 		JSON.registerObjectMarshaller(RepresentativeData) {
 			def returnMap = [:]
 			returnMap['optionSelectedId'] = it.optionSelectedId
-			returnMap['numRepresentations'] = it.numRepresentations
+			returnMap['numRepresentedWithVote'] = it.numRepresentedWithVote
+			returnMap['numTotalRepresentations'] = it.numTotalRepresentations
 			return returnMap
 		}
     }
