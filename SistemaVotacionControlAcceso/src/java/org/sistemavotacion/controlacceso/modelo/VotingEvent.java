@@ -13,7 +13,6 @@ public enum VotingEvent {
 	private Usuario user;
 	private Evento event;
 	private OpcionDeEvento optionSelected;
-	private Long numRepresentations;
 	
 	public VotingEvent setData(Evento event, 
 			OpcionDeEvento optionSelected) {
@@ -32,20 +31,10 @@ public enum VotingEvent {
 			OpcionDeEvento optionSelected,  Long numRepresentations) {
 		this.setUser(user);
 		this.setEvent(event);
-		this.numRepresentations = numRepresentations;
 		this.setOptionSelected(optionSelected);
 		return this;
 	}
-
-
-	public Long getNumRepresentations() {
-		return numRepresentations;
-	}
-
-	public void setNumRepresentations(Long numRepresentations) {
-		this.numRepresentations = numRepresentations;
-	}
-
+	
 	public Usuario getUser() {
 		return user;
 	}

@@ -46,24 +46,25 @@ task runApp << { task ->
 
 ext {
 	grailsRestDocPluginVersion = "0.4"
+	gwtVisualizationVersion="1.1.2"
 }
 
 task installGrailsRestDocPlugin << { task ->
 	ProcessBuilder pb;
 	Process proc;
-	println grailsRestDocPluginVersion
-	if(!file("../GrailsRestDocPlugin-${grailsRestDocPluginVersion}/" + 
-		"grails-rest-doc-plugin-${grailsRestDocPluginVersion}.zip").exists()) {
-		if(!file('../GrailsRestDocPlugin-${grailsRestDocPluginVersion}').exists()) {
+	println "GrailsRestDocPlugin Version: ${grailsRestDocPluginVersion}"
+	String pluginFilePath = "../GrailsRestDocPlugin-${grailsRestDocPluginVersion}.zip"
+	String pluginBaseDir = "../GrailsRestDocPlugin-${grailsRestDocPluginVersion}"
+	if(!file("${pluginBaseDir}/grails-rest-doc-plugin-${grailsRestDocPluginVersion}.zip").exists()) {
+		if(!file(pluginBaseDir).exists()) {
 			String fileURL = "https://github.com/jgzornoza/GrailsRestDocPlugin/" + 
 				"archive/v${grailsRestDocPluginVersion}.zip"
 			println "--- downloading ${fileURL}"
-			ant.get(src:fileURL,
-				dest:"../GrailsRestDocPlugin-${grailsRestDocPluginVersion}.zip")
-			ant.unzip(src:"../GrailsRestDocPlugin-${grailsRestDocPluginVersion}.zip", dest:"..")
+			ant.get(src:fileURL, dest:pluginFilePath)
+			ant.unzip(src:pluginFilePath, dest:"..")
 		}
 		pb = new ProcessBuilder("grails", "package-plugin");
-		pb.directory(file("../GrailsRestDocPlugin-${grailsRestDocPluginVersion}"));
+		pb.directory(file(pluginBaseDir));
 		proc = pb.start();
 		proc.consumeProcessErrorStream(System.err)
 		proc.consumeProcessOutputStream(System.out)
@@ -72,8 +73,7 @@ task installGrailsRestDocPlugin << { task ->
 		}
 	}
 	pb  = new ProcessBuilder("grails", "install-plugin", 
-		"../GrailsRestDocPlugin-${grailsRestDocPluginVersion}/" + 
-			"grails-rest-doc-plugin-${grailsRestDocPluginVersion}.zip");
+		"${pluginBaseDir}/grails-rest-doc-plugin-${grailsRestDocPluginVersion}.zip");
 	pb.directory(file("."));
 	proc = pb.start();
 	proc.consumeProcessErrorStream(System.err)
@@ -82,6 +82,30 @@ task installGrailsRestDocPlugin << { task ->
 		throw new RuntimeException('install-plugin GrailsRestDocPlugin failed')
 	}
 	announce.announce("GrailsRestDocPlugin installed", "local")
+}
+
+task installGwtVisualizationApi << { task ->
+	ProcessBuilder pb;
+	Process proc;
+	println grailsRestDocPluginVersion
+	String apiFilePath = "../libs/gwt-visualization-${gwtVisualizationVersion}.zip"
+	if(!file(apiFilePath).exists()) {
+		String fileURL = "http://gwt-google-apis.googlecode.com/files/gwt-visualization-${gwtVisualizationVersion}.zip"
+		println "--- downloading ${fileURL}"
+		ant.get(src:fileURL, dest:apiFilePath)
+		ant.unzip(src:apiFilePath, dest:"../libs")
+		pb = new ProcessBuilder("mvn", "install:install-file", "-Dfile=gwt-visualization.jar",
+			"-DgroupId=com.google.gwt.google-apis", "-DartifactId=gwt-visualization",
+			"-Dversion=${gwtVisualizationVersion}", "-Dpackaging=jar", "-Djavadoc=gwt-visualization-javadoc.jar");
+		pb.directory(file("../libs/gwt-visualization-${gwtVisualizationVersion}"));
+		proc = pb.start();
+		proc.consumeProcessErrorStream(System.err)
+		proc.consumeProcessOutputStream(System.out)
+		if (proc.waitFor() != 0) {
+			throw new RuntimeException('package-plugin GrailsRestDocPlugin failed')
+		}
+		announce.announce("GWT Visualization API installed", "local")
+	}
 }
 
 task generateRestDocs(dependsOn:['installGrailsRestDocPlugin']) << {task ->
@@ -94,7 +118,7 @@ task generateRestDocs(dependsOn:['installGrailsRestDocPlugin']) << {task ->
 		throw new RuntimeException('GrailsRestDocPlugin - generate-rest-docs - failed')
 	}
 }
-task war(dependsOn:['copyAppletDeps', 'installGrailsRestDocPlugin']) << {task ->
+task war(dependsOn:['copyAppletDeps', 'installGwtVisualizationApi']) << {task ->
 	ProcessBuilder pb = new ProcessBuilder("grails", "war");
 	pb.directory(projectDir);
 	Process proc = pb.start();

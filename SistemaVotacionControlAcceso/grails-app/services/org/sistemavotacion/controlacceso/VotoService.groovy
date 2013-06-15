@@ -65,15 +65,13 @@ class VotoService {
 				voto.save()
 			}
 			X509Certificate controlCenterCert = smimeMessageReq.getInformacionVoto()?.
-				getServerCerts()?.iterator()?.next()
-				
+				getServerCerts()?.iterator()?.next()				
 			
 			VotingEvent votingEvent = null
 			if(certificado.usuario?.id) {
 				def userMetaInfJSON = JSON.parse(certificado.usuario.metaInf)
 				votingEvent = VotingEvent.REPRESENTATIVE_VOTE.setData(
-					certificado.usuario, evento, opcionSeleccionada, 
-					userMetaInfJSON.numRepresentations)
+					certificado.usuario, evento, opcionSeleccionada)
 				} else	votingEvent = VotingEvent.VOTE.setData(
 					evento, opcionSeleccionada)
 			
