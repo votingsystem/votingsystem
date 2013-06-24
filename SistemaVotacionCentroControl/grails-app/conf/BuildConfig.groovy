@@ -56,7 +56,7 @@ grails.project.dependency.resolution = {
 			) {
 				excludes 'xalan', 'xml-apis','groovy','commons-io'
 			}
-			runtime 'postgresql:postgresql:9.2-1002.jdbc4'//9.1-901-1.jdbc4
+			runtime 'org.postgresql:postgresql:9.2-1002-jdbc4'
     }
 
     plugins {
