@@ -31,7 +31,7 @@ public class Operation {
         FIRMA_RECLAMACION_SMIME, 
         PUBLICACION_VOTACION_SMIME, 
         CANCELAR_EVENTO, VOTAR, FIRMAR_MANIFIESTO, 
-        FIRMAR_RECLAMACION, ENVIO_VOTO_SMIME;
+        FIRMAR_RECLAMACION, ENVIO_VOTO_SMIME, SOLICITUD_ACCESO;
     
         Tipo(String caption) {
             this.caption = caption;

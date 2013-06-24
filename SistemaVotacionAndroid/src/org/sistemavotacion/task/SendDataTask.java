@@ -7,54 +7,40 @@ import org.sistemavotacion.util.HttpHelper;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class SendDataTask extends AsyncTask<String, Void, Integer> {
+public class SendDataTask extends AsyncTask<String, Void, Respuesta> {
 
 	public static final String TAG = "SendDataTask";
 	
-	private Integer id;
-    private TaskListener listener = null;
-    private int statusCode = Respuesta.SC_ERROR_PETICION;
-    private String data = null;
-    private String message = null;
-    private Exception exception = null;
+
+    private byte[] data = null;
+    private String contentType = null;
     
-    public SendDataTask(Integer id, TaskListener listener, String data) {
-    	this.id = id;
-		this.listener = listener;
+    public SendDataTask(byte[] data, String contentType) {
 		this.data = data;
+		this.contentType = contentType;
     }
 	
 	@Override
-	protected Integer doInBackground(String... urls) {
+	protected Respuesta doInBackground(String... urls) {
         Log.d(TAG + ".doInBackground(...)", " - url:" + urls[0]);
+        Respuesta respuesta = null;
         try {
-            HttpResponse response = HttpHelper.sendData(data, urls[0]); 
-            statusCode = response.getStatusLine().getStatusCode();
-            message = EntityUtils.toString(response.getEntity());;
+            HttpResponse response = HttpHelper.sendByteArray(data, contentType, urls[0]); 
+            respuesta = new Respuesta(
+            		response.getStatusLine().getStatusCode(),
+            		EntityUtils.toString(response.getEntity()));
         } catch (Exception ex) {
         	ex.printStackTrace();
-        	exception = ex;
+        	respuesta = new Respuesta(Respuesta.SC_ERROR,
+            		ex.getMessage());
         }
-        return statusCode;
+        return respuesta;
 	}
 	
-    @Override
-    protected void onPostExecute(Integer data) {
-    	Log.d(TAG + ".onPostExecute", " - statusCode: " + data);
-    	listener.showTaskResult(this);
+    @Override  protected void onPostExecute(Respuesta respuesta) {
+    	Log.d(TAG + ".onPostExecute", " - statusCode: " + 
+    				respuesta.getCodigoEstado());
     }
 
-    public Integer getId() {
-    	return id;
-    }
-    
-    public int getStatusCode() {
-    	return statusCode;
-    }
-    
-	public String getMessage() {
-		if(exception != null) return exception.getMessage();
-		return message;
-	}
 	
 }

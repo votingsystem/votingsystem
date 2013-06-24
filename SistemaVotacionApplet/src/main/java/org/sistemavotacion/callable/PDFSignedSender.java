@@ -1,4 +1,4 @@
-package org.sistemavotacion.worker;
+package org.sistemavotacion.callable;
 
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfDate;
@@ -26,9 +26,8 @@ import java.util.HashMap;
 import static org.sistemavotacion.Contexto.*;
 
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
-import javax.swing.SwingWorker;
+import java.util.concurrent.Callable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -43,8 +42,10 @@ import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.sistemavotacion.Contexto;
+import org.sistemavotacion.callable.MessageTimeStamper;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.DNIePDFSessionHelper;
+import org.sistemavotacion.seguridad.Encryptor;
 import org.sistemavotacion.seguridad.PDF_CMSSignedGenerator;
 import org.sistemavotacion.seguridad.VotingSystemCMSSignedGenerator;
 import org.sistemavotacion.util.DateUtils;
@@ -56,50 +57,41 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class PDFSignerWorker extends SwingWorker<Respuesta, String>  
-        implements VotingSystemWorker {
+public class PDFSignedSender implements Callable<Respuesta> {
     
-    private static Logger logger = LoggerFactory.getLogger(PDFSignerWorker.class);
-
-    private VotingSystemWorkerType workerType;
-    private Respuesta respuesta = new Respuesta(Respuesta.SC_ERROR); 
-    private String urlTimeStampServer;
+    private static Logger logger = LoggerFactory.getLogger(PDFSignedSender.class);
+    
+    private Integer id;
+    private String urlToSendDocument;
     private String location;
     private String reason;
-    private VotingSystemWorkerListener workerListener;
-    private TimeStampToken timeStampToken = null;
-    private TimeStampRequest timeStampRequest = null;
     private char[] password;
     private PdfReader pdfReader;
-    private File signedFile;
     private PrivateKey signerPrivatekey;
+    private X509Certificate destinationCert = null;
     private Certificate[] signerCertChain;
+    private VotingSystemCMSSignedGenerator systemSignedGenerator = null;
     
-    public PDFSignerWorker(VotingSystemWorkerType workerType, String reason, 
-            String location, char[] password, PdfReader reader, PrivateKey signerPrivatekey,
-            Certificate[] signerCertChain, VotingSystemWorkerListener workerListener)
+    public PDFSignedSender(Integer id, String urlToSendDocument, 
+            String reason, String location, 
+            char[] password, PdfReader reader, PrivateKey signerPrivatekey, 
+            Certificate[] signerCertChain,  X509Certificate destinationCert)
             throws NoSuchAlgorithmException, NoSuchAlgorithmException, 
             NoSuchAlgorithmException, NoSuchProviderException, IOException, Exception {
-        this.workerType = workerType;
+        this.id = id;
+        this.urlToSendDocument = urlToSendDocument;
         this.signerPrivatekey = signerPrivatekey;
         this.signerCertChain = signerCertChain;
-        this.urlTimeStampServer = Contexto.INSTANCE.getURLTimeStampServer();
-        this.workerListener = workerListener;  
         this.location = location;
         this.password = password;
         this.pdfReader = reader;
         this.reason = reason;
         this.signerCertChain = signerCertChain;
-        this.signedFile = File.createTempFile("signedPDF", ".pdf");
-        signedFile.deleteOnExit();
+        this.destinationCert = destinationCert;
     }
     
-    @Override public void process(List<String> messages) {
-        workerListener.processVotingSystemWorkerMsg(messages);
-    }
-    
-    @Override protected Respuesta doInBackground() throws Exception {
-        VotingSystemCMSSignedGenerator systemSignedGenerator;
+    private Respuesta doInBackground() throws Exception {
+        
         if(signerPrivatekey != null && signerCertChain != null) {
             logger.debug("Generating PrivateKey VotingSystemSignedGenerator");
             PDF_CMSSignedGenerator signedGenerator = new PDF_CMSSignedGenerator(
@@ -108,14 +100,14 @@ public class PDFSignerWorker extends SwingWorker<Respuesta, String>
             systemSignedGenerator = signedGenerator;
         } else {
             logger.debug("Generating smartcard VotingSystemSignedGenerator");
-            DNIePDFSessionHelper sessionHelper = new DNIePDFSessionHelper(
-                    password, DNIe_SESSION_MECHANISM);
+            DNIePDFSessionHelper sessionHelper = new DNIePDFSessionHelper(password, DNIe_SESSION_MECHANISM);
             signerCertChain = sessionHelper.getCertificateChain();
             systemSignedGenerator = sessionHelper;
         }
-        
+        File fileToSend = File.createTempFile("signedPDF", ".pdf");
+        fileToSend.deleteOnExit();
         PdfStamper stp = PdfStamper.createSignature(pdfReader, 
-                new FileOutputStream(signedFile), '\0');
+                new FileOutputStream(fileToSend), '\0');
         stp.setEncryption(null, null,PdfWriter.ALLOW_PRINTING, false);
         final PdfSignatureAppearance sap = stp.getSignatureAppearance();  
         sap.setVisibleSignature(new Rectangle(100, 10, 400, 40), 1, null);       
@@ -146,10 +138,10 @@ public class PDFSignerWorker extends SwingWorker<Respuesta, String>
         sap.setLayer2Text(Contexto.INSTANCE.getString(
                 "signedByPDFLabel") + ":\n" + firmante); 
         
+        final Respuesta respuesta = new Respuesta(Respuesta.SC_OK);
         CMSAttributeTableGenerator unsAttr= new CMSAttributeTableGenerator() {
 
-                public AttributeTable getAttributes(final Map parameters) 
-                        throws CMSAttributeTableGenerationException {
+                public AttributeTable getAttributes(final Map parameters) throws CMSAttributeTableGenerationException {
                     AttributeTable attributeTable = null;
                     // Gets the signature bytes
                     byte[] signatureBytes = (byte[]) parameters.get(SIGNATURE);
@@ -161,40 +153,38 @@ public class PDFSignerWorker extends SwingWorker<Respuesta, String>
                         
                         TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
                         //reqgen.setReqPolicy(m_sPolicyOID);
-                        timeStampRequest = reqgen.generate(TIMESTAMP_PDF_HASH, digest);
-                        
-                        Respuesta respuesta = Contexto.INSTANCE.
-                                getHttpHelper().sendByteArray(
-                                timeStampRequest.getEncoded(), "timestamp-query", 
-                                urlTimeStampServer);
-                        
-                        if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
-                            byte[] bytesToken =respuesta.getBytesArchivo();
-                            timeStampToken = new TimeStampToken(
-                                new CMSSignedData(bytesToken));
-                            
-                            final Calendar cal = new GregorianCalendar();
-                            cal.setTime(timeStampToken.getTimeStampInfo().getGenTime());
-                            logger.debug("*** TimeStamp: " + DateUtils.getStringFromDate(cal.getTime()));
-                        
-                            obj = new ASN1InputStream(timeStampToken.getEncoded()).readObject();
-                            // Creates the signatureTimestampToken attribute
-                            DERSet s = new DERSet(obj);                        
-                            Attribute att = new Attribute(PKCSObjectIdentifiers.
-                                id_aa_signatureTimeStampToken, s);
-                            Hashtable oh = new Hashtable();
-                            //oh.put(PKCSObjectIdentifiers.id_aa_signatureTimeStampToken, att);
-                            oh.put(new DERObjectIdentifier("1.2.840.113549.1.9.16.2.14"), att);
-                            attributeTable = new AttributeTable(oh);     
+                        TimeStampRequest timeStampRequest = reqgen.generate(TIMESTAMP_PDF_HASH, digest);
+                        MessageTimeStamper messageTimeStamper = 
+                                new MessageTimeStamper(timeStampRequest);
+                        Respuesta respuesta = messageTimeStamper.call();
+                        if(Respuesta.SC_OK != respuesta.getCodigoEstado()) {
+                            logger.error("Error timestamping", respuesta.getMensaje());
+                            return null;
                         }
+                        TimeStampToken timeStampToken = messageTimeStamper.getTimeStampToken();
+                        final Calendar cal = new GregorianCalendar();
+                        cal.setTime(timeStampToken.getTimeStampInfo().getGenTime());
+                        logger.debug("*** TimeStamp: " + DateUtils.getStringFromDate(cal.getTime()));
+
+                        obj = new ASN1InputStream(timeStampToken.getEncoded()).readObject();
+                        // Creates the signatureTimestampToken attribute
+                        DERSet s = new DERSet(obj);                        
+                        Attribute att = new Attribute(PKCSObjectIdentifiers.
+                            id_aa_signatureTimeStampToken, s);
+                        Hashtable oh = new Hashtable();
+                        //oh.put(PKCSObjectIdentifiers.id_aa_signatureTimeStampToken, att);
+                        oh.put(new DERObjectIdentifier("1.2.840.113549.1.9.16.2.14"), att);
+                        attributeTable = new AttributeTable(oh); 
+
                    } catch(Exception ex) {
                         logger.error(ex.getMessage(), ex);
                         respuesta.appendErrorMessage(ex.getMessage());
                    }
-                    return attributeTable;
+                   return attributeTable;
                 }
             };
         
+        if(Respuesta.SC_OK != respuesta.getCodigoEstado()) return respuesta;
         dic.setDate(new PdfDate(sap.getSignDate()));
         sap.preClose(exc);
         MessageDigest md = MessageDigest.getInstance(PDF_SIGNATURE_DIGEST);
@@ -210,8 +200,21 @@ public class PDFSignerWorker extends SwingWorker<Respuesta, String>
         System.arraycopy(pk, 0, outc, 0, pk.length);
         dic2.put(PdfName.CONTENTS, new PdfString(outc).setHexWriting(true));
         sap.close(dic2);
-        respuesta = new Respuesta(Respuesta.SC_OK);
-        return respuesta;
+        String contentType = null;
+        byte[] bytesToSend = null;
+        if(destinationCert != null) {
+            logger.debug("---- with destinationCert -> encrypting response");
+            bytesToSend = Encryptor.encryptFile(fileToSend,destinationCert);
+            contentType = Contexto.PDF_SIGNED_AND_ENCRYPTED_CONTENT_TYPE;
+        } else {
+            contentType = Contexto.PDF_SIGNED_CONTENT_TYPE;
+            bytesToSend = FileUtils.getBytesFromFile(fileToSend);
+        }
+
+        Respuesta senderResponse = Contexto.INSTANCE.getHttpHelper().sendByteArray(
+                bytesToSend, contentType, urlToSendDocument);
+        senderResponse.setId(id);
+        return senderResponse;
     }
     
     public static String getNifUsuario (X509Certificate certificate) {
@@ -219,38 +222,11 @@ public class PDFSignerWorker extends SwingWorker<Respuesta, String>
     	return subjectDN.split("SERIALNUMBER=")[1].split(",")[0];
     }
     
-    @Override protected void done() {//on the EDT
-        try {
-            respuesta = get();
-        }catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
-        } 
-        if(workerListener != null) workerListener.showResult(this);
+
+    @Override public Respuesta call() throws Exception {
+       Respuesta respuesta = doInBackground();
+       respuesta.setId(id);
+       return respuesta;
     }
     
-    public File getSignedAndTimeStampedPDF() {
-        return signedFile;
-    }
-    
-    @Override public String getErrorMessage() {
-        if(workerType != null) return "### ERROR - " + workerType + " - msg: " + 
-                getMessage(); 
-        else return "### ERROR - msg: " + getMessage(); 
-    }
-
-   @Override public String getMessage() {
-        if(respuesta == null) return null;
-        else return respuesta.getMensaje();
-    }
-
-    @Override  public int getStatusCode() {
-        if(respuesta == null) return Respuesta.SC_ERROR;
-        else return respuesta.getCodigoEstado();
-    }
-
-    @Override
-    public VotingSystemWorkerType getType() {
-        return workerType;
-    }
 }

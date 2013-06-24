@@ -1,6 +1,7 @@
 package org.sistemavotacion.controlacceso
 
 import org.sistemavotacion.controlacceso.modelo.*
+import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.util.StringUtils;
 import grails.converters.JSON
 import org.sistemavotacion.util.DateUtils;
@@ -204,12 +205,17 @@ class RepresentativeController {
 			render msg
 			return false
 		}
+		def ctx = startAsync()
+		//ctx.setTimeout(10000);
 		Respuesta respuesta = representativeService.saveUserRepresentative(
 			mensajeSMIME, request.getLocale())
+		
 		params.respuesta = respuesta
 		if (Respuesta.SC_OK == respuesta.codigoEstado){
 			response.contentType = "${grailsApplication.config.pkcs7SignedContentType}"
 		}
+		ctx.complete();
+		
 	}
 	
 	/**

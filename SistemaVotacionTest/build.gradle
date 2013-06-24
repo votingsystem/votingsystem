@@ -87,13 +87,13 @@ task runVoting(dependsOn: ['classes'], type: JavaExec) {
 	
 	
 	doFirst {
-		File simulationDataFile = file('simulationData.json')
+		File simulationDataFile = file('./src/main/resources/simulatorFiles/votingSimulationData.json')
 		
-		println "${simulationDataFile.text}"
+		println "Reading data from simulation file: ${simulationDataFile.absolutePath}"
 		
 		args simulationDataFile.text
 		//args "-h"
-		main = 'org.sistemavotacion.test.simulacion.HeadlessSimulation'
+		main = 'org.sistemavotacion.test.simulation.VotingProcessSimulator'
 		classpath = sourceSets.main.runtimeClasspath
 	}
 	

@@ -3,6 +3,7 @@ import grails.converters.JSON
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
 import org.sistemavotacion.controlacceso.modelo.*
+import org.sistemavotacion.utils.*
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -14,6 +15,7 @@ class BootStrap {
 	def pdfService
 	def timeStampService
 	def encryptionService
+	def grailsApplication
 	
     def init = { servletContext ->
         JSON.registerObjectMarshaller(Date) {
@@ -22,12 +24,12 @@ class BootStrap {
 		
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 		MailcapCommandMap mc = (MailcapCommandMap)CommandMap.getDefaultCommandMap();
-
-		mc.addMailcap("text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain");
-		mc.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html");
-		mc.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
-		mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true");
-		mc.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822");
+		
+		mc.addMailcap("text/plain;;x-java-content-handler=gnu.mail.handler.TextPlain");
+		mc.addMailcap("text/html;;x-java-content-handler=gnu.mail.handler.TextHtml");
+		mc.addMailcap("text/xml;;x-java-content-handler=gnu.mail.handler.TextXml");
+		mc.addMailcap("multipart/*;;x-java-content-handler=gnu.mail.handler.Multipart");
+		mc.addMailcap("message/rfc822;;x-java-content-handler=gnu.mail.handler.MessageRFC822");
 
 		CommandMap.setDefaultCommandMap(mc);
 		
@@ -45,6 +47,7 @@ class BootStrap {
 			returnMap['numTotalRepresentations'] = it.numTotalRepresentations
 			return returnMap
 		}
+		
     }
 	
     def destroy = {}

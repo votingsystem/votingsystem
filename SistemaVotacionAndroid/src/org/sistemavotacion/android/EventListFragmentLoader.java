@@ -10,8 +10,6 @@ import java.util.List;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.sistemavotacion.android.ui.VoteReceiptListScreen;
-import org.sistemavotacion.json.DeJSONAObjeto;
-import org.sistemavotacion.json.DeObjetoAJSON;
 import org.sistemavotacion.modelo.Consulta;
 import org.sistemavotacion.modelo.DatosBusqueda;
 import org.sistemavotacion.modelo.Evento;
@@ -470,17 +468,16 @@ public class EventListFragmentLoader extends FragmentActivity {
 	                			Aplicacion.CONTROL_ACCESO_URL, 0, Aplicacion.EVENTS_PAGE_SIZE);
 	                	DatosBusqueda datosBusqueda = new DatosBusqueda(
 	                			subSystem.getEventType(), enumTab.getEventState(), queryString);
-	                	response = HttpHelper.sendData(DeObjetoAJSON.
-	                			obtenerDatosBusqueda(datosBusqueda), url);
+	                	response = HttpHelper.sendByteArray(
+	                			datosBusqueda.toJSON().toString().getBytes(), null, url);
 	                } else {
 	                	String url = ServerPaths.getURLEventos(
 	    	            		Aplicacion.CONTROL_ACCESO_URL, enumTab, subSystem, Aplicacion.EVENTS_PAGE_SIZE, offset);
-	                	response = HttpHelper.obtenerInformacion(url);
+	                	response = HttpHelper.getData(url, null);
 	                }
 	                int statusCode = response.getStatusLine().getStatusCode();
 	                if(Respuesta.SC_OK == statusCode) {
-	                	Consulta consulta = DeJSONAObjeto.obtenerConsultaEventos(
-	                			EntityUtils.toString(response.getEntity()));
+	                	Consulta consulta = Consulta.parse(EntityUtils.toString(response.getEntity()));
 	                	eventEntryList = new ArrayList<EventEntry>();
 	                	for(Evento evento:consulta.getEventos()) {
 	                		eventEntryList.add(new EventEntry(evento));

@@ -24,6 +24,7 @@ class StatisticsService {
 
 	def grailsApplication	
 	def filesService
+	def eventoService
 	
 	private final ExecutorService requestExecutor = Executors.newFixedThreadPool(100);
 	// Executors.newCachedThreadPool(null)
@@ -38,15 +39,16 @@ class StatisticsService {
 	public void onApplicationEvent(final  VotingEvent votingEvent) {
 		Long eventId = votingEvent?.getEvent()?.id
 		log.debug(" ----- onApplicationEvent: ${votingEvent} - eventId: ${eventId}")
-		if(eventId != null) {			
-			Map<String, Object> eventMap = getEventMap(votingEvent.getEvent());
-			
+		if(eventId != null) {		
+			Map<String, Object> eventMap = eventsMap.get(votingEvent?.getEvent().id);
+			if(!eventMap)  eventMap = eventoService.getEventMetaInfMap(votingEvent?.getEvent())
+
 			Long selectedOptionId = votingEvent.getOptionSelected()?.id
 			Long  numVotesOption = 0
 
 			Map<String, Object> repAccreditationsMap = eventMap.get("REPRESENTATIVE_ACCREDITATIONS")
 			if(!repAccreditationsMap) {
-				repAccreditationsMap = new HashMap<String, Object>();
+				repAccreditationsMap = [:];
 			}
 			Long numUsersWithRepresentativeWithAccessRequest = 
 				repAccreditationsMap.get("numUsersWithRepresentativeWithAccessRequest")
@@ -58,12 +60,13 @@ class StatisticsService {
 			Long numRepresentativesWithVote = repAccreditationsMap.get("numRepresentativesWithVote")
 			if(!numRepresentativesWithVote) numRepresentativesWithVote = new Long(0)
 		
+			
 			Map<String, Object> backupMap = eventMap.get("BACKUP")
 			if(!backupMap) {
-				backupMap = new HashMap<String, Object>();
-			} 
-			Long numUserVotes = backupMap.get("numUserVotes")
-			if(!numUserVotes) numUserVotes = new Long(0)
+				backupMap =[:];
+				backupMap.numUserVotes = 0L
+			}
+			Long numUserVotes = backupMap.numUserVotes;
 						
 			Map<String, RepresentativeData> representativesMap = eventMap.get("representatives")
 			
@@ -136,9 +139,9 @@ class StatisticsService {
 				numRepresentativesWithVote)
 			eventMap.put("REPRESENTATIVE_ACCREDITATIONS", repAccreditationsMap)
 			
-			if(!eventsMap.replace(eventId, eventMap))
-				eventsMap.put(eventId, eventMap)
-			filesService.updateStatisticsMetaInf(eventMap)
+			if(!eventsMap.replace(eventId, eventMap)) eventsMap.put(eventId, eventMap)
+
+			eventoService.updateEventMetaInf(votingEvent?.getEvent(), eventMap)
 			log.debug(" --- ${eventMap as JSON}")
 		}
 	}
@@ -169,33 +172,6 @@ class StatisticsService {
 		return result
 	}
 
-	public Map getEventMap(Evento event) {
-		Map<String, Object> eventMap = eventsMap.get(event.id);
-		if(!eventMap) {
-			File statisticsFile = filesService.getStatisticsMetaInf(event.id)
-			if(statisticsFile.exists())	eventMap = JSON.parse(statisticsFile?.text)
-		}
-		if(!eventMap) {
-			eventMap = new HashMap<String, Object>();
-			eventMap.put("id", event.id);
-			eventMap.put("serverURL", "${grailsApplication.config.grails.serverURL}")
-			eventMap.put("subject", event.asunto)
-			eventMap.put("type", Tipo.EVENTO_VOTACION.toString())
-			eventMap.put("dateFinish", DateUtils.getStringFromDate(event.getDateFinish()))
-			eventMap.put("representatives", new HashMap<String, RepresentativeData>())
-			if(event instanceof EventoVotacion) {
-				Set<OpcionDeEvento> opciones = ((EventoVotacion)event).opciones
-				List optionList = new ArrayList()
-				for(OpcionDeEvento opcion:opciones) {
-					optionList.add([id:opcion.id,
-						content:opcion.contenido,
-						numUserVotes:0,
-						numRepresentativeVotes:0])
-				}
-				eventMap.put("options", optionList) 
-			}
-		}
-		return eventMap
-	}
+
 	
 }

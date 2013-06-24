@@ -4,13 +4,9 @@ import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.Future;
 import javax.swing.JDialog;
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
 import org.sistemavotacion.AppletFirma;
 import static org.sistemavotacion.AppletFirma.SERVER_INFO_URL_SUFIX;
 import org.sistemavotacion.Contexto;
@@ -20,12 +16,25 @@ import org.sistemavotacion.SaveReceiptDialog;
 import org.sistemavotacion.VotacionDialog;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Operacion;
+import static org.sistemavotacion.modelo.Operacion.Tipo.ANULAR_SOLICITUD_ACCESO;
+import static org.sistemavotacion.modelo.Operacion.Tipo.ANULAR_VOTO;
+import static org.sistemavotacion.modelo.Operacion.Tipo.ASOCIAR_CENTRO_CONTROL;
+import static org.sistemavotacion.modelo.Operacion.Tipo.CANCELAR_EVENTO;
+import static org.sistemavotacion.modelo.Operacion.Tipo.ENVIO_VOTO_SMIME;
+import static org.sistemavotacion.modelo.Operacion.Tipo.FIRMA_MANIFIESTO_PDF;
+import static org.sistemavotacion.modelo.Operacion.Tipo.FIRMA_RECLAMACION_SMIME;
+import static org.sistemavotacion.modelo.Operacion.Tipo.NEW_REPRESENTATIVE;
+import static org.sistemavotacion.modelo.Operacion.Tipo.PUBLICACION_MANIFIESTO_PDF;
+import static org.sistemavotacion.modelo.Operacion.Tipo.PUBLICACION_RECLAMACION_SMIME;
+import static org.sistemavotacion.modelo.Operacion.Tipo.PUBLICACION_VOTACION_SMIME;
+import static org.sistemavotacion.modelo.Operacion.Tipo.REPRESENTATIVE_ACCREDITATIONS_REQUEST;
+import static org.sistemavotacion.modelo.Operacion.Tipo.REPRESENTATIVE_REVOKE;
+import static org.sistemavotacion.modelo.Operacion.Tipo.REPRESENTATIVE_SELECTION;
+import static org.sistemavotacion.modelo.Operacion.Tipo.REPRESENTATIVE_VOTING_HISTORY_REQUEST;
+import static org.sistemavotacion.modelo.Operacion.Tipo.SOLICITUD_COPIA_SEGURIDAD;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.pdf.PdfFormHelper;
-import org.sistemavotacion.worker.InfoGetterWorker;
-import org.sistemavotacion.worker.VotingSystemWorker;
-import org.sistemavotacion.worker.VotingSystemWorkerListener;
-import org.sistemavotacion.worker.VotingSystemWorkerType;
+import org.sistemavotacion.callable.InfoGetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,28 +42,17 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class PreconditionsCheckerDialog extends JDialog 
-        implements VotingSystemWorkerListener {
+public class PreconditionsCheckerDialog extends JDialog {
     
     private static Logger logger = LoggerFactory.getLogger(
             PreconditionsCheckerDialog.class);
     
-    public enum Worker implements VotingSystemWorkerType{
-        CHECK_ACCES_CONTROL_CERT, CHECK_CONTROL_CENTER_CERT}
-    
-
     private static final Map<String, ActorConIP> actorMap = 
             new HashMap<String, ActorConIP>();
     private Operacion operacion;
     
-    private final CountDownLatch checkLatch = new CountDownLatch(1);
-    private AtomicBoolean preconditionsOK = new AtomicBoolean(false);
     private Frame frame = null;
-    
-    private Boolean accessControlCertChecked = null;
-    private Boolean controlCenterCertChecked = null;
     private final AppletFirma appletFirma;
-    private String message = null;
 
     public PreconditionsCheckerDialog(Frame parent, 
             boolean modal, Operacion operacion, final AppletFirma appletFirma) {
@@ -78,94 +76,100 @@ public class PreconditionsCheckerDialog extends JDialog
                 appletFirma.cancelarOperacion();
             }
         });
-        Runnable runnable = new Runnable() {
-            public void run() { 
+        
+        Contexto.INSTANCE.submit(new Runnable() {
+            @Override
+            public void run() {
                 try {
                     checkConditions();
-                } catch (Exception ex) {
+                } catch (final Exception ex) {
                     logger.error(ex.getMessage(), ex);
-                } 
+                    javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            MensajeDialog errorDialog = new MensajeDialog(frame, true);
+                            errorDialog.setMessage(ex.getMessage(), 
+                                    Contexto.INSTANCE.getString("errorLbl"));
+                        }
+                    });
+                }
             }
-        };
-        new Thread(runnable).start();
+        });
         pack();
     }
     
-    public void checkConditions() throws InterruptedException {
+    public void checkConditions() throws Exception {
         logger.debug("checkConditions");
-        try {
-            switch(operacion.getTipo()) {
-                case ENVIO_VOTO_SMIME:
-                    boolean accessControlChecked = checkCert(operacion.getEvento().
-                            getCentroControl().getServerURL(), 
-                            Worker.CHECK_CONTROL_CENTER_CERT);
-                    boolean controlCenterChecked = checkCert(operacion.getEvento().
-                            getControlAcceso().getServerURL(), 
-                            Worker.CHECK_ACCES_CONTROL_CERT);
-                    if(accessControlChecked && controlCenterChecked) {
-                        preconditionsOK.set(true);
-                        checkLatch.countDown();
-                    }
-                    logger.debug("controlCenterCertChecked: " + controlCenterCertChecked + 
-                            " - accessControlCertChecked: " + accessControlCertChecked);
-                    break;
-                case REPRESENTATIVE_REVOKE:
-                case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
-                case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
-                case NEW_REPRESENTATIVE:
-                case REPRESENTATIVE_SELECTION:
-                case PUBLICACION_MANIFIESTO_PDF:
-                case FIRMA_MANIFIESTO_PDF:
-                case PUBLICACION_RECLAMACION_SMIME:
-                case FIRMA_RECLAMACION_SMIME:
-                case PUBLICACION_VOTACION_SMIME:
-                case CANCELAR_EVENTO:
-                case ASOCIAR_CENTRO_CONTROL:
-                case ANULAR_SOLICITUD_ACCESO:
-                case ANULAR_VOTO: 
-                case SOLICITUD_COPIA_SEGURIDAD:
-                    accessControlCertChecked = checkCert(
-                            operacion.getUrlServer(), 
-                            Worker.CHECK_ACCES_CONTROL_CERT);
-                    if(accessControlCertChecked) {
-                        preconditionsOK.set(true);
-                        checkLatch.countDown();
-                    }
-                    break;
-                default:
-                    logger.error(" ################# UNKNOWN OPERATION -> " +  
-                            operacion.getTipo());
-                    checkLatch.countDown();
-                    preconditionsOK.set(true);
+        Respuesta respuesta = null;
+        switch(operacion.getTipo()) {
+            case ENVIO_VOTO_SMIME:
+                respuesta = checkActorConIP(operacion.getEvento().
+                        getControlAcceso().getServerURL());
+                if(Respuesta.SC_OK != respuesta.getCodigoEstado()) {
+                    logger.error("ERROR checking ACCESS CONTROL");
+                    cancelOperation(respuesta.getMensaje());
+                    return;
+                } else {
+                    ActorConIP accessControl = ActorConIP.parse(respuesta.getMensaje());
+                    Contexto.INSTANCE.setAccessControl(accessControl);
+                }
+                respuesta = checkActorConIP(operacion.getEvento().
+                        getCentroControl().getServerURL());
+                if(Respuesta.SC_OK != respuesta.getCodigoEstado()) {
+                    logger.error("ERROR checking CONTROL CENTER");
+                    cancelOperation(respuesta.getMensaje());
+                    return;
+                } else {
+                    ActorConIP controlCenter = ActorConIP.parse(respuesta.getMensaje());
+                    Contexto.INSTANCE.setControlCenter(controlCenter);
+                }
+                break;
+            case REPRESENTATIVE_REVOKE:
+            case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
+            case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
+            case NEW_REPRESENTATIVE:
+            case REPRESENTATIVE_SELECTION:
+            case PUBLICACION_MANIFIESTO_PDF:
+            case FIRMA_MANIFIESTO_PDF:
+            case PUBLICACION_RECLAMACION_SMIME:
+            case FIRMA_RECLAMACION_SMIME:
+            case PUBLICACION_VOTACION_SMIME:
+            case CANCELAR_EVENTO:
+            case ASOCIAR_CENTRO_CONTROL:
+            case ANULAR_SOLICITUD_ACCESO:
+            case ANULAR_VOTO: 
+            case SOLICITUD_COPIA_SEGURIDAD:
+                respuesta = checkActorConIP(operacion.getUrlServer());
+                if(Respuesta.SC_OK != respuesta.getCodigoEstado()) {
+                    logger.error("ERROR checking ACCESS CONTROL - msg:" + 
+                            respuesta.getMensaje());
+                    cancelOperation(respuesta.getMensaje());
+                    return;
+                } else {
+                    ActorConIP accessControl = ActorConIP.parse(respuesta.getMensaje());
+                    Contexto.INSTANCE.setAccessControl(accessControl);
+                }
+            default: 
+                logger.error(" ################# UNKNOWN OPERATION -> " +  
+                        operacion.getTipo());
+                break;
+        }
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                processOperation();
             }
-        } catch(final Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            javax.swing.SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    MensajeDialog errorDialog = new MensajeDialog(frame, true);
-                    errorDialog.setMessage(ex.getMessage(), 
-                            Contexto.INSTANCE.getString("errorLbl"));
-                }
-            });
-        }
-        checkLatch.await();
-        logger.debug("preconditionsOK: " + preconditionsOK);
-        if(preconditionsOK.get() == true) {
-            javax.swing.SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    processOperation();
-                }
-            });
-        } else {
-            acceptButton.setVisible(true);
-            progressLabel.setText(Contexto.INSTANCE.getString("errorLbl"));
-            progressBar.setVisible(false);
-            waitLabel.setText(message);
-            appletFirma.responderCliente(
-                    Operacion.SC_ERROR, 
-                    Contexto.INSTANCE.getString("votingPreconditionsErrorMsg", 
-                    Contexto.INSTANCE.getString("errorLbl")));
-        }
+        });
+        pack();
+    }
+    
+    private void cancelOperation(String message) {
+        acceptButton.setVisible(true);
+        progressLabel.setText(Contexto.INSTANCE.getString("errorLbl"));
+        progressBar.setVisible(false);
+        waitLabel.setText(message);
+        appletFirma.responderCliente(
+                Operacion.SC_ERROR, 
+                Contexto.INSTANCE.getString("votingPreconditionsErrorMsg", 
+                Contexto.INSTANCE.getString("errorLbl")));
         pack();
     }
     
@@ -247,19 +251,19 @@ public class PreconditionsCheckerDialog extends JDialog
                         operacion.getTipo().toString());
         }
     }
-     
-    private boolean checkCert(String serverURL, Worker worker) throws Exception {
-        logger.debug(" - checkCert - serverURL: " + serverURL 
-                + " - worker: " + worker);
-        if(serverURL == null) throw new Exception("Missing cert url");
+    
+    private Respuesta checkActorConIP(String serverURL) throws Exception {
+        logger.debug(" - checkActorConIP: " + serverURL);
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         ActorConIP actorConIp = actorMap.get(serverURL);
-        if(actorConIp == null) {
-            if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        if(actorConIp == null) { 
             String serverInfoURL = serverURL + SERVER_INFO_URL_SUFIX;
-            new InfoGetterWorker(worker, serverInfoURL, null, this).execute();
-            return false;
-        } else return true;
+            InfoGetter infoGetter = new InfoGetter(null, serverInfoURL, null);
+            Future<Respuesta> future = Contexto.INSTANCE.submit(infoGetter);
+            return future.get();
+        } else return new Respuesta(Respuesta.SC_OK);
     }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -362,69 +366,4 @@ public class PreconditionsCheckerDialog extends JDialog
     private javax.swing.JLabel waitLabel;
     // End of variables declaration//GEN-END:variables
 
-    @Override public void processVotingSystemWorkerMsg(List<String> messages) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    private void setVotingPreconditions() {
-         logger.debug(" - setVotingPreconditions - accessControlCertChecked: " 
-                 + accessControlCertChecked 
-                 + " - controlCenterCertChecked: " + controlCenterCertChecked);
-        if(accessControlCertChecked == true && controlCenterCertChecked == true) 
-            preconditionsOK.set(true);
-        checkLatch.countDown();
-    }
-    
-    @Override
-    public void showResult(VotingSystemWorker worker) {
-        logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-                " - worker: " + worker.getType());
-        InfoGetterWorker infoWorker = null;
-        try {
-            switch((Worker)worker.getType()) {
-                case CHECK_ACCES_CONTROL_CERT:
-                    infoWorker = (InfoGetterWorker)worker;
-                    if(Respuesta.SC_OK == worker.getStatusCode()) {
-                        JSONObject actorConIPJSON = (JSONObject) JSONSerializer.
-                                toJSON(infoWorker.getMessage());
-                        ActorConIP actorConIP = ActorConIP.parse(actorConIPJSON);
-                        actorMap.put(operacion.getUrlServer(), actorConIP);
-                        Contexto.INSTANCE.setAccessControl(actorConIP);
-                        accessControlCertChecked = true;                        
-                    } else {
-                        accessControlCertChecked = false;
-                        message = Contexto.INSTANCE.getString("checkAccessControlErrorMsg");
-                    } 
-                    if(operacion.getTipo() == Operacion.Tipo.ENVIO_VOTO_SMIME) {
-                        if(controlCenterCertChecked != null) setVotingPreconditions();
-                        else return;
-                    } else {
-                        if(Respuesta.SC_OK == worker.getStatusCode()) {
-                            preconditionsOK.set(true);
-                        } else preconditionsOK.set(false);
-                        checkLatch.countDown();
-                    }
-                    logger.debug("CHECK_ACCES_CONTROL_CERT - url: " + operacion.getUrlServer());
-                    break;
-                case CHECK_CONTROL_CENTER_CERT: 
-                    infoWorker = (InfoGetterWorker)worker;
-                    if(Respuesta.SC_OK == worker.getStatusCode()) {
-                        JSONObject actorConIPJSON = (JSONObject) JSONSerializer.
-                                toJSON(infoWorker.getMessage());
-                        ActorConIP controlCenter = ActorConIP.parse(actorConIPJSON);
-                        Contexto.INSTANCE.setControlCenter(controlCenter);
-                        actorMap.put(operacion.getEvento().getCentroControl().
-                                getServerURL(), controlCenter);
-                        controlCenterCertChecked = true;
-                    } else {
-                        controlCenterCertChecked = false;
-                        message = Contexto.INSTANCE.getString("checkControlCenterErrorMsg");
-                    } 
-                    if(accessControlCertChecked != null) setVotingPreconditions();
-                    break;
-            }
-        } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
-        }
-    }
 }

@@ -7,52 +7,37 @@ import org.sistemavotacion.util.HttpHelper;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class GetDataTask extends AsyncTask<String, Void, Integer> {
+public class GetDataTask extends AsyncTask<String, Void, Respuesta> {
 
 	public static final String TAG = "GetDataTask";
 	
-	private Integer id;
-    private TaskListener listener = null;
-    private Exception exception = null;
-    private String message = null;
-    private int statusCode = Respuesta.SC_ERROR_PETICION;
+
+    private String contentType = null;
     
-    public GetDataTask(Integer id, TaskListener listener) {
-    	this.id = id;
-    	this.listener = listener;
+    public GetDataTask(String contentType) {
+    	this.contentType = contentType;
     }
 	
 	@Override
-	protected Integer doInBackground(String... urls) {
+	protected Respuesta doInBackground(String... urls) {
         Log.d(TAG + ".doInBackground", " - url: " + urls[0]);
+        Respuesta respuesta = null;
         try {
-            HttpResponse response = HttpHelper.obtenerInformacion(urls[0]);
-            statusCode = response.getStatusLine().getStatusCode();
-            message = EntityUtils.toString(response.getEntity());
+            HttpResponse response = HttpHelper.getData(urls[0], contentType);
+            if(Respuesta.SC_OK == response.getStatusLine().getStatusCode()) {
+                byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
+                respuesta = new Respuesta(response.getStatusLine().getStatusCode(),
+                        new String(responseBytes), responseBytes);
+            } else {
+                respuesta = new Respuesta(response.getStatusLine().getStatusCode(),
+                        EntityUtils.toString(response.getEntity()));
+            }
         } catch (Exception ex) {
         	ex.printStackTrace();
-        	exception = ex;
+        	respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
         }
-        return statusCode;
+        return respuesta;
 	}
-	
-    @Override
-    protected void onPostExecute(Integer data) {
-    	Log.d(TAG + ".onPostExecute", " - statusCode: " + data);
-    	listener.showTaskResult(this);
-    }
-    
-    public Integer getId() {
-    	return id;
-    }
-    
-    public int getStatusCode() {
-    	return statusCode;
-    }
-    
-	public String getMessage() {
-		if(exception != null) return exception.getMessage();
-		return message;
-	}
+
 	
 }

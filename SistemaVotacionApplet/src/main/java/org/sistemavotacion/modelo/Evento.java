@@ -631,6 +631,7 @@ public class Evento {
         controlAccesoMap.put("serverURL", controlAcceso.getServerURL());
         controlAccesoMap.put("nombre", controlAcceso.getNombre());
         map.put("controlAcceso", controlAccesoMap);
+        map.put("id", id);
         if(eventoId != null) map.put("eventoId", eventoId);
         else map.put("eventoId", id);
         map.put("asunto", asunto);

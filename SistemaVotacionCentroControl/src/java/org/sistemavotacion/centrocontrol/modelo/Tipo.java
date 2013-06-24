@@ -57,7 +57,9 @@ public enum Tipo {
                              
     //USUARIO
     HISTORICO_USUARIO(""), 
-     ERROR_FIRMANDO_VALIDACION(""),
+    ERROR_FIRMANDO_VALIDACION(""),
+    
+    TEST(""),
     
      //Actores
     CENTRO_CONTROL(""), 

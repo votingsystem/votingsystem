@@ -3,6 +3,7 @@ package org.sistemavotacion.controlacceso
 import grails.converters.JSON
 import org.sistemavotacion.controlacceso.modelo.*
 import grails.util.Environment
+import org.sistemavotacion.utils.*
 
 /**
  * @infoController Información de la aplicación
@@ -26,10 +27,10 @@ class InfoServidorController {
         infoServidor.centrosDeControl = []
         infoServidor.nombre = grailsApplication.config.SistemaVotacion.serverName
         infoServidor.tipoServidor = Tipo.CONTROL_ACCESO.toString()
-        infoServidor.serverURL = grailsApplication.config.grails.serverURL
+        infoServidor.serverURL = "${grailsApplication.config.grails.serverURL}"
         infoServidor.urlBlog = grailsApplication.config.SistemaVotacion.urlBlog
 		infoServidor.estado = ActorConIP.Estado.ACTIVO.toString()
-		infoServidor.environmentMode = Environment.current.toString()
+		infoServidor.environmentMode = VotingSystemApplicationContex.instance.getEnvironment().toString()
         List<CentroControl> centrosDeControl = CentroControl.getAll()
         centrosDeControl?.collect {centroControl ->
             def centroControlMap = [id:centroControl.id, nombre:centroControl.nombre,

@@ -324,54 +324,5 @@ public class Evento implements Serializable {
 		if(dateCanceled != null) return dateCanceled;
 		else return fechaFin;
 	}
-	
-	public String updateMetaInf(Tipo type, Map value) throws Exception {
-		Map eventMetaInf = null;
-		if(metaInf == null || "".equals(metaInf)) {
-			if(type == null) {
-				eventMetaInf = value;
-			} else {
-				eventMetaInf = new HashMap();
-				eventMetaInf.put(type.toString(), value);
-			}
-			
-		} else {
-			eventMetaInf = (Map) JSON.parse(metaInf);
-			if(type == null) eventMetaInf.putAll(value);
-			else eventMetaInf.put(type.toString(), value);
-			
-		}
-		if(eventMetaInf != null) {
-			eventMetaInf.put("id", id);
-			eventMetaInf.put("subject", asunto);
-			if(getDateFinish() != null) eventMetaInf.put(
-					"dateFinish", DateUtils.getStringFromDate(getDateFinish()));
-			Set<String> keySet = eventMetaInf.keySet();
-			for(String k: keySet) {
-				if(eventMetaInf.get(k) == null) eventMetaInf.remove(k);
-			}
-			if(this instanceof EventoVotacion) {
-				eventMetaInf.put("type", Tipo.EVENTO_VOTACION.toString());
-				EventoVotacion votacion = (EventoVotacion)this;
-				List optionsList = new ArrayList();
-				Set<OpcionDeEvento> opciones = votacion.getOpciones();
-				for(OpcionDeEvento opcion:opciones) {
-					Map optionMap = new HashMap();
-					optionMap.put("id", opcion.getId());
-					optionMap.put("content", opcion.getContenido());
-					optionsList.add(optionMap);
-				}
-				eventMetaInf.put("options", optionsList);
-			} else if(this instanceof EventoReclamacion) {
-				eventMetaInf.put("type", Tipo.EVENTO_RECLAMACION.toString());
-			} else if(this instanceof EventoFirma) {
-				eventMetaInf.put("type", Tipo.EVENTO_FIRMA.toString());
-			}
-			eventMetaInf.put("serverURL", 
-					((ConfigObject)VotingSystemApplicationContex.
-					getConfig().get("grails")).get("serverURL"));
-			metaInf = new grails.converters.JSON(eventMetaInf).toString();
-		}
-		return metaInf;
-	}
+
 }

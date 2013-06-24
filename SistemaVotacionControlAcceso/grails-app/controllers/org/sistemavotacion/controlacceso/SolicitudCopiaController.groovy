@@ -8,7 +8,7 @@ import com.itextpdf.text.pdf.AcroFields
 import com.itextpdf.text.pdf.PdfReader
 import grails.converters.JSON
 import grails.util.*
-
+import org.sistemavotacion.utils.*
 /**
  * @infoController Solicitud de copias de seguridad
  * @descController Servicios que gestiona solicitudes de copias de seguridad.
@@ -77,7 +77,9 @@ class SolicitudCopiaController {
 				
 				log.debug "backup request - eventoId: ${eventoId} - asunto: ${asunto} - email: ${email}"
 				Respuesta respuestaGeneracionBackup = null
-				if(params.sync && Environment.DEVELOPMENT.equals(Environment.current)) {
+				if(VotingSystemApplicationContex.Environment.DEVELOPMENT.equals(
+					VotingSystemApplicationContex.instance.environment)) {
+					log.debug "Request from DEVELOPMENT environment generating sync response"
 					respuestaGeneracionBackup = requestBackup(evento, request.locale)
 					if(Respuesta.SC_OK == respuestaGeneracionBackup?.codigoEstado) {
 						File archivoCopias = respuestaGeneracionBackup.file
@@ -156,7 +158,8 @@ class SolicitudCopiaController {
 	}
 	
 	def devDownload() {
-		if(!Environment.DEVELOPMENT.equals(Environment.current)) {
+		if(!VotingSystemApplicationContex.Environment.DEVELOPMENT.equals(
+			VotingSystemApplicationContex.instance.environment)) {
 			def msg = message(code: "serviceDevelopmentModeMsg")
 			log.error msg
 			response.status = Respuesta.SC_ERROR_PETICION
@@ -180,13 +183,13 @@ class SolicitudCopiaController {
 			byte[] bytesCopiaRespaldo = archivoCopias.getBytes()
 			String backupFileName = "backup.zip"
 			if(event instanceof EventoVotacion) {
-				backupFileName = message(code:'votingBackupFileName');
+				backupFileName = message(code:'votingBackupFileName', args:[event.id]);
 			}
 			if(event instanceof EventoFirma) {
-				backupFileName = message(code:'manifestBackupFileName');
+				backupFileName = message(code:'manifestBackupFileName', args:[event.id]);
 			}
 			if(event instanceof EventoReclamacion){
-				backupFileName = message(code:'claimBackupFileName');
+				backupFileName = message(code:'claimBackupFileName', args:[event.id]);
 			}
 			response.contentLength = bytesCopiaRespaldo.length
 			response.setHeader("Content-disposition", "filename=${backupFileName}.zip")

@@ -8,8 +8,11 @@ import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.security.cert.X509Certificate;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JDialog;
-import javax.swing.SwingWorker;
 import javax.swing.text.html.parser.ParserDelegator;
 import org.sistemavotacion.dialogo.MensajeDialog;
 import org.sistemavotacion.dialogo.PasswordDialog;
@@ -23,8 +26,8 @@ import org.sistemavotacion.smime.SMIMEMessageWrapper;
 
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.StringUtils;
-import org.sistemavotacion.worker.AccessRequestWorker;
-import org.sistemavotacion.worker.SMIMESignedSenderWorker;
+import org.sistemavotacion.callable.AccessRequestor;
+import org.sistemavotacion.callable.SMIMESignedSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,9 +39,12 @@ public class VotacionDialog extends JDialog {
 
     private static Logger logger = LoggerFactory.getLogger(VotacionDialog.class);
     
+    private static BlockingQueue<Future<Respuesta>> queue = 
+        new LinkedBlockingQueue<Future<Respuesta>>(3);
+    
     private volatile boolean mostrandoPantallaEnvio = false;
     private Frame parentFrame;
-    private SwingWorker tareaEnEjecucion;
+    private Future<Respuesta> tareaEnEjecucion;
     private Evento votoEvento;
     private AppletFirma appletFirma;
     private SMIMEMessageWrapper smimeMessage;
@@ -71,10 +77,39 @@ public class VotacionDialog extends JDialog {
         setTitle(appletFirma.getOperacionEnCurso().
                 getTipo().getCaption());
         progressBarPanel.setVisible(false);
+        Contexto.INSTANCE.submit(new Runnable() {
+            @Override public void run() {
+                try {
+                    readFutures();
+                } catch (Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                }
+            }
+        });
         pack();
         logger.info("Inicializado dialogo voto");
     }
     
+    public void readFutures () {
+        logger.debug(" - readFutures");
+        AtomicBoolean done = new AtomicBoolean(false);
+        while (!done.get()) {
+            try {
+                Future<Respuesta> future = queue.take();
+                Respuesta respuesta = future.get();
+                logger.debug(" - readFutures - response status: " + respuesta.getCodigoEstado());
+                if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+
+                } else {
+
+                }
+
+            } catch(Exception ex) {
+                logger.error(ex.getMessage(), ex);
+            }
+        }
+    }
+        
     public void mostrarPantallaEnvio (boolean visibility) {
         logger.debug("mostrarPantallaEnvio - " + visibility);
         mostrandoPantallaEnvio = visibility;
@@ -297,19 +332,19 @@ public class VotacionDialog extends JDialog {
 
             X509Certificate accesRequestServerCert = Contexto.INSTANCE.
                     getAccessControl().getCertificate();
-            tareaEnEjecucion = new AccessRequestWorker(null, 
-                    smimeMessage, votoEvento, accesRequestServerCert, null);
-            tareaEnEjecucion.execute();
-            Respuesta respuesta = (Respuesta) tareaEnEjecucion.get();
+            AccessRequestor accessRequestor = new AccessRequestor(smimeMessage, 
+                    votoEvento, accesRequestServerCert);
+            Future<Respuesta> future = Contexto.INSTANCE.submit(accessRequestor);
+            tareaEnEjecucion = future;
+            Respuesta respuesta =  future.get();
             if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {  
-                notificarCentroControl(((AccessRequestWorker)tareaEnEjecucion).
-                    getPKCS10WrapperClient(), votoEvento);
+                notificarCentroControl(accessRequestor.getPKCS10WrapperClient(), 
+                        votoEvento);
             } else {
                 appletFirma.responderCliente(respuesta.getCodigoEstado(), 
                         respuesta.getMensaje());
                 dispose();
             }
-            
         } catch (Exception ex) {
             mostrarPantallaEnvio(false);
             logger.error(ex.getMessage(), ex);
@@ -336,15 +371,13 @@ public class VotacionDialog extends JDialog {
             smimeMessage = pkcs10WrapperClient.genMimeMessage(fromUser, toUser, 
                     textToSign, msgSubject, null);
   
-            //X509Certificate controlCenterCert = Contexto.INSTANCE.
-            //        getControlCenter().getCertificate();
-            
             String urlVoteService = votoEvento.getUrlRecolectorVotosCentroControl();
-            tareaEnEjecucion = new SMIMESignedSenderWorker(null, 
+            SMIMESignedSender signedSender = new SMIMESignedSender(null,
                     smimeMessage, urlVoteService, pkcs10WrapperClient.
-                    getKeyPair(), null, null);
-            tareaEnEjecucion.execute();
-            Respuesta respuesta = (Respuesta) tareaEnEjecucion.get();
+                    getKeyPair(), Contexto.INSTANCE. getControlCenter().getCertificate());
+            Future<Respuesta> future = Contexto.INSTANCE.submit(signedSender);
+            tareaEnEjecucion = future;
+            Respuesta respuesta = future.get();
             if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {  
                 try {
                     SMIMEMessageWrapper validatedVote = respuesta.getSmimeMessage();

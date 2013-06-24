@@ -6,10 +6,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
-import javax.swing.SwingWorker;
 import org.sistemavotacion.dialogo.MensajeDialog;
 import org.sistemavotacion.dialogo.PasswordDialog;
 import org.sistemavotacion.modelo.Operacion;
@@ -17,38 +15,43 @@ import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.smime.DNIeSignedMailGenerator;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.util.FileUtils;
-import org.sistemavotacion.worker.InfoGetterWorker;
-import org.sistemavotacion.worker.VotingSystemWorkerListener;
+import org.sistemavotacion.callable.InfoGetter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.itextpdf.text.pdf.PdfReader;
 import java.security.cert.X509Certificate;
-import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import static org.sistemavotacion.modelo.Operacion.Tipo.*;
-import org.sistemavotacion.worker.PDFSignedSenderWorker;
-import org.sistemavotacion.worker.SMIMESignedSenderWorker;
-import org.sistemavotacion.worker.VotingSystemWorker;
-import org.sistemavotacion.worker.VotingSystemWorkerType;
+import org.sistemavotacion.callable.PDFSignedSender;
+import org.sistemavotacion.callable.SMIMESignedSender;
 
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
+public class FirmaDialog extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
     private static Logger logger = LoggerFactory.getLogger(FirmaDialog.class);
-
-    public enum Worker implements VotingSystemWorkerType{INFO_GETTER}
-
-
+    
+    private static final int INFO_GETTER   = 0;
+    private static final int SIGNED_SENDER = 1;
+    
+    private ExecutorService executorService = Executors.newFixedThreadPool(3);
+    private static CompletionService<Respuesta> executorCompletionService;
+    
     private byte[] bytesDocumento;
     private volatile boolean mostrandoPantallaEnvio = false;
     private Frame parentFrame;
-    private SwingWorker tareaEnEjecucion;
+    private Future future;
     private AppletFirma appletFirma;
     private Operacion operacion;
     private SMIMEMessageWrapper smimeMessage;
@@ -60,6 +63,17 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
         //parentFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);       
         initComponents();
+        executorCompletionService = new ExecutorCompletionService<Respuesta>(executorService);
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    readResponses();
+                } catch (Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                }
+            }
+        });
         operacion = appletFirma.getOperacionEnCurso();
         if(operacion != null && operacion.getContenidoFirma() != null) {
             bytesDocumento = operacion.getContenidoFirma().toString().getBytes();
@@ -88,9 +102,9 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                         progressLabel.setText("<html>" + 
                 Contexto.INSTANCE.getString("obteniendoDocumento") +"</html>");
                 mostrarPantallaEnvio(true);
-                tareaEnEjecucion = new InfoGetterWorker(Worker.INFO_GETTER, 
-                        operacion.getUrlDocumento(), Contexto.PDF_CONTENT_TYPE, this);
-                tareaEnEjecucion.execute();
+                InfoGetter infoGetter = new InfoGetter(INFO_GETTER, 
+                        operacion.getUrlDocumento(), Contexto.PDF_CONTENT_TYPE);
+                future = executorCompletionService.submit(infoGetter);
                 break;             
             case SOLICITUD_COPIA_SEGURIDAD:
                 verDocumentoButton.setIcon(new ImageIcon(getClass().
@@ -111,6 +125,59 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                 break;
         }
         pack();
+    }
+    
+    private void readResponses() throws Exception {
+        logger.debug("readResponses");
+        AtomicBoolean done = new AtomicBoolean(false);
+        while(!done.get()) {
+            Future<Respuesta> f = executorCompletionService.take();
+            Respuesta respuesta = f.get();  
+            mostrarPantallaEnvio(false);
+            switch(respuesta.getId()) {
+                case INFO_GETTER:
+                    if (Respuesta.SC_OK == respuesta.getCodigoEstado()) { 
+                    try {
+                        bytesDocumento = respuesta.getMessageBytes();
+                        pack();
+                    } catch (Exception ex) {
+                        logger.error(ex.getMessage(), ex);
+                    }
+                    } else {
+                        appletFirma.responderCliente(respuesta.getCodigoEstado(), 
+                                Contexto.INSTANCE.getString(
+                                "errorDescragandoDocumento") + " - " + respuesta.getMensaje());
+                        dispose();
+                    }
+                    break;
+                case SIGNED_SENDER:
+                    if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                    String msg = null;
+                    if(operacion.isRespuestaConRecibo()) {
+                        try {
+                            logger.debug("showResult - precessing receipt");
+                            ByteArrayInputStream bais = new ByteArrayInputStream(
+                                    respuesta.getMensaje().getBytes());
+                            SMIMEMessageWrapper smimeMessageResp = 
+                                    new SMIMEMessageWrapper(null, bais, null);
+                            String operationStr = smimeMessageResp.getSignedContent();
+                            Operacion result = Operacion.parse(operationStr);
+                            msg = result.getMensaje();
+                        } catch (Exception ex) {
+                            logger.error(ex.getMessage(), ex);
+                        }
+                    } else msg = respuesta.getMensaje();
+                    appletFirma.responderCliente(respuesta.getCodigoEstado(), msg);
+                    dispose();
+                    } else {
+                        mostrarPantallaEnvio(false);
+                        MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
+                        errorDialog.setMessage(respuesta.getMensaje(), 
+                                Contexto.INSTANCE.getString("errorLbl"));
+                    }
+                    break;
+            }        
+        }
     }
     
     public void inicializarSinDescargarPDF (byte[] bytesPDF) {
@@ -274,7 +341,7 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
     private void cerrarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cerrarButtonActionPerformed
         logger.debug("cerrarButtonActionPerformed - mostrandoPantallaEnvio: " + mostrandoPantallaEnvio);
         if (mostrandoPantallaEnvio) {
-            if (tareaEnEjecucion != null) tareaEnEjecucion.cancel(true);
+            if (future != null) future.cancel(true);
             mostrarPantallaEnvio(false);
             return;
         }
@@ -292,7 +359,6 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
         mostrarPantallaEnvio(true);
         progressLabel.setText("<html>" + 
                 Contexto.INSTANCE.getString("progressLabel")+ "</html>");
-        final VotingSystemWorkerListener workerListener = this;
         Runnable runnable = new Runnable() {
             public void run() {  
                 try {
@@ -315,12 +381,13 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                                     operacion.getContenidoFirma().toString(),
                                     finalPassword.toCharArray(), operacion.getAsuntoMensajeFirmado(), null); 
                             destinationCert = Contexto.INSTANCE.
-                                getAccessControl().getCertificate(); 
-                            tareaEnEjecucion = new SMIMESignedSenderWorker(null, 
-                                    smimeMessage, operacion.getUrlEnvioDocumento(), null, 
-                                    destinationCert, workerListener);
-                            tareaEnEjecucion.execute();
-                            tareaEnEjecucion.get();
+                                getAccessControl().getCertificate();
+                            SMIMESignedSender senderWorker = new SMIMESignedSender(
+                                    SIGNED_SENDER, smimeMessage, operacion.getUrlEnvioDocumento(), 
+                                    null, destinationCert);
+                            future = executorCompletionService.submit(senderWorker);
+ 
+                            
                             break;
                         case SOLICITUD_COPIA_SEGURIDAD:
                         case FIRMA_MANIFIESTO_PDF:
@@ -330,43 +397,15 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
                             String location = null;
                             destinationCert = Contexto.INSTANCE.
                                 getAccessControl().getCertificate();
-                            tareaEnEjecucion = new PDFSignedSenderWorker(null,
-                                    operacion.getUrlEnvioDocumento(), reason, location, 
+                            PDFSignedSender pdfSenderWorker = new PDFSignedSender(
+                                    SIGNED_SENDER,  operacion.getUrlEnvioDocumento(), reason, location, 
                                     finalPassword.toCharArray(), readerManifiesto, 
-                                    null, null, destinationCert, workerListener);
-                            tareaEnEjecucion.execute();
-                            tareaEnEjecucion.get();
+                                    null, null, destinationCert);                            
+                            future = executorCompletionService.submit(pdfSenderWorker);
                             break;
                         default:
                             logger.debug("No se ha encontrado la operación " + operacion.getTipo().toString());
                             break;
-                    }
-                    if(tareaEnEjecucion != null) {
-                        Respuesta respuesta = (Respuesta) tareaEnEjecucion.get();
-                        if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
-                            String msg = null;
-                            if(operacion.isRespuestaConRecibo()) {
-                                try {
-                                    logger.debug("showResult - precessing receipt");
-                                    ByteArrayInputStream bais = new ByteArrayInputStream(
-                                            respuesta.getMensaje().getBytes());
-                                    SMIMEMessageWrapper smimeMessageResp = 
-                                            new SMIMEMessageWrapper(null, bais, null);
-                                    String operationStr = smimeMessageResp.getSignedContent();
-                                    Operacion result = Operacion.parse(operationStr);
-                                    msg = result.getMensaje();
-                                } catch (Exception ex) {
-                                    logger.error(ex.getMessage(), ex);
-                                }
-                            } else msg = respuesta.getMensaje();
-                            appletFirma.responderCliente(respuesta.getCodigoEstado(), msg);
-                            dispose();
-                        } else {
-                            mostrarPantallaEnvio(false);
-                            MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                            errorDialog.setMessage(respuesta.getMensaje(), 
-                                    Contexto.INSTANCE.getString("errorLbl"));
-                        }
                     }
                 } catch (Exception ex) {
                     logger.error(ex.getMessage(), ex);
@@ -418,32 +457,5 @@ public class FirmaDialog extends JDialog implements VotingSystemWorkerListener {
     private javax.swing.JButton verDocumentoButton;
     // End of variables declaration//GEN-END:variables
 
-    
-    @Override  public void processVotingSystemWorkerMsg(List<String> messages) {
-        logger.debug(" - process: " + messages.iterator().next());
-        progressLabel.setText(messages.iterator().next());
-    }
-    
-    @Override public void showResult(VotingSystemWorker worker) {
-        logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-                " - worker: " + worker.getType());
-        if(worker.getType() == null) return;
-        mostrarPantallaEnvio(false);
-        if (Respuesta.SC_OK == worker.getStatusCode()) { 
-            try {
-                InfoGetterWorker infoWorker = (InfoGetterWorker)worker;
-                bytesDocumento = ((Respuesta)infoWorker.get()).getBytesArchivo();
-                pack();
-            } catch (Exception ex) {
-                logger.error(ex.getMessage(), ex);
-            }
-        } else {
-            appletFirma.responderCliente(worker.getStatusCode(), 
-                    Contexto.INSTANCE.getString(
-                    "errorDescragandoDocumento") + " - " + worker.getMessage());
-            dispose();
-        }
-
-    }
-
+   
 }

@@ -259,7 +259,7 @@ class ControlAccesoFilters {
 								return
 							}
 						} else if(request?.contentType?.contains("application/x-pkcs7-signature")) {
-							log.debug "---- pkcs7DocumentsFilter - before - SIGNED"
+							log.debug "---- pkcs7DocumentsFilter - before - SIGNED"							
 							try {
 								smimeMessageReq = new SMIMEMessageWrapper(
 									new ByteArrayInputStream(requestBytes));
@@ -302,7 +302,7 @@ class ControlAccesoFilters {
 							log.debug "---- pkcs7DocumentsFilter - after - SIGNED AND ENCRYPTED RESPONSE"
 							//log.debug "---- pkcs7DocumentsFilter - after - receiver: ${encryptionReceiverCert.getSubjectDN()}"
 							Respuesta encryptResponse =  encryptionService.encryptSMIMEMessage(
-								smimeResponseBytes, encryptionReceiverCert, request.getLocale())
+								mensajeSMIME.smimeMessage.getBytes(), encryptionReceiverCert, request.getLocale())
 							if(Respuesta.SC_OK == encryptResponse.codigoEstado) {
 								response.contentLength = encryptResponse.messageBytes.length
 								response.outputStream << encryptResponse.messageBytes

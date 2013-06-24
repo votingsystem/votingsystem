@@ -95,7 +95,6 @@ class PdfService {
 	
 	public Respuesta checkSignature (byte[] signedPDF, Locale locale) {
 		log.debug "checkSiganture - signedPDF.length: ${signedPDF.length}"
-		
 		Respuesta respuesta = null;
 		PdfReader reader = new PdfReader(signedPDF);
 		Documento documento;

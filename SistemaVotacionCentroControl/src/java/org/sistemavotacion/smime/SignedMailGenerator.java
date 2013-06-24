@@ -128,9 +128,8 @@ public class SignedMailGenerator {
  		 return multiSignedMessage;*/
          smimeMessage.setSubject(mailSubject);
          smimeMessage.setContent(newMimeMultipart, newMimeMultipart.getContentType());
-         smimeMessage.saveChanges();
+         smimeMessage.updateChanges();
          return smimeMessage;
      }
-
     
 }

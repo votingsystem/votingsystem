@@ -23,6 +23,7 @@
     <string name="remain_lbl">Quedan %1$s horas</string>
     <string name="option_selected_msg">Seleccionada opción \'%1$s\'</string>
     
+    <string name="voting_system_lbl">Sistema de Votación</string>
     <string name="voting_drop_down_lbl">Votaciones</string>
     <string name="claims_drop_down_lbl">Reclamaciones</string>
     <string name="manifiests_drop_down_lbl">Manifiestos</string>
@@ -234,4 +235,6 @@
 	<string name="surname_lbl">Apellidos</string>
 
 	<string name="encrypted_message_error_msg">Mensaje con errores de cifrado</string>
+	<string name="voting_service_error_msg"><![CDATA[
+	    Problemas con el servicio de voto.<br/>Por favor inténtelo más tarde]]></string>
 </resources>

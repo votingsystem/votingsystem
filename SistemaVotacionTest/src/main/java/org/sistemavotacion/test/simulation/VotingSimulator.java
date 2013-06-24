@@ -14,6 +14,7 @@ import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.modelo.VotingSimulationData;
 import org.sistemavotacion.test.modelo.UserBaseSimulationData;
+import org.sistemavotacion.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,9 +27,9 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
     
     private static Logger logger = LoggerFactory.getLogger(VotingSimulator.class);
     
-    private static ExecutorService votacionExecutor;
-    private static ExecutorService votosExecutor;
-    private static CompletionService<Respuesta> votosCompletionService;
+    private static ExecutorService votacionExecutor = Executors.newFixedThreadPool(100);
+    private static CompletionService<Respuesta> votosCompletionService
+             = new ExecutorCompletionService<Respuesta>(votacionExecutor);
 
     private static List<String> accessRequesterrorList;
     private static List<String> voteerrorList;    
@@ -62,9 +63,12 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
         int totalNumberElectors = userBaseData.getNumberElectors();
         List<String> result = new ArrayList<String>(totalNumberElectors);
         
-        List<String> representativesList = new ArrayList<String>(userBaseData.getRepresentativeNifList());
+        List<String> representativesList = new ArrayList<String>(
+                userBaseData.getRepresentativeNifList());
         int numberVotesRep = userBaseData.getNumVotesRepresentatives();
-        if(numberVotesRep > 0 && !representativesList.isEmpty()) {
+        if(numberVotesRep > representativesList.size())
+            numberVotesRep = representativesList.size();
+        if(numberVotesRep > 0) {
             for(int i = 0; i < numberVotesRep; i++) {
                 int randomRep = new Random().nextInt(representativesList.size());
                 result.add(representativesList.remove(randomRep));
@@ -75,14 +79,17 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
         List<String> userWithRepresentativesList = new ArrayList<String>(
                 userBaseData.getUsersWithRepresentativeList());
         int numberVotesUserWithRepresentative = userBaseData.getNumVotesUsersWithRepresentative();
-        if(numberVotesUserWithRepresentative > 0 && !userWithRepresentativesList.isEmpty()) {
-            for(int i = 0; i < numberVotesUserWithRepresentative; i++) {
-                int randomUser = new Random().nextInt(userWithRepresentativesList.size());
-                result.add(userWithRepresentativesList.remove(randomUser));
-            }
-            logger.debug("Added '" + numberVotesUserWithRepresentative + "' " + 
-                    "users WITH representatives to elector list");
+        int numVoters = numberVotesUserWithRepresentative;
+        if(numberVotesUserWithRepresentative > userWithRepresentativesList.size()) {
+            logger.error(" --- numberVotesUserWithRepresentative lower than list");
+            numVoters = userWithRepresentativesList.size();
         }
+        for(int i = 0; i < numVoters; i++) {
+            int randomUser = new Random().nextInt(userWithRepresentativesList.size());
+            result.add(userWithRepresentativesList.remove(randomUser));
+        }
+        logger.debug("Added '" + numberVotesUserWithRepresentative + "' " + 
+                "users WITH representatives to elector list");
             
         List<String> userWithoutRepresentativesList = new ArrayList<String>(
                 userBaseData.getUsersWithoutRepresentativeList());
@@ -144,21 +151,21 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
                 nifFrom = respuesta.getEvento().getUsuario().getNif();
                 if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
                     ReciboVoto reciboVoto = respuesta.getReciboVoto();
-                    logger.debug("OK - Recibo de voto en ");
                     simulationData.getAndIncrementNumVotingRequestsOK();
                 } else {
                     String mensaje = "ERROR - Usuario: " + nifFrom + 
-                            " - Msg: " + respuesta.getMensaje();
-                    logger.error(mensaje);
+                            " - Msg: " + respuesta.getMensaje();                
                     if(respuesta.getData() != null) { 
+                        logger.error("ACCESS REQUEST ERROR - Usuario: " + 
+                            nifFrom + " - Msg: " + respuesta.getMensaje());
                         addAccessRequestErrorMsg(mensaje);
                         simulationData.getAndIncrementNumAccessRequestsERROR();
                     } else {
+                        logger.error("VOTING ERROR - Usuario: " + 
+                            nifFrom + " - Msg: " + respuesta.getMensaje());
                         addVotingErrorMsg(mensaje);
                         simulationData.getAndIncrementNumVotingRequestsERROR();
                     }
-                    //=======
-                    break;
                 }
             } catch (Exception ex) {
                 logger.error("ERROR from nif: " + nifFrom + ex.getMessage(), ex);
@@ -183,7 +190,7 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
     }
 
 
-    @Override public List<String> geterrorList() {
+    @Override public List<String> getErrorList() {
         List<String> errosList = new ArrayList<String>();
         if(voteerrorList != null) {
             errosList.add("------------------ VOTE ERROR LIST -------------\n");
@@ -203,9 +210,6 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
         
         logger.debug("lanzarVotacion - total number of electors: " +  
                 simulationData.getNumOfElectors());
-        votacionExecutor = Executors.newFixedThreadPool(5);
-        votosExecutor = Executors.newFixedThreadPool(100);
-        votosCompletionService = new ExecutorCompletionService<Respuesta>(votosExecutor);
         simulationData.setBegin(System.currentTimeMillis());
         votacionExecutor.execute(new Runnable() {
             @Override public void run() {
@@ -232,33 +236,35 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
         simulationData.setFinish(System.currentTimeMillis());
         if(timer != null) timer.stop();
         if(votacionExecutor != null) votacionExecutor.shutdownNow();
-        if(votosExecutor != null) votosExecutor.shutdownNow(); 
-        logger.debug("--------------- SIMULATION RESULT------------------");
-        logger.info("Duration: " + simulationData.getDurationStr());
-        logger.info("Number of requests projected: " + simulationData.getNumOfElectors());
-        logger.info("Solicitudes con error: " + simulationData.getNumAccessRequestsERROR());
-        logger.info("Votos enviados: " + simulationData.getNumVotingRequests());
-        logger.info("Votos validos: " +  simulationData.getNumVotingRequestsOK());
-        logger.info("Votos con error: " + simulationData.getNumVotingRequestsERROR());
-        if(accessRequesterrorList != null && 
-                !accessRequesterrorList.isEmpty()) {
-            logger.info("Access request errors: \n" + 
-                getFormattedErrorList(accessRequesterrorList));
-        } 
-         if(voteerrorList != null && !voteerrorList.isEmpty()) {
-            logger.info("Vote errors: \n" + 
-                    getFormattedErrorList(voteerrorList));
-         }            
-        String errorsMsg = getFormattedErrorList();
-        if(errorsMsg != null) {
-            logger.info(" ************* " + geterrorList().size() + " ERRORS: \n" + 
-                        errorsMsg);
+        simulationData.seterrorList(getErrorList());
+        if(simulationListener != null) {
+            simulationListener.setSimulationResult(simulationData);
+        } else {
+            logger.debug("--------------- SIMULATION RESULT------------------");
+            logger.info("Begin: " + DateUtils.getStringFromDate(
+                simulationData.getBeginDate())  + " - Duration: " + 
+                simulationData.getDurationStr());
+            logger.info("Number of requests projected: " + simulationData.getNumOfElectors());
+            logger.info("Solicitudes con error: " + simulationData.getNumAccessRequestsERROR());
+            logger.info("Votos enviados: " + simulationData.getNumVotingRequests());
+            logger.info("Votos validos: " +  simulationData.getNumVotingRequestsOK());
+            logger.info("Votos con error: " + simulationData.getNumVotingRequestsERROR());
+            if(accessRequesterrorList != null && 
+                    !accessRequesterrorList.isEmpty()) {
+                logger.info("Access request errors: \n" + 
+                    getFormattedErrorList(accessRequesterrorList));
+            } 
+             if(voteerrorList != null && !voteerrorList.isEmpty()) {
+                logger.info("Vote errors: \n" + 
+                        getFormattedErrorList(voteerrorList));
+             }            
+            String errorsMsg = getFormattedErrorList();
+            if(errorsMsg != null) {
+                logger.info(" ************* " + getErrorList().size() + " ERRORS: \n" + 
+                            errorsMsg);
+            }
+            logger.debug("------------------- FINISHED --------------------------");
         }
-        logger.debug("------------------- FINISHED --------------------------");
-        if(simulationListener != null) simulationListener.
-                setSimulationResult(simulationData);
-        
-        simulationData.setStatusCode(Respuesta.SC_OK);
         return simulationData;
     }
 

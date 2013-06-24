@@ -9,7 +9,7 @@ import java.util.concurrent.Callable;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.modelo.Respuesta;
-import org.sistemavotacion.worker.PDFSignedSenderWorker;
+import org.sistemavotacion.callable.PDFSignedSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,12 +49,11 @@ public class ManifestSigner implements Callable<Respuesta> {
 
         X509Certificate destinationCert = Contexto.INSTANCE.
                     getAccessControl().getCertificate();
-        PDFSignedSenderWorker worker = new PDFSignedSenderWorker(null,
+        PDFSignedSender worker = new PDFSignedSender(null,
                 urlToSendDocument, reason, location, null,
                 manifestToSign, privateKey, signerCertChain, 
-                destinationCert, null);
-        worker.execute();
-        respuesta = worker.get();
+                destinationCert);
+        respuesta = worker.call();
         return respuesta;
     }
     

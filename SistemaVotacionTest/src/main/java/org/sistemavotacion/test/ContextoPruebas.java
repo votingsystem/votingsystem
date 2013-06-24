@@ -16,11 +16,18 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import javax.security.auth.x500.X500PrivateCredential;
 import org.apache.log4j.PropertyConfigurator;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Evento;
+import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.sistemavotacion.test.modelo.UserBaseSimulationData;
@@ -38,7 +45,11 @@ public enum ContextoPruebas {
     INSTANCE;
     
     private static Logger logger = LoggerFactory.getLogger(ContextoPruebas.class);
-
+    
+    private static ExecutorService executor = Executors.newFixedThreadPool(10);
+    private static CompletionService<Respuesta> completionService
+             = new ExecutorCompletionService<Respuesta>(executor);
+    
     public static class DEFAULTS {
         public static final String APPDIR =  Contexto.DEFAULTS.APPDIR + 
                 File.separator + "ContextoPruebas"  + File.separator;  
@@ -117,7 +128,6 @@ public enum ContextoPruebas {
             Contexto.INSTANCE.initMultiThreadedHttp();
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 @Override public void run() {
-                    logger.debug("------- ContextoPruebas Shutdown Hook -------");
                     shutdown();
                 }
             });
@@ -126,11 +136,20 @@ public enum ContextoPruebas {
         }
 
     }
+
+    public void init() {}
     
-    public void init() { }
+    public void submit(Runnable runnable) {
+        executor.submit(runnable);
+    }
     
+    public Future<Respuesta> submit(Callable<Respuesta> callable) {
+        return completionService.submit(callable);
+    }
+            
     public void shutdown() {
-        logger.debug("shutdown");
+        logger.debug("----------- ContextoPruebas shutdown ----------------- ");
+        if(executor != null) executor.shutdown();
         Contexto.INSTANCE.shutdown();
     }
     
@@ -307,6 +326,11 @@ public enum ContextoPruebas {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         return serverURL + "encryptor";
     }
+    
+    public static String getURLMultiSignTest(String serverURL) {
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "encryptor/getMultiSignedMessage";
+    }
 
     public static String getVotingEventURL(String serverURL, Long eventoId) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
@@ -480,7 +504,7 @@ public enum ContextoPruebas {
         if (accessControl == null) return null;
         String serverURL = accessControl.getServerURL();
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
-        return serverURL + "solicitudCopia?sync=true";
+        return serverURL + "solicitudCopia";
     }
     
     /**

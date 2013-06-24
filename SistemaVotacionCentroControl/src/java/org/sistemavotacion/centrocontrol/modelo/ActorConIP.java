@@ -22,6 +22,14 @@ import javax.persistence.EnumType;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
+
+import net.sf.json.JSONNull;
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.security.cert.X509Certificate;
 /**
 * @author jgzornoza
@@ -36,7 +44,9 @@ import java.security.cert.X509Certificate;
 )
 @DiscriminatorValue("ActorConIP")
 public class ActorConIP implements Serializable {
-
+	
+    private static Logger logger = LoggerFactory.getLogger(ActorConIP.class);
+    
     public static final long serialVersionUID = 1L;
     
     public enum Estado {SUSPENDIDO, ACTIVO, INACTIVO}
@@ -190,4 +200,33 @@ public class ActorConIP implements Serializable {
 		this.tipoServidor = tipoServidor;
 	}
 
+    public static ActorConIP parse(String actorConIPStr) throws Exception {
+        logger.debug(" -- parse --");
+        if(actorConIPStr == null) return null;
+        JSONObject actorConIPJSON = (JSONObject) JSONSerializer.toJSON(actorConIPStr);
+        ActorConIP actorConIP = null;
+        if (actorConIPJSON.containsKey("tipoServidor")){
+            Tipo tipoServidor = Tipo.valueOf(actorConIPJSON.getString("tipoServidor"));
+            if(Tipo.CONTROL_ACCESO == tipoServidor) {
+            	actorConIP = new ControlAcceso();
+            } else actorConIP = new ActorConIP();
+            actorConIP.setTipoServidor(tipoServidor);
+        }
+        if (actorConIPJSON.containsKey("estado")){
+        	actorConIP.setEstado(ActorConIP.Estado.valueOf(
+        			actorConIPJSON.getString("estado")));
+        }
+        if(actorConIPJSON.containsKey("id") && !JSONNull.getInstance().
+                equals(actorConIPJSON.get("id"))) actorConIP.setId(
+                actorConIPJSON.getLong("id"));
+        if (actorConIPJSON.containsKey("serverURL"))
+        	actorConIP.setServerURL(actorConIPJSON.getString("serverURL"));
+        if (actorConIPJSON.containsKey("nombre"))
+        	actorConIP.setNombre(actorConIPJSON.getString("nombre"));       
+        if (actorConIPJSON.containsKey("cadenaCertificacionPEM")) {
+        	actorConIP.setCadenaCertificacion(actorConIPJSON.getString(
+                        "cadenaCertificacionPEM").getBytes());
+        }
+        return actorConIP;
+    }
 }

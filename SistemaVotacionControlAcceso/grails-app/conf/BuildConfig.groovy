@@ -19,9 +19,10 @@ grails.project.source.level = 1.6
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
+		//excludes "grails-plugin-logging", "log4j"
 		excludes 'bcprov-jdk15', 'bcpg-jdk15', 'bcprov-jdk14', 'bcmail-jdk14'
     }
-    log "error" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
+    log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     checksums true // Whether to verify checksums on resolve
     legacyResolve false // whether to do a secondary resolve on plugin installation, not advised and here for backwards compatibility
 
@@ -46,22 +47,24 @@ grails.project.dependency.resolution = {
 
     dependencies {
 		// specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
-		compile("org.xhtmlrenderer:core-renderer:R8")
-		compile("com.lowagie:itext:2.1.0")
 		test("org.apache.pdfbox:pdfbox:1.0.0") {
 			exclude 'jempbox'
 			exported = false
 		}
 		compile('org.codehaus.groovy.modules.http-builder:http-builder:0.5.1',
-			'org.apache.httpcomponents:httpmime:4.1',
+			'org.apache.httpcomponents:httpmime:4.2.4',
+			'org.apache.httpcomponents:httpclient:4.2.4',
 			'org.bouncycastle:bcprov-jdk16:1.46',
 			'org.bouncycastle:bcmail-jdk16:1.46',
 			'org.bouncycastle:bcpg-jdk16:1.46',
-			'javax.mail:mail:1.4.1',
-			'com.sun.mail:dsn:1.4.3',
-			'javax.activation:activation:1.1.1',
+			//'gnu.mail:gnumail:1.1.2',
+			//'gnu.mail:inetlib:1.1.1',
+			//'org.apache.geronimo.specs:geronimo-javamail_1.4_spec:1.7.1',
+			'javax.mail:mail:1.4.7',
 			'org.hibernate:hibernate-search:3.4.2.Final',
 			'com.itextpdf:itextpdf:5.1.3',
+			'com.lowagie:itext:2.1.0',
+			'org.xhtmlrenderer:core-renderer:R8',
 			'org.bouncycastle:bctsp-jdk16:1.46',
 			'joda-time:joda-time:2.1',
 			'org.rometools:rome-modules:1.0',
@@ -72,18 +75,16 @@ grails.project.dependency.resolution = {
 			'org.springframework:spring-test:3.1.4.RELEASE',
 			'org.apache.ant:ant-launcher:1.8.3'
 			) {
-			excludes 'xalan'
-			excludes 'xml-apis'
-			excludes 'groovy'
-			excludes 'commons-io'
+				excludes "slf4j-api", "log4j", "commons-logging", "xalan",
+					"xml-apis", "groovy","commons-io"
 			}
-			runtime 'postgresql:postgresql:9.1-901-1.jdbc4'
+			
+			runtime 'postgresql:postgresql:9.2-1002.jdbc4'//9.1-901-1.jdbc4
+			
     }
 
     plugins {
-        runtime ":hibernate:$grailsVersion"
-        runtime ":jquery:1.8.3"
-        runtime ":resources:1.1.6"
+        runtime (":hibernate:$grailsVersion", ":jquery:1.8.3", ":resources:1.1.6"){ }
 
         // Uncomment these (or add new ones) to enable additional resources capabilities
         //runtime ":zipped-resources:1.0"
@@ -94,7 +95,6 @@ grails.project.dependency.resolution = {
 
         runtime ":database-migration:1.3.2"
 
-        compile ':cache:1.0.1'
-		compile ":rendering:0.4.3"
+        compile ":cache:1.0.1", ":rendering:0.4.3"
     }
 }

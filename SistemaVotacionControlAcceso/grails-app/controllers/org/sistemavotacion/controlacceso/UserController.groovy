@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest
 import org.bouncycastle.util.encoders.Base64;
 import org.sistemavotacion.seguridad.*
 import grails.util.*
+import org.sistemavotacion.utils.*
 
 class UserController {
 	
@@ -81,7 +82,8 @@ class UserController {
 	 * 
 	 */
 	def save() {
-		if(!Environment.DEVELOPMENT.equals(Environment.current)) {
+		if(!VotingSystemApplicationContex.Environment.DEVELOPMENT.equals(
+			VotingSystemApplicationContex.instance.environment)) {
 			def msg = message(code: "serviceDevelopmentModeMsg")
 			log.error msg
 			response.status = Respuesta.SC_ERROR_PETICION
@@ -123,7 +125,8 @@ class UserController {
 	 *
 	 */
 	def prepareUserBaseData() {
-		if(!Environment.DEVELOPMENT.equals(Environment.current)) {
+		if(!VotingSystemApplicationContex.Environment.DEVELOPMENT.equals(
+			VotingSystemApplicationContex.instance.environment)) {
 			def msg = message(code: "serviceDevelopmentModeMsg")
 			log.error msg
 			response.status = Respuesta.SC_ERROR_PETICION
@@ -144,8 +147,9 @@ class UserController {
 				user.save()
 			}
 			
+			def repDocsFromUser
 			RepresentationDocument.withTransaction {
-				def repDocsFromUser = RepresentationDocument.findAllWhere(user:user)
+				repDocsFromUser = RepresentationDocument.findAllWhere(user:user)
 				repDocsFromUser.each { repDocFromUser ->
 					repDocFromUser.state = RepresentationDocument.State.CANCELLED
 					repDocFromUser.dateCanceled = DateUtils.getTodayDate()
@@ -154,7 +158,8 @@ class UserController {
 			}
 			
 			String userId = String.format('%05d', user.id)
-			log.debug("prepareUserBaseData - user: ${userId} of ${users.size()}");
+			log.debug("prepareUserBaseData - user: ${userId} of ${users.size()}" + 
+				" - ${repDocsFromUser.size()} representations");
 		}
 		response.status = Respuesta.SC_OK
 		render "OK"

@@ -43,6 +43,8 @@ public enum Tipo {
     EVENTO_VOTACION_ERROR(""),
     EVENTO_VOTACION_FINALIZADO(""),
 
+    TEST(""),
+    
     //VOTO
     VOTING(""),
     VOTO(""),

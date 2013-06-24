@@ -21,8 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author jgzornoza
+* @author jgzornoza
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
 public class EncryptionTester implements Callable<Respuesta> {
 
@@ -45,16 +45,14 @@ public class EncryptionTester implements Callable<Respuesta> {
         serverCert = Contexto.INSTANCE.getAccessControl().getCertificate();
     }
     @Override public Respuesta call() throws Exception {
-                File encryptedFile = File.createTempFile("csrEncryptedFile", ".p7m");
-        encryptedFile.deleteOnExit();
         String testJSONstr = getTestJSON(requestNIF, publicKey);
-        Encryptor.encryptMessage(testJSONstr.getBytes(), encryptedFile, serverCert);
-        
-        respuesta = Contexto.INSTANCE.getHttpHelper().sendFile(encryptedFile, 
+        byte[] encryptredRequestBytes = Encryptor.encryptMessage(
+                testJSONstr.getBytes(), serverCert);
+        respuesta = Contexto.INSTANCE.getHttpHelper().sendByteArray(
+                encryptredRequestBytes, 
                 Contexto.ENCRYPTED_CONTENT_TYPE, serverURL);
-
         if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
-            byte[] encryptedData = respuesta.getBytesArchivo();
+            byte[] encryptedData = respuesta.getMessageBytes();
             byte[] decryptedData = Encryptor.decryptFile(encryptedData, 
                     publicKey, privateKey);
             //logger.debug(" >>>>>> decryptedData: " + new String(decryptedData));

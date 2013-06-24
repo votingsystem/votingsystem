@@ -23,17 +23,15 @@ import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
+import org.sistemavotacion.test.modelo.SimulationData;
 import org.sistemavotacion.test.modelo.VotingSimulationData;
 import org.sistemavotacion.test.modelo.UserBaseSimulationData;
-import org.sistemavotacion.test.simulation.callable.AccessControlInitializer;
-import org.sistemavotacion.test.simulation.callable.BackupValidator;
-import org.sistemavotacion.test.util.SimulationUtils;
+import org.sistemavotacion.test.simulation.callable.ServerInitializer;
+import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
-import org.sistemavotacion.util.StringUtils;
-import org.sistemavotacion.worker.DocumentSenderWorker;
-import org.sistemavotacion.worker.InfoGetterWorker;
-import org.sistemavotacion.worker.PDFSignedSenderWorker;
-import org.sistemavotacion.worker.SMIMESignedSenderWorker;
+import org.sistemavotacion.callable.InfoSender;
+import org.sistemavotacion.callable.PDFSignedSender;
+import org.sistemavotacion.callable.SMIMESignedSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,9 +44,14 @@ import org.slf4j.LoggerFactory;
 * 4)- Initialice user base data
 * 5)- When finishes user base data initilization, 'setSimulationResult' inits simulation 
 */
-public class VotingProcessSimulator extends  Simulator<VotingSimulationData>  {
+public class VotingProcessSimulator extends  Simulator<VotingSimulationData> 
+    implements SimulatorListener<SimulationData>{
     
     private static Logger logger = LoggerFactory.getLogger(VotingProcessSimulator.class);
+
+    @Override public void updateSimulationData(SimulationData data) { }
+
+    @Override public void setSimulationResult(SimulationData data) { }
     
     
     public enum Simulation {VOTING, ACCESS_REQUEST}
@@ -68,8 +71,9 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>  {
 
     @Override public VotingSimulationData call() throws Exception {
         logger.debug("call");
-        AccessControlInitializer accessControlInitializer = 
-                new AccessControlInitializer(simulationData.getAccessControlURL());
+        ServerInitializer accessControlInitializer = 
+                new ServerInitializer(simulationData.getAccessControlURL(),
+                ActorConIP.Tipo.CONTROL_ACCESO);
         Respuesta respuesta = accessControlInitializer.call();
         if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
             initControlCenter();
@@ -77,9 +81,11 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>  {
                 
         countDownLatch.await();
         if(simulatorExecutor != null) simulatorExecutor.shutdown();
-        logger.debug("--------- SIMULATION RESULT EVENT: " + event.getEventoId() 
+        logger.debug("--------- SIMULATION RESULT - EVENT: " + event.getEventoId() 
                 + " -----------------");
-        logger.info("Duration: " + simulationData.getDurationStr());
+        logger.info("Begin: " + DateUtils.getStringFromDate(
+                simulationData.getBeginDate())  + " - Duration: " + 
+                simulationData.getDurationStr());
         logger.info("Number of requests projected: " + simulationData.getNumOfElectors());
         logger.info("Number access request ERRORs: " + simulationData.getNumAccessRequestsERROR());
         logger.info("Number of vote requests: " + simulationData.getNumVotingRequests());
@@ -87,10 +93,9 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>  {
         logger.info("Number of votes ERROR: " + simulationData.getNumVotingRequestsERROR());    
         String errorsMsg = getFormattedErrorList();
         if(errorsMsg != null) {
-            logger.info(" ************* " + geterrorList().size() + " ERRORS: \n" + 
+            logger.info(" ************* " + getErrorList().size() + " ERRORS: \n" + 
                         errorsMsg);
-        }
-        logger.debug("------------------- FINISHED --------------------------");        
+        }  
         if(simulationListener != null)
             simulationListener.setSimulationResult(simulationData);
         return simulationData;
@@ -111,8 +116,6 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>  {
                     ContextoPruebas.VOTE_SIGN_MECHANISM);
     }
     
-
-    
     private void initControlCenter() throws Exception {
         logger.debug("initControlCenter");
         Set<ActorConIP> controlCenters = ContextoPruebas.INSTANCE.
@@ -121,24 +124,13 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>  {
             associateControlCenter();
             return;
         } else {
-            String urlServidor = StringUtils.prepararURL(
-                controlCenters.iterator().next().getServerURL());
-            String urlInfoServidor = ContextoPruebas.
-                getURLInfoServidor(urlServidor);
-            InfoGetterWorker worker = new InfoGetterWorker(null, 
-                    urlInfoServidor, null, null);
-            worker.execute();
-            worker.get();
-            if(Respuesta.SC_OK == worker.getStatusCode()) {
-                ActorConIP controlCenter = ActorConIP.parse(worker.getMessage());
-                String msg = SimulationUtils.checkActor(
-                        controlCenter, ActorConIP.Tipo.CENTRO_CONTROL);
-                if(msg == null) {
-                    ContextoPruebas.INSTANCE.setControlCenter(controlCenter);
-                    //Loaded Access Control and Control Center. Now we can publish  
-                    publishEvent();
-                }
-            } else logger.error(worker.getErrorMessage());
+            ServerInitializer controlCenterInitializer = 
+                new ServerInitializer(simulationData.getControlCenterURL(),
+                ActorConIP.Tipo.CENTRO_CONTROL);
+            Respuesta respuesta = controlCenterInitializer.call();
+            if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                publishEvent();
+            } else logger.error(respuesta.getMensaje());
         }
     }
     
@@ -150,11 +142,10 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>  {
             ContextoPruebas.INSTANCE.getRootCACert());
         String rootCAServiceURL = ContextoPruebas.INSTANCE.
                 getControlCenterRootCAServiceURL();
-        DocumentSenderWorker caSenderWorker = new DocumentSenderWorker(
-                null, rootCACertPEMBytes, null, rootCAServiceURL, null);
-        caSenderWorker.execute();
-        caSenderWorker.get();//wait to get worker response
-        if(Respuesta.SC_OK == caSenderWorker.getStatusCode()) {
+        InfoSender caSenderWorker = new InfoSender(
+                null, rootCACertPEMBytes, null, rootCAServiceURL);
+        Respuesta respuesta = caSenderWorker.call();
+        if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
             String cancelDataStr = event.getCancelEventJSON(
                     Contexto.INSTANCE.getAccessControl().getServerURL(),
                     nextEventState).toString();
@@ -165,18 +156,17 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>  {
                     ContextoPruebas.INSTANCE.getUserTest().getEmail(),
                     ContextoPruebas.INSTANCE.getAccessControl().
                     getNombreNormalizado(), cancelDataStr, msgSubject, null);
-            SMIMESignedSenderWorker eventStateChangerWorker = 
-                    new SMIMESignedSenderWorker(null,
+            SMIMESignedSender eventStateChangerWorker = 
+                    new SMIMESignedSender(null,
                     cancelSmimeDocument, ContextoPruebas.INSTANCE.
-                    getCancelEventURL(), null, null, null);
-            eventStateChangerWorker.execute();
-            eventStateChangerWorker.get();
+                    getCancelEventURL(), null, null);
+            respuesta = eventStateChangerWorker.call();
             logger.debug("eventStateChangerWorker - status: " + 
-                    eventStateChangerWorker.getStatusCode());
-            if(Respuesta.SC_OK == eventStateChangerWorker.getStatusCode()) {
+                    respuesta.getCodigoEstado());
+            if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
                 if(simulationData.getBackupRequestEmail() != null) requestBackup();
-            } else logger.error(eventStateChangerWorker.getErrorMessage());
-        } else logger.error(caSenderWorker.getErrorMessage());
+            } else logger.error(respuesta.getMensaje());
+        } else logger.error(respuesta.getMensaje());
     }
 
     private void requestBackup() throws Exception {
@@ -187,19 +177,21 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>  {
         PrivateKey signerPrivateKey = ContextoPruebas.INSTANCE.getUserTestPrivateKey();
         Certificate[] signerCertChain = ContextoPruebas.INSTANCE.getUserTestCertificateChain();
         PdfReader requestBackupPDF = new PdfReader(requestBackupPDFBytes);
-        PDFSignedSenderWorker worker = new PDFSignedSenderWorker(null, 
+        PDFSignedSender worker = new PDFSignedSender(null, 
                 ContextoPruebas.INSTANCE.getUrlBackupEvents(), 
                 null, null, null, requestBackupPDF, signerPrivateKey, 
-                signerCertChain, null, null);
-        worker.execute();
-        Respuesta respuesta = worker.get();
+                signerCertChain, null);
+        Respuesta respuesta = worker.call();
         if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
-            FutureTask<Respuesta> future = new FutureTask<Respuesta>(
-                new BackupValidator(respuesta.getBytesArchivo()));
-            simulatorExecutor.execute(future);
-            respuesta = future.get();
-            logger.debug("BackupRequestWorker - status: " + respuesta.getCodigoEstado());
-        } else logger.error(worker.getErrorMessage());
+            /*byte[] backupZipBytes = respuesta.getMessageBytes();
+            if(backupZipBytes != null) {
+                FutureTask<Respuesta> future = new FutureTask<Respuesta>(
+                    new BackupValidator(backupZipBytes));
+                simulatorExecutor.execute(future);
+                respuesta = future.get();
+            } else logger.error("ZIP file null");
+            logger.debug("BackupRequestWorker - status: " + respuesta.getCodigoEstado());*/
+        } else logger.error(respuesta.getMensaje());
     }
     
     private void inicializarBaseUsuarios() throws Exception{
@@ -210,28 +202,30 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>  {
         simulatorExecutor.execute(futureUserBase);
         UserBaseSimulationData ubd = futureUserBase.get();
         logger.debug("UserBaseSimulationData - status: " + ubd.getStatusCode());
-        if(Respuesta.SC_OK == ubd.getStatusCode()) {
-            switch(simulation) {
-                case ACCESS_REQUEST:
-                    AccessRequestSimulator accessRequest = 
-                            new AccessRequestSimulator(simulationData, null);
-                    accessRequest.call();
-                    break;
-                case VOTING:
-                    FutureTask<VotingSimulationData> futureVotingData = 
-                            new FutureTask<VotingSimulationData>(
-                            new VotingSimulator(simulationData));
-                    simulatorExecutor.execute(futureVotingData);
-                    VotingSimulationData simulData = futureVotingData.get();
-                    logger.debug("VotingSimulationData - status: " + simulData.getStatusCode());
-                    if(Respuesta.SC_OK == simulData.getStatusCode()) {
-                        if(nextEventState != null) {               
-                            setNextEventState();
-                        }
-                    }
-                    break;
-            }
-        } else logger.error(ubd.getMessage());
+        if(Respuesta.SC_OK != ubd.getStatusCode()) { 
+            logger.error(ubd.getMessage());
+            errorList.addAll(ubd.getErrorList());
+            
+        }
+        switch(simulation) {
+            case ACCESS_REQUEST:
+                AccessRequestSimulator accessRequest = 
+                        new AccessRequestSimulator(simulationData, null);
+                accessRequest.call();
+                break;
+            case VOTING:
+                FutureTask<VotingSimulationData> futureVotingData = 
+                        new FutureTask<VotingSimulationData>(
+                        new VotingSimulator(simulationData, this));
+                simulatorExecutor.execute(futureVotingData);
+                VotingSimulationData simulData = futureVotingData.get();
+                logger.debug("VotingSimulationData - status: " + simulData.getStatusCode());
+                
+                if(nextEventState != null) {               
+                    setNextEventState();
+                }
+                break;
+        }
         
         countDownLatch.countDown();
     }
@@ -254,13 +248,12 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>  {
                 ContextoPruebas.INSTANCE.getAccessControl().getNombreNormalizado(), 
                 eventParaPublicar, subject, null);
 
-        SMIMESignedSenderWorker worker = new SMIMESignedSenderWorker(null, 
+        SMIMESignedSender worker = new SMIMESignedSender(null, 
                 smimeDocument, ContextoPruebas.INSTANCE. getURLGuardarEventoParaVotar(), 
-                null, null, null);
-        worker.execute();
-        worker.get();
-        if(Respuesta.SC_OK == worker.getStatusCode()) {
-            byte[] responseBytes = worker.getMessage().getBytes();
+                null, null);
+        Respuesta respuesta = worker.call();
+        if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+            byte[] responseBytes = respuesta.getMessageBytes();
             FileUtils.copyStreamToFile(new ByteArrayInputStream(responseBytes), 
                 new File(ContextoPruebas.DEFAULTS.APPDIR + "VotingPublishReceipt"));
             SMIMEMessageWrapper mimeMessage = new SMIMEMessageWrapper(null, 
@@ -273,7 +266,7 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>  {
             logger.debug("Respuesta - Evento ID: " + event.getEventoId() + 
                     " - url: " + event.getUrl());
             inicializarBaseUsuarios();
-        } else logger.error(worker.getErrorMessage());
+        } else logger.error(respuesta.getMensaje());
     }
     
     private void associateControlCenter() throws Exception {
@@ -286,20 +279,20 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>  {
                 ContextoPruebas.INSTANCE.getAccessControl().getNombreNormalizado(), 
                 documentoAsociacion, msgSubject, null);
 
-        SMIMESignedSenderWorker worker =new SMIMESignedSenderWorker(null, 
+        SMIMESignedSender worker =new SMIMESignedSender(null, 
                 smimeDocument, ContextoPruebas.INSTANCE.getURLAsociarActorConIP(), 
-                null, null, null);
-        worker.execute();
-        worker.get();
-        if(Respuesta.SC_OK == worker.getStatusCode()) {
-            ActorConIP controlCenter = ActorConIP.parse(worker.getMessage());
-            ContextoPruebas.INSTANCE.setControlCenter(controlCenter);
-            String msg = SimulationUtils.checkActor(
-                    controlCenter, ActorConIP.Tipo.CENTRO_CONTROL);
-            if(msg == null) {
+                null, null);
+        Respuesta respuesta = worker.call();
+
+        if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+            ServerInitializer controlCenterInitializer = 
+                new ServerInitializer(simulationData.getControlCenterURL(),
+                ActorConIP.Tipo.CENTRO_CONTROL);
+            respuesta = controlCenterInitializer.call();
+            if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
                 publishEvent();
-            } 
-        } else logger.error(worker.getErrorMessage());
+            } else logger.error(respuesta.getMensaje());
+        } else logger.error(respuesta.getMensaje());
     }
 
     public static void main(String[] args) throws Exception {
@@ -307,7 +300,7 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>  {
         if(args != null && args.length > 0) {
             logger.debug("args[0]");
             simulationData = VotingSimulationData.parse(args[0]);
-            if(args[1] != null) simulation = Simulation.valueOf(args[1]);
+            if(args.length > 1 && args[1] != null) simulation = Simulation.valueOf(args[1]);
         } else {
             simulation = Simulation.VOTING;
             File jsonFile = File.createTempFile("VotingProcessSimulation", ".json");

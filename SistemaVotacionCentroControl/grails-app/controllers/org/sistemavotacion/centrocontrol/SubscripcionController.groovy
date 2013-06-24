@@ -1,9 +1,6 @@
 package org.sistemavotacion.centrocontrol
 
 import org.sistemavotacion.utils.StringUtils;
-import groovyx.net.http.*
-import static groovyx.net.http.ContentType.*
-import static groovyx.net.http.Method.*
 import org.sistemavotacion.centrocontrol.modelo.*;
 import grails.converters.JSON
 import org.sistemavotacion.smime.*
@@ -47,7 +44,8 @@ class SubscripcionController {
 		}
 		SMIMEMessageWrapper smimeMessageReq = mensajeSMIME.getSmimeMessage()
         def mensajeJSON = JSON.parse(smimeMessageReq.getSignedContent())
-        if (mensajeJSON.serverURL) {
+		int status
+		if (mensajeJSON.serverURL) {
             String serverURL = StringUtils.checkURL(mensajeJSON.serverURL)
 			ControlAcceso controlAcceso = ControlAcceso.findWhere(serverURL:serverURL)
 			String mensaje
@@ -56,15 +54,22 @@ class SubscripcionController {
 				mensaje = message(code: 'controlCenterAlreadyAssociatedMsg', args:[controlAcceso.serverURL]) 
 			} else {
 				def urlInfoControlAcceso = "${serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLInfoServidor}"
-				Respuesta respuesta = httpService.obtenerInfoActorConIP(urlInfoControlAcceso, new ControlAcceso())
-				response.status = respuesta.codigoEstado
-				if (Respuesta.SC_OK == respuesta.codigoEstado) {					
-					mensaje = message(code: 'controlCenterAssociatedMsg', args:[urlInfoControlAcceso]) 
-					ControlAcceso actorConIP = respuesta.actorConIP
-					actorConIP.save()
+				Respuesta respuesta = httpService.getInfo(urlInfoControlAcceso, null)
+				status = respuesta.codigoEstado
+				if (Respuesta.SC_OK == respuesta.codigoEstado) {
+					mensaje = message(code: 'controlCenterAssociatedMsg', args:[urlInfoControlAcceso])
+					try {
+						ControlAcceso actorConIP = ActorConIP.parse(respuesta.mensaje)
+						actorConIP.save()
+					} catch(Exception ex) {
+						log.error(ex.getMessage(), ex)
+						status = Respuesta.SC_ERROR
+						mensaje = "ERROR"
+					}
 				} else mensaje = respuesta.mensaje
 			}
-            log.debug mensaje
+			log.debug mensaje
+			response.status = status
             render mensaje
             return false
         } 

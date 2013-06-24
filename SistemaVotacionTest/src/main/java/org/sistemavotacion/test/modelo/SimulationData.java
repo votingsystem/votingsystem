@@ -1,5 +1,7 @@
 package org.sistemavotacion.test.modelo;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import net.sf.json.JSONNull;
@@ -42,7 +44,7 @@ public class SimulationData {
     private String durationStr = null;
     private String backupRequestEmail = null;
     
-    private List<String> errorList;
+    private List<String> errorList = new ArrayList<String>();
 
     public SimulationData(int status, String message) {
         this.statusCode = status;
@@ -178,6 +180,11 @@ public class SimulationData {
         return begin;
     }
 
+    public Date getBeginDate() {
+        if(begin == null) return null;
+        else return new Date(begin);
+    }
+    
     /**
      * @param begin the begin to set
      */
@@ -207,6 +214,7 @@ public class SimulationData {
         return durationStr;
     }
    
+    
 
     /**
      * @return the accessControlURL
@@ -337,7 +345,7 @@ public class SimulationData {
     /**
      * @return the errorList
      */
-    public List<String> geterrorList() {
+    public List<String> getErrorList() {
         return errorList;
     }
 

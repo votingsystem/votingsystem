@@ -10,5 +10,50 @@
     
     <!-- Para poder hacer funcionar la instalacion en cloudfoundry.com 
      <bean class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close" id="dataSource"/>-->
+
+
+	<bean id="hibernateStatisticsBean" class="org.hibernate.jmx.StatisticsService">
+	    <property name="statisticsEnabled" value="true"/>
+		<property name="sessionFactory">
+    		<ref bean="sessionFactory"/>
+	    	<!-- Uncomment the following when using Hibernate directly -->
+	        <!-- ref local="sessionFactory"/ -->
+	
+	        <!-- Uncomment the following when using Hibernate via JPA
+	             (Assuming the managed EMF is named 'entityManagerFactory'.
+	              Namespace is: xmlns:util="http://www.springframework.org/schema/util")
+	        -->
+	        <!-- util:property-path path="entityManagerFactory.sessionFactory" /-->
+    	</property>
+	</bean>
+
+	
+	<bean id="jmxExporter" class="org.springframework.jmx.export.MBeanExporter">
+	    <property name="beans">
+	        <map>
+	            <entry key="Hibernate:application=Statistics" value-ref="hibernateStatisticsBean"/>
+	        </map>
+	    </property>
+	</bean>
+
+
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="smtp.gmail.com" />
+		<property name="port" value="465" />
+		<property name="username" value="gruposp2p@gmail.com" />
+		<property name="password" value="s#lcill#" />
+ 
+		<property name="javaMailProperties">
+		   		<props>
+	       	      <prop key="mail.smtp.auth">true</prop>
+	       	      <prop key="mail.smtp.starttls.enable">true</prop>
+	       	      <prop key="mail.smtp.socketFactory.class">javax.net.ssl.SSLSocketFactory</prop>
+	       	      <prop key="mail.smtp.socketFactory.port">465</prop>
+	       	      <prop key="mail.smtp.socketFactory.fallback">false</prop>
+	       	   </props>
+		</property>
+		
+	</bean>
+	     
     
 </beans>

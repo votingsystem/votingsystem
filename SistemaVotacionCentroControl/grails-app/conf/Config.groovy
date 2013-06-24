@@ -70,6 +70,9 @@ grails.exceptionresolver.params.exclude = ['password']
 // configure auto-caching of queries by default (if false you can cache individual queries with 'cache: true')
 grails.hibernate.cache.queries = false
 
+//To test production environments, on of DEVELOPMENT, PRODUCTION, TEST
+VotingSystemEnvironment="DEVELOPMENT"
+
 environments {
 	
     development {
@@ -79,9 +82,8 @@ environments {
     }
     production {
         grails.logging.jul.usebridge = false
-		String localIP = getDevelopmentServerIP();
-		//grails.serverURL = "http://${localIP}:8080/${appName}"
-		grails.serverURL = "http://sistemavotacioncentrocontrol.cloudfoundry.com"
+		//grails.serverURL = "http://sistemavotacioncentrocontrol.cloudfoundry.com"
+		grails.serverURL = "http://192.168.1.5:8080/SistemaVotacionCentroControl"
     }
 	test {
 		//grails.serverURL = "http://sistemavotacioncentrocontrol.cloudfoundry.com"
@@ -142,10 +144,6 @@ log4j = {
 		   
 
 }
-
-grails.plugin.cloudfoundry.username = 'jgzornoza@gmail.com'
-grails.plugin.cloudfoundry.password = 'cloudfoundrysotopo'
-grails.plugin.cloudfoundry.appname = 'SistemaVotacionCentroControl'
 
 grails.war.copyToWebApp = { args ->
 	fileset(dir:"WEB-INF/cms") {

@@ -108,12 +108,8 @@ class EncryptionService {
 				log.debug(" -- recipientId.getSerialNumber(): " + recipientId.getSerialNumber());
 			}
 			MimeBodyPart res = SMIMEUtil.toMimeBodyPart(recipientInfo.getContent(getRecipient()));
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			res.writeTo(baos)
-			MimeMessage mimeMessage = new MimeMessage(null,
-				new ByteArrayInputStream(baos.toByteArray()));
 			return new Respuesta(codigoEstado: Respuesta.SC_OK,
-				messageBytes:mimeMessage.getContent())
+				messageBytes:res.getContent())
 		} catch(CMSException ex) {
 			log.error (ex.getMessage(), ex)
 			return new Respuesta(mensaje:messageSource.getMessage(
@@ -155,16 +151,18 @@ class EncryptionService {
 				mensaje:ex.getMessage())
 		}
 	}
-	
+		
 	/**
 	 * Method to encrypt SMIME signed messages
 	 */
-	Respuesta encryptSMIMEMessage(byte[] bytesToEncrypt, 
+	Respuesta encryptSMIMEMessage(byte[] bytesToEncrypt,
 		X509Certificate receiverCert, Locale locale) throws Exception {
 		log.debug(" - encryptSMIMEMessage(...) ");
+		//If the message isn't recreated there can be problems with
+		//multipart boundaries. TODO
+		SMIMEMessageWrapper msgToEncrypt = new SMIMEMessageWrapper(
+				new ByteArrayInputStream(bytesToEncrypt));
 		try {
-			SMIMEMessageWrapper msgToEncrypt = new SMIMEMessageWrapper(
-					new ByteArrayInputStream(bytesToEncrypt));
 			SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
 			encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
 				receiverCert).setProvider("BC"));
@@ -173,12 +171,6 @@ class EncryptionService {
 				new JceCMSContentEncryptorBuilder(
 				CMSAlgorithm.DES_EDE3_CBC).setProvider("BC").build());
 			// Create a new MimeMessage that contains the encrypted and signed content
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			encryptedPart.writeTo(out);
-	
-			MimeMessage encryptedMessage = new MimeMessage(null,
-				new ByteArrayInputStream(out.toByteArray()));
-	
 			/* Set all original MIME headers in the encrypted message */
 			Enumeration headers = msgToEncrypt.getAllHeaderLines();
 			while (headers.hasMoreElements()) {
@@ -189,26 +181,25 @@ class EncryptionService {
 				* original message
 				*/
 				if (!Strings.toLowerCase(headerLine).startsWith("content-")) {
-					encryptedMessage.addHeaderLine(headerLine);
+					encryptedPart.addHeaderLine(headerLine);
 				}
 			}
-		
 			/*SignerInformationStore  signers =
 				msgToEncrypt.getSmimeSigned().getSignerInfos();
 			Iterator<SignerInformation> it = signers.getSigners().iterator();
-			byte[] digestBytes = it.next().getContentDigest();//method can only be called after verify.
-			String digestStr = new String(Base64.encode(digestBytes));
-			encryptedMessage.addHeaderLine("SignedMessageDigest: " + digestStr);*/
+			byte[] digestBytes = it.next().getContentDigest();//method can only be called after verify.*/
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			encryptedMessage.writeTo(baos);
+			encryptedPart.writeTo(baos);
 			return new Respuesta(messageBytes:baos.toByteArray(),
 				codigoEstado:Respuesta.SC_OK);
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
 			return new Respuesta(mensaje:ex.getMessage(),
 				codigoEstado:Respuesta.SC_ERROR_PETICION)
-		}
-	}	
+		}	
+		return encryptSMIMEMessage(msgToEncrypt, receiverCert, locale)
+	}
+	
 	
 	/**
 	 * Method to decrypt SMIME signed messages
@@ -221,10 +212,9 @@ class EncryptionService {
 				new ByteArrayInputStream(encryptedMessageBytes));
 			
 			//String encryptedMessageBytesStr = new String(encryptedMessageBytes);
-			//log.debug("decryptSMIMEMessage - encryptedMessageBytesStr: " + encryptedMessageBytesStr)
+			//log.debug("- decryptSMIMEMessage - encryptedMessageBytesStr: " + encryptedMessageBytesStr)
 	
 			SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
-		 
 			RecipientInformationStore   recipients = smimeEnveloped.getRecipientInfos();
 			RecipientInformation        recipientInfo = recipients.get(getRecipientId());
 	
@@ -263,7 +253,7 @@ class EncryptionService {
 	}
 	
 	private Recipient getRecipient() {
-		return recipient;
+		return recipient;	
 	}
 	
 	private RecipientId getRecipientId() {

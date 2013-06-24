@@ -17,7 +17,6 @@ class CsrService {
 	
     public Respuesta validarCSRVoto(byte[] csrPEMBytes, 
 		EventoVotacion evento, Locale locale) {
-		log.debug("validarCSRVoto -")
         PKCS10CertificationRequest csr = PKCS10WrapperServer.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
 		if(!csr) {
 			String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
@@ -96,6 +95,11 @@ class CsrService {
 		}
 		if(subjectDN.split("CN=nif:").length > 1) {
 			nif = subjectDN.split("CN=nif:")[1];
+			if (nif.split(",").length > 1) {
+				nif = nif.split(",")[0];
+			}
+		} else if(subjectDN.split("SERIALNUMBER=").length > 1) {
+			nif = subjectDN.split("SERIALNUMBER=")[1];
 			if (nif.split(",").length > 1) {
 				nif = nif.split(",")[0];
 			}

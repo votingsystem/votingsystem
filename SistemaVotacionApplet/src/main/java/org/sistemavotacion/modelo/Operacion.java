@@ -352,7 +352,7 @@ public class Operacion {
         logger.debug("- parse: " + operacionStr);
         if(operacionStr == null) return null;
         Operacion operacion = new Operacion();
-        JSON datosJSON = JSONSerializer.toJSON(operacionStr);
+        JSON datosJSON = JSONSerializer.toJSON(operacionStr.trim());
         JSONObject operacionJSON = null;
         if(datosJSON instanceof JSONArray) {
             operacionJSON = ((JSONArray)datosJSON).getJSONObject(0);

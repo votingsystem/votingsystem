@@ -1,8 +1,15 @@
 package org.sistemavotacion.modelo;
 
 import java.security.KeyStore;
+import java.security.cert.CertPath;
 import java.security.cert.X509Certificate;
-
+import java.util.Date;
+import org.bouncycastle.cms.SignerInformation;
+import org.bouncycastle.tsp.TimeStampToken;
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
+import org.sistemavotacion.smime.CMSUtils;
+import org.bouncycastle.util.encoders.Base64;
+        
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -19,12 +26,17 @@ public class Usuario {
     private String email;
     private String nombre;
     private String telefono;
-    
     private KeyStore keyStore;
-
-
     private X509Certificate certificate;
+    private Date fechaFirma;
+    private String subjectDN;
+    private TimeStampToken timeStampToken;
+    private SignerInformation signer;
+    private CertPath certPath;
+    private String contenidoFirmado;
+    private HexBinaryAdapter hexConverter;
 
+    
     public Usuario() { }
     
     public Usuario(String nif) {
@@ -153,5 +165,142 @@ public class Usuario {
      */
     public void setKeyStore(KeyStore keyStore) {
         this.keyStore = keyStore;
+    }
+
+    /**
+     * @return the fechaFirma
+     */
+    public Date getFechaFirma() {
+        return fechaFirma;
+    }
+
+    /**
+     * @param fechaFirma the fechaFirma to set
+     */
+    public void setFechaFirma(Date fechaFirma) {
+        this.fechaFirma = fechaFirma;
+    }
+
+    /**
+     * @return the subjectDN
+     */
+    public String getSubjectDN() {
+        return subjectDN;
+    }
+
+    /**
+     * @param subjectDN the subjectDN to set
+     */
+    public void setSubjectDN(String subjectDN) {
+        this.subjectDN = subjectDN;
+    }
+
+    /**
+     * @return the cert
+     */
+    public X509Certificate getCert() {
+        return certificate;
+    }
+
+    /**
+     * @param cert the cert to set
+     */
+    public void setCert(X509Certificate cert) {
+        this.certificate = cert;
+    }
+
+    public String getInfoCert() {
+        return CMSUtils.obtenerInfoCertificado(certificate);
+    }
+    
+    /**
+     * @return the certPath
+     */
+    public CertPath getCertPath() {
+        return certPath;
+    }
+
+    /**
+     * @param certPath the certPath to set
+     */
+    public void setCertPath(CertPath certPath) {
+        this.certPath = certPath;
+    }
+    
+        /**
+     * @return the contentDigest
+     */
+    public String getContentDigestBase64() {
+        if (signer.getContentDigest() == null) return null;
+        return new String(Base64.encode(signer.getContentDigest()));
+    }
+
+    /**
+     * @return the contentDigest
+     */
+    public String getContentDigestHex() {
+        if (signer.getContentDigest() == null) return null;
+        if(hexConverter == null) hexConverter = new HexBinaryAdapter();
+        return hexConverter.marshal(signer.getContentDigest());
+    }
+
+    /**
+     * @return the contentDigest
+     */
+    public String getFirmaBase64() {
+        if (signer.getSignature() == null) return null;
+        return new String(Base64.encode(signer.getSignature()));
+    }
+
+        /**
+     * @return the contentDigest
+     */
+    public String getFirmaHex() {
+        if (signer.getSignature() == null) return null;
+        if(hexConverter == null) hexConverter = new HexBinaryAdapter();
+        return hexConverter.marshal(signer.getSignature());
+    }
+
+    /**
+     * @param signer the signer to set
+     */
+    public void setSigner(SignerInformation signer) {
+        this.signer = signer;
+    }
+    
+    public String getEncryptiontId() {
+        return CMSUtils.getEncryptiontId(signer.getEncryptionAlgOID());
+    }
+
+    public String getDigestId() {
+        return CMSUtils.getDigestId(signer.getDigestAlgOID());
+    }
+
+    /**
+     * @return the contenidoFirmado
+     */
+    public String getContenidoFirmado() {
+        return contenidoFirmado;
+    }
+
+    /**
+     * @param contenidoFirmado the contenidoFirmado to set
+     */
+    public void setContenidoFirmado(String contenidoFirmado) {
+        this.contenidoFirmado = contenidoFirmado;
+    }
+
+    /**
+     * @return the timeStampToken
+     */
+    public TimeStampToken getTimeStampToken() {
+        return timeStampToken;
+    }
+
+    /**
+     * @param timeStampToken the timeStampToken to set
+     */
+    public void setTimeStampToken(TimeStampToken timeStampToken) {
+        this.timeStampToken = timeStampToken;
     }
 }

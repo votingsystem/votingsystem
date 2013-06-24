@@ -1,32 +1,34 @@
 package org.sistemavotacion.util;
 
+import java.text.MessageFormat;
+
 import org.sistemavotacion.android.WebActivity;
 
 public class ServerPaths {
 
 	public static final String sufijoURLCadenaCertificacion = "certificado/cadenaCertificacion";
-	public static final String sufijoURLEventos = "evento/obtener";
-	public static final String sufijoURLVotingEvents = "eventoVotacion/obtener";
+	public static final String sufijoURLEventos = "evento";
+	public static final String sufijoURLVotingEvents = "eventoVotacion";
 	
-	public static final String sufixURLTimeStampService = "timeStamp/obtener";
-	public static final String sufixURLPDFManifest = "eventoFirma/obtenerPDF?id=";
-	public static final String sufixURLPDFManifestCollector = "recolectorFirma/validarPDF?id=";
+	public static final String sufixURLTimeStampService = "timeStamp";
+	public static final String sufixURLPDFManifest = "eventoFirma/";
+	public static final String sufixURLPDFManifestCollector = "recolectorFirma/";
 	public static final String sufixURLSearch = "buscador/consultaJSON?max=";
 	
-	public static final String sufixURLCheckEvent = "evento/comprobarFechas?id=";
+	public static final String sufixURLCheckEvent = "evento/{0}/comprobarFechas";
 	
-	public static final String sufijoURLManifestEvents = "eventoFirma/obtenerManifiestos";
-	public static final String sufijoURLClaimEvents = "eventoReclamacion/obtener";
+	public static final String sufijoURLManifestEvents = "eventoFirma";
+	public static final String sufijoURLClaimEvents = "eventoReclamacion";
 	public static final String sufixURLCertificationAddresses = "infoServidor/centrosCertificacion";
 	
-	public static final String sufijoInfoServidor = "infoServidor/obtener";
-	public static final String sufijoURLEventoParaVotar = "eventoVotacion/obtener"; 
-	public static final String sufijoURLSolcitudAcceso = "solicitudAcceso/procesar"; 
-	public static final String sufijoURLVoto = "voto/guardarAdjuntandoValidacion"; 
+	public static final String sufijoInfoServidor = "infoServidor";
+	public static final String sufijoURLEventoParaVotar = "eventoVotacion"; 
+	public static final String sufijoURLSolcitudAcceso = "solicitudAcceso"; 
+	public static final String sufijoURLVoto = "voto"; 
 	public static final String sufijoURLSolicitudCSRUsuario = "csr/solicitar";
-	public static final String sufijoURLSolicitudCertificadoUsuario = "csr/obtener?idSolicitudCSR=";
-	public static final String sufijoEventoFirmado = "recolectorFirma/guardarAdjuntandoValidacion";
-	public static final String sufijoReclamacion = "recolectorReclamacion/guardarAdjuntandoValidacion";
+	public static final String sufijoURLSolicitudCertificadoUsuario = "csr?idSolicitudCSR=";
+	public static final String sufijoEventoFirmado = "recolectorFirma";
+	public static final String sufijoReclamacion = "recolectorReclamacion";
 	
     public static String getURLCadenaCertificacion (String serverURL) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
@@ -55,7 +57,7 @@ public class ServerPaths {
     
     public static String getURLCheckEvent(String serverURL, Long eventoId) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
-        return serverURL + sufixURLCheckEvent + eventoId; 
+        return MessageFormat.format(sufixURLCheckEvent, eventoId);
     }
     
     public static String getURLPDFManifestCollector (String serverURL, Long manifestId) {
@@ -65,7 +67,7 @@ public class ServerPaths {
     
     public static String getURLAnulacionVoto(String serverURL) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
-    	return serverURL + "anuladorVoto/guardarAdjuntandoValidacion";
+    	return serverURL + "anuladorVoto";
     }
     
     public static String getURLEventos (String serverURL) {

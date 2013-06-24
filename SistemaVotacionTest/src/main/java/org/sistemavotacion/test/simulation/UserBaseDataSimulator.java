@@ -19,13 +19,15 @@ import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.test.modelo.UserBaseSimulationData;
 import org.sistemavotacion.test.modelo.VotingSimulationData;
-import org.sistemavotacion.test.simulation.callable.AccessControlInitializer;
+import org.sistemavotacion.test.simulation.callable.ServerInitializer;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.NifUtils;
-import org.sistemavotacion.worker.DocumentSenderWorker;
+import org.sistemavotacion.callable.InfoSender;
 import java.security.cert.X509Certificate;
 import org.sistemavotacion.Contexto;
+import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.seguridad.CertUtil;
+import org.sistemavotacion.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,12 +88,11 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
                 
                 String certServiceURL = ContextoPruebas.INSTANCE.
                     getUserCertServiceURL();
-                DocumentSenderWorker worker = new DocumentSenderWorker(null, 
-                    usertCertPEMBytes, Contexto.X509_CONTENT_TYPE, certServiceURL, null);
-                worker.execute();
-                worker.get();
-                if(Respuesta.SC_OK != worker.getStatusCode()) {
-                    errorList.add(worker.getMessage());
+                InfoSender infoSender = new InfoSender(null, 
+                    usertCertPEMBytes, Contexto.X509_CONTENT_TYPE, certServiceURL);
+                Respuesta respuesta = infoSender.call();
+                if(Respuesta.SC_OK != respuesta.getCodigoEstado()) {
+                    errorList.add(respuesta.getMensaje());
                     return;
                 }
             } catch (Exception ex) {
@@ -211,7 +212,6 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
                     addErrorMsg(respuesta.getMensaje());
                     simulationData.getAndIncrementNumDelegationsERROR();
                 }
-
                 //TODO defensive copy
                 if(simulationListener != null) simulationListener.
                         updateSimulationData(simulationData);
@@ -272,7 +272,9 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
         simulationData.setRepresentativeNifList(representativeNifList);
         if(requestExecutor != null) requestExecutor.shutdownNow();
         logger.debug("--------------- UserBaseDataSimulator ----------------------");   
-        logger.info("Duration: " + simulationData.getDurationStr());
+        logger.info("Begin: " + DateUtils.getStringFromDate(
+                simulationData.getBeginDate())  + " - Duration: " + 
+                simulationData.getDurationStr());
         logger.info("numRepresentativeRequests: " + 
                 simulationData.getNumRepresentativeRequests());
         logger.info("numRepresentativeRequestsOK: " + 
@@ -291,7 +293,7 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
         
         String errorsMsg = getFormattedErrorList();
         if(errorsMsg != null) {
-            logger.info(" ************* " + geterrorList().size() + " ERRORS: \n" + 
+            logger.info(" ************* " + getErrorList().size() + " ERRORS: \n" + 
                         errorsMsg);
         }
         logger.debug("-------------------------------------------------------");
@@ -315,8 +317,9 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
             simulationData = VotingSimulationData.parse(FileUtils.getStringFromFile(jsonFile));
             logger.debug("Simulation for Access Control: " + simulationData.getAccessControlURL());
         }
-        AccessControlInitializer accessControlInitializer = 
-                new AccessControlInitializer(simulationData.getAccessControlURL());
+        ServerInitializer accessControlInitializer = 
+                new ServerInitializer(simulationData.getAccessControlURL(), 
+                ActorConIP.Tipo.CONTROL_ACCESO);
         Respuesta respuesta = accessControlInitializer.call();
         if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
             UserBaseDataSimulator simuHelper = new 

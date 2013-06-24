@@ -13,7 +13,9 @@ import java.net.*;
 //    grails.config.locations << "file:" + System.properties["${appName}.config.location"]
 // }
 
-grails.config.locations = [ "classpath:app-config.properties"]
+grails.converters.default.pretty.print=true
+
+grails.config.locations = [ "classpath:app-config.properties", "classpath:app-config-test.properties"]
 
  if(System.properties["${appName}.config.location"]) {
 	grails.config.locations << "file:" + System.properties["${appName}.config.location"]
@@ -69,25 +71,25 @@ grails.exceptionresolver.params.exclude = ['password']
 // configure auto-caching of queries by default (if false you can cache individual queries with 'cache: true')
 grails.hibernate.cache.queries = false
 
+//To test production environments, on of DEVELOPMENT, PRODUCTION, TEST
+VotingSystemEnvironment="DEVELOPMENT"
+
 // set per-environment serverURL stem for creating absolute links
 environments {
-    production {
-	//grails.serverURL = "http://sistemavotacioncontrolacceso.cloudfoundry.com"
-	grails.logging.jul.usebridge = false
-	String localIP = getDevelopmentServerIP();
-	//=====
-	//grails.serverURL = "http://${localIP}:8080/${appName}"
-	grails.serverURL = "http://sistemavotacioncontrolacceso.cloudfoundry.com"
-    }
     development {
-	grails.logging.jul.usebridge = false
-	String localIP = getDevelopmentServerIP();
+		grails.logging.jul.usebridge = false
+		String localIP = getDevelopmentServerIP();
         grails.serverURL = "http://${localIP}:8080/${appName}"
     }
+	production {
+		grails.logging.jul.usebridge = false
+		//grails.serverURL = "http://sistemavotacioncontrolacceso.cloudfoundry.com"
+		grails.serverURL = "http://192.168.1.5:8080/SistemaVotacionControlAcceso"
+	}
     test {
-	grails.logging.jul.usebridge = true	
-	String localIP = getDevelopmentServerIP();
-        grails.serverURL = "http://${localIP}:8080/${appName}"
+		grails.logging.jul.usebridge = true	
+		String localIP = getDevelopmentServerIP();
+	        grails.serverURL = "http://${localIP}:8080/${appName}"
     }
 
 }
@@ -147,12 +149,13 @@ def getDevelopmentServerIP() {
 	}
 }
 
+
 grails {
 	mail {
 		host = "smtp.gmail.com"
 		port = 465
-		username = "SistemaVotacion"
-		password = "*****"
+		username = "********"
+		password = "********"
 		props = ["mail.smtp.auth":"true",
 			 "mail.smtp.socketFactory.port":"465",
 			 "mail.smtp.socketFactory.class":"javax.net.ssl.SSLSocketFactory",

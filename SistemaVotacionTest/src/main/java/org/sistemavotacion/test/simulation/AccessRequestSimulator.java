@@ -14,6 +14,7 @@ import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.modelo.VotingSimulationData;
 import org.sistemavotacion.test.modelo.UserBaseSimulationData;
+import org.sistemavotacion.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,8 +31,6 @@ public class AccessRequestSimulator extends Simulator<VotingSimulationData>
             AccessRequestSimulator.class);
     
     private static ExecutorService simulatorExecutor;
-    
-    private static ExecutorService accessRequestExecutor;
     private static CompletionService<Respuesta> accessRequestCompletionService;
 
     private UserBaseSimulationData userBaseData = null;
@@ -49,10 +48,9 @@ public class AccessRequestSimulator extends Simulator<VotingSimulationData>
         this.userBaseData = simulationData.getUserBaseData(); 
         this.simulationListener = simulationListener;
         this.evento = simulationData.getEvento();
-        simulatorExecutor = Executors.newFixedThreadPool(5);
-        accessRequestExecutor = Executors.newFixedThreadPool(100);
+        simulatorExecutor = Executors.newFixedThreadPool(100);
         accessRequestCompletionService = 
-                new ExecutorCompletionService<Respuesta>(accessRequestExecutor);
+                new ExecutorCompletionService<Respuesta>(simulatorExecutor);
         electorList = getElectorList(userBaseData);
         numberRequests = electorList.size();
     }
@@ -201,12 +199,14 @@ public class AccessRequestSimulator extends Simulator<VotingSimulationData>
         simulationData.setFinish(System.currentTimeMillis());
         if(timer != null) timer.stop();
         if(simulatorExecutor == null) simulatorExecutor.shutdownNow();
-        if(accessRequestExecutor == null) accessRequestExecutor.shutdownNow(); 
         if(simulationListener != null) {
             simulationListener.setSimulationResult(simulationData);
         } else {
             logger.debug("--------------- SIMULATION RESULT------------------");
-            logger.info("Duration: " + simulationData.getDurationStr());
+            simulationData.setFinish(System.currentTimeMillis());
+                    logger.info("Begin: " + DateUtils.getStringFromDate(
+                    simulationData.getBeginDate())  + " - Duration: " + 
+                    simulationData.getDurationStr());
             logger.info("Solicitudes enviadas: " + simulationData.getNumAccessRequests());
             logger.info("Solicitudes OK: " + simulationData.getNumAccessRequestsOK());
             logger.info("Solicitudes con error: " + simulationData.getNumAccessRequestsERROR());

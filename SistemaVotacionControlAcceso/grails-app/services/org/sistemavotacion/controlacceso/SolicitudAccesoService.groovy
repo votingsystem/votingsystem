@@ -120,8 +120,6 @@ class SolicitudAccesoService {
 							firmante, eventoVotacion)
 					}
 					
-					statisticsService.onApplicationEvent(votingEvent)
-					
 					solicitudAcceso = new SolicitudAcceso(usuario:firmante,
 						mensajeSMIME:mensajeSMIMEReq,
 						estado: SolicitudAcceso.Estado.OK,
@@ -171,8 +169,9 @@ class SolicitudAccesoService {
 		} else return new Respuesta(codigoEstado:Respuesta.SC_OK);
 	}
 	
-	def rechazarSolicitud(SolicitudAcceso solicitudAcceso) {
+	def rechazarSolicitud(SolicitudAcceso solicitudAcceso, String detalles) {
 		log.debug("rechazarSolicitud '${solicitudAcceso.id}'")
+		solicitudAcceso.detalles = detalles
 		solicitudAcceso = solicitudAcceso.merge()
 		solicitudAcceso.estado = SolicitudAcceso.Estado.ANULADO
 		solicitudAcceso.save()

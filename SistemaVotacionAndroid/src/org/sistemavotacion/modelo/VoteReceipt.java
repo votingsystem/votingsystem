@@ -14,8 +14,6 @@ import javax.mail.MessagingException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sistemavotacion.android.R;
-import org.sistemavotacion.json.DeJSONAObjeto;
-import org.sistemavotacion.json.DeObjetoAJSON;
 import org.sistemavotacion.seguridad.PKCS10WrapperClient;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 
@@ -87,7 +85,7 @@ public class VoteReceipt {
     			+ voto.getHashSolicitudAccesoBase64());
     	JSONObject jsonObject = new JSONObject();
     	jsonObject.put("codigoEstado", codigoEstado);
-        if(voto != null) jsonObject.put("voto", DeObjetoAJSON.obtenerEventoJSON(voto));
+        if(voto != null) jsonObject.put("voto", voto.toJSON());
         jsonObject.put("isCanceled", isCanceled);
         return jsonObject.toString();
     }
@@ -105,7 +103,7 @@ public class VoteReceipt {
         if(jsonObject.has("isCanceled"))
         	isCanceled = jsonObject.getBoolean("isCanceled");
         if(jsonObject.has("voto"))
-        	voto = DeJSONAObjeto.obtenerEvento(jsonObject.getJSONObject("voto"));
+        	voto = Evento.parse(jsonObject.getJSONObject("voto"));
         VoteReceipt voteReceipt = new VoteReceipt(codigoEstado, voto);
         voteReceipt.setCanceled(isCanceled);
     	return voteReceipt;

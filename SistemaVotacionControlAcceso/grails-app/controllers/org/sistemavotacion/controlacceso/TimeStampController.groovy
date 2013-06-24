@@ -39,6 +39,10 @@ class TimeStampController {
 	def index() {
 		try {
 			byte[] timeStampRequestBytes = getStringFromInputStream(request.getInputStream()) 
+			
+			//String timeStampRequestStr = new String(Base64.encode(timeStampRequestBytes));
+			//log.debug(" - timeStampRequestStr: ${timeStampRequestStr}")
+			
 			int attempts = 0
 			AtomicBoolean pending = new AtomicBoolean(Boolean.TRUE)
 			Respuesta respuesta = null
@@ -54,7 +58,7 @@ class TimeStampController {
 					} else {
 						log.debug(" ---- consumidos los tres intentos")
 						pending.set(false)
-						respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+						respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_TIMESTAMP,
 							mensaje:message(code: 'error.timeStampGeneration'))
 					} 
 				} catch(TSPValidationException ex) {
@@ -64,23 +68,24 @@ class TimeStampController {
 					} else {
 						log.debug(" ---- consumidos los tres intentos")
 						pending.set(false)
-						respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+						respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_TIMESTAMP,
 							mensaje:message(code: 'error.timeStampGeneration'))
 					}
 				}catch(Exception ex) {
 					log.error(ex.getMessage(), ex)
-					respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+					respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_TIMESTAMP,
 						mensaje:message(code: 'error.timeStampGeneration'))
 					pending.set(false)
 				}
 			}
-
-			response.status = respuesta.codigoEstado
+			
 			if(Respuesta.SC_OK == respuesta.codigoEstado) {
+				response.status = Respuesta.SC_OK
 				response.contentType = "application/timestamp-response"
 				response.outputStream << respuesta.timeStampToken // Performing a binary stream copy
 				//response.outputStream.flush()
 			} else {
+				response.status = respuesta.codigoEstado
 				render respuesta.mensaje
 			} 
 			return false

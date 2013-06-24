@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.activation.CommandMap;
-import javax.activation.MailcapCommandMap;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.internet.ContentType;
@@ -41,7 +40,6 @@ import org.bouncycastle.cms.SignerInfoGenerator;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.mail.smime.SMIMEException;
-import org.bouncycastle.mail.smime.SMIMESigned;
 import org.bouncycastle.mail.smime.SMIMEStreamingProcessor;
 import org.bouncycastle.mail.smime.util.CRLFOutputStream;
 import org.bouncycastle.util.Store;
@@ -99,7 +97,7 @@ public class SMIMESignedGenerator
     public static final String  ENCRYPTION_ECGOST3410 = CryptoProObjectIdentifiers.gostR3410_2001.getId();
 
     private static final String CERTIFICATE_MANAGEMENT_CONTENT = "application/pkcs7-mime; name=smime.p7c; smime-type=certs-only";
-    public static final String DETACHED_SIGNATURE_TYPE = "application/pkcs7-signature; name=smime.p7s; smime-type=signed-data";
+    public static final String DETACHED_SIGNATURE_TYPE = "application/pkcs7-signature; smime-type=signed-data";
     private static final String ENCAPSULATED_SIGNED_CONTENT_TYPE = "application/pkcs7-mime; name=smime.p7m; smime-type=signed-data";
 
     private final String        _defaultContentTransferEncoding;
@@ -113,24 +111,6 @@ public class SMIMESignedGenerator
     private List                _oldSigners = new ArrayList();
     private List                _attributeCerts = new ArrayList();
     private Map                 _digests = new HashMap();
-    
-    static
-    {
-        CommandMap.setDefaultCommandMap(addCommands(CommandMap.getDefaultCommandMap()));
-    }
-
-    private static MailcapCommandMap addCommands(CommandMap cm)
-    {
-        MailcapCommandMap mc = (MailcapCommandMap)cm;
-
-        mc.addMailcap("application/pkcs7-signature;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.pkcs7_signature");
-        mc.addMailcap("application/pkcs7-mime;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.pkcs7_mime");
-        mc.addMailcap("application/x-pkcs7-signature;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.x_pkcs7_signature");
-        mc.addMailcap("application/x-pkcs7-mime;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.x_pkcs7_mime");
-        mc.addMailcap("multipart/signed;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.multipart_signed");
-
-        return mc;
-    }
 
     /**
      * base constructor - default content transfer encoding 7bit
@@ -471,7 +451,7 @@ public class SMIMESignedGenerator
 
             sig.setContent(new SMIMESignedGenerator.ContentSigner(content, false), DETACHED_SIGNATURE_TYPE);
             sig.addHeader("Content-Type", DETACHED_SIGNATURE_TYPE);
-            sig.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+            //sig.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
             sig.addHeader("Content-Description", "S/MIME Cryptographic Signature");
             sig.addHeader("Content-Transfer-Encoding", encoding);
 
@@ -989,7 +969,6 @@ public class SMIMESignedGenerator
                     }
                     else
                     {
-                        content.getDataHandler().setCommandMap(addCommands(CommandMap.getDefaultCommandMap()));
 
                         content.writeTo(signingStream);
                     }

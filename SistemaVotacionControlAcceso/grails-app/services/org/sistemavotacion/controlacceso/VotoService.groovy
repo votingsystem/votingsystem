@@ -31,6 +31,9 @@ class VotoService {
 		String msg
 		try {
 			SMIMEMessageWrapper smimeMessageReq = mensajeSMIMEReq.getSmimeMessage()
+			Certificado certificadoVoto = smimeMessageReq.getInformacionVoto().getCertificado()
+			
+			
 			def votoJSON = JSON.parse(smimeMessageReq.getSignedContent())
 			OpcionDeEvento opcionSeleccionada =
 				evento.comprobarOpcionId(Long.valueOf(votoJSON.opcionSeleccionadaId))
@@ -56,26 +59,16 @@ class VotoService {
 			MensajeSMIME.withTransaction {
 				mensajeSMIMEResp.save()
 			}
-			Certificado certificado = smimeMessageReq.getInformacionVoto().getCertificado()
-			certificado.estado = Certificado.Estado.UTILIZADO;
+			
+			certificadoVoto.estado = Certificado.Estado.UTILIZADO;
 			Voto voto = new Voto(opcionDeEvento:opcionSeleccionada,
 				eventoVotacion:evento, estado:Voto.Estado.OK,
-				certificado:certificado, mensajeSMIME:mensajeSMIMEResp)
+				certificado:certificadoVoto, mensajeSMIME:mensajeSMIMEResp)
 			Voto.withTransaction {
 				voto.save()
 			}
 			X509Certificate controlCenterCert = smimeMessageReq.getInformacionVoto()?.
 				getServerCerts()?.iterator()?.next()				
-			
-			VotingEvent votingEvent = null
-			if(certificado.usuario?.id) {
-				def userMetaInfJSON = JSON.parse(certificado.usuario.metaInf)
-				votingEvent = VotingEvent.REPRESENTATIVE_VOTE.setData(
-					certificado.usuario, evento, opcionSeleccionada)
-				} else	votingEvent = VotingEvent.VOTE.setData(
-					evento, opcionSeleccionada)
-			
-			statisticsService.onApplicationEvent(votingEvent)
 				
 			return new Respuesta(codigoEstado:Respuesta.SC_OK, evento:evento, 
 				tipo:Tipo.VOTO_VALIDADO_CONTROL_ACCESO,
@@ -208,7 +201,7 @@ class VotoService {
 				String centroControlURL = eventoVotacion.centroControl.serverURL
 				String urlAnulacionVoto = "${centroControlURL}/anuladorVoto"
 				Respuesta encryptResponse = encryptionService.encryptSMIMEMessage(
-					smimeMessageResp.getBytes(), eventoVotacion.getControlCenterCert(), locale)
+					smimeMessageResp, eventoVotacion.getControlCenterCert(), locale)
 				if (Respuesta.SC_OK != encryptResponse.codigoEstado) return encryptResponse
 				String contentType = "${grailsApplication.config.pkcs7SignedContentType};" +
 					"${grailsApplication.config.pkcs7EncryptedContentType}"

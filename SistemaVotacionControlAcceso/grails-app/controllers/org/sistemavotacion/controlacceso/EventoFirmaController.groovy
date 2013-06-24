@@ -312,7 +312,10 @@ class EventoFirmaController {
 	 * @return El manifiesto en formato PDF.
 	 */
 	def firmado () {
-		EventoFirma evento = EventoFirma.get(params.long('id'))
+		EventoFirma evento
+		EventoFirma.withTransaction {
+			evento = EventoFirma.get(params.long('id'))
+		}
 		if(!evento) {
 			response.status = Respuesta.SC_NOT_FOUND
 			render message(code: 'eventNotFound', args:[params.id])

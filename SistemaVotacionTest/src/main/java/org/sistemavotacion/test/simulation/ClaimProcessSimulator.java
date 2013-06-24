@@ -22,6 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import org.sistemavotacion.Contexto;
+import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.modelo.Tipo;
@@ -29,13 +30,14 @@ import org.sistemavotacion.pdf.PdfFormHelper;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.test.simulation.callable.AccessControlInitializer;
+import org.sistemavotacion.test.simulation.callable.ServerInitializer;
 import org.sistemavotacion.test.simulation.callable.BackupValidator;
 import org.sistemavotacion.test.simulation.callable.ClaimSigner;
+import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.NifUtils;
 import org.sistemavotacion.util.FileUtils;
-import org.sistemavotacion.worker.PDFSignedSenderWorker;
-import org.sistemavotacion.worker.SMIMESignedSenderWorker;
+import org.sistemavotacion.callable.PDFSignedSender;
+import org.sistemavotacion.callable.SMIMESignedSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +55,6 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>
     private static Logger logger = LoggerFactory.getLogger(ClaimProcessSimulator.class);
 
     private static ExecutorService simulatorExecutor;
-    private static ExecutorService signClaimExecutor;
     private static CompletionService<Respuesta> signClaimCompletionService;
     
     private Evento event = null;
@@ -136,12 +137,11 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>
                 ContextoPruebas.INSTANCE.getUserTest().getEmail(), 
                 Contexto.INSTANCE.getAccessControl().getNombreNormalizado(), 
                 cancelDataStr, msgSubject,  null);
-        SMIMESignedSenderWorker worker = new SMIMESignedSenderWorker(
+        SMIMESignedSender signedSender = new SMIMESignedSender(
                 null, smimeDocument, ContextoPruebas.INSTANCE.getCancelEventURL(), 
-                null, null, null);
-        worker.execute();
-        worker.get();
-        if(Respuesta.SC_OK == worker.getStatusCode()) {
+                null, null);
+        Respuesta respuesta = signedSender.call();
+        if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
             if(simulationData.getBackupRequestEmail() != null) requestBackup();
         }
     }
@@ -154,29 +154,27 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>
         PrivateKey signerPrivateKey = ContextoPruebas.INSTANCE.getUserTestPrivateKey();
         Certificate[] signerCertChain = ContextoPruebas.INSTANCE.getUserTestCertificateChain();
         PdfReader requestBackupPDF = new PdfReader(requestBackupPDFBytes);
-        PDFSignedSenderWorker worker = new PDFSignedSenderWorker(null, 
+        PDFSignedSender signedSender = new PDFSignedSender(null, 
                 ContextoPruebas.INSTANCE.getUrlBackupEvents(), 
                 null, null, null, requestBackupPDF, signerPrivateKey, 
-                signerCertChain, null, null);
-        worker.execute();
-        Respuesta respuesta = worker.get();
+                signerCertChain, null);
+        Respuesta respuesta = signedSender.call();
         if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
             FutureTask<Respuesta> future = new FutureTask<Respuesta>(
-                new BackupValidator(respuesta.getBytesArchivo()));
+                new BackupValidator(respuesta.getMessageBytes()));
             simulatorExecutor.execute(future);
             respuesta = future.get();
             logger.debug("BackupRequestWorker - status: " + respuesta.getCodigoEstado());
             if(Respuesta.SC_OK != respuesta.getCodigoEstado()) {
                 addErrorList(respuesta.getErrorList());
             }
-        } else logger.error(worker.getErrorMessage());
+        } else logger.error(respuesta.getMensaje());
     }
     
     private void initExecutors(){
-        simulatorExecutor = Executors.newFixedThreadPool(5);
-        signClaimExecutor = Executors.newFixedThreadPool(100);
+        simulatorExecutor = Executors.newFixedThreadPool(100);
         signClaimCompletionService = 
-                new ExecutorCompletionService<Respuesta>(signClaimExecutor);
+                new ExecutorCompletionService<Respuesta>(simulatorExecutor);
         
         simulatorExecutor.execute(new Runnable() {
             @Override
@@ -223,16 +221,14 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>
                 ContextoPruebas.INSTANCE.getUserTest().getEmail(), 
                 Contexto.INSTANCE.getAccessControl().getNombreNormalizado(), 
                 eventStr, msgSubject,  null);
-            
-            
-        SMIMESignedSenderWorker worker = new SMIMESignedSenderWorker(
+
+        SMIMESignedSender signedSender = new SMIMESignedSender(
                 null, smimeDocument, ContextoPruebas.INSTANCE.getClaimServiceURL(), 
-                null, null, null);
-        worker.execute();
-        worker.get();
-        if(Respuesta.SC_OK == worker.getStatusCode()) {
+                null, null);
+        Respuesta respuesta = signedSender.call();
+        if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
             try {
-                byte[] responseBytes = worker.getMessage().getBytes();
+                byte[] responseBytes = respuesta.getMessageBytes();
                 FileUtils.copyStreamToFile(new ByteArrayInputStream(responseBytes), 
                     new File(ContextoPruebas.DEFAULTS.APPDIR + "VotingPublishReceipt"));
                 SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(null, 
@@ -276,6 +272,7 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>
         }
         ClaimProcessSimulator simuHelper = new ClaimProcessSimulator(simulationData, null);
         simuHelper.call();
+        System.exit(0);
     }
 
     @Override
@@ -283,8 +280,9 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>
         logger.debug("call - NumberOfRequestsProjected: " +  
                 simulationData.getNumRequestsProjected());
         simulationData.setBegin(System.currentTimeMillis());
-        AccessControlInitializer accessControlInitializer = 
-            new AccessControlInitializer(simulationData.getAccessControlURL());
+        ServerInitializer accessControlInitializer = 
+                new ServerInitializer(simulationData.getAccessControlURL(), 
+                ActorConIP.Tipo.CONTROL_ACCESO);
         Respuesta respuesta = accessControlInitializer.call();
         if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
              publishEvent();
@@ -297,9 +295,11 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>
         simulationData.setFinish(System.currentTimeMillis());
         if(timer != null) timer.stop();
         if(simulatorExecutor != null)  simulatorExecutor.shutdownNow();
-        if(signClaimExecutor != null)  signClaimExecutor.shutdownNow();   
         logger.debug("--------------- SIMULATION RESULT------------------");  
-        logger.info("Duration: " + simulationData.getDurationStr());
+        simulationData.setFinish(System.currentTimeMillis());
+                logger.info("Begin: " + DateUtils.getStringFromDate(
+                simulationData.getBeginDate())  + " - Duration: " + 
+                simulationData.getDurationStr());
         logger.info("Number of projected requests: " + 
                 simulationData.getNumRequestsProjected());
         logger.info("Number of completed requests: " + 

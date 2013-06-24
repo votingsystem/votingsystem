@@ -6,7 +6,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import javax.swing.JFrame;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.sistemavotacion.modelo.Firmante;
+import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +19,7 @@ public class FirmantePanel extends javax.swing.JPanel implements ItemListener {
 
     private static Logger logger = LoggerFactory.getLogger(FirmantePanel.class);
     
-    private Firmante firmante;
+    private Usuario firmante;
     
     /** Creates new form FirmantePanel */
     public FirmantePanel() {
@@ -27,7 +27,7 @@ public class FirmantePanel extends javax.swing.JPanel implements ItemListener {
     }
 
     
-    public FirmantePanel(Firmante firmante) throws Exception {
+    public FirmantePanel(Usuario firmante) throws Exception {
         initComponents();
         textoEditorPane.setEditable(false);
         textoEditorPane.setContentType("text/html");

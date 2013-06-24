@@ -1,7 +1,6 @@
 package org.sistemavotacion.modelo;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.slf4j.Logger;
@@ -17,33 +16,40 @@ public class Respuesta<T> {
     
     public static final int SC_OK = 200;
     public static final int SC_OK_ANULACION_SOLICITUD_ACCESO = 270;
-    public static final int SC_REQUEST_TIMEOUT = 408;
+    public static final int SC_REQUEST_TIMEOUT  = 408;
     public static final int SC_ERROR_PETICION = 400;
     public static final int SC_NOT_FOUND = 404;
     public static final int SC_ERROR_VOTO_REPETIDO = 470;
     public static final int SC_ANULACION_REPETIDA = 471;
     public static final int SC_NULL_REQUEST = 472;
     
-    public static final int SC_ERROR = 500;
-    public static final int SC_PROCESANDO = 700;
-    public static final int SC_CANCELADO = 0;
+    public static final int SC_ERROR           = 500;
+    public static final int SC_ERROR_TIMESTAMP = 570;
+    public static final int SC_PROCESANDO      = 700;
+    public static final int SC_CANCELADO       = 0;
 
-    private int codigoEstado;
+    private Integer id;
+    private Integer codigoEstado;
     private String mensaje;
     private T data;
     private Tipo tipo;
     private Evento evento;
     private SMIMEMessageWrapper smimeMessage;
     private ReciboVoto reciboVoto;
-    private byte[] bytesArchivo;
+    private byte[] messageBytes;
     private File archivo;
     private List<String> errorList;
         
     public Respuesta () {  }
     
         
-    public Respuesta (int codigoEstado) {
+    public Respuesta (Integer codigoEstado) {
         this.codigoEstado = codigoEstado;    
+    }
+    
+    public Respuesta (Integer codigoEstado, Integer id) {
+        this.codigoEstado = codigoEstado; 
+        this.id = id;
     }
     
     public Respuesta (int codigoEstado, Evento evento) {
@@ -72,10 +78,15 @@ public class Respuesta<T> {
         this.mensaje = mensaje;
     }
         
+    public Respuesta (int codigoEstado, byte[] bytesArchivo) {
+        this.codigoEstado = codigoEstado;
+        this.messageBytes = bytesArchivo;
+    }
+           
     public Respuesta (int codigoEstado, String mensaje, byte[] bytesArchivo) {
         this.codigoEstado = codigoEstado;
         this.mensaje = mensaje;
-        this.bytesArchivo = bytesArchivo;
+        this.messageBytes = bytesArchivo;
     }
 
     /**
@@ -128,21 +139,6 @@ public class Respuesta<T> {
      */
     public void setTipo(Tipo tipo) {
         this.tipo = tipo;
-    }
-
-
-    /**
-     * @return the bytesArchivo
-     */
-    public byte[] getBytesArchivo() {
-        return bytesArchivo;
-    }
-
-    /**
-     * @param bytesArchivo the bytesArchivo to set
-     */
-    public void setBytesArchivo(byte[] bytesArchivo) {
-        this.bytesArchivo = bytesArchivo;
     }
 
     /**
@@ -240,5 +236,32 @@ public class Respuesta<T> {
         this.errorList = errorList;
     }
 
+    /**
+     * @return the id
+     */
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    /**
+     * @return the messageBytes
+     */
+    public byte[] getMessageBytes() {
+        return messageBytes;
+    }
+
+    /**
+     * @param messageBytes the messageBytes to set
+     */
+    public void setMessageBytes(byte[] messageBytes) {
+        this.messageBytes = messageBytes;
+    }
 
 }

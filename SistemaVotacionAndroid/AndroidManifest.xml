@@ -36,14 +36,14 @@
                        android:resource="@xml/searchable" />
             
            	<intent-filter>    
-		       	<data android:scheme="http" android:host="192.168.1.7"/>
+		       	<data android:scheme="http" android:host="192.168.1.3"/>
 	       	    <data android:path="/SistemaVotacionCentroControl/app/clienteAndroid"/>
 		        <action android:name="android.intent.action.VIEW" />
 		        <category android:name="android.intent.category.DEFAULT"/>  
      		    <category android:name="android.intent.category.BROWSABLE" />
 	        </intent-filter>
 		    <intent-filter>    
-		       	<data android:scheme="http" android:host="192.168.1.7"/>
+		       	<data android:scheme="http" android:host="192.168.1.3"/>
 	       	    <data android:path="/SistemaVotacionControlAcceso/app/clienteAndroid"/>
 		        <action android:name="android.intent.action.VIEW" />
 		        <category android:name="android.intent.category.DEFAULT"/>  

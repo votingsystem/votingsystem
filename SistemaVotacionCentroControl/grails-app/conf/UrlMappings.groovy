@@ -85,5 +85,12 @@ class UrlMappings {
 			}
 		}
 		
+		"/errors/event/${id}" {
+			controller = "voto"
+			action = "errors"
+			constraints {
+				id(matches:/\d*/)
+			}
+		}
 	}
 }

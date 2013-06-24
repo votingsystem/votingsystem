@@ -49,6 +49,8 @@ public class SolicitudAcceso implements Serializable {
     private AnuladorVoto anuladorVoto; 
     @Column(name="hashSolicitudAccesoBase64")
     private String hashSolicitudAccesoBase64;
+    @Column(name="detalles")
+    private String detalles;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="fechaCreacion", length=23)
     private Date dateCreated;
@@ -128,6 +130,14 @@ public class SolicitudAcceso implements Serializable {
 
 	public void setLastUpdated(Date lastUpdated) {
 		this.lastUpdated = lastUpdated;
+	}
+
+	public String getDetalles() {
+		return detalles;
+	}
+
+	public void setDetalles(String detalles) {
+		this.detalles = detalles;
 	}
 
 }

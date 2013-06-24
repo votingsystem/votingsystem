@@ -27,8 +27,8 @@ public enum VotingEvent {
 		return this;
 	}
 	
-	public VotingEvent setData(Usuario user, Evento event,
-			OpcionDeEvento optionSelected,  Long numRepresentations) {
+	public VotingEvent setData(Usuario user, 
+			Evento event, OpcionDeEvento optionSelected) {
 		this.setUser(user);
 		this.setEvent(event);
 		this.setOptionSelected(optionSelected);

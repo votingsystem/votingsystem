@@ -1,16 +1,21 @@
 package org.sistemavotacion.centrocontrol
 
 import org.sistemavotacion.centrocontrol.modelo.*
+import org.sistemavotacion.seguridad.*;
 import grails.converters.JSON
 import java.security.cert.X509Certificate;
+import java.util.concurrent.atomic.AtomicBoolean
 import org.bouncycastle.cms.SignerInformationVerifier
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder
 import org.bouncycastle.tsp.TimeStampToken
 import org.codehaus.groovy.grails.web.json.JSONElement
+import java.security.cert.X509Certificate;
 
 class TimeStampService {
 	
 	private static final String BC = org.bouncycastle.jce.provider.BouncyCastleProvider.PROVIDER_NAME;
+	
+	private static final int numMaxAttempts = 3;
 	
 	def grailsApplication
 	def messageSource
@@ -40,18 +45,35 @@ class TimeStampService {
 					accessControlURL = accessControlURL.substring(0, accessControlURL.length() - 1)
 				}
 				String timeStampCertURL = "${accessControlURL}/timeStamp/cert"
-				respuesta = httpService.obtenerCertificado(timeStampCertURL)
+				respuesta = httpService.getInfo(timeStampCertURL, null)
 				if(Respuesta.SC_OK != respuesta.codigoEstado) {
 					msg = messageSource.getMessage('timeStampCertErrorMsg', [timeStampCertURL].toArray(), locale)
 					log.error("validateToken - ${msg}")
 					return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg)
 				} else {
+					X509Certificate timeStampCert = CertUtil.fromPEMToX509Cert(respuesta.messageBytes)
 					timeStampVerifier = new JcaSimpleSignerInfoVerifierBuilder().
-						setProvider(BC).build(respuesta.certificado)
+						setProvider(BC).build(timeStampCert)
 					timeStampVerifiers.put(accessControl.id, timeStampVerifier)
 				}
 			}
-			timeStampToken.validate(timeStampVerifier)
+			
+			AtomicBoolean done = new AtomicBoolean(false);
+			int numAttemp = 0;
+			while(!done.get()) {
+				try {
+					timeStampToken.validate(timeStampVerifier)
+					done.set(true)
+				} catch(Exception ex) {
+					if(numAttemp < numMaxAttempts) {
+						++numAttemp;
+					} else {
+						log.error(" ------ Exceeded max num attemps");
+						throw ex;
+					}
+				}
+			}
+			
 			Date timestampDate = timeStampToken.getTimeStampInfo().getGenTime()
 			if(!timestampDate.after(evento.fechaInicio) &&
 				!timestampDate.before(evento.fechaFin)) {

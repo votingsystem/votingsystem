@@ -1,15 +1,8 @@
 package org.sistemavotacion.smime;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -24,11 +17,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Properties;
-import java.util.Random;
 import java.util.Set;
 
-import javax.activation.CommandMap;
-import javax.activation.MailcapCommandMap;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -43,57 +33,41 @@ import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.CMSProcessable;
 import org.bouncycastle.cms.CMSVerifierCertificateNotValidException;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.mail.smime.SMIMEException;
 import org.bouncycastle.mail.smime.SMIMESigned;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.util.encoders.Base64;
-import org.sistemavotacion.centrocontrol.modelo.*;
+import org.sistemavotacion.centrocontrol.modelo.InformacionVoto;
+import org.sistemavotacion.centrocontrol.modelo.Usuario;
 import org.sistemavotacion.seguridad.PKIXCertPathReviewer;
+import org.sistemavotacion.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.sun.mail.util.BASE64DecoderStream;
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class SMIMEMessageWrapper extends MimeMessage {
-	
+    
     private static Logger logger = LoggerFactory.getLogger(SMIMEMessageWrapper.class);
     
-    static {
-        MailcapCommandMap mc = (MailcapCommandMap)CommandMap.getDefaultCommandMap();
-
-        mc.addMailcap("text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain");
-        mc.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html");
-        mc.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
-        mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true");
-        mc.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822");
-
-        CommandMap.setDefaultCommandMap(mc);
-    }
-    
     private static final String BC = BouncyCastleProvider.PROVIDER_NAME;
-    public static final String SIGNED_FILE_EXTENSION = "p7m";
 
     private String messageId;
     private String contentType;
     private String signedContent;
     private SMIMESigned smimeSigned = null;
-    private SignedMailValidator.ValidationResult validationResult = null;
 
 	private Set<Usuario> firmantes = null;
 	private Usuario firmante;
 	private InformacionVoto informacionVoto;
 	private boolean isValidSignature = false;
+	private byte[] messageBytes = null;
 	
 	private static Properties props = System.getProperties();
 	// Get a Session object with the default properties.
@@ -101,20 +75,19 @@ public class SMIMEMessageWrapper extends MimeMessage {
     
     public SMIMEMessageWrapper(Session session) throws MessagingException {
         super(session);
-        String fileName =  RandomLowerString(System.currentTimeMillis(), 7);
+        String fileName =  StringUtils.randomLowerString(System.currentTimeMillis(), 7);
         setDisposition("attachment; fileName=" + fileName + ".p7m");
         contentType = "application/x-pkcs7-mime; smime-type=signed-data; name=" + fileName + ".p7m";
     }
     
-    public SMIMEMessageWrapper (InputStream inputStream) 
-            throws IOException, MessagingException, CMSException, SMIMEException, Exception {
+    public SMIMEMessageWrapper (InputStream inputStream) throws Exception {
         super(defaultSession, inputStream);
-        if (getContent() instanceof BASE64DecoderStream) {
-            smimeSigned = new SMIMESigned(this); 
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ((CMSProcessable)smimeSigned.getSignedContent()).write(baos);
-            signedContent = baos.toString(); 
-        } else {
+        init();
+    }
+
+    public void init() throws Exception {
+        if(getContent() instanceof MimeMultipart){
+            logger.debug("content instanceof MimeMultipart");
             smimeSigned = new SMIMESigned((MimeMultipart)getContent());
             MimeBodyPart content = smimeSigned.getContent();
             Object  cont = content.getContent();
@@ -130,30 +103,45 @@ public class SMIMEMessageWrapper extends MimeMessage {
                     stringBuilder.append("Part " + i).append("---------------------------");
                     if (part instanceof String) {
                         stringBuilder.append((String)part);
-                    } else if (part instanceof BASE64DecoderStream) {
-                        InputStreamReader isr = new InputStreamReader((BASE64DecoderStream)part);
-                        Writer writer = new StringWriter();
-                        char[] buffer = new char[1024];
-                        try {
-                            Reader reader = new BufferedReader(isr);
-                            int n;
-                            while ((n = reader.read(buffer)) != -1) {
-                                writer.write(buffer, 0, n);
-                            }
-                        } finally {
-                            isr.close();
+                    } else if (part instanceof ByteArrayInputStream) {
+                        ByteArrayInputStream contentStream = (ByteArrayInputStream)cont;
+                        ByteArrayOutputStream output = new ByteArrayOutputStream();
+                        byte[] buf =new byte[2048];
+                        int len;
+                        while((len = contentStream.read(buf)) > 0){
+                            output.write(buf,0,len);
                         }
-                        signedContent = writer.toString();
-                    } else  {
-                        logger.debug("IMPOSIBLE EXTRAER CONTENIDO DE LA SECCION " + i);
+                        output.close();
+                        contentStream.close();
+                        signedContent = new String(output.toByteArray());
+                    }  else  {
+                        logger.debug(" TODO - get content from part instanceof -> " + part.getClass());
                     }
                 }
                 signedContent = stringBuilder.toString();
+            } else if (cont instanceof ByteArrayInputStream) {
+                ByteArrayInputStream contentStream = (ByteArrayInputStream)cont;
+                ByteArrayOutputStream output = new ByteArrayOutputStream();
+                byte[] buf =new byte[2048];
+                int len;
+                while((len = contentStream.read(buf)) > 0){
+                    output.write(buf,0,len);
+                }
+                output.close();
+                contentStream.close();
+                signedContent = new String(output.toByteArray());
             }
+        } else if(getContent() instanceof String){ 
+            logger.error("TODO - content instanceof String -> " + getContent()); 
         }
-        checkSignature();
+        checkSignature(); 
     }
 
+    public void updateChanges() throws Exception {
+    	super.saveChanges();
+    	init();
+    }
+    
     @Override
     public void updateMessageID() throws MessagingException {
             setHeader("Message-ID", messageId);
@@ -163,28 +151,6 @@ public class SMIMEMessageWrapper extends MimeMessage {
     	this.messageId = messageId;
     	updateMessageID();
     }
-    
-    public void setTo(String to) throws MessagingException {
-    	setHeader("To", to);
-    }
-    
-    public void setContent (byte[] content) throws MessagingException {
-            setContent(content, contentType);
-            saveChanges();
-    }
-
-    public static String RandomLowerString(long seed, int size) {
-        StringBuffer tmp = new StringBuffer();
-        Random random = new Random(seed);
-        for (int i = 0; i < size; i++) {
-            long newSeed = random.nextLong();
-            int currInt = (int) (26 * random.nextFloat());
-            currInt += 97;
-            random = new Random(newSeed);
-            tmp.append((char) currInt);
-        }
-        return tmp.toString();
-    }
 
     /**
      * @return the signedContent
@@ -192,7 +158,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
     public String getSignedContent() {
         return signedContent;
     }
-    
+
     /**
      * Digest for storing unique MensajeSMIME in database 
      * @return the contentDigestStr
@@ -203,21 +169,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
         byte[] resultDigest =  messageDigest.digest(signedContent.getBytes());
         return new String(Base64.encode(resultDigest));
     }
-    
-    /**
-     * @param signedContent the signedContent to set
-     */
-    public void setSignedContent(String signedContent) {
-        this.signedContent = signedContent;
-    }
 
-    /**
-     * @return the smimeSigned
-     */
-    public SMIMESigned getSmimeSigned() {
-        return smimeSigned;
-    }
-    
 	private boolean verifySignerCert(SignerInformation signer, X509Certificate cert) {
     	boolean result = false;
         try {
@@ -278,8 +230,12 @@ public class SMIMEMessageWrapper extends MimeMessage {
             if (cert.getSubjectDN().toString().contains("OU=hashCertificadoVotoHEX:")) {
             	informacionVoto.setCertificadoVoto(cert);
             	informacionVoto.setVoteTimeStampToken(timeStampToken);
-            } else {informacionVoto.addServerCert(cert);} 
+            } else {informacionVoto.addServerCert(cert);}
         }
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        writeTo(baos);
+        messageBytes = baos.toByteArray();
+        baos.close();
     }
     
     public static PKIXParameters getPKIXParameters (X509Certificate... certs) 
@@ -364,79 +320,6 @@ public class SMIMEMessageWrapper extends MimeMessage {
                 }
             }
         }
-        validationResult = result;
-        return result;
-    }
-    
-    public static SignedMailValidator.ValidationResult verify(
-            SignedMailValidator validator) throws Exception {
-        // iterate over all signatures and print results
-        Iterator it = validator.getSignerInformationStore().getSigners().iterator();
-        Locale loc = Locale.ENGLISH;
-        //only one signer supposed!!!
-        SignedMailValidator.ValidationResult result = null;
-        while (it.hasNext()) {
-            SignerInformation signer = (SignerInformation) it.next();
-            result = validator.getValidationResult(signer);
-            if (result.isValidSignature()){
-                logger.debug("isValidSignature");
-            }
-            else {
-                logger.debug("sigInvalid");
-                logger.debug("Errors:");
-                Iterator errorsIt = result.getErrors().iterator();
-                while (errorsIt.hasNext()) {
-                    logger.debug("ERROR - " + errorsIt.next().toString());
-                }
-            }
-            if (!result.getNotifications().isEmpty()) {
-                logger.debug("Notifications:");
-                Iterator notIt = result.getNotifications().iterator();
-                while (notIt.hasNext()) {
-                    logger.debug("NOTIFICACION - " + notIt.next());
-                }
-            }
-            PKIXCertPathReviewer review = result.getCertPathReview();
-            if (review != null) {
-                if (review.isValidCertPath()) {
-                    logger.debug("Certificate path valid");
-                }
-                else {
-                    logger.debug("Certificate path invalid");
-                }
-                logger.debug("Certificate path validation results:");
-                Iterator errorsIt = review.getErrors(-1).iterator();
-                while (errorsIt.hasNext()) {
-                    logger.debug("ERROR - " + errorsIt.next().toString());
-                }
-                Iterator notificationsIt = review.getNotifications(-1)
-                        .iterator();
-                while (notificationsIt.hasNext()) {
-                    logger.debug("NOTIFICACION - " + notificationsIt.next().toString());
-                }
-                // per certificate errors and notifications
-                Iterator certIt = review.getCertPath().getCertificates().iterator();
-                int i = 0;
-                while (certIt.hasNext()) {
-                    X509Certificate cert = (X509Certificate) certIt.next();
-                    logger.debug("Certificate " + i + " ------------ ");
-                    logger.debug("Issuer: " + cert.getIssuerDN().getName());
-                    logger.debug("Subject: " + cert.getSubjectDN().getName());
-                    logger.debug("Errors:");
-                    errorsIt = review.getErrors(i).iterator();
-                    while (errorsIt.hasNext())  {
-                        logger.debug( errorsIt.next().toString());
-                    }
-                    // notifications
-                    logger.debug("Notifications:");
-                    notificationsIt = review.getNotifications(i).iterator();
-                    while (notificationsIt.hasNext()) {
-                        logger.debug(notificationsIt.next().toString());
-                    }
-                    i++;
-                }
-            }
-        }
         return result;
     }
 
@@ -444,24 +327,29 @@ public class SMIMEMessageWrapper extends MimeMessage {
     	return firmantes;
     }
     
-    /**
-     * @return the validationResult
-     */
-    public SignedMailValidator.ValidationResult getValidationResult() {
-        return validationResult;
-    }
-    
-    public File copyContentToFile (File destFile) throws IOException, MessagingException {
-        FileOutputStream fos = new FileOutputStream(destFile);
-        writeTo(fos);
-        fos.close();
-        return destFile;
+    public byte[] getBytes () {
+        return messageBytes;
     }
 
+	public InformacionVoto getInformacionVoto() {
+		return informacionVoto;
+	}
+
+
 	public Usuario getFirmante() {
+		if(firmante == null && !firmantes.isEmpty()) {
+			firmante = firmantes.iterator().next();
+		}
 		return firmante;
 	}
 	
+    /**
+     * @return the smimeSigned
+     */
+    public SMIMESigned getSmimeSigned() {
+        return smimeSigned;
+    }
+    
     //Call this method after isValidSignature()!!!
     private TimeStampToken checkTimeStampToken(SignerInformation signer) throws Exception {
         TimeStampToken timeStampToken = null;
@@ -488,21 +376,5 @@ public class SMIMEMessageWrapper extends MimeMessage {
         } else logger.debug("checkTimeStampToken - without unsignedAttributes"); 
         return timeStampToken;
     }
-    
-    public byte[] getBytes () throws IOException, MessagingException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(content.length);
-        writeTo(baos);
-        byte[] resultado = baos.toByteArray();
-        baos.close();
-        return resultado;
-    }
-
-	public InformacionVoto getInformacionVoto() {
-		return informacionVoto;
-	}
-
-	public void setInformacionVoto(InformacionVoto informacionVoto) {
-		this.informacionVoto = informacionVoto;
-	}
     
 }

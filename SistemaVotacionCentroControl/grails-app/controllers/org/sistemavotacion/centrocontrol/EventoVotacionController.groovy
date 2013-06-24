@@ -107,10 +107,10 @@ class EventoVotacionController {
 			render msg
 			return false
 		}
-		Respuesta respuesta = eventoVotacionService.saveEvent(mensajeSMIME, request.getLocale())
-		if(Respuesta.SC_OK == respuesta.codigoEstado) {
-			render respuesta.mensaje
-			return false
+		params.respuesta = eventoVotacionService.saveEvent(mensajeSMIME, request.getLocale())
+		if(Respuesta.SC_OK == params.respuesta.codigoEstado) {
+			response.status = Respuesta.SC_OK
+			render params.respuesta.mensaje
 		}
 	}
 
@@ -210,8 +210,9 @@ class EventoVotacionController {
 				return false
 			}
 		} else if(params.eventAccessControlURL) {
+			log.debug("params.eventAccessControlURL: ${params.eventAccessControlURL}")
 			EventoVotacion.withTransaction {
-				eventoVotacion = EventoVotacion.findWhere(url:params.eventAccessControlURL)
+				eventoVotacion = EventoVotacion.findByUrl(params.eventAccessControlURL.trim())
 			}
 			if (!eventoVotacion) {
 				response.status = Respuesta.SC_NOT_FOUND

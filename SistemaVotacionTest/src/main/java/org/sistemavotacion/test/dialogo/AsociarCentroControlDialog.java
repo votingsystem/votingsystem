@@ -5,11 +5,13 @@ import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JTextField;
-import javax.swing.SwingWorker;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import org.sistemavotacion.Contexto;
@@ -19,11 +21,8 @@ import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.util.StringUtils;
-import org.sistemavotacion.worker.InfoGetterWorker;
-import org.sistemavotacion.worker.SMIMESignedSenderWorker;
-import org.sistemavotacion.worker.VotingSystemWorker;
-import org.sistemavotacion.worker.VotingSystemWorkerListener;
-import org.sistemavotacion.worker.VotingSystemWorkerType;
+import org.sistemavotacion.callable.InfoGetter;
+import org.sistemavotacion.callable.SMIMESignedSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,18 +31,21 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class AsociarCentroControlDialog extends JDialog implements 
-        VotingSystemWorkerListener, KeyListener {
+public class AsociarCentroControlDialog extends JDialog implements KeyListener {
 
     private static Logger logger = LoggerFactory.getLogger(AsociarCentroControlDialog.class);
 
-    public enum Worker implements VotingSystemWorkerType{INFO_GETTER,
-        ASSOCIATE_CONTROL_CENTER}
+    private static BlockingQueue<Future<Respuesta>> queue = 
+        new LinkedBlockingQueue<Future<Respuesta>>(3);
+    
+    private static final int CONTROL_CENTER_GETTER    = 0;
+    private static final int ASSOCIATE_CONTROL_CENTER = 1;
+
 
     public enum Estado {DESCONECTADO, CONECTANDO, CONECTADO_CENTRO_CONTROL, 
         ASOCIANDO_CENTRO_CONTROL, CENTRO_CONTROL_ASOCIADO;}
     
-    private SwingWorker tareaEnEjecucion;
+    private Future<Respuesta> tareaEnEjecucion;
     private Estado estado = Estado.DESCONECTADO;
     private ActorConIP controlCenter = null;
     private Border normalTextBorder;
@@ -59,8 +61,92 @@ public class AsociarCentroControlDialog extends JDialog implements
         normalTextBorder = new JTextField().getBorder();
         mensajePanel.setVisible(false);
         controlCenterTextField.addKeyListener(this);
+        ContextoPruebas.INSTANCE.submit(new Runnable() {
+            @Override public void run() {
+                try {
+                    readFutures();
+                } catch (Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                }
+            }
+        });
         pack();
     }
+        
+    public void readFutures () {
+        logger.debug(" - readFutures");
+        AtomicBoolean done = new AtomicBoolean(false);
+        while (!done.get()) {
+            try {
+                Future<Respuesta> future = queue.take();
+                Respuesta respuesta = future.get();
+                switch(respuesta.getId()) {
+                    case CONTROL_CENTER_GETTER:
+                        if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                            try {
+                                controlCenter = ActorConIP.parse(respuesta.getMensaje());
+                                if(controlCenter.getTipo() != ActorConIP.Tipo.CENTRO_CONTROL) {
+                                    mostrarMensajeUsuario(ContextoPruebas.INSTANCE.
+                                            getString("controlCenterErrorMsg"));
+                                    controlCenterTextField.setBorder(new LineBorder(Color.RED,2));
+                                    infoServidorButton.setIcon(null);
+                                    infoServidorButton.setText(ContextoPruebas.INSTANCE.
+                                            getString("associateLbl"));
+                                    estado = Estado.DESCONECTADO;
+                                    return;
+                                }
+                                if(ActorConIP.EnvironmentMode.DEVELOPMENT !=  
+                                        controlCenter.getEnvironmentMode()) {
+                                    String msg = ContextoPruebas.INSTANCE.getString(
+                                            "serverModeErrorMsg", controlCenter.getEnvironmentMode());
+                                    logger.error("### ERROR - " + msg);
+                                    mostrarMensajeUsuario(msg);
+                                    controlCenterTextField.setBorder(new LineBorder(Color.RED,2));
+                                    infoServidorButton.setIcon(null);
+                                    infoServidorButton.setText(ContextoPruebas.INSTANCE.
+                                            getString("associateLbl"));
+                                    estado = Estado.DESCONECTADO;                        
+                                    return;
+                                }
+                                mostrarMensajeUsuario(null);
+                                controlCenterTextField.setBorder(normalTextBorder);
+                                estado = Estado.CONECTADO_CENTRO_CONTROL;
+                                sendAssociationRequest();
+                            } catch(Exception ex) {
+                                logger.error(ex.getMessage(), ex);
+                                infoServidorButton.setIcon(new javax.swing.ImageIcon(
+                                        getClass().getResource("/images/pair_16x16.png")));
+                                infoServidorButton.setText(ContextoPruebas.INSTANCE.
+                                        getString("associateLbl"));
+                                mostrarMensajeUsuario(ex.getMessage());
+                            }
+                        } else {
+                            mostrarMensajeUsuario(respuesta.getMensaje());
+                            infoServidorButton.setIcon(null);
+                            infoServidorButton.setText("Asociar");
+                        }  
+                        break;
+                    case ASSOCIATE_CONTROL_CENTER:
+                        if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                            estado = Estado.CENTRO_CONTROL_ASOCIADO;
+                            infoServidorButton.setText("Información del servidor");
+                            infoServidorButton.setIcon(new ImageIcon(getClass()
+                                    .getResource("/images/information-white.png")));
+                            ContextoPruebas.INSTANCE.setControlCenter(controlCenter);
+                            dispose();
+                        } else {
+                            mostrarMensajeUsuario(respuesta.getMensaje());
+                            infoServidorButton.setIcon(null);
+                            infoServidorButton.setText("Asociar");
+                        }
+                        break;
+                }
+            } catch(Exception ex) {
+                logger.error(ex.getMessage(), ex);
+            }
+        }
+    }
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -204,10 +290,16 @@ public class AsociarCentroControlDialog extends JDialog implements
                 String urlServidor = StringUtils.prepararURL(
                         controlCenterTextField.getText().trim());
                 String urlInfoServidor = ContextoPruebas.getURLInfoServidor(urlServidor);
-                tareaEnEjecucion = new InfoGetterWorker(Worker.INFO_GETTER,
-                    urlInfoServidor, null, this);
-                tareaEnEjecucion.execute();
+                InfoGetter infoGetter = new InfoGetter(
+                        CONTROL_CENTER_GETTER,urlInfoServidor, null);
+                Future<Respuesta> future = ContextoPruebas.INSTANCE.submit(infoGetter);
+                tareaEnEjecucion = future;
                 controlCenterTextField.setText(controlCenterTextField.getText().trim());
+                try {
+                    queue.put(future);
+                } catch(Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                }
                 break;
             case CONECTANDO:
                 tareaEnEjecucion.cancel(true);
@@ -315,11 +407,12 @@ public class AsociarCentroControlDialog extends JDialog implements
                     ContextoPruebas.INSTANCE.getUserTest().getEmail(), 
                     Contexto.INSTANCE.getAccessControl().getNombreNormalizado(), 
                     documentoAsociacion, msgSubject, null);
-
-            tareaEnEjecucion = new SMIMESignedSenderWorker(Worker.ASSOCIATE_CONTROL_CENTER, 
+            SMIMESignedSender signedSender = new SMIMESignedSender(ASSOCIATE_CONTROL_CENTER, 
                     smimeDocument, ContextoPruebas.INSTANCE.getURLAsociarActorConIP(), 
-                    null, null, this);
-            tareaEnEjecucion.execute();
+                    null, null);
+            Future<Respuesta> future = ContextoPruebas.INSTANCE.submit(signedSender);
+            queue.put(future);
+            tareaEnEjecucion = future;
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             infoServidorButton.setIcon(null);
@@ -349,81 +442,5 @@ public class AsociarCentroControlDialog extends JDialog implements
     }
 
     @Override public void keyReleased(KeyEvent ke) { }
-    
-
-    @Override public void processVotingSystemWorkerMsg(List<String> messages) {
-        String msg = null;
-        for(String message : messages) {
-            if(msg == null ) msg = message;
-            else msg = msg + "<br/>" + message; 
-        }
-        mostrarMensajeUsuario(msg);
-    }
-
-    @Override public void showResult(VotingSystemWorker worker) {
-        logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-                " - worker: " + worker.getType());
-        switch((Worker)worker.getType()) {
-            case INFO_GETTER:
-            if(Respuesta.SC_OK == worker.getStatusCode()) {
-                try {
-                    controlCenter = ActorConIP.parse(worker.getMessage());
-                    if(controlCenter.getTipo() != ActorConIP.Tipo.CENTRO_CONTROL) {
-                        mostrarMensajeUsuario(ContextoPruebas.INSTANCE.
-                                getString("controlCenterErrorMsg"));
-                        controlCenterTextField.setBorder(new LineBorder(Color.RED,2));
-                        infoServidorButton.setIcon(null);
-                        infoServidorButton.setText(ContextoPruebas.INSTANCE.
-                                getString("associateLbl"));
-                        estado = Estado.DESCONECTADO;
-                        return;
-                    }
-                    if(ActorConIP.EnvironmentMode.DEVELOPMENT !=  
-                            controlCenter.getEnvironmentMode()) {
-                        String msg = ContextoPruebas.INSTANCE.getString(
-                                "serverModeErrorMsg", controlCenter.getEnvironmentMode());
-                        logger.error("### ERROR - " + msg);
-                        mostrarMensajeUsuario(msg);
-                        controlCenterTextField.setBorder(new LineBorder(Color.RED,2));
-                        infoServidorButton.setIcon(null);
-                        infoServidorButton.setText(ContextoPruebas.INSTANCE.
-                                getString("associateLbl"));
-                        estado = Estado.DESCONECTADO;                        
-                        return;
-                    }
-                    mostrarMensajeUsuario(null);
-                    controlCenterTextField.setBorder(normalTextBorder);
-                    estado = Estado.CONECTADO_CENTRO_CONTROL;
-                    sendAssociationRequest();
-                } catch(Exception ex) {
-                    logger.error(ex.getMessage(), ex);
-                    infoServidorButton.setIcon(new javax.swing.ImageIcon(
-                            getClass().getResource("/images/pair_16x16.png")));
-                    infoServidorButton.setText(ContextoPruebas.INSTANCE.
-                            getString("associateLbl"));
-                    mostrarMensajeUsuario(ex.getMessage());
-                }
-            } else {
-                mostrarMensajeUsuario(worker.getMessage());
-                infoServidorButton.setIcon(null);
-                infoServidorButton.setText("Asociar");
-            }
-            break;
-            case ASSOCIATE_CONTROL_CENTER:
-                if(Respuesta.SC_OK == worker.getStatusCode()) {
-                    estado = Estado.CENTRO_CONTROL_ASOCIADO;
-                    infoServidorButton.setText("Información del servidor");
-                    infoServidorButton.setIcon(new ImageIcon(getClass()
-                            .getResource("/images/information-white.png")));
-                    ContextoPruebas.INSTANCE.setControlCenter(controlCenter);
-                    dispose();
-                } else {
-                    mostrarMensajeUsuario(worker.getMessage());
-                    infoServidorButton.setIcon(null);
-                    infoServidorButton.setText("Asociar");
-                }
-                break;
-        }
-    }
         
 }

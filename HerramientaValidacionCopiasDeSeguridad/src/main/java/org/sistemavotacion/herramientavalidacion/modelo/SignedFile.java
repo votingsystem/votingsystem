@@ -133,9 +133,18 @@ public class SignedFile {
     public Long getSelectedOptionId() {
         if(smimeMessageWraper == null) return null;
         String signedContent = smimeMessageWraper.getSignedContent();
-        JSONObject contentJSON = (JSONObject)JSONSerializer.toJSON(signedContent);
-        if(contentJSON.containsKey("opcionSeleccionadaId")) {
-            return contentJSON.getLong("opcionSeleccionadaId");
-        } else return null;
+        Object content = JSONSerializer.toJSON(signedContent);
+        if(content instanceof JSONObject) {
+            JSONObject contentJSON = (JSONObject)content;
+            if(contentJSON.containsKey("opcionSeleccionadaId")) {
+                return contentJSON.getLong("opcionSeleccionadaId");
+            }
+        } else {
+            logger.error(" =========== File '" + name + "' content is instance of " + 
+                    content.getClass());
+            logger.error(" =========== content:" + content);
+        }
+        return null;
     }
+    
 }

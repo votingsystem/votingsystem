@@ -1,5 +1,6 @@
 package org.sistemavotacion.controlacceso
 
+import java.security.cert.X509Certificate
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Temporal;
@@ -30,7 +31,7 @@ class EventoReclamacionService {
     def grailsApplication
 	def messageSource
 	def filesService
-	
+	def timeStampService
 
     Respuesta saveEvent(MensajeSMIME mensajeSMIMEReq, Locale locale) {		
 		EventoReclamacion evento
@@ -95,37 +96,42 @@ class EventoReclamacionService {
 		}
     }
 
-    public synchronized Respuesta generarCopiaRespaldo (EventoReclamacion evento, Locale locale) {
-        log.debug("generarCopiaRespaldo - eventoId: ${evento.id}")
+    public synchronized Respuesta generarCopiaRespaldo (EventoReclamacion event, Locale locale) {
+        log.debug("generarCopiaRespaldo - eventoId: ${event.id}")
 		Respuesta respuesta;
-        if (!evento) {
+        if (!event) {
 			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:
-				messageSource.getMessage('evento.peticionSinEvento', null, locale))
+				messageSource.getMessage('event.peticionSinEvento', null, locale))
         }
 		
 		Map<String, File> mapFiles = filesService.getBackupFiles(
-			evento, Tipo.EVENTO_RECLAMACION, locale)
+			event, Tipo.EVENTO_RECLAMACION, locale)
 		File metaInfFile = mapFiles.metaInfFile
 		File filesDir = mapFiles.filesDir
 		File zipResult   = mapFiles.zipResult
 		
-
-		
-		def firmasRecibidas = Firma.findAllWhere(evento:evento)		
-		def metaInfMap = [numSignatures:firmasRecibidas.size()]
-		Evento.withTransaction {
-			evento.updateMetaInf(Tipo.BACKUP, metaInfMap)
-		}
-		metaInfFile.write(evento.metaInf)
+		def firmasRecibidas = Firma.findAllWhere(
+			evento:event, tipo:Tipo.FIRMA_EVENTO_RECLAMACION)		
+		def backupMetaInfMap = [numSignatures:firmasRecibidas.size()]
+		def eventMetaInfMap = eventoService.updateEventMetaInf(
+			event, Tipo.BACKUP, backupMetaInfMap)
+		metaInfFile.write((eventMetaInfMap as JSON).toString())
 		
 		String fileNamePrefix = messageSource.getMessage('claimLbl', null, locale);
-		int i = 0
-		
-		firmasRecibidas.each { firma ->
+		firmasRecibidas.eachWithIndex { firma, index ->
 			MensajeSMIME mensajeSMIME = firma.mensajeSMIME
-			File smimeFile = new File("${filesDir.absolutePath}/${fileNamePrefix}_${String.format('%08d', i++)}.p7m")
+			File smimeFile = new File("${filesDir.absolutePath}/${fileNamePrefix}_${String.format('%08d', index)}.p7m")
 			smimeFile.setBytes(mensajeSMIME.contenido)
 		}
+		
+		Set<X509Certificate> systemTrustedCerts = firmaService.getTrustedCerts()
+		byte[] systemTrustedCertsPEMBytes = CertUtil.fromX509CertCollectionToPEM(systemTrustedCerts)
+		File systemTrustedCertsFile = new File("${filesDir.absolutePath}/systemTrustedCerts.pem")
+		systemTrustedCertsFile.setBytes(systemTrustedCertsPEMBytes)
+		
+		byte[] timeStampCertPEMBytes = timeStampService.getSigningCert()
+		File timeStampCertFile = new File("${filesDir.absolutePath}/timeStampCert.pem")
+		timeStampCertFile.setBytes(timeStampCertPEMBytes)
 		
 		def ant = new AntBuilder()
 		ant.zip(destfile: zipResult, basedir: "${filesDir.absolutePath}") {

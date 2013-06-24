@@ -8,6 +8,8 @@ import org.springframework.context.ApplicationContext;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.security.cert.X509Certificate;
 import grails.util.*
+import org.sistemavotacion.utils.*
+
 /**
 * @infoController Servicio de Certificados
 * @descController Servicios relacionados con los certificados manejados por la aplicación
@@ -166,7 +168,8 @@ class CertificadoController {
 	 * @return Si todo va bien devuelve un código de estado HTTP 200.
 	 */
 	def addCertificateAuthority () {
-		if(!Environment.DEVELOPMENT.equals(Environment.current)) {
+		if(!VotingSystemApplicationContex.Environment.DEVELOPMENT.equals(
+			VotingSystemApplicationContex.instance.environment)) {
 			def msg = message(code: "serviceDevelopmentModeMsg")
 			log.error msg
 			response.status = Respuesta.SC_ERROR_PETICION

@@ -8,7 +8,7 @@ import org.sistemavotacion.seguridad.*;
 import org.sistemavotacion.smime.*;
 import org.sistemavotacion.util.*;
 import org.sistemavotacion.controlacceso.modelo.*;
-
+import java.security.cert.X509Certificate;
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.*
 import java.io.File;
@@ -56,31 +56,35 @@ class EventoFirmaService {
 
 	}
 
-	public synchronized Respuesta generarCopiaRespaldo(EventoFirma evento, Locale locale) {
-		log.debug("generarCopiaRespaldo - eventoId: ${evento.id}")
+	public synchronized Respuesta generarCopiaRespaldo(EventoFirma event, Locale locale) {
+		log.debug("generarCopiaRespaldo - eventoId: ${event.id}")
 		Respuesta respuesta;
-		if(!evento) {
+		if(!event) {
 			return respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
 				mensaje:messageSource.getMessage(
-				'eventNotFound', [evento.id].toArray(), locale))
+				'eventNotFound', [event.id].toArray(), locale))
 		}
-		def firmasRecibidas = Documento.findAllWhere(evento:evento,
+		def firmasRecibidas = Documento.findAllWhere(evento:event,
 			estado:Documento.Estado.FIRMA_MANIFIESTO_VALIDADA)
 		
 		Map<String, File> mapFiles = filesService.getBackupFiles(
-			evento, Tipo.EVENTO_FIRMA, locale)
+			event, Tipo.EVENTO_FIRMA, locale)
 		File metaInfFile = mapFiles.metaInfFile
 		File filesDir = mapFiles.filesDir
 		File zipResult   = mapFiles.zipResult
 		
-		def metaInfMap = [numSignatures:firmasRecibidas.size()]
-		Evento.withTransaction {
-			evento.updateMetaInf(Tipo.BACKUP, metaInfMap)
-		}
-		metaInfFile.write(evento.metaInf)
+		Set<X509Certificate> systemTrustedCerts = firmaService.getTrustedCerts()
+		byte[] systemTrustedCertsPEMBytes = CertUtil.fromX509CertCollectionToPEM(systemTrustedCerts)
+		File systemTrustedCertsFile = new File("${filesDir.absolutePath}/systemTrustedCerts.pem")
+		systemTrustedCertsFile.setBytes(systemTrustedCertsPEMBytes)
 		
-		String fileNamePrefix = messageSource.getMessage('manifestSignatureLbl', 
-			null, locale);
+		def backupMetaInfMap = [numSignatures:firmasRecibidas.size()]
+		def eventMetaInfMap = eventoService.updateEventMetaInf(
+			event, Tipo.BACKUP, backupMetaInfMap)
+		metaInfFile.write((eventMetaInfMap as JSON).toString())
+		
+		String fileNamePrefix = messageSource.getMessage(
+			'manifestSignatureLbl', null, locale);
 		int i = 1
 		firmasRecibidas.each { firma ->
 			File pdfFile = new File("${filesDir.absolutePath}/${fileNamePrefix}_${String.format('%08d', i++)}.pdf")

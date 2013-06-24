@@ -78,7 +78,7 @@ public abstract class Simulator<T extends SimulationData>
         }
     }
         
-    public List<String> geterrorList() {
+    public List<String> getErrorList() {
         return errorList;
     }
     

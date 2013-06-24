@@ -97,7 +97,8 @@ class SubscripcionService {
 		}
 		Usuario usuario = Usuario.findWhere(nif:nifValidado)
 		if (!usuario) {
-			usuario = new Usuario(nif:nifValidado, email:email, telefono:telefono).save()
+			usuario = new Usuario(nif:nifValidado, email:email, telefono:telefono,
+				type:Usuario.Type.USER).save()
 		}
 		Dispositivo dispositivo = Dispositivo.findWhere(deviceId:deviceId)
 		if (!dispositivo || (dispositivo.usuario.id != usuario.id)) dispositivo = new Dispositivo(usuario:usuario, telefono:telefono, email:email, 
@@ -105,7 +106,7 @@ class SubscripcionService {
 		return new Respuesta(codigoEstado:Respuesta.SC_OK, usuario:usuario, dispositivo:dispositivo)
 	}
     
-	Respuesta checkControlCenter(String serverURL) {
+	Respuesta checkControlCenter(String serverURL, Locale locale) {
         log.debug "checkControlCenter - serverURL:${serverURL}"
 		String msg = null
         serverURL = StringUtils.checkURL(serverURL)
@@ -123,9 +124,10 @@ class SubscripcionService {
 				x509controlCenterCertDB = CertUtil.loadCertificateFromStream (bais) 
 			}
 		}
-		Respuesta respuesta = httpService.obtenerInfoActorConIP(urlInfoCentroControl)
+		Respuesta respuesta = httpService.getInfo(urlInfoCentroControl, null)
 		if (Respuesta.SC_OK == respuesta.codigoEstado) {
-			ActorConIP actorConIP = respuesta.actorConIP
+			ActorConIP actorConIP = ActorConIP.parse(respuesta.mensaje)
+
 			if (!Tipo.CENTRO_CONTROL.equals(actorConIP.tipoServidor)) {
 				msg = message(code: 'susbcripcion.actorNoCentroControl',
 					args:[actorConIP.serverURL])
@@ -203,7 +205,7 @@ class SubscripcionService {
 						codigoEstado:Respuesta.SC_ERROR_PETICION,
 						tipo:Tipo.ASOCIAR_CENTRO_CONTROL_ERROR)
 				} else {
-					Respuesta respuesta = checkControlCenter(serverURL)
+					Respuesta respuesta = checkControlCenter(serverURL, locale)
 					if (Respuesta.SC_OK != respuesta.codigoEstado) {
 						log.error("asociarCentroControl- ERROR CHECKING CONTROL CENTER - ${respuesta.mensaje}")
 						return new Respuesta(mensaje:respuesta.mensaje,

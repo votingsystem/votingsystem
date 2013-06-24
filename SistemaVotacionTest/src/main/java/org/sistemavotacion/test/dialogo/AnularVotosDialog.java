@@ -10,7 +10,6 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
 import net.sf.json.JSONException;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.Evento;
@@ -40,7 +39,7 @@ public class AnularVotosDialog extends JDialog implements SelectorArchivosListen
     private MensajeDialog mensajeDialog;
     private static long comienzo;
     private List<String> errorList;
-    private SwingWorker tareaEnEjecucion;
+    private Future<Respuesta> tareaEnEjecucion;
     private Evento evento;
     private Estado estado = Estado.RECOGIENDO_DATOS;
     private static ExecutorService operationExecutor;

@@ -29,7 +29,7 @@ import java.util.Properties;
 import java.util.UUID;
 
 import org.bouncycastle.tsp.TSPAlgorithms;
-import org.sistemavotacion.json.DeJSONAObjeto;
+import org.bouncycastle2.jce.provider.BouncyCastleProvider;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Consulta;
 import org.sistemavotacion.modelo.Evento;
@@ -38,7 +38,6 @@ import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.task.GetDataTask;
-import org.sistemavotacion.task.TaskListener;
 import org.sistemavotacion.util.ServerPaths;
 import org.sistemavotacion.util.StringUtils;
 import org.sistemavotacion.util.SubSystem;
@@ -52,7 +51,6 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
@@ -63,24 +61,24 @@ import android.widget.Button;
 import android.widget.Toast;
 
 
-public class Aplicacion extends FragmentActivity implements TaskListener {
+public class Aplicacion extends FragmentActivity {
 	
 	public static final String TAG = "Aplicacion";
 	
 	public enum Estado {CON_CERTIFICADO, CON_CSR, SIN_CSR}
 
-	
-	public static final String PREFS_ESTADO              = "estado";
-	public static final String PREFS_ID_SOLICTUD_CSR     = "idSolicitudCSR";
-	public static final String PREFS_ID_APLICACION       = "idAplicacion";
-	public static final String MANIFEST_FILE_NAME        = "Manifest";
-    public static final String NOMBRE_ARCHIVO_FIRMADO    = "archivoFirmado";
-    public static final String NOMBRE_ARCHIVO_CSR        = "csr";
-    public static final String NOMBRE_ARCHIVO_BYTE_ARRAY = "byteArray";
-    public static final String SIGNED_PART_EXTENSION     = ".p7m";
-    public static final String DEFAULT_SIGNED_FILE_NAME  = "smimeMessage";
-    public static final String PROVIDER             = "BC";
-    public static final String SERVER_URL_EXTRA_PROP_NAME= "serverURL";
+	public static final String PREFS_ESTADO               = "estado";
+	public static final String PREFS_ID_SOLICTUD_CSR      = "idSolicitudCSR";
+	public static final String PREFS_ID_APLICACION        = "idAplicacion";
+	public static final String MANIFEST_FILE_NAME         = "Manifest";
+    public static final String NOMBRE_ARCHIVO_FIRMADO     = "archivoFirmado";
+    public static final String CSR_FILE_NAME              = "csr";
+    public static final String ACCESS_REQUEST_FILE_NAME   = "accessRequest";  
+    public static final String NOMBRE_ARCHIVO_BYTE_ARRAY  = "byteArray";
+    public static final String SIGNED_PART_EXTENSION      = ".p7m";
+    public static final String DEFAULT_SIGNED_FILE_NAME   = "smimeMessage.p7m";
+    public static final String PROVIDER                   = BouncyCastleProvider.PROVIDER_NAME;
+    public static final String SERVER_URL_EXTRA_PROP_NAME = "serverURL";
     public static final int KEY_SIZE = 1024;
     public static final int EVENTS_PAGE_SIZE = 30;
     public static final int MAX_SUBJECT_SIZE = 60;
@@ -88,7 +86,8 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
     public static final String SIG_HASH = "SHA256";
     public static final String SIG_NAME = "RSA";
     public static final String SIGNATURE_ALGORITHM = "SHA256WithRSA";
-    public static final String VOTE_SIGN_MECHANISM = "SHA256withRSA";
+    //public static final String VOTE_SIGN_MECHANISM = "SHA512withRSA";
+    public static final String VOTE_SIGN_MECHANISM = "SHA256WithRSA";
     public static final String ALIAS_CERT_USUARIO = "CertificadoUsuario";
     public static final String KEY_STORE_FILE = "keyStoreFile.p12";
     
@@ -98,9 +97,24 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
     public static final String ASUNTO_MENSAJE_FIRMA_DOCUMENTO = "[Firma]-";    
     public static String CONTROL_ACCESO_URL = null;
     public static final String SISTEMA_VOTACION_DIR = "SistemaVotacion";
+    public static final String VOTING_HEADER_LABEL  = "votingSystemMessageType";
+    
     
     public static final String CERT_NOT_FOUND_DIALOG_ID      = "certNotFoundDialog";
     public static final String PIN_DIALOG_ID                 = "pinDialog";
+    
+    public static final String PDF_CONTENT_TYPE    = "application/pdf";
+    public static final String SIGNED_CONTENT_TYPE = "application/x-pkcs7-signature";
+    public static final String X509_CONTENT_TYPE = "application/x-x509-ca-cert";
+    public static final String ENCRYPTED_CONTENT_TYPE = "application/x-pkcs7-mime";
+    public static final String SIGNED_AND_ENCRYPTED_CONTENT_TYPE = 
+            SIGNED_CONTENT_TYPE + "," + ENCRYPTED_CONTENT_TYPE;
+    public static final String PDF_SIGNED_AND_ENCRYPTED_CONTENT_TYPE = 
+            PDF_CONTENT_TYPE + "," +  SIGNED_CONTENT_TYPE + ";" + ENCRYPTED_CONTENT_TYPE;    
+    public static final String PDF_SIGNED_CONTENT_TYPE = 
+    		PDF_CONTENT_TYPE + "," + SIGNED_CONTENT_TYPE;     
+    public static final String PDF_ENCRYPTED_CONTENT_TYPE = 
+    		PDF_CONTENT_TYPE + "," + ENCRYPTED_CONTENT_TYPE; 
     
     private SubSystem selectedSubsystem = SubSystem.VOTING;
     private List<SubSystemChangeListener> subSystemChangeListeners = new ArrayList<SubSystemChangeListener>();
@@ -177,10 +191,12 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
             	operation.setTipo(browserToken.trim());
             if(operation.getEvento() != null) {
             	try {
-                	GetDataTask getDataTask = (GetDataTask)new GetDataTask(null, this).execute(operation.getEvento().getURL());
-                	Log.d(TAG + ".onCreate(...)", " - getDataTask - statusCode: " + getDataTask.get());
-                	if(Respuesta.SC_OK == getDataTask.getStatusCode()) {
-                		Consulta consulta =  DeJSONAObjeto.obtenerConsultaEventos(getDataTask.getMessage());
+                	GetDataTask getDataTask = (GetDataTask)new GetDataTask(null).execute(
+                			operation.getEvento().getURL());
+                	Respuesta respuesta = getDataTask.get();
+                	Log.d(TAG + ".onCreate(...)", " - getDataTask - statusCode: " + respuesta.getCodigoEstado());
+                	if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                		Consulta consulta = Consulta.parse(respuesta.getMensaje());
 						if(consulta.getEventos() != null && consulta.getEventos().size() > 0) {
 							eventoSeleccionado = consulta.getEventos().iterator().next();
 							eventoSeleccionado.setOpcionSeleccionada(operation.
@@ -188,7 +204,7 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
 							operation.setEvento(eventoSeleccionado);	
 						}
 						processOperation(operation);
-                	} else showMessage(getString(R.string.error_lbl), getDataTask.getMessage());
+                	} else showMessage(getString(R.string.error_lbl), respuesta.getMensaje());
             	} catch(Exception ex) {
             		ex.printStackTrace();
             		showMessage(getString(R.string.error_lbl), ex.getMessage());
@@ -218,17 +234,18 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
     	if (controlAcceso == null || !controlAcceso.getServerURL().
     			equals(CONTROL_ACCESO_URL)) {
     		try {
-        		GetDataTask getDataTask = (GetDataTask) new GetDataTask(null, this).
+        		GetDataTask getDataTask = (GetDataTask) new GetDataTask(null).
         				execute(ServerPaths.getURLInfoServidor(CONTROL_ACCESO_URL));
-    			if(Respuesta.SC_OK == getDataTask.get()) {
+        		Respuesta respuesta = getDataTask.get();
+    			if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
     				try {
-    					controlAcceso = DeJSONAObjeto.obtenerActorConIP(
-    							getDataTask.getMessage(), ActorConIP.Tipo.CONTROL_ACCESO);
+    					controlAcceso = ActorConIP.parse(respuesta.getMensaje(), 
+    							ActorConIP.Tipo.CONTROL_ACCESO);
     				} catch (Exception ex) {
     					ex.printStackTrace();
     				    showMessage(getString(R.string.error_lbl), ex.getMessage());
     				}
-    			} else showMessage(getString(R.string.error_lbl), getDataTask.getMessage());
+    			} else showMessage(getString(R.string.error_lbl), respuesta.getMensaje());
     		} catch(Exception ex) {
     			ex.printStackTrace();
     			showMessage(getString(R.string.error_lbl), ex.getMessage());
@@ -239,15 +256,16 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
     public void getNetworkCert(String serverURL) throws Exception {
     	Log.d(TAG + ".getServerCert() ", " - getServerCert - serverURL: " + serverURL);
     	String serverCertURL = ServerPaths.getURLCadenaCertificacion(serverURL);
-		GetDataTask getDataTask = (GetDataTask) new GetDataTask(null, this).
+		GetDataTask getDataTask = (GetDataTask) new GetDataTask(null).
 				execute(serverCertURL);
-		if(Respuesta.SC_OK == getDataTask.get()) {
+		Respuesta respuesta = getDataTask.get();
+		if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
 			Collection<X509Certificate> certChain = CertUtil.fromPEMToX509CertCollection(
-					getDataTask.getMessage().getBytes());
+					respuesta.getMessageBytes());
 			X509Certificate serverCert = certChain.iterator().next();
 			certsMap.put(serverURL, serverCert);
 		} else Log.d(TAG + ".getServerCert() ", " - Error - server status: " + 
-			getDataTask.getStatusCode() + " - message: " + getDataTask.getMessage());
+				respuesta.getCodigoEstado() + " - message: " + respuesta.getMensaje());
     }
     
     public X509Certificate getCert(String serverURL) {
@@ -514,13 +532,5 @@ public class Aplicacion extends FragmentActivity implements TaskListener {
         editor.putString(PREFS_ESTADO + "_" + CONTROL_ACCESO_URL , estado.toString());
         editor.commit();
 	}
-	
-	@Override
-	public void processTaskMessages(List<String> messages, AsyncTask task) { }
 
-	@Override
-	public void showTaskResult(AsyncTask task) {
-		Log.d(TAG + ".showTaskResult(...)", " - task: " + task.getClass());
-	}
-	
 }

@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class VotingBackupData {
+public class VotingBackupData implements BackupData{
     
     private static Logger logger = LoggerFactory.getLogger(VotingBackupData.class);
     
@@ -26,15 +26,18 @@ public class VotingBackupData {
     private Map<String, RepresentativeBackupData> representativesMap = 
             new HashMap<String, RepresentativeBackupData>();
     
-    private byte[] accessRequestTrustedCertsBytes;
+    private byte[] systemTrustedCertsBytes;
+    private Collection<X509Certificate> systemTrustedCerts;
     private byte[] eventTrustedCertsBytes;
+    private Collection<X509Certificate> eventTrustedCerts;
+    private byte[] timeStampCertBytes;    
+    private Collection<X509Certificate> timeStampCerts;
     private byte[] representativeReport;
     private Map<Long, Integer> optionsMap = new HashMap<Long, Integer>();
-    private Collection<X509Certificate> eventTrustedCerts;
-    private Collection<X509Certificate> accessRequestTrustedCerts;
     private MetaInf metaInf;    
     
     public String getFormattedInfo() {
+        StringBuilder result = new StringBuilder("");
         int numRepresentatives = representativesMap.keySet().size();
         int numRepresentativesWithVote = 0;
         int numRepresented = 0;
@@ -43,7 +46,7 @@ public class VotingBackupData {
         int numTotalVotesForEvent = 0;
         Collection<RepresentativeBackupData>  repList = 
                 representativesMap.values();
-        
+
         calculateOptionsValues(); 
         for(RepresentativeBackupData rep: repList) {
             if(rep.getVote() != null) {
@@ -55,14 +58,13 @@ public class VotingBackupData {
             numVotesOfRepresented += rep.getNumVotesOfRepresented();
             numTotalVotesForEvent += rep.getNumVotesOfRepresented();
         }
-        
+
         int numVotesUsersWithoutRepresentative = votes.size() - numVotesOfRepresented;
         numTotalVotesForEvent += numVotesUsersWithoutRepresentative;
-        
-        StringBuilder result = new StringBuilder(
-                "\n - with eventTrustedCerts: " + (eventTrustedCerts != null)).append(
-                "\n - with accessRequestTrustedCertsBytes: " + (
-                    accessRequestTrustedCertsBytes != null)).append(
+
+        result.append("\n - with eventTrustedCerts: " + (eventTrustedCerts != null)).append(
+                "\n - with systemTrustedCertsBytes: " + (
+                    systemTrustedCertsBytes != null)).append(
                 "\n - with representative report: " + (representativeReport != null)).append(
                 "\n - num. representatives: " + numRepresentatives + 
                 "\n - num. total represented: " + numRepresented + 
@@ -72,7 +74,7 @@ public class VotingBackupData {
                 "\n - num. votes users WITHOUT representative: " + 
                        numVotesUsersWithoutRepresentative +
                 "\n - num. access request: " + accessRequests.size());
-        
+
 
         Set<Long> options = optionsMap.keySet();
         if(!options.isEmpty()) {
@@ -88,8 +90,6 @@ public class VotingBackupData {
     }
 
     
-    //       
-    //"opcionSeleccionadaId":1, "opcionSeleccionadaContenido":"si"
     public Map calculateOptionsValues() {
         logger.debug("calculateOptionsValues - num. votes: " + votes.size());
         List<OpcionEvento> optionList = metaInf.getOptionList();
@@ -198,20 +198,11 @@ public class VotingBackupData {
     }
 
     /**
-     * @return the accessRequestTrustedCertsBytes
-     */
-    public byte[] getAccessRequestTrustedCertsBytes() {
-        return accessRequestTrustedCertsBytes;
-    }
-
-    /**
      * @param accessRequestTrustedCertsBytes the accessRequestTrustedCertsBytes to set
      */
     public void setAccessRequestTrustedCertsBytes(
             byte[] accessRequestTrustedCertsBytes) throws Exception {
-        this.accessRequestTrustedCertsBytes = accessRequestTrustedCertsBytes;
-        accessRequestTrustedCerts = CertUtil.fromPEMToX509CertCollection(
-                accessRequestTrustedCertsBytes);
+
     }
 
     /**
@@ -261,13 +252,6 @@ public class VotingBackupData {
     }
 
     /**
-     * @return the accessRequestTrustedCerts
-     */
-    public Collection<X509Certificate> getAccessRequestTrustedCerts() {
-        return accessRequestTrustedCerts;
-    }
-
-    /**
      * @return the eventTrustedCerts
      */
     public Collection<X509Certificate> getEventTrustedCerts() {
@@ -286,6 +270,24 @@ public class VotingBackupData {
      */
     public void setMetaInf(MetaInf metaInf) {
         this.metaInf = metaInf;
+    }
+
+    @Override public void setSystemTrustedCerts(
+            byte[] systemTrustedCertsBytes) throws Exception { 
+        this.systemTrustedCertsBytes = systemTrustedCertsBytes;
+        systemTrustedCerts = CertUtil.fromPEMToX509CertCollection(
+                systemTrustedCertsBytes);
+    }
+
+    @Override
+    public void setTimeStampCert(byte[] timeStampCertBytes) throws Exception {
+        this.timeStampCertBytes = timeStampCertBytes;
+        if(timeStampCertBytes != null)
+            timeStampCerts = CertUtil.fromPEMToX509CertCollection(timeStampCertBytes);
+    }
+
+    @Override public Collection<X509Certificate> getTimeStampCerts() {
+        return timeStampCerts;
     }
 
 }

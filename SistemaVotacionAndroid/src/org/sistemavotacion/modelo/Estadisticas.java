@@ -1,14 +1,22 @@
 package org.sistemavotacion.modelo;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.sistemavotacion.util.*;
+
+import android.util.Log;
 
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class Estadisticas {
+	
+	public static final String TAG = "Estadisticas";
    
     private Long id;
     private Evento.Estado estado;
@@ -122,4 +130,44 @@ public class Estadisticas {
         this.numeroVotosContabilizados = numeroVotosContabilizados;
     }
 
+    public static Estadisticas parse (String strEstadisticas) throws IOException, Exception {
+    	Log.d(TAG + ".parse(...)", "parse(...)");
+        Estadisticas estadisticas = new Estadisticas();
+        JSONObject estadisticaJSON = new JSONObject(strEstadisticas);
+        JSONObject jsonObject = null;
+        JSONArray jsonArray = null;
+        if (estadisticaJSON.has("tipo")) 
+            estadisticas.setTipo(Tipo.valueOf(estadisticaJSON.getString("tipo")));
+        if (estadisticaJSON.has("id"))
+             estadisticas.setId(estadisticaJSON.getLong("id"));
+        if (estadisticaJSON.has("estado"))
+             estadisticas.setEstado(Evento.Estado.valueOf(estadisticaJSON.getString("estado")));
+        if (estadisticaJSON.has("usuario")) {
+            Usuario usuario = new Usuario();
+            usuario.setNif(estadisticaJSON.getString("usuario"));
+            estadisticas.setUsuario(usuario);
+        }
+        if (estadisticaJSON.has("numeroSolicitudesDeAcceso"))
+             estadisticas.setNumeroSolicitudesDeAcceso(estadisticaJSON.getInt("numeroSolicitudesDeAcceso"));
+        if (estadisticaJSON.has("numeroFirmasRecibidas"))
+             estadisticas.setNumeroFirmasRecibidas(estadisticaJSON.getInt("numeroFirmasRecibidas"));
+        if (estadisticaJSON.has("solicitudPublicacionValidadaURL"))
+             estadisticas.setSolicitudPublicacionValidadaURL(estadisticaJSON.getString("solicitudPublicacionValidadaURL"));
+        if (estadisticaJSON.has("solicitudPublicacionURL"))
+             estadisticas.setSolicitudPublicacionURL(estadisticaJSON.getString("solicitudPublicacionURL"));
+        if (estadisticaJSON.has("fechaInicio"))
+             estadisticas.setFechaInicio(DateUtils.getDateFromString(estadisticaJSON.getString("fechaInicio")));
+        if (estadisticaJSON.has("fechaFin"))
+             estadisticas.setFechaInicio(DateUtils.getDateFromString(estadisticaJSON.getString("fechaFin")));        
+        if (estadisticaJSON.has("centroControl")) {
+            jsonObject = estadisticaJSON.getJSONObject("centroControl");
+            CentroControl centroControl = new CentroControl();
+            centroControl.setNombre(jsonObject.getString("nombre"));
+            centroControl.setServerURL(jsonObject.getString("serverURL"));
+            centroControl.setId(jsonObject.getLong("id"));
+        } 
+        if (estadisticaJSON.has("numeroSolicitudesDeAcceso"))
+             estadisticas.setNumeroSolicitudesDeAcceso(estadisticaJSON.getInt("numeroSolicitudesDeAcceso"));          
+        return estadisticas;	
+    }
 }

@@ -2,24 +2,38 @@ package org.sistemavotacion.controlacceso
 
 import org.sistemavotacion.controlacceso.modelo.*;
 import java.util.Locale;
+import javax.mail.internet.MimeMessage
+import grails.converters.JSON
+import grails.gsp.PageRenderer;
+import org.springframework.mail.MailSender
+import org.springframework.mail.SimpleMailMessage
+import org.springframework.mail.javamail.JavaMailSenderImpl
+import org.springframework.core.io.ByteArrayResource
+import org.springframework.core.io.FileSystemResource
+import org.springframework.mail.javamail.MimeMessageHelper
+import javax.mail.MessagingException;
 
 class MailSenderService {
 	
-	boolean transactional = false
-	def mailService;
+	static transactional = false
+	
+	def mailSender;
 	def grailsApplication
 	def messageSource
-
-	public void sendMail (String email, String url, String mailSubject, String bodyView) {
-		log.debug "- Sending mail -" + mailSubject + "- to email:${email}"
-	    runAsync {
-		   mailService.sendMail {
-			   to email
-			   subject mailSubject
-			   body(view:bodyView, model:[url:url])
-		   }
-	   }
-    }	
+	PageRenderer groovyPageRenderer
+	
+	
+	public void sendMail(String toUser, String msg, String subject) {
+		log.debug "sendMail - toUser:${toUser} - subject:${subject}"
+		runAsync {
+			SimpleMailMessage message = new SimpleMailMessage();
+			//message.setFrom(fromUser);
+			message.setTo(toUser);
+			message.setSubject(subject);
+			message.setText(msg);
+			mailSender.send(message);
+		}
+	}	
 	
 	public void sendInstruccionesDescargaCopiaSeguridad (SolicitudCopia solicitud, Locale locale) {
 		log.debug "sendInstruccionesDescarga - email:${solicitud.email} - solicitud:${solicitud.id}"
@@ -37,14 +51,11 @@ class MailSenderService {
 		}
 		log.debug "solicitante:${solicitante} - urlSolicitud:${urlSolicitud} - urlDescarga:${urlDescarga}"
 		String asuntoEmail = messageSource.getMessage('mailSenderService.asuntoMailDescargaCopiaSeguridad', null, locale)
-		runAsync {
-		   mailService.sendMail {
-			   to solicitud.email
-			   subject asuntoEmail
-			   body(view:"/mail/notificacionUrlCopias", model:[solicitante:solicitante,
+		
+		String renderedSrc = groovyPageRenderer.render (
+			view:"/mail/notificacionUrlCopias", model:[solicitante:solicitante,
 				   urlSolicitud:urlSolicitud, asuntoManifiesto:asunto, urlDescarga:urlDescarga])
-		   }
-	   }
+		sendMail(solicitud.email, renderedSrc, asuntoEmail);
    }
 	
 	public void sendRepresentativeAccreditations (
@@ -67,15 +78,14 @@ class MailSenderService {
 		}
 		String emailSubject = messageSource.getMessage('representativeAccreditationsMailSubject',
 			[representativeName].toArray(), locale)
-		runAsync {
-			mailService.sendMail {
-				to solicitud.email
-				subject emailSubject
-				body(view:"/mail/RepresentativeAccreditationRequestDownloadInstructions", 
-					model:[solicitante:userRequestName, dateStr:dateStr, pageTitle:emailSubject,
+		
+		String renderedSrc = groovyPageRenderer.render (
+				view:"/mail/RepresentativeAccreditationRequestDownloadInstructions", 
+				model:[solicitante:userRequestName, dateStr:dateStr, pageTitle:emailSubject,
 						urlSolicitud:urlSolicitud, representative:representativeName, urlDescarga:urlDescarga])
-			}
-		}
+				
+		sendMail(solicitud.email, renderedSrc, emailSubject);
+
 	}
 	
 	public void sendRepresentativeVotingHistory (SolicitudCopia solicitud, 
@@ -94,32 +104,45 @@ class MailSenderService {
 			representativeName = "${representative?.nombre} ${representative?.primerApellido}"
 			userRequestName = "${userRequest?.nombre} ${userRequest?.primerApellido}"
 			urlSolicitud = "${grailsApplication.config.grails.serverURL}/solicitudCopia/${solicitud.id}"
-			urlDescarga = "${grailsApplication.config.grails.serverURL}/solicitudCopia/download/${solicitud.id}"
+			urlDescaimport grails.gsp.PageRendererrga = "${grailsApplication.config.grails.serverURL}/solicitudCopia/download/${solicitud.id}"
 		}
 		String emailSubject = messageSource.getMessage('representativeVotingHistoryMailSubject',
 			[representativeName].toArray(), locale)
-		runAsync {
-			mailService.sendMail {
-				to solicitud.email
-				subject emailSubject
-				body(view:"/mail/RepresentativeVotingHistoryDownloadInstructions", 
-					model:[solicitante:userRequestName, dateFromStr:dateFromStr, dateToStr:dateToStr,
-						pageTitle:emailSubject,	urlSolicitud:urlSolicitud, representative:representativeName, urlDescarga:urlDescarga])
-			}
-		}
+		
+		String renderedSrc = groovyPageRenderer.render (
+			view:"/mail/RepresentativeVotingHistoryDownloadInstructions",
+			model:[solicitante:userRequestName, dateFromStr:dateFromStr, dateToStr:dateToStr,
+				pageTitle:emailSubject,	urlSolicitud:urlSolicitud, representative:representativeName, urlDescarga:urlDescarga])
+		
+		sendMail(solicitud.email, renderedSrc, emailSubject);
+
 	}
 	
-	def enviarPDFAdjunto(Usuario usuario, String bodyView, byte[] pdfBytes) {
-		log.debug "- enviarOfertaCliente - to usuario:${cliente.email}"
-		runAsync {
-			mailService.sendMail {
-				multipart true
-				to usuario.email
-				subject "Notificación"
-				body(view:bodyView, model:[usuario:usuario])
-				attachBytes "Adjunto.pdf", "application/pdf", pdfBytes
-			}
-		}
+	def sendPDF(String email, String subject, 
+		String bodyView, Map model, byte[] pdfBytes) {
+		log.debug "- sendPDF - to usuario:${cliente.email}"
+		
+		String renderedSrc = groovyPageRenderer.render (
+			view:bodyView, model:model)
+		
+		MimeMessage message = mailSender.createMimeMessage();
+		try {
+			MimeMessageHelper helper = new MimeMessageHelper(message, true);
+	 
+			//helper.setFrom("from");
+			helper.setTo(email);
+			helper.setSubject(subject);
+			helper.setText(renderedSrc);
+	 
+			ByteArrayResource byteArrayResource = new ByteArrayResource(pdfBytes)
+			
+			helper.addAttachment("attached.pdf", byteArrayResource);
+	 
+	   } catch(MessagingException ex) {
+			log.error(ex.getMessage(), ex)
+	   }
+		mailSender.send(message);
+		
 	}
 	
 }

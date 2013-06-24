@@ -8,6 +8,7 @@ import java.security.KeyStore
 import java.security.cert.X509Certificate;
 import java.security.cert.Certificate
 import grails.converters.JSON;
+import org.sistemavotacion.utils.*
 
 /**
  * @infoController Validación de solicitudes de certificación
@@ -22,38 +23,6 @@ class CsrController {
 	def firmaService
 	
 	/**
-	 * @httpMethod [GET]
-	 * @return Información sobre los servicios que tienen como url base '/csr'.
-	 */
-	def index() { 
-		redirect action: "restDoc"
-	}
-	
-	
-	/**
-	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS)<br/>
-	 * Servicio para la creación de certificados de usuario.
-	 * 
-	 * @httpMethod [POST]
-	 * @param csr Solicitud de certificación con los datos de usuario.
-	 * @return Si todo es correcto devuelve un código de estado HTTP 200 y el identificador 
-	 *         de la solicitud en la base de datos.
-	 */
-	def solicitar() {
-		String consulta = "${request.getInputStream()}"
-		if (!consulta) {
-			response.status = Respuesta.SC_ERROR_PETICION
-			render message(code: 'error.PeticionIncorrectaHTML', args:[
-				"${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
-			return false
-		}
-		Respuesta respuesta = csrService.validarCSRUsuario(consulta.getBytes(), request.getLocale())
-		response.status = respuesta.codigoEstado
-		render respuesta.mensaje
-		return false;
-	}
-	
-	/**
 	 * Servicio que devuelve las solicitudes de certificados firmadas una vez que
 	 * se ha validado la identidad del usuario.
 	 *
@@ -61,7 +30,7 @@ class CsrController {
 	 * @param idSolicitudCSR Identificador de la solicitud de certificación enviada previamente por el usuario.
 	 * @return Si el sistema ha validado al usuario devuelve la solicitud de certificación firmada.
 	 */
-	def obtener() { 
+	def index() { 
 		SolicitudCSRUsuario solicitudCSR
 		SolicitudCSRUsuario.withTransaction {
 			solicitudCSR = SolicitudCSRUsuario.findWhere(
@@ -110,6 +79,30 @@ class CsrController {
 		return false
 	}
 	
+	
+	/**
+	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS)<br/>
+	 * Servicio para la creación de certificados de usuario.
+	 * 
+	 * @httpMethod [POST]
+	 * @param csr Solicitud de certificación con los datos de usuario.
+	 * @return Si todo es correcto devuelve un código de estado HTTP 200 y el identificador 
+	 *         de la solicitud en la base de datos.
+	 */
+	def solicitar() {
+		String consulta = "${request.getInputStream()}"
+		if (!consulta) {
+			response.status = Respuesta.SC_ERROR_PETICION
+			render message(code: 'error.PeticionIncorrectaHTML', args:[
+				"${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
+			return false
+		}
+		Respuesta respuesta = csrService.validarCSRUsuario(consulta.getBytes(), request.getLocale())
+		response.status = respuesta.codigoEstado
+		render respuesta.mensaje
+		return false;
+	}
+
 	private String getAbsolutePath(String filePath){
 		String prefijo = "${grailsApplication.mainContext.getResource('.')?.getFile()}"
 		String sufijo =filePath.startsWith(File.separator)? filePath : File.separator + filePath;
@@ -199,6 +192,15 @@ class CsrController {
 	 * @return Si todo es correcto devuelve un código de estado HTTP 200.
 	 */
 	def validar() {
+		if(!VotingSystemApplicationContex.Environment.DEVELOPMENT.equals(
+			VotingSystemApplicationContex.instance.environment)) {
+			def msg = message(code: "serviceDevelopmentModeMsg")
+			log.error msg
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
+			return false
+		}
+		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		String consulta = "${request.getInputStream()}"
 		if (!consulta) {
 			response.status = Respuesta.SC_ERROR_PETICION

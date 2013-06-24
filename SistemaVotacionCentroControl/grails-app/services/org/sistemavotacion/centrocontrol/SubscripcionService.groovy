@@ -80,10 +80,14 @@ class SubscripcionService {
 		ControlAcceso controlAcceso = ControlAcceso.findWhere(serverURL:serverURL)
 		if (!controlAcceso) {
 			String urlInfoControlAcceso = "${serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLInfoServidor}"
-			Respuesta respuesta = httpService.obtenerInfoActorConIP(urlInfoControlAcceso, new ControlAcceso())
-			if (Respuesta.SC_OK== respuesta.codigoEstado) {
-				controlAcceso = respuesta.actorConIP
-				controlAcceso.save()
+			Respuesta respuesta = httpService.getInfo(urlInfoControlAcceso, null)
+			if (Respuesta.SC_OK == respuesta.codigoEstado) {
+				try {
+					controlAcceso = ControlAcceso.parse(respuesta.mensaje)
+					controlAcceso.save()
+				} catch(Exception ex) {
+					log.error(ex.getMessage(), ex)
+				}
 			} else return null
 		} 
 		return controlAcceso

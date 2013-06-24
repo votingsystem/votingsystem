@@ -1,5 +1,7 @@
 package org.sistemavotacion.seguridad;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.security.PrivateKey;
 import java.security.cert.CertificateException;
@@ -129,7 +131,9 @@ public class PKCS10WrapperServer {
     
     public static PKCS10CertificationRequest fromPEMToPKCS10CertificationRequest (
             byte[] csrBytes) throws Exception {
-        PEMReader pemReader = new PEMReader(new StringReader(new String(csrBytes).trim()));
+        PEMReader pemReader = new PEMReader(
+        		new InputStreamReader(new ByteArrayInputStream(csrBytes)));
+    	
         Object pemObject = null;
         pemObject = pemReader.readObject();
         PKCS10CertificationRequest csr = (PKCS10CertificationRequest)pemObject;

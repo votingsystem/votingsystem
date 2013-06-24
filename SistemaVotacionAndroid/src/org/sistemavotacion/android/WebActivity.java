@@ -19,20 +19,17 @@ package org.sistemavotacion.android;
 import static org.sistemavotacion.android.Aplicacion.KEY_STORE_FILE;
 
 import java.io.FileInputStream;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.json.JSONException;
 import org.sistemavotacion.android.service.PublishService;
-import org.sistemavotacion.android.service.PublishServiceListener;
+import org.sistemavotacion.android.service.ServiceListener;
 import org.sistemavotacion.android.ui.CertNotFoundDialog;
 import org.sistemavotacion.android.ui.CertPinDialog;
 import org.sistemavotacion.android.ui.CertPinDialogListener;
 import org.sistemavotacion.modelo.Operation;
 import org.sistemavotacion.modelo.Respuesta;
-import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.ServerPaths;
 import org.sistemavotacion.util.SubSystem;
@@ -48,14 +45,15 @@ import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.text.Html;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
-public class WebActivity extends FragmentActivity implements WebSessionListener, 
-	CertPinDialogListener, PublishServiceListener {
+public class WebActivity extends FragmentActivity 
+	implements WebSessionListener, CertPinDialogListener, ServiceListener {
 	
 	public static final String TAG = "WebActivity";
 	
@@ -184,6 +182,7 @@ public class WebActivity extends FragmentActivity implements WebSessionListener,
     }
 	
     private void loadUrl(String serverURL) {
+    	Log.d(TAG + ".serverURL(...)", " - serverURL: " + serverURL);
     	isPageLoaded = false;
     	javaScriptInterface = new JavaScriptInterface(this);
         svWebView = (WebView) findViewById(R.id.webview);
@@ -302,7 +301,7 @@ public class WebActivity extends FragmentActivity implements WebSessionListener,
             progressDialog.dismiss();
         }
 		AlertDialog.Builder builder= new AlertDialog.Builder(this);
-		builder.setTitle(caption).setMessage(message).show();
+		builder.setTitle(caption).setMessage(Html.fromHtml(message)).show();
 	}
 	
     private void showProgressDialog(String dialogMessage) {
@@ -313,15 +312,40 @@ public class WebActivity extends FragmentActivity implements WebSessionListener,
     	progressDialog.setCancelable(false);
         progressDialog.show();
     }
-    
+
 	@Override
-	public void setPublishServiceMsg(int statusCode, String msg) {
-    	Log.d(TAG + ".setPublishServiceMsg(...) ", " - statusCode: " + statusCode);
-    	String resultMsg = null;
-    	String resultCaption = null;
-    	SubSystem selectedSubsystem = null;
-    	if(Respuesta.SC_OK == statusCode) {
-    		resultCaption = getString(R.string.operacion_ok_msg);
+	public void setPin(String pin) {
+		Log.d(TAG + ".setPin(...) ", " - setPin ");
+		if(pin != null) {
+			byte[] keyStoreBytes = null;
+	        try {
+	        	FileInputStream fis = openFileInput(KEY_STORE_FILE);
+				keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
+
+	        } catch(Exception ex) {
+				ex.printStackTrace();
+				showMessage(getString(R.string.error_lbl), 
+						getString(R.string.pin_error_msg));
+	        }
+	        if(publishService != null) {
+	        	showProgressDialog(getString(R.string.publishing_document_msg));
+	        	publishService.publishDocument(null, pendingOperation, 
+	        			keyStoreBytes, pin.toCharArray(), this);
+
+	        } else {
+	        	Log.d(TAG + ".publishService(...) ", " - publishService null ");
+	        } 
+		} 
+	}
+	
+	@Override public void proccessResponse(Integer requestId, Respuesta response) {
+		Log.d(TAG + ".proccessResponse(...) ", " - requestId: " + requestId + 
+				" - statusCode: " + response.getCodigoEstado());
+		String resultMsg = null;
+		String resultCaption = null;
+		SubSystem selectedSubsystem = null;
+		if(Respuesta.SC_OK == response.getCodigoEstado()) {
+			resultCaption = getString(R.string.operacion_ok_msg);
 			switch(pendingOperation.getTipo()) {
 				case PUBLICACION_MANIFIESTO_PDF:
 					resultMsg = getString(R.string.publish_manifest_OK_prefix_msg);
@@ -348,40 +372,13 @@ public class WebActivity extends FragmentActivity implements WebSessionListener,
 			}).show();
 		} else {
 			resultCaption = getString(R.string.publish_document_ERROR_msg);
-			resultMsg = msg;
+			resultMsg = response.getMensaje();
 			showMessage(resultCaption, resultMsg);
-		}	
-	}
-
-	@Override
-	public void proccessReceipt(SMIMEMessageWrapper receipt) {
-		Log.d(TAG + ".proccessReceipt(...) ", " - proccessReceipt ");
+		}
 		
 	}
 
-	@Override
-	public void setPin(String pin) {
-		Log.d(TAG + ".setPin(...) ", " - setPin ");
-		if(pin != null) {
-			byte[] keyStoreBytes = null;
-	        try {
-	        	FileInputStream fis = openFileInput(KEY_STORE_FILE);
-				keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
-
-	        } catch(Exception ex) {
-				ex.printStackTrace();
-				showMessage(getString(R.string.error_lbl), 
-						getString(R.string.pin_error_msg));
-	        }
-	        if(publishService != null) {
-	        	showProgressDialog(getString(R.string.publishing_document_msg));
-	        	publishService.publishDocument(
-		        		pendingOperation, keyStoreBytes, pin.toCharArray(), this);
-	        } else {
-	        	Log.d(TAG + ".publishService(...) ", " - publishService null ");
-	        } 
-		} 
-	}
+	
 	
 
 }

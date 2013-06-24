@@ -8,56 +8,35 @@ import org.sistemavotacion.util.HttpHelper;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class SendFileTask extends AsyncTask<String, Void, Integer> {
+public class SendFileTask extends AsyncTask<String, Void, Respuesta> {
 
 	public static final String TAG = "SendFileTask";
 	
-	private Integer id;
-    private TaskListener listener = null;
     private File file = null;
-    private Exception exception = null;
-    private String message = null;
-    private int statusCode = Respuesta.SC_ERROR_PETICION;
-    
-    public SendFileTask(Integer id, TaskListener listener, File file) {
-    	this.id = id;
-		this.listener = listener;
+
+    public SendFileTask(File file) {
 		this.file = file;
     }
 	
 	@Override
-	protected Integer doInBackground(String... urls) {
+	protected Respuesta doInBackground(String... urls) {
         Log.d(TAG + ".doInBackground", " - doInBackground - url: " + urls[0]);
+        Respuesta respuesta = null;
         try {
             HttpResponse response = HttpHelper.sendFile(file, urls[0]);
-            statusCode = response.getStatusLine().getStatusCode();
-            message = EntityUtils.toString(response.getEntity());
+            respuesta = new Respuesta(
+            		response.getStatusLine().getStatusCode(),
+            		EntityUtils.toString(response.getEntity()));
         } catch (Exception ex) {
-        	Log.e(TAG + ".doInBackground", ex.getMessage(), ex);
-        	exception = ex;
+        	ex.printStackTrace();
+        	respuesta = new Respuesta(Respuesta.SC_ERROR,
+            		ex.getMessage());
         }
-        return statusCode;
+        return respuesta;
 	}
 	
-    @Override
-    protected void onPostExecute(Integer data) {
-    	Log.d(TAG + ".onPostExecute", " - statuscode: " + data);
-    	if(Respuesta.SC_OK != data)
-    		Log.d(TAG + ".onPostExecute", " - message: " + message);
-    	listener.showTaskResult(this);
+    @Override  protected void onPostExecute(Respuesta respuesta) {
+    	Log.d(TAG + ".onPostExecute", " - statuscode: " + respuesta.getCodigoEstado());
     }
-    
-    public Integer getId() {
-    	return id;
-    }
-    
-    public int getStatusCode() {
-    	return statusCode;
-    }
-    
-	public String getMessage() {
-		if(exception != null) return exception.getMessage();
-		return message;
-	}
 
 }

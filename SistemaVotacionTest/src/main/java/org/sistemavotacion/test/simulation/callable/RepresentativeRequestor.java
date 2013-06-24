@@ -18,7 +18,7 @@ import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.StringUtils;
-import org.sistemavotacion.worker.RepresentativeRequestWorker;
+import org.sistemavotacion.callable.RepresentativeDataSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,17 +68,16 @@ public class RepresentativeRequestor implements Callable<Respuesta> {
         
         String urlService = ContextoPruebas.INSTANCE.getUrlRepresentativeService();
         
-        RepresentativeRequestWorker worker = new RepresentativeRequestWorker(null, 
+        RepresentativeDataSender worker = new RepresentativeDataSender( 
                 smimeMessage, selectedImage, urlService, ContextoPruebas.INSTANCE.
-                getAccessControl().getCertificate(),null);
-        worker.execute();
-        Respuesta respuesta = worker.get();
+                getAccessControl().getCertificate());
+        Respuesta respuesta = worker.call();
         if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
             respuesta.setMensaje(representativeNIF);
         } else respuesta.appendErrorMessage(" - From nif: " + representativeNIF);
         return respuesta;
     }
-   
+    
     public static String getRepresentativeDataJSON(String representativeNIF,
             String imageDigestStr) {
         logger.debug("getRepresentativeDataJSOn - ");

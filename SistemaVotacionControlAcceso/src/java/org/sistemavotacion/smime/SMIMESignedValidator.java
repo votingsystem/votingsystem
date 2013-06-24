@@ -1,18 +1,10 @@
 package org.sistemavotacion.smime;
 
-import com.sun.mail.util.BASE64DecoderStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
-
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 
 import org.bouncycastle.asn1.ASN1UTCTime;
 import org.bouncycastle.asn1.DERUTCTime;
@@ -21,13 +13,10 @@ import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.CMSProcessable;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.mail.smime.SMIMEException;
 import org.bouncycastle.mail.smime.SMIMESigned;
 import org.bouncycastle.util.Store;
 import org.slf4j.Logger;

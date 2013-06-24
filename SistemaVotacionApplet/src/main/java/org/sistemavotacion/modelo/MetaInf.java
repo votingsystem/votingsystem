@@ -36,9 +36,9 @@ public class MetaInf {
     
     public String getFormattedInfo() {
         StringBuilder result = new StringBuilder("");
-        result.append("\n type: " + getType().toString())
+        result.append("\n id: " + getId())
               .append("\n subject: " + getSubject())
-              .append("\n id: " + getId());
+              .append("\n type: " + getType().toString());
         if(numSignatures != null ) result.append("\n numSignatures: " + 
                 numSignatures );
         if(numAccessRequest != null ) result.append("\n numAccessRequest: " + 

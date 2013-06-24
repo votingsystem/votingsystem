@@ -23,6 +23,7 @@ class ReclamacionService {
 		SMIMEMessageWrapper smimeMessage = mensajeSMIMEReq.getSmimeMessage()
         def mensajeJSON = JSON.parse(smimeMessage.getSignedContent())
 		Usuario usuario = mensajeSMIMEReq.getUsuario()
+		//log.debug("mensajeJSON: ${smimeMessage.getSignedContent()}")
         EventoReclamacion eventoReclamacion = EventoReclamacion.get(mensajeJSON.id)
         if (!eventoReclamacion) {
 			msg = messageSource.getMessage('eventNotFound', 

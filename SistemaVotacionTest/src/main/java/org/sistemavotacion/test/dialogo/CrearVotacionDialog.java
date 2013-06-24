@@ -7,16 +7,18 @@ import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.mail.internet.MimeMessage;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.SwingWorker;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import net.miginfocom.swing.MigLayout;
@@ -29,10 +31,7 @@ import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
-import org.sistemavotacion.worker.DocumentSenderWorker;
-import org.sistemavotacion.worker.VotingSystemWorker;
-import org.sistemavotacion.worker.VotingSystemWorkerListener;
-import org.sistemavotacion.worker.VotingSystemWorkerType;
+import org.sistemavotacion.callable.InfoSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,13 +39,13 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class CrearVotacionDialog extends JDialog implements 
-           KeyListener, VotingSystemWorkerListener {
+public class CrearVotacionDialog extends JDialog implements KeyListener {
 
     private static Logger logger = LoggerFactory.getLogger(CrearVotacionDialog.class);
     
-    public enum Worker implements VotingSystemWorkerType{PUBLISH_DOCUMENT}
-   
+    private static BlockingQueue<Future<Respuesta>> queue = 
+        new LinkedBlockingQueue<Future<Respuesta>>(3);
+    
     private static final String IPADDRESS_PATTERN = 
 		"^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
 		"([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
@@ -58,7 +57,7 @@ public class CrearVotacionDialog extends JDialog implements
     private Border opcionesBorder;
     private Evento evento;
     private static final String ASUNTO_VOTACION = "Nueva Votación";
-    private SwingWorker tareaEnEjecucion;
+    private Future<Respuesta> tareaEnEjecucion;
     
     /**
      * Creates new form CrearVotacionDialog
@@ -92,8 +91,56 @@ public class CrearVotacionDialog extends JDialog implements
         asuntoTextField.addKeyListener(this);
         editorPane.addKeyListener(this);
         etiquetasTextField.addKeyListener(this);
+        ContextoPruebas.INSTANCE.submit(new Runnable() {
+            @Override public void run() {
+                try {
+                    readFutures();
+                } catch (Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                }
+            }
+        });
         pack();
     }
+        
+    public void readFutures () {
+        logger.debug(" - readFutures");
+        AtomicBoolean done = new AtomicBoolean(false);
+        while (!done.get()) {
+            try {
+                Future<Respuesta> future = queue.take();
+                Respuesta respuesta = future.get();
+                if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                    try {
+                        byte[] responseBytes = respuesta.getMessageBytes();
+                        FileUtils.copyStreamToFile(new ByteArrayInputStream(responseBytes), 
+                            new File(ContextoPruebas.DEFAULTS.APPDIR + "VotingPublishReceipt"));
+                        SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(null, 
+                                new ByteArrayInputStream(responseBytes), 
+                                "VotingPublishReceipt");
+                        dnieMimeMessage.verify(
+                                ContextoPruebas.INSTANCE.getSessionPKIXParameters());
+                        logger.debug("--- dnieMimeMessage.getSignedContent(): " + dnieMimeMessage.getSignedContent());
+                        evento = Evento.parse(dnieMimeMessage.getSignedContent());
+                        logger.debug("Respuesta - Evento ID: " + evento.getEventoId());
+                        ContextoPruebas.INSTANCE.setEvento(evento);
+                        dispose();
+                    } catch (Exception ex) {
+                        logger.error(ex.getMessage(), ex);
+                        MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
+                        errorDialog.setMessage(ex.getMessage(), "Error");
+                        dispose();
+                    }
+                } else {
+                    mostrarPantallaEnvio(false);
+                    mostrarMensajeUsuario("ERROR - " + respuesta.getMensaje());
+                } 
+            } catch(Exception ex) {
+                logger.error(ex.getMessage(), ex);
+            }
+        }
+    }
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -387,23 +434,23 @@ public class CrearVotacionDialog extends JDialog implements
                 ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS, 
                 ContextoPruebas.DEFAULTS.PASSWORD.toCharArray(),
                 ContextoPruebas.VOTE_SIGN_MECHANISM);
-            File eventToPublish = new File(ContextoPruebas.DEFAULTS.APPDIR + 
-                "SolicitudPublicacionConvocatoria");
-            logger.debug("publishing event: " + eventToPublish.getAbsolutePath());
+            
             String eventoParaPublicar = evento.toJSON().toString();
             MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(
                     ContextoPruebas.INSTANCE.getUserTest().getEmail(), 
                     Contexto.INSTANCE.getAccessControl().getNombreNormalizado(), 
                     eventoParaPublicar, "Solicitud Publicación convocatoria",
                     null);
-            mimeMessage.writeTo(new FileOutputStream(eventToPublish));
-            tareaEnEjecucion = new DocumentSenderWorker(
-                    Worker.PUBLISH_DOCUMENT, eventToPublish, 
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            mimeMessage.writeTo(baos);
+            InfoSender infoSender = new InfoSender(null, baos.toByteArray(), 
                     Contexto.SIGNED_CONTENT_TYPE,
                     ContextoPruebas.getURLGuardarEventoParaVotar(
-                    Contexto.INSTANCE.getAccessControl().getServerURL()), this);
-            tareaEnEjecucion.execute();
+                    Contexto.INSTANCE.getAccessControl().getServerURL()));
+            Future<Respuesta> future = ContextoPruebas.INSTANCE.submit(infoSender);
             mostrarPantallaEnvio(true);
+            tareaEnEjecucion = future;
+            queue.put(future);
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
         }
@@ -576,48 +623,4 @@ public class CrearVotacionDialog extends JDialog implements
         pack();
     }
 
-    @Override public void processVotingSystemWorkerMsg(List<String> messages) {
-        String message = null;
-        for(String msg: messages) {
-            message = message + "<br/>";
-        }
-        if(message != null && !"".equals(message)) 
-            mensajeValidacionLabel.setText(message);
-    }
-
-    @Override
-    public void showResult(VotingSystemWorker worker) {
-        logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-                " - worker: " + worker.getType());
-        switch((Worker)worker.getType()) {
-            case PUBLISH_DOCUMENT:
-                if(Respuesta.SC_OK == worker.getStatusCode()) {
-                    try {
-                        byte[] responseBytes = worker.getMessage().getBytes();
-                        FileUtils.copyStreamToFile(new ByteArrayInputStream(responseBytes), 
-                            new File(ContextoPruebas.DEFAULTS.APPDIR + "VotingPublishReceipt"));
-                        SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(null, 
-                                new ByteArrayInputStream(responseBytes), 
-                                "VotingPublishReceipt");
-                        dnieMimeMessage.verify(
-                                ContextoPruebas.INSTANCE.getSessionPKIXParameters());
-                        logger.debug("--- dnieMimeMessage.getSignedContent(): " + dnieMimeMessage.getSignedContent());
-                        evento = Evento.parse(dnieMimeMessage.getSignedContent());
-                        logger.debug("Respuesta - Evento ID: " + evento.getEventoId());
-                        ContextoPruebas.INSTANCE.setEvento(evento);
-                        dispose();
-                    } catch (Exception ex) {
-                        logger.error(ex.getMessage(), ex);
-                        MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                        errorDialog.setMessage(ex.getMessage(), "Error");
-                        dispose();
-                    }
-                } else {
-                    mostrarPantallaEnvio(false);
-                    mostrarMensajeUsuario("ERROR - " + worker.getMessage());
-                }
-                break;
-        }
-    }
-    
 }

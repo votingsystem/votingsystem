@@ -5,8 +5,7 @@
 dataSource {
 	pooled = true
 	driverClassName = "org.postgresql.Driver"
-	// dialect = org.hibernate.dialect.PostgreSQLDialect
-	dialect = net.sf.hibernate.dialect.PostgreSQLDialect
+	dialect = org.hibernate.dialect.PostgreSQLDialect
 	username = "usuariovotacion"
 	password = "usuariovotacion"
 	//dataSource.logSql = true
@@ -16,7 +15,8 @@ hibernate {
     cache.use_second_level_cache = true
     cache.use_query_cache = false
     cache.region.factory_class = 'net.sf.ehcache.hibernate.EhCacheRegionFactory'
-	hibernate.search.default.indexBase = new File("./searchIndexControlAcceso").absolutePath
+	hibernate.search.default.indexBase = new File("./VotingSystem/searchIndexControlAcceso").absolutePath
+	//hibernate.show_sql=true
 }
 // environment specific settings
 environments {

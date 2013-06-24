@@ -1,8 +1,18 @@
 package org.sistemavotacion.modelo;
 
+import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.util.Log;
+
 public class Consulta {
+	
+	public static final String TAG = "Consulta";
 
     private int numeroEventosFirmaEnPeticion;
     private int numeroTotalEventosFirmaEnSistema;
@@ -145,4 +155,65 @@ public class Consulta {
 		this.eventos = eventos;
 	}
     
+	public static Consulta parse(String consultaStr) throws ParseException, JSONException {
+    	Log.d(TAG + ".parse(...)", "parse(...)");
+    	JSONObject jsonObject = new JSONObject (consultaStr);
+        List<Evento> eventos = new ArrayList<Evento>();
+        JSONObject jsonEventos = jsonObject.getJSONObject("eventos");
+        JSONArray arrayEventos;
+        if (jsonEventos != null) {
+        	if(jsonEventos.has("firmas")) {
+                arrayEventos = jsonEventos.getJSONArray("firmas");
+                if (arrayEventos != null) {
+                    for (int i=0; i<arrayEventos.length(); i++) {
+                        Evento evento = Evento.parse(arrayEventos.getJSONObject(i));
+                        evento.setTipo(Tipo.EVENTO_FIRMA);
+                        eventos.add(evento);
+                    }
+                }	
+        	}
+        	if(jsonEventos.has("reclamaciones")) { 
+                arrayEventos = jsonEventos.getJSONArray("reclamaciones");
+                if (arrayEventos != null) {
+                    for (int i=0; i<arrayEventos.length(); i++) {
+                        Evento evento = Evento.parse(arrayEventos.getJSONObject(i));
+                        evento.setTipo(Tipo.EVENTO_RECLAMACION);
+                        eventos.add(evento);
+                    }
+                }	
+        	}
+        	if(jsonEventos.has("votaciones")) {
+                arrayEventos = jsonEventos.getJSONArray("votaciones");
+                if (arrayEventos != null) {
+                    for (int i=0; i<arrayEventos.length(); i++) {
+                        Evento evento = Evento.parse(arrayEventos.getJSONObject(i));
+                        evento.setTipo(Tipo.EVENTO_VOTACION);
+                        eventos.add(evento);
+                    }
+                }	
+        	}
+        }
+        Consulta consulta = new Consulta();
+        if(jsonEventos.has("numeroEventosFirmaEnPeticion"))
+        	consulta.setNumeroEventosFirmaEnPeticion(jsonObject.getInt("numeroEventosFirmaEnPeticion"));
+        if(jsonEventos.has("numeroTotalEventosFirmaEnSistema"))
+        	consulta.setNumeroTotalEventosFirmaEnSistema(jsonObject.getInt("numeroTotalEventosFirmaEnSistema"));
+        if(jsonEventos.has("numeroEventosVotacionEnPeticion"))
+        	consulta.setNumeroEventosVotacionEnPeticion(jsonObject.getInt("numeroEventosVotacionEnPeticion"));
+        if(jsonEventos.has("numeroTotalEventosVotacionEnSistema"))
+        	consulta.setNumeroTotalEventosVotacionEnSistema(jsonObject.getInt("numeroTotalEventosVotacionEnSistema"));
+        if(jsonEventos.has("numeroEventosReclamacionEnPeticion"))
+        	consulta.setNumeroEventosReclamacionEnPeticion(jsonObject.getInt("numeroEventosReclamacionEnPeticion"));
+        if(jsonEventos.has("numeroTotalEventosReclamacionEnSistema"))
+        	consulta.setNumeroTotalEventosReclamacionEnSistema(jsonObject.getInt("numeroTotalEventosReclamacionEnSistema"));
+        if(jsonEventos.has("numeroEventosEnPeticion"))
+        	consulta.setNumeroEventosEnPeticion(jsonObject.getInt("numeroEventosEnPeticion"));
+        if(jsonEventos.has("numeroTotalEventosEnSistema"))
+        	consulta.setNumeroTotalEventosEnSistema(jsonObject.getInt("numeroTotalEventosEnSistema"));
+        if (jsonObject.has("offset"))
+            consulta.setOffset(jsonObject.getInt("offset"));
+        consulta.setEventos(eventos);
+        return consulta;
+    }
+	
 }

@@ -29,7 +29,6 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.text.Normalizer;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 import org.sistemavotacion.android.ui.CertPinDialog;
@@ -39,7 +38,6 @@ import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.sistemavotacion.seguridad.PKCS10WrapperClient;
 import org.sistemavotacion.task.SendDataTask;
-import org.sistemavotacion.task.TaskListener;
 import org.sistemavotacion.util.ServerPaths;
 import org.sistemavotacion.util.StringUtils;
 
@@ -51,8 +49,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -75,7 +71,7 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
 public class UserCertRequestForm extends FragmentActivity 
-		implements CertPinDialogListener, TaskListener {
+		implements CertPinDialogListener {
 
 	public static final String TAG = "UserCertRequestForm";
 	
@@ -228,7 +224,7 @@ public class UserCertRequestForm extends FragmentActivity
     
     private void sendCsrRequest() {
         showProgressDialog(getString(R.string.request_cert_msg));
-        String csr = null;
+        byte[] csrBytes = null;
     	try {
     		String givenName = Normalizer.normalize(
     				givennameText.getText().toString().toUpperCase(), Normalizer.Form.NFD);
@@ -239,12 +235,7 @@ public class UserCertRequestForm extends FragmentActivity
     		String nif = StringUtils.validarNIF(nifText.getText().toString().toUpperCase());
 			pkcs10WrapperClient = PKCS10WrapperClient.buildCSRUsuario (KEY_SIZE, SIG_NAME, 
 			        SIGNATURE_ALGORITHM, PROVIDER, nif, email, telefono, deviceId, givenName, surname);
-	        //String privateKeyPEMString = pkcs10WrapperClient.getPrivateKeyPEMString();
-	        csr = new String(pkcs10WrapperClient.getPEMEncodedRequestCSR());
-	        /*X509Certificate cert = CertUtil.generateV1RootCert(pkcs10WrapperClient.getKeyPair(), 
-	        		System.currentTimeMillis(), 
-	        		Long.valueOf(System.currentTimeMillis()).intValue() + 365 * 24 * 60 * 60 * 1000,
-	        		"CN=" + ALIAS_CERT_USUARIO);*/
+			csrBytes = pkcs10WrapperClient.getPEMEncodedRequestCSR();
 	        X509Certificate[] arrayCerts = CertUtil.generateCertificate(pkcs10WrapperClient.getKeyPair(), 
 	        		new Date(System.currentTimeMillis()), 
 	        		new Date(System.currentTimeMillis() + 365 * 24 * 60 * 60 * 1000),
@@ -263,13 +254,14 @@ public class UserCertRequestForm extends FragmentActivity
 			showMessage(getString(R.string.error_lbl), ex.getMessage());
 		}
     	try {
-    		SendDataTask sendDataTask = (SendDataTask) new SendDataTask(null, this, csr).execute(ServerPaths.getURLSolicitudCSRUsuario(
-        			Aplicacion.CONTROL_ACCESO_URL));
-			Log.d(TAG + ".sendCsrRequest(...)", " - sendCsrRequest - sendDataTask - statuscode: " + sendDataTask.get());
-	        if(Respuesta.SC_OK == sendDataTask.getStatusCode()) {
+    		SendDataTask sendDataTask = (SendDataTask) new SendDataTask(csrBytes, null).
+    				execute(ServerPaths.getURLSolicitudCSRUsuario(Aplicacion.CONTROL_ACCESO_URL));
+    		Respuesta respuesta = sendDataTask.get();
+			Log.d(TAG + ".sendCsrRequest(...)", " - sendCsrRequest - sendDataTask - statuscode: " + respuesta.getCodigoEstado());
+	        if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
 	        	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		        SharedPreferences.Editor editor = settings.edit();
-		        Long idSolictud = Long.valueOf(sendDataTask.getMessage());
+		        Long idSolictud = Long.valueOf(respuesta.getMensaje());
 		        editor.putLong(PREFS_ID_SOLICTUD_CSR, idSolictud);
 		        editor.commit();
 		        Aplicacion.setEstado(Aplicacion.Estado.CON_CSR);
@@ -279,7 +271,7 @@ public class UserCertRequestForm extends FragmentActivity
 	        } else {
 	            if (progressDialog != null) progressDialog.dismiss();
 				AlertDialog.Builder builder= new AlertDialog.Builder(UserCertRequestForm.this);
-				builder.setTitle(R.string.alert_exception_caption).setMessage(sendDataTask.getMessage())
+				builder.setTitle(R.string.alert_exception_caption).setMessage(respuesta.getMensaje())
 					.setPositiveButton("OK", null).show();
 	        }
     	} catch(Exception ex) {
@@ -350,10 +342,5 @@ public class UserCertRequestForm extends FragmentActivity
 		if(password == null) return;
 		sendCsrRequest();
 	}
-
-	@Override
-	public void processTaskMessages(List<String> messages, AsyncTask task) { }
-
-	@Override public void showTaskResult(AsyncTask task) { }
 
 }

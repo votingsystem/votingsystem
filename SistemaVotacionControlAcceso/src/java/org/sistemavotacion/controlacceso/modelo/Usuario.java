@@ -1,12 +1,8 @@
 package org.sistemavotacion.controlacceso.modelo;
 
 import static javax.persistence.GenerationType.IDENTITY;
-import grails.converters.JSON;
-
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -393,16 +389,4 @@ public class Usuario implements Serializable {
 		this.representativeRegisterDate = representativeRegisterDate;
 	}
 
-	public Long setNumRepresentations(Long numRep) {
-		Long result = new Long(1);
-		Map userMetaInf = null;
-		if(metaInf == null || "".equals(metaInf)) {
-			userMetaInf = new HashMap();
-		} else {
-			userMetaInf = (Map) JSON.parse(metaInf);
-		}
-		userMetaInf.put("numRepresentations", numRep);
-		metaInf = new grails.converters.JSON(userMetaInf).toString();
-		return result;
-	}
 }

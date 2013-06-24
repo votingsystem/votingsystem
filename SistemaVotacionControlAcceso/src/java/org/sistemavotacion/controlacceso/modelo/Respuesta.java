@@ -21,7 +21,8 @@ public class Respuesta {
     public static final int SC_ANULACION_REPETIDA            = 471;
     public static final int SC_NULL_REQUEST                  = 472;
 
-    public static final int SC_ERROR      = 500;
+    public static final int SC_ERROR           = 500;
+    public static final int SC_ERROR_TIMESTAMP = 570;
     public static final int SC_PROCESANDO = 700;
     public static final int SC_CANCELADO  = 0;
     
@@ -55,6 +56,7 @@ public class Respuesta {
     
     private Object data;
 
+    
 	public String getAsunto() {
 		return asunto;
 	}

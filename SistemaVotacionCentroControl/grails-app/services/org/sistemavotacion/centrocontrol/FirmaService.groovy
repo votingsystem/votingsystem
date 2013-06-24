@@ -318,9 +318,10 @@ class FirmaService {
 			eventTrustedCertsHashMap.put(evento.id, eventTrustedCerts)
 		}
 		respuesta = timeStampService.validateToken(
-			infoVoto.getVoteTimeStampToken(), evento, locale)
+				infoVoto.getVoteTimeStampToken(), evento, locale)
 		if(Respuesta.SC_OK != respuesta.codigoEstado) {
 			respuesta.tipo = Tipo.VOTO_CON_ERRORES
+			respuesta.evento = evento
 			return respuesta
 		}
 		X509Certificate checkedCert = infoVoto.getCertificadoVoto()
@@ -473,22 +474,20 @@ class FirmaService {
 		return baos.toByteArray();
 	}
 
-	public synchronized SMIMEMessageWrapper getMultiSignedMimeMessage (String fromUser,
-		String toUser, SMIMEMessageWrapper smimeMessage, String subject) {
-		log.debug("getMultiSignedMimeMessage- subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'");
-		if(signedMailGenerator == null) inicializar()
+		
+	public synchronized SMIMEMessageWrapper getMultiSignedMimeMessage (
+		String fromUser, String toUser,	final SMIMEMessageWrapper smimeMessage, String subject) {
+		log.debug("getMultiSignedMimeMessage - subject '${subject}' - fromUser '${fromUser}' to user '${toUser}'");
 		if(fromUser) {
 			fromUser = fromUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
 			smimeMessage.setFrom(new InternetAddress(fromUser))
-		} 
+		}
 		if(toUser) {
 			toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-			smimeMessage.setTo(toUser)
+			smimeMessage.setHeader("To", toUser)
 		}
-		if(fromUser) smimeMessage.setFrom(new InternetAddress(fromUser))
-		if(toUser) smimeMessage.setTo(toUser)
-		MimeMessage multifirma = getSignedMailGenerator().
-			genMultiSignedMessage(smimeMessage, subject); 
+		SMIMEMessageWrapper multifirma = getSignedMailGenerator().
+				genMultiSignedMessage(smimeMessage, subject);
 		return multifirma
 	}
 	

@@ -47,13 +47,15 @@ class VotoService {
 	def encryptionService
 	
 	
-	Respuesta validateVote(MensajeSMIME mensajeSMIMEReq, Locale locale) {
+	public synchronized Respuesta validateVote(MensajeSMIME mensajeSMIMEReq, Locale locale) {
 		log.debug ("validateVote - ")
 		EventoVotacion evento = mensajeSMIMEReq.evento
 		String msg
 		try {
-			SMIMEMessageWrapper smimeMessageReq = mensajeSMIMEReq.getSmimeMessage()
+			SMIMEMessageWrapper smimeMessageReq = mensajeSMIMEReq.getSmimeMessage()			
+			
 			def votoJSON = JSON.parse(smimeMessageReq.getSignedContent())
+			String voteUUID = votoJSON.UUID
 			OpcionDeEvento opcionSeleccionada = OpcionDeEvento.findWhere(
 				opcionDeEventoId:String.valueOf(votoJSON.opcionSeleccionadaId))
 			if (!opcionSeleccionada || (opcionSeleccionada.eventoVotacion.id != evento.id)) {
@@ -76,18 +78,16 @@ class VotoService {
 			String localServerURL = grailsApplication.config.grails.serverURL
 			
 			String signedVoteDigest = smimeMessageReq.getContentDigestStr()
-			
-			
+						
 			String fromUser = grailsApplication.config.SistemaVotacion.serverName
-			String toUser = evento.controlAcceso.serverURL
+			String toUser = evento.controlAcceso.nombre
 			String subject = messageSource.getMessage(
 				'validacionVoto.smimeMessageSubject', null, locale)
 			smimeMessageReq.setMessageID("${localServerURL}/mensajeSMIME/${mensajeSMIMEReq.id}")
 
-
 			SMIMEMessageWrapper smimeVoteValidation = firmaService.
 					getMultiSignedMimeMessage(fromUser, toUser, smimeMessageReq, subject)
-			
+					
 			Respuesta encryptResponse = encryptionService.encryptSMIMEMessage(
 				smimeVoteValidation.getBytes(), evento.getControlAccesoCert(), locale);
 			if (Respuesta.SC_OK != encryptResponse.codigoEstado) {
@@ -141,7 +141,7 @@ class VotoService {
 				msg = messageSource.getMessage('accessRequestVoteErrorMsg', 
 					[respuesta.mensaje].toArray(), locale)
 				log.error("validateVote - ${msg}")
-				return new Respuesta(Respuesta.SC_ERROR_PETICION, 
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
 					tipo:Tipo.VOTO_CON_ERRORES, mensaje:msg)
 			}
 		} catch(Exception ex) {

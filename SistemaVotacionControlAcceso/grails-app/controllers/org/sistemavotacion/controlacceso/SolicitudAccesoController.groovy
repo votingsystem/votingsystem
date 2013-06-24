@@ -86,6 +86,12 @@ class SolicitudAccesoController {
 			if(solicitudAcceso.usuario.type == Usuario.Type.REPRESENTATIVE) {
 				representative = solicitudAcceso.usuario
 			}
+			
+			
+			//log.debug("======== csrRequest: ${new String(csrRequest)}")
+			
+			
+			
 			Respuesta respuestaValidacionCSR = firmaService.
 					firmarCertificadoVoto(csrRequest, 
 					evento, representative, request.getLocale())
@@ -96,20 +102,12 @@ class SolicitudAccesoController {
 				params.receiverCert = respuestaValidacionCSR.certificado
 				params.receiverPublicKey = respuestaValidacionCSR.data
 				response.setContentType("multipart/encrypted")
-				
-				
-				/*response.contentLength = respuestaValidacionCSR.firmaCSR.length
-				response.outputStream << respuestaValidacionCSR.firmaCSR
-				response.outputStream.flush()*/
-				return false
-				
 				return false
 			} else {
-				respuesta.tipo = Tipo.SOLICITUD_ACCESO_ERROR;
-				respuesta.mensaje = respuestaValidacionCSR.mensaje
-				params.respuesta = respuesta
+				respuestaValidacionCSR.tipo = Tipo.SOLICITUD_ACCESO_ERROR;
+				params.respuesta = respuestaValidacionCSR
 				if (solicitudAcceso) solicitudAccesoService.
-					rechazarSolicitud(solicitudAcceso)
+					rechazarSolicitud(solicitudAcceso, respuesta.mensaje)
 					
 			}
 		} else params.respuesta = respuesta

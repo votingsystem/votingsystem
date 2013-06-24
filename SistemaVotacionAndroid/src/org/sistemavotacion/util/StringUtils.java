@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Random;
 
 import android.util.Log;
 
@@ -34,6 +35,19 @@ public class StringUtils {
         salida.close();
         entrada.close();
         return new String(salida.toByteArray());
+    }
+    
+    public static String randomLowerString(long seed, int size) {
+        StringBuffer tmp = new StringBuffer();
+        Random random = new Random(seed);
+        for (int i = 0; i < size; i++) {
+            long newSeed = random.nextLong();
+            int currInt = (int) (26 * random.nextFloat());
+            currInt += 97;
+            random = new Random(newSeed);
+            tmp.append((char) currInt);
+        }
+        return tmp.toString();
     }
     
     // sacado de http://felinfo.blogspot.com.es/2010/12/calcular-la-letra-del-dni-con-java.html

@@ -1,109 +1,147 @@
 package org.sistemavotacion.centrocontrol
 
-import groovyx.net.http.*
-import static groovyx.net.http.ContentType.*
-import static groovyx.net.http.Method.*
+import org.apache.http.util.EntityUtils;
+import org.apache.http.entity.ContentType;
+import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.text.ParseException;
+import org.apache.http.params.BasicHttpParams
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams
 import org.sistemavotacion.centrocontrol.modelo.*
 import org.sistemavotacion.seguridad.*;
+import org.apache.http.HttpResponse
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.entity.ByteArrayEntity
 import org.apache.http.entity.mime.content.*
 import org.apache.http.entity.mime.MultipartEntity
+import org.apache.http.impl.client.DefaultHttpClient
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.conn.HttpHostConnectException;
 
 class HttpService {
 	
-    def grailsApplication;
-
-    public Respuesta obtenerCadenaCertificacion (String serverURL) {
-        String urlCadenaCertificacion = "${serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLCadenaCertificacion}"
-        log.debug "obtenerCadenaCertificacion - urlCadenaCertificacion: ${urlCadenaCertificacion}"
-        def infoActorHTTPBuilder = new HTTPBuilder(urlCadenaCertificacion);
-		Respuesta respuesta
-		infoActorHTTPBuilder.request(Method.GET) { req ->
-            response.'200' = { resp, reader ->
-                log.debug "***** OK: ${resp.statusLine}"
-                respuesta = new Respuesta(codigoEstado:resp.statusLine.statusCode)
-                respuesta.cadenaCertificacion = reader.getBytes()
-            }
-            response.failure = { resp, reader ->
-                respuesta = new Respuesta(codigoEstado:resp.statusLine.statusCode)
-                respuesta.mensaje = new String("${reader}")
-            }
-		}
-        return respuesta;
-    }
+	private static HttpClient httpclient;
+	private static PoolingClientConnectionManager cm;
+	private static IdleConnectionEvictor connEvictor;
 	
-    public Respuesta obtenerCertificado (String urlCertificado) {
-        log.debug "obtenerCertificado - urlCertificado: ${urlCertificado}"
-		Respuesta respuesta
-        def certificadoHTTPBuilder = new HTTPBuilder(urlCertificado.trim());
-        certificadoHTTPBuilder.request(Method.GET) { req ->
-            response.'200' = { resp, reader ->
-                log.debug "---- OK: ${resp.statusLine}"
-                respuesta = new Respuesta(codigoEstado:resp.statusLine.statusCode)
-                respuesta.certificado = CertUtil.fromPEMToX509Cert(reader.text.getBytes())
-            }
-            response.failure = { resp, reader ->
-                log.error "***** ERROR: ${resp.statusLine}"
-                respuesta = new Respuesta(codigoEstado:resp.statusLine.statusCode)
-                respuesta.mensaje = new String("${reader}")
-            }
-        }
-        return respuesta
-    }
+	static {
+		cm = new PoolingClientConnectionManager();
+		cm.setMaxTotal(100);
+		// set the connection timeout value to 15 seconds (15000 milliseconds)
+		connEvictor = new IdleConnectionEvictor(cm);
+		connEvictor.start();
+		final HttpParams httpParams = new BasicHttpParams();
+		HttpConnectionParams.setConnectionTimeout(httpParams, 15000);
+		httpclient = new DefaultHttpClient(cm, httpParams);
+	 }
 
-	public Respuesta obtenerInfoActorConIP (String urlInfo, ActorConIP actorConIP) {
-		log.debug "obtenerInfoActorConIP - urlInfo: ${urlInfo}"		
-		Respuesta respuesta
-		def infoActorHTTPBuilder = new HTTPBuilder(urlInfo);
-		infoActorHTTPBuilder.request(Method.GET) { req ->
-			response.'200' = { resp, reader ->
-				log.debug "***** OK: ${resp.statusLine}"
-				actorConIP.nombre = reader.nombre
-				actorConIP.serverURL = reader.serverURL
-				actorConIP.estado = ActorConIP.Estado.valueOf(reader.estado)
-				actorConIP.tipoServidor = Tipo.valueOf(reader.tipoServidor)
-				respuesta = new Respuesta(codigoEstado:resp.statusLine.statusCode)
-				respuesta.actorConIP = actorConIP
-			}
-			response.failure = { resp, reader ->
-				log.error "***** ERROR: ${resp.statusLine}"
-				respuesta = new Respuesta(codigoEstado:resp.statusLine.statusCode)
-				respuesta.mensaje = new String("${reader}")
-			}
-		}
-		return respuesta
-	}
-
-	Respuesta sendMessage(byte[] message, String contentType, String serverURL) {
-		log.debug(" - sendMessage:${serverURL} - contentType: ${contentType}")
-		def httpBuilder = new HTTPBuilder(serverURL);
-		def respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR)
+	public Respuesta getInfo (String serverURL, String contentType)
+			throws IOException, ParseException {
+		log.debug("getInfo - serverURL: " + serverURL + " - contentType: "
+				+ contentType);
+		Respuesta respuesta = null;
+		HttpGet httpget = new HttpGet(serverURL);
+		HttpResponse response = null;
 		try {
-			httpBuilder.request(POST) {request ->
-				ByteArrayEntity byteArrayEntity = new ByteArrayEntity(message)
-				byteArrayEntity.setContentType(contentType)
-				request.entity = byteArrayEntity
-				request.getParams().setParameter("http.connection.timeout", new Integer(10000));
-				request.getParams().setParameter("http.socket.timeout", new Integer(10000));
-				response.'200' = { resp, reader ->
-						log.debug "***** OK: ${resp.statusLine}"
-						respuesta = new Respuesta(codigoEstado:resp.statusLine.statusCode)
-						respuesta.mensaje = new String("${reader}")
-				}
-				response.failure = { resp, reader ->
-						String mensajeRespuesta = new String("${reader}")
-						log.error "***** Error: ${resp.statusLine}"
-						log.error "***** mensajeRespuesta: ${mensajeRespuesta}"
-						respuesta.mensaje = mensajeRespuesta
-						respuesta.codigoEstado = resp.statusLine.statusCode
-				}
-			}
-		} catch(SocketTimeoutException ste) {
-			log.error(ste.getMessage(), ste)
-			respuesta.mensaje = ste.getMessage()
+			if(contentType != null) httpget.setHeader("Content-Type", contentType);
+			response = httpclient.execute(httpget);
+			log.debug("----------------------------------------");
+			log.debug("Connections in pool: " + cm.getTotalStats().getAvailable());
+			/*Header[] headers = response.getAllHeaders();
+			for (int i = 0; i < headers.length; i++) {
+			System.out.println(headers[i]);
+			}*/
+			log.debug(response.getStatusLine().toString());
+			log.debug("----------------------------------------");
+			byte[] responseBytes = null;
+			if(Respuesta.SC_OK == response.getStatusLine().getStatusCode())
+				responseBytes = EntityUtils.toByteArray(response.getEntity());
+			respuesta = new Respuesta(codigoEstado:response.getStatusLine().getStatusCode(),
+						mensaje:new String(responseBytes), messageBytes:responseBytes);
+		} catch(Exception ex) {
+			log.error(ex.getMessage(), ex);
+			respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR,
+				mensaje:ex.getMessage());
+			httpget.abort();
+		} finally {
+			if(response != null) EntityUtils.consume(response.getEntity());
 		}
 		return respuesta;
+	}
+			
+	
+	public Respuesta sendMessage(byte[] byteArray, String contentType,
+		String serverURL) throws IOException {
+		log.debug("sendByteArray - contentType: " + contentType +
+				" - serverURL: " + serverURL);
+		Respuesta respuesta = null;
+		HttpPost httpPost = new HttpPost(serverURL);
+		try {
+			ByteArrayEntity entity = null;
+			if(contentType != null) {
+				entity = new ByteArrayEntity(byteArray,  ContentType.create(contentType));
+			} else entity = new ByteArrayEntity(byteArray);
+			httpPost.setEntity(entity);
+			HttpResponse response = httpclient.execute(httpPost);
+			log.debug("----------------------------------------");
+			log.debug(response.getStatusLine().toString());
+			log.debug("----------------------------------------");
+			byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
+			respuesta = new Respuesta(mensaje:new String(responseBytes),
+				codigoEstado:response.getStatusLine().getStatusCode(),
+				messageBytes:responseBytes);
+			//EntityUtils.consume(response.getEntity());
+		} catch(HttpHostConnectException ex){
+			log.error(ex.getMessage(), ex);
+			respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR,
+					mensaje:"hostConnectionErrorMsg");
+			httpPost.abort();
+		} catch(Exception ex) {
+			log.error(ex.getMessage(), ex);
+			respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+			httpPost.abort();
+		}
+		return respuesta;
+	}
+	
+		
+	public static class IdleConnectionEvictor extends Thread {
+		
+		private final ClientConnectionManager connMgr;
+		private volatile boolean shutdown;
+
+		public IdleConnectionEvictor(ClientConnectionManager connMgr) {
+			super();
+			this.connMgr = connMgr;
+		}
+
+		@Override public void run() {
+			try {
+				while (!shutdown) {
+					synchronized (this) {
+						wait(3000);
+						// Close expired connections
+						connMgr.closeExpiredConnections();
+						// Optionally, close connections
+						// that have been idle longer than 5 sec
+						connMgr.closeIdleConnections(30, TimeUnit.SECONDS);
+					}
+				}
+			} catch (InterruptedException ex) {
+				log.error(ex.getMessage(), ex);
+			}
+		}
+
+		public void shutdown() {
+			shutdown = true;
+			synchronized (this) {
+				notifyAll();
+			}
+		}
 	}
 	
 }

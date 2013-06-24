@@ -1,9 +1,9 @@
 package org.sistemavotacion.controlacceso
 
-import groovyx.net.http.*
-import static groovyx.net.http.ContentType.*
-import static groovyx.net.http.Method.*
-
+//import groovyx.net.http.*
+//import static groovyx.net.http.ContentType.*
+//import static groovyx.net.http.Method.*
+import org.apache.http.entity.ContentType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.cert.X509Certificate;
@@ -14,124 +14,124 @@ import java.util.concurrent.Executors
 import java.util.concurrent.Executor
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
+
+import org.apache.http.HttpResponse
+import org.apache.http.HttpVersion;
+import org.apache.http.client.HttpClient
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.conn.ClientConnectionManager
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.ByteArrayEntity
 import org.apache.http.entity.mime.content.ByteArrayBody
 import org.apache.http.entity.mime.MultipartEntity
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.CoreConnectionPNames;
+import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.protocol.HTTP;
 import org.codehaus.groovy.grails.web.json.*
 import java.util.Locale;
-
+import java.io.IOException;
+import java.text.ParseException;
+import org.apache.http.util.EntityUtils;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.conn.HttpHostConnectException;
 import javax.persistence.Transient;
 
 class HttpService {
 	
-	def grailsApplication
-	def messageSource
+	private static HttpClient httpclient;
+	private static PoolingClientConnectionManager cm;
+	private static IdleConnectionEvictor connEvictor;
+	
+	static {
+		cm = new PoolingClientConnectionManager();
+		cm.setMaxTotal(100);
+		// set the connection timeout value to 15 seconds (15000 milliseconds)
+		connEvictor = new IdleConnectionEvictor(cm);
+		connEvictor.start();
+		final HttpParams httpParams = new BasicHttpParams();
+		HttpConnectionParams.setConnectionTimeout(httpParams, 15000);
+		httpclient = new DefaultHttpClient(cm, httpParams);
+	 }
 
-    public Respuesta obtenerCadenaCertificacion (String serverURL, Locale locale) {
-        String urlCadenaCertificacion = "${serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLCadenaCertificacion}"
-        log.debug "obtenerCadenaCertificacion - urlCadenaCertificacion: ${urlCadenaCertificacion}"
-        def infoActorHTTPBuilder = new HTTPBuilder(urlCadenaCertificacion);
-		Respuesta respuesta
+	public Respuesta getInfo (String serverURL, String contentType)
+			throws IOException, ParseException {
+		log.debug("getInfo - serverURL: " + serverURL + " - contentType: "
+				+ contentType);
+		Respuesta respuesta = null;
+		HttpGet httpget = new HttpGet(serverURL);
+		HttpResponse response = null;
 		try {
-			infoActorHTTPBuilder.request(Method.GET) { req ->
-				response.'200' = { resp, reader ->
-					log.debug "***** OK: ${resp.statusLine}"
-					respuesta = new Respuesta(codigoEstado:resp.statusLine.statusCode)
-					respuesta.cadenaCertificacion = reader.getBytes()
-				}
-				response.failure = { resp, reader ->
-					respuesta = new Respuesta(codigoEstado:resp.statusLine.statusCode)
-					respuesta.mensaje = new String("${reader}")
-				}
-			}
+			if(contentType != null) httpget.setHeader("Content-Type", contentType);
+			response = httpclient.execute(httpget);
+			log.debug("----------------------------------------");
+			log.debug("Connections in pool: " + cm.getTotalStats().getAvailable());
+			/*Header[] headers = response.getAllHeaders();
+			for (int i = 0; i < headers.length; i++) {
+			System.out.println(headers[i]);
+			}*/
+			log.debug(response.getStatusLine().toString());
+			log.debug("----------------------------------------");
+			byte[] responseBytes = null;
+			if(Respuesta.SC_OK == response.getStatusLine().getStatusCode())
+				responseBytes = EntityUtils.toByteArray(response.getEntity());
+			respuesta = new Respuesta(codigoEstado:response.getStatusLine().getStatusCode(),
+						mensaje:new String(responseBytes), messageBytes:responseBytes);
 		} catch(Exception ex) {
-			log.error (ex.getMessage(), ex)
-			return new Respuesta(codigoEstado:500, mensaje:
-				messageSource.getMessage('http.errorObteniendoCadenaCertificacion', 
-					[serverURL].toArray(), locale))
-		}
-        return respuesta;
-    }
-	
-	public Respuesta obtenerCertificado (String urlCertificado) {
-		log.debug "obtenerCertificado - urlCertificado: ${urlCertificado}"
-		Respuesta respuesta
-		def certificadoHTTPBuilder = new HTTPBuilder(urlCertificado.trim());
-		certificadoHTTPBuilder.request(Method.GET) { req ->
-			response.'200' = { resp, reader ->
-				log.debug "---- OK: ${resp.statusLine}"
-				respuesta = new Respuesta(codigoEstado:resp.statusLine.statusCode)
-				respuesta.certificado = CertUtil.fromPEMToX509Cert(reader.text.getBytes())
-			}
-			response.failure = { resp, reader ->
-				log.error "***** ERROR: ${resp.statusLine}"
-				respuesta = new Respuesta(codigoEstado:resp.statusLine.statusCode)
-				respuesta.mensaje = new String("${reader}")
-			}
-		}
-		return respuesta
-	}
-	
-	public Respuesta obtenerInfoActorConIP (String urlInfo) {
-		log.debug "obtenerInfoActorConIP - urlInfo: ${urlInfo}"
-		Respuesta respuesta
-		try {
-			def infoActorHTTPBuilder = new HTTPBuilder(urlInfo);
-			infoActorHTTPBuilder.request(Method.GET) { req ->
-				response.'200' = { resp, reader ->
-					log.debug "***** OK: ${resp.statusLine}"
-					ActorConIP actorConIP = new ActorConIP(nombre:reader.nombre,
-						serverURL:reader.serverURL, 
-						cadenaCertificacion:reader.cadenaCertificacionPEM?.getBytes(),
-						estado:ActorConIP.Estado.valueOf(reader.estado),
-						tipoServidor:Tipo.valueOf(reader.tipoServidor))
-					respuesta = new Respuesta(actorConIP:actorConIP,
-						codigoEstado:resp.statusLine.statusCode)
-				}
-				response.failure = { resp ->
-					log.error "***** ERROR: ${resp.statusLine}"
-					respuesta = new Respuesta(codigoEstado:resp.statusLine.statusCode)
-					respuesta.mensaje = new String("${reader}")
-				}
-			}
-		} catch (Exception ex) {
-			log.error (ex.getMessage(), ex)
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
-				mensaje:ex.getMessage())
-		}
-		return respuesta
-	}
-	
-	Respuesta sendMessage(byte[] message, String contentType, String serverURL) {
-		log.debug(" - sendMessage:${serverURL} - contentType: ${contentType}")
-		def httpBuilder = new HTTPBuilder(serverURL);
-		def respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR)
-		try {
-			httpBuilder.request(POST) {request ->
-				ByteArrayEntity byteArrayEntity = new ByteArrayEntity(message)
-				byteArrayEntity.setContentType(contentType)
-				request.entity = byteArrayEntity
-				request.getParams().setParameter("http.connection.timeout", new Integer(10000));
-				request.getParams().setParameter("http.socket.timeout", new Integer(10000));
-				response.'200' = { resp, reader ->
-					log.debug "***** OK: ${resp.statusLine}"
-					respuesta = new Respuesta(codigoEstado:resp.statusLine.statusCode)
-					respuesta.mensaje = reader.text
-				}
-				response.failure = { resp, reader ->
-					log.error "***** Error: ${resp.statusLine}"
-					respuesta = new Respuesta(codigoEstado:resp.statusLine.statusCode)
-					respuesta.mensaje = new String("${reader}")
-				}
-			}
-		} catch(SocketTimeoutException ste) {
-			log.error(ste.getMessage(), ste)
-			respuesta.mensaje = ste.getMessage()
+			log.error(ex.getMessage(), ex);
+			respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR, 
+				mensaje:ex.getMessage());
+			httpget.abort();
+		} finally {
+			if(response != null) EntityUtils.consume(response.getEntity());
 		}
 		return respuesta;
 	}
+			
+	public Respuesta sendMessage(byte[] byteArray, String contentType,
+			String serverURL) throws IOException {
+		log.debug("sendByteArray - contentType: " + contentType +
+				" - serverURL: " + serverURL);
+		Respuesta respuesta = null;
+		HttpPost httpPost = new HttpPost(serverURL);
+		try {
+			ByteArrayEntity entity = null;
+			if(contentType != null) {
+				entity = new ByteArrayEntity(byteArray,  ContentType.create(contentType));
+			} else entity = new ByteArrayEntity(byteArray);
+			httpPost.setEntity(entity);
+			HttpResponse response = httpclient.execute(httpPost);
+			log.debug("----------------------------------------");
+			log.debug(response.getStatusLine().toString());
+			log.debug("----------------------------------------");
+			byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
+			respuesta = new Respuesta(mensaje:new String(responseBytes),
+				codigoEstado:response.getStatusLine().getStatusCode(),
+				messageBytes:responseBytes);
+			//EntityUtils.consume(response.getEntity());
+		} catch(HttpHostConnectException ex){
+			log.error(ex.getMessage(), ex);
+			respuesta = new Respuesta(codigoEstado:Respuesta.SC_ERROR,
+					mensaje:"hostConnectionErrorMsg");
+			httpPost.abort();
+		} catch(Exception ex) {
+			log.error(ex.getMessage(), ex);
+			respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+			httpPost.abort();
+		}
+		return respuesta;
+	}
+
 	
-	ConcurrentHashMap notificarActoresInicializacionDeEvento (byte[] mensaje,
+	/* ConcurrentHashMap notificarActoresInicializacionDeEvento (byte[] mensaje,
 			EventoVotacion eventoVotacion, Set<ActorConIP> actores) {
 		log.debug("notificarActoresInicializacionDeEvento - eventoVotacion: ${eventoVotacion.asunto} - numero actores: ${actores.size()}")
 		Executor executor = Executors.newFixedThreadPool(actores.size())
@@ -153,7 +153,43 @@ class HttpService {
 		}
 		//comprobarRespuestasActores(mapaRespuestas, eventoVotacion)
 		return mapaRespuestas
+	}*/
+		
+
+	public static class IdleConnectionEvictor extends Thread {
+		
+		private final ClientConnectionManager connMgr;
+		private volatile boolean shutdown;
+
+		public IdleConnectionEvictor(ClientConnectionManager connMgr) {
+			super();
+			this.connMgr = connMgr;
+		}
+
+		@Override
+		public void run() {
+			try {
+				while (!shutdown) {
+					synchronized (this) {
+						wait(3000);
+						// Close expired connections
+						connMgr.closeExpiredConnections();
+						// Optionally, close connections
+						// that have been idle longer than 5 sec
+						connMgr.closeIdleConnections(30, TimeUnit.SECONDS);
+					}
+				}
+			} catch (InterruptedException ex) {
+				log.error(ex.getMessage(), ex);
+			}
+		}
+
+		public void shutdown() {
+			shutdown = true;
+			synchronized (this) {
+				notifyAll();
+			}
+		}
 	}
-			
 	
 }

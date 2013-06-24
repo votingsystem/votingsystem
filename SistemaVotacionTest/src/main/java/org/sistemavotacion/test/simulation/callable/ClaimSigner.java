@@ -16,7 +16,7 @@ import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.util.StringUtils;
-import org.sistemavotacion.worker.SMIMESignedSenderWorker;
+import org.sistemavotacion.callable.SMIMESignedSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,11 +59,10 @@ public class ClaimSigner implements Callable<Respuesta> {
                     nif, toUser, claimDataStr, subject, null);
             X509Certificate destinationCert = ContextoPruebas.INSTANCE.
                     getAccessControl().getCertificate();  
-            SMIMESignedSenderWorker worker = new SMIMESignedSenderWorker(
+            SMIMESignedSender worker = new SMIMESignedSender(
                     null, smimeMessage, submitClaimsURL, 
-                    null, destinationCert,null);
-            worker.execute();
-            respuesta = worker.get();
+                    null, destinationCert);
+            respuesta = worker.call();
             if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
                 respuesta.setMensaje(nif);
             } else respuesta.appendErrorMessage(nif);

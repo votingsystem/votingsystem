@@ -17,10 +17,10 @@ import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.simulation.callable.EncryptionTester;
-import org.sistemavotacion.test.util.SimulationUtils;
+import org.sistemavotacion.test.simulation.callable.ServerInitializer;
+import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.NifUtils;
 import org.sistemavotacion.util.FileUtils;
-import org.sistemavotacion.worker.InfoGetterWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,9 +94,9 @@ public class EncryptionSimulator extends Simulator<SimulationData>
                 simulationData.getNumRequestsProjected()) {
                 if((simulationData.getNumRequests() - simulationData.
                     getNumRequestsColected()) <= simulationData.getMaxPendingResponses()) {
-                    logger.debug("launchRequests - WITHOUT REQUESTS PROJECTED");
                     String nifFrom = NifUtils.getNif(simulationData.
                             getAndIncrementNumRequests().intValue());
+                    logger.debug("launchRequests - request from: " + nifFrom);
                     requestCompletionService.submit(new EncryptionTester(
                             nifFrom, requestURL));
                  } else Thread.sleep(300);
@@ -139,6 +139,7 @@ public class EncryptionSimulator extends Simulator<SimulationData>
         }
         EncryptionSimulator simuHelper = new EncryptionSimulator(simulationData, null);
         simuHelper.call();
+        System.exit(0);
     }
 
     @Override public void actionPerformed(ActionEvent ae) {
@@ -161,23 +162,14 @@ public class EncryptionSimulator extends Simulator<SimulationData>
     }
     
     @Override public SimulationData call() throws Exception {
-        String urlInfoServer = ContextoPruebas.getURLInfoServidor(
-                simulationData.getAccessControlURL());
-        logger.debug("call - urlInfoServer: " + urlInfoServer);
-        InfoGetterWorker worker = new InfoGetterWorker(null, 
-                urlInfoServer, null, null);
-        worker.execute();
-        worker.get();
-        if(Respuesta.SC_OK == worker.getStatusCode()) {
-            ActorConIP accessControl = ActorConIP.parse(worker.getMessage());
-            String msg = SimulationUtils.checkActor(
-                    accessControl, ActorConIP.Tipo.CONTROL_ACCESO);
-            if(msg == null) {
-                ContextoPruebas.INSTANCE.setControlAcceso(accessControl);
-                launchSimulationThreads();
-            }
-        } else logger.error(worker.getMessage());
-        
+        ServerInitializer accessControlInitializer = 
+            new ServerInitializer(simulationData.getAccessControlURL(), 
+                ActorConIP.Tipo.CONTROL_ACCESO);
+        Respuesta respuesta = accessControlInitializer.call();
+        if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+             launchSimulationThreads();
+        } else logger.error(respuesta.getMensaje());
+
         logger.debug("- await");
         countDownLatch.await();
         logger.debug("- call - shutdown executors");   
@@ -188,7 +180,10 @@ public class EncryptionSimulator extends Simulator<SimulationData>
         if(requestExecutor != null) requestExecutor.shutdownNow();    
         logger.debug("--------------- SIMULATION RESULT----------------------"); 
         simulationData.setFinish(System.currentTimeMillis());
-        logger.debug("duracionStr: " + simulationData.getDurationStr());
+        simulationData.setFinish(System.currentTimeMillis());
+                logger.info("Begin: " + DateUtils.getStringFromDate(
+                simulationData.getBeginDate())  + " - Duration: " + 
+                simulationData.getDurationStr());
         logger.debug("NumRequests: " + simulationData.getNumRequests());
         logger.debug("NumRequestsOK: " + simulationData.getNumRequestsOK());
         logger.debug("NumRequestsERROR: " + simulationData.getNumRequestsERROR());

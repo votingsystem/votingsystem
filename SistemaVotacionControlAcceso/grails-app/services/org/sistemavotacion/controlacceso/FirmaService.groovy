@@ -11,6 +11,7 @@ import org.springframework.beans.factory.InitializingBean
 import org.sistemavotacion.util.*
 import org.sistemavotacion.controlacceso.modelo.*
 import org.sistemavotacion.seguridad.*
+import org.sistemavotacion.seguridad.SVCertExtensionChecker;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.springframework.context.ApplicationContext;
@@ -22,14 +23,21 @@ import javax.mail.internet.MimeMessage;
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.PublicKey
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
+import java.security.cert.CertPath;
+import java.security.cert.CertPathValidator;
 import java.security.cert.CertPathValidatorException
+import java.security.cert.CertPathValidatorResult;
+import java.security.cert.CertificateFactory;
 import java.security.cert.PKIXCertPathValidatorResult
+import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor
 import java.security.cert.X509Certificate;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
@@ -58,10 +66,10 @@ class FirmaService {
 	private KeyStore trustedCertsKeyStore
 	static HashMap<Long, Certificado> trustedCertsHashMap;
 	private X509Certificate localServerCertSigner;
-	private static HashMap<Long, Set<X509Certificate>> eventTrustedCertsHashMap = 
-		new HashMap<Long, Set<X509Certificate>>();
-	private static HashMap<Long, Set<X509Certificate>> eventValidationTrustedCertsHashMap =
-		new HashMap<Long, Set<X509Certificate>>();
+	private static HashMap<Long, Set<TrustAnchor>> eventTrustedAnchorsHashMap = 
+		new HashMap<Long, Set<TrustAnchor>>();
+	private static HashMap<Long, Set<TrustAnchor>> controlCenterTrustedAnchorsHashMap =
+		new HashMap<Long, Set<TrustAnchor>>();
 	def grailsApplication;
 	def messageSource
 	def csrService;
@@ -133,11 +141,32 @@ class FirmaService {
 	
 	public Respuesta getEventTrustedCerts(Evento event, Locale locale) {
 		log.debug("getEventTrustedCerts")
-		if(!event) return null
-		Set<X509Certificate> eventTrustedCerts = eventTrustedCertsHashMap.get(event.id)
-		Respuesta respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK,
+		if(!event) return new Respuesta(Respuesta.SC_ERROR)
+		Certificado certificadoCAEvento = Certificado.findWhere(
+			eventoVotacion:event, estado:Certificado.Estado.OK,
+			tipo:Certificado.Tipo.RAIZ_VOTOS)
+		if(!certificadoCAEvento) {
+			String msg = messageSource.getMessage('eventWithoutCAErrorMsg',
+				[event.id].toArray(), locale)
+			log.error ("validateVoteCerts - ERROR EVENT CA CERT -> '${msg}'")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+				mensaje:msg, tipo:Tipo.VOTO_CON_ERRORES, evento:event)
+		}
+		X509Certificate certCAEvento = CertUtil.loadCertificateFromStream (
+			new ByteArrayInputStream(certificadoCAEvento.contenido))
+		Set<X509Certificate> eventTrustedCerts = new HashSet<X509Certificate>()
+		eventTrustedCerts.add(certCAEvento)
+		return new Respuesta(codigoEstado:Respuesta.SC_OK, 
 			data:eventTrustedCerts)
-		if(!eventTrustedCerts) {
+	}
+	
+	public Respuesta getEventTrustedAnchors(Evento event, Locale locale) {
+		log.debug("getEventTrustedAnchors")
+		if(!event) return new Respuesta(Respuesta.SC_ERROR)
+		Set<TrustAnchor> eventTrustAnchors = eventTrustedAnchorsHashMap.get(event.id)
+		Respuesta respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK,
+			data:eventTrustAnchors)
+		if(!eventTrustAnchors) {
 			Certificado certificadoCAEvento = Certificado.findWhere(
 				eventoVotacion:event, estado:Certificado.Estado.OK,
 				tipo:Certificado.Tipo.RAIZ_VOTOS)
@@ -150,12 +179,13 @@ class FirmaService {
 			}
 			X509Certificate certCAEvento = CertUtil.loadCertificateFromStream (
 				new ByteArrayInputStream(certificadoCAEvento.contenido))
-			eventTrustedCerts = new HashSet<X509Certificate>()
-			eventTrustedCerts.add(certCAEvento)
-			eventTrustedCertsHashMap.put(event.id, eventTrustedCerts)
-			respuesta.data = eventTrustedCerts
+			TrustAnchor anchor = new TrustAnchor(certCAEvento, null);
+			eventTrustAnchors = new HashSet<TrustAnchor>()
+			eventTrustAnchors.add(anchor)
+			eventTrustedAnchorsHashMap.put(event.id, eventTrustAnchors)
+			respuesta.data = eventTrustAnchors
 			
-		} 
+		}
 		return respuesta
 	}
 
@@ -335,7 +365,7 @@ class FirmaService {
 		} 
 		if(toUser) {
 			toUser = toUser?.replaceAll(" ", "_").replaceAll("[\\/:.]", "")
-			smimeMessage.setTo(toUser)
+			smimeMessage.setHeader("To", toUser)
 		}
 		SMIMEMessageWrapper multifirma = getSignedMailGenerator().
 				genMultiSignedMessage(smimeMessage, subject);
@@ -357,7 +387,8 @@ class FirmaService {
 		X509Certificate certSigner = (X509Certificate) keyStore.getCertificate(almacenClaves.keyAlias);
 		String representativeURL = null
 		if(representative && representative.type == Usuario.Type.REPRESENTATIVE) 
-			representativeURL = "OU=RepresentativeURL:http://localhost:8080/SistemaVotacionControlAcceso/representative/${representative.id}"
+			representativeURL = "OU=RepresentativeURL:http://${grailsApplication.config.grails.serverURL}" + 
+				"/SistemaVotacionControlAcceso/representative/${representative.id}"
 		
 		//representativeNIF = "OU=RepresentativeURL:${representative.nif}"
 		byte[] certificadoFirmado = PKCS10WrapperServer.firmarValidandoCsr(
@@ -394,7 +425,7 @@ class FirmaService {
 		PrivateKey privateKeySigner = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray());
 		X509Certificate certSigner = (X509Certificate) keyStore.getCertificate(aliasClaves);
 		
-		log.debug("firmarCertificadoUsuario - certSigner:${certSigner}");
+		//log.debug("firmarCertificadoUsuario - certSigner:${certSigner}");
 
 		Date today = Calendar.getInstance().getTime();
 		Calendar today_plus_year = Calendar.getInstance();
@@ -556,7 +587,23 @@ class FirmaService {
 		}
 		return new Respuesta(codigoEstado:Respuesta.SC_OK,
 			smimeMessage:messageWrapper, usuarios:checkedSigners)
-	}                    
+	} 
+		        
+			
+	public PKIXCertPathValidatorResult verifyCertificate(Set<TrustAnchor> anchors, 
+		boolean checkCRL, List<X509Certificate> certs) throws Exception {
+		PKIXParameters pkixParameters = new PKIXParameters(anchors);
+		
+		SVCertExtensionChecker checker = new SVCertExtensionChecker();
+		pkixParameters.addCertPathChecker(checker);
+		
+		pkixParameters.setRevocationEnabled(checkCRL); // if false tell system do not check CRL's
+		CertPathValidator certPathValidator = CertPathValidator.getInstance("PKIX","BC");
+		CertificateFactory certFact = CertificateFactory.getInstance("X.509");
+		CertPath certPath = certFact.generateCertPath(certs);
+		CertPathValidatorResult result = certPathValidator.validate(certPath, pkixParameters);
+		return (PKIXCertPathValidatorResult)result;
+	}
 
 	public Respuesta validateSMIMEVote(
 		SMIMEMessageWrapper messageWrapper, Locale locale) {
@@ -621,19 +668,16 @@ class FirmaService {
 				tipo:Tipo.VOTO_CON_ERRORES, evento:evento)
 		}
 		smimeMessageReq.informacionVoto.setCertificado(certificado)
-		respuesta = getEventTrustedCerts(evento, locale)
+		respuesta = getEventTrustedAnchors(evento, locale)
 		if(Respuesta.SC_OK != respuesta.codigoEstado) return respuesta
-		Set<X509Certificate> eventTrustedCerts = (Set<X509Certificate>) respuesta.data
+		Set<TrustAnchor> trustedAnchors = (Set<TrustAnchor>) respuesta.data
 		//Vote validation
 		PKIXCertPathValidatorResult pkixResult;
-		TrustAnchor ta;
 		X509Certificate certCaResult;
 		X509Certificate checkedCert = infoVoto.getCertificadoVoto()
 		try {
-			pkixResult = CertUtil.verifyCertificate(
-				checkedCert, eventTrustedCerts, false)
-			ta = pkixResult.getTrustAnchor();
-			certCaResult = ta.getTrustedCert();
+			pkixResult = verifyCertificate(trustedAnchors, false, [checkedCert])
+			certCaResult = pkixResult.getTrustAnchor().getTrustedCert();
 			log.debug("validateVoteCerts - vote cert -> CA Result: " + certCaResult?.getSubjectDN()?.toString()+
 					"- numserie: " + certCaResult?.getSerialNumber()?.longValue());
 		} catch (Exception ex) {
@@ -654,20 +698,28 @@ class FirmaService {
 				tipo:Tipo.VOTO_CON_ERRORES, evento:evento)
 		}
 		//Control Center cert validation
-		eventTrustedCerts = eventValidationTrustedCertsHashMap.get(evento?.id)
-		if(!eventTrustedCerts) {
-			eventTrustedCerts = new HashSet<X509Certificate>()
-			Collection<X509Certificate> centroControlCerts = CertUtil.
+		trustedAnchors = controlCenterTrustedAnchorsHashMap.get(evento?.id)
+		if(!trustedAnchors) {
+			trustedAnchors = new HashSet<TrustAnchor>()
+			Collection<X509Certificate> controlCenterCerts = CertUtil.
 				fromPEMToX509CertCollection (evento.cadenaCertificacionCentroControl)
-			eventTrustedCerts.addAll(centroControlCerts)
-			eventValidationTrustedCertsHashMap.put(evento.id, eventTrustedCerts)
+			for(X509Certificate controlCenterCert : controlCenterCerts)	{
+				TrustAnchor anchor = new TrustAnchor(controlCenterCert, null);
+				trustedAnchors.add(anchor);
+			}
+			controlCenterTrustedAnchorsHashMap.put(evento.id, trustedAnchors)
+		}
+		//check control center certificate
+		if(infoVoto.getServerCerts().isEmpty()) {
+			msg = messageSource.getMessage('controlCenterMissingSignatureErrorMsg', null, locale)
+			log.error(" ERROR - MISSING CONTROL CENTER SIGNATURE - msg: ${msg}")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+				mensaje:msg, tipo:Tipo.VOTO_CON_ERRORES, evento:evento)
 		}
 		checkedCert = infoVoto.getServerCerts()?.iterator()?.next()
 		try {
-			pkixResult = CertUtil.verifyCertificate(
-				checkedCert, eventTrustedCerts, false)
-			ta = pkixResult.getTrustAnchor();
-			certCaResult = ta.getTrustedCert();
+			pkixResult = verifyCertificate(trustedAnchors, false, [checkedCert])
+			certCaResult = pkixResult.getTrustAnchor().getTrustedCert();
 			log.debug("validateVoteCerts - Control Center cert -> CA Result: " + certCaResult?.getSubjectDN()?.toString() +
 					"- numserie: " + certCaResult?.getSerialNumber()?.longValue());
 		} catch (Exception ex) {

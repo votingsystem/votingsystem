@@ -3,7 +3,6 @@ package org.sistemavotacion.android.ui;
 import static org.sistemavotacion.android.Aplicacion.ALIAS_CERT_USUARIO;
 import static org.sistemavotacion.android.Aplicacion.KEY_STORE_FILE;
 
-import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.security.KeyFactory;
 import java.security.KeyStore;
@@ -19,12 +18,11 @@ import org.sistemavotacion.android.FragmentTabsPager;
 import org.sistemavotacion.android.R;
 import org.sistemavotacion.android.db.VoteReceiptDBHelper;
 import org.sistemavotacion.android.service.SignService;
-import org.sistemavotacion.android.service.SignServiceListener;
+import org.sistemavotacion.android.service.ServiceListener;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.modelo.VoteReceipt;
-import org.sistemavotacion.seguridad.EncryptionHelper;
+import org.sistemavotacion.seguridad.Encryptor;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
-import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.ServerPaths;
@@ -60,7 +58,7 @@ import android.widget.TextView;
 
 public class VoteReceiptListScreen extends FragmentActivity 
 	implements CertPinDialogListener, ReceiptOperationsListener, 
-	SignServiceListener{
+	ServiceListener{
 	
 	public static final String TAG = "VoteReceiptListScreen";
 	
@@ -308,7 +306,7 @@ public class VoteReceiptListScreen extends FragmentActivity
 			PrivateKey signerPrivatekey = (PrivateKey)keyStore.getKey(ALIAS_CERT_USUARIO, password);
 			X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(ALIAS_CERT_USUARIO);
 
-			byte[] base64encodedvoteCertPrivateKey = EncryptionHelper.decryptMessage(
+			byte[] base64encodedvoteCertPrivateKey = Encryptor.decryptMessage(
 					 operationReceipt.getEncryptedKey(), signerCert, signerPrivatekey);
 			PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(
 					Base64.decode(base64encodedvoteCertPrivateKey));
@@ -316,13 +314,11 @@ public class VoteReceiptListScreen extends FragmentActivity
 	        PrivateKey certPrivKey = kf.generatePrivate(keySpec);
 			operationReceipt.setCertVotePrivateKey(certPrivKey);
 
-			
-            boolean isWithSignedReceipt = true;
             boolean isEncryptedResponse = true;
             
-    		if(signService != null) signService.processSignature(operationReceipt.
+    		if(signService != null) signService.processSignature(null, operationReceipt.
 	        		getVoto().getCancelVoteData(), subject, serverURL, this, 
-	        		isWithSignedReceipt, isEncryptedResponse, keyStoreBytes, password);	
+	        		isEncryptedResponse, keyStoreBytes, password);	
         } catch(Exception ex) {
 			ex.printStackTrace();
 			showMessage(getString(R.string.error_lbl), 
@@ -406,31 +402,26 @@ public class VoteReceiptListScreen extends FragmentActivity
 	    certDialog.show(ft, Aplicacion.CERT_NOT_FOUND_DIALOG_ID);
 	}
 
-	@Override
-	public void proccessReceipt(SMIMEMessageWrapper cancelReceipt) {
-		Log.d(TAG + ".proccessReceipt(..)", "--- proccessReceipt -- ");
-		operationReceipt.setCancelVoteReceipt(cancelReceipt);
-		String msg = getString(R.string.cancel_vote_result_msg, 
-				this.operationReceipt.getVoto().getAsunto());
-		try {
-			db.updateVoteReceipt(operationReceipt);
-		} catch (Exception e) {
-			e.printStackTrace();
-		} 
-		refreshReceiptList();
-		AlertDialog.Builder builder= new AlertDialog.Builder(this);
-		builder.setTitle(getString(R.string.msg_lbl)).setMessage(msg).show();
-	}
-
-	@Override
-	public void setSignServiceMsg(int statusCode, String msg) {
-		Log.d(TAG + ".setSignServiceMsg()", "--- statusCode: " 
-				+ statusCode + " - msg: " + msg);
+	@Override public void proccessResponse(Integer requestId, Respuesta respuesta) {
+		Log.d(TAG + ".setSignServiceMsg()", "--- statusCode: " + 
+				respuesta.getCodigoEstado() + " - msg: " + respuesta.getMensaje());
 		String caption  = null;
-		if(Respuesta.SC_OK != statusCode) {
+		if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+			operationReceipt.setCancelVoteReceipt(respuesta.getSmimeMessage());
+			String msg = getString(R.string.cancel_vote_result_msg, 
+					this.operationReceipt.getVoto().getAsunto());
+			try {
+				db.updateVoteReceipt(operationReceipt);
+			} catch (Exception e) {
+				e.printStackTrace();
+			} 
+			refreshReceiptList();
+			AlertDialog.Builder builder= new AlertDialog.Builder(this);
+			builder.setTitle(getString(R.string.msg_lbl)).setMessage(msg).show();
+		} else {
 			caption = getString(R.string.error_lbl) + " " 
-					+ new Integer(statusCode).toString();
-			if(Respuesta.SC_ANULACION_REPETIDA == statusCode) {
+					+ respuesta.getCodigoEstado();
+			if(Respuesta.SC_ANULACION_REPETIDA == respuesta.getCodigoEstado()) {
 				Log.e(TAG + ".setSignServiceMsg(...)", " --- ANULACION_REPETIDA --- ");
 				operationReceipt.setCanceled(true);
 				try {
@@ -439,8 +430,9 @@ public class VoteReceiptListScreen extends FragmentActivity
 					e.printStackTrace();
 				} 
 			}
+			showMessage(caption, respuesta.getMensaje());
 		}
-		showMessage(caption, msg);
+		
 	}
 
 	@Override
@@ -455,17 +447,4 @@ public class VoteReceiptListScreen extends FragmentActivity
 		
 	}
 
-
-	@Override
-	public void proccessEncryptedResponse(byte[] encryptedResponse) {
-		Log.d(TAG + ".proccessEncryptedResponse()", "--- proccessEncryptedResponse ");
-		//This method is called if cancellation process finish OK
-		try {
-			SMIMEMessageWrapper receipt = EncryptionHelper.decryptSMIMEMessage(
-					encryptedResponse, null, operationReceipt.getCertVotePrivateKey());
-			proccessReceipt(receipt);
-		} catch(Exception ex ) {
-			Log.e(TAG + ".guardarReciboButton.setOnClickListener(...) ", ex.getMessage(), ex);
-		}
-	}
 }

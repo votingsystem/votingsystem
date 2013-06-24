@@ -5,6 +5,7 @@ beans = {
 		bean.factoryMethod = 'getInstance'
 	}
 	
+	
 	//to get ApplicationEventPublisher
 	//publishService(org.sistemavotacion.controlacceso.PublishService) {}
 }

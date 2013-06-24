@@ -81,8 +81,8 @@ public class SignedMailGenerator {
     
     public MimeMessage genMimeMessage(String fromUser, String toUser, 
     		String textoAFirmar, String asunto, Header header) throws Exception {
-        if (asunto == null) asunto = "";
-        if (textoAFirmar == null) textoAFirmar = "";
+        if (asunto == null) throw new Exception("Subject null");
+        if (textoAFirmar == null) throw new Exception("Content null");
         MimeBodyPart msg = new MimeBodyPart();
         msg.setText(textoAFirmar);
         MimeMultipart mimeMultipart = smimeSignedGenerator.generate(
@@ -130,8 +130,7 @@ public class SignedMailGenerator {
  		 return multiSignedMessage;*/
          smimeMessage.setSubject(mailSubject);
          smimeMessage.setContent(newMimeMultipart, newMimeMultipart.getContentType());
-         //smimeMessage.setHeader("To", "Username");
-         smimeMessage.saveChanges();
+         smimeMessage.updateChanges();
          return smimeMessage;
      }
 

@@ -1,18 +1,12 @@
 package org.sistemavotacion.smime;
 
 import static org.sistemavotacion.Contexto.*;
-
-import com.sun.mail.util.BASE64DecoderStream;
-import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.Certificate;
 import java.security.cert.PKIXCertPathChecker;
@@ -29,7 +23,6 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.CMSProcessable;
 import org.bouncycastle.mail.smime.SMIMEException;
 import org.bouncycastle.util.Store;
 import org.slf4j.Logger;
@@ -38,6 +31,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -47,32 +41,30 @@ import java.util.Properties;
 import java.util.Set;
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
-import javax.mail.util.SharedByteArrayInputStream;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.sistemavotacion.modelo.Firmante;
 import org.sistemavotacion.seguridad.PKIXCertPathReviewer;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.DERUTCTime;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.cms.CMSVerifierCertificateNotValidException;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
-import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.mail.smime.SMIMESigned;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
-import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.tsp.TimeStampToken;
+import org.sistemavotacion.Contexto;
+import org.sistemavotacion.modelo.InformacionVoto;
 import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.StringUtils;
@@ -93,6 +85,12 @@ public class SMIMEMessageWrapper extends MimeMessage {
         mc.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
         mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true");
         mc.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822");
+        
+        mc.addMailcap("application/pkcs7-signature;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.pkcs7_signature");
+        mc.addMailcap("application/pkcs7-mime;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.pkcs7_mime");
+        mc.addMailcap("application/x-pkcs7-signature;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.x_pkcs7_signature");
+        mc.addMailcap("application/x-pkcs7-mime;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.x_pkcs7_mime");
+        mc.addMailcap("multipart/signed;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.multipart_signed");
 
         CommandMap.setDefaultCommandMap(mc);
     }
@@ -102,14 +100,18 @@ public class SMIMEMessageWrapper extends MimeMessage {
     private String contentType;
     private String signedContent;
     private SMIMESigned smimeSigned = null;
+    
+    private Set<Usuario> firmantes = null;
+    private Usuario firmante;
+    private InformacionVoto informacionVoto;
     private boolean isValidSignature = false;
     
-    private Set<Firmante> firmantes;
+
     private static Properties props = System.getProperties();
     // Get a Session object with the default properties.
     private static Session defaultSession = Session.getDefaultInstance(props, null);
     
-    public Set<Firmante> getFirmantes() {
+    public Set<Usuario> getFirmantes() {
         return firmantes;
     }
     
@@ -131,21 +133,9 @@ public class SMIMEMessageWrapper extends MimeMessage {
 
     private void initSMIMEMessage() throws IOException, MessagingException, 
             CMSException, SMIMEException, Exception{
-        if (getContent() instanceof BASE64DecoderStream) {
-            logger.debug("content instanceof BASE64DecoderStream");
-            smimeSigned = new SMIMESigned(this); 
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ((CMSProcessable)smimeSigned.getSignedContent()).write(baos);
-            signedContent = baos.toString(); 
-        } else if(getContent() instanceof SharedByteArrayInputStream){ 
-            logger.debug("content instanceof SharedByteArrayInputStream");
-            smimeSigned = new SMIMESigned(this); 
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ((CMSProcessable)smimeSigned.getSignedContent()).write(baos);
-            signedContent = baos.toString();
-        } else if(getContent() instanceof MimeMultipart){
-            smimeSigned = new SMIMESigned((MimeMultipart)getContent());
+        if(getContent() instanceof MimeMultipart){
             logger.debug("content instanceof MimeMultipart");
+            smimeSigned = new SMIMESigned((MimeMultipart)getContent());
             MimeBodyPart content = smimeSigned.getContent();
             Object  cont = content.getContent();
             if (cont instanceof String) {
@@ -160,40 +150,39 @@ public class SMIMEMessageWrapper extends MimeMessage {
                     stringBuilder.append("Part " + i).append("---------------------------");
                     if (part instanceof String) {
                         stringBuilder.append((String)part);
-                    } else if (part instanceof BASE64DecoderStream) {
-                        InputStreamReader isr = new InputStreamReader((BASE64DecoderStream)part);
-                        Writer writer = new StringWriter();
-                        char[] buffer = new char[1024];
-                        try {
-                            Reader reader = new BufferedReader(isr);
-                            int n;
-                            while ((n = reader.read(buffer)) != -1) {
-                                writer.write(buffer, 0, n);
-                            }
-                        } finally {
-                            isr.close();
-                        }
-                        signedContent = writer.toString();
                     } else  {
-                        logger.debug("IMPOSIBLE EXTRAER CONTENIDO DE LA SECCION " + i);
+                        logger.debug(" TODO - get content from part instanceof -> " + part.getClass());
                     }
                 }
                 signedContent = stringBuilder.toString();
+            } else if (cont instanceof ByteArrayInputStream) {
+                ByteArrayInputStream contentStream = (ByteArrayInputStream)cont;
+                ByteArrayOutputStream output = new ByteArrayOutputStream();
+                byte[] buf =new byte[2048];
+                int len;
+                while((len = contentStream.read(buf)) > 0){
+                    output.write(buf,0,len);
+                }
+                output.close();
+                contentStream.close();
+                signedContent = new String(output.toByteArray());
             }
+        } else if(getContent() instanceof String){ 
+            logger.error("TODO - content instanceof String -> " + getContent()); 
         }
         checkSignature(); 
     }
     
-    @Override
+    //@Override
     public void updateMessageID() throws MessagingException {
             setHeader("Message-ID", messageId);
     }
  
     public void updateMessageID(String nifUsuario) throws MessagingException {
-            messageId = getFileName() + "@" + nifUsuario;
-            Address[] addresses = {new InternetAddress(nifUsuario)};
-            addFrom(addresses);
-            updateMessageID(); 
+        messageId = getFileName() + "@" + nifUsuario;
+        Address[] addresses = {new InternetAddress(nifUsuario)};
+        addFrom(addresses);
+        updateMessageID(); 
     }
 
     /**
@@ -230,72 +219,61 @@ public class SMIMEMessageWrapper extends MimeMessage {
         Store certs = smimeSigned.getCertificates();
         // SignerInfo blocks which contain the signatures
         SignerInformationStore  signers = smimeSigned.getSignerInfos();
-        logger.debug("signers.size(): " + signers.size());
-        Iterator<SignerInformation> it = signers.getSigners().iterator();
+        informacionVoto = new InformacionVoto();
+        logger.debug("checkSignature - document with '" + signers.size() + "' signers");
+        Collection c = signers.getSigners();
+        Iterator it = c.iterator();
+        Date firstSignature = null;
         isValidSignature = false;
-        // check each signer
-        firmantes = new HashSet<Firmante>();
-        while (it.hasNext()) {
-            logger.debug("-------------- signer -------------------");
-            SignerInformation   signer = it.next();
-            AttributeTable  attributes = signer.getSignedAttributes();
-            DERUTCTime time = null;
-            Firmante firmante = new Firmante();
-            firmante.setSigner(signer);
-            firmante.setContenidoFirmado(getSignedContent());
-            /*byte[] hash = null;
-            String hashStr = null;
-            if (attributes != null) {
-                Attribute signingTimeAttribute = attributes.get(CMSAttributes.signingTime);
-                time = (DERUTCTime) signingTimeAttribute.getAttrValues().getObjectAt(0);
-                firmante.setFechaFirma(time.getDate());
-                Attribute messageDigestAttribute = attributes.get( CMSAttributes.messageDigest );
-                hash = ((ASN1OctetString)messageDigestAttribute.getAttrValues().getObjectAt(0)).getOctets();
-                hashStr = new String(Base64.encode(hash));
-            }*/   
-            Collection certCollection = certs.getMatches(signer.getSID());
-            logger.debug("Collection matches: " + certCollection.size());
+        firmantes = new HashSet<Usuario>();
+        while (it.hasNext()) {// check each signer
+            SignerInformation   signer = (SignerInformation)it.next();
+            Collection          certCollection = certs.getMatches(signer.getSID());
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = new JcaX509CertificateConverter()
-                    .setProvider(PROVIDER).getCertificate(
-                    (X509CertificateHolder)certIt.next());
-            SignerInformationVerifier siv = new JcaSimpleSignerInfoVerifierBuilder().
-                    setProvider(PROVIDER).build(cert);
-            isValidSignature  = signer.verify(siv);
-            if(!isValidSignature) {
-                logger.debug("signature verified");
-                return;
-            } 
-            firmante.setUsuario(Usuario.getUsuario(cert));
-            firmante.setCert(cert);
-            firmantes.add(firmante);
-            firmante.setTimeStampToken(checkTimeStampToken(signer));//method can only be called after verify.
-            logger.debug("cert.getSubjectDN(): " + cert.getSubjectDN());
-
-            //byte[] digestParams = signer.getDigestAlgParams();
-            //String digestParamsStr = new String(Base64.encode(digestParams));
-            //logger.debug(" -- digestParamsStr: " + digestParamsStr);
-            //byte[] digest, AlgorithmIdentifier encryptionAlgorithm, AlgorithmIdentifier  digestAlgorithm, PublicKey key, byte[] signature, 
-            //String sigProviderSignerInformation signer, X509Certificate cert,  String provider
-            
-            //boolean cmsVerifyDigest = CMSUtils.verifyDigest(signer, cert, SIGN_PROVIDER);
-            //logger.debug(" -- cmsVerifyDigest: " + cmsVerifyDigest);
-            //boolean cmsVerifySignature = CMSUtils.verifySignature(signer, cert, SIGN_PROVIDER);
-            //logger.debug(" -- cmsVerifySignature: " + cmsVerifySignature);
+                    .setProvider(Contexto.PROVIDER)
+                    .getCertificate((X509CertificateHolder)certIt.next());
+            logger.debug("checkSignature - cert: " + cert.getSubjectDN() + " --- " + 
+                    certCollection.size() + " match");
+            isValidSignature = verifySignerCert(signer, cert);
+            if(!isValidSignature) return;
+            Usuario usuario = Usuario.getUsuario(cert);
+            TimeStampToken timeStampToken = checkTimeStampToken(signer);//method can only be called after verify.
+            if(timeStampToken != null) {
+            	Date timeStampDate = timeStampToken.getTimeStampInfo().getGenTime();
+            	if(firstSignature == null || firstSignature.after(timeStampDate)) {
+            		firstSignature = timeStampDate;
+            		this.firmante = usuario;
+            	}
+            }
+            usuario.setTimeStampToken(timeStampToken);
+            firmantes.add(usuario);
+            if (cert.getSubjectDN().toString().contains("OU=hashCertificadoVotoHEX:")) {
+            	informacionVoto.setCertificadoVoto(cert);
+            	informacionVoto.setVoteTimeStampToken(timeStampToken);
+            } else {informacionVoto.addServerCert(cert);} 
         }
     }
     
+    public InformacionVoto getInformacionVoto() {
+        return informacionVoto;
+    }
     
-    public boolean hasTimeStampToken() throws Exception {
-        //Call this method after isValidSignature()
-        SignerInformationStore  signers = smimeSigned.getSignerInfos();
-        Iterator<SignerInformation> it = signers.getSigners().iterator();
-        boolean result = false;
-        while (it.hasNext()) {
-            TimeStampToken timeStampToken = checkTimeStampToken(it.next());
-            if(timeStampToken != null) result = true;
+    private boolean verifySignerCert(SignerInformation signer, X509Certificate cert) {
+    	boolean result = false;
+        try {
+            if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(
+                    Contexto.PROVIDER).build(cert))){
+            logger.debug("signature verified");
+            result = true;
+            } else {logger.debug("signature failed!");}
+        } catch(CMSVerifierCertificateNotValidException ex) {
+        	logger.debug("-----> cert.getNotBefore(): " + cert.getNotBefore());
+        	logger.debug("-----> cert.getNotAfter(): " + cert.getNotAfter());
+    		logger.error(ex.getMessage(), ex);
+        } finally {
+        	return result;
         }
-        return result;
     }
     
     private TimeStampToken checkTimeStampToken(SignerInformation signer) throws Exception {
@@ -394,8 +372,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
 
     private void replaceSigners(CMSSignedData cmsdata) throws Exception {
         logger.debug("replaceSigners");
-        SMIMESignedGenerator gen = 
-                new SMIMESignedGenerator();
+        SMIMESignedGenerator gen = new SMIMESignedGenerator();
         gen.addAttributeCertificates(cmsdata.getAttributeCertificates());
         gen.addCertificates(cmsdata.getCertificates());
         gen.addSigners(cmsdata.getSignerInfos());
@@ -405,14 +382,10 @@ public class SMIMEMessageWrapper extends MimeMessage {
         saveChanges();
     }
     
-    @Override public void saveChanges() throws MessagingException {
-        logger.debug("saveChanges");
-        super.saveChanges(); 
-        try {
-            initSMIMEMessage();
-        } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
-        } 
+    public void save() throws Exception {
+        logger.debug("save");
+        super.saveChanges();
+        initSMIMEMessage();
     }
     
     public File copyContentToFile (File destFile) throws IOException, MessagingException {
@@ -423,10 +396,10 @@ public class SMIMEMessageWrapper extends MimeMessage {
     }
     
     public byte[] getBytes () throws IOException, MessagingException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(content.length);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
         writeTo(baos);
-        byte[] resultado = baos.toByteArray();
         baos.close();
+        byte[] resultado = baos.toByteArray();
         return resultado;
     }
 

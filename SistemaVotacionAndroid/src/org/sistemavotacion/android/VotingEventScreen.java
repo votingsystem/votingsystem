@@ -16,24 +16,18 @@
 
 package org.sistemavotacion.android;
 
-import static org.sistemavotacion.android.Aplicacion.ALIAS_CERT_USUARIO;
 import static org.sistemavotacion.android.Aplicacion.KEY_STORE_FILE;
 import static org.sistemavotacion.android.Aplicacion.MAX_SUBJECT_SIZE;
 
-import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
-import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import org.sistemavotacion.android.db.VoteReceiptDBHelper;
+import org.sistemavotacion.android.service.ServiceListener;
 import org.sistemavotacion.android.service.SignService;
-import org.sistemavotacion.android.service.SignServiceListener;
 import org.sistemavotacion.android.service.VotingService;
-import org.sistemavotacion.android.service.VotingServiceListener;
 import org.sistemavotacion.android.ui.CancelVoteDialog;
 import org.sistemavotacion.android.ui.CertNotFoundDialog;
 import org.sistemavotacion.android.ui.CertPinDialog;
@@ -43,8 +37,6 @@ import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.OpcionDeEvento;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.modelo.VoteReceipt;
-import org.sistemavotacion.seguridad.EncryptionHelper;
-import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
@@ -77,13 +69,15 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 public class VotingEventScreen extends FragmentActivity 
-	implements VotingServiceListener, SignServiceListener,
-	CertPinDialogListener {
+	implements ServiceListener, CertPinDialogListener {
 	
 	public static final String TAG = "VotingEventScreen";
 	
-	
 	public enum Operation {CANCEL_VOTE, SAVE_VOTE, VOTE};
+	
+	
+	public static final int CANCEL_VOTE_REQUEST = 0;
+	public static final int VOTE_REQUEST        = 1;
 	
     public static final String INTENT_EXTRA_DIALOG_PROP_NAME = "dialog";
     public static final String RECEIPT_KEY_PROP_NAME         = "receiptKey";
@@ -395,7 +389,8 @@ public class VotingEventScreen extends FragmentActivity
 	private void firmarEnviarVoto(char[] password) {
 		try {
 			setOptionButtonsEnabled(false);
-			if(votingService != null) votingService.processVote(evento, this, keyStoreBytes, password);	
+			if(votingService != null) votingService.processVote(
+					VOTE_REQUEST, evento, this, keyStoreBytes, password);	
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			showMessage(getString(R.string.error_lbl), 
@@ -409,11 +404,11 @@ public class VotingEventScreen extends FragmentActivity
         String serverURL = ServerPaths.getURLAnulacionVoto(Aplicacion.CONTROL_ACCESO_URL);
 		cancelVoteButton.setEnabled(false);
         try {
-            boolean isWithSignedReceipt = true;
             boolean isEncryptedResponse = true;
-    		if(signService != null) signService.processSignature(
+            
+    		if(signService != null) signService.processSignature(CANCEL_VOTE_REQUEST,
     				receipt.getVoto().getCancelVoteData(), subject, serverURL, this, 
-    				isWithSignedReceipt, isEncryptedResponse, keyStoreBytes, password);	
+    				isEncryptedResponse, keyStoreBytes, password);	
         } catch(Exception ex) {
         	ex.printStackTrace();
         	showMessage(getString(R.string.error_lbl), 
@@ -546,98 +541,70 @@ public class VotingEventScreen extends FragmentActivity
 		mHandler.removeCallbacks(processPinTask);
         mHandler.postDelayed(processPinTask, 100);
 	}
-	
 
-	@Override
-	public void proccessReceipt(VoteReceipt receipt) {
-		Log.d(TAG + ".proccessReceipt()", "--- proccessReceipt ");
+	@Override public void proccessResponse(Integer requestId, Respuesta response) {
+		Log.d(TAG + ".proccessResponse()", "--- proccessResponse - requestId: " 
+				+ requestId + " - status: " + response.getCodigoEstado());
         if (progressDialog != null && progressDialog.isShowing()) {
             progressDialog.dismiss();
         }
-		VotingResultDialog votingResultDialog = VotingResultDialog.newInstance(
-				getString(R.string.operacion_ok_msg), receipt);
-		FragmentManager fm = getSupportFragmentManager();
-		votingResultDialog.show(fm, "fragment_voting_result");
-		this.receipt = receipt;
-        setReceiptScreen(receipt);
-	}
-	
-	@Override
-	public void proccessEncryptedResponse(byte[] encryptedResponse) {
-		Log.d(TAG + ".proccessEncryptedResponse()", "--- proccessEncryptedResponse ");
-		//This method is called if cancellation process finish OK
-		try {
-			byte[] decryptedMessage = EncryptionHelper.decryptFile(
-					encryptedResponse, null, receipt.getPkcs10WrapperClient().getPrivateKey());
-			SMIMEMessageWrapper receipt = new SMIMEMessageWrapper(null,
-					new ByteArrayInputStream(decryptedMessage), null);
-			proccessReceipt(receipt);
-		} catch(Exception ex ) {
-			Log.e(TAG + ".guardarReciboButton.setOnClickListener(...) ", ex.getMessage(), ex);
+        FragmentManager fragmentManager = null;
+        String caption = null;
+		switch(requestId) {
+			case CANCEL_VOTE_REQUEST:
+				if(Respuesta.SC_OK == response.getCodigoEstado()) {
+					SMIMEMessageWrapper cancelReceipt = response.getSmimeMessage();
+					receipt.setCancelVoteReceipt(cancelReceipt);
+					String msg = getString(R.string.cancel_vote_result_msg, 
+							this.receipt.getVoto().getAsunto());
+					caption = getString(R.string.msg_lbl);
+					AppData.INSTANCE.removeReceipt(StringUtils.getCadenaNormalizada(
+							receipt.getEventoURL()));
+					if(receipt.getId() > 0) {
+				    	VoteReceiptDBHelper db = new VoteReceiptDBHelper(VotingEventScreen.this);
+						try {
+							db.insertVoteReceipt(receipt);
+						} catch (Exception ex) {
+							Log.e(TAG + ".guardarReciboButton.setOnClickListener(...) ", ex.getMessage(), ex);
+						}			
+					}
+					Aplicacion.INSTANCIA.getEventoSeleccionado().setOpcionSeleccionada(null);
+					setEventScreen(Aplicacion.INSTANCIA.getEventoSeleccionado());
+					CancelVoteDialog cancelVoteDialog = CancelVoteDialog.newInstance(
+							caption, msg, receipt);
+					fragmentManager = getSupportFragmentManager();
+					cancelVoteDialog.show(fragmentManager, "fragment_cancel_vote_result");
+				} else {
+					cancelVoteButton.setEnabled(true);
+					caption = getString(R.string.error_lbl) + " " 
+							+ new Integer(response.getCodigoEstado()).toString();	
+					showMessage(caption, response.getMensaje());
+				}
+				break;
+			case VOTE_REQUEST:
+				if(Respuesta.SC_OK == response.getCodigoEstado()) {
+					this.receipt = (VoteReceipt)response.getData();
+					VotingResultDialog votingResultDialog = VotingResultDialog.newInstance(
+							getString(R.string.operacion_ok_msg), receipt);
+					fragmentManager = getSupportFragmentManager();
+					votingResultDialog.show(fragmentManager, "fragment_voting_result");
+					
+			        setReceiptScreen(receipt);					
+				} else if(Respuesta.SC_ERROR_VOTO_REPETIDO == response.getCodigoEstado()) {
+					caption = getString(R.string.access_request_repeated_caption);
+					showHtmlMessage(caption, getString(
+							R.string.access_request_repeated_msg, 
+							evento.getAsunto(), response.getMensaje()));
+					return;
+				} else {
+					caption = getString(R.string.error_lbl);	
+					showHtmlMessage(caption, response.getMensaje());
+					setOptionButtonsEnabled(true);
+				}
+				break;
 		}
+		
 	}
-
-
-	@Override
-	public void setMsg(int statusCode, String msg) {
-		Log.d(TAG + ".setMsg()", "--- statusCode: " 
-				+ statusCode + " - msg: " + msg);
-		String caption  = null;
-		if(Respuesta.SC_OK != statusCode) {
-			if(Respuesta.SC_ERROR_VOTO_REPETIDO == statusCode) {
-				caption = getString(R.string.access_request_repeated_caption);
-				showHtmlMessage(caption, getString(
-						R.string.access_request_repeated_msg, evento.getAsunto(), msg));
-				return;
-			} else {
-				caption = getString(R.string.error_lbl) + " " 
-						+ new Integer(statusCode).toString();	
-			}
-		} else caption = getString(R.string.msg_lbl);
-		showMessage(caption, msg);
-	}
-	
-
-	@Override
-	public void setSignServiceMsg(int statusCode, String msg) {
-		Log.d(TAG + ".setSignServiceMsg()", "--- statusCode: " 
-				+ statusCode + " - msg: " + msg);
-		String caption  = null;
-		if(Respuesta.SC_OK != statusCode) {
-			caption = getString(R.string.error_lbl) + " " 
-					+ new Integer(statusCode).toString();
-			cancelVoteButton.setEnabled(true);
-		} else {
-			caption = getString(R.string.operacion_ok_msg);
-		}
-		showMessage(caption, msg);
-	}
-	
-	@Override
-	public void proccessReceipt(SMIMEMessageWrapper cancelReceipt) {
-		Log.d(TAG + ".proccessReceipt(...)", "--- proccessReceipt " );
-		receipt.setCancelVoteReceipt(cancelReceipt);
-		String msg = getString(R.string.cancel_vote_result_msg, 
-				this.receipt.getVoto().getAsunto());
-		String caption = getString(R.string.msg_lbl);
-		AppData.INSTANCE.removeReceipt(StringUtils.getCadenaNormalizada(
-				receipt.getEventoURL()));
-		if(receipt.getId() > 0) {
-	    	VoteReceiptDBHelper db = new VoteReceiptDBHelper(VotingEventScreen.this);
-			try {
-				db.insertVoteReceipt(receipt);
-			} catch (Exception ex) {
-				Log.e(TAG + ".guardarReciboButton.setOnClickListener(...) ", ex.getMessage(), ex);
-			}			
-		}
-		Aplicacion.INSTANCIA.getEventoSeleccionado().setOpcionSeleccionada(null);
-		setEventScreen(Aplicacion.INSTANCIA.getEventoSeleccionado());
-		CancelVoteDialog cancelVoteDialog = CancelVoteDialog.newInstance(
-				caption, msg, receipt);
-		FragmentManager fm = getSupportFragmentManager();
-		cancelVoteDialog.show(fm, "fragment_cancel_vote_result");
-	}
-
 	
 	ServiceConnection votingServiceConnection = new ServiceConnection() {
 

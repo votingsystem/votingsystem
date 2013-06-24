@@ -226,7 +226,8 @@ public class ActorConIP {
     public static ActorConIP parse(String actorConIPStr) throws Exception {
         logger.debug("parse - ActorConIP: " + actorConIPStr);
         if(actorConIPStr == null) return null;
-        JSONObject actorConIPJSON = (JSONObject) JSONSerializer.toJSON(actorConIPStr);
+        JSONObject actorConIPJSON = (JSONObject) JSONSerializer.toJSON(
+                actorConIPStr.trim());
         JSONObject jsonObject = null;
         ActorConIP actorConIP = new ActorConIP();
         JSONArray jsonArray;

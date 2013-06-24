@@ -27,7 +27,6 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.List;
 
 import org.sistemavotacion.android.ui.CertPinDialog;
 import org.sistemavotacion.android.ui.CertPinDialogListener;
@@ -35,22 +34,20 @@ import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.sistemavotacion.task.GetDataTask;
-import org.sistemavotacion.task.TaskListener;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.ServerPaths;
 
 import android.app.AlertDialog;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -62,7 +59,7 @@ import android.widget.TextView;
 
 
 public class UserCertResponseForm extends FragmentActivity 
-	implements CertPinDialogListener, TaskListener {
+	implements CertPinDialogListener {
 	
 	public static final String TAG = "UserCertResponseForm";
 	
@@ -157,19 +154,20 @@ public class UserCertResponseForm extends FragmentActivity
 	    	                }
 	                });
 	            try {
-	            	GetDataTask getDataTask = (GetDataTask)new GetDataTask(null, this).execute(ServerPaths.getURLSolicitudCertificadoUsuario(
+	            	GetDataTask getDataTask = (GetDataTask)new GetDataTask(null).
+	            			execute(ServerPaths.getURLSolicitudCertificadoUsuario(
 		        			CONTROL_ACCESO_URL, String.valueOf(idSolicitudCSR)));
-	            	getDataTask.get();
+	            	Respuesta respuesta = getDataTask.get();
 	            	if (progressDialog != null && progressDialog.isShowing()) {
 			            progressDialog.dismiss();
 			        }
-	            	Log.d(TAG + ".checkCertState() ", "- getDataTask - statusCode: " + getDataTask.getStatusCode());	
-	            	if (Respuesta.SC_OK == getDataTask.getStatusCode()) {
-			        	setCsrFirmado(getDataTask.getMessage());
+	            	Log.d(TAG + ".checkCertState() ", "- getDataTask - statusCode: " + respuesta.getCodigoEstado());	
+	            	if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+			        	setCsrFirmado(respuesta.getMensaje());
 			        	setMessage(getString(R.string.cert_downloaded_msg));
 			            insertPinButton.setVisibility(View.VISIBLE);
 				        setCertStateChecked(true);
-			        } else if(Respuesta.SC_NOT_FOUND == getDataTask.getStatusCode()) {
+			        } else if(Respuesta.SC_NOT_FOUND == respuesta.getCodigoEstado()) {
 			        	String certificationAddresses = ServerPaths.
 			        			getURLCertificationAddresses(Aplicacion.CONTROL_ACCESO_URL);
 			        	setMessage(getString(R.string.
@@ -308,10 +306,5 @@ public class UserCertResponseForm extends FragmentActivity
 		} 
 		goAppButton.setVisibility(View.VISIBLE);
 	}
-
-	@Override
-	public void processTaskMessages(List<String> messages, AsyncTask task) {  }
-
-	@Override public void showTaskResult(AsyncTask task) { }
 	
 }

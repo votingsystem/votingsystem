@@ -35,7 +35,8 @@ public class BarraNavegacion extends Composite {
 
     
     Listener listener;
-    int pageSelected = 1;
+    int pageSelected   = 1;
+    int maxNumberPages = 15;
     int size, offset, range;
 
     public interface Listener {
@@ -84,7 +85,7 @@ public class BarraNavegacion extends Composite {
     	if((offset + range) < size) gotoNextButton.setEnabled(true);
     	else gotoNextButton.setEnabled(false);
     }
-
+    
     private void updatePageAnchors(int pageSelected) {
     	this.pageSelected = pageSelected;
     	int numberPages = (size/range);
@@ -92,7 +93,19 @@ public class BarraNavegacion extends Composite {
     	logger.info("updatePageAnchors - pageSelected: " + pageSelected 
     			+ " - numberPages: " + numberPages);
     	contenedorPaginas.clear();
-    	for(int i = 1; i <= numberPages; i++) {
+    	int beginPage = 1;
+    	int endPage = maxNumberPages;
+    	if(numberPages < maxNumberPages) endPage = numberPages;
+    	if(pageSelected > maxNumberPages/2) {
+    		if(pageSelected + maxNumberPages/2 < numberPages) {
+    			beginPage = pageSelected - maxNumberPages/2;
+    			endPage = pageSelected + maxNumberPages/2;
+    		} else {
+    			endPage = numberPages;
+    			beginPage = numberPages - maxNumberPages;
+    		}	
+    	}
+    	for(int i = beginPage; i <= endPage; i++) {
     		final Anchor anchor = new Anchor(new Integer(i).toString());
 			final int pageNumber = i;
 			if(pageSelected == i) {

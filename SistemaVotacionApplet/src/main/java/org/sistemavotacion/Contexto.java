@@ -10,8 +10,12 @@ import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
-import javax.activation.CommandMap;
-import javax.activation.MailcapCommandMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import net.sf.json.JSONObject;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -19,6 +23,7 @@ import org.bouncycastle.tsp.TSPAlgorithms;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.ReciboVoto;
+import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.red.HttpHelper;
 import org.sistemavotacion.util.FileUtils;
@@ -36,8 +41,15 @@ public enum Contexto {
     INSTANCE;
 
     private Logger logger = LoggerFactory.getLogger(Contexto.class);
+    
+    private static ExecutorService executor = Executors.newFixedThreadPool(10);
+    private static CompletionService<Respuesta> completionService
+             = new ExecutorCompletionService<Respuesta>(executor);
+    
+    
 
     public void shutdown() {
+        if(executor != null) executor.shutdown();
         if(httpHelper != null) httpHelper.shutdown();
     }
     
@@ -104,7 +116,7 @@ public enum Contexto {
     public static final String PDF_DIGEST_OID = CMSSignedDataGenerator.DIGEST_SHA1;
 
 
-    public static final String DEFAULT_SIGNED_FILE_NAME = "smimeMessage";
+    public static final String DEFAULT_SIGNED_FILE_NAME = "smimeMessage.p7m";
     public static String CERT_STORE_TYPE = "Collection";
     
     
@@ -138,23 +150,9 @@ public enum Contexto {
     private ActorConIP controlCenter;
     
     static {
-        CommandMap.setDefaultCommandMap(addCommands(CommandMap.getDefaultCommandMap()));
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-        
     }
 
-    private static MailcapCommandMap addCommands(CommandMap cm) {
-        MailcapCommandMap mc = (MailcapCommandMap)cm;
-
-        mc.addMailcap("application/pkcs7-signature;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.pkcs7_signature");
-        mc.addMailcap("application/pkcs7-mime;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.pkcs7_mime");
-        mc.addMailcap("application/x-pkcs7-signature;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.x_pkcs7_signature");
-        mc.addMailcap("application/x-pkcs7-mime;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.x_pkcs7_mime");
-        mc.addMailcap("multipart/signed;; x-java-content-handler=org.bouncycastle.mail.smime.handlers.multipart_signed");
-
-        return mc;
-    }
-    
     private Contexto () { 
         try {
             new File(DEFAULTS.APPDIR).mkdir();
@@ -170,8 +168,15 @@ public enum Contexto {
     }
 
     public void init(){}
-    
         
+    public void submit(Runnable runnable) {
+        executor.submit(runnable);
+    }
+    
+    public Future<Respuesta> submit(Callable<Respuesta> callable) {
+        return completionService.submit(callable);
+    }
+    
     public void initMultiThreadedHttp() {
         httpHelper.initMultiThreadedMode();
     }

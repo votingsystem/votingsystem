@@ -22,21 +22,23 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import org.sistemavotacion.Contexto;
+import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.pdf.PdfFormHelper;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.test.simulation.callable.AccessControlInitializer;
+import org.sistemavotacion.test.simulation.callable.ServerInitializer;
 import org.sistemavotacion.test.simulation.callable.BackupValidator;
 import org.sistemavotacion.test.simulation.callable.ManifestSigner;
+import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.NifUtils;
 import org.sistemavotacion.util.FileUtils;
-import org.sistemavotacion.worker.DocumentSenderWorker;
-import org.sistemavotacion.worker.InfoGetterWorker;
-import org.sistemavotacion.worker.PDFSignedSenderWorker;
-import org.sistemavotacion.worker.SMIMESignedSenderWorker;
+import org.sistemavotacion.callable.InfoSender;
+import org.sistemavotacion.callable.InfoGetter;
+import org.sistemavotacion.callable.PDFSignedSender;
+import org.sistemavotacion.callable.SMIMESignedSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +53,6 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
             ManifestProcessSimulator.class);
 
     private static ExecutorService simulatorExecutor;
-    private static ExecutorService signManifestExecutor;
     private static CompletionService<Respuesta> signManifestCompletionService;
     
     private List<String> signerList = null;
@@ -146,13 +147,12 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
                 ContextoPruebas.INSTANCE.getUserTest().getEmail(), 
                 Contexto.INSTANCE.getAccessControl().getNombreNormalizado(), 
                 cancelDataStr, msgSubject,  null);
-        SMIMESignedSenderWorker worker = new SMIMESignedSenderWorker(
+        SMIMESignedSender worker = new SMIMESignedSender(
                 null, smimeDocument, ContextoPruebas.INSTANCE.getCancelEventURL(), 
-                null, null, null);
-        worker.execute();
-        worker.get();//wait
-        if(Respuesta.SC_OK != worker.getStatusCode()) 
-            logger.error(worker.getErrorMessage());
+                null, null);
+        Respuesta respuesta = worker.call();
+        if(Respuesta.SC_OK != respuesta.getCodigoEstado()) 
+            logger.error(respuesta.getMensaje());
     }
 
     private void requestBackup() throws Exception {
@@ -163,19 +163,18 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
         PrivateKey signerPrivateKey = ContextoPruebas.INSTANCE.getUserTestPrivateKey();
         Certificate[] signerCertChain = ContextoPruebas.INSTANCE.getUserTestCertificateChain();
         PdfReader requestBackupPDF = new PdfReader(requestBackupPDFBytes);
-        PDFSignedSenderWorker worker = new PDFSignedSenderWorker(null, 
+        PDFSignedSender worker = new PDFSignedSender(null, 
                 ContextoPruebas.INSTANCE.getUrlBackupEvents(), 
                 null, null, null, requestBackupPDF, signerPrivateKey, 
-                signerCertChain, null, null);
-        worker.execute();
-        Respuesta respuesta = worker.get();
+                signerCertChain, null);
+        Respuesta respuesta = worker.call();
         if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
             FutureTask<Respuesta> future = new FutureTask<Respuesta>(
-                new BackupValidator(respuesta.getBytesArchivo()));
+                new BackupValidator(respuesta.getMessageBytes()));
             simulatorExecutor.execute(future);
             respuesta = future.get();
             logger.debug("BackupRequestWorker - status: " + respuesta.getCodigoEstado());
-        } else logger.error(worker.getErrorMessage());
+        } else logger.error(respuesta.getMensaje());
     }
     
     private void initExecutors(){
@@ -188,10 +187,9 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
             signerList.add(NifUtils.getNif(i));
         }
         
-        simulatorExecutor = Executors.newFixedThreadPool(5);
-        signManifestExecutor = Executors.newFixedThreadPool(100);
+        simulatorExecutor = Executors.newFixedThreadPool(100);
         signManifestCompletionService = 
-                new ExecutorCompletionService<Respuesta>(signManifestExecutor);
+                new ExecutorCompletionService<Respuesta>(simulatorExecutor);
         
         simulatorExecutor.execute(new Runnable() {
             @Override
@@ -227,27 +225,25 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
         String eventStr = event.toJSON().toString();
         urlPublishManifest = ContextoPruebas.getManifestServiceURL(
                 Contexto.INSTANCE.getAccessControl().getServerURL());
-        DocumentSenderWorker worker = new DocumentSenderWorker(null, 
+        InfoSender infoSender = new InfoSender(null, 
                 eventStr.getBytes(), Contexto.JSON_CONTENT_TYPE, 
-                urlPublishManifest, null);
-        worker.execute();
-        worker.get();
-        if(Respuesta.SC_OK == worker.getStatusCode()) { 
-            event.setEventoId(Long.valueOf(worker.getMessage()));
+                urlPublishManifest);
+        Respuesta respuesta = infoSender.call();
+        if(Respuesta.SC_OK == respuesta.getCodigoEstado()) { 
+            event.setEventoId(Long.valueOf(respuesta.getMensaje()));
             urlSignManifest = ContextoPruebas.getSignManifestURL(
                 Contexto.INSTANCE.getAccessControl().getServerURL()) + 
-                File.separator + worker.getMessage();
+                File.separator + respuesta.getMensaje();
             //manifest PDF has been validated, now we have to download it
             String pdfURL = ContextoPruebas.getManifestServiceURL(
                     Contexto.INSTANCE.getAccessControl().getServerURL()) + 
-                    File.separator + worker.getMessage();
-            InfoGetterWorker pdfGetterWorker = new InfoGetterWorker(null,
-                    pdfURL, Contexto.PDF_CONTENT_TYPE, null);
-            pdfGetterWorker.execute();
-            Respuesta respuesta = pdfGetterWorker.get();
+                    File.separator + respuesta.getMensaje();
+            InfoGetter pdfGetterWorker = new InfoGetter(null,
+                    pdfURL, Contexto.PDF_CONTENT_TYPE);
+            respuesta = pdfGetterWorker.call();
             if(Respuesta.SC_OK == respuesta.getCodigoEstado()) { 
                 //if all is OK server responds with the id of the new manifest
-                pdfBytes =respuesta.getBytesArchivo();
+                pdfBytes =respuesta.getMessageBytes();
                 PdfReader manifestToSign = new PdfReader(pdfBytes);
                 String reason = null;
                 String location = null;
@@ -259,18 +255,17 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
                     File.separator + event.getEventoId();
                 X509Certificate destinationCert = Contexto.INSTANCE.
                         getAccessControl().getCertificate();
-                PDFSignedSenderWorker pdfSenderWorker = 
-                        new PDFSignedSenderWorker(null,
+                PDFSignedSender pdfSenderWorker = 
+                        new PDFSignedSender(null,
                         urlToSendDocument, reason, location, null,
                         manifestToSign, privateKey, signerCertChain, 
-                        destinationCert, null);
-                pdfSenderWorker.execute();
-                pdfSenderWorker.get();
-                if(Respuesta.SC_OK == pdfSenderWorker.getStatusCode()) {
+                        destinationCert);
+                respuesta = pdfSenderWorker.call();
+                if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
                     initExecutors();//Manifest published, we now initialize user base data.
-                } else logger.error(pdfSenderWorker.getMessage());
-            } else logger.error(pdfGetterWorker.getMessage());
-        } logger.error(worker.getMessage());
+                } else logger.error(respuesta.getMensaje());
+            } else logger.error(respuesta.getMensaje());
+        } logger.error(respuesta.getMensaje());
     }
 
     @Override
@@ -302,6 +297,7 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
         ManifestProcessSimulator simuHelper = new ManifestProcessSimulator(
                 simulationData, null);
         simuHelper.call();
+        System.exit(0);
     }
 
 
@@ -310,8 +306,9 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
         logger.debug("call - NumberOfRequestsProjected: " +  
                 simulationData.getNumRequestsProjected());
         simulationData.setBegin(System.currentTimeMillis());
-        AccessControlInitializer accessControlInitializer = 
-            new AccessControlInitializer(simulationData.getAccessControlURL());
+        ServerInitializer accessControlInitializer = 
+                new ServerInitializer(simulationData.getAccessControlURL(),
+                ActorConIP.Tipo.CONTROL_ACCESO);
         Respuesta respuesta = accessControlInitializer.call();
         if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
              publishManifest();
@@ -323,11 +320,13 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
         simulationData.setFinish(System.currentTimeMillis());
         if(timer != null) timer.stop();
         if(simulatorExecutor != null) simulatorExecutor.shutdownNow();
-        if(signManifestExecutor != null) signManifestExecutor.shutdownNow(); 
         
         logger.debug("--------------- SIMULATION RESULT----------------------");   
         simulationData.setFinish(System.currentTimeMillis());
-        logger.info("Duration: " + simulationData.getDurationStr());
+        simulationData.setFinish(System.currentTimeMillis());
+                logger.info("Begin: " + DateUtils.getStringFromDate(
+                simulationData.getBeginDate())  + " - Duration: " + 
+                simulationData.getDurationStr());
         logger.info("Number of projected requests: " + 
                 simulationData.getNumRequestsProjected());
         logger.info("Number of completed requests: " + simulationData.getNumRequests());
@@ -335,7 +334,7 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
         logger.info("Number of signatures ERROR: " + simulationData.getNumRequestsERROR());
         String errorsMsg = getFormattedErrorList();
         if(errorsMsg != null) {
-            logger.info(" ************* " + geterrorList().size() + " ERRORS: \n" + 
+            logger.info(" ************* " + getErrorList().size() + " ERRORS: \n" + 
                         errorsMsg);
         }
         logger.debug("------------------- FINISHED --------------------------");

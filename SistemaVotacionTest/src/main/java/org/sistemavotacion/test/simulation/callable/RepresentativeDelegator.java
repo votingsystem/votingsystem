@@ -14,7 +14,7 @@ import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.util.StringUtils;
-import org.sistemavotacion.worker.SMIMESignedSenderWorker;
+import org.sistemavotacion.callable.SMIMESignedSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,15 +60,13 @@ public class RepresentativeDelegator implements Callable<Respuesta> {
         
         X509Certificate destinationCert = ContextoPruebas.INSTANCE.
                     getAccessControl().getCertificate();
-        SMIMESignedSenderWorker senderWorker = new SMIMESignedSenderWorker(null, 
-                smimeMessage, urlService, null, destinationCert,null);
-        senderWorker.execute();
-        respuesta = senderWorker.get();
-        if (Respuesta.SC_OK == senderWorker.getStatusCode()) {
+        SMIMESignedSender senderSender = new SMIMESignedSender(null, 
+                smimeMessage, urlService, null, destinationCert);
+        respuesta = senderSender.call();
+        if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
             respuesta.setMensaje(userNIF);
         } else {
-            logger.debug(senderWorker.getErrorMessage());
-            respuesta.appendErrorMessage(senderWorker.getErrorMessage());
+            logger.debug(respuesta.getMensaje());
         }
         return respuesta;
     }

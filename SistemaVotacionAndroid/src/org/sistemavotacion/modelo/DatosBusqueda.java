@@ -1,7 +1,16 @@
 package org.sistemavotacion.modelo;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.json.JSONObject;
+
+import android.util.Log;
+
 
 public class DatosBusqueda {
+	
+	public static final String TAG = "DatosBusqueda";
 	
 	private Tipo tipo;
 	private Evento.Estado estadoEvento;
@@ -36,6 +45,18 @@ public class DatosBusqueda {
 
 	public void setTextQuery(String textQuery) {
 		this.textQuery = textQuery;
+	}
+	
+	public JSONObject toJSON() {
+		Log.d(TAG + ".toJSON(...)", " - toJSON");
+		Map<String, Object> map = new HashMap<String, Object>();
+		if(tipo != null)
+			map.put("tipo", tipo.toString());
+		if(estadoEvento != null)
+			map.put("estadoEvento", estadoEvento.toString());
+		if(textQuery != null)
+			map.put("textQuery", textQuery);
+	    return new JSONObject(map);
 	}
 	
 }

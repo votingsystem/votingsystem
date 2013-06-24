@@ -1,0 +1,11 @@
+{"accessControlURL":"http://localhost:8080/SistemaVotacionControlAcceso",
+ "controlCenterURL": "http://localhost:8081/SistemaVotacionCentroControl",/*http://localhost:8081/SistemaVotacionCentroControl*/
+ "maxPendingResponses":10,
+ "numRequestsProjected":1,
+ "timer":{"active":false,
+          "numHoursProjected":0,
+          "numMinutesProjected":0,
+          "numSecondsProjected":0}
+}
+
+    

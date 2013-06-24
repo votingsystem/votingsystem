@@ -26,16 +26,18 @@ public class Respuesta {
     public static final int SC_ERROR_VOTO_REPETIDO = 470;
     public static final int SC_ANULACION_REPETIDA = 471;
     public static final int SC_NULL_REQUEST = 472;
-    
-    public static final int SC_ERROR = 500;
-    public static final int SC_PROCESANDO = 700;
-    public static final int SC_CANCELADO = 0;
+
+    public static final int SC_ERROR           = 500;
+    public static final int SC_ERROR_EXCEPCION = 500;
+    public static final int SC_ERROR_TIMESTAMP = 570;    
+    public static final int SC_PROCESANDO      = 700;
+    public static final int SC_CANCELADO       = 0;
 
 
     private int codigoEstado;
     private Consulta consulta; 
     private String mensaje;
-    private Object objeto;
+    private Object data;
     private Tipo tipo;
     private Date fecha;
     private Long eventoId;
@@ -44,10 +46,11 @@ public class Respuesta {
     private byte[] messageBytes;
     
     
-    public Respuesta (int codigoEstado, String mensaje, Object objeto) {
+    public Respuesta (int codigoEstado, 
+    		String mensaje, byte[] messageBytes) {
         this.codigoEstado = codigoEstado;
         this.mensaje = mensaje;
-        this.objeto = objeto;
+        this.messageBytes = messageBytes;
     }
 
     public Respuesta (int codigoEstado, String mensaje) {
@@ -217,15 +220,15 @@ public class Respuesta {
     /**
      * @return the objeto
      */
-    public Object getObjeto() {
-        return objeto;
+    public Object getData() {
+        return data;
     }
 
     /**
      * @param objeto the objeto to set
      */
-    public void setObjeto(Object objeto) {
-        this.objeto = objeto;
+    public void setData(Object data) {
+        this.data = data;
     }
 
 	public byte[] getMessageBytes() {
@@ -243,4 +246,11 @@ public class Respuesta {
 	public void setSmimeMessage(SMIMEMessageWrapper smimeMessage) {
 		this.smimeMessage = smimeMessage;
 	}
+
+    public void appendErrorMessage(String msg) {
+        codigoEstado = SC_ERROR;
+        if(mensaje != null) mensaje = mensaje + " - " + msg;
+        else mensaje = msg;
+    }
+    
 }

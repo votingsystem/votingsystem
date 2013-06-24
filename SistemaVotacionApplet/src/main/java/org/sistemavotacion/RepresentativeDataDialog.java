@@ -7,10 +7,12 @@ import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.security.MessageDigest;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.SwingWorker;
 import org.bouncycastle.util.encoders.Base64;
 import org.sistemavotacion.dialogo.MensajeDialog;
 import org.sistemavotacion.dialogo.PasswordDialog;
@@ -22,7 +24,7 @@ import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.ImagePreviewPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sistemavotacion.worker.RepresentativeRequestWorker;
+import org.sistemavotacion.callable.RepresentativeDataSender;
 
 /**
 * @author jgzornoza
@@ -32,10 +34,13 @@ public class RepresentativeDataDialog extends JDialog  {
     
     private static Logger logger = LoggerFactory.getLogger(SaveReceiptDialog.class);
 
+    private static BlockingQueue<Future<Respuesta>> queue = 
+        new LinkedBlockingQueue<Future<Respuesta>>(3);
+    
     private Frame parentFrame = null;
     private Operacion operacion = null;
     private File selectedImage = null;
-    private SwingWorker tareaEnEjecucion;
+    private Future<Respuesta> tareaEnEjecucion;
     private AtomicBoolean mostrandoPantallaEnvio = new AtomicBoolean(false);
     private final AppletFirma appletFirma;
         
@@ -61,7 +66,39 @@ public class RepresentativeDataDialog extends JDialog  {
                 appletFirma.cancelarOperacion();
             }
         });
+        Contexto.INSTANCE.submit(new Runnable() {
+            @Override public void run() {
+                try {
+                    readFutures();
+                } catch (Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                }
+            }
+        });
         pack();
+    }
+    
+    public void readFutures () {
+        logger.debug(" - readFutures");
+        AtomicBoolean done = new AtomicBoolean(false);
+        while (!done.get()) {
+            try {
+                Future<Respuesta> future = queue.take();
+                Respuesta respuesta = future.get();
+                logger.debug(" - readFutures - response status: " + respuesta.getCodigoEstado());
+                if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                    appletFirma.responderCliente(
+                            respuesta.getCodigoEstado(), respuesta.getMensaje());
+                } else {
+                    mostrarPantallaEnvio(false);
+                    appletFirma.responderCliente(
+                            respuesta.getCodigoEstado(), respuesta.getMensaje());
+                }
+                dispose();
+            } catch(Exception ex) {
+                logger.error(ex.getMessage(), ex);
+            }
+        }
     }
     
     public void mostrarPantallaEnvio (boolean visibility) {
@@ -374,46 +411,35 @@ public class RepresentativeDataDialog extends JDialog  {
         mostrarPantallaEnvio(true);
         progressLabel.setText("<html>" + Contexto.INSTANCE.getString(
                 "progressLabel")+ "</html>");
-        Runnable runnable = new Runnable() {
+
+        Contexto.INSTANCE.submit(new Runnable() {
             public void run() {
                 try {
-                    SMIMEMessageWrapper representativeRequestSMIME = 
-                            DNIeSignedMailGenerator.genMimeMessage(null,
-                            operacion.getNombreDestinatarioFirmaNormalizado(),
-                            operacion.getContenidoFirma().toString(),
-                            finalPassword.toCharArray(), operacion.getAsuntoMensajeFirmado(), null);
-                    
-                    tareaEnEjecucion = new RepresentativeRequestWorker(null, 
-                            representativeRequestSMIME, selectedImage, 
-                            operacion.getUrlEnvioDocumento(), Contexto.INSTANCE.
-                            getAccessControl().getCertificate(), null);
-                    tareaEnEjecucion.execute();
-                    Respuesta respuesta = (Respuesta) tareaEnEjecucion.get();
-                    if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
-                        appletFirma.responderCliente(
-                                respuesta.getCodigoEstado(), respuesta.getMensaje());
-                    } else {
-                        mostrarPantallaEnvio(false);
-                        appletFirma.responderCliente(
-                                respuesta.getCodigoEstado(), respuesta.getMensaje());
-                    }
-                    dispose();
-                } catch (Exception ex) {
-                    logger.error(ex.getMessage(), ex);
-                    mostrarPantallaEnvio(false);
-                    String mensajeError = null;
-                    if ("CKR_PIN_INCORRECT".equals(ex.getMessage())) {
-                        mensajeError = Contexto.INSTANCE.getString("MENSAJE_ERROR_PASSWORD");
-                    } else mensajeError = ex.getMessage();
-                    MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                    errorDialog.setMessage(mensajeError, 
-                            Contexto.INSTANCE.getString("errorLbl"));
-                    return;
-                }
+                   SMIMEMessageWrapper representativeRequestSMIME = 
+                           DNIeSignedMailGenerator.genMimeMessage(null,
+                           operacion.getNombreDestinatarioFirmaNormalizado(),
+                           operacion.getContenidoFirma().toString(),
+                           finalPassword.toCharArray(), operacion.getAsuntoMensajeFirmado(), null);
+                   RepresentativeDataSender dataSender = new RepresentativeDataSender( 
+                           representativeRequestSMIME, selectedImage, 
+                           operacion.getUrlEnvioDocumento(), Contexto.INSTANCE.
+                           getAccessControl().getCertificate());
+                   Future<Respuesta> future = Contexto.INSTANCE.submit(dataSender);
+                   queue.put(future);
+                   tareaEnEjecucion = future;
+               } catch (Exception ex) {
+                   logger.error(ex.getMessage(), ex);
+                   mostrarPantallaEnvio(false);
+                   String mensajeError = null;
+                   if ("CKR_PIN_INCORRECT".equals(ex.getMessage())) {
+                       mensajeError = Contexto.INSTANCE.getString("MENSAJE_ERROR_PASSWORD");
+                   } else mensajeError = ex.getMessage();
+                   MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
+                   errorDialog.setMessage(mensajeError, 
+                           Contexto.INSTANCE.getString("errorLbl"));
+               }
             }
-        };
-        Thread thread = new Thread(runnable);
-        thread.start();
+        });
         pack();
     }//GEN-LAST:event_enviarButtonActionPerformed
 

@@ -1,12 +1,26 @@
 package org.sistemavotacion.controlacceso
 
 import org.codehaus.groovy.grails.web.json.JSONObject;
+import org.sistemavotacion.controlacceso.modelo.Evento;
+import org.sistemavotacion.controlacceso.modelo.EventoFirma;
+import org.sistemavotacion.controlacceso.modelo.EventoReclamacion;
+import org.sistemavotacion.controlacceso.modelo.EventoVotacion;
+import org.sistemavotacion.controlacceso.modelo.OpcionDeEvento;
 import org.sistemavotacion.controlacceso.modelo.Respuesta;
+import org.sistemavotacion.controlacceso.modelo.Tipo;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.sistemavotacion.controlacceso.modelo.*;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.util.*;
+import org.sistemavotacion.utils.VotingSystemApplicationContex;
+
 import grails.converters.JSON
+import groovy.util.ConfigObject;
+
 import java.util.Locale;
 import javax.mail.internet.InternetAddress
 
@@ -24,6 +38,7 @@ class EventoService {
 	def grailsApplication
 	def httpService
 	def firmaService
+	def filesService
 
 	
 	Respuesta comprobarFechasEvento (Evento evento, Locale locale) {
@@ -220,6 +235,8 @@ class EventoService {
 			return optenerEventoReclamacionJSONMap(eventoItem)
 	}
 	
+	
+	
 	public Map optenerEventoVotacionJSONMap(EventoVotacion eventoItem) {
 		//log.debug("eventoItem: ${eventoItem.id} - estado ${eventoItem.estado}")
 		def eventoMap = [id: eventoItem.id, fechaCreacion: eventoItem.dateCreated,
@@ -298,6 +315,187 @@ class EventoService {
 		eventoMap.campos = eventoItem.camposEvento?.collect {campoItem ->
 				return [id:campoItem.id, contenido:campoItem.contenido]}
 		return eventoMap
+	}
+	
+	public Map getEventMetaInfMap(Evento event) {
+		Map<String, Object> eventMap = null;
+		event
+		File metaInfFile = filesService.getEventMetaInf(event)
+		if(metaInfFile.exists()) eventMap = JSON.parse(metaInfFile?.text)
+		if(!eventMap) {
+			eventMap = [:];
+			eventMap.put("id", event.id);
+			eventMap.put("serverURL", "${grailsApplication.config.grails.serverURL}")
+			eventMap.put("subject", event.asunto)
+			eventMap.put("dateInit", DateUtils.getStringFromDate(event.getFechaInicio()))
+			eventMap.put("dateFinish", DateUtils.getStringFromDate(event.getDateFinish()))
+			if(event instanceof EventoVotacion) {
+				log.debug("getEventMetaInfMap - EventoVotacion")
+				eventMap.put("representatives", [:])
+				eventMap.put("type", Tipo.EVENTO_VOTACION.toString())
+				EventoVotacion.withTransaction {
+					event = event.get(event.id)//for no session or session closed
+					Set<OpcionDeEvento> opciones = event.opciones
+					List optionList = new ArrayList()
+					for(OpcionDeEvento opcion:opciones) {
+						def numTotalVotes = Voto.countByOpcionDeEventoAndEstado(opcion, Voto.Estado.OK)
+						
+						def criteria = Voto.createCriteria()
+						def numRepresentativeVotes = criteria.count {
+							createAlias("certificado", "certificado")
+							eq("certificado.usuario", null)
+							eq("estado", Voto.Estado.OK)
+							eq("eventoVotacion", event)
+						}
+						
+						def numUserVotes = numTotalVotes -numRepresentativeVotes
+						log.debug("event: ${event.id} - numUserVotes: ${numUserVotes} - numRepresentativeVotes: ${numRepresentativeVotes}")
+						
+						
+						optionList.add([id:opcion.id,
+							content:opcion.contenido,
+							numUserVotes:numUserVotes,
+							numRepresentativeVotes:0])
+					}
+					eventMap.put("options", optionList)
+				}
+			} else if(event instanceof EventoReclamacion) {
+				log.debug("getEventMetaInfMap - EventoReclamacion")
+				eventMap.put("type", Tipo.EVENTO_RECLAMACION.toString());
+			} else if(event instanceof EventoFirma) {
+				log.debug("getEventMetaInfMap - EventoFirma")
+				eventMap.put("type", Tipo.EVENTO_FIRMA.toString());
+			}
+		}
+		return eventMap
+	}
+	
+	public void getAsyncEventMetaInfMap(Evento event) {
+		runAsync {
+			
+			Date selectedDate = DateUtils.getTodayDate()
+			def votingEvents 
+			
+			//look for active voting events
+			def criteria = EventoVotacion.createCriteria()
+			votingEvents = criteria.list (max: 1000000, offset: 0) {
+				eq("type", 	 Usuario.Type.REPRESENTATIVE)
+				le("fechaInicio", selectedDate)
+				isNull("dateCanceled")
+				gt("fechaFin", selectedDate)
+			}
+			
+			votingEvents.each { votingEvent ->
+				Map<String, Object> eventMap = [:];
+				eventMap.put("id", votingEvent.id);
+				eventMap.put("serverURL", "${grailsApplication.config.grails.serverURL}")
+				eventMap.put("subject", votingEvent.asunto)
+				eventMap.put("dateInit", DateUtils.getStringFromDate(votingEvent.getFechaInicio()))
+				eventMap.put("dateFinish", DateUtils.getStringFromDate(event.getDateFinish()))
+				eventMap.put("representatives", [:])
+				
+				eventMap.put("type", Tipo.EVENTO_VOTACION.toString())
+				EventoVotacion.withTransaction {
+					event = event.get(event.id)//for no session or session closed
+					Set<OpcionDeEvento> opciones = event.opciones
+					List optionList = new ArrayList()
+					for(OpcionDeEvento opcion:opciones) {
+						optionList.add([id:opcion.id,
+							content:opcion.contenido,
+							numUserVotes:0,
+							numRepresentativeVotes:0])
+					}
+					eventMap.put("options", optionList)
+				}
+				
+			}
+			
+			
+			log.debug(" ----- asyncEventUpdate - event.id: ${event.id}")
+			if(event.id != null) {
+				Map<String, Object> eventMap = eventsMap.get(event.id);
+				if(!eventMap)  eventMap = eventoService.getEventMetaInfMap(event)
+	
+	
+				Map<String, Object> repAccreditationsMap = eventMap.get("REPRESENTATIVE_ACCREDITATIONS")
+				if(!repAccreditationsMap) {
+					repAccreditationsMap = [:];
+				}
+				Long numUsersWithRepresentativeWithAccessRequest =
+					repAccreditationsMap.get("numUsersWithRepresentativeWithAccessRequest")
+				if(!numUsersWithRepresentativeWithAccessRequest)
+					numUsersWithRepresentativeWithAccessRequest = new Long(0)
+				Long numRepresentativesWithAccessRequest =
+					repAccreditationsMap.get("numRepresentativesWithAccessRequest")
+				if(!numRepresentativesWithAccessRequest) numRepresentativesWithAccessRequest = new Long(0)
+				Long numRepresentativesWithVote = repAccreditationsMap.get("numRepresentativesWithVote")
+				if(!numRepresentativesWithVote) numRepresentativesWithVote = new Long(0)
+			
+				Map<String, Object> backupMap = eventMap.get("BACKUP")
+				if(!backupMap) {
+					backupMap = [:];
+				}
+				Long numUserVotes = backupMap.get("numUserVotes")
+				if(!numUserVotes) numUserVotes = new Long(0)
+							
+				Map<String, RepresentativeData> representativesMap = eventMap.get("representatives")
+	
+				
+							
+				representativesMap?.values()?.each {repData ->
+					Usuario representative = Usuario.get(repData.id)
+					if(representative) repData.numTotalRepresentations =
+						Usuario.countByRepresentative(representative) + 1//plus the representative itself
+				}
+				
+				eventMap.options.each {option ->
+					option.numUserVotes += numVotesOption
+					option.numRepresentativeVotes = getNumVotesFromRepresentatives(representativesMap, option.id)
+				}
+				
+				
+				
+				backupMap.put("numUserVotes", numUserVotes)
+				backupMap.put("numRepresentativesWithVote", numRepresentativesWithVote)
+				eventMap.put("representatives", representativesMap)
+				
+				Long numAccessRequest = SolicitudAcceso.countByEstadoAndEventoVotacion(
+					SolicitudAcceso.Estado.OK, event)
+				
+				backupMap.put("numAccessRequest", numAccessRequest)
+				eventMap.put("BACKUP", backupMap)
+				
+				repAccreditationsMap.put("numUsersWithRepresentativeWithAccessRequest",
+					numUsersWithRepresentativeWithAccessRequest)
+				repAccreditationsMap.put("numVotesRepresentedByRepresentatives",
+					getNumVotesFromRepresentatives(representativesMap))
+				repAccreditationsMap.put("numRepresentativesWithAccessRequest",
+					numRepresentativesWithAccessRequest)
+				repAccreditationsMap.put("numRepresentativesWithVote",
+					numRepresentativesWithVote)
+				eventMap.put("REPRESENTATIVE_ACCREDITATIONS", repAccreditationsMap)
+				
+				if(!eventsMap.replace(event.id, eventMap)) eventsMap.put(event.id, eventMap)
+	
+				eventoService.updateEventMetaInf(event, eventMap)
+				log.debug(" --- ${eventMap as JSON}")
+			}
+		}
+	}
+	
+	public Map updateEventMetaInf(Evento event, 
+			Tipo nodeType, Map nodeMetaInfMap) {
+		Map eventMetaInf = getEventMetaInfMap(event)
+		eventMetaInf.put(nodeType.toString(), nodeMetaInfMap);
+		updateEventMetaInf(event, eventMetaInf)
+		return eventMetaInf
+	}
+			
+	public void updateEventMetaInf(Evento event, Map metaInfMap) {
+		//def converter = eventMap as JSON;
+		//converter.render(new java.io.FileWriter("./meta_event_${eventMap.id}.inf"));
+		File metaInfFile = filesService.getEventMetaInf(event)
+		metaInfFile.write((metaInfMap as JSON).toString())
 	}
 	
 }

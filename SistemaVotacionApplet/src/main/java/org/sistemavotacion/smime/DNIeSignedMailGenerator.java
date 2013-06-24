@@ -92,7 +92,7 @@ public class DNIeSignedMailGenerator {
         body.setRecipient(Message.RecipientType.TO, toUserAddress);
         body.setSubject(asunto, "UTF-8");
         body.setContent(mimeMultipart, mimeMultipart.getContentType());
-        body.saveChanges();
+        body.save();
         //sessionHelper.closeSession();
         return body;
     }

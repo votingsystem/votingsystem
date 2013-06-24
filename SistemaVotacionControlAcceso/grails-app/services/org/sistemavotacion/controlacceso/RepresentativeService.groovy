@@ -22,6 +22,7 @@ import org.sistemavotacion.util.StringUtils
 import grails.converters.JSON
 import sun.misc.BASE64Decoder;
 import org.hibernate.criterion.Projections
+import java.util.concurrent.TimeUnit
 
 class RepresentativeService {
 	
@@ -33,6 +34,7 @@ class RepresentativeService {
 	def mailSenderService
 	def firmaService
 	def filesService
+	def eventoService
 
 	/*
 	 * Creates backup of the state of all the representatives for a closed event
@@ -68,13 +70,17 @@ class RepresentativeService {
 		def representatives = null;
 
 		Usuario.withTransaction {
-			def criteria = Usuario.createCriteria()
+			representatives = Usuario.findAllByTypeAndRepresentativeRegisterDateLessThanEquals(
+				Usuario.Type.REPRESENTATIVE, selectedDate)
+			/*def criteria = Usuario.createCriteria()
 			representatives = criteria.list (max: 1000000, offset: 0) {
 				eq("type", 	 Usuario.Type.REPRESENTATIVE)
 				le("representativeRegisterDate", selectedDate)
-			}
+			}*/
 		}
 
+		log.debug("num representatives: ${representatives.size()}")
+		
 		int numRepresentatives = 0
 		int numRepresentativesWithAccessRequest = 0
 		int numRepresentativesWithVote = 0
@@ -188,20 +194,100 @@ class RepresentativeService {
 			numUsersWithRepresentativeWithAccessRequest:numTotalRepresentedWithAccessRequest,
 			numRepresented:numTotalRepresented, 
 			numVotesRepresentedByRepresentatives:numVotesRepresentedByRepresentatives]
-		Evento.withTransaction {
-			event.updateMetaInf(
-				Tipo.REPRESENTATIVE_ACCREDITATIONS, metaInfMap)
-		}
-		metaInfFile.write(event.metaInf)
+		
+		eventoService.updateEventMetaInf(event, Tipo.REPRESENTATIVE_ACCREDITATIONS, metaInfMap)
 		
 		/*def ant = new AntBuilder()
 		ant.zip(destfile: zipResult, basedir: filesDir.absolutePath)*/
 		
+		return new Respuesta(metaInf:metaInfMap,
+			codigoEstado:Respuesta.SC_OK)
+	}
+	
+	/*
+	 * Makes a Representative map representing the state on the moment
+	 */
+	private synchronized Respuesta getAccreditationsMapForEvent (
+			EventoVotacion event, Locale locale){
+		log.debug("getAccreditationsBackupForEvent - event: ${event.id}")
+		String msg = null
+		if(!event) {
+			msg = messageSource.getMessage('nullParamErrorMsg', null, locale)
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR, mensaje:msg)
+		}
+		Date selectedDate = DateUtils.getTodayDate();
+		
+		def representatives = Usuario.findAllWhere(type:Usuario.Type.REPRESENTATIVE);
+
+		int numRepresentativesWithAccessRequest = 0
+		
+		SolicitudAcceso.withTransaction {
+			def criteria = SolicitudAcceso.createCriteria()
+			numRepresentativesWithAccessRequest = criteria.count {
+				createAlias("usuario", "usuario")
+				eq("usuario.type", Usuario.Type.REPRESENTATIVE)
+				eq("estado", SolicitudAcceso.Estado.OK)
+				eq("eventoVotacion", event)
+			}
+		}		
+		
+		int numRepresentativesWithVote = 0
+		int numTotalRepresented = 0
+		int numTotalRepresentedWithAccessRequest = 0
+		int numVotesRepresentedByRepresentatives = 0
+		
+		Map representativesMap = [:]
+		representatives.each { representative ->
+			int numRepresented = 1 //The representative itself
+			int numUsersWithRepresentativeWithAccessRequest = 0
+			numRepresented = Usuario.countByRepresentative(representative) + 1; //The representative itself
+			numTotalRepresented += numRepresented
+			log.debug("${representative.nif} has ${numRepresented} representations")
+			
+			def representativeVote
+			Voto.withTransaction {
+				def criteria = Voto.createCriteria()
+				representativeVote = criteria.get {
+					createAlias("certificado", "certificado")
+					eq("certificado.usuario", representative)
+					eq("estado", Voto.Estado.OK)
+					eq("eventoVotacion", event)
+				}
+			}
+			if(representativeVote) ++numRepresentativesWithVote
+
+			def numRepresentedWithAccessRequest
+			SolicitudAcceso.withTransaction {
+				def criteria = SolicitudAcceso.createCriteria()
+				numRepresentedWithAccessRequest = criteria.count {
+					createAlias("usuario","usuario")
+					eq("usuario.representative", representative)
+					eq("estado", SolicitudAcceso.Estado.OK)
+					eq("eventoVotacion", event)
+				}
+			}			
+			numTotalRepresentedWithAccessRequest += numRepresentedWithAccessRequest
+			
+			Map representativeMap = [
+				optionSelectedId:representativeVote?.opcionDeEvento?.id,
+				numRepresentedWithVote:numRepresentedWithAccessRequest,
+				numTotalRepresentations: numRepresented]
+			representativesMap[representative.nif] = representativeMap
+		}
+		
+		def metaInfMap = [numRepresentatives:representatives.size(),
+			numRepresentativesWithAccessRequest:numRepresentativesWithAccessRequest,
+			numRepresentativesWithVote:numRepresentativesWithVote,
+			numUsersWithRepresentativeWithAccessRequest:numTotalRepresentedWithAccessRequest,
+			numRepresented:numTotalRepresented,
+			numVotesRepresentedByRepresentatives:numVotesRepresentedByRepresentatives,
+			representatives:representativesMap]
+		
 		return new Respuesta(codigoEstado:Respuesta.SC_OK,
 			metaInf:metaInfMap)
 	}
-
-			
+	
+					
 	private Respuesta getAccreditationsBackup (Usuario representative,
 		Date selectedDate, Locale locale){
 		log.debug("getAccreditationsBackup - representative: ${representative.id}" +
@@ -270,8 +356,10 @@ class RepresentativeService {
 	}
 	
 	//{"operation":"REPRESENTATIVE_SELECTION","representativeNif":"...","representativeName":"...","UUID":"..."}
-	Respuesta saveUserRepresentative(MensajeSMIME mensajeSMIMEReq, Locale locale) {
+	public synchronized Respuesta saveUserRepresentative(MensajeSMIME mensajeSMIMEReq, Locale locale) {
 		log.debug("saveUserRepresentative -")
+		//def future = callAsync {}
+		//return future.get(30, TimeUnit.SECONDS)
 		MensajeSMIME mensajeSMIME = null
 		SMIMEMessageWrapper smimeMessage = mensajeSMIMEReq.getSmimeMessage()
 		RepresentationDocument representationDocument = null
@@ -310,22 +398,27 @@ class RepresentativeService {
 				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
 					mensaje:msg, tipo:Tipo.REPRESENTATIVE_SELECTION_ERROR)
 			}
-			cancelRepresentationDocument(mensajeSMIMEReq, usuario);
-			representationDocument = new RepresentationDocument(activationSMIME:mensajeSMIMEReq,
-				user:usuario, representative:representative, state:RepresentationDocument.State.OK);
 			
-			
-			representative.setNumRepresentations(
-				Usuario.countByRepresentative(representative) + 2)//the new user plus the representative itself
-			
-			RepresentationDocument.withTransaction { 
-				usuario.representative = representative
-				representationDocument.save(flush:true)
+			usuario.representative = representative
+			RepresentationDocument.withTransaction {
+				
+				representationDocument = RepresentationDocument.findWhere(
+					user:usuario, state:RepresentationDocument.State.OK)
+				if(representationDocument) {
+					log.debug("cancelRepresentationDocument - User changing representative")
+					representationDocument.state = RepresentationDocument.State.CANCELLED
+					representationDocument.cancellationSMIME = mensajeSMIMEReq
+					representationDocument.dateCanceled = usuario.getTimeStampToken().
+							getTimeStampInfo().getGenTime();
+					representationDocument.save(flush:true)
+					log.debug("cancelRepresentationDocument - cancelled user '${usuario.nif}' representationDocument ${representationDocument.id}")
+				} else log.debug("cancelRepresentationDocument - user '${usuario.nif}' doesn't have representative")
+				
+				
+				representationDocument = new RepresentationDocument(activationSMIME:mensajeSMIMEReq,
+					user:usuario, representative:representative, state:RepresentationDocument.State.OK);
+				representationDocument.save()
 			}
-
-			/*Usuario.withTransaction {
-				representative.save(flush:true)
-			}*/
 						
 			msg = messageSource.getMessage('representativeAssociatedMsg',
 				[mensajeJSON.representativeName, usuario.nif].toArray(), locale)
@@ -338,6 +431,7 @@ class RepresentativeService {
 			SMIMEMessageWrapper smimeMessageResp = firmaService.getMultiSignedMimeMessage(
 				fromUser, toUser, smimeMessage, subject)
 			MensajeSMIME mensajeSMIMEResp = new MensajeSMIME(
+					smimeMessage:smimeMessageResp,
 					tipo:Tipo.RECIBO, smimePadre: mensajeSMIMEReq, 
 					valido:true, contenido:smimeMessageResp.getBytes())
 			MensajeSMIME.withTransaction {
@@ -345,13 +439,14 @@ class RepresentativeService {
 			}
 			return new Respuesta(codigoEstado:Respuesta.SC_OK, mensaje:msg,
 				mensajeSMIME:mensajeSMIMEResp, tipo:Tipo.REPRESENTATIVE_SELECTION)
-		}  catch(Exception ex) {
+		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
 			msg = messageSource.getMessage(
 				'representativeSelectErrorMsg', null, locale)
 			return new Respuesta(codigoEstado:Respuesta.SC_ERROR,
 				mensaje:msg, tipo:Tipo.REPRESENTATIVE_SELECTION_ERROR)
 		}
+
 	}
 	
 	private void cancelRepresentationDocument(MensajeSMIME mensajeSMIMEReq, Usuario usuario) {
@@ -364,7 +459,7 @@ class RepresentativeService {
 				representationDocument.cancellationSMIME = mensajeSMIMEReq
 				representationDocument.dateCanceled = usuario.getTimeStampToken().
 						getTimeStampInfo().getGenTime();
-				representationDocument.save()
+				representationDocument.save(flush:true)
 				log.debug("cancelRepresentationDocument - cancelled user '${usuario.nif}' representationDocument ${representationDocument.id}")
 			} else log.debug("cancelRepresentationDocument - user '${usuario.nif}' doesn't have representative")
 		}
@@ -400,7 +495,6 @@ class RepresentativeService {
 			if(Usuario.Type.REPRESENTATIVE != usuario.type) {
 				usuario.type = Usuario.Type.REPRESENTATIVE
 				usuario.representativeRegisterDate = DateUtils.getTodayDate()
-				usuario.setNumRepresentations(1)
 				usuario.representative = null
 				cancelRepresentationDocument(mensajeSMIMEReq, usuario);				
 				msg = messageSource.getMessage('representativeDataCreatedOKMsg', 
@@ -409,7 +503,6 @@ class RepresentativeService {
 				def representations = Usuario.countByRepresentative(usuario)
 				msg = messageSource.getMessage('representativeDataUpdatedMsg',
 					[usuario.nombre, usuario.primerApellido].toArray(), locale)
-				usuario.setNumRepresentations(representations + 1)//plus the representative itself
 			} 
 			usuario.setInfo(mensajeJSON.representativeInfo)
 			usuario.representativeMessage = mensajeSMIMEReq
@@ -629,10 +722,6 @@ class RepresentativeService {
 			usuario.representativeMessage = mensajeSMIMEReq
 			usuario.type = Usuario.Type.EX_REPRESENTATIVE
 			
-			def userMetaInfJSON = JSON.parse(usuario.metaInf)
-			userMetaInfJSON.numRepresentations = 0
-			usuario.metaInf = userMetaInfJSON;
-
 			Usuario.withTransaction  {
 				usuario.save()
 			}
@@ -743,10 +832,11 @@ class RepresentativeService {
 		String imageURL = "${grailsApplication.config.grails.serverURL}/representative/image/${image?.id}" 
 		String infoURL = "${grailsApplication.config.grails.serverURL}/representative/${usuario?.id}" 
 		
-		def userMetaInfJSON = JSON.parse(usuario.metaInf)
+		def numRepresentations = Usuario.countByRepresentative(usuario) + 1//plus the representative itself
+		
 		def representativeMap = [id: usuario.id, nif:usuario.nif, infoURL:infoURL, 
 			 representativeMessageURL:representativeMessageURL,
-			 imageURL:imageURL, numRepresentations:userMetaInfJSON?.numRepresentations,
+			 imageURL:imageURL, numRepresentations:numRepresentations,
 			 nombre: usuario.nombre, primerApellido:usuario.primerApellido]
 		return representativeMap
 	}
@@ -755,7 +845,6 @@ class RepresentativeService {
 		Map representativeMap = getRepresentativeJSONMap(usuario)
 		representativeMap.info = usuario.info
 		representativeMap.votingHistory = []
-		
 		return representativeMap
 	}
 	

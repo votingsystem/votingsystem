@@ -3,6 +3,7 @@ package org.sistemavotacion.test.simulation.callable;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Callable;
+import org.sistemavotacion.callable.SMIMESignedSender;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.ReciboVoto;
 import org.sistemavotacion.modelo.Respuesta;
@@ -12,7 +13,6 @@ import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sistemavotacion.worker.SMIMESignedSenderWorker;
 
 /**
 * @author jgzornoza
@@ -71,19 +71,25 @@ public class Voter implements Callable<Respuesta> {
                 String votoJSON = evento.getVoteJSON().toString();
                 String subject = ContextoPruebas.INSTANCE.getString(
                         "voteMsgSubject", evento.getEventoId());
-                smimeMessage = wrapperClient.genMimeMessage(
+                try {
+                    smimeMessage = wrapperClient.genMimeMessage(
                         evento.getHashCertificadoVotoBase64(), 
                         evento.getControlAcceso().getNombreNormalizado(),
                         votoJSON, subject, null);
+                } catch(Exception ex) {
+                    logger.error(ex.getMessage() + " - Respuesta codigoEstado:" + 
+                    respuesta.getCodigoEstado(), ex);
+                }
+                
+
                 String urlVoteService = ContextoPruebas.getURLVoto(
                     evento.getCentroControl().getServerURL()); 
-                SMIMESignedSenderWorker senderWorker = new SMIMESignedSenderWorker(
+                SMIMESignedSender sender= new SMIMESignedSender(
                         null, smimeMessage, urlVoteService, wrapperClient.
-                        getKeyPair(), null, null);
-                senderWorker.execute();
-                Respuesta senderResponse = senderWorker.get();
+                        getKeyPair(), null);
+                Respuesta senderResponse = sender.call();
                 senderResponse.setEvento(evento);
-                if (Respuesta.SC_OK == senderWorker.getStatusCode()) {  
+                if (Respuesta.SC_OK == senderResponse.getCodigoEstado()) {  
                     SMIMEMessageWrapper validatedVote =  
                             senderResponse.getSmimeMessage();
                     ReciboVoto reciboVoto = new ReciboVoto(
@@ -95,7 +101,8 @@ public class Voter implements Callable<Respuesta> {
             }
             return respuesta;
         } catch(Exception ex) {
-            String msg = ex.getMessage() + " - nifFrom: " + nifFrom;
+            String msg = ex.getMessage() + " - nifFrom: " + nifFrom + 
+                    " - hashVoto: " + evento.getHashCertificadoVotoBase64();
             logger.error(msg , ex);
             return new Respuesta(Respuesta.SC_ERROR, evento, msg);
         }  

@@ -2,9 +2,20 @@ package org.sistemavotacion.modelo;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.security.cert.X509Certificate;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.sistemavotacion.seguridad.CertUtil;
+import org.sistemavotacion.util.DateUtils;
+
+import android.util.Log;
+
 public class ActorConIP implements java.io.Serializable {
+	
+	public static final String TAG = "ActorConIP";
 
     private static final long serialVersionUID = 1L;
         
@@ -33,6 +44,7 @@ public class ActorConIP implements java.io.Serializable {
     private String certificadoPEM;
     private X509Certificate certificado;
     private Collection<X509Certificate> certChain;
+    private X509Certificate timeStampCert = null;
 
     public void setServerURL(String serverURL) {
             this.serverURL = serverURL;
@@ -185,4 +197,69 @@ public class ActorConIP implements java.io.Serializable {
 	public void setCertChain(Collection<X509Certificate> certChain) {
 		this.certChain = certChain;
 	}
+	
+    public void setTimeStampCertPEM(String timeStampPEM) throws Exception {
+        timeStampCert = CertUtil.fromPEMToX509CertCollection(
+                    timeStampPEM.getBytes()).iterator().next();
+    }
+
+    public X509Certificate getTimeStampCert() {
+    	return timeStampCert;
+    }
+	
+    public static ActorConIP parse(String actorConIPStr, ActorConIP.Tipo tipo) 
+ 		   throws Exception {
+        JSONObject actorConIPJSON = new JSONObject(actorConIPStr);
+        JSONObject jsonObject = null;
+        ActorConIP actorConIP = null;
+        JSONArray jsonArray;
+        switch (tipo) {
+             case CENTRO_CONTROL:
+                 actorConIP = new CentroControl();
+                 break;
+             case CONTROL_ACCESO:
+                 actorConIP = new ControlAcceso();
+                 ((ControlAcceso)actorConIP).setUrlClientePublicacionJNLP(actorConIPStr);
+                 if (actorConIPJSON.getJSONArray("centrosDeControl") != null) {
+                     Set<CentroControl> centrosDeControl = new HashSet<CentroControl>();
+                     jsonArray = actorConIPJSON.getJSONArray("centrosDeControl");
+                     for (int i = 0; i< jsonArray.length(); i++) {
+                         jsonObject = jsonArray.getJSONObject(i);
+                         CentroControl centroControl = new CentroControl();
+                         centroControl.setNombre(jsonObject.getString("nombre"));
+                         centroControl.setServerURL(jsonObject.getString("serverURL"));
+                         centroControl.setId(jsonObject.getLong("id"));
+                         centroControl.setDateCreated(DateUtils.getDateFromString(jsonObject.getString("fechaCreacion")));
+                         if (jsonObject.getString("estado") != null) {
+                              centroControl.setEstado(ActorConIP.Estado.valueOf(jsonObject.getString("estado")));
+                         }
+                         centrosDeControl.add(centroControl);
+                     }
+                     ((ControlAcceso)actorConIP).setCentrosDeControl(centrosDeControl);
+                 }
+                 break;
+            
+        }
+        if (actorConIPJSON.has("urlBlog"))
+             actorConIP.setUrlBlog(actorConIPJSON.getString("urlBlog"));
+        if (actorConIPJSON.has("serverURL"))
+             actorConIP.setServerURL(actorConIPJSON.getString("serverURL"));
+        if (actorConIPJSON.has("nombre"))
+             actorConIP.setNombre(actorConIPJSON.getString("nombre"));
+        if (actorConIPJSON.has("cadenaCertificacionPEM")) {
+     	   Collection<X509Certificate> certChain = 
+	        			CertUtil.fromPEMToX509CertCollection(actorConIPJSON.
+	        			getString("cadenaCertificacionPEM").getBytes());
+	        	actorConIP.setCertChain(certChain);
+	        	X509Certificate serverCert = certChain.iterator().next();
+	        	Log.d(TAG + ".obtenerActorConIP(..) ", " - actorConIP Cert: " 
+	        			+ serverCert.getSubjectDN().toString());
+	        	actorConIP.setCertificado(serverCert);
+        }
+        if (actorConIPJSON.has("timeStampCertPEM")) {
+     	   actorConIP.setTimeStampCertPEM(actorConIPJSON.getString(
+                    "timeStampCertPEM"));
+        }
+        return actorConIP;
+    }
 }

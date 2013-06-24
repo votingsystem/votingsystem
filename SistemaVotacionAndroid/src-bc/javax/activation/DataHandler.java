@@ -40,28 +40,24 @@
 
 package javax.activation;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.io.OutputStreamWriter;
 import java.net.URL;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMultipart;
 
-import org.sistemavotacion.smime.SMIMESignedGenerator;
-
-import android.util.Log;
-
-import com.sun.mail.handlers.message_rfc822;
-import com.sun.mail.handlers.multipart_mixed;
-import com.sun.mail.handlers.text_plain;
-
 import myjava.awt.datatransfer.DataFlavor;
 import myjava.awt.datatransfer.Transferable;
 import myjava.awt.datatransfer.UnsupportedFlavorException;
+
+import org.sistemavotacion.smime.SMIMESignedGenerator;
+
+import android.util.Log;
 
 /**
  * The DataHandler class provides a consistent interface to data
@@ -906,8 +902,8 @@ class ObjectDataContentHandler implements DataContentHandler {
 	@Override
 	public void writeTo(Object obj, String mimeType, OutputStream os)
 						throws IOException {
-		//Log.i("DataHandler.writeTo", "mimeType: " + mimeType);
-		//Log.i("DataHandler.writeTo", "obj.getClass().getName(): " + obj.getClass().getName());
+		//Log.i("============ DataHandler.writeTo", "mimeType: " + mimeType);
+		//Log.i("============ DataHandler.writeTo", "obj.getClass(): " + obj.getClass());
 		    if (dch != null)
 		    dch.writeTo(obj, mimeType, os);
 		else if (obj instanceof byte[])

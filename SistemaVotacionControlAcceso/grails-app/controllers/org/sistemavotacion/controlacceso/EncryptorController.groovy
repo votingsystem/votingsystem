@@ -16,13 +16,18 @@ import java.io.BufferedReader
 import org.bouncycastle.util.encoders.Base64;
 import java.security.KeyFactory;
 import grails.util.Environment
+import org.sistemavotacion.smime.SMIMEMessageWrapper
+import org.sistemavotacion.utils.*
+import org.sistemavotacion.controlacceso.modelo.*
 
 class EncryptorController {
 	
 	def grailsApplication
+	def firmaService
 
     def index() { 
-		if(! Environment.DEVELOPMENT.equals(Environment.current)) {
+		if(!VotingSystemApplicationContex.Environment.DEVELOPMENT.equals(
+			VotingSystemApplicationContex.instance.environment)) {
 			String msg = message(code: "serviceDevelopmentModeMsg")
 			log.error msg
 			response.status = Respuesta.SC_ERROR_PETICION
@@ -64,6 +69,59 @@ class EncryptorController {
 		
 		params.responseBytes = mensajeJSON.toString().getBytes()
 		
+	}
+	
+	
+	/**
+	 * Servicio para comprbar la creación de documentos con multifirma
+	 *
+	 * @httpMethod [POST]
+	 * @serviceURL [/getMultiSignedMessage]
+	 * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] Obligatorio.
+	 *                     Documento SMIME firmado.
+	 * @responseContentType [application/x-pkcs7-signature]. Recibo firmado por el sistema.
+	 * @return  Recibo que consiste en el documento recibido con la firma añadida del servidor.
+	 */
+	def getMultiSignedMessage() {
+		if(!VotingSystemApplicationContex.Environment.DEVELOPMENT.equals(
+			VotingSystemApplicationContex.instance.environment)) {
+			String msg = message(code: "serviceDevelopmentModeMsg")
+			log.error msg
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
+			return false
+		}
+		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
+		MensajeSMIME mensajeSMIMEReq = params.mensajeSMIMEReq
+		if(!mensajeSMIMEReq) {
+			String msg = message(code:'evento.peticionSinArchivo')
+			log.error msg
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
+			return false
+		}
+		response.contentType = "${grailsApplication.config.pkcs7SignedContentType}"
+			
+		SMIMEMessageWrapper smimeMessage = mensajeSMIMEReq.getSmimeMessage()
+		
+		String fromUser = "EncryptorController"
+		String toUser = "MultiSignatureTestClient"
+		String subject = "Multisigned response"
+		SMIMEMessageWrapper smimeMessageResp = firmaService.getMultiSignedMimeMessage(
+			fromUser, toUser, smimeMessage, subject)
+		
+		//smimeMessageResp.init()
+		
+		//ByteArrayOutputStream messageBaos = new ByteArrayOutputStream();
+		//smimeMessageResp.writeTo(messageBaos)
+		//log.debug("========= ${new String(messageBaos.toByteArray())}")
+
+		
+		MensajeSMIME mensajeSMIMEResp = new MensajeSMIME(tipo:Tipo.TEST,
+			contenido:smimeMessage.getBytes())
+		
+		params.respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK,
+			mensajeSMIME:mensajeSMIMEResp, tipo:Tipo.TEST)
 	}
 	
 	private getPemBytesFromKey(Key key) {

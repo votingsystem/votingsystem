@@ -35,6 +35,7 @@ class EventoVotacionService {
 	def encryptionService
 	def representativeService
 	def filesService
+	def timeStampService
 
     Respuesta saveEvent(MensajeSMIME mensajeSMIMEReq, Locale locale) {
 		EventoVotacion event = null
@@ -48,7 +49,7 @@ class EventoVotacionService {
 			if (!mensajeJSON.centroControl || !mensajeJSON.centroControl.serverURL) {
 				msg = messageSource.getMessage(
 						'error.requestWithoutControlCenter', null, locale)
-				log.error "saveEvent - DATA ERROR - ${msg}" 
+				log.error "saveEvent - DATA ERROR - ${msg} - mensajeJSON: ${mensajeJSON}" 
 				return new Respuesta(tipo:Tipo.EVENTO_VOTACION_ERROR,
 						mensaje:msg, codigoEstado:Respuesta.SC_ERROR_PETICION)
 			}
@@ -59,7 +60,7 @@ class EventoVotacionService {
 					fechaFin: new Date().parse(
 						"yyyy-MM-dd HH:mm:ss", mensajeJSON.fechaFin))
 			respuesta = subscripcionService.checkControlCenter(
-				mensajeJSON.centroControl.serverURL)
+				mensajeJSON.centroControl.serverURL, locale)
 			if(Respuesta.SC_OK != respuesta.codigoEstado) {
 				log.error "saveEvent - CHECKING CONTROL CENTER ERROR - ${respuesta.mensaje}"
 				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
@@ -96,7 +97,7 @@ class EventoVotacionService {
 			}
 			log.debug(" ------ Saved voting event '${event.id}'")
 			mensajeJSON.id = event.id
-			mensajeJSON.URL = "${grailsApplication.config.grails.serverURL}/eventVotacion/${event.id}"
+			mensajeJSON.URL = "${grailsApplication.config.grails.serverURL}/eventoVotacion/${event.id}"
 			mensajeJSON.fechaCreacion = DateUtils.getStringFromDate(event.dateCreated)
 			mensajeJSON.tipo = Tipo.EVENTO_VOTACION
 			respuesta = almacenClavesService.generar(event)
@@ -149,7 +150,7 @@ class EventoVotacionService {
 					[respuestaNotificacion.mensaje].toArray(), locale)	
 				log.error "saveEvent - ERROR NOTIFYING CONTROL CENTER - ${msg}"
 				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
-					mensaje:msg, tipo:Tipo.EVENTO_VOTACION_ERROR, event:event)
+					mensaje:msg, tipo:Tipo.EVENTO_VOTACION_ERROR, evento:event)
 			}
 			MensajeSMIME mensajeSMIMEResp = new MensajeSMIME(tipo:Tipo.RECIBO,
 				smimePadre:mensajeSMIMEReq, event:event, valido:true,
@@ -181,37 +182,43 @@ class EventoVotacionService {
 				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
 					mensaje:msg, tipo:Tipo.BACKUP_ERROR)
 			}
-			respuesta = representativeService.getAccreditationsBackupForEvent(event, locale)
-			if(Respuesta.SC_OK != respuesta.codigoEstado) {
-				log.error("generarCopiaRespaldo - REPRESENTATIVE DATA GEN ERROR  ${respuesta.mensaje}")
-				return respuesta
-			}
 			
 			Map<String, File> mapFiles = filesService.getBackupFiles(event,
 				Tipo.EVENTO_VOTACION, locale)
 			File zipResult   = mapFiles.zipResult
 			File metaInfFile = mapFiles.metaInfFile
 			File filesDir    = mapFiles.filesDir
-
+			
 			if(zipResult.exists()) {
 				log.debug("generarCopiaRespaldo - backup file already exists")
 				return new Respuesta(codigoEstado:Respuesta.SC_OK,file:zipResult)
 			}
+			respuesta = representativeService.getAccreditationsBackupForEvent(event, locale)
+			if(Respuesta.SC_OK != respuesta.codigoEstado) {
+				log.error("generarCopiaRespaldo - REPRESENTATIVE DATA GEN ERROR  ${respuesta.mensaje}")
+				return respuesta
+			}
+			
 			
 			respuesta = firmaService.getEventTrustedCerts(event, locale)
 			if(Respuesta.SC_OK != respuesta.codigoEstado) {
 				respuesta.tipo = Tipo.BACKUP_ERROR
 				return respuesta
 			}
+			
+			Set<X509Certificate> systemTrustedCerts = firmaService.getTrustedCerts()
+			byte[] systemTrustedCertsPEMBytes = CertUtil.fromX509CertCollectionToPEM(systemTrustedCerts)
+			File systemTrustedCertsFile = new File("${filesDir.absolutePath}/systemTrustedCerts.pem")
+			systemTrustedCertsFile.setBytes(systemTrustedCertsPEMBytes)
+			
 			Set<X509Certificate> eventTrustedCerts = (Set<X509Certificate>) respuesta.data
 			byte[] eventTrustedCertsPEMBytes = CertUtil.fromX509CertCollectionToPEM(eventTrustedCerts)
 			File eventTrustedCertsFile = new File("${filesDir.absolutePath}/eventTrustedCerts.pem")
-			eventTrustedCertsFile.write(new String(eventTrustedCertsPEMBytes))
+			eventTrustedCertsFile.setBytes(eventTrustedCertsPEMBytes)
 
-			Set<X509Certificate> accessRequestTrustedCerts = firmaService.getTrustedCerts()
-			byte[] accessRequestTrustedCertsPEMBytes = CertUtil.fromX509CertCollectionToPEM(accessRequestTrustedCerts)
-			File accessRequestTrustedCertsFile = new File("${filesDir.absolutePath}/accessRequestTrustedCerts.pem")
-			accessRequestTrustedCertsFile.write(new String(accessRequestTrustedCertsPEMBytes))
+			byte[] timeStampCertPEMBytes = timeStampService.getSigningCert()
+			File timeStampCertFile = new File("${filesDir.absolutePath}/timeStampCert.pem")
+			timeStampCertFile.setBytes(timeStampCertPEMBytes)
 			
 			List<Voto> votes = null
 			Voto.withTransaction {
@@ -228,14 +235,10 @@ class EventoVotacionService {
 					estado:SolicitudAcceso.Estado.OK, eventoVotacion:event)
 			}
 			
-			
-			def metaInfMap = [numVotes:votes.size(),
-				numAccessRequest:solicitudesAcceso.size()]			
-			Evento.withTransaction {
-				event.updateMetaInf(Tipo.BACKUP, metaInfMap)
-			}
-			metaInfFile.write(event.metaInf)
-
+			def backupMetaInfMap = [numVotes:votes.size(),
+				numAccessRequest:solicitudesAcceso.size()]	
+			def metaInfMap = eventoService.updateEventMetaInf(event, Tipo.BACKUP, backupMetaInfMap)
+			metaInfFile.write((metaInfMap as JSON).toString())
 			
 			String voteFileName = messageSource.getMessage('voteFileName', null, locale)
 			String representativeVoteFileName = messageSource.getMessage(
@@ -270,6 +273,8 @@ class EventoVotacionService {
 			ant.zip(destfile: zipResult, basedir: "${filesDir}") {
 				fileset(dir:"${filesDir}/..", includes: "meta.inf")
 			}
+
+			log.debug("zip backup of event ${event.id} on file ${zipResult.absolutePath}")
 			return new Respuesta(codigoEstado:Respuesta.SC_OK, metaInf:metaInfMap, 
 				file:zipResult)
 		} catch(Exception ex) {

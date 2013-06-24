@@ -1,16 +1,18 @@
 package org.sistemavotacion.controlacceso.modelo;
 
 import static javax.persistence.GenerationType.IDENTITY;
+
 import java.io.Serializable;
+import java.security.cert.X509Certificate;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import javax.persistence.CascadeType;
+
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
@@ -18,12 +20,14 @@ import javax.persistence.InheritanceType;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Enumerated;
-import javax.persistence.EnumType;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
 import javax.persistence.Transient;
-import java.security.cert.X509Certificate;
+
+import net.sf.json.JSONNull;
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -37,6 +41,8 @@ import java.security.cert.X509Certificate;
 )
 @DiscriminatorValue("ActorConIP")
 public class ActorConIP implements Serializable {
+	
+    private static Logger logger = LoggerFactory.getLogger(ActorConIP.class);
 
     public static final long serialVersionUID = 1L;
     
@@ -186,4 +192,31 @@ public class ActorConIP implements Serializable {
 	public void setCadenaCertificacion(byte[] cadenaCertificacion) {
 		this.cadenaCertificacion = cadenaCertificacion;
 	}
+	
+    public static ActorConIP parse(String actorConIPStr) throws Exception {
+        logger.debug(" - parse -");
+        if(actorConIPStr == null) return null;
+        JSONObject actorConIPJSON = (JSONObject) JSONSerializer.toJSON(actorConIPStr);
+        ActorConIP actorConIP = new ActorConIP();
+        if (actorConIPJSON.containsKey("tipoServidor")){
+            Tipo tipoServidor = Tipo.valueOf(actorConIPJSON.getString("tipoServidor"));
+            actorConIP.setTipoServidor(tipoServidor);
+        }
+        if (actorConIPJSON.containsKey("estado")){
+        	actorConIP.setEstado(ActorConIP.Estado.valueOf(
+        			actorConIPJSON.getString("estado")));
+        }
+        if(actorConIPJSON.containsKey("id") && !JSONNull.getInstance().
+                equals(actorConIPJSON.get("id"))) actorConIP.setId(
+                actorConIPJSON.getLong("id"));
+        if (actorConIPJSON.containsKey("serverURL"))
+             actorConIP.setServerURL(actorConIPJSON.getString("serverURL"));
+        if (actorConIPJSON.containsKey("nombre"))
+             actorConIP.setNombre(actorConIPJSON.getString("nombre"));       
+        if (actorConIPJSON.containsKey("cadenaCertificacionPEM")) {
+            actorConIP.setCadenaCertificacion(actorConIPJSON.getString(
+                        "cadenaCertificacionPEM").getBytes());
+        }
+        return actorConIP;
+    }
 }

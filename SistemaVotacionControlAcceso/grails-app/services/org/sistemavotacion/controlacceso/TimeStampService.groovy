@@ -65,6 +65,8 @@ class TimeStampService {
 	def grailsApplication
 	def messageSource
 	
+	private static final int numMaxAttempts = 3;
+	
 	private static final String SIGNATURE_ALGORITHM = "SHA256withRSA";
 	private static final String DEFAULT_TSA_POLICY_OID = "1.2.3";
 	private static final Integer ACCURACYMICROS = 500;
@@ -181,17 +183,13 @@ class TimeStampService {
 	}
 	
 	public Respuesta processRequest(byte[] timeStampRequestBytes,
-			Locale locale) throws Exception {
+			Locale locale) throws Exception {	
 		if(!timeStampRequestBytes) {
 			String msg = messageSource.getMessage('timestampRequestNullMsg', null, locale)
 			log.debug("processRequest - ${msg}"); 
 			return new Respuesta(mensaje:msg,
 				codigoEstado:Respuesta.SC_ERROR_PETICION)
 		}
-		//String timeStampRequestStr = new String(Base64.encode(timeStampRequestBytes));
-		//log.debug("processRequest - timeStampRequestStr: ${timeStampRequestStr}")
-		
-		
 		TimeStampRequest timeStampRequest = new TimeStampRequest(timeStampRequestBytes)
 		final Date date = DateUtils.getTodayDate();
 		long numSerie = getSernoGenerator().incrementAndGet()
@@ -202,7 +200,14 @@ class TimeStampService {
 				timeStampRequest, serialNumber, date);
 		final TimeStampToken token = timeStampResponse.getTimeStampToken();
 		
+		//String timeStampRequestStr = new String(Base64.encode(timeStampRequestBytes));
+		//log.debug("timeStampRequestStr: ${timeStampRequestStr}")
+		//String digestStr = new String(Base64.encode(timeStampRequest.getMessageImprintDigest()));
+		//log.debug("timeStampRequest MessageImprintDigest: ${digestStr}")
+		//log.debug("timeStampRequest MessageImprintAlgOID: ${timeStampRequest.getMessageImprintAlgOID()}")
+		
 		if(!token) {
+			log.error("processRequest - error:'${timeStampResponse.getStatusString()}'")
 			String msg = messageSource.getMessage('timestampRequestNullMsg', null, locale)
 			log.debug("processRequest - ${msg}"); 
 			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
@@ -210,7 +215,22 @@ class TimeStampService {
 		}
 		
 		SignerInformationVerifier sigVerifier = getTimeStampSignerInfoVerifier()
-		token.validate(sigVerifier)
+		AtomicBoolean done = new AtomicBoolean(false);
+		int numAttemp = 0;
+		while(!done.get()) {
+			log.error(" ------ validating token");
+			try {
+				token.validate(sigVerifier)
+				done.set(true)
+			} catch(Exception ex) {
+				if(numAttemp < numMaxAttempts) {
+					++numAttemp;
+				} else {
+					log.error(" ------ Exceeded max num attemps - ${ex.getMessage()}", ex);
+					throw ex
+				}
+			}
+		}
 		//validate(token, locale)
 		
 		//String tokenStr = new String(Base64.encode(token.getEncoded()));

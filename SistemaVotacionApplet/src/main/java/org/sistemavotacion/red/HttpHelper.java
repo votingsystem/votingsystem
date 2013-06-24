@@ -56,7 +56,8 @@ public class HttpHelper {
             schemeRegistry.register(
         new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));*/
         cm = new PoolingClientConnectionManager();
-        // set the connection timeout value to 15 seconds (15000 milliseconds)
+        connEvictor = new IdleConnectionEvictor(cm);
+        connEvictor.start();
         final HttpParams httpParams = new BasicHttpParams();
         HttpConnectionParams.setConnectionTimeout(httpParams, 15000);
         httpclient = new DefaultHttpClient(cm, httpParams);
@@ -67,12 +68,12 @@ public class HttpHelper {
         logger.debug("initMultiThreadedMode");
         if(cm != null) cm.shutdown();
         cm = new PoolingClientConnectionManager();
-        cm.setMaxTotal(100);
+        cm.setMaxTotal(200);
+        cm.setDefaultMaxPerRoute(200); 
         connEvictor = new IdleConnectionEvictor(cm);
         connEvictor.start();
-        // set the connection timeout value to 15 seconds (15000 milliseconds)
         final HttpParams httpParams = new BasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(httpParams, 20000);
+        HttpConnectionParams.setConnectionTimeout(httpParams, 40000);
         httpclient = new DefaultHttpClient(cm, httpParams);
     }
     
@@ -89,9 +90,9 @@ public class HttpHelper {
         }
     }
     
-    public Respuesta getInfo (String serverURL, String contentType) 
+    public Respuesta getData (String serverURL, String contentType) 
             throws IOException, ParseException {
-        logger.debug("getInfo - serverURL: " + serverURL + " - contentType: " 
+        logger.debug("getData - serverURL: " + serverURL + " - contentType: " 
                 + contentType);  
         Respuesta respuesta = null;
         HttpGet httpget = new HttpGet(serverURL);
@@ -106,20 +107,23 @@ public class HttpHelper {
             }*/
             logger.debug(response.getStatusLine().toString());
             logger.debug("----------------------------------------");
-            byte[] responseBytes = null;
-            if(Respuesta.SC_OK == response.getStatusLine().getStatusCode()) 
-                responseBytes = EntityUtils.toByteArray(response.getEntity());
-            respuesta = new Respuesta(response.getStatusLine().getStatusCode(),
+            if(Respuesta.SC_OK == response.getStatusLine().getStatusCode()) {
+                byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
+                respuesta = new Respuesta(response.getStatusLine().getStatusCode(),
                         new String(responseBytes), responseBytes);
+            } else {
+                respuesta = new Respuesta(response.getStatusLine().getStatusCode(),
+                        EntityUtils.toString(response.getEntity()));
+            }
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
-            respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+            respuesta = new Respuesta(Respuesta.SC_ERROR, Contexto.INSTANCE.
+                    getString("hostConnectionErrorMsg", serverURL));
             httpget.abort();
         } finally {
             if(response != null) EntityUtils.consume(response.getEntity());
-            httpget.releaseConnection();
+            return respuesta;
         }
-        return respuesta;
     }
     
     public X509Certificate obtenerCertificadoDeServidor (String serverURL) throws Exception {
@@ -135,7 +139,6 @@ public class HttpHelper {
             certificado = CertUtil.fromPEMToX509Cert(EntityUtils.toByteArray(entity));
         }
         EntityUtils.consume(response.getEntity());
-        httpget.releaseConnection();
         return certificado;
     }
     
@@ -155,7 +158,6 @@ public class HttpHelper {
                     EntityUtils.toByteArray(entity));
         }
         EntityUtils.consume(response.getEntity());
-        httpget.releaseConnection();
         return certificados;
     }
    
@@ -179,8 +181,7 @@ public class HttpHelper {
     }
 
     
-    public Respuesta sendFile (File file, String contentType, 
-            String serverURL) throws IOException {
+    public Respuesta sendFile (File file, String contentType, String serverURL) {
         logger.debug("sendFile - contentType: " + contentType + 
                 " - serverURL: " + serverURL); 
         Respuesta respuesta = null;
@@ -196,7 +197,6 @@ public class HttpHelper {
             respuesta = new Respuesta(response.getStatusLine().getStatusCode(),
                     new String(responseBytes), responseBytes);
             EntityUtils.consume(response.getEntity());
-            httpPost.releaseConnection();
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
             respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
@@ -207,7 +207,7 @@ public class HttpHelper {
         
         
     public Respuesta sendString (String stringToSend, 
-            String paramName, String serverURL) throws IOException {
+            String paramName, String serverURL) {
         logger.debug("sendString - serverURL: " + serverURL);
         Respuesta respuesta = null;
         HttpPost httpPost = new HttpPost(serverURL);
@@ -220,7 +220,6 @@ public class HttpHelper {
             logger.debug("----------------------------------------");
             logger.debug(response.getStatusLine().toString());
             logger.debug("----------------------------------------");
-            httpPost.releaseConnection();
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
             respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
@@ -235,32 +234,34 @@ public class HttpHelper {
                 " - serverURL: " + serverURL);
         Respuesta respuesta = null;
         HttpPost httpPost = new HttpPost(serverURL);
+        HttpResponse response = null;
         try {
             ByteArrayEntity entity = null;
             if(contentType != null) {
                 entity = new ByteArrayEntity(byteArray,  ContentType.create(contentType));
             } else entity = new ByteArrayEntity(byteArray); 
             httpPost.setEntity(entity);
-            HttpResponse response = httpclient.execute(httpPost);
+            response = httpclient.execute(httpPost);
             logger.debug("----------------------------------------");
             logger.debug(response.getStatusLine().toString());
             logger.debug("----------------------------------------");
             byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
             respuesta = new Respuesta(response.getStatusLine().getStatusCode(),
                     new String(responseBytes), responseBytes);
-            EntityUtils.consume(response.getEntity());
-            httpPost.releaseConnection();
+            //EntityUtils.consume(response.getEntity());
         } catch(HttpHostConnectException ex){
             logger.error(ex.getMessage(), ex);
-            respuesta = new Respuesta(Respuesta.SC_ERROR,
-                    Contexto.INSTANCE.getString("hostConnectionErrorMsg"));
+            respuesta = new Respuesta(Respuesta.SC_ERROR, Contexto.INSTANCE.
+                    getString("hostConnectionErrorMsg", serverURL));
             httpPost.abort();
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
             respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
             httpPost.abort();
-        } 
-        return respuesta;
+        }  finally {
+            if(response != null) EntityUtils.consume(response.getEntity());
+            return respuesta;
+        }
     }
     
     
@@ -271,6 +272,7 @@ public class HttpHelper {
         if(fileMap == null || fileMap.isEmpty()) throw new Exception(
                 Contexto.INSTANCE.getString("requestWithoutFileMapErrorMsg"));
         HttpPost httpPost = new HttpPost(serverURL);
+        HttpResponse response = null;
         try {
             Set<String> fileNames = fileMap.keySet();
             MultipartEntity reqEntity = new MultipartEntity();
@@ -289,17 +291,20 @@ public class HttpHelper {
                 }
             }
             httpPost.setEntity(reqEntity);
-            HttpResponse response = httpclient.execute(httpPost);     
+            response = httpclient.execute(httpPost);     
             logger.debug("----------------------------------------");
             logger.debug(response.getStatusLine().toString());
             logger.debug("----------------------------------------");
             byte[] responseBytes =  EntityUtils.toByteArray(response.getEntity());
             respuesta = new Respuesta(response.getStatusLine().getStatusCode(),
                     new String(responseBytes), responseBytes);
-            EntityUtils.consume(response.getEntity());
-            httpPost.releaseConnection();
+            //EntityUtils.consume(response.getEntity());
         } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            String statusLine = null;
+            if(response != null) {
+                statusLine = response.getStatusLine().toString();
+            }
+            logger.error(ex.getMessage() + " - StatusLine: " + statusLine, ex);
             respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
             httpPost.abort();
         }
@@ -328,7 +333,7 @@ public class HttpHelper {
                         connMgr.closeExpiredConnections();
                         // Optionally, close connections
                         // that have been idle longer than 5 sec
-                        connMgr.closeIdleConnections(15, TimeUnit.SECONDS);
+                        connMgr.closeIdleConnections(30, TimeUnit.SECONDS);
                     }
                 }
             } catch (InterruptedException ex) {

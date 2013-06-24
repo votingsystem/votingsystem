@@ -36,21 +36,23 @@ public class PKCS10WrapperClient {
     private KeyPair keyPair;
     private PrivateKey privateKey;
     private PublicKey publicKey;
+    private String signatureMechanism;
     private X509Certificate certificate;
     private SignedMailGenerator signedMailGenerator;
 
     public PKCS10WrapperClient(int keySize, String keyName,
-            String sigName, String provider, String controlAccesoURL, String eventoId,
+            String signatureMechanism, String provider, String controlAccesoURL, String eventoId,
             String hashCertificadoVotoHEX) throws NoSuchAlgorithmException, 
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         keyPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
         privateKey = keyPair.getPrivate();
         publicKey = keyPair.getPublic();
+        this.signatureMechanism = signatureMechanism;
         X500Principal subject = new X500Principal(
                 "CN=controlAccesoURL:" + controlAccesoURL + 
                 ", OU=eventoId:" + eventoId +
                 ", OU=hashCertificadoVotoHEX:" + hashCertificadoVotoHEX); 
-        csr = new PKCS10CertificationRequest(VOTE_SIGN_MECHANISM, 
+        csr = new PKCS10CertificationRequest(signatureMechanism, 
                 subject, keyPair.getPublic(), null, keyPair.getPrivate(), provider);
     }
 
@@ -98,7 +100,7 @@ public class PKCS10WrapperClient {
         X509Certificate[] arrayCerts = new X509Certificate[certificados.size()];
         certificados.toArray(arrayCerts);
         signedMailGenerator = new SignedMailGenerator(
-                privateKey, arrayCerts, VOTE_SIGN_MECHANISM);
+                privateKey, arrayCerts, signatureMechanism);
     }
     
     public SMIMEMessageWrapper genMimeMessage(String fromUser, String toUser, 

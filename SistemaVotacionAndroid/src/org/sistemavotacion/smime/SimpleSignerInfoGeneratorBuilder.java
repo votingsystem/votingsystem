@@ -96,6 +96,14 @@ public class SimpleSignerInfoGeneratorBuilder {
         
         return configureAndBuild().build(contentSigner, new JcaX509CertificateHolder(certificate));
     }
+    
+    public SignerInfoGenerator build(String algorithmName, PrivateKey privateKey, X509Certificate certificate)
+    throws OperatorCreationException, CertificateEncodingException
+{
+    ContentSigner contentSigner = helper.createContentSigner(algorithmName, privateKey);
+
+    return configureAndBuild().build(contentSigner, new JcaX509CertificateHolder(certificate));
+}
 
     public SignerInfoGenerator build(String algorithmName, PrivateKey privateKey, byte[] keyIdentifier)
         throws OperatorCreationException, CertificateEncodingException

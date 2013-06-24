@@ -10,8 +10,11 @@ import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
-import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
@@ -22,11 +25,8 @@ import org.sistemavotacion.test.dialogo.InfoServidorDialog;
 import org.sistemavotacion.test.dialogo.MensajeDialog;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.util.StringUtils;
-import org.sistemavotacion.worker.DocumentSenderWorker;
-import org.sistemavotacion.worker.InfoGetterWorker;
-import org.sistemavotacion.worker.VotingSystemWorker;
-import org.sistemavotacion.worker.VotingSystemWorkerListener;
-import org.sistemavotacion.worker.VotingSystemWorkerType;
+import org.sistemavotacion.callable.InfoSender;
+import org.sistemavotacion.callable.InfoGetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,19 +34,22 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class MainFrame extends JFrame  implements KeyListener, 
-        FocusListener, VotingSystemWorkerListener {
+public class MainFrame extends JFrame  implements KeyListener, FocusListener {
     
     private static Logger logger = LoggerFactory.getLogger(MainFrame.class);
+        
+    private static final int ACCESS_CONTROL_GETTER = 0;
+    private static final int CONTROL_CENTER_GETTER = 1;
+    private static final int CA_CERT_INITIALIZER   = 2;
     
-    public enum Worker implements VotingSystemWorkerType{
-        ACCESS_CONTROL_GETTER, CONTROL_CENTER_GETTER, CA_CERT_INITIALIZER}
+    private static BlockingQueue<Future<Respuesta>> queue = 
+            new LinkedBlockingQueue<Future<Respuesta>>(10);
 
     public enum Estado {CONECTADO_CONTROL_ACCESO , ERROR_CONEXION_CONTROL_ACCESO,
         DESCONECTADO, CONECTANDO;}
     
     private Estado estado = Estado.DESCONECTADO;
-    private SwingWorker tareaEnEjecucion;
+    private Future<Respuesta> tareaEnEjecucion;
     private Border normalTextBorder;
     private Frame mainFrame;
     /**
@@ -64,6 +67,122 @@ public class MainFrame extends JFrame  implements KeyListener,
         pack();
         votacionesPanel.setMainFrame(this);
         ContextoPruebas.INSTANCE.setVotingPanel(votacionesPanel);
+        ContextoPruebas.INSTANCE.submit(new Runnable() {
+            @Override public void run() {
+                try {
+                    readFutures();
+                } catch (Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                }
+            }
+        });
+    }
+                
+    public void readFutures () {
+        logger.debug(" - readFutures");
+        AtomicBoolean done = new AtomicBoolean(false);
+        while (!done.get()) {
+            try {
+                Future<Respuesta> future = queue.take();
+                Respuesta respuesta = future.get();
+                switch(respuesta.getId()) {
+                    case ACCESS_CONTROL_GETTER:
+                        estado = Estado.DESCONECTADO;
+                        infoServidorButton.setIcon(null);
+                        infoServidorButton.setText("Conectar");
+                        infoServidorButton.setIcon(new ImageIcon(getClass().getResource("/images/pair_16x16.png")));            
+                        if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                            try {
+                                ActorConIP controlAcceso = ActorConIP.parse(
+                                        respuesta.getMensaje());
+                                if(ActorConIP.Tipo.CONTROL_ACCESO != 
+                                        controlAcceso.getTipo()) {
+                                    mostrarMensajeUsuario(ContextoPruebas.INSTANCE.
+                                            getString("accessControlErrorMsg"));
+                                    controlAccesoTextField.setBorder(new LineBorder(Color.RED,2));
+                                    return;
+                                }
+                                if(ActorConIP.EnvironmentMode.DEVELOPMENT !=  
+                                        controlAcceso.getEnvironmentMode()) {
+                                    String msg = "SERVER NOT IN DEVELOPMENT MODE. Server mode:" + 
+                                            controlAcceso.getEnvironmentMode();
+                                    logger.error("### ERROR - " + msg);
+                                    mostrarMensajeUsuario(msg);
+                                    return;
+                                }
+                                mostrarMensajeUsuario(null);
+                                controlAccesoTextField.setBorder(normalTextBorder);
+                                ContextoPruebas.INSTANCE.setControlAcceso(controlAcceso);
+                                votacionesPanel.setControlAcceso(controlAcceso);
+                                byte[] caPemCertificateBytes = CertUtil.fromX509CertToPEM (
+                                    ContextoPruebas.INSTANCE.getRootCACert());
+                                String urlAnyadirCertificadoCA = ContextoPruebas.getRootCAServiceURL(
+                                    controlAcceso.getServerURL());
+                                estado = Estado.CONECTANDO;
+                                infoServidorButton.setIcon(new javax.swing.ImageIcon(
+                                getClass().getResource("/images/loading.gif")));
+                                infoServidorButton.setText("Añadiendo Autoridad Certificadora");
+                                InfoSender infoSender = new InfoSender(CA_CERT_INITIALIZER, 
+                                        caPemCertificateBytes, null, urlAnyadirCertificadoCA);
+                                Future<Respuesta> futureCaInitializer = ContextoPruebas.INSTANCE.submit(infoSender);
+                                queue.add(futureCaInitializer);
+                                tareaEnEjecucion = futureCaInitializer;
+                            } catch(Exception ex) {
+                                logger.error(ex.getMessage(), ex);
+                                mostrarMensajeUsuario(ex.getMessage());
+                            }
+                        } else if (Respuesta.SC_NOT_FOUND == respuesta.getCodigoEstado()) { 
+                            mostrarMensajeUsuario("Página no encontrada");
+                        } else {
+                            String mensaje = "Error - " + respuesta.getMensaje();
+                            mostrarMensajeUsuario(mensaje);
+                        }
+                        break;
+                    case CONTROL_CENTER_GETTER:
+                        if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                            try {
+                                ActorConIP actorConIP = ActorConIP.parse(
+                                        respuesta.getMensaje());
+                                if(!(ActorConIP.Tipo.CENTRO_CONTROL == actorConIP.getTipo())) {
+                                    mostrarMensajeUsuario("El servidor no es un Centro Control");
+                                    return;
+                                }
+                                mostrarMensajeUsuario(null);
+                                ContextoPruebas.INSTANCE.setControlCenter(actorConIP);
+                            } catch(Exception ex) {
+                                String mensaje = "Error Cargando centro Control <br/>" + ex.getMessage();
+                                mostrarMensajeUsuario(mensaje);
+                            }
+                        } else {
+                            String mensaje = "Error Cargando centro Control <br/>" + 
+                                    respuesta.getMensaje();
+                            mostrarMensajeUsuario(mensaje);
+                        }
+                        break;
+                    case CA_CERT_INITIALIZER:
+                        if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                            infoServidorButton.setText("Información del servidor");
+                            infoServidorButton.setIcon(new ImageIcon(getClass()
+                                    .getResource("/images/information-white.png")));
+                            estado = Estado.CONECTADO_CONTROL_ACCESO;
+                            tabbedPane.setVisible(true);
+                            pack();
+                        } else {
+                            estado = Estado.DESCONECTADO;
+                            infoServidorButton.setText("Conectar");
+                            infoServidorButton.setIcon(new ImageIcon(getClass().getResource("/images/pair_16x16.png")));
+                            String mensaje = "Error añadiendo Autoridad Certificadora de pruebas - " + 
+                                            respuesta.getMensaje();
+                            mostrarMensajeUsuario(mensaje);
+                            logger.debug("mostrarResultadoOperacion - multipartEntityWorker - message: " 
+                                + mensaje);
+                        } 
+                        break;
+                }
+            } catch(Exception ex) {
+                logger.error(ex.getMessage(), ex); 
+            }
+       }
     }
 
     /**
@@ -361,25 +480,27 @@ public class MainFrame extends JFrame  implements KeyListener,
         controlAccesoTextField.setEditable(isEditable);
     }
     
-    public void cargarControlAcceso(){
+    public void cargarControlAcceso() {
         estado = Estado.CONECTANDO;
         infoServidorButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/loading.gif")));
         infoServidorButton.setText("Conectando");
         String urlServidor = StringUtils.prepararURL(controlAccesoTextField.getText());
         controlAccesoTextField.setText(urlServidor);
         String urlInfoServidor = ContextoPruebas.getURLInfoServidor(urlServidor);
-        tareaEnEjecucion = new InfoGetterWorker(Worker.ACCESS_CONTROL_GETTER,
-                urlInfoServidor, null,this);
-        tareaEnEjecucion.execute();
+        InfoGetter infoGetter = new InfoGetter(null, urlInfoServidor, null);
+        Future<Respuesta> future = ContextoPruebas.INSTANCE.submit(infoGetter);
+        queue.add(future);
+        tareaEnEjecucion = future;
     }
     
     public void cargarCentroControl(String urlCentroControl){
         String urlServidor = StringUtils.prepararURL(urlCentroControl);
         String urlInfoServidor = ContextoPruebas.getURLInfoServidor(urlServidor);
-        tareaEnEjecucion = new InfoGetterWorker(Worker.CONTROL_CENTER_GETTER,
-                urlInfoServidor, null, this);
-        tareaEnEjecucion.execute();
+        InfoGetter infoGetter = new InfoGetter(null, urlInfoServidor, null);
         controlAccesoTextField.setText(controlAccesoTextField.getText().trim());
+        Future<Respuesta> future = ContextoPruebas.INSTANCE.submit(infoGetter);
+        queue.add(future);
+        tareaEnEjecucion = future;      
     }
     /**
      * @param args the command line arguments
@@ -520,106 +641,5 @@ public class MainFrame extends JFrame  implements KeyListener,
             }
         });
     }
-            
-    @Override public void processVotingSystemWorkerMsg(List<String> messages) {
-        //mostrarMensajeUsuario(messages.iterator().next());
-    }
-    
-    @Override
-    public void showResult(VotingSystemWorker worker) {
-        logger.debug("showResult - statusCode: " + worker.getStatusCode() + 
-                " - worker: " + worker.getType());
-        switch((Worker)worker.getType()) {
-            case ACCESS_CONTROL_GETTER:
-                estado = Estado.DESCONECTADO;
-                infoServidorButton.setIcon(null);
-                infoServidorButton.setText("Conectar");
-                infoServidorButton.setIcon(new ImageIcon(getClass().getResource("/images/pair_16x16.png")));            
-                if(Respuesta.SC_OK == worker.getStatusCode()) {
-                    try {
-                        ActorConIP controlAcceso = ActorConIP.parse(worker.getMessage());
-                        if(ActorConIP.Tipo.CONTROL_ACCESO != controlAcceso.getTipo()) {
-                            mostrarMensajeUsuario(ContextoPruebas.INSTANCE.
-                                    getString("accessControlErrorMsg"));
-                            controlAccesoTextField.setBorder(new LineBorder(Color.RED,2));
-                            return;
-                        }
-                        if(ActorConIP.EnvironmentMode.DEVELOPMENT !=  
-                                controlAcceso.getEnvironmentMode()) {
-                            String msg = "SERVER NOT IN DEVELOPMENT MODE. Server mode:" + 
-                                    controlAcceso.getEnvironmentMode();
-                            logger.error("### ERROR - " + msg);
-                            mostrarMensajeUsuario(msg);
-                            return;
-                        }
-                        mostrarMensajeUsuario(null);
-                        controlAccesoTextField.setBorder(normalTextBorder);
-                        ContextoPruebas.INSTANCE.setControlAcceso(controlAcceso);
-                        votacionesPanel.setControlAcceso(controlAcceso);
-                        byte[] caPemCertificateBytes = CertUtil.fromX509CertToPEM (
-                            ContextoPruebas.INSTANCE.getRootCACert());
-                        String urlAnyadirCertificadoCA = ContextoPruebas.getRootCAServiceURL(
-                            controlAcceso.getServerURL());
-                        estado = Estado.CONECTANDO;
-                        infoServidorButton.setIcon(new javax.swing.ImageIcon(
-                        getClass().getResource("/images/loading.gif")));
-                        infoServidorButton.setText("Añadiendo Autoridad Certificadora");
-                        tareaEnEjecucion = new DocumentSenderWorker(
-                                Worker.CA_CERT_INITIALIZER, caPemCertificateBytes, null,
-                                urlAnyadirCertificadoCA, this);
-                        tareaEnEjecucion.execute(); 
-                    } catch(Exception ex) {
-                        logger.error(ex.getMessage(), ex);
-                        mostrarMensajeUsuario(ex.getMessage());
-                    }
-                } else if (Respuesta.SC_NOT_FOUND == worker.getStatusCode()) { 
-                    mostrarMensajeUsuario("Página no encontrada");
-                } else {
-                    String mensaje = "Error - " + worker.getMessage();
-                    mostrarMensajeUsuario(mensaje);
-                }
-                break;
-            case CONTROL_CENTER_GETTER:
-                if(Respuesta.SC_OK == worker.getStatusCode()) {
-                    try {
-                        ActorConIP actorConIP = ActorConIP.parse(worker.getMessage());
-                        if(!(ActorConIP.Tipo.CENTRO_CONTROL == actorConIP.getTipo())) {
-                            mostrarMensajeUsuario("El servidor no es un Centro Control");
-                            return;
-                        }
-                        mostrarMensajeUsuario(null);
-                        ContextoPruebas.INSTANCE.setControlCenter(actorConIP);
-                    } catch(Exception ex) {
-                        String mensaje = "Error Cargando centro Control <br/>" + ex.getMessage();
-                        mostrarMensajeUsuario(mensaje);
-                    }
 
-                } else {
-                    String mensaje = "Error Cargando centro Control <br/>" + worker.getMessage();
-                    mostrarMensajeUsuario(mensaje);
-                }
-                break;
-            case CA_CERT_INITIALIZER:
-                if(Respuesta.SC_OK == worker.getStatusCode()) {
-                    infoServidorButton.setText("Información del servidor");
-                    infoServidorButton.setIcon(new ImageIcon(getClass()
-                            .getResource("/images/information-white.png")));
-                    estado = Estado.CONECTADO_CONTROL_ACCESO;
-                    tabbedPane.setVisible(true);
-                    pack();
-                } else {
-                    estado = Estado.DESCONECTADO;
-                    infoServidorButton.setText("Conectar");
-                    infoServidorButton.setIcon(new ImageIcon(getClass().getResource("/images/pair_16x16.png")));
-                    String mensaje = "Error añadiendo Autoridad Certificadora de pruebas - " + 
-                                    worker.getMessage();
-                    mostrarMensajeUsuario(mensaje);
-                    logger.debug("mostrarResultadoOperacion - multipartEntityWorker - message: " 
-                        + mensaje);
-                } 
-                break;
-        } 
-         
-
-    }
 }

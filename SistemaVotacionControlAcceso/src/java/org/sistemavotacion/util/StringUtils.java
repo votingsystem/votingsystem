@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Clob;
 import java.sql.SQLException;
+import java.util.Random;
+
 import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialException;
 import org.slf4j.Logger;
@@ -33,6 +35,19 @@ public class StringUtils {
             }
             return stringClob;
     }	
+
+    public static String randomLowerString(long seed, int size) {
+        StringBuffer tmp = new StringBuffer();
+        Random random = new Random(seed);
+        for (int i = 0; i < size; i++) {
+            long newSeed = random.nextLong();
+            int currInt = (int) (26 * random.nextFloat());
+            currInt += 97;
+            random = new Random(newSeed);
+            tmp.append((char) currInt);
+        }
+        return tmp.toString();
+    }
     
     public static Clob getClobFromString (String string) {
     	if(string == null) return null;

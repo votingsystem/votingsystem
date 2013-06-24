@@ -82,6 +82,41 @@ class VotoController {
 	}
 	
 	/**
+	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE DESARROLLO). 
+	 * Servicio que devuelve los votos con errores de una votación
+	 * @httpMethod [GET]
+	 * @serviceURL [/errors/event/${id}]
+	 * @param [id] Obligatorio. Identificador del evento en la base de datos
+	 * del Control de Acceso
+	 * @responseContentType [application/zip]
+	 * @return Documento ZIP con los errores de una votación
+	 */
+	def errors() {
+		if(!VotingSystemApplicationContex.Environment.DEVELOPMENT.equals(
+			VotingSystemApplicationContex.instance.environment)) {
+			def msg = message(code: "serviceDevelopmentModeMsg")
+			log.error msg
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
+			return false
+		}
+		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
+		EventoVotacion event = EventoVotacion.getAt(params.long('id'))
+		if(!event) {
+			response.status = Respuesta.SC_NOT_FOUND
+			render message(code: 'evento.eventoNotFound', args:[params.id])
+			return false
+		}
+		def errorMessages
+		MensajeSMIME.withTransaction {
+			errorMessages = MensajeSMIME.findAllByEventoAndTipoAndTipo(event, Tipo.ERROR, Tipo.VOTO_CON_ERRORES)
+		}
+
+		render errorMessages.size()
+		return false
+	}
+	
+	/**
 	 * Servicio que devuelve la información de un voto a partir del  
 	 * hash asociado al mismo
 	 * @httpMethod [GET]

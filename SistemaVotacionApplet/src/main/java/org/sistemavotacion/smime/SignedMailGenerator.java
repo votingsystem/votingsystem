@@ -19,7 +19,6 @@ import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.cms.AttributeTable;
@@ -88,13 +87,12 @@ public class SignedMailGenerator {
     
     public SMIMEMessageWrapper genMimeMessage(String fromUser, String toUser, 
             String textoAFirmar, String asunto, Header header) throws Exception {
-        if (asunto == null) asunto = "";
-        if (textoAFirmar == null) textoAFirmar = "";
+        if (asunto == null) throw new Exception("Subject null");
+        if (textoAFirmar == null) throw new Exception("Content null");
         MimeBodyPart msg = new MimeBodyPart();
         msg.setText(textoAFirmar);
-        MimeMultipart mimeMultipart = smimeSignedGenerator.generate(msg, "smime.p7s");
-        
-        
+        MimeMultipart mimeMultipart = smimeSignedGenerator.generate(
+                msg, DEFAULT_SIGNED_FILE_NAME);
         SMIMEMessageWrapper body = new SMIMEMessageWrapper(session);
         if (header != null) body.setHeader(header.getName(), header.getValue());
         if (fromUser != null && !"".equals(fromUser)) {
@@ -107,15 +105,16 @@ public class SignedMailGenerator {
         }
         body.setSubject(asunto);
         body.setContent(mimeMultipart, mimeMultipart.getContentType());
-        body.saveChanges();
+        body.save();
         return body;
     }
-    
 
-     public MimeMultipart genMimeMultipart(MimeBodyPart body, 
+    public MimeMultipart genMimeMultipart(MimeBodyPart body, 
              SMIMEMessageWrapper dnieMimeMessage, String signatureMechanism) throws Exception {
-         smimeSignedGenerator.addSigners(dnieMimeMessage.getSmimeSigned().getSignerInfos());
-         smimeSignedGenerator.addAttributeCertificates(dnieMimeMessage.getSmimeSigned().getAttributeCertificates());
+         smimeSignedGenerator.addSigners(
+                 dnieMimeMessage.getSmimeSigned().getSignerInfos());
+         smimeSignedGenerator.addAttributeCertificates(
+                 dnieMimeMessage.getSmimeSigned().getAttributeCertificates());
          smimeSignedGenerator.addCertificates(dnieMimeMessage.getSmimeSigned().getCertificates());
          smimeSignedGenerator.addCRLs(dnieMimeMessage.getSmimeSigned().getCRLs());
          smimeSignedGenerator.getGeneratedDigests();
@@ -123,7 +122,8 @@ public class SignedMailGenerator {
         // MimeMultipart mimeMultipart = smimeSignedGenerator.generate(
          //        dnieMimeMessage, PROVIDER,
            //      type.toString() + SIGNED_PART_EXTENSION);
-         MimeMultipart mimeMultipart = smimeSignedGenerator.generate(body, PROVIDER);
+         MimeMultipart mimeMultipart = smimeSignedGenerator.generate(
+                 body, DEFAULT_SIGNED_FILE_NAME);
          //MimeMultipart mimeMultipart = smimeSignedGenerator.generate(body, PROVIDER, signatureMechanism);
          return mimeMultipart;
      }

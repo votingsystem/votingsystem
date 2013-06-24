@@ -2,7 +2,7 @@ package org.sistemavotacion.herramientavalidacion;
 
 import java.util.Set;
 import javax.swing.JDialog;
-import org.sistemavotacion.modelo.Firmante;
+import org.sistemavotacion.modelo.Usuario;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,9 +71,9 @@ public class FirmantesDialog extends JDialog {
         dispose();
     }//GEN-LAST:event_cerrarButtonActionPerformed
 
-    public void mostrarInformacion (Set<Firmante> firmantes) throws Exception {
+    public void mostrarInformacion (Set<Usuario> firmantes) throws Exception {
         logger.debug("Numero firmantes: " + firmantes.size());
-        for (Firmante firmante:firmantes) {
+        for (Usuario firmante:firmantes) {
             FirmantePanel firmantePanel = new FirmantePanel(firmante);
             tabbedPane.addTab("Firmante", firmantePanel);
         }
