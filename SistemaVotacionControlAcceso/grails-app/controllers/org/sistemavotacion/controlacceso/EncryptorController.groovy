@@ -24,6 +24,7 @@ class EncryptorController {
 	
 	def grailsApplication
 	def firmaService
+	def timeStampService
 
     def index() { 
 		if(!VotingSystemApplicationContex.Environment.DEVELOPMENT.equals(
@@ -122,6 +123,37 @@ class EncryptorController {
 		
 		params.respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK,
 			mensajeSMIME:mensajeSMIMEResp, tipo:Tipo.TEST)
+	}
+	
+	def validateTimeStamp() {
+		if(!VotingSystemApplicationContex.Environment.DEVELOPMENT.equals(
+			VotingSystemApplicationContex.instance.environment)) {
+			String msg = message(code: "serviceDevelopmentModeMsg")
+			log.error msg
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
+			return false
+		}
+		MensajeSMIME mensajeSMIMEReq = params.mensajeSMIMEReq
+		if(!mensajeSMIMEReq) {
+			String msg = message(code:'evento.peticionSinArchivo')
+			log.error msg
+			response.status = Respuesta.SC_ERROR_PETICION
+			render msg
+			return false
+		}
+		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
+		SMIMEMessageWrapper smimeMessage = mensajeSMIMEReq.getSmimeMessage()
+		Usuario usuario = mensajeSMIMEReq.getUsuario()
+		Respuesta timeStampVerification = timeStampService.validateToken(
+			usuario.getTimeStampToken(), request.locale)
+		timeStampVerification.tipo = Tipo.TEST
+		params.respuesta = timeStampVerification
+		if(Respuesta.SC_OK == timeStampVerification.codigoEstado) {
+			response.status = Respuesta.SC_OK
+			render timeStampVerification.mensaje
+		}
+		
 	}
 	
 	private getPemBytesFromKey(Key key) {

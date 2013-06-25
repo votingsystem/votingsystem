@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.Certificate;
 import java.security.cert.PKIXCertPathChecker;
@@ -68,6 +69,7 @@ import org.sistemavotacion.modelo.InformacionVoto;
 import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.StringUtils;
+import org.sistemavotacion.util.VotingSystemKeyGenerator;
 
 /**
 * @author jgzornoza
@@ -358,7 +360,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
         if(signerInformation == null) {
             logger.debug("signerInformation null");
             return null;
-        } 
+        }
         AttributeTable table = signerInformation.getSignedAttributes();
         Attribute hash = table.get(CMSAttributes.messageDigest);
         ASN1OctetString as = ((ASN1OctetString)hash.getAttrValues().getObjectAt(0));
@@ -366,7 +368,8 @@ public class SMIMEMessageWrapper extends MimeMessage {
         //logger.debug(" - digest: " + new String(digest));
         TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
         //reqgen.setReqPolicy(m_sPolicyOID);
-        return reqgen.generate(signerInformation.getDigestAlgOID(), as.getOctets());
+        return reqgen.generate(signerInformation.getDigestAlgOID(), as.getOctets(),
+                BigInteger.valueOf(VotingSystemKeyGenerator.INSTANCE.getNextRandomInt()));
     }
     
 

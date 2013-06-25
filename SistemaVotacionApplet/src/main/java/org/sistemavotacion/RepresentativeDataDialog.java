@@ -43,6 +43,7 @@ public class RepresentativeDataDialog extends JDialog  {
     private Future<Respuesta> tareaEnEjecucion;
     private AtomicBoolean mostrandoPantallaEnvio = new AtomicBoolean(false);
     private final AppletFirma appletFirma;
+    private final AtomicBoolean done = new AtomicBoolean(false);
         
     public RepresentativeDataDialog(Frame parent, boolean modal, 
             final AppletFirma appletFirma) {
@@ -62,8 +63,8 @@ public class RepresentativeDataDialog extends JDialog  {
 
             public void windowClosing(WindowEvent e) {
                 logger.debug(" - window closing event received");
-                dispose();
-                appletFirma.cancelarOperacion();
+                sendResponse(Operacion.SC_CANCELADO,
+                    Contexto.INSTANCE.getString("operacionCancelada"));
             }
         });
         Contexto.INSTANCE.submit(new Runnable() {
@@ -78,23 +79,29 @@ public class RepresentativeDataDialog extends JDialog  {
         pack();
     }
     
+    private void sendResponse(int status, String message) {
+        done.set(true);
+        operacion.setCodigoEstado(status);
+        operacion.setMensaje(message);
+        appletFirma.enviarMensajeAplicacion(operacion);
+        dispose();
+    }
+    
     public void readFutures () {
         logger.debug(" - readFutures");
-        AtomicBoolean done = new AtomicBoolean(false);
         while (!done.get()) {
             try {
                 Future<Respuesta> future = queue.take();
                 Respuesta respuesta = future.get();
                 logger.debug(" - readFutures - response status: " + respuesta.getCodigoEstado());
                 if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
-                    appletFirma.responderCliente(
-                            respuesta.getCodigoEstado(), respuesta.getMensaje());
+                    sendResponse(respuesta.getCodigoEstado(), 
+                            respuesta.getMensaje());
                 } else {
                     mostrarPantallaEnvio(false);
-                    appletFirma.responderCliente(
-                            respuesta.getCodigoEstado(), respuesta.getMensaje());
+                    sendResponse(respuesta.getCodigoEstado(), 
+                            respuesta.getMensaje());
                 }
-                dispose();
             } catch(Exception ex) {
                 logger.error(ex.getMessage(), ex);
             }
@@ -451,8 +458,8 @@ public class RepresentativeDataDialog extends JDialog  {
             mostrarPantallaEnvio(false);
             return;
         }
-        dispose();
-        appletFirma.cancelarOperacion();
+        sendResponse(Operacion.SC_CANCELADO,
+                Contexto.INSTANCE.getString("operacionCancelada"));
     }//GEN-LAST:event_cerrarButtonActionPerformed
 
     private void verDocumentoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_verDocumentoButtonActionPerformed

@@ -39,15 +39,13 @@ public class VotacionDialog extends JDialog {
 
     private static Logger logger = LoggerFactory.getLogger(VotacionDialog.class);
     
-    private static BlockingQueue<Future<Respuesta>> queue = 
-        new LinkedBlockingQueue<Future<Respuesta>>(3);
-    
     private volatile boolean mostrandoPantallaEnvio = false;
     private Frame parentFrame;
     private Future<Respuesta> tareaEnEjecucion;
     private Evento votoEvento;
     private AppletFirma appletFirma;
     private SMIMEMessageWrapper smimeMessage;
+    private final AtomicBoolean done = new AtomicBoolean(false);
     
     public VotacionDialog(java.awt.Frame parent, 
             boolean modal, final AppletFirma appletFirma) {
@@ -65,7 +63,8 @@ public class VotacionDialog extends JDialog {
 
             public void windowClosing(WindowEvent e) {
                 logger.debug("VotacionDialog window closing event received");
-                appletFirma.cancelarOperacion();
+                sendResponse(Operacion.SC_CANCELADO,
+                        Contexto.INSTANCE.getString("operacionCancelada"));
             }
         });
         //Bug similar to -> http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6993691
@@ -77,37 +76,17 @@ public class VotacionDialog extends JDialog {
         setTitle(appletFirma.getOperacionEnCurso().
                 getTipo().getCaption());
         progressBarPanel.setVisible(false);
-        Contexto.INSTANCE.submit(new Runnable() {
-            @Override public void run() {
-                try {
-                    readFutures();
-                } catch (Exception ex) {
-                    logger.error(ex.getMessage(), ex);
-                }
-            }
-        });
         pack();
         logger.info("Inicializado dialogo voto");
     }
-    
-    public void readFutures () {
-        logger.debug(" - readFutures");
-        AtomicBoolean done = new AtomicBoolean(false);
-        while (!done.get()) {
-            try {
-                Future<Respuesta> future = queue.take();
-                Respuesta respuesta = future.get();
-                logger.debug(" - readFutures - response status: " + respuesta.getCodigoEstado());
-                if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
 
-                } else {
-
-                }
-
-            } catch(Exception ex) {
-                logger.error(ex.getMessage(), ex);
-            }
-        }
+    private void sendResponse(int status, String message) {
+        done.set(true);
+        Operacion operacion = appletFirma.getOperacionEnCurso();
+        operacion.setCodigoEstado(status);
+        operacion.setMensaje(message);
+        appletFirma.enviarMensajeAplicacion(operacion);
+        dispose();
     }
         
     public void mostrarPantallaEnvio (boolean visibility) {
@@ -258,8 +237,8 @@ public class VotacionDialog extends JDialog {
             mostrarPantallaEnvio(false);
             return;
         }
-        dispose();
-        appletFirma.cancelarOperacion();
+        sendResponse(Operacion.SC_CANCELADO,
+                Contexto.INSTANCE.getString("operacionCancelada"));
     }//GEN-LAST:event_cerrarButtonActionPerformed
 
     private void enviarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enviarButtonActionPerformed
@@ -269,12 +248,11 @@ public class VotacionDialog extends JDialog {
         password = dialogoPassword.getPassword();
         if (password == null) return;
         final String finalPassword = password;
-        Runnable runnable = new Runnable() {
+        Contexto.INSTANCE.submit(new Runnable() {
             public void run() {  
                 lanzarVoto(finalPassword);    
             }
-        };
-        new Thread(runnable).start();
+        });
         mostrarPantallaEnvio(true);
         progressLabel.setText("<html>" + Contexto.INSTANCE.
                 getString("progressLabel") + "</html>");
@@ -341,9 +319,7 @@ public class VotacionDialog extends JDialog {
                 notificarCentroControl(accessRequestor.getPKCS10WrapperClient(), 
                         votoEvento);
             } else {
-                appletFirma.responderCliente(respuesta.getCodigoEstado(), 
-                        respuesta.getMensaje());
-                dispose();
+                sendResponse(respuesta.getCodigoEstado(), respuesta.getMensaje());
             }
         } catch (Exception ex) {
             mostrarPantallaEnvio(false);
@@ -356,6 +332,7 @@ public class VotacionDialog extends JDialog {
         }
     }
     
+
         
     private void notificarCentroControl (PKCS10WrapperClient pkcs10WrapperClient, 
             Evento votoEvento) {
@@ -378,6 +355,7 @@ public class VotacionDialog extends JDialog {
             Future<Respuesta> future = Contexto.INSTANCE.submit(signedSender);
             tareaEnEjecucion = future;
             Respuesta respuesta = future.get();
+            
             if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {  
                 try {
                     SMIMEMessageWrapper validatedVote = respuesta.getSmimeMessage();
@@ -387,19 +365,15 @@ public class VotacionDialog extends JDialog {
                     reciboVoto.setVoto(votoEvento);
                     Contexto.INSTANCE.addReceipt(
                         votoEvento.getHashCertificadoVotoBase64(), reciboVoto);
-                    appletFirma.responderCliente(
-                        respuesta.getCodigoEstado(), respuesta.getMensaje());
+                    sendResponse(respuesta.getCodigoEstado(), respuesta.getMensaje());
                 } catch (Exception ex) {
                     logger.error(ex.getMessage(), ex);
-                   appletFirma.responderCliente(Operacion.SC_ERROR_ENVIO_VOTO, 
-                        ex.getMessage());
+                    sendResponse(Operacion.SC_ERROR_ENVIO_VOTO, ex.getMessage());
                 }
             } else {
                 logger.error(" - Error enviando voto: " + respuesta.getMensaje());
-                appletFirma.responderCliente(Operacion.SC_ERROR_ENVIO_VOTO, 
-                        respuesta.getMensaje());
+                sendResponse(Operacion.SC_ERROR_ENVIO_VOTO, respuesta.getMensaje());
             }
-            dispose();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);

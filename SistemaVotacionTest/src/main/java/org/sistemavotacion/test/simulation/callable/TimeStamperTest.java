@@ -9,6 +9,7 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.callable.MessageTimeStamper;
+import org.sistemavotacion.callable.SMIMESignedSender;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
@@ -28,10 +29,12 @@ public class TimeStamperTest implements Callable<Respuesta> {
     
     private SMIMEMessageWrapper documentSMIME;
     private String requestNIF;
+    private String urlTimeStampService;
 
-    public TimeStamperTest (String requestNIF, String urlTimeStampServer) 
+    public TimeStamperTest (String requestNIF, String urlTimeStampService) 
             throws Exception {
         this.requestNIF = requestNIF;
+        this.urlTimeStampService = urlTimeStampService;
     }
         
     @Override
@@ -49,10 +52,15 @@ public class TimeStamperTest implements Callable<Respuesta> {
         documentSMIME = signedMailGenerator.genMimeMessage(
                 requestNIF, toUser, getRequestDataJSON(), subject , null);
 
-        MessageTimeStamper timeStamper = new MessageTimeStamper(documentSMIME);
+        /*MessageTimeStamper timeStamper = new MessageTimeStamper(documentSMIME);
         Respuesta respuesta = timeStamper.call();
         if(Respuesta.SC_OK != respuesta.getCodigoEstado()) return respuesta;
-        documentSMIME = timeStamper.getSmimeMessage();
+        documentSMIME = timeStamper.getSmimeMessage();*/
+        
+        SMIMESignedSender signedSender = new SMIMESignedSender(null, documentSMIME, 
+                urlTimeStampService, null, null);
+        Respuesta respuesta = signedSender.call();
+        
         return respuesta;
     }
         

@@ -21,6 +21,7 @@ import org.apache.http.entity.mime.MultipartEntity
 import org.apache.http.impl.client.DefaultHttpClient
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.conn.HttpHostConnectException;
+import java.util.concurrent.TimeUnit
 
 class HttpService {
 	

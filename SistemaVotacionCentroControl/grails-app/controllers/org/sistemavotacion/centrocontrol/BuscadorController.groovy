@@ -17,6 +17,7 @@ import java.util.Date;
 import org.hibernate.search.Search;
 import org.sistemavotacion.util.*;
 import org.apache.lucene.search.Sort;
+import org.sistemavotacion.utils.*
 
 /**
  * @infoController Búsquedas
@@ -30,6 +31,7 @@ class BuscadorController {
    SearchHelper searchHelper;
    def subscripcionService
    def sessionFactory
+   def usuarioService
    
    /**
     * ==================================================
@@ -39,7 +41,15 @@ class BuscadorController {
 	* @httpMethod [GET]
 	*/
    def reindexTest () {
-	   log.debug "==== Usuario en la lista de administradores, reindexando"
+	   if(!VotingSystemApplicationContex.Environment.DEVELOPMENT.equals(
+		   VotingSystemApplicationContex.instance.environment)) {
+		   def msg = message(code: "serviceDevelopmentModeMsg")
+		   log.error msg
+		   response.status = Respuesta.SC_ERROR_PETICION
+		   render msg
+		   return false
+	   }
+	   log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 	   FullTextSession fullTextSession = Search.getFullTextSession(sessionFactory.currentSession);
 	   fullTextSession.createIndexer().startAndWait()
 	   response.status = Respuesta.SC_OK
@@ -65,6 +75,7 @@ class BuscadorController {
 				return false
 			}
 			def requestJSON = JSON.parse(mensajeSMIME.getSmimeMessage().getSignedContent())
+			Usuario usuario = mensajeSMIME.getUsuario()
 			Tipo operacion = Tipo.valueOf(requestJSON.operacion)
 			String msg
 			if(Tipo.SOLICITUD_INDEXACION != operacion) {
@@ -75,10 +86,7 @@ class BuscadorController {
 				render msg
 				return false
 			}
-			List<String> administradores = Arrays.asList(
-				grailsApplication.config.SistemaVotacion.adminsDNI.split(","))
-			Usuario usuario = mensajeSMIME.getUsuario()
-			if (administradores.contains(usuario.nif)) {
+			if(usuarioService.isUserAdmin(usuario.nif)) {
 				log.debug "Usuario en la lista de administradores, reindexando"
 				FullTextSession fullTextSession = Search.getFullTextSession(sessionFactory.currentSession);
 				fullTextSession.createIndexer().startAndWait()

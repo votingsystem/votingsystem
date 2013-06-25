@@ -1,10 +1,10 @@
-package org.sistemavotacion.controlacceso
+package org.sistemavotacion.centrocontrol
 
 import java.util.Date;
 import java.util.List;
 
 import org.codehaus.groovy.grails.web.json.JSONArray
-import org.sistemavotacion.controlacceso.modelo.*;
+import org.sistemavotacion.centrocontrol.modelo.*;
 import java.security.cert.X509Certificate;
 import org.sistemavotacion.seguridad.*
 
@@ -33,19 +33,6 @@ class UsuarioService {
 		return datosRespuesta
 	}
 	
-	public Map getControlCenterMap(CentroControl controlCenter) {
-		Certificado certificado = Certificado.findWhere(actorConIP:controlCenter, estado:Certificado.Estado.OK)
-		String cadenaCertificacionPEM
-		if(certificado) {
-			ByteArrayInputStream bais = new ByteArrayInputStream(certificado.contenido)
-			X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
-			byte[] pemCert = CertUtil.fromX509CertToPEM (certX509)
-			cadenaCertificacionPEM = new String(pemCert)
-		}
-		return [cadenaCertificacionPEM:cadenaCertificacionPEM, nombre:controlCenter.nombre,
-			serverURL:controlCenter.serverURL, id:controlCenter.id, 
-			tipoServidor:Tipo.CENTRO_CONTROL.toString()]
-	}
 	
 	boolean isUserAdmin(String nif) {
 		if(!administradoresSistema) {

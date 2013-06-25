@@ -180,11 +180,20 @@ class EventoFirmaController {
 				def eventoJSON = JSON.parse(eventoStr)
 				log.debug "eventoJSON.contenido: ${eventoJSON.contenido}"
 				eventoJSON.contenido = htmlService.prepareHTMLToPDF(eventoJSON.contenido.getBytes())
+				Date fechaFin = new Date().parse("yyyy-MM-dd HH:mm:ss", eventoJSON.fechaFin)
+				if(fechaFin.before(DateUtils.getTodayDate())) {
+					String msg = message(code:'publishDocumentDateErrorMsg', 
+						args:[DateUtils.getStringFromDate(fechaFin)]) 
+					log.error("DATE ERROR - msg: ${msg}")
+					response.status = Respuesta.SC_ERROR
+					render msg
+					return false
+				}
 				EventoFirma evento = new EventoFirma(asunto:eventoJSON.asunto,
 					fechaInicio:DateUtils.todayDate,
 					estado: Evento.Estado.PENDIENTE_DE_FIRMA,
 					contenido:eventoJSON.contenido,
-					fechaFin:new Date().parse("yyyy-MM-dd HH:mm:ss", eventoJSON.fechaFin))
+					fechaFin:fechaFin)
 				evento.save()
 				ByteArrayOutputStream bytes = pdfRenderingService.render(
 						template: "/eventoFirma/pdf", model:[evento:evento])

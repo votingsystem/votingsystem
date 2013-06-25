@@ -72,8 +72,8 @@ public class PreconditionsCheckerDialog extends JDialog {
 
             public void windowClosing(WindowEvent e) {
                 logger.debug(" - window closing event received");
-                dispose();
-                appletFirma.cancelarOperacion();
+                sendResponse(Operacion.SC_CANCELADO,
+                        Contexto.INSTANCE.getString("operacionCancelada"));
             }
         });
         
@@ -97,6 +97,17 @@ public class PreconditionsCheckerDialog extends JDialog {
         pack();
     }
     
+    private void sendResponse(int status, String message) {
+        acceptButton.setVisible(true);
+        progressLabel.setText(Contexto.INSTANCE.getString("errorLbl"));
+        progressBar.setVisible(false);
+        waitLabel.setText(message);
+        operacion.setCodigoEstado(status);
+        operacion.setMensaje(message);
+        appletFirma.enviarMensajeAplicacion(operacion);
+        pack();
+    }
+    
     public void checkConditions() throws Exception {
         logger.debug("checkConditions");
         Respuesta respuesta = null;
@@ -106,7 +117,7 @@ public class PreconditionsCheckerDialog extends JDialog {
                         getControlAcceso().getServerURL());
                 if(Respuesta.SC_OK != respuesta.getCodigoEstado()) {
                     logger.error("ERROR checking ACCESS CONTROL");
-                    cancelOperation(respuesta.getMensaje());
+                    sendResponse(Operacion.SC_ERROR, respuesta.getMensaje());
                     return;
                 } else {
                     ActorConIP accessControl = ActorConIP.parse(respuesta.getMensaje());
@@ -116,7 +127,7 @@ public class PreconditionsCheckerDialog extends JDialog {
                         getCentroControl().getServerURL());
                 if(Respuesta.SC_OK != respuesta.getCodigoEstado()) {
                     logger.error("ERROR checking CONTROL CENTER");
-                    cancelOperation(respuesta.getMensaje());
+                    sendResponse(Operacion.SC_ERROR, respuesta.getMensaje());
                     return;
                 } else {
                     ActorConIP controlCenter = ActorConIP.parse(respuesta.getMensaje());
@@ -142,12 +153,13 @@ public class PreconditionsCheckerDialog extends JDialog {
                 if(Respuesta.SC_OK != respuesta.getCodigoEstado()) {
                     logger.error("ERROR checking ACCESS CONTROL - msg:" + 
                             respuesta.getMensaje());
-                    cancelOperation(respuesta.getMensaje());
+                    sendResponse(Operacion.SC_ERROR, respuesta.getMensaje());
                     return;
                 } else {
                     ActorConIP accessControl = ActorConIP.parse(respuesta.getMensaje());
                     Contexto.INSTANCE.setAccessControl(accessControl);
                 }
+                break;
             default: 
                 logger.error(" ################# UNKNOWN OPERATION -> " +  
                         operacion.getTipo());
@@ -160,18 +172,7 @@ public class PreconditionsCheckerDialog extends JDialog {
         });
         pack();
     }
-    
-    private void cancelOperation(String message) {
-        acceptButton.setVisible(true);
-        progressLabel.setText(Contexto.INSTANCE.getString("errorLbl"));
-        progressBar.setVisible(false);
-        waitLabel.setText(message);
-        appletFirma.responderCliente(
-                Operacion.SC_ERROR, 
-                Contexto.INSTANCE.getString("votingPreconditionsErrorMsg", 
-                Contexto.INSTANCE.getString("errorLbl")));
-        pack();
-    }
+
     
     private void processOperation() {
         logger.debug("processOperation: " + operacion.getTipo());
@@ -348,13 +349,8 @@ public class PreconditionsCheckerDialog extends JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void acceptButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_acceptButtonActionPerformed
-        dispose();
-        if(AppletFirma.ModoEjecucion.APLICACION == 
-                AppletFirma.modoEjecucion){
-            logger.debug(" ------ System.exit(0) ------ ");
-            System.exit(0);
-        }
-        appletFirma.cancelarOperacion();
+        sendResponse(Operacion.SC_CANCELADO,
+                Contexto.INSTANCE.getString("operacionCancelada"));
     }//GEN-LAST:event_acceptButtonActionPerformed
 
 

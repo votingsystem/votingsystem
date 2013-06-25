@@ -22,7 +22,6 @@ public class AppletFirma extends JApplet {
     
     private static Logger logger = LoggerFactory.getLogger(AppletFirma.class);
 
-    //public static final String CERT_CHAIN_URL_SUFIX = "certificado/cadenaCertificacion";
     public static final String SERVER_INFO_URL_SUFIX = "infoServidor";
     
     public static enum ModoEjecucion {APPLET, APLICACION}
@@ -61,6 +60,7 @@ public class AppletFirma extends JApplet {
                 }
             });
         } catch (Exception ex) {
+            ex.printStackTrace();
             //logger.error(ex.getMessage(), ex);
         }
     }
@@ -130,7 +130,7 @@ public class AppletFirma extends JApplet {
     public void finalizar() {
         logger.debug("finalizar");
         if(cancelado.get()) {
-            logger.debug("Gestor previamente finalizado");
+            logger.debug("finalizar - already cancelled");
             return;
         }
         recolectorOperaciones.cancel();
@@ -140,12 +140,14 @@ public class AppletFirma extends JApplet {
         cancelado.set(true);
     }
     
-    private void enviarMensajeAplicacion(Operacion operacion) {
+    public void enviarMensajeAplicacion(Operacion operacion) {
         if (operacion == null) {
-            logger.debug(" - enviarMensajeAplicacion - operación nula");
+            logger.debug(" - enviarMensajeAplicacion - Operacion null");
             return;
         }
-        logger.debug(" - enviarMensajeAplicacion - operación: " + operacion.obtenerJSONStr());
+        logger.debug(" - enviarMensajeAplicacion - status: " + 
+                operacion.getCodigoEstado() + "\n - operación: " + 
+                operacion.obtenerJSONStr());
         try {
             if(AppletFirma.modoEjecucion == AppletFirma.ModoEjecucion.APPLET) {
                 Object[] args = {operacion.obtenerJSONStr()};
@@ -153,56 +155,36 @@ public class AppletFirma extends JApplet {
                         call("setClienteFirmaMessage", args);
             } else logger.debug("---> APP EXECUTION MODE: " +  
                     AppletFirma.modoEjecucion.toString());
-        } catch (Exception e) {
-            //logger.error(e.getMessage(), e);
-            e.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
-    }
-    
-    public void responderCliente(int codigoEstado, String mensaje) {
-        logger.debug("responderCliente - codigoEstado: " + codigoEstado);
-        if(operacionEnCurso == null) {
-            logger.debug("responderCliente ---> No hay ninguna operación en curso");
-            return;
-        }
-        operacionEnCurso.setCodigoEstado(codigoEstado);
-        operacionEnCurso.setMensaje(mensaje);
-        enviarMensajeAplicacion(operacionEnCurso);
         operacionEnCurso = null;
-    }
-    
-    public void cancelarOperacion () {
-        if(operacionEnCurso == null) return;
-        else if(operacionEnCurso.getCodigoEstado() == Operacion.SC_PROCESANDO) {
-            operacionEnCurso.setMensaje(Contexto.INSTANCE.getString("operacionCancelada"));
-            operacionEnCurso.setCodigoEstado(Operacion.SC_CANCELADO);
-            enviarMensajeAplicacion(operacionEnCurso);
-            operacionEnCurso = null;  
-        }  
         if(AppletFirma.ModoEjecucion.APLICACION == 
-                AppletFirma.modoEjecucion){
+                AppletFirma.modoEjecucion && operacion.getCodigoEstado() == 
+                Operacion.SC_CANCELADO){
             logger.debug(" ------ System.exit(0) ------ ");
             System.exit(0);
         }
     }
-        
+ 
     public void ejecutarOperacion(String operacionJSONStr) {
         logger.debug("ejecutarOperacion: " + operacionJSONStr);
         if(operacionJSONStr == null || "".equals(operacionJSONStr)) return;
-        this.operacionEnCurso = Operacion.parse(operacionJSONStr);
-        String errorValidacion = operacionEnCurso.getErrorValidacion();
-        if(errorValidacion != null) {
-            logger.debug("ejecutarOperacion - errorValidacion: " + errorValidacion);
-            responderCliente(Operacion.SC_ERROR_PETICION, errorValidacion);
+        operacionEnCurso = Operacion.parse(operacionJSONStr);
+        if(operacionEnCurso.getErrorValidacion() != null) {
+            logger.debug("ejecutarOperacion - errorValidacion: " + 
+                    operacionEnCurso.getErrorValidacion());
+            operacionEnCurso.setCodigoEstado(Operacion.SC_ERROR_PETICION);
+            enviarMensajeAplicacion(operacionEnCurso);
             return;
-        }
-        PreconditionsCheckerDialog preconditionsChecker = 
+        } else {
+            PreconditionsCheckerDialog preconditionsChecker = 
                 new PreconditionsCheckerDialog(frame, true, operacionEnCurso, this);
-        preconditionsChecker.setVisible(true);
+            preconditionsChecker.setVisible(true);
+        }
     }
     
     public static void main (String[] args) { 
-        
         modoEjecucion = ModoEjecucion.APLICACION;
         Operacion ope = new Operacion();
         String[] _args = {""};
@@ -219,21 +201,20 @@ public class AppletFirma extends JApplet {
                         File jsonFile = File.createTempFile("operacion", ".json");
                         jsonFile.deleteOnExit();
                         FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
-                            .getResourceAsStream("testFiles/publishManifest.json"), jsonFile);        
+                            .getResourceAsStream("testFiles/newRepresentative.json"), jsonFile);        
                         appletFirma.ejecutarOperacion(FileUtils.getStringFromFile(jsonFile));
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
                     }
                 }
             });
-            logger.debug("-- finalizando aplicación --- ");
             if(AppletFirma.ModoEjecucion.APLICACION == 
                 AppletFirma.modoEjecucion){
                 logger.debug(" ------ System.exit(0) ------ ");
                 System.exit(0);
-            }
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            } else logger.debug("-- finalizando aplicación --- ");
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
     

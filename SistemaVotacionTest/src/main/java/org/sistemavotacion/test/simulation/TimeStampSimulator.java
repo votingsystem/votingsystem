@@ -18,6 +18,7 @@ import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.NifUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.callable.InfoGetter;
+import org.sistemavotacion.test.simulation.callable.ServerInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,7 +92,7 @@ public class TimeStampSimulator extends Simulator<SimulationData>  {
                 String nifFrom = NifUtils.getNif(simulationData.
                         getAndIncrementNumRequests().intValue());
                 requestCompletionService.submit(new TimeStamperTest(nifFrom, 
-                        ContextoPruebas.INSTANCE.getUrlTimeStampServer()));
+                        ContextoPruebas.INSTANCE.getUrlTimeStampTestService()));
              } else Thread.sleep(300);
         }
     }
@@ -143,24 +144,15 @@ public class TimeStampSimulator extends Simulator<SimulationData>  {
         String serverInfoURL = ContextoPruebas.getURLInfoServidor(
                 simulationData.getAccessControlURL());
         logger.debug("init - serverInfoURL: " + serverInfoURL);
-        InfoGetter worker = new InfoGetter(null,serverInfoURL, null);
-        Respuesta respuesta = worker.call();
+        simulationData.setBegin(System.currentTimeMillis());
+        ServerInitializer accessControlInitializer = 
+                new ServerInitializer(simulationData.getAccessControlURL(),
+                ActorConIP.Tipo.CONTROL_ACCESO);
+        Respuesta respuesta = accessControlInitializer.call();
         if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
-            try {
-                ActorConIP accessControl = ActorConIP.parse(respuesta.getMensaje());
-                String msg = SimulationUtils.checkActor(
-                        accessControl, ActorConIP.Tipo.CONTROL_ACCESO);
-                if(msg == null) {
-                    ContextoPruebas.INSTANCE.setControlAcceso(accessControl);
-                    initExecutors();
-                    countDownLatch.await();
-                } else logger.error(msg);
-            } catch(Exception ex) {
-                logger.error(ex.getMessage(), ex);
-            }
-        } else {
-            logger.error("ERROR GETTING ACCESS REQUEST DATA: " + respuesta.getMensaje());
-        }        
+            initExecutors();
+            countDownLatch.await();
+        } else logger.error(respuesta.getMensaje());
         simulationData.setFinish(System.currentTimeMillis());
         if(requestExecutor != null) requestExecutor.shutdownNow();
         logger.debug("--------------- SIMULATION RESULT------------------");

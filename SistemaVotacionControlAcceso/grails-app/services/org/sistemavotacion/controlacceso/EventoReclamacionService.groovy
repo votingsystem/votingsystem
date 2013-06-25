@@ -40,11 +40,19 @@ class EventoReclamacionService {
 			String documentStr = mensajeSMIMEReq.getSmimeMessage().getSignedContent()
 			log.debug("saveEvent - firmante: ${firmante.nif} - documentStr: ${documentStr}")
 			def mensajeJSON = JSON.parse(documentStr)
+			Date fechaFin = new Date().parse("yyyy-MM-dd HH:mm:ss", mensajeJSON.fechaFin)
+			if(fechaFin.before(DateUtils.getTodayDate())) {
+				String msg = messageSource.getMessage(
+					'publishDocumentDateErrorMsg', 
+					[DateUtils.getStringFromDate(fechaFin)].toArray(), locale)
+				log.error("DATE ERROR - msg: ${msg}")
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR,
+					mensaje:msg, tipo:Tipo.EVENTO_RECLAMACION_ERROR, evento:evento)
+			}
 			evento = new EventoReclamacion(usuario:firmante,
 					asunto:mensajeJSON.asunto, contenido:mensajeJSON.contenido,
 					copiaSeguridadDisponible:mensajeJSON.copiaSeguridadDisponible,
-					fechaFin: new Date().parse(
-						"yyyy-MM-dd HH:mm:ss", mensajeJSON.fechaFin))
+					fechaFin:fechaFin)
 			if(mensajeJSON.cardinalidad) evento.cardinalidadRepresentaciones =
 				Evento.Cardinalidad.valueOf(mensajeJSON.cardinalidad)
 			else evento.cardinalidadRepresentaciones = Evento.Cardinalidad.UNA
@@ -102,8 +110,7 @@ class EventoReclamacionService {
         if (!event) {
 			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:
 				messageSource.getMessage('event.peticionSinEvento', null, locale))
-        }
-		
+        }		
 		Map<String, File> mapFiles = filesService.getBackupFiles(
 			event, Tipo.EVENTO_RECLAMACION, locale)
 		File metaInfFile = mapFiles.metaInfFile

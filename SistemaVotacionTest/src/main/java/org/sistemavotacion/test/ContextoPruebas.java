@@ -475,6 +475,13 @@ public enum ContextoPruebas {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         return serverURL + "timeStamp";
     }
+    
+    public String getUrlTimeStampTestService() {
+        if (accessControl == null) return null;
+        String serverURL = accessControl.getServerURL();
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "encryptor/validateTimeStamp";
+    }
 
     public static String getUrlSubmitClaims(String serverURL) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";

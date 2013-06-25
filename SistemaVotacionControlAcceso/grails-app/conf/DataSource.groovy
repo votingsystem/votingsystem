@@ -48,7 +48,7 @@ environments {
 				validationQuery = "/* ping *//*"
 			}
 		}
-    }
+    }*/
 	
 	production {
 		dataSource {
@@ -56,11 +56,11 @@ environments {
 			dbCreate = "update"
 			jndiName = "java:comp/env/jdbc/controlacceso"
 		}
-	}*/
-	production {
+	}
+	/*production {
 		dataSource {
 			dbCreate = "update" // one of 'create', 'create-drop','update'
 			url="jdbc:postgresql://localhost:5432/SistemaVotacionControlAcceso"
 		}
-	}
+	}*/
 }
