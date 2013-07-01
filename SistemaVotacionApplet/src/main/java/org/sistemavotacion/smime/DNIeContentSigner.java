@@ -6,7 +6,6 @@ import org.bouncycastle.operator.ContentSigner;
 import iaik.pkcs.pkcs11.Session;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.math.BigInteger;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -87,30 +86,7 @@ public class DNIeContentSigner implements ContentSigner {
         public void write(int b) throws IOException {
             bOut.write(b);
         }
-        
-        
-        byte[] getSignature2() {
-            byte[] sigBytes = null;
-            
-            byte[] encoding = bOut.toByteArray();
-            if (encoding[0] != (DERTags.CONSTRUCTED | DERTags.SEQUENCE)) {
-                logger.debug(" -------not a digest info object");
-            }
-            
-            
-            ASN1InputStream aIn = new ASN1InputStream(encoding);
-            DigestInfo digestInfo = null;
-            try {
-               digestInfo  = new DigestInfo((ASN1Sequence)aIn.readObject());
-               sigBytes = pkcs11Session.sign(digestInfo.getEncoded(ASN1Encodable.DER));
-                String sigBytesStr = new String(Base64.encode(sigBytes));
-                logger.debug(" ------- sigBytesStr: " + sigBytesStr);
-            } catch (Exception ex) {
-                logger.error(ex.getMessage(), ex);
-            }
-            return sigBytes;
-        }
-        
+
         byte[] getSignature() {
             byte[] sigBytes = null;
             try {
@@ -122,33 +98,11 @@ public class DNIeContentSigner implements ContentSigner {
                 //logger.debug(" ------- sigBytesStr: " + sigBytesStr);
                 DNIeSessionHelper.closeSession();
             } catch (Exception ex) {       
-                logger.error(ex.getMessage(), ex);
+                logger.error(ex.getMessage(), ex);            
             }
             return sigBytes;
         }
 
-        byte[] getSignature1() {
-            byte[] sigBytes = null;
-            try {
-                //DERObjectIdentifier hashAlgoId = NISTObjectIdentifiers.id_sha512;
-                DERObjectIdentifier oid = OIWObjectIdentifiers.idSHA1;
-                byte[] hashValue = bOut.toByteArray();
-                
-                AlgorithmIdentifier algId = new AlgorithmIdentifier(oid, DERNull.INSTANCE);
-                DigestInfo dInfo = new DigestInfo(algId, hashValue);
-
-                String hashValueStr = new String(Base64.encode(hashValue));
-                logger.debug(" ------- DigestInfo hashValueStr: " + hashValueStr);
-                //sigBytes = pkcs11Session.sign(bOut.toByteArray());
-                sigBytes = pkcs11Session.sign(dInfo.getEncoded(ASN1Encodable.DER));
-                String sigBytesStr = new String(Base64.encode(sigBytes));
-                logger.debug(" ------- sigBytesStr: " + sigBytesStr);
-                DNIeSessionHelper.closeSession();
-            } catch (Exception ex) {       
-                logger.error(ex.getMessage(), ex);
-            }
-            return sigBytes;
-        }
     }
     
 }

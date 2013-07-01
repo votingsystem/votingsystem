@@ -170,9 +170,9 @@ class VotoService {
 			}
 			Date timeStampDate = signer.getTimeStampToken().getTimeStampInfo().genTime
 			if(!eventoVotacion.isActiveDate(timeStampDate)) {
-				String dateRangeStr = "[${eventoVotacion.fechaInicio} - ${eventoVotacion.fechaFin}]"
 				msg = messageSource.getMessage('timestampDateErrorMsg', 
-					[timeStampDate, dateRangeStr].toArray(), locale)
+					[timeStampDate, eventoVotacion.fechaInicio, 
+						eventoVotacion.getDateFinish()].toArray(), locale)
 				log.error("processCancel - DATE ERROR - ${msg}")
 				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
 					mensaje:msg, tipo:Tipo.ANULADOR_VOTO_ERROR)

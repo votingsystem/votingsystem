@@ -145,11 +145,16 @@ class EventoService {
 			Respuesta respuesta = checkCancelEventJSONData(mensajeJSON, locale)
 			if(Respuesta.SC_OK !=  respuesta.codigoEstado) return respuesta
 			Evento.withTransaction {
-				evento = Evento.findWhere(id:Long.valueOf(mensajeJSON.eventId),
-					estado:Evento.Estado.ACTIVO)
+				evento = Evento.findWhere(id:Long.valueOf(mensajeJSON.eventId))
 			}
 			if(!evento) {
 				msg = messageSource.getMessage('eventNotFound',
+					[mensajeJSON?.eventId].toArray(), locale)
+				log.error("cancelEvent - msg: ${msg}")
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+					tipo:Tipo.CANCELAR_EVENTO_ERROR, mensaje:msg)
+			} else if(evento.estado != Evento.Estado.ACTIVO) {
+				msg = messageSource.getMessage('eventNotActiveMsg',
 					[mensajeJSON?.eventId].toArray(), locale)
 				log.error("cancelEvent - msg: ${msg}")
 				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
@@ -185,7 +190,9 @@ class EventoService {
 					String contentType = "${grailsApplication.config.pkcs7SignedContentType}"
 					Respuesta respuestaCentroControl =	httpService.sendMessage(
 							smimeMessageResp.getBytes(), contentType, cancelCentroCentrolEventURL);
-					if(Respuesta.SC_OK == respuestaCentroControl.codigoEstado) {
+					log.debug("respuestaCentroControl - status: ${respuestaCentroControl.codigoEstado}")
+					if(Respuesta.SC_OK == respuestaCentroControl.codigoEstado ||
+						Respuesta.SC_ANULACION_REPETIDA == respuestaCentroControl.codigoEstado) {
 						msg = msg + " - " + messageSource.getMessage(
 							'centroControl.notificado', [centroControlUrl].toArray(), locale)
 					} else {
@@ -200,15 +207,28 @@ class EventoService {
 					smimeMessageResp = firmaService.getMultiSignedMimeMessage(
 						fromUser, toUser, smimeMessageReq, subject)
 				}
+				log.debug("cancel event - msg:${msg}")
+				
 				MensajeSMIME mensajeSMIMEResp = new MensajeSMIME(tipo:Tipo.RECIBO,
 					smimePadre:mensajeSMIMEReq, evento:evento, valido:true,
 					contenido:smimeMessageResp.getBytes())
 				MensajeSMIME.withTransaction {
-					mensajeSMIMEResp.save()
+					if (!mensajeSMIMEResp.save()) {
+						mensajeSMIMEResp.errors.each {
+							log.error("cancel event - save mensajeSMIMEResp error - ${it}")}
+					}
+					
 				}
 				evento.estado = Evento.Estado.valueOf(mensajeJSON.estado)
 				evento.dateCanceled = new Date(System.currentTimeMillis());
-				evento.save()
+				log.debug("evento validated")
+				EventoVotacion.withTransaction {
+					if (!evento.save()) {
+						evento.errors.each {
+							log.error("cancel event error saving evento - ${it}")}
+					}
+				}
+				log.debug("updated evento.id: ${evento.id}")
 				return new Respuesta(codigoEstado:Respuesta.SC_OK,mensaje:msg,
 					tipo:Tipo.CANCELAR_EVENTO, mensajeSMIME:mensajeSMIMEResp,
 					evento:evento)
@@ -349,7 +369,7 @@ class EventoService {
 						}
 						
 						def numUserVotes = numTotalVotes -numRepresentativeVotes
-						log.debug("event: ${event.id} - numUserVotes: ${numUserVotes} - numRepresentativeVotes: ${numRepresentativeVotes}")
+						log.debug("opcion: ${opcion.id} - numUserVotes: ${numUserVotes} - numRepresentativeVotes: ${numRepresentativeVotes}")
 						
 						
 						optionList.add([id:opcion.id,
@@ -421,10 +441,10 @@ class EventoService {
 				if(!repAccreditationsMap) {
 					repAccreditationsMap = [:];
 				}
-				Long numUsersWithRepresentativeWithAccessRequest =
-					repAccreditationsMap.get("numUsersWithRepresentativeWithAccessRequest")
-				if(!numUsersWithRepresentativeWithAccessRequest)
-					numUsersWithRepresentativeWithAccessRequest = new Long(0)
+				Long numRepresentedWithAccessRequest =
+					repAccreditationsMap.get("numRepresentedWithAccessRequest")
+				if(!numRepresentedWithAccessRequest)
+					numRepresentedWithAccessRequest = new Long(0)
 				Long numRepresentativesWithAccessRequest =
 					repAccreditationsMap.get("numRepresentativesWithAccessRequest")
 				if(!numRepresentativesWithAccessRequest) numRepresentativesWithAccessRequest = new Long(0)
@@ -465,8 +485,8 @@ class EventoService {
 				backupMap.put("numAccessRequest", numAccessRequest)
 				eventMap.put("BACKUP", backupMap)
 				
-				repAccreditationsMap.put("numUsersWithRepresentativeWithAccessRequest",
-					numUsersWithRepresentativeWithAccessRequest)
+				repAccreditationsMap.put("numRepresentedWithAccessRequest",
+					numRepresentedWithAccessRequest)
 				repAccreditationsMap.put("numVotesRepresentedByRepresentatives",
 					getNumVotesFromRepresentatives(representativesMap))
 				repAccreditationsMap.put("numRepresentativesWithAccessRequest",

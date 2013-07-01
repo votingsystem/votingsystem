@@ -24,6 +24,7 @@ import com.itextpdf.text.pdf.PdfReader;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -177,6 +178,12 @@ public class FirmaDialog extends JDialog {
                         logger.error("readFutures --- Unknown response ID ---");
                         break;
                 }       
+            } catch(CancellationException ex) {
+                logger.error(ex.getMessage(), ex);
+                mostrarPantallaEnvio(false);
+                MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
+                errorDialog.setMessage(Contexto.INSTANCE.getString("operationCanelledMsg"), 
+                        Contexto.INSTANCE.getString("errorLbl"));
             } catch(Exception ex) {
                 logger.error(ex.getMessage(), ex);
                 mostrarPantallaEnvio(false);
@@ -439,7 +446,15 @@ public class FirmaDialog extends JDialog {
                     }
                 } catch (Exception ex) {
                     logger.error(ex.getMessage(), ex);
-                }
+                    mostrarPantallaEnvio(false);
+                    String mensajeError = null;
+                    if ("CKR_PIN_INCORRECT".equals(ex.getMessage())) {
+                        mensajeError = Contexto.INSTANCE.getString("MENSAJE_ERROR_PASSWORD");
+                    } else mensajeError = Contexto.INSTANCE.getString("signDocumentErrorMsg");
+                        MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
+                        errorDialog.setMessage(mensajeError, 
+                                Contexto.INSTANCE.getString("errorLbl"));
+                    }
             }
         };
         Contexto.INSTANCE.submit(runnable);

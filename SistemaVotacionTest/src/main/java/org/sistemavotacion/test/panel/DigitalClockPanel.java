@@ -46,7 +46,7 @@ public class DigitalClockPanel extends JPanel implements ActionListener {
 
     }
     public void stop() {
-        logger.debug("Parando reloj");
+        logger.debug("Stop clock");
         timer.stop();
     }
     

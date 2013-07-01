@@ -75,11 +75,10 @@ class TimeStampService {
 			}
 			
 			Date timestampDate = timeStampToken.getTimeStampInfo().getGenTime()
-			if(!timestampDate.after(evento.fechaInicio) &&
-				!timestampDate.before(evento.fechaFin)) {
-				String dateRangeStr = "[${eventoVotacion.fechaInicio} - ${eventoVotacion.fechaFin}]"
+			if(!timestampDate.after(evento.fechaInicio) ||
+				!timestampDate.before(evento.getDateFinish())) {
 				msg = messageSource.getMessage('timestampDateErrorMsg',
-					[timestampDate, dateRangeStr].toArray(), locale)
+					[timestampDate, evento.fechaInicio, evento.getDateFinish()].toArray(), locale)
 				log.debug("validateToken - ERROR TIMESTAMP DATE -  - Event '${evento.id}' - ${msg}")
 				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
 					mensaje:msg, evento:evento)

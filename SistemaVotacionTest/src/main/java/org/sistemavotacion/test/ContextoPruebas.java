@@ -47,12 +47,15 @@ public enum ContextoPruebas {
     private static Logger logger = LoggerFactory.getLogger(ContextoPruebas.class);
     
     private static ExecutorService executor = Executors.newFixedThreadPool(10);
-    private static CompletionService<Respuesta> completionService
-             = new ExecutorCompletionService<Respuesta>(executor);
+    
+    private static CompletionService completionService = 
+            new ExecutorCompletionService(executor);
     
     public static class DEFAULTS {
         public static final String APPDIR =  Contexto.DEFAULTS.APPDIR + 
-                File.separator + "ContextoPruebas"  + File.separator;  
+                File.separator + "ContextoPruebas"  + File.separator;
+        public static final String ERROR_DIR =  DEFAULTS.APPDIR + File.separator +
+            "Error"; 
         private static final String locale =  "es";
         private static final String ROOT_ALIAS = "rootAlias";
         public static final String END_ENTITY_ALIAS = "endEntityAlias";        
@@ -62,6 +65,8 @@ public enum ContextoPruebas {
         private static final long USER_KEYSTORE_PERIOD = 20000000000L;  
     } 
 
+
+    
     public static String locale = "es";
     public static final String SIG_NAME = "RSA";
     public static final String PROVIDER = "BC";
@@ -92,7 +97,7 @@ public enum ContextoPruebas {
 
     private ContextoPruebas () {
         try {
-            new File(DEFAULTS.APPDIR).mkdirs();
+            new File(DEFAULTS.ERROR_DIR).mkdirs();
             Properties props = new Properties();
             props.load(Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("log4jSistemaVotacionTest.properties")); 
@@ -144,6 +149,10 @@ public enum ContextoPruebas {
     }
     
     public Future<Respuesta> submit(Callable<Respuesta> callable) {
+        return completionService.submit(callable);
+    }
+    
+    public <T> Future<Respuesta<T>> submitSimulation(Callable<Respuesta<T>> callable) {
         return completionService.submit(callable);
     }
             

@@ -71,7 +71,7 @@ class EventoReclamacionService {
 			mensajeJSON.tipo = Tipo.EVENTO_RECLAMACION
 			def camposValidados = []
 			JSONArray arrayCampos = new JSONArray()
-			mensajeJSON.campos?.collect { campoItem ->
+			mensajeJSON.campos?.each { campoItem ->
 				def campo = new CampoDeEvento(evento:evento, contenido:campoItem.contenido)
 				campo.save();
 				arrayCampos.add(new JSONObject([id:campo.id, contenido:campo.contenido]))

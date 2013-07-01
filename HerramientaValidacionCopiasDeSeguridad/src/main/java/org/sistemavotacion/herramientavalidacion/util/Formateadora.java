@@ -37,9 +37,20 @@ public class Formateadora {
     
 
     public static String procesar (String cadena) throws ParseException {
-        JSONObject jsonObject = (JSONObject)JSONSerializer.toJSON(cadena);
-        Evento evento = Evento.parse(jsonObject);
-        return obtenerEvento(evento);
+        if(cadena == null) {
+            logger.debug(" - procesar null string");
+            return null;
+        }
+        Evento evento = null;
+        String result = null;
+        try {
+            JSONObject jsonObject = (JSONObject)JSONSerializer.toJSON(cadena);
+            evento = Evento.parse(jsonObject);
+            result = obtenerEvento(evento);
+        } catch(Exception ex) {
+            logger.error("cadena: " + cadena + " - " + ex.getMessage(), ex);
+        }
+        return result;
     }
     
     	

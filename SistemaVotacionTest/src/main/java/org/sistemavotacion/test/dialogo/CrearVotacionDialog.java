@@ -7,7 +7,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -16,9 +15,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.mail.internet.MimeMessage;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import net.miginfocom.swing.MigLayout;
@@ -31,7 +30,8 @@ import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
-import org.sistemavotacion.callable.InfoSender;
+import org.sistemavotacion.callable.SMIMESignedSender;
+import org.sistemavotacion.modelo.Tipo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,7 +124,16 @@ public class CrearVotacionDialog extends JDialog implements KeyListener {
                         evento = Evento.parse(dnieMimeMessage.getSignedContent());
                         logger.debug("Respuesta - Evento ID: " + evento.getEventoId());
                         ContextoPruebas.INSTANCE.setEvento(evento);
-                        dispose();
+                        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                try {
+                                    dispose();
+                                } catch (Exception e) {
+                                    logger.error(e.getMessage(), e);
+                                }
+                            }
+                        });
+                        
                     } catch (Exception ex) {
                         logger.error(ex.getMessage(), ex);
                         MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
@@ -241,13 +250,13 @@ public class CrearVotacionDialog extends JDialog implements KeyListener {
         opcionesVotacionPanel.setLayout(opcionesVotacionPanelLayout);
         opcionesVotacionPanelLayout.setHorizontalGroup(
             opcionesVotacionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, opcionesVotacionPanelLayout.createSequentialGroup()
+            .addGroup(opcionesVotacionPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(opcionesVotacionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(opcionesPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(opcionesVotacionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(opcionesVotacionPanelLayout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(crearOpcionVotacionButton)))
+                        .addComponent(crearOpcionVotacionButton))
+                    .addComponent(opcionesPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         opcionesVotacionPanelLayout.setVerticalGroup(
@@ -255,8 +264,8 @@ public class CrearVotacionDialog extends JDialog implements KeyListener {
             .addGroup(opcionesVotacionPanelLayout.createSequentialGroup()
                 .addComponent(crearOpcionVotacionButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(opcionesPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(opcionesPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 78, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         etiquetasLabel.setText("Etiquetas (separadas por comas):");
@@ -426,6 +435,7 @@ public class CrearVotacionDialog extends JDialog implements KeyListener {
             evento.setFechaInicio(fechaInicioDatePicker.getDate());
             evento.setFechaFin(fechaFinalDatePicker.getDate());
             evento.setOpciones(opcionesPanel.obtenerOpciones());
+            evento.setTipo(Tipo.VOTACION);
             String[] etiquetas = etiquetasTextField.getText().split(",");
             evento.setEtiquetas(etiquetas);
             evento.setCentroControl(ContextoPruebas.INSTANCE.getControlCenter());
@@ -436,18 +446,16 @@ public class CrearVotacionDialog extends JDialog implements KeyListener {
                 ContextoPruebas.VOTE_SIGN_MECHANISM);
             
             String eventoParaPublicar = evento.toJSON().toString();
-            MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(
+            SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage(
                     ContextoPruebas.INSTANCE.getUserTest().getEmail(), 
                     Contexto.INSTANCE.getAccessControl().getNombreNormalizado(), 
                     eventoParaPublicar, "Solicitud Publicación convocatoria",
                     null);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            mimeMessage.writeTo(baos);
-            InfoSender infoSender = new InfoSender(null, baos.toByteArray(), 
-                    Contexto.SIGNED_CONTENT_TYPE,
-                    ContextoPruebas.getURLGuardarEventoParaVotar(
-                    Contexto.INSTANCE.getAccessControl().getServerURL()));
-            Future<Respuesta> future = ContextoPruebas.INSTANCE.submit(infoSender);
+            
+            SMIMESignedSender worker = new SMIMESignedSender(null, 
+                smimeDocument, ContextoPruebas.INSTANCE. getURLGuardarEventoParaVotar(), 
+                null, null);
+            Future<Respuesta> future = ContextoPruebas.INSTANCE.submit(worker);
             mostrarPantallaEnvio(true);
             tareaEnEjecucion = future;
             queue.put(future);

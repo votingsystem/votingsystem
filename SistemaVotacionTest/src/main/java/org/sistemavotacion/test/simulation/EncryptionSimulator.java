@@ -161,7 +161,7 @@ public class EncryptionSimulator extends Simulator<SimulationData>
         }
     }
     
-    @Override public SimulationData call() throws Exception {
+    @Override public Respuesta call() throws Exception {
         ServerInitializer accessControlInitializer = 
             new ServerInitializer(simulationData.getAccessControlURL(), 
                 ActorConIP.Tipo.CONTROL_ACCESO);
@@ -193,10 +193,10 @@ public class EncryptionSimulator extends Simulator<SimulationData>
                         errorsMsg);
         }
         logger.debug("--------------- FINISHED --------------------------");
+        respuesta = new Respuesta(Respuesta.SC_FINALIZADO,simulationData);
         if(simulationListener != null)            
-            simulationListener.setSimulationResult(simulationData);
-        
-        return simulationData;
+            simulationListener.processResponse(respuesta);
+        return respuesta;
     }
 
 }

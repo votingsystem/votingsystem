@@ -56,7 +56,7 @@ class RepresentativeController {
 		representativeMap.representativesTotalNumber = Usuario.
 				   countByType(Usuario.Type.REPRESENTATIVE)
 		representativeMap.numberRepresentativesInRequest = representativeList.size()
-		representativeList.collect {representative ->
+		representativeList.each {representative ->
 				representativeMap.representatives.add(representativeService.getRepresentativeJSONMap(representative))
 		}
 		render representativeMap as JSON

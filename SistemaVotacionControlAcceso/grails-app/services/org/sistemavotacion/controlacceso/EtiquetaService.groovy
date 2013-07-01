@@ -14,7 +14,7 @@ class EtiquetaService {
 	Set<Etiqueta> guardarEtiquetas(JSONArray etiquetas) {
 		log.debug("guardarEtiquetas - etiquetas: ${etiquetas}")
 		def etiquetaSet  
-		etiquetas.collect { etiquetaItem ->
+		etiquetas.each { etiquetaItem ->
 			if (!etiquetaItem || "".equals(etiquetaItem)) return null
 			if(!etiquetaSet) etiquetaSet = new HashSet<Etiqueta>()
 			etiquetaItem = etiquetaItem.toLowerCase().trim()

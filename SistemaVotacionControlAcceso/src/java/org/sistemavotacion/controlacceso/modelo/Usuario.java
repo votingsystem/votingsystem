@@ -1,10 +1,11 @@
 package org.sistemavotacion.controlacceso.modelo;
 
 import static javax.persistence.GenerationType.IDENTITY;
+
 import java.io.Serializable;
+import java.security.cert.X509Certificate;
 import java.util.Date;
-import java.util.Set;
-import javax.persistence.CascadeType;
+
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -15,7 +16,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -24,7 +24,6 @@ import javax.persistence.Transient;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.security.cert.X509Certificate;
 
 /**
 * @author jgzornoza
@@ -81,12 +80,6 @@ public class Usuario implements Serializable {
     @JoinColumn(name="representativeId")
     private Usuario representative;  
     
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="representative")
-    private Set<Usuario> represented;
-    
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="representative")
-    private Set<RepresentationDocument> representations;
-    
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="fechaCreacion", length=23)
     private Date dateCreated;
@@ -98,18 +91,6 @@ public class Usuario implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="representativeRegisterDate", length=23)
     private Date representativeRegisterDate;
-    
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="usuario")
-    private Set<Image> images;
-    
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="usuario")
-    private Set<Evento> eventos;
-    
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="usuario")
-    private Set<Certificado> certificados;
-    
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="usuario")
-    private Set<Dispositivo> dispositivo;
     
     @Transient
     private transient X509Certificate certificate;
@@ -248,22 +229,6 @@ public class Usuario implements Serializable {
         return certificate;
     }
 
-    public void setCertificados(Set<Certificado> certificados) {
-        this.certificados = certificados;
-    }
-
-    public Set<Certificado> getCertificados() {
-        return certificados;
-    }
-
-    public void setEventos(Set<Evento> eventos) {
-        this.eventos = eventos;
-    }
-
-    public Set<Evento> getEventos() {
-        return eventos;
-    }
-
 	public String getTelefono() {
 		return telefono;
 	}
@@ -287,14 +252,6 @@ public class Usuario implements Serializable {
 	public void setId(Long id) {
 		this.id = id;
 	}
-
-	public Set<Dispositivo> getDispositivo() {
-		return dispositivo;
-	}
-
-	public void setDispositivo(Set<Dispositivo> dispositivo) {
-		this.dispositivo = dispositivo;
-	}
 	
 	public void beforeInsert(){
 		if(nif != null) this.nif = nif.toUpperCase();
@@ -314,30 +271,6 @@ public class Usuario implements Serializable {
 
 	public void setRepresentative(Usuario representative) {
 		this.representative = representative;
-	}
-	public Set<Usuario> getRepresented() {
-		return represented;
-	}
-
-	public void setRepresented(Set<Usuario> represented) {
-		this.represented = represented;
-	}
-
-	public Set<RepresentationDocument> getRepresentations() {
-		return representations;
-	}
-
-	public void setRepresentations(Set<RepresentationDocument> representations) {
-		this.representations = representations;
-	}
- 
-	
-	public Set<Image> getImages() {
-		return images;
-	}
-
-	public void setImages(Set<Image> images) {
-		this.images = images;
 	}
 
 	public Type getType() {

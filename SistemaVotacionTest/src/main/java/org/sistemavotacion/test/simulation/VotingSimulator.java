@@ -3,6 +3,8 @@ package org.sistemavotacion.test.simulation;
 import org.sistemavotacion.test.simulation.callable.Voter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -11,6 +13,7 @@ import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.ReciboVoto;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.modelo.Usuario;
+import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.modelo.VotingSimulationData;
 import org.sistemavotacion.test.modelo.UserBaseSimulationData;
@@ -163,6 +166,15 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
                     } else {
                         logger.error("VOTING ERROR - Usuario: " + 
                             nifFrom + " - Msg: " + respuesta.getMensaje());
+                        
+                        SMIMEMessageWrapper vote = respuesta.getSmimeMessage();
+                        if(vote != null) {
+                            File outputFile = new File(
+                                    ContextoPruebas.DEFAULTS.ERROR_DIR);
+                            vote.writeTo(new FileOutputStream(outputFile));
+                            logger.error("VOTING ERROR file copy to file -> " + 
+                                    outputFile.getAbsolutePath());
+                        } else logger.error("VOTING ERROR - response without vote");
                         addVotingErrorMsg(mensaje);
                         simulationData.getAndIncrementNumVotingRequestsERROR();
                     }
@@ -203,8 +215,7 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
         return errosList;
     }
 
-    @Override
-    public VotingSimulationData call() throws Exception {
+    @Override public Respuesta call() throws Exception {
         electorList = getElectorList(userBaseData);
         simulationData.setNumOfElectors(electorList.size());
         
@@ -237,8 +248,10 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
         if(timer != null) timer.stop();
         if(votacionExecutor != null) votacionExecutor.shutdownNow();
         simulationData.seterrorList(getErrorList());
+        Respuesta respuesta = new Respuesta(
+                    Respuesta.SC_FINALIZADO,simulationData);
         if(simulationListener != null) {
-            simulationListener.setSimulationResult(simulationData);
+            simulationListener.processResponse(respuesta);
         } else {
             logger.debug("--------------- SIMULATION RESULT------------------");
             logger.info("Begin: " + DateUtils.getStringFromDate(
@@ -263,9 +276,8 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
                 logger.info(" ************* " + getErrorList().size() + " ERRORS: \n" + 
                             errorsMsg);
             }
-            logger.debug("------------------- FINISHED --------------------------");
         }
-        return simulationData;
+        return respuesta;
     }
 
     

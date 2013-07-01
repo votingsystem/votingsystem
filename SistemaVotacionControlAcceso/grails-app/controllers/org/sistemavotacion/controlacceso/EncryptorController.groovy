@@ -19,6 +19,7 @@ import grails.util.Environment
 import org.sistemavotacion.smime.SMIMEMessageWrapper
 import org.sistemavotacion.utils.*
 import org.sistemavotacion.controlacceso.modelo.*
+import org.sistemavotacion.util.*
 
 class EncryptorController {
 	
@@ -45,9 +46,7 @@ class EncryptorController {
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		byte[] solicitud = params.requestBytes
 		//log.debug("Solicitud" + new String(solicitud))
-		
 		def mensajeJSON = JSON.parse(new String(solicitud))
-		
 		if(!mensajeJSON.publicKey) {
 			String msg = message(code: "publicKeyMissingErrorMsg")
 			log.error msg
@@ -55,23 +54,16 @@ class EncryptorController {
 			render msg
 			return false
 		}
-		
 	    byte[] decodedPK = Base64.decode(mensajeJSON.publicKey);
 	    PublicKey receiverPublic =  KeyFactory.getInstance("RSA").
 	            generatePublic(new X509EncodedKeySpec(decodedPK));
 	    //log.debug("receiverPublic.toString(): " + receiverPublic.toString());
-		
 		mensajeJSON.message="Hello '${mensajeJSON.from}' from server"
-		
 		params.receiverPublicKey = receiverPublic
 		response.setContentType("multipart/encrypted")
-		
 		params.respuesta = new Respuesta(codigoEstado:Respuesta.SC_OK)
-		
 		params.responseBytes = mensajeJSON.toString().getBytes()
-		
 	}
-	
 	
 	/**
 	 * Servicio para comprbar la creación de documentos con multifirma
@@ -145,8 +137,17 @@ class EncryptorController {
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		SMIMEMessageWrapper smimeMessage = mensajeSMIMEReq.getSmimeMessage()
 		Usuario usuario = mensajeSMIMEReq.getUsuario()
+		//Date fechaFin = DateUtils.getDateFromString("2014-01-01 00:00:00")
+		
+		Evento evento
+		Evento.withTransaction{
+			evento = Evento.get(1)
+			//evento.fechaFin = fechaFin
+		}
+		
 		Respuesta timeStampVerification = timeStampService.validateToken(
-			usuario.getTimeStampToken(), request.locale)
+			usuario.getTimeStampToken(), evento, request.locale)
+		
 		timeStampVerification.tipo = Tipo.TEST
 		params.respuesta = timeStampVerification
 		if(Respuesta.SC_OK == timeStampVerification.codigoEstado) {

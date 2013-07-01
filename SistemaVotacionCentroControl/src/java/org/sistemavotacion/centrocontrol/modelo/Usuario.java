@@ -3,9 +3,9 @@ package org.sistemavotacion.centrocontrol.modelo;
 import static javax.persistence.GenerationType.IDENTITY;
 
 import java.io.Serializable;
+import java.security.cert.X509Certificate;
 import java.util.Date;
-import java.util.Set;
-import javax.persistence.CascadeType;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -15,16 +15,14 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+
 import org.bouncycastle.tsp.TimeStampToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.security.cert.X509Certificate;
 
 /**
 * @author jgzornoza
@@ -77,20 +75,13 @@ public class Usuario implements Serializable {
     @JoinColumn(name="representativeId")
     private Usuario representative;  
     
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="usuario")
-    private Set<Certificado> certificados;
-    
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="fechaCreacion", length=23)
     private Date dateCreated;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="fechaActualizacion", length=23)
-    private Date lastUpdated;
-    
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="usuario")
-    private Set<EventoVotacion> eventos;
-    
+    private Date lastUpdated;    
     
     @Transient
     private transient X509Certificate certificate;
@@ -220,22 +211,6 @@ public class Usuario implements Serializable {
 
 	public X509Certificate getCertificate() {
 		return certificate;
-	}
-
-	public void setCertificados(Set<Certificado> certificados) {
-		this.certificados = certificados;
-	}
-
-	public Set<Certificado> getCertificados() {
-		return certificados;
-	}
-
-	public void setEventos(Set<EventoVotacion> eventos) {
-		this.eventos = eventos;
-	}
-
-	public Set<EventoVotacion> getEventos() {
-		return eventos;
 	}
 
 	public String getTelefono() {

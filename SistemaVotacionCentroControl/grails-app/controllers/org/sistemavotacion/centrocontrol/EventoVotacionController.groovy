@@ -80,7 +80,7 @@ class EventoVotacionController {
 			EventoVotacion.Estado.ACTIVO, EventoVotacion.Estado.CANCELADO,
 			EventoVotacion.Estado.FINALIZADO, EventoVotacion.Estado.PENDIENTE_COMIENZO)
 		eventosMap.numeroEventosVotacionEnPeticion = eventoList.size()
-		eventoList.collect {eventoItem ->
+		eventoList.each {eventoItem ->
 				eventosMap.eventos.votaciones.add(eventoVotacionService.
 					optenerEventoVotacionJSONMap(eventoItem))
 		}
@@ -144,7 +144,7 @@ class EventoVotacionController {
                 votosMap.controlAccesoURL=eventoVotacion.controlAcceso.serverURL
 				votosMap.eventoVotacionURL=eventoVotacion.url
                 HexBinaryAdapter hexConverter = new HexBinaryAdapter();
-                votos.collect {voto ->
+                votos.each {voto ->
                     String hashCertificadoVotoHex = hexConverter.marshal(
                         voto.certificado.hashCertificadoVotoBase64.getBytes()); 
                     def votoMap = [id:voto.id, 
@@ -163,7 +163,7 @@ class EventoVotacionController {
 					}
 					votosMap.votos.add(votoMap)
                 }
-                eventoVotacion.opciones.collect {opcion ->
+                eventoVotacion.opciones.each {opcion ->
 					def numeroVotos = Voto.findAllWhere(opcionDeEvento:opcion, estado:Voto.Estado.OK).size()
                     def opcionMap = [opcionDeEventoId:opcion.opcionDeEventoId,
                         contenido:opcion.contenido, numeroVotos:numeroVotos]
@@ -230,7 +230,7 @@ class EventoVotacionController {
 					eventoVotacion, Voto.Estado.OK)
 			estadisticasMap.numeroVotosANULADOS = Voto.countByEventoVotacionAndEstado(
 				eventoVotacion, Voto.Estado.ANULADO)								
-			eventoVotacion.opciones.collect { opcion ->
+			eventoVotacion.opciones.each { opcion ->
 				def numeroVotos = Voto.countByOpcionDeEventoAndEstado(
 					opcion, Voto.Estado.OK)
 				def opcionMap = [id:opcion.id, contenido:opcion.contenido,
@@ -299,5 +299,51 @@ class EventoVotacionController {
 			response.setContentType("${grailsApplication.config.pkcs7SignedContentType}")
 		}
 		params.respuesta = respuesta
+	}
+	
+	
+	/**
+	 * Servicio que devuelve un archivo zip con los errores que se han producido
+	 * en una votación
+	 *
+	 * @httpMethod [GET]
+	 * @serviceURL [/eventoVotacion/$id/votingErrors]
+	 * @param [id] Obligatorio. Identificador del evento en la base de datos
+	 * @return Archivo zip con los mensajes con errores
+	 */
+	def votingErrors() {
+		EventoVotacion event
+		EventoVotacion.withTransaction {
+			event = EventoVotacion.get(params.long('id'))
+		}
+		if (!event) {
+			response.status = Respuesta.SC_NOT_FOUND
+			render message(code: 'eventNotFound', args:[params.id])
+			return false
+		}
+		def errors
+		MensajeSMIME.withTransaction {
+			errors = MensajeSMIME.findAllWhere (
+				tipo:Tipo.VOTO_CON_ERRORES,  evento:event)
+		}
+		
+		if(errors.size == 0){
+			response.status = Respuesta.SC_OK
+			render message(code: 'votingWithoutErrorsMsg',
+				args:[event.id, event.asunto])
+		} else {
+			String datePathPart = DateUtils.getShortStringFromDate(event.getDateFinish())
+			String baseDirPath = "${grailsApplication.config.SistemaVotacion.errorsBaseDir}" +
+				"/${datePathPart}/Event_${event.id}"
+			errors.each { mensajeSMIME ->
+				File errorFile = new File("${baseDirPath}/MensajeSMIME_${mensajeSMIME.id}")
+				errorFile.setBytes(mensajeSMIME.contenido)
+			}
+			File zipResult = new File("${baseDirPath}.zip")
+			def ant = new AntBuilder()
+			ant.zip(destfile: zipResult, basedir: "${baseDirPath}")
+			
+			response.setContentType("application/zip")
+		}
 	}
 }

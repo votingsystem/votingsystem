@@ -1,9 +1,9 @@
 package org.sistemavotacion.centrocontrol.modelo;
 
-import java.io.Serializable;
-import java.util.Set;
 import static javax.persistence.GenerationType.IDENTITY;
-import javax.persistence.CascadeType;
+
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -11,7 +11,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -35,8 +34,6 @@ public class OpcionDeEvento implements Serializable {
     private EventoVotacion eventoVotacion;
     @Column(name="contenido", length=10000, nullable=false)
     private String contenido;
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="opcionDeEvento")
-    private Set<Voto> votos;
     
     public OpcionDeEvento () {}
 
@@ -87,14 +84,6 @@ public class OpcionDeEvento implements Serializable {
 
 	public String getOpcionDeEventoId() {
 		return opcionDeEventoId;
-	}
-
-	public void setVotos(Set<Voto> votos) {
-		this.votos = votos;
-	}
-
-	public Set<Voto> getVotos() {
-		return votos;
 	}
 
 

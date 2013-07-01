@@ -1,61 +1,46 @@
 package org.sistemavotacion.controlacceso.modelo;
 
 import static javax.persistence.GenerationType.IDENTITY;
-import grails.converters.JSON;
-import groovy.util.ConfigObject;
 
 import java.io.Serializable;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import javax.persistence.CascadeType;
+
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.JoinColumn;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.ManyToOne;
-import javax.persistence.Enumerated;
-import javax.persistence.EnumType;
 
 import org.apache.solr.analysis.HTMLStripCharFilterFactory;
 import org.apache.solr.analysis.StandardTokenizerFactory;
-import org.codehaus.groovy.grails.commons.ApplicationHolder;
-import org.codehaus.groovy.grails.commons.GrailsApplication;
 import org.hibernate.search.annotations.Analyzer;
 import org.hibernate.search.annotations.AnalyzerDef;
 import org.hibernate.search.annotations.CharFilterDef;
 import org.hibernate.search.annotations.DateBridge;
-import org.hibernate.search.annotations.FieldBridge;
-import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.DocumentId;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Index;
+import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.Resolution;
 import org.hibernate.search.annotations.Store;
 import org.hibernate.search.annotations.TokenizerDef;
-import org.sistemavotacion.util.DateUtils;
-import org.sistemavotacion.util.StringUtils;
-import org.sistemavotacion.utils.VotingSystemApplicationContex;
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -119,8 +104,6 @@ public class Evento implements Serializable {
      	})
     @ManyToMany
     private Set<Etiqueta> etiquetaSet;
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="evento")
-    private Set<MensajeSMIME> mensajeSMIMESet; 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="fechaInicio", length=23, nullable=false)
     @Field(index = Index.UN_TOKENIZED, store = Store.YES)
@@ -256,14 +239,6 @@ public class Evento implements Serializable {
 	public void setAlmacenClaves(AlmacenClaves almacenClaves) {
 		this.almacenClaves = almacenClaves;
 	}
-
-	public Set<MensajeSMIME> getMensajeSMIMESet() {
-		return mensajeSMIMESet;
-	}
-
-	public void setMensajeSMIMESet(Set<MensajeSMIME> mensajeSMIMESet) {
-		this.mensajeSMIMESet = mensajeSMIMESet;
-	}
         
 	public boolean isOpen(Date selectedDate) {
 		if(selectedDate == null) return false;
@@ -276,7 +251,7 @@ public class Evento implements Serializable {
 	
 	public boolean isActiveDate(Date date) {
 		boolean result = false;
-		if (date.after(fechaInicio) && date.before(fechaFin)) result = true;
+		if (date.after(fechaInicio) && date.before(getDateFinish())) result = true;
 		return result;
 	}
 

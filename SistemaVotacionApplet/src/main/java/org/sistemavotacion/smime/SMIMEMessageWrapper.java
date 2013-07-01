@@ -117,6 +117,10 @@ public class SMIMEMessageWrapper extends MimeMessage {
         return firmantes;
     }
     
+    public Usuario getFirmante() {
+        return firmante;
+    }
+    
     public SMIMEMessageWrapper(Session session) throws MessagingException {
         super(session);
         fileName =  StringUtils.RandomLowerString(System.currentTimeMillis(), 7);
@@ -240,7 +244,9 @@ public class SMIMEMessageWrapper extends MimeMessage {
             isValidSignature = verifySignerCert(signer, cert);
             if(!isValidSignature) return;
             Usuario usuario = Usuario.getUsuario(cert);
+            usuario.setSigner(signer);
             TimeStampToken timeStampToken = checkTimeStampToken(signer);//method can only be called after verify.
+            usuario.setTimeStampToken(timeStampToken);
             if(timeStampToken != null) {
             	Date timeStampDate = timeStampToken.getTimeStampInfo().getGenTime();
             	if(firstSignature == null || firstSignature.after(timeStampDate)) {

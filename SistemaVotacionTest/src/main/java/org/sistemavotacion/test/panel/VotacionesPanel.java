@@ -6,9 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
@@ -20,6 +17,7 @@ import org.sistemavotacion.test.MainFrame;
 import org.sistemavotacion.test.dialogo.*;
 import org.sistemavotacion.test.modelo.VotingSimulationData;
 import org.sistemavotacion.test.simulation.SimulatorListener;
+import org.sistemavotacion.test.simulation.VotingProcessSimulator;
 import org.sistemavotacion.test.simulation.VotingSimulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +77,6 @@ public class VotacionesPanel extends JPanel implements
         publicacionConvocatoriaPanel = new javax.swing.JPanel();
         mensajePublicacionLabel = new javax.swing.JLabel();
         publicarButton = new javax.swing.JButton();
-        createUserBaseButton = new javax.swing.JButton();
         datosSimulacionPanel = new javax.swing.JPanel();
         infoEventoButton = new javax.swing.JButton();
         datosSimulacionButton = new javax.swing.JButton();
@@ -102,6 +99,7 @@ public class VotacionesPanel extends JPanel implements
         centrosDeControlComboBox = new javax.swing.JComboBox();
         infoServidorButton = new javax.swing.JButton();
         asociarCentroControlButton = new javax.swing.JButton();
+        createUserBaseButton = new javax.swing.JButton();
 
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/sistemavotacion/test/panel/Bundle"); // NOI18N
         mensajePublicacionLabel.setText(bundle.getString("VotacionesPanel.mensajePublicacionLabel.text")); // NOI18N
@@ -114,14 +112,6 @@ public class VotacionesPanel extends JPanel implements
             }
         });
 
-        createUserBaseButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Group_16x16.png"))); // NOI18N
-        createUserBaseButton.setText(bundle.getString("VotacionesPanel.createUserBaseButton.text")); // NOI18N
-        createUserBaseButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                createUserBaseButtonActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout publicacionConvocatoriaPanelLayout = new javax.swing.GroupLayout(publicacionConvocatoriaPanel);
         publicacionConvocatoriaPanel.setLayout(publicacionConvocatoriaPanelLayout);
         publicacionConvocatoriaPanelLayout.setHorizontalGroup(
@@ -130,22 +120,16 @@ public class VotacionesPanel extends JPanel implements
                 .addContainerGap()
                 .addGroup(publicacionConvocatoriaPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(mensajePublicacionLabel)
-                    .addGroup(publicacionConvocatoriaPanelLayout.createSequentialGroup()
-                        .addComponent(publicarButton)
-                        .addGap(18, 18, 18)
-                        .addComponent(createUserBaseButton)))
-                .addContainerGap(467, Short.MAX_VALUE))
+                    .addComponent(publicarButton))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         publicacionConvocatoriaPanelLayout.setVerticalGroup(
             publicacionConvocatoriaPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(publicacionConvocatoriaPanelLayout.createSequentialGroup()
-                .addContainerGap()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(mensajePublicacionLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(publicacionConvocatoriaPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(publicarButton)
-                    .addComponent(createUserBaseButton))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(publicarButton))
         );
 
         infoEventoButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/information-white.png"))); // NOI18N
@@ -234,7 +218,7 @@ public class VotacionesPanel extends JPanel implements
                 .addGroup(contadorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(contadorVotosValidadosLabel)
                     .addComponent(contadorVotosLabel)
-                    .addComponent(contadorSolicitudesErrorLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 271, Short.MAX_VALUE)
+                    .addComponent(contadorSolicitudesErrorLabel)
                     .addComponent(timePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(contadorVotosErrorLabel))
                 .addContainerGap(729, Short.MAX_VALUE))
@@ -380,20 +364,34 @@ public class VotacionesPanel extends JPanel implements
                 .addContainerGap())
         );
 
+        createUserBaseButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Group_16x16.png"))); // NOI18N
+        createUserBaseButton.setText(bundle.getString("VotacionesPanel.createUserBaseButton.text")); // NOI18N
+        createUserBaseButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                createUserBaseButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(publicacionConvocatoriaPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(datosSimulacionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(centroControlPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(publicacionConvocatoriaPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(createUserBaseButton)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(centroControlPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(publicacionConvocatoriaPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(createUserBaseButton)
+                    .addComponent(publicacionConvocatoriaPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(datosSimulacionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
@@ -460,17 +458,22 @@ public class VotacionesPanel extends JPanel implements
                 actualizarContadorVotosLanzados(0);
                 actualizarContadorVotosValidados(0);
                 actualizarContadorVotosError(0);
-                
-                logger.error("============= TODO");//TODO
-                VotingSimulationData simulationdata = new VotingSimulationData();
-                simulationdata.setUserBaseData(
-                        ContextoPruebas.INSTANCE.getUserBaseData());
-                
-                if(executorPool == null)executorPool = Executors.newFixedThreadPool(3);
-                votacion = new VotingSimulator(simulationdata, this);
-                executorPool.submit(votacion);
-   
-                digitalClockPanel.start(DigitalClockPanel.Mode.STOPWATCH);
+                try {
+                    VotingSimulationData simulationData = new VotingSimulationData();
+                    simulationData.setUserBaseData(ContextoPruebas.
+                            INSTANCE.getUserBaseData());
+                    simulationData.setAccessControlURL(ContextoPruebas.INSTANCE.
+                            getAccessControl().getServerURL());
+                    simulationData.setControlCenterURL(ContextoPruebas.
+                            INSTANCE.getControlCenter().getServerURL());
+                    simulationData.setEvento(ContextoPruebas.INSTANCE.getEvento());
+                    VotingProcessSimulator simulation = new 
+                        VotingProcessSimulator(simulationData, null);
+                    ContextoPruebas.INSTANCE.submitSimulation(simulation);
+                    digitalClockPanel.start(DigitalClockPanel.Mode.STOPWATCH);
+                } catch(Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                }
                 break;
             case SIMULACION:
                 Object[] opciones = {"Seguir con la simulación",
@@ -527,8 +530,8 @@ public class VotacionesPanel extends JPanel implements
     }//GEN-LAST:event_anularVotosButtonActionPerformed
 
     private void createUserBaseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createUserBaseButtonActionPerformed
-        UserBaseDialog userBaseDialog = new UserBaseDialog(
-                parentFrame, false);
+        UserBaseDialog userBaseDialog = new UserBaseDialog(parentFrame, false);
+        userBaseDialog.setData(ContextoPruebas.INSTANCE.getUserBaseData());
         userBaseDialog.setVisible(true);
     }//GEN-LAST:event_createUserBaseButtonActionPerformed
 
@@ -703,7 +706,19 @@ public class VotacionesPanel extends JPanel implements
         votingerrorList.add(error);
     }
     
-    @Override public void updateSimulationData(VotingSimulationData data) {
+    @Override public void processResponse(
+            Respuesta<VotingSimulationData> respuesta) {
+        switch(respuesta.getCodigoEstado()) {
+            case Respuesta.SC_FINALIZADO:
+                setSimulationResult(respuesta.getData());
+                break;
+            default:
+                updateSimulationData((VotingSimulationData) respuesta.getData());
+                break;
+        }
+    }
+    
+    private void updateSimulationData(VotingSimulationData data) {
         if(Respuesta.SC_OK == data.getStatusCode()) {
         
         } else {
@@ -726,7 +741,7 @@ public class VotacionesPanel extends JPanel implements
     }
 
 
-    @Override public void setSimulationResult(VotingSimulationData simuData) {
+    private void setSimulationResult(VotingSimulationData simuData) {
         logger.debug("setSimulationResult");
 
         digitalClockPanel.stop();

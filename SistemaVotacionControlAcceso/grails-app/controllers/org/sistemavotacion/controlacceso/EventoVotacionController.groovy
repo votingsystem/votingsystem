@@ -2,9 +2,6 @@ package org.sistemavotacion.controlacceso
 
 import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.CascadeType;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
 import org.sistemavotacion.controlacceso.modelo.*
 import grails.converters.JSON
 import java.security.cert.X509Certificate;
@@ -84,7 +81,7 @@ class EventoVotacionController {
 				eventosMap.offset = params.long('offset')
 			}
 			eventosMap.numeroEventosVotacionEnPeticion = eventoList.size()
-			eventoList.collect {eventoItem ->
+			eventoList.each {eventoItem ->
 					eventosMap.eventos.votaciones.add(eventoService.optenerEventoVotacionJSONMap(eventoItem))
 			}
 			response.setContentType("application/json")
@@ -159,7 +156,7 @@ class EventoVotacionController {
 						eventoVotacion, Voto.Estado.OK)
 				estadisticasMap.numeroVotosANULADOS = Voto.countByEventoVotacionAndEstado(
 					eventoVotacion, Voto.Estado.ANULADO)								
-    			eventoVotacion.opciones.collect { opcion ->
+    			eventoVotacion.opciones.each { opcion ->
 					def numeroVotos = Voto.countByOpcionDeEventoAndEstado(
 						opcion, Voto.Estado.OK)
 					def opcionMap = [id:opcion.id, contenido:opcion.contenido,
@@ -279,11 +276,11 @@ class EventoVotacionController {
 	 */
 	def informacionVotos () {
 		if (params.long('id')) {
-			Evento evento
-			Evento.withTransaction {
-				evento = Evento.get(params.id)
+			EventoVotacion evento
+			EventoVotacion.withTransaction {
+				evento = EventoVotacion.get(params.long('id'))
 			}
-			if (!evento || !(evento instanceof EventoVotacion)) {
+			if (!evento) {
 				response.status = Respuesta.SC_NOT_FOUND
 				render message(code: 'eventNotFound', args:[params.id])
 				return false
@@ -314,7 +311,7 @@ class EventoVotacionController {
 			informacionVotosMap.solicitudesAcceso = []
 			informacionVotosMap.votos = []
 			informacionVotosMap.opciones = []
-			evento.solicitudesAcceso.collect { solicitud ->
+			evento.solicitudesAcceso.each { solicitud ->
 				def solicitudMap = [id:solicitud.id, fechaCreacion:solicitud.dateCreated,
 				estado:solicitud.estado.toString(),
 				hashSolicitudAccesoBase64:solicitud.hashSolicitudAccesoBase64,
@@ -328,7 +325,7 @@ class EventoVotacionController {
 				}
 				informacionVotosMap.solicitudesAcceso.add(solicitudMap)
 			}
-			evento.opciones.collect { opcion ->
+			evento.opciones.each { opcion ->
 				def numeroVotos = Voto.findAllWhere(opcionDeEvento:opcion, estado:Voto.Estado.OK).size()
 				def opcionMap = [id:opcion.id, contenido:opcion.contenido,
 					numeroVotos:numeroVotos]
@@ -336,7 +333,7 @@ class EventoVotacionController {
 			}
 			
 			HexBinaryAdapter hexConverter = new HexBinaryAdapter();
-			evento.votos.collect { voto ->
+			evento.votos.each { voto ->
 				def hashCertificadoVotoHex = hexConverter.marshal(
 					voto.certificado.hashCertificadoVotoBase64.getBytes() )
 				def votoMap = [id:voto.id, opcionSeleccionadaId:voto.opcionDeEvento.id,
@@ -362,4 +359,51 @@ class EventoVotacionController {
 			args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
 		return false
 	}
+
+	/**
+	 * Servicio que devuelve un archivo zip con los errores que se han producido
+	 * en una votación
+	 *
+	 * @httpMethod [GET]
+	 * @serviceURL [/eventoVotacion/$id/votingErrors]
+	 * @param [id] Obligatorio. Identificador del evento en la base de datos
+	 * @return Archivo zip con los mensajes con errores
+	 */
+	def votingErrors() {
+		EventoVotacion event
+		EventoVotacion.withTransaction {
+			event = EventoVotacion.get(params.long('id'))
+		}
+		if (!event) {
+			response.status = Respuesta.SC_NOT_FOUND
+			render message(code: 'eventNotFound', args:[params.id])
+			return false
+		}
+		def errors
+		MensajeSMIME.withTransaction {
+			errors = MensajeSMIME.findAllWhere (
+				tipo:Tipo.VOTO_CON_ERRORES,  evento:event)
+		}
+		
+		if(errors.size == 0){
+			response.status = Respuesta.SC_OK
+			render message(code: 'votingWithoutErrorsMsg',
+				args:[event.id, event.asunto])
+		} else {
+			String datePathPart = DateUtils.getShortStringFromDate(event.getDateFinish())
+			String baseDirPath = "${grailsApplication.config.SistemaVotacion.errorsBaseDir}" +
+				"/${datePathPart}/Event_${event.id}"
+			errors.each { mensajeSMIME ->
+				File errorFile = new File("${baseDirPath}/MensajeSMIME_${mensajeSMIME.id}")
+				errorFile.setBytes(mensajeSMIME.contenido)
+			}
+			File zipResult = new File("${baseDirPath}.zip")
+			def ant = new AntBuilder()
+			ant.zip(destfile: zipResult, basedir: "${baseDirPath}")
+			
+			response.setContentType("application/zip")
+		}
+	}
+	
+	
 }

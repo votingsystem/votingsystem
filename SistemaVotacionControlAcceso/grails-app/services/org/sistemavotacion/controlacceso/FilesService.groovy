@@ -20,6 +20,11 @@ class FilesService {
 	def grailsApplication
 	def messageSource
 
+	public void init() {
+		File errorsDir = new File("${grailsApplication.config.SistemaVotacion.errorsBaseDir}")
+		errorsDir.mkdirs()
+	}
+	
  	public Map<String, File> getBackupFiles(Evento event, Tipo type, 
 		 	Locale locale){
 		 String servicePathPart = null

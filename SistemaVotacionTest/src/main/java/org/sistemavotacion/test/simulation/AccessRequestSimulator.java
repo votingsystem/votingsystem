@@ -169,7 +169,7 @@ public class AccessRequestSimulator extends Simulator<VotingSimulationData>
         }
     }
 
-    @Override public VotingSimulationData call() throws Exception {
+    @Override public Respuesta call() throws Exception {
         logger.debug("call - total number of electors: " +  numberRequests);
         simulationData.setBegin(System.currentTimeMillis());
         simulatorExecutor.execute(new Runnable() {
@@ -199,8 +199,10 @@ public class AccessRequestSimulator extends Simulator<VotingSimulationData>
         simulationData.setFinish(System.currentTimeMillis());
         if(timer != null) timer.stop();
         if(simulatorExecutor == null) simulatorExecutor.shutdownNow();
+        
+        Respuesta respuesta = new Respuesta(Respuesta.SC_FINALIZADO,simulationData);
         if(simulationListener != null) {
-            simulationListener.setSimulationResult(simulationData);
+            simulationListener.processResponse(respuesta);
         } else {
             logger.debug("--------------- SIMULATION RESULT------------------");
             simulationData.setFinish(System.currentTimeMillis());
@@ -217,8 +219,7 @@ public class AccessRequestSimulator extends Simulator<VotingSimulationData>
             logger.debug("------------------- FINISHED ----------------------");
         }
         
-        
-        return simulationData;
+        return respuesta;
     }
 
 }

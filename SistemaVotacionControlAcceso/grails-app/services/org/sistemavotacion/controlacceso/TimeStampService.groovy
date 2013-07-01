@@ -9,8 +9,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.SecureRandom;
 import java.security.cert.*
 import java.security.cert.Certificate;
 import java.util.ArrayList;
@@ -28,10 +32,14 @@ import java.security.cert.*;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.cert.CertUtils;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cms.CMSSignedData
 import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.bc.BcDigestCalculatorProvider;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder
 import org.bouncycastle.tsp.*;
@@ -43,11 +51,15 @@ import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.operator.DigestCalculator;
+import org.bouncycastle.asn1.cmp.PKIFailureInfo
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.SignerInfoGenerator;
 import org.bouncycastle.cms.SignerInformation;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.cms.CMSAttributes;
@@ -81,11 +93,20 @@ class TimeStampService {
 	private org.sistemavotacion.seguridad.TimeStampResponseGenerator timeStampResponseGen;
 	private SignerInformationVerifier timeStampSignerInfoVerifier
 	private byte[] signingCertBytes
-
+	private String tsaName
+	
+	
 	private static List ACCEPTEDPOLICIES = ["1.2.3", "1.2.4"];
 	private static List ACCEPTEDEXTENSIONS = [];
 	private static List ACCEPTEDALGORITHMS = ["SHA1","SHA256", "SHA512"];
-		
+	
+	
+	private transient SecureRandom random;
+	/** Random generator algorithm. */
+	private static String algorithm = "SHA1PRNG";
+	private X509Certificate signingCert;
+	private static final int DEFAULT_MAXSERIALNUMBERLENGTH = 8;
+	
 	private static HashMap<String, String> ACCEPTEDALGORITHMSMAP = [
 			"GOST3411":TSPAlgorithms.GOST3411,
 			"MD5":TSPAlgorithms.MD5,
@@ -102,7 +123,6 @@ class TimeStampService {
 	//@Override
 	public void afterPropertiesSet() throws Exception {
 		log.debug(" - afterPropertiesSet - afterPropertiesSet - afterPropertiesSet");
-		sernoGenerator = new AtomicLong(SelloTiempo.count())
 		def rutaAlmacenClaves = getAbsolutePath("${grailsApplication.config.SistemaVotacion.rutaAlmacenClaves}")
 		File keyStoreFile = new File(rutaAlmacenClaves);
 		String aliasClaves = grailsApplication.config.SistemaVotacion.aliasClavesFirma
@@ -110,7 +130,7 @@ class TimeStampService {
 		KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(
 			FileUtils.getBytesFromFile(keyStoreFile), password.toCharArray());
 		PrivateKey signingKey = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray());
-		X509Certificate signingCert = keyStore.getCertificate(aliasClaves)
+		signingCert = keyStore.getCertificate(aliasClaves)
 		
 		signingCertBytes = CertUtil.fromX509CertToPEM (signingCert)
 		
@@ -180,7 +200,7 @@ class TimeStampService {
 		timeStampResponseGen = new TimeStampResponseGenerator(timeStampTokenGen,
 			getAcceptedAlgorithms(), getAcceptedPolicies(),
 			getAcceptedExtensions())
-	}
+	}	
 	
 	public Respuesta processRequest(byte[] timeStampRequestBytes,
 			Locale locale) throws Exception {	
@@ -192,13 +212,31 @@ class TimeStampService {
 		}
 		TimeStampRequest timeStampRequest = new TimeStampRequest(timeStampRequestBytes)
 		final Date date = DateUtils.getTodayDate();
-		long numSerie = getSernoGenerator().incrementAndGet()
-		final BigInteger serialNumber = BigInteger.valueOf(numSerie);
-		log.debug("processRequest - serialNumber: '${numSerie}'" +
+		//long numSerie = getSernoGenerator().incrementAndGet()
+		//final BigInteger serialNumber = BigInteger.valueOf(numSerie);
+		final BigInteger serialNumber = getSerno(DEFAULT_MAXSERIALNUMBERLENGTH)
+		long numSerie = serialNumber.longValue()
+		
+		
+		log.debug("processRequest - serialNumber: '${serialNumber}'" +
 			" - CertReq: ${timeStampRequest.getCertReq()}");	
-		final TimeStampResponse timeStampResponse = getTimeStampResponseGen().generate(
+		
+		final TimeStampToken token = null;
+		
+		synchronized(this) {
+			final TimeStampResponse timeStampResponse = getTimeStampResponseGen().generate(
 				timeStampRequest, serialNumber, date);
-		final TimeStampToken token = timeStampResponse.getTimeStampToken();
+			token = timeStampResponse.getTimeStampToken();
+			PKIFailureInfo failureInfo = timeStampResponse.getFailInfo();
+			if (failureInfo != null) {
+				log.debug("timeStampResponse Status: " + timeStampResponse.getStatus())
+				log.error("timeStampResponse Failure info: ${failureInfo.intValue()}");
+			}
+		}
+		
+		
+
+		
 		
 		//String timeStampRequestStr = new String(Base64.encode(timeStampRequestBytes));
 		//log.debug("timeStampRequestStr: ${timeStampRequestStr}")
@@ -218,7 +256,7 @@ class TimeStampService {
 		AtomicBoolean done = new AtomicBoolean(false);
 		int numAttemp = 0;
 		while(!done.get()) {
-			log.error(" ------ validating token");
+			log.debug(" ------ validating token");
 			try {
 				token.validate(sigVerifier)
 				done.set(true)
@@ -226,6 +264,8 @@ class TimeStampService {
 				if(numAttemp < numMaxAttempts) {
 					++numAttemp;
 				} else {
+					File errorFile = new File("${grailsApplication.config.SistemaVotacion.errorsBaseDir}/timeStampError_${System.currentTimeMillis()}")
+					errorFile.setBytes(Base64.encode(token.getEncoded()))
 					log.error(" ------ Exceeded max num attemps - ${ex.getMessage()}", ex);
 					throw ex
 				}
@@ -239,7 +279,22 @@ class TimeStampService {
 			estado:SelloTiempo.Estado.OK,
 			timeStampRequestBytes:timeStampRequestBytes).save()
 		return new Respuesta(codigoEstado:Respuesta.SC_OK,
-			timeStampToken:token.getEncoded())
+			messageBytes:token.getEncoded())
+	}
+			
+	public BigInteger getSerno(int maxLength) {
+		if (random == null) {
+			try {
+				random = SecureRandom.getInstance(algorithm);
+			} catch (NoSuchAlgorithmException ex) {
+				log.error(ex.getMessage(), ex)
+			}
+		}
+		
+		final byte[] sernobytes = new byte[maxLength];
+		random.nextBytes(sernobytes);
+		BigInteger serno = new BigInteger(sernobytes).abs();
+		return serno;
 	}
 		
 	public Respuesta validateToken(TimeStampToken  tsToken, Locale locale) {
@@ -292,7 +347,7 @@ class TimeStampService {
 			baos.close();
 			
 			if(!Arrays.equals(digestToken, resultDigest)) {
-				//String tokenStr = new String(Base64.encode(tsToken.getEncoded()));
+				String tokenStr = new String(Base64.encode(tsToken.getEncoded()));
 				String resultDigestStr = new String(Base64.encode(resultDigest));
 				String digestTokenStr = new String(Base64.encode(digestToken));
 				msg = "resultDigestStr '${resultDigestStr} - digestTokenStr '${digestTokenStr}'"
@@ -320,13 +375,16 @@ class TimeStampService {
 				log.error("ERROR - verifyToken - ${msg}")
 				return new Respuesta(codigoEstado:Respuesta.SC_NULL_REQUEST, mensaje:msg)
 			}
-			timeStampToken.validate(getTimeStampSignerInfoVerifier())
+			respuesta = validateToken(timeStampToken, locale)
+			if(Respuesta.SC_OK != respuesta.codigoEstado) return respuesta
+			
+			//timeStampToken.validate(getTimeStampSignerInfoVerifier()) -> Cert validation
+			// errors problems with multiple requests
 			Date timestampDate = timeStampToken.getTimeStampInfo().getGenTime()
-			if(!timestampDate.after(evento.fechaInicio) &&
+			if(!timestampDate.after(evento.fechaInicio) ||
 				!timestampDate.before(evento.fechaFin)) {
-				String dateRangeStr = "[${evento.fechaInicio} - ${evento.fechaFin}]"
 				msg = messageSource.getMessage('timestampDateErrorMsg',
-					[timestampDate, dateRangeStr].toArray(), locale)
+					[timestampDate, evento.fechaInicio, evento.fechaFin].toArray(), locale)
 				log.debug("validateToken - ERROR TIMESTAMP DATE - Event '${evento.id}' - ${msg}")
 				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
 					mensaje:msg, evento:evento)
@@ -376,7 +434,9 @@ class TimeStampService {
 	}
 
 	private AtomicLong getSernoGenerator() {
-		if(!sernoGenerator) afterPropertiesSet()
+		if(!sernoGenerator) {
+			sernoGenerator = new AtomicLong(SelloTiempo.count())
+		}
 		return sernoGenerator
 	}
 

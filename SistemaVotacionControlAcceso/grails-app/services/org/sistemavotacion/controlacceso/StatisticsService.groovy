@@ -50,10 +50,10 @@ class StatisticsService {
 			if(!repAccreditationsMap) {
 				repAccreditationsMap = [:];
 			}
-			Long numUsersWithRepresentativeWithAccessRequest = 
-				repAccreditationsMap.get("numUsersWithRepresentativeWithAccessRequest")
-			if(!numUsersWithRepresentativeWithAccessRequest) 
-				numUsersWithRepresentativeWithAccessRequest = new Long(0)
+			Long numRepresentedWithAccessRequest = 
+				repAccreditationsMap.get("numRepresentedWithAccessRequest")
+			if(!numRepresentedWithAccessRequest) 
+				numRepresentedWithAccessRequest = new Long(0)
 			Long numRepresentativesWithAccessRequest =
 				repAccreditationsMap.get("numRepresentativesWithAccessRequest")
 			if(!numRepresentativesWithAccessRequest) numRepresentativesWithAccessRequest = new Long(0)
@@ -82,7 +82,7 @@ class StatisticsService {
 					if(!repData) repData = new RepresentativeData() 
 					++repData.numRepresentedWithVote
 					representativesMap.put(representativeNIF, repData)
-					++numUsersWithRepresentativeWithAccessRequest
+					++numRepresentedWithAccessRequest
 					break;
 				case VotingEvent.VOTE:
 					++numUserVotes
@@ -129,8 +129,8 @@ class StatisticsService {
 			backupMap.put("numAccessRequest", numAccessRequest)			
 			eventMap.put("BACKUP", backupMap)
 			
-			repAccreditationsMap.put("numUsersWithRepresentativeWithAccessRequest",
-				numUsersWithRepresentativeWithAccessRequest)
+			repAccreditationsMap.put("numRepresentedWithAccessRequest",
+				numRepresentedWithAccessRequest)
 			repAccreditationsMap.put("numVotesRepresentedByRepresentatives",
 				getNumVotesFromRepresentatives(representativesMap))
 			repAccreditationsMap.put("numRepresentativesWithAccessRequest",

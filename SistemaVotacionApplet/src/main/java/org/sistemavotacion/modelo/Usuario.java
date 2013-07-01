@@ -9,14 +9,16 @@ import org.bouncycastle.tsp.TimeStampToken;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import org.sistemavotacion.smime.CMSUtils;
 import org.bouncycastle.util.encoders.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
         
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class Usuario {
-
-    private static final long serialVersionUID = 1L;
+    
+    private static Logger logger = LoggerFactory.getLogger(Usuario.class);
 
     private String nif;
     private String primerApellido;
@@ -171,7 +173,12 @@ public class Usuario {
      * @return the fechaFirma
      */
     public Date getFechaFirma() {
-        return fechaFirma;
+        if(timeStampToken != null) {
+            return timeStampToken.getTimeStampInfo().getGenTime();
+        } else {
+            logger.debug("timeStampToken null");
+            return fechaFirma;
+        } 
     }
 
     /**

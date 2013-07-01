@@ -17,6 +17,7 @@ import javax.mail.Header;
 import javax.mail.internet.MimeMessage;
 import java.security.cert.X509Certificate;
 import java.util.Locale;
+import org.codehaus.groovy.grails.plugins.DomainClassGrailsPlugin
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -36,6 +37,7 @@ class EventoVotacionService {
 	def representativeService
 	def filesService
 	def timeStampService
+	def sessionFactory
 
     Respuesta saveEvent(MensajeSMIME mensajeSMIMEReq, Locale locale) {
 		EventoVotacion event = null
@@ -197,8 +199,7 @@ class EventoVotacionService {
 			if(Respuesta.SC_OK != respuesta.codigoEstado) {
 				log.error("generarCopiaRespaldo - REPRESENTATIVE DATA GEN ERROR  ${respuesta.mensaje}")
 				return respuesta
-			}
-			
+			}			
 			
 			respuesta = firmaService.getEventTrustedCerts(event, locale)
 			if(Respuesta.SC_OK != respuesta.codigoEstado) {
@@ -219,25 +220,15 @@ class EventoVotacionService {
 			byte[] timeStampCertPEMBytes = timeStampService.getSigningCert()
 			File timeStampCertFile = new File("${filesDir.absolutePath}/timeStampCert.pem")
 			timeStampCertFile.setBytes(timeStampCertPEMBytes)
-			
-			List<Voto> votes = null
-			Voto.withTransaction {
-				def criteria = Voto.createCriteria()
-				votes = criteria.list {
-					eq("eventoVotacion", event)
-					eq("estado", Voto.Estado.OK)
-				}
-			}
-
-			def solicitudesAcceso = null
-			SolicitudAcceso.withTransaction {
-				solicitudesAcceso = SolicitudAcceso.findAllWhere(
-					estado:SolicitudAcceso.Estado.OK, eventoVotacion:event)
-			}
-			
-			def backupMetaInfMap = [numVotes:votes.size(),
-				numAccessRequest:solicitudesAcceso.size()]	
+				
+			int numTotalVotes = Voto.countByEstadoAndEventoVotacion(
+				Voto.Estado.OK, event)
+			int numTotalAccessRequests = SolicitudAcceso.countByEstadoAndEventoVotacion(
+				SolicitudAcceso.Estado.OK, event)
+			def backupMetaInfMap = [numVotes:numTotalVotes,
+				numAccessRequest:numTotalAccessRequests]	
 			def metaInfMap = eventoService.updateEventMetaInf(event, Tipo.BACKUP, backupMetaInfMap)
+			log.debug(" metaInfFile ${metaInfFile.path}")
 			metaInfFile.write((metaInfMap as JSON).toString())
 			
 			String voteFileName = messageSource.getMessage('voteFileName', null, locale)
@@ -247,26 +238,64 @@ class EventoVotacionService {
 				'solicitudAccesoFileName', null, locale)
 			String votesBaseDir="${filesDir.absolutePath}/votes"
 			new File(votesBaseDir).mkdirs()
-			votes.each { voto ->
-				Usuario representative = voto?.certificado?.usuario
-				String voteFilePath = null
-				if(representative) {//representative vote, not anonymous
-					voteFilePath = "${votesBaseDir}/${representativeVoteFileName}_${representative.nif}.p7m"
-				} else {
-					//user vote, is anonymous
-					String voteId = String.format('%08d', voto.id)
-					voteFilePath = "${votesBaseDir}/${voteFileName}_${voteId}.p7m"
-				} 
-				MensajeSMIME mensajeSMIME = voto.mensajeSMIME
-				File smimeFile = new File(voteFilePath)
-				smimeFile.setBytes(mensajeSMIME.contenido)
-			}
+
+			
 			String accessRequestBaseDir="${filesDir.absolutePath}/accessRequest"
 			new File(accessRequestBaseDir).mkdirs()
-			solicitudesAcceso.each { solicitud ->
-				MensajeSMIME mensajeSMIME = solicitud.mensajeSMIME
-				File smimeFile = new File("${accessRequestBaseDir}/${solicitudAccesoFileName}_${solicitud.usuario.nif}.p7m")
-				smimeFile.setBytes(mensajeSMIME.contenido)
+			def votes = null
+			long begin = System.currentTimeMillis()
+			Voto.withTransaction {
+				def criteria = Voto.createCriteria()
+				votes = criteria.scroll {
+					eq("estado", Voto.Estado.OK)
+					eq("eventoVotacion", event)
+				}
+				while (votes.next()) {
+					Voto voto = (Voto) votes.get(0);
+					Usuario representative = voto?.certificado?.usuario
+					String voteFilePath = null
+					if(representative) {//representative vote, not anonymous
+						voteFilePath = "${votesBaseDir}/${representativeVoteFileName}_${representative.nif}.p7m"
+					} else {
+						//user vote, is anonymous
+						String voteId = String.format('%08d', voto.id)
+						voteFilePath = "${votesBaseDir}/${voteFileName}_${voteId}.p7m"
+					}
+					MensajeSMIME mensajeSMIME = voto.mensajeSMIME
+					File smimeFile = new File(voteFilePath)
+					smimeFile.setBytes(mensajeSMIME.contenido)
+					if((votes.getRowNumber() % 100) == 0) {
+						String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
+							System.currentTimeMillis() - begin)
+						log.debug("processed ${votes.getRowNumber()} votes of ${numTotalVotes} - ${elapsedTimeStr}");
+						sessionFactory.currentSession.flush()
+						sessionFactory.currentSession.clear()
+					}
+						
+				}
+			}
+			
+			def accessRequests = null
+			begin = System.currentTimeMillis()
+			SolicitudAcceso.withTransaction {
+				def criteria = SolicitudAcceso.createCriteria()
+				accessRequests = criteria.scroll {
+					eq("estado", SolicitudAcceso.Estado.OK)
+					eq("eventoVotacion", event)
+				}
+				while (accessRequests.next()) {
+					SolicitudAcceso accessRequest = (SolicitudAcceso) accessRequests.get(0);
+					MensajeSMIME mensajeSMIME = accessRequest.mensajeSMIME
+					File smimeFile = new File("${accessRequestBaseDir}/${solicitudAccesoFileName}_${accessRequest.usuario.nif}.p7m")
+					smimeFile.setBytes(mensajeSMIME.contenido)
+					if((accessRequests.getRowNumber() % 100) == 0) {
+						String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
+							System.currentTimeMillis() - begin)
+						log.debug(" - accessRequest ${accessRequests.getRowNumber()} of ${numTotalAccessRequests} - ${elapsedTimeStr}");
+						sessionFactory.currentSession.flush()
+						sessionFactory.currentSession.clear()
+					} 
+				}
 			}
 			
 			def ant = new AntBuilder()
@@ -275,7 +304,7 @@ class EventoVotacionService {
 			}
 
 			log.debug("zip backup of event ${event.id} on file ${zipResult.absolutePath}")
-			return new Respuesta(codigoEstado:Respuesta.SC_OK, metaInf:metaInfMap, 
+			return new Respuesta(codigoEstado:Respuesta.SC_OK, data:metaInfMap, 
 				file:zipResult)
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex)

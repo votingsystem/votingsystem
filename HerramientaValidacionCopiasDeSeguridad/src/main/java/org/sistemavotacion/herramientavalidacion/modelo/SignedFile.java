@@ -25,6 +25,7 @@ public class SignedFile {
     
     private byte[] signedFileBytes = null;
     private String name = null;
+    private TimeStampToken timeStampToken = null;
     private SMIMEMessageWrapper smimeMessageWraper = null;
     private boolean signatureVerified = false;
 
@@ -52,7 +53,7 @@ public class SignedFile {
                 //Calendar signDate = pk.getSignDate();
                 //logger.debug(" - checkSignature - signingCert: " + signDate.getTime().toString());
                 //X509Certificate[] pkc = (X509Certificate[])pk.getSignCertificateChain();
-                TimeStampToken timeStampToken = pk.getTimeStampToken();
+                timeStampToken = pk.getTimeStampToken();
                 //logger.debug(" - checkSignature - timeStampToken: " + 
                 //        timeStampToken.getTimeStampInfo().getGenTime().toString());
                 //KeyStore keyStore = firmaService.getTrustedCertsKeyStore()
@@ -64,8 +65,13 @@ public class SignedFile {
             smimeMessageWraper = new SMIMEMessageWrapper(null,
                 new ByteArrayInputStream(signedFileBytes), null);
             signatureVerified = smimeMessageWraper.isValidSignature();
+            timeStampToken = smimeMessageWraper.getFirmante().getTimeStampToken();
         } else {
-            logger.error(" #### UNKNOWN FILE TYPE -> " + name);
+            logger.error(" #### UNKNOWN FILE TYPE -> " + name + 
+                    " trying with SMIMEMessageWrapper");
+            smimeMessageWraper = new SMIMEMessageWrapper(null,
+                new ByteArrayInputStream(signedFileBytes), null);
+            signatureVerified = smimeMessageWraper.isValidSignature();
         }
     }
     

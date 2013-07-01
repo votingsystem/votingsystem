@@ -82,7 +82,7 @@ class TimeStampController {
 			if(Respuesta.SC_OK == respuesta.codigoEstado) {
 				response.status = Respuesta.SC_OK
 				response.contentType = "application/timestamp-response"
-				response.outputStream << respuesta.timeStampToken // Performing a binary stream copy
+				response.outputStream << respuesta.messageBytes // Performing a binary stream copy
 				//response.outputStream.flush()
 			} else {
 				response.status = respuesta.codigoEstado

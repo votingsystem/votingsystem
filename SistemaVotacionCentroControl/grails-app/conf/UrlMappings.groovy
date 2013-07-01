@@ -92,5 +92,13 @@ class UrlMappings {
 				id(matches:/\d*/)
 			}
 		}
+		
+		"/eventoVotacion/$id/votingErrors" {
+			controller = "eventoVotacion"
+			action = "votingErrors"
+			constraints {
+				id(matches:/\d*/)
+			}
+		}
 	}
 }

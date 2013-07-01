@@ -24,7 +24,7 @@ public class SimulationData {
     private int statusCode = Respuesta.SC_ERROR;
     private String message = null;
     private String accessControlURL = null;
-    private Integer maxPendingResponses = null;
+    private Integer maxPendingResponses = 10; //default
     private Integer numRequestsProjected = null;
 
     private AtomicLong numRequests = new AtomicLong(0);
@@ -40,6 +40,7 @@ public class SimulationData {
     private Integer numHoursProjected;
     private Integer numMinutesProjected;
     private Integer numSecondsProjected;
+    private Long eventId;
     
     private String durationStr = null;
     private String backupRequestEmail = null;
@@ -76,6 +77,10 @@ public class SimulationData {
         }
         if (dataJSON.containsKey("event")) {
             evento = Evento.parse(dataJSON.getJSONObject("event"));
+        }
+        if (dataJSON.containsKey("eventId")&& 
+                !JSONNull.getInstance().equals(dataJSON.getLong("eventId"))) {
+            simulationData.setEventId(dataJSON.getLong("eventId"));
         }
         if (dataJSON.containsKey("backupRequestEmail") && 
                 !JSONNull.getInstance().equals(dataJSON.getString("backupRequestEmail"))) {
@@ -354,6 +359,20 @@ public class SimulationData {
      */
     public void seterrorList(List<String> errorList) {
         this.errorList = errorList;
+    }
+
+    /**
+     * @return the eventId
+     */
+    public Long getEventId() {
+        return eventId;
+    }
+
+    /**
+     * @param eventId the eventId to set
+     */
+    public void setEventId(Long eventId) {
+        this.eventId = eventId;
     }
 
 }

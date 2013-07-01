@@ -44,7 +44,7 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
     private final ExecutorService requestExecutor;
     private static CompletionService<Respuesta> requestCompletionService;
     
-    SimulatorListener<UserBaseSimulationData> simulationListener;
+    SimulatorListener simulationListener;
     
     private final CountDownLatch usersWithoutRepresentativeLatch = new CountDownLatch(1);
     private final CountDownLatch repLatch = new CountDownLatch(1);
@@ -55,7 +55,7 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
     
 
     public UserBaseDataSimulator(UserBaseSimulationData simulationData, 
-            SimulatorListener<UserBaseSimulationData> simulationListener) {
+            SimulatorListener simulationListener) {
         super(simulationData);
         this.simulationListener = simulationListener;
         requestExecutor = Executors.newFixedThreadPool(100);
@@ -68,8 +68,7 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
         requestExecutor = Executors.newFixedThreadPool(100);
         requestCompletionService = new ExecutorCompletionService<Respuesta>(requestExecutor);
     }
-
-
+    
     private void createUsersWithoutRepresentative() {
         logger.debug("createUsersWithoutRepresentative - users without representative:" +  
                 simulationData.getNumVotesUsersWithoutRepresentative());
@@ -92,8 +91,8 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
                     usertCertPEMBytes, Contexto.X509_CONTENT_TYPE, certServiceURL);
                 Respuesta respuesta = infoSender.call();
                 if(Respuesta.SC_OK != respuesta.getCodigoEstado()) {
+                    logger.error("ERROR nif: " + userNif + " - msg:" + respuesta.getMensaje());
                     errorList.add(respuesta.getMensaje());
-                    return;
                 }
             } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);
@@ -173,8 +172,11 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
                 addErrorMsg(respuesta.getMensaje());
                 simulationData.getAndIncrementNumRepresentativeRequestsERROR();
             }
-            if(simulationListener != null)
-                simulationListener.updateSimulationData(simulationData);
+            if(simulationListener != null) {
+                respuesta.setData(simulationData); // <- TODO defensive copy
+                simulationListener.processResponse(respuesta);
+            }
+                
         }
 
         if(!errorList.isEmpty()) {
@@ -212,9 +214,11 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
                     addErrorMsg(respuesta.getMensaje());
                     simulationData.getAndIncrementNumDelegationsERROR();
                 }
-                //TODO defensive copy
-                if(simulationListener != null) simulationListener.
-                        updateSimulationData(simulationData);
+                if(simulationListener != null) {
+                    respuesta.setData(simulationData);//TODO -> defensive copy
+                    simulationListener.
+                        processResponse(respuesta);
+                } 
             }        
         }
         repLatch.countDown();
@@ -226,7 +230,7 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
         return representativeNifList.get(randomSelected);
     }
 
-    @Override public UserBaseSimulationData call() throws Exception {
+    @Override public Respuesta<UserBaseSimulationData> call() throws Exception {
         logger.debug("call");
         simulationData.setStatusCode(Respuesta.SC_OK);
         simulationData.setBegin(System.currentTimeMillis());
@@ -297,12 +301,12 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
                         errorsMsg);
         }
         logger.debug("-------------------------------------------------------");
+        Respuesta<UserBaseSimulationData> respuesta = new Respuesta(
+                    Respuesta.SC_FINALIZADO,simulationData);
         if(simulationListener != null)
-            simulationListener.setSimulationResult(simulationData);
-        
-        return simulationData;
+            simulationListener.processResponse(respuesta);   
+        return respuesta;
     }
-
 
     public static void main(String[] args) throws Exception {
         VotingSimulationData simulationData = null;
@@ -326,8 +330,6 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
             UserBaseDataSimulator(simulationData.getUserBaseData(), null);
             simuHelper.call();
         } else logger.error(respuesta.getMensaje());
-        
-        
-
     }
+
 }

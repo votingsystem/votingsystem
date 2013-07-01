@@ -76,6 +76,7 @@ public class MainFrame extends JFrame  implements KeyListener, FocusListener {
                 }
             }
         });
+        setTitle(ContextoPruebas.INSTANCE.getString("mainFrameCaptionLbl"));
     }
                 
     public void readFutures () {
@@ -487,7 +488,8 @@ public class MainFrame extends JFrame  implements KeyListener, FocusListener {
         String urlServidor = StringUtils.prepararURL(controlAccesoTextField.getText());
         controlAccesoTextField.setText(urlServidor);
         String urlInfoServidor = ContextoPruebas.getURLInfoServidor(urlServidor);
-        InfoGetter infoGetter = new InfoGetter(null, urlInfoServidor, null);
+        InfoGetter infoGetter = new InfoGetter(
+                ACCESS_CONTROL_GETTER, urlInfoServidor, null);
         Future<Respuesta> future = ContextoPruebas.INSTANCE.submit(infoGetter);
         queue.add(future);
         tareaEnEjecucion = future;
@@ -496,7 +498,8 @@ public class MainFrame extends JFrame  implements KeyListener, FocusListener {
     public void cargarCentroControl(String urlCentroControl){
         String urlServidor = StringUtils.prepararURL(urlCentroControl);
         String urlInfoServidor = ContextoPruebas.getURLInfoServidor(urlServidor);
-        InfoGetter infoGetter = new InfoGetter(null, urlInfoServidor, null);
+        InfoGetter infoGetter = new InfoGetter(
+                CONTROL_CENTER_GETTER, urlInfoServidor, null);
         controlAccesoTextField.setText(controlAccesoTextField.getText().trim());
         Future<Respuesta> future = ContextoPruebas.INSTANCE.submit(infoGetter);
         queue.add(future);

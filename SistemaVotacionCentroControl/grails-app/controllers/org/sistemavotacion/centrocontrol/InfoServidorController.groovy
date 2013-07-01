@@ -34,7 +34,7 @@ class InfoServidorController {
 		infoServidor.cadenaCertificacionPEM = cadenaCertificacion?.text
 		def controlesAcceso = ControlAcceso.getAll()
 		infoServidor.controlesAcceso = []
-		controlesAcceso?.collect {controlAcceso ->
+		controlesAcceso?.each {controlAcceso ->
 			def controlesAccesoMap = [nombre:controlAcceso.nombre, serverURL:controlAcceso.serverURL,
 				estado:controlAcceso.estado.toString()]
 			infoServidor.controlesAcceso.add(controlesAccesoMap)

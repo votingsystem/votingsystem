@@ -30,11 +30,14 @@ public class TimeStamperTest implements Callable<Respuesta> {
     private SMIMEMessageWrapper documentSMIME;
     private String requestNIF;
     private String urlTimeStampService;
+    private Long eventId;
 
-    public TimeStamperTest (String requestNIF, String urlTimeStampService) 
+    public TimeStamperTest (String requestNIF, 
+            String urlTimeStampService, Long eventId) 
             throws Exception {
         this.requestNIF = requestNIF;
         this.urlTimeStampService = urlTimeStampService;
+        this.eventId = eventId;
     }
         
     @Override
@@ -64,11 +67,12 @@ public class TimeStamperTest implements Callable<Respuesta> {
         return respuesta;
     }
         
-    public static String getRequestDataJSON() {
+    public String getRequestDataJSON() {
         logger.debug("getRepresentativeDataJSOn - ");
         Map map = new HashMap();
         map.put("operation", "TIMESTAMP_TEST");
         map.put("UUID", UUID.randomUUID().toString());
+        map.put("eventId", eventId);
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);
         return jsonObject.toString();
     }

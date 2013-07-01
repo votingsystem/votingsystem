@@ -7,6 +7,8 @@ import static org.sistemavotacion.herramientavalidacion.AppletHerramienta.*;
 import java.io.IOException;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
 import org.sistemavotacion.herramientavalidacion.modelo.SignedFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +30,7 @@ public class ArchivoFirmadoPanel extends JPanel {
     public ArchivoFirmadoPanel(SignedFile signedFile) throws Exception {
         initComponents();
         informacionFirmadaEditorPane.setEditable(false);
-        informacionFirmadaEditorPane.setContentType("text/html");        
+        informacionFirmadaEditorPane.setContentType("text/html");       
         initFileData(signedFile);
     }
 
@@ -61,8 +63,9 @@ public class ArchivoFirmadoPanel extends JPanel {
                         getResource("/resources/images/signature-bad_16x16.png")));
             }
             if(!signedFile.isPDF()) {
-                informacionFirmadaEditorPane.setText(signedFile.
-                        getSMIMEMessageWraper().getSignedContent());
+                JSONObject contentJSON = (JSONObject) JSONSerializer.toJSON(
+                    signedFile.getSMIMEMessageWraper().getSignedContent());
+                informacionFirmadaEditorPane.setText(contentJSON.toString(5));
             }
            
         } catch (Exception ex) {

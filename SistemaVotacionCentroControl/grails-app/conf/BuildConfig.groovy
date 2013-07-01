@@ -1,4 +1,4 @@
-grails.servlet.version = "2.5" // Change depending on target container compliance (2.5 or 3.0)
+grails.servlet.version = "3.0" // Change depending on target container compliance (2.5 or 3.0)
 grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
@@ -72,7 +72,7 @@ grails.project.dependency.resolution = {
 
         build ":tomcat:$grailsVersion"
 
-        compile (":cache:1.0.1", ":cloud-foundry:1.2.3", ":gwt:0.8")
+        compile (":cache:1.0.1", ":gwt:0.8", ":rest-doc-plugin:0.4")
     }
 
 }

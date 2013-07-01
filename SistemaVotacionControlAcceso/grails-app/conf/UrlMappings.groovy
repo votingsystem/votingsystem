@@ -212,6 +212,14 @@ class UrlMappings {
 			}
 		}
 		
+		"/eventoVotacion/$id/votingErrors" {
+			controller = "eventoVotacion"
+			action = "votingErrors"
+			constraints {
+				id(matches:/\d*/)
+			}
+		}
+		
 		"/mensajeSMIME/$id" {
 			controller = "mensajeSMIME"
 			action = "index"
@@ -354,5 +362,6 @@ class UrlMappings {
 				id(matches:/\d*/)
 			}
 		}
+
 	}
 }

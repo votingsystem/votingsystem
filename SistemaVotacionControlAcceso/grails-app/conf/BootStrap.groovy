@@ -16,29 +16,21 @@ class BootStrap {
 	def timeStampService
 	def encryptionService
 	def grailsApplication
+	def filesService
 	
     def init = { servletContext ->
         JSON.registerObjectMarshaller(Date) {
             return it?.format("yyyy-MM-dd' 'HH:mm:ss")
         }
 		
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-		MailcapCommandMap mc = (MailcapCommandMap)CommandMap.getDefaultCommandMap();
-		
-		mc.addMailcap("text/plain;;x-java-content-handler=gnu.mail.handler.TextPlain");
-		mc.addMailcap("text/html;;x-java-content-handler=gnu.mail.handler.TextHtml");
-		mc.addMailcap("text/xml;;x-java-content-handler=gnu.mail.handler.TextXml");
-		mc.addMailcap("multipart/*;;x-java-content-handler=gnu.mail.handler.Multipart");
-		mc.addMailcap("message/rfc822;;x-java-content-handler=gnu.mail.handler.MessageRFC822");
-
-		CommandMap.setDefaultCommandMap(mc);
-		
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());	
 		
 		//We call it here because InitializingBean method interface is called before GORM plugin
 		firmaService.afterPropertiesSet()
 		pdfService.afterPropertiesSet()
 		timeStampService.afterPropertiesSet()
 		encryptionService.afterPropertiesSet()
+		filesService.init()
 		
 		JSON.registerObjectMarshaller(RepresentativeData) {
 			def returnMap = [:]

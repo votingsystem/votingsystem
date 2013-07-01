@@ -5,6 +5,7 @@ import org.sistemavotacion.controlacceso.modelo.Respuesta;
 
 import java.security.MessageDigest
 import java.text.DateFormat;
+import java.text.DecimalFormat
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -26,7 +27,7 @@ import java.util.concurrent.TimeUnit
 
 class RepresentativeService {
 	
-	public enum State{WITHOUT_ACCESS_REQUEST, WITH_ACCESS_REQUEST, WITH_VOTE}
+	enum State {WITHOUT_ACCESS_REQUEST, WITH_ACCESS_REQUEST, WITH_VOTE}
 	
 	def subscripcionService
 	def messageSource
@@ -35,6 +36,7 @@ class RepresentativeService {
 	def firmaService
 	def filesService
 	def eventoService
+	def sessionFactory
 
 	/*
 	 * Creates backup of the state of all the representatives for a closed event
@@ -65,133 +67,129 @@ class RepresentativeService {
 			log.debug("getAccreditationsBackupForEvent - backup file already exists")
 			return new Respuesta(codigoEstado:Respuesta.SC_OK,
 				file:zipResult)
-		}
+		}		
 		
-		def representatives = null;
-
-		Usuario.withTransaction {
-			representatives = Usuario.findAllByTypeAndRepresentativeRegisterDateLessThanEquals(
+		int numRepresentatives = Usuario.
+			countByTypeAndRepresentativeRegisterDateLessThanEquals(
 				Usuario.Type.REPRESENTATIVE, selectedDate)
-			/*def criteria = Usuario.createCriteria()
-			representatives = criteria.list (max: 1000000, offset: 0) {
-				eq("type", 	 Usuario.Type.REPRESENTATIVE)
-				le("representativeRegisterDate", selectedDate)
-			}*/
-		}
-
-		log.debug("num representatives: ${representatives.size()}")
+		log.debug("num representatives: ${numRepresentatives}")
 		
-		int numRepresentatives = 0
 		int numRepresentativesWithAccessRequest = 0
 		int numRepresentativesWithVote = 0
 		int numTotalRepresented = 0
 		int numTotalRepresentedWithAccessRequest = 0
-		int numVotesRepresentedByRepresentatives = 0
-
-		//Only counts representatives active when event finish
-		if(!representatives.isEmpty()) {
+		int numVotesRepresentedByRepresentatives = 0	
+		
+		long representativeBegin = System.currentTimeMillis()
+		def criteria = Usuario.createCriteria()
+		def representatives = criteria.scroll {
+			eq("type", Usuario.Type.REPRESENTATIVE)
+			le("representativeRegisterDate", selectedDate)
+		}
+		while (representatives.next()) {
+			Usuario representative = (Usuario) representatives.get(0);			
 			File representativesReportFile = mapFiles.representativesReportFile
 			representativesReportFile.write("")
-			representatives.each { representative ->
+			String representativeBaseDir = "${filesDir.absolutePath}/representative_${representative.nif}"
+			new File(representativeBaseDir).mkdirs()
 
-				String representativeBaseDir = "${filesDir.absolutePath}/representative_${representative.nif}"
-				new File(representativeBaseDir).mkdirs()
-
-				if(representative.type != Usuario.Type.REPRESENTATIVE) {
-					//check if active on selected date
-					def revocationMessage
-					MensajeSMIME.withTransaction {
-						def criteria = MensajeSMIME.createCriteria()
-						revocationMessage = criteria.list (max: 1000000, offset: 0) {
-							eq("tipo", Tipo.REPRESENTATIVE_REVOKE)
-							le("dateCreated", selectedDate)
-						}
-					}
-					if(revocationMessage) {
-						log.debug("${representative.nif} wasn't active on ${selectedDate}")
-						return
-					}
+			if(representative.type != Usuario.Type.REPRESENTATIVE) {
+				//check if active on selected date
+				MensajeSMIME revocationMessage = MensajeSMIME.findByTipoAndDateCreatedLessThan(
+					Tipo.REPRESENTATIVE_REVOKE, selectedDate)
+				if(revocationMessage) {
+					log.debug("${representative.nif} wasn't active on ${selectedDate}")
+					continue
 				}
-				//representative active on selected date
-				numRepresentatives++;
-				def representationDoc
-				int numRepresented = 1 //The representative itself
-				int numUsersWithRepresentativeWithAccessRequest = 0
-				RepresentationDocument.withTransaction {
-					def criteria = RepresentationDocument.createCriteria()
-					representationDoc = criteria.list (max: 1000000, offset: 0) {
-						eq("representative", representative)
-						le("dateCreated", selectedDate)
-						or {
-							eq("state", RepresentationDocument.State.CANCELLED)
-							eq("state", RepresentationDocument.State.OK)
-						}
-						or {
-							isNull("dateCanceled")
-							gt("dateCanceled", selectedDate)
-						}
+			}
+			//representative active on selected date
+			def representationDoc
+			int numRepresented = 1 //The representative itself
+			int numRepresentedWithAccessRequest = 0
+			
+			def representationDocumentCriteria = RepresentationDocument.createCriteria()
+			def representationDocuments = representationDocumentCriteria.scroll {
+					eq("representative", representative)
+					le("dateCreated", selectedDate)
+					or {
+						eq("state", RepresentationDocument.State.CANCELLED)
+						eq("state", RepresentationDocument.State.OK)
 					}
-					numRepresented = representationDoc.totalCount + 1; //The representative itself
-					numTotalRepresented += numRepresented
-					log.debug("${representative.nif} has ${numRepresented} representations")
-				}
-				representationDoc.each {representationDocument ->
-					Usuario represented = representationDocument.user
-					SolicitudAcceso representedAccessRequest = SolicitudAcceso.findWhere(
-						estado:SolicitudAcceso.Estado.OK, usuario:represented, eventoVotacion:event)
-					String repDocFileName = null 
-					if(representedAccessRequest) {
-						numUsersWithRepresentativeWithAccessRequest++
-						repDocFileName = "${representativeBaseDir}/WithRequest_RepDoc_${represented.nif}.p7m"
-					} else repDocFileName = "${representativeBaseDir}/RepDoc_${represented.nif}.p7m"
-					File representationDocFile = new File(repDocFileName)
-					representationDocFile.setBytes(representationDocument.activationSMIME.contenido)
-				}
-				log.debug("representative: ${representative.nif} - numUsersWithRepresentativeWithAccessRequest: ${numUsersWithRepresentativeWithAccessRequest}")
-				numTotalRepresentedWithAccessRequest += numUsersWithRepresentativeWithAccessRequest
-				SolicitudAcceso solicitudAcceso = null
-				State state = State.WITHOUT_ACCESS_REQUEST
-				SolicitudAcceso.withTransaction {
-					solicitudAcceso = SolicitudAcceso.findWhere(
-						eventoVotacion:event,
-						estado:SolicitudAcceso.Estado.OK, usuario:representative)
-					if(solicitudAcceso) {//Representative has access request
-						numRepresentativesWithAccessRequest++;
-						state = State.WITH_ACCESS_REQUEST
+					or {
+						isNull("dateCanceled")
+						gt("dateCanceled", selectedDate)
 					}
+			}
+			while (representationDocuments.next()) {
+				++numRepresented
+				RepresentationDocument repDocument = (RepresentationDocument) representationDocuments.get(0);
+				Usuario represented = repDocument.user
+				SolicitudAcceso representedAccessRequest = SolicitudAcceso.findWhere(
+					estado:SolicitudAcceso.Estado.OK, usuario:represented, eventoVotacion:event)
+				String repDocFileName = null
+				if(representedAccessRequest) {
+					numRepresentedWithAccessRequest++
+					repDocFileName = "${representativeBaseDir}/WithRequest_RepDoc_${represented.nif}.p7m"
+				} else repDocFileName = "${representativeBaseDir}/RepDoc_${represented.nif}.p7m"
+				File representationDocFile = new File(repDocFileName)
+				representationDocFile.setBytes(repDocument.activationSMIME.contenido)
+				if((representationDocuments.getRowNumber() % 100) == 0) {
+					sessionFactory.currentSession.flush()
+					sessionFactory.currentSession.clear()
+					log.debug("Representative ${representative.nif} - processed ${representationDocuments.getRowNumber()} representations");
 				}
-				def voteResults
-				if(solicitudAcceso?.id) {
-					Voto.withTransaction {
-						def criteria = Voto.createCriteria()
-						voteResults = criteria.list (offset: 0) {
-							createAlias("certificado", "certificado")
-							eq("certificado.usuario", representative)
-							eq("estado", Voto.Estado.OK)
-							eq("eventoVotacion", event)
-						}
+					
+			}
+			numTotalRepresented += numRepresented			
+			numTotalRepresentedWithAccessRequest += numRepresentedWithAccessRequest
+			SolicitudAcceso solicitudAcceso = null
+			State state = State.WITHOUT_ACCESS_REQUEST
+			SolicitudAcceso.withTransaction {
+				solicitudAcceso = SolicitudAcceso.findWhere(
+					eventoVotacion:event, usuario:representative,
+					estado:SolicitudAcceso.Estado.OK)
+				if(solicitudAcceso) {//Representative has access request
+					numRepresentativesWithAccessRequest++;
+					state = State.WITH_ACCESS_REQUEST
+				}
+			}
+			Voto representativeVote
+			if(solicitudAcceso) {
+				Voto.withTransaction {
+					def voteCriteria = Voto.createCriteria()
+					representativeVote = voteCriteria.get () {
+						createAlias("certificado", "certificado")
+						eq("certificado.usuario", representative)
+						eq("estado", Voto.Estado.OK)
+						eq("eventoVotacion", event)
 					}
 				}
-				if(voteResults && !voteResults.isEmpty()) {
-					state = State.WITH_VOTE
-					numRepresentativesWithVote++
-					numVotesRepresentedByRepresentatives += numRepresented - numUsersWithRepresentativeWithAccessRequest
-				}
-				
-				String csvLine = "${representative.nif}, " + 
-					 "numRepresented:${String.format('%08d', numRepresented)}, " +
-					"numUsersWithRepresentativeWithAccessRequest:${String.format('%08d', numUsersWithRepresentativeWithAccessRequest)}, " +
-					"${state.toString()}\n"
-				log.debug("csvLine -> ${csvLine}")
-				
-				representativesReportFile.append(csvLine)
-			}//end representative iteration				
+			}
+			if(representativeVote) {
+				state = State.WITH_VOTE
+				numRepresentativesWithVote++
+				numVotesRepresentedByRepresentatives += numRepresented - numRepresentedWithAccessRequest
+			}
+			
+			String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
+				System.currentTimeMillis() - representativeBegin)
+			DecimalFormat formatted = new DecimalFormat("00000000");
+			String csvLine = "${representative.nif}, " +
+				 "numRepresented:${formatted.format(numRepresented)}, " +
+				"numRepresentedWithAccessRequest:${String.format('%08d', numRepresentedWithAccessRequest)}, " +
+				"${state.toString()}\n"
+			log.debug("csvLine ${representatives.getRowNumber()}/${numRepresentatives} - ${elapsedTimeStr} -> ${csvLine}")
+			representativesReportFile.append(csvLine)
+			if((representatives.getRowNumber() % 100) == 0) {
+				sessionFactory.currentSession.flush()
+				sessionFactory.currentSession.clear()
+			}
 		}
 
 		def metaInfMap = [numRepresentatives:numRepresentatives,
 			numRepresentativesWithAccessRequest:numRepresentativesWithAccessRequest,
 			numRepresentativesWithVote:numRepresentativesWithVote,
-			numUsersWithRepresentativeWithAccessRequest:numTotalRepresentedWithAccessRequest,
+			numRepresentedWithAccessRequest:numTotalRepresentedWithAccessRequest,
 			numRepresented:numTotalRepresented, 
 			numVotesRepresentedByRepresentatives:numVotesRepresentedByRepresentatives]
 		
@@ -200,12 +198,12 @@ class RepresentativeService {
 		/*def ant = new AntBuilder()
 		ant.zip(destfile: zipResult, basedir: filesDir.absolutePath)*/
 		
-		return new Respuesta(metaInf:metaInfMap,
+		return new Respuesta(data:metaInfMap,
 			codigoEstado:Respuesta.SC_OK)
 	}
 	
 	/*
-	 * Makes a Representative map representing the state on the moment
+	 * Makes a Representative map
 	 */
 	private synchronized Respuesta getAccreditationsMapForEvent (
 			EventoVotacion event, Locale locale){
@@ -216,9 +214,6 @@ class RepresentativeService {
 			return new Respuesta(codigoEstado:Respuesta.SC_ERROR, mensaje:msg)
 		}
 		Date selectedDate = DateUtils.getTodayDate();
-		
-		def representatives = Usuario.findAllWhere(type:Usuario.Type.REPRESENTATIVE);
-
 		int numRepresentativesWithAccessRequest = 0
 		
 		SolicitudAcceso.withTransaction {
@@ -237,65 +232,80 @@ class RepresentativeService {
 		int numVotesRepresentedByRepresentatives = 0
 		
 		Map representativesMap = [:]
-		representatives.each { representative ->
-			int numRepresented = 1 //The representative itself
-			int numUsersWithRepresentativeWithAccessRequest = 0
-			numRepresented = Usuario.countByRepresentative(representative) + 1; //The representative itself
+		
+		def criteria = Usuario.createCriteria()
+		def representatives = criteria.scroll {
+			eq("type", Usuario.Type.REPRESENTATIVE)
+		}
+		
+		while (representatives.next()) {
+			Usuario representative = (Usuario) representatives.get(0);
+			int numRepresented = Usuario.countByRepresentative(representative) + 1; //The representative itself
 			numTotalRepresented += numRepresented
-			log.debug("${representative.nif} has ${numRepresented} representations")
-			
+			log.debug("${representative.nif} represents '${numRepresented}' users")
+
+			def numRepresentedWithAccessRequest = 0
+			SolicitudAcceso.withTransaction {
+				def accessRequestCriteria = SolicitudAcceso.createCriteria()
+				numRepresentedWithAccessRequest = accessRequestCriteria.count {
+					createAlias("usuario","usuario")
+					eq("usuario.representative", representative)
+					eq("estado", SolicitudAcceso.Estado.OK)
+					eq("eventoVotacion", event)
+				}
+			}
+			numTotalRepresentedWithAccessRequest += numRepresentedWithAccessRequest
+						
 			def representativeVote
 			Voto.withTransaction {
-				def criteria = Voto.createCriteria()
-				representativeVote = criteria.get {
+				def voteCriteria = Voto.createCriteria()
+				representativeVote = voteCriteria.get {
 					createAlias("certificado", "certificado")
 					eq("certificado.usuario", representative)
 					eq("estado", Voto.Estado.OK)
 					eq("eventoVotacion", event)
 				}
 			}
-			if(representativeVote) ++numRepresentativesWithVote
-
-			def numRepresentedWithAccessRequest
-			SolicitudAcceso.withTransaction {
-				def criteria = SolicitudAcceso.createCriteria()
-				numRepresentedWithAccessRequest = criteria.count {
-					createAlias("usuario","usuario")
-					eq("usuario.representative", representative)
-					eq("estado", SolicitudAcceso.Estado.OK)
-					eq("eventoVotacion", event)
-				}
-			}			
-			numTotalRepresentedWithAccessRequest += numRepresentedWithAccessRequest
+			int numVotesRepresentedByRepresentative = 0
+			if(representativeVote) {
+				++numRepresentativesWithVote
+				numVotesRepresentedByRepresentative = 
+					numRepresented  - numRepresentedWithAccessRequest
+			} 
+			numVotesRepresentedByRepresentatives += numVotesRepresentedByRepresentative
 			
 			Map representativeMap = [
 				optionSelectedId:representativeVote?.opcionDeEvento?.id,
 				numRepresentedWithVote:numRepresentedWithAccessRequest,
-				numTotalRepresentations: numRepresented]
+				numTotalRepresentations: numRepresented,
+				numVotesRepresentedByRepresentative:numVotesRepresentedByRepresentative]
 			representativesMap[representative.nif] = representativeMap
+			if((representatives.getRowNumber() % 100) == 0) {
+				sessionFactory.currentSession.flush() 
+				sessionFactory.currentSession.clear()
+			}
 		}
 		
 		def metaInfMap = [numRepresentatives:representatives.size(),
 			numRepresentativesWithAccessRequest:numRepresentativesWithAccessRequest,
 			numRepresentativesWithVote:numRepresentativesWithVote,
-			numUsersWithRepresentativeWithAccessRequest:numTotalRepresentedWithAccessRequest,
+			numRepresentedWithAccessRequest:numTotalRepresentedWithAccessRequest,
 			numRepresented:numTotalRepresented,
 			numVotesRepresentedByRepresentatives:numVotesRepresentedByRepresentatives,
 			representatives:representativesMap]
 		
-		return new Respuesta(codigoEstado:Respuesta.SC_OK,
-			metaInf:metaInfMap)
+		return new Respuesta(codigoEstado:Respuesta.SC_OK, data:metaInfMap)
 	}
 	
 					
-	private Respuesta getAccreditationsBackup (Usuario representative,
-		Date selectedDate, Locale locale){
-		log.debug("getAccreditationsBackup - representative: ${representative.id}" +
+	private synchronized Respuesta getAccreditationsBackup (
+		Usuario representative, Date selectedDate, Locale locale){
+		log.debug("getAccreditationsBackup - representative: ${representative.nif}" +
 			" - selectedDate: ${selectedDate}")
-		def results
+		def representationDocuments
 		RepresentationDocument.withTransaction {
 			def criteria = RepresentationDocument.createCriteria()
-			results = criteria.list {
+			representationDocuments = criteria.scroll {
 				eq("representative", representative)
 				le("dateCreated", selectedDate)
 				or {
@@ -309,9 +319,7 @@ class RepresentativeService {
 			}
 		}
 		
-		log.debug("getAccreditationsBackup - number of representations: ${results?.size()}")
-		
-		def selectedDateStr = DateUtils.getShortStringFromDate(DateUtils.getTodayDate())
+		def selectedDateStr = DateUtils.getShortStringFromDate(selectedDate)
 		String zipNamePrefix = messageSource.getMessage(
 			'representativeAcreditationsBackupFileName', null, locale);
 		def basedir = "${grailsApplication.config.SistemaVotacion.baseRutaCopiaRespaldo}" +
@@ -322,37 +330,37 @@ class RepresentativeService {
 		if(zipResult.exists()) {
 			 metaInfFile = new File("${basedir}/meta.inf")
 			 if(metaInfFile) {
-				 def metaInfJSON = JSON.parse(metaInfFile.text)
+				 def metaInfMap = JSON.parse(metaInfFile.text)
 				 log.debug("getAccreditationsBackup - send previous request")
-				 Map datos = [cantidad:metaInfJSON.numberOfAccreditations]
 				 return new Respuesta(codigoEstado:Respuesta.SC_OK, 
-					 file:zipResult, datos:datos)
+					 file:zipResult, data:metaInfMap)
 			 }
 		}
 		new File(basedir).mkdirs()
 		String accreditationFileName = messageSource.getMessage('accreditationFileName', null, locale)
-		int i = 0
-		MensajeSMIME.withTransaction {
-			results.each { acReq ->
-				MensajeSMIME mensajeSMIME = acReq.activationSMIME
-				log.debug("getAccreditationsBackup - copying mensajeSMIME '${mensajeSMIME.id}'")
-				File smimeFile = new File("${basedir}/${accreditationFileName}_${i}")
-				smimeFile.setBytes(mensajeSMIME.contenido)
-				i++;
-			}
-		}
 
-		def metaInfMap = [numberOfAccreditations:i, selectedDate: DateUtils.getStringFromDate(selectedDate),
+		int numAccreditations = 0
+		while (representationDocuments.next()) {
+			++numAccreditations
+			RepresentationDocument representationDocument = (RepresentationDocument)representationDocuments.get(0);
+			MensajeSMIME mensajeSMIME = representationDocument.activationSMIME
+			File smimeFile = new File("${basedir}/${accreditationFileName}_${representationDocument.id}")
+			smimeFile.setBytes(mensajeSMIME.contenido)
+			if((representationDocuments.getRowNumber() % 100) == 0) {
+				sessionFactory.currentSession.flush() 
+				sessionFactory.currentSession.clear()
+				log.debug("getAccreditationsBackup - processed ${representationDocuments.getRowNumber()} representations")
+			}
+				
+		}
+		def metaInfMap = [numAccreditations:numAccreditations, selectedDate: selectedDateStr,
 			representativeURL:"${grailsApplication.config.grails.serverURL}/representative/${representative.id}"]
-		String metaInfJSONStr = metaInfMap as JSON
 		metaInfFile = new File("${basedir}/meta.inf")
 		metaInfFile.write((metaInfMap as JSON).toString())
 		def ant = new AntBuilder()
-		ant.zip(destfile: "${basedir}.zip", basedir: basedir)
-		zipResult = new File("${basedir}.zip")
+		ant.zip(destfile: zipResult, basedir: basedir)
 		log.debug("getAccreditationsBackup - destfile.name '${zipResult.name}'")
-		Map datos = [cantidad:i]
-		return new Respuesta(codigoEstado:Respuesta.SC_OK, datos:datos, file:zipResult)
+		return new Respuesta(codigoEstado:Respuesta.SC_OK, data:metaInfMap, file:zipResult)
 	}
 	
 	//{"operation":"REPRESENTATIVE_SELECTION","representativeNif":"...","representativeName":"...","UUID":"..."}
@@ -412,7 +420,7 @@ class RepresentativeService {
 							getTimeStampInfo().getGenTime();
 					representationDocument.save(flush:true)
 					log.debug("cancelRepresentationDocument - cancelled user '${usuario.nif}' representationDocument ${representationDocument.id}")
-				} else log.debug("cancelRepresentationDocument - user '${usuario.nif}' doesn't have representative")
+				} else log.debug("cancelRepresentationDocument - user '${usuario.nif}' without representative")
 				
 				
 				representationDocument = new RepresentationDocument(activationSMIME:mensajeSMIMEReq,
@@ -446,7 +454,6 @@ class RepresentativeService {
 			return new Respuesta(codigoEstado:Respuesta.SC_ERROR,
 				mensaje:msg, tipo:Tipo.REPRESENTATIVE_SELECTION_ERROR)
 		}
-
 	}
 	
 	private void cancelRepresentationDocument(MensajeSMIME mensajeSMIMEReq, Usuario usuario) {
@@ -460,7 +467,7 @@ class RepresentativeService {
 				representationDocument.dateCanceled = usuario.getTimeStampToken().
 						getTimeStampInfo().getGenTime();
 				representationDocument.save(flush:true)
-				log.debug("cancelRepresentationDocument - cancelled user '${usuario.nif}' representationDocument ${representationDocument.id}")
+				log.debug("cancelRepresentationDocument - user '${usuario.nif}' representationDocument ${representationDocument.id}")
 			} else log.debug("cancelRepresentationDocument - user '${usuario.nif}' doesn't have representative")
 		}
 	}
@@ -510,7 +517,8 @@ class RepresentativeService {
 				usuario.save(flush:true)
 			}
 			Image.withTransaction {
-				def images = Image.findAllWhere(usuario:usuario)
+				def images = Image.findAllWhere(usuario:usuario,
+					type:Image.Type.REPRESENTATIVE)
 				images?.each {
 					it.type = Image.Type.REPRESENTATIVE_CANCELLED
 					it.save()
@@ -541,7 +549,7 @@ class RepresentativeService {
 	
 	private Respuesta getVotingHistoryBackup (Usuario representative, 
 		Date dateFrom, Date dateTo, Locale locale){
-		log.debug("getVotingHistoryBackup - representative: ${representative.id}" + 
+		log.debug("getVotingHistoryBackup - representative: ${representative.nif}" + 
 			" - dateFrom: ${dateFrom} - dateTo: ${dateTo}")
 		
 		def dateFromStr = DateUtils.getShortStringFromDate(dateFrom)
@@ -557,42 +565,52 @@ class RepresentativeService {
 		if(zipResult.exists()) {
 			 metaInfFile = new File("${basedir}/meta.inf")
 			 if(metaInfFile) {
-				 def metaInfJSON = JSON.parse(metaInfFile.text)
-				 log.debug("============= getVotingHistoryBackup - ${zipResult.name} already exists");
-				 /*Map datos = [cantidad:metaInfJSON.numberVotes]
+				 def metaInfMap = JSON.parse(metaInfFile.text)
+				 log.debug("getVotingHistoryBackup - ${zipResult.name} already exists");
 				 return new Respuesta(codigoEstado:Respuesta.SC_OK, file:zipResult,
-					 datos:datos)*/
+					 data:metaInfMap)
 			 }
 		}
-			
 		new File(basedir).mkdirs()
 		String voteFileName = messageSource.getMessage('voteFileName', null, locale)
-		int i = 0
-		log.debug("============= TODO");
-		/*def criteria = RepresentationDocument.createCriteria()
-		def results = criteria.list {
-			eq("state", RepresentationDocument.State.OK)
-			eq("representative", representative)
-			and {
-				le("dateCreated", selectedDate)
+		int numVotes = 0
+		Voto.withTransaction {
+			def voteCriteria = Voto.createCriteria()
+			def representativeVotes = voteCriteria.scroll {
+				createAlias("certificado", "certificado")
+				eq("certificado.usuario", representative)
+				eq("estado", Voto.Estado.OK)
+				between("dateCreated", dateFrom, dateTo)
+			}
+			while (representativeVotes.next()) {
+				numVotes++
+				Voto vote = (Voto) representativeVotes.get(0);
+				MensajeSMIME voteSMIME = vote.mensajeSMIME
+				
+				String voteId = String.format('%08d', vote.id)
+				String voteFilePath = "${basedir}/${voteFileName}_${voteId}.p7m"
+				MensajeSMIME mensajeSMIME = vote.mensajeSMIME
+				File smimeFile = new File(voteFilePath)
+				smimeFile.setBytes(mensajeSMIME.contenido)
+			}
+			log.debug("${representative.nif} -> ${numVotes} votes ");
+			if((representativeVotes.getRowNumber() % 100) == 0) {
+				sessionFactory.currentSession.flush() 
+				sessionFactory.currentSession.clear()
 			}
 		}
-		results.each { it ->
-			MensajeSMIME mensajeSMIME = it.activationSMIME
-			File smimeFile = new File("${basedir}/${voteFileName}_${i}")
-			smimeFile.setBytes(mensajeSMIME.contenido)
-			i++;
-		}*/
-		def metaInfMap = [numberVotes:i, dateFrom: DateUtils.getStringFromDate(dateFrom),
-			dateTo:DateUtils.getStringFromDate(dateTo),
+		def metaInfMap = [dateFrom: DateUtils.getStringFromDate(dateFrom),
+			dateTo:DateUtils.getStringFromDate(dateTo), numVotes:numVotes, 
 			representativeURL:"${grailsApplication.config.grails.serverURL}/representative/${representative.id}"]
 		String metaInfJSONStr = metaInfMap as JSON
 		metaInfFile = new File("${basedir}/meta.inf")
 		metaInfFile.write(metaInfJSONStr)
 		def ant = new AntBuilder()
-		ant.zip(destfile: "${basedir}.zip", basedir: basedir)
-		Map datos = [cantidad:i]
-		return new Respuesta(codigoEstado:Respuesta.SC_OK, datos:datos, file:new File("${basedir}.zip"))
+		ant.zip(destfile: zipResult, basedir: basedir)
+		
+		log.debug("getVotingHistoryBackup - zipResult: ${zipResult.absolutePath}")
+		return new Respuesta(codigoEstado:Respuesta.SC_OK, 
+			data:metaInfMap, file:zipResult)
 	}
 
 	
@@ -696,29 +714,46 @@ class RepresentativeService {
 					mensaje:msg, tipo:Tipo.REPRESENTATIVE_REVOKE_ERROR)
 			}
 			//(TODO notify users)=====
+			def representedUsers
 			Usuario.withTransaction {
-				def representedUsers = Usuario.findAllWhere(representative:usuario)
-				log.debug "processRevoke - number of represented users : ${representedUsers.size()}"
-				representedUsers?.each {
-					log.debug "processRevoke -  updating user - ${it.id}"
-					it.type = Usuario.Type.USER_WITH_CANCELLED_REPRESENTATIVE
-					it.representative = null
-					it.save()
+				def criteria = Usuario.createCriteria()
+				representedUsers = criteria.scroll {
+					eq("representative", usuario)
+				}
+				while (representedUsers.next()) {
+					Usuario representedUser = (Usuario) representedUsers.get(0);
+					representedUsers.type = Usuario.Type.USER_WITH_CANCELLED_REPRESENTATIVE
+					representedUser.representative = null
+					representedUser.save()
+					if((representedUsers.getRowNumber() % 100) == 0) {
+						sessionFactory.currentSession.flush() 
+						sessionFactory.currentSession.clear()
+						log.debug("processRevoke - processed ${representedUsers.getRowNumber()} user updates")
+					}	
 				}
 			}
-			def representationDocuments 
+
 			RepresentationDocument.withTransaction {
-				representationDocuments = RepresentationDocument.findAllWhere(
-					state:RepresentationDocument.State.OK, representative:usuario)
-				representationDocuments.each {
-					log.debug " - checking representationDocument - ${it.id}"
-					it.state = RepresentationDocument.State.CANCELLED_BY_REPRESENTATIVE
-					it.cancellationSMIME = mensajeSMIME
-					it.dateCanceled = usuario.getTimeStampToken().
+				def repDocCriteria = RepresentationDocument.createCriteria()
+				def representationDocuments = repDocCriteria.scroll {
+					eq("state", RepresentationDocument.State.OK)
+					eq("representative", usuario)
+				}
+				while (representationDocuments.next()) {
+					RepresentationDocument representationDocument = (RepresentationDocument) representationDocuments.get(0);
+					representationDocument.state = RepresentationDocument.State.CANCELLED_BY_REPRESENTATIVE
+					representationDocument.cancellationSMIME = mensajeSMIMEReq
+					representationDocument.dateCanceled = usuario.getTimeStampToken().
 						getTimeStampInfo().getGenTime()
-					it.save()
+					representationDocument.save()
+					if((representationDocuments.getRowNumber() % 100) == 0) {
+						sessionFactory.currentSession.flush() 
+						sessionFactory.currentSession.clear()
+						log.debug("processRevoke - processed ${representationDocuments.getRowNumber()} representationDocument updates")
+					}
 				}
 			}
+			
 			usuario.representativeMessage = mensajeSMIMEReq
 			usuario.type = Usuario.Type.EX_REPRESENTATIVE
 			
@@ -741,8 +776,8 @@ class RepresentativeService {
 				mensajeSMIMEResp.save();
 			}
 			log.error "processRevoke - saved MensajeSMIME '${mensajeSMIMEResp.id}'"
-			msg =  messageSource.getMessage(
-				'representativeRevokeMsg',[usuario.getNif()].toArray(), locale)
+			msg =  messageSource.getMessage('representativeRevokeMsg',
+				[usuario.getNif()].toArray(), locale)
 			return new Respuesta(codigoEstado:Respuesta.SC_OK, 
 				mensajeSMIME:mensajeSMIMEResp, usuario:usuario, 
 				tipo:Tipo.REPRESENTATIVE_REVOKE, mensaje:msg )
@@ -817,33 +852,29 @@ class RepresentativeService {
 				codigoEstado:Respuesta.SC_ERROR,
 				tipo:Tipo.REPRESENTATIVE_ACCREDITATIONS_REQUEST_ERROR)
 		}
-
 	}
 		
-	public Map getRepresentativeJSONMap(Usuario usuario) {
-		//log.debug("getRepresentativeJSONMap: ${usuario.id} ")
-		
+	public Map getRepresentativeJSONMap(Usuario representative) {
+		//log.debug("getRepresentativeJSONMap: ${representative.id} ")		
 		String representativeMessageURL = 
-			"${grailsApplication.config.grails.serverURL}/mensajeSMIME/${usuario.representativeMessage?.id}"
+			"${grailsApplication.config.grails.serverURL}/mensajeSMIME/${representative.representativeMessage?.id}"
 		Image image
 		Image.withTransaction {
-			image = Image.findByTypeAndUsuario (Image.Type.REPRESENTATIVE, usuario)
+			image = Image.findByTypeAndUsuario (Image.Type.REPRESENTATIVE, representative)
 		}
 		String imageURL = "${grailsApplication.config.grails.serverURL}/representative/image/${image?.id}" 
-		String infoURL = "${grailsApplication.config.grails.serverURL}/representative/${usuario?.id}" 
-		
-		def numRepresentations = Usuario.countByRepresentative(usuario) + 1//plus the representative itself
-		
-		def representativeMap = [id: usuario.id, nif:usuario.nif, infoURL:infoURL, 
-			 representativeMessageURL:representativeMessageURL,
+		String infoURL = "${grailsApplication.config.grails.serverURL}/representative/${representative?.id}" 
+		def numRepresentations = Usuario.countByRepresentative(representative) + 1//plus the representative itself
+		def representativeMap = [id: representative.id, nif:representative.nif, 
+			 infoURL:infoURL, representativeMessageURL:representativeMessageURL,
 			 imageURL:imageURL, numRepresentations:numRepresentations,
-			 nombre: usuario.nombre, primerApellido:usuario.primerApellido]
+			 nombre: representative.nombre, primerApellido:representative.primerApellido]
 		return representativeMap
 	}
 	
-	public Map getRepresentativeDetailedJSONMap(Usuario usuario) {
-		Map representativeMap = getRepresentativeJSONMap(usuario)
-		representativeMap.info = usuario.info
+	public Map getRepresentativeDetailedJSONMap(Usuario representative) {
+		Map representativeMap = getRepresentativeJSONMap(representative)
+		representativeMap.info = representative.info
 		representativeMap.votingHistory = []
 		return representativeMap
 	}

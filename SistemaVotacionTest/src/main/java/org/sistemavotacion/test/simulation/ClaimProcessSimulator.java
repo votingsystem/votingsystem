@@ -275,8 +275,7 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>
         System.exit(0);
     }
 
-    @Override
-    public SimulationData call() throws Exception {
+    @Override  public Respuesta call() throws Exception {
         logger.debug("call - NumberOfRequestsProjected: " +  
                 simulationData.getNumRequestsProjected());
         simulationData.setBegin(System.currentTimeMillis());
@@ -312,10 +311,10 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>
                         errorsMsg);
         }
         logger.debug("------------------ FINISHED -----------------------");
+        respuesta = new Respuesta(Respuesta.SC_FINALIZADO,simulationData);
         if(simulationListener != null) 
-            simulationListener.setSimulationResult(simulationData);
-        
-        return simulationData;
+            simulationListener.processResponse(respuesta);      
+        return respuesta;
     }
 
 }

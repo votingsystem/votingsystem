@@ -47,7 +47,7 @@ class SubscripcionService {
 		Certificado certificado = null;
 		if (!usuarioDB) {
 			usuarioDB = usuario.save();
-			log.debug "- checkUser - NEW USER -> ${usuario.nif} - id '${usuarioDB.id}'"
+			log.debug "- checkUser - user -> ${usuario.nif} - id '${usuarioDB.id}'"
 			if (usuario.getCertificate()) {
 				certificado = new Certificado(usuario:usuarioDB,
 					contenido:usuario.getCertificate()?.getEncoded(),
@@ -57,7 +57,7 @@ class SubscripcionService {
 					validoDesde:usuario.getCertificate()?.getNotBefore(),
 					validoHasta:usuario.getCertificate()?.getNotAfter())
 				certificado.save();
-				log.debug "- checkUser - NEW USER CERT -> id '${certificado.id}'"
+				log.debug "- checkUser - user cert -> id '${certificado.id}'"
 			}
 		} else {
 			certificado = Certificado.findWhere(

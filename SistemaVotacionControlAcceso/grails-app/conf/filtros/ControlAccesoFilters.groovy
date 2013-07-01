@@ -65,10 +65,10 @@ class ControlAccesoFilters {
 						mensajeSMIME.tipo = respuesta.tipo
 						mensajeSMIME.save(flush:true)
 					}
-					log.debug "paramsCheck - after - saved MensajeSMIME '${mensajeSMIME.id}' -> '${mensajeSMIME.tipo}'"
+					log.debug "after - saved MensajeSMIME '${mensajeSMIME.id}' -> '${mensajeSMIME.tipo}'"
 				}
 				if(response?.contentType?.contains("multipart/encrypted")) {
-					log.debug "---- paramsCheck - after - ENCRYPTED PLAIN TEXT"
+					log.debug "after - ENCRYPTED PLAIN TEXT"
 					if(params.responseBytes && (params.receiverCert || params.receiverPublicKey)) {
 						Respuesta encryptResponse = null
 						if(params.receiverPublicKey) {
@@ -89,18 +89,18 @@ class ControlAccesoFilters {
 							return false
 						}
 					} else {
-						log.error "---- paramsCheck - after - ERROR - ENCRYPTED PLAIN TEXT"
+						log.error "after - ERROR - ENCRYPTED PLAIN TEXT"
 					}
 				}
 				if(respuesta && Respuesta.SC_OK != respuesta.codigoEstado) {
-					log.error "**** paramsCheck - after - respuesta - status: ${respuesta.codigoEstado} - contentType: ${response.contentType}"
-					log.error "**** paramsCheck - after - respuesta - mensaje: ${respuesta.mensaje}"
+					log.error "after - respuesta - status: ${respuesta.codigoEstado} - contentType: ${response.contentType}"
+					log.error "after - respuesta - mensaje: ${respuesta.mensaje}"
 					response.status = respuesta.codigoEstado
 					render respuesta.mensaje
 					
 					return false
 				}
-				log.debug "---- paramsCheck - after - status: ${response.status} - contentType: ${response.contentType}"
+				log.debug "after - status: ${response.status} - contentType: ${response.contentType}"
 			}
         }
 		

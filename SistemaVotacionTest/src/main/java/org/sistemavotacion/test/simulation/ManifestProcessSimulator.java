@@ -301,8 +301,7 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
     }
 
 
-    @Override
-    public SimulationData call() throws Exception {
+    @Override public Respuesta call() throws Exception {
         logger.debug("call - NumberOfRequestsProjected: " +  
                 simulationData.getNumRequestsProjected());
         simulationData.setBegin(System.currentTimeMillis());
@@ -338,13 +337,10 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
                         errorsMsg);
         }
         logger.debug("------------------- FINISHED --------------------------");
-        
+        respuesta = new Respuesta(Respuesta.SC_FINALIZADO,simulationData);
         if(simulationListener != null)            
-            simulationListener.setSimulationResult(simulationData);
-        
-        
-        simulationData.setStatusCode(Respuesta.SC_OK);
-        return simulationData;
+            simulationListener.processResponse(respuesta);
+        return respuesta;
     }
 
 }

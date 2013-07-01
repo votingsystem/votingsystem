@@ -410,7 +410,8 @@ public class AsociarCentroControlDialog extends JDialog implements KeyListener {
             SMIMESignedSender signedSender = new SMIMESignedSender(ASSOCIATE_CONTROL_CENTER, 
                     smimeDocument, ContextoPruebas.INSTANCE.getURLAsociarActorConIP(), 
                     null, null);
-            Future<Respuesta> future = ContextoPruebas.INSTANCE.submit(signedSender);
+            Future<Respuesta> future = ContextoPruebas.INSTANCE.
+                    submit(signedSender);
             queue.put(future);
             tareaEnEjecucion = future;
         } catch (Exception ex) {

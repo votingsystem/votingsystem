@@ -73,7 +73,7 @@ class EventoController {
 				   countByEstadoOrEstadoOrEstadoOrEstado(Evento.Estado.ACTIVO,
 				   Evento.Estado.CANCELADO, Evento.Estado.FINALIZADO, Evento.Estado.PENDIENTE_COMIENZO)
         eventosMap.numeroEventosEnPeticion = eventoList.size()
-        eventoList.collect {eventoItem ->
+        eventoList.each {eventoItem ->
                 if (eventoItem instanceof EventoVotacion) {
 					eventosMap.eventos.votaciones.add(eventoService.optenerEventoVotacionJSONMap(eventoItem))
                 } else if (eventoItem instanceof EventoFirma) {

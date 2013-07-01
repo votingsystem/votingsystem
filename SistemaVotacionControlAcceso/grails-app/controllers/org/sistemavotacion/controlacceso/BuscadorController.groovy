@@ -215,7 +215,7 @@ class BuscadorController {
 						fullTextQuery.setSort(new Sort(new SortField("id", SortField.LONG)));
 						eventosVotacion = fullTextQuery.setFirstResult(params.int('offset')).
 							setMaxResults(params.int('max')).list();
-						eventosVotacion.collect {eventoItem ->
+						eventosVotacion.each {eventoItem ->
 							eventosMap.eventos.votaciones.add(eventoService.optenerEventoVotacionJSONMap(eventoItem))
 						}
 						if(eventosVotacion) numeroEventosEnPeticion = eventosVotacion.size()
@@ -229,7 +229,7 @@ class BuscadorController {
 						fullTextQuery.setSort(new Sort(new SortField("id", SortField.LONG)));
 						eventosFirma = fullTextQuery.setFirstResult(params.int('offset')).
 							setMaxResults(params.int('max')).list();
-						eventosFirma.collect {eventoItem ->
+						eventosFirma.each {eventoItem ->
 							eventosMap.eventos.firmas.add(eventoService.optenerEventoFirmaJSONMap(eventoItem))
 						}
 						if(eventosFirma) numeroEventosEnPeticion = eventosFirma.size()
@@ -243,7 +243,7 @@ class BuscadorController {
 						fullTextQuery.setSort(new Sort(new SortField("id", SortField.LONG)));
 						eventosReclamacion = fullTextQuery.setFirstResult(params.int('offset')).
 							setMaxResults(params.int('max')).list();
-						eventosReclamacion.collect {eventoItem ->
+						eventosReclamacion.each {eventoItem ->
 							eventosMap.eventos.reclamaciones.add(eventoService.optenerEventoReclamacionJSONMap(eventoItem))
 						}
 						if(eventosReclamacion) numeroEventosEnPeticion = eventosReclamacion.size()

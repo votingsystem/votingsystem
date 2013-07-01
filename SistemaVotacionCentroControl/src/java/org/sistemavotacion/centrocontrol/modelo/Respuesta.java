@@ -1,5 +1,6 @@
 package org.sistemavotacion.centrocontrol.modelo;
 
+import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Set;
@@ -9,7 +10,9 @@ import org.sistemavotacion.smime.SMIMEMessageWrapper;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class Respuesta {
+public class Respuesta implements Serializable {
+	
+    private static final long serialVersionUID = 1L;
     
     public static final int SC_OK = 200;
     public static final int SC_OK_ANULACION_SOLICITUD_ACCESO = 270;
@@ -35,9 +38,9 @@ public class Respuesta {
 	private String asunto;
 	private Voto voto;
     private X509Certificate certificado;
-    private byte[] cadenaCertificacion;
     private byte[] messageBytes;
     private ActorConIP actorConIP;
+    private Object data;
 
 	public Voto getVoto() {
 		return voto;
@@ -73,20 +76,6 @@ public class Respuesta {
      */
     public void setActorConIP(ActorConIP actorConIP) {
         this.actorConIP = actorConIP;
-    }
-
-    /**
-     * @return the cadenaCertificacion
-     */
-    public byte[] getCadenaCertificacion() {
-        return cadenaCertificacion;
-    }
-
-    /**
-     * @param cadenaCertificacion the cadenaCertificacion to set
-     */
-    public void setCadenaCertificacion(byte[] cadenaCertificacion) {
-        this.cadenaCertificacion = cadenaCertificacion;
     }
 
     public String getMensaje() {
@@ -149,5 +138,21 @@ public class Respuesta {
 
 	public void setAsunto(String asunto) {
 		this.asunto = asunto;
+	}
+
+	public Set<Usuario> getUsuarios() {
+		return usuarios;
+	}
+
+	public void setUsuarios(Set<Usuario> usuarios) {
+		this.usuarios = usuarios;
+	}
+
+	public Object getData() {
+		return data;
+	}
+
+	public void setData(Object data) {
+		this.data = data;
 	}
 }

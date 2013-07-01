@@ -1,9 +1,9 @@
 package org.sistemavotacion.controlacceso.modelo;
 
 import java.io.File;
+import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.Date;
-import java.util.Map;
 import java.util.Set;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 
@@ -11,7 +11,9 @@ import org.sistemavotacion.smime.SMIMEMessageWrapper;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class Respuesta {
+public class Respuesta implements Serializable {
+	
+    private static final long serialVersionUID = 1L;
     
     public static final int SC_OK                            = 200;
     public static final int SC_OK_ANULACION_SOLICITUD_ACCESO = 270;
@@ -39,21 +41,16 @@ public class Respuesta {
 	private AnuladorVoto anuladorVoto;
 	private String asunto;
 	private String hashCertificadoVotoBase64;
-	private byte[] firmaCSR;
 	private Voto voto;
 	private File file;
     private X509Certificate certificado;
     private Certificado certificadoDB;
-    private byte[] cadenaCertificacion;
-    private byte[] timeStampToken;
     private byte[] messageBytes;
     private ActorConIP actorConIP;
     private CentroControl centroControl;
     private SolicitudCSRVoto solicitudCSR;
     private Dispositivo dispositivo;
     private Documento documento;
-    private Map metaInf;
-    
     private Object data;
 
     
@@ -64,15 +61,7 @@ public class Respuesta {
 	public void setAsunto(String asunto) {
 		this.asunto = asunto;
 	}
-
-	public byte[] getFirmaCSR() {
-		return firmaCSR;
-	}
-
-	public void setFirmaCSR(byte[] firmaCSR) {
-		this.firmaCSR = firmaCSR;
-	}
-
+	
 	public SolicitudAcceso getSolicitudAcceso() {
 		return solicitudAcceso;
 	}
@@ -111,14 +100,6 @@ public class Respuesta {
 
 	public void setCertificado(X509Certificate certificado) {
 		this.certificado = certificado;
-	}
-
-	public byte[] getCadenaCertificacion() {
-		return cadenaCertificacion;
-	}
-
-	public void setCadenaCertificacion(byte[] cadenaCertificacion) {
-		this.cadenaCertificacion = cadenaCertificacion;
 	}
 
 	public ActorConIP getActorConIP() {
@@ -221,14 +202,6 @@ public class Respuesta {
 		this.file = file;
 	}
 
-	public byte[] getTimeStampToken() {
-		return timeStampToken;
-	}
-
-	public void setTimeStampToken(byte[] timeStampToken) {
-		this.timeStampToken = timeStampToken;
-	}
-
 	public Certificado getCertificadoDB() {
 		return certificadoDB;
 	}
@@ -274,11 +247,4 @@ public class Respuesta {
 		this.data = data;
 	}
 
-	public Map getMetaInf() {
-		return metaInf;
-	}
-
-	public void setMetaInf(Map metaInf) {
-		this.metaInf = metaInf;
-	}
 }

@@ -226,8 +226,7 @@ class EventoVotacionService {
 			byte[] certChainBytes
 			EventoVotacion.withTransaction {
 				evento = EventoVotacion.findWhere(
-					eventoVotacionId:mensajeJSON.eventId?.toString(),
-					estado:EventoVotacion.Estado.ACTIVO)
+					eventoVotacionId:mensajeJSON.eventId?.toString())
 				certChainBytes = evento?.cadenaCertificacionControlAcceso
 			}
 			if(!evento) {
@@ -237,11 +236,29 @@ class EventoVotacionService {
 				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
 					tipo:Tipo.CANCELAR_EVENTO_ERROR, mensaje:msg)
 			}
+			if(evento.estado != EventoVotacion.Estado.ACTIVO) {
+				msg = messageSource.getMessage('eventAllreadyCancelledMsg',
+					[mensajeJSON?.eventId].toArray(), locale)
+				log.error("cancelEvent - msg: ${msg}")
+				return new Respuesta(codigoEstado:Respuesta.SC_ANULACION_REPETIDA,
+					tipo:Tipo.CANCELAR_EVENTO_ERROR, mensaje:msg)
+			}
+			
 			Collection<X509Certificate> certColl = CertUtil.fromPEMToX509CertCollection(certChainBytes)
 			X509Certificate accessControlCert = certColl.iterator().next()
 			if(!firmaService.isSignerCertificate(mensajeSMIMEReq.getSigners(), accessControlCert)) {
 				msg = messageSource.getMessage('eventCancelacionCertError', null, locale)
 				log.error("cancelEvent - msg: ${msg}")
+				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
+					tipo:Tipo.CANCELAR_EVENTO_ERROR, mensaje:msg, evento:evento)
+			}
+			//new state must be or CANCELLED or DELETED
+			EventoVotacion.Estado newState = EventoVotacion.Estado.valueOf(mensajeJSON.estado)
+			if(!(newState == EventoVotacion.Estado.BORRADO_DE_SISTEMA || 
+				newState == EventoVotacion.Estado.CANCELADO)) {
+				msg = messageSource.getMessage('eventCancelacionStateError', 
+					[mensajeJSON.estado].toArray(), locale)
+				log.error("cancelEvent new state error - msg: ${msg}")
 				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
 					tipo:Tipo.CANCELAR_EVENTO_ERROR, mensaje:msg, evento:evento)
 			}
@@ -253,16 +270,29 @@ class EventoVotacionService {
 			
 			SMIMEMessageWrapper smimeMessageResp = firmaService.
 					getMultiSignedMimeMessage(fromUser, toUser, smimeMessageReq, subject)
+
+						
 			MensajeSMIME mensajeSMIMEResp = new MensajeSMIME(tipo:Tipo.RECIBO,
 				smimePadre:mensajeSMIMEReq, evento:evento, valido:true,
 				contenido:smimeMessageResp.getBytes())
-			MensajeSMIME.withTransaction {
-				mensajeSMIMEResp.save()
+			if (!mensajeSMIMEResp.validate()) {
+				mensajeSMIMEResp.errors.each {
+					log.debug("mensajeSMIMEResp - error: ${it}")
+				}
 			}
+			MensajeSMIME.withTransaction {
+				if (!mensajeSMIMEResp.save()) {
+					mensajeSMIMEResp.errors.each {
+						log.error("cancel event error saving mensajeSMIMEResp - ${it}")}
+				}
+			}
+			evento.estado = newState
+			evento.dateCanceled = DateUtils.getTodayDate();
 			EventoVotacion.withTransaction { 
-				evento.estado = EventoVotacion.Estado.valueOf(mensajeJSON.estado)
-				evento.dateCanceled = new Date(System.currentTimeMillis());
-				evento.save()
+				if (!evento.save()) {
+					evento.errors.each {
+						log.error("cancel event error saving evento - ${it}")}
+				}
 			}
 			log.debug("cancelEvent - cancelled event with id: ${evento.id}")
 			return new Respuesta(codigoEstado:Respuesta.SC_OK,mensaje:msg,

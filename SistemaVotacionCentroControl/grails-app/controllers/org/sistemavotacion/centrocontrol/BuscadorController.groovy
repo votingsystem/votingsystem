@@ -201,7 +201,7 @@ class BuscadorController {
 		eventosMap.numeroEventosVotacionEnPeticion = numeroEventosEnPeticion
 		eventosMap.numeroTotalEventosVotacionEnSistema = numeroTotalEventosVotacionEnSistema
 		eventosMap.offset = params.int('offset')
-		eventosVotacion.collect {eventoItem ->
+		eventosVotacion.each {eventoItem ->
 			def eventoItemId = eventoItem.id
 			def eventoMap = [id: eventoItem.id, fechaCreacion: eventoItem.dateCreated,
 					URL:"${grailsApplication.config.grails.serverURL}/evento/${eventoItem.id}",

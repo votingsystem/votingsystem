@@ -3,8 +3,7 @@ package org.sistemavotacion.test.dialogo;
 import java.awt.Frame;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
@@ -13,7 +12,6 @@ import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.modelo.UserBaseSimulationData;
 import org.sistemavotacion.test.simulation.UserBaseDataSimulator;
 import org.sistemavotacion.test.simulation.SimulatorListener;
-import org.sistemavotacion.test.simulation.VotingSimulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,8 +19,8 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class UserBaseDialog extends JDialog 
-        implements SimulatorListener<UserBaseSimulationData> {
+public class UserBaseDialog extends JDialog implements 
+        SimulatorListener<UserBaseSimulationData> {
 
     private static Logger logger = LoggerFactory.getLogger(UserBaseDialog.class);  
     
@@ -31,8 +29,7 @@ public class UserBaseDialog extends JDialog
     private Frame parentFrame;
     private List<String> errors = null;
     private MensajeDialog errorDialog = null;
-    
-    private ExecutorService executorPool = null;
+    private Future<Respuesta<UserBaseSimulationData>> future;
     
     /**
      * Creates new form RepresentativesDialog
@@ -172,6 +169,7 @@ public class UserBaseDialog extends JDialog
             }
         });
 
+        scrollPane.setMinimumSize(new java.awt.Dimension(400, 100));
         scrollPane.setViewportView(editorPane);
 
         errorButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/error.png"))); // NOI18N
@@ -198,7 +196,7 @@ public class UserBaseDialog extends JDialog
                         .addComponent(createUsersButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cancelButton))
-                    .addComponent(scrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                    .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -210,7 +208,7 @@ public class UserBaseDialog extends JDialog
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(userBasePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(scrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(createUsersButton)
@@ -240,19 +238,15 @@ public class UserBaseDialog extends JDialog
         userBasePanel.setVisible(false);
         progressBarPanel.setVisible(true);
         pack();
-        
-                        
-        if(executorPool == null)executorPool = Executors.newFixedThreadPool(3);
         creacionBaseUsuarios = new UserBaseDataSimulator(
                        userBaseData, this);
-        executorPool.submit(creacionBaseUsuarios);
-        
+        future = ContextoPruebas.INSTANCE.submitSimulation(creacionBaseUsuarios);        
     }//GEN-LAST:event_createUsersButtonActionPerformed
 
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
         if(progressBarPanel.isVisible()) {
             try {
-                if(executorPool != null) executorPool.shutdown();
+                if(future != null) future.cancel(true);
             } catch(Exception ex) {
                 logger.error(ex.getMessage(), ex);
             }
@@ -329,19 +323,6 @@ public class UserBaseDialog extends JDialog
     // End of variables declaration//GEN-END:variables
 
 
-    @Override public void updateSimulationData(UserBaseSimulationData data) {
-        if(Respuesta.SC_OK == data.getStatusCode()) {
-            progressLabel.setText(getProgressMessage(data));
-        } else {
-            if(errors == null) {
-                errors = new ArrayList<String>();
-                errorButton.setVisible(true);
-            } 
-            errors.add((String) data.getMessage());
-            errorButton.setText(errors.size() + " errores");
-        }
-    }
-
     private String getProgressMessage(UserBaseSimulationData data) {
         return "<html>" + data.getNumRepresentativeRequestsColected() + " de " 
                 + data.getNumRepresentativeRequests() + 
@@ -362,7 +343,7 @@ public class UserBaseDialog extends JDialog
                 .append("</html>").toString();
     }
         
-    public String getUserBaseDataHtmlResultMsg(UserBaseSimulationData userBaseData) {
+    public static String getUserBaseDataHtmlResultMsg(UserBaseSimulationData userBaseData) {
         return new StringBuffer("<html><b>Número representantes:</b>")
                 .append(userBaseData.getNumRepresentatives())
                 .append("<br/><b>Número de votos de representantes:</b>")
@@ -375,16 +356,12 @@ public class UserBaseDialog extends JDialog
                 .append(userBaseData.getNumVotesUsersWithoutRepresentative())
                 .append("</html>").toString();
     }
-
-    @Override
-    public void setSimulationResult(UserBaseSimulationData data) {
-       logger.debug("setResult");
-        userBasePanel.setVisible(true);
-        progressBarPanel.setVisible(false);
+    
+    public void setData(UserBaseSimulationData simulationData) {
+        if(simulationData == null) return;
         createUsersButton.setVisible(false);
-        ContextoPruebas.INSTANCE.setUserBaseData(data);
-        setMessage(ContextoPruebas.INSTANCE.getString("userBaseDataInContextMsg"));
-        final String result = getUserBaseDataHtmlResultMsg(data);
+        userBasePanel.setVisible(false);
+        final String result = getUserBaseDataHtmlResultMsg(simulationData);
         try {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
@@ -397,12 +374,51 @@ public class UserBaseDialog extends JDialog
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
         }
-        /*Document doc = editorPane.getDocument();
-        try {
-            doc.insertString(0, data.toHtmlString(), null);
-        } catch (BadLocationException ex) {
-            logger.error(ex.getMessage(), ex);
-        }*/
-        pack();
     }
+    
+    @Override public void processResponse(
+            Respuesta<UserBaseSimulationData> respuesta) { 
+        switch(respuesta.getCodigoEstado()) {
+            case Respuesta.SC_OK:
+                progressLabel.setText(getProgressMessage(respuesta.getData()));
+                break;
+            case Respuesta.SC_FINALIZADO:
+                logger.debug("simulation finished");
+                userBasePanel.setVisible(true);
+                progressBarPanel.setVisible(false);
+                createUsersButton.setVisible(false);
+                ContextoPruebas.INSTANCE.setUserBaseData(respuesta.getData());
+                setMessage(ContextoPruebas.INSTANCE.getString("userBaseDataInContextMsg"));
+                final String result = getUserBaseDataHtmlResultMsg(respuesta.getData());
+                try {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            editorPane.setText(result);
+                            scrollPane.setVisible(true);
+                            pack();
+                        }
+                    });
+                } catch (Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                }
+                /*Document doc = editorPane.getDocument();
+                try {
+                    doc.insertString(0, data.toHtmlString(), null);
+                } catch (BadLocationException ex) {
+                    logger.error(ex.getMessage(), ex);
+                }*/
+                pack();
+                break;
+            default:
+                if(errors == null) {
+                    errors = new ArrayList<String>();
+                    errorButton.setVisible(true);
+                } 
+                errors.add((String) respuesta.getMensaje());
+                errorButton.setText(errors.size() + " errores");
+                break;
+        }
+    }
+
 }

@@ -302,7 +302,7 @@ class EventoFirmaController {
             consultaMap.offset = params.long('offset')
 	   }
 	   consultaMap.numeroEventosFirmaEnPeticion = eventoList.size()
-	   eventoList.collect {eventoItem ->
+	   eventoList.each {eventoItem ->
 		   firmas.add(eventoService.optenerEventoFirmaJSONMap(eventoItem))
 	   }
 	   consultaMap.eventos.firmas = firmas
@@ -376,7 +376,7 @@ class EventoFirmaController {
 		informacionFirmasMap.eventoURL =
 			"${grailsApplication.config.grails.serverURL}/evento/${evento.id}"
 		informacionFirmasMap.firmas = []
-		firmas.collect { firma ->
+		firmas.each { firma ->
 			def firmaMap = [id:firma.id, fechaCreacion:firma.dateCreated,
 			usuario:firma.usuario.nif,
 			firmaURL:"${grailsApplication.config.grails.serverURL}/documento" +

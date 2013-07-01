@@ -36,16 +36,10 @@ public class EventoVotacion extends Evento implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name="cardinalidadOpciones")
     private Cardinalidad cardinalidadOpciones = Cardinalidad.UNA; 
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="eventoVotacion")
-    private Set<Certificado> certificados;    
+  
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="eventoVotacion")
     private Set<OpcionDeEvento> opciones;
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="eventoVotacion")
-    private Set<SolicitudAcceso> solicitudesAcceso;
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="eventoVotacion")
-    private Set<SolicitudCSRVoto> solicitudesCSR;
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="eventoVotacion")
-    private Set<Voto> votos;
+
     /**
      * @return the opciones
      */
@@ -60,13 +54,6 @@ public class EventoVotacion extends Evento implements Serializable {
         this.opciones = opciones;
     }
 
-    public void setSolicitudesAcceso(Set<SolicitudAcceso> SolicitudesAcceso) {
-        this.solicitudesAcceso = SolicitudesAcceso;
-    }
-
-    public Set<SolicitudAcceso> getSolicitudesAcceso() {
-        return solicitudesAcceso;
-    }
 
     /**
      * @return the cardinalidadOpciones
@@ -82,14 +69,6 @@ public class EventoVotacion extends Evento implements Serializable {
         this.cardinalidadOpciones = cardinalidadOpciones;
     }
 
-	public Set<SolicitudCSRVoto> getSolicitudesCSR() {
-		return solicitudesCSR;
-	}
-
-	public void setSolicitudesCSR(
-			Set<SolicitudCSRVoto> solicitudesCSR) {
-		this.solicitudesCSR = solicitudesCSR;
-	}
 
 	public byte[] getCadenaCertificacionCentroControl() {
 		return cadenaCertificacionCentroControl;
@@ -98,22 +77,6 @@ public class EventoVotacion extends Evento implements Serializable {
 	public void setCadenaCertificacionCentroControl(
 			byte[] cadenaCertificacionCentroControl) {
 		this.cadenaCertificacionCentroControl = cadenaCertificacionCentroControl;
-	}
-
-	public Set<Certificado> getCertificados() {
-		return certificados;
-	}
-
-	public void setCertificados(Set<Certificado> certificados) {
-		this.certificados = certificados;
-	}
-
-	public Set<Voto> getVotos() {
-		return votos;
-	}
-
-	public void setVotos(Set<Voto> votos) {
-		this.votos = votos;
 	}
 	
 	public OpcionDeEvento comprobarOpcionId(Long opcionId) {

@@ -76,18 +76,39 @@ class FirmaService {
 	def encryptionService;
 	def subscripcionService
 	def timeStampService
+	def sessionFactory
 	boolean testMode = false
 	
 	public Respuesta deleteTestCerts () {
 		log.debug(" - deleteTestCerts - ")
-		def certificadosTest = null 
-		Certificado.withTransaction {
-			certificadosTest = Certificado.findAllWhere(tipo:Certificado.Tipo.AUTORIDAD_CERTIFICADORA_TEST);
-			certificadosTest.each {
-				it.delete()
-			} 
+		int numTestCerts = Certificado.countByTipo(Certificado.Tipo.AUTORIDAD_CERTIFICADORA_TEST)
+		log.debug(" - deleteTestCerts - numTestCerts: ${numTestCerts}") 
+		long begin = System.currentTimeMillis()
+		def criteria = Certificado.createCriteria()
+		def testCerts = criteria.scroll {
+			eq("tipo", Certificado.Tipo.AUTORIDAD_CERTIFICADORA_TEST)
+		}   
+		while (testCerts.next()) {
+			Certificado cert = (Certificado) testCerts.get(0);
+
+			def userCertCriteria = Certificado.createCriteria()
+			def userTestCerts = userCertCriteria.scroll {
+				eq("certificadoAutoridad", cert)
+			}
+			while (userTestCerts.next()) { 
+				Certificado userCert = (Certificado) userTestCerts.get(0);
+				userCert.delete()
+				if((userTestCerts.getRowNumber() % 100) == 0) {
+					sessionFactory.currentSession.flush()
+					sessionFactory.currentSession.clear()
+					log.debug(" - processed ${userTestCerts.getRowNumber()} user certs from auth. cert ${cert.id}");
+				}
+				
+			}
+			Certificado.withTransaction {
+				cert.delete()
+			}
 		}
-		
 		return new Respuesta(codigoEstado:Respuesta.SC_OK)
 	}
 	
@@ -225,9 +246,9 @@ class FirmaService {
 			for(X509Certificate certificate:fileSystemCerts) {
 				long numSerie = certificate.getSerialNumber().longValue()
 				log.debug " --- Importado certificado -- SubjectDN: ${certificate?.getSubjectDN()} --- número serie:${numSerie}"
-				Certificado certificado = null
+				def certificado = null
 				Certificado.withTransaction {
-					certificado = Certificado.findWhere(numeroSerie:numSerie)
+					certificado = Certificado.findByNumeroSerie(numSerie)
 				}
 				if(!certificado) {
 					boolean esRaiz = CertUtil.isSelfSigned(certificate)
@@ -410,7 +431,7 @@ class FirmaService {
 				hashCertificadoVotoBase64:respuesta.hashCertificadoVotoBase64)
 			certificado.save()
 			return new Respuesta(codigoEstado:Respuesta.SC_OK, data:requestPublicKey,
-				firmaCSR:certificadoFirmado, certificado:certificate)
+				messageBytes:certificadoFirmado, certificado:certificate)
 		}
 	}
 	

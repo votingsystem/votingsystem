@@ -98,7 +98,7 @@ class SolicitudAccesoController {
 			if (Respuesta.SC_OK == respuestaValidacionCSR.codigoEstado) {
 				respuesta.tipo = Tipo.SOLICITUD_ACCESO;
 				params.respuesta = respuesta
-				params.responseBytes = respuestaValidacionCSR.firmaCSR
+				params.responseBytes = respuestaValidacionCSR.messageBytes
 				params.receiverCert = respuestaValidacionCSR.certificado
 				params.receiverPublicKey = respuestaValidacionCSR.data
 				response.setContentType("multipart/encrypted")

@@ -9,7 +9,7 @@ class StringUtils {
     static final checkIds = { value ->
         if (value == null) return null; 
         def result = []
-        value.split(",").collect { sub ->
+        value.split(",").each { sub ->
             if (sub.isNumber()) result << sub
         }
         return result

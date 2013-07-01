@@ -50,7 +50,7 @@ public class ServerPaths {
     }
     
     public static String getUrlDatosAplicacion () {
-   	 	return getApplicationPath() + "infoServidor";
+   	 	return getApplicationPath() + "infoServidor/informacion";
     }
     
     //redirect the browser to the given url

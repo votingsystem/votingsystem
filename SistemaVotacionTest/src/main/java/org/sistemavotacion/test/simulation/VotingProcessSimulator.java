@@ -10,9 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.Future;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Evento;
@@ -23,7 +21,6 @@ import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
-import org.sistemavotacion.test.modelo.SimulationData;
 import org.sistemavotacion.test.modelo.VotingSimulationData;
 import org.sistemavotacion.test.modelo.UserBaseSimulationData;
 import org.sistemavotacion.test.simulation.callable.ServerInitializer;
@@ -45,13 +42,12 @@ import org.slf4j.LoggerFactory;
 * 5)- When finishes user base data initilization, 'setSimulationResult' inits simulation 
 */
 public class VotingProcessSimulator extends  Simulator<VotingSimulationData> 
-    implements SimulatorListener<SimulationData>{
+    implements SimulatorListener {
     
-    private static Logger logger = LoggerFactory.getLogger(VotingProcessSimulator.class);
+    private static Logger logger = LoggerFactory.getLogger(
+            VotingProcessSimulator.class);
 
-    @Override public void updateSimulationData(SimulationData data) { }
-
-    @Override public void setSimulationResult(SimulationData data) { }
+    @Override public void processResponse(Respuesta respuesta) { }
     
     
     public enum Simulation {VOTING, ACCESS_REQUEST}
@@ -66,10 +62,9 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>
     private SimulatorListener simulationListener;
     private final SignedMailGenerator signedMailGenerator;
     
-    private final ExecutorService simulatorExecutor;
     private final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    @Override public VotingSimulationData call() throws Exception {
+    @Override public Respuesta call() throws Exception {
         logger.debug("call");
         ServerInitializer accessControlInitializer = 
                 new ServerInitializer(simulationData.getAccessControlURL(),
@@ -80,7 +75,6 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>
         } else logger.error(respuesta.getMensaje());
                 
         countDownLatch.await();
-        if(simulatorExecutor != null) simulatorExecutor.shutdown();
         logger.debug("--------- SIMULATION RESULT - EVENT: " + event.getEventoId() 
                 + " -----------------");
         logger.info("Begin: " + DateUtils.getStringFromDate(
@@ -96,9 +90,10 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>
             logger.info(" ************* " + getErrorList().size() + " ERRORS: \n" + 
                         errorsMsg);
         }  
+        respuesta = new Respuesta(Respuesta.SC_FINALIZADO,simulationData);
         if(simulationListener != null)
-            simulationListener.setSimulationResult(simulationData);
-        return simulationData;
+            simulationListener.processResponse(respuesta);
+        return respuesta;
     }
     
     public VotingProcessSimulator(VotingSimulationData simulationData,
@@ -108,7 +103,6 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>
         nextEventState = simulationData.getEvento().getNextState();
         this.userBaseData = simulationData.getUserBaseData();   
         this.simulationListener = simulationListener;
-        simulatorExecutor = Executors.newFixedThreadPool(5);
         signedMailGenerator = new SignedMailGenerator(
                     ContextoPruebas.INSTANCE.getUserTest().getKeyStore(),
                     ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS, 
@@ -196,11 +190,12 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>
     
     private void inicializarBaseUsuarios() throws Exception{
         logger.debug("inicializarBaseUsuarios");
-        FutureTask<UserBaseSimulationData> futureUserBase = 
-                new FutureTask<UserBaseSimulationData>(
-                new  UserBaseDataSimulator(userBaseData));
-        simulatorExecutor.execute(futureUserBase);
-        UserBaseSimulationData ubd = futureUserBase.get();
+        UserBaseSimulationData ubd = ContextoPruebas.INSTANCE.getUserBaseData();
+        if(ubd == null) {
+            Future<Respuesta<UserBaseSimulationData>> future = ContextoPruebas.
+                INSTANCE.submitSimulation(new  UserBaseDataSimulator(userBaseData));
+            ubd = future.get().getData();
+        } else logger.debug("UserBaseSimulationData from Context");
         logger.debug("UserBaseSimulationData - status: " + ubd.getStatusCode());
         if(Respuesta.SC_OK != ubd.getStatusCode()) { 
             logger.error(ubd.getMessage());
@@ -214,13 +209,10 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>
                 accessRequest.call();
                 break;
             case VOTING:
-                FutureTask<VotingSimulationData> futureVotingData = 
-                        new FutureTask<VotingSimulationData>(
-                        new VotingSimulator(simulationData, this));
-                simulatorExecutor.execute(futureVotingData);
-                VotingSimulationData simulData = futureVotingData.get();
-                logger.debug("VotingSimulationData - status: " + simulData.getStatusCode());
-                
+                Future<Respuesta<VotingSimulationData>> futureVotingData = 
+                        ContextoPruebas.INSTANCE.submitSimulation(new VotingSimulator(
+                        simulationData, this));
+                VotingSimulationData simulData = futureVotingData.get().getData();
                 if(nextEventState != null) {               
                     setNextEventState();
                 }

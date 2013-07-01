@@ -11,15 +11,12 @@
 //    grails.config.locations << "file:" + System.properties["${appName}.config.location"]
 // }
 import java.net.*;
+import org.apache.log4j.net.SMTPAppender
+import org.apache.log4j.Level
+
 
 grails.converters.default.pretty.print=true
-
-grails.config.locations = [ "classpath:app-config.properties"]
-
- if(System.properties["${appName}.config.location"]) {
-	grails.config.locations << "file:" + System.properties["${appName}.config.location"]
- }
- 
+grails.gorm.failOnError=true
 grails.resources.adhoc.excludes = ['**/gwt/**']
 
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
@@ -82,11 +79,9 @@ environments {
     }
     production {
         grails.logging.jul.usebridge = false
-		//grails.serverURL = "http://sistemavotacioncentrocontrol.cloudfoundry.com"
-		grails.serverURL = "http://192.168.1.5:8080/SistemaVotacionCentroControl"
+		grails.serverURL = "http://192.168.1.4:8080/SistemaVotacionCentroControl"
     }
 	test {
-		//grails.serverURL = "http://sistemavotacioncentrocontrol.cloudfoundry.com"
 		String localIP = getDevelopmentServerIP();
 		grails.serverURL = "http://${localIP}:8081/${appName}"
 	}
@@ -109,20 +104,37 @@ def getDevelopmentServerIP() {
 	}
 }
 
-// log4j configuration
+mail.error.server = 'localhost'
+mail.error.port = 25
+//mail.error.username = 'ControlCenter@sistemavotacion.org'
+//mail.error.password = '*****'
+mail.error.to = 'admin@sistemavotacion.org'
+mail.error.from = 'ControlCenter@sistemavotacion.org'
+mail.error.subject = '[Control Center Application Error]'
+mail.error.starttls = false
+mail.error.debug = false
+
 log4j = {
 
     appenders{
-        appender new org.apache.log4j.DailyRollingFileAppender(
-                name:"CentroControl",
-                layout:pattern(conversionPattern: '%d{[dd.MM.yy HH:mm:ss.SSS]} [%t] %p %c %x - %m%n'),
-                file:"./logs/CentroControl.log",
-                datePattern: '\'_\'yyyy-MM-dd')
-
+		file name:'CentroControlERRORES', threshold:Level.ERROR,
+			file:"./logs/CentroControlERRORES.log", datePattern: '\'_\'yyyy-MM-dd'
+	
+		rollingFile name:"CentroControl", threshold:Level.DEBUG,
+			layout:pattern(conversionPattern: '%d{[dd.MM.yy HH:mm:ss.SSS]} [%t] %p %c %x - %m%n'),
+			file:"./logs/ControlAcceso.log", datePattern: '\'_\'yyyy-MM-dd'
+			
+		appender new SMTPAppender(name: 'smtp', to: mail.error.to, from: mail.error.from,
+			subject: mail.error.subject, threshold: Level.ERROR,
+			SMTPHost: mail.error.server, SMTPUsername: mail.error.username,
+			SMTPDebug: mail.error.debug.toString(), SMTPPassword: mail.error.password,
+			layout: pattern(conversionPattern:
+			   '%d{[ dd.MM.yyyy HH:mm:ss.SSS]} [%t] %n%-5p %n%c %n%C %n %x %n %m%n'))
     }
 	
     root {
-            info  'stdout', 'CentroControl'
+            debug  'stdout', 'CentroControl'
+			error 'CentroControlERRORES', 'smtp'
     }
 
     debug  'org.sistemavotacion','filtros',
@@ -150,3 +162,32 @@ grails.war.copyToWebApp = { args ->
 		include(name: "**")
 	}
 }
+
+
+SistemaVotacion.baseRutaCopiaRespaldo='./VotingSystem/copiaRespaldo'
+SistemaVotacion.eventsMetaInfBaseDir='./VotingSystem/Eventos_MetaInf'
+SistemaVotacion.errorsBaseDir='./VotingSystem/errors'
+SistemaVotacion.sufijoURLCadenaCertificacion='/certificado/cadenaCertificacion'
+SistemaVotacion.sufijoURLInfoServidor='/infoServidor'
+SistemaVotacion.sufijoURLNotificacionVotoControlAcceso='/voto'
+SistemaVotacion.sufijoURLEventoVotacion='/eventoVotacion/'
+SistemaVotacion.sufijoURLEventoVotacionValidado='/eventoVotacion/validado/'
+SistemaVotacion.sufijoURLVotar='/app/home#VOTAR&eventoId='
+SistemaVotacion.rutaAlmacenClaves='WEB-INF/cms/CentroControl.jks'
+SistemaVotacion.aliasClavesFirma='ClavesCentroControl'
+SistemaVotacion.rutaDirectorioArchivosCA='WEB-INF/cms/'
+SistemaVotacion.rutaCadenaCertificacion='WEB-INF/cms/cadenaCertificacion.pem'
+SistemaVotacion.passwordClavesFirma='PemPass'
+SistemaVotacion.encabezadoOpcionSeleccionada='opcionSeleccionada'
+//milliseconds
+SistemaVotacion.timeOutConsulta = 500
+//Nombre decriptivo del servidor
+SistemaVotacion.serverName='Primer CentroControl'
+SistemaVotacion.votingHashAlgorithm='SHA256'
+SistemaVotacion.urlBlog ='http://www.gruposp2p.org'
+SistemaVotacion.emailAdmin='jgzornoza@gmail.com'
+//TODO En un principio asi para no complicar mucho
+SistemaVotacion.adminsDNI='07553172H'
+
+pkcs7SignedContentType='application/x-pkcs7-signature'
+pkcs7EncryptedContentType='application/x-pkcs7-mime'

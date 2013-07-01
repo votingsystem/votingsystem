@@ -31,8 +31,8 @@ class InfoServidorController {
         infoServidor.urlBlog = grailsApplication.config.SistemaVotacion.urlBlog
 		infoServidor.estado = ActorConIP.Estado.ACTIVO.toString()
 		infoServidor.environmentMode = VotingSystemApplicationContex.instance.getEnvironment().toString()
-        List<CentroControl> centrosDeControl = CentroControl.getAll()
-        centrosDeControl?.collect {centroControl ->
+        def centrosDeControl = CentroControl.findAll()
+        centrosDeControl?.each {centroControl ->
             def centroControlMap = [id:centroControl.id, nombre:centroControl.nombre,
                 estado:centroControl.estado?.toString(),
                 serverURL:centroControl.serverURL, fechaCreacion:centroControl.dateCreated]

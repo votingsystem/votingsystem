@@ -7,7 +7,6 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -15,14 +14,13 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
-import javax.persistence.OneToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
@@ -83,8 +81,7 @@ public class MensajeSMIME implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="fechaActualizacion", length=23, insertable=true)
     private Date lastUpdated;
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="smimePadre")
-    private Set<MensajeSMIME> smimeHijosSet;  
+
 
     @Transient
     private transient SMIMEMessageWrapper smimeMessage;
@@ -190,14 +187,6 @@ public class MensajeSMIME implements Serializable {
 
 	public void setVoto(Voto voto) {
 		this.voto = voto;
-	}
-
-	public Set<MensajeSMIME> getSmimeHijosSet() {
-		return smimeHijosSet;
-	}
-
-	public void setSmimeHijosSet(Set<MensajeSMIME> smimeHijosSet) {
-		this.smimeHijosSet = smimeHijosSet;
 	}
 
 	public MensajeSMIME getSmimePadre() {

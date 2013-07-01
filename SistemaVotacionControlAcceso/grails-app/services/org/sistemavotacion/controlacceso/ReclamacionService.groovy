@@ -48,7 +48,7 @@ class ReclamacionService {
                 firma = new Firma(usuario:usuario, evento:eventoReclamacion, 
 					tipo:Tipo.FIRMA_EVENTO_RECLAMACION, mensajeSMIME:mensajeSMIMEReq)
 				firma.save();
-				mensajeJSON.campos?.collect { campoItem ->
+				mensajeJSON.campos?.each { campoItem ->
 					CampoDeEvento campo = CampoDeEvento.findWhere(id:campoItem.id?.longValue())
 					if (campo) {
 						new ValorCampoDeEvento(valor:campoItem.valor, firma:firma, campoDeEvento:campo).save()

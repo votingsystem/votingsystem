@@ -143,9 +143,6 @@ class UserController {
 			user.representativeRegisterDate = null
 			user.metaInf = null
 			user.info = null
-			Usuario.withTransaction {
-				user.save()
-			}
 			
 			def repDocsFromUser
 			RepresentationDocument.withTransaction {
@@ -158,7 +155,9 @@ class UserController {
 			}
 			
 			String userId = String.format('%05d', user.id)
-			log.debug("prepareUserBaseData - user: ${userId} of ${users.size()}" + 
+			render "prepareUserBaseData - user: ${userId} of ${users.size()}" + 
+				" - ${repDocsFromUser.size()} representations<br/>"
+			log.info("prepareUserBaseData - user: ${userId} of ${users.size()}" + 
 				" - ${repDocsFromUser.size()} representations");
 		}
 		response.status = Respuesta.SC_OK

@@ -180,6 +180,22 @@ public class DateUtils {
         return getElapsedTime(cal1, cal2);
     }
 
+    /**
+     *  elapsed time in hours/minutes/seconds/milliseconds
+     * @return String
+     */
+    public static String getElapsedTimeHoursMinutesMillisFromMilliseconds(long milliseconds) {
+        String format = String.format("%%0%dd", 2);
+        String millisecondsFormat = String.format("%%0%dd", 3);
+        long elapsedTime = milliseconds / 1000;
+        String milliSeconds = String.format(millisecondsFormat, milliseconds % 1000);
+        String seconds = String.format(format, elapsedTime % 60);
+        String minutes = String.format(format, (elapsedTime % 3600) / 60);
+        String hours = String.format(format, elapsedTime / 3600);
+        String time =  hours + ":" + minutes + ":" + seconds + ":" + milliSeconds;
+        return time;
+    }
+    
     public static String getElapsedTime (Calendar cal1, Calendar cal2) {
         Interval interval = new Interval(cal1.getTimeInMillis(), cal2.getTimeInMillis());
         Period period = interval.toPeriod();

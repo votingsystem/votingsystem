@@ -73,7 +73,7 @@ class EventoReclamacionController {
             eventosMap.offset = params.long('offset')
         }
 		eventosMap.numeroEventosReclamacionEnPeticion = eventoList.size()
-        eventoList.collect {eventoItem ->
+        eventoList.each {eventoItem ->
                 eventosMap.eventos.reclamaciones.add(
 				eventoService.optenerEventoReclamacionJSONMap(eventoItem))
         }
@@ -259,7 +259,7 @@ class EventoReclamacionController {
 		informacionReclamacionMap.eventoURL =
 			"${grailsApplication.config.grails.serverURL}/evento/${evento.id}"
 		informacionReclamacionMap.firmas = []
-		firmas.collect { firma ->
+		firmas.each { firma ->
 			def firmaMap = [id:firma.id, fechaCreacion:firma.dateCreated,
 			usuario:firma.usuario.nif,
 			firmaReclamacionURL:"${grailsApplication.config.grails.serverURL}/mensajeSMIME" +
@@ -268,7 +268,7 @@ class EventoReclamacionController {
 				"/recibo/${firma.mensajeSMIME?.id}"]
 			def valoresCampos = ValorCampoDeEvento.findAllWhere(firma:firma)
 			firmaMap.campos = []
-			valoresCampos.collect { valorCampo ->
+			valoresCampos.each { valorCampo ->
 				firmaMap.campos.add([campo:valorCampo.campoDeEvento.contenido, valor:valorCampo.valor])
 			}
 			informacionReclamacionMap.firmas.add(firmaMap)

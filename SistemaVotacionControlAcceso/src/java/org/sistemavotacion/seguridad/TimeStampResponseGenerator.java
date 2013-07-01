@@ -123,38 +123,34 @@ public class TimeStampResponseGenerator
     {   
         TimeStampResp resp;
         
-        try
-        {
-            if (genTime == null)
-            {
+        try {
+            if (genTime == null) {
                 throw new TSPValidationException("The time source is not available.", PKIFailureInfo.timeNotAvailable);
             }
 
             request.validate(acceptedAlgorithms, acceptedPolicies, acceptedExtensions, provider);
 
             status = PKIStatus.GRANTED;
-            this.addStatusString("Operation Okay");
+            this.addStatusString("Operation OK");
             
             PKIStatusInfo pkiStatusInfo = getPKIStatusInfo();
             
             ContentInfo tstTokenContentInfo = null;
-            try
-            {
-                ByteArrayInputStream    bIn = new ByteArrayInputStream(tokenGenerator.generate(request, serialNumber, genTime, provider).toCMSSignedData().getEncoded());
+            try {
+                ByteArrayInputStream    bIn = new ByteArrayInputStream(
+                		tokenGenerator.generate(request, serialNumber, genTime, provider).toCMSSignedData().getEncoded());
                 ASN1InputStream         aIn = new ASN1InputStream(bIn);
                 
                 tstTokenContentInfo = ContentInfo.getInstance(aIn.readObject());
             }
-            catch (java.io.IOException ioEx)
-            {
+            catch (java.io.IOException ioEx) {
                 throw new TSPException(
                         "Timestamp token received cannot be converted to ContentInfo", ioEx);
             }
     
             resp = new TimeStampResp(pkiStatusInfo, tstTokenContentInfo);
         }
-        catch (TSPValidationException e)
-        {
+        catch (TSPValidationException e) {
             status = PKIStatus.REJECTION;
             
             this.setFailInfoField(e.getFailureCode());
@@ -165,12 +161,10 @@ public class TimeStampResponseGenerator
             resp = new TimeStampResp(pkiStatusInfo, null);
         }
 
-        try
-        {
+        try {
             return new TimeStampResponse(resp);
         }
-        catch (IOException e)
-        {
+        catch (IOException e) {
             throw new TSPException("created badly formatted response!");
         }
     }

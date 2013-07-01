@@ -1,15 +1,18 @@
 package org.sistemavotacion.centrocontrol.modelo;
 
 import static javax.persistence.GenerationType.IDENTITY;
+
 import java.io.Serializable;
+import java.security.cert.X509Certificate;
 import java.util.Date;
-import java.util.Set;
-import javax.persistence.CascadeType;
+
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
@@ -17,10 +20,6 @@ import javax.persistence.InheritanceType;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Enumerated;
-import javax.persistence.EnumType;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
 import net.sf.json.JSONNull;
@@ -29,8 +28,6 @@ import net.sf.json.JSONSerializer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.security.cert.X509Certificate;
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -84,9 +81,6 @@ public class ActorConIP implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="fechaActualizacion", length=23, insertable=true)
     public Date lastUpdated;
-
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="actorConIP")
-    private Set<Certificado> certificados;
     
     public void setDateCreated(Date dateCreated) {
         this.dateCreated = dateCreated;
@@ -182,14 +176,6 @@ public class ActorConIP implements Serializable {
 
 	public void setCadenaCertificacion(byte[] cadenaCertificacion) {
 		this.cadenaCertificacion = cadenaCertificacion;
-	}
-
-	public Set<Certificado> getCertificados() {
-		return certificados;
-	}
-
-	public void setCertificados(Set<Certificado> certificados) {
-		this.certificados = certificados;
 	}
 
 	public Tipo getTipoServidor() {

@@ -23,15 +23,6 @@ class AppController {
 		redirect action: "restDoc"
 	}
 
-	/**
-	 * @contentType pdf blim blim vlim
-	 * @return Información sobre los servicios que tienen como url base '/app'
-	 */
-	def prueba() {
-		String pathToImage1 = g.resource(controller: 'app')
-		render pathToImage1
-		return false
-	}
 
 	/**
 	 * @httpMethod [GET]
@@ -39,15 +30,6 @@ class AppController {
 	 */
 	def home() {
 	}
-	
-	/**
-	 * @httpMethod [GET]
-	 * @return Parámetros de configuración de Hibernate 
-	 */
-	/*def hibernate () {
-		render hibernateProperties as JSON
-		return false
-	}*/
 	
 	/**
 	 * @httpMethod [GET]

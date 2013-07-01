@@ -32,9 +32,10 @@ public class ServerInitializer implements Callable<Respuesta> {
         
     @Override
     public Respuesta call() throws Exception {
-        logger.debug("call - serverType: " + serverType.toString());
         String urlInfoServidor = ContextoPruebas.getURLInfoServidor(
                 StringUtils.prepararURL(accessControlURL));
+        logger.debug("call - serverType: " + serverType.toString() + 
+                " - serviceURL: " + urlInfoServidor);
         InfoGetter worker = new InfoGetter(null, urlInfoServidor, null);
         Respuesta respuesta = worker.call();
         String msg = null;

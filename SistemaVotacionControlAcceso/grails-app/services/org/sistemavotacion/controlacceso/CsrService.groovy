@@ -117,7 +117,7 @@ class CsrService {
 		SolicitudCSRUsuario solicitudCSR
 		def solicitudesPrevias = SolicitudCSRUsuario.findAllByDispositivoAndUsuarioAndEstado(
 			respuesta.dispositivo, respuesta.usuario, SolicitudCSRUsuario.Estado.PENDIENTE_APROVACION)
-		solicitudesPrevias.collect {eventoItem ->
+		solicitudesPrevias.each {eventoItem ->
 			eventoItem.estado = SolicitudCSRUsuario.Estado.ANULADA
 			eventoItem.save();
 		}

@@ -13,11 +13,9 @@ import java.util.concurrent.Future;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.modelo.Respuesta;
-import org.sistemavotacion.test.util.SimulationUtils;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.NifUtils;
 import org.sistemavotacion.util.FileUtils;
-import org.sistemavotacion.callable.InfoGetter;
 import org.sistemavotacion.test.simulation.callable.ServerInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +24,7 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class TimeStampSimulator extends Simulator<SimulationData>  {
+public class TimeStampSimulator extends Simulator<SimulationData> {
         
     private static Logger logger = LoggerFactory.getLogger(TimeStampSimulator.class);
     
@@ -80,7 +78,8 @@ public class TimeStampSimulator extends Simulator<SimulationData>  {
     
     private void launchRequests () throws Exception {
         logger.debug("--------------- launchRequests - NumRequestsProjected: " + 
-                simulationData.getNumRequestsProjected());
+                simulationData.getNumRequestsProjected() + " - eventId: " + 
+                simulationData.getEventId());
         if(simulationData.getNumRequestsProjected() == 0) {
             logger.debug("launchRequests - WITHOUT REQUESTS PROJECTED");
             return;
@@ -92,7 +91,8 @@ public class TimeStampSimulator extends Simulator<SimulationData>  {
                 String nifFrom = NifUtils.getNif(simulationData.
                         getAndIncrementNumRequests().intValue());
                 requestCompletionService.submit(new TimeStamperTest(nifFrom, 
-                        ContextoPruebas.INSTANCE.getUrlTimeStampTestService()));
+                        ContextoPruebas.INSTANCE.getUrlTimeStampTestService(), 
+                        simulationData.getEventId()));
              } else Thread.sleep(300);
         }
     }
@@ -104,6 +104,8 @@ public class TimeStampSimulator extends Simulator<SimulationData>  {
         for (int v = 0; v < simulationData.getNumRequestsProjected(); v++) {
             Future<Respuesta> f = requestCompletionService.take();
             final Respuesta respuesta = f.get();
+            if(simulationListener != null) 
+                simulationListener.processResponse(respuesta);
             logger.debug("Response '" + (v +1) + "' statusCode: " + 
                     respuesta.getCodigoEstado());
             if(respuesta.getCodigoEstado() == Respuesta.SC_OK) {
@@ -140,7 +142,7 @@ public class TimeStampSimulator extends Simulator<SimulationData>  {
         System.exit(0);
     }
 
-    @Override public SimulationData call() throws Exception {
+    @Override public Respuesta<SimulationData> call() throws Exception {
         String serverInfoURL = ContextoPruebas.getURLInfoServidor(
                 simulationData.getAccessControlURL());
         logger.debug("init - serverInfoURL: " + serverInfoURL);
@@ -166,10 +168,11 @@ public class TimeStampSimulator extends Simulator<SimulationData>  {
             logger.info(" ************* " + getErrorList().size() + " ERRORS: \n" + 
                         errorsMsg);
         }
-        if(simulationListener != null)
-            simulationListener.setSimulationResult(null);
-        
-        return simulationData;
+        respuesta = new Respuesta(Respuesta.SC_FINALIZADO, simulationData);
+        if(simulationListener != null) 
+            simulationListener.processResponse(respuesta);
+        return respuesta;
     }
+
     
 }

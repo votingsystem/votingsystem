@@ -74,13 +74,9 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
         }
         userBaseEditorPane.setContentType("text/html");
         userBaseEditorPane.setEditable(false); 
-        userBaseEditorPane.setText(getUserBaseEditorPaneMsg(userBaseData));
+        String htmlMessage = UserBaseDialog.getUserBaseDataHtmlResultMsg(userBaseData);
+        userBaseEditorPane.setText(htmlMessage);
         pack();
-    }
-
-    private String getUserBaseEditorPaneMsg(UserBaseSimulationData userBaseData) {
-        logger.debug("=========== TODO");
-        return userBaseData.getMessage();
     }
     
     /**
@@ -109,7 +105,6 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
         minutosComboBox = new javax.swing.JComboBox();
         minutosLabel = new javax.swing.JLabel();
         cerrarButton = new javax.swing.JButton();
-        aceptarButton = new javax.swing.JButton();
         validacionPanel = new javax.swing.JPanel();
         mensajeValidacionLabel = new javax.swing.JLabel();
         closePanelLabel = new javax.swing.JLabel();
@@ -267,14 +262,6 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
             }
         });
 
-        aceptarButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/accept_16x16.png"))); // NOI18N
-        aceptarButton.setText(bundle.getString("DatosSimulacionDialog.aceptarButton.text")); // NOI18N
-        aceptarButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                aceptarButtonActionPerformed(evt);
-            }
-        });
-
         validacionPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         mensajeValidacionLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -345,8 +332,6 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
                     .addComponent(tiempoVotacionPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(aceptarButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cerrarButton))
                     .addComponent(asuntoConvocatoriaLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(validacionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -367,9 +352,7 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(tiempoVotacionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cerrarButton)
-                    .addComponent(aceptarButton))
+                .addComponent(cerrarButton)
                 .addContainerGap())
         );
 
@@ -404,29 +387,6 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
         mostrarMensajeUsuario(null);
         pack();
     }//GEN-LAST:event_closePanelLabelcloseMensajeUsuario
-
-    private void aceptarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aceptarButtonActionPerformed
-        if(!validarFormulario()) return;
-        userBaseData.setWithRandomVotes(votosAleatoriosRadioButton.isSelected());
-        userBaseData.setTimerBased(introduccionManualTiempoRadioButton.isSelected());
-        if(numVotosManualRadioButton.isSelected()) {
-            List<OpcionEvento> opciones = new ArrayList<OpcionEvento>();
-            for(OpcionVotacionPanel opcionVotacionPanel : panelesOpciones) {
-                OpcionEvento opcion = opcionVotacionPanel.getOpcion();
-                opciones.add(opcion);
-            }
-            evento.setOpciones(opciones);
-        }
-        if(introduccionManualTiempoRadioButton.isSelected()) {
-            userBaseData.setNumHoursProjected(horasComboBox.getSelectedIndex());
-            userBaseData.setNumMinutesProjected(minutosComboBox.getSelectedIndex());
-        }
-        logger.debug("Hora: " + userBaseData.getNumHoursProjected() + 
-                " - Minuto: " + userBaseData.getNumMinutesProjected());
-        ContextoPruebas.INSTANCE.setEvento(evento);
-        ContextoPruebas.INSTANCE.setUserBaseData(userBaseData);
-        dispose();
-    }//GEN-LAST:event_aceptarButtonActionPerformed
 
     public boolean validarFormulario() {
         ContextoPruebas.INSTANCE.setUserBaseData(userBaseData);
@@ -466,7 +426,6 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
     
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton aceptarButton;
     private javax.swing.JLabel asuntoConvocatoriaLabel;
     private javax.swing.JButton cerrarButton;
     private javax.swing.JLabel closePanelLabel;
@@ -502,7 +461,6 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
         int key = ke.getKeyCode();
         if (key == KeyEvent.VK_ENTER) {
             Toolkit.getDefaultToolkit().beep();
-            aceptarButton.doClick();
         }
     }
 

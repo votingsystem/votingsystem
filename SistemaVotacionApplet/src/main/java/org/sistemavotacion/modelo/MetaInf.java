@@ -24,7 +24,7 @@ public class MetaInf {
     private Long numAccessRequest;    
     private Long numVotes;
     private Long numRepresented;
-    private Long numUsersWithRepresentativeWithAccessRequest;
+    private Long numRepresentedWithAccessRequest;
     private Long numRepresentatives;    
     private Long numRepresentativesWithAccessRequest;
     private Long numRepresentativesWithVote;
@@ -54,8 +54,8 @@ public class MetaInf {
                 numRepresentativesWithVote); 
         if(numRepresented != null ) result.append(
                 "\n numRepresented: " + numRepresented); 
-        if(numUsersWithRepresentativeWithAccessRequest != null ) result.append(
-                "\n numUsersWithRepresentativeWithAccessRequest: " + numUsersWithRepresentativeWithAccessRequest);         
+        if(numRepresentedWithAccessRequest != null ) result.append(
+                "\n numRepresentedWithAccessRequest: " + numRepresentedWithAccessRequest);         
         return result.toString();
     }
 			
@@ -97,9 +97,9 @@ public class MetaInf {
                 metaInfoDeEvento.setNumRepresented(
                         repJSON.getLong("numRepresented"));
             }
-            if(repJSON.containsKey("numUsersWithRepresentativeWithAccessRequest")) {
+            if(repJSON.containsKey("numRepresentedWithAccessRequest")) {
                 metaInfoDeEvento.setNumUsersWithRepresentativeWithAccessRequest(
-                        repJSON.getLong("numUsersWithRepresentativeWithAccessRequest"));
+                        repJSON.getLong("numRepresentedWithAccessRequest"));
             }
             if(repJSON.containsKey("numRepresentativesWithAccessRequest")) {
                 metaInfoDeEvento.setNumRepresentativesWithAccessRequest(
@@ -320,17 +320,17 @@ public class MetaInf {
     }
 
     /**
-     * @return the numUsersWithRepresentativeWithAccessRequest
+     * @return the numRepresentedWithAccessRequest
      */
     public Long getNumUsersWithRepresentativeWithAccessRequest() {
-        return numUsersWithRepresentativeWithAccessRequest;
+        return numRepresentedWithAccessRequest;
     }
 
     /**
-     * @param numUsersWithRepresentativeWithAccessRequest the numUsersWithRepresentativeWithAccessRequest to set
+     * @param numRepresentedWithAccessRequest the numRepresentedWithAccessRequest to set
      */
-    public void setNumUsersWithRepresentativeWithAccessRequest(Long numUsersWithRepresentativeWithAccessRequest) {
-        this.numUsersWithRepresentativeWithAccessRequest = numUsersWithRepresentativeWithAccessRequest;
+    public void setNumUsersWithRepresentativeWithAccessRequest(Long numRepresentedWithAccessRequest) {
+        this.numRepresentedWithAccessRequest = numRepresentedWithAccessRequest;
     }
 
     /**

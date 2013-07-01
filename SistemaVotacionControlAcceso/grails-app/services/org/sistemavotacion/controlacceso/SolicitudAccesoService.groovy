@@ -28,6 +28,7 @@ class SolicitudAccesoService {
     def grailsApplication
 	def encryptionService
 	def statisticsService
+	def timeStampService
 	
 	//{"operation":"SOLICITUD_ACCESO","hashSolicitudAccesoBase64":"...",
 	// "eventId":"..","eventURL":"...","UUID":"..."}
@@ -87,7 +88,7 @@ class SolicitudAccesoService {
 							codigoEstado:Respuesta.SC_ERROR_VOTO_REPETIDO)
 				} else {
 					//TimeStamp comes cert validated from filters. Check date
-					respuesta = validateTokenDate(firmante.getTimeStampToken(), 
+					respuesta = timeStampService.validateToken(firmante.getTimeStampToken(), 
 						eventoVotacion, locale)
 					log.debug("saveRequest - validateTokenDate status: ${respuesta.codigoEstado}")
 					if(Respuesta.SC_OK != respuesta.codigoEstado) {
@@ -150,24 +151,6 @@ class SolicitudAccesoService {
 					'accessRequestWithErrorsMsg', null, locale))
 		}
     }
-	
-	Respuesta validateTokenDate(TimeStampToken timeStampToken, 
-		Evento evento, Locale locale) {
-		String msg = null;
-		if(!timeStampToken) {
-			msg = messageSource.getMessage('timeStampNullErrorMsg', null, locale)
-			return new Respuesta(codigoEstado:Respuesta.SC_NULL_REQUEST, mensaje:msg)
-		}
-		Date timestampDate = timeStampToken.getTimeStampInfo().getGenTime()
-		if(!timestampDate.after(evento.fechaInicio) &&
-			!timestampDate.before(evento.fechaFin)) {
-			String dateRangeStr = "[${eventoVotacion.fechaInicio} - ${eventoVotacion.fechaFin}]"
-			msg = messageSource.getMessage('timestampDateErrorMsg',
-				[timestampDate, dateRangeStr].toArray(), locale)
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
-				mensaje:msg, evento:evento)
-		} else return new Respuesta(codigoEstado:Respuesta.SC_OK);
-	}
 	
 	def rechazarSolicitud(SolicitudAcceso solicitudAcceso, String detalles) {
 		log.debug("rechazarSolicitud '${solicitudAcceso.id}'")

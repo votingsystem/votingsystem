@@ -188,7 +188,7 @@ public class MultiSignSimulator extends Simulator<SimulationData>
         }
     }
     
-    @Override public SimulationData call() throws Exception {
+    @Override public Respuesta call() throws Exception {
         launchSimulationThreads();
         countDownLatch.await();
         logger.debug("- call - shutdown executors");   
@@ -208,10 +208,11 @@ public class MultiSignSimulator extends Simulator<SimulationData>
             logger.info(" ************* " + errorList.size() + " ERRORS: \n" + 
                         errorsMsg);
         }
-        if(simulationListener != null)            
-            simulationListener.setSimulationResult(simulationData);
+        Respuesta respuesta = new Respuesta(
+                    Respuesta.SC_FINALIZADO,simulationData);
+        if(simulationListener != null) simulationListener.processResponse(respuesta);
         
-        return simulationData;
+        return respuesta;
     }
 
 }

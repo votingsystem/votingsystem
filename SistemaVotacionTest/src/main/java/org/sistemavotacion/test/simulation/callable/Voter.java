@@ -1,5 +1,6 @@
 package org.sistemavotacion.test.simulation.callable;
 
+import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Callable;
@@ -81,8 +82,14 @@ public class Voter implements Callable<Respuesta> {
                     respuesta.getCodigoEstado(), ex);
                 }
                 
-
-                String urlVoteService = ContextoPruebas.getURLVoto(
+                respuesta = sendVote(smimeMessage, wrapperClient.
+                        getKeyPair());
+                if (Respuesta.SC_OK != respuesta.getCodigoEstado()) { 
+                    logger.debug("============= SEGUNDO INTENTO DE VOTO " + 
+                          " - mensaje: " + respuesta.getMensaje());
+                    respuesta = sendVote(smimeMessage, wrapperClient.getKeyPair());
+                }
+                /*String urlVoteService = ContextoPruebas.getURLVoto(
                     evento.getCentroControl().getServerURL()); 
                 SMIMESignedSender sender= new SMIMESignedSender(
                         null, smimeMessage, urlVoteService, wrapperClient.
@@ -97,8 +104,9 @@ public class Voter implements Callable<Respuesta> {
                     
                     senderResponse.setReciboVoto(reciboVoto);
                 }
-                respuesta = senderResponse;
+                respuesta = senderResponse;*/
             }
+            respuesta.setSmimeMessage(smimeMessage);
             return respuesta;
         } catch(Exception ex) {
             String msg = ex.getMessage() + " - nifFrom: " + nifFrom + 
@@ -106,6 +114,25 @@ public class Voter implements Callable<Respuesta> {
             logger.error(msg , ex);
             return new Respuesta(Respuesta.SC_ERROR, evento, msg);
         }  
+    }
+    
+    private Respuesta sendVote(
+            SMIMEMessageWrapper smimeMessage, KeyPair keyPair) throws Exception {
+        String urlVoteService = ContextoPruebas.getURLVoto(
+            evento.getCentroControl().getServerURL()); 
+        SMIMESignedSender sender= new SMIMESignedSender(
+                null, smimeMessage, urlVoteService, keyPair, null);
+        Respuesta senderResponse = sender.call();
+        senderResponse.setEvento(evento);
+        if (Respuesta.SC_OK == senderResponse.getCodigoEstado()) {  
+            SMIMEMessageWrapper validatedVote =  
+                    senderResponse.getSmimeMessage();
+            ReciboVoto reciboVoto = new ReciboVoto(
+                        Respuesta.SC_OK, validatedVote, evento);
+
+            senderResponse.setReciboVoto(reciboVoto);
+        }
+        return senderResponse;
     }
     
 }

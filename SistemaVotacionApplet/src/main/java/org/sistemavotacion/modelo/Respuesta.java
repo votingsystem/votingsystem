@@ -26,6 +26,7 @@ public class Respuesta<T> {
     public static final int SC_ERROR           = 500;
     public static final int SC_ERROR_TIMESTAMP = 570;
     public static final int SC_PROCESANDO      = 700;
+    public static final int SC_FINALIZADO      = 710;
     public static final int SC_CANCELADO       = 0;
 
     private Integer id;
@@ -55,6 +56,11 @@ public class Respuesta<T> {
     public Respuesta (int codigoEstado, Evento evento) {
         this.codigoEstado = codigoEstado;
         this.evento = evento;
+    }
+    
+    public Respuesta (int codigoEstado, T data) {
+        this.codigoEstado = codigoEstado;
+        this.data = data;
     }
     
     public Respuesta (int codigoEstado, Evento evento, String msg) {

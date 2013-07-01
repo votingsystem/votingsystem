@@ -49,7 +49,7 @@ environments {
 				validationQuery = "/* ping *//*"
 			}
 		}
-    }
+    }*/
 	
 	production {
 		dataSource {
@@ -57,11 +57,11 @@ environments {
 			dbCreate = "update"
 			jndiName = "java:comp/env/jdbc/centrocontrol"
 		}
-	}*/
-	production {
+	}
+	/*production {
 		dataSource {
 			dbCreate = "update" // one of 'create', 'create-drop','update'
 			url="jdbc:postgresql://localhost:5432/SistemaVotacionCentroControl"
 		}
-	}
+	}*/
 }

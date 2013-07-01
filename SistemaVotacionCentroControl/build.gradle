@@ -73,6 +73,16 @@ task installGrailsRestDocPlugin << { task ->
 			throw new RuntimeException('package-plugin GrailsRestDocPlugin failed')
 		}
 	}
+	
+	pb  = new ProcessBuilder("grails", "maven-install");
+	pb.directory(file(pluginBaseDir));
+	proc = pb.start();
+	proc.consumeProcessErrorStream(System.err)
+	proc.consumeProcessOutputStream(System.out)
+	if (proc.waitFor() != 0) {
+		throw new RuntimeException('install-plugin GrailsRestDocPlugin failed')
+	}
+	
 	pb  = new ProcessBuilder("grails", "install-plugin", 
 		"${pluginBaseDir}/grails-rest-doc-plugin-${grailsRestDocPluginVersion}.zip");
 	pb.directory(file("."));

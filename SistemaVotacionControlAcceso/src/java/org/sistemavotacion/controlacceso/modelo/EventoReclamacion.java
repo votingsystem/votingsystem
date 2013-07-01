@@ -29,21 +29,9 @@ public class EventoReclamacion extends Evento implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name="cardinalidadRepresentaciones")
     private Cardinalidad cardinalidadRepresentaciones = Cardinalidad.UNA;   
-    
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="evento")
-    private Set<Firma> firmas;
-    
+
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="evento")
     private Set<CampoDeEvento> camposEvento;
-
-    public void setFirmas(Set<Firma> firmas) {
-        this.firmas = firmas;
-    }
-
-    public Set<Firma> getFirmas() {
-        return firmas;
-    }
-
     
     /**
      * @return the cardinalidadRepresentaciones

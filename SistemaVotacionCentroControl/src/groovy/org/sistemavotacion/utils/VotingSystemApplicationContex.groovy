@@ -64,5 +64,5 @@ import org.springframework.context.ApplicationContextAware
 	static GrailsPluginManager getPluginManager() {
 		getBean('pluginManager')
 	}
-  
+	
 }

@@ -89,13 +89,9 @@ public class EventoVotacion implements Serializable {
     private String asunto;
     @Column(name="url")
     private String url;
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="evento")
-    private Set<MensajeSMIME> mensajeSMIMESet; 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="usuarioId")
-    private Usuario usuario; 
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="eventoVotacion")
-    private Set<Certificado> certificados;       
+    private Usuario usuario;    
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="eventoVotacion")
     private Set<OpcionDeEvento> opciones;
     //Owning Entity side of the relationship
@@ -108,8 +104,6 @@ public class EventoVotacion implements Serializable {
      	})
     @ManyToMany
     private Set<Etiqueta> etiquetaSet;
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="eventoVotacion")
-    private Set<Voto> votos;  
     
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="fechaInicio", length=23)
@@ -135,6 +129,17 @@ public class EventoVotacion implements Serializable {
     @Column(name="fechaCancelacion", length=23)
     private Date dateCanceled;
 
+	public boolean isActiveDate(Date date) {
+		boolean result = false;
+		if (date.after(fechaInicio) && date.before(getDateFinish())) result = true;
+		return result;
+	}
+	
+	public Date getDateFinish() {
+		if(dateCanceled != null) return dateCanceled;
+		else return fechaFin;
+	}
+    
     public Tipo getTipo() {
         return tipo;
     }
@@ -249,14 +254,6 @@ public class EventoVotacion implements Serializable {
 		return fechaFin;
 	}
 
-	public void setVotos(Set<Voto> votos) {
-		this.votos = votos;
-	}
-
-	public Set<Voto> getVotos() {
-		return votos;
-	}
-
 	public void setUrl(String url) {
 		this.url = url;
 	}
@@ -303,14 +300,6 @@ public class EventoVotacion implements Serializable {
     public void setEstado(Estado estado) {
         this.estado = estado;
     }
-
-	public Set<Certificado> getCertificados() {
-		return certificados;
-	}
-
-	public void setCertificados(Set<Certificado> certificados) {
-		this.certificados = certificados;
-	}
 	
 	public Date getDateCanceled() {
 		return dateCanceled;
@@ -325,14 +314,6 @@ public class EventoVotacion implements Serializable {
 		Collection<X509Certificate> controlAccesoCertCollection = 
 				CertUtil.fromPEMToX509CertCollection(cadenaCertificacionControlAcceso);
 		return controlAccesoCertCollection.iterator().next();		
-	}
-
-	public Set<MensajeSMIME> getMensajeSMIMESet() {
-		return mensajeSMIMESet;
-	}
-
-	public void setMensajeSMIMESet(Set<MensajeSMIME> mensajeSMIMESet) {
-		this.mensajeSMIMESet = mensajeSMIMESet;
 	}
 
 	public String getMetaInf() {
