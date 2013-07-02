@@ -64,40 +64,62 @@ class EventoFirmaService {
 				mensaje:messageSource.getMessage(
 				'eventNotFound', [event.id].toArray(), locale))
 		}
-		def firmasRecibidas = Documento.findAllWhere(evento:event,
-			estado:Documento.Estado.FIRMA_MANIFIESTO_VALIDADA)
-		
+
+		int numSignatures = Documento.countByEventoAndEstado(event,
+			Documento.Estado.FIRMA_MANIFIESTO_VALIDADA)
 		Map<String, File> mapFiles = filesService.getBackupFiles(
 			event, Tipo.EVENTO_FIRMA, locale)
 		File metaInfFile = mapFiles.metaInfFile
 		File filesDir = mapFiles.filesDir
 		File zipResult   = mapFiles.zipResult
 		
+		String serviceURLPart = messageSource.getMessage(
+			'manifestsBackupPartPath', [event.id].toArray(), locale)
+		String datePathPart = DateUtils.getShortStringFromDate(event.getDateFinish())
+		String backupURL = "/backup/${datePathPart}/${serviceURLPart}.zip"
+		String webappBackupPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}${backupURL}"
+		
+		if(zipResult.exists()) {
+			log.debug("generarCopiaRespaldo - backup file already exists")
+			return new Respuesta(codigoEstado:Respuesta.SC_OK, mensaje:backupURL)
+		}
+		
 		Set<X509Certificate> systemTrustedCerts = firmaService.getTrustedCerts()
 		byte[] systemTrustedCertsPEMBytes = CertUtil.fromX509CertCollectionToPEM(systemTrustedCerts)
 		File systemTrustedCertsFile = new File("${filesDir.absolutePath}/systemTrustedCerts.pem")
 		systemTrustedCertsFile.setBytes(systemTrustedCertsPEMBytes)
 		
-		def backupMetaInfMap = [numSignatures:firmasRecibidas.size()]
+		def backupMetaInfMap = [numSignatures:numSignatures]
 		def eventMetaInfMap = eventoService.updateEventMetaInf(
 			event, Tipo.BACKUP, backupMetaInfMap)
 		metaInfFile.write((eventMetaInfMap as JSON).toString())
 		
 		String fileNamePrefix = messageSource.getMessage(
 			'manifestSignatureLbl', null, locale);
-		int i = 1
-		firmasRecibidas.each { firma ->
-			File pdfFile = new File("${filesDir.absolutePath}/${fileNamePrefix}_${String.format('%08d', i++)}.pdf")
-			pdfFile.setBytes(firma.pdf)
+		long begin = System.currentTimeMillis()
+		Documento.withTransaction {
+			def criteria = Documento.createCriteria()
+			def firmasRecibidas = criteria.scroll {
+				eq("evento", event)
+				eq("estado", Documento.Estado.FIRMA_MANIFIESTO_VALIDADA)
+			}
+			while (firmasRecibidas.next()) {
+				Documento firma = (Documento) firmasRecibidas.get(0);
+				File pdfFile = new File("${filesDir.absolutePath}/${fileNamePrefix}_${String.format('%08d', firmasRecibidas.getRowNumber())}.pdf")
+				pdfFile.setBytes(firma.pdf)
+				
+
+			}
 		}
 		
 		def ant = new AntBuilder()
-		ant.zip(destfile: zipResult, basedir: "${filesDir.absolutePath}") {
-			fileset(dir:"${filesDir}/..", includes: "meta.inf")
+		ant.zip(destfile: zipResult, basedir: filesDir) {
+			fileset(dir:"${filesDir.absolutePath}/..", includes: "meta.inf")
 		}
+		ant.copy(file: zipResult, tofile: webappBackupPath)
 		
 		return new Respuesta(codigoEstado:Respuesta.SC_OK,
-			file:zipResult, tipo:Tipo.EVENTO_FIRMA) 
+			 mensaje:backupURL, tipo:Tipo.EVENTO_FIRMA) 
 	}
 
 }

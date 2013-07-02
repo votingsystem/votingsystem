@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import org.sistemavotacion.Contexto;
+import org.sistemavotacion.callable.InfoGetter;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Respuesta;
@@ -177,6 +178,10 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>
                 signerCertChain, null);
         Respuesta respuesta = worker.call();
         if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+            String downloadServiceURL = ContextoPruebas.INSTANCE.
+                    getUrlDownloadBackup(respuesta.getMensaje());
+            InfoGetter infoGetter = new InfoGetter(null, downloadServiceURL, null);
+            infoGetter.call();
             /*byte[] backupZipBytes = respuesta.getMessageBytes();
             if(backupZipBytes != null) {
                 FutureTask<Respuesta> future = new FutureTask<Respuesta>(

@@ -523,6 +523,13 @@ public enum ContextoPruebas {
         return serverURL + "solicitudCopia";
     }
     
+    public String getUrlDownloadBackup(String id) {
+        if (accessControl == null) return null;
+        String serverURL = accessControl.getServerURL();
+        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
+        return serverURL + "solicitudCopia/download/" + id;
+    }
+    
     /**
      * @return the userBaseData
      */

@@ -140,9 +140,11 @@ public class PanelVotacion extends Composite implements SolicitanteEmail, Conten
     	switch(estadoDocumento) {
         	case CANCELADO:
         		message = Constantes.INSTANCIA.votingCanceledMsg();
+        		administracionDocumentoLabel.setVisible(false);
         		break;
         	case FINALIZADO:
         		message = Constantes.INSTANCIA.votingFinishedMsg();
+        		administracionDocumentoLabel.setVisible(false);
         		break;
         	case PENDIENTE_COMIENZO:
         		message = Constantes.INSTANCIA.votingPendingMsg();

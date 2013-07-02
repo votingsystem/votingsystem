@@ -122,7 +122,7 @@ log4j = {
 	
 		rollingFile name:"CentroControl", threshold:Level.DEBUG,
 			layout:pattern(conversionPattern: '%d{[dd.MM.yy HH:mm:ss.SSS]} [%t] %p %c %x - %m%n'),
-			file:"./logs/ControlAcceso.log", datePattern: '\'_\'yyyy-MM-dd'
+			file:"./logs/CentroControl.log", datePattern: '\'_\'yyyy-MM-dd'
 			
 		appender new SMTPAppender(name: 'smtp', to: mail.error.to, from: mail.error.from,
 			subject: mail.error.subject, threshold: Level.ERROR,

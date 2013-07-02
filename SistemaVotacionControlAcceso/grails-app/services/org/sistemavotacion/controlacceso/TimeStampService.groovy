@@ -217,12 +217,10 @@ class TimeStampService {
 		final BigInteger serialNumber = getSerno(DEFAULT_MAXSERIALNUMBERLENGTH)
 		long numSerie = serialNumber.longValue()
 		
-		
 		log.debug("processRequest - serialNumber: '${serialNumber}'" +
 			" - CertReq: ${timeStampRequest.getCertReq()}");	
 		
 		final TimeStampToken token = null;
-		
 		synchronized(this) {
 			final TimeStampResponse timeStampResponse = getTimeStampResponseGen().generate(
 				timeStampRequest, serialNumber, date);
@@ -233,10 +231,6 @@ class TimeStampService {
 				log.error("timeStampResponse Failure info: ${failureInfo.intValue()}");
 			}
 		}
-		
-		
-
-		
 		
 		//String timeStampRequestStr = new String(Base64.encode(timeStampRequestBytes));
 		//log.debug("timeStampRequestStr: ${timeStampRequestStr}")
@@ -259,6 +253,7 @@ class TimeStampService {
 			log.debug(" ------ validating token");
 			try {
 				token.validate(sigVerifier)
+				//validate(token, locale)
 				done.set(true)
 			} catch(Exception ex) {
 				if(numAttemp < numMaxAttempts) {
@@ -271,8 +266,6 @@ class TimeStampService {
 				}
 			}
 		}
-		//validate(token, locale)
-		
 		//String tokenStr = new String(Base64.encode(token.getEncoded()));
 		//log.debug("processRequest - tokenStr: '${tokenStr}'");
 		new SelloTiempo(serialNumber:numSerie, tokenBytes:token.getEncoded(), 
@@ -396,21 +389,6 @@ class TimeStampService {
 			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg)
 		}
 	}
-			
-	public Respuesta validate1(TimeStampToken  tsToken, Locale locale) {
-		log.debug("validate")
-		try {
-			tsToken.validate(getTimeStampSignerInfoVerifier())
-			return new Respuesta(codigoEstado:Respuesta.SC_OK)
-		}catch(Exception ex) {
-			log.error(ex.getMessage(), ex)
-			log.debug("validate - token issuer: ${tsToken?.getSID()?.getIssuer()}" + 
-				" - timeStampSignerInfoVerifier: ${timeStampSignerInfoVerifier?.associatedCertificate?.subject}")
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
-				mensaje:messageSource.getMessage('timeStampErrorMsg', null, locale))
-		}
-	}
-	
 	
 	public SignerInformationVerifier getTimeStampSignerInfoVerifier(){
 		if(!timeStampSignerInfoVerifier) afterPropertiesSet()

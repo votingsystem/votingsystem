@@ -60,7 +60,7 @@ class FilesService {
 				break;
 			case Tipo.EVENTO_RECLAMACION:
 				servicePathPart = messageSource.getMessage(
-					'claimssBackupPartPath', [event.id].toArray(), locale)
+					'claimsBackupPartPath', [event.id].toArray(), locale)
 				result.filesDir = new File("${baseDirPath}/files")
 
 				break;

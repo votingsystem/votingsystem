@@ -91,6 +91,7 @@ class FirmaService {
 		while (testCerts.next()) {
 			Certificado cert = (Certificado) testCerts.get(0);
 
+			int numCerts = Certificado.countByCertificadoAutoridad(cert)
 			def userCertCriteria = Certificado.createCriteria()
 			def userTestCerts = userCertCriteria.scroll {
 				eq("certificadoAutoridad", cert)
@@ -101,7 +102,7 @@ class FirmaService {
 				if((userTestCerts.getRowNumber() % 100) == 0) {
 					sessionFactory.currentSession.flush()
 					sessionFactory.currentSession.clear()
-					log.debug(" - processed ${userTestCerts.getRowNumber()} user certs from auth. cert ${cert.id}");
+					log.debug(" - processed ${userTestCerts.getRowNumber()}/${numCerts} user certs from auth. cert ${cert.id}");
 				}
 				
 			}

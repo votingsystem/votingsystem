@@ -1,7 +1,6 @@
 package org.centrocontrol.clientegwt.client.panel;
 
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.centrocontrol.clientegwt.client.*;
 import org.centrocontrol.clientegwt.client.evento.*;
@@ -11,7 +10,6 @@ import org.centrocontrol.clientegwt.client.util.StringUtils;
 import org.centrocontrol.clientegwt.client.dialogo.DialogoCargaHerramientaValidacion;
 import org.centrocontrol.clientegwt.client.dialogo.ErrorDialog;
 import org.centrocontrol.clientegwt.client.modelo.*;
-
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -179,15 +177,9 @@ public class PanelCentral extends Composite implements ValueChangeHandler<String
         public void onResponseReceived(Request request, Response response) {
             if (response.getStatusCode() == Response.SC_OK) {
             	logger.info("response.getText(): " + response.getText());
-                ConsultaEventosSistemaVotacionJso consulta = 
-                		ConsultaEventosSistemaVotacionJso.create(response.getText());
-                EventosSistemaVotacionJso eventos = consulta.getEventos();
-                if(eventos == null) return;
-                List<EventoSistemaVotacionJso> listaEventos = eventos.getEventosList();
-        	    if (listaEventos != null && (listaEventos.size() > 0)) {
-        	    	eventoSeleccionado = listaEventos.iterator().next();
-        	    	BusEventos.fireEvent(new EventoGWTConsultaEvento(eventoSeleccionado));
-                } else History.newItem(HistoryToken.VOTACIONES.toString());
+            	EventoSistemaVotacionJso eventoSeleccionado = 
+            			EventoSistemaVotacionJso.create(response.getText());
+            	BusEventos.fireEvent(new EventoGWTConsultaEvento(eventoSeleccionado));
             } else {
             	if(response.getStatusCode() == 0) {//Magic Number!!! -> network problem
             		showErrorDialog (Constantes.INSTANCIA.errorLbl() , 

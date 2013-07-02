@@ -50,6 +50,11 @@ public class BackupValidator implements Callable<Respuesta> {
         return result;
     }
         
+    
+    public Respuesta call1() throws Exception {
+        return null;
+    }
+    
     @Override public Respuesta call() throws Exception {
         String representativeReportFileName = ContextoPruebas.INSTANCE.
                 getString("representativeReportFileName");
@@ -211,7 +216,7 @@ public class BackupValidator implements Callable<Respuesta> {
             filePath = args[0];
         } else {
             //filePath = "/home/jgzornoza/Descargas/CopiaSeguridadDeManifiesto.zip";
-            filePath = "/home/jgzornoza/Descargas/CopiaSeguridadDeVotacion.zip";
+            filePath = "/home/jgzornoza/Descargas/VotosEvento_5.zip";
             //filePath = "/home/jgzornoza/Descargas/CopiaSeguridadDeReclamacion.zip";
         }
         File backupFile = new File(filePath);

@@ -22,6 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import org.sistemavotacion.Contexto;
+import org.sistemavotacion.callable.InfoGetter;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Respuesta;
@@ -160,14 +161,20 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>
                 signerCertChain, null);
         Respuesta respuesta = signedSender.call();
         if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
-            FutureTask<Respuesta> future = new FutureTask<Respuesta>(
-                new BackupValidator(respuesta.getMessageBytes()));
-            simulatorExecutor.execute(future);
-            respuesta = future.get();
-            logger.debug("BackupRequestWorker - status: " + respuesta.getCodigoEstado());
-            if(Respuesta.SC_OK != respuesta.getCodigoEstado()) {
-                addErrorList(respuesta.getErrorList());
-            }
+            String downloadServiceURL = ContextoPruebas.INSTANCE.
+                    getUrlDownloadBackup(respuesta.getMensaje());
+            InfoGetter infoGetter = new InfoGetter(null, downloadServiceURL, null);
+            respuesta = infoGetter.call();
+            if(Respuesta.SC_OK == respuesta.getCodigoEstado()) { 
+                FutureTask<Respuesta> future = new FutureTask<Respuesta>(
+                    new BackupValidator(respuesta.getMessageBytes()));
+                simulatorExecutor.execute(future);
+                respuesta = future.get();
+                logger.debug("BackupRequestWorker - status: " + respuesta.getCodigoEstado());
+                if(Respuesta.SC_OK != respuesta.getCodigoEstado()) {
+                    addErrorList(respuesta.getErrorList());
+                }
+            } else logger.error(respuesta.getMensaje());
         } else logger.error(respuesta.getMensaje());
     }
     
@@ -310,7 +317,6 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>
             logger.info(" ************* " + errorList.size() + " ERRORS: \n" + 
                         errorsMsg);
         }
-        logger.debug("------------------ FINISHED -----------------------");
         respuesta = new Respuesta(Respuesta.SC_FINALIZADO,simulationData);
         if(simulationListener != null) 
             simulationListener.processResponse(respuesta);      

@@ -81,18 +81,17 @@ class SolicitudCopiaController {
 					VotingSystemApplicationContex.instance.environment)) {
 					log.debug "Request from DEVELOPMENT environment generating sync response"
 					respuestaGeneracionBackup = requestBackup(evento, request.locale)
-					if(Respuesta.SC_OK == respuestaGeneracionBackup?.codigoEstado) {
-						File archivoCopias = respuestaGeneracionBackup.file
+					if(Respuesta.SC_OK == respuestaGeneracionBackup?.codigoEstado) {						
 						SolicitudCopia solicitudCopia = new SolicitudCopia(
-							filePath:archivoCopias.getAbsolutePath(), 
+							filePath:respuestaGeneracionBackup.mensaje,
 							type:respuestaGeneracionBackup.tipo,
 							documento:documento, email:email)
 						SolicitudCopia.withTransaction {
 							solicitudCopia.save()
 						}
-						params.id = solicitudCopia.id
-						flash.forwarded = Boolean.TRUE
-						forward action: "download"
+						response.status = Respuesta.SC_OK
+						render solicitudCopia.id
+						return
 					} else {
 						log.error("DEVELOPMENT - error generating backup");
 						params.respuesta = respuestaGeneracionBackup
@@ -105,9 +104,8 @@ class SolicitudCopiaController {
 					runAsync {
 						Respuesta backupResponse = requestBackup(event, locale)
 						if(Respuesta.SC_OK == backupResponse?.codigoEstado) {
-							File archivoCopias = backupResponse.file
 							SolicitudCopia solicitudCopia = new SolicitudCopia(
-								filePath:archivoCopias.getAbsolutePath(), 
+								filePath:backupResponse.mensaje,
 								type:backupResponse.tipo,
 								documento:documento, email:emailRequest)
 							SolicitudCopia.withTransaction {
@@ -157,6 +155,12 @@ class SolicitudCopiaController {
 		return respuestaGeneracionBackup
 	}
 	
+	/**
+	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE DESARROLLO). Que genera copias la copia de
+	 * respaldo de un evento.
+	 *
+	 * @httpMethod [GET]
+	 */
 	def devDownload() {
 		if(!VotingSystemApplicationContex.Environment.DEVELOPMENT.equals(
 			VotingSystemApplicationContex.instance.environment)) {
@@ -179,30 +183,12 @@ class SolicitudCopiaController {
 		}
 		Respuesta requestBackup = requestBackup(event, request.locale)
 		if(Respuesta.SC_OK == requestBackup?.codigoEstado) {
-			File archivoCopias = requestBackup.file
-			byte[] bytesCopiaRespaldo = archivoCopias.getBytes()
-			String backupFileName = "backup.zip"
-			if(event instanceof EventoVotacion) {
-				backupFileName = message(code:'votingBackupFileName', args:[event.id]);
-			}
-			if(event instanceof EventoFirma) {
-				backupFileName = message(code:'manifestBackupFileName', args:[event.id]);
-			}
-			if(event instanceof EventoReclamacion){
-				backupFileName = message(code:'claimBackupFileName', args:[event.id]);
-			}
-			response.contentLength = bytesCopiaRespaldo.length
-			response.setHeader("Content-disposition", "filename=${backupFileName}.zip")
-			response.setContentType("application/zip")
-			response.outputStream << bytesCopiaRespaldo
-			response.outputStream.flush()
-			return false
+			redirect(uri: requestBackup.mensaje)
 		} else {
 			log.error("DEVELOPMENT - error generating backup");
 			params.respuesta = requestBackup
 			return false
 		}
-		
 	}
 	
 	/**
@@ -224,44 +210,7 @@ class SolicitudCopiaController {
 			render message(code: 'solicitudCopia.noEncontrada', args:[params.id]) 
 			return false
 		}
-		if(!solicitud.filePath) {
-			response.status = Respuesta.SC_ERROR_PETICION
-			render message(code: 'backupDownloadedMsg', args:[params.id]) 
-			return false
-		}
-		File copiaRespaldo = new File(solicitud.filePath)
-
-		String backupFileName = "Backup.zip"
-		switch(solicitud.type) {
-			case Tipo.EVENTO_VOTACION:
-				backupFileName = message(code:'votingBackupFileName');
-			break;
-			case Tipo.EVENTO_RECLAMACION:
-				backupFileName = message(code:'claimBackupFileName');
-			break;
-			case Tipo.EVENTO_FIRMA:
-				backupFileName = message(code:'manifestBackupFileName');
-			break;
-			
-		}
-
-		if (copiaRespaldo != null) {
-			def bytesCopiaRespaldo = copiaRespaldo.getBytes()
-			response.contentLength = bytesCopiaRespaldo.length
-			response.setHeader("Content-disposition", "filename=${backupFileName}")
-			response.setContentType("application/zip")
-			response.outputStream << bytesCopiaRespaldo
-			response.outputStream.flush()
-			solicitud.filePath = null
-			solicitud.save()
-			copiaRespaldo.delete()
-			return false
-		} else {
-			log.error (message(code: 'error.SinCopiaRespaldo'))
-			response.status = Respuesta.SC_ERROR
-			render message(code: 'error.SinCopiaRespaldo')
-			return false
-		}
+		redirect(uri: solicitud.filePath)
 	}
 	
 	/**

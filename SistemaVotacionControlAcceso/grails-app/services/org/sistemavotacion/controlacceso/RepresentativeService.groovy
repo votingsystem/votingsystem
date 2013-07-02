@@ -194,10 +194,6 @@ class RepresentativeService {
 			numVotesRepresentedByRepresentatives:numVotesRepresentedByRepresentatives]
 		
 		eventoService.updateEventMetaInf(event, Tipo.REPRESENTATIVE_ACCREDITATIONS, metaInfMap)
-		
-		/*def ant = new AntBuilder()
-		ant.zip(destfile: zipResult, basedir: filesDir.absolutePath)*/
-		
 		return new Respuesta(data:metaInfMap,
 			codigoEstado:Respuesta.SC_OK)
 	}
@@ -320,11 +316,14 @@ class RepresentativeService {
 		}
 		
 		def selectedDateStr = DateUtils.getShortStringFromDate(selectedDate)
-		String zipNamePrefix = messageSource.getMessage(
-			'representativeAcreditationsBackupFileName', null, locale);
+		String serviceURLPart = messageSource.getMessage(
+			'representativeAcreditationsBackupPath', [representative.nif].toArray(), locale)
 		def basedir = "${grailsApplication.config.SistemaVotacion.baseRutaCopiaRespaldo}" +
-			"/AccreditationsBackup/${selectedDateStr}/${zipNamePrefix}_${representative.nif}"
-		log.debug("getAccreditationsBackup - basedir: ${basedir}")
+			"/AccreditationsBackup/${selectedDateStr}/${serviceURLPart}"
+			
+		String backupURL = "/backup/${selectedDateStr}/${serviceURLPart}.zip"
+		String webappBackupPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}${backupURL}"
+
 		File zipResult = new File("${basedir}.zip")
 		File metaInfFile;
 		if(zipResult.exists()) {
@@ -333,7 +332,7 @@ class RepresentativeService {
 				 def metaInfMap = JSON.parse(metaInfFile.text)
 				 log.debug("getAccreditationsBackup - send previous request")
 				 return new Respuesta(codigoEstado:Respuesta.SC_OK, 
-					 file:zipResult, data:metaInfMap)
+					 mensaje:backupURL, data:metaInfMap)
 			 }
 		}
 		new File(basedir).mkdirs()
@@ -359,8 +358,11 @@ class RepresentativeService {
 		metaInfFile.write((metaInfMap as JSON).toString())
 		def ant = new AntBuilder()
 		ant.zip(destfile: zipResult, basedir: basedir)
+		ant.copy(file: zipResult, tofile: webappBackupPath)
+		
 		log.debug("getAccreditationsBackup - destfile.name '${zipResult.name}'")
-		return new Respuesta(codigoEstado:Respuesta.SC_OK, data:metaInfMap, file:zipResult)
+		return new Respuesta(codigoEstado:Respuesta.SC_OK, 
+			data:metaInfMap, mensaje:backupURL)
 	}
 	
 	//{"operation":"REPRESENTATIVE_SELECTION","representativeNif":"...","representativeName":"...","UUID":"..."}
@@ -555,20 +557,25 @@ class RepresentativeService {
 		def dateFromStr = DateUtils.getShortStringFromDate(dateFrom)
 		def dateToStr = DateUtils.getShortStringFromDate(dateTo)
 		
-		String zipNamePrefix = messageSource.getMessage(
-			'representativeHistoryVotingBackupFileName', null, locale);
+		String serviceURLPart = messageSource.getMessage(
+			'representativeVotingHistoryBackupPartPath', [representative.nif].toArray(), locale)
 		def basedir = "${grailsApplication.config.SistemaVotacion.baseRutaCopiaRespaldo}" +
-			"/RepresentativeHistoryVoting/${dateFromStr}_${dateToStr}/${zipNamePrefix}_${representative.nif}"
+			"/RepresentativeHistoryVoting/${dateFromStr}_${dateToStr}/${serviceURLPart}"
 		log.debug("getVotingHistoryBackup - basedir: ${basedir}")
 		File zipResult = new File("${basedir}.zip")
+
+		String datePathPart = DateUtils.getShortStringFromDate(DateUtils.getTodayDate())
+		String backupURL = "/backup/${datePathPart}/${serviceURLPart}.zip"
+		String webappBackupPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}${backupURL}"
+		
 		File metaInfFile;
 		if(zipResult.exists()) {
 			 metaInfFile = new File("${basedir}/meta.inf")
 			 if(metaInfFile) {
 				 def metaInfMap = JSON.parse(metaInfFile.text)
 				 log.debug("getVotingHistoryBackup - ${zipResult.name} already exists");
-				 return new Respuesta(codigoEstado:Respuesta.SC_OK, file:zipResult,
-					 data:metaInfMap)
+				 return new Respuesta(codigoEstado:Respuesta.SC_OK,
+					 data:metaInfMap, mensaje:backupURL)
 			 }
 		}
 		new File(basedir).mkdirs()
@@ -607,10 +614,12 @@ class RepresentativeService {
 		metaInfFile.write(metaInfJSONStr)
 		def ant = new AntBuilder()
 		ant.zip(destfile: zipResult, basedir: basedir)
+		ant.copy(file: zipResult, tofile: webappBackupPath)
 		
-		log.debug("getVotingHistoryBackup - zipResult: ${zipResult.absolutePath}")
+		log.debug("getVotingHistoryBackup - zipResult: ${zipResult.absolutePath} " + 
+			" - backupURL: ${backupURL}")
 		return new Respuesta(codigoEstado:Respuesta.SC_OK, 
-			data:metaInfMap, file:zipResult)
+			data:metaInfMap, mensaje:backupURL)
 	}
 
 	
@@ -630,7 +639,6 @@ class RepresentativeService {
 				log.error "processVotingHistoryRequest - DATE ERROR - dateFrom '${dateFrom}' dateTo '${dateTo}'"
 				DateFormat formatter = new SimpleDateFormat("dd MMM 'de' yyyy 'a las' HH:mm");
 				
-
 				msg = messageSource.getMessage('dateRangeErrorMsg',[formatter.format(dateFrom), 
 					formatter.format(dateTo)].toArray(), locale) 
 				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
@@ -660,10 +668,9 @@ class RepresentativeService {
 				Respuesta respuestaGeneracionBackup
 				respuestaGeneracionBackup = getVotingHistoryBackup(representative, dateFrom,  dateTo, locale)
 				if(Respuesta.SC_OK == respuestaGeneracionBackup?.codigoEstado) {
-					File archivoCopias = respuestaGeneracionBackup.file
-					
+		
 					SolicitudCopia solicitudCopia = new SolicitudCopia(
-						filePath:archivoCopias.getAbsolutePath(),
+						filePath:respuestaGeneracionBackup.mensaje,
 						type:Tipo.REPRESENTATIVE_VOTING_HISTORY_REQUEST, 
 						representative:representative,
 						mensajeSMIME:mensajeSMIMEReq, email:mensajeJSON.email)

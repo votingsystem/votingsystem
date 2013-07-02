@@ -169,11 +169,17 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
                 signerCertChain, null);
         Respuesta respuesta = worker.call();
         if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
-            FutureTask<Respuesta> future = new FutureTask<Respuesta>(
-                new BackupValidator(respuesta.getMessageBytes()));
-            simulatorExecutor.execute(future);
-            respuesta = future.get();
-            logger.debug("BackupRequestWorker - status: " + respuesta.getCodigoEstado());
+            String downloadServiceURL = ContextoPruebas.INSTANCE.
+                    getUrlDownloadBackup(respuesta.getMensaje());
+            InfoGetter infoGetter = new InfoGetter(null, downloadServiceURL, null);
+            respuesta = infoGetter.call();
+            if(Respuesta.SC_OK == respuesta.getCodigoEstado()) { 
+                FutureTask<Respuesta> future = new FutureTask<Respuesta>(
+                    new BackupValidator(respuesta.getMessageBytes()));
+                simulatorExecutor.execute(future);
+                respuesta = future.get();
+                logger.debug("BackupRequestWorker - status: " + respuesta.getCodigoEstado());
+            } else logger.error(respuesta.getMensaje());
         } else logger.error(respuesta.getMensaje());
     }
     
@@ -336,7 +342,6 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
             logger.info(" ************* " + getErrorList().size() + " ERRORS: \n" + 
                         errorsMsg);
         }
-        logger.debug("------------------- FINISHED --------------------------");
         respuesta = new Respuesta(Respuesta.SC_FINALIZADO,simulationData);
         if(simulationListener != null)            
             simulationListener.processResponse(respuesta);

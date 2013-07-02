@@ -191,9 +191,15 @@ class EventoVotacionService {
 			File metaInfFile = mapFiles.metaInfFile
 			File filesDir    = mapFiles.filesDir
 			
+			String serviceURLPart = messageSource.getMessage(
+				'votingBackupPartPath', [event.id].toArray(), locale)
+			String datePathPart = DateUtils.getShortStringFromDate(event.getDateFinish())
+			String backupURL = "/backup/${datePathPart}/${serviceURLPart}.zip"
+			String webappBackupPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}${backupURL}"
+			
 			if(zipResult.exists()) {
 				log.debug("generarCopiaRespaldo - backup file already exists")
-				return new Respuesta(codigoEstado:Respuesta.SC_OK,file:zipResult)
+				return new Respuesta(codigoEstado:Respuesta.SC_OK, mensaje:backupURL)
 			}
 			respuesta = representativeService.getAccreditationsBackupForEvent(event, locale)
 			if(Respuesta.SC_OK != respuesta.codigoEstado) {
@@ -302,10 +308,10 @@ class EventoVotacionService {
 			ant.zip(destfile: zipResult, basedir: "${filesDir}") {
 				fileset(dir:"${filesDir}/..", includes: "meta.inf")
 			}
-
+			ant.copy(file: zipResult, tofile: webappBackupPath)
+			
 			log.debug("zip backup of event ${event.id} on file ${zipResult.absolutePath}")
-			return new Respuesta(codigoEstado:Respuesta.SC_OK, data:metaInfMap, 
-				file:zipResult)
+			return new Respuesta(codigoEstado:Respuesta.SC_OK, mensaje:backupURL)
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex)
 			msg =  messageSource.getMessage('error.backupGenericErrorMsg', 

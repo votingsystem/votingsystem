@@ -32,6 +32,7 @@ class EventoReclamacionService {
 	def messageSource
 	def filesService
 	def timeStampService
+	def sessionFactory
 
     Respuesta saveEvent(MensajeSMIME mensajeSMIMEReq, Locale locale) {		
 		EventoReclamacion evento
@@ -117,20 +118,47 @@ class EventoReclamacionService {
 		File filesDir = mapFiles.filesDir
 		File zipResult   = mapFiles.zipResult
 		
-		def firmasRecibidas = Firma.findAllWhere(
-			evento:event, tipo:Tipo.FIRMA_EVENTO_RECLAMACION)		
-		def backupMetaInfMap = [numSignatures:firmasRecibidas.size()]
+		String serviceURLPart = messageSource.getMessage(
+			'claimsBackupPartPath', [event.id].toArray(), locale)
+		String datePathPart = DateUtils.getShortStringFromDate(event.getDateFinish())
+		String backupURL = "/backup/${datePathPart}/${serviceURLPart}.zip"
+		String webappBackupPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}${backupURL}"
+		
+		if(zipResult.exists()) {
+			log.debug("generarCopiaRespaldo - backup file already exists")
+			return new Respuesta(codigoEstado:Respuesta.SC_OK, mensaje:backupURL)
+		}		
+		
+		int numSignatures = Firma.countByEventoAndTipo(event, 
+			Tipo.FIRMA_EVENTO_RECLAMACION)	
+		def backupMetaInfMap = [numSignatures:numSignatures]
 		def eventMetaInfMap = eventoService.updateEventMetaInf(
 			event, Tipo.BACKUP, backupMetaInfMap)
 		metaInfFile.write((eventMetaInfMap as JSON).toString())
 		
 		String fileNamePrefix = messageSource.getMessage('claimLbl', null, locale);
-		firmasRecibidas.eachWithIndex { firma, index ->
-			MensajeSMIME mensajeSMIME = firma.mensajeSMIME
-			File smimeFile = new File("${filesDir.absolutePath}/${fileNamePrefix}_${String.format('%08d', index)}.p7m")
-			smimeFile.setBytes(mensajeSMIME.contenido)
-		}
-		
+		long begin = System.currentTimeMillis()
+		Firma.withTransaction {
+			def criteria = Firma.createCriteria()
+			def firmasRecibidas = criteria.scroll {
+				eq("evento", event)
+				eq("tipo", Tipo.FIRMA_EVENTO_RECLAMACION)
+			}
+			while (firmasRecibidas.next()) {
+				Firma firma = (Firma) firmasRecibidas.get(0);
+				MensajeSMIME mensajeSMIME = firma.mensajeSMIME
+				File smimeFile = new File("${filesDir.absolutePath}/${fileNamePrefix}_${String.format('%08d', firmasRecibidas.getRowNumber())}.p7m")
+				smimeFile.setBytes(mensajeSMIME.contenido)
+				if((firmasRecibidas.getRowNumber() % 100) == 0) {
+					String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
+						System.currentTimeMillis() - begin)
+					log.debug(" - accessRequest ${firmasRecibidas.getRowNumber()} of ${numSignatures} - ${elapsedTimeStr}");
+					sessionFactory.currentSession.flush()
+					sessionFactory.currentSession.clear()
+				}
+			}
+		}	
+
 		Set<X509Certificate> systemTrustedCerts = firmaService.getTrustedCerts()
 		byte[] systemTrustedCertsPEMBytes = CertUtil.fromX509CertCollectionToPEM(systemTrustedCerts)
 		File systemTrustedCertsFile = new File("${filesDir.absolutePath}/systemTrustedCerts.pem")
@@ -141,12 +169,13 @@ class EventoReclamacionService {
 		timeStampCertFile.setBytes(timeStampCertPEMBytes)
 		
 		def ant = new AntBuilder()
-		ant.zip(destfile: zipResult, basedir: "${filesDir.absolutePath}") {
+		ant.zip(destfile: zipResult, basedir: filesDir) {
 			fileset(dir:"${filesDir}/..", includes: "meta.inf")
 		}
+		ant.copy(file: zipResult, tofile: webappBackupPath)
 
 		return new Respuesta(codigoEstado:Respuesta.SC_OK,
-			tipo:Tipo.EVENTO_RECLAMACION, file:zipResult)
+			tipo:Tipo.EVENTO_RECLAMACION, mensaje:backupURL)
     }
 
 }
