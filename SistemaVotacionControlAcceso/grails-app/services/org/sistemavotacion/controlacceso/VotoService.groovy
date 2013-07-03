@@ -22,7 +22,6 @@ class VotoService {
 	def firmaService
 	def httpService
 	def encryptionService
-	def statisticsService
 	
     synchronized Respuesta validateVote(MensajeSMIME mensajeSMIMEReq, Locale locale) {
 		log.debug ("validateVote - ")

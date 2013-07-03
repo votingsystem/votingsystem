@@ -90,8 +90,13 @@ class EventoFirmaService {
 		systemTrustedCertsFile.setBytes(systemTrustedCertsPEMBytes)
 		
 		def backupMetaInfMap = [numSignatures:numSignatures]
-		def eventMetaInfMap = eventoService.updateEventMetaInf(
-			event, Tipo.BACKUP, backupMetaInfMap)
+		Map eventMetaInfMap = eventoService.getMetaInfMap(event)
+		eventMetaInfMap.put(Tipo.BACKUP.toString(), backupMetaInfMap);
+		event.metaInf = eventMetaInfMap as JSON
+		Evento.withTransaction {
+			event.save()
+		}
+
 		metaInfFile.write((eventMetaInfMap as JSON).toString())
 		
 		String fileNamePrefix = messageSource.getMessage(

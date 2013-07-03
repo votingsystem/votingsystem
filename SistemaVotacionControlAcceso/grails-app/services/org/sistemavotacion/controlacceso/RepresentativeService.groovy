@@ -38,7 +38,7 @@ class RepresentativeService {
 	def eventoService
 	def sessionFactory
 
-	/*
+	/**
 	 * Creates backup of the state of all the representatives for a closed event
 	 */
 	private synchronized Respuesta getAccreditationsBackupForEvent (
@@ -56,7 +56,7 @@ class RepresentativeService {
 		}
 		
 		Map<String, File> mapFiles = filesService.getBackupFiles(event, 
-			Tipo.REPRESENTATIVE_ACCREDITATIONS, locale)
+			Tipo.REPRESENTATIVE_DATA, locale)
 		File zipResult   = mapFiles.zipResult
 		File metaInfFile = mapFiles.metaInfFile
 		File filesDir    = mapFiles.filesDir
@@ -86,6 +86,7 @@ class RepresentativeService {
 			eq("type", Usuario.Type.REPRESENTATIVE)
 			le("representativeRegisterDate", selectedDate)
 		}
+		Map representativesMap = [:]
 		while (representatives.next()) {
 			Usuario representative = (Usuario) representatives.get(0);			
 			File representativesReportFile = mapFiles.representativesReportFile
@@ -165,11 +166,21 @@ class RepresentativeService {
 					}
 				}
 			}
+			int numVotesRepresentedByRepresentative = 0
 			if(representativeVote) {
 				state = State.WITH_VOTE
 				numRepresentativesWithVote++
-				numVotesRepresentedByRepresentatives += numRepresented - numRepresentedWithAccessRequest
-			}
+				numVotesRepresentedByRepresentative =
+					numRepresented  - numRepresentedWithAccessRequest
+				numVotesRepresentedByRepresentatives += numVotesRepresentedByRepresentative
+			}			
+			
+			Map representativeMap = [
+				optionSelectedId:representativeVote?.opcionDeEvento?.id,
+				numRepresentedWithVote:numRepresentedWithAccessRequest,
+				numRepresentations: numRepresented,
+				numVotesRepresented:numVotesRepresentedByRepresentative]
+			representativesMap[representative.nif] = representativeMap
 			
 			String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
 				System.currentTimeMillis() - representativeBegin)
@@ -191,25 +202,60 @@ class RepresentativeService {
 			numRepresentativesWithVote:numRepresentativesWithVote,
 			numRepresentedWithAccessRequest:numTotalRepresentedWithAccessRequest,
 			numRepresented:numTotalRepresented, 
-			numVotesRepresentedByRepresentatives:numVotesRepresentedByRepresentatives]
+			numVotesRepresentedByRepresentatives:numVotesRepresentedByRepresentatives,
+			representatives: representativesMap]
 		
-		eventoService.updateEventMetaInf(event, Tipo.REPRESENTATIVE_ACCREDITATIONS, metaInfMap)
 		return new Respuesta(data:metaInfMap,
 			codigoEstado:Respuesta.SC_OK)
 	}
 	
-	/*
+	/**
 	 * Makes a Representative map
+	 * (Estimativo, puede haber cambios en el recuento final. Se pueden producir incosistencias 
+	 * en los resultados debido a los usuarios que hayan cambiado de representante a mitad de la votación. 
+	 * En el backup no se presenta este fallo)
 	 */
 	private synchronized Respuesta getAccreditationsMapForEvent (
 			EventoVotacion event, Locale locale){
-		log.debug("getAccreditationsBackupForEvent - event: ${event.id}")
+		log.debug("getAccreditationsMapForEvent - event: ${event?.id}")
 		String msg = null
 		if(!event) {
 			msg = messageSource.getMessage('nullParamErrorMsg', null, locale)
 			return new Respuesta(codigoEstado:Respuesta.SC_ERROR, mensaje:msg)
 		}
-		Date selectedDate = DateUtils.getTodayDate();
+		
+		Date selectedDate = DateUtils.getTodayDate();	
+		if(event.getDateFinish().before(selectedDate)) {
+			log.debug("Event finished, fetching map from backup data")
+			Map eventMetaInfMap = JSON.parse(event.metaInf)
+			Map representativeAccreditationsMap = eventMetaInfMap[
+				Tipo.REPRESENTATIVE_DATA.toString()]
+			return new Respuesta(codigoEstado:Respuesta.SC_OK, 
+				data:representativeAccreditationsMap)
+		}
+		log.debug("getAccreditationsMapForEvent - selectedDate: ${selectedDate} ")
+		Map optionsMap = [:]
+		event.opciones.each {option ->
+			def numVotes = Voto.countByOpcionDeEventoAndEstado(option, Voto.Estado.OK)
+			def voteCriteria = Voto.createCriteria()
+			def numUsersWithVote = voteCriteria.count {
+				createAlias("certificado", "certificado")
+				isNull("certificado.usuario")
+				eq("estado", Voto.Estado.OK)
+				eq("eventoVotacion", event)
+				eq("opcionDeEvento", option)
+			}
+			int numRepresentativesWithVote = numVotes - numUsersWithVote
+			Map optionMap = [content:option.contenido,
+				numVotes:numVotes, numUsersWithVote:numUsersWithVote,
+				numRepresentativesWithVote:numRepresentativesWithVote,
+				numVotesResult:numUsersWithVote]
+			optionsMap[option.id] = optionMap
+		}		
+		
+		int numRepresentatives = Usuario.
+			countByTypeAndRepresentativeRegisterDateLessThanEquals(
+			Usuario.Type.REPRESENTATIVE, selectedDate)		
 		int numRepresentativesWithAccessRequest = 0
 		
 		SolicitudAcceso.withTransaction {
@@ -229,66 +275,84 @@ class RepresentativeService {
 		
 		Map representativesMap = [:]
 		
-		def criteria = Usuario.createCriteria()
-		def representatives = criteria.scroll {
-			eq("type", Usuario.Type.REPRESENTATIVE)
-		}
-		
-		while (representatives.next()) {
-			Usuario representative = (Usuario) representatives.get(0);
-			int numRepresented = Usuario.countByRepresentative(representative) + 1; //The representative itself
-			numTotalRepresented += numRepresented
-			log.debug("${representative.nif} represents '${numRepresented}' users")
-
-			def numRepresentedWithAccessRequest = 0
-			SolicitudAcceso.withTransaction {
-				def accessRequestCriteria = SolicitudAcceso.createCriteria()
-				numRepresentedWithAccessRequest = accessRequestCriteria.count {
-					createAlias("usuario","usuario")
-					eq("usuario.representative", representative)
-					eq("estado", SolicitudAcceso.Estado.OK)
-					eq("eventoVotacion", event)
-				}
+		Usuario.withTransaction {
+			def criteria = Usuario.createCriteria()
+			def representatives = criteria.scroll {
+				eq("type", Usuario.Type.REPRESENTATIVE)
+				le("representativeRegisterDate", selectedDate)
 			}
-			numTotalRepresentedWithAccessRequest += numRepresentedWithAccessRequest
-						
-			def representativeVote
-			Voto.withTransaction {
-				def voteCriteria = Voto.createCriteria()
-				representativeVote = voteCriteria.get {
-					createAlias("certificado", "certificado")
-					eq("certificado.usuario", representative)
-					eq("estado", Voto.Estado.OK)
-					eq("eventoVotacion", event)
-				}
-			}
-			int numVotesRepresentedByRepresentative = 0
-			if(representativeVote) {
-				++numRepresentativesWithVote
-				numVotesRepresentedByRepresentative = 
-					numRepresented  - numRepresentedWithAccessRequest
-			} 
-			numVotesRepresentedByRepresentatives += numVotesRepresentedByRepresentative
 			
-			Map representativeMap = [
-				optionSelectedId:representativeVote?.opcionDeEvento?.id,
-				numRepresentedWithVote:numRepresentedWithAccessRequest,
-				numTotalRepresentations: numRepresented,
-				numVotesRepresentedByRepresentative:numVotesRepresentedByRepresentative]
-			representativesMap[representative.nif] = representativeMap
-			if((representatives.getRowNumber() % 100) == 0) {
-				sessionFactory.currentSession.flush() 
-				sessionFactory.currentSession.clear()
+			while (representatives.next()) {
+				Usuario representative = (Usuario) representatives.get(0);
+				
+				int numRepresented = 0
+				RepresentationDocument.withTransaction {
+					def representationDocumentCriteria = RepresentationDocument.createCriteria()
+					//The representative itself
+					numRepresented = 1 + representationDocumentCriteria.count {
+						isNull("cancellationSMIME")
+						eq("representative", representative)
+					}
+					numTotalRepresented += numRepresented
+				}	
+
+				log.debug("${representative.nif} represents '${numRepresented}' users")
+	
+				def numRepresentedWithAccessRequest = 0
+				SolicitudAcceso.withTransaction {
+					def accessRequestCriteria = SolicitudAcceso.createCriteria()
+					numRepresentedWithAccessRequest = accessRequestCriteria.count {
+						createAlias("usuario","usuario")
+						eq("usuario.representative", representative)
+						eq("estado", SolicitudAcceso.Estado.OK)
+						eq("eventoVotacion", event)
+					}
+				}
+				numTotalRepresentedWithAccessRequest += numRepresentedWithAccessRequest
+							
+				def representativeVote
+				Voto.withTransaction {
+					def voteCriteria = Voto.createCriteria()
+					representativeVote = voteCriteria.get {
+						createAlias("certificado", "certificado")
+						eq("certificado.usuario", representative)
+						eq("estado", Voto.Estado.OK)
+						eq("eventoVotacion", event)
+					}
+				}
+				int numVotesRepresentedByRepresentative = 0
+				
+				if(representativeVote) {
+					++numRepresentativesWithVote
+					numVotesRepresentedByRepresentative =
+						numRepresented  - numRepresentedWithAccessRequest
+					optionsMap[representativeVote.opcionDeEvento.id].numVotesResult += numVotesRepresentedByRepresentative
+				}
+				numVotesRepresentedByRepresentatives += numVotesRepresentedByRepresentative
+				
+				Map representativeMap = [
+					optionSelectedId:representativeVote?.opcionDeEvento?.id,
+					numRepresentedWithVote:numRepresentedWithAccessRequest,
+					numRepresentations: numRepresented,
+					numVotesRepresented:numVotesRepresentedByRepresentative]
+				
+
+				representativesMap[representative.nif] = representativeMap
+				if((representatives.getRowNumber() % 100) == 0) {
+					sessionFactory.currentSession.flush()
+					sessionFactory.currentSession.clear()
+				}
 			}
+			
 		}
-		
-		def metaInfMap = [numRepresentatives:representatives.size(),
+
+		def metaInfMap = [numRepresentatives:numRepresentatives,
 			numRepresentativesWithAccessRequest:numRepresentativesWithAccessRequest,
 			numRepresentativesWithVote:numRepresentativesWithVote,
 			numRepresentedWithAccessRequest:numTotalRepresentedWithAccessRequest,
 			numRepresented:numTotalRepresented,
 			numVotesRepresentedByRepresentatives:numVotesRepresentedByRepresentatives,
-			representatives:representativesMap]
+			representatives:representativesMap, options:optionsMap]
 		
 		return new Respuesta(codigoEstado:Respuesta.SC_OK, data:metaInfMap)
 	}

@@ -27,7 +27,6 @@ class SolicitudAccesoService {
     def firmaService
     def grailsApplication
 	def encryptionService
-	def statisticsService
 	def timeStampService
 	
 	//{"operation":"SOLICITUD_ACCESO","hashSolicitudAccesoBase64":"...",

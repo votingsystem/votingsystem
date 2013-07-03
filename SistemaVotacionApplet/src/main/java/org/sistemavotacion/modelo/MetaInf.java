@@ -87,9 +87,9 @@ public class MetaInf {
                     metaInfoJSON.getString("dateFinish"));
             metaInfoDeEvento.setDateFinish(dateFinish);
         }
-        if(metaInfoJSON.containsKey("REPRESENTATIVE_ACCREDITATIONS")) {
+        if(metaInfoJSON.containsKey("REPRESENTATIVE_DATA")) {
             JSONObject repJSON = metaInfoJSON.getJSONObject(
-                    "REPRESENTATIVE_ACCREDITATIONS");
+                    "REPRESENTATIVE_DATA");
             if(repJSON.containsKey("numRepresentatives")) {
                 metaInfoDeEvento.setNumRepresentatives(repJSON.getLong("numRepresentatives"));
             }

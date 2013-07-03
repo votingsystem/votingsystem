@@ -37,7 +37,7 @@ class FilesService {
 		 new File(zipFilesDirPath).mkdirs()
 		 result.metaInfFile = new File("${baseDirPath}/meta.inf")
 		 switch(type) {
-			 case Tipo.REPRESENTATIVE_ACCREDITATIONS:
+			 case Tipo.REPRESENTATIVE_DATA:
 				 servicePathPart = messageSource.getMessage(
 					 'repAccreditationsBackupPartPath', null, locale)
 				 filesDirPath = "${baseDirPath}/files/${servicePathPart}"
@@ -71,18 +71,7 @@ class FilesService {
 		 if(result.filesDir) result.filesDir.mkdirs();
 		 result.zipResult = new File("${zipFilesDirPath}/${servicePathPart}.zip")
 		 return result
-
 	 }			 
-
-	 public File getEventMetaInf(Evento event) {
-		 String datePathPart = DateUtils.getShortStringFromDate(event.fechaInicio)
-		 String eventsMetaInfBaseDirPath = "${grailsApplication.config.SistemaVotacion.eventsMetaInfBaseDir}" +
-			 "/${datePathPart}"
-		 File eventMetaInfBaseDir = new File(eventsMetaInfBaseDirPath)
-		 if(!eventMetaInfBaseDir.exists()) eventMetaInfBaseDir.mkdirs()
-		 File metaInfFile = new File("${eventMetaInfBaseDir.absolutePath}/meta_event_${event.id}.inf")
-		 return metaInfFile
-	 }
 
 }
 

@@ -202,6 +202,7 @@ class EventoVotacionService {
 				return new Respuesta(codigoEstado:Respuesta.SC_OK, mensaje:backupURL)
 			}
 			respuesta = representativeService.getAccreditationsBackupForEvent(event, locale)
+			Map representativeDataMap = respuesta.data
 			if(Respuesta.SC_OK != respuesta.codigoEstado) {
 				log.error("generarCopiaRespaldo - REPRESENTATIVE DATA GEN ERROR  ${respuesta.mensaje}")
 				return respuesta
@@ -232,10 +233,12 @@ class EventoVotacionService {
 			int numTotalAccessRequests = SolicitudAcceso.countByEstadoAndEventoVotacion(
 				SolicitudAcceso.Estado.OK, event)
 			def backupMetaInfMap = [numVotes:numTotalVotes,
-				numAccessRequest:numTotalAccessRequests]	
-			def metaInfMap = eventoService.updateEventMetaInf(event, Tipo.BACKUP, backupMetaInfMap)
-			log.debug(" metaInfFile ${metaInfFile.path}")
-			metaInfFile.write((metaInfMap as JSON).toString())
+				numAccessRequest:numTotalAccessRequests]
+			Map eventMetaInfMap = eventoService.getMetaInfMap(event)
+			eventMetaInfMap.put(Tipo.BACKUP.toString(), backupMetaInfMap);
+			eventMetaInfMap.put(Tipo.REPRESENTATIVE_DATA.toString(), representativeDataMap);
+			
+			metaInfFile.write((eventMetaInfMap as JSON).toString())
 			
 			String voteFileName = messageSource.getMessage('voteFileName', null, locale)
 			String representativeVoteFileName = messageSource.getMessage(
@@ -302,6 +305,7 @@ class EventoVotacionService {
 						sessionFactory.currentSession.clear()
 					} 
 				}
+				
 			}
 			
 			def ant = new AntBuilder()
@@ -310,8 +314,15 @@ class EventoVotacionService {
 			}
 			ant.copy(file: zipResult, tofile: webappBackupPath)
 			
+			if (!event.isAttached()) {
+				event.attach()
+			}
+			event.metaInf = eventMetaInfMap as JSON
+			event.save()
+			
 			log.debug("zip backup of event ${event.id} on file ${zipResult.absolutePath}")
-			return new Respuesta(codigoEstado:Respuesta.SC_OK, mensaje:backupURL)
+			return new Respuesta(codigoEstado:Respuesta.SC_OK, mensaje:backupURL,
+				data:eventMetaInfMap)
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex)
 			msg =  messageSource.getMessage('error.backupGenericErrorMsg', 

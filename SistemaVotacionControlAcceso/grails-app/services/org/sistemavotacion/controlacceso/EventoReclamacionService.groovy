@@ -132,8 +132,12 @@ class EventoReclamacionService {
 		int numSignatures = Firma.countByEventoAndTipo(event, 
 			Tipo.FIRMA_EVENTO_RECLAMACION)	
 		def backupMetaInfMap = [numSignatures:numSignatures]
-		def eventMetaInfMap = eventoService.updateEventMetaInf(
-			event, Tipo.BACKUP, backupMetaInfMap)
+		Map eventMetaInfMap =  eventoService.getMetaInfMap(event)
+		eventMetaInfMap.put(Tipo.BACKUP.toString(), backupMetaInfMap);
+		event.metaInf = eventMetaInfMap as JSON
+		Evento.withTransaction {
+			event.save()
+		}
 		metaInfFile.write((eventMetaInfMap as JSON).toString())
 		
 		String fileNamePrefix = messageSource.getMessage('claimLbl', null, locale);
