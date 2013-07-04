@@ -69,6 +69,25 @@ class RepresentativeService {
 				file:zipResult)
 		}		
 		
+		Map optionsMap = [:]
+		event.opciones.each {option ->
+			def numVoteRequests = Voto.countByOpcionDeEventoAndEstado(option, Voto.Estado.OK)
+			def voteCriteria = Voto.createCriteria()
+			def numUsersWithVote = voteCriteria.count {
+				createAlias("certificado", "certificado")
+				isNull("certificado.usuario")
+				eq("estado", Voto.Estado.OK)
+				eq("eventoVotacion", event)
+				eq("opcionDeEvento", option)
+			}
+			int numRepresentativesWithVote = numVoteRequests - numUsersWithVote
+			Map optionMap = [content:option.contenido,
+				numVoteRequests:numVoteRequests, numUsersWithVote:numUsersWithVote,
+				numRepresentativesWithVote:numRepresentativesWithVote,
+				numVotesResult:numUsersWithVote]
+			optionsMap[option.id] = optionMap
+		}		
+		
 		int numRepresentatives = Usuario.
 			countByTypeAndRepresentativeRegisterDateLessThanEquals(
 				Usuario.Type.REPRESENTATIVE, selectedDate)
@@ -169,10 +188,11 @@ class RepresentativeService {
 			int numVotesRepresentedByRepresentative = 0
 			if(representativeVote) {
 				state = State.WITH_VOTE
-				numRepresentativesWithVote++
+				++numRepresentativesWithVote
 				numVotesRepresentedByRepresentative =
 					numRepresented  - numRepresentedWithAccessRequest
 				numVotesRepresentedByRepresentatives += numVotesRepresentedByRepresentative
+				optionsMap[representativeVote.opcionDeEvento.id].numVotesResult += numVotesRepresentedByRepresentative
 			}			
 			
 			Map representativeMap = [
@@ -203,7 +223,7 @@ class RepresentativeService {
 			numRepresentedWithAccessRequest:numTotalRepresentedWithAccessRequest,
 			numRepresented:numTotalRepresented, 
 			numVotesRepresentedByRepresentatives:numVotesRepresentedByRepresentatives,
-			representatives: representativesMap]
+			representatives: representativesMap, options:optionsMap]
 		
 		return new Respuesta(data:metaInfMap,
 			codigoEstado:Respuesta.SC_OK)
@@ -236,7 +256,7 @@ class RepresentativeService {
 		log.debug("getAccreditationsMapForEvent - selectedDate: ${selectedDate} ")
 		Map optionsMap = [:]
 		event.opciones.each {option ->
-			def numVotes = Voto.countByOpcionDeEventoAndEstado(option, Voto.Estado.OK)
+			def numVoteRequests = Voto.countByOpcionDeEventoAndEstado(option, Voto.Estado.OK)
 			def voteCriteria = Voto.createCriteria()
 			def numUsersWithVote = voteCriteria.count {
 				createAlias("certificado", "certificado")
@@ -245,9 +265,9 @@ class RepresentativeService {
 				eq("eventoVotacion", event)
 				eq("opcionDeEvento", option)
 			}
-			int numRepresentativesWithVote = numVotes - numUsersWithVote
+			int numRepresentativesWithVote = numVoteRequests - numUsersWithVote
 			Map optionMap = [content:option.contenido,
-				numVotes:numVotes, numUsersWithVote:numUsersWithVote,
+				numVoteRequests:numVoteRequests, numUsersWithVote:numUsersWithVote,
 				numRepresentativesWithVote:numRepresentativesWithVote,
 				numVotesResult:numUsersWithVote]
 			optionsMap[option.id] = optionMap

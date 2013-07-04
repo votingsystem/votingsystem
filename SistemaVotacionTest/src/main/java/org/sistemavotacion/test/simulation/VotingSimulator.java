@@ -84,7 +84,7 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
         int numberVotesUserWithRepresentative = userBaseData.getNumVotesUsersWithRepresentative();
         int numVoters = numberVotesUserWithRepresentative;
         if(numberVotesUserWithRepresentative > userWithRepresentativesList.size()) {
-            logger.error(" --- numberVotesUserWithRepresentative lower than list");
+            logger.error(" #### numberVotesUserWithRepresentative lower than list");
             numVoters = userWithRepresentativesList.size();
         }
         for(int i = 0; i < numVoters; i++) {
