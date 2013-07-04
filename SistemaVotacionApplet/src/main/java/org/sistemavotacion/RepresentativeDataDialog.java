@@ -58,11 +58,13 @@ public class RepresentativeDataDialog extends JDialog  {
         progressBarPanel.setVisible(false);
         addWindowListener(new WindowAdapter() {
             public void windowClosed(WindowEvent e) {
+                done.set(true);
                 logger.debug(" - window closed event received");
             }
 
             public void windowClosing(WindowEvent e) {
                 logger.debug(" - window closing event received");
+                done.set(true);
                 sendResponse(Operacion.SC_CANCELADO,
                     Contexto.INSTANCE.getString("operacionCancelada"));
             }

@@ -74,8 +74,7 @@ grails.project.dependency.resolution = {
 			'org.apache.ant:ant:1.8.3',
 			//for rendering plugin in production environments
 			'org.springframework:spring-test:3.1.4.RELEASE',
-			'org.apache.ant:ant-launcher:1.8.3',
-			'javax.servlet:javax.servlet-api:3.1.0'
+			'org.apache.ant:ant-launcher:1.8.3'
 			) {
 				excludes "slf4j-api", "log4j", "commons-logging", "xalan",
 					"xml-apis", "groovy","commons-io"
@@ -86,9 +85,9 @@ grails.project.dependency.resolution = {
     }
 
     plugins {
+		//":resources:1.1.6",
         runtime ":hibernate:$grailsVersion", 
 				":jquery:1.8.3",
-				":resources:1.1.6",
 				":database-migration:1.3.2"
 
         // Uncomment these (or add new ones) to enable additional resources capabilities
@@ -98,8 +97,7 @@ grails.project.dependency.resolution = {
 
         build ":tomcat:$grailsVersion"
 
-		//":cache:1.0.1" 
-        compile (":gwt:0.8", ":executor:0.3",
+        compile (":cache:1.0.1", ":gwt:0.8", ":executor:0.3",
 			":rendering:0.4.3", ":rest-doc-plugin:0.4")
     }
 	

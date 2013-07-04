@@ -9,6 +9,8 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.Scanner;
 import java.util.concurrent.BlockingQueue;
@@ -52,6 +54,8 @@ public class MainFrame extends JFrame  implements KeyListener, FocusListener {
     private Future<Respuesta> tareaEnEjecucion;
     private Border normalTextBorder;
     private Frame mainFrame;
+    private final AtomicBoolean done = new AtomicBoolean(false);
+    
     /**
      * Creates new form MainFrame
      */
@@ -62,6 +66,17 @@ public class MainFrame extends JFrame  implements KeyListener, FocusListener {
         tabbedPane.setVisible(false);
         mensajePanel.setVisible(false);
         normalTextBorder = new JTextField().getBorder();
+        addWindowListener(new WindowAdapter() {
+            public void windowClosed(WindowEvent e) {
+                done.set(true);
+                if (tareaEnEjecucion != null) {
+                    tareaEnEjecucion.cancel(true);
+                }
+            }
+            public void windowClosing(WindowEvent e) { 
+                done.set(true);
+            }
+        });
         controlAccesoTextField.addKeyListener(this);
         mainFrame = getFrames()[0];
         pack();
@@ -81,7 +96,6 @@ public class MainFrame extends JFrame  implements KeyListener, FocusListener {
                 
     public void readFutures () {
         logger.debug(" - readFutures");
-        AtomicBoolean done = new AtomicBoolean(false);
         while (!done.get()) {
             try {
                 Future<Respuesta> future = queue.take();

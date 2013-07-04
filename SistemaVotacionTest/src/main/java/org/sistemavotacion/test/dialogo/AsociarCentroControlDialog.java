@@ -5,6 +5,8 @@ import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -50,6 +52,8 @@ public class AsociarCentroControlDialog extends JDialog implements KeyListener {
     private ActorConIP controlCenter = null;
     private Border normalTextBorder;
     private Frame parentFrame;
+    private final AtomicBoolean done = new AtomicBoolean(false);
+    
     /**
      * Creates new form AsociarCentroControlDialog
      */
@@ -61,6 +65,17 @@ public class AsociarCentroControlDialog extends JDialog implements KeyListener {
         normalTextBorder = new JTextField().getBorder();
         mensajePanel.setVisible(false);
         controlCenterTextField.addKeyListener(this);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosed(WindowEvent e) {
+                done.set(true);
+                if (tareaEnEjecucion != null) {
+                    tareaEnEjecucion.cancel(true);
+                }
+            }
+            public void windowClosing(WindowEvent e) { 
+                done.set(true);
+            }
+        });
         ContextoPruebas.INSTANCE.submit(new Runnable() {
             @Override public void run() {
                 try {
@@ -75,7 +90,6 @@ public class AsociarCentroControlDialog extends JDialog implements KeyListener {
         
     public void readFutures () {
         logger.debug(" - readFutures");
-        AtomicBoolean done = new AtomicBoolean(false);
         while (!done.get()) {
             try {
                 Future<Respuesta> future = queue.take();

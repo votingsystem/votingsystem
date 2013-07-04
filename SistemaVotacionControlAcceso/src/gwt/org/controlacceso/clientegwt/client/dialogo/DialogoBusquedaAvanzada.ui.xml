@@ -8,11 +8,13 @@
 		.texto{font-weight: bold;}
 		.textoMsg {margin: 10px; font-weight: bold;}
 		.textBox {border:1pt solid #3E125F;}
+		.calendarImg {margin: 3px 2px 0px 0px;}
 	</ui:style>
 	<ui:with field='recursos' type='org.controlacceso.clientegwt.client.Recursos'/>
 	<ui:with field='constantes' type='org.controlacceso.clientegwt.client.Constantes'/>
 	<ui:image field='aceptar' src="../BotonAceptar.png"/>
 	<ui:image field='cerrar' src="../BotonCancelar.png"/>
+	<ui:image field='appointment' src="../appointment.png"/>
 	<g:DialogBox ui:field="dialogBox" autoHide="false" modal="true" glassEnabled="true" 
 	    animationEnabled="true" text="{constantes.advancedSearchCaption}"   >
 		<g:VerticalPanel>        
@@ -25,21 +27,35 @@
 				<g:HorizontalPanel>
 					<g:VerticalPanel styleName="{style.textPanel}">
 						<g:HTML styleName="{style.texto}" text="{constantes.beginFromLabel}"/>
-						<p1:DateBox ui:field="fechaInicioDesde" styleName="{style.textBox}"/>
+						<g:HorizontalPanel>
+						    <g:Image resource='{recursos.appointment}' styleName="{style.calendarImg}"/>
+						    <p1:DateBox ui:field="fechaInicioDesde" styleName="{style.textBox}"/>
+						</g:HorizontalPanel>
 					</g:VerticalPanel>
 					<g:VerticalPanel styleName="{style.textPanel}">
 						<g:Label styleName="{style.texto}" text="{constantes.beginToLabel}"/>
-						<p1:DateBox ui:field="fechaInicioHasta" styleName="{style.textBox}"/>
+						<g:HorizontalPanel>
+						    <g:HorizontalPanel>
+						        <g:Image resource='{recursos.appointment}' styleName="{style.calendarImg}"/>
+						        <p1:DateBox ui:field="fechaInicioHasta" styleName="{style.textBox}"/>
+						    </g:HorizontalPanel>
+						</g:HorizontalPanel>
 					</g:VerticalPanel>	
 				</g:HorizontalPanel>	
 				<g:HorizontalPanel>
 					<g:VerticalPanel styleName="{style.textPanel}">
 						<g:HTML styleName="{style.texto}" text="{constantes.endFromLabel}"/>
-						<p1:DateBox ui:field="fechaFinDesde" styleName="{style.textBox}"/>
+						<g:HorizontalPanel>
+						    <g:Image resource='{recursos.appointment}' styleName="{style.calendarImg}"/>
+						    <p1:DateBox ui:field="fechaFinDesde" styleName="{style.textBox}"/>
+						</g:HorizontalPanel>
 					</g:VerticalPanel>
 					<g:VerticalPanel styleName="{style.textPanel}">
 						<g:Label styleName="{style.texto}" text="{constantes.endToLabel}"/>
-						<p1:DateBox ui:field="fechaFinHasta" styleName="{style.textBox}"/>
+						<g:HorizontalPanel>
+						    <g:Image resource='{recursos.appointment}' styleName="{style.calendarImg}"/>
+						    <p1:DateBox ui:field="fechaFinHasta" styleName="{style.textBox}"/>
+						</g:HorizontalPanel>
 					</g:VerticalPanel>	
 				</g:HorizontalPanel>		
 			</g:VerticalPanel>

@@ -301,7 +301,7 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>
         simulationData.setFinish(System.currentTimeMillis());
         if(timer != null) timer.stop();
         if(simulatorExecutor != null)  simulatorExecutor.shutdownNow();
-        logger.debug("--------------- SIMULATION RESULT------------------");  
+        logger.debug("------- SIMULATION RESULT - Event: " + event.getId());  
         simulationData.setFinish(System.currentTimeMillis());
                 logger.info("Begin: " + DateUtils.getStringFromDate(
                 simulationData.getBeginDate())  + " - Duration: " + 

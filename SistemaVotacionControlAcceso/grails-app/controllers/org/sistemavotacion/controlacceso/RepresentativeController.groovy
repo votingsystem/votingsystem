@@ -205,8 +205,6 @@ class RepresentativeController {
 			render msg
 			return false
 		}
-		def ctx = startAsync()
-		//ctx.setTimeout(10000);
 		Respuesta respuesta = representativeService.saveUserRepresentative(
 			mensajeSMIME, request.getLocale())
 		
@@ -214,8 +212,6 @@ class RepresentativeController {
 		if (Respuesta.SC_OK == respuesta.codigoEstado){
 			response.contentType = "${grailsApplication.config.pkcs7SignedContentType}"
 		}
-		ctx.complete();
-		
 	}
 	
 	/**

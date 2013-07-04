@@ -15,10 +15,12 @@
  	    .fechaLabel {font-size:16px; font-weight: bold; margin: 2px 0px 0px 20px;}
 		.boton { margin: 2px; cursor:pointer;}
 		.buttonPanel { float: right; margin-top: 15px;}
- 	    .dateFromBox {font-size:16px; margin: 0px 0px 0px 3px; border: 1px solid #02227a; width:200px}
-		.dateToBox {font-size:16px; margin: 0px 0px 0px 3px;border: 1px solid #02227a; width:200px}
+ 	    .dateFromBox {font-size:16px; margin: 0px 15px 0px 3px; border: 1px solid #02227a; width:180px}
+		.dateToBox {font-size:16px; margin: 0px 0px 0px 3px;border: 1px solid #02227a; width:180px}
 		.errorTextBox {border-color: red;}
+		.calendarImg {margin: 3px 2px 0px 0px;}
 	</ui:style>
+	<ui:with field='recursos' type='org.controlacceso.clientegwt.client.Recursos'/>
 	<ui:image field='aceptar' src="../BotonAceptar.png"/>
 	<ui:image field='cerrar' src="../BotonCancelar.png"/>	
 	<ui:with field='constantes' type='org.controlacceso.clientegwt.client.Constantes'/>	
@@ -34,14 +36,20 @@
        		<g:HorizontalPanel ui:field="datePanel" styleName="{style.datePanel}">
        		    <g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE" width="100%">
 	      		    <g:HorizontalPanel>
-		   		        <g:HorizontalPanel>
-		    		        <g:Label ui:field="dateFromLabel" styleName="{style.fechaLabel}"/>
-		     				<dp:DateBox ui:field="dateFromBox" styleName="{style.dateFromBox}"/>
-		       		    </g:HorizontalPanel>
-		   		        <g:HorizontalPanel>
-		    		        <g:Label ui:field="dateToLabel" styleName="{style.fechaLabel}"/>
-		  					<dp:DateBox ui:field="dateToBox" styleName="{style.dateToBox}"/>
-		       		    </g:HorizontalPanel>
+       					<g:VerticalPanel>
+							<g:Label ui:field="dateFromLabel" styleName="{style.fechaLabel}"/>
+							<g:HorizontalPanel>
+							    <g:Image resource='{recursos.appointment}' styleName="{style.calendarImg}"/>
+							    <dp:DateBox ui:field="dateFromBox" styleName="{style.dateFromBox}"/>
+							</g:HorizontalPanel>
+						</g:VerticalPanel>
+       					<g:VerticalPanel ui:field="dateToPanel">
+							<g:Label ui:field="dateToLabel" styleName="{style.fechaLabel}"/>
+							<g:HorizontalPanel>
+							    <g:Image resource='{recursos.appointment}' styleName="{style.calendarImg}"/>
+							    <dp:DateBox ui:field="dateToBox" styleName="{style.dateToBox}"/>
+							</g:HorizontalPanel>
+						</g:VerticalPanel>						
 	       		    </g:HorizontalPanel>
        		    </g:cell>
        		</g:HorizontalPanel>

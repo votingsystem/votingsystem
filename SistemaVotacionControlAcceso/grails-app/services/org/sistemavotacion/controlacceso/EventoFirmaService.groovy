@@ -1,5 +1,6 @@
 package org.sistemavotacion.controlacceso
 
+import java.text.DecimalFormat
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Temporal;
@@ -30,6 +31,7 @@ class EventoFirmaService {
     def grailsApplication
 	def messageSource
 	def filesService
+	def sessionFactory
 
 	public Respuesta saveManifest(Documento pdfDocument, Evento event, Locale locale) {
 		Documento documento = Documento.findWhere(evento:event, estado:Documento.Estado.MANIFIESTO_VALIDADO)
@@ -99,6 +101,11 @@ class EventoFirmaService {
 
 		metaInfFile.write((eventMetaInfMap as JSON).toString())
 		
+		DecimalFormat formatted = new DecimalFormat("00000000");
+		int signaturesBatch = 0;
+		String baseDir="${filesDir.absolutePath}/batch_${formatted.format(++signaturesBatch)}"
+		new File(baseDir).mkdirs()
+		
 		String fileNamePrefix = messageSource.getMessage(
 			'manifestSignatureLbl', null, locale);
 		long begin = System.currentTimeMillis()
@@ -110,10 +117,19 @@ class EventoFirmaService {
 			}
 			while (firmasRecibidas.next()) {
 				Documento firma = (Documento) firmasRecibidas.get(0);
-				File pdfFile = new File("${filesDir.absolutePath}/${fileNamePrefix}_${String.format('%08d', firmasRecibidas.getRowNumber())}.pdf")
+				File pdfFile = new File("${baseDir}/${fileNamePrefix}_${String.format('%08d', firmasRecibidas.getRowNumber())}.pdf")
 				pdfFile.setBytes(firma.pdf)
-				
-
+				if((firmasRecibidas.getRowNumber() % 100) == 0) {
+					String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
+						System.currentTimeMillis() - begin)
+					log.debug(" - accessRequest ${firmasRecibidas.getRowNumber()} of ${numSignatures} - ${elapsedTimeStr}");
+					sessionFactory.currentSession.flush()
+					sessionFactory.currentSession.clear()
+				}
+				if(((firmasRecibidas.getRowNumber() + 1) % 2000) == 0) {
+					baseDir="${filesDir.absolutePath}/batch_${formatted.format(++signaturesBatch)}"
+					new File(baseDir).mkdirs()
+				}
 			}
 		}
 		

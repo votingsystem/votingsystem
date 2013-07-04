@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import org.sistemavotacion.Contexto;
@@ -50,6 +51,7 @@ public class DirValidator {
     
     public static void main(String[] args) throws Exception {
         Contexto.INSTANCE.init();
+        
         File dir = new File(ContextoPruebas.DEFAULTS.ERROR_DIR);
         DirValidator validateDirFiles = new DirValidator();
         validateDirFiles.validateDirFiles(dir);

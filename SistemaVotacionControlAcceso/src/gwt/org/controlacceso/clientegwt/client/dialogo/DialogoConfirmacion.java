@@ -45,6 +45,7 @@ public class DialogoConfirmacion {
     @UiField Label errorMessageLabel;
     @UiField Label dateFromLabel;
     @UiField Label dateToLabel;
+    @UiField VerticalPanel dateToPanel;
     @UiField VerticalPanel errorMessagePanel;
     private boolean isDateFromVisible = false;
     private boolean isDateToVisible = false;
@@ -81,8 +82,7 @@ public class DialogoConfirmacion {
 			dateToLabel.setVisible(true);
 			isDateToVisible = true;
 		} else {
-			dateToBox.setVisible(false);
-			dateToLabel.setVisible(false);
+			dateToPanel.setVisible(false);
 			dateFromLabel.setText(Constantes.INSTANCIA.requestDateLabel() + ": ");
 			dateFromLabel.setVisible(true);
 		}

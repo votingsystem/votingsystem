@@ -58,6 +58,7 @@ public class CrearVotacionDialog extends JDialog implements KeyListener {
     private Evento evento;
     private static final String ASUNTO_VOTACION = "Nueva Votación";
     private Future<Respuesta> tareaEnEjecucion;
+    private final AtomicBoolean done = new AtomicBoolean(false);
     
     /**
      * Creates new form CrearVotacionDialog
@@ -76,11 +77,14 @@ public class CrearVotacionDialog extends JDialog implements KeyListener {
         opcionesPanel.setLayout(new MigLayout());
         addWindowListener(new WindowAdapter() {
             public void windowClosed(WindowEvent e) {
+                done.set(true);
                 if (tareaEnEjecucion != null) {
                     tareaEnEjecucion.cancel(true);
                 }
             }
-            public void windowClosing(WindowEvent e) { }
+            public void windowClosing(WindowEvent e) { 
+                done.set(true);
+            }
         });
         progressBar.setIndeterminate(true);
         progressBarPanel.setVisible(false);
@@ -105,7 +109,6 @@ public class CrearVotacionDialog extends JDialog implements KeyListener {
         
     public void readFutures () {
         logger.debug(" - readFutures");
-        AtomicBoolean done = new AtomicBoolean(false);
         while (!done.get()) {
             try {
                 Future<Respuesta> future = queue.take();

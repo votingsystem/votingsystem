@@ -1,6 +1,7 @@
 package org.sistemavotacion.controlacceso
 
 import java.security.cert.X509Certificate
+import java.text.DecimalFormat
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Temporal;
@@ -141,6 +142,12 @@ class EventoReclamacionService {
 		metaInfFile.write((eventMetaInfMap as JSON).toString())
 		
 		String fileNamePrefix = messageSource.getMessage('claimLbl', null, locale);
+		
+		DecimalFormat formatted = new DecimalFormat("00000000");
+		int claimsBatch = 0;
+		String baseDir="${filesDir.absolutePath}/batch_${formatted.format(++claimsBatch)}"
+		new File(baseDir).mkdirs()
+		
 		long begin = System.currentTimeMillis()
 		Firma.withTransaction {
 			def criteria = Firma.createCriteria()
@@ -148,10 +155,13 @@ class EventoReclamacionService {
 				eq("evento", event)
 				eq("tipo", Tipo.FIRMA_EVENTO_RECLAMACION)
 			}
+			
+			
+			
 			while (firmasRecibidas.next()) {
 				Firma firma = (Firma) firmasRecibidas.get(0);
 				MensajeSMIME mensajeSMIME = firma.mensajeSMIME
-				File smimeFile = new File("${filesDir.absolutePath}/${fileNamePrefix}_${String.format('%08d', firmasRecibidas.getRowNumber())}.p7m")
+				File smimeFile = new File("${baseDir}/${fileNamePrefix}_${formatted.format(firmasRecibidas.getRowNumber())}.p7m")
 				smimeFile.setBytes(mensajeSMIME.contenido)
 				if((firmasRecibidas.getRowNumber() % 100) == 0) {
 					String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
@@ -159,6 +169,10 @@ class EventoReclamacionService {
 					log.debug(" - accessRequest ${firmasRecibidas.getRowNumber()} of ${numSignatures} - ${elapsedTimeStr}");
 					sessionFactory.currentSession.flush()
 					sessionFactory.currentSession.clear()
+				}
+				if(((firmasRecibidas.getRowNumber() + 1) % 2000) == 0) {
+					baseDir="${filesDir.absolutePath}/batch_${formatted.format(++claimsBatch)}"
+					new File(baseDir).mkdirs()
 				}
 			}
 		}	

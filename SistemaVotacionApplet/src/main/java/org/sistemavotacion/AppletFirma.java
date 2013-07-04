@@ -158,7 +158,6 @@ public class AppletFirma extends JApplet {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        operacionEnCurso = null;
         if(AppletFirma.ModoEjecucion.APLICACION == 
                 AppletFirma.modoEjecucion && operacion.getCodigoEstado() == 
                 Operacion.SC_CANCELADO){
@@ -201,7 +200,7 @@ public class AppletFirma extends JApplet {
                         File jsonFile = File.createTempFile("operacion", ".json");
                         jsonFile.deleteOnExit();
                         FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
-                            .getResourceAsStream("testFiles/cancelVoting.json"), jsonFile);        
+                            .getResourceAsStream("testFiles/selectRepresentative.json"), jsonFile);        
                         appletFirma.ejecutarOperacion(FileUtils.getStringFromFile(jsonFile));
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);

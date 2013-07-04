@@ -224,7 +224,7 @@ public class Evento {
     }
     
     public JSONObject toJSON() {
-        logger.debug("obtenerJSON");
+        logger.debug("toJSON");
         Map map = new HashMap();
         if(asunto != null) map.put("asunto", asunto);
         if(contenido != null) map.put("contenido", contenido);
@@ -763,6 +763,7 @@ public class Evento {
                 for(int i = 0; i < arrayEtiquetas.size(); i++) {
                     etiquetas[i] = arrayEtiquetas.getString(i);
                 }
+                evento.setEtiquetas(etiquetas);
             }    
             
         } catch(Exception ex) {

@@ -1,6 +1,7 @@
 package org.sistemavotacion.controlacceso
 
 import java.io.File;
+import java.text.DecimalFormat
 import java.util.Date;
 import java.util.Set;
 
@@ -245,11 +246,14 @@ class EventoVotacionService {
 				'representativeVoteFileName', null, locale)
 			String solicitudAccesoFileName = messageSource.getMessage(
 				'solicitudAccesoFileName', null, locale)
-			String votesBaseDir="${filesDir.absolutePath}/votes"
+			
+			DecimalFormat formatted = new DecimalFormat("00000000");
+			int votesBatch = 0;
+			String votesBaseDir="${filesDir.absolutePath}/votes/batch_${formatted.format(++votesBatch)}"
 			new File(votesBaseDir).mkdirs()
 
-			
-			String accessRequestBaseDir="${filesDir.absolutePath}/accessRequest"
+			int accessRequestBatch = 0;
+			String accessRequestBaseDir="${filesDir.absolutePath}/accessRequest/batch_${formatted.format(++accessRequestBatch)}"
 			new File(accessRequestBaseDir).mkdirs()
 			def votes = null
 			long begin = System.currentTimeMillis()
@@ -267,8 +271,7 @@ class EventoVotacionService {
 						voteFilePath = "${votesBaseDir}/${representativeVoteFileName}_${representative.nif}.p7m"
 					} else {
 						//user vote, is anonymous
-						String voteId = String.format('%08d', voto.id)
-						voteFilePath = "${votesBaseDir}/${voteFileName}_${voteId}.p7m"
+						voteFilePath = "${votesBaseDir}/${voteFileName}_${formatted.format(voto.id)}.p7m"
 					}
 					MensajeSMIME mensajeSMIME = voto.mensajeSMIME
 					File smimeFile = new File(voteFilePath)
@@ -280,7 +283,10 @@ class EventoVotacionService {
 						sessionFactory.currentSession.flush()
 						sessionFactory.currentSession.clear()
 					}
-						
+					if(((votes.getRowNumber() + 1) % 2000) == 0) {
+						votesBaseDir="${filesDir.absolutePath}/votes/batch_${formatted.format(++votesBatch)}"
+						new File(votesBaseDir).mkdirs()
+					}	
 				}
 			}
 			
@@ -304,6 +310,10 @@ class EventoVotacionService {
 						sessionFactory.currentSession.flush()
 						sessionFactory.currentSession.clear()
 					} 
+					if(((accessRequests.getRowNumber() + 1) % 2000) == 0) {
+						accessRequestBaseDir="${filesDir.absolutePath}/accessRequest/batch_${formatted.format(++accessRequestBatch)}"
+						new File(accessRequestBaseDir).mkdirs()
+					}
 				}
 				
 			}

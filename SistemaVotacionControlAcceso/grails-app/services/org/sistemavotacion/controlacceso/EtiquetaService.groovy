@@ -2,6 +2,7 @@ package org.sistemavotacion.controlacceso
 
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.sistemavotacion.controlacceso.modelo.*;
+import org.codehaus.groovy.grails.web.json.JSONObject
 
 /**
 * @author jgzornoza
@@ -13,10 +14,8 @@ class EtiquetaService {
 
 	Set<Etiqueta> guardarEtiquetas(JSONArray etiquetas) {
 		log.debug("guardarEtiquetas - etiquetas: ${etiquetas}")
-		def etiquetaSet  
-		etiquetas.each { etiquetaItem ->
-			if (!etiquetaItem || "".equals(etiquetaItem)) return null
-			if(!etiquetaSet) etiquetaSet = new HashSet<Etiqueta>()
+		def etiquetaSet = etiquetas.findAll {it != JSONObject.NULL  && 
+				!"".equals(it)}.collect { etiquetaItem ->
 			etiquetaItem = etiquetaItem.toLowerCase().trim()
 			def etiqueta
 			Etiqueta.withTransaction {
@@ -29,7 +28,7 @@ class EtiquetaService {
 					etiqueta.save(flush: true)
 				}
 			}
-			etiquetaSet.add(etiqueta);
+			return etiqueta;
 		}
 		return etiquetaSet
 	}

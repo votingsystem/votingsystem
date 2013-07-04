@@ -26,6 +26,10 @@ public interface Recursos extends ClientBundle {
 	
 	@Source("feed.png")
 	ImageResource feedImage();
+	
+	@Source("appointment.png")
+	ImageResource appointment();
+	
 	@Source("Indeterminate.gif")
 	ImageResource indeterminate();
 	@Source("info_16x16.png")

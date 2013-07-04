@@ -110,7 +110,10 @@ class RepresentativeService {
 			Usuario representative = (Usuario) representatives.get(0);			
 			File representativesReportFile = mapFiles.representativesReportFile
 			representativesReportFile.write("")
-			String representativeBaseDir = "${filesDir.absolutePath}/representative_${representative.nif}"
+			
+			DecimalFormat formatted = new DecimalFormat("00000000");
+			int delegationsBatch = 0
+			String representativeBaseDir = "${filesDir.absolutePath}/representative_${representative.nif}/batch_${formatted.format(++delegationsBatch)}"
 			new File(representativeBaseDir).mkdirs()
 
 			if(representative.type != Usuario.Type.REPRESENTATIVE) {
@@ -158,6 +161,10 @@ class RepresentativeService {
 					sessionFactory.currentSession.clear()
 					log.debug("Representative ${representative.nif} - processed ${representationDocuments.getRowNumber()} representations");
 				}
+				if(((representationDocuments.getRowNumber() + 1) % 2000) == 0) {
+					representativeBaseDir= "${filesDir.absolutePath}/representative_${representative.nif}/batch_${formatted.format(++delegationsBatch)}"
+					new File(representativeBaseDir).mkdirs()
+				}
 					
 			}
 			numTotalRepresented += numRepresented			
@@ -204,11 +211,12 @@ class RepresentativeService {
 			
 			String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
 				System.currentTimeMillis() - representativeBegin)
-			DecimalFormat formatted = new DecimalFormat("00000000");
+			
+			
 			String csvLine = "${representative.nif}, " +
-				 "numRepresented:${formatted.format(numRepresented)}, " +
-				"numRepresentedWithAccessRequest:${String.format('%08d', numRepresentedWithAccessRequest)}, " +
-				"${state.toString()}\n"
+				"numRepresented:${formatted.format(numRepresented)}, " +
+			    "numRepresentedWithAccessRequest:${formatted.format(numRepresentedWithAccessRequest)}, " +
+			    "${state.toString()}\n"
 			log.debug("csvLine ${representatives.getRowNumber()}/${numRepresentatives} - ${elapsedTimeStr} -> ${csvLine}")
 			representativesReportFile.append(csvLine)
 			if((representatives.getRowNumber() % 100) == 0) {
