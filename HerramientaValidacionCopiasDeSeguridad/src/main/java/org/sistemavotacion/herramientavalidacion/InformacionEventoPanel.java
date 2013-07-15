@@ -1,13 +1,17 @@
 package org.sistemavotacion.herramientavalidacion;
 
-import org.sistemavotacion.modelo.MetaInf;
+import org.sistemavotacion.herramientavalidacion.modelo.MetaInf;
 import java.awt.Desktop;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 import org.sistemavotacion.Contexto;
+import org.sistemavotacion.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,93 +19,87 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class InformacionEventoPanel extends javax.swing.JPanel {
+public class InformacionEventoPanel extends JPanel {
     
     private static Logger logger = LoggerFactory.getLogger(InformacionEventoPanel.class);
-
-    /** Creates new form InformacionEventoPanel */
-    public InformacionEventoPanel() {
-        initComponents();
-        valorURLButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                URI uri = null;
-                try {
-                    uri = new URI("");
-                } catch (URISyntaxException ex) {
-                    logger.error(ex.getMessage(), ex);
-                }
-                open(uri);
-            }
-        });
-    }
     
-    public InformacionEventoPanel(byte[] metaInfBytes) {
+    private String valorTipoEvento = null;
+    private MetaInf metaInf = null;
+
+    public InformacionEventoPanel(MetaInf metaInf) {
         try {
             initComponents();
-            MetaInf metaInf = MetaInf.parse(new String(metaInfBytes));
             valorAsuntoLabel.setText(metaInf.getSubject());
-            String valorTipoEvento = null;
             String eventPathPart = null;
+            dateFinishValueLabel.setText(DateUtils.getStringFromDate(metaInf.getDateFinish()));
+            dateInitValueLabel.setText(DateUtils.getStringFromDate(metaInf.getDateInit()));
             switch (metaInf.getType()) {
                 case EVENTO_FIRMA:
-                    valorTipoEvento = AppletHerramienta.getResourceBundle().
-                        getString("manfiestoLabel");
+                    valorTipoEvento = Contexto.INSTANCE.getString("manfiestoLabel");
                     eventPathPart = "/eventoFirma";
                     documentosFirmadosLabel.setText("<html><b>" + 
-                            AppletHerramienta.getResourceBundle().
-                            getString("numeroFirmasLabel") + ": </b></html>");
-                    valorNumeroDocumentosLabel.setText(String.valueOf(metaInf.getNumSignatures()));
+                            Contexto.INSTANCE.getString("numeroFirmasLabel") + 
+                            ": </b></html>");
+                    valorNumeroDocumentosLabel.setText(
+                            String.valueOf(metaInf.getNumSignatures()));
+                    representativesButton.setVisible(false);
                     break;
                 case EVENTO_RECLAMACION:
-                    valorTipoEvento = AppletHerramienta.getResourceBundle().
+                    valorTipoEvento = Contexto.INSTANCE.
                         getString("reclamacionLabel");
                     eventPathPart = "/eventoReclamacion";
                     documentosFirmadosLabel.setText("<html><b>" + 
-                            AppletHerramienta.getResourceBundle().
+                            Contexto.INSTANCE.
                             getString("numeroFirmasLabel") + ": </b></html>");
-                    valorNumeroDocumentosLabel.setText(String.valueOf(metaInf.getNumSignatures()));
+                    valorNumeroDocumentosLabel.setText(
+                            String.valueOf(metaInf.getNumSignatures()));
+                    representativesButton.setVisible(false);
                     break;
                 case EVENTO_VOTACION:
-                    valorTipoEvento = AppletHerramienta.getResourceBundle().
+                    valorTipoEvento = Contexto.INSTANCE.
                         getString("votacionLabel");
                     eventPathPart = "/eventoVotacion";
                     documentosFirmadosLabel.setText("<html><b>" + 
-                            AppletHerramienta.getResourceBundle().
+                            Contexto.INSTANCE.
                             getString("numeroVotosLabel") + ": </b></html>");
                     valorNumeroDocumentosLabel.setText(String.valueOf(metaInf.getNumVotes()));
                     solicitudesAccesoLabel.setText("<html><b>" + 
-                            AppletHerramienta.getResourceBundle().
+                            Contexto.INSTANCE.
                         getString("solicitudesAccesoLabel") + ": </b></html>");
                     valorSolicitudesAccesoLabel.setText(String.valueOf(
                             metaInf.getNumAccessRequest()));                            
                     break;                    
             }
-            tipoEventoLabel.setText("<html><h2> -  " + valorTipoEvento + " -</h2></html>");
-            
-            
-            final String metaInfURL = metaInf.getServerURL();
+            String metaInfURL = metaInf.getServerURL();
             if(eventPathPart != null) {
-                metaInfURL.concat(eventPathPart);
-                if(metaInf.getId() != null) metaInfURL.concat(
+                metaInfURL = metaInfURL.concat(eventPathPart);
+                if(metaInf.getId() != null) metaInfURL = metaInfURL.concat(
                         "/"+ metaInf.getId());
             }
-            
+            final String urlToOpen = metaInfURL;
             valorURLButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     URI uri = null;
                     try {
-                        uri = new URI(metaInfURL);
+                        uri = new URI(urlToOpen);
                     } catch (URISyntaxException ex) {
                         logger.error(ex.getMessage(), ex);
                     }
                     open(uri);
                 }
             });
+            this.metaInf = metaInf;
+            textPane.setContentType("text/html");
+            textPane.setEditable(false);
+            textPane.setText(metaInf.getOptionsHTML());
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
         }        
+    }
+    
+    public String getValorTipoEvento() {
+        return valorTipoEvento;
     }
     
 
@@ -116,22 +114,26 @@ public class InformacionEventoPanel extends javax.swing.JPanel {
 
         asuntoLabel = new javax.swing.JLabel();
         valorAsuntoLabel = new javax.swing.JLabel();
-        tipoEventoLabel = new javax.swing.JLabel();
         documentosFirmadosLabel = new javax.swing.JLabel();
         valorNumeroDocumentosLabel = new javax.swing.JLabel();
         valorURLButton = new javax.swing.JButton();
         solicitudesAccesoLabel = new javax.swing.JLabel();
         valorSolicitudesAccesoLabel = new javax.swing.JLabel();
+        scrollPane = new javax.swing.JScrollPane();
+        textPane = new javax.swing.JTextPane();
+        representativesButton = new javax.swing.JButton();
+        dateInitLabel = new javax.swing.JLabel();
+        dateInitValueLabel = new javax.swing.JLabel();
+        dateFinishLabel = new javax.swing.JLabel();
+        dateFinishValueLabel = new javax.swing.JLabel();
 
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/sistemavotacion/herramientavalidacion/Bundle"); // NOI18N
         asuntoLabel.setText(bundle.getString("InformacionEventoPanel.asuntoLabel.text")); // NOI18N
         asuntoLabel.setName("asuntoLabel"); // NOI18N
 
+        valorAsuntoLabel.setFont(new java.awt.Font("Cantarell", 0, 18)); // NOI18N
         valorAsuntoLabel.setText(bundle.getString("InformacionEventoPanel.valorAsuntoLabel.text")); // NOI18N
         valorAsuntoLabel.setName("valorAsuntoLabel"); // NOI18N
-
-        tipoEventoLabel.setText(bundle.getString("InformacionEventoPanel.tipoEventoLabel.text")); // NOI18N
-        tipoEventoLabel.setName("tipoEventoLabel"); // NOI18N
 
         documentosFirmadosLabel.setText(bundle.getString("InformacionEventoPanel.documentosFirmadosLabel.text")); // NOI18N
         documentosFirmadosLabel.setName("documentosFirmadosLabel"); // NOI18N
@@ -149,6 +151,32 @@ public class InformacionEventoPanel extends javax.swing.JPanel {
         valorSolicitudesAccesoLabel.setText(bundle.getString("InformacionEventoPanel.valorSolicitudesAccesoLabel.text")); // NOI18N
         valorSolicitudesAccesoLabel.setName("valorSolicitudesAccesoLabel"); // NOI18N
 
+        scrollPane.setName("scrollPane"); // NOI18N
+
+        textPane.setName("textPane"); // NOI18N
+        scrollPane.setViewportView(textPane);
+
+        representativesButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/images/Group_16x16.png"))); // NOI18N
+        representativesButton.setText(bundle.getString("InformacionEventoPanel.representativesButton.text")); // NOI18N
+        representativesButton.setName("representativesButton"); // NOI18N
+        representativesButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                representativesButtonActionPerformed(evt);
+            }
+        });
+
+        dateInitLabel.setText(bundle.getString("InformacionEventoPanel.dateInitLabel.text")); // NOI18N
+        dateInitLabel.setName("dateInitLabel"); // NOI18N
+
+        dateInitValueLabel.setText(bundle.getString("InformacionEventoPanel.dateInitValueLabel.text")); // NOI18N
+        dateInitValueLabel.setName("dateInitValueLabel"); // NOI18N
+
+        dateFinishLabel.setText(bundle.getString("InformacionEventoPanel.dateFinishLabel.text")); // NOI18N
+        dateFinishLabel.setName("dateFinishLabel"); // NOI18N
+
+        dateFinishValueLabel.setText(bundle.getString("InformacionEventoPanel.dateFinishValueLabel.text")); // NOI18N
+        dateFinishValueLabel.setName("dateFinishValueLabel"); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -159,49 +187,79 @@ public class InformacionEventoPanel extends javax.swing.JPanel {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(asuntoLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(valorAsuntoLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 607, Short.MAX_VALUE))
+                        .addComponent(valorAsuntoLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(tipoEventoLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 431, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(valorURLButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(valorURLButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 228, Short.MAX_VALUE)
+                        .addComponent(representativesButton))
+                    .addComponent(scrollPane)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(dateInitLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(dateInitValueLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(dateFinishLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(dateFinishValueLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(documentosFirmadosLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 277, Short.MAX_VALUE)
-                            .addComponent(solicitudesAccesoLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(solicitudesAccesoLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 277, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(documentosFirmadosLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 277, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(valorSolicitudesAccesoLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 406, Short.MAX_VALUE)
-                            .addComponent(valorNumeroDocumentosLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 406, Short.MAX_VALUE))))
+                            .addComponent(valorNumeroDocumentosLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(valorSolicitudesAccesoLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(tipoEventoLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(asuntoLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(valorAsuntoLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(documentosFirmadosLabel)
-                    .addComponent(valorNumeroDocumentosLabel))
+                    .addComponent(dateInitLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(dateInitValueLabel)
+                    .addComponent(dateFinishLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(dateFinishValueLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(documentosFirmadosLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(valorNumeroDocumentosLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(solicitudesAccesoLabel)
                     .addComponent(valorSolicitudesAccesoLabel))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 157, Short.MAX_VALUE)
-                .addComponent(valorURLButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 296, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(valorURLButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(representativesButton))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
+
+    private void representativesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_representativesButtonActionPerformed
+        RepresentativesDetailsDialog representativesDialog = 
+                new RepresentativesDetailsDialog(new JFrame(), true);
+        representativesDialog.showRepresentativesDetails(metaInf.getRepresentativesHTML());
+    }//GEN-LAST:event_representativesButtonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel asuntoLabel;
+    private javax.swing.JLabel dateFinishLabel;
+    private javax.swing.JLabel dateFinishValueLabel;
+    private javax.swing.JLabel dateInitLabel;
+    private javax.swing.JLabel dateInitValueLabel;
     private javax.swing.JLabel documentosFirmadosLabel;
+    private javax.swing.JButton representativesButton;
+    private javax.swing.JScrollPane scrollPane;
     private javax.swing.JLabel solicitudesAccesoLabel;
-    private javax.swing.JLabel tipoEventoLabel;
+    private javax.swing.JTextPane textPane;
     private javax.swing.JLabel valorAsuntoLabel;
     private javax.swing.JLabel valorNumeroDocumentosLabel;
     private javax.swing.JLabel valorSolicitudesAccesoLabel;
@@ -213,11 +271,13 @@ public class InformacionEventoPanel extends javax.swing.JPanel {
             Desktop desktop = Desktop.getDesktop();
             try {
                 desktop.browse(uri);
-            } catch (IOException e) {
-            // TODO: error handling
+            } catch (IOException ex) {
+                logger.error(ex.getMessage(), ex);
             }
         } else {
-        // TODO: error handling
+            MensajeDialog mensajeDialog = new MensajeDialog(new Frame(), true);
+            mensajeDialog.setMessage(Contexto.INSTANCE.getString(
+                    "platformNotSupportedErrorMsg"), Contexto.INSTANCE.getString("errorLbl"));
         }
     }
 

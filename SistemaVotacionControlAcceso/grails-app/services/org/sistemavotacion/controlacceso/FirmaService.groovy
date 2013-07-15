@@ -393,112 +393,11 @@ class FirmaService {
 				genMultiSignedMessage(smimeMessage, subject);
 		return multifirma
 	}
-
-	public Respuesta firmarCertificadoVoto (byte[] csr, Evento evento, 
-		Usuario representative, Locale locale) {
-		log.debug("firmarCertificadoVoto - evento: ${evento?.id}");
-		Respuesta respuesta = csrService.validarCSRVoto(csr, evento, locale)
-		if(Respuesta.SC_OK != respuesta.codigoEstado) return respuesta
-		PublicKey requestPublicKey = (PublicKey)respuesta.data
-		AlmacenClaves almacenClaves = evento.getAlmacenClaves()
-		//TODO ==== vote keystore -- this is for developement
-		KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(almacenClaves.bytes, 
-			grailsApplication.config.SistemaVotacion.passwordClavesFirma.toCharArray());
-		PrivateKey privateKeySigner = (PrivateKey)keyStore.getKey(almacenClaves.keyAlias, 
-			grailsApplication.config.SistemaVotacion.passwordClavesFirma.toCharArray());
-		X509Certificate certSigner = (X509Certificate) keyStore.getCertificate(almacenClaves.keyAlias);
-		String representativeURL = null
-		if(representative && representative.type == Usuario.Type.REPRESENTATIVE) 
-			representativeURL = "OU=RepresentativeURL:http://${grailsApplication.config.grails.serverURL}" + 
-				"/SistemaVotacionControlAcceso/representative/${representative.id}"
-		
-		//representativeNIF = "OU=RepresentativeURL:${representative.nif}"
-		byte[] certificadoFirmado = PKCS10WrapperServer.firmarValidandoCsr(
-			csr, representativeURL, privateKeySigner, certSigner, 
-			evento.fechaInicio, evento.fechaFin)
-		if (!certificadoFirmado) {
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, tipo:Tipo.ERROR_VALIDANDO_CSR)	
-		} else {
-		    X509Certificate certificate = getVoteCert(certificadoFirmado)
-			SolicitudCSRVoto solicitudCSR = new SolicitudCSRVoto(
-				numeroSerie:certificate.getSerialNumber().longValue(),
-				contenido:csr, eventoVotacion:evento, 
-				estado:SolicitudCSRVoto.Estado.OK,
-				hashCertificadoVotoBase64:respuesta.hashCertificadoVotoBase64)
-			solicitudCSR.save()					
-			Certificado certificado = new Certificado(numeroSerie:certificate.getSerialNumber().longValue(),
-				contenido:certificate.getEncoded(), eventoVotacion:evento, estado:Certificado.Estado.OK,
-				solicitudCSRVoto:solicitudCSR, tipo:Certificado.Tipo.VOTO, usuario:representative,
-				hashCertificadoVotoBase64:respuesta.hashCertificadoVotoBase64)
-			certificado.save()
-			return new Respuesta(codigoEstado:Respuesta.SC_OK, data:requestPublicKey,
-				messageBytes:certificadoFirmado, certificado:certificate)
-		}
-	}
-	
-	public Respuesta firmarCertificadoUsuario (SolicitudCSRUsuario solicitudCSR, Locale locale) {
-		log.debug("firmarCertificadoUsuario");
-		def rutaAlmacenClaves = getAbsolutePath("${grailsApplication.config.SistemaVotacion.rutaAlmacenClaves}")
-		File keyStoreFile = new File(rutaAlmacenClaves);
-		String aliasClaves = grailsApplication.config.SistemaVotacion.aliasClavesFirma
-		String password = grailsApplication.config.SistemaVotacion.passwordClavesFirma		
-		KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(
-			FileUtils.getBytesFromFile(keyStoreFile), password.toCharArray());
-		PrivateKey privateKeySigner = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray());
-		X509Certificate certSigner = (X509Certificate) keyStore.getCertificate(aliasClaves);
-		
-		//log.debug("firmarCertificadoUsuario - certSigner:${certSigner}");
-
-		Date today = Calendar.getInstance().getTime();
-		Calendar today_plus_year = Calendar.getInstance();
-		today_plus_year.add(Calendar.YEAR, 1);
-		byte[] certificadoFirmado = PKCS10WrapperServer.firmarValidandoCsr(
-				solicitudCSR.contenido, null, privateKeySigner, 
-				certSigner, today, today_plus_year.getTime())
-		if (!certificadoFirmado) {
-			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, 
-				mensaje:Tipo.ERROR_VALIDANDO_CSR.toString())
-		} else {
-			X509Certificate certificate = getUserCert(certificadoFirmado)
-			solicitudCSR.estado = SolicitudCSRUsuario.Estado.OK
-			solicitudCSR.numeroSerie = certificate.getSerialNumber().longValue()
-			solicitudCSR.save()
-			Certificado certificado = new Certificado(numeroSerie:certificate.getSerialNumber()?.longValue(),
-				contenido:certificate.getEncoded(), usuario:solicitudCSR.usuario, estado:Certificado.Estado.OK,
-				solicitudCSRUsuario:solicitudCSR, tipo:Certificado.Tipo.USUARIO, valido:true)
-			certificado.save()
-			return new Respuesta(codigoEstado:Respuesta.SC_OK)
-		}
-	}
 	
 	public String getAbsolutePath(String filePath){
 		String prefijo = "${grailsApplication.mainContext.getResource('.')?.getFile()}"
 		String sufijo =filePath.startsWith(File.separator)? filePath : File.separator + filePath;
 		return "${prefijo}${sufijo}";
-	}
-	
-	public X509Certificate getUserCert(byte[] csrFirmada) throws Exception {
-		Collection<X509Certificate> certificados = 
-			CertUtil.fromPEMToX509CertCollection(csrFirmada);
-		X509Certificate userCert
-		for (X509Certificate certificate : certificados) {
-			if (certificate.subjectDN.toString().contains("OU=deviceId:")) {
-				userCert = certificate
-			}
-		}
-		return userCert
-	}
-	
-	public X509Certificate getVoteCert(byte[] csrFirmada) throws Exception {
-		Collection<X509Certificate> certificados = 
-			CertUtil.fromPEMToX509CertCollection(csrFirmada);
-		X509Certificate userCert
-		for (X509Certificate certificate : certificados) {
-			if (certificate.subjectDN.toString().contains("OU=hashCertificadoVotoHEX:")) {
-				userCert = certificate
-			}
-		}
-		return userCert
 	}
 	
 	/*

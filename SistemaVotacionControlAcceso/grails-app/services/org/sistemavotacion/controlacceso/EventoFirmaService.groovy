@@ -32,6 +32,7 @@ class EventoFirmaService {
 	def messageSource
 	def filesService
 	def sessionFactory
+	def timeStampService
 
 	public Respuesta saveManifest(Documento pdfDocument, Evento event, Locale locale) {
 		Documento documento = Documento.findWhere(evento:event, estado:Documento.Estado.MANIFIESTO_VALIDADO)
@@ -90,6 +91,10 @@ class EventoFirmaService {
 		byte[] systemTrustedCertsPEMBytes = CertUtil.fromX509CertCollectionToPEM(systemTrustedCerts)
 		File systemTrustedCertsFile = new File("${filesDir.absolutePath}/systemTrustedCerts.pem")
 		systemTrustedCertsFile.setBytes(systemTrustedCertsPEMBytes)
+		
+		byte[] timeStampCertPEMBytes = timeStampService.getSigningCert()
+		File timeStampCertFile = new File("${filesDir.absolutePath}/timeStampCert.pem")
+		timeStampCertFile.setBytes(timeStampCertPEMBytes)
 		
 		def backupMetaInfMap = [numSignatures:numSignatures]
 		Map eventMetaInfMap = eventoService.getMetaInfMap(event)

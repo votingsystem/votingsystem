@@ -271,7 +271,7 @@ class EventoVotacionService {
 						voteFilePath = "${votesBaseDir}/${representativeVoteFileName}_${representative.nif}.p7m"
 					} else {
 						//user vote, is anonymous
-						voteFilePath = "${votesBaseDir}/${voteFileName}_${formatted.format(voto.id)}.p7m"
+						voteFilePath = "${votesBaseDir}${voteFileName}_${formatted.format(voto.id)}.p7m"
 					}
 					MensajeSMIME mensajeSMIME = voto.mensajeSMIME
 					File smimeFile = new File(voteFilePath)

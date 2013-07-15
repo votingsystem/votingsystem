@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.sistemavotacion.Contexto;
 import org.sistemavotacion.seguridad.CertUtil;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +22,7 @@ public class PEMCertDialog extends javax.swing.JDialog {
         initComponents();
         pemCertEditorPane.setEditable(false);
         //pemCertEditorPane.setContentType("text/html");  
-        setTitle(AppletHerramienta.getString("pemCertDialogCaption"));
+        setTitle(Contexto.INSTANCE.getString("pemCertDialogCaption"));
         setSize(650, 500);
         setLocationRelativeTo(null);
         asuntoTextField.setEditable(false);

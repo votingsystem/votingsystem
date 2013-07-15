@@ -65,6 +65,8 @@ public class PanelPublicacionReclamacion extends Composite
         String buttonContainerPanelAndroid();
     }
 
+    @UiField org.controlacceso.clientegwt.client.Recursos res;
+    
 	@UiField HorizontalPanel pageTitle;
 	@UiField HorizontalPanel submitButtonsPanel;
     @UiField VerticalPanel piePagina;
@@ -94,6 +96,7 @@ public class PanelPublicacionReclamacion extends Composite
         richTextToolbar = new RichTextToolbar (richTextArea);
         panelCampos = new PanelPublicacionCamposReclamacion(PanelCampoReclamacion.Modo.CREAR);
         initWidget(uiBinder.createAndBindUi(this));
+        res.style().ensureInjected();
         richTextArea.setStyleName(style.richTextArea(), true);
         editorPanel.add(richTextArea);
         SubmitHandler sh = new SubmitHandler();

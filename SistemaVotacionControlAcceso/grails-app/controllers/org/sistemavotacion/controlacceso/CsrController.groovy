@@ -20,7 +20,6 @@ import org.sistemavotacion.utils.*
 class CsrController {
 
 	def csrService
-	def firmaService
 	
 	/**
 	 * Servicio que devuelve las solicitudes de certificados firmadas una vez que
@@ -97,7 +96,7 @@ class CsrController {
 				"${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
 			return false
 		}
-		Respuesta respuesta = csrService.validarCSRUsuario(consulta.getBytes(), request.getLocale())
+		Respuesta respuesta = csrService.saveUserCSR(consulta.getBytes(), request.getLocale())
 		response.status = respuesta.codigoEstado
 		render respuesta.mensaje
 		return false;
@@ -160,7 +159,7 @@ class CsrController {
 				render message(code: "csr.usuarioSinSolicitud", args: [usuarioMovil.nif])
 				return false
 			}
-			Respuesta respuestaValidacionCSR = firmaService.firmarCertificadoUsuario(
+			Respuesta respuestaValidacionCSR = csrService.firmarCertificadoUsuario(
 				solicitudCSR, request.getLocale())
 			if (Respuesta.SC_OK == respuestaValidacionCSR.codigoEstado) {
 				response.status = Respuesta.SC_OK
@@ -234,7 +233,7 @@ class CsrController {
 			render message(code: "csr.solicitudNoEncontrada", args: [consulta])
 			return false
 		}
-		Respuesta respuestaValidacionCSR = firmaService.firmarCertificadoUsuario(
+		Respuesta respuestaValidacionCSR = csrService.firmarCertificadoUsuario(
 			solicitudCSR, request.getLocale())
 		if (Respuesta.SC_OK == respuestaValidacionCSR.codigoEstado) {
 			response.status = Respuesta.SC_OK

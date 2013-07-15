@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -15,6 +16,9 @@ import java.lang.reflect.Field;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +30,6 @@ public class FileUtils {
 
     private static Logger logger = LoggerFactory.getLogger(FileUtils.class);
 
-
-	
     public static byte[] getBytesFromFile(File file) throws IOException {
         byte[] b = new byte[(int) file.length()];
         FileInputStream fs = new FileInputStream(file);
@@ -164,5 +166,56 @@ public class FileUtils {
         }
      }
 
+    /*
+     * http://www.mkyong.com/java/how-to-delete-directory-in-java/
+     */
+    public static void deleteRecursively(File file) throws IOException {
+    	if(file.isDirectory()){
+            //directory is empty, then delete it
+            if(file.list().length==0){
+               file.delete();
+               logger.debug("Directory is deleted : " 
+                                             + file.getAbsolutePath());
+            }else{
+               //list all the directory contents
+               String files[] = file.list();
+               for (String temp : files) {
+                  //construct the file structure
+                  File fileDelete = new File(file, temp);
+                  //recursive delete
+                 deleteRecursively(fileDelete);
+               }
+               //check the directory again, if empty then delete it
+               if(file.list().length==0){
+                 file.delete();
+                 logger.debug("Directory is deleted : " 
+                                              + file.getAbsolutePath());
+               }
+            }
+    	}else{
+            file.delete();//if file, then delete it
+    	}
+    }
+
+    public static List<File> findRecursively(
+            File baseDir, final String textToFind) throws IOException {
+    	List<File> result = new ArrayList<File>();
+        if(baseDir.isDirectory()){
+            File[] matchingFiles = baseDir.listFiles(new FilenameFilter() {
+                public boolean accept(File dir, String name) {
+                    return name.contains(textToFind);
+                }
+            });
+            result.addAll(Arrays.asList(matchingFiles));
+            File[] dirFiles = baseDir.listFiles();
+            for(File file: dirFiles) {
+                if(file.isDirectory()) {
+                    List<File> subdirMatchingFiles = findRecursively(file, textToFind);
+                    result.addAll(subdirMatchingFiles);
+                }
+            }
+    	} 
+        return result; 
+    }
 
 }

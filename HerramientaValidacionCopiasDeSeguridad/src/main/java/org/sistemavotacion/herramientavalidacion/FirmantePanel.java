@@ -36,6 +36,10 @@ public class FirmantePanel extends javax.swing.JPanel implements ItemListener {
         this.firmante = firmante;
         valorAlgoritmoFirmaLabel.setText(firmante.getEncryptiontId() + " - " + 
                 firmante.getDigestId());
+        if(firmante.getTimeStampToken() == null) {
+            timeStampButton.setVisible(false);
+        } else {
+        }
         valorFechaFirmaLabel.setText(DateUtils.
                 getSpanishFormattedStringFromDate(firmante.getFechaFirma()));
         firmanteEditorPane.setText(firmante.getInfoCert());
@@ -234,12 +238,8 @@ public class FirmantePanel extends javax.swing.JPanel implements ItemListener {
             logger.debug("TimeStampToken NULL");
             return;
         }
-        Frame frame;
-        Frame[] frames = JFrame.getFrames();
-        if(frames.length == 0 || frames[0] == null) frame = new javax.swing.JFrame();
-        else frame = frames[0];
         TimeStampDialog timeStampDialog = new TimeStampDialog(
-                frame, true, timeStampToken);
+                new JFrame(), true, timeStampToken);
        timeStampDialog.setVisible(true);
     }//GEN-LAST:event_timeStampButtonActionPerformed
 

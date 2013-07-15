@@ -81,7 +81,7 @@ public class Formateadora {
             result.append("<br/><b>Opciones: </b><ul>");
             List<OpcionEvento> opciones = evento.getOpciones();
             for(OpcionEvento opcion: opciones) {
-                result.append("<li><b>Nombre: </b> " + opcion.getContenido() + "</li>");
+                result.append("<li><b>Nombre: </b> " + opcion.getContent() + "</li>");
             }
             result.append("</ul>");
         }

@@ -58,6 +58,7 @@ public class PanelFirmaManifiesto extends Composite implements ConfirmacionListe
         String panelInfoDocumentoOver();
     }
 
+    @UiField org.controlacceso.clientegwt.client.Recursos res;
 	@UiField HTML pageTitle;
 	@UiField HTML piePagina;
     @UiField EditorStyle style;
@@ -89,6 +90,7 @@ public class PanelFirmaManifiesto extends Composite implements ConfirmacionListe
     
     public PanelFirmaManifiesto() {
         initWidget(uiBinder.createAndBindUi(this));
+        res.style().ensureInjected();
         messagePanel.setVisible(false);
         panelInfoDocumento.setEventListener(eventListener);
 		administracionDocumentoLabel.setListener(administrarEventoEventListener);

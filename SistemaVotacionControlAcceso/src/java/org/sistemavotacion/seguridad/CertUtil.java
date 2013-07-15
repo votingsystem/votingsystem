@@ -14,6 +14,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.security.cert.CRLException;
 import java.security.cert.CertPath;
@@ -74,6 +75,7 @@ public class CertUtil {
     public static final int PERIODO_VALIDEZ = 7 * 24 * 60 * 60 * 1000;
     
     static public String SIG_ALGORITHM = "SHA1WithRSAEncryption";
+	private static String randomAlgorithm = "SHA1PRNG";
     
     /**
      * Genera un certificado V1 para usarlo como certificado raíz de una CA
@@ -81,7 +83,13 @@ public class CertUtil {
     public static X509Certificate generateV1RootCert(KeyPair pair, 
     		long comienzo, int periodoValidez, String principal) throws Exception {
         X509V1CertificateGenerator  certGen = new X509V1CertificateGenerator();
-        certGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()));
+
+        byte[] serno = new byte[8];
+        SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+        random.setSeed((new Date().getTime()));
+        random.nextBytes(serno);
+        certGen.setSerialNumber((new java.math.BigInteger(serno)).abs());
+        
         certGen.setIssuerDN(new X500Principal(principal));
         certGen.setNotBefore(new Date(comienzo));
         certGen.setNotAfter(new Date(comienzo + periodoValidez));
@@ -99,7 +107,13 @@ public class CertUtil {
         X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
         logger.debug("strSubjectDN: " + strSubjectDN);
         X509Principal x509Principal = new X509Principal(strSubjectDN);          
-        certGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()));
+
+        byte[] serno = new byte[8];
+        SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+        random.setSeed((new Date().getTime()));
+        random.nextBytes(serno);
+        certGen.setSerialNumber((new java.math.BigInteger(serno)).abs());
+        
         certGen.setIssuerDN(x509Principal);
         certGen.setNotBefore(fechaIncio);
         certGen.setNotAfter(fechaFin);
@@ -123,7 +137,13 @@ public class CertUtil {
     		PrivateKey caKey, X509Certificate caCert, Date fechaInicio, 
     		Date fechaFin, String endEntitySubjectDN) throws Exception {
         X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
-        certGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()));
+
+        byte[] serno = new byte[8];
+        SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+        random.setSeed((new Date().getTime()));
+        random.nextBytes(serno);
+        certGen.setSerialNumber((new java.math.BigInteger(serno)).abs());
+        
         certGen.setIssuerDN(PrincipalUtil.getSubjectX509Principal(caCert));
         certGen.setNotBefore(fechaInicio);
         certGen.setNotAfter(fechaFin);
@@ -139,8 +159,7 @@ public class CertUtil {
     }
     
     /**
-     * Genera un certificado V3 para usarlo como certificado de usuario final a partir
-     * de una 'certificate signing request'
+     * Genera un certificado V3 a partir de una CSR (Certificate Signing Request)
      */
     public static X509Certificate generateV3EndEntityCertFromCsr(PKCS10CertificationRequest csr, 
             PrivateKey caKey, X509Certificate caCert, Date fechaInicio, Date fechaFin,
@@ -148,8 +167,15 @@ public class CertUtil {
         X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
         PublicKey requestPublicKey = csr.getPublicKey();
         X509Principal x509Principal = new X509Principal(strSubjectDN);  
-        certGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()));
-        logger.debug("generateV3EndEntityCertFromCsr::caCert.getSubjectX500Principal(): " + caCert.getSubjectX500Principal());
+        
+        byte[] serno = new byte[8];
+        SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+        random.setSeed((new Date().getTime()));
+        random.nextBytes(serno);
+        certGen.setSerialNumber((new java.math.BigInteger(serno)).abs());
+        
+
+        logger.debug("generateV3EndEntityCertFromCsr - caCert.getSubjectX500Principal(): " + caCert.getSubjectX500Principal());
         certGen.setIssuerDN(PrincipalUtil.getSubjectX509Principal(caCert));
         certGen.setNotBefore(fechaInicio);
         certGen.setNotAfter(fechaFin);
@@ -178,7 +204,6 @@ public class CertUtil {
         }
         X509Certificate cert = certGen.generate(caKey, "BC");
         cert.verify(caCert.getPublicKey());
-        logger.debug("Verificacion OK");
         return cert;
     }
 

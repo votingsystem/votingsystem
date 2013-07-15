@@ -404,7 +404,7 @@ public class DatosSimulacionDialog extends JDialog implements KeyListener {
                     break;
                 } else {
                     opcionVotacionPanel.setError(false);
-                    sumaVotosOpciones += opcion.getNumeroVotos();
+                    sumaVotosOpciones += opcion.getNumVoteRequests().intValue();
                 }
             }
         }

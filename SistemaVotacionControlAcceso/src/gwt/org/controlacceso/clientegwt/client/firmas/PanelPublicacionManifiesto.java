@@ -64,6 +64,7 @@ public class PanelPublicacionManifiesto extends Composite
         String buttonContainerPanelAndroid();
     }
     
+    @UiField org.controlacceso.clientegwt.client.Recursos res;
 	@UiField HorizontalPanel pageTitle;
 	@UiField HorizontalPanel buttonContainerPanel;
     @UiField VerticalPanel piePagina;
@@ -92,6 +93,7 @@ public class PanelPublicacionManifiesto extends Composite
     	richTextArea = new RichTextArea();
         richTextToolbar = new RichTextToolbar (richTextArea);
         initWidget(uiBinder.createAndBindUi(this));
+        res.style().ensureInjected();
         richTextArea.setStyleName(style.richTextArea(), true);
         editorPanel.add(richTextArea);
         SubmitHandler sh = new SubmitHandler();

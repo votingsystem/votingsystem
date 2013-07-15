@@ -3,6 +3,7 @@ package org.sistemavotacion.test.simulation;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletionService;
@@ -191,7 +192,8 @@ public class MultiSignSimulator extends Simulator<SimulationData>
     @Override public Respuesta call() throws Exception {
         launchSimulationThreads();
         countDownLatch.await();
-        logger.debug("- call - shutdown executors");   
+        logger.debug("- call - shutdown executors - process:" + 
+                ManagementFactory.getRuntimeMXBean().getName());   
         simulationData.setFinish(System.currentTimeMillis());
         if(timer != null) timer.stop();
         if(requestExecutor != null) requestExecutor.shutdownNow();    

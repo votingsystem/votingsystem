@@ -3,7 +3,7 @@ package org.sistemavotacion.herramientavalidacion.util;
 import java.text.ParseException;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
-import org.sistemavotacion.herramientavalidacion.AppletHerramienta;
+import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,23 +16,16 @@ public class Formateadora {
     
    private static Logger logger = LoggerFactory.getLogger(Formateadora.class);
 
-   private static String controlAccesoLabel = AppletHerramienta.getResourceBundle().
-                getString("controlAccesoLabel");
-   private static String nombreLabel = AppletHerramienta.getResourceBundle().
-                getString("nombreLabel");  
-   private static String asuntoLabel = AppletHerramienta.getResourceBundle().
-                getString("asuntoLabel"); 
-   private static String contenidoLabel = AppletHerramienta.getResourceBundle().
-                getString("contenidoLabel");
-   private static String fechaInicioLabel = AppletHerramienta.getResourceBundle().
-                getString("fechaInicioLabel");   
-   private static String fechaFinLabel = AppletHerramienta.getResourceBundle().
-                getString("fechaFinLabel");  
-   private static String urlLabel = AppletHerramienta.getResourceBundle().
-              getString("urlLabel");  
-    private static String hashSolicitudAccesoBase64Label = AppletHerramienta.getResourceBundle().
+   private static String controlAccesoLabel = Contexto.INSTANCE.getString("controlAccesoLabel");
+   private static String nombreLabel = Contexto.INSTANCE.getString("nombreLabel");  
+   private static String asuntoLabel = Contexto.INSTANCE.getString("asuntoLabel"); 
+   private static String contenidoLabel = Contexto.INSTANCE.getString("contenidoLabel");
+   private static String fechaInicioLabel = Contexto.INSTANCE.getString("fechaInicioLabel");   
+   private static String fechaFinLabel = Contexto.INSTANCE.getString("fechaFinLabel");  
+   private static String urlLabel = Contexto.INSTANCE.getString("urlLabel");  
+    private static String hashSolicitudAccesoBase64Label = Contexto.INSTANCE.
               getString("hashSolicitudAccesoBase64Label");  
-    private static String opcionSeleccionadaContenidoLabel = AppletHerramienta.getResourceBundle().
+    private static String opcionSeleccionadaContenidoLabel = Contexto.INSTANCE.
               getString("opcionSeleccionadaContenidoLabel");
     
 
@@ -78,7 +71,7 @@ public class Formateadora {
         if(evento.getOpcionSeleccionada() != null) {
              result.append("<b>" + 
                 opcionSeleccionadaContenidoLabel + "</b>: ").append(
-                evento.getOpcionSeleccionada().getContenido() + "<br/>");
+                evento.getOpcionSeleccionada().getContent() + "<br/>");
         }
         return result.toString();
     }

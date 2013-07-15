@@ -242,7 +242,7 @@ public class Evento {
         if(opcionSeleccionada != null) {
             JSONObject opcionJSONObject = new JSONObject();
             opcionJSONObject.put("id", opcionSeleccionada.getId());
-            opcionJSONObject.put("contenido", opcionSeleccionada.getContenido());
+            opcionJSONObject.put("contenido", opcionSeleccionada.getContent());
             map.put("opcionSeleccionada", opcionJSONObject);
         }
         if(centroControl != null) {
@@ -283,8 +283,8 @@ public class Evento {
             JSONArray jsonArray = new JSONArray();
             for (OpcionEvento opcion : opciones) {
                 Map campoMap = new HashMap();
-                campoMap.put("contenido", opcion.getContenido());
-                campoMap.put("valor", opcion.getValor());
+                campoMap.put("contenido", opcion.getContent());
+                campoMap.put("valor", opcion.getValue());
                 campoMap.put("id", opcion.getId());
                 JSONObject camposJSON = (JSONObject) JSONSerializer.toJSON(campoMap);
                 jsonArray.element(camposJSON);
@@ -297,7 +297,7 @@ public class Evento {
         if (opcionSeleccionada != null) {
             Map opcionSeleccionadaMap = new HashMap(); 
             opcionSeleccionadaMap.put("id", opcionSeleccionada.getId());
-            opcionSeleccionadaMap.put("contenido", opcionSeleccionada.getContenido());
+            opcionSeleccionadaMap.put("contenido", opcionSeleccionada.getContent());
             JSONObject opcionSeleccionadaJSON = (JSONObject) JSONSerializer.toJSON( opcionSeleccionadaMap );
             jsonObject.put("opcionSeleccionada", opcionSeleccionadaJSON);
         }     
@@ -310,7 +310,7 @@ public class Evento {
         map.put("operation", Operacion.Tipo.ENVIO_VOTO_SMIME.toString());
         map.put("eventoURL", url);
         map.put("opcionSeleccionadaId", opcionSeleccionada.getId());
-        map.put("opcionSeleccionadaContenido", opcionSeleccionada.getContenido());
+        map.put("opcionSeleccionadaContenido", opcionSeleccionada.getContent());
         map.put("UUID", UUID.randomUUID().toString());
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);
         return jsonObject;
@@ -644,8 +644,8 @@ public class Evento {
             for (OpcionEvento opcion : opciones) {
                 Map campoMap = new HashMap();
                 campoMap.put("id", opcion.getId());
-                campoMap.put("contenido", opcion.getContenido());
-                campoMap.put("valor", opcion.getValor());
+                campoMap.put("contenido", opcion.getContent());
+                campoMap.put("valor", opcion.getValue());
                 JSONObject camposJSON = (JSONObject) JSONSerializer.toJSON(campoMap);
                 jsonArray.element(camposJSON);
             }
@@ -688,7 +688,7 @@ public class Evento {
                 OpcionEvento opcion = new OpcionEvento();
                 opcion.setId(eventoJSON.getLong("opcionSeleccionadaId"));
                 if(eventoJSON.containsKey("opcionSeleccionadaContenido")) {
-                    opcion.setContenido(
+                    opcion.setContent(
                             eventoJSON.getString("opcionSeleccionadaContenido"));
                 }
                 evento.setOpcionSeleccionada(opcion);
@@ -740,7 +740,7 @@ public class Evento {
                     if(eventoJSON.containsKey("id"))
                         campo.setId(jsonObject.getLong("id"));
                     if(eventoJSON.containsKey("contenido"))
-                        campo.setContenido(jsonObject.getString("contenido"));
+                        campo.setContent(jsonObject.getString("contenido"));
                     campos.add(campo);
                  }
                 evento.setOpciones(campos);

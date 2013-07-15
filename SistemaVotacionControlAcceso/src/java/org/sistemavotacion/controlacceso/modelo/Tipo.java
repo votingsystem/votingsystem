@@ -1,5 +1,6 @@
 package org.sistemavotacion.controlacceso.modelo;
 
+
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -66,6 +67,7 @@ public enum Tipo {
     FIRMA_EVENTO_FIRMA_REPETIDA(""),
     FIRMA_EVENTO_RECLAMACION_ERROR(""),
     FIRMA_EVENTO_RECLAMACION(""),
+    FIRMA_RECLAMACION_SMIME(""),
     FIRMA_ERROR_CONTENIDO_CON_ERRORES(""),
     
     //EVENTO_RECLAMACION

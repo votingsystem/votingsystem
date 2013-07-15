@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.lang.management.ManagementFactory;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.text.DateFormat;
@@ -32,7 +33,6 @@ import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.simulation.callable.ServerInitializer;
-import org.sistemavotacion.test.simulation.callable.BackupValidator;
 import org.sistemavotacion.test.simulation.callable.ClaimSigner;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.NifUtils;
@@ -166,14 +166,15 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>
             InfoGetter infoGetter = new InfoGetter(null, downloadServiceURL, null);
             respuesta = infoGetter.call();
             if(Respuesta.SC_OK == respuesta.getCodigoEstado()) { 
-                FutureTask<Respuesta> future = new FutureTask<Respuesta>(
-                    new BackupValidator(respuesta.getMessageBytes()));
+                logger.debug("TODO validate backup");
+                /*FutureTask<Respuesta> future = new FutureTask<Respuesta>(
+                    new ZipBackupValidator(respuesta.getMessageBytes()));
                 simulatorExecutor.execute(future);
                 respuesta = future.get();
                 logger.debug("BackupRequestWorker - status: " + respuesta.getCodigoEstado());
                 if(Respuesta.SC_OK != respuesta.getCodigoEstado()) {
                     addErrorList(respuesta.getErrorList());
-                }
+                }*/
             } else logger.error(respuesta.getMensaje());
         } else logger.error(respuesta.getMensaje());
     }
@@ -284,7 +285,8 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>
 
     @Override  public Respuesta call() throws Exception {
         logger.debug("call - NumberOfRequestsProjected: " +  
-                simulationData.getNumRequestsProjected());
+                simulationData.getNumRequestsProjected() + " - process: " + 
+                ManagementFactory.getRuntimeMXBean().getName());
         simulationData.setBegin(System.currentTimeMillis());
         ServerInitializer accessControlInitializer = 
                 new ServerInitializer(simulationData.getAccessControlURL(), 

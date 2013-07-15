@@ -92,7 +92,7 @@ class SolicitudAccesoController {
 			
 			
 			
-			Respuesta respuestaValidacionCSR = firmaService.
+			Respuesta respuestaValidacionCSR = csrService.
 					firmarCertificadoVoto(csrRequest, 
 					evento, representative, request.getLocale())
 			if (Respuesta.SC_OK == respuestaValidacionCSR.codigoEstado) {

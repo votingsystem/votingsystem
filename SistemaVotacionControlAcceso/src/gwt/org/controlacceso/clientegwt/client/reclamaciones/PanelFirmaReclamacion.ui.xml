@@ -6,8 +6,6 @@
 	xmlns:dp="urn:import:com.google.gwt.user.datepicker.client">
 	<ui:style type='org.controlacceso.clientegwt.client.reclamaciones.PanelFirmaReclamacion.EditorStyle'>
     	.mainPanel{padding: 0px 20px 0px 20px;}
-		.messagePanel{padding: 7px 12px 7px 12px; margin: 12px 20px 12px 20px; 
-			border: 2px solid #cc1606;-moz-border-radius: 5px; border-radius: 5px;}
 	    .messageLabel {color: #cc1606; font-size: 16px; font-weight: bold; margin: 10px 10px 10px 10px; text-align: center;}
 		.htmlMessagePanel{ margin: 30px 0px 20px 10px; background-color:#f2f2f2;
 			padding:10px 10px 10px 10px;}
@@ -35,7 +33,10 @@
 		.labelInfoDocumentoOver{font-size: 18px; font-weight:bold; color:#fba131;}
 		.panelInfoDocumento {border:1pt solid #3a7f35; margin-top:0px; 
 			padding:3px 10px 3px 10px; float: left; margin-right:0px;
-			-moz-border-radius: 5px; border-radius: 5px; cursor: pointer; cursor: hand;}	
+			-moz-border-radius: 5px; border-radius: 5px; cursor: pointer; cursor: hand;
+			-moz-box-shadow: 0 8px 6px -6px #888;
+			-webkit-box-shadow: 0 8px 6px -6px #888;
+			box-shadow: 0 8px 6px -6px #888;}	
 		.panelInfoDocumentoOver{border:1pt solid #fba131; margin-top:0px; 
 			padding:3px 10px 3px 10px; float: left; margin-right:0px;
 			-moz-border-radius: 5px; border-radius: 5px; cursor: pointer; cursor: hand;}
@@ -60,7 +61,7 @@
 				        <g:HTML ui:field='pageTitle' styleName="{style.pageTitle}"/>
 				    </g:cell>
 				    <g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_MIDDLE" width="100%">
-				        <g:VerticalPanel ui:field="messagePanel" styleName="{style.messagePanel}">
+				        <g:VerticalPanel ui:field="messagePanel" styleName="{res.style.messagePanel}">
 							<g:Label ui:field="messageLabel" styleName="{style.messageLabel}"/>
 						</g:VerticalPanel>	
 				    </g:cell>

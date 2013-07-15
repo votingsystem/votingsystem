@@ -1,0 +1,7 @@
+@CHARSET "UTF-8";
+
+.messagePanel{padding: 7px 12px 7px 12px; margin: 12px 20px 12px 20px; 
+	border: 2px solid #cc1606;-moz-border-radius: 5px; border-radius: 5px;
+	-moz-box-shadow: 0 8px 6px -6px #888;
+	-webkit-box-shadow: 0 8px 6px -6px #888;
+	box-shadow: 0 8px 6px -6px #888;}

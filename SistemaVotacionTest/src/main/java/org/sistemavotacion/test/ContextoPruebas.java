@@ -65,9 +65,6 @@ public enum ContextoPruebas {
         private static final long USER_KEYSTORE_PERIOD = 20000000000L;  
     } 
 
-
-    
-    public static String locale = "es";
     public static final String SIG_NAME = "RSA";
     public static final String PROVIDER = "BC";
 
@@ -176,11 +173,6 @@ public enum ContextoPruebas {
         return userTest.getKeyStore().getCertificateChain(DEFAULTS.END_ENTITY_ALIAS);
     }
     
-    /*
-     * ContextoPruebas.DEFAULTS.END_ENTITY_ALIAS, 
-                    ContextoPruebas.PASSWORD.toCharArray()
-     */
-    
     public KeyStore crearMockDNIe(String userNIF) throws Exception {
         //logger.info("crearMockDNIe - userNIF: " + userNIF);
         KeyStore keyStore = KeyStoreUtil.createUserKeyStore(
@@ -194,13 +186,11 @@ public enum ContextoPruebas {
         return keyStore;
     }
     
-    public String getString(String key) {
-        return resourceBundle.getString(key);
-    }    
-    
     public String getString(String key, Object... arguments) {
-        String pattern = getString(key);
-        return MessageFormat.format(pattern, arguments);
+        String pattern = resourceBundle.getString(key);
+        if(arguments.length > 0)
+            return MessageFormat.format(pattern, arguments);
+        else return resourceBundle.getString(key);
     }
 
     /**
@@ -322,9 +312,6 @@ public enum ContextoPruebas {
             crearNivelesDeDirectorios(numDirsPorNivel, file.getAbsolutePath(), nivel-1);
         }
     }
-
- 
-
 
     public static String getURLInfoServidor(String serverURL) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";

@@ -170,7 +170,8 @@ public class VotingSimulator extends  Simulator<VotingSimulationData>
                         SMIMEMessageWrapper vote = respuesta.getSmimeMessage();
                         if(vote != null) {
                             File outputFile = new File(
-                                    ContextoPruebas.DEFAULTS.ERROR_DIR);
+                                    ContextoPruebas.DEFAULTS.ERROR_DIR + 
+                                    File.separator + "ErrorFile.txt");
                             vote.writeTo(new FileOutputStream(outputFile));
                             logger.error("VOTING ERROR file copy to file -> " + 
                                     outputFile.getAbsolutePath());

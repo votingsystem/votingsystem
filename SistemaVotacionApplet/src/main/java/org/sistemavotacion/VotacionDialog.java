@@ -70,7 +70,7 @@ public class VotacionDialog extends JDialog {
         
         messageLabel.setText(Contexto.INSTANCE.getString(
                 "mensajeVotacion", votoEvento.getAsunto(), 
-                votoEvento.getOpcionSeleccionada().getContenido()));
+                votoEvento.getOpcionSeleccionada().getContent()));
         setTitle(appletFirma.getOperacionEnCurso().
                 getTipo().getCaption());
         progressBarPanel.setVisible(false);

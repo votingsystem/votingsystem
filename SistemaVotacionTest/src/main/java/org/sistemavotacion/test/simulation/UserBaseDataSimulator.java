@@ -1,6 +1,7 @@
 package org.sistemavotacion.test.simulation;
 
 import java.io.File;
+import java.lang.management.ManagementFactory;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import org.sistemavotacion.test.simulation.callable.RepresentativeRequestor;
@@ -231,7 +232,8 @@ public class UserBaseDataSimulator extends Simulator<UserBaseSimulationData> {
     }
 
     @Override public Respuesta<UserBaseSimulationData> call() throws Exception {
-        logger.debug("call");
+        logger.debug("call - process:" + 
+                ManagementFactory.getRuntimeMXBean().getName());
         simulationData.setStatusCode(Respuesta.SC_OK);
         simulationData.setBegin(System.currentTimeMillis());
         requestExecutor.execute(new Runnable() {

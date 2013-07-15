@@ -1,22 +1,21 @@
 package org.sistemavotacion.herramientavalidacion;
 
 import java.awt.Frame;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.UIManager;
 import org.sistemavotacion.Contexto;
+import org.sistemavotacion.herramientavalidacion.backup.ValidatorListener;
 import org.sistemavotacion.herramientavalidacion.modelo.SignedFile;
+import org.sistemavotacion.herramientavalidacion.modelo.MetaInf;
+import org.sistemavotacion.modelo.Respuesta;
+import org.sistemavotacion.modelo.Tipo;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.slf4j.Logger;
@@ -26,7 +25,7 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemListener {
+public class VisualizadorDeEventoFirmadoDialog extends JDialog {
     
     private static Logger logger = LoggerFactory.getLogger(
             VisualizadorDeEventoFirmadoDialog.class);
@@ -38,14 +37,9 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
     private List<SignedFile> signedFileList = new ArrayList<SignedFile>();
 
     private int selectedFileIndex;
-    String tituloDialogo;
-    
-    @Override
-    public void itemStateChanged(ItemEvent ie) {
-        ArchivoFirmadoPanel archivoFirmado = 
-                (ArchivoFirmadoPanel)tabbedPane.getSelectedComponent();
-        archivoFirmado.setContentFormated(checkBox.isSelected());
-    }
+    private String tituloDialogo;
+    private MetaInf metaInf;
+    private String decompressedBackupBaseDir = null;
     
     /**
      * Creates new form VisualizadorDeEventoFirmadoDialog
@@ -58,11 +52,11 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
             initComponents();
             progressBar.setIndeterminate(true);
             tabbedPane.setVisible(false);
-            checkBox.setVisible(false);
-            checkBox.addItemListener(this);
             guardarButton.setVisible(false);
             navegacionPanel.setVisible(false);
+            validateBackupButton.setVisible(false);
             mostrarPantallaEnvio(false);
+            setResizable(true);
             pack();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
@@ -89,9 +83,10 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
         navegacionPanel = new javax.swing.JPanel();
         siguienteButton = new javax.swing.JButton();
         anteriorButton = new javax.swing.JButton();
-        checkBox = new javax.swing.JCheckBox();
+        validateBackupButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setMinimumSize(new java.awt.Dimension(600, 600));
 
         mensajeLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         mensajeLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -167,15 +162,22 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
                 .addComponent(anteriorButton))
         );
 
-        checkBox.setText(bundle.getString("VisualizadorDeEventoFirmadoDialog.checkBox.text")); // NOI18N
+        validateBackupButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/images/ValidateBackup_26x16.png"))); // NOI18N
+        validateBackupButton.setText(bundle.getString("VisualizadorDeEventoFirmadoDialog.validateBackupButton.text")); // NOI18N
+        validateBackupButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                validateBackupButtonActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout botonesPanelLayout = new javax.swing.GroupLayout(botonesPanel);
         botonesPanel.setLayout(botonesPanelLayout);
         botonesPanelLayout.setHorizontalGroup(
             botonesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(botonesPanelLayout.createSequentialGroup()
-                .addComponent(checkBox)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 90, Short.MAX_VALUE)
+                .addContainerGap()
+                .addComponent(validateBackupButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 116, Short.MAX_VALUE)
                 .addComponent(navegacionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(guardarButton)
@@ -188,7 +190,7 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
             .addGroup(botonesPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(botonesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(checkBox)
+                    .addComponent(validateBackupButton)
                     .addGroup(botonesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                         .addGroup(botonesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(cerrarButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -258,6 +260,16 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
     private void guardarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guardarButtonActionPerformed
         guardarMensajeMime();
     }//GEN-LAST:event_guardarButtonActionPerformed
+
+    private void validateBackupButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_validateBackupButtonActionPerformed
+        ValidateBackupDialog validationDialog = new ValidateBackupDialog(
+                parentFrame, metaInf, false);
+        try {
+            validationDialog.initValidation(decompressedBackupBaseDir);
+        } catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
+    }//GEN-LAST:event_validateBackupButtonActionPerformed
     
     private void mostrarArchivo (File file) {
         directorioArchivo = file.getParent();
@@ -272,7 +284,6 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
             byte[] fileBytes = FileUtils.getBytesFromFile(file);
             SignedFile signedFile = new SignedFile(fileBytes, file.getName());
             ArchivoFirmadoPanel archivoFirmadoPanel = new ArchivoFirmadoPanel(signedFile);
-            archivoFirmadoPanel.setContentFormated(checkBox.isSelected());
             tabbedPane.addTab(file, archivoFirmadoPanel);
             tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
             tabbedPane.setVisible(true);
@@ -287,8 +298,7 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
         try {
             tabbedPane.setTitleAt(1, "<html>" + signedFile.getName() + "&nbsp;&nbsp;&nbsp;&nbsp;</html>");
             ArchivoFirmadoPanel archivoFirmadoPanel = (ArchivoFirmadoPanel) tabbedPane.getComponentAt(1);
-                archivoFirmadoPanel.initFileData(signedFile);              
-            archivoFirmadoPanel.setContentFormated(checkBox.isSelected());
+            archivoFirmadoPanel.initFileData(signedFile);  
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
         }
@@ -298,7 +308,6 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
         mostrandoPantallaEnvio = visibility;
         progressBarPanel.setVisible(visibility);
         tabbedPane.setVisible(!visibility);
-        checkBox.setVisible(!visibility);
         botonesPanel.setVisible(!visibility);
         pack();
     }
@@ -337,7 +346,7 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
         logger.debug("checkFileSize");
         String result = null;
         if (file.length() > Contexto.SIGNED_MAX_FILE_SIZE) {
-            result = AppletHerramienta.getString("fileSizeExceededMsg", 
+            result = Contexto.INSTANCE.getString("fileSizeExceededMsg", 
                         file.length() , Contexto.SIGNED_MAX_FILE_SIZE_KB);
         }
         return result;
@@ -346,17 +355,14 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
     private String checkByteArraySize (byte[] signedFileBytes) {
         String result = null;
         if (signedFileBytes.length > Contexto.SIGNED_MAX_FILE_SIZE) {
-            result = AppletHerramienta.getString("fileSizeExceededMsg", 
+            result = Contexto.INSTANCE.getString("fileSizeExceededMsg", 
                         signedFileBytes.length , Contexto.SIGNED_MAX_FILE_SIZE_KB);
         }
         return result;
     }
      
-     
-     
     private class FiltroCMS implements java.io.FileFilter {
-        @Override
-        public boolean accept(File file) {
+        @Override public boolean accept(File file) {
             return (checkFileSize(file) == null);
         }
     }
@@ -366,9 +372,43 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
                 DateUtils.getSpanishFormattedStringFromDate(date) + "</html>";
     }
 
-    public void setVisible(File zip) {
-        logger.debug("setVisible - file: " + zip.getAbsolutePath());
+    public void setVisible(String decompressedBackupBaseDir) {
+        logger.debug("setVisible - decompressedBackupBaseDir: " + 
+                decompressedBackupBaseDir);
+        this.decompressedBackupBaseDir = decompressedBackupBaseDir;
+        File metaInfFile = new File(decompressedBackupBaseDir + File.separator + 
+                "meta.inf");
+        
+        
+        if(!metaInfFile.exists()) {
+            String message = ContextoHerramienta.INSTANCE.getString(
+                    "metaInfNotFoundMsg", 
+                    metaInfFile.getAbsolutePath());
+            logger.error(message);
+            MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
+            errorDialog.setMessage(message, "Error");
+            return;
+        }
         try {
+            metaInf = MetaInf.parse(FileUtils.getStringFromFile(metaInfFile));
+            InformacionEventoPanel informacionEventoPanel = 
+                    new InformacionEventoPanel(metaInf);
+            tabbedPane.removeAll();
+            tabbedPane.addTab("<html><b>" + informacionEventoPanel.
+                    getValorTipoEvento() + "</b>&nbsp;&nbsp;&nbsp;&nbsp;</html>", 
+                    informacionEventoPanel);
+            if(Tipo.EVENTO_VOTACION == metaInf.getType() ||
+                    Tipo.EVENTO_FIRMA == metaInf.getType() ||
+                    Tipo.EVENTO_RECLAMACION == metaInf.getType()) {
+                validateBackupButton.setVisible(true);
+            }
+        } catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
+        
+        
+        
+        /*try {
             ZipFile backupZip = new ZipFile(zip);
             new File(Contexto.DEFAULTS.APPTEMPDIR + File.separator + 
                     zip.getName()).mkdirs();
@@ -424,12 +464,30 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
             else habilitarBotones(true);
             contexto = Contexto.EXPLORANDO_DIRECTORIO;
             mostrarArchivo(archivo);
-            mostrarPantallaEnvio(false);*/
+            mostrarPantallaEnvio(false);
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             mostrarPantallaEnvio(false);
-        }   
+        } */  
         setVisible(true);
+    }
+    
+        
+    public static void main(String args[]) {
+        Contexto.INSTANCE.init();
+        final VisualizadorDeEventoFirmadoDialog dialog = 
+                new VisualizadorDeEventoFirmadoDialog(new javax.swing.JFrame(), true);
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    logger.debug("run");
+                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                    dialog.setVisible(".VotingSystem/temp/89afb85b-2fd4-490a-95a1-6434fa0a20e4");
+                } catch (Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                }
+            }
+        });
     }
 
         
@@ -437,7 +495,6 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
     private javax.swing.JButton anteriorButton;
     private javax.swing.JPanel botonesPanel;
     private javax.swing.JButton cerrarButton;
-    private javax.swing.JCheckBox checkBox;
     private javax.swing.JButton guardarButton;
     private javax.swing.JLabel mensajeLabel;
     private javax.swing.JPanel navegacionPanel;
@@ -445,5 +502,6 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog implements ItemLi
     private javax.swing.JPanel progressBarPanel;
     private javax.swing.JButton siguienteButton;
     private org.sistemavotacion.herramientavalidacion.ClosableTabbedPane tabbedPane;
+    private javax.swing.JButton validateBackupButton;
     // End of variables declaration//GEN-END:variables
 }

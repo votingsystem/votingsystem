@@ -44,7 +44,7 @@ class FilesService {
 				 new File(filesDirPath).mkdirs()
 				 String reportPathPart = messageSource.getMessage(
 					 'representativeReport', null, locale) 
-				 result.representativesReportFile = new File("${filesDirPath}/${reportPathPart}.csv")
+				 //result.representativesReportFile = new File("${filesDirPath}/${reportPathPart}.csv")
 				 result.filesDir = new File(filesDirPath)
 				 break; 
 			 case Tipo.EVENTO_VOTACION:
@@ -72,6 +72,12 @@ class FilesService {
 		 result.zipResult = new File("${zipFilesDirPath}/${servicePathPart}.zip")
 		 return result
 	 }			 
+			 
+	public String getAbsolutePath(String filePath){
+		String prefijo = "${grailsApplication.mainContext.getResource('.')?.getFile()}"
+		String sufijo =filePath.startsWith(File.separator)? filePath : File.separator + filePath;
+		return "${prefijo}${sufijo}";
+	}
 
 }
 

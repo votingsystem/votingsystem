@@ -17,9 +17,12 @@ public class OpcionEvento {
     private static Logger logger = LoggerFactory.getLogger(OpcionEvento.class);
     
     private Long id;
-    private String contenido;
-    private String valor;
-    private Integer numeroVotos;
+    private String content;
+    private String value;
+    private Long numVoteRequests;
+    private Long numUsersWithVote;
+    private Long numRepresentativesWithVote;
+    private Long numVotesResult;
 
     /**
      * @return the id
@@ -35,28 +38,6 @@ public class OpcionEvento {
         this.id = id;
     }
 
-    /**
-     * @return the contenido
-     */
-    public String getContenido() {
-        return contenido;
-    }
-
-    /**
-     * @param contenido the contenido to set
-     */
-    public void setContenido(String contenido) {
-        this.contenido = contenido;
-    }
-
-	public String getValor() {
-		return valor;
-	}
-
-	public void setValor(String valor) {
-		this.valor = valor;
-	}
-	
     public static OpcionEvento parse (String opcionStr) {
         if(opcionStr == null) return null;
         JSONObject eventoJSON = (JSONObject)JSONSerializer.toJSON(opcionStr);
@@ -70,7 +51,7 @@ public class OpcionEvento {
                 !JSONNull.getInstance().equals(opcionJSON.get("id"))) {
             opcion.setId(opcionJSON.getLong("id"));
         }
-        if(opcionJSON.containsKey("contenido")) opcion.setContenido(opcionJSON.getString("contenido"));
+        if(opcionJSON.containsKey("contenido")) opcion.setContent(opcionJSON.getString("contenido"));
         return opcion;
     }
     
@@ -78,7 +59,7 @@ public class OpcionEvento {
         logger.debug("obtenerJSON");
         Map map = new HashMap();
         map.put("id", id);
-        map.put("contenido", contenido);
+        map.put("contenido", content);
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);        
         return jsonObject;
     }
@@ -89,12 +70,88 @@ public class OpcionEvento {
         return jsonObject.toString();
     }
 
-	public Integer getNumeroVotos() {
-		return numeroVotos;
-	}
+    /**
+     * @return the content
+     */
+    public String getContent() {
+        return content;
+    }
 
-	public void setNumeroVotos(Integer numeroVotos) {
-		this.numeroVotos = numeroVotos;
-	}
+    /**
+     * @param content the content to set
+     */
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    /**
+     * @return the value
+     */
+    public String getValue() {
+        return value;
+    }
+
+    /**
+     * @param value the value to set
+     */
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    /**
+     * @return the numVoteRequests
+     */
+    public Long getNumVoteRequests() {
+        return numVoteRequests;
+    }
+
+    /**
+     * @param numVoteRequests the numVoteRequests to set
+     */
+    public void setNumVoteRequests(Long numVoteRequests) {
+        this.numVoteRequests = numVoteRequests;
+    }
+
+    /**
+     * @return the numUsersWithVote
+     */
+    public Long getNumUsersWithVote() {
+        return numUsersWithVote;
+    }
+
+    /**
+     * @param numUsersWithVote the numUsersWithVote to set
+     */
+    public void setNumUsersWithVote(Long numUsersWithVote) {
+        this.numUsersWithVote = numUsersWithVote;
+    }
+
+    /**
+     * @return the numRepresentativesWithVote
+     */
+    public Long getNumRepresentativesWithVote() {
+        return numRepresentativesWithVote;
+    }
+
+    /**
+     * @param numRepresentativesWithVote the numRepresentativesWithVote to set
+     */
+    public void setNumRepresentativesWithVote(Long numRepresentativesWithVote) {
+        this.numRepresentativesWithVote = numRepresentativesWithVote;
+    }
+
+    /**
+     * @return the numVotesResult
+     */
+    public Long getNumVotesResult() {
+        return numVotesResult;
+    }
+
+    /**
+     * @param numVotesResult the numVotesResult to set
+     */
+    public void setNumVotesResult(Long numVotesResult) {
+        this.numVotesResult = numVotesResult;
+    }
 
 }

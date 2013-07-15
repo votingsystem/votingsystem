@@ -46,7 +46,7 @@ public class OpcionesPanel extends javax.swing.JPanel implements ContenedorOpcio
         List<OpcionEvento> opcionesDeEvento = new ArrayList<OpcionEvento>();
         for (String opcion : opciones) {
             OpcionEvento opcionDeEvento = new OpcionEvento();
-            opcionDeEvento.setContenido(opcion);
+            opcionDeEvento.setContent(opcion);
             opcionesDeEvento.add(opcionDeEvento);
         }
         return opcionesDeEvento;

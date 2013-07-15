@@ -56,7 +56,7 @@ public class Certificado implements Serializable {
     @OneToOne(mappedBy="certificado")
     private Voto voto;
     
-    @Column(name="numeroSerie", nullable=false)
+    @Column(name="numeroSerie", unique=true, nullable=false)
     private Long numeroSerie;
    
     @Column(name="contenido", nullable=false)

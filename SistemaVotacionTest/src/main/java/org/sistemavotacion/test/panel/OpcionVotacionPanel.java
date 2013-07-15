@@ -19,15 +19,15 @@ public class OpcionVotacionPanel extends javax.swing.JPanel {
         initComponents();
         this.opcion = opcion;
         normalTextBorder = numeroVotosTextField.getBorder();
-        opcionLabel.setText("<html><b>" + opcion.getContenido() + "</b></html>");
-        if(opcion.getNumeroVotos() != null)
-            numeroVotosTextField.setText(opcion.getNumeroVotos().toString());
+        opcionLabel.setText("<html><b>" + opcion.getContent() + "</b></html>");
+        if(opcion.getNumVotesResult() != null)
+            numeroVotosTextField.setText(opcion.getNumVotesResult().toString());
     }
 
     public OpcionEvento getOpcion() {
         if(!"".equals(numeroVotosTextField.getText().trim())) {
             try {
-                opcion.setNumeroVotos(new Integer(numeroVotosTextField.getText().trim()));
+                opcion.setNumVoteRequests(new Long(numeroVotosTextField.getText().trim()));
             } catch(Exception ex) {
                 mensajeError = "<html>El valor debe ser numérico</html>";
                 return null;

@@ -3,6 +3,7 @@ package org.sistemavotacion.test.simulation;
 import com.itextpdf.text.pdf.PdfReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.lang.management.ManagementFactory;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.text.DateFormat;
@@ -66,7 +67,7 @@ public class VotingProcessSimulator extends  Simulator<VotingSimulationData>
     private final CountDownLatch countDownLatch = new CountDownLatch(1);
 
     @Override public Respuesta call() throws Exception {
-        logger.debug("call");
+        logger.debug("call - process: " + ManagementFactory.getRuntimeMXBean().getName());
         ServerInitializer accessControlInitializer = 
                 new ServerInitializer(simulationData.getAccessControlURL(),
                 ActorConIP.Tipo.CONTROL_ACCESO);

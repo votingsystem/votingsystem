@@ -77,6 +77,8 @@ public class ClaimSigner implements Callable<Respuesta> {
         Map map = new HashMap();
         map.put("operation", Operacion.Tipo.FIRMA_RECLAMACION_SMIME.toString());
         map.put("id", eventId);
+        map.put("URL", ContextoPruebas.INSTANCE.getAccessControl().
+                getServerURL() + "/evento/" + eventId);
         map.put("UUID", UUID.randomUUID().toString());
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);
         return jsonObject.toString();

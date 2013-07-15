@@ -165,7 +165,7 @@ public class OpcionVotacionDialog extends javax.swing.JDialog implements KeyList
             return;
         }
         opcionEvento = new OpcionEvento();
-        opcionEvento.setContenido(textArea.getText());
+        opcionEvento.setContent(textArea.getText());
         this.dispose();
     }//GEN-LAST:event_anyadirButtonActionPerformed
 

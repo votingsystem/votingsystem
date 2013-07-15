@@ -2,6 +2,7 @@ package org.sistemavotacion.herramientavalidacion.modelo;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.sistemavotacion.herramientavalidacion.modelo.SignedFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,18 +10,26 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class RepresentativeBackupData {
+public class RepresentativeData {
     
     private static Logger logger = LoggerFactory.getLogger(
-            RepresentativeBackupData.class);
+            RepresentativeData.class);
     
     private String nif;
+    private Long id;
     private SignedFile accessRequest;
     private SignedFile vote;
     private List<SignedFile> representationDocumentList = new ArrayList<SignedFile>();
     private byte[] representedReport;
 
-    RepresentativeBackupData(String nif) {
+    private Long optionSelectedId = null;
+    private Long numRepresentedWithVote = null;
+    private Long numRepresentations = null;
+    private Long numVotesRepresented = null;
+   
+    public RepresentativeData() { }
+    
+    public RepresentativeData(String nif) {
         this.nif = nif;
     }
     
@@ -30,13 +39,6 @@ public class RepresentativeBackupData {
             return;
         } 
         representationDocumentList.add(repDoc);
-    }
-    
-    public Long getSelectedOptionId() {
-        if(vote == null) {
-            return null;
-        }
-        return vote.getSelectedOptionId();
     }
     
     public int getNumVotesRepresentedForEvent() {
@@ -135,5 +137,87 @@ public class RepresentativeBackupData {
     public void setNif(String nif) {
         this.nif = nif;
     }
+
+    /**
+     * @return the optionSelectedId
+     */
+    public Long getOptionSelectedId() {
+        return optionSelectedId;
+    }
+   
+    public Long getOptionSelectedIdFromVote() {
+        if(vote == null) {
+            return null;
+        }
+        return vote.getSelectedOptionId();
+    }
+    /**
+     * @param optionSelectedId the optionSelectedId to set
+     */
+    public void setOptionSelectedId(Long optionSelectedId) {
+        this.optionSelectedId = optionSelectedId;
+    }
+
+    /**
+     * @return the numRepresentedWithVote
+     */
+    public Long getNumRepresentedWithVote() {
+        return numRepresentedWithVote;
+    }
+
+    /**
+     * @param numRepresentedWithVote the numRepresentedWithVote to set
+     */
+    public void setNumRepresentedWithVote(Long numRepresentedWithVote) {
+        this.numRepresentedWithVote = numRepresentedWithVote;
+    }
+
+    /**
+     * @return the numRepresentations
+     */
+    public Long getNumRepresentations() {
+        return numRepresentations;
+    }
+
+    /**
+     * @param numRepresentations the numRepresentations to set
+     */
+    public void setNumRepresentations(Long numRepresentations) {
+        this.numRepresentations = numRepresentations;
+    }
+
+    /**
+     * @return the numVotesRepresented
+     */
+    public Long getNumVotesRepresented() {
+        return numVotesRepresented;
+    }
+
+    /**
+     * @param numVotesRepresented the numVotesRepresented to set
+     */
+    public void setNumVotesRepresented(Long numVotesRepresented) {
+        this.numVotesRepresented = numVotesRepresented;
+    }
+
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
     
+    public String getString() {
+        return "[numRepresentations: " + numRepresentations + 
+                " - numRepresentedWithVote: "+ numRepresentedWithVote+ 
+                " - numVotesRepresented: " + numVotesRepresented + "]";
+    }
+
 }

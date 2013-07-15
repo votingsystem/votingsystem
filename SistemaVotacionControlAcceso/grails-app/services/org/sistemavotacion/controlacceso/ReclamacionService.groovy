@@ -2,6 +2,8 @@ package org.sistemavotacion.controlacceso
 
 import java.io.FileOutputStream;
 import grails.converters.JSON
+
+import org.codehaus.groovy.grails.web.json.JSONObject;
 import org.sistemavotacion.controlacceso.modelo.Respuesta;
 import org.sistemavotacion.smime.*;
 import org.sistemavotacion.seguridad.*;
@@ -23,6 +25,8 @@ class ReclamacionService {
 		SMIMEMessageWrapper smimeMessage = mensajeSMIMEReq.getSmimeMessage()
         def mensajeJSON = JSON.parse(smimeMessage.getSignedContent())
 		Usuario usuario = mensajeSMIMEReq.getUsuario()
+		Respuesta respuesta = checkClaimJSONData(mensajeJSON, locale)
+		if(Respuesta.SC_OK != respuesta.codigoEstado) return respuesta
 		//log.debug("mensajeJSON: ${smimeMessage.getSignedContent()}")
         EventoReclamacion eventoReclamacion = EventoReclamacion.get(mensajeJSON.id)
         if (!eventoReclamacion) {
@@ -35,7 +39,7 @@ class ReclamacionService {
 			Respuesta timeStampVerification = timeStampService.validateToken(
 				usuario.getTimeStampToken(), eventoReclamacion, locale)
 			if(Respuesta.SC_OK != timeStampVerification.codigoEstado) {
-				log.error("saveManifestSignature - ERROR TIMESTAMP VOTE VALIDATION -> '${timeStampVerification.mensaje}'")
+				log.error("saveManifestSignature - ERROR TIMESTAMP VALIDATION -> '${timeStampVerification.mensaje}'")
 				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
 					mensaje:timeStampVerification.mensaje,
 					tipo:Tipo.FIRMA_EVENTO_CON_ERRORES, evento:eventoReclamacion)
@@ -81,5 +85,26 @@ class ReclamacionService {
             }
         }
     }
+	 
+	 private Respuesta checkClaimJSONData(JSONObject claimDataJSON, Locale locale) {
+		 int status = Respuesta.SC_ERROR_PETICION
+		 Tipo tipoRespuesta = Tipo.FIRMA_RECLAMACION_SMIME
+		 org.bouncycastle.tsp.TimeStampToken tms;
+		 String msg
+		 try {
+			 Tipo operationType = Tipo.valueOf(claimDataJSON.operation)
+			 if (claimDataJSON.id && claimDataJSON.URL &&
+				 (Tipo.FIRMA_RECLAMACION_SMIME == operationType)) {
+				 status = Respuesta.SC_OK
+			 } else msg = messageSource.getMessage('claimSignatureWithErrorsMsg', null, locale)
+		 } catch(Exception ex) {
+			 log.error(ex.getMessage(), ex)
+			 msg = messageSource.getMessage('claimSignatureWithErrorsMsg', null, locale)
+		 }
+		 if(Respuesta.SC_OK == status) tipoRespuesta = Tipo.FIRMA_RECLAMACION_SMIME
+		 else log.error("checkClaimJSONData - msg: ${msg} - data:${claimDataJSON.toString()}")
+		 return new Respuesta(codigoEstado:status, mensaje:msg, tipo:tipoRespuesta)
+	 }
+	 
 	 
 }

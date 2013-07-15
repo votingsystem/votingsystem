@@ -1,6 +1,5 @@
 package org.sistemavotacion;
 
-import java.awt.Frame;
 import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -26,7 +25,6 @@ public class AppletFirma extends JApplet {
     
     public static enum ModoEjecucion {APPLET, APLICACION}
     
-    private Frame frame;
     private Timer recolectorOperaciones;
     private AtomicBoolean cancelado = new AtomicBoolean(false);
     private Operacion operacionEnCurso;
@@ -78,9 +76,6 @@ public class AppletFirma extends JApplet {
                 }
             }
         });
-        Frame[] frames = JFrame.getFrames();
-        if(frames.length == 0 || frames[0] == null) frame = new javax.swing.JFrame();
-        else frame = frames[0];
         if(AppletFirma.modoEjecucion == AppletFirma.ModoEjecucion.APPLET) {
             lanzarTimer();
             if(getParameter("locale") != null) locale = getParameter("locale");
@@ -138,6 +133,7 @@ public class AppletFirma extends JApplet {
         operacion.setTipo(Operacion.Tipo.MENSAJE_CIERRE_APPLET);
         enviarMensajeAplicacion(operacion);
         cancelado.set(true);
+        Contexto.INSTANCE.shutdown();
     }
     
     public void enviarMensajeAplicacion(Operacion operacion) {
@@ -178,7 +174,8 @@ public class AppletFirma extends JApplet {
             return;
         } else {
             PreconditionsCheckerDialog preconditionsChecker = 
-                new PreconditionsCheckerDialog(frame, true, operacionEnCurso, this);
+                    new PreconditionsCheckerDialog(
+                    new JFrame(), true, operacionEnCurso, this);
             preconditionsChecker.setVisible(true);
         }
     }
@@ -200,7 +197,7 @@ public class AppletFirma extends JApplet {
                         File jsonFile = File.createTempFile("operacion", ".json");
                         jsonFile.deleteOnExit();
                         FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
-                            .getResourceAsStream("testFiles/selectRepresentative.json"), jsonFile);        
+                            .getResourceAsStream("testFiles/claimOperation.json"), jsonFile);        
                         appletFirma.ejecutarOperacion(FileUtils.getStringFromFile(jsonFile));
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);

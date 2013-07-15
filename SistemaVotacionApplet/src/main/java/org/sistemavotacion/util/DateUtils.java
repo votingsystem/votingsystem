@@ -96,9 +96,9 @@ public class DateUtils {
     	return formatter.parse(dateString);
     }
     
-    public static Date getDateFromShortString (String dateString) throws ParseException {
+    public static Date getDateFromShortString (String yyyy_MM_dd) throws ParseException {
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-    	return formatter.parse(dateString);
+    	return formatter.parse(yyyy_MM_dd);
     }
 
     /**

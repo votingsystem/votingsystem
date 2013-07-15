@@ -179,7 +179,7 @@ public class VotingSimulationData extends SimulationData {
             JSONArray jsonArray = dataJSON.getJSONArray("options");
             for (int i = 0; i< jsonArray.size(); i++) {
                 OpcionEvento campo = new OpcionEvento();
-                campo.setContenido(jsonArray.getString(i));
+                campo.setContent(jsonArray.getString(i));
                 eventOptions.add(campo);
             }
             simulationData.getEvento().setOpciones(eventOptions);

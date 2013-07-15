@@ -97,6 +97,14 @@ public final class EventoSistemaVotacionJso extends JavaScriptObject {
 		return this.tipo;
 	}-*/;
 
+	public final native String getOperation() /*-{
+		return this.operation;
+	}-*/;
+	
+	public final native void setOperation(String value) /*-{
+		this.operation = value;
+	}-*/;
+	
 	public final native String getHashSolicitudAccesoBase64() /*-{
 		return this.hashSolicitudAccesoBase64;
 	}-*/;

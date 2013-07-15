@@ -4,6 +4,7 @@ import org.sistemavotacion.test.modelo.SimulationData;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletionService;
@@ -170,7 +171,8 @@ public class EncryptionSimulator extends Simulator<SimulationData>
              launchSimulationThreads();
         } else logger.error(respuesta.getMensaje());
 
-        logger.debug("- await");
+        logger.debug("call - await  - process:" + ManagementFactory.
+                getRuntimeMXBean().getName());
         countDownLatch.await();
         logger.debug("- call - shutdown executors");   
         

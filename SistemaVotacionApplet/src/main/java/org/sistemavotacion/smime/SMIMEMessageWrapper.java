@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -47,9 +48,11 @@ import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.sistemavotacion.seguridad.PKIXCertPathReviewer;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1UTCTime;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERUTCTime;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSAttributes;
@@ -253,8 +256,9 @@ public class SMIMEMessageWrapper extends MimeMessage {
             		firstSignature = timeStampDate;
             		this.firmante = usuario;
             	}
+            } else {
+                usuario.setFechaFirma(getSinatureDate(signer));
             }
-            usuario.setTimeStampToken(timeStampToken);
             firmantes.add(usuario);
             if (cert.getSubjectDN().toString().contains("OU=hashCertificadoVotoHEX:")) {
             	informacionVoto.setCertificadoVoto(cert);
@@ -310,6 +314,26 @@ public class SMIMEMessageWrapper extends MimeMessage {
             }
         } else logger.debug(" --- without unsignedAttributes"); 
         return timeStampToken;
+    }
+    
+    private Date getSinatureDate(SignerInformation signer) throws Exception {
+        AttributeTable signedAttr = signer.getSignedAttributes();
+        Attribute signingTime = signedAttr.get(CMSAttributes.signingTime);
+        if (signingTime != null) {
+            Enumeration en = signingTime.getAttrValues().getObjects();
+            while (en.hasMoreElements()) {
+                Object obj = en.nextElement();
+                System.out.println(obj.getClass().getName());
+                if (obj instanceof ASN1UTCTime) {
+                    ASN1UTCTime asn1Time = (ASN1UTCTime) obj;
+                    return asn1Time.getDate();
+                } else if (obj instanceof DERUTCTime) {
+                    DERUTCTime derTime = (DERUTCTime) obj;
+                    return derTime.getDate();
+                }
+            }
+        }
+        return null;
     }
     
     public void setTimeStampToken(TimeStampToken timeStampToken) throws Exception {

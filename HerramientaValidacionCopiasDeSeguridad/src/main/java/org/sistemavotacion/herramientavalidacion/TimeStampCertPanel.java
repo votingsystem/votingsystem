@@ -76,12 +76,8 @@ public class TimeStampCertPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void pemCertDataButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pemCertDataButtonActionPerformed
-        Frame frame;
-        Frame[] frames = JFrame.getFrames();
-        if(frames.length == 0 || frames[0] == null) frame = 
-                new javax.swing.JFrame();
-        else frame = frames[0];
-        PEMCertDialog pemCertDialog = new PEMCertDialog(frame, true, certificate);
+        PEMCertDialog pemCertDialog = new PEMCertDialog(
+                new JFrame(), true, certificate);
         pemCertDialog.setVisible(true);
     }//GEN-LAST:event_pemCertDataButtonActionPerformed
 

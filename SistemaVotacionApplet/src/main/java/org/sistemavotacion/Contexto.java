@@ -4,6 +4,7 @@ import com.itextpdf.text.pdf.PdfName;
 import iaik.pkcs.pkcs11.Mechanism;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.text.MessageFormat;
@@ -45,13 +46,6 @@ public enum Contexto {
     private static ExecutorService executor = Executors.newFixedThreadPool(10);
     private static CompletionService<Respuesta> completionService
              = new ExecutorCompletionService<Respuesta>(executor);
-    
-    
-
-    public void shutdown() {
-        if(executor != null) executor.shutdown();
-        if(httpHelper != null) httpHelper.shutdown();
-    }
     
     public static class DEFAULTS {
         public static String BASEDIR =  System.getProperty("user.home");
@@ -168,7 +162,18 @@ public enum Contexto {
     }
 
     public void init(){}
-        
+    
+    public void shutdown() {
+        try {
+            logger.debug("------------- shutdown ----------------- ");
+            if(executor != null) executor.shutdown();
+            if(httpHelper != null) httpHelper.shutdown();
+            FileUtils.deleteRecursively(new File(DEFAULTS.APPTEMPDIR));
+        } catch (IOException ex) {
+           logger.error(ex.getMessage(), ex);
+        }
+    }
+    
     public void submit(Runnable runnable) {
         executor.submit(runnable);
     }
@@ -197,16 +202,12 @@ public enum Contexto {
     public ResourceBundle getResourceBundle() {
         return resourceBundle;
     }
-    
-    public String getString(String key) {
-        if(resourceBundle == null) resourceBundle = 
-                ResourceBundle.getBundle("messages_" + AppletFirma.locale);
-        return resourceBundle.getString(key);
-    }
-
+   
     public String getString(String key, Object... arguments) {
-        String pattern = getString(key);
-        return MessageFormat.format(pattern, arguments);
+        String pattern = resourceBundle.getString(key);
+        if(arguments.length > 0) 
+            return MessageFormat.format(pattern, arguments);
+        else return pattern;
     }
 
     public static String getApplicactionBaseDir () {

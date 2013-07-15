@@ -25,6 +25,7 @@ import org.controlacceso.clientegwt.client.util.ServerPaths;
 import org.controlacceso.clientegwt.client.util.StringUtils;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -58,6 +59,8 @@ public class PanelFirmaReclamacion extends Composite implements ConfirmacionList
         String labelInfoDocumentoOver();
         String panelInfoDocumentoOver();
     }
+    
+    @UiField org.controlacceso.clientegwt.client.Recursos res;
 
 	@UiField HTML pageTitle;
 	@UiField HTML piePagina;
@@ -93,6 +96,7 @@ public class PanelFirmaReclamacion extends Composite implements ConfirmacionList
         panelCampos = new PanelPublicacionCamposReclamacion(
         		PanelCampoReclamacion.Modo.EDITAR);
         initWidget(uiBinder.createAndBindUi(this));
+        res.style().ensureInjected();
         messagePanel.setVisible(false);
 		panelInfoDocumento.setVisible(false);
 		panelContenidos.setVisible(false);
@@ -122,8 +126,11 @@ public class PanelFirmaReclamacion extends Composite implements ConfirmacionList
 		mensajeClienteFirma.setAsuntoMensajeFirmado(
 				Constantes.INSTANCIA.asuntoFirmaReclamacion(evento.getAsunto()));
 		evento.setCampoDeEventoList(panelCampos.getCampos());
+
 		mensajeClienteFirma.setEvento(evento);
 		mensajeClienteFirma.setNombreDestinatarioFirma(PuntoEntrada.INSTANCIA.servidor.getNombre());
+
+		evento.setOperation(Operacion.FIRMA_RECLAMACION_SMIME.toString());
 		mensajeClienteFirma.setContenidoFirma(evento);
 		mensajeClienteFirma.setRespuestaConRecibo(true);
 		if(!Browser.isAndroid()) setWidgetsStateFirmando(true);

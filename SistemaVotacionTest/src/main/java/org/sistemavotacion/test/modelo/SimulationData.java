@@ -132,6 +132,10 @@ public class SimulationData {
         return numRequests.getAndIncrement();
     }
     
+    public Long getAndAddNumRequestsOK(long delta) {
+        return numRequestsOK.getAndAdd(delta);
+    }
+    
     public Long getNumRequestsOK() {
         return numRequestsOK.get();
     }

@@ -2,6 +2,7 @@ package org.sistemavotacion.test.simulation;
 
 import org.sistemavotacion.test.modelo.SimulationData;
 import java.io.File;
+import java.lang.management.ManagementFactory;
 import org.sistemavotacion.test.simulation.callable.TimeStamperTest;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.CountDownLatch;
@@ -145,7 +146,8 @@ public class TimeStampSimulator extends Simulator<SimulationData> {
     @Override public Respuesta<SimulationData> call() throws Exception {
         String serverInfoURL = ContextoPruebas.getURLInfoServidor(
                 simulationData.getAccessControlURL());
-        logger.debug("init - serverInfoURL: " + serverInfoURL);
+        logger.debug("init - serverInfoURL: " + serverInfoURL  + " - process:" + 
+                ManagementFactory.getRuntimeMXBean().getName());
         simulationData.setBegin(System.currentTimeMillis());
         ServerInitializer accessControlInitializer = 
                 new ServerInitializer(simulationData.getAccessControlURL(),

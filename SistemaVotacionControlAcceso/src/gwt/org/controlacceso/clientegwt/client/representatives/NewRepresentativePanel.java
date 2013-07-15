@@ -66,6 +66,8 @@ public class NewRepresentativePanel extends Composite implements
         String imageMissing();
         String pageTitle();
     }
+    
+    @UiField org.controlacceso.clientegwt.client.Recursos res;
 
 	@UiField HorizontalPanel pageTitle;
 	@UiField HorizontalPanel submitButtonsPanel;
@@ -93,6 +95,7 @@ public class NewRepresentativePanel extends Composite implements
     	richTextArea = new RichTextArea();
         richTextToolbar = new RichTextToolbar (richTextArea);
         initWidget(uiBinder.createAndBindUi(this));
+        res.style().ensureInjected();
         richTextArea.setStyleName(style.richTextArea(), true);
         editorPanel.add(richTextArea);
         SubmitHandler sh = new SubmitHandler();

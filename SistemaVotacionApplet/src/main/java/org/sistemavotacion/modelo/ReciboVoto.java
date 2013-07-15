@@ -28,7 +28,7 @@ public class ReciboVoto {
     public static String obtenerMensajeVotoOk (Evento voto) {
         return "<html>En el asunto <b>" + voto.getAsunto() + "</b><br/>"
                 + " usted ha elegido la opción <b>" 
-                + voto.getOpcionSeleccionada().getContenido() + "</b></html>";
+                + voto.getOpcionSeleccionada().getContent() + "</b></html>";
     }
 
     

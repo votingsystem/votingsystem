@@ -1,8 +1,11 @@
 package org.sistemavotacion.herramientavalidacion;
 
 import java.io.File;
+import java.util.UUID;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.filechooser.FileFilter;
+import org.sistemavotacion.Contexto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,11 +24,9 @@ public class DialogoPrincipal extends javax.swing.JDialog {
         super(parentFrame, modal);
         initComponents();
         this.parentFrame = parentFrame;
-        progressBarPanel.setVisible(false);
-        pack();
         setLocationRelativeTo(null);   
-        setTitle(AppletHerramienta.getResourceBundle().
-                getString("dialogoPrincipalCaption"));
+        setTitle(Contexto.INSTANCE.getString("dialogoPrincipalCaption"));
+        pack();
     }
 
     /** This method is called from within the constructor to
@@ -39,9 +40,6 @@ public class DialogoPrincipal extends javax.swing.JDialog {
 
         abrirArchivoFirmadoButton = new javax.swing.JButton();
         abrirZipCopiaRespaldoButton = new javax.swing.JButton();
-        progressBarPanel = new javax.swing.JPanel();
-        progressLabel = new javax.swing.JLabel();
-        progressBar = new javax.swing.JProgressBar();
         cerrarButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -65,34 +63,6 @@ public class DialogoPrincipal extends javax.swing.JDialog {
             }
         });
 
-        progressBarPanel.setName("progressBarPanel"); // NOI18N
-
-        progressLabel.setText(bundle.getString("DialogoPrincipal.progressLabel.text")); // NOI18N
-        progressLabel.setName("progressLabel"); // NOI18N
-
-        progressBar.setIndeterminate(true);
-        progressBar.setName("progressBar"); // NOI18N
-
-        javax.swing.GroupLayout progressBarPanelLayout = new javax.swing.GroupLayout(progressBarPanel);
-        progressBarPanel.setLayout(progressBarPanelLayout);
-        progressBarPanelLayout.setHorizontalGroup(
-            progressBarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(progressBarPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(progressBarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(progressLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
-                    .addComponent(progressBar, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        progressBarPanelLayout.setVerticalGroup(
-            progressBarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(progressBarPanelLayout.createSequentialGroup()
-                .addComponent(progressLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
         cerrarButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/images/cancel_16x16.png"))); // NOI18N
         cerrarButton.setText(bundle.getString("DialogoPrincipal.cerrarButton.text")); // NOI18N
         cerrarButton.setName("cerrarButton"); // NOI18N
@@ -111,7 +81,6 @@ public class DialogoPrincipal extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(abrirZipCopiaRespaldoButton, javax.swing.GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE)
                     .addComponent(abrirArchivoFirmadoButton, javax.swing.GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE)
-                    .addComponent(progressBarPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(cerrarButton, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addContainerGap())
         );
@@ -119,8 +88,6 @@ public class DialogoPrincipal extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(progressBarPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(abrirArchivoFirmadoButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(abrirZipCopiaRespaldoButton)
@@ -149,9 +116,17 @@ public class DialogoPrincipal extends javax.swing.JDialog {
             int returnVal = chooser.showOpenDialog(parentFrame);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File result = chooser.getSelectedFile();
-                VisualizadorDeEventoFirmadoDialog visualizador =
-                    new VisualizadorDeEventoFirmadoDialog(parentFrame, false);
-                visualizador.setVisible(result);
+                String outputFolder = Contexto.DEFAULTS.APPTEMPDIR + 
+                    File.separator + UUID.randomUUID();
+                final DecompressFileDialog dialog = new DecompressFileDialog(
+                    new JFrame(), true);
+                boolean unzipFinished = dialog.unZipBackup(
+                        result.getAbsolutePath(), outputFolder);
+                if(unzipFinished) {
+                    VisualizadorDeEventoFirmadoDialog visualizador =
+                        new VisualizadorDeEventoFirmadoDialog(parentFrame, false);
+                    visualizador.setVisible(outputFolder);
+                }  
             }
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
@@ -175,8 +150,5 @@ public class DialogoPrincipal extends javax.swing.JDialog {
     private javax.swing.JButton abrirArchivoFirmadoButton;
     private javax.swing.JButton abrirZipCopiaRespaldoButton;
     private javax.swing.JButton cerrarButton;
-    private javax.swing.JProgressBar progressBar;
-    private javax.swing.JPanel progressBarPanel;
-    private javax.swing.JLabel progressLabel;
     // End of variables declaration//GEN-END:variables
 }

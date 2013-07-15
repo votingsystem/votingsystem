@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
+import org.sistemavotacion.Contexto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,7 +108,7 @@ public class ClosableTabbedPane extends JTabbedPane {
                 tabbedPane.setCursor(new Cursor(Cursor.HAND_CURSOR));	
                 if(selectedTab > -1)
                         tabbedPane.setToolTipTextAt(selectedTab, 
-                        AppletHerramienta.getResourceBundle().getString("closeToolTipText") + 
+                        Contexto.INSTANCE.getString("closeToolTipText") + 
                         tabbedPane.getTitleAt(selectedTab));
             }
             else{
@@ -127,8 +128,8 @@ public class ClosableTabbedPane extends JTabbedPane {
             int tabCount = tabbedPane.getTabCount();
             for(int j = 0; j < tabCount; j++)
                 if(tabbedPane.getComponent(j).isShowing()){			
-                    int x = tabbedPane.getBoundsAt(j).x + tabbedPane.getBoundsAt(j).width -width-5;
-                    int y = tabbedPane.getBoundsAt(j).y +15;	
+                    int x = tabbedPane.getBoundsAt(j).x + tabbedPane.getBoundsAt(j).width -width- 5;
+                    int y = tabbedPane.getBoundsAt(j).y + 10;	
                     drawClose(g,x,y);
                     break;
                 }
@@ -167,7 +168,7 @@ public class ClosableTabbedPane extends JTabbedPane {
                 if(tabbedPane.getBoundsAt(j).contains(meX, meY)){
                     selectedTab = j;
                     closeX = tabbedPane.getBoundsAt(j).x + tabbedPane.getBoundsAt(j).width -width-5;
-                    closeY = tabbedPane.getBoundsAt(j).y + 15;					
+                    closeY = tabbedPane.getBoundsAt(j).y + 10;					
                     return true;
                 }
             return false;

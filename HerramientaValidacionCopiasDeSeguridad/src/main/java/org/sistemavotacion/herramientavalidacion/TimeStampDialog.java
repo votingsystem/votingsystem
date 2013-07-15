@@ -95,7 +95,7 @@ public class TimeStampDialog extends javax.swing.JDialog {
                     logger.error(ex.getMessage(), ex);
                 }
                 if(!validationOk) {
-                    setMessage(AppletHerramienta.getString(
+                    setMessage(Contexto.INSTANCE.getString(
                             "timeStampWithoutCertErrorMsg"));
                 }
             }
@@ -272,12 +272,8 @@ public class TimeStampDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_closeButtonActionPerformed
 
     private void certValidationButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_certValidationButtonActionPerformed
-        Frame frame;
-        Frame[] frames = JFrame.getFrames();
-        if(frames.length == 0 || frames[0] == null) frame = new javax.swing.JFrame();
-        else frame = frames[0];
         TimeStampCertFormDialog certFormDialog = 
-                new TimeStampCertFormDialog(frame, true, timeStampToken);
+                new TimeStampCertFormDialog(new JFrame(), true, timeStampToken);
         certFormDialog.setVisible(true);
     }//GEN-LAST:event_certValidationButtonActionPerformed
 

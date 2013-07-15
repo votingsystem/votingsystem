@@ -224,16 +224,21 @@ public class FirmaDialog extends JDialog {
         setVisible(true);
     }
     
-    public void mostrarPantallaEnvio (boolean visibility) {
+    public void mostrarPantallaEnvio (final boolean visibility) {
         logger.debug("mostrarPantallaEnvio - " + visibility);
-        mostrandoPantallaEnvio = visibility;
-        progressBarPanel.setVisible(visibility);
-        enviarButton.setVisible(!visibility);
-        confirmacionPanel.setVisible(!visibility);
-        if (mostrandoPantallaEnvio) cerrarButton.setText(
-                Contexto.INSTANCE.getString("cancelar"));
-        else cerrarButton.setText(Contexto.INSTANCE.getString("cerrar"));
-        pack();
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                mostrandoPantallaEnvio = visibility;
+                progressBarPanel.setVisible(visibility);
+                enviarButton.setVisible(!visibility);
+                confirmacionPanel.setVisible(!visibility);
+                if (mostrandoPantallaEnvio) cerrarButton.setText(
+                        Contexto.INSTANCE.getString("cancelar"));
+                else cerrarButton.setText(Contexto.INSTANCE.getString("cerrar"));
+                pack();
+            }
+        }); 
+
     }
 
     /**

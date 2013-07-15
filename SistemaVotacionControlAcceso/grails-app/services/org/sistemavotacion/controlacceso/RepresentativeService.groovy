@@ -108,12 +108,10 @@ class RepresentativeService {
 		Map representativesMap = [:]
 		while (representatives.next()) {
 			Usuario representative = (Usuario) representatives.get(0);			
-			File representativesReportFile = mapFiles.representativesReportFile
-			representativesReportFile.write("")
 			
 			DecimalFormat formatted = new DecimalFormat("00000000");
 			int delegationsBatch = 0
-			String representativeBaseDir = "${filesDir.absolutePath}/representative_${representative.nif}/batch_${formatted.format(++delegationsBatch)}"
+			String representativeBaseDir = "${filesDir.absolutePath}/${representatives.getRowNumber()}_representative_${representative.nif}/batch_${formatted.format(++delegationsBatch)}"
 			new File(representativeBaseDir).mkdirs()
 
 			if(representative.type != Usuario.Type.REPRESENTATIVE) {
@@ -152,11 +150,11 @@ class RepresentativeService {
 				String repDocFileName = null
 				if(representedAccessRequest) {
 					numRepresentedWithAccessRequest++
-					repDocFileName = "${representativeBaseDir}/WithRequest_RepDoc_${represented.nif}.p7m"
-				} else repDocFileName = "${representativeBaseDir}/RepDoc_${represented.nif}.p7m"
+					repDocFileName = "${representativeBaseDir}/${representationDocuments.getRowNumber()}_WithRequest_RepDoc_${represented.nif}.p7m"
+				} else repDocFileName = "${representativeBaseDir}/${representationDocuments.getRowNumber()}_RepDoc_${represented.nif}.p7m"
 				File representationDocFile = new File(repDocFileName)
 				representationDocFile.setBytes(repDocument.activationSMIME.contenido)
-				if((representationDocuments.getRowNumber() % 100) == 0) {
+				if(((representationDocuments.getRowNumber() + 1)  % 100) == 0) {
 					sessionFactory.currentSession.flush()
 					sessionFactory.currentSession.clear()
 					log.debug("Representative ${representative.nif} - processed ${representationDocuments.getRowNumber()} representations");
@@ -202,7 +200,7 @@ class RepresentativeService {
 				optionsMap[representativeVote.opcionDeEvento.id].numVotesResult += numVotesRepresentedByRepresentative
 			}			
 			
-			Map representativeMap = [
+			Map representativeMap = [id:representative.id,
 				optionSelectedId:representativeVote?.opcionDeEvento?.id,
 				numRepresentedWithVote:numRepresentedWithAccessRequest,
 				numRepresentations: numRepresented,
@@ -213,13 +211,15 @@ class RepresentativeService {
 				System.currentTimeMillis() - representativeBegin)
 			
 			
+			/*File representativesReportFile = mapFiles.representativesReportFile
+			representativesReportFile.write("")
 			String csvLine = "${representative.nif}, " +
 				"numRepresented:${formatted.format(numRepresented)}, " +
 			    "numRepresentedWithAccessRequest:${formatted.format(numRepresentedWithAccessRequest)}, " +
 			    "${state.toString()}\n"
-			log.debug("csvLine ${representatives.getRowNumber()}/${numRepresentatives} - ${elapsedTimeStr} -> ${csvLine}")
-			representativesReportFile.append(csvLine)
-			if((representatives.getRowNumber() % 100) == 0) {
+			representativesReportFile.append(csvLine)*/
+			log.debug("processed ${representatives.getRowNumber()} of ${numRepresentatives} representatives - ${elapsedTimeStr}")
+			if(((representatives.getRowNumber() + 1)  % 100) == 0) {
 				sessionFactory.currentSession.flush()
 				sessionFactory.currentSession.clear()
 			}
@@ -253,14 +253,14 @@ class RepresentativeService {
 		}
 		
 		Date selectedDate = DateUtils.getTodayDate();	
-		if(event.getDateFinish().before(selectedDate)) {
+		/*if(event.getDateFinish().before(selectedDate)) {
 			log.debug("Event finished, fetching map from backup data")
 			Map eventMetaInfMap = JSON.parse(event.metaInf)
 			Map representativeAccreditationsMap = eventMetaInfMap[
 				Tipo.REPRESENTATIVE_DATA.toString()]
 			return new Respuesta(codigoEstado:Respuesta.SC_OK, 
 				data:representativeAccreditationsMap)
-		}
+		}*/
 		log.debug("getAccreditationsMapForEvent - selectedDate: ${selectedDate} ")
 		Map optionsMap = [:]
 		event.opciones.each {option ->
@@ -358,7 +358,7 @@ class RepresentativeService {
 				}
 				numVotesRepresentedByRepresentatives += numVotesRepresentedByRepresentative
 				
-				Map representativeMap = [
+				Map representativeMap = [id:representative.id,
 					optionSelectedId:representativeVote?.opcionDeEvento?.id,
 					numRepresentedWithVote:numRepresentedWithAccessRequest,
 					numRepresentations: numRepresented,
@@ -963,9 +963,11 @@ class RepresentativeService {
 		}
 		String imageURL = "${grailsApplication.config.grails.serverURL}/representative/image/${image?.id}" 
 		String infoURL = "${grailsApplication.config.grails.serverURL}/representative/${representative?.id}" 
+		String webPageURL = "${grailsApplication.config.grails.serverURL}/app/home#REPRESENTATIVE_DETAILS&representativeId=${representative?.id}"
 		def numRepresentations = Usuario.countByRepresentative(representative) + 1//plus the representative itself
-		def representativeMap = [id: representative.id, nif:representative.nif, 
-			 infoURL:infoURL, representativeMessageURL:representativeMessageURL,
+		def representativeMap = [id: representative.id, nif:representative.nif,
+			 webPageURL:webPageURL, infoURL:infoURL, 
+			 representativeMessageURL:representativeMessageURL,
 			 imageURL:imageURL, numRepresentations:numRepresentations,
 			 nombre: representative.nombre, primerApellido:representative.primerApellido]
 		return representativeMap

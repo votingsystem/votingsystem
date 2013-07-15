@@ -105,7 +105,8 @@ class TimeStampService {
 	/** Random generator algorithm. */
 	private static String algorithm = "SHA1PRNG";
 	private X509Certificate signingCert;
-	private static final int DEFAULT_MAXSERIALNUMBERLENGTH = 8;
+	/** number of bytes serial number to generate, default 8 */
+	private int noOctets = 8;
 	
 	private static HashMap<String, String> ACCEPTEDALGORITHMSMAP = [
 			"GOST3411":TSPAlgorithms.GOST3411,
@@ -214,7 +215,7 @@ class TimeStampService {
 		final Date date = DateUtils.getTodayDate();
 		//long numSerie = getSernoGenerator().incrementAndGet()
 		//final BigInteger serialNumber = BigInteger.valueOf(numSerie);
-		final BigInteger serialNumber = getSerno(DEFAULT_MAXSERIALNUMBERLENGTH)
+		final BigInteger serialNumber = getSerno(noOctets)
 		long numSerie = serialNumber.longValue()
 		
 		log.debug("processRequest - serialNumber: '${serialNumber}'" +
@@ -283,7 +284,7 @@ class TimeStampService {
 				log.error(ex.getMessage(), ex)
 			}
 		}
-		
+		random.setSeed(new Date().getTime());
 		final byte[] sernobytes = new byte[maxLength];
 		random.nextBytes(sernobytes);
 		BigInteger serno = new BigInteger(sernobytes).abs();

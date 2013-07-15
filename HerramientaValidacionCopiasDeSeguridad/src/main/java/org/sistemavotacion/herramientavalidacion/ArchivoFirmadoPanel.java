@@ -3,12 +3,14 @@ package org.sistemavotacion.herramientavalidacion;
 import org.sistemavotacion.herramientavalidacion.util.Formateadora;
 import java.awt.Desktop;
 import java.awt.Frame;
-import static org.sistemavotacion.herramientavalidacion.AppletHerramienta.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.IOException;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
+import org.sistemavotacion.Contexto;
 import org.sistemavotacion.herramientavalidacion.modelo.SignedFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +19,7 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class ArchivoFirmadoPanel extends JPanel {
+public class ArchivoFirmadoPanel extends JPanel implements ItemListener  {
     
     private static Logger logger = LoggerFactory.getLogger(ArchivoFirmadoPanel.class);
     
@@ -32,8 +34,13 @@ public class ArchivoFirmadoPanel extends JPanel {
         informacionFirmadaEditorPane.setEditable(false);
         informacionFirmadaEditorPane.setContentType("text/html");       
         initFileData(signedFile);
+        checkBox.addItemListener(this);
     }
-
+    
+    @Override public void itemStateChanged(ItemEvent ie) {
+        setContentFormated(checkBox.isSelected());
+    }
+    
     
     public void initFileData(SignedFile signedFile) throws IOException, Exception {  
         this.signedFile = signedFile;
@@ -52,13 +59,13 @@ public class ArchivoFirmadoPanel extends JPanel {
         try {
             if (signedFile.isValidSignature()) {
                 resultadoFirmaButton.setText("<html><b>" + 
-                    getString("signatureOKLabel") + "</b><html>");
+                        Contexto.INSTANCE.getString("signatureOKLabel") + "</b><html>");
             resultadoFirmaButton.setIcon(new ImageIcon(getClass().
                     getResource("/resources/images/signature-ok_16x16.png")));
 
             } else {
                 resultadoFirmaButton.setText("<html><b>" + 
-                        getString("signatureERRORLabel") + "</b><html>");
+                        Contexto.INSTANCE.getString("signatureERRORLabel") + "</b><html>");
                 resultadoFirmaButton.setIcon(new ImageIcon(getClass().
                         getResource("/resources/images/signature-bad_16x16.png")));
             }
@@ -71,7 +78,7 @@ public class ArchivoFirmadoPanel extends JPanel {
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             resultadoFirmaButton.setText("<html><b>" + 
-                        getString("signatureERRORLabel") + "</b><html>");
+                    Contexto.INSTANCE.getString("signatureERRORLabel") + "</b><html>");
             resultadoFirmaButton.setIcon(new ImageIcon(getClass().
                         getResource("/resources/images/signature-bad_16x16.png")));
             resultadoFirmaButton.setEnabled(false);
@@ -95,6 +102,7 @@ public class ArchivoFirmadoPanel extends JPanel {
         scrollPane = new javax.swing.JScrollPane();
         informacionFirmadaEditorPane = new javax.swing.JEditorPane();
         openPDFButton = new javax.swing.JButton();
+        checkBox = new javax.swing.JCheckBox();
 
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/sistemavotacion/herramientavalidacion/Bundle"); // NOI18N
         firmantesLabel.setText(bundle.getString("ArchivoFirmadoPanel.firmantesLabel.text")); // NOI18N
@@ -138,6 +146,8 @@ public class ArchivoFirmadoPanel extends JPanel {
             }
         });
 
+        checkBox.setText(bundle.getString("ArchivoFirmadoPanel.checkBox.text")); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -147,7 +157,9 @@ public class ArchivoFirmadoPanel extends JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(openPDFButton)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(checkBox)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -156,7 +168,9 @@ public class ArchivoFirmadoPanel extends JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(openPDFButton)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(openPDFButton)
+                    .addComponent(checkBox))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -199,6 +213,7 @@ public class ArchivoFirmadoPanel extends JPanel {
     }//GEN-LAST:event_openPDFButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox checkBox;
     private javax.swing.JPanel datosFirmadosPanel;
     private javax.swing.JLabel firmantesLabel;
     private javax.swing.JEditorPane informacionFirmadaEditorPane;

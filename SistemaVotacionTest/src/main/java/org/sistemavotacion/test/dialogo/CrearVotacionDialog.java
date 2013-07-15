@@ -414,7 +414,7 @@ public class CrearVotacionDialog extends JDialog implements KeyListener {
         OpcionEvento opcionEvento = opcionVotacionDialog.getOpcionEvento();
         if (opcionEvento != null) {
             opcionesPanel.setBorder(normalTextBorder);
-            opcionesPanel.anyadirOpcion(opcionEvento.getContenido());
+            opcionesPanel.anyadirOpcion(opcionEvento.getContent());
             this.pack();
         }
     }//GEN-LAST:event_crearOpcionVotacionButtonActionPerformed

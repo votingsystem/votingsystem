@@ -69,6 +69,8 @@ public class PanelPublicacionVotacion extends Composite implements
         String submitButtonsPanel();
         String buttonContainerPanelAndroid();
     }
+    
+    @UiField org.controlacceso.clientegwt.client.Recursos res;
 
 	@UiField HorizontalPanel pageTitle;
 	@UiField HorizontalPanel submitButtonsPanel;
@@ -104,6 +106,7 @@ public class PanelPublicacionVotacion extends Composite implements
     	richTextArea = new RichTextArea();
         richTextToolbar = new RichTextToolbar (richTextArea);
         initWidget(uiBinder.createAndBindUi(this));
+        res.style().ensureInjected();
         listaCentrosControl.addItem(Constantes.INSTANCIA.centroControlListBoxFirstItem());
         richTextArea.setStyleName(style.richTextArea(), true);
         editorPanel.add(richTextArea);

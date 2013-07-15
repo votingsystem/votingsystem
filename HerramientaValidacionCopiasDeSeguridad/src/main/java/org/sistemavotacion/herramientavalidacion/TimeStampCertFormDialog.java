@@ -172,7 +172,7 @@ public class TimeStampCertFormDialog extends javax.swing.JDialog {
             certs = CertUtil.fromPEMToX509CertCollection(pemCert.getBytes());
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-            setMessage(false, AppletHerramienta.getString("pemCertsErrorMsg"));
+            setMessage(false, Contexto.INSTANCE.getString("pemCertsErrorMsg"));
         }
         for(X509Certificate cert:certs) {
             logger.debug(" ----------- Validating timeStampToken with cert: " 
@@ -188,10 +188,10 @@ public class TimeStampCertFormDialog extends javax.swing.JDialog {
         }
         if(!validationOK) {
             logger.debug("Error validando");
-             setMessage(false, AppletHerramienta.getString("pemCertsErrorMsg"));
+             setMessage(false, Contexto.INSTANCE.getString("pemCertsErrorMsg"));
         } else {
             logger.debug("Validación OK");
-            setMessage(true, AppletHerramienta.getString("pemCertsValidationOKMsg", 
+            setMessage(true, Contexto.INSTANCE.getString("pemCertsValidationOKMsg", 
                     validationCert.getSubjectDN().toString()));        
         }
     }//GEN-LAST:event_validationButtonActionPerformed

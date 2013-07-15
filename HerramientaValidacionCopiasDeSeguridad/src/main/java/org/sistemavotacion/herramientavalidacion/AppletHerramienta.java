@@ -11,6 +11,7 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import netscape.javascript.JSObject;
 import org.apache.log4j.PropertyConfigurator;
+import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.Operacion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,16 +31,10 @@ public class AppletHerramienta extends JApplet {
     private String locale = "es";
     public static ModoEjecucion modoEjecucion = ModoEjecucion.APPLET;
     
-    private static ResourceBundle resourceBundle;
-    
     public AppletHerramienta() { }
         
     @Override  public void init() {
         logger.debug("init");
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                logger.debug("ShutdownHook - ShutdownHook - ShutdownHook");
-        }});
         //Execute a job on the event-dispatching thread:
         //creating this applet's GUI.
         try {
@@ -68,9 +63,6 @@ public class AppletHerramienta extends JApplet {
     public void start() {
         logger.debug("start");
         init();
-        Frame[] frames = JFrame.getFrames();
-        if(frames.length == 0 || frames[0] == null) frame = new javax.swing.JFrame();
-        else frame = frames[0];
         Properties props = new Properties();
         try {
             props.load(Thread.currentThread().getContextClassLoader()
@@ -82,16 +74,15 @@ public class AppletHerramienta extends JApplet {
         if(AppletHerramienta.modoEjecucion == AppletHerramienta.ModoEjecucion.APPLET) {
             if(getParameter("locale") != null) locale = getParameter("locale");
         } 
-        resourceBundle = ResourceBundle.getBundle(
-                "herramientaValidacionMessages_" + locale);
-                javax.swing.SwingUtilities.invokeLater(new Runnable() {
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 try {
                     if(AppletHerramienta.modoEjecucion != 
                             AppletHerramienta.ModoEjecucion.APPLET) {
                         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
                     }
-                    DialogoPrincipal dialogo = new DialogoPrincipal(frame, false);
+                    DialogoPrincipal dialogo = new DialogoPrincipal(
+                            new JFrame(), false);
                     dialogo.setVisible(true);
                 } catch (Exception e) {
                     logger.error(e.getMessage(), e);
@@ -100,7 +91,7 @@ public class AppletHerramienta extends JApplet {
         });
         Operacion operacion = new Operacion();
         operacion.setTipo(Operacion.Tipo.MENSAJE_HERRAMIENTA_VALIDACION);
-        operacion.setMensaje(resourceBundle.getString("appletInicializado"));
+        operacion.setMensaje(Contexto.INSTANCE.getString("appletHerramientaInicializado"));
         enviarMensajeAplicacion(operacion);
     }
 
@@ -127,19 +118,6 @@ public class AppletHerramienta extends JApplet {
 
     public void destroy() {
         logger.debug("destroy");
-    }
-    
-    public static ResourceBundle getResourceBundle() {
-        return resourceBundle;
-    }
-    
-    public static String getString(String key) {
-        return resourceBundle.getString(key);
-    }
-    
-    public static String getString(String key, Object... arguments) {
-        String pattern = getString(key);
-        return MessageFormat.format(pattern, arguments);
     }
 
     public static void main (String[] args) { 

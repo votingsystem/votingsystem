@@ -84,9 +84,11 @@ public class PanelVotacion extends Composite implements ConfirmacionListener, Co
     public static PanelVotacion INSTANCIA;
     private String hashCertificadoVotoHEX;
     
+    @UiField org.controlacceso.clientegwt.client.Recursos res;
     
     public PanelVotacion() {
         initWidget(uiBinder.createAndBindUi(this));
+        res.style().ensureInjected();
         messagePanel.setVisible(false);
 		administracionDocumentoLabel.setListener(administrarEventoEventListener);
         INSTANCIA = this;

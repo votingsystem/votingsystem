@@ -5,6 +5,7 @@ import com.itextpdf.text.pdf.PdfReader;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.lang.management.ManagementFactory;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
@@ -30,7 +31,6 @@ import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.smime.SignedMailGenerator;
 import org.sistemavotacion.test.ContextoPruebas;
 import org.sistemavotacion.test.simulation.callable.ServerInitializer;
-import org.sistemavotacion.test.simulation.callable.BackupValidator;
 import org.sistemavotacion.test.simulation.callable.ManifestSigner;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.NifUtils;
@@ -174,11 +174,12 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
             InfoGetter infoGetter = new InfoGetter(null, downloadServiceURL, null);
             respuesta = infoGetter.call();
             if(Respuesta.SC_OK == respuesta.getCodigoEstado()) { 
-                FutureTask<Respuesta> future = new FutureTask<Respuesta>(
-                    new BackupValidator(respuesta.getMessageBytes()));
+                logger.debug("TODO validate backup");
+                /*FutureTask<Respuesta> future = new FutureTask<Respuesta>(
+                    new ZipBackupValidator(respuesta.getMessageBytes()));
                 simulatorExecutor.execute(future);
                 respuesta = future.get();
-                logger.debug("BackupRequestWorker - status: " + respuesta.getCodigoEstado());
+                logger.debug("BackupRequestWorker - status: " + respuesta.getCodigoEstado());*/
             } else logger.error(respuesta.getMensaje());
         } else logger.error(respuesta.getMensaje());
     }
@@ -309,7 +310,8 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
 
     @Override public Respuesta call() throws Exception {
         logger.debug("call - NumberOfRequestsProjected: " +  
-                simulationData.getNumRequestsProjected());
+                simulationData.getNumRequestsProjected() + " - process:" + 
+                ManagementFactory.getRuntimeMXBean().getName());
         simulationData.setBegin(System.currentTimeMillis());
         ServerInitializer accessControlInitializer = 
                 new ServerInitializer(simulationData.getAccessControlURL(),
@@ -326,7 +328,7 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
         if(timer != null) timer.stop();
         if(simulatorExecutor != null) simulatorExecutor.shutdownNow();
         
-        logger.debug("--------------- SIMULATION RESULT----------------------");   
+        logger.debug("------- SIMULATION RESULT - Event: " + event.getId());  
         simulationData.setFinish(System.currentTimeMillis());
         simulationData.setFinish(System.currentTimeMillis());
                 logger.info("Begin: " + DateUtils.getStringFromDate(

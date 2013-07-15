@@ -38,7 +38,7 @@ public class CertGenerator {
     public static void main(String[] args) throws Exception{
         if(args == null || args.length == 0) {
             Map certMap = new HashMap();
-            certMap.put("rootCertFile", "/home/jgzornoza/webAppsRootCert.jks");
+            certMap.put("rootCertFile", "./webAppsRootCert.jks");
             certMap.put("rootSubjectDN", "CN=rootSUbjectDN");
             certMap.put("password", "password");
             JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(certMap);       

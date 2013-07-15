@@ -22,24 +22,33 @@
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="asuntoLabel" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="valorAsuntoLabel" pref="607" max="32767" attributes="0"/>
+                      <Component id="valorAsuntoLabel" max="32767" attributes="0"/>
                   </Group>
                   <Group type="102" attributes="0">
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="tipoEventoLabel" alignment="0" min="-2" pref="431" max="-2" attributes="0"/>
-                          <Component id="valorURLButton" alignment="0" min="-2" max="-2" attributes="1"/>
-                      </Group>
+                      <Component id="valorURLButton" min="-2" max="-2" attributes="1"/>
+                      <EmptySpace pref="228" max="32767" attributes="0"/>
+                      <Component id="representativesButton" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <Component id="scrollPane" max="32767" attributes="0"/>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="dateInitLabel" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="dateInitValueLabel" min="-2" pref="200" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="dateFinishLabel" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="dateFinishValueLabel" min="-2" pref="173" max="-2" attributes="0"/>
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
-                      <Group type="103" groupAlignment="1" max="-2" attributes="0">
-                          <Component id="documentosFirmadosLabel" pref="277" max="32767" attributes="1"/>
-                          <Component id="solicitudesAccesoLabel" max="32767" attributes="1"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="solicitudesAccesoLabel" alignment="0" min="-2" pref="277" max="-2" attributes="1"/>
+                          <Component id="documentosFirmadosLabel" alignment="0" min="-2" pref="277" max="-2" attributes="1"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="valorSolicitudesAccesoLabel" alignment="0" pref="406" max="32767" attributes="0"/>
-                          <Component id="valorNumeroDocumentosLabel" pref="406" max="32767" attributes="0"/>
+                          <Component id="valorNumeroDocumentosLabel" max="32767" attributes="0"/>
+                          <Component id="valorSolicitudesAccesoLabel" max="32767" attributes="0"/>
                       </Group>
                   </Group>
               </Group>
@@ -50,26 +59,36 @@
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
-              <EmptySpace max="-2" attributes="0"/>
-              <Component id="tipoEventoLabel" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="asuntoLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="valorAsuntoLabel" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="documentosFirmadosLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="valorNumeroDocumentosLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="dateInitLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="dateInitValueLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="dateFinishLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="dateFinishValueLabel" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                  <Component id="documentosFirmadosLabel" max="32767" attributes="0"/>
+                  <Component id="valorNumeroDocumentosLabel" max="32767" attributes="0"/>
+              </Group>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="solicitudesAccesoLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="valorSolicitudesAccesoLabel" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace pref="157" max="32767" attributes="0"/>
-              <Component id="valorURLButton" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
+              <Component id="scrollPane" pref="296" max="32767" attributes="0"/>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="valorURLButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="representativesButton" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -85,18 +104,13 @@
     </Component>
     <Component class="javax.swing.JLabel" name="valorAsuntoLabel">
       <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+          <Font name="Cantarell" size="18" style="0"/>
+        </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
           <ResourceString bundle="org/sistemavotacion/herramientavalidacion/Bundle.properties" key="InformacionEventoPanel.valorAsuntoLabel.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
         </Property>
         <Property name="name" type="java.lang.String" value="valorAsuntoLabel" noResource="true"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JLabel" name="tipoEventoLabel">
-      <Properties>
-        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="org/sistemavotacion/herramientavalidacion/Bundle.properties" key="InformacionEventoPanel.tipoEventoLabel.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
-        </Property>
-        <Property name="name" type="java.lang.String" value="tipoEventoLabel" noResource="true"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="documentosFirmadosLabel">
@@ -140,6 +154,69 @@
           <ResourceString bundle="org/sistemavotacion/herramientavalidacion/Bundle.properties" key="InformacionEventoPanel.valorSolicitudesAccesoLabel.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
         </Property>
         <Property name="name" type="java.lang.String" value="valorSolicitudesAccesoLabel" noResource="true"/>
+      </Properties>
+    </Component>
+    <Container class="javax.swing.JScrollPane" name="scrollPane">
+      <Properties>
+        <Property name="name" type="java.lang.String" value="scrollPane" noResource="true"/>
+      </Properties>
+      <AuxValues>
+        <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
+      </AuxValues>
+
+      <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
+      <SubComponents>
+        <Component class="javax.swing.JTextPane" name="textPane">
+          <Properties>
+            <Property name="name" type="java.lang.String" value="textPane" noResource="true"/>
+          </Properties>
+        </Component>
+      </SubComponents>
+    </Container>
+    <Component class="javax.swing.JButton" name="representativesButton">
+      <Properties>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/resources/images/Group_16x16.png"/>
+        </Property>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="org/sistemavotacion/herramientavalidacion/Bundle.properties" key="InformacionEventoPanel.representativesButton.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+        </Property>
+        <Property name="name" type="java.lang.String" value="representativesButton" noResource="true"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="representativesButtonActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JLabel" name="dateInitLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="org/sistemavotacion/herramientavalidacion/Bundle.properties" key="InformacionEventoPanel.dateInitLabel.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+        </Property>
+        <Property name="name" type="java.lang.String" value="dateInitLabel" noResource="true"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="dateInitValueLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="org/sistemavotacion/herramientavalidacion/Bundle.properties" key="InformacionEventoPanel.dateInitValueLabel.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+        </Property>
+        <Property name="name" type="java.lang.String" value="dateInitValueLabel" noResource="true"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="dateFinishLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="org/sistemavotacion/herramientavalidacion/Bundle.properties" key="InformacionEventoPanel.dateFinishLabel.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+        </Property>
+        <Property name="name" type="java.lang.String" value="dateFinishLabel" noResource="true"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="dateFinishValueLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="org/sistemavotacion/herramientavalidacion/Bundle.properties" key="InformacionEventoPanel.dateFinishValueLabel.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+        </Property>
+        <Property name="name" type="java.lang.String" value="dateFinishValueLabel" noResource="true"/>
       </Properties>
     </Component>
   </SubComponents>
