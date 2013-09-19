@@ -1,7 +1,7 @@
 import java.io.File;
 
 task copyApps(dependsOn: [':SistemaVotacionApplet:signJar', 
-	':HerramientaValidacionCopiasDeSeguridad:signJar', ':SistemaVotacionAndroid:zipalign']) {
+	':HerramientaValidacionCopiasDeSeguridad:signJar', ':SistemaVotacionAndroid:release']) {
 	
 	doLast {
 		File appletDir = new File("$projectDir/web-app/applet/");
