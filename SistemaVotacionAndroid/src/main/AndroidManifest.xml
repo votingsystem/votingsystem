@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.sistemavotacion.android"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <!-- Si no se pone un target SDK post 3.0 sale el 'menu botón' -->
+    <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="14"/>
+
+   	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+	
+    <application android:icon="@drawable/password_32" android:label="@string/app_name">
+
+     	<!-- <activity android:label="@string/app_name" android:noHistory="true"
+            android:name=".Aplicacion" android:screenOrientation="portrait">-->
+ 
+ 
+     	<activity android:label="@string/app_name" android:noHistory="true" android:name=".Aplicacion">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            
+            <!-- This intent-filter identifies this activity as "searchable" -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            
+            <!-- This metadata entry provides further configuration details for searches -->
+            <!-- that are handled by this activity. -->
+            <meta-data android:name="android.app.searchable"
+                       android:resource="@xml/searchable" />
+            
+           	<intent-filter>    
+		       	<data android:scheme="http" android:host="192.168.1.20"/>
+	       	    <data android:path="/SistemaVotacionCentroControl/app/clienteAndroid"/>
+		        <action android:name="android.intent.action.VIEW" />
+		        <category android:name="android.intent.category.DEFAULT"/>  
+     		    <category android:name="android.intent.category.BROWSABLE" />
+	        </intent-filter>
+		    <intent-filter>    
+		       	<data android:scheme="http" android:host="192.168.1.20"/>
+	       	    <data android:path="/SistemaVotacionControlAcceso/app/clienteAndroid"/>
+		        <action android:name="android.intent.action.VIEW" />
+		        <category android:name="android.intent.category.DEFAULT"/>  
+     		    <category android:name="android.intent.category.BROWSABLE" />
+	        </intent-filter>
+       		<intent-filter>    
+		       	<data android:scheme="http" android:host="sistemavotacioncontrolacceso.cloudfoundry.com"/>
+	       	    <data android:path="/app/clienteAndroid"/>
+		        <action android:name="android.intent.action.VIEW" />
+		        <category android:name="android.intent.category.DEFAULT"/>  
+     		    <category android:name="android.intent.category.BROWSABLE" />
+	        </intent-filter>
+		    <intent-filter>    
+		       	<data android:scheme="http" android:host="sistemavotacioncentrocontrol.cloudfoundry.com"/>
+	       	    <data android:path="/app/clienteAndroid"/>
+		        <action android:name="android.intent.action.VIEW" />
+		        <category android:name="android.intent.category.DEFAULT"/>  
+     		    <category android:name="android.intent.category.BROWSABLE" />
+	        </intent-filter>
+     	</activity>
+            
+        <activity android:name="org.sistemavotacion.android.UserCertRequestForm" android:noHistory="true" 
+            android:configChanges="orientation|keyboard"/>
+        
+        <activity android:name="org.sistemavotacion.android.UserCertResponseForm" android:noHistory="true"/>
+        
+        <activity android:name="org.sistemavotacion.android.WebActivity" android:label="@string/app_name"
+            android:screenOrientation="landscape" android:noHistory="true"/>
+        
+        <activity android:name="org.sistemavotacion.android.ui.VoteReceiptListScreen" android:label="@string/app_name"/>
+           
+		<activity android:label="@string/app_name" android:name=".FragmentTabsPager">
+            
+            <!-- This metadata entry causes .Aplicacion to be the default context -->
+            <!-- whenever the user invokes search while in this Activity. 
+            <meta-data android:name="android.app.default_searchable"
+                       android:value=".Aplicacion" />-->
+            
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            
+            <meta-data android:name="android.app.searchable"
+                       android:resource="@xml/searchable" />
+            
+        </activity>
+
+        <!-- <activity android:label="@string/app_name"  android:screenOrientation="portrait"
+            android:name="org.sistemavotacion.android.EventScreen" />-->
+
+        <activity android:label="@string/app_name"
+            android:name="org.sistemavotacion.android.EventScreen" />
+        
+        <activity android:label="@string/app_name"
+            android:name="org.sistemavotacion.android.VotingEventScreen" />
+        
+                <!-- This provider declaration informs the Search Manager that you have a provider of -->
+        <!-- Search suggestions, and provides information about how to access it. -->
+        
+        <provider android:name="org.sistemavotacion.util.SearchSuggestionProvider"
+                  android:authorities="org.sistemavotacion.util.SuggestionProvider" />
+        
+        <service android:name="org.sistemavotacion.android.service.VotingService"/>
+        <service android:name="org.sistemavotacion.android.service.SignService"/>
+        <service android:name="org.sistemavotacion.android.service.PublishService"/>
+        
+    </application>
+</manifest>

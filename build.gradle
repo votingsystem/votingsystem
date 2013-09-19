@@ -32,14 +32,6 @@ task buildAll(dependsOn:['SistemaVotacionApplet:signJar',
 
 dependencies { }
 
-dependencies {
-	archives ('org.apache.httpcomponents:httpmime:4.2.2') {
-		exclude module: 'httpcore'
-	}
-	archives ('com.google.android:support-v4:r7')
-}
-
-
 task genAppsCerts(dependsOn:['SistemaVotacionApplet:classes']) {
 	
 	doFirst { }
@@ -136,5 +128,5 @@ task uploadControlCenter() << {
 //  2) /gradlew.bat which is the windows bat script for for executing builds
 //  3) /wrapper which is a directory named by the "jarPath" config which contains other needed files.
 task wrapper(type: Wrapper) {
-	gradleVersion = '1.5'
+	gradleVersion = '1.7'
 }

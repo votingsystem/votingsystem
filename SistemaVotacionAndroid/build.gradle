@@ -1,91 +1,75 @@
-import java.net.*;
-import java.util.Properties;
-
-import org.ajoberstar.gradle.git.tasks.*
-
-
-apply plugin: 'java'
+apply plugin: 'android'
 
 buildscript {
   repositories { mavenCentral() }
-  //dependencies { classpath 'org.ajoberstar:gradle-git:0.2.3' }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.5.+'
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+android {
+
+    defaultConfig { }
+
+    signingConfigs {
+        release {
+            storeFile file("$rootProject.projectDir/mockDnie.jks")
+            storePassword rootProject.keyStorePassword
+            keyAlias rootProject.signKeyAlias
+            keyPassword rootProject.keyStorePassword
+        }
+    }
+
+
+    compileSdkVersion 17
+    buildToolsVersion "18.1"
+
+    defaultConfig {
+        minSdkVersion 8
+        targetSdkVersion 16
+    }
+
+    sourceSets {
+        main {
+            java {
+                srcDirs = ["src/main/java", "src/bc/java", "src/itext/java"]
+            }
+        }
+    }
+
+    buildTypes {
+        debug { }
+        release {
+            signingConfig signingConfigs.release
+        }
+
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputFile = file("${signedAppName}.apk")
+    }
 }
 
 dependencies {
-	archives ('org.apache.httpcomponents:httpmime:4.2.2') {
-		exclude module: 'httpcore'
-	}
-	archives ('com.google.android:support-v4:r7')
+    compile 'com.google.android:support-v4:r7'
+    compile ('org.apache.httpcomponents:httpmime:4.2.2') {
+        exclude module: 'httpcore'
+    }
 }
 
-task antDebugInstall(dependsOn:'cleanAndroid') << {
-	ProcessBuilder pb = new ProcessBuilder("ant", "debug", "install");
-	pb.directory(projectDir);
-	Process proc = pb.start();
-	proc.consumeProcessErrorStream(System.err)
-	proc.consumeProcessOutputStream(System.out)
-	if (proc.waitFor() != 0) {
-		throw new RuntimeException('antDebugInstall failed')
-	}
-	announce.announce("$project.name - Done antDebugInstall", "local")
-}
+preBuild.dependsOn 'setAndroidEnv'
 
-task cleanAndroid << {
-	ProcessBuilder pb = new ProcessBuilder("ant", "clean");
-	pb.directory(projectDir);
-	Process proc = pb.start();
-	proc.consumeProcessErrorStream(System.err)
-	proc.consumeProcessOutputStream(System.out)
-	if (proc.waitFor() != 0) {
-		throw new RuntimeException('antDebugInstall failed')
-	}
-}
-
-task releaseUnSigned(dependsOn:['classes']) <<  {
-	ProcessBuilder pb = new ProcessBuilder("ant", "release");
-	pb.directory(projectDir);
-	Process proc = pb.start();
-	proc.consumeProcessErrorStream(System.err)
-	proc.consumeProcessOutputStream(System.out)
-	if (proc.waitFor() != 0) {
-		throw new RuntimeException('release failed')
-	}
-}
-
-task signRelease(dependsOn:'releaseUnSigned') <<  {
-	ant.signjar(keystore: "$rootProject.projectDir/mockDnie.jks",
-		storepass:rootProject.keyStorePassword,
-		alias:rootProject.signKeyAlias,
-		jar:"bin/Aplicacion-release-unsigned.apk",
-		signedjar:"bin/Aplicacion-release.apk")
+task release(dependsOn:'build') <<  {
+    rootProject.ext.set("aplicacionAndroid",file("${signedAppName}.apk"))
+    announce.announce("Aplicaci\u00f3n Android firmada", "local")
 }
 
 
-task zipalign(dependsOn:'signRelease') <<  {
-	ProcessBuilder pb = new ProcessBuilder("zipalign", "-v", "4", 
-		"bin/Aplicacion-release.apk", "bin/${signedAppName}.apk");
-	pb.directory(projectDir);
-	Process proc = pb.start();
-	proc.consumeProcessErrorStream(System.err)
-	proc.consumeProcessOutputStream(System.out)
-	if (proc.waitFor() != 0) {
-		throw new RuntimeException('release failed')
-	}
-}
-
-task release(dependsOn:'zipalign') <<  {
-	rootProject.ext.set("aplicacionAndroid",file("bin/${signedAppName}.apk"))
-	announce.announce("Aplicación Android firmada", "local")
-}
-
-task copyToLib(type: Copy) {
-	into "libs"
-	from project.configurations.archives
-}
-
-task checkDependencies(dependsOn:['copyToLib', 'setAndroidEnv']) << {}
-
-task setAndroidEnv << {
+task setAndroidEnv() << {
 	def env = System.getenv()
 	//env.each{println it} 
 	String androidHome= env['ANDROID_HOME']
@@ -100,8 +84,8 @@ task setAndroidEnv << {
 	
 	java.util.Properties props = new Properties();
 	String lastIp = null
-	if(file('assets/VotingSystem.properties').exists()) {
-		props.load(new FileInputStream(file('assets/VotingSystem.properties')))
+	if(file('src/main/assets/VotingSystem.properties').exists()) {
+		props.load(new FileInputStream(file('src/main/assets/VotingSystem.properties')))
 		lastIp= "${props.DEVELOPMENT_IP}"
 	}
 	
@@ -109,18 +93,18 @@ task setAndroidEnv << {
 		"${serverIP}:$rootProject.controlAccesoPort" + 
 		"$rootProject.controlAccesoPath";
 	println("controlAccesoURL: $controlAccesoURL")
-	ant.delete(file:"assets/VotingSystem.properties")
+	ant.delete(file:"src/main/assets/VotingSystem.properties")
 	ant.copy(file:"$rootProject.projectDir/templates/VotingSystem.properties",
-		toFile:"assets/VotingSystem.properties")
-	ant.replace(file:"assets/VotingSystem.properties",
+		toFile:"src/main/assets/VotingSystem.properties")
+	ant.replace(file:"src/main/assets/VotingSystem.properties",
 		token:"[CONTROL_ACCESO_URL]",
 		value:controlAccesoURL)
-	ant.replace(file:"assets/VotingSystem.properties",
+	ant.replace(file:"src/main/assets/VotingSystem.properties",
 		token:"[DEVELOPMENT_IP]",
 		value:serverIP)
 	
 	if(lastIp) {//other way
-		File manifest = file("AndroidManifest.xml");
+		File manifest = file("src/main/AndroidManifest.xml");
 		String manifestContent = manifest.text;
 		manifestContent = manifestContent.replaceAll(
 			"android:host=\"${lastIp}\"", "android:host=\"${serverIP}\"")
@@ -146,6 +130,3 @@ def getDevelopmentServerIP() {
 	}
 }
 
-classes.dependsOn cleanAndroid
-release.dependsOn checkDependencies, classes
-antDebugInstall.dependsOn checkDependencies

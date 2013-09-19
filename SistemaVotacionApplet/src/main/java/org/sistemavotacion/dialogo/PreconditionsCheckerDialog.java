@@ -62,7 +62,6 @@ public class PreconditionsCheckerDialog extends JDialog {
         this.operacion = operacion;
         initComponents();
         setLocationRelativeTo(null);  
-        acceptButton.setVisible(false);
         setTitle(Contexto.INSTANCE.getString("preconditionsCheckerDialogCaption"));
         
         addWindowListener(new WindowAdapter() {
@@ -98,14 +97,13 @@ public class PreconditionsCheckerDialog extends JDialog {
     }
     
     private void sendResponse(int status, String message) {
-        acceptButton.setVisible(true);
         progressLabel.setText(Contexto.INSTANCE.getString("errorLbl"));
         progressBar.setVisible(false);
         waitLabel.setText(message);
         operacion.setCodigoEstado(status);
         operacion.setMensaje(message);
         appletFirma.enviarMensajeAplicacion(operacion);
-        pack();
+        dispose();
     }
     
     public void checkConditions() throws Exception {
@@ -274,7 +272,6 @@ public class PreconditionsCheckerDialog extends JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        acceptButton = new javax.swing.JButton();
         messagePanel = new javax.swing.JPanel();
         progressLabel = new javax.swing.JLabel();
         progressBar = new javax.swing.JProgressBar();
@@ -282,25 +279,17 @@ public class PreconditionsCheckerDialog extends JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        acceptButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/images/accept_16x16.png"))); // NOI18N
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/sistemavotacion/dialogo/Bundle"); // NOI18N
-        acceptButton.setText(bundle.getString("PreconditionsCheckerDialog.acceptButton.text")); // NOI18N
-        acceptButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                acceptButtonActionPerformed(evt);
-            }
-        });
-
         progressLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 14)); // NOI18N
         progressLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        java.util.ResourceBundle bundle1 = java.util.ResourceBundle.getBundle("org/sistemavotacion/Bundle"); // NOI18N
-        progressLabel.setText(bundle1.getString("VotacionDialog.progressLabel.text")); // NOI18N
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/sistemavotacion/Bundle"); // NOI18N
+        progressLabel.setText(bundle.getString("VotacionDialog.progressLabel.text")); // NOI18N
 
         progressBar.setIndeterminate(true);
 
         waitLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 14)); // NOI18N
         waitLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        waitLabel.setText(bundle.getString("PreconditionsCheckerDialog.waitLabel.text")); // NOI18N
+        java.util.ResourceBundle bundle1 = java.util.ResourceBundle.getBundle("org/sistemavotacion/dialogo/Bundle"); // NOI18N
+        waitLabel.setText(bundle1.getString("PreconditionsCheckerDialog.waitLabel.text")); // NOI18N
 
         javax.swing.GroupLayout messagePanelLayout = new javax.swing.GroupLayout(messagePanel);
         messagePanel.setLayout(messagePanelLayout);
@@ -329,33 +318,20 @@ public class PreconditionsCheckerDialog extends JDialog {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(acceptButton)
-                .addContainerGap())
             .addComponent(messagePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(messagePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(acceptButton)
-                .addContainerGap())
+                .addComponent(messagePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void acceptButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_acceptButtonActionPerformed
-        sendResponse(Operacion.SC_CANCELADO,
-                Contexto.INSTANCE.getString("operacionCancelada"));
-    }//GEN-LAST:event_acceptButtonActionPerformed
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton acceptButton;
     private javax.swing.JPanel messagePanel;
     private javax.swing.JProgressBar progressBar;
     private javax.swing.JLabel progressLabel;

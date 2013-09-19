@@ -4,6 +4,7 @@ GrailsRestDocPlugin-0.4.zip
 .gradle
 .settings
 .project
+.idea
 /libs
 /build/
 /SistemaVotacionAndroid/build/

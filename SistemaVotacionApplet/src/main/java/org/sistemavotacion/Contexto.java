@@ -43,9 +43,8 @@ public enum Contexto {
 
     private Logger logger = LoggerFactory.getLogger(Contexto.class);
     
-    private static ExecutorService executor = Executors.newFixedThreadPool(10);
-    private static CompletionService<Respuesta> completionService
-             = new ExecutorCompletionService<Respuesta>(executor);
+    private static ExecutorService executor;
+    private static CompletionService<Respuesta> completionService;
     
     public static class DEFAULTS {
         public static String BASEDIR =  System.getProperty("user.home");
@@ -175,6 +174,11 @@ public enum Contexto {
     }
     
     public void submit(Runnable runnable) {
+        if(executor == null || executor.isShutdown()) {
+            executor = Executors.newFixedThreadPool(10);
+            completionService = 
+                    new ExecutorCompletionService<Respuesta>(executor);
+        }
         executor.submit(runnable);
     }
     
