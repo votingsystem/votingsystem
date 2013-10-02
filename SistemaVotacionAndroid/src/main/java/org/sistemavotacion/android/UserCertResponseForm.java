@@ -25,8 +25,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -52,13 +52,12 @@ import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 
-import static org.sistemavotacion.android.Aplicacion.ALIAS_CERT_USUARIO;
-import static org.sistemavotacion.android.Aplicacion.CONTROL_ACCESO_URL;
-import static org.sistemavotacion.android.Aplicacion.KEY_STORE_FILE;
-import static org.sistemavotacion.android.Aplicacion.PREFS_ID_SOLICTUD_CSR;
+import static org.sistemavotacion.android.AppData.ALIAS_CERT_USUARIO;
+import static org.sistemavotacion.android.AppData.KEY_STORE_FILE;
+import static org.sistemavotacion.android.AppData.PREFS_ID_SOLICTUD_CSR;
 
 
-public class UserCertResponseForm extends FragmentActivity 
+public class UserCertResponseForm extends ActionBarActivity
 	implements CertPinDialogListener {
 	
 	public static final String TAG = "UserCertResponseForm";
@@ -74,23 +73,22 @@ public class UserCertResponseForm extends FragmentActivity
     private Button goAppButton;
     private Button insertPinButton;
     private Button requestCertButton;
+    private AppData appData;
     
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
         
     	super.onCreate(savedInstanceState);
         Log.d(TAG + ".onCreate(...) ", " - onCreate");
-        setContentView(R.layout.user_cert_response_screen);  
-		try {//android api 11 I don't have this method
-			getActionBar().setDisplayHomeAsUpEnabled(true);
-		} catch(NoSuchMethodError ex) {
-			Log.d(TAG + ".setTitle(...)", " --- android api 11 doesn't have method 'setLogo'");
-		}  
+        setContentView(R.layout.user_cert_response_screen);
+        appData = AppData.getInstance(getBaseContext());
+        getSupportActionBar().setTitle(getString(R.string.voting_system_lbl));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         goAppButton = (Button) findViewById(R.id.go_app_button);
         goAppButton.setVisibility(View.GONE);
         goAppButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-            	Intent intent = new Intent(getApplicationContext(), FragmentTabsPager.class);
+            	Intent intent = new Intent(getBaseContext(), NavigationDrawer.class);
             	startActivity(intent);
             }
         });
@@ -105,13 +103,13 @@ public class UserCertResponseForm extends FragmentActivity
         requestCertButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             	Intent intent = null;
-          	  	switch(Aplicacion.INSTANCIA.getEstado()) {
+          	  	switch(appData.getEstado()) {
 			    	case SIN_CSR:
-			    		intent = new Intent(getApplicationContext(), Aplicacion.class);
+			    		intent = new Intent(getBaseContext(), MainActivity.class);
 			    		break;
 			    	case CON_CSR:
 			    	case CON_CERTIFICADO:
-			    		intent = new Intent(getApplicationContext(), UserCertRequestForm.class);
+			    		intent = new Intent(getBaseContext(), UserCertRequestForm.class);
 			    		break;
           	  	}
           	  	if(intent != null) {
@@ -127,14 +125,14 @@ public class UserCertResponseForm extends FragmentActivity
     }
     
     private void checkCertState () {
-  	  	switch(Aplicacion.INSTANCIA.getEstado()) {
+  	  	switch(appData.getEstado()) {
 	    	case SIN_CSR:
-	    		Intent intent = new Intent(getApplicationContext(), Aplicacion.class);
+	    		Intent intent = new Intent(getBaseContext(), MainActivity.class);
 	    		startActivity(intent);
 	    		break;
 	    	case CON_CSR:
 	    		if(isCertStateChecked) break;
-	        	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+	        	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 	        	Long idSolicitudCSR = settings.getLong(PREFS_ID_SOLICTUD_CSR, -1);
 	        	/*if(idSolicitudCSR < 0) {
 	    			setMessage(getString(R.string.app_unstable_msg));
@@ -156,7 +154,7 @@ public class UserCertResponseForm extends FragmentActivity
 	            try {
 	            	GetDataTask getDataTask = (GetDataTask)new GetDataTask(null).
 	            			execute(ServerPaths.getURLSolicitudCertificadoUsuario(
-		        			CONTROL_ACCESO_URL, String.valueOf(idSolicitudCSR)));
+                                    appData.getAccessControlURL(), String.valueOf(idSolicitudCSR)));
 	            	Respuesta respuesta = getDataTask.get();
 	            	if (progressDialog != null && progressDialog.isShowing()) {
 			            progressDialog.dismiss();
@@ -169,7 +167,7 @@ public class UserCertResponseForm extends FragmentActivity
 				        setCertStateChecked(true);
 			        } else if(Respuesta.SC_NOT_FOUND == respuesta.getCodigoEstado()) {
 			        	String certificationAddresses = ServerPaths.
-			        			getURLCertificationAddresses(Aplicacion.CONTROL_ACCESO_URL);
+			        			getURLCertificationAddresses(appData.getAccessControlURL());
 			        	setMessage(getString(R.string.
 			        			resultado_solicitud_certificado_activity, 
 			        			certificationAddresses));
@@ -218,7 +216,7 @@ public class UserCertResponseForm extends FragmentActivity
 		switch (item.getItemId()) {        
 	    	case android.R.id.home:  
 	    		Log.d(TAG + ".onOptionsItemSelected(...) ", " - home - ");
-	    		Intent intent = new Intent(this, FragmentTabsPager.class);   
+	    		Intent intent = new Intent(this, NavigationDrawer.class);   
 	    		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); 
 	    		startActivity(intent);            
 	    		return true;        
@@ -262,7 +260,7 @@ public class UserCertResponseForm extends FragmentActivity
 	        FileOutputStream fos = openFileOutput(KEY_STORE_FILE, Context.MODE_PRIVATE);
 	        fos.write(keyStoreBytes);
 	        fos.close();
-        	Aplicacion.setEstado(Aplicacion.Estado.CON_CERTIFICADO);
+            appData.setEstado(AppData.Estado.CON_CERTIFICADO);
     		return true;
 		} catch (Exception ex) {
 			Log.e(TAG, " - ex.getMessage(): " + ex.getMessage());

@@ -27,8 +27,8 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBarActivity;
 import android.telephony.TelephonyManager;
 import android.text.Html;
 import android.util.Log;
@@ -62,16 +62,15 @@ import java.text.Normalizer;
 import java.util.Date;
 import java.util.UUID;
 
-import static org.sistemavotacion.android.Aplicacion.ALIAS_CERT_USUARIO;
-import static org.sistemavotacion.android.Aplicacion.KEY_SIZE;
-import static org.sistemavotacion.android.Aplicacion.KEY_STORE_FILE;
-import static org.sistemavotacion.android.Aplicacion.PREFS_ID_SOLICTUD_CSR;
-import static org.sistemavotacion.android.Aplicacion.PROVIDER;
-import static org.sistemavotacion.android.Aplicacion.SIGNATURE_ALGORITHM;
-import static org.sistemavotacion.android.Aplicacion.SIG_NAME;
+import static org.sistemavotacion.android.AppData.ALIAS_CERT_USUARIO;
+import static org.sistemavotacion.android.AppData.KEY_SIZE;
+import static org.sistemavotacion.android.AppData.KEY_STORE_FILE;
+import static org.sistemavotacion.android.AppData.PREFS_ID_SOLICTUD_CSR;
+import static org.sistemavotacion.android.AppData.PROVIDER;
+import static org.sistemavotacion.android.AppData.SIGNATURE_ALGORITHM;
+import static org.sistemavotacion.android.AppData.SIG_NAME;
 
-public class UserCertRequestForm extends FragmentActivity 
-		implements CertPinDialogListener {
+public class UserCertRequestForm extends ActionBarActivity implements CertPinDialogListener {
 
 	public static final String TAG = "UserCertRequestForm";
 	
@@ -84,33 +83,31 @@ public class UserCertRequestForm extends FragmentActivity
     private EditText nifText;
     private EditText givennameText;
     private EditText surnameText;
+    private AppData appData;
     
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
         
     	super.onCreate(savedInstanceState);
         Log.d(TAG + ".onCreate(...) ", " - onCreate - ");
-        setContentView(R.layout.user_cert_request_form); 
-		try {//android api 11 I don't have this method
-			getActionBar().setDisplayHomeAsUpEnabled(true);
-		} catch(NoSuchMethodError ex) {
-			Log.d(TAG + ".setTitle(...)", " --- android api 11 doesn't have method 'setLogo'");
-		}  
+        setContentView(R.layout.user_cert_request_form);
+        appData = AppData.getInstance(getBaseContext());
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(getString(R.string.formulario_solicitud_certificado_label));
         
         Button cancelarButton = (Button) findViewById(R.id.cancelar_button);
         cancelarButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) { 
             	//finish(); 
-            	Intent intent = new Intent(getApplicationContext(), FragmentTabsPager.class);
+            	Intent intent = new Intent(getBaseContext(), NavigationDrawer.class);
             	startActivity(intent);
             }
-        });    
-        
+        });
+
         givennameText = (EditText)findViewById(R.id.given_name_edit);
         surnameText = (EditText)findViewById(R.id.surname_edit);
 
-        
+
         nifText = (EditText)findViewById(R.id.nif_edit);
         nifText.setOnEditorActionListener(new OnEditorActionListener(){
 			@Override
@@ -118,7 +115,7 @@ public class UserCertRequestForm extends FragmentActivity
 				if (actionId == EditorInfo.IME_ACTION_DONE) {
 		            InputMethodManager imm = (InputMethodManager)v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 		            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-		            return true;	
+		            return true;
 		        }
 		        return false;
 			}});
@@ -142,12 +139,12 @@ public class UserCertRequestForm extends FragmentActivity
             }
         });
     }
-    
+
     @Override public void onStart() {
     	Log.d(TAG + ".onStart(...) ", " --- onStart --- ");
     	super.onStart();
     }
-    
+
     @Override //android:configChanges="orientation"
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -159,28 +156,28 @@ public class UserCertRequestForm extends FragmentActivity
         	Log.d(TAG + ".onConfigurationChanged(...) ", " - ORIENTATION_PORTRAIT - ");
         }
       }
-    
-    
-	@Override public boolean onOptionsItemSelected(MenuItem item) {  
+
+
+	@Override public boolean onOptionsItemSelected(MenuItem item) {
 		Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
-		switch (item.getItemId()) {        
-	    	case android.R.id.home:  
+		switch (item.getItemId()) {
+	    	case android.R.id.home:
 	    		Log.d(TAG + ".onOptionsItemSelected(...) ", " - home - ");
-	    		Intent intent = new Intent(this, FragmentTabsPager.class);   
-	    		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); 
-	    		startActivity(intent);            
-	    		return true;        
-	    	default:            
-	    		return super.onOptionsItemSelected(item);    
+	    		Intent intent = new Intent(this, NavigationDrawer.class);
+	    		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	    		startActivity(intent);
+	    		return true;
+	    	default:
+	    		return super.onOptionsItemSelected(item);
 		}
 	}
-	
+
     private void processNif() {
     	InputMethodManager imm = (InputMethodManager)getSystemService(
   		      Context.INPUT_METHOD_SERVICE);
   		imm.hideSoftInputFromWindow(nifText.getWindowToken(), 0);
       	if (validarFormulario ()) {
-      		
+
     		String givenName = Normalizer.normalize(
     				givennameText.getText().toString().toUpperCase(), Normalizer.Form.NFD);
     		givenName  = givenName.replaceAll("[^\\p{ASCII}]", "");
@@ -188,9 +185,9 @@ public class UserCertRequestForm extends FragmentActivity
     				 surnameText.getText().toString().toUpperCase(), Normalizer.Form.NFD);
     		surname  = surname.replaceAll("[^\\p{ASCII}]", "");
     		String nif = StringUtils.validarNIF(nifText.getText().toString().toUpperCase());
-      		
-      		
-      		
+
+
+
 			AlertDialog.Builder builder= new AlertDialog.Builder(this);
     		builder.setTitle(getString(R.string.
     				formulario_solicitud_certificado_label));
@@ -212,16 +209,16 @@ public class UserCertRequestForm extends FragmentActivity
             textView.setGravity(Gravity.CENTER);
       	}
     }
-    
+
     private void showProgressDialog(String dialogMessage) {
-        if (progressDialog == null) 
+        if (progressDialog == null)
         	progressDialog = new ProgressDialog(UserCertRequestForm.this);
     	progressDialog.setMessage(dialogMessage);
     	progressDialog.setIndeterminate(true);
     	progressDialog.setCancelable(false);
         progressDialog.show();
     }
-    
+
     private void sendCsrRequest() {
         showProgressDialog(getString(R.string.request_cert_msg));
         byte[] csrBytes = null;
@@ -233,39 +230,39 @@ public class UserCertRequestForm extends FragmentActivity
     				 surnameText.getText().toString().toUpperCase(), Normalizer.Form.NFD);
     		surname  = surname.replaceAll("[^\\p{ASCII}]", "");
     		String nif = StringUtils.validarNIF(nifText.getText().toString().toUpperCase());
-			pkcs10WrapperClient = PKCS10WrapperClient.buildCSRUsuario (KEY_SIZE, SIG_NAME, 
+			pkcs10WrapperClient = PKCS10WrapperClient.buildCSRUsuario (KEY_SIZE, SIG_NAME,
 			        SIGNATURE_ALGORITHM, PROVIDER, nif, email, telefono, deviceId, givenName, surname);
 			csrBytes = pkcs10WrapperClient.getPEMEncodedRequestCSR();
-	        X509Certificate[] arrayCerts = CertUtil.generateCertificate(pkcs10WrapperClient.getKeyPair(), 
-	        		new Date(System.currentTimeMillis()), 
+	        X509Certificate[] arrayCerts = CertUtil.generateCertificate(pkcs10WrapperClient.getKeyPair(),
+	        		new Date(System.currentTimeMillis()),
 	        		new Date(System.currentTimeMillis() + 365 * 24 * 60 * 60 * 1000),
 	        		"CN=" + ALIAS_CERT_USUARIO);
 	        KeyStore keyStore = KeyStore.getInstance("PKCS12");
 	        keyStore.load(null, null);
-	        keyStore.setKeyEntry(ALIAS_CERT_USUARIO, pkcs10WrapperClient.getPrivateKey(), 
+	        keyStore.setKeyEntry(ALIAS_CERT_USUARIO, pkcs10WrapperClient.getPrivateKey(),
 	        		password.toCharArray(), arrayCerts);
 	        byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, password.toCharArray());
 	        FileOutputStream fos = openFileOutput(KEY_STORE_FILE, Context.MODE_PRIVATE);
 	        fos.write(keyStoreBytes);
 	        fos.close();
-	        Aplicacion.setEstado(Aplicacion.Estado.CON_CSR);
+            appData.setEstado(AppData.Estado.CON_CSR);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			showMessage(getString(R.string.error_lbl), ex.getMessage());
 		}
     	try {
     		SendDataTask sendDataTask = (SendDataTask) new SendDataTask(csrBytes, null).
-    				execute(ServerPaths.getURLSolicitudCSRUsuario(Aplicacion.CONTROL_ACCESO_URL));
+    				execute(ServerPaths.getURLSolicitudCSRUsuario(appData.getAccessControlURL()));
     		Respuesta respuesta = sendDataTask.get();
 			Log.d(TAG + ".sendCsrRequest(...)", " - sendCsrRequest - sendDataTask - statuscode: " + respuesta.getCodigoEstado());
 	        if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
-	        	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+	        	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 		        SharedPreferences.Editor editor = settings.edit();
 		        Long idSolictud = Long.valueOf(respuesta.getMensaje());
 		        editor.putLong(PREFS_ID_SOLICTUD_CSR, idSolictud);
 		        editor.commit();
-		        Aplicacion.setEstado(Aplicacion.Estado.CON_CSR);
-	        	Intent intent = new Intent(getApplicationContext(), 
+                appData.setEstado(AppData.Estado.CON_CSR);
+	        	Intent intent = new Intent(getBaseContext(),
 	        			UserCertResponseForm.class);
 	        	startActivity(intent);
 	        } else {

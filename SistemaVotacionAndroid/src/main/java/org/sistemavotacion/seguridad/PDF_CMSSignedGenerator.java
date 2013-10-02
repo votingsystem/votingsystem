@@ -28,7 +28,7 @@ import org.bouncycastle2.cms.DefaultSignedAttributeTableGenerator;
 import org.bouncycastle2.cms.SignerInfoGenerator;
 import org.bouncycastle2.cms.SignerInformation;
 import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
-import org.sistemavotacion.android.Aplicacion;
+import org.sistemavotacion.android.AppData;
 import org.sistemavotacion.smime.CMSUtils;
 
 import java.io.ByteArrayInputStream;
@@ -165,7 +165,7 @@ public class PDF_CMSSignedGenerator extends CMSSignedGenerator {
         byte[] hash = softwareDigestEngine.digest();
     	
         CertStore certsAndCRLs = CertStore.getInstance(CERT_STORE_TYPE,
-                new CollectionCertStoreParameters(Arrays.asList(signerCertChain)), Aplicacion.PROVIDER);
+                new CollectionCertStoreParameters(Arrays.asList(signerCertChain)), AppData.PROVIDER);
         addCertificatesAndCRLs(certsAndCRLs);
     	
     	CMSAttributeTableGenerator sAttr = new DefaultSignedAttributeTableGenerator();
@@ -178,7 +178,7 @@ public class PDF_CMSSignedGenerator extends CMSSignedGenerator {
         String signatureHashStr = Base64.encodeToString(signatureHash, Base64.DEFAULT);
     	
         JcaSimpleSignerInfoGeneratorBuilder jcaSignerInfoGeneratorBuilder =  new JcaSimpleSignerInfoGeneratorBuilder();
-        jcaSignerInfoGeneratorBuilder = jcaSignerInfoGeneratorBuilder.setProvider(Aplicacion.PROVIDER);
+        jcaSignerInfoGeneratorBuilder = jcaSignerInfoGeneratorBuilder.setProvider(AppData.PROVIDER);
         jcaSignerInfoGeneratorBuilder.setSignedAttributeGenerator(attributeTable);
         jcaSignerInfoGeneratorBuilder.setUnsignedAttributeGenerator(unsAttr);
         SignerInfoGenerator signerInfoGenerator = jcaSignerInfoGeneratorBuilder.build(

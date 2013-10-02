@@ -2,3 +2,10 @@ La librería 'plugin-1.3.jar' es necesaria para compilar los proyectos 'SistemaV
 Es necesaria para que el Applet pueda comunicarse con la interfaz de usuario web usando Javascript.
 
 La librería se puede encontrar en el directorio jre/lib de las máquinas virtuales Java de Oracle.
+
+-------------------------------------------------------------------------------------------------
+MboxStore -> https://java.net/projects/javamail/pages/MboxStore
+
+mbox-1.5.0-sources.jar
+mbox.jar
+

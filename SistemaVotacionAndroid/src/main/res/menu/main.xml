@@ -1,73 +1,35 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:votingSystem="http://schemas.android.com/apk/res-auto" >
 
-    <item android:id="@+id/action_search"
-          android:icon="@android:drawable/ic_menu_search"
+    <item android:id="@+id/search_item"
+          android:icon="@drawable/action_search"
           android:title="@string/searchLabel"
-	      android:showAsAction="collapseActionView|ifRoom"
+          votingSystem:showAsAction="ifRoom"
           android:actionViewClass="android.widget.SearchView" />
 
-   <item android:id="@+id/documents"
-         android:orderInCategory="10"
-         android:showAsAction="ifRoom"
-         android:icon="@drawable/password_32"
-	     android:text="@string/documents_lbl"
-         android:title="@string/documents_lbl">
-		 <menu>
-		    <item
-			android:id="@+id/votings"
-	  		android:orderInCategory="10"
-			android:showAsAction="ifRoom"
-			android:icon="@drawable/poll_32"
-			android:title="@string/voting_drop_down_lbl"/>
-		   <item
-			android:id="@+id/manifests"
-			android:orderInCategory="20"
-			android:showAsAction="never"
-			android:icon="@drawable/manifest_32"
-			android:title="@string/manifiests_drop_down_lbl"/>
-		   <item
-			android:id="@+id/claims"
-			android:orderInCategory="30"
-			android:showAsAction="never"
-			android:icon="@drawable/filenew_32"
-			android:title="@string/claims_drop_down_lbl"/>
-        </menu> 
-    </item>
-    
-     <item
-        android:id="@+id/operations"
-        android:orderInCategory="10"
-        android:showAsAction="ifRoom"
-        android:icon="@drawable/ic_menu_more"
-		android:text="@string/operations_lbl"
-        android:title="@string/operations_lbl">
-		<menu>   
-		   <item
-			android:id="@+id/reload"
-			android:orderInCategory="1"
-			android:showAsAction="never"
-			android:icon="@drawable/reload_32"
-			android:title="@string/menu_actualizar">
-		    </item>
-		   <item
-			android:id="@+id/get_cert"
-			android:orderInCategory="2"
-			android:showAsAction="never"
-			android:icon="@drawable/signature_ok_32"
-			android:title="@string/menu_solicitar_certificado"/>
-		      		   <item
-			android:id="@+id/publish_document"
-			android:orderInCategory="3"
-			android:showAsAction="never"
-			android:icon="@drawable/view_detailed_22"
-			android:title="@string/publish_document_lbl"/>
-		   <item
-			android:id="@+id/receipt_list"
-			android:orderInCategory="4"
-			android:showAsAction="never"
-			android:icon="@drawable/receipt_32"
-			android:title="@string/menu_receipt_list"/>
-	    </menu> 
-    </item>
+    <item
+        android:id="@+id/get_cert"
+        android:orderInCategory="1"
+        android:showAsAction="never"
+        android:icon="@android:drawable/btn_plus"
+        android:title="@string/menu_solicitar_certificado"/>
+    <item
+        android:id="@+id/publish_document"
+        android:orderInCategory="2"
+        android:showAsAction="never"
+        android:icon="@drawable/view_detailed_22"
+        android:title="@string/publish_document_lbl"/>
+    <item
+        android:id="@+id/receipt_list"
+        android:orderInCategory="3"
+        android:showAsAction="never"
+        android:icon="@drawable/receipt_32"
+        android:title="@string/menu_receipt_list"/>
+
+    <item
+        android:id="@+id/close_app"
+        android:orderInCategory="4"
+        android:showAsAction="never"
+        android:title="@string/close_app_lbl"/>
 
 </menu> 

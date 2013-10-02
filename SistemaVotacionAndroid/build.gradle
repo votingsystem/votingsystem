@@ -12,9 +12,6 @@ repositories {
 }
 
 android {
-
-    defaultConfig { }
-
     signingConfigs {
         release {
             storeFile file("$rootProject.projectDir/mockDnie.jks")
@@ -55,7 +52,8 @@ android {
 }
 
 dependencies {
-    compile 'com.google.android:support-v4:r7'
+    compile 'com.android.support:appcompat-v7:18.0.0'
+    compile 'com.android.support:support-v4:18.0.0'
     compile ('org.apache.httpcomponents:httpmime:4.2.2') {
         exclude module: 'httpcore'
     }

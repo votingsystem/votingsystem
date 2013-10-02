@@ -81,6 +81,7 @@ class EventoVotacionService {
 			X509Certificate certCAVotacion = CertUtil.fromPEMToX509Cert(mensajeJSON.certCAVotacion?.bytes)
 			byte[] cadenaCertificacion = mensajeJSON.cadenaCertificacion?.getBytes()
 			X509Certificate userCert = CertUtil.fromPEMToX509Cert(mensajeJSON.usuario?.bytes)
+			
 			Usuario user = Usuario.getUsuario(userCert);
 			//Publish request comes with Access Control cert
 			respuesta = subscripcionService.checkUser(user, locale)

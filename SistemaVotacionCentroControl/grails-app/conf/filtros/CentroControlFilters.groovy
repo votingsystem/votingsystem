@@ -247,6 +247,9 @@ class CentroControlFilters {
 			if("voto".equals(params.controller)) {
 				certValidationResponse = firmaService.validateSMIMEVote(
 					smimeMessageReq, request.getLocale())
+			} else if("anuladorVoto".equals(params.controller)) {
+				certValidationResponse = firmaService.validateSMIMEVoteCancelation(
+					params.url, smimeMessageReq, request.getLocale())
 			} else certValidationResponse = firmaService.validateSMIME(
 				smimeMessageReq, request.getLocale())
 

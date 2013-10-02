@@ -1,5 +1,8 @@
 package org.sistemavotacion.util;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 
 import org.apache.http.HttpResponse;
@@ -30,7 +33,7 @@ import java.text.ParseException;
 import java.util.Map;
 import java.util.Set;
 
-import static org.sistemavotacion.android.Aplicacion.NOMBRE_ARCHIVO_FIRMADO;
+import static org.sistemavotacion.android.AppData.NOMBRE_ARCHIVO_FIRMADO;
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -159,4 +162,13 @@ public class HttpHelper {
      }
 
 
+
+
+    public boolean isOnline(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(
+                Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        if (netInfo != null && netInfo.isConnectedOrConnecting()) return true;
+        return false;
+    }
 }

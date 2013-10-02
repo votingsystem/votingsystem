@@ -198,9 +198,10 @@ class VotoService {
 				def cancelDataJSONResp
 				String msgArg
 				String centroControlURL = eventoVotacion.centroControl.serverURL
-				String urlAnulacionVoto = "${centroControlURL}/anuladorVoto"
+				String eventURL = "${grailsApplication.config.grails.serverURL}/eventoVotacion/${eventoVotacion.id}"
+				String urlAnulacionVoto = "${centroControlURL}/anuladorVoto?url=${eventURL}"
 				Respuesta encryptResponse = encryptionService.encryptSMIMEMessage(
-					smimeMessageResp, eventoVotacion.getControlCenterCert(), locale)
+					smimeMessageResp.getBytes(), eventoVotacion.getControlCenterCert(), locale)
 				if (Respuesta.SC_OK != encryptResponse.codigoEstado) return encryptResponse
 				String contentType = "${grailsApplication.config.pkcs7SignedContentType};" +
 					"${grailsApplication.config.pkcs7EncryptedContentType}"

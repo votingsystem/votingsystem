@@ -6,7 +6,7 @@ import org.bouncycastle2.util.encoders.Hex;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.sistemavotacion.android.Aplicacion;
+import org.sistemavotacion.android.AppData;
 import org.sistemavotacion.smime.CMSUtils;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.HttpHelper;
@@ -411,15 +411,14 @@ public class Evento implements Serializable {
         else return Estado.valueOf(estado);
     }
     
-    public void comprobarFechas() {
+    public void comprobarFechas(String accessControlURL) {
     	if(estado == null) return;
         Date fecha = DateUtils.getTodayDate();
         Estado estadoEnum = Estado.valueOf(estado);
         if(!(fecha.after(fechaInicio) 
         		&& fecha.before(fechaFin))){
         	if(estadoEnum == Estado.ACTIVO){
-        		final String checkURL = ServerPaths.getURLCheckEvent(
-        				Aplicacion.CONTROL_ACCESO_URL, eventoId);
+        		final String checkURL = ServerPaths.getURLCheckEvent(accessControlURL, eventoId);
                 Runnable runnable = new Runnable() {
                     public void run() { 
                     	try {
@@ -495,15 +494,16 @@ public class Evento implements Serializable {
     public Evento initVoteData() throws NoSuchAlgorithmException {
     	this.origenHashSolicitudAcceso = UUID.randomUUID().toString();
     	this.hashSolicitudAccesoBase64 = CMSUtils.obtenerHashBase64(
-    			this.origenHashSolicitudAcceso, Aplicacion.SIG_HASH);
+    			this.origenHashSolicitudAcceso, AppData.SIG_HASH);
     	this.origenHashCertificadoVoto = UUID.randomUUID().toString();
     	this.hashCertificadoVotoBase64 = CMSUtils.obtenerHashBase64(
-    			this.origenHashCertificadoVoto, Aplicacion.SIG_HASH); 
+    			this.origenHashCertificadoVoto, AppData.SIG_HASH);
     	return this;
     }
     
     public String getCancelVoteData() throws JSONException {
 		JSONObject jsonObject = new JSONObject();
+        jsonObject.put("eventURL", URL);
 		jsonObject.put("origenHashCertificadoVoto", 
         		getOrigenHashCertificadoVoto());
 		jsonObject.put("hashCertificadoVotoBase64", 
@@ -524,6 +524,7 @@ public class Evento implements Serializable {
     
 	public boolean estaAbierto() {
 		Date todayDate = DateUtils.getTodayDate();
+
 		if (todayDate.after(fechaInicio) && todayDate.before(fechaFin)) return true;
 		else return false;
 	}
@@ -604,6 +605,10 @@ public class Evento implements Serializable {
         map.put("asunto", asunto);
         map.put("contenido", contenido);
         map.put("UUID", UUID.randomUUID().toString());
+        map.put("URL", URL);
+        if(Tipo.EVENTO_RECLAMACION == tipo) {
+            map.put("operation", Operation.Tipo.FIRMA_RECLAMACION_SMIME);
+        }
         JSONObject jsonObject = new JSONObject(map);
         if (campos != null) {
             JSONArray jsonArray = new JSONArray();
@@ -747,7 +752,6 @@ public class Evento implements Serializable {
         	opcionSeleccionada.setContenido(jsonObject.getString("contenido"));
             evento.setOpcionSeleccionada(opcionSeleccionada);
         }
-        evento.comprobarFechas();
         return evento;
     }
     

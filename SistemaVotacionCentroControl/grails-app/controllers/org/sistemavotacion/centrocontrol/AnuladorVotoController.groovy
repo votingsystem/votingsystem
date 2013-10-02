@@ -22,7 +22,8 @@ class AnuladorVotoController {
 
 	/**
 	 * @httpMethod [POST]
-	 * @serviceURL [/anuladorVoto]
+	 * @serviceURL [/anuladorVoto?url=${urlEvento}]
+	 * @param [urlEvento] Obligatorio. URL en el control de acceso del evento al que está asociada la anulación
 	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. Documento firmado en formato 
 	 * 			SMIME con el <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Anulador-de-voto">El anulador de voto</a>
 	 * @return Recibo firmado con el certificado del servidor

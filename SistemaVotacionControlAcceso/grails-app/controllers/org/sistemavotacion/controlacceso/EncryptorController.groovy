@@ -138,10 +138,11 @@ class EncryptorController {
 		SMIMEMessageWrapper smimeMessage = mensajeSMIMEReq.getSmimeMessage()
 		Usuario usuario = mensajeSMIMEReq.getUsuario()
 		//Date fechaFin = DateUtils.getDateFromString("2014-01-01 00:00:00")
+		def msgJSON = JSON.parse(smimeMessage.getSignedContent())
 		
 		Evento evento
 		Evento.withTransaction{
-			evento = Evento.get(1)
+			evento = Evento.get(msgJSON.eventId)
 			//evento.fechaFin = fechaFin
 		}
 		

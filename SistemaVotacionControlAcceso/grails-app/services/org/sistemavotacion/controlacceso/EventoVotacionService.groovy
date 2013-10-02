@@ -116,7 +116,14 @@ class EventoVotacionService {
 			mensajeJSON.cadenaCertificacion = new String(cadenaCertificacion.getBytes())
 			
 			X509Certificate certUsuX509 = firmante.getCertificate()
-			mensajeJSON.usuario = new String(CertUtil.fromX509CertToPEM (certUsuX509))
+			mensajeJSON.usuario = new String(CertUtil.fromX509CertToPEM (certUsuX509))			
+			
+			/*Set<X509Certificate> trustedCAs = firmaService.getTrustedCerts()
+			JSONArray trustedCAPEMArray= new JSONArray() ;
+			for(X509Certificate trustedCA: trustedCAs) {
+				trustedCAPEMArray.add(new String(CertUtil.fromX509CertToPEM (trustedCA)))
+			}
+			mensajeJSON.trustedCAs = trustedCAPEMArray*/
 
 			String controCenterEventsURL = "${event.centroControl.serverURL}" +
 				"${grailsApplication.config.SistemaVotacion.sufijoURLInicializacionEvento}"
@@ -342,5 +349,32 @@ class EventoVotacionService {
 		}
 
 	}
+        
+    public Map getStatisticsMap (EventoVotacion event, Locale locale) {
+        log.debug("getStatisticsMap - eventId: ${event?.id}")
+        if(!event) return null
+        def statisticsMap = new HashMap()
+        statisticsMap.opciones = []
+        statisticsMap.id = event.id
+        statisticsMap.asunto = event.asunto
+        statisticsMap.numeroSolicitudesDeAcceso = SolicitudAcceso.countByEventoVotacion(event)
+        statisticsMap.numeroSolicitudesDeAccesoOK = SolicitudAcceso.countByEventoVotacionAndEstado(
+                        event, SolicitudAcceso.Estado.OK)
+        statisticsMap.numeroSolicitudesDeAccesoANULADAS =   SolicitudAcceso.countByEventoVotacionAndEstado(
+                        event, SolicitudAcceso.Estado.ANULADO)
+        statisticsMap.numeroVotos = Voto.countByEventoVotacion(event)
+        statisticsMap.numeroVotosOK = Voto.countByEventoVotacionAndEstado(
+                        event, Voto.Estado.OK)
+        statisticsMap.numeroVotosANULADOS = Voto.countByEventoVotacionAndEstado(
+                event, Voto.Estado.ANULADO)								
+        event.opciones.each { opcion ->
+            def numeroVotos = Voto.countByOpcionDeEventoAndEstado(
+                    opcion, Voto.Estado.OK)
+            def opcionMap = [id:opcion.id, contenido:opcion.contenido,
+                    numeroVotos:numeroVotos]
+            statisticsMap.opciones.add(opcionMap)
+        }
+        return statisticsMap
+    }
 	
 }

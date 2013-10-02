@@ -21,6 +21,8 @@ import org.sistemavotacion.utils.*
 class UserController {
 	
 	def subscripcionService
+        
+        def index() {}
 
 	/**
 	 *

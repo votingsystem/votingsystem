@@ -35,9 +35,9 @@ class BuscadorController {
 
    
    /**
-    * ==================================================
+    * ==================================================\n
 	* (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS). 
-	* ==================================================
+	* ==================================================\n
 	* Servicio que reindexa el motor de búsqueda
 	* @httpMethod [GET]
 	*/

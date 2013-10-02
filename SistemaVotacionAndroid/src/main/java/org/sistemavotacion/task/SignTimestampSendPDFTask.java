@@ -31,11 +31,12 @@ import org.bouncycastle2.cms.CMSAttributeTableGenerationException;
 import org.bouncycastle2.cms.CMSAttributeTableGenerator;
 import org.bouncycastle2.cms.CMSSignedData;
 import org.bouncycastle2.cms.CMSSignedDataGenerator;
-import org.sistemavotacion.android.Aplicacion;
+import org.sistemavotacion.android.AppData;
 import org.sistemavotacion.android.R;
 import org.sistemavotacion.callable.MessageTimeStamper;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.Encryptor;
+import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.sistemavotacion.seguridad.PDF_CMSSignedGenerator;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
@@ -43,6 +44,7 @@ import org.sistemavotacion.util.HttpHelper;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
+import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -55,6 +57,8 @@ import java.util.Map;
 
 import javax.mail.Header;
 import javax.mail.internet.MimeBodyPart;
+
+import static org.sistemavotacion.android.AppData.ALIAS_CERT_USUARIO;
 
 public class SignTimestampSendPDFTask extends AsyncTask<String, Void, Respuesta> {
 
@@ -69,41 +73,54 @@ public class SignTimestampSendPDFTask extends AsyncTask<String, Void, Respuesta>
     private String location;
     private String reason;
 
-    private PdfReader pdfReader;
     private Context context;
+
+    private byte[] keyStoreBytes;
+    private char[] password;
     
-    private X509Certificate signerCert;
-    private PrivateKey signerPrivatekey;
-    private Certificate[] signerCertChain;
-    
-    public SignTimestampSendPDFTask(Context context,
-    		String reason, String location, PrivateKey signerPrivatekey, 
-    		Certificate[] signerCertChain, PdfReader reader) {
+    public SignTimestampSendPDFTask(byte[] keyStoreBytes, char[] password, String reason,
+                                    String location, Context context) {
     	this.context = context;
     	this.reason = reason;
     	this.location = location;
-    	this.signerCert = (X509Certificate) signerCertChain[0];
-    	this.signerPrivatekey = signerPrivatekey;
-    	this.signerCertChain = signerCertChain;
-    	this.pdfReader = reader;
+        this.keyStoreBytes = keyStoreBytes;
+        this.password = password;
     }
 	
 	@Override protected Respuesta doInBackground(String... urls) {
-		String serviceURL = urls[0];
+        String documentToSignURL = urls[0];
+        String serviceURL = urls[1];
 		Respuesta respuesta = null;
+        byte[] pdfBytes = null;
         try {
+            KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
+            PrivateKey signerPrivatekey = (PrivateKey)keyStore.getKey(ALIAS_CERT_USUARIO, password);
+            //X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(ALIAS_CERT_USUARIO);
+            Certificate[] signerCertChain = keyStore.getCertificateChain(ALIAS_CERT_USUARIO);
+            X509Certificate signerCert = (X509Certificate) signerCertChain[0];
+
+            //Get the PDF to sign
+            HttpResponse response = HttpHelper.getData(documentToSignURL, AppData.PDF_CONTENT_TYPE);
+            if(Respuesta.SC_OK != response.getStatusLine().getStatusCode()) {
+                return new Respuesta(response.getStatusLine().getStatusCode(),
+                        EntityUtils.toString(response.getEntity()));
+            } else {
+                pdfBytes = EntityUtils.toByteArray(response.getEntity());
+            }
+            PdfReader pdfReader = new PdfReader(pdfBytes);
+
         	byte[] timeStampedSignedPDF = signWithTimestamp(pdfReader, 
         			signerCert, signerPrivatekey, signerCertChain);
-        	Header header = new Header(Aplicacion.VOTING_HEADER_LABEL,"SignedPDF");
+        	Header header = new Header(AppData.VOTING_HEADER_LABEL,"SignedPDF");
             MimeBodyPart mimeBodyPart = Encryptor.encryptBase64Message(
-            		timeStampedSignedPDF,Aplicacion.getControlAcceso().
+            		timeStampedSignedPDF, AppData.getInstance(context).getControlAcceso().
             		getCertificado(), header);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             mimeBodyPart.writeTo(baos);
             byte[] bytesToSend = baos.toByteArray();
             baos.close();
-            HttpResponse response = HttpHelper.sendByteArray(bytesToSend, 
-            		Aplicacion.PDF_SIGNED_AND_ENCRYPTED_CONTENT_TYPE, serviceURL);
+            response = HttpHelper.sendByteArray(bytesToSend,
+                    AppData.PDF_SIGNED_AND_ENCRYPTED_CONTENT_TYPE, serviceURL);
             respuesta = new Respuesta(
             		response.getStatusLine().getStatusCode(), 
             		EntityUtils.toString(response.getEntity()));
@@ -165,7 +182,7 @@ public class SignTimestampSendPDFTask extends AsyncTask<String, Void, Respuesta>
                         byte[] digest = d.digest(signatureBytes);
 
                         MessageTimeStamper messageTimeStamper = 
-                                new MessageTimeStamper(TIMESTAMP_PDF_HASH, digest);
+                                new MessageTimeStamper(TIMESTAMP_PDF_HASH, digest, context);
                         Respuesta respuesta = messageTimeStamper.call();
                         if(Respuesta.SC_OK != respuesta.getCodigoEstado()) {
                         	Log.d(TAG + ".signWithTimestamp(...)", " - Error timestamping: " + 

@@ -75,9 +75,9 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.SharedByteArrayInputStream;
 
-import static org.sistemavotacion.android.Aplicacion.DEFAULT_SIGNED_FILE_NAME;
-import static org.sistemavotacion.android.Aplicacion.PROVIDER;
-import static org.sistemavotacion.android.Aplicacion.SIGNED_PART_EXTENSION;
+import static org.sistemavotacion.android.AppData.DEFAULT_SIGNED_FILE_NAME;
+import static org.sistemavotacion.android.AppData.PROVIDER;
+import static org.sistemavotacion.android.AppData.SIGNED_PART_EXTENSION;
 
 
 /**

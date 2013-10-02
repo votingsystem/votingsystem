@@ -76,7 +76,7 @@ public class ServerPaths {
     }
     
     public static String getURLEventos (String serverURL, 
-    		EnumTab enumTab, SubSystem subSystem, int max, int offset) {
+    		EventState eventState, SubSystem subSystem, int max, int offset) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         String result = serverURL;
         String path = null;
@@ -95,7 +95,7 @@ public class ServerPaths {
 	    		break;
         }
         result = result + path;
-        switch(enumTab) {
+        switch(eventState) {
 	        case CLOSED:
 	        	path = "FINALIZADO";
 	        	break;

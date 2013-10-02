@@ -1,5 +1,6 @@
 package org.sistemavotacion.util;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
@@ -20,6 +21,8 @@ import java.nio.charset.Charset;
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class FileUtils {
+
+    public static final String TAG = "AppData";
 	
     public static byte[] getBytesFromFile(File file) throws IOException {
         byte[] b = new byte[(int) file.length()];
@@ -97,6 +100,30 @@ public class FileUtils {
         } catch (IOException ex) {
         	Log.e("FileUtils", ex.getMessage(), ex);
         }
+    }
+
+    public static FileOutputStream openFileOutputStream(String filename, Context context) {
+        Log.d(TAG + ".openFileOutputStream(...)", " - filename: " + filename);
+        FileOutputStream fout = null;
+        try {
+            fout = context.openFileOutput(filename, Context.MODE_PRIVATE);
+        } catch(Exception ex) {
+            Log.e(TAG + ".openFileOutputStream(...)", ex.getMessage(), ex);
+        }
+        return fout;
+    }
+
+    public static File getFile(String filename, Context context) {
+        File file = null;
+        try {
+            //File sdCard = Environment.getExternalStorageDirectory();
+            file = new File(context.getFilesDir(), filename);
+            Log.d(TAG + ".getFile(...)", " - file.getAbsolutePath(): "
+                    + file.getAbsolutePath());
+        } catch(Exception ex) {
+            Log.e(TAG + ".getFile(...)", ex.getMessage(), ex);
+        }
+        return file;
     }
 
 }

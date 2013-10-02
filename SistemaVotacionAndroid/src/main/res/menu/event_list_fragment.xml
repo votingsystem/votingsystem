@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:votingSystem="http://schemas.android.com/apk/res-auto" >
+
+    <item
+        android:id="@+id/reload"
+        votingSystem:showAsAction="ifRoom"
+        android:icon="@drawable/navigation_refresh"
+        android:title="@string/menu_actualizar">
+    </item>
+
+</menu> 

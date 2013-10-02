@@ -2,7 +2,7 @@
 <resources>
     
     <string name="sending_data_caption">Por favor, espere</string>
-    <string name="sending_data_lbl">Enviando información</string>
+    <string name="sending_data_lbl">Enviando información ... </string>
     <string name="back_to_cancel_lbl">Pulsar \'atrás\' para cancelar</string>
     
     <string name="manifest_pendind_lbl">Manifiesto pendiente de abrir</string>
@@ -28,6 +28,8 @@
     <string name="claims_drop_down_lbl">Reclamaciones</string>
     <string name="manifiests_drop_down_lbl">Manifiestos</string>
     <string name="unknown_drop_down_lbl">Sistema desconocido</string>
+    <string name="unknown_event_state_lbl">Evento de tipo desconocido</string>
+
     <string name="subject_lbl">Asunto</string>
     <string name="menuSync">Sincronizar</string>
 
@@ -62,26 +64,26 @@
     <string name="FIRMA_RECLAMACION_SMIME">Enviando reclamación</string>
     <string name="PUBLICACION_VOTACION_SMIME">Publicación de documento de votación</string>
     <string name="CANCELAR_EVENTO">Cancelar evento</string>
-    <string name="errorOperacionNoEncontrada">Falta el tipo de operación</string>
+    <string name="errorOperacionNoEncontrada">Operación desconocida</string>
     <string name="errorDatosEvento">Errores en datos del evento</string>
     <string name="errorCodigoEstadoNoEncontrado">Falta código de estado</string>
     <string name="errorEmail">Debe proporcionar una dirección de correo válida</string>
     <string name="errorDatosCancelacionEvento">Error en los datos de cancelación de evento</string>
     <string name="errorDestinatarioNoEncontrado">Falta el nombre de destinatario del documento firmado</string>
     
-    <string name="open_voting_tab_lbl">ABIERTAS</string>
-    <string name="pending_voting_tab_lbl">PENDIENTES</string>
-    <string name="closed_voting_tab_lbl">CERRADAS</string>
+    <string name="open_voting_lbl">Abiertas</string>
+    <string name="pending_voting_lbl">Pendientes</string>
+    <string name="closed_voting_lbl">Cerradas</string>
 
-    <string name="open_claim_tab_lbl">ABIERTAS</string>
-    <string name="pending_claim_tab_lbl">PENDIENTES</string>
-    <string name="closed_claim_tab_lbl">CERRADAS</string>
+    <string name="open_claim_lbl">Abiertas</string>
+    <string name="pending_claim_lbl">Pendientes</string>
+    <string name="closed_claim_lbl">Cerradas</string>
 
-    <string name="open_manifest_tab_lbl">ABIERTOS</string>
-    <string name="pending_manifest_tab_lbl">PENDIENTES</string>
-    <string name="closed_manifest_tab_lbl">CERRADOS</string>
+    <string name="open_manifest_lbl">Abiertos</string>
+    <string name="pending_manifest_lbl">Pendientes</string>
+    <string name="closed_manifest_lbl">Cerrados</string>
 
-    <string name="unknown_tab_lbl">... DESCONOCIDO ...</string>
+    <string name="unknown_lbl">... DESCONOCIDO ...</string>
     
 
     <string name="panel_principal_lbl">Panel principal</string>
@@ -118,7 +120,7 @@
     <string name="request_cert_msg">Tramitando solicitud</string>
     <string name="alert_exception_caption">Excepción!</string>
     <string name="cancel_back_msg">Pulsar \'atrás\' para cancelar</string>
-    <string name="connecting_caption">Conectando</string>
+    <string name="connecting_caption">Conectando...</string>
     <string name="cert_state_msg">Comprobando el estado de la solicitud de certificado</string>
     <string name="cert_downloaded_msg">El certificado de usuario está disponible</string>
     
@@ -151,7 +153,7 @@
     <string name="solicitud_csr">Solicitud CSR</string>
     <string name="enviarVoto">Enviar Voto</string>
     <string name="receipt_error_msg">Error validando recibo de voto</string>
-    <string name="cert_not_found_caption">No tiene instalado ningún certificado</string>
+    <string name="cert_not_found_caption">Falta certificado de votación</string>
     <string name="cert_not_found_msg">Para poder votar y firmar documentos debe tener instalado un certificado</string>
 
     <string name="lanzarServicio">Lanzar Servicio</string>
@@ -237,4 +239,14 @@
 	<string name="encrypted_message_error_msg">Mensaje con errores de cifrado</string>
 	<string name="voting_service_error_msg"><![CDATA[
 	    Problemas con el servicio de voto.<br/>Por favor inténtelo más tarde]]></string>
+
+    <string name="drawer_open">Seleccionar sección</string>
+    <string name="drawer_close">Cerrar selector de secciones</string>
+
+    <string name="close_app_lbl">Cerrar aplicación</string>
+
+    <string name="get_cert_error_msg">Error obteniendo certificado de: </string>
+
+    <string name="event_canceled">Evento cancelado</string>
+
 </resources>

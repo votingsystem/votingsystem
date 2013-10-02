@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import org.sistemavotacion.android.Aplicacion;
+import org.sistemavotacion.android.AppData;
 import org.sistemavotacion.android.R;
 import org.sistemavotacion.android.UserCertRequestForm;
 import org.sistemavotacion.android.UserCertResponseForm;
@@ -20,6 +20,8 @@ public class CertNotFoundDialog  extends DialogFragment {
 	public static final String TAG = "CertNotFoundDialog";
 	
 	public static final int MAX_MSG_LENGTH = 400;
+
+
 
     public CertNotFoundDialog() {
         // Empty constructor required for DialogFragment
@@ -41,7 +43,7 @@ public class CertNotFoundDialog  extends DialogFragment {
         openReceiptButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
             	Intent intent = null;
-          	  	switch(Aplicacion.INSTANCIA.getEstado()) {
+          	  	switch(AppData.getInstance(getActivity().getBaseContext()).getEstado()) {
           	  		case CON_CSR:
           	  			intent = new Intent(getActivity(), UserCertResponseForm.class);
           	  			break;

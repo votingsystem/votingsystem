@@ -1,0 +1,12 @@
+.loading {
+  margin: auto;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  width: 6em;
+  height: 6em;
+}
+
+#chart_div {
+    width: 100%;
+    height: 100%;
+}

@@ -6,7 +6,7 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import org.sistemavotacion.controlacceso.modelo.*;
 
 /**
- * @infoController Anulación de votos ======
+ * @infoController Anulación de votos
  * @descController Servicios relacionados con la anulación de votos.
  *
  * @author jgzornoza

@@ -18,6 +18,7 @@ package org.sistemavotacion.android;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 
@@ -30,17 +31,17 @@ import java.util.Map;
 public class JavaScriptInterface {
 	
 	public static final String TAG = "JavaScriptInterface";
-	
-	WebActivity webActivity;
+
+    private FragmentActivity hostActivity;
     private ProgressDialog progressDialog = null;
     private static Map<String, Operation> sessions = new HashMap<String, Operation>();
     private static Map<String, WebSessionListener> sessionListeners = 
     		new HashMap<String, WebSessionListener>();
 
     /** Instantiate the interface and set the context */
-    JavaScriptInterface(WebActivity webActivity) {
-    	this.webActivity = webActivity;
-    	showProgressDialog(webActivity.getString(R.string.loading_html_msg));
+    JavaScriptInterface(FragmentActivity hostActivity) {
+    	this.hostActivity = hostActivity;
+    	showProgressDialog(hostActivity.getString(R.string.loading_html_msg));
     }
     
     @JavascriptInterface public void setVotingWebAppMessage (String appMessage) {
@@ -49,15 +50,15 @@ public class JavaScriptInterface {
 			Operation operation = Operation.parse(appMessage);
 			if(operation.getCodigoEstado() == Operation.SC_PING) {
 				if(progressDialog != null) progressDialog.dismiss();
-				webActivity.isPageLoaded(true);
-			} else webActivity.processOperation(operation);
+                ((WebActivity)hostActivity).isPageLoaded(true);
+			} else ((WebActivity)hostActivity).processOperation(operation);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
     }
     
     @JavascriptInterface public void showProgressDialog (String appMessage) {
-    	progressDialog = new ProgressDialog(webActivity);
+    	progressDialog = new ProgressDialog(hostActivity);
     	progressDialog.setMessage(appMessage);
     	progressDialog.setIndeterminate(true);
     	//progressDialog.setCancelable(false);
@@ -65,8 +66,8 @@ public class JavaScriptInterface {
     }
     
     @JavascriptInterface public void setMessage (String appMessage) {
-		AlertDialog.Builder builder= new AlertDialog.Builder(webActivity);
-		builder.setTitle(webActivity.getString(R.string.error_lbl));
+		AlertDialog.Builder builder= new AlertDialog.Builder(hostActivity);
+		builder.setTitle(hostActivity.getString(R.string.error_lbl));
 		builder.setMessage(appMessage);
 		builder.show();
     }

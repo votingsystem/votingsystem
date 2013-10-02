@@ -1,5 +1,8 @@
 package org.sistemavotacion.util;
 
+import android.content.Context;
+
+import org.sistemavotacion.android.R;
 import org.sistemavotacion.modelo.Tipo;
 
 
@@ -34,5 +37,18 @@ public enum SubSystem  {
 	public Tipo getEventType() {
         return eventType;
 	}
-	
+
+    public String getDescription(Context context) {
+        switch(this) {
+            case VOTING:
+                return context.getString(R.string.voting_drop_down_lbl);
+            case MANIFESTS:
+                return context.getString(R.string.manifiests_drop_down_lbl);
+            case CLAIMS:
+                return context.getString(R.string.claims_drop_down_lbl);
+            default:
+                return context.getString(R.string.unknown_drop_down_lbl);
+        }
+    }
+
 }

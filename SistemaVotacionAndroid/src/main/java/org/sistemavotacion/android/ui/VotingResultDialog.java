@@ -20,7 +20,7 @@ public class VotingResultDialog  extends DialogFragment {
         // Empty constructor required for DialogFragment
     }
     
-    VoteReceipt reciboVoto;
+    private VoteReceipt reciboVoto;
 
     public static VotingResultDialog newInstance(String caption, 
     		VoteReceipt reciboVoto) {
@@ -28,11 +28,6 @@ public class VotingResultDialog  extends DialogFragment {
         Bundle args = new Bundle();
         votingResultDialog.setReciboVoto(reciboVoto);
         args.putString("caption", caption);
-        String msg = null;
-        if(reciboVoto != null) msg = reciboVoto.getMensaje();
-        if(msg != null && msg.length() > MAX_MSG_LENGTH)
-        	msg = msg.substring(0, MAX_MSG_LENGTH) + "...";
-        args.putString("message", msg);
         votingResultDialog.setArguments(args);
         return votingResultDialog;
     }
@@ -50,8 +45,12 @@ public class VotingResultDialog  extends DialogFragment {
         if(getArguments().getString("caption") != null) {
         	getDialog().setTitle(getArguments().getString("caption"));
         }
-        if(getArguments().getString("message") != null) {
-        	msgTextView.setText(getArguments().getString("message"));
+
+        if(reciboVoto != null) {
+            String msg = reciboVoto.getMensaje(getActivity().getBaseContext());
+            if(msg != null && msg.length() > MAX_MSG_LENGTH)
+                msg = msg.substring(0, MAX_MSG_LENGTH) + "...";
+            msgTextView.setText(msg);
         }
         return view;
     }

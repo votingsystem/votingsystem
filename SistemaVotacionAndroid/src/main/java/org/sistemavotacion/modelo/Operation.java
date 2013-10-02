@@ -1,5 +1,6 @@
 package org.sistemavotacion.modelo;
 
+import android.content.Context;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -10,7 +11,6 @@ import org.sistemavotacion.util.StringUtils;
 
 import java.text.ParseException;
 
-import static org.sistemavotacion.android.Aplicacion.getAppString;
 
 /**
  *
@@ -376,25 +376,23 @@ public class Operation {
         this.emailSolicitante = emailSolicitante;
     }		
     
-    public String getErrorValidacion() {
-        if(tipo == null) return 
-                        getAppString(R.string.errorOperacionNoEncontrada); 
-        if(codigoEstado == null) return 
-                        getAppString(R.string.errorCodigoEstadoNoEncontrado); 
+    public String getErrorValidacion(Context context) {
+        if(tipo == null) return context.getString(R.string.errorOperacionNoEncontrada);
+        if(codigoEstado == null) return context.getString(R.string.errorCodigoEstadoNoEncontrado);
         switch (tipo) {
             case SOLICITUD_COPIA_SEGURIDAD:
-                if(evento == null || evento.getEventoId() == null) return 
-                        getAppString(R.string.errorDatosEvento);
-                if(emailSolicitante == null) return 
-                        getAppString(R.string.errorEmail);
+                if(evento == null || evento.getEventoId() == null) return
+                        context.getString(R.string.errorDatosEvento);
+                if(emailSolicitante == null) return
+                        context.getString(R.string.errorEmail);
                 break;
             case CANCELAR_EVENTO:
-                if(contenidoFirma == null) return 
-                        getAppString(R.string.errorDatosCancelacionEvento);
+                if(contenidoFirma == null) return
+                        context.getString(R.string.errorDatosCancelacionEvento);
                 return null;
             default:
-                if(nombreDestinatarioFirma == null) return 
-                        getAppString(R.string.errorDestinatarioNoEncontrado);
+                if(nombreDestinatarioFirma == null) return
+                        context.getString(R.string.errorDestinatarioNoEncontrado);
         }
         return null;
     }

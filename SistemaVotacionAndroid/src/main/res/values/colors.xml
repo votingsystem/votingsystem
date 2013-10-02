@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="empty_field_form">#f00</color>
+    <color name="progress_text_lbl">#FFF</color>
+    <color name="event_list_progress_text_lbl">#8e8e8e</color>
+    <color name="event_progress_text_lbl">#FFF</color>
+    <color name="drawer_list_item">#8e8e8e</color>
+    <color name="drawer_list_header">#333333</color>
+    <color name="event_subject">#005b92</color>
+</resources>

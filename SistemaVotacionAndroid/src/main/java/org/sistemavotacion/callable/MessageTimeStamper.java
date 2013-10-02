@@ -1,5 +1,6 @@
 package org.sistemavotacion.callable;
 
+import android.content.Context;
 import android.util.Log;
 
 import org.apache.http.HttpResponse;
@@ -8,7 +9,7 @@ import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.cms.CMSSignedData;
-import org.sistemavotacion.android.Aplicacion;
+import org.sistemavotacion.android.AppData;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.util.HttpHelper;
@@ -30,21 +31,25 @@ public class MessageTimeStamper implements Callable<Respuesta> {
     private static final int numMaxAttempts = 3;
     private TimeStampToken timeStampToken;
     private TimeStampRequest timeStampRequest;
+    private Context context;
       
-    public MessageTimeStamper (SMIMEMessageWrapper smimeMessage) throws Exception {
+    public MessageTimeStamper (SMIMEMessageWrapper smimeMessage, Context context) throws Exception {
         this.smimeMessage = smimeMessage;
         this.timeStampRequest = smimeMessage.getTimeStampRequest();
+        this.context = context;
     }
     
-    public MessageTimeStamper (TimeStampRequest timeStampRequest) throws Exception {
+    public MessageTimeStamper (TimeStampRequest timeStampRequest, Context context) throws Exception {
         this.timeStampRequest = timeStampRequest;
+        this.context = context;
     }
         
     public MessageTimeStamper (String timeStampDigestAlgorithm, 
-    		byte[] digestToTimeStamp) throws Exception {
+    		byte[] digestToTimeStamp, Context context) throws Exception {
     	TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
         this.timeStampRequest = reqgen.generate(
         		timeStampDigestAlgorithm, digestToTimeStamp);
+        this.context = context;
     }
     
         
@@ -55,7 +60,7 @@ public class MessageTimeStamper implements Callable<Respuesta> {
         Respuesta respuesta = null;
         while(!done.get()) {
         	String timeStampServiceURL = ServerPaths.getURLTimeStampService(
-        			Aplicacion.CONTROL_ACCESO_URL);
+                    AppData.getInstance(context).getAccessControlURL());
             HttpResponse response = HttpHelper.sendByteArray(
             		timeStampRequest.getEncoded(), "timestamp-query", timeStampServiceURL);
             respuesta = new Respuesta(response.getStatusLine().getStatusCode(),
@@ -63,13 +68,14 @@ public class MessageTimeStamper implements Callable<Respuesta> {
             if(Respuesta.SC_OK == response.getStatusLine().getStatusCode()) {
                 byte[] bytesToken = EntityUtils.toByteArray(response.getEntity());
                 timeStampToken = new TimeStampToken(new CMSSignedData(bytesToken));
-                X509Certificate timeStampCert = Aplicacion.getControlAcceso().getTimeStampCert();
+                X509Certificate timeStampCert = AppData.getInstance(context).
+                        getControlAcceso().getTimeStampCert();
 
                 /* -> Android project config problem
                  * SignerInformationVerifier timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().
-                    setProvider(Aplicacion.PROVIDER).build(timeStampCert); 
+                    setProvider(MainActivity.PROVIDER).build(timeStampCert);
                 timeStampToken.validate(timeStampSignerInfoVerifier);*/
-                timeStampToken.validate(timeStampCert, Aplicacion.PROVIDER);/**/
+                timeStampToken.validate(timeStampCert, AppData.PROVIDER);/**/
                 if(smimeMessage != null)
                 	smimeMessage.setTimeStampToken(timeStampToken);
                 done.set(true);

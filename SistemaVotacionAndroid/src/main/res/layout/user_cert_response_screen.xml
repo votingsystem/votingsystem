@@ -37,7 +37,7 @@
 	        android:layout_width="240dip"
 	        android:layout_height="wrap_content"
 	        android:layout_marginTop="10dp"
-	        android:drawableLeft="@drawable/reload_22"
+	        android:drawableLeft="@android:drawable/ic_input_get"
 	        android:text="@string/request_cert_again_button" />
 	
 	</LinearLayout>

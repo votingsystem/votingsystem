@@ -1,11 +1,12 @@
 package org.sistemavotacion.task;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
-import org.sistemavotacion.android.Aplicacion;
+import org.sistemavotacion.android.AppData;
 import org.sistemavotacion.callable.MessageTimeStamper;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.Encryptor;
@@ -23,12 +24,14 @@ public class SMIMESignedSenderTask extends AsyncTask<String, Void, Respuesta> {
     private SMIMEMessageWrapper smimeMessage = null;
     private X509Certificate destinationCert = null;
     private KeyPair keypair;
+    private Context context = null;
     
     public SMIMESignedSenderTask(SMIMEMessageWrapper smimeMessage, 
-    		KeyPair keypair, X509Certificate destinationCert) {
+    		KeyPair keypair, X509Certificate destinationCert, Context context) {
 		this.smimeMessage = smimeMessage;
 		this.destinationCert = destinationCert;
 		this.keypair = keypair;
+        this.context = context;
     }
 	
 	@Override
@@ -38,7 +41,7 @@ public class SMIMESignedSenderTask extends AsyncTask<String, Void, Respuesta> {
         MessageTimeStamper timeStamper = null;
         Respuesta respuesta = null;
         try {
-            timeStamper = new MessageTimeStamper(smimeMessage);
+            timeStamper = new MessageTimeStamper(smimeMessage, context);
             respuesta = timeStamper.call();
         } catch(Exception ex) {
         	ex.printStackTrace();
@@ -60,13 +63,13 @@ public class SMIMESignedSenderTask extends AsyncTask<String, Void, Respuesta> {
             if(destinationCert != null) {
             	messageToSend = Encryptor.encryptSMIME(
                         smimeMessage, destinationCert);
-                documentContentType = Aplicacion.SIGNED_AND_ENCRYPTED_CONTENT_TYPE;
+                documentContentType = AppData.SIGNED_AND_ENCRYPTED_CONTENT_TYPE;
 	        } else {
 	        	ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	        	smimeMessage.writeTo(baos);
 	        	messageToSend = baos.toByteArray();
 	        	baos.close();
-                documentContentType = Aplicacion.SIGNED_CONTENT_TYPE;
+                documentContentType = AppData.SIGNED_CONTENT_TYPE;
 	        }
             HttpResponse response  = HttpHelper.sendByteArray(
             		messageToSend, documentContentType, serviceURL);  

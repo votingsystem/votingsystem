@@ -22,7 +22,8 @@ import org.bouncycastle2.asn1.x509.CertificateList;
 import org.bouncycastle2.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle2.asn1.x509.X509CertificateStructure;
 import org.bouncycastle2.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle2.cms.*;
+import org.bouncycastle2.cms.CMSException;
+import org.bouncycastle2.cms.CMSSignedData;
 import org.bouncycastle2.util.encoders.Base64;
 import org.bouncycastle2.util.io.Streams;
 

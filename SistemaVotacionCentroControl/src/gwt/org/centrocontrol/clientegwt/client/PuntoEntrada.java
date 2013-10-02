@@ -152,7 +152,7 @@ public class PuntoEntrada implements EntryPoint {
      * Detecta si java es > 1.6
      * */
     public static native boolean isJavaAvailable() /*-{
-    	return ($wnd.deployJava.versionCheck('1.6') || 
+    	return ($wnd.deployJava.versionCheck('1.8') || 
     		$wnd.deployJava.versionCheck('1.7'));
     }-*/;
 

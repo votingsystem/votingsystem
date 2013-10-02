@@ -1,5 +1,6 @@
 package org.sistemavotacion.modelo;
 
+import android.content.Context;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -17,7 +18,6 @@ import java.util.Random;
 
 import javax.mail.MessagingException;
 
-import static org.sistemavotacion.android.Aplicacion.getAppString;
 
 /**
 * @author jgzornoza
@@ -48,11 +48,6 @@ public class VoteReceipt {
     private Date dateCreated;
     private Date dateUpdated;
     
-    public VoteReceipt (int codigoEstado, String mensaje) { 
-        this.codigoEstado = codigoEstado;
-        this.mensaje = mensaje;
-    }
-    
     public int initNotificationId() {
         Random randomGenerator = new Random();
         this.notificationId = randomGenerator.nextInt(100);
@@ -72,7 +67,15 @@ public class VoteReceipt {
         JSONObject contenidoReciboJSON = new JSONObject(contenidoRecibo);
         this.opcionSeleccionadaId = contenidoReciboJSON.getLong("opcionSeleccionadaId");
         this.eventoURL = contenidoReciboJSON.getString("eventoURL");
-        comprobarRecibo();
+        if (smimeMessage.isValidSignature()) {
+            esValido = true;
+        }
+        if (Respuesta.SC_ERROR_VOTO_REPETIDO == codigoEstado) {//voto repetido
+            esValido = false;
+        }
+        if (!opcionSeleccionadaId.equals(voto.getOpcionSeleccionada().getId())) {
+            esValido = false;
+        }
     }
     
     public VoteReceipt (int codigoEstado, Evento voto) throws Exception { 
@@ -117,26 +120,6 @@ public class VoteReceipt {
     	if(file == null) throw new Exception("File null");
     	if(smimeMessage == null) throw new Exception("Receipt null");
     	smimeMessage.writeTo(new FileOutputStream(file));
-    }
-    
-    private void comprobarRecibo () throws Exception {
-        if (Respuesta.SC_ERROR_VOTO_REPETIDO == codigoEstado) {//voto repetido
-            esValido = true; 
-            mensaje = getAppString(R.string.vote_repeated_msg, 
-            		voto.getAsunto(), voto.getOpcionSeleccionada().getContenido());
-            return;
-        }
-        if (!opcionSeleccionadaId.equals(voto.getOpcionSeleccionada().getId())) {
-            Log.e("ReciboVoto", getAppString(R.string.option_error_msg));
-            esValido = false; 
-            mensaje = getAppString(R.string.option_error_msg);
-            return;
-        }
-        if (smimeMessage.isValidSignature()) {
-            esValido = true;
-            mensaje = getAppString(R.string.vote_ok_msg, 
-        		voto.getAsunto(), voto.getOpcionSeleccionada().getContenido());
-        } 
     }
     
     public void setId(int id) {
@@ -246,8 +229,19 @@ public class VoteReceipt {
     /**
      * @return the mensaje
      */
-    public String getMensaje() {
-        return mensaje;
+    public String getMensaje(Context context) {
+        if (Respuesta.SC_ERROR_VOTO_REPETIDO == codigoEstado) {//voto repetido
+            return context.getString(R.string.vote_repeated_msg,
+                    voto.getAsunto(), voto.getOpcionSeleccionada().getContenido());
+        }
+        if (!opcionSeleccionadaId.equals(voto.getOpcionSeleccionada().getId())) {
+            return context.getString(R.string.option_error_msg);
+        }
+        if (smimeMessage.isValidSignature()) {
+            return context.getString(R.string.vote_ok_msg,
+                    voto.getAsunto(), voto.getOpcionSeleccionada().getContenido());
+        }
+        return null;
     }
 
     /**

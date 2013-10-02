@@ -129,7 +129,10 @@ class EventoVotacionController {
 	 * @httpMethod [GET]
 	 * @serviceURL [/eventoVotacion/$id/estadisticas]
 	 * @param [id] Obligatorio. Identificador en la base de datos de la votación que se desea consultar.
-	 * @responseContentType [application/json]
+         * @requestContentType [application/json] Para solicitar una respuesta en formato JSON
+         * @requestContentType [text/html] Para solicitar una respuesta en formato HTML
+         * @responseContentType [application/json]                    
+	 * @responseContentType [text/html]
 	 * @return Documento JSON con las estadísticas asociadas a la votación solicitada.
 	 */
     def estadisticas () {
@@ -143,29 +146,16 @@ class EventoVotacionController {
             else eventoVotacion = params.evento
             if (eventoVotacion) {
                 response.status = Respuesta.SC_OK
-                def estadisticasMap = new HashMap()
-				estadisticasMap.opciones = []
-                estadisticasMap.id = eventoVotacion.id
-				estadisticasMap.numeroSolicitudesDeAcceso = SolicitudAcceso.countByEventoVotacion(eventoVotacion)
-				estadisticasMap.numeroSolicitudesDeAccesoOK = SolicitudAcceso.countByEventoVotacionAndEstado(
-						eventoVotacion, SolicitudAcceso.Estado.OK)
-				estadisticasMap.numeroSolicitudesDeAccesoANULADAS =   SolicitudAcceso.countByEventoVotacionAndEstado(
-						eventoVotacion, SolicitudAcceso.Estado.ANULADO)
-				estadisticasMap.numeroVotos = Voto.countByEventoVotacion(eventoVotacion)
-				estadisticasMap.numeroVotosOK = Voto.countByEventoVotacionAndEstado(
-						eventoVotacion, Voto.Estado.OK)
-				estadisticasMap.numeroVotosANULADOS = Voto.countByEventoVotacionAndEstado(
-					eventoVotacion, Voto.Estado.ANULADO)								
-    			eventoVotacion.opciones.each { opcion ->
-					def numeroVotos = Voto.countByOpcionDeEventoAndEstado(
-						opcion, Voto.Estado.OK)
-					def opcionMap = [id:opcion.id, contenido:opcion.contenido,
-						numeroVotos:numeroVotos]
-					estadisticasMap.opciones.add(opcionMap)
-				}
-				if (params.callback) render "${params.callback}(${estadisticasMap as JSON})"
-	            else render estadisticasMap as JSON
-                return false
+                def statisticsMap = eventoVotacionService.getStatisticsMap(
+			eventoVotacion, request.getLocale())
+                if(request.contentType?.contains("application/json")) {
+                    if (params.callback) render "${params.callback}(${statisticsMap as JSON})"
+                    else render statisticsMap as JSON
+                    return false
+                } else {
+                    render(view:"statistics", model: [statisticsJSON: statisticsMap  as JSON])
+                    return
+                }
             }
             response.status = Respuesta.SC_NOT_FOUND
             render message(code: 'eventNotFound', args:[params.id])

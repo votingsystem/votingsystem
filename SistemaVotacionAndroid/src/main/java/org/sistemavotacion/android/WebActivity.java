@@ -25,8 +25,8 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -50,9 +50,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.sistemavotacion.android.Aplicacion.KEY_STORE_FILE;
+import static org.sistemavotacion.android.AppData.KEY_STORE_FILE;
 
-public class WebActivity extends FragmentActivity 
+public class WebActivity extends ActionBarActivity
 	implements WebSessionListener, CertPinDialogListener, ServiceListener {
 	
 	public static final String TAG = "WebActivity";
@@ -73,6 +73,7 @@ public class WebActivity extends FragmentActivity
     private static List<String> pendingOperations = new ArrayList<String>();
 	private PublishService publishService = null;
 	private Operation pendingOperation;
+    private AppData appData;
 	
 	ServiceConnection publishServiceConnection = new ServiceConnection() {
 
@@ -98,7 +99,8 @@ public class WebActivity extends FragmentActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.web_activity);     
+        setContentView(R.layout.web_activity);
+        appData = AppData.getInstance(getBaseContext());
         String operation = getIntent().getStringExtra(OPERATION_KEY);
         if(operation!= null) {
         	try {
@@ -114,27 +116,23 @@ public class WebActivity extends FragmentActivity
         	switch(screen) {
 	        	case PUBLISH_CLAIM:
 	        		serverURL = ServerPaths.getURLPublish(
-	        				Aplicacion.CONTROL_ACCESO_URL, Screen.PUBLISH_CLAIM);
+                            appData.getAccessControlURL(), Screen.PUBLISH_CLAIM);
 	        		screenTitle = getString(R.string.publish_claim_caption);
 	        		break;
 	        	case PUBLISH_MANIFEST:
 	        		serverURL = ServerPaths.getURLPublish(
-	        				Aplicacion.CONTROL_ACCESO_URL, Screen.PUBLISH_MANIFEST);
+                            appData.getAccessControlURL(), Screen.PUBLISH_MANIFEST);
 	        		screenTitle = getString(R.string.publish_manifest_caption);
 	        		break;
 	        	case PUBLISH_VOTING:
 	        		serverURL = ServerPaths.getURLPublish(
-	        				Aplicacion.CONTROL_ACCESO_URL, Screen.PUBLISH_VOTING);
+                            appData.getAccessControlURL(), Screen.PUBLISH_VOTING);
 	        		screenTitle = getString(R.string.publish_voting_caption);
 	        		break;
         	}  
         }
-		try {
-			getActionBar().setDisplayHomeAsUpEnabled(true);
-			getActionBar().setTitle(screenTitle);
-		} catch(NoSuchMethodError ex) {
-			Log.d(TAG + ".onCreate(...)", " --- android api 11 I doesn't have method 'setLogo'");
-		}  
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(screenTitle);
         loadUrl(serverURL);
     }
     
@@ -143,7 +141,7 @@ public class WebActivity extends FragmentActivity
 		switch (item.getItemId()) {        
 	    	case android.R.id.home:  
 	    		Log.d(TAG + ".onOptionsItemSelected(...) ", " - home - ");
-	    		Intent intent = new Intent(this, FragmentTabsPager.class);   
+	    		Intent intent = new Intent(this, NavigationDrawer.class);   
 	    		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); 
 	    		startActivity(intent); 
 	    		return true;        
@@ -164,7 +162,7 @@ public class WebActivity extends FragmentActivity
 			.setPositiveButton(R.string.solicitar_label, new DialogInterface.OnClickListener() {
 	            public void onClick(DialogInterface dialog, int whichButton) {
 	        		Intent intent = new Intent(
-	        				WebActivity.this, Aplicacion.class);;
+	        				WebActivity.this, MainActivity.class);;
 	                startActivity(intent);
 	            }
 				}).show();
@@ -198,7 +196,7 @@ public class WebActivity extends FragmentActivity
     
     @Override public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            Log.d(this.getClass().getName(), "back button pressed");
+            Log.d(TAG, ".onKeyDown(...) - back button pressed");
             if(svWebView.canGoBack()) {
             	svWebView.goBack();
             } else return super.onKeyDown(keyCode, event);
@@ -237,7 +235,7 @@ public class WebActivity extends FragmentActivity
 		startService(publishServiceIntent);
 		bindService(publishServiceIntent, publishServiceConnection, BIND_AUTO_CREATE);
 		this.pendingOperation = operation;
-		if (!Aplicacion.Estado.CON_CERTIFICADO.equals(Aplicacion.INSTANCIA.getEstado())) {
+		if (!AppData.Estado.CON_CERTIFICADO.equals(appData.getEstado())) {
     		Log.d(TAG + ".processOperation(...)", " - Cert Not Found - ");
     		showCertNotFoundDialog();
     	} else showPinScreen(null);
@@ -247,12 +245,12 @@ public class WebActivity extends FragmentActivity
 		Log.d(TAG + ".showCertNotFoundDialog(...)", " - showCertNotFoundDialog - ");
 		CertNotFoundDialog certDialog = new CertNotFoundDialog();
 		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-	    Fragment prev = getSupportFragmentManager().findFragmentByTag(Aplicacion.CERT_NOT_FOUND_DIALOG_ID);
+	    Fragment prev = getSupportFragmentManager().findFragmentByTag(AppData.CERT_NOT_FOUND_DIALOG_ID);
 	    if (prev != null) {
 	        ft.remove(prev);
 	    }
 	    ft.addToBackStack(null);
-	    certDialog.show(ft, Aplicacion.CERT_NOT_FOUND_DIALOG_ID);
+	    certDialog.show(ft, AppData.CERT_NOT_FOUND_DIALOG_ID);
 	}
 	
 	@Override
@@ -365,8 +363,8 @@ public class WebActivity extends FragmentActivity
 	    	new AlertDialog.Builder(this).setTitle(resultCaption).setMessage(resultMsg)
 			.setPositiveButton(R.string.ok_button, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {
-					Aplicacion.INSTANCIA.setSelectedSubsystem(subSystem);
-			    	Intent intent = new Intent(getApplicationContext(), FragmentTabsPager.class);
+					appData.setSelectedSubsystem(subSystem);
+			    	Intent intent = new Intent(getBaseContext(), NavigationDrawer.class);
 			    	startActivity(intent);
 				}
 			}).show();

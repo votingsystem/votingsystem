@@ -151,8 +151,24 @@ class FirmaService {
 				trustedCerts.addAll(CertUtil.fromPEMToX509CertCollection(
 					FileUtils.getBytesFromFile(caFile)));
 			}
+			Certificado.withTransaction {
+				def criteria = Certificado.createCriteria()
+				def trustedCertsDB = criteria.list {
+					eq("estado", Certificado.Estado.OK)
+					or {
+						eq("tipo",	Certificado.Tipo.AUTORIDAD_CERTIFICADORA)
+						eq("tipo", Certificado.Tipo.AUTORIDAD_CERTIFICADORA_TEST)
+					}
+				}
+				trustedCertsDB.each { certificado ->
+					ByteArrayInputStream bais = new ByteArrayInputStream(certificado.contenido)
+					X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
+					trustedCerts.add(certX509)
+				}
+			}
+			
 			for(X509Certificate certificate:trustedCerts) {
-				log.debug " --- Importado certificado -- SubjectDN: ${certificate?.getSubjectDN()} - número serie:${certificate?.getSerialNumber()?.longValue()}"
+				log.debug " ---Added trustedCert authority -- SubjectDN: ${certificate?.getSubjectDN()} - número serie:${certificate?.getSerialNumber()?.longValue()}"
 				Certificado certificado
 				Certificado.withTransaction {
 					certificado = Certificado.findByNumeroSerie(
@@ -170,10 +186,10 @@ class FirmaService {
 					Certificado.withTransaction {
 						certificado.save()
 					}
-					log.debug " -- Almacenada CA con id:'${certificado?.id}'"
-				} else log.debug " -- Id de certificado: ${certificado?.id}"
+					log.debug " -- Added to database CA con id:'${certificado?.id}'"
+				} else log.debug " -- CA: ${certificate.getSerialNumber().longValue()} ---database id: ${certificado?.id}"
 				trustedCertsHashMap.put(certificate?.getSerialNumber()?.longValue(), certificado)
-			}
+			}			
 			log.debug("Número de Autoridades Certificadoras en sistema: ${trustedCerts?.size()}")
 			return new Respuesta(codigoEstado:Respuesta.SC_OK, mensaje:"Importadas Autoridades Certificadoras")
 		} catch(Exception ex) {
@@ -238,6 +254,32 @@ class FirmaService {
 			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg)
 		}
 		return validateVoteCerts(messageWrapper, locale)
+	}
+		
+	public Respuesta validateSMIMEVoteCancelation(String url,
+		SMIMEMessageWrapper messageWrapper, Locale locale) {
+		log.debug("validateSMIMEVoteCancelation -")
+		EventoVotacion evento = null
+		if(url) {
+			EventoVotacion.withTransaction {
+				evento = EventoVotacion.findByUrl(url)
+			}
+		}
+		if(!evento) {
+			String msg = messageSource.getMessage('evento.eventoNotFound',
+				[url].toArray(), locale)
+			log.error("validateSMIMEVoteCancelation - ${msg}")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg)
+		}
+		MensajeSMIME mensajeSMIME = MensajeSMIME.findWhere(
+			base64ContentDigest:messageWrapper.getContentDigestStr())
+		if(mensajeSMIME) {
+			String msg = messageSource.getMessage('smimeDigestRepeatedErrorMsg',
+				[messageWrapper.getContentDigestStr()].toArray(), locale)
+			log.error("validateSMIMEVoteCancelation - ${msg}")
+			return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:msg)
+		}
+		return validateVoteValidationCerts(messageWrapper,	evento, locale)
 	}
 
 	public Respuesta validateVoteCerts(SMIMEMessageWrapper smimeMessageReq, Locale locale) {
@@ -346,7 +388,7 @@ class FirmaService {
 			
 	public Respuesta validateVoteValidationCerts(SMIMEMessageWrapper smimeMessageReq,
 		EventoVotacion evento, Locale locale) {
-		log.debug("validateAccessControlVoteCerts");
+		log.debug("validateVoteValidationCerts");
 		Set<Usuario> firmantes = smimeMessageReq.getFirmantes();
 		String msg
 		if(firmantes.isEmpty()) {
@@ -409,12 +451,12 @@ class FirmaService {
 		if(firmantes.isEmpty()) return new Respuesta(
 			codigoEstado:Respuesta.SC_ERROR_PETICION, mensaje:
 			messageSource.getMessage('error.documentWithoutSigners', null, locale))
-		log.debug("*** validateSignersCerts - number of signers: ${firmantes.size()}")
+		log.debug("validateSignersCerts - number of signers: ${firmantes.size()}")
 		Set<Usuario> firmantesDB = new HashSet<Usuario>()
 		for(Usuario usuario: firmantes) {
 			try {
 				PKIXCertPathValidatorResult pkixResult = CertUtil.verifyCertificate(
-					usuario.getCertificate(), trustedCerts, false)
+					usuario.getCertificate(), getTrustedCerts(), false)
 				TrustAnchor ta = pkixResult.getTrustAnchor();
 				X509Certificate certCaResult = ta.getTrustedCert();
 				usuario.certificadoCA = trustedCertsHashMap.get(
@@ -431,6 +473,7 @@ class FirmaService {
 				}
 			} catch (CertPathValidatorException ex) {
 				log.error(ex.getMessage(), ex)
+				log.error(" --- Error with certificate: ${usuario.getCertificate().getSubjectDN()}")
 				return new Respuesta(codigoEstado:Respuesta.SC_ERROR_PETICION,
 					mensaje:messageSource.getMessage('error.caUnknown', null, locale))
 			} catch (Exception ex) {
@@ -495,6 +538,13 @@ class FirmaService {
 		String prefijo = "${grailsApplication.mainContext.getResource('.')?.getFile()}"
 		String sufijo =filePath.startsWith(File.separator)? filePath : File.separator + filePath;
 		return "${prefijo}${sufijo}";
+	}
+	
+	public Set<X509Certificate> getTrustedCerts() {
+		if(!trustedCerts || trustedCerts.isEmpty()) {
+			inicializar()
+		}
+		return trustedCerts;
 	}
 	
 	public File getCadenaCertificacion() {

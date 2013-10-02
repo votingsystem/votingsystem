@@ -10,8 +10,7 @@
         android:id="@+id/event_icon"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
-        android:layout_marginRight="10dp"
-        android:src="@drawable/machine" />
+        android:layout_marginRight="10dp"/>
 
     <LinearLayout
         android:layout_width="0dip"

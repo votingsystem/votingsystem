@@ -18,8 +18,8 @@ class UrlMappings {
 		"/android/SistemaVotacion.apk" {
 			controller = "android"
 			action = "app"
-		}
-	
+		}		
+		
 		"/anuladorVoto" {
 			controller = "anuladorVoto"
 			action = [POST:"post"]

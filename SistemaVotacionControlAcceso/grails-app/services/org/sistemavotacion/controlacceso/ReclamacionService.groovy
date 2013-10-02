@@ -88,7 +88,6 @@ class ReclamacionService {
 	 
 	 private Respuesta checkClaimJSONData(JSONObject claimDataJSON, Locale locale) {
 		 int status = Respuesta.SC_ERROR_PETICION
-		 Tipo tipoRespuesta = Tipo.FIRMA_RECLAMACION_SMIME
 		 org.bouncycastle.tsp.TimeStampToken tms;
 		 String msg
 		 try {
@@ -101,9 +100,10 @@ class ReclamacionService {
 			 log.error(ex.getMessage(), ex)
 			 msg = messageSource.getMessage('claimSignatureWithErrorsMsg', null, locale)
 		 }
-		 if(Respuesta.SC_OK == status) tipoRespuesta = Tipo.FIRMA_RECLAMACION_SMIME
-		 else log.error("checkClaimJSONData - msg: ${msg} - data:${claimDataJSON.toString()}")
-		 return new Respuesta(codigoEstado:status, mensaje:msg, tipo:tipoRespuesta)
+		 if(Respuesta.SC_OK != status) log.error(
+			 "checkClaimJSONData - msg: ${msg} - data:${claimDataJSON.toString()}")
+		 return new Respuesta(codigoEstado:status, mensaje:msg, 
+			 tipo:Tipo.FIRMA_RECLAMACION_SMIME)
 	 }
 	 
 	 

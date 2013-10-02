@@ -11,8 +11,9 @@ import org.bouncycastle2.cert.jcajce.JcaCertStore;
 import org.bouncycastle2.cms.SignerInfoGenerator;
 import org.bouncycastle2.operator.OperatorCreationException;
 import org.bouncycastle2.util.Store;
-import org.sistemavotacion.android.Aplicacion;
+import org.sistemavotacion.android.AppData;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
+import org.sistemavotacion.seguridad.VotingSystemKeyStoreException;
 
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -45,11 +46,15 @@ public class SignedMailGenerator {
     private static Session session = Session.getDefaultInstance(props, null);
 
     public SignedMailGenerator(byte[] keyStoreBytes, String keyAlias, 
-    		char[] password, String signMechanism) throws Exception {
-    	KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
-        PrivateKey key = (PrivateKey)keyStore.getKey(keyAlias, password);
-        Certificate[] chain = keyStore.getCertificateChain(keyAlias);
-        init(key, chain, signMechanism);
+    		char[] password, String signMechanism) throws VotingSystemKeyStoreException {
+        try {
+            KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
+            PrivateKey key = (PrivateKey)keyStore.getKey(keyAlias, password);
+            Certificate[] chain = keyStore.getCertificateChain(keyAlias);
+            init(key, chain, signMechanism);
+        }catch(Exception ex) {
+            throw new VotingSystemKeyStoreException(ex);
+        }
     }
     
     public SignedMailGenerator(PrivateKey key, Certificate[] chain, 
@@ -77,7 +82,7 @@ public class SignedMailGenerator {
         Store certs = new JcaCertStore(certList);
         smimeSignedGenerator = new SMIMESignedGenerator();
         SimpleSignerInfoGeneratorBuilder signerInfoGeneratorBuilder =  new SimpleSignerInfoGeneratorBuilder();
-        signerInfoGeneratorBuilder.setProvider(Aplicacion.PROVIDER);
+        signerInfoGeneratorBuilder.setProvider(AppData.PROVIDER);
         signerInfoGeneratorBuilder.setSignedAttributeGenerator(new AttributeTable(signedAttrs));
         SignerInfoGenerator signerInfoGenerator = signerInfoGeneratorBuilder.build(
                 signatureMechanism, key, (X509Certificate)chain[0]);
@@ -92,8 +97,8 @@ public class SignedMailGenerator {
         if (textoAFirmar == null) textoAFirmar = "";
         MimeBodyPart msg = new MimeBodyPart();
         msg.setText(textoAFirmar);
-        MimeMultipart mimeMultipart = smimeSignedGenerator.generate(msg, 
-                Aplicacion.DEFAULT_SIGNED_FILE_NAME);
+        MimeMultipart mimeMultipart = smimeSignedGenerator.generate(msg,
+                AppData.DEFAULT_SIGNED_FILE_NAME);
         SMIMEMessageWrapper body = new SMIMEMessageWrapper(session);
         if (header != null) body.setHeader(header.getName(), header.getValue());
         if (fromUser != null && !"".equals(fromUser)) {
@@ -122,7 +127,7 @@ public class SignedMailGenerator {
          //        dnieMimeMessage, PROVIDER,
            //      type.toString() + SIGNED_PART_EXTENSION);
          MimeMultipart mimeMultipart = smimeSignedGenerator.generate(
-        		 body, Aplicacion.PROVIDER, Aplicacion.SIGNATURE_ALGORITHM);
+        		 body, AppData.PROVIDER, AppData.SIGNATURE_ALGORITHM);
          return mimeMultipart;
      }
     

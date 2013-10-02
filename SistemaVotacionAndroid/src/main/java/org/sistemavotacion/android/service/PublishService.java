@@ -10,10 +10,11 @@ import android.widget.Toast;
 
 import com.itextpdf.text.pdf.PdfReader;
 
-import org.sistemavotacion.android.Aplicacion;
+import org.sistemavotacion.android.AppData;
 import org.sistemavotacion.android.R;
 import org.sistemavotacion.modelo.Operation;
 import org.sistemavotacion.modelo.Respuesta;
+import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.sistemavotacion.seguridad.VotingSystemKeyStoreException;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
@@ -26,14 +27,15 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 
-import static org.sistemavotacion.android.Aplicacion.ALIAS_CERT_USUARIO;
-import static org.sistemavotacion.android.Aplicacion.SIGNATURE_ALGORITHM;
+import static org.sistemavotacion.android.AppData.ALIAS_CERT_USUARIO;
+import static org.sistemavotacion.android.AppData.SIGNATURE_ALGORITHM;
 
 public class PublishService extends Service {
 	
 	public static final String TAG = "PublishService";
 
     private Operation pendingOperation;
+    private AppData appData = null;
 
 	private IBinder iBinder = new PublishServiceBinder();
 	
@@ -62,6 +64,7 @@ public class PublishService extends Service {
     @Override public void onCreate() {
     	Log.d(TAG + ".onCreate(...) ", " *** PublishService - onCreate ");
         super.onCreate();
+        appData = AppData.getInstance(getBaseContext());
     }
 
     @Override public void onDestroy() {
@@ -71,7 +74,7 @@ public class PublishService extends Service {
 
     @Override public void onLowMemory() {
         super.onLowMemory();
-        Toast.makeText(this, getApplicationContext().getString(
+        Toast.makeText(this, getBaseContext().getString(
         		R.string.low_memory_msg), 300);
     }
     
@@ -91,8 +94,9 @@ public class PublishService extends Service {
     		byte[] keyStoreBytes, char[] password, ServiceListener serviceListener) {
     	Log.d(TAG + ".publishDocument(...)", " operation: " + operation.getTipo());
     	this.pendingOperation = operation;
-    	String usuario = null;
-        if (Aplicacion.getUsuario() != null) usuario = Aplicacion.getUsuario().getNif();
+    	String userNIF = null;
+        Usuario user = appData.getUsuario();
+        if (user != null) userNIF = user.getNif();
         SignedMailGenerator signedMailGenerator = null;
         SMIMEMessageWrapper smimeMessage        = null;
         SMIMESignedSenderTask signedSenderTask  = null;
@@ -108,7 +112,7 @@ public class PublishService extends Service {
 			//X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(ALIAS_CERT_USUARIO);
     		switch(pendingOperation.getTipo()) {
 				case PUBLICACION_MANIFIESTO_PDF:
-					GetDataTask getDataTask = new GetDataTask(Aplicacion.PDF_CONTENT_TYPE);
+					GetDataTask getDataTask = new GetDataTask(AppData.PDF_CONTENT_TYPE);
 					getDataTask.execute(pendingOperation.getUrlDocumento());
 					respuesta = getDataTask.get();
 		            if(Respuesta.SC_OK != respuesta.getCodigoEstado()) {
@@ -118,9 +122,11 @@ public class PublishService extends Service {
 					try {
 						PdfReader pdfFile = new PdfReader(respuesta.getMessageBytes());
 						Certificate[] signerCertsChain = keyStore.getCertificateChain(ALIAS_CERT_USUARIO);
-						SignTimestampSendPDFTask signTimestampSendPDFTask = (SignTimestampSendPDFTask) 
+                        SignTimestampSendPDFTask signTimestampSendPDFTask = null;
+                        Log.d(TAG + ".processOperation(...) ", " ============== ");
+						/*SignTimestampSendPDFTask signTimestampSendPDFTask = (SignTimestampSendPDFTask)
 								new SignTimestampSendPDFTask(this, null, null,
-										signerPrivatekey, signerCertsChain, pdfFile);				
+										signerPrivatekey, signerCertsChain, pdfFile);	*/
 						
 						signTimestampSendPDFTask.execute(pendingOperation.getUrlEnvioDocumento());
 						
@@ -136,12 +142,13 @@ public class PublishService extends Service {
 				case PUBLICACION_VOTACION_SMIME:
 				case PUBLICACION_RECLAMACION_SMIME:
 				case ASOCIAR_CENTRO_CONTROL_SMIME:
-					smimeMessage = signedMailGenerator.genMimeMessage(usuario, 
-							Aplicacion.getControlAcceso().getNombreNormalizado(), 
+					smimeMessage = signedMailGenerator.genMimeMessage(userNIF,
+							appData.getControlAcceso().getNombreNormalizado(),
 							operation.getContenidoFirma().toString(), 
 							operation.getAsuntoMensajeFirmado(), null);
 			        signedSenderTask = new SMIMESignedSenderTask(
-			        		smimeMessage, null,	Aplicacion.getControlAcceso().getCertificado());
+			        		smimeMessage, null,	appData.getControlAcceso().getCertificado(),
+                            getBaseContext());
 			        signedSenderTask.execute(pendingOperation.getUrlEnvioDocumento());
 			        
 			        respuesta = signedSenderTask.get();

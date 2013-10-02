@@ -18,6 +18,8 @@ class VotoController {
 	def votoService
 	def grailsApplication
 	def encryptionService
+        
+    def index() {}
 	
 	/**
 	 * Servicio que recoge los votos enviados por los Centrol de Control
