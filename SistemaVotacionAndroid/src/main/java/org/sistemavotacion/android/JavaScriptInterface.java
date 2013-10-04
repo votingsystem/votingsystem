@@ -41,7 +41,6 @@ public class JavaScriptInterface {
     /** Instantiate the interface and set the context */
     JavaScriptInterface(FragmentActivity hostActivity) {
     	this.hostActivity = hostActivity;
-    	showProgressDialog(hostActivity.getString(R.string.loading_html_msg));
     }
     
     @JavascriptInterface public void setVotingWebAppMessage (String appMessage) {
@@ -50,19 +49,11 @@ public class JavaScriptInterface {
 			Operation operation = Operation.parse(appMessage);
 			if(operation.getCodigoEstado() == Operation.SC_PING) {
 				if(progressDialog != null) progressDialog.dismiss();
-                ((WebActivity)hostActivity).isPageLoaded(true);
-			} else ((WebActivity)hostActivity).processOperation(operation);
+                ((EventPublishingActivity)hostActivity).isPageLoaded(true);
+			} else ((EventPublishingActivity)hostActivity).processOperation(operation);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-    }
-    
-    @JavascriptInterface public void showProgressDialog (String appMessage) {
-    	progressDialog = new ProgressDialog(hostActivity);
-    	progressDialog.setMessage(appMessage);
-    	progressDialog.setIndeterminate(true);
-    	//progressDialog.setCancelable(false);
-    	progressDialog.show();
     }
     
     @JavascriptInterface public void setMessage (String appMessage) {

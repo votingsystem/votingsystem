@@ -37,9 +37,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListView;
-import android.widget.ImageView;
 
-import org.sistemavotacion.android.ui.VoteReceiptListScreen;
+import org.sistemavotacion.android.ui.VoteReceiptListActivity;
+import org.sistemavotacion.modelo.Operation;
 import org.sistemavotacion.util.EventState;
 import org.sistemavotacion.util.ScreenUtils;
 import org.sistemavotacion.util.SubSystem;
@@ -259,7 +259,7 @@ public class NavigationDrawer extends ActionBarActivity {
                         startActivity(new Intent(this, MainActivity.class));
                         return true;
                     case CON_CSR:
-                        startActivity(new Intent(this, UserCertResponseForm.class));
+                        startActivity(new Intent(this, UserCertResponseActivity.class));
                         return true;
                     case CON_CERTIFICADO:
                         AlertDialog.Builder builder= new AlertDialog.Builder(this);
@@ -270,7 +270,7 @@ public class NavigationDrawer extends ActionBarActivity {
                         builder.setPositiveButton(getString(
                                 R.string.ok_button), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                Intent intent = new Intent(NavigationDrawer.this, UserCertRequestForm.class);
+                                Intent intent = new Intent(NavigationDrawer.this, UserCertRequestActivity.class);
                                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(intent);
                             }
@@ -281,7 +281,7 @@ public class NavigationDrawer extends ActionBarActivity {
                 }
                 return true;
             case R.id.receipt_list:
-                startActivity(new Intent(this, VoteReceiptListScreen.class));
+                startActivity(new Intent(this, VoteReceiptListActivity.class));
                 return true;
             case R.id.publish_document:
                 showPublishDialog();
@@ -301,19 +301,19 @@ public class NavigationDrawer extends ActionBarActivity {
                 .setTitle(R.string.publish_document_lbl).setIcon(R.drawable.view_detailed_32)
                 .setItems(R.array.publish_options, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(NavigationDrawer.this, WebActivity.class);
+                        Intent intent = new Intent(NavigationDrawer.this, EventPublishingActivity.class);
                         switch (which) {
                             case 0:
-                                intent.putExtra(WebActivity.SCREEN_EXTRA_KEY,
-                                        WebActivity.Screen.PUBLISH_VOTING.toString());
+                                intent.putExtra(EventPublishingActivity.FORM_TYPE_KEY,
+                                        Operation.Tipo.PUBLICACION_VOTACION_SMIME.toString());
                                 break;
                             case 1:
-                                intent.putExtra(WebActivity.SCREEN_EXTRA_KEY,
-                                        WebActivity.Screen.PUBLISH_MANIFEST.toString());
+                                intent.putExtra(EventPublishingActivity.FORM_TYPE_KEY,
+                                        Operation.Tipo.PUBLICACION_MANIFIESTO_PDF.toString());
                                 break;
                             case 2:
-                                intent.putExtra(WebActivity.SCREEN_EXTRA_KEY,
-                                        WebActivity.Screen.PUBLISH_CLAIM.toString());
+                                intent.putExtra(EventPublishingActivity.FORM_TYPE_KEY,
+                                        Operation.Tipo.PUBLICACION_RECLAMACION_SMIME.toString());
                                 break;
                         }
                         startActivity(intent);

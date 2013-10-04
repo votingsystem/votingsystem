@@ -54,10 +54,10 @@ import java.util.List;
 import static org.sistemavotacion.android.AppData.ALIAS_CERT_USUARIO;
 import static org.sistemavotacion.android.AppData.KEY_STORE_FILE;
 
-public class VoteReceiptListScreen extends ActionBarActivity
+public class VoteReceiptListActivity extends ActionBarActivity
         implements CertPinDialogListener, ReceiptOperationsListener {
 
-    public static final String TAG = "VoteReceiptListScreen";
+    public static final String TAG = "VoteReceiptListActivity";
 
 
     private static final String OPTIONS_DIALOG_ID = "optionsDialog";
@@ -260,7 +260,7 @@ public class VoteReceiptListScreen extends ActionBarActivity
                 if(voteReceipt.isCanceled()) {
                     Log.d(TAG + ".ReceiptListAdapter.getView(...)", " - voteReceipt: " + voteReceipt.getId()
                             + " -position: " + position + " - isCanceled");
-                    receiptState.setText(getContext().getString(R.string.canceled_lbl));
+                    receiptState.setText(getContext().getString(R.string.vote_canceled_receipt_lbl));
                     receiptState.setVisibility(View.VISIBLE);
                 } else {
                     Log.d(TAG + ".ReceiptListAdapter.getView(...)", " - voteReceipt: " + voteReceipt.getId()

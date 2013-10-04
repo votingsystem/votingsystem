@@ -9,6 +9,7 @@ import android.widget.Toast;
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.bouncycastle2.jce.provider.BouncyCastleProvider;
 import org.sistemavotacion.modelo.ActorConIP;
+import org.sistemavotacion.modelo.ControlAcceso;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Operation;
 import org.sistemavotacion.modelo.Respuesta;
@@ -143,7 +144,8 @@ public class AppData {
                 e.printStackTrace();
                 showMessage(context.getString(R.string.CONTROL_CENTER_CONECTION_ERROR_MSG), context);
             }
-        }
+        } else if(Tipo.EVENTO_FIRMA == event.getTipo()) this.eventoSeleccionado.setControlAcceso(
+                new ControlAcceso(controlAcceso));
 	}
 	
 	public Evento getEvent() {

@@ -57,10 +57,10 @@ import static org.sistemavotacion.android.AppData.KEY_STORE_FILE;
 import static org.sistemavotacion.android.AppData.PREFS_ID_SOLICTUD_CSR;
 
 
-public class UserCertResponseForm extends ActionBarActivity
+public class UserCertResponseActivity extends ActionBarActivity
 	implements CertPinDialogListener {
 	
-	public static final String TAG = "UserCertResponseForm";
+	public static final String TAG = "UserCertResponseActivity";
 	
 	
 	private ProgressDialog progressDialog = null;
@@ -109,7 +109,7 @@ public class UserCertResponseForm extends ActionBarActivity
 			    		break;
 			    	case CON_CSR:
 			    	case CON_CERTIFICADO:
-			    		intent = new Intent(getBaseContext(), UserCertRequestForm.class);
+			    		intent = new Intent(getBaseContext(), UserCertRequestActivity.class);
 			    		break;
           	  	}
           	  	if(intent != null) {
@@ -140,7 +140,7 @@ public class UserCertResponseForm extends ActionBarActivity
 	        	} */
 	        	Log.d(TAG + ".checkCertState() ", "- idSolicitudCSR: " + idSolicitudCSR);	
 	            progressDialog = ProgressDialog.show(
-	            		UserCertResponseForm.this,
+	            		UserCertResponseActivity.this,
 	            		getString(R.string.connecting_caption),
 	            		getString(R.string.cert_state_msg), true,
 	    	            true, new DialogInterface.OnCancelListener() {

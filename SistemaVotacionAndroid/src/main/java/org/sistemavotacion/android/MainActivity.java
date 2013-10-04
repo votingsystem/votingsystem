@@ -115,8 +115,8 @@ public class MainActivity extends FragmentActivity {
             	Log.d(TAG + ".onCreate(...)", " - operation: " + operation.getTipo());
             	if(msg != null) {
                     appData.checkConnection(getBaseContext());
-            		Intent intent = new Intent(this, WebActivity.class);
-     			    intent.putExtra(WebActivity.OPERATION_KEY, msg);
+            		Intent intent = new Intent(this, EventPublishingActivity.class);
+     			    intent.putExtra(Operation.OPERATION_KEY, msg);
      			    startActivity(intent);
             	}
             } 
@@ -147,7 +147,7 @@ public class MainActivity extends FragmentActivity {
 	    			editor.putString(PREFS_ID_APLICACION, idAplicacion);
 			        editor.commit();
 	    		}
-	            setContentView(R.layout.init_screen);
+	            setContentView(R.layout.main_screen);
 	            Button cancelarButton = (Button) findViewById(R.id.cancelar_button);
 	            cancelarButton.setOnClickListener(new OnClickListener() {
 	                public void onClick(View v) { 
@@ -160,13 +160,13 @@ public class MainActivity extends FragmentActivity {
 	            Button solicitarButton = (Button) findViewById(R.id.solicitar_button);
 	            solicitarButton.setOnClickListener(new OnClickListener() {
 	                public void onClick(View v) {
-	                	Intent intent = new Intent(getBaseContext(), UserCertRequestForm.class);
+	                	Intent intent = new Intent(getBaseContext(), UserCertRequestActivity.class);
 	                	startActivity(intent);
 	                }
 	            });
 	    		break;
 	    	case CON_CSR:
-	    		intent = new Intent(getBaseContext(), UserCertResponseForm.class);
+	    		intent = new Intent(getBaseContext(), UserCertResponseActivity.class);
 	    		break;
 	    	case CON_CERTIFICADO:
 	    		intent = new Intent(getBaseContext(), NavigationDrawer.class);
@@ -187,11 +187,11 @@ public class MainActivity extends FragmentActivity {
     		switch(operation.getTipo()) {
 		        case VOTAR:
 		        	Log.d(TAG + ".setActivityState(...)", " - intent voting ---- ");
-		        	intent = new Intent(this, VotingEventScreen.class);
+		        	intent = new Intent(this, VotingEventActivity.class);
 		        	break;
 		        case FIRMAR_MANIFIESTO:
 		        case FIRMAR_RECLAMACION:
-		        	intent = new Intent(this, EventScreen.class);
+		        	intent = new Intent(this, EventActivity.class);
 		        	break;
 		        default: 
 		        	Log.e(TAG + ".processOperation(...)", "- unknown operation");;

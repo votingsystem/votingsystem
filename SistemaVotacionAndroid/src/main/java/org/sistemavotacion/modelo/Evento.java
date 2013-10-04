@@ -51,7 +51,6 @@ public class Evento implements Serializable {
     private String URL;
     private Integer numeroTotalFirmas;
     private Integer numeroTotalVotos;
-    private String controlAccesoServerURL;    
     private Boolean firmado;
     private MensajeMime mensajeMime;
     private CentroControl centroControl;
@@ -376,20 +375,6 @@ public class Evento implements Serializable {
      */
     public void setConsultasDeVoto(Set<ConsultaVoto> consultasDeVoto) {
         this.consultasDeVoto = consultasDeVoto;
-    }
-
-    /**
-     * @return the controlAccesoServerURL
-     */
-    public String getControlAccesoServerURL() {
-        return controlAccesoServerURL;
-    }
-
-    /**
-     * @param controlAccesoServerURL the controlAccesoServerURL to set
-     */
-    public void setControlAccesoServerURL(String controlAccesoServerURL) {
-        this.controlAccesoServerURL = controlAccesoServerURL;
     }
 
     /**

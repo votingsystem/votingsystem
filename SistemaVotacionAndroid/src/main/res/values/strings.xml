@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <string name="vote_canceled_receipt_lbl">Recibo de anulación de voto</string>
+    <string name="save_cancelation_receipt_lbl">Guardar recibo de la cancelación</string>
+    <string name="loading_data_msg">Cargando datos, por favor espere</string>
     
     <string name="sending_data_caption">Por favor, espere</string>
     <string name="sending_data_lbl">Enviando información ... </string>
@@ -37,7 +41,7 @@
     <string name="publish_voting_caption">Publicando votación</string>
     <string name="publish_claim_caption">Publicando reclamación</string>
     <string name="publish_manifest_caption">Publicando manifiesto</string>
-    <string name="publishing_document_msg">Publicando documento</string>   
+    <string name="publishing_document_msg">Publicando documento...</string>
 
     <string name="publish_claim_OK_prefix_msg">La reclamación</string>
     <string name="publish_voting_OK_prefix_msg">La votación</string>
@@ -248,5 +252,6 @@
     <string name="get_cert_error_msg">Error obteniendo certificado de: </string>
 
     <string name="event_canceled">Evento cancelado</string>
+    <string name="info_lbl">Información</string>
 
 </resources>

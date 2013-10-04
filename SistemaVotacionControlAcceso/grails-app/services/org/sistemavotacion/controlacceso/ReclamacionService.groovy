@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import grails.converters.JSON
 
 import org.codehaus.groovy.grails.web.json.JSONObject;
+import org.sistemavotacion.controlacceso.modelo.EventoReclamacion;
 import org.sistemavotacion.controlacceso.modelo.Respuesta;
 import org.sistemavotacion.smime.*;
 import org.sistemavotacion.seguridad.*;
@@ -11,6 +12,7 @@ import org.sistemavotacion.util.*;
 import javax.mail.internet.MimeMessage;
 import org.sistemavotacion.controlacceso.modelo.*;
 import java.util.Locale;
+import java.util.Map;
 
 class ReclamacionService {
 	
@@ -106,5 +108,28 @@ class ReclamacionService {
 			 tipo:Tipo.FIRMA_RECLAMACION_SMIME)
 	 }
 	 
+	 public Map getStatisticsMap (EventoReclamacion event, Locale locale) {
+		 log.debug("getStatisticsMap - eventId: ${event?.id}")
+		 if(!event) return null
+		 def statisticsMap = new HashMap()
+		 statisticsMap.camposReclamacion = []
+		 statisticsMap.id = event.id
+		 statisticsMap.asunto = event.asunto
+		 statisticsMap.numeroFirmas = Firma.countByEvento(event)
+		 statisticsMap.estado =  event.estado.toString()
+		 statisticsMap.fechaInicio = event.getFechaInicio()
+		 statisticsMap.fechaFin = event.getFechaFin()
+		 statisticsMap.solicitudPublicacionURL = "${grailsApplication?.config.grails.serverURL}" +
+			 "/eventoReclamacion/${event.id}/firmado"
+		 statisticsMap.solicitudPublicacionValidadaURL = "${grailsApplication?.config.grails.serverURL}" +
+			 "/eventoReclamacion/${event.id}/validado"
+		 statisticsMap.informacionFirmasReclamacionURL = "${grailsApplication?.config.grails.serverURL}" +
+			 "/eventoReclamacion/${event.id}/informacionFirmas"
+		 statisticsMap.URL = "${grailsApplication.config.grails.serverURL}/evento/${event.id}"
+		 event.camposEvento.each { campo ->
+			 statisticsMap.camposReclamacion.add(campo.contenido)
+		 }
+		 return statisticsMap
+	 }
 	 
 }

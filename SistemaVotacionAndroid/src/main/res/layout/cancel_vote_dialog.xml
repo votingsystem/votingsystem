@@ -24,7 +24,7 @@
             android:layout_marginRight="30dp"
             android:layout_weight="0.43"
             android:drawableLeft="@drawable/filesave_22x22"
-            android:text="@string/guardar_recibo_voto_label"
+            android:text="@string/save_cancelation_receipt_lbl"
             android:textStyle="bold" />
 
     </LinearLayout>

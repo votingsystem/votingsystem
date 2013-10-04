@@ -13,6 +13,7 @@ import org.sistemavotacion.util.*
 class EventoReclamacionController {
 
     def eventoReclamacionService
+	def reclamacionService
     def eventoService
 	def firmaService
 	
@@ -206,24 +207,15 @@ class EventoReclamacionController {
 			}
 		} else eventoReclamacion = params.evento
         if (eventoReclamacion) {
-            response.status = Respuesta.SC_OK
-            def estadisticasMap = new HashMap()
-            estadisticasMap.id = eventoReclamacion.id
-            estadisticasMap.tipo = Tipo.EVENTO_RECLAMACION.toString()
-            estadisticasMap.numeroFirmas = eventoReclamacion.firmas.size()
-            estadisticasMap.estado =  eventoReclamacion.estado.toString()
-            estadisticasMap.usuario = eventoReclamacion.usuario.getNif()
-            estadisticasMap.fechaInicio = eventoReclamacion.getFechaInicio()
-            estadisticasMap.fechaFin = eventoReclamacion.getFechaFin()
-            estadisticasMap.solicitudPublicacionURL = "${grailsApplication.config.grails.serverURL}" +
-				"/eventoReclamacion/${eventoReclamacion.id}/firmado"
-            estadisticasMap.solicitudPublicacionValidadaURL = "${grailsApplication.config.grails.serverURL}" + 
-				"/eventoReclamacion/${eventoReclamacion.id}/validado"
-			estadisticasMap.informacionFirmasReclamacionURL = "${grailsApplication.config.grails.serverURL}" + 
-				"/eventoReclamacion/${eventoReclamacion.id}/informacionFirmas"
-			estadisticasMap.URL = "${grailsApplication.config.grails.serverURL}/evento/${eventoReclamacion.id}"
-			render estadisticasMap as JSON
-            return false
+            def statisticsMap = reclamacionService.getStatisticsMap(eventoReclamacion, request.getLocale())
+			if(request.contentType?.contains("application/json")) {
+				if (params.callback) render "${params.callback}(${statisticsMap as JSON})"
+				else render statisticsMap as JSON
+				return false
+			} else {
+				render(view:"statistics", model: [statisticsMap:statisticsMap])
+				return
+			}
         }
         response.status = Respuesta.SC_NOT_FOUND
         render message(code: 'eventNotFound', args:[params.id])

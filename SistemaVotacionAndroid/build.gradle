@@ -35,6 +35,9 @@ android {
             java {
                 srcDirs = ["src/main/java", "src/bc/java", "src/itext/java"]
             }
+            resources {
+                srcDir 'src/itext/java'
+            }
         }
     }
 

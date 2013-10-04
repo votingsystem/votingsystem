@@ -74,13 +74,13 @@
         </activity>
 
 
-        <activity android:name="org.sistemavotacion.android.UserCertRequestForm" android:noHistory="true" 
+        <activity android:name=".UserCertRequestActivity" android:noHistory="true"
             android:configChanges="orientation|keyboard" android:theme="@style/Theme.AppCompat.Light"/>
         
-        <activity android:name="org.sistemavotacion.android.UserCertResponseForm" android:noHistory="true"
+        <activity android:name=".UserCertResponseActivity" android:noHistory="true"
             android:theme="@style/Theme.AppCompat.Light"/>
         
-        <activity android:name="org.sistemavotacion.android.WebActivity" android:label="@string/app_name"
+        <activity android:name=".EventPublishingActivity" android:label="@string/app_name"
             android:screenOrientation="landscape" android:noHistory="true"
             android:theme="@style/Theme.AppCompat.Light"/>
 
@@ -88,18 +88,18 @@
             android:label="@string/app_name" android:theme="@style/Theme.AppCompat.Light"/>
 
 
-        <activity android:name="org.sistemavotacion.android.ui.VoteReceiptListScreen"
+        <activity android:name=".ui.VoteReceiptListActivity"
             android:label="@string/app_name" android:theme="@style/Theme.AppCompat.Light"/>
            
         <!-- <activity android:label="@string/app_name"  android:screenOrientation="portrait"
-            android:name="org.sistemavotacion.android.EventScreen" />-->
+            android:name="org.sistemavotacion.android.EventActivityty" />-->
 
         <activity android:label="@string/app_name"
-            android:name="org.sistemavotacion.android.EventScreen"
+            android:name=".EventActivity"
             android:theme="@style/Theme.AppCompat.Light"/>
         
         <activity android:label="@string/app_name"
-            android:name="org.sistemavotacion.android.VotingEventScreen"
+            android:name=".VotingEventActivity"
             android:theme="@style/Theme.AppCompat.Light"/>
         
                 <!-- This provider declaration informs the Search Manager that you have a provider of -->
@@ -107,7 +107,6 @@
         
         <provider android:name="org.sistemavotacion.util.SearchSuggestionProvider"
                   android:authorities="org.sistemavotacion.util.SuggestionProvider" />
-        <service android:name="org.sistemavotacion.android.service.PublishService"/>
-        
+
     </application>
 </manifest>

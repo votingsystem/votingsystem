@@ -12,8 +12,23 @@ public class ControlAcceso extends ActorConIP implements Serializable {
     public static final long serialVersionUID = 1L;
     
     private Evento evento;
-    private String urlClientePublicacionJNLP;
     private Set<CentroControl> centrosDeControl;
+
+
+    public ControlAcceso() {}
+
+    public ControlAcceso(ActorConIP actorConIP) {
+        setCertificado(actorConIP.getCertificado());
+        setCertChain(actorConIP.getCertChain());
+        setCertificadoPEM(actorConIP.getCertificadoPEM());
+        setCertificadoURL(actorConIP.getCertificadoURL());
+        setDateCreated(actorConIP.getDateCreated());
+        setId(actorConIP.getId());
+        setEstado(actorConIP.getEstado());
+        setServerURL(actorConIP.getServerURL());
+        setLastUpdated(actorConIP.getLastUpdated());
+        setNombre(actorConIP.getNombre());
+    }
 
     public void setEvento(Evento evento) {
         this.evento = evento;
@@ -26,21 +41,6 @@ public class ControlAcceso extends ActorConIP implements Serializable {
     @Override
     public Tipo getTipo() {
         return Tipo.CENTRO_CONTROL;
-    }
-
-
-    /**
-     * @return the urlClientePublicacionJNLP
-     */
-    public String getURLClientePublicacionJNLP() {
-        return urlClientePublicacionJNLP;
-    }
-
-    /**
-     * @param urlClientePublicacionJNLP the urlClientePublicacionJNLP to set
-     */
-    public void setUrlClientePublicacionJNLP(String urlClientePublicacionJNLP) {
-        this.urlClientePublicacionJNLP = urlClientePublicacionJNLP;
     }
 
     /**

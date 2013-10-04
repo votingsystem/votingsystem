@@ -15,10 +15,6 @@
   		</script>
   		<script type="text/javascript">
 
-				function setVotingWebAppMessage(appMessage) {
-					androidClient.setVotingWebAppMessage(appMessage);
-				}
-
 				function setEditorData(appMessage) {
 					androidClient.setEditorData(appMessage);
 				}

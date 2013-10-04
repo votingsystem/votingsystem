@@ -1,6 +1,7 @@
 package org.sistemavotacion.util;
 
-import org.sistemavotacion.android.WebActivity;
+import org.sistemavotacion.modelo.Evento;
+import org.sistemavotacion.modelo.Operation;
 
 import java.text.MessageFormat;
 
@@ -116,16 +117,16 @@ public class ServerPaths {
     }
     
     public static String getURLPublish (
-    		String serverURL, WebActivity.Screen screen) {
+    		String serverURL, Operation.Tipo type) {
     	String param = null;
-    	switch(screen) {
-	    	case PUBLISH_CLAIM:
+    	switch(type) {
+	    	case PUBLICACION_RECLAMACION_SMIME:
 	    		param = "claim";
 	    		break;
-	    	case PUBLISH_MANIFEST:
+	    	case PUBLICACION_MANIFIESTO_PDF:
 	    		param = "manifest";
 	    		break;
-	    	case PUBLISH_VOTING:
+	    	case PUBLICACION_VOTACION_SMIME:
 	    		param = "vote";
 	    		break;
     	}
@@ -184,5 +185,22 @@ public class ServerPaths {
     		String serverURL, String idSolicitudCSR) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         return serverURL + sufijoURLSolicitudCertificadoUsuario + idSolicitudCSR;             
+    }
+
+    public static String getURLStatistics(Evento event) {
+        String basePath = event.getControlAcceso().getServerURL();
+        if (!basePath.endsWith("/")) basePath = basePath + "/";
+        switch(event.getTipo()) {
+            case EVENTO_VOTACION:
+                basePath = basePath + "eventoVotacion/";
+                break;
+            case EVENTO_RECLAMACION:
+                basePath = basePath + "eventoReclamacion/";
+                break;
+            case EVENTO_FIRMA:
+                basePath = basePath + "eventoFirma/";
+                break;
+        }
+        return basePath + event.getId() + "/estadisticas";
     }
 }

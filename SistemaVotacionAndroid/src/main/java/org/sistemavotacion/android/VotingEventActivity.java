@@ -28,7 +28,9 @@ import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -63,9 +65,9 @@ import java.util.Set;
 import static org.sistemavotacion.android.AppData.KEY_STORE_FILE;
 import static org.sistemavotacion.android.AppData.MAX_SUBJECT_SIZE;
 
-public class VotingEventScreen extends ActionBarActivity implements CertPinDialogListener {
+public class VotingEventActivity extends ActionBarActivity implements CertPinDialogListener {
 
-    public static final String TAG = "VotingEventScreen";
+    public static final String TAG = "VotingEventActivity";
 
     public enum Operation {CANCEL_VOTE, SAVE_VOTE, VOTE};
 
@@ -121,6 +123,11 @@ public class VotingEventScreen extends ActionBarActivity implements CertPinDialo
         Log.d(TAG + ".onRestoreInstanceState(...) ", " -- onRestoreInstanceState --");
     }
 
+    @Override public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.event, menu);
+        return true;
+    }
+
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
         switch (item.getItemId()) {
@@ -128,6 +135,11 @@ public class VotingEventScreen extends ActionBarActivity implements CertPinDialo
                 Intent intent = new Intent(this, NavigationDrawer.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
+                return true;
+            case R.id.eventInfo:
+                Intent infoIntent = new Intent(this, EventStatisticsActivity.class);
+                infoIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(infoIntent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -198,7 +210,7 @@ public class VotingEventScreen extends ActionBarActivity implements CertPinDialo
 			builder.setTitle(getString(R.string.error_lbl)).
 				setMessage(ex.getMessage()).show();
 		}*/
-        VoteReceiptDBHelper db = new VoteReceiptDBHelper(VotingEventScreen.this);
+        VoteReceiptDBHelper db = new VoteReceiptDBHelper(VotingEventActivity.this);
         try {
             receipt.setId(db.insertVoteReceipt(receipt));
             saveReceiptButton.setEnabled(false);
@@ -318,7 +330,7 @@ public class VotingEventScreen extends ActionBarActivity implements CertPinDialo
         Log.d(TAG + ".onClickSubject(...)", " - onClickSubject");
         if(evento != null && evento.getAsunto() != null &&
                 evento.getAsunto().length() > MAX_SUBJECT_SIZE) {
-            AlertDialog.Builder builder= new AlertDialog.Builder(VotingEventScreen.this);
+            AlertDialog.Builder builder= new AlertDialog.Builder(VotingEventActivity.this);
             builder.setTitle(getString(R.string.subject_lbl));
             builder.setMessage(evento.getAsunto());
             builder.show();
@@ -358,6 +370,7 @@ public class VotingEventScreen extends ActionBarActivity implements CertPinDialo
     }
 
     private void showPinScreen(String message) {
+        isDestroyed = false;
         CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         Fragment prev = getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
@@ -415,6 +428,10 @@ public class VotingEventScreen extends ActionBarActivity implements CertPinDialo
             progressContainer.setVisibility(View.GONE);
             //eventContainer.setVisibility(View.VISIBLE);
             mainLayout.getForeground().setAlpha( 0); // restore
+            progressContainer.setOnTouchListener(new View.OnTouchListener() {
+                //to enable touch events on background view
+                @Override public boolean onTouch(View v, MotionEvent event) {return false;}
+            });
         } else {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(
@@ -425,6 +442,10 @@ public class VotingEventScreen extends ActionBarActivity implements CertPinDialo
             progressContainer.setVisibility(View.VISIBLE);
             //eventContainer.setVisibility(View.INVISIBLE);
             mainLayout.getForeground().setAlpha(150); // dim
+            progressContainer.setOnTouchListener(new View.OnTouchListener() {
+                //to disable touch events on background view
+                @Override public boolean onTouch(View v, MotionEvent event) { return true; }
+            });
         }
     }
 
@@ -525,7 +546,7 @@ public class VotingEventScreen extends ActionBarActivity implements CertPinDialo
                         String msg = getString(R.string.cancel_vote_result_msg,
                                 receipt.getVoto().getAsunto());
                         if(receipt.getId() > 0) {
-                            VoteReceiptDBHelper db = new VoteReceiptDBHelper(VotingEventScreen.this);
+                            VoteReceiptDBHelper db = new VoteReceiptDBHelper(VotingEventActivity.this);
                             try {
                                 db.insertVoteReceipt(receipt);
                             } catch (Exception ex) {
@@ -544,14 +565,7 @@ public class VotingEventScreen extends ActionBarActivity implements CertPinDialo
                     }
                     break;
             }
-
-
-
-
-
         }
-
     }
-
 
 }

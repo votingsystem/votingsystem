@@ -12,8 +12,8 @@ import android.widget.TextView;
 
 import org.sistemavotacion.android.AppData;
 import org.sistemavotacion.android.R;
-import org.sistemavotacion.android.UserCertRequestForm;
-import org.sistemavotacion.android.UserCertResponseForm;
+import org.sistemavotacion.android.UserCertRequestActivity;
+import org.sistemavotacion.android.UserCertResponseActivity;
 
 public class CertNotFoundDialog  extends DialogFragment {
 
@@ -45,10 +45,10 @@ public class CertNotFoundDialog  extends DialogFragment {
             	Intent intent = null;
           	  	switch(AppData.getInstance(getActivity().getBaseContext()).getEstado()) {
           	  		case CON_CSR:
-          	  			intent = new Intent(getActivity(), UserCertResponseForm.class);
+          	  			intent = new Intent(getActivity(), UserCertResponseActivity.class);
           	  			break;
           	  		case SIN_CSR:
-          	  			intent = new Intent(getActivity(), UserCertRequestForm.class);
+          	  			intent = new Intent(getActivity(), UserCertRequestActivity.class);
           	  			break;
           	  	}
           	  	if(intent != null) startActivity(intent);

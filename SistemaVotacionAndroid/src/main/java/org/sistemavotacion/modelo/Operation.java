@@ -19,6 +19,8 @@ import java.text.ParseException;
 public class Operation {
 
 	public static final String TAG = "Operacion";
+
+    public static final String OPERATION_KEY   = "operationKey";
     
     public static enum Tipo {ASOCIAR_CENTRO_CONTROL_SMIME, 
         CAMBIO_ESTADO_CENTRO_CONTROL_SMIME, 

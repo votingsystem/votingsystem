@@ -126,9 +126,26 @@ public class PanelPublicacionManifiesto extends Composite
 		logger.info("Formulario válido - richTextArea.getHTML: " + richTextArea.getHTML());
 		evento.setContenido(richTextToolbar.getHTML());
 		evento.setFechaFin(fechaFinalDateBox.getValue());
-		setWidgetsStatePublicando(true);
-		RequestHelper.doPost(ServerPaths.getUrlPublicarPDF(), 
-				evento.toJSONString(), new PostDocumentRequestCallback());
+		MensajeClienteFirmaJso mensajeClienteFirma = MensajeClienteFirmaJso.create(null, 
+				Operacion.PUBLICACION_MANIFIESTO_PDF.toString(), 
+				MensajeClienteFirmaJso.SC_PROCESANDO);
+		mensajeClienteFirma.setUrlDocumento(ServerPaths.getUrlManifiesto(evento.getId()));
+		mensajeClienteFirma.setUrlEnvioDocumento(ServerPaths.
+				getUrlPublicacionManifiesto());
+    	mensajeClienteFirma.setAsuntoMensajeFirmado(
+    			Constantes.INSTANCIA.asuntoPublicarManifiesto());
+    	mensajeClienteFirma.setContenidoFirma(evento);
+		if(PuntoEntradaEditor.INSTANCIA != null && 
+				PuntoEntradaEditor.INSTANCIA.getAndroidClientLoaded()) {
+    		mensajeClienteFirma.setNombreDestinatarioFirma(
+    				PuntoEntradaEditor.INSTANCIA.servidor.getNombre());
+			Browser.setAndroidClientMessage(mensajeClienteFirma.toJSONString());
+    	} else {
+    		mensajeClienteFirma.setNombreDestinatarioFirma(
+    				PuntoEntrada.INSTANCIA.servidor.getNombre());
+    		setWidgetsStatePublicando(true);
+    		Browser.ejecutarOperacionClienteFirma(mensajeClienteFirma);
+    	}
     }
     
     @UiHandler("cerrarButton")

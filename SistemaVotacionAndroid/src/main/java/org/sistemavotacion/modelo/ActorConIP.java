@@ -219,7 +219,6 @@ public class ActorConIP implements java.io.Serializable {
                  break;
              case CONTROL_ACCESO:
                  actorConIP = new ControlAcceso();
-                 ((ControlAcceso)actorConIP).setUrlClientePublicacionJNLP(actorConIPStr);
                  if (actorConIPJSON.getJSONArray("centrosDeControl") != null) {
                      Set<CentroControl> centrosDeControl = new HashSet<CentroControl>();
                      jsonArray = actorConIPJSON.getJSONArray("centrosDeControl");

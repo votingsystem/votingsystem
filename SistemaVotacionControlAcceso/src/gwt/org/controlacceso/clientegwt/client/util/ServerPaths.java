@@ -181,6 +181,10 @@ public class ServerPaths {
    	 	return getApplicationPath() + "eventoReclamacion";
     }
     
+    public static String getUrlPublicacionManifiesto () {
+   	 	return getApplicationPath() + "eventoFirma";
+    }
+    
     public static String getUrlServerCert() {
     	return getApplicationPath() + "certificado/cadenaCertificacion";
     }

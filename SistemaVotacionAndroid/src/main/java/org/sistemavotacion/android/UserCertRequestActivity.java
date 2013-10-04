@@ -70,9 +70,9 @@ import static org.sistemavotacion.android.AppData.PROVIDER;
 import static org.sistemavotacion.android.AppData.SIGNATURE_ALGORITHM;
 import static org.sistemavotacion.android.AppData.SIG_NAME;
 
-public class UserCertRequestForm extends ActionBarActivity implements CertPinDialogListener {
+public class UserCertRequestActivity extends ActionBarActivity implements CertPinDialogListener {
 
-	public static final String TAG = "UserCertRequestForm";
+	public static final String TAG = "UserCertRequestActivity";
 	
     private ProgressDialog progressDialog = null;
     private String password = null;
@@ -212,7 +212,7 @@ public class UserCertRequestForm extends ActionBarActivity implements CertPinDia
 
     private void showProgressDialog(String dialogMessage) {
         if (progressDialog == null)
-        	progressDialog = new ProgressDialog(UserCertRequestForm.this);
+        	progressDialog = new ProgressDialog(UserCertRequestActivity.this);
     	progressDialog.setMessage(dialogMessage);
     	progressDialog.setIndeterminate(true);
     	progressDialog.setCancelable(false);
@@ -263,11 +263,11 @@ public class UserCertRequestForm extends ActionBarActivity implements CertPinDia
 		        editor.commit();
                 appData.setEstado(AppData.Estado.CON_CSR);
 	        	Intent intent = new Intent(getBaseContext(),
-	        			UserCertResponseForm.class);
+	        			UserCertResponseActivity.class);
 	        	startActivity(intent);
 	        } else {
 	            if (progressDialog != null) progressDialog.dismiss();
-				AlertDialog.Builder builder= new AlertDialog.Builder(UserCertRequestForm.this);
+				AlertDialog.Builder builder= new AlertDialog.Builder(UserCertRequestActivity.this);
 				builder.setTitle(R.string.alert_exception_caption).setMessage(respuesta.getMensaje())
 					.setPositiveButton("OK", null).show();
 	        }

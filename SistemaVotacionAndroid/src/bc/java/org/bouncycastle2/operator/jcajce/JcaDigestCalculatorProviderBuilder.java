@@ -48,7 +48,7 @@ public class JcaDigestCalculatorProviderBuilder
 
                 try {
                     //JJGZ - MessageDigest dig = helper.createDigest(algorithm);
-                	MessageDigest dig = MessageDigest.getInstance(org.sistemavotacion.android.Aplicacion.SIG_HASH);
+                	MessageDigest dig = MessageDigest.getInstance(org.sistemavotacion.android.AppData.SIG_HASH);
                     stream = new DigestOutputStream(dig);
                 }
                 catch (GeneralSecurityException e)

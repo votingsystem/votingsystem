@@ -29,7 +29,9 @@ import android.text.InputType;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
@@ -64,9 +66,9 @@ import static org.sistemavotacion.android.AppData.ASUNTO_MENSAJE_FIRMA_DOCUMENTO
 import static org.sistemavotacion.android.AppData.KEY_STORE_FILE;
 import static org.sistemavotacion.android.AppData.MAX_SUBJECT_SIZE;
 
-public class EventScreen extends ActionBarActivity implements CertPinDialogListener {
+public class EventActivity extends ActionBarActivity implements CertPinDialogListener {
 	
-	public static final String TAG = "EventScreen";
+	public static final String TAG = "EventActivity";
 	
     private Button firmarEnviarButton;
     private Evento evento =  null;
@@ -188,6 +190,11 @@ public class EventScreen extends ActionBarActivity implements CertPinDialogListe
         isProgressShown = false;
         isDestroyed = false;
 	}
+
+    @Override public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.event, menu);
+        return true;
+    }
 	
 	@Override public boolean onOptionsItemSelected(MenuItem item) {
 		Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
@@ -196,8 +203,13 @@ public class EventScreen extends ActionBarActivity implements CertPinDialogListe
 	    		Intent intent = new Intent(this, NavigationDrawer.class);
 	    		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); 
 	    		startActivity(intent);            
-	    		return true;        
-	    	default:            
+	    		return true;
+            case R.id.eventInfo:
+                Intent infoIntent = new Intent(this, EventStatisticsActivity.class);
+                infoIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(infoIntent);
+                return true;
+            default:
 	    		return super.onOptionsItemSelected(item);    
 		}
 	}
@@ -206,7 +218,7 @@ public class EventScreen extends ActionBarActivity implements CertPinDialogListe
 		Log.d(TAG + ".onClickSubject(...)", " - onClickSubject");
 		if(evento != null && evento.getAsunto() != null &&
 				evento.getAsunto().length() > MAX_SUBJECT_SIZE) {
-	    	AlertDialog.Builder builder= new AlertDialog.Builder(EventScreen.this);
+	    	AlertDialog.Builder builder= new AlertDialog.Builder(EventActivity.this);
 			builder.setTitle(getString(R.string.subject_lbl));
 			builder.setMessage(evento.getAsunto());
 			builder.show();	
@@ -230,7 +242,7 @@ public class EventScreen extends ActionBarActivity implements CertPinDialogListe
             Log.d(TAG + ".showClaimFieldsDialog(...)", " - claim without fields");
             return;
         }
-    	AlertDialog.Builder builder= new AlertDialog.Builder(EventScreen.this);
+    	AlertDialog.Builder builder= new AlertDialog.Builder(EventActivity.this);
         LayoutInflater inflater = getLayoutInflater();
         ScrollView mScrollView = (ScrollView) inflater.inflate(R.layout.claim_dinamic_form,
                 (ViewGroup) getCurrentFocus());
@@ -310,6 +322,7 @@ public class EventScreen extends ActionBarActivity implements CertPinDialogListe
 	}
 	
     private void showPinScreen(String message) {
+        isDestroyed = false;
     	CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
 		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 	    Fragment prev = getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
@@ -352,6 +365,13 @@ public class EventScreen extends ActionBarActivity implements CertPinDialogListe
             progressContainer.setVisibility(View.GONE);
             //eventContainer.setVisibility(View.VISIBLE);
             mainLayout.getForeground().setAlpha( 0); // restore
+            progressContainer.setOnTouchListener(new View.OnTouchListener() {
+                //to enable touch events on background view
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    return false;
+                }
+            });
         } else {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(
@@ -362,6 +382,13 @@ public class EventScreen extends ActionBarActivity implements CertPinDialogListe
             progressContainer.setVisibility(View.VISIBLE);
             //eventContainer.setVisibility(View.INVISIBLE);
             mainLayout.getForeground().setAlpha(150); // dim
+            progressContainer.setOnTouchListener(new View.OnTouchListener() {
+                //to disable touch events on background view
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    return true;
+                }
+            });
         }
     }
 

@@ -1,11 +1,8 @@
 package org.sistemavotacion.android;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -196,42 +193,14 @@ public class EventListFragment extends ListFragment
         }
     }
 
-
-    private void showPublishDialog(){
-        Dialog dialog = new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.publish_document_lbl).setIcon(R.drawable.view_detailed_32)
-                .setItems(R.array.publish_options, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(getActivity(), WebActivity.class);
-                        switch (which) {
-                            case 0:
-                                intent.putExtra(WebActivity.SCREEN_EXTRA_KEY,
-                                        WebActivity.Screen.PUBLISH_VOTING.toString());
-                                break;
-                            case 1:
-                                intent.putExtra(WebActivity.SCREEN_EXTRA_KEY,
-                                        WebActivity.Screen.PUBLISH_MANIFEST.toString());
-                                break;
-                            case 2:
-                                intent.putExtra(WebActivity.SCREEN_EXTRA_KEY,
-                                        WebActivity.Screen.PUBLISH_CLAIM.toString());
-                                break;
-                        }
-                        startActivity(intent);
-                    }
-                })
-                .create();
-        dialog.show();
-    }
-
     @Override public void onListItemClick(ListView l, View v, int position, long id) {
         Log.d(TAG +  ".onListItemClick", "Item clicked: " + id);
         Evento event = ((Evento) getListAdapter().getItem(position));
         appData.setEvent(event, getActivity().getBaseContext());
         Intent intent = null;
         if (event.getTipo().equals(Tipo.EVENTO_VOTACION))
-            intent = new Intent(getActivity(), VotingEventScreen.class);
-        else intent = new Intent(getActivity(), EventScreen.class);
+            intent = new Intent(getActivity(), VotingEventActivity.class);
+        else intent = new Intent(getActivity(), EventActivity.class);
         startActivity(intent);
     }
 

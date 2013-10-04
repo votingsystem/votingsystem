@@ -17,7 +17,8 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="5dp"
         android:layout_weight="1"
-        android:orientation="vertical" >
+        android:orientation="vertical"
+        android:background="@android:drawable/list_selector_background">
 
         <TextView
             android:id="@+id/event_subject"

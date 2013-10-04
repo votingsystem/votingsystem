@@ -406,16 +406,21 @@ class EventoFirmaController {
 			} 
 			else eventoFirma = params.evento //forwarded from /evento/estadisticas
 			if (eventoFirma) {
-				def estadisticasMap = eventoService.optenerEventoFirmaJSONMap(eventoFirma)
-				estadisticasMap.numeroFirmas = Documento.countByEventoAndEstado(
+				def statisticsMap = eventoService.optenerEventoFirmaJSONMap(eventoFirma)
+				statisticsMap.numeroFirmas = Documento.countByEventoAndEstado(
 					eventoFirma, Documento.Estado.FIRMA_MANIFIESTO_VALIDADA)
-				estadisticasMap.informacionFirmasURL = "${grailsApplication.config.grails.serverURL}" +
+				statisticsMap.informacionFirmasURL = "${grailsApplication.config.grails.serverURL}" +
 					"/evento/informacionFirmas?id=${eventoFirma.id}"
-				estadisticasMap.URL = "${grailsApplication.config.grails.serverURL}" + 
+				statisticsMap.URL = "${grailsApplication.config.grails.serverURL}" + 
 					"/evento/${eventoFirma.id}"
-				response.status = Respuesta.SC_OK
-				render estadisticasMap as JSON
-				return false
+				if(request.contentType?.contains("application/json")) {
+					if (params.callback) render "${params.callback}(${statisticsMap as JSON})"
+					else render statisticsMap as JSON
+					return false
+				} else {
+					render(view:"statistics", model: [statisticsMap:statisticsMap])
+					return
+				}
 			}
 			response.status = Respuesta.SC_NOT_FOUND
 			render message(code: 'eventNotFound', args:[params.id])
