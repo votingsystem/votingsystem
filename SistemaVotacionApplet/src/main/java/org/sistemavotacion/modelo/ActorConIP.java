@@ -207,8 +207,8 @@ public class ActorConIP {
         return jsonObject;
     }
     
-    public JSONObject obtenerJSON() {
-        logger.debug("obtenerJSON");
+    public JSONObject toJSON() {
+        logger.debug("toJSON");
         Map map = new HashMap();
         map.put("id", id);
         map.put("serverURL", serverURL);

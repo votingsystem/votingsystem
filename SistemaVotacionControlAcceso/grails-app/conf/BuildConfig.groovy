@@ -69,7 +69,6 @@ grails.project.dependency.resolution = {
 			'org.bouncycastle:bctsp-jdk16:1.46',
 			'joda-time:joda-time:2.1',
 			'org.rometools:rome-modules:1.0',
-			'com.google.gwt.google-apis:gwt-visualization:1.1.2',
 			//para hacer funcionar AntBuilder en Cloudfoundry
 			'org.apache.ant:ant:1.8.3',
 			//for rendering plugin in production environments
@@ -85,9 +84,9 @@ grails.project.dependency.resolution = {
     }
 
     plugins {
-		//":resources:1.1.6",
+
         runtime ":hibernate:$grailsVersion", 
-				":jquery:1.8.3",
+				":resources:1.2.1",
 				":database-migration:1.3.2"
 
         // Uncomment these (or add new ones) to enable additional resources capabilities
@@ -97,7 +96,7 @@ grails.project.dependency.resolution = {
 
         build ":tomcat:$grailsVersion"
 
-        compile (":cache:1.0.1", ":gwt:0.8", ":executor:0.3",
+        compile (":cache:1.0.1", ":executor:0.3",
 			":rendering:0.4.3", ":rest-doc-plugin:0.4")
     }
 	

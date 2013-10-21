@@ -67,7 +67,7 @@ public class SaveReceiptDialog extends javax.swing.JDialog {
                 logger.error(ex.getMessage(), ex);
             }
             respuesta.setMensaje(resultado);
-            logger.debug("- guardarRecibo - resultado: " + respuesta.obtenerJSONStr());
+            logger.debug("- guardarRecibo - resultado: " + respuesta.toJSON().toString());
         } else {
             logger.debug(" - Receipt Null - ");
             respuesta.setCodigoEstado(Operacion.SC_ERROR_PETICION);

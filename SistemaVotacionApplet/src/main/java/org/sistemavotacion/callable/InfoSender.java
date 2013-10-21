@@ -1,6 +1,8 @@
 package org.sistemavotacion.callable;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.Respuesta;
@@ -19,9 +21,16 @@ public class InfoSender implements Callable<Respuesta> {
     private String urlToSendDocument;
     private Object documentoEnviado;
     private String documentContentType = null;
+    private List<String> headerNameList = new ArrayList<String>();
 
     public InfoSender(Integer id, Object documentoEnviado, 
-            String documentContentType, String urlToSendDocument) {
+            String documentContentType, String urlToSendDocument, 
+            String... headerNames) {
+        if(headerNames != null) {
+            for(String headerName: headerNames) {
+                headerNameList.add(headerName);
+            }
+        }
         this.id = id;
         this.documentoEnviado = documentoEnviado;
         this.documentContentType = documentContentType;
@@ -41,10 +50,12 @@ public class InfoSender implements Callable<Respuesta> {
         try {
             if(documentoEnviado instanceof File) {
                 respuesta = Contexto.INSTANCE.getHttpHelper().sendFile((File)documentoEnviado, 
-                    documentContentType, urlToSendDocument);
+                    documentContentType, urlToSendDocument,
+                    headerNameList.toArray(new String[headerNameList.size()]));
             } else if(documentoEnviado instanceof byte[]) {
                 respuesta = Contexto.INSTANCE.getHttpHelper().sendByteArray(
-                    (byte[])documentoEnviado, documentContentType, urlToSendDocument);
+                        (byte[])documentoEnviado, documentContentType, urlToSendDocument, 
+                        headerNameList.toArray(new String[headerNameList.size()]));
             }
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);

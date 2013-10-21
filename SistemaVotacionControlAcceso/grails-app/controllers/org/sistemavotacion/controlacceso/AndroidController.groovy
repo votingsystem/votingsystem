@@ -11,14 +11,6 @@ import grails.converters.JSON
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
 class AndroidController {
-
-	/**
-	 * @httpMethod [GET]
-	 * @return Información sobre los servicios que tienen como url base '/actorConIP'.
-	 */
-	def index() {
-		redirect action: "restDoc"
-	}
 	
 	/**
 	 * Este servicio surgió para resolver un problema que surgió en un servicio de hosting.

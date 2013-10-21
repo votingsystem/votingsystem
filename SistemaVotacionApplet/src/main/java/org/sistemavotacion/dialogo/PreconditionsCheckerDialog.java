@@ -5,8 +5,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Future;
 import javax.swing.JDialog;
+import javax.swing.SwingWorker;
 import org.sistemavotacion.AppletFirma;
 import static org.sistemavotacion.AppletFirma.SERVER_INFO_URL_SUFIX;
 import org.sistemavotacion.Contexto;
@@ -50,7 +50,6 @@ public class PreconditionsCheckerDialog extends JDialog {
     private static final Map<String, ActorConIP> actorMap = 
             new HashMap<String, ActorConIP>();
     private Operacion operacion;
-    
     private Frame frame = null;
     private final AppletFirma appletFirma;
 
@@ -63,7 +62,6 @@ public class PreconditionsCheckerDialog extends JDialog {
         initComponents();
         setLocationRelativeTo(null);  
         setTitle(Contexto.INSTANCE.getString("preconditionsCheckerDialogCaption"));
-        
         addWindowListener(new WindowAdapter() {
             public void windowClosed(WindowEvent e) {
                 logger.debug("PreconditionsCheckerDialog window closed event received");
@@ -75,25 +73,14 @@ public class PreconditionsCheckerDialog extends JDialog {
                         Contexto.INSTANCE.getString("operacionCancelada"));
             }
         });
-        
-        Contexto.INSTANCE.submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    checkConditions();
-                } catch (final Exception ex) {
-                    logger.error(ex.getMessage(), ex);
-                    javax.swing.SwingUtilities.invokeLater(new Runnable() {
-                        public void run() {
-                            MensajeDialog errorDialog = new MensajeDialog(frame, true);
-                            errorDialog.setMessage(ex.getMessage(), 
-                                    Contexto.INSTANCE.getString("errorLbl"));
-                        }
-                    });
-                }
-            }
-        });
         pack();
+    }
+    
+    public void showDialog() {
+        logger.debug("showDialog");
+        PreconditionsCheckerWorker worker = new PreconditionsCheckerWorker();
+        worker.execute();
+        setVisible(true);
     }
     
     private void sendResponse(int status, String message) {
@@ -106,161 +93,161 @@ public class PreconditionsCheckerDialog extends JDialog {
         dispose();
     }
     
-    public void checkConditions() throws Exception {
-        logger.debug("checkConditions");
-        Respuesta respuesta = null;
-        switch(operacion.getTipo()) {
-            case ENVIO_VOTO_SMIME:
-                respuesta = checkActorConIP(operacion.getEvento().
-                        getControlAcceso().getServerURL());
-                if(Respuesta.SC_OK != respuesta.getCodigoEstado()) {
-                    logger.error("ERROR checking ACCESS CONTROL");
-                    sendResponse(Operacion.SC_ERROR, respuesta.getMensaje());
-                    return;
-                } else {
-                    ActorConIP accessControl = ActorConIP.parse(respuesta.getMensaje());
-                    Contexto.INSTANCE.setAccessControl(accessControl);
-                }
-                respuesta = checkActorConIP(operacion.getEvento().
-                        getCentroControl().getServerURL());
-                if(Respuesta.SC_OK != respuesta.getCodigoEstado()) {
-                    logger.error("ERROR checking CONTROL CENTER");
-                    sendResponse(Operacion.SC_ERROR, respuesta.getMensaje());
-                    return;
-                } else {
-                    ActorConIP controlCenter = ActorConIP.parse(respuesta.getMensaje());
-                    Contexto.INSTANCE.setControlCenter(controlCenter);
-                }
-                break;
-            case REPRESENTATIVE_REVOKE:
-            case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
-            case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
-            case NEW_REPRESENTATIVE:
-            case REPRESENTATIVE_SELECTION:
-            case PUBLICACION_MANIFIESTO_PDF:
-            case FIRMA_MANIFIESTO_PDF:
-            case PUBLICACION_RECLAMACION_SMIME:
-            case FIRMA_RECLAMACION_SMIME:
-            case PUBLICACION_VOTACION_SMIME:
-            case CANCELAR_EVENTO:
-            case ASOCIAR_CENTRO_CONTROL:
-            case ANULAR_SOLICITUD_ACCESO:
-            case ANULAR_VOTO: 
-            case SOLICITUD_COPIA_SEGURIDAD:
-                respuesta = checkActorConIP(operacion.getUrlServer());
-                if(Respuesta.SC_OK != respuesta.getCodigoEstado()) {
-                    logger.error("ERROR checking ACCESS CONTROL - msg:" + 
-                            respuesta.getMensaje());
-                    sendResponse(Operacion.SC_ERROR, respuesta.getMensaje());
-                    return;
-                } else {
-                    ActorConIP accessControl = ActorConIP.parse(respuesta.getMensaje());
-                    Contexto.INSTANCE.setAccessControl(accessControl);
-                }
-                break;
-            default: 
-                logger.error(" ################# UNKNOWN OPERATION -> " +  
-                        operacion.getTipo());
-                break;
-        }
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                processOperation();
+    class PreconditionsCheckerWorker extends SwingWorker<Respuesta, Object> {
+       
+        @Override public Respuesta doInBackground() {
+            logger.debug("PreconditionsCheckerWorker.doInBackground - operation:" + 
+                    operacion.getTipo());
+            Respuesta respuesta = null;
+            try {
+            switch(operacion.getTipo()) {
+                case ENVIO_VOTO_SMIME:
+                    String accessControlURL = operacion.getEvento().
+                            getControlAcceso().getServerURL().trim();
+                    respuesta = checkActorConIP(accessControlURL);
+                    if(Respuesta.SC_OK != respuesta.getCodigoEstado()) {
+                        return respuesta;
+                    } else {
+                        Contexto.INSTANCE.setAccessControl(
+                                (ActorConIP)respuesta.getData());
+                    }
+                    String controlCenterURL = operacion.getEvento().
+                            getCentroControl().getServerURL().trim();
+                    respuesta = checkActorConIP(controlCenterURL);
+                    if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                        Contexto.INSTANCE.setControlCenter(
+                            (ActorConIP)respuesta.getData());
+                    }
+                    break;
+                case REPRESENTATIVE_REVOKE:
+                case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
+                case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
+                case NEW_REPRESENTATIVE:
+                case REPRESENTATIVE_SELECTION:
+                case PUBLICACION_MANIFIESTO_PDF:
+                case FIRMA_MANIFIESTO_PDF:
+                case PUBLICACION_RECLAMACION_SMIME:
+                case FIRMA_RECLAMACION_SMIME:
+                case PUBLICACION_VOTACION_SMIME:
+                case CANCELAR_EVENTO:
+                case ASOCIAR_CENTRO_CONTROL:
+                case ANULAR_SOLICITUD_ACCESO:
+                case ANULAR_VOTO: 
+                case SOLICITUD_COPIA_SEGURIDAD:
+                    String serverURL = operacion.getUrlServer().trim();
+                    respuesta = checkActorConIP(serverURL);
+                    if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                        Contexto.INSTANCE.setAccessControl(
+                                (ActorConIP)respuesta.getData());
+                    }
+                    break;
+                default: 
+                    logger.error(" ################# UNKNOWN OPERATION -> " +  
+                            operacion.getTipo());
+                    respuesta = new Respuesta(Respuesta.SC_ERROR, 
+                            Contexto.INSTANCE.getString("unknownOperationErrorMsg") +  
+                            operacion.getTipo());
+                    break;
             }
-        });
-        pack();
-    }
+            } catch(Exception ex) {
+                logger.error(ex.getMessage(), ex);
+                return new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+            }
+            return respuesta;
+        }
 
-    
-    private void processOperation() {
-        logger.debug("processOperation: " + operacion.getTipo());
-        switch(operacion.getTipo()) {
-            case GUARDAR_RECIBO_VOTO:
-                javax.swing.SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        SaveReceiptDialog saveReceiptDialog = 
+        @Override protected void done() {
+            try{
+                Respuesta respuesta = get();
+                logger.debug("PreconditionsCheckerWorker.done - operation:" + 
+                        operacion.getTipo() + " - status: " + respuesta.getCodigoEstado());
+                if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                    switch(operacion.getTipo()) {
+                        case GUARDAR_RECIBO_VOTO:
+                            SaveReceiptDialog saveReceiptDialog = 
                                 new SaveReceiptDialog(frame, true, appletFirma);
-                        dispose();
-                        saveReceiptDialog.show(operacion.getArgs()[0]);
-                    }
-                });   
-                break;
-            case NEW_REPRESENTATIVE:
-                javax.swing.SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        RepresentativeDataDialog representativeDialog = 
+                            dispose();
+                            saveReceiptDialog.show(operacion.getArgs()[0]);
+                            break;
+                        case NEW_REPRESENTATIVE:
+                            RepresentativeDataDialog representativeDialog = 
                                 new RepresentativeDataDialog(frame, true, appletFirma);
-                        dispose();
-                        representativeDialog.show(operacion);
-                    }
-                });  
-                break;
-            case ENVIO_VOTO_SMIME:
-                javax.swing.SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        VotacionDialog votacionDialog = new VotacionDialog(
+                            dispose();
+                            representativeDialog.show(operacion);
+                            break;
+                        case ENVIO_VOTO_SMIME:
+                            VotacionDialog votacionDialog = new VotacionDialog(
                                     frame, true, appletFirma);
-                        dispose();
-                        votacionDialog.setVisible(true);
-                    }
-                });    
-                break;
-            case REPRESENTATIVE_REVOKE:
-            case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
-            case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
-            case REPRESENTATIVE_SELECTION:
-            case PUBLICACION_MANIFIESTO_PDF:
-            case FIRMA_MANIFIESTO_PDF:
-            case PUBLICACION_RECLAMACION_SMIME:
-            case FIRMA_RECLAMACION_SMIME:
-            case PUBLICACION_VOTACION_SMIME:
-            case CANCELAR_EVENTO:
-            case ASOCIAR_CENTRO_CONTROL:
-            case ANULAR_SOLICITUD_ACCESO:
-            case ANULAR_VOTO: 
-                javax.swing.SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        FirmaDialog firmaDialog = new FirmaDialog(frame, true, appletFirma);
-                        dispose();
-                        firmaDialog.setVisible(true);
-                    }
-                });
-                break;
-            case SOLICITUD_COPIA_SEGURIDAD:
-                javax.swing.SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        try {
+                            dispose();
+                            votacionDialog.setVisible(true);
+                            break;
+                        case REPRESENTATIVE_REVOKE:
+                        case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
+                        case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
+                        case REPRESENTATIVE_SELECTION:
+                        case PUBLICACION_MANIFIESTO_PDF:
+                        case FIRMA_MANIFIESTO_PDF:
+                        case PUBLICACION_RECLAMACION_SMIME:
+                        case FIRMA_RECLAMACION_SMIME:
+                        case PUBLICACION_VOTACION_SMIME:
+                        case CANCELAR_EVENTO:
+                        case ASOCIAR_CENTRO_CONTROL:
+                        case ANULAR_SOLICITUD_ACCESO:
+                        case ANULAR_VOTO: 
                             FirmaDialog firmaDialog = new FirmaDialog(frame, true, appletFirma);
+                            dispose();
+                            firmaDialog.mostrar();
+                            break;
+                        case SOLICITUD_COPIA_SEGURIDAD:
+                            FirmaDialog firmaDialog1 = new FirmaDialog(frame, true, appletFirma);
                             byte[] bytesPDF = PdfFormHelper.getBackupRequest(
                                     operacion.getEvento().getEventoId().toString(),
                                     operacion.getEvento().getAsunto(), 
                                     operacion.getEmailSolicitante());
                             dispose();
-                            firmaDialog.inicializarSinDescargarPDF(bytesPDF);
-                        } catch(Exception ex) {
-                            logger.error(ex.getMessage(), ex);
-                        }
-                    }
-                });
-                
-
-                break;
-            default:
-                logger.debug("################# UNKNOWN OPERATION -> " + 
-                        operacion.getTipo().toString());
+                            firmaDialog1.inicializarSinDescargarPDF(bytesPDF);
+                            break;
+                        default:
+                            logger.debug("############ UNKNOWN OPERATION -> " + 
+                            operacion.getTipo().toString());
+                            sendResponse(Respuesta.SC_ERROR, Contexto.INSTANCE.
+                                    getString("unknownOperationErrorMsg") +  
+                                    operacion.getTipo());
+                    }            
+                } else {
+                    logger.debug("respuesta.getMensaje(): " + respuesta.getMensaje());
+                    sendResponse(respuesta.getCodigoEstado(), respuesta.getMensaje());
+                }
+            } catch (Exception ex) {
+                logger.error(ex.getMessage(), ex);
+                sendResponse(Respuesta.SC_ERROR, ex.getMessage());
+            }
         }
     }
+
     
-    private Respuesta checkActorConIP(String serverURL) throws Exception {
+    private Respuesta<ActorConIP> checkActorConIP(String serverURL) throws Exception {
         logger.debug(" - checkActorConIP: " + serverURL);
-        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
-        ActorConIP actorConIp = actorMap.get(serverURL);
+        ActorConIP actorConIp = actorMap.get(serverURL.trim());
         if(actorConIp == null) { 
-            String serverInfoURL = serverURL + SERVER_INFO_URL_SUFIX;
+            String serverInfoURL = serverURL;
+            if (!serverInfoURL.endsWith("/")) serverInfoURL = serverInfoURL + "/";
+            serverInfoURL = serverInfoURL + SERVER_INFO_URL_SUFIX;
             InfoGetter infoGetter = new InfoGetter(null, serverInfoURL, null);
-            Future<Respuesta> future = Contexto.INSTANCE.submit(infoGetter);
-            return future.get();
-        } else return new Respuesta(Respuesta.SC_OK);
+            Respuesta respuesta = infoGetter.call();
+            if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                ActorConIP actorConIP = ActorConIP.parse(respuesta.getMensaje());
+                respuesta.setData(actorConIP);
+                logger.error("checkActorConIP - adding " + serverURL.trim() + 
+                        " to actor map");
+                actorMap.put(serverURL.trim(), actorConIP);
+            }
+            return respuesta;
+        } else {
+            Respuesta respuesta = new Respuesta(Respuesta.SC_OK);
+            respuesta.setData(actorConIp);
+            return respuesta;
+        }
     }
     
     /**

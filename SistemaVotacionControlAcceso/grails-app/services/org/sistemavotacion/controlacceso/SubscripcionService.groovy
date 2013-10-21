@@ -199,7 +199,7 @@ class SubscripcionService {
 				CentroControl centroControl = CentroControl.findWhere(serverURL:serverURL)
 				if (centroControl) {
 					msg = messageSource.getMessage('susbcripcion.centroControlYaAsociado',
-						[actorConIP.nombre].toArray(), locale)
+						[centroControl.nombre].toArray(), locale)
 					log.error("asociarCentroControl- CONTROL CENTER ALREADY ASSOCIATED - ${msg}")
 					return new Respuesta(mensaje:msg,
 						codigoEstado:Respuesta.SC_ERROR_PETICION,

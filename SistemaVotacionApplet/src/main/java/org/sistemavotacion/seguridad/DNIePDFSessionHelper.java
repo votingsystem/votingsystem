@@ -56,7 +56,6 @@ import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.smime.CMSUtils;
-import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.OSValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -362,9 +361,9 @@ public class DNIePDFSessionHelper extends CMSSignedGenerator
             selector.setIssuers(collection);
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-            String mensajeError = ex.getMessage();
             if (ex instanceof ArrayIndexOutOfBoundsException) {
-                mensajeError = Contexto.INSTANCE.getString("smartCardReaderErrorMsg");
+                throw new VotingSystemException(
+                        Contexto.INSTANCE.getString("smartCardReaderErrorMsg"));
             }
             if ("CKR_DEVICE_ERROR".equals(ex.getMessage()) || 
                     "CKR_CRYPTOKI_ALREADY_INITIALIZED".equals(ex.getMessage()) ||
@@ -372,10 +371,15 @@ public class DNIePDFSessionHelper extends CMSSignedGenerator
                 closeSession();
                 return getSession(password, signatureMechanism);
             }
-            if ("CKR_PIN_INCORRECT".equals(ex.getMessage())) { }
-            if ("CKR_HOST_MEMORY".equals(ex.getMessage())) mensajeError = 
-                    Contexto.INSTANCE.getString("smartCardReaderErrorMsg");
-            throw new Exception(mensajeError);
+            if ("CKR_PIN_INCORRECT".equals(ex.getMessage())) { 
+                throw new VotingSystemException(
+                        Contexto.INSTANCE.getString("MENSAJE_ERROR_PASSWORD"));
+            }
+            if ("CKR_HOST_MEMORY".equals(ex.getMessage())) {
+                    throw new VotingSystemException(
+                        Contexto.INSTANCE.getString("smartCardReaderErrorMsg"));
+            }
+            throw ex;
         }
         //closeSession();
         return pkcs11Session;

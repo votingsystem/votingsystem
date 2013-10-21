@@ -111,7 +111,7 @@ public class AppletFirma extends JApplet {
             new TimerTask(){
                 public void run() { 
                     //logger.debug("Comprobando operaciones pendientes");
-                    Object object = jsObject.call("obtenerOperacion", null);
+                    Object object = jsObject.call("getMessageToNativeClient", null);
                     if(object != null) {
                         ejecutarOperacion(object.toString());
                     } else {
@@ -142,13 +142,13 @@ public class AppletFirma extends JApplet {
             return;
         }
         logger.debug(" - enviarMensajeAplicacion - status: " + 
-                operacion.getCodigoEstado() + "\n - operación: " + 
-                operacion.obtenerJSONStr());
+                operacion.getCodigoEstado() + " - operación: " + 
+                operacion.toJSON().toString());
         try {
             if(AppletFirma.modoEjecucion == AppletFirma.ModoEjecucion.APPLET) {
-                Object[] args = {operacion.obtenerJSONStr()};
+                Object[] args = {operacion.toJSON().toString()};
                 Object object = netscape.javascript.JSObject.getWindow(this).
-                        call("setClienteFirmaMessage", args);
+                        call("setMessageFromNativeClient", args);
             } else logger.debug("---> APP EXECUTION MODE: " +  
                     AppletFirma.modoEjecucion.toString());
         } catch (Exception ex) {
@@ -157,7 +157,7 @@ public class AppletFirma extends JApplet {
         if(AppletFirma.ModoEjecucion.APLICACION == 
                 AppletFirma.modoEjecucion && operacion.getCodigoEstado() == 
                 Operacion.SC_CANCELADO){
-            logger.debug(" ------ System.exit(0) ------ ");
+            logger.debug(" ------  System.exit(0) ------ ");
             System.exit(0);
         }
     }
@@ -176,16 +176,16 @@ public class AppletFirma extends JApplet {
             PreconditionsCheckerDialog preconditionsChecker = 
                     new PreconditionsCheckerDialog(
                     new JFrame(), true, operacionEnCurso, this);
-            preconditionsChecker.setVisible(true);
+            preconditionsChecker.showDialog();
         }
     }
     
     public static void main (String[] args) { 
         modoEjecucion = ModoEjecucion.APLICACION;
-        Operacion ope = new Operacion();
+        Operacion operation = new Operacion();
         String[] _args = {""};
-        ope.setArgs(_args);
-        logger.debug("ope: " + ope.obtenerJSONStr());
+        operation.setArgs(_args);
+        logger.debug("operation: " + operation.toJSON());
         try {
             Contexto.INSTANCE.init();
             javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
@@ -194,10 +194,10 @@ public class AppletFirma extends JApplet {
                         UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
                         AppletFirma appletFirma = new AppletFirma();
                         appletFirma.start();
-                        File jsonFile = File.createTempFile("operacion", ".json");
+                        File jsonFile = File.createTempFile("publishVoting", ".json");
                         jsonFile.deleteOnExit();
                         FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
-                            .getResourceAsStream("testFiles/claimOperation.json"), jsonFile);        
+                            .getResourceAsStream("testFiles/votingOperation.json"), jsonFile);        
                         appletFirma.ejecutarOperacion(FileUtils.getStringFromFile(jsonFile));
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);

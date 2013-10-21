@@ -46,7 +46,6 @@ task runApp << { task ->
 
 ext {
 	grailsRestDocPluginVersion = "0.4"
-	gwtVisualizationVersion="1.1.2"
 }
 
 task installGrailsRestDocPlugin << { task ->
@@ -93,29 +92,6 @@ task installGrailsRestDocPlugin << { task ->
 	announce.announce("GrailsRestDocPlugin installed", "local")
 }
 
-task installGwtVisualizationApi << { task ->
-	ProcessBuilder pb;
-	Process proc;
-	println grailsRestDocPluginVersion
-	String apiFilePath = "../libs/gwt-visualization-${gwtVisualizationVersion}.zip"
-	if(!file(apiFilePath).exists()) {
-		String fileURL = "http://gwt-google-apis.googlecode.com/files/gwt-visualization-${gwtVisualizationVersion}.zip"
-		println "--- downloading ${fileURL}"
-		ant.get(src:fileURL, dest:apiFilePath)
-		ant.unzip(src:apiFilePath, dest:"../libs")
-		pb = new ProcessBuilder("mvn", "install:install-file", "-Dfile=gwt-visualization.jar",
-			"-DgroupId=com.google.gwt.google-apis", "-DartifactId=gwt-visualization",
-			"-Dversion=${gwtVisualizationVersion}", "-Dpackaging=jar", "-Djavadoc=gwt-visualization-javadoc.jar");
-		pb.directory(file("../libs/gwt-visualization-${gwtVisualizationVersion}"));
-		proc = pb.start();
-		proc.consumeProcessErrorStream(System.err)
-		proc.consumeProcessOutputStream(System.out)
-		if (proc.waitFor() != 0) {
-			throw new RuntimeException('package-plugin GrailsRestDocPlugin failed')
-		}
-		announce.announce("GWT Visualization API installed", "local")
-	}
-}
 
 task generateRestDocs(dependsOn:['installGrailsRestDocPlugin']) << {task ->
 	ProcessBuilder pb  = new ProcessBuilder("grails", "generate-rest-docs");
@@ -127,7 +103,7 @@ task generateRestDocs(dependsOn:['installGrailsRestDocPlugin']) << {task ->
 		throw new RuntimeException('GrailsRestDocPlugin - generate-rest-docs - failed')
 	}
 }
-task war(dependsOn:['copyAppletDeps', 'installGwtVisualizationApi']) << {task ->
+task war(dependsOn:['copyAppletDeps']) << {task ->
 	ProcessBuilder pb = new ProcessBuilder("grails", "war");
 	pb.directory(projectDir);
 	Process proc = pb.start();

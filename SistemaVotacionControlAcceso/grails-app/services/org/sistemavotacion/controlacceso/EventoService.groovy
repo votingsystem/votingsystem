@@ -246,18 +246,18 @@ class EventoService {
 		}
 	}
 
-	public Map optenerEventoJSONMap(Evento eventoItem) {
+	public Map optenerEventoMap(Evento eventoItem) {
 		if(eventoItem instanceof EventoVotacion) 
-			return optenerEventoVotacionJSONMap(eventoItem)
+			return optenerEventoVotacionMap(eventoItem)
 		else if(eventoItem instanceof EventoFirma)
-			return optenerEventoFirmaJSONMap(eventoItem)
+			return optenerEventoFirmaMap(eventoItem)
 		else if(eventoItem instanceof EventoReclamacion)
-			return optenerEventoReclamacionJSONMap(eventoItem)
+			return optenerEventoReclamacionMap(eventoItem)
 	}
 	
 	
 	
-	public Map optenerEventoVotacionJSONMap(EventoVotacion eventoItem) {
+	public Map optenerEventoVotacionMap(EventoVotacion eventoItem) {
 		//log.debug("eventoItem: ${eventoItem.id} - estado ${eventoItem.estado}")
 		def eventoMap = [id: eventoItem.id, fechaCreacion: eventoItem.dateCreated,
 			URL:"${grailsApplication.config.grails.serverURL}/evento/${eventoItem.id}",
@@ -289,7 +289,7 @@ class EventoService {
 		return eventoMap
 	}
 	
-	public Map optenerEventoFirmaJSONMap(EventoFirma eventoItem) {
+	public Map optenerEventoFirmaMap(EventoFirma eventoItem) {
 		//log.debug("eventoItem: ${eventoItem.id} - estado ${eventoItem.estado}")
 		def eventoMap = [id: eventoItem.id, fechaCreacion: eventoItem.dateCreated,
 			URL:"${grailsApplication.config.grails.serverURL}/evento/${eventoItem.id}",
@@ -309,7 +309,7 @@ class EventoService {
 		return eventoMap
 	}
 	
-	public Map optenerEventoReclamacionJSONMap(EventoReclamacion eventoItem) {
+	public Map optenerEventoReclamacionMap(EventoReclamacion eventoItem) {
 		//log.debug("eventoItem: ${eventoItem.id} - estado ${eventoItem.estado}")
 		def eventoMap = [id: eventoItem.id, fechaCreacion: eventoItem.dateCreated,
 			URL:"${grailsApplication.config.grails.serverURL}/evento/${eventoItem.id}",

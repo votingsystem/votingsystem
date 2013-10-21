@@ -21,8 +21,10 @@ import org.slf4j.LoggerFactory;
 import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -56,12 +58,13 @@ public class HttpHelper {
             schemeRegistry.register(
         new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));*/
         cm = new PoolingClientConnectionManager();
+        cm.setMaxTotal(10);
+        cm.setDefaultMaxPerRoute(10); 
         connEvictor = new IdleConnectionEvictor(cm);
         connEvictor.start();
         final HttpParams httpParams = new BasicHttpParams();
         HttpConnectionParams.setConnectionTimeout(httpParams, 15000);
         httpclient = new DefaultHttpClient(cm, httpParams);
-        
     }
     
     public synchronized void initMultiThreadedMode() {
@@ -94,6 +97,7 @@ public class HttpHelper {
             throws IOException, ParseException {
         logger.debug("getData - serverURL: " + serverURL + " - contentType: " 
                 + contentType);  
+        
         Respuesta respuesta = null;
         HttpGet httpget = new HttpGet(serverURL);
         HttpResponse response = null;
@@ -181,7 +185,8 @@ public class HttpHelper {
     }
 
     
-    public Respuesta sendFile (File file, String contentType, String serverURL) {
+    public Respuesta sendFile (File file, String contentType, String serverURL, 
+            String... headerNames) {
         logger.debug("sendFile - contentType: " + contentType + 
                 " - serverURL: " + serverURL); 
         Respuesta respuesta = null;
@@ -196,6 +201,15 @@ public class HttpHelper {
             byte[] responseBytes =  EntityUtils.toByteArray(response.getEntity());
             respuesta = new Respuesta(response.getStatusLine().getStatusCode(),
                     new String(responseBytes), responseBytes);
+            if(headerNames != null) {
+                List<String> headerValues = new ArrayList<String>();
+                for(String headerName: headerNames) {
+                    org.apache.http.Header headerValue = 
+                            response.getFirstHeader(headerName);
+                    headerValues.add(headerValue.getValue());
+                }
+                respuesta.setData(headerValues);
+            }
             EntityUtils.consume(response.getEntity());
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
@@ -229,7 +243,7 @@ public class HttpHelper {
     }
     
     public Respuesta sendByteArray(byte[] byteArray, String contentType,
-            String serverURL) throws IOException {
+            String serverURL, String... headerNames) throws IOException {
         logger.debug("sendByteArray - contentType: " + contentType + 
                 " - serverURL: " + serverURL);
         Respuesta respuesta = null;
@@ -248,7 +262,16 @@ public class HttpHelper {
             byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
             respuesta = new Respuesta(response.getStatusLine().getStatusCode(),
                     new String(responseBytes), responseBytes);
-            //EntityUtils.consume(response.getEntity());
+            if(headerNames != null) {
+                List<String> headerValues = new ArrayList<String>();
+                for(String headerName: headerNames) {
+                    org.apache.http.Header headerValue = 
+                            response.getFirstHeader(headerName);
+                    headerValues.add(headerValue.getValue());
+                }
+                respuesta.setData(headerValues);
+            }
+            EntityUtils.consume(response.getEntity());
         } catch(HttpHostConnectException ex){
             logger.error(ex.getMessage(), ex);
             respuesta = new Respuesta(Respuesta.SC_ERROR, Contexto.INSTANCE.
@@ -332,7 +355,7 @@ public class HttpHelper {
                         // Close expired connections
                         connMgr.closeExpiredConnections();
                         // Optionally, close connections
-                        // that have been idle longer than 5 sec
+                        // that have been idle longer than 30 sec
                         connMgr.closeIdleConnections(30, TimeUnit.SECONDS);
                     }
                 }

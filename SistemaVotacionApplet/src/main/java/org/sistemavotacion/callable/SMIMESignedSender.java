@@ -3,6 +3,8 @@ package org.sistemavotacion.callable;
 import java.io.ByteArrayOutputStream;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.Respuesta;
@@ -26,8 +28,16 @@ public class SMIMESignedSender implements Callable<Respuesta> {
     private KeyPair keypair;
     private Integer id;
     
+    private List<String> headerNameList = new ArrayList<String>();
+    
     public SMIMESignedSender(Integer id, SMIMEMessageWrapper smimeMessage, 
-            String urlToSendDocument, KeyPair keypair, X509Certificate destinationCert) {
+            String urlToSendDocument, KeyPair keypair, X509Certificate destinationCert,
+            String... headerNames) {
+        if(headerNames != null) {
+            for(String headerName: headerNames) {
+                headerNameList.add(headerName);
+            }
+        }
         this.id = id;
         this.smimeMessage = smimeMessage;
         this.urlToSendDocument = urlToSendDocument;
@@ -55,7 +65,8 @@ public class SMIMESignedSender implements Callable<Respuesta> {
             documentContentType = Contexto.SIGNED_CONTENT_TYPE;
         } 
         respuesta = Contexto.INSTANCE.getHttpHelper().sendByteArray(
-            messageToSendBytes, documentContentType, urlToSendDocument);            
+                messageToSendBytes, documentContentType, urlToSendDocument,
+                headerNameList.toArray(new String[headerNameList.size()]));            
         
        if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
             if(keypair != null) {

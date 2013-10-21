@@ -256,6 +256,11 @@ class UrlMappings {
 			action = "getByNif"
 		}
 		
+		"/representative/edit/$nif" {
+			controller = "representative"
+			action = "editRepresentative"
+		}
+		
 		"/representative/image/$id" {
 			controller = "representative"
 			action = "image"

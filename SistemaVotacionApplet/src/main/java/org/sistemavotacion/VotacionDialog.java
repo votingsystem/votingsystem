@@ -8,11 +8,13 @@ import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.security.cert.X509Certificate;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JDialog;
+import javax.swing.SwingWorker;
 import javax.swing.text.html.parser.ParserDelegator;
-import org.sistemavotacion.dialogo.MensajeDialog;
 import org.sistemavotacion.dialogo.PasswordDialog;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Operacion;
@@ -75,7 +77,6 @@ public class VotacionDialog extends JDialog {
                 getTipo().getCaption());
         progressBarPanel.setVisible(false);
         pack();
-        logger.info("Inicializado dialogo voto");
     }
 
     private void sendResponse(int status, String message) {
@@ -245,15 +246,12 @@ public class VotacionDialog extends JDialog {
         dialogoPassword.setVisible(true);
         password = dialogoPassword.getPassword();
         if (password == null) return;
-        final String finalPassword = password;
-        Contexto.INSTANCE.submit(new Runnable() {
-            public void run() {  
-                lanzarVoto(finalPassword);    
-            }
-        });
         mostrarPantallaEnvio(true);
         progressLabel.setText("<html>" + Contexto.INSTANCE.
                 getString("progressLabel") + "</html>");
+        AccesRequestWorker accesRequestWorker = new AccesRequestWorker(password);
+        tareaEnEjecucion = accesRequestWorker;
+        accesRequestWorker.execute();
         pack();       
     }//GEN-LAST:event_enviarButtonActionPerformed
 
@@ -267,10 +265,11 @@ public class VotacionDialog extends JDialog {
         }
         try {
             File documento = new File(Contexto.DEFAULTS.APPTEMPDIR +
+                    UUID.randomUUID().toString() + "_" +
                     appletFirma.getOperacionEnCurso().getTipo().
                     getNombreArchivoEnDisco());
             documento.deleteOnExit();
-            String accessRequest = votoEvento.getAsunto().toString();
+            String accessRequest = votoEvento.getAccessRequestJSON().toString();
             FileUtils.copyStreamToFile(new ByteArrayInputStream(
                     accessRequest.getBytes()), documento);
             logger.info("documento.getAbsolutePath(): " + documento.getAbsolutePath());
@@ -290,72 +289,115 @@ public class VotacionDialog extends JDialog {
     javax.swing.JLabel progressLabel;
     javax.swing.JButton verDocumentoButton;
     // End of variables declaration//GEN-END:variables
+ 
+    class AccesRequestWorker extends SwingWorker<Respuesta, Object> {
 
-    
-    private void lanzarVoto(String password) {
-        try {
-            String fromUser = Contexto.INSTANCE.getString("electorLbl");
-            String toUser =  votoEvento.getControlAcceso().getNombreNormalizado();
-            String msgSubject = Contexto.INSTANCE.getString(
-                    "accessRequestMsgSubject")  + votoEvento.getEventoId();
-            smimeMessage = DNIeSignedMailGenerator.genMimeMessage(fromUser, 
-                    toUser, votoEvento.getAccessRequestJSON().toString(),
-                    password.toCharArray(), msgSubject, null);
-
-            //No se hace la comprobación antes porque no hay usuario en contexto
-            //hasta que no se firma al menos una vez
-            votoEvento.setUsuario(Contexto.INSTANCE.getUsuario());
-
-            X509Certificate accesRequestServerCert = Contexto.INSTANCE.
-                    getAccessControl().getCertificate();
-            AccessRequestor accessRequestor = new AccessRequestor(smimeMessage, 
-                    votoEvento, accesRequestServerCert);
-            Future<Respuesta> future = Contexto.INSTANCE.submit(accessRequestor);
-            tareaEnEjecucion = future;
-            Respuesta respuesta =  future.get();
-            if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {  
-                notificarCentroControl(accessRequestor.getPKCS10WrapperClient(), 
-                        votoEvento);
-            } else {
-                sendResponse(respuesta.getCodigoEstado(), respuesta.getMensaje());
-            }
-        } catch (Exception ex) {
-            mostrarPantallaEnvio(false);
-            logger.error(ex.getMessage(), ex);
-            MensajeDialog mensajeDialog = new MensajeDialog(parentFrame,true);
-            String errorLanzandoVotoMsg = 
-                    Contexto.INSTANCE.getString("errorLanzandoVotoMsg");
-            mensajeDialog.setMessage(errorLanzandoVotoMsg + " - " 
-                    + ex.getMessage(), errorLanzandoVotoMsg);
-        }
-    }
-    
-
+        private String password = null;
+        private PKCS10WrapperClient pkcs10WrapperClient;
         
-    private void notificarCentroControl (PKCS10WrapperClient pkcs10WrapperClient, 
-            Evento votoEvento) {
-        progressLabel.setText("<html><b>" + Contexto.INSTANCE.getString(
-                "notificandoCentroControlLabel") +"</b></html>");
-        mostrarPantallaEnvio(true);
-        String textToSign = votoEvento.getVoteJSON().toString();
-        try {
-            String fromUser = votoEvento.getHashCertificadoVotoBase64();
-            String toUser = StringUtils.getCadenaNormalizada(
-                    votoEvento.getCentroControl().getNombre());
-            String msgSubject = Contexto.INSTANCE.getString("asuntoVoto");
-            smimeMessage = pkcs10WrapperClient.genMimeMessage(fromUser, toUser, 
-                    textToSign, msgSubject, null);
-  
-            String urlVoteService = votoEvento.getUrlRecolectorVotosCentroControl();
-            SMIMESignedSender signedSender = new SMIMESignedSender(null,
-                    smimeMessage, urlVoteService, pkcs10WrapperClient.
-                    getKeyPair(), Contexto.INSTANCE. getControlCenter().getCertificate());
-            Future<Respuesta> future = Contexto.INSTANCE.submit(signedSender);
-            tareaEnEjecucion = future;
-            Respuesta respuesta = future.get();
-            
-            if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {  
-                try {
+        private AccesRequestWorker(String password) {
+            this.password = password;
+        }
+       
+        @Override public Respuesta doInBackground() {
+            logger.debug("AccesRequestWorker.doInBackground");
+            try {
+                String fromUser = Contexto.INSTANCE.getString("electorLbl");
+                String toUser =  votoEvento.getControlAcceso().getNombreNormalizado();
+                String msgSubject = Contexto.INSTANCE.getString(
+                        "accessRequestMsgSubject")  + votoEvento.getEventoId();
+                smimeMessage = DNIeSignedMailGenerator.genMimeMessage(fromUser, 
+                        toUser, votoEvento.getAccessRequestJSON().toString(),
+                        password.toCharArray(), msgSubject, null);
+
+                //No se hace la comprobación antes porque no hay usuario en contexto
+                //hasta que no se firma al menos una vez
+                votoEvento.setUsuario(Contexto.INSTANCE.getUsuario());
+
+                X509Certificate accesRequestServerCert = Contexto.INSTANCE.
+                        getAccessControl().getCertificate();
+                AccessRequestor accessRequestor = new AccessRequestor(smimeMessage, 
+                        votoEvento, accesRequestServerCert);
+                Respuesta respuesta =  accessRequestor.call();
+                pkcs10WrapperClient = accessRequestor.getPKCS10WrapperClient();
+                return respuesta;
+            } catch (Exception ex) {
+                logger.error(ex.getMessage(), ex);
+                return new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+            }
+        }
+
+       @Override protected void done() {
+           mostrarPantallaEnvio(false);
+            try {
+                Respuesta respuesta = get();
+                logger.debug("AccesRequestWorker.done - response status: " + 
+                        respuesta.getCodigoEstado());
+                if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                    progressLabel.setText("<html><b>" + Contexto.INSTANCE.getString(
+                        "notificandoCentroControlLabel") +"</b></html>");
+                    mostrarPantallaEnvio(true);
+                    VoteSenderWorker voteSenderWorker = new VoteSenderWorker(
+                        pkcs10WrapperClient, votoEvento);
+                    tareaEnEjecucion = voteSenderWorker;
+                    voteSenderWorker.execute();
+                } else {
+                    /*MensajeDialog mensajeDialog = new MensajeDialog(parentFrame,true);
+                    String errorLanzandoVotoMsg = 
+                            Contexto.INSTANCE.getString("errorLanzandoVotoMsg");
+                    mensajeDialog.showMessage(errorLanzandoVotoMsg + " - " 
+                            + ex.getMessage(), errorLanzandoVotoMsg);*/
+                    sendResponse(respuesta.getCodigoEstado(), respuesta.getMensaje());
+                }
+            } catch(Exception ex) {
+                sendResponse(Respuesta.SC_ERROR, ex.getMessage());
+            }
+       }
+   }
+    
+    
+    class VoteSenderWorker extends SwingWorker<Respuesta, Object> {
+
+        PKCS10WrapperClient pkcs10WrapperClient;
+        Evento vote;
+        
+        private VoteSenderWorker(PKCS10WrapperClient pkcs10WrapperClient, 
+                Evento votoEvento) {
+            this.pkcs10WrapperClient = pkcs10WrapperClient;
+            this.vote = votoEvento;
+        }
+       
+        @Override public Respuesta doInBackground() {
+            logger.debug("VoteSenderWorker.doInBackground");
+            String textToSign = vote.getVoteJSON().toString();
+            try {
+                String fromUser = votoEvento.getHashCertificadoVotoBase64();
+                String toUser = StringUtils.getCadenaNormalizada(
+                        votoEvento.getCentroControl().getNombre());
+                String msgSubject = Contexto.INSTANCE.getString("asuntoVoto");
+                smimeMessage = pkcs10WrapperClient.genMimeMessage(fromUser, toUser, 
+                        textToSign, msgSubject, null);
+
+                String urlVoteService = votoEvento.getUrlRecolectorVotosCentroControl();
+                SMIMESignedSender signedSender = new SMIMESignedSender(null,
+                        smimeMessage, urlVoteService, pkcs10WrapperClient.
+                        getKeyPair(), Contexto.INSTANCE. getControlCenter().getCertificate(),
+                        "voteURL");
+                return signedSender.call();
+            } catch (Exception ex) {
+                logger.error(ex.getMessage(), ex);
+                return new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+            }
+        }
+
+       @Override protected void done() {
+           mostrarPantallaEnvio(false);
+            try {
+                Respuesta respuesta = get();
+                logger.debug("VoteSenderWorker.done - response status: " + 
+                        respuesta.getCodigoEstado());
+                String msg = respuesta.getMensaje();
+                if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {  
                     SMIMEMessageWrapper validatedVote = respuesta.getSmimeMessage();
                     ReciboVoto reciboVoto = new ReciboVoto(
                             Respuesta.SC_OK, validatedVote, votoEvento);
@@ -363,21 +405,13 @@ public class VotacionDialog extends JDialog {
                     reciboVoto.setVoto(votoEvento);
                     Contexto.INSTANCE.addReceipt(
                         votoEvento.getHashCertificadoVotoBase64(), reciboVoto);
-                    sendResponse(respuesta.getCodigoEstado(), respuesta.getMensaje());
-                } catch (Exception ex) {
-                    logger.error(ex.getMessage(), ex);
-                    sendResponse(Operacion.SC_ERROR_ENVIO_VOTO, ex.getMessage());
+                    //voteURL header
+                    msg = ((List<String>)respuesta.getData()).iterator().next();
                 }
-            } else {
-                logger.error(" - Error enviando voto: " + respuesta.getMensaje());
-                sendResponse(Operacion.SC_ERROR_ENVIO_VOTO, respuesta.getMensaje());
+                sendResponse(respuesta.getCodigoEstado(), msg);
+            } catch(Exception ex) {
+                sendResponse(Respuesta.SC_ERROR, ex.getMessage());
             }
-        } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-            errorDialog.setMessage(ex.getMessage(), 
-                    Contexto.INSTANCE.getString("errorLbl"));
-        }
-    }
-
+       }
+   }
 }

@@ -8,7 +8,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
-import org.sistemavotacion.dialogo.MensajeDialog;
 import org.sistemavotacion.dialogo.PasswordDialog;
 import org.sistemavotacion.modelo.Operacion;
 import org.sistemavotacion.modelo.Respuesta;
@@ -22,15 +21,15 @@ import org.slf4j.LoggerFactory;
 
 import com.itextpdf.text.pdf.PdfReader;
 import java.security.cert.X509Certificate;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
+import java.util.List;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.swing.SwingWorker;
+import org.sistemavotacion.callable.InfoSender;
 import static org.sistemavotacion.modelo.Operacion.Tipo.*;
 import org.sistemavotacion.callable.PDFSignedSender;
 import org.sistemavotacion.callable.SMIMESignedSender;
+import org.sistemavotacion.seguridad.VotingSystemException;
 
 /**
 * @author jgzornoza
@@ -40,14 +39,9 @@ public class FirmaDialog extends JDialog {
 
     private static Logger logger = LoggerFactory.getLogger(FirmaDialog.class);
     
-    private static final int INFO_GETTER   = 0;
-    private static final int SIGNED_SENDER = 1;
-    
-    private static final BlockingQueue<Future<Respuesta>> queue = 
-        new LinkedBlockingQueue<Future<Respuesta>>(3);
-    
     private byte[] bytesDocumento;
-    private volatile boolean mostrandoPantallaEnvio = false;
+    private String eventId = null;
+    private AtomicBoolean mostrandoPantallaEnvio = new AtomicBoolean(false);
     private Frame parentFrame;
     private Future executingTask;
     private AppletFirma appletFirma;
@@ -62,17 +56,6 @@ public class FirmaDialog extends JDialog {
         //parentFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);       
         initComponents();
-        Contexto.INSTANCE.submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    readFutures();
-                } catch (Exception ex) {
-                    logger.error(ex.getMessage(), ex);
-                }
-            }
-        });
-        
         operacion = appletFirma.getOperacionEnCurso();
         if(operacion != null && operacion.getContenidoFirma() != null) {
             bytesDocumento = operacion.getContenidoFirma().toString().getBytes();
@@ -90,21 +73,33 @@ public class FirmaDialog extends JDialog {
                         Contexto.INSTANCE.getString("operacionCancelada"));
             }
         });
-        Operacion.Tipo tipoOperacion = operacion.getTipo();
-        logger.debug(" - tipoOperacion: " + tipoOperacion);
-        setTitle(tipoOperacion.getCaption());
         progressBarPanel.setVisible(false);
         messageLabel.setVisible(false);
+        pack();
+    }
+    
+    public void mostrar() {
+        Operacion.Tipo tipoOperacion = operacion.getTipo();
+        logger.debug("mostrar - tipoOperacion: " + tipoOperacion);
+        setTitle(tipoOperacion.getCaption());
         switch(tipoOperacion) {
             case FIRMA_MANIFIESTO_PDF:
+                verDocumentoButton.setIcon(new ImageIcon(getClass().
+                        getResource("/resources/images/pdf_16x16.png"))); 
+                        progressLabel.setText("<html>" + 
+                Contexto.INSTANCE.getString("obteniendoDocumento") +"</html>");
+                mostrarPantallaEnvio(true);
+                PdfGetterWorker pdfGetterWorker = new PdfGetterWorker();
+                pdfGetterWorker.execute();
+                break;  
             case PUBLICACION_MANIFIESTO_PDF:
                 verDocumentoButton.setIcon(new ImageIcon(getClass().
                         getResource("/resources/images/pdf_16x16.png"))); 
                         progressLabel.setText("<html>" + 
                 Contexto.INSTANCE.getString("obteniendoDocumento") +"</html>");
                 mostrarPantallaEnvio(true);
-                submitCallable(new InfoGetter(INFO_GETTER, 
-                        operacion.getUrlDocumento(), Contexto.PDF_CONTENT_TYPE));
+                PdfGetterWorker publisherWorker = new PdfGetterWorker();
+                publisherWorker.execute();
                 break;                          
             case SOLICITUD_COPIA_SEGURIDAD:
                 verDocumentoButton.setIcon(new ImageIcon(getClass().
@@ -125,80 +120,71 @@ public class FirmaDialog extends JDialog {
                 break;
         }
         pack();
+        setVisible(true);
     }
     
     
-    public void readFutures () {
-        logger.debug(" - readFutures");
-        while (!done.get()) {
+    class PdfGetterWorker extends SwingWorker<Respuesta, Object> {
+       
+        @Override public Respuesta doInBackground() {
+            logger.debug("PdfGetterWorker.doInBackground");
+            switch(operacion.getTipo()) {
+                case FIRMA_MANIFIESTO_PDF:
+                    InfoGetter infoGetter = new InfoGetter(null, 
+                            operacion.getUrlDocumento(), Contexto.PDF_CONTENT_TYPE);
+                    return infoGetter.call();
+                case PUBLICACION_MANIFIESTO_PDF:
+                    InfoSender infoSender = new InfoSender(null, 
+                            operacion.getContenidoFirma().toString().getBytes(),
+                            null, operacion.getUrlEnvioDocumento(), "eventId");
+                    return infoSender.call();   
+            }   
+            return null;
+        }
+
+       @Override protected void done() {
+           logger.debug("PdfGetterWorker.done");
             try {
-                Future<Respuesta> future = queue.take();
-                Respuesta respuesta = future.get();
-                mostrarPantallaEnvio(false);
-                switch(respuesta.getId()) {
-                    case INFO_GETTER:
+                Respuesta respuesta = get();
+                switch(operacion.getTipo()) {
+                    case FIRMA_MANIFIESTO_PDF:
                         if (Respuesta.SC_OK == respuesta.getCodigoEstado()) { 
                             try {
                                 bytesDocumento = respuesta.getMessageBytes();
-                                pack();
                             } catch (Exception ex) {
                                 logger.error(ex.getMessage(), ex);
                             }
                         } else {
                             sendResponse(respuesta.getCodigoEstado(), 
                                     Contexto.INSTANCE.getString(
-                                    "errorDescragandoDocumento") + " - " + respuesta.getMensaje());
+                                    "errorDescargandoDocumento") + " - " + respuesta.getMensaje());
                         }
                         break;
-                    case SIGNED_SENDER:
-                        if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
-                        String msg = null;
-                        if(operacion.isRespuestaConRecibo()) {
-                            try {
-                                logger.debug("showResult - precessing receipt");
-                                ByteArrayInputStream bais = new ByteArrayInputStream(
-                                        respuesta.getMensaje().getBytes());
-                                SMIMEMessageWrapper smimeMessageResp = 
-                                        new SMIMEMessageWrapper(null, bais, null);
-                                String operationStr = smimeMessageResp.getSignedContent();
-                                Operacion result = Operacion.parse(operationStr);
-                                msg = result.getMensaje();
+                    case PUBLICACION_MANIFIESTO_PDF:
+                        if (Respuesta.SC_OK == respuesta.getCodigoEstado()) { 
+                          try {
+                                bytesDocumento = respuesta.getMessageBytes();
+                                eventId = ((List<String>)respuesta.getData()).iterator().next();
+                                String urlEnvioDocumento = operacion.getUrlEnvioDocumento() + 
+                                        "/" + eventId;
+                                operacion.setUrlEnvioDocumento(urlEnvioDocumento);
                             } catch (Exception ex) {
                                 logger.error(ex.getMessage(), ex);
                             }
-                        } else msg = respuesta.getMensaje();
-                        sendResponse(respuesta.getCodigoEstado(), msg);
-                        dispose();
                         } else {
-                            mostrarPantallaEnvio(false);
-                            MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                            errorDialog.setMessage(respuesta.getMensaje(), 
-                                    Contexto.INSTANCE.getString("errorLbl"));
+                            sendResponse(respuesta.getCodigoEstado(), 
+                                    Contexto.INSTANCE.getString(
+                                    "errorDescargandoDocumento") + " - " + respuesta.getMensaje());
                         }
                         break;
-                    default:
-                        logger.error("readFutures --- Unknown response ID ---");
-                        break;
-                }       
-            } catch(CancellationException ex) {
+                }   
+            } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);
-                mostrarPantallaEnvio(false);
-                MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                errorDialog.setMessage(Contexto.INSTANCE.getString("operationCanelledMsg"), 
-                        Contexto.INSTANCE.getString("errorLbl"));
-            } catch(Exception ex) {
-                logger.error(ex.getMessage(), ex);
-                mostrarPantallaEnvio(false);
-                String mensajeError = null;
-                if ("CKR_PIN_INCORRECT".equals(ex.getMessage())) {
-                    mensajeError = Contexto.INSTANCE.getString("MENSAJE_ERROR_PASSWORD");
-                } else mensajeError = ex.getMessage();
-                MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                errorDialog.setMessage(mensajeError, 
-                        Contexto.INSTANCE.getString("errorLbl"));
+                sendResponse(Respuesta.SC_ERROR, ex.getMessage());
             }
-        }
-    }
+            mostrarPantallaEnvio(false);
+       }
+   }
 
     private void sendResponse(int status, String message) {
         done.set(true);
@@ -208,16 +194,6 @@ public class FirmaDialog extends JDialog {
         dispose();
     }
     
-    private void submitCallable(Callable<Respuesta> callable) {
-        Future<Respuesta> future = Contexto.INSTANCE.submit(callable);
-        try {
-            queue.put(future);
-        } catch (InterruptedException ex) {
-            logger.error(ex.getMessage(), ex);
-        }
-        executingTask = future;
-    }
-    
     public void inicializarSinDescargarPDF (byte[] bytesPDF) {
         logger.debug("inicializarSinDescargarPDF");
         bytesDocumento = bytesPDF;
@@ -225,20 +201,16 @@ public class FirmaDialog extends JDialog {
     }
     
     public void mostrarPantallaEnvio (final boolean visibility) {
-        logger.debug("mostrarPantallaEnvio - " + visibility);
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                mostrandoPantallaEnvio = visibility;
-                progressBarPanel.setVisible(visibility);
-                enviarButton.setVisible(!visibility);
-                confirmacionPanel.setVisible(!visibility);
-                if (mostrandoPantallaEnvio) cerrarButton.setText(
-                        Contexto.INSTANCE.getString("cancelar"));
-                else cerrarButton.setText(Contexto.INSTANCE.getString("cerrar"));
-                pack();
-            }
-        }); 
-
+        logger.debug("mostrarPantallaEnvio: " + visibility + 
+                " - mostrandoPantallaEnvio: " + mostrandoPantallaEnvio.get());
+        progressBarPanel.setVisible(visibility);
+        enviarButton.setVisible(!visibility);
+        confirmacionPanel.setVisible(!visibility);
+        mostrandoPantallaEnvio.set(visibility);
+        if (mostrandoPantallaEnvio.get()) cerrarButton.setText(
+                Contexto.INSTANCE.getString("cancelar"));
+        else cerrarButton.setText(Contexto.INSTANCE.getString("cerrar"));
+        pack();
     }
 
     /**
@@ -314,6 +286,7 @@ public class FirmaDialog extends JDialog {
                 .addContainerGap())
         );
 
+        progressLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         progressLabel.setText(bundle.getString("FirmaDialog.progressLabel.text")); // NOI18N
 
         progressBar.setIndeterminate(true);
@@ -332,8 +305,8 @@ public class FirmaDialog extends JDialog {
         progressBarPanelLayout.setVerticalGroup(
             progressBarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(progressBarPanelLayout.createSequentialGroup()
-                .addComponent(progressLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(progressLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -384,7 +357,7 @@ public class FirmaDialog extends JDialog {
     private void cerrarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cerrarButtonActionPerformed
         logger.debug("cerrarButtonActionPerformed - mostrandoPantallaEnvio: " + 
                 mostrandoPantallaEnvio);
-        if (mostrandoPantallaEnvio) {
+        if (mostrandoPantallaEnvio.get()) {
             if (executingTask != null) executingTask.cancel(true);
             mostrarPantallaEnvio(false);
             return;
@@ -392,6 +365,7 @@ public class FirmaDialog extends JDialog {
             sendResponse(Operacion.SC_CANCELADO,
                     Contexto.INSTANCE.getString("operacionCancelada"));
         }
+        dispose();
     }//GEN-LAST:event_cerrarButtonActionPerformed
 
     private void enviarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enviarButtonActionPerformed
@@ -400,71 +374,12 @@ public class FirmaDialog extends JDialog {
         dialogoPassword.setVisible(true);
         password = dialogoPassword.getPassword();
         if (password == null) return;
-        final String finalPassword = password;
         mostrarPantallaEnvio(true);
         progressLabel.setText("<html>" + 
                 Contexto.INSTANCE.getString("progressLabel")+ "</html>");
-        Runnable runnable = new Runnable() {
-            public void run() {  
-                try {
-                    X509Certificate destinationCert = null;
-                    switch(operacion.getTipo()) {
-                        case REPRESENTATIVE_REVOKE:
-                        case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
-                        case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
-                        case REPRESENTATIVE_SELECTION:
-                        case ANULAR_VOTO:
-                        case ANULAR_SOLICITUD_ACCESO:
-                        case CAMBIO_ESTADO_CENTRO_CONTROL_SMIME:
-                        case ASOCIAR_CENTRO_CONTROL:
-                        case FIRMA_RECLAMACION_SMIME:
-                        case PUBLICACION_RECLAMACION_SMIME:
-                        case CANCELAR_EVENTO:
-                        case PUBLICACION_VOTACION_SMIME:
-                            smimeMessage = DNIeSignedMailGenerator.
-                                    genMimeMessage(null, operacion.getNombreDestinatarioFirmaNormalizado(),
-                                    operacion.getContenidoFirma().toString(),
-                                    finalPassword.toCharArray(), operacion.getAsuntoMensajeFirmado(), null); 
-                            destinationCert = Contexto.INSTANCE.
-                                getAccessControl().getCertificate();
-                            SMIMESignedSender senderWorker = new SMIMESignedSender(
-                                    SIGNED_SENDER, smimeMessage, operacion.getUrlEnvioDocumento(), 
-                                    null, destinationCert);
-                            Future<Respuesta> future = Contexto.INSTANCE.submit(senderWorker);
-                            queue.put(future);
-                            executingTask = future;
-                            break;
-                        case SOLICITUD_COPIA_SEGURIDAD:
-                        case FIRMA_MANIFIESTO_PDF:
-                        case PUBLICACION_MANIFIESTO_PDF:
-                            PdfReader readerManifiesto = new PdfReader(bytesDocumento);
-                            String reason = null;
-                            String location = null;
-                            destinationCert = Contexto.INSTANCE.
-                                getAccessControl().getCertificate();
-                            submitCallable(new PDFSignedSender(
-                                    SIGNED_SENDER,  operacion.getUrlEnvioDocumento(), reason, location, 
-                                    finalPassword.toCharArray(), readerManifiesto, 
-                                    null, null, destinationCert));
-                            break;
-                        default:
-                            logger.debug("No se ha encontrado la operación " + operacion.getTipo().toString());
-                            break;
-                    }
-                } catch (Exception ex) {
-                    logger.error(ex.getMessage(), ex);
-                    mostrarPantallaEnvio(false);
-                    String mensajeError = null;
-                    if ("CKR_PIN_INCORRECT".equals(ex.getMessage())) {
-                        mensajeError = Contexto.INSTANCE.getString("MENSAJE_ERROR_PASSWORD");
-                    } else mensajeError = Contexto.INSTANCE.getString("signDocumentErrorMsg");
-                        MensajeDialog errorDialog = new MensajeDialog(parentFrame, true);
-                        errorDialog.setMessage(mensajeError, 
-                                Contexto.INSTANCE.getString("errorLbl"));
-                    }
-            }
-        };
-        Contexto.INSTANCE.submit(runnable);
+        SignedSenderWorker signedSenderWorker = new SignedSenderWorker(password);
+        executingTask = signedSenderWorker;
+        signedSenderWorker.execute();
         pack();       
     }//GEN-LAST:event_enviarButtonActionPerformed
 
@@ -500,5 +415,118 @@ public class FirmaDialog extends JDialog {
     private javax.swing.JButton verDocumentoButton;
     // End of variables declaration//GEN-END:variables
 
+    
+    class SignedSenderWorker extends SwingWorker<Respuesta, Object> {
+        
+        private String password = null;
+        
+        public SignedSenderWorker(String password) {
+            this.password = password;
+        }
+        
+        @Override public Respuesta doInBackground() 
+                throws Exception {
+            logger.debug("SignedSenderWorker.doInBackground");
+            X509Certificate destinationCert = null;
+            switch(operacion.getTipo()) {
+                case REPRESENTATIVE_REVOKE:
+                case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
+                case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
+                case REPRESENTATIVE_SELECTION:
+                case ANULAR_VOTO:
+                case ANULAR_SOLICITUD_ACCESO:
+                case CAMBIO_ESTADO_CENTRO_CONTROL_SMIME:
+                case ASOCIAR_CENTRO_CONTROL:
+                case FIRMA_RECLAMACION_SMIME:
+                case CANCELAR_EVENTO:
+                    smimeMessage = DNIeSignedMailGenerator.
+                            genMimeMessage(null, operacion.getNombreDestinatarioFirmaNormalizado(),
+                            operacion.getContenidoFirma().toString(),
+                            password.toCharArray(), operacion.getAsuntoMensajeFirmado(), null); 
+                    destinationCert = Contexto.INSTANCE.
+                        getAccessControl().getCertificate();
+                    SMIMESignedSender senderWorker = new SMIMESignedSender(
+                            null, smimeMessage, operacion.getUrlEnvioDocumento(), 
+                            null, destinationCert);
+                    return senderWorker.call();
+                case PUBLICACION_VOTACION_SMIME:
+                case PUBLICACION_RECLAMACION_SMIME:    
+                    smimeMessage = DNIeSignedMailGenerator.
+                        genMimeMessage(null, operacion.getNombreDestinatarioFirmaNormalizado(),
+                        operacion.getContenidoFirma().toString(),
+                        password.toCharArray(), operacion.getAsuntoMensajeFirmado(), null); 
+                    destinationCert = Contexto.INSTANCE.
+                        getAccessControl().getCertificate();
+                    SMIMESignedSender worker = new SMIMESignedSender(
+                            null, smimeMessage, operacion.getUrlEnvioDocumento(), 
+                            null, destinationCert, "eventURL");
+                    return worker.call();
+                case SOLICITUD_COPIA_SEGURIDAD:
+                case FIRMA_MANIFIESTO_PDF:
+                case PUBLICACION_MANIFIESTO_PDF:
+                    PdfReader readerManifiesto = new PdfReader(bytesDocumento);
+                    String reason = null;
+                    String location = null;
+                    destinationCert = Contexto.INSTANCE.
+                        getAccessControl().getCertificate();
+                    PDFSignedSender pdfSignedSender = new PDFSignedSender(
+                            null,  operacion.getUrlEnvioDocumento(), reason, location, 
+                            password.toCharArray(), readerManifiesto, 
+                            null, null, destinationCert);
+                    return pdfSignedSender.call();
+                default:
+                    logger.debug("Operation not found" + operacion.getTipo().toString());
+                    break;
+            }
+            return null;
+       }
+
+       @Override protected void done() {
+            mostrarPantallaEnvio(false);
+            try {
+                Respuesta respuesta = get();
+                if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                    logger.debug("SignedSenderWorker.done - statusCode:" + 
+                            respuesta.getCodigoEstado());
+                    if(operacion.isRespuestaConRecibo()) {
+                        try {
+                            logger.debug("SignedSenderWorker.done - isRespuestaConRecibo");
+                            ByteArrayInputStream bais = new ByteArrayInputStream(
+                                    respuesta.getMensaje().getBytes());
+                            SMIMEMessageWrapper smimeMessageResp = 
+                                    new SMIMEMessageWrapper(null, bais, null);
+                            String operationStr = smimeMessageResp.getSignedContent();
+                            Operacion result = Operacion.parse(operationStr);
+                            String msg = result.getMensaje();
+                            if(Operacion.Tipo.PUBLICACION_VOTACION_SMIME == 
+                                    operacion.getTipo() || Operacion.Tipo.
+                                    PUBLICACION_RECLAMACION_SMIME == operacion.getTipo()) {
+                                String eventURL = ((List<String>)respuesta.
+                                        getData()).iterator().next();
+                                result.setUrlDocumento(eventURL);
+                                msg = eventURL;
+                            }
+                            sendResponse(respuesta.getCodigoEstado(), msg);
+                        } catch (Exception ex) {
+                            logger.error(ex.getMessage(), ex);
+                            sendResponse(Respuesta.SC_ERROR, ex.getMessage());
+                        }
+                    } else sendResponse(respuesta.getCodigoEstado(), 
+                            respuesta.getMensaje());   
+                } else {
+                    sendResponse(respuesta.getCodigoEstado(), 
+                            respuesta.getMensaje());
+                }
+           } catch(Exception ex) {
+               logger.error(ex.getMessage(), ex);
+               String mensajeError = Contexto.INSTANCE.getString("signDocumentErrorMsg");
+               if(ex.getCause() instanceof VotingSystemException) {
+                   mensajeError = ex.getCause().getMessage();
+               }
+               sendResponse(Respuesta.SC_ERROR, mensajeError);
+            }
+            dispose();
+       }
+    }
    
 }

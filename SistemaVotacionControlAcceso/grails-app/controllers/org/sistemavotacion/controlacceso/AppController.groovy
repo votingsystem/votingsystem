@@ -16,6 +16,7 @@ import org.codehaus.groovy.ast.stmt.BlockStatement
 import org.codehaus.groovy.control.CompilePhase
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.utils.*
+import org.sistemavotacion.controlacceso.modelo.*
 
 /**
  * @infoController Aplicación
@@ -26,34 +27,13 @@ import org.sistemavotacion.utils.*
  * */
 class AppController {
 
-	def firmaService;
 	def grailsApplication;
-	
-	def prueba() { 
-		firmaService.checkCancelledCerts()
-		return false;
-	} 
-	
-	/**
-	 * @httpMethod [GET]
-	 * @return Información sobre los servicios que tienen como url base '/app'.
-	 */
-	def index() { 
-		redirect action: "restDoc"
-	}
 
 	/**
 	 * @httpMethod [GET]
 	 * @return La página principal de la aplicación web de votación.
 	 */
 	def home() { }
-		
-	/**
-	 * @httpMethod [GET]
-	 * @return Página que sirve el editor de documentos que se emplea en las aplicaciones Android.
-	 */
-	def editor() { }
-
 	
 	/**
 	 * @httpMethod [GET]
@@ -75,6 +55,14 @@ class AppController {
 		}
 		redirect(uri:uri)
 		return
+	}
+	
+	/**
+	 * @httpMethod [GET]
+	 * @return Archivo con variables localizadas (i18n) empleadas en javascript.
+	 */
+	def jsMessages() {
+		response.contentType = "application/javascript"
 	}
 	
 }

@@ -216,7 +216,7 @@ class BuscadorController {
 						eventosVotacion = fullTextQuery.setFirstResult(params.int('offset')).
 							setMaxResults(params.int('max')).list();
 						eventosVotacion.each {eventoItem ->
-							eventosMap.eventos.votaciones.add(eventoService.optenerEventoVotacionJSONMap(eventoItem))
+							eventosMap.eventos.votaciones.add(eventoService.optenerEventoVotacionMap(eventoItem))
 						}
 						if(eventosVotacion) numeroEventosEnPeticion = eventosVotacion.size()
 						eventosMap.numeroEventosVotacionEnPeticion = numeroEventosEnPeticion
@@ -230,7 +230,7 @@ class BuscadorController {
 						eventosFirma = fullTextQuery.setFirstResult(params.int('offset')).
 							setMaxResults(params.int('max')).list();
 						eventosFirma.each {eventoItem ->
-							eventosMap.eventos.firmas.add(eventoService.optenerEventoFirmaJSONMap(eventoItem))
+							eventosMap.eventos.firmas.add(eventoService.optenerEventoFirmaMap(eventoItem))
 						}
 						if(eventosFirma) numeroEventosEnPeticion = eventosFirma.size()
 						eventosMap.numeroEventosFirmaEnPeticion = numeroEventosEnPeticion
@@ -244,7 +244,7 @@ class BuscadorController {
 						eventosReclamacion = fullTextQuery.setFirstResult(params.int('offset')).
 							setMaxResults(params.int('max')).list();
 						eventosReclamacion.each {eventoItem ->
-							eventosMap.eventos.reclamaciones.add(eventoService.optenerEventoReclamacionJSONMap(eventoItem))
+							eventosMap.eventos.reclamaciones.add(eventoService.optenerEventoReclamacionMap(eventoItem))
 						}
 						if(eventosReclamacion) numeroEventosEnPeticion = eventosReclamacion.size()
 						eventosMap.numeroEventosReclamacionEnPeticion = numeroEventosEnPeticion

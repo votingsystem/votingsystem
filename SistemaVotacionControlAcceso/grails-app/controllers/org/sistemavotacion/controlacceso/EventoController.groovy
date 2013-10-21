@@ -49,7 +49,7 @@ class EventoController {
 				render message(code: 'eventNotFound', args:[params.id])
 				return false
 			} else {
-				render eventoService.optenerEventoJSONMap(evento) as JSON 
+				render eventoService.optenerEventoMap(evento) as JSON 
 				return false
 			} 
         } else {
@@ -75,12 +75,12 @@ class EventoController {
         eventosMap.numeroEventosEnPeticion = eventoList.size()
         eventoList.each {eventoItem ->
                 if (eventoItem instanceof EventoVotacion) {
-					eventosMap.eventos.votaciones.add(eventoService.optenerEventoVotacionJSONMap(eventoItem))
+					eventosMap.eventos.votaciones.add(eventoService.optenerEventoVotacionMap(eventoItem))
                 } else if (eventoItem instanceof EventoFirma) {
 					if(eventoItem.estado == Evento.Estado.PENDIENTE_DE_FIRMA ) return
-                    eventosMap.eventos.firmas.add(eventoService.optenerEventoFirmaJSONMap(eventoItem))
+                    eventosMap.eventos.firmas.add(eventoService.optenerEventoFirmaMap(eventoItem))
                 } else if (eventoItem instanceof EventoReclamacion) {
-                    eventosMap.eventos.reclamaciones.add(eventoService.optenerEventoReclamacionJSONMap(eventoItem))
+                    eventosMap.eventos.reclamaciones.add(eventoService.optenerEventoReclamacionMap(eventoItem))
                 }
         }
 		eventosMap.numeroEventosVotacionEnPeticion = eventosMap.eventos.votaciones.size()

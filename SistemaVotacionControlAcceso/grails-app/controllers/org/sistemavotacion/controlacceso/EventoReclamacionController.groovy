@@ -17,6 +17,16 @@ class EventoReclamacionController {
     def eventoService
 	def firmaService
 	
+	
+	
+	/**
+	 * @httpMethod [GET]
+	 * @return La página principal de la aplicación web de reclamaciones.
+	 */
+	def mainPage() {
+		render(view:"mainPage" , model:[selectedSubsystem:Subsystem.CLAIMS.toString()])
+	}
+	
 	/**
 	 * @httpMethod [GET]
 	 * @param [id] Opcional. El identificador de la reclamación en la base de datos. Si no se pasa ningún 
@@ -44,8 +54,15 @@ class EventoReclamacionController {
 				render message(code: 'eventNotFound', args:[params.id])
 				return false
 			} else {
-				render eventoService.optenerEventoJSONMap(evento) as JSON
-				return false
+				if(request.contentType?.contains("application/json")) {
+					render eventoService.optenerEventoMap(evento) as JSON
+					return false
+				} else {
+					render(view:"eventoReclamacion", model: [
+						selectedSubsystem:Subsystem.CLAIMS.toString(),
+						eventMap: eventoService.optenerEventoMap(evento)])
+					return
+				}
 			}
         } else {
 			params.sort = "fechaInicio"
@@ -76,7 +93,7 @@ class EventoReclamacionController {
 		eventosMap.numeroEventosReclamacionEnPeticion = eventoList.size()
         eventoList.each {eventoItem ->
                 eventosMap.eventos.reclamaciones.add(
-				eventoService.optenerEventoReclamacionJSONMap(eventoItem))
+				eventoService.optenerEventoReclamacionMap(eventoItem))
         }
         response.setContentType("application/json")
         render eventosMap as JSON
@@ -178,6 +195,8 @@ class EventoReclamacionController {
 			Respuesta respuesta = eventoReclamacionService.saveEvent(
 				mensajeSMIMEReq, request.getLocale())
 			if(Respuesta.SC_OK == respuesta.codigoEstado) {
+				response.setHeader('eventURL',
+					"${grailsApplication.config.grails.serverURL}/eventoReclamacion/${respuesta.evento.id}")
 				response.setContentType("application/x-pkcs7-signature")
 			} 
 			params.respuesta = respuesta

@@ -21,6 +21,16 @@ class EventoVotacionController {
     def eventoVotacionService
     def eventoService
 
+	
+	
+	/**
+	 * @httpMethod [GET]
+	 * @return La página principal de la aplicación web de votación.
+	 */
+	def mainPage() {
+		render(view:"mainPage" , model:[selectedSubsystem:Subsystem.VOTES.toString()])
+	}
+	
 	/**
 	 * @httpMethod [GET]
      * @serviceURL [/eventoVotacion/$id]	 
@@ -50,8 +60,15 @@ class EventoVotacionController {
 					render message(code: 'eventNotFound', args:[params.id])
 					return false
 				} else {
-					render eventoService.optenerEventoJSONMap(evento) as JSON
-					return false
+					if(request.contentType?.contains("application/json")) {
+						render eventoService.optenerEventoMap(evento) as JSON
+						return false
+					} else {
+						render(view:"eventoVotacion", model: [
+							selectedSubsystem:Subsystem.VOTES.toString(),
+							eventMap: eventoService.optenerEventoMap(evento)])
+						return
+					}
 				}
 			} else {
 				params.sort = "fechaInicio"
@@ -82,7 +99,7 @@ class EventoVotacionController {
 			}
 			eventosMap.numeroEventosVotacionEnPeticion = eventoList.size()
 			eventoList.each {eventoItem ->
-					eventosMap.eventos.votaciones.add(eventoService.optenerEventoVotacionJSONMap(eventoItem))
+					eventosMap.eventos.votaciones.add(eventoService.optenerEventoVotacionMap(eventoItem))
 			}
 			response.setContentType("application/json")
 			render eventosMap as JSON
@@ -119,6 +136,8 @@ class EventoVotacionController {
 			mensajeSMIME, request.getLocale())
 		params.respuesta = respuesta
 		if (Respuesta.SC_OK == respuesta.codigoEstado) {
+			response.setHeader('eventURL', 
+				"${grailsApplication.config.grails.serverURL}/eventoVotacion/${respuesta.evento.id}")
 			response.contentType = grailsApplication.config.pkcs7SignedContentType
 		}
     }

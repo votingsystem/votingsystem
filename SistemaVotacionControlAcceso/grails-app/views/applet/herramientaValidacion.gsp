@@ -9,12 +9,12 @@
         <link rel="shortcut icon" href="${resource(dir:'images',file:'favicon.ico')}" type="image/x-icon" />
    	    <script type="text/javascript">
 
-		function setClienteFirmaMessage(mensaje) {
-			return parent.setClienteFirmaMessage(mensaje)
+		function setMessageFromNativeClient(mensaje) {
+			return parent.setMessageFromNativeClient(mensaje)
 		}
 
-		function obtenerOperacion() {
-			return parent.obtenerOperacion()
+		function getMessageToNativeClient() {
+			return parent.getMessageToNativeClient()
 		}
 		
    	    </script>

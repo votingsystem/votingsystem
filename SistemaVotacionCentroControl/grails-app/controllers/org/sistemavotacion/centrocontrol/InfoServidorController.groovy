@@ -40,6 +40,8 @@ class InfoServidorController {
 			infoServidor.controlesAcceso.add(controlesAccesoMap)
 		}
 
+		response.setHeader('Access-Control-Allow-Origin', "*")
+		
 		if (params.callback) render "${params.callback}(${infoServidor as JSON})"
         else render infoServidor as JSON
 	}

@@ -136,7 +136,7 @@ public enum Contexto {
     
     
     private Usuario usuario;
-    private final HttpHelper httpHelper = new HttpHelper();
+    private HttpHelper httpHelper;
     private ResourceBundle resourceBundle;
     private Map<String, ReciboVoto> receiptMap;
     private ActorConIP accessControl;
@@ -147,6 +147,12 @@ public enum Contexto {
     }
 
     private Contexto () { 
+        logger.debug("------------- Contexto ----------------- ");
+    }
+
+    public void init(){
+        logger.debug("------------- init ----------------- ");
+        httpHelper = new HttpHelper();
         try {
             new File(DEFAULTS.APPDIR).mkdir();
             new File(DEFAULTS.APPTEMPDIR).mkdir();
@@ -155,12 +161,11 @@ public enum Contexto {
                 .getResourceAsStream(CERT_RAIZ_PATH), copiaRaizDNI);
             OSValidator.initClassPath();
             resourceBundle = ResourceBundle.getBundle("messages_" + AppletFirma.locale);
+            
         } catch (Exception ex) {
             LoggerFactory.getLogger(Contexto.class).error(ex.getMessage(), ex);
         } 
     }
-
-    public void init(){}
     
     public void shutdown() {
         try {

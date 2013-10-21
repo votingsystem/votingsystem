@@ -18,6 +18,7 @@ import java.util.Hashtable;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.modelo.Usuario;
 import org.sistemavotacion.seguridad.CertUtil;
+import org.sistemavotacion.seguridad.VotingSystemException;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.OSValidator;
 import org.slf4j.Logger;
@@ -66,10 +67,11 @@ public class DNIeSessionHelper {
             lectorSlots.setSlots(pkcs11Module.getSlotList(
                         Module.SlotRequirement.TOKEN_PRESENT));
             Slot slot = lectorSlots.obtenerSlotSeleccionado();
-            if(slot == null) throw new Exception ("¿Seguro que tiene el DNI corréctamente insertado en el lector?");
+            if(slot == null) throw new VotingSystemException (
+                    Contexto.INSTANCE.getString("smartCardReaderErrorMsg"));
             token = slot.getToken();
-            if(token == null) throw new Exception ("¿Seguro que tiene instalada en su"
-                    + "máquina el soporte para PKCS#11?");
+            if(token == null) throw new VotingSystemException (
+                    Contexto.INSTANCE.getString("missingPKCS11ErrorMsg"));
             pkcs11Session = token.openSession(Token.SessionType.SERIAL_SESSION,
                 Token.SessionReadWriteBehavior.RO_SESSION, null, null);
             pkcs11Session.login(Session.UserType.USER, password);
@@ -109,9 +111,9 @@ public class DNIeSessionHelper {
             pkcs11Session.findObjectsFinal();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-            String mensajeError = ex.getMessage();
             if (ex instanceof ArrayIndexOutOfBoundsException) {
-                mensajeError = Contexto.INSTANCE.getString("smartCardReaderErrorMsg");
+                throw new VotingSystemException(
+                        Contexto.INSTANCE.getString("smartCardReaderErrorMsg"));
             }
             if ("CKR_DEVICE_ERROR".equals(ex.getMessage()) || 
                     "CKR_CRYPTOKI_ALREADY_INITIALIZED".equals(ex.getMessage()) ||
@@ -119,10 +121,15 @@ public class DNIeSessionHelper {
                 closeSession();
                 return getSession(password, signatureMechanism);
             }
-            if ("CKR_PIN_INCORRECT".equals(ex.getMessage())) { }
-            if ("CKR_HOST_MEMORY".equals(ex.getMessage())) mensajeError = 
-                    Contexto.INSTANCE.getString("smartCardReaderErrorMsg");
-            throw new Exception(mensajeError);
+            if ("CKR_PIN_INCORRECT".equals(ex.getMessage())) { 
+                throw new VotingSystemException(
+                        Contexto.INSTANCE.getString("MENSAJE_ERROR_PASSWORD"));
+            }
+            if ("CKR_HOST_MEMORY".equals(ex.getMessage())) {
+                    throw new VotingSystemException(
+                        Contexto.INSTANCE.getString("smartCardReaderErrorMsg"));
+            }
+            throw ex;
         }
         //closeSession();
         return pkcs11Session;

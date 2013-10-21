@@ -17,6 +17,70 @@ class RepresentativeController {
 
 	
 	/**
+	 * @httpMethod [GET]
+	 * @return La página principal de la aplicación web de representantes.
+	 */
+	def mainPage() {
+		render(view:"mainPage" , model:[selectedSubsystem:Subsystem.REPRESENTATIVES.toString()])
+	}
+	
+	/**
+	 * @httpMethod [GET]
+	 * @return Página a partir de la que se pueden crear representantes.
+	 */
+	def newRepresentative() {
+		render(view:"newRepresentative" , model:[selectedSubsystem:Subsystem.REPRESENTATIVES.toString()])
+	}
+	
+	/**
+	 * @httpMethod [GET]
+	 *
+	 * @serviceURL [/representative/edit/$nif] 
+	 * @param [nif] NIF del representante que se desea consultar.
+	 * @responseContentType [application/json]
+	 * @return Documento JSON con datos del representante
+	 */
+	def editRepresentative() {
+		String nif = StringUtils.validarNIF(params.nif)
+		if(!nif) {
+			response.status = Respuesta.SC_ERROR_PETICION
+			render message(code: 'error.errorNif', args:[params.nif])
+			return false
+		}
+		Usuario representative
+		Usuario.withTransaction {
+			representative =  Usuario.findWhere(type:Usuario.Type.REPRESENTATIVE,
+				nif:nif)
+		}
+		if(!representative) {
+			response.status = Respuesta.SC_NOT_FOUND
+			render message(code: 'representativeNifErrorMsg', args:[nif])
+			return false
+		} else {
+			String name = "${representative.nombre} ${representative.primerApellido}"
+			def resultMap = [id: representative.id, nombre:representative.nombre,
+				primerApellido:representative.primerApellido, info:representative.info,
+				nif:representative.nif, fullName:"${representative.nombre} ${representative.primerApellido}"]
+			if(request.contentType?.contains("application/json")) {
+				render resultMap as JSON
+				return false
+			} else {
+				render(view:"editRepresentative" , model:[representative:resultMap,
+				selectedSubsystem:Subsystem.REPRESENTATIVES.toString()])
+				return
+			}
+		}
+	}
+	
+	/**
+	 * @httpMethod [GET]
+	 * @return Página de la sección de administración PARA representantes.
+	 */
+	def representativeAdmin() {
+		render(view:"representativeAdmin" , model:[selectedSubsystem:Subsystem.REPRESENTATIVES.toString()])
+	}
+	
+	/**
 	 * Servicio de consulta de representantes
 	 *
 	 * @httpMethod [GET]
@@ -38,7 +102,14 @@ class RepresentativeController {
 			if (representative) {
 				representativeMap = representativeService.
 					getRepresentativeDetailedJSONMap(representative)
-				render representativeMap as JSON
+				if(request.contentType?.contains("application/json")) {
+					render representativeMap as JSON
+					return false
+				} else {
+					render(view:"index", model: [selectedSubsystem:Subsystem.REPRESENTATIVES.toString(),
+						representative:representativeMap])
+					return
+				}
 			} else {
 				String msg = message(code:'representativeIdErrorMsg', args:[params.id])
 				log.debug msg

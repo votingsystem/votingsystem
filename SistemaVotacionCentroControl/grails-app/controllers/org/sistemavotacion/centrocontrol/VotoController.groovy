@@ -52,6 +52,8 @@ class VotoController {
 			response.setContentType("${grailsApplication.config.pkcs7SignedContentType};" +
 				"${grailsApplication.config.pkcs7EncryptedContentType}")
 		}
+		String voteURL = "${createLink(controller:'mensajeSMIME', absolute:'true')}/${respuesta?.mensajeSMIME?.id}" 
+		response.setHeader('voteURL', voteURL)		
 		params.respuesta = respuesta
 	}
 	

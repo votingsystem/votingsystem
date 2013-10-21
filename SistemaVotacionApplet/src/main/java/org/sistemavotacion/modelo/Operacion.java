@@ -415,10 +415,17 @@ public class Operacion {
         return operacion;
     }
 
-    public JSONObject obtenerJSON () {
+    public JSONObject toJSON () {
+        logger.debug("toJSON");
         Map map = new HashMap();
         if(codigoEstado != null) map.put("codigoEstado", codigoEstado);
-        if(mensaje != null) map.put("mensaje", mensaje);
+        if(mensaje != null) {
+            map.put("mensaje", mensaje);
+        } else {
+            if(codigoEstado != null && SC_OK != codigoEstado) {
+                map.put("mensaje", getErrorValidacion());
+            }
+        }
         if(tipo != null) map.put("operacion", tipo.toString());
         if(urlDocumento != null) map.put("urlDocumento", urlDocumento);
         if(urlEnvioDocumento != null) map.put("urlEnvioDocumento", urlEnvioDocumento);
@@ -430,12 +437,6 @@ public class Operacion {
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);
         if(evento != null) jsonObject.put("evento", evento.toJSON());
         return jsonObject;
-    }
-    
-    public String obtenerJSONStr () {
-        JSONObject operacionJSON = obtenerJSON();
-        if(operacionJSON == null) return null;
-        else return operacionJSON.toString();
     }
 
     /**

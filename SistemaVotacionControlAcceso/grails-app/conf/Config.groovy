@@ -15,6 +15,7 @@ import org.apache.log4j.Level
 //    grails.config.locations << "file:" + System.properties["${appName}.config.location"]
 // }
 
+
 grails.converters.default.pretty.print=true
 
 //grails.gorm.failOnError=true
@@ -36,8 +37,6 @@ grails.mime.types = [
     text:          'text/plain',
     xml:           ['text/xml', 'application/xml']
 ]
-
-grails.resources.adhoc.excludes = ['**/gwt/**']
 
 // URL Mapping Cache Max Size, defaults to 5000
 //grails.urlmapping.cache.maxsize = 1000
@@ -75,7 +74,8 @@ VotingSystemEnvironment="DEVELOPMENT"
 // set per-environment serverURL stem for creating absolute links
 environments {
     development {
-        grails.logging.jul.usebridge = true
+        //grails.logging.jul.usebridge = true
+		grails.resources.debug = true
 		String localIP = getDevelopmentServerIP();
         grails.serverURL = "http://${localIP}:8080/${appName}"
     }
@@ -114,12 +114,12 @@ log4j = {
 			layout:pattern(conversionPattern: '%d{[dd.MM.yy HH:mm:ss.SSS]} [%t] %p %c %x - %m%n'),
             file:"./logs/ControlAcceso.log", datePattern: '\'_\'yyyy-MM-dd'
 			
-		appender new SMTPAppender(name: 'smtp', to: mail.error.to, from: mail.error.from,
+		/*appender new SMTPAppender(name: 'smtp', to: mail.error.to, from: mail.error.from,
 			subject: mail.error.subject, threshold: Level.ERROR,
 			SMTPHost: mail.error.server, SMTPUsername: mail.error.username,
 			SMTPDebug: mail.error.debug.toString(), SMTPPassword: mail.error.password,
 			layout: pattern(conversionPattern:
-			   '%d{[ dd.MM.yyyy HH:mm:ss.SSS]} [%t] %n%-5p %n%c %n%C %n %x %n %m%n'))
+			   '%d{[ dd.MM.yyyy HH:mm:ss.SSS]} [%t] %n%-5p %n%c %n%C %n %x %n %m%n'))*/
 		 
 	}
 		
@@ -131,9 +131,8 @@ log4j = {
 
     debug  'org.sistemavotacion','filtros',
            'grails.app',
-           'grails.plugins',
-           'org.springframework.security',
-		   'org.apache.catalina.core',
+           //'org.springframework.security',
+		   //'org.apache.catalina.core',
 		   'com.itextpdf.text.*'
 		   
     error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
@@ -146,6 +145,10 @@ log4j = {
            'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
            'org.springframework',
            'org.hibernate',
+		   'grails.plugins',
+		   'grails.app.services.org.grails.plugin.resource',
+		   'grails.app.taglib.org.grails.plugin.resource',
+		   'grails.app.resourceMappers.org.grails.plugin.resource',
            'net.sf.ehcache.hibernate'
 		   
 
@@ -174,7 +177,6 @@ grails.war.copyToWebApp = { args ->
 }
 
 SistemaVotacion.baseRutaCopiaRespaldo='./VotingSystem/copiaRespaldo'
-SistemaVotacion.eventsMetaInfBaseDir='./VotingSystem/Eventos_MetaInf'
 SistemaVotacion.errorsBaseDir='./VotingSystem/errors'
 SistemaVotacion.sufijoURLCadenaCertificacion='/certificado/cadenaCertificacion'
 SistemaVotacion.sufijoURLInfoServidor='/infoServidor'

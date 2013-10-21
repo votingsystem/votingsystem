@@ -31,7 +31,7 @@ class InfoServidorController {
         infoServidor.urlBlog = grailsApplication.config.SistemaVotacion.urlBlog
 		infoServidor.estado = ActorConIP.Estado.ACTIVO.toString()
 		infoServidor.environmentMode = VotingSystemApplicationContex.instance.getEnvironment().toString()
-        def centrosDeControl = CentroControl.findAll()
+        def centrosDeControl = CentroControl.findAllWhere(estado: ActorConIP.Estado.ACTIVO)
         centrosDeControl?.each {centroControl ->
             def centroControlMap = [id:centroControl.id, nombre:centroControl.nombre,
                 estado:centroControl.estado?.toString(),
@@ -44,6 +44,9 @@ class InfoServidorController {
 			grailsApplication.config.SistemaVotacion.rutaCadenaCertificacion).getFile();
 		infoServidor.cadenaCertificacionPEM = cadenaCertificacion?.text
 		infoServidor.timeStampCertPEM = new String(timeStampService.getSigningCert())
+
+		
+		response.setHeader('Access-Control-Allow-Origin', "*")
 		
 		if (params.callback) render "${params.callback}(${infoServidor as JSON})"
         else render infoServidor as JSON

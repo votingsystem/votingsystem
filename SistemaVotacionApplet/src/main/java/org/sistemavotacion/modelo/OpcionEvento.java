@@ -55,19 +55,13 @@ public class OpcionEvento {
         return opcion;
     }
     
-    public JSONObject obtenerJSON() {
-        logger.debug("obtenerJSON");
+    public JSONObject toJSON() {
+        logger.debug("toJSON");
         Map map = new HashMap();
         map.put("id", id);
         map.put("contenido", content);
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(map);        
         return jsonObject;
-    }
-    
-    public String obtenerJSONStr() {
-        logger.debug("obtenerJSONStr");
-        JSONObject jsonObject = obtenerJSON();        
-        return jsonObject.toString();
     }
 
     /**

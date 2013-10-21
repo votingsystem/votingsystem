@@ -24,6 +24,14 @@ class EventoFirmaController {
 	
 	/**
 	 * @httpMethod [GET]
+	 * @return La página principal de la aplicación web de manifiestos.
+	 */
+	def mainPage() {
+		render(view:"mainPage" , model:[selectedSubsystem:Subsystem.MANIFESTS.toString()])
+	}
+	
+	/**
+	 * @httpMethod [GET]
      * @serviceURL [/eventoFirma/$id]	 
 	 * @param [id] Opcional. El identificador del manifiesto en la base de datos.
 	 * @responseContentType [application/json]
@@ -44,9 +52,15 @@ class EventoFirmaController {
 				render message(code:'eventNotFound', args:["${params.id}"])
 				return false
 			}
-			def eventoMap = eventoService.optenerEventoFirmaJSONMap(evento)
-			render eventoMap as JSON
-			return false
+			if(request.contentType?.contains("application/json")) {
+				render eventoService.optenerEventoMap(evento) as JSON
+				return false
+			} else {
+				render(view:"eventoFirma", model: [
+					selectedSubsystem:Subsystem.MANIFESTS.toString(),
+					eventMap: eventoService.optenerEventoMap(evento)])
+				return
+			}
 		}
 		flash.forwarded = true
 		forward action: "obtenerManifiestos"
@@ -154,7 +168,8 @@ class EventoFirmaController {
 				render(ex.getMessage())
 				return false
 			}
-		}
+		} else log.error ("Missing Manifest tu publish id")
+			
 		response.status = Respuesta.SC_ERROR_PETICION
 		render message(code: 'error.PeticionIncorrectaHTML', args:[
 			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
@@ -165,6 +180,8 @@ class EventoFirmaController {
 	 * @httpMethod [POST]
      * @serviceURL [/eventoFirma]	 
 	 * @param [htmlManifest] Manifiesto que se desea publicar en formato HTML.
+	 * @responseHeader [eventId] Identificador en la base de datos del evento que se desea publicar
+	 * @responseContentType [application/pdf] 
 	 * @return Si todo va bien devuelve un código de estado HTTP 200 con el identificador
 	 * del nuevo manifiesto en la base de datos en el cuerpo del mensaje.
 	 */
@@ -180,7 +197,7 @@ class EventoFirmaController {
 				def eventoJSON = JSON.parse(eventoStr)
 				log.debug "eventoJSON.contenido: ${eventoJSON.contenido}"
 				eventoJSON.contenido = htmlService.prepareHTMLToPDF(eventoJSON.contenido.getBytes())
-				Date fechaFin = new Date().parse("yyyy-MM-dd HH:mm:ss", eventoJSON.fechaFin)
+				Date fechaFin = new Date().parse("yyyy/MM/dd HH:mm:ss", eventoJSON.fechaFin)
 				if(fechaFin.before(DateUtils.getTodayDate())) {
 					String msg = message(code:'publishDocumentDateErrorMsg', 
 						args:[DateUtils.getStringFromDate(fechaFin)]) 
@@ -195,21 +212,23 @@ class EventoFirmaController {
 					contenido:eventoJSON.contenido,
 					fechaFin:fechaFin)
 				evento.save()
-				ByteArrayOutputStream bytes = pdfRenderingService.render(
+				ByteArrayOutputStream pdfByteStream = pdfRenderingService.render(
 						template: "/eventoFirma/pdf", model:[evento:evento])
-				Evento.withTransaction{
+				/*Evento.withTransaction{
 					evento.pdf = bytes.toByteArray()
 					evento.save()
 					log.debug "Generado PDF de evento ${evento.id}"
-				}
-				log.debug "Saved evento ${evento.id}"
-				render evento.id
+				}*/
+				log.debug "Saved event ${evento.id}"
+				response.setHeader('eventId', "${evento.id}")
+				response.contentType = "application/pdf"
+				response.outputStream << pdfByteStream.toByteArray() // Performing a binary stream copy
 				return false
 			}
 		} catch (Exception ex) {
 			log.error (ex.getMessage(), ex)
 			response.status = Respuesta.SC_ERROR
-			render ex.getMessage()
+			render message(code:'publishManifestErrorMessage')
 			return false 
 		}
 	}
@@ -263,7 +282,7 @@ class EventoFirmaController {
 				render message(code: 'eventNotFound', args:[params.id])
 				return false
 			} else {
-				render eventoService.optenerEventoJSONMap(evento) as JSON
+				render eventoService.optenerEventoMap(evento) as JSON
 				return false
 			}
 	   } else {
@@ -303,7 +322,7 @@ class EventoFirmaController {
 	   }
 	   consultaMap.numeroEventosFirmaEnPeticion = eventoList.size()
 	   eventoList.each {eventoItem ->
-		   firmas.add(eventoService.optenerEventoFirmaJSONMap(eventoItem))
+		   firmas.add(eventoService.optenerEventoFirmaMap(eventoItem))
 	   }
 	   consultaMap.eventos.firmas = firmas
 	   response.setContentType("application/json")
@@ -406,7 +425,7 @@ class EventoFirmaController {
 			} 
 			else eventoFirma = params.evento //forwarded from /evento/estadisticas
 			if (eventoFirma) {
-				def statisticsMap = eventoService.optenerEventoFirmaJSONMap(eventoFirma)
+				def statisticsMap = eventoService.optenerEventoFirmaMap(eventoFirma)
 				statisticsMap.numeroFirmas = Documento.countByEventoAndEstado(
 					eventoFirma, Documento.Estado.FIRMA_MANIFIESTO_VALIDADA)
 				statisticsMap.informacionFirmasURL = "${grailsApplication.config.grails.serverURL}" +
