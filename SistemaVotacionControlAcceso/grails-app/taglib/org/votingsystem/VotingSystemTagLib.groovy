@@ -4,8 +4,6 @@ package org.votingsystem
 class VotingSystemTagLib {
 	
 	static namespace = "votingSystem"
-	//<g:votingEvent event="${event}" />
-	//out << "<div id=\"${attrs.event.id}\"> \Subject: ${attrs.event.subject} </div>"
 	
 	def simpleButton = { attrs, body ->		
 		def button = [id:attrs.id, href: attrs.href, imgSrc:attrs.imgSrc, message:body(), 

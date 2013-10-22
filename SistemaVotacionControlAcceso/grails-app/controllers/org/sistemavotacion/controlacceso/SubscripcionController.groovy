@@ -162,7 +162,7 @@ class SubscripcionController {
 		" -${grailsApplication.config.SistemaVotacion.serverName}-"
 		SyndFeed feed = new SyndFeedImpl(feedType: feedType,
 				title: tituloSubscripcionReclamaciones,
-				link: "${grailsApplication.config.grails.serverURL}/app/home#RECLAMACIONES",
+				link: "${createLink(controller: 'eventoReclamacion', action: 'mainPage')}",
 				description: message(code: 'subscripcion.descripcionSubscripcionReclamaciones'),
 				entries: entradas);
 		StringWriter writer = new StringWriter();
@@ -200,7 +200,7 @@ class SubscripcionController {
 		" -${grailsApplication.config.SistemaVotacion.serverName}-"
 		SyndFeed feed = new SyndFeedImpl(feedType: feedType,
 				title: tituloSubscripcionVotaciones,
-				link: "${grailsApplication.config.grails.serverURL}/app/home#VOTACIONES",
+				link: "${createLink(controller: 'eventoVotacion', action: 'mainPage')}",
 				description: message(code: 'subscripcion.descripcionSubscripcionVotaciones'),
 				entries: entradas);
 		StringWriter writer = new StringWriter();
@@ -238,7 +238,7 @@ class SubscripcionController {
 		" -${grailsApplication.config.SistemaVotacion.serverName}-"
 		SyndFeed feed = new SyndFeedImpl(feedType: feedType, 
 				title: tituloSubscripcionManifiestos,
-				link: "${grailsApplication.config.grails.serverURL}/app/home#MANIFIESTOS",
+				link: "${createLink(controller: 'eventoFirma', action: 'mainPage')}",
 				description: message(code: 'subscripcion.descripcionSubscripcionManifiestos'),
 				entries: entradas);
 		StringWriter writer = new StringWriter();

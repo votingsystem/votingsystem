@@ -1,6 +1,7 @@
 package org.sistemavotacion.controlacceso
 
 import org.codehaus.groovy.grails.web.json.JSONObject;
+import org.codehaus.groovy.grails.web.mapping.LinkGenerator;
 import org.sistemavotacion.controlacceso.modelo.Respuesta;
 
 import java.security.MessageDigest
@@ -10,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeMessage
 
@@ -22,7 +24,9 @@ import org.sistemavotacion.util.StringUtils
 
 import grails.converters.JSON
 import sun.misc.BASE64Decoder;
+
 import org.hibernate.criterion.Projections
+
 import java.util.concurrent.TimeUnit
 
 class RepresentativeService {
@@ -37,7 +41,7 @@ class RepresentativeService {
 	def filesService
 	def eventoService
 	def sessionFactory
-
+	LinkGenerator grailsLinkGenerator
 	/**
 	 * Creates backup of the state of all the representatives for a closed event
 	 */
@@ -963,7 +967,7 @@ class RepresentativeService {
 		}
 		String imageURL = "${grailsApplication.config.grails.serverURL}/representative/image/${image?.id}" 
 		String infoURL = "${grailsApplication.config.grails.serverURL}/representative/${representative?.id}" 
-		String webPageURL = "${grailsApplication.config.grails.serverURL}/app/home#REPRESENTATIVE_DETAILS&representativeId=${representative?.id}"
+		String webPageURL = "${grailsLinkGenerator.link(controller: 'representative')}/${representative?.id}"
 		def numRepresentations = Usuario.countByRepresentative(representative) + 1//plus the representative itself
 		def representativeMap = [id: representative.id, nif:representative.nif,
 			 webPageURL:webPageURL, infoURL:infoURL, 

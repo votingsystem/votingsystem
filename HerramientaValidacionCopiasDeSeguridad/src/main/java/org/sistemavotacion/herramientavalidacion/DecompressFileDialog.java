@@ -194,7 +194,7 @@ public class DecompressFileDialog extends javax.swing.JDialog {
      */
     public static void main(String args[]) {
         final DecompressFileDialog dialog = new DecompressFileDialog(new javax.swing.JFrame(), true);
-        Contexto.INSTANCE.init();
+        Contexto.INSTANCE.init(null);
         String zipFile = "./representative_00000001R.zip";
         String outputFolder = Contexto.DEFAULTS.APPTEMPDIR + 
             File.separator + UUID.randomUUID();

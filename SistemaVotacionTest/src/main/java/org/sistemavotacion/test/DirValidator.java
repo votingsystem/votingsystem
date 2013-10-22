@@ -50,7 +50,7 @@ public class DirValidator {
     }
     
     public static void main(String[] args) throws Exception {
-        Contexto.INSTANCE.init();
+        Contexto.INSTANCE.init(null);
         
         File dir = new File(ContextoPruebas.DEFAULTS.ERROR_DIR);
         DirValidator validateDirFiles = new DirValidator();

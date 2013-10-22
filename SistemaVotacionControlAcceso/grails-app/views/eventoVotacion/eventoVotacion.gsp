@@ -136,7 +136,7 @@
 					webAppMessage.contenidoFirma = contenidoFirma
 					pendingOperation = Operation.CANCELAR_EVENTO
 					//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-					votingSystemApplet.setMessateToNativeClient(JSON.stringify(webAppMessage)); 
+					votingSystemApplet.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
 				}
             }
             
@@ -155,11 +155,11 @@
 				webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStamp', absolute:true)}"
 				pendingOperation = Operation.ENVIO_VOTO_SMIME
 				//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-				votingSystemApplet.setMessateToNativeClient(JSON.stringify(webAppMessage)); 
+				votingSystemApplet.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
 			}
 
-			function setMessageFromNativeClient(appMessage) {
-				console.log("setMessageFromNativeClient - message from native client: " + appMessage);
+			function setMessageFromSignatureClient(appMessage) {
+				console.log("setMessageFromSignatureClient - message from native client: " + appMessage);
 				$("#loadingVotingSystemAppletDialog").dialog("close");
 				if(appMessage != null) {
 					votingSystemAppletLoaded = true;

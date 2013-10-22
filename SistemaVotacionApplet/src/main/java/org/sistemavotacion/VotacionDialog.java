@@ -43,19 +43,18 @@ public class VotacionDialog extends JDialog {
     private Frame parentFrame;
     private Future<Respuesta> tareaEnEjecucion;
     private Evento votoEvento;
-    private AppletFirma appletFirma;
+    private Operacion operacion;
     private SMIMEMessageWrapper smimeMessage;
     private final AtomicBoolean done = new AtomicBoolean(false);
     
-    public VotacionDialog(java.awt.Frame parent, 
-            boolean modal, final AppletFirma appletFirma) {
+    public VotacionDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         this.parentFrame = parent;
-        this.appletFirma = appletFirma;
         //parentFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);       
         initComponents();
-        votoEvento = appletFirma.getOperacionEnCurso().getEvento();
+        operacion = Contexto.INSTANCE.getPendingOperation();
+        votoEvento = operacion.getEvento();
         addWindowListener(new WindowAdapter() {
             public void windowClosed(WindowEvent e) {
                 logger.debug("VotacionDialog window closed event received");
@@ -73,18 +72,16 @@ public class VotacionDialog extends JDialog {
         messageLabel.setText(Contexto.INSTANCE.getString(
                 "mensajeVotacion", votoEvento.getAsunto(), 
                 votoEvento.getOpcionSeleccionada().getContent()));
-        setTitle(appletFirma.getOperacionEnCurso().
-                getTipo().getCaption());
+        setTitle(operacion.getTipo().getCaption());
         progressBarPanel.setVisible(false);
         pack();
     }
 
     private void sendResponse(int status, String message) {
         done.set(true);
-        Operacion operacion = appletFirma.getOperacionEnCurso();
         operacion.setCodigoEstado(status);
         operacion.setMensaje(message);
-        appletFirma.enviarMensajeAplicacion(operacion);
+        Contexto.INSTANCE.sendMessageToHost(operacion);
         dispose();
     }
         
@@ -265,8 +262,7 @@ public class VotacionDialog extends JDialog {
         }
         try {
             File documento = new File(Contexto.DEFAULTS.APPTEMPDIR +
-                    UUID.randomUUID().toString() + "_" +
-                    appletFirma.getOperacionEnCurso().getTipo().
+                    UUID.randomUUID().toString() + "_" + operacion.getTipo().
                     getNombreArchivoEnDisco());
             documento.deleteOnExit();
             String accessRequest = votoEvento.getAccessRequestJSON().toString();

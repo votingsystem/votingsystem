@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.herramientavalidacion.ContextoHerramienta;
-import static org.sistemavotacion.herramientavalidacion.backup.ValidationEvent.CLAIM_FINISH;
 import org.sistemavotacion.herramientavalidacion.modelo.MetaInf;
 import org.sistemavotacion.herramientavalidacion.modelo.SignedFile;
 import org.sistemavotacion.modelo.Respuesta;
@@ -41,7 +40,7 @@ public class ClaimBackupValidator implements Callable<Respuesta> {
     
     public ClaimBackupValidator(String backupPath, 
             ValidatorListener validatorListener) throws Exception {
-        ContextoHerramienta.INSTANCE.init();
+        ContextoHerramienta.INSTANCE.init(null);
         backupDir = new File(backupPath);
         this.validatorListener =  validatorListener;
     }

@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JDialog;
 import javax.swing.SwingWorker;
-import org.sistemavotacion.AppletFirma;
 import static org.sistemavotacion.AppletFirma.SERVER_INFO_URL_SUFIX;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.FirmaDialog;
@@ -51,14 +50,11 @@ public class PreconditionsCheckerDialog extends JDialog {
             new HashMap<String, ActorConIP>();
     private Operacion operacion;
     private Frame frame = null;
-    private final AppletFirma appletFirma;
 
-    public PreconditionsCheckerDialog(Frame parent, 
-            boolean modal, Operacion operacion, final AppletFirma appletFirma) {
+    public PreconditionsCheckerDialog(Frame parent, boolean modal) {
         super(parent, modal);
         frame = parent;
-        this.appletFirma = appletFirma;
-        this.operacion = operacion;
+        this.operacion = Contexto.INSTANCE.getPendingOperation();
         initComponents();
         setLocationRelativeTo(null);  
         setTitle(Contexto.INSTANCE.getString("preconditionsCheckerDialogCaption"));
@@ -89,7 +85,7 @@ public class PreconditionsCheckerDialog extends JDialog {
         waitLabel.setText(message);
         operacion.setCodigoEstado(status);
         operacion.setMensaje(message);
-        appletFirma.enviarMensajeAplicacion(operacion);
+        Contexto.INSTANCE.sendMessageToHost(operacion);
         dispose();
     }
     
@@ -165,19 +161,19 @@ public class PreconditionsCheckerDialog extends JDialog {
                     switch(operacion.getTipo()) {
                         case GUARDAR_RECIBO_VOTO:
                             SaveReceiptDialog saveReceiptDialog = 
-                                new SaveReceiptDialog(frame, true, appletFirma);
+                                new SaveReceiptDialog(frame, true);
                             dispose();
                             saveReceiptDialog.show(operacion.getArgs()[0]);
                             break;
                         case NEW_REPRESENTATIVE:
                             RepresentativeDataDialog representativeDialog = 
-                                new RepresentativeDataDialog(frame, true, appletFirma);
+                                new RepresentativeDataDialog(frame, true);
                             dispose();
                             representativeDialog.show(operacion);
                             break;
                         case ENVIO_VOTO_SMIME:
                             VotacionDialog votacionDialog = new VotacionDialog(
-                                    frame, true, appletFirma);
+                                    frame, true);
                             dispose();
                             votacionDialog.setVisible(true);
                             break;
@@ -194,12 +190,12 @@ public class PreconditionsCheckerDialog extends JDialog {
                         case ASOCIAR_CENTRO_CONTROL:
                         case ANULAR_SOLICITUD_ACCESO:
                         case ANULAR_VOTO: 
-                            FirmaDialog firmaDialog = new FirmaDialog(frame, true, appletFirma);
+                            FirmaDialog firmaDialog = new FirmaDialog(frame, true);
                             dispose();
                             firmaDialog.mostrar();
                             break;
                         case SOLICITUD_COPIA_SEGURIDAD:
-                            FirmaDialog firmaDialog1 = new FirmaDialog(frame, true, appletFirma);
+                            FirmaDialog firmaDialog1 = new FirmaDialog(frame, true);
                             byte[] bytesPDF = PdfFormHelper.getBackupRequest(
                                     operacion.getEvento().getEventoId().toString(),
                                     operacion.getEvento().getAsunto(), 

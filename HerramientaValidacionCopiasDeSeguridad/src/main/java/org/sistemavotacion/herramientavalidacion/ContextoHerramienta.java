@@ -3,8 +3,8 @@ package org.sistemavotacion.herramientavalidacion;
 import java.text.MessageFormat;
 import java.util.Properties;
 import java.util.ResourceBundle;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.log4j.PropertyConfigurator;
+import org.sistemavotacion.AppHost;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,13 +23,13 @@ public enum ContextoHerramienta {
     } 
     
     private ResourceBundle resourceBundle;
+    private AppHost appHost;
     
     private ContextoHerramienta () {
         try {
             Properties props = new Properties();
             props.load(Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("log4jHerramienta.properties")); 
-            org.sistemavotacion.Contexto.INSTANCE.init();
             resourceBundle = ResourceBundle.getBundle(
                     "herramientaValidacionMessages_" + DEFAULTS.locale);
             PropertyConfigurator.configure(props);
@@ -44,7 +44,9 @@ public enum ContextoHerramienta {
 
     }
 
-    public void init() {}
+    public void init(AppHost appHost) {
+        org.sistemavotacion.Contexto.INSTANCE.init(appHost);
+    }
             
     public void shutdown() {
         logger.debug("----------- shutdown ------------ ");

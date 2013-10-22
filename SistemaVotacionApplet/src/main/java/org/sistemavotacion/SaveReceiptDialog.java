@@ -17,14 +17,11 @@ public class SaveReceiptDialog extends javax.swing.JDialog {
     private static Logger logger = LoggerFactory.getLogger(SaveReceiptDialog.class);
 
     private Frame parentFrame = null;
-    private final AppletFirma appletFirma;
     
-    public SaveReceiptDialog(Frame parent, boolean modal,
-            final AppletFirma appletFirma) {
+    public SaveReceiptDialog(Frame parent, boolean modal) {
         super(parent, modal);
         setLocationRelativeTo(null);
         this.parentFrame = parent;
-        this.appletFirma = appletFirma;
         initComponents();
         parent.setLocationRelativeTo(null);
     }
@@ -74,7 +71,7 @@ public class SaveReceiptDialog extends javax.swing.JDialog {
             respuesta.setMensaje(Contexto.INSTANCE.getString(
                             "receiptNotFoundMsg", hashCertificadoVotoBase64));
         }
-        appletFirma.enviarMensajeAplicacion(respuesta);
+        Contexto.INSTANCE.sendMessageToHost(respuesta);
         dispose();
     }
 

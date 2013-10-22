@@ -6,6 +6,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.filechooser.FileFilter;
 import org.sistemavotacion.Contexto;
+import org.sistemavotacion.modelo.Operacion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,8 +143,8 @@ public class DialogoPrincipal extends javax.swing.JDialog {
     }//GEN-LAST:event_abrirArchivoFirmadoButtonActionPerformed
 
     private void cerrarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cerrarButtonActionPerformed
+        Contexto.INSTANCE.sendMessageToHost(new Operacion(Operacion.SC_CANCELADO));
         dispose();
-        System.exit(0);
     }//GEN-LAST:event_cerrarButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

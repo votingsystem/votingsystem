@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class AppletFirma extends JApplet {
+public class AppletFirma extends JApplet implements AppHost {
     
     private static Logger logger = LoggerFactory.getLogger(AppletFirma.class);
 
@@ -43,7 +43,7 @@ public class AppletFirma extends JApplet {
         //Execute a job on the event-dispatching thread:
         //creating this applet's GUI.
         try {
-            Contexto.INSTANCE.init();
+            Contexto.INSTANCE.init(this);
             javax.swing.SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     try {
@@ -76,14 +76,14 @@ public class AppletFirma extends JApplet {
                 }
             }
         });
-        if(AppletFirma.modoEjecucion == AppletFirma.ModoEjecucion.APPLET) {
+        if(modoEjecucion == ModoEjecucion.APPLET) {
             lanzarTimer();
             if(getParameter("locale") != null) locale = getParameter("locale");
         } 
         Operacion operacion = new Operacion(Operacion.SC_PROCESANDO, 
                 Operacion.Tipo.MENSAJE_APPLET, 
                 Contexto.INSTANCE.getString("appletInicializado"));
-        enviarMensajeAplicacion(operacion);
+        sendMessageToHost(operacion);
     }
 
     public void stop() {
@@ -94,10 +94,6 @@ public class AppletFirma extends JApplet {
     public void destroy() {
         logger.debug("destroy");
         finalizar();
-    }
-
-    public Operacion getOperacionEnCurso() {
-        return operacionEnCurso;
     }
     
     /*
@@ -111,7 +107,7 @@ public class AppletFirma extends JApplet {
             new TimerTask(){
                 public void run() { 
                     //logger.debug("Comprobando operaciones pendientes");
-                    Object object = jsObject.call("getMessageToNativeClient", null);
+                    Object object = jsObject.call("getMessageToSignatureClient", null);
                     if(object != null) {
                         ejecutarOperacion(object.toString());
                     } else {
@@ -131,35 +127,9 @@ public class AppletFirma extends JApplet {
         recolectorOperaciones.cancel();
         Operacion operacion = new Operacion();
         operacion.setTipo(Operacion.Tipo.MENSAJE_CIERRE_APPLET);
-        enviarMensajeAplicacion(operacion);
+        sendMessageToHost(operacion);
         cancelado.set(true);
         Contexto.INSTANCE.shutdown();
-    }
-    
-    public void enviarMensajeAplicacion(Operacion operacion) {
-        if (operacion == null) {
-            logger.debug(" - enviarMensajeAplicacion - Operacion null");
-            return;
-        }
-        logger.debug(" - enviarMensajeAplicacion - status: " + 
-                operacion.getCodigoEstado() + " - operación: " + 
-                operacion.toJSON().toString());
-        try {
-            if(AppletFirma.modoEjecucion == AppletFirma.ModoEjecucion.APPLET) {
-                Object[] args = {operacion.toJSON().toString()};
-                Object object = netscape.javascript.JSObject.getWindow(this).
-                        call("setMessageFromNativeClient", args);
-            } else logger.debug("---> APP EXECUTION MODE: " +  
-                    AppletFirma.modoEjecucion.toString());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        if(AppletFirma.ModoEjecucion.APLICACION == 
-                AppletFirma.modoEjecucion && operacion.getCodigoEstado() == 
-                Operacion.SC_CANCELADO){
-            logger.debug(" ------  System.exit(0) ------ ");
-            System.exit(0);
-        }
     }
  
     public void ejecutarOperacion(String operacionJSONStr) {
@@ -170,12 +140,12 @@ public class AppletFirma extends JApplet {
             logger.debug("ejecutarOperacion - errorValidacion: " + 
                     operacionEnCurso.getErrorValidacion());
             operacionEnCurso.setCodigoEstado(Operacion.SC_ERROR_PETICION);
-            enviarMensajeAplicacion(operacionEnCurso);
+            sendMessageToHost(operacionEnCurso);
             return;
         } else {
             PreconditionsCheckerDialog preconditionsChecker = 
                     new PreconditionsCheckerDialog(
-                    new JFrame(), true, operacionEnCurso, this);
+                    new JFrame(), true);
             preconditionsChecker.showDialog();
         }
     }
@@ -187,13 +157,13 @@ public class AppletFirma extends JApplet {
         operation.setArgs(_args);
         logger.debug("operation: " + operation.toJSON());
         try {
-            Contexto.INSTANCE.init();
             javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
                 public void run() {
                     try {
                         UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
                         AppletFirma appletFirma = new AppletFirma();
                         appletFirma.start();
+                        Contexto.INSTANCE.init(appletFirma);
                         File jsonFile = File.createTempFile("publishVoting", ".json");
                         jsonFile.deleteOnExit();
                         FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
@@ -213,5 +183,32 @@ public class AppletFirma extends JApplet {
             ex.printStackTrace();
         }
     }
-    
+ 
+    @Override public void sendMessageToHost(Operacion operacion) {
+        if (operacion == null) {
+            logger.debug(" - sendMessageToHost - Operacion null");
+            return;
+        }
+        logger.debug(" - sendMessageToHost - status: " + 
+                operacion.getCodigoEstado() + " - operación: " + 
+                operacion.toJSON().toString());
+        try {
+            if(modoEjecucion == ModoEjecucion.APPLET) {
+                Object[] args = {operacion.toJSON().toString()};
+                Object object = netscape.javascript.JSObject.getWindow(this).
+                        call("setMessageFromSignatureClient", args);
+            } else logger.debug("---> APP EXECUTION MODE: " + modoEjecucion.toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        if(ModoEjecucion.APLICACION == modoEjecucion && 
+                operacion.getCodigoEstado() == Operacion.SC_CANCELADO){
+            logger.debug(" ------  System.exit(0) ------ ");
+            System.exit(0);
+        }
+    }
+
+    @Override public Operacion getPendingOperation() {
+        return operacionEnCurso; 
+    }
 }

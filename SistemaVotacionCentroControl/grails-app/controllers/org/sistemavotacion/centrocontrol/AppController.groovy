@@ -17,22 +17,6 @@ class AppController {
 	
 	/**
 	 * @httpMethod [GET]
-	 * @return Información sobre los servicios que tienen como url base '/app'
-	 */
-	def index() { 
-		redirect action: "restDoc"
-	}
-
-
-	/**
-	 * @httpMethod [GET]
-	 * @return La página principal de la aplicación web de votación.
-	 */
-	def home() {
-	}
-	
-	/**
-	 * @httpMethod [GET]
 	 * @return La página principal de la aplicación web de votación con parámetros de utilidad
 	 * 		   para una sesión con cliente Android.
 	 */
@@ -53,4 +37,28 @@ class AppController {
 		return
 	}
 	
+	/**
+	 * @httpMethod [GET]
+	 * @return Archivo con funciones de utilidad Javascript localizadas (i18n)
+	 */
+	def jsUtils() {
+		response.contentType = "application/javascript"
+	}
+	
+	/**
+	 * @httpMethod [GET]
+	 * @return Archivo con funciones de utilidad Javascript empleadas en dispositivos móviles localizadas (i18n)
+	 */
+	def jsMobileUtils() {
+		response.contentType = "application/javascript"
+	}
+	
+	/**
+	 * @httpMethod [GET]
+	 * @return  Archivo con funciones Javascript empleadas en el pie de página localizadas (i18n)
+	 */
+	def jsJQueryPaginate() {
+		response.contentType = "application/javascript"
+	}
+
 }

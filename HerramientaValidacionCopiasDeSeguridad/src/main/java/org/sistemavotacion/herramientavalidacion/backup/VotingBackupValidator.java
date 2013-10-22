@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
+import org.sistemavotacion.AppHost;
 import org.sistemavotacion.Contexto;
 import org.sistemavotacion.herramientavalidacion.ContextoHerramienta;
 import org.sistemavotacion.herramientavalidacion.modelo.MetaInf;
@@ -18,6 +19,7 @@ import org.sistemavotacion.herramientavalidacion.modelo.RepresentativeData;
 import org.sistemavotacion.herramientavalidacion.modelo.RepresentativesData;
 import org.sistemavotacion.herramientavalidacion.modelo.SignedFile;
 import org.sistemavotacion.modelo.OpcionEvento;
+import org.sistemavotacion.modelo.Operacion;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.util.DateUtils;
@@ -29,7 +31,7 @@ import org.slf4j.LoggerFactory;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class VotingBackupValidator implements Callable<Respuesta> {
+public class VotingBackupValidator implements Callable<Respuesta>, AppHost {
     
     private static Logger logger = LoggerFactory.getLogger(VotingBackupValidator.class);
 
@@ -50,7 +52,7 @@ public class VotingBackupValidator implements Callable<Respuesta> {
     
     public VotingBackupValidator(String backupPath, 
             ValidatorListener validatorListener) throws Exception {
-        ContextoHerramienta.INSTANCE.init();
+        ContextoHerramienta.INSTANCE.init(this);
         backupDir = new File(backupPath);
         this.validatorListener =  validatorListener;
         accessRequestsDir = new File(backupPath + "/accessRequest");
@@ -434,6 +436,14 @@ public class VotingBackupValidator implements Callable<Respuesta> {
         dirBackupValidator.call();
 
         System.exit(0);
+    }
+
+    @Override public void sendMessageToHost(Operacion operacion) {
+        throw new UnsupportedOperationException("Not supported yet."); 
+    }
+
+    @Override public Operacion getPendingOperation() {
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
     

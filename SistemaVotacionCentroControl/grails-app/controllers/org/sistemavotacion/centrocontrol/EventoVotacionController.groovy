@@ -23,6 +23,14 @@ class EventoVotacionController {
 	def subscripcionService
 	def httpService
 	def grailsApplication
+	
+	/**
+	 * @httpMethod [GET]
+	 * @return La página principal de la aplicación web de votación.
+	 */
+	def mainPage() {
+		render(view:"mainPage" , model:[selectedSubsystem:Subsystem.VOTES.toString()])
+	}
 
 	/**
 	 * Servicio de consulta de las votaciones publicadas.
@@ -52,9 +60,15 @@ class EventoVotacionController {
 				render message(code: 'eventoVotacion.eventoNotFound', args:[params.id])
 				return false
 			} else {
-				render eventoVotacionService.
-					optenerEventoVotacionJSONMap(evento) as JSON
-				return false
+				Map eventMap = eventoVotacionService.optenerEventoVotacionJSONMap(evento)
+				if(request.contentType?.contains("application/json")) {
+					render eventMap as JSON
+					return false
+				} else {
+					render(view:"eventoVotacion", model: [
+						selectedSubsystem:Subsystem.VOTES.toString(), eventMap: eventMap])
+					return
+				}
 			}
 		} else {
 			params.sort = "fechaInicio"

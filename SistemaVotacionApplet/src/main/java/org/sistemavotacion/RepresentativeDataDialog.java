@@ -39,15 +39,12 @@ public class RepresentativeDataDialog extends JDialog  {
     private File selectedImage = null;
     private Future<Respuesta> tareaEnEjecucion;
     private AtomicBoolean mostrandoPantallaEnvio = new AtomicBoolean(false);
-    private final AppletFirma appletFirma;
     private final AtomicBoolean done = new AtomicBoolean(false);
         
-    public RepresentativeDataDialog(Frame parent, boolean modal, 
-            final AppletFirma appletFirma) {
+    public RepresentativeDataDialog(Frame parent, boolean modal) {
         super(parent, modal);
         setLocationRelativeTo(null);
         this.parentFrame = parent;
-        this.appletFirma = appletFirma;
         initComponents();
         parent.setLocationRelativeTo(null);
         setTitle(Contexto.INSTANCE.getString("NEW_REPRESENTATIVE"));
@@ -73,7 +70,7 @@ public class RepresentativeDataDialog extends JDialog  {
         done.set(true);
         operacion.setCodigoEstado(status);
         operacion.setMensaje(message);
-        appletFirma.enviarMensajeAplicacion(operacion);
+        Contexto.INSTANCE.sendMessageToHost(operacion);
         dispose();
     }
     

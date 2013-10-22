@@ -2,18 +2,11 @@
 <html>
     <head>
         <title>${message(code: 'nombreServidorLabel', null)}</title>
+         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
         <link rel="shortcut icon" href="${resource(dir:'images',file:'favicon.ico')}" type="image/x-icon" />
         <meta name="viewport" content="width=device-width" />
         <meta name="HandheldFriendly" content="true" />
-        <link rel="stylesheet" href="${resource(dir:'css',file:'votingSystem.css')}">  
-        <script src="${resource(dir:'js',file:'jquery-1.10.2.min.js')}"></script>  
-        
-        <script src="${resource(dir:'js',file:'jquery-ui-1.10.3.custom.min.js')}"></script>
-        <link rel="stylesheet" href="${resource(dir:'css',file:'jquery-ui-1.10.3.custom.min.css')}">    
-        <script src="${resource(dir:'app',file:'jsMessages')}"></script>
-        <script src="${resource(dir:'js',file:'utils.js')}"></script>
-   		<script src="${resource(dir:'js',file:'deployJava.js')}"></script>
-        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+   		<g:include controller="app" action="jsUtils" />
         <g:layoutHead />
         <script type="text/javascript">
         
@@ -87,9 +80,6 @@
 			<g:layoutBody/>
 
 			<div class="footer" style="display:none;">
-				<a id="validationToolLink" class="appLink" href="#" style="float:left;margin: 3px 20px 0 0;">
-					<g:message code="validationToolLinkText"/>
-				</a>
 				<a class="appLink" href="${createLink(controller: 'infoServidor', action: 'informacion')}"
 					style="float:right;margin: 3px 0 0 20px;">
 					<g:message code="dataInfoLinkText"/>
@@ -101,24 +91,25 @@
 			<p style="text-align: center;"><g:message code="advancedSearchMsg"/>.</p>
     		<form id="advancedSearchForm">
 				<div style="margin:0px auto 0px auto; width:50%">
-    				<label for="searchText"><g:message code="advancedSearchFieldLbl"/></label>
     				<input type="text" id="searchText" style="" required
+    					title="<g:message code="advancedSearchFieldLbl"/>"
+    					placeholder="<g:message code="advancedSearchFieldLbl"/>"
 	    				oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
 	    				onchange="this.setCustomValidity('')" />
    				</div>
   
   				<div style="display:block;margin:20px 0px 0px 0px;">
 	  				<div style="display:inline-block;margin:0px 0px 0px 20px;">
-	  					<label for="dateBeginFrom" style="margin:0px 0px 20px 3px"><g:message code="dateBeginFromLbl"/></label>
 						<input type="text" id="dateBeginFrom" style="width:230px;" required readonly
+							title="<g:message code="dateBeginFromLbl"/>"
+							placeholder="<g:message code="dateBeginFromLbl"/>"
 		   					oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
 		   					onchange="this.setCustomValidity('')"/>
 	  				</div>
-	
-	
 	  				<div style="display:inline-block;margin:0px 0px 0px 20px;">
-		   				<label for="dateBeginTo" style="margin:0px 0px 20px 3px;"><g:message code="dateToLbl"/></label>
 						<input type="text" id="dateBeginTo" required readonly
+							title="<g:message code="dateToLbl"/>"
+							placeholder="<g:message code="dateToLbl"/>"
 		   					oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
 		   					onchange="this.setCustomValidity('')"/>
 	   				</div>
@@ -126,15 +117,17 @@
    				
   				<div style="display:block;margin:20px 0px 0px 0px;">
 	  				<div style="display:inline-block;margin:0px 0px 0px 20px;">
-						<label for="dateFinishFrom" style="margin:0px 0px 20px 3px"><g:message code="dateFinishFromLbl"/></label>
 						<input type="text" id="dateFinishFrom" style="width:230px;" required readonly
+							title="<g:message code="dateFinishFromLbl"/>"
+							placeholder="<g:message code="dateFinishFromLbl"/>"
 							oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
 		   					onchange="this.setCustomValidity('')"/>
 	  				</div>
 	
 	  				<div style="display:inline-block;margin:0px 0px 0px 20px;">
-		   				<label for="dateFinishTo" style="margin:0px 0px 20px 3px"><g:message code="dateToLbl"/></label>
 						<input type="text" id="dateFinishTo" required readonly
+							title="<g:message code="dateToLbl"/>"
+							placeholder="<g:message code="dateToLbl"/>"
 		   					oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
 		   					onchange="this.setCustomValidity('')"/>
 	   				</div>
@@ -143,8 +136,7 @@
     		</form>
     	</div> 
     	
-	<div id="appletsFrame" style="display:none;">
-		<iframe id="validationToolAppletFrame" src="" style="visibility:hidden;width:0px; height:0px;"></iframe>
+	<div id="appletsFrame">
 		<iframe id="votingSystemAppletFrame" src="" style="visibility:hidden;width:0px; height:0px;"></iframe>
 	</div>
 

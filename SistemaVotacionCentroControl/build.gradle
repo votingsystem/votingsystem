@@ -47,7 +47,8 @@ task runApp << { task ->
 
 ext {
 	grailsRestDocPluginVersion = "0.4"
-	gwtVisualizationVersion="1.1.2"
+	ckeditorVersion="4.2.2"
+	bcprovVersion="jdk16-1.46"
 }
 
 task installGrailsRestDocPlugin << { task ->
@@ -95,30 +96,32 @@ task installGrailsRestDocPlugin << { task ->
 	announce.announce("GrailsRestDocPlugin installed", "local")
 }
 
-task installGwtVisualizationApi << { task ->
+task installCkeditor << { task ->
 	ProcessBuilder pb;
 	Process proc;
 	println grailsRestDocPluginVersion
-	String apiFilePath = "../libs/gwt-visualization-${gwtVisualizationVersion}.zip"
+	String apiFilePath = "../libs/gckeditor_${ckeditorVersion}_standard.zip"
 	if(!file(apiFilePath).exists()) {
-		String fileURL = "http://gwt-google-apis.googlecode.com/files/gwt-visualization-${gwtVisualizationVersion}.zip"
+		String fileURL = "http://download.cksource.com/CKEditor/CKEditor/CKEditor%204.2.2/ckeditor_4.2.2_standard.zip"
 		println "--- downloading ${fileURL}"
 		ant.get(src:fileURL, dest:apiFilePath)
-		ant.unzip(src:apiFilePath, dest:"../libs")
-		pb = new ProcessBuilder("mvn", "install:install-file", "-Dfile=gwt-visualization.jar",
-			"-DgroupId=com.google.gwt.google-apis", "-DartifactId=gwt-visualization",
-			"-Dversion=${gwtVisualizationVersion}", "-Dpackaging=jar", "-Djavadoc=gwt-visualization-javadoc.jar");
-		pb.directory(file("../libs/gwt-visualization-${gwtVisualizationVersion}"));
-		proc = pb.start();
-		proc.consumeProcessErrorStream(System.err)
-		proc.consumeProcessOutputStream(System.out)
-		if (proc.waitFor() != 0) {
-			throw new RuntimeException('package-plugin GrailsRestDocPlugin failed')
-		}
-		announce.announce("GWT Visualization API installed", "local")
+		ant.unzip(src:apiFilePath, dest:"./web-app")
+		announce.announce("CKEDITOR installed", "local")
 	}
 }
 
+task installAppletBcprov << { task ->
+	ProcessBuilder pb;
+	Process proc;
+	println grailsRestDocPluginVersion
+	String jarFilePath = "./web-app/applet/lib/bcprov-${bcprovVersion}.jar"
+	if(!file(jarFilePath).exists()) {
+		String jarFileURL = "http://central.maven.org/maven2/org/bouncycastle/bcprov-jdk16/1.46/bcprov-${bcprovVersion}.jar"
+		println "--- downloading ${jarFileURL}"
+		ant.get(src:jarFileURL, dest:jarFilePath)
+		announce.announce("Bcprovider installed", "local")
+	} else println "--- AppletBcprov already installed"
+}
 
 task generateRestDocs(dependsOn:['installGrailsRestDocPlugin']) << {task ->
 	ProcessBuilder pb  = new ProcessBuilder("grails", "generate-rest-docs");
@@ -131,7 +134,7 @@ task generateRestDocs(dependsOn:['installGrailsRestDocPlugin']) << {task ->
 	}
 }
 
-task war(dependsOn:['copyAppletDeps', 'installGwtVisualizationApi']) << {task ->
+task war(dependsOn:['copyAppletDeps', 'installCkeditor', 'installAppletBcprov']) << {task ->
 	ProcessBuilder pb = new ProcessBuilder("grails", "war");
 	pb.directory(projectDir);
 	Process proc = pb.start();

@@ -40,7 +40,7 @@ public class ManifestBackupValidator implements Callable<Respuesta> {
     
     public ManifestBackupValidator(String backupPath, 
             ValidatorListener validatorListener) throws Exception {
-        ContextoHerramienta.INSTANCE.init();
+        ContextoHerramienta.INSTANCE.init(null);
         backupDir = new File(backupPath);
         this.validatorListener =  validatorListener;
     }

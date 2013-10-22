@@ -2,8 +2,8 @@
 <html>
 <head>
         <meta name="layout" content="main" />
-        <script src="${resource(dir:'js',file:'jquery.paginate.js')}"></script>
-   		<link rel="stylesheet" href="${resource(dir:'css',file:'jqueryPaginate.css')}">
+		<link rel="stylesheet" href="${resource(dir:'css',file:'jqueryPaginate.css')}">
+		<g:include controller="app" action="jsJQueryPaginate"/>
         <script type="text/javascript">
 		 	$(function() {
 		 		loadEvents("${createLink( controller:'eventoFirma')}")	

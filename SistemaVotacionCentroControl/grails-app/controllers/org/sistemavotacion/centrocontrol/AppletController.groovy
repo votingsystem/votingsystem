@@ -9,14 +9,6 @@ class AppletController {
 	
 	/**
 	 * @httpMethod [GET]
-	 * @return Información sobre los servicios que tienen como url base '/applet'.
-	 */
-	def index() { 
-		redirect action: "restDoc"
-	}
-	
-	/**
-	 * @httpMethod [GET]
 	 * @return Página HTML que sirve para cargar el Applet principal de firma.
 	 */
 	def cliente () { }

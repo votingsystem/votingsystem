@@ -474,7 +474,7 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog {
     
         
     public static void main(String args[]) {
-        Contexto.INSTANCE.init();
+        Contexto.INSTANCE.init(null);
         final VisualizadorDeEventoFirmadoDialog dialog = 
                 new VisualizadorDeEventoFirmadoDialog(new javax.swing.JFrame(), true);
         java.awt.EventQueue.invokeLater(new Runnable() {

@@ -69,7 +69,7 @@
 			    		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
 					webAppMessage.contenidoFirma = event
 					webAppMessage.urlEnvioDocumento = "${createLink( controller:'eventoFirma', absolute:true)}"
-					webAppMessage.asuntoMensajeFirmado = Message.publishManifestSubject
+					webAppMessage.asuntoMensajeFirmado = '<g:message code="publishManifestSubject"/>'
 					
 					setMessateToNativeClient(JSON.stringify(webAppMessage))
 					return false

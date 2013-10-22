@@ -140,7 +140,7 @@
 			webAppMessage.urlEnvioDocumento = "${createLink(controller:'representative', action:'userSelection', absolute:true)}"
 			webAppMessage.asuntoMensajeFirmado = '<g:message code="requestRepresentativeAcreditationsLbl"/>'
 			webAppMessage.respuestaConRecibo = true
-			votingSystemApplet.setMessateToNativeClient(JSON.stringify(webAppMessage)); 
+			votingSystemApplet.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
 		}
 
 		function requestVotingHistory() {
@@ -160,7 +160,7 @@
 			webAppMessage.asuntoMensajeFirmado = '<g:message code="requestVotingHistoryLbl"/>'
 			webAppMessage.emailSolicitante = $("#userEmailText").val()
 			webAppMessage.respuestaConRecibo = true
-			votingSystemApplet.setMessateToNativeClient(JSON.stringify(webAppMessage)); 
+			votingSystemApplet.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
 		}
 
 		function requestAccreditations() {
@@ -178,11 +178,11 @@
 			webAppMessage.asuntoMensajeFirmado = '<g:message code="requestRepresentativeAcreditationsLbl"/>'
 			webAppMessage.emailSolicitante = $("#accreditationReqUserEmailText").val()
 			webAppMessage.respuestaConRecibo = true
-			votingSystemApplet.setMessateToNativeClient(JSON.stringify(webAppMessage)); 
+			votingSystemApplet.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
 		}
 	
-		function setMessageFromNativeClient(appMessage) {
-			console.log("setMessageFromNativeClient - message from native client: " + appMessage);
+		function setMessageFromSignatureClient(appMessage) {
+			console.log("setMessageFromSignatureClient - message from native client: " + appMessage);
 			$("#loadingVotingSystemAppletDialog").dialog("close");
 			if(appMessage != null) {
 				votingSystemAppletLoaded = true;

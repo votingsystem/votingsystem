@@ -101,11 +101,11 @@
 				webAppMessage.urlEnvioDocumento = "${createLink(controller:'representative', action:'revoke', absolute:true)}"
 				webAppMessage.asuntoMensajeFirmado = '<g:message code="removeRepresentativeMsgSubject"/>'
 				webAppMessage.respuestaConRecibo = true
-				votingSystemApplet.setMessateToNativeClient(JSON.stringify(webAppMessage)); 
+				votingSystemApplet.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
 		 	}
 
-			function setMessageFromNativeClient(appMessage) {
-				console.log("setMessageFromNativeClient - message from native client: " + appMessage);
+			function setMessageFromSignatureClient(appMessage) {
+				console.log("setMessageFromSignatureClient - message from native client: " + appMessage);
 				$("#loadingVotingSystemAppletDialog").dialog("close");
 				if(appMessage != null) {
 					votingSystemAppletLoaded = true;

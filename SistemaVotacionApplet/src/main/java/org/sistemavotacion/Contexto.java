@@ -23,6 +23,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.Evento;
+import org.sistemavotacion.modelo.Operacion;
 import org.sistemavotacion.modelo.ReciboVoto;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.modelo.Usuario;
@@ -141,6 +142,7 @@ public enum Contexto {
     private Map<String, ReciboVoto> receiptMap;
     private ActorConIP accessControl;
     private ActorConIP controlCenter;
+    private AppHost appHost;
     
     static {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
@@ -150,8 +152,9 @@ public enum Contexto {
         logger.debug("------------- Contexto ----------------- ");
     }
 
-    public void init(){
+    public void init(AppHost appHost){
         logger.debug("------------- init ----------------- ");
+        this.appHost = appHost;
         httpHelper = new HttpHelper();
         try {
             new File(DEFAULTS.APPDIR).mkdir();
@@ -160,11 +163,19 @@ public enum Contexto {
             FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream(CERT_RAIZ_PATH), copiaRaizDNI);
             OSValidator.initClassPath();
-            resourceBundle = ResourceBundle.getBundle("messages_" + AppletFirma.locale);
-            
+            resourceBundle = ResourceBundle.getBundle(
+                    "messages_" + AppletFirma.locale);
         } catch (Exception ex) {
             LoggerFactory.getLogger(Contexto.class).error(ex.getMessage(), ex);
         } 
+    }
+    
+    public void sendMessageToHost(Operacion operacion) {
+        appHost.sendMessageToHost(operacion);
+    }
+    
+    public Operacion getPendingOperation() {
+        return appHost.getPendingOperation();
     }
     
     public void shutdown() {

@@ -44,19 +44,17 @@ public class FirmaDialog extends JDialog {
     private AtomicBoolean mostrandoPantallaEnvio = new AtomicBoolean(false);
     private Frame parentFrame;
     private Future executingTask;
-    private AppletFirma appletFirma;
     private Operacion operacion;
     private SMIMEMessageWrapper smimeMessage;
     private final AtomicBoolean done = new AtomicBoolean(false);
     
-    public FirmaDialog(Frame parent, boolean modal, final AppletFirma appletFirma) {
+    public FirmaDialog(Frame parent, boolean modal) {
         super(parent, modal);
         this.parentFrame = parent;
-        this.appletFirma = appletFirma;
         //parentFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);       
         initComponents();
-        operacion = appletFirma.getOperacionEnCurso();
+        operacion = Contexto.INSTANCE.getPendingOperation();
         if(operacion != null && operacion.getContenidoFirma() != null) {
             bytesDocumento = operacion.getContenidoFirma().toString().getBytes();
         }
@@ -190,7 +188,7 @@ public class FirmaDialog extends JDialog {
         done.set(true);
         operacion.setCodigoEstado(status);
         operacion.setMensaje(message);
-        appletFirma.enviarMensajeAplicacion(operacion);
+        Contexto.INSTANCE.sendMessageToHost(operacion);
         dispose();
     }
     
@@ -392,8 +390,8 @@ public class FirmaDialog extends JDialog {
             logger.debug("No se puede editar archivos");
         }
         try {
-            File documento = new File(Contexto.DEFAULTS.APPTEMPDIR + appletFirma.
-                    getOperacionEnCurso().getTipo().getNombreArchivoEnDisco());
+            File documento = new File(Contexto.DEFAULTS.APPTEMPDIR + 
+                    operacion.getTipo().getNombreArchivoEnDisco());
             documento.deleteOnExit();
             FileUtils.copyStreamToFile(new ByteArrayInputStream(bytesDocumento), documento);
             logger.info("documento.getAbsolutePath(): " + documento.getAbsolutePath());

@@ -34,7 +34,7 @@
 					webAppMessage.urlEnvioDocumento = "${createLink( controller:'representative', absolute:true)}"
 					webAppMessage.asuntoMensajeFirmado = '<g:message code="representativeDataLbl"/>'
 					webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStamp', absolute:true)}"
-					votingSystemApplet.setMessateToNativeClient(JSON.stringify(webAppMessage));
+					votingSystemApplet.setMessageToSignatureClient(JSON.stringify(webAppMessage));
 			    	return false 
 
 			    });
@@ -42,10 +42,10 @@
 			  });
 
 
-			function setMessageFromNativeClient(appMessage) {
+			function setMessageFromSignatureClient(appMessage) {
 		        var dataStr = JSON.stringify(appMessage);  
-  			    console.log( "setMessageFromNativeClient - dataStr: " + dataStr);
-  			    console.log( "setMessageFromNativeClient");
+  			    console.log( "setMessageFromSignatureClient - dataStr: " + dataStr);
+  			    console.log( "setMessageFromSignatureClient");
 				$("#loadingVotingSystemAppletDialog").dialog("close");
 				if(appMessage != null) {
 					votingSystemAppletLoaded = true;
@@ -56,7 +56,7 @@
 						appMessageJSON = appMessage
 					} 
 					var statusCode = appMessageJSON.codigoEstado
-					console.log( "setMessageFromNativeClient - statusCode: " + statusCode);
+					console.log( "setMessageFromSignatureClient - statusCode: " + statusCode);
 					if(StatusCode.SC_PROCESANDO == statusCode){
 						$("#loadingVotingSystemAppletDialog").dialog("close");
 						$("#workingWithAppletDialog").dialog("open");

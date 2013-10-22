@@ -28,12 +28,6 @@ import org.sistemavotacion.controlacceso.modelo.*
 class AppController {
 
 	def grailsApplication;
-
-	/**
-	 * @httpMethod [GET]
-	 * @return La página principal de la aplicación web de votación.
-	 */
-	def home() { }
 	
 	/**
 	 * @httpMethod [GET]
@@ -44,7 +38,7 @@ class AppController {
 		log.debug("*** Si llega aqui mostrar mensaje app market browserToken: ${params.browserToken}" )
 		if(params.boolean('androidClientLoaded'))
 			render(view:"index")
-		String uri = "${grailsApplication.config.grails.serverURL}/app/home?androidClientLoaded=false"
+		String uri = "${grailsApplication.config.grails.serverURL}/eventoVotacion/mainPage?androidClientLoaded=false"
 		if(params.browserToken) uri = "${uri}#${params.browserToken}"
 		if(params.eventoId) uri = "${uri}&eventoId=${params.eventoId}"
 		if(params.serverURL) uri = "${uri}&serverURL=${params.serverURL}"
@@ -59,10 +53,25 @@ class AppController {
 	
 	/**
 	 * @httpMethod [GET]
-	 * @return Archivo con variables localizadas (i18n) empleadas en javascript.
+	 * @return Archivo con funciones de utilidad Javascript localizadas (i18n)
 	 */
-	def jsMessages() {
+	def jsUtils() {
 		response.contentType = "application/javascript"
 	}
 	
+	/**
+	 * @httpMethod [GET]
+	 * @return Archivo con funciones de utilidad Javascript empleadas en dispositivos móviles localizadas (i18n)
+	 */
+	def jsMobileUtils() {
+		response.contentType = "application/javascript"
+	}
+	
+	/**
+	 * @httpMethod [GET]
+	 * @return  Archivo con funciones Javascript empleadas en el pie de página localizadas (i18n)
+	 */
+	def jsJQueryPaginate() {
+		response.contentType = "application/javascript"
+	}
 }

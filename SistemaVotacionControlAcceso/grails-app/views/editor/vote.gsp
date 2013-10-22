@@ -191,7 +191,7 @@
 					webAppMessage.asuntoMensajeFirmado = '<g:message code="publishVoteSubject"/>'
 					webAppMessage.respuestaConRecibo = true
 
-					votingSystemApplet.setMessateToNativeClient(JSON.stringify(webAppMessage)); 
+					votingSystemApplet.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
 					return false
 				 })
 
@@ -201,8 +201,8 @@
 			    
 			  });
 
-			function setMessageFromNativeClient(appMessage) {
-				console.log("setMessageFromNativeClient - message from native client: " + appMessage);
+			function setMessageFromSignatureClient(appMessage) {
+				console.log("setMessageFromSignatureClient - message from native client: " + appMessage);
 				$("#loadingVotingSystemAppletDialog").dialog("close");
 				if(appMessage != null) {
 					votingSystemAppletLoaded = true;
@@ -246,7 +246,7 @@
 				webAppMessage.contenidoFirma = signatureContent
 				webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStamp', absolute:true)}"
 				webAppMessage.urlEnvioDocumento = "${createLink( controller:'subscripcion', absolute:true)}"
-				votingSystemApplet.setMessateToNativeClient(JSON.stringify(webAppMessage)); 
+				votingSystemApplet.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
 			} 	
 
         </script>        

@@ -3,7 +3,7 @@
 <head>
         <meta name="layout" content="main" />
 		<link rel="stylesheet" href="${resource(dir:'css',file:'jqueryPaginate.css')}">
-        <script src="${resource(dir:'js',file:'jquery.paginate.js')}"></script>
+		<g:include controller="app" action="jsJQueryPaginate"/>
 
         <script type="text/javascript">
 		 	$(function() {

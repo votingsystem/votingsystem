@@ -50,7 +50,6 @@ grails.project.dependency.resolution = {
 			'org.bouncycastle:bctsp-jdk16:1.46',
 			'joda-time:joda-time:2.1',
 			'org.rometools:rome-modules:1.0',
-			'com.google.gwt.google-apis:gwt-visualization:1.1.2',
 			'javax.mail:mail:1.4.7',
 			'org.hibernate:hibernate-search:3.4.2.Final',
 			) {
@@ -61,7 +60,7 @@ grails.project.dependency.resolution = {
 
     plugins {
         runtime ":hibernate:$grailsVersion", 
-				":jquery:1.8.3",
+				":jquery:1.10.2",
 				":resources:1.1.6",
 				":database-migration:1.3.2"
 
@@ -72,7 +71,7 @@ grails.project.dependency.resolution = {
 
         build ":tomcat:$grailsVersion"
 
-        compile (":cache:1.0.1", ":gwt:0.8", ":rest-doc-plugin:0.4")
+        compile (":cache:1.0.1", ":rest-doc-plugin:0.4")
     }
 
 }

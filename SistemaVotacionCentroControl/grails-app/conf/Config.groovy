@@ -15,9 +15,10 @@ import org.apache.log4j.net.SMTPAppender
 import org.apache.log4j.Level
 
 
+grails.views.javascript.library="jquery"
+
 grails.converters.default.pretty.print=true
 grails.gorm.failOnError=true
-grails.resources.adhoc.excludes = ['**/gwt/**']
 
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
@@ -74,6 +75,7 @@ environments {
 	
     development {
         grails.logging.jul.usebridge = true
+		grails.resources.debug = true
 		String localIP = getDevelopmentServerIP();
         grails.serverURL = "http://${localIP}:8081/${appName}"
     }
@@ -124,12 +126,12 @@ log4j = {
 			layout:pattern(conversionPattern: '%d{[dd.MM.yy HH:mm:ss.SSS]} [%t] %p %c %x - %m%n'),
 			file:"./logs/CentroControl.log", datePattern: '\'_\'yyyy-MM-dd'
 			
-		appender new SMTPAppender(name: 'smtp', to: mail.error.to, from: mail.error.from,
+		/*appender new SMTPAppender(name: 'smtp', to: mail.error.to, from: mail.error.from,
 			subject: mail.error.subject, threshold: Level.ERROR,
 			SMTPHost: mail.error.server, SMTPUsername: mail.error.username,
 			SMTPDebug: mail.error.debug.toString(), SMTPPassword: mail.error.password,
 			layout: pattern(conversionPattern:
-			   '%d{[ dd.MM.yyyy HH:mm:ss.SSS]} [%t] %n%-5p %n%c %n%C %n %x %n %m%n'))
+			   '%d{[ dd.MM.yyyy HH:mm:ss.SSS]} [%t] %n%-5p %n%c %n%C %n %x %n %m%n'))*/
     }
 	
     root {

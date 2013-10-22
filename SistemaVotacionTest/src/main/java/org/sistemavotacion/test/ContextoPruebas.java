@@ -98,7 +98,7 @@ public enum ContextoPruebas {
             Properties props = new Properties();
             props.load(Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("log4jSistemaVotacionTest.properties")); 
-            Contexto.INSTANCE.init();
+            Contexto.INSTANCE.init(null);
             resourceBundle = ResourceBundle.getBundle("messagesTest_" + DEFAULTS.locale);
             PropertyConfigurator.configure(props);
             DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss");
