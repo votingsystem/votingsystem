@@ -103,9 +103,11 @@ task installCkeditor << { task ->
 		String fileURL = "http://download.cksource.com/CKEditor/CKEditor/CKEditor%204.2.2/ckeditor_${ckeditorVersion}_standard.zip"
 		println "--- downloading ${fileURL}"
 		ant.get(src:fileURL, dest:apiFilePath)
+	}
+	if(!file("./web-app/ckeditor").exists()) {
 		ant.unzip(src:apiFilePath, dest:"./web-app")
 		announce.announce("CKEDITOR installed", "local")
-	}
+	} else println "--- CKEDITOR already installed"
 }
 
 task installAppletBcprov << { task ->

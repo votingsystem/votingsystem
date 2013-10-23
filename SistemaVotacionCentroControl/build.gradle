@@ -96,20 +96,6 @@ task installGrailsRestDocPlugin << { task ->
 	announce.announce("GrailsRestDocPlugin installed", "local")
 }
 
-task installCkeditor << { task ->
-	ProcessBuilder pb;
-	Process proc;
-	println grailsRestDocPluginVersion
-	String apiFilePath = "../libs/gckeditor_${ckeditorVersion}_standard.zip"
-	if(!file(apiFilePath).exists()) {
-		String fileURL = "http://download.cksource.com/CKEditor/CKEditor/CKEditor%204.2.2/ckeditor_4.2.2_standard.zip"
-		println "--- downloading ${fileURL}"
-		ant.get(src:fileURL, dest:apiFilePath)
-		ant.unzip(src:apiFilePath, dest:"./web-app")
-		announce.announce("CKEDITOR installed", "local")
-	}
-}
-
 task installAppletBcprov << { task ->
 	ProcessBuilder pb;
 	Process proc;
@@ -134,7 +120,7 @@ task generateRestDocs(dependsOn:['installGrailsRestDocPlugin']) << {task ->
 	}
 }
 
-task war(dependsOn:['copyAppletDeps', 'installCkeditor', 'installAppletBcprov']) << {task ->
+task war(dependsOn:['copyAppletDeps','installAppletBcprov']) << {task ->
 	ProcessBuilder pb = new ProcessBuilder("grails", "war");
 	pb.directory(projectDir);
 	Process proc = pb.start();

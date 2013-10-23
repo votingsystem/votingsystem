@@ -263,32 +263,9 @@ function updateSubsystem(selectedSubsystem) {
 		subsystem_0_0_Text = "<g:message code="manifestLbl"/>"
 		subsystem_0_1_Link = "<g:message code="claimSystemURL"/>"
 		subsystem_0_1_Text = "<g:message code="claimLbl"/>"
-		selectedSubsystemLink = "<g:message code="votingSystemURL"/>"
+		selectedSubsystemLink =  "${createLink(controller: 'eventoVotacion', action: 'mainPage')}"
 		selectedSubsystemText = "<g:message code="votingSystemLbl"/>"
 
-	} else if(SubSystem.CLAIMS == selectedSubsystem) {
-		subsystem_0_0_Link = "<g:message code="votingSystemURL"/>"
-		subsystem_0_0_Text = "<g:message code="votingLbl"/>"
-		subsystem_0_1_Link = "<g:message code="manifestSystemURL"/>"
-		subsystem_0_1_Text = "<g:message code="manifestLbl"/>"
-		selectedSubsystemLink = "<g:message code="claimSystemURL"/>"
-		selectedSubsystemText = "<g:message code="claimSystemLbl"/>"
-	} else if(SubSystem.MANIFESTS == selectedSubsystem) {
-		subsystem_0_0_Link = "<g:message code="votingSystemURL"/>"
-		subsystem_0_0_Text = "<g:message code="votingLbl"/>"
-		subsystem_0_1_Link = "<g:message code="claimSystemURL"/>"
-		subsystem_0_1_Text = "<g:message code="claimLbl"/>"
-		selectedSubsystemLink = "<g:message code="manifestSystemURL"/>"
-		selectedSubsystemText = "<g:message code="manifestSystemLbl"/>"
-	} else if(SubSystem.REPRESENTATIVES == selectedSubsystem) {
-		subsystem_0_0_Link = "<g:message code="votingSystemURL"/>"
-		subsystem_0_0_Text = "<g:message code="votingLbl"/>"
-		subsystem_0_1_Link = "<g:message code="claimSystemURL"/>"
-		subsystem_0_1_Text = "<g:message code="claimLbl"/>"
-		subsystem_0_2_Link = "<g:message code="manifestSystemURL"/>"
-		subsystem_0_2_Text = "<g:message code="manifestSystemLbl"/>"
-		selectedSubsystemLink = "<g:message code="representativeSystemURL"/>"
-		selectedSubsystemText = "<g:message code="representativeSystemLbl"/>"
 	} else {
 		console.log("### updateSubsystem - unknown subsytem -> " + selectedSubsystem)
 	}
