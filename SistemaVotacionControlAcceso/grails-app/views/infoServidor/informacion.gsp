@@ -17,7 +17,7 @@
 	    		$("#validationToolLink").click(function () { 
 			    	var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESANDO, 
 					    	Operation.MENSAJE_HERRAMIENTA_VALIDACION)
-	    			votingSystemApplet.setMessateToValidationTool(JSON.stringify(webAppMessage))
+	    			votingSystemApplet.setMessageToValidationTool(JSON.stringify(webAppMessage))
 	    		});
 		  });
 
@@ -74,7 +74,7 @@
 			  </div>
 			</div>
 			<div class="infoFooter" style="margin: 0px auto 20px 0;width:100%;font-size: 0.7em;">
-				<div class="mailLink" style="width:100px;margin:0 auto 0 auto;">
+				<div class="appLink" style="width:100px;margin:0 auto 0 auto;">
 					<a href="mailto:${grailsApplication.config.SistemaVotacion.emailAdmin}">${message(code: 'emailLabel', null)}</a>
 				</div>
 		   	</div>	

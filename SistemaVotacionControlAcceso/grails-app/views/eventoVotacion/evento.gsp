@@ -1,19 +1,5 @@
 <%@ page import="grails.converters.JSON" %>
 <%@ page import="org.sistemavotacion.controlacceso.modelo.*" %>
-<%
-	def messageToUser = null
-	def eventClass = null
-	if(Evento.Estado.FINALIZADO.toString().equals(eventMap?.estado)) {
-		messageToUser =  message(code: 'eventFinishedLbl')
-		eventClass = "eventFinishedBox"
-	} else if(Evento.Estado.PENDIENTE_COMIENZO.toString().equals(eventMap?.estado)) {
-		messageToUser = message(code: 'eventPendingLbl')
-		eventClass = "eventPendingBox"
-	} else if(Evento.Estado.CANCELADO.toString().equals(eventMap?.estado)) {
-		messageToUser = message(code: 'eventCancelledLbl')
-		eventClass = "eventFinishedBox"
-	}
-%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
 <head>
@@ -28,16 +14,33 @@
 		    			selectedOption = {id:$(this).attr("optionId"), 
 			    			contenido:$(this).attr("optionContent")}
 		    			console.log(" - selectedOption: " +  JSON.stringify(selectedOption))
+		    			$("#confirmOptionDialog").dialog("open");
 		    		});
 
 		    		$("#adminDocumentLink").click(function () {
 		    			$("#adminDocumentDialog").dialog("open");
 			    	})
 
-					if(DocumentState.PENDIENTE_COMIENZO == '${eventClass}') { 
-						$("#eventMessagePanel").addClass(eventClass);
+					if(DocumentState.PENDIENTE_COMIENZO == '${eventMap?.estado}') {
+						$("#eventMessagePanel").find('.messageContent').text("<g:message code='eventPendingLbl'/>")
+						$("#eventMessagePanel").css("border-color", "#fba131")
+						$("#eventMessagePanel").css("color", "#fba131")
 						$("#eventMessagePanel").fadeIn(1000)
 
+					} else if(DocumentState.FINALIZADO == '${eventMap?.estado}') {
+						$("#adminDocumentLink").css("display", "none")
+						$("#eventMessagePanel").find('.messageContent').text("<g:message code='eventFinishedLbl'/>")
+						$("#eventMessagePanel").css("border-color", "#cc1606")
+						$("#eventMessagePanel").css("color", "#cc1606")
+						$("#eventMessagePanel").fadeIn(1000)
+						
+					} else if(DocumentState.CANCELADO == '${eventMap?.estado}') {
+						$("#adminDocumentLink").css("display", "none")
+						$("#eventMessagePanel").find('.messageContent').text("<g:message code='eventCancelledLbl'/>")
+						$("#eventMessagePanel").css("border-color", "#cc1606")
+						$("#eventMessagePanel").css("color", "#cc1606")
+						$("#eventMessagePanel").addClass("eventMessageCancelled");
+						$("#eventMessagePanel").fadeIn(1000)
 					}
 			 });
 
@@ -110,9 +113,7 @@
 <body>
 
 	<div id="eventMessagePanel" class="eventMessagePanel" style="display:none;">
-		<p class="messageContent">
-			<g:if test="${messageToUser != null}">${messageToUser}</g:if>
-		</p>
+		<p class="messageContent"></p>
 	</div>
 
 	<div class="publishPageTitle" style="margin:0px 0px 0px 0px;">
@@ -125,23 +126,9 @@
 		<div style="display:inline;margin:0px 20px 0px 20px;">
 			<b><g:message code="dateLimitLbl"/>: </b>${eventMap?.fechaFin}
 		</div>
-		
-		
-		
-		<g:if test="${Evento.Estado.ACTIVO.toString() == eventMap?.estado ||
-			Evento.Estado.PENDIENTE_COMIENZO.toString()}">			
-			<div id="adminDocumentLink" class="appLink" style="float:right;margin:0px 20px 0px 0px;">
-				<g:message code="adminDocumentLinkLbl"/>
-			</div>
-		</g:if>
-		
-
-		
-		
-		
-		
-		
-
+		<div id="adminDocumentLink" class="appLink" style="float:right;margin:0px 20px 0px 0px;">
+			<g:message code="adminDocumentLinkLbl"/>
+		</div>
 	</div>
 
 	<div class="eventPageContentDiv">
@@ -155,14 +142,33 @@
 			</div>
 		</div>
 	
-	
-	
-	
-	
-	
-	
-	
+		<div class="eventOptionsDiv">
+			<fieldset id="fieldsBox" style="">
+				<legend id="fieldsLegend"><g:message code="pollFieldLegend"/></legend>
+				<div id="fields" style="width:100%;">
+					<g:if test="${Evento.Estado.ACTIVO.toString() == eventMap?.estado}">
+						<g:each in="${eventMap?.opciones}">
+							<div class="voteOptionButton button_base" 
+								style="width: 90%;margin: 10px auto 0px auto;"
+								optionId = "${it.id}" optionContent="${it.contenido}">
+								${it.contenido}
+							</div>
+						</g:each>
+					</g:if>
+					<g:if test="${Evento.Estado.CANCELADO.toString() == eventMap?.estado ||
+						Evento.Estado.FINALIZADO.toString() == eventMap?.estado ||
+						Evento.Estado.PENDIENTE_COMIENZO.toString() == eventMap?.estado}">			
+						<g:each in="${eventMap?.opciones}">
+							<div class="voteOption" style="width: 90%;margin: 10px auto 0px auto;">
+								 - ${it.contenido}
+							</div>
+						</g:each>
+					</g:if>
+				</div>
+			</fieldset>
 
+			
+		</div>
 	</div>
 
 		
@@ -174,6 +180,7 @@
 		</ul>
 	</div>		
 
+<g:include controller="gsp" action="index" params="[pageName:'confirmOptionDialog']"/>   
 <g:include controller="gsp" action="index" params="[pageName:'adminDocumentDialog']"/> 	
 </body>
 </html>

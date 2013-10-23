@@ -55,6 +55,8 @@ class EventoVotacionController {
 				EventoVotacion.withTransaction {
 					evento = EventoVotacion.get(params.long('id'))
 				}
+				if(!(evento.estado == Evento.Estado.ACTIVO || evento.estado == Evento.Estado.PENDIENTE_COMIENZO ||
+					evento.estado == Evento.Estado.CANCELADO || evento.estado == Evento.Estado.FINALIZADO)) evento = null
 				if(!evento) {
 					response.status = Respuesta.SC_NOT_FOUND
 					render message(code: 'eventNotFound', args:[params.id])

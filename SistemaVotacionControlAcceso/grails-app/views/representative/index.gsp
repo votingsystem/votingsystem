@@ -6,11 +6,6 @@
   <script>
 	  	$(function() {
 			var pendingOperation
-
-		    $("#dateFrom").datepicker(pickerOpts);
-		    $("#dateTo").datepicker(pickerOpts);
-		    $("#accreditationDateSelected").datepicker(pickerOpts);
-		    
 		  	$( "#tabs" ).tabs({
 			      beforeLoad: function( event, ui ) {
 			    	  ui.panel.html("${votingSystem.tabProgresTemplate()}");
@@ -23,11 +18,11 @@
 			})
 		    
    		    $("#votingHistoryButton").click(function() {
-		    	$("#reqVotingHistoryDialog").dialog("open");
+		    	$("#requestRepresentativeVotingHistoryDialog").dialog("open");
 			})
 		    
    		    $("#accreditationRequestButton").click(function() {
-		    	$("#reqAccreditationDialog").dialog("open");
+		    	$("#requestRepresentativeAccreditationsDialog").dialog("open");
 			})
 		    
    		    $("#selectRepresentativeButton").click(function() {
@@ -39,7 +34,7 @@
 		 		event.preventDefault();
 				var dateFrom = $("#dateFrom"),
 					dateTo = $("#dateTo"); 
-	        	allFields = $( [] ).add(dateFrom).add(dateTo);
+	        	allFields = $([]).add(dateFrom).add(dateTo);
 				allFields.removeClass("ui-state-error");
 
 				if(dateFrom.datepicker("getDate") > 
@@ -57,76 +52,8 @@
 			   event.preventDefault();
 			   requestAccreditations();
 			})
+	  	}); 
 
-		   
-		   
-   		   $("#selectRepresentativeDialog").dialog({
-   			   	  width: 500, autoOpen: false, modal: true,
-   			      buttons: [{id: "acceptButton",
-   			        		text:"<g:message code="acceptLbl"/>",
-   			               	icons: { primary: "ui-icon-check"},
-   			             	click:function() {
-   			             		selectRepresentative(); 
-   			             		$(this).dialog( "close" );  	   			   				
-   	   			        	}}, {	
-   	  	   			        	id: "cancelButton",
-   	   			        		text:"<g:message code="cancelLbl"/>",
-   	   			               	icons: { primary: "ui-icon-closethick"},
-   	   			             	click:function() {
-   	  	   			   					$(this).dialog( "close" );
-   	  	   			       	 		}}],
-   			      show: {effect:"fade", duration: 300},
-   			      hide: {effect: "fade",duration: 300}
-		    });
-		    
-		    
-   		   $("#imageDialog").dialog({
-   			   	  width: 500, autoOpen: false, modal: true,
-   			      buttons: [{id: "acceptButton",
-   			        		text:"<g:message code="acceptLbl"/>",
-   			               	icons: { primary: "ui-icon-check"},
-   			             	click:function() {
-   			             		$(this).dialog( "close" );   	   			   				
-   	   			        	}}],
-   			      show: {effect:"fade", duration: 300},
-   			      hide: {effect: "fade",duration: 300}
-		    });
-
-   		   $("#reqAccreditationDialog").dialog({
-   			   	  width: 500, autoOpen: false, modal: true,
-   			      buttons: [{id: "acceptButton",
-   			        		text:"<g:message code="acceptLbl"/>",
-   			               	icons: { primary: "ui-icon-check"},
-   			             	click:function() {
-   			             		$("#submitAccreditationRequest").click()  	   			   				
-   	   			        	}}, {id: "cancelButton",
-   	   			        		text:"<g:message code="cancelLbl"/>",
-   	   			               	icons: { primary: "ui-icon-closethick"},
-   	   			             	click:function() {
-   	  	   			   					$(this).dialog( "close" );
-   	  	   			       	 		}}],
-   			      show: {effect:"fade", duration: 300},
-   			      hide: {effect: "fade",duration: 300}
-		    });
-		    
-   		   $("#reqVotingHistoryDialog").dialog({
-			   	  width: 550, autoOpen: false, modal: true,
-			      buttons: [{id: "acceptButton",
-			        		text:"<g:message code="acceptLbl"/>",
-			               	icons: { primary: "ui-icon-check"},
-			             	click:function() {
-			             		$("#submitVotingHistoryRequest").click() 	   			   				
-	   			        	}}, {id: "cancelButton",
-   	   			        		text:"<g:message code="cancelLbl"/>",
-   	   			               	icons: { primary: "ui-icon-closethick"},
-   	   			             	click:function() {
-   	  	   			   					$(this).dialog( "close" );
-   	  	   			       	 		}}],
-			      show: {effect:"fade", duration: 300},
-			      hide: {effect: "fade",duration: 300}
-		    });
-	    
-	  	});
 
 		function selectRepresentative() {
 			console.log("selectRepresentative")
@@ -204,8 +131,7 @@
 					if(StatusCode.SC_OK == statusCode) { 
 						caption = '<g:message code="operationOKCaption"/>'
 						if(pendingOperation == Operation.REPRESENTATIVE_SELECTION)  {
-							msgTemplate = "<g:message code='representativeFullName'/>";
-							msg = msgTemplate.format(representativeFullName);
+							msg = "<g:message code='selectedRepresentativeMsg' args='['${representativeFullName}']'/>";
 						}
 					}
 					showResultDialog(caption, msg)
@@ -216,24 +142,24 @@
   </script>
 </head>
 <body>
-	<div id="contentDiv" style="display:block;position:relative; margin: 0px 0px 30px 0px;min-height: 700px;">	
-		<div>
-			<div style="margin:0px auto 15px 0px; position:relative;display:table;">
-				<div style="display:table-cell;">
-					<votingSystem:simpleButton id="selectRepresentativeButton"
-						imgSrc="${resource(dir:'images',file:'accept_16x16.png')}" style="margin:0px 20px 0px 0px;">
-							<g:message code="selectRepresentativeLbl"/>
-					</votingSystem:simpleButton>
-				</div>
-				<div class="representativeNameHeader">
-					<div>${representativeFullName}</div>
-				</div>
-				<div  class="representativeNumRepHeader">
-					<div>  ${representative.numRepresentations} <g:message code="numDelegationsPartMsg"/></div>
-				</div>
+<div id="contentDiv" style="display:block;position:relative; margin: 0px 0px 30px 0px;min-height: 700px;">	
+	<div>
+		<div style="margin:0px auto 15px 0px; position:relative;display:table;">
+			<div style="display:table-cell;">
+				<votingSystem:simpleButton id="selectRepresentativeButton"
+					imgSrc="${resource(dir:'images',file:'accept_16x16.png')}" style="margin:0px 20px 0px 0px;">
+						<g:message code="selectRepresentativeLbl"/>
+				</votingSystem:simpleButton>
+			</div>
+			<div class="representativeNameHeader">
+				<div>${representativeFullName}</div>
+			</div>
+			<div  class="representativeNumRepHeader">
+				<div>  ${representative.numRepresentations} <g:message code="numDelegationsPartMsg"/></div>
 			</div>
 		</div>
-		<div id="tabs" style="min-height: 700px;">
+	</div>
+	<div id="tabs" style="min-height: 700px;">
 		    <ul>
 			    <li><a href="#tabs-1"><g:message code='profileLbl'/></a></li>
 			    <li><a href="#tabs-2"><g:message code='votingHistoryLbl'/></a></li>
@@ -265,76 +191,12 @@
 				</div>
 			</div>
 		</div>
-			
 
-
-			</div>
-		</div>
-	
-	
-     <div id="selectRepresentativeDialog" title="<g:message code="selectRepresentativeLbl"/>" style="padding:20px 20px 20px 20px;">
-		<% def msgParams = [representativeFullName]%>
-		<g:message code="selectRepresentativeMsg" args='${msgParams}'/>
-		<p style="text-align:center;"><g:message code="clickAcceptToContinueLbl" args='${msgParams}'/></p>
-    </div> 
-		
-    <div id="imageDialog" title="" style="padding:20px 20px 20px 20px">
-		<img id="dialogRepresentativeImg" style="width:100%; height: 100%;"></img>
-    </div> 
-    
-     <div id="reqVotingHistoryDialog" title="<g:message code="requestVotingHistoryLbl"/>" style="padding:20px 20px 20px 20px">
-		<g:message code="representativeHistoryRequestMsg"/>
-		
-		<label><g:message code="selectDateRangeMsg"/></label>
-		
-		<form id="reqVotingHistoryForm">
-			<div style="display:table;margin:20px 0px 0px 0px;">
-				<div style="display:table-cell;margin:0px 0px 0px 20px;">
-					<label for="dateFrom" style="margin:0px 0px 0px 3px;width:250px;display:block;"><g:message code="firstDaterangeLbl"/></label>
-					<input type="text" id="dateFrom" style="width:200px;" readonly required
-					oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-					onchange="this.setCustomValidity('')"/>
-				</div>
-				<div style="display:table-cell;margin:0px 0px 0px 20px;">
-					<label for="dateTo" style="margin:0px 0px 0px 3px;width:250px;display:block;"><g:message code="dateToLbl"/></label>
-					<input type="text" id="dateTo" style="width:200px;" readonly required
-					oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-					onchange="this.setCustomValidity('')"/>
-				</div>
-			</div>
-			<div style="margin:15px 0px 20px 0px">
-		    	<label for="userEmailText"><g:message code="enterEmailLbl"/></label>
-				<input type="email" id="userEmailText" style="width:350px; margin:0px auto 0px auto;" required
-						oninvalid="this.setCustomValidity('<g:message code="emailERRORMsg"/>')"
-			   			onchange="this.setCustomValidity('')"/>
-			</div>
-			<input id="submitVotingHistoryRequest" type="submit" style="display:none;">
-		</form> 	   
-    </div> 
-		
-     <div id="reqAccreditationDialog" title="<g:message code="requestRepresentativeAcreditationsLbl"/>" style="padding:20px 20px 20px 20px">
-		<g:message code="accreditationRequestMsg"/>
-		<form id="accreditationRequestForm">
-			<div style="display:table-cell;margin:0px 0px 0px 20px;">
-				<label for="accreditationDateSelected" style="margin:0px 0px 0px 3px;width:250px;display:block;"><g:message code="dateRequestLbl"/></label>
-				<input type="text" id="accreditationDateSelected" style="width:200px;" readonly required 
-				oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-				onchange="this.setCustomValidity('')"/>
-			</div>
-			<div style="margin:15px 0px 20px 0px">
-		    	<label for="accreditationReqUserEmailText"><g:message code="enterEmailLbl"/></label>
-				<input type="email" id="accreditationReqUserEmailText" style="width:350px; margin:0px auto 0px auto;" required
-						oninvalid="this.setCustomValidity('<g:message code="emailERRORMsg"/>')"
-			   			onchange="this.setCustomValidity('')"/>
-			</div>			
-			<input id="submitAccreditationRequest" type="submit" style="display:none;">
-		</form>
-    </div> 	  
-	
-	
-	
-
-	
-	</div>
+</div>
+<g:include controller="gsp" action="index" params="${[pageName:'selectRepresentativeDialog', 
+	representativeName:representativeFullName]}"/> 
+<g:include controller="gsp" action="index" params="[pageName:'representativeImageDialog']"/> 
+<g:include controller="gsp" action="index" params="[pageName:'requestRepresentativeVotingHistoryDialog']"/>	
+<g:include controller="gsp" action="index" params="[pageName:'requestRepresentativeAccreditationsDialog']"/> 
 </body>
 </html>

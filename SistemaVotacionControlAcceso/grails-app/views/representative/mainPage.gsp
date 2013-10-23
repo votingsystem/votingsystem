@@ -6,92 +6,14 @@
 		<g:include controller="app" action="jsJQueryPaginate"/>
        	<script type="text/javascript">
 	 	$(function() {			
-		 	
 	 		loadRepresentatives("${createLink( controller:'representative')}")	
 
 	 		$('#checkRepresentativeButton').click(function() {
-	 			$("#userNifText").val("");
-		 		$("#checkRepresentativeDialogFormDiv").show()
-				$("#checkRepresentativeDialogProgressDiv").hide()
-				$("#checkRepresentativeDialogResultDiv").hide()
-				$("#acceptButton").show();
-		 		$("#acceptButton").button("enable");
-		 		$("#cancelButton").button("enable");
-	 			$("#cancelButton").find(".ui-button-text").text("<g:message code="cancelLbl"/>")
 	 			$("#checkRepresentativeDialog").dialog("open");
 			})
-
-
-   		   $("#checkRepresentativeDialog").dialog({
-   			   	  width: 500, autoOpen: false, modal: true,
-   			      buttons: [{id: "acceptButton",
-   			        		text:"<g:message code="acceptLbl"/>",
-   			               	icons: { primary: "ui-icon-check"},
-   			             	click:function() {
-   			             		$("#submitNifCheck").click() 
-   			             		//$(this).dialog( "close" );   	   			   				
-   	   			        	}}, {	
-  	   			        	id: "cancelButton",
-   			        		text:"<g:message code="cancelLbl"/>",
-   			               	icons: { primary: "ui-icon-closethick"},
-   			             	click:function() {
-  	   			   					$(this).dialog( "close" );
-  	   			       	 		}	
-   			           }],
-   			      show: {effect:"fade", duration: 300},
-   			      hide: {effect: "fade",duration: 300}
-   			    });
-
-	 		document.getElementById('userNifText').addEventListener('change', nifValidation, false);
-		    $('#checkRepresentativeForm').submit(function(event){	
-		 		console.log("checkRepresentativeForm")
-		 		event.preventDefault();
-		 		$("#acceptButton").button("disable");
-		 		$("#cancelButton").button("disable");
-		 		checkRepresentative();
-			 })
 		 });
 
-	 	function checkRepresentative () { 
-	 		$("#checkRepresentativeDialogFormDiv").hide()
-	 		$("#checkRepresentativeDialogProgressDiv").fadeIn(500)
-	 		var urlRequest = "${createLink(controller:'user')}/" + $("#userNifText").val() + "/representative"
-	 		console.log(" - checkRepresentative - urlRequest: " + urlRequest)
-			$.ajax({///user/$nif/representative
-				url: urlRequest
-				//data: data,
-			}).done(function(resultMsg) {
-				//var resultMsgStr = JSON.stringify(resultMsg);  
-				//console.log(" - ajax call done - resultMsgStr: " + resultMsgStr);
-				showCheckRepresentativeResult (StatusCode.SC_OK, resultMsg.responseText)
-			}).error(function(resultMsg) {
-				showCheckRepresentativeResult (StatusCode.SC_ERROR, resultMsg.responseText)
-			});
-		}
 
-	 	function showCheckRepresentativeResult (statusCode, msg) { 
-	 		console.log("showCheckRepresentativeResult - statusCode: " + statusCode)
-	 		$("#checkRepresentativeDialogProgressDiv").hide()
-	 		$("#checkRepresentativeDialogResultDiv").fadeIn(500)
-	 		$("#acceptButton").fadeOut();
-	 		$("#cancelButton").find(".ui-button-text").text("<g:message code="acceptLbl"/>")
-	 		$("#cancelButton").button("enable");
-	 		if(StatusCode.SC_OK == statusCode) {
-	 			$("#checkRepresentativeDialogResultImage").attr('src','../images/accept_48x48.png');
-		 	} else {
-		 		$("#checkRepresentativeDialogResultImage").attr('src','../images/advert_64x64.png');
-			}
-	 		$("#checkRepresentativeDialogResultMsg").text(msg)
-		}
-	 	
-	 	var nifValidation = function () {
-			var nifInput = document.getElementById('userNifText')
-			var validationResult = validateNIF(nifInput.value)
-			console.log("validateNIF result: " + validationResult)
-			if (!validationResult) {
-				document.getElementById('userNifText').setCustomValidity("<g:message code='nifERRORMsg'/>");
-			}
-		}
 
 		function loadRepresentatives(representativesURL) {
 			console.log("- loadRepresentatives - representativesURL: " + representativesURL);
@@ -100,8 +22,6 @@
 			$contentDiv.css("display", "none")
 			$('#representativeList').empty()
 			$loadingPanel.fadeIn(100)
-
-			
 			$.ajax({
 				url: representativesURL,
 				//data: data,
@@ -186,33 +106,7 @@
 		</div>
 	</div>   	
 
-<div id="checkRepresentativeDialog" title="<g:message code="checkRepresentativeLbl"/>">	
-	<div id="checkRepresentativeDialogFormDiv" >
-		<p style="text-align: center;"><g:message code="checkRepresentativeMsg"/></p>
-		<div style="width: 80%; margin: 0 auto;">
-			<form id="checkRepresentativeForm">
-		    	<label for="userNifText" style="margin:0px 0px 20px 0px"><g:message code="enterNIFMsg"/></label>
-				<input type="text" id="userNifText" style="width:350px; margin:0px auto 0px auto;" required
-					oninvalid="this.setCustomValidity('<g:message code="nifERRORMsg"/>')"
-		   			onchange="this.setCustomValidity('')"/>
-				<input id="submitNifCheck" type="submit" style="display:none;">
-			</form>
-		</div>
-	</div>  	
-	<div id="checkRepresentativeDialogProgressDiv" style="display:none;">
-		<p style='text-align: center;'><g:message code="checkingDataLbl"/></p>
-		<progress style='display:block;margin:0px auto 10px auto;'></progress>
-	</div>
-	<div id="checkRepresentativeDialogResultDiv" style="display:none;">
-		<div style='display:table; width:100%;'>
-			<div style='display:table-cell; vertical-align:middle;'><img id="checkRepresentativeDialogResultImage" src='' style='margin:3px 0 0 10px;'></img></div>
-			<div style='display:table-cell;width:15px;'></div>
-			<div style='display:table-cell; vertical-align:middle;'>
-				<p id="checkRepresentativeDialogResultMsg" style="margin: 0px 0px 0px 0px; text-align:center;"></p>
-			</div>
-		</div>
-	</div>
-</div> 
-
+ 
+<g:include controller="gsp" action="index" params="[pageName:'checkRepresentativeDialog']"/> 	
 </body>
 </html>

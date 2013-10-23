@@ -100,5 +100,11 @@ class UrlMappings {
 				id(matches:/\d*/)
 			}
 		}
+		
+		"/gsp/${pageName}?" {
+			controller = "gsp"
+			action = "index"
+		}
+		
 	}
 }

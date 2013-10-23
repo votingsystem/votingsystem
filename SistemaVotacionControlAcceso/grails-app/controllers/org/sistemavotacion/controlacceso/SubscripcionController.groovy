@@ -148,7 +148,7 @@ class SubscripcionController {
 				author = "${reclamacion.usuario.nombre} ${reclamacion.usuario.primerApellido}"
 			}
 			String urlReclamacion = "${grailsApplication.config.grails.serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLFirmarReclamacion}" + reclamacion.id
-			String accion = message(code: 'subscripcion.firmarReclamacion')
+			String accion = message(code: 'signClaim')
 			 //if(contenido?.length() > 500) contenido = contenido.substring(0, 500)
 			String contenidoFeed = "<p>${contenido}</p>" +
 				"<a href='${urlReclamacion}'>${accion}</a>"

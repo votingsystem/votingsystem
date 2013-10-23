@@ -17,8 +17,6 @@ class EventoReclamacionController {
     def eventoService
 	def firmaService
 	
-	
-	
 	/**
 	 * @httpMethod [GET]
 	 * @return La página principal de la aplicación web de reclamaciones.
@@ -48,6 +46,8 @@ class EventoReclamacionController {
 			EventoReclamacion evento = null
 			EventoReclamacion.withTransaction {
 				evento = EventoReclamacion.get(params.long('id'))
+				if(!(evento.estado == Evento.Estado.ACTIVO || evento.estado == Evento.Estado.PENDIENTE_COMIENZO ||
+						evento.estado == Evento.Estado.CANCELADO || evento.estado == Evento.Estado.FINALIZADO)) evento = null
 			}
 			if(!evento) {
 				response.status = Respuesta.SC_NOT_FOUND

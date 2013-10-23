@@ -6,7 +6,6 @@
 <script type="text/javascript">
 
 var WebAppMessage = function (statusCode, operacion) {
-	
 	this.codigoEstado = statusCode
 	this.operacion = operacion
 	this.asunto ;
@@ -20,7 +19,6 @@ var WebAppMessage = function (statusCode, operacion) {
 }
 
 var Evento = function () {
-
     this.id
     this.fechaCreacion
     this.fechaFin
@@ -65,20 +63,19 @@ var Evento = function () {
     this.getMessage = function () {
     	var result =  "";
     	if(EstadoEvento.ACTIVO == estado) {
-    		result = "Recibiendo solicitudes";
+    		result = "<g:message code='openLbl'/>";
     	} else if(EstadoEvento.PENDIENTE_COMIENZO == estado) {
-    		result =  "Pendiente de abrir";
+    		result =  "<g:message code='pendingLbl'/>";
     	} else if(EstadoEvento.FINALIZADO == estado) {
-    		result =  "Finalizado";
+    		result =  "<g:message code='closedLbl'/>";
     	} else if(EstadoEvento.CANCELADO == estado) {
-    		result =  "Suspendido";
+    		result =  "<g:message code='cancelledLbl'/>";
     	} else if(EstadoEvento.ACTORES_PENDIENTES_NOTIFICACION == estado) {
-    		result =  "Falta notificación a participantes";
+    		result =  "<g:message code='withoutNotificationsLbl'/>";
     	}
     	return result; 	
     }
 }
-
 
 var DateUtils = {
 
@@ -237,7 +234,8 @@ function checkIEVersion() {
    var ver = getInternetExplorerVersion();
    if ( ver> -1 ) {
       if ( ver<= 8.0 ) {
-    	  alert("Navegador no soportado, actualizate")
+    	  showResultDialog("<g:message code='errorLbl'/>", 
+    	    	  "<g:message code='browserNosuportedMsg'/>")
 	  }
    }
 }
@@ -335,7 +333,7 @@ function getElapsedTime(endTime) {
     var timeDiff = endTime - new Date();
 
     if(timeDiff < 0) {
-    	return "<g:message code="timeFinsishedLbl"/>"	
+    	return "<g:message code='timeFinsishedLbl'/>"	
     }
     
     // strip the miliseconds
@@ -409,70 +407,13 @@ function printPaginate (offset, numItems, numMaxItemsForPage) {
 	});
 }
 
-function showResultDialog(caption, message) {
-	console.log("showResultDialog - caption: " + caption + " - message: "+ message);
-	$('#resultMessage').html(message);
-	$('#resultDialog').dialog('option', 'title', caption);
-	$("#resultDialog").dialog( "open" );
-}
-
-var workingWithAppletDialog = $("${votingSystem.workingWithAppletDialog()}");
-
-var resultDialog = $("<div id='resultDialog' title=''>" +
-		  "<p id='resultMessage' style='text-align: center;'></p></div>");
-
-
-var browserWithoutJavaDialogParams = {
-	width: 600, autoOpen: false, modal: true,
-	buttons: [{text:"<g:message code="acceptLbl"/>",
-	          	icons: { primary: "ui-icon-check"},
-	        	click:function() {$(this).dialog( "close" );}}],
-	show: {effect:"fade", duration: 300},
-	hide: {effect: "fade",duration: 300}
-}
-
-var loadingVotingSystemAppletDialogParams = {
-	width: 330, autoOpen: false, modal: true,
-    show: {effect: "fade", duration: 1000},
-    hide: {effect: "fade", duration: 1000}}
-
-var workingWithAppletDialogParams = {
-   	  width: 330, autoOpen: false, modal: true,
-      show: {effect: "fade",duration: 1000},
-      hide: {effect: "fade", duration: 1000}
-}
-
-var resultDialogParams = {
-	  width: 600, autoOpen: false, modal: true,
-	   buttons: [{
-	  		text:"<g:message code="acceptLbl"/>",
-	         	icons: { primary: "ui-icon-check"},
-	       	click:function() {
-	       		$(this).dialog( "close" );	   	   			   				
-		        	}
-	     }],
-	show: {effect: "fade",duration: 1000},
-	hide: { effect: "fade", duration: 1000}
-}
-
 function isJavaEnabledClient() {
 	if(!(deployJava.versionCheck('1.8') || deployJava.versionCheck('1.7'))) {
 		console.log("---- checkJavaEnabled -> browser without Java7 or Java8 ");
-		$(document.body).append("${votingSystem.browserWithoutJavaDialog()}");
-		$("#browserWithoutJavaDialog").dialog(browserWithoutJavaDialogParams);
-		$("#browserWithoutJavaDialog").dialog("open");
+		showBrowserWithoutJavaDialog()
 		return false
 	} else return true
 }
-
-function showLoadingVotingSystemAppletDialog() {
-	if (!($("#loadingVotingSystemAppletDialog").length > 0)) { 
-    	$(document.body).append("${votingSystem.loadingAppletDialog()}");
-    	$("#loadingVotingSystemAppletDialog").dialog(loadingVotingSystemAppletDialogParams);
-	}
-	$("#loadingVotingSystemAppletDialog").dialog("open");
-}
-
 
 var VotingSystemApplet = function () {
 	
@@ -500,18 +441,18 @@ var VotingSystemApplet = function () {
 		return result
 	}
 	
-	this.setMessateToValidationTool = function (message) {
-		console.log("jsUtils.js - setMessateToValidationTool - message:" + message);
+	this.setMessageToValidationTool = function (message) {
+		console.log("jsUtils.js - setMessageToValidationTool - message:" + message);
 		messageToValidationTool = message;
 		if(!validationToolAppletLoaded) {
 			if(isJavaEnabledClient()) {
 				console.log("Loading validationTool")
 				$("#validationToolAppletFrame").attr("src", '${createLink(controller:'applet', action:'herramientaValidacion')}');
-				showLoadingVotingSystemAppletDialog()
+				$("#loadingVotingSystemAppletDialog").dialog("open");
 				window.getMessageToValidationTool = getMessageToValidationTool
 			}
     	} else {
-    		console.log("setMessateToValidationTool - validationToolAppletLoaded already loaded");
+    		console.log("setMessageToValidationTool - validationToolAppletLoaded already loaded");
     		$("#workingWithAppletDialog").dialog("open");
 	    } 
 	}
@@ -524,7 +465,7 @@ var VotingSystemApplet = function () {
 				console.log("Loading signature client");
 				window.getMessageToSignatureClient = getMessageToSignatureClient
 				$("#votingSystemAppletFrame").attr("src", '${createLink(controller:'applet', action:'cliente')}');
-				showLoadingVotingSystemAppletDialog()
+				$("#loadingVotingSystemAppletDialog").dialog("open");
 			} 
     	} else {
     		console.log("signature client already loaded");
@@ -535,15 +476,7 @@ var VotingSystemApplet = function () {
 	window.onload=function(){
 		$("#votingSystemAppletFrame").attr("src", "");
 		$("#validationToolAppletFrame").attr("src", "");
-
-
-		$(document.body).append(workingWithAppletDialog);
-		$("#workingWithAppletDialog").dialog(workingWithAppletDialogParams);
-				
-		$(document.body).append(resultDialog);
-	    $("#resultDialog").dialog(resultDialogParams);
 	};
-
 }
 
 //"yy/MM/dd 12:00:00"
@@ -558,4 +491,11 @@ var votingSystemAppletLoaded = false
 
 var votingSystemApplet = new VotingSystemApplet()
 </script> 
- 
+<g:include controller="gsp" action="index" params="[pageName:'loadingAppletDialog']"/>
+<g:include controller="gsp" action="index" params="[pageName:'workingWithAppletDialog']"/> 
+<g:include controller="gsp" action="index" params="[pageName:'browserWithoutJavaDialog']"/> 
+<g:include controller="gsp" action="index" params="[pageName:'resultDialog']"/> 
+
+<div id="appletsFrame">
+	<iframe id="votingSystemAppletFrame" src="" style="visibility:hidden;width:0px; height:0px;"></iframe>
+</div>
