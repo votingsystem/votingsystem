@@ -1,0 +1,433 @@
+.mainPageEventList {
+	display:block;
+	overflow:hidden; margin:0px 0px 0px 0px;
+}
+
+.mainPageEventList ul{
+	margin:0px 0px 0px 0px;
+}
+
+.representativeDiv {
+	display:table;
+	width:385px;
+	background-color: #f2f2f2;
+	border: 1px solid #02227a; 
+	margin: 10px 5px 5px 10px;
+	-moz-border-radius: 5px; border-radius: 5px;
+	cursor: pointer; cursor: hand; 
+	height:100px;
+	overflow:hidden; 
+	float:left;
+}
+
+.representativeDiv .representativeImgCol{
+	display:table-cell;
+	vertical-align: middle;
+}
+ 
+ 
+.representativeDataCol p{
+	text-overflow: ellipsis;
+	margin: 0px 10px 0px 10px;
+}
+ 
+ .representativeDataCol {
+	margin: 0px 10px 0px 10px;
+	vertical-align: middle;
+}
+	
+
+.representativeDiv .representativeDataCol{
+	display:table-cell;
+	margin-left: 30px;
+}
+
+.representativeImgCol img {
+	width:80px;
+	margin: 0px 0px 0px 15px;
+}
+
+.representativeDiv .numDelegationsData {
+	margin: 10px 10px 0px 10px;
+}
+
+.representativeDiv .representativeName {
+	font-size: 1.2em;
+	text-overflow: ellipsis;
+}
+
+.representativeNameHeader {
+	font-size: 1.4em;
+	text-overflow: ellipsis;
+	color:#aaaaaa;
+	display:table-cell; 
+	text-align:center; 
+	width: 400px;
+}
+
+.representativeNumRepHeader {
+	font-size: 1.1em;
+	text-overflow: ellipsis;
+	color:#aaaaaa;
+	display:table-cell; 
+	text-align:center;
+}
+
+html {
+	height:100%;
+}
+
+body {
+ 	font-family: Arial, sans-serif;
+ 	color:#434343;
+ 	max-width: 1000px;
+ 	margin: 0 auto;
+ 	height: 600px;
+}
+	/* background-color: #BADA55;*/
+	/*display:inline-block;*/
+	
+.header {
+    margin: 0 0 10px 0;
+    width:100%;
+    height:40px;
+	border-bottom: 1pt solid #3E125F;
+	padding: 0px 0 5px 0;
+	overflow: hidden;
+	display:table;
+}
+
+.footer {
+    margin: 0 auto 20px 0;
+	border-top: 1pt solid #3E125F;
+	padding: 0 20px 5px 20px;
+	overflow: hidden;
+	font-size: 0.7em;
+}
+
+.headerTitle {
+	font-size: 26px; 
+	font-weight:bold;
+	line-height: 1;
+	display:block;
+	margin: 10px auto 5px 100px;
+	color:#0066cc;
+	text-decoration: none;
+}
+
+
+
+.mainLinkContainer {
+	display:table;
+}
+
+
+.content .mainLink {
+	font-size: 20px;
+	color:#0066cc;
+	line-height: 1;
+	display:table-cell;
+}
+
+[class*='col-'] {
+	padding:0px 0px 0px 0px;
+}
+
+.col-subsystem {
+	font-size: 0.72em;
+	width: 200px;
+	display:table-cell;
+	vertical-align:middle;
+}
+
+.col-subsystem a {
+	display:block;
+	font-size: 0.9em;
+	text-decoration: none;
+}
+
+.col-selectedSystem {
+	font-size: 1.8em;
+	margin: 0px auto 0px auto;
+	display:table-cell;
+	vertical-align:middle;
+	text-align: center;
+	right: 0;
+}
+
+.col-selectedSystem a {text-decoration: none;}
+
+.col-advancedSearch {
+	width: 290px;
+	display:table-cell;
+	vertical-align:middle;
+}
+
+.appLink {
+	text-decoration: none;
+    cursor: pointer; 
+    cursor: hand;
+    color: #09287e;
+    display:inline;
+}
+
+.appLink:hover {
+	text-decoration: underline;
+}
+
+.userAdvert {
+	margin: 20px auto 20px auto;
+	background-color: #f2f2f2;
+	font-size:0.8em; 
+	padding: 5px 10px 5px 0px;
+	-moz-border-radius: 5px; border-radius: 5px;
+	width:90%;
+}
+
+
+.publishPageTitle {
+	font-size:1.5em; 
+	border-bottom: 1px dotted; 
+	color:#02227a; 
+	margin: 5px auto 20px auto;
+
+}
+
+.publishPageTitle p {
+	width:600px;
+	margin: 0px 0px 0px 0px; 
+	text-align:center;
+	overflow:hidden;
+	text-overflow: ellipsis;
+}
+
+.eventContentDiv {
+    border: #f2f2f2 solid 1px;
+    margin:10px 0px 15px 15px;
+    min-height:300px;
+   	padding: 10px 10px 10px 10px;
+}
+
+
+.eventPageContentDiv #eventAuthorDiv {
+	font-size: 0.9em;
+	float:right;
+	margin:0px 30px 0px 0px;
+}
+
+.eventOptionsDiv {
+	width: 80%;
+	margin: 0px auto 0px auto;
+}
+
+.eventOptionsDiv .voteOption {
+	font-size: 1.9em;
+}
+
+
+.eventPageContentDiv #fieldsBox {
+	border: #f2f2f2 solid 1px;
+	margin: 60px 20px 20px 30px;
+	width: 80%;
+}
+
+.eventPageContentDiv #fieldsBox legend {
+	font-size: 1.1em;
+}
+
+.eventMessagePanel {
+	padding: 7px 12px 7px 12px; 
+	margin: 20px auto 20px auto; 
+	border: 2px solid #cc1606;
+	-moz-border-radius: 5px; 
+	border-radius: 5px;
+	-moz-box-shadow: 0 8px 6px -6px #888;
+	-webkit-box-shadow: 0 8px 6px -6px #888;
+	box-shadow: 0 8px 6px -6px #888;
+	width: 70%;
+}
+
+.eventMessagePanel .messageContent {
+    text-align: center;
+	font-size: 1.3em;
+	font-weight:bold;
+	margin:7px 0px 7px 0px;
+}
+
+.eventMessageCancelled {
+	position:absolute;
+	opacity:0.4;
+	left:0px;
+	top:50%;
+	text-transform:uppercase;
+	transform:rotate(20deg);
+	-ms-transform:rotate(20deg);
+	-webkit-transform:rotate(20deg);
+	-moz-transform: rotate(20deg);
+}
+
+.cancelNotification {
+	transform:rotate(20deg);
+	-ms-transform:rotate(20deg); 
+	-webkit-transform:rotate(20deg); 
+	-moz-transform: rotate(20deg);
+}
+
+
+.button_base {
+	display:table;
+	position:relative;
+    margin: 0;
+    border: 0;
+    font-size: 1.2em;
+    padding: 0px 10px 0px 0px;
+    height: 30px;
+    text-align: center;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-user-select: none;
+    cursor: pointer; 
+    cursor: hand;
+    vertical-align: middle;
+    text-decoration: none;
+    background-color: #f1f5f8;
+    /*button_simple_rollover*/
+    color: #769ab5;
+    border: #769ab5 solid 1px;
+}
+
+.button_base .buttonImage { 
+	display:table-cell;
+	vertical-align:middle;
+	margin:5px 0px 5px 5px;
+}
+
+.button_base .buttonText {
+	display:table-cell;
+	vertical-align:middle;
+	padding:0px 0px 0px 5px;
+}
+
+.button_base:hover {
+	color: #0066cc;
+    background-color: #dae7f1;
+}
+
+.clearing{clear:both;}
+
+.fieldsBox {
+	border: #f2f2f2 solid 1px;
+	margin: 0px 20px 20px 20px;
+}
+
+select, textarea, text, input {
+	background-color: #fcfcfc;
+	border: 1px solid #cccccc;
+	font-size: 1em;
+	padding: 1px 2px 1px 2px;
+	overflow: hidden; word-wrap: break-word; resize: none; 
+}
+
+#eventsDiv {
+	width:90%;
+	margin:0px auto 0px auto;
+}
+
+.eventDiv {
+	display:inline;
+	width:285px;
+	background-color: #f2f2f2;
+	border: 1px solid #02227a; 
+	margin: 10px 5px 5px 10px;
+	-moz-border-radius: 5px; border-radius: 5px;
+	cursor: pointer; cursor: hand; 
+	height:150px;
+	overflow:hidden; 
+	float:left;
+}
+
+.eventBodyDiv {
+	position:relative;
+	font-size: 0.7em;
+	height:75px;
+	display:table-cell; 
+	vertical-align:middle;
+	padding: 0px 5px 0px 5px;
+}
+
+
+.eventSubjectDiv {
+	font-size: 1.1em; 
+	height:38px;
+	font-weight:bold; 
+	color:white;  
+	position: relative;
+	padding: 5px 5px 5px 5px;
+}
+
+.eventAuthorDiv {
+	position: relative;
+	white-space:nowrap; 
+	text-overflow: ellipsis;
+}
+
+.eventBodyDiv .cancelMessage {
+	display:none;
+	transform:rotate(20deg);
+	-ms-transform:rotate(20deg);
+	-webkit-transform:rotate(20deg);
+	-moz-transform:rotate(20deg);
+	padding:3px 5px 3px 5px;
+	opacity:0.4;
+	text-transform:uppercase;
+	font-weight:bold; 
+	font-size: 1.8em;
+	background-color: #fff;
+}
+
+.eventAuthorLblDiv {
+	display:inline;
+	font-weight:bold; 
+	position: relative;
+}
+
+.eventAuthorValueDiv {
+	width:150px;
+	overflow:hidden; 
+	display:inline;
+	position: relative;
+}
+
+.eventDateBeginDiv {
+	position: relative;
+}
+
+.eventDateBeginLblDiv {
+	display:inline;
+	font-weight:bold; 
+	position: relative;
+}
+
+.eventDateBeginValueDiv {
+	display:inline;
+}
+
+.eventDivFooter{
+	position: relative;
+	padding: 5px 5px 0px 5px;
+}
+
+.eventRemainingDiv {
+	display:inline;
+	font-weight:bold; 
+	position: relative;
+}
+
+.eventStateDiv {
+	font-size: 0.9em;
+	display:inline;
+	font-weight:bold; 
+	float:right;
+	position: relative;
+}
