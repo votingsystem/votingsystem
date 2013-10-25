@@ -1,4 +1,4 @@
-<div id="confirmOptionDialog" title="<g:message code="confirmOptionDialogCaption"/>">	    	
+<div id="confirmOptionDialog" title="<g:message code="confirmOptionDialogCaption"/>" style="display:none;">	    	
 	<p style="text-align: center;">
 		<g:message code="confirmOptionDialogMsg"/>:<br>
 		<b><span id="optionSelectedDialogMsg"></span></b>

@@ -1,6 +1,5 @@
 <div id='resultDialog' title='' style="display:none;">
-	<p id='resultMessage' style='text-align: center;'>
-</p>
+	<p id='resultMessage' style="text-align: center;"></p>
 </div>
 <script>
 
@@ -16,13 +15,6 @@ $("#resultDialog").dialog({
 	show: {effect: "fade",duration: 1000},
 	hide: { effect: "fade", duration: 1000}
 });
-
-function showResultDialog(caption, message) {
-	console.log("showResultDialog - caption: " + caption + " - message: "+ message);
-	$('#resultMessage').html(message);
-	$('#resultDialog').dialog('option', 'title', caption);
-	$("#resultDialog").dialog( "open" );
-}
 
 function showResultDialog(caption, message, callback) {
 	console.log("showResultDialog - caption: " + caption + " - message: "+ message);

@@ -36,7 +36,7 @@
 					webAppMessage.urlEnvioDocumento = "${createLink( controller:'representative', absolute:true)}"
 					webAppMessage.asuntoMensajeFirmado = '<g:message code="representativeDataLbl"/>'
 					webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStamp', absolute:true)}"
-					votingSystemApplet.setMessageToSignatureClient(JSON.stringify(webAppMessage));
+					votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage));
 			    	return false 
 
 			    	
@@ -51,7 +51,7 @@
   			    console.log( "setMessageFromSignatureClient");
 				$("#loadingVotingSystemAppletDialog").dialog("close");
 				if(appMessage != null) {
-					votingSystemAppletLoaded = true;
+					signatureClientToolLoaded = true;
 					var appMessageJSON
 					if( Object.prototype.toString.call(appMessage) == '[object String]' ) {
 						appMessageJSON = JSON.parse(appMessage);

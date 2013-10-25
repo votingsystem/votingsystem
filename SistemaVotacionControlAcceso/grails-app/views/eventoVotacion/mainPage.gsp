@@ -3,7 +3,7 @@
 <head>
         <meta name="layout" content="main" />
 		<link rel="stylesheet" href="${resource(dir:'css',file:'jqueryPaginate.css')}">
-		<g:include controller="app" action="jsJQueryPaginate"/>
+		<g:render template="/template/js/jqueryPaginate"/>
 
         <script type="text/javascript">
 		 	$(function() {
@@ -62,7 +62,7 @@
 				//var dataStr = JSON.stringify(eventJSON);  
   			    //console.log( " - ajax call done - dataStr: " + dataStr);
 				//console.log("printEvent: " + dataStr);
-		        var newEventTemplate = "${votingSystem.event(isTemplate:true)}"
+		        var newEventTemplate ="${render(template:'/template/event', model:[isTemplate:'true']).replace("\n","")}"
 		        var endTime = Date.parse(eventJSON.fechaFin)
 		        
 		        var newEventHTML = newEventTemplate.format(eventJSON.asunto, 
@@ -136,7 +136,7 @@
 	<div id="contentDiv" style="display:none;">
 	
 		<div style="display:inline-block;width:100%;vertical-align: middle;margin:0px 0 10px 0px;">
-			<div style="display:inline;float:left;width:30%;">
+			<div style="display:inline;float:left;width:300px;">
 				<votingSystem:simpleButton href="${createLink(controller:'representative', action:'mainPage')}" 
 					imgSrc="${resource(dir:'images',file:'group_24x24.png')}" style="margin:0px 0px 0px 15px;">
 						<g:message code="representativesPageLbl"/>

@@ -87,19 +87,19 @@ public class DateUtils {
     }
 
     /**
-     * Método que devuelve un Date a partir de un String con formato "yyyy-MM-dd'T'HH:mm:ss"
+     * Método que devuelve un Date a partir de un String con formato "yyyy/MM/dd'T'HH:mm:ss"
      *
      * @param dateString fecha en formato String
      * @return Date fecha en formato Date
      * @throws import java.text.ParseException;
      */
     public static Date getDateFromString (String dateString) throws ParseException {
-        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     	return formatter.parse(dateString);
     }
     
     public static Date getDateFromShortString (String dateString) throws ParseException {
-        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
     	return formatter.parse(dateString);
     }
     
@@ -113,24 +113,24 @@ public class DateUtils {
 	}
 
     /**
-     * Método que devuelve un String con formato "yyyy-MM-dd'T'HH:mm:ss a partir de un Date"
+     * Método que devuelve un String con formato "yyyy/MM/dd'T'HH:mm:ss a partir de un Date"
      *
      * @param Date fecha en formato Date
      * @return dateString fecha en formato String
      * @throws import java.text.ParseException;
      */
     public static String getStringFromDate (Date date) {
-        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss");
+        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd' 'HH:mm:ss");
     	return formatter.format(date);
     }
     
     public static String getDirStringFromDate (Date date) {
-        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd_HH-mm-ss");
     	return formatter.format(date);
     }
     
     public static String getShortStringFromDate (Date date) {
-        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
     	return formatter.format(date);
     }
 
@@ -162,7 +162,7 @@ public class DateUtils {
 
     public static final String getFechaYYYYMMDD () {
         Date date = new Date();
-        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
         return formatter.format(date);
     }
 

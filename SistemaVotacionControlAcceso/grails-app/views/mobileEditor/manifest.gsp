@@ -1,66 +1,54 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
 <head>
-        <link rel="stylesheet" media="handheld, only screen and (max-device-width: 320px)">                             
-        <title>${message(code: 'nombreServidorLabel', null)}</title>
-        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-        <meta name="viewport" content="width=device-width" />
-        <meta name="HandheldFriendly" content="true" />
-        <script src="${resource(dir:'ckeditor',file:'ckeditor.js')}"></script>
-        <script src="${resource(dir:'js',file:'jquery-1.10.2.min.js')}"></script>
-        <script src="${resource(dir:'js',file:'jquery-ui-1.10.3.custom.min.js')}"></script>
-        <link rel="stylesheet" href="${resource(dir:'css',file:'jquery-ui-1.10.3.custom.min.css')}">    
-        <script src="${resource(dir:'js/i18n',file:'jquery.ui.datepicker-es.js')}"></script>
-        <script src="${resource(dir:'app',file:'jsMessages')}"></script>
-        <script src="${resource(dir:'js',file:'mobileUtils.js')}"></script>
+<g:render template="/template/js/mobileEditor"/>
         <script type="text/javascript">
-
-			CKEDITOR.on( 'instanceReady', function( ev ) {
-				$("#contentDiv").fadeIn(500)
-			});
 		
 		 	$(function() {
+		 		showEditor()
 			    $("#dateFinish").datepicker(pickerOpts);
 
 			    $('#mainForm').submit(function(event){
 			    	event.preventDefault();
-			    	var subject = $("#subject"),
+			    	var isValidForm = true
+				    hideEditor()
+    		    	var subject = $("#subject"),
 			    	dateFinish = $("#dateFinish"),
-			    	ckeditorDiv = $("#ckeditor"),
+			    	ckeditorDiv = $("#editor"),
 			        allFields = $([]).add(subject).add(dateFinish).add(ckeditorDiv);	
 			        allFields.removeClass( "ui-state-error" );
-
 					if(!document.getElementById('subject').validity.valid) {
 						subject.addClass( "ui-state-error" );
 						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 							'<g:message code="emptyFieldMsg"/>')
-						return false
+						isValidForm = false
 					}
-
 					if(!document.getElementById('dateFinish').validity.valid) {
 						dateFinish.addClass( "ui-state-error" );
 						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 							'<g:message code="emptyFieldMsg"/>')
-						return false
+						isValidForm = false
 					}
 					if(dateFinish.datepicker("getDate") < new Date() ) {
 						dateFinish.addClass( "ui-state-error" );
 						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 						'<g:message code="dateInitERRORMsg"/>')
-						return false
+						isValidForm = false
 					}
-			        
-			        var editor = CKEDITOR.instances.editor1;
-					if(editor.getData().length == 0) {
+					if(htmlEditorContent.trim() == 0) {
 						ckeditorDiv.addClass( "ui-state-error" );
 						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 							'<g:message code="emptyDocumentERRORMsg"/>')
-						return false;
+						isValidForm = false;
 					}  
+					if(!isValidForm) {
+						showEditor();
+						return false;
+					} 		
 			    	var event = new Evento();
 			    	event.asunto = subject.val();
-			    	event.contenido = editor.getData();
-			    	event.fechaFin = dateFinish.val() + " 00:00:00";
+			    	event.contenido = htmlEditorContent.trim();
+			    	event.fechaFin = DateUtils.format($("#dateFinish").datepicker('getDate')) + " 00:00:00";
 
 			    	var webAppMessage = new WebAppMessage(
 					    	StatusCode.SC_PROCESANDO, 
@@ -70,8 +58,7 @@
 					webAppMessage.contenidoFirma = event
 					webAppMessage.urlEnvioDocumento = "${createLink( controller:'eventoFirma', absolute:true)}"
 					webAppMessage.asuntoMensajeFirmado = '<g:message code="publishManifestSubject"/>'
-					
-					setMessateToNativeClient(JSON.stringify(webAppMessage))
+					votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage))
 					return false
 				});
 			  });   
@@ -80,28 +67,36 @@
 </head>
 <body>
 
-<div id="contentDiv" style="display:none;">
+<div id="contentDiv" style="display:none; padding: 20px 20px 20px 20px;">
 
 	<form id="mainForm">
 		<div style="margin:0px 0px 20px 0px">
-			<label for="subject"><g:message code="subjectLbl"/></label>
-	    	<input type="text" name="subject" id="subject" style="width:300px" 
-	    		class="text ui-widget-content ui-corner-all" required/>
+	    	<input type="text" name="subject" id="subject" style="width:600px"  required
+				title="<g:message code="subjectLbl"/>"
+				placeholder="<g:message code="subjectLbl"/>"/>
 	   			
 	   			
-    	<label for="dateFinish" style="margin:0px 0px 20px 0px"><g:message code="dateFinishLbl"/></label>
-		<input type="text" id="dateFinish" class="text ui-widget-content ui-corner-all" style="width:110px;" required readonly/>
+		<input type="text" id="dateFinish" required readonly
+				style="margin:0px 0px 0px 30px"
+				title="<g:message code="dateLbl"/>"
+				placeholder="<g:message code="dateLbl"/>"/>
 		</div>
 	
-		<div id="ckeditor">
-			<script>
-				CKEDITOR.appendTo( 'ckeditor', {
-	                toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Link', 'Unlink' ],
-						[ 'FontSize', 'TextColor', 'BGColor' ]]});
-			</script>
+		<div id="editor"></div>
+		<div id="editorContents" class="editorContents"  style="display: none"></div>
+		
+		<div id="contents" style="display: none">
+			<!-- This div will be used to display the editor contents. -->
+			<div id="editorContents" class="editorContents">
+			</div>
 		</div>
-		<div style="margin:10px 0px 0px 20px;">
-			<input id="submitEditorData" type="submit" value="<g:message code="publishDocumentLbl"/>">
+	
+	
+		<div style="float:right; margin:15px 20px 0px 0px;">
+			<votingSystem:simpleButton isButton='true' id="submitEditorData" 
+					imgSrc="${resource(dir:'images',file:'accept_16x16.png')}">
+					<g:message code="publishDocumentLbl"/>
+			</votingSystem:simpleButton>
 		</div>
 	</form>
 

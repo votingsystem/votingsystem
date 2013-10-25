@@ -194,9 +194,12 @@ public class AppletFirma extends JApplet implements AppHost {
                 operacion.toJSON().toString());
         try {
             if(modoEjecucion == ModoEjecucion.APPLET) {
+                String callbackFunction = "setMessageFromSignatureClient";
+                if(operacion.getCallerCallback() != null) 
+                    callbackFunction = operacion.getCallerCallback();
                 Object[] args = {operacion.toJSON().toString()};
                 Object object = netscape.javascript.JSObject.getWindow(this).
-                        call("setMessageFromSignatureClient", args);
+                        call(callbackFunction, args);
             } else logger.debug("---> APP EXECUTION MODE: " + modoEjecucion.toString());
         } catch (Exception ex) {
             ex.printStackTrace();

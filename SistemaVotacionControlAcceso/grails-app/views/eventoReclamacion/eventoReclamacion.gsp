@@ -56,7 +56,7 @@
 						webAppMessage.respuestaConRecibo = true
 						pendingOperation = Operation.FIRMA_RECLAMACION_SMIME
 						//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-						votingSystemApplet.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
+						votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
 		 			});
 				    
 			 });
@@ -83,7 +83,7 @@
 				webAppMessage.respuestaConRecibo = true
 				pendingOperation = Operation.FIRMA_RECLAMACION_SMIME
 				//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-				votingSystemApplet.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
+				votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
 			}
 
 
@@ -91,7 +91,7 @@
 				console.log("setMessageFromSignatureClient - message from native client: " + appMessage);
 				$("#loadingVotingSystemAppletDialog").dialog("close");
 				if(appMessage != null) {
-					votingSystemAppletLoaded = true;
+					signatureClientToolLoaded = true;
 					var appMessageJSON
 					if( Object.prototype.toString.call(appMessage) == '[object String]' ) {
 						appMessageJSON = JSON.parse(appMessage);
@@ -225,7 +225,8 @@
 		</ul>
 	</div>		
 
-<g:include controller="gsp" action="index" params="[pageName:'adminDocumentDialog']"/> 
-<g:include controller="gsp" action="index" params="[pageName:'requestEventBackupDialog']"/> 		
+<g:render template="/template/dialog/adminDocumentDialog"/>
+<g:render template="/template/dialog/requestEventBackupDialog"/>
+	
 </body>
 </html>

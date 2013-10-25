@@ -141,6 +141,7 @@ public class Operacion {
     
     private Tipo tipo;
     private Integer codigoEstado;
+    private String callerCallback;
     private String mensaje;
     private String urlDocumento;
     private String urlTimeStampServer;
@@ -386,6 +387,9 @@ public class Operacion {
         if (operacionJSON.containsKey("urlServer")) {
             operacion.setUrlServer(operacionJSON.getString("urlServer"));
         }
+        if (operacionJSON.containsKey("callerCallback")) {
+            operacion.setCallerCallback(operacionJSON.getString("callerCallback"));
+        }
         if (operacionJSON.containsKey("evento")) {
             Evento evento = Evento.parse(operacionJSON.getJSONObject("evento"));
             operacion.setEvento(evento);
@@ -521,6 +525,20 @@ public class Operacion {
                         getString("errorDestinatarioNoEncontrado");
         }
         return null;
+    }
+
+    /**
+     * @return the callerCallback
+     */
+    public String getCallerCallback() {
+        return callerCallback;
+    }
+
+    /**
+     * @param callerCallback the callerCallback to set
+     */
+    public void setCallerCallback(String callerCallback) {
+        this.callerCallback = callerCallback;
     }
 
 

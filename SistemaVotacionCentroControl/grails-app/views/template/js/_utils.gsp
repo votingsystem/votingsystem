@@ -1,5 +1,6 @@
+<script type="text/javascript">
+
 var WebAppMessage = function (statusCode, operacion) {
-    	
 	this.codigoEstado = statusCode
 	this.operacion = operacion
 	this.asunto ;
@@ -9,11 +10,11 @@ var WebAppMessage = function (statusCode, operacion) {
 	this.nombreDestinatarioFirma;
 	this.urlServer;
 	this.respuestaConRecibo;
-		
+	this.evento;
+	this.callerCallback;
 }
 
 var Evento = function () {
-
     this.id
     this.fechaCreacion
     this.fechaFin
@@ -58,20 +59,19 @@ var Evento = function () {
     this.getMessage = function () {
     	var result =  "";
     	if(EstadoEvento.ACTIVO == estado) {
-    		result = "Recibiendo solicitudes";
+    		result = "<g:message code='openLbl'/>";
     	} else if(EstadoEvento.PENDIENTE_COMIENZO == estado) {
-    		result =  "Pendiente de abrir";
+    		result =  "<g:message code='pendingLbl'/>";
     	} else if(EstadoEvento.FINALIZADO == estado) {
-    		result =  "Finalizado";
+    		result =  "<g:message code='closedLbl'/>";
     	} else if(EstadoEvento.CANCELADO == estado) {
-    		result =  "Suspendido";
+    		result =  "<g:message code='cancelledLbl'/>";
     	} else if(EstadoEvento.ACTORES_PENDIENTES_NOTIFICACION == estado) {
-    		result =  "Falta notificación a participantes";
+    		result =  "<g:message code='withoutNotificationsLbl'/>";
     	}
     	return result; 	
     }
 }
-
 
 var DateUtils = {
 
@@ -79,7 +79,7 @@ var DateUtils = {
 		var curr_date = date.getDate();
 	    var curr_month = date.getMonth() + 1; //Months are zero based
 	    var curr_year = date.getFullYear();
-	    return curr_date + "-" + curr_month + "-" + curr_year
+	    return curr_year + "/" + curr_month + "/" + curr_date
 	},
 	
 	//parse dates with format "2010-08-30 01:02:03" 	
@@ -114,21 +114,16 @@ String.prototype.format = function() {
 	  });
 	};
 
-var FormUtils = {
 
-	checkEmptyField: function (field) {
-	      if (field.val().length == 0) {
-	    	  field.addClass( "ui-state-error" );
-  	          return false;
-  	      } else {
-  	          return true;
-  	      }
-	}
+var DocumentState = {
+		BORRADO_DE_SISTEMA : "BORRADO_DE_SISTEMA",
+		CANCELADO:"CANCELADO",
+		PENDIENTE_COMIENZO:"PENDIENTE_COMIENZO",
+		FINALIZADO:"FINALIZADO"		
 }
 
 var StatusCode = {
 		SC_OK : 200,
-		SC_PING : 0,
 		SC_ERROR_PETICION : 400,
 		SC_ANULACION_REPETIDA : 471,
 		SC_ERROR_VOTO_REPETIDO : 470,
@@ -160,7 +155,16 @@ var Operation = {
 		REPRESENTATIVE_SELECTION:"REPRESENTATIVE_SELECTION", 
 		REPRESENTATIVE_VOTING_HISTORY_REQUEST: "REPRESENTATIVE_VOTING_HISTORY_REQUEST",
 		REPRESENTATIVE_ACCREDITATIONS_REQUEST: "REPRESENTATIVE_ACCREDITATIONS_REQUEST", 
-		REPRESENTATIVE_REVOKE: "REPRESENTATIVE_REVOKE"
+		REPRESENTATIVE_REVOKE: "REPRESENTATIVE_REVOKE",
+		REPRESENTATIVE_DATA:"REPRESENTATIVE_DATA"
+}
+
+var SubSystem = {
+		VOTES : "VOTES",
+		CLAIMS: "CLAIMS",
+		MANIFESTS: "MANIFESTS",
+		REPRESENTATIVES:"REPRESENTATIVES"
+			
 }
 
 var DataType = {
@@ -178,45 +182,93 @@ var EstadoEvento = {
 		BORRADO_DE_SISTEMA:"BORRADO_DE_SISTEMA"
 }
 
-function showResultDialog(caption, message) {
-	console.log("showResultDialog - caption: " + caption + " - message: "+ message);
-	$('#resultMessage').html(message);
-	$('#resultDialog').dialog('option', 'title', caption);
-	$("#resultDialog").dialog( "open" );
-}
-
-var resultDialog = $("<div id='resultDialog' title=''>" +
-		  "<p id='resultMessage' style='text-align: center;'></p></div>");
-
-var VotingSystemClient = function () {
+function getEstadoEventoMsg(estadoEvento) { 
 	
-	
-	function setMessateToNativeClient (message) {
-		console.log("---- setMessateToNativeClient: " + message);
-		androidClient.setVotingWebAppMessage(message);
+	if(EstadoEvento.ACTIVO == estadoEvento) {
+		return "<g:message code='openLbl'/>"
 	}
-
-	window.onload = function(){
-		window.setMessateToNativeClient = setMessateToNativeClient
-		$(document.body).append(resultDialog);
-		$("#resultDialog").dialog({
-		   	  width: 400, autoOpen: false, modal: true,
-		      buttons: [{
-		        		text:"<g:message code="acceptLbl"/>",
-		               	icons: { primary: "ui-icon-check"},
-		             	click:function() {
-		             		$(this).dialog( "close" );	   	   			   				
-   			        	}
-		           }],
-		      //show: {effect: "fade",duration: 100},
-		      //hide: { effect: "fade", duration: 100}
-		    });
-		
-	};
-
+	if(EstadoEvento.FINALIZADO == estadoEvento) {
+		return "<g:message code='closedLbl'/>"
+	}
+	if(EstadoEvento.CANCELADO == estadoEvento) {
+		return  "<g:message code='closedLbl'/>"
+	}
+	if(EstadoEvento.PENDIENTE_COMIENZO == estadoEvento) {
+		return  "<g:message code='pendingLbl'/>"
+	}
+	console.log("utils.getEstadoEventoMsg() - UNKNOWN STATE")
+	return "UNKNOWN STATE"
 }
 
-var pickerOpts = {showOn: 'both', buttonImage: '/SistemaVotacionControlAcceso/images/appointment.png', 
-		buttonImageOnly: true, dateFormat: 'yy/MM/dd'};
+function loadjsfile(filename){
+	var fileref=document.createElement('script')
+	fileref.setAttribute("type","text/javascript")
+ 	fileref.setAttribute("src", filename)
+ }
 
-var votingSystemClient = new VotingSystemClient()
+function calculateNIFLetter(dni) {
+    var  nifLetters = "TRWAGMYFPDXBNJZSQVHLCKET";
+    var module= dni % 23;
+    return nifLetters.charAt(module);
+}
+
+function validateNIF(nif) {
+	if(nif == null) return false;
+	nif  = nif.toUpperCase();
+	if(nif.length < 9) {
+        var numZeros = 9 - nif.length;
+		for(var i = 0; i < numZeros ; i++) {
+			nif = "0" + nif;
+		}
+	}
+	var number = nif.substring(0, 8);
+    var letter = nif.substring(8, 9);
+    if(letter != calculateNIFLetter(number)) return null;
+    else return nif;
+}
+
+
+//http://jsfiddle.net/cckSj/5/
+function getElapsedTime(endTime) { 
+	
+    // time difference in ms
+    var timeDiff = endTime - new Date();
+
+    if(timeDiff < 0) {
+    	return "<g:message code='timeFinsishedLbl'/>"	
+    }
+    
+    // strip the miliseconds
+    timeDiff /= 1000;
+
+    // get seconds
+    var seconds = Math.round(timeDiff % 60);
+
+    // remove seconds from the date
+    timeDiff = Math.floor(timeDiff / 60);
+
+    // get minutes
+    var minutes = Math.round(timeDiff % 60);
+
+    // remove minutes from the date
+    timeDiff = Math.floor(timeDiff / 60);
+
+    // get hours
+    var hours = Math.round(timeDiff % 24);
+
+    // remove hours from the date
+    timeDiff = Math.floor(timeDiff / 24);
+
+    // the rest of timeDiff is number of days
+    var resultStr
+    var days = timeDiff;
+    if(days > 0) {
+    	resultStr = days + " " + "<g:message code="daysLbl"/>" + " " + "<g:message code="andLbl"/>" + " " + hours + " " + "<g:message code="hoursLbl"/>"
+    } else if (hours > 0) {
+    	resultStr = hours + " " + "<g:message code="hoursLbl"/>" + " " + "<g:message code="andLbl"/>" + " " + minutes + " " + "<g:message code="minutesLbl"/>"
+    } else if (minutes > 0) {
+    	resultStr = minutes + " " + "<g:message code="minutesLbl"/>" + " " + "<g:message code="andLbl"/>" + " " + seconds + " " + "<g:message code="secondsLbl"/>"
+    }
+    return resultStr
+}
+</script>

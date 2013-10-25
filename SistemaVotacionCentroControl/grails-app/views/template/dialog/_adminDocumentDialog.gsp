@@ -69,7 +69,7 @@ function submitAdminForm() {
 		webAppMessage.contenidoFirma = contenidoFirma
 		pendingOperation = Operation.CANCELAR_EVENTO
 		//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-		votingSystemApplet.setMessateToNativeClient(JSON.stringify(webAppMessage)); 
+		votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
 	}
 }
 </script>

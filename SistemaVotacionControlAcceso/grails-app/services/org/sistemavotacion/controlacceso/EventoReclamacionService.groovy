@@ -42,7 +42,7 @@ class EventoReclamacionService {
 			String documentStr = mensajeSMIMEReq.getSmimeMessage().getSignedContent()
 			log.debug("saveEvent - firmante: ${firmante.nif} - documentStr: ${documentStr}")
 			def mensajeJSON = JSON.parse(documentStr)
-			Date fechaFin = new Date().parse("yyyy-MM-dd HH:mm:ss", mensajeJSON.fechaFin)
+			Date fechaFin = new Date().parse("yyyy/MM/dd HH:mm:ss", mensajeJSON.fechaFin)
 			if(fechaFin.before(DateUtils.getTodayDate())) {
 				String msg = messageSource.getMessage(
 					'publishDocumentDateErrorMsg', 
@@ -59,7 +59,7 @@ class EventoReclamacionService {
 				Evento.Cardinalidad.valueOf(mensajeJSON.cardinalidad)
 			else evento.cardinalidadRepresentaciones = Evento.Cardinalidad.UNA
 			if(mensajeJSON.fechaInicio) evento.fechaInicio = new Date().parse(
-						"yyyy-MM-dd HH:mm:ss", mensajeJSON.fechaInicio)
+						"yyyy/MM/dd HH:mm:ss", mensajeJSON.fechaInicio)
 			else evento.fechaInicio = DateUtils.getTodayDate();
 			Respuesta respuesta = eventoService.setEventDatesState(evento, locale)
 			if(Respuesta.SC_OK != respuesta.codigoEstado) return respuesta 

@@ -68,14 +68,14 @@
 				webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStamp', absolute:true)}"
 				pendingOperation = Operation.ENVIO_VOTO_SMIME
 				//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-				votingSystemApplet.setMessateToNativeClient(JSON.stringify(webAppMessage)); 
+				votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
 			}
 
 			function setMessageFromNativeClient(appMessage) {
 				console.log("setMessageFromNativeClient - message from native client: " + appMessage);
 				$("#loadingVotingSystemAppletDialog").dialog("close");
 				if(appMessage != null) {
-					votingSystemAppletLoaded = true;
+					signatureClientToolLoaded = true;
 					var appMessageJSON
 					if( Object.prototype.toString.call(appMessage) == '[object String]' ) {
 						appMessageJSON = JSON.parse(appMessage);
@@ -127,7 +127,7 @@
 	</div>
 
 	<div class="publishPageTitle" style="margin:0px 0px 0px 0px;">
-		<p style="margin: 0px 0px 0px 0px; text-align:center;">
+		<p style="margin: 0px 0px 0px 0px; text-align:center; width:100%;">
 			${eventMap?.asunto}
 		</p>
 	</div>
@@ -189,17 +189,8 @@
 			<li><g:message code="javaInstallAdvertMsg"/></li>
 		</ul>
 	</div>		
-		
-    <div id="confirmOptionDialog" title="<g:message code="confirmOptionDialogCaption"/>">	    	
-		<p style="text-align: center;">
-			<g:message code="confirmOptionDialogMsg"/>:<br>
-			<b><span id="optionSelectedDialogMsg"></span></b>
-	  	</p>
-   	</div> 
-   	
 
-   	
-<g:include controller="gsp" action="index" params="[pageName:'confirmOptionDialog']"/>   
-<g:include controller="gsp" action="index" params="[pageName:'adminDocumentDialog']"/> 	   	
+<g:render template="/template/dialog/confirmOptionDialog"/>	
+<g:render template="/template/dialog/adminDocumentDialog"/>	   		   	
 </body>
 </html>

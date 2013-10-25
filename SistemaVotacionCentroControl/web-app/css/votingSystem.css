@@ -134,14 +134,14 @@ body {
 }
 
 .col-subsystem {
-	font-size: 0.72em;
+	font-size: 0.8em;
 	width: 200px;
 	display:table-cell;
 	vertical-align:middle;
+	padding:0px 0px 0px 20px;
 }
 
 .col-subsystem a {
-	display:block;
 	font-size: 0.9em;
 	text-decoration: none;
 }
@@ -151,8 +151,7 @@ body {
 	margin: 0px auto 0px auto;
 	display:table-cell;
 	vertical-align:middle;
-	text-align: center;
-	right: 0;
+	text-align:center;
 }
 
 .col-selectedSystem a {text-decoration: none;}
@@ -206,8 +205,13 @@ body {
     margin:10px 0px 15px 15px;
     min-height:300px;
    	padding: 10px 10px 10px 10px;
+   	overflow: hidden;
 }
 
+.eventPageContentDiv {
+	overflow: hidden;
+	margin: 0px 15px 15px 15px;
+}
 
 .eventPageContentDiv #eventAuthorDiv {
 	font-size: 0.9em;
@@ -215,7 +219,7 @@ body {
 	margin:0px 30px 0px 0px;
 }
 
-.eventOptionsDiv {
+.eventPageContentDiv .eventOptionsDiv {
 	width: 80%;
 	margin: 0px auto 0px auto;
 }
@@ -266,6 +270,16 @@ body {
 	-moz-transform: rotate(20deg);
 }
 
+.eventPendingBox {
+	border-color: #fba131;
+	color:#fba131;
+}
+
+.eventFinishedBox {
+	border-color: #cc1606;
+	color:#cc1606;
+}
+
 .cancelNotification {
 	transform:rotate(20deg);
 	-ms-transform:rotate(20deg); 
@@ -273,6 +287,15 @@ body {
 	-moz-transform: rotate(20deg);
 }
 
+
+.claimFieldInput {
+	font-size: 1.5em; 
+	display: block; 
+	width: 90%;
+	margin: 10px auto 5px auto;
+	padding: 3px;
+	text-overflow: ellipsis;
+}
 
 .button_base {
 	display:table;
@@ -326,7 +349,6 @@ select, textarea, text, input {
 	border: 1px solid #cccccc;
 	font-size: 1em;
 	padding: 1px 2px 1px 2px;
-	overflow: hidden; word-wrap: break-word; resize: none; 
 }
 
 #eventsDiv {

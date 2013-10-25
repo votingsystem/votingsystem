@@ -1,12 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
-<head>
-	<title>${message(code: 'nombreServidorLabel', null)}</title>
-	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-	<link rel="shortcut icon" href="${resource(dir:'images',file:'favicon.ico')}" type="image/x-icon" />
-	<meta name="viewport" content="width=device-width" />
-	<meta name="HandheldFriendly" content="true" />   
-	<g:include controller="app" action="jsUtils" />
+<head>   
+   	<g:render template="/template/js/pcUtils"/>
 	<g:layoutHead />
 	<script type="text/javascript">
 	        
@@ -29,7 +24,7 @@
 </head>
 <body>
 	<div class="header">
-		<div style="margin:10px 10px 0 15px;">
+		<div class="col-subsystem">
 			<img src="${resource(dir:'images',file:'feed.png')}" style="margin:3px 0 0 15px;"></img>
 			<g:link controller="subscripcion" action="votaciones" style="font-size: 0.8em;"><g:message code="subscribeToFeedsLbl"/></g:link>
 		</div>
@@ -57,6 +52,6 @@
 		</a>
 	</div>
 		
-	<g:include controller="gsp" action="index" params="[pageName:'advancedSearchDialog']"/> 	
+ 	<g:render template="/template/dialog/advancedSearchDialog"/>			
 </body>
 </html>

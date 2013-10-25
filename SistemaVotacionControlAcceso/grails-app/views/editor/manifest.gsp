@@ -40,7 +40,7 @@
 					var event = new Evento();
 			    	event.asunto = subject.val();
 			    	event.contenido = editor.getData();
-			    	event.fechaFin = dateFinish.val() + " 00:00:00";
+			    	event.fechaFin = DateUtils.format(dateFinish.datepicker('getDate')) + " 00:00:00";
 
 			    	var webAppMessage = new WebAppMessage(
 					    	StatusCode.SC_PROCESANDO, 
@@ -51,7 +51,7 @@
 					webAppMessage.urlEnvioDocumento = "${createLink( controller:'eventoFirma', absolute:true)}"
 					webAppMessage.asuntoMensajeFirmado = '<g:message code="publishManifestSubject"/>'
 
-					votingSystemApplet.setMessageToSignatureClient(JSON.stringify(webAppMessage));
+					votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage));
 			    	return false 
 			    });
 
@@ -64,7 +64,7 @@
   			    console.log( "setMessageFromSignatureClient");
 				$("#loadingVotingSystemAppletDialog").dialog("close");
 				if(appMessage != null) {
-					votingSystemAppletLoaded = true;
+					signatureClientToolLoaded = true;
 					var appMessageJSON
 					if( Object.prototype.toString.call(appMessage) == '[object String]' ) {
 						appMessageJSON = JSON.parse(appMessage);
@@ -94,10 +94,10 @@
 </head>
 <body>
 
-<div id="contentDiv" style="display:none;">
+<div id="contentDiv" style="display:none; padding: 0px 20px 0px 20px;">
 
 	<div class="publishPageTitle">
-		<p style="margin: 0px 0px 0px 0px; text-align:center;">
+		<p style="text-align:center; width: 100%;">
 			<g:message code="publishManifestLbl"/>
 		</p>
 	</div>
@@ -105,13 +105,15 @@
 	<form id="mainForm">
 	
 	<div style="margin:0px 0px 20px 0px">
-		<label for="subject"><g:message code="subjectLbl"/></label>
     	<input type="text" name="subject" id="subject" style="width:400px"  required 
+				title="<g:message code="subjectLbl"/>"
+				placeholder="<g:message code="subjectLbl"/>"
     			oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
     			onchange="this.setCustomValidity('')" />
 
-    	<label for="dateFinish" style="margin:0px 0px 20px 20px"><g:message code="dateLbl"/></label>
-		<input type="text" id="dateFinish" required readonly
+		<input type="text" id="dateFinish" style="margin:0px 0px 0px 35px;" required readonly
+				title="<g:message code="dateLbl"/>"
+				placeholder="<g:message code="dateLbl"/>"
    				oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
    				onchange="this.setCustomValidity('')"/>
 	</div>

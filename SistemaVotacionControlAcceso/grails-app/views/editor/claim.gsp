@@ -2,102 +2,62 @@
 <html>
 <head>
         <meta name="layout" content="main" />
-        <script src="${resource(dir:'ckeditor',file:'ckeditor.js')}"></script>
+        <g:render template="/template/js/pcEditor"/>
         <script type="text/javascript">
-			var numFields = 0
-
-			CKEDITOR.on( 'instanceReady', function( ev ) {
-				$("#contentDiv").fadeIn(500)
-			});
+			var numClaimFields = 0
 			
 		 	$(function() {
-    		   $("#claimFieldMsgDialog").dialog({
-   			   	  width: 450, autoOpen: false, modal: true,
-   			      buttons: [
-   			           {
-   			        		text:"<g:message code="acceptLbl"/>",
-   			               	icons: { primary: "ui-icon-check"},
-   			             	click:function() {
-  	   	   			   				$("#submitClaimFieldText").click() 	   	   			   				
-  	   	   			        	}
-   			           },
-   			           {
-   			        		text:"<g:message code="cancelLbl"/>",
-   			               	icons: { primary: "ui-icon-closethick"},
-   			             	click:function() {
-  	   			   				$(this).dialog( "close" );
-  	   			       	 	}	
-   			           }
-   			       ],
-   			      show: { effect: "fade", duration: 500 },
-   			      hide: { effect: "fade", duration: 500 }
-   			    });
-
+		 		showEditor()
 			    $("#dateFinish").datepicker(pickerOpts);
 
-	    		$("#addClaimFieldLink").click(function () { 
-	    			$("#claimFieldMsgDialog").dialog("open");
+	    		$("#addClaimFieldButton").click(function () {
+	    			hideEditor() 
+	    			showAddClaimFieldDialog(addClaimField)
 	    		});
 	    		
-			    $('#newFieldClaimForm').submit(function(event){
-			        event.preventDefault();
+	    		function addClaimField (claimFieldText) {
+	    			showEditor()
+					if(claimFieldText == null) return
 			        var newFieldTemplate = "${votingSystem.newField(isTemplate:true)}"
-			        var newFieldHTML = newFieldTemplate.format($("#claimFieldText").val());
+			        var newFieldHTML = newFieldTemplate.format(claimFieldText);
 			        var $newField = $(newFieldHTML)
    					$newField.find('div#deleteFieldButton').click(function() {
-							$(this).parent().fadeOut(500, 
+							$(this).parent().fadeOut(1000, 
    							function() { $(this).parent().remove(); });
-							numFields--
-							if(numFields == 0) {
+							numClaimFields--
+							if(numClaimFields == 0) {
 			   					$("#fieldsBox").fadeOut(1000)
 				   			}
     					}
 					)
-
 	   				$("#fieldsBox #fields").append($newField)
-	   				if(numFields == 0) {
+	   				if(numClaimFields == 0) {
 	   					$("#fieldsBox").fadeIn(1000)
-	   					
 		   			}
-	   				numFields++
+	   				numClaimFields++
 	   				$("#claimFieldText").val("");
-					$("#claimFieldMsgDialog").dialog( "close" );
-			    });
+		    	}
 
-			    $('#mainForm').submit(function(){
-					var subject = $( "#subject" ),
-			    		dateFinish = $( "#dateFinish" ),
-			    		ckeditorDiv = $( "#ckeditor" ),
-			        	allFields = $( [] ).add( subject ).add( dateFinish ).add(ckeditorDiv);
-					allFields.removeClass( "ui-state-error" );
-
-
-					if(dateFinish.datepicker("getDate") < new Date() ) {
-						dateFinish.addClass( "ui-state-error" );
-						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
-							'<g:message code="dateInitERRORMsg"/>')
-						return false
-					}
-
-		        	
-			        var editor = CKEDITOR.instances.editor1;
-					if(editor.getData().length == 0) {
-						ckeditorDiv.addClass( "ui-state-error" );
-						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
-								'<g:message code="emptyDocumentERRORMsg"/>')
-						return false;
-					}  
-
+			    $('#mainForm').submit(function(event){
+			    	event.preventDefault();
+				    hideEditor()
+					if(!validateForm()) {
+						showEditor();
+						return;
+					} 					
 			    	var event = new Evento();
-			    	event.asunto = subject.val();
-			    	event.contenido = editor.getData();
-			    	event.fechaFin = dateFinish.val() + " 00:00:00";
+			    	event.asunto = $("#subject").val();
+			    	event.contenido = htmlEditorContent.trim();
+			    	event.fechaFin = DateUtils.format($("#dateFinish").datepicker('getDate')) + " 00:00:00";
 			    	
 					var claimFields = new Array();
 					$("#fieldsBox").children().each(function(){
-						var claimFieldTxt = $(this).find('div.newFieldValueDiv').text();
-						var claimField = {contenido:claimFieldTxt}
-						claimFields.push(claimField)
+						var claimField = $(this).find('div.newFieldValueDiv');
+						var claimFieldTxt = claimField.text();
+						if(claimFieldTxt.length > 0) {
+							var claimField = {contenido:claimFieldTxt}
+							claimFields.push(claimField)
+						}
 					});
 
 			    	event.campos = claimFields
@@ -120,51 +80,87 @@
 					webAppMessage.asuntoMensajeFirmado = "${message(code:'publishClaimSubject')}"
 					webAppMessage.respuestaConRecibo = true
 
-					votingSystemApplet.setMessageToSignatureClient(JSON.stringify(webAppMessage));
+					votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage))
 					return false
 				 })
 			    
 			  });
 
+			function validateForm() {
+				var subject = $("#subject"),
+	    		dateFinish = $("#dateFinish"),
+	    		ckeditorDiv = $("#editor"),
+	        	allFields = $([]).add(subject).add(dateFinish).add(ckeditorDiv);
+				allFields.removeClass( "ui-state-error" );
+	
+				if(!document.getElementById('subject').validity.valid) {
+					subject.addClass( "ui-state-error" );
+					showResultDialog('<g:message code="dataFormERRORLbl"/>', 
+						'<g:message code="emptyFieldMsg"/>')
+					return false
+				}
+	
+				if(!document.getElementById('dateFinish').validity.valid) {
+					dateFinish.addClass( "ui-state-error" );
+					showResultDialog('<g:message code="dataFormERRORLbl"/>', 
+						'<g:message code="emptyFieldMsg"/>')
+					return false
+				}
+				
+				if(dateFinish.datepicker("getDate") < new Date() ) {
+					dateFinish.addClass( "ui-state-error" );
+					showResultDialog('<g:message code="dataFormERRORLbl"/>', 
+						'<g:message code="dateInitERRORMsg"/>')
+					return false
+				}
+	
+				if(htmlEditorContent.trim() == 0) {
+					ckeditorDiv.addClass( "ui-state-error" );
+					showResultDialog('<g:message code="dataFormERRORLbl"/>', 
+							'<g:message code="emptyDocumentERRORMsg"/>')
+					return false;
+				}  
+				return true
+			}
 
-				function setMessageFromSignatureClient(appMessage) {
-					console.log("setMessageFromSignatureClient - message from native client: " + appMessage);
-					$("#loadingVotingSystemAppletDialog").dialog("close");
-					if(appMessage != null) {
-						votingSystemAppletLoaded = true;
-						var appMessageJSON
-						if( Object.prototype.toString.call(appMessage) == '[object String]' ) {
-							appMessageJSON = JSON.parse(appMessage);
-						} else {
-							appMessageJSON = appMessage
-						} 
-						var statusCode = appMessageJSON.codigoEstado
-						if(StatusCode.SC_PROCESANDO == statusCode){
-							$("#loadingVotingSystemAppletDialog").dialog("close");
-							$("#workingWithAppletDialog").dialog("open");
-						} else {
-							$("#workingWithAppletDialog" ).dialog("close");
-							var caption = '<g:message code="publishERRORCaption"/>'
-							var msg = appMessageJSON.mensaje
-							if(StatusCode.SC_OK == statusCode) { 
-								caption = '<g:message code="publishOKCaption"/>'
-						    	var msgTemplate = "<g:message code='documentLinkMsg'/>";
-								msg = "<p><g:message code='publishOKMsg'/>.</p>" + 
-									msgTemplate.format(appMessageJSON.mensaje);
-							}
-							showResultDialog(caption, msg)
+			function setMessageFromSignatureClient(appMessage) {
+				console.log("setMessageFromSignatureClient - message from native client: " + appMessage);
+				$("#loadingVotingSystemAppletDialog").dialog("close");
+				if(appMessage != null) {
+					signatureClientToolLoaded = true;
+					var appMessageJSON
+					if( Object.prototype.toString.call(appMessage) == '[object String]' ) {
+						appMessageJSON = JSON.parse(appMessage);
+					} else {
+						appMessageJSON = appMessage
+					} 
+					var statusCode = appMessageJSON.codigoEstado
+					if(StatusCode.SC_PROCESANDO == statusCode){
+						$("#loadingVotingSystemAppletDialog").dialog("close");
+						$("#workingWithAppletDialog").dialog("open");
+					} else {
+						$("#workingWithAppletDialog" ).dialog("close");
+						var caption = '<g:message code="publishERRORCaption"/>'
+						var msg = appMessageJSON.mensaje
+						if(StatusCode.SC_OK == statusCode) { 
+							caption = '<g:message code="publishOKCaption"/>'
+					    	var msgTemplate = "<g:message code='documentLinkMsg'/>";
+							msg = "<p><g:message code='publishOKMsg'/>.</p>" + 
+								msgTemplate.format(appMessageJSON.mensaje);
 						}
+						showResultDialog(caption, msg)
 					}
 				}
+			}
 
         </script>
 </head>
 <body>
 
-<div id="contentDiv" style="display:none;">
+<div id="contentDiv" style="display:none; padding: 0px 20px 0px 20px;">
 
 	<div class="publishPageTitle">
-		<p style="margin: 0px 0px 0px 0px; text-align:center;">
+		<p style="text-align:center; width: 100%;">
 			<g:message code="publishClaimLbl"/>
 		</p>
 	</div>
@@ -172,26 +168,21 @@
 	<form id="mainForm">
 	
 	<div style="margin:0px 0px 20px 0px">
-		<label for="subject"><g:message code="subjectLbl"/></label>
-    	<input type="text" name="subject" id="subject" style="width:400px;margin:0px 40px 0px 0px" required 
+    	<input type="text" name="subject" id="subject" style="width:400px;margin:0px 40px 0px 0px" required
+				title="<g:message code="subjectLbl"/>"
+				placeholder="<g:message code="subjectLbl"/>" 
     			oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
     			onchange="this.setCustomValidity('')" />
 
-    	<label for="dateFinish"><g:message code="dateLbl"/></label>
 		<input type="text" id="dateFinish" required readonly
+				title="<g:message code="dateLbl"/>"
+				placeholder="<g:message code="dateLbl"/>" 
    				oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
    				onchange="this.setCustomValidity('')"/>
 	</div>
 	
-
-	<div id="ckeditor">
-		<script>
-			CKEDITOR.appendTo( 'ckeditor', {
-                toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Link', 'Unlink' ],
-					[ 'FontSize', 'TextColor', 'BGColor' ]]});
-		</script>
-	</div>
-	
+	<div id="editor"></div>
+	<div id="editorContents" class="editorContents"></div>
 	
 	<div style="margin:0px 0px 30px 0px;">
 		<div style="font-size: 0.9em; margin:10px 0 0 10px; width:60%;display: inline-block;"> 
@@ -199,7 +190,7 @@
 			<input type="checkbox" id="allowBackupRequestCheckbox"><g:message code="allowBackupRequestLbl"/>
 		</div>
 	    <div style="float:right; margin:10px 20px 0px 0px;">
-			<votingSystem:simpleButton id="addClaimFieldLink" style="margin:0px 20px 0px 0px;"
+			<votingSystem:simpleButton id="addClaimFieldButton" style="margin:0px 20px 0px 0px;"
 				imgSrc="${resource(dir:'images',file:'info_16x16.png')}">
 					<g:message code="addClaimFieldLbl"/>
 			</votingSystem:simpleButton>
@@ -233,21 +224,8 @@
 			<li><g:message code="javaInstallAdvertMsg"/></li>
 		</ul>
 	</div>	
-    
-    <div id="claimFieldMsgDialog" title="<g:message code="addClaimFieldLbl"/>">
-		<p style="text-align: center;">
-	  		<g:message code="claimFieldDescriptionMsg"/>
-	  	</p>
-	  	<span><g:message code="addClaimFieldMsg"/></span>
-   		<form id="newFieldClaimForm">
-   			<input type="text" id="claimFieldText" style="width:400px" 
-   				oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-   				onchange="this.setCustomValidity('')"
-   				class="text ui-widget-content ui-corner-all" required/>
-  				<input id="submitClaimFieldText" type="submit" style="display:none;">
-   		</form>
-    </div> 
 </div>
 
+<g:render template="/template/dialog/addClaimFieldDialog"/>
 </body>
 </html>

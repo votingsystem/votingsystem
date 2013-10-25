@@ -59,9 +59,9 @@ class EventoVotacionService {
 			event = new EventoVotacion(asunto:mensajeJSON.asunto,
 				contenido:mensajeJSON.contenido, usuario:firmante,
 					fechaInicio: new Date().parse(
-						"yyyy-MM-dd HH:mm:ss", mensajeJSON.fechaInicio),
+						"yyyy/MM/dd HH:mm:ss", mensajeJSON.fechaInicio),
 					fechaFin: new Date().parse(
-						"yyyy-MM-dd HH:mm:ss", mensajeJSON.fechaFin))
+						"yyyy/MM/dd HH:mm:ss", mensajeJSON.fechaFin))
 			respuesta = subscripcionService.checkControlCenter(
 				mensajeJSON.centroControl.serverURL, locale)
 			if(Respuesta.SC_OK != respuesta.codigoEstado) {

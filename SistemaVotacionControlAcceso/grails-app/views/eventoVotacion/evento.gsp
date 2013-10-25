@@ -58,14 +58,14 @@
 				webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStamp', absolute:true)}"
 				pendingOperation = Operation.ENVIO_VOTO_SMIME
 				//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-				votingSystemApplet.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
+				votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
 			}
 
 			function setMessageFromSignatureClient(appMessage) {
 				console.log("setMessageFromSignatureClient - message from native client: " + appMessage);
 				$("#loadingVotingSystemAppletDialog").dialog("close");
 				if(appMessage != null) {
-					votingSystemAppletLoaded = true;
+					signatureClientToolLoaded = true;
 					var appMessageJSON
 					if( Object.prototype.toString.call(appMessage) == '[object String]' ) {
 						appMessageJSON = JSON.parse(appMessage);
@@ -180,7 +180,8 @@
 		</ul>
 	</div>		
 
-<g:include controller="gsp" action="index" params="[pageName:'confirmOptionDialog']"/>   
-<g:include controller="gsp" action="index" params="[pageName:'adminDocumentDialog']"/> 	
+<g:render template="/template/dialog/confirmOptionDialog"/>
+<g:render template="/template/dialog/adminDocumentDialog"/>
+	
 </body>
 </html>

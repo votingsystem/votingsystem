@@ -1,8 +1,6 @@
 <html>
     <head>
-        <title>${message(code: 'nombreServidorLabel', null)}</title>
-        <link rel="shortcut icon" href="${resource(dir:'images',file:'favicon.ico')}" type="image/x-icon" />
-        <g:include controller="app" action="jsUtils" />
+    	<g:render template="/template/js/pcUtils"/>
         <style type="text/css" media="screen">
         	#content a{margin: 0px 100px 0px 0px;}
         </style>  
@@ -10,14 +8,14 @@
 		  $(function() {
 			  $( "#tabs" ).tabs({
 			      beforeLoad: function( event, ui ) {
-			    	  ui.panel.html("${votingSystem.tabProgresTemplate()}");
+			    	  ui.panel.html("${render(template:'/template/tabProgres').replace("\n","")}");
 			      }
 			    })
 
 	    		$("#validationToolLink").click(function () { 
 			    	var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESANDO, 
 					    	Operation.MENSAJE_HERRAMIENTA_VALIDACION)
-	    			votingSystemApplet.setMessageToValidationTool(JSON.stringify(webAppMessage))
+			    	votingSystemClient.setMessageToValidationTool(JSON.stringify(webAppMessage))
 	    		});
 		  });
 
@@ -25,7 +23,7 @@
 				console.log("setMessageFromValidationTool: " + appMessage);
 				$("#loadingVotingSystemAppletDialog").dialog("close");
 				if(appMessage != null) {
-					validationToolAppletLoaded = true;
+					validationToolLoaded = true;
 					var appMessageJSON
 					if( Object.prototype.toString.call(appMessage) == '[object String]' ) {
 						appMessageJSON = JSON.parse(appMessage);

@@ -36,29 +36,4 @@ class AppController {
 		redirect(uri:uri)
 		return
 	}
-	
-	/**
-	 * @httpMethod [GET]
-	 * @return Archivo con funciones de utilidad Javascript localizadas (i18n)
-	 */
-	def jsUtils() {
-		response.contentType = "application/javascript"
-	}
-	
-	/**
-	 * @httpMethod [GET]
-	 * @return Archivo con funciones de utilidad Javascript empleadas en dispositivos móviles localizadas (i18n)
-	 */
-	def jsMobileUtils() {
-		response.contentType = "application/javascript"
-	}
-	
-	/**
-	 * @httpMethod [GET]
-	 * @return  Archivo con funciones Javascript empleadas en el pie de página localizadas (i18n)
-	 */
-	def jsJQueryPaginate() {
-		response.contentType = "application/javascript"
-	}
-
 }

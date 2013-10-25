@@ -3,7 +3,7 @@
 <head>
         <meta name="layout" content="main" />
 		<link rel="stylesheet" href="${resource(dir:'css',file:'jqueryPaginate.css')}">
-		<g:include controller="app" action="jsJQueryPaginate"/>
+		<g:render template="/template/js/jqueryPaginate"/>	
         <script type="text/javascript">
 		 	$(function() {
 
@@ -126,27 +126,6 @@
 			
 			function paginate (pageNumber) {
 				console.log(" - paginate: " + pageNumber)
-			}
-			
-			function setMessageFromNativeClient(appMessage) {
-				console.log("setMessageFromNativeClient - message from native client: " + appMessage);
-				if(appMessage != null) {
-					validationToolAppletLoaded = true
-					var appMessageJSON
-					if( Object.prototype.toString.call(appMessage) == '[object String]' ) {
-						appMessageJSON = JSON.parse(appMessage);
-					} else {
-						appMessageJSON = appMessage
-					} 
-					var statusCode = appMessageJSON.codigoEstado
-					if(StatusCode.SC_PROCESANDO == statusCode){
-						$("#workingWithAppletDialog").dialog("open");
-						
-					} else {
-						$("#workingWithAppletDialog" ).dialog("close");
-					}
-					$("#loadingVotingSystemAppletDialog").dialog("close");
-				}
 			}
 
         </script>

@@ -3,7 +3,7 @@
 <head>
         <meta name="layout" content="main" />
 		<link rel="stylesheet" href="${resource(dir:'css',file:'jqueryPaginate.css')}">
-		<g:include controller="app" action="jsJQueryPaginate"/>
+		<g:render template="/template/js/jqueryPaginate"/>
         <script type="text/javascript">
 		 	$(function() {
 		 		loadEvents("${createLink( controller:'eventoReclamacion')}")	
@@ -67,7 +67,7 @@
 				//var dataStr = JSON.stringify(eventJSON);  
 				    //console.log( " - ajax call done - dataStr: " + dataStr);
 				//console.log("printEvent: " + dataStr);
-		        var newEventTemplate = "${votingSystem.event(isTemplate:true)}"
+		        var newEventTemplate = "${render(template:'/template/event', model:[isTemplate:'true']).replace("\n","")}"
 		        var endTime = Date.parse(eventJSON.fechaFin)
 		        
 		        var newEventHTML = newEventTemplate.format(eventJSON.asunto, 

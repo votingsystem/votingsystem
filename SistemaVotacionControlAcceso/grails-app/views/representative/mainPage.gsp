@@ -3,7 +3,7 @@
 <head>
        	<meta name="layout" content="main" />
 		<link rel="stylesheet" href="${resource(dir:'css',file:'jqueryPaginate.css')}">
-		<g:include controller="app" action="jsJQueryPaginate"/>
+		<g:render template="/template/js/jqueryPaginate"/>
        	<script type="text/javascript">
 	 	$(function() {			
 	 		loadRepresentatives("${createLink( controller:'representative')}")	
@@ -106,7 +106,6 @@
 		</div>
 	</div>   	
 
- 
-<g:include controller="gsp" action="index" params="[pageName:'checkRepresentativeDialog']"/> 	
+<g:render template="/template/dialog/checkRepresentativeDialog"/>	
 </body>
 </html>

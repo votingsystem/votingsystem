@@ -1,4 +1,4 @@
-<% def representativeFullName = representative.nombre + " " + representative.primerApellido %>
+<% def representativeFullName = representative?.nombre + " " + representative?.primerApellido %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
 <head>
@@ -8,7 +8,7 @@
 			var pendingOperation
 		  	$( "#tabs" ).tabs({
 			      beforeLoad: function( event, ui ) {
-			    	  ui.panel.html("${votingSystem.tabProgresTemplate()}");
+			    	  ui.panel.html("${render(template:'/template/tabProgres').replace("\n","")}");
 			      }
 		    })
 
@@ -67,7 +67,7 @@
 			webAppMessage.urlEnvioDocumento = "${createLink(controller:'representative', action:'userSelection', absolute:true)}"
 			webAppMessage.asuntoMensajeFirmado = '<g:message code="requestRepresentativeAcreditationsLbl"/>'
 			webAppMessage.respuestaConRecibo = true
-			votingSystemApplet.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
+			votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
 		}
 
 		function requestVotingHistory() {
@@ -76,8 +76,8 @@
 	    	var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESANDO, pendingOperation)
 	    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.SistemaVotacion.serverName}"
     		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
-        	var dateFromStr = $("#dateForm").val() + " 00:00:00"
-        	var dateToStr = $("#dateTo").val() + " 00:00:00"
+        	var dateFromStr =  + " 00:00:00"
+        	var dateToStr = DateUtils.format($("#dateTo").datepicker('getDate')) + " 00:00:00"
         	console.log("requestVotingHistory - dateFromStr: " + dateFromStr + " - dateToStr: " + dateToStr)
 			webAppMessage.contenidoFirma = {operation:Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST, representativeNif:"${representative.nif}",
     				representativeName:"${representativeFullName}", dateForm:dateFromStr, 
@@ -87,7 +87,7 @@
 			webAppMessage.asuntoMensajeFirmado = '<g:message code="requestVotingHistoryLbl"/>'
 			webAppMessage.emailSolicitante = $("#userEmailText").val()
 			webAppMessage.respuestaConRecibo = true
-			votingSystemApplet.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
+			votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
 		}
 
 		function requestAccreditations() {
@@ -105,14 +105,14 @@
 			webAppMessage.asuntoMensajeFirmado = '<g:message code="requestRepresentativeAcreditationsLbl"/>'
 			webAppMessage.emailSolicitante = $("#accreditationReqUserEmailText").val()
 			webAppMessage.respuestaConRecibo = true
-			votingSystemApplet.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
+			votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
 		}
 	
 		function setMessageFromSignatureClient(appMessage) {
 			console.log("setMessageFromSignatureClient - message from native client: " + appMessage);
 			$("#loadingVotingSystemAppletDialog").dialog("close");
 			if(appMessage != null) {
-				votingSystemAppletLoaded = true;
+				signatureClientToolLoaded = true;
 				var appMessageJSON
 				if( Object.prototype.toString.call(appMessage) == '[object String]' ) {
 					appMessageJSON = JSON.parse(appMessage);
@@ -131,7 +131,7 @@
 					if(StatusCode.SC_OK == statusCode) { 
 						caption = '<g:message code="operationOKCaption"/>'
 						if(pendingOperation == Operation.REPRESENTATIVE_SELECTION)  {
-							msg = "<g:message code='selectedRepresentativeMsg' args='['${representativeFullName}']'/>";
+							msg = "<g:message code='selectedRepresentativeMsg' args="${[representativeFullName]}"/>";
 						}
 					}
 					showResultDialog(caption, msg)
@@ -193,10 +193,11 @@
 		</div>
 
 </div>
-<g:include controller="gsp" action="index" params="${[pageName:'selectRepresentativeDialog', 
-	representativeName:representativeFullName]}"/> 
-<g:include controller="gsp" action="index" params="[pageName:'representativeImageDialog']"/> 
-<g:include controller="gsp" action="index" params="[pageName:'requestRepresentativeVotingHistoryDialog']"/>	
-<g:include controller="gsp" action="index" params="[pageName:'requestRepresentativeAccreditationsDialog']"/> 
+<g:render template="/template/dialog/selectRepresentativeDialog" model="${[representativeName:representativeFullName]}" />	
+<g:render template="/template/dialog/representativeImageDialog"/>	
+<g:render template="/template/dialog/requestRepresentativeVotingHistoryDialog"/>	
+<g:render template="/template/dialog/requestRepresentativeAccreditationsDialog"/>	
+
+
 </body>
 </html>
