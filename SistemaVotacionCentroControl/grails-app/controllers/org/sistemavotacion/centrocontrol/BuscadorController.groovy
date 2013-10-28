@@ -160,29 +160,32 @@ class BuscadorController {
 		int numeroEventosEnPeticion = 0;
 		int numeroTotalEventosVotacionEnSistema = 0;
 		List<EventoVotacion> eventosVotacion
-		if (Tipo.EVENTO_VOTACION == Tipo.valueOf(mensajeJSON.tipo)) {
+		if (Subsystem.VOTES == Subsystem.valueOf(mensajeJSON.subsystem)) {
 			Date fechaInicioDesde
 			Date fechaInicioHasta
 			Date fechaFinDesde
 			Date fechaFinHasta
 			List<EventoVotacion.Estado> estadosEvento
 			try{
-				if(mensajeJSON.fechaInicioDesde)
-					fechaInicioDesde = DateUtils.getDateFromString(mensajeJSON.fechaInicioDesde)
-				if(mensajeJSON.fechaInicioHasta)
-					fechaInicioHasta = DateUtils.getDateFromString(mensajeJSON.fechaInicioHasta)
-				if(mensajeJSON.fechaFinDesde)
-					fechaFinDesde = DateUtils.getDateFromString(mensajeJSON.fechaFinDesde)
-				if(mensajeJSON.fechaFinHasta)
-					fechaFinHasta = DateUtils.getDateFromString(mensajeJSON.fechaFinHasta)
-				if(mensajeJSON.estadoEvento) {
+				if(mensajeJSON.dateBeginFrom)
+					fechaInicioDesde = DateUtils.getDateFromString(mensajeJSON.dateBeginFrom)
+				if(mensajeJSON.dateBeginTo)
+					fechaInicioHasta = DateUtils.getDateFromString(mensajeJSON.dateBeginTo)
+				if(mensajeJSON.dateFinishFrom)
+					fechaFinDesde = DateUtils.getDateFromString(mensajeJSON.dateFinishFrom)
+				if(mensajeJSON.dateFinishTo)
+					fechaFinHasta = DateUtils.getDateFromString(mensajeJSON.dateFinishTo)
+				if(mensajeJSON.eventState &&  !"".equals(mensajeJSON.eventState.trim())) {
 					estadosEvento = new ArrayList<EventoVotacion.Estado>();
-					EventoVotacion.Estado estadoEvento = EventoVotacion.Estado.valueOf(mensajeJSON.estadoEvento)
+					EventoVotacion.Estado estadoEvento = Evento.Estado.valueOf(mensajeJSON.eventState)
 					estadosEvento.add(estadoEvento);
 					if(EventoVotacion.Estado.FINALIZADO == estadoEvento) estadosEvento.add(EventoVotacion.Estado.CANCELADO)
 				}
 			} catch(Exception ex){
-				log.error(ex.getMessage(), ex)
+				log.error (ex.getMessage(), ex)
+				response.status = Respuesta.SC_ERROR
+				render ex.getMessage()
+				return false
 			}
 			FullTextQuery fullTextQuery =  searchHelper.getCombinedQuery(EventoVotacion.class,
 				['asunto', 'contenido']  as String[], mensajeJSON.textQuery?.toString(),

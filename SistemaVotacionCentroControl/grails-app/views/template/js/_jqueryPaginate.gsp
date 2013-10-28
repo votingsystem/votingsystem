@@ -1,3 +1,4 @@
+<link rel="stylesheet" href="${resource(dir:'css',file:'jqueryPaginate.css')}">
 <script type="text/javascript">
 /************************* http://tympanus.net/jPaginate/ *********************************************/
 (function($) {
@@ -11,7 +12,11 @@
 		});
 	};
 	var outsidewidth_tmp = 0;
-	var insidewidth 	 = 0;
+
+	var  _firstPageButton
+	var _lastPageButton
+
+	
 	var bName = navigator.appName;
 	var bVer = navigator.appVersion;
 	if(bVer.indexOf('MSIE 7.0') > 0)
@@ -48,7 +53,8 @@
 			var snextclass 		= 'jPag-snext';
 			var nextclass 		= 'jPag-next';
 		}
-		var _first		= $(document.createElement('a')).addClass('jPag-first').html("<g:message code="firstPageLbl"/>");
+		 _firstPageButton = $(document.createElement('a')).addClass('jPag-first').
+		 	html("<g:message code="firstPageLbl"/>");
 		
 		if(o.rotate){
 			if(o.images) var _rotleft	= $(document.createElement('span')).addClass(spreviousclass);
@@ -56,17 +62,32 @@
 		}
 		
 		var _divwrapleft	= $(document.createElement('div')).addClass('jPag-control-back');
-		_divwrapleft.append(_first).append(_rotleft);
+		_divwrapleft.append( _firstPageButton).append(_rotleft);
 		
-		//jjgz var _ulwrapdiv	= $(document.createElement('div')).css('overflow','hidden');
+		 var _ulwrapdiv	= $(document.createElement('div')).css('overflow','hidden');
 		
 		var _ulwrapdiv	= $(document.createElement('div')).addClass('jPag-pages-wrapper')
 		var _ul			= $(document.createElement('ul')).addClass('jPag-pages')
 		var c = (o.display - 1) / 2;
 		var first = selectedpage - c;
 		var selobj;
-		for(var i = 0; i < o.count; i++){
-			var val = i+1;
+
+		var offset = 0
+		var maxPage = o.count
+		if(o.count > o.display) {
+			offset = o.start - ((o.display - o.display%2)/2) - 1
+			maxPage = o.start + (o.display - (o.display - o.display%2)/2) - 1
+			if(offset < 0) {
+				offset = 0
+				maxPage = o.display
+			} 
+			if(maxPage > o.count) {
+				maxPage = o.count
+				offset = maxPage - o.display
+			}
+		}
+		for(offset; offset < maxPage; offset++){
+			var val = offset + 1;
 			if(val == selectedpage){
 				var _obj = $(document.createElement('li')).html('<span class="jPag-current">'+val+'</span>');
 				selobj = _obj;
@@ -75,7 +96,7 @@
 			else{
 				var _obj = $(document.createElement('li')).html('<a>'+ val +'</a>');
 				_ul.append(_obj);
-				}				
+			}				
 		}		
 		_ulwrapdiv.append(_ul);
 		
@@ -84,9 +105,9 @@
 			else var _rotright	= $(document.createElement('span')).addClass(snextclass).html('&raquo;');
 		}
 		
-		var _last		= $(document.createElement('a')).addClass('jPag-last').html("<g:message code="lastPageLbl"/>");
+		_lastPageButton		= $(document.createElement('a')).addClass('jPag-last').html("<g:message code="lastPageLbl"/>");
 		var _divwrapright	= $(document.createElement('div')).addClass('jPag-control-front');
-		_divwrapright.append(_rotright).append(_last);
+		_divwrapright.append(_rotright).append(_lastPageButton);
 		
 		//append all:
 		$this.addClass('jPaginate').append(_divwrapleft).append(_ulwrapdiv).append(_divwrapright);
@@ -104,18 +125,17 @@
 			else var hover_css 										= {'color':o.text_hover_color,'background-color':o.background_hover_color,'border':'1px solid '+o.border_hover_color};
 		}
 		
-		$.fn.applystyle(o,$this,a_css,hover_css,_first,_ul,_ulwrapdiv,_divwrapright);
+		$.fn.applystyle(o,$this,a_css,hover_css, _firstPageButton,_ul,_ulwrapdiv,_divwrapright);
 		//calculate width of the ones displayed:
-		var outsidewidth = outsidewidth_tmp - _first.parent().width() -3;
+		var outsidewidth = outsidewidth_tmp -  _firstPageButton.parent().width() -3;
 		if(ver == 'ie7'){
-			//jjgz _ulwrapdiv.css('width', outsidewidth+72+'px');
-			//jjgz _divwrapright.css('left', outsidewidth_tmp+6+72+'px');
+			 _ulwrapdiv.css('width', outsidewidth+72+'px');
+			 _divwrapright.css('left', outsidewidth_tmp+6+72+'px');
 		}
 		else{
-			//jjgz _ulwrapdiv.css('width', outsidewidth+'px');
-			//jjgz _divwrapright.css('left', outsidewidth_tmp+6+'px');
+			 _ulwrapdiv.css('width', outsidewidth+'px');
+			 _divwrapright.css('left', outsidewidth_tmp+6+'px');
 		}
-		//_ulwrapdiv.css('width', '1000px');//jjgz
 		if(o.rotate){
 			_rotright.hover(
 				function() {
@@ -193,13 +213,11 @@
 		}
 		
 		//first and last:
-		_first.click(function(e){
-				_ulwrapdiv.animate({scrollLeft: '0px'});
-				_ulwrapdiv.find('li').eq(0).click();
+		 _firstPageButton.click(function(e){
+			 o.onChange(0);
 		});
-		_last.click(function(e){
-				_ulwrapdiv.animate({scrollLeft: insidewidth +'px'});
-				_ulwrapdiv.find('li').eq(o.count - 1).click();
+		_lastPageButton.click(function(e){
+			o.onChange(o.count);
 		});
 		
 		//click a page
@@ -208,27 +226,13 @@
 			var currval = $(this).find('a').html();
 			$(this).html('<span class="jPag-current">'+currval+'</span>');
 			selobj = $(this);
-			$.fn.applystyle(o,$(this).parent().parent().parent(),a_css,hover_css,_first,_ul,_ulwrapdiv,_divwrapright);	
-			var left = (this.offsetLeft) / 2;
-			var left2 = _ulwrapdiv.scrollLeft() + left;
-			var tmp = left - (outsidewidth / 2);
-			if(ver == 'ie7')
-				_ulwrapdiv.animate({scrollLeft: left + tmp - _first.parent().width() + 52 + 'px'});	
-			else
-				_ulwrapdiv.animate({scrollLeft: left + tmp - _first.parent().width() + 'px'});	
+			$.fn.applystyle(o,$(this).parent().parent().parent(),a_css,hover_css, _firstPageButton,_ul,_ulwrapdiv,_divwrapright);		
 			o.onChange(currval);	
 		});
-		
-		var last = _ulwrapdiv.find('li').eq(o.start-1);
-		last.attr('id','tmp');
-		var left = document.getElementById('tmp').offsetLeft / 2;
-		last.removeAttr('id');
-		var tmp = left - (outsidewidth / 2);
-		if(ver == 'ie7') _ulwrapdiv.animate({scrollLeft: left + tmp - _first.parent().width() + 52 + 'px'});	
-		else _ulwrapdiv.animate({scrollLeft: left + tmp - _first.parent().width() + 'px'});	
+			
 	}
 	
-	$.fn.applystyle = function(o,obj,a_css,hover_css,_first,_ul,_ulwrapdiv,_divwrapright){
+	$.fn.applystyle = function(o,obj,a_css,hover_css, _firstPageButton,_ul,_ulwrapdiv,_divwrapright){
 					obj.find('a').css(a_css);
 					obj.find('span.jPag-current').css(hover_css);
 					obj.find('a').hover(
@@ -239,17 +243,26 @@
 						$(this).css(a_css);
 					}
 					);
-					//jjgz obj.css('padding-left',_first.parent().width() + 5 +'px');
-					insidewidth = 0;
-					
+					var insidewidth 	 = 0;
 					obj.find('li').each(function(i,n){
 						if(i == (o.display-1)){
 							outsidewidth_tmp = this.offsetLeft + this.offsetWidth ;
 						}
 						insidewidth += this.offsetWidth;
 					})
-					//jjgz _ul.css('width',insidewidth+'px');
-					//_ul.css('width', '1000px');
+					 var bodyWidth = $("body").width()
+					 var maxInsideWidth = bodyWidth - _firstPageButton.width() - _lastPageButton.width() - 30 //30 -> margin
+					 if(insidewidth > maxInsideWidth) insidewidth = maxInsideWidth
+					 _ul.css('width', insidewidth + 'px');
+					 var paginationDivWidth = insidewidth + _firstPageButton.width() + _lastPageButton.width() + 80 //80 -> margin and arrows
+	
+
+					 $("#paginationDiv").css('width', paginationDivWidth + 'px');
+
+					if(o.count <= o.display) {
+						$('.jPag-control-back').hide()
+						$('.jPag-control-front').hide()
+					}
 	}
 })(jQuery);
 </script>

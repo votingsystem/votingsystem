@@ -47,25 +47,25 @@ class RepresentativeController {
 			render message(code: 'error.errorNif', args:[params.nif])
 			return false
 		}
-		Usuario representative
+		Usuario index
 		Usuario.withTransaction {
 			representative =  Usuario.findWhere(type:Usuario.Type.REPRESENTATIVE,
 				nif:nif)
 		}
-		if(!representative) {
+		if(!index) {
 			response.status = Respuesta.SC_NOT_FOUND
 			render message(code: 'representativeNifErrorMsg', args:[nif])
 			return false
 		} else {
-			String name = "${representative.nombre} ${representative.primerApellido}"
-			def resultMap = [id: representative.id, nombre:representative.nombre,
-				primerApellido:representative.primerApellido, info:representative.info,
-				nif:representative.nif, fullName:"${representative.nombre} ${representative.primerApellido}"]
+			String name = "${index.nombre} ${index.primerApellido}"
+			def resultMap = [id: index.id, nombre:index.nombre,
+				primerApellido:index.primerApellido, info:index.info,
+				nif:index.nif, fullName:"${index.nombre} ${index.primerApellido}"]
 			if(request.contentType?.contains("application/json")) {
 				render resultMap as JSON
 				return false
 			} else {
-				render(view:"editRepresentative" , model:[representative:resultMap,
+				render(view:"editRepresentative" , model:[index:resultMap,
 				selectedSubsystem:Subsystem.REPRESENTATIVES.toString()])
 				return
 			}
@@ -151,19 +151,19 @@ class RepresentativeController {
 			render message(code: 'error.errorNif', args:[params.nif])
 			return false
 		}
-		Usuario representative
+		Usuario index
 		Usuario.withTransaction {
 			representative =  Usuario.findWhere(type:Usuario.Type.REPRESENTATIVE,
 				nif:nif)
 		}
-		if(!representative) {
+		if(!index) {
 			response.status = Respuesta.SC_NOT_FOUND
 			render message(code: 'representativeNifErrorMsg', args:[nif])
 			return false
 		} else {
-			String name = "${representative.nombre} ${representative.primerApellido}"
-			def resultMap = [representativeId: representative.id, representativeName:name,
-				representativeNIF:representative.nif]
+			String name = "${index.nombre} ${index.primerApellido}"
+			def resultMap = [representativeId: index.id, representativeName:name,
+				representativeNIF:index.nif]
 			render resultMap as JSON
 			return false
 		}
@@ -348,12 +348,12 @@ class RepresentativeController {
 			}
 			if(!image) msg = message(code:'imageNotFound', args:[params.id])
 		} else if(params.long('representativeId')) {
-			Usuario representative
+			Usuario index
 			Usuario.withTransaction {
 				representative = Usuario.get(params.long('representativeId'))
 			}
-			if (Usuario.Type.REPRESENTATIVE == representative?.type) {
-				image = Image.findWhere(usuario:representative, 
+			if (Usuario.Type.REPRESENTATIVE == index?.type) {
+				image = Image.findWhere(usuario:index, 
 					type:Image.Type.REPRESENTATIVE)
 				if(!image) msg = message(code:'representativeWithoutImageErrorMsg', args:[params.representativeId])
 			} else {

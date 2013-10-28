@@ -1,5 +1,4 @@
 <% def representativeFullName = representative?.nombre + " " + representative?.primerApellido %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
 <head>
 	<meta name="layout" content="main" />
@@ -76,8 +75,8 @@
 	    	var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESANDO, pendingOperation)
 	    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.SistemaVotacion.serverName}"
     		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
-        	var dateFromStr =  + " 00:00:00"
-        	var dateToStr = DateUtils.format($("#dateTo").datepicker('getDate')) + " 00:00:00"
+        	var dateFromStr = $("#dateFrom").datepicker('getDate').format()
+        	var dateToStr = $("#dateTo").datepicker('getDate').format() 
         	console.log("requestVotingHistory - dateFromStr: " + dateFromStr + " - dateToStr: " + dateToStr)
 			webAppMessage.contenidoFirma = {operation:Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST, representativeNif:"${representative.nif}",
     				representativeName:"${representativeFullName}", dateForm:dateFromStr, 
@@ -91,7 +90,7 @@
 		}
 
 		function requestAccreditations() {
-			var accreditationDateSelectedStr = $("#accreditationDateSelected").val() + " 00:00:00"
+			var accreditationDateSelectedStr = $("#accreditationDateSelected").val()
 			console.log("requestAccreditations - accreditationDateSelectedStr: " + accreditationDateSelectedStr)
 			pendingOperation = Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST
 	    	var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESANDO, pendingOperation)

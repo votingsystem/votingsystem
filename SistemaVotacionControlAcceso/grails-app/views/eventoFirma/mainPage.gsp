@@ -1,12 +1,12 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
 <head>
         <meta name="layout" content="main" />
-		<link rel="stylesheet" href="${resource(dir:'css',file:'jqueryPaginate.css')}">
 		<g:render template="/template/js/jqueryPaginate"/>
         <script type="text/javascript">
+			var eventState = ''
+            var searchQuery
 		 	$(function() {
-		 		loadEvents("${createLink( controller:'eventoFirma')}")	
+		 		paginate(0)
 			 	
 		 		$('#eventsStateSelect').on('change', function (e) {
 		 		    var optionSelected = $("option:selected", this);
@@ -22,14 +22,15 @@
 					 	}
 			 		}
 		 		    loadEvents(valueSelected)
-	
-	
+						
 		 		});
-			
+				$("#searchFormDiv").fadeIn()
 			 });
 	
-			function loadEvents(eventsURL) {
+			function loadEvents(eventsURL, data) {
 				console.log("- loadEvents - eventsURL: " + eventsURL);
+				var requestType = 'GET'
+				if(data != null) requestType = 'POST'
 				var $loadingPanel = $('#progressDiv')
 				var $contentDiv = $('#contentDiv')
 				$contentDiv.css("display", "none")
@@ -37,20 +38,12 @@
 				$loadingPanel.fadeIn(100)
 				$.ajax({
 					url: eventsURL,
-					//data: data,
+					type:requestType,
+					contentType:'application/json',
+					data: JSON.stringify(data),
 				}).done(function(jsonResult) {
-					console.log(" - ajax call done - ");
-					$.each(jsonResult.eventos.firmas, function() {
-						printEvent(this)
-						//var dataStr = JSON.stringify(this);  
-						//console.log( " - ajax call done - dataStr: " + dataStr);
-					});
-	
-					printPaginate(jsonResult.offset, jsonResult.numeroTotalEventosFirmaEnSistema)
-					
-					
-					$contentDiv.fadeIn(500)
-					$loadingPanel.fadeOut(500)
+					console.log(" - ajax call done - printEvents");
+					printEvents(jsonResult)
 				}).error(function() {
 					console.log("- ajax error - ");
 					showResultDialog('<g:message code="errorLbl"/>',
@@ -58,16 +51,24 @@
 					$loadingPanel.fadeOut(100)
 				});
 			}
+
+			function printEvents(eventsJSON) {
+				$.each(eventsJSON.eventos.firmas, function() {
+					printEvent(this)
+				});
+				printPaginate(eventsJSON.offset, eventsJSON.numeroTotalEventosFirmaEnSistema, numMaxEventsForPage)
+				$('#contentDiv').fadeIn(500)
+				$('#progressDiv').fadeOut(500)
+			}
 	
 			function printEvent(eventJSON) {
 				//var dataStr = JSON.stringify(eventJSON);  
 				    //console.log( " - ajax call done - dataStr: " + dataStr);
 				//console.log("printEvent: " + dataStr);
 		        var newEventTemplate = "${render(template:'/template/event', model:[isTemplate:'true']).replace("\n","")}"
-		        var endTime = Date.parse(eventJSON.fechaFin)
 		        
 		        var newEventHTML = newEventTemplate.format(eventJSON.asunto, 
-				        eventJSON.usuario, eventJSON.fechaInicio, getElapsedTime(endTime), 
+				        eventJSON.usuario, eventJSON.fechaInicio, eventJSON.fechaFin.getElapsedTime(), 
 				        getEstadoEventoMsg(eventJSON.estado));
 		        var $newEvent = $(newEventHTML)
 		        
@@ -94,8 +95,6 @@
 					$newEvent.find(".eventStateDiv").css('color', '#fba131')
 				}
 		        
-		        
-				
 				$newEvent.click(function() {
 					console.log("- eventURL: " + "${createLink( controller:'eventoFirma')}/" + eventJSON.id);
 					window.location.href = "${createLink(controller:'eventoFirma')}/" + eventJSON.id;
@@ -103,33 +102,28 @@
 				});
 					$("#mainPageEventList ul").append($newEvent)
 			}
-	
-			function printPaginate (offset, numEvents) {
-				console.log(" - paginate - offset:" + offset + " - numEvents: " + numEvents)
-				var numPages = ( (numEvents -numEvents%numMaxEventsForPage)/numMaxEventsForPage) + 1
-				var offsetPage = ( (offset -offset%numMaxEventsForPage)/numMaxEventsForPage) + 1
-				console.log(" - paginate - numPages:" + numPages + " - offsetPage: " + offsetPage)
-				$("#paginationDiv").paginate({
-					count 		: numPages,
-					start 		: offsetPage,
-					display     : 8,
-					border					: true,
-					border_color			: '#09287e',
-					text_color  			: '#09287e',
-					background_color    	: '',	
-					background_hover_color  : '#09287e',
-					border_hover_color		: '#ccc',
-					text_hover_color  		: '#fff',
-					images					: false,
-					mouse					: 'press', 
-					onChange				: paginate
-				});
+
+			function paginate (newOffsetPage) {
+				console.log(" - paginate - offsetPage : " + offsetPage + " - newOffsetPage: " + newOffsetPage)
+				if(newOffsetPage == offsetPage) return
+				offsetPage = newOffsetPage
+				var offsetItem
+				if(newOffsetPage == 0) offsetItem = 0
+				else offsetItem = (newOffsetPage -1) * numMaxEventsForPage
+				var targetURL = "${createLink( controller:'eventoFirma')}?max=" + numMaxEventsForPage + "&offset=" + offsetItem
+				if(searchQuery != null) targetURL = "${createLink( controller:'buscador', action:'consultaJSON')}?max=" + 
+						numMaxEventsForPage + "&offset=" + offsetItem
+				loadEvents(targetURL, searchQuery)	
 			}
-			
-			function paginate (pageNumber) {
-				console.log(" - paginate: " + pageNumber)
+
+			function getSearchResult(newSearchQuery) {
+				newSearchQuery.eventState = eventState
+				newSearchQuery.subsystem = "${selectedSubsystem}"
+				searchQuery = newSearchQuery
+				showEventsSearchInfoMsg(newSearchQuery)
+				loadEvents("${createLink(controller:'buscador', action:'consultaJSON')}?max=" + 
+						numMaxEventsForPage + "&offset=0", newSearchQuery)
 			}
-		
         </script>
 </head>
 <body>
@@ -162,6 +156,8 @@
 		
 	</div>
 	
+	<g:render template="/template/eventsSearchInfo"/>
+	
 	<div id="mainPageEventList" class="mainPageEventList"><ul></ul></div>
 
 	<div id="progressDiv" style="vertical-align: middle;height:100%;">
@@ -174,6 +170,6 @@
 		</div>
 	</div>
 
-
+	<g:render template="/template/pagination"/>
 </body>
 </html>

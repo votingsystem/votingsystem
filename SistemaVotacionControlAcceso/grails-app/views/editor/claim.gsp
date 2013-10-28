@@ -18,7 +18,7 @@
 	    		function addClaimField (claimFieldText) {
 	    			showEditor()
 					if(claimFieldText == null) return
-			        var newFieldTemplate = "${votingSystem.newField(isTemplate:true)}"
+			        var newFieldTemplate = "${render(template:'/template/newField', model:[]).replace("\n","")}"
 			        var newFieldHTML = newFieldTemplate.format(claimFieldText);
 			        var $newField = $(newFieldHTML)
    					$newField.find('div#deleteFieldButton').click(function() {
@@ -48,7 +48,7 @@
 			    	var event = new Evento();
 			    	event.asunto = $("#subject").val();
 			    	event.contenido = htmlEditorContent.trim();
-			    	event.fechaFin = DateUtils.format($("#dateFinish").datepicker('getDate')) + " 00:00:00";
+			    	event.fechaFin = $("#dateFinish").datepicker('getDate').format();
 			    	
 					var claimFields = new Array();
 					$("#fieldsBox").children().each(function(){

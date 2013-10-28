@@ -10,7 +10,8 @@
 </div>
 <div id="status" role="complementary" style="display:inline-block;">
 	<div style="float:right;">
-		<h1>${message(code: 'appLabel', null)}</h1>
+		<div style="margin:25px 0px 0px 0px; font-size: 0.8em;">
+		<h3 style="margin:15px 0px 0px 0px;">${message(code: 'appLabel', null)}</h3>
 		<ul>
 			<li>${message(code: 'appVersionLabel', null)}: <g:meta name="app.version"/></li>
 			<li>${message(code: 'grailsVersionLabel', null)}: <g:meta name="app.grails.version"/></li>
@@ -22,13 +23,13 @@
 			<li>${message(code: 'tagLibrariesLabel', null)}: ${grailsApplication.tagLibClasses.size()}</li>
 		</ul>
 		</div>
-		<div>
-		<h1>Plugins</h1>
-		<ul>
-			<g:each var="plugin" in="${applicationContext.getBean('pluginManager').allPlugins}">
-				<li>${plugin.name} - ${plugin.version}</li>
-			</g:each>
-		</ul>
+		<div style="margin:45px 0px 0px 0px;font-size: 0.8em;">
+			<h3>Plugins</h3>
+			<ul>
+				<g:each var="plugin" in="${applicationContext.getBean('pluginManager').allPlugins}">
+					<li>${plugin.name} - ${plugin.version}</li>
+				</g:each>
+			</ul>
 		</div>
 	</div>
 </div>

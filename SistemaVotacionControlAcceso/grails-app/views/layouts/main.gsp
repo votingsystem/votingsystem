@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html>
 <head>
 	<g:render template="/template/js/pcUtils"/>
@@ -11,11 +11,14 @@
 			$("#advancedSearchLink").click(function () { 
 				$("#advancedSearchDialog").dialog("open");
 			});
-			
-			$('#advancedSearchForm').submit(function(event){
-				console.log("advancedSearchForm")
-				event.preventDefault();
-			});
+
+			 $('#searchForm').submit(function(event){
+			 	console.log("searchForm")
+			 	event.preventDefault();
+			 	var searchQuery = {textQuery:$("#searchText").val()}
+			 	getSearchResult(searchQuery)
+			 });
+
 		})
 	</script>
 </head>
@@ -30,13 +33,16 @@
 		        <a id="selectedSubsystemLink"></a>
 		   	</div>
 		   	<div class="col-advancedSearch">
-				<form>
-				  	<input name="q" placeholder="<g:message code="searchLbl"/>" 
+		   		<div id="searchFormDiv" style="display:none;">
+				<form id="searchForm">
+				  	<input id="searchText" name="q"  required 
+				  		placeholder="<g:message code="searchLbl"/>" 
 				  		title="<g:message code="searchLbl"/>" style="width:120px;">
-					<div id="advancedSearchLink" class="appLink" style="display:inline;font-weight:bold;">
+					<div id="advancedSearchLink" class="appLink" style="display:inline;font-weight:bold;font-size: 0.8em">
 						<g:message code="advancedSearchLabel"/>
 					</div>
 				</form>
+				</div>
 		   	</div>
 		</div>
 

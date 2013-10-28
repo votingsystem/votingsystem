@@ -5,7 +5,7 @@
   	<div>
    		<span><g:message code="controlCenterURLLbl"/></span>
    		<form id="newControlCenter">
-   			<input type="text" id="controlCenterURL" style="width:500px; margin:0px auto 0px auto;" 
+   			<input type="url" id="controlCenterURL" style="width:500px; margin:0px auto 0px auto;" 
    				oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
    				onchange="this.setCustomValidity('')"
    				class="text ui-widget-content ui-corner-all" required/>

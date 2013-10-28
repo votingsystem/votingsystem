@@ -14,7 +14,6 @@
 		eventClass = "eventFinishedBox"
 	}
 %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
 <head>
 <meta name="layout" content="main" />
@@ -78,12 +77,12 @@
 			    	StatusCode.SC_PROCESANDO, 
 			    	Operation.ENVIO_VOTO_SMIME)
 		   	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.SistemaVotacion.serverName}"
-		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
-		votingEvent.urlSolicitudAcceso = "${grailsApplication.config.grails.serverURL}/solicitudAcceso"
-		votingEvent.urlRecolectorVotosCentroControl = "${eventMap?.centroControl?.serverURL}/voto"
-		votingEvent.opcionSeleccionada = selectedOption
-		webAppMessage.evento = votingEvent
-		webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStamp', absolute:true)}"
+			webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
+			votingEvent.urlSolicitudAcceso = "${grailsApplication.config.grails.serverURL}/solicitudAcceso"
+			votingEvent.urlRecolectorVotosCentroControl = "${eventMap?.centroControl?.serverURL}/voto"
+			votingEvent.opcionSeleccionada = selectedOption
+			webAppMessage.evento = votingEvent
+			webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStamp', absolute:true)}"
 			pendingOperation = Operation.ENVIO_VOTO_SMIME
 			//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
 			votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 

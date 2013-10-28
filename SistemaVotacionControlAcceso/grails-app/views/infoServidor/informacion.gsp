@@ -71,10 +71,11 @@
 			  	</div>
 			  </div>
 			</div>
-			<div class="infoFooter" style="margin: 0px auto 20px 0;width:100%;font-size: 0.7em;">
-				<div class="appLink" style="width:100px;margin:0 auto 0 auto;">
-					<a href="mailto:${grailsApplication.config.SistemaVotacion.emailAdmin}">${message(code: 'emailLabel', null)}</a>
-				</div>
+			<div class="infoFooter" style="margin: 0px auto 20px 0;width:100%;font-size: 0.7em; position:relative;">
+				<p style="text-align: center;">
+					<a  class="appLink" href="mailto:${grailsApplication.config.SistemaVotacion.emailAdmin}">
+						${message(code: 'emailLabel', null)}</a>
+				</p>	
 		   	</div>	
 		<div>
 		<iframe id="validationToolAppletFrame" src="" style="visibility:hidden;width:0px; height:0px;"></iframe>

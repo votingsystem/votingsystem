@@ -1,12 +1,12 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
 <head>
         <meta name="layout" content="main" />
-		<link rel="stylesheet" href="${resource(dir:'css',file:'jqueryPaginate.css')}">
 		<g:render template="/template/js/jqueryPaginate"/>
         <script type="text/javascript">
+    		var eventState = ''
+            var searchQuery
 		 	$(function() {
-		 		loadEvents("${createLink( controller:'eventoReclamacion')}")	
+		 		paginate(0)
 		 		
 		 		$('#publishButton').click(function() {
 		 			window.location.href = "${createLink(controller:'editor', action:'claim')}";
@@ -25,15 +25,18 @@
 								 'border-color': $( "#eventsStateSelect option:selected" ).css('color')})
 					 	}
 			 		}
+					var targetURL = "${createLink( controller:'eventoReclamacion')}"
+					if("" != eventState) targetURL = targetURL + "?estadoEvento=" + $(this).val()
+		 		    loadEvents(targetURL)
 		 		    loadEvents(valueSelected)
-	
-	
 		 		});
-			
+				$("#searchFormDiv").fadeIn()
 			 });
 	
-			function loadEvents(eventsURL) {
+			function loadEvents(eventsURL, data) {
 				console.log("- loadEvents - eventsURL: " + eventsURL);
+				var requestType = 'GET'
+				if(data != null) requestType = 'POST'
 				var $loadingPanel = $('#progressDiv')
 				var $contentDiv = $('#contentDiv')
 				$contentDiv.css("display", "none")
@@ -41,20 +44,12 @@
 				$loadingPanel.fadeIn(100)
 				$.ajax({
 					url: eventsURL,
-					//data: data,
+					type:requestType,
+					contentType:'application/json',
+					data: JSON.stringify(data),
 				}).done(function(jsonResult) {
-					console.log(" - ajax call done - ");
-					$.each(jsonResult.eventos.reclamaciones, function() {
-						printEvent(this)
-						//var dataStr = JSON.stringify(this);  
-						//console.log( " - ajax call done - dataStr: " + dataStr);
-					});
-	
-					printPaginate(jsonResult.offset, jsonResult.numeroTotalEventosReclamacionEnSistema, numMaxItemsForPage)
-					
-					
-					$contentDiv.fadeIn(500)
-					$loadingPanel.fadeOut(500)
+					console.log(" - ajax call done - printEvents");
+					printEvents(jsonResult)
 				}).error(function() {
 					console.log("- ajax error - ");
 					showResultDialog('<g:message code="errorLbl"/>',
@@ -62,16 +57,21 @@
 					$loadingPanel.fadeOut(100)
 				});
 			}
+
+			function printEvents(eventsJSON) {
+				$.each(eventsJSON.eventos.reclamaciones, function() {
+					printEvent(this)
+				});
+				printPaginate(eventsJSON.offset, eventsJSON.numeroTotalEventosReclamacionEnSistema, numMaxEventsForPage)
+				$('#contentDiv').fadeIn(500)
+				$('#progressDiv').fadeOut(500)
+			}
 	
 			function printEvent(eventJSON) {
-				//var dataStr = JSON.stringify(eventJSON);  
-				    //console.log( " - ajax call done - dataStr: " + dataStr);
-				//console.log("printEvent: " + dataStr);
 		        var newEventTemplate = "${render(template:'/template/event', model:[isTemplate:'true']).replace("\n","")}"
-		        var endTime = Date.parse(eventJSON.fechaFin)
-		        
+
 		        var newEventHTML = newEventTemplate.format(eventJSON.asunto, 
-				        eventJSON.usuario, eventJSON.fechaInicio, getElapsedTime(endTime), 
+				        eventJSON.usuario, eventJSON.fechaInicio, eventJSON.fechaFin.getElapsedTime(), 
 				        getEstadoEventoMsg(eventJSON.estado));
 		        var $newEvent = $(newEventHTML)
 		        
@@ -107,12 +107,29 @@
 				});
 					$("#mainPageEventList ul").append($newEvent)
 			}
-	
-			
-			function paginate (pageNumber) {
-				console.log(" - paginate: " + pageNumber)
+
+			function paginate (newOffsetPage) {
+				console.log(" - paginate - offsetPage : " + offsetPage + " - newOffsetPage: " + newOffsetPage)
+				if(newOffsetPage == offsetPage) return
+				offsetPage = newOffsetPage
+				var offsetItem
+				if(newOffsetPage == 0) offsetItem = 0
+				else offsetItem = (newOffsetPage -1) * numMaxEventsForPage
+				var targetURL = "${createLink( controller:'eventoReclamacion')}?max=" + numMaxEventsForPage + "&offset=" + offsetItem
+				if(searchQuery != null) targetURL = "${createLink( controller:'buscador', action:'consultaJSON')}?max=" + 
+						numMaxEventsForPage + "&offset=" + offsetItem
+				loadEvents(targetURL, searchQuery)	
 			}
-		
+
+			function getSearchResult(newSearchQuery) {
+				newSearchQuery.eventState = eventState
+				newSearchQuery.subsystem = "${selectedSubsystem}"
+				searchQuery = newSearchQuery
+				showEventsSearchInfoMsg(newSearchQuery)
+				loadEvents("${createLink(controller:'buscador', action:'consultaJSON')}?max=" + 
+						numMaxEventsForPage + "&offset=0", newSearchQuery)
+			}
+			
         </script>
 </head>
 <body>
@@ -132,10 +149,10 @@
 			<div style="display:inline;float:left;margin:0px auto 0px auto;">
 				<div style="margin:0px auto 0px auto;">		
 					<select id="eventsStateSelect" style="margin:0px 0px 0px 40px;color:black;">
-						<option value="${createLink( controller:'eventoReclamacion')}" style="color:black;"> - <g:message code="selectPollsLbl"/> - </option>
-					  	<option value="${createLink( controller:'eventoReclamacion')}?estadoEvento=ACTIVO" style="color:#6bad74;"> - <g:message code="selectOpenClaimsLbl"/> - </option>
-					  	<option value="${createLink( controller:'eventoReclamacion')}?estadoEvento=PENDIENTE_COMIENZO" style="color:#fba131;"> - <g:message code="selectPendingClaimsLbl"/> - </option>
-					  	<option value="${createLink( controller:'eventoReclamacion')}?estadoEvento=FINALIZADO" style="color:#cc1606;"> - <g:message code="selectClosedClaimsLbl"/> - </option>
+						<option value="" style="color:black;"> - <g:message code="selectPollsLbl"/> - </option>
+					  	<option value="ACTIVO" style="color:#6bad74;"> - <g:message code="selectOpenClaimsLbl"/> - </option>
+					  	<option value="PENDIENTE_COMIENZO" style="color:#fba131;"> - <g:message code="selectPendingClaimsLbl"/> - </option>
+					  	<option value="FINALIZADO" style="color:#cc1606;"> - <g:message code="selectClosedClaimsLbl"/> - </option>
 					</select>
 				</div>
 			</div>
@@ -149,19 +166,14 @@
 		
 	</div>
 	
+	<g:render template="/template/eventsSearchInfo"/>
+	
 	<div id="mainPageEventList" class="mainPageEventList"><ul></ul></div>
 
 	<div id="progressDiv" style="vertical-align: middle;height:100%;">
 		<progress style="display:block;margin:0px auto 20px auto;"></progress>
 	</div>
 
-	
-	<div style="width:100%;position:relative;display:block;">
-		<div style="right:50%;">
-			<div style="width:400px; margin:20px auto 20px auto;" id="paginationDiv" ></div>
-		</div>
-	</div>
-
-
+	<g:render template="/template/pagination"/>
 </body>
 </html>

@@ -40,7 +40,7 @@
 					var event = new Evento();
 			    	event.asunto = subject.val();
 			    	event.contenido = editor.getData();
-			    	event.fechaFin = DateUtils.format(dateFinish.datepicker('getDate')) + " 00:00:00";
+			    	event.fechaFin = dateFinish.datepicker('getDate').format();
 
 			    	var webAppMessage = new WebAppMessage(
 					    	StatusCode.SC_PROCESANDO, 

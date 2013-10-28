@@ -34,7 +34,7 @@
 				function addVoteOption (voteOptionText) {
 					showEditor()
 					if(voteOptionText == null) return
-			        var newFieldTemplate = "${votingSystem.newField(isTemplate:true)}"
+			        var newFieldTemplate = "${render(template:'/template/newField', model:[]).replace("\n","")}"
 		            var newFieldHTML = newFieldTemplate.format(voteOptionText);
 		            var $newField = $(newFieldHTML)
 			      	$newField.find('div#deleteFieldButton').click(function() {
@@ -67,8 +67,8 @@
 				  	var event = new Evento();
 				  	event.asunto = subject.val();
 				  	event.contenido = htmlEditorContent;
-				  	event.fechaInicio = DateUtils.format(dateBegin.datepicker('getDate')) + " 00:00:00";
-				  	event.fechaFin = DateUtils.format(dateFinish.datepicker('getDate')) + " 00:00:00";
+				  	event.fechaInicio = dateBegin.datepicker('getDate').format();
+				  	event.fechaFin = dateFinish.datepicker('getDate').format();
 					  	event.centroControl = controlCenters[$('#controlCenterSelect').val()]
 			
 				  	event.opciones = pollOptions

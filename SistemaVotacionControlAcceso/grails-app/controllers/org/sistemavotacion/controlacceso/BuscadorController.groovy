@@ -156,11 +156,11 @@ class BuscadorController {
 			return false
 		}
 		def mensajeJSON = JSON.parse(consulta)
-		Tipo tipoConsultaEVento = Tipo.valueOf(mensajeJSON.tipo)
+		Subsystem targetSubsystem = Subsystem.valueOf(mensajeJSON.subsystem)
 		Class<?> entityClass
-		if(tipoConsultaEVento == Tipo.EVENTO_VOTACION) entityClass = EventoVotacion.class
-		if(tipoConsultaEVento == Tipo.EVENTO_FIRMA) entityClass = EventoFirma.class
-		if(tipoConsultaEVento == Tipo.EVENTO_RECLAMACION) entityClass = EventoReclamacion.class
+		if(targetSubsystem == Subsystem.VOTES) entityClass = EventoVotacion.class
+		if(targetSubsystem == Subsystem.MANIFESTS) entityClass = EventoFirma.class
+		if(targetSubsystem == Subsystem.CLAIMS) entityClass = EventoReclamacion.class
 		if(!entityClass) {
 			response.status = Respuesta.SC_ERROR_PETICION
 			render message(code: 'error.PeticionIncorrectaHTML', args:[
@@ -183,17 +183,17 @@ class BuscadorController {
 		Date fechaFinHasta
 		List<Evento.Estado> estadosEvento
 		try{
-			if(mensajeJSON.fechaInicioDesde)
-				fechaInicioDesde = DateUtils.getDateFromString(mensajeJSON.fechaInicioDesde)
-			if(mensajeJSON.fechaInicioHasta)
-				fechaInicioHasta = DateUtils.getDateFromString(mensajeJSON.fechaInicioHasta)
-			if(mensajeJSON.fechaFinDesde)
-				fechaFinDesde = DateUtils.getDateFromString(mensajeJSON.fechaFinDesde)
-			if(mensajeJSON.fechaFinHasta)
-				fechaFinHasta = DateUtils.getDateFromString(mensajeJSON.fechaFinHasta)
-			if(mensajeJSON.estadoEvento) {
+			if(mensajeJSON.dateBeginFrom)
+				fechaInicioDesde = DateUtils.getDateFromString(mensajeJSON.dateBeginFrom)
+			if(mensajeJSON.dateBeginTo)
+				fechaInicioHasta = DateUtils.getDateFromString(mensajeJSON.dateBeginTo)
+			if(mensajeJSON.dateFinishFrom)
+				fechaFinDesde = DateUtils.getDateFromString(mensajeJSON.dateFinishFrom)
+			if(mensajeJSON.dateFinishTo)
+				fechaFinHasta = DateUtils.getDateFromString(mensajeJSON.dateFinishTo)
+			if(mensajeJSON.eventState &&  !"".equals(mensajeJSON.eventState.trim())) {
 				estadosEvento = new ArrayList<Evento.Estado>();
-				Evento.Estado estadoEvento = Evento.Estado.valueOf(mensajeJSON.estadoEvento)
+				Evento.Estado estadoEvento = Evento.Estado.valueOf(mensajeJSON.eventState)
 				estadosEvento.add(estadoEvento);
 				if(Evento.Estado.FINALIZADO == estadoEvento) estadosEvento.add(Evento.Estado.CANCELADO)
 			}
@@ -207,8 +207,8 @@ class BuscadorController {
 				['asunto', 'contenido']  as String[], mensajeJSON.textQuery?.toString(),
 				fechaInicioDesde, fechaInicioHasta, fechaFinDesde, fechaFinHasta, estadosEvento)
 		if(fullTextQuery) {
-			switch(tipoConsultaEVento) {
-				case Tipo.EVENTO_VOTACION:	
+			switch(targetSubsystem) {
+				case Subsystem.VOTES:	
 					numeroTotalEventosVotacionEnSistema = fullTextQuery?.getResultSize()
 					List<EventoVotacion> eventosVotacion
 					EventoVotacion.withTransaction {
@@ -222,7 +222,7 @@ class BuscadorController {
 						eventosMap.numeroEventosVotacionEnPeticion = numeroEventosEnPeticion
 					}
 					break;
-				case Tipo.EVENTO_FIRMA:
+				case Subsystem.MANIFESTS:
 					numeroTotalEventosFirmaEnSistema = fullTextQuery?.getResultSize()
 					List<EventoFirma> eventosFirma
 					EventoFirma.withTransaction {
@@ -236,7 +236,7 @@ class BuscadorController {
 						eventosMap.numeroEventosFirmaEnPeticion = numeroEventosEnPeticion
 					}
 					break;
-				case Tipo.EVENTO_RECLAMACION:
+				case Subsystem.CLAIMS:
 					numeroTotalEventosReclamacionEnSistema = fullTextQuery?.getResultSize()
 					List<EventoReclamacion> eventosReclamacion
 					EventoReclamacion.withTransaction {

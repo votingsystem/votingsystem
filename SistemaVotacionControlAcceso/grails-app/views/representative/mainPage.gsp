@@ -1,19 +1,17 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
 <head>
        	<meta name="layout" content="main" />
-		<link rel="stylesheet" href="${resource(dir:'css',file:'jqueryPaginate.css')}">
 		<g:render template="/template/js/jqueryPaginate"/>
        	<script type="text/javascript">
-	 	$(function() {			
-	 		loadRepresentatives("${createLink( controller:'representative')}")	
+       	var numMaxRepresentativesForPage = 20
+       	
+	 	$(function() {		
+	 		paginate(0)	
 
 	 		$('#checkRepresentativeButton').click(function() {
 	 			$("#checkRepresentativeDialog").dialog("open");
 			})
 		 });
-
-
 
 		function loadRepresentatives(representativesURL) {
 			console.log("- loadRepresentatives - representativesURL: " + representativesURL);
@@ -33,7 +31,7 @@
 	  			    //console.log( " - ajax call done - dataStr: " + dataStr);
 					//console.log("votacion " + this);
 				});
-				printPaginate(jsonResult.offset, jsonResult.representativesTotalNumber, numMaxItemsForPage)
+				printPaginate(jsonResult.offset, jsonResult.representativesTotalNumber, numMaxRepresentativesForPage)
 				$contentDiv.fadeIn(500)
 				$loadingPanel.fadeOut(500)
 			}).error(function() {
@@ -48,7 +46,7 @@
 			//var dataStr = JSON.stringify(representativeJSON);  
 			//console.log( " - ajax call done - dataStr: " + dataStr);
 			//console.log("printEvent: " + dataStr);
-	        var newRepresentativeTemplate = "${votingSystem.representative(isTemplate:true)}"
+	        var newRepresentativeTemplate = "${render(template:'/template/representative').replace("\n","")}"
 	        var endTime = Date.parse(representativeJSON.fechaFin)
 	        
 	        var newRepresentativeHTML = newRepresentativeTemplate.format(representativeJSON.imageURL, 
@@ -66,6 +64,17 @@
 
 		function paginate (pageNumber) {
 			console.log(" - paginate: " + pageNumber)
+		}
+
+		
+		function paginate (newOffsetPage) {
+			console.log(" - paginate - offsetPage : " + offsetPage + " - newOffsetPage: " + newOffsetPage)
+			if(newOffsetPage == offsetPage) return
+			offsetPage = newOffsetPage
+			var offsetItem
+			if(newOffsetPage == 0) offsetItem = 0
+			else offsetItem = (newOffsetPage -1) * numMaxRepresentativesForPage
+			loadRepresentatives("${createLink( controller:'representative')}?max=" + numMaxRepresentativesForPage + "&offset=" + offsetItem)	
 		}
 		
        </script>
@@ -100,11 +109,7 @@
 	<progress style="display:block;margin:0px auto 20px auto;"></progress>
 </div>
 
-	<div style="width:100%;position:relative;display:block;">
-		<div style="right:50%;">
-			<div style="width:400px; margin:20px auto 20px auto;" id="paginationDiv" ></div>
-		</div>
-	</div>   	
+<g:render template="/template/pagination"/> 	
 
 <g:render template="/template/dialog/checkRepresentativeDialog"/>	
 </body>

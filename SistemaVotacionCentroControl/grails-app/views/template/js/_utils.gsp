@@ -75,13 +75,6 @@ var Evento = function () {
 
 var DateUtils = {
 
-	format: function (date) {
-		var curr_date = date.getDate();
-	    var curr_month = date.getMonth() + 1; //Months are zero based
-	    var curr_year = date.getFullYear();
-	    return curr_year + "/" + curr_month + "/" + curr_date
-	},
-	
 	//parse dates with format "2010-08-30 01:02:03" 	
 	parse: function (dateStr) {
 		var reggie = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
@@ -104,6 +97,57 @@ var DateUtils = {
 	}
 }
 
+Date.prototype.format = function() {
+	var curr_date = this.getDate();
+    var curr_month = this.getMonth() + 1; //Months are zero based
+    var curr_year = this.getFullYear();
+    return curr_year + "/" + curr_month + "/" + curr_date + " 00:00:00"
+};
+
+//http://jsfiddle.net/cckSj/5/
+Date.prototype.getElapsedTime = function() {
+    // time difference in ms
+    var timeDiff = this - new Date();
+
+    if(timeDiff <= 0) {
+    	return "<g:message code='timeFinsishedLbl'/>"	
+    }
+    
+    // strip the miliseconds
+    timeDiff /= 1000;
+
+    // get seconds
+    var seconds = Math.round(timeDiff % 60);
+
+    // remove seconds from the date
+    timeDiff = Math.floor(timeDiff / 60);
+
+    // get minutes
+    var minutes = Math.round(timeDiff % 60);
+
+    // remove minutes from the date
+    timeDiff = Math.floor(timeDiff / 60);
+
+    // get hours
+    var hours = Math.round(timeDiff % 24);
+
+    // remove hours from the date
+    timeDiff = Math.floor(timeDiff / 24);
+
+    // the rest of timeDiff is number of days
+    var resultStr
+    var days = timeDiff;
+    if(days > 0) {
+    	resultStr = days + " " + "<g:message code="daysLbl"/>" + " " + "<g:message code="andLbl"/>" + " " + hours + " " + "<g:message code="hoursLbl"/>"
+    } else if (hours > 0) {
+    	resultStr = hours + " " + "<g:message code="hoursLbl"/>" + " " + "<g:message code="andLbl"/>" + " " + minutes + " " + "<g:message code="minutesLbl"/>"
+    } else if (minutes > 0) {
+    	resultStr = minutes + " " + "<g:message code="minutesLbl"/>" + " " + "<g:message code="andLbl"/>" + " " + seconds + " " + "<g:message code="secondsLbl"/>"
+    }
+    return resultStr
+};
+
+
 String.prototype.format = function() {
 	  var args = arguments;
 	  return this.replace(/{(\d+)}/g, function(match, number) { 
@@ -114,6 +158,15 @@ String.prototype.format = function() {
 	  });
 	};
 
+	
+String.prototype.getDate = function() {
+	  var timeMillis = Date.parse(this)
+	  return new Date(timeMillis)
+};
+
+String.prototype.getElapsedTime = function() {
+	  return this.getDate().getElapsedTime()
+};
 
 var DocumentState = {
 		BORRADO_DE_SISTEMA : "BORRADO_DE_SISTEMA",
@@ -227,48 +280,4 @@ function validateNIF(nif) {
     else return nif;
 }
 
-
-//http://jsfiddle.net/cckSj/5/
-function getElapsedTime(endTime) { 
-	
-    // time difference in ms
-    var timeDiff = endTime - new Date();
-
-    if(timeDiff < 0) {
-    	return "<g:message code='timeFinsishedLbl'/>"	
-    }
-    
-    // strip the miliseconds
-    timeDiff /= 1000;
-
-    // get seconds
-    var seconds = Math.round(timeDiff % 60);
-
-    // remove seconds from the date
-    timeDiff = Math.floor(timeDiff / 60);
-
-    // get minutes
-    var minutes = Math.round(timeDiff % 60);
-
-    // remove minutes from the date
-    timeDiff = Math.floor(timeDiff / 60);
-
-    // get hours
-    var hours = Math.round(timeDiff % 24);
-
-    // remove hours from the date
-    timeDiff = Math.floor(timeDiff / 24);
-
-    // the rest of timeDiff is number of days
-    var resultStr
-    var days = timeDiff;
-    if(days > 0) {
-    	resultStr = days + " " + "<g:message code="daysLbl"/>" + " " + "<g:message code="andLbl"/>" + " " + hours + " " + "<g:message code="hoursLbl"/>"
-    } else if (hours > 0) {
-    	resultStr = hours + " " + "<g:message code="hoursLbl"/>" + " " + "<g:message code="andLbl"/>" + " " + minutes + " " + "<g:message code="minutesLbl"/>"
-    } else if (minutes > 0) {
-    	resultStr = minutes + " " + "<g:message code="minutesLbl"/>" + " " + "<g:message code="andLbl"/>" + " " + seconds + " " + "<g:message code="secondsLbl"/>"
-    }
-    return resultStr
-}
 </script>

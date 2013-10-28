@@ -11,12 +11,4 @@ class VotingSystemTagLib {
 		out << render(template: "/template/taglib/buttonTemplate", model:[button: button])
 	}
 	
-	def newField = {attrs, body ->
-		out << render(template: "/template/taglib/newFieldTemplate", model: [:]).replace("\n","")
-	}
-	
-	def representative = {attrs, body ->
-		out << render(template: "/template/taglib/representativeTemplate", model: [:]).replace("\n","")
-	} 
-	
 }

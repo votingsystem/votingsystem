@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html>
 <head>
 <g:render template="/template/js/mobileEditor"/>
@@ -18,7 +18,7 @@
 				function addClaimField (claimFieldText) {
 					showEditor()
 					if(claimFieldText == null) return
-			        var newFieldTemplate = "${votingSystem.newField(isTemplate:true)}"
+			        var newFieldTemplate = "${render(template:'/template/newField', model:[]).replace("\n","")}"
 			        var newFieldHTML = newFieldTemplate.format(claimFieldText);
 			        var $newField = $(newFieldHTML)
    					$newField.find('div#deleteFieldButton').click(function() {
@@ -48,7 +48,7 @@
 			    	var event = new Evento();
 			    	event.asunto = $("#subject").val();
 			    	event.contenido = htmlEditorContent.trim();
-			    	event.fechaFin = DateUtils.format($("#dateFinish").datepicker('getDate')) + " 00:00:00";
+			    	event.fechaFin = $("#dateFinish").datepicker('getDate').format();
 			    	
 					var claimFields = new Array();
 					$("#fieldsBox").children().each(function(){
@@ -126,20 +126,18 @@
         </script>
 </head>
 <body>
-
-<div id="contentDiv" class="editorContentDiv">
-
+<div class ="contentDiv">
 	<form id="mainForm">
 	
-	<div style="margin:0px 0px 20px 0px">
-    	<input type="text" name="subject" id="subject" style="width:600px" required 
+	<div style="margin:0px 0px 10px 0px">
+    	<input type="text" name="subject" id="subject" style="width:500px" required 
 				title="<g:message code="subjectLbl"/>"
 				placeholder="<g:message code="subjectLbl"/>" 
     			oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
     			onchange="this.setCustomValidity('')" />
-
-		<input type="text" id="dateFinish" required readonly 
-				style="margin:0px 0px 0px 30px"
+   </div>
+   <div style="margin:0px 0px 10px 0px">	    			
+		<input type="text" id="dateFinish" required readonly
 				title="<g:message code="dateLbl"/>"
 				placeholder="<g:message code="dateLbl"/>" 
    				oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
@@ -149,15 +147,10 @@
 	<div id="editor"></div>
 	<div id="editorContents" class="editorContents"></div>
 
-	<div style="position:relative; height: 50px;">
-		<div style="font-size: 0.9em; margin:10px 0 0 10px; width:60%;display: inline-block;"> 
+	<div style="position:relative; height: 50px;display: block;">
+		<div style="font-size: 0.9em; margin:10px 0 0 10px;"> 
 			<input type="checkbox" id="multipleSignaturesCheckbox"><g:message code="multipleClaimsLbl"/><br>
 			<input type="checkbox" id="allowBackupRequestCheckbox"><g:message code="allowBackupRequestLbl"/>
-		</div>
-		<div style="float:right; margin:15px 20px 0px 0px;">
-			<votingSystem:simpleButton id="addClaimFieldButton" imgSrc="${resource(dir:'images',file:'info_16x16.png')}">
-					<g:message code="addClaimFieldLbl"/>
-			</votingSystem:simpleButton>
 		</div>
 	</div>
 
@@ -168,9 +161,14 @@
 		</fieldset>
 	</div>
 	
-	<div style="position:relative; margin:10px 10px 0px 0px; height:20px;">
-		<div style="position:absolute; right:0;">
-			<votingSystem:simpleButton isButton='true' id="addOptionButton" style="margin:0px 0px 0px 20px;"
+	<div style="position:relative; margin:20px 0px 0px 0px; height:20px;">
+		<div style="float:left;">
+			<votingSystem:simpleButton id="addClaimFieldButton" imgSrc="${resource(dir:'images',file:'info_16x16.png')}">
+					<g:message code="addClaimFieldLbl"/>
+			</votingSystem:simpleButton>
+		</div>
+		<div style="float:right;">
+			<votingSystem:simpleButton isButton='true' id="addOptionButton"
 				imgSrc="${resource(dir:'images',file:'accept_16x16.png')}">
 					<g:message code="publishDocumentLbl"/>
 			</votingSystem:simpleButton>	
@@ -180,6 +178,7 @@
 	</form>
 
 </div>
+<div style="clear: both;margin:0px 0px 30px 0px;">&nbsp;</div>
 <g:render template="/template/dialog/addClaimFieldDialog"/>
 <g:render template="/template/dialog/resultDialog"/>
 </body>

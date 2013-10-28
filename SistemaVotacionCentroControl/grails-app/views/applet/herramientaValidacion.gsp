@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <% def jarArchives = "HerramientaValidacion.jar"
 	String depsPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}/applet/lib"
 	def appletJarDependencies = []
@@ -10,7 +11,6 @@
 	}
 	
 %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
     <head>
         <link rel="shortcut icon" href="${resource(dir:'images',file:'favicon.ico')}" type="image/x-icon" />

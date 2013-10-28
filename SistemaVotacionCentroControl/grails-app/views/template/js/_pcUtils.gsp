@@ -1,14 +1,12 @@
 <title>${message(code: 'nombreServidorLabel', null)}</title>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <link rel="shortcut icon" href="${resource(dir:'images',file:'favicon.ico')}" type="image/x-icon" />
-<meta name="viewport" content="width=device-width" />
-<meta name="HandheldFriendly" content="true" />
 <script src="${resource(dir:'js',file:'deployJava.js')}"></script>
 <script src="${resource(dir:'js',file:'jquery-1.10.2.min.js')}"></script>  
 <script src="${resource(dir:'js',file:'jquery-ui-1.10.3.custom.min.js')}"></script>
 <link rel="stylesheet" href="${resource(dir:'css',file:'jquery-ui-1.10.3.custom.min.css')}">  
 <script src="${resource(dir:'js/i18n',file:'jquery.ui.datepicker-es.js')}"></script>
-<link rel="stylesheet" href="${resource(dir:'css',file:'votingSystem.css')}">
+<link rel="stylesheet" href="${resource(dir:'css',file:'pcVotingSystem.css')}">
 <g:render template="/template/js/utils"/>	
 <script type="text/javascript">
 
@@ -109,34 +107,10 @@ function isFirefox () {
 	return (navigator.userAgent.toLowerCase().indexOf("firefox") > - 1);
 }
 
-
-function printPaginate (offset, numItems, numMaxItemsForPage) {
-	console.log("utils.printPaginate - offset:" + offset + " - numItems: " + numItems + 
-			" - numMaxItemsForPage: " + numMaxItemsForPage)
-	var numPages = ( (numItems -numItems%numMaxItemsForPage)/numMaxItemsForPage) + 1
-	var offsetPage = ( (offset -offset%numMaxItemsForPage)/numMaxItemsForPage) + 1
-	console.log("printPaginate - numPages:" + numPages + " - offsetPage: " + offsetPage)
-	$("#paginationDiv").paginate({
-		count 		: numPages,
-		start 		: offsetPage,
-		display     : 8,
-		border					: true,
-		border_color			: '#09287e',
-		text_color  			: '#09287e',
-		background_color    	: '',	
-		background_hover_color  : '#09287e',
-		border_hover_color		: '#ccc',
-		text_hover_color  		: '#fff',
-		images					: false,
-		mouse					: 'press', 
-		onChange				: window.paginate
-	});
-}
-
 function isJavaEnabledClient() {
 	if(!(deployJava.versionCheck('1.8') || deployJava.versionCheck('1.7'))) {
 		console.log("---- checkJavaEnabled -> browser without Java7 or Java8 ");
-		showBrowserWithoutJavaDialog()
+		$("#browserWithoutJavaDialog").dialog("open")
 		return false
 	} else return true
 }
@@ -221,8 +195,7 @@ var editorConfig = {toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', 'Bulleted
 var pickerOpts = {showOn: 'both', buttonImage: "${createLinkTo(dir: 'images', file: 'appointment.png')}", 
 		buttonImageOnly: true, dateFormat: 'yy/MM/dd'};
 
-var numMaxEventsForPage = 6
-var numMaxItemsForPage = 6
+var numMaxEventsForPage = 12
 
 var validationToolLoaded = false
 var signatureClientToolLoaded = false
@@ -235,6 +208,6 @@ var votingSystemClient = new VotingSystemApplet()
 <g:render template="/template/dialog/browserWithoutJavaDialog"/>
 <g:render template="/template/dialog/resultDialog"/>
 
-<div id="appletsFrame">
+<div id="appletsFrame" style="width:0px; height:0px;">
 	<iframe id="votingSystemAppletFrame" src="" style="visibility:hidden;width:0px; height:0px;"></iframe>
 </div>
