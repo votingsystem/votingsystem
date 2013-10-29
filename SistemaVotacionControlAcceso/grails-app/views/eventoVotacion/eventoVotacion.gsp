@@ -20,57 +20,25 @@
 	<script type="text/javascript">
 		var votingEvent = ${eventMap as JSON} 
 		var selectedOption
-		var pendingOperation
 		$(function() {
-		  		$(".voteOptionButton").click(function () { 
-		  			$("#optionSelectedDialogMsg").text($(this).attr("optionContent"))
-		  			selectedOption = {id:$(this).attr("optionId"), 
-		   			contenido:$(this).attr("optionContent")}
-		  			console.log(" - selectedOption: " +  JSON.stringify(selectedOption))
-		  			$("#confirmOptionDialog").dialog("open");
-		  		});
+			if(${messageToUser != null?true:false}) { 
+				$("#eventMessagePanel").addClass("${eventClass}");
+			}
+
+	  		$(".voteOptionButton").click(function () { 
+	  			$("#optionSelectedDialogMsg").text($(this).attr("optionContent"))
+	  			selectedOption = {id:$(this).attr("optionId"), 
+	   			contenido:$(this).attr("optionContent")}
+	  			console.log(" - selectedOption: " +  JSON.stringify(selectedOption))
+	  			$("#confirmOptionDialog").dialog("open");
+	  		});
 		
-		  		$("#adminDocumentLink").click(function () {
-		  			$("#adminDocumentDialog").dialog("open");
+	  		$("#adminDocumentLink").click(function () {
+    			showAdminDocumentDialog(cancelEventCallback)
 		   	})
-		
-		  		$("#selectDeleteDocument").click(function () {
-		  			if($("#selectCloseDocument").is(':checked')) {
-		  				$("#selectCloseDocument").prop('checked', false);
-		   		}
-		   	})
-		   	
-		  		$("#selectCloseDocument").click(function () {
-		  			if($("#selectDeleteDocument").is(':checked')) {
-		  				$("#selectDeleteDocument").prop('checked', false);
-		   		}
-		   	})
-		
-		
-			if(DocumentState.PENDIENTE_COMIENZO == '${eventMap?.estado}') {
-			$("#eventMessagePanel").find('.messageContent').text("<g:message code='eventPendingLbl'/>")
-			$("#eventMessagePanel").css("border-color", "#fba131")
-			$("#eventMessagePanel").css("color", "#fba131")
-			$("#eventMessagePanel").fadeIn(1000)
-		
-		} else if(DocumentState.FINALIZADO == '${eventMap?.estado}') {
-			$("#adminDocumentLink").css("display", "none")
-			$("#eventMessagePanel").find('.messageContent').text("<g:message code='eventFinishedLbl'/>")
-			$("#eventMessagePanel").css("border-color", "#cc1606")
-			$("#eventMessagePanel").css("color", "#cc1606")
-			$("#eventMessagePanel").fadeIn(1000)
-			
-		} else if(DocumentState.CANCELADO == '${eventMap?.estado}') {
-					$("#adminDocumentLink").css("display", "none")
-					$("#eventMessagePanel").find('.messageContent').text("<g:message code='eventCancelledLbl'/>")
-					$("#eventMessagePanel").css("border-color", "#cc1606")
-					$("#eventMessagePanel").css("color", "#cc1606")
-					$("#eventMessagePanel").addClass("eventMessageCancelled");
-					$("#eventMessagePanel").fadeIn(1000)
-				}
+
 		 });
 		         
-		
 		function sendVote() {
 			console.log("sendVote")
 		   	var webAppMessage = new WebAppMessage(
@@ -83,65 +51,60 @@
 			votingEvent.opcionSeleccionada = selectedOption
 			webAppMessage.evento = votingEvent
 			webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStamp', absolute:true)}"
-			pendingOperation = Operation.ENVIO_VOTO_SMIME
 			//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-			votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
+			votingSystemClient.setMessageToSignatureClient(webAppMessage, eventVoteCallback); 
 		}
-		
-		function setMessageFromSignatureClient(appMessage) {
-			console.log("setMessageFromSignatureClient - message from native client: " + appMessage);
-			$("#loadingVotingSystemAppletDialog").dialog("close");
-			if(appMessage != null) {
-				signatureClientToolLoaded = true;
-				var appMessageJSON
-				if( Object.prototype.toString.call(appMessage) == '[object String]' ) {
-					appMessageJSON = JSON.parse(appMessage);
-				} else {
-					appMessageJSON = appMessage
-				} 
-				var statusCode = appMessageJSON.codigoEstado
-				if(StatusCode.SC_PROCESANDO == statusCode){
-					$("#loadingVotingSystemAppletDialog").dialog("close");
-					$("#workingWithAppletDialog").dialog("open");
-				} else {
-					$("#workingWithAppletDialog" ).dialog("close");
-					var caption
-					var msgTemplate
-					var msg = appMessageJSON.mensaje
-					if(Operation.ENVIO_VOTO_SMIME == pendingOperation) {
-						caption = '<g:message code="voteERRORCaption"/>'
-						msgTemplate = "<g:message code='voteResultMsg'/>"
-						if(StatusCode.SC_OK == statusCode) { 
-							caption = "<g:message code='voteOKCaption'/>"
-							msg = msgTemplate.format(
-									'<g:message code="voteResultOKMsg"/>',
-									appMessageJSON.mensaje);
-						} else if(StatusCode.SC_ERROR_VOTO_REPETIDO == statusCode) {
-							var msgTemplate1 =  "<g:message code='accessRequestRepeatedMsg'/>" 
-							msg = msgTemplate.format(
-									msgTemplate1.format('${eventMap?.asunto}'), 
+
+		function eventVoteCallback(appMessage) {
+			console.log("eventVoteCallback - message from native client: " + appMessage);
+			var appMessageJSON = toJSON(appMessage)
+			if(appMessageJSON != null) {
+				$("#workingWithAppletDialog").dialog("close");
+				caption = '<g:message code="voteERRORCaption"/>'
+				msgTemplate = "<g:message code='voteResultMsg'/>"
+				if(StatusCode.SC_OK == appMessageJSON.codigoEstado) { 
+					caption = "<g:message code='voteOKCaption'/>"
+					msg = msgTemplate.format(
+							'<g:message code="voteResultOKMsg"/>',
+							appMessageJSON.mensaje);
+				} else if(StatusCode.SC_ERROR_VOTO_REPETIDO == appMessageJSON.codigoEstado) {
+					var msgTemplate1 =  "<g:message code='accessRequestRepeatedMsg'/>" 
+					msg = msgTemplate.format(
+						msgTemplate1.format('${eventMap?.asunto}'), 
 						appMessageJSON.mensaje);
-			}
-		} else if(Operation.CANCELAR_EVENTO == pendingOperation) {
-			if(StatusCode.SC_OK == statusCode) { 
-				caption = "<g:message code='operationOKCaption'/>"
-				msgTemplate = "<g:message code='documentCancellationOKMsg'/>"
-				msg = msgTemplate.format('${eventMap?.asunto}');
-						} else {
-							caption = "<g:message code='operationERRORCaption'/>"
-						}
-					}
-					showResultDialog(caption, msg)
 				}
+				showResultDialog(caption, msg)
+			}
+		}
+
+		function cancelEventCallback(appMessage) {
+			console.log("cancelEventCallback - message from native client: " + appMessage);
+			var appMessageJSON = toJSON(appMessage)
+			if(appMessageJSON != null) {
+				$("#workingWithAppletDialog").dialog("close");
+				var callBack
+				if(StatusCode.SC_OK == appMessageJSON.codigoEstado) { 
+					caption = "<g:message code='operationOKCaption'/>"
+					msgTemplate = "<g:message code='documentCancellationOKMsg'/>"
+					msg = msgTemplate.format('${eventMap?.asunto}');
+					callBack = function() {
+						window.location.href = "${createLink(controller:'eventoReclamacion')}/" + claimEvent.id;
+					}
+				}
+				showResultDialog(caption, msg, callBack)
 			}
 		}
 	</script>
 </head>
 <body>
 
-	<div id="eventMessagePanel" class="eventMessagePanel" style="display:none;">
-		<p class="messageContent"></p>
-	</div>
+	<g:if test="${messageToUser != null}">
+		<div id="eventMessagePanel" class="eventMessagePanel">
+			<p class="messageContent">
+				${messageToUser}
+			</p>
+		</div>
+	</g:if>
 
 	<div class="publishPageTitle" style="margin:0px 0px 0px 0px;">
 		<p style="margin: 0px 0px 0px 0px; text-align:center;">
@@ -153,9 +116,12 @@
 		<div style="display:inline;margin:0px 20px 0px 20px;">
 			<b><g:message code="dateLimitLbl"/>: </b>${eventMap?.fechaFin}
 		</div>
-		<div id="adminDocumentLink" class="appLink" style="float:right;margin:0px 20px 0px 0px;">
-			<g:message code="adminDocumentLinkLbl"/>
-		</div>
+		<g:if test="${Evento.Estado.ACTIVO.toString() == eventMap?.estado ||
+			Evento.Estado.PENDIENTE_COMIENZO.toString()}">			
+			<div id="adminDocumentLink" class="appLink" style="float:right;margin:0px 20px 0px 0px;">
+				<g:message code="adminDocumentLinkLbl"/>
+			</div>
+		</g:if>
 	</div>
 
 	<div class="eventPageContentDiv">
@@ -196,14 +162,7 @@
 		</div>
 	</div>
 
-		
-	<div class="userAdvert">
-		<ul>
-			<li><g:message code="dniConnectedMsg"/></li>
-			<li><g:message code="appletAdvertMsg"/></li>
-			<li><g:message code="javaInstallAdvertMsg"/></li>
-		</ul>
-	</div>		
+	<g:render template="/template/signatureMechanismAdvert"/>
 
 <g:render template="/template/dialog/confirmOptionDialog"/>
 <g:render template="/template/dialog/adminDocumentDialog"/>

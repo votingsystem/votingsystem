@@ -101,7 +101,7 @@ public enum ContextoPruebas {
             Contexto.INSTANCE.init(null);
             resourceBundle = ResourceBundle.getBundle("messagesTest_" + DEFAULTS.locale);
             PropertyConfigurator.configure(props);
-            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss");
+            DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd' 'HH:mm:ss");
             String dateStr = formatter.format(new Date(DEFAULTS.CERT_VALID_FROM));
     
             String strSubjectDN = getString("rootCASubjectDN", dateStr);

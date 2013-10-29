@@ -292,7 +292,7 @@ class EventoService {
 	public Map optenerEventoFirmaMap(EventoFirma eventoItem) {
 		//log.debug("eventoItem: ${eventoItem.id} - estado ${eventoItem.estado}")
 		def eventoMap = [id: eventoItem.id, fechaCreacion: eventoItem.dateCreated,
-			URL:"${grailsApplication.config.grails.serverURL}/evento/${eventoItem.id}",
+			URL:"${grailsApplication.config.grails.serverURL}/eventoFirma/${eventoItem.id}",
 			urlPDF:"${grailsApplication.config.grails.serverURL}/eventoFirma/firmado/${eventoItem.id}",
 			asunto:eventoItem.asunto, contenido: eventoItem.contenido,
 			etiquetas:eventoItem.etiquetaSet?.collect {etiqueta ->

@@ -19,6 +19,18 @@
 		 	getSearchResult(searchQuery)
 		 });
 	})
+	
+	
+	function setMessageFromSignatureClient(appMessage) {
+		var appMessageJSON = toJSON(appMessage)
+		if(appMessageJSON != null) {
+			if(StatusCode.SC_PROCESANDO == appMessageJSON.codigoEstado){
+				signatureClientToolLoaded = true;
+				$("#loadingVotingSystemAppletDialog").dialog("close");
+				$("#workingWithAppletDialog").dialog("open");
+			}
+		}
+	}
 			 
 	</script>
 </head>

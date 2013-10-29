@@ -16,118 +16,106 @@
 %>
 <html>
 <head>
-        <meta name="layout" content="main" />
-        <script type="text/javascript">
-        	var claimEvent = ${eventMap as JSON} 
-        	var pendingOperation
-        	var fieldsArray = new Array();
-		 	$(function() {
-		    		$("#adminDocumentLink").click(function () {
-		    			$("#adminDocumentDialog").dialog("open");
-			    	})
-
-					if(${messageToUser != null?true:false}) { 
-						$("#eventMessagePanel").addClass("${eventClass}");
-					}
-
-				    $('#submitClaimForm').submit(function(event){
-				        event.preventDefault();
-				        sendSiganture()
-				    });
-		    		$("#requestBackupButton").click(function () {
-		    			$("#requestEventBackupDialog").dialog("open");
-			    	})
-
-    			   	$('#requestEventBackupForm').submit(function(event){
-		 				event.preventDefault();
-				    	var webAppMessage = new WebAppMessage(
-						    	StatusCode.SC_PROCESANDO, 
-						    	Operation.SOLICITUD_COPIA_SEGURIDAD)
-				    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.SistemaVotacion.serverName}"
-			    		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
-		    			webAppMessage.urlEnvioDocumento = "${createLink(controller:'solicitudCopia', absolute:true)}"
-		   				webAppMessage.asuntoMensajeFirmado = "${eventMap.asunto}"
-						webAppMessage.evento = claimEvent
-						claimEvent.operation = Operation.SOLICITUD_COPIA_SEGURIDAD
-						webAppMessage.contenidoFirma = claimEvent
-						webAppMessage.emailSolicitante = $("#eventBackupUserEmailText").val()
-						webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStamp', absolute:true)}"
-						webAppMessage.respuestaConRecibo = true
-						pendingOperation = Operation.FIRMA_RECLAMACION_SMIME
-						//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-						votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
-		 			});
-				    
-			 });
-
-			function sendSiganture() {
-				console.log("sendSiganture")
-		    	var webAppMessage = new WebAppMessage(
-				    	StatusCode.SC_PROCESANDO, 
-				    	Operation.FIRMA_RECLAMACION_SMIME)
-		    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.SistemaVotacion.serverName}"
-	    		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
-    			webAppMessage.urlEnvioDocumento = "${createLink( controller:'recolectorReclamacion', absolute:true)}"
-   				webAppMessage.asuntoMensajeFirmado = "${eventMap.asunto}"
-				webAppMessage.evento = claimEvent
-
-				var fieldsArray = new Array();
-				<g:each in="${eventMap?.campos}" status="i" var="claimField">
-					fieldsArray[${i}] = {id:${claimField?.id}, contenido:'${claimField?.contenido}', valor:$("#claimField${claimField?.id}").val()}
-				</g:each>
-				claimEvent.campos = fieldsArray
-				claimEvent.operation = Operation.FIRMA_RECLAMACION_SMIME
-				webAppMessage.contenidoFirma = claimEvent
-				webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStamp', absolute:true)}"
-				webAppMessage.respuestaConRecibo = true
-				pendingOperation = Operation.FIRMA_RECLAMACION_SMIME
-				//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-				votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
+       <meta name="layout" content="main" />
+       <script type="text/javascript">
+       	var pageEvent = ${eventMap as JSON} 
+       	var fieldsArray = new Array();
+	 	$(function() {
+			if(${messageToUser != null?true:false}) { 
+				$("#eventMessagePanel").addClass("${eventClass}");
 			}
+			
+    		$("#adminDocumentLink").click(function () {
+    			showAdminDocumentDialog(cancelEventCallback)
+	    	})
 
+		    $('#submitClaimForm').submit(function(event){
+		        event.preventDefault();
+		        sendSignature()
+		    });
+    		$("#requestBackupButton").click(function () {
+    			showRequestEventBackupDialog(requestEventBackupCallback)
+	    	})
+			    
+		 });
 
-			function setMessageFromSignatureClient(appMessage) {
-				console.log("setMessageFromSignatureClient - message from native client: " + appMessage);
-				$("#loadingVotingSystemAppletDialog").dialog("close");
-				if(appMessage != null) {
-					signatureClientToolLoaded = true;
-					var appMessageJSON
-					if( Object.prototype.toString.call(appMessage) == '[object String]' ) {
-						appMessageJSON = JSON.parse(appMessage);
-					} else {
-						appMessageJSON = appMessage
-					} 
-					var statusCode = appMessageJSON.codigoEstado
-					if(StatusCode.SC_PROCESANDO == statusCode){
-						$("#loadingVotingSystemAppletDialog").dialog("close");
-						$("#workingWithAppletDialog").dialog("open");
-					} else {
-						$("#workingWithAppletDialog" ).dialog("close");
-						var caption
-						var msgTemplate
-						var callBack
-						var msg = appMessageJSON.mensaje
-						if(Operation.FIRMA_RECLAMACION_SMIME == pendingOperation) {
-							caption = '<g:message code="operationERRORCaption"/>'
-							msg = appMessageJSON.mensaje
-							if(StatusCode.SC_OK == statusCode) { 
-								caption = "<g:message code='operationOKCaption'/>"
-							}
-						} else if(Operation.CANCELAR_EVENTO == pendingOperation) {
-							if(StatusCode.SC_OK == statusCode) { 
-								caption = "<g:message code='operationOKCaption'/>"
-								msgTemplate = "<g:message code='documentCancellationOKMsg'/>"
-								msg = msgTemplate.format('${eventMap?.asunto}');
-								callBack = function() {
-									window.location.href = "${createLink(controller:'eventoReclamacion')}/" + claimEvent.id;
-								}
-							}
-						}
-						showResultDialog(caption, msg, callBack)
+		function sendSignature() {
+			console.log("sendSignature")
+	    	var webAppMessage = new WebAppMessage(
+			    	StatusCode.SC_PROCESANDO, 
+			    	Operation.FIRMA_RECLAMACION_SMIME)
+	    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.SistemaVotacion.serverName}"
+    		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
+   			webAppMessage.urlEnvioDocumento = "${createLink( controller:'recolectorReclamacion', absolute:true)}"
+  				webAppMessage.asuntoMensajeFirmado = "${eventMap.asunto}"
+			webAppMessage.evento = pageEvent
+
+			var fieldsArray = new Array();
+			<g:each in="${eventMap?.campos}" status="i" var="claimField">
+				fieldsArray[${i}] = {id:${claimField?.id}, contenido:'${claimField?.contenido}', valor:$("#claimField${claimField?.id}").val()}
+			</g:each>
+			pageEvent.campos = fieldsArray
+			pageEvent.operation = Operation.FIRMA_RECLAMACION_SMIME
+			webAppMessage.contenidoFirma = pageEvent
+			webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStamp', absolute:true)}"
+			webAppMessage.respuestaConRecibo = true
+			//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
+			votingSystemClient.setMessageToSignatureClient(webAppMessage, eventSignatureCallback); 
+		}
+
+		function requestEventBackupCallback(appMessage) {
+			console.log("requestEventBackupCallback");
+			var appMessageJSON = toJSON(appMessage)
+			if(appMessageJSON != null) {
+				if(StatusCode.SC_PROCESANDO == appMessageJSON.codigoEstado){
+					$("#loadingVotingSystemAppletDialog").dialog("close");
+					$("#workingWithAppletDialog").dialog("open");
+				} else {
+					$("#workingWithAppletDialog" ).dialog("close");
+					var caption = '<g:message code="operationERRORCaption"/>'
+					if(StatusCode.SC_OK == appMessageJSON.codigoEstado) { 
+						caption = "<g:message code='operationOKCaption'/>"
 					}
+					var msg = appMessageJSON.mensaje
+					showResultDialog(caption, msg)
 				}
 			}
-        </script>
+		}
+
+		function eventSignatureCallback(appMessage) {
+			console.log("eventSignatureCallback - message from native client: " + appMessage);
+			var appMessageJSON = toJSON(appMessage)
+			if(appMessageJSON != null) {
+				$("#workingWithAppletDialog" ).dialog("close");
+				var caption = '<g:message code="operationERRORCaption"/>'
+				if(StatusCode.SC_OK == appMessageJSON.codigoEstado) { 
+					caption = "<g:message code='operationOKCaption'/>"
+				} else if (StatusCode.SC_CANCELADO== appMessageJSON.codigoEstado) {
+					caption = "<g:message code='operationCANCELLEDLbl'/>"
+				}
+				var msg = appMessageJSON.mensaje
+				showResultDialog(caption, msg)
+			}
+		}
+		
+		function cancelEventCallback(appMessage) {
+			console.log("cancelEventCallback - message from native client: " + appMessage);
+			var appMessageJSON = toJSON(appMessage)
+			if(appMessageJSON != null) {
+				$("#workingWithAppletDialog").dialog("close");
+				var callBack
+				if(StatusCode.SC_OK == appMessageJSON.codigoEstado) { 
+					caption = "<g:message code='operationOKCaption'/>"
+					msgTemplate = "<g:message code='documentCancellationOKMsg'/>"
+					msg = msgTemplate.format('${eventMap?.asunto}');
+					callBack = function() {
+						window.location.href = "${createLink(controller:'eventoReclamacion')}/" + claimEvent.id;
+					}
+				}
+				showResultDialog(caption, msg, callBack)
+			}
+		}
+       </script>
 </head>
 <body>
 
@@ -216,13 +204,7 @@
 		</form>
 	</div>
 	
-	<div class="userAdvert">
-		<ul>
-			<li><g:message code="dniConnectedMsg"/></li>
-			<li><g:message code="appletAdvertMsg"/></li>
-			<li><g:message code="javaInstallAdvertMsg"/></li>
-		</ul>
-	</div>		
+	<g:render template="/template/signatureMechanismAdvert"/>	
 
 <g:render template="/template/dialog/adminDocumentDialog"/>
 <g:render template="/template/dialog/requestEventBackupDialog"/>

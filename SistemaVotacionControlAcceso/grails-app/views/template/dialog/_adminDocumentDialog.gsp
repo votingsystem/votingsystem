@@ -10,6 +10,15 @@
 </div> 
 <script>
 
+
+var callerCallback
+
+function showAdminDocumentDialog(callback) {
+	$("#adminDocumentDialog").dialog("open");
+	callerCallback = callback	
+}
+
+
 $("#selectDeleteDocument").click(function () {
 	if($("#selectCloseDocument").is(':checked')) {
 		$("#selectCloseDocument").prop('checked', false);
@@ -70,7 +79,7 @@ function submitAdminForm() {
 		webAppMessage.contenidoFirma = contenidoFirma
 		pendingOperation = Operation.CANCELAR_EVENTO
 		//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-		votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
+		votingSystemClient.setMessageToSignatureClient(webAppMessage); 
 	}
 }
 </script>

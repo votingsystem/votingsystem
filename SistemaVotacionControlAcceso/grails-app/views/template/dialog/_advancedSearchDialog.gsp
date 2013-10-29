@@ -64,13 +64,11 @@
 	      show: {effect: "fade",duration: 300},
 	      hide: {effect: "fade",duration: 300},
 	      open: function( event, ui ) {
-	 		$("#advancedSearchText").val("")
-	 		$("#dateBeginFrom").val("")
-	 		$("#dateBeginTo").val("")
-	 		$("#dateFinishFrom").val("")
-	 		$("#dateFinishTo").val("")
-	 		allFields.removeClass("ui-state-error");
-	 		$("#advancedSearchDialog .errorMsgWrapper").hide()
+	 			$("#userNifText").val("");
+		 		$("#editRepresentativeDialogFormDiv").show()
+				$("#editRepresentativeDialogProgressDiv").hide()
+		 		$("#acceptButton").button("enable");
+		 		$("#cancelButton").button("enable");	
 		  }
 	    });
 

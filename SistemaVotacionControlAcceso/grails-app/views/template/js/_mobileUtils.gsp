@@ -17,7 +17,8 @@ var pickerOpts = {showOn: 'both', buttonImage: "${createLinkTo(dir: 'images', fi
 
 var VotingSystemClient = function () {
 
-	this.setMessageToSignatureClient = function (message) {
+	this.setMessageToSignatureClient = function (messageJSON) {
+		var message = JSON.stringify(messageJSON)
 		console.log("---- setMessageToSignatureClient: " + message);
 		androidClient.setVotingWebAppMessage(message);
 	}

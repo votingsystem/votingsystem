@@ -25,7 +25,6 @@
 						return false;
 					}
 
-
 			    	var webAppMessage = new WebAppMessage(
 					    	StatusCode.SC_PROCESANDO, 
 					    	Operation.NEW_REPRESENTATIVE)
@@ -35,43 +34,26 @@
 					webAppMessage.urlEnvioDocumento = "${createLink( controller:'representative', absolute:true)}"
 					webAppMessage.asuntoMensajeFirmado = '<g:message code="representativeDataLbl"/>'
 					webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStamp', absolute:true)}"
-					votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage));
+					votingSystemClient.setMessageToSignatureClient(webAppMessage, editRepresentativeCallback);
 			    	return false 
-
-			    	
 			    });
 
 			  });
 
 
-			function setMessageFromSignatureClient(appMessage) {
-		        var dataStr = JSON.stringify(appMessage);  
-  			    console.log( "setMessageFromSignatureClient - dataStr: " + dataStr);
-  			    console.log( "setMessageFromSignatureClient");
-				$("#loadingVotingSystemAppletDialog").dialog("close");
-				if(appMessage != null) {
-					signatureClientToolLoaded = true;
-					var appMessageJSON
-					if( Object.prototype.toString.call(appMessage) == '[object String]' ) {
-						appMessageJSON = JSON.parse(appMessage);
-					} else {
-						appMessageJSON = appMessage
-					} 
-					var statusCode = appMessageJSON.codigoEstado
-					console.log( "setMessageFromSignatureClient - statusCode: " + statusCode);
-					if(StatusCode.SC_PROCESANDO == statusCode){
-						$("#loadingVotingSystemAppletDialog").dialog("close");
-						$("#workingWithAppletDialog").dialog("open");
-					} else {
-						$("#workingWithAppletDialog" ).dialog("close");
-						var caption = '<g:message code="operationERRORCaption"/>'
-						var msg = appMessageJSON.mensaje
-						if(StatusCode.SC_OK == statusCode) { 
-							caption = '<g:message code="operationOKCaption"/>'
-							msg = "<g:message code='operationOKCaption'/>";
-						}
-						showResultDialog(caption, msg)
+			function editRepresentativeCallback(appMessage) {
+				console.log("editRepresentativeCallback - message from native client: " + appMessage);
+				var appMessageJSON = toJSON(appMessage)
+				if(appMessageJSON != null) {
+					$("#workingWithAppletDialog" ).dialog("close");
+					var caption = '<g:message code="operationERRORCaption"/>'
+					var msg = appMessageJSON.mensaje
+					if(StatusCode.SC_OK == appMessageJSON.codigoEstado) { 
+						caption = "<g:message code='operationOKCaption'/>"
+					} else if (StatusCode.SC_CANCELADO== appMessageJSON.codigoEstado) {
+						caption = "<g:message code='operationCANCELLEDLbl'/>"
 					}
+					showResultDialog(caption, msg)
 				}
 			}
 
@@ -119,14 +101,8 @@
 		
 	</form>
 		
-	<div class="userAdvert" >
-		<ul>
-			<li><g:message code="onlySignedDocumentsMsg"/></li>
-			<li><g:message code="dniConnectedMsg"/></li>
-			<li><g:message code="appletAdvertMsg"/></li>
-			<li><g:message code="javaInstallAdvertMsg"/></li>
-		</ul>
-	</div>	
+	<g:render template="/template/signatureMechanismAdvert"  model="${[advices:[message(code:"onlySignedDocumentsMsg")]]}"/>
+
 </div>
 
 </body>

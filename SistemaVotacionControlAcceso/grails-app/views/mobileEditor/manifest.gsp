@@ -58,7 +58,7 @@
 					webAppMessage.contenidoFirma = event
 					webAppMessage.urlEnvioDocumento = "${createLink( controller:'eventoFirma', absolute:true)}"
 					webAppMessage.asuntoMensajeFirmado = '<g:message code="publishManifestSubject"/>'
-					votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage))
+					votingSystemClient.setMessageToSignatureClient(webAppMessage)
 					return false
 				});
 			  });   

@@ -168,6 +168,17 @@ String.prototype.getElapsedTime = function() {
 	  return this.getDate().getElapsedTime()
 };
 
+
+function toJSON(message){
+	if(message != null) {
+		if( Object.prototype.toString.call(message) == '[object String]' ) {
+			return JSON.parse(message);
+		} else {
+			return message
+		} 
+	}
+}
+
 var DocumentState = {
 		BORRADO_DE_SISTEMA : "BORRADO_DE_SISTEMA",
 		CANCELADO:"CANCELADO",
@@ -251,6 +262,18 @@ function getEstadoEventoMsg(estadoEvento) {
 	}
 	console.log("utils.getEstadoEventoMsg() - UNKNOWN STATE")
 	return "UNKNOWN STATE"
+}
+
+function getUrlParam(paramName, staticURL, decode){
+   var currLocation = (staticURL.length)? staticURL : window.location.search,
+       parArr = currLocation.split("?")[1].split("&");
+   
+   for(var i = 0; i < parArr.length; i++){
+        parr = parArr[i].split("=");
+        if(parr[0] == paramName){
+            return (decode) ? decodeURIComponent(parr[1]) : parr[1];
+        }
+   }
 }
 
 function loadjsfile(filename){

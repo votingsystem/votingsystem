@@ -103,31 +103,21 @@ $("#addControlCenterDialog").dialog({
 		webAppMessage.contenidoFirma = signatureContent
 		webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStamp', absolute:true)}"
 		webAppMessage.urlEnvioDocumento = "${createLink( controller:'subscripcion', absolute:true)}"
-		webAppMessage.callerCallback = 'associateControlCenterCallback'
-		votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage),
-				associateControlCenterCallback)
+		votingSystemClient.setMessageToSignatureClient(webAppMessage, associateControlCenterCallback)
 	} 
 
 	function associateControlCenterCallback(callbackMessage){ 
 		console.log("addControlCenterDialog.associateControlCenterCallback")
-		$("#loadingVotingSystemAppletDialog").dialog("close");
-		if(callbackMessage != null) {
-			signatureClientToolLoaded = true;
-			var appMessageJSON
-			if( Object.prototype.toString.call(callbackMessage) == '[object String]' ) {
-				appMessageJSON = JSON.parse(callbackMessage);
-			} else {
-				appMessageJSON = callbackMessage
-			} 
-			var statusCode = appMessageJSON.codigoEstado
-			if(StatusCode.SC_PROCESANDO == statusCode){
+		var appMessageJSON = toJSON(callbackMessage)
+		if(appMessageJSON != null) {
+			if(StatusCode.SC_PROCESANDO ==  appMessageJSON.codigoEstado){
 				$("#loadingVotingSystemAppletDialog").dialog("close");
 				$("#workingWithAppletDialog").dialog("open");
 			} else {
 				$("#workingWithAppletDialog" ).dialog("close");
 				var caption = '<g:message code="operationERRORCaption"/>'
 				var msg = appMessageJSON.mensaje
-				if(StatusCode.SC_OK == statusCode) { 
+				if(StatusCode.SC_OK ==  appMessageJSON.codigoEstado) { 
 					caption = '<g:message code="operationOKCaption"/>'
 					var msgArg = 
 			    	msg = "<g:message code='operationOKMsg' args='${[message(code:'addControlCenterOperation')]}'/>";

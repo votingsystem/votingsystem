@@ -160,23 +160,47 @@ var VotingSystemApplet = function () {
 	    } 
 	}
 	
-	this.setMessageToSignatureClient = function (message, callerCallback) {
-		var callerCallbackName
-		if(callerCallback != null) {
-			callerCallbackName = getFnName(callerCallback) 
-			var appletframe = document.getElementById('votingSystemAppletFrame');
-			appletframe.contentWindow[callerCallbackName] = callerCallback
-		}
-		console.log("setMessageToSignatureClient: " + message + " - callerCallback: " + callerCallbackName);
+	this.setMessageToSignatureClient = function (messageJSON, callerCallback) {
+		var callerCallbackName = getFnName(callerCallback) 
+		messageJSON.callerCallback = callerCallbackName
+		var message = JSON.stringify(messageJSON)
+		console.log(" - callerCallback: " + callerCallbackName + " - setMessageToSignatureClient: " + message);
 		messageToSignatureClient = message;
+
+
+
+	   	//var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESANDO,Operation.ENVIO_VOTO_SMIME)
+	   	//message = JSON.stringify(webAppMessage)
+
+
+		//alert("'" + encodeURIComponent(message) + "'")
+		if(isAndroid()) {
+			console.log("=============== isAndroid browser")
+			//to avoid URI too large
+			//if(message.evento != null) message.evento.contenido = null;
+
+			var redirectURL = "${createLink(controller:'app', action:'clienteAndroid')}?msg=" + encodeURIComponent(message) + 
+				"&refererURL=" + window.location + 
+				"&serverURL=" + "${grailsApplication.config.grails.serverURL}"
+
+			alert(redirectURL)
+			window.location.href = redirectURL.replace("\n","")
+			return
+		}
+		
 		if(!signatureClientToolLoaded) {
 			if(isJavaEnabledClient()) {
 				console.log("Loading signature client");
+				signatureClientCallback = callerCallback
 				window.getMessageToSignatureClient = this.getMessageToSignatureClient
 				$("#votingSystemAppletFrame").attr("src", '${createLink(controller:'applet', action:'cliente')}');
 				$("#loadingVotingSystemAppletDialog").dialog("open");
 			} 
     	} else {
+    		if(callerCallback != null) {
+    			var appletframe = document.getElementById('votingSystemAppletFrame');
+    			appletframe.contentWindow[callerCallbackName] = callerCallback
+    		}
     		console.log("signature client already loaded");
     		$("#workingWithAppletDialog").dialog("open");
 	    } 
@@ -189,6 +213,8 @@ function getFnName(fn) {
 	  var s = f && ((fn.name && ['', fn.name]) || fn.toString().match(/function ([^\(]+)/));
 	  return (!f && 'not a function') || (s && s[1] || 'anonymous');
 }
+
+var signatureClientCallback
 
 var editorConfig = {toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Link', 'Unlink' ],
   	      					[ 'FontSize', 'TextColor', 'BGColor' ]]}

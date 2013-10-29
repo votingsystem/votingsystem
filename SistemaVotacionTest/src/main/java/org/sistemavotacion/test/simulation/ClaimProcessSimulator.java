@@ -209,7 +209,7 @@ public class ClaimProcessSimulator extends Simulator<SimulationData>
     private void publishEvent() throws Exception {
         logger.debug("publishEvent");
            
-        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date(System.currentTimeMillis());
         String dateStr = formatter.format(date);
         event = simulationData.getEvento();

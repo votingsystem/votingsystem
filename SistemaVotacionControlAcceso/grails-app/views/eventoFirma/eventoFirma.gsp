@@ -19,101 +19,103 @@
 <head>
         <meta name="layout" content="main" />
         <script type="text/javascript">
-        	var votingEvent = ${eventMap as JSON} 
-        	var selectedOption
-        	var pendingOperation
+        	var pageEvent = ${eventMap as JSON} 
 		 	$(function() {
-		    		$(".voteOptionButton").click(function () { 
-		    			$("#optionSelectedDialogMsg").text($(this).attr("optionContent"))
-		    			selectedOption = {id:$(this).attr("optionId"), 
-			    			contenido:$(this).attr("optionContent")}
-		    			console.log(" - selectedOption: " +  JSON.stringify(selectedOption))
-		    		});
-
-		    		$("#adminDocumentLink").click(function () {
-		    			$("#adminDocumentDialog").dialog("open");
-			    	})
-
-					if(DocumentState.PENDIENTE_COMIENZO == '${eventClass}') { 
-						$("#eventMessagePanel").addClass(eventClass);
-						$("#eventMessagePanel").fadeIn(1000)
-
-					}
+				if(${messageToUser != null?true:false}) { 
+					$("#eventMessagePanel").addClass("${eventClass}");
+				}
+			 	
+	    		$("#adminDocumentLink").click(function () {
+	    			showAdminDocumentDialog(cancelEventCallback)
+		    	})
+		    	
+	    		$("#signManifestButton").click(function () {
+	    			sendManifest();
+		    	})
+		    	
+	    		$("#requestBackupButton").click(function () {
+	    			showRequestEventBackupDialog(requestEventBackupCallback)
+		    	})
+		    	
 			 });
 
-			function sendVote() {
-				console.log("sendVote")
+			function sendManifest() {
+				console.log("sendManifest")
 		    	var webAppMessage = new WebAppMessage(
 				    	StatusCode.SC_PROCESANDO, 
-				    	Operation.ENVIO_VOTO_SMIME)
+				    	Operation.FIRMA_MANIFIESTO_PDF)
 		    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.SistemaVotacion.serverName}"
 	    		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
-    			votingEvent.urlSolicitudAcceso = "${grailsApplication.config.grails.serverURL}/solicitudAcceso"
-   				votingEvent.urlRecolectorVotosCentroControl = "${eventMap?.centroControl?.serverURL}/voto"
-				votingEvent.opcionSeleccionada = selectedOption
-				webAppMessage.evento = votingEvent
+    			webAppMessage.urlEnvioDocumento = "${createLink( controller:'recolectorFirma', absolute:true)}/${eventMap.id}"
+   				webAppMessage.asuntoMensajeFirmado = "${eventMap.asunto}"
+		    	//signed and encrypted
+    			webAppMessage.contentType = 'application/x-pkcs7-signature, application/x-pkcs7-mime'
+   				webAppMessage.respuestaConRecibo = true
+	    		webAppMessage.evento = pageEvent
 				webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStamp', absolute:true)}"
-				pendingOperation = Operation.ENVIO_VOTO_SMIME
-				//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-				votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
+				webAppMessage.urlDocumento = pageEvent.URL
+				votingSystemClient.setMessageToSignatureClient(webAppMessage, eventSignatureCallback); 
 			}
 
-			function setMessageFromSignatureClient(appMessage) {
-				console.log("setMessageFromSignatureClient - message from native client: " + appMessage);
-				$("#loadingVotingSystemAppletDialog").dialog("close");
-				if(appMessage != null) {
-					signatureClientToolLoaded = true;
-					var appMessageJSON
-					if( Object.prototype.toString.call(appMessage) == '[object String]' ) {
-						appMessageJSON = JSON.parse(appMessage);
-					} else {
-						appMessageJSON = appMessage
-					} 
-					var statusCode = appMessageJSON.codigoEstado
-					if(StatusCode.SC_PROCESANDO == statusCode){
-						$("#loadingVotingSystemAppletDialog").dialog("close");
-						$("#workingWithAppletDialog").dialog("open");
-					} else {
-						$("#workingWithAppletDialog" ).dialog("close");
-						var caption
-						var msgTemplate
-						var msg = appMessageJSON.mensaje
-						if(Operation.ENVIO_VOTO_SMIME == pendingOperation) {
-							caption = '<g:message code="voteERRORCaption"/>'
-							msgTemplate = "<g:message code='voteResultMsg'/>"
-							if(StatusCode.SC_OK == statusCode) { 
-								caption = "<g:message code='voteOKCaption'/>"
-								msg = msgTemplate.format(
-										'<g:message code="voteResultOKMsg"/>',
-										appMessageJSON.mensaje);
-							} else if(StatusCode.SC_ERROR_VOTO_REPETIDO == statusCode) {
-								var msgTemplate1 =  "<g:message code='accessRequestRepeatedMsg'/>" 
-								msg = msgTemplate.format(
-										msgTemplate1.format('${eventMap?.asunto}'), 
-										appMessageJSON.mensaje);
-							}
-						} else if(Operation.CANCELAR_EVENTO == pendingOperation) {
-							if(StatusCode.SC_OK == statusCode) { 
-								caption = "<g:message code='operationOKCaption'/>"
-								msgTemplate = "<g:message code='documentCancellationOKMsg'/>"
-								msg = msgTemplate.format('${eventMap?.asunto}');
-							} else {
-								caption = "<g:message code='operationERRORCaption'/>"
-							}
-						}
-						showResultDialog(caption, msg)
+			function requestEventBackupCallback(appMessage) {
+				console.log("requestEventBackupCallback");
+				var appMessageJSON = toJSON(appMessage)
+				if(appMessageJSON != null) {
+					$("#workingWithAppletDialog" ).dialog("close");
+					var caption = '<g:message code="operationERRORCaption"/>'
+					if(StatusCode.SC_OK == appMessageJSON.codigoEstado) { 
+						caption = "<g:message code='operationOKCaption'/>"
 					}
+					var msg = appMessageJSON.mensaje
+					showResultDialog(caption, msg)
 				}
 			}
+
+			function eventSignatureCallback(appMessage) {
+				console.log("eventSignatureCallback - message from native client: " + appMessage);
+				var appMessageJSON = toJSON(appMessage)
+				if(appMessageJSON != null) {
+					$("#workingWithAppletDialog" ).dialog("close");
+					var caption = '<g:message code="operationERRORCaption"/>'
+					if(StatusCode.SC_OK == appMessageJSON.codigoEstado) { 
+						caption = "<g:message code='operationOKCaption'/>"
+					} else if (StatusCode.SC_CANCELADO== appMessageJSON.codigoEstado) {
+						caption = "<g:message code='operationCANCELLEDLbl'/>"
+					}
+					var msg = appMessageJSON.mensaje
+					showResultDialog(caption, msg)
+				}
+			}
+
+			function cancelEventCallback(appMessage) {
+				console.log("cancelEventCallback - message from native client: " + appMessage);
+				var appMessageJSON = toJSON(appMessage)
+				if(appMessageJSON != null) {
+					$("#workingWithAppletDialog").dialog("close");
+					var callBack
+					if(StatusCode.SC_OK == appMessageJSON.codigoEstado) { 
+						caption = "<g:message code='operationOKCaption'/>"
+						msgTemplate = "<g:message code='documentCancellationOKMsg'/>"
+						msg = msgTemplate.format('${eventMap?.asunto}');
+						callBack = function() {
+							window.location.href = "${createLink(controller:'eventoReclamacion')}/" + claimEvent.id;
+						}
+					}
+					showResultDialog(caption, msg, callBack)
+				}
+			}
+
         </script>
 </head>
 <body>
 
-	<div id="eventMessagePanel" class="eventMessagePanel" style="display:none;">
-		<p class="messageContent">
-			<g:if test="${messageToUser != null}">${messageToUser}</g:if>
-		</p>
-	</div>
+	<g:if test="${messageToUser != null}">
+		<div id="eventMessagePanel" class="eventMessagePanel">
+			<p class="messageContent">
+				${messageToUser}
+			</p>
+		</div>
+	</g:if>
 
 	<div class="publishPageTitle" style="margin:0px 0px 0px 0px;">
 		<p style="margin: 0px 0px 0px 0px; text-align:center;">
@@ -126,22 +128,12 @@
 			<b><g:message code="dateLimitLbl"/>: </b>${eventMap?.fechaFin}
 		</div>
 		
-		
-		
 		<g:if test="${Evento.Estado.ACTIVO.toString() == eventMap?.estado ||
 			Evento.Estado.PENDIENTE_COMIENZO.toString()}">			
 			<div id="adminDocumentLink" class="appLink" style="float:right;margin:0px 20px 0px 0px;">
 				<g:message code="adminDocumentLinkLbl"/>
 			</div>
 		</g:if>
-		
-
-		
-		
-		
-		
-		
-
 	</div>
 
 	<div class="eventPageContentDiv">
@@ -149,31 +141,33 @@
 			<div class="eventContentDiv">${eventMap?.contenido}</div>
 		</div>
 		
-		<div style="width:100%;position:relative;margin:0px 0px 0px 0px;">
-			<div id="eventAuthorDiv"><b>
-				<g:message code="publisshedByLbl"/>:</b>${eventMap?.usuario}
+		<div style="width:100%; height: 50px;">
+			<g:if test="${eventMap?.numeroFirmas > 0}">
+				<div style="float:left;margin:0px 0px 0px 40px;">
+					<votingSystem:simpleButton id="requestBackupButton"  
+						style="margin:0px 20px 0px 0">
+						<g:message code="numSignaturesForEvent" args="${[eventMap?.numeroFirmas]}"/>
+					</votingSystem:simpleButton>
+				</div>
+			</g:if>
+			<div id="eventAuthorDiv" style="float:right;top:0px;">
+				<b><g:message code="publisshedByLbl"/>:</b>${eventMap?.usuario}
 			</div>
 		</div>
-	
-	
-	
-	
-	
-	
-	
-	
-
+		
+		<g:if test="${Evento.Estado.ACTIVO.toString().equals(eventMap?.estado)}">			
+			<votingSystem:simpleButton id="signManifestButton"  isButton='true'  
+				style="margin:15px 20px 0px 0px; float:right;"
+				imgSrc="${resource(dir:'images',file:'claim_22.png')}">
+					<g:message code="subscripcion.firmarManifiesto"/>
+			</votingSystem:simpleButton>
+		</g:if>
 	</div>
 
-		
-	<div class="userAdvert">
-		<ul>
-			<li><g:message code="dniConnectedMsg"/></li>
-			<li><g:message code="appletAdvertMsg"/></li>
-			<li><g:message code="javaInstallAdvertMsg"/></li>
-		</ul>
-	</div>		
+	<g:render template="/template/signatureMechanismAdvert"/>
+
 
 <g:render template="/template/dialog/adminDocumentDialog"/>
+<g:render template="/template/dialog/requestEventBackupDialog"/>
 </body>
 </html>

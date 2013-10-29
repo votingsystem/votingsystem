@@ -23,10 +23,15 @@
 		function getMessageToSignatureClient() {
 			return parent.getMessageToSignatureClient()
 		}
+
+		function loadCallerCallback() {
+			var signatureClientCallback = parent.signatureClientCallback
+			this[parent.getFnName(signatureClientCallback)] = signatureClientCallback
+		}
 		
    	    </script>
     </head>
-    <body>
+    <body onload="loadCallerCallback()">
 		<APPLET CODEBASE="${grailsApplication.config.grails.serverURL}/applet" 
      		CODE="org.sistemavotacion.AppletFirma" 
      		ARCHIVE="${jarArchives}" 

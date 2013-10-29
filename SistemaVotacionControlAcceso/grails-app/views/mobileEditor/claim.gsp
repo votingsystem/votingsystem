@@ -80,7 +80,7 @@
 					webAppMessage.asuntoMensajeFirmado = "${message(code:'publishClaimSubject')}"
 					webAppMessage.respuestaConRecibo = true
 
-					votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage))
+					votingSystemClient.setMessageToSignatureClient(webAppMessage)
 					return false
 				 })
 			    

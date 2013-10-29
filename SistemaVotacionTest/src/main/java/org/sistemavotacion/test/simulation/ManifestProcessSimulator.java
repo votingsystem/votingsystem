@@ -222,7 +222,7 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
     
     private void publishManifest() throws Exception {
         logger.debug("publishManifest");
-        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date(System.currentTimeMillis());
         String dateStr = formatter.format(date);
         event = simulationData.getEvento();

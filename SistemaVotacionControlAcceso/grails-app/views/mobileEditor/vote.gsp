@@ -83,7 +83,7 @@
 				webAppMessage.asuntoMensajeFirmado = "${message(code:'publishVoteSubject')}"
 				webAppMessage.respuestaConRecibo = true
 			
-				votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage))
+				votingSystemClient.setMessageToSignatureClient(webAppMessage)
 				return false
 			})
 

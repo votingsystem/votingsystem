@@ -15,6 +15,32 @@
 </div>
 <script>
 
+var callerCallback
+
+function showRequestEventBackupDialog(callback) {
+	$("#requestEventBackupDialog").dialog("open");
+	callerCallback = callback	
+}
+
+$('#requestEventBackupForm').submit(function(event){
+	event.preventDefault();
+   	var webAppMessage = new WebAppMessage(
+	    	StatusCode.SC_PROCESANDO, 
+	    	Operation.SOLICITUD_COPIA_SEGURIDAD)
+   	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.SistemaVotacion.serverName}"
+	webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
+	webAppMessage.urlEnvioDocumento = "${createLink(controller:'solicitudCopia', absolute:true)}"
+	webAppMessage.asuntoMensajeFirmado = "${eventMap.asunto}"
+	webAppMessage.evento = pageEvent
+	pageEvent.operation = Operation.SOLICITUD_COPIA_SEGURIDAD
+	webAppMessage.contenidoFirma = pageEvent
+	webAppMessage.emailSolicitante = $("#eventBackupUserEmailText").val()
+	webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStamp', absolute:true)}"
+	webAppMessage.respuestaConRecibo = true
+	pendingOperation = Operation.FIRMA_RECLAMACION_SMIME
+	votingSystemClient.setMessageToSignatureClient(webAppMessage, callerCallback); 
+});
+
 $("#requestEventBackupDialog").dialog({
  	  width: 400, autoOpen: false, modal: true,
     buttons: [{id: "acceptButton",

@@ -4,7 +4,6 @@
 	<meta name="layout" content="main" />
   <script>
 	  	$(function() {
-			var pendingOperation
 		  	$( "#tabs" ).tabs({
 			      beforeLoad: function( event, ui ) {
 			    	  ui.panel.html("${render(template:'/template/tabProgres').replace("\n","")}");
@@ -56,8 +55,7 @@
 
 		function selectRepresentative() {
 			console.log("selectRepresentative")
-			pendingOperation = Operation.REPRESENTATIVE_SELECTION
-	    	var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESANDO, pendingOperation)
+	    	var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESANDO, Operation.REPRESENTATIVE_SELECTION)
 	    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.SistemaVotacion.serverName}"
     		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
 			webAppMessage.contenidoFirma = {operation:Operation.REPRESENTATIVE_SELECTION, representativeNif:"${representative.nif}",
@@ -66,13 +64,12 @@
 			webAppMessage.urlEnvioDocumento = "${createLink(controller:'representative', action:'userSelection', absolute:true)}"
 			webAppMessage.asuntoMensajeFirmado = '<g:message code="requestRepresentativeAcreditationsLbl"/>'
 			webAppMessage.respuestaConRecibo = true
-			votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
+			votingSystemClient.setMessageToSignatureClient(webAppMessage, selectRepresentativeCallback); 
 		}
 
 		function requestVotingHistory() {
 			console.log("requestVotingHistory")
-			pendingOperation = Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST
-	    	var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESANDO, pendingOperation)
+	    	var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESANDO, Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST)
 	    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.SistemaVotacion.serverName}"
     		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
         	var dateFromStr = $("#dateFrom").datepicker('getDate').format()
@@ -86,14 +83,13 @@
 			webAppMessage.asuntoMensajeFirmado = '<g:message code="requestVotingHistoryLbl"/>'
 			webAppMessage.emailSolicitante = $("#userEmailText").val()
 			webAppMessage.respuestaConRecibo = true
-			votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
+			votingSystemClient.setMessageToSignatureClient(webAppMessage, representativeOperationCallback); 
 		}
 
 		function requestAccreditations() {
 			var accreditationDateSelectedStr = $("#accreditationDateSelected").val()
 			console.log("requestAccreditations - accreditationDateSelectedStr: " + accreditationDateSelectedStr)
-			pendingOperation = Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST
-	    	var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESANDO, pendingOperation)
+	    	var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESANDO, Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST)
 	    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.SistemaVotacion.serverName}"
     		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
 			webAppMessage.contenidoFirma = {operation:Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST, 
@@ -104,40 +100,42 @@
 			webAppMessage.asuntoMensajeFirmado = '<g:message code="requestRepresentativeAcreditationsLbl"/>'
 			webAppMessage.emailSolicitante = $("#accreditationReqUserEmailText").val()
 			webAppMessage.respuestaConRecibo = true
-			votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
+			votingSystemClient.setMessageToSignatureClient(webAppMessage, representativeOperationCallback); 
 		}
-	
-		function setMessageFromSignatureClient(appMessage) {
-			console.log("setMessageFromSignatureClient - message from native client: " + appMessage);
-			$("#loadingVotingSystemAppletDialog").dialog("close");
-			if(appMessage != null) {
-				signatureClientToolLoaded = true;
-				var appMessageJSON
-				if( Object.prototype.toString.call(appMessage) == '[object String]' ) {
-					appMessageJSON = JSON.parse(appMessage);
-				} else {
-					appMessageJSON = appMessage
-				} 
-				var statusCode = appMessageJSON.codigoEstado
-				if(StatusCode.SC_PROCESANDO == statusCode){
-					$("#loadingVotingSystemAppletDialog").dialog("close");
-					$("#workingWithAppletDialog").dialog("open");
-				} else {
-					$("#workingWithAppletDialog" ).dialog("close");
-					var caption = '<g:message code="operationERRORCaption"/>'
-					var msg = appMessageJSON.mensaje
-					var msgTemplate
-					if(StatusCode.SC_OK == statusCode) { 
-						caption = '<g:message code="operationOKCaption"/>'
-						if(pendingOperation == Operation.REPRESENTATIVE_SELECTION)  {
-							msg = "<g:message code='selectedRepresentativeMsg' args="${[representativeFullName]}"/>";
-						}
-					}
-					showResultDialog(caption, msg)
+
+		function selectRepresentativeCallback(appMessage) {
+			console.log("selectRepresentativeCallback - message from native client: " + appMessage);
+			var appMessageJSON = toJSON(appMessage)
+			if(appMessageJSON != null) {
+				$("#workingWithAppletDialog" ).dialog("close");
+				var caption = '<g:message code="operationERRORCaption"/>'
+				var msg = appMessageJSON.mensaje
+				if(StatusCode.SC_OK == appMessageJSON.codigoEstado) { 
+					caption = "<g:message code='operationOKCaption'/>"
+					msg = "<g:message code='selectedRepresentativeMsg' args="${[representativeFullName]}"/>";
+				} else if (StatusCode.SC_CANCELADO== appMessageJSON.codigoEstado) {
+					caption = "<g:message code='operationCANCELLEDLbl'/>"
 				}
+				showResultDialog(caption, msg)
 			}
 		}
-	  	
+
+		function representativeOperationCallback(appMessage) {
+			console.log("requestAccreditationsCallback - message from native client: " + appMessage);
+			var appMessageJSON = toJSON(appMessage)
+			if(appMessageJSON != null) {
+				$("#workingWithAppletDialog" ).dialog("close");
+				var caption = '<g:message code="operationERRORCaption"/>'
+				if(StatusCode.SC_OK == appMessageJSON.codigoEstado) { 
+					caption = "<g:message code='operationOKCaption'/>"
+				} else if (StatusCode.SC_CANCELADO== appMessageJSON.codigoEstado) {
+					caption = "<g:message code='operationCANCELLEDLbl'/>"
+				}
+				var msg = appMessageJSON.mensaje
+				showResultDialog(caption, msg)
+			}
+		}
+
   </script>
 </head>
 <body>
@@ -192,11 +190,11 @@
 		</div>
 
 </div>
+
 <g:render template="/template/dialog/selectRepresentativeDialog" model="${[representativeName:representativeFullName]}" />	
 <g:render template="/template/dialog/representativeImageDialog"/>	
 <g:render template="/template/dialog/requestRepresentativeVotingHistoryDialog"/>	
 <g:render template="/template/dialog/requestRepresentativeAccreditationsDialog"/>	
-
 
 </body>
 </html>

@@ -1,78 +1,53 @@
 <html>
 <head>
         <meta name="layout" content="main" />
-        <script src="${resource(dir:'ckeditor',file:'ckeditor.js')}"></script>
+        <g:render template="/template/js/pcEditor"/>
         <script type="text/javascript">
-
-			CKEDITOR.on( 'instanceReady', function( ev ) {
-				$("#contentDiv").fadeIn(500)
-			});
-		
 		 	$(function() {
-
+		 		showEditor()
+		 		
 			    $('#mainForm').submit(function(event){
 			    	event.preventDefault();
-			    	var ckeditorDiv = $( "#ckeditor" )
-			    	ckeditorDiv.removeClass( "ui-state-error" );
-					
-			        var editor = CKEDITOR.instances.editor1;
-					if(editor.getData().length == 0) {
+			    	var ckeditorDiv = $("#editor")
+			    	hideEditor()
+					if(htmlEditorContent.trim() == 0) {
 						ckeditorDiv.addClass( "ui-state-error" );
 						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 								'<g:message code="emptyDocumentERRORMsg"/>')
-						return false;
-					}
-
+						showEditor();
+						return
+					}  
 
 			    	var webAppMessage = new WebAppMessage(
 					    	StatusCode.SC_PROCESANDO, 
 					    	Operation.NEW_REPRESENTATIVE)
 			    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.SistemaVotacion.serverName}"
 		    		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
-					webAppMessage.contenidoFirma = {representativeInfo:editor.getData(), operation:Operation.REPRESENTATIVE_DATA}
+					webAppMessage.contenidoFirma = {representativeInfo:htmlEditorContent.trim(), 
+							operation:Operation.REPRESENTATIVE_DATA}
 					webAppMessage.urlEnvioDocumento = "${createLink( controller:'representative', absolute:true)}"
 					webAppMessage.asuntoMensajeFirmado = '<g:message code="representativeDataLbl"/>'
 					webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStamp', absolute:true)}"
-					votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage));
-			    	return false 
-
+					votingSystemClient.setMessageToSignatureClient(webAppMessage, newRepresentativeCallback);
 			    });
-
 			  });
 
-
-			function setMessageFromSignatureClient(appMessage) {
-		        var dataStr = JSON.stringify(appMessage);  
-  			    console.log( "setMessageFromSignatureClient - dataStr: " + dataStr);
-  			    console.log( "setMessageFromSignatureClient");
-				$("#loadingVotingSystemAppletDialog").dialog("close");
-				if(appMessage != null) {
-					signatureClientToolLoaded = true;
-					var appMessageJSON
-					if( Object.prototype.toString.call(appMessage) == '[object String]' ) {
-						appMessageJSON = JSON.parse(appMessage);
-					} else {
-						appMessageJSON = appMessage
-					} 
-					var statusCode = appMessageJSON.codigoEstado
-					console.log( "setMessageFromSignatureClient - statusCode: " + statusCode);
-					if(StatusCode.SC_PROCESANDO == statusCode){
-						$("#loadingVotingSystemAppletDialog").dialog("close");
-						$("#workingWithAppletDialog").dialog("open");
-					} else {
-						$("#workingWithAppletDialog" ).dialog("close");
-						var caption = '<g:message code="publishERRORCaption"/>'
-						var msg = appMessageJSON.mensaje
-						if(StatusCode.SC_OK == statusCode) { 
-							caption = '<g:message code="publishOKCaption"/>'
-					    	var msgTemplate = "<g:message code='documentLinkMsg'/>";
-							msg = "<p><g:message code='publishOKMsg'/>.</p>" + msgTemplate.format(appMessageJSON.mensaje);
-						}
-						showResultDialog(caption, msg)
+			function newRepresentativeCallback(appMessage) {
+				console.log("newRepresentativeCallback - message from native client: " + appMessage);
+				var appMessageJSON = toJSON(appMessage)
+				if(appMessageJSON != null) {
+					$("#workingWithAppletDialog" ).dialog("close");
+					var caption = '<g:message code="publishERRORCaption"/>'
+					var msg = appMessageJSON.mensaje
+					if(StatusCode.SC_OK == appMessageJSON.codigoEstado) { 
+						caption = '<g:message code="publishOKCaption"/>'
+				    	var msgTemplate = "<g:message code='documentLinkMsg'/>";
+						msg = "<p><g:message code='publishOKMsg'/>.</p>" + 
+							msgTemplate.format(appMessageJSON.mensaje);
 					}
+					showResultDialog(caption, msg)
 				}
 			}
-
         </script>
 </head>
 <body>
@@ -96,13 +71,8 @@
 	
 	<form id="mainForm">
 	
-	<div id="ckeditor" style="display:block;">
-		<script>
-			CKEDITOR.appendTo( 'ckeditor', {
-                toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Link', 'Unlink' ],
-					[ 'FontSize', 'TextColor', 'BGColor' ]]});
-		</script>
-	</div>	
+	<div id="editor"></div>
+	<div id="editorContents" class="editorContents"></div>
 		
 	<div style="position:relative; margin:10px 10px 0px 0px;height:20px;">
 		<div style="position:absolute; right:0;">
@@ -113,19 +83,10 @@
 		</div>	
 	</div>	
 		
-		
 	</form>
 		
-	<div class="userAdvert" >
-		<ul>
-			<li><g:message code="onlySignedDocumentsMsg"/></li>
-			<li><g:message code="dniConnectedMsg"/></li>
-			<li><g:message code="appletAdvertMsg"/></li>
-			<li><g:message code="javaInstallAdvertMsg"/></li>
-		</ul>
-	</div>	
+	<g:render template="/template/signatureMechanismAdvert"  model="${[advices:[message(code:"onlySignedDocumentsMsg")]]}"/>
 	
-
 </div>
 
 </body>
