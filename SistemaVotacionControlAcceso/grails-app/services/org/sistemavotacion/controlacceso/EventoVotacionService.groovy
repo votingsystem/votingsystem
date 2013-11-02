@@ -125,8 +125,7 @@ class EventoVotacionService {
 			}
 			mensajeJSON.trustedCAs = trustedCAPEMArray*/
 
-			String controCenterEventsURL = "${event.centroControl.serverURL}" +
-				"${grailsApplication.config.SistemaVotacion.sufijoURLInicializacionEvento}"
+			String controCenterEventsURL = "${event.centroControl.serverURL}/eventoVotacion"
 
 			Header header = new Header ("serverURL", "${grailsApplication.config.grails.serverURL}");
 			String fromUser = grailsApplication.config.SistemaVotacion.serverName

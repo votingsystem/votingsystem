@@ -32,7 +32,6 @@ import org.sistemavotacion.modelo.Consulta;
 import org.sistemavotacion.modelo.DatosBusqueda;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Respuesta;
-import org.sistemavotacion.modelo.Tipo;
 import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.EventState;
 import org.sistemavotacion.util.HttpHelper;
@@ -72,8 +71,7 @@ public class EventListFragment extends ListFragment
      */
     public static final Comparator<Evento> ALPHA_COMPARATOR = new Comparator<Evento>() {
         private final Collator sCollator = Collator.getInstance();
-        @Override
-        public int compare(Evento object1, Evento object2) {
+        @Override public int compare(Evento object1, Evento object2) {
             return sCollator.compare(object1.getAsunto(), object2.getAsunto());
         }
     };
@@ -81,6 +79,10 @@ public class EventListFragment extends ListFragment
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         appData = appData.getInstance(getActivity().getBaseContext());
+        if(appData.getAccessControlURL() == null) {
+            Intent intent = new Intent(getActivity(), MainActivity.class);
+            startActivity(intent);
+        }
         Bundle args = getArguments();
         String eventStateStr = null;
         String subSystemStr = "";
@@ -92,7 +94,6 @@ public class EventListFragment extends ListFragment
             queryStr = args.getString(SearchManager.QUERY);
             offset = args.getInt("offset");
         }
-        setHasOptionsMenu(true);
         Log.d(TAG +  ".onCreate(..)", " - eventState: " + eventState +
                 " - subSystem: " + subSystem + " - queryStr: " + queryStr);
     };
@@ -116,15 +117,14 @@ public class EventListFragment extends ListFragment
         mProgressContainer = rootView.findViewById(R.id.progressContainer);
         mListContainer =  rootView.findViewById(R.id.listContainer);
         mListShown = true;
+        setHasOptionsMenu(true);
         return rootView;
     }
 
-    //context menu
-    protected boolean onLongListItemClick(View v, int pos, long id) {
+    protected boolean onLongListItemClick(View v, int pos, long id) {//context menu
         Log.i(TAG, ".onLongListItemClick - id: =========== " + id);
         return true;
     }
-
 
     public void setListShown(boolean shown, boolean animate){
         if (mListShown == shown) {
@@ -158,14 +158,12 @@ public class EventListFragment extends ListFragment
         setListShown(shown, false);
     }
 
-
     @Override public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         getView().setBackgroundColor(Color.WHITE);
   //      setEmptyText(getActivity().getBaseContext().
   //              getString(R.string.empty_search_lbl));
 
-        setHasOptionsMenu(true);
         mAdapter = new EventListAdapter(getActivity());
         setListAdapter(mAdapter);
         // Start out with a progress indicator.
@@ -196,11 +194,9 @@ public class EventListFragment extends ListFragment
     @Override public void onListItemClick(ListView l, View v, int position, long id) {
         Log.d(TAG +  ".onListItemClick", "Item clicked: " + id);
         Evento event = ((Evento) getListAdapter().getItem(position));
-        appData.setEvent(event, getActivity().getBaseContext());
-        Intent intent = null;
-        if (event.getTipo().equals(Tipo.EVENTO_VOTACION))
-            intent = new Intent(getActivity(), VotingEventActivity.class);
-        else intent = new Intent(getActivity(), EventActivity.class);
+        appData.setEvent(event);
+        appData.setEventList(mAdapter.getEvents());
+        Intent intent = new Intent(getActivity(), EventPagerActivity.class);
         startActivity(intent);
     }
 
@@ -228,10 +224,10 @@ public class EventListFragment extends ListFragment
     }
 
     @Override public void onLoadFinished(Loader<List<Evento>> loader, List<Evento> data) {
-        Log.i(TAG +  ".onLoadFinished", " - onLoadFinished ");
+        Log.i(TAG +  ".onLoadFinished", " - onLoadFinished - data: " +
+                ((data == null) ? "NULL":data.size()));
         if(errorLoadingEventsMsg == null) {
             mAdapter.setData(data);
-            appData.checkConnection(getActivity().getBaseContext());
         } else {
             //setEmptyText(getString(R.string.connection_error_msg));
             //emptyResultsView.setText(getString(R.string.connection_error_msg));
@@ -250,9 +246,11 @@ public class EventListFragment extends ListFragment
     }
 
 
-    public static class EventListAdapter extends ArrayAdapter<Evento> {
+    public class EventListAdapter extends ArrayAdapter<Evento> {
 
         private final LayoutInflater mInflater;
+
+        List<Evento> events;
 
         public EventListAdapter(Context context) {
             super(context, R.layout.row_evento);
@@ -262,10 +260,18 @@ public class EventListFragment extends ListFragment
         public void setData(List<Evento> data) {
             clear();
             if (data != null) {
-                for (Evento event : data) {
+                if(events == null) {
+                    events = new ArrayList<Evento>();
+                }
+                events.addAll(data);
+                for(Evento event : data) {
                     add(event);
                 }
             }
+        }
+
+        public List<Evento> getEvents() {
+            return events;
         }
 
         /**
@@ -360,7 +366,7 @@ public class EventListFragment extends ListFragment
             Log.d(TAG + ".EventListLoader.loadInBackground()", " - subSystem: " + subSystem
                     + " - eventState: " + eventState + " - queryString: " + queryString);
 
-            List<Evento> EventoList = null;
+            List<Evento> eventList = null;
             try {
                 HttpResponse response = null;
                 if(queryString != null) {
@@ -382,16 +388,13 @@ public class EventListFragment extends ListFragment
                 int statusCode = response.getStatusLine().getStatusCode();
                 if(Respuesta.SC_OK == statusCode) {
                     Consulta consulta = Consulta.parse(EntityUtils.toString(response.getEntity()));
-                    EventoList = new ArrayList<Evento>();
-                    for(Evento evento:consulta.getEventos()) {
-                        EventoList.add(evento);
-                    }
+                    eventList = consulta.getEventos();
                 } else errorLoadingEventsMsg = response.getStatusLine().toString();
             } catch (Exception ex) {
                 Log.e(TAG + ".doInBackground", ex.getMessage(), ex);
                 errorLoadingEventsMsg = getContext().getString(R.string.connection_error_msg);
             }
-            return EventoList;
+            return eventList;
         }
 
         /**
@@ -407,20 +410,20 @@ public class EventListFragment extends ListFragment
                     onReleaseResources(events);
                 }
             }
-            List<Evento> oldEvents = events;
             this.events = events;
 
+            Log.d(TAG + ".deliverResult", " - deliverResult - events.size(): " +
+                    (events == null? " NULL " : events.size()));
             if (isStarted()) {
                 // If the Loader is currently started, we can immediately
                 // deliver its results.
                 super.deliverResult(events);
             }
-
             // At this point we can release the resources associated with
             // 'oldApps' if needed; now that the new result is delivered we
             // know that it is no longer in use.
-            if (oldEvents != null) {
-                onReleaseResources(oldEvents);
+            if (events != null) {
+                onReleaseResources(events);
             }
         }
 
@@ -430,8 +433,7 @@ public class EventListFragment extends ListFragment
         @Override protected void onStartLoading() {
             Log.d(TAG + ".onStartLoading()", " - onStartLoading");
             if (events != null) {
-                // If we currently have a result available, deliver it
-                // immediately.
+                // If we currently have a result available, deliver it immediately.
                 deliverResult(events);
             }
             forceLoad();
@@ -470,7 +472,6 @@ public class EventListFragment extends ListFragment
             // For a simple List<> there is nothing to do.  For something
             // like a Cursor, we would close it here.
         }
-
     }
 
 }

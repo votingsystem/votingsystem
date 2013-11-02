@@ -79,7 +79,7 @@ class SubscripcionService {
 		serverURL = StringUtils.checkURL(serverURL)
 		ControlAcceso controlAcceso = ControlAcceso.findWhere(serverURL:serverURL)
 		if (!controlAcceso) {
-			String urlInfoControlAcceso = "${serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLInfoServidor}"
+			String urlInfoControlAcceso = "${serverURL}/infoServidor"
 			Respuesta respuesta = httpService.getInfo(urlInfoControlAcceso, null)
 			if (Respuesta.SC_OK == respuesta.codigoEstado) {
 				try {

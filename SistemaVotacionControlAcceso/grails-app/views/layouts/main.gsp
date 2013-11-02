@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<g:render template="/template/js/pcUtils"/>
-	<g:layoutHead />
+<g:render template="/template/js/pcUtils"/>
 	<script type="text/javascript">
 		$(function() {
 			updateSubsystem("${selectedSubsystem}")
@@ -34,6 +33,7 @@
 		}
 		
 	</script>
+	<g:layoutHead />
 </head>
     <body>
 		<div class="header">

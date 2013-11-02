@@ -159,7 +159,6 @@ public class VoteReceiptListActivity extends ActionBarActivity
             case android.R.id.home:
                 Log.d(TAG + ".onOptionsItemSelected(...) ", " - home - ");
                 Intent intent = new Intent(this, NavigationDrawer.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
                 this.finish();
                 return true;

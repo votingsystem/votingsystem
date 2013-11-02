@@ -1,17 +1,10 @@
 package org.sistemavotacion.modelo;
 
-import android.util.Log;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.sistemavotacion.seguridad.CertUtil;
-import org.sistemavotacion.util.DateUtils;
 
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 public class ActorConIP implements java.io.Serializable {
 	
@@ -206,59 +199,5 @@ public class ActorConIP implements java.io.Serializable {
     public X509Certificate getTimeStampCert() {
     	return timeStampCert;
     }
-	
-    public static ActorConIP parse(String actorConIPStr, ActorConIP.Tipo tipo) 
- 		   throws Exception {
-        JSONObject actorConIPJSON = new JSONObject(actorConIPStr);
-        JSONObject jsonObject = null;
-        ActorConIP actorConIP = null;
-        JSONArray jsonArray;
-        switch (tipo) {
-             case CENTRO_CONTROL:
-                 actorConIP = new CentroControl();
-                 break;
-             case CONTROL_ACCESO:
-                 actorConIP = new ControlAcceso();
-                 if (actorConIPJSON.getJSONArray("centrosDeControl") != null) {
-                     Set<CentroControl> centrosDeControl = new HashSet<CentroControl>();
-                     jsonArray = actorConIPJSON.getJSONArray("centrosDeControl");
-                     for (int i = 0; i< jsonArray.length(); i++) {
-                         jsonObject = jsonArray.getJSONObject(i);
-                         CentroControl centroControl = new CentroControl();
-                         centroControl.setNombre(jsonObject.getString("nombre"));
-                         centroControl.setServerURL(jsonObject.getString("serverURL"));
-                         centroControl.setId(jsonObject.getLong("id"));
-                         centroControl.setDateCreated(DateUtils.getDateFromString(jsonObject.getString("fechaCreacion")));
-                         if (jsonObject.getString("estado") != null) {
-                              centroControl.setEstado(ActorConIP.Estado.valueOf(jsonObject.getString("estado")));
-                         }
-                         centrosDeControl.add(centroControl);
-                     }
-                     ((ControlAcceso)actorConIP).setCentrosDeControl(centrosDeControl);
-                 }
-                 break;
-            
-        }
-        if (actorConIPJSON.has("urlBlog"))
-             actorConIP.setUrlBlog(actorConIPJSON.getString("urlBlog"));
-        if (actorConIPJSON.has("serverURL"))
-             actorConIP.setServerURL(actorConIPJSON.getString("serverURL"));
-        if (actorConIPJSON.has("nombre"))
-             actorConIP.setNombre(actorConIPJSON.getString("nombre"));
-        if (actorConIPJSON.has("cadenaCertificacionPEM")) {
-     	   Collection<X509Certificate> certChain = 
-	        			CertUtil.fromPEMToX509CertCollection(actorConIPJSON.
-	        			getString("cadenaCertificacionPEM").getBytes());
-	        	actorConIP.setCertChain(certChain);
-	        	X509Certificate serverCert = certChain.iterator().next();
-	        	Log.d(TAG + ".obtenerActorConIP(..) ", " - actorConIP Cert: " 
-	        			+ serverCert.getSubjectDN().toString());
-	        	actorConIP.setCertificado(serverCert);
-        }
-        if (actorConIPJSON.has("timeStampCertPEM")) {
-     	   actorConIP.setTimeStampCertPEM(actorConIPJSON.getString(
-                    "timeStampCertPEM"));
-        }
-        return actorConIP;
-    }
+
 }

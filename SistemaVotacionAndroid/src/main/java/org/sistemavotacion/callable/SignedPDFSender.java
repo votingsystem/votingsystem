@@ -60,7 +60,8 @@ import javax.mail.internet.MimeBodyPart;
 import static org.sistemavotacion.android.AppData.ALIAS_CERT_USUARIO;
 
 /**
- * Created by jgzornoza on 1/10/13.
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
 public class SignedPDFSender implements Callable<Respuesta> {
 
@@ -80,8 +81,8 @@ public class SignedPDFSender implements Callable<Respuesta> {
     private byte[] keyStoreBytes;
     private char[] password;
 
-    String documentToSignURL = null;
-    String serviceURL = null;
+    private String documentToSignURL = null;
+    private String serviceURL = null;
 
     public SignedPDFSender(String documentToSignURL, String serviceURL, byte[] keyStoreBytes,
                            char[] password, String reason, String location, Context context) {
@@ -96,7 +97,7 @@ public class SignedPDFSender implements Callable<Respuesta> {
 
     @Override public Respuesta call() {
         Respuesta respuesta = null;
-        byte[] pdfBytes = null;
+
         try {
             KeyStore keyStore = null;
             PrivateKey signerPrivatekey = null;
@@ -110,14 +111,20 @@ public class SignedPDFSender implements Callable<Respuesta> {
             //X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(ALIAS_CERT_USUARIO);
             Certificate[] signerCertChain = keyStore.getCertificateChain(ALIAS_CERT_USUARIO);
             X509Certificate signerCert = (X509Certificate) signerCertChain[0];
-
+            HttpResponse response = null;
+            byte[] pdfBytes = null;
             //Get the PDF to sign
-            HttpResponse response = HttpHelper.getData(documentToSignURL, AppData.PDF_CONTENT_TYPE);
-            if(Respuesta.SC_OK != response.getStatusLine().getStatusCode()) {
-                return new Respuesta(response.getStatusLine().getStatusCode(),
-                        EntityUtils.toString(response.getEntity()));
+            if(documentToSignURL != null) {
+                response = HttpHelper.getData(documentToSignURL, AppData.PDF_CONTENT_TYPE);
+                if(Respuesta.SC_OK != response.getStatusLine().getStatusCode()) {
+                    return new Respuesta(response.getStatusLine().getStatusCode(),
+                            EntityUtils.toString(response.getEntity()));
+                } else {
+                    pdfBytes = EntityUtils.toByteArray(response.getEntity());
+                }
             } else {
-                pdfBytes = EntityUtils.toByteArray(response.getEntity());
+                Log.d(TAG + ".call(...)", " - documentToSignURL null ");
+                return new Respuesta(Respuesta.SC_ERROR);
             }
             PdfReader pdfReader = new PdfReader(pdfBytes);
 

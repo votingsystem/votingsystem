@@ -3,9 +3,9 @@
 	<g:message code="documentStateSelectionMsg"/>:<br/>
 	<div style="font-size: 0.9em; margin:10px 0 0 10px;"> 
 		<div style="margin:0px 0 10px 0px;display:block;">
-			<input type="checkbox" id="selectDeleteDocument"><g:message code="selectDeleteDocumentMsg"/>
+			<input type="checkbox" id="selectDeleteDocument"/><label for="selectDeleteDocument"><g:message code="selectDeleteDocumentMsg"/></label>
 		</div>
-		<input type="checkbox" id="selectCloseDocument"><g:message code="selectCloseDocumentMsg"/>
+		<input type="checkbox" id="selectCloseDocument"/><g:message code="selectCloseDocumentMsg"/>
 	</div>
 </div> 
 <script>

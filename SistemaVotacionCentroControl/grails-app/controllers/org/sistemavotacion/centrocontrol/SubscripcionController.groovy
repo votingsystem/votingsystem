@@ -53,7 +53,7 @@ class SubscripcionController {
 				response.status = Respuesta.SC_ERROR_PETICION
 				mensaje = message(code: 'controlCenterAlreadyAssociatedMsg', args:[controlAcceso.serverURL]) 
 			} else {
-				def urlInfoControlAcceso = "${serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLInfoServidor}"
+				def urlInfoControlAcceso = "${serverURL}/infoServidor"
 				Respuesta respuesta = httpService.getInfo(urlInfoControlAcceso, null)
 				status = respuesta.codigoEstado
 				if (Respuesta.SC_OK == respuesta.codigoEstado) {
@@ -118,8 +118,7 @@ class SubscripcionController {
 			if(votacion.usuario) {
 				author = "${votacion.usuario.nombre} ${votacion.usuario.primerApellido}"
 			}
-			String urlVotacion = "${grailsApplication.config.grails.serverURL}" +
-				"${grailsApplication.config.SistemaVotacion.sufijoURLVotar}" + votacion.id
+			String urlVotacion = "${createLink(controller: 'eventoVotacion')}/" + votacion.id
 			String accion = message(code: 'subscripcion.votar')
 			 //if(contenido?.length() > 500) contenido = contenido.substring(0, 500)
 			String contenidoFeed = "<p>${contenido}</p>" +

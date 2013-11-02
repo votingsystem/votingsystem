@@ -22,7 +22,7 @@ public class Operation {
 
     public static final String OPERATION_KEY   = "operationKey";
     
-    public static enum Tipo {ASOCIAR_CENTRO_CONTROL_SMIME, 
+    public static enum Tipo {ASOCIAR_CENTRO_CONTROL,
         CAMBIO_ESTADO_CENTRO_CONTROL_SMIME, 
         SOLICITUD_COPIA_SEGURIDAD, 
         PUBLICACION_MANIFIESTO_PDF, 
@@ -33,8 +33,8 @@ public class Operation {
         PUBLICACION_RECLAMACION_SMIME,
         FIRMA_RECLAMACION_SMIME, 
         PUBLICACION_VOTACION_SMIME, 
-        CANCELAR_EVENTO, VOTAR, FIRMAR_MANIFIESTO, 
-        FIRMAR_RECLAMACION, ENVIO_VOTO_SMIME, SOLICITUD_ACCESO;
+        CANCELAR_EVENTO, FIRMAR_MANIFIESTO,
+        ENVIO_VOTO_SMIME, SOLICITUD_ACCESO;
     
         Tipo(String caption) {
             this.caption = caption;

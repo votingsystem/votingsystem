@@ -26,7 +26,7 @@
 			}
 			
     		$("#adminDocumentLink").click(function () {
-    			showAdminDocumentDialog(cancelEventCallback)
+    			showAdminDocumentDialog(adminDocumentCallback)
 	    	})
 
 		    $('#submitClaimForm').submit(function(event){
@@ -34,7 +34,7 @@
 		        sendSignature()
 		    });
     		$("#requestBackupButton").click(function () {
-    			showRequestEventBackupDialog(requestEventBackupCallback)
+    			showRequestEventBackupDialog(requestBackupCallback)
 	    	})
 			    
 		 });
@@ -60,11 +60,11 @@
 			webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStamp', absolute:true)}"
 			webAppMessage.respuestaConRecibo = true
 			//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-			votingSystemClient.setMessageToSignatureClient(webAppMessage, eventSignatureCallback); 
+			votingSystemClient.setMessageToSignatureClient(webAppMessage, sendSignatureCallback); 
 		}
 
-		function requestEventBackupCallback(appMessage) {
-			console.log("requestEventBackupCallback");
+		function requestBackupCallback(appMessage) {
+			console.log("requestBackupCallback");
 			var appMessageJSON = toJSON(appMessage)
 			if(appMessageJSON != null) {
 				if(StatusCode.SC_PROCESANDO == appMessageJSON.codigoEstado){
@@ -82,8 +82,8 @@
 			}
 		}
 
-		function eventSignatureCallback(appMessage) {
-			console.log("eventSignatureCallback - message from native client: " + appMessage);
+		function sendSignatureCallback(appMessage) {
+			console.log("sendSignatureCallback - message from native client: " + appMessage);
 			var appMessageJSON = toJSON(appMessage)
 			if(appMessageJSON != null) {
 				$("#workingWithAppletDialog" ).dialog("close");
@@ -98,8 +98,8 @@
 			}
 		}
 		
-		function cancelEventCallback(appMessage) {
-			console.log("cancelEventCallback - message from native client: " + appMessage);
+		function adminDocumentCallback(appMessage) {
+			console.log("adminDocumentCallback - message from native client: " + appMessage);
 			var appMessageJSON = toJSON(appMessage)
 			if(appMessageJSON != null) {
 				$("#workingWithAppletDialog").dialog("close");

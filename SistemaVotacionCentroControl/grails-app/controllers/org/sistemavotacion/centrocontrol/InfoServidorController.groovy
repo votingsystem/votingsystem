@@ -27,8 +27,7 @@ class InfoServidorController {
         infoServidor.urlBlog = grailsApplication.config.SistemaVotacion.urlBlog
         infoServidor.estado = ActorConIP.Estado.ACTIVO.toString()
 		infoServidor.environmentMode = VotingSystemApplicationContex.instance.getEnvironment().toString()
-		def sufijoURLCadenaCertificacion = grailsApplication.config.SistemaVotacion.sufijoURLCadenaCertificacion
-		infoServidor.cadenaCertificacionURL = "${grailsApplication.config.grails.serverURL}${sufijoURLCadenaCertificacion}"
+		infoServidor.cadenaCertificacionURL = "${createLink(controller: 'certificado', action:'cadenaCertificacion', absolute:true)}"
 		File cadenaCertificacion = grailsApplication.mainContext.getResource(
 			grailsApplication.config.SistemaVotacion.rutaCadenaCertificacion).getFile();
 		infoServidor.cadenaCertificacionPEM = cadenaCertificacion?.text

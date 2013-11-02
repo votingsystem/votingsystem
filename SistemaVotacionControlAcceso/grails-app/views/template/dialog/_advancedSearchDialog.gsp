@@ -50,6 +50,18 @@
   	</div> 
 <script>
 
+var dateBeginFrom  = $("#dateBeginFrom"),
+	dateBeginTo    = $("#dateBeginTo"),
+	dateFinishFrom = $("#dateFinishFrom"),
+	dateFinishTo   = $("#dateFinishTo"),
+	allFields = $( [] ).add(dateBeginFrom).add(dateBeginTo).add(dateFinishFrom).add(dateFinishTo);
+
+
+dateBeginFrom.datepicker(pickerOpts);
+dateBeginTo.datepicker(pickerOpts);
+dateFinishFrom.datepicker(pickerOpts);
+dateFinishTo.datepicker(pickerOpts);
+
  $("#advancedSearchDialog").dialog({
 		width: 'auto', autoOpen: false, modal: true,
 	      buttons: [{text:"<g:message code="acceptLbl"/>",
@@ -64,31 +76,19 @@
 	      show: {effect: "fade",duration: 300},
 	      hide: {effect: "fade",duration: 300},
 	      open: function( event, ui ) {
-	 			$("#userNifText").val("");
-		 		$("#editRepresentativeDialogFormDiv").show()
-				$("#editRepresentativeDialogProgressDiv").hide()
-		 		$("#acceptButton").button("enable");
-		 		$("#cancelButton").button("enable");	
+	 			$("#advancedSearchText").val("");
+	 			$("#dateBeginFrom").val("");
+	 			$("#dateBeginTo").val("");
+	 			$("#dateFinishFrom").val("");
+	 			$("#dateFinishTo").val("");
 		  }
 	    });
-
-var dateBeginFrom  = $("#dateBeginFrom"),
-	dateBeginTo    = $("#dateBeginTo"),
-	dateFinishFrom = $("#dateFinishFrom"),
-	dateFinishTo   = $("#dateFinishTo"),
-	allFields = $( [] ).add(dateBeginFrom).add(dateBeginTo).add(dateFinishFrom).add(dateFinishTo);
-
-
-dateBeginFrom.datepicker(pickerOpts);
-dateBeginTo.datepicker(pickerOpts);
-dateFinishFrom.datepicker(pickerOpts);
-dateFinishTo.datepicker(pickerOpts);
-
 
  $('#advancedSearchForm').submit(function(event){
  	console.log("advancedSearchForm")
  	event.preventDefault();
  	allFields.removeClass("ui-state-error");
+ 	$(".errorMsgWrapper").fadeOut()
 	if(dateBeginFrom.datepicker("getDate") === null) {
 		dateBeginFrom.addClass( "ui-state-error" );
 		showErrorMsg('<g:message code="emptyFieldMsg"/>')

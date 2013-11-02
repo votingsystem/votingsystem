@@ -18,7 +18,16 @@ public enum EventState {
 	        default: return null;
         }
 	}
-	
+
+    public int getposition()  {
+        switch(this) {
+            case OPEN: return 0;
+            case PENDING: return 1;
+            case CLOSED: return 2;
+            default: return 0;
+        }
+    }
+
 	public String getColor()  {
         switch(this) {
         	case OPEN: return "#6bad74";

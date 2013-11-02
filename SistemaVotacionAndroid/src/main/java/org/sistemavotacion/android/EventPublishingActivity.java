@@ -1,22 +1,7 @@
-/*
- * Copyright 2011 - Jose. J. García Zornoza
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.sistemavotacion.android;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -31,6 +16,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -40,6 +26,7 @@ import android.widget.TextView;
 import org.sistemavotacion.android.ui.CertNotFoundDialog;
 import org.sistemavotacion.android.ui.CertPinDialog;
 import org.sistemavotacion.android.ui.CertPinDialogListener;
+import org.sistemavotacion.callable.PDFPublisher;
 import org.sistemavotacion.callable.SMIMESignedSender;
 import org.sistemavotacion.callable.SignedPDFSender;
 import org.sistemavotacion.modelo.Operation;
@@ -53,33 +40,28 @@ import java.io.FileInputStream;
 import java.net.URL;
 import java.security.KeyStore;
 import java.security.PrivateKey;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import static org.sistemavotacion.android.AppData.ALIAS_CERT_USUARIO;
 import static org.sistemavotacion.android.AppData.KEY_STORE_FILE;
 
-public class EventPublishingActivity extends ActionBarActivity
-	implements WebSessionListener, CertPinDialogListener {
+/**
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ */
+public class EventPublishingActivity extends ActionBarActivity implements CertPinDialogListener {
 	
 	public static final String TAG = "EventPublishingActivity";
 
 	public static final String EDITOR_SESSION_KEY = "editorSessionKey";
     public static final String FORM_TYPE_KEY = "formTypeKey";
 	
-	private static WebView svWebView;
-	private String serverURL = null;
-
+	private WebView svWebView;
 	private Operation.Tipo formType;
 	private JavaScriptInterface javaScriptInterface;
-	private boolean isPageLoaded = false;
-    private static List<String> pendingOperations = new ArrayList<String>();
 	private Operation pendingOperation;
     private AppData appData;
-
     private TextView progressMessage;
-
     private View progressContainer;
     private FrameLayout mainLayout;
     private boolean isProgressShown;
@@ -100,6 +82,7 @@ public class EventPublishingActivity extends ActionBarActivity
         }
         String formTypeStr = getIntent().getStringExtra(FORM_TYPE_KEY);
         String screenTitle = null;
+        String serverURL = null;
         if(formTypeStr != null) {
             formType = Operation.Tipo.valueOf(formTypeStr);
         	switch(formType) {
@@ -142,8 +125,7 @@ public class EventPublishingActivity extends ActionBarActivity
 		switch (item.getItemId()) {        
 	    	case android.R.id.home:  
 	    		Log.d(TAG + ".onOptionsItemSelected(...) ", " - home - ");
-	    		Intent intent = new Intent(this, NavigationDrawer.class);   
-	    		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); 
+	    		Intent intent = new Intent(this, NavigationDrawer.class);
 	    		startActivity(intent); 
 	    		return true;        
 	    	default:            
@@ -158,14 +140,6 @@ public class EventPublishingActivity extends ActionBarActivity
         if(publishTask != null) publishTask.cancel(true);
     }
 
-    @Override public void onStop() {
-        super.onStop();
-        Log.d(TAG + ".onStop()", " - onStop");
-        isDestroyed = true;
-        if(publishTask != null) publishTask.cancel(true);
-    }
-
-
     private void showPinScreen(String message) {
     	CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
 		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
@@ -178,25 +152,31 @@ public class EventPublishingActivity extends ActionBarActivity
     }
 	
     private void loadUrl(String serverURL) {
-    	Log.d(TAG + ".serverURL(...)", " - serverURL: " + serverURL);
-    	isPageLoaded = false;
+    	Log.d(TAG + ".serverURL(...)", " --- serverURL: " + serverURL);
     	javaScriptInterface = new JavaScriptInterface(this);
         svWebView = (WebView) findViewById(R.id.webview);
+        svWebView.setWebChromeClient(new WebChromeClient());
+        svWebView.setWebViewClient(new WebViewClient());
         WebSettings webSettings = svWebView.getSettings();
         webSettings.setBuiltInZoomControls(true);
         webSettings.setSupportZoom(true);
         webSettings.setUseWideViewPort(true);
         webSettings.setLoadWithOverviewMode(true);
+        String userAgent = webSettings.getUserAgentString();
+        //To prevent block if ckeditor detects the 'Mobile' in user agent
+        webSettings.setUserAgentString(userAgent.replaceAll("Mobile", ""));
         svWebView.setClickable(true);
-        svWebView.addJavascriptInterface(javaScriptInterface, "androidClient");
         webSettings.setJavaScriptEnabled(true);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+        webSettings.setDomStorageEnabled(true);
+        svWebView.addJavascriptInterface(javaScriptInterface, "androidClient");
+        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         svWebView.setWebViewClient(new WebViewClient() {
-
             public void onPageFinished(WebView view, String url) {
                 showProgress(false, true);
             }
         });
+
         svWebView.loadUrl(serverURL);
     }
     
@@ -228,10 +208,8 @@ public class EventPublishingActivity extends ActionBarActivity
 	}
     
 	@Override
-	public void onRestoreInstanceState(Bundle savedInstanceState) {		
-		String sessionDataKey = savedInstanceState.getString(EDITOR_SESSION_KEY);
-		javaScriptInterface.getEditorData(sessionDataKey, this);
-		Log.d(TAG + ".onRestoreInstanceState(...) ", " --- sessionDataKey: " + sessionDataKey);
+	public void onRestoreInstanceState(Bundle savedInstanceState) {
+		Log.d(TAG + ".onRestoreInstanceState(...) ", " --- onRestoreInstanceState");
 	}
 
 	public void processOperation(Operation operation) {
@@ -256,50 +234,27 @@ public class EventPublishingActivity extends ActionBarActivity
 	    certDialog.show(ft, AppData.CERT_NOT_FOUND_DIALOG_ID);
 	}
 	
-	@Override
-	public void updateEditorData(Operation editorData) {
-		if(editorData == null || editorData.getEvento() == null) {
-			Log.d(TAG + ".updateEditorData(...) ", " --- editorData null");
+	public void sendMessageToWebApp(Operation operation) {
+		if(operation == null) {
+			Log.d(TAG + ".sendMessageToWebApp(...) ", " --- operation null");
 			return;
-		} 
-		String editorDataStr = null;
+		}
 		try {
-			editorDataStr = editorData.obtenerJSONStr();
+            String operationStr = operation.obtenerJSONStr();
+            Log.d(TAG + ".sendMessageToWebApp(...) ", " --- operationStr: " + operationStr);
+            String jsOperation = "javascript:sendMessageToWebApp('" + operationStr + "')";
+            svWebView.loadUrl(jsOperation);
 		} catch(Exception ex) {
 			ex.printStackTrace();
-		}
-		Log.d(TAG + ".updateEditorData(...) ", " --- editorDataStr: " + editorDataStr);
-		String jsOperation = "javascript:updateEditorData('" + editorDataStr + "')";
-		if(isPageLoaded) {
-			Log.d(TAG + ".updateEditorData(...) ", " --- lanzando jsOperation: " + jsOperation);
-			svWebView.loadUrl(jsOperation);
-		} 
-		else  {
-			Log.d(TAG + ".updateEditorData(...) ", " --- poniendo en cola jsOperation: " + jsOperation);
-			pendingOperations.add(jsOperation);
-		} 
-	}
-	
-	public void isPageLoaded(boolean isPageLoaded) {
-		this.isPageLoaded = isPageLoaded;
-		if(isPageLoaded) {
-			for(final String javascriptOperation: pendingOperations) {
-		    	runOnUiThread(new Runnable() {
-		    	    public void run() {
-		    	    	Log.d(TAG + ".isPageLoaded(...) ", " --- javascriptOperation: " + javascriptOperation);
-		    	    	svWebView.loadUrl(javascriptOperation);
-		    	    	pendingOperations.remove(javascriptOperation);
-		    	    }
-		    	});  
-			}
 		}
 	}
 
 	private void showMessage(String caption, String message) {
 		Log.d(TAG + ".showMessage(...) ", " - caption: " 
-				+ caption + "  - showMessage: " + message);
+				+ caption + "  - message: " + message);
 		AlertDialog.Builder builder= new AlertDialog.Builder(this);
-		builder.setTitle(caption).setMessage(Html.fromHtml(message)).show();
+		builder.setTitle(caption).setMessage(Html.fromHtml(
+                (message == null? "" : message))).show();
 	}
 
 	@Override
@@ -319,6 +274,18 @@ public class EventPublishingActivity extends ActionBarActivity
         publishTask = new PublishTask(pin);
         publishTask.execute();
 	}
+
+    @Override public void onStop() {
+        super.onStop();
+        Log.d(TAG + ".onStop()", " - onStop");
+        isDestroyed = true;
+        if(publishTask != null) publishTask.cancel(true);
+    }
+
+    @Override public void onResume() {
+        super.onResume();
+        Log.d(TAG + ".onResume() ", " - onResume");
+    }
 
     public void showProgress(boolean shown, boolean animate) {
         if (isProgressShown == shown) {
@@ -378,16 +345,16 @@ public class EventPublishingActivity extends ActionBarActivity
                 //X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(ALIAS_CERT_USUARIO);
                 switch(pendingOperation.getTipo()) {
                     case PUBLICACION_MANIFIESTO_PDF:
-                        SignedPDFSender signedPDFSender = new SignedPDFSender(
-                                pendingOperation.getUrlDocumento(),
-                                pendingOperation.getUrlEnvioDocumento(),
+                        PDFPublisher publisher = new PDFPublisher(pendingOperation.getUrlEnvioDocumento(),
+                                pendingOperation.getContenidoFirma().toString(),
                                 keyStoreBytes, pin.toCharArray(), null, null, getBaseContext());
-                        respuesta = signedPDFSender.call();
+                        respuesta = publisher.call();
                         break;
                     case PUBLICACION_VOTACION_SMIME:
                     case PUBLICACION_RECLAMACION_SMIME:
-                    case ASOCIAR_CENTRO_CONTROL_SMIME:
+                    case ASOCIAR_CENTRO_CONTROL:
                         boolean isEncryptedResponse = false;
+                        pendingOperation.getContenidoFirma().put("UUID", UUID.randomUUID().toString());
                         SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
                                 pendingOperation.getUrlEnvioDocumento(),
                                 pendingOperation.getContenidoFirma().toString(),
@@ -397,7 +364,7 @@ public class EventPublishingActivity extends ActionBarActivity
                         respuesta = smimeSignedSender.call();
                         break;
                     default:
-                        Log.d(TAG + ".processOperation(...) ", " --- unknown operation: " +
+                        Log.d(TAG + ".doInBackground(...) ", " --- unknown operation: " +
                                 pendingOperation.getTipo().toString());
                 }
                 return respuesta;

@@ -147,7 +147,7 @@ class SubscripcionController {
 			if(reclamacion.usuario) {
 				author = "${reclamacion.usuario.nombre} ${reclamacion.usuario.primerApellido}"
 			}
-			String urlReclamacion = "${grailsApplication.config.grails.serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLFirmarReclamacion}" + reclamacion.id
+			String urlReclamacion =  "${createLink(controller: 'eventoReclamacion')}/" + reclamacion.id
 			String accion = message(code: 'signClaim')
 			 //if(contenido?.length() > 500) contenido = contenido.substring(0, 500)
 			String contenidoFeed = "<p>${contenido}</p>" +
@@ -185,7 +185,7 @@ class SubscripcionController {
 			if(votacion.usuario) {
 				author = "${votacion.usuario.nombre} ${votacion.usuario.primerApellido}"
 			}
-			String urlVotacion = "${grailsApplication.config.grails.serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLVotar}" + votacion.id
+			String urlVotacion =  "${createLink(controller: 'eventoVotacion')}/" + votacion.id
 			String accion = message(code: 'subscripcion.votar')
 			 //if(contenido?.length() > 500) contenido = contenido.substring(0, 500)
 			String contenidoFeed = "<p>${contenido}</p>" +
@@ -223,7 +223,7 @@ class SubscripcionController {
 			if(manifiesto.usuario) {
 				author = "${manifiesto.usuario.nombre} ${manifiesto.usuario.primerApellido}"
 			}
-			String urlManifiesto = "${grailsApplication.config.grails.serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLFirmarManifiesto}" + manifiesto.id
+			String urlManifiesto = "${createLink(controller: 'eventoFirma')}/" + manifiesto.id
 			String accion = message(code: 'subscripcion.firmarManifiesto')
  			//if(contenido?.length() > 500) contenido = contenido.substring(0, 500)
 			String contenidoFeed = "<p>${contenido}</p>" + 

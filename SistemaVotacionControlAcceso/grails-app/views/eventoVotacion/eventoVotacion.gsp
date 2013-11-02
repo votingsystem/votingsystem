@@ -34,7 +34,7 @@
 	  		});
 		
 	  		$("#adminDocumentLink").click(function () {
-    			showAdminDocumentDialog(cancelEventCallback)
+    			showAdminDocumentDialog(adminDocumentCallback)
 		   	})
 
 		 });
@@ -52,11 +52,11 @@
 			webAppMessage.evento = votingEvent
 			webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStamp', absolute:true)}"
 			//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-			votingSystemClient.setMessageToSignatureClient(webAppMessage, eventVoteCallback); 
+			votingSystemClient.setMessageToSignatureClient(webAppMessage, sendVoteCallback); 
 		}
 
-		function eventVoteCallback(appMessage) {
-			console.log("eventVoteCallback - message from native client: " + appMessage);
+		function sendVoteCallback(appMessage) {
+			console.log("sendVoteCallback - message from native client: " + appMessage);
 			var appMessageJSON = toJSON(appMessage)
 			if(appMessageJSON != null) {
 				$("#workingWithAppletDialog").dialog("close");
@@ -77,8 +77,8 @@
 			}
 		}
 
-		function cancelEventCallback(appMessage) {
-			console.log("cancelEventCallback - message from native client: " + appMessage);
+		function adminDocumentCallback(appMessage) {
+			console.log("adminDocumentCallback - message from native client: " + appMessage);
 			var appMessageJSON = toJSON(appMessage)
 			if(appMessageJSON != null) {
 				$("#workingWithAppletDialog").dialog("close");

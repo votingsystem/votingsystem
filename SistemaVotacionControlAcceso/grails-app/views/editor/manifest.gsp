@@ -2,19 +2,19 @@
 <html>
 <head>
         <meta name="layout" content="main" />
-        <script src="${resource(dir:'js/i18n',file:'jquery.ui.datepicker-es.js')}"></script>
-        <script src="${resource(dir:'ckeditor',file:'ckeditor.js')}"></script>
+        <g:render template="/template/js/pcEditor"/>
         <script type="text/javascript">
-
-			CKEDITOR.on( 'instanceReady', function( ev ) {
-				$("#contentDiv").fadeIn(500)
-			});
 		
 		 	$(function() {
+		 		showEditor()
 			    $("#dateFinish").datepicker(pickerOpts);
+
+			    
 			    $('#mainForm').submit(function(event){
 			    	event.preventDefault();
-				    
+			    	hideEditor() 
+			    	var isValidForm = true
+			    	
 			    	var subject = $( "#subject" ),
 			    	dateFinish = $( "#dateFinish" ),
 			    	ckeditorDiv = $( "#ckeditor" ),
@@ -26,20 +26,23 @@
 						dateFinish.addClass( "ui-state-error" );
 						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 							'<g:message code="dateInitERRORMsg"/>')
-						return false
+						isValidForm = false
 					}
-					
-			        var editor = CKEDITOR.instances.editor1;
-					if(editor.getData().length == 0) {
+
+					if(htmlEditorContent.trim() == 0) {
 						ckeditorDiv.addClass( "ui-state-error" );
 						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 								'<g:message code="emptyDocumentERRORMsg"/>')
-						return false;
+						isValidForm = false
+					}  
+					if(!isValidForm) {
+						showEditor()
+						return 
 					}
-
+					
 					var event = new Evento();
 			    	event.asunto = subject.val();
-			    	event.contenido = editor.getData();
+			    	event.contenido = htmlEditorContent.trim();
 			    	event.fechaFin = dateFinish.datepicker('getDate').format();
 
 			    	var webAppMessage = new WebAppMessage(
@@ -103,13 +106,8 @@
    				onchange="this.setCustomValidity('')"/>
 	</div>
 	
-	<div id="ckeditor" style="display:block;">
-		<script>
-			CKEDITOR.appendTo( 'ckeditor', {
-                toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Link', 'Unlink' ],
-					[ 'FontSize', 'TextColor', 'BGColor' ]]});
-		</script>
-	</div>	
+	<div id="editor"></div>
+	<div id="editorContents" class="editorContents"></div>	
 		
 	<div style='overflow:hidden;'>
 		<div style="float:right; margin:20px 10px 0px 0px;">

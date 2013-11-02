@@ -73,8 +73,7 @@ class VotoService {
 			certificado.setSigningCert(certificadoFirma)
 			certificado.save()
 			
-			String urlVotosControlAcceso = "${evento.controlAcceso.serverURL}" +
-				"${grailsApplication.config.SistemaVotacion.sufijoURLNotificacionVotoControlAcceso}"
+			String urlVotosControlAcceso = "${evento.controlAcceso.serverURL}/voto"
 			String localServerURL = grailsApplication.config.grails.serverURL
 			
 			String signedVoteDigest = smimeMessageReq.getContentDigestStr()

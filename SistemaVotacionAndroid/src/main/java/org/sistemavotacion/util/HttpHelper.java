@@ -69,8 +69,8 @@ public class HttpHelper {
     
     public static HttpResponse getData (String serverURL, String contentType) 
             throws IOException, ParseException {
+        Log.d(TAG + ".getData(...)" ," - serverURL: " + serverURL);
         HttpGet httpget = new HttpGet(serverURL);
-        Log.d(TAG + ".getData(...)" ," - serverURL: " + httpget.getURI());
         if(contentType != null) httpget.setHeader("Content-Type", contentType);
         HttpResponse response = httpclient.execute(httpget);
         Log.d(TAG + ".obtenerInformacion" ,"----------------------------------------");

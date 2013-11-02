@@ -1,7 +1,6 @@
-package org.sistemavotacion.task;
+package org.sistemavotacion.callable;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.itextpdf.text.Rectangle;
@@ -33,7 +32,6 @@ import org.bouncycastle2.cms.CMSSignedData;
 import org.bouncycastle2.cms.CMSSignedDataGenerator;
 import org.sistemavotacion.android.AppData;
 import org.sistemavotacion.android.R;
-import org.sistemavotacion.callable.MessageTimeStamper;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.Encryptor;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
@@ -54,16 +52,21 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import javax.mail.Header;
 import javax.mail.internet.MimeBodyPart;
 
 import static org.sistemavotacion.android.AppData.ALIAS_CERT_USUARIO;
 
-public class SignTimestampSendPDFTask extends AsyncTask<String, Void, Respuesta> {
+/**
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ */
+public class PDFPublisher implements Callable<Respuesta> {
 
-	public static final String TAG = "SignTimestampSendPDFTask";
-	
+    public static final String TAG = "SignedPDFSender";
+
     public static final PdfName PDF_SIGNATURE_NAME     = PdfName.ADBE_PKCS7_SHA1;
     public static final String PDF_SIGNATURE_DIGEST    = "SHA1";
     public static final String PDF_SIGNATURE_MECHANISM = "SHA1withRSA";
@@ -77,74 +80,91 @@ public class SignTimestampSendPDFTask extends AsyncTask<String, Void, Respuesta>
 
     private byte[] keyStoreBytes;
     private char[] password;
-    
-    public SignTimestampSendPDFTask(byte[] keyStoreBytes, char[] password, String reason,
-                                    String location, Context context) {
-    	this.context = context;
-    	this.reason = reason;
-    	this.location = location;
+
+    private String serviceURL = null;
+    private String pdfContent = null;
+
+    public PDFPublisher(String serviceURL, String pdfContent,
+            byte[] keyStoreBytes, char[] password, String reason, String location, Context context) {
+        this.serviceURL = serviceURL;
+        this.context = context;
+        this.reason = reason;
+        this.pdfContent = pdfContent;
+        this.location = location;
         this.keyStoreBytes = keyStoreBytes;
         this.password = password;
     }
-	
-	@Override protected Respuesta doInBackground(String... urls) {
-        String documentToSignURL = urls[0];
-        String serviceURL = urls[1];
-		Respuesta respuesta = null;
-        byte[] pdfBytes = null;
+
+    @Override public Respuesta call() {
+        Respuesta respuesta = null;
         try {
-            KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
-            PrivateKey signerPrivatekey = (PrivateKey)keyStore.getKey(ALIAS_CERT_USUARIO, password);
+            KeyStore keyStore = null;
+            PrivateKey signerPrivatekey = null;
+            try {
+                keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
+                signerPrivatekey = (PrivateKey)keyStore.getKey(ALIAS_CERT_USUARIO, password);
+            } catch(Exception ex) {
+                ex.printStackTrace();
+                return new Respuesta(Respuesta.SC_ERROR, context.getString(R.string.pin_error_msg));
+            }
             //X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(ALIAS_CERT_USUARIO);
             Certificate[] signerCertChain = keyStore.getCertificateChain(ALIAS_CERT_USUARIO);
             X509Certificate signerCert = (X509Certificate) signerCertChain[0];
-
+            HttpResponse response = null;
+            byte[] pdfBytes = null;
+            String manifestId = null;
             //Get the PDF to sign
-            HttpResponse response = HttpHelper.getData(documentToSignURL, AppData.PDF_CONTENT_TYPE);
+            if(pdfContent == null) {
+                Log.d(TAG + ".call(...)", " - call pdfContent null");
+                return new Respuesta(Respuesta.SC_ERROR, context.getString(R.string.content_error_msg));
+            }
+            response = HttpHelper.sendByteArray(pdfContent.getBytes(), null, serviceURL);
             if(Respuesta.SC_OK != response.getStatusLine().getStatusCode()) {
                 return new Respuesta(response.getStatusLine().getStatusCode(),
                         EntityUtils.toString(response.getEntity()));
             } else {
+                org.apache.http.Header manifestIdHeader = response.getFirstHeader("eventId");
                 pdfBytes = EntityUtils.toByteArray(response.getEntity());
+                manifestId = manifestIdHeader.getValue();
             }
             PdfReader pdfReader = new PdfReader(pdfBytes);
 
-        	byte[] timeStampedSignedPDF = signWithTimestamp(pdfReader, 
-        			signerCert, signerPrivatekey, signerCertChain);
-        	Header header = new Header(AppData.VOTING_HEADER_LABEL,"SignedPDF");
+            byte[] timeStampedSignedPDF = signWithTimestamp(pdfReader,
+                    signerCert, signerPrivatekey, signerCertChain);
+            Header header = new Header(AppData.VOTING_HEADER_LABEL,"SignedPDF");
             MimeBodyPart mimeBodyPart = Encryptor.encryptBase64Message(
-            		timeStampedSignedPDF, AppData.getInstance(context).getControlAcceso().
-            		getCertificado(), header);
+                    timeStampedSignedPDF, AppData.getInstance(context).getControlAcceso().
+                    getCertificado(), header);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             mimeBodyPart.writeTo(baos);
             byte[] bytesToSend = baos.toByteArray();
             baos.close();
             response = HttpHelper.sendByteArray(bytesToSend,
-                    AppData.PDF_SIGNED_AND_ENCRYPTED_CONTENT_TYPE, serviceURL);
+                    AppData.PDF_SIGNED_AND_ENCRYPTED_CONTENT_TYPE, serviceURL + "/" + manifestId);
             respuesta = new Respuesta(
-            		response.getStatusLine().getStatusCode(), 
-            		EntityUtils.toString(response.getEntity()));
+                    response.getStatusLine().getStatusCode(),
+                    EntityUtils.toString(response.getEntity()));
         }catch (Exception ex) {
-			ex.printStackTrace();
-			respuesta = new Respuesta(
-					Respuesta.SC_ERROR, ex.getMessage());
-		}
+            ex.printStackTrace();
+            respuesta = new Respuesta(
+                    Respuesta.SC_ERROR, ex.getMessage());
+        }
         return respuesta;
-	}
-	
-    public byte[] signWithTimestamp(PdfReader pdfReader, 
-    		X509Certificate signerCert, PrivateKey signerPrivatekey, 
-    		Certificate[] signerCertChain) throws Exception {
+    }
+
+    public byte[] signWithTimestamp(PdfReader pdfReader,
+                                    X509Certificate signerCert, PrivateKey signerPrivatekey,
+                                    Certificate[] signerCertChain) throws Exception {
         Log.d(TAG + ".signWithTimestamp(...)", " - certsChain.length: " + signerCertChain.length);
         PDF_CMSSignedGenerator signedGenerator = new PDF_CMSSignedGenerator(signerPrivatekey,
-        		signerCertChain, PDF_SIGNATURE_MECHANISM, PDF_SIGNATURE_DIGEST, PDF_DIGEST_OID);
-        
+                signerCertChain, PDF_SIGNATURE_MECHANISM, PDF_SIGNATURE_DIGEST, PDF_DIGEST_OID);
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PdfStamper stp = PdfStamper.createSignature(pdfReader, baos, '\0');
-        stp.setEncryption(null, null,PdfWriter.ALLOW_PRINTING, false);
-        final PdfSignatureAppearance sap = stp.getSignatureAppearance();  
-        sap.setVisibleSignature(new Rectangle(100, 10, 400, 40), 1, null);       
-               
+        stp.setEncryption(null, null, PdfWriter.ALLOW_PRINTING, false);
+        final PdfSignatureAppearance sap = stp.getSignatureAppearance();
+        sap.setVisibleSignature(new Rectangle(100, 10, 400, 40), 1, null);
+
         if(location != null) sap.setLocation(location);
         sap.setCrypto(null, signerCertChain, null, PdfSignatureAppearance.WINCER_SIGNED);
         if(reason != null) sap.setReason(reason);
@@ -162,72 +182,72 @@ public class SignTimestampSendPDFTask extends AsyncTask<String, Void, Respuesta>
         //Nota del javadoc -> due to the hex string coding this size should be byte_size*2+2.
         exc.put(PdfName.CONTENTS, new Integer(csize * 2 + 2));
         String firmante = PdfPKCS7.getSubjectFields(signerCert).getField("CN");
-        
+
         if(firmante != null && firmante.contains("(FIRMA)")) {
             firmante = firmante.replace("(FIRMA)", "");
         } else firmante = getNifUsuario(signerCert);
-        
-        
-        sap.setLayer2Text(context.getString(R.string.pdf_signed_by_lbl) + ":\n" + firmante); 
-        
+
+
+        sap.setLayer2Text(context.getString(R.string.pdf_signed_by_lbl) + ":\n" + firmante);
+
         CMSAttributeTableGenerator unsAttr= new CMSAttributeTableGenerator() {
 
-                public AttributeTable getAttributes(final Map parameters) throws CMSAttributeTableGenerationException {
-                    AttributeTable attributeTable = null;
-                    // Gets the signature bytes
-                    byte[] signatureBytes = (byte[]) parameters.get(SIGNATURE);
-                    DERObject obj;                   
-                    try {
-                        MessageDigest d = MessageDigest.getInstance(PDF_SIGNATURE_DIGEST);
-                        byte[] digest = d.digest(signatureBytes);
+            public AttributeTable getAttributes(final Map parameters) throws CMSAttributeTableGenerationException {
+                AttributeTable attributeTable = null;
+                // Gets the signature bytes
+                byte[] signatureBytes = (byte[]) parameters.get(SIGNATURE);
+                DERObject obj;
+                try {
+                    MessageDigest d = MessageDigest.getInstance(PDF_SIGNATURE_DIGEST);
+                    byte[] digest = d.digest(signatureBytes);
 
-                        MessageTimeStamper messageTimeStamper = 
-                                new MessageTimeStamper(TIMESTAMP_PDF_HASH, digest, context);
-                        Respuesta respuesta = messageTimeStamper.call();
-                        if(Respuesta.SC_OK != respuesta.getCodigoEstado()) {
-                        	Log.d(TAG + ".signWithTimestamp(...)", " - Error timestamping: " + 
-                        			respuesta.getMensaje());
-                            return null;
-                        }
-                        TimeStampToken timeStampToken = messageTimeStamper.getTimeStampToken();
-                        
-                        final Calendar cal = new GregorianCalendar();
-                        cal.setTime(timeStampToken.getTimeStampInfo().getGenTime());
-                        Log.d(TAG, "*** TimeStamp: " + DateUtils.getStringFromDate(cal.getTime()));
-                    
-                        obj = new ASN1InputStream(timeStampToken.getEncoded()).readObject();
-                        // Creates the signatureTimestampToken attribute
-                        DERSet s = new DERSet(obj);                        
-                        Attribute att = new Attribute(PKCSObjectIdentifiers.
+                    MessageTimeStamper messageTimeStamper =
+                            new MessageTimeStamper(TIMESTAMP_PDF_HASH, digest, context);
+                    Respuesta respuesta = messageTimeStamper.call();
+                    if(Respuesta.SC_OK != respuesta.getCodigoEstado()) {
+                        Log.d(TAG + ".signWithTimestamp(...)", " - Error timestamping: " +
+                                respuesta.getMensaje());
+                        return null;
+                    }
+                    TimeStampToken timeStampToken = messageTimeStamper.getTimeStampToken();
+
+                    final Calendar cal = new GregorianCalendar();
+                    cal.setTime(timeStampToken.getTimeStampInfo().getGenTime());
+                    Log.d(TAG, "*** TimeStamp: " + DateUtils.getStringFromDate(cal.getTime()));
+
+                    obj = new ASN1InputStream(timeStampToken.getEncoded()).readObject();
+                    // Creates the signatureTimestampToken attribute
+                    DERSet s = new DERSet(obj);
+                    Attribute att = new Attribute(PKCSObjectIdentifiers.
                             id_aa_signatureTimeStampToken, s);
-                        Hashtable oh = new Hashtable();
-                        //oh.put(PKCSObjectIdentifiers.id_aa_signatureTimeStampToken, att);
-                        oh.put(new DERObjectIdentifier("1.2.840.113549.1.9.16.2.14"), att);
-                        attributeTable = new AttributeTable(oh);  
-                   } catch(Exception ex) {
-                	   ex.printStackTrace();
-                	   throw new CMSAttributeTableGenerationException(ex.getMessage());
-                   }
-                    return attributeTable;
+                    Hashtable oh = new Hashtable();
+                    //oh.put(PKCSObjectIdentifiers.id_aa_signatureTimeStampToken, att);
+                    oh.put(new DERObjectIdentifier("1.2.840.113549.1.9.16.2.14"), att);
+                    attributeTable = new AttributeTable(oh);
+                } catch(Exception ex) {
+                    ex.printStackTrace();
+                    throw new CMSAttributeTableGenerationException(ex.getMessage());
                 }
-            };
-        
+                return attributeTable;
+            }
+        };
+
         dic.setDate(new PdfDate(sap.getSignDate()));
         sap.preClose(exc);
         MessageDigest md = MessageDigest.getInstance(PDF_SIGNATURE_DIGEST);
         byte[] signatureHash = md.digest(FileUtils.getBytesFromInputStream(sap.getRangeStream()));
-        
-        CMSSignedData signedData = signedGenerator.genSignedData(
-        		signatureHash, unsAttr);
 
-        /*CertStore certStore = signedData.getCertificatesAndCRLs("Collection", "BC"); 
-        SignerInformationStore signers = signedData.getSignerInfos(); 
-        Collection c = signers.getSigners(); 
-        Iterator it = c.iterator(); 
-        while (it.hasNext()) { 
-            SignerInformation signer = (SignerInformation) it.next(); 
-            Collection certCollection = certStore.getCertificates(signer.getSID()); 
-            Iterator certIt = certCollection.iterator(); 
+        CMSSignedData signedData = signedGenerator.genSignedData(
+                signatureHash, unsAttr);
+
+        /*CertStore certStore = signedData.getCertificatesAndCRLs("Collection", "BC");
+        SignerInformationStore signers = signedData.getSignerInfos();
+        Collection c = signers.getSigners();
+        Iterator it = c.iterator();
+        while (it.hasNext()) {
+            SignerInformation signer = (SignerInformation) it.next();
+            Collection certCollection = certStore.getCertificates(signer.getSID());
+            Iterator certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate) certIt.next();
             Log.d(TAG, "cert: " + cert.getSubjectDN().toString());
             Log.d(TAG, "signer.verify(...): " + signer.verify(cert, "BC"));
@@ -244,34 +264,33 @@ public class SignTimestampSendPDFTask extends AsyncTask<String, Void, Respuesta>
         return result;
     }
 
-    public static void sign(PdfReader reader, FileOutputStream outputStream, 
-    		PrivateKey key, Certificate[] chain) throws Exception {
-        Log.d(TAG + ".sign(...)", " - chain: " + chain.length);     
+    public static void sign(PdfReader reader, FileOutputStream outputStream,
+                            PrivateKey key, Certificate[] chain) throws Exception {
+        Log.d(TAG + ".sign(...)", " - chain: " + chain.length);
         PdfStamper stp = PdfStamper.createSignature(reader, outputStream, '\0');
         PdfSignatureAppearance signatureAppearance = stp.getSignatureAppearance();
         signatureAppearance.setCrypto(key, chain, null, PdfSignatureAppearance.WINCER_SIGNED);
         //sap.setReason("Support this");
         //sap.setLocation("Higueruela");
-        signatureAppearance.setSignDate( new GregorianCalendar() ); 
+        signatureAppearance.setSignDate( new GregorianCalendar() );
         signatureAppearance.setVisibleSignature(new Rectangle(50, 40, 300, 140), 1, null);
         stp.close();
-     }
-	
-    public static String getNifUsuario (X509Certificate certificate) {
-    	String subjectDN = certificate.getSubjectDN().getName();
-		String nif = null;
-    	if(subjectDN.split("CN=nif:").length > 1) {
-			nif = subjectDN.split("CN=nif:")[1];
-			if (nif.split(",").length > 1) {
-				nif = nif.split(",")[0];
-			}
-		} else if(subjectDN.split("SERIALNUMBER=").length > 1) {
-			nif = subjectDN.split("SERIALNUMBER=")[1];
-			if (nif.split(",").length > 1) {
-				nif = nif.split(",")[0];
-			}
-		}
-    	return nif;
     }
 
+    public static String getNifUsuario (X509Certificate certificate) {
+        String subjectDN = certificate.getSubjectDN().getName();
+        String nif = null;
+        if(subjectDN.split("CN=nif:").length > 1) {
+            nif = subjectDN.split("CN=nif:")[1];
+            if (nif.split(",").length > 1) {
+                nif = nif.split(",")[0];
+            }
+        } else if(subjectDN.split("SERIALNUMBER=").length > 1) {
+            nif = subjectDN.split("SERIALNUMBER=")[1];
+            if (nif.split(",").length > 1) {
+                nif = nif.split(",")[0];
+            }
+        }
+        return nif;
+    }
 }

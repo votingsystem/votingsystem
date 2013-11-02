@@ -302,7 +302,7 @@ class FirmaService {
 	def checkCancelledCerts () {
 		log.debug "checkCancelledCerts - checkCancelledCerts"
 		String caDirPath = getAbsolutePath("${grailsApplication.config.SistemaVotacion.rutaDirectorioArchivosCA}")
-		String cancelSufix = "${grailsApplication.config.SistemaVotacion.cancelSufix}".toUpperCase()
+		String cancelSufix = "_CANCELLED"
 		log.debug ("caDirPath: ${caDirPath} - cancelSufix: ${cancelSufix}")
 		new File(caDirPath).eachFile() { file ->
 			String fileName = file.getName().toUpperCase()

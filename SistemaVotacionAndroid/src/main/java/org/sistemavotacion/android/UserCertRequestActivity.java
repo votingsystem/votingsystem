@@ -18,12 +18,12 @@ package org.sistemavotacion.android;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -35,23 +35,28 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.sistemavotacion.android.ui.CertPinDialog;
 import org.sistemavotacion.android.ui.CertPinDialogListener;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
 import org.sistemavotacion.seguridad.PKCS10WrapperClient;
-import org.sistemavotacion.task.SendDataTask;
+import org.sistemavotacion.util.HttpHelper;
 import org.sistemavotacion.util.ServerPaths;
 import org.sistemavotacion.util.StringUtils;
 
@@ -73,8 +78,7 @@ import static org.sistemavotacion.android.AppData.SIG_NAME;
 public class UserCertRequestActivity extends ActionBarActivity implements CertPinDialogListener {
 
 	public static final String TAG = "UserCertRequestActivity";
-	
-    private ProgressDialog progressDialog = null;
+
     private String password = null;
     private String email = null;
     private String telefono = null;
@@ -84,13 +88,20 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
     private EditText givennameText;
     private EditText surnameText;
     private AppData appData;
-    
+
+    private TextView progressMessage;
+    private View progressContainer;
+    private FrameLayout mainLayout;
+    private boolean isProgressShown;
+    private boolean isDestroyed = true;
+    private SendDataTask sendDataTask;
+
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
         
     	super.onCreate(savedInstanceState);
         Log.d(TAG + ".onCreate(...) ", " - onCreate - ");
-        setContentView(R.layout.user_cert_request_form);
+        setContentView(R.layout.user_cert_request_activity);
         appData = AppData.getInstance(getBaseContext());
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(getString(R.string.formulario_solicitud_certificado_label));
@@ -138,6 +149,14 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
             	processNif();
             }
         });
+
+        mainLayout = (FrameLayout) findViewById(R.id.mainLayout);
+        progressContainer = findViewById(R.id.progressContainer);
+        progressMessage = (TextView)findViewById(R.id.progressMessage);
+        mainLayout.getForeground().setAlpha(0);
+        isProgressShown = false;
+        isDestroyed = false;
+        progressMessage.setText(R.string.loading_data_msg);
     }
 
     @Override public void onStart() {
@@ -157,14 +176,12 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
         }
       }
 
-
 	@Override public boolean onOptionsItemSelected(MenuItem item) {
 		Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
 		switch (item.getItemId()) {
 	    	case android.R.id.home:
 	    		Log.d(TAG + ".onOptionsItemSelected(...) ", " - home - ");
 	    		Intent intent = new Intent(this, NavigationDrawer.class);
-	    		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 	    		startActivity(intent);
 	    		return true;
 	    	default:
@@ -185,8 +202,6 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
     				 surnameText.getText().toString().toUpperCase(), Normalizer.Form.NFD);
     		surname  = surname.replaceAll("[^\\p{ASCII}]", "");
     		String nif = StringUtils.validarNIF(nifText.getText().toString().toUpperCase());
-
-
 
 			AlertDialog.Builder builder= new AlertDialog.Builder(this);
     		builder.setTitle(getString(R.string.
@@ -210,80 +225,9 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
       	}
     }
 
-    private void showProgressDialog(String dialogMessage) {
-        if (progressDialog == null)
-        	progressDialog = new ProgressDialog(UserCertRequestActivity.this);
-    	progressDialog.setMessage(dialogMessage);
-    	progressDialog.setIndeterminate(true);
-    	progressDialog.setCancelable(false);
-        progressDialog.show();
-    }
-
-    private void sendCsrRequest() {
-        showProgressDialog(getString(R.string.request_cert_msg));
-        byte[] csrBytes = null;
-    	try {
-    		String givenName = Normalizer.normalize(
-    				givennameText.getText().toString().toUpperCase(), Normalizer.Form.NFD);
-    		givenName  = givenName.replaceAll("[^\\p{ASCII}]", "");
-    		String surname = Normalizer.normalize(
-    				 surnameText.getText().toString().toUpperCase(), Normalizer.Form.NFD);
-    		surname  = surname.replaceAll("[^\\p{ASCII}]", "");
-    		String nif = StringUtils.validarNIF(nifText.getText().toString().toUpperCase());
-			pkcs10WrapperClient = PKCS10WrapperClient.buildCSRUsuario (KEY_SIZE, SIG_NAME,
-			        SIGNATURE_ALGORITHM, PROVIDER, nif, email, telefono, deviceId, givenName, surname);
-			csrBytes = pkcs10WrapperClient.getPEMEncodedRequestCSR();
-	        X509Certificate[] arrayCerts = CertUtil.generateCertificate(pkcs10WrapperClient.getKeyPair(),
-	        		new Date(System.currentTimeMillis()),
-	        		new Date(System.currentTimeMillis() + 365 * 24 * 60 * 60 * 1000),
-	        		"CN=" + ALIAS_CERT_USUARIO);
-	        KeyStore keyStore = KeyStore.getInstance("PKCS12");
-	        keyStore.load(null, null);
-	        keyStore.setKeyEntry(ALIAS_CERT_USUARIO, pkcs10WrapperClient.getPrivateKey(),
-	        		password.toCharArray(), arrayCerts);
-	        byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, password.toCharArray());
-	        FileOutputStream fos = openFileOutput(KEY_STORE_FILE, Context.MODE_PRIVATE);
-	        fos.write(keyStoreBytes);
-	        fos.close();
-            appData.setEstado(AppData.Estado.CON_CSR);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			showMessage(getString(R.string.error_lbl), ex.getMessage());
-		}
-    	try {
-    		SendDataTask sendDataTask = (SendDataTask) new SendDataTask(csrBytes, null).
-    				execute(ServerPaths.getURLSolicitudCSRUsuario(appData.getAccessControlURL()));
-    		Respuesta respuesta = sendDataTask.get();
-			Log.d(TAG + ".sendCsrRequest(...)", " - sendCsrRequest - sendDataTask - statuscode: " + respuesta.getCodigoEstado());
-	        if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
-	        	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-		        SharedPreferences.Editor editor = settings.edit();
-		        Long idSolictud = Long.valueOf(respuesta.getMensaje());
-		        editor.putLong(PREFS_ID_SOLICTUD_CSR, idSolictud);
-		        editor.commit();
-                appData.setEstado(AppData.Estado.CON_CSR);
-	        	Intent intent = new Intent(getBaseContext(),
-	        			UserCertResponseActivity.class);
-	        	startActivity(intent);
-	        } else {
-	            if (progressDialog != null) progressDialog.dismiss();
-				AlertDialog.Builder builder= new AlertDialog.Builder(UserCertRequestActivity.this);
-				builder.setTitle(R.string.alert_exception_caption).setMessage(respuesta.getMensaje())
-					.setPositiveButton("OK", null).show();
-	        }
-    	} catch(Exception ex) {
-    		ex.printStackTrace();
-			showMessage(getString(R.string.error_lbl), ex.getMessage());
-    	}
-
-    }
-    
 	private void showMessage(String caption, String message) {
 		Log.d(TAG + ".showMessage(...) ", " - caption: " 
 				+ caption + "  - showMessage: " + message);
-        if (progressDialog != null && progressDialog.isShowing()) {
-            progressDialog.dismiss();
-        }
 		AlertDialog.Builder builder= new AlertDialog.Builder(this);
 		builder.setTitle(caption).setMessage(message).show();
 	}
@@ -337,7 +281,121 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
 	    ft.addToBackStack(null);
 		password = pin;
 		if(password == null) return;
-		sendCsrRequest();
+        if(sendDataTask != null) sendDataTask.cancel(true);
+        sendDataTask = new SendDataTask();
+        sendDataTask.execute(ServerPaths.getURLSolicitudCSRUsuario(appData.getAccessControlURL()));
 	}
 
+    public void showProgress(boolean shown, boolean animate) {
+        if (isProgressShown == shown) {
+            return;
+        }
+        isProgressShown = shown;
+        if (!shown) {
+            if (animate) {
+                progressContainer.startAnimation(AnimationUtils.loadAnimation(
+                        this, android.R.anim.fade_out));
+                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
+                //        this, android.R.anim.fade_in));
+            }
+            progressContainer.setVisibility(View.GONE);
+            //eventContainer.setVisibility(View.VISIBLE);
+            mainLayout.getForeground().setAlpha( 0); // restore
+            progressContainer.setOnTouchListener(new View.OnTouchListener() {
+                //to enable touch events on background view
+                @Override public boolean onTouch(View v, MotionEvent event) {return false;}
+            });
+        } else {
+            if (animate) {
+                progressContainer.startAnimation(AnimationUtils.loadAnimation(
+                        this, android.R.anim.fade_in));
+                //eventContainer.startAnimation(AnimationUtils.loadAnimation(
+                //        this, android.R.anim.fade_out));
+            }
+            progressContainer.setVisibility(View.VISIBLE);
+            //eventContainer.setVisibility(View.INVISIBLE);
+            mainLayout.getForeground().setAlpha(150); // dim
+            progressContainer.setOnTouchListener(new View.OnTouchListener() {
+                //to disable touch events on background view
+                @Override public boolean onTouch(View v, MotionEvent event) { return true; }
+            });
+        }
+
+    }
+
+    public class SendDataTask extends AsyncTask<String, Void, Respuesta> {
+
+        public static final String TAG = "SendDataTask";
+
+
+        public SendDataTask() { }
+
+        protected void onPreExecute() {
+            Log.d(TAG + ".SendDataTask.onPreExecute(...)", " --- onPreExecute");
+            getWindow().getDecorView().findViewById(
+                    android.R.id.content).invalidate();
+            showProgress(true, true);
+        }
+
+
+        @Override
+        protected Respuesta doInBackground(String... urls) {
+            Log.d(TAG + ".SendDataTask.doInBackground(...)", " - url:" + urls[0]);
+            byte[] csrBytes = null;
+            try {
+                String givenName = Normalizer.normalize(
+                        givennameText.getText().toString().toUpperCase(), Normalizer.Form.NFD);
+                givenName  = givenName.replaceAll("[^\\p{ASCII}]", "");
+                String surname = Normalizer.normalize(
+                        surnameText.getText().toString().toUpperCase(), Normalizer.Form.NFD);
+                surname  = surname.replaceAll("[^\\p{ASCII}]", "");
+                String nif = StringUtils.validarNIF(nifText.getText().toString().toUpperCase());
+                pkcs10WrapperClient = PKCS10WrapperClient.buildCSRUsuario (KEY_SIZE, SIG_NAME,
+                        SIGNATURE_ALGORITHM, PROVIDER, nif, email, telefono, deviceId, givenName, surname);
+                csrBytes = pkcs10WrapperClient.getPEMEncodedRequestCSR();
+                X509Certificate[] arrayCerts = CertUtil.generateCertificate(pkcs10WrapperClient.getKeyPair(),
+                        new Date(System.currentTimeMillis()),
+                        new Date(System.currentTimeMillis() + 365 * 24 * 60 * 60 * 1000),
+                        "CN=" + ALIAS_CERT_USUARIO);
+                KeyStore keyStore = KeyStore.getInstance("PKCS12");
+                keyStore.load(null, null);
+                keyStore.setKeyEntry(ALIAS_CERT_USUARIO, pkcs10WrapperClient.getPrivateKey(),
+                        password.toCharArray(), arrayCerts);
+                byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, password.toCharArray());
+                FileOutputStream fos = openFileOutput(KEY_STORE_FILE, Context.MODE_PRIVATE);
+                fos.write(keyStoreBytes);
+                fos.close();
+                HttpResponse response = HttpHelper.sendByteArray(csrBytes, null, urls[0]);
+                return new Respuesta(response.getStatusLine().getStatusCode(),
+                        EntityUtils.toString(response.getEntity()));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                return new Respuesta(Respuesta.SC_ERROR,
+                        ex.getMessage());
+            }
+        }
+
+        @Override  protected void onPostExecute(Respuesta respuesta) {
+            Log.d(TAG + ".SendDataTask.onPostExecute", " - statusCode: " +
+                    respuesta.getCodigoEstado());
+            showProgress(false, true);
+            if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+                SharedPreferences.Editor editor = settings.edit();
+                Long idSolictud = Long.valueOf(respuesta.getMensaje());
+                editor.putLong(PREFS_ID_SOLICTUD_CSR, idSolictud);
+                editor.commit();
+                appData.setEstado(AppData.Estado.CON_CSR);
+                Intent intent = new Intent(getBaseContext(),
+                        UserCertResponseActivity.class);
+                startActivity(intent);
+            } else {
+                AlertDialog.Builder builder= new AlertDialog.Builder(UserCertRequestActivity.this);
+                builder.setTitle(R.string.alert_exception_caption).setMessage(respuesta.getMensaje())
+                        .setPositiveButton("OK", null).show();
+            }
+        }
+
+
+    }
 }

@@ -26,7 +26,7 @@
 				}
 			 	
 	    		$("#adminDocumentLink").click(function () {
-	    			showAdminDocumentDialog(cancelEventCallback)
+	    			showAdminDocumentDialog(adminDocumentCallback)
 		    	})
 		    	
 	    		$("#signManifestButton").click(function () {
@@ -34,7 +34,7 @@
 		    	})
 		    	
 	    		$("#requestBackupButton").click(function () {
-	    			showRequestEventBackupDialog(requestEventBackupCallback)
+	    			showRequestEventBackupDialog(requestBackupCallback)
 		    	})
 		    	
 			 });
@@ -54,11 +54,11 @@
 	    		webAppMessage.evento = pageEvent
 				webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStamp', absolute:true)}"
 				webAppMessage.urlDocumento = pageEvent.URL
-				votingSystemClient.setMessageToSignatureClient(webAppMessage, eventSignatureCallback); 
+				votingSystemClient.setMessageToSignatureClient(webAppMessage, sendManifestCallback); 
 			}
 
-			function requestEventBackupCallback(appMessage) {
-				console.log("requestEventBackupCallback");
+			function requestBackupCallback(appMessage) {
+				console.log("requestBackupCallback");
 				var appMessageJSON = toJSON(appMessage)
 				if(appMessageJSON != null) {
 					$("#workingWithAppletDialog" ).dialog("close");
@@ -71,7 +71,7 @@
 				}
 			}
 
-			function eventSignatureCallback(appMessage) {
+			function sendManifestCallback(appMessage) {
 				console.log("eventSignatureCallback - message from native client: " + appMessage);
 				var appMessageJSON = toJSON(appMessage)
 				if(appMessageJSON != null) {
@@ -87,8 +87,8 @@
 				}
 			}
 
-			function cancelEventCallback(appMessage) {
-				console.log("cancelEventCallback - message from native client: " + appMessage);
+			function adminDocumentCallback(appMessage) {
+				console.log("adminDocumentCallback - message from native client: " + appMessage);
 				var appMessageJSON = toJSON(appMessage)
 				if(appMessageJSON != null) {
 					$("#workingWithAppletDialog").dialog("close");

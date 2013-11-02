@@ -110,7 +110,7 @@ class SubscripcionService {
         log.debug "checkControlCenter - serverURL:${serverURL}"
 		String msg = null
         serverURL = StringUtils.checkURL(serverURL)
-		String urlInfoCentroControl = "${serverURL}${grailsApplication.config.SistemaVotacion.sufijoURLInfoServidor}"
+		String urlInfoCentroControl = "${serverURL}/infoServidor"
 		CentroControl centroControl = null
 		CentroControl centroControlDB = CentroControl.findWhere(serverURL:serverURL)
 		Certificado controlCenterCert = null

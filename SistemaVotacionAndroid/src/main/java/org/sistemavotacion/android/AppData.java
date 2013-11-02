@@ -4,32 +4,23 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.bouncycastle2.jce.provider.BouncyCastleProvider;
-import org.sistemavotacion.modelo.ActorConIP;
 import org.sistemavotacion.modelo.ControlAcceso;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Operation;
 import org.sistemavotacion.modelo.Respuesta;
-import org.sistemavotacion.modelo.Tipo;
 import org.sistemavotacion.modelo.Usuario;
-import org.sistemavotacion.seguridad.CertUtil;
-import org.sistemavotacion.task.GetDataTask;
 import org.sistemavotacion.util.EventState;
-import org.sistemavotacion.util.ServerPaths;
 import org.sistemavotacion.util.SubSystem;
 import org.sistemavotacion.util.SubSystemChangeListener;
 
-import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -45,11 +36,10 @@ public class AppData {
     public static final String PREFS_ESTADO               = "estado";
     public static final String PREFS_ID_SOLICTUD_CSR      = "idSolicitudCSR";
     public static final String PREFS_ID_APLICACION        = "idAplicacion";
-    public static final String MANIFEST_FILE_NAME         = "Manifest";
+    public static final String EVENT_KEY                  = "eventKey";
     public static final String NOMBRE_ARCHIVO_FIRMADO     = "archivoFirmado";
     public static final String CSR_FILE_NAME              = "csr";
     public static final String ACCESS_REQUEST_FILE_NAME   = "accessRequest";
-    public static final String NOMBRE_ARCHIVO_BYTE_ARRAY  = "byteArray";
     public static final String SIGNED_PART_EXTENSION      = ".p7m";
     public static final String DEFAULT_SIGNED_FILE_NAME   = "smimeMessage.p7m";
     public static final String PROVIDER                   = BouncyCastleProvider.PROVIDER_NAME;
@@ -71,12 +61,10 @@ public class AppData {
     public static final String TIMESTAMP_VOTE_HASH = TSPAlgorithms.SHA256;
 
     public static final String ASUNTO_MENSAJE_FIRMA_DOCUMENTO = "[Firma]-";
-    public static final String SISTEMA_VOTACION_DIR = "SistemaVotacion";
     public static final String VOTING_HEADER_LABEL  = "votingSystemMessageType";
 
 
     public static final String CERT_NOT_FOUND_DIALOG_ID      = "certNotFoundDialog";
-    public static final String PIN_DIALOG_ID                 = "pinDialog";
 
     public static final String PDF_CONTENT_TYPE    = "application/pdf";
     public static final String SIGNED_CONTENT_TYPE = "application/x-pkcs7-signature";
@@ -92,15 +80,15 @@ public class AppData {
             PDF_CONTENT_TYPE + "," + ENCRYPTED_CONTENT_TYPE;
 
 
-
     private String accessControlURL = null;
     private Estado estado = Estado.SIN_CSR;
     private List<SubSystemChangeListener> subSystemChangeListeners = new ArrayList<SubSystemChangeListener>();
     private SubSystem selectedSubsystem = SubSystem.VOTING;
     private EventState navigationDrawerEventState = EventState.OPEN;
     private Evento eventoSeleccionado;
+    private ArrayList<Evento> eventsSelectedList;
 
-    private ActorConIP controlAcceso;
+    private ControlAcceso controlAcceso;
     private Usuario usuario;
     private Map<String, X509Certificate> certsMap = new HashMap<String, X509Certificate>();
     private Operation operation = null;
@@ -112,18 +100,6 @@ public class AppData {
 
     private AppData(Context context) {
         this.context = context.getApplicationContext();
-        Properties props = new Properties();
-        try {
-            props.load(context.getAssets().open("VotingSystem.properties"));
-            if(props != null) {
-                accessControlURL = props.getProperty("CONTROL_ACCESO_URL");
-                Log.d(TAG + ".onCreate()", " - accessControlURL: " + accessControlURL);
-            } else Log.d(TAG + ".onCreate()", " - NULL accessControlURL");
-        } catch (IOException ex) {
-            Log.e(TAG + ".onCreate()", ex.getMessage(), ex);
-        }
-        actualizarEstado(accessControlURL);
-
     }
 
     public static AppData getInstance(Context context) {
@@ -134,20 +110,30 @@ public class AppData {
         return INSTANCE;
     }
 	
-	public void setEvent(Evento event, Context context) {
-        Log.d(TAG + ".setEvent(...)", "- event type: " + event.getTipo());
+	public void setEvent(Evento event) {
+        Log.d(TAG + ".setEvent(...)", "- eventId: " + event.getId() + " - type: " + event.getTipo());
 		this.eventoSeleccionado = event;
-        if(Tipo.EVENTO_VOTACION == event.getTipo()) {
-            try {
-                checkCert(eventoSeleccionado.getCentroControl(), context);
-            } catch (Exception e) {
-                e.printStackTrace();
-                showMessage(context.getString(R.string.CONTROL_CENTER_CONECTION_ERROR_MSG), context);
-            }
-        } else if(Tipo.EVENTO_FIRMA == event.getTipo()) this.eventoSeleccionado.setControlAcceso(
-                new ControlAcceso(controlAcceso));
 	}
-	
+
+    public List<Evento> getEvents() {
+        return eventsSelectedList;
+    }
+
+    public void setEventList(List<Evento> events) {
+        Log.d(TAG + ".setEventList(...)", " --- setEventList - events.size(): " + events.size());
+        eventsSelectedList = new ArrayList<Evento>();
+        if(events != null) {
+            for(Evento event: events) {
+                event.setControlAcceso(controlAcceso);
+                eventsSelectedList.add(event);
+            }
+        }
+    }
+
+    public int getEventIndex(Evento event) {
+        return eventsSelectedList.indexOf(event);
+    }
+
 	public Evento getEvent() {
 		return eventoSeleccionado;
 	}
@@ -169,29 +155,20 @@ public class AppData {
 	}
 
     public void setAccessControlURL(String accessControlURL) {
-        this.accessControlURL = accessControlURL;
-    }
-
-
-    public void actualizarEstado(String accessControlURL) {
+        Log.d(TAG + ".setAccessControlURL() ", " - setAccessControlURL: " + accessControlURL);
         if(accessControlURL == null) {
             Log.d(TAG + ".actualizarEstado(...)", "----- NULL accessControlURL -----");
             return;
         }
-        this.accessControlURL = accessControlURL;
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         String estadoStr = settings.getString(
                 PREFS_ESTADO + "_" + accessControlURL, Estado.SIN_CSR.toString());
         estado = Estado.valueOf(estadoStr);
+        this.accessControlURL = accessControlURL;
     }
-
 
     public String getAccessControlURL() {
         return accessControlURL;
-    }
-
-    public void showMessage(String message, Context context) {
-        Toast.makeText(context, message, Toast.LENGTH_LONG).show();
     }
 
     public void setEstado(Estado estado) {
@@ -221,70 +198,15 @@ public class AppData {
         return selectedSubsystem;
     }
 
-
-    public void checkConnection(Context context) {
-        Log.d(TAG + ".checkConnection() ", " - accessControlURL: " + accessControlURL);
-        if (controlAcceso == null || !controlAcceso.getServerURL().equals(accessControlURL)) {
-            try {
-                GetDataTask getDataTask = (GetDataTask) new GetDataTask(null).
-                        execute(ServerPaths.getURLInfoServidor(accessControlURL));
-                Respuesta respuesta = getDataTask.get();
-                if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
-                    try {
-                        controlAcceso = ActorConIP.parse(respuesta.getMensaje(),
-                                ActorConIP.Tipo.CONTROL_ACCESO);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                        showMessage(context.getString(R.string.error_lbl) + ": " +
-                                ex.getMessage(), context);
-                    }
-                } else showMessage(context.getString(R.string.error_lbl) + ": " +
-                        respuesta.getMensaje(), context);
-            } catch(Exception ex) {
-                ex.printStackTrace();
-                showMessage(context.getString(R.string.error_lbl) + ": " + ex.getMessage(), context);
-            }
-        }
-    }
-
-    public void getNetworkCert(String serverURL, Context context) throws Exception {
-        Log.d(TAG + ".getServerCert() ", " - getServerCert - serverURL: " + serverURL);
-        String serverCertURL = ServerPaths.getURLCadenaCertificacion(serverURL);
-        GetDataTask getDataTask = (GetDataTask) new GetDataTask(null).
-                execute(serverCertURL);
-        Respuesta respuesta = getDataTask.get();
-        if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
-            Collection<X509Certificate> certChain = CertUtil.fromPEMToX509CertCollection(
-                    respuesta.getMessageBytes());
-            X509Certificate serverCert = certChain.iterator().next();
-            certsMap.put(serverURL, serverCert);
-        } else {
-            Log.d(TAG + ".getServerCert() ", " - Error - server status: " +
-                    respuesta.getCodigoEstado() + " - message: " + respuesta.getMensaje());
-            showMessage(context.getString(R.string.get_cert_error_msg) + ": " + serverURL, context);
-        }
-    }
-
     public X509Certificate getCert(String serverURL) {
         Log.d(TAG + ".getCert(...)", " - getCert - serverURL: " + serverURL);
         if(serverURL == null) return null;
         return certsMap.get(serverURL);
     }
 
-    public void checkCert(ActorConIP actorConIP, Context context) throws Exception {
-        Log.d(TAG + ".checkCert(...)", " - checkCert - serverURL: "
-                + actorConIP.getServerURL());
-        if(actorConIP.getCertificado() == null) {
-            if(actorConIP.getServerURL() == null) {
-                throw new Exception(" - Missing serverURL param - ");
-            }
-            X509Certificate actorCert = certsMap.get(actorConIP.getServerURL().trim());
-            if(actorCert == null) {
-                getNetworkCert(actorConIP.getServerURL(),context);
-            } else {
-                actorConIP.setCertificado(actorCert);
-            }
-        }
+    public void putCert(String serverURL, X509Certificate cert) {
+        Log.d(TAG + ".putCert(...)", " - putCert - serverURL: " + serverURL);
+        certsMap.put(serverURL, cert);
     }
 
     public Usuario getUsuario() {
@@ -295,11 +217,12 @@ public class AppData {
         this.usuario = usuario;
     }
 
-    public ActorConIP getControlAcceso() {
+    public ControlAcceso getControlAcceso() {
+        Log.d(TAG + ".getControlAcceso() ", " - getControlAcceso");
         return controlAcceso;
     }
 
-    public void setControlAcceso(ActorConIP controlAcceso) {
+    public void setControlAcceso(ControlAcceso controlAcceso) {
         this.controlAcceso = controlAcceso;
     }
 

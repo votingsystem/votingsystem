@@ -16,14 +16,15 @@
 
 package org.sistemavotacion.android;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -33,14 +34,15 @@ import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.util.ServerPaths;
 
 
-public class EventStatisticsActivity extends ActionBarActivity {
+public class EventStatisticsFragment extends Fragment {
 	
-	public static final String TAG = "EventStatisticsActivity";
+	public static final String TAG = "EventStatisticsFragment";
 
-	public static final String EVENT_URL_KEY      = "eventURL";
+    private int eventIndex;
+    private View rootView;
+
 
     private Evento evento =  null;
-	private static WebView svWebView;
     private AppData appData;
 
     private View progressContainer;
@@ -48,55 +50,55 @@ public class EventStatisticsActivity extends ActionBarActivity {
     private boolean isProgressShown;
     private boolean isDestroyed = true;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                       Bundle savedInstanceState) {
+        Log.d(TAG + ".onCreate(...)", " --- onCreate");
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.event_statistics_activity);
-        String eventStatisticsURL = getIntent().getStringExtra(EVENT_URL_KEY);
-        appData = AppData.getInstance(getBaseContext());
-        if(eventStatisticsURL == null) {
-            evento = appData.getEvent();
-            if(evento == null) return;
-            eventStatisticsURL = ServerPaths.getURLStatistics(evento);
-        }
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(evento.getAsunto());
-        getSupportActionBar().setLogo(android.R.drawable.ic_dialog_info);
-        mainLayout = (FrameLayout) findViewById( R.id.mainLayout);
-        progressContainer = findViewById(R.id.progressContainer);
+        Bundle args = getArguments();
+        eventIndex =  args.getInt(EventPagerActivity.EventsPagerAdapter.EVENT_INDEX_KEY);
+        appData = AppData.getInstance(getActivity());
+        evento = appData.getEvents().get(eventIndex);
+        appData.setEvent(evento);
+        rootView = inflater.inflate(R.layout.event_statistics_fragment, container, false);
+        String eventStatisticsURL = ServerPaths.getURLStatistics(evento);
+        mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
+        progressContainer = rootView.findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha( 0);
         isProgressShown = false;
+        setHasOptionsMenu(true);
         isDestroyed = false;
-        Log.d(TAG + ".onCreate(...) ", " - opening: " + eventStatisticsURL);
         showProgress(true, true);
         loadUrl(eventStatisticsURL);
+        return rootView;
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case android.R.id.home:
-                finish();
+                appData.setEvent(evento);
+                Intent intent = new Intent(getActivity(), EventPagerActivity.class);
+                startActivity(intent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    @Override protected void onDestroy() {
+    @Override public void onDestroy() {
         super.onDestroy();
-    	Log.d(TAG + ".onDestroy()", " - onDestroy");
+        Log.d(TAG + ".onDestroy()", " - onDestroy");
     };
 
     public void showProgress(boolean shown, boolean animate) {
-        if (isProgressShown == shown) {
+        if (isProgressShown == shown || getActivity() == null) {
             return;
         }
         isProgressShown = shown;
         if (!shown) {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        this, android.R.anim.fade_out));
+                        getActivity(), android.R.anim.fade_out));
                 //eventContainer.startAnimation(AnimationUtils.loadAnimation(
                 //        this, android.R.anim.fade_in));
             }
@@ -113,7 +115,7 @@ public class EventStatisticsActivity extends ActionBarActivity {
         } else {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        this, android.R.anim.fade_in));
+                        getActivity(), android.R.anim.fade_in));
                 //eventContainer.startAnimation(AnimationUtils.loadAnimation(
                 //        this, android.R.anim.fade_out));
             }
@@ -132,12 +134,12 @@ public class EventStatisticsActivity extends ActionBarActivity {
 
     private void loadUrl(String serverURL) {
     	Log.d(TAG + ".serverURL(...)", " - serverURL: " + serverURL);
-        svWebView = (WebView) findViewById(R.id.webview);
+        WebView svWebView = (WebView) rootView.findViewById(R.id.webview);
         WebSettings webSettings = svWebView.getSettings();
         webSettings.setBuiltInZoomControls(true);
         webSettings.setUseWideViewPort(true);
         webSettings.setSupportZoom(true);
-        //webSettings.setLoadWithOverviewMode(true);
+        webSettings.setLoadWithOverviewMode(true);
         svWebView.setClickable(true);
         webSettings.setJavaScriptEnabled(true);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);

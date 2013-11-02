@@ -1,11 +1,15 @@
 package org.sistemavotacion.util;
 
+import android.util.Log;
+
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.Operation;
 
 import java.text.MessageFormat;
 
 public class ServerPaths {
+
+    public static final String TAG = "ServerPaths";
 
 	public static final String sufijoURLCadenaCertificacion = "certificado/cadenaCertificacion";
 	public static final String sufijoURLEventos = "evento";
@@ -78,6 +82,7 @@ public class ServerPaths {
     
     public static String getURLEventos (String serverURL, 
     		EventState eventState, SubSystem subSystem, int max, int offset) {
+        Log.d(TAG + ".getURLEventos() ", " - serverURL: " + serverURL);
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         String result = serverURL;
         String path = null;
@@ -131,7 +136,7 @@ public class ServerPaths {
 	    		break;
     	}
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
-        return serverURL + "app/editor?androidClientLoaded=true&editor=" + param;        
+        return serverURL + "mobileEditor/" + param;
     }
     
     public static String getURLInfoServidor (String serverURL) {

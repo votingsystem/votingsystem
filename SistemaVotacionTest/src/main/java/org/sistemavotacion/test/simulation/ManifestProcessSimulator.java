@@ -279,9 +279,10 @@ public class ManifestProcessSimulator extends Simulator<SimulationData>
     public void actionPerformed(ActionEvent ae) {
         if (ae.getSource().equals(timer)) {
             if(!signerList.isEmpty()) {
-                try {
-                    int randomSigner = new Random().nextInt(signerList.size());
+                int randomSigner = new Random().nextInt(signerList.size());
                     launchSignature(signerList.remove(randomSigner));
+                try {
+                    
                 } catch (Exception ex) {
                     logger.error(ex.getMessage(), ex);
                 }

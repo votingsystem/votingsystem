@@ -81,6 +81,7 @@ environments {
     }
     production {
         grails.logging.jul.usebridge = false
+		// TODO: grails.serverURL = "http://www.sistemavotacion.org"
 		grails.serverURL = "http://192.168.1.4:8080/SistemaVotacionCentroControl"
     }
 	test {
@@ -169,18 +170,11 @@ grails.war.copyToWebApp = { args ->
 SistemaVotacion.baseRutaCopiaRespaldo='./VotingSystem/copiaRespaldo'
 SistemaVotacion.eventsMetaInfBaseDir='./VotingSystem/Eventos_MetaInf'
 SistemaVotacion.errorsBaseDir='./VotingSystem/errors'
-SistemaVotacion.sufijoURLCadenaCertificacion='/certificado/cadenaCertificacion'
-SistemaVotacion.sufijoURLInfoServidor='/infoServidor'
-SistemaVotacion.sufijoURLNotificacionVotoControlAcceso='/voto'
-SistemaVotacion.sufijoURLEventoVotacion='/eventoVotacion/'
-SistemaVotacion.sufijoURLEventoVotacionValidado='/eventoVotacion/validado/'
-SistemaVotacion.sufijoURLVotar='/app/home#VOTAR&eventoId='
 SistemaVotacion.rutaAlmacenClaves='WEB-INF/cms/CentroControl.jks'
 SistemaVotacion.aliasClavesFirma='ClavesCentroControl'
 SistemaVotacion.rutaDirectorioArchivosCA='WEB-INF/cms/'
 SistemaVotacion.rutaCadenaCertificacion='WEB-INF/cms/cadenaCertificacion.pem'
 SistemaVotacion.passwordClavesFirma='PemPass'
-SistemaVotacion.encabezadoOpcionSeleccionada='opcionSeleccionada'
 //milliseconds
 SistemaVotacion.timeOutConsulta = 500
 //Nombre decriptivo del servidor

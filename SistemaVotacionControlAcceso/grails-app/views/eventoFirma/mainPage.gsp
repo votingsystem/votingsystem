@@ -9,6 +9,7 @@
 		 		paginate(0)
 			 	
 		 		$('#eventsStateSelect').on('change', function (e) {
+		 			eventState = $(this).val()
 		 		    var optionSelected = $("option:selected", this);
 		 		    var valueSelected = this.value;
 		 		    console.log(" - valueSelected: " + valueSelected)
@@ -18,11 +19,12 @@
 				 		    							 'border-color': '#cccccc'})
 				 		} else {
 			 		    	$('#eventsStateSelect').css({'color': $( "#eventsStateSelect option:selected" ).css('color'),
-								 'border-color': $( "#eventsStateSelect option:selected" ).css('color')})
+    							 'border-color': $( "#eventsStateSelect option:selected" ).css('color')})
 					 	}
 			 		}
-		 		    loadEvents(valueSelected)
-						
+					var targetURL = "${createLink( controller:'eventoFirma')}"
+					if("" != eventState) targetURL = targetURL + "?estadoEvento=" + $(this).val()
+		 		    loadEvents(targetURL)
 		 		});
 				$("#searchFormDiv").fadeIn()
 			 });
@@ -139,10 +141,10 @@
 			<div style="display:inline;float:left;margin:0px auto 0px auto;">
 				<div style="margin:0px auto 0px auto;">		
 					<select id="eventsStateSelect" style="margin:0px 0px 0px 40px;color:black;">
-						<option value="${createLink( controller:'eventoFirma')}" style="color:black;"> - <g:message code="selectManifestsLbl"/> - </option>
-					  	<option value="${createLink( controller:'eventoFirma')}?estadoEvento=ACTIVO" style="color:#6bad74;"> - <g:message code="selectOpenManifestsLbl"/> - </option>
-					  	<option value="${createLink( controller:'eventoFirma')}?estadoEvento=PENDIENTE_COMIENZO" style="color:#fba131;"> - <g:message code="selectPendingManifestsLbl"/> - </option>
-					  	<option value="${createLink( controller:'eventoFirma')}?estadoEvento=FINALIZADO" style="color:#cc1606;"> - <g:message code="selectClosedManifestsLbl"/> - </option>
+						<option value="" style="color:black;"> - <g:message code="selectManifestsLbl"/> - </option>
+					  	<option value="ACTIVO" style="color:#6bad74;"> - <g:message code="selectOpenManifestsLbl"/> - </option>
+					  	<option value="PENDIENTE_COMIENZO" style="color:#fba131;"> - <g:message code="selectPendingManifestsLbl"/> - </option>
+					  	<option value="FINALIZADO" style="color:#cc1606;"> - <g:message code="selectClosedManifestsLbl"/> - </option>
 					</select>
 				</div>
 			</div>

@@ -15,8 +15,6 @@
 </div>
 <script>
 
-document.getElementById('representativeNifText').addEventListener('change', nifValidation, false);
-
 $("#editRepresentativeDialog").dialog({
    	  width: 450, autoOpen: false, modal: true,
       buttons: [{id: "acceptButton",
@@ -89,4 +87,6 @@ function editRepresentativeCallback(appMessage) {
 		showResultDialog(caption, msg)
 	}
 }
+
+document.getElementById('representativeNifText').addEventListener('change', nifValidation, false);
 </script>

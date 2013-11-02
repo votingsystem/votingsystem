@@ -7,7 +7,6 @@
 <script src="${resource(dir:'js',file:'jquery-ui-1.10.3.custom.min.js')}"></script>
 <link rel="stylesheet" href="${resource(dir:'css',file:'jquery-ui-1.10.3.custom.min.css')}">  
 <script src="${resource(dir:'js/i18n',file:'jquery.ui.datepicker-es.js')}"></script>
-<link rel="stylesheet" href="${resource(dir:'css',file:'pcVotingSystem.css')}">
 <g:render template="/template/js/utils"/>	
 <script type="text/javascript">
 

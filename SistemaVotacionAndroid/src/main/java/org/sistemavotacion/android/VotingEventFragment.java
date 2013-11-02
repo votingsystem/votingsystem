@@ -18,6 +18,7 @@ package org.sistemavotacion.android;
 
 import android.app.AlertDialog;
 import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,10 +29,13 @@ import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -45,101 +49,91 @@ import org.sistemavotacion.android.ui.CertNotFoundDialog;
 import org.sistemavotacion.android.ui.CertPinDialog;
 import org.sistemavotacion.android.ui.CertPinDialogListener;
 import org.sistemavotacion.android.ui.VotingResultDialog;
+import org.sistemavotacion.callable.DataGetter;
 import org.sistemavotacion.callable.SMIMESignedSender;
 import org.sistemavotacion.callable.VoteSender;
 import org.sistemavotacion.modelo.Evento;
 import org.sistemavotacion.modelo.OpcionDeEvento;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.modelo.VoteReceipt;
+import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
-import org.sistemavotacion.util.DateUtils;
 import org.sistemavotacion.util.FileUtils;
 import org.sistemavotacion.util.ServerPaths;
 
 import java.io.FileInputStream;
 import java.net.URL;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 import static org.sistemavotacion.android.AppData.KEY_STORE_FILE;
 import static org.sistemavotacion.android.AppData.MAX_SUBJECT_SIZE;
 
-public class VotingEventActivity extends ActionBarActivity implements CertPinDialogListener {
+public class VotingEventFragment extends Fragment implements CertPinDialogListener {
 
-    public static final String TAG = "VotingEventActivity";
+    public static final String TAG = "VotingEventFragment";
 
     public enum Operation {CANCEL_VOTE, SAVE_VOTE, VOTE};
 
-    public static Operation operation = Operation.VOTE;
+    private Operation operation = Operation.VOTE;
     private Evento evento;
     private VoteReceipt receipt;
     private List<Button> optionButtons = null;
-    byte[] keyStoreBytes = null;
+    private byte[] keyStoreBytes = null;
     private Button saveReceiptButton;
     private Button cancelVoteButton;
     private AppData appData;
 
-
+    private View rootView;
     private View progressContainer;
     private FrameLayout mainLayout;
     private boolean isProgressShown;
     private ProcessSignatureTask processSignatureTask;
     private boolean isDestroyed = true;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
+    @Override public View onCreateView(LayoutInflater inflater,
+                                       ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG + ".onCreate(...)", " --- onCreate");
-
         super.onCreate(savedInstanceState);
-        appData = AppData.getInstance(getBaseContext());
-        if (AppData.Estado.CON_CERTIFICADO.equals(appData.getEstado())) {
-            FileInputStream fis = null;
+        appData = AppData.getInstance(getActivity());
+        rootView = inflater.inflate(R.layout.voting_event_fragment, container, false);
+        Bundle args = getArguments();
+        Integer eventIndex =  args.getInt(EventPagerActivity.EventsPagerAdapter.EVENT_INDEX_KEY);
+        if(eventIndex != null) {
+            evento = appData.getEvents().get(eventIndex);
+        } else {
+            String eventStr = args.getString(AppData.EVENT_KEY);
             try {
-                fis = openFileInput(KEY_STORE_FILE);
-                keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
-            } catch (Exception e) {
-                e.printStackTrace();
-                showMessage(getString(R.string.error_lbl), e.getMessage());
+                evento = Evento.parse(eventStr);
+            } catch(Exception ex) {
+                ex.printStackTrace();
             }
         }
-        setContentView(R.layout.voting_event_screen);
-        saveReceiptButton = (Button) findViewById(R.id.save_receipt_button);
-        cancelVoteButton = (Button) findViewById(R.id.cancel_vote_button);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setLogo(R.drawable.poll_32);
-        operation = Operation.VOTE;
-        evento = appData.getEvent();
-        chechControlCenterCert();
+        saveReceiptButton = (Button) rootView.findViewById(R.id.save_receipt_button);
+        cancelVoteButton = (Button) rootView.findViewById(R.id.cancel_vote_button);
         setEventScreen(evento);
-        mainLayout = (FrameLayout) findViewById( R.id.mainLayout);
-        progressContainer = findViewById(R.id.progressContainer);
-        mainLayout.getForeground().setAlpha( 0);
+        mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
+        progressContainer = rootView.findViewById(R.id.progressContainer);
+        mainLayout.getForeground().setAlpha(0);
         isProgressShown = false;
+        setHasOptionsMenu(true);
         isDestroyed = false;
+        return rootView;
     }
 
-    @Override public void onRestoreInstanceState(Bundle savedInstanceState) {
-        Log.d(TAG + ".onRestoreInstanceState(...) ", " -- onRestoreInstanceState --");
-    }
-
-    @Override public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.event, menu);
-        return true;
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        menuInflater.inflate(R.menu.event, menu);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
         switch (item.getItemId()) {
-            case android.R.id.home:
-                Intent intent = new Intent(this, NavigationDrawer.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-                return true;
             case R.id.eventInfo:
-                Intent infoIntent = new Intent(this, EventStatisticsActivity.class);
-                infoIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(infoIntent);
+                Intent intent = new Intent(getActivity(), EventStatisticsPagerActivity.class);
+                startActivity(intent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -148,42 +142,41 @@ public class VotingEventActivity extends ActionBarActivity implements CertPinDia
 
     private void setReceiptScreen(final VoteReceipt receipt) {
         Log.d(TAG + ".setReceiptScreen(...)", " - setReceiptScreen");
-        ((LinearLayout)findViewById(R.id.receipt_buttons)).setVisibility(View.VISIBLE);
-        setTitle(getString(R.string.already_voted_lbl, receipt.getVoto().
+        ((LinearLayout)rootView.findViewById(R.id.receipt_buttons)).setVisibility(View.VISIBLE);
+        ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(
+                R.string.already_voted_lbl, receipt.getVoto().
                 getOpcionSeleccionada().getContenido()));
-        TextView asuntoTextView = (TextView) findViewById(R.id.asunto_evento);
+        TextView asuntoTextView = (TextView) rootView.findViewById(R.id.asunto_evento);
         String subject = receipt.getVoto().getAsunto();
         if(subject != null && subject.length() > MAX_SUBJECT_SIZE)
             subject = subject.substring(0, MAX_SUBJECT_SIZE) + " ...";
         asuntoTextView.setText(subject);
         cancelVoteButton.setEnabled(true);
         saveReceiptButton.setEnabled(true);
-        TextView contenidoTextView = (TextView) findViewById(R.id.contenido_evento);
+        TextView contenidoTextView = (TextView) rootView.findViewById(R.id.contenido_evento);
         contenidoTextView.setText(Html.fromHtml(receipt.getVoto().getContenido()) + "\n");
         contenidoTextView.setMovementMethod(LinkMovementMethod.getInstance());
         Set<OpcionDeEvento> opciones = receipt.getVoto().getOpciones();
-        LinearLayout linearLayout = (LinearLayout)findViewById(R.id.option_button_container);
+        LinearLayout linearLayout = (LinearLayout)rootView.findViewById(R.id.option_button_container);
         if(optionButtons == null) {
             optionButtons = new ArrayList<Button>();
             FrameLayout.LayoutParams paramsButton = new
                     FrameLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
             paramsButton.setMargins(15, 15, 15, 15);
             for (final OpcionDeEvento opcion:opciones) {
-                Button opcionButton = new Button(this);
+                Button opcionButton = new Button(getActivity());
                 opcionButton.setText(opcion.getContenido());
                 optionButtons.add(opcionButton);
                 opcionButton.setEnabled(false);
                 linearLayout.addView(opcionButton, paramsButton);
             }
         } else setOptionButtonsEnabled(false);
-        //int dialog = getIntent().getIntExtra(INTENT_EXTRA_DIALOG_PROP_NAME, 0);
-        //switch(dialog) {}
     }
 
     public void cancelVote(View v) {
         Log.d(TAG + ".cancelVote(...)", " - cancelVote");
         NotificationManager notificationManager =
-                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(receipt.getNotificationId());
         operation = Operation.CANCEL_VOTE;
         showPinScreen(getString(R.string.cancel_vote_msg));
@@ -192,7 +185,7 @@ public class VotingEventActivity extends ActionBarActivity implements CertPinDia
     public void saveVote(View v) {
         Log.d(TAG + ".saveVote(...)", " - saveVote");
         NotificationManager notificationManager =
-                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(receipt.getNotificationId());
 		/*Log.d(TAG + ".guardarReciboButton ", " - Files dir path: " +
 		getActivity().getApplicationContext().getFilesDir().getAbsolutePath());
@@ -210,7 +203,7 @@ public class VotingEventActivity extends ActionBarActivity implements CertPinDia
 			builder.setTitle(getString(R.string.error_lbl)).
 				setMessage(ex.getMessage()).show();
 		}*/
-        VoteReceiptDBHelper db = new VoteReceiptDBHelper(VotingEventActivity.this);
+        VoteReceiptDBHelper db = new VoteReceiptDBHelper(getActivity());
         try {
             receipt.setId(db.insertVoteReceipt(receipt));
             saveReceiptButton.setEnabled(false);
@@ -219,47 +212,29 @@ public class VotingEventActivity extends ActionBarActivity implements CertPinDia
         }
     }
 
-    /*@Override public boolean onCreateOptionsMenu(Menu menu) {
-    	Intent intent = new Intent(this, FragmentTabsPager.class);
-        menu.add(getString(R.string.panel_principal_lbl)).setIntent(intent)
-            .setIcon(R.drawable.password_22x22)
-            .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-        return true;
-    }*/
 
     private void setEventScreen(final Evento event) {
         Log.d(TAG + ".setEventScreen(...)", " - setEventScreen");
-        ((LinearLayout)findViewById(R.id.receipt_buttons)).setVisibility(View.GONE);
-        switch(event.getEstadoEnumValue()) {
-            case ACTIVO:
-                setTitle(getString(R.string.voting_open_lbl,
-                        DateUtils.getElpasedTimeHoursFromNow(event.getFechaFin())));
-                break;
-            case PENDIENTE_COMIENZO:
-                setTitle(getString(R.string.voting_pending_lbl));
-                break;
-            default:
-                setTitle(getString(R.string.voting_closed_lbl));
-        }
-        TextView asuntoTextView = (TextView) findViewById(R.id.asunto_evento);
+        ((LinearLayout)rootView.findViewById(R.id.receipt_buttons)).setVisibility(View.GONE);
+        TextView asuntoTextView = (TextView) rootView.findViewById(R.id.asunto_evento);
         cancelVoteButton.setEnabled(true);
         saveReceiptButton.setEnabled(true);
         String subject = event.getAsunto();
         if(subject != null && subject.length() > MAX_SUBJECT_SIZE)
             subject = subject.substring(0, MAX_SUBJECT_SIZE) + " ...";
         asuntoTextView.setText(subject);
-        TextView contenidoTextView = (TextView) findViewById(R.id.contenido_evento);
+        TextView contenidoTextView = (TextView) rootView.findViewById(R.id.contenido_evento);
         contenidoTextView.setText(Html.fromHtml(event.getContenido()));
         //contenidoTextView.setMovementMethod(LinkMovementMethod.getInstance());
         Set<OpcionDeEvento> opciones = event.getOpciones();
-        LinearLayout linearLayout = (LinearLayout)findViewById(R.id.option_button_container);
+        LinearLayout linearLayout = (LinearLayout)rootView.findViewById(R.id.option_button_container);
         if(optionButtons != null) linearLayout.removeAllViews();
         optionButtons = new ArrayList<Button>();
         FrameLayout.LayoutParams paramsButton = new FrameLayout.LayoutParams(
                 LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
         paramsButton.setMargins(15, 15, 15, 15);
         for (final OpcionDeEvento opcion:opciones) {
-            Button opcionButton = new Button(this);
+            Button opcionButton = new Button(getActivity());
             opcionButton.setText(opcion.getContenido());
             opcionButton.setOnClickListener(new Button.OnClickListener() {
                 OpcionDeEvento opcionSeleccionada = opcion;
@@ -289,24 +264,11 @@ public class VotingEventActivity extends ActionBarActivity implements CertPinDia
             Log.d(TAG + "- firmarEnviarButton -", " mostrando dialogo certificado no encontrado");
             showCertNotFoundDialog();
         } else {
-            chechControlCenterCert();
             String contenido = opcionSeleccionada.getContenido().length() >
                     AppData.SELECTED_OPTION_MAX_LENGTH ?
                     opcionSeleccionada.getContenido().substring(0, AppData.SELECTED_OPTION_MAX_LENGTH) +
                             "..." : opcionSeleccionada.getContenido();
             showPinScreen(getString(R.string.option_selected_msg, contenido));
-        }
-    }
-
-    private void chechControlCenterCert() {
-        if(evento.getCentroControl().getCertificado() == null) {
-            try {
-                appData.checkCert(evento.getCentroControl(), getBaseContext());
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                showMessage(getString(R.string.error_lbl),
-                        getString(R.string.CONTROL_CENTER_CONECTION_ERROR_MSG));
-            }
         }
     }
 
@@ -317,8 +279,9 @@ public class VotingEventActivity extends ActionBarActivity implements CertPinDia
 
     private void showCertNotFoundDialog() {
         CertNotFoundDialog certDialog = new CertNotFoundDialog();
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        Fragment prev = getSupportFragmentManager().findFragmentByTag(AppData.CERT_NOT_FOUND_DIALOG_ID);
+        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
+        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(
+                AppData.CERT_NOT_FOUND_DIALOG_ID);
         if (prev != null) {
             ft.remove(prev);
         }
@@ -330,7 +293,7 @@ public class VotingEventActivity extends ActionBarActivity implements CertPinDia
         Log.d(TAG + ".onClickSubject(...)", " - onClickSubject");
         if(evento != null && evento.getAsunto() != null &&
                 evento.getAsunto().length() > MAX_SUBJECT_SIZE) {
-            AlertDialog.Builder builder= new AlertDialog.Builder(VotingEventActivity.this);
+            AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
             builder.setTitle(getString(R.string.subject_lbl));
             builder.setMessage(evento.getAsunto());
             builder.show();
@@ -354,7 +317,7 @@ public class VotingEventActivity extends ActionBarActivity implements CertPinDia
         contenidoTextView.setMovementMethod(LinkMovementMethod.getInstance());
 		AlertDialog.Builder builder= new AlertDialog.Builder(this);
 		builder.setTitle(caption).setView(contenidoTextView).show();*/
-        AlertDialog alertDialog= new AlertDialog.Builder(this).
+        AlertDialog alertDialog= new AlertDialog.Builder(getActivity()).
                 setTitle(caption).setMessage(Html.fromHtml(message)).create();
         alertDialog.show();
         ((TextView)alertDialog.findViewById(android.R.id.message)).
@@ -365,15 +328,15 @@ public class VotingEventActivity extends ActionBarActivity implements CertPinDia
         Log.d(TAG + ".showMessage(...) ", " - caption: " + caption + "  - showMessage: " +
                 message + " - isDestroyed: " + isDestroyed);
         if(isDestroyed) return;
-        AlertDialog.Builder builder= new AlertDialog.Builder(this);
+        AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
         builder.setTitle(caption).setMessage(message).show();
     }
 
     private void showPinScreen(String message) {
         isDestroyed = false;
         CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        Fragment prev = getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
+        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
+        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
         if (prev != null) {
             ft.remove(prev);
         }
@@ -384,8 +347,8 @@ public class VotingEventActivity extends ActionBarActivity implements CertPinDia
 
     @Override public void setPin(final String pin) {
         Log.d(TAG + ".setPin()", "--- setPin - operation: " + operation);
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        Fragment prev = getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
+        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
+        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
         if (prev != null) {
             ft.remove(prev);
         }
@@ -394,12 +357,21 @@ public class VotingEventActivity extends ActionBarActivity implements CertPinDia
             Log.d(TAG + ".setPin()", "--- setPin - pin null");
             return;
         }
-        if(processSignatureTask != null) processSignatureTask.cancel(true);
-        processSignatureTask = new ProcessSignatureTask(pin);
-        processSignatureTask.execute();
+        X509Certificate controlCenterCert = appData.getCert(evento.getCentroControl().getServerURL());
+        if(evento.getCentroControl().getCertificado() == null && controlCenterCert == null) {
+            GetCertTask getCertTask = new GetCertTask(pin);
+            getCertTask.execute(evento.getCentroControl().getServerURL());
+        } else {
+            if(evento.getCentroControl().getCertificado() == null) {
+                evento.getCentroControl().setCertificado(controlCenterCert);
+            }
+            if(processSignatureTask != null) processSignatureTask.cancel(true);
+            processSignatureTask = new ProcessSignatureTask(pin);
+            processSignatureTask.execute();
+        }
     }
 
-    @Override protected void onDestroy() {
+    @Override public void onDestroy() {
         super.onDestroy();
         Log.d(TAG + ".onDestroy()", " - onDestroy");
         isDestroyed = true;
@@ -421,7 +393,7 @@ public class VotingEventActivity extends ActionBarActivity implements CertPinDia
         if (!shown) {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        this, android.R.anim.fade_out));
+                        getActivity(), android.R.anim.fade_out));
                 //eventContainer.startAnimation(AnimationUtils.loadAnimation(
                 //        this, android.R.anim.fade_in));
             }
@@ -435,7 +407,7 @@ public class VotingEventActivity extends ActionBarActivity implements CertPinDia
         } else {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        this, android.R.anim.fade_in));
+                        getActivity(), android.R.anim.fade_in));
                 //eventContainer.startAnimation(AnimationUtils.loadAnimation(
                 //        this, android.R.anim.fade_out));
             }
@@ -459,7 +431,7 @@ public class VotingEventActivity extends ActionBarActivity implements CertPinDia
 
         protected void onPreExecute() {
             Log.d(TAG + ".ProcessSignatureTask.onPreExecute(...)", " --- onPreExecute");
-            getWindow().getDecorView().findViewById(
+            getActivity().getWindow().getDecorView().findViewById(
                     android.R.id.content).invalidate();
             showProgress(true, true);
             switch(operation) {
@@ -479,8 +451,11 @@ public class VotingEventActivity extends ActionBarActivity implements CertPinDia
             switch(operation) {
                 case VOTE:
                     try {
+                        FileInputStream fis = null;
+                        fis = getActivity().openFileInput(KEY_STORE_FILE);
+                        keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
                         VoteSender voteSender = new VoteSender(evento, keyStoreBytes,
-                                pin.toCharArray(), getBaseContext());
+                                pin.toCharArray(), getActivity());
                         respuesta = voteSender.call();
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -493,11 +468,11 @@ public class VotingEventActivity extends ActionBarActivity implements CertPinDia
                     try {
                         String signatureContent = receipt.getVoto().getCancelVoteData();
                         boolean isEncryptedResponse = true;
-                        FileInputStream fis = openFileInput(KEY_STORE_FILE);
+                        FileInputStream fis = getActivity().openFileInput(KEY_STORE_FILE);
                         byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
                         SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
                                 signatureContent, subject, isEncryptedResponse, keyStoreBytes, pin.toCharArray(),
-                                appData.getControlAcceso().getCertificado(), getBaseContext());
+                                appData.getControlAcceso().getCertificado(), getActivity());
                         respuesta = smimeSignedSender.call();
                     } catch(Exception ex) {
                         ex.printStackTrace();
@@ -525,7 +500,7 @@ public class VotingEventActivity extends ActionBarActivity implements CertPinDia
                         receipt = (VoteReceipt)response.getData();
                         VotingResultDialog votingResultDialog = VotingResultDialog.newInstance(
                                 getString(R.string.operacion_ok_msg), receipt);
-                        FragmentManager fragmentManager = getSupportFragmentManager();
+                        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                         votingResultDialog.show(fragmentManager, "fragment_voting_result");
 
                         setReceiptScreen(receipt);
@@ -546,7 +521,7 @@ public class VotingEventActivity extends ActionBarActivity implements CertPinDia
                         String msg = getString(R.string.cancel_vote_result_msg,
                                 receipt.getVoto().getAsunto());
                         if(receipt.getId() > 0) {
-                            VoteReceiptDBHelper db = new VoteReceiptDBHelper(VotingEventActivity.this);
+                            VoteReceiptDBHelper db = new VoteReceiptDBHelper(getActivity());
                             try {
                                 db.insertVoteReceipt(receipt);
                             } catch (Exception ex) {
@@ -557,13 +532,66 @@ public class VotingEventActivity extends ActionBarActivity implements CertPinDia
                         setEventScreen(appData.getEvent());
                         CancelVoteDialog cancelVoteDialog = CancelVoteDialog.newInstance(
                                 getString(R.string.msg_lbl), msg, receipt);
-                        FragmentManager fragmentManager = getSupportFragmentManager();
+                        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                         cancelVoteDialog.show(fragmentManager, "fragment_cancel_vote_result");
                     } else {
                         cancelVoteButton.setEnabled(true);
                         showMessage(getString(R.string.error_lbl), response.getMensaje());
                     }
                     break;
+            }
+        }
+    }
+
+    private class GetCertTask extends AsyncTask<String, Integer, Respuesta> {
+
+        private String serverURL = null;
+        private String pin = null;
+
+        public GetCertTask(String pin) {
+            this.pin = pin;
+        }
+
+        protected void onPreExecute() {
+            Log.d(TAG + ".GetCertTask.onPreExecute(...)", " --- onPreExecute");
+            getActivity().getWindow().getDecorView().findViewById(
+                    android.R.id.content).invalidate();
+            showProgress(true, true);
+        }
+
+        protected Respuesta doInBackground(String... urls) {
+            Log.d(TAG + ".GetCertTask.doInBackground(...)", " - serverURL: " + urls[0]);
+            serverURL = urls[0];
+            String serverCertURL = ServerPaths.getURLCadenaCertificacion(serverURL);
+            DataGetter dataGetter = new DataGetter(null, serverCertURL);
+            return dataGetter.call();
+        }
+
+        // This is called each time you call publishProgress()
+        protected void onProgressUpdate(Integer... progress) { }
+
+        protected void onPostExecute(Respuesta respuesta) {
+            Log.d(TAG + ".GetCertTask.onPostExecute(...)", " - onPostExecute - status:" +
+                    respuesta.getCodigoEstado());
+            showProgress(false, true);
+            try {
+                if(Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                    Collection<X509Certificate> certChain = CertUtil.fromPEMToX509CertCollection(
+                            respuesta.getMessageBytes());
+                    X509Certificate serverCert = certChain.iterator().next();
+                    appData.putCert(serverURL, serverCert);
+                    evento.getCentroControl().setCertificado(serverCert);
+                    if(processSignatureTask != null) processSignatureTask.cancel(true);
+                    processSignatureTask = new ProcessSignatureTask(pin);
+                    processSignatureTask.execute();
+                } else {
+                    Log.d(TAG + ".getServerCert() ", " - Error message: " + respuesta.getMensaje());
+                    showMessage(getString(R.string.get_cert_error_msg) + ": " + serverURL,
+                            respuesta.getMensaje());
+                }
+            } catch(Exception ex) {
+                ex.printStackTrace();
+                showMessage(getString(R.string.error_lbl), ex.getMessage());
             }
         }
     }

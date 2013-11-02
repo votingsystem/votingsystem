@@ -27,7 +27,9 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
@@ -37,13 +39,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListView;
-
 import org.sistemavotacion.android.ui.VoteReceiptListActivity;
 import org.sistemavotacion.modelo.Operation;
 import org.sistemavotacion.util.EventState;
 import org.sistemavotacion.util.ScreenUtils;
 import org.sistemavotacion.util.SubSystem;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,15 +67,36 @@ public class NavigationDrawer extends ActionBarActivity {
     private HashMap<String, List<String>> listDataChild;
 
     private DrawerLayout mDrawerLayout;
+    private ViewPager mViewPager;
     private ActionBarDrawerToggle mDrawerToggle;
 
     private AppData appData = null;
+    private String searchQuery = null;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    @Override protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG + ".onCreate()", " - onCreate: ");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.navigation_drawer);
+        mViewPager = (ViewPager) findViewById(R.id.pager);
+        SubsystemPagerAdapter subsystemPagerAdapter = new SubsystemPagerAdapter(getSupportFragmentManager());
+        mViewPager.setAdapter(subsystemPagerAdapter);
+        mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override public void onPageSelected(int position) {
+                Log.d(TAG +  ".mViewPager - ", " - position: " + position);
+                switch(position) {
+                    case OPEN_CHILD_POSITION:
+                        appData.setNavigationDrawerEventState(EventState.OPEN);
+                        break;
+                    case PENDING_CHILD_POSITION:
+                        appData.setNavigationDrawerEventState(EventState.PENDING);
+                        break;
+                    case CLOSED_CHILD_POSITION:
+                        appData.setNavigationDrawerEventState(EventState.CLOSED);
+                        break;
+                }
+                updateActionBarTitle();
+            }
+        });
         appData = AppData.getInstance(getBaseContext());
         expListView = (ExpandableListView) findViewById(R.id.left_drawer);
         prepareListData();
@@ -95,7 +116,7 @@ public class NavigationDrawer extends ActionBarActivity {
         expListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
 
             @Override public void onGroupExpand(int groupPosition) {
-                Log.d(TAG +  ".NavigationDrawer - GroupExpandListener", " - Expanded group " +
+                Log.d(TAG +  ".expListView - GroupExpandListener", " - Expanded group " +
                         listDataHeader.get(groupPosition));
             }
         });
@@ -103,7 +124,7 @@ public class NavigationDrawer extends ActionBarActivity {
         expListView.setOnGroupCollapseListener(new ExpandableListView.OnGroupCollapseListener() {
 
             @Override public void onGroupCollapse(int groupPosition) {
-                Log.d(TAG +  ".NavigationDrawer - GroupExpandListener", " - Collapsed group " +
+                Log.d(TAG +  ".expListView - GroupExpandListener", " - Collapsed group " +
                         listDataHeader.get(groupPosition));
             }
         });
@@ -113,34 +134,35 @@ public class NavigationDrawer extends ActionBarActivity {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v,
                                         int groupPosition, int childPosition, long id) {
-                Log.d(TAG +  ".NavigationDrawer - ChildClickListener", " - " +
+                Log.d(TAG +  ".expListView - ChildClickListener", " - " +
                         listDataHeader.get(groupPosition) + " - : " +
                         listDataChild.get(listDataHeader.get(groupPosition)).get(childPosition));
+                searchQuery = null;
+                SubSystem selectedSubSystem = null;
+                EventState selectedEventState = null;
                 switch(groupPosition) {
                     case VOTING_GROUP_POSITION:
-                        appData.setSelectedSubsystem(SubSystem.VOTING);
+                        selectedSubSystem = SubSystem.VOTING;
                         break;
                     case MANIFEST_GROUP_POSITION:
-                        appData.setSelectedSubsystem(SubSystem.MANIFESTS);
+                        selectedSubSystem = SubSystem.MANIFESTS;
                         break;
                     case CLAIM_GROUP_POSITION:
-                        appData.setSelectedSubsystem(SubSystem.CLAIMS);
+                        selectedSubSystem = SubSystem.CLAIMS;
                         break;
                 }
-
                 switch(childPosition) {
                     case OPEN_CHILD_POSITION:
-                        appData.setNavigationDrawerEventState(EventState.OPEN);
+                        selectedEventState = EventState.OPEN;
                         break;
                     case PENDING_CHILD_POSITION:
-                        appData.setNavigationDrawerEventState(EventState.PENDING);
+                        selectedEventState = EventState.PENDING;
                         break;
                     case CLOSED_CHILD_POSITION:
-                        appData.setNavigationDrawerEventState(EventState.CLOSED);
+                        selectedEventState = EventState.CLOSED;
                         break;
                 }
-                selectItem(appData.getSelectedSubsystem(),
-                        appData.getNavigationDrawerEventState(), null);
+                selectItem(selectedSubSystem, selectedEventState);
                 return true;
             }
         });
@@ -179,12 +201,18 @@ public class NavigationDrawer extends ActionBarActivity {
             }
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
-        String query = null;
+
         if (Intent.ACTION_SEARCH.equals(getIntent().getAction())) {
-            query = getIntent().getStringExtra(SearchManager.QUERY);
-        }
-        selectItem(appData.getSelectedSubsystem(),
-                appData.getNavigationDrawerEventState(), query);
+            searchQuery = getIntent().getStringExtra(SearchManager.QUERY);
+        } else searchQuery = null;
+        selectItem(appData.getSelectedSubsystem(), appData.getNavigationDrawerEventState());
+    }
+
+    private void updateActionBarTitle() {
+        getSupportActionBar().setTitle(appData.getSelectedSubsystem().getDescription(getBaseContext()));
+        getSupportActionBar().setSubtitle(appData.getNavigationDrawerEventState().getDescription(
+                appData.getSelectedSubsystem(), getBaseContext()));
+        updateActionbarLogo();
     }
 
     private void updateActionbarLogo() {
@@ -210,29 +238,37 @@ public class NavigationDrawer extends ActionBarActivity {
     }
 
 
-    private void selectItem(SubSystem subSystem, EventState eventState, String query) {
+    private void selectItem(SubSystem subSystem, EventState eventState) {
         Log.d(TAG + ".selectItem()", " - subSystem: " + subSystem + " - eventState: " + eventState +
-                " - query: " + query);
+             " - eventPosition: " +  eventState.getposition() + " - searchQuery: " + searchQuery);
         // update the main content by replacing fragments
-        Fragment fragment = new EventListFragment();
+        /*Fragment fragment = new EventListFragment();
         Bundle args = new Bundle();
         args.putString("eventState", eventState.toString());
         args.putString("subSystem", subSystem.toString());
-        args.putString(SearchManager.QUERY, query);
+
         fragment.setArguments(args);
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
-        getSupportActionBar().setTitle(subSystem.getDescription(getBaseContext()));
-        getSupportActionBar().setSubtitle(eventState.getDescription(subSystem, getBaseContext()));
+        fragmentManager.beginTransaction().replace(R.id.pager, fragment).commit();*/
+        boolean subSystemChanged = true;
+        SubSystem previousSelectedSubsystem = appData.getSelectedSubsystem();
+        if(subSystem == previousSelectedSubsystem) subSystemChanged = false;
         mDrawerLayout.closeDrawer(expListView);
-        updateActionbarLogo();
         appData.setSelectedSubsystem(subSystem);
+        appData.setNavigationDrawerEventState(eventState);
+        updateActionBarTitle();
+        if(subSystemChanged) {
+            Log.d(TAG +  ".selectItem", " - changing subsystem");
+            SubsystemPagerAdapter subsystemPagerAdapter = new SubsystemPagerAdapter(getSupportFragmentManager());
+            mViewPager.setAdapter(subsystemPagerAdapter);
+        }
+        mViewPager.setCurrentItem(eventState.getposition(), true);
     }
 
     @Override public boolean onCreateOptionsMenu(Menu menu) {
         Log.d(TAG +  ".onCreateOptionsMenu(..)", " - onCreateOptionsMenu");
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main, menu);
+        inflater.inflate(R.menu.navigation_drawer, menu);
         //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH ||
         //        Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) { }
         double diagonalInches = ScreenUtils.getDiagonalInches(getWindowManager().getDefaultDisplay());
@@ -366,4 +402,41 @@ public class NavigationDrawer extends ActionBarActivity {
         listDataChild.put(listDataHeader.get(MANIFEST_GROUP_POSITION), manifests);
         listDataChild.put(listDataHeader.get(CLAIM_GROUP_POSITION), claims);
     }
+
+    public class SubsystemPagerAdapter extends FragmentStatePagerAdapter {
+
+        public SubsystemPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override public Fragment getItem(int i) {
+            EventState eventState = null;
+            switch(i) {
+                case OPEN_CHILD_POSITION:
+                    eventState = EventState.OPEN;
+                    break;
+                case PENDING_CHILD_POSITION:
+                    eventState = EventState.PENDING;
+                    break;
+                case CLOSED_CHILD_POSITION:
+                    eventState = EventState.CLOSED;
+                    break;
+            }
+            Log.d(TAG + ".SubsystemPagerAdapter.getItem(...) ", " - item: " + i + " - subSystem: " +
+                    appData.getSelectedSubsystem() + " - eventState: " + eventState +
+                    " - searchQuery: " + searchQuery);
+            Bundle args = new Bundle();
+            args.putString("subSystem", appData.getSelectedSubsystem().toString());
+            args.putString("eventState", eventState.toString());
+            args.putString(SearchManager.QUERY, searchQuery);
+            Fragment fragment = new EventListFragment();
+            fragment.setArguments(args);
+            return fragment;
+       }
+
+        @Override public int getCount() {
+            return 3;//OPEN, PENDING, CLOSED states -> 3
+        }
+    }
+
 }

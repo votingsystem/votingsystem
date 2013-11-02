@@ -1,6 +1,5 @@
-package org.sistemavotacion.task;
+package org.sistemavotacion.callable;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import org.apache.http.HttpResponse;
@@ -8,23 +7,25 @@ import org.apache.http.util.EntityUtils;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.util.HttpHelper;
 
-public class GetDataTask extends AsyncTask<String, Void, Respuesta> {
+import java.util.concurrent.Callable;
 
-	public static final String TAG = "GetDataTask";
-	
+public class DataGetter  implements Callable<Respuesta> {
+
+    public static final String TAG = "DataGetter";
 
     private String contentType = null;
-    
-    public GetDataTask(String contentType) {
-    	this.contentType = contentType;
+    private String serviceURL = null;
+
+    public DataGetter(String contentType, String serviceURL) {
+        this.contentType = contentType;
+        this.serviceURL = serviceURL;
     }
-	
-	@Override
-	protected Respuesta doInBackground(String... urls) {
-        Log.d(TAG + ".doInBackground", " - url: " + urls[0]);
+
+    @Override public Respuesta call() {
+        Log.d(TAG + ".call", " - serviceURL: " + serviceURL);
         Respuesta respuesta = null;
         try {
-            HttpResponse response = HttpHelper.getData(urls[0], contentType);
+            HttpResponse response = HttpHelper.getData(serviceURL, contentType);
             if(Respuesta.SC_OK == response.getStatusLine().getStatusCode()) {
                 byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
                 respuesta = new Respuesta(response.getStatusLine().getStatusCode(),
@@ -34,11 +35,10 @@ public class GetDataTask extends AsyncTask<String, Void, Respuesta> {
                         EntityUtils.toString(response.getEntity()));
             }
         } catch (Exception ex) {
-        	ex.printStackTrace();
-        	respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+            ex.printStackTrace();
+            return new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
         }
         return respuesta;
-	}
+    }
 
-	
 }

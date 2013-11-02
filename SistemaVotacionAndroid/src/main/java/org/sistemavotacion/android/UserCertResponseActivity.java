@@ -19,9 +19,9 @@ package org.sistemavotacion.android;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -36,13 +36,15 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.sistemavotacion.android.ui.CertPinDialog;
 import org.sistemavotacion.android.ui.CertPinDialogListener;
 import org.sistemavotacion.modelo.Respuesta;
 import org.sistemavotacion.seguridad.CertUtil;
 import org.sistemavotacion.seguridad.KeyStoreUtil;
-import org.sistemavotacion.task.GetDataTask;
 import org.sistemavotacion.util.FileUtils;
+import org.sistemavotacion.util.HttpHelper;
 import org.sistemavotacion.util.ServerPaths;
 
 import java.io.FileInputStream;
@@ -80,7 +82,7 @@ public class UserCertResponseActivity extends ActionBarActivity
         
     	super.onCreate(savedInstanceState);
         Log.d(TAG + ".onCreate(...) ", " - onCreate");
-        setContentView(R.layout.user_cert_response_screen);
+        setContentView(R.layout.user_cert_response_activity);
         appData = AppData.getInstance(getBaseContext());
         getSupportActionBar().setTitle(getString(R.string.voting_system_lbl));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -134,54 +136,24 @@ public class UserCertResponseActivity extends ActionBarActivity
 	    		if(isCertStateChecked) break;
 	        	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 	        	Long idSolicitudCSR = settings.getLong(PREFS_ID_SOLICTUD_CSR, -1);
-	        	/*if(idSolicitudCSR < 0) {
-	    			setMessage(getString(R.string.app_unstable_msg));
-	        		return;
-	        	} */
-	        	Log.d(TAG + ".checkCertState() ", "- idSolicitudCSR: " + idSolicitudCSR);	
-	            progressDialog = ProgressDialog.show(
-	            		UserCertResponseActivity.this,
-	            		getString(R.string.connecting_caption),
-	            		getString(R.string.cert_state_msg), true,
-	    	            true, new DialogInterface.OnCancelListener() {
-	    	                @Override
-	    	                public void onCancel(DialogInterface dialog) { 
-	    	                	/*if (getDataTask != null) {
-	    	                		getDataTask.cancel(true);
-	    	                	}*/
-	    	                }
-	                });
-	            try {
-	            	GetDataTask getDataTask = (GetDataTask)new GetDataTask(null).
-	            			execute(ServerPaths.getURLSolicitudCertificadoUsuario(
-                                    appData.getAccessControlURL(), String.valueOf(idSolicitudCSR)));
-	            	Respuesta respuesta = getDataTask.get();
-	            	if (progressDialog != null && progressDialog.isShowing()) {
-			            progressDialog.dismiss();
-			        }
-	            	Log.d(TAG + ".checkCertState() ", "- getDataTask - statusCode: " + respuesta.getCodigoEstado());	
-	            	if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
-			        	setCsrFirmado(respuesta.getMensaje());
-			        	setMessage(getString(R.string.cert_downloaded_msg));
-			            insertPinButton.setVisibility(View.VISIBLE);
-				        setCertStateChecked(true);
-			        } else if(Respuesta.SC_NOT_FOUND == respuesta.getCodigoEstado()) {
-			        	String certificationAddresses = ServerPaths.
-			        			getURLCertificationAddresses(appData.getAccessControlURL());
-			        	setMessage(getString(R.string.
-			        			resultado_solicitud_certificado_activity, 
-			        			certificationAddresses));
-			        } else showException(getString(
-			        		R.string.request_user_cert_error_msg));
-			        goAppButton.setVisibility(View.VISIBLE);
-	            } catch(Exception ex) {
-	            	ex.printStackTrace();
-	            	showException(ex.getMessage());
-	            }
+	        	Log.d(TAG + ".checkCertState() ", "- idSolicitudCSR: " + idSolicitudCSR);
+                GetDataTask getDataTask = new GetDataTask(null);
+                getDataTask.execute(ServerPaths.getURLSolicitudCertificadoUsuario(
+                    appData.getAccessControlURL(), String.valueOf(idSolicitudCSR)));
   	  	}
-    	
     }
-    
+
+    private void showProgressDialog(String title, String dialogMessage) {
+        if (progressDialog == null)
+            progressDialog = new ProgressDialog(this);
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle(title);
+        progressDialog.setMessage(dialogMessage);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+    }
+
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 		Log.d(TAG + ".onSaveInstanceState(...) ", " ------ onSaveInstanceState -------");
@@ -216,8 +188,7 @@ public class UserCertResponseActivity extends ActionBarActivity
 		switch (item.getItemId()) {        
 	    	case android.R.id.home:  
 	    		Log.d(TAG + ".onOptionsItemSelected(...) ", " - home - ");
-	    		Intent intent = new Intent(this, NavigationDrawer.class);   
-	    		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); 
+	    		Intent intent = new Intent(this, NavigationDrawer.class);
 	    		startActivity(intent);            
 	    		return true;        
 	    	default:            
@@ -304,5 +275,64 @@ public class UserCertResponseActivity extends ActionBarActivity
 		} 
 		goAppButton.setVisibility(View.VISIBLE);
 	}
-	
+
+    public class GetDataTask extends AsyncTask<String, Void, Respuesta> {
+
+        public static final String TAG = "GetDataTask";
+
+
+        private String contentType = null;
+
+        public GetDataTask(String contentType) {
+            this.contentType = contentType;
+        }
+
+        @Override protected void onPreExecute() {
+            showProgressDialog(getString(R.string.connecting_caption),
+                    getString(R.string.cert_state_msg));
+        }
+
+        @Override
+        protected Respuesta doInBackground(String... urls) {
+            Log.d(TAG + ".doInBackground", " - url: " + urls[0]);
+            Respuesta respuesta = null;
+            try {
+                HttpResponse response = HttpHelper.getData(urls[0], contentType);
+                if(Respuesta.SC_OK == response.getStatusLine().getStatusCode()) {
+                    byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
+                    respuesta = new Respuesta(response.getStatusLine().getStatusCode(),
+                            new String(responseBytes), responseBytes);
+                } else {
+                    respuesta = new Respuesta(response.getStatusLine().getStatusCode(),
+                            EntityUtils.toString(response.getEntity()));
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                respuesta = new Respuesta(Respuesta.SC_ERROR, ex.getMessage());
+            }
+            return respuesta;
+        }
+
+        @Override  protected void onPostExecute(Respuesta respuesta) {
+            Log.d(TAG + "GetDataTask.onPostExecute() ", " - statusCode: " + respuesta.getCodigoEstado());
+            if (progressDialog != null && progressDialog.isShowing()) {
+                progressDialog.dismiss();
+            }
+            if (Respuesta.SC_OK == respuesta.getCodigoEstado()) {
+                setCsrFirmado(respuesta.getMensaje());
+                setMessage(getString(R.string.cert_downloaded_msg));
+                insertPinButton.setVisibility(View.VISIBLE);
+                setCertStateChecked(true);
+            } else if(Respuesta.SC_NOT_FOUND == respuesta.getCodigoEstado()) {
+                String certificationAddresses = ServerPaths.
+                        getURLCertificationAddresses(appData.getAccessControlURL());
+                setMessage(getString(R.string.
+                        resultado_solicitud_certificado_activity,
+                        certificationAddresses));
+            } else showException(getString(
+                    R.string.request_user_cert_error_msg));
+            goAppButton.setVisibility(View.VISIBLE);
+        }
+    }
+
 }
