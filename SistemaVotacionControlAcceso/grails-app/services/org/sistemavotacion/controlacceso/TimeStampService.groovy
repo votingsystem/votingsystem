@@ -109,16 +109,11 @@ class TimeStampService {
 	private int noOctets = 8;
 	
 	private static HashMap<String, String> ACCEPTEDALGORITHMSMAP = [
-			"GOST3411":TSPAlgorithms.GOST3411,
-			"MD5":TSPAlgorithms.MD5,
 			"SHA1":TSPAlgorithms.SHA1,
 			"SHA224":TSPAlgorithms.SHA224,
 			"SHA256":TSPAlgorithms.SHA256,
 			"SHA384":TSPAlgorithms.SHA384,
-			"SHA512":TSPAlgorithms.SHA512,
-			"RIPEMD128":TSPAlgorithms.RIPEMD128,
-			"RIPEMD160":TSPAlgorithms.RIPEMD160,
-			"RIPEMD256":TSPAlgorithms.RIPEMD256
+			"SHA512":TSPAlgorithms.SHA512
 		];
 	
 	//@Override

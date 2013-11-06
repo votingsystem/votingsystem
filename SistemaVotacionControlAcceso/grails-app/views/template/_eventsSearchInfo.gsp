@@ -5,7 +5,7 @@
 		<div class="eventSearchDateFinish"></div>
 	</div>
 </div>
-<script>
+<r:script>
 
 var searchResultMsgTemplate = "<g:message code="searchResultMsg"/>"
 var beginSearchMsgTemplate = "<g:message code="beginSearchInfoLbl"/>"
@@ -32,4 +32,4 @@ function showEventsSearchInfoMsg(searchQuery) {
 	}
 	$(".eventSearchInfo").fadeIn()
 }
-</script>
+</r:script>

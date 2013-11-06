@@ -41,7 +41,7 @@ public class Certificado implements Serializable {
 
     private static final long serialVersionUID = 1L;
     
-    private static Logger logger = LoggerFactory.getLogger(Certificado.class);
+    private static Logger log = LoggerFactory.getLogger(Certificado.class);
     
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false)
@@ -123,13 +123,13 @@ public class Certificado implements Serializable {
     
     public Certificado (X509Certificate certificate) {
     	String subjectDN = certificate.getSubjectDN().getName();
-    	logger.debug("Certificado - subjectDN: " +subjectDN);
+    	log.debug("Certificado - subjectDN: " +subjectDN);
     	if(subjectDN.split("OU=eventoId:").length > 1) {
     		setEventoId(subjectDN.split("OU=eventoId:")[1].split(",")[0]);
     	}
     	if(subjectDN.split("CN=controlAccesoURL:").length > 1) {
     		String parte = subjectDN.split("CN=controlAccesoURL:")[1];
-    		logger.debug("Certificado - parte: " + parte);
+    		log.debug("Certificado - parte: " + parte);
     		if (parte.split(",").length > 1) {
     			serverURL = parte.split(",")[0];
     		} else serverURL = parte;

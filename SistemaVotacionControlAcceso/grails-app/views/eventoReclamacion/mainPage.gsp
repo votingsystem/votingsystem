@@ -1,8 +1,55 @@
 <html>
 <head>
         <meta name="layout" content="main" />
-		<g:render template="/template/js/jqueryPaginate"/>
-        <script type="text/javascript">
+       	<r:require modules="paginate"/>
+</head>
+<body>
+
+	<div id="contentDiv" style="display:none;">
+	
+		<div style="display:inline-block;width:100%;vertical-align: middle;margin:0px 0 10px 0px;">
+			<div style="display:inline;float:left;width:30%;">
+				<div>
+					<img src="${resource(dir:'images',file:'feed.png')}" style="margin:3px 0 0 10px;"></img>
+					<g:link controller="subscripcion" action="reclamaciones" style="font-size: 0.8em;"><g:message code="subscribeToFeedsLbl"/></g:link>
+				</div>
+			</div>
+			<div style="display:inline;float:left;margin:0px auto 0px auto;">
+				<div style="margin:0px auto 0px auto;">		
+					<select id="eventsStateSelect" style="margin:0px 0px 0px 40px;color:black;">
+						<option value="" style="color:black;"> - <g:message code="selectPollsLbl"/> - </option>
+					  	<option value="ACTIVO" style="color:#6bad74;"> - <g:message code="selectOpenClaimsLbl"/> - </option>
+					  	<option value="PENDIENTE_COMIENZO" style="color:#fba131;"> - <g:message code="selectPendingClaimsLbl"/> - </option>
+					  	<option value="FINALIZADO" style="color:#cc1606;"> - <g:message code="selectClosedClaimsLbl"/> - </option>
+					</select>
+				</div>
+			</div>
+			<div style="display:inline;float:right;">
+				<votingSystem:simpleButton href="${createLink(controller:'editor', action:'claim')}" 
+					imgSrc="${resource(dir:'images',file:'claim_22.png')}" style="margin:0px 20px 0px 0px;">
+						<g:message code="publishDocumentLbl"/>
+				</votingSystem:simpleButton>
+			</div>
+		</div>	
+		
+	</div>
+	
+	<g:render template="/template/eventsSearchInfo"/>
+	
+	<div id="mainPageEventList" class="mainPageEventList"><ul></ul></div>
+
+	<div id="progressDiv" style="vertical-align: middle;height:100%;">
+		<progress style="display:block;margin:0px auto 20px auto;"></progress>
+	</div>
+
+	<g:render template="/template/pagination"/>
+	
+	<div id="eventTemplate" style="display:none;">
+		<g:render template="/template/event" model="[isTemplate:'true']"/>
+	</div> 
+</body>
+</html>
+<r:script>
     		var eventState = ''
             var searchQuery
 		 	$(function() {
@@ -68,7 +115,7 @@
 			}
 	
 			function printEvent(eventJSON) {
-		        var newEventTemplate = "${render(template:'/template/event', model:[isTemplate:'true']).replace("\n","")}"
+		        var newEventTemplate = $('#eventTemplate').html()
 
 		        var newEventHTML = newEventTemplate.format(eventJSON.asunto, 
 				        eventJSON.usuario, eventJSON.fechaInicio, eventJSON.fechaFin.getElapsedTime(), 
@@ -130,50 +177,4 @@
 						numMaxEventsForPage + "&offset=0", newSearchQuery)
 			}
 			
-        </script>
-</head>
-<body>
-
-
-
-
-	<div id="contentDiv" style="display:none;">
-	
-		<div style="display:inline-block;width:100%;vertical-align: middle;margin:0px 0 10px 0px;">
-			<div style="display:inline;float:left;width:30%;">
-				<div>
-					<img src="${resource(dir:'images',file:'feed.png')}" style="margin:3px 0 0 10px;"></img>
-					<g:link controller="subscripcion" action="reclamaciones" style="font-size: 0.8em;"><g:message code="subscribeToFeedsLbl"/></g:link>
-				</div>
-			</div>
-			<div style="display:inline;float:left;margin:0px auto 0px auto;">
-				<div style="margin:0px auto 0px auto;">		
-					<select id="eventsStateSelect" style="margin:0px 0px 0px 40px;color:black;">
-						<option value="" style="color:black;"> - <g:message code="selectPollsLbl"/> - </option>
-					  	<option value="ACTIVO" style="color:#6bad74;"> - <g:message code="selectOpenClaimsLbl"/> - </option>
-					  	<option value="PENDIENTE_COMIENZO" style="color:#fba131;"> - <g:message code="selectPendingClaimsLbl"/> - </option>
-					  	<option value="FINALIZADO" style="color:#cc1606;"> - <g:message code="selectClosedClaimsLbl"/> - </option>
-					</select>
-				</div>
-			</div>
-			<div style="display:inline;float:right;">
-				<votingSystem:simpleButton href="${createLink(controller:'editor', action:'claim')}" 
-					imgSrc="${resource(dir:'images',file:'claim_22.png')}" style="margin:0px 20px 0px 0px;">
-						<g:message code="publishDocumentLbl"/>
-				</votingSystem:simpleButton>
-			</div>
-		</div>	
-		
-	</div>
-	
-	<g:render template="/template/eventsSearchInfo"/>
-	
-	<div id="mainPageEventList" class="mainPageEventList"><ul></ul></div>
-
-	<div id="progressDiv" style="vertical-align: middle;height:100%;">
-		<progress style="display:block;margin:0px auto 20px auto;"></progress>
-	</div>
-
-	<g:render template="/template/pagination"/>
-</body>
-</html>
+</r:script>

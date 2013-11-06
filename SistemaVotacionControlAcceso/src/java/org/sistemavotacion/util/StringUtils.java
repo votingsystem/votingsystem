@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 */
 public class StringUtils {
 	
-	private static Logger logger = LoggerFactory.getLogger(StringUtils.class);
+	private static Logger log = LoggerFactory.getLogger(StringUtils.class);
 
     public static String getStringFromClob (Clob clob) {
     		if(clob == null) return null;
@@ -31,7 +31,7 @@ public class StringUtils {
                 stringClob = clob.getSubString(i, clobLength);
             }
             catch (Exception e) {
-                    logger.error(e.getMessage(), e);
+                    log.error(e.getMessage(), e);
             }
             return stringClob;
     }	
@@ -55,9 +55,9 @@ public class StringUtils {
         try {
             clob = new SerialClob(string.toCharArray());
         } catch (SerialException ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         } catch (SQLException ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
         return clob;
     }

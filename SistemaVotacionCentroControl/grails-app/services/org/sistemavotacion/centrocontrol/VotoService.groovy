@@ -17,14 +17,9 @@ import org.sistemavotacion.seguridad.*;
 import org.sistemavotacion.smime.*;
 import java.io.File;
 import org.apache.http.conn.HttpHostConnectException
-import groovyx.net.http.*
-import static groovyx.net.http.ContentType.*
-import static groovyx.net.http.Method.*
 import org.apache.http.entity.mime.MultipartEntity
 import org.apache.http.entity.mime.content.ByteArrayBody
 import java.nio.charset.Charset
-import groovyx.net.http.ContentType
-import net.sf.json.JSONSerializer
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.multipart.MultipartHttpServletRequest

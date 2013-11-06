@@ -22,9 +22,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
-import net.sf.json.JSONNull;
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -187,7 +184,7 @@ public class ActorConIP implements Serializable {
 	}
 
     public static ActorConIP parse(String actorConIPStr) throws Exception {
-        logger.debug(" -- parse --");
+        /*logger.debug(" -- parse --");
         if(actorConIPStr == null) return null;
         JSONObject actorConIPJSON = (JSONObject) JSONSerializer.toJSON(actorConIPStr);
         ActorConIP actorConIP = null;
@@ -213,6 +210,7 @@ public class ActorConIP implements Serializable {
         	actorConIP.setCadenaCertificacion(actorConIPJSON.getString(
                         "cadenaCertificacionPEM").getBytes());
         }
-        return actorConIP;
+        return actorConIP;*/
+    	return null;
     }
 }

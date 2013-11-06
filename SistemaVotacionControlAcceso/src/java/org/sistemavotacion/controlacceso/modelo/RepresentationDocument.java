@@ -34,7 +34,7 @@ public class RepresentationDocument implements Serializable {
 	
     private static final long serialVersionUID = 1L;
     
-    private static Logger logger = LoggerFactory.getLogger(RepresentationDocument.class);
+    private static Logger log = LoggerFactory.getLogger(RepresentationDocument.class);
     
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false)

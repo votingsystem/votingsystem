@@ -1,39 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-<g:render template="/template/js/pcUtils"/>
-	<script type="text/javascript">
-		$(function() {
-			updateSubsystem("${selectedSubsystem}")
-			$(".footer").fadeIn(3000)
-			
-			$("#advancedSearchLink").click(function () { 
-				$("#advancedSearchDialog").dialog("open");
-			});
-
-			 $('#searchForm').submit(function(event){
-			 	console.log("searchForm")
-			 	event.preventDefault();
-			 	var searchQuery = {textQuery:$("#searchText").val()}
-			 	getSearchResult(searchQuery)
-			 });
-
-		})
-		
-		
-		function setMessageFromSignatureClient(appMessage) {
-			var appMessageJSON = toJSON(appMessage)
-			if(appMessageJSON != null) {
-				if(StatusCode.SC_PROCESANDO == appMessageJSON.codigoEstado){
-					signatureClientToolLoaded = true;
-					$("#loadingVotingSystemAppletDialog").dialog("close");
-					$("#workingWithAppletDialog").dialog("open");
-				}
-			}
-		}
-		
-	</script>
-	<g:layoutHead />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title><g:message code="nombreServidorLabel"/></title>
+	<r:require module="application"/>
+	<g:layoutHead/>
+	<r:layoutResources />
 </head>
     <body>
 		<div class="header">
@@ -60,7 +32,7 @@
 		</div>
 
 		<g:layoutBody/>
-
+	
 		<div class="footer" style="display:none;">
 			<a class="appLink" href="mailto:${grailsApplication.config.SistemaVotacion.emailAdmin}"
 				 style="">${message(code: 'emailLabel', null)}</a>
@@ -70,6 +42,49 @@
 			</a>
 		</div>
 		
-<g:render template="/template/dialog/advancedSearchDialog"/>		
+	
+
+	<div id="appletsFrame"  style="width:0px; height:0px;">
+		<iframe id="votingSystemAppletFrame" src="" style="visibility:hidden;width:0px; height:0px;"></iframe>
+	</div>	
 </body>
+
+<g:include view="/include/dialog/advancedSearchDialog.gsp"/>	
+<g:include view="/include/dialog/loadingAppletDialog.gsp"/>
+<g:include view="/include/dialog/workingWithAppletDialog.gsp"/>
+<g:include view="/include/dialog/browserWithoutJavaDialog.gsp"/>
+<g:include view="/include/dialog/resultDialog.gsp"/>
+
 </html>
+<r:script>
+	$(function() {
+		updateSubsystem("${selectedSubsystem}")
+		$(".footer").fadeIn(3000)
+		
+		$("#advancedSearchLink").click(function () { 
+			$("#advancedSearchDialog").dialog("open");
+		});
+
+		 $('#searchForm').submit(function(event){
+		 	console.log("searchForm")
+		 	event.preventDefault();
+		 	var searchQuery = {textQuery:$("#searchText").val()}
+		 	getSearchResult(searchQuery)
+		 });
+
+	})
+	
+	
+	function setMessageFromSignatureClient(appMessage) {
+		var appMessageJSON = toJSON(appMessage)
+		if(appMessageJSON != null) {
+			if(StatusCode.SC_PROCESANDO == appMessageJSON.codigoEstado){
+				signatureClientToolLoaded = true;
+				$("#loadingVotingSystemAppletDialog").dialog("close");
+				$("#workingWithAppletDialog").dialog("open");
+			}
+		}
+	}
+	
+</r:script>
+<r:layoutResources/>

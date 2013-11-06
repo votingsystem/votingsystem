@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 */
 public class SignedMailGenerator {
 
-    private static Logger logger = LoggerFactory.getLogger(SignedMailGenerator.class);
+    private static Logger log = LoggerFactory.getLogger(SignedMailGenerator.class);
     
     public static final String NOMBRE_ARCHIVO_FIRMADO = "EventoEnviado";
     public static final String NOMBRE_ARCHIVO_MULTIFIRMA = "MultiFirma";
@@ -53,7 +53,7 @@ public class SignedMailGenerator {
     private SignerInfoGenerator signerInfoGenerator;
     
     public SignedMailGenerator(byte[] keyStoreBytes, String keyAlias, char[] password) throws Exception {
-    	logger.debug("SignedMailGenerator");                                
+    	log.debug("SignedMailGenerator");                                
         KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
         key = (PrivateKey)keyStore.getKey(keyAlias, password);
         chain = keyStore.getCertificateChain(keyAlias);

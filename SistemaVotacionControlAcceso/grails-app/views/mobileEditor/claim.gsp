@@ -1,14 +1,75 @@
 <!DOCTYPE html>
 <html>
 <head>
-<g:render template="/template/js/mobileEditor"/>
+	<r:require modules="textEditorMobile"/>
+	<r:layoutResources />
+</head>
+<body>
+<div class ="contentDiv">
+	<form id="mainForm">
+	
+	<div style="margin:0px 0px 10px 0px">
+    	<input type="text" name="subject" id="subject" style="width:500px" required 
+				title="<g:message code="subjectLbl"/>"
+				placeholder="<g:message code="subjectLbl"/>" 
+    			oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
+    			onchange="this.setCustomValidity('')" />
+   </div>
+   <div style="margin:0px 0px 10px 0px">	    			
+		<votingSystem:datePicker id="dateFinish" title="${message(code:'dateLbl')}"
+			 placeholder="${message(code:'dateLbl')}"
+			 oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
+			 onchange="this.setCustomValidity('')"></votingSystem:datePicker>   				
+	</div>	
 
-        <script type="text/javascript">
+	<votingSystem:textEditorMobile id="editorDiv"/>
+
+	<div style="position:relative; height: 50px;display: block;">
+		<div style="font-size: 0.9em; margin:10px 0 0 10px;"> 
+			<input type="checkbox" id="multipleSignaturesCheckbox"><g:message code="multipleClaimsLbl"/><br>
+			<input type="checkbox" id="allowBackupRequestCheckbox"><g:message code="allowBackupRequestLbl"/>
+		</div>
+	</div>
+
+	<div id="fieldsBox"  style="display:none;">
+		<fieldset class="fieldsBox" style="margin:20px 20px 0px 20px;">
+			<legend id="fieldsLegend" style="font-size: 1.2em;"><g:message code="claimsFieldLegend"/></legend>
+			<div id="fields"></div>
+		</fieldset>
+	</div>
+	
+	<div style="position:relative; margin:20px 0px 0px 0px; height:20px;">
+		<div style="float:left;">
+			<votingSystem:simpleButton id="addClaimFieldButton" imgSrc="${resource(dir:'images',file:'info_16x16.png')}">
+					<g:message code="addClaimFieldLbl"/>
+			</votingSystem:simpleButton>
+		</div>
+		<div style="float:right;">
+			<votingSystem:simpleButton isButton='true' id="addOptionButton"
+				imgSrc="${resource(dir:'images',file:'accept_16x16.png')}">
+					<g:message code="publishDocumentLbl"/>
+			</votingSystem:simpleButton>	
+		</div>	
+	</div>	
+		
+	</form>
+
+</div>
+<div style="clear: both;margin:0px 0px 30px 0px;">&nbsp;</div>
+<g:include view="/include/dialog/addClaimFieldDialog.gsp"/>
+<g:include view="/include/dialog/resultDialog.gsp"/>
+
+	<div id="newFieldTemplate" style="display:none;">
+		<g:render template="/template/newField" model="[isTemplate:'true']"/>
+	</div> 
+	
+</body>
+</html>
+<r:script>
 			var numFields = 0
 
 			$(function() {
 		 		showEditor()
-			    $("#dateFinish").datepicker(pickerOpts);
 			    
 	    		$("#addClaimFieldButton").click(function () {
 	    			hideEditor() 
@@ -18,7 +79,7 @@
 				function addClaimField (claimFieldText) {
 					showEditor()
 					if(claimFieldText == null) return
-			        var newFieldTemplate = "${render(template:'/template/newField', model:[]).replace("\n","")}"
+			        var newFieldTemplate = $('#newFieldTemplate').html()
 			        var newFieldHTML = newFieldTemplate.format(claimFieldText);
 			        var $newField = $(newFieldHTML)
    					$newField.find('div#deleteFieldButton').click(function() {
@@ -89,8 +150,8 @@
 			function validateForm() {
 				var subject = $("#subject"),
 	    		dateFinish = $("#dateFinish"),
-	    		ckeditorDiv = $("#editor"),
-	        	allFields = $([]).add(subject).add(dateFinish).add(ckeditorDiv);
+	    		editorDiv = $("#editorDiv"),
+	        	allFields = $([]).add(subject).add(dateFinish).add(editorDiv);
 				allFields.removeClass( "ui-state-error" );
 	
 				if(!document.getElementById('subject').validity.valid) {
@@ -115,7 +176,7 @@
 				}
 	
 				if(htmlEditorContent.trim() == 0) {
-					ckeditorDiv.addClass( "ui-state-error" );
+					editorDiv.addClass( "ui-state-error" );
 					showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 							'<g:message code="emptyDocumentERRORMsg"/>')
 					return false;
@@ -123,63 +184,5 @@
 				return true
 			}
 		 	
-        </script>
-</head>
-<body>
-<div class ="contentDiv">
-	<form id="mainForm">
-	
-	<div style="margin:0px 0px 10px 0px">
-    	<input type="text" name="subject" id="subject" style="width:500px" required 
-				title="<g:message code="subjectLbl"/>"
-				placeholder="<g:message code="subjectLbl"/>" 
-    			oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-    			onchange="this.setCustomValidity('')" />
-   </div>
-   <div style="margin:0px 0px 10px 0px">	    			
-		<input type="text" id="dateFinish" required readonly
-				title="<g:message code="dateLbl"/>"
-				placeholder="<g:message code="dateLbl"/>" 
-   				oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-   				onchange="this.setCustomValidity('')"/>
-	</div>	
-
-	<div id="editor"></div>
-	<div id="editorContents" class="editorContents"></div>
-
-	<div style="position:relative; height: 50px;display: block;">
-		<div style="font-size: 0.9em; margin:10px 0 0 10px;"> 
-			<input type="checkbox" id="multipleSignaturesCheckbox"><g:message code="multipleClaimsLbl"/><br>
-			<input type="checkbox" id="allowBackupRequestCheckbox"><g:message code="allowBackupRequestLbl"/>
-		</div>
-	</div>
-
-	<div id="fieldsBox"  style="display:none;">
-		<fieldset class="fieldsBox" style="margin:20px 20px 0px 20px;">
-			<legend id="fieldsLegend" style="font-size: 1.2em;"><g:message code="claimsFieldLegend"/></legend>
-			<div id="fields"></div>
-		</fieldset>
-	</div>
-	
-	<div style="position:relative; margin:20px 0px 0px 0px; height:20px;">
-		<div style="float:left;">
-			<votingSystem:simpleButton id="addClaimFieldButton" imgSrc="${resource(dir:'images',file:'info_16x16.png')}">
-					<g:message code="addClaimFieldLbl"/>
-			</votingSystem:simpleButton>
-		</div>
-		<div style="float:right;">
-			<votingSystem:simpleButton isButton='true' id="addOptionButton"
-				imgSrc="${resource(dir:'images',file:'accept_16x16.png')}">
-					<g:message code="publishDocumentLbl"/>
-			</votingSystem:simpleButton>	
-		</div>	
-	</div>	
-		
-	</form>
-
-</div>
-<div style="clear: both;margin:0px 0px 30px 0px;">&nbsp;</div>
-<g:render template="/template/dialog/addClaimFieldDialog"/>
-<g:render template="/template/dialog/resultDialog"/>
-</body>
-</html>
+</r:script>
+<r:layoutResources />

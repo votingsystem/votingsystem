@@ -13,8 +13,6 @@ import org.codehaus.groovy.grails.web.json.JSONObject;
 import org.sistemavotacion.centrocontrol.modelo.*
 import org.springframework.context.*
 import groovyx.net.http.*
-import static groovyx.net.http.ContentType.*
-import static groovyx.net.http.Method.*
 import org.sistemavotacion.seguridad.cms.*
 import org.sistemavotacion.smime.SMIMEMessageWrapper;
 import org.sistemavotacion.seguridad.*;
@@ -36,7 +34,7 @@ class EventoVotacionService {
 	
     static transactional = false
 	
-	static scope = "session"
+	//static scope = "session"
 	
 	def messageSource
 	def subscripcionService

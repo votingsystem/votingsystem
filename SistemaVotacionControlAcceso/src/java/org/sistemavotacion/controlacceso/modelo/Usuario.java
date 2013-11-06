@@ -36,7 +36,7 @@ public class Usuario implements Serializable {
 	
     private static final long serialVersionUID = 1L;
     
-    private static Logger logger = LoggerFactory.getLogger(Usuario.class);
+    private static Logger log = LoggerFactory.getLogger(Usuario.class);
     
 	 public enum Type {USER, REPRESENTATIVE, USER_WITH_CANCELLED_REPRESENTATIVE, EX_REPRESENTATIVE}
 

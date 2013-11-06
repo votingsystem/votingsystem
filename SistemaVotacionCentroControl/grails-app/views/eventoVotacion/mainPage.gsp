@@ -1,16 +1,46 @@
 <html>
 <head>
-        <meta name="layout" content="main" />
-		<g:render template="/template/js/jqueryPaginate"/>	
-        <script type="text/javascript">
+       <meta name="layout" content="main" />
+      	<r:require module="paginate"/>
+</head>
+<body>
+<div id="contentDiv" style="display:none;">
+	<div style="position:relative; height: 30px;">
+		<div style="position:absolute;width: 50%;  margin: auto; left: 0; right: 0;">
+			<select id="eventsStateSelect" style="margin:0px 0px 0px 40px;color:black;">
+				<option value="" style="color:black;"> - <g:message code="selectPollsLbl"/> - </option>
+			  	<option value="ACTIVO" style="color:#6bad74;"> - <g:message code="selectOpenPollsLbl"/> - </option>
+			  	<option value="PENDIENTE_COMIENZO" style="color:#fba131;"> - <g:message code="selectPendingPollsLbl"/> - </option>
+			  	<option value="FINALIZADO" style="color:#cc1606;"> - <g:message code="selectClosedPollsLbl"/> - </option>
+			</select>
+		</div>
+	</div>
+	
+	<g:render template="/template/eventsSearchInfo"/>
+		
+	<div id="mainPageEventList" class="mainPageEventList"><ul></ul></div>
+	
+	<div id="progressDiv" style="vertical-align: middle;height:100%;">
+		<progress style="display:block;margin:0px auto 20px auto;"></progress>
+	</div>
+</div>
+
+<g:render template="/template/pagination"/>	
+
+	<div id="eventTemplate" style="display:none;">
+		<g:render template="/template/event" model="[isTemplate:'true']"/>
+	</div> 
+</body>
+</html>
+<r:script>
     		var eventState = ''
             var searchQuery
 		 	$(function() {
 		 		paginate(0)
 		 		$('#eventsStateSelect').on('change', function (e) {
+		 			eventState = $(this).val()
 		 		    var optionSelected = $("option:selected", this);
-		 		    var valueSelected = this.value;
-		 		    console.log(" - valueSelected: " + valueSelected)
+		 		    console.log(" - eventState: " + eventState)
 		 		    if(!isFirefox()) {
 			 		    if($('#eventsStateSelect')[0].selectedIndex == 0) {
 			 		    	$('#eventsStateSelect').css({'color': '#434343',
@@ -65,7 +95,7 @@
 				//var dataStr = JSON.stringify(eventJSON);  
   			    //console.log( " - ajax call done - dataStr: " + dataStr);
 				//console.log("printEvent: " + dataStr);
-		        var newEventTemplate ="${render(template:'/template/event', model:[isTemplate:'true']).replace("\n","")}"
+		        var newEventTemplate = $('#eventTemplate').html()
 		        
 		        var newEventHTML = newEventTemplate.format(eventJSON.asunto, 
 				        eventJSON.usuario, eventJSON.fechaInicio, eventJSON.fechaFin.getElapsedTime(), 
@@ -124,30 +154,4 @@
 				loadEvents("${createLink(controller:'buscador', action:'consultaJSON')}?max=" + 
 						numMaxEventsForPage + "&offset=0", newSearchQuery)
 			}
-        </script>
-</head>
-<body>
-<div id="contentDiv" style="display:none;">
-	<div style="position:relative; height: 30px;">
-		<div style="position:absolute;width: 50%;  margin: auto; left: 0; right: 0;">
-			<select id="eventsStateSelect" style="margin:0px 0px 0px 40px;color:black;">
-				<option value="" style="color:black;"> - <g:message code="selectPollsLbl"/> - </option>
-			  	<option value="ACTIVO" style="color:#6bad74;"> - <g:message code="selectOpenPollsLbl"/> - </option>
-			  	<option value="PENDIENTE_COMIENZO" style="color:#fba131;"> - <g:message code="selectPendingPollsLbl"/> - </option>
-			  	<option value="FINALIZADO" style="color:#cc1606;"> - <g:message code="selectClosedPollsLbl"/> - </option>
-			</select>
-		</div>
-	</div>
-	
-	<g:render template="/template/eventsSearchInfo"/>
-		
-	<div id="mainPageEventList" class="mainPageEventList"><ul></ul></div>
-	
-	<div id="progressDiv" style="vertical-align: middle;height:100%;">
-		<progress style="display:block;margin:0px auto 20px auto;"></progress>
-	</div>
-</div>
-
-<g:render template="/template/pagination"/>	
-</body>
-</html>
+</r:script>

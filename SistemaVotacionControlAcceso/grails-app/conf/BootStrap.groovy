@@ -4,13 +4,13 @@ import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
 import org.sistemavotacion.controlacceso.modelo.*
 import org.sistemavotacion.utils.*
+
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 class BootStrap {
 
-	
 	def firmaService
 	def pdfService
 	def timeStampService
@@ -43,5 +43,4 @@ class BootStrap {
     }
 	
     def destroy = {}
-
 }

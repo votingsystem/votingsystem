@@ -13,8 +13,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import groovyx.net.http.*
-import static groovyx.net.http.ContentType.*
-import static groovyx.net.http.Method.*
 import java.security.PrivateKey;
 import java.security.cert.PKIXCertPathValidatorResult
 import java.security.cert.TrustAnchor

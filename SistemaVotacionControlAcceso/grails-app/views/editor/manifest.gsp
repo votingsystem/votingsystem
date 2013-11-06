@@ -1,15 +1,59 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html>
 <head>
-        <meta name="layout" content="main" />
-        <g:render template="/template/js/pcEditor"/>
-        <script type="text/javascript">
+    <meta name="layout" content="main" />
+</head>
+<body>
+
+<div id="contentDiv" style="display:none; padding: 0px 20px 0px 20px;">
+
+	<div class="publishPageTitle">
+		<p style="text-align:center; width: 100%;">
+			<g:message code="publishManifestLbl"/>
+		</p>
+	</div>
+	
+	<form id="mainForm">
+	
+	<div style="margin:0px 0px 20px 0px">
+    	<input type="text" name="subject" id="subject" style="width:400px"  required 
+				title="<g:message code="subjectLbl"/>"
+				placeholder="<g:message code="subjectLbl"/>"
+    			oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
+    			onchange="this.setCustomValidity('')" />
+
+		<votingSystem:datePicker id="dateFinish" style="margin:0px 0px 0px 35px;" 
+						title="${message(code:'dateLbl')}"
+						placeholder="${message(code:'dateLbl')}"
+	   					oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
+	   					onchange="this.setCustomValidity('')"></votingSystem:datePicker>
+	</div>
+	
+	<votingSystem:textEditorPC id="editorDiv"/>
+		
+	<div style='overflow:hidden;'>
+		<div style="float:right; margin:20px 10px 0px 0px;">
+			<votingSystem:simpleButton id="buttonAccept" isButton='true' 
+				imgSrc="${resource(dir:'images',file:'accept_16x16.png')}" style="margin:0px 20px 0px 0px;">
+					<g:message code="publishDocumentLbl"/>
+			</votingSystem:simpleButton>
+		</div>	
+	</div>	
+		
+		
+	</form>
+		
+	<g:render template="/template/signatureMechanismAdvert"  model="${[advices:[message(code:"onlySignedDocumentsMsg")]]}"/>
+	
+</div>
+
+</body>
+</html>
+<r:script>
 		
 		 	$(function() {
 		 		showEditor()
-			    $("#dateFinish").datepicker(pickerOpts);
 
-			    
 			    $('#mainForm').submit(function(event){
 			    	event.preventDefault();
 			    	hideEditor() 
@@ -17,8 +61,8 @@
 			    	
 			    	var subject = $( "#subject" ),
 			    	dateFinish = $( "#dateFinish" ),
-			    	ckeditorDiv = $( "#ckeditor" ),
-			        allFields = $( [] ).add( subject ).add( dateFinish ).add(ckeditorDiv);
+			    	editorDiv = $( "#editorDiv" ),
+			        allFields = $( [] ).add( subject ).add( dateFinish ).add(editorDiv);
 			        allFields.removeClass( "ui-state-error" );
 
 
@@ -30,7 +74,7 @@
 					}
 
 					if(htmlEditorContent.trim() == 0) {
-						ckeditorDiv.addClass( "ui-state-error" );
+						editorDiv.addClass( "ui-state-error" );
 						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 								'<g:message code="emptyDocumentERRORMsg"/>')
 						isValidForm = false
@@ -78,52 +122,4 @@
 				}
 			}
 
-        </script>
-</head>
-<body>
-
-<div id="contentDiv" style="display:none; padding: 0px 20px 0px 20px;">
-
-	<div class="publishPageTitle">
-		<p style="text-align:center; width: 100%;">
-			<g:message code="publishManifestLbl"/>
-		</p>
-	</div>
-	
-	<form id="mainForm">
-	
-	<div style="margin:0px 0px 20px 0px">
-    	<input type="text" name="subject" id="subject" style="width:400px"  required 
-				title="<g:message code="subjectLbl"/>"
-				placeholder="<g:message code="subjectLbl"/>"
-    			oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-    			onchange="this.setCustomValidity('')" />
-
-		<input type="text" id="dateFinish" style="margin:0px 0px 0px 35px;" required readonly
-				title="<g:message code="dateLbl"/>"
-				placeholder="<g:message code="dateLbl"/>"
-   				oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-   				onchange="this.setCustomValidity('')"/>
-	</div>
-	
-	<div id="editor"></div>
-	<div id="editorContents" class="editorContents"></div>	
-		
-	<div style='overflow:hidden;'>
-		<div style="float:right; margin:20px 10px 0px 0px;">
-			<votingSystem:simpleButton id="buttonAccept" isButton='true' 
-				imgSrc="${resource(dir:'images',file:'accept_16x16.png')}" style="margin:0px 20px 0px 0px;">
-					<g:message code="publishDocumentLbl"/>
-			</votingSystem:simpleButton>
-		</div>	
-	</div>	
-		
-		
-	</form>
-		
-	<g:render template="/template/signatureMechanismAdvert"  model="${[advices:[message(code:"onlySignedDocumentsMsg")]]}"/>
-	
-</div>
-
-</body>
-</html>
+</r:script>

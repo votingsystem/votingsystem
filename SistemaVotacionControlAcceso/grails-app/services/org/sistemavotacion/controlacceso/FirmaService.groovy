@@ -110,6 +110,7 @@ class FirmaService {
 				cert.delete()
 			}
 		}
+		afterPropertiesSet();
 		return new Respuesta(codigoEstado:Respuesta.SC_OK)
 	}
 	
@@ -412,7 +413,8 @@ class FirmaService {
 		try {
 			Collection<X509Certificate> certX509CertCollection = CertUtil.fromPEMToX509CertCollection(caPEM)
 			for(X509Certificate cert: certX509CertCollection) {
-				log.debug(" ------- addCertificateAuthority - adding cert: ${cert.getSubjectDN()}" );
+				log.debug(" ------- addCertificateAuthority - adding cert: ${cert.getSubjectDN()}" + 
+					" - serial number: ${cert.getSerialNumber()}");
 				Certificado certificado = null
 				Certificado.withTransaction {
 					certificado = Certificado.findByNumeroSerie(

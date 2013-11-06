@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 */
 public class SMIMEMessageWrapper extends MimeMessage {
     
-    private static Logger logger = LoggerFactory.getLogger(SMIMEMessageWrapper.class);
+    private static Logger log = LoggerFactory.getLogger(SMIMEMessageWrapper.class);
     
     private static final String BC = BouncyCastleProvider.PROVIDER_NAME;
 
@@ -78,7 +78,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
 	
     public SMIMEMessageWrapper(Session session) throws MessagingException {
         super(session);
-        logger.debug("SMIMEMessageWrapper(Session session)");
+        log.debug("SMIMEMessageWrapper(Session session)");
         String fileName =  StringUtils.randomLowerString(System.currentTimeMillis(), 7);
         setDisposition("attachment; fileName=" + fileName + ".p7m");
         contentType = "application/x-pkcs7-mime; smime-type=signed-data; name=" + fileName + ".p7m";
@@ -101,7 +101,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
 
     public void init() throws Exception {
         if(getContent() instanceof MimeMultipart){
-            logger.debug("content instanceof MimeMultipart");
+            log.debug("content instanceof MimeMultipart");
             smimeSigned = new SMIMESigned((MimeMultipart)getContent());
             MimeBodyPart content = smimeSigned.getContent();
             Object  cont = content.getContent();
@@ -129,7 +129,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
                         contentStream.close();
                         signedContent = new String(output.toByteArray());
                     }  else  {
-                        logger.debug(" TODO - get content from part instanceof -> " + part.getClass());
+                        log.debug(" TODO - get content from part instanceof -> " + part.getClass());
                     }
                 }
                 signedContent = stringBuilder.toString();
@@ -146,7 +146,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
                 signedContent = new String(output.toByteArray());
             }
         } else if(getContent() instanceof String){ 
-            logger.error("TODO - content instanceof String -> " + getContent()); 
+            log.error("TODO - content instanceof String -> " + getContent()); 
         }
         checkSignature(); 
     }
@@ -194,13 +194,13 @@ public class SMIMEMessageWrapper extends MimeMessage {
     	boolean result = false;
         try {
         	if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert))){
-                logger.debug("signature verified");
+                log.debug("signature verified");
                 result = true;
-            } else {logger.debug("signature failed!");}
+            } else {log.debug("signature failed!");}
         } catch(CMSVerifierCertificateNotValidException ex) {
-        	logger.debug("-----> cert.getNotBefore(): " + cert.getNotBefore());
-        	logger.debug("-----> cert.getNotAfter(): " + cert.getNotAfter());
-    		logger.error(ex.getMessage(), ex);
+        	log.debug("-----> cert.getNotBefore(): " + cert.getNotBefore());
+        	log.debug("-----> cert.getNotAfter(): " + cert.getNotAfter());
+    		log.error(ex.getMessage(), ex);
         } finally {
         	return result;
         }
@@ -220,7 +220,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
         // SignerInfo blocks which contain the signatures
         SignerInformationStore  signers = smimeSigned.getSignerInfos();
         informacionVoto = new InformacionVoto();
-        logger.debug("checkSignature - document with '" + signers.size() + "' signers");
+        log.debug("checkSignature - document with '" + signers.size() + "' signers");
         Collection c = signers.getSigners();
         Iterator it = c.iterator();
         Date firstSignature = null;
@@ -232,7 +232,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = new JcaX509CertificateConverter().setProvider(BC)
                     .getCertificate((X509CertificateHolder)certIt.next());
-            logger.debug("checkSignature - cert: " + cert.getSubjectDN() + " --- " + 
+            log.debug("checkSignature - cert: " + cert.getSubjectDN() + " --- " + 
                     certCollection.size() + " match");
             isValidSignature = verifySignerCert(signer, cert);
             if(!isValidSignature) return;
@@ -270,59 +270,59 @@ public class SMIMEMessageWrapper extends MimeMessage {
             SignerInformation signer = (SignerInformation) it.next();
             result = validator.getValidationResult(signer);
             if (result.isValidSignature()){
-                logger.debug("isValidSignature");
+                log.debug("isValidSignature");
             }
             else {
-                logger.debug("sigInvalid");
-                logger.debug("Errors:");
+                log.debug("sigInvalid");
+                log.debug("Errors:");
                 Iterator errorsIt = result.getErrors().iterator();
                 while (errorsIt.hasNext()) {
-                    logger.debug("ERROR - " + errorsIt.next().toString());
+                    log.debug("ERROR - " + errorsIt.next().toString());
                 }
             }
             if (!result.getNotifications().isEmpty()) {
-                logger.debug("Notifications:");
+                log.debug("Notifications:");
                 Iterator notIt = result.getNotifications().iterator();
                 while (notIt.hasNext()) {
-                    logger.debug("NOTIFICACION - " + notIt.next());
+                    log.debug("NOTIFICACION - " + notIt.next());
                 }
             }
             PKIXCertPathReviewer review = result.getCertPathReview();
             if (review != null) {
                 if (review.isValidCertPath()) {
-                    logger.debug("Certificate path valid");
+                    log.debug("Certificate path valid");
                 }
                 else {
-                    logger.debug("Certificate path invalid");
+                    log.debug("Certificate path invalid");
                 }
-                logger.debug("Certificate path validation results:");
+                log.debug("Certificate path validation results:");
                 Iterator errorsIt = review.getErrors(-1).iterator();
                 while (errorsIt.hasNext()) {
-                    logger.debug("ERROR - " + errorsIt.next().toString());
+                    log.debug("ERROR - " + errorsIt.next().toString());
                 }
                 Iterator notificationsIt = review.getNotifications(-1)
                         .iterator();
                 while (notificationsIt.hasNext()) {
-                    logger.debug("NOTIFICACION - " + notificationsIt.next().toString());
+                    log.debug("NOTIFICACION - " + notificationsIt.next().toString());
                 }
                 // per certificate errors and notifications
                 Iterator certIt = review.getCertPath().getCertificates().iterator();
                 int i = 0;
                 while (certIt.hasNext()) {
                     X509Certificate cert = (X509Certificate) certIt.next();
-                    logger.debug("Certificate " + i + " ----------- ");
-                    logger.debug("Issuer: " + cert.getIssuerDN().getName());
-                    logger.debug("Subject: " + cert.getSubjectDN().getName());
-                    logger.debug("Errors:");
+                    log.debug("Certificate " + i + " ----------- ");
+                    log.debug("Issuer: " + cert.getIssuerDN().getName());
+                    log.debug("Subject: " + cert.getSubjectDN().getName());
+                    log.debug("Errors:");
                     errorsIt = review.getErrors(i).iterator();
                     while (errorsIt.hasNext())  {
-                        logger.debug( errorsIt.next().toString());
+                        log.debug( errorsIt.next().toString());
                     }
                     // notifications
-                    logger.debug("Notifications:");
+                    log.debug("Notifications:");
                     notificationsIt = review.getNotifications(i).iterator();
                     while (notificationsIt.hasNext()) {
-                        logger.debug(notificationsIt.next().toString());
+                        log.debug(notificationsIt.next().toString());
                     }
                     i++;
                 }
@@ -372,12 +372,12 @@ public class SMIMEMessageWrapper extends MimeMessage {
                 String digestTokenStr = new String(Base64.encode(hashToken));
                 Calendar cal = new GregorianCalendar();
                 cal.setTime(timeStampToken.getTimeStampInfo().getGenTime());
-                logger.debug("checkTimeStampToken - timeStampToken - fecha: " +  cal.getTime());
-                //logger.debug("checkTimeStampToken - digestStr: " + digestStr 
+                log.debug("checkTimeStampToken - timeStampToken - fecha: " +  cal.getTime());
+                //log.debug("checkTimeStampToken - digestStr: " + digestStr 
                 //		+ " - digestTokenStr " + digestTokenStr);
                 return timeStampToken;
             }
-        } else logger.debug("checkTimeStampToken - without unsignedAttributes"); 
+        } else log.debug("checkTimeStampToken - without unsignedAttributes"); 
         return timeStampToken;
     }
     

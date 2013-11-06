@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 @DiscriminatorValue("ActorConIP")
 public class ActorConIP implements Serializable {
 	
-    private static Logger logger = LoggerFactory.getLogger(ActorConIP.class);
+    private static Logger log = LoggerFactory.getLogger(ActorConIP.class);
 
     public static final long serialVersionUID = 1L;
     
@@ -194,7 +194,7 @@ public class ActorConIP implements Serializable {
 	}
 	
     public static ActorConIP parse(String actorConIPStr) throws Exception {
-        logger.debug(" - parse -");
+        log.debug(" - parse -");
         if(actorConIPStr == null) return null;
         JSONObject actorConIPJSON = (JSONObject) JSONSerializer.toJSON(actorConIPStr);
         ActorConIP actorConIP = new ActorConIP();

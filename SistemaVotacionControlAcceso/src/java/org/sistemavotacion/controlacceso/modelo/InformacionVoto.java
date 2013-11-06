@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 public class InformacionVoto {
 	
-    private static Logger logger = LoggerFactory.getLogger(InformacionVoto.class);
+    private static Logger log = LoggerFactory.getLogger(InformacionVoto.class);
     
 	private String hashCertificadoVotoHEX;
 	private String hashCertificadoVotoBase64;
@@ -76,7 +76,7 @@ public class InformacionVoto {
 	public void setCertificadoVoto(X509Certificate certificadoVoto) {
 		this.certificadoVoto = certificadoVoto;
     	String subjectDN = certificadoVoto.getSubjectDN().getName();
-    	//logger.debug("setCertificadoVoto - subjectDN: " +subjectDN);
+    	//log.debug("setCertificadoVoto - subjectDN: " +subjectDN);
     	if(subjectDN.split("OU=eventoId:").length > 1) {
     		setEventoId(subjectDN.split("OU=eventoId:")[1].split(",")[0]);
     	}

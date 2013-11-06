@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SMIMESignedValidator { 
     
-    private static Logger logger = LoggerFactory.getLogger(SMIMESignedValidator.class);
+    private static Logger log = LoggerFactory.getLogger(SMIMESignedValidator.class);
 	
     private static final String BC = BouncyCastleProvider.PROVIDER_NAME;
     
@@ -41,7 +41,7 @@ public class SMIMESignedValidator {
         Store certs = smimeSigned.getCertificates();
         // SignerInfo blocks which contain the signatures
         SignerInformationStore  signers = smimeSigned.getSignerInfos();
-        logger.debug("signers.size(): " + signers.size());
+        log.debug("signers.size(): " + signers.size());
         Collection c = signers.getSigners();
         Iterator it = c.iterator();
         boolean result = false;
@@ -49,18 +49,18 @@ public class SMIMESignedValidator {
         while (it.hasNext()) {
             SignerInformation   signer = (SignerInformation)it.next();
             Collection          certCollection = certs.getMatches(signer.getSID());
-            logger.debug("Collection matches: " + certCollection.size());
+            log.debug("Collection matches: " + certCollection.size());
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = new JcaX509CertificateConverter().setProvider(BC)
                     .getCertificate((X509CertificateHolder)certIt.next());
-            logger.debug("SubjectDN: " + cert.getSubjectDN() + 
+            log.debug("SubjectDN: " + cert.getSubjectDN() + 
           		  " - Not before: " + cert.getNotBefore() + " - Not after: " + cert.getNotAfter() 
           		  + " - SigningTime: " + getSigningTime(signer));
             if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert))){
-                logger.debug("signature verified");
+                log.debug("signature verified");
                 result = true;
             } else {
-                logger.debug("signature failed!");
+                log.debug("signature failed!");
                 result = false;
             }
         }
@@ -85,7 +85,7 @@ public class SMIMESignedValidator {
                         } 
                 } 
         	} catch(Exception ex) {
-        		logger.error(ex.getMessage(), ex);
+        		log.error(ex.getMessage(), ex);
         	}
         }
 		return null; 

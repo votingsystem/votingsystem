@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 */
 public class ClienteOCSP {
 
-    private static Logger logger = LoggerFactory.getLogger(ClienteOCSP.class);
+    private static Logger log = LoggerFactory.getLogger(ClienteOCSP.class);
 
     public enum EstadoCertificado {OK, REVOCADO, DESCONOCIDO}
 

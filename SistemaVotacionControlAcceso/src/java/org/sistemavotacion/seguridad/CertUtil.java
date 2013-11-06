@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
 */
 public class CertUtil {
     
-    private static Logger logger = LoggerFactory.getLogger(CertUtil.class);
+    private static Logger log = LoggerFactory.getLogger(CertUtil.class);
     
     public static String ROOT_ALIAS = "root";
     public static String END_ENTITY_ALIAS = "end";
@@ -105,7 +105,7 @@ public class CertUtil {
     public static X509Certificate generateV3RootCert(KeyPair pair, 
     		Date fechaIncio, Date fechaFin, String strSubjectDN) throws Exception {
         X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
-        logger.debug("strSubjectDN: " + strSubjectDN);
+        log.debug("strSubjectDN: " + strSubjectDN);
         X509Principal x509Principal = new X509Principal(strSubjectDN);          
 
         byte[] serno = new byte[8];
@@ -117,7 +117,7 @@ public class CertUtil {
         certGen.setIssuerDN(x509Principal);
         certGen.setNotBefore(fechaIncio);
         certGen.setNotAfter(fechaFin);
-        logger.debug("fechaIncio: " + fechaIncio.toString() + 
+        log.debug("fechaIncio: " + fechaIncio.toString() + 
         		" - fechaFin: " + fechaFin.toString());
         certGen.setSubjectDN(x509Principal);
         certGen.setPublicKey(pair.getPublic());
@@ -175,7 +175,7 @@ public class CertUtil {
         certGen.setSerialNumber((new java.math.BigInteger(serno)).abs());
         
 
-        logger.debug("generateV3EndEntityCertFromCsr - caCert.getSubjectX500Principal(): " + caCert.getSubjectX500Principal());
+        log.debug("generateV3EndEntityCertFromCsr - caCert.getSubjectX500Principal(): " + caCert.getSubjectX500Principal());
         certGen.setIssuerDN(PrincipalUtil.getSubjectX509Principal(caCert));
         certGen.setNotBefore(fechaInicio);
         certGen.setNotAfter(fechaFin);
@@ -290,7 +290,7 @@ public class CertUtil {
         //PKIXCertPathValidatorResult pkixResult = (PKIXCertPathValidatorResult)result;
         //TrustAnchor ta = pkixResult.getTrustAnchor();
         //X509Certificate certCaResult = ta.getTrustedCert();
-        //logger.debug("certCaResult: " + certCaResult.getSubjectDN().toString()+
+        //log.debug("certCaResult: " + certCaResult.getSubjectDN().toString()+
         //        "- numserie: " + certCaResult.getSerialNumber().longValue());
         return (PKIXCertPathValidatorResult)result;
     }
@@ -363,7 +363,7 @@ public class CertUtil {
 				throws CertPathValidatorException {
 			for(String ext : unresolvedCritExts) {
 				if(X509Extensions.ExtendedKeyUsage.toString().equals(ext)) {
-					logger.debug("------------- ExtendedKeyUsage removed from validation");
+					log.debug("------------- ExtendedKeyUsage removed from validation");
 					unresolvedCritExts.remove(ext);
 				}
 			}

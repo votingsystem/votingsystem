@@ -40,10 +40,10 @@ import android.widget.Button;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
-import org.eclipse.jetty.websocket.WebSocket;
-import org.eclipse.jetty.websocket.WebSocketClient;
-import org.eclipse.jetty.websocket.WebSocketClientFactory;
-import org.mortbay.ijetty.log.AndroidLog;
+//import org.eclipse.jetty.websocket.WebSocket;
+//import org.eclipse.jetty.websocket.WebSocketClient;
+//import org.eclipse.jetty.websocket.WebSocketClientFactory;
+//import org.mortbay.ijetty.log.AndroidLog;
 import org.sistemavotacion.callable.DataGetter;
 import org.sistemavotacion.modelo.Consulta;
 import org.sistemavotacion.modelo.ControlAcceso;

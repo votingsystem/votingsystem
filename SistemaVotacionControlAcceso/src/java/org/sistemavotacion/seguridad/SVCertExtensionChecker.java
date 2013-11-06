@@ -34,7 +34,7 @@ public class SVCertExtensionChecker extends PKIXCertPathChecker {
 			throws CertPathValidatorException {
 		for(String ext : unresolvedCritExts) {
 			if(X509Extensions.ExtendedKeyUsage.toString().equals(ext)) {
-				//logger.debug("------------- ExtendedKeyUsage removed from validation");
+				//log.debug("------------- ExtendedKeyUsage removed from validation");
 				unresolvedCritExts.remove(ext);
 			}
 		}

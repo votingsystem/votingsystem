@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository("searchHelper")
 public class SearchHelper {
 
-    private static Logger logger =
+    private static Logger log =
             LoggerFactory.getLogger(SearchHelper.class);
 
     // a Hibernate SessionFactory
@@ -44,7 +44,7 @@ public class SearchHelper {
         try {
             luceneQuery = parser.parse(textToFind);
         } catch (ParseException e) {
-            logger.error("Cannot parse [" + textToFind + "] to a full text query", e);
+            log.error("Cannot parse [" + textToFind + "] to a full text query", e);
             return new ArrayList<T>(0);
         }
         FullTextQuery query = session.createFullTextQuery( luceneQuery, entityClass );
@@ -62,7 +62,7 @@ public class SearchHelper {
         try {
             luceneQuery = parser.parse(textToFind);
         } catch (ParseException e) {
-            logger.error("Cannot parse [" + textToFind + "] to a full text query", e);
+            log.error("Cannot parse [" + textToFind + "] to a full text query", e);
             return null;
         }
         return session.createFullTextQuery( luceneQuery, entityClass );
@@ -73,7 +73,7 @@ public class SearchHelper {
             String[] entityFields, String textToFind, Date fechaInicioDesde,
             Date fechaInicioHasta, Date fechaFinDesde, Date fechaFinHasta, 
             List<Evento.Estado> estados) {
-    	logger.debug("getCombinedQuery -- fechaInicioDesde: " + fechaInicioDesde + 
+    	log.debug("getCombinedQuery -- fechaInicioDesde: " + fechaInicioDesde + 
     			" -fechaInicioHasta: " + fechaInicioHasta + "fechaFinDesde: " + fechaFinDesde + 
     			" -fechaFinHasta: " + fechaFinHasta);
         FullTextSession session = Search.getFullTextSession(
@@ -85,7 +85,7 @@ public class SearchHelper {
         	if(textToFind != null && !"".equals(textToFind))
         		luceneQuery = parser.parse(textToFind);
         } catch (ParseException e) {
-            logger.error("Cannot parse [" + textToFind + "] to a full text query", e);
+            log.error("Cannot parse [" + textToFind + "] to a full text query", e);
             return null;
         }
         SearchFactory searchFactory = session.getSearchFactory();
@@ -96,25 +96,25 @@ public class SearchHelper {
 			booleanJunction.must(luceneQuery);
 		} 
         if(fechaInicioDesde != null) {
-        	logger.debug("Restringiendo por fechaIncioDesde");
+        	log.debug("Restringiendo por fechaIncioDesde");
         	if(booleanJunction == null) booleanJunction = queryBuilder.bool();
         	booleanJunction.must(queryBuilder.range()
         	        .onField("fechaInicio").above(fechaInicioDesde).createQuery());
         } 
         if(fechaInicioHasta != null) {
-        	logger.debug("Restringiendo por fechaIncioHasta");
+        	log.debug("Restringiendo por fechaIncioHasta");
         	if(booleanJunction == null) booleanJunction = queryBuilder.bool();
         	booleanJunction.must(queryBuilder.range()
         	        .onField("fechaInicio").below(fechaInicioHasta).createQuery());
         } 
         if(fechaFinDesde != null) {
-        	logger.debug("Restringiendo por fechaFinDesde");
+        	log.debug("Restringiendo por fechaFinDesde");
         	if(booleanJunction == null) booleanJunction = queryBuilder.bool();
         	booleanJunction.must(queryBuilder.range()
         	        .onField("fechaFin").above(fechaFinDesde).createQuery()); 
         }        
         if(fechaFinHasta != null) {
-        	logger.debug("Restringiendo por fechaFinHasta");
+        	log.debug("Restringiendo por fechaFinHasta");
         	if(booleanJunction == null) booleanJunction = queryBuilder.bool();
         	booleanJunction.must(queryBuilder.range()
         	        .onField("fechaFin").below(fechaFinHasta).createQuery()); 

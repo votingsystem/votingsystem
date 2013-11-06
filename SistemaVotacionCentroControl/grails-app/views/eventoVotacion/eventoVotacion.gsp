@@ -3,8 +3,84 @@
 <html>
 <head>
         <meta name="layout" content="main" />
-        <script type="text/javascript">
-        	var votingEvent = ${eventMap as JSON} 
+</head>
+<body>
+
+	<div id="eventMessagePanel" class="eventMessagePanel" style="display:none;">
+		<p class="messageContent"></p>
+	</div>
+
+	<div class="publishPageTitle" style="margin:0px 0px 0px 0px;">
+		<p style="margin: 0px 0px 0px 0px; text-align:center; width:100%;">
+			${eventMap?.asunto}
+		</p>
+	</div>
+	
+	<div style="display:inline-block; width:100%; font-size:0.8em;">
+		<div style="display:inline;margin:0px 20px 0px 20px;">
+			<b><g:message code="dateLimitLbl"/>: </b>${eventMap?.fechaFin}
+		</div>
+		<div id="adminDocumentLink" class="appLink" style="float:right;margin:0px 20px 0px 0px;">
+			<g:message code="adminDocumentLinkLbl"/>
+		</div>
+	</div>
+
+	<div class="eventPageContentDiv">
+		<div style="width:100%;position:relative;">
+			<div class="eventContentDiv">${eventMap?.contenido}</div>
+		</div>
+		
+		<div style="width:100%;position:relative;margin:0px 0px 0px 0px;">
+			<div id="eventAuthorDiv"><b>
+				<g:message code="publisshedByLbl"/>:</b>${eventMap?.usuario}
+			</div>
+		</div>
+	
+		<div class="eventOptionsDiv">
+			<fieldset id="fieldsBox" style="">
+				<legend id="fieldsLegend"><g:message code="pollFieldLegend"/></legend>
+				<div id="fields" style="width:100%;">
+					<g:if test="${EventoVotacion.Estado.ACTIVO.toString() == eventMap?.estado}">
+						<g:each in="${eventMap?.opciones}">
+							<div class="voteOptionButton button_base" 
+								style="width: 90%;margin: 10px auto 0px auto;"
+								optionId = "${it.id}" optionContent="${it.contenido}">
+								${it.contenido}
+							</div>
+						</g:each>
+					</g:if>
+					<g:if test="${EventoVotacion.Estado.CANCELADO.toString() == eventMap?.estado ||
+						EventoVotacion.Estado.FINALIZADO.toString() == eventMap?.estado ||
+						EventoVotacion.Estado.PENDIENTE_COMIENZO.toString() == eventMap?.estado}">			
+						<g:each in="${eventMap?.opciones}">
+							<div class="voteOption" style="width: 90%;margin: 10px auto 0px auto;">
+								 - ${it.contenido}
+							</div>
+						</g:each>
+					</g:if>
+				</div>
+			</fieldset>
+
+			
+		</div>
+	</div>
+
+		
+	<div class="userAdvert">
+		<ul>
+			<li><g:message code="dniConnectedMsg"/></li>
+			<li><g:message code="appletAdvertMsg"/></li>
+			<li><g:message code="javaInstallAdvertMsg"/></li>
+		</ul>
+	</div>		
+
+<g:include view="/include/dialog/confirmOptionDialog.gsp"/>	
+<g:include view="/include/dialog/adminDocumentDialog.gsp"/>	   		   	
+</body>
+</html>
+<r:script>
+	<g:applyCodec encodeAs="none">
+                	var votingEvent = ${eventMap as JSON} 
         	var selectedOption
         	var pendingOperation
 		 	$(function() {
@@ -117,79 +193,5 @@
 					}
 				}
 			}
-        </script>
-</head>
-<body>
-
-	<div id="eventMessagePanel" class="eventMessagePanel" style="display:none;">
-		<p class="messageContent"></p>
-	</div>
-
-	<div class="publishPageTitle" style="margin:0px 0px 0px 0px;">
-		<p style="margin: 0px 0px 0px 0px; text-align:center; width:100%;">
-			${eventMap?.asunto}
-		</p>
-	</div>
-	
-	<div style="display:inline-block; width:100%; font-size:0.8em;">
-		<div style="display:inline;margin:0px 20px 0px 20px;">
-			<b><g:message code="dateLimitLbl"/>: </b>${eventMap?.fechaFin}
-		</div>
-		<div id="adminDocumentLink" class="appLink" style="float:right;margin:0px 20px 0px 0px;">
-			<g:message code="adminDocumentLinkLbl"/>
-		</div>
-	</div>
-
-	<div class="eventPageContentDiv">
-		<div style="width:100%;position:relative;">
-			<div class="eventContentDiv">${eventMap?.contenido}</div>
-		</div>
-		
-		<div style="width:100%;position:relative;margin:0px 0px 0px 0px;">
-			<div id="eventAuthorDiv"><b>
-				<g:message code="publisshedByLbl"/>:</b>${eventMap?.usuario}
-			</div>
-		</div>
-	
-		<div class="eventOptionsDiv">
-			<fieldset id="fieldsBox" style="">
-				<legend id="fieldsLegend"><g:message code="pollFieldLegend"/></legend>
-				<div id="fields" style="width:100%;">
-					<g:if test="${EventoVotacion.Estado.ACTIVO.toString() == eventMap?.estado}">
-						<g:each in="${eventMap?.opciones}">
-							<div class="voteOptionButton button_base" 
-								style="width: 90%;margin: 10px auto 0px auto;"
-								optionId = "${it.id}" optionContent="${it.contenido}">
-								${it.contenido}
-							</div>
-						</g:each>
-					</g:if>
-					<g:if test="${EventoVotacion.Estado.CANCELADO.toString() == eventMap?.estado ||
-						EventoVotacion.Estado.FINALIZADO.toString() == eventMap?.estado ||
-						EventoVotacion.Estado.PENDIENTE_COMIENZO.toString() == eventMap?.estado}">			
-						<g:each in="${eventMap?.opciones}">
-							<div class="voteOption" style="width: 90%;margin: 10px auto 0px auto;">
-								 - ${it.contenido}
-							</div>
-						</g:each>
-					</g:if>
-				</div>
-			</fieldset>
-
-			
-		</div>
-	</div>
-
-		
-	<div class="userAdvert">
-		<ul>
-			<li><g:message code="dniConnectedMsg"/></li>
-			<li><g:message code="appletAdvertMsg"/></li>
-			<li><g:message code="javaInstallAdvertMsg"/></li>
-		</ul>
-	</div>		
-
-<g:render template="/template/dialog/confirmOptionDialog"/>	
-<g:render template="/template/dialog/adminDocumentDialog"/>	   		   	
-</body>
-</html>
+	</g:applyCodec>
+</r:script>

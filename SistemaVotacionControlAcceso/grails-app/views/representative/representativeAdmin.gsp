@@ -1,17 +1,6 @@
 <html>
 <head>
 <meta name="layout" content="main" />
-<script type="text/javascript">
-	$(function() {
-		$("#editRepresentativeButton").click(function() {		 	
-			$("#editRepresentativeDialog").dialog("open");
-		 })
-		 		  
-		$("#removeRepresentativeButton").click(function () { 
-			$("#removeRepresentativeDialog").dialog("open");
-		});
-	});
-</script>
 </head>
 <body>
 	<div id="contentDiv" style="position:relative; height:700px;">
@@ -32,8 +21,19 @@
 		</div>
 	</div>
 
-<g:render template="/template/dialog/removeRepresentativeDialog"/>
-<g:render template="/template/dialog/editRepresentativeDialog"/>
+<g:include view="/include/dialog/removeRepresentativeDialog.gsp"/>
+<g:include view="/include/dialog/editRepresentativeDialog.gsp"/>
 
 </body>
 </html>
+<r:script>
+	$(function() {
+		$("#editRepresentativeButton").click(function() {		 	
+			$("#editRepresentativeDialog").dialog("open");
+		 })
+		 		  
+		$("#removeRepresentativeButton").click(function () { 
+			$("#removeRepresentativeDialog").dialog("open");
+		});
+	});
+</r:script>

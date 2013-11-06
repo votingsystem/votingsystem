@@ -1,19 +1,69 @@
 <html>
 <head>
-        <meta name="layout" content="main" />
-		<g:render template="/template/js/jqueryPaginate"/>
+    <meta name="layout" content="main" />
+   	<r:require module="paginate"/>
+</head>
+<body>
 
-        <script type="text/javascript">
+	<div id="contentDiv" style="display:none;">
+	
+		<div style="display:inline-block;width:100%;vertical-align: middle;margin:0px 0 10px 0px;">
+			<div style="display:inline;float:left;width:300px;">
+				<votingSystem:simpleButton href="${createLink(controller:'representative', action:'mainPage')}" 
+					imgSrc="${resource(dir:'images',file:'group_24x24.png')}" style="margin:0px 0px 0px 15px;">
+						<g:message code="representativesPageLbl"/>
+				</votingSystem:simpleButton>
+				<div>
+					<img src="${resource(dir:'images',file:'feed.png')}" style="margin:3px 0 0 15px;"></img>
+					<g:link controller="subscripcion" action="votaciones" style="font-size: 0.8em;"><g:message code="subscribeToFeedsLbl"/></g:link>
+				</div>
+			</div>
+			<div style="display:inline;float:left;margin:0px auto 0px auto;">
+				<div style="margin:0px auto 0px auto;">		
+					<select id="eventsStateSelect" style="margin:0px 0px 0px 40px;color:black;">
+						<option value="" style="color:black;"> - <g:message code="selectPollsLbl"/> - </option>
+					  	<option value="ACTIVO" style="color:#6bad74;"> - <g:message code="selectOpenPollsLbl"/> - </option>
+					  	<option value="PENDIENTE_COMIENZO" style="color:#fba131;"> - <g:message code="selectPendingPollsLbl"/> - </option>
+					  	<option value="FINALIZADO" style="color:#cc1606;"> - <g:message code="selectClosedPollsLbl"/> - </option>
+					</select>
+				</div>
+			</div>
+
+			<div style="display:inline;float:right;">
+				<votingSystem:simpleButton href="${createLink(controller:'editor', action:'vote')}" 
+					imgSrc="${resource(dir:'images',file:'poll_22x22.png')}" style="margin:0px 20px 0px 0px;">
+						<g:message code="publishDocumentLbl"/>
+				</votingSystem:simpleButton>
+			</div>
+		</div>	
+		
+	</div>
+
+	<g:render template="/template/eventsSearchInfo"/>
+	
+	<div id="mainPageEventList" class="mainPageEventList"><ul></ul></div>
+		
+	<div id="progressDiv" style="vertical-align: middle;height:100%;">
+		<progress style="display:block;margin:0px auto 20px auto;"></progress>
+	</div>
+
+	<g:render template="/template/pagination"/>
+
+
+	<div id="eventTemplate" style="display:none;">
+		<g:render template="/template/event" model="[isTemplate:'true']"/>
+	</div> 
+</body>
+</html>
+<r:script>
         	var eventState = ''
             var searchQuery
 		 	$(function() {
 		 		paginate(0)
-		 		
 		 		$('#eventsStateSelect').on('change', function (e) {
 		 			eventState = $(this).val()
 		 		    var optionSelected = $("option:selected", this);
-		 		    var valueSelected = this.value;
-		 		    console.log(" - valueSelected: " + valueSelected)
+		 		    console.log(" - eventState: " + eventState)
 		 		    if(!isFirefox()) {
 			 		    if($('#eventsStateSelect')[0].selectedIndex == 0) {
 			 		    	$('#eventsStateSelect').css({'color': '#434343',
@@ -68,7 +118,7 @@
 				//var dataStr = JSON.stringify(eventJSON);  
   			    //console.log( " - ajax call done - dataStr: " + dataStr);
 				//console.log("printEvent: " + dataStr);
-		        var newEventTemplate ="${render(template:'/template/event', model:[isTemplate:'true']).replace("\n","")}"
+		        var newEventTemplate = $('#eventTemplate').html()
 		        
 		        var newEventHTML = newEventTemplate.format(eventJSON.asunto, 
 				        eventJSON.usuario, eventJSON.fechaInicio, eventJSON.fechaFin.getElapsedTime(), 
@@ -128,53 +178,4 @@
 				loadEvents("${createLink(controller:'buscador', action:'consultaJSON')}?max=" + 
 						numMaxEventsForPage + "&offset=0", newSearchQuery)
 			}
-        </script>
-</head>
-<body>
-
-	<div id="contentDiv" style="display:none;">
-	
-		<div style="display:inline-block;width:100%;vertical-align: middle;margin:0px 0 10px 0px;">
-			<div style="display:inline;float:left;width:300px;">
-				<votingSystem:simpleButton href="${createLink(controller:'representative', action:'mainPage')}" 
-					imgSrc="${resource(dir:'images',file:'group_24x24.png')}" style="margin:0px 0px 0px 15px;">
-						<g:message code="representativesPageLbl"/>
-				</votingSystem:simpleButton>
-				<div>
-					<img src="${resource(dir:'images',file:'feed.png')}" style="margin:3px 0 0 15px;"></img>
-					<g:link controller="subscripcion" action="votaciones" style="font-size: 0.8em;"><g:message code="subscribeToFeedsLbl"/></g:link>
-				</div>
-			</div>
-			<div style="display:inline;float:left;margin:0px auto 0px auto;">
-				<div style="margin:0px auto 0px auto;">		
-					<select id="eventsStateSelect" style="margin:0px 0px 0px 40px;color:black;">
-						<option value="" style="color:black;"> - <g:message code="selectPollsLbl"/> - </option>
-					  	<option value="ACTIVO" style="color:#6bad74;"> - <g:message code="selectOpenPollsLbl"/> - </option>
-					  	<option value="PENDIENTE_COMIENZO" style="color:#fba131;"> - <g:message code="selectPendingPollsLbl"/> - </option>
-					  	<option value="FINALIZADO" style="color:#cc1606;"> - <g:message code="selectClosedPollsLbl"/> - </option>
-					</select>
-				</div>
-			</div>
-
-			<div style="display:inline;float:right;">
-				<votingSystem:simpleButton href="${createLink(controller:'editor', action:'vote')}" 
-					imgSrc="${resource(dir:'images',file:'poll_22x22.png')}" style="margin:0px 20px 0px 0px;">
-						<g:message code="publishDocumentLbl"/>
-				</votingSystem:simpleButton>
-			</div>
-		</div>	
-		
-	</div>
-
-	<g:render template="/template/eventsSearchInfo"/>
-	
-	<div id="mainPageEventList" class="mainPageEventList"><ul></ul></div>
-		
-	<div id="progressDiv" style="vertical-align: middle;height:100%;">
-		<progress style="display:block;margin:0px auto 20px auto;"></progress>
-	</div>
-
-	<g:render template="/template/pagination"/>
-
-</body>
-</html>
+</r:script>

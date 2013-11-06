@@ -1,9 +1,18 @@
+<!DOCTYPE html>
 <html>
-    <head>
-        <title>${message(code: 'nombreServidorLabel', null)}</title>
-        <link rel="stylesheet" href="${resource(dir:'css',file:'charts.css')}" />   
-        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-  <script type="text/javascript">
+<head>
+	<r:require module="charts"/>
+</head>
+    <body>    
+        <div id="chart_div">
+            <div class='loading'>
+                <img src="${resource(dir:'images',file:'Indeterminate.gif')}"/>
+            </div>        
+        </div>
+    </body>
+</html>
+<r:script>
+<g:applyCodec encodeAs="none">
     var jsonData = ${statisticsJSON}
     google.load('visualization', '1', {'packages':['corechart']});
     google.setOnLoadCallback(drawChart);
@@ -27,13 +36,5 @@
         };
         chart.draw(data, options);
     }
-  </script>
-</head>
-    <body>    
-        <div id="chart_div">
-            <div class='loading'>
-                <img src="${resource(dir:'images',file:'Indeterminate.gif')}"/>
-            </div>        
-        </div>
-    </body>
-</html>
+</g:applyCodec>
+</r:script>

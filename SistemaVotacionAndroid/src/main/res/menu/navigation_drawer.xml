@@ -1,0 +1,35 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:votingSystem="http://schemas.android.com/apk/res-auto" >
+
+    <item android:id="@+id/search_item"
+          android:icon="@drawable/action_search"
+          android:title="@string/searchLabel"
+          votingSystem:showAsAction="ifRoom"
+          android:actionViewClass="android.widget.SearchView" />
+
+    <item
+        android:id="@+id/get_cert"
+        android:orderInCategory="1"
+        android:showAsAction="never"
+        android:icon="@android:drawable/btn_plus"
+        android:title="@string/menu_solicitar_certificado"/>
+    <item
+        android:id="@+id/publish_document"
+        android:orderInCategory="2"
+        android:showAsAction="never"
+        android:icon="@drawable/view_detailed_22"
+        android:title="@string/publish_document_lbl"/>
+    <item
+        android:id="@+id/receipt_list"
+        android:orderInCategory="3"
+        android:showAsAction="never"
+        android:icon="@drawable/receipt_32"
+        android:title="@string/menu_receipt_list"/>
+
+    <item
+        android:id="@+id/close_app"
+        android:orderInCategory="4"
+        android:showAsAction="never"
+        android:title="@string/close_app_lbl"/>
+
+</menu> 

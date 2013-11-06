@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 */
 public class DateUtils {
 
-	private static Logger logger = LoggerFactory.getLogger(DateUtils.class);
+	private static Logger log = LoggerFactory.getLogger(DateUtils.class);
 	
     public static int getDayOfMonthFromDate (Date date) {
         Calendar calendar = Calendar.getInstance();

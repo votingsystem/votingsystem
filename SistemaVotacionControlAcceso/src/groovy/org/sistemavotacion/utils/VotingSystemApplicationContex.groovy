@@ -3,6 +3,7 @@ package org.sistemavotacion.utils
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import javax.servlet.ServletContext
+
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.plugins.GrailsPluginManager
 import org.sistemavotacion.smime.SignedMailGenerator;
@@ -24,14 +25,14 @@ import org.springframework.context.ApplicationContextAware
 	private ApplicationContext ctx
 	private static VotingSystemApplicationContex INSTANCE
 	
-	public Environment getEnvironment() {		
+	public Environment getEnvironment() {	
 		if(environment == null) {
 			Map grailsConfig = getBean("grailsApplication").config
-			String environmentStr = grailsConfig.VotingSystemEnvironment?.toString().trim()
-			if(environmentStr == null || "".equals(environmentStr.trim())) {
+			ConfigObject environment = grailsConfig.VotingSystemEnvironment
+			if(environment == null || environment.isEmpty()) {
 				return  Environment.valueOf(
-					Environment.current.toString())
-			} else environment = Environment.valueOf(environmentStr)	
+					grails.util.Environment.current.name.toUpperCase())
+			} else environment = Environment.valueOf(environment.toString().trim())	
 		} 
 		return environment;
 	}

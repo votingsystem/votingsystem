@@ -19,7 +19,7 @@ import org.sistemavotacion.utils.VotingSystemApplicationContex
 */
 class SolicitudAccesoService {
 	
-	static scope = "request"
+	//static scope = "request"
 
     static transactional = true
 	

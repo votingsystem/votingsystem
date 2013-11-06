@@ -2,11 +2,75 @@
 <html>
 <head>
 	<meta name="layout" content="main" />
-  <script>
+</head>
+<body>
+<div id="contentDiv" style="display:block;position:relative; margin: 0px 0px 30px 0px;min-height: 700px;">	
+	<div>
+		<div style="margin:0px auto 15px 0px; position:relative;display:table;">
+			<div style="display:table-cell;">
+				<votingSystem:simpleButton id="selectRepresentativeButton"
+					imgSrc="${resource(dir:'images',file:'accept_16x16.png')}" style="margin:0px 20px 0px 0px;">
+						<g:message code="selectRepresentativeLbl"/>
+				</votingSystem:simpleButton>
+			</div>
+			<div class="representativeNameHeader">
+				<div>${representativeFullName}</div>
+			</div>
+			<div  class="representativeNumRepHeader">
+				<div>  ${representative.numRepresentations} <g:message code="numDelegationsPartMsg"/></div>
+			</div>
+		</div>
+	</div>
+	<div id="tabs" style="min-height: 700px;">
+		    <ul>
+			    <li><a href="#tabs-1"><g:message code='profileLbl'/></a></li>
+			    <li><a href="#tabs-2"><g:message code='votingHistoryLbl'/></a></li>
+		  	</ul>
+			<div id="tabs-1">
+				<div style="width: 90%;margin: auto;top: 0; left: 0;right: 0; position:relative;display:table;">
+					<div style="display:table-cell; vertical-align: top; float:left;">
+						<img id="representativeImg" src="${representative.imageURL}" style="text-align:center; width: 200px;"></img>
+					</div>
+					<div style="display:table-cell;margin:0px 15px 15px 20px; vertical-align: top;text-align:center;">
+						${representative.info} 
+					</div>
+				</div>
+			</div>
+			<div id="tabs-2">
+				<div style="width: 90%;margin: auto;top: 0; left: 0; right: 0; position:relative;display:table;">
+					<div style="display:table-cell;">
+						<votingSystem:simpleButton id="votingHistoryButton"
+							imgSrc="${resource(dir:'images',file:'requestRepresentativeVotingHistory.png')}" style="margin:0px 20px 0px 0px;">
+								<g:message code="requestVotingHistoryLbl"/>
+						</votingSystem:simpleButton>
+					</div>
+					<div style="display:table-cell;">
+						<votingSystem:simpleButton id="accreditationRequestButton"
+							imgSrc="${resource(dir:'images',file:'requestRepresentativeAccreditations.png')}" style="margin:0px 20px 0px 0px;">
+								<g:message code="requestRepresentativeAcreditationsLbl"/>
+						</votingSystem:simpleButton>
+					</div>
+				</div>
+			</div>
+		</div>
+
+</div>
+
+<g:include view="/include/dialog/selectRepresentativeDialog.gsp" model="${[representativeName:representativeFullName]}" />	
+<g:include view="/include/dialog/representativeImageDialog.gsp"/>	
+<g:include view="/include/dialog/requestRepresentativeVotingHistoryDialog.gsp"/>	
+<g:include view="/include/dialog/requestRepresentativeAccreditationsDialog.gsp"/>	
+
+	<div id="tabProgressTemplate" style="display:none;">
+		<g:include view="/include/tabProgress.gsp"/>
+	</div> 
+</body>
+</html>
+<r:script>
 	  	$(function() {
 		  	$( "#tabs" ).tabs({
 			      beforeLoad: function( event, ui ) {
-			    	  ui.panel.html("${render(template:'/template/tabProgres').replace("\n","")}");
+			    	  ui.panel.html($('#tabProgressTemplate').html());
 			      }
 		    })
 
@@ -136,65 +200,4 @@
 			}
 		}
 
-  </script>
-</head>
-<body>
-<div id="contentDiv" style="display:block;position:relative; margin: 0px 0px 30px 0px;min-height: 700px;">	
-	<div>
-		<div style="margin:0px auto 15px 0px; position:relative;display:table;">
-			<div style="display:table-cell;">
-				<votingSystem:simpleButton id="selectRepresentativeButton"
-					imgSrc="${resource(dir:'images',file:'accept_16x16.png')}" style="margin:0px 20px 0px 0px;">
-						<g:message code="selectRepresentativeLbl"/>
-				</votingSystem:simpleButton>
-			</div>
-			<div class="representativeNameHeader">
-				<div>${representativeFullName}</div>
-			</div>
-			<div  class="representativeNumRepHeader">
-				<div>  ${representative.numRepresentations} <g:message code="numDelegationsPartMsg"/></div>
-			</div>
-		</div>
-	</div>
-	<div id="tabs" style="min-height: 700px;">
-		    <ul>
-			    <li><a href="#tabs-1"><g:message code='profileLbl'/></a></li>
-			    <li><a href="#tabs-2"><g:message code='votingHistoryLbl'/></a></li>
-		  	</ul>
-			<div id="tabs-1">
-				<div style="width: 90%;margin: auto;top: 0; left: 0;right: 0; position:relative;display:table;">
-					<div style="display:table-cell; vertical-align: top; float:left;">
-						<img id="representativeImg" src="${representative.imageURL}" style="text-align:center; width: 200px;"></img>
-					</div>
-					<div style="display:table-cell;margin:0px 15px 15px 20px; vertical-align: top;text-align:center;">
-						${representative.info} 
-					</div>
-				</div>
-			</div>
-			<div id="tabs-2">
-				<div style="width: 90%;margin: auto;top: 0; left: 0; right: 0; position:relative;display:table;">
-					<div style="display:table-cell;">
-						<votingSystem:simpleButton id="votingHistoryButton"
-							imgSrc="${resource(dir:'images',file:'requestRepresentativeVotingHistory.png')}" style="margin:0px 20px 0px 0px;">
-								<g:message code="requestVotingHistoryLbl"/>
-						</votingSystem:simpleButton>
-					</div>
-					<div style="display:table-cell;">
-						<votingSystem:simpleButton id="accreditationRequestButton"
-							imgSrc="${resource(dir:'images',file:'requestRepresentativeAccreditations.png')}" style="margin:0px 20px 0px 0px;">
-								<g:message code="requestRepresentativeAcreditationsLbl"/>
-						</votingSystem:simpleButton>
-					</div>
-				</div>
-			</div>
-		</div>
-
-</div>
-
-<g:render template="/template/dialog/selectRepresentativeDialog" model="${[representativeName:representativeFullName]}" />	
-<g:render template="/template/dialog/representativeImageDialog"/>	
-<g:render template="/template/dialog/requestRepresentativeVotingHistoryDialog"/>	
-<g:render template="/template/dialog/requestRepresentativeAccreditationsDialog"/>	
-
-</body>
-</html>
+</r:script>

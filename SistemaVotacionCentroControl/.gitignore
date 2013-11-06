@@ -1,8 +1,2 @@
-/searchIndexCentroControl
+/build
 /logs
-/target
-/target-eclipse
-/bin
-*.log
-.settings
-.project

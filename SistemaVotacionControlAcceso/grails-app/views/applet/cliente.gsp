@@ -10,11 +10,11 @@
 	}
 	
 %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html>
     <head>
         <link rel="shortcut icon" href="${resource(dir:'images',file:'favicon.ico')}" type="image/x-icon" />
-   	    <script type="text/javascript">
+   	    <r:script>
 
 		function setMessageFromSignatureClient(mensaje) {
 			return parent.setMessageFromSignatureClient(mensaje)
@@ -29,7 +29,7 @@
 			this[parent.getFnName(signatureClientCallback)] = signatureClientCallback
 		}
 		
-   	    </script>
+   	    </r:script>
     </head>
     <body onload="loadCallerCallback()">
 		<APPLET CODEBASE="${grailsApplication.config.grails.serverURL}/applet" 

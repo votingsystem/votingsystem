@@ -2,8 +2,85 @@
 <%@ page import="grails.converters.JSON" %>
 <html>
 <head>
-	<g:render template="/template/js/mobileEditor"/>
-	<script type="text/javascript">
+	<r:require modules="textEditorMobile"/>
+	<r:layoutResources />
+</head>
+<body>
+<div class ="contentDiv">
+	<form id="mainForm">
+	
+	<div style="margin:0px 0px 10px 0px">
+    	<input type="text" name="subject" id="subject" style="width:500px" required 
+			title="<g:message code="subjectLbl"/>"
+			placeholder="<g:message code="subjectLbl"/>" 
+    		oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
+   			onchange="this.setCustomValidity('')" />
+   </div>
+   <div style="margin:0px 0px 10px 0px">		   
+		<votingSystem:datePicker id="dateBegin" title="${message(code:'dateBeginLbl')}"
+			 style="width:150px;"
+			 placeholder="${message(code:'dateBeginLbl')}"
+			 oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
+			 onchange="this.setCustomValidity('')"></votingSystem:datePicker>   
+
+		<votingSystem:datePicker id="dateFinish" title="${message(code:'dateFinishLbl')}"
+			 style="width:150px; margin:0px 0px 0px 20px;"
+			 placeholder="${message(code:'dateFinishLbl')}"
+			 oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
+			 onchange="this.setCustomValidity('')"></votingSystem:datePicker>   
+	</div>
+
+	<votingSystem:textEditorMobile id="editorDiv"/>
+
+	<div style="margin: 15px auto 30px auto;">
+		<div style="display:inline;">
+			<img src="${resource(dir:'images',file:'info_16x16.png')}"></img>
+			<span id="controlCenterLink" style="font-size:1.1em; color:#02227a; cursor: pointer; cursor: hand;">
+				<g:message code="controlCenterLbl"/>
+			</span>
+		</div>
+		<div style="display:inline;">    	
+			<select id="controlCenterSelect" style="margin:0px 0px 0px 20px;display:inline;" required
+					oninvalid="this.setCustomValidity('<g:message code="selectControlCenterLbl"/>')"
+	   				onchange="this.setCustomValidity('')">
+				<g:each status="i" in="${controlCenters}" var="controlCenter">
+					<option value=""> --- <g:message code="selectControlCenterLbl"/> --- </option>
+				  	<option value="${controlCenter.id}">${controlCenter.nombre}</option>
+				</g:each>
+			</select>		
+		</div>
+	</div>
+	
+	<fieldset id="fieldsBox" class="fieldsBox" style="display:none;">
+		<legend id="fieldsLegend" style="font-size: 1.2em;"><g:message code="pollFieldLegend"/></legend>
+		<div id="fields"></div>
+	</fieldset>
+	
+	<div style="position:relative; margin:20px 0px 20px 0px;">
+		<votingSystem:simpleButton id="addOptionButton" style="margin:0px 0px 0px 20px;"
+			imgSrc="${resource(dir:'images',file:'poll_16x16.png')}">
+				<g:message code="addOptionLbl"/>
+		</votingSystem:simpleButton>
+		<votingSystem:simpleButton id="buttonAccept" isButton='true' style="position:absolute; right:10px; top:0px;"
+			imgSrc="${resource(dir:'images',file:'accept_16x16.png')}">
+				<g:message code="publishDocumentLbl"/>
+		</votingSystem:simpleButton>
+	</div>
+		 
+	</form>
+</div>
+<div style="clear: both;margin:0px 0px 30px 0px;">&nbsp;</div>
+<g:include view="/include/dialog/addControlCenterDialog.gsp"/>
+<g:include view="/include/dialog/addVoteOptionDialog.gsp"/>
+
+	<div id="newFieldTemplate" style="display:none;">
+		<g:render template="/template/newField" model="[isTemplate:'true']"/>
+	</div> 
+	
+</body>
+</html>
+<r:script>
+<g:applyCodec encodeAs="none">
 		var numVoteOptions = 0
 		var controlCenters = {};
 		<g:each status="i" in="${controlCenters}" var="controlCenter">
@@ -12,8 +89,6 @@
 		
 		$(function() {
 			showEditor()
-		    $("#dateFinish").datepicker(pickerOpts);
-		    $("#dateBegin").datepicker(pickerOpts);
 
     		$("#addOptionButton").click(function () { 
     			hideEditor() 
@@ -33,7 +108,7 @@
 			function addVoteOption (voteOptionText) {
 				showEditor()
 				if(voteOptionText == null) return
-		        var newFieldTemplate = "${render(template:'/template/newField', model:[]).replace("\n","")}"
+		        var newFieldTemplate = $('#newFieldTemplate').html()
 	            var newFieldHTML = newFieldTemplate.format(voteOptionText);
 	            var $newField = $(newFieldHTML)
 		      	$newField.find('div#deleteFieldButton').click(function() {
@@ -93,9 +168,9 @@
 			var subject = $("#subject"),
 			dateBegin = $("#dateBegin"),
 			dateFinish = $("#dateFinish"),
-			ckeditorDiv = $("#editor"),
+			editorDiv = $("#editorDiv"),
 			addOptionButton = $("#addOptionButton"), 
-			allFields = $( [] ).add( subject ).add(dateBegin).add(dateFinish).add(ckeditorDiv);
+			allFields = $( [] ).add( subject ).add(dateBegin).add(dateFinish).add(editorDiv);
 			allFields.removeClass("ui-state-error");
 			
 			if(!document.getElementById('subject').validity.valid) {
@@ -136,7 +211,7 @@
 			}
 			     	
 			if(htmlEditorContent.trim() == 0) {
-				ckeditorDiv.addClass( "ui-state-error" );
+				editorDiv.addClass( "ui-state-error" );
 				showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 						'<g:message code="emptyDocumentERRORMsg"/>')
 				return null;
@@ -168,76 +243,6 @@
 			}
 			return pollOptions
 		}
-     </script>     
-</head>
-<body>
-<div class ="contentDiv">
-	<form id="mainForm">
-	
-	<div style="margin:0px 0px 10px 0px">
-    	<input type="text" name="subject" id="subject" style="width:500px" required 
-			title="<g:message code="subjectLbl"/>"
-			placeholder="<g:message code="subjectLbl"/>" 
-    		oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-   			onchange="this.setCustomValidity('')" />
-   </div>
-   <div style="margin:0px 0px 10px 0px">		
-		<input type="text" id="dateBegin" style="width:150px;" required readonly
-				title="<g:message code="dateBeginLbl"/>"
-				placeholder="<g:message code="dateBeginLbl"/>"
-    			oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-    			onchange="this.setCustomValidity('')" />    
-
-		<input type="text" id="dateFinish" style="width:150px; margin:0px 0px 0px 20px;" required readonly
-				title="<g:message code="dateFinishLbl"/>"
-				placeholder="<g:message code="dateFinishLbl"/>"
-    			oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-    			onchange="this.setCustomValidity('')" />
-	</div>
-
-	<div id="editor"></div>
-	<div id="editorContents" class="editorContents"></div>
-
-	<div style="margin: 15px auto 30px auto;">
-		<div style="display:inline;">
-			<img src="${resource(dir:'images',file:'info_16x16.png')}"></img>
-			<span id="controlCenterLink" style="font-size:1.1em; color:#02227a; cursor: pointer; cursor: hand;">
-				<g:message code="controlCenterLbl"/>
-			</span>
-		</div>
-		<div style="display:inline;">    	
-			<select id="controlCenterSelect" style="margin:0px 0px 0px 20px;display:inline;" required
-					oninvalid="this.setCustomValidity('<g:message code="selectControlCenterLbl"/>')"
-	   				onchange="this.setCustomValidity('')">
-				<g:each status="i" in="${controlCenters}" var="controlCenter">
-					<option value=""> --- <g:message code="selectControlCenterLbl"/> --- </option>
-				  	<option value="${controlCenter.id}">${controlCenter.nombre}</option>
-				</g:each>
-			</select>		
-		</div>
-	</div>
-	
-	<fieldset id="fieldsBox" class="fieldsBox" style="display:none;">
-		<legend id="fieldsLegend" style="font-size: 1.2em;"><g:message code="pollFieldLegend"/></legend>
-		<div id="fields"></div>
-	</fieldset>
-	
-	<div style="position:relative; margin:20px 0px 20px 0px;">
-		<votingSystem:simpleButton id="addOptionButton" style="margin:0px 0px 0px 20px;"
-			imgSrc="${resource(dir:'images',file:'poll_16x16.png')}">
-				<g:message code="addOptionLbl"/>
-		</votingSystem:simpleButton>
-		<votingSystem:simpleButton id="buttonAccept" isButton='true' style="position:absolute; right:10px; top:0px;"
-			imgSrc="${resource(dir:'images',file:'accept_16x16.png')}">
-				<g:message code="publishDocumentLbl"/>
-		</votingSystem:simpleButton>
-	</div>
-		 
-	</form>
-</div>
-<div style="clear: both;margin:0px 0px 30px 0px;">&nbsp;</div>
-<g:render template="/template/dialog/addControlCenterDialog"/>
-<g:render template="/template/dialog/addVoteOptionDialog"/>
-
-</body>
-</html>
+</g:applyCodec>		
+</r:script>  
+<r:layoutResources />

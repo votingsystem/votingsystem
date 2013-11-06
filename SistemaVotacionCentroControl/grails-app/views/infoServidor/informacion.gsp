@@ -1,47 +1,10 @@
 <html>
     <head>
-    	<g:render template="/template/js/pcUtils"/>
+   		<r:require modules="application"/>
+	    <r:layoutResources/>
         <style type="text/css" media="screen">
         	#content a{margin: 0px 100px 0px 0px;}
         </style>  
-		  <script>
-		  $(function() {
-			  $( "#tabs" ).tabs({
-			      beforeLoad: function( event, ui ) {
-			    	  ui.panel.html("${render(template:'/template/tabProgres').replace("\n","")}");
-			      }
-			    })
-
-	    		$("#validationToolLink").click(function () { 
-			    	var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESANDO, 
-					    	Operation.MENSAJE_HERRAMIENTA_VALIDACION)
-			    	votingSystemClient.setMessageToValidationTool(JSON.stringify(webAppMessage))
-	    		});
-		  });
-
-			function setMessageFromValidationTool(appMessage) {
-				console.log("setMessageFromValidationTool: " + appMessage);
-				$("#loadingVotingSystemAppletDialog").dialog("close");
-				if(appMessage != null) {
-					validationToolLoaded = true;
-					var appMessageJSON
-					if( Object.prototype.toString.call(appMessage) == '[object String]' ) {
-						appMessageJSON = JSON.parse(appMessage);
-					} else {
-						appMessageJSON = appMessage
-					} 
-					var statusCode = appMessageJSON.codigoEstado
-					if(StatusCode.SC_PROCESANDO == statusCode){
-						$("#loadingVotingSystemAppletDialog").dialog("close");
-						$("#workingWithAppletDialog").dialog("open");
-					} else if(StatusCode.SC_CANCELADO == statusCode) {
-						$("#workingWithAppletDialog" ).dialog("close");
-					}
-				}
-				
-				
-			}
-		  </script>
     </head>
     <body>
 		<div class="container">
@@ -80,5 +43,47 @@
 		   	</div>	
 		<div>
 		<iframe id="validationToolAppletFrame" src="" style="visibility:hidden;width:0px; height:0px;"></iframe>
+		<div id="tabProgressTemplate" style="display:none;">
+			<g:include view="/include/tabProgress.gsp"/>
+		</div> 
 	</body>
 </html>
+<r:script>
+		  $(function() {
+			  $( "#tabs" ).tabs({
+			      beforeLoad: function( event, ui ) {
+			    	  ui.panel.html($('#tabProgressTemplate').html());
+			      }
+			    })
+
+	    		$("#validationToolLink").click(function () { 
+			    	var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESANDO, 
+					    	Operation.MENSAJE_HERRAMIENTA_VALIDACION)
+			    	votingSystemClient.setMessageToValidationTool(JSON.stringify(webAppMessage))
+	    		});
+		  });
+
+			function setMessageFromValidationTool(appMessage) {
+				console.log("setMessageFromValidationTool: " + appMessage);
+				$("#loadingVotingSystemAppletDialog").dialog("close");
+				if(appMessage != null) {
+					validationToolLoaded = true;
+					var appMessageJSON
+					if( Object.prototype.toString.call(appMessage) == '[object String]' ) {
+						appMessageJSON = JSON.parse(appMessage);
+					} else {
+						appMessageJSON = appMessage
+					} 
+					var statusCode = appMessageJSON.codigoEstado
+					if(StatusCode.SC_PROCESANDO == statusCode){
+						$("#loadingVotingSystemAppletDialog").dialog("close");
+						$("#workingWithAppletDialog").dialog("open");
+					} else if(StatusCode.SC_CANCELADO == statusCode) {
+						$("#workingWithAppletDialog" ).dialog("close");
+					}
+				}
+				
+				
+			}
+</r:script>
+<r:layoutResources/>

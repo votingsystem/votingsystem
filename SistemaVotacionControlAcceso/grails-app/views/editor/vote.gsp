@@ -1,10 +1,96 @@
 <%@ page import="grails.converters.JSON" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html>
 <head>
-        <meta name="layout" content="main" />
-        <g:render template="/template/js/pcEditor"/>
-        <script type="text/javascript">
+	<meta name="layout" content="main" /> 
+</head>
+<body>
+
+<div id="contentDiv" style="display:none;padding: 0px 20px 0px 20px;">
+
+
+	<div class="publishPageTitle">
+		<p style="text-align:center; width: 100%;">
+			<g:message code="publishVoteLbl"/>
+		</p>
+	</div>
+
+	<form id="mainForm">
+	
+	<div style="margin:0px 0px 20px 0px">
+		<div style="display: block;">
+	    	<input type="text" name="subject" id="subject" style="width:600px" required 
+				title="<g:message code="subjectLbl"/>"
+				placeholder="<g:message code="subjectLbl"/>"
+	    		oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
+	   			onchange="this.setCustomValidity('')" />
+		</div>
+		<div style="margin:10px 0px 0px 0px;">
+				<votingSystem:datePicker id="dateBegin" title="${message(code:'dateBeginLbl')}"
+					placeholder="${message(code:'dateBeginLbl')}"
+   					oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
+   					onchange="this.setCustomValidity('')"></votingSystem:datePicker>   					
+   					
+				<votingSystem:datePicker id="dateFinish" title="${message(code:'dateFinishLbl')}"
+					style="width:150px; margin: 0px 0px 0px 30px;"
+					placeholder="${message(code:'dateFinishLbl')}"
+   					oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
+   					onchange="this.setCustomValidity('')"></votingSystem:datePicker>
+		
+		</div>
+	</div>
+	 
+	<votingSystem:textEditorPC id="editorDiv"/>
+	
+	<div style="margin: 15px auto 30px auto; width:600px">
+		<img src="${resource(dir:'images',file:'info_16x16.png')}"></img>
+		<span id="controlCenterLink" style="font-size:1.1em; color:#02227a; cursor: pointer; cursor: hand;">
+			<g:message code="controlCenterLbl"/>
+		</span>
+		     	
+		<select id="controlCenterSelect" style="margin:0px 0px 0px 40px;" required
+				oninvalid="this.setCustomValidity('<g:message code="selectControlCenterLbl"/>')"
+   				onchange="this.setCustomValidity('')">
+			<g:each status="i" in="${controlCenters}" var="controlCenter">
+				<option value=""> --- <g:message code="selectControlCenterLbl"/> --- </option>
+			  	<option value="${controlCenter.id}">${controlCenter.nombre}</option>
+			</g:each>
+		</select>		
+	</div>
+	
+	<fieldset id="fieldsBox" class="fieldsBox" style="display:none;">
+		<legend id="fieldsLegend"><g:message code="pollFieldLegend"/></legend>
+		<div id="fields"></div>
+	</fieldset>
+	
+	<div style="position:relative; margin:0px 0px 20px 0px;">
+		<votingSystem:simpleButton id="addOptionButton" 
+			imgSrc="${resource(dir:'images',file:'poll_16x16.png')}" style="margin:0px 20px 0px 0px;">
+				<g:message code="addOptionLbl"/>
+		</votingSystem:simpleButton>
+
+		<votingSystem:simpleButton id="buttonAccept" isButton='true' 
+			imgSrc="${resource(dir:'images',file:'accept_16x16.png')}" style="position:absolute; right:10px; top:0px;">
+				<g:message code="publishDocumentLbl"/>
+		</votingSystem:simpleButton>
+	</div>
+		 
+	</form>
+
+	<g:render template="/template/signatureMechanismAdvert"  model="${[advices:[message(code:"onlySignedDocumentsMsg")]]}"/>
+
+</div>
+<g:include view="/include/dialog/addControlCenterDialog.gsp"/>
+<g:include view="/include/dialog/addVoteOptionDialog.gsp"/>
+
+	<div id="newFieldTemplate" style="display:none;">
+		<g:render template="/template/newField" model="[isTemplate:'true']"/>
+	</div> 
+	
+</body>
+</html>
+<r:script>
+<g:applyCodec encodeAs="none">
 			var numVoteOptions = 0
 			var controlCenters = {};
 
@@ -14,8 +100,6 @@
 			
 		 	$(function() {
 		 		showEditor()
-			    $("#dateFinish").datepicker(pickerOpts);
-			    $("#dateBegin").datepicker(pickerOpts);
 			    	
 	    		$("#addOptionButton").click(function () { 
 	    			hideEditor() 
@@ -34,7 +118,7 @@
 				function addVoteOption (voteOptionText) {
 					showEditor()
 					if(voteOptionText == null) return
-			        var newFieldTemplate = "${render(template:'/template/newField', model:[]).replace("\n","")}"
+			        var newFieldTemplate = $('#newFieldTemplate').html()
 		            var newFieldHTML = newFieldTemplate.format(voteOptionText);
 		            var $newField = $(newFieldHTML)
 			      	$newField.find('div#deleteFieldButton').click(function() {
@@ -93,9 +177,9 @@
 				var subject = $("#subject"),
 				dateBegin = $("#dateBegin"),
 				dateFinish = $("#dateFinish"),
-				ckeditorDiv = $("#editor"),
+				editorDiv = $("#editorDiv"),
 				addOptionButton = $("#addOptionButton"), 
-				allFields = $( [] ).add( subject ).add(dateBegin).add(dateFinish).add(ckeditorDiv);
+				allFields = $( [] ).add( subject ).add(dateBegin).add(dateFinish).add(editorDiv);
 				allFields.removeClass("ui-state-error");
 				
 				if(!document.getElementById('subject').validity.valid) {
@@ -136,7 +220,7 @@
 				}
 				     	
 				if(htmlEditorContent.trim() == 0) {
-					ckeditorDiv.addClass( "ui-state-error" );
+					editorDiv.addClass( "ui-state-error" );
 					showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 							'<g:message code="emptyDocumentERRORMsg"/>')
 					return null;
@@ -185,87 +269,5 @@
 					showResultDialog(caption, msg)
 				}
 			}
-        </script>        
-</head>
-<body>
-
-<div id="contentDiv" style="display:none;padding: 0px 20px 0px 20px;">
-
-
-	<div class="publishPageTitle">
-		<p style="text-align:center; width: 100%;">
-			<g:message code="publishVoteLbl"/>
-		</p>
-	</div>
-
-	<form id="mainForm">
-	
-	<div style="margin:0px 0px 20px 0px">
-		<div style="display: block;">
-	    	<input type="text" name="subject" id="subject" style="width:600px" required 
-				title="<g:message code="subjectLbl"/>"
-				placeholder="<g:message code="subjectLbl"/>"
-	    		oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-	   			onchange="this.setCustomValidity('')" />
-		</div>
-		<div style="margin:10px 0px 0px 0px;">
-			<input type="text" id="dateBegin" required readonly
-					title="<g:message code="dateBeginLbl"/>"
-					placeholder="<g:message code="dateBeginLbl"/>"
-	   				oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-	   				onchange="this.setCustomValidity('')"/>    			
-
-			<input type="text" id="dateFinish" style="width:150px; margin: 0px 0px 0px 30px;" required readonly
-					title="<g:message code="dateFinishLbl"/>"
-					placeholder="<g:message code="dateFinishLbl"/>"
-	   				oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-	   				onchange="this.setCustomValidity('')"/>
-		
-		</div>
-	</div>
-	 
-	<div id="editor"></div>
-	<div id="editorContents" class="editorContents"></div>
-	
-	<div style="margin: 15px auto 30px auto; width:600px">
-		<img src="${resource(dir:'images',file:'info_16x16.png')}"></img>
-		<span id="controlCenterLink" style="font-size:1.1em; color:#02227a; cursor: pointer; cursor: hand;">
-			<g:message code="controlCenterLbl"/>
-		</span>
-		     	
-		<select id="controlCenterSelect" style="margin:0px 0px 0px 40px;" required
-				oninvalid="this.setCustomValidity('<g:message code="selectControlCenterLbl"/>')"
-   				onchange="this.setCustomValidity('')">
-			<g:each status="i" in="${controlCenters}" var="controlCenter">
-				<option value=""> --- <g:message code="selectControlCenterLbl"/> --- </option>
-			  	<option value="${controlCenter.id}">${controlCenter.nombre}</option>
-			</g:each>
-		</select>		
-	</div>
-	
-	<fieldset id="fieldsBox" class="fieldsBox" style="display:none;">
-		<legend id="fieldsLegend"><g:message code="pollFieldLegend"/></legend>
-		<div id="fields"></div>
-	</fieldset>
-	
-	<div style="position:relative; margin:0px 0px 20px 0px;">
-		<votingSystem:simpleButton id="addOptionButton" 
-			imgSrc="${resource(dir:'images',file:'poll_16x16.png')}" style="margin:0px 20px 0px 0px;">
-				<g:message code="addOptionLbl"/>
-		</votingSystem:simpleButton>
-
-		<votingSystem:simpleButton id="buttonAccept" isButton='true' 
-			imgSrc="${resource(dir:'images',file:'accept_16x16.png')}" style="position:absolute; right:10px; top:0px;">
-				<g:message code="publishDocumentLbl"/>
-		</votingSystem:simpleButton>
-	</div>
-		 
-	</form>
-
-	<g:render template="/template/signatureMechanismAdvert"  model="${[advices:[message(code:"onlySignedDocumentsMsg")]]}"/>
-
-</div>
-<g:render template="/template/dialog/addControlCenterDialog"/>
-<g:render template="/template/dialog/addVoteOptionDialog"/>
-</body>
-</html>
+</g:applyCodec>
+</r:script>   
