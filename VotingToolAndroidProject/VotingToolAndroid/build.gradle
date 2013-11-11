@@ -1,0 +1,114 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.6.+'
+    }
+}
+apply plugin: 'android'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+android {
+    compileSdkVersion 18
+    buildToolsVersion "18.1.1"
+
+
+    signingConfigs {
+        release {
+            storeFile file("$rootProject.projectDir/mockDnie.jks")
+            storePassword rootProject.keyStorePassword
+            keyAlias rootProject.signKeyAlias
+            keyPassword rootProject.keyStorePassword
+        }
+    }
+
+    defaultConfig {
+        minSdkVersion 7
+        targetSdkVersion 16
+    }
+
+    buildTypes {
+        debug { }
+        release {
+            signingConfig signingConfigs.release
+        }
+
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputFile = file("${signedAndroidAppName}.apk")
+    }
+
+}
+
+dependencies {
+
+	compile 'com.android.support:appcompat-v7:+'
+    //compile fileTree(dir: 'libs', include: '*.jar')
+    compile 'com.android.support:support-v4:18.0.0'
+    compile ('org.apache.httpcomponents:httpmime:4.2.2') {
+        exclude module: 'httpcore'
+    }
+    compile project(':VotingToolAndroidProject:libraries:votingsystem')
+    compile project(':VotingToolAndroidProject:libraries:bc')
+    compile project(':VotingToolAndroidProject:libraries:itext')
+    compile project(':VotingToolAndroidProject:libraries:votingsystemimpl')
+
+}
+
+preBuild.dependsOn 'setAndroidEnv'
+
+task release(dependsOn:'build') <<  {
+    rootProject.ext.set("votingToolAndroid",file("${signedAndroidAppName}.apk"))
+    announce.announce("Android Voting Tool '${signedAndroidAppName}.apk' signed and put into context", "local")
+}
+
+task setAndroidEnv() << {
+	def env = System.getenv()
+	//env.each{println it} 
+	String androidHome= env['ANDROID_HOME']
+	if(!androidHome) throw new RuntimeException('Android SDK not Found you must install -> http://developer.android.com/sdk/index.html')
+	String serverIP
+	
+	if(rootProject.hasProperty("SERVER_IP")) {
+		serverIP = "$rootProject.SERVER_IP"
+	} else serverIP = getDevelopmentServerIP()
+
+	println " -------------> serverIP: ${serverIP}"
+	
+	java.util.Properties props = new Properties();
+	String lastIp = null
+	if(file('src/main/assets/VotingSystem.properties').exists()) {
+		props.load(new FileInputStream(file('src/main/assets/VotingSystem.properties')))
+		lastIp= "${props.DEVELOPMENT_IP}"
+	}
+	
+	def accessControlURL = "$rootProject.accessControlProtocol://" + 
+		"${serverIP}:$rootProject.accessControlPort" + 
+		"$rootProject.accessControlPath";
+	println("accessControlURL: $accessControlURL")
+	ant.delete(file:"src/main/assets/VotingSystem.properties")
+	ant.copy(file:"$rootProject.projectDir/templates/VotingSystem.properties",
+		toFile:"src/main/assets/VotingSystem.properties")
+	ant.replace(file:"src/main/assets/VotingSystem.properties",
+		token:"[CONTROL_ACCESO_URL]",
+		value:accessControlURL)
+	ant.replace(file:"src/main/assets/VotingSystem.properties",
+		token:"[DEVELOPMENT_IP]",
+		value:serverIP)
+	
+	if(lastIp) {//other way
+		File manifest = file("src/main/AndroidManifest.xml");
+		String manifestContent = manifest.text;
+		manifestContent = manifestContent.replaceAll(
+			"android:host=\"${lastIp}\"", "android:host=\"${serverIP}\"")
+		manifest.write(manifestContent);
+		println "last development IP: ${lastIp} - new development IP: ${serverIP}"
+	}
+}

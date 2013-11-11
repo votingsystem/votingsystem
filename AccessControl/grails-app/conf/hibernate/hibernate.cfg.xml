@@ -1,0 +1,43 @@
+<!DOCTYPE hibernate-configuration SYSTEM
+  "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <property name="hibernate.search.default.directory_provider">org.hibernate.search.store.impl.FSDirectoryProvider</property>
+		<!--<property name="hibernate.search.default.directory_provider">org.hibernate.search.store.impl.RAMDirectoryProvider</property>-->
+        <property name="hibernate.search.analyzer">org.apache.lucene.analysis.standard.StandardAnalyzer</property>
+        
+        <property name="hibernate.generate_statistics">true</property>
+        
+        <mapping package="org.votingsystem.accesscontrol.model" />
+        <mapping class="org.votingsystem.accesscontrol.model.CentroControl" />
+        <mapping class="org.votingsystem.accesscontrol.model.ControlAcceso" />
+        <mapping class="org.votingsystem.accesscontrol.model.Certificado" />
+        <mapping class="org.votingsystem.accesscontrol.model.Documento" />
+        <mapping class="org.votingsystem.accesscontrol.model.ActorConIP" />    
+        <mapping class="org.votingsystem.accesscontrol.model.Direccion" />  
+        <mapping class="org.votingsystem.accesscontrol.model.EtiquetaEvento" />
+        <mapping class="org.votingsystem.accesscontrol.model.EventoReclamacion" />
+        <mapping class="org.votingsystem.accesscontrol.model.EventoVotacion" /> 
+        <mapping class="org.votingsystem.accesscontrol.model.EventoFirma" />
+        <mapping class="org.votingsystem.accesscontrol.model.Evento" />
+        <mapping class="org.votingsystem.accesscontrol.model.Etiqueta" />   
+        <mapping class="org.votingsystem.accesscontrol.model.MessageSMIME" />             
+        <mapping class="org.votingsystem.accesscontrol.model.OpcionDeEvento" /> 
+        <mapping class="org.votingsystem.accesscontrol.model.SolicitudAcceso"/>
+        <mapping class="org.votingsystem.accesscontrol.model.AnuladorVoto"/>
+        <mapping class="org.votingsystem.accesscontrol.model.SolicitudAcceso" /> 
+        <mapping class="org.votingsystem.accesscontrol.model.SolicitudCSRVoto" /> 
+        <mapping class="org.votingsystem.accesscontrol.model.SolicitudCSRUsuario" /> 
+        <mapping class="org.votingsystem.accesscontrol.model.Usuario" />      
+        <mapping class="org.votingsystem.accesscontrol.model.Firma" />
+        <mapping class="org.votingsystem.accesscontrol.model.CampoDeEvento" />
+        <mapping class="org.votingsystem.accesscontrol.model.ValorCampoDeEvento" />
+        <mapping class="org.votingsystem.accesscontrol.model.Voto" />
+        <mapping class="org.votingsystem.accesscontrol.model.AlmacenClaves" />
+        <mapping class="org.votingsystem.accesscontrol.model.Dispositivo" />  
+        <mapping class="org.votingsystem.accesscontrol.model.SolicitudCopia" />
+        <mapping class="org.votingsystem.accesscontrol.model.SelloTiempo" />
+        <mapping class="org.votingsystem.accesscontrol.model.Image" />
+        <mapping class="org.votingsystem.accesscontrol.model.RepresentationDocument" />
+    </session-factory>
+</hibernate-configuration>

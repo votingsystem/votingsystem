@@ -1,0 +1,194 @@
+package org.votingsystem.controlcenter.controller
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.signature.util.*
+import org.votingsystem.controlcenter.model.*
+import org.springframework.context.ApplicationContext;
+
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
+
+import java.security.cert.X509Certificate;
+
+import grails.util.*
+
+import org.votingsystem.groovy.util.*
+
+/**
+* @infoController Servicio de Certificados
+* @descController Servicios relacionados con los certificados manejados por la aplicación
+* 
+* @author jgzornoza
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+* */
+class CertificadoController {
+
+	def firmaService
+
+	/**
+	 * @httpMethod [GET]
+	 * @return La cadena de certificación del servidor
+	 */
+	def cadenaCertificacion () {
+		try {
+			response.outputStream << firmaService.getCadenaCertificacion().getBytes()
+			response.outputStream.flush()
+			return
+		} catch (Exception ex) {
+			log.error (ex.getMessage(), ex)
+			response.status = ResponseVS.SC_ERROR
+			render ex.getMessage()
+			return false 
+		}
+	}
+	
+	/**
+	 * Servicio de consulta de certificados de voto.
+	 * 
+	 * @httpMethod [GET]
+	 * @serviceURL [/certificado/voto/$hashHex] 
+	 *
+	 * @param	[hashHex] Obligatorio. Hash en hexadecimal asociado al
+	 *          certificado del voto consultado.
+	 * @return El certificado de voto en formato PEM.
+	 */
+	def voto () {
+		if (params.hashHex) {
+			HexBinaryAdapter hexConverter = new HexBinaryAdapter();
+			String hashCertificadoVotoBase64 = new String(
+				hexConverter.unmarshal(params.hashHex))
+			log.debug "hashCertificadoVotoBase64: ${hashCertificadoVotoBase64}"
+			def certificado
+			Certificado.withTransaction {
+				certificado = Certificado.findWhere(hashCertificadoVotoBase64:
+					hashCertificadoVotoBase64)
+			}
+			if (certificado) {
+				response.status = ResponseVS.SC_OK
+				ByteArrayInputStream bais = new ByteArrayInputStream(certificado.contenido)
+				X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
+				byte[] pemCert = CertUtil.fromX509CertToPEM (certX509)
+				response.setContentType("text/plain")
+				response.contentLength = pemCert.length
+				response.outputStream <<  pemCert
+				response.outputStream.flush()
+				return false
+			}
+			response.status = ResponseVS.SC_NOT_FOUND
+			render message(code: 'certificado.certificadoHexNotFound',
+				args:[params.hashHex])
+			return false
+		}
+		response.status = ResponseVS.SC_ERROR_PETICION
+		render message(code: 'error.PeticionIncorrectaHTML', args:
+			["${grailsApplication.config.grails.serverURL}/${params.controller}"])
+		return false
+	}
+	
+	/**
+	 * Servicio de consulta de certificados de usuario.
+	 *
+	 * @httpMethod [GET]
+	 * @serviceURL [/certificado/usuario/$userId] 
+	 * @param [userId] Obligatorio. El identificador en la base de datos del usuario.	 
+	 * @return El certificado en formato PEM.
+	 */
+	def usuario () {
+		Usuario usuario = Usuario.get(params.long('userId'))
+		if(!usuario) {
+			response.status = ResponseVS.SC_ERROR_PETICION
+			render message(code: 'error.UsuarioNoEncontrado', args:[params.userId])
+			return false
+		}
+		def certificado
+		Certificado.withTransaction {
+			certificado = Certificado.findWhere(usuario:usuario, 
+				estado:Certificado.Estado.OK)
+		}
+		if (certificado) {
+			response.status = ResponseVS.SC_OK
+			ByteArrayInputStream bais = new ByteArrayInputStream(certificado.contenido)
+			X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
+			byte[] pemCert = CertUtil.fromX509CertToPEM (certX509)
+			response.setContentType("text/plain")
+			response.contentLength = pemCert.length
+			response.outputStream <<  pemCert
+			response.outputStream.flush()
+			return false
+		}
+		response.status = ResponseVS.SC_NOT_FOUND
+		render message(code: 'error.UsuarioSinCertificado',
+			args:[params.userId])
+		return false
+	}
+	
+	/**
+	 * Servicio de consulta de los certificados con los que se firman los 
+	 * certificados de los voto en una votación.
+	 * 
+	 * @httpMethod [GET]
+	 * @serviceURL [/certificado/eventCA] 
+     * @param [eventAccessControlURL] Opcional. La url en el Control de Acceso  del evento 
+     *        cuyos votos fueron emitidos por el certificado consultado.
+	 * @return Devuelve la cadena de certificación, en formato PEM, con la que se generan los 
+	 * 			certificados de los votos.
+	 */
+	def eventCA () {
+		EventoVotacion eventoVotacion
+		if (params.eventAccessControlURL){
+			EventoVotacion.withTransaction {
+				eventoVotacion = EventoVotacion.findWhere(url:params.eventAccessControlURL)
+			}
+			if (eventoVotacion) {
+				Certificado certificadoCA
+				Certificado.withTransaction {
+					certificadoCA = Certificado.findWhere(eventoVotacion:eventoVotacion,
+						actorConIP:eventoVotacion.controlAcceso, esRaiz:true)
+				}
+				if(certificadoCA) {
+					response.status = ResponseVS.SC_OK
+					ByteArrayInputStream bais = new ByteArrayInputStream(certificadoCA.contenido)
+					X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
+					byte[] pemCert = CertUtil.fromX509CertToPEM (certX509)
+					response.setContentType("text/plain")
+					response.contentLength = pemCert.length
+					response.outputStream <<  pemCert
+					response.outputStream.flush()
+					return false
+				}
+			}
+		}
+		response.status = ResponseVS.SC_NOT_FOUND
+		render  message(code: 'eventoByURLNotFound', args:[params.eventAccessControlURL])
+		return false
+	}
+	
+	/**
+	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE DESARROLLO). Servicio que añade Autoridades de Confianza.<br/>
+	 * Sirve para poder validar los certificados enviados en las simulaciones.
+	 *
+	 * @httpMethod [POST]
+	 * @param pemCertificate certificado en formato PEM de la Autoridad de Confianza que se desea añadir.
+	 * @return Si todo va bien devuelve un código de estado HTTP 200.
+	 */
+	def addCertificateAuthority () {
+		if(!VotingSystemApplicationContex.Environment.DEVELOPMENT.equals(
+			VotingSystemApplicationContex.instance.environment)) {
+			def msg = message(code: "serviceDevelopmentModeMsg")
+			log.error msg
+			response.status = ResponseVS.SC_ERROR_PETICION
+			render msg
+			return false
+		}
+		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
+		firmaService.deleteTestCerts()
+		ResponseVS respuesta = firmaService.addCertificateAuthority(
+			"${request.getInputStream()}".getBytes(), request.getLocale())
+		log.debug("addCertificateAuthority - status: ${respuesta.statusCode} - msg: ${respuesta.message}")
+		response.status = respuesta.statusCode
+		render respuesta.message
+		return false
+	}
+}

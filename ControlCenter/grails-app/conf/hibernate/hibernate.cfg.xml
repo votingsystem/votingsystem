@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-configuration SYSTEM "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+ <session-factory name="">
+  <property name="hibernate.search.default.directory_provider">org.hibernate.search.store.impl.FSDirectoryProvider</property>
+  <!--<property name="hibernate.search.default.directory_provider">org.hibernate.search.store.impl.RAMDirectoryProvider</property>-->
+  <property name="hibernate.search.analyzer">org.apache.lucene.analysis.standard.StandardAnalyzer</property>
+  
+  <mapping package="org.votingsystem.controlcenter.model"/>
+  <mapping class="org.votingsystem.controlcenter.model.AnuladorVoto"/>
+  <mapping class="org.votingsystem.controlcenter.model.Certificado"/>
+  <mapping class="org.votingsystem.controlcenter.model.ControlAcceso"/> 
+  <mapping class="org.votingsystem.controlcenter.model.ActorConIP" />    
+  <mapping class="org.votingsystem.controlcenter.model.EtiquetaEvento"/>
+  <mapping class="org.votingsystem.controlcenter.model.EventoVotacion"/>
+  <mapping class="org.votingsystem.controlcenter.model.Etiqueta"/>
+  <mapping class="org.votingsystem.controlcenter.model.Incidencia"/> 
+  <mapping class="org.votingsystem.controlcenter.model.MessageSMIME"/>
+  <mapping class="org.votingsystem.controlcenter.model.OpcionDeEvento"/>
+  <mapping class="org.votingsystem.controlcenter.model.Voto"/>
+  <mapping class="org.votingsystem.controlcenter.model.Usuario"/>
+ </session-factory>
+</hibernate-configuration>

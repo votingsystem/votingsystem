@@ -1,0 +1,32 @@
+task copyApps(dependsOn: [':generateVotingSystemApps']) {
+	doLast {
+		copyVotingSystemApps(project)
+	}
+}
+
+task stopApp << {
+	file("${projectDir}/.kill-run-app").createNewFile()
+}
+
+task runApp << { task ->
+	runCommand(project, file(".") ,["grails", "run-app"])	
+}
+
+task installCkeditor << { task ->
+	installCkeditor(project)
+}
+
+task installGrailsRestDocPlugin << { task ->
+	installGrailsRestDocPlugin(project)
+}
+
+task generateRestDocs() << {task ->
+	runCommand(project, file(".") ,["grails", "generate-rest-docs"])
+}
+
+task war(dependsOn:['copyApps']) << {task ->
+	runCommand(project, file(".") ,["grails", "war"])	
+	announce.announce("'$project.name' - WebApp WAR file generated", "local")
+}
+
+defaultTasks 'war'

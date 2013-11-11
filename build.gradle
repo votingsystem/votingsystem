@@ -1,4 +1,4 @@
-version = '0.5.0'
+version = '0.6.0'
 
 apply plugin: 'java'
 
@@ -10,29 +10,29 @@ subprojects {
 	}
 
 	apply plugin: 'announce'
-	
-	group = 'org.sistemavotacion'
+	group = 'org.votingsystem'
 }
 
 ext {
-	appletFirma = null
-	appletHerramienta = null
-	aplicacionAndroid = null
+	votingToolApplet = null
+	validationToolApplet = null
+	votingSystemLibrary = null
+	votingToolAndroid = null
 	certsDataMap = null
 }
 
-task buildAll(dependsOn:['SistemaVotacionApplet:signJar', 
-	'HerramientaValidacionCopiasDeSeguridad:signJar',
-	'SistemaVotacionAndroid:release',
-	'SistemaVotacionControlAcceso:war',
-	'SistemaVotacionCentroControl:war',
-	'SistemaVotacionTest:buildJar']) << {
-	
+task buildAll(dependsOn:['VotingSystemLibrary:jar', 
+	'VotingToolApplet:signJar', 
+	'ValidationToolApplet:signJar',
+	':VotingToolAndroidProject:VotingToolAndroid:release',
+	'AccessControl:war',
+	'ControlCenter:war']) << { }
+
+dependencies { 
+	compile "org.codehaus.groovy:groovy-all:2.1.9"
 }
 
-dependencies { }
-
-task genAppsCerts(dependsOn:['SistemaVotacionApplet:classes']) {
+task genAppsCerts(dependsOn:['VotingSystemLibrary:classes']) {
 	
 	doFirst { }
 	
@@ -48,14 +48,14 @@ task genAppsCerts(dependsOn:['SistemaVotacionApplet:classes']) {
 		List certs = [certMap]
 		rootProject.certsDataMap.certs = certs
 		
-		tasks.getByPath('SistemaVotacionApplet:genCertsGroovy').execute()
-		/*project(':SistemaVotacionApplet').tasks.each {task ->
+		tasks.getByPath('VotingSystemLibrary:genCertsGroovy').execute()
+		/*project(':VotingSystemLibrary').tasks.each {task ->
 			println task.path
 		}*/
 	}
 }
 
-task genWebAppsCerts(dependsOn:['SistemaVotacionApplet:classes']) {
+task genWebAppsCerts(dependsOn:['VotingSystemLibrary:classes']) {
 	
 	doFirst { }
 	
@@ -64,18 +64,17 @@ task genWebAppsCerts(dependsOn:['SistemaVotacionApplet:classes']) {
 			rootSubjectDN:"$rootProject.rootSubjectDN",
 			password:"$rootProject.keyStorePassword"]
 		
-		Map controAccesoMap = [file:"$rootProject.projectDir/SistemaVotacionControlAcceso/web-app/WEB-INF/cms/ControlAcceso.jks",
-			distinguishedName:"$rootProject.controlAccesoDN", alias:"$rootProject.controlAccesoCertAlias",
+		Map accessControlMap = [file:"$rootProject.projectDir/AccessControl/web-app/WEB-INF/cms/AccessControl.jks",
+			distinguishedName:"$rootProject.accessControlDN", alias:"$rootProject.accessControlCertAlias",
 			isTimeStampingCert:true]
 		
-		Map centroControMap = [file:"$rootProject.projectDir/SistemaVotacionCentroControl/web-app/WEB-INF/cms/CentroControl.jks",
-			distinguishedName:"$rootProject.centroControlDN", alias:"$rootProject.centroControlCertAlias",
+		Map controlCenterMap = [file:"$rootProject.projectDir/ControlCenter/web-app/WEB-INF/cms/ControlCenter.jks",
+			distinguishedName:"$rootProject.controlCenterDN", alias:"$rootProject.controlCenterCertAlias",
 			isTimeStampingCert:true]
 		
-		List certs = [controAccesoMap, centroControMap]
+		List certs = [accessControlMap, controlCenterMap]
 		rootProject.certsDataMap.certs = certs
-		tasks.getByPath('SistemaVotacionApplet:classes').execute()
-		tasks.getByPath('SistemaVotacionApplet:genCertsGroovy').execute()
+		tasks.getByPath('VotingSystemLibrary:genCertsGroovy').execute()
 	}
 }
 
@@ -83,11 +82,10 @@ task genWebAppsCerts(dependsOn:['SistemaVotacionApplet:classes']) {
 task uploadApps(dependsOn:['uploadAccessControl', 'uploadControlCenter']) << {}
 
 task uploadAccessControl() << {
-	//ncftpput -u jgzornoza -p hola 192.168.1.5 . target/SistemaVotacionControlAcceso.war
-	tasks.getByPath('SistemaVotacionControlAcceso:war').execute()
+	//ncftpput -u jgzornoza -p hola 192.168.1.5 . target/AccessControl.war
+	tasks.getByPath('AccessControl:war').execute()
 
-	def warFilePath = "SistemaVotacionControlAcceso/target/SistemaVotacionControlAcceso.war"
-	
+	def warFilePath = "AccessControl/target/AccessControl.war"
 
 	ProcessBuilder pb = new ProcessBuilder("ncftpput", "-u", "jgzornoza", 
 			"-p", "hola", "$rootProject.testServerIP", ".", warFilePath);
@@ -101,11 +99,27 @@ task uploadAccessControl() << {
 	
 }
 
-task uploadControlCenter() << {
-	//ncftpput -u jgzornoza -p hola 192.168.1.5 . target/SistemaVotacionCentroControl.war
-	tasks.getByPath('SistemaVotacionCentroControl:war').execute()
+def getDevelopmentServerIP() {
+	Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
+	for (NetworkInterface netint : Collections.list(nets)){
+		Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
+		for (InetAddress inetAddress : Collections.list(inetAddresses)) {
+			if(inetAddress.isSiteLocalAddress()) {
+				String inetAddressStr = inetAddress.toString();
+				while(inetAddressStr.startsWith("/"))
+					inetAddressStr = inetAddressStr.substring(1)
+				return inetAddressStr
+			}
+			
+		}
+	}
+}
 
-	def warFilePath = "SistemaVotacionCentroControl/target/SistemaVotacionCentroControl.war"
+task uploadControlCenter() << {
+	//ncftpput -u jgzornoza -p hola 192.168.1.5 . target/ControlCenter.war
+	tasks.getByPath('ControlCenter:war').execute()
+
+	def warFilePath = "ControlCenter/target/ControlCenter.war"
 	
 	ProcessBuilder pb = new ProcessBuilder("ncftpput", "-u", "jgzornoza",
 		"-p", "hola", "$rootProject.testServerIP", ".", warFilePath);
@@ -119,7 +133,84 @@ task uploadControlCenter() << {
 
 }
 
-//tasks.getByPath(':SistemaVotacionApplet:genCerts')
+task generateVotingSystemApps(dependsOn: [':VotingToolApplet:signJar', ':ValidationToolApplet:signJar', ':VotingToolAndroidProject:VotingToolAndroid:release']) {
+}
+
+def copyVotingSystemApps(project) {
+	File appletDir = project.file("web-app/applet/");
+	appletDir.mkdirs();
+	File androidDir = project.file("web-app/android/");
+	androidDir.mkdirs();
+	
+	File votingToolApplet = project.file("web-app/applet/VotingToolApplet.jar")
+	if(votingToolApplet.exists()) votingToolApplet.delete()
+	votingToolApplet << rootProject.votingToolApplet?.bytes
+	
+	File validationToolApplet = project.file("web-app/applet/ValidationToolApplet.jar")
+	if(validationToolApplet.exists()) validationToolApplet.delete()
+	validationToolApplet << rootProject.validationToolApplet?.bytes
+	
+	File votingToolAndroid = project.file("web-app/android/VotingToolAndroid.apk")
+	if(votingToolAndroid.exists()) votingToolAndroid.delete()
+	votingToolAndroid << rootProject.votingToolAndroid?.bytes
+
+	copyAppletDeps(project)
+}
+
+def copyAppletDeps(project) {
+	installAppletBcprov(project)
+}
+
+def installAppletBcprov(project) {
+	println "installAppletBcprov - bcprovVersion '$bcprovVersion'"
+	File jarFile = project.file("web-app/applet/lib/bcprov-${bcprovVersion}.jar") 
+	if(!jarFile.exists()) {
+		String jarFileURL = "http://central.maven.org/maven2/org/bouncycastle/bcprov-jdk16/1.46/bcprov-${bcprovVersion}.jar"
+		println "--- downloading ${jarFileURL}"
+		ant.get(src:jarFileURL, dest:jarFile)
+		project.announce.announce("Bcprovider installed on project '$project.name'", "local")
+	} else println "--- bcprovVersion '$bcprovVersion' already installed on project '$project.name'"
+}
+
+def installGrailsRestDocPlugin(project) {
+	String fileURL = "https://github.com/jgzornoza/GrailsRestDocPlugin/" + 
+		"archive/v${grailsRestDocPluginVersion}.zip"
+	File pluginFile = file("GrailsRestDocPlugin-${grailsRestDocPluginVersion}.zip")
+	println "--- downloading ${fileURL}"
+	ant.get(src:fileURL, dest:pluginFile)
+	ant.unzip(src:pluginFile, dest:".")
+	runCommand(project, file("GrailsRestDocPlugin-${grailsRestDocPluginVersion}"), ["grails", "package-plugin"])
+	runCommand(project, file("GrailsRestDocPlugin-${grailsRestDocPluginVersion}"), ["grails", "maven-install"])
+	project.announce.announce("GrailsRestDocPlugin installed", "local")
+}
+
+
+def installCkeditor(project) {
+	ProcessBuilder pb;
+	Process proc;
+	println ckeditorVersion
+	File apiFile = file("libs/gckeditor_${ckeditorVersion}_standard.zip")
+	if(!apiFile.exists()) {
+		String fileURL = "http://download.cksource.com/CKEditor/CKEditor/CKEditor%204.2.2/ckeditor_${ckeditorVersion}_standard.zip"
+		println "--- downloading ${fileURL}"
+		ant.get(src:fileURL, dest:apiFile)
+	}
+	if(!project.file("web-app/ckeditor").exists()) {
+		ant.unzip(src:apiFile, dest:project.file("web-app"))
+		project.announce.announce("CKEDITOR installed on project $project.name", "local")
+	} else println "--- CKEDITOR already installed on project '$project.name'"
+}
+
+def runCommand(project, targetDir, commands) {
+	ProcessBuilder pb  = new ProcessBuilder(commands);
+	pb.directory(targetDir);
+	Process proc = pb.start();
+	proc.consumeProcessErrorStream(System.err)
+	proc.consumeProcessOutputStream(System.out)
+	if (proc.waitFor() != 0) {
+		throw new RuntimeException("runCommand - project: '${project.name}' - commands: ${commands} - failed")
+	}
+}
 
 // This is a task that generates the gradlew scripts, allowing users to run gradle without having gradle installed
 // on their system.
@@ -128,5 +219,5 @@ task uploadControlCenter() << {
 //  2) /gradlew.bat which is the windows bat script for for executing builds
 //  3) /wrapper which is a directory named by the "jarPath" config which contains other needed files.
 task wrapper(type: Wrapper) {
-	gradleVersion = '1.7'
+	gradleVersion = '1.8'
 }

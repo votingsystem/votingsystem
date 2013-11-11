@@ -1,0 +1,42 @@
+buildscript {
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.6.+'
+    }
+}
+
+apply plugin: 'android-library'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+android {
+    compileSdkVersion 18
+    buildToolsVersion "18.1.1"
+
+
+    defaultConfig {
+        minSdkVersion 7
+        targetSdkVersion 16
+    }
+}
+
+/*sourceSets {
+        main {
+            java {
+                srcDirs = ["src/main/java", "src/bc/java", "src/itext/java"]
+            }
+            resources {
+                srcDir 'src/itext/java'
+            }
+        }
+}*/
+
+
+dependencies { }

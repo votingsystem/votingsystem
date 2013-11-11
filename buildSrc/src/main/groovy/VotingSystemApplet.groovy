@@ -76,8 +76,7 @@ class VotingSystemApplet extends Jar {
 	}
 	
 	
-	@TaskAction
-	def deleteDirs() {
+	@TaskAction def deleteDirs() {
 		if(appletDependencies) appletDependencies.delete()
 		if(outputFolder) {
 			println("-------------- borrando: $outputFolder.path")
