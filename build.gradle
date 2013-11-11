@@ -165,6 +165,7 @@ def installAppletBcprov(project) {
 	println "installAppletBcprov - bcprovVersion '$bcprovVersion'"
 	File jarFile = project.file("web-app/applet/lib/bcprov-${bcprovVersion}.jar") 
 	if(!jarFile.exists()) {
+		jarFile.getParentFile().mkdirs()
 		String jarFileURL = "http://central.maven.org/maven2/org/bouncycastle/bcprov-jdk16/1.46/bcprov-${bcprovVersion}.jar"
 		println "--- downloading ${jarFileURL}"
 		ant.get(src:jarFileURL, dest:jarFile)
@@ -186,8 +187,6 @@ def installGrailsRestDocPlugin(project) {
 
 
 def installCkeditor(project) {
-	ProcessBuilder pb;
-	Process proc;
 	println ckeditorVersion
 	File apiFile = file("libs/gckeditor_${ckeditorVersion}_standard.zip")
 	if(!apiFile.exists()) {
