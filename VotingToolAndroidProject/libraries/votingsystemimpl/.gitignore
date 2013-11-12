@@ -1,5 +1,4 @@
 /build
-/bin
-.VotingSystem
+.settings
 .classpath
 .project

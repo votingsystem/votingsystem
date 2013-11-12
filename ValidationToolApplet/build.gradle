@@ -41,12 +41,12 @@ task buildVotingApplet(type:VotingSystemApplet) {
 task signJar {
 	
 	doLast {
-		ant.signjar(keystore: "$rootProject.projectDir/mockDnie.jks",
-			storepass:rootProject.keyStorePassword,
+		ant.signjar(storepass:rootProject.keyStorePassword,
+			keystore: "$rootProject.projectDir/$rootProject.testUserKeyStorePath",
 			alias:rootProject.signKeyAlias,
 			jar:jar.archivePath,
 			signedjar:"$buildDir/$rootProject.validationToolAppletJarName")
-		rootProject.ext.set("herramientaValidacion",file("$buildDir/$rootProject.validationToolAppletJarName"))
+		rootProject.ext.set("validationToolApplet",file("$buildDir/$rootProject.validationToolAppletJarName"))
 		announce.announce("$rootProject.validationToolAppletJarName signed", "local")
 	}
 	

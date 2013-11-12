@@ -37,13 +37,12 @@ task genAppsCerts(dependsOn:['VotingSystemLibrary:classes']) {
 	doFirst { }
 	
 	doLast {
-		rootProject.certsDataMap = [rootCertFile:"$rootProject.projectDir/appsRootCert.jks",
-			rootSubjectDN:rootProject.rootSubjectDN,
-			password:rootProject.keyStorePassword]
+		rootProject.certsDataMap = [rootCertFile:"$projectDir/$rootKeyStorePath",
+			rootSubjectDN:rootSubjectDN, password:keyStorePassword]
 		
-		Map certMap = [file:"$rootProject.projectDir/mockDnie.jks",
-			distinguishedName:rootProject.appCertDN, alias:rootProject.signKeyAlias,
-			isTimeStampingCert:false]
+		Map certMap = [file:"$projectDir/$testUserKeyStorePath", 
+			distinguishedName:rootProject.appCertDN, 
+			alias:rootProject.signKeyAlias, isTimeStampingCert:false]
 		
 		List certs = [certMap]
 		rootProject.certsDataMap.certs = certs
@@ -60,16 +59,15 @@ task genWebAppsCerts(dependsOn:['VotingSystemLibrary:classes']) {
 	doFirst { }
 	
 	doLast {
-		rootProject.certsDataMap = [rootCertFile:"$rootProject.projectDir/webAppsRootCert.jks",
-			rootSubjectDN:"$rootProject.rootSubjectDN",
-			password:"$rootProject.keyStorePassword"]
+		rootProject.certsDataMap = [rootCertFile:"$projectDir/$rootKeyStorePath",
+			rootSubjectDN:rootSubjectDN, password:keyStorePassword]
 		
-		Map accessControlMap = [file:"$rootProject.projectDir/AccessControl/web-app/WEB-INF/cms/AccessControl.jks",
-			distinguishedName:"$rootProject.accessControlDN", alias:"$rootProject.accessControlCertAlias",
+		Map accessControlMap = [file:"$projectDir/AccessControl/web-app/WEB-INF/cms/AccessControl.jks",
+			distinguishedName:accessControlDN, alias:accessControlCertAlias,
 			isTimeStampingCert:true]
 		
-		Map controlCenterMap = [file:"$rootProject.projectDir/ControlCenter/web-app/WEB-INF/cms/ControlCenter.jks",
-			distinguishedName:"$rootProject.controlCenterDN", alias:"$rootProject.controlCenterCertAlias",
+		Map controlCenterMap = [file:"$projectDir/ControlCenter/web-app/WEB-INF/cms/ControlCenter.jks",
+			distinguishedName:controlCenterDN, alias:controlCenterCertAlias,
 			isTimeStampingCert:true]
 		
 		List certs = [accessControlMap, controlCenterMap]
@@ -133,7 +131,9 @@ task uploadControlCenter() << {
 
 }
 
-task generateVotingSystemApps(dependsOn: [':VotingToolApplet:signJar', ':ValidationToolApplet:signJar', ':VotingToolAndroidProject:VotingToolAndroid:release']) {
+task generateVotingSystemApps(dependsOn: [':VotingToolApplet:signJar', 
+	':ValidationToolApplet:signJar', 
+	':VotingToolAndroidProject:VotingToolAndroid:release']) {
 }
 
 def copyVotingSystemApps(project) {

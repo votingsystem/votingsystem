@@ -1,12 +1,10 @@
 /bin
-/GrailsRestDocPlugin-0.4
-GrailsRestDocPlugin-0.4.zip
+/libs
+/build
+GrailsRestDoc*
+.classpath
 .gradle
 .settings
 .project
 .idea
-/libs
-/build/
-/SistemaVotacionAndroid/build/
-/VotingToolAndroidProject/libraries/bc/build/
-/VotingToolAndroidProject/libraries/votingsystemimpl/build/
+
