@@ -60,7 +60,7 @@
 					}  
 
 			    	var webAppMessage = new WebAppMessage(
-					    	StatusCode.SC_PROCESANDO, 
+					    	StatusCode.SC_PROCESSING, 
 					    	Operation.NEW_REPRESENTATIVE)
 			    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
 		    		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
@@ -84,7 +84,7 @@
 					var msg = appMessageJSON.message
 					if(StatusCode.SC_OK == appMessageJSON.statusCode) { 
 						caption = "<g:message code='operationOKCaption'/>"
-					} else if (StatusCode.SC_CANCELADO== appMessageJSON.statusCode) {
+					} else if (StatusCode.SC_CANCELLED== appMessageJSON.statusCode) {
 						caption = "<g:message code='operationCANCELLEDLbl'/>"
 					}
 					showResultDialog(caption, msg)

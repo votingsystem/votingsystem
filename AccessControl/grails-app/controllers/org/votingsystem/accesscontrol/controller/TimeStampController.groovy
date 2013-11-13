@@ -91,9 +91,9 @@ class TimeStampController {
 			return false
 		} catch(Exception ex) {
 			log.debug (ex.getMessage(), ex)
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 		}
-		response.status = ResponseVS.SC_ERROR_PETICION
+		response.status = ResponseVS.SC_ERROR_REQUEST
 		render message(code: 'error.PeticionIncorrectaHTML', args:[
 			"${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
 		return false
@@ -162,7 +162,7 @@ class TimeStampController {
 			}
 			return false
 		}
-		response.status = ResponseVS.SC_ERROR_PETICION
+		response.status = ResponseVS.SC_ERROR_REQUEST
 		render message(code: 'error.PeticionIncorrectaHTML', args:[
 			"${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
 		return false

@@ -47,7 +47,7 @@ class UsuarioService {
 		}
 		return [cadenaCertificacionPEM:cadenaCertificacionPEM, nombre:controlCenter.nombre,
 			serverURL:controlCenter.serverURL, id:controlCenter.id, 
-			serverType:TypeVS.CENTRO_CONTROL.toString()]
+			serverType:TypeVS.CONTROL_CENTER.toString()]
 	}
 	
 	boolean isUserAdmin(String nif) {

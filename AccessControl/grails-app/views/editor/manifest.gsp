@@ -90,8 +90,8 @@
 			    	event.fechaFin = dateFinish.datepicker('getDate').format();
 
 			    	var webAppMessage = new WebAppMessage(
-					    	StatusCode.SC_PROCESANDO, 
-					    	Operation.PUBLICACION_MANIFIESTO_PDF)
+					    	StatusCode.SC_PROCESSING, 
+					    	Operation.MANIFEST_PUBLISHING)
 			    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
 			    		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
 					webAppMessage.contenidoFirma = event

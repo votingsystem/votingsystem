@@ -131,7 +131,7 @@ class EventoController {
 		if(!messageSMIMEReq) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -139,7 +139,7 @@ class EventoController {
 			messageSMIMEReq, request.getLocale());
 		if(ResponseVS.SC_OK == respuesta.statusCode) {
 			response.status = ResponseVS.SC_OK
-			response.setContentType(ContextVS.SIGNED_CONTENT_TYPE)
+			response.setContentType(org.votingsystem.model.ContentTypeVS.SIGNED)
 	    }
 	    params.respuesta = respuesta
    }

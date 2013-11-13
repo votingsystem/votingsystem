@@ -10,6 +10,7 @@ public interface UserVS {
 	public void setCertificate(X509Certificate certificate);
 	public X509Certificate getCertificate();
 	public void setCertificateCA(CertificateVS certificate);
+	public CertificateVS getCertificateCA();
 	public void setPais(String country);
 	public void setNif(String nif);
 	public String getNif();

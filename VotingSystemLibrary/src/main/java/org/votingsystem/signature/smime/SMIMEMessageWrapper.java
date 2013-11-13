@@ -2,6 +2,7 @@ package org.votingsystem.signature.smime;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -130,7 +131,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
                         }
                         output.close();
                         contentStream.close();
-                        signedContent = new String(output.toByteArray());
+                        stringBuilder.append(new String(output.toByteArray()));
                     }  else  {
                         logger.debug(" TODO - get content from part instanceof -> " + part.getClass());
                     }
@@ -257,10 +258,6 @@ public class SMIMEMessageWrapper extends MimeMessage {
             	informacionVoto.setVoteTimeStampToken(timeStampToken);
             } else {informacionVoto.addServerCert(cert);} 
         }
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        writeTo(baos);
-        messageBytes = baos.toByteArray();
-        baos.close();
     }
     
     public SignedMailValidator.ValidationResult verify(
@@ -418,7 +415,13 @@ public class SMIMEMessageWrapper extends MimeMessage {
     	return signers;
     }
   
-    public byte[] getBytes () {
+    public byte[] getBytes () throws Exception {
+        if(messageBytes == null) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            writeTo(baos);
+            messageBytes = baos.toByteArray();
+            baos.close();
+        }
     	return messageBytes;
     }
 

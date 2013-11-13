@@ -51,7 +51,7 @@ class EventoService {
 			return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:evento)
 		}
 		if(evento.fechaInicio.after(evento.fechaFin)) {
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
 				message:messageSource.getMessage(
 				'error.fechaInicioAfterFechaFinalMsg', null, locale) )
 		}
@@ -82,7 +82,7 @@ class EventoService {
    ResponseVS setEventDatesState (Evento evento, Locale locale) {
 		Evento.Estado estado
 		if(evento.fechaInicio.after(evento.fechaFin)) {
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 				message:messageSource.getMessage('dateRangeErrorMsg', 
 					[evento.fechaInicio, evento.fechaFin].toArray(), locale) )
 		}
@@ -103,15 +103,15 @@ class EventoService {
 		return administradoresSistema.contains(nif)
 	}
    
-	//{"operation":"CANCELAR_EVENTO","accessControlURL":"...","eventId":"..","estado":"CANCELADO","UUID":"..."}
+	//{"operation":"EVENT_CANCELLATION","accessControlURL":"...","eventId":"..","estado":"CANCELADO","UUID":"..."}
 	private ResponseVS checkCancelEventJSONData(JSONObject cancelDataJSON, Locale locale) {
-		int status = ResponseVS.SC_ERROR_PETICION
-		TypeVS typeRespuesta = TypeVS.CANCELAR_EVENTO_ERROR
+		int status = ResponseVS.SC_ERROR_REQUEST
+		TypeVS typeRespuesta = TypeVS.EVENT_CANCELLATION_ERROR
 		String msg
 		try {
 			TypeVS operationType = TypeVS.valueOf(cancelDataJSON.operation)
 			if (cancelDataJSON.accessControlURL && cancelDataJSON.eventId && 
-				cancelDataJSON.estado && (TypeVS.CANCELAR_EVENTO == operationType) && 
+				cancelDataJSON.estado && (TypeVS.EVENT_CANCELLATION == operationType) && 
 				((Evento.Estado.CANCELADO == Evento.Estado.valueOf(cancelDataJSON.estado)) ||
 					(Evento.Estado.BORRADO_DE_SISTEMA == Evento.Estado.valueOf(cancelDataJSON.estado)))) {
 				String requestURL = cancelDataJSON.accessControlURL
@@ -133,7 +133,7 @@ class EventoService {
 			log.error(ex.getMessage(), ex)
 			msg = messageSource.getMessage('evento.datosCancelacionError', null, locale)
 		}
-		if(ResponseVS.SC_OK == status) typeRespuesta = TypeVS.CANCELAR_EVENTO
+		if(ResponseVS.SC_OK == status) typeRespuesta = TypeVS.EVENT_CANCELLATION
 		else log.error("checkCancelEventJSONData - msg: ${msg} - data:${cancelDataJSON.toString()}")
 		return new ResponseVS(statusCode:status, message:msg, type:typeRespuesta)
 	}
@@ -155,14 +155,14 @@ class EventoService {
 				msg = messageSource.getMessage('eventNotFound',
 					[messageJSON?.eventId].toArray(), locale)
 				log.error("cancelEvent - msg: ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-					type:TypeVS.CANCELAR_EVENTO_ERROR, message:msg)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+					type:TypeVS.EVENT_CANCELLATION_ERROR, message:msg)
 			} else if(evento.estado != Evento.Estado.ACTIVO) {
 				msg = messageSource.getMessage('eventNotActiveMsg',
 					[messageJSON?.eventId].toArray(), locale)
 				log.error("cancelEvent - msg: ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-					type:TypeVS.CANCELAR_EVENTO_ERROR, message:msg)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+					type:TypeVS.EVENT_CANCELLATION_ERROR, message:msg)
 			}
 			if(evento.usuario?.nif.equals(signer.nif) || isUserAdmin(signer.nif)){
 				log.debug("Usuario con privilegios para cancelar evento")
@@ -192,18 +192,18 @@ class EventoService {
 					toUser = ((EventoVotacion)evento).getCentroControl()?.nombre
 					String cancelCentroCentrolEventURL = centroControlUrl + "/eventoVotacion/cancelled"
 					ResponseVS respuestaCentroControl =	httpService.sendMessage(
-							smimeMessageResp.getBytes(), ContextVS.SIGNED_CONTENT_TYPE, cancelCentroCentrolEventURL);
+							smimeMessageResp.getBytes(), org.votingsystem.model.ContentTypeVS.SIGNED, cancelCentroCentrolEventURL);
 					log.debug("respuestaCentroControl - status: ${respuestaCentroControl.statusCode}")
 					if(ResponseVS.SC_OK == respuestaCentroControl.statusCode ||
-						ResponseVS.SC_ANULACION_REPETIDA == respuestaCentroControl.statusCode) {
+						ResponseVS.SC_CANCELLATION_REPEATED == respuestaCentroControl.statusCode) {
 						msg = msg + " - " + messageSource.getMessage(
 							'centroControl.notificado', [centroControlUrl].toArray(), locale)
 					} else {
 						msg = msg + " - " + messageSource.getMessage('controCenterCommunicationErrorMsg',
 							[centroControlUrl].toArray(), locale)
 						log.error("cancelEvent - msg: ${msg}")
-						return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-							type:TypeVS.CANCELAR_EVENTO_ERROR, message:msg, eventVS:evento)
+						return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+							type:TypeVS.EVENT_CANCELLATION_ERROR, message:msg, eventVS:evento)
 					}
 				} else {
 					toUser = signer.getNif()
@@ -212,7 +212,7 @@ class EventoService {
 				}
 				log.debug("cancel event - msg:${msg}")
 				
-				MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECIBO,
+				MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT,
 					smimePadre:messageSMIMEReq, evento:evento, valido:true,
 					contenido:smimeMessageResp.getBytes())
 				MessageSMIME.withTransaction {
@@ -233,19 +233,19 @@ class EventoService {
 				}
 				log.debug("updated evento.id: ${evento.id}")
 				return new ResponseVS(statusCode:ResponseVS.SC_OK,message:msg,
-					type:TypeVS.CANCELAR_EVENTO, messageSMIME:messageSMIMEResp,
+					type:TypeVS.EVENT_CANCELLATION, data:messageSMIMEResp,
 					eventVS:evento)
 			} else {
 				msg = messageSource.getMessage('csr.usuarioNoAutorizado', null, locale)
 				log.error("cancelEvent - msg: ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-					type:TypeVS.CANCELAR_EVENTO_ERROR, message:msg, eventVS:evento)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+					type:TypeVS.EVENT_CANCELLATION_ERROR, message:msg, eventVS:evento)
 			}	
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex)
 			msg = messageSource.getMessage('evento.datosCancelacionError', null, locale)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
-				message:msg, eventVS:evento, type:TypeVS.CANCELAR_EVENTO_ERROR)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
+				message:msg, eventVS:evento, type:TypeVS.EVENT_CANCELLATION_ERROR)
 		}
 	}
 
@@ -330,7 +330,7 @@ class EventoService {
 			fechaFin:eventoItem.getFechaFin()]
 		if(eventoItem.usuario) eventoMap.usuario = "${eventoItem.usuario?.nombre} ${eventoItem.usuario?.primerApellido}"
 		Firma.withTransaction {
-			eventoMap.numeroFirmas = Firma.countByEventoAndType(eventoItem, TypeVS.FIRMA_EVENTO_RECLAMACION)
+			eventoMap.numeroFirmas = Firma.countByEventoAndType(eventoItem, TypeVS.CLAIM_EVENT_SIGN)
 		}
 		def controlAccesoMap = [serverURL:grailsApplication.config.grails.serverURL,
 				nombre:grailsApplication.config.VotingSystem.serverName]
@@ -348,11 +348,11 @@ class EventoService {
 		eventMap.put("dateInit", DateUtils.getStringFromDate(event.getFechaInicio()))
 		eventMap.put("dateFinish", DateUtils.getStringFromDate(event.getDateFinish()))
 		if(event instanceof EventoVotacion) {
-			eventMap.put("type", TypeVS.EVENTO_VOTACION.toString())
+			eventMap.put("type", TypeVS.VOTING_EVENT.toString())
 		} else if(event instanceof EventoReclamacion) {
-			eventMap.put("type", TypeVS.EVENTO_RECLAMACION.toString());
+			eventMap.put("type", TypeVS.CLAIM_EVENT.toString());
 		} else if(event instanceof EventoFirma) {
-			eventMap.put("type", TypeVS.EVENTO_FIRMA.toString());
+			eventMap.put("type", TypeVS.SIGN_EVENT.toString());
 		}
 		log.debug("getMetaInfMap - Event type: ${eventMap.type?.toString()}")
 		return eventMap

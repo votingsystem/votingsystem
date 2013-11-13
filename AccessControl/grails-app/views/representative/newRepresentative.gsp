@@ -60,7 +60,7 @@
 					}  
 
 			    	var webAppMessage = new WebAppMessage(
-					    	StatusCode.SC_PROCESANDO, 
+					    	StatusCode.SC_PROCESSING, 
 					    	Operation.NEW_REPRESENTATIVE)
 			    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
 		    		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"

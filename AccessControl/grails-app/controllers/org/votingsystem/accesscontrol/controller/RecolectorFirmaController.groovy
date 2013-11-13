@@ -42,7 +42,7 @@ class RecolectorFirmaController {
 				evento = EventoFirma.get(params.long('id'))
 			}
 			if(!evento) {
-				response.status = ResponseVS.SC_ERROR_PETICION
+				response.status = ResponseVS.SC_ERROR_REQUEST
 				render message(code: 'manifestNotFound', args:[params.id])
 				return false
 			}
@@ -54,12 +54,12 @@ class RecolectorFirmaController {
 				return false
 			} catch (Exception ex) {
 				log.error (ex.getMessage(), ex)
-				response.status = ResponseVS.SC_ERROR_PETICION
+				response.status = ResponseVS.SC_ERROR_REQUEST
 				render(ex.getMessage())
 				return false
 			}
 		}
-		response.status = ResponseVS.SC_ERROR_PETICION
+		response.status = ResponseVS.SC_ERROR_REQUEST
 		render message(code: 'error.PeticionIncorrectaHTML', args:[
 			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false

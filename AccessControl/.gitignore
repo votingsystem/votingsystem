@@ -4,3 +4,7 @@
 /target-eclipse
 /VotingSystem
 .VotingSystem
+.classpath
+.project
+.idea
+AccessControl.iml

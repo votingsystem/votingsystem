@@ -1,15 +1,18 @@
 package org.votingsystem.applet.callable;
 
 import java.io.File;
+
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
+
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
-
 import org.apache.log4j.Logger;
 import org.votingsystem.applet.util.HttpHelper;
 
@@ -51,7 +54,7 @@ public class RepresentativeDataSender implements Callable<ResponseVS>{
             Map<String, Object> fileMap = new HashMap<String, Object>();
             String representativeDataFileName = 
                     ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" + 
-                    ContextVS.SIGNED_AND_ENCRYPTED_CONTENT_TYPE;
+                    ContentTypeVS.SIGNED_AND_ENCRYPTED;
             fileMap.put(representativeDataFileName, representativeEncryptedDataBytes);
             fileMap.put(ContextVS.IMAGE_FILE_NAME, selectedImage);
             responseVS = HttpHelper.INSTANCE.sendObjectMap(

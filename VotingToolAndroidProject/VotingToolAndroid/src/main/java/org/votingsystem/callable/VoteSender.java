@@ -35,7 +35,7 @@ import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.android.util.HttpHelper;
 import org.votingsystem.android.util.ServerPaths;
-
+import org.votingsystem.model.ContentTypeVS;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -100,7 +100,7 @@ public class VoteSender implements Callable<ResponseVS> {
                 return responseVS;
             }
             signedVote = timeStamper.getSmimeMessage();
-            String documentContentType = ContextVSAndroid.SIGNED_AND_ENCRYPTED_CONTENT_TYPE;
+            String documentContentType = ContentTypeVS.SIGNED_AND_ENCRYPTED;
             byte[] messageToSend = Encryptor.encryptSMIME(signedVote,
                     event.getControlCenter().getCertificado());
             HttpResponse response  = HttpHelper.sendByteArray(messageToSend,

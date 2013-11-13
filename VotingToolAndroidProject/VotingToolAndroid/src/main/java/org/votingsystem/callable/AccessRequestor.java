@@ -2,7 +2,7 @@ package org.votingsystem.callable;
 
 import android.content.Context;
 import android.util.Log;
-
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.android.model.ContextVSAndroid;
 import org.votingsystem.android.model.EventVSAndroid;
 import org.votingsystem.model.ResponseVS;
@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 import javax.mail.Header;
-
+import org.votingsystem.model.ContentTypeVS;
 import static org.votingsystem.android.model.ContextVSAndroid.KEY_SIZE;
 import static org.votingsystem.android.model.ContextVSAndroid.PROVIDER;
 import static org.votingsystem.android.model.ContextVSAndroid.SIG_NAME;
@@ -67,10 +67,10 @@ public class AccessRequestor implements Callable<ResponseVS> {
             byte[] csrEncryptedAccessRequestBytes = Encryptor.encryptSMIME(
                     accessRequets, destinationCert);
             String csrFileName = ContextVSAndroid.CSR_FILE_NAME + ":" +
-                    ContextVSAndroid.ENCRYPTED_CONTENT_TYPE;
+            		ContentTypeVS.ENCRYPTED;
 
             String accessRequestFileName = ContextVSAndroid.ACCESS_REQUEST_FILE_NAME + ":" +
-                    ContextVSAndroid.SIGNED_AND_ENCRYPTED_CONTENT_TYPE;
+                    ContentTypeVS.SIGNED_AND_ENCRYPTED;
             Map<String, Object> mapToSend = new HashMap<String, Object>();
             mapToSend.put(csrFileName, csrEncryptedBytes);
             mapToSend.put(accessRequestFileName, csrEncryptedAccessRequestBytes);

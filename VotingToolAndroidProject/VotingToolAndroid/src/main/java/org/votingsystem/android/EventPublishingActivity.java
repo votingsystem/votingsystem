@@ -26,9 +26,9 @@ import org.votingsystem.android.model.ContextVSAndroid;
 import org.votingsystem.android.ui.CertNotFoundDialog;
 import org.votingsystem.android.ui.CertPinDialog;
 import org.votingsystem.android.ui.CertPinDialogListener;
+import org.votingsystem.android.model.OperationVSAndroid;
 import org.votingsystem.callable.PDFPublisher;
 import org.votingsystem.callable.SMIMESignedSender;
-import org.votingsystem.android.model.OperationVSAndroid;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.FileUtils;
@@ -85,22 +85,22 @@ public class EventPublishingActivity extends ActionBarActivity implements CertPi
         if(formTypeStr != null) {
             formType = OperationVSAndroid.Tipo.valueOf(formTypeStr);
         	switch(formType) {
-	        	case PUBLICACION_RECLAMACION_SMIME:
+	        	case CLAIM_PUBLISHING:
 	        		serverURL = ServerPaths.getURLPublish(
                             contextVSAndroid.getAccessControlURL(),
-                            OperationVSAndroid.Tipo.PUBLICACION_RECLAMACION_SMIME);
+                            OperationVSAndroid.Tipo.CLAIM_PUBLISHING);
 	        		screenTitle = getString(R.string.publish_claim_caption);
 	        		break;
-	        	case PUBLICACION_MANIFIESTO_PDF:
+	        	case MANIFEST_PUBLISHING:
 	        		serverURL = ServerPaths.getURLPublish(
                             contextVSAndroid.getAccessControlURL(),
-                            OperationVSAndroid.Tipo.PUBLICACION_MANIFIESTO_PDF);
+                            OperationVSAndroid.Tipo.MANIFEST_PUBLISHING);
 	        		screenTitle = getString(R.string.publish_manifest_caption);
 	        		break;
-	        	case PUBLICACION_VOTACION_SMIME:
+	        	case VOTING_PUBLISHING:
 	        		serverURL = ServerPaths.getURLPublish(
                             contextVSAndroid.getAccessControlURL(),
-                            OperationVSAndroid.Tipo.PUBLICACION_VOTACION_SMIME);
+                            OperationVSAndroid.Tipo.VOTING_PUBLISHING);
 	        		screenTitle = getString(R.string.publish_voting_caption);
 	        		break;
         	}  
@@ -343,15 +343,15 @@ public class EventPublishingActivity extends ActionBarActivity implements CertPi
                 PrivateKey signerPrivatekey = (PrivateKey)keyStore.getKey(ALIAS_CERT_USUARIO, pin.toCharArray());
                 //X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(ALIAS_CERT_USUARIO);
                 switch(pendingOperationVSAndroid.getTipo()) {
-                    case PUBLICACION_MANIFIESTO_PDF:
+                    case MANIFEST_PUBLISHING:
                         PDFPublisher publisher = new PDFPublisher(pendingOperationVSAndroid.getUrlEnvioDocumento(),
                                 pendingOperationVSAndroid.getContenidoFirma().toString(),
                                 keyStoreBytes, pin.toCharArray(), null, null, getBaseContext());
                         responseVS = publisher.call();
                         break;
-                    case PUBLICACION_VOTACION_SMIME:
-                    case PUBLICACION_RECLAMACION_SMIME:
-                    case ASOCIAR_CENTRO_CONTROL:
+                    case VOTING_PUBLISHING:
+                    case CLAIM_PUBLISHING:
+                    case CONTROL_CENTER_ASSOCIATION:
                         boolean isEncryptedResponse = false;
                         pendingOperationVSAndroid.getContenidoFirma().put("UUID", UUID.randomUUID().toString());
                         SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
@@ -394,15 +394,15 @@ public class EventPublishingActivity extends ActionBarActivity implements CertPi
             if(ResponseVS.SC_OK == response.getStatusCode()) {
                 resultCaption = getString(R.string.operacion_ok_msg);
                 switch(pendingOperationVSAndroid.getTipo()) {
-                    case PUBLICACION_MANIFIESTO_PDF:
+                    case MANIFEST_PUBLISHING:
                         resultMsg = getString(R.string.publish_manifest_OK_prefix_msg);
                         selectedSubsystem = SubSystem.MANIFESTS;
                         break;
-                    case PUBLICACION_RECLAMACION_SMIME:
+                    case CLAIM_PUBLISHING:
                         resultMsg = getString(R.string.publish_claim_OK_prefix_msg);
                         selectedSubsystem = SubSystem.CLAIMS;
                         break;
-                    case PUBLICACION_VOTACION_SMIME:
+                    case VOTING_PUBLISHING:
                         resultMsg = getString(R.string.publish_voting_OK_prefix_msg);
                         selectedSubsystem = SubSystem.VOTING;
                         break;

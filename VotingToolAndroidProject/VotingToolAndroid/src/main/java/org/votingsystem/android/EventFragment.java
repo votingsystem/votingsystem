@@ -100,7 +100,7 @@ public class EventFragment extends Fragment implements CertPinDialogListener {
                     showCertNotFoundDialog();
                     return;
                 }
-                if (event.getTypeVS().equals(TypeVS.EVENTO_RECLAMACION)) {
+                if (event.getTypeVS().equals(TypeVS.CLAIM_EVENT)) {
                     if(event.getCampos() != null && event.getCampos().size() > 0) {
                         showClaimFieldsDialog();
                         return;
@@ -350,14 +350,14 @@ public class EventFragment extends Fragment implements CertPinDialogListener {
                 byte[] keyStoreBytes = null;
                 FileInputStream fis = getActivity().openFileInput(KEY_STORE_FILE);
                 keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
-                if(event.getTypeVS().equals(TypeVS.EVENTO_FIRMA)) {
+                if(event.getTypeVS().equals(TypeVS.SIGN_EVENT)) {
                     SignedPDFSender signedPDFSender = new SignedPDFSender(ServerPaths.getURLPDFManifest(
                             contextVSAndroid.getAccessControlURL(), event.getEventoId()),
                             ServerPaths.getURLPDFManifestCollector(contextVSAndroid.getAccessControlURL(),
                             event.getEventoId()), keyStoreBytes, pin.toCharArray(), null, null,
                             getActivity().getBaseContext());
                     responseVS = signedPDFSender.call();
-                } else if(event.getTypeVS().equals(TypeVS.EVENTO_RECLAMACION)) {
+                } else if(event.getTypeVS().equals(TypeVS.CLAIM_EVENT)) {
                     String subject = ASUNTO_MENSAJE_FIRMA_DOCUMENTO + event.getAsunto();
                     String signatureContent = event.getSignatureContentJSON();
                     String serviceURL = ServerPaths.getURLReclamacion(

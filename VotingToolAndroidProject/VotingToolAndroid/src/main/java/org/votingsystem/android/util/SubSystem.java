@@ -8,9 +8,9 @@ import org.votingsystem.model.TypeVS;
 
 public enum SubSystem  {
 	
-	VOTING(0, TypeVS.EVENTO_VOTACION),
-	MANIFESTS(1, TypeVS.EVENTO_FIRMA),
-	CLAIMS(2, TypeVS.EVENTO_RECLAMACION),
+	VOTING(0, TypeVS.VOTING_EVENT),
+	MANIFESTS(1, TypeVS.SIGN_EVENT),
+	CLAIMS(2, TypeVS.CLAIM_EVENT),
 	UNKNOW(-1, null);
 	
 	int position;

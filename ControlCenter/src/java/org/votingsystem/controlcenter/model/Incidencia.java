@@ -26,8 +26,8 @@ public class Incidencia implements Serializable {
     @Column(name="id", unique=true, nullable=false)
     private Long id;
     @Enumerated(EnumType.STRING)
-    @Column(name="tipo", nullable=false)
-    private Tipo tipo;  
+    @Column(name="type", nullable=false)
+    private Tipo type;  
     
 
 	
@@ -37,11 +37,11 @@ public class Incidencia implements Serializable {
 	public Long getId() {
 		return id;
 	}
-	public void setTipo(Tipo tipo) {
-		this.tipo = tipo;
+	public void setType(Tipo type) {
+		this.type = type;
 	}
 	public Tipo getTipo() {
-		return tipo;
+		return type;
 	}
 
 

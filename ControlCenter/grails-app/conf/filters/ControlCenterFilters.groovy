@@ -69,12 +69,12 @@ class ControlCenterFilters {
 					messageSMIME.evento = respuesta.eventVS
 					messageSMIME.valido = operationOK
 					messageSMIME.motivo = respuesta.message
-					messageSMIME.tipo = respuesta.tipo
+					messageSMIME.type = respuesta.type
 					MessageSMIME.withTransaction {
 						messageSMIME.save(flush:true)
 					}
 					params.messageSMIMEReq = null
-					log.debug "after - saved MessageSMIME '${messageSMIME.id}' -> '${messageSMIME.tipo}'"
+					log.debug "after - saved MessageSMIME '${messageSMIME.id}' -> '${messageSMIME.type}'"
 				}
 				if(response?.contentType?.contains("multipart/encrypted")) {
 					log.debug "after - ENCRYPTED PLAIN TEXT"
@@ -126,7 +126,7 @@ class ControlCenterFilters {
 					ResponseVS respuesta
 					if(!requestBytes) {
 						log.debug "---- pkcs7DocumentsFilter - before - REQUEST WITHOUT FILE ------------"
-						response.status = ResponseVS.SC_ERROR_PETICION
+						response.status = ResponseVS.SC_ERROR_REQUEST
 						render(messageSource.getMessage(
 							'evento.peticionSinArchivo', null, request.getLocale()))
 						return false
@@ -152,7 +152,7 @@ class ControlCenterFilters {
 								new ByteArrayInputStream(requestBytes));
 						} catch(Exception ex) {
 							log.error(ex.getMessage(), ex)
-							response.status = ResponseVS.SC_ERROR_PETICION
+							response.status = ResponseVS.SC_ERROR_REQUEST
 							render messageSource.getMessage(
 								'signedDocumentErrorMsg', null, request.getLocale())
 							return false
@@ -160,7 +160,7 @@ class ControlCenterFilters {
 					}
 					respuesta = processSMIMERequest(smimeMessageReq, params, request)
 					if(ResponseVS.SC_OK == respuesta.statusCode) {
-						params.messageSMIMEReq = respuesta.messageSMIME
+						params.messageSMIMEReq = respuesta.data
 						return
 					} else {
 						response.status = respuesta?.statusCode
@@ -261,7 +261,7 @@ class ControlCenterFilters {
 			if(ResponseVS.SC_OK != certValidationResponse.statusCode) {
 				messageSMIME = new MessageSMIME(valido:false,
 					motivo:certValidationResponse.message,
-					tipo:Tipo.ERROR, contenido:smimeMessageReq.getBytes())
+					type:TypeVS.ERROR, contenido:smimeMessageReq.getBytes())
 				MessageSMIME.withTransaction {
 					messageSMIME.save()
 				}
@@ -275,17 +275,17 @@ class ControlCenterFilters {
 					smimeMessage:smimeMessageReq,
 					evento:certValidationResponse.evento,
 					usuario:certValidationResponse.usuarios?.iterator()?.next(),
-					tipo:certValidationResponse.tipo,
+					type:certValidationResponse.type,
 					contenido:smimeMessageReq.getBytes(),
 					base64ContentDigest:smimeMessageReq.getContentDigestStr())
 				MessageSMIME.withTransaction {
 					messageSMIME.save()
 				}
 			}
-			return new ResponseVS(statusCode:ResponseVS.SC_OK, messageSMIME:messageSMIME)
+			return new ResponseVS(statusCode:ResponseVS.SC_OK, data:data)
 		} else if(smimeMessageReq) {
 			log.error "**** Filter - processSMIMERequest - signature ERROR - "
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 				message:messageSource.getMessage('signatureErrorMsg', null, request.getLocale()))
 		}
 	}

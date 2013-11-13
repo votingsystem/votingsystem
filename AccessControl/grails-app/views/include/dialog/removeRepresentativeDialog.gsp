@@ -25,7 +25,7 @@ $("#removeRepresentativeDialog").dialog({
 function removeRepresentative() {
 	console.log("removeRepresentative")
    	var webAppMessage = new WebAppMessage(
-	    	StatusCode.SC_PROCESANDO, 
+	    	StatusCode.SC_PROCESSING, 
 	    	Operation.REPRESENTATIVE_REVOKE)
    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
 	webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
@@ -47,7 +47,7 @@ function removeRepresentativeCallback(appMessage) {
 		if(StatusCode.SC_OK == appMessageJSON.statusCode) { 
 			caption = "<g:message code='operationOKCaption'/>"
 			msg = "<g:message code='removeRepresentativeOKMsg'/>";
-		} else if (StatusCode.SC_CANCELADO== appMessageJSON.statusCode) {
+		} else if (StatusCode.SC_CANCELLED== appMessageJSON.statusCode) {
 			caption = "<g:message code='operationCANCELLEDLbl'/>"
 		}
 		showResultDialog(caption, msg)

@@ -51,7 +51,7 @@ class EventoFirmaService {
 			messageValidacionDocumento = messageSource.getMessage('pdfManifestRepeated',
 				[evento.asunto, documento.usuario?.nif].toArray(), locale)
 			log.debug ("saveManifest - ${messageValidacionDocumento}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
 				message:messageValidacionDocumento)
 		} else {
 			pdfDocument.estado = Documento.Estado.MANIFIESTO_VALIDADO
@@ -73,7 +73,7 @@ class EventoFirmaService {
 		log.debug("generarCopiaRespaldo - eventoId: ${event.id}")
 		ResponseVS respuesta;
 		if(!event) {
-			return respuesta = new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
+			return respuesta = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
 				message:messageSource.getMessage(
 				'eventNotFound', [event.id].toArray(), locale))
 		}
@@ -81,7 +81,7 @@ class EventoFirmaService {
 		int numSignatures = Documento.countByEventoAndEstado(event,
 			Documento.Estado.FIRMA_MANIFIESTO_VALIDADA)
 		Map<String, File> mapFiles = filesService.getBackupFiles(
-			event, TypeVS.EVENTO_FIRMA, locale)
+			event, TypeVS.SIGN_EVENT, locale)
 		File metaInfFile = mapFiles.metaInfFile
 		File filesDir = mapFiles.filesDir
 		File zipResult   = mapFiles.zipResult
@@ -155,7 +155,7 @@ class EventoFirmaService {
 		ant.copy(file: zipResult, tofile: webappBackupPath)
 		
 		return new ResponseVS(statusCode:ResponseVS.SC_OK,
-			 message:backupURL, type:TypeVS.EVENTO_FIRMA) 
+			 message:backupURL, type:TypeVS.SIGN_EVENT) 
 	}
 
 }

@@ -8,6 +8,7 @@ import grails.util.Environment
 
 import org.votingsystem.groovy.util.*
 import org.votingsystem.model.TypeVS;
+import org.votingsystem.model.ActorVS;
 
 /**
  * @infoController Información de la aplicación
@@ -30,7 +31,7 @@ class InfoServidorController {
         HashMap infoServidor = new HashMap()
         infoServidor.centrosDeControl = []
         infoServidor.nombre = grailsApplication.config.VotingSystem.serverName
-        infoServidor.serverType = TypeVS.CONTROL_ACCESO.toString()
+        infoServidor.serverType = ActorVS.Type.ACCESS_CONTROL.toString()
         infoServidor.serverURL = "${grailsApplication.config.grails.serverURL}"
         infoServidor.urlBlog = grailsApplication.config.VotingSystem.blogURL
 		infoServidor.estado = ActorConIP.Estado.ACTIVO.toString()

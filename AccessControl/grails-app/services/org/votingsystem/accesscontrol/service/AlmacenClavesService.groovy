@@ -31,7 +31,7 @@ class AlmacenClavesService {
 			activo:Boolean.TRUE, evento:evento)
 		if (almacenClavesPrevio) {
 			log.error ("Ya se había generado el almacén de claves de CA del evento: '${evento.getId()}'")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST)
 		} 
 		//String password = (1..7).inject("") { a, b -> a += ('a'..'z')[new Random().nextFloat() * 26 as int] }.toUpperCase()
 		//TODO ====== crypto token

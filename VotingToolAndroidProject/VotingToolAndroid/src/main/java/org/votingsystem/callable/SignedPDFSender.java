@@ -33,6 +33,7 @@ import org.bouncycastle2.cms.CMSSignedDataGenerator;
 import org.votingsystem.android.model.ContextVSAndroid;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.signature.util.PDF_CMSSignedGenerator;
@@ -115,7 +116,7 @@ public class SignedPDFSender implements Callable<ResponseVS> {
             byte[] pdfBytes = null;
             //Get the PDF to sign
             if(documentToSignURL != null) {
-                response = HttpHelper.getData(documentToSignURL, ContextVSAndroid.PDF_CONTENT_TYPE);
+                response = HttpHelper.getData(documentToSignURL, ContentTypeVS.PDF);
                 if(ResponseVS.SC_OK != response.getStatusLine().getStatusCode()) {
                     return new ResponseVS(response.getStatusLine().getStatusCode(),
                             EntityUtils.toString(response.getEntity()));
@@ -139,7 +140,7 @@ public class SignedPDFSender implements Callable<ResponseVS> {
             byte[] bytesToSend = baos.toByteArray();
             baos.close();
             response = HttpHelper.sendByteArray(bytesToSend,
-                    ContextVSAndroid.PDF_SIGNED_AND_ENCRYPTED_CONTENT_TYPE, serviceURL);
+            		ContentTypeVS.PDF_SIGNED_AND_ENCRYPTED, serviceURL);
             responseVS = new ResponseVS(
                     response.getStatusLine().getStatusCode(),
                     EntityUtils.toString(response.getEntity()));

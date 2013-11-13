@@ -22,6 +22,7 @@ import org.springframework.beans.factory.InitializingBean
 import org.votingsystem.util.*
 import org.votingsystem.accesscontrol.model.*
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.util.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
@@ -96,8 +97,6 @@ class EncryptionService {
 
 	static scope = "prototype"
 	
-	private static final String BC = BouncyCastleProvider.PROVIDER_NAME
-	
 	def grailsApplication;
 	def messageSource
 	private X509Certificate serverCert;
@@ -119,7 +118,7 @@ class EncryptionService {
 		serverCert = (X509Certificate)chain[0]
 		recId = new JceKeyTransRecipientId(serverCert)
 		serverPrivateKey = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray())
-		recipient = new JceKeyTransEnvelopedRecipient(serverPrivateKey).setProvider(BC)
+		recipient = new JceKeyTransEnvelopedRecipient(serverPrivateKey).setProvider(ContextVS.PROVIDER)
 		Properties props = System.getProperties();
 		// Get a Session object with the default properties.
 		session = Session.getDefaultInstance(props, null);
@@ -142,18 +141,18 @@ class EncryptionService {
 			//mimeMessage.setSentDate(new Date());
 			SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
 			encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
-							receiverCert).setProvider(BC));
+							receiverCert).setProvider(ContextVS.PROVIDER));
 			/* Encrypt the message */
 			MimeBodyPart encryptedPart = encrypter.generate(mimeMessage,
 					new JceCMSContentEncryptorBuilder(
-					CMSAlgorithm.DES_EDE3_CBC).setProvider(BC).build());
+					CMSAlgorithm.DES_EDE3_CBC).setProvider(ContextVS.PROVIDER).build());
 			encryptedPart.writeTo(new FileOutputStream(encryptedFile));
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 				file:encryptedFile)
 			
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex);
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 				message:ex.getMessage())
 		}
 	}
@@ -169,11 +168,11 @@ class EncryptionService {
 			//mimeMessage.setSentDate(new Date());
 			SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
 			encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
-					"".getBytes(), publicKey).setProvider(BC));
+					"".getBytes(), publicKey).setProvider(ContextVS.PROVIDER));
 			/* Encrypt the message */
 			MimeBodyPart encryptedPart = encrypter.generate(mimeMessage,
 					new JceCMSContentEncryptorBuilder(
-					CMSAlgorithm.DES_EDE3_CBC).setProvider(BC).build());
+					CMSAlgorithm.DES_EDE3_CBC).setProvider(ContextVS.PROVIDER).build());
 			ByteArrayOutputStream baos = new ByteArrayOutputStream()
 			encryptedPart.writeTo(baos);
 			byte[] result = baos.toByteArray()
@@ -183,7 +182,7 @@ class EncryptionService {
 				messageBytes:result)
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex);
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 				message:ex.getMessage())
 		}
 	}
@@ -252,11 +251,11 @@ class EncryptionService {
 			//log.error(" --- encryptedFile: ${new String(encryptedFile)}")
 			return new ResponseVS(message:messageSource.getMessage(
 				'encryptedMessageErrorMsg', null, locale),
-				statusCode:ResponseVS.SC_ERROR_PETICION)
+				statusCode:ResponseVS.SC_ERROR_REQUEST)
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
 			//log.error(" --- encryptedFile: ${new String(encryptedFile)}")
-			return new ResponseVS(statusCode: ResponseVS.SC_ERROR_PETICION,
+			return new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
 				message:ex.getMessage())
 		}
 	}
@@ -265,11 +264,11 @@ class EncryptionService {
 		X509Certificate reciCert) throws Exception {
 		log.debug(" - encryptToCMS")
 		CMSEnvelopedDataStreamGenerator dataStreamGen = new CMSEnvelopedDataStreamGenerator();
-		dataStreamGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(reciCert).setProvider(BC));
+		dataStreamGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(reciCert).setProvider(ContextVS.PROVIDER));
 		ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
 		OutputStream out = dataStreamGen.open(bOut,
 				new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC).
-				setProvider(BC).build());
+				setProvider(ContextVS.PROVIDER).build());
 		out.write(dataToEncrypt);
 		out.close();
 		byte[] result = bOut.toByteArray();
@@ -293,7 +292,7 @@ class EncryptionService {
         if (it.hasNext()) {
             RecipientInformation   recipient = (RecipientInformation)it.next();
             //assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
-            CMSTypedStream recData = recipient.getContentStream(new JceKeyTransEnvelopedRecipient(privateKey).setProvider(BC));
+            CMSTypedStream recData = recipient.getContentStream(new JceKeyTransEnvelopedRecipient(privateKey).setProvider(ContextVS.PROVIDER));
             InputStream           dataStream = recData.getContentStream();
             ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
             byte[]                buf = new byte[4096];
@@ -324,11 +323,11 @@ s
 			//log.debug(" - encryptSMIMEMessage(...) str1: " + str1);
 			SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
 			encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
-				receiverCert).setProvider(BC));
+				receiverCert).setProvider(ContextVS.PROVIDER));
 			/* Encrypt the message */
 			MimeBodyPart encryptedPart = encrypter.generate(msgToEncrypt,
 				new JceCMSContentEncryptorBuilder(
-				CMSAlgorithm.DES_EDE3_CBC).setProvider(BC).build());
+				CMSAlgorithm.DES_EDE3_CBC).setProvider(ContextVS.PROVIDER).build());
 			/* Set all original MIME headers in the encrypted message */
 			Enumeration headers = msgToEncrypt.getAllHeaderLines();
 			while (headers.hasMoreElements()) {
@@ -356,11 +355,60 @@ s
 			log.error (ex.getMessage(), ex)
 			return new ResponseVS(message:messageSource.getMessage(
 				'error.encryptErrorMsg', null, locale),
-				statusCode:ResponseVS.SC_ERROR_PETICION)
+				statusCode:ResponseVS.SC_ERROR_REQUEST)
 		}
 	}		
 
-
+		/**
+		 * Method to encrypt SMIME signed messages
+		 */
+		ResponseVS encryptSMIMEMessage(SMIMEMessageWrapper msgToEncrypt,
+			X509Certificate receiverCert, Locale locale) throws Exception {
+			log.debug(" - encryptSMIMEMessage(...) ");
+			try {
+				//String str1 = new String(msgToEncrypt.getBytes())
+				//log.debug(" - encryptSMIMEMessage(...) str1: " + str1);
+				SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
+				encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
+					receiverCert).setProvider(ContextVS.PROVIDER));
+				/* Encrypt the message */
+				MimeBodyPart encryptedPart = encrypter.generate(msgToEncrypt,
+					new JceCMSContentEncryptorBuilder(
+					CMSAlgorithm.DES_EDE3_CBC).setProvider(ContextVS.PROVIDER).build());
+				/* Set all original MIME headers in the encrypted message */
+				Enumeration headers = msgToEncrypt.getAllHeaderLines();
+				while (headers.hasMoreElements()) {
+					String headerLine = (String)headers.nextElement();
+					//log.debug(" - headerLine: ${headerLine}");
+					/*
+					* Make sure not to override any content-* headers from the
+					* original message
+					*/
+					if (!Strings.toLowerCase(headerLine).startsWith("content-")) {
+						encryptedPart.addHeaderLine(headerLine);
+					}
+				}
+				/*SignerInformationStore  signers =
+					msgToEncrypt.getSmimeSigned().getSignerInfos();
+				Iterator<SignerInformation> it = signers.getSigners().iterator();
+				byte[] digestBytes = it.next().getContentDigest();//method can only be called after verify.
+				String digestStr = new String(Base64.encode(digestBytes));
+				encryptedMessage.addHeaderLine("SignedMessageDigest: " + digestStr);*/
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				encryptedPart.writeTo(baos);
+				return new ResponseVS(messageBytes:baos.toByteArray(),
+					statusCode:ResponseVS.SC_OK);
+			} catch(Exception ex) {
+				log.error ("============================")
+				log.error (ex)
+				ex.printStackTrace();
+				return new ResponseVS(message:messageSource.getMessage(
+					'error.encryptErrorMsg', null, locale),
+					statusCode:ResponseVS.SC_ERROR_REQUEST)
+			}
+		}
+		
+		
 	/**
 	 * Method to decrypt SMIME signed messages
 	 */
@@ -386,7 +434,7 @@ s
 				} else log.debug(" -- recipient.getRID().getCertificate() NULL");
 			} else log.debug(" -- getRID NULL");
 			MimeBodyPart res = SMIMEUtil.toMimeBodyPart(
-				 recipient.getContent(new JceKeyTransEnvelopedRecipient(serverPrivateKey).setProvider(BC)));*/
+				 recipient.getContent(new JceKeyTransEnvelopedRecipient(serverPrivateKey).setProvider(ContextVS.PROVIDER)));*/
 			if(!recipientInfo) {
 				String messsage = messageSource.getMessage(
 					'encryptedMessageContentNotFoundErrorMsg', null, locale)
@@ -414,7 +462,7 @@ s
 			log.debug(" - decryptSMIMEMessage - msg: '${msg}'");
 			return new ResponseVS(message:messageSource.getMessage(
 				'encryptedMessageErrorMsg', null, locale),
-				statusCode:ResponseVS.SC_ERROR_PETICION)
+				statusCode:ResponseVS.SC_ERROR_REQUEST)
 		}
 		return new ResponseVS(smimeMessage:smimeMessageReq,
 			statusCode:ResponseVS.SC_OK)

@@ -1,7 +1,7 @@
 package org.votingsystem.accesscontrol.service
 
 import javax.mail.internet.MimeMessage;
-
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.accesscontrol.model.*;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
@@ -44,8 +44,8 @@ class VotoService {
 				msg = messageSource.getMessage('validacionVoto.errorOptionSelected', 
 					[votoJSON.opcionSeleccionadaId].toArray(), locale)
 				log.error ("validateVote - ERROR OPTION -> '${msg}'")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-					message:msg, type:TypeVS.VOTO_CON_ERRORES, eventVS:evento)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+					message:msg, type:TypeVS.VOTE_ERROR, eventVS:evento)
 			}
 
 			String fromUser = grailsApplication.config.VotingSystem.serverName
@@ -56,7 +56,7 @@ class VotoService {
 						
 			SMIMEMessageWrapper smimeMessageResp = firmaService.getMultiSignedMimeMessage(
 				fromUser,toUser, smimeMessageReq, subject)
-			messageSMIMEReq.type = TypeVS.VOTO_VALIDADO_CONTROL_ACCESO
+			messageSMIMEReq.type = TypeVS.VOTO_VALIDADO_ACCESS_CONTROL
 			messageSMIMEReq.contenido = smimeMessageResp.getBytes()
 			MessageSMIME messageSMIMEResp = messageSMIMEReq
 			MessageSMIME.withTransaction {
@@ -72,15 +72,14 @@ class VotoService {
 			}
 			X509Certificate controlCenterCert = smimeMessageReq.getVoteVS()?.
 				getServerCerts()?.iterator()?.next()				
-				
+			Map data = [certificate:certificado, messageSMIME:messageSMIMEResp]
 			return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:evento, 
-				type:TypeVS.VOTO_VALIDADO_CONTROL_ACCESO,
-				certificado:controlCenterCert, messageSMIME:messageSMIMEResp)
+				type:TypeVS.VOTO_VALIDADO_ACCESS_CONTROL, data:data)
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
 				message:messageSource.getMessage('voteErrorMsg', null, locale), 
-				type:TypeVS.VOTO_CON_ERRORES, eventVS:evento)
+				type:TypeVS.VOTE_ERROR, eventVS:evento)
 		}
     }
 	
@@ -91,20 +90,20 @@ class VotoService {
 		def hashSolicitudAccesoBase64 = cancelDataJSON.hashSolicitudAccesoBase64
 		if(!origenHashCertificadoVoto || !hashCertificadoVotoBase64 ||
 			!origenHashSolicitudAcceso || !hashSolicitudAccesoBase64) {
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 				message:messageSource.getMessage('anulacionVoto.dataError', null, locale), 
-				type:TypeVS.ANULADOR_VOTO_ERROR)
+				type:TypeVS.CANCEL_VOTE_ERROR)
 		}
 		def hashCertificadoVoto = CMSUtils.obtenerHashBase64(origenHashCertificadoVoto,
 			"${grailsApplication.config.VotingSystem.votingHashAlgorithm}")
 		def hashSolicitud = CMSUtils.obtenerHashBase64(origenHashSolicitudAcceso,
 			"${grailsApplication.config.VotingSystem.votingHashAlgorithm}")
 		if (!hashSolicitudAccesoBase64.equals(hashSolicitud))
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:messageSource.getMessage(
-				'anulacionVoto.accessRequestHashError', null, locale), type:TypeVS.ANULADOR_VOTO_ERROR)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:messageSource.getMessage(
+				'anulacionVoto.accessRequestHashError', null, locale), type:TypeVS.CANCEL_VOTE_ERROR)
 		if (!hashCertificadoVotoBase64.equals(hashCertificadoVoto))
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:messageSource.getMessage(
-					'anulacionVoto.errorEnHashCertificado', null, locale), type:TypeVS.ANULADOR_VOTO_ERROR)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:messageSource.getMessage(
+					'anulacionVoto.errorEnHashCertificado', null, locale), type:TypeVS.CANCEL_VOTE_ERROR)
 		return new ResponseVS(statusCode:ResponseVS.SC_OK)
 	}
 	
@@ -120,8 +119,8 @@ class VotoService {
 					'cancelDataWithErrorsMsg', null, locale)
 			log.error("checkCancelResponseJSONData - requestDataJSON: '${requestDataJSON}'" + 
 				" - responseDataJSON: '${responseDataJSON}'")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
-				message:msg, type:TypeVS.ANULADOR_VOTO_ERROR)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
+				message:msg, type:TypeVS.CANCEL_VOTE_ERROR)
 		} else return new ResponseVS(statusCode:ResponseVS.SC_OK)
 	}
 	
@@ -140,23 +139,23 @@ class VotoService {
 
 			String msg
 			def solicitudAcceso = SolicitudAcceso.findWhere(hashSolicitudAccesoBase64:hashSolicitudAccesoBase64)
-			if (!solicitudAcceso) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
+			if (!solicitudAcceso) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
 				message:messageSource.getMessage('anulacionVoto.errorSolicitudNoEncontrada', null, locale),
-				type:TypeVS.ANULADOR_VOTO_ERROR)
+				type:TypeVS.CANCEL_VOTE_ERROR)
 			if(solicitudAcceso.estado.equals(SolicitudAcceso.Estado.ANULADO)) {
 				msg = messageSource.getMessage(
 					'anulacionVoto.errorSolicitudAnulada', null, locale)
 				log.error("processCancel - ERROR ACCESS REQUEST ALREADY CANCELLED - ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ANULACION_REPETIDA, 
-					message:msg, type:TypeVS.ANULADOR_VOTO_ERROR)
+				return new ResponseVS(statusCode:ResponseVS.SC_CANCELLATION_REPEATED, 
+					message:msg, type:TypeVS.CANCEL_VOTE_ERROR)
 			}
 			Certificado certificado = Certificado.findWhere(hashCertificadoVotoBase64:hashCertificadoVotoBase64)
 			if (!certificado){
 				msg = messageSource.getMessage(
 					'anulacionVoto.errorSolicitudCSRNoEncontrada', null, locale)
 				log.error("processCancel - ERROR CSR NOT FOUND - ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
-					message:msg, type:TypeVS.ANULADOR_VOTO_ERROR)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
+					message:msg, type:TypeVS.CANCEL_VOTE_ERROR)
 			} 
 			else eventoVotacion = certificado.eventoVotacion
 			def voto = Voto.findWhere(certificado:certificado)
@@ -167,8 +166,8 @@ class VotoService {
 				msg = messageSource.getMessage('voteAlreadyCancelled',
 						[voteURL].toArray(), locale)
 				log.error("processCancel - REAPEATED CANCEL REQUEST - ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ANULACION_REPETIDA,
-					messageSMIME:anuladorVoto.messageSMIME, type:TypeVS.ANULADOR_VOTO_ERROR,
+				return new ResponseVS(statusCode:ResponseVS.SC_CANCELLATION_REPEATED,
+					data:anuladorVoto.messageSMIME, type:TypeVS.CANCEL_VOTE_ERROR,
 					message:msg, eventVS:eventoVotacion)
 			}
 			Date timeStampDate = signer.getTimeStampToken().getTimeStampInfo().genTime
@@ -177,8 +176,8 @@ class VotoService {
 					[timeStampDate, eventoVotacion.fechaInicio, 
 						eventoVotacion.getDateFinish()].toArray(), locale)
 				log.error("processCancel - DATE ERROR - ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
-					message:msg, type:TypeVS.ANULADOR_VOTO_ERROR)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
+					message:msg, type:TypeVS.CANCEL_VOTE_ERROR)
 			}
 			
 			//smimeMessageResp -> Message no notificate cancelation to Control Center
@@ -190,7 +189,7 @@ class VotoService {
 				"/messageSMIME/${messageSMIME.id}")
 			SMIMEMessageWrapper smimeMessageResp = firmaService.getMultiSignedMimeMessage(
 				fromUser, toUser, smimeMessage, subject)
-			messageSMIMEResp = new MessageSMIME(type:TypeVS.RECIBO,
+			messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT,
 				smimePadre:messageSMIME, evento:eventoVotacion, valido:true)
 			AnuladorVoto.Estado estadoAnulador
 			if(!voto){//Access request without vote
@@ -208,7 +207,7 @@ class VotoService {
 					smimeMessageResp.getBytes(), eventoVotacion.getControlCenterCert(), locale)
 				if (ResponseVS.SC_OK != encryptResponse.statusCode) return encryptResponse
 				ResponseVS respuestaCentroControl = httpService.sendMessage(
-					encryptResponse.messageBytes, ContextVS.SIGNED_AND_ENCRYPTED_CONTENT_TYPE, urlAnulacionVoto)
+					encryptResponse.messageBytes, ContentTypeVS.SIGNED_AND_ENCRYPTED, urlAnulacionVoto)
 				if (ResponseVS.SC_OK == respuestaCentroControl.statusCode) {	
 					//decrypt response
 					respuestaCentroControl = encryptionService.decryptSMIMEMessage(
@@ -219,8 +218,8 @@ class VotoService {
 						msg = messageSource.getMessage('controCenterCommunicationErrorMsg',
 							[msgArg].toArray(), locale)
 						log.debug ("processCancel --- Problem with response encryption - ${msg}")
-						return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-								message:msg, eventVS:eventoVotacion, type:TypeVS.ANULADOR_VOTO_ERROR)
+						return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+								message:msg, eventVS:eventoVotacion, type:TypeVS.CANCEL_VOTE_ERROR)
 					}
 					smimeMessageResp = respuestaCentroControl.smimeMessage;//already decrypted
 					//check message content
@@ -230,12 +229,12 @@ class VotoService {
 						msg = messageSource.getMessage('controCenterCommunicationErrorMsg',
 							[respuesta.message].toArray(), locale)
 						log.debug ("processCancel - ${msg}")
-						return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-								message:msg, eventVS:eventoVotacion, type:TypeVS.ANULADOR_VOTO_ERROR)
+						return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+								message:msg, eventVS:eventoVotacion, type:TypeVS.CANCEL_VOTE_ERROR)
 					}
 					messageSMIMEResp.contenido = smimeMessageResp.getBytes()
 					estadoAnulador = AnuladorVoto.Estado.NOTIFICADO
-				} else if(ResponseVS.SC_ANULACION_REPETIDA) {
+				} else if(ResponseVS.SC_CANCELLATION_REPEATED) {
 					respuestaCentroControl =  encryptionService.decryptSMIMEMessage(
 						respuestaCentroControl.message.getBytes(), locale)
 					if(ResponseVS.SC_OK != respuestaCentroControl.statusCode) {
@@ -244,25 +243,25 @@ class VotoService {
 						msg = messageSource.getMessage('controCenterCommunicationErrorMsg',
 							[msgArg].toArray(), locale)
 						log.debug ("processCancel *** Problem with response encryption - ${msg}")
-						return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-								message:msg, eventVS:eventoVotacion, type:TypeVS.ANULADOR_VOTO_ERROR)
+						return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+								message:msg, eventVS:eventoVotacion, type:TypeVS.CANCEL_VOTE_ERROR)
 					}
 					smimeMessageResp = respuestaCentroControl.smimeMessage
 					ResponseVS respuestaValidacion = firmaService.
 							validateSignersCertificate(smimeMessageResp, locale)
-					if(!firmaService.isSystemSignedMessage(respuestaValidacion.usersVS)) {
+					if(!firmaService.isSystemSignedMessage((Set<Usuario>)respuestaValidacion.data)) {
 						msgArg = messageSource.getMessage('unknownReceipt', null, locale)
 						msg = messageSource.getMessage('controCenterCommunicationErrorMsg',
 							[msgArg].toArray(), locale)
 						log.error("processCancel - Not local receipt - ${msg}")
 						messageSMIMEResp = new MessageSMIME(valido:false,	
-							type:TypeVS.RECIBO_ERROR, contenido:smimeMessageResp.getBytes(),
+							type:TypeVS.RECEIPT_ERROR, contenido:smimeMessageResp.getBytes(),
 							 evento:eventoVotacion, motivo:msg) 
 						MessageSMIME.withTransaction {
 							messageSMIMEResp.save()
 						}
-						return new ResponseVS(statusCode: ResponseVS.SC_ERROR_PETICION,
-							message:msg, eventVS:eventoVotacion, type:TypeVS.ANULADOR_VOTO_ERROR)
+						return new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+							message:msg, eventVS:eventoVotacion, type:TypeVS.CANCEL_VOTE_ERROR)
 					}
 					cancelDataJSONResp = JSON.parse(smimeMessageResp.getSignedContent())
 					respuesta = checkCancelResponseJSONData(cancelDataJSON, cancelDataJSONResp)
@@ -270,8 +269,8 @@ class VotoService {
 						msg = messageSource.getMessage('controCenterCommunicationErrorMsg',
 							[respuesta.message].toArray(), locale)
 						log.error("processCancel - response data with errors - ${msg}")
-						return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-							message:msg, eventVS:eventoVotacion, type:TypeVS.ANULADOR_VOTO_ERROR)
+						return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+							message:msg, eventVS:eventoVotacion, type:TypeVS.CANCEL_VOTE_ERROR)
 					}		
 					messageSMIMEResp.contenido = smimeMessageResp.getBytes()
 					estadoAnulador = AnuladorVoto.Estado.NOTIFICADO
@@ -303,12 +302,12 @@ class VotoService {
 			certificado.solicitudCSRVoto.estado = SolicitudCSRVoto.Estado.ANULADA
 			certificado.estado = Certificado.Estado.ANULADO
 			certificado.save()
-			return new ResponseVS(statusCode:ResponseVS.SC_OK, anuladorVoto:anuladorVoto, 
-				messageSMIME:messageSMIMEResp, eventVS:eventoVotacion, type:TypeVS.ANULADOR_VOTO)
+			return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.CANCEL_VOTE, 
+				data:messageSMIMEResp, eventVS:eventoVotacion)
 		}catch(Exception ex) {
 			log.error(ex.getMessage(), ex)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
-				message:ex.getMessage(), eventVS:eventoVotacion, type:TypeVS.ANULADOR_VOTO_ERROR)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
+				message:ex.getMessage(), eventVS:eventoVotacion, type:TypeVS.CANCEL_VOTE_ERROR)
 		}
 	}
 	

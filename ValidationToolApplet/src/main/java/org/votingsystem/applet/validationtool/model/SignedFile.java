@@ -283,7 +283,7 @@ public class SignedFile {
         return new ResponseVS(ResponseVS.SC_OK);
     }
     
-    //{"operation":"ENVIO_VOTO_SMIME","opcionSeleccionadaId":2,"UUID":"cfbeec4a-f87c-4e4f-b442-4b127259fbd5",
+    //{"operation":"SEND_SMIME_VOTE","opcionSeleccionadaId":2,"UUID":"cfbeec4a-f87c-4e4f-b442-4b127259fbd5",
     //"opcionSeleccionadaContenido":"depende","eventoURL":"http://192.168.1.20:8080/AccessControl/eventoVotacion/1"}
     public ResponseVS<Long> validateAsVote(Set<X509Certificate> systemTrustedCerts,
         Set<X509Certificate> eventTrustedCerts, 
@@ -333,9 +333,9 @@ public class SignedFile {
         JSONObject contentJSON = getContent(); 
         if(contentJSON.containsKey("operation")) {
             TypeVS operationType = TypeVS.valueOf(contentJSON.getString("operation"));
-            if(TypeVS.ENVIO_VOTO_SMIME != operationType) {
+            if(TypeVS.SEND_SMIME_VOTE != operationType) {
                 return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.
-                        getString("operationErrorMsg", TypeVS.ENVIO_VOTO_SMIME.toString(),
+                        getString("operationErrorMsg", TypeVS.SEND_SMIME_VOTE.toString(),
                         operationType.toString()), name);
             }
         } else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString("jsonErrorMsg") + 
@@ -385,9 +385,9 @@ public class SignedFile {
         JSONObject contentJSON = getContent(); 
         if(contentJSON.containsKey("operation")) {
             TypeVS operationType = TypeVS.valueOf(contentJSON.getString("operation"));
-            if(TypeVS.SOLICITUD_ACCESO != operationType) {
+            if(TypeVS.ACCESS_REQUEST != operationType) {
                 return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.
-                        getString("operationErrorMsg", TypeVS.SOLICITUD_ACCESO.toString(),
+                        getString("operationErrorMsg", TypeVS.ACCESS_REQUEST.toString(),
                         operationType.toString()), name);
             }
         } else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString("jsonErrorMsg") + 
@@ -459,7 +459,7 @@ public class SignedFile {
                     logger.debug("pdf checkSignature - fails - Cert:" + cert.getSubjectDN()
                             + " - NotBefore: " + notBefore + " - NotAfter:" + notAfter);
             }
-            return new ResponseVS (ResponseVS.SC_ERROR_PETICION);	
+            return new ResponseVS (ResponseVS.SC_ERROR_REQUEST);	
         }
         return new ResponseVS (ResponseVS.SC_OK);
     }
@@ -486,10 +486,10 @@ public class SignedFile {
         JSONObject contentJSON = getContent(); 
         if(contentJSON.containsKey("operation")) {
             TypeVS operationType = TypeVS.valueOf(contentJSON.getString("operation"));
-            if(TypeVS.FIRMA_RECLAMACION_SMIME != operationType) {
+            if(TypeVS.SMIME_CLAIM_SIGNATURE != operationType) {
                 return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.
                         getString("operationErrorMsg", 
-                        TypeVS.FIRMA_RECLAMACION_SMIME.toString(),
+                        TypeVS.SMIME_CLAIM_SIGNATURE.toString(),
                         operationType.toString()), name);
             }
         } else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString("jsonErrorMsg") + 

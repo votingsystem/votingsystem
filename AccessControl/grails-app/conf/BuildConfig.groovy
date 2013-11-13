@@ -48,7 +48,8 @@ grails.project.dependency.resolution = {
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes e.g.
 		
-		compile('org.votingsystem:votingsystemlibrary:0.2',
+		compile(
+			'org.votingsystem:votingsystemlibrary:0.2.0',
 			'org.codehaus.groovy.modules.http-builder:http-builder:0.5.1',
 			'org.apache.httpcomponents:httpmime:4.2.4',
 			'org.apache.httpcomponents:httpclient:4.2.4',
@@ -86,7 +87,7 @@ grails.project.dependency.resolution = {
         compile ':cache:1.1.1'
 		compile ':executor:0.3'
 		compile ':rendering:0.4.4'
-		compile ':rest-doc-plugin:0.4'
+		//runtime ':rest-doc-plugin:0.4'
 		
 
         // plugins needed at runtime but not for compilation

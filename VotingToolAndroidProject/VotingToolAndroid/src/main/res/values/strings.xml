@@ -59,16 +59,16 @@
 
     <string name="pdf_signed_by_lbl">Firmado electrónicamente por</string>
     
-    <string name="ASOCIAR_CENTRO_CONTROL_SMIME">Asociando Centro de Control </string>
-    <string name="CAMBIO_ESTADO_CENTRO_CONTROL_SMIME">Cambiando estado de Centro de Control</string>
+    <string name="CONTROL_CENTER_ASSOCIATION_SMIME">Asociando Centro de Control </string>
+    <string name="CONTROL_CENTER_STATE_CHANGE_SMIME">Cambiando estado de Centro de Control</string>
     <string name="CONTROL_CENTER_CONECTION_ERROR_MSG">Problemas conectando con el centro de control. Por favor, inténtelo mas tarde</string>
-    <string name="SOLICITUD_COPIA_SEGURIDAD">Solicitud de copia de seguridad</string>
-    <string name="PUBLICACION_MANIFIESTO_PDF">Publicación de documento para recoger firmas</string>
-    <string name="FIRMA_MANIFIESTO_PDF">Firma de manifiesto</string>
-    <string name="PUBLICACION_RECLAMACION_SMIME">Publicación de documento de reclamación</string>
-    <string name="FIRMA_RECLAMACION_SMIME">Enviando reclamación</string>
-    <string name="PUBLICACION_VOTACION_SMIME">Publicación de documento de votación</string>
-    <string name="CANCELAR_EVENTO">Cancelar eventVSAndroid</string>
+    <string name="BACKUP_REQUEST">Solicitud de copia de seguridad</string>
+    <string name="MANIFEST_PUBLISHING">Publicación de documento para recoger firmas</string>
+    <string name="MANIFEST_SIGN">Firma de manifiesto</string>
+    <string name="CLAIM_PUBLISHING">Publicación de documento de reclamación</string>
+    <string name="SMIME_CLAIM_SIGNATURE">Enviando reclamación</string>
+    <string name="VOTING_PUBLISHING">Publicación de documento de votación</string>
+    <string name="EVENT_CANCELLATION">Cancelar eventVSAndroid</string>
     <string name="errorOperacionNoEncontrada">Operación desconocida</string>
     <string name="errorDatosEvento">Errores en datos del eventVSAndroid</string>
     <string name="errorCodigoEstadoNoEncontrado">Falta código de estado</string>

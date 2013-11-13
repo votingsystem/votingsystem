@@ -21,7 +21,7 @@ ext {
 	certsDataMap = null
 }
 
-task buildAll(dependsOn:['VotingSystemLibrary:jar', 
+task buildAll(dependsOn:['VotingSystemLibrary:publish', 
 	'VotingToolApplet:signJar', 
 	'ValidationToolApplet:signJar',
 	':VotingToolAndroidProject:VotingToolAndroid:release',
@@ -133,6 +133,7 @@ task uploadControlCenter() << {
 
 task generateVotingSystemApps(dependsOn: [':VotingToolApplet:signJar', 
 	':ValidationToolApplet:signJar', 
+	':VotingSystemLibrary:publish',
 	':VotingToolAndroidProject:VotingToolAndroid:release']) {
 }
 

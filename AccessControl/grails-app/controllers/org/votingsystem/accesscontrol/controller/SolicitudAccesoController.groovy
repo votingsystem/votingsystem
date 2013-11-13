@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import org.votingsystem.accesscontrol.model.*;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
-
+import org.votingsystem.model.ContentTypeVS;
 import grails.converters.JSON
 
 import org.bouncycastle.util.encoders.Base64;
@@ -53,7 +53,7 @@ class SolicitudAccesoController {
             render  message(code: 'anulacionVoto.errorSolicitudNoEncontrada')
             return false
         }
-        response.status = ResponseVS.SC_ERROR_PETICION
+        response.status = ResponseVS.SC_ERROR_REQUEST
         render message(code: 'error.PeticionIncorrecta')
         return false
     }
@@ -74,7 +74,7 @@ class SolicitudAccesoController {
 		if(!messageSMIMEReq) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -101,15 +101,15 @@ class SolicitudAccesoController {
 					firmarCertificadoVoto(csrRequest, 
 					evento, representative, request.getLocale())
 			if (ResponseVS.SC_OK == respuestaValidacionCSR.statusCode) {
-				respuesta.type = TypeVS.SOLICITUD_ACCESO;
+				respuesta.type = TypeVS.ACCESS_REQUEST;
 				params.respuesta = respuesta
 				params.responseBytes = respuestaValidacionCSR.messageBytes
-				params.receiverCert = respuestaValidacionCSR.certificado
-				params.receiverPublicKey = respuestaValidacionCSR.data
-				response.setContentType("multipart/encrypted")
+				params.receiverCert = respuestaValidacionCSR.data.issuedCert
+				params.receiverPublicKey = respuestaValidacionCSR.data.requestPublicKey
+				response.setContentType(ContentTypeVS.MULTIPART_ENCRYPTED)
 				return false
 			} else {
-				respuestaValidacionCSR.type = TypeVS.SOLICITUD_ACCESO_ERROR;
+				respuestaValidacionCSR.type = TypeVS.ACCESS_REQUEST_ERROR;
 				params.respuesta = respuestaValidacionCSR
 				if (solicitudAcceso) solicitudAccesoService.
 					rechazarSolicitud(solicitudAcceso, respuesta.message)
@@ -146,7 +146,7 @@ class SolicitudAccesoController {
                 args:[params.hashHex])
             return false
         }
-        response.status = ResponseVS.SC_ERROR_PETICION
+        response.status = ResponseVS.SC_ERROR_REQUEST
         render message(code: 'error.PeticionIncorrectaHTML', args:[
 			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
         return false
@@ -196,7 +196,7 @@ class SolicitudAccesoController {
 			response.outputStream.flush()
 			return false
 		}
-		response.status = ResponseVS.SC_ERROR_PETICION
+		response.status = ResponseVS.SC_ERROR_REQUEST
 		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
 		return false
 	}

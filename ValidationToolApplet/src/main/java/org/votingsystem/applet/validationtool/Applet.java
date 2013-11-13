@@ -8,7 +8,7 @@ import javax.swing.JApplet;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 import org.apache.log4j.Logger;
-import org.votingsystem.applet.model.OperationVSApplet;
+import org.votingsystem.applet.model.AppletOperation;
 import org.votingsystem.model.AppHostVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OperationVS;
@@ -85,8 +85,8 @@ public class Applet extends JApplet implements AppHostVS {
             lanzarTimer();
             if(getParameter("locale") != null) locale = getParameter("locale");
         } 
-        OperationVSApplet operacion = new OperationVSApplet(ResponseVS.SC_PROCESANDO);
-        operacion.setType(OperationVSApplet.Type.MENSAJE_HERRAMIENTA_VALIDACION);
+        AppletOperation operacion = new AppletOperation(ResponseVS.SC_PROCESSING);
+        operacion.setType(AppletOperation.Type.MENSAJE_HERRAMIENTA_VALIDACION);
         operacion.setMessage(ContextVS.INSTANCE.getString("appletHerramientaInicializado"));
         sendMessageToHost(operacion);
     }
@@ -140,7 +140,7 @@ public class Applet extends JApplet implements AppHostVS {
     public void ejecutarOperacion(String operacionJSONStr) {
         logger.debug("ejecutarOperacion: " + operacionJSONStr);
         if(operacionJSONStr == null || "".equals(operacionJSONStr)) return;
-        operacionEnCurso = OperationVSApplet.parse(operacionJSONStr);
+        operacionEnCurso = AppletOperation.parse(operacionJSONStr);
         DialogoPrincipal dialogo = new DialogoPrincipal(new JFrame(), false);
         dialogo.setVisible(true);
     }
@@ -150,7 +150,7 @@ public class Applet extends JApplet implements AppHostVS {
             logger.debug(" - sendMessageToHost - Operacion null");
             return;
         }
-        OperationVSApplet messageToHost = (OperationVSApplet)operation;
+        AppletOperation messageToHost = (AppletOperation)operation;
         logger.debug(" - sendMessageToHost - status: " + 
                 messageToHost.getStatusCode() + " - operación: " + 
                 messageToHost.toJSON().toString());
@@ -164,7 +164,7 @@ public class Applet extends JApplet implements AppHostVS {
             ex.printStackTrace();
         }
         if(ModoEjecucion.APLICACION == modoEjecucion && 
-                messageToHost.getStatusCode() == ResponseVS.SC_CANCELADO){
+                messageToHost.getStatusCode() == ResponseVS.SC_CANCELLED){
             logger.debug(" ------  System.exit(0) ------ ");
             System.exit(0);
         }

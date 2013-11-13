@@ -189,8 +189,8 @@ public class ActorConIP implements Serializable {
         JSONObject actorConIPJSON = (JSONObject) JSONSerializer.toJSON(actorConIPStr);
         ActorConIP actorConIP = null;
         if (actorConIPJSON.containsKey("serverType")){
-            Tipo serverType = Tipo.valueOf(actorConIPJSON.getString("serverType"));
-            if(Tipo.CONTROL_ACCESO == serverType) {
+            Tipo serverType = TypeVS.valueOf(actorConIPJSON.getString("serverType"));
+            if(TypeVS.ACCESS_CONTROL == serverType) {
             	actorConIP = new ControlAcceso();
             } else actorConIP = new ActorConIP();
             actorConIP.setTipoServidor(serverType);

@@ -170,7 +170,7 @@ public class EventQueryResponse implements EventQueryResponseVS {
                 if (arrayEventos != null) {
                     for (int i=0; i<arrayEventos.length(); i++) {
                         EventVSAndroid eventVSAndroid = EventVSAndroid.parse(arrayEventos.getJSONObject(i));
-                        eventVSAndroid.setTypeVS(TypeVS.EVENTO_FIRMA);
+                        eventVSAndroid.setTypeVS(TypeVS.SIGN_EVENT);
                         eventVSes.add(eventVSAndroid);
                     }
                 }	
@@ -180,7 +180,7 @@ public class EventQueryResponse implements EventQueryResponseVS {
                 if (arrayEventos != null) {
                     for (int i=0; i<arrayEventos.length(); i++) {
                         EventVSAndroid eventVSAndroid = EventVSAndroid.parse(arrayEventos.getJSONObject(i));
-                        eventVSAndroid.setTypeVS(TypeVS.EVENTO_RECLAMACION);
+                        eventVSAndroid.setTypeVS(TypeVS.CLAIM_EVENT);
                         eventVSes.add(eventVSAndroid);
                     }
                 }	
@@ -190,7 +190,7 @@ public class EventQueryResponse implements EventQueryResponseVS {
                 if (arrayEventos != null) {
                     for (int i=0; i<arrayEventos.length(); i++) {
                         EventVSAndroid eventVSAndroid = EventVSAndroid.parse(arrayEventos.getJSONObject(i));
-                        eventVSAndroid.setTypeVS(TypeVS.EVENTO_VOTACION);
+                        eventVSAndroid.setTypeVS(TypeVS.VOTING_EVENT);
                         eventVSes.add(eventVSAndroid);
                     }
                 }	

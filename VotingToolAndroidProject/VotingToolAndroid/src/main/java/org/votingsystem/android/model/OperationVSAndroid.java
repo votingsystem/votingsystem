@@ -23,19 +23,19 @@ public class OperationVSAndroid implements OperationVS {
 
     public static final String OPERATION_KEY   = "operationKey";
     
-    public static enum Tipo {ASOCIAR_CENTRO_CONTROL,
-        CAMBIO_ESTADO_CENTRO_CONTROL_SMIME, 
-        SOLICITUD_COPIA_SEGURIDAD, 
-        PUBLICACION_MANIFIESTO_PDF, 
-        FIRMA_MANIFIESTO_PDF, 
+    public static enum Tipo {CONTROL_CENTER_ASSOCIATION,
+        CONTROL_CENTER_STATE_CHANGE_SMIME, 
+        BACKUP_REQUEST, 
+        MANIFEST_PUBLISHING, 
+        MANIFEST_SIGN, 
         CREAR_RECLAMACION,
         CREAR_VOTACION,
         CREAR_MANIFIESTO,
-        PUBLICACION_RECLAMACION_SMIME,
-        FIRMA_RECLAMACION_SMIME, 
-        PUBLICACION_VOTACION_SMIME, 
-        CANCELAR_EVENTO, FIRMAR_MANIFIESTO,
-        ENVIO_VOTO_SMIME, SOLICITUD_ACCESO;
+        CLAIM_PUBLISHING,
+        SMIME_CLAIM_SIGNATURE,
+        VOTING_PUBLISHING, 
+        EVENT_CANCELLATION, FIRMAR_MANIFIESTO,
+        SEND_SMIME_VOTE, ACCESS_REQUEST;
     
         Tipo(String caption) {
             this.caption = caption;
@@ -53,12 +53,12 @@ public class OperationVSAndroid implements OperationVS {
     
     public static final int SC_PING = 0;
     public static final int SC_OK = 200;
-    public static final int SC_ERROR_PETICION = 400;
-    public static final int SC_ERROR_VOTO_REPETIDO = 470;
+    public static final int SC_ERROR_REQUEST = 400;
+    public static final int SC_ERROR_VOTE_REPEATED = 470;
     public static final int SC_ERROR = 500;
     public static final int SC_ERROR_ENVIO_VOTO = 570;
-    public static final int SC_PROCESANDO = 700;
-    public static final int SC_CANCELADO = 0;
+    public static final int SC_PROCESSING = 700;
+    public static final int SC_CANCELLED = 0;
     
     private Tipo tipo;
     private Integer codigoEstado;
@@ -383,13 +383,13 @@ public class OperationVSAndroid implements OperationVS {
         if(tipo == null) return context.getString(R.string.errorOperacionNoEncontrada);
         if(codigoEstado == null) return context.getString(R.string.errorCodigoEstadoNoEncontrado);
         switch (tipo) {
-            case SOLICITUD_COPIA_SEGURIDAD:
+            case BACKUP_REQUEST:
                 if(eventVSAndroid == null || eventVSAndroid.getEventoId() == null) return
                         context.getString(R.string.errorDatosEvento);
                 if(emailSolicitante == null) return
                         context.getString(R.string.errorEmail);
                 break;
-            case CANCELAR_EVENTO:
+            case EVENT_CANCELLATION:
                 if(contenidoFirma == null) return
                         context.getString(R.string.errorDatosCancelacionEvento);
                 return null;

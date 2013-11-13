@@ -52,7 +52,7 @@ class BuscadorController {
 		   VotingSystemApplicationContex.instance.environment)) {
 		   def msg = message(code: "serviceDevelopmentModeMsg")
 		   log.error msg
-		   response.status = ResponseVS.SC_ERROR_PETICION
+		   response.status = ResponseVS.SC_ERROR_REQUEST
 		   render msg
 		   return false
 	   }
@@ -77,7 +77,7 @@ class BuscadorController {
 			if(!messageSMIME) {
 				String msg = message(code:'evento.peticionSinArchivo')
 				log.error msg
-				response.status = ResponseVS.SC_ERROR_PETICION
+				response.status = ResponseVS.SC_ERROR_REQUEST
 				render msg
 				return false
 			}
@@ -87,7 +87,7 @@ class BuscadorController {
 			if(TypeVS.SOLICITUD_INDEXACION != operacion) {
 				msg = message(code:'operationErrorMsg',
 					args:[operacion.toString()])
-				response.status = ResponseVS.SC_ERROR_PETICION
+				response.status = ResponseVS.SC_ERROR_REQUEST
 				log.debug("ERROR - ${msg}")
 				render msg
 				return false
@@ -98,23 +98,23 @@ class BuscadorController {
 				FullTextSession fullTextSession = Search.getFullTextSession(sessionFactory.currentSession);
 				fullTextSession.createIndexer().startAndWait()
 				params.respuesta = new ResponseVS(type:TypeVS.SOLICITUD_INDEXACION,
-					statusCode:ResponseVS.SC_ERROR_PETICION)
+					statusCode:ResponseVS.SC_ERROR_REQUEST)
 				response.status = ResponseVS.SC_OK
 				render "OK"
 			} else {
 				log.debug "Usuario no esta en la lista de administradores, petición denegada"
 				msg = message(code: 'adminIdentificationErrorMsg', [usuario.nif])
-				params.respuesta = new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+				params.respuesta = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 					type:TypeVS.SOLICITUD_INDEXACION_ERROR, message:msg)
-				response.status = ResponseVS.SC_ERROR_PETICION
+				response.status = ResponseVS.SC_ERROR_REQUEST
 				render msg
 			}
 			return false
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
-			params.respuesta = new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+			params.respuesta = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 				type:TypeVS.SOLICITUD_INDEXACION_ERROR, message:ex.getMessage())
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render ex.getMessage()
 			return false
 		}
@@ -156,7 +156,7 @@ class BuscadorController {
 		String consulta = "${request.getInputStream()}"
 		log.debug("consulta: ${consulta} - offset:${params.offset} - max: ${params.max}")
 		if (!consulta) {
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render message(code: 'error.PeticionIncorrectaHTML', args:[
 				"${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
 			return false
@@ -168,7 +168,7 @@ class BuscadorController {
 		if(targetSubsystem == Subsystem.MANIFESTS) entityClass = EventoFirma.class
 		if(targetSubsystem == Subsystem.CLAIMS) entityClass = EventoReclamacion.class
 		if(!entityClass) {
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render message(code: 'error.PeticionIncorrectaHTML', args:[
 				"${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
 			return false

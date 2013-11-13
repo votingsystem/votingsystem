@@ -186,7 +186,7 @@ public class MetaInf {
         
     public String getOptionsHTML() {
         StringBuilder result = new StringBuilder("<HTML>");
-        if(TypeVS.EVENTO_VOTACION == type) {
+        if(TypeVS.VOTING_EVENT == type) {
             result.append("<ul>");
             for(OptionVS option : optionList) {
                 result.append("<li><b>Opcion:</b> " + option.getContent() + "<br/>" +
@@ -206,18 +206,18 @@ public class MetaInf {
     public String getEventURL() {
         if(serverURL == null) return null;
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
-        if(TypeVS.EVENTO_VOTACION == type) {
+        if(TypeVS.VOTING_EVENT == type) {
             return serverURL + "eventoVotacion/" + id;
-        } else if (TypeVS.EVENTO_RECLAMACION == type) {
+        } else if (TypeVS.CLAIM_EVENT == type) {
             return serverURL + "eventoReclamacion/" + id;
-        } else if (TypeVS.EVENTO_FIRMA == type) {
+        } else if (TypeVS.SIGN_EVENT == type) {
             return serverURL + "eventoFirma/" + id;
         } else return null;
     }
         
     public String getRepresentativesHTML() {
         StringBuilder result = new StringBuilder("<HTML>");
-        if(TypeVS.EVENTO_VOTACION == type) {
+        if(TypeVS.VOTING_EVENT == type) {
             result.append("<ul>");
             Map<String, RepresentativeData> representativesMap = 
                     representativesData.getRepresentativeMap();

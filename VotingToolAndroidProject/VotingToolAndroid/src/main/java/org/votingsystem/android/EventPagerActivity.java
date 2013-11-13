@@ -56,7 +56,7 @@ public class EventPagerActivity  extends ActionBarActivity {
     private void setActionBarTitle(EventVSAndroid event) {
         String subtTitle = null;
         switch(event.getTypeVS()) {
-            case EVENTO_FIRMA:
+            case SIGN_EVENT:
                 getSupportActionBar().setLogo(R.drawable.manifest_32);
                 switch(event.getEstadoEnumValue()) {
                     case ACTIVO:
@@ -90,7 +90,7 @@ public class EventPagerActivity  extends ActionBarActivity {
                         getSupportActionBar().setTitle(getString(R.string.manifest_closed_lbl));
                 }
                 break;
-            case EVENTO_RECLAMACION:
+            case CLAIM_EVENT:
                 getSupportActionBar().setLogo(R.drawable.filenew_32);
                 switch(event.getEstadoEnumValue()) {
                     case ACTIVO:
@@ -123,7 +123,7 @@ public class EventPagerActivity  extends ActionBarActivity {
                         getSupportActionBar().setTitle(getString(R.string.claim_closed_lbl));
                 }
                 break;
-            case EVENTO_VOTACION:
+            case VOTING_EVENT:
                 getSupportActionBar().setLogo(R.drawable.poll_32);
                 switch(event.getEstadoEnumValue()) {
                     case ACTIVO:
@@ -171,7 +171,7 @@ public class EventPagerActivity  extends ActionBarActivity {
         @Override public Fragment getItem(int i) {
             Log.d(TAG + ".EventsPagerAdapter.getItem(...) ", " - item: " + i);
             Fragment fragment = null;
-            if (contextVSAndroid.getEvent().getTypeVS().equals(TypeVS.EVENTO_VOTACION)) {
+            if (contextVSAndroid.getEvent().getTypeVS().equals(TypeVS.VOTING_EVENT)) {
                 fragment = new VotingEventFragment();
             } else {
                 fragment = new EventFragment();

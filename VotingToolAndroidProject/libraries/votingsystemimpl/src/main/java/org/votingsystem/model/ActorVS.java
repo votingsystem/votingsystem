@@ -12,7 +12,7 @@ public class ActorVS implements java.io.Serializable {
 
     private static final long serialVersionUID = 1L;
         
-    public enum Tipo {CENTRO_CONTROL, CONTROL_ACCESO}
+    public enum Tipo {CONTROL_CENTER, ACCESS_CONTROL}
 
     public enum Estado {
         SUSPENDIDO ("Suspendido"), ACTIVO("Activo"), INACTIVO("Inactivo");

@@ -17,7 +17,7 @@ public class ActorVS {
     
     private static Logger logger = Logger.getLogger(ActorVS.class);
  
-    public enum Type {CENTRO_CONTROL, CONTROL_ACCESO;}
+    public enum Type {CONTROL_CENTER, ACCESS_CONTROL;}
 
     public enum EnvironmentMode {DEVELOPMENT, TEST, PRODUCTION; }
 	
@@ -27,7 +27,7 @@ public class ActorVS {
     private String serverURL;
     private String nombre;
     private Estado estado; 
-    private Type tipo;
+    private Type type;
     private EnvironmentMode environmentMode;
     private String certificadoURL;
     private String informacionVotosURL;
@@ -139,11 +139,11 @@ public class ActorVS {
  }
 
  public Type getType() {
-         return tipo;
+         return type;
  }
 
- public void setType(Type tipo) {
-         this.tipo = tipo;
+ public void setType(Type type) {
+         this.type = type;
  }
 
  public EnvironmentMode getEnvironmentMode() {
@@ -193,7 +193,7 @@ public class ActorVS {
  public static Map getAssociationDocumentMap(String serverURL) {
      logger.debug("getAssociationDocumentMap");
      Map map = new HashMap();
-     map.put("operation", "ASOCIAR_CENTRO_CONTROL");
+     map.put("operation", "CONTROL_CENTER_ASSOCIATION");
      map.put("serverURL", serverURL.trim());
      map.put("UUID", UUID.randomUUID().toString());     
      return map;
@@ -217,8 +217,8 @@ public class ActorVS {
          ActorVS.Type serverType = ActorVS.Type.valueOf((String) actorVSMap.get("serverType"));
          actorVS.setType(serverType);
           switch (serverType) {
-              case CENTRO_CONTROL: break;
-              case CONTROL_ACCESO:
+              case CONTROL_CENTER: break;
+              case ACCESS_CONTROL:
                   if (actorVSMap.get("centrosDeControl") != null) {
                       List<ActorVS> centrosDeControl = new ArrayList<ActorVS>();
                       for (Map controlCenterMap : (List<Map>) actorVSMap.get("centrosDeControl")) {

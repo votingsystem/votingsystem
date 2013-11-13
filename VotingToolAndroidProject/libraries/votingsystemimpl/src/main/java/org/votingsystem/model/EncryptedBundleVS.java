@@ -16,7 +16,7 @@ public class EncryptedBundleVS {
 	private byte[] decryptedMessageBytes;
 	private String message;
 	private Type type;
-	private int statusCode = ResponseVS.SC_PROCESANDO;
+	private int statusCode = ResponseVS.SC_PROCESSING;
 
 	public EncryptedBundleVS(byte[] encryptedMessageBytes, Type type) {
 		this.encryptedMessageBytes = encryptedMessageBytes;

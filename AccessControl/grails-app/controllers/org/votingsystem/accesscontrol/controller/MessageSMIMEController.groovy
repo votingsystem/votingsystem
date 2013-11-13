@@ -53,7 +53,7 @@ class MessageSMIMEController {
 		def messageSMIMEPadre = MessageSMIME.get(params.long('requestMessageId'))
 		if (messageSMIMEPadre) {
 			def messageSMIME = MessageSMIME.findWhere(smimePadre:messageSMIMEPadre,
-				type: TypeVS.RECIBO)
+				type: TypeVS.RECEIPT)
 			if (messageSMIME) {
 				response.status = ResponseVS.SC_OK
 				response.contentLength = messageSMIME.contenido.length

@@ -84,7 +84,7 @@ public class MainActivity extends FragmentActivity {
             Properties props = new Properties();
             try {
                 props.load(getAssets().open("VotingSystem.properties"));
-                accessControlURL = props.getProperty("CONTROL_ACCESO_URL");
+                accessControlURL = props.getProperty("ACCESS_CONTROL_URL");
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -110,7 +110,7 @@ public class MainActivity extends FragmentActivity {
                     try {
                         Properties props = new Properties();
                         props.load(getAssets().open("VotingSystem.properties"));
-                        accessControlURL = props.getProperty("CONTROL_ACCESO_URL");
+                        accessControlURL = props.getProperty("ACCESS_CONTROL_URL");
                     } catch (IOException ex) {
                         ex.printStackTrace();
                     }
@@ -192,11 +192,11 @@ public class MainActivity extends FragmentActivity {
         Intent intent = null;
         if(ContextVSAndroid.Estado.CON_CERTIFICADO == estado) {
     		switch(operationVSAndroid.getTipo()) {
-		        case ENVIO_VOTO_SMIME:
+		        case SEND_SMIME_VOTE:
                     intent = new Intent(MainActivity.this, VotingEventFragment.class);
                     break;
-		        case FIRMA_MANIFIESTO_PDF:
-		        case FIRMA_RECLAMACION_SMIME:
+		        case MANIFEST_SIGN:
+		        case SMIME_CLAIM_SIGNATURE:
                     intent = new Intent(MainActivity.this, EventFragment.class);
 		        	break;
 		        default: 

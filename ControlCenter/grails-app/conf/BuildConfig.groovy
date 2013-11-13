@@ -21,22 +21,23 @@ grails.project.fork = [
     console: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256]
 ]
 
-grails.project.dependency.resolver = "ivy" // or maven - maven ->  problems with excludes
+grails.project.dependency.resolver = "maven" //ivy or  - maven ->  problems with excludes
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
 		excludes 'bcprov-jdk15', 'bcpg-jdk15', 'bcprov-jdk14', 'bcmail-jdk14'
     }
-    log "error" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
+    log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     checksums true // Whether to verify checksums on resolve
     legacyResolve false // whether to do a secondary resolve on plugin installation, not advised and here for backwards compatibility
 
     repositories {
         inherits true // Whether to inherit repository definitions from plugins
-
+		
+		mavenLocal()
         grailsPlugins()
         grailsHome()
-        mavenLocal()
+        
         grailsCentral()
         mavenCentral()
         // uncomment these (or add new ones) to enable remote dependency resolution from public Maven repositories
@@ -48,7 +49,7 @@ grails.project.dependency.resolution = {
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes e.g.
 		
-		compile('org.votingsystem:votingsystemlibrary:0.2',
+		compile('org.votingsystem:votingsystemlibrary:0.2.0',
 			'org.codehaus.groovy.modules.http-builder:http-builder:0.5.1',
 			'org.apache.httpcomponents:httpmime:4.2.4',
 			'org.apache.httpcomponents:httpclient:4.2.4',
@@ -86,7 +87,7 @@ grails.project.dependency.resolution = {
         compile ':cache:1.1.1'
 		compile ':executor:0.3'
 		compile ':rendering:0.4.4'
-		runtime 'org.votingsystem:rest-doc-plugin:0.2'
+		//runtime 'org.votingsystem:rest-doc-plugin:0.2'
 
         // plugins needed at runtime but not for compilation
         runtime ":hibernate4:4.1.11.2" // or ":hibernate:3.6.10.3"

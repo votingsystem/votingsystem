@@ -1,0 +1,10 @@
+/build
+/logs
+/target
+/target-eclipse
+/VotingSystem
+.VotingSystem
+.classpath
+.project
+.idea
+TestsWebApp.iml

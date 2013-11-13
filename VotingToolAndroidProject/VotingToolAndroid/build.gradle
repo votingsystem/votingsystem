@@ -97,7 +97,7 @@ task setAndroidEnv() << {
 	ant.copy(file:"$rootProject.projectDir/templates/VotingSystem.properties",
 		toFile:"src/main/assets/VotingSystem.properties")
 	ant.replace(file:"src/main/assets/VotingSystem.properties",
-		token:"[CONTROL_ACCESO_URL]",
+		token:"[ACCESS_CONTROL_URL]",
 		value:accessControlURL)
 	ant.replace(file:"src/main/assets/VotingSystem.properties",
 		token:"[DEVELOPMENT_IP]",

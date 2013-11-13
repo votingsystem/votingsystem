@@ -395,9 +395,9 @@ public class VisualizadorDeEventoFirmadoDialog extends JDialog {
             tabbedPane.addTab("<html><b>" + informacionEventoPanel.
                     getValorTipoEvento() + "</b>&nbsp;&nbsp;&nbsp;&nbsp;</html>", 
                     informacionEventoPanel);
-            if(TypeVS.EVENTO_VOTACION == metaInf.getType() ||
-                    TypeVS.EVENTO_FIRMA == metaInf.getType() ||
-                    TypeVS.EVENTO_RECLAMACION == metaInf.getType()) {
+            if(TypeVS.VOTING_EVENT == metaInf.getType() ||
+                    TypeVS.SIGN_EVENT == metaInf.getType() ||
+                    TypeVS.CLAIM_EVENT == metaInf.getType()) {
                 validateBackupButton.setVisible(true);
             }
         } catch(Exception ex) {

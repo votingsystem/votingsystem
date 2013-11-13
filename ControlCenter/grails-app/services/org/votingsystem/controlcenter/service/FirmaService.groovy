@@ -88,7 +88,7 @@ class FirmaService {
 		log.debug(" - deleteTestCerts - ")
 		def certificadosTest = null
 		Certificado.withTransaction {
-			certificadosTest = Certificado.findAllWhere(tipo:Certificado.Tipo.AUTORIDAD_CERTIFICADORA_TEST);
+			certificadosTest = Certificado.findAllWhere(type:Certificado.Type.AUTORIDAD_CERTIFICADORA_TEST);
 			certificadosTest.each {
 				it.delete()
 			}
@@ -105,10 +105,10 @@ class FirmaService {
 		log.debug("addCertificateAuthority");
 		if(grails.util.Environment.PRODUCTION  ==  grails.util.Environment.current) {
 			log.debug(" ### ADDING CERTS NOT ALLOWED IN PRODUCTION ENVIRONMENTS ###")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 				message: messageSource.getMessage('serviceDevelopmentModeMsg', null, locale))
 		}
-		if(!caPEM) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+		if(!caPEM) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 			message: messageSource.getMessage('error.nullCertificate', null, locale))
 		try {
 			Collection<X509Certificate> certX509CertCollection = CertUtil.fromPEMToX509CertCollection(caPEM)
@@ -121,7 +121,7 @@ class FirmaService {
 					if(!certificado) {
 						boolean esRaiz = CertUtil.isSelfSigned(cert)
 						certificado = new Certificado(esRaiz:esRaiz,
-							tipo:Certificado.Tipo.AUTORIDAD_CERTIFICADORA_TEST,
+							type:Certificado.Type.AUTORIDAD_CERTIFICADORA_TEST,
 							estado:Certificado.Estado.OK,
 							contenido:cert.getEncoded(),
 							numeroSerie:cert.getSerialNumber()?.longValue(),
@@ -138,7 +138,7 @@ class FirmaService {
 				message:messageSource.getMessage('cert.newCACertMsg', null, locale))
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:ex.getMessage())
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage())
 		}
 	}
 	
@@ -162,9 +162,9 @@ class FirmaService {
 				def trustedCertsDB = criteria.list {
 					eq("estado", Certificado.Estado.OK)
 					or {
-						eq("tipo",	Certificado.Tipo.AUTORIDAD_CERTIFICADORA)
+						eq("type",	Certificado.Type.AUTORIDAD_CERTIFICADORA)
 						if(grails.util.Environment.PRODUCTION  !=  grails.util.Environment.current) {
-							eq("tipo", Certificado.Tipo.AUTORIDAD_CERTIFICADORA_TEST)
+							eq("type", Certificado.Type.AUTORIDAD_CERTIFICADORA_TEST)
 						}
 					}
 				}
@@ -185,7 +185,7 @@ class FirmaService {
 				if(!certificado) {
 					boolean esRaiz = CertUtil.isSelfSigned(certificate)
 					certificado = new Certificado(esRaiz:esRaiz, 
-						tipo:Certificado.Tipo.AUTORIDAD_CERTIFICADORA,
+						type:Certificado.Type.AUTORIDAD_CERTIFICADORA,
 						estado:Certificado.Estado.OK,
 						contenido:certificate.getEncoded(),
 						numeroSerie:certificate.getSerialNumber().longValue(),
@@ -202,7 +202,7 @@ class FirmaService {
 			return new ResponseVS(statusCode:ResponseVS.SC_OK, message:"Importadas Autoridades Certificadoras")
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:ex.getMessage())
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage())
 		}
 	}
 	
@@ -224,7 +224,7 @@ class FirmaService {
 			String msg = messageSource.getMessage('smimeDigestRepeatedErrorMsg',
 				[messageWrapper.getContentDigestStr()].toArray(), locale)
 			log.error("validateSMIMEVote - ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
 		}
 		return validateVoteCerts(messageWrapper, locale)
 	}
@@ -242,7 +242,7 @@ class FirmaService {
 			String msg = messageSource.getMessage('evento.eventoNotFound',
 				[url].toArray(), locale)
 			log.error("validateSMIMEVoteCancelation - ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
 		}
 		MessageSMIME messageSMIME = MessageSMIME.findWhere(
 			base64ContentDigest:messageWrapper.getContentDigestStr())
@@ -250,7 +250,7 @@ class FirmaService {
 			String msg = messageSource.getMessage('smimeDigestRepeatedErrorMsg',
 				[messageWrapper.getContentDigestStr()].toArray(), locale)
 			log.error("validateSMIMEVoteCancelation - ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
 		}
 		return validateVoteValidationCerts(messageWrapper,	evento, locale)
 	}
@@ -264,8 +264,8 @@ class FirmaService {
 		if(!infoVoto || !infoVoto.getCertificadoVoto()) {
 			msg = messageSource.getMessage('error.documentWithoutSigners', null, locale)
 			log.error ("validateVoteCerts - ERROR SIGNERS - ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-				tipo:Tipo.VOTO_CON_ERRORES, message:msg)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+				type:TypeVS.VOTE_ERROR, message:msg)
 		} 
 		if (infoVoto.getRepresentativeURL()) {
 			votantes = new HashSet<Usuario>();
@@ -282,8 +282,8 @@ class FirmaService {
 		if (!controlAcceso) {
 			msg = messageSource.getMessage('validacionVoto.errorEmisorDesconocido', null, locale)
 			log.error ("validateVoteCerts - ERROR SERVER URL - ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg,
-				tipo:Tipo.VOTO_CON_ERRORES)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
+				type:TypeVS.VOTE_ERROR)
 		} 
 		EventoVotacion.withTransaction {
 			evento = EventoVotacion.findWhere(controlAcceso:controlAcceso,
@@ -293,14 +293,14 @@ class FirmaService {
 			msg = messageSource.getMessage('validacionVoto.convocatoriaDesconocida', null, locale)
 			log.error ("validateVoteCerts - ERROR EVENT NOT FOUND - Event '${infoVoto?.getEventoId()}' " + 
 				"voteAccessControlURL: '${controlAccesoURL}'")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg,
-				tipo:Tipo.VOTO_CON_ERRORES)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
+				type:TypeVS.VOTE_ERROR)
 		}
 		if(evento.estado != EventoVotacion.Estado.ACTIVO) {
 			msg = messageSource.getMessage('validacionVoto.eventClosed', [evento.asunto].toArray(), locale)
 			log.error ("validateVoteCerts - ERROR EVENT '${evento.id}' STATE -> ${evento.estado}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg,
-				tipo:Tipo.VOTO_CON_ERRORES)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
+					message:msg, type:TypeVS.VOTE_ERROR)
 		}
 		Certificado certificado = Certificado.findWhere(
 			hashCertificadoVotoBase64:infoVoto.hashCertificadoVotoBase64)
@@ -309,7 +309,7 @@ class FirmaService {
 			Voto voto = Voto.findWhere(certificado:certificado)
 			msg = messageSource.getMessage('voteRepeatedErrorMsg', [voto.id].toArray(), locale)
 			log.error("validateVoteCerts - ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_VOTO_REPETIDO,
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_VOTE_REPEATED,
 				evento:evento, message:msg)
 		}
 		Set<X509Certificate> eventTrustedCerts = eventTrustedCertsHashMap.get(evento?.id)
@@ -318,12 +318,12 @@ class FirmaService {
 			Certificado.withTransaction {
 				eventCACert = Certificado.findWhere(
 					eventoVotacion:evento, estado:Certificado.Estado.OK,
-					tipo:Certificado.Tipo.RAIZ_VOTOS)
+					type:Certificado.TypeVS.RAIZ_VOTOS)
 			}
 			if(!eventCACert) {
 				msg = messageSource.getMessage('certificado.caEventoNotFound', null, locale)
 				log.error ("validateVoteCerts - Event '${evento.id}' without CA cert")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 					message:msg)
 			} 
 			ByteArrayInputStream bais =	new ByteArrayInputStream(eventCACert.contenido)
@@ -335,7 +335,7 @@ class FirmaService {
 		respuesta = timeStampService.validateToken(
 				infoVoto.getVoteTimeStampToken(), evento, locale)
 		if(ResponseVS.SC_OK != respuesta.statusCode) {
-			respuesta.tipo = TypeVS.VOTO_CON_ERRORES
+			respuesta.type = TypeVS.VOTE_ERROR
 			respuesta.eventVS = evento
 			return respuesta
 		}
@@ -353,7 +353,7 @@ class FirmaService {
 			msg = messageSource.getMessage('certValidationErrorMsg',
 					[checkedCert.getSubjectDN()?.toString()].toArray(), locale)
 			log.error ("validateVoteCerts - msg:{msg} - Event '${evento.id}'")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
 		}
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, evento:evento, 
 			smimeMessage:smimeMessageReq, usuarios:votantes)
@@ -366,7 +366,7 @@ class FirmaService {
 		String msg
 		if(firmantes.isEmpty()) {
 			return new ResponseVS(
-				statusCode:ResponseVS.SC_ERROR_PETICION, message:messageSource.
+				statusCode:ResponseVS.SC_ERROR_REQUEST, message:messageSource.
 					getMessage('error.documentWithoutSigners', null, locale))
 		}
 		Set<X509Certificate> eventTrustedCerts = eventValidationTrustedCertsHashMap.get(evento?.id)
@@ -397,7 +397,7 @@ class FirmaService {
 				msg = messageSource.getMessage('certValidationErrorMsg',
 						[usuario.getCertificate().getSubjectDN()?.toString()].toArray(), locale)
 				log.error ("validateAccessControlVoteCerts - msg:{msg} - Event '${evento.id}'")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
 			}
 		}
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, evento:evento,
@@ -412,7 +412,7 @@ class FirmaService {
 			String msg = messageSource.getMessage('smimeDigestRepeatedErrorMsg',
 				[smimeMessageReq.getContentDigestStr()].toArray(), locale)
 			log.error("validateSMIME - ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
 		}
 		return validateSignersCerts(smimeMessageReq, locale)
 	}
@@ -422,7 +422,7 @@ class FirmaService {
 			SMIMEMessageWrapper smimeMessageReq, Locale locale) {
 		Set<Usuario> firmantes = smimeMessageReq.getFirmantes();
 		if(firmantes.isEmpty()) return new ResponseVS(
-			statusCode:ResponseVS.SC_ERROR_PETICION, message:
+			statusCode:ResponseVS.SC_ERROR_REQUEST, message:
 			messageSource.getMessage('error.documentWithoutSigners', null, locale))
 		log.debug("validateSignersCerts - number of signers: ${firmantes.size()}")
 		Set<Usuario> firmantesDB = new HashSet<Usuario>()
@@ -447,12 +447,12 @@ class FirmaService {
 			} catch (CertPathValidatorException ex) {
 				log.error(ex.getMessage(), ex)
 				log.error(" --- Error with certificate: ${usuario.getCertificate().getSubjectDN()}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 					message:messageSource.getMessage('error.caUnknown', null, locale))
 			} catch (Exception ex) {
 				log.error(ex.getMessage(), ex)
 				return new ResponseVS(
-					statusCode:ResponseVS.SC_ERROR_PETICION, message:ex.getMessage())
+					statusCode:ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage())
 			}
 		}
 		return new ResponseVS(statusCode:ResponseVS.SC_OK,

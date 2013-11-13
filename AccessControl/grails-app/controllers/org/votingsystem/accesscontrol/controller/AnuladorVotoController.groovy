@@ -4,7 +4,7 @@ import grails.converters.JSON
 
 import javax.mail.internet.MimeMessage
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
-
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.accesscontrol.model.*;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
@@ -48,7 +48,7 @@ class AnuladorVotoController {
 				render anuladorvotoMap as JSON
 			}
 		} else {
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render message(code: 'error.PeticionIncorrectaHTML', args:[
 				"${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
 		}
@@ -71,42 +71,18 @@ class AnuladorVotoController {
 		if(!messageSMIMEReq) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
 		params.receiverCert = messageSMIMEReq.getUsuario().getCertificate()
 		ResponseVS respuesta = votoService.processCancel(messageSMIMEReq, request.getLocale())
 		if (ResponseVS.SC_OK == respuesta.statusCode) {
-			response.setContentType(ContextVS.SIGNED_AND_ENCRYPTED_CONTENT_TYPE)		
+			response.setContentType(ContentTypeVS.SIGNED_AND_ENCRYPTED)		
         }
 		params.respuesta = respuesta
     }
-	
-	
-	/*
-	def postAsync () {
-		Respuesta respuesta = votoService.validarAnulacion(params.messageSMIMEReq)
-		if (200 == respuesta.statusCode) {
-			def ctx = startAsync()
-			ctx.setTimeout(10000);
-			AnuladorVoto anuladorVoto = respuesta.anuladorVoto
-			def future = callAsync {
-				 return votoService.sendVoteCancelationToControlCenter(anuladorVoto)
-			}
-			respuesta = future.get()
-			if (200  == respuesta?.statusCode) {
-				ctx.response.status = 200
-				ctx.response.setContentType("text/plain")
-				ctx.response.contentLength = anuladorVoto.messageSMIME.contenido.length
-				ctx.response.outputStream <<  anuladorVoto.messageSMIME.contenido
-				ctx.response.outputStream.flush()
-			}
-			ctx.complete();
-		}
-		params.respuesta = respuesta
-	}*/
-	
+
 	/**
 	 * Servicio que devuelve la información de la anulación de un voto a partir del
 	 * identifiacador del voto en la base de datos

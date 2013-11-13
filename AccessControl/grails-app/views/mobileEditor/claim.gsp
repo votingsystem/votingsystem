@@ -131,8 +131,8 @@
 					event.copiaSeguridadDisponible = $("#allowBackupRequestCheckbox").is(':checked')
 
 			    	var webAppMessage = new WebAppMessage(
-					    	StatusCode.SC_PROCESANDO, 
-					    	Operation.PUBLICACION_RECLAMACION_SMIME)
+					    	StatusCode.SC_PROCESSING, 
+					    	Operation.CLAIM_PUBLISHING)
 			    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
 		    		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
 					webAppMessage.contenidoFirma = event

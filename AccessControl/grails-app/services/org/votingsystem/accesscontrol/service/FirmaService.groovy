@@ -179,8 +179,8 @@ class FirmaService {
 			String msg = messageSource.getMessage('eventWithoutCAErrorMsg',
 				[event.id].toArray(), locale)
 			log.error ("validateVoteCerts - ERROR EVENT CA CERT -> '${msg}'")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-				message:msg, type:TypeVS.VOTO_CON_ERRORES, eventVS:event)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+				message:msg, type:TypeVS.VOTE_ERROR, eventVS:event)
 		}
 		X509Certificate certCAEvento = CertUtil.loadCertificateFromStream (
 			new ByteArrayInputStream(certificadoCAEvento.contenido))
@@ -204,8 +204,8 @@ class FirmaService {
 				String msg = messageSource.getMessage('eventWithoutCAErrorMsg',
 					[event.id].toArray(), locale)
 				log.error ("validateVoteCerts - ERROR EVENT CA CERT -> '${msg}'")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-					message:msg, type:TypeVS.VOTO_CON_ERRORES, eventVS:event)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+					message:msg, type:TypeVS.VOTE_ERROR, eventVS:event)
 			}
 			X509Certificate certCAEvento = CertUtil.loadCertificateFromStream (
 				new ByteArrayInputStream(certificadoCAEvento.contenido))
@@ -303,7 +303,7 @@ class FirmaService {
 			return new ResponseVS(statusCode:ResponseVS.SC_OK, message:"Importadas Autoridades Certificadoras")
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:ex.getMessage())
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage())
 		}
 	}
 	
@@ -411,10 +411,10 @@ class FirmaService {
 		log.debug("addCertificateAuthority");
 		if(grails.util.Environment.PRODUCTION  ==  grails.util.Environment.current) {
 			log.debug(" ### ADDING CERTS NOT ALLOWED IN PRODUCTION ENVIRONMENTS ###")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 				message: messageSource.getMessage('serviceDevelopmentModeMsg', null, locale))
 		}
-		if(!caPEM) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
+		if(!caPEM) return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
 			message: messageSource.getMessage('error.nullCertificate', null, locale))
 		try {
 			Collection<X509Certificate> certX509CertCollection = CertUtil.fromPEMToX509CertCollection(caPEM)
@@ -445,7 +445,7 @@ class FirmaService {
 				message:messageSource.getMessage('cert.newCACertMsg', null, locale))
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:ex.getMessage())
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage())
 		}
 	}
 	
@@ -462,7 +462,7 @@ class FirmaService {
 			String message = messageSource.getMessage('smimeDigestRepeatedErrorMsg', 
 				[messageWrapper.getContentDigestStr()].toArray(), locale)
 			log.error("validateSMIME - ${message}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:message)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:message)
 		}
 		return validateSignersCertificate(messageWrapper, locale)
 	}
@@ -471,7 +471,7 @@ class FirmaService {
 			SMIMEMessageWrapper messageWrapper, Locale locale) {
 		Set<UserVS> firmantes = messageWrapper.getSigners();
 		if(firmantes.isEmpty()) return new ResponseVS(
-			statusCode:ResponseVS.SC_ERROR_PETICION, message:
+			statusCode:ResponseVS.SC_ERROR_REQUEST, message:
 			messageSource.getMessage('error.documentWithoutSigners', null, locale))
 		log.debug("validateSignersCertificate - number of signers: ${firmantes.size()}")
 		Set<Usuario> checkedSigners = new HashSet<Usuario>()
@@ -501,21 +501,21 @@ class FirmaService {
 					String msg = messageSource.getMessage('documentWithoutTimeStampErrorMsg', null, locale)
 					log.error("ERROR - validateSignersCertificate - ${msg}")
 					return new ResponseVS(message:msg,
-						statusCode:ResponseVS.SC_ERROR_PETICION)
+						statusCode:ResponseVS.SC_ERROR_REQUEST)
 				}
 				checkedSigners.add(respuesta.userVS)
 			} catch (CertPathValidatorException ex) {
 				log.error(ex.getMessage(), ex)
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
 					messageSource.getMessage('error.caUnknown', null, locale))
 			} catch (Exception ex) {
 				log.error(ex.getMessage(), ex)
 				return new ResponseVS(message:ex.getMessage(),
-					statusCode:ResponseVS.SC_ERROR_PETICION)
+					statusCode:ResponseVS.SC_ERROR_REQUEST)
 			}
 		}
 		return new ResponseVS(statusCode:ResponseVS.SC_OK,
-			smimeMessage:messageWrapper, usersVS:checkedSigners)
+			smimeMessage:messageWrapper, data:checkedSigners)
 	} 
 		        
 			
@@ -542,7 +542,7 @@ class FirmaService {
 			String msg = messageSource.getMessage('smimeDigestRepeatedErrorMsg',
 				[messageWrapper.getContentDigestStr()].toArray(), locale)
 			log.error("validateSMIMEVote - ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
 		}
 		return validateVoteCerts(messageWrapper, locale)
 	}
@@ -555,8 +555,8 @@ class FirmaService {
 		if(firmantes.isEmpty()) {
 			msg = messageSource.getMessage('error.documentWithoutSigners', null, locale)
 			log.error ("validateVoteCerts - ERROR SIGNERS - ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
-				message:msg, type:TypeVS.VOTO_CON_ERRORES)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
+				message:msg, type:TypeVS.VOTE_ERROR)
 		}
 		InformacionVoto infoVoto = smimeMessageReq.informacionVoto
 		String localServerURL = grailsApplication.config.grails.serverURL
@@ -568,23 +568,23 @@ class FirmaService {
 			msg = messageSource.getMessage('validacionVoto.errorCert', 
 				[voteAccessControlURL, localServerURL].toArray(), locale)
 			log.error ("validateVoteCerts - ERROR SERVER URL - ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg, 
-				type:TypeVS.VOTO_CON_ERRORES)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, 
+				type:TypeVS.VOTE_ERROR)
 		}
 		evento = EventoVotacion.get(Long.valueOf(infoVoto.getEventoId()))
 		if (!evento)  {
 			msg = messageSource.getMessage('validacionVoto.eventoNotFound', 
 				[infoVoto.getEventoId()].toArray(), locale)
 			log.error ("validateVoteCerts - ERROR EVENT NOT FOUND - ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg,
-				type:TypeVS.VOTO_CON_ERRORES)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
+				type:TypeVS.VOTE_ERROR)
 		}
 		if(evento.estado != Evento.Estado.ACTIVO) {
 			msg = messageSource.getMessage('validacionVoto.eventClosed', 
 				[evento.asunto].toArray(), locale)
 			log.error ("validateVoteCerts - ERROR EVENT '${evento.id}' STATE -> ${evento.estado}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg,
-				type:TypeVS.VOTO_CON_ERRORES, eventVS:evento)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
+				type:TypeVS.VOTE_ERROR, eventVS:evento)
 		}
 		Certificado certificado = Certificado.findWhere(
 			hashCertificadoVotoBase64:infoVoto.hashCertificadoVotoBase64,
@@ -593,8 +593,8 @@ class FirmaService {
 			msg = messageSource.getMessage(
 				'validacionVoto.errorHash', [infoVoto.hashCertificadoVotoBase64].toArray(), locale)
 			log.error ("validateVoteCerts - ERROR CERT '${msg}'")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg,
-				type:TypeVS.VOTO_CON_ERRORES, eventVS:evento)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
+				type:TypeVS.VOTE_ERROR, eventVS:evento)
 		}
 		smimeMessageReq.informacionVoto.setCertificado(certificado)
 		respuesta = getEventTrustedAnchors(evento, locale)
@@ -614,17 +614,17 @@ class FirmaService {
 			msg = messageSource.getMessage('certValidationErrorMsg',
 					[checkedCert.getSubjectDN()?.toString()].toArray(), locale)
 			log.error ("validateVoteCerts - ERROR VOTE CERT VALIDATION -> '${msg}'")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
-				message:msg, type:TypeVS.VOTO_CON_ERRORES, eventVS:evento)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
+				message:msg, type:TypeVS.VOTE_ERROR, eventVS:evento)
 		}
 		//TimeStamp validation
 		ResponseVS timestampValidationResp = timeStampService.validateToken(
 			infoVoto.getVoteTimeStampToken(), evento, locale)
 		if(ResponseVS.SC_OK != timestampValidationResp.statusCode) {
 			log.error("validateVoteCerts - ERROR TIMESTAMP VOTE VALIDATION -> '${timestampValidationResp.message}'")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
 				message:timestampValidationResp.message, 
-				type:TypeVS.VOTO_CON_ERRORES, eventVS:evento)
+				type:TypeVS.VOTE_ERROR, eventVS:evento)
 		}
 		//Control Center cert validation
 		trustedAnchors = controlCenterTrustedAnchorsHashMap.get(evento?.id)
@@ -642,8 +642,8 @@ class FirmaService {
 		if(infoVoto.getServerCerts().isEmpty()) {
 			msg = messageSource.getMessage('controlCenterMissingSignatureErrorMsg', null, locale)
 			log.error(" ERROR - MISSING CONTROL CENTER SIGNATURE - msg: ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-				message:msg, type:TypeVS.VOTO_CON_ERRORES, eventVS:evento)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+				message:msg, type:TypeVS.VOTE_ERROR, eventVS:evento)
 		}
 		checkedCert = infoVoto.getServerCerts()?.iterator()?.next()
 		try {
@@ -656,11 +656,11 @@ class FirmaService {
 			msg = messageSource.getMessage('certValidationErrorMsg',
 					[checkedCert.getSubjectDN()?.toString()].toArray(), locale)
 			log.error ("validateVoteCerts - ERROR CONTROL CENTER CERT VALIDATION -> '${msg}'")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-				message:msg, type:TypeVS.VOTO_CON_ERRORES, eventVS:evento)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+				message:msg, type:TypeVS.VOTE_ERROR, eventVS:evento)
 		}
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:evento,
-			smimeMessage:smimeMessageReq, type:TypeVS.VOTO_VALIDADO_CENTRO_CONTROL)
+			smimeMessage:smimeMessageReq, type:TypeVS.CONTROL_CENTER_VALIDATED_VOTE)
 	}
 	
 	private SignedMailGenerator getSignedMailGenerator() {

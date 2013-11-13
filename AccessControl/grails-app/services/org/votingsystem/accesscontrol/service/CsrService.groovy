@@ -50,7 +50,7 @@ class CsrService {
 		X509Certificate issuedCert = signCSR(csr, representativeURL, 
 			privateKeySigner, certSigner, evento.fechaInicio, evento.fechaFin)
 		if (!issuedCert) {
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, type:TypeVS.ERROR_VALIDANDO_CSR)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR_VALIDANDO_CSR)
 		} else {
 			SolicitudCSRVoto solicitudCSR = new SolicitudCSRVoto(
 				numeroSerie:issuedCert.getSerialNumber().longValue(),
@@ -64,8 +64,8 @@ class CsrService {
 				hashCertificadoVotoBase64:respuesta.hashCertificadoVotoBase64)
 			certificado.save()
 			byte[] issuedCertPEMBytes = CertUtil.fromX509CertToPEM(issuedCert);
-			return new ResponseVS(statusCode:ResponseVS.SC_OK, data:requestPublicKey,
-				messageBytes:issuedCertPEMBytes, certificado:issuedCert)
+			Map data = [requestPublicKey:requestPublicKey, issuedCert:issuedCert]
+			return new ResponseVS(statusCode:ResponseVS.SC_OK, data:data)
 		}
 	}
 	
@@ -127,8 +127,8 @@ class CsrService {
 		if(!csr) {
 			String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
 			log.error("- validarCSRVoto - ERROR  ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg,
-				type:TypeVS.SOLICITUD_ACCESO_ERROR)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
+				type:TypeVS.ACCESS_REQUEST_ERROR)
 		}
         CertificationRequestInfo info = csr.getCertificationRequestInfo();
 		String eventoId;
@@ -142,8 +142,8 @@ class CsrService {
 			if (!eventoId.equals(String.valueOf(evento.getId()))) {
 				String msg = messageSource.getMessage('evento.solicitudCsrError', null, locale)
 				log.error("- validarCSRVoto - ERROR - ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
-					message:msg, type:TypeVS.SOLICITUD_ACCESO_ERROR)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
+					message:msg, type:TypeVS.ACCESS_REQUEST_ERROR)
 			}
 		}
 		
@@ -158,8 +158,8 @@ class CsrService {
 				String msg = messageSource.getMessage(
 					'error.urlControlAccesoWrong', [serverURL, controlAccesoURL].toArray(), locale)
 				log.error("- validarCSRVoto - ERROR - ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
-					message:msg, type:TypeVS.SOLICITUD_ACCESO_ERROR)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
+					message:msg, type:TypeVS.ACCESS_REQUEST_ERROR)
 			}	
 		}
 		if (subjectDN.split("OU=hashCertificadoVotoHEX:").length > 1) {
@@ -174,16 +174,16 @@ class CsrService {
 					String msg = messageSource.getMessage(
 						'error.hashCertificadoVotoRepetido', [hashCertificadoVotoBase64].toArray(), locale)
 					log.error("- validarCSRVoto - ERROR - solicitudCSR previa: ${solicitudCSR.id} - ${msg}")
-					return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
-						message:msg, type:TypeVS.SOLICITUD_ACCESO_ERROR)
+					return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
+						message:msg, type:TypeVS.ACCESS_REQUEST_ERROR)
 				}
 			} catch (Exception ex) {
 				log.error(ex.getMessage(), ex)
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
-					message:ex.getMessage(), type:TypeVS.SOLICITUD_ACCESO_ERROR)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
+					message:ex.getMessage(), type:TypeVS.ACCESS_REQUEST_ERROR)
 			}
 		}
-		return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.SOLICITUD_ACCESO,
+		return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ACCESS_REQUEST,
 			data:csr.getPublicKey(),hashCertificadoVotoBase64:hashCertificadoVotoBase64)
     }
 	
@@ -234,7 +234,7 @@ class CsrService {
 				dispositivo:respuesta.dispositivo).save()
 		}
 		if(solicitudCSR) return new ResponseVS(statusCode:ResponseVS.SC_OK, message:solicitudCSR.id)
-		else return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION)
+		else return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST)
 	}
 	
 	public synchronized ResponseVS firmarCertificadoUsuario (SolicitudCSRUsuario solicitudCSR, Locale locale) {
@@ -257,7 +257,7 @@ class CsrService {
 				solicitudCSR.contenido, null, privateKeySigner,
 				certSigner, today, today_plus_year.getTime())
 		if (!issuedCert) {
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 				message:TypeVS.ERROR_VALIDANDO_CSR.toString())
 		} else {
 			solicitudCSR.estado = SolicitudCSRUsuario.Estado.OK

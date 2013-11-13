@@ -57,7 +57,7 @@
 			    })
 
 	    		$("#validationToolLink").click(function () { 
-			    	var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESANDO, 
+			    	var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESSING, 
 					    	Operation.MENSAJE_HERRAMIENTA_VALIDACION)
 			    	votingSystemClient.setMessageToValidationTool(JSON.stringify(webAppMessage))
 	    		});
@@ -75,10 +75,10 @@
 						appMessageJSON = appMessage
 					} 
 					var statusCode = appMessageJSON.codigoEstado
-					if(StatusCode.SC_PROCESANDO == statusCode){
+					if(StatusCode.SC_PROCESSING == statusCode){
 						$("#loadingVotingSystemAppletDialog").dialog("close");
 						$("#workingWithAppletDialog").dialog("open");
-					} else if(StatusCode.SC_CANCELADO == statusCode) {
+					} else if(StatusCode.SC_CANCELLED == statusCode) {
 						$("#workingWithAppletDialog" ).dialog("close");
 					}
 				}

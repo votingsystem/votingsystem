@@ -108,15 +108,15 @@
 			function sendManifest() {
 				console.log("sendManifest")
 		    	var webAppMessage = new WebAppMessage(
-				    	StatusCode.SC_PROCESANDO, 
-				    	Operation.FIRMA_MANIFIESTO_PDF)
+				    	StatusCode.SC_PROCESSING, 
+				    	Operation.MANIFEST_SIGN)
 		    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
 	    		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
     			webAppMessage.urlEnvioDocumento = "${createLink( controller:'recolectorFirma', absolute:true)}/${eventMap.id}"
    				webAppMessage.asuntoMensajeFirmado = "${eventMap.asunto}"
 		    	//signed and encrypted
     			webAppMessage.contentType = 'application/x-pkcs7-signature, application/x-pkcs7-mime'
-   				webAppMessage.respuestaConRecibo = true
+   				webAppMessage.respuestaConRecibo = false
 	    		webAppMessage.evento = pageEvent
 				webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStamp', absolute:true)}"
 				webAppMessage.urlDocumento = pageEvent.URL
@@ -145,7 +145,7 @@
 					var caption = '<g:message code="operationERRORCaption"/>'
 					if(StatusCode.SC_OK == appMessageJSON.statusCode) { 
 						caption = "<g:message code='operationOKCaption'/>"
-					} else if (StatusCode.SC_CANCELADO== appMessageJSON.statusCode) {
+					} else if (StatusCode.SC_CANCELLED== appMessageJSON.statusCode) {
 						caption = "<g:message code='operationCANCELLEDLbl'/>"
 					}
 					var msg = appMessageJSON.message

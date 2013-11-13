@@ -36,7 +36,7 @@ public class Certificado implements Serializable, CertificateVS {
 	
     public enum Estado {OK, CON_ERRORES, ANULADO}
 
-    public enum Tipo {RAIZ_VOTOS, VOTO, USUARIO, AUTORIDAD_CERTIFICADORA,
+    public enum Type {RAIZ_VOTOS, VOTO, USUARIO, AUTORIDAD_CERTIFICADORA,
     	AUTORIDAD_CERTIFICADORA_TEST}
     
     private static final long serialVersionUID = 1L;
@@ -70,8 +70,8 @@ public class Certificado implements Serializable, CertificateVS {
     private String hashCertificadoVotoBase64;   
     
     @Enumerated(EnumType.STRING)
-    @Column(name="tipo", nullable=false)
-    private Tipo tipo;
+    @Column(name="type", nullable=false)
+    private Type type;
 
     @Column(name="esRaiz", nullable=false, columnDefinition="BOOLEAN default false")
     private Boolean esRaiz = false;
@@ -271,12 +271,12 @@ public class Certificado implements Serializable, CertificateVS {
 		this.serverURL = serverURL;
 	}
 
-	public Tipo getTipo() {
-		return tipo;
+	public Type getType() {
+		return type;
 	}
 
-	public void setTipo(Tipo tipo) {
-		this.tipo = tipo;
+	public void setType(Type type) {
+		this.type = type;
 	}
 
 	public Date getValidoDesde() {

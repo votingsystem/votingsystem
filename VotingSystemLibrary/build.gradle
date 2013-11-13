@@ -85,14 +85,6 @@ jar {
 				from components.java
 			}
 
-			mavenJava(MavenPublication) {
-				groupId 'org.votingsystem'
-				artifactId 'votingsystemlibrary'
-
-				from components.java
-			}
-
-			//gradle publishJarAndSourceJar
 			jarAndSourceJar(MavenPublication) {
 				groupId 'org.votingsystem'
 				artifactId 'votingsystemlibrary'

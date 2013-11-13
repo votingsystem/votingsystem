@@ -56,18 +56,18 @@ function submitAdminForm() {
 			estado = DocumentState.CANCELADO
 		}
     	var webAppMessage = new WebAppMessage(
-		    	StatusCode.SC_PROCESANDO, 
-		    	Operation.CANCELAR_EVENTO)
+		    	StatusCode.SC_PROCESSING, 
+		    	Operation.EVENT_CANCELLATION)
     	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
 		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
 		webAppMessage.respuestaConRecibo = false
 		webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStamp', absolute:true)}"
 		webAppMessage.urlEnvioDocumento= "${createLink(controller:'evento', action:'cancelled', absolute:true)}"
-		var contenidoFirma = {operation:Operation.CANCELAR_EVENTO,
+		var contenidoFirma = {operation:Operation.EVENT_CANCELLATION,
 				accessControlURL:"${grailsApplication.config.grails.serverURL}",
 				eventId:"${eventMap?.id}", estado:estado}
 		webAppMessage.contenidoFirma = contenidoFirma
-		pendingOperation = Operation.CANCELAR_EVENTO
+		pendingOperation = Operation.EVENT_CANCELLATION
 		//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
 		votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
 	}

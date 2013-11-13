@@ -157,8 +157,8 @@
 			
 				  	event.opciones = pollOptions
 				  	var webAppMessage = new WebAppMessage(
-				    	StatusCode.SC_PROCESANDO, 
-				    	Operation.PUBLICACION_VOTACION_SMIME)
+				    	StatusCode.SC_PROCESSING, 
+				    	Operation.VOTING_PUBLISHING)
 					webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
 					webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
 					webAppMessage.contenidoFirma = event

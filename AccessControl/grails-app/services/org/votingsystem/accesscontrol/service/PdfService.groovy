@@ -106,7 +106,7 @@ class PdfService {
 		Documento documento;
 		AcroFields acroFields = reader.getAcroFields();
 		ArrayList<String> names = acroFields.getSignatureNames();
-		respuesta = new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+		respuesta = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 			message:messageSource.getMessage('error.documentWithoutSigners', null, locale));
 		for (String name : names) {
 			log.debug("checkSignature - Signature name: " + name + " - covers whole document:" +
@@ -115,7 +115,7 @@ class PdfService {
 			log.debug("checkSignature - Hash verified -> ${pk.verify()}");
 			if(!pk.verify()) {
 				log.debug("checkSignature - VERIFICATION FAILED!!!");
-				respuesta = new ResponseVS (statusCode:ResponseVS.SC_ERROR_PETICION,
+				respuesta = new ResponseVS (statusCode:ResponseVS.SC_ERROR_REQUEST,
 					message:messageSource.getMessage('pdfSignedDocumentError', null, locale))
 			}
 			X509Certificate signingCert = pk.getSigningCertificate();
@@ -135,7 +135,7 @@ class PdfService {
 					String notBefore = DateUtils.getStringFromDate(cert.getNotBefore())
 					log.debug("checkSignature - fails - Cert: ${cert.getSubjectDN()} - NotBefore: ${notBefore} - NotAfter: ${notAfter}")
 				}
-				return new ResponseVS (statusCode:ResponseVS.SC_ERROR_PETICION, message:
+				return new ResponseVS (statusCode:ResponseVS.SC_ERROR_REQUEST, message:
 					messageSource.getMessage('error.caUnknown', null, locale))	
 			}
 			Certificado certificado = Certificado.findWhere(numeroSerie:signingCert.getSerialNumber()?.longValue())
@@ -149,13 +149,13 @@ class PdfService {
 						log.debug("checkSignature - CA: '${certificate?.getSerialNumber()?.longValue()}' - ${certificate.getSubjectDN().toString()}")
 						certificadoCA = firmaService.getCertificadoCA(certificate.getSerialNumber()?.longValue())
 						//log.debug("checkSignature - CA id: ${certificadoCA?.id}")
-						usuario.setCertificadoCA(certificadoCA);
+						usuario.setCertificateCA(certificadoCA);
 					}
 				}
 				ResponseVS respuestaValidacionUsu = subscripcionService.checkUser(usuario, locale);
 				if(ResponseVS.SC_OK != respuestaValidacionUsu.statusCode) return respuestaValidacionUsu;
 				usuario = respuestaValidacionUsu.userVS;
-				certificado = respuestaValidacionUsu.certificateVS;
+				certificado = (Certificado)respuestaValidacionUsu.data;
 			} else usuario = certificado.usuario;
 			/*if (timeStampToken != null) {
 				boolean impr = pk.verifyTimestampImprint();
@@ -214,7 +214,7 @@ class PdfService {
 			respuesta = new ResponseVS(statusCode:ResponseVS.SC_OK, file:file)
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:ex.getMessage())
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage())
 		}
 		return respuesta
 	}
@@ -241,7 +241,7 @@ class PdfService {
 			respuesta = new ResponseVS(statusCode:ResponseVS.SC_OK, file:file)
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:ex.getMessage())
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage())
 		}
 		return respuesta
 	}

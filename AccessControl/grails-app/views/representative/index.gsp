@@ -119,7 +119,7 @@
 
 		function selectRepresentative() {
 			console.log("selectRepresentative")
-	    	var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESANDO, Operation.REPRESENTATIVE_SELECTION)
+	    	var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESSING, Operation.REPRESENTATIVE_SELECTION)
 	    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
     		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
 			webAppMessage.contenidoFirma = {operation:Operation.REPRESENTATIVE_SELECTION, representativeNif:"${representative.nif}",
@@ -133,7 +133,7 @@
 
 		function requestVotingHistory() {
 			console.log("requestVotingHistory")
-	    	var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESANDO, Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST)
+	    	var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESSING, Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST)
 	    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
     		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
         	var dateFromStr = $("#dateFrom").datepicker('getDate').format()
@@ -153,7 +153,7 @@
 		function requestAccreditations() {
 			var accreditationDateSelectedStr = $("#accreditationDateSelected").val()
 			console.log("requestAccreditations - accreditationDateSelectedStr: " + accreditationDateSelectedStr)
-	    	var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESANDO, Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST)
+	    	var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESSING, Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST)
 	    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
     		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
 			webAppMessage.contenidoFirma = {operation:Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST, 
@@ -177,7 +177,7 @@
 				if(StatusCode.SC_OK == appMessageJSON.statusCode) { 
 					caption = "<g:message code='operationOKCaption'/>"
 					msg = "<g:message code='selectedRepresentativeMsg' args="${[representativeFullName]}"/>";
-				} else if (StatusCode.SC_CANCELADO== appMessageJSON.statusCode) {
+				} else if (StatusCode.SC_CANCELLED== appMessageJSON.statusCode) {
 					caption = "<g:message code='operationCANCELLEDLbl'/>"
 				}
 				showResultDialog(caption, msg)
@@ -192,7 +192,7 @@
 				var caption = '<g:message code="operationERRORCaption"/>'
 				if(StatusCode.SC_OK == appMessageJSON.statusCode) { 
 					caption = "<g:message code='operationOKCaption'/>"
-				} else if (StatusCode.SC_CANCELADO== appMessageJSON.statusCode) {
+				} else if (StatusCode.SC_CANCELLED== appMessageJSON.statusCode) {
 					caption = "<g:message code='operationCANCELLEDLbl'/>"
 				}
 				var msg = appMessageJSON.message

@@ -96,13 +96,23 @@ public class Usuario implements Serializable, UserVS {
     
     @Transient private transient X509Certificate certificate;
     
-    @Transient private transient CertificateVS certificadoCA;
+    @Transient private transient CertificateVS certificateCA;
     
     @Transient private transient TimeStampToken timeStampToken;
     
     @Transient private transient SignerInformation signerInformation;
 
 
+    public Usuario() {}
+
+    public Usuario(UserVS userVS) {
+        this.certificate = userVS.getCertificate();
+        this.certificateCA = userVS.getCertificateCA();
+        this.email = userVS.getEmail();
+        this.nif = userVS.getNif();
+        this.nombre = userVS.getNombre();
+        this.timeStampToken = userVS.getTimeStampToken();
+    }
    /**
      * @return the id
      */
@@ -260,12 +270,12 @@ public class Usuario implements Serializable, UserVS {
 	}
 
 	public CertificateVS getCertificateCA() {
-		return certificadoCA;
+		return certificateCA;
 	}
 
 	@Override
 	public void setCertificateCA(CertificateVS certificate) {
-		this.certificadoCA = certificate;
+		this.certificateCA = certificate;
 		
 	}
 

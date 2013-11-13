@@ -57,7 +57,7 @@ class EventoReclamacionService {
 					[DateUtils.getStringFromDate(fechaFin)].toArray(), locale)
 				log.error("DATE ERROR - msg: ${msg}")
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
-					message:msg, type:TypeVS.EVENTO_RECLAMACION_ERROR, eventVS:evento)
+					message:msg, type:TypeVS.CLAIM_EVENT_ERROR, eventVS:evento)
 			}
 			evento = new EventoReclamacion(usuario:firmante,
 					asunto:messageJSON.asunto, contenido:messageJSON.contenido,
@@ -78,7 +78,7 @@ class EventoReclamacionService {
 			}
 			messageJSON.id = evento.id
 			messageJSON.fechaCreacion = DateUtils.getStringFromDate(evento.dateCreated)
-			messageJSON.type = TypeVS.EVENTO_RECLAMACION
+			messageJSON.type = TypeVS.CLAIM_EVENT
 			def camposValidados = []
 			JSONArray arrayCampos = new JSONArray()
 			messageJSON.campos?.each { campoItem ->
@@ -94,23 +94,21 @@ class EventoReclamacionService {
 			String toUser = firmante.getNif()
 			String subject = messageSource.getMessage(
 					'mime.asunto.EventoReclamacionValidado', null, locale)
-			
 			byte[] smimeMessageRespBytes = firmaService.getSignedMimeMessage(
 				fromUser, toUser,  messageJSON.toString(), subject, null)
-			
-			MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECIBO,
+			MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT,
 				smimePadre:messageSMIMEReq, evento:evento,
 				valido:true, contenido:smimeMessageRespBytes)
 			MessageSMIME.withTransaction {
 				messageSMIMEResp.save()
 			}
 			return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:evento,
-				messageSMIME:messageSMIMEResp, type:TypeVS.EVENTO_RECLAMACION)
+				data:messageSMIMEResp, type:TypeVS.CLAIM_EVENT)
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
 				message:messageSource.getMessage('publishClaimErrorMessage', null, locale), 
-				type:TypeVS.EVENTO_RECLAMACION_ERROR, eventVS:evento)
+				type:TypeVS.CLAIM_EVENT_ERROR, eventVS:evento)
 		}
     }
 
@@ -118,11 +116,11 @@ class EventoReclamacionService {
         log.debug("generarCopiaRespaldo - eventoId: ${event.id}")
 		ResponseVS respuesta;
         if (!event) {
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
 				messageSource.getMessage('event.peticionSinEvento', null, locale))
         }		
 		Map<String, File> mapFiles = filesService.getBackupFiles(
-			event, TypeVS.EVENTO_RECLAMACION, locale)
+			event, TypeVS.CLAIM_EVENT, locale)
 		File metaInfFile = mapFiles.metaInfFile
 		File filesDir = mapFiles.filesDir
 		File zipResult   = mapFiles.zipResult
@@ -139,7 +137,7 @@ class EventoReclamacionService {
 		}		
 		
 		int numSignatures = Firma.countByEventoAndType(event, 
-			TypeVS.FIRMA_EVENTO_RECLAMACION)	
+			TypeVS.CLAIM_EVENT_SIGN)	
 		def backupMetaInfMap = [numSignatures:numSignatures]
 		Map eventMetaInfMap =  eventoService.getMetaInfMap(event)
 		eventMetaInfMap.put(TypeVS.BACKUP.toString(), backupMetaInfMap);
@@ -161,7 +159,7 @@ class EventoReclamacionService {
 			def criteria = Firma.createCriteria()
 			def firmasRecibidas = criteria.scroll {
 				eq("evento", event)
-				eq("type", TypeVS.FIRMA_EVENTO_RECLAMACION)
+				eq("type", TypeVS.CLAIM_EVENT_SIGN)
 			}
 			
 			
@@ -201,7 +199,7 @@ class EventoReclamacionService {
 		ant.copy(file: zipResult, tofile: webappBackupPath)
 
 		return new ResponseVS(statusCode:ResponseVS.SC_OK,
-			type:TypeVS.EVENTO_RECLAMACION, message:backupURL)
+			type:TypeVS.CLAIM_EVENT, message:backupURL)
     }
 
 }

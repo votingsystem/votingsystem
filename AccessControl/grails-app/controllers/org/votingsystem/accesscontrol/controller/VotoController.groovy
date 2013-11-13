@@ -40,15 +40,17 @@ class VotoController {
 		if(!messageSMIMEReq) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg 
 			return false
 		}
+		
 	    ResponseVS respuesta = votoService.validateVote(
 			messageSMIMEReq, request.getLocale())
 		if (ResponseVS.SC_OK == respuesta.statusCode) {
-			X509Certificate controlCenterCert = respuesta.certificado
+			X509Certificate controlCenterCert = respuesta.data.certificate
 			params.receiverCert = controlCenterCert
+			respuesta.data = respuesta.data.messageSMIME
 			response.setContentType("application/x-pkcs7-signature")
 		}
 		params.respuesta = respuesta

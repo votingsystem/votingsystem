@@ -46,7 +46,7 @@ class RepresentativeController {
 	def editRepresentative() {
 		String nif = StringUtils.validarNIF(params.nif)
 		if(!nif) {
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render message(code: 'error.errorNif', args:[params.nif])
 			return false
 		}
@@ -150,7 +150,7 @@ class RepresentativeController {
 	def getByNif() {
 		String nif = StringUtils.validarNIF(params.nif)
 		if(!nif) {
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render message(code: 'error.errorNif', args:[params.nif])
 			return false
 		}
@@ -188,7 +188,7 @@ class RepresentativeController {
 		if(!messageSMIME) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.debug msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -196,7 +196,7 @@ class RepresentativeController {
 			processRevoke(messageSMIME, request.getLocale())
 		params.respuesta = respuesta
 		if (ResponseVS.SC_OK == respuesta.statusCode){
-			response.contentType = ContextVS.SIGNED_CONTENT_TYPE
+			response.contentType = org.votingsystem.model.ContentTypeVS.SIGNED
 		}
 	}
 	
@@ -218,7 +218,7 @@ class RepresentativeController {
 		if(!messageSMIME) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.debug msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -247,7 +247,7 @@ class RepresentativeController {
 		if(!messageSMIME) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.debug msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -275,7 +275,7 @@ class RepresentativeController {
 		if(!messageSMIME) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.debug msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -284,7 +284,7 @@ class RepresentativeController {
 		
 		params.respuesta = respuesta
 		if (ResponseVS.SC_OK == respuesta.statusCode){
-			response.contentType = ContextVS.SIGNED_CONTENT_TYPE
+			response.contentType = org.votingsystem.model.ContentTypeVS.SIGNED
 		}
 	}
 	
@@ -310,18 +310,18 @@ class RepresentativeController {
 			if(!imageBytes) msg = message(code: 'imageMissingErrorMsg')
 			else msg = message(code: 'representativeDataMissingErrorMsg')
 			log.error "processFileMap - ERROR - msg: ${msg}"
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
 		params.messageSMIMEReq = messageSMIMEReq
 		if(imageBytes.length > MAX_FILE_SIZE) {
-			response.status =  ResponseVS.SC_ERROR_PETICION
+			response.status =  ResponseVS.SC_ERROR_REQUEST
 			String msg = message(code: 'imageSizeExceededMsg', 
 				args:[imageBytes.length/1024, MAX_FILE_SIZE_KB])
 			log.error "processFileMap - ERROR - msg: ${msg}"
 			params.respuesta = new ResponseVS(message:msg,
-				statusCode:ResponseVS.SC_ERROR_PETICION,
+				statusCode:ResponseVS.SC_ERROR_REQUEST,
 				type:TypeVS.REPRESENTATIVE_DATA_ERROR)
 		} else {
 			ResponseVS respuesta = representativeService.saveRepresentativeData(
@@ -400,14 +400,14 @@ class RepresentativeController {
 		if(!event) {
 			msg = message(code: 'eventNotFound')
 			log.error "accreditationsBackupForEvent - ERROR - msg: ${msg}"
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
 		if(event.isOpen(DateUtils.getTodayDate())) {
 			msg = message(code: 'eventDateNotFinished')
 			log.error "accreditationsBackupForEvent - ERROR - msg: ${msg}"
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}

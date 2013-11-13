@@ -42,16 +42,16 @@ class RecolectorFirmaService {
 						'pdfSignatureManifestRepeated',	[usuario.nif, event.asunto, DateUtils.
 						getStringFromDate(documento.dateCreated)].toArray(), locale)
 				log.debug ("saveManifestSignature - ${messageValidacionDocumento}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 					message:messageValidacionDocumento)
 			} else {
 				ResponseVS timeStampVerification = timeStampService.validateToken(
 					pdfDocument.timeStampToken, event, locale)	
 				if(ResponseVS.SC_OK != timeStampVerification.statusCode) {
 					log.error("saveManifestSignature - ERROR TIMESTAMP VOTE VALIDATION -> '${timeStampVerification.message}'")
-					return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+					return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 						message:timeStampVerification.message,
-						type:TypeVS.FIRMA_EVENTO_CON_ERRORES, eventVS:event)
+						type:TypeVS.EVENT_SIGN_WITH_ERRORS, eventVS:event)
 				}
 			
 				Documento.withTransaction {

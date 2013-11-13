@@ -17,9 +17,9 @@ import org.votingsystem.applet.validationtool.backup.ValidatorListener;
 import org.votingsystem.applet.validationtool.backup.VotingBackupValidator;
 import org.votingsystem.applet.validationtool.model.MetaInf;
 import org.votingsystem.model.ResponseVS;
-import static org.votingsystem.model.TypeVS.EVENTO_FIRMA;
-import static org.votingsystem.model.TypeVS.EVENTO_RECLAMACION;
-import static org.votingsystem.model.TypeVS.EVENTO_VOTACION;
+import static org.votingsystem.model.TypeVS.SIGN_EVENT;
+import static org.votingsystem.model.TypeVS.CLAIM_EVENT;
+import static org.votingsystem.model.TypeVS.VOTING_EVENT;
 
 import org.votingsystem.model.ContextVS;
 
@@ -61,19 +61,19 @@ public class ValidateBackupDialog extends JDialog
             }
         });
         switch(metaInf.getType()) {
-            case EVENTO_FIRMA:
+            case SIGN_EVENT:
                 setTitle(ContextVS.INSTANCE.getString(
                         "validateManifestBackupCaption"));
                 filesToProcess = metaInf.getNumSignatures();
                 break;
-            case EVENTO_VOTACION:
+            case VOTING_EVENT:
                 setTitle(ContextVS.INSTANCE.getString(
                         "validateVotingBackupCaption"));
                 filesToProcess = metaInf.getNumAccessRequest() + metaInf.getNumVotes() + 
                     metaInf.getRepresentativesData().getNumRepresented() + 
                     metaInf.getRepresentativesData().getNumRepresentativesWithAccessRequest();
                 break;
-            case EVENTO_RECLAMACION:
+            case CLAIM_EVENT:
                 setTitle(ContextVS.INSTANCE.getString(
                         "validateClaimBackupCaption"));
                 filesToProcess = metaInf.getNumSignatures();
@@ -87,17 +87,17 @@ public class ValidateBackupDialog extends JDialog
     
     public void initValidation(String decompressedBackupBaseDir) throws Exception {
         switch(metaInf.getType()) {
-            case EVENTO_VOTACION:
+            case VOTING_EVENT:
                 VotingBackupValidator votingBackupValidator = new VotingBackupValidator(
                     decompressedBackupBaseDir, this);
                 runningTask = ValidationToolContext.INSTANCE.submit(votingBackupValidator);
                 break;
-            case EVENTO_FIRMA:
+            case SIGN_EVENT:
                 ManifestBackupValidator manifestBackupValidator = new ManifestBackupValidator(
                     decompressedBackupBaseDir, this);
                 runningTask = ValidationToolContext.INSTANCE.submit(manifestBackupValidator); 
                 break;
-            case EVENTO_RECLAMACION:
+            case CLAIM_EVENT:
                 ClaimBackupValidator claimBackupValidator = new ClaimBackupValidator(
                     decompressedBackupBaseDir, this);
                 runningTask = ValidationToolContext.INSTANCE.submit(claimBackupValidator); 
@@ -226,13 +226,13 @@ public class ValidateBackupDialog extends JDialog
     @Override public void processValidationEvent(
             ResponseVS<ValidationEvent> validationEventResponse) {
         switch(metaInf.getType()) {
-            case EVENTO_FIRMA:
+            case SIGN_EVENT:
                 processManifestValidationEvent(validationEventResponse);
                 break;
-            case EVENTO_VOTACION:
+            case VOTING_EVENT:
                 processVotingValidationEvent(validationEventResponse);
                 break;
-            case EVENTO_RECLAMACION:
+            case CLAIM_EVENT:
                 processClaimValidationEvent(validationEventResponse);
                 break;
         }

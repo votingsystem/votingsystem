@@ -11,6 +11,7 @@ import com.itextpdf.text.pdf.PdfSignatureAppearance;
 import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.PdfString;
 import com.itextpdf.text.pdf.PdfWriter;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -23,11 +24,13 @@ import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+
 import static org.votingsystem.model.ContextVS.*;
 
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.Callable;
+
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -41,6 +44,7 @@ import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.applet.pdf.DNIePDFSessionHelper;
@@ -49,7 +53,6 @@ import org.votingsystem.signature.util.PDF_CMSSignedGenerator;
 import org.votingsystem.signature.util.VotingSystemCMSSignedGenerator;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
-
 import org.apache.log4j.Logger;
 import org.votingsystem.applet.util.HttpHelper;
 import org.votingsystem.applet.votingtool.VotingToolContext;
@@ -208,9 +211,9 @@ public class PDFSignedSender implements Callable<ResponseVS> {
         if(destinationCert != null) {
             logger.debug("---- with destinationCert -> encrypting response");
             bytesToSend = Encryptor.encryptFile(fileToSend,destinationCert);
-            contentType = ContextVS.PDF_SIGNED_AND_ENCRYPTED_CONTENT_TYPE;
+            contentType = ContentTypeVS.PDF_SIGNED_AND_ENCRYPTED;
         } else {
-            contentType = ContextVS.PDF_SIGNED_CONTENT_TYPE;
+            contentType = ContentTypeVS.PDF_SIGNED;
             bytesToSend = FileUtils.getBytesFromFile(fileToSend);
         }
 

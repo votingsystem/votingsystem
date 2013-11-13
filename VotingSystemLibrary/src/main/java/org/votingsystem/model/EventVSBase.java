@@ -280,7 +280,7 @@ public class EventVSBase implements EventVS {
 				campoMap.put("id", opcion.getId());
 				optionList.add(campoMap);
 			}
-			if(type == TypeVS.EVENTO_VOTACION) resultMap.put("opciones", optionList);
+			if(type == TypeVS.VOTING_EVENT) resultMap.put("opciones", optionList);
 			else resultMap.put("campos", optionList);
 		}
 		if (cardinalidadDeOpciones != null) map.put("cardinalidad",
@@ -298,7 +298,7 @@ public class EventVSBase implements EventVS {
 	public HashMap getVoteDataMap() {
 		logger.debug("getVoteDataMap");
 		Map map = new HashMap();
-		map.put("operation", OperationVSBase.ENVIO_VOTO_SMIME.toString());
+		map.put("operation", TypeVS.SEND_SMIME_VOTE.toString());
 		map.put("eventoURL", url);
 		map.put("opcionSeleccionadaId", opcionSeleccionada.getId());
 		map.put("opcionSeleccionadaContenido", opcionSeleccionada.getContent());
@@ -310,7 +310,7 @@ public class EventVSBase implements EventVS {
 	public HashMap getAccessRequestDataMap() {
 		logger.debug("getAccessRequestDataMap");
 		Map map = new HashMap();
-		map.put("operation", OperationVSBase.SOLICITUD_ACCESO.toString());
+		map.put("operation", TypeVS.ACCESS_REQUEST.toString());
 		if(eventoId != null) map.put("eventId", eventoId);
 		else map.put("eventId", id);
 		map.put("eventURL", url);
@@ -324,7 +324,7 @@ public class EventVSBase implements EventVS {
 	public HashMap getCancelVoteDataMap() {
 		logger.debug("getCancelVoteDataMap");
 		Map map = new HashMap();
-		map.put("operation", OperationVSBase.ANULADOR_VOTO.toString());
+		map.put("operation", TypeVS.CANCEL_VOTE.toString());
 		map.put("origenHashCertificadoVoto", origenHashCertificadoVoto);
 		map.put("hashCertificadoVotoBase64", hashCertificadoVotoBase64);
 		map.put("origenHashSolicitudAcceso", origenHashSolicitudAcceso);
@@ -337,7 +337,7 @@ public class EventVSBase implements EventVS {
 	public HashMap getChangeEventDataMap(String serverURL, Estado state) {
 		logger.debug("getCancelEventDataMap");
 		Map map = new HashMap();
-		map.put("operation", OperationVSBase.CANCELAR_EVENTO.toString());
+		map.put("operation", TypeVS.EVENT_CANCELLATION.toString());
 		map.put("accessControlURL", serverURL);
 		if(eventoId != null) map.put("eventId", eventoId);
 		else map.put("eventId", id);

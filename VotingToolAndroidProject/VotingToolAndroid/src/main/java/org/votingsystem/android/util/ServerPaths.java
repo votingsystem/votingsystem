@@ -125,13 +125,13 @@ public class ServerPaths {
     		String serverURL, OperationVSAndroid.Tipo type) {
     	String param = null;
     	switch(type) {
-	    	case PUBLICACION_RECLAMACION_SMIME:
+	    	case CLAIM_PUBLISHING:
 	    		param = "claim";
 	    		break;
-	    	case PUBLICACION_MANIFIESTO_PDF:
+	    	case MANIFEST_PUBLISHING:
 	    		param = "manifest";
 	    		break;
-	    	case PUBLICACION_VOTACION_SMIME:
+	    	case VOTING_PUBLISHING:
 	    		param = "vote";
 	    		break;
     	}
@@ -196,13 +196,13 @@ public class ServerPaths {
         String basePath = event.getAccessControl().getServerURL();
         if (!basePath.endsWith("/")) basePath = basePath + "/";
         switch(event.getTypeVS()) {
-            case EVENTO_VOTACION:
+            case VOTING_EVENT:
                 basePath = basePath + "eventoVotacion/";
                 break;
-            case EVENTO_RECLAMACION:
+            case CLAIM_EVENT:
                 basePath = basePath + "eventoReclamacion/";
                 break;
-            case EVENTO_FIRMA:
+            case SIGN_EVENT:
                 basePath = basePath + "eventoFirma/";
                 break;
         }

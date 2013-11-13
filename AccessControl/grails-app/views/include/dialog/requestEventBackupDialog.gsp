@@ -25,19 +25,19 @@ function showRequestEventBackupDialog(callback) {
 $('#requestEventBackupForm').submit(function(event){
 	event.preventDefault();
    	var webAppMessage = new WebAppMessage(
-	    	StatusCode.SC_PROCESANDO, 
-	    	Operation.SOLICITUD_COPIA_SEGURIDAD)
+	    	StatusCode.SC_PROCESSING, 
+	    	Operation.BACKUP_REQUEST)
    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
 	webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
 	webAppMessage.urlEnvioDocumento = "${createLink(controller:'solicitudCopia', absolute:true)}"
 	webAppMessage.asuntoMensajeFirmado = "${eventMap.asunto}"
 	webAppMessage.evento = pageEvent
-	pageEvent.operation = Operation.SOLICITUD_COPIA_SEGURIDAD
+	pageEvent.operation = Operation.BACKUP_REQUEST
 	webAppMessage.contenidoFirma = pageEvent
 	webAppMessage.emailSolicitante = $("#eventBackupUserEmailText").val()
 	webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStamp', absolute:true)}"
 	webAppMessage.respuestaConRecibo = true
-	pendingOperation = Operation.FIRMA_RECLAMACION_SMIME
+	pendingOperation = Operation.SMIME_CLAIM_SIGNATURE
 	votingSystemClient.setMessageToSignatureClient(webAppMessage, callerCallback); 
 });
 

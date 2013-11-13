@@ -477,7 +477,7 @@ class RepresentativeService {
 				msg = messageSource.getMessage('userIsRepresentativeErrorMsg',
 					[usuario.nif].toArray(), locale)
 				log.error "saveUserRepresentative - ERROR - user '${usuario.nif}' is REPRESENTATIVE - ${msg}"
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
 					message:msg, type:TypeVS.REPRESENTATIVE_SELECTION_ERROR)
 			}
 			def messageJSON = JSON.parse(smimeMessage.getSignedContent())
@@ -502,7 +502,7 @@ class RepresentativeService {
 				msg = messageSource.getMessage('representativeNifErrorMsg',
 					[requestValidatedNIF].toArray(), locale)
 				log.error "saveUserRepresentative - ERROR NIF REPRESENTATIVE - ${msg}"
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
 					message:msg, type:TypeVS.REPRESENTATIVE_SELECTION_ERROR)
 			}
 			
@@ -539,13 +539,13 @@ class RepresentativeService {
 				fromUser, toUser, smimeMessage, subject)
 			MessageSMIME messageSMIMEResp = new MessageSMIME(
 					smimeMessage:smimeMessageResp,
-					type:TypeVS.RECIBO, smimePadre: messageSMIMEReq, 
+					type:TypeVS.RECEIPT, smimePadre: messageSMIMEReq, 
 					valido:true, contenido:smimeMessageResp.getBytes())
 			MessageSMIME.withTransaction {
 				messageSMIMEResp.save();
 			}
 			return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg,
-				messageSMIME:messageSMIMEResp, type:TypeVS.REPRESENTATIVE_SELECTION)
+				data:messageSMIMEResp, type:TypeVS.REPRESENTATIVE_SELECTION)
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
 			msg = messageSource.getMessage(
@@ -590,7 +590,7 @@ class RepresentativeService {
 			if(!base64ResultDigest.equals(base64ImageHash)) {
 				msg = messageSource.getMessage('imageHashErrorMsg', null, locale)
 				log.error("saveRepresentativeData - ERROR ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
 					message:msg, type:TypeVS.REPRESENTATIVE_DATA_ERROR)
 			}
 			//String base64EncodedImage = messageJSON.base64RepresentativeEncodedImage
@@ -738,7 +738,7 @@ class RepresentativeService {
 				
 				msg = messageSource.getMessage('dateRangeErrorMsg',[formatter.format(dateFrom), 
 					formatter.format(dateTo)].toArray(), locale) 
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 					message:msg, type:TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST_ERROR)
 			}
 			TypeVS operationType = TypeVS.valueOf(messageJSON.operation)
@@ -746,7 +746,7 @@ class RepresentativeService {
 				msg = messageSource.getMessage('operationErrorMsg',
 					[messageJSON.operation].toArray(), locale)
 				log.error "processVotingHistoryRequest - OPERATION ERROR - ${msg}"
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 					message:msg, type:TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST_ERROR)
 			}
 			String requestValidatedNIF =  StringUtils.validarNIF(messageJSON.representativeNif)
@@ -757,7 +757,7 @@ class RepresentativeService {
 				msg = messageSource.getMessage('representativeNifErrorMsg',
 					[requestValidatedNIF].toArray(), locale)
 				log.error "processVotingHistoryRequest - USER NOT REPRESENTATIVE ${msg}"
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg, 
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, 
 					type:TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST_ERROR)
 			}
 
@@ -807,14 +807,14 @@ class RepresentativeService {
 				msg = messageSource.getMessage('operationErrorMsg',
 					[messageJSON.operation].toArray(), locale)
 				log.error "processRevoke - OPERATION ERROR - ${msg}" 
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 					message:msg, type:TypeVS.REPRESENTATIVE_REVOKE_ERROR)
 			}
 			if(Usuario.Type.REPRESENTATIVE != usuario.type) {
 				msg = messageSource.getMessage('unsubscribeRepresentativeUserErrorMsg',
 					[usuario.nif].toArray(), locale)
 				log.error "processRevoke - USER TYPE ERROR - ${msg}"
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
 					message:msg, type:TypeVS.REPRESENTATIVE_REVOKE_ERROR)
 			}
 			//(TODO notify users)=====
@@ -874,7 +874,7 @@ class RepresentativeService {
 				getMultiSignedMimeMessage(fromUser, toUser, smimeMessage, subject)
 				
 			MessageSMIME messageSMIMEResp = new MessageSMIME(
-				type:TypeVS.RECIBO, smimePadre: messageSMIMEReq,
+				type:TypeVS.RECEIPT, smimePadre: messageSMIMEReq,
 				valido:true, contenido:smimeMessageResp.getBytes())
 			MessageSMIME.withTransaction {
 				messageSMIMEResp.save();
@@ -883,7 +883,7 @@ class RepresentativeService {
 			msg =  messageSource.getMessage('representativeRevokeMsg',
 				[usuario.getNif()].toArray(), locale)
 			return new ResponseVS(statusCode:ResponseVS.SC_OK, 
-				messageSMIME:messageSMIMEResp, usuario:usuario, 
+				data:messageSMIMEResp, userVS:usuario, 
 				type:TypeVS.REPRESENTATIVE_REVOKE, message:msg )
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
@@ -912,7 +912,7 @@ class RepresentativeService {
 				!selectedDate || !messageJSON.email || !messageJSON.UUID ){
 				msg = messageSource.getMessage('representativeAccreditationRequestErrorMsg', null, locale)
 				log.error "processAccreditationsRequest - ERROR DATA - ${msg} - ${messageJSON.toString()}"
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg,
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
 					type:TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST_ERROR)
 			}
 			Usuario representative = Usuario.findWhere(nif:requestValidatedNIF,
@@ -921,7 +921,7 @@ class RepresentativeService {
 			   msg = messageSource.getMessage('representativeNifErrorMsg',
 				   [requestValidatedNIF].toArray(), locale)
 			   log.error "processAccreditationsRequest - ERROR REPRESENTATIVE - ${msg}"
-			   return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg,
+			   return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
 				   type:TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST_ERROR)
 		   }
 			runAsync {

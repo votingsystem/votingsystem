@@ -120,7 +120,7 @@ class EventoVotacionController {
 		if(!messageSMIME) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -196,7 +196,7 @@ class EventoVotacionController {
             render message(code: 'eventoUrlNotFound', args:[params.eventAccessControlURL])
             return false
         }
-        response.status = ResponseVS.SC_ERROR_PETICION
+        response.status = ResponseVS.SC_ERROR_REQUEST
 	    render message(code: 'error.PeticionIncorrectaHTML', args:[
 			"${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]);
         return false
@@ -259,7 +259,7 @@ class EventoVotacionController {
 			else render estadisticasMap as JSON
             return false
         } else {
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render message(code: 'error.PeticionIncorrectaHTML', args:[
 				"${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
 			return false
@@ -305,7 +305,7 @@ class EventoVotacionController {
 		if(!messageSMIMEReq) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -313,7 +313,7 @@ class EventoVotacionController {
 			messageSMIMEReq, request.getLocale());
 		if(ResponseVS.SC_OK == respuesta.statusCode) {
 			response.status = ResponseVS.SC_OK
-			response.setContentType(ContextVS.SIGNED_CONTENT_TYPE)
+			response.setContentType(org.votingsystem.model.ContentTypeVS.SIGNED)
 		}
 		params.respuesta = respuesta
 	}
@@ -341,7 +341,7 @@ class EventoVotacionController {
 		def errors
 		MessageSMIME.withTransaction {
 			errors = MessageSMIME.findAllWhere (
-				tipo:TypeVS.VOTO_CON_ERRORES,  evento:event)
+				type:TypeVS.VOTE_ERROR,  evento:event)
 		}
 		
 		if(errors.size == 0){

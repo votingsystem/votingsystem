@@ -4,7 +4,7 @@ import java.security.cert.X509Certificate;
 import java.util.Collection;
 import org.votingsystem.model.ContextVS;
 import grails.converters.JSON
-
+import org.votingsystem.model.ContentTypeVS;
 import javax.mail.internet.MimeMessage
 
 import org.votingsystem.controlcenter.model.*;
@@ -36,7 +36,7 @@ class AnuladorVotoController {
 		if(!messageSMIMEReq) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -51,8 +51,8 @@ class AnuladorVotoController {
 		X509Certificate receiverCert = certColl.iterator().next()
 		params.receiverCert = receiverCert
 		if(ResponseVS.SC_OK == respuesta.statusCode || 
-			ResponseVS.SC_ANULACION_REPETIDA == respuesta.statusCode) {
-			response.setContentType(ContextVS.SIGNED_AND_ENCRYPTED_CONTENT_TYPE)
+			ResponseVS.SC_CANCELLATION_REPEATED == respuesta.statusCode) {
+			response.setContentType(ContentTypeVS.SIGNED_AND_ENCRYPTED)
 		}
 		params.respuesta =  respuesta
 	}

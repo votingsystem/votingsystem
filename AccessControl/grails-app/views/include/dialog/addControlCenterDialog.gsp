@@ -48,7 +48,7 @@ $('#newControlCenter').submit(function(event){
 	jqxhr.done(function(data) {
 		//var dataStr = JSON.stringify(data);  
 		//console.log( "second success - dataStr: " + dataStr);
-		if(DataType.CENTRO_CONTROL == data.serverType) { 
+		if(DataType.CONTROL_CENTER == data.serverType) { 
 			associateControlCenter(data.serverURL)
 		} else {
 			console.log( "Server type wrong -> " + data.serverType);
@@ -93,11 +93,11 @@ $("#addControlCenterDialog").dialog({
 	function associateControlCenter(controlCenterURL){ 
 		console.log("addControlCenterDialog.associateControlCenter - controlCenterURL: " + controlCenterURL);
 	 	var webAppMessage = new WebAppMessage(
-	   		StatusCode.SC_PROCESANDO, 
-	   		Operation.ASOCIAR_CENTRO_CONTROL)
+	   		StatusCode.SC_PROCESSING, 
+	   		Operation.CONTROL_CENTER_ASSOCIATION)
 	 	var signatureContent = {
 			serverURL:controlCenterURL,
-			operation:Operation.ASOCIAR_CENTRO_CONTROL}
+			operation:Operation.CONTROL_CENTER_ASSOCIATION}
 	 	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
 		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
 		webAppMessage.contenidoFirma = signatureContent
@@ -110,7 +110,7 @@ $("#addControlCenterDialog").dialog({
 		console.log("addControlCenterDialog.associateControlCenterCallback")
 		var appMessageJSON = toJSON(callbackMessage)
 		if(appMessageJSON != null) {
-			if(StatusCode.SC_PROCESANDO ==  appMessageJSON.statusCode){
+			if(StatusCode.SC_PROCESSING ==  appMessageJSON.statusCode){
 				$("#loadingVotingSystemAppletDialog").dialog("close");
 				$("#workingWithAppletDialog").dialog("open");
 			} else {

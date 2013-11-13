@@ -136,7 +136,7 @@ public class DNIePDFSessionHelper extends CMSSignedGenerator
             ByteArrayInputStream bais = new ByteArrayInputStream(out.toByteArray());
             MessageDigest softwareDigestEngine = MessageDigest.getInstance(PDF_SIGNATURE_DIGEST);
             int bytesRead;
-            byte[] dataBuffer = new byte[ResponseVS.SC_ERROR_VOTO_REPETIDO];
+            byte[] dataBuffer = new byte[ResponseVS.SC_ERROR_VOTE_REPEATED];
             while ((bytesRead = bais.read(dataBuffer)) >= 0) {
               softwareDigestEngine.update(dataBuffer, 0, bytesRead);
             }

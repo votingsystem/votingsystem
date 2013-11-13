@@ -1,4 +1,4 @@
-{"codigoEstado":700, "operacion":"CANCELAR_EVENTO", "mensaje":null, 
+{"codigoEstado":700, "operacion":"EVENT_CANCELLATION", "mensaje":null, 
             "urlEnvioDocumento":"http://localhost:8080/SistemaVotacionControlAcceso/evento/cancelled", 
             "asuntoMensajeFirmado":"Cancelar documento - Asunto Votación Pruebas -> 2013-06-28 13:51:06", 
             "evento":{"id":1, "fechaCreacion":"2013-06-28 13:51:07", 
@@ -17,6 +17,6 @@
             {"id":16, "contenido":"si"},{"id":17, "contenido":"depende"}], 
                 "centroControl":{"id":1, "serverURL":"http://192.168.1.4:8081/SistemaVotacionCentroControl", 
                     "nombre":"Primer CentroControl", 
-                    "estadisticasEventoURL":"http://192.168.1.4:8081/SistemaVotacionCentroControl/eventoVotacion/estadisticas?eventAccessControlURL=http://192.168.1.4:8080/SistemaVotacionControlAcceso/eventoVotacion/6"}, "certificadoCA_DeEvento":"http://192.168.1.4:8080/SistemaVotacionControlAcceso/certificado/eventCA/6", "tipo":"EVENTO_VOTACION"}, 
-            "nombreDestinatarioFirma":"Primer ControlAcceso", "contenidoFirma":{"operation":"CANCELAR_EVENTO", "accessControlURL":"http://192.168.1.4:8080/SistemaVotacionControlAcceso", "eventId":"1", "estado":"CANCELADO"}, 
+                    "estadisticasEventoURL":"http://192.168.1.4:8081/SistemaVotacionCentroControl/eventoVotacion/estadisticas?eventAccessControlURL=http://192.168.1.4:8080/SistemaVotacionControlAcceso/eventoVotacion/6"}, "certificadoCA_DeEvento":"http://192.168.1.4:8080/SistemaVotacionControlAcceso/certificado/eventCA/6", "tipo":"VOTING_EVENT"}, 
+            "nombreDestinatarioFirma":"Primer ControlAcceso", "contenidoFirma":{"operation":"EVENT_CANCELLATION", "accessControlURL":"http://192.168.1.4:8080/SistemaVotacionControlAcceso", "eventId":"1", "estado":"CANCELADO"}, 
             "respuestaConRecibo":false, "urlTimeStampServer":"http://localhost:8080/SistemaVotacionControlAcceso/timeStamp", "urlServer":"http://192.168.1.4:8080/SistemaVotacionControlAcceso"}

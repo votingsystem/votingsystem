@@ -66,8 +66,8 @@ class EventoVotacionService {
 			if(!controlAcceso) {
 				msg = message(code:'accessControlNotFound', args:[serverURL])
 				log.debug("- saveEvent - ${msg}")
-				return new ResponseVS(tipo:Tipo.EVENTO_VOTACION_ERROR,
-					message:msg, statusCode:ResponseVS.SC_ERROR_PETICION)
+				return new ResponseVS(type:TypeVS.VOTING_EVENT_ERROR,
+					message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST)
 			}
 			def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
 			if(!messageJSON.certCAVotacion || !messageJSON.usuario ||
@@ -75,16 +75,16 @@ class EventoVotacionService {
 				!messageJSON.centroControl) {
 				msg = messageSource.getMessage('documentParamsErrorMsg', null, locale)
 				log.error("saveEvent - ERROR - ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-					message:msg, tipo:Tipo.EVENTO_VOTACION_ERROR)	
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+					message:msg, type:TypeVS.VOTING_EVENT_ERROR)	
 			}
 			String serverURL = grailsApplication.config.grails.serverURL
 			if (!serverURL.equals(messageJSON.centroControl?.serverURL)) {
 				msg = messageSource.getMessage('localServerURLErrorMsg', 
 					[messageJSON.centroControl?.serverURL, serverURL].toArray(), locale)
 				log.error("saveEvent - ERROR - ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
-					message:msg, tipo:Tipo.EVENTO_VOTACION_ERROR)	
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
+					message:msg, type:TypeVS.VOTING_EVENT_ERROR)	
 			}
 			X509Certificate certCAVotacion = CertUtil.fromPEMToX509Cert(messageJSON.certCAVotacion?.bytes)
 			byte[] cadenaCertificacion = messageJSON.cadenaCertificacion?.getBytes()
@@ -95,8 +95,8 @@ class EventoVotacionService {
 			respuesta = subscripcionService.checkUser(user, locale)
 			if(ResponseVS.SC_OK != respuesta.statusCode) {
 				log.error("saveEvent - USER CHECK ERROR - ${respuesta.message}")
-				return  new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
-					message:respuesta.message, tipo:Tipo.EVENTO_VOTACION_ERROR)	
+				return  new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
+					message:respuesta.message, type:TypeVS.VOTING_EVENT_ERROR)	
 			} 
 			user = respuesta.usuario
 			def evento = new EventoVotacion(eventoVotacionId:messageJSON.id,
@@ -106,13 +106,13 @@ class EventoVotacionService {
 				fechaFin:DateUtils.getDateFromString(messageJSON.fechaFin))
 			respuesta = setEventDatesState(evento, locale)
 			if(ResponseVS.SC_OK != respuesta.statusCode) {
-				return  new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-					message:respuesta.message, tipo:Tipo.EVENTO_VOTACION_ERROR)
+				return  new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+					message:respuesta.message, type:TypeVS.VOTING_EVENT_ERROR)
 			}
 			EventoVotacion.withTransaction { evento.save() }
 			Certificado certificadoCAVotacion = new Certificado(esRaiz:true,
 				actorConIP:controlAcceso, estado:Certificado.Estado.OK,
-				tipo:Certificado.Tipo.RAIZ_VOTOS, eventoVotacion:evento,
+				type:Certificado.Type.RAIZ_VOTOS, eventoVotacion:evento,
 				contenido:certCAVotacion.getEncoded(),
 				numeroSerie:certCAVotacion.getSerialNumber().longValue(),
 				validoDesde:certCAVotacion?.getNotBefore(),
@@ -126,12 +126,12 @@ class EventoVotacionService {
 			evento.save()
 			log.debug("saveEvent - SAVED event - '${evento.id}'")
 			return new ResponseVS(statusCode:ResponseVS.SC_OK, 
-				evento:evento, tipo:Tipo.EVENTO_VOTACION)
+				eventVS:evento, type:TypeVS.VOTING_EVENT)
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 				message: messageSource.getMessage('saveDocumentoErrorMsg', null, locale),
-				tipo:Tipo.EVENTO_VOTACION_ERROR)
+				type:TypeVS.VOTING_EVENT_ERROR)
 		}
 	}
 	
@@ -147,7 +147,7 @@ class EventoVotacionService {
 
 	ResponseVS setEventDatesState (EventoVotacion evento, Locale locale) {
 		if(evento.fechaInicio.after(evento.fechaFin)) {
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 				message:messageSource.getMessage('dateRangeErrorMsg',
 					[evento.fechaInicio, evento.fechaFin].toArray(), locale) )
 		}
@@ -169,7 +169,7 @@ class EventoVotacionService {
 			return new ResponseVS(statusCode:ResponseVS.SC_OK, evento:evento)
 		}
 		if(evento.fechaInicio.after(evento.fechaFin)) {
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
 				message:messageSource.getMessage(
                 'error.fechaInicioAfterFechaFinalMsg', null, locale) )
 		}
@@ -197,15 +197,15 @@ class EventoVotacionService {
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, evento:evento)
 	}
 	
-	//{"operation":"CANCELAR_EVENTO","accessControlURL":"...","eventId":"..","estado":"CANCELADO","UUID":"..."}
+	//{"operation":"EVENT_CANCELLATION","accessControlURL":"...","eventId":"..","estado":"CANCELADO","UUID":"..."}
 	private ResponseVS checkCancelEventJSONData(JSONObject cancelDataJSON, Locale locale) {
-		int status = ResponseVS.SC_ERROR_PETICION
-		TypeVS tipoRespuesta = TypeVS.CANCELAR_EVENTO_ERROR
+		int status = ResponseVS.SC_ERROR_REQUEST
+		TypeVS typeVS = TypeVS.EVENT_CANCELLATION_ERROR
 		String msg
 		try {
 			TypeVS operationType = TypeVS.valueOf(cancelDataJSON.operation)
 			if (cancelDataJSON.accessControlURL && cancelDataJSON.eventId &&
-				cancelDataJSON.estado && (TypeVS.CANCELAR_EVENTO == operationType) &&
+				cancelDataJSON.estado && (TypeVS.EVENT_CANCELLATION == operationType) &&
 				((EventoVotacion.Estado.CANCELADO == EventoVotacion.Estado.valueOf(cancelDataJSON.estado)) ||
 					(EventoVotacion.Estado.BORRADO_DE_SISTEMA == EventoVotacion.Estado.valueOf(cancelDataJSON.estado)))) {
 				status = ResponseVS.SC_OK
@@ -217,9 +217,9 @@ class EventoVotacionService {
 			log.error(ex.getMessage(), ex)
 			msg = messageSource.getMessage('evento.datosCancelacionError', null, locale)
 		}
-		if(ResponseVS.SC_OK == status) tipoRespuesta = TypeVS.CANCELAR_EVENTO
+		if(ResponseVS.SC_OK == status) typeVS = TypeVS.EVENT_CANCELLATION
 		else log.error("checkCancelEventJSONData - msg: ${msg} - data:${cancelDataJSON.toString()}")
-		return new ResponseVS(statusCode:status, message:msg, tipo:tipoRespuesta)
+		return new ResponseVS(statusCode:status, message:msg, type:typeVS)
 	}
 	
 	public ResponseVS cancelEvent(MessageSMIME messageSMIMEReq, Locale locale) {
@@ -242,15 +242,15 @@ class EventoVotacionService {
 				msg = messageSource.getMessage('evento.eventoNotFound',
 					[messageJSON?.eventId].toArray(), locale)
 				log.error("cancelEvent - msg: ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-					tipo:Tipo.CANCELAR_EVENTO_ERROR, message:msg)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+					type:TypeVS.EVENT_CANCELLATION_ERROR, message:msg)
 			}
 			if(evento.estado != EventoVotacion.Estado.ACTIVO) {
 				msg = messageSource.getMessage('eventAllreadyCancelledMsg',
 					[messageJSON?.eventId].toArray(), locale)
 				log.error("cancelEvent - msg: ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ANULACION_REPETIDA,
-					tipo:Tipo.CANCELAR_EVENTO_ERROR, message:msg)
+				return new ResponseVS(statusCode:ResponseVS.SC_CANCELLATION_REPEATED,
+					type:TypeVS.EVENT_CANCELLATION_ERROR, message:msg)
 			}
 			
 			Collection<X509Certificate> certColl = CertUtil.fromPEMToX509CertCollection(certChainBytes)
@@ -258,8 +258,8 @@ class EventoVotacionService {
 			if(!firmaService.isSignerCertificate(messageSMIMEReq.getSigners(), accessControlCert)) {
 				msg = messageSource.getMessage('eventCancelacionCertError', null, locale)
 				log.error("cancelEvent - msg: ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-					tipo:Tipo.CANCELAR_EVENTO_ERROR, message:msg, evento:evento)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+					type:TypeVS.EVENT_CANCELLATION_ERROR, message:msg, evento:evento)
 			}
 			//new state must be or CANCELLED or DELETED
 			EventoVotacion.Estado newState = EventoVotacion.Estado.valueOf(messageJSON.estado)
@@ -268,8 +268,8 @@ class EventoVotacionService {
 				msg = messageSource.getMessage('eventCancelacionStateError', 
 					[messageJSON.estado].toArray(), locale)
 				log.error("cancelEvent new state error - msg: ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-					tipo:Tipo.CANCELAR_EVENTO_ERROR, message:msg, evento:evento)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+					type:TypeVS.EVENT_CANCELLATION_ERROR, message:msg, eventVS:evento)
 			}
 			//local receipt
 			String fromUser = grailsApplication.config.VotingSystem.serverName
@@ -281,7 +281,7 @@ class EventoVotacionService {
 					getMultiSignedMimeMessage(fromUser, toUser, smimeMessageReq, subject)
 
 						
-			MessageSMIME messageSMIMEResp = new MessageSMIME(tipo:Tipo.RECIBO,
+			MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT,
 				smimePadre:messageSMIMEReq, evento:evento, valido:true,
 				contenido:smimeMessageResp.getBytes())
 			if (!messageSMIMEResp.validate()) {
@@ -305,13 +305,13 @@ class EventoVotacionService {
 			}
 			log.debug("cancelEvent - cancelled event with id: ${evento.id}")
 			return new ResponseVS(statusCode:ResponseVS.SC_OK,message:msg,
-				tipo:Tipo.CANCELAR_EVENTO, messageSMIME:messageSMIMEResp,
-				evento:evento)			
+				type:TypeVS.EVENT_CANCELLATION, data:messageSMIMEResp,
+				eventVS:evento)			
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex)
 			msg = messageSource.getMessage('evento.datosCancelacionError', null, locale)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
-				message:msg, evento:evento, tipo:Tipo.CANCELAR_EVENTO_ERROR)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
+				message:msg, eventVS:evento, type:TypeVS.EVENT_CANCELLATION_ERROR)
 		}
 	}
 

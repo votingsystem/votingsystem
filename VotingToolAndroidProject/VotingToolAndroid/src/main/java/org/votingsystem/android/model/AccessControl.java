@@ -52,7 +52,7 @@ public class AccessControl extends ActorVS implements Serializable {
         
     @Override
     public Tipo getTipo() {
-        return Tipo.CENTRO_CONTROL;
+        return Tipo.CONTROL_CENTER;
     }
 
     /**

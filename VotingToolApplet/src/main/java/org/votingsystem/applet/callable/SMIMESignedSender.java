@@ -6,13 +6,12 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import org.apache.log4j.Logger;
 import org.votingsystem.applet.util.HttpHelper;
-import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
-
+import org.apache.log4j.Logger;
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -55,13 +54,13 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
         if(destinationCert != null) {
             messageToSendBytes = Encryptor.encryptSMIME(
                 smimeMessage, destinationCert);
-            documentContentType = ContextVS.SIGNED_AND_ENCRYPTED_CONTENT_TYPE;
+            documentContentType = ContentTypeVS.SIGNED_AND_ENCRYPTED;
         } else {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             smimeMessage.writeTo(baos);
             messageToSendBytes = baos.toByteArray();
             baos.close();
-            documentContentType = ContextVS.SIGNED_CONTENT_TYPE;
+            documentContentType = org.votingsystem.model.ContentTypeVS.SIGNED;
         } 
         responseVS = HttpHelper.INSTANCE.sendByteArray(
                 messageToSendBytes, documentContentType, urlToSendDocument,

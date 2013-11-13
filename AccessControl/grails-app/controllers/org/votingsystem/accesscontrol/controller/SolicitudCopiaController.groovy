@@ -74,7 +74,7 @@ class SolicitudCopiaController {
 				}
 				if(msg) {
 					params.respuesta = new ResponseVS(
-						statusCode:ResponseVS.SC_ERROR_PETICION,
+						statusCode:ResponseVS.SC_ERROR_REQUEST,
 						message:msg)
 					return false
 				}
@@ -126,14 +126,14 @@ class SolicitudCopiaController {
 
 
 			} else {
-				response.status = ResponseVS.SC_ERROR_PETICION
+				response.status = ResponseVS.SC_ERROR_REQUEST
 				render message(code: 'error.PeticionIncorrectaHTML', args:[
 					"${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
 				return false
 			}
 		} catch (Exception ex) {
 			log.error (ex.getMessage(), ex)
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render(ex.getMessage())
 			return false
 		}
@@ -170,7 +170,7 @@ class SolicitudCopiaController {
 			VotingSystemApplicationContex.instance.environment)) {
 			def msg = message(code: "serviceDevelopmentModeMsg")
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -181,7 +181,7 @@ class SolicitudCopiaController {
 		if(!event) {
 			def msg = message(code: "nullParamErrorMsg")
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -210,7 +210,7 @@ class SolicitudCopiaController {
 			solicitud = SolicitudCopia.get(params.long('id'))
 		}
 		if(!solicitud) {
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render message(code: 'solicitudCopia.noEncontrada', args:[params.id]) 
 			return false
 		}
@@ -242,7 +242,7 @@ class SolicitudCopiaController {
 			} 
 		}
 		if(!solicitud) {
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render message(code: 'solicitudCopia.noEncontrada', args:[params.id]) 
 			return false
 		}

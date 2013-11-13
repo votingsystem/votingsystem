@@ -343,15 +343,15 @@ public class NavigationDrawer extends ActionBarActivity {
                         switch (which) {
                             case 0:
                                 intent.putExtra(EventPublishingActivity.FORM_TYPE_KEY,
-                                        OperationVSAndroid.Tipo.PUBLICACION_VOTACION_SMIME.toString());
+                                        OperationVSAndroid.Tipo.VOTING_PUBLISHING.toString());
                                 break;
                             case 1:
                                 intent.putExtra(EventPublishingActivity.FORM_TYPE_KEY,
-                                        OperationVSAndroid.Tipo.PUBLICACION_MANIFIESTO_PDF.toString());
+                                        OperationVSAndroid.Tipo.MANIFEST_PUBLISHING.toString());
                                 break;
                             case 2:
                                 intent.putExtra(EventPublishingActivity.FORM_TYPE_KEY,
-                                        OperationVSAndroid.Tipo.PUBLICACION_RECLAMACION_SMIME.toString());
+                                        OperationVSAndroid.Tipo.CLAIM_PUBLISHING.toString());
                                 break;
                         }
                         startActivity(intent);

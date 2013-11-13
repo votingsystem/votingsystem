@@ -35,7 +35,7 @@ public class InformacionEventoPanel extends JPanel {
             dateFinishValueLabel.setText(DateUtils.getStringFromDate(metaInf.getDateFinish()));
             dateInitValueLabel.setText(DateUtils.getStringFromDate(metaInf.getDateInit()));
             switch (metaInf.getType()) {
-                case EVENTO_FIRMA:
+                case SIGN_EVENT:
                     valorTipoEvento = ContextVS.INSTANCE.getString("manfiestoLabel");
                     eventPathPart = "/eventoFirma";
                     documentosFirmadosLabel.setText("<html><b>" + 
@@ -45,7 +45,7 @@ public class InformacionEventoPanel extends JPanel {
                             String.valueOf(metaInf.getNumSignatures()));
                     representativesButton.setVisible(false);
                     break;
-                case EVENTO_RECLAMACION:
+                case CLAIM_EVENT:
                     valorTipoEvento = ContextVS.INSTANCE.
                         getString("reclamacionLabel");
                     eventPathPart = "/eventoReclamacion";
@@ -56,7 +56,7 @@ public class InformacionEventoPanel extends JPanel {
                             String.valueOf(metaInf.getNumSignatures()));
                     representativesButton.setVisible(false);
                     break;
-                case EVENTO_VOTACION:
+                case VOTING_EVENT:
                     valorTipoEvento = ContextVS.INSTANCE.
                         getString("votacionLabel");
                     eventPathPart = "/eventoVotacion";

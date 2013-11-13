@@ -6,7 +6,7 @@ import javax.swing.JFileChooser;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.applet.model.OperationVSApplet;
+import org.votingsystem.applet.model.AppletOperation;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.FileUtils;
 
@@ -40,7 +40,7 @@ public class SaveReceiptDialog extends javax.swing.JDialog {
     public void guardarRecibo(String hashCertificadoVotoBase64) { 
         logger.debug(" - guardarRecibo - ");
         VoteVS recibo = VotingToolContext.INSTANCE.getVoteReceipt(hashCertificadoVotoBase64);
-        OperationVSApplet operationVS = new OperationVSApplet(ResponseVS.SC_CANCELADO);
+        AppletOperation operationVS = new AppletOperation(ResponseVS.SC_CANCELLED);
         parentFrame.setLocationRelativeTo(null);
         if(recibo != null) {
             String resultado = ContextVS.INSTANCE.getString("operacionCancelada");
@@ -69,7 +69,7 @@ public class SaveReceiptDialog extends javax.swing.JDialog {
             logger.debug("- guardarRecibo - resultado: " + operationVS.toJSON().toString());
         } else {
             logger.debug(" - Receipt Null - ");
-            operationVS.setStatusCode(ResponseVS.SC_ERROR_PETICION);
+            operationVS.setStatusCode(ResponseVS.SC_ERROR_REQUEST);
             operationVS.setMessage(ContextVS.INSTANCE.getString(
                             "receiptNotFoundMsg", hashCertificadoVotoBase64));
         }

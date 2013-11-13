@@ -21,7 +21,7 @@ import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.applet.util.ImagePreviewPanel;
 import org.votingsystem.applet.callable.RepresentativeDataSender;
-import org.votingsystem.applet.model.OperationVSApplet;
+import org.votingsystem.applet.model.AppletOperation;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.util.VotingSystemException;
 
@@ -34,7 +34,7 @@ public class RepresentativeDataDialog extends JDialog  {
     private static Logger logger = Logger.getLogger(SaveReceiptDialog.class);
 
     private Frame parentFrame = null;
-    private OperationVSApplet operacion = null;
+    private AppletOperation operacion = null;
     private File selectedImage = null;
     private Future<ResponseVS> tareaEnEjecucion;
     private AtomicBoolean mostrandoPantallaEnvio = new AtomicBoolean(false);
@@ -58,7 +58,7 @@ public class RepresentativeDataDialog extends JDialog  {
             public void windowClosing(WindowEvent e) {
                 logger.debug(" - window closing event received");
                 done.set(true);
-                sendResponse(ResponseVS.SC_CANCELADO,
+                sendResponse(ResponseVS.SC_CANCELLED,
                     ContextVS.INSTANCE.getString("operacionCancelada"));
             }
         });
@@ -95,7 +95,7 @@ public class RepresentativeDataDialog extends JDialog  {
         pack();
     }
     
-    public void show(OperationVSApplet operacion) {
+    public void show(AppletOperation operacion) {
         this.operacion = operacion;
         setVisible(true);
     }
@@ -396,7 +396,7 @@ public class RepresentativeDataDialog extends JDialog  {
             mostrarPantallaEnvio(false);
             return;
         }
-        sendResponse(ResponseVS.SC_CANCELADO, ContextVS.INSTANCE.
+        sendResponse(ResponseVS.SC_CANCELLED, ContextVS.INSTANCE.
                 getString("operacionCancelada"));
     }//GEN-LAST:event_cerrarButtonActionPerformed
 

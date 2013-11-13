@@ -138,8 +138,8 @@
 		function sendSignature() {
 			console.log("sendSignature")
 	    	var webAppMessage = new WebAppMessage(
-			    	StatusCode.SC_PROCESANDO, 
-			    	Operation.FIRMA_RECLAMACION_SMIME)
+			    	StatusCode.SC_PROCESSING, 
+			    	Operation.SMIME_CLAIM_SIGNATURE)
 	    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
     		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
    			webAppMessage.urlEnvioDocumento = "${createLink( controller:'recolectorReclamacion', absolute:true)}"
@@ -151,7 +151,7 @@
 				fieldsArray[${i}] = {id:${claimField?.id}, contenido:'${claimField?.contenido}', valor:$("#claimField${claimField?.id}").val()}
 			</g:each>
 			pageEvent.campos = fieldsArray
-			pageEvent.operation = Operation.FIRMA_RECLAMACION_SMIME
+			pageEvent.operation = Operation.SMIME_CLAIM_SIGNATURE
 			webAppMessage.contenidoFirma = pageEvent
 			webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStamp', absolute:true)}"
 			webAppMessage.respuestaConRecibo = true
@@ -163,7 +163,7 @@
 			console.log("requestBackupCallback");
 			var appMessageJSON = toJSON(appMessage)
 			if(appMessageJSON != null) {
-				if(StatusCode.SC_PROCESANDO == appMessageJSON.statusCode){
+				if(StatusCode.SC_PROCESSING == appMessageJSON.statusCode){
 					$("#loadingVotingSystemAppletDialog").dialog("close");
 					$("#workingWithAppletDialog").dialog("open");
 				} else {
@@ -186,7 +186,7 @@
 				var caption = '<g:message code="operationERRORCaption"/>'
 				if(StatusCode.SC_OK == appMessageJSON.statusCode) { 
 					caption = "<g:message code='operationOKCaption'/>"
-				} else if (StatusCode.SC_CANCELADO== appMessageJSON.statusCode) {
+				} else if (StatusCode.SC_CANCELLED== appMessageJSON.statusCode) {
 					caption = "<g:message code='operationCANCELLEDLbl'/>"
 				}
 				var msg = appMessageJSON.message

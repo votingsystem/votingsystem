@@ -121,10 +121,10 @@ class EncryptionService {
 			log.error (ex.getMessage(), ex)
 			return new ResponseVS(message:messageSource.getMessage(
 				'encryptedMessageErrorMsg', null, locale),
-				statusCode:ResponseVS.SC_ERROR_PETICION)
+				statusCode:ResponseVS.SC_ERROR_REQUEST)
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
-			return new ResponseVS(statusCode: ResponseVS.SC_ERROR_PETICION,
+			return new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
 				message:ex.getMessage())
 		}
 	}
@@ -154,7 +154,7 @@ class EncryptionService {
 				messageBytes:result)
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex);
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 				message:ex.getMessage())
 		}
 	}
@@ -202,7 +202,7 @@ class EncryptionService {
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
 			return new ResponseVS(message:ex.getMessage(),
-				statusCode:ResponseVS.SC_ERROR_PETICION)
+				statusCode:ResponseVS.SC_ERROR_REQUEST)
 		}	
 		return encryptSMIMEMessage(msgToEncrypt, receiverCert, locale)
 	}
@@ -244,11 +244,11 @@ class EncryptionService {
 			log.error (ex.getMessage(), ex)
 			return new ResponseVS(message:messageSource.getMessage(
 				'encryptedMessageErrorMsg', null, locale),
-				statusCode:ResponseVS.SC_ERROR_PETICION)
+				statusCode:ResponseVS.SC_ERROR_REQUEST)
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
 			return new ResponseVS(message:ex.getMessage(),
-				statusCode:ResponseVS.SC_ERROR_PETICION)
+				statusCode:ResponseVS.SC_ERROR_REQUEST)
 		}
 		return new ResponseVS(smimeMessage:smimeMessageReq,
 			statusCode:ResponseVS.SC_OK)

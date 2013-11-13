@@ -528,7 +528,7 @@ public class EventVSAndroid implements Serializable, EventVS {
     public JSONObject getVoteJSON() {
     	Log.d(TAG + ".getVoteJSON", "getVoteJSON");
         Map map = new HashMap();
-        map.put("operation", OperationVSAndroid.Tipo.ENVIO_VOTO_SMIME.toString());
+        map.put("operation", OperationVSAndroid.Tipo.SEND_SMIME_VOTE.toString());
         map.put("eventoURL", URL);
         map.put("opcionSeleccionadaId", opcionSeleccionada.getId());
         map.put("opcionSeleccionadaContenido", opcionSeleccionada.getContent());
@@ -568,8 +568,8 @@ public class EventVSAndroid implements Serializable, EventVS {
         map.put("contenido", contenido);
         map.put("UUID", UUID.randomUUID().toString());
         map.put("URL", URL);
-        if(TypeVS.EVENTO_RECLAMACION == typeVS) {
-            map.put("operation", OperationVSAndroid.Tipo.FIRMA_RECLAMACION_SMIME);
+        if(TypeVS.CLAIM_EVENT == typeVS) {
+            map.put("operation", OperationVSAndroid.Tipo.SMIME_CLAIM_SIGNATURE);
         }
         JSONObject jsonObject = new JSONObject(map);
         if (campos != null) {
@@ -595,7 +595,7 @@ public class EventVSAndroid implements Serializable, EventVS {
     public JSONObject getAccessRequestJSON() {
     	Log.d(TAG + ".getAccessRequestJSON(...)", "getAccessRequestJSON");
         Map map = new HashMap();
-        map.put("operation", OperationVSAndroid.Tipo.SOLICITUD_ACCESO.toString());
+        map.put("operation", OperationVSAndroid.Tipo.ACCESS_REQUEST.toString());
         if(eventoId != null) map.put("eventId", eventoId);
         else map.put("eventId", id);
         map.put("eventURL", URL);

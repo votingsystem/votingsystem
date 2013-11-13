@@ -156,7 +156,7 @@ var VotingSystemApplet = function () {
 
 
 
-	   	//var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESANDO,Operation.ENVIO_VOTO_SMIME)
+	   	//var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESSING,Operation.SEND_SMIME_VOTE)
 	   	//message = JSON.stringify(webAppMessage)
 
 

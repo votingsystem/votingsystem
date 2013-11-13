@@ -26,7 +26,7 @@ class InfoServidorController {
 	def index() { 
         HashMap infoServidor = new HashMap()
         infoServidor.nombre = grailsApplication.config.VotingSystem.serverName
-		infoServidor.serverType = TypeVS.CENTRO_CONTROL.toString()
+		infoServidor.serverType = TypeVS.CONTROL_CENTER.toString()
         infoServidor.serverURL = "${grailsApplication.config.grails.serverURL}"
         infoServidor.urlBlog = grailsApplication.config.VotingSystem.blogURL
         infoServidor.estado = ActorConIP.Estado.ACTIVO.toString()

@@ -221,6 +221,13 @@ class TestingController {
 			 Thread.sleep(6000)
 			 return "Hello from async controller"
 		}
+		/*
+		 * 				ctx.response.status = 200
+				ctx.response.setContentType("text/plain")
+				ctx.response.contentLength = anuladorVoto.messageSMIME.contenido.length
+				ctx.response.outputStream <<  anuladorVoto.messageSMIME.contenido
+				ctx.response.outputStream.flush()
+		 */
 		String respuesta = future.get()
 		render respuesta
 		ctx.complete();

@@ -132,8 +132,8 @@
 			function sendVote() {
 				console.log("sendVote")
 		    	var webAppMessage = new WebAppMessage(
-				    	StatusCode.SC_PROCESANDO, 
-				    	Operation.ENVIO_VOTO_SMIME)
+				    	StatusCode.SC_PROCESSING, 
+				    	Operation.SEND_SMIME_VOTE)
 		    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
 	    		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
     			votingEvent.urlSolicitudAcceso = "${grailsApplication.config.grails.serverURL}/solicitudAcceso"
@@ -141,7 +141,7 @@
 				votingEvent.opcionSeleccionada = selectedOption
 				webAppMessage.evento = votingEvent
 				webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStamp', absolute:true)}"
-				pendingOperation = Operation.ENVIO_VOTO_SMIME
+				pendingOperation = Operation.SEND_SMIME_VOTE
 				//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
 				votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
 			}
@@ -158,7 +158,7 @@
 						appMessageJSON = appMessage
 					} 
 					var statusCode = appMessageJSON.codigoEstado
-					if(StatusCode.SC_PROCESANDO == statusCode){
+					if(StatusCode.SC_PROCESSING == statusCode){
 						$("#loadingVotingSystemAppletDialog").dialog("close");
 						$("#workingWithAppletDialog").dialog("open");
 					} else {
@@ -166,7 +166,7 @@
 						var caption
 						var msgTemplate
 						var msg = appMessageJSON.mensaje
-						if(Operation.ENVIO_VOTO_SMIME == pendingOperation) {
+						if(Operation.SEND_SMIME_VOTE == pendingOperation) {
 							caption = '<g:message code="voteERRORCaption"/>'
 							msgTemplate = "<g:message code='voteResultMsg'/>"
 							if(StatusCode.SC_OK == statusCode) { 
@@ -174,13 +174,13 @@
 								msg = msgTemplate.format(
 										'<g:message code="voteResultOKMsg"/>',
 										appMessageJSON.mensaje);
-							} else if(StatusCode.SC_ERROR_VOTO_REPETIDO == statusCode) {
+							} else if(StatusCode.SC_ERROR_VOTE_REPEATED == statusCode) {
 								var msgTemplate1 =  "<g:message code='accessRequestRepeatedMsg'/>" 
 								msg = msgTemplate.format(
 										msgTemplate1.format('${eventMap?.asunto}'), 
 										appMessageJSON.mensaje);
 							}
-						} else if(Operation.CANCELAR_EVENTO == pendingOperation) {
+						} else if(Operation.EVENT_CANCELLATION == pendingOperation) {
 							if(StatusCode.SC_OK == statusCode) { 
 								caption = "<g:message code='operationOKCaption'/>"
 								msgTemplate = "<g:message code='documentCancellationOKMsg'/>"

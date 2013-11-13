@@ -116,7 +116,7 @@ class EventoVotacionController {
 			render eventosMap as JSON
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render ex.getMessage()
 			return false
 		}
@@ -139,7 +139,7 @@ class EventoVotacionController {
 		if(!messageSMIME) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -149,7 +149,7 @@ class EventoVotacionController {
 		if (ResponseVS.SC_OK == respuesta.statusCode) {
 			response.setHeader('eventURL', 
 				"${grailsApplication.config.grails.serverURL}/eventoVotacion/${respuesta.eventVS.id}")
-			response.contentType =  ContextVS.SIGNED_CONTENT_TYPE
+			response.contentType =  org.votingsystem.model.ContentTypeVS.SIGNED
 		}
     }
 
@@ -191,7 +191,7 @@ class EventoVotacionController {
             render message(code: 'eventNotFound', args:[params.id])
             return false
         }
-        response.status = ResponseVS.SC_ERROR_PETICION
+        response.status = ResponseVS.SC_ERROR_REQUEST
         render message(code: 'error.PeticionIncorrectaHTML', args:[
 			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
         return false
@@ -219,7 +219,7 @@ class EventoVotacionController {
 					List results = MessageSMIME.withCriteria {
 						createAlias("smimePadre", "smimePadre")
 						eq("smimePadre.evento", evento)
-						eq("smimePadre.type", TypeVS.EVENTO_VOTACION)
+						eq("smimePadre.type", TypeVS.VOTING_EVENT)
 					}
 					messageSMIME = results.iterator().next()
 				}
@@ -240,7 +240,7 @@ class EventoVotacionController {
                 return false
             }
         }
-        response.status = ResponseVS.SC_ERROR_PETICION
+        response.status = ResponseVS.SC_ERROR_REQUEST
         render message(code: 'error.PeticionIncorrectaHTML', args:[
 			"${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
         return false
@@ -264,7 +264,7 @@ class EventoVotacionController {
 			if (evento) {
 				MessageSMIME messageSMIME
 				MessageSMIME.withTransaction {
-					messageSMIME = MessageSMIME.findWhere(evento:evento, type: TypeVS.EVENTO_VOTACION)
+					messageSMIME = MessageSMIME.findWhere(evento:evento, type: TypeVS.VOTING_EVENT)
 				}
 				if (messageSMIME) {
 					response.status = ResponseVS.SC_OK
@@ -279,7 +279,7 @@ class EventoVotacionController {
 			render message(code: 'eventNotFound', args:[params.id])
 			return false
 		}
-		response.status = ResponseVS.SC_ERROR_PETICION
+		response.status = ResponseVS.SC_ERROR_REQUEST
 		render message(code: 'error.PeticionIncorrectaHTML', args:[
 			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false
@@ -374,7 +374,7 @@ class EventoVotacionController {
 			response.setContentType("application/json")
 			render informacionVotosMap as JSON
 		}
-		response.status = ResponseVS.SC_ERROR_PETICION
+		response.status = ResponseVS.SC_ERROR_REQUEST
 		render message(code: 'error.PeticionIncorrectaHTML',
 			args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
 		return false
@@ -402,7 +402,7 @@ class EventoVotacionController {
 		def errors
 		MessageSMIME.withTransaction {
 			errors = MessageSMIME.findAllWhere (
-				type:TypeVS.VOTO_CON_ERRORES,  evento:event)
+				type:TypeVS.VOTE_ERROR,  evento:event)
 		}
 		
 		if(errors.size == 0){

@@ -270,12 +270,8 @@ public class UserVSBase implements Serializable, UserVS {
         if(nif != null) this.nif = nif.toUpperCase();
     }
 
-    public CertificateVS getCertificadoCA() {
+    public CertificateVS getCertificateCA() {
         return certificateCA;
-    }
-
-    public void setCertificadoCA(CertificateVS certificateCA) {
-        
     }
         
         

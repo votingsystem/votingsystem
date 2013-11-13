@@ -43,7 +43,7 @@ public class EventStatisticsPagerActivity extends ActionBarActivity {
         String title = null;
         String subtTitle = null;
         switch(event.getTypeVS()) {
-            case EVENTO_FIRMA:
+            case SIGN_EVENT:
                 getSupportActionBar().setLogo(R.drawable.manifest_32);
                 title = getString(R.string.manifest_info_lbl) + " '"+ event.getAsunto() + "'";
                 switch(event.getEstadoEnumValue()) {
@@ -78,7 +78,7 @@ public class EventStatisticsPagerActivity extends ActionBarActivity {
                         getSupportActionBar().setTitle(getString(R.string.manifest_closed_lbl));
                 }
                 break;
-            case EVENTO_RECLAMACION:
+            case CLAIM_EVENT:
                 getSupportActionBar().setLogo(R.drawable.filenew_32);
                 title = getString(R.string.claim_info_lbl) + " '"+ event.getAsunto() + "'";
                 switch(event.getEstadoEnumValue()) {
@@ -112,7 +112,7 @@ public class EventStatisticsPagerActivity extends ActionBarActivity {
                         subtTitle = getString(R.string.claim_closed_lbl);
                 }
                 break;
-            case EVENTO_VOTACION:
+            case VOTING_EVENT:
                 getSupportActionBar().setLogo(R.drawable.poll_32);
                 title = getString(R.string.voting_info_lbl) + " '"+ event.getAsunto() + "'";
                 switch(event.getEstadoEnumValue()) {

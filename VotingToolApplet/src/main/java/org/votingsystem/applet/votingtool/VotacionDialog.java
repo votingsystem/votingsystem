@@ -31,7 +31,7 @@ import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.applet.callable.AccessRequestor;
 import org.votingsystem.applet.callable.SMIMESignedSender;
-import org.votingsystem.applet.model.OperationVSApplet;
+import org.votingsystem.applet.model.AppletOperation;
 import org.votingsystem.model.ContextVS;
 
 /**
@@ -46,7 +46,7 @@ public class VotacionDialog extends JDialog {
     private Frame parentFrame;
     private Future<ResponseVS> tareaEnEjecucion;
     private EventVSBase votoEvento;
-    private OperationVSApplet operation;
+    private AppletOperation operation;
     private SMIMEMessageWrapper smimeMessage;
     private final AtomicBoolean done = new AtomicBoolean(false);
     
@@ -63,7 +63,7 @@ public class VotacionDialog extends JDialog {
 
             public void windowClosing(WindowEvent e) {
                 logger.debug("VotacionDialog window closing event received");
-                sendResponse(ResponseVS.SC_CANCELADO,
+                sendResponse(ResponseVS.SC_CANCELLED,
                         ContextVS.INSTANCE.getString("operationCancelada"));
             }
         });
@@ -71,7 +71,7 @@ public class VotacionDialog extends JDialog {
         pack();
     }
 
-    public void show(OperationVSApplet operation) {
+    public void show(AppletOperation operation) {
         this.operation = operation;
         votoEvento = operation.getEvento();
         //Bug similar to -> http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6993691
@@ -239,7 +239,7 @@ public class VotacionDialog extends JDialog {
             mostrarPantallaEnvio(false);
             return;
         }
-        sendResponse(ResponseVS.SC_CANCELADO,
+        sendResponse(ResponseVS.SC_CANCELLED,
                 ContextVS.INSTANCE.getString("operationCancelada"));
     }//GEN-LAST:event_cerrarButtonActionPerformed
 

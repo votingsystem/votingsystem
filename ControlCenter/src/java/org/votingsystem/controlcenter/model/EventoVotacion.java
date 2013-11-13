@@ -70,8 +70,8 @@ public class EventoVotacion implements Serializable, EventVS {
     @Column(name="eventoVotacionId",nullable=false)
     private String eventoVotacionId;
     @Enumerated(EnumType.STRING)
-    @Column(name="tipo")
-    private TypeVS tipo;
+    @Column(name="type")
+    private TypeVS type;
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
     @Field(index = Index.YES, analyze=Analyze.YES, store=Store.YES)    
@@ -145,12 +145,12 @@ public class EventoVotacion implements Serializable, EventVS {
 		else return fechaFin;
 	}
     
-    public TypeVS getTipo() {
-        return tipo;
+    public TypeVS getType() {
+        return type;
     }
 
-    public void setTipo(TypeVS tipo) {
-        this.tipo = tipo;
+    public void setType(TypeVS type) {
+        this.type = type;
     }
 
     public String getContenido () {

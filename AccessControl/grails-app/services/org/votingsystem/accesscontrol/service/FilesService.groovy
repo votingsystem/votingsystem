@@ -52,18 +52,18 @@ class FilesService {
 				 //result.representativesReportFile = new File("${filesDirPath}/${reportPathPart}.csv")
 				 result.filesDir = new File(filesDirPath)
 				 break; 
-			 case TypeVS.EVENTO_VOTACION:
+			 case TypeVS.VOTING_EVENT:
 				 servicePathPart = messageSource.getMessage(
 					 'votingBackupPartPath', [event.id].toArray(), locale)
 				 filesDirPath = "${baseDirPath}/files"
 				 result.filesDir = new File(filesDirPath)
 				 break;
-			case TypeVS.EVENTO_FIRMA:
+			case TypeVS.SIGN_EVENT:
 				servicePathPart = messageSource.getMessage(
 					'manifestsBackupPartPath', [event.id].toArray(), locale)
 				result.filesDir = new File("${baseDirPath}/files") 
 				break;
-			case TypeVS.EVENTO_RECLAMACION:
+			case TypeVS.CLAIM_EVENT:
 				servicePathPart = messageSource.getMessage(
 					'claimsBackupPartPath', [event.id].toArray(), locale)
 				result.filesDir = new File("${baseDirPath}/files")

@@ -4,3 +4,5 @@
 /target-eclipse
 /VotingSystem
 .VotingSystem
+.idea
+ControlCenter.iml

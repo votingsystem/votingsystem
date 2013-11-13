@@ -111,7 +111,7 @@ class EventoFirmaController {
 			response.outputStream.flush()
 			return false
 		}
-		response.status = ResponseVS.SC_ERROR_PETICION
+		response.status = ResponseVS.SC_ERROR_REQUEST
 		render message(code: 'error.PeticionIncorrectaHTML', args:[
 			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false
@@ -153,12 +153,12 @@ class EventoFirmaController {
 				evento = EventoFirma.get(params.id)
 			}			 
 			if(!evento) {
-				response.status = ResponseVS.SC_ERROR_PETICION;
+				response.status = ResponseVS.SC_ERROR_REQUEST;
 				render message(code:'eventNotFound', args:["${params.id}"]) 
 				return false
 			}
 			if(evento.estado != Evento.Estado.PENDIENTE_DE_FIRMA) {
-				response.status = ResponseVS.SC_ERROR_PETICION;
+				response.status = ResponseVS.SC_ERROR_REQUEST;
 				render message(code:'manifestNotPending', args:["${params.id}"])
 				return false
 			}
@@ -170,13 +170,13 @@ class EventoFirmaController {
 				return false
 			} catch (Exception ex) {
 				log.error (ex.getMessage(), ex)
-				response.status = ResponseVS.SC_ERROR_PETICION
+				response.status = ResponseVS.SC_ERROR_REQUEST
 				render(ex.getMessage())
 				return false
 			}
 		} else log.error ("Missing Manifest tu publish id")
 			
-		response.status = ResponseVS.SC_ERROR_PETICION
+		response.status = ResponseVS.SC_ERROR_REQUEST
 		render message(code: 'error.PeticionIncorrectaHTML', args:[
 			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false
@@ -195,7 +195,7 @@ class EventoFirmaController {
 		try {
 			String eventoStr = "${request.getInputStream()}"
 			if (!eventoStr) {
-				response.status = ResponseVS.SC_ERROR_PETICION
+				response.status = ResponseVS.SC_ERROR_REQUEST
 				render message(code: 'error.PeticionIncorrectaHTML', args:[
 					"${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
 				return false
@@ -254,7 +254,7 @@ class EventoFirmaController {
 			render evento.contenido
 			return false
 		}
-		response.status = ResponseVS.SC_ERROR_PETICION
+		response.status = ResponseVS.SC_ERROR_REQUEST
 		render message(code: 'error.PeticionIncorrectaHTML', args:[
 			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false
@@ -300,7 +300,7 @@ class EventoFirmaController {
 			   if(params.estadoEvento) estadoEvento = Evento.Estado.valueOf(params.estadoEvento)
 		   } catch(Exception ex) {
 		   		log.error(ex.getMessage(), ex)
-				response.status = ResponseVS.SC_ERROR_PETICION
+				response.status = ResponseVS.SC_ERROR_REQUEST
 				render message(code: 'paramValueERRORMsg', args:[
 					params.estadoEvento, "${Evento.Estado.values()}"])
 				return 
@@ -451,7 +451,7 @@ class EventoFirmaController {
 			render message(code: 'eventNotFound', args:[params.id])
 			return false
 		}
-		response.status = ResponseVS.SC_ERROR_PETICION
+		response.status = ResponseVS.SC_ERROR_REQUEST
 		render message(code: 'error.PeticionIncorrectaHTML', args:[
 			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false

@@ -142,8 +142,9 @@ public class DNIeSessionHelper {
                 token.closeAllSessions();
             }
             if (pkcs11Session != null ) {
-                pkcs11Session.closeSession();
+                //pkcs11Session.closeSession(); -> exeption
                 pkcs11Session = null;
+                System.gc();
             } 
             if (pkcs11Module != null ) {
                 pkcs11Module.finalize(null);

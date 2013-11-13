@@ -42,7 +42,7 @@ class SubscripcionController {
 		if(!messageSMIME) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -54,7 +54,7 @@ class SubscripcionController {
 			ControlAcceso controlAcceso = ControlAcceso.findWhere(serverURL:serverURL)
 			String message
 			if (controlAcceso) {
-				response.status = ResponseVS.SC_ERROR_PETICION
+				response.status = ResponseVS.SC_ERROR_REQUEST
 				message = message(code: 'controlCenterAlreadyAssociatedMsg', args:[controlAcceso.serverURL]) 
 			} else {
 				def urlInfoControlAcceso = "${serverURL}/infoServidor"
@@ -77,7 +77,7 @@ class SubscripcionController {
             render message
             return false
         } 
-        response.status = ResponseVS.SC_ERROR_PETICION
+        response.status = ResponseVS.SC_ERROR_REQUEST
         render message(code: 'error.PeticionIncorrecta')
         return false	
 	}

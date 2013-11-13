@@ -12,7 +12,7 @@ import org.apache.log4j.Logger;
 import org.votingsystem.applet.votingtool.dialog.PreconditionsCheckerDialog;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.util.FileUtils;
-import org.votingsystem.applet.model.OperationVSApplet;
+import org.votingsystem.applet.model.AppletOperation;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 
@@ -30,7 +30,7 @@ public class Applet extends JApplet implements AppHostVS {
     
     private Timer recolectorOperaciones;
     private AtomicBoolean cancelado = new AtomicBoolean(false);
-    private OperationVSApplet operacionEnCurso;
+    private AppletOperation operacionEnCurso;
     public static String locale = "es";
     public static ModoEjecucion modoEjecucion = ModoEjecucion.APPLET;
     
@@ -84,9 +84,9 @@ public class Applet extends JApplet implements AppHostVS {
             if(getParameter("locale") != null) locale = getParameter("locale");
         } 
         init();
-        OperationVSApplet operacion = new OperationVSApplet(
-                ResponseVS.SC_PROCESANDO, 
-                OperationVSApplet.Type.MENSAJE_APPLET, 
+        AppletOperation operacion = new AppletOperation(
+                ResponseVS.SC_PROCESSING, 
+                AppletOperation.Type.APPLET_MESSAGE, 
                 ContextVS.INSTANCE.getString("appletInicializado"));
         sendMessageToHost(operacion);
     }
@@ -130,8 +130,8 @@ public class Applet extends JApplet implements AppHostVS {
             return;
         }
         recolectorOperaciones.cancel();
-        OperationVSApplet operacion = new OperationVSApplet();
-        operacion.setType(OperationVSApplet.Type.MENSAJE_CIERRE_APPLET);
+        AppletOperation operacion = new AppletOperation();
+        operacion.setType(AppletOperation.Type.APPLET_PAUSED_MESSAGE);
         sendMessageToHost(operacion);
         cancelado.set(true);
         VotingToolContext.INSTANCE.shutdown();
@@ -140,11 +140,11 @@ public class Applet extends JApplet implements AppHostVS {
     public void ejecutarOperacion(String operacionJSONStr) {
         logger.debug("ejecutarOperacion: " + operacionJSONStr);
         if(operacionJSONStr == null || "".equals(operacionJSONStr)) return;
-        operacionEnCurso = OperationVSApplet.parse(operacionJSONStr);
+        operacionEnCurso = AppletOperation.parse(operacionJSONStr);
         if(operacionEnCurso.getErrorValidacion() != null) {
             logger.debug("ejecutarOperacion - errorValidacion: " + 
                     operacionEnCurso.getErrorValidacion());
-            operacionEnCurso.setStatusCode(ResponseVS.SC_ERROR_PETICION);
+            operacionEnCurso.setStatusCode(ResponseVS.SC_ERROR_REQUEST);
             sendMessageToHost(operacionEnCurso);
             return;
         } else {
@@ -157,7 +157,7 @@ public class Applet extends JApplet implements AppHostVS {
     
     public static void main (String[] args) { 
         modoEjecucion = ModoEjecucion.APLICACION;
-        OperationVSApplet operation = new OperationVSApplet();
+        AppletOperation operation = new AppletOperation();
         String[] _args = {""};
         operation.setArgs(_args);
         logger.debug("operation: " + operation.toJSON());
@@ -168,10 +168,10 @@ public class Applet extends JApplet implements AppHostVS {
                         UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
                         Applet appletFirma = new Applet();
                         appletFirma.start();                        
-                        File jsonFile = File.createTempFile("publishVoting", ".json");
+                        File jsonFile = File.createTempFile("signClaim", ".json");
                         jsonFile.deleteOnExit();
                         FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
-                            .getResourceAsStream("testFiles/votingOperation.json"), jsonFile);        
+                            .getResourceAsStream("testFiles/signClaim.json"), jsonFile);        
                         appletFirma.ejecutarOperacion(FileUtils.getStringFromFile(jsonFile));
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
@@ -193,7 +193,7 @@ public class Applet extends JApplet implements AppHostVS {
             logger.debug(" - sendMessageToHost - Operacion null");
             return;
         }
-        OperationVSApplet messageToHost = (OperationVSApplet)operacion;
+        AppletOperation messageToHost = (AppletOperation)operacion;
         try {
             if(modoEjecucion == ModoEjecucion.APPLET) {
                 String callbackFunction = "setMessageFromSignatureClient";
@@ -211,7 +211,7 @@ public class Applet extends JApplet implements AppHostVS {
             ex.printStackTrace();
         }
         if(ModoEjecucion.APLICACION == modoEjecucion && 
-                messageToHost.getStatusCode() == ResponseVS.SC_CANCELADO){
+                messageToHost.getStatusCode() == ResponseVS.SC_CANCELLED){
             logger.debug(" ------  System.exit(0) ------ ");
             System.exit(0);
         }

@@ -13,7 +13,7 @@ import javax.mail.internet.MimeMessage
 import org.votingsystem.controlcenter.model.*
 import grails.converters.JSON
 import java.security.cert.X509Certificate;
-
+import org.votingsystem.model.ContentTypeVS;
 /**
  * @infoController Servicio de Votos
  * @descController Servicio que procesa los votos recibidos.
@@ -42,18 +42,19 @@ class VotoController {
 		if(!messageSMIMEReq) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
 		ResponseVS respuesta = votoService.validateVote(
 			messageSMIMEReq, request.getLocale())
 		if (ResponseVS.SC_OK == respuesta.statusCode) {
-			X509Certificate certificadoVoto = respuesta.certificado
+			X509Certificate certificadoVoto = respuesta.data.certificate
+			respuesta.data = respuesta.data.messageSMIME
 			params.receiverCert = certificadoVoto
 			if(messageSMIMEReq.getUsuario())
 				response.addHeader("representativeNIF", messageSMIMEReq.getUsuario().nif)
-			response.setContentType(ContextVS.SIGNED_AND_ENCRYPTED_CONTENT_TYPE)
+			response.setContentType(ContentTypeVS.SIGNED_AND_ENCRYPTED)
 		}
 		String voteURL = "${createLink(controller:'messageSMIME', absolute:'true')}/${respuesta?.messageSMIME?.id}" 
 		response.setHeader('voteURL', voteURL)		
@@ -101,7 +102,7 @@ class VotoController {
 			VotingSystemApplicationContex.instance.environment)) {
 			def msg = message(code: "serviceDevelopmentModeMsg")
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -114,7 +115,7 @@ class VotoController {
 		}
 		def errorMessages
 		MessageSMIME.withTransaction {
-			errorMessages = MessageSMIME.findAllByEventoAndTypeAndType(event, TypeVS.ERROR, TypeVS.VOTO_CON_ERRORES)
+			errorMessages = MessageSMIME.findAllByEventoAndTypeAndType(event, TypeVS.ERROR, TypeVS.VOTE_ERROR)
 		}
 
 		render errorMessages.size()
@@ -171,7 +172,7 @@ class VotoController {
 			render votoMap as JSON
 			return false
 		}
-		response.status = ResponseVS.SC_ERROR_PETICION
+		response.status = ResponseVS.SC_ERROR_REQUEST
 		render message(code: 'error.PeticionIncorrectaHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
 		return false
 	}
@@ -202,14 +203,14 @@ class VotoController {
 			 respuesta = future.get()
 			 if (ResponseVS.SC_OK == respuesta?.statusCode) {
 				 ctx.response.status = ResponseVS.SC_OK
-				 ctx.response.setContentType(ContextVS.SIGNED_AND_ENCRYPTED_CONTENT_TYPE)
+				 ctx.response.setContentType(ContentTypeVS.SIGNED_AND_ENCRYPTED)
 				 ctx.response.contentLength = respuesta.voto.messageSMIME.contenido.length
 				 ctx.response.outputStream <<  respuesta.voto.messageSMIME.contenido
 				 ctx.response.outputStream.flush()
 			 } 
 			 ctx.complete();
-		 } else if (ResponseVS.SC_ERROR_VOTO_REPETIDO == respuesta.statusCode){
-			 response.status = ResponseVS.SC_ERROR_VOTO_REPETIDO
+		 } else if (ResponseVS.SC_ERROR_VOTE_REPEATED == respuesta.statusCode){
+			 response.status = ResponseVS.SC_ERROR_VOTE_REPEATED
 			 response.contentLength = respuesta.voto.messageSMIME.contenido.length
 			 response.outputStream <<  respuesta.voto.messageSMIME.contenido
 			 response.outputStream.flush()

@@ -13,19 +13,19 @@ public class ResponseVS<T> {
 	private static Logger logger = Logger.getLogger(ResponseVS.class);
     
     public static final int SC_OK = 200;
-    public static final int SC_OK_ANULACION_SOLICITUD_ACCESO = 270;
+    public static final int SC_OK_CANCEL_ACCESS_REQUEST = 270;
     public static final int SC_REQUEST_TIMEOUT  = 408;
-    public static final int SC_ERROR_PETICION = 400;
+    public static final int SC_ERROR_REQUEST = 400;
     public static final int SC_NOT_FOUND = 404;
-    public static final int SC_ERROR_VOTO_REPETIDO = 470;
-    public static final int SC_ANULACION_REPETIDA = 471;
+    public static final int SC_ERROR_VOTE_REPEATED = 470;
+    public static final int SC_CANCELLATION_REPEATED = 471;
     public static final int SC_NULL_REQUEST = 472;
     
     public static final int SC_ERROR           = 500;
     public static final int SC_ERROR_TIMESTAMP = 570;
-    public static final int SC_PROCESANDO      = 700;
-    public static final int SC_FINALIZADO      = 710;
-    public static final int SC_CANCELADO       = 0;
+    public static final int SC_PROCESSING      = 700;
+    public static final int SC_TERMINATED      = 710;
+    public static final int SC_CANCELLED       = 0;
 
     //Simulation status codes
     public static final int SC_SIMULATION_INITIATED = 275;
@@ -37,6 +37,7 @@ public class ResponseVS<T> {
     private EventVS eventVS;
     private T data;
     private TypeVS type;
+    private UserVS userVS;
 
     private byte[] messageBytes;
     private File archivo;
@@ -216,5 +217,15 @@ public class ResponseVS<T> {
     public void setEventVS(EventVS eventVS) {
         this.eventVS = eventVS;
     }
+
+
+	public UserVS getUserVS() {
+		return userVS;
+	}
+
+
+	public void setUserVS(UserVS userVS) {
+		this.userVS = userVS;
+	}
 
 }

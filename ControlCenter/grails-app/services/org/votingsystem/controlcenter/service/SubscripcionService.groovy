@@ -31,16 +31,16 @@ class SubscripcionService {
 			msg = messageSource.getMessage(
 				'susbcripcion.errorDatosUsuario', null, locale)
 			log.error("- checkUser - ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
-				message:msg, tipo:Tipo.USER_ERROR)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
+				message:msg, type:TypeVS.USER_ERROR)
 		}
 		String nifValidado = org.votingsystem.util.StringUtils.validarNIF(usuario.nif)
 		if(!nifValidado) {
 			msg = messageSource.getMessage('susbcripcion.errorNifUsuario', 
 				[usuario.nif].toArray(), locale)
 			log.error("- checkUser - ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
-				message:msg, tipo:Tipo.USER_ERROR)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
+				message:msg, type:TypeVS.USER_ERROR)
 		}
 		usuario.nif = nifValidado
 		X509Certificate certificadoUsu = usuario.getCertificate()
@@ -52,7 +52,7 @@ class SubscripcionService {
 				Certificado certificado = new Certificado(usuario:usuario,
 					contenido:usuario.getCertificate()?.getEncoded(),
 					numeroSerie:usuario.getCertificate()?.getSerialNumber()?.longValue(),
-					estado:Certificado.Estado.OK, tipo:Certificado.Tipo.USUARIO,
+					estado:Certificado.Estado.OK, type:Certificado.Type.USUARIO,
 					validoDesde:usuario.getCertificate()?.getNotBefore(),
 					validoHasta:usuario.getCertificate()?.getNotAfter())
 				certificado.save();
@@ -68,7 +68,7 @@ class SubscripcionService {
 				certificado = new Certificado(usuario:usuarioDB,
 					contenido:certificadoUsu?.getEncoded(), estado:Certificado.Estado.OK,
 					numeroSerie:certificadoUsu?.getSerialNumber()?.longValue(),
-					certificadoAutoridad:usuario.getCertificadoCA(),
+					certificadoAutoridad:usuario.getCertificateCA(),
 					validoDesde:usuario.getCertificate()?.getNotBefore(),
 					validoHasta:usuario.getCertificate()?.getNotAfter())
 				certificado.save();

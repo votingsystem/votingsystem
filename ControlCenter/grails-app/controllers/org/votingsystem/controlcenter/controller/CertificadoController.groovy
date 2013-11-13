@@ -81,7 +81,7 @@ class CertificadoController {
 				args:[params.hashHex])
 			return false
 		}
-		response.status = ResponseVS.SC_ERROR_PETICION
+		response.status = ResponseVS.SC_ERROR_REQUEST
 		render message(code: 'error.PeticionIncorrectaHTML', args:
 			["${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false
@@ -98,7 +98,7 @@ class CertificadoController {
 	def usuario () {
 		Usuario usuario = Usuario.get(params.long('userId'))
 		if(!usuario) {
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render message(code: 'error.UsuarioNoEncontrado', args:[params.userId])
 			return false
 		}
@@ -178,7 +178,7 @@ class CertificadoController {
 			VotingSystemApplicationContex.instance.environment)) {
 			def msg = message(code: "serviceDevelopmentModeMsg")
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}

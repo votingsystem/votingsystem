@@ -17,7 +17,7 @@ import org.votingsystem.accesscontrol.model.*;
 import org.votingsystem.signature.smime.*;
 import org.votingsystem.model.ContextVS
 import grails.converters.JSON
-
+import org.votingsystem.model.ContentTypeVS;
 import org.codehaus.groovy.grails.web.json.*
 
 import javax.mail.Header;
@@ -61,8 +61,8 @@ class EventoVotacionService {
 				msg = messageSource.getMessage(
 						'error.requestWithoutControlCenter', null, locale)
 				log.error "saveEvent - DATA ERROR - ${msg} - messageJSON: ${messageJSON}" 
-				return new ResponseVS(type:TypeVS.EVENTO_VOTACION_ERROR,
-						message:msg, statusCode:ResponseVS.SC_ERROR_PETICION)
+				return new ResponseVS(type:TypeVS.VOTING_EVENT_ERROR,
+						message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST)
 			}
 			event = new EventoVotacion(asunto:messageJSON.asunto,
 				contenido:messageJSON.contenido, usuario:firmante,
@@ -74,8 +74,8 @@ class EventoVotacionService {
 				messageJSON.centroControl.serverURL, locale)
 			if(ResponseVS.SC_OK != respuesta.statusCode) {
 				log.error "saveEvent - CHECKING CONTROL CENTER ERROR - ${respuesta.message}"
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-					message:respuesta.message, type:TypeVS.EVENTO_VOTACION_ERROR)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+					message:respuesta.message, type:TypeVS.VOTING_EVENT_ERROR)
 			}  
 			event.centroControl = respuesta.centroControl
 			event.cadenaCertificacionCentroControl = respuesta.centroControl.cadenaCertificacion
@@ -83,8 +83,8 @@ class EventoVotacionService {
 			respuesta = eventoService.setEventDatesState(event,locale)
 			if(ResponseVS.SC_OK != respuesta.statusCode) {
 				log.error "saveEvent - EVENT DATES ERROR - ${respuesta.message}"
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-					message:respuesta.message, type:TypeVS.EVENTO_VOTACION_ERROR)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+					message:respuesta.message, type:TypeVS.VOTING_EVENT_ERROR)
 			} 
 			if(messageJSON.cardinalidad) event.cardinalidadOpciones =
 					Evento.Cardinalidad.valueOf(messageJSON.cardinalidad)
@@ -110,12 +110,12 @@ class EventoVotacionService {
 			messageJSON.id = event.id
 			messageJSON.URL = "${grailsApplication.config.grails.serverURL}/eventoVotacion/${event.id}"
 			messageJSON.fechaCreacion = DateUtils.getStringFromDate(event.dateCreated)
-			messageJSON.type = TypeVS.EVENTO_VOTACION
+			messageJSON.type = TypeVS.VOTING_EVENT
 			respuesta = almacenClavesService.generar(event)
 			if(ResponseVS.SC_OK != respuesta.statusCode) {
 				log.error "saveEvent - ERROR GENERATING EVENT KEYSTRORE- ${respuesta.message}"
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-					message:respuesta.message, type:TypeVS.EVENTO_VOTACION_ERROR, event:event)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+					message:respuesta.message, type:TypeVS.VOTING_EVENT_ERROR, event:event)
 			} 
 			messageJSON.certCAVotacion = new String(
 				CertUtil.fromX509CertToPEM (respuesta.certificado))
@@ -150,12 +150,12 @@ class EventoVotacionService {
 					event.save()
 				}
 				log.error "saveEvent - ERROR ENCRYPTING MSG - ${encryptResponse.message}"
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 					message:encryptResponse.message, , event:event, 
-					type:TypeVS.EVENTO_VOTACION_ERROR)
+					type:TypeVS.VOTING_EVENT_ERROR)
 			}
 			ResponseVS respuestaNotificacion = httpService.sendMessage(
-				encryptResponse.messageBytes, ContextVS.SIGNED_AND_ENCRYPTED_CONTENT_TYPE, controCenterEventsURL)
+				encryptResponse.messageBytes, ContentTypeVS.SIGNED_AND_ENCRYPTED, controCenterEventsURL)
 			if(ResponseVS.SC_OK != respuestaNotificacion.statusCode) {
 				event.estado = Evento.Estado.ACTORES_PENDIENTES_NOTIFICACION
 				Evento.withTransaction {
@@ -164,22 +164,22 @@ class EventoVotacionService {
 				msg = messageSource.getMessage('controCenterCommunicationErrorMsg', 
 					[respuestaNotificacion.message].toArray(), locale)	
 				log.error "saveEvent - ERROR NOTIFYING CONTROL CENTER - ${msg}"
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-					message:msg, type:TypeVS.EVENTO_VOTACION_ERROR, eventVS:event)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+					message:msg, type:TypeVS.VOTING_EVENT_ERROR, eventVS:event)
 			}
-			MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECIBO,
+			MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT,
 				smimePadre:messageSMIMEReq, event:event, valido:true,
 				contenido:smimeMessageRespBytes)
 			MessageSMIME.withTransaction {
 				messageSMIMEResp.save()
 			}
 			return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:event,
-					type:TypeVS.EVENTO_VOTACION, messageSMIME:messageSMIMEResp)
+					type:TypeVS.VOTING_EVENT, data:messageSMIMEResp)
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
 			msg = messageSource.getMessage('publishVotingErrorMessage', null, locale)
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
-				message:msg, type:TypeVS.EVENTO_VOTACION_ERROR, eventVS:event)
+				message:msg, type:TypeVS.VOTING_EVENT_ERROR, eventVS:event)
 		}
     }
     
@@ -194,12 +194,12 @@ class EventoVotacionService {
 					new Date(System.currentTimeMillis()))
 				log.error("generarCopiaRespaldo - DATE ERROR  ${msg} - " + 
 					"fecha actual '${currentDateStr}' fecha final event '${event.fechaFin}'")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
 					message:msg, type:TypeVS.BACKUP_ERROR)
 			}
 			
 			Map<String, File> mapFiles = filesService.getBackupFiles(event,
-				TypeVS.EVENTO_VOTACION, locale)
+				TypeVS.VOTING_EVENT, locale)
 			File zipResult   = mapFiles.zipResult
 			File metaInfFile = mapFiles.metaInfFile
 			File filesDir    = mapFiles.filesDir

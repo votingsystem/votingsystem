@@ -6,7 +6,7 @@ import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.model.ContextVS
 import grails.converters.JSON
-
+import org.votingsystem.model.ContentTypeVS;
 /**
  * @infoController Recogida de reclamaciones
  * @descController Servicios relacionados con la recogida de reclamaciones.
@@ -33,7 +33,7 @@ class RecolectorReclamacionController {
 		if(!messageSMIMEReq) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -41,14 +41,15 @@ class RecolectorReclamacionController {
             ResponseVS respuesta = reclamacionService.guardar(
 				messageSMIMEReq, request.getLocale())
 			if (ResponseVS.SC_OK == respuesta?.statusCode) {
-				response.contentType = ContextVS.SI
+				response.contentType = ContentTypeVS.SIGNED
+				params.receiverCert = messageSMIMEReq.getSmimeMessage().getFirmante().certificate
 			}	
 			params.respuesta = respuesta
         } catch (Exception ex) {
             log.error (ex.getMessage(), ex)
-			params.respuesta = new ResponseVS(ResponseVS.SC_ERROR_PETICION, 
+			params.respuesta = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, 
 				message:message(code:'signClaimErrorMessage'), 
-				type:TypeVS.FIRMA_EVENTO_RECLAMACION_ERROR)
+				type:TypeVS.CLAIM_EVENT_SIGNATURE_ERROR)
         }
 	}
 	

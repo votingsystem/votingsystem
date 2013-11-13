@@ -40,14 +40,14 @@ class EncryptorController {
 			VotingSystemApplicationContex.instance.environment)) {
 			String msg = message(code: "serviceDevelopmentModeMsg")
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
 		if(!params.requestBytes) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -58,7 +58,7 @@ class EncryptorController {
 		if(!messageJSON.publicKey) {
 			String msg = message(code: "publicKeyMissingErrorMsg")
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -88,7 +88,7 @@ class EncryptorController {
 			VotingSystemApplicationContex.instance.environment)) {
 			String msg = message(code: "serviceDevelopmentModeMsg")
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -97,11 +97,11 @@ class EncryptorController {
 		if(!messageSMIMEReq) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
-		response.contentType = ContextVS.SIGNED_CONTENT_TYPE
+		response.contentType = org.votingsystem.model.ContentTypeVS.SIGNED
 			
 		SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage()
 		
@@ -122,7 +122,7 @@ class EncryptorController {
 			contenido:smimeMessage.getBytes())
 		
 		params.respuesta = new ResponseVS(statusCode:ResponseVS.SC_OK,
-			messageSMIME:messageSMIMEResp, type:TypeVS.TEST)
+			data:messageSMIMEResp, type:TypeVS.TEST)
 	}
 	
 	def validateTimeStamp() {
@@ -130,7 +130,7 @@ class EncryptorController {
 			VotingSystemApplicationContex.instance.environment)) {
 			String msg = message(code: "serviceDevelopmentModeMsg")
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -138,7 +138,7 @@ class EncryptorController {
 		if(!messageSMIMEReq) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}

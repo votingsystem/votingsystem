@@ -16,6 +16,6 @@ Para trabajar en entornos de pruebas se pueden emplear los que genera la aplicac
 
 Para generar los componentes de los distintos proyectos es necesario tener instalados certificados electrónicos (para entornos de pruebas se pueden emplear los generados en el paso anterior):
 	
-	$gradle buildAll
+	SistemaVotacion$gradle buildAll
 
 

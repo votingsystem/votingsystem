@@ -68,7 +68,7 @@ class TimeStampService {
 				if(ResponseVS.SC_OK != respuesta.statusCode) {
 					msg = messageSource.getMessage('timeStampCertErrorMsg', [timeStampCertURL].toArray(), locale)
 					log.error("validateToken - ${msg}")
-					return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg)
+					return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
 				} else {
 					X509Certificate timeStampCert = CertUtil.fromPEMToX509Cert(respuesta.messageBytes)
 					timeStampVerifier = new JcaSimpleSignerInfoVerifierBuilder().
@@ -86,14 +86,14 @@ class TimeStampService {
 				msg = messageSource.getMessage('timestampDateErrorMsg',
 					[timestampDate, evento.fechaInicio, evento.getDateFinish()].toArray(), locale)
 				log.debug("validateToken - ERROR TIMESTAMP DATE -  - Event '${evento.id}' - ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 					message:msg, evento:evento)
 			} else return new ResponseVS(statusCode:ResponseVS.SC_OK);
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex)
 			msg = messageSource.getMessage('timeStampErrorMsg', null, locale)
 			log.error ("validateToken - msg:${msg} - Event '${evento.id}'")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
 		}
 	}
 
@@ -111,21 +111,21 @@ class TimeStampService {
 			if (!Arrays.equals(tsToken.certID.getCertHash(), calc.getDigest())) {
 				msg = messageSource.getMessage('hashCertifcatesErrorMsg', null, locale)
 				log.error("validate - ERROR - ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
 			}
 			if (tsToken.certID.getIssuerSerial() != null) {
 				IssuerAndSerialNumber issuerSerial = certHolder.getIssuerAndSerialNumber();
 				if (!tsToken.certID.getIssuerSerial().getSerial().equals(issuerSerial.getSerialNumber())) {
 					msg = messageSource.getMessage('issuerSerialErrorMsg', null, locale)
 					log.error("validate - ERROR - ${msg}")
-					return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg)
+					return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
 				}
 			}
 			TSPUtil.validateCertificate(certHolder);
 			if (!certHolder.isValidOn(tsToken.tstInfo.getGenTime())) {
 				msg = messageSource.getMessage('certificateDateError', null, locale)
 				log.error("validate - ERROR - ${msg}");
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
 			}
 			CMSSignedData tokenCMSSignedData = tsToken.tsToken
 			Collection signers = tokenCMSSignedData.getSignerInfos().getSigners();
@@ -153,14 +153,14 @@ class TimeStampService {
 				String digestTokenStr = new String(Base64.encode(digestToken));
 				msg = "resultDigestStr '${resultDigestStr} - digestTokenStr '${digestTokenStr}'"
 				log.error("validate - ERROR HASH - ${msg}");
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
 			}
 			return new ResponseVS(statusCode:ResponseVS.SC_OK)
 		}catch(Exception ex) {
 			log.error(ex.getMessage(), ex)
 			log.debug("validate - token issuer: ${tsToken?.getSID()?.getIssuer()}" +
 				" - timeStampSignerInfoVerifier: ${timeStampSignerInfoVerifier?.associatedCertificate?.subject}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 				message:messageSource.getMessage('timeStampErrorMsg', null, locale))
 		}
 	}

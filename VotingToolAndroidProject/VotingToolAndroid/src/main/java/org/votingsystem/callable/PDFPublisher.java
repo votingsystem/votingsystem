@@ -56,7 +56,7 @@ import java.util.concurrent.Callable;
 
 import javax.mail.Header;
 import javax.mail.internet.MimeBodyPart;
-
+import org.votingsystem.model.ContentTypeVS;
 import static org.votingsystem.android.model.ContextVSAndroid.ALIAS_CERT_USUARIO;
 
 /**
@@ -140,7 +140,7 @@ public class PDFPublisher implements Callable<ResponseVS> {
             byte[] bytesToSend = baos.toByteArray();
             baos.close();
             response = HttpHelper.sendByteArray(bytesToSend,
-                    ContextVSAndroid.PDF_SIGNED_AND_ENCRYPTED_CONTENT_TYPE, serviceURL + "/" + manifestId);
+            		ContentTypeVS.PDF_SIGNED_AND_ENCRYPTED, serviceURL + "/" + manifestId);
             responseVS = new ResponseVS(
                     response.getStatusLine().getStatusCode(),
                     EntityUtils.toString(response.getEntity()));

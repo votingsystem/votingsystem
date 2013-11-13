@@ -23,6 +23,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.votingsystem.android.model.ContextVSAndroid;
 import org.votingsystem.android.R;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyStoreUtil;
@@ -45,7 +46,7 @@ import static org.votingsystem.android.model.ContextVSAndroid.SIGNATURE_ALGORITH
 
 public class SMIMESignedSender implements Callable<ResponseVS> {
 
-	public static final String TAG = "SMIMESignedSender";
+    public static final String TAG = "SMIMESignedSender";
 
     private SMIMEMessageWrapper smimeMessage = null;
     private X509Certificate destinationCert = null;
@@ -59,12 +60,12 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
     private boolean isEncryptedResponse = false;
 
     public SMIMESignedSender(String serviceURL, String signatureContent, String subject,
-             boolean isEncryptedResponse, byte[] keyStoreBytes, char[] password,
-             X509Certificate destinationCert, Context context) {
-		this.subject = subject;
+                             boolean isEncryptedResponse, byte[] keyStoreBytes, char[] password,
+                             X509Certificate destinationCert, Context context) {
+        this.subject = subject;
         this.signatureContent = signatureContent;
-		this.keyStoreBytes = keyStoreBytes;
-		this.password = password;
+        this.keyStoreBytes = keyStoreBytes;
+        this.password = password;
         this.context = context;
         this.serviceURL = serviceURL;
         this.isEncryptedResponse = isEncryptedResponse;
@@ -101,13 +102,13 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
             if(destinationCert != null) {
                 messageToSend = Encryptor.encryptSMIME(
                         smimeMessage, destinationCert);
-                documentContentType = ContextVSAndroid.SIGNED_AND_ENCRYPTED_CONTENT_TYPE;
+                documentContentType = ContentTypeVS.SIGNED_AND_ENCRYPTED;
             } else {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 smimeMessage.writeTo(baos);
                 messageToSend = baos.toByteArray();
                 baos.close();
-                documentContentType = ContextVSAndroid.SIGNED_CONTENT_TYPE;
+                documentContentType = ContentTypeVS.SIGNED;
             }
             HttpResponse response  = HttpHelper.sendByteArray(
                     messageToSend, documentContentType, serviceURL);
@@ -130,8 +131,8 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
         return responseVS;
     }
 
-	public SMIMEMessageWrapper getSmimeMessage() {
-		return smimeMessage;
-	}
+    public SMIMEMessageWrapper getSmimeMessage() {
+        return smimeMessage;
+    }
 
 }

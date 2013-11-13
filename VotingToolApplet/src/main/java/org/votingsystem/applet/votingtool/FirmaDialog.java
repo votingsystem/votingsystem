@@ -6,25 +6,32 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
+
 import org.votingsystem.applet.votingtool.dialog.PasswordDialog;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.DNIeSignedMailGenerator;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.applet.callable.InfoGetter;
+
 import com.itextpdf.text.pdf.PdfReader;
+
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import javax.swing.SwingWorker;
+
 import org.apache.log4j.Logger;
 import org.votingsystem.applet.callable.InfoSender;
 import org.votingsystem.applet.callable.PDFSignedSender;
 import org.votingsystem.applet.callable.SMIMESignedSender;
-import org.votingsystem.applet.model.OperationVSApplet;
+import org.votingsystem.applet.model.AppletOperation;
 import org.votingsystem.applet.pdf.PdfFormHelper;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.util.VotingSystemException;
@@ -42,7 +49,7 @@ public class FirmaDialog extends JDialog {
     private AtomicBoolean mostrandoPantallaEnvio = new AtomicBoolean(false);
     private Frame parentFrame;
     private Future executingTask;
-    private OperationVSApplet operation;
+    private AppletOperation operation;
     private SMIMEMessageWrapper smimeMessage;
     private final AtomicBoolean done = new AtomicBoolean(false);
     
@@ -64,7 +71,7 @@ public class FirmaDialog extends JDialog {
             public void windowClosing(WindowEvent e) {
                 logger.debug(" - window closing event received");
                 done.set(true);
-                sendResponse(ResponseVS.SC_CANCELADO,
+                sendResponse(ResponseVS.SC_CANCELLED,
                         ContextVS.INSTANCE.getString("operacionCancelada"));
             }
         });
@@ -73,13 +80,13 @@ public class FirmaDialog extends JDialog {
         pack();
     }
     
-    public void show(OperationVSApplet operation) {
+    public void show(AppletOperation operation) {
         this.operation = operation;
-        OperationVSApplet.Type tipoOperacion = operation.getType();
+        AppletOperation.Type tipoOperacion = operation.getType();
         logger.debug("mostrar - tipoOperacion: " + tipoOperacion);
         setTitle(tipoOperacion.getCaption());
         switch(tipoOperacion) {
-            case FIRMA_MANIFIESTO_PDF:
+            case MANIFEST_SIGN:
                 verDocumentoButton.setIcon(new ImageIcon(getClass().
                         getResource("/resources/images/pdf_16x16.png"))); 
                         progressLabel.setText("<html>" + 
@@ -88,7 +95,7 @@ public class FirmaDialog extends JDialog {
                 PdfGetterWorker pdfGetterWorker = new PdfGetterWorker();
                 pdfGetterWorker.execute();
                 break;  
-            case PUBLICACION_MANIFIESTO_PDF:
+            case MANIFEST_PUBLISHING:
                 verDocumentoButton.setIcon(new ImageIcon(getClass().
                         getResource("/resources/images/pdf_16x16.png"))); 
                         progressLabel.setText("<html>" + 
@@ -97,7 +104,7 @@ public class FirmaDialog extends JDialog {
                 PdfGetterWorker publisherWorker = new PdfGetterWorker();
                 publisherWorker.execute();
                 break;                          
-            case SOLICITUD_COPIA_SEGURIDAD:
+            case BACKUP_REQUEST:
                 verDocumentoButton.setIcon(new ImageIcon(getClass().
                     getResource("/resources/images/pdf_16x16.png")));
                 try {
@@ -133,11 +140,11 @@ public class FirmaDialog extends JDialog {
         @Override public ResponseVS doInBackground() {
             logger.debug("PdfGetterWorker.doInBackground");
             switch(operation.getType()) {
-                case FIRMA_MANIFIESTO_PDF:
+                case MANIFEST_SIGN:
                     InfoGetter infoGetter = new InfoGetter(null, 
-                            operation.getUrlDocumento(), ContextVS.PDF_CONTENT_TYPE);
+                            operation.getUrlDocumento(), ContentTypeVS.PDF);
                     return infoGetter.call();
-                case PUBLICACION_MANIFIESTO_PDF:
+                case MANIFEST_PUBLISHING:
                     InfoSender infoSender = new InfoSender(null, 
                             operation.getContenidoFirma().toString().getBytes(),
                             null, operation.getUrlEnvioDocumento(), "eventId");
@@ -151,7 +158,7 @@ public class FirmaDialog extends JDialog {
             try {
                 ResponseVS responseVS = get();
                 switch(operation.getType()) {
-                    case FIRMA_MANIFIESTO_PDF:
+                    case MANIFEST_SIGN:
                         if (ResponseVS.SC_OK == responseVS.getStatusCode()) { 
                             try {
                                 bytesDocumento = responseVS.getMessageBytes();
@@ -164,7 +171,7 @@ public class FirmaDialog extends JDialog {
                                     "errorDescargandoDocumento") + " - " + responseVS.getMessage());
                         }
                         break;
-                    case PUBLICACION_MANIFIESTO_PDF:
+                    case MANIFEST_PUBLISHING:
                         if (ResponseVS.SC_OK == responseVS.getStatusCode()) { 
                           try {
                                 bytesDocumento = responseVS.getMessageBytes();
@@ -366,7 +373,7 @@ public class FirmaDialog extends JDialog {
             mostrarPantallaEnvio(false);
             return;
         } else {
-            sendResponse(ResponseVS.SC_CANCELADO,
+            sendResponse(ResponseVS.SC_CANCELLED,
                     ContextVS.INSTANCE.getString("operacionCancelada"));
         }
         dispose();
@@ -437,12 +444,12 @@ public class FirmaDialog extends JDialog {
                 case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
                 case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
                 case REPRESENTATIVE_SELECTION:
-                case ANULAR_VOTO:
-                case ANULAR_SOLICITUD_ACCESO:
-                case CAMBIO_ESTADO_CENTRO_CONTROL_SMIME:
-                case ASOCIAR_CENTRO_CONTROL:
-                case FIRMA_RECLAMACION_SMIME:
-                case CANCELAR_EVENTO:
+                case VOTE_CANCELLATION:
+                case ACCESS_REQUEST_CANCELLATION:
+                case CONTROL_CENTER_STATE_CHANGE_SMIME:
+                case CONTROL_CENTER_ASSOCIATION:
+                case SMIME_CLAIM_SIGNATURE:
+                case EVENT_CANCELLATION:
                     smimeMessage = DNIeSignedMailGenerator.
                             genMimeMessage(null, operation.getNombreDestinatarioFirmaNormalizado(),
                             operation.getContenidoFirma().toString(),
@@ -453,8 +460,8 @@ public class FirmaDialog extends JDialog {
                             null, smimeMessage, operation.getUrlEnvioDocumento(), 
                             null, destinationCert);
                     return senderWorker.call();
-                case PUBLICACION_VOTACION_SMIME:
-                case PUBLICACION_RECLAMACION_SMIME:    
+                case VOTING_PUBLISHING:
+                case CLAIM_PUBLISHING:    
                     smimeMessage = DNIeSignedMailGenerator.
                         genMimeMessage(null, operation.getNombreDestinatarioFirmaNormalizado(),
                         operation.getContenidoFirma().toString(),
@@ -465,9 +472,9 @@ public class FirmaDialog extends JDialog {
                             null, smimeMessage, operation.getUrlEnvioDocumento(), 
                             null, destinationCert, "eventURL");
                     return worker.call();
-                case SOLICITUD_COPIA_SEGURIDAD:
-                case FIRMA_MANIFIESTO_PDF:
-                case PUBLICACION_MANIFIESTO_PDF:
+                case BACKUP_REQUEST:
+                case MANIFEST_SIGN:
+                case MANIFEST_PUBLISHING:
                     PdfReader readerManifiesto = new PdfReader(bytesDocumento);
                     String reason = null;
                     String location = null;
@@ -494,16 +501,18 @@ public class FirmaDialog extends JDialog {
                     if(operation.isRespuestaConRecibo()) {
                         try {
                             logger.debug("SignedSenderWorker.done - isRespuestaConRecibo");
-                            ByteArrayInputStream bais = new ByteArrayInputStream(
-                                    responseVS.getMessage().getBytes());
-                            SMIMEMessageWrapper smimeMessageResp = 
-                                    new SMIMEMessageWrapper(bais);
+                            SMIMEMessageWrapper smimeMessageResp = responseVS.getSmimeMessage();
+                            if(smimeMessageResp == null) {
+                                ByteArrayInputStream bais = new ByteArrayInputStream(
+                                    responseVS.getMessageBytes());
+                                smimeMessageResp = new SMIMEMessageWrapper(bais);
+                            }
                             String operationStr = smimeMessageResp.getSignedContent();
-                            OperationVSApplet result = OperationVSApplet.parse(operationStr);
+                            AppletOperation result = AppletOperation.parse(operationStr);
                             String msg = result.getMessage();
-                            if(OperationVSApplet.Type.PUBLICACION_VOTACION_SMIME == 
-                                    operation.getType() || OperationVSApplet.Type.
-                                    PUBLICACION_RECLAMACION_SMIME == operation.getType()) {
+                            if(AppletOperation.Type.VOTING_PUBLISHING == 
+                                    operation.getType() || AppletOperation.Type.
+                                    CLAIM_PUBLISHING == operation.getType()) {
                                 String eventURL = ((List<String>)responseVS.
                                         getData()).iterator().next();
                                 result.setUrlDocumento(eventURL);

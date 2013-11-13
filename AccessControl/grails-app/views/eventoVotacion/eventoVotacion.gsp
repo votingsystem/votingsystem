@@ -115,8 +115,8 @@
 		function sendVote() {
 			console.log("sendVote")
 		   	var webAppMessage = new WebAppMessage(
-			    	StatusCode.SC_PROCESANDO, 
-			    	Operation.ENVIO_VOTO_SMIME)
+			    	StatusCode.SC_PROCESSING, 
+			    	Operation.SEND_SMIME_VOTE)
 		   	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
 			webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
 			votingEvent.urlSolicitudAcceso = "${grailsApplication.config.grails.serverURL}/solicitudAcceso"
@@ -141,7 +141,7 @@
 					msg = msgTemplate.format(
 							'<g:message code="voteResultOKMsg"/>',
 							appMessageJSON.message);
-				} else if(StatusCode.SC_ERROR_VOTO_REPETIDO == appMessageJSON.statusCode) {
+				} else if(StatusCode.SC_ERROR_VOTE_REPEATED == appMessageJSON.statusCode) {
 					msgTemplate =  "<g:message code='accessRequestRepeatedMsg'/>" 
 					msg = msgTemplate.format(
 						msgTemplate1.format('${eventMap?.asunto}'), 

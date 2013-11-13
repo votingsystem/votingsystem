@@ -94,7 +94,7 @@ class CsrController {
 	def solicitar() {
 		String consulta = "${request.getInputStream()}"
 		if (!consulta) {
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render message(code: 'error.PeticionIncorrectaHTML', args:[
 				"${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
 			return false
@@ -126,7 +126,7 @@ class CsrController {
 		if(!messageSMIME) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -139,7 +139,7 @@ class CsrController {
 			String msg = message(code: "csr.usuarioAutorizado", args: [usuario.nif])
 			Dispositivo dispositivo = Dispositivo.findWhere(deviceId: docValidacionJSON.deviceId)
 			if (!dispositivo?.usuario) {
-				response.status = ResponseVS.SC_ERROR_PETICION
+				response.status = ResponseVS.SC_ERROR_REQUEST
 				render message(code: "csr.solicitudNoEncontrada", args: [smimeMessageReq.getSignedContent()])
 				return false
 			}
@@ -152,7 +152,7 @@ class CsrController {
 			SolicitudCSRUsuario solicitudCSR = SolicitudCSRUsuario.findWhere(usuario:dispositivo.usuario,
 				estado:SolicitudCSRUsuario.Estado.PENDIENTE_APROVACION);
 			if (!solicitudCSR) {
-				response.status = ResponseVS.SC_ERROR_PETICION
+				response.status = ResponseVS.SC_ERROR_REQUEST
 				render message(code: "csr.usuarioSinSolicitud", args: [usuarioMovil.nif])
 				return false
 			}
@@ -169,7 +169,7 @@ class CsrController {
 		} else {
 			String msg = message(code: "csr.usuarioNoAutorizado", args: [usuario.nif])
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -192,14 +192,14 @@ class CsrController {
 			VotingSystemApplicationContex.instance.environment)) {
 			def msg = message(code: "serviceDevelopmentModeMsg")
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		String consulta = "${request.getInputStream()}"
 		if (!consulta) {
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render(view:"index")
 			return false	
 		}
@@ -207,7 +207,7 @@ class CsrController {
 		def consultaJSON = JSON.parse(consulta)
 		Dispositivo dispositivo = Dispositivo.findByDeviceId(consultaJSON?.deviceId?.trim())
 		if (!dispositivo) {
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render message(code: "csr.solicitudNoEncontrada", args: 
 				["deviceId: ${consultaJSON?.deviceId}"])
 			return false
@@ -216,7 +216,7 @@ class CsrController {
 		String nifValidado = StringUtils.validarNIF(consultaJSON?.nif)
 		if(nifValidado) usuario = Usuario.findByNif(nifValidado)
 		if (!usuario) {
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render message(code: "csr.solicitudNoEncontrada", args: ["nif: ${nifValidado}"])
 			return false
 		}
@@ -226,7 +226,7 @@ class CsrController {
 				dispositivo, usuario, SolicitudCSRUsuario.Estado.PENDIENTE_APROVACION);
 		}
 		if (!solicitudCSR) {
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render message(code: "csr.solicitudNoEncontrada", args: [consulta])
 			return false
 		}

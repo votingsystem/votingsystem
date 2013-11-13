@@ -1,13 +1,17 @@
 package org.votingsystem.applet.callable;
 
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVSBase;
 import org.votingsystem.model.ResponseVS;
+
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
+
 import javax.mail.Header;
+
 import org.apache.log4j.Logger;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerInformationVerifier;
@@ -15,10 +19,12 @@ import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.applet.util.HttpHelper;
+
 import static org.votingsystem.model.ContextVS.KEY_SIZE;
 import static org.votingsystem.model.ContextVS.PROVIDER;
 import static org.votingsystem.model.ContextVS.SIG_NAME;
 import static org.votingsystem.model.ContextVS.VOTE_SIGN_MECHANISM;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.PKCS10WrapperClient;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
@@ -78,10 +84,10 @@ public class AccessRequestor implements Callable<ResponseVS> {
                     smimeMessage, destinationCert);
 
             String csrFileName = ContextVS.CSR_FILE_NAME + ":" + 
-                    ContextVS.ENCRYPTED_CONTENT_TYPE;
+            		ContentTypeVS.ENCRYPTED;
         
             String accessRequestFileName = ContextVS.ACCESS_REQUEST_FILE_NAME + ":" + 
-                    ContextVS.SIGNED_AND_ENCRYPTED_CONTENT_TYPE;
+                    ContentTypeVS.SIGNED_AND_ENCRYPTED;
             Map<String, Object> mapToSend = new HashMap<String, Object>();
             mapToSend.put(csrFileName, encryptedCSRBytes);
             mapToSend.put(accessRequestFileName, accessRequestEncryptedBytes);

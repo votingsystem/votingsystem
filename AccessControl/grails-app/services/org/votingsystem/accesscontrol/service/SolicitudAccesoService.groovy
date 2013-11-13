@@ -36,25 +36,25 @@ class SolicitudAccesoService {
 	def encryptionService
 	def timeStampService
 	
-	//{"operation":"SOLICITUD_ACCESO","hashSolicitudAccesoBase64":"...",
+	//{"operation":"ACCESS_REQUEST","hashSolicitudAccesoBase64":"...",
 	// "eventId":"..","eventURL":"...","UUID":"..."}
 	private ResponseVS checkAccessRequestJSONData(JSONObject accessDataJSON, Locale locale) {
-		int status = ResponseVS.SC_ERROR_PETICION
-		TypeVS typeRespuesta = TypeVS.SOLICITUD_ACCESO_ERROR
+		int status = ResponseVS.SC_ERROR_REQUEST
+		TypeVS typeRespuesta = TypeVS.ACCESS_REQUEST_ERROR
 		org.bouncycastle.tsp.TimeStampToken tms;
 		String msg
 		try {
 			TypeVS operationType = TypeVS.valueOf(accessDataJSON.operation)
 			if (accessDataJSON.eventId && accessDataJSON.eventURL &&
 				accessDataJSON.hashSolicitudAccesoBase64 && 
-				(TypeVS.SOLICITUD_ACCESO == operationType)) {
+				(TypeVS.ACCESS_REQUEST == operationType)) {
 				status = ResponseVS.SC_OK
 			} else msg = messageSource.getMessage('accessRequestWithErrorsMsg', null, locale)
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex)
 			msg = messageSource.getMessage('accessRequestWithErrorsMsg', null, locale)
 		}
-		if(ResponseVS.SC_OK == status) typeRespuesta = TypeVS.SOLICITUD_ACCESO
+		if(ResponseVS.SC_OK == status) typeRespuesta = TypeVS.ACCESS_REQUEST
 		else log.error("checkAccessRequestJSONData - msg: ${msg} - data:${accessDataJSON.toString()}")
 		return new ResponseVS(statusCode:status, message:msg, type:typeRespuesta)
 	}
@@ -79,8 +79,8 @@ class SolicitudAccesoService {
 				if (!eventoVotacion.isOpen(DateUtils.getTodayDate())) {
 					msg = messageSource.getMessage('evento.messageCerrado', null, locale)
 					log.error("saveRequest - EVENT CLOSED - ${msg}")
-					return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-						type:TypeVS.SOLICITUD_ACCESO_ERROR, message:msg)
+					return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+						type:TypeVS.ACCESS_REQUEST_ERROR, message:msg)
 				}
 				SolicitudAcceso.withTransaction {
 					solicitudAcceso = SolicitudAcceso.findWhere(usuario:firmante,
@@ -90,8 +90,8 @@ class SolicitudAccesoService {
 						msg = "${grailsApplication.config.grails.serverURL}/messageSMIME/${solicitudAcceso.messageSMIME.id}"
 						log.error("saveRequest - ACCESS REQUEST ERROR - ${msg}")
 						return new ResponseVS(solicitudAcceso:solicitudAcceso, 
-							type:TypeVS.SOLICITUD_ACCESO_ERROR, message:msg, eventVS:eventoVotacion,
-							statusCode:ResponseVS.SC_ERROR_VOTO_REPETIDO)
+							type:TypeVS.ACCESS_REQUEST_ERROR, message:msg, eventVS:eventoVotacion,
+							statusCode:ResponseVS.SC_ERROR_VOTE_REPEATED)
 				} else {
 					//TimeStamp comes cert validated from filters. Check date
 					respuesta = timeStampService.validateToken(firmante.getTimeStampToken(), 
@@ -100,9 +100,9 @@ class SolicitudAccesoService {
 					if(ResponseVS.SC_OK != respuesta.statusCode) {
 						log.error("saveRequest - ERROR TOKEN DATE VALIDATION -${respuesta.message}")
 						return new ResponseVS(solicitudAcceso:solicitudAcceso, 
-							type:TypeVS.SOLICITUD_ACCESO_ERROR, 
+							type:TypeVS.ACCESS_REQUEST_ERROR, 
 							message:espuesta.message, eventVS:eventoVotacion,
-							statusCode:ResponseVS.SC_ERROR_VOTO_REPETIDO) 
+							statusCode:ResponseVS.SC_ERROR_VOTE_REPEATED) 
 					}
 					//es el hash único?
 					hashSolicitudAccesoBase64 = messageJSON.hashSolicitudAccesoBase64
@@ -111,8 +111,8 @@ class SolicitudAccesoService {
 					if (hashSolicitudAccesoRepetido) {
 						msg = messageSource.getMessage('error.HashRepetido', null, locale)
 						log.error("saveRequest -ERROR ACCESS REQUEST HAS REPEATED -> ${hashSolicitudAccesoBase64} - ${msg}")
-						return new ResponseVS(type:TypeVS.SOLICITUD_ACCESO_ERROR, message:msg,
-								statusCode:ResponseVS.SC_ERROR_PETICION, eventVS:eventoVotacion)
+						return new ResponseVS(type:TypeVS.ACCESS_REQUEST_ERROR, message:msg,
+								statusCode:ResponseVS.SC_ERROR_REQUEST, eventVS:eventoVotacion)
 					} else {//Todo OK
 					
 					VotingEvent votingEvent = null
@@ -137,7 +137,7 @@ class SolicitudAccesoService {
 							solicitudAcceso.errors.each { log.error("- saveRequest - ERROR - ${it}")}
 						}
 					}
-					return new ResponseVS(type:TypeVS.SOLICITUD_ACCESO,
+					return new ResponseVS(type:TypeVS.ACCESS_REQUEST,
 							statusCode:ResponseVS.SC_OK, eventVS:eventoVotacion,
 							solicitudAcceso:solicitudAcceso)
 					}
@@ -146,13 +146,13 @@ class SolicitudAccesoService {
 				msg = messageSource.getMessage( 'eventNotFound',
 							[messageJSON.eventId].toArray(), locale)
 				log.error("saveRequest - Event Id not found - > ${messageJSON.eventId} - ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
-						type:TypeVS.SOLICITUD_ACCESO_ERROR, message:msg)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+						type:TypeVS.ACCESS_REQUEST_ERROR, message:msg)
 			}
 		}catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
-					type:TypeVS.SOLICITUD_ACCESO_ERROR,
+					type:TypeVS.ACCESS_REQUEST_ERROR,
 					message:messageSource.getMessage(
 					'accessRequestWithErrorsMsg', null, locale))
 		}

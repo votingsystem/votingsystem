@@ -123,7 +123,7 @@ class EventoReclamacionController {
 				List results = MessageSMIME.withCriteria {
 					createAlias("smimePadre", "smimePadre")
 					eq("smimePadre.evento", evento)
-					eq("smimePadre.type", TypeVS.EVENTO_RECLAMACION)
+					eq("smimePadre.type", TypeVS.CLAIM_EVENT)
 				}
 				messageSMIME = results?.iterator()?.next()
 			}
@@ -160,7 +160,7 @@ class EventoReclamacionController {
 			MessageSMIME messageSMIME
 			MessageSMIME.withTransaction {
 				messageSMIME = MessageSMIME.findWhere(evento:evento, type:
-					TypeVS.EVENTO_RECLAMACION)
+					TypeVS.CLAIM_EVENT)
 			}
 			if (messageSMIME) {
 				response.status = ResponseVS.SC_OK
@@ -191,7 +191,7 @@ class EventoReclamacionController {
 		if(!messageSMIMEReq) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -207,9 +207,9 @@ class EventoReclamacionController {
         } catch (Exception ex) {
 			log.error (ex.getMessage(), ex)
 			params.respuesta = new ResponseVS(
-				statusCode:ResponseVS.SC_ERROR_PETICION,
+				statusCode:ResponseVS.SC_ERROR_REQUEST,
 				message:message(code:'publishClaimErrorMessage'), 
-				type:TypeVS.EVENTO_RECLAMACION_ERROR)
+				type:TypeVS.CLAIM_EVENT_ERROR)
         }
     }
 	
@@ -265,10 +265,10 @@ class EventoReclamacionController {
 		def informacionReclamacionMap = new HashMap()
 		List<Firma> firmas
 		Firma.withTransaction {
-			firmas = Firma.findAllWhere(evento:evento, type:TypeVS.FIRMA_EVENTO_RECLAMACION)
+			firmas = Firma.findAllWhere(evento:evento, type:TypeVS.CLAIM_EVENT_SIGN)
 		}
 		log.debug("count: " + Firma.findAllWhere(
-			evento:evento, type:TypeVS.FIRMA_EVENTO_RECLAMACION).size())
+			evento:evento, type:TypeVS.CLAIM_EVENT_SIGN).size())
 		informacionReclamacionMap.numeroFirmas = firmas.size()
 		informacionReclamacionMap.asuntoEvento = evento.asunto
 		informacionReclamacionMap.eventoURL =

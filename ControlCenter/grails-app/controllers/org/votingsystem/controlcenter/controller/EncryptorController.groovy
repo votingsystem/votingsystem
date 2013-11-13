@@ -30,14 +30,14 @@ class EncryptorController {
 			VotingSystemApplicationContex.instance.environment)) {
 			String msg = message(code: "serviceDevelopmentModeMsg")
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
 		if(!params.requestBytes) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -50,7 +50,7 @@ class EncryptorController {
 		if(!messageJSON.publicKey) {
 			String msg = message(code: "publicKeyMissingErrorMsg")
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -87,7 +87,7 @@ class EncryptorController {
 			VotingSystemApplicationContex.instance.environment)) {
 			String msg = message(code: "serviceDevelopmentModeMsg")
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
@@ -96,11 +96,11 @@ class EncryptorController {
 		if(!messageSMIMEReq) {
 			String msg = message(code:'evento.peticionSinArchivo')
 			log.error msg
-			response.status = ResponseVS.SC_ERROR_PETICION
+			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
 			return false
 		}
-		response.contentType = ContextVS.SIGNED_CONTENT_TYPE
+		response.contentType = org.votingsystem.model.ContentTypeVS.SIGNED
 			
 		SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage()
 		
@@ -110,11 +110,11 @@ class EncryptorController {
 		SMIMEMessageWrapper smimeMessageResp = firmaService.getMultiSignedMimeMessage(
 			fromUser, toUser, smimeMessage, subject)
 
-		MessageSMIME messageSMIMEResp = new MessageSMIME(tipo:TypeVS.TEST,
+		MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.TEST,
 			contenido:smimeMessageResp.getBytes())
 		
 		params.respuesta = new ResponseVS(statusCode:ResponseVS.SC_OK,
-			messageSMIME:messageSMIMEResp, tipo:TypeVS.TEST)
+			data:data, type:TypeVS.TEST)
 	}
 	
 	private getPemBytesFromKey(Key key) {

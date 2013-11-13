@@ -40,16 +40,16 @@ class ReclamacionService {
 			msg = messageSource.getMessage('eventNotFound', 
                     [messageJSON.id].toArray() , locale)
 			log.debug("guardar - ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:msg,
-				type:TypeVS.FIRMA_EVENTO_RECLAMACION_ERROR)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
+				type:TypeVS.CLAIM_EVENT_SIGNATURE_ERROR)
         } else {
 			ResponseVS timeStampVerification = timeStampService.validateToken(
 				usuario.getTimeStampToken(), eventoReclamacion, locale)
 			if(ResponseVS.SC_OK != timeStampVerification.statusCode) {
 				log.error("saveManifestSignature - ERROR TIMESTAMP VALIDATION -> '${timeStampVerification.message}'")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 					message:timeStampVerification.message,
-					type:TypeVS.FIRMA_EVENTO_CON_ERRORES, eventVS:eventoReclamacion)
+					type:TypeVS.EVENT_SIGN_WITH_ERRORS, eventVS:eventoReclamacion)
 			}
 		
             Firma firma = Firma.findWhere(evento:eventoReclamacion, usuario:usuario)
@@ -57,7 +57,7 @@ class ReclamacionService {
                     eventoReclamacion.cardinalidadRepresentaciones)) {
                 log.debug("guardar - claim signature OK - signer: ${usuario.nif}")
                 firma = new Firma(usuario:usuario, evento:eventoReclamacion, 
-					type:TypeVS.FIRMA_EVENTO_RECLAMACION, messageSMIME:messageSMIMEReq)
+					type:TypeVS.CLAIM_EVENT_SIGN, messageSMIME:messageSMIMEReq)
 				firma.save();
 				messageJSON.campos?.each { campoItem ->
 					CampoDeEvento campo = CampoDeEvento.findWhere(id:campoItem.id?.longValue())
@@ -73,34 +73,35 @@ class ReclamacionService {
 
 				SMIMEMessageWrapper smimeMessageResp = firmaService.
 					getMultiSignedMimeMessage (fromUser, toUser, smimeMessage, subject)
-				MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECIBO,
+				MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT,
 					smimePadre:messageSMIMEReq, evento:eventoReclamacion, 
 					valido:true, contenido:smimeMessageResp.getBytes())
 				MessageSMIME.withTransaction {
 					messageSMIMEResp.save()
 				}
+				messageSMIMEResp.smimeMessage = smimeMessageResp
 				return new ResponseVS(statusCode:ResponseVS.SC_OK,
-					messageSMIME:messageSMIMEResp, eventVS:eventoReclamacion,
-					smimeMessage:smimeMessage, type:TypeVS.FIRMA_EVENTO_RECLAMACION)
+					data:messageSMIMEResp, eventVS:eventoReclamacion,
+					smimeMessage:smimeMessage, type:TypeVS.CLAIM_EVENT_SIGN)
             } else {
 				msg = messageSource.getMessage('eventoReclamacion.firmaRepetida',
 					[usuario.nif, eventoReclamacion.asunto].toArray() , locale)
                 log.error("guardar - ${msg} - signer: ${usuario.nif}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
 					eventVS:eventoReclamacion, message:msg,
-					type:TypeVS.FIRMA_EVENTO_RECLAMACION_ERROR)
+					type:TypeVS.CLAIM_EVENT_SIGNATURE_ERROR)
             }
         }
     }
 	 
 	 private ResponseVS checkClaimJSONData(JSONObject claimDataJSON, Locale locale) {
-		 int status = ResponseVS.SC_ERROR_PETICION
+		 int status = ResponseVS.SC_ERROR_REQUEST
 		 org.bouncycastle.tsp.TimeStampToken tms;
 		 String msg
 		 try {
 			 TypeVS operationType = TypeVS.valueOf(claimDataJSON.operation)
 			 if (claimDataJSON.id && claimDataJSON.URL &&
-				 (TypeVS.FIRMA_RECLAMACION_SMIME == operationType)) {
+				 (TypeVS.SMIME_CLAIM_SIGNATURE == operationType)) {
 				 status = ResponseVS.SC_OK
 			 } else msg = messageSource.getMessage('claimSignatureWithErrorsMsg', null, locale)
 		 } catch(Exception ex) {
@@ -110,7 +111,7 @@ class ReclamacionService {
 		 if(ResponseVS.SC_OK != status) log.error(
 			 "checkClaimJSONData - msg: ${msg} - data:${claimDataJSON.toString()}")
 		 return new ResponseVS(statusCode:status, message:msg, 
-			 type:TypeVS.FIRMA_RECLAMACION_SMIME)
+			 type:TypeVS.SMIME_CLAIM_SIGNATURE)
 	 }
 	 
 	 public Map getStatisticsMap (EventoReclamacion event, Locale locale) {

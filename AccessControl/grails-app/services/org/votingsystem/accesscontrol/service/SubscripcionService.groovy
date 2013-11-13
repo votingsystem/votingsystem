@@ -2,18 +2,15 @@ package org.votingsystem.accesscontrol.service
 
 import org.votingsystem.accesscontrol.model.*;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.TypeVS;
+import org.votingsystem.model.TypeVS
+import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.*
 import org.votingsystem.groovy.util.*;
-
 import groovyx.net.http.*
 import static groovyx.net.http.ContentType.*
 import static groovyx.net.http.Method.*
-
 import java.security.cert.X509Certificate;
-
 import grails.converters.JSON
-
 import org.codehaus.groovy.grails.web.json.*
 import org.votingsystem.signature.smime.*
 
@@ -30,63 +27,66 @@ class SubscripcionService {
 	def messageSource
 	def httpService
 	
-	ResponseVS checkUser(Usuario usuario, Locale locale) {
-		log.debug "checkUser - user  '${usuario.nif}'"
+	ResponseVS checkUser(UserVS userVS, Locale locale) {
+		log.debug "checkUser - userVS.nif  '${userVS.getNif()}'"
 		String msg
-		if(!usuario.nif) {
+		if(!userVS.getNif()) {
 			msg = messageSource.getMessage('susbcripcion.errorDatosUsuario', null, locale)
 			log.error("- checkUser - ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
 				message:msg, type:TypeVS.USER_ERROR)
 		}
-		X509Certificate certificadoUsu = usuario.getCertificate()
-		String nifValidado = org.votingsystem.util.StringUtils.validarNIF(usuario.nif)
-		if(!nifValidado) {
+		X509Certificate userCert = userVS.getCertificate()
+		if (!userCert) {
+			log.debug("Missing certificate!!!")
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:"Missing certificate!!!")
+		}
+		String validatedNIF = org.votingsystem.util.StringUtils.validarNIF(userVS.getNif())
+		if(!validatedNIF) {
 			msg = messageSource.getMessage('susbcripcion.errorNifUsuario', 
-				[usuario.nif].toArray(), locale)
+				[userVS.getNif()].toArray(), locale)
 			log.error("- checkUser - ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, 
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
 				message:msg, type:TypeVS.USER_ERROR)
 		}
-		usuario.nif = nifValidado
-		usuario.type = Usuario.Type.USER
-		Usuario usuarioDB = Usuario.findWhere(nif:nifValidado.toUpperCase())
+		Usuario usuarioDB = Usuario.findByNif(validatedNIF.toUpperCase())
 		Certificado certificado = null;
 		if (!usuarioDB) {
-			usuarioDB = usuario.save();
-			log.debug "- checkUser - user -> ${usuario.nif} - id '${usuarioDB.id}'"
-			if (usuario.getCertificate()) {
-				certificado = new Certificado(usuario:usuarioDB,
-					contenido:usuario.getCertificate()?.getEncoded(),
-					numeroSerie:usuario.getCertificate()?.getSerialNumber()?.longValue(),
-					estado:Certificado.Estado.OK, type:Certificado.Type.USUARIO,
-					certificadoAutoridad:usuario.getCertificadoCA(),
-					validoDesde:usuario.getCertificate()?.getNotBefore(),
-					validoHasta:usuario.getCertificate()?.getNotAfter())
-				certificado.save();
-				log.debug "- checkUser - user cert -> id '${certificado.id}'"
-			}
+            usuarioDB = new Usuario(userVS)
+            usuarioDB.nif = nifValidado
+            usuarioDB.type = Usuario.Type.USER
+			usuarioDB.save();
+			log.debug "- checkUser - user -> ${usuarioDB.nif} - id '${usuarioDB.id}'"
+			certificado = new Certificado(usuario:usuarioDB,
+				contenido:usuarioDB.getCertificate()?.getEncoded(),
+				numeroSerie:usuarioDB.getCertificate()?.getSerialNumber()?.longValue(),
+				estado:Certificado.Estado.OK, type:Certificado.Type.USUARIO,
+				certificadoAutoridad:usuarioDB.getCertificateCA(),
+				validoDesde:usuarioDB.getCertificate()?.getNotBefore(),
+				validoHasta:usuarioDB.getCertificate()?.getNotAfter())
+			certificado.save();
+			log.debug "- checkUser - user cert -> id '${certificado.id}'"
 		} else {
 			certificado = Certificado.findWhere(
 				usuario:usuarioDB, estado:Certificado.Estado.OK)
-			if (!certificado?.numeroSerie == certificadoUsu.getSerialNumber()?.longValue()) {
+			if (!certificado?.numeroSerie == userCert.getSerialNumber()?.longValue()) {
 				certificado.estado = Certificado.Estado.ANULADO
 				certificado.save()
 				log.debug "- checkUser - CANCELLED user cert id '${certificado.id}'"
 				certificado = new Certificado(usuario:usuarioDB,
-					contenido:certificadoUsu?.getEncoded(), estado:Certificado.Estado.OK,
-					numeroSerie:certificadoUsu?.getSerialNumber()?.longValue(),
-					certificadoAutoridad:usuario.getCertificadoCA(),
-					validoDesde:usuario.getCertificate()?.getNotBefore(),
-					validoHasta:usuario.getCertificate()?.getNotAfter())
+					contenido:userCert?.getEncoded(), estado:Certificado.Estado.OK,
+					numeroSerie:userCert?.getSerialNumber()?.longValue(),
+					certificadoAutoridad:userVS.getCertificateCA(),
+					validoDesde:userVS.getCertificate()?.getNotBefore(),
+					validoHasta:userVS.getCertificate()?.getNotAfter())
 				certificado.save();
 				log.debug "- checkUser - UPDATED user cert -> id '${certificado.id}'"
 			}
-			usuarioDB.setCertificadoCA(usuario.getCertificadoCA())
-			usuarioDB.setCertificate(usuario.getCertificate())
-			usuarioDB.setTimeStampToken(usuario.getTimeStampToken())
+			usuarioDB.setCertificateCA(userVS.getCertificateCA())
+			usuarioDB.setCertificate(userVS.getCertificate())
+			usuarioDB.setTimeStampToken(userVS.getTimeStampToken())
 		}
-		return new ResponseVS(statusCode:ResponseVS.SC_OK, userVS:usuarioDB, certificateVS:certificado)
+		return new ResponseVS(statusCode:ResponseVS.SC_OK, userVS:usuarioDB, data:certificado)
 	}
 	
 	ResponseVS comprobarDispositivo(String nif, String telefono, String email, 
@@ -94,12 +94,12 @@ class SubscripcionService {
 		log.debug "comprobarDispositivo - nif:${nif} - telefono:${telefono} - email:${email} - deviceId:${deviceId}"
 		if(!nif || !deviceId) {
 			log.debug "Sin datos"
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
 				messageSource.getMessage('error.requestWithoutData', null, locale))
 		}
 		String nifValidado = org.votingsystem.util.StringUtils.validarNIF(nif)
 		if(!nifValidado) {
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION, message:
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
 				messageSource.getMessage('error.errorNif', [nif].toArray(), locale))
 		}
 		Usuario usuario = Usuario.findWhere(nif:nifValidado)
@@ -135,11 +135,11 @@ class SubscripcionService {
 		if (ResponseVS.SC_OK == respuesta.statusCode) {
 			ActorConIP actorConIP = ActorConIP.parse(respuesta.message)
 
-			if (!TypeVS.CENTRO_CONTROL.equals(actorConIP.serverType)) {
+			if (!TypeVS.CONTROL_CENTER.equals(actorConIP.serverType)) {
 				msg = message(code: 'susbcripcion.actorNoCentroControl',
 					args:[actorConIP.serverURL])
 				log.error("checkControlCenter - ERROR - ${msg}")
-				return new ResponseVS(message:msg, statusCode:ResponseVS.SC_ERROR_PETICION)
+				return new ResponseVS(message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST)
 			}
 			centroControl = new CentroControl(nombre:actorConIP.nombre,
 						serverURL:actorConIP.serverURL, 
@@ -179,7 +179,7 @@ class SubscripcionService {
 		} else {
 			msg = messageSource.getMessage('http.errorConectandoCentroControl', null, locale)
 			log.error("checkControlCenter - ERROR CONECTANDO CONTROL CENTER - ${msg}")
-			return new ResponseVS(message:msg, statusCode:ResponseVS.SC_ERROR_PETICION)
+			return new ResponseVS(message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST)
 		}
 	}
 
@@ -193,11 +193,11 @@ class SubscripcionService {
 		try {
 			def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
 			if (!messageJSON.serverURL || !messageJSON.operation ||
-				(TypeVS.ASOCIAR_CENTRO_CONTROL != TypeVS.valueOf(messageJSON.operation))) {
+				(TypeVS.CONTROL_CENTER_ASSOCIATION != TypeVS.valueOf(messageJSON.operation))) {
 				msg = messageSource.getMessage('documentWithErrorsMsg',null, locale)
 				log.error("asociarCentroControl - ERROR DATA - ${msg} -> ${smimeMessageReq.getSignedContent()}")
-				return new ResponseVS(message:msg, type:TypeVS.ASOCIAR_CENTRO_CONTROL_ERROR, 
-					statusCode:ResponseVS.SC_ERROR_PETICION)
+				return new ResponseVS(message:msg, type:TypeVS.CONTROL_CENTER_ASSOCIATION_ERROR, 
+					statusCode:ResponseVS.SC_ERROR_REQUEST)
 			} else {
 				serverURL = StringUtils.checkURL(messageJSON.serverURL)
 				while (serverURL.endsWith("/")){
@@ -209,15 +209,15 @@ class SubscripcionService {
 						[centroControl.nombre].toArray(), locale)
 					log.error("asociarCentroControl- CONTROL CENTER ALREADY ASSOCIATED - ${msg}")
 					return new ResponseVS(message:msg,
-						statusCode:ResponseVS.SC_ERROR_PETICION,
-						type:TypeVS.ASOCIAR_CENTRO_CONTROL_ERROR)
+						statusCode:ResponseVS.SC_ERROR_REQUEST,
+						type:TypeVS.CONTROL_CENTER_ASSOCIATION_ERROR)
 				} else {
 					ResponseVS respuesta = checkControlCenter(serverURL, locale)
 					if (ResponseVS.SC_OK != respuesta.statusCode) {
 						log.error("asociarCentroControl- ERROR CHECKING CONTROL CENTER - ${respuesta.message}")
 						return new ResponseVS(message:respuesta.message,
-							statusCode:ResponseVS.SC_ERROR_PETICION,
-							type:TypeVS.ASOCIAR_CENTRO_CONTROL_ERROR)
+							statusCode:ResponseVS.SC_ERROR_REQUEST,
+							type:TypeVS.CONTROL_CENTER_ASSOCIATION_ERROR)
 					} else {
 						msg =  messageSource.getMessage('susbcripcion.centroControlAsociado',
 							[respuesta.centroControl.nombre].toArray(), locale)
@@ -225,16 +225,16 @@ class SubscripcionService {
 						return new ResponseVS(message: msg,
 							centroControl:respuesta.centroControl,
 							statusCode:ResponseVS.SC_OK,
-							type:TypeVS.ASOCIAR_CENTRO_CONTROL)
+							type:TypeVS.CONTROL_CENTER_ASSOCIATION)
 					}
 				}
 			}
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 				message: messageSource.getMessage('error.errorConexionActor',
 					[serverURL, ex.getMessage()].toArray(), locale),
-				type:TypeVS.ASOCIAR_CENTRO_CONTROL_ERROR)
+				type:TypeVS.CONTROL_CENTER_ASSOCIATION_ERROR)
 		}
 	}
 }

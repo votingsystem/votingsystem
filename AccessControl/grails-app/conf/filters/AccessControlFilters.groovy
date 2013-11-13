@@ -116,7 +116,7 @@ class AccessControlFilters {
 				log.debug "---- filemapFilter - before "
 				if (!(request instanceof MultipartHttpServletRequest)) {
 					log.debug "---- filemapFilter - before - ERROR - request NOT MultipartHttpServletRequest "
-					response.status = ResponseVS.SC_ERROR_PETICION
+					response.status = ResponseVS.SC_ERROR_REQUEST
 					render(messageSource.getMessage(
 						'evento.peticionSinArchivo', null, request.getLocale()))
 					return false
@@ -161,7 +161,7 @@ class AccessControlFilters {
 									new ByteArrayInputStream(fileMap.get(key)?.getBytes()));
 							} catch(Exception ex) {
 								log.error(ex.getMessage(), ex)
-								response.status = ResponseVS.SC_ERROR_PETICION
+								response.status = ResponseVS.SC_ERROR_REQUEST
 								render messageSource.getMessage(
 									'signedDocumentErrorMsg', null, request.getLocale())
 								return false
@@ -170,7 +170,7 @@ class AccessControlFilters {
 						if(smimeMessageReq) {
 							respuesta = processSMIMERequest(smimeMessageReq, params, request)
 							if(ResponseVS.SC_OK == respuesta.statusCode) {
-								params[fileName] = respuesta.messageSMIME
+								params[fileName] = respuesta.data
 							} else {
 								params[fileName] = null
 								response.status = respuesta?.statusCode
@@ -208,7 +208,7 @@ class AccessControlFilters {
 					requestBytes = getBytesFromInputStream(request.getInputStream())
 					if(!requestBytes) {
 						log.debug "---- pkcs7DocumentsFilter - before  - REQUEST WITHOUT FILE ------------"
-						response.status = ResponseVS.SC_ERROR_PETICION
+						response.status = ResponseVS.SC_ERROR_REQUEST
 						render(messageSource.getMessage(
 							'evento.peticionSinArchivo', null, request.getLocale()))
 						return false
@@ -270,7 +270,7 @@ class AccessControlFilters {
 									new ByteArrayInputStream(requestBytes));
 							} catch(Exception ex) {
 								log.error(ex.getMessage(), ex)
-								response.status = ResponseVS.SC_ERROR_PETICION
+								response.status = ResponseVS.SC_ERROR_REQUEST
 								render messageSource.getMessage(
 									'signedDocumentErrorMsg', null, request.getLocale())
 								return false
@@ -278,8 +278,7 @@ class AccessControlFilters {
 						}
 						respuesta = processSMIMERequest(smimeMessageReq, params, request)
 						if(ResponseVS.SC_OK == respuesta.statusCode) { 
-							params.messageSMIMEReq = respuesta.messageSMIME
-							params.messageSMIMEReq = respuesta.messageSMIME
+							params.messageSMIMEReq = respuesta.data
 							return
 						} else {
 							response.status = respuesta?.statusCode
@@ -298,7 +297,7 @@ class AccessControlFilters {
 					return
 				}
 				ResponseVS respuesta = params.respuesta
-				MessageSMIME messageSMIME = respuesta.messageSMIME
+				MessageSMIME messageSMIME = respuesta.data
 				if(messageSMIME) {
 					byte[] smimeResponseBytes = messageSMIME?.contenido
 					X509Certificate encryptionReceiverCert = params.receiverCert
@@ -306,8 +305,9 @@ class AccessControlFilters {
 						if(response?.contentType?.contains("application/x-pkcs7-signature")) {
 							log.debug "---- pkcs7DocumentsFilter - after - SIGNED AND ENCRYPTED RESPONSE"
 							//log.debug "---- pkcs7DocumentsFilter - after - receiver: ${encryptionReceiverCert.getSubjectDN()}"
+							// ori -> ResponseVS encryptResponse =  encryptionService.encryptSMIMEMessage(messageSMIME.smimeMessage.getBytes(), encryptionReceiverCert, request.getLocale())
 							ResponseVS encryptResponse =  encryptionService.encryptSMIMEMessage(
-								messageSMIME.smimeMessage.getBytes(), encryptionReceiverCert, request.getLocale())
+								messageSMIME.smimeMessage, encryptionReceiverCert, request.getLocale())
 							if(ResponseVS.SC_OK == encryptResponse.statusCode) {
 								response.contentLength = encryptResponse.messageBytes.length
 								response.outputStream << encryptResponse.messageBytes
@@ -387,22 +387,22 @@ class AccessControlFilters {
 						  " - message: ${certValidationResponse.message}"
 				return certValidationResponse
 			} else {
+				Set<Usuario> usersVS = (Set<Usuario>)certValidationResponse.data;
 				messageSMIME = new MessageSMIME(valido:true,
-					signers:certValidationResponse.usersVS,
-					smimeMessage:smimeMessageReq,
+					signers:usersVS, smimeMessage:smimeMessageReq,
 					evento:certValidationResponse.eventVS,
-					usuario:certValidationResponse.usersVS?.iterator()?.next(),
-					type:certValidationResponse.type,
+					usuario:usersVS?.iterator()?.next(),
+					type:TypeVS.OK,
 					contenido:smimeMessageReq.getBytes(),
 					base64ContentDigest:smimeMessageReq.getContentDigestStr())
 				MessageSMIME.withTransaction {
 					messageSMIME.save()
 				}
 			}
-			return new ResponseVS(statusCode:ResponseVS.SC_OK, messageSMIME:messageSMIME)
+			return new ResponseVS(statusCode:ResponseVS.SC_OK, data:messageSMIME)
 		} else if(smimeMessageReq) {
 			log.error "**** Filter - processSMIMERequest - signature ERROR - "
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_PETICION,
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 				message:messageSource.getMessage('signatureErrorMsg', null, request.getLocale()))
 		}
 	}

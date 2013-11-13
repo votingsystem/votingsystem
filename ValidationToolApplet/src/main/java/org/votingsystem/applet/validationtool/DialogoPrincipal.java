@@ -6,7 +6,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.filechooser.FileFilter;
 import org.apache.log4j.Logger;
-import org.votingsystem.applet.model.OperationVSApplet;
+import org.votingsystem.applet.model.AppletOperation;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 
@@ -144,7 +144,7 @@ public class DialogoPrincipal extends javax.swing.JDialog {
 
     private void cerrarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cerrarButtonActionPerformed
         ContextVS.INSTANCE.sendMessageToHost(
-                new OperationVSApplet(ResponseVS.SC_CANCELADO));
+                new AppletOperation(ResponseVS.SC_CANCELLED));
         dispose();
     }//GEN-LAST:event_cerrarButtonActionPerformed
 

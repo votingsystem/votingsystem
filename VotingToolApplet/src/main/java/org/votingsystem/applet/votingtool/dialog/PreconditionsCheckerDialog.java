@@ -15,23 +15,23 @@ import org.votingsystem.applet.votingtool.FirmaDialog;
 import org.votingsystem.applet.votingtool.RepresentativeDataDialog;
 import org.votingsystem.applet.votingtool.SaveReceiptDialog;
 import org.votingsystem.applet.votingtool.VotacionDialog;
-import org.votingsystem.applet.model.OperationVSApplet;
-import static org.votingsystem.applet.model.OperationVSApplet.Type.ANULAR_SOLICITUD_ACCESO;
-import static org.votingsystem.applet.model.OperationVSApplet.Type.ANULAR_VOTO;
-import static org.votingsystem.applet.model.OperationVSApplet.Type.ASOCIAR_CENTRO_CONTROL;
-import static org.votingsystem.applet.model.OperationVSApplet.Type.CANCELAR_EVENTO;
-import static org.votingsystem.applet.model.OperationVSApplet.Type.ENVIO_VOTO_SMIME;
-import static org.votingsystem.applet.model.OperationVSApplet.Type.FIRMA_MANIFIESTO_PDF;
-import static org.votingsystem.applet.model.OperationVSApplet.Type.FIRMA_RECLAMACION_SMIME;
-import static org.votingsystem.applet.model.OperationVSApplet.Type.NEW_REPRESENTATIVE;
-import static org.votingsystem.applet.model.OperationVSApplet.Type.PUBLICACION_MANIFIESTO_PDF;
-import static org.votingsystem.applet.model.OperationVSApplet.Type.PUBLICACION_RECLAMACION_SMIME;
-import static org.votingsystem.applet.model.OperationVSApplet.Type.PUBLICACION_VOTACION_SMIME;
-import static org.votingsystem.applet.model.OperationVSApplet.Type.REPRESENTATIVE_ACCREDITATIONS_REQUEST;
-import static org.votingsystem.applet.model.OperationVSApplet.Type.REPRESENTATIVE_REVOKE;
-import static org.votingsystem.applet.model.OperationVSApplet.Type.REPRESENTATIVE_SELECTION;
-import static org.votingsystem.applet.model.OperationVSApplet.Type.REPRESENTATIVE_VOTING_HISTORY_REQUEST;
-import static org.votingsystem.applet.model.OperationVSApplet.Type.SOLICITUD_COPIA_SEGURIDAD;
+import org.votingsystem.applet.model.AppletOperation;
+import static org.votingsystem.applet.model.AppletOperation.Type.ACCESS_REQUEST_CANCELLATION;
+import static org.votingsystem.applet.model.AppletOperation.Type.VOTE_CANCELLATION;
+import static org.votingsystem.applet.model.AppletOperation.Type.CONTROL_CENTER_ASSOCIATION;
+import static org.votingsystem.applet.model.AppletOperation.Type.EVENT_CANCELLATION;
+import static org.votingsystem.applet.model.AppletOperation.Type.SEND_SMIME_VOTE;
+import static org.votingsystem.applet.model.AppletOperation.Type.MANIFEST_SIGN;
+import static org.votingsystem.applet.model.AppletOperation.Type.SMIME_CLAIM_SIGNATURE;
+import static org.votingsystem.applet.model.AppletOperation.Type.NEW_REPRESENTATIVE;
+import static org.votingsystem.applet.model.AppletOperation.Type.MANIFEST_PUBLISHING;
+import static org.votingsystem.applet.model.AppletOperation.Type.CLAIM_PUBLISHING;
+import static org.votingsystem.applet.model.AppletOperation.Type.VOTING_PUBLISHING;
+import static org.votingsystem.applet.model.AppletOperation.Type.REPRESENTATIVE_ACCREDITATIONS_REQUEST;
+import static org.votingsystem.applet.model.AppletOperation.Type.REPRESENTATIVE_REVOKE;
+import static org.votingsystem.applet.model.AppletOperation.Type.REPRESENTATIVE_SELECTION;
+import static org.votingsystem.applet.model.AppletOperation.Type.REPRESENTATIVE_VOTING_HISTORY_REQUEST;
+import static org.votingsystem.applet.model.AppletOperation.Type.BACKUP_REQUEST;
 import org.votingsystem.applet.pdf.PdfFormHelper;
 import org.votingsystem.applet.callable.InfoGetter;
 import org.votingsystem.model.ActorVS;
@@ -49,10 +49,10 @@ public class PreconditionsCheckerDialog extends JDialog {
     
     private static final Map<String, ActorVS> actorMap = 
             new HashMap<String, ActorVS>();
-    private OperationVSApplet operation;
+    private AppletOperation operation;
     private Frame frame = null;
 
-    public PreconditionsCheckerDialog(OperationVSApplet operation, 
+    public PreconditionsCheckerDialog(AppletOperation operation, 
             Frame parent, boolean modal) {
         super(parent, modal);
         frame = parent;
@@ -67,7 +67,7 @@ public class PreconditionsCheckerDialog extends JDialog {
 
             public void windowClosing(WindowEvent e) {
                 logger.debug(" - window closing event received");
-                sendResponse(ResponseVS.SC_CANCELADO,
+                sendResponse(ResponseVS.SC_CANCELLED,
                         ContextVS.INSTANCE.getString("operacionCancelada"));
             }
         });
@@ -99,7 +99,7 @@ public class PreconditionsCheckerDialog extends JDialog {
             ResponseVS responseVS = null;
             try {
             switch(operation.getType()) {
-                case ENVIO_VOTO_SMIME:
+                case SEND_SMIME_VOTE:
                     String accessControlURL = operation.getEvento().
                             getControlAcceso().getServerURL().trim();
                     responseVS = checkActorConIP(accessControlURL);
@@ -122,16 +122,16 @@ public class PreconditionsCheckerDialog extends JDialog {
                 case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
                 case NEW_REPRESENTATIVE:
                 case REPRESENTATIVE_SELECTION:
-                case PUBLICACION_MANIFIESTO_PDF:
-                case FIRMA_MANIFIESTO_PDF:
-                case PUBLICACION_RECLAMACION_SMIME:
-                case FIRMA_RECLAMACION_SMIME:
-                case PUBLICACION_VOTACION_SMIME:
-                case CANCELAR_EVENTO:
-                case ASOCIAR_CENTRO_CONTROL:
-                case ANULAR_SOLICITUD_ACCESO:
-                case ANULAR_VOTO: 
-                case SOLICITUD_COPIA_SEGURIDAD:
+                case MANIFEST_PUBLISHING:
+                case MANIFEST_SIGN:
+                case CLAIM_PUBLISHING:
+                case SMIME_CLAIM_SIGNATURE:
+                case VOTING_PUBLISHING:
+                case EVENT_CANCELLATION:
+                case CONTROL_CENTER_ASSOCIATION:
+                case ACCESS_REQUEST_CANCELLATION:
+                case VOTE_CANCELLATION: 
+                case BACKUP_REQUEST:
                     String serverURL = operation.getUrlServer().trim();
                     responseVS = checkActorConIP(serverURL);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -161,7 +161,7 @@ public class PreconditionsCheckerDialog extends JDialog {
                         operation.getType() + " - status: " + responseVS.getStatusCode());
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     switch(operation.getType()) {
-                        case GUARDAR_RECIBO_VOTO:
+                        case SAVE_VOTE_RECEIPT:
                             SaveReceiptDialog saveReceiptDialog = 
                                 new SaveReceiptDialog(frame, true);
                             dispose();
@@ -173,7 +173,7 @@ public class PreconditionsCheckerDialog extends JDialog {
                             dispose();
                             representativeDialog.show(operation);
                             break;
-                        case ENVIO_VOTO_SMIME:
+                        case SEND_SMIME_VOTE:
                             VotacionDialog votacionDialog = new VotacionDialog(
                                     frame, true);
                             dispose();
@@ -183,16 +183,16 @@ public class PreconditionsCheckerDialog extends JDialog {
                         case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
                         case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
                         case REPRESENTATIVE_SELECTION:
-                        case PUBLICACION_MANIFIESTO_PDF:
-                        case FIRMA_MANIFIESTO_PDF:
-                        case PUBLICACION_RECLAMACION_SMIME:
-                        case FIRMA_RECLAMACION_SMIME:
-                        case PUBLICACION_VOTACION_SMIME:
-                        case CANCELAR_EVENTO:
-                        case ASOCIAR_CENTRO_CONTROL:
-                        case ANULAR_SOLICITUD_ACCESO:
-                        case ANULAR_VOTO:
-                        case SOLICITUD_COPIA_SEGURIDAD:
+                        case MANIFEST_PUBLISHING:
+                        case MANIFEST_SIGN:
+                        case CLAIM_PUBLISHING:
+                        case SMIME_CLAIM_SIGNATURE:
+                        case VOTING_PUBLISHING:
+                        case EVENT_CANCELLATION:
+                        case CONTROL_CENTER_ASSOCIATION:
+                        case ACCESS_REQUEST_CANCELLATION:
+                        case VOTE_CANCELLATION:
+                        case BACKUP_REQUEST:
                             FirmaDialog firmaDialog = new FirmaDialog(frame, true);
                             dispose();
                             firmaDialog.show(operation);
