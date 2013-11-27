@@ -44,12 +44,10 @@
 	    </div>
 	</div>
 
-
 	<fieldset id="fieldsBox" class="fieldsBox" style="display:none;">
 		<legend id="fieldsLegend"><g:message code="claimsFieldLegend"/></legend>
 		<div id="fields"></div>
 	</fieldset>
-	
 	
 	<div style='overflow:hidden;'>
 		<div style="float:right; margin:0px 10px 0px 0px;">
@@ -114,41 +112,38 @@
 						showEditor();
 						return;
 					} 					
-			    	var event = new Evento();
-			    	event.asunto = $("#subject").val();
-			    	event.contenido = htmlEditorContent.trim();
-			    	event.fechaFin = $("#dateFinish").datepicker('getDate').format();
+			    	var eventVS = new EventVS();
+			    	eventVS.subject = $("#subject").val();
+			    	eventVS.content = htmlEditorContent.trim();
+			    	eventVS.dateFinish = $("#dateFinish").datepicker('getDate').format();
 			    	
 					var claimFields = new Array();
 					$("#fieldsBox").children().each(function(){
 						var claimField = $(this).find('div.newFieldValueDiv');
 						var claimFieldTxt = claimField.text();
 						if(claimFieldTxt.length > 0) {
-							var claimField = {contenido:claimFieldTxt}
+							var claimField = {content:claimFieldTxt}
 							claimFields.push(claimField)
 						}
 					});
 
-			    	event.campos = claimFields
+			    	eventVS.fieldsEventVS = claimFields
 
 					if($("#multipleSignaturesCheckbox").is(':checked') ) {
-						event.cardinalidad = "UNA"
+						eventVS.cardinality = "EXCLUSIVE"
 					} else {
-						event.cardinalidad = "MULTIPLES"
+						eventVS.cardinality = "MULTIPLE"
 					}
-					event.copiaSeguridadDisponible = $("#allowBackupRequestCheckbox").is(':checked')
+					eventVS.backupAvailable = $("#allowBackupRequestCheckbox").is(':checked')
 
-			    	var webAppMessage = new WebAppMessage(
-					    	StatusCode.SC_PROCESSING, 
-					    	Operation.CLAIM_PUBLISHING)
-			    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
-		    		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
-					webAppMessage.contenidoFirma = event
-					webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStamp', absolute:true)}"
-					webAppMessage.urlEnvioDocumento = "${createLink( controller:'eventoReclamacion', absolute:true)}"
-					webAppMessage.asuntoMensajeFirmado = "${message(code:'publishClaimSubject')}"
-					webAppMessage.respuestaConRecibo = true
-
+			    	var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.CLAIM_PUBLISHING)
+			    	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+		    		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
+					webAppMessage.signedContent = eventVS
+					webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
+					webAppMessage.receiverSignServiceURL = "${createLink( controller:'eventVSClaim', absolute:true)}"
+					webAppMessage.signedMessageSubject = "${message(code:'publishClaimSubject')}"
+					webAppMessage.isResponseWithReceipt = true
 					votingSystemClient.setMessageToSignatureClient(webAppMessage, publishDocumentCallback)
 					return false
 				 })
@@ -160,33 +155,29 @@
 	    		dateFinish = $("#dateFinish"),
 	    		editorDiv = $("#editorDiv"),
 	        	allFields = $([]).add(subject).add(dateFinish).add(editorDiv);
-				allFields.removeClass( "ui-state-error" );
+				allFields.removeClass( "formFieldError" );
 	
 				if(!document.getElementById('subject').validity.valid) {
-					subject.addClass( "ui-state-error" );
-					showResultDialog('<g:message code="dataFormERRORLbl"/>', 
-						'<g:message code="emptyFieldMsg"/>')
+					subject.addClass( "formFieldError" );
+					showResultDialog('<g:message code="dataFormERRORLbl"/>',  '<g:message code="emptyFieldMsg"/>')
 					return false
 				}
 	
 				if(!document.getElementById('dateFinish').validity.valid) {
-					dateFinish.addClass( "ui-state-error" );
-					showResultDialog('<g:message code="dataFormERRORLbl"/>', 
-						'<g:message code="emptyFieldMsg"/>')
+					dateFinish.addClass( "formFieldError" );
+					showResultDialog('<g:message code="dataFormERRORLbl"/>',  '<g:message code="emptyFieldMsg"/>')
 					return false
 				}
 				
 				if(dateFinish.datepicker("getDate") < new Date() ) {
-					dateFinish.addClass( "ui-state-error" );
-					showResultDialog('<g:message code="dataFormERRORLbl"/>', 
-						'<g:message code="dateInitERRORMsg"/>')
+					dateFinish.addClass( "formFieldError" );
+					showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="dateInitERRORMsg"/>')
 					return false
 				}
 	
 				if(htmlEditorContent.trim() == 0) {
-					editorDiv.addClass( "ui-state-error" );
-					showResultDialog('<g:message code="dataFormERRORLbl"/>', 
-							'<g:message code="emptyDocumentERRORMsg"/>')
+					editorDiv.addClass( "formFieldError" );
+					showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="emptyDocumentERRORMsg"/>')
 					return false;
 				}  
 				return true
@@ -199,7 +190,7 @@
 					$("#workingWithAppletDialog" ).dialog("close");
 					var caption = '<g:message code="publishERRORCaption"/>'
 					var msg = appMessageJSON.message
-					if(StatusCode.SC_OK == appMessageJSON.statusCode) { 
+					if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
 						caption = '<g:message code="publishOKCaption"/>'
 				    	var msgTemplate = "<g:message code='documentLinkMsg'/>";
 						msg = "<p><g:message code='publishOKMsg'/>.</p>" + 

@@ -1,24 +1,14 @@
 package org.votingsystem.util;
 
-import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Arrays;
 import org.apache.log4j.Logger;
+
+import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -118,13 +108,13 @@ public class FileUtils {
         }
     }
            
-    public static File getFileFromString (String contenido) {
+    public static File getFileFromString (String content) {
         File tempFile = null;
         try {
              tempFile = File.createTempFile("getFileFromString", ".temp");
              tempFile.deleteOnExit();
              BufferedWriter out = new BufferedWriter(new FileWriter(tempFile));
-             out.write(contenido);
+             out.write(content);
              out.close();
         } catch (IOException ex) {
             logger.error(ex.getMessage(), ex);

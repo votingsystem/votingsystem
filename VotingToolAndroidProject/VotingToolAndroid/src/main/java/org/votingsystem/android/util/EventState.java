@@ -2,7 +2,7 @@ package org.votingsystem.android.util;
 
 import android.content.Context;
 import org.votingsystem.android.R;
-import org.votingsystem.android.model.EventVSAndroid;
+import org.votingsystem.model.EventVS;
 
 
 public enum EventState {
@@ -36,11 +36,11 @@ public enum EventState {
         }
 	}
 	
-	public EventVSAndroid.Estado getEventState() {
+	public EventVS.State getEventState() {
         switch(this) {
-	    	case OPEN: return EventVSAndroid.Estado.ACTIVO;
-	    	case PENDING: return EventVSAndroid.Estado.PENDIENTE_COMIENZO;
-	    	case CLOSED: return EventVSAndroid.Estado.FINALIZADO;
+	    	case OPEN: return EventVS.State.ACTIVE;
+	    	case PENDING: return EventVS.State.AWAITING;
+	    	case CLOSED: return EventVS.State.TERMINATED;
 	    	default: return null;
         }
 	}

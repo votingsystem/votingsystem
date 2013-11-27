@@ -50,24 +50,24 @@
 			    $('#mainForm').submit(function(event){
 			    	event.preventDefault();
 			    	var editorDiv = $( "#editorDiv" )
-			    	editorDiv.removeClass( "ui-state-error" );
+			    	editorDiv.removeClass( "formFieldError" );
 					
 					if(htmlEditorContent.trim() == 0) {
-						editorDiv.addClass( "ui-state-error" );
+						editorDiv.addClass( "formFieldError" );
 						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 								'<g:message code="emptyDocumentERRORMsg"/>')
 						return false;
 					}  
 
 			    	var webAppMessage = new WebAppMessage(
-					    	StatusCode.SC_PROCESSING, 
+					    	ResponseVS.SC_PROCESSING,
 					    	Operation.NEW_REPRESENTATIVE)
-			    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
-		    		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
-					webAppMessage.contenidoFirma = {representativeInfo:editor.getData(), operation:Operation.REPRESENTATIVE_DATA}
-					webAppMessage.urlEnvioDocumento = "${createLink( controller:'representative', absolute:true)}"
-					webAppMessage.asuntoMensajeFirmado = '<g:message code="representativeDataLbl"/>'
-					webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStamp', absolute:true)}"
+			    	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+		    		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
+					webAppMessage.signedContent = {representativeInfo:editor.getData(), operation:Operation.REPRESENTATIVE_DATA}
+					webAppMessage.receiverSignServiceURL = "${createLink( controller:'representative', absolute:true)}"
+					webAppMessage.signedMessageSubject = '<g:message code="representativeDataLbl"/>'
+					webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
 					votingSystemClient.setMessageToSignatureClient(webAppMessage, editRepresentativeCallback);
 			    	return false 
 			    });
@@ -82,9 +82,9 @@
 					$("#workingWithAppletDialog" ).dialog("close");
 					var caption = '<g:message code="operationERRORCaption"/>'
 					var msg = appMessageJSON.message
-					if(StatusCode.SC_OK == appMessageJSON.statusCode) { 
+					if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
 						caption = "<g:message code='operationOKCaption'/>"
-					} else if (StatusCode.SC_CANCELLED== appMessageJSON.statusCode) {
+					} else if (ResponseVS.SC_CANCELLED== appMessageJSON.statusCode) {
 						caption = "<g:message code='operationCANCELLEDLbl'/>"
 					}
 					showResultDialog(caption, msg)

@@ -1,30 +1,13 @@
 package org.bouncycastle2.cert;
 
+import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.asn1.x509.*;
+import org.bouncycastle2.operator.ContentSigner;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.DERBitString;
-import org.bouncycastle2.asn1.DERGeneralizedTime;
-import org.bouncycastle2.asn1.DERSequence;
-import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.asn1.x509.AttributeCertificate;
-import org.bouncycastle2.asn1.x509.AttributeCertificateInfo;
-import org.bouncycastle2.asn1.x509.CertificateList;
-import org.bouncycastle2.asn1.x509.TBSCertList;
-import org.bouncycastle2.asn1.x509.TBSCertificateStructure;
-import org.bouncycastle2.asn1.x509.X509CertificateStructure;
-import org.bouncycastle2.asn1.x509.X509Extensions;
-import org.bouncycastle2.operator.ContentSigner;
+import java.util.*;
 
 class CertUtils
 {

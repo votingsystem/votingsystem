@@ -1,16 +1,6 @@
 package org.bouncycastle2.crypto.util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigInteger;
-
-import org.bouncycastle2.asn1.ASN1InputStream;
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DEREncodable;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.nist.NISTNamedCurves;
 import org.bouncycastle2.asn1.oiw.ElGamalParameter;
 import org.bouncycastle2.asn1.oiw.OIWObjectIdentifiers;
@@ -27,16 +17,11 @@ import org.bouncycastle2.asn1.x9.X962NamedCurves;
 import org.bouncycastle2.asn1.x9.X962Parameters;
 import org.bouncycastle2.asn1.x9.X9ECParameters;
 import org.bouncycastle2.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle2.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle2.crypto.params.DHParameters;
-import org.bouncycastle2.crypto.params.DHPrivateKeyParameters;
-import org.bouncycastle2.crypto.params.DSAParameters;
-import org.bouncycastle2.crypto.params.DSAPrivateKeyParameters;
-import org.bouncycastle2.crypto.params.ECDomainParameters;
-import org.bouncycastle2.crypto.params.ECPrivateKeyParameters;
-import org.bouncycastle2.crypto.params.ElGamalParameters;
-import org.bouncycastle2.crypto.params.ElGamalPrivateKeyParameters;
-import org.bouncycastle2.crypto.params.RSAPrivateCrtKeyParameters;
+import org.bouncycastle2.crypto.params.*;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
 
 /**
  * Factory for creating private key objects from PKCS8 PrivateKeyInfo objects.

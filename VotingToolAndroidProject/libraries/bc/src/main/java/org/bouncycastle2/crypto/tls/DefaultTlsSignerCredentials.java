@@ -1,12 +1,12 @@
 package org.bouncycastle2.crypto.tls;
 
-import java.io.IOException;
-
 import org.bouncycastle2.crypto.CryptoException;
 import org.bouncycastle2.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle2.crypto.params.DSAPrivateKeyParameters;
 import org.bouncycastle2.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle2.crypto.params.RSAKeyParameters;
+
+import java.io.IOException;
 
 public class DefaultTlsSignerCredentials implements TlsSignerCredentials
 {

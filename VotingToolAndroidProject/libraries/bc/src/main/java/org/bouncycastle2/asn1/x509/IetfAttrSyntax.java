@@ -1,19 +1,9 @@
 package org.bouncycastle2.asn1.x509;
 
+import org.bouncycastle2.asn1.*;
+
 import java.util.Enumeration;
 import java.util.Vector;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.ASN1TaggedObject;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DEROctetString;
-import org.bouncycastle2.asn1.DERSequence;
-import org.bouncycastle2.asn1.DERTaggedObject;
-import org.bouncycastle2.asn1.DERUTF8String;
 
 /**
  * Implementation of <code>IetfAttrSyntax</code> as specified by RFC3281.

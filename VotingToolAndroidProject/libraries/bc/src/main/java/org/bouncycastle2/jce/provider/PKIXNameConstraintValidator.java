@@ -8,14 +8,7 @@ import org.bouncycastle2.asn1.x509.GeneralSubtree;
 import org.bouncycastle2.util.Arrays;
 import org.bouncycastle2.util.Strings;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class PKIXNameConstraintValidator
 {

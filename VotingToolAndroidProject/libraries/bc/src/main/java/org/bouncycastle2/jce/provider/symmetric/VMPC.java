@@ -1,13 +1,13 @@
 package org.bouncycastle2.jce.provider.symmetric;
 
-import java.util.HashMap;
-
 import org.bouncycastle2.crypto.CipherKeyGenerator;
 import org.bouncycastle2.crypto.engines.VMPCEngine;
 import org.bouncycastle2.crypto.macs.VMPCMac;
 import org.bouncycastle2.jce.provider.JCEKeyGenerator;
 import org.bouncycastle2.jce.provider.JCEMac;
 import org.bouncycastle2.jce.provider.JCEStreamCipher;
+
+import java.util.HashMap;
 
 public final class VMPC
 {

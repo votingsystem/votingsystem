@@ -4,35 +4,34 @@
        	<r:require modules="paginate"/>
 </head>
 <body>
-<div id="contentDiv" style="display:block;position:relative; margin: 0px 0px 30px 0px;min-height: 700px;">
-		<div style="width: 80%;margin: auto;top: 0; left: 0; right: 0; position:relative;display:table;">
-			<div style="display:table-cell;">
-				<votingSystem:simpleButton id="checkRepresentativeButton"
-					imgSrc="${resource(dir:'images',file:'checkRepresentative.png')}" style="margin:0px 20px 0px 0px;">
-						<g:message code="checkRepresentativeLbl"/>
-				</votingSystem:simpleButton>
-			</div>
+<div style="position:relative;">
+    <div id="progressDiv" style="position: absolute; left: 40%; right:40%; top: 300px;">
+        <progress style="margin:0px auto 0px auto;"></progress>
+    </div>
 
-			<div style="display:table-cell;">
-				<votingSystem:simpleButton href="${createLink(controller:'representative', action:'representativeAdmin')}"
-					imgSrc="${resource(dir:'images',file:'representativeAdmin.png')}" style="margin:0px 20px 0px 0px;">
-						<g:message code="adminRepresentativeLbl"/>
-				</votingSystem:simpleButton>
-			</div>
-		</div>
+    <div id="contentDiv" style="display:block;position:relative; margin: 0px 0px 30px 0px;min-height: 700px;">
+        <div style="width: 80%;margin: auto;top: 0; left: 0; right: 0; position:relative;display:table;">
+            <div style="display:table-cell;">
+                <votingSystem:simpleButton id="checkRepresentativeButton"
+                                           imgSrc="${resource(dir:'images',file:'checkRepresentative.png')}" style="margin:0px 20px 0px 0px;">
+                    <g:message code="checkRepresentativeLbl"/>
+                </votingSystem:simpleButton>
+            </div>
 
-		<div style="width:90%;margin: auto;top: 0; left: 0; right: 0; position:relative;display:table;">
-			<div style="display:table-cell;"><ul id="representativeList"></ul></div>
-			
-		</div>
-	
+            <div style="display:table-cell;">
+                <votingSystem:simpleButton href="${createLink(controller:'representative', action:'representativeAdmin')}"
+                                           imgSrc="${resource(dir:'images',file:'representativeAdmin.png')}" style="margin:0px 20px 0px 0px;">
+                    <g:message code="adminRepresentativeLbl"/>
+                </votingSystem:simpleButton>
+            </div>
+        </div>
+
+        <div style="width:90%;margin: auto;top: 0; left: 0; right: 0; position:relative;display:table;">
+            <div style="display:table-cell;"><ul id="representativeList"></ul></div>
+
+        </div>
+    </div>
 </div>
-
-		
-<div id="progressDiv" style="vertical-align: middle;height:100%;">
-	<progress style="display:block;margin:0px auto 20px auto;"></progress>
-</div>
-
 <g:render template="/template/pagination"/> 	
 
 <g:include view="/include/dialog/checkRepresentativeDialog.gsp"/>	
@@ -87,10 +86,10 @@
 			//console.log( " - ajax call done - dataStr: " + dataStr);
 			//console.log("printEvent: " + dataStr);
 	        var newRepresentativeTemplate = $('#representativeTemplate').html()
-	        var endTime = Date.parse(representativeJSON.fechaFin)
+	        var endTime = Date.parse(representativeJSON.dateFinish)
 	        
 	        var newRepresentativeHTML = newRepresentativeTemplate.format(representativeJSON.imageURL, 
-			        representativeJSON.nombre + " " + representativeJSON.primerApellido,
+			        representativeJSON.name + " " + representativeJSON.firstName,
 			        representativeJSON.numRepresentations);
 	        var $newRepresentative = $(newRepresentativeHTML)
 	        //$newRepresentative.attr("representativeData", dataStr)			

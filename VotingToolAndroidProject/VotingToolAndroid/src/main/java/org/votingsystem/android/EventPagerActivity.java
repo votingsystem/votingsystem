@@ -9,9 +9,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.MenuItem;
-
-import org.votingsystem.android.model.ContextVSAndroid;
-import org.votingsystem.android.model.EventVSAndroid;
+import org.votingsystem.android.model.AndroidContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
@@ -25,13 +23,13 @@ public class EventPagerActivity  extends ActionBarActivity {
 
     public static final String TAG = "EventPagerActivity";
 
-    private ContextVSAndroid contextVSAndroid;
+    private AndroidContextVS androidContextVS;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         Log.d(TAG + ".onCreate(...) ", " - onCreate ");
         super.onCreate(savedInstanceState);
-        contextVSAndroid = ContextVSAndroid.getInstance(getBaseContext());
-        if(contextVSAndroid.getEvents() == null) {
+        androidContextVS = AndroidContextVS.getInstance(getBaseContext());
+        if(androidContextVS.getEvents() == null) {
             Log.d(TAG + ".onCreate(...) ", " - Events not found in context");
             return;
         }
@@ -39,52 +37,52 @@ public class EventPagerActivity  extends ActionBarActivity {
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         EventsPagerAdapter eventsPagerAdapter = new EventsPagerAdapter(
-                getSupportFragmentManager(), contextVSAndroid.getEvents());
+                getSupportFragmentManager(), androidContextVS.getEvents());
         mViewPager.setAdapter(eventsPagerAdapter);
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override public void onPageSelected(int position) {
-                EventVSAndroid selectedEvent = (EventVSAndroid) contextVSAndroid.getEvents().get(position);
-                contextVSAndroid.setEvent(selectedEvent);
+                EventVS selectedEvent = (EventVS) androidContextVS.getEvents().get(position);
+                androidContextVS.setEvent(selectedEvent);
                 setActionBarTitle(selectedEvent);
 
             }
         });
-        mViewPager.setCurrentItem(contextVSAndroid.getEventIndex(contextVSAndroid.getEvent()), true);
-        setActionBarTitle(contextVSAndroid.getEvent());
+        mViewPager.setCurrentItem(androidContextVS.getEventIndex(androidContextVS.getEvent()), true);
+        setActionBarTitle(androidContextVS.getEvent());
     }
 
-    private void setActionBarTitle(EventVSAndroid event) {
+    private void setActionBarTitle(EventVS event) {
         String subtTitle = null;
         switch(event.getTypeVS()) {
-            case SIGN_EVENT:
+            case MANIFEST_EVENT:
                 getSupportActionBar().setLogo(R.drawable.manifest_32);
-                switch(event.getEstadoEnumValue()) {
-                    case ACTIVO:
+                switch(event.getStateEnumValue()) {
+                    case ACTIVE:
                         getSupportActionBar().setTitle(getString(R.string.manifest_open_lbl,
-                                DateUtils.getElpasedTimeHoursFromNow(event.getFechaFin())));
+                                DateUtils.getElpasedTimeHoursFromNow(event.getDateFinish())));
                         break;
-                    case PENDIENTE_COMIENZO:
+                    case AWAITING:
                         getSupportActionBar().setTitle(getString(R.string.manifest_pendind_lbl));
                         subtTitle = getString(R.string.inicio_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getFechaInicio()) + " - " +
+                                DateUtils.getShortSpanishStringFromDate(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.fin_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getFechaFin());
+                                DateUtils.getShortSpanishStringFromDate(event.getDateFinish());
                         break;
-                    case CANCELADO:
+                    case CANCELLED:
                         getSupportActionBar().setTitle(getString(R.string.manifest_closed_lbl) + " - (" +
                                 getString(R.string.event_canceled) + ")");
                         subtTitle = getString(R.string.inicio_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getFechaInicio()) + " - " +
+                                DateUtils.getShortSpanishStringFromDate(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.fin_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getFechaFin()) +
+                                DateUtils.getShortSpanishStringFromDate(event.getDateFinish()) +
                                 " (" +  getString(R.string.event_canceled)  + ")";
                         break;
-                    case FINALIZADO:
+                    case TERMINATED:
                         getSupportActionBar().setTitle(getString(R.string.manifest_closed_lbl));
                         subtTitle = getString(R.string.inicio_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getFechaInicio()) + " - " +
+                                DateUtils.getShortSpanishStringFromDate(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.fin_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getFechaFin());
+                                DateUtils.getShortSpanishStringFromDate(event.getDateFinish());
                         break;
                     default:
                         getSupportActionBar().setTitle(getString(R.string.manifest_closed_lbl));
@@ -92,50 +90,50 @@ public class EventPagerActivity  extends ActionBarActivity {
                 break;
             case CLAIM_EVENT:
                 getSupportActionBar().setLogo(R.drawable.filenew_32);
-                switch(event.getEstadoEnumValue()) {
-                    case ACTIVO:
+                switch(event.getStateEnumValue()) {
+                    case ACTIVE:
                         getSupportActionBar().setTitle(getString(R.string.claim_open_lbl,
-                                DateUtils.getElpasedTimeHoursFromNow(event.getFechaFin())));
+                                DateUtils.getElpasedTimeHoursFromNow(event.getDateFinish())));
                         break;
-                    case PENDIENTE_COMIENZO:
+                    case AWAITING:
                         getSupportActionBar().setTitle(getString(R.string.claim_pending_lbl));
                         subtTitle = getString(R.string.inicio_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getFechaInicio()) + " - " +
+                                DateUtils.getShortSpanishStringFromDate(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.fin_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getFechaFin());
+                                DateUtils.getShortSpanishStringFromDate(event.getDateFinish());
                         break;
-                    case CANCELADO:
+                    case CANCELLED:
                         getSupportActionBar().setTitle(getString(R.string.claim_closed_lbl) + " - (" +
                                 getString(R.string.event_canceled) + ")");
                         subtTitle = getString(R.string.inicio_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getFechaInicio()) + " - " +
+                                DateUtils.getShortSpanishStringFromDate(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.fin_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getFechaFin()) +
+                                DateUtils.getShortSpanishStringFromDate(event.getDateFinish()) +
                                 " (" +  getString(R.string.event_canceled)  + ")";
                         break;
-                    case FINALIZADO:
+                    case TERMINATED:
                         setTitle(getString(R.string.claim_closed_lbl));
                         subtTitle = getString(R.string.inicio_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getFechaInicio()) + " - " +
+                                DateUtils.getShortSpanishStringFromDate(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.fin_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getFechaFin());
+                                DateUtils.getShortSpanishStringFromDate(event.getDateFinish());
                     default:
                         getSupportActionBar().setTitle(getString(R.string.claim_closed_lbl));
                 }
                 break;
             case VOTING_EVENT:
                 getSupportActionBar().setLogo(R.drawable.poll_32);
-                switch(event.getEstadoEnumValue()) {
-                    case ACTIVO:
+                switch(event.getStateEnumValue()) {
+                    case ACTIVE:
                         getSupportActionBar().setTitle(getString(R.string.voting_open_lbl,
-                                        DateUtils.getElpasedTimeHoursFromNow(event.getFechaFin())));
+                                        DateUtils.getElpasedTimeHoursFromNow(event.getDateFinish())));
                         break;
-                    case PENDIENTE_COMIENZO:
+                    case AWAITING:
                         getSupportActionBar().setTitle(getString(R.string.voting_pending_lbl));
                         subtTitle = getString(R.string.inicio_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getFechaInicio()) + " - " +
+                                DateUtils.getShortSpanishStringFromDate(event.getDateBegin()) + " - " +
                                 "" + getString(R.string.fin_lbl) + ": " +
-                                DateUtils.getShortSpanishStringFromDate(event.getFechaFin());
+                                DateUtils.getShortSpanishStringFromDate(event.getDateFinish());
                         break;
                     default:
                         getSupportActionBar().setTitle(getString(R.string.voting_closed_lbl));
@@ -171,7 +169,7 @@ public class EventPagerActivity  extends ActionBarActivity {
         @Override public Fragment getItem(int i) {
             Log.d(TAG + ".EventsPagerAdapter.getItem(...) ", " - item: " + i);
             Fragment fragment = null;
-            if (contextVSAndroid.getEvent().getTypeVS().equals(TypeVS.VOTING_EVENT)) {
+            if (androidContextVS.getEvent().getTypeVS().equals(TypeVS.VOTING_EVENT)) {
                 fragment = new VotingEventFragment();
             } else {
                 fragment = new EventFragment();

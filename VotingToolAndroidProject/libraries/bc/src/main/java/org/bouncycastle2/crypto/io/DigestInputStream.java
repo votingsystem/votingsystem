@@ -1,10 +1,10 @@
 package org.bouncycastle2.crypto.io;
 
+import org.bouncycastle2.crypto.Digest;
+
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import org.bouncycastle2.crypto.Digest;
 
 public class DigestInputStream
     extends FilterInputStream

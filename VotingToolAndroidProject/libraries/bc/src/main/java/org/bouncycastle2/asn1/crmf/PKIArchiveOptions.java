@@ -1,12 +1,6 @@
 package org.bouncycastle2.asn1.crmf;
 
-import org.bouncycastle2.asn1.ASN1Choice;
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.ASN1TaggedObject;
-import org.bouncycastle2.asn1.DERBoolean;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERTaggedObject;
+import org.bouncycastle2.asn1.*;
 
 public class PKIArchiveOptions
     extends ASN1Encodable

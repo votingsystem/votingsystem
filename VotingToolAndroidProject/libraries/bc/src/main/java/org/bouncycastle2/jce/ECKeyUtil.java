@@ -1,16 +1,5 @@
 package org.bouncycastle2.jce;
 
-import java.io.UnsupportedEncodingException;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.PublicKey;
-import java.security.Security;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-
 import org.bouncycastle2.asn1.ASN1Object;
 import org.bouncycastle2.asn1.DERObject;
 import org.bouncycastle2.asn1.DERObjectIdentifier;
@@ -23,6 +12,11 @@ import org.bouncycastle2.asn1.x9.X9ECParameters;
 import org.bouncycastle2.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle2.jce.provider.ProviderUtil;
 import org.bouncycastle2.jce.provider.asymmetric.ec.ECUtil;
+
+import java.io.UnsupportedEncodingException;
+import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 /**
  * Utility class to allow conversion of EC key parameters to explicit from named

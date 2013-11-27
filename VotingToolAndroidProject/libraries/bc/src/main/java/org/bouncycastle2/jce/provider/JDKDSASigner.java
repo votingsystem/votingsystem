@@ -1,35 +1,21 @@
 package org.bouncycastle2.jce.provider;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.SignatureException;
-import java.security.SignatureSpi;
-import java.security.interfaces.DSAKey;
-import java.security.spec.AlgorithmParameterSpec;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERSequence;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle2.crypto.CipherParameters;
 import org.bouncycastle2.crypto.DSA;
 import org.bouncycastle2.crypto.Digest;
-import org.bouncycastle2.crypto.digests.NullDigest;
-import org.bouncycastle2.crypto.digests.SHA1Digest;
-import org.bouncycastle2.crypto.digests.SHA224Digest;
-import org.bouncycastle2.crypto.digests.SHA256Digest;
-import org.bouncycastle2.crypto.digests.SHA384Digest;
-import org.bouncycastle2.crypto.digests.SHA512Digest;
+import org.bouncycastle2.crypto.digests.*;
 import org.bouncycastle2.crypto.params.ParametersWithRandom;
 import org.bouncycastle2.crypto.signers.DSASigner;
 import org.bouncycastle2.jce.interfaces.GOST3410Key;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.*;
+import java.security.interfaces.DSAKey;
+import java.security.spec.AlgorithmParameterSpec;
 
 public class JDKDSASigner
     extends SignatureSpi

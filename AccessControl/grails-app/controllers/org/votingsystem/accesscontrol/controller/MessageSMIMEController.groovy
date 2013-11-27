@@ -1,10 +1,10 @@
 package org.votingsystem.accesscontrol.controller
 
 import org.servidordnie.persistencia.modelo.*
-import org.votingsystem.accesscontrol.model.*;
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.TypeVS;
-
+import org.votingsystem.model.ContentTypeVS
+import org.votingsystem.model.MessageSMIME
+import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.TypeVS
 /**
  * @infoController Mensajes firmados
  * @descController Servicios relacionados con los messages firmados manejados por la
@@ -28,14 +28,14 @@ class MessageSMIMEController {
 		}
         if (messageSMIME) {
             response.status = ResponseVS.SC_OK
-            response.contentLength = messageSMIME.contenido.length
-            response.setContentType("text/plain")
-            response.outputStream <<  messageSMIME.contenido
+            response.contentLength = messageSMIME.content.length
+            response.setContentType(ContentTypeVS.TEXT)
+            response.outputStream <<  messageSMIME.content
             response.outputStream.flush()
             return false
         }
         response.status = ResponseVS.SC_NOT_FOUND
-        render message(code: 'messageSMIME.eventoNoEncontrado', args:[params.id])
+        render message(code: 'eventVSNotFound', args:[params.id])
         return false
 	}
 	
@@ -52,19 +52,19 @@ class MessageSMIMEController {
 	def recibo() {
 		def messageSMIMEPadre = MessageSMIME.get(params.long('requestMessageId'))
 		if (messageSMIMEPadre) {
-			def messageSMIME = MessageSMIME.findWhere(smimePadre:messageSMIMEPadre,
+			def messageSMIME = MessageSMIME.findWhere(smimeParent:messageSMIMEPadre,
 				type: TypeVS.RECEIPT)
 			if (messageSMIME) {
 				response.status = ResponseVS.SC_OK
-				response.contentLength = messageSMIME.contenido.length
-				response.setContentType("text/plain")
-				response.outputStream <<  messageSMIME.contenido
+				response.contentLength = messageSMIME.content.length
+				response.setContentType(ContentTypeVS.TEXT)
+				response.outputStream <<  messageSMIME.content
 				response.outputStream.flush()
 				return false
 			}
 		}
 		response.status = ResponseVS.SC_NOT_FOUND
-		render message(code: 'messageSMIME.eventoNoEncontrado', args:[params.smimePadreId])
+		render message(code: 'eventVSNotFound', args:[params.smimeParentId])
 		return false
 	}
 	

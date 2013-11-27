@@ -40,12 +40,15 @@
 
 package com.sun.mail.mbox;
 
-import javax.mail.*;
-import javax.mail.internet.*;
-import javax.activation.*;
-import java.util.*;
-import java.io.*;
 import com.sun.mail.util.LineInputStream;
+
+import javax.activation.DataSource;
+import javax.mail.BodyPart;
+import javax.mail.MessagingException;
+import javax.mail.MethodNotSupportedException;
+import javax.mail.internet.InternetHeaders;
+import javax.mail.internet.MimeMultipart;
+import java.io.*;
 
 /**
  * The SunV3Multipart class is an implementation of the abstract Multipart

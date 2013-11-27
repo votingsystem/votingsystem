@@ -1,10 +1,5 @@
 package org.bouncycastle2.pkcs;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.bouncycastle2.asn1.ASN1Object;
 import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle2.asn1.ASN1Set;
@@ -16,6 +11,11 @@ import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle2.operator.ContentVerifier;
 import org.bouncycastle2.operator.ContentVerifierProvider;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Holding class for a PKCS#10 certification request.

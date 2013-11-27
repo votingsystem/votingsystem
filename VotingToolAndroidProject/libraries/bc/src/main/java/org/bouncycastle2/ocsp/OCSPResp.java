@@ -1,14 +1,14 @@
 package org.bouncycastle2.ocsp;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.bouncycastle2.asn1.ASN1InputStream;
 import org.bouncycastle2.asn1.ASN1Object;
 import org.bouncycastle2.asn1.ocsp.BasicOCSPResponse;
 import org.bouncycastle2.asn1.ocsp.OCSPObjectIdentifiers;
 import org.bouncycastle2.asn1.ocsp.OCSPResponse;
 import org.bouncycastle2.asn1.ocsp.ResponseBytes;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 public class OCSPResp
 {

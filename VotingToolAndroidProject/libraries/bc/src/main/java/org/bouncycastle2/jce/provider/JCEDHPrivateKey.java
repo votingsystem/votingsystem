@@ -1,15 +1,5 @@
 package org.bouncycastle2.jce.provider;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.math.BigInteger;
-import java.util.Enumeration;
-
-import javax.crypto.interfaces.DHPrivateKey;
-import javax.crypto.spec.DHParameterSpec;
-import javax.crypto.spec.DHPrivateKeySpec;
-
 import org.bouncycastle2.asn1.ASN1Sequence;
 import org.bouncycastle2.asn1.DEREncodable;
 import org.bouncycastle2.asn1.DERInteger;
@@ -22,6 +12,15 @@ import org.bouncycastle2.asn1.x9.DHDomainParameters;
 import org.bouncycastle2.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle2.crypto.params.DHPrivateKeyParameters;
 import org.bouncycastle2.jce.interfaces.PKCS12BagAttributeCarrier;
+
+import javax.crypto.interfaces.DHPrivateKey;
+import javax.crypto.spec.DHParameterSpec;
+import javax.crypto.spec.DHPrivateKeySpec;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.math.BigInteger;
+import java.util.Enumeration;
 
 public class JCEDHPrivateKey
     implements DHPrivateKey, PKCS12BagAttributeCarrier

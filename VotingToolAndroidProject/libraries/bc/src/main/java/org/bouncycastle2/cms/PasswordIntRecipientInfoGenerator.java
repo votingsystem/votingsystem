@@ -1,21 +1,16 @@
 package org.bouncycastle2.cms;
 
-import java.security.GeneralSecurityException;
-import java.security.Provider;
-import java.security.SecureRandom;
-
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DEROctetString;
-import org.bouncycastle2.asn1.DERSequence;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.cms.PasswordRecipientInfo;
 import org.bouncycastle2.asn1.cms.RecipientInfo;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import java.security.GeneralSecurityException;
+import java.security.Provider;
+import java.security.SecureRandom;
 
 class PasswordIntRecipientInfoGenerator
     implements IntRecipientInfoGenerator

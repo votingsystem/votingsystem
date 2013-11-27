@@ -14,10 +14,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
-import org.votingsystem.android.model.ContextVSAndroid;
 import org.votingsystem.android.R;
+import org.votingsystem.android.model.AndroidContextVS;
 import org.votingsystem.android.model.VoteReceipt;
+import org.votingsystem.model.ContentTypeVS;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -115,7 +115,7 @@ public class ReceiptOptionsDialog  extends DialogFragment {
     		/*File receiptFile =  new File(getActivity()
     				.getExternalFilesDir(null), "vote_receipt_" + 
     				receipt.getNotificationId() + SIGNED_PART_EXTENSION);*/
-    		String fileName = "receipt_" + receipt.getId() + ContextVSAndroid.SIGNED_PART_EXTENSION;
+    		String fileName = "receipt_" + receipt.getId() + AndroidContextVS.SIGNED_PART_EXTENSION;
        		File receiptFile = getTemporaryFile(getActivity(), fileName);
        		
     		if(receipt.getCancelVoteReceipt() != null) {
@@ -126,7 +126,7 @@ public class ReceiptOptionsDialog  extends DialogFragment {
     		Log.d(TAG + ".openReceipt - ", " - receiptFile path: " + receiptFile.getAbsolutePath() 
     				+ " - length: " + receiptFile.length() );
         	Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
-        	intent.setDataAndType(Uri.fromFile(receiptFile), "text/plain");
+        	intent.setDataAndType(Uri.fromFile(receiptFile), ContentTypeVS.TEXT);
         	startActivity(intent);	
     	}catch(Exception ex) {
     		ex.printStackTrace();

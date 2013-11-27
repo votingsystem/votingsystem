@@ -1,8 +1,8 @@
 package org.bouncycastle2.crypto.tls;
 
-import java.io.IOException;
-
 import org.bouncycastle2.crypto.params.AsymmetricKeyParameter;
+
+import java.io.IOException;
 
 public interface TlsAgreementCredentials extends TlsCredentials
 {

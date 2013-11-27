@@ -1,14 +1,15 @@
 package org.votingsystem.util;
 
+import org.apache.log4j.Logger;
+
+import javax.sql.rowset.serial.SerialClob;
+import javax.sql.rowset.serial.SerialException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.util.Random;
-import javax.sql.rowset.serial.SerialClob;
-import javax.sql.rowset.serial.SerialException;
-import org.apache.log4j.Logger;
 
 /**
 * @author jgzornoza
@@ -63,11 +64,8 @@ public class StringUtils {
     	if(url == null) return null;
     	url = url.trim();
         String result = null;
-        if(url.startsWith("http://")) {
-        	result = url;
-        } else {
-        	result = "http://" + url;
-        }
+        if(url.startsWith("http://") || url.startsWith("https://")) result = url;
+        else result = "http://" + url;
         while(result.endsWith("/")) {
         	result = result.substring(0, result.length() -1);
         }
@@ -90,31 +88,5 @@ public class StringUtils {
         if(cadena == null) return null;
         else return cadena.replaceAll("[\\/:.]", ""); 
     }
-    
-    // sacado de http://felinfo.blogspot.com.es/2010/12/calcular-la-letra-del-dni-con-java.html
-    public static String calculaLetraNIF(int dni) {
-	    String juegoCaracteres="TRWAGMYFPDXBNJZSQVHLCKET";
-	    int modulo= dni % 23;
-	    Character letra = juegoCaracteres.charAt(modulo);
-	    return letra.toString(); 
-    }
-    
-    public static String validarNIF(String nif) {
-    	if(nif == null) return null;
-    	nif  = nif.toUpperCase();
-    	if(nif.length() < 9) {
-            int numberZeros = 9 - nif.length();
-			for(int i = 0; i < numberZeros ; i++) {
-				nif = "0" + nif;
-			}
-    	}
-    	String number = nif.substring(0, 8);
-        String letter = nif.substring(8, 9);
-        try {
-            if(!letter.equals(calculaLetraNIF(new Integer(number)))) return null;
-            else return nif;
-        } catch (Exception ex) {
-            return null;
-        }
-    }
+
 }

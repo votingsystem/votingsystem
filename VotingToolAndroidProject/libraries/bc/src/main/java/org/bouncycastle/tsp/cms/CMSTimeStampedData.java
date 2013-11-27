@@ -1,25 +1,19 @@
 package org.bouncycastle.tsp.cms;
 
+import org.bouncycastle.tsp.TimeStampToken;
+import org.bouncycastle2.asn1.ASN1InputStream;
+import org.bouncycastle2.asn1.DERIA5String;
+import org.bouncycastle2.asn1.cms.*;
+import org.bouncycastle2.cms.CMSException;
+import org.bouncycastle2.operator.DigestCalculator;
+import org.bouncycastle2.operator.DigestCalculatorProvider;
+import org.bouncycastle2.operator.OperatorCreationException;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-
-import org.bouncycastle2.asn1.ASN1InputStream;
-import org.bouncycastle2.asn1.DERIA5String;
-import org.bouncycastle2.asn1.cms.AttributeTable;
-import org.bouncycastle2.asn1.cms.CMSObjectIdentifiers;
-import org.bouncycastle2.asn1.cms.ContentInfo;
-import org.bouncycastle2.asn1.cms.Evidence;
-import org.bouncycastle2.asn1.cms.TimeStampAndCRL;
-import org.bouncycastle2.asn1.cms.TimeStampTokenEvidence;
-import org.bouncycastle2.asn1.cms.TimeStampedData;
-import org.bouncycastle2.cms.CMSException;
-import org.bouncycastle2.operator.DigestCalculator;
-import org.bouncycastle2.operator.DigestCalculatorProvider;
-import org.bouncycastle2.operator.OperatorCreationException;
-import org.bouncycastle.tsp.TimeStampToken;
 
 public class CMSTimeStampedData
 {

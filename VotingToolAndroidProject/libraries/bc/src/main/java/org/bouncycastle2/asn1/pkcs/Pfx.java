@@ -1,13 +1,8 @@
 package org.bouncycastle2.asn1.pkcs;
 
-import java.math.BigInteger;
+import org.bouncycastle2.asn1.*;
 
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.BERSequence;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERObject;
+import java.math.BigInteger;
 
 /**
  * the infamous Pfx from PKCS12

@@ -1,13 +1,13 @@
 package org.bouncycastle2.jce.provider.symmetric;
 
-import java.util.HashMap;
-
 import org.bouncycastle2.crypto.CipherKeyGenerator;
 import org.bouncycastle2.crypto.engines.BlowfishEngine;
 import org.bouncycastle2.crypto.modes.CBCBlockCipher;
 import org.bouncycastle2.jce.provider.JCEBlockCipher;
 import org.bouncycastle2.jce.provider.JCEKeyGenerator;
 import org.bouncycastle2.jce.provider.JDKAlgorithmParameters;
+
+import java.util.HashMap;
 
 public final class Blowfish
 {

@@ -5,12 +5,7 @@ import org.bouncycastle2.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.crypto.Digest;
-import org.bouncycastle2.crypto.digests.MD4Digest;
-import org.bouncycastle2.crypto.digests.MD5Digest;
-import org.bouncycastle2.crypto.digests.SHA1Digest;
-import org.bouncycastle2.crypto.digests.SHA224Digest;
-import org.bouncycastle2.crypto.digests.SHA256Digest;
-import org.bouncycastle2.crypto.digests.SHA384Digest;
+import org.bouncycastle2.crypto.digests.*;
 import org.bouncycastle2.operator.OperatorCreationException;
 
 class BcUtil

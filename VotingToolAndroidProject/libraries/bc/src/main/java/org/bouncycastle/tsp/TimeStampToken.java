@@ -1,20 +1,5 @@
 package org.bouncycastle.tsp;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.cert.CertStore;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateExpiredException;
-import java.security.cert.CertificateNotYetValidException;
-import java.security.cert.X509Certificate;
-import java.util.Collection;
-import java.util.Date;
-
 import org.bouncycastle2.asn1.ASN1InputStream;
 import org.bouncycastle2.asn1.cms.Attribute;
 import org.bouncycastle2.asn1.cms.AttributeTable;
@@ -34,18 +19,24 @@ import org.bouncycastle2.asn1.x509.GeneralName;
 import org.bouncycastle2.asn1.x509.IssuerSerial;
 import org.bouncycastle2.asn1.x509.X509Name;
 import org.bouncycastle2.cert.X509CertificateHolder;
-import org.bouncycastle2.cms.CMSException;
-import org.bouncycastle2.cms.CMSProcessable;
-import org.bouncycastle2.cms.CMSSignedData;
-import org.bouncycastle2.cms.SignerId;
-import org.bouncycastle2.cms.SignerInformation;
-import org.bouncycastle2.cms.SignerInformationVerifier;
+import org.bouncycastle2.cms.*;
 import org.bouncycastle2.jce.PrincipalUtil;
 import org.bouncycastle2.jce.X509Principal;
 import org.bouncycastle2.operator.DigestCalculator;
 import org.bouncycastle2.operator.OperatorCreationException;
 import org.bouncycastle2.util.Arrays;
 import org.bouncycastle2.util.Store;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.cert.*;
+import java.util.Collection;
+import java.util.Date;
 
 public class TimeStampToken
 {

@@ -51,27 +51,27 @@
 			    	dateFinish = $("#dateFinish"),
 			    	editorDiv = $("#editorDiv"),
 			        allFields = $([]).add(subject).add(dateFinish).add(editorDiv);	
-			        allFields.removeClass( "ui-state-error" );
+			        allFields.removeClass( "formFieldError" );
 					if(!document.getElementById('subject').validity.valid) {
-						subject.addClass( "ui-state-error" );
+						subject.addClass( "formFieldError" );
 						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 							'<g:message code="emptyFieldMsg"/>')
 						isValidForm = false
 					}
 					if(!document.getElementById('dateFinish').validity.valid) {
-						dateFinish.addClass( "ui-state-error" );
+						dateFinish.addClass( "formFieldError" );
 						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 							'<g:message code="emptyFieldMsg"/>')
 						isValidForm = false
 					}
 					if(dateFinish.datepicker("getDate") < new Date() ) {
-						dateFinish.addClass( "ui-state-error" );
+						dateFinish.addClass( "formFieldError" );
 						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 						'<g:message code="dateInitERRORMsg"/>')
 						isValidForm = false
 					}
 					if(htmlEditorContent.trim() == 0) {
-						editorDiv.addClass( "ui-state-error" );
+						editorDiv.addClass( "formFieldError" );
 						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 							'<g:message code="emptyDocumentERRORMsg"/>')
 						isValidForm = false;
@@ -81,18 +81,18 @@
 						return false;
 					} 		
 			    	var event = new Evento();
-			    	event.asunto = subject.val();
-			    	event.contenido = htmlEditorContent.trim();
-			    	event.fechaFin = $("#dateFinish").datepicker('getDate').format();
+			    	event.subject = subject.val();
+			    	event.content = htmlEditorContent.trim();
+			    	event.dateFinish = $("#dateFinish").datepicker('getDate').format();
 
 			    	var webAppMessage = new WebAppMessage(
-					    	StatusCode.SC_PROCESSING, 
+					    	ResponseVS.SC_PROCESSING,
 					    	Operation.MANIFEST_PUBLISHING)
-			    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
-			    		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
-					webAppMessage.contenidoFirma = event
-					webAppMessage.urlEnvioDocumento = "${createLink( controller:'eventoFirma', absolute:true)}"
-					webAppMessage.asuntoMensajeFirmado = '<g:message code="publishManifestSubject"/>'
+			    	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+			    		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
+					webAppMessage.signedContent = event
+					webAppMessage.receiverSignServiceURL = "${createLink( controller:'eventVSManifest', absolute:true)}"
+					webAppMessage.signedMessageSubject = '<g:message code="publishManifestSubject"/>'
 					votingSystemClient.setMessageToSignatureClient(webAppMessage)
 					return false
 				});

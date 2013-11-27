@@ -1,24 +1,19 @@
 package org.bouncycastle2.cert;
 
+import org.bouncycastle2.asn1.ASN1Object;
+import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle2.asn1.cms.IssuerAndSerialNumber;
+import org.bouncycastle2.asn1.x500.X500Name;
+import org.bouncycastle2.asn1.x509.*;
+import org.bouncycastle2.operator.ContentVerifier;
+import org.bouncycastle2.operator.ContentVerifierProvider;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.cms.IssuerAndSerialNumber;
-import org.bouncycastle2.asn1.x500.X500Name;
-import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle2.asn1.x509.TBSCertificateStructure;
-import org.bouncycastle2.asn1.x509.X509CertificateStructure;
-import org.bouncycastle2.asn1.x509.X509Extension;
-import org.bouncycastle2.asn1.x509.X509Extensions;
-import org.bouncycastle2.operator.ContentVerifier;
-import org.bouncycastle2.operator.ContentVerifierProvider;
 
 /**
  * Holding class for an X.509 Certificate structure.

@@ -1,14 +1,9 @@
 package org.bouncycastle2.cms;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle2.asn1.cms.CMSObjectIdentifiers;
+
+import java.io.*;
 
 /**
  * a holding class for a file of data to be processed.

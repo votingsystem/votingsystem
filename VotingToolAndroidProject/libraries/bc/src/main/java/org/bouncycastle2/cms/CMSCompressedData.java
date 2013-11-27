@@ -1,15 +1,15 @@
 package org.bouncycastle2.cms;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.zip.InflaterInputStream;
-
 import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle2.asn1.ASN1OctetString;
 import org.bouncycastle2.asn1.cms.CompressedData;
 import org.bouncycastle2.asn1.cms.ContentInfo;
 import org.bouncycastle2.operator.InputExpander;
 import org.bouncycastle2.operator.InputExpanderProvider;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.zip.InflaterInputStream;
 
 /**
  * containing class for an CMS Compressed Data object

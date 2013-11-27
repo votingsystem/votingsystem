@@ -1,10 +1,5 @@
 package org.bouncycastle2.cert.ocsp;
 
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.bouncycastle2.asn1.ASN1EncodableVector;
 import org.bouncycastle2.asn1.DERBitString;
 import org.bouncycastle2.asn1.DERSequence;
@@ -18,6 +13,11 @@ import org.bouncycastle2.asn1.x509.GeneralName;
 import org.bouncycastle2.asn1.x509.X509Extensions;
 import org.bouncycastle2.cert.X509CertificateHolder;
 import org.bouncycastle2.operator.ContentSigner;
+
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class OCSPReqBuilder
 {

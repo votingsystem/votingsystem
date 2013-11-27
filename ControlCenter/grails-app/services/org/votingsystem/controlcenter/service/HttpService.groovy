@@ -1,30 +1,22 @@
 package org.votingsystem.controlcenter.service
 
-import org.apache.http.util.EntityUtils;
-import org.apache.http.entity.ContentType;
-
-import java.io.IOException;
-import java.security.cert.X509Certificate;
-import java.text.ParseException;
-
-import org.apache.http.params.BasicHttpParams
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams
-import org.votingsystem.controlcenter.model.*
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.*;
 import org.apache.http.HttpResponse
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
-import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.ClientConnectionManager
+import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.entity.ByteArrayEntity
-import org.apache.http.entity.mime.content.*
-import org.apache.http.entity.mime.MultipartEntity
+import org.apache.http.entity.ContentType
 import org.apache.http.impl.client.DefaultHttpClient
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.http.conn.HttpHostConnectException;
+import org.apache.http.impl.conn.PoolingClientConnectionManager
+import org.apache.http.params.BasicHttpParams
+import org.apache.http.params.HttpConnectionParams
+import org.apache.http.params.HttpParams
+import org.apache.http.util.EntityUtils
+import org.votingsystem.model.ResponseVS
 
+import java.text.ParseException
 import java.util.concurrent.TimeUnit
 
 class HttpService {
@@ -48,7 +40,7 @@ class HttpService {
 			throws IOException, ParseException {
 		log.debug("getInfo - serverURL: " + serverURL + " - contentType: "
 				+ contentType);
-		ResponseVS respuesta = null;
+		ResponseVS responseVS = null;
 		HttpGet httpget = new HttpGet(serverURL);
 		HttpResponse response = null;
 		try {
@@ -65,17 +57,17 @@ class HttpService {
 			byte[] responseBytes = null;
 			if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode())
 				responseBytes = EntityUtils.toByteArray(response.getEntity());
-			respuesta = new ResponseVS(statusCode:response.getStatusLine().getStatusCode(),
+			responseVS = new ResponseVS(statusCode:response.getStatusLine().getStatusCode(),
 						message:new String(responseBytes), messageBytes:responseBytes);
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex);
-			respuesta = new ResponseVS(statusCode:ResponseVS.SC_ERROR,
+			responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR,
 				message:ex.getMessage());
 			httpget.abort();
 		} finally {
 			if(response != null) EntityUtils.consume(response.getEntity());
 		}
-		return respuesta;
+		return responseVS;
 	}
 			
 	
@@ -83,7 +75,7 @@ class HttpService {
 		String serverURL) throws IOException {
 		log.debug("sendByteArray - contentType: " + contentType +
 				" - serverURL: " + serverURL);
-		ResponseVS respuesta = null;
+		ResponseVS responseVS = null;
 		HttpPost httpPost = new HttpPost(serverURL);
 		try {
 			ByteArrayEntity entity = null;
@@ -96,21 +88,21 @@ class HttpService {
 			log.debug(response.getStatusLine().toString());
 			log.debug("----------------------------------------");
 			byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
-			respuesta = new ResponseVS(message:new String(responseBytes),
+			responseVS = new ResponseVS(message:new String(responseBytes),
 				statusCode:response.getStatusLine().getStatusCode(),
 				messageBytes:responseBytes);
 			//EntityUtils.consume(response.getEntity());
 		} catch(HttpHostConnectException ex){
 			log.error(ex.getMessage(), ex);
-			respuesta = new ResponseVS(statusCode:ResponseVS.SC_ERROR,
+			responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR,
 					message:"hostConnectionErrorMsg");
 			httpPost.abort();
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex);
-			respuesta = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
+			responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
 			httpPost.abort();
 		}
-		return respuesta;
+		return responseVS;
 	}
 	
 		

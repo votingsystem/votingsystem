@@ -1,49 +1,8 @@
 package org.bouncycastle2.openssl;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.Reader;
-import java.security.AlgorithmParameters;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PublicKey;
-import java.security.cert.CertificateFactory;
-import java.security.spec.DSAPrivateKeySpec;
-import java.security.spec.DSAPublicKeySpec;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.RSAPrivateCrtKeySpec;
-import java.security.spec.RSAPublicKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
-
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.PBEParameterSpec;
-
-import org.bouncycastle2.asn1.ASN1InputStream;
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.cms.ContentInfo;
-import org.bouncycastle2.asn1.pkcs.EncryptedPrivateKeyInfo;
-import org.bouncycastle2.asn1.pkcs.EncryptionScheme;
-import org.bouncycastle2.asn1.pkcs.KeyDerivationFunc;
-import org.bouncycastle2.asn1.pkcs.PBEParameter;
-import org.bouncycastle2.asn1.pkcs.PBES2Parameters;
-import org.bouncycastle2.asn1.pkcs.PBKDF2Params;
-import org.bouncycastle2.asn1.pkcs.PKCS12PBEParams;
-import org.bouncycastle2.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle2.asn1.pkcs.*;
 import org.bouncycastle2.asn1.sec.ECPrivateKeyStructure;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.asn1.x509.RSAPublicKeyStructure;
@@ -57,6 +16,19 @@ import org.bouncycastle2.util.io.pem.PemObject;
 import org.bouncycastle2.util.io.pem.PemObjectParser;
 import org.bouncycastle2.util.io.pem.PemReader;
 import org.bouncycastle2.x509.X509V2AttributeCertificate;
+
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.PBEParameterSpec;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.Reader;
+import java.security.*;
+import java.security.cert.CertificateFactory;
+import java.security.spec.*;
+import java.util.*;
 
 /**
  * Class for reading OpenSSL PEM encoded streams containing

@@ -1,7 +1,5 @@
 package org.bouncycastle2.crypto.tls;
 
-import java.security.SecureRandom;
-
 import org.bouncycastle2.crypto.CryptoException;
 import org.bouncycastle2.crypto.Signer;
 import org.bouncycastle2.crypto.digests.NullDigest;
@@ -11,6 +9,8 @@ import org.bouncycastle2.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle2.crypto.params.ParametersWithRandom;
 import org.bouncycastle2.crypto.params.RSAKeyParameters;
 import org.bouncycastle2.crypto.signers.GenericSigner;
+
+import java.security.SecureRandom;
 
 class TlsRSASigner implements TlsSigner
 {

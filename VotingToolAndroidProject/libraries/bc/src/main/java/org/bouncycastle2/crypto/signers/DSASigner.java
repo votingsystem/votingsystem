@@ -2,11 +2,7 @@ package org.bouncycastle2.crypto.signers;
 
 import org.bouncycastle2.crypto.CipherParameters;
 import org.bouncycastle2.crypto.DSA;
-import org.bouncycastle2.crypto.params.DSAKeyParameters;
-import org.bouncycastle2.crypto.params.DSAParameters;
-import org.bouncycastle2.crypto.params.DSAPrivateKeyParameters;
-import org.bouncycastle2.crypto.params.DSAPublicKeyParameters;
-import org.bouncycastle2.crypto.params.ParametersWithRandom;
+import org.bouncycastle2.crypto.params.*;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;

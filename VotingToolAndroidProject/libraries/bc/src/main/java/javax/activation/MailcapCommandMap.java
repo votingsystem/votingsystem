@@ -41,11 +41,14 @@
 
 package javax.activation;
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
-import com.sun.activation.registries.MailcapFile;
 import com.sun.activation.registries.LogSupport;
+import com.sun.activation.registries.MailcapFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.*;
 
 /**
  * MailcapCommandMap extends the CommandMap

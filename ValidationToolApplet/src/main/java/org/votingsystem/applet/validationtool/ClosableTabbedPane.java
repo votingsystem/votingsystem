@@ -1,12 +1,10 @@
 package org.votingsystem.applet.validationtool;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import org.apache.log4j.Logger;
+import org.votingsystem.model.ContextVS;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -14,11 +12,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.*;
-
-
-import org.apache.log4j.Logger;
-import org.votingsystem.model.ContextVS;
 
 /**
 * @author jgzornoza
@@ -109,7 +102,7 @@ public class ClosableTabbedPane extends JTabbedPane {
                 tabbedPane.setCursor(new Cursor(Cursor.HAND_CURSOR));	
                 if(selectedTab > -1)
                         tabbedPane.setToolTipTextAt(selectedTab, 
-                        ContextVS.INSTANCE.getString("closeToolTipText") + 
+                        ContextVS.getInstance().getMessage("closeToolTipText") +
                         tabbedPane.getTitleAt(selectedTab));
             }
             else{

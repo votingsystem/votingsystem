@@ -7,24 +7,18 @@ import org.bouncycastle2.mail.smime.SMIMEException;
 import org.bouncycastle2.mail.smime.util.CRLFOutputStream;
 import org.bouncycastle2.mail.smime.util.FileBackedMimeBodyPart;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FilterOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import javax.mail.BodyPart;
+import javax.mail.MessagingException;
+import javax.mail.internet.ContentType;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMultipart;
+import java.io.*;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.Security;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
-
-import javax.mail.BodyPart;
-import javax.mail.MessagingException;
-import javax.mail.internet.ContentType;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMultipart;
 
 public class SMIMEUtil
 {

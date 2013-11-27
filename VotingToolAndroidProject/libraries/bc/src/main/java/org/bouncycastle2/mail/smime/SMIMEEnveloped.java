@@ -1,16 +1,15 @@
 package org.bouncycastle2.mail.smime;
 
-import java.io.IOException;
-import java.io.InputStream;
+import org.bouncycastle2.cms.CMSEnvelopedData;
+import org.bouncycastle2.cms.CMSException;
 
 import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimePart;
-
-import org.bouncycastle2.cms.CMSEnvelopedData;
-import org.bouncycastle2.cms.CMSException;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * containing class for an S/MIME pkcs7-mime encrypted MimePart.

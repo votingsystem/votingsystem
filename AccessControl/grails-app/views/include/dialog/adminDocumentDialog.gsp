@@ -59,24 +59,24 @@ function submitAdminForm() {
 		showResultDialog("<g:message code='errorLbl'/>", 
 				"<g:message code='selectDocumentStateERRORMsg'/>")
 	} else {
-		var estado
+		var state
 		if($("#selectDeleteDocument").is(':checked')) {
-			estado = DocumentState.BORRADO_DE_SISTEMA
+			state = EventVS.State.DELETED_FROM_SYSTEM
 		} else if($("#selectCloseDocument").is(':checked')) {
-			estado = DocumentState.CANCELADO
+			state = EventVS.State.CANCELLED
 		}
     	var webAppMessage = new WebAppMessage(
-		    	StatusCode.SC_PROCESSING, 
+		    	ResponseVS.SC_PROCESSING,
 		    	Operation.EVENT_CANCELLATION)
-    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
-		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
-		webAppMessage.respuestaConRecibo = false
-		webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStamp', absolute:true)}"
-		webAppMessage.urlEnvioDocumento= "${createLink(controller:'evento', action:'cancelled', absolute:true)}"
-		var contenidoFirma = {operation:Operation.EVENT_CANCELLATION,
+    	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
+		webAppMessage.isResponseWithReceipt = false
+		webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStampVS', absolute:true)}"
+		webAppMessage.receiverSignServiceURL= "${createLink(controller:'eventVS', action:'cancelled', absolute:true)}"
+		var signedContent = {operation:Operation.EVENT_CANCELLATION,
 				accessControlURL:"${grailsApplication.config.grails.serverURL}",
-				eventId:"${eventMap?.id}", estado:estado}
-		webAppMessage.contenidoFirma = contenidoFirma
+				eventId:"${eventMap?.id}", state:state}
+		webAppMessage.signedContent = signedContent
 		pendingOperation = Operation.EVENT_CANCELLATION
 		//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
 		votingSystemClient.setMessageToSignatureClient(webAppMessage); 

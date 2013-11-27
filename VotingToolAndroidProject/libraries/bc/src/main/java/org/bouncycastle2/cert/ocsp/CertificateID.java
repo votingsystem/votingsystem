@@ -1,13 +1,6 @@
 package org.bouncycastle2.cert.ocsp;
 
-import java.io.OutputStream;
-import java.math.BigInteger;
-
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERNull;
-import org.bouncycastle2.asn1.DEROctetString;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.ocsp.CertID;
 import org.bouncycastle2.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
@@ -16,6 +9,9 @@ import org.bouncycastle2.cert.X509CertificateHolder;
 import org.bouncycastle2.operator.DigestCalculator;
 import org.bouncycastle2.operator.DigestCalculatorProvider;
 import org.bouncycastle2.operator.OperatorCreationException;
+
+import java.io.OutputStream;
+import java.math.BigInteger;
 
 public class CertificateID
 {

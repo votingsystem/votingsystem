@@ -1,8 +1,7 @@
 package org.votingsystem.groovy.util
 
-import java.io.File;
 import groovy.json.JsonSlurper
-
+import org.votingsystem.util.CertGenerator
 
 def processCertsDataMap(args) {
 	println "++++++++++++++++++++ CertGen.processCertsDataMap(...)"
@@ -37,10 +36,9 @@ def processCertsDataMap(args) {
 	String rootSubjectDN = jsonCertsData.rootSubjectDN;
 	String password  = jsonCertsData.password;
 	
-	org.votingsystem.util.CertGenerator cerGenerator = new org.votingsystem.util.CertGenerator(
-            rootCertFile, rootSubjectDN, password);
-	
-	jsonCertsData.certs.each {certData ->
+	 CertGenerator cerGenerator = new CertGenerator(rootCertFile, rootSubjectDN, password)
+
+    jsonCertsData.certs.each {certData ->
 		if(!certData.file || !certData.distinguishedName
 			|| !certData.alias || !certData.containsKey("isTimeStampingCert")) {
 			println "certData: ${certData}"

@@ -1,8 +1,8 @@
 package org.bouncycastle2.crypto.paddings;
 
-import java.security.SecureRandom;
-
 import org.bouncycastle2.crypto.InvalidCipherTextException;
+
+import java.security.SecureRandom;
 
 /**
  * A padder that adds PKCS7/PKCS5 padding to a block.

@@ -1,12 +1,12 @@
 package org.bouncycastle2.x509.extension;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.PublicKey;
-
 import org.bouncycastle2.asn1.ASN1OctetString;
 import org.bouncycastle2.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
+
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.PublicKey;
 
 /**
  * A high level subject key identifier.

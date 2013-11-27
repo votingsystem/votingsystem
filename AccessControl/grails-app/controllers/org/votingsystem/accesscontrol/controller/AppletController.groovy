@@ -1,9 +1,4 @@
 package org.votingsystem.accesscontrol.controller
-
-import org.votingsystem.accesscontrol.model.*
-import org.springframework.web.servlet.support.RequestContextUtils as RCU
-
-
 /**
  * @infoController Applet
  * @descController Servicios relacionados con los applets de la aplicación.
@@ -15,7 +10,7 @@ class AppletController {
 	
 	/**
 	 * @httpMethod [GET]
-	 * @return Página HTML que sirve para cargar el Applet principal de firma.
+	 * @return Página HTML que sirve para cargar el Applet principal de signatureVS.
 	 */
 	def cliente () { }
 	

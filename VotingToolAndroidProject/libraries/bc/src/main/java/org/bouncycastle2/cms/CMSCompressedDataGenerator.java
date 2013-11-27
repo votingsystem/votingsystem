@@ -1,10 +1,5 @@
 package org.bouncycastle2.cms;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.zip.DeflaterOutputStream;
-
 import org.bouncycastle2.asn1.ASN1OctetString;
 import org.bouncycastle2.asn1.BERConstructedOctetString;
 import org.bouncycastle2.asn1.DERObjectIdentifier;
@@ -13,6 +8,11 @@ import org.bouncycastle2.asn1.cms.CompressedData;
 import org.bouncycastle2.asn1.cms.ContentInfo;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.operator.OutputCompressor;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.zip.DeflaterOutputStream;
 
 /**
  * General class for generating a compressed CMS message.

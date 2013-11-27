@@ -1,46 +1,6 @@
 package org.votingsystem.signature.smime;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.PublicKey;
-import java.security.cert.CertPath;
-import java.security.cert.CertStore;
-import java.security.cert.CertStoreException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateExpiredException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.CertificateNotYetValidException;
-import java.security.cert.PKIXParameters;
-import java.security.cert.TrustAnchor;
-import java.security.cert.X509CertSelector;
-import java.security.cert.X509Certificate;
-import java.security.interfaces.DSAPublicKey;
-import java.security.interfaces.RSAPublicKey;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
-
-import javax.mail.Address;
-import javax.mail.MessagingException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSAttributes;
@@ -54,12 +14,22 @@ import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.i18n.ErrorBundle;
 import org.bouncycastle.i18n.filter.TrustedInput;
-import org.bouncycastle.i18n.filter.UntrustedInput;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.mail.smime.SMIMESigned;
 import org.bouncycastle.x509.CertPathReviewerException;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.signature.util.PKIXCertPathReviewer;
+
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
+import java.security.cert.*;
+import java.security.interfaces.DSAPublicKey;
+import java.security.interfaces.RSAPublicKey;
+import java.util.*;
 
 public class SignedMailValidator
 {
@@ -90,7 +60,7 @@ public class SignedMailValidator
 
     /**
      * Validates the signed {@link MimeMessage} message. The
-     * {@link PKIXParameters} from param are used for the certificate path
+     * {@link java.security.cert.PKIXParameters} from param are used for the certificate path
      * validation. The actual PKIXParameters used for the certificate path
      * validation is a copy of param with the followin changes: <br> - The
      * validation date is changed to the signature time <br> - A CertStore with
@@ -99,12 +69,12 @@ public class SignedMailValidator
      * In <code>param</code> it's also possible to add additional CertStores
      * with intermediate Certificates and/or CRLs which then are also used for
      * the validation.
-     * 
+     *
      * @param message
      *            the signed MimeMessage
      * @param param
-     *            the parameters for the certificate path validation 
-     * @throws SignedMailValidatorException
+     *            the parameters for the certificate path validation
+     * @throws org.votingsystem.signature.smime.SignedMailValidatorException
      *             if the message is no signed message or if an exception occurs
      *             reading the message
      */
@@ -113,10 +83,10 @@ public class SignedMailValidator
     {
         this(message, param, DEFAULT_CERT_PATH_REVIEWER);
     }
-    
+
     /**
      * Validates the signed {@link MimeMessage} message. The
-     * {@link PKIXParameters} from param are used for the certificate path
+     * {@link java.security.cert.PKIXParameters} from param are used for the certificate path
      * validation. The actual PKIXParameters used for the certificate path
      * validation is a copy of param with the followin changes: <br> - The
      * validation date is changed to the signature time <br> - A CertStore with
@@ -125,20 +95,20 @@ public class SignedMailValidator
      * In <code>param</code> it's also possible to add additional CertStores
      * with intermediate Certificates and/or CRLs which then are also used for
      * the validation.
-     * 
+     *
      * @param message
      *            the signed MimeMessage
      * @param param
      *            the parameters for the certificate path validation
      * @param certPathReviewerClass
-     *            a subclass of {@link PKIXCertPathReviewer}. The SignedMailValidator
+     *            a subclass of {@link org.votingsystem.signature.util.PKIXCertPathReviewer}. The SignedMailValidator
      *            uses objects of this type for the cert path vailidation. The class must
      *            have an empty constructor.
-     * @throws SignedMailValidatorException
+     * @throws org.votingsystem.signature.smime.SignedMailValidatorException
      *             if the message is no signed message or if an exception occurs
      *             reading the message
-     * @throws IllegalArgumentException if the certPathReviewerClass is not a 
-     *             subclass of {@link PKIXCertPathReviewer} or objects of 
+     * @throws IllegalArgumentException if the certPathReviewerClass is not a
+     *             subclass of {@link org.votingsystem.signature.util.PKIXCertPathReviewer} or objects of
      *             certPathReviewerClass can not be instantiated
      */
     public SignedMailValidator(MimeMessage message, PKIXParameters param, Class certPathReviewerClass)
@@ -153,23 +123,17 @@ public class SignedMailValidator
 
         SMIMESigned s;
 
-        try
-        {
+        try {
             // check if message is multipart signed
-            if (message.isMimeType("multipart/signed"))
-            {
+            if (message.isMimeType(ContentTypeVS.MULTIPART_SIGNED)) {
                 MimeMultipart mimemp = (MimeMultipart) message.getContent();
                 s = new SMIMESigned(mimemp);
             }
-            else if (message.isMimeType("application/pkcs7-mime")
-                    || message.isMimeType("application/x-pkcs7-mime"))
-            {
+            else if (message.isMimeType("application/pkcs7-mime") || message.isMimeType(ContentTypeVS.ENCRYPTED))  {
                 s = new SMIMESigned(message);
             }
-            else
-            {
-                ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                        "SignedMailValidator.noSignedMessage");
+            else {
+                ErrorBundle msg = new ErrorBundle(RESOURCE_NAME, "SignedMailValidator.noSignedMessage");
                 throw new SignedMailValidatorException(msg);
             }
 
@@ -204,8 +168,7 @@ public class SignedMailValidator
                 throw (SignedMailValidatorException) e;
             }
             // exception reading message
-            ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                    "SignedMailValidator.exceptionReadingMessage",
+            ErrorBundle msg = new ErrorBundle(RESOURCE_NAME, "SignedMailValidator.exceptionReadingMessage",
                     new Object[] { e.getMessage(), e , e.getClass().getName()});
             throw new SignedMailValidatorException(msg, e);
         }
@@ -214,8 +177,7 @@ public class SignedMailValidator
         validateSignatures(param);
     }
 
-    protected void validateSignatures(PKIXParameters pkixParam)
-    {
+    protected void validateSignatures(PKIXParameters pkixParam) {
         PKIXParameters usedParameters = (PKIXParameters) pkixParam.clone();
 
         // add crls and certs from mail
@@ -234,21 +196,16 @@ public class SignedMailValidator
             // signer certificate
             X509Certificate cert = null;
 
-            try
-            {
-                Collection certCollection = findCerts(usedParameters
-                        .getCertStores(), signer.getSID());
+            try {
+                Collection certCollection = findCerts(usedParameters.getCertStores(), signer.getSID());
 
                 Iterator certIt = certCollection.iterator();
-                if (certIt.hasNext())
-                {
+                if (certIt.hasNext()){
                     cert = (X509Certificate) certIt.next();
                 }
             }
-            catch (CertStoreException cse)
-            {
-                ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                        "SignedMailValidator.exceptionRetrievingSignerCert",
+            catch (CertStoreException cse) {
+                ErrorBundle msg = new ErrorBundle(RESOURCE_NAME, "SignedMailValidator.exceptionRetrievingSignerCert",
                         new Object[] { cse.getMessage(), cse , cse.getClass().getName()});
                 errors.add(msg);
             }
@@ -332,7 +289,7 @@ public class SignedMailValidator
                     // construct cert chain
                     CertPath certPath;
                     List userProvidedList;
-                    
+
                     List userCertStores = new ArrayList();
                     userCertStores.add(certs);
                     Object[] cpres = createCertPath(cert, usedParameters.getTrustAnchors(), pkixParam.getCertStores(), userCertStores);
@@ -463,7 +420,7 @@ public class SignedMailValidator
                     new Object[] { new Integer(keyLenght) });
             notifications.add(msg);
         }
-        
+
         // warn if certificate has very long validity period
         long validityPeriod = cert.getNotAfter().getTime() - cert.getNotBefore().getTime();
         if (validityPeriod > THIRTY_YEARS_IN_MILLI_SEC)
@@ -607,7 +564,7 @@ public class SignedMailValidator
         }
         return result;
     }
-    
+
     private static X509Certificate findNextCert(List certStores, X509CertSelector selector, Set certSet)
         throws CertStoreException
     {
@@ -624,17 +581,17 @@ public class SignedMailValidator
                 break;
             }
         }
-        
+
         return certFound ? nextCert : null;
     }
 
     /**
-     * 
+     *
      * @param signerCert the end of the path
      * @param trustanchors trust anchors for the path
      * @param certStores
      * @return the resulting certificate path.
-     * @throws GeneralSecurityException
+     * @throws java.security.GeneralSecurityException
      */
     public static CertPath createCertPath(X509Certificate signerCert,
             Set trustanchors, List certStores) throws GeneralSecurityException
@@ -642,16 +599,16 @@ public class SignedMailValidator
         Object[] results = createCertPath(signerCert, trustanchors, certStores, null);
         return (CertPath) results[0];
     }
-    
+
     /**
      * Returns an Object array containing a CertPath and a List of Booleans. The list contains the value <code>true</code>
      * if the corresponding certificate in the CertPath was taken from the user provided CertStores.
      * @param signerCert the end of the path
      * @param trustanchors trust anchors for the path
-     * @param systemCertStores list of {@link CertStore} provided by the system
-     * @param userCertStores list of {@link CertStore} provided by the user
+     * @param systemCertStores list of {@link java.security.cert.CertStore} provided by the system
+     * @param userCertStores list of {@link java.security.cert.CertStore} provided by the user
      * @return a CertPath and a List of booleans.
-     * @throws GeneralSecurityException
+     * @throws java.security.GeneralSecurityException
      */
     public static Object[] createCertPath(X509Certificate signerCert,
             Set trustanchors, List systemCertStores, List userCertStores) throws GeneralSecurityException
@@ -666,7 +623,7 @@ public class SignedMailValidator
         userProvidedList.add(new Boolean(true));
 
         boolean trustAnchorFound = false;
-        
+
         X509Certificate taCert = null;
 
         // add other certs to the cert path
@@ -744,14 +701,14 @@ public class SignedMailValidator
                     }
                 }
                 boolean userProvided = false;
-                
+
                 cert = findNextCert(systemCertStores, select, certSet);
                 if (cert == null && userCertStores != null)
                 {
                     userProvided = true;
                     cert = findNextCert(userCertStores, select, certSet);
                 }
-                
+
                 if (cert != null)
                 {
                     // cert found
@@ -783,9 +740,9 @@ public class SignedMailValidator
                 {
                     throw new IllegalStateException(e.toString());
                 }
-    
+
                 boolean userProvided = false;
-                
+
                 taCert = findNextCert(systemCertStores, select, certSet);
                 if (taCert == null && userCertStores != null)
                 {
@@ -807,7 +764,7 @@ public class SignedMailValidator
                 }
             }
         }
-        
+
         CertPath certPath = CertificateFactory.getInstance("X.509", "BC").generateCertPath(new ArrayList(certSet));
         return new Object[] {certPath, userProvidedList};
     }
@@ -839,107 +796,5 @@ public class SignedMailValidator
         }
     }
 
-    public class ValidationResult
-    {
 
-        private PKIXCertPathReviewer review;
-
-        private List errors;
-
-        private List notifications;
-        
-        private List userProvidedCerts;
-
-        private boolean signVerified;
-
-        ValidationResult(PKIXCertPathReviewer review, boolean verified,
-                List errors, List notifications, List userProvidedCerts)
-        {
-            this.review = review;
-            this.errors = errors;
-            this.notifications = notifications;
-            signVerified = verified;
-            this.userProvidedCerts = userProvidedCerts;
-        }
-
-        /**
-         * Returns a list of error messages of type {@link ErrorBundle}.
-         * 
-         * @return List of error messages
-         */
-        public List getErrors()
-        {
-            return errors;
-        }
-
-        /**
-         * Returns a list of notification messages of type {@link ErrorBundle}.
-         * 
-         * @return List of notification messages
-         */
-        public List getNotifications()
-        {
-            return notifications;
-        }
-
-        /**
-         * 
-         * @return the PKIXCertPathReviewer for the CertPath of this signature
-         *         or null if an Exception occured.
-         */
-        public PKIXCertPathReviewer getCertPathReview()
-        {
-            return review;
-        }
-        
-        /**
-         * 
-         * @return the CertPath for this signature
-         *         or null if an Exception occured.
-         */
-        public CertPath getCertPath()
-        {
-            return review != null ? review.getCertPath() : null;
-        }
-        
-        /**
-         * 
-         * @return a List of Booleans that are true if the corresponding certificate in the CertPath was taken from
-         * the CertStore of the SMIME message
-         */
-        public List getUserProvidedCerts()
-        {
-            return userProvidedCerts;
-        }
-
-        /**
-         * 
-         * @return true if the signature corresponds to the public key of the
-         *         signer
-         */
-        public boolean isVerifiedSignature()
-        {
-            return signVerified;
-        }
-
-        /**
-         * 
-         * @return true if the signature is valid (ie. if it corresponds to the
-         *         public key of the signer and the cert path for the signers
-         *         certificate is also valid)
-         */
-        public boolean isValidSignature()
-        {
-            if (review != null)
-            {
-                return signVerified && review.isValidCertPath()
-                        && errors.isEmpty();
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-    }
 }

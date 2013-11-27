@@ -1,37 +1,18 @@
 package org.bouncycastle2.cms;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.security.AlgorithmParameters;
-import java.security.GeneralSecurityException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Provider;
-import java.security.SecureRandom;
-import java.util.HashMap;
-import java.util.Iterator;
-
-import javax.crypto.Cipher;
-import javax.crypto.CipherOutputStream;
-import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.ASN1Set;
-import org.bouncycastle2.asn1.BERSequenceGenerator;
-import org.bouncycastle2.asn1.BERSet;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERSet;
-import org.bouncycastle2.asn1.DERTaggedObject;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.cms.AttributeTable;
 import org.bouncycastle2.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.operator.GenericKey;
 import org.bouncycastle2.operator.OutputEncryptor;
+
+import javax.crypto.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.*;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * General class for generating a CMS enveloped-data message stream.

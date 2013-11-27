@@ -2,49 +2,19 @@ package org.bouncycastle2.jce.provider;
 
 import org.bouncycastle2.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle2.crypto.AsymmetricCipherKeyPair;
-import org.bouncycastle2.crypto.generators.DHBasicKeyPairGenerator;
-import org.bouncycastle2.crypto.generators.DHParametersGenerator;
-import org.bouncycastle2.crypto.generators.DSAKeyPairGenerator;
-import org.bouncycastle2.crypto.generators.DSAParametersGenerator;
-import org.bouncycastle2.crypto.generators.ElGamalKeyPairGenerator;
-import org.bouncycastle2.crypto.generators.ElGamalParametersGenerator;
-import org.bouncycastle2.crypto.generators.GOST3410KeyPairGenerator;
-import org.bouncycastle2.crypto.generators.RSAKeyPairGenerator;
-import org.bouncycastle2.crypto.params.DHKeyGenerationParameters;
-import org.bouncycastle2.crypto.params.DHParameters;
-import org.bouncycastle2.crypto.params.DHPrivateKeyParameters;
-import org.bouncycastle2.crypto.params.DHPublicKeyParameters;
-import org.bouncycastle2.crypto.params.DSAKeyGenerationParameters;
-import org.bouncycastle2.crypto.params.DSAParameters;
-import org.bouncycastle2.crypto.params.DSAPrivateKeyParameters;
-import org.bouncycastle2.crypto.params.DSAPublicKeyParameters;
-import org.bouncycastle2.crypto.params.ElGamalKeyGenerationParameters;
-import org.bouncycastle2.crypto.params.ElGamalParameters;
-import org.bouncycastle2.crypto.params.ElGamalPrivateKeyParameters;
-import org.bouncycastle2.crypto.params.ElGamalPublicKeyParameters;
-import org.bouncycastle2.crypto.params.GOST3410KeyGenerationParameters;
-import org.bouncycastle2.crypto.params.GOST3410Parameters;
-import org.bouncycastle2.crypto.params.GOST3410PrivateKeyParameters;
-import org.bouncycastle2.crypto.params.GOST3410PublicKeyParameters;
-import org.bouncycastle2.crypto.params.RSAKeyGenerationParameters;
-import org.bouncycastle2.crypto.params.RSAKeyParameters;
-import org.bouncycastle2.crypto.params.RSAPrivateCrtKeyParameters;
+import org.bouncycastle2.crypto.generators.*;
+import org.bouncycastle2.crypto.params.*;
 import org.bouncycastle2.jce.spec.ElGamalParameterSpec;
 import org.bouncycastle2.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle2.jce.spec.GOST3410PublicKeyParameterSetSpec;
 
+import javax.crypto.spec.DHParameterSpec;
 import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidParameterException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.SecureRandom;
+import java.security.*;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.DSAParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Hashtable;
-
-import javax.crypto.spec.DHParameterSpec;
 
 public abstract class JDKKeyPairGenerator
     extends KeyPairGenerator

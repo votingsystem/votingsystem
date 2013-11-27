@@ -1,30 +1,25 @@
 package org.votingsystem.simulation.model
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
-
-import org.votingsystem.model.EventVS
-import org.votingsystem.model.EventVSBase
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.simulation.ApplicationContextHolder;
-import org.votingsystem.simulation.model.*
-import org.votingsystem.util.DateUtils;
-
-import groovy.json.JsonSlurper;
-
+import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.json.JSONObject
-import org.apache.log4j.Logger;
+import org.votingsystem.model.EventVS
+import org.votingsystem.model.ResponseVS
+import org.votingsystem.util.DateUtils
+import org.votingsystem.util.StringUtils
 
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 
 class SimulationData {
 	
-	 private static Logger log = Logger.getLogger(SimulationData.class);
+	 private static Logger logger = Logger.getLogger(SimulationData.class);
 	
-	 private int statusCode = ResponseVS.SC_ERROR;
+	 private AtomicInteger statusCode;
 	 private String message = null;
 	 private String accessControlURL = null;
+     private String serverURL = null;
+
 	 private Integer maxPendingResponses = 10; //default
 	 private Integer numRequestsProjected = null;
 	
@@ -32,7 +27,7 @@ class SimulationData {
 	 private AtomicLong numRequestsOK = new AtomicLong(0);
 	 private AtomicLong numRequestsERROR = new AtomicLong(0);
 	 
-	 private EventVS evento = null;
+	 private EventVS eventVS = null;
 	 
 	 private Long begin = null;
 	 private Long finish = null;
@@ -45,19 +40,33 @@ class SimulationData {
 	 
 	 private String durationStr = null;
 	 private String backupRequestEmail = null;
-	 
+
+     private UserBaseSimulationData userBaseSimulationData;
+     private EventVS.State eventStateWhenFinished;
+
 	 private List<String> errorList = new ArrayList<String>();
 	
 	 public SimulationData(int status, String message) {
-		 this.statusCode = status;
+         this.statusCode.set(status)
 		 this.message = message;
 	 }
 	 
 	 public SimulationData() {}
 	 
-		 
+     public EventVS.State getEventStateWhenFinished() {
+         return eventStateWhenFinished
+     }
+
+    public void setEventStateWhenFinished(EventVS.State nextState) {
+        eventStateWhenFinished = nextState;
+    }
+
+    public boolean isRunning() {
+        return (ResponseVS.SC_PROCESSING == getStatusCode());
+    }
+
 	 public static SimulationData parse (String dataStr) throws Exception {
-		 log.debug("- parse");
+		 logger.debug("- parse");
 		 if(dataStr == null) return null;
 		 JSONObject dataJSON = new JSONObject(dataStr);
 		 return parse(dataJSON);
@@ -65,22 +74,35 @@ class SimulationData {
 	 
 	 public Map getDataMap() {
 		 Map resultMap = new HashMap();
-		 resultMap.statusCode = statusCode;
+         String timeDurationStr = null;
+         if(durationStr == null && begin != null) {
+             long timeDuration = System.currentTimeMillis() - begin;
+             timeDurationStr = DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(timeDuration);
+         } else timeDurationStr = durationStr;
+		 resultMap.statusCode = statusCode.get();
 		 resultMap.errorList = errorList;
-		 resultMap.numRequests = numRequests.longValue();
-		 resultMap.numRequestsOK = numRequestsOK.longValue();
-		 resultMap.numRequestsERROR = numRequestsERROR.longValue();
+         resultMap.numRequestsProjected = numRequestsProjected?.longValue()
+		 resultMap.numRequests = numRequests?.longValue();
+		 resultMap.numRequestsOK = numRequestsOK?.longValue();
+		 resultMap.numRequestsERROR = numRequestsERROR?.longValue();
+         resultMap.timeDuration = timeDurationStr;
 		 return resultMap;
 	 }
 	 
 	 public static SimulationData parse (JSONObject dataJSON) throws Exception {
-		 log.debug(" --- parse - json ");
-		 if(dataJSON == null) return null;
+		 logger.debug(" --- parse - json ");
 		 SimulationData simulationData = new SimulationData();
-		 EventVSBase evento = new EventVSBase();
+		 EventVS eventVS = new EventVS();
 		 if (dataJSON.containsKey("accessControlURL")) {
 			 simulationData.setAccessControlURL(dataJSON.getString("accessControlURL"));
 		 }
+         if (dataJSON.containsKey("serverURL")) {
+             simulationData.setServerURL(dataJSON.getString("serverURL"));
+         }
+
+         if(dataJSON.containsKey("userBaseData")) {
+             simulationData.setUserBaseSimulationData(UserBaseSimulationData.parse(dataJSON.getJSONObject("userBaseData")));
+         }
 		 if (dataJSON.containsKey("numRequestsProjected")) {
 			 simulationData.setNumRequestsProjected(dataJSON.getInt("numRequestsProjected"));
 		 }
@@ -88,7 +110,7 @@ class SimulationData {
 			 simulationData.setMaxPendingResponses(dataJSON.getInt("maxPendingResponses"));
 		 }
 		 if (dataJSON.containsKey("event")) {
-			 evento = EventVSBase.populate(dataJSON.getJSONObject("event"));
+			 eventVS = EventVS.populate(dataJSON.getJSONObject("event"));
 		 }
 		 if (!dataJSON.isNull("eventId")) {
 			 simulationData.setEventId(dataJSON.getLong("eventId"));
@@ -104,30 +126,33 @@ class SimulationData {
 				 boolean timerBased = timerJSONObject.getBoolean("active");
 				 simulationData.setTimerBased(timerBased);
 				 if(timerBased) {
-					  if(timerJSONObject.containsKey("numHoursProjected")) {
-						  simulationData.setNumHoursProjected(
-								  timerJSONObject.getInt("numHoursProjected"));
-					  }
-					 if(timerJSONObject.containsKey("numMinutesProjected")) {
-						  simulationData.setNumMinutesProjected(
-								  timerJSONObject.getInt("numMinutesProjected"));
-					 }
-					 if(timerJSONObject.containsKey("numSecondsProjected")) {
-						  simulationData.setNumSecondsProjected(
-								  timerJSONObject.getInt("numSecondsProjected"));
-					 }
+                     if(timerJSONObject.containsKey("time")) {
+                         String timeStr = timerJSONObject.getString("time");
+                         simulationData.setNumHoursProjected(Integer.valueOf(timeStr.split(":")[0]));
+                         simulationData.setNumMinutesProjected(Integer.valueOf(timeStr.split(":")[1]));
+                     } else {
+                         if(timerJSONObject.containsKey("numHoursProjected")) {
+                             simulationData.setNumHoursProjected(timerJSONObject.getInt("numHoursProjected"));
+                         }
+                         if(timerJSONObject.containsKey("numMinutesProjected")) {
+                             simulationData.setNumMinutesProjected(timerJSONObject.getInt("numMinutesProjected"));
+                         }
+                         if(timerJSONObject.containsKey("numSecondsProjected")) {
+                             simulationData.setNumSecondsProjected(timerJSONObject.getInt("numSecondsProjected"));
+                         }
+                     }
 				 }
 			 }
 		 }
 		 if (dataJSON.containsKey("whenFinishChangeEventStateTo")) {
 			 try {
-				 EventVSBase.Estado estado = EventVSBase.Estado.valueOf(
+				 EventVS.State nextState = EventVS.State.valueOf(
 					 dataJSON.getString("whenFinishChangeEventStateTo"));
-				 evento.setNextState(estado);
+                 simulationData.setEventStateWhenFinished(nextState)
 			 }catch(Exception ex) { }
 	
 		 }
-		 simulationData.setEvento(evento);
+		 simulationData.setEventVS(eventVS);
 		 return simulationData;
 	 }
 	 
@@ -162,40 +187,33 @@ class SimulationData {
 	 public Long getAndIncrementNumRequestsERROR() {
 		 return numRequestsERROR.getAndIncrement();
 	 }
-	 
-	 
-	 /**
-	  * @return the message
-	  */
+
+
+     public void setUserBaseSimulationData(UserBaseSimulationData userBaseSimulationData) {
+        this.userBaseSimulationData = userBaseSimulationData;
+     }
+
+     public UserBaseSimulationData getUserBaseSimulationData() {
+        return userBaseSimulationData;
+     }
+
 	 public String getMessage() {
 		 return message;
 	 }
-	
-	 /**
-	  * @param message the message to set
-	  */
+
 	 public void setMessage(String message) {
 		 this.message = message;
 	 }
-	
-	 
-	 /**
-	  * @return the statusCode
-	  */
+
 	 public int getStatusCode() {
-		 return statusCode;
+         if(statusCode == null) return null;
+		 return statusCode.get();
 	 }
-	
-	 /**
-	  * @param statusCode the statusCode to set
-	  */
+
 	 public void setStatusCode(int statusCode) {
-		 this.statusCode = statusCode;
+		 this.statusCode.set(statusCode);
 	 }
-	
-	 /**
-	  * @return the begin
-	  */
+
 	 public Long getBegin() {
 		 return begin;
 	 }
@@ -204,189 +222,125 @@ class SimulationData {
 		 if(begin == null) return null;
 		 else return new Date(begin);
 	 }
-	 
-	 /**
-	  * @param begin the begin to set
-	  */
-	 public void setBegin(Long begin) {
+
+	 public void init(Long begin) {
+         statusCode = new AtomicInteger(ResponseVS.SC_PROCESSING);
 		 this.begin = begin;
 	 }
 	
-	 /**
-	  * @return the finish
-	  */
 	 public Long getFinish() {
 		 return finish;
 	 }
 	
-	 /**
-	  * @param finish the finish to set
-	  */
-	 public void setFinish(Long finish) throws Exception {
-		 if(begin != null) {
+	 public void finish(int statusCode, Long finish) throws Exception {
+         setStatusCode(statusCode)
+		 if(begin != null && finish != null) {
 			 long duration = finish - begin;
 			 durationStr = DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(duration);
+             this.finish = finish;
 		 }
-		 this.finish = finish;
 	 }
 	
 	 public String getDurationStr() {
 		 return durationStr;
 	 }
 	
-	 
-	
-	 /**
-	  * @return the accessControlURL
-	  */
 	 public String getAccessControlURL() {
 		 return accessControlURL;
 	 }
 	
-	 /**
-	  * @param accessControlURL the accessControlURL to set
-	  */
 	 public void setAccessControlURL(String accessControlURL) {
 		 this.accessControlURL = accessControlURL;
 	 }
-	
-	 /**
-	  * @return the maxPendingResponses
-	  */
-	 public Integer getMaxPendingResponses() {
+
+    public String getServerURL() {
+        return serverURL;
+    }
+
+
+    public void setServerURL(String serverURL) {
+        this.serverURL = StringUtils.checkURL(serverURL);
+    }
+
+	public Integer getMaxPendingResponses() {
 		 return maxPendingResponses;
-	 }
+	}
 	
-	 /**
-	  * @param maxPendingResponses the maxPendingResponses to set
-	  */
-	 public void setMaxPendingResponses(Integer maxPendingResponses) {
+	public void setMaxPendingResponses(Integer maxPendingResponses) {
 		 this.maxPendingResponses = maxPendingResponses;
-	 }
-	
-	 /**
-	  * @return the numRequestsProjected
-	  */
-	 public Integer getNumRequestsProjected() {
-		 return numRequestsProjected;
-	 }
-	
-	 /**
-	  * @param numRequestsProjected the numRequestsProjected to set
-	  */
+         if(userBaseSimulationData != null) userBaseSimulationData.setMaxPendingResponses(maxPendingResponses)
+	}
+
+	public Integer getNumRequestsProjected() {
+		return numRequestsProjected;
+	}
+
 	 public void setNumRequestsProjected(Integer numRequestsProjected) {
 		 this.numRequestsProjected = numRequestsProjected;
 	 }
-	
-	 /**
-	  * @return the timerBased
-	  */
+
 	 public boolean isTimerBased() {
 		 return timerBased;
 	 }
-	
-	 /**
-	  * @param timerBased the timerBased to set
-	  */
+
 	 public void setTimerBased(boolean timerBased) {
 		 this.timerBased = timerBased;
 	 }
-	
-	 /**
-	  * @return the numHoursProjected
-	  */
+
 	 public Integer getNumHoursProjected() {
 		 return numHoursProjected;
 	 }
-	
-	 /**
-	  * @param numHoursProjected the numHoursProjected to set
-	  */
+
 	 public void setNumHoursProjected(Integer numHoursProjected) {
 		 this.numHoursProjected = numHoursProjected;
 	 }
-	
-	 /**
-	  * @return the numMinutesProjected
-	  */
+
 	 public Integer getNumMinutesProjected() {
 		 return numMinutesProjected;
 	 }
-	
-	 /**
-	  * @param numMinutesProjected the numMinutesProjected to set
-	  */
+
 	 public void setNumMinutesProjected(Integer numMinutesProjected) {
 		 this.numMinutesProjected = numMinutesProjected;
 	 }
-	
-	 /**
-	  * @return the numSecondsProjected
-	  */
+
 	 public Integer getNumSecondsProjected() {
 		 return numSecondsProjected;
 	 }
-	
-	 /**
-	  * @param numSecondsProjected the numSecondsProjected to set
-	  */
+
 	 public void setNumSecondsProjected(Integer numSecondsProjected) {
 		 this.numSecondsProjected = numSecondsProjected;
 	 }
-	
-	 /**
-	  * @return the evento
-	  */
-	 public EventVS getEvento() {
-		 return evento;
+
+	 public EventVS getEventVS() {
+		 return eventVS;
 	 }
-	
-	 /**
-	  * @param evento the evento to set
-	  */
-	 public void setEvento(EventVS evento) {
-		 this.evento = evento;
+
+	 public void setEventVS(EventVS eventVS) {
+		 this.eventVS = eventVS;
 	 }
-	
-	 /**
-	  * @return the backupRequestEmail
-	  */
+
 	 public String getBackupRequestEmail() {
 		 return backupRequestEmail;
 	 }
-	
-	 /**
-	  * @param backupRequestEmail the backupRequestEmail to set
-	  */
+
 	 public void setBackupRequestEmail(String backupRequestEmail) {
 		 this.backupRequestEmail = backupRequestEmail;
 	 }
-	
-	 /**
-	  * @return the errorList
-	  */
+
 	 public List<String> getErrorList() {
 		 return errorList;
 	 }
-	
-	 /**
-	  * @param errorList the errorList to set
-	  */
+
 	 public void seterrorList(List<String> errorList) {
 		 this.errorList = errorList;
 	 }
-	
-	 /**
-	  * @return the eventId
-	  */
+
 	 public Long getEventId() {
 		 return eventId;
 	 }
-	
-	 /**
-	  * @param eventId the eventId to set
-	  */
+
 	 public void setEventId(Long eventId) {
 		 this.eventId = eventId;
 	 }
+
 }

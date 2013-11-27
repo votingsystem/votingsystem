@@ -1,9 +1,7 @@
-import java.security.Security;
+import grails.util.Metadata
+import org.votingsystem.model.RepresentativeVS
+
 import grails.converters.JSON
-import javax.activation.CommandMap;
-import javax.activation.MailcapCommandMap;
-import org.votingsystem.accesscontrol.model.*
-import org.votingsystem.groovy.util.*
 import org.votingsystem.model.ContextVS
 
 /**
@@ -12,9 +10,9 @@ import org.votingsystem.model.ContextVS
 */
 class BootStrap {
 
-	def firmaService
+	def signatureVSService
 	def pdfService
-	def timeStampService
+	def timeStampVSService
 	def encryptionService
 	def grailsApplication
 	def filesService
@@ -23,17 +21,18 @@ class BootStrap {
         JSON.registerObjectMarshaller(Date) {
             return it?.format("yyyy/MM/dd' 'HH:mm:ss")
         }
-		
-		ContextVS.init("org.votingsystem.accesscontrol.model.Usuario")
+
+        log.debug("isWarDeployed: ${Metadata.current.isWarDeployed()}")
+		ContextVS.init()
 		
 		//We call it here because InitializingBean method interface is called before GORM plugin
-		firmaService.afterPropertiesSet()
+        signatureVSService.afterPropertiesSet()
 		pdfService.afterPropertiesSet()
-		timeStampService.afterPropertiesSet()
+        timeStampVSService.afterPropertiesSet()
 		encryptionService.afterPropertiesSet()
 		filesService.init()
 		
-		JSON.registerObjectMarshaller(RepresentativeData) {
+		JSON.registerObjectMarshaller(RepresentativeVS) {
 			def returnMap = [:]
 			returnMap['optionSelectedId'] = it.optionSelectedId
 			returnMap['numRepresentedWithVote'] = it.numRepresentedWithVote

@@ -1,16 +1,15 @@
 package org.bouncycastle2.ocsp;
 
-import java.security.MessageDigest;
-import java.security.PublicKey;
-
-import javax.security.auth.x500.X500Principal;
-
 import org.bouncycastle2.asn1.ASN1InputStream;
 import org.bouncycastle2.asn1.ASN1OctetString;
 import org.bouncycastle2.asn1.DEROctetString;
 import org.bouncycastle2.asn1.ocsp.ResponderID;
 import org.bouncycastle2.asn1.x500.X500Name;
 import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
+
+import javax.security.auth.x500.X500Principal;
+import java.security.MessageDigest;
+import java.security.PublicKey;
 
 /**
  * Carrier for a ResponderID.

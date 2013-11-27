@@ -1,10 +1,9 @@
 package org.bouncycastle2.operator.jcajce;
 
-import java.security.Key;
+import org.bouncycastle2.operator.GenericKey;
 
 import javax.crypto.spec.SecretKeySpec;
-
-import org.bouncycastle2.operator.GenericKey;
+import java.security.Key;
 
 class OperatorUtils
 {

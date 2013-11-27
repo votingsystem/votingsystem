@@ -1,23 +1,18 @@
 package org.votingsystem.signature.smime;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.cert.CertStore;
-import java.security.cert.CertStoreException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.cms.*;
+import org.bouncycastle.mail.smime.SMIMEException;
+import org.bouncycastle.mail.smime.SMIMEStreamingProcessor;
+import org.bouncycastle.mail.smime.util.CRLFOutputStream;
+import org.bouncycastle.util.Store;
+import org.bouncycastle.x509.X509Store;
 
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
@@ -27,24 +22,13 @@ import javax.mail.internet.ContentType;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-
-import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.CMSSignedDataStreamGenerator;
-import org.bouncycastle.cms.SignerInfoGenerator;
-import org.bouncycastle.cms.SignerInformation;
-import org.bouncycastle.cms.SignerInformationStore;
-import org.bouncycastle.mail.smime.SMIMEException;
-import org.bouncycastle.mail.smime.SMIMEStreamingProcessor;
-import org.bouncycastle.mail.smime.util.CRLFOutputStream;
-import org.bouncycastle.util.Store;
-import org.bouncycastle.x509.X509Store;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.*;
+import java.security.cert.CertStore;
+import java.security.cert.CertStoreException;
+import java.security.cert.X509Certificate;
+import java.util.*;
 
 /**
  * general class for generating a pkcs7-signature message.
@@ -302,7 +286,7 @@ public class SMIMESignedGenerator
      * generator.
      *
      * @param store a store of Version 2 attribute certificates
-     * @throws CMSException if an error occurse processing the store.
+     * @throws org.bouncycastle.cms.CMSException if an error occurse processing the store.
      * @deprecated use addAttributeCertificates(Store)
      */
     public void addAttributeCertificates(
@@ -317,13 +301,13 @@ public class SMIMESignedGenerator
         List         signers)
     {
         int                 count = 0;
-        
+
         //
         // build the hash header
         //
         Iterator   it = signers.iterator();
         Set        micAlgs = new HashSet();
-        
+
         while (it.hasNext())
         {
             Object       signer = it.next();
@@ -375,9 +359,9 @@ public class SMIMESignedGenerator
                 micAlgs.add("unknown");
             }
         }
-        
+
         it = micAlgs.iterator();
-        
+
         while (it.hasNext())
         {
             String    alg = (String)it.next();
@@ -411,7 +395,7 @@ public class SMIMESignedGenerator
             }
         }
     }
-    
+
     /*
      * at this point we expect our body part to be well defined.
      */
@@ -510,13 +494,13 @@ public class SMIMESignedGenerator
         try
         {
             MimeBodyPart sig = new MimeBodyPart();
-            
+
             sig.setContent(new ContentSigner(content, true, sigProvider), ENCAPSULATED_SIGNED_CONTENT_TYPE);
             sig.addHeader("Content-Type", ENCAPSULATED_SIGNED_CONTENT_TYPE);
             sig.addHeader("Content-Disposition", "attachment; filename=\"smime.p7m\"");
             sig.addHeader("Content-Description", "S/MIME Cryptographic Signed Data");
             sig.addHeader("Content-Transfer-Encoding", encoding);
-            
+
             return sig;
         }
         catch (MessagingException e)
@@ -567,9 +551,9 @@ public class SMIMESignedGenerator
      * @param content the MimeBodyPart to be signed.
      * @param sigProvider the provider to be used for the signature.
      * @return a Multipart containing the content and signature.
-     * @throws NoSuchAlgorithmException if the required algorithms for the signature cannot be found.
-     * @throws NoSuchProviderException if no provider can be found.
-     * @throws SMIMEException if an exception occurs in processing the signature.
+     * @throws java.security.NoSuchAlgorithmException if the required algorithms for the signature cannot be found.
+     * @throws java.security.NoSuchProviderException if no provider can be found.
+     * @throws org.bouncycastle.mail.smime.SMIMEException if an exception occurs in processing the signature.
      * @deprecated use generate(MimeBodyPart)
      */
     public MimeMultipart generate(
@@ -587,8 +571,8 @@ public class SMIMESignedGenerator
      * @param content the MimeBodyPart to be signed.
      * @param sigProvider the provider to be used for the signature.
      * @return a Multipart containing the content and signature.
-     * @throws NoSuchAlgorithmException if the required algorithms for the signature cannot be found.
-     * @throws SMIMEException if an exception occurs in processing the signature.
+     * @throws java.security.NoSuchAlgorithmException if the required algorithms for the signature cannot be found.
+     * @throws org.bouncycastle.mail.smime.SMIMEException if an exception occurs in processing the signature.
      */
     public MimeMultipart generate(
         MimeBodyPart    content,
@@ -602,9 +586,9 @@ public class SMIMESignedGenerator
      * generate a signed object that contains an SMIME Signed Multipart
      * object using the given provider from the given MimeMessage
      *
-     * @throws NoSuchAlgorithmException if the required algorithms for the signature cannot be found.
-     * @throws NoSuchProviderException if no provider can be found.
-     * @throws SMIMEException if an exception occurs in processing the signature.
+     * @throws java.security.NoSuchAlgorithmException if the required algorithms for the signature cannot be found.
+     * @throws java.security.NoSuchProviderException if no provider can be found.
+     * @throws org.bouncycastle.mail.smime.SMIMEException if an exception occurs in processing the signature.
      */
     public MimeMultipart generate(
         MimeMessage     message,
@@ -618,9 +602,9 @@ public class SMIMESignedGenerator
      * generate a signed object that contains an SMIME Signed Multipart
      * object using the given provider from the given MimeMessage
      *
-     * @throws NoSuchAlgorithmException if the required algorithms for the signature cannot be found.
-     * @throws NoSuchProviderException if no provider can be found.
-     * @throws SMIMEException if an exception occurs in processing the signature.
+     * @throws java.security.NoSuchAlgorithmException if the required algorithms for the signature cannot be found.
+     * @throws java.security.NoSuchProviderException if no provider can be found.
+     * @throws org.bouncycastle.mail.smime.SMIMEException if an exception occurs in processing the signature.
      */
     public MimeMultipart generate(
         MimeMessage     message,

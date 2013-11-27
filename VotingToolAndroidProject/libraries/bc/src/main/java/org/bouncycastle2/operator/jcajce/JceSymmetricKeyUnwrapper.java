@@ -1,12 +1,5 @@
 package org.bouncycastle2.operator.jcajce;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.Provider;
-
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle2.jcajce.NamedJcaJceHelper;
@@ -14,6 +7,12 @@ import org.bouncycastle2.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle2.operator.GenericKey;
 import org.bouncycastle2.operator.OperatorException;
 import org.bouncycastle2.operator.SymmetricKeyUnwrapper;
+
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
 
 public class JceSymmetricKeyUnwrapper
     extends SymmetricKeyUnwrapper

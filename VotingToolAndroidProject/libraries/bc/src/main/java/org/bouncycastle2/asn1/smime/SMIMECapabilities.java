@@ -1,14 +1,14 @@
 package org.bouncycastle2.asn1.smime;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import org.bouncycastle2.asn1.ASN1Encodable;
 import org.bouncycastle2.asn1.ASN1Sequence;
 import org.bouncycastle2.asn1.DERObject;
 import org.bouncycastle2.asn1.DERObjectIdentifier;
 import org.bouncycastle2.asn1.cms.Attribute;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Handler class for dealing with S/MIME Capabilities

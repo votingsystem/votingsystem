@@ -1,19 +1,6 @@
 package org.bouncycastle2.crypto.util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigInteger;
-
-import org.bouncycastle2.asn1.ASN1InputStream;
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DERBitString;
-import org.bouncycastle2.asn1.DEREncodable;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DEROctetString;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.nist.NISTNamedCurves;
 import org.bouncycastle2.asn1.oiw.ElGamalParameter;
 import org.bouncycastle2.asn1.oiw.OIWObjectIdentifiers;
@@ -21,30 +8,13 @@ import org.bouncycastle2.asn1.pkcs.DHParameter;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.asn1.sec.SECNamedCurves;
 import org.bouncycastle2.asn1.teletrust.TeleTrusTNamedCurves;
-import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.asn1.x509.DSAParameter;
-import org.bouncycastle2.asn1.x509.RSAPublicKeyStructure;
-import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle2.asn1.x509.X509ObjectIdentifiers;
-import org.bouncycastle2.asn1.x9.DHDomainParameters;
-import org.bouncycastle2.asn1.x9.DHPublicKey;
-import org.bouncycastle2.asn1.x9.DHValidationParms;
-import org.bouncycastle2.asn1.x9.X962NamedCurves;
-import org.bouncycastle2.asn1.x9.X962Parameters;
-import org.bouncycastle2.asn1.x9.X9ECParameters;
-import org.bouncycastle2.asn1.x9.X9ECPoint;
-import org.bouncycastle2.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle2.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle2.crypto.params.DHParameters;
-import org.bouncycastle2.crypto.params.DHPublicKeyParameters;
-import org.bouncycastle2.crypto.params.DHValidationParameters;
-import org.bouncycastle2.crypto.params.DSAParameters;
-import org.bouncycastle2.crypto.params.DSAPublicKeyParameters;
-import org.bouncycastle2.crypto.params.ECDomainParameters;
-import org.bouncycastle2.crypto.params.ECPublicKeyParameters;
-import org.bouncycastle2.crypto.params.ElGamalParameters;
-import org.bouncycastle2.crypto.params.ElGamalPublicKeyParameters;
-import org.bouncycastle2.crypto.params.RSAKeyParameters;
+import org.bouncycastle2.asn1.x509.*;
+import org.bouncycastle2.asn1.x9.*;
+import org.bouncycastle2.crypto.params.*;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
 
 /**
  * Factory to create asymmetric public key parameters for asymmetric ciphers from range of

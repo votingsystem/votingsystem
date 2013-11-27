@@ -1,13 +1,5 @@
 package org.bouncycastle2.operator.jcajce;
 
-import java.security.GeneralSecurityException;
-import java.security.Key;
-import java.security.Provider;
-import java.security.SecureRandom;
-
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-
 import org.bouncycastle2.asn1.DERInteger;
 import org.bouncycastle2.asn1.DERNull;
 import org.bouncycastle2.asn1.DERObjectIdentifier;
@@ -21,6 +13,13 @@ import org.bouncycastle2.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle2.operator.GenericKey;
 import org.bouncycastle2.operator.OperatorException;
 import org.bouncycastle2.operator.SymmetricKeyWrapper;
+
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import java.security.GeneralSecurityException;
+import java.security.Key;
+import java.security.Provider;
+import java.security.SecureRandom;
 
 public class JceSymmetricKeyWrapper
     extends SymmetricKeyWrapper

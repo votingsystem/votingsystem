@@ -1,18 +1,13 @@
 package org.bouncycastle2.cms;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Provider;
-
-import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
-
 import org.bouncycastle2.asn1.cms.KEKIdentifier;
 import org.bouncycastle2.asn1.cms.KEKRecipientInfo;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
+import java.io.IOException;
+import java.security.*;
 
 /**
  * the RecipientInfo class for a recipient who has been sent a message

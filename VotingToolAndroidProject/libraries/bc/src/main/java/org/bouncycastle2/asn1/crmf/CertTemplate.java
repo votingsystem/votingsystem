@@ -1,17 +1,12 @@
 package org.bouncycastle2.asn1.crmf;
 
-import java.util.Enumeration;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.ASN1TaggedObject;
-import org.bouncycastle2.asn1.DERBitString;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERObject;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.x500.X500Name;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle2.asn1.x509.X509Extensions;
+
+import java.util.Enumeration;
 
 public class CertTemplate
     extends ASN1Encodable

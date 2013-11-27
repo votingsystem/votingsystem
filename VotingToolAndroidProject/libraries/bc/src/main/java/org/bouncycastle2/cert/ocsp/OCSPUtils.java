@@ -1,16 +1,10 @@
 package org.bouncycastle2.cert.ocsp;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.bouncycastle2.asn1.DERGeneralizedTime;
 import org.bouncycastle2.asn1.x509.X509Extensions;
 import org.bouncycastle2.cert.X509CertificateHolder;
+
+import java.util.*;
 
 class OCSPUtils
 {

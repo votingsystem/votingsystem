@@ -1,10 +1,10 @@
 package org.bouncycastle2.cert.cmp;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 import org.bouncycastle2.asn1.ASN1Encodable;
 import org.bouncycastle2.asn1.DEROutputStream;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 class CMPUtil
 {

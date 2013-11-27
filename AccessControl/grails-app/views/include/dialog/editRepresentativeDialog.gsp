@@ -79,9 +79,9 @@ function editRepresentativeCallback(appMessage) {
 		$("#workingWithAppletDialog" ).dialog("close");
 		var caption = '<g:message code="operationERRORCaption"/>'
 		var msg = appMessageJSON.message
-		if(StatusCode.SC_OK == appMessageJSON.statusCode) { 
+		if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
 			caption = "<g:message code='operationOKCaption'/>"
-		} else if (StatusCode.SC_CANCELLED== appMessageJSON.statusCode) {
+		} else if (ResponseVS.SC_CANCELLED== appMessageJSON.statusCode) {
 			caption = "<g:message code='operationCANCELLEDLbl'/>"
 		}
 		showResultDialog(caption, msg)

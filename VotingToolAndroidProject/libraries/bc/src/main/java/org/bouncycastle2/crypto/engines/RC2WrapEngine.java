@@ -1,7 +1,5 @@
 package org.bouncycastle2.crypto.engines;
 
-import java.security.SecureRandom;
-
 import org.bouncycastle2.crypto.CipherParameters;
 import org.bouncycastle2.crypto.Digest;
 import org.bouncycastle2.crypto.InvalidCipherTextException;
@@ -11,6 +9,8 @@ import org.bouncycastle2.crypto.modes.CBCBlockCipher;
 import org.bouncycastle2.crypto.params.ParametersWithIV;
 import org.bouncycastle2.crypto.params.ParametersWithRandom;
 import org.bouncycastle2.util.Arrays;
+
+import java.security.SecureRandom;
 
 /**
  * Wrap keys according to RFC 3217 - RC2 mechanism

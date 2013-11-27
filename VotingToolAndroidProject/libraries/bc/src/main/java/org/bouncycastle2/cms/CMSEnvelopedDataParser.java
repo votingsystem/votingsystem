@@ -1,24 +1,17 @@
 package org.bouncycastle2.cms;
 
+import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.asn1.cms.AttributeTable;
+import org.bouncycastle2.asn1.cms.EncryptedContentInfoParser;
+import org.bouncycastle2.asn1.cms.EnvelopedDataParser;
+import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.AlgorithmParameters;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
-
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1OctetStringParser;
-import org.bouncycastle2.asn1.ASN1SequenceParser;
-import org.bouncycastle2.asn1.ASN1Set;
-import org.bouncycastle2.asn1.ASN1SetParser;
-import org.bouncycastle2.asn1.DEREncodable;
-import org.bouncycastle2.asn1.DERSet;
-import org.bouncycastle2.asn1.DERTags;
-import org.bouncycastle2.asn1.cms.AttributeTable;
-import org.bouncycastle2.asn1.cms.EncryptedContentInfoParser;
-import org.bouncycastle2.asn1.cms.EnvelopedDataParser;
-import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 
 /**
  * Parsing class for an CMS Enveloped Data object from an input stream.

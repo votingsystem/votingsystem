@@ -1,15 +1,9 @@
 package org.bouncycastle2.asn1.x509.qualified;
 
-import java.util.Enumeration;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DERIA5String;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERSequence;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+
+import java.util.Enumeration;
 
 /**
  * The BiometricData object.

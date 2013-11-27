@@ -1,23 +1,18 @@
 package org.bouncycastle.tsp.cms;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
-import org.bouncycastle2.asn1.cms.AttributeTable;
-import org.bouncycastle2.asn1.cms.ContentInfo;
-import org.bouncycastle2.asn1.cms.Evidence;
-import org.bouncycastle2.asn1.cms.TimeStampAndCRL;
-import org.bouncycastle2.asn1.cms.TimeStampedData;
-import org.bouncycastle2.asn1.cms.TimeStampedDataParser;
+import org.bouncycastle.tsp.TSPException;
+import org.bouncycastle.tsp.TimeStampToken;
+import org.bouncycastle.tsp.TimeStampTokenInfo;
+import org.bouncycastle2.asn1.cms.*;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.cms.CMSException;
 import org.bouncycastle2.operator.DigestCalculator;
 import org.bouncycastle2.operator.DigestCalculatorProvider;
 import org.bouncycastle2.operator.OperatorCreationException;
-import org.bouncycastle.tsp.TSPException;
-import org.bouncycastle.tsp.TimeStampToken;
-import org.bouncycastle.tsp.TimeStampTokenInfo;
 import org.bouncycastle2.util.Arrays;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 class TimeStampDataUtil
 {

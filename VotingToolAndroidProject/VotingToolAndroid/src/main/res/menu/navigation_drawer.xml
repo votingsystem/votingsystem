@@ -12,7 +12,7 @@
         android:orderInCategory="1"
         android:showAsAction="never"
         android:icon="@android:drawable/btn_plus"
-        android:title="@string/menu_solicitar_certificado"/>
+        android:title="@string/request_certificate_menu"/>
     <item
         android:id="@+id/publish_document"
         android:orderInCategory="2"

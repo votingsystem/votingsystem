@@ -1,24 +1,6 @@
 package org.bouncycastle2.jce.provider;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.math.BigInteger;
-import java.security.interfaces.ECPrivateKey;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.ECPoint;
-import java.security.spec.ECPrivateKeySpec;
-import java.security.spec.EllipticCurve;
-import java.util.Enumeration;
-
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DERBitString;
-import org.bouncycastle2.asn1.DEREncodable;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERNull;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle2.asn1.cryptopro.ECGOST3410NamedCurves;
 import org.bouncycastle2.asn1.pkcs.PrivateKeyInfo;
@@ -36,6 +18,17 @@ import org.bouncycastle2.jce.provider.asymmetric.ec.EC5Util;
 import org.bouncycastle2.jce.provider.asymmetric.ec.ECUtil;
 import org.bouncycastle2.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle2.math.ec.ECCurve;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.math.BigInteger;
+import java.security.interfaces.ECPrivateKey;
+import java.security.spec.ECParameterSpec;
+import java.security.spec.ECPoint;
+import java.security.spec.ECPrivateKeySpec;
+import java.security.spec.EllipticCurve;
+import java.util.Enumeration;
 
 public class JCEECPrivateKey
     implements ECPrivateKey, org.bouncycastle2.jce.interfaces.ECPrivateKey, PKCS12BagAttributeCarrier, ECPointEncoder

@@ -1,9 +1,5 @@
 package org.votingsystem.signature.smime;
 
-import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cms.CMSAttributeTableGenerator;
@@ -15,12 +11,18 @@ import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
+
+import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+
 /**
  *
  * @author jgzornoza
  */
 public class SimpleSignerInfoGeneratorBuilder {
-  private Helper helper;
+     private Helper helper;
 
     private boolean hasNoSignedAttributes;
     private CMSAttributeTableGenerator signedGen;
@@ -94,6 +96,13 @@ public class SimpleSignerInfoGeneratorBuilder {
     {
         
         return configureAndBuild().build(contentSigner, new JcaX509CertificateHolder(certificate));
+    }
+
+    public SignerInfoGenerator build(DNIeContentSigner contentSigner)
+            throws OperatorCreationException, CertificateEncodingException
+    {
+
+        return configureAndBuild().build((ContentSigner) contentSigner, new JcaX509CertificateHolder(contentSigner.getUserCert()));
     }
 
     public SignerInfoGenerator build(String algorithmName, PrivateKey privateKey, byte[] keyIdentifier)

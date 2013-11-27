@@ -1,19 +1,18 @@
 package org.votingsystem.applet.validationtool;
 
-import java.awt.Frame;
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
+import netscape.javascript.*;
+import org.apache.log4j.Logger;
+import org.votingsystem.applet.validationtool.dialog.MainDialog;
+import org.votingsystem.applet.validationtool.panel.AboutPanel;
+import org.votingsystem.model.OperationVS;
+import org.votingsystem.model.*;
+import javax.swing.*;
 import java.security.Security;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import javax.swing.JApplet;
-import javax.swing.JFrame;
-import javax.swing.UIManager;
-import org.apache.log4j.Logger;
-import org.votingsystem.applet.model.AppletOperation;
-import org.votingsystem.model.AppHostVS;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.OperationVS;
-import org.votingsystem.model.ResponseVS;
-
 
 /**
 * @author jgzornoza
@@ -23,30 +22,26 @@ public class Applet extends JApplet implements AppHostVS {
     
     private static Logger logger = Logger.getLogger(Applet.class);
     
-    public static enum ModoEjecucion {APPLET, APLICACION}
-    
-    private Frame frame;
+    public static enum ExecutionMode {APPLET, APLICACION}
+
     private String locale = "es";
-    private Timer recolectorOperaciones;
-    private OperationVS operacionEnCurso;
-    public static ModoEjecucion modoEjecucion = ModoEjecucion.APPLET;
-    
+    private Timer operationGetter;
+    public static ExecutionMode executionMode = ExecutionMode.APPLET;
+
     public Applet() { }
-        
+
     @Override  public void init() {
         logger.debug("init");
         //Execute a job on the event-dispatching thread:
         //creating this applet's GUI.
         try {
-            ValidationToolContext.init(this, "log4jValidationTool.properties", 
-                    "validationToolMessages_", locale);
-            
+            ContextVS.init(this, "log4jValidationTool.properties", "validationToolMessages_", locale);
             javax.swing.SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     try {
                         UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
-                        AcercaDePanel acercaDePanel = new AcercaDePanel();
-                        getContentPane().add(acercaDePanel);           
+                        AboutPanel aboutPanel = new AboutPanel();
+                        getContentPane().add(aboutPanel);
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
                     }
@@ -56,41 +51,35 @@ public class Applet extends JApplet implements AppHostVS {
             logger.error(ex.getMessage(), ex);
         }
     }
-    
-    public Frame getFrame() {
-        return frame;
-    }
-        
+
     public void start() {
         logger.debug("start");
-        if(modoEjecucion == ModoEjecucion.APPLET) {
+        if(executionMode == ExecutionMode.APPLET) {
             if(getParameter("locale") != null) locale = getParameter("locale");
-        } 
+        }
         init();
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    if(modoEjecucion != ModoEjecucion.APPLET) {
+                    if(executionMode != ExecutionMode.APPLET) {
                         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
                     }
-                    DialogoPrincipal dialogo = new DialogoPrincipal(
-                            new JFrame(), false);
+                    MainDialog dialogo = new MainDialog(new JFrame(), false);
                     dialogo.setVisible(true);
                 } catch (Exception e) {
                     logger.error(e.getMessage(), e);
                 }
             }
         });
-        if(modoEjecucion == ModoEjecucion.APPLET) {
-            lanzarTimer();
+        if(executionMode == ExecutionMode.APPLET) {
+            initOperationGetter();
             if(getParameter("locale") != null) locale = getParameter("locale");
-        } 
-        AppletOperation operacion = new AppletOperation(ResponseVS.SC_PROCESSING);
-        operacion.setType(AppletOperation.Type.MENSAJE_HERRAMIENTA_VALIDACION);
-        operacion.setMessage(ContextVS.INSTANCE.getString("appletHerramientaInicializado"));
+        }
+        OperationVS operacion = new OperationVS(ResponseVS.SC_PROCESSING);
+        operacion.setMessage(ContextVS.getInstance().getMessage("appletInitialized"));
         sendMessageToHost(operacion);
     }
- 
+
     public void stop() {
         logger.debug("stop");
     }
@@ -99,9 +88,9 @@ public class Applet extends JApplet implements AppHostVS {
         logger.debug("destroy");
     }
 
-    public static void main (String[] args) { 
+    public static void main (String[] args) {
         logger.info("Arrancando aplicación");
-        modoEjecucion = ModoEjecucion.APLICACION;
+        executionMode = ExecutionMode.APLICACION;
         try {
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
             javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
@@ -118,59 +107,58 @@ public class Applet extends JApplet implements AppHostVS {
             logger.error(e.getMessage(), e);
         }
     }
-    
-    private void lanzarTimer() {
-        logger.info("lanzarTimer");
-        recolectorOperaciones =  new Timer(true);
-        final netscape.javascript.JSObject jsObject = 
-                netscape.javascript.JSObject.getWindow(this);
-        recolectorOperaciones.scheduleAtFixedRate(
+
+    private void initOperationGetter() {
+        logger.info("initOperationGetter");
+        operationGetter =  new Timer(true);
+        final netscape.javascript.JSObject jsObject = netscape.javascript.JSObject.getWindow(this);
+        operationGetter.scheduleAtFixedRate(
             new TimerTask(){
-                public void run() { 
+                public void run() {
                     Object object = jsObject.call(
                             "getMessageToValidationTool", null);
                     if(object != null) {
-                        ejecutarOperacion(object.toString());
+                        runOperation(object.toString());
                     } else { }
                 }
             }, 0, 1000);
     }
-    
-    
-    public void ejecutarOperacion(String operacionJSONStr) {
-        logger.debug("ejecutarOperacion: " + operacionJSONStr);
-        if(operacionJSONStr == null || "".equals(operacionJSONStr)) return;
-        operacionEnCurso = AppletOperation.parse(operacionJSONStr);
-        DialogoPrincipal dialogo = new DialogoPrincipal(new JFrame(), false);
+
+
+    public void runOperation(String operacionJSONStr) {
+        logger.debug("runOperation: " + operacionJSONStr);
+        //if(operacionJSONStr == null || "".equals(operacionJSONStr)) return;
+        //JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(operacionJSONStr);
+        //OperationVS runningOperation = OperationVS.populate(jsonObject);
+        MainDialog dialogo = new MainDialog(new JFrame(), false);
         dialogo.setVisible(true);
     }
-    
+
     @Override public void sendMessageToHost(OperationVS operation) {
         if (operation == null) {
             logger.debug(" - sendMessageToHost - Operacion null");
             return;
         }
-        AppletOperation messageToHost = (AppletOperation)operation;
-        logger.debug(" - sendMessageToHost - status: " + 
-                messageToHost.getStatusCode() + " - operación: " + 
-                messageToHost.toJSON().toString());
+        OperationVS messageToHost = (OperationVS)operation;
+        Map appletOperationDataMap = ((OperationVS)operation).getDataMap();
+        JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(appletOperationDataMap);
+        logger.debug(" - sendMessageToHost - status: " +  messageToHost.getStatusCode() +
+                " - operación: " + messageJSON.toString());
         try {
-            if(modoEjecucion == ModoEjecucion.APPLET) {
-                Object[] args = {messageToHost.toJSON().toString()};
+            if(executionMode == ExecutionMode.APPLET) {
+                Object[] args = {messageJSON.toString()};
+                JSObject jsObject = null;
                 Object object = netscape.javascript.JSObject.getWindow(this).
                         call("setMessageFromValidationTool", args);
-            } else logger.debug("---> APP EXECUTION MODE: " + modoEjecucion.toString());
+            } else logger.debug("---> APP EXECUTION MODE: " + executionMode.toString());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        if(ModoEjecucion.APLICACION == modoEjecucion && 
+        if(ExecutionMode.APLICACION == executionMode &&
                 messageToHost.getStatusCode() == ResponseVS.SC_CANCELLED){
             logger.debug(" ------  System.exit(0) ------ ");
             System.exit(0);
         }
     }
 
-    @Override public OperationVS getPendingOperation() {
-        throw new UnsupportedOperationException("Not supported yet."); 
-    }
 }

@@ -1,11 +1,11 @@
 package org.bouncycastle2.crypto.tls;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
 import org.bouncycastle2.crypto.Digest;
 import org.bouncycastle2.crypto.macs.HMac;
 import org.bouncycastle2.crypto.params.KeyParameter;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 /**
  * A generic TLS MAC implementation, which can be used with any kind of Digest to act as

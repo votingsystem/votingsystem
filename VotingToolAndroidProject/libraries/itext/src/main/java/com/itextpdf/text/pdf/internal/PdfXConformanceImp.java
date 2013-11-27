@@ -45,21 +45,7 @@ package com.itextpdf.text.pdf.internal;
 
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.error_messages.MessageLocalization;
-import com.itextpdf.text.pdf.BaseFont;
-import com.itextpdf.text.pdf.ExtendedColor;
-import com.itextpdf.text.pdf.PatternColor;
-import com.itextpdf.text.pdf.PdfArray;
-import com.itextpdf.text.pdf.PdfDictionary;
-import com.itextpdf.text.pdf.PdfGState;
-import com.itextpdf.text.pdf.PdfImage;
-import com.itextpdf.text.pdf.PdfName;
-import com.itextpdf.text.pdf.PdfNumber;
-import com.itextpdf.text.pdf.PdfObject;
-import com.itextpdf.text.pdf.PdfString;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.text.pdf.PdfXConformanceException;
-import com.itextpdf.text.pdf.ShadingColor;
-import com.itextpdf.text.pdf.SpotColor;
+import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.pdf.interfaces.PdfXConformance;
 
 public class PdfXConformanceImp implements PdfXConformance {

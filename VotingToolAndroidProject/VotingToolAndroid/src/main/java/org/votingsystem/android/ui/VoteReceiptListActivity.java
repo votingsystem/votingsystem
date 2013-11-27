@@ -12,34 +12,23 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.view.animation.AnimationUtils;
-import android.widget.AdapterView;
+import android.widget.*;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.TextView;
-
 import org.bouncycastle2.util.encoders.Base64;
-import org.votingsystem.android.model.ContextVSAndroid;
 import org.votingsystem.android.NavigationDrawer;
 import org.votingsystem.android.R;
+import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.db.VoteReceiptDBHelper;
-import org.votingsystem.callable.SMIMESignedSender;
-import org.votingsystem.model.ResponseVS;
+import org.votingsystem.android.model.AndroidContextVS;
 import org.votingsystem.android.model.VoteReceipt;
+import org.votingsystem.android.util.ServerPaths;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
-import org.votingsystem.android.util.ServerPaths;
 
 import java.io.FileInputStream;
 import java.net.URL;
@@ -51,8 +40,8 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.votingsystem.android.model.ContextVSAndroid.ALIAS_CERT_USUARIO;
-import static org.votingsystem.android.model.ContextVSAndroid.KEY_STORE_FILE;
+import static org.votingsystem.android.model.AndroidContextVS.USER_CERT_ALIAS;
+import static org.votingsystem.android.model.AndroidContextVS.KEY_STORE_FILE;
 
 public class VoteReceiptListActivity extends ActionBarActivity
         implements CertPinDialogListener, ReceiptOperationsListener {
@@ -65,7 +54,7 @@ public class VoteReceiptListActivity extends ActionBarActivity
     private List<VoteReceipt> voteReceiptList;
     private ReceiptListAdapter adapter;
     private VoteReceipt operationReceipt = null;
-    private ContextVSAndroid contextVSAndroid;
+    private AndroidContextVS androidContextVS;
     private View progressContainer;
     private FrameLayout mainLayout;
     private boolean isProgressShown;
@@ -77,7 +66,7 @@ public class VoteReceiptListActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         Log.d(TAG + ".onCreate(...) ", " - onCreate ");
         setContentView(R.layout.vote_receipt_list);
-        contextVSAndroid = ContextVSAndroid.getInstance(getBaseContext());
+        androidContextVS = AndroidContextVS.getInstance(getBaseContext());
         db = new VoteReceiptDBHelper(this);
         try {
             voteReceiptList = db.getVoteReceiptList();
@@ -112,7 +101,7 @@ public class VoteReceiptListActivity extends ActionBarActivity
 
 
     private void launchOptionsDialog(VoteReceipt receipt) {
-        String caption = receipt.getVoto().getAsunto();
+        String caption = receipt.getVoto().getSubject();
         String msg = getString(R.string.receipt_options_dialog_msg);
         ReceiptOptionsDialog optionsDialog = ReceiptOptionsDialog.newInstance(
                 caption, msg, receipt, this);
@@ -238,21 +227,21 @@ public class VoteReceiptListActivity extends ActionBarActivity
                 TextView author = (TextView) view.findViewById(R.id.event_author);
                 TextView receiptState = (TextView) view.findViewById(R.id.receipt_state);
 
-                subject.setText(voteReceipt.getVoto().getAsunto());
+                subject.setText(voteReceipt.getVoto().getSubject());
                 String dateInfoStr = null;
                 ImageView imgView = (ImageView)view.findViewById(R.id.event_state_icon);
-                if(DateUtils.getTodayDate().after(voteReceipt.getVoto().getFechaFin())) {
+                if(DateUtils.getTodayDate().after(voteReceipt.getVoto().getDateFinish())) {
                     imgView.setImageResource(R.drawable.closed);
                     dateInfoStr = "<b>" + getContext().getString(R.string.closed_upper_lbl) + "</b> - " +
                             "<b>" + getContext().getString(R.string.inicio_lbl) + "</b>: " +
                             DateUtils.getShortSpanishStringFromDate(
-                                    voteReceipt.getVoto().getFechaInicio()) + " - " +
+                                    voteReceipt.getVoto().getDateBegin()) + " - " +
                             "<b>" + getContext().getString(R.string.fin_lbl) + "</b>: " +
-                            DateUtils.getShortSpanishStringFromDate(voteReceipt.getVoto().getFechaFin());
+                            DateUtils.getShortSpanishStringFromDate(voteReceipt.getVoto().getDateFinish());
                 } else {
                     imgView.setImageResource(R.drawable.open);
                     dateInfoStr = "<b>" + getContext().getString(R.string.remain_lbl,
-                            DateUtils.getElpasedTimeHoursFromNow(voteReceipt.getVoto().getFechaFin()))  +"</b>";
+                            DateUtils.getElpasedTimeHoursFromNow(voteReceipt.getVoto().getDateFinish()))  +"</b>";
                 }
                 if(dateInfoStr != null) dateInfo.setText(Html.fromHtml(dateInfoStr));
                 else dateInfo.setVisibility(View.GONE);
@@ -267,11 +256,11 @@ public class VoteReceiptListActivity extends ActionBarActivity
                     receiptState.setVisibility(View.GONE);
                 }
 
-                //Log.d(TAG + ".ReceiptListAdapter.getView(...)", " - UserVSBase: " + voteReceipt.getVoto().getUserVSBase());
-                if(voteReceipt.getVoto().getUserVSBase() != null && !"".equals(
-                        voteReceipt.getVoto().getUserVSBase().getNombreCompleto())) {
+                //Log.d(TAG + ".ReceiptListAdapter.getView(...)", " - UserVS: " + voteReceipt.getVoto().getUserVS());
+                if(voteReceipt.getVoto().getUserVS() != null && !"".equals(
+                        voteReceipt.getVoto().getUserVS().getFullName())) {
                     String authorStr =  "<b>" + getContext().getString(R.string.author_lbl) + "</b>: " +
-                            voteReceipt.getVoto().getUserVSBase().getNombreCompleto();
+                            voteReceipt.getVoto().getUserVS().getFullName();
                     author.setText(Html.fromHtml(authorStr));
                 } else author.setVisibility(View.GONE);
             }
@@ -301,7 +290,7 @@ public class VoteReceiptListActivity extends ActionBarActivity
     @Override public void cancelVote(VoteReceipt receipt) {
         Log.d(TAG + ".cancelVote(...)", " - cancelVote");
         operationReceipt = receipt;
-        if (!ContextVSAndroid.Estado.CON_CERTIFICADO.equals(contextVSAndroid.getEstado())) {
+        if (!AndroidContextVS.State.CON_CERTIFICADO.equals(androidContextVS.getState())) {
             Log.d(TAG + "- firmarEnviarButton -", " mostrando dialogo certificado no encontrado");
             showCertNotFoundDialog();
         } else {
@@ -324,12 +313,12 @@ public class VoteReceiptListActivity extends ActionBarActivity
     private void showCertNotFoundDialog() {
         CertNotFoundDialog certDialog = new CertNotFoundDialog();
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        Fragment prev = getSupportFragmentManager().findFragmentByTag(ContextVSAndroid.CERT_NOT_FOUND_DIALOG_ID);
+        Fragment prev = getSupportFragmentManager().findFragmentByTag(AndroidContextVS.CERT_NOT_FOUND_DIALOG_ID);
         if (prev != null) {
             ft.remove(prev);
         }
         ft.addToBackStack(null);
-        certDialog.show(ft, ContextVSAndroid.CERT_NOT_FOUND_DIALOG_ID);
+        certDialog.show(ft, AndroidContextVS.CERT_NOT_FOUND_DIALOG_ID);
     }
 
 
@@ -394,13 +383,13 @@ public class VoteReceiptListActivity extends ActionBarActivity
         protected ResponseVS doInBackground(URL... urls) {
             Log.d(TAG + ".ProcessSignatureTask.doInBackground(...)", " - doInBackground " );
             String subject = getString(R.string.cancel_vote_msg_subject);
-            String serverURL = ServerPaths.getURLAnulacionVoto(contextVSAndroid.getAccessControlURL());
+            String serverURL = ServerPaths.getURLAnulacionVoto(androidContextVS.getAccessControlURL());
             try {
                 FileInputStream fis = openFileInput(KEY_STORE_FILE);
                 byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
                 KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, pin.toCharArray());
-                PrivateKey signerPrivatekey = (PrivateKey)keyStore.getKey(ALIAS_CERT_USUARIO, pin.toCharArray());
-                X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(ALIAS_CERT_USUARIO);
+                PrivateKey signerPrivatekey = (PrivateKey)keyStore.getKey(USER_CERT_ALIAS, pin.toCharArray());
+                X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(USER_CERT_ALIAS);
 
                 byte[] base64encodedvoteCertPrivateKey = Encryptor.decryptMessage(
                         operationReceipt.getEncryptedKey(), signerCert, signerPrivatekey);
@@ -412,11 +401,11 @@ public class VoteReceiptListActivity extends ActionBarActivity
                 boolean isEncryptedResponse = true;
                 String signatureContent = operationReceipt.getVoto().getCancelVoteData();
                 String serviceURL = ServerPaths.getURLReclamacion(
-                        contextVSAndroid.getAccessControlURL());
+                        androidContextVS.getAccessControlURL());
 
                 SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
                         signatureContent, subject, isEncryptedResponse, keyStoreBytes, pin.toCharArray(),
-                        contextVSAndroid.getAccessControl().getCertificado(), getBaseContext());
+                        androidContextVS.getAccessControlVS().getCertificate(), getBaseContext());
                 return smimeSignedSender.call();
             } catch(Exception ex) {
                 ex.printStackTrace();
@@ -442,7 +431,7 @@ public class VoteReceiptListActivity extends ActionBarActivity
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 operationReceipt.setCancelVoteReceipt(responseVS.getSmimeMessage());
                 String msg = getString(R.string.cancel_vote_result_msg,
-                        operationReceipt.getVoto().getAsunto());
+                        operationReceipt.getVoto().getSubject());
                 try {
                     db.updateVoteReceipt(operationReceipt);
                 } catch (Exception e) {

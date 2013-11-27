@@ -1,19 +1,15 @@
 package org.bouncycastle2.crypto.tls;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.security.SecureRandom;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
 import org.bouncycastle2.asn1.ASN1Object;
 import org.bouncycastle2.asn1.x500.X500Name;
 import org.bouncycastle2.crypto.prng.ThreadedSeedGenerator;
 import org.bouncycastle2.util.Arrays;
+
+import java.io.*;
+import java.security.SecureRandom;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  * An implementation of all high level protocols in TLS 1.0.

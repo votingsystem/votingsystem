@@ -55,3 +55,9 @@ select, textarea, text, input {
 hr {
 	border: 1px solid #cccccc;
 }
+
+
+.formFieldError{
+    font-weight: bold;
+    background: #f6ccd0;
+}

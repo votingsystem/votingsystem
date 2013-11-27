@@ -1,9 +1,5 @@
 package org.bouncycastle2.cms.jcajce;
 
-import java.security.Key;
-import java.security.PrivateKey;
-import java.security.Provider;
-
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.cms.CMSException;
 import org.bouncycastle2.cms.KeyTransRecipient;
@@ -12,6 +8,10 @@ import org.bouncycastle2.jcajce.NamedJcaJceHelper;
 import org.bouncycastle2.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle2.operator.AsymmetricKeyUnwrapper;
 import org.bouncycastle2.operator.OperatorException;
+
+import java.security.Key;
+import java.security.PrivateKey;
+import java.security.Provider;
 
 public abstract class JceKeyTransRecipient
     implements KeyTransRecipient

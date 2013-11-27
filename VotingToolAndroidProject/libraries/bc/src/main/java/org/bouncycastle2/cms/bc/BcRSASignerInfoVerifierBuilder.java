@@ -1,14 +1,14 @@
 package org.bouncycastle2.cms.bc;
 
-import java.security.cert.CertificateException;
-
-import org.bouncycastle2.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle2.cert.X509CertificateHolder;
 import org.bouncycastle2.cms.SignerInformationVerifier;
+import org.bouncycastle2.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle2.operator.DigestAlgorithmIdentifierFinder;
 import org.bouncycastle2.operator.DigestCalculatorProvider;
 import org.bouncycastle2.operator.OperatorCreationException;
 import org.bouncycastle2.operator.bc.BcRSAContentVerifierProviderBuilder;
+
+import java.security.cert.CertificateException;
 
 public class BcRSASignerInfoVerifierBuilder
 {

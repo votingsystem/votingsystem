@@ -1,36 +1,8 @@
 package org.votingsystem.applet.callable;
 
 import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.pdf.PdfDate;
-import com.itextpdf.text.pdf.PdfDictionary;
-import com.itextpdf.text.pdf.PdfName;
-import com.itextpdf.text.pdf.PdfPKCS7;
-import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.PdfSignature;
-import com.itextpdf.text.pdf.PdfSignatureAppearance;
-import com.itextpdf.text.pdf.PdfStamper;
-import com.itextpdf.text.pdf.PdfString;
-import com.itextpdf.text.pdf.PdfWriter;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-
-import static org.votingsystem.model.ContextVS.*;
-
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.concurrent.Callable;
-
+import com.itextpdf.text.pdf.*;
+import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -44,18 +16,31 @@ import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
+import org.votingsystem.applet.signature.DNIePDFContentSigner;
+import org.votingsystem.applet.util.HttpHelper;
+import org.votingsystem.applet.votingtool.Applet;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.applet.pdf.DNIePDFSessionHelper;
+import org.votingsystem.signature.util.ContentSignerVS;
 import org.votingsystem.signature.util.Encryptor;
-import org.votingsystem.signature.util.PDF_CMSSignedGenerator;
-import org.votingsystem.signature.util.VotingSystemCMSSignedGenerator;
+import org.votingsystem.signature.util.PDFContentSigner;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
-import org.apache.log4j.Logger;
-import org.votingsystem.applet.util.HttpHelper;
-import org.votingsystem.applet.votingtool.VotingToolContext;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
+import java.util.*;
+import java.util.concurrent.Callable;
+
+import static org.votingsystem.model.ContextVS.*;
 
 /**
 * @author jgzornoza
@@ -74,7 +59,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
     private PrivateKey signerPrivatekey;
     private X509Certificate destinationCert = null;
     private Certificate[] signerCertChain;
-    private VotingSystemCMSSignedGenerator systemSignedGenerator = null;
+    private ContentSignerVS systemSignedGenerator = null;
     
     public PDFSignedSender(Integer id, String urlToSendDocument, 
             String reason, String location, 
@@ -98,14 +83,12 @@ public class PDFSignedSender implements Callable<ResponseVS> {
         
         if(signerPrivatekey != null && signerCertChain != null) {
             logger.debug("Generating PrivateKey VotingSystemSignedGenerator");
-            PDF_CMSSignedGenerator signedGenerator = new PDF_CMSSignedGenerator(
-                    signerPrivatekey, signerCertChain, PDF_SIGNATURE_MECHANISM, 
-                    PDF_SIGNATURE_DIGEST, PDF_DIGEST_OID);
+            PDFContentSigner signedGenerator = new PDFContentSigner( signerPrivatekey, signerCertChain,
+                    PDF_SIGNATURE_MECHANISM, PDF_SIGNATURE_DIGEST, PDF_DIGEST_OID);
             systemSignedGenerator = signedGenerator;
         } else {
             logger.debug("Generating smartcard VotingSystemSignedGenerator");
-            DNIePDFSessionHelper sessionHelper = new DNIePDFSessionHelper(
-                    password, VotingToolContext.DNIe_SESSION_MECHANISM);
+            DNIePDFContentSigner sessionHelper = DNIePDFContentSigner.getInstance(password, Applet.DNIe_SESSION_MECHANISM);
             signerCertChain = sessionHelper.getCertificateChain();
             systemSignedGenerator = sessionHelper;
         }
@@ -125,8 +108,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
         //sap.setSignDate(cal);
         //sap.setContact("This is the Contact");
         sap.setAcro6Layers(true);
-        final PdfSignature dic = new PdfSignature(PdfName.ADOBE_PPKLITE, 
-                VotingToolContext.PDF_SIGNATURE_NAME);
+        final PdfSignature dic = new PdfSignature(PdfName.ADOBE_PPKLITE,  Applet.PDF_SIGNATURE_NAME);
         //dic.setDate(new PdfDate(sap.getSignDate()));
         dic.setName(PdfPKCS7.getSubjectFields((X509Certificate)signerCertChain[0]).getField("CN"));
         logger.debug("signAndTimestamp - Firmante: " + PdfPKCS7.getSubjectFields(
@@ -136,13 +118,13 @@ public class PDFSignedSender implements Callable<ResponseVS> {
         HashMap exc = new HashMap();
         //Nota del javadoc -> due to the hex string coding this size should be byte_size*2+2.
         exc.put(PdfName.CONTENTS, new Integer(csize * 2 + 2));
-        String firmante = PdfPKCS7.getSubjectFields((X509Certificate)signerCertChain[0]).
+        String signerVS = PdfPKCS7.getSubjectFields((X509Certificate)signerCertChain[0]).
                 getField("CN");
-        if(firmante != null && firmante.contains("(FIRMA)")) {
-            firmante = firmante.replace("(FIRMA)", "");
-        } else firmante = getNifUsuario(((X509Certificate)signerCertChain[0]));
-        sap.setLayer2Text(ContextVS.INSTANCE.getString(
-                "signedByPDFLabel") + ":\n" + firmante); 
+        if(signerVS != null && signerVS.contains("(FIRMA)")) {
+            signerVS = signerVS.replace("(FIRMA)", "");
+        } else signerVS = getUserNIF(((X509Certificate)signerCertChain[0]));
+        sap.setLayer2Text(ContextVS.getInstance().getMessage(
+                "signedByPDFLabel") + ":\n" + signerVS);
         
         final ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK);
         CMSAttributeTableGenerator unsAttr= new CMSAttributeTableGenerator() {
@@ -184,7 +166,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
 
                    } catch(Exception ex) {
                         logger.error(ex.getMessage(), ex);
-                        responseVS.appendErrorMessage(ex.getMessage());
+                        responseVS.appendMessage(ex.getMessage());
                    }
                    return attributeTable;
                 }
@@ -197,7 +179,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
         byte[] signatureHash = md.digest(FileUtils.getBytesFromInputStream(sap.getRangeStream()));
         
         CMSSignedData signedData = systemSignedGenerator.genSignedData(signatureHash, unsAttr);
-        //ValidadoraCMS validadora = new ValidadoraCMS(certificadoCA);
+        //ValidadoraCMS validadora = new ValidadoraCMS(certCA);
         //logger.info("validadora.isValid(signedData): " + validadora.isValid(signedData));
 
         byte[] pk = signedData.getEncoded();
@@ -217,12 +199,12 @@ public class PDFSignedSender implements Callable<ResponseVS> {
             bytesToSend = FileUtils.getBytesFromFile(fileToSend);
         }
 
-        ResponseVS senderResponse = HttpHelper.INSTANCE.sendByteArray(
+        ResponseVS senderResponse = HttpHelper.getInstance().sendByteArray(
                 bytesToSend, contentType, urlToSendDocument);
         return senderResponse;
     }
     
-    public static String getNifUsuario (X509Certificate certificate) {
+    private String getUserNIF (X509Certificate certificate) {
     	String subjectDN = certificate.getSubjectDN().getName();
     	return subjectDN.split("SERIALNUMBER=")[1].split(",")[0];
     }

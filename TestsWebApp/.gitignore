@@ -3,6 +3,7 @@
 /target
 /target-eclipse
 /VotingSystem
+/simulationFiles
 .VotingSystem
 .classpath
 .project

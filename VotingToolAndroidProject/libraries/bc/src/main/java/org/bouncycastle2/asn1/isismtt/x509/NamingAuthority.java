@@ -1,19 +1,10 @@
 package org.bouncycastle2.asn1.isismtt.x509;
 
-import java.util.Enumeration;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.ASN1String;
-import org.bouncycastle2.asn1.ASN1TaggedObject;
-import org.bouncycastle2.asn1.DEREncodable;
-import org.bouncycastle2.asn1.DERIA5String;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DERSequence;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.isismtt.ISISMTTObjectIdentifiers;
 import org.bouncycastle2.asn1.x500.DirectoryString;
+
+import java.util.Enumeration;
 
 /**
  * Names of authorities which are responsible for the administration of title

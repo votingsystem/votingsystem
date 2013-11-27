@@ -7,8 +7,8 @@
         </style>
     </head>
     <body>
-		${solicitante} ha solicitado mediante <a href="${urlSolicitud}">este documento firmado electrónicamente</a> una copia de seguridad de los archivos 
-		relacionados con el asunto '<b>${asuntoManifiesto}</b>'.<br/>
+		${solicitante} ha solicitado mediante <a href="${urlSolicitud}">este PDFDocumentVS firmado electrónicamente</a> una copia de seguridad de los archivos
+		relacionados con el subject '<b>${eventVSManifestSubject}</b>'.<br/>
 		<br/>
 		Pulse <a href="${urlDescarga}">aquí</a> para proceder con la descarga del archivo con la copia de seguridad.
 		<br/><br/>

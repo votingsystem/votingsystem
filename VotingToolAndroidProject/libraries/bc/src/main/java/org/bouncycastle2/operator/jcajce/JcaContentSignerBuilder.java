@@ -1,23 +1,14 @@
 package org.bouncycastle2.operator.jcajce;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.security.GeneralSecurityException;
-import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.SecureRandom;
-import java.security.Signature;
-import java.security.SignatureException;
-
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle2.jcajce.NamedJcaJceHelper;
 import org.bouncycastle2.jcajce.ProviderJcaJceHelper;
-import org.bouncycastle2.operator.ContentSigner;
-import org.bouncycastle2.operator.DefaultSignatureAlgorithmIdentifierFinder;
-import org.bouncycastle2.operator.OperatorCreationException;
-import org.bouncycastle2.operator.OperatorStreamException;
-import org.bouncycastle2.operator.RuntimeOperatorException;
+import org.bouncycastle2.operator.*;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.*;
 
 public class JcaContentSignerBuilder
 {

@@ -48,15 +48,7 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.ExceptionConverter;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.error_messages.MessageLocalization;
-import com.itextpdf.text.pdf.PdfContentByte;
-import com.itextpdf.text.pdf.PdfFormField;
-import com.itextpdf.text.pdf.PdfName;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPCellEvent;
-import com.itextpdf.text.pdf.PdfPageEventHelper;
-import com.itextpdf.text.pdf.PdfRectangle;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.text.pdf.TextField;
+import com.itextpdf.text.pdf.*;
 
 import java.io.IOException;
 import java.util.HashMap;

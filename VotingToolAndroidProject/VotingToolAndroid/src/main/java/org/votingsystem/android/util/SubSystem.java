@@ -1,7 +1,6 @@
 package org.votingsystem.android.util;
 
 import android.content.Context;
-
 import org.votingsystem.android.R;
 import org.votingsystem.model.TypeVS;
 
@@ -9,7 +8,7 @@ import org.votingsystem.model.TypeVS;
 public enum SubSystem  {
 	
 	VOTING(0, TypeVS.VOTING_EVENT),
-	MANIFESTS(1, TypeVS.SIGN_EVENT),
+	MANIFESTS(1, TypeVS.MANIFEST_EVENT),
 	CLAIMS(2, TypeVS.CLAIM_EVENT),
 	UNKNOW(-1, null);
 	

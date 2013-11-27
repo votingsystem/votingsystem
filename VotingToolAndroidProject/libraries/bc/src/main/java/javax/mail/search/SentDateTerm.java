@@ -40,8 +40,8 @@
 
 package javax.mail.search;
 
-import java.util.Date;
 import javax.mail.Message;
+import java.util.Date;
 
 /**
  * This class implements comparisons for the Message SentDate.

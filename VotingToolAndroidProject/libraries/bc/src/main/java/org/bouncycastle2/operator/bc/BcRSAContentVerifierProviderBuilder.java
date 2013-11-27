@@ -1,7 +1,5 @@
 package org.bouncycastle2.operator.bc;
 
-import java.io.IOException;
-
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle2.crypto.Digest;
@@ -11,6 +9,8 @@ import org.bouncycastle2.crypto.signers.RSADigestSigner;
 import org.bouncycastle2.crypto.util.PublicKeyFactory;
 import org.bouncycastle2.operator.DigestAlgorithmIdentifierFinder;
 import org.bouncycastle2.operator.OperatorCreationException;
+
+import java.io.IOException;
 
 public class BcRSAContentVerifierProviderBuilder
     extends BcContentVerifierProviderBuilder

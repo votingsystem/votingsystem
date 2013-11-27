@@ -40,8 +40,9 @@
 
 package com.sun.mail.util;
 
-import java.io.*;
 import javax.mail.MessagingException;
+import java.io.FilterOutputStream;
+import java.io.OutputStream;
 
 /**
  * This class is to support writing out Strings as a sequence of bytes

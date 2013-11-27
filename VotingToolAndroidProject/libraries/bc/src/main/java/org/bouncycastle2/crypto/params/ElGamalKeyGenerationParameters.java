@@ -1,8 +1,8 @@
 package org.bouncycastle2.crypto.params;
 
-import java.security.SecureRandom;
-
 import org.bouncycastle2.crypto.KeyGenerationParameters;
+
+import java.security.SecureRandom;
 
 public class ElGamalKeyGenerationParameters
     extends KeyGenerationParameters

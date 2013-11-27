@@ -1,38 +1,22 @@
 package org.bouncycastle2.jce.provider;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.spec.AlgorithmParameterSpec;
+import org.bouncycastle2.crypto.CipherParameters;
+import org.bouncycastle2.crypto.Mac;
+import org.bouncycastle2.crypto.digests.*;
+import org.bouncycastle2.crypto.engines.DESEngine;
+import org.bouncycastle2.crypto.engines.RC2Engine;
+import org.bouncycastle2.crypto.macs.*;
+import org.bouncycastle2.crypto.paddings.ISO7816d4Padding;
+import org.bouncycastle2.crypto.params.KeyParameter;
+import org.bouncycastle2.crypto.params.ParametersWithIV;
 
 import javax.crypto.MacSpi;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEParameterSpec;
-
-import org.bouncycastle2.crypto.CipherParameters;
-import org.bouncycastle2.crypto.Mac;
-import org.bouncycastle2.crypto.digests.MD2Digest;
-import org.bouncycastle2.crypto.digests.MD4Digest;
-import org.bouncycastle2.crypto.digests.MD5Digest;
-import org.bouncycastle2.crypto.digests.RIPEMD128Digest;
-import org.bouncycastle2.crypto.digests.RIPEMD160Digest;
-import org.bouncycastle2.crypto.digests.SHA1Digest;
-import org.bouncycastle2.crypto.digests.SHA224Digest;
-import org.bouncycastle2.crypto.digests.SHA256Digest;
-import org.bouncycastle2.crypto.digests.SHA384Digest;
-import org.bouncycastle2.crypto.digests.SHA512Digest;
-import org.bouncycastle2.crypto.digests.TigerDigest;
-import org.bouncycastle2.crypto.engines.DESEngine;
-import org.bouncycastle2.crypto.engines.RC2Engine;
-import org.bouncycastle2.crypto.macs.CBCBlockCipherMac;
-import org.bouncycastle2.crypto.macs.CFBBlockCipherMac;
-import org.bouncycastle2.crypto.macs.GOST28147Mac;
-import org.bouncycastle2.crypto.macs.HMac;
-import org.bouncycastle2.crypto.macs.ISO9797Alg3Mac;
-import org.bouncycastle2.crypto.macs.OldHMac;
-import org.bouncycastle2.crypto.paddings.ISO7816d4Padding;
-import org.bouncycastle2.crypto.params.KeyParameter;
-import org.bouncycastle2.crypto.params.ParametersWithIV;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.spec.AlgorithmParameterSpec;
 
 public class JCEMac
     extends MacSpi implements PBE

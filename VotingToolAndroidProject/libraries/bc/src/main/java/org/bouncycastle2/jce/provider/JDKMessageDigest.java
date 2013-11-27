@@ -1,9 +1,9 @@
 package org.bouncycastle2.jce.provider;
 
-import java.security.MessageDigest;
-
 import org.bouncycastle2.crypto.Digest;
 import org.bouncycastle2.crypto.digests.*;
+
+import java.security.MessageDigest;
 
 public class JDKMessageDigest
     extends MessageDigest

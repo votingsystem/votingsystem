@@ -9,11 +9,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
-import org.votingsystem.android.model.ContextVSAndroid;
 import org.votingsystem.android.R;
 import org.votingsystem.android.UserCertRequestActivity;
 import org.votingsystem.android.UserCertResponseActivity;
+import org.votingsystem.android.model.AndroidContextVS;
 
 public class CertNotFoundDialog  extends DialogFragment {
 
@@ -43,7 +42,7 @@ public class CertNotFoundDialog  extends DialogFragment {
         openReceiptButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
             	Intent intent = null;
-          	  	switch(ContextVSAndroid.getInstance(getActivity().getBaseContext()).getEstado()) {
+          	  	switch(AndroidContextVS.getInstance(getActivity().getBaseContext()).getState()) {
           	  		case CON_CSR:
           	  			intent = new Intent(getActivity(), UserCertResponseActivity.class);
           	  			break;
@@ -56,7 +55,7 @@ public class CertNotFoundDialog  extends DialogFragment {
         });
         getDialog().setTitle(getString(R.string.cert_not_found_caption));
         msgTextView.setText(Html.fromHtml(getString(
-				R.string.certificado_no_encontrado_msg)));
+				R.string.cert_not_found_msg)));
         return view;
     }
     

@@ -1,28 +1,19 @@
 package org.bouncycastle2.jce;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.asn1.pkcs.ContentInfo;
+import org.bouncycastle2.asn1.pkcs.MacData;
+import org.bouncycastle2.asn1.pkcs.Pfx;
+import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle2.asn1.x509.DigestInfo;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
-
-import org.bouncycastle2.asn1.ASN1InputStream;
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DERNull;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DEROctetString;
-import org.bouncycastle2.asn1.DEROutputStream;
-import org.bouncycastle2.asn1.pkcs.ContentInfo;
-import org.bouncycastle2.asn1.pkcs.MacData;
-import org.bouncycastle2.asn1.pkcs.Pfx;
-import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.asn1.x509.DigestInfo;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 /**
  * Utility class for reencoding PKCS#12 files to definite length.

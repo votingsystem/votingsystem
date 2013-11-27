@@ -1,7 +1,5 @@
 package org.bouncycastle2.operator.bc;
 
-import java.io.IOException;
-
 import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
@@ -10,6 +8,8 @@ import org.bouncycastle2.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle2.crypto.engines.RSAEngine;
 import org.bouncycastle2.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle2.crypto.util.PublicKeyFactory;
+
+import java.io.IOException;
 
 public class BcRSAAsymmetricKeyWrapper
     extends BcAsymmetricKeyWrapper

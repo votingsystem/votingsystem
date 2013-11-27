@@ -1,13 +1,13 @@
 package org.bouncycastle2.cms;
 
+import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle2.util.io.Streams;
+
 import java.io.BufferedInputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle2.util.io.Streams;
 
 public class CMSTypedStream
 {

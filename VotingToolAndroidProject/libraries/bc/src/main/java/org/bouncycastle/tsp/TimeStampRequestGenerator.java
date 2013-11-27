@@ -1,22 +1,16 @@
 package org.bouncycastle.tsp;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.Hashtable;
-import java.util.Vector;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.DERBoolean;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERNull;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DEROctetString;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.tsp.MessageImprint;
 import org.bouncycastle2.asn1.tsp.TimeStampReq;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.asn1.x509.X509Extension;
 import org.bouncycastle2.asn1.x509.X509Extensions;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  * Generator for RFC 3161 Time Stamp Request objects.

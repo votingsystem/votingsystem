@@ -1,10 +1,5 @@
 package org.bouncycastle2.cms.jcajce;
 
-import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-
 import org.bouncycastle2.asn1.cms.AttributeTable;
 import org.bouncycastle2.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle2.cms.CMSAttributeTableGenerator;
@@ -16,6 +11,11 @@ import org.bouncycastle2.operator.DigestCalculatorProvider;
 import org.bouncycastle2.operator.OperatorCreationException;
 import org.bouncycastle2.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle2.operator.jcajce.JcaDigestCalculatorProviderBuilder;
+
+import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 
 /**
  * Use this class if you are using a provider that has all the facilities you

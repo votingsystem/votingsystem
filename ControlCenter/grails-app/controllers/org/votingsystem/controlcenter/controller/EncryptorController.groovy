@@ -1,33 +1,26 @@
 package org.votingsystem.controlcenter.controller
 
-import java.io.BufferedReader;
-import java.io.FileReader;
+import org.votingsystem.model.MessageSMIME
+
 import java.security.Key
-import java.security.KeyPair;
+import java.security.KeyFactory
 import java.security.PublicKey
 import java.security.spec.X509EncodedKeySpec
 
-import org.bouncycastle.openssl.PEMReader;
 import org.bouncycastle.openssl.PEMWriter
-import org.votingsystem.controlcenter.model.*
-import org.votingsystem.model.ContextVS;
-import grails.converters.JSON;
-import java.io.BufferedReader
-import org.bouncycastle.util.encoders.Base64;
-import java.security.KeyFactory;
-import grails.util.Environment
+import grails.converters.JSON
+import org.bouncycastle.util.encoders.Base64
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
-import org.votingsystem.groovy.util.*
 
 class EncryptorController {
 	
 	def grailsApplication
-	def firmaService
+	def signatureVSService
 
     def index() { 
-		if(!VotingSystemApplicationContex.Environment.DEVELOPMENT.equals(
-			VotingSystemApplicationContex.instance.environment)) {
+		if(!EnvironmentVS.DEVELOPMENT.equals(
+			ApplicationContextHolder.getEnvironment())) {
 			String msg = message(code: "serviceDevelopmentModeMsg")
 			log.error msg
 			response.status = ResponseVS.SC_ERROR_REQUEST
@@ -35,7 +28,7 @@ class EncryptorController {
 			return false
 		}
 		if(!params.requestBytes) {
-			String msg = message(code:'evento.peticionSinArchivo')
+			String msg = message(code:'requestWithoutFile')
 			log.error msg
 			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
@@ -63,9 +56,9 @@ class EncryptorController {
 		messageJSON.message="Hello '${messageJSON.from}' from server"
 		
 		params.receiverPublicKey = receiverPublic
-		response.setContentType("multipart/encrypted")
+		response.setContentType(ContentTypeVS.MULTIPART_ENCRYPTED)
 		
-		params.respuesta = new ResponseVS(statusCode:ResponseVS.SC_OK)
+		params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK)
 		
 		params.responseBytes = messageJSON.toString().getBytes()
 		
@@ -83,8 +76,8 @@ class EncryptorController {
 	 * @return  Recibo que consiste en el documento recibido con la firma añadida del servidor.
 	 */
 	def getMultiSignedMessage() {
-		if(!VotingSystemApplicationContex.Environment.DEVELOPMENT.equals(
-			VotingSystemApplicationContex.instance.environment)) {
+		if(!EnvironmentVS.DEVELOPMENT.equals(
+			ApplicationContextHolder.getEnvironment())) {
 			String msg = message(code: "serviceDevelopmentModeMsg")
 			log.error msg
 			response.status = ResponseVS.SC_ERROR_REQUEST
@@ -94,7 +87,7 @@ class EncryptorController {
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		MessageSMIME messageSMIMEReq = params.messageSMIMEReq
 		if(!messageSMIMEReq) {
-			String msg = message(code:'evento.peticionSinArchivo')
+			String msg = message(code:'requestWithoutFile')
 			log.error msg
 			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
@@ -107,13 +100,13 @@ class EncryptorController {
 		String fromUser = "EncryptorController"
 		String toUser = "MultiSignatureTestClient"
 		String subject = "Multisigned response"
-		SMIMEMessageWrapper smimeMessageResp = firmaService.getMultiSignedMimeMessage(
+		SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
 			fromUser, toUser, smimeMessage, subject)
 
 		MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.TEST,
-			contenido:smimeMessageResp.getBytes())
+			content:smimeMessageResp.getBytes())
 		
-		params.respuesta = new ResponseVS(statusCode:ResponseVS.SC_OK,
+		params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK,
 			data:data, type:TypeVS.TEST)
 	}
 	

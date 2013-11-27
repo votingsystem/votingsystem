@@ -1,9 +1,9 @@
 package org.bouncycastle2.cert.cmp;
 
-import java.math.BigInteger;
-
 import org.bouncycastle2.asn1.cmp.RevDetails;
 import org.bouncycastle2.asn1.x500.X500Name;
+
+import java.math.BigInteger;
 
 public class RevocationDetails
 {

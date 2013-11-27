@@ -1,16 +1,16 @@
 package org.bouncycastle2.operator.bc;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle2.cert.X509CertificateHolder;
 import org.bouncycastle2.crypto.Signer;
 import org.bouncycastle2.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle2.cert.X509CertificateHolder;
 import org.bouncycastle2.operator.ContentVerifier;
 import org.bouncycastle2.operator.ContentVerifierProvider;
 import org.bouncycastle2.operator.OperatorCreationException;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 public abstract class BcContentVerifierProviderBuilder
 {

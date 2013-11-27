@@ -1,10 +1,10 @@
 package org.bouncycastle2.crypto.io;
 
+import org.bouncycastle2.crypto.Mac;
+
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import org.bouncycastle2.crypto.Mac;
 
 public class MacInputStream
     extends FilterInputStream

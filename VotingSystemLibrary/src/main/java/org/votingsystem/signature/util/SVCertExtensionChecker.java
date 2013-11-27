@@ -1,5 +1,7 @@
 package org.votingsystem.signature.util;
 
+import org.bouncycastle.asn1.x509.X509Extensions;
+
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.Certificate;
 import java.security.cert.PKIXCertPathChecker;
@@ -7,8 +9,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.bouncycastle.asn1.x509.X509Extensions;
-
+/**
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ * To bypass id_kp_timeStamping ExtendedKeyUsage exception
+ */
 public class SVCertExtensionChecker extends PKIXCertPathChecker {
 	
 	Set supportedExtensions;

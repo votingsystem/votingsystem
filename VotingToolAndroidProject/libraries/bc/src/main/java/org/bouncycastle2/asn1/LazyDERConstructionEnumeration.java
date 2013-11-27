@@ -1,7 +1,7 @@
 package org.bouncycastle2.asn1;
 
-import java.util.Enumeration;
 import java.io.IOException;
+import java.util.Enumeration;
 
 class LazyDERConstructionEnumeration
     implements Enumeration

@@ -40,10 +40,13 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.io.*;
-import java.util.*;
-import com.sun.mail.util.*;
-import com.sun.mail.iap.*;
+import com.sun.mail.iap.ParsingException;
+import com.sun.mail.iap.Protocol;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.iap.Response;
+
+import java.io.IOException;
+import java.util.Vector;
 
 /**
  * This class represents a response obtained from the input stream

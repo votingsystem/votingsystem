@@ -1,36 +1,19 @@
 package org.bouncycastle2.ocsp;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.cert.CertStore;
-import java.security.cert.CertStoreParameters;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.CollectionCertStoreParameters;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1InputStream;
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.ASN1OutputStream;
-import org.bouncycastle2.asn1.ASN1Sequence;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.ocsp.OCSPRequest;
 import org.bouncycastle2.asn1.ocsp.Request;
 import org.bouncycastle2.asn1.x509.GeneralName;
 import org.bouncycastle2.asn1.x509.X509Extension;
 import org.bouncycastle2.asn1.x509.X509Extensions;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.*;
+import java.security.cert.*;
+import java.util.*;
 
 /**
  * <pre>

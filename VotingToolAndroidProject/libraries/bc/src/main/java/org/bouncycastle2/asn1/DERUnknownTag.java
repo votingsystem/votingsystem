@@ -1,8 +1,8 @@
 package org.bouncycastle2.asn1;
 
-import java.io.IOException;
-
 import org.bouncycastle2.util.Arrays;
+
+import java.io.IOException;
 
 /**
  * We insert one of these when we find a tag we don't recognise.

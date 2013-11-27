@@ -1,11 +1,11 @@
 package org.bouncycastle2.jce;
 
-import java.util.Enumeration;
-
 import org.bouncycastle2.asn1.DERObjectIdentifier;
 import org.bouncycastle2.asn1.cryptopro.ECGOST3410NamedCurves;
 import org.bouncycastle2.crypto.params.ECDomainParameters;
 import org.bouncycastle2.jce.spec.ECNamedCurveParameterSpec;
+
+import java.util.Enumeration;
 
 /**
  * a table of locally supported named curves.

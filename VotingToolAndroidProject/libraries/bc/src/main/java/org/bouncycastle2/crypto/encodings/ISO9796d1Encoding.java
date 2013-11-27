@@ -1,12 +1,12 @@
 package org.bouncycastle2.crypto.encodings;
 
-import java.math.BigInteger;
-
 import org.bouncycastle2.crypto.AsymmetricBlockCipher;
 import org.bouncycastle2.crypto.CipherParameters;
 import org.bouncycastle2.crypto.InvalidCipherTextException;
 import org.bouncycastle2.crypto.params.ParametersWithRandom;
 import org.bouncycastle2.crypto.params.RSAKeyParameters;
+
+import java.math.BigInteger;
 
 /**
  * ISO 9796-1 padding. Note in the light of recent results you should

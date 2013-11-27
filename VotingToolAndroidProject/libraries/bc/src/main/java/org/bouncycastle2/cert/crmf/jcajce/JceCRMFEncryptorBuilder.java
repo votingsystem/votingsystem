@@ -1,16 +1,5 @@
 package org.bouncycastle2.cert.crmf.jcajce;
 
-import java.io.OutputStream;
-import java.security.AlgorithmParameters;
-import java.security.GeneralSecurityException;
-import java.security.Provider;
-import java.security.SecureRandom;
-
-import javax.crypto.Cipher;
-import javax.crypto.CipherOutputStream;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-
 import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.cert.crmf.CRMFException;
@@ -19,6 +8,16 @@ import org.bouncycastle2.jcajce.NamedJcaJceHelper;
 import org.bouncycastle2.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle2.operator.GenericKey;
 import org.bouncycastle2.operator.OutputEncryptor;
+
+import javax.crypto.Cipher;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import java.io.OutputStream;
+import java.security.AlgorithmParameters;
+import java.security.GeneralSecurityException;
+import java.security.Provider;
+import java.security.SecureRandom;
 
 public class JceCRMFEncryptorBuilder
 {

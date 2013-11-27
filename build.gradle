@@ -1,6 +1,9 @@
 version = '0.6.0'
 
 apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'project-report'
+apply plugin: 'announce'
 
 subprojects {
 	
@@ -21,16 +24,9 @@ ext {
 	certsDataMap = null
 }
 
-task buildAll(dependsOn:['VotingSystemLibrary:publish', 
-	'VotingToolApplet:signJar', 
-	'ValidationToolApplet:signJar',
-	':VotingToolAndroidProject:VotingToolAndroid:release',
-	'AccessControl:war',
-	'ControlCenter:war']) << { }
+task buildAll(dependsOn:['VotingSystemLibrary:publish', 'VotingToolApplet:signJar', 'ValidationToolApplet:signJar',
+	':VotingToolAndroidProject:VotingToolAndroid:release', 'AccessControl:war', 'ControlCenter:war']) << { }
 
-dependencies { 
-	compile "org.codehaus.groovy:groovy-all:2.1.9"
-}
 
 task genAppsCerts(dependsOn:['VotingSystemLibrary:classes']) {
 	
@@ -79,22 +75,14 @@ task genWebAppsCerts(dependsOn:['VotingSystemLibrary:classes']) {
 
 task uploadApps(dependsOn:['uploadAccessControl', 'uploadControlCenter']) << {}
 
-task uploadAccessControl() << {
+task uploadAccessControl(dependsOn:['AccessControl:war']) << {
 	//ncftpput -u jgzornoza -p hola 192.168.1.5 . target/AccessControl.war
-	tasks.getByPath('AccessControl:war').execute()
-
-	def warFilePath = "AccessControl/target/AccessControl.war"
-
-	ProcessBuilder pb = new ProcessBuilder("ncftpput", "-u", "jgzornoza", 
-			"-p", "hola", "$rootProject.testServerIP", ".", warFilePath);
-		pb.directory(projectDir);
-		Process proc = pb.start();
-		proc.consumeProcessErrorStream(System.err)
-		proc.consumeProcessOutputStream(System.out)
-		if (proc.waitFor() != 0) {
-			throw new RuntimeException('runApp failed')
-		}
-	
+    def warFilePath = "AccessControl/target/AccessControl.war"
+    File warFile = project.file(warFilePath)
+    if(warFile.exists()) {
+        runCommand(project, file(".") ,["ncftpput", "-u", "jgzornoza",
+                "-p", "hola", "$rootProject.testServerIP", ".", warFilePath])
+    } else println "${warFilePath} not found"
 }
 
 def getDevelopmentServerIP() {
@@ -113,22 +101,22 @@ def getDevelopmentServerIP() {
 	}
 }
 
-task uploadControlCenter() << {
+task uploadControlCenter(dependsOn:['ControlCenter:war']) << {
 	//ncftpput -u jgzornoza -p hola 192.168.1.5 . target/ControlCenter.war
-	tasks.getByPath('ControlCenter:war').execute()
-
 	def warFilePath = "ControlCenter/target/ControlCenter.war"
-	
-	ProcessBuilder pb = new ProcessBuilder("ncftpput", "-u", "jgzornoza",
-		"-p", "hola", "$rootProject.testServerIP", ".", warFilePath);
-	pb.directory(projectDir);
-	Process proc = pb.start();
-	proc.consumeProcessErrorStream(System.err)
-	proc.consumeProcessOutputStream(System.out)
-	if (proc.waitFor() != 0) {
-		throw new RuntimeException('runApp failed')
-	}
+    File warFile = project.file(warFilePath)
+    if(warFile.exists()) {
+        runCommand(project, file(".") ,["ncftpput", "-u", "jgzornoza",
+                "-p", "hola", "$rootProject.testServerIP", ".", warFilePath])
+    } else println "${warFilePath} not found"
 
+}
+
+task refreshDependencies(dependsOn:['VotingSystemLibrary:publish']) << {
+    runCommand(project, file("./AccessControl") ,["grails", "refresh-dependencies"])
+    runCommand(project, file("./TestsWebApp") ,["grails", "refresh-dependencies"])
+    runCommand(project, file("./ControlCenter") ,["grails", "refresh-dependencies"])
+    announce.announce("'$project.name' - Library Dependencies updated", "local")
 }
 
 task generateVotingSystemApps(dependsOn: [':VotingToolApplet:signJar', 

@@ -1,30 +1,24 @@
 package org.votingsystem.signature.smime;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FilterOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.security.NoSuchProviderException;
-import java.security.Provider;
-import java.security.Security;
-import java.security.cert.CertificateParsingException;
-import java.security.cert.X509Certificate;
-import java.util.Enumeration;
-
-import javax.mail.BodyPart;
-import javax.mail.MessagingException;
-import javax.mail.internet.ContentType;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMultipart;
-
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.cms.CMSTypedStream;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.mail.smime.SMIMEException;
 import org.bouncycastle.mail.smime.util.CRLFOutputStream;
 import org.bouncycastle.mail.smime.util.FileBackedMimeBodyPart;
+
+import javax.mail.BodyPart;
+import javax.mail.MessagingException;
+import javax.mail.internet.ContentType;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMultipart;
+import java.io.*;
+import java.security.NoSuchProviderException;
+import java.security.Provider;
+import java.security.Security;
+import java.security.cert.CertificateParsingException;
+import java.security.cert.X509Certificate;
+import java.util.Enumeration;
 
 public class SMIMEUtil
 {
@@ -296,7 +290,7 @@ public class SMIMEUtil
                 ContentType contentType = new ContentType(mp.getContentType());
                 String boundary = "--" + contentType.getParameter("boundary");
 
-                SMIMEUtil.LineOutputStream lOut = new SMIMEUtil.LineOutputStream(out);
+                LineOutputStream lOut = new LineOutputStream(out);
 
                 Enumeration headers = mimePart.getAllHeaderLines();
                 while (headers.hasMoreElements())
@@ -325,7 +319,7 @@ public class SMIMEUtil
                 }
 
                 lOut.writeln(boundary + "--");
-     
+
                 outputPostamble(lOut, mimePart, mp.getCount(), boundary);
 
                 return;
@@ -377,10 +371,10 @@ public class SMIMEUtil
             // Write headers
             //
             LineOutputStream outLine = new LineOutputStream(out);
-            for (Enumeration e = mimePart.getAllHeaderLines(); e.hasMoreElements();) 
+            for (Enumeration e = mimePart.getAllHeaderLines(); e.hasMoreElements();)
             {
                 String header = (String)e.nextElement();
-  
+
                 outLine.writeln(header);
             }
 
@@ -389,7 +383,7 @@ public class SMIMEUtil
 
 
             OutputStream outCRLF;
-              
+
             if (base64)
             {
                 outCRLF = new Base64CRLFOutputStream(out);
@@ -432,7 +426,7 @@ public class SMIMEUtil
     {
         return toMimeBodyPart(new ByteArrayInputStream(content));
     }
-    
+
     /**
      * return the MimeBodyPart described in the input stream content
      */
@@ -469,7 +463,7 @@ public class SMIMEUtil
     }
 
     /**
-     * return a file backed MimeBodyPart described in {@link CMSTypedStream} content. 
+     * return a file backed MimeBodyPart described in {@link org.bouncycastle.cms.CMSTypedStream} content.
      * </p>
      */
     public static FileBackedMimeBodyPart toMimeBodyPart(
@@ -485,15 +479,15 @@ public class SMIMEUtil
             throw new SMIMEException("IOException creating tmp file:" + e.getMessage(), e);
         }
     }
-    
+
     /**
      * Return a file based MimeBodyPart represented by content and backed
      * by the file represented by file.
-     * 
+     *
      * @param content content stream containing body part.
      * @param file file to store the decoded body part in.
      * @return the decoded body part.
-     * @throws SMIMEException
+     * @throws org.bouncycastle.mail.smime.SMIMEException
      */
     public static FileBackedMimeBodyPart toMimeBodyPart(
         CMSTypedStream    content,

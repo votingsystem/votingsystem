@@ -1,10 +1,5 @@
 package org.bouncycastle2.crypto.tls;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import org.bouncycastle2.asn1.DERBitString;
 import org.bouncycastle2.asn1.x509.KeyUsage;
 import org.bouncycastle2.asn1.x509.X509CertificateStructure;
@@ -17,6 +12,11 @@ import org.bouncycastle2.crypto.macs.HMac;
 import org.bouncycastle2.crypto.params.KeyParameter;
 import org.bouncycastle2.util.Strings;
 import org.bouncycastle2.util.io.Streams;
+
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * Some helper fuctions for MicroTLS.

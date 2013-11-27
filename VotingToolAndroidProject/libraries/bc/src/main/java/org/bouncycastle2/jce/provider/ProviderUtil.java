@@ -1,14 +1,14 @@
 package org.bouncycastle2.jce.provider;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.Permission;
-
 import org.bouncycastle2.jce.ProviderConfigurationPermission;
 import org.bouncycastle2.jce.interfaces.ConfigurableProvider;
 import org.bouncycastle2.jce.provider.asymmetric.ec.EC5Util;
 import org.bouncycastle2.jce.spec.ECParameterSpec;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.Permission;
 
 public class ProviderUtil
 {

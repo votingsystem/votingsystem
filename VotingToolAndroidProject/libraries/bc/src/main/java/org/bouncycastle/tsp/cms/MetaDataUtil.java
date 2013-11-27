@@ -1,12 +1,12 @@
 package org.bouncycastle.tsp.cms;
 
-import java.io.IOException;
-
 import org.bouncycastle2.asn1.ASN1String;
 import org.bouncycastle2.asn1.cms.Attributes;
 import org.bouncycastle2.asn1.cms.MetaData;
 import org.bouncycastle2.cms.CMSException;
 import org.bouncycastle2.operator.DigestCalculator;
+
+import java.io.IOException;
 
 class MetaDataUtil
 {

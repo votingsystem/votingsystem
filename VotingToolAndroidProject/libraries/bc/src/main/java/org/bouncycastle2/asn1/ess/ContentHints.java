@@ -1,13 +1,6 @@
 package org.bouncycastle2.asn1.ess;
 
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DEREncodable;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DERSequence;
-import org.bouncycastle2.asn1.DERUTF8String;
+import org.bouncycastle2.asn1.*;
 
 public class ContentHints
     extends ASN1Encodable

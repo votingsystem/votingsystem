@@ -1,11 +1,11 @@
 package org.bouncycastle2.jce.provider.symmetric;
 
-import java.util.HashMap;
-
 import org.bouncycastle2.crypto.CipherKeyGenerator;
 import org.bouncycastle2.crypto.engines.CAST6Engine;
 import org.bouncycastle2.jce.provider.JCEBlockCipher;
 import org.bouncycastle2.jce.provider.JCEKeyGenerator;
+
+import java.util.HashMap;
 
 public final class CAST6
 {

@@ -1,7 +1,5 @@
 package org.votingsystem.signature.util;
 
-import org.votingsystem.signature.util.*;
-
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia

@@ -41,7 +41,10 @@
 package javax.mail;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Locale;
+import java.util.Vector;
 
 /**
  * The Flags class represents the set of flags on a Message.  Flags

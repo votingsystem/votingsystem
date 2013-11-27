@@ -1,17 +1,17 @@
 package org.bouncycastle2.cms;
 
-import java.io.IOException;
-import java.math.BigInteger;
-
 import org.bouncycastle2.asn1.ASN1OctetString;
 import org.bouncycastle2.asn1.DEROctetString;
 import org.bouncycastle2.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle2.asn1.x500.X500Name;
 import org.bouncycastle2.asn1.x509.X509Extension;
+import org.bouncycastle2.cert.X509CertificateHolder;
 import org.bouncycastle2.crypto.Digest;
 import org.bouncycastle2.crypto.digests.SHA1Digest;
 import org.bouncycastle2.util.Arrays;
-import org.bouncycastle2.cert.X509CertificateHolder;
+
+import java.io.IOException;
+import java.math.BigInteger;
 
 public class KeyTransRecipientId
     extends RecipientId

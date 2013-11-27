@@ -1,22 +1,21 @@
 package org.bouncycastle2.jce.provider;
 
-import java.lang.reflect.Constructor;
-import java.security.InvalidKeyException;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
-
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactorySpi;
-import javax.crypto.spec.DESKeySpec;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
-
 import org.bouncycastle2.asn1.DERObjectIdentifier;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.crypto.CipherParameters;
 import org.bouncycastle2.crypto.params.DESParameters;
 import org.bouncycastle2.crypto.params.KeyParameter;
 import org.bouncycastle2.crypto.params.ParametersWithIV;
+
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactorySpi;
+import javax.crypto.spec.DESKeySpec;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.lang.reflect.Constructor;
+import java.security.InvalidKeyException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 
 public class JCESecretKeyFactory
     extends SecretKeyFactorySpi

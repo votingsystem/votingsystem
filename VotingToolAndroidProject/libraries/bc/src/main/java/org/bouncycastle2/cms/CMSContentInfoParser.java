@@ -1,11 +1,11 @@
 package org.bouncycastle2.cms;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.bouncycastle2.asn1.ASN1SequenceParser;
 import org.bouncycastle2.asn1.ASN1StreamParser;
 import org.bouncycastle2.asn1.cms.ContentInfoParser;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 public class CMSContentInfoParser
 {

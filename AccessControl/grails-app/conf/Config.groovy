@@ -90,6 +90,9 @@ grails.exceptionresolver.params.exclude = ['password']
 // configure auto-caching of queries by default (if false you can cache individual queries with 'cache: true')
 grails.hibernate.cache.queries = false
 
+//To make tests on production environments. One of DEVELOPMENT, PRODUCTION, TEST
+VotingSystemEnvironment="DEVELOPMENT"
+
 environments {
     development {
         grails.logging.jul.usebridge = true
@@ -198,20 +201,19 @@ grails.war.copyToWebApp = { args ->
 VotingSystem.backupCopyPath='./VotingSystem/copiaRespaldo'
 VotingSystem.errorsBaseDir='./VotingSystem/errors'
 SistemaVotacion.accessRequestFileName='accessRequest'
-SistemaVotacion.nombreSolicitudCSR='csr'
+SistemaVotacion.csrRequestFileName='csr'
 SistemaVotacion.imageFileName='image'
 SistemaVotacion.representativeDataFileName='representativeData'
 VotingSystem.keyStorePath='WEB-INF/cms/AccessControl.jks'
 VotingSystem.signKeysAlias='AccessControlKeys'
 VotingSystem.signKeysPassword='PemPass'
 VotingSystem.certAuthoritiesDirPath='WEB-INF/cms/'
-VotingSystem.certChainPath='WEB-INF/cms/cadenaCertificacion.pem'
-SistemaVotacion.hashCertificadoVotoBase64='hashCertificadoVotoBase64'
+VotingSystem.certChainPath='WEB-INF/cms/certChain.pem'
 
 VotingSystem.requestTimeOut = 500
-VotingSystem.serverName='Primer ControlAcceso'
+VotingSystem.serverName='Primer AccessControlVS'
 VotingSystem.votingHashAlgorithm='SHA256'
 VotingSystem.blogURL = 'http://www.gruposp2p.org'
 VotingSystem.emailAdmin='jgzornoza@gmail.com'
-//TODO En un principio asi para no complicar mucho
+//_ TODO _
 VotingSystem.adminsDNI='07553172H'

@@ -40,8 +40,8 @@
 
 package javax.mail.internet;
 
+import java.io.UnsupportedEncodingException;
 import java.util.*;
-import java.io.*;
 
 /**
  * This class holds MIME parameters (attribute-value pairs).

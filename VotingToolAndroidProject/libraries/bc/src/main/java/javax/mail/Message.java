@@ -40,11 +40,11 @@
 
 package javax.mail;
 
-import java.util.Vector;
-import java.util.Date;
-import java.util.Properties;
-import java.io.*;
 import javax.mail.search.SearchTerm;
+import java.io.InvalidObjectException;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * This class models an email message. This is an abstract class.  

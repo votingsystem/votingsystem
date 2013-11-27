@@ -20,19 +20,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.view.animation.AnimationUtils;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
-
-import org.votingsystem.android.model.ContextVSAndroid;
-import org.votingsystem.android.model.EventVSAndroid;
+import org.votingsystem.android.model.AndroidContextVS;
+import org.votingsystem.model.EventVS;
 import org.votingsystem.android.util.ServerPaths;
 
 
@@ -44,8 +39,8 @@ public class EventStatisticsFragment extends Fragment {
     private View rootView;
 
 
-    private EventVSAndroid eventVSAndroid =  null;
-    private ContextVSAndroid contextVSAndroid;
+    private EventVS eventVS =  null;
+    private AndroidContextVS androidContextVS;
 
     private View progressContainer;
     private FrameLayout mainLayout;
@@ -58,11 +53,11 @@ public class EventStatisticsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
         eventIndex =  args.getInt(EventPagerActivity.EventsPagerAdapter.EVENT_INDEX_KEY);
-        contextVSAndroid = ContextVSAndroid.getInstance(getActivity());
-        eventVSAndroid = (EventVSAndroid) contextVSAndroid.getEvents().get(eventIndex);
-        contextVSAndroid.setEvent(eventVSAndroid);
+        androidContextVS = AndroidContextVS.getInstance(getActivity());
+        eventVS = (EventVS) androidContextVS.getEvents().get(eventIndex);
+        androidContextVS.setEvent(eventVS);
         rootView = inflater.inflate(R.layout.event_statistics_fragment, container, false);
-        String eventStatisticsURL = ServerPaths.getURLStatistics(eventVSAndroid);
+        String eventStatisticsURL = ServerPaths.getURLStatistics(eventVS);
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha( 0);
@@ -78,7 +73,7 @@ public class EventStatisticsFragment extends Fragment {
         Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case android.R.id.home:
-                contextVSAndroid.setEvent(eventVSAndroid);
+                androidContextVS.setEvent(eventVS);
                 Intent intent = new Intent(getActivity(), EventPagerActivity.class);
                 startActivity(intent);
                 return true;

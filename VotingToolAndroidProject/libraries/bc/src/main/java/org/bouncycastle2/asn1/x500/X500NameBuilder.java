@@ -1,9 +1,9 @@
 package org.bouncycastle2.asn1.x500;
 
-import java.util.Vector;
-
 import org.bouncycastle2.asn1.ASN1Encodable;
 import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
+
+import java.util.Vector;
 
 public class X500NameBuilder
 {

@@ -258,7 +258,6 @@ body {
 	font-size: 1.9em;
 }
 
-
 #fieldsBox {
 	border: #f2f2f2 solid 1px;
 	margin: 60px 20px 20px 30px;
@@ -324,11 +323,6 @@ body {
 	margin: 10px auto 5px auto;
 	padding: 3px;
 	text-overflow: ellipsis;
-}
-
-.fieldsBox {
-	border: #f2f2f2 solid 1px;
-	margin: 0px 20px 20px 20px;
 }
 
 .editorContents {
@@ -439,4 +433,9 @@ body {
 	font-weight:bold; 
 	float:right;
 	position: relative;
+}
+
+.mainPage {
+    position: relative;
+    min-height: 900px;
 }

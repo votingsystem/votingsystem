@@ -40,12 +40,13 @@
 
 package com.sun.mail.dsn;
 
-import java.io.*;
-import java.util.Vector;
-
-import javax.activation.*;
-import javax.mail.*;
+import javax.activation.DataSource;
+import javax.mail.BodyPart;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.internet.*;
+import java.io.IOException;
+import java.util.Vector;
 
 /**
  * A multipart/report message content, as defined in

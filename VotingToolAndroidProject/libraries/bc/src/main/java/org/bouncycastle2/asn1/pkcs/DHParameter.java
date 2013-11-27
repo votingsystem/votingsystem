@@ -1,14 +1,9 @@
 package org.bouncycastle2.asn1.pkcs;
 
+import org.bouncycastle2.asn1.*;
+
 import java.math.BigInteger;
 import java.util.Enumeration;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERSequence;
 
 public class DHParameter
     extends ASN1Encodable

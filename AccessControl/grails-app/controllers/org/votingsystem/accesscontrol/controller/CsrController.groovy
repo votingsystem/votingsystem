@@ -1,22 +1,26 @@
 package org.votingsystem.accesscontrol.controller
 
-import org.votingsystem.util.*;
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.*
+import grails.converters.JSON
+import org.votingsystem.util.StringUtils
+import org.votingsystem.model.CertificateVS
+import org.votingsystem.model.DeviceVS
+import org.votingsystem.model.MessageSMIME
+import org.votingsystem.model.UserRequestCsrVS
+import org.votingsystem.model.UserVS
+import org.votingsystem.util.ApplicationContextHolder;
+import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
-import org.votingsystem.accesscontrol.model.*;
+import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.KeyStoreUtil
+import org.votingsystem.util.FileUtils
+import org.votingsystem.util.NifUtils
 
 import java.security.KeyStore
-import java.security.cert.X509Certificate;
 import java.security.cert.Certificate
-
-import grails.converters.JSON;
-
-import org.votingsystem.groovy.util.*
-
+import java.security.cert.X509Certificate
 /**
  * @infoController Validación de solicitudes de certificación
- * @descController Servicios relacionados con validación y firma de certificados.
+ * @descController Servicios relacionados con validación y signatureVS de certificados.
  *
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -27,23 +31,23 @@ class CsrController {
 	
 	/**
 	 * Servicio que devuelve las solicitudes de certificados firmadas una vez que
-	 * se ha validado la identidad del usuario.
+	 * se ha validado la identidad del userVS.
 	 *
 	 * @httpMethod [GET]
-	 * @param idSolicitudCSR Identificador de la solicitud de certificación enviada previamente por el usuario.
-	 * @return Si el sistema ha validado al usuario devuelve la solicitud de certificación firmada.
+	 * @param idSolicitudCSR Identificador de la solicitud de certificación enviada previamente por el userVS.
+	 * @return Si el sistema ha validado al userVS devuelve la solicitud de certificación firmada.
 	 */
 	def index() { 
-		SolicitudCSRUsuario solicitudCSR
-		SolicitudCSRUsuario.withTransaction {
-			solicitudCSR = SolicitudCSRUsuario.findWhere(
-				id:params.long('idSolicitudCSR'), estado:SolicitudCSRUsuario.Estado.OK)
+		UserRequestCsrVS solicitudCSR
+		UserRequestCsrVS.withTransaction {
+			solicitudCSR = UserRequestCsrVS.findWhere(
+				id:params.long('idSolicitudCSR'), state:UserRequestCsrVS.State.OK)
 		}
 		if (solicitudCSR) {
-			def certificado = Certificado.findWhere(solicitudCSRUsuario:solicitudCSR)
-			if (certificado) {
+			def certificate = CertificateVS.findWhere(solicitudCSRUsuario:solicitudCSR)
+			if (certificate) {
 				response.status = ResponseVS.SC_OK
-				ByteArrayInputStream bais = new ByteArrayInputStream(certificado.contenido)
+				ByteArrayInputStream bais = new ByteArrayInputStream(certificate.content)
 				X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
 				File keyStoreFile = grailsApplication.mainContext.getResource(
 					grailsApplication.config.VotingSystem.keyStorePath).getFile()
@@ -63,10 +67,10 @@ class CsrController {
 				log.debug("certs.size(): " + certs.size())
 				
 				
-				byte[] pemCert = CertUtil.fromX509CertCollectionToPEM(certs)
+				byte[] pemCert = CertUtil.getPEMEncoded(certs)
 				
-				//byte[] pemCert = CertUtil.fromX509CertToPEM (certX509)
-				response.setContentType("text/plain")
+				//byte[] pemCert = CertUtil.getPEMEncoded (certX509)
+				response.setContentType(ContentTypeVS.TEXT)
 				response.contentLength = pemCert.length
 				response.outputStream <<  pemCert
 				response.outputStream.flush()
@@ -77,54 +81,70 @@ class CsrController {
 			return false
 		} 
 		response.status = ResponseVS.SC_NOT_FOUND
-		render message(code: "csr.solicitudNoValidada")
+		render message(code: "csrRequestNotValidated")
 		return false
 	}
 	
 	
 	/**
 	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS)<br/>
-	 * Servicio para la creación de certificados de usuario.
+	 * Servicio para la creación de certificados de userVS.
 	 * 
 	 * @httpMethod [POST]
-	 * @param csr Solicitud de certificación con los datos de usuario.
+	 * @param csr Solicitud de certificación con los datos de userVS.
 	 * @return Si todo es correcto devuelve un código de estado HTTP 200 y el identificador 
 	 *         de la solicitud en la base de datos.
 	 */
 	def solicitar() {
+        if(!EnvironmentVS.DEVELOPMENT.equals(
+                ApplicationContextHolder.getEnvironment())) {
+            def msg = message(code: "serviceDevelopmentModeMsg")
+            log.error msg
+            response.status = ResponseVS.SC_ERROR_REQUEST
+            render msg
+            return false
+        }
 		String consulta = "${request.getInputStream()}"
 		if (!consulta) {
 			response.status = ResponseVS.SC_ERROR_REQUEST
-			render message(code: 'error.PeticionIncorrectaHTML', args:[
+			render message(code: 'requestWithErrorsHTML', args:[
 				"${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
 			return false
 		}
-		ResponseVS respuesta = csrService.saveUserCSR(consulta.getBytes(), request.getLocale())
-		response.status = respuesta.statusCode
-		render respuesta.message
+		ResponseVS responseVS = csrService.saveUserCSR(consulta.getBytes(), request.getLocale())
+		response.status = responseVS.statusCode
+		render responseVS.message
 		return false;
 	}
 	
 	/**
 	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS).
 	 *
-	 * Servicio que firma solicitudes de certificación de usuario.<br/>
+	 * Servicio que signatureVS solicitudes de certificación de userVS.<br/>
 	 *
 	 * TODO - Hacer las validaciones sólo sobre solicitudes firmadas electrónicamente
 	 * por personal dado de alta en la base de datos.
 	 *
 	 * @httpMethod [POST]
-	 * @requestContentType [application/x-pkcs7-signature] Obligatorio. Documento 
-	 * firmadoArchivo firmado en formato SMIME en cuyo contenido 
+	 * @requestContentType [application/x-pkcs7-signature] Obligatorio. PDFDocumentVS
+	 * firmadoArchivo firmado en formato SMIME en cuyo content
 	 * se encuentran los datos de la solicitud que se desea validar.
-	 * <code>{deviceId:"000000000000000", telefono:"15555215554", nif:"1R" }</code>
+	 * <code>{deviceId:"000000000000000", phone:"15555215554", nif:"1R" }</code>
 	 * 
 	 * @return Si todo es correcto devuelve un código de estado HTTP 200.
 	 */
-	def validacion() { 
+	def validacion() {
+        if(!EnvironmentVS.DEVELOPMENT.equals(
+                ApplicationContextHolder.getEnvironment())) {
+            def msg = message(code: "serviceDevelopmentModeMsg")
+            log.error msg
+            response.status = ResponseVS.SC_ERROR_REQUEST
+            render msg
+            return false
+        }
 		MessageSMIME messageSMIME = params.messageSMIMEReq
 		if(!messageSMIME) {
-			String msg = message(code:'evento.peticionSinArchivo')
+			String msg = message(code:'requestWithoutFile')
 			log.error msg
 			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
@@ -132,42 +152,41 @@ class CsrController {
 		}
 		List<String> administradores = Arrays.asList(
 			grailsApplication.config.VotingSystem.adminsDNI.split(","))
-		Usuario usuario = messageSMIME.getUsuario()
+		UserVS userVS = messageSMIME.getUserVS()
 		def docValidacionJSON = JSON.parse(messageSMIME.getSmimeMessage().getSignedContent())
 		SMIMEMessageWrapper smimeMessageReq = messageSMIME.getSmimeMessage()
-		if (administradores.contains(usuario.nif) || usuario.nif.equals(docValidacionJSON.nif)) {
-			String msg = message(code: "csr.usuarioAutorizado", args: [usuario.nif])
-			Dispositivo dispositivo = Dispositivo.findWhere(deviceId: docValidacionJSON.deviceId)
-			if (!dispositivo?.usuario) {
+		if (administradores.contains(userVS.nif) || userVS.nif.equals(docValidacionJSON.nif)) {
+			String msg = message(code: "userWithCSRPrivileges", args: [userVS.nif])
+			DeviceVS dispositivo = DeviceVS.findWhere(deviceId: docValidacionJSON.deviceId)
+			if (!dispositivo?.userVS) {
 				response.status = ResponseVS.SC_ERROR_REQUEST
 				render message(code: "csr.solicitudNoEncontrada", args: [smimeMessageReq.getSignedContent()])
 				return false
 			}
-			if(dispositivo.usuario.nif != usuario.nif) {
-				log.debug "Usuario con nif:'${usuario.nif}' intentando validar dispositivo:" + 
-					"'${dispositivo.id}' con nif:'${dispositivo.usuario.nif}'"
-				render message(code: "csr.usuarioNoAutorizado")
+			if(dispositivo.userVS.nif != userVS.nif) {
+				log.debug "UserVS con nif:'${userVS.nif}' intentando validar deviceVS:" +
+					"'${dispositivo.id}' con nif:'${dispositivo.userVS.nif}'"
+				render message(code: "userWithoutPrivilegesToValidateCSR", args: [userVS.nif])
 				return false
 			}
-			SolicitudCSRUsuario solicitudCSR = SolicitudCSRUsuario.findWhere(usuario:dispositivo.usuario,
-				estado:SolicitudCSRUsuario.Estado.PENDIENTE_APROVACION);
+			UserRequestCsrVS solicitudCSR = UserRequestCsrVS.findWhere(userVS:dispositivo.userVS,
+				state:UserRequestCsrVS.State.PENDING);
 			if (!solicitudCSR) {
 				response.status = ResponseVS.SC_ERROR_REQUEST
-				render message(code: "csr.usuarioSinSolicitud", args: [usuarioMovil.nif])
+				render message(code: "userCSRNotFoundMsg", args: [userVSMovil.nif])
 				return false
 			}
-			ResponseVS respuestaValidacionCSR = csrService.firmarCertificadoUsuario(
-				solicitudCSR, request.getLocale())
-			if (ResponseVS.SC_OK == respuestaValidacionCSR.statusCode) {
+			ResponseVS csrValidationResponseVS = csrService.signCertUserVS(solicitudCSR, request.getLocale())
+			if (ResponseVS.SC_OK == csrValidationResponseVS.statusCode) {
 				response.status = ResponseVS.SC_OK
 				render message(code: "csr.generacionCertOK")
 			} else {
-				response.status = respuestaValidacionCSR.statusCode
-				render respuestaValidacionCSR.message
+				response.status = csrValidationResponseVS.statusCode
+				render csrValidationResponseVS.message
 			}
 			return false
 		} else {
-			String msg = message(code: "csr.usuarioNoAutorizado", args: [usuario.nif])
+			String msg = message(code: "userWithoutPrivilegesToValidateCSR", args: [userVS.nif])
 			log.error msg
 			response.status = ResponseVS.SC_ERROR_REQUEST
 			render msg
@@ -180,16 +199,16 @@ class CsrController {
 	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS). 
 	 * ==================================================
 	 * 
-	 * Servicio que firma solicitudes de certificación de usuario.<br/>
+	 * Servicio que signatureVS solicitudes de certificación de userVS.<br/>
 	 * 
 	 * @httpMethod [POST]
-	 * @requestContentType [application/json] Documento JSON con los datos del usuario 
-	 * <code>{deviceId:"000000000000000", telefono:"15555215554", nif:"1R" }</code>
+	 * @requestContentType [application/json] PDFDocumentVS JSON con los datos del userVS
+	 * <code>{deviceId:"000000000000000", phone:"15555215554", nif:"1R" }</code>
 	 * @return Si todo es correcto devuelve un código de estado HTTP 200.
 	 */
 	def validar() {
-		if(!VotingSystemApplicationContex.Environment.DEVELOPMENT.equals(
-			VotingSystemApplicationContex.instance.environment)) {
+		if(!EnvironmentVS.DEVELOPMENT.equals(
+			ApplicationContextHolder.getEnvironment())) {
 			def msg = message(code: "serviceDevelopmentModeMsg")
 			log.error msg
 			response.status = ResponseVS.SC_ERROR_REQUEST
@@ -205,39 +224,39 @@ class CsrController {
 		}
 		log.debug ("consulta: ${consulta}")
 		def consultaJSON = JSON.parse(consulta)
-		Dispositivo dispositivo = Dispositivo.findByDeviceId(consultaJSON?.deviceId?.trim())
+		DeviceVS dispositivo = DeviceVS.findByDeviceId(consultaJSON?.deviceId?.trim())
 		if (!dispositivo) {
 			response.status = ResponseVS.SC_ERROR_REQUEST
 			render message(code: "csr.solicitudNoEncontrada", args: 
 				["deviceId: ${consultaJSON?.deviceId}"])
 			return false
 		}
-		Usuario usuario
-		String nifValidado = StringUtils.validarNIF(consultaJSON?.nif)
-		if(nifValidado) usuario = Usuario.findByNif(nifValidado)
-		if (!usuario) {
+		UserVS userVS
+		String nifValidado = NifUtils.validate(consultaJSON?.nif)
+		if(nifValidado) userVS = UserVS.findByNif(nifValidado)
+		if (!userVS) {
 			response.status = ResponseVS.SC_ERROR_REQUEST
 			render message(code: "csr.solicitudNoEncontrada", args: ["nif: ${nifValidado}"])
 			return false
 		}
-		SolicitudCSRUsuario solicitudCSR
-		SolicitudCSRUsuario.withTransaction{
-			solicitudCSR = SolicitudCSRUsuario.findByDispositivoAndUsuarioAndEstado(
-				dispositivo, usuario, SolicitudCSRUsuario.Estado.PENDIENTE_APROVACION);
+		UserRequestCsrVS solicitudCSR
+		UserRequestCsrVS.withTransaction{
+			solicitudCSR = UserRequestCsrVS.findByDispositivoAndUsuarioAndState(
+				dispositivo, userVS, UserRequestCsrVS.State.PENDING);
 		}
 		if (!solicitudCSR) {
 			response.status = ResponseVS.SC_ERROR_REQUEST
 			render message(code: "csr.solicitudNoEncontrada", args: [consulta])
 			return false
 		}
-		ResponseVS respuestaValidacionCSR = csrService.firmarCertificadoUsuario(
+		ResponseVS csrValidationResponseVS = csrService.signCertUserVS(
 			solicitudCSR, request.getLocale())
-		if (ResponseVS.SC_OK == respuestaValidacionCSR.statusCode) {
+		if (ResponseVS.SC_OK == csrValidationResponseVS.statusCode) {
 			response.status = ResponseVS.SC_OK
 			render message(code: "csr.generacionCertOK")
 		} else {
-			response.status = respuestaValidacionCSR.statusCode
-			render respuestaValidacionCSR.message
+			response.status = csrValidationResponseVS.statusCode
+			render csrValidationResponseVS.message
 		}
 		return false
 	}

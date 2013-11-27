@@ -40,11 +40,11 @@
 
 package javax.activation;
 
-import java.net.URL;
-import java.net.URLConnection;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
 
 /**
  * The URLDataSource class provides an object that wraps a <code>URL</code>

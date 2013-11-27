@@ -41,10 +41,15 @@
 package com.sun.mail.mbox;
 
 import javax.mail.*;
-import javax.mail.event.*;
-import javax.mail.internet.*;
+import javax.mail.event.ConnectionEvent;
+import javax.mail.event.FolderEvent;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.InternetHeaders;
+import javax.mail.internet.MimeMessage;
 import java.io.*;
-import java.util.*;
+import java.util.Date;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 /**
  * This class represents a mailbox file containing RFC822 style email messages. 

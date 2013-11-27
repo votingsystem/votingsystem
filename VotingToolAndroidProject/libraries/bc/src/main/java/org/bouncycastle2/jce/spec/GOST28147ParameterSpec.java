@@ -1,8 +1,8 @@
-package org.bouncycastle2.jce.spec; 
-
-import java.security.spec.AlgorithmParameterSpec;
+package org.bouncycastle2.jce.spec;
 
 import org.bouncycastle2.crypto.engines.GOST28147Engine;
+
+import java.security.spec.AlgorithmParameterSpec;
 
 /**
  * A parameter spec for the GOST-28147 cipher.

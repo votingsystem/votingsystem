@@ -1,8 +1,8 @@
 package org.bouncycastle2.cms;
 
-import java.security.cert.X509CertSelector;
-
 import org.bouncycastle2.util.Selector;
+
+import java.security.cert.X509CertSelector;
 
 public abstract class RecipientId
     extends X509CertSelector

@@ -1,43 +1,23 @@
 package org.bouncycastle2.cms;
 
+import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.asn1.cms.*;
+import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle2.operator.DigestCalculator;
+import org.bouncycastle2.util.io.TeeInputStream;
+
+import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.AlgorithmParameterGenerator;
-import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Provider;
+import java.security.*;
 import java.security.spec.InvalidParameterSpecException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.KeyGenerator;
-import javax.crypto.Mac;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-
-import org.bouncycastle2.asn1.ASN1Null;
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.ASN1Set;
-import org.bouncycastle2.asn1.DEREncodable;
-import org.bouncycastle2.asn1.cms.KEKRecipientInfo;
-import org.bouncycastle2.asn1.cms.KeyAgreeRecipientInfo;
-import org.bouncycastle2.asn1.cms.KeyTransRecipientInfo;
-import org.bouncycastle2.asn1.cms.PasswordRecipientInfo;
-import org.bouncycastle2.asn1.cms.RecipientInfo;
-import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.util.io.TeeInputStream;
-import org.bouncycastle2.operator.DigestCalculator;
 
 class CMSEnvelopedHelper
 {

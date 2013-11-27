@@ -1,32 +1,14 @@
 package org.bouncycastle2.x509;
 
+import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.asn1.x509.*;
+
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.SignatureException;
+import java.security.*;
 import java.security.cert.CertificateEncodingException;
 import java.util.Date;
 import java.util.Iterator;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.DERBitString;
-import org.bouncycastle2.asn1.DERGeneralizedTime;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DERSequence;
-import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.asn1.x509.AttCertIssuer;
-import org.bouncycastle2.asn1.x509.Attribute;
-import org.bouncycastle2.asn1.x509.AttributeCertificate;
-import org.bouncycastle2.asn1.x509.AttributeCertificateInfo;
-import org.bouncycastle2.asn1.x509.V2AttributeCertificateInfoGenerator;
-import org.bouncycastle2.asn1.x509.X509ExtensionsGenerator;
 
 /**
  * class to produce an X.509 Version 2 AttributeCertificate.

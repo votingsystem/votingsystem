@@ -1,12 +1,12 @@
 package org.bouncycastle2.cert.cmp;
 
-import java.io.IOException;
-
 import org.bouncycastle2.asn1.ASN1Object;
 import org.bouncycastle2.asn1.cmp.PKIBody;
 import org.bouncycastle2.asn1.cmp.PKIHeader;
 import org.bouncycastle2.asn1.cmp.PKIMessage;
 import org.bouncycastle2.cert.CertIOException;
+
+import java.io.IOException;
 
 /**
  * General wrapper for a generic PKIMessage

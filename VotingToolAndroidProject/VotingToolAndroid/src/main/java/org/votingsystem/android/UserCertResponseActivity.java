@@ -35,18 +35,17 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
-import org.votingsystem.android.model.ContextVSAndroid;
+import org.votingsystem.android.model.AndroidContextVS;
 import org.votingsystem.android.ui.CertPinDialog;
 import org.votingsystem.android.ui.CertPinDialogListener;
+import org.votingsystem.android.util.HttpHelper;
+import org.votingsystem.android.util.ServerPaths;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.FileUtils;
-import org.votingsystem.android.util.HttpHelper;
-import org.votingsystem.android.util.ServerPaths;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -55,9 +54,7 @@ import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 
-import static org.votingsystem.android.model.ContextVSAndroid.ALIAS_CERT_USUARIO;
-import static org.votingsystem.android.model.ContextVSAndroid.KEY_STORE_FILE;
-import static org.votingsystem.android.model.ContextVSAndroid.PREFS_ID_SOLICTUD_CSR;
+import static org.votingsystem.android.model.AndroidContextVS.*;
 
 
 public class UserCertResponseActivity extends ActionBarActivity
@@ -68,7 +65,7 @@ public class UserCertResponseActivity extends ActionBarActivity
 	
 	private ProgressDialog progressDialog = null;
 	private String CSR_SIGNED = "csrSigned";
-	private String csrFirmado = null;
+	private String csrSigned = null;
 	private String SCREEN_MESSAGE = "screenMessage";
 	private String screenMessage = null;
 	private boolean isCertStateChecked = false;
@@ -76,7 +73,7 @@ public class UserCertResponseActivity extends ActionBarActivity
     private Button goAppButton;
     private Button insertPinButton;
     private Button requestCertButton;
-    private ContextVSAndroid contextVSAndroid;
+    private AndroidContextVS androidContextVS;
     
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +81,7 @@ public class UserCertResponseActivity extends ActionBarActivity
     	super.onCreate(savedInstanceState);
         Log.d(TAG + ".onCreate(...) ", " - onCreate");
         setContentView(R.layout.user_cert_response_activity);
-        contextVSAndroid = ContextVSAndroid.getInstance(getBaseContext());
+        androidContextVS = AndroidContextVS.getInstance(getBaseContext());
         getSupportActionBar().setTitle(getString(R.string.voting_system_lbl));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         goAppButton = (Button) findViewById(R.id.go_app_button);
@@ -106,7 +103,7 @@ public class UserCertResponseActivity extends ActionBarActivity
         requestCertButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             	Intent intent = null;
-          	  	switch(contextVSAndroid.getEstado()) {
+          	  	switch(androidContextVS.getState()) {
 			    	case SIN_CSR:
 			    		intent = new Intent(getBaseContext(), MainActivity.class);
 			    		break;
@@ -128,7 +125,7 @@ public class UserCertResponseActivity extends ActionBarActivity
     }
     
     private void checkCertState () {
-  	  	switch(contextVSAndroid.getEstado()) {
+  	  	switch(androidContextVS.getState()) {
 	    	case SIN_CSR:
 	    		Intent intent = new Intent(getBaseContext(), MainActivity.class);
 	    		startActivity(intent);
@@ -140,7 +137,7 @@ public class UserCertResponseActivity extends ActionBarActivity
 	        	Log.d(TAG + ".checkCertState() ", "- idSolicitudCSR: " + idSolicitudCSR);
                 GetDataTask getDataTask = new GetDataTask(null);
                 getDataTask.execute(ServerPaths.getURLSolicitudCertificadoUsuario(
-                    contextVSAndroid.getAccessControlURL(), String.valueOf(idSolicitudCSR)));
+                    androidContextVS.getAccessControlURL(), String.valueOf(idSolicitudCSR)));
   	  	}
     }
 
@@ -159,7 +156,7 @@ public class UserCertResponseActivity extends ActionBarActivity
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 		Log.d(TAG + ".onSaveInstanceState(...) ", " ------ onSaveInstanceState -------");
 		savedInstanceState.putBoolean(CERT_CHECKED, isCertStateChecked);
-		savedInstanceState.putString(CSR_SIGNED, csrFirmado);
+		savedInstanceState.putString(CSR_SIGNED, csrSigned);
 		savedInstanceState.putString(SCREEN_MESSAGE, screenMessage);
 	}
 	
@@ -167,18 +164,18 @@ public class UserCertResponseActivity extends ActionBarActivity
 		isCertStateChecked = isChecked;
 	}
 	
-	private void setCsrFirmado (String csrFirmado) {
-		this.csrFirmado = csrFirmado;
+	private void setCsrSigned (String csrSigned) {
+		this.csrSigned = csrSigned;
 	}
     
 	@Override
 	public void onRestoreInstanceState(Bundle savedInstanceState) {		
 		Log.d(TAG + ".onRestoreInstanceState(...) ", " ------ onRestoreInstanceState -------");
 		setMessage(savedInstanceState.getString(SCREEN_MESSAGE));
-		csrFirmado = savedInstanceState.getString(CSR_SIGNED);
+		csrSigned = savedInstanceState.getString(CSR_SIGNED);
 		isCertStateChecked = savedInstanceState.getBoolean(CERT_CHECKED, false);
 		if(isCertStateChecked) {
-			if(csrFirmado != null)
+			if(csrSigned != null)
 				insertPinButton.setVisibility(View.VISIBLE);
 			else goAppButton.setVisibility(View.VISIBLE);
 		}
@@ -210,29 +207,29 @@ public class UserCertResponseActivity extends ActionBarActivity
     
     private boolean actualizarKeyStore (char[] password) {
     	Log.d(TAG + ".actualizarKeyStore(...)", "");
-    	if (csrFirmado == null) {
-    		Log.d(TAG + ".actualizarKeyStore(...)", " - csrFirmado: " + csrFirmado);
+    	if (csrSigned == null) {
+    		Log.d(TAG + ".actualizarKeyStore(...)", " - csrSigned: " + csrSigned);
     		return false;
     	}
     	try {
     		FileInputStream fis = openFileInput(KEY_STORE_FILE);
 			byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
 			KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
-			PrivateKey privateKey = (PrivateKey)keyStore.getKey(ALIAS_CERT_USUARIO, password);
-	        Collection<X509Certificate> certificados = 
-	        		CertUtil.fromPEMToX509CertCollection(csrFirmado.getBytes());
-	        Log.d(TAG + ".actualizarKeyStore(...)", " - certificados.size(): " + certificados.size());
-	        for(X509Certificate cert:certificados) {
+			PrivateKey privateKey = (PrivateKey)keyStore.getKey(USER_CERT_ALIAS, password);
+	        Collection<X509Certificate> certificates =
+	        		CertUtil.fromPEMToX509CertCollection(csrSigned.getBytes());
+	        Log.d(TAG + ".actualizarKeyStore(...)", " - certificates.size(): " + certificates.size());
+	        for(X509Certificate cert:certificates) {
 	        	Log.d(TAG + ".actualizarKeyStore(...)", "************ cert.toString(): " + cert.toString());
 	        }
-	        X509Certificate[] arrayCerts = new X509Certificate[certificados.size()];
-	        certificados.toArray(arrayCerts);
-	        keyStore.setKeyEntry(ALIAS_CERT_USUARIO, privateKey, password, arrayCerts);
+	        X509Certificate[] arrayCerts = new X509Certificate[certificates.size()];
+	        certificates.toArray(arrayCerts);
+	        keyStore.setKeyEntry(USER_CERT_ALIAS, privateKey, password, arrayCerts);
 	        keyStoreBytes = KeyStoreUtil.getBytes(keyStore, password);
 	        FileOutputStream fos = openFileOutput(KEY_STORE_FILE, Context.MODE_PRIVATE);
 	        fos.write(keyStoreBytes);
 	        fos.close();
-            contextVSAndroid.setEstado(ContextVSAndroid.Estado.CON_CERTIFICADO);
+            androidContextVS.setState(AndroidContextVS.State.CON_CERTIFICADO);
     		return true;
 		} catch (Exception ex) {
 			Log.e(TAG, " - ex.getMessage(): " + ex.getMessage());
@@ -244,9 +241,9 @@ public class UserCertResponseActivity extends ActionBarActivity
     private void setMessage(String message) {
 		Log.d(TAG + ".setMessage(...) ", " - message: " + message);
 		this.screenMessage = message;
-    	TextView contenidoTextView = (TextView) findViewById(R.id.text);
-    	contenidoTextView.setText(Html.fromHtml(message));
-        contenidoTextView.setMovementMethod(LinkMovementMethod.getInstance());
+    	TextView contentTextView = (TextView) findViewById(R.id.text);
+    	contentTextView.setText(Html.fromHtml(message));
+        contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
     }
     
 	public void showException(String exMessage) {
@@ -263,7 +260,7 @@ public class UserCertResponseActivity extends ActionBarActivity
 		if(pin != null) {
 			if(actualizarKeyStore(pin.toCharArray())) {
 				setMessage(getString(
-	    				R.string.resultado_solicitud_certificado_activity_ok));
+	    				R.string.request_cert_result_activity_ok));
 			    insertPinButton.setVisibility(View.GONE);
 			    requestCertButton.setVisibility(View.GONE);
 			} else {
@@ -289,8 +286,7 @@ public class UserCertResponseActivity extends ActionBarActivity
         }
 
         @Override protected void onPreExecute() {
-            showProgressDialog(getString(R.string.connecting_caption),
-                    getString(R.string.cert_state_msg));
+            showProgressDialog(getString(R.string.connecting_caption), getString(R.string.cert_state_msg));
         }
 
         @Override
@@ -320,16 +316,14 @@ public class UserCertResponseActivity extends ActionBarActivity
                 progressDialog.dismiss();
             }
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                setCsrFirmado(responseVS.getMessage());
+                setCsrSigned(responseVS.getMessage());
                 setMessage(getString(R.string.cert_downloaded_msg));
                 insertPinButton.setVisibility(View.VISIBLE);
                 setCertStateChecked(true);
             } else if(ResponseVS.SC_NOT_FOUND == responseVS.getStatusCode()) {
                 String certificationAddresses = ServerPaths.
-                        getURLCertificationAddresses(contextVSAndroid.getAccessControlURL());
-                setMessage(getString(R.string.
-                        resultado_solicitud_certificado_activity,
-                        certificationAddresses));
+                        getURLCertificationAddresses(androidContextVS.getAccessControlURL());
+                setMessage(getString(R.string.request_cert_result_activity, certificationAddresses));
             } else showException(getString(
                     R.string.request_user_cert_error_msg));
             goAppButton.setVisibility(View.VISIBLE);

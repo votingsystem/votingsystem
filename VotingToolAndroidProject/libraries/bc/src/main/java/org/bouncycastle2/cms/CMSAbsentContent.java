@@ -1,11 +1,11 @@
 package org.bouncycastle2.cms;
 
+import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle2.asn1.cms.CMSObjectIdentifiers;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.cms.CMSObjectIdentifiers;
 
 /**
  * a holding class for a byte array of data to be processed.

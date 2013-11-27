@@ -1,7 +1,5 @@
 package org.bouncycastle2.cert.crmf;
 
-import java.io.IOException;
-
 import org.bouncycastle2.asn1.cms.EnvelopedData;
 import org.bouncycastle2.asn1.crmf.CRMFObjectIdentifiers;
 import org.bouncycastle2.asn1.crmf.EncKeyWithID;
@@ -9,12 +7,10 @@ import org.bouncycastle2.asn1.crmf.EncryptedKey;
 import org.bouncycastle2.asn1.crmf.PKIArchiveOptions;
 import org.bouncycastle2.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle2.asn1.x509.GeneralName;
-import org.bouncycastle2.cms.CMSEnvelopedData;
-import org.bouncycastle2.cms.CMSEnvelopedDataGenerator;
-import org.bouncycastle2.cms.CMSException;
-import org.bouncycastle2.cms.CMSProcessableByteArray;
-import org.bouncycastle2.cms.RecipientInfoGenerator;
+import org.bouncycastle2.cms.*;
 import org.bouncycastle2.operator.OutputEncryptor;
+
+import java.io.IOException;
 
 /**
  * Builder for a PKIArchiveControl structure.

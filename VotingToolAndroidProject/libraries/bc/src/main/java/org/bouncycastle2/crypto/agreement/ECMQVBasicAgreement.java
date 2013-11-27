@@ -1,17 +1,13 @@
 package org.bouncycastle2.crypto.agreement;
 
-import java.math.BigInteger;
-
 import org.bouncycastle2.crypto.BasicAgreement;
 import org.bouncycastle2.crypto.CipherParameters;
-import org.bouncycastle2.crypto.params.ECDomainParameters;
-import org.bouncycastle2.crypto.params.ECPrivateKeyParameters;
-import org.bouncycastle2.crypto.params.ECPublicKeyParameters;
-import org.bouncycastle2.crypto.params.MQVPrivateParameters;
-import org.bouncycastle2.crypto.params.MQVPublicParameters;
+import org.bouncycastle2.crypto.params.*;
 import org.bouncycastle2.math.ec.ECAlgorithms;
 import org.bouncycastle2.math.ec.ECConstants;
 import org.bouncycastle2.math.ec.ECPoint;
+
+import java.math.BigInteger;
 
 public class ECMQVBasicAgreement
     implements BasicAgreement

@@ -1,7 +1,5 @@
 package org.bouncycastle2.cert.ocsp;
 
-import java.io.OutputStream;
-
 import org.bouncycastle2.asn1.DERNull;
 import org.bouncycastle2.asn1.DEROctetString;
 import org.bouncycastle2.asn1.ocsp.ResponderID;
@@ -10,6 +8,8 @@ import org.bouncycastle2.asn1.x500.X500Name;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle2.operator.DigestCalculator;
+
+import java.io.OutputStream;
 
 /**
  * Carrier for a ResponderID.

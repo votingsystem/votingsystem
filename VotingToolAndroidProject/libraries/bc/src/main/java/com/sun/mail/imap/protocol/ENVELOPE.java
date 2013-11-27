@@ -40,15 +40,14 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.util.Vector;
-import java.util.Date;
-import java.io.UnsupportedEncodingException;
-import java.text.ParseException;
-import javax.mail.internet.InternetAddress;
+import com.sun.mail.iap.ParsingException;
+import com.sun.mail.iap.Response;
+
 import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
-import javax.mail.internet.MimeUtility;
-import com.sun.mail.iap.*;
+import java.util.Date;
+import java.util.Vector;
 
 /**
  * The ENEVELOPE item of an IMAP FETCH response.

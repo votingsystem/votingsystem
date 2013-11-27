@@ -1,9 +1,9 @@
 package org.bouncycastle2.x509;
 
-import java.security.cert.CertPath;
-
 import org.bouncycastle2.i18n.ErrorBundle;
 import org.bouncycastle2.i18n.LocalizedException;
+
+import java.security.cert.CertPath;
 
 public class CertPathReviewerException extends LocalizedException
 {

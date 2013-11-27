@@ -40,8 +40,8 @@
 
 package com.sun.activation.registries;
 
-import java.io.*;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Logging related methods.

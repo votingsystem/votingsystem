@@ -44,11 +44,7 @@
 package com.itextpdf.text.pdf.internal;
 
 import com.itextpdf.text.DocWriter;
-import com.itextpdf.text.pdf.OutputStreamCounter;
-import com.itextpdf.text.pdf.PdfDeveloperExtension;
-import com.itextpdf.text.pdf.PdfDictionary;
-import com.itextpdf.text.pdf.PdfName;
-import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.pdf.interfaces.PdfVersion;
 
 import java.io.IOException;

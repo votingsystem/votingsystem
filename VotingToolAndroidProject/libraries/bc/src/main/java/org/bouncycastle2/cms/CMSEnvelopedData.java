@@ -1,11 +1,5 @@
 package org.bouncycastle2.cms;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.AlgorithmParameters;
-import java.security.NoSuchProviderException;
-import java.security.Provider;
-
 import org.bouncycastle2.asn1.ASN1Set;
 import org.bouncycastle2.asn1.DEREncodable;
 import org.bouncycastle2.asn1.cms.AttributeTable;
@@ -13,6 +7,12 @@ import org.bouncycastle2.asn1.cms.ContentInfo;
 import org.bouncycastle2.asn1.cms.EncryptedContentInfo;
 import org.bouncycastle2.asn1.cms.EnvelopedData;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.AlgorithmParameters;
+import java.security.NoSuchProviderException;
+import java.security.Provider;
 
 /**
  * containing class for an CMS Enveloped Data object

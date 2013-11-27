@@ -1,5 +1,6 @@
 /bin
 /build
+/libs_dev
 GrailsRestDoc*
 .classpath
 .gradle

@@ -1,14 +1,7 @@
 package org.votingsystem.controlcenter.service
 
-import java.util.Date;
-import java.util.Locale;
-import grails.converters.JSON
-import org.codehaus.groovy.grails.web.json.JSONArray
-import org.votingsystem.controlcenter.model.*;
-import org.votingsystem.util.DateUtils;
-import java.security.cert.X509Certificate;
-import org.votingsystem.signature.util.*
-
+import org.votingsystem.model.EventVS
+import org.votingsystem.util.DateUtils
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -27,8 +20,8 @@ class FilesService {
 		errorsDir.mkdirs()
 	}	 
 
-	 public File getEventMetaInf(EventoVotacion event) {
-		 String datePathPart = DateUtils.getShortStringFromDate(event.fechaInicio)
+	 public File getEventMetaInf(EventVS event) {
+		 String datePathPart = DateUtils.getShortStringFromDate(event.dateBegin)
 		 String eventsMetaInfBaseDirPath = "${grailsApplication.config.VotingSystem.eventsMetaInfBaseDir}" +
 			 "/${datePathPart}"
 		 File metaInfFile = new File("${eventsMetaInfBaseDirPath}/meta_event_${event.id}.inf")

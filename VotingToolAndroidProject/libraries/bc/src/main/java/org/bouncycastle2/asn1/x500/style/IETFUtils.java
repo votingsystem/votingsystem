@@ -1,21 +1,16 @@
 package org.bouncycastle2.asn1.x500.style;
 
-import java.io.IOException;
-import java.util.Hashtable;
-import java.util.Vector;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.ASN1String;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERUniversalString;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.x500.AttributeTypeAndValue;
 import org.bouncycastle2.asn1.x500.RDN;
 import org.bouncycastle2.asn1.x500.X500NameBuilder;
 import org.bouncycastle2.asn1.x500.X500NameStyle;
 import org.bouncycastle2.util.Strings;
 import org.bouncycastle2.util.encoders.Hex;
+
+import java.io.IOException;
+import java.util.Hashtable;
+import java.util.Vector;
 
 public class IETFUtils
 {

@@ -1,10 +1,10 @@
 package org.bouncycastle2.crypto.tls;
 
+import org.bouncycastle2.util.Arrays;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Hashtable;
-
-import org.bouncycastle2.util.Arrays;
 
 public abstract class SRPTlsClient implements TlsClient
 {

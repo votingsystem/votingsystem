@@ -1,16 +1,12 @@
 package org.bouncycastle2.cms;
 
+import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.asn1.cms.CMSObjectIdentifiers;
+import org.bouncycastle2.operator.OutputCompressor;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.DeflaterOutputStream;
-
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.BERSequenceGenerator;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DERSequenceGenerator;
-import org.bouncycastle2.asn1.cms.CMSObjectIdentifiers;
-import org.bouncycastle2.operator.OutputCompressor;
 
 /**
  * General class for generating a compressed CMS message stream.

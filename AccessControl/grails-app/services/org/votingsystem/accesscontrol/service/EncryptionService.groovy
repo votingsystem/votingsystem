@@ -1,91 +1,31 @@
 package org.votingsystem.accesscontrol.service
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.util.Properties;
+import org.bouncycastle.cms.*
+import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder
+import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientId
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator
+import org.bouncycastle.mail.smime.SMIMEEnveloped
+import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator
+import org.bouncycastle.mail.smime.SMIMEUtil
+import org.bouncycastle.util.Strings
+import org.bouncycastle.util.encoders.Base64
+import org.votingsystem.model.ContextVS
+import org.votingsystem.model.ResponseVS
+import org.votingsystem.signature.smime.SMIMEMessageWrapper
 
 import javax.activation.DataHandler
 import javax.activation.FileDataSource
-import javax.crypto.Cipher
-import javax.crypto.CipherInputStream
-import javax.crypto.CipherOutputStream
-import javax.crypto.SecretKey
-import javax.mail.Header;
+import javax.mail.BodyPart
 import javax.mail.Multipart
-import javax.mail.Session;
-import javax.mail.internet.MimeMultipart;
-
-import org.springframework.beans.factory.InitializingBean
-import org.votingsystem.util.*
-import org.votingsystem.accesscontrol.model.*
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.signature.util.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
-import org.votingsystem.signature.smime.SignedMailGenerator;
-import org.springframework.context.ApplicationContext;
-
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-
-import java.security.Key
+import javax.mail.Session
+import javax.mail.internet.MimeBodyPart
+import javax.mail.internet.MimeMessage
+import javax.mail.internet.MimeMultipart
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.PublicKey
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
-import java.security.cert.CertPathValidatorException
-import java.security.cert.PKIXCertPathValidatorResult
-import java.security.cert.TrustAnchor
-import java.security.cert.X509Certificate;
-import java.security.interfaces.RSAPrivateKey
-import java.security.interfaces.RSAPublicKey
-
-import org.bouncycastle.jce.PKCS10CertificationRequest;
-import org.bouncycastle.mail.smime.SMIMEEnveloped
-import org.bouncycastle.mail.smime.SMIMESigned
-import org.bouncycastle.asn1.pkcs.CertificationRequestInfo
-import org.bouncycastle.asn1.x509.X509Extensions
-
-import java.util.Locale;
-import java.util.concurrent.atomic.AtomicBoolean
-
-import org.bouncycastle.cert.X509CertificateHolder
-import org.bouncycastle.cms.CMSEnvelopedData
-import org.bouncycastle.cms.CMSEnvelopedDataParser
-import org.bouncycastle.cms.CMSEnvelopedDataStreamGenerator
-import org.bouncycastle.cms.CMSException
-import org.bouncycastle.cms.CMSTypedStream
-import org.bouncycastle.cms.KeyTransRecipientId
-import org.bouncycastle.cms.Recipient
-import org.bouncycastle.cms.RecipientId;
-import org.bouncycastle.cms.RecipientInformation
-import org.bouncycastle.cms.RecipientInformationStore
-import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient
-import org.bouncycastle.cms.jcajce.JceKeyTransRecipientId;
-import org.bouncycastle.mail.smime.SMIMEUtil;
-import org.bouncycastle.cms.CMSAlgorithm;
-import org.bouncycastle.cms.SignerInformation;
-import org.bouncycastle.cms.SignerInformationStore;
-import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
-import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
-import org.bouncycastle.cms.bc.BcRSAKeyTransRecipientInfoGenerator;
-import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
-import org.bouncycastle.openssl.PEMWriter
-import org.bouncycastle.util.Strings;
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.FixedSecureRandom
-
-import javax.mail.BodyPart
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
+import java.security.cert.X509Certificate
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -157,8 +97,7 @@ class EncryptionService {
 		}
 	}
 	
-	public ResponseVS encryptMessage(byte[] bytesToEncrypt,
-		PublicKey publicKey) throws Exception {
+	public ResponseVS encryptMessage(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {
 				log.debug("--- - encryptMessage(...) - ");
 		try {
 			MimeBodyPart mimeMessage = new MimeBodyPart();
@@ -314,19 +253,16 @@ s
 	ResponseVS encryptSMIMEMessage(byte[] bytesToEncrypt,
 		X509Certificate receiverCert, Locale locale) throws Exception {
 		log.debug(" - encryptSMIMEMessage(...) ");
-		//If the message isn't recreated there can be problems with
-		//multipart boundaries. TODO
-		SMIMEMessageWrapper msgToEncrypt = new SMIMEMessageWrapper(
-				new ByteArrayInputStream(bytesToEncrypt));
+		//If the message isn't recreated there can be problems with multipart boundaries. _ TODO _
+		SMIMEMessageWrapper msgToEncrypt = new SMIMEMessageWrapper(new ByteArrayInputStream(bytesToEncrypt));
 		try {
 			//String str1 = new String(msgToEncrypt.getBytes())
 			//log.debug(" - encryptSMIMEMessage(...) str1: " + str1);
 			SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
 			encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
-				receiverCert).setProvider(ContextVS.PROVIDER));
+                    receiverCert).setProvider(ContextVS.PROVIDER));
 			/* Encrypt the message */
-			MimeBodyPart encryptedPart = encrypter.generate(msgToEncrypt,
-				new JceCMSContentEncryptorBuilder(
+			MimeBodyPart encryptedPart = encrypter.generate(msgToEncrypt, new JceCMSContentEncryptorBuilder(
 				CMSAlgorithm.DES_EDE3_CBC).setProvider(ContextVS.PROVIDER).build());
 			/* Set all original MIME headers in the encrypted message */
 			Enumeration headers = msgToEncrypt.getAllHeaderLines();

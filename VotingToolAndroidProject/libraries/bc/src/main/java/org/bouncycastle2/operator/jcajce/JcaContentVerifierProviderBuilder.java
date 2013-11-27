@@ -1,28 +1,19 @@
 package org.bouncycastle2.operator.jcajce;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.security.GeneralSecurityException;
-import java.security.Provider;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.cert.X509CertificateHolder;
 import org.bouncycastle2.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle2.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle2.jcajce.NamedJcaJceHelper;
 import org.bouncycastle2.jcajce.ProviderJcaJceHelper;
-import org.bouncycastle2.operator.ContentVerifier;
-import org.bouncycastle2.operator.ContentVerifierProvider;
-import org.bouncycastle2.operator.OperatorCreationException;
-import org.bouncycastle2.operator.OperatorStreamException;
-import org.bouncycastle2.operator.RawContentVerifier;
-import org.bouncycastle2.operator.RuntimeOperatorException;
+import org.bouncycastle2.operator.*;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.*;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 public class JcaContentVerifierProviderBuilder
 {

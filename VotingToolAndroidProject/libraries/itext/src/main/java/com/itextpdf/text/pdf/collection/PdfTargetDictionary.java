@@ -43,11 +43,7 @@
  */
 package com.itextpdf.text.pdf.collection;
 
-import com.itextpdf.text.pdf.PdfDictionary;
-import com.itextpdf.text.pdf.PdfName;
-import com.itextpdf.text.pdf.PdfNumber;
-import com.itextpdf.text.pdf.PdfObject;
-import com.itextpdf.text.pdf.PdfString;
+import com.itextpdf.text.pdf.*;
 
 public class PdfTargetDictionary extends PdfDictionary {
 	

@@ -1,12 +1,12 @@
 package org.bouncycastle2.pkcs;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-
 import org.bouncycastle2.asn1.pkcs.EncryptedPrivateKeyInfo;
 import org.bouncycastle2.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle2.operator.OutputEncryptor;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * A class for creating EncryptedPrivateKeyInfo structures.

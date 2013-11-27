@@ -63,18 +63,18 @@
 			    	dateFinish = $( "#dateFinish" ),
 			    	editorDiv = $( "#editorDiv" ),
 			        allFields = $( [] ).add( subject ).add( dateFinish ).add(editorDiv);
-			        allFields.removeClass( "ui-state-error" );
+			        allFields.removeClass( "formFieldError" );
 
 
 					if(dateFinish.datepicker("getDate") < new Date() ) {
-						dateFinish.addClass( "ui-state-error" );
+						dateFinish.addClass( "formFieldError" );
 						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 							'<g:message code="dateInitERRORMsg"/>')
 						isValidForm = false
 					}
 
 					if(htmlEditorContent.trim() == 0) {
-						editorDiv.addClass( "ui-state-error" );
+						editorDiv.addClass( "formFieldError" );
 						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 								'<g:message code="emptyDocumentERRORMsg"/>')
 						isValidForm = false
@@ -84,19 +84,19 @@
 						return 
 					}
 					
-					var event = new Evento();
-			    	event.asunto = subject.val();
-			    	event.contenido = htmlEditorContent.trim();
-			    	event.fechaFin = dateFinish.datepicker('getDate').format();
+					var eventVS = new EventoVS();
+			    	eventVS.subject = subject.val();
+			    	eventVS.content = htmlEditorContent.trim();
+			    	eventVS.dateFinish = dateFinish.datepicker('getDate').format();
 
 			    	var webAppMessage = new WebAppMessage(
-					    	StatusCode.SC_PROCESSING, 
+					    	ResponseVS.SC_PROCESSING,
 					    	Operation.MANIFEST_PUBLISHING)
-			    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
-			    		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
-					webAppMessage.contenidoFirma = event
-					webAppMessage.urlEnvioDocumento = "${createLink( controller:'eventoFirma', absolute:true)}"
-					webAppMessage.asuntoMensajeFirmado = '<g:message code="publishManifestSubject"/>'
+			    	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+			    		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
+					webAppMessage.signedContent = eventVS
+					webAppMessage.receiverSignServiceURL = "${createLink( controller:'eventVSManifest', absolute:true)}"
+					webAppMessage.signedMessageSubject = '<g:message code="publishManifestSubject"/>'
 
 					votingSystemClient.setMessageToSignatureClient(webAppMessage, publishDocumentCallback);
 			    	return false 
@@ -112,11 +112,11 @@
 					$("#workingWithAppletDialog" ).dialog("close");
 					var caption = '<g:message code="publishERRORCaption"/>'
 					var msg = appMessageJSON.message
-					if(StatusCode.SC_OK == appMessageJSON.statusCode) { 
+					if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
 						caption = '<g:message code="publishOKCaption"/>'
 				    	var msgTemplate = "<g:message code='documentLinkMsg'/>";
 						msg = "<p><g:message code='publishOKMsg'/>.</p>" + 
-							msgTemplate.format(appMessageJSON.urlEnvioDocumento);
+							msgTemplate.format(appMessageJSON.receiverSignServiceURL);
 					}
 					showResultDialog(caption, msg)
 				}

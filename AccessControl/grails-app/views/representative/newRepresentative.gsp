@@ -52,7 +52,7 @@
 			    	var editorDiv = $("#editorDiv")
 			    	hideEditor()
 					if(htmlEditorContent.trim() == 0) {
-						editorDiv.addClass( "ui-state-error" );
+						editorDiv.addClass( "formFieldError" );
 						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 								'<g:message code="emptyDocumentERRORMsg"/>')
 						showEditor();
@@ -60,15 +60,15 @@
 					}  
 
 			    	var webAppMessage = new WebAppMessage(
-					    	StatusCode.SC_PROCESSING, 
+					    	ResponseVS.SC_PROCESSING,
 					    	Operation.NEW_REPRESENTATIVE)
-			    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
-		    		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
-					webAppMessage.contenidoFirma = {representativeInfo:htmlEditorContent.trim(), 
+			    	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+		    		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
+					webAppMessage.signedContent = {representativeInfo:htmlEditorContent.trim(),
 							operation:Operation.REPRESENTATIVE_DATA}
-					webAppMessage.urlEnvioDocumento = "${createLink( controller:'representative', absolute:true)}"
-					webAppMessage.asuntoMensajeFirmado = '<g:message code="representativeDataLbl"/>'
-					webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStamp', absolute:true)}"
+					webAppMessage.receiverSignServiceURL = "${createLink( controller:'representative', absolute:true)}"
+					webAppMessage.signedMessageSubject = '<g:message code="representativeDataLbl"/>'
+					webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
 					votingSystemClient.setMessageToSignatureClient(webAppMessage, newRepresentativeCallback);
 			    });
 			  });
@@ -80,7 +80,7 @@
 					$("#workingWithAppletDialog" ).dialog("close");
 					var caption = '<g:message code="publishERRORCaption"/>'
 					var msg = appMessageJSON.message
-					if(StatusCode.SC_OK == appMessageJSON.statusCode) { 
+					if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
 						caption = '<g:message code="publishOKCaption"/>'
 				    	var msgTemplate = "<g:message code='documentLinkMsg'/>";
 						msg = "<p><g:message code='publishOKMsg'/>.</p>" + 

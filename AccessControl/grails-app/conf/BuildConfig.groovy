@@ -72,10 +72,10 @@ grails.project.dependency.resolution = {
 			//'org.apache.ant:ant-launcher:1.8.3'
 			) {
 				excludes "slf4j-api", "log4j", "commons-logging", "xalan",
-					"xml-apis", "groovy","commons-io"
+					"xml-apis", "groovy","commons-io", 'h2'
 			}
 			
-			runtime 'org.postgresql:postgresql:9.2-1003-jdbc4'
+			compile 'org.postgresql:postgresql:9.2-1003-jdbc4'
     }
 
     plugins {
@@ -87,7 +87,7 @@ grails.project.dependency.resolution = {
         compile ':cache:1.1.1'
 		compile ':executor:0.3'
 		compile ':rendering:0.4.4'
-		//runtime ':rest-doc-plugin:0.4'
+		//runtime 'org.votingsystem:rest-doc-plugin:0.5'
 		
 
         // plugins needed at runtime but not for compilation

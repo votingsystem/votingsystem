@@ -40,11 +40,16 @@
 
 package javax.mail.internet;
 
-import javax.mail.MessagingException;
-import javax.activation.*;
-import java.util.*;
-import java.io.*;
 import com.sun.mail.util.*;
+
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.mail.MessagingException;
+import java.io.*;
+import java.util.Hashtable;
+import java.util.Locale;
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
 
 /**
  * This is a utility class that provides various MIME related
@@ -221,7 +226,7 @@ public class MimeUtility {
      * <code>writeTo</code> method to examine the data.  This is more
      * efficient in the common case of a <code>DataHandler</code>
      * created with an object and a MIME type (for example, a
-     * "text/plain" String) because all the I/O is done in this
+     * ContentTypeVS.TEXT String) because all the I/O is done in this
      * thread.  In the case requiring an <code>InputStream</code> the
      * <code>DataHandler</code> uses a thread, a pair of pipe streams,
      * and the <code>writeTo</code> method to produce the data. <p>

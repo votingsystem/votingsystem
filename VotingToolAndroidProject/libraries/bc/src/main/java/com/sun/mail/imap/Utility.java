@@ -40,13 +40,11 @@
 
 package com.sun.mail.imap;
 
-import java.util.Vector;
-
-import javax.mail.*;
-
-import com.sun.mail.util.*;
 import com.sun.mail.imap.protocol.MessageSet;
 import com.sun.mail.imap.protocol.UIDSet;
+
+import javax.mail.Message;
+import java.util.Vector;
 
 /**
  * Holder for some static utility methods.

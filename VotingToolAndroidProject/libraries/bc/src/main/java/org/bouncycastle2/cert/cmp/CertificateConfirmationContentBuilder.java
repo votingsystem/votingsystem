@@ -1,20 +1,16 @@
 package org.bouncycastle2.cert.cmp;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.bouncycastle2.asn1.ASN1EncodableVector;
 import org.bouncycastle2.asn1.DERSequence;
 import org.bouncycastle2.asn1.cmp.CertConfirmContent;
 import org.bouncycastle2.asn1.cmp.CertStatus;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.cert.X509CertificateHolder;
-import org.bouncycastle2.operator.DefaultDigestAlgorithmIdentifierFinder;
-import org.bouncycastle2.operator.DigestAlgorithmIdentifierFinder;
-import org.bouncycastle2.operator.DigestCalculator;
-import org.bouncycastle2.operator.DigestCalculatorProvider;
-import org.bouncycastle2.operator.OperatorCreationException;
+import org.bouncycastle2.operator.*;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CertificateConfirmationContentBuilder
 {

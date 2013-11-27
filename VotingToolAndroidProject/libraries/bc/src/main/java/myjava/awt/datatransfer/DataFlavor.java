@@ -20,11 +20,17 @@
  */
 package myjava.awt.datatransfer;
 
-import java.io.*;
-import java.nio.*;
-import java.nio.charset.*;
-import java.util.*;
 import org.apache.harmony.awt.internal.nls.Messages;
+
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 
 public class DataFlavor implements Externalizable, Cloneable {

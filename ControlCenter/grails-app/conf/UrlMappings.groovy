@@ -12,31 +12,31 @@ class UrlMappings {
 		"500"(view:'/error500')
 		
 		
-		"/anuladorVoto/voto/${id}"{
-			controller = "anuladorVoto"
+		"/voteVSCanceller/voteVS/${id}"{
+			controller = "voteVSCanceller"
 			action = "get"
 			constraints {
 				id(matches:/\d*/)
 			}
 		}
 		
-		"/certificado/voto/hashHex/$hashHex"{
-			controller = "certificado"
-			action = "voto"
+		"/certificateVS/voteVS/hashHex/$hashHex"{
+			controller = "certificateVS"
+			action = "voteVS"
 		}
 		
-		"/certificado/usuario/$userId" {
-			controller = "certificado"
-			action = "usuario"
+		"/certificateVS/userVS/$userId" {
+			controller = "certificateVS"
+			action = "userVS"
 		}
 		
-		"/eventoVotacion"{
-			controller = "eventoVotacion"
+		"/eventVSElection"{
+			controller = "eventVSElection"
 			action = [POST:"save"]
 		}
 		
-		"/eventoVotacion/$id?"{
-			controller = "eventoVotacion"
+		"/eventVSElection/$id?"{
+			controller = "eventVSElection"
 			action = "index"
 			constraints {
 				id(matches:/\d*/)
@@ -44,17 +44,17 @@ class UrlMappings {
 		}
 		
 		
-		"/eventoVotacion/$id?/estadisticas"{
-			controller = "eventoVotacion"
-			action = "estadisticas"
+		"/eventVSElection/$id?/statistics"{
+			controller = "eventVSElection"
+			action = "statistics"
 			constraints {
 				id(matches:/\d*/)
 			}
 		}
 		
-		"/eventoVotacion/$id/comprobarFechas"{
-			controller = "eventoVotacion"
-			action = "comprobarFechas"
+		"/eventVSElection/$id/checkDates"{
+			controller = "eventVSElection"
+			action = "checkDates"
 			constraints {
 				id(matches:/\d*/)
 			}
@@ -68,18 +68,18 @@ class UrlMappings {
 			}
 		}
 		
-		"/subscripcion/votaciones/$feedType"{
-			controller = "subscripcion"
-			action = "votaciones"
+		"/subscriptionVS/elections/$feedType"{
+			controller = "subscriptionVS"
+			action = "elections"
 		}
 		
-		"/voto/hashHex/$hashHex" {
-			controller = "voto"
-			action = [GET:"hashCertificadoVotoHex"]
+		"/voteVS/hashHex/$hashHex" {
+			controller = "voteVS"
+			action = [GET:"hashCertVoteHex"]
 		}
 		
-		"/voto/${id}" {
-			controller = "voto"
+		"/voteVS/${id}" {
+			controller = "voteVS"
 			action = "get"
 			constraints {
 				id(matches:/\d*/)
@@ -87,15 +87,15 @@ class UrlMappings {
 		}
 		
 		"/errors/event/${id}" {
-			controller = "voto"
+			controller = "voteVS"
 			action = "errors"
 			constraints {
 				id(matches:/\d*/)
 			}
 		}
 		
-		"/eventoVotacion/$id/votingErrors" {
-			controller = "eventoVotacion"
+		"/eventVSElection/$id/votingErrors" {
+			controller = "eventVSElection"
 			action = "votingErrors"
 			constraints {
 				id(matches:/\d*/)

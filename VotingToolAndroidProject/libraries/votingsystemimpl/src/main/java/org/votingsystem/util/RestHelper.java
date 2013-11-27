@@ -1,7 +1,6 @@
 package org.votingsystem.util;
 
 import android.util.Log;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.client.methods.HttpDelete;
@@ -21,6 +20,7 @@ import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 import org.json.JSONObject;
+import org.votingsystem.model.ContentTypeVS;
 
 public class RestHelper {
 	
@@ -61,12 +61,12 @@ public class RestHelper {
     public static HttpResponse doPost (final String url,final JSONObject json) {
     	Log.d(CLASSTAG + ".doPost a url: " + url, "- JSON: " + json.toString());
 		HttpPost httpPost = new HttpPost(url);
-    	httpPost.addHeader("Accept", "application/json");
-    	httpPost.addHeader("Content-Type", "application/json"); 
+    	httpPost.addHeader("Accept", ContentTypeVS.JSON);
+    	httpPost.addHeader("Content-Type", ContentTypeVS.JSON);
     	HttpResponse response = null;
     	try {
     	    StringEntity entity = new StringEntity(json.toString(), "UTF-8");
-    	    entity.setContentType("application/json");
+    	    entity.setContentType(ContentTypeVS.JSON);
     	    httpPost.setEntity(entity);
     	    // execute is a blocking call, it's best to call this code in a thread separate from the ui's
     	    response = httpClient.execute(httpPost);
@@ -81,12 +81,12 @@ public class RestHelper {
     public static HttpResponse doPut (final String url,final JSONObject json) {
     	Log.d(CLASSTAG + ".doPut a url: " + url, "- JSON: " + json.toString());
 		HttpPut httpPut = new HttpPut(url);
-		httpPut.addHeader("Accept", "application/json");
-		httpPut.addHeader("Content-Type", "application/json");       
+		httpPut.addHeader("Accept", ContentTypeVS.JSON);
+		httpPut.addHeader("Content-Type", ContentTypeVS.JSON);
 		HttpResponse response = null;
     	try {
     	    StringEntity entity = new StringEntity(json.toString(), "UTF-8");
-    	    entity.setContentType("application/json");
+    	    entity.setContentType(ContentTypeVS.JSON);
     	    httpPut.setEntity(entity);
     	    // execute is a blocking call, it's best to call this code in a thread separate from the ui's
     	    response = httpClient.execute(httpPut);
@@ -101,7 +101,7 @@ public class RestHelper {
     public static HttpResponse doDelete (final String url) {
     	Log.d(CLASSTAG + ".doDelete" , " - url: " + url);
 		HttpDelete httpDelete = new HttpDelete(url);
-		httpDelete.addHeader("Accept", "application/json");  
+		httpDelete.addHeader("Accept", ContentTypeVS.JSON);
 		HttpResponse response = null;
     	try {
     		// execute is a blocking call, it's best to call this code in a thread separate from the ui's

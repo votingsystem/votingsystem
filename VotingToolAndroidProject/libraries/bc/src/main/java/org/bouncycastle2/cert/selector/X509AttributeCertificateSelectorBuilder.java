@@ -1,18 +1,13 @@
 package org.bouncycastle2.cert.selector;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
 import org.bouncycastle2.asn1.x509.GeneralName;
 import org.bouncycastle2.cert.AttributeCertificateHolder;
 import org.bouncycastle2.cert.AttributeCertificateIssuer;
 import org.bouncycastle2.cert.X509AttributeCertificateHolder;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.*;
 
 /**
  * This class builds selectors according to the set criteria.

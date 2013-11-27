@@ -40,7 +40,6 @@
 
 package com.sun.mail.mbox;
 
-import java.io.*;
 import javax.mail.*;
 
 public class MboxStore extends Store {

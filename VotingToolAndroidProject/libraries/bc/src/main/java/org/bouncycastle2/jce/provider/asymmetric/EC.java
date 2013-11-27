@@ -1,12 +1,12 @@
 package org.bouncycastle2.jce.provider.asymmetric;
 
-import java.util.HashMap;
-
 import org.bouncycastle2.asn1.DERObjectIdentifier;
 import org.bouncycastle2.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle2.asn1.eac.EACObjectIdentifiers;
 import org.bouncycastle2.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle2.asn1.x9.X9ObjectIdentifiers;
+
+import java.util.HashMap;
 
 public class EC
 {

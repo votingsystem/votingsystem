@@ -47,26 +47,14 @@ import com.itextpdf.text.error_messages.MessageLocalization;
 import com.itextpdf.text.log.Level;
 import com.itextpdf.text.log.Logger;
 import com.itextpdf.text.log.LoggerFactory;
-
 import org.bouncycastle2.asn1.DERObjectIdentifier;
 import org.bouncycastle2.asn1.DEROctetString;
 import org.bouncycastle2.asn1.ocsp.OCSPObjectIdentifiers;
 import org.bouncycastle2.asn1.x509.X509Extension;
 import org.bouncycastle2.asn1.x509.X509Extensions;
-import org.bouncycastle2.ocsp.BasicOCSPResp;
-import org.bouncycastle2.ocsp.CertificateID;
-import org.bouncycastle2.ocsp.CertificateStatus;
-import org.bouncycastle2.ocsp.OCSPException;
-import org.bouncycastle2.ocsp.OCSPReq;
-import org.bouncycastle2.ocsp.OCSPReqGenerator;
-import org.bouncycastle2.ocsp.OCSPResp;
-import org.bouncycastle2.ocsp.SingleResp;
+import org.bouncycastle2.ocsp.*;
 
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;

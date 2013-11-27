@@ -1,26 +1,18 @@
 package org.votingsystem.applet.validationtool.backup;
 
-import java.io.File;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-
-import org.votingsystem.applet.validationtool.ValidationToolContext;
+import org.apache.log4j.Logger;
 import org.votingsystem.applet.validationtool.model.MetaInf;
 import org.votingsystem.applet.validationtool.model.SignedFile;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 
-import org.apache.log4j.Logger;
-import org.votingsystem.model.ContextVS;
+import java.io.File;
+import java.security.cert.X509Certificate;
+import java.util.*;
+import java.util.concurrent.Callable;
 
 /**
 * @author jgzornoza
@@ -41,7 +33,7 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
     
     public ClaimBackupValidator(String backupPath, 
             ValidatorListener validatorListener) throws Exception {
-        ValidationToolContext.init(null, "log4jValidationTool.properties", 
+        ContextVS.init(null, "log4jValidationTool.properties", 
             "validationToolMessages_", "es");
         backupDir = new File(backupPath);
         this.validatorListener =  validatorListener;
@@ -51,16 +43,15 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
         //logger.debug("checkByteArraySize");
         String result = null;
         if (signedFileBytes.length > ContextVS.SIGNED_MAX_FILE_SIZE) {
-            result = ContextVS.INSTANCE.getString("fileSizeExceededMsg", 
-                        ContextVS.SIGNED_MAX_FILE_SIZE_KB, signedFileBytes.length);
+            result = ContextVS.getInstance().getMessage("fileSizeExceededMsg",                    ContextVS.SIGNED_MAX_FILE_SIZE_KB, signedFileBytes.length);
         }
         return result;
     }
     
     @Override public ResponseVS call() throws Exception {
         long begin = System.currentTimeMillis();
-        claimFileName = ContextVS.INSTANCE.
-                getString("claimFileName");
+        claimFileName = ContextVS.getInstance().
+                getMessage("claimFileName");
 
         String backupPath = backupDir.getAbsolutePath();
         File trustedCertsFile = new File(backupPath + File.separator + 
@@ -81,9 +72,7 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
             logger.error(" - metaInfFile: " + metaInfFile.getAbsolutePath() + " not found");
         } else {
             metaInf = MetaInf.parse(FileUtils.getStringFromFile(metaInfFile));
-            String serverURL = metaInf.getServerURL();
-            if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
-            eventURL= serverURL + "evento/" + metaInf.getId();
+            eventURL= metaInf.getServerURL() + "eventvs/" + metaInf.getId();
         }
 
         ResponseVS responseVS = validateClaims();
@@ -149,8 +138,8 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
                                 signedFile.getSignerNif());
                         if(repeatedSignature) {
                             numClaimsERROR++;
-                            errorMessage = ContextVS.INSTANCE.getString(
-                                    "claimSignatureRepeatedErrorMsg", 
+                            errorMessage = ContextVS.getInstance().getMessage(
+                                    "claimSignatureRepeatedErrorMsg",
                                     signedFile.getSignerNif()) + " - " + 
                                     claim.getAbsolutePath() + " - " + 
                                     signersNifMap.get(signedFile.getSignerNif());
@@ -182,9 +171,9 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
         String message = null;
         if(metaInf.getNumSignatures() != numClaimsOK) {
             statusCode = ResponseVS.SC_ERROR;
-            message = ContextVS.INSTANCE.getString("numClaimSignaturesErrorMsg", 
+            message = ContextVS.getInstance().getMessage("numClaimSignaturesErrorMsg",
                     metaInf.getNumAccessRequest(), numClaimsOK);
-        } else message =  ContextVS.INSTANCE.getString(
+        } else message =  ContextVS.getInstance().getMessage(
                 "claimsValidationResultMsg", metaInf.getNumAccessRequest());
         return new ResponseVS(statusCode, message);
     }

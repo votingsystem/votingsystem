@@ -1,6 +1,6 @@
 package org.votingsystem.controlcenter.controller
 
-import org.votingsystem.controlcenter.model.*;
+import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.ResponseVS;
 
 /**
@@ -26,14 +26,14 @@ class MessageSMIMEController {
 		}
         if (messageSMIME) {
             response.status = ResponseVS.SC_OK
-            response.contentLength = messageSMIME.contenido.length
-            response.setContentType("text/plain")
-            response.outputStream <<  messageSMIME.contenido
+            response.contentLength = messageSMIME.content.length
+            response.setContentType(ContentTypeVS.TEXT)
+            response.outputStream <<  messageSMIME.content
             response.outputStream.flush()
             return false
         }
         response.status = ResponseVS.SC_NOT_FOUND
-        render message(code: 'messageSMIME.eventoNoEncontrado', args:[params.id])
+        render message(code: 'eventVSNotFound', args:[params.id])
         return false
     }
 	

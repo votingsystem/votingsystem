@@ -1,10 +1,14 @@
 package org.bouncycastle2.jce;
 
-import java.io.*;
-import java.security.cert.*;
+import org.bouncycastle2.asn1.ASN1Object;
+import org.bouncycastle2.asn1.x509.TBSCertList;
+import org.bouncycastle2.asn1.x509.TBSCertificateStructure;
 
-import org.bouncycastle2.asn1.*;
-import org.bouncycastle2.asn1.x509.*;
+import java.io.IOException;
+import java.security.cert.CRLException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
 
 /**
  * a utility class that will extract X509Principal objects from X.509 certificates.

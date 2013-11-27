@@ -1,14 +1,13 @@
 package org.bouncycastle2.cert.ocsp.jcajce;
 
-import java.security.PublicKey;
-
-import javax.security.auth.x500.X500Principal;
-
 import org.bouncycastle2.asn1.x500.X500Name;
 import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle2.cert.ocsp.OCSPException;
 import org.bouncycastle2.cert.ocsp.RespID;
 import org.bouncycastle2.operator.DigestCalculator;
+
+import javax.security.auth.x500.X500Principal;
+import java.security.PublicKey;
 
 public class JcaRespID
     extends RespID

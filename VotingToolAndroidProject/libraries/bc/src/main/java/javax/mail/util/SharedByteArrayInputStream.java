@@ -40,8 +40,9 @@
 
 package javax.mail.util;
 
-import java.io.*;
 import javax.mail.internet.SharedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 /**
  * A ByteArrayInputStream that implements the SharedInputStream interface,

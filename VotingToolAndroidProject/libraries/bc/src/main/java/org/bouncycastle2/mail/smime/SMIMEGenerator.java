@@ -1,11 +1,7 @@
 package org.bouncycastle2.mail.smime;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.Provider;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import org.bouncycastle2.cms.CMSEnvelopedGenerator;
+import org.bouncycastle2.util.Strings;
 
 import javax.crypto.KeyGenerator;
 import javax.mail.Header;
@@ -14,9 +10,12 @@ import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
-
-import org.bouncycastle2.util.Strings;
-import org.bouncycastle2.cms.CMSEnvelopedGenerator;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * super class of the various generators.

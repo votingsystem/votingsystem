@@ -12,33 +12,21 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.text.Html;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.view.animation.AnimationUtils;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.TextView;
-
+import android.widget.*;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
-import org.votingsystem.android.model.ContextVSAndroid;
-import org.votingsystem.android.model.DatosBusqueda;
-import org.votingsystem.android.model.EventQueryResponse;
-import org.votingsystem.android.model.EventVSAndroid;
+import org.votingsystem.android.model.AndroidContextVS;
 import org.votingsystem.model.EventVS;
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.util.DateUtils;
+import org.votingsystem.android.model.EventQueryResponse;
+import org.votingsystem.android.model.QueryData;
 import org.votingsystem.android.util.EventState;
 import org.votingsystem.android.util.HttpHelper;
 import org.votingsystem.android.util.ServerPaths;
 import org.votingsystem.android.util.SubSystem;
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.DateUtils;
 
 import java.text.Collator;
 import java.util.ArrayList;
@@ -66,7 +54,7 @@ public class EventListFragment extends ListFragment
     private SubSystem subSystem = SubSystem.VOTING;
     private String queryStr = null;
     private int offset = 0;
-    private static ContextVSAndroid contextVSAndroid = null;
+    private static AndroidContextVS androidContextVS = null;
 
     /**
      * Perform alphabetical comparison of application entry objects.
@@ -80,8 +68,8 @@ public class EventListFragment extends ListFragment
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVSAndroid = contextVSAndroid.getInstance(getActivity().getBaseContext());
-        if(contextVSAndroid.getAccessControlURL() == null) {
+        androidContextVS = androidContextVS.getInstance(getActivity().getBaseContext());
+        if(androidContextVS.getAccessControlURL() == null) {
             Intent intent = new Intent(getActivity(), MainActivity.class);
             startActivity(intent);
         }
@@ -195,9 +183,9 @@ public class EventListFragment extends ListFragment
 
     @Override public void onListItemClick(ListView l, View v, int position, long id) {
         Log.d(TAG +  ".onListItemClick", "Item clicked: " + id);
-        EventVSAndroid event = ((EventVSAndroid) getListAdapter().getItem(position));
-        contextVSAndroid.setEvent(event);
-        contextVSAndroid.setEventList(mAdapter.getEvents());
+        EventVS event = ((EventVS) getListAdapter().getItem(position));
+        androidContextVS.setEvent(event);
+        androidContextVS.setEventList(mAdapter.getEvents());
         Intent intent = new Intent(getActivity(), EventPagerActivity.class);
         startActivity(intent);
     }
@@ -286,47 +274,47 @@ public class EventListFragment extends ListFragment
             } else {
                 view = convertView;
             }
-            EventVSAndroid eventVSAndroid = (EventVSAndroid) getItem(position);
-            if (eventVSAndroid != null) {
+            EventVS eventVS = (EventVS) getItem(position);
+            if (eventVS != null) {
                 LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
                 linearLayout.setBackgroundColor(Color.WHITE);
                 TextView subject = (TextView) view.findViewById(R.id.event_subject);
                 TextView dateInfo = (TextView) view.findViewById(R.id.event_date_info);
                 TextView author = (TextView) view.findViewById(R.id.event_author);
-                subject.setText(eventVSAndroid.getAsunto());
+                subject.setText(eventVS.getSubject());
                 String dateInfoStr = null;
                 ImageView imgView = (ImageView)view.findViewById(R.id.event_icon);
-                switch(eventVSAndroid.getEstadoEnumValue()) {
-                    case ACTIVO:
+                switch(eventVS.getStateEnumValue()) {
+                    case ACTIVE:
                         imgView.setImageResource(R.drawable.open);
                         dateInfoStr = "<b>" + getContext().getString(R.string.remain_lbl,
-                                DateUtils.getElpasedTimeHoursFromNow(eventVSAndroid.getFechaFin()))  +"</b>";
+                                DateUtils.getElpasedTimeHoursFromNow(eventVS.getDateFinish()))  +"</b>";
                         break;
-                    case PENDIENTE_COMIENZO:
+                    case AWAITING:
                         imgView.setImageResource(R.drawable.pending);
                         dateInfoStr = "<b>" + getContext().getString(R.string.inicio_lbl) + "</b>: " +
-                                DateUtils.getShortSpanishStringFromDate(eventVSAndroid.getFechaInicio()) + " - " +
+                                DateUtils.getShortSpanishStringFromDate(eventVS.getDateBegin()) + " - " +
                                 "<b>" + getContext().getString(R.string.fin_lbl) + "</b>: " +
-                                DateUtils.getShortSpanishStringFromDate(eventVSAndroid.getFechaFin());
+                                DateUtils.getShortSpanishStringFromDate(eventVS.getDateFinish());
                         break;
-                    case CANCELADO:
-                    case FINALIZADO:
+                    case CANCELLED:
+                    case TERMINATED:
                         imgView.setImageResource(R.drawable.closed);
                         dateInfoStr = "<b>" + getContext().getString(R.string.inicio_lbl) + "</b>: " +
-                                DateUtils.getShortSpanishStringFromDate(eventVSAndroid.getFechaInicio()) + " - " +
+                                DateUtils.getShortSpanishStringFromDate(eventVS.getDateBegin()) + " - " +
                                 "<b>" + getContext().getString(R.string.fin_lbl) + "</b>: " +
-                                DateUtils.getShortSpanishStringFromDate(eventVSAndroid.getFechaFin());
+                                DateUtils.getShortSpanishStringFromDate(eventVS.getDateFinish());
                         break;
                     default:
-                        Log.d(TAG +  ".getView", " - event state: " + eventVSAndroid.getEstadoEnumValue());
+                        Log.d(TAG +  ".getView", " - event state: " + eventVS.getStateEnumValue());
                 }
 
                 if(dateInfoStr != null) dateInfo.setText(Html.fromHtml(dateInfoStr));
                 else dateInfo.setVisibility(View.GONE);
-                if(eventVSAndroid.getUserVSBase() != null && !"".equals(
-                        eventVSAndroid.getUserVSBase().getNombreCompleto())) {
+                if(eventVS.getUserVS() != null && !"".equals(
+                        eventVS.getUserVS().getFullName())) {
                     String authorStr =  "<b>" + getContext().getString(R.string.author_lbl) + "</b>: " +
-                            eventVSAndroid.getUserVSBase().getNombreCompleto();
+                            eventVS.getUserVS().getFullName();
                     author.setText(Html.fromHtml(authorStr));
                 } else author.setVisibility(View.GONE);
             }
@@ -373,24 +361,24 @@ public class EventListFragment extends ListFragment
                 HttpResponse response = null;
                 if(queryString != null) {
                     String url = ServerPaths.getURLSearch(
-                            contextVSAndroid.getAccessControlURL(), 0, contextVSAndroid.EVENTS_PAGE_SIZE);
-                    DatosBusqueda datosBusqueda = new DatosBusqueda(
+                            androidContextVS.getAccessControlURL(), 0, androidContextVS.EVENTS_PAGE_SIZE);
+                    QueryData queryData = new QueryData(
                             subSystem.getEventType(), eventState.getEventState(), queryString);
                     response = HttpHelper.sendByteArray(
-                            datosBusqueda.toJSON().toString().getBytes(), null, url);
+                            queryData.toJSON().toString().getBytes(), null, url);
                     searchTextView.setText(Html.fromHtml(getContext().getString(
                             R.string.search_query_info_msg, queryString)));
                     searchTextView.setVisibility(View.VISIBLE);
                 } else {
                     String url = ServerPaths.getURLEventos(
-                            contextVSAndroid.getAccessControlURL(), eventState, subSystem, contextVSAndroid.EVENTS_PAGE_SIZE, offset);
+                            androidContextVS.getAccessControlURL(), eventState, subSystem, androidContextVS.EVENTS_PAGE_SIZE, offset);
                     response = HttpHelper.getData(url, null);
                     searchTextView.setVisibility(View.GONE);
                 }
                 int statusCode = response.getStatusLine().getStatusCode();
                 if(ResponseVS.SC_OK == statusCode) {
                     EventQueryResponse consulta = EventQueryResponse.parse(EntityUtils.toString(response.getEntity()));
-                    eventList = consulta.getEventVSBases();
+                    eventList = consulta.getEventVSs();
                 } else errorLoadingEventsMsg = response.getStatusLine().toString();
             } catch (Exception ex) {
                 Log.e(TAG + ".doInBackground", ex.getMessage(), ex);

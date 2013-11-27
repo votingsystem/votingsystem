@@ -48,11 +48,7 @@ import com.itextpdf.text.error_messages.MessageLocalization;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Properties;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
  * Creates a CJK font compatible with the fonts in the Adobe Asian font Pack.

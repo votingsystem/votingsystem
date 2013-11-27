@@ -1,42 +1,20 @@
 package org.bouncycastle2.x509;
 
+import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.asn1.x509.*;
+import org.bouncycastle2.jce.X509Principal;
+import org.bouncycastle2.jce.provider.X509CRLObject;
+
+import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.SignatureException;
+import java.security.*;
 import java.security.cert.CRLException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
-
-import javax.security.auth.x500.X500Principal;
-
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1InputStream;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DERBitString;
-import org.bouncycastle2.asn1.DEREncodable;
-import org.bouncycastle2.asn1.DERGeneralizedTime;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DERSequence;
-import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.asn1.x509.CertificateList;
-import org.bouncycastle2.asn1.x509.TBSCertList;
-import org.bouncycastle2.asn1.x509.Time;
-import org.bouncycastle2.asn1.x509.V2TBSCertListGenerator;
-import org.bouncycastle2.asn1.x509.X509Extensions;
-import org.bouncycastle2.asn1.x509.X509ExtensionsGenerator;
-import org.bouncycastle2.asn1.x509.X509Name;
-import org.bouncycastle2.jce.X509Principal;
-import org.bouncycastle2.jce.provider.X509CRLObject;
 
 /**
  * class to produce an X.509 Version 2 CRL.

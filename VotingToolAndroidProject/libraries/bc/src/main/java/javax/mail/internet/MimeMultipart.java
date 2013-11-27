@@ -40,13 +40,13 @@
 
 package javax.mail.internet;
 
-import javax.mail.*;
-import javax.activation.*;
-import java.util.*;
-import java.io.*;
-import com.sun.mail.util.LineOutputStream;
-import com.sun.mail.util.LineInputStream;
 import com.sun.mail.util.ASCIIUtility;
+import com.sun.mail.util.LineInputStream;
+import com.sun.mail.util.LineOutputStream;
+
+import javax.activation.DataSource;
+import javax.mail.*;
+import java.io.*;
 
 /**
  * The MimeMultipart class is an implementation of the abstract Multipart

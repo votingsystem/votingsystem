@@ -4,7 +4,6 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.client.methods.HttpGet;
@@ -33,7 +32,7 @@ import java.text.ParseException;
 import java.util.Map;
 import java.util.Set;
 
-import static org.votingsystem.android.model.ContextVSAndroid.NOMBRE_ARCHIVO_FIRMADO;
+import static org.votingsystem.android.model.AndroidContextVS.SIGNED_FILE_NAME;
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -73,7 +72,7 @@ public class HttpHelper {
         HttpGet httpget = new HttpGet(serverURL);
         if(contentType != null) httpget.setHeader("Content-Type", contentType);
         HttpResponse response = httpclient.execute(httpget);
-        Log.d(TAG + ".obtenerInformacion" ,"----------------------------------------");
+        Log.d(TAG + ".getInformacion" ,"----------------------------------------");
         /*Header[] headers = response.getAllHeaders();
         for (int i = 0; i < headers.length; i++) {
         System.out.println(headers[i]);
@@ -90,7 +89,7 @@ public class HttpHelper {
         		+ " - file: " + file.getAbsolutePath());
         FileBody fileBody = new FileBody(file);
         MultipartEntity reqEntity = new MultipartEntity();
-        reqEntity.addPart(NOMBRE_ARCHIVO_FIRMADO, fileBody);
+        reqEntity.addPart(SIGNED_FILE_NAME, fileBody);
         httpPost.setEntity(reqEntity);
         HttpResponse response = httpclient.execute(httpPost);
         Log.d(TAG + ".sendFile" , "----------------------------------------");

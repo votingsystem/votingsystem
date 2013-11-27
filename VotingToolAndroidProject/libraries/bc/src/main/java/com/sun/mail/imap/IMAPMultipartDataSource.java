@@ -40,16 +40,14 @@
 
 package com.sun.mail.imap;
 
-import java.io.InputStream;
-import java.io.IOException;
+import com.sun.mail.imap.protocol.BODYSTRUCTURE;
+
+import javax.mail.BodyPart;
+import javax.mail.MessagingException;
+import javax.mail.MultipartDataSource;
+import javax.mail.internet.MimePart;
+import javax.mail.internet.MimePartDataSource;
 import java.util.Vector;
-
-import javax.mail.*;
-import javax.mail.internet.*;
-
-import com.sun.mail.util.*;
-import com.sun.mail.iap.*;
-import com.sun.mail.imap.protocol.*;
 
 /**
  * This class 

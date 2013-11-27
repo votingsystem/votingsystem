@@ -11,8 +11,8 @@ import java.util.Set;
 public class TagVS {
 
     private Long id;
-    private String nombre;
-    private Long frecuencia;
+    private String name;
+    private Long frequency;
     private Date dateCreated;
     private Date lastUpdated;
 
@@ -29,12 +29,12 @@ public class TagVS {
         this.id = id;
     }
     
-    public String getNombre() {
-        return this.nombre;
+    public String getName() {
+        return this.name;
     }
     
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Set<EventTagVS> getEventTagVSes() {
@@ -45,12 +45,12 @@ public class TagVS {
         this.eventTagVSes = eventTagVSes;
     }
 
-    public void setFrecuencia(Long frecuencia) {
-        this.frecuencia = frecuencia;
+    public void setFrequency(Long frequency) {
+        this.frequency = frequency;
     }
 
-    public Long getFrecuencia() {
-        return frecuencia;
+    public Long getFrequency() {
+        return frequency;
     }
 
     public void setDateCreated(Date dateCreated) {

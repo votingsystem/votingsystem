@@ -1,7 +1,6 @@
 package org.votingsystem.signature.util;
 
 import android.util.Log;
-
 import org.bouncycastle2.asn1.ASN1Set;
 import org.bouncycastle2.asn1.DERObjectIdentifier;
 import org.bouncycastle2.asn1.cms.Attribute;
@@ -26,35 +25,16 @@ import org.bouncycastle2.x509.X509V3CertificateGenerator;
 import org.bouncycastle2.x509.extension.AuthorityKeyIdentifierStructure;
 import org.bouncycastle2.x509.extension.SubjectKeyIdentifierStructure;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
+import javax.mail.MessagingException;
+import javax.security.auth.x500.X500Principal;
+import java.io.*;
 import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.KeyPair;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.cert.CertPath;
-import java.security.cert.CertPathBuilder;
-import java.security.cert.CertPathBuilderException;
-import java.security.cert.CertPathBuilderResult;
-import java.security.cert.CertStore;
-import java.security.cert.CertificateFactory;
-import java.security.cert.PKIXBuilderParameters;
-import java.security.cert.TrustAnchor;
-import java.security.cert.X509CertSelector;
-import java.security.cert.X509Certificate;
+import java.security.*;
+import java.security.cert.*;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Set;
-
-import javax.mail.MessagingException;
-import javax.security.auth.x500.X500Principal;
 
 /**
 * @author jgzornoza
@@ -87,11 +67,11 @@ public class CertUtil {
     }
     
     public static X509Certificate[] generateCertificate(KeyPair keyPair,Date fechaIncio, 
-    		Date fechaFin, String principal) throws Exception {
+    		Date dateFinish, String principal) throws Exception {
 		X509v1CertificateBuilder certGen = new JcaX509v1CertificateBuilder(
 	   			new X500Name(principal),
 	   			BigInteger.valueOf(System.currentTimeMillis()),
-	   			fechaIncio, fechaFin, new X500Name(principal),
+	   			fechaIncio, dateFinish, new X500Name(principal),
 	   			keyPair.getPublic());
    		JcaContentSignerBuilder contentSignerBuilder = new JcaContentSignerBuilder("SHA256withRSA");
    		ContentSigner contentSigner = contentSignerBuilder.build(keyPair.getPrivate());  
@@ -242,7 +222,7 @@ public class CertUtil {
      *            list of trusted (usually self-signed) certificates.
      * 
      * @return true if the certificate's signature is valid and can be validated
-     *         using a trustedCertficated, false otherwise.
+     *         using a trustedCertificated, false otherwise.
      */
     public static CertPath verifyCertificate(
             X509Certificate cert, CertStore store, Set<TrustAnchor> trustAnchors) 
@@ -285,7 +265,7 @@ public class CertUtil {
         
     }
     
-    public static byte[] fromX509CertToPEM (X509Certificate certificate) throws IOException {
+    public static byte[] getPEMEncoded (X509Certificate certificate) throws IOException {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
         PEMWriter pemWrt = new PEMWriter(new OutputStreamWriter(bOut));
         pemWrt.writeObject(certificate);

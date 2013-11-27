@@ -1,32 +1,20 @@
 package org.votingsystem.applet.validationtool.backup;
 
-import java.io.File;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicLong;
-import org.votingsystem.model.AppHostVS;
-
-import org.votingsystem.applet.validationtool.ValidationToolContext;
+import org.apache.log4j.Logger;
 import org.votingsystem.applet.validationtool.model.MetaInf;
 import org.votingsystem.applet.validationtool.model.RepresentativeData;
 import org.votingsystem.applet.validationtool.model.RepresentativesData;
 import org.votingsystem.applet.validationtool.model.SignedFile;
-import org.votingsystem.model.OptionVS;
-import org.votingsystem.model.OperationVS;
-import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.*;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 
-import org.apache.log4j.Logger;
-import org.votingsystem.model.ContextVS;
+import java.io.File;
+import java.security.cert.X509Certificate;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
 * @author jgzornoza
@@ -53,7 +41,7 @@ public class VotingBackupValidator implements Callable<ResponseVS>, AppHostVS {
     
     public VotingBackupValidator(String backupPath, 
             ValidatorListener validatorListener) throws Exception {
-        ValidationToolContext.init(this, "log4jValidationTool.properties", 
+        ContextVS.init(this, "log4jValidationTool.properties", 
                     "validationToolMessages_", "es");
         backupDir = new File(backupPath);
         this.validatorListener =  validatorListener;
@@ -65,20 +53,19 @@ public class VotingBackupValidator implements Callable<ResponseVS>, AppHostVS {
         //logger.debug("checkByteArraySize");
         String result = null;
         if (signedFileBytes.length > ContextVS.SIGNED_MAX_FILE_SIZE) {
-            result = ContextVS.INSTANCE.getString("fileSizeExceededMsg", 
-                        ContextVS.SIGNED_MAX_FILE_SIZE_KB, signedFileBytes.length);
+            result = ContextVS.getInstance().getMessage("fileSizeExceededMsg",                    ContextVS.SIGNED_MAX_FILE_SIZE_KB, signedFileBytes.length);
         }
         return result;
     }
     
     @Override public ResponseVS call() throws Exception {
         long begin = System.currentTimeMillis();
-        representativeReportFileName = ContextVS.INSTANCE.
-                getString("representativeReportFileName");
-        accessRequestFileName = ContextVS.INSTANCE.
-                getString("accessRequestFileName");
-        representativeVoteFileName = ContextVS.INSTANCE.
-                getString("representativeVoteFileName");
+        representativeReportFileName = ContextVS.getInstance().
+                getMessage("representativeReportFileName");
+        accessRequestFileName = ContextVS.getInstance().
+                getMessage("accessRequestFileName");
+        representativeVoteFileName = ContextVS.getInstance().
+                getMessage("representativeVoteFileName");
 
         String backupPath = backupDir.getAbsolutePath();
         File trustedCertsFile = new File(backupPath + File.separator + 
@@ -105,7 +92,7 @@ public class VotingBackupValidator implements Callable<ResponseVS>, AppHostVS {
             metaInf = MetaInf.parse(FileUtils.getStringFromFile(metaInfFile));
             eventURL = metaInf.getEventURL();
         }
-        for(OptionVS option : metaInf.getOptionList()) {
+        for(FieldEventVS option : metaInf.getOptionList()) {
             optionsMap.put(option.getId(), new AtomicLong(0));
         }
         
@@ -171,7 +158,7 @@ public class VotingBackupValidator implements Callable<ResponseVS>, AppHostVS {
         long numVotesRepresentedByRepresentatives = 0;
         
         String repAccreditationsBackupPath = backupDir.getAbsolutePath() + 
-            File.separator + ContextVS.INSTANCE.getString("repAccreditationsBackupPartPath");
+            File.separator + ContextVS.getInstance().getMessage("repAccreditationsBackupPartPath");
         File representativesDir = new File(repAccreditationsBackupPath);
         File[] representativesDirs = representativesDir.listFiles();
         RepresentativesData representativesData = metaInf.getRepresentativesData();
@@ -204,8 +191,8 @@ public class VotingBackupValidator implements Callable<ResponseVS>, AppHostVS {
                                 numRepresentedWithAccessRequest++;
                                 numRepresentedWithVote++;
                             } else {
-                                String errorMsg = ContextVS.INSTANCE.getString(
-                                        "representedAccessRequestNotFound", 
+                                String errorMsg = ContextVS.getInstance().getMessage(
+                                        "representedAccessRequestNotFound",
                                         signedFile.getNifFromRepresented(),
                                         representativeNif);
                                 errorList.add(errorMsg);
@@ -244,7 +231,7 @@ public class VotingBackupValidator implements Callable<ResponseVS>, AppHostVS {
                             numVotesRepresentedByRepresentatives += numVotesRepresented;
                         } 
                     } else {
-                        String errorMsg = ContextVS.INSTANCE.getString(
+                        String errorMsg = ContextVS.getInstance().getMessage(
                                 "representativeVoteNotFound", representativeNif);
                         errorList.add(errorMsg);
                     }
@@ -257,9 +244,9 @@ public class VotingBackupValidator implements Callable<ResponseVS>, AppHostVS {
                 if(representativeDataMetaInf.getNumRepresentations() != numRepresentations ||
                     representativeDataMetaInf.getNumVotesRepresented() != numVotesRepresented ||
                     representativeDataMetaInf.getNumRepresentedWithVote() != numRepresentedWithVote) {           
-                    String errorMsg = ContextVS.INSTANCE.getString(
-                        "representativeDataErrorMsg", representativeNif, 
-                        representativeDataMetaInf.getString(), msg);
+                    String errorMsg = ContextVS.getInstance().getMessage(
+                            "representativeDataErrorMsg", representativeNif,
+                            representativeDataMetaInf.getString(), msg);
                     errorList.add(errorMsg);
                 } 
             }
@@ -278,7 +265,7 @@ public class VotingBackupValidator implements Callable<ResponseVS>, AppHostVS {
                 representativesData.getNumVotesRepresentedByRepresentatives() 
                 != numVotesRepresentedByRepresentatives) {
             statusCode = ResponseVS.SC_ERROR;
-            message = ContextVS.INSTANCE.getString(
+            message = ContextVS.getInstance().getMessage(
                     "representativesDataErrorMsg", representativesData.getString(),
                     message);
             errorList.add(message);
@@ -311,8 +298,8 @@ public class VotingBackupValidator implements Callable<ResponseVS>, AppHostVS {
                         boolean repeatedAccessrequest = signersNifMap.containsKey(signedFile.getSignerNif());
                         if(repeatedAccessrequest) {
                             numAccessRequestERROR++;
-                            errorMessage = ContextVS.INSTANCE.getString(
-                                    "accessRequetsRepeatedErrorMsg", 
+                            errorMessage = ContextVS.getInstance().getMessage(
+                                    "accessRequetsRepeatedErrorMsg",
                                     signedFile.getSignerNif()) + " - " + 
                                     accessRequest.getAbsolutePath() + " - " + 
                                     signersNifMap.get(signedFile.getSignerNif());
@@ -344,9 +331,9 @@ public class VotingBackupValidator implements Callable<ResponseVS>, AppHostVS {
         String message = null;
         if(metaInf.getNumAccessRequest() != numAccessRequestOK) {
             statusCode = ResponseVS.SC_ERROR;
-            message = ContextVS.INSTANCE.getString("numAccessRequestErrorMsg", 
+            message = ContextVS.getInstance().getMessage("numAccessRequestErrorMsg",
                     metaInf.getNumAccessRequest(), numAccessRequestOK);
-        } else message =  ContextVS.INSTANCE.getString(
+        } else message =  ContextVS.getInstance().getMessage(
                 "accessRequestValidationResultMsg", metaInf.getNumAccessRequest());
         return new ResponseVS(statusCode, message);
     }
@@ -376,7 +363,7 @@ public class VotingBackupValidator implements Callable<ResponseVS>, AppHostVS {
                         if(repeatedVote){
                             numVotesERROR++;
                             statusCode = ResponseVS.SC_ERROR;
-                            String msg = ContextVS.INSTANCE.getString(
+                            String msg = ContextVS.getInstance().getMessage(
                                     "voteRepeatedErrorMsg", signedFile.getNumSerieSignerCert()) + " - " + 
                                     vote.getAbsolutePath() + " - " + 
                                     signerCertMap.get(signedFile.getNumSerieSignerCert());
@@ -414,15 +401,15 @@ public class VotingBackupValidator implements Callable<ResponseVS>, AppHostVS {
         String message = null;
         if(metaInf.getNumVotes() != numVotesOK) {
             statusCode = ResponseVS.SC_ERROR;
-            message = ContextVS.INSTANCE.getString("numVotesErrorMsg", 
+            message = ContextVS.getInstance().getMessage("numVotesErrorMsg",
                     metaInf.getNumVotes(), numVotesOK);
             
         }
         if(metaInf.getRepresentativesData().getNumRepresentativesWithVote() != 
                 numRepresentativeVotes) {
             statusCode = ResponseVS.SC_ERROR;
-            String msg = ContextVS.INSTANCE.getString("numRepresentativesVotesErrorMsg", 
-                    metaInf.getRepresentativesData().getNumRepresentativesWithVote(), 
+            String msg = ContextVS.getInstance().getMessage("numRepresentativesVotesErrorMsg",
+                    metaInf.getRepresentativesData().getNumRepresentativesWithVote(),
                     numRepresentativeVotes);
             if(message == null) message = msg;
             else message = msg.concat("\n" + msg);
@@ -443,11 +430,5 @@ public class VotingBackupValidator implements Callable<ResponseVS>, AppHostVS {
     @Override public void sendMessageToHost(OperationVS operacion) {
         throw new UnsupportedOperationException("Not supported yet."); 
     }
-
-    @Override public OperationVS getPendingOperation() {
-        throw new UnsupportedOperationException("Not supported yet."); 
-    }
-
-    
 
 }

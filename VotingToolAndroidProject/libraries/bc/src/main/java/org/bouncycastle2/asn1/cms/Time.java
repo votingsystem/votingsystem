@@ -1,11 +1,6 @@
 package org.bouncycastle2.asn1.cms;
 
-import org.bouncycastle2.asn1.ASN1Choice;
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1TaggedObject;
-import org.bouncycastle2.asn1.DERGeneralizedTime;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERUTCTime;
+import org.bouncycastle2.asn1.*;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

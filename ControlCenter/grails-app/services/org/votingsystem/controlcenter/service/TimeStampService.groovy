@@ -1,34 +1,25 @@
 package org.votingsystem.controlcenter.service
 
-import org.votingsystem.controlcenter.model.*
 import org.bouncycastle.asn1.ASN1OctetString
 import org.bouncycastle.asn1.DERObject
-import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.*;
-
-import grails.converters.JSON
-import java.security.cert.X509Certificate;
-
-import java.util.Locale;
-import java.util.concurrent.atomic.AtomicBoolean
-
+import org.bouncycastle.asn1.cms.CMSAttributes
+import org.bouncycastle.asn1.cms.IssuerAndSerialNumber
 import org.bouncycastle.cert.X509CertificateHolder
 import org.bouncycastle.cms.CMSSignedData
 import org.bouncycastle.cms.SignerInformation
 import org.bouncycastle.cms.SignerInformationVerifier
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder
 import org.bouncycastle.operator.DigestCalculator
+import org.bouncycastle.tsp.TSPUtil
 import org.bouncycastle.tsp.TimeStampToken
-import org.codehaus.groovy.grails.web.json.JSONElement
+import org.bouncycastle.util.encoders.Base64
+import org.votingsystem.model.AccessControlVS
+import org.votingsystem.model.EventVS
+import org.votingsystem.model.ResponseVS
+import org.votingsystem.signature.util.CertUtil
 
 import java.security.MessageDigest
-import java.security.cert.X509Certificate;
-
-import org.bouncycastle.tsp.TSPUtil
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.asn1.cms.CMSAttributes;
-
+import java.security.cert.X509Certificate
 
 class TimeStampService {
 	
@@ -45,61 +36,52 @@ class TimeStampService {
 			
 	public void afterPropertiesSet() throws Exception {}
 	
-	public ResponseVS validateToken(TimeStampToken timeStampToken, 
-		EventoVotacion evento, Locale locale) throws Exception {
-		log.debug("validateToken - event:${evento.id}")
+	public ResponseVS validateToken(TimeStampToken timeStampToken, EventVS eventVS, Locale locale) throws Exception {
+		log.debug("validateToken - event:${eventVS.id}")
 		String msg = null;
-		ResponseVS respuesta
+		ResponseVS responseVS
 		try {
 			if(!timeStampToken) {
 				msg = messageSource.getMessage('timeStampNullErrorMsg', null, locale)
 				log.error("ERROR - validateToken - ${msg}")
 				return new ResponseVS(statusCode:ResponseVS.SC_NULL_REQUEST, message:msg)
 			}
-			ControlAcceso accessControl = evento.controlAcceso
-			SignerInformationVerifier timeStampVerifier = timeStampVerifiers.get(accessControl.id)
+			SignerInformationVerifier timeStampVerifier = timeStampVerifiers.get(eventVS.accessControlVS.id)
 			if(!timeStampVerifier) {
-				String accessControlURL = accessControl.serverURL
-				while(accessControlURL.endsWith("/")) {
-					accessControlURL = accessControlURL.substring(0, accessControlURL.length() - 1)
-				}
-				String timeStampCertURL = "${accessControlURL}/timeStamp/cert"
-				respuesta = httpService.getInfo(timeStampCertURL, null)
-				if(ResponseVS.SC_OK != respuesta.statusCode) {
+				String timeStampCertURL = "${eventVS.accessControlVS.serverURL}/timeStampVS/cert"
+				responseVS = httpService.getInfo(timeStampCertURL, null)
+				if(ResponseVS.SC_OK != responseVS.statusCode) {
 					msg = messageSource.getMessage('timeStampCertErrorMsg', [timeStampCertURL].toArray(), locale)
 					log.error("validateToken - ${msg}")
 					return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
 				} else {
-					X509Certificate timeStampCert = CertUtil.fromPEMToX509Cert(respuesta.messageBytes)
-					timeStampVerifier = new JcaSimpleSignerInfoVerifierBuilder().
-						setProvider(BC).build(timeStampCert)
-					timeStampVerifiers.put(accessControl.id, timeStampVerifier)
+					X509Certificate timeStampCert = CertUtil.fromPEMToX509Cert(responseVS.messageBytes)
+					timeStampVerifier = new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(timeStampCert)
+					timeStampVerifiers.put(eventVS.accessControlVS.id, timeStampVerifier)
 				}
 			}
 			
-			respuesta = validateToken(timeStampToken, timeStampVerifier, locale)
-			if(ResponseVS.SC_OK != respuesta.statusCode) return respuesta
+			responseVS = validateToken(timeStampToken, timeStampVerifier, locale)
+			if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
 			
 			Date timestampDate = timeStampToken.getTimeStampInfo().getGenTime()
-			if(!timestampDate.after(evento.fechaInicio) ||
-				!timestampDate.before(evento.getDateFinish())) {
+			if(!timestampDate.after(eventVS.dateBegin) || !timestampDate.before(eventVS.getDateFinish())) {
 				msg = messageSource.getMessage('timestampDateErrorMsg',
-					[timestampDate, evento.fechaInicio, evento.getDateFinish()].toArray(), locale)
-				log.debug("validateToken - ERROR TIMESTAMP DATE -  - Event '${evento.id}' - ${msg}")
+					[timestampDate, eventVS.dateBegin, eventVS.getDateFinish()].toArray(), locale)
+				log.debug("validateToken - ERROR TIMESTAMP DATE -  - Event '${eventVS.id}' - ${msg}")
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-					message:msg, evento:evento)
+					message:msg, eventVS:eventVS)
 			} else return new ResponseVS(statusCode:ResponseVS.SC_OK);
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex)
 			msg = messageSource.getMessage('timeStampErrorMsg', null, locale)
-			log.error ("validateToken - msg:${msg} - Event '${evento.id}'")
+			log.error ("validateToken - msg:${msg} - Event '${eventVS.id}'")
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
 		}
 	}
 
 
-	public ResponseVS validateToken(TimeStampToken  tsToken, 
-			SignerInformationVerifier sigVerifier, Locale locale) {
+	public ResponseVS validateToken(TimeStampToken  tsToken, SignerInformationVerifier sigVerifier, Locale locale) {
 		log.debug("validateToken")
 		String msg = null
 		try {

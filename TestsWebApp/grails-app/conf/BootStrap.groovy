@@ -11,7 +11,7 @@ class BootStrap {
 			return it?.format("yyyy/MM/dd' 'HH:mm:ss")
 		}
 		
-		ContextVS.init("org.votingsystem.model.UserVSBase")
+		ContextVS.init()
     }
 	
     def destroy = { }
