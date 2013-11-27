@@ -1,9 +1,5 @@
 package org.bouncycastle2.jce.provider;
 
-import java.security.spec.AlgorithmParameterSpec;
-
-import javax.crypto.spec.PBEParameterSpec;
-
 import org.bouncycastle2.crypto.CipherParameters;
 import org.bouncycastle2.crypto.Digest;
 import org.bouncycastle2.crypto.PBEParametersGenerator;
@@ -15,6 +11,9 @@ import org.bouncycastle2.crypto.generators.PKCS5S1ParametersGenerator;
 import org.bouncycastle2.crypto.generators.PKCS5S2ParametersGenerator;
 import org.bouncycastle2.crypto.params.KeyParameter;
 import org.bouncycastle2.crypto.params.ParametersWithIV;
+
+import javax.crypto.spec.PBEParameterSpec;
+import java.security.spec.AlgorithmParameterSpec;
 
 /**
  * Generator for PBE derived keys and ivs as defined by PKCS 12 V1.0,

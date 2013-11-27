@@ -1,5 +1,21 @@
 package org.votingsystem.signature.util;
 
+import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.x509.*;
+import org.bouncycastle.asn1.x509.qualified.Iso4217CurrencyCode;
+import org.bouncycastle.asn1.x509.qualified.MonetaryValue;
+import org.bouncycastle.asn1.x509.qualified.QCStatement;
+import org.bouncycastle.i18n.ErrorBundle;
+import org.bouncycastle.i18n.LocaleString;
+import org.bouncycastle.i18n.filter.TrustedInput;
+import org.bouncycastle.i18n.filter.UntrustedInput;
+import org.bouncycastle.i18n.filter.UntrustedUrlInput;
+import org.bouncycastle.jce.provider.*;
+import org.bouncycastle.x509.CertPathReviewerException;
+import org.bouncycastle.x509.X509CRLStoreSelector;
+import org.bouncycastle.x509.extension.X509ExtensionUtil;
+
+import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -9,76 +25,8 @@ import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.security.SignatureException;
-import java.security.cert.CertPath;
-import java.security.cert.CertPathValidatorException;
-import java.security.cert.CertificateExpiredException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.CertificateNotYetValidException;
-import java.security.cert.PKIXCertPathChecker;
-import java.security.cert.PKIXParameters;
-import java.security.cert.PolicyNode;
-import java.security.cert.TrustAnchor;
-import java.security.cert.X509CRL;
-import java.security.cert.X509CRLEntry;
-import java.security.cert.X509CertSelector;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
-
-import javax.security.auth.x500.X500Principal;
-
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DEREnumerated;
-import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.x509.AccessDescription;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
-import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
-import org.bouncycastle.asn1.x509.BasicConstraints;
-import org.bouncycastle.asn1.x509.CRLDistPoint;
-import org.bouncycastle.asn1.x509.DistributionPoint;
-import org.bouncycastle.asn1.x509.DistributionPointName;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.GeneralNames;
-import org.bouncycastle.asn1.x509.GeneralSubtree;
-import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
-import org.bouncycastle.asn1.x509.NameConstraints;
-import org.bouncycastle.asn1.x509.PolicyInformation;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x509.qualified.Iso4217CurrencyCode;
-import org.bouncycastle.asn1.x509.qualified.MonetaryValue;
-import org.bouncycastle.asn1.x509.qualified.QCStatement;
-import org.bouncycastle.i18n.ErrorBundle;
-import org.bouncycastle.i18n.LocaleString;
-import org.bouncycastle.i18n.filter.TrustedInput;
-import org.bouncycastle.i18n.filter.UntrustedInput;
-import org.bouncycastle.i18n.filter.UntrustedUrlInput;
-import org.bouncycastle.jce.provider.AnnotatedException;
-import org.bouncycastle.jce.provider.CertPathValidatorUtilities;
-import org.bouncycastle.jce.provider.PKIXNameConstraintValidator;
-import org.bouncycastle.jce.provider.PKIXNameConstraintValidatorException;
-import org.bouncycastle.jce.provider.PKIXPolicyNode;
-import org.bouncycastle.x509.CertPathReviewerException;
-import org.bouncycastle.x509.X509CRLStoreSelector;
-import org.bouncycastle.x509.extension.X509ExtensionUtil;
+import java.security.cert.*;
+import java.util.*;
 
 /**
  * PKIXCertPathReviewer<br>
@@ -118,11 +66,11 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
     private boolean initialized;
     
     /** 
-     * Initializes the PKIXCertPathReviewer with the given {@link CertPath} and {@link PKIXParameters} params
-     * @param certPath the {@link CertPath} to validate
-     * @param params the {@link PKIXParameters} to use
-     * @throws CertPathReviewerException if the certPath is empty
-     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} is already initialized
+     * Initializes the PKIXCertPathReviewer with the given {@link java.security.cert.CertPath} and {@link java.security.cert.PKIXParameters} params
+     * @param certPath the {@link java.security.cert.CertPath} to validate
+     * @param params the {@link java.security.cert.PKIXParameters} to use
+     * @throws org.bouncycastle.x509.CertPathReviewerException if the certPath is empty
+     * @throws IllegalStateException if the {@link org.votingsystem.signature.util.PKIXCertPathReviewer} is already initialized
      */
     public void init(CertPath certPath, PKIXParameters params)
             throws CertPathReviewerException
@@ -132,7 +80,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
             throw new IllegalStateException("object is already initialized!");
         }
         initialized = true;
-        
+
         // check input parameters
         if (certPath == null)
         {
@@ -163,28 +111,28 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
         // d) done at the beginning of checkSignatures
 
         // e) f) g) part of pkixParams
-        
+
         // initialize output parameters
-        
+
         notifications = null;
         errors = null;
         trustAnchor = null;
         subjectPublicKey = null;
         policyTree = null;
     }
-    
+
     /**
-     * Creates a PKIXCertPathReviewer and initializes it with the given {@link CertPath} and {@link PKIXParameters} params
-     * @param certPath the {@link CertPath} to validate
-     * @param params the {@link PKIXParameters} to use
-     * @throws CertPathReviewerException if the certPath is empty
+     * Creates a PKIXCertPathReviewer and initializes it with the given {@link java.security.cert.CertPath} and {@link java.security.cert.PKIXParameters} params
+     * @param certPath the {@link java.security.cert.CertPath} to validate
+     * @param params the {@link java.security.cert.PKIXParameters} to use
+     * @throws org.bouncycastle.x509.CertPathReviewerException if the certPath is empty
      */
     public PKIXCertPathReviewer(CertPath certPath, PKIXParameters params)
             throws CertPathReviewerException
     {
         init(certPath, params);
     }
-    
+
     /**
      * Creates an empty PKIXCertPathReviewer. Don't forget to call init() to initialize the object.
      */
@@ -192,18 +140,18 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
     {
         // do nothing
     }
-    
+
     /**
-     * 
+     *
      * @return the CertPath that was validated
      */
     public CertPath getCertPath()
     {
         return certPath;
     }
-    
+
     /**
-     * 
+     *
      * @return the size of the CertPath
      */
     public int getCertPathSize()
@@ -212,25 +160,25 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
     }
 
     /**
-     * Returns an Array of Lists which contains a List of global error messages 
+     * Returns an Array of Lists which contains a List of global error messages
      * and a List of error messages for each certificate in the path.
-     * The global error List is at index 0. The error lists for each certificate at index 1 to n. 
+     * The global error List is at index 0. The error lists for each certificate at index 1 to n.
      * The error messages are of type.
      * @return the Array of Lists which contain the error messages
-     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} was not initialized
+     * @throws IllegalStateException if the {@link org.votingsystem.signature.util.PKIXCertPathReviewer} was not initialized
      */
     public List[] getErrors()
     {
         doChecks();
         return errors;
     }
-    
+
     /**
      * Returns an List of error messages for the certificate at the given index in the CertPath.
-     * If index == -1 then the list of global errors is returned with errors not specific to a certificate. 
+     * If index == -1 then the list of global errors is returned with errors not specific to a certificate.
      * @param index the index of the certificate in the CertPath
      * @return List of error messages for the certificate
-     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} was not initialized
+     * @throws IllegalStateException if the {@link org.votingsystem.signature.util.PKIXCertPathReviewer} was not initialized
      */
     public List getErrors(int index)
     {
@@ -239,25 +187,25 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
     }
 
     /**
-     * Returns an Array of Lists which contains a List of global notification messages 
+     * Returns an Array of Lists which contains a List of global notification messages
      * and a List of botification messages for each certificate in the path.
-     * The global notificatio List is at index 0. The notification lists for each certificate at index 1 to n. 
+     * The global notificatio List is at index 0. The notification lists for each certificate at index 1 to n.
      * The error messages are of type.
      * @return the Array of Lists which contain the notification messages
-     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} was not initialized
+     * @throws IllegalStateException if the {@link org.votingsystem.signature.util.PKIXCertPathReviewer} was not initialized
      */
     public List[] getNotifications()
     {
         doChecks();
         return notifications;
     }
-    
+
     /**
      * Returns an List of notification messages for the certificate at the given index in the CertPath.
-     * If index == -1 then the list of global notifications is returned with notifications not specific to a certificate. 
+     * If index == -1 then the list of global notifications is returned with notifications not specific to a certificate.
      * @param index the index of the certificate in the CertPath
      * @return List of notification messages for the certificate
-     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} was not initialized
+     * @throws IllegalStateException if the {@link org.votingsystem.signature.util.PKIXCertPathReviewer} was not initialized
      */
     public List getNotifications(int index)
     {
@@ -266,9 +214,9 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
     }
 
     /**
-     * 
+     *
      * @return the valid policy tree, <b>null</b> if no valid policy exists.
-     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} was not initialized
+     * @throws IllegalStateException if the {@link org.votingsystem.signature.util.PKIXCertPathReviewer} was not initialized
      */
     public PolicyNode getPolicyTree()
     {
@@ -277,9 +225,9 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
     }
 
     /**
-     * 
+     *
      * @return the PublicKey if the last certificate in the CertPath
-     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} was not initialized
+     * @throws IllegalStateException if the {@link org.votingsystem.signature.util.PKIXCertPathReviewer} was not initialized
      */
     public PublicKey getSubjectPublicKey()
     {
@@ -288,20 +236,20 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
     }
 
     /**
-     * 
+     *
      * @return the TrustAnchor for the CertPath, <b>null</b> if no valid TrustAnchor was found.
-     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} was not initialized
+     * @throws IllegalStateException if the {@link org.votingsystem.signature.util.PKIXCertPathReviewer} was not initialized
      */
     public TrustAnchor getTrustAnchor()
     {
         doChecks();
         return trustAnchor;
     }
-    
+
     /**
-     * 
+     *
      * @return if the CertPath is valid
-     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} was not initialized
+     * @throws IllegalStateException if the {@link org.votingsystem.signature.util.PKIXCertPathReviewer} was not initialized
      */
     public boolean isValidCertPath()
     {

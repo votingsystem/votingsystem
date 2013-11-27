@@ -1,17 +1,12 @@
 package org.bouncycastle2.crypto.agreement;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
-
 import org.bouncycastle2.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle2.crypto.CipherParameters;
 import org.bouncycastle2.crypto.generators.DHKeyPairGenerator;
-import org.bouncycastle2.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle2.crypto.params.DHKeyGenerationParameters;
-import org.bouncycastle2.crypto.params.DHParameters;
-import org.bouncycastle2.crypto.params.DHPrivateKeyParameters;
-import org.bouncycastle2.crypto.params.DHPublicKeyParameters;
-import org.bouncycastle2.crypto.params.ParametersWithRandom;
+import org.bouncycastle2.crypto.params.*;
+
+import java.math.BigInteger;
+import java.security.SecureRandom;
 
 /**
  * a Diffie-Hellman key exchange engine.

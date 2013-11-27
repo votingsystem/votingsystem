@@ -4,19 +4,6 @@ import org.votingsystem.model.ActorVS
 import org.votingsystem.model.ResponseVS
 
 class SimulationUtils {
-
-	public static ResponseVS checkActor(ActorVS actor, ActorVS.Type type) {
-		if(type != actor.getType()) {
-			return new ResponseVS(ResponseVS.SC_ERROR, "SERVER IS NOT " + type.toString());
-		}
-		if(actor.getEnvironmentMode() == null || ActorVS.
-				EnvironmentMode.DEVELOPMENT != actor.getEnvironmentMode()) {
-			return new ResponseVS(ResponseVS.SC_ERROR, "SERVER NOT IN DEVELOPMENT MODE. Server mode:" +
-				actor.getEnvironmentMode() + " - server: " + type.toString());
-		} else {
-			return new ResponseVS(ResponseVS.SC_OK);
-		}
-	}
 	
 	public static String getFormattedErrorList(List<String> errorList) {
 		if(errorList.isEmpty()) return null;
@@ -28,8 +15,7 @@ class SimulationUtils {
 			return result.toString();
 		}
 	}
-	   
-	
+
 	public static String getUserDirPath (String userNIF) {
 		int subPathLength = 3;
 		String basePath = "/";

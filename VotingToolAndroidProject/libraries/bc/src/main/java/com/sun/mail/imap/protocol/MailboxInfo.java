@@ -40,8 +40,10 @@
 
 package com.sun.mail.imap.protocol;
 
+import com.sun.mail.iap.ParsingException;
+import com.sun.mail.iap.Response;
+
 import javax.mail.Flags;
-import com.sun.mail.iap.*;
 
 /**
  * This class 

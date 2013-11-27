@@ -40,12 +40,11 @@
 
 package javax.mail;
 
-import java.io.IOException;
-import java.net.*;
-import java.util.Vector;
-import java.util.Hashtable;
+import javax.mail.event.TransportEvent;
+import javax.mail.event.TransportListener;
 import java.util.Enumeration;
-import javax.mail.event.*;
+import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  * An abstract class that models a message transport.

@@ -40,12 +40,9 @@
 
 package javax.mail;
 
-import java.io.*;
-import java.lang.*;
-import java.util.Vector;
-import java.util.StringTokenizer;
-import javax.mail.search.SearchTerm;
 import javax.mail.event.*;
+import javax.mail.search.SearchTerm;
+import java.util.Vector;
 
 /**
  * Folder is an abstract class that represents a folder for mail

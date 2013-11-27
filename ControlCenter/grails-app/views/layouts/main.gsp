@@ -2,16 +2,17 @@
 <html>
 <head>   
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<title><g:message code="nombreServidorLabel"/></title>
+	<title><g:message code="serverNameLabel"/></title>
 	<r:require module="application"/>
 	<g:layoutHead/>
 	<r:layoutResources />
 </head>
 <body>
+
 	<div class="header">
 		<div class="col-subsystem" style="width:200px;">
 			<g:img dir="images" file="feed.png" style="margin:3px 0 0 15px;"></g:img>
-			<g:link controller="subscripcion" action="votaciones" style="font-size: 0.8em; display:inline;"><g:message code="subscribeToFeedsLbl"/></g:link>
+			<g:link controller="subscriptionVS" action="elections" style="font-size: 0.8em; display:inline;"><g:message code="subscribeToFeedsLbl"/></g:link>
 		</div>
 	   	<div id="selectedSubsystemDiv" class="col-selectedSystem"  style="width:300px;">
 	        <a id="selectedSubsystemLink"></a>
@@ -26,18 +27,19 @@
 	   	</div>
 	</div>
 
-	<g:layoutBody/>
+    <div style="min-height: 600px;"><g:layoutBody/></div>
 
 	<div class="footer" style="display:none;width:100%;">
 		<a class="appLink" href="mailto:${grailsApplication.config.VotingSystem.emailAdmin}"
 			 style="">${message(code: 'emailLabel', null)}</a>
-		<a class="appLink" href="${createLink(controller: 'infoServidor', action: 'informacion')}"
+		<a class="appLink" href="${createLink(controller: 'serverInfo', action: 'info')}"
 			style="margin: 3px 0 0 20px; float:right;">
 			<g:message code="dataInfoLinkText"/>
 		</a>
 	</div>
 		
-	<g:include view="/include/dialog/advancedSearchDialog.gsp"/>			
+	<g:include view="/include/dialog/advancedSearchDialog.gsp"/>
+
 </body>
 </html>
 <r:script>
@@ -61,7 +63,7 @@
 	function setMessageFromSignatureClient(appMessage) {
 		var appMessageJSON = toJSON(appMessage)
 		if(appMessageJSON != null) {
-			if(StatusCode.SC_PROCESSING == appMessageJSON.codigoEstado){
+			if(ResponseVS.SC_PROCESSING == appMessageJSON.statusCode){
 				signatureClientToolLoaded = true;
 				$("#loadingVotingSystemAppletDialog").dialog("close");
 				$("#workingWithAppletDialog").dialog("open");

@@ -1,11 +1,6 @@
 package org.bouncycastle2.asn1.x509;
 
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.DERBitString;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERSequence;
-import org.bouncycastle2.asn1.DERTaggedObject;
-import org.bouncycastle2.asn1.DERUTCTime;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.x500.X500Name;
 
 /**

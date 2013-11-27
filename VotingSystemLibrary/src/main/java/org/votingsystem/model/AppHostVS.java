@@ -1,7 +1,5 @@
 package org.votingsystem.model;
 
-import org.votingsystem.model.OperationVS;
-
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -9,5 +7,5 @@ import org.votingsystem.model.OperationVS;
 public interface AppHostVS {
     
     public void sendMessageToHost(OperationVS operacion);
-    public OperationVS getPendingOperation();
+
 }

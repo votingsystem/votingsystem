@@ -1,8 +1,5 @@
 package org.bouncycastle2.cert;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.bouncycastle2.asn1.ASN1Encodable;
 import org.bouncycastle2.asn1.DERSequence;
 import org.bouncycastle2.asn1.x500.X500Name;
@@ -11,6 +8,9 @@ import org.bouncycastle2.asn1.x509.GeneralName;
 import org.bouncycastle2.asn1.x509.GeneralNames;
 import org.bouncycastle2.asn1.x509.V2Form;
 import org.bouncycastle2.util.Selector;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Carrying class for an attribute certificate issuer.

@@ -1,7 +1,5 @@
 package org.bouncycastle2.operator.bc;
 
-import java.security.SecureRandom;
-
 import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.crypto.AsymmetricBlockCipher;
@@ -12,6 +10,8 @@ import org.bouncycastle2.crypto.params.ParametersWithRandom;
 import org.bouncycastle2.operator.AsymmetricKeyWrapper;
 import org.bouncycastle2.operator.GenericKey;
 import org.bouncycastle2.operator.OperatorException;
+
+import java.security.SecureRandom;
 
 public abstract class BcAsymmetricKeyWrapper
     extends AsymmetricKeyWrapper

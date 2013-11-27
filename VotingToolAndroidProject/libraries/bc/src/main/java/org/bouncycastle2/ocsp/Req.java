@@ -1,14 +1,14 @@
 package org.bouncycastle2.ocsp;
 
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.bouncycastle2.asn1.ASN1Encodable;
 import org.bouncycastle2.asn1.DERObjectIdentifier;
 import org.bouncycastle2.asn1.ocsp.Request;
 import org.bouncycastle2.asn1.x509.X509Extension;
 import org.bouncycastle2.asn1.x509.X509Extensions;
+
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Req
     implements java.security.cert.X509Extension

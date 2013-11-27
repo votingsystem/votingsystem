@@ -1,45 +1,18 @@
 package org.votingsystem.accesscontrol.controller
 
-import java.util.Date;
-import java.util.Locale;import org.votingsystem.util.DateUtils;
-
-import org.votingsystem.accesscontrol.model.Usuario;
-import java.io.IOException;
-import java.io.InputStream;
-import org.bouncycastle.tsp.TimeStampToken
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.cert.X509CertificateHolder
-import org.bouncycastle.cms.CMSSignedData
-import org.hibernate.criterion.DetachedCriteria
-import org.hibernate.criterion.Property
-import org.votingsystem.accesscontrol.model.*
-
 import grails.converters.JSON
-
-import org.votingsystem.util.FileUtils;
-import org.votingsystem.groovy.util.*
-import org.votingsystem.util.StringUtils;
-import org.votingsystem.util.DateUtils;
-
-import java.io.IOException;
-import java.io.InputStream;
-
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.*
-import org.votingsystem.accesscontrol.model.*
-import org.springframework.context.ApplicationEventPublisher
-import org.springframework.mail.SimpleMailMessage
-
-import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
-import java.security.cert.X509Certificate;
-
-
-import java.security.cert.X509Certificate;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher
-import java.util.regex.Pattern
-
+import org.bouncycastle.cms.CMSSignedData
+import org.bouncycastle.tsp.TimeStampToken
+import org.bouncycastle.util.encoders.Base64
+import org.votingsystem.model.CertificateVS
+import org.votingsystem.model.EventVS
+import org.votingsystem.model.EventVSElection
+import org.votingsystem.model.SignatureVS
+import org.votingsystem.model.TypeVS
+import org.votingsystem.model.UserVS
+import org.votingsystem.model.VoteVS
+import org.votingsystem.model.ResponseVS
+import org.votingsystem.util.DateUtils
 /**
  * @infoController Prueba
  * @descController Servicios de acceso a la aplicación web principal
@@ -52,122 +25,58 @@ class TestingController {
 	def representativeService
 	def grailsApplication
 	def httpService
-	def timeStampService
-	def firmaService
+	def timeStampVSService
+	def signatureVSService
 	def accessControlBackgroundService
 	def applicationContext
 	def publishService
-	def eventoService
+	def eventVSService
 	def pdfService
 	def mailSenderService
 	def hibernateProperties
-	
-	
-	def index() {
-		render(view: "prueba")
-	}
-	
-	def pruebaGsp() {
-		if(params.pageName) render(view:params.pageName, model:params)
-		else {
-			response.status = ResponseVS.SC_ERROR
-			render "page name null"
-			return false
-		}
-	}
 
-	def pruMail(){
-		for(int i =0; i < 20; i++) {
-			log.debug("sent mail ${i}")
-			mailSenderService.sendMail("jgzornoza@sistemavotacion.org", "Cuerpo message", "Hola desde grails")
-		}
-		
-	}
-	
-	def zip(){
-		def zipPath = "/home/jgzornoza/Descargas/bootstrap.zip"
-		String link = "${grailsApplication.mainContext.getResource('.')?.getFile()}/backup/VotosEvento_5.zip"
-		//ln -s /destino /enlaceSimbolico
-		
-		/*
-		def ant = new AntBuilder()
-		//File zipResult = new File()
-		ant.copy(file: zipPath, tofile: link)*/
-		
-		
-		/*def command = """cp ${zipPath} ${link}"""// Create the String
-		def proc = command.execute()                 // Call *execute* on the string
-		proc.waitFor()                               // Wait for the command to finish
 
-		// Obtain status and output
-		render "return code: ${ proc.exitValue()}<br/>"
-		render "stderr: ${proc.err.text}<br/>"
-		render "stdout: ${proc.in.text}<br/>"*/
-		
-		
-		/**/
-		String url = "/backup/2013-07-02/VotosEvento_8.zip"
-		log.debug("redirect to -> ${url}")
-		redirect(uri: url)
+    def index() {
+        CertificateVS certificate = null
+        CertificateVS.withTransaction { certificate = CertificateVS.findBySerialNumber("6156340016997887657")}
+        render "certificate.id: ${certificate.id}"
+    }
+
+	def count() {
+        /*int numTestCerts = CertificateVS.countByType(CertificateVS.Type.CERTIFICATE_AUTHORITY_TEST)
+		render "numTestCerts: ${numTestCerts}"*/
+
+        EventVS eventVS = EventVS.get(0)
+        log.debug(" ======= eventVS: ${eventVS.id}")
+        SignatureVS.withTransaction {
+            def numSignatures = SignatureVS.countByEventVS(eventVS)
+            log.debug(" ======= numSignatures: ${numSignatures}")
+        }
+
+        return false
 	}
-	
 	
 
-	
-	def pruEventMap1(){
-		Evento event
-		Evento.withTransaction {
-			event = Evento.get(16)
-			Map eventMap = eventoService.getMetaInfMap(event) 
-			//Map eventMap = JSON.parse(event?.metaInf)
-			//ventMap.metaInf = "Buenas"
-			event.metaInf = eventMap as JSON
-			log.debug(" === eventMap.metaInf: ${eventMap.metaInf}")
-			render event.metaInf
-			event.save()
-		}
-		
-		
-	}
-	
-	def pruEventMap(){
-		Evento event
-		Evento.withTransaction {
-			event = Evento.get(16)
-		}
-		Map eventMap = JSON.parse(event?.metaInf)
-		render eventMap as JSON	
-	}
-	
-	
-	def pruRevoke(){
-		Usuario usuario = Usuario.get(71)	
-		Date dateFrom = DateUtils.getDateFromString("2012-01-31 00:00:00")
-		Date dateTo = DateUtils.getDateFromString("2014-01-31 00:00:00")
-		ResponseVS respuesta = representativeService.getVotingHistoryBackup (
-			usuario, dateFrom, dateTo, request.locale)
-		render respuesta.statusCode
-	}
 	
 	def votes() {
 		def votes = null
-		Evento event
-		Evento.withTransaction {
-			event = Evento.get(6)
+		EventVS event
+		EventVS.withTransaction {
+			event = EventVS.get(6)
 		}
 		
-		Voto.withTransaction {
-			//votes = Voto.findAllWhere(estado:Voto.Estado.OK, eventoVotacion:event)
-			def criteria = Voto.createCriteria()
+		VoteVS.withTransaction {
+			//votes = VoteVS.findAllWhere(state:VoteVS.State.OK, eventVSElection:event)
+			def criteria = VoteVS.createCriteria()
 			votes = criteria.scroll {
 				//maxResults(50)
-				eq("estado", Voto.Estado.OK)
-				eq("eventoVotacion", event)
+				eq("state", VoteVS.State.OK)
+				eq("eventVSElection", event)
 			}
 			log.debug("--- votes.getClass(): ${votes.getClass()}")
 			int iteration = 0;
 			while (votes.next() ) {
-				def vote = (Voto) votes.get(0);
+				def vote = (VoteVS) votes.get(0);
 				log.debug("iteration: ${++iteration} - vote: ${vote.id}")
 			}
 		}	
@@ -175,14 +84,12 @@ class TestingController {
 	
 	
 	def asyncMeta() {
-		EventoVotacion evento
-		EventoVotacion.withTransaction {
-			evento = Evento.get(params.id)
+		EventVSElection eventVS
+		EventVSElection.withTransaction {
+			eventVS = EventVS.get(params.id)
 		}
-		ResponseVS respuesta = representativeService.getAccreditationsMapForEvent(
-			evento, request.locale)
-		
-		render respuesta.data as JSON
+		ResponseVS responseVS = representativeService.getAccreditationsMapForEvent(eventVS, request.locale)
+		render responseVS.data as JSON
 	}
 
 	
@@ -192,8 +99,8 @@ class TestingController {
 		 String timeStampRequestStr = "MDkCAQEwMTANBglghkgBZQMEAgMFAAQgrbiEUT6OZejyQSkNg1PqR48b+s9pudY512Dm3Oow4H0BAf8="                                                       
 		
 		
-		ResponseVS respuesta = timeStampService.processRequest(Base64.decode(timeStampRequestStr), request.getLocale())
-		byte[] encodedTimestamp = respuesta.messageBytes
+		ResponseVS responseVS = timeStampVSService.processRequest(Base64.decode(timeStampRequestStr), request.getLocale())
+		byte[] encodedTimestamp = responseVS.messageBytes
 		String encodedTimestampStr =  new String(Base64.encode(encodedTimestamp));
 		render encodedTimestampStr
 		return false
@@ -205,9 +112,9 @@ class TestingController {
 		CMSSignedData cmsSignedData = new CMSSignedData(Base64.decode(clientTokenStr))
 		TimeStampToken timeStampToken = new TimeStampToken(cmsSignedData)
 		
-		ResponseVS respuesta = timeStampService.validateToken(timeStampToken, request.getLocale());
+		ResponseVS responseVS = timeStampVSService.validateToken(timeStampToken, request.getLocale());
 		
-		render "- statusCode: ${respuesta.statusCode} - -message: ${respuesta.message}"
+		render "- statusCode: ${responseVS.statusCode} - -message: ${responseVS.message}"
 		
 	}
 	
@@ -223,9 +130,9 @@ class TestingController {
 		}
 		/*
 		 * 				ctx.response.status = 200
-				ctx.response.setContentType("text/plain")
-				ctx.response.contentLength = anuladorVoto.messageSMIME.contenido.length
-				ctx.response.outputStream <<  anuladorVoto.messageSMIME.contenido
+				ctx.response.setContentType(ContentTypeVS.TEXT)
+				ctx.response.contentLength = voteVSCanceller.messageSMIME.content.length
+				ctx.response.outputStream <<  voteVSCanceller.messageSMIME.content
 				ctx.response.outputStream.flush()
 		 */
 		String respuesta = future.get()

@@ -1,15 +1,15 @@
 package org.bouncycastle2.cert.ocsp;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
 import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle2.asn1.ocsp.CertStatus;
 import org.bouncycastle2.asn1.ocsp.RevokedInfo;
 import org.bouncycastle2.asn1.ocsp.SingleResponse;
 import org.bouncycastle2.asn1.x509.X509Extension;
 import org.bouncycastle2.asn1.x509.X509Extensions;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 public class SingleResp
 {

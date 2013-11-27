@@ -40,15 +40,14 @@
 
 package javax.mail.internet;
 
-import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Vector;
-import java.util.StringTokenizer;
-import java.util.Locale;
-import javax.mail.*;
-
 import android.util.Log;
+
+import javax.mail.Address;
+import javax.mail.Session;
+import java.io.UnsupportedEncodingException;
+import java.util.Locale;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 /**
  * This class represents an Internet email address using the syntax

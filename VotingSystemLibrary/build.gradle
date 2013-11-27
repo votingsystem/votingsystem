@@ -5,6 +5,7 @@ apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'ivy-publish'
 apply plugin: 'maven-publish'
+apply plugin: "idea"
 
 install {
     repositories.mavenInstaller {
@@ -12,153 +13,156 @@ install {
     }
 }
 
-
-
 repositories {
-	mavenLocal()
-	mavenCentral()
- }
-
-ext.groovyVersion = '2.1.0'
+    mavenLocal()
+    mavenCentral()
+}
 
 dependencies {
 
-	compile localGroovy()
+    compile localGroovy()
 
-	compile 'commons-cli:commons-cli:1.2'
-	
-	groovy "org.codehaus.groovy:groovy:$ext.groovyVersion"
+    compile 'commons-cli:commons-cli:1.2'
 
-	compile ('org.bouncycastle:bcprov-jdk16:1.46',
-		'org.bouncycastle:bcmail-jdk16:1.46',
-		'javax.mail:mail:1.4.1',
-		'org.bouncycastle:bctsp-jdk16:1.46',
-		'log4j:log4j:1.2.12')
-	
+    compile (
+            'org.hibernate:hibernate-search:4.2.0.Final',
+            'org.hibernate.javax.persistence:hibernate-jpa-2.0-api:1.0.1.Final',
+            'net.sf.json-lib:json-lib:2.4:jdk15',
+            'org.bouncycastle:bcprov-jdk16:1.46',
+            'org.bouncycastle:bcmail-jdk16:1.46',
+            'javax.mail:mail:1.4.1',
+            'org.bouncycastle:bctsp-jdk16:1.46',
+            'log4j:log4j:1.2.12')
+
 }
 
 task copydeps(type: Copy) {
-	doFirst {
-		def file = file("$buildDir/librarydeps")
-		file.deleteDir()
-		println "${file.path} deleted"
-	}
-	
-	into "$buildDir/librarydeps"
-	def bcJar = project.configurations.runtime.find { 
-		it.name.startsWith("bcprov-") }
-	if(bcJar) ant.copy(file:bcJar, todir:file("$buildDir/librarydeps").path) 
+    doFirst {
+        def file = file("$buildDir/librarydeps")
+        file.deleteDir()
+        println "${file.path} deleted"
+    }
 
-	/*doLast {
-		def bcJars = ["bcprov-jdk16-1.46.jar", "bcmail-jdk16-1.46.jar",
-			"bctsp-jdk16-1.46.jar"]
-		def depFiles = file("$buildDir/librarydeps")
-		depFiles.eachFile() {
-			if(!bcJars.contains(it.name)) {
-				println "signing: " + it.path
-				ant.signjar(keystore: "$rootProject.projectDir/mockDnie.jks",
-					storepass:rootProject.keyStorePassword,
-					alias:rootProject.signKeyAlias,
-					jar:it.path,
-					signedjar:it.path)
-			}
-				
-		}
-	}*/
+    into "$buildDir/librarydeps"
+    def bcJar = project.configurations.runtime.find {
+        it.name.startsWith("bcprov-") }
+    if(bcJar) ant.copy(file:bcJar, todir:file("$buildDir/librarydeps").path)
+
+    /*doLast {
+        def bcJars = ["bcprov-jdk16-1.46.jar", "bcmail-jdk16-1.46.jar",
+            "bctsp-jdk16-1.46.jar"]
+        def depFiles = file("$buildDir/librarydeps")
+        depFiles.eachFile() {
+            if(!bcJars.contains(it.name)) {
+                println "signing: " + it.path
+                ant.signjar(keystore: "$rootProject.projectDir/mockDnie.jks",
+                    storepass:rootProject.keyStorePassword,
+                    alias:rootProject.signKeyAlias,
+                    jar:it.path,
+                    signedjar:it.path)
+            }
+
+        }
+    }*/
 
 }
 
 jar {
-	manifest {
-		attributes 'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/VotingSystemLibrary',
-			   'provider': 'GruposP2P'
-	}
+    manifest {
+        attributes 'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/VotingSystemLibrary',
+                'provider': 'GruposP2P'
+    }
 
-	publishing {
-		publications {
-			//gradle publishIvyJavaPublicationToIvyRepository
-			ivy(IvyPublication) {
-				organisation 'org.votingsystem'
-				module 'votingsystemlibrary'
-				descriptor.status = 'release'
+    publishing {
+        publications {
+            //gradle publishIvyJavaPublicationToIvyRepository
+            ivy(IvyPublication) {
+                organisation 'org.votingsystem'
+                module 'votingsystemlibrary'
+                descriptor.status = 'release'
 
-				from components.java
-			}
+                from components.java
+            }
 
-			jarAndSourceJar(MavenPublication) {
-				groupId 'org.votingsystem'
-				artifactId 'votingsystemlibrary'
-			
-				from components.java
+            jarAndSourceJar(MavenPublication) {
+                groupId 'org.votingsystem'
+                artifactId 'votingsystemlibrary'
 
-				artifact sourceJar {
-					classifier "sources"
-				}
-			
-				pom.withXml {
-					asNode().appendNode('description', 'Helper library for Voting System - ' + 
-						'https://github.com/jgzornoza/SistemaVotacion')
-			  }
-			}
+                from components.java
 
-		}
+                artifact sourceJar {
+                    classifier "sources"
+                }
 
-		repositories {
-			ivy {
-				def repoPath = "${System.getProperty('user.home')}/.grails/ivy-cache"
-				println(" --- publishing to '${repoPath}' ivy repo")
-				url "$repoPath"
-				layout 'pattern' , {
-					artifact '[organisation]/[module]/jars/[artifact]-[revision](.[ext])'
-					ivy '[organisation]/[module]/ivy-[revision].xml'
-				}
-			}
+                pom.withXml {
+                    asNode().appendNode('description', 'Helper library for Voting System - ' +
+                            'https://github.com/jgzornoza/SistemaVotacion')
+                }
+            }
 
-			maven {
-				def repoPath = "${System.getProperty('user.home')}/.m2/repository"
-				println(" --- publishing to '${repoPath}' maven repo")
-				url "$repoPath"
-			}
+        }
 
-		}
+        repositories {
+            ivy {
+                def repoPath = "${System.getProperty('user.home')}/.grails/ivy-cache"
+                println(" --- publishing to '${repoPath}' ivy repo")
+                url "$repoPath"
+                layout 'pattern' , {
+                    artifact '[organisation]/[module]/jars/[artifact]-[revision](.[ext])'
+                    ivy '[organisation]/[module]/ivy-[revision].xml'
+                }
+            }
 
-	}
+            maven {
+                def repoPath = "${System.getProperty('user.home')}/.m2/repository"
+                println(" --- publishing to '${repoPath}' maven repo")
+                url "$repoPath"
+            }
+
+        }
+
+    }
 }
 
 task sourceJar(type: Jar) {
-	from sourceSets.main.allJava
+    from sourceSets.main.allJava
 }
 
 task genCertsJava(dependsOn: ['classes'], type: JavaExec) {
-	
-	onlyIf {rootProject.certsDataMap}
-	
-	doFirst {
-		args groovy.json.JsonOutput.toJson(rootProject.certsDataMap)
-	}
-	
-	main = 'org.votingsystem.util.CertGenerator'
-	classpath = sourceSets.main.runtimeClasspath
+
+    onlyIf {rootProject.certsDataMap}
+
+    doFirst {
+        args groovy.json.JsonOutput.toJson(rootProject.certsDataMap)
+    }
+
+    main = 'org.votingsystem.util.CertGenerator'
+    classpath = sourceSets.main.runtimeClasspath
 }
 
 task genCertsGroovy(dependsOn: ['classes'], type: JavaExec) {
-	
-	onlyIf {rootProject.certsDataMap}
-	
-	doFirst {
-		args groovy.json.JsonOutput.toJson(rootProject.certsDataMap)
-		//args "-h"
-		main = 'org.votingsystem.groovy.util.CertGenerator'
-		classpath = sourceSets.main.runtimeClasspath
-	}
-	
+
+    onlyIf {rootProject.certsDataMap}
+
+    doFirst {
+        args groovy.json.JsonOutput.toJson(rootProject.certsDataMap)
+        //args "-h"
+        main = 'org.votingsystem.groovy.util.CertGenerator'
+        classpath = sourceSets.main.runtimeClasspath
+    }
+
 }
 
 
 sourceSets {
-	main {
-	  //to override the defaults:
-	  //output.resourcesDir = "$buildDir/classes"
-	  output.classesDir   = "$buildDir/classes"
-	}
+    main {
+
+        groovy {
+            srcDirs 'src/main/groovy', 'src/main/java'
+        }
+
+        //to override the defaults:
+        //output.resourcesDir = "$buildDir/classes"
+        output.classesDir   = "$buildDir/classes"
+    }
 }

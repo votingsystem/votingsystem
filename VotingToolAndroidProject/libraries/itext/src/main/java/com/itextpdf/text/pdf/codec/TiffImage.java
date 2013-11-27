@@ -48,13 +48,7 @@ import com.itextpdf.text.Image;
 import com.itextpdf.text.ImgRaw;
 import com.itextpdf.text.Jpeg;
 import com.itextpdf.text.error_messages.MessageLocalization;
-import com.itextpdf.text.pdf.ICC_Profile;
-import com.itextpdf.text.pdf.PdfArray;
-import com.itextpdf.text.pdf.PdfDictionary;
-import com.itextpdf.text.pdf.PdfName;
-import com.itextpdf.text.pdf.PdfNumber;
-import com.itextpdf.text.pdf.PdfString;
-import com.itextpdf.text.pdf.RandomAccessFileOrArray;
+import com.itextpdf.text.pdf.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

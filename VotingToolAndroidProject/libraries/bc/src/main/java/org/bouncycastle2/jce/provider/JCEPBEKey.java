@@ -1,13 +1,13 @@
 package org.bouncycastle2.jce.provider;
 
-import javax.crypto.interfaces.PBEKey;
-import javax.crypto.spec.PBEKeySpec;
-
 import org.bouncycastle2.asn1.DERObjectIdentifier;
 import org.bouncycastle2.crypto.CipherParameters;
 import org.bouncycastle2.crypto.PBEParametersGenerator;
 import org.bouncycastle2.crypto.params.KeyParameter;
 import org.bouncycastle2.crypto.params.ParametersWithIV;
+
+import javax.crypto.interfaces.PBEKey;
+import javax.crypto.spec.PBEKeySpec;
 
 public class JCEPBEKey
     implements PBEKey

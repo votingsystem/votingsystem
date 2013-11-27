@@ -1,12 +1,6 @@
 package org.votingsystem.signature.smime;
 
-import java.security.cert.X509Certificate;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Iterator;
 import org.apache.log4j.Logger;
-
 import org.bouncycastle.asn1.ASN1UTCTime;
 import org.bouncycastle.asn1.DERUTCTime;
 import org.bouncycastle.asn1.cms.Attribute;
@@ -20,6 +14,12 @@ import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.mail.smime.SMIMESigned;
 import org.bouncycastle.util.Store;
 import org.votingsystem.model.ContextVS;
+
+import java.security.cert.X509Certificate;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Iterator;
 
 /**
  *

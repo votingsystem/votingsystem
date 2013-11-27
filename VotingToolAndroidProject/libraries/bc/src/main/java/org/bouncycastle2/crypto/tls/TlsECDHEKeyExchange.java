@@ -1,13 +1,13 @@
 package org.bouncycastle2.crypto.tls;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.bouncycastle2.crypto.Signer;
 import org.bouncycastle2.crypto.io.SignerInputStream;
 import org.bouncycastle2.crypto.params.ECDomainParameters;
 import org.bouncycastle2.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle2.math.ec.ECPoint;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * ECDHE key exchange (see RFC 4492)

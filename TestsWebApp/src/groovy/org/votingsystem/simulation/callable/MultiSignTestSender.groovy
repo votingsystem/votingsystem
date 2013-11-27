@@ -1,0 +1,74 @@
+package org.votingsystem.simulation.callable
+
+import org.apache.log4j.Logger
+import org.codehaus.groovy.grails.web.json.JSONObject
+import org.votingsystem.model.ResponseVS
+import org.votingsystem.signature.smime.SMIMEMessageWrapper
+import org.votingsystem.signature.smime.SignedMailGenerator
+import org.votingsystem.simulation.ContextService
+import org.votingsystem.util.ApplicationContextHolder
+
+import java.security.KeyStore
+import java.util.concurrent.Callable
+/**
+* @author jgzornoza
+* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ */
+public class MultiSignTestSender implements Callable<ResponseVS> {
+
+    private static Logger logger = Logger.getLogger(MultiSignTestSender.class);
+
+    private String requestNIF;
+    private String serverURL = null;
+    private ContextService contextService = null;
+
+    public MultiSignTestSender(String requestNIF, String serverURL)
+            throws Exception {
+        this.requestNIF = requestNIF;
+        this.serverURL = serverURL;
+        contextService = ApplicationContextHolder.getSimulationContext();
+    }
+    
+    @Override public ResponseVS call() throws Exception {
+        KeyStore mockDnie = contextService.generateTestDNIe(requestNIF);
+        String msgSubject = "Message from MultiSignTestSender";
+        
+        SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, contextService.END_ENTITY_ALIAS,
+                contextService.PASSWORD.toCharArray(), contextService.VOTE_SIGN_MECHANISM);
+        
+        File encryptedFile = File.createTempFile("signTestFile_from" + requestNIF, ".p7m");
+        encryptedFile.deleteOnExit();
+        String testJSONstr = getTestJSON(requestNIF);
+
+        String toUser = "MultiSignController";
+        SMIMEMessageWrapper smimeMessage = signedMailGenerator.genMimeMessage(
+                requestNIF, toUser, testJSONstr, msgSubject, null);
+
+        SMIMESignedSender sender= new SMIMESignedSender(smimeMessage, serverURL, null, null);
+        ResponseVS senderResponse = sender.call();
+
+        if(ResponseVS.SC_OK == senderResponse.getStatusCode()) {
+            byte[] multiSigendResponseBytes = senderResponse.getMessageBytes();
+            SMIMEMessageWrapper smimeResponse = new SMIMEMessageWrapper(new ByteArrayInputStream(multiSigendResponseBytes));
+            logger.debug("- smimeResponse.isValidSignature(): " + smimeResponse.isValidSignature());
+        } else senderResponse.appendMessage(" - from: " + requestNIF);
+        return senderResponse;
+    }
+
+    public String getTestJSON(String from) {
+        String result = null;
+        try {
+            logger.debug("getTestJSON");
+            
+            Map map = new HashMap();
+            map.put("from", from);
+            map.put("UUID", UUID.randomUUID().toString());
+            JSONObject jsonObject = new JSONObject(map);
+            result = jsonObject.toString();
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
+        return result;
+    }
+
+}

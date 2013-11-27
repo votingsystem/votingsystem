@@ -1,11 +1,5 @@
 package org.bouncycastle2.jce.provider;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.security.Provider;
-import java.util.Iterator;
-import java.util.Map;
-
 import org.bouncycastle2.asn1.DERObjectIdentifier;
 import org.bouncycastle2.asn1.bc.BCObjectIdentifiers;
 import org.bouncycastle2.asn1.cryptopro.CryptoProObjectIdentifiers;
@@ -15,6 +9,12 @@ import org.bouncycastle2.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle2.jce.interfaces.ConfigurableProvider;
+
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.Provider;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * To add the provider at runtime use:

@@ -1,11 +1,10 @@
 package org.bouncycastle2.cert.jcajce;
 
-import java.util.Date;
-
-import javax.security.auth.x500.X500Principal;
-
 import org.bouncycastle2.asn1.x500.X500Name;
 import org.bouncycastle2.cert.X509v2CRLBuilder;
+
+import javax.security.auth.x500.X500Principal;
+import java.util.Date;
 
 public class JcaX509v2CRLBuilder
     extends X509v2CRLBuilder

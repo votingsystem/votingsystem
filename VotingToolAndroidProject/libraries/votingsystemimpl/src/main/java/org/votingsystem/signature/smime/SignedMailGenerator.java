@@ -1,7 +1,6 @@
 package org.votingsystem.signature.smime;
 
 import android.util.Log;
-
 import org.bouncycastle2.asn1.ASN1EncodableVector;
 import org.bouncycastle2.asn1.cms.AttributeTable;
 import org.bouncycastle2.asn1.smime.SMIMECapabilitiesAttribute;
@@ -15,6 +14,13 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.signature.util.VotingSystemKeyStoreException;
 
+import javax.mail.Address;
+import javax.mail.Header;
+import javax.mail.Message;
+import javax.mail.Session;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMultipart;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -23,14 +29,6 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-
-import javax.mail.Address;
-import javax.mail.Header;
-import javax.mail.Message;
-import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMultipart;
 
 /**
 * @author jgzornoza
@@ -91,12 +89,12 @@ public class SignedMailGenerator {
         smimeSignedGenerator.addCertificates(certs);
     }
     
-    public SMIMEMessageWrapper genMimeMessage(String fromUser, String toUser, String textoAFirmar, 
-            String asunto, Header header) throws Exception {
-        if (asunto == null) asunto = "";
-        if (textoAFirmar == null) textoAFirmar = "";
+    public SMIMEMessageWrapper genMimeMessage(String fromUser, String toUser, String textToSign,
+            String subject, Header header) throws Exception {
+        if (subject == null) subject = "";
+        if (textToSign == null) textToSign = "";
         MimeBodyPart msg = new MimeBodyPart();
-        msg.setText(textoAFirmar);
+        msg.setText(textToSign);
         MimeMultipart mimeMultipart = smimeSignedGenerator.generate(msg,
                 ContextVS.DEFAULT_SIGNED_FILE_NAME);
         SMIMEMessageWrapper body = new SMIMEMessageWrapper(session);
@@ -109,7 +107,7 @@ public class SignedMailGenerator {
         	Address toUserAddress = new InternetAddress(toUser.replace(" ", ""));
         	body.setRecipient(Message.RecipientType.TO, toUserAddress);
         }
-        body.setSubject(asunto);
+        body.setSubject(subject);
         body.setContent(mimeMultipart, mimeMultipart.getContentType());
         body.save();
         return body;

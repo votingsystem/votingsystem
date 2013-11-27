@@ -1,10 +1,6 @@
 package org.bouncycastle2.asn1.esf;
 
-import org.bouncycastle2.asn1.ASN1Choice;
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DEROctetString;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 

@@ -1,30 +1,15 @@
 package org.bouncycastle2.jce.netscape;
 
+import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Signature;
-import java.security.SignatureException;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1InputStream;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DERBitString;
-import org.bouncycastle2.asn1.DERIA5String;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERSequence;
-import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
 
 /**
  *

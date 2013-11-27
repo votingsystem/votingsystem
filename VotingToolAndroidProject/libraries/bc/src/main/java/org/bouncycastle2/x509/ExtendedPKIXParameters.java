@@ -4,17 +4,8 @@ import org.bouncycastle2.util.Selector;
 import org.bouncycastle2.util.Store;
 
 import java.security.InvalidAlgorithmParameterException;
-import java.security.cert.CertSelector;
-import java.security.cert.CertStore;
-import java.security.cert.PKIXParameters;
-import java.security.cert.TrustAnchor;
-import java.security.cert.X509CertSelector;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.security.cert.*;
+import java.util.*;
 
 /**
  * This class extends the PKIXParameters with a validity model parameter.

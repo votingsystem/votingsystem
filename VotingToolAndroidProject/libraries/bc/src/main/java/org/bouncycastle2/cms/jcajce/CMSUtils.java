@@ -1,15 +1,14 @@
 package org.bouncycastle2.cms.jcajce;
 
-import java.security.Key;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-
-import javax.crypto.spec.SecretKeySpec;
-
 import org.bouncycastle2.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle2.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle2.asn1.x509.X509CertificateStructure;
 import org.bouncycastle2.operator.GenericKey;
+
+import javax.crypto.spec.SecretKeySpec;
+import java.security.Key;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 
 class CMSUtils
 {

@@ -1,10 +1,10 @@
 package org.bouncycastle2.asn1.cryptopro;
 
+import org.bouncycastle2.asn1.DERObjectIdentifier;
+
 import java.math.BigInteger;
 import java.util.Enumeration;
 import java.util.Hashtable;
-
-import org.bouncycastle2.asn1.DERObjectIdentifier;
 
 /**
  * table of the available named parameters for GOST 3410-94.

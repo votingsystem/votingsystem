@@ -1,5 +1,14 @@
 package org.votingsystem.signature.util;
 
+import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.cmp.PKIFailureInfo;
+import org.bouncycastle.asn1.cmp.PKIFreeText;
+import org.bouncycastle.asn1.cmp.PKIStatus;
+import org.bouncycastle.asn1.cmp.PKIStatusInfo;
+import org.bouncycastle.asn1.cms.ContentInfo;
+import org.bouncycastle.asn1.tsp.TimeStampResp;
+import org.bouncycastle.tsp.*;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -7,20 +16,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Date;
 import java.util.Set;
-
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERUTF8String;
-import org.bouncycastle.asn1.cmp.PKIFailureInfo;
-import org.bouncycastle.asn1.cmp.PKIFreeText;
-import org.bouncycastle.asn1.cmp.PKIStatus;
-import org.bouncycastle.asn1.cmp.PKIStatusInfo;
-import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.asn1.tsp.*;
-import org.bouncycastle.tsp.*;
 
 /**
  * Generator for RFC 3161 Time Stamp Responses.
@@ -110,9 +105,9 @@ public class TimeStampResponseGenerator
      * @param provider provider to use for signature calculation.
      * @deprecated use method that does not require provider
      * @return
-     * @throws NoSuchAlgorithmException
-     * @throws NoSuchProviderException
-     * @throws TSPException
+     * @throws java.security.NoSuchAlgorithmException
+     * @throws java.security.NoSuchProviderException
+     * @throws org.bouncycastle.tsp.TSPException
      */
     public TimeStampResponse generate(
         TimeStampRequest    request,
@@ -120,9 +115,9 @@ public class TimeStampResponseGenerator
         Date                genTime,
         String              provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, TSPException
-    {   
+    {
         TimeStampResp resp;
-        
+
         try {
             if (genTime == null) {
                 throw new TSPValidationException("The time source is not available.", PKIFailureInfo.timeNotAvailable);
@@ -132,30 +127,30 @@ public class TimeStampResponseGenerator
 
             status = PKIStatus.GRANTED;
             this.addStatusString("Operation OK");
-            
+
             PKIStatusInfo pkiStatusInfo = getPKIStatusInfo();
-            
+
             ContentInfo tstTokenContentInfo = null;
             try {
                 ByteArrayInputStream    bIn = new ByteArrayInputStream(
                 		tokenGenerator.generate(request, serialNumber, genTime, provider).toCMSSignedData().getEncoded());
                 ASN1InputStream         aIn = new ASN1InputStream(bIn);
-                
+
                 tstTokenContentInfo = ContentInfo.getInstance(aIn.readObject());
             }
-            catch (java.io.IOException ioEx) {
+            catch (IOException ioEx) {
                 throw new TSPException(
                         "Timestamp token received cannot be converted to ContentInfo", ioEx);
             }
-    
+
             resp = new TimeStampResp(pkiStatusInfo, tstTokenContentInfo);
         }
         catch (TSPValidationException e) {
             status = PKIStatus.REJECTION;
-            
+
             this.setFailInfoField(e.getFailureCode());
             this.addStatusString(e.getMessage());
-            
+
             PKIStatusInfo pkiStatusInfo = getPKIStatusInfo();
 
             resp = new TimeStampResp(pkiStatusInfo, null);
@@ -178,8 +173,8 @@ public class TimeStampResponseGenerator
      * @param serialNumber serial number for the response token.
      * @param genTime generation time for the response token.
      * @return
-     * @throws NoSuchAlgorithmException
-     * @throws TSPException
+     * @throws java.security.NoSuchAlgorithmException
+     * @throws org.bouncycastle.tsp.TSPException
      */
     public TimeStampResponse generate(
         TimeStampRequest    request,
@@ -211,7 +206,7 @@ public class TimeStampResponseGenerator
 
                 tstTokenContentInfo = ContentInfo.getInstance(aIn.readObject());
             }
-            catch (java.io.IOException ioEx)
+            catch (IOException ioEx)
             {
                 throw new TSPException(
                         "Timestamp token received cannot be converted to ContentInfo", ioEx);
@@ -251,12 +246,12 @@ public class TimeStampResponseGenerator
 
     /**
      * Generate a TimeStampResponse with chosen status and FailInfoField.
-     * 
+     *
      * @param status the PKIStatus to set.
      * @param failInfoField the FailInfoField to set.
      * @param statusString an optional string describing the failure.
      * @return a TimeStampResponse with a failInfoField and optional statusString
-     * @throws TSPException in case the response could not be created
+     * @throws org.bouncycastle.tsp.TSPException in case the response could not be created
      */
     public TimeStampResponse generateFailResponse(int status, int failInfoField, String statusString)
         throws TSPException

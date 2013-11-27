@@ -17,7 +17,7 @@ $('#addVoteOptionForm').submit(function(event){
 	console.log("addVoteOptionForm - addVoteOptionForm")
 	$("#addVoteOptionDialog").dialog( "close" );
 	if(!document.getElementById('newOptionText').validity.valid) {
-		$("#newOptionText").addClass( "ui-state-error" );
+		$("#newOptionText").addClass( "formFieldError" );
 		showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 			'<g:message code="emptyFieldMsg"/>',function() {
 				$("#addVoteOptionDialog").dialog("open")
@@ -25,7 +25,7 @@ $('#addVoteOptionForm').submit(function(event){
 	} else {
    		if(callerCallback != null) callerCallback($("#newOptionText").val())
    		else console.log("addVoteOptionDialog - missing callerCallback")
-		$("#newOptionText").removeClass( "ui-state-error" );
+		$("#newOptionText").removeClass( "formFieldError" );
 	}
 })
 

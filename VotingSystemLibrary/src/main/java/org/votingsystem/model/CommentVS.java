@@ -10,39 +10,39 @@ public class CommentVS implements Comparable {
 
     private Long id;
     private Long mensajeMimeId;
-    private String contenido;
-    private UserVS userVSBase;
-    private String nombreUsuario;
+    private String content;
+    private UserVS userVS;
+    private String userVSName;
     private EventVS eventVS;
     private Date dateCreated;
     private Date lastUpdated;
 
     /**
-     * @return the contenido
+     * @return the content
      */
-    public String getContenido() {
-        return contenido;
+    public String getContent() {
+        return content;
     }
 
     /**
-     * @param contenido the contenido to set
+     * @param content the content to set
      */
-    public void setContenido(String contenido) {
-        this.contenido = contenido;
+    public void setContent(String content) {
+        this.content = content;
     }
 
     /**
-     * @return the userVSBase
+     * @return the userVS
      */
-    public UserVS getUserVSBase() {
-        return userVSBase;
+    public UserVS getUserVS() {
+        return userVS;
     }
 
     /**
-     * @param userVSBase the userVSBase to set
+     * @param userVS the userVS to set
      */
-    public void setUserVSBase(UserVS userVSBase) {
-        this.userVSBase = userVSBase;
+    public void setUserVS(UserVS userVS) {
+        this.userVS = userVS;
     }
 
     /**
@@ -87,20 +87,20 @@ public class CommentVS implements Comparable {
         this.lastUpdated = lastUpdated;
     }
 
-	public void setEventVSBase(EventVS eventVS) {
+	public void setEventVS(EventVS eventVS) {
 		this.eventVS = eventVS;
 	}
 
-	public EventVS getEventVSBase() {
+	public EventVS getEventVS() {
 		return eventVS;
 	}
 
-	public void setNombreUsuario(String nombreUsuario) {
-		this.nombreUsuario = nombreUsuario;
+	public void setUserName(String userVSName) {
+		this.userVSName = userVSName;
 	}
 
-	public String getNombreUsuario() {
-		return nombreUsuario;
+	public String getUserName() {
+		return userVSName;
 	}
 
 	public void setMensajeMimeId(Long mensajeMimeId) {

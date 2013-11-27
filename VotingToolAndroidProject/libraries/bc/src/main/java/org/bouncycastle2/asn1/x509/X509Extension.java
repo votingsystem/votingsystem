@@ -1,12 +1,8 @@
 package org.bouncycastle2.asn1.x509;
 
-import java.io.IOException;
+import org.bouncycastle2.asn1.*;
 
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.DERBoolean;
+import java.io.IOException;
 
 /**
  * an object for the elements in the X.509 V3 extension block.

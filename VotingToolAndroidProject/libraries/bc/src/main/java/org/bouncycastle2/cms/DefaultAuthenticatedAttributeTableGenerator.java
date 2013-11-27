@@ -1,14 +1,14 @@
 package org.bouncycastle2.cms;
 
-import java.util.Hashtable;
-import java.util.Map;
-
 import org.bouncycastle2.asn1.DERObjectIdentifier;
 import org.bouncycastle2.asn1.DEROctetString;
 import org.bouncycastle2.asn1.DERSet;
 import org.bouncycastle2.asn1.cms.Attribute;
 import org.bouncycastle2.asn1.cms.AttributeTable;
 import org.bouncycastle2.asn1.cms.CMSAttributes;
+
+import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * Default authenticated attributes generator.

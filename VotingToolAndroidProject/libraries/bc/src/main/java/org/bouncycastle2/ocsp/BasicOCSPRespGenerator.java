@@ -1,30 +1,14 @@
 package org.bouncycastle2.ocsp;
 
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DERBitString;
-import org.bouncycastle2.asn1.DERGeneralizedTime;
-import org.bouncycastle2.asn1.DERNull;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DERSequence;
-import org.bouncycastle2.asn1.ocsp.BasicOCSPResponse;
-import org.bouncycastle2.asn1.ocsp.CertStatus;
-import org.bouncycastle2.asn1.ocsp.ResponseData;
-import org.bouncycastle2.asn1.ocsp.RevokedInfo;
-import org.bouncycastle2.asn1.ocsp.SingleResponse;
+import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.asn1.ocsp.*;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.asn1.x509.CRLReason;
 import org.bouncycastle2.asn1.x509.X509CertificateStructure;
 import org.bouncycastle2.asn1.x509.X509Extensions;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
+import java.security.*;
 import java.security.Signature;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;

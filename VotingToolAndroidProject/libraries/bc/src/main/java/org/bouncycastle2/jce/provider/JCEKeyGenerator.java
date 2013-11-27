@@ -1,17 +1,16 @@
 package org.bouncycastle2.jce.provider;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidParameterException;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
+import org.bouncycastle2.crypto.CipherKeyGenerator;
+import org.bouncycastle2.crypto.KeyGenerationParameters;
+import org.bouncycastle2.crypto.generators.DESKeyGenerator;
 
 import javax.crypto.KeyGeneratorSpi;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-
-import org.bouncycastle2.crypto.CipherKeyGenerator;
-import org.bouncycastle2.crypto.KeyGenerationParameters;
-import org.bouncycastle2.crypto.generators.DESKeyGenerator;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidParameterException;
+import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
 
 public class JCEKeyGenerator
     extends KeyGeneratorSpi

@@ -1,19 +1,14 @@
 package org.bouncycastle2.cms;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.security.AlgorithmParameters;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Provider;
-
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
-
 import org.bouncycastle2.asn1.DEREncodable;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.util.io.Streams;
+
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.security.*;
 
 public abstract class RecipientInformation
 {

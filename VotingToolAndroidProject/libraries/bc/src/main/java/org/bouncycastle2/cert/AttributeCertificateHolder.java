@@ -1,25 +1,20 @@
 package org.bouncycastle2.cert;
 
-import java.io.OutputStream;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle2.asn1.ASN1Sequence;
 import org.bouncycastle2.asn1.DERInteger;
 import org.bouncycastle2.asn1.DERSequence;
 import org.bouncycastle2.asn1.x500.X500Name;
-import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.asn1.x509.GeneralName;
-import org.bouncycastle2.asn1.x509.GeneralNames;
-import org.bouncycastle2.asn1.x509.Holder;
-import org.bouncycastle2.asn1.x509.IssuerSerial;
-import org.bouncycastle2.asn1.x509.ObjectDigestInfo;
-import org.bouncycastle2.util.Arrays;
-import org.bouncycastle2.util.Selector;
+import org.bouncycastle2.asn1.x509.*;
 import org.bouncycastle2.operator.DigestCalculator;
 import org.bouncycastle2.operator.DigestCalculatorProvider;
+import org.bouncycastle2.util.Arrays;
+import org.bouncycastle2.util.Selector;
+
+import java.io.OutputStream;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The Holder object.

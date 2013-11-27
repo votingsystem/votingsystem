@@ -43,13 +43,7 @@
  */
 package com.itextpdf.text.pdf.parser;
 
-import com.itextpdf.text.pdf.PRIndirectReference;
-import com.itextpdf.text.pdf.PRStream;
-import com.itextpdf.text.pdf.PdfArray;
-import com.itextpdf.text.pdf.PdfDictionary;
-import com.itextpdf.text.pdf.PdfName;
-import com.itextpdf.text.pdf.PdfObject;
-import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

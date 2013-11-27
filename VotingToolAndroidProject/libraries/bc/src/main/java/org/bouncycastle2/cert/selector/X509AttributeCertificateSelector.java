@@ -1,18 +1,14 @@
 package org.bouncycastle2.cert.selector;
 
-import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Date;
-
-import org.bouncycastle2.asn1.x509.GeneralName;
-import org.bouncycastle2.asn1.x509.Target;
-import org.bouncycastle2.asn1.x509.TargetInformation;
-import org.bouncycastle2.asn1.x509.Targets;
-import org.bouncycastle2.asn1.x509.X509Extension;
-import org.bouncycastle2.util.Selector;
+import org.bouncycastle2.asn1.x509.*;
 import org.bouncycastle2.cert.AttributeCertificateHolder;
 import org.bouncycastle2.cert.AttributeCertificateIssuer;
 import org.bouncycastle2.cert.X509AttributeCertificateHolder;
+import org.bouncycastle2.util.Selector;
+
+import java.math.BigInteger;
+import java.util.Collection;
+import java.util.Date;
 
 /**
  * This class is an <code>Selector</code> like implementation to select

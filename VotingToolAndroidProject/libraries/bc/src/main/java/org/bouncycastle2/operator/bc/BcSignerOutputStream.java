@@ -1,10 +1,10 @@
 package org.bouncycastle2.operator.bc;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 import org.bouncycastle2.crypto.CryptoException;
 import org.bouncycastle2.crypto.Signer;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 public class BcSignerOutputStream
     extends OutputStream

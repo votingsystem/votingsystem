@@ -1,25 +1,16 @@
 package org.bouncycastle2.x509;
 
+import org.bouncycastle2.asn1.ASN1InputStream;
+import org.bouncycastle2.asn1.ASN1Object;
+import org.bouncycastle2.asn1.DEROctetString;
+import org.bouncycastle2.asn1.x509.*;
+import org.bouncycastle2.util.Selector;
+
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
-import org.bouncycastle2.asn1.ASN1InputStream;
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.DEROctetString;
-import org.bouncycastle2.asn1.x509.GeneralName;
-import org.bouncycastle2.asn1.x509.Target;
-import org.bouncycastle2.asn1.x509.TargetInformation;
-import org.bouncycastle2.asn1.x509.Targets;
-import org.bouncycastle2.asn1.x509.X509Extensions;
-import org.bouncycastle2.util.Selector;
+import java.util.*;
 
 /**
  * This class is an <code>Selector</code> like implementation to select

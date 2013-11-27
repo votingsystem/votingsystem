@@ -1,9 +1,8 @@
 package org.bouncycastle2.cms;
 
+import javax.crypto.Mac;
 import java.io.IOException;
 import java.io.OutputStream;
-
-import javax.crypto.Mac;
 
 class MacOutputStream extends OutputStream
 {

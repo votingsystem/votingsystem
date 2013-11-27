@@ -1,8 +1,8 @@
 package org.bouncycastle2.pkcs;
 
-import java.io.IOException;
-
 import org.bouncycastle2.asn1.pkcs.EncryptedPrivateKeyInfo;
+
+import java.io.IOException;
 
 /**
  * Holding class for a PKCS#8 EncryptedPrivateKeyInfo structure.

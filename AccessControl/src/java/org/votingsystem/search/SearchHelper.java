@@ -23,19 +23,17 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import org.votingsystem.accesscontrol.model.Evento;
+import org.votingsystem.model.EventVS;
 
 @Repository("searchHelper")
 public class SearchHelper {
 
-    private static Logger log =
-            Logger.getLogger(SearchHelper.class);
+    private static Logger log = Logger.getLogger(SearchHelper.class);
 
     // a Hibernate SessionFactory
     @Autowired private SessionFactory sessionFactory;
 
-    @Transactional(readOnly = true)
-    public <T> List<T> findByFullText(Class<T> entityClass,
+    @Transactional(readOnly = true) public <T> List<T> findByFullText(Class<T> entityClass,
             String[] entityFields, String textToFind, int firstResult, int maxResults) {
         FullTextSession session = Search.getFullTextSession(
                 sessionFactory.getCurrentSession());
@@ -52,8 +50,7 @@ public class SearchHelper {
         return query.setFirstResult(firstResult).setMaxResults(maxResults).list();
     }
     
-    @Transactional(readOnly = true)
-    public FullTextQuery getFullTextQuery(Class<?> entityClass,
+    @Transactional(readOnly = true) public FullTextQuery getFullTextQuery(Class<?> entityClass,
             String[] entityFields, String textToFind) {
         FullTextSession session = Search.getFullTextSession(
                 sessionFactory.getCurrentSession());
@@ -69,14 +66,12 @@ public class SearchHelper {
         return session.createFullTextQuery( luceneQuery, entityClass );
     }
 
-    @Transactional(readOnly = true)
-    public FullTextQuery getCombinedQuery(Class<?> entityClass,
-            String[] entityFields, String textToFind, Date fechaInicioDesde,
-            Date fechaInicioHasta, Date fechaFinDesde, Date fechaFinHasta, 
-            List<Evento.Estado> estados) {
-    	log.debug("getCombinedQuery -- fechaInicioDesde: " + fechaInicioDesde + 
-    			" -fechaInicioHasta: " + fechaInicioHasta + "fechaFinDesde: " + fechaFinDesde + 
-    			" -fechaFinHasta: " + fechaFinHasta);
+    @Transactional(readOnly = true) public FullTextQuery getCombinedQuery(Class<?> entityClass, String[] entityFields,
+            String textToFind, Date dateBeginFrom, Date dateBeginTo, Date dateFinishFrom, Date dateFinishTo,
+            List<EventVS.State> states) {
+    	log.debug("getCombinedQuery -- dateBeginFrom: " + dateBeginFrom +
+    			" -dateBeginTo: " + dateBeginTo + "dateFinishFrom: " + dateFinishFrom +
+    			" -dateFinishTo: " + dateFinishTo);
         FullTextSession session = Search.getFullTextSession(
                 sessionFactory.getCurrentSession());
         MultiFieldQueryParser parser = new MultiFieldQueryParser(Version.LUCENE_31,
@@ -96,39 +91,39 @@ public class SearchHelper {
 			if(booleanJunction == null) booleanJunction = queryBuilder.bool();
 			booleanJunction.must(luceneQuery);
 		} 
-        if(fechaInicioDesde != null) {
+        if(dateBeginFrom != null) {
         	log.debug("Restringiendo por fechaIncioDesde");
         	if(booleanJunction == null) booleanJunction = queryBuilder.bool();
         	booleanJunction.must(queryBuilder.range()
-        	        .onField("fechaInicio").above(fechaInicioDesde).createQuery());
+        	        .onField("dateBegin").above(dateBeginFrom).createQuery());
         } 
-        if(fechaInicioHasta != null) {
+        if(dateBeginTo != null) {
         	log.debug("Restringiendo por fechaIncioHasta");
         	if(booleanJunction == null) booleanJunction = queryBuilder.bool();
         	booleanJunction.must(queryBuilder.range()
-        	        .onField("fechaInicio").below(fechaInicioHasta).createQuery());
+        	        .onField("dateBegin").below(dateBeginTo).createQuery());
         } 
-        if(fechaFinDesde != null) {
-        	log.debug("Restringiendo por fechaFinDesde");
+        if(dateFinishFrom != null) {
+        	log.debug("Restringiendo por dateFinishFrom");
         	if(booleanJunction == null) booleanJunction = queryBuilder.bool();
         	booleanJunction.must(queryBuilder.range()
-        	        .onField("fechaFin").above(fechaFinDesde).createQuery()); 
+        	        .onField("dateFinish").above(dateFinishFrom).createQuery());
         }        
-        if(fechaFinHasta != null) {
-        	log.debug("Restringiendo por fechaFinHasta");
+        if(dateFinishTo != null) {
+        	log.debug("Restringiendo por dateFinishTo");
         	if(booleanJunction == null) booleanJunction = queryBuilder.bool();
         	booleanJunction.must(queryBuilder.range()
-        	        .onField("fechaFin").below(fechaFinHasta).createQuery()); 
+        	        .onField("dateFinish").below(dateFinishTo).createQuery());
         } 
-        if(estados != null) {
-        	BooleanQuery estadoFilter = new BooleanQuery();
-        	estadoFilter.setMinimumNumberShouldMatch(1);
-        	for(Evento.Estado estado:estados) {
-        		estadoFilter.add(queryBuilder.phrase().onField("estado").
-        				sentence(estado.toString()).createQuery(), BooleanClause.Occur.SHOULD);
+        if(states != null) {
+        	BooleanQuery stateFilter = new BooleanQuery();
+        	stateFilter.setMinimumNumberShouldMatch(1);
+        	for(EventVS.State state:states) {
+        		stateFilter.add(queryBuilder.phrase().onField("state").
+        				sentence(state.toString()).createQuery(), BooleanClause.Occur.SHOULD);
         	}
 			if(booleanJunction == null) booleanJunction = queryBuilder.bool();
-			booleanJunction.must(estadoFilter);
+			booleanJunction.must(stateFilter);
         }
         if(booleanJunction == null) return null;
         return session.createFullTextQuery( booleanJunction.createQuery(), entityClass );

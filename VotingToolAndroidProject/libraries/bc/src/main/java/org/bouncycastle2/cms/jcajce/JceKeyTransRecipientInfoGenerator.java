@@ -1,14 +1,14 @@
 package org.bouncycastle2.cms.jcajce;
 
-import java.security.Provider;
-import java.security.PublicKey;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-
 import org.bouncycastle2.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle2.cms.KeyTransRecipientInfoGenerator;
 import org.bouncycastle2.operator.OperatorCreationException;
 import org.bouncycastle2.operator.jcajce.JceAsymmetricKeyWrapper;
+
+import java.security.Provider;
+import java.security.PublicKey;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 
 public class JceKeyTransRecipientInfoGenerator
     extends KeyTransRecipientInfoGenerator

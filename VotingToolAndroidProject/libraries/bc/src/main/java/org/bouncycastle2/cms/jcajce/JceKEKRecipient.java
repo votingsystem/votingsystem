@@ -1,10 +1,5 @@
 package org.bouncycastle2.cms.jcajce;
 
-import java.security.Key;
-import java.security.Provider;
-
-import javax.crypto.SecretKey;
-
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.cms.CMSException;
 import org.bouncycastle2.cms.KEKRecipient;
@@ -13,6 +8,10 @@ import org.bouncycastle2.jcajce.NamedJcaJceHelper;
 import org.bouncycastle2.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle2.operator.OperatorException;
 import org.bouncycastle2.operator.SymmetricKeyUnwrapper;
+
+import javax.crypto.SecretKey;
+import java.security.Key;
+import java.security.Provider;
 
 public abstract class JceKEKRecipient
     implements KEKRecipient

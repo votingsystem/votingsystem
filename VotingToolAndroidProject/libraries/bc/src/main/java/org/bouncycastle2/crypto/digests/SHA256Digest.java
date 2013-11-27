@@ -1,7 +1,6 @@
 package org.bouncycastle2.crypto.digests;
 
 
-import org.bouncycastle2.crypto.digests.GeneralDigest;
 import org.bouncycastle2.crypto.util.Pack;
 
 

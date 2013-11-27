@@ -1,21 +1,16 @@
 package org.votingsystem.applet.validationtool.model;
 
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
-import org.votingsystem.model.OptionVS;
+import org.apache.log4j.Logger;
+import org.votingsystem.model.FieldEventVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.StringUtils;
 
-import org.apache.log4j.Logger;
+import java.text.ParseException;
+import java.util.*;
 
 /**
 * @author jgzornoza
@@ -39,7 +34,7 @@ public class MetaInf {
     private Long numRepresentativesWithAccessRequest;
     
     private List<String> errorsList;
-    private List<OptionVS> optionList;
+    private List<FieldEventVS> optionList;
     
     
     public String getFormattedInfo() {
@@ -136,9 +131,9 @@ public class MetaInf {
             if(repJSON.containsKey("options")) {
                 JSONObject options = repJSON.getJSONObject("options");
                 Set<String> keySet = options.keySet();
-                List<OptionVS> optionList = new ArrayList<OptionVS>();
+                List<FieldEventVS> optionList = new ArrayList<FieldEventVS>();
                 for(String key:keySet) {
-                    OptionVS option = new OptionVS();
+                    FieldEventVS option = new FieldEventVS();
                     JSONObject optionJSON = options.getJSONObject(key);
                     option.setId(Long.valueOf(key));
                     option.setContent(optionJSON.getString("content"));
@@ -188,7 +183,7 @@ public class MetaInf {
         StringBuilder result = new StringBuilder("<HTML>");
         if(TypeVS.VOTING_EVENT == type) {
             result.append("<ul>");
-            for(OptionVS option : optionList) {
+            for(FieldEventVS option : optionList) {
                 result.append("<li><b>Opcion:</b> " + option.getContent() + "<br/>" +
                         "id:" + option.getId() + "<br/>" +
                         "numVoteRequests:" + option.getNumVoteRequests() + "<br/>" +
@@ -205,14 +200,16 @@ public class MetaInf {
     
     public String getEventURL() {
         if(serverURL == null) return null;
-        if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
         if(TypeVS.VOTING_EVENT == type) {
-            return serverURL + "eventoVotacion/" + id;
+            return serverURL + "/eventVSElection/" + id;
         } else if (TypeVS.CLAIM_EVENT == type) {
-            return serverURL + "eventoReclamacion/" + id;
-        } else if (TypeVS.SIGN_EVENT == type) {
-            return serverURL + "eventoFirma/" + id;
-        } else return null;
+            return serverURL + "/eventVSClaim/" + id;
+        } else if (TypeVS.MANIFEST_EVENT == type) {
+            return serverURL + "/eventVSManifest/" + id;
+        } else {
+            logger.error("Unknown server type: " + type);
+            return null;
+        }
     }
         
     public String getRepresentativesHTML() {
@@ -260,176 +257,104 @@ public class MetaInf {
     public String getOptionContent(Long optionId) {
         if(optionId == null) return null;
         if(optionList == null) return null;
-        for(OptionVS option:optionList) {
+        for(FieldEventVS option:optionList) {
             if(option.getId() == optionId) return option.getContent();
         }
         return null;
     }
 
-    /**
-     * @return the numSignatures
-     */
     public Long getNumSignatures() {
         return numSignatures;
     }
 
-    /**
-     * @param numSignatures the numSignatures to set
-     */
     public void setNumSignatures(Long numSignatures) {
         this.numSignatures = numSignatures;
     }
 
-    /**
-     * @return the numVotes
-     */
     public Long getNumVotes() {
         return numVotes;
     }
 
-    /**
-     * @param numVotes the numVotes to set
-     */
     public void setNumVotes(Long numVotes) {
         this.numVotes = numVotes;
     }
 
-    /**
-     * @return the numAccessRequest
-     */
     public Long getNumAccessRequest() {
         return numAccessRequest;
     }
 
-    /**
-     * @param numAccessRequest the numAccessRequest to set
-     */
     public void setNumAccessRequest(Long numAccessRequest) {
         this.numAccessRequest = numAccessRequest;
     }
 
-    /**
-     * @return the type
-     */
     public TypeVS getType() {
         return type;
     }
 
-    /**
-     * @param type the type to set
-     */
     public void setType(TypeVS type) {
         this.type = type;
     }
 
-    /**
-     * @return the subject
-     */
     public String getSubject() {
         return subject;
     }
 
-    /**
-     * @param subject the subject to set
-     */
     public void setSubject(String subject) {
         this.subject = subject;
     }
 
-    /**
-     * @return the errorsList
-     */
     public List<String> getErrorsList() {
         return errorsList;
     }
 
-    /**
-     * @param aErrorsList the errorsList to set
-     */
     public void setErrorsList(List<String> aErrorsList) {
         errorsList = aErrorsList;
     }
 
-    /**
-     * @return the dateFinish
-     */
     public Date getDateFinish() {
         return dateFinish;
     }
 
-    /**
-     * @param dateFinish the dateFinish to set
-     */
     public void setDateFinish(Date dateFinish) {
         this.dateFinish = dateFinish;
     }
-        
-    /**
-     * @param dateFinish the dateFinish to set
-     */
+
     public void setDateInit(Date dateInit) {
         this.dateInit = dateInit;
     }    
 
-    /**
-     * @return the id
-     */
     public Long getId() {
         return id;
     }
 
-    /**
-     * @param id the id to set
-     */
     public void setId(Long id) {
         this.id = id;
     }
 
-    /**
-     * @return the serverURL
-     */
     public String getServerURL() {
         return serverURL;
     }
 
-    /**
-     * @param serverURL the serverURL to set
-     */
     public void setServerURL(String serverURL) {
-        this.serverURL = serverURL;
+        this.serverURL = StringUtils.checkURL(serverURL);
     }
 
-    /**
-     * @return the numRepresentativesWithAccessRequest
-     */
     public Long getNumRepresentativesWithAccessRequest() {
         return numRepresentativesWithAccessRequest;
     }
 
-    /**
-     * @param numRepresentativesWithAccessRequest the numRepresentativesWithAccessRequest to set
-     */
     public void setNumRepresentativesWithAccessRequest(Long numRepresentativesWithAccessRequest) {
         this.numRepresentativesWithAccessRequest = numRepresentativesWithAccessRequest;
     }
 
-    /**
-     * @return the optionList
-     */
-    public List<OptionVS> getOptionList() {
+    public List<FieldEventVS> getOptionList() {
         return optionList;
     }
 
-    /**
-     * @param optionList the optionList to set
-     */
-    public void setOptionList(List<OptionVS> optionList) {
+    public void setOptionList(List<FieldEventVS> optionList) {
         this.optionList = optionList;
     }
-    
-    /**
-     * @return the representativesData
-     */
+
     public RepresentativeData getRepresentativeData(String representativeNif) {
         if(representativesData == null) return null;
         Map<String, RepresentativeData> representativesMap = 
@@ -437,16 +362,10 @@ public class MetaInf {
         return representativesMap.get(representativeNif);
     }
 
-    /**
-     * @return the representativesData
-     */
     public RepresentativesData getRepresentativesData() {
         return representativesData;
     }
 
-    /**
-     * @param representativesData the representativesData to set
-     */
     public void setRepresentativesData(RepresentativesData representativesData) {
         this.representativesData = representativesData;
     }

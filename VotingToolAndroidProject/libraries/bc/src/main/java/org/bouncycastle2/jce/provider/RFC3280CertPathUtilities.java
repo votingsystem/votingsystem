@@ -1,61 +1,22 @@
 package org.bouncycastle2.jce.provider;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.GeneralSecurityException;
-import java.security.PublicKey;
-import java.security.cert.CertPath;
-import java.security.cert.CertPathBuilder;
-import java.security.cert.CertPathBuilderException;
-import java.security.cert.CertPathValidatorException;
-import java.security.cert.CertificateExpiredException;
-import java.security.cert.CertificateNotYetValidException;
-import java.security.cert.PKIXCertPathChecker;
-import java.security.cert.X509CRL;
-import java.security.cert.X509Certificate;
-import java.security.cert.X509Extension;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
-
-import javax.security.auth.x500.X500Principal;
-
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1InputStream;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.ASN1TaggedObject;
-import org.bouncycastle2.asn1.DEREncodable;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DERSequence;
-import org.bouncycastle2.asn1.x509.BasicConstraints;
-import org.bouncycastle2.asn1.x509.CRLDistPoint;
-import org.bouncycastle2.asn1.x509.CRLReason;
-import org.bouncycastle2.asn1.x509.DistributionPoint;
-import org.bouncycastle2.asn1.x509.DistributionPointName;
-import org.bouncycastle2.asn1.x509.GeneralName;
-import org.bouncycastle2.asn1.x509.GeneralNames;
-import org.bouncycastle2.asn1.x509.GeneralSubtree;
-import org.bouncycastle2.asn1.x509.IssuingDistributionPoint;
-import org.bouncycastle2.asn1.x509.NameConstraints;
-import org.bouncycastle2.asn1.x509.PolicyInformation;
-import org.bouncycastle2.asn1.x509.X509Extensions;
-import org.bouncycastle2.asn1.x509.X509Name;
+import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.asn1.x509.*;
 import org.bouncycastle2.jce.exception.ExtCertPathValidatorException;
 import org.bouncycastle2.util.Arrays;
 import org.bouncycastle2.x509.ExtendedPKIXBuilderParameters;
 import org.bouncycastle2.x509.ExtendedPKIXParameters;
 import org.bouncycastle2.x509.X509CRLStoreSelector;
 import org.bouncycastle2.x509.X509CertStoreSelector;
+
+import javax.security.auth.x500.X500Principal;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
+import java.security.cert.*;
+import java.security.cert.X509Extension;
+import java.util.*;
 
 public class RFC3280CertPathUtilities
 {

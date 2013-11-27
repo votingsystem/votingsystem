@@ -43,10 +43,10 @@
 
 package iaik.pkcs.pkcs11.objects;
 
-import java.util.Enumeration;
-
 import iaik.pkcs.pkcs11.wrapper.CK_ATTRIBUTE;
 import iaik.pkcs.pkcs11.wrapper.Constants;
+
+import java.util.Enumeration;
 
 /**
  * Objects of this class represent a attribute array of a PKCS#11 object

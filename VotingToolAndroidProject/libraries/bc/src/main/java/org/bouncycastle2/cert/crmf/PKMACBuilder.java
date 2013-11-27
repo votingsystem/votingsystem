@@ -1,19 +1,19 @@
 package org.bouncycastle2.cert.crmf;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.security.SecureRandom;
-
 import org.bouncycastle2.asn1.DERNull;
 import org.bouncycastle2.asn1.cmp.CMPObjectIdentifiers;
 import org.bouncycastle2.asn1.cmp.PBMParameter;
 import org.bouncycastle2.asn1.iana.IANAObjectIdentifiers;
 import org.bouncycastle2.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.util.Strings;
 import org.bouncycastle2.operator.GenericKey;
 import org.bouncycastle2.operator.MacCalculator;
 import org.bouncycastle2.operator.RuntimeOperatorException;
+import org.bouncycastle2.util.Strings;
+
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.security.SecureRandom;
 
 public class PKMACBuilder
 {

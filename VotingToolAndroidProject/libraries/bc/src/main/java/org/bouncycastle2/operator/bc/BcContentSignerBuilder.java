@@ -1,8 +1,5 @@
 package org.bouncycastle2.operator.bc;
 
-import java.io.OutputStream;
-import java.security.SecureRandom;
-
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.crypto.CryptoException;
 import org.bouncycastle2.crypto.Signer;
@@ -11,6 +8,9 @@ import org.bouncycastle2.crypto.params.ParametersWithRandom;
 import org.bouncycastle2.operator.ContentSigner;
 import org.bouncycastle2.operator.OperatorCreationException;
 import org.bouncycastle2.operator.RuntimeOperatorException;
+
+import java.io.OutputStream;
+import java.security.SecureRandom;
 
 public abstract class BcContentSignerBuilder
 {

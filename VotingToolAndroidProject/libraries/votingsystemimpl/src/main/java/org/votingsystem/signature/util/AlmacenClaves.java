@@ -5,12 +5,12 @@ import java.util.Date;
 
 public class AlmacenClaves {
 	
-    private Boolean activo;
-    private Boolean esRaiz;
+    private Boolean valid;
+    private Boolean isRoot;
     private Date dateCreated;
     private Date lastUpdated;
-    private Date validoDesde;
-    private Date validoHasta;
+    private Date validFrom;
+    private Date validTo;
     private String password;
     private String keyAlias;
     private String rootKeyAlias;
@@ -28,12 +28,12 @@ public class AlmacenClaves {
        this.bytes = bytes;
    }
 
-    public void setActivo(Boolean activo) {
-        this.activo = activo;
+    public void setValid(Boolean valid) {
+        this.valid = valid;
     }
 
-    public Boolean getActivo() {
-        return activo;
+    public Boolean getValid() {
+        return valid;
     }
 
     public void setDateCreated(Date dateCreated) {
@@ -44,12 +44,12 @@ public class AlmacenClaves {
         return dateCreated;
     }
 
-    public void setEsRaiz(Boolean esRaiz) {
-        this.esRaiz = esRaiz;
+    public void setIsRoot(Boolean isRoot) {
+        this.isRoot = isRoot;
     }
 
-    public Boolean getEsRaiz() {
-            return esRaiz;
+    public Boolean getIsRoot() {
+            return isRoot;
     }
 
     private void setLastUpdated(Date lastUpdated) {
@@ -60,20 +60,20 @@ public class AlmacenClaves {
         return lastUpdated;
     }
 
-    public void setValidoDesde(Date validoDesde) {
-        this.validoDesde = validoDesde;
+    public void setValidFrom(Date validFrom) {
+        this.validFrom = validFrom;
     }
 
-    public Date getValidoDesde() {
-        return validoDesde;
+    public Date getValidFrom() {
+        return validFrom;
     }
 
-    public void setValidoHasta(Date validoHasta) {
-        this.validoHasta = validoHasta;
+    public void setValidTo(Date validTo) {
+        this.validTo = validTo;
     }
 
-    public Date getValidoHasta() {
-        return validoHasta;
+    public Date getValidTo() {
+        return validTo;
     }
 
     public void setPassword(String password) {

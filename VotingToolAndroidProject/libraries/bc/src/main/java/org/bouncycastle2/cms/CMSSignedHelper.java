@@ -1,30 +1,6 @@
 package org.bouncycastle2.cms;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.Provider;
-import java.security.Signature;
-import java.security.cert.CRLException;
-import java.security.cert.CertStore;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.CollectionCertStoreParameters;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.ASN1Set;
-import org.bouncycastle2.asn1.ASN1TaggedObject;
-import org.bouncycastle2.asn1.DEREncodable;
-import org.bouncycastle2.asn1.DERNull;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle2.asn1.eac.EACObjectIdentifiers;
 import org.bouncycastle2.asn1.nist.NISTObjectIdentifiers;
@@ -38,6 +14,12 @@ import org.bouncycastle2.x509.NoSuchStoreException;
 import org.bouncycastle2.x509.X509CollectionStoreParameters;
 import org.bouncycastle2.x509.X509Store;
 import org.bouncycastle2.x509.X509V2AttributeCertificate;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.security.*;
+import java.security.cert.*;
+import java.util.*;
 
 class CMSSignedHelper
 {

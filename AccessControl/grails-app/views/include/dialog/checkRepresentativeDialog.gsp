@@ -76,7 +76,7 @@ $("#checkRepresentativeDialog").dialog({
 	function checkRepresentative () { 
  		$("#checkRepresentativeDialogFormDiv").hide()
  		$("#checkRepresentativeDialogProgressDiv").fadeIn(500)
- 		var urlRequest = "${createLink(controller:'user')}/" + $("#userNifText").val() + "/representative"
+ 		var urlRequest = "${createLink(controller:'userVS')}/" + $("#userNifText").val() + "/representative"
  		console.log(" - checkRepresentative - urlRequest: " + urlRequest)
 		$.ajax({///user/$nif/representative
 			url: urlRequest
@@ -86,9 +86,9 @@ $("#checkRepresentativeDialog").dialog({
 			console.log(" - ajax call done - resultMsgStr: " + resultMsgStr);
 			var msgTemplate = "<g:message code="representativeAssociatedCheckedMsg"/>"
 			var msg = msgTemplate.format(resultMsg.representativeName, $("#userNifText").val())
-			showCheckRepresentativeResult (StatusCode.SC_OK, msg)
+			showCheckRepresentativeResult (ResponseVS.SC_OK, msg)
 		}).error(function(resultMsg) {
-			showCheckRepresentativeResult (StatusCode.SC_ERROR, resultMsg.responseText)
+			showCheckRepresentativeResult (ResponseVS.SC_ERROR, resultMsg.responseText)
 		});
 	}
 
@@ -99,7 +99,7 @@ $("#checkRepresentativeDialog").dialog({
  		$("#acceptButton").fadeOut();
  		$("#cancelButton").find(".ui-button-text").text("<g:message code="acceptLbl"/>")
  		$("#cancelButton").button("enable");
- 		if(StatusCode.SC_OK == statusCode) {
+ 		if(ResponseVS.SC_OK == statusCode) {
  			$("#checkRepresentativeDialogResultImage").attr('src',"${resource(dir:'images', file:'accept_48x48.png')}");
 	 	} else {
 	 		$("#checkRepresentativeDialogResultImage").attr('src',"${resource(dir:'images', file:'advert_64x64.png')}")

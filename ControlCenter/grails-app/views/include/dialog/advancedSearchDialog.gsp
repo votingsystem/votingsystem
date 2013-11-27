@@ -79,16 +79,16 @@ var dateBeginFrom  = $("#dateBeginFrom"),
  $('#advancedSearchForm').submit(function(event){
  	console.log("advancedSearchForm")
  	event.preventDefault();
- 	allFields.removeClass("ui-state-error");
+ 	allFields.removeClass("formFieldError");
  	$(".errorMsgWrapper").fadeOut()
 	if(dateBeginFrom.datepicker("getDate") === null) {
-		dateBeginFrom.addClass( "ui-state-error" );
+		dateBeginFrom.addClass( "formFieldError" );
 		showErrorMsg('<g:message code="emptyFieldMsg"/>')
 		return
 	}
 	
 	if(dateBeginTo.datepicker("getDate") === null) {
-		dateBeginTo.addClass( "ui-state-error" );
+		dateBeginTo.addClass( "formFieldError" );
 		showErrorMsg('<g:message code="emptyFieldMsg"/>')
 		return
 	}
@@ -96,19 +96,19 @@ var dateBeginFrom  = $("#dateBeginFrom"),
 	if(dateBeginFrom.datepicker("getDate") > 
 		dateBeginTo.datepicker("getDate")) {
 		showErrorMsg('<g:message code="dateRangeERRORMsg"/>') 
-		dateBeginFrom.addClass("ui-state-error");
-		dateBeginTo.addClass("ui-state-error");
+		dateBeginFrom.addClass("formFieldError");
+		dateBeginTo.addClass("formFieldError");
 		return
 	}
 
 	if(dateFinishFrom.datepicker("getDate") === null) {
-		dateFinishFrom.addClass( "ui-state-error" );
+		dateFinishFrom.addClass( "formFieldError" );
 		showErrorMsg('<g:message code="emptyFieldMsg"/>')
 		return
 	}
 
 	if(dateFinishTo.datepicker("getDate") === null) {
-		dateFinishTo.addClass( "ui-state-error" );
+		dateFinishTo.addClass( "formFieldError" );
 		showErrorMsg('<g:message code="emptyFieldMsg"/>')
 		return
 	}
@@ -116,8 +116,8 @@ var dateBeginFrom  = $("#dateBeginFrom"),
 	if(dateFinishFrom.datepicker("getDate") > 
 		dateFinishTo.datepicker("getDate")) {
 		showErrorMsg('<g:message code="dateRangeERRORMsg"/>') 
-		dateFinishFrom.addClass("ui-state-error");
-		dateFinishTo.addClass("ui-state-error");
+		dateFinishFrom.addClass("formFieldError");
+		dateFinishTo.addClass("formFieldError");
 		return
 	}
  	getSearchResult(getAdvancedSearchQuery())

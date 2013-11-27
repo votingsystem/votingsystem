@@ -1,27 +1,15 @@
 package org.bouncycastle2.asn1.x509;
 
-import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.ASN1Set;
-import org.bouncycastle2.asn1.ASN1TaggedObject;
-import org.bouncycastle2.asn1.DEREncodable;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DERSequence;
-import org.bouncycastle2.asn1.DERSet;
-import org.bouncycastle2.asn1.DERString;
-import org.bouncycastle2.asn1.DERUniversalString;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.asn1.x500.X500Name;
 import org.bouncycastle2.util.Strings;
 import org.bouncycastle2.util.encoders.Hex;
+
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  * <pre>

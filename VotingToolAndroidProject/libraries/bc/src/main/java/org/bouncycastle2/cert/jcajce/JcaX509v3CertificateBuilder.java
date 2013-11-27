@@ -1,17 +1,16 @@
 package org.bouncycastle2.cert.jcajce;
 
+import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle2.asn1.x500.X500Name;
+import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle2.cert.X509v3CertificateBuilder;
+
+import javax.security.auth.x500.X500Principal;
 import java.math.BigInteger;
 import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
-
-import javax.security.auth.x500.X500Principal;
-
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.x500.X500Name;
-import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle2.cert.X509v3CertificateBuilder;
 
 /**
  * JCA helper class to allow JCA objects to be used in the construction of a Version 3 certificate.

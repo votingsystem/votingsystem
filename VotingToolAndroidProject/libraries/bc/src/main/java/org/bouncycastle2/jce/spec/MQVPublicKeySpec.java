@@ -1,9 +1,9 @@
 package org.bouncycastle2.jce.spec;
 
+import org.bouncycastle2.jce.interfaces.MQVPublicKey;
+
 import java.security.PublicKey;
 import java.security.spec.KeySpec;
-
-import org.bouncycastle2.jce.interfaces.MQVPublicKey;
 
 /**
  * Static/ephemeral public key pair for use with ECMQV key agreement

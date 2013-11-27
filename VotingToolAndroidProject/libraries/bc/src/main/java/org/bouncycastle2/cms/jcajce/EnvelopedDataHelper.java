@@ -1,40 +1,6 @@
 package org.bouncycastle2.cms.jcajce;
 
-import java.io.IOException;
-import java.security.AlgorithmParameterGenerator;
-import java.security.AlgorithmParameters;
-import java.security.GeneralSecurityException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.InvalidParameterSpecException;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.crypto.Cipher;
-import javax.crypto.KeyAgreement;
-import javax.crypto.KeyGenerator;
-import javax.crypto.Mac;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.RC2ParameterSpec;
-
-import org.bouncycastle2.asn1.ASN1Null;
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.DEREncodable;
-import org.bouncycastle2.asn1.DERNull;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DEROctetString;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.asn1.pkcs.RC2CBCParameter;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
@@ -45,7 +11,15 @@ import org.bouncycastle2.jcajce.JcaJceHelper;
 import org.bouncycastle2.operator.AsymmetricKeyUnwrapper;
 import org.bouncycastle2.operator.SymmetricKeyUnwrapper;
 
-import android.util.Log;
+import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.RC2ParameterSpec;
+import java.io.IOException;
+import java.security.*;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.InvalidParameterSpecException;
+import java.util.HashMap;
+import java.util.Map;
 
 class EnvelopedDataHelper
 {

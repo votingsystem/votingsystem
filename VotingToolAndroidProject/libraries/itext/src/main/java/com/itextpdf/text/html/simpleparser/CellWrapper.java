@@ -43,11 +43,7 @@
  */
 package com.itextpdf.text.html.simpleparser;
 
-import com.itextpdf.text.Chunk;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.ElementListener;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.TextElementArray;
+import com.itextpdf.text.*;
 import com.itextpdf.text.html.HtmlTags;
 import com.itextpdf.text.html.HtmlUtilities;
 import com.itextpdf.text.pdf.PdfPCell;

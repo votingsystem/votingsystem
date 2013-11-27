@@ -49,11 +49,7 @@ import iaik.pkcs.pkcs11.wrapper.CK_DATE;
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
-import java.util.Vector;
+import java.util.*;
 
 
 

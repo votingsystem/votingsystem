@@ -1,13 +1,13 @@
 package org.bouncycastle2.openssl;
 
+import org.bouncycastle2.util.io.pem.PemGenerationException;
+import org.bouncycastle2.util.io.pem.PemObjectGenerator;
+import org.bouncycastle2.util.io.pem.PemWriter;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
-
-import org.bouncycastle2.util.io.pem.PemGenerationException;
-import org.bouncycastle2.util.io.pem.PemObjectGenerator;
-import org.bouncycastle2.util.io.pem.PemWriter;
 
 /**
  * General purpose writer for OpenSSL PEM objects.

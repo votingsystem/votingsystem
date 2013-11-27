@@ -3,17 +3,8 @@ package org.bouncycastle2.jce.provider;
 import org.bouncycastle2.jce.MultiCertStoreParameters;
 
 import java.security.InvalidAlgorithmParameterException;
-import java.security.cert.CRLSelector;
-import java.security.cert.CertSelector;
-import java.security.cert.CertStore;
-import java.security.cert.CertStoreException;
-import java.security.cert.CertStoreParameters;
-import java.security.cert.CertStoreSpi;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.security.cert.*;
+import java.util.*;
 
 public class MultiCertStoreSpi
     extends CertStoreSpi

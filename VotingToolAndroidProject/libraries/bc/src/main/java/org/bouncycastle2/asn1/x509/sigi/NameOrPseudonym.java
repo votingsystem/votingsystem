@@ -1,15 +1,9 @@
 package org.bouncycastle2.asn1.x509.sigi;
 
-import java.util.Enumeration;
-
-import org.bouncycastle2.asn1.ASN1Choice;
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.ASN1String;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERSequence;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.x500.DirectoryString;
+
+import java.util.Enumeration;
 
 /**
  * Structure for a name or pseudonym.

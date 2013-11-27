@@ -1,21 +1,16 @@
 package org.bouncycastle2.ocsp;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.PublicKey;
-import java.security.cert.X509Certificate;
-
-import org.bouncycastle2.asn1.ASN1InputStream;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERNull;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DEROctetString;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.ocsp.CertID;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle2.jce.PrincipalUtil;
 import org.bouncycastle2.jce.X509Principal;
+
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.PublicKey;
+import java.security.cert.X509Certificate;
 
 public class CertificateID
 {

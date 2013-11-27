@@ -1,13 +1,7 @@
 package org.votingsystem.signature.util;
 
 import android.util.Log;
-
-import org.bouncycastle2.cms.CMSAlgorithm;
-import org.bouncycastle2.cms.KeyTransRecipientId;
-import org.bouncycastle2.cms.Recipient;
-import org.bouncycastle2.cms.RecipientId;
-import org.bouncycastle2.cms.RecipientInformation;
-import org.bouncycastle2.cms.RecipientInformationStore;
+import org.bouncycastle2.cms.*;
 import org.bouncycastle2.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle2.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle2.cms.jcajce.JceKeyTransRecipientId;
@@ -20,6 +14,11 @@ import org.votingsystem.model.EncryptedBundleVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 
+import javax.crypto.Cipher;
+import javax.mail.Header;
+import javax.mail.Session;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -31,12 +30,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
-
-import javax.crypto.Cipher;
-import javax.mail.Header;
-import javax.mail.Session;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
 
 /**
 * @author jgzornoza

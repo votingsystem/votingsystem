@@ -1,14 +1,7 @@
 package org.bouncycastle2.jce.provider;
 
 import java.security.InvalidAlgorithmParameterException;
-import java.security.cert.CRL;
-import java.security.cert.CRLSelector;
-import java.security.cert.CertSelector;
-import java.security.cert.CertStoreException;
-import java.security.cert.CertStoreParameters;
-import java.security.cert.CertStoreSpi;
-import java.security.cert.Certificate;
-import java.security.cert.CollectionCertStoreParameters;
+import java.security.cert.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;

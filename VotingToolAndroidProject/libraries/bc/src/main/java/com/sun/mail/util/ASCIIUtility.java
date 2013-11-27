@@ -41,8 +41,8 @@ package com.sun.mail.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class ASCIIUtility {
 

@@ -3,15 +3,13 @@ package org.votingsystem.util;
 import org.apache.log4j.Logger;
 
 public class NifUtils {
-
-    private static Logger logger = Logger.getLogger(NifUtils.class);
 	    
     public static String getNif(int number) {
         String numberStr = String.format("%08d", number);
         return numberStr + getNifLetter(number);
     }
     
-    public static String validarNIF(String nif) {
+    public static String validate(String nif) {
     	if(nif == null) return null;
     	nif  = nif.toUpperCase();
     	if(nif.length() < 9) {
@@ -29,8 +27,7 @@ public class NifUtils {
             return null;
         }
     }
-    
-    // sacado de http://felinfo.blogspot.com.es/2010/12/calcular-la-letra-del-dni-con-java.html
+
     public static String getNifLetter(int dni) {
         String juegoCaracteres="TRWAGMYFPDXBNJZSQVHLCKET";
         int modulo= dni % 23;
@@ -38,5 +35,4 @@ public class NifUtils {
         return letra.toString(); 
     }
 
-	    
 }

@@ -1,16 +1,5 @@
 package org.bouncycastle2.cms;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.Provider;
-import java.security.ProviderException;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
-
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-
 import org.bouncycastle2.asn1.ASN1Object;
 import org.bouncycastle2.asn1.ASN1OctetString;
 import org.bouncycastle2.asn1.DEROctetString;
@@ -21,6 +10,12 @@ import org.bouncycastle2.asn1.cms.RecipientInfo;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle2.asn1.x509.TBSCertificateStructure;
+
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import java.io.IOException;
+import java.security.*;
+import java.security.cert.X509Certificate;
 
 class KeyTransIntRecipientInfoGenerator
     implements IntRecipientInfoGenerator

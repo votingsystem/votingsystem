@@ -40,8 +40,8 @@
 
 package com.sun.mail.util;
 
-import java.io.IOException;
 import javax.mail.Folder;
+import java.io.IOException;
 
 /**
  * A variant of FolderClosedException that can be thrown from methods

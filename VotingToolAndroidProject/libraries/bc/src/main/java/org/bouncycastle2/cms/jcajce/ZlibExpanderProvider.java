@@ -1,14 +1,14 @@
 package org.bouncycastle2.cms.jcajce;
 
+import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle2.operator.InputExpander;
+import org.bouncycastle2.operator.InputExpanderProvider;
+import org.bouncycastle2.util.io.StreamOverflowException;
+
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.InflaterInputStream;
-
-import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.util.io.StreamOverflowException;
-import org.bouncycastle2.operator.InputExpander;
-import org.bouncycastle2.operator.InputExpanderProvider;
 
 public class ZlibExpanderProvider
     implements InputExpanderProvider

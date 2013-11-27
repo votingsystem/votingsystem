@@ -1,18 +1,17 @@
 package org.bouncycastle2.cert.crmf.jcajce;
 
-import java.security.GeneralSecurityException;
-import java.security.MessageDigest;
-import java.security.Provider;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.cert.crmf.CRMFException;
 import org.bouncycastle2.cert.crmf.PKMACValuesCalculator;
 import org.bouncycastle2.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle2.jcajce.NamedJcaJceHelper;
 import org.bouncycastle2.jcajce.ProviderJcaJceHelper;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.GeneralSecurityException;
+import java.security.MessageDigest;
+import java.security.Provider;
 
 public class JcePKMACValuesCalculator
     implements PKMACValuesCalculator

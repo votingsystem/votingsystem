@@ -1,19 +1,19 @@
 package org.votingsystem.util;
 
+import org.apache.log4j.Logger;
+import org.votingsystem.model.ContextVS;
+import org.votingsystem.signature.util.KeyStoreUtil;
+
+import javax.security.auth.x500.X500PrivateCredential;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.security.auth.x500.X500PrivateCredential;
-import org.votingsystem.signature.util.KeyStoreUtil;
-import org.apache.log4j.Logger;
-import org.votingsystem.model.ContextVS;
 
 public class CertGenerator {
 	
@@ -31,8 +31,7 @@ public class CertGenerator {
     private X500PrivateCredential rootPrivateCredential;
 
     public static void main(String[] args) throws Exception{
-        ContextVS.init(null, "VotingSystemLibrary_log4j.properties", 
-                "VotingSystemLibraryMessages_", "es");
+        ContextVS.init(null, "VotingSystemLibrary_log4j.properties", "VotingSystemLibraryMessages_", "es");
         if(args == null || args.length == 0) {
             Map certMap = new HashMap();
             certMap.put("rootCertFile", "./webAppsRootCert.jks");
@@ -44,16 +43,14 @@ public class CertGenerator {
 
     public CertGenerator(File rootCertFile, String rootSubjectDN, 
                     String password) throws Exception {
-        if(ContextVS.INSTANCE == null)
+        if(ContextVS.getInstance() == null)
             ContextVS.init(null, "VotingSystemLibrary_log4j.properties", 
                     "VotingSystemLibraryMessages_", "es");
         logger.debug(" - rootSubjectDN: " + rootSubjectDN + " - password: " + password + 
                 " - rootCertFile.getAbsolutePath(): " + rootCertFile.getAbsolutePath()); 
         this.password = password;
-        KeyStore rootKeyStore = KeyStoreUtil.createRootKeyStore(
-                new Date(COMIEZO_VALIDEZ_CERT), 
-                new Date(COMIEZO_VALIDEZ_CERT + PERIODO_VALIDEZ_ALMACEN_RAIZ),
-                password.toCharArray(), ROOT_ALIAS, null, rootSubjectDN);
+        KeyStore rootKeyStore = KeyStoreUtil.createRootKeyStore(COMIEZO_VALIDEZ_CERT, PERIODO_VALIDEZ_ALMACEN_RAIZ,
+                password.toCharArray(), ROOT_ALIAS, rootSubjectDN);
         rootKeyStore.store(new FileOutputStream(rootCertFile),  password.toCharArray());
         X509Certificate rootCertificate = (X509Certificate)rootKeyStore.getCertificate(ROOT_ALIAS);
         PrivateKey rootPK = (PrivateKey) rootKeyStore.getKey(ROOT_ALIAS, password.toCharArray());

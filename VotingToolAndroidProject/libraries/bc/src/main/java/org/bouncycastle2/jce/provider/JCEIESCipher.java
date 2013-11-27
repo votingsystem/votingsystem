@@ -1,19 +1,5 @@
 package org.bouncycastle2.jce.provider;
 
-import java.io.ByteArrayOutputStream;
-import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.interfaces.DHPrivateKey;
-
 import org.bouncycastle2.crypto.CipherParameters;
 import org.bouncycastle2.crypto.InvalidCipherTextException;
 import org.bouncycastle2.crypto.agreement.DHBasicAgreement;
@@ -28,6 +14,15 @@ import org.bouncycastle2.jce.interfaces.ECPublicKey;
 import org.bouncycastle2.jce.interfaces.IESKey;
 import org.bouncycastle2.jce.provider.asymmetric.ec.ECUtil;
 import org.bouncycastle2.jce.spec.IESParameterSpec;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.interfaces.DHPrivateKey;
+import java.io.ByteArrayOutputStream;
+import java.security.*;
+import java.security.spec.AlgorithmParameterSpec;
 
 public class JCEIESCipher extends WrapCipherSpi
 {

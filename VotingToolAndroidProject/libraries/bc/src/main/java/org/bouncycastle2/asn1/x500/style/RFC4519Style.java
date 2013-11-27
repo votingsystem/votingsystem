@@ -1,17 +1,13 @@
 package org.bouncycastle2.asn1.x500.style;
 
-import java.io.IOException;
-import java.util.Hashtable;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.DERIA5String;
-import org.bouncycastle2.asn1.DERPrintableString;
-import org.bouncycastle2.asn1.DERUTF8String;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.x500.AttributeTypeAndValue;
 import org.bouncycastle2.asn1.x500.RDN;
 import org.bouncycastle2.asn1.x500.X500Name;
 import org.bouncycastle2.asn1.x500.X500NameStyle;
+
+import java.io.IOException;
+import java.util.Hashtable;
 
 public class RFC4519Style
     implements X500NameStyle

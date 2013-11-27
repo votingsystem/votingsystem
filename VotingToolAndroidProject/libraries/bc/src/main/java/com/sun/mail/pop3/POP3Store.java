@@ -40,13 +40,10 @@
 
 package com.sun.mail.pop3;
 
-import java.util.Properties;
-import java.lang.reflect.*;
-
 import javax.mail.*;
-import javax.mail.internet.*;
-import java.io.IOException;
 import java.io.EOFException;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
 
 /**
  * A POP3 Message Store.  Contains only one folder, "INBOX".

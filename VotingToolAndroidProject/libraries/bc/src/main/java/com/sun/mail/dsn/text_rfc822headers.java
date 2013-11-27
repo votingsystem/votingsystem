@@ -40,12 +40,15 @@
 
 package com.sun.mail.dsn;
 
-import java.io.*;
-import javax.activation.*;
-import javax.mail.*;
-import javax.mail.internet.*;
-
 import myjava.awt.datatransfer.DataFlavor;
+
+import javax.activation.ActivationDataFlavor;
+import javax.activation.DataContentHandler;
+import javax.activation.DataSource;
+import javax.mail.MessagingException;
+import javax.mail.internet.ContentType;
+import javax.mail.internet.MimeUtility;
+import java.io.*;
 
 /**
  * DataContentHandler for text/rfc822-headers.

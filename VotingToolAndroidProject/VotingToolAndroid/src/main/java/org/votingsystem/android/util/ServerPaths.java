@@ -1,9 +1,8 @@
 package org.votingsystem.android.util;
 
 import android.util.Log;
-
-import org.votingsystem.android.model.EventVSAndroid;
-import org.votingsystem.android.model.OperationVSAndroid;
+import org.votingsystem.model.EventVS;
+import org.votingsystem.model.TypeVS;
 
 import java.text.MessageFormat;
 
@@ -11,33 +10,33 @@ public class ServerPaths {
 
     public static final String TAG = "ServerPaths";
 
-	public static final String sufijoURLCadenaCertificacion = "certificado/cadenaCertificacion";
-	public static final String sufijoURLEventos = "evento";
-	public static final String sufijoURLVotingEvents = "eventoVotacion";
+	public static final String sufijoURLCertChain = "certificateVS/certChain";
+	public static final String sufijoURLEventos = "eventVS";
+	public static final String sufijoURLVotingEvents = "eventVSElection";
 	
 	public static final String sufixURLTimeStampService = "timeStamp";
-	public static final String sufixURLPDFManifest = "eventoFirma/";
-	public static final String sufixURLPDFManifestCollector = "recolectorFirma/";
+	public static final String sufixURLPDFManifest = "eventVSManifest/";
+	public static final String sufixURLPDFManifestCollector = "eventVSManifestCollector/";
 	public static final String sufixURLSearch = "buscador/consultaJSON?max=";
 	
-	public static final String sufixURLCheckEvent = "evento/{0}/comprobarFechas";
+	public static final String sufixURLCheckEvent = "evento/{0}/checkDates";
 	
-	public static final String sufijoURLManifestEvents = "eventoFirma";
-	public static final String sufijoURLClaimEvents = "eventoReclamacion";
-	public static final String sufixURLCertificationAddresses = "infoServidor/centrosCertificacion";
+	public static final String sufijoURLManifestEvents = "eventVSManifest";
+	public static final String sufijoURLClaimEvents = "eventVSClaim";
+	public static final String sufixURLCertificationAddresses = "serverInfo/certificationCenters";
 	
-	public static final String sufijoInfoServidor = "infoServidor";
-	public static final String sufijoURLEventoParaVotar = "eventoVotacion"; 
-	public static final String sufijoURLSolcitudAcceso = "solicitudAcceso"; 
+	public static final String sufijoInfoServidor = "serverInfo";
+	public static final String sufijoURLEventoParaVotar = "eventVSElection";
+	public static final String sufijoURLSolcitudAcceso = "accessRequestVS";
 	public static final String sufijoURLVoto = "voto"; 
 	public static final String sufijoURLSolicitudCSRUsuario = "csr/solicitar";
 	public static final String sufijoURLSolicitudCertificadoUsuario = "csr?idSolicitudCSR=";
-	public static final String sufijoEventoFirmado = "recolectorFirma";
-	public static final String sufijoReclamacion = "recolectorReclamacion";
+	public static final String sufijoEventoFirmado = "eventVSManifestCollector";
+	public static final String sufijoReclamacion = "eventVSClaimCollector";
 	
-    public static String getURLCadenaCertificacion (String serverURL) {
+    public static String getURLCertChain (String serverURL) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
-        return serverURL + sufijoURLCadenaCertificacion;        
+        return serverURL + sufijoURLCertChain;
     }
 
     public static String getURLPDFManifest (String serverURL, Long manifestId) {
@@ -60,9 +59,9 @@ public class ServerPaths {
         return serverURL + sufixURLSearch + max + "&offset=" + offset;    
     }
     
-    public static String getURLCheckEvent(String serverURL, Long eventoId) {
+    public static String getURLCheckEvent(String serverURL, Long eventId) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
-        return MessageFormat.format(sufixURLCheckEvent, eventoId);
+        return MessageFormat.format(sufixURLCheckEvent, eventId);
     }
     
     public static String getURLPDFManifestCollector (String serverURL, Long manifestId) {
@@ -103,26 +102,26 @@ public class ServerPaths {
         result = result + path;
         switch(eventState) {
 	        case CLOSED:
-	        	path = "FINALIZADO";
+	        	path = "TERMINATED";
 	        	break;
 	        case OPEN:
-	        	path = "ACTIVO";
+	        	path = "ACTIVE";
 	        	break;
 	        case PENDING:
-	        	path = "PENDIENTE_COMIENZO";
+	        	path = "AWAITING";
 	        	break;
 	    	default:
 	    		path = "";
 	    		break;
         }
         if(!"".equals(path)) {
-        	path = "&estadoEvento=" + path;
+        	path = "&eventVSState=" + path;
         }
     	return result + "?max="+ max + "&offset=" + offset  + path;
     }
     
     public static String getURLPublish (
-    		String serverURL, OperationVSAndroid.Tipo type) {
+    		String serverURL, TypeVS type) {
     	String param = null;
     	switch(type) {
 	    	case CLAIM_PUBLISHING:
@@ -144,9 +143,9 @@ public class ServerPaths {
         return serverURL + sufijoInfoServidor;        
     }
 
-    public static String getURLEventoParaVotar (String serverURL, String eventoId) {
+    public static String getURLEventoParaVotar (String serverURL, String eventId) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
-        return serverURL + sufijoURLEventoParaVotar + "?id=" +eventoId;             
+        return serverURL + sufijoURLEventoParaVotar + "?id=" +eventId;
     }
     
     public static String getURLEventoFirmado (String serverURL) {
@@ -174,11 +173,10 @@ public class ServerPaths {
         return serverURL + sufijoURLSolicitudCSRUsuario;             
     }
     
-    public static String getUrlSolicitudAccesoPorNif (
-    		String serverURL , String nif, int eventoId) {
+    public static String getAccessRequestURLPorNif (String serverURL , String nif, int eventId) {
         if (!serverURL.endsWith("/")) serverURL = serverURL + "/";
     	return serverURL + "solicitudAcceso/encontrarPorNif?nif=" + nif +
-    			"&eventoId=" + eventoId;
+    			"&eventId=" + eventId;
     }
     
     public static String getUrlAndroidBrowserSession (String serverURL) {
@@ -192,20 +190,20 @@ public class ServerPaths {
         return serverURL + sufijoURLSolicitudCertificadoUsuario + idSolicitudCSR;             
     }
 
-    public static String getURLStatistics(EventVSAndroid event) {
-        String basePath = event.getAccessControl().getServerURL();
+    public static String getURLStatistics(EventVS event) {
+        String basePath = event.getAccessControlVS().getServerURL();
         if (!basePath.endsWith("/")) basePath = basePath + "/";
         switch(event.getTypeVS()) {
             case VOTING_EVENT:
-                basePath = basePath + "eventoVotacion/";
+                basePath = basePath + "eventVSElection/";
                 break;
             case CLAIM_EVENT:
-                basePath = basePath + "eventoReclamacion/";
+                basePath = basePath + "eventVSClaim/";
                 break;
-            case SIGN_EVENT:
-                basePath = basePath + "eventoFirma/";
+            case MANIFEST_EVENT:
+                basePath = basePath + "eventVSManifest/";
                 break;
         }
-        return basePath + event.getId() + "/estadisticas";
+        return basePath + event.getId() + "/statistics";
     }
 }

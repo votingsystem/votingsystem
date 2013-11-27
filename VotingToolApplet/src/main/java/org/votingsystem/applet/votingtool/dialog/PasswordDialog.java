@@ -1,49 +1,53 @@
 package org.votingsystem.applet.votingtool.dialog;
 
-import java.awt.Frame;
+import java.awt.Color;
+import java.awt.Container;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.text.html.parser.ParserDelegator;
-import org.votingsystem.model.ContextVS;
 
+import net.miginfocom.swing.MigLayout;
 import org.apache.log4j.Logger;
+import org.votingsystem.model.ContextVS;
 
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class PasswordDialog extends javax.swing.JDialog {
-    
-    private static Logger logger = Logger.getLogger(PasswordDialog.class);
 
+    private static Logger logger = Logger.getLogger(MessageDialog.class);
+    
+    private Container container;
+    private JLabel messageLabel;
+    private JPanel messagePanel;
+    private JPasswordField password1Field;
+    private JPasswordField password2Field;
+    private JButton cancelButton;
+    private JButton acceptButton;
     private String password;
-    Frame parentFrame;
     boolean isCapsLockPressed = false;
-            
+
     public PasswordDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
-        this.parentFrame = parent;
+
+        setLocationRelativeTo(null);       
         initComponents();
-        setLocationRelativeTo(null);    
+        setLocationRelativeTo(null);
         password1Field.addKeyListener(new KeyListener(){
             boolean shiftPressed = false;
             @Override public void keyPressed(KeyEvent e){
                 if(!shiftPressed) {
-                    if(Character.isUpperCase(e.getKeyChar())) {
-                        setCapsLockState(true);
-                    } else setCapsLockState(false);
+                    if(Character.isUpperCase(e.getKeyChar())) setCapsLockState(true);
+                    else setCapsLockState(false);
                 } else {
-                    if(Character.isUpperCase(e.getKeyChar())) {
-                        setCapsLockState(false);
-                    } else setCapsLockState(true);
+                    if(Character.isUpperCase(e.getKeyChar())) setCapsLockState(false);
+                    else setCapsLockState(true);
                 }
-                
-                if (e.getKeyCode() == KeyEvent.VK_ENTER)
-                    aceptarButton.doClick();
-                if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
-                    shiftPressed = true;
-                }
-                
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) acceptButton.doClick();
+                if (e.getKeyCode() == KeyEvent.VK_SHIFT) shiftPressed = true;
             }
             @Override public void keyTyped(KeyEvent ke) {}
             @Override public void keyReleased(KeyEvent ke) {
@@ -54,8 +58,7 @@ public class PasswordDialog extends javax.swing.JDialog {
         });
         password2Field.addKeyListener(new KeyListener(){
             @Override public void keyPressed(KeyEvent e){
-                if (e.getKeyCode() == KeyEvent.VK_ENTER)
-                aceptarButton.doClick();
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) acceptButton.doClick();
             }
             @Override public void keyTyped(KeyEvent ke) {}
             @Override public void keyReleased(KeyEvent ke) {}
@@ -64,7 +67,7 @@ public class PasswordDialog extends javax.swing.JDialog {
         ParserDelegator workaround = new ParserDelegator();
 
         password = null;
-        setTitle(ContextVS.INSTANCE.getString("passwordDialogCaption"));
+        setTitle(ContextVS.getInstance().getMessage("passwordDialogCaption"));
         /*boolean check = false;
         try {//NOT SUPPORTED IN APPLET
             check = Toolkit.getDefaultToolkit().
@@ -73,235 +76,125 @@ public class PasswordDialog extends javax.swing.JDialog {
             logger.error(ex.getMessage(), ex);
         }
         if(check) changeCapsLockState();
-        else messageLabel.setText(getString("recomendacionDNIE")); */
-        messageLabel.setText(ContextVS.INSTANCE.getString("recomendacionDNIE"));
-        this.pack();
-    }
-    
-    private void setCapsLockState (boolean pressed) {
-        this.isCapsLockPressed = pressed;
-        setMessage(null);
-    }
-    
-    private void setMessage (String mensaje) {
-        if (mensaje == null) {
-            if(isCapsLockPressed) {
-                messageLabel.setText("<html><b>" + 
-                        ContextVS.INSTANCE.getString(
-                        "capsLockKeyPressed") + "</b><br/><br/>" + 
-                        ContextVS.INSTANCE.getString(
-                        "recomendacionDNIE") + "</html>");
-            } else {
-                messageLabel.setText(ContextVS.INSTANCE.getString("recomendacionDNIE"));
-            }
-        } else {
-            if(isCapsLockPressed) {
-                messageLabel.setText("<html><b>" + 
-                        ContextVS.INSTANCE.getString("capsLockKeyPressed") + "</b><br/>" + 
-                        mensaje + "</html>");
-            }  else messageLabel.setText(mensaje);
-        }
-        validationPanel.setVisible(true);
+        else messageLabel.setText(getMessage("adviceDNIE")); */
+        setMessage(ContextVS.getInstance().getMessage("adviceDNIE"));
         pack();
+    }
+
+    private void initComponents() {
+        logger.debug("initComponents");
+        container = getContentPane();
+        container.setLayout(new MigLayout("fill", "", "[][]20[]"));
+        
+        messagePanel = new JPanel();
+        Border messagePanelBorder = BorderFactory.createLineBorder(Color.GRAY, 1);
+        messagePanel.setBorder(messagePanelBorder);
+        messagePanel.setLayout(new MigLayout("fill"));
+        messageLabel = new JLabel();
+
+        messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        messagePanel.add(messageLabel, "growx, wrap");
+        container.add(messagePanel, "cell 0 0, growx, wrap");
+
+
+        JPanel formPanel = new JPanel();
+        formPanel.setLayout(new MigLayout("fill", "15[grow]15"));
+        JLabel password1Label = new JLabel(ContextVS.getMessage("password1Lbl"));
+        password1Field = new JPasswordField();
+        formPanel.add(password1Label, "wrap");
+        formPanel.add(password1Field, "growx, wrap");
+
+        JLabel password2Label = new JLabel(ContextVS.getMessage("password2Lbl"));
+        password2Field = new JPasswordField();
+        formPanel.add(password2Label, "wrap");
+        formPanel.add(password2Field, "growx, wrap");
+        container.add(formPanel, "cell 0 1, growx, wrap");
+
+
+        acceptButton = new JButton(ContextVS.getMessage("acceptLbl"));
+        acceptButton.setIcon(ContextVS.getIcon(this, "accept"));
+        acceptButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) { checkPasswords();}
+        });
+        container.add(acceptButton, "width :150:, cell 0 2, split2, align right");
+
+        cancelButton = new JButton(ContextVS.getMessage("closeLbl"));
+        cancelButton.setIcon(ContextVS.getIcon(this, "cancel"));
+        cancelButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) { dispose();}
+        });
+        container.add(cancelButton, "width :150:, align right");
+
+
     }
 
     public String getPassword() {
         return password;
     }
 
-    /**
-     * This method is called from within the constructor to initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is always
-     * regenerated by the Form Editor.
-     */
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-
-        validationPanel = new javax.swing.JPanel();
-        messageLabel = new javax.swing.JLabel();
-        password2Label = new javax.swing.JLabel();
-        password2Field = new javax.swing.JPasswordField();
-        aceptarButton = new javax.swing.JButton();
-        cerrarButton = new javax.swing.JButton();
-        password1Label = new javax.swing.JLabel();
-        password1Field = new javax.swing.JPasswordField();
-
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-
-        validationPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
-        messageLabel.setForeground(new java.awt.Color(215, 43, 13));
-        messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/votingsystem/applet/votingtool/dialog/Bundle"); // NOI18N
-        messageLabel.setText(bundle.getString("PasswordDialog.messageLabel.text")); // NOI18N
-
-        javax.swing.GroupLayout validationPanelLayout = new javax.swing.GroupLayout(validationPanel);
-        validationPanel.setLayout(validationPanelLayout);
-        validationPanelLayout.setHorizontalGroup(
-            validationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(validationPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(messageLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(70, 70, 70))
-        );
-        validationPanelLayout.setVerticalGroup(
-            validationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(validationPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(messageLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 60, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-
-        password2Label.setText(bundle.getString("PasswordDialog.password2Label.text")); // NOI18N
-
-        aceptarButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/images/accept_16x16.png"))); // NOI18N
-        aceptarButton.setText(bundle.getString("PasswordDialog.aceptarButton.text_1")); // NOI18N
-        aceptarButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                aceptarButtonActionPerformed(evt);
-            }
-        });
-
-        cerrarButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/images/cancel_16x16.png"))); // NOI18N
-        cerrarButton.setText(bundle.getString("PasswordDialog.cerrarButton.text_1")); // NOI18N
-        cerrarButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cerrarButtonActionPerformed(evt);
-            }
-        });
-
-        password1Label.setText(bundle.getString("PasswordDialog.password1Label.text")); // NOI18N
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(password2Field)
-                    .addComponent(password1Field)
-                    .addComponent(validationPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(cerrarButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(aceptarButton))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(password1Label)
-                            .addComponent(password2Label))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(validationPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(password1Label)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(password1Field, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(password2Label)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(password2Field, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cerrarButton)
-                    .addComponent(aceptarButton))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        pack();
-    }// </editor-fold>//GEN-END:initComponents
-
-    private void aceptarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aceptarButtonActionPerformed
+    private void checkPasswords() {
+        logger.debug("checkPasswords");
         String password1 = new String(password1Field.getPassword());
         String password2 = new String(password2Field.getPassword());
         if("".equals(password1) && "".equals(password1)) {
-            messageLabel.setText(ContextVS.INSTANCE.getString("passwordMissing"));
-            validationPanel.setVisible(true);
-            pack();
+            setMessage(ContextVS.getMessage("passwordMissing"));
             return;
         }
-        messageLabel.setText(ContextVS.INSTANCE.getString("recomendacionDNIE"));
         pack();
         if (password1.equals(password2)) {
             password = password1;
-            this.dispose();
+            dispose();
         } else {
-            messageLabel.setText(ContextVS.INSTANCE.getString("passwordError"));
-            validationPanel.setVisible(true);
-            pack();
+            setMessage(ContextVS.getMessage("passwordError"));
             password1Field.setText("");
             password2Field.setText("");
-        }        // TODO add your handling code here:        // TODO add your handling code here:
-    }//GEN-LAST:event_aceptarButtonActionPerformed
-
-    private void cerrarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cerrarButtonActionPerformed
-        dispose();
-    }//GEN-LAST:event_cerrarButtonActionPerformed
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /*
-         * Set the Nimbus look and feel
-         */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /*
-         * If Nimbus (introduced in Java SE 6) is not available, stay with the
-         * default look and feel. For details see
-         * http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(PasswordDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(PasswordDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(PasswordDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(PasswordDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        //</editor-fold>
+    }
 
-        /*
-         * Create and display the dialog
-         */
+    private void setCapsLockState (boolean pressed) {
+        this.isCapsLockPressed = pressed;
+        setMessage(null);
+    }
+
+    private void setMessage (String mensaje) {
+        if (mensaje == null) {
+            if(isCapsLockPressed) {
+                messageLabel.setText("<html><b>" +
+                        ContextVS.getMessage("capsLockKeyPressed") + "</b><br/><br/>" +
+                        ContextVS.getMessage("adviceDNIE") + "</html>");
+            } else {
+                messageLabel.setText(ContextVS.getMessage("adviceDNIE"));
+            }
+        } else {
+            if(isCapsLockPressed) {
+                messageLabel.setText("<html><b>" + ContextVS.getMessage("capsLockKeyPressed")+ "</b><br/>" +
+                        mensaje + "</html>");
+            }  else messageLabel.setText(mensaje);
+        }
+        pack();
+    }
+
+    public static void main(String args[]) {
+
         java.awt.EventQueue.invokeLater(new Runnable() {
 
             public void run() {
-                final PasswordDialog dialog = new PasswordDialog(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        dialog.dispose();
-                    }
-                });
-                dialog.setVisible(true);
+                try {
+                    UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
+                    ContextVS.initSignatureApplet(null, "log4j.properties", "messages_", "es");
+                    final PasswordDialog dialog = new PasswordDialog(new javax.swing.JFrame(), true);
+                    dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+                        @Override public void windowClosing(java.awt.event.WindowEvent e) { dialog.dispose(); }
+                    });
+                    logger.debug("--- Mostrando diálogo ---");
+                    dialog.setVisible(true);
+                    logger.debug("--- Diálogo mostrado ---");
+                } catch(Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                }
             }
         });
     }
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton aceptarButton;
-    private javax.swing.JButton cerrarButton;
-    private javax.swing.JLabel messageLabel;
-    private javax.swing.JPasswordField password1Field;
-    private javax.swing.JLabel password1Label;
-    private javax.swing.JPasswordField password2Field;
-    private javax.swing.JLabel password2Label;
-    private javax.swing.JPanel validationPanel;
-    // End of variables declaration//GEN-END:variables
+
+
 }

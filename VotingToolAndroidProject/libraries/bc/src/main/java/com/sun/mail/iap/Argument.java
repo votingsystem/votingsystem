@@ -40,9 +40,10 @@
 
 package com.sun.mail.iap;
 
-import java.util.Vector;
+import com.sun.mail.util.ASCIIUtility;
+
 import java.io.*;
-import com.sun.mail.util.*;
+import java.util.Vector;
 
 /**
  * @version 1.11, 07/05/04

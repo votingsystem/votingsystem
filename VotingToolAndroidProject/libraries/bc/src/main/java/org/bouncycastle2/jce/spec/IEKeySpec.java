@@ -1,10 +1,10 @@
 package org.bouncycastle2.jce.spec;
 
+import org.bouncycastle2.jce.interfaces.IESKey;
+
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.KeySpec;
-
-import org.bouncycastle2.jce.interfaces.IESKey;
 
 /**
  * key pair for use with an integrated encryptor - together

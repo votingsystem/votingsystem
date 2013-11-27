@@ -1,25 +1,19 @@
 package org.bouncycastle2.jce.provider.symmetric;
 
-import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
-import java.util.HashMap;
-
-import javax.crypto.spec.IvParameterSpec;
-
 import org.bouncycastle2.crypto.CipherKeyGenerator;
 import org.bouncycastle2.crypto.engines.RC532Engine;
 import org.bouncycastle2.crypto.engines.RC564Engine;
 import org.bouncycastle2.crypto.macs.CBCBlockCipherMac;
 import org.bouncycastle2.crypto.macs.CFBBlockCipherMac;
 import org.bouncycastle2.crypto.modes.CBCBlockCipher;
-import org.bouncycastle2.jce.provider.BouncyCastleProvider;
-import org.bouncycastle2.jce.provider.JCEBlockCipher;
-import org.bouncycastle2.jce.provider.JCEKeyGenerator;
-import org.bouncycastle2.jce.provider.JCEMac;
-import org.bouncycastle2.jce.provider.JDKAlgorithmParameterGenerator;
-import org.bouncycastle2.jce.provider.JDKAlgorithmParameters;
+import org.bouncycastle2.jce.provider.*;
+
+import javax.crypto.spec.IvParameterSpec;
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
+import java.util.HashMap;
 
 public final class RC5
 {

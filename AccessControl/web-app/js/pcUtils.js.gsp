@@ -40,33 +40,33 @@ function updateSubsystem(selectedSubsystem) {
 	var selectedSubsystemLink
 	var selectedSubsystemText
 	if(SubSystem.VOTES == selectedSubsystem) {
-		subsystem_0_0_Link = "${createLink(controller: 'eventoFirma', action: 'mainPage')}"
-		subsystem_0_0_Text = "<g:message code="manifestLbl"/>"
-		subsystem_0_1_Link = "${createLink(controller: 'eventoReclamacion', action: 'mainPage')}"
-		subsystem_0_1_Text = "<g:message code="claimLbl"/>"
-		selectedSubsystemLink = "${createLink(controller: 'eventoVotacion', action: 'mainPage')}"
-		selectedSubsystemText = "<g:message code="votingSystemLbl"/>"
+		subsystem_0_0_Link = "${createLink(controller: 'eventVSManifest', action: 'mainPage')}"
+		subsystem_0_0_Text = "<g:message code="manifestSystemLbl"/>"
+		subsystem_0_1_Link = "${createLink(controller: 'eventVSClaim', action: 'mainPage')}"
+		subsystem_0_1_Text = "<g:message code="claimSystemLbl"/>"
+		selectedSubsystemLink = "${createLink(controller: 'eventVSElection', action: 'mainPage')}"
+		selectedSubsystemText = "<g:message code="electionSystemLbl"/>"
 
 	} else if(SubSystem.CLAIMS == selectedSubsystem) {
-		subsystem_0_0_Link = "${createLink(controller: 'eventoVotacion', action: 'mainPage')}"
-		subsystem_0_0_Text = "<g:message code="votingLbl"/>"
-		subsystem_0_1_Link = "${createLink(controller: 'eventoFirma', action: 'mainPage')}"
-		subsystem_0_1_Text = "<g:message code="manifestLbl"/>"
-		selectedSubsystemLink = "${createLink(controller: 'eventoReclamacion', action: 'mainPage')}"
+		subsystem_0_0_Link = "${createLink(controller: 'eventVSElection', action: 'mainPage')}"
+		subsystem_0_0_Text = "<g:message code="electionSystemLbl"/>"
+		subsystem_0_1_Link = "${createLink(controller: 'eventVSManifest', action: 'mainPage')}"
+		subsystem_0_1_Text = "<g:message code="manifestSystemLbl"/>"
+		selectedSubsystemLink = "${createLink(controller: 'eventVSClaim', action: 'mainPage')}"
 		selectedSubsystemText = "<g:message code="claimSystemLbl"/>"
 	} else if(SubSystem.MANIFESTS == selectedSubsystem) {
-		subsystem_0_0_Link = "${createLink(controller: 'eventoVotacion', action: 'mainPage')}"
-		subsystem_0_0_Text = "<g:message code="votingLbl"/>"
-		subsystem_0_1_Link = "${createLink(controller: 'eventoReclamacion', action: 'mainPage')}"
-		subsystem_0_1_Text = "<g:message code="claimLbl"/>"
-		selectedSubsystemLink = "${createLink(controller: 'eventoFirma', action: 'mainPage')}"
+		subsystem_0_0_Link = "${createLink(controller: 'eventVSElection', action: 'mainPage')}"
+		subsystem_0_0_Text = "<g:message code="electionSystemLbl"/>"
+		subsystem_0_1_Link = "${createLink(controller: 'eventVSClaim', action: 'mainPage')}"
+		subsystem_0_1_Text = "<g:message code="claimSystemLbl"/>"
+		selectedSubsystemLink = "${createLink(controller: 'eventVSManifest', action: 'mainPage')}"
 		selectedSubsystemText = "<g:message code="manifestSystemLbl"/>"
 	} else if(SubSystem.REPRESENTATIVES == selectedSubsystem) {
-		subsystem_0_0_Link = "${createLink(controller: 'eventoVotacion', action: 'mainPage')}"
-		subsystem_0_0_Text = "<g:message code="votingLbl"/>"
-		subsystem_0_1_Link = "${createLink(controller: 'eventoReclamacion', action: 'mainPage')}"
-		subsystem_0_1_Text = "<g:message code="claimLbl"/>"
-		subsystem_0_2_Link = "${createLink(controller: 'eventoFirma', action: 'mainPage')}"
+		subsystem_0_0_Link = "${createLink(controller: 'eventVSElection', action: 'mainPage')}"
+		subsystem_0_0_Text = "<g:message code="electionSystemLbl"/>"
+		subsystem_0_1_Link = "${createLink(controller: 'eventVSClaim', action: 'mainPage')}"
+		subsystem_0_1_Text = "<g:message code="claimSystemLbl"/>"
+		subsystem_0_2_Link = "${createLink(controller: 'eventVSManifest', action: 'mainPage')}"
 		subsystem_0_2_Text = "<g:message code="manifestSystemLbl"/>"
 		selectedSubsystemLink = "${createLink(controller: 'representative', action: 'mainPage')}"
 		selectedSubsystemText = "<g:message code="representativesPageLbl"/>"
@@ -156,7 +156,7 @@ var VotingSystemApplet = function () {
 
 
 
-	   	//var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESSING,Operation.SEND_SMIME_VOTE)
+	   	//var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.SEND_SMIME_VOTE)
 	   	//message = JSON.stringify(webAppMessage)
 
 
@@ -164,7 +164,7 @@ var VotingSystemApplet = function () {
 		if(isAndroid()) {
 			console.log("=============== isAndroid browser")
 			//to avoid URI too large
-			//if(message.evento != null) message.evento.contenido = null;
+			//if(message.eventVS != null) message.eventVS.content = null;
 
 			var redirectURL = "${createLink(controller:'app', action:'androidClient')}?msg=" + encodeURIComponent(message) + 
 				"&refererURL=" + window.location + 

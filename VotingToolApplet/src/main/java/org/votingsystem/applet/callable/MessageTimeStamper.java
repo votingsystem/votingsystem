@@ -1,14 +1,11 @@
 package org.votingsystem.applet.callable;
 
-import java.security.cert.X509Certificate;
-import java.util.Collection;
-import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.cms.CMSSignedData;
@@ -17,11 +14,18 @@ import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.bouncycastle.asn1.cms.Attribute;
 import org.votingsystem.applet.util.HttpHelper;
+import org.votingsystem.model.AccessControlVS;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+
+import javax.mail.internet.ContentType;
+import java.security.cert.X509Certificate;
+import java.util.Collection;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
 * @author jgzornoza
@@ -50,14 +54,14 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
         AtomicBoolean done = new AtomicBoolean(false);
         ResponseVS responseVS = null;
         while(!done.get()) {
-            responseVS = HttpHelper.INSTANCE.sendByteArray(
-                timeStampRequest.getEncoded(), "timestamp-query", 
-                ContextVS.INSTANCE.getURLTimeStampServer());
+            AccessControlVS accessControl = (AccessControlVS) ContextVS.getInstance().getAccessControl();
+            responseVS = HttpHelper.getInstance().sendByteArray(
+                timeStampRequest.getEncoded(), ContentTypeVS.TIMESTAMP_QUERY, accessControl.getTimeStampServerURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 byte[] bytesToken = responseVS.getMessageBytes();
                 timeStampToken = new TimeStampToken(
                         new CMSSignedData(bytesToken));
-                X509Certificate timeStampCert = ContextVS.INSTANCE.getTimeStampServerCert();
+                X509Certificate timeStampCert = ContextVS.getInstance().getTimeStampServerCert();
                 SignerInformationVerifier timeStampSignerInfoVerifier = new 
                         JcaSimpleSignerInfoVerifierBuilder().build(timeStampCert); 
                 timeStampToken.validate(timeStampSignerInfoVerifier);

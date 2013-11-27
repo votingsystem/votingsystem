@@ -40,10 +40,14 @@
 
 package com.sun.mail.mbox;
 
-import javax.mail.*;
-import javax.mail.internet.*;
-import javax.activation.*;
-import java.io.*;
+import javax.activation.DataHandler;
+import javax.mail.IllegalWriteException;
+import javax.mail.MessagingException;
+import javax.mail.MethodNotSupportedException;
+import javax.mail.internet.InternetHeaders;
+import javax.mail.internet.MimeBodyPart;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * This class represents a SunV3 BodyPart.
@@ -153,7 +157,7 @@ public class SunV3BodyPart extends MimeBodyPart {
      * Returns the value of the RFC822 "Content-Type" header field.
      * This represents the content-type of the content of this
      * BodyPart. This value must not be null. If this field is
-     * unavailable, "text/plain" should be returned. <p>
+     * unavailable, ContentTypeVS.TEXT should be returned. <p>
      *
      * This implementation uses <code>getHeader(name)</code>
      * to obtain the requisite header field.

@@ -1,30 +1,6 @@
 package org.bouncycastle2.jce.provider;
 
-import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.InvalidParameterException;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.MGF1ParameterSpec;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.interfaces.DHKey;
-import javax.crypto.spec.OAEPParameterSpec;
-import javax.crypto.spec.PSource;
-
-import org.bouncycastle2.crypto.AsymmetricBlockCipher;
-import org.bouncycastle2.crypto.BufferedAsymmetricBlockCipher;
-import org.bouncycastle2.crypto.CipherParameters;
-import org.bouncycastle2.crypto.Digest;
-import org.bouncycastle2.crypto.InvalidCipherTextException;
+import org.bouncycastle2.crypto.*;
 import org.bouncycastle2.crypto.encodings.ISO9796d1Encoding;
 import org.bouncycastle2.crypto.encodings.OAEPEncoding;
 import org.bouncycastle2.crypto.encodings.PKCS1Encoding;
@@ -34,6 +10,17 @@ import org.bouncycastle2.jce.interfaces.ElGamalKey;
 import org.bouncycastle2.jce.interfaces.ElGamalPrivateKey;
 import org.bouncycastle2.jce.interfaces.ElGamalPublicKey;
 import org.bouncycastle2.util.Strings;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.interfaces.DHKey;
+import javax.crypto.spec.OAEPParameterSpec;
+import javax.crypto.spec.PSource;
+import java.security.*;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.MGF1ParameterSpec;
 
 public class JCEElGamalCipher extends WrapCipherSpi
 {

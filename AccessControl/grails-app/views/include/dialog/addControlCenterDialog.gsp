@@ -27,7 +27,7 @@ function showVoteControlCenterDialog(callback) {
 $('#newControlCenter').submit(function(event){
 	event.preventDefault();	      
 	if(!document.getElementById('controlCenterURL').validity.valid) {
-		$("#controlCenterURL").addClass( "ui-state-error" );
+		$("#controlCenterURL").addClass( "formFieldError" );
 		showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 			'<g:message code="emptyFieldMsg"/>', function() {
 			$("#addControlCenterDialog").dialog("open")
@@ -39,7 +39,7 @@ $('#newControlCenter').submit(function(event){
 	if((controlCenterURL.indexOf(suffix, controlCenterURL.length - suffix.length) == -1)) {
 		controlCenterURL = controlCenterURL + "/"
 	}
-	controlCenterURL = controlCenterURL + "infoServidor"
+	controlCenterURL = controlCenterURL + "serverInfo"
 	if(controlCenterURL.indexOf("http://") != 0) {
 		controlCenterURL = "http://" + controlCenterURL
 	}
@@ -48,7 +48,7 @@ $('#newControlCenter').submit(function(event){
 	jqxhr.done(function(data) {
 		//var dataStr = JSON.stringify(data);  
 		//console.log( "second success - dataStr: " + dataStr);
-		if(DataType.CONTROL_CENTER == data.serverType) { 
+		if("CONTROL_CENTER" == data.serverType) {
 			associateControlCenter(data.serverURL)
 		} else {
 			console.log( "Server type wrong -> " + data.serverType);
@@ -93,16 +93,16 @@ $("#addControlCenterDialog").dialog({
 	function associateControlCenter(controlCenterURL){ 
 		console.log("addControlCenterDialog.associateControlCenter - controlCenterURL: " + controlCenterURL);
 	 	var webAppMessage = new WebAppMessage(
-	   		StatusCode.SC_PROCESSING, 
+	   		ResponseVS.SC_PROCESSING,
 	   		Operation.CONTROL_CENTER_ASSOCIATION)
 	 	var signatureContent = {
 			serverURL:controlCenterURL,
 			operation:Operation.CONTROL_CENTER_ASSOCIATION}
-	 	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
-		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
-		webAppMessage.contenidoFirma = signatureContent
-		webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStamp', absolute:true)}"
-		webAppMessage.urlEnvioDocumento = "${createLink( controller:'subscripcion', absolute:true)}"
+	 	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
+		webAppMessage.signedContent = signatureContent
+		webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
+		webAppMessage.receiverSignServiceURL = "${createLink( controller:'subscriptionVS', absolute:true)}"
 		votingSystemClient.setMessageToSignatureClient(webAppMessage, associateControlCenterCallback)
 	} 
 
@@ -110,14 +110,14 @@ $("#addControlCenterDialog").dialog({
 		console.log("addControlCenterDialog.associateControlCenterCallback")
 		var appMessageJSON = toJSON(callbackMessage)
 		if(appMessageJSON != null) {
-			if(StatusCode.SC_PROCESSING ==  appMessageJSON.statusCode){
+			if(ResponseVS.SC_PROCESSING ==  appMessageJSON.statusCode){
 				$("#loadingVotingSystemAppletDialog").dialog("close");
 				$("#workingWithAppletDialog").dialog("open");
 			} else {
 				$("#workingWithAppletDialog" ).dialog("close");
 				var caption = '<g:message code="operationERRORCaption"/>'
 				var msg = appMessageJSON.message
-				if(StatusCode.SC_OK ==  appMessageJSON.statusCode) { 
+				if(ResponseVS.SC_OK ==  appMessageJSON.statusCode) {
 					caption = '<g:message code="operationOKCaption"/>'
 					var msgArg = 
 			    	msg = "<g:message code='operationOKMsg' args='${[message(code:'addControlCenterOperation')]}'/>";

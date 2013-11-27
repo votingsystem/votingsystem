@@ -1,10 +1,10 @@
 package org.bouncycastle2.asn1;
 
+import org.bouncycastle2.util.io.Streams;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-
-import org.bouncycastle2.util.io.Streams;
 
 class DefiniteLengthInputStream
         extends LimitedInputStream

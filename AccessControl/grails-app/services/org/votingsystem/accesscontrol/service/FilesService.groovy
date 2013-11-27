@@ -1,19 +1,8 @@
 package org.votingsystem.accesscontrol.service
 
-import java.util.Date;
-import java.util.Locale;
-
-import grails.converters.JSON
-
-import org.codehaus.groovy.grails.web.json.JSONArray
-import org.votingsystem.accesscontrol.model.*;
-import org.votingsystem.util.DateUtils;
-
-import java.security.cert.X509Certificate;
-
-import org.votingsystem.model.TypeVS;
-import org.votingsystem.signature.util.*
-
+import org.votingsystem.model.EventVS
+import org.votingsystem.model.TypeVS
+import org.votingsystem.util.DateUtils
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -30,7 +19,7 @@ class FilesService {
 		errorsDir.mkdirs()
 	}
 	
- 	public Map<String, File> getBackupFiles(Evento event, TypeVS type, 
+ 	public Map<String, File> getBackupFiles(EventVS event, TypeVS type,
 		 	Locale locale){
 		 String servicePathPart = null
 		 Map<String, File> result = new HashMap<String, File>()
@@ -58,7 +47,7 @@ class FilesService {
 				 filesDirPath = "${baseDirPath}/files"
 				 result.filesDir = new File(filesDirPath)
 				 break;
-			case TypeVS.SIGN_EVENT:
+			case TypeVS.MANIFEST_EVENT:
 				servicePathPart = messageSource.getMessage(
 					'manifestsBackupPartPath', [event.id].toArray(), locale)
 				result.filesDir = new File("${baseDirPath}/files") 

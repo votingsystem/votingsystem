@@ -1,31 +1,24 @@
 package org.votingsystem.simulation
 
+import org.apache.log4j.Logger
+
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.text.DateFormat
 import java.text.SimpleDateFormat
-import java.util.List;
-import java.util.Locale;
-import java.util.TimerTask;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CompletionService
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.atomic.AtomicBoolean
-import java.security.cert.Certificate;
-import java.security.cert.X509Certificate
+import java.util.concurrent.Future
+import java.security.cert.Certificate
 
 import org.codehaus.groovy.grails.web.json.JSONObject;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
-import org.springframework.beans.factory.InitializingBean
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.simulation.callable.ClaimSigner
-import org.votingsystem.simulation.callable.ManifestSigner
+import org.votingsystem.simulation.callable.ClaimSignedSender
 import org.votingsystem.simulation.callable.PDFSignedSender
 import org.votingsystem.simulation.callable.SMIMESignedSender
 import org.votingsystem.simulation.callable.ServerInitializer
@@ -36,10 +29,15 @@ import org.votingsystem.simulation.util.PdfFormHelper;
 import org.votingsystem.simulation.util.SimulationUtils;
 
 import com.itextpdf.text.pdf.PdfReader;
-
-import java.util.Timer
+import grails.converters.JSON
 
 class ClaimSimulationService {
+
+    public enum Status implements StatusVS<Status> {INIT_SIMULATION, INIT_ACCESS_CONTROL, PUBLISH_EVENT, SEND_CLAIMS,
+        CHANGE_EVENT_STATE, REQUEST_BACKUP ,FINISH_SIMULATION, LISTEN}
+
+    private Long broadcastMessageInterval = 10000;
+    private Locale locale = new Locale("es")
 	
 	def webSocketService
 	def contextService
@@ -47,187 +45,226 @@ class ClaimSimulationService {
 	def grailsApplication
 	private String simulationStarter
 
-	private Locale locale = new Locale("es")
-	private Long timeStart
-	private Long timeEnd
-	private AtomicBoolean simulationRunning = new AtomicBoolean(false)
-	
-	private EventVSBase.Estado nextEventState = null;
-	
-	private List<String> signerList = null;
+	private List<String> synchronizedSignerList = null;
 	private List<String> errorList = new ArrayList<String>();
-	private static final Set<String> simulationListener = new HashSet<String>();
+	private Set<String> synchronizedListenerSet;
 	
 	private static ExecutorService simulatorExecutor;
 	private static CompletionService<ResponseVS> signClaimCompletionService;
 	private Timer simulationTimer;
 	private Timer broadcastTimer;
 	private SimulationData simulationData;
-	private EventVS event;
+	private EventVS eventVS;
 	private SignedMailGenerator signedMailGenerator
+
 	
-    def serviceMethod() { }
-	
-	public void processRequest(SimulationOperation operation, JSONObject messageJSON) {
-		log.debug("--- processRequest - operation: '${operation?.toString()}'")
-		switch(operation) {
-			case SimulationOperation.INIT_SIMULATION:
-				if(!simulationRunning.get()) {
-					initSimulation(messageJSON)
-				} else {
-					messageJSON.statusCode = ResponseVS.SC_SIMULATION_RUNNING
-					webSocketService.processResponse(messageJSON)
-				}
-	
-				break;
-			case SimulationOperation.CANCEL_SIMULATION:
-				if(simulationStarter?.equals(messageJSON.userId)) {
-					stopSimulation();
-				}
-				break;
-			case SimulationOperation.LISTEN:
-				simulationListener.add(messageJSON.userId)
-				break;
-			default:
-				log.error("UNKNOWN OPERATION ${messageJSON.operation}")
-		}		
-	}
-	
-	private void stopSimulation () {
-		log.debug("stopSimulation")
+	public void processRequest(JSONObject messageJSON) {
+		log.debug(" --- processRequest - for status: '${messageJSON?.status}'")
+        try {
+            Status status = Status.valueOf(messageJSON?.status);
+            switch(status) {
+                case Status.INIT_SIMULATION:
+                    if(simulationData?.isRunning()) {
+                        log.error("INIT_SIMULATION ERROR - Simulation Running")
+                        Map responseMap = [userId: messageJSON.userId, message:"Simulation already running",
+                                statusCode:ResponseVS.SC_ERROR, service:this.getClass().getSimpleName()]
+                        webSocketService.processResponse(new JSONObject(responseMap))
+                    } else initSimulation(messageJSON)
+                    break;
+                case Status.FINISH_SIMULATION:
+                    if(simulationStarter?.equals(messageJSON.userId)) {
+                        String message = messageSource.getMessage("simulationCancelledByUserMsg", null, locale) +
+                                " - message: ${messageJSON.message}"
+                        finishSimulation(new ResponseVS(ResponseVS.SC_CANCELLED, message));
+                    }
+                    break;
+                case Status.LISTEN:
+                    synchronizedListenerSet.add(messageJSON.userId)
+                    break;
+                default:
+                    log.error("UNKNOWN OPERATION ${messageJSON.status}")
+            }
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex)
+        }
 	}
 	
 	private void initSimulation(JSONObject simulationDataJSON) {
+        log.debug("initSimulation - Enter status INIT_SIMULATION")
 		errorList = new ArrayList<String>();
 		simulationStarter = simulationDataJSON.userId
-		simulationListener.removeAll(simulationListener)//init listeners
-		simulationListener.add(simulationStarter)
+        synchronizedListenerSet = Collections.synchronizedSet(new HashSet<String>())
+		synchronizedListenerSet.add(simulationStarter)
 		simulationData = SimulationData.parse(simulationDataJSON)
-		startBroadcatsTimer();
-		//simulationRunning.set(true)
-		log.debug("initSimulation - numRequestsProjected: " + simulationData.numRequestsProjected)
 		contextService.init();
-		
-		simulationData.setBegin(System.currentTimeMillis());
-		ServerInitializer accessControlInitializer = new ServerInitializer(simulationData.getAccessControlURL(), 
-			ActorVS.Type.ACCESS_CONTROL);
-		ResponseVS responseVS = accessControlInitializer.call();
-		if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-			publishClaim(simulationData.getEvento());
-	    }
-		simulationDataJSON.statusCode = ResponseVS.SC_SIMULATION_INITIATED
-		webSocketService.processResponse(simulationDataJSON)
+		simulationData.init(System.currentTimeMillis());
+        startBroadcatsTimer();
+        changeSimulationStatus(new ResponseVS(ResponseVS.SC_OK, Status.INIT_SIMULATION, null));
 	}
+
+    public void startSimulationTimer(SimulationData simulationData) throws Exception {
+        log.debug("startSimulationTimer")
+        Long hoursMillis = 1000 * 60 * 60 * new Long(simulationData.getNumHoursProjected());
+        Long minutesMillis = 1000 * 60 * new Long(simulationData.getNumMinutesProjected());
+        Long secondMillis = 1000 * new Long(simulationData.getNumSecondsProjected());
+        Long totalMillis = hoursMillis + minutesMillis + secondMillis;
+        Long interval = totalMillis/simulationData.getNumRequestsProjected();
+        log.debug("starting timer - interval between requests: "+ interval + " milliseconds");
+        simulationTimer = new Timer();
+        simulationTimer.schedule(new SignTask(), 0, interval);
+    }
+
+    class SignTask extends TimerTask {
+        public void run() {
+            if(!synchronizedSignerList.isEmpty()) {
+                int randomSigner = new Random().nextInt(synchronizedSignerList.size());
+                launchSignature(synchronizedSignerList.remove(randomSigner));
+            } else simulationTimer.stop();
+        }
+    }
+
+    public void startBroadcatsTimer() throws Exception {
+        log.debug("startBroadcatsTimer - interval between broadcasts: '${broadcastMessageInterval}' milliseconds");
+        if(broadcastTimer != null) broadcastTimer.cancel();
+        broadcastTimer = new Timer();
+        broadcastTimer.schedule(new BroadcastTimerTask(simulationData, broadcastTimer), 0, broadcastMessageInterval);
+    }
+
+    class BroadcastTimerTask extends TimerTask {
+
+        private SimulationData simulationData;
+        private Timer launcher;
+
+        public BroadcastTimerTask(SimulationData simulationData, Timer launcher) {
+            this.simulationData = simulationData;
+            this.launcher = launcher;
+        }
+
+        public void run() {
+            //log.debug("======== BroadcastTimer run")
+            if(ResponseVS.SC_PROCESSING == simulationData.getStatusCode()) {
+                Map messageMap = [statusCode:ResponseVS.SC_PROCESSING, simulationData:simulationData.getDataMap()]
+                Map broadcastResul = webSocketService.broadcastList(messageMap, synchronizedListenerSet);
+                if(ResponseVS.SC_OK != broadcastResul.statusCode) {
+                    broadcastResul.errorList.each {synchronizedListenerSet.remove(it)}
+                }
+            } else {
+                Logger.getLogger(MultiSignSimulationService.class).debug("Cancelling BroadcastTimerTask - statusCode(): "
+                        + simulationData.getStatusCode() + " - message: " + simulationData.getMessage())
+                launcher.cancel();
+            }
+        }
+    }
+
+    private void initAccessControl() {
+        log.debug("initAccessControl ### Enter INIT_ACCESS_CONTROl status")
+        ServerInitializer accessControlInitializer = new ServerInitializer(simulationData.getAccessControlURL(),
+                ActorVS.Type.ACCESS_CONTROL);
+        ResponseVS responseVS = accessControlInitializer.call();
+        responseVS.setStatus(Status.INIT_ACCESS_CONTROL)
+        changeSimulationStatus(responseVS)
+    }
 	
-	private void publishClaim(EventVS event) throws Exception {
-		log.debug("publishClaim");
+	private void publishEvent(EventVS event) throws Exception {
+        log.debug("publishEvent ### Enter status PUBLISH_EVENT");
 		DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date(System.currentTimeMillis());
 		String dateStr = formatter.format(date);
-		nextEventState = event.getNextState();
-		String subject = event.getAsunto()+ " -> " + dateStr;
-		event.setAsunto(subject);
-		this.event = event;
-		String eventStr = new JSONObject(event.getDataMap()).toString();
-		String urlPublishClaim = contextService.getAccessControl().getServerURL() + "/eventoReclamacion"
-
-		String msgSubject = messageSource.getMessage("cancelClaimMsgSubject",null, locale); 	
-		
+		String subject = event.getSubject()+ " -> " + dateStr;
+		event.setSubject(subject);
+		this.eventVS = event;
+		String eventStr = "${eventVS.getDataMap() as JSON}".toString();
+		String urlPublishClaim = contextService.getAccessControl().getPublishClaimURL()
+		String msgSubject = messageSource.getMessage("publishClaimMsgSubject",null, locale);
 		KeyStore keyStore = contextService.getUserTest().getKeyStore()
 		PrivateKey privateKey = (PrivateKey)keyStore.getKey(
 			contextService.END_ENTITY_ALIAS, contextService.PASSWORD.toCharArray());
 		Certificate[] chain = keyStore.getCertificateChain(contextService.END_ENTITY_ALIAS);
 		signedMailGenerator = new SignedMailGenerator(
-			privateKey, chain, contextService.VOTE_SIGN_MECHANISM);
+			privateKey, chain, contextService.DNIe_SIGN_MECHANISM);
 		SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage(
 				contextService.getUserTest().getEmail(),
-				contextService.getAccessControl().getNombreNormalizado(),
+				contextService.getAccessControl().getNameNormalized(),
 				eventStr, msgSubject,  null);
-		SMIMESignedSender signedSender = new SMIMESignedSender(
-				null, smimeDocument, urlPublishClaim, null, null);
-		ResponseVS respuesta = signedSender.call();
-		if(ResponseVS.SC_OK == respuesta.getStatusCode()) {
+		SMIMESignedSender signedSender = new SMIMESignedSender(smimeDocument, urlPublishClaim, null, null);
+		ResponseVS responseVS = signedSender.call();
+		if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
 			try {
-				byte[] responseBytes = respuesta.getMessageBytes();
-				contextService.copyFileToSimulationDir(responseBytes, 
-					"/claimSimulation", "ClaimPublishedReceipt")
+				byte[] responseBytes = responseVS.getMessageBytes();
+				contextService.copyFileToSimDir(responseBytes, "/claimSimulation", "ClaimPublishedReceipt")
 				SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(
 						new ByteArrayInputStream(responseBytes));
 				dnieMimeMessage.verify(contextService.getSessionPKIXParameters());
-				
-				event = EventVSBase.populate(new JSONObject(dnieMimeMessage.getSignedContent()));
-				initExecutors(event);
+                EventVS eventToSign = EventVS.populate(new JSONObject(dnieMimeMessage.getSignedContent()));
+                eventVS.setId(eventToSign.getId());
 			} catch (Exception ex) {
 				log.error(ex.getMessage(), ex);
+                responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage())
 			}
 		}
+        responseVS.setStatus(Status.PUBLISH_EVENT)
+        changeSimulationStatus(responseVS)
 	}
-	
-	private void initExecutors(EventVS eventVS){
+
+    private void sendClaims(){
+        log.debug("sendVotes ### Enter status SEND_CLAIMS");
 		if(!(simulationData.getNumRequestsProjected() > 0)) {
 			log.debug("WITHOUT NumberOfRequestsProjected");
 			return;
 		}
-		signerList = new ArrayList<String>();
+		List<String> signerList = new ArrayList<String>();
 		for(int i = 0; i < simulationData.getNumRequestsProjected(); i++) {
 			signerList.add(NifUtils.getNif(i));
 		}
+        synchronizedSignerList = Collections.synchronizedList(signerList)
 		
 		simulatorExecutor = Executors.newFixedThreadPool(100);
-		signClaimCompletionService =
-				new ExecutorCompletionService<ResponseVS>(simulatorExecutor);
-		
-		simulatorExecutor.execute(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					launchRequests(eventVS);
-				} catch (Exception ex) {
-					log.error(ex.getMessage(), ex);
-				}
-			}
-		});
-		simulatorExecutor.execute(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					readResponses();
-				} catch (Exception ex) {
-					log.error(ex.getMessage(), ex);
-				}
-			}
-		});
+		signClaimCompletionService = new ExecutorCompletionService<ResponseVS>(simulatorExecutor);
+        try {
+            simulatorExecutor.execute(new Runnable() {
+                @Override public void run() { sendClaimRequests(); }
+            });
+            simulatorExecutor.execute(new Runnable() {
+                @Override public void run() { waitForClaimResponses(); }
+            });
+        }catch(Exception ex) {
+            log.error(ex.getMessage(), ex);
+            changeSimulationStatus(new ResponseVS(ResponseVS.SC_ERROR, Status.SEND_CLAIMS, ex.getMessage()));
+        }
 	}
 
-	public void launchRequests (EventVS eventVS) throws Exception {
-		log.debug(" ----------- launchRequests - NumRequestsProjected: " +
+	public void sendClaimRequests () throws Exception {
+		log.debug(" ----------- sendClaimRequests - NumRequestsProjected: " +
 				simulationData.getNumRequestsProjected());
 		if(simulationData.isTimerBased()) startSimulationTimer(simulationData, this);
 		else {
-			while(!signerList.isEmpty()) {
+			while(!synchronizedSignerList.isEmpty()) {
 				if((simulationData.getNumRequests() -
 						simulationData.getNumRequestsColected()) <
 						simulationData.getMaxPendingResponses()) {
-					int randomSigner = new Random().nextInt(signerList.size());
-					launchSignature(eventVS, signerList.remove(randomSigner));
+					int randomSigner = new Random().nextInt(synchronizedSignerList.size());
+					launchSignature(synchronizedSignerList.remove(randomSigner));
 				} else Thread.sleep(200);
 			}
 		}
 	}
+
+    private void launchSignature(String nif) throws Exception {
+        signClaimCompletionService.submit(new ClaimSignedSender(nif, eventVS.getId()));
+        simulationData.getAndIncrementNumRequests();
+    }
 	
-	private void readResponses() throws Exception {
-		log.debug(" -------------- readResponses - NumRequestsProjected: " +
-				simulationData.getNumRequestsProjected());
-		while (simulationData.getNumRequestsProjected() >
-				simulationData.getNumRequestsColected()) {
+	private void waitForClaimResponses() throws Exception {
+		log.debug(" -------------- waitForClaimResponses - NumRequestsProjected: " + simulationData.getNumRequestsProjected());
+		while (simulationData.getNumRequestsProjected() > simulationData.getNumRequestsColected()) {
 			try {
 				Future<ResponseVS> f = signClaimCompletionService.take();
-				ResponseVS respuesta = f.get();
-				if (ResponseVS.SC_OK == respuesta.getStatusCode()) {
+				ResponseVS responseVS = f.get();
+				if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
 					simulationData.getAndIncrementNumRequestsOK();
 				} else {
 					simulationData.getAndIncrementNumRequestsERROR();
-					String msg = "Signature ERROR - msg: " + respuesta.getMessage();
+					String msg = "Signature ERROR - msg: " + responseVS.getMessage();
 					errorList.add(msg);
 				}
 			} catch (Exception ex) {
@@ -237,155 +274,144 @@ class ClaimSimulationService {
 				simulationData.getAndIncrementNumRequestsERROR();
 			}
 		}
-		if(nextEventState != null) setNextEventState();
-		if(nextEventState != null && simulationData.
-				getBackupRequestEmail() != null) requestBackup();
-		finishSimulation();
+        ResponseVS responseVS = null;
+        if(!errorList.isEmpty()) {
+            String errorsMsg = SimulationUtils.getFormattedErrorList(errorList);
+            responseVS = new ResponseVS(ResponseVS.SC_ERROR, Status.SEND_CLAIMS, errorsMsg);
+        } else responseVS = new ResponseVS(ResponseVS.SC_OK, Status.SEND_CLAIMS, null)
+        changeSimulationStatus(responseVS);
 	}
-	
-	private void finishSimulation() {
-		log.debug(" -------------- finishSimulation ")
-		log.debug("- call - shutdown executors");
-		
-		simulationData.setFinish(System.currentTimeMillis());
+
+    private void changeEventState() throws Exception {
+        log.debug("changeEventState ### Enter status CHANGE_EVENT_STATE");
+        Map cancelDataMap = eventVS.getChangeEventDataMap(contextService.getAccessControl().getServerURL(),
+                simulationData.getEventStateWhenFinished());
+        String cancelDataStr = new JSONObject(cancelDataMap).toString()
+        String msgSubject = messageSource.getMessage("cancelEventMsgSubject", [eventVS.getId()].toArray(), locale);
+        SignedMailGenerator signedMailGenerator = new SignedMailGenerator(contextService.getUserTest().getKeyStore(),
+                contextService.END_ENTITY_ALIAS, contextService.PASSWORD.toCharArray(), contextService.VOTE_SIGN_MECHANISM);
+        SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage(contextService.getUserTest().getEmail(),
+                contextService.getAccessControl().getNameNormalized(), cancelDataStr, msgSubject,  null);
+        SMIMESignedSender worker = new SMIMESignedSender(smimeDocument,
+                contextService.getAccessControl().getCancelEventServiceURL(), null, null);
+        ResponseVS responseVS = worker.call();
+        responseVS.setStatus(Status.CHANGE_EVENT_STATE);
+        changeSimulationStatus(responseVS);
+    }
+
+    private void requestBackup() throws Exception {
+        log.debug("requestBackup ### Enter status REQUEST_BACKUP");
+        byte[] requestBackupPDFBytes = PdfFormHelper.getBackupRequest(eventVS.getId().toString(), event.getSubject(),
+                simulationData.getBackupRequestEmail());
+
+        KeyStore userTestKeyStore = contextService.getUserTest().getKeyStore();
+        PrivateKey signerPrivateKey = (PrivateKey)userTestKeyStore.getKey(
+                ContextService.END_ENTITY_ALIAS, ContextService.PASSWORD.toCharArray());
+        Certificate[] signerCertChain = userTestKeyStore.getCertificateChain(ContextService.END_ENTITY_ALIAS);
+
+        PdfReader requestBackupPDF = new PdfReader(requestBackupPDFBytes);
+        String urlBackupEvents = contextService.getAccessControl().getBackupServiceURL();
+
+        PDFSignedSender worker = new PDFSignedSender(null, urlBackupEvents, null, null, null, requestBackupPDF,
+                signerPrivateKey, signerCertChain, null);
+        ResponseVS responseVS = worker.call();
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+            String downloadServiceURL = contextService.getAccessControl().getDownloadServiceURL(responseVS.getMessage());
+            responseVS = HttpHelper.getInstance().getData(downloadServiceURL, ContentTypeVS.BACKUP);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                log.debug("TODO validate backup");
+                /*FutureTask<ResponseVS> future = new FutureTask<ResponseVS>(
+                    new ZipBackupValidator(responseVS.getMessageBytes()));
+                simulatorExecutor.execute(future);
+                responseVS = future.get();
+                log.debug("BackupRequestWorker - status: " + responseVS.getStatusCode());*/
+            }
+        }
+        responseVS.setStatus(Status.REQUEST_BACKUP)
+        changeSimulationStatus(responseVS);
+    }
+
+    private void finishSimulation(ResponseVS responseVS) {
+        log.debug(" --- finishSimulation Enter status FINISH_SIMULATION - status: ${responseVS.statusCode}")
+
+        simulationData.finish(responseVS.getStatusCode(), System.currentTimeMillis());
 		if(simulationTimer != null) simulationTimer.cancel();
 		if(broadcastTimer != null) broadcastTimer.cancel();
 		
 		if(simulatorExecutor != null) simulatorExecutor.shutdownNow();
-		
-		log.debug("------- SIMULATION RESULT - Event: " + event.getId());
-		simulationData.setFinish(System.currentTimeMillis());
-		simulationData.setFinish(System.currentTimeMillis());
-				log.info("Begin: " + DateUtils.getStringFromDate(
-				simulationData.getBeginDate())  + " - Duration: " +
-				simulationData.getDurationStr());
-		log.info("Number of projected requests: " +
-				simulationData.getNumRequestsProjected());
-		log.info("Number of completed requests: " + simulationData.getNumRequests());
-		log.info("Number of signatures OK: " + simulationData.getNumRequestsOK());
-		log.info("Number of signatures ERROR: " + simulationData.getNumRequestsERROR());
-		
-		if(!errorList.isEmpty()) {
-			String errorsMsg = SimulationUtils.getFormattedErrorList(errorList);
-			log.info(" ************* " + errorList.size() + " ERRORS: \n" + errorsMsg);
-		}
-		simulationData.statusCode = ResponseVS.SC_TERMINATED
-		webSocketService.broadcastList(new JSONObject(simulationData.getDataMap()), simulationListener)
-	}
-	
-	private void setNextEventState() throws Exception {
-		log.debug("setNextEventState");
-		Map cancelDataMap = event.getChangeEventDataMap(
-			contextService.getAccessControl().getServerURL(), nextEventState);
-		String cancelDataStr = new JSONObject(cancelDataMap).toString()
-		String msgSubject = messageSource.getMessage("cancelEventMsgSubject", 
-			[event.getId()].toArray(), locale);
-		SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
-				contextService.getUserTest().getKeyStore(),
-				contextService.END_ENTITY_ALIAS,
-				contextService.PASSWORD.toCharArray(),
-				contextService.VOTE_SIGN_MECHANISM);
-		SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage(
-				contextService.getUserTest().getEmail(),
-				contextService.getAccessControl().getNombreNormalizado(),
-				cancelDataStr, msgSubject,  null);
-		SMIMESignedSender worker = new SMIMESignedSender(
-				null, smimeDocument, contextService.getCancelEventURL(),
-				null, null);
-		ResponseVS responseVS = worker.call();
-		if(ResponseVS.SC_OK != responseVS.getStatusCode())
-			log.error(responseVS.getMessage());
-	}
-	
-	private void requestBackup() throws Exception {
-		log.debug("requestBackup");
-		byte[] requestBackupPDFBytes = PdfFormHelper.getBackupRequest(
-			event.getEventoId().toString(), event.getAsunto(),
-							simulationData.getBackupRequestEmail());
 
-		KeyStore userTestKeyStore = contextService.getUserTest().getKeyStore();
-		PrivateKey signerPrivateKey = (PrivateKey)userTestKeyStore.getKey(
-				ContextService.END_ENTITY_ALIAS, ContextService.PASSWORD.toCharArray());
-		Certificate[] signerCertChain = userTestKeyStore.getCertificateChain(ContextService.END_ENTITY_ALIAS);
-			
-		PdfReader requestBackupPDF = new PdfReader(requestBackupPDFBytes);
-		String urlBackupEvents = contextService.getAccessControl().getServerURL() + "/" + "solicitudCopia";
-		
-		PDFSignedSender worker = new PDFSignedSender(null, urlBackupEvents,
-				null, null, null, requestBackupPDF, signerPrivateKey,
-				signerCertChain, null);
-		ResponseVS responseVS = worker.call();
-		if(ResponseVS.SC_OK == respuesta.getStatusCode()) {
-			String downloadServiceURL = contextService.getAccessControl().getServerURL() +  
-				"/solicitudCopia/download/" + respuesta.getMessage();
-			responseVS = contextService.getHttpHelper().getData(downloadServiceURL, "");
-			if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-				log.debug("TODO validate backup");
-				/*FutureTask<ResponseVS> future = new FutureTask<ResponseVS>(
-					new ZipBackupValidator(respuesta.getMessageBytes()));
-				simulatorExecutor.execute(future);
-				respuesta = future.get();
-				log.debug("BackupRequestWorker - status: " + respuesta.getStatusCode());*/
-			} else log.error(responseVS.getMessage());
-		} else log.error(responseVS.getMessage());
+        log.info("Begin: " + DateUtils.getStringFromDate(simulationData.getBeginDate())  + " - Duration: " +
+				simulationData.getDurationStr());
+        log.info("------- SIMULATION RESULT for EventVS: " + eventVS?.getId());
+        log.info("numRequestsProjected: " + simulationData.getNumRequestsProjected());
+		log.info("numRequests: " + simulationData.getNumRequests());
+		log.info("numRequestsOK: " + simulationData.getNumRequestsOK());
+		log.info("numRequestsERROR: " + simulationData.getNumRequestsERROR());
+
+        String message = responseVS.getMessage();
+        if(!errorList.isEmpty()) {
+            String errorsMsg = SimulationUtils.getFormattedErrorList(errorList);
+            if(message == null) message = errorsMsg;
+            else message = message + "\n" + errorsMsg;
+            log.info(" ************* " + errorList.size() + " ERRORS: \n" + errorsMsg);
+        }
+        simulationData.statusCode = responseVS.getStatusCode()
+        simulationData.message = message
+        responseVS.setStatus(Status.FINISH_SIMULATION)
+        changeSimulationStatus(responseVS);
 	}
-	
-	public void startSimulationTimer(SimulationData simulationData) throws Exception {
-		log.debug("startSimulationTimer")
-		Long hoursMillis = 1000 * 60 * 60 * new Long(
-				simulationData.getNumHoursProjected());
-		Long minutesMillis = 1000 * 60 * new Long(
-				simulationData.getNumMinutesProjected());
-		Long secondMillis = 1000 * new Long(
-				simulationData.getNumSecondsProjected());
-		Long totalMillis = hoursMillis + minutesMillis + secondMillis;
-		Long interval = totalMillis/simulationData.getNumRequestsProjected();
-		log.debug("starting timer - interval between requests: "
-				+ interval + " milliseconds");
-		simulationTimer = new Timer();
-		simulationTimer.schedule(new SignTask(), 0, interval);
-	}
-	
-	class SignTask extends TimerTask {
-		public void run() {
-			if(!signerList.isEmpty()) {
-				int randomSigner = new Random().nextInt(signerList.size());
-				try {
-					launchSignature(signerList.remove(randomSigner));
-				} catch (Exception ex) {
-					log.error(ex.getMessage(), ex);
-				}
-			} else simulationTimer.stop();
-		}
-	}
-	
-	
-	public void startBroadcatsTimer() throws Exception {
-		Long broadcastInterval = 5000;
-		log.debug("starting startBroadcastTimer - interval between broadcasts: '"
-				+ broadcastInterval + "' milliseconds");
-		broadcastTimer = new Timer();
-		broadcastTimer.schedule(new BroadcastTimerTask(), 0, broadcastInterval);
-	}
-	
-	class BroadcastTimerTask extends TimerTask {
-		public void run() {
-			//log.debug("======== BroadcastTimer run")
-			Map broadcastResul = webSocketService.broadcastList(
-				new JSONObject(simulationData?.getDataMap()), simulationListener);
-			if(ResponseVS.SC_OK != broadcastResul.statusCode) {
-				broadcastResul.errorList.each {
-					simulationListener.remove(it)
-				}
-			}
-		}
-	}
-	
-	private void launchSignature(EventVS eventVS, String nif) throws Exception {
-		log.debug("========= launchSignature - event.id: ${eventVS.id}")
-        signClaimCompletionService.submit(new ClaimSigner(
-                nif, eventVS.getEventoId()));
-        simulationData.getAndIncrementNumRequests();
-	}
-	
+
+    private void changeSimulationStatus (ResponseVS statusFromResponse) {
+        log.debug("changeSimulationStatus - statusFrom: '${statusFromResponse.getStatus()}' " +
+                " - statusCode: ${statusFromResponse.getStatusCode()}")
+        if(ResponseVS.SC_OK != statusFromResponse.getStatusCode())
+            log.debug("statusFromResponse message: ${statusFromResponse.getMessage()}")
+        try {
+            switch(statusFromResponse.getStatus()) {
+                case Status.INIT_SIMULATION:
+                    if(ResponseVS.SC_OK == statusFromResponse.getStatusCode()) {
+                        initAccessControl();
+                    } else finishSimulation(statusFromResponse);
+                    break;
+                case Status.INIT_ACCESS_CONTROL:
+                    if(ResponseVS.SC_OK == statusFromResponse.getStatusCode()) {
+                        publishEvent(simulationData.getEventVS());
+                    } else finishSimulation(statusFromResponse);
+                    break;
+                case Status.PUBLISH_EVENT:
+                    if(ResponseVS.SC_OK == statusFromResponse.getStatusCode()) {
+                        Thread.sleep(1000);//to avoid timestamping race issues
+                        sendClaims();
+                    } else finishSimulation(statusFromResponse);
+                    break;
+                case Status.SEND_CLAIMS:
+                    if(ResponseVS.SC_OK == statusFromResponse.getStatusCode()) {
+                        if(simulationData.getEventStateWhenFinished() != null) {
+                            changeEventState();
+                        } else finishSimulation(statusFromResponse);
+                    } else finishSimulation(statusFromResponse);
+                    break;
+                case Status.CHANGE_EVENT_STATE:
+                    if(ResponseVS.SC_OK == statusFromResponse.getStatusCode()) {
+                        if(simulationData.getBackupRequestEmail() != null) {
+                            requestBackup();
+                        }
+                    } else finishSimulation(statusFromResponse);
+                    break;
+                case Status.REQUEST_BACKUP:
+                    finishSimulation(statusFromResponse);
+                    break;
+                case Status.FINISH_SIMULATION:
+                    Map messageMap = [statusCode:statusFromResponse.statusCode,
+                            status:statusFromResponse.getStatus().toString(),
+                            message:statusFromResponse.message, simulationData:simulationData.getDataMap()]
+                    webSocketService.broadcastList(messageMap, synchronizedListenerSet)
+                    break;
+            }
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex)
+            finishSimulation(new ResponseVS(ResponseVS.SC_ERROR, statusFromResponse.getStatus() , ex.getMessage()));
+        }
+    }
+
 }

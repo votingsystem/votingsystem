@@ -22,11 +22,11 @@ public class EventTagVS implements java.io.Serializable {
         this.id = id;
     }
 
-    public EventVS getEventVSBase() {
+    public EventVS getEventVS() {
         return this.eventVS;
     }
     
-    public void setEventVSBase(EventVS eventVS) {
+    public void setEventVS(EventVS eventVS) {
         this.eventVS = eventVS;
     }
 

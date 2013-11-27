@@ -24,7 +24,7 @@ $('#newFieldClaimForm').submit(function(event){
 	event.preventDefault();
 	$("#addClaimFieldDialog").dialog( "close" );
  		if(!document.getElementById('claimFieldText').validity.valid) {
- 			$("#claimFieldText").addClass( "ui-state-error" );
+ 			$("#claimFieldText").addClass( "formFieldError" );
  			showResultDialog('<g:message code="dataFormERRORLbl"/>', 
  				'<g:message code="emptyFieldMsg"/>',function() {
  					$("#addClaimFieldDialog").dialog("open")
@@ -32,7 +32,7 @@ $('#newFieldClaimForm').submit(function(event){
  		} else {
      		if(callerCallback != null) callerCallback($("#claimFieldText").val())
      		else console.log("addClaimFieldDialog - missing callerCallback")
- 			$("#claimFieldText").removeClass( "ui-state-error" );
+ 			$("#claimFieldText").removeClass( "formFieldError" );
  		}
 })
 

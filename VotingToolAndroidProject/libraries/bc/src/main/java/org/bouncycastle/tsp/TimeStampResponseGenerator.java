@@ -1,5 +1,13 @@
 package org.bouncycastle.tsp;
 
+import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.asn1.cmp.PKIFailureInfo;
+import org.bouncycastle2.asn1.cmp.PKIFreeText;
+import org.bouncycastle2.asn1.cmp.PKIStatus;
+import org.bouncycastle2.asn1.cmp.PKIStatusInfo;
+import org.bouncycastle2.asn1.cms.ContentInfo;
+import org.bouncycastle2.asn1.tsp.TimeStampResp;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -7,19 +15,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Date;
 import java.util.Set;
-
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1InputStream;
-import org.bouncycastle2.asn1.DERBitString;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERSequence;
-import org.bouncycastle2.asn1.DERUTF8String;
-import org.bouncycastle2.asn1.cmp.PKIFailureInfo;
-import org.bouncycastle2.asn1.cmp.PKIFreeText;
-import org.bouncycastle2.asn1.cmp.PKIStatus;
-import org.bouncycastle2.asn1.cmp.PKIStatusInfo;
-import org.bouncycastle2.asn1.cms.ContentInfo;
-import org.bouncycastle2.asn1.tsp.TimeStampResp;
 
 /**
  * Generator for RFC 3161 Time Stamp Responses.

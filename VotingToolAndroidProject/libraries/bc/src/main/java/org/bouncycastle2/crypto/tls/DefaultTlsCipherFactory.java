@@ -1,7 +1,5 @@
 package org.bouncycastle2.crypto.tls;
 
-import java.io.IOException;
-
 import org.bouncycastle2.crypto.BlockCipher;
 import org.bouncycastle2.crypto.Digest;
 import org.bouncycastle2.crypto.digests.MD5Digest;
@@ -11,6 +9,8 @@ import org.bouncycastle2.crypto.digests.SHA384Digest;
 import org.bouncycastle2.crypto.engines.AESFastEngine;
 import org.bouncycastle2.crypto.engines.DESedeEngine;
 import org.bouncycastle2.crypto.modes.CBCBlockCipher;
+
+import java.io.IOException;
 
 public class DefaultTlsCipherFactory implements TlsCipherFactory
 {

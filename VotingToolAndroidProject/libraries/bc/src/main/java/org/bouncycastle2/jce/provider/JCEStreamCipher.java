@@ -1,11 +1,11 @@
 package org.bouncycastle2.jce.provider;
 
-import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
+import org.bouncycastle2.crypto.*;
+import org.bouncycastle2.crypto.engines.*;
+import org.bouncycastle2.crypto.modes.CFBBlockCipher;
+import org.bouncycastle2.crypto.modes.OFBBlockCipher;
+import org.bouncycastle2.crypto.params.KeyParameter;
+import org.bouncycastle2.crypto.params.ParametersWithIV;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
@@ -15,22 +15,8 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEParameterSpec;
 import javax.crypto.spec.RC2ParameterSpec;
 import javax.crypto.spec.RC5ParameterSpec;
-
-import org.bouncycastle2.crypto.BlockCipher;
-import org.bouncycastle2.crypto.CipherParameters;
-import org.bouncycastle2.crypto.DataLengthException;
-import org.bouncycastle2.crypto.StreamBlockCipher;
-import org.bouncycastle2.crypto.StreamCipher;
-import org.bouncycastle2.crypto.engines.BlowfishEngine;
-import org.bouncycastle2.crypto.engines.DESEngine;
-import org.bouncycastle2.crypto.engines.DESedeEngine;
-import org.bouncycastle2.crypto.engines.RC4Engine;
-import org.bouncycastle2.crypto.engines.SkipjackEngine;
-import org.bouncycastle2.crypto.engines.TwofishEngine;
-import org.bouncycastle2.crypto.modes.CFBBlockCipher;
-import org.bouncycastle2.crypto.modes.OFBBlockCipher;
-import org.bouncycastle2.crypto.params.KeyParameter;
-import org.bouncycastle2.crypto.params.ParametersWithIV;
+import java.security.*;
+import java.security.spec.AlgorithmParameterSpec;
 
 public class JCEStreamCipher
     extends WrapCipherSpi implements PBE

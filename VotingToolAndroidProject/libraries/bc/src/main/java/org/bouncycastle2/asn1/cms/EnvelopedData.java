@@ -1,16 +1,8 @@
 package org.bouncycastle2.asn1.cms;
 
-import java.util.Enumeration;
+import org.bouncycastle2.asn1.*;
 
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.ASN1Set;
-import org.bouncycastle2.asn1.ASN1TaggedObject;
-import org.bouncycastle2.asn1.BERSequence;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERTaggedObject;
+import java.util.Enumeration;
 
 public class EnvelopedData
     extends ASN1Encodable

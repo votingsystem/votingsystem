@@ -4,8 +4,8 @@ import org.bouncycastle2.crypto.CipherParameters;
 import org.bouncycastle2.crypto.DSA;
 import org.bouncycastle2.crypto.params.*;
 
-import java.security.SecureRandom;
 import java.math.BigInteger;
+import java.security.SecureRandom;
 
 /**
  * GOST R 34.10-94 Signature Algorithm

@@ -1,7 +1,6 @@
 package com.itextpdf.text.pdf;
 
 import com.itextpdf.text.error_messages.MessageLocalization;
-
 import org.bouncycastle2.asn1.ASN1InputStream;
 import org.bouncycastle2.asn1.DERObject;
 
@@ -11,11 +10,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Add verification according to PAdES-LTV (part 4)

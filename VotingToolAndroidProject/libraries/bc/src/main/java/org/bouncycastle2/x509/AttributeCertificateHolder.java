@@ -1,33 +1,23 @@
 package org.bouncycastle2.x509;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.Principal;
-import java.security.cert.CertSelector;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateParsingException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.security.auth.x500.X500Principal;
-
 import org.bouncycastle2.asn1.ASN1Encodable;
 import org.bouncycastle2.asn1.ASN1Sequence;
 import org.bouncycastle2.asn1.DERInteger;
 import org.bouncycastle2.asn1.DERSequence;
-import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.asn1.x509.GeneralName;
-import org.bouncycastle2.asn1.x509.GeneralNames;
-import org.bouncycastle2.asn1.x509.Holder;
-import org.bouncycastle2.asn1.x509.IssuerSerial;
-import org.bouncycastle2.asn1.x509.ObjectDigestInfo;
+import org.bouncycastle2.asn1.x509.*;
 import org.bouncycastle2.jce.PrincipalUtil;
 import org.bouncycastle2.jce.X509Principal;
 import org.bouncycastle2.util.Arrays;
 import org.bouncycastle2.util.Selector;
+
+import javax.security.auth.x500.X500Principal;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.Principal;
+import java.security.cert.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The Holder object.

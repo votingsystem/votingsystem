@@ -40,13 +40,11 @@
 
 package javax.activation;
 
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import javax.activation.DataSource;
-
 import myjava.awt.datatransfer.DataFlavor;
 import myjava.awt.datatransfer.UnsupportedFlavorException;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * The DataContentHandler interface is implemented by objects that can

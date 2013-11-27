@@ -1,30 +1,19 @@
 package org.votingsystem.signature.util;
 
 import android.util.Log;
-
 import org.bouncycastle2.jce.PKCS10CertificationRequest;
 import org.bouncycastle2.openssl.PEMWriter;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 
+import javax.mail.Header;
+import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.KeyStore;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.SignatureException;
+import java.security.*;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-
-import javax.mail.Header;
-import javax.security.auth.x500.X500Principal;
 
 /**
 * @author jgzornoza
@@ -47,8 +36,8 @@ public class PKCS10WrapperClient {
     private String signatureAlgorithm;
 
     public PKCS10WrapperClient(int keySize, String keyName, String signatureAlgorithm, 
-    		String provider, String controlAccesoURL, String eventoId,
-            String hashCertificadoVotoHEX) throws NoSuchAlgorithmException, 
+    		String provider, String accessControlURL, String eventId,
+            String hashCertVoteHex) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(keyName, provider);
         keyPairGenerator.initialize(keySize, new SecureRandom());
@@ -57,16 +46,16 @@ public class PKCS10WrapperClient {
         this.signatureAlgorithm = signatureAlgorithm;
         publicKey = keyPair.getPublic();
         X500Principal subject = new X500Principal(
-                "CN=controlAccesoURL:" + controlAccesoURL + 
-                ", OU=eventoId:" + eventoId +
-                ", OU=hashCertificadoVotoHEX:" + hashCertificadoVotoHEX); 
+                "CN=accessControlURL:" + accessControlURL + 
+                ", OU=eventId:" + eventId +
+                ", OU=hashCertVoteHex:" + hashCertVoteHex);
         csr = new PKCS10CertificationRequest(signatureAlgorithm, subject, 
         		keyPair.getPublic(), null, keyPair.getPrivate(), provider);
     }
     
     public PKCS10WrapperClient(int keySize, String keyName, 
             String signatureAlgorithm, String provider, String nif, String email,
-            String telefono, String deviceId, String givenName, String surName) 
+            String phone, String deviceId, String givenName, String surName)
             		throws NoSuchAlgorithmException, 
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(keyName, provider);
@@ -78,52 +67,52 @@ public class PKCS10WrapperClient {
         		", OU=deviceId:" + deviceId + ", GIVENNAME=" + givenName + 
         		", SURNAME=" + surName;
         if (email != null) principal.concat(", OU=email:" + email);
-        if (telefono != null) principal.concat(", OU=telefono:" + telefono);
+        if (phone != null) principal.concat(", OU=phone:" + phone);
         X500Principal subject = new X500Principal(principal.toString()); 
         csr = new PKCS10CertificationRequest(signatureAlgorithm, subject, 
         		keyPair.getPublic(), null, keyPair.getPrivate(), provider);
     }
 
     public static PKCS10WrapperClient buildCSRVoto (int keySize, String keyName, 
-            String sigName, String provider, String controlAccesoURL, String eventoId,
-            String hashCertificadoVotoHEX) throws NoSuchAlgorithmException, 
+            String sigName, String provider, String accessControlURL, String eventId,
+            String hashCertVoteHex) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
     	return new PKCS10WrapperClient(keySize, keyName, sigName, 
-    			provider, controlAccesoURL, eventoId, hashCertificadoVotoHEX);
+    			provider, accessControlURL, eventId, hashCertVoteHex);
     }
     
     public static PKCS10WrapperClient buildCSRUsuario (int keySize, String keyName, 
             String sigName, String provider, String nif, String email,
-            String telefono, String deviceId, String givenName, String surName) throws NoSuchAlgorithmException, 
+            String phone, String deviceId, String givenName, String surName) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
     	return new PKCS10WrapperClient(keySize, keyName, sigName, provider,
-    			nif, email, telefono, deviceId, givenName, surName);
+    			nif, email, phone, deviceId, givenName, surName);
     }
     
     /**
      * @return The DER encoded byte array.
      */
-    public byte[] getDEREncodedRequestCSR() {
+    public byte[] getCsrDER() {
         return this.csr.getEncoded();
     }
 
     /**
      * @return The PEM encoded string representation.
      */
-    public byte[] getPEMEncodedRequestCSR() {
+    public byte[] getCsrPEM() {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
         PEMWriter pemWrt = new PEMWriter(new OutputStreamWriter(bOut));
         try {
             pemWrt.writeObject(csr);
         } catch (IOException ex) {
-        	Log.e("getPEMEncodedRequestCSR", ex.getMessage(), ex);
+        	Log.e("getCsrPEM", ex.getMessage(), ex);
             return null;
         } finally {
             try {
                 pemWrt.close();
                 bOut.close();
             } catch (IOException ex) {
-            	Log.e("getPEMEncodedRequestCSR", ex.getMessage(), ex);
+            	Log.e("getCsrPEM", ex.getMessage(), ex);
             }
         }
         return bOut.toByteArray();
@@ -148,21 +137,21 @@ public class PKCS10WrapperClient {
     }
     
     public void initSigner (byte[] csrFirmada) throws Exception {
-        Collection<X509Certificate> certificados = CertUtil.fromPEMToX509CertCollection(csrFirmada);
-        certificate = certificados.iterator().next();
-        X509Certificate[] arrayCerts = new X509Certificate[certificados.size()];
-        certificados.toArray(arrayCerts);
+        Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(csrFirmada);
+        certificate = certificates.iterator().next();
+        X509Certificate[] arrayCerts = new X509Certificate[certificates.size()];
+        certificates.toArray(arrayCerts);
         signedMailGenerator = new SignedMailGenerator(
                 privateKey, arrayCerts, signatureAlgorithm);
     }
 
 
     public SMIMEMessageWrapper genSignedMessage(String fromUser, String toUser, 
-    		String textoAFirmar, String asunto, Header header) throws Exception {
+    		String textToSign, String subject, Header header) throws Exception {
         if (signedMailGenerator == null) 
         	throw new Exception ("signedMailGenerator no inicializado ");
         return signedMailGenerator.genMimeMessage(
-        		fromUser, toUser, textoAFirmar, asunto, header);
+        		fromUser, toUser, textToSign, subject, header);
     }
     
     /**
@@ -176,10 +165,10 @@ public class PKCS10WrapperClient {
     
     public static KeyStore getKeyStore (byte[] csrFirmada, PrivateKey privateKey, 
     		char[] passwordClaves, String aliasClaves) throws Exception {
-        Collection<X509Certificate> certificados = CertUtil.fromPEMToX509CertCollection(csrFirmada);
-    	Log.i("Número certificados en cadena: ", String.valueOf(certificados.size()));
-        X509Certificate[] arrayCerts = new X509Certificate[certificados.size()];
-        certificados.toArray(arrayCerts);
+        Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(csrFirmada);
+    	Log.i("Número certificates en cadena: ", String.valueOf(certificates.size()));
+        X509Certificate[] arrayCerts = new X509Certificate[certificates.size()];
+        certificates.toArray(arrayCerts);
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
         keyStore.load(null, null);
         keyStore.setKeyEntry(aliasClaves, privateKey, passwordClaves, arrayCerts);

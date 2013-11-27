@@ -1,14 +1,10 @@
 package org.bouncycastle.asn1.tsp;
 
-import java.util.Enumeration;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERSequence;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.cmp.PKIStatusInfo;
 import org.bouncycastle2.asn1.cms.ContentInfo;
+
+import java.util.Enumeration;
 
 
 public class TimeStampResp

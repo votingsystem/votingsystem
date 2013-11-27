@@ -1,12 +1,11 @@
 package org.bouncycastle2.cms;
 
+import org.bouncycastle2.asn1.cms.RecipientInfo;
+
+import javax.crypto.SecretKey;
 import java.security.GeneralSecurityException;
 import java.security.Provider;
 import java.security.SecureRandom;
-
-import javax.crypto.SecretKey;
-
-import org.bouncycastle2.asn1.cms.RecipientInfo;
 
 interface IntRecipientInfoGenerator
 {

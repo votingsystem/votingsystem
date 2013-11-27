@@ -1,5 +1,13 @@
 package org.bouncycastle.tsp;
 
+import org.bouncycastle2.asn1.ASN1InputStream;
+import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle2.asn1.DERObjectIdentifier;
+import org.bouncycastle2.asn1.cmp.PKIFailureInfo;
+import org.bouncycastle2.asn1.tsp.TimeStampReq;
+import org.bouncycastle2.asn1.x509.X509Extension;
+import org.bouncycastle2.asn1.x509.X509Extensions;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,14 +17,6 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.bouncycastle2.asn1.ASN1InputStream;
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.cmp.PKIFailureInfo;
-import org.bouncycastle2.asn1.tsp.TimeStampReq;
-import org.bouncycastle2.asn1.x509.X509Extension;
-import org.bouncycastle2.asn1.x509.X509Extensions;
 
 /**
  * Base class for an RFC 3161 Time Stamp Request.

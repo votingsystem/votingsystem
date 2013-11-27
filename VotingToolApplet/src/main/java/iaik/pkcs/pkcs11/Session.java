@@ -43,24 +43,12 @@
 
 package iaik.pkcs.pkcs11;
 
-import iaik.pkcs.pkcs11.objects.Key;
-import iaik.pkcs.pkcs11.objects.KeyPair;
+import iaik.pkcs.pkcs11.objects.*;
 import iaik.pkcs.pkcs11.objects.Object;
-import iaik.pkcs.pkcs11.objects.PrivateKey;
-import iaik.pkcs.pkcs11.objects.PublicKey;
-import iaik.pkcs.pkcs11.objects.SecretKey;
 import iaik.pkcs.pkcs11.parameters.Parameters;
 import iaik.pkcs.pkcs11.parameters.SSL3KeyMaterialParameters;
 import iaik.pkcs.pkcs11.parameters.SSL3MasterKeyDeriveParameters;
-import iaik.pkcs.pkcs11.wrapper.CK_ATTRIBUTE;
-import iaik.pkcs.pkcs11.wrapper.CK_MECHANISM;
-import iaik.pkcs.pkcs11.wrapper.CK_SESSION_INFO;
-import iaik.pkcs.pkcs11.wrapper.CK_SSL3_KEY_MAT_PARAMS;
-import iaik.pkcs.pkcs11.wrapper.CK_SSL3_MASTER_KEY_DERIVE_PARAMS;
-import iaik.pkcs.pkcs11.wrapper.Constants;
-import iaik.pkcs.pkcs11.wrapper.Functions;
-import iaik.pkcs.pkcs11.wrapper.PKCS11;
-import iaik.pkcs.pkcs11.wrapper.PKCS11Constants;
+import iaik.pkcs.pkcs11.wrapper.*;
 
 import java.util.Vector;
 

@@ -44,12 +44,7 @@
 package com.itextpdf.text.pdf.collection;
 
 import com.itextpdf.text.error_messages.MessageLocalization;
-import com.itextpdf.text.pdf.PdfDate;
-import com.itextpdf.text.pdf.PdfDictionary;
-import com.itextpdf.text.pdf.PdfName;
-import com.itextpdf.text.pdf.PdfNumber;
-import com.itextpdf.text.pdf.PdfObject;
-import com.itextpdf.text.pdf.PdfString;
+import com.itextpdf.text.pdf.*;
 
 import java.util.Calendar;
 

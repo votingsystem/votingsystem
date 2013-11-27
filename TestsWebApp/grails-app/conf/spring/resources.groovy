@@ -1,7 +1,7 @@
 // Place your Spring DSL code here
 beans = {
 	
-	applicationContextHolder(org.votingsystem.simulation.ApplicationContextHolder) { bean ->
+	applicationContextHolder(org.votingsystem.util.ApplicationContextHolder) { bean ->
 		bean.factoryMethod = 'getInstance'
 	 }
 }

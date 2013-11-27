@@ -46,16 +46,7 @@ package com.itextpdf.text.pdf;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.error_messages.MessageLocalization;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInput;
-import java.io.DataInputStream;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.net.URL;
 import java.nio.channels.FileChannel;
 /** An implementation of a RandomAccessFile for input only

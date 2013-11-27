@@ -1,22 +1,17 @@
 package org.bouncycastle2.jce.provider;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.bouncycastle2.asn1.DERObjectIdentifier;
 import org.bouncycastle2.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle2.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.crypto.Digest;
-import org.bouncycastle2.crypto.digests.MD5Digest;
-import org.bouncycastle2.crypto.digests.SHA1Digest;
-import org.bouncycastle2.crypto.digests.SHA224Digest;
-import org.bouncycastle2.crypto.digests.SHA256Digest;
-import org.bouncycastle2.crypto.digests.SHA384Digest;
-import org.bouncycastle2.crypto.digests.SHA512Digest;
+import org.bouncycastle2.crypto.digests.*;
 import org.bouncycastle2.util.Strings;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 class JCEDigestUtil
 {

@@ -1,19 +1,14 @@
 package org.votingsystem.signature.util;
 
+import javax.security.auth.x500.X500PrivateCredential;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.security.KeyPair;
 import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.cert.Certificate;
-import java.util.Date;
 import java.security.cert.X509Certificate;
-
-import javax.security.auth.x500.X500PrivateCredential;
+import java.util.Date;
 
 /**
 * @author jgzornoza
@@ -38,64 +33,27 @@ public class KeyStoreUtil {
     	keyStore.store(baos, password);
     	return baos.toByteArray();
     }
-
-    /**
-     * Crea un almacén de claves que contiene la credencial privada con la cadena de certificados.
-     * Crea certificado raíz.
-     */
-    public static KeyStore createKeyStoreWithEndEntity(Date fechaInicio, Date fechaFin, 
-    		char[] password, String rootAlias, String endEntityAlias, 
-    		String principal, String endEntitySubjectDN) throws Exception {
-        KeyStore store = KeyStore.getInstance("JKS");
-        store.load(null, null);
-        X500PrivateCredential rootCredential = KeyUtil.createRootCredential(
-        		fechaInicio, fechaFin, rootAlias, principal);
-        X500PrivateCredential endCredential = KeyUtil.createEndEntityCredential(
-        		rootCredential.getPrivateKey(), rootCredential.getCertificate(), 
-        		fechaInicio, fechaFin, endEntityAlias, endEntitySubjectDN);
-        store.setCertificateEntry(
-        		rootCredential.getAlias(), rootCredential.getCertificate());
-        store.setKeyEntry(endCredential.getAlias(), endCredential.getPrivateKey(), password, 
-                new Certificate[] { 
-        		endCredential.getCertificate(), rootCredential.getCertificate()});
-        return store;
-    }
-
-    
-    /**
-     * Crea un almacén de claves para la Autoridad Certificadora
-     */
-    public static KeyStore createRootKeyStore(Date fechaInicio, Date fechaFin, 
-    		char[] password, String rootAlias, String filePath, String strSubjectDN) throws Exception {
-        KeyStore store = KeyStore.getInstance("JKS");
-        store.load(null, null);
-        X500PrivateCredential rootCredential = KeyUtil.createRootCredential(
-        		fechaInicio, fechaFin, rootAlias, strSubjectDN);
-        store.setCertificateEntry(rootCredential.getAlias(), 
-                rootCredential.getCertificate());
-        store.setKeyEntry(rootCredential.getAlias(), rootCredential.getPrivateKey(), password, 
-                new Certificate[] {rootCredential.getCertificate()});
-        if (filePath != null) store.store(new FileOutputStream(new File(filePath)), password);
-        return store;
-    } 
     
     public static KeyStore createRootKeyStore(long begin, long period, 
             char[] password, String rootAlias, String strSubjectDN) throws Exception {
+        Date dateBegin = new Date(begin);
+        Date dateFinish = new Date(begin + period);
+        return createRootKeyStore(dateBegin, dateFinish, password, rootAlias, strSubjectDN);
+    }
+
+    public static KeyStore createRootKeyStore(Date dateBegin, Date dateFinish, char[] password,
+              String rootAlias, String strSubjectDN) throws Exception {
         KeyStore store = KeyStore.getInstance("JKS");
         store.load(null, null);
         KeyPair rootPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
-        X509Certificate rootCert = CertUtil.generateV3RootCert(
-                rootPair, begin, period, strSubjectDN);
-
-        X500PrivateCredential rootCredential = new X500PrivateCredential(
-                rootCert, rootPair.getPrivate(), rootAlias);
-        store.setCertificateEntry(
-        		rootCredential.getAlias(), rootCredential.getCertificate());
-        store.setKeyEntry(rootCredential.getAlias(), rootCredential.getPrivateKey(), password, 
+        X509Certificate rootCert = CertUtil.generateV3RootCert(rootPair, dateBegin, dateFinish, strSubjectDN);
+        X500PrivateCredential rootCredential = new X500PrivateCredential(rootCert, rootPair.getPrivate(), rootAlias);
+        store.setCertificateEntry(rootCredential.getAlias(), rootCredential.getCertificate());
+        store.setKeyEntry(rootCredential.getAlias(), rootCredential.getPrivateKey(), password,
                 new Certificate[] {rootCredential.getCertificate()});
         return store;
-    } 
-    
+    }
+
     /**
      * Create user KeyStore
      */
@@ -114,12 +72,11 @@ public class KeyStoreUtil {
                 endCert, endPair.getPrivate(), endEntityAlias);
         store.setCertificateEntry(rootCredential.getAlias(), rootCredential.getCertificate());
         store.setKeyEntry(endCredential.getAlias(), endCredential.getPrivateKey(), password, 
-                new Certificate[] { 
-        		endCredential.getCertificate(), rootCredential.getCertificate()});
+                new Certificate[] {endCredential.getCertificate(), rootCredential.getCertificate()});
         return store;
     }
     
-        /**
+    /**
      * Create user TimeStampingKeyStore
      */
     public static KeyStore createTimeStampingKeyStore(long begin, long period, 

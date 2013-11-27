@@ -1,14 +1,14 @@
 package org.bouncycastle2.asn1.cryptopro;
 
-import java.math.BigInteger;
-import java.util.Enumeration;
-import java.util.Hashtable;
-
 import org.bouncycastle2.asn1.DERObjectIdentifier;
 import org.bouncycastle2.crypto.params.ECDomainParameters;
 import org.bouncycastle2.math.ec.ECCurve;
 import org.bouncycastle2.math.ec.ECFieldElement;
 import org.bouncycastle2.math.ec.ECPoint;
+
+import java.math.BigInteger;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 /**
  * table of the available named parameters for GOST 3410-2001.

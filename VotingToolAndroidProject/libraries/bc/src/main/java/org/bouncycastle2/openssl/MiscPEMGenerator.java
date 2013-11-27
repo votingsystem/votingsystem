@@ -1,31 +1,6 @@
 package org.bouncycastle2.openssl;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.Key;
-import java.security.KeyPair;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.security.cert.CRLException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509CRL;
-import java.security.cert.X509Certificate;
-import java.security.interfaces.DSAParams;
-import java.security.interfaces.DSAPrivateKey;
-import java.security.interfaces.RSAPrivateCrtKey;
-import java.security.interfaces.RSAPrivateKey;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERSequence;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.cms.ContentInfo;
 import org.bouncycastle2.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle2.asn1.pkcs.RSAPrivateKeyStructure;
@@ -39,6 +14,20 @@ import org.bouncycastle2.util.io.pem.PemObject;
 import org.bouncycastle2.util.io.pem.PemObjectGenerator;
 import org.bouncycastle2.x509.X509AttributeCertificate;
 import org.bouncycastle2.x509.X509V2AttributeCertificate;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.*;
+import java.security.cert.CRLException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.DSAParams;
+import java.security.interfaces.DSAPrivateKey;
+import java.security.interfaces.RSAPrivateCrtKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * PEM generator for the original set of PEM objects used in Open SSL.

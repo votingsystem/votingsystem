@@ -1,8 +1,8 @@
 package org.bouncycastle2.operator;
 
-import java.io.OutputStream;
-
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+
+import java.io.OutputStream;
 
 public interface MacCalculator
 {

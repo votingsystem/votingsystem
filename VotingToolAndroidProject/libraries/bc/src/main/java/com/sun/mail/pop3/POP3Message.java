@@ -40,11 +40,15 @@
 
 package com.sun.mail.pop3;
 
-import java.io.*;
-import java.util.Enumeration;
 import javax.mail.*;
-import javax.mail.internet.*;
-import javax.mail.event.*;
+import javax.mail.event.MessageChangedEvent;
+import javax.mail.internet.InternetHeaders;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.SharedInputStream;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Enumeration;
 
 /**
  * A POP3 Message.  Just like a MimeMessage except that

@@ -1,12 +1,12 @@
 package org.bouncycastle2.jce.spec;
 
+import org.bouncycastle2.math.ec.ECCurve;
+
 import java.math.BigInteger;
 import java.security.spec.ECFieldF2m;
 import java.security.spec.ECFieldFp;
 import java.security.spec.ECPoint;
 import java.security.spec.EllipticCurve;
-
-import org.bouncycastle2.math.ec.ECCurve;
 
 /**
  * specification signifying that the curve parameters can also be

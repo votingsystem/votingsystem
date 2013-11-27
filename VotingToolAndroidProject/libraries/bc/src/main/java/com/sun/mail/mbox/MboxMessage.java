@@ -40,13 +40,16 @@
 
 package com.sun.mail.mbox;
 
-import java.io.*;
-import java.util.StringTokenizer;
-import java.util.Date;
-import javax.activation.*;
-import javax.mail.*;
-import javax.mail.internet.*;
+import javax.activation.DataHandler;
+import javax.mail.Address;
+import javax.mail.Flags;
+import javax.mail.MessagingException;
+import javax.mail.Session;
 import javax.mail.event.MessageChangedEvent;
+import javax.mail.internet.*;
+import java.io.*;
+import java.util.Date;
+import java.util.StringTokenizer;
 
 /**
  * This class represents an RFC822 style email message that resides in a file.

@@ -32,11 +32,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.telephony.TelephonyManager;
 import android.text.Html;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.KeyEvent;
-import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
+import android.view.*;
 import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
 import android.view.animation.AnimationUtils;
@@ -47,20 +43,18 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
-import org.votingsystem.android.model.ContextVSAndroid;
+import org.votingsystem.android.model.AndroidContextVS;
 import org.votingsystem.android.ui.CertPinDialog;
 import org.votingsystem.android.ui.CertPinDialogListener;
+import org.votingsystem.android.util.HttpHelper;
+import org.votingsystem.android.util.ServerPaths;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.signature.util.PKCS10WrapperClient;
-import org.votingsystem.android.util.HttpHelper;
-import org.votingsystem.android.util.ServerPaths;
-import org.votingsystem.util.StringUtils;
-
+import org.votingsystem.util.NifUtils;
 import java.io.FileOutputStream;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
@@ -68,13 +62,7 @@ import java.text.Normalizer;
 import java.util.Date;
 import java.util.UUID;
 
-import static org.votingsystem.android.model.ContextVSAndroid.ALIAS_CERT_USUARIO;
-import static org.votingsystem.android.model.ContextVSAndroid.KEY_SIZE;
-import static org.votingsystem.android.model.ContextVSAndroid.KEY_STORE_FILE;
-import static org.votingsystem.android.model.ContextVSAndroid.PREFS_ID_SOLICTUD_CSR;
-import static org.votingsystem.android.model.ContextVSAndroid.PROVIDER;
-import static org.votingsystem.android.model.ContextVSAndroid.SIGNATURE_ALGORITHM;
-import static org.votingsystem.android.model.ContextVSAndroid.SIG_NAME;
+import static org.votingsystem.android.model.AndroidContextVS.*;
 
 public class UserCertRequestActivity extends ActionBarActivity implements CertPinDialogListener {
 
@@ -82,13 +70,13 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
 
     private String password = null;
     private String email = null;
-    private String telefono = null;
+    private String phone = null;
     private String deviceId = null;
     private PKCS10WrapperClient pkcs10WrapperClient;
     private EditText nifText;
     private EditText givennameText;
     private EditText surnameText;
-    private ContextVSAndroid contextVSAndroid;
+    private AndroidContextVS androidContextVS;
 
     private TextView progressMessage;
     private View progressContainer;
@@ -103,9 +91,9 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
     	super.onCreate(savedInstanceState);
         Log.d(TAG + ".onCreate(...) ", " - onCreate - ");
         setContentView(R.layout.user_cert_request_activity);
-        contextVSAndroid = ContextVSAndroid.getInstance(getBaseContext());
+        androidContextVS = AndroidContextVS.getInstance(getBaseContext());
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        setTitle(getString(R.string.formulario_solicitud_certificado_label));
+        setTitle(getString(R.string.request_certificate_form_lbl));
         
         Button cancelarButton = (Button) findViewById(R.id.cancelar_button);
         cancelarButton.setOnClickListener(new OnClickListener() {
@@ -202,11 +190,11 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
     		String surname = Normalizer.normalize(
     				 surnameText.getText().toString().toUpperCase(), Normalizer.Form.NFD);
     		surname  = surname.replaceAll("[^\\p{ASCII}]", "");
-    		String nif = StringUtils.validarNIF(nifText.getText().toString().toUpperCase());
+    		String nif = NifUtils.validate(nifText.getText().toString().toUpperCase());
 
 			AlertDialog.Builder builder= new AlertDialog.Builder(this);
     		builder.setTitle(getString(R.string.
-    				formulario_solicitud_certificado_label));
+    				request_certificate_form_lbl));
     		builder.setMessage(Html.fromHtml(
     				getString(R.string.cert_data_confirm_msg, givenName, surname, nif)));
     		builder.setPositiveButton(getString(
@@ -235,7 +223,7 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
     
     private boolean validarFormulario () {
     	Log.d(TAG + ".validarFormulario", " - validarFormulario");
-    	if(StringUtils.validarNIF(nifText.getText().toString()) == null) {
+    	if(NifUtils.validate(nifText.getText().toString()) == null) {
     		showMessage(getString(R.string.error_lbl), getString(R.string.nif_error));
     		return false;
     	}
@@ -249,9 +237,9 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
     	}
     	TelephonyManager telephonyManager = (TelephonyManager)
                 getSystemService(Context.TELEPHONY_SERVICE);
-    	telefono = telephonyManager.getLine1Number();
+    	phone = telephonyManager.getLine1Number();
     	//IMSI
-    	//telefono = telephonyManager.getSubscriberId();
+    	//phone = telephonyManager.getSubscriberId();
     	deviceId = telephonyManager.getDeviceId();
     	if(deviceId == null || "".equals(deviceId.trim())) {
     		deviceId = android.os.Build.SERIAL;
@@ -284,7 +272,7 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
 		if(password == null) return;
         if(sendDataTask != null) sendDataTask.cancel(true);
         sendDataTask = new SendDataTask();
-        sendDataTask.execute(ServerPaths.getURLSolicitudCSRUsuario(contextVSAndroid.getAccessControlURL()));
+        sendDataTask.execute(ServerPaths.getURLSolicitudCSRUsuario(androidContextVS.getAccessControlURL()));
 	}
 
     public void showProgress(boolean shown, boolean animate) {
@@ -350,17 +338,17 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
                 String surname = Normalizer.normalize(
                         surnameText.getText().toString().toUpperCase(), Normalizer.Form.NFD);
                 surname  = surname.replaceAll("[^\\p{ASCII}]", "");
-                String nif = StringUtils.validarNIF(nifText.getText().toString().toUpperCase());
+                String nif = NifUtils.validate(nifText.getText().toString().toUpperCase());
                 pkcs10WrapperClient = PKCS10WrapperClient.buildCSRUsuario (KEY_SIZE, SIG_NAME,
-                        SIGNATURE_ALGORITHM, PROVIDER, nif, email, telefono, deviceId, givenName, surname);
-                csrBytes = pkcs10WrapperClient.getPEMEncodedRequestCSR();
+                        SIGNATURE_ALGORITHM, PROVIDER, nif, email, phone, deviceId, givenName, surname);
+                csrBytes = pkcs10WrapperClient.getCsrPEM();
                 X509Certificate[] arrayCerts = CertUtil.generateCertificate(pkcs10WrapperClient.getKeyPair(),
                         new Date(System.currentTimeMillis()),
                         new Date(System.currentTimeMillis() + 365 * 24 * 60 * 60 * 1000),
-                        "CN=" + ALIAS_CERT_USUARIO);
+                        "CN=" + USER_CERT_ALIAS);
                 KeyStore keyStore = KeyStore.getInstance("PKCS12");
                 keyStore.load(null, null);
-                keyStore.setKeyEntry(ALIAS_CERT_USUARIO, pkcs10WrapperClient.getPrivateKey(),
+                keyStore.setKeyEntry(USER_CERT_ALIAS, pkcs10WrapperClient.getPrivateKey(),
                         password.toCharArray(), arrayCerts);
                 byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, password.toCharArray());
                 FileOutputStream fos = openFileOutput(KEY_STORE_FILE, Context.MODE_PRIVATE);
@@ -386,7 +374,7 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
                 Long idSolictud = Long.valueOf(responseVS.getMessage());
                 editor.putLong(PREFS_ID_SOLICTUD_CSR, idSolictud);
                 editor.commit();
-                contextVSAndroid.setEstado(ContextVSAndroid.Estado.CON_CSR);
+                androidContextVS.setState(AndroidContextVS.State.CON_CSR);
                 Intent intent = new Intent(getBaseContext(),
                         UserCertResponseActivity.class);
                 startActivity(intent);

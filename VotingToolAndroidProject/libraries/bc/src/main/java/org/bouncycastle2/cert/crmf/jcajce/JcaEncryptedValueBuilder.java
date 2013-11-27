@@ -1,14 +1,14 @@
 package org.bouncycastle2.cert.crmf.jcajce;
 
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-
 import org.bouncycastle2.asn1.crmf.EncryptedValue;
 import org.bouncycastle2.cert.crmf.CRMFException;
 import org.bouncycastle2.cert.crmf.EncryptedValueBuilder;
 import org.bouncycastle2.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle2.operator.KeyWrapper;
 import org.bouncycastle2.operator.OutputEncryptor;
+
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 
 public class JcaEncryptedValueBuilder
     extends EncryptedValueBuilder

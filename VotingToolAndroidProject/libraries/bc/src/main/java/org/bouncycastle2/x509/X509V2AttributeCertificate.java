@@ -1,35 +1,21 @@
 package org.bouncycastle2.x509;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateExpiredException;
-import java.security.cert.CertificateNotYetValidException;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1InputStream;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DERBitString;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.x509.AttributeCertificate;
 import org.bouncycastle2.asn1.x509.X509Extension;
 import org.bouncycastle2.asn1.x509.X509Extensions;
 import org.bouncycastle2.util.Arrays;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.security.*;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateNotYetValidException;
+import java.text.ParseException;
+import java.util.*;
 
 /**
  * An implementation of a version 2 X.509 Attribute Certificate.

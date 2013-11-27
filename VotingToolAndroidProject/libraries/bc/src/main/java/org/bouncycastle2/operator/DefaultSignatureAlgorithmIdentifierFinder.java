@@ -1,10 +1,5 @@
 package org.bouncycastle2.operator;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.bouncycastle2.asn1.DEREncodable;
 import org.bouncycastle2.asn1.DERInteger;
 import org.bouncycastle2.asn1.DERNull;
@@ -18,6 +13,11 @@ import org.bouncycastle2.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle2.util.Strings;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class DefaultSignatureAlgorithmIdentifierFinder
     implements SignatureAlgorithmIdentifierFinder

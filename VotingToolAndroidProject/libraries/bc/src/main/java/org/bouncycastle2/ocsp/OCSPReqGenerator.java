@@ -1,5 +1,17 @@
 package org.bouncycastle2.ocsp;
 
+import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.asn1.ocsp.OCSPRequest;
+import org.bouncycastle2.asn1.ocsp.Request;
+import org.bouncycastle2.asn1.ocsp.Signature;
+import org.bouncycastle2.asn1.ocsp.TBSRequest;
+import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle2.asn1.x509.GeneralName;
+import org.bouncycastle2.asn1.x509.X509CertificateStructure;
+import org.bouncycastle2.asn1.x509.X509Extensions;
+import org.bouncycastle2.jce.X509Principal;
+
+import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -11,26 +23,6 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.security.auth.x500.X500Principal;
-
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.ASN1OutputStream;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DERBitString;
-import org.bouncycastle2.asn1.DERNull;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DERSequence;
-import org.bouncycastle2.asn1.ocsp.OCSPRequest;
-import org.bouncycastle2.asn1.ocsp.Request;
-import org.bouncycastle2.asn1.ocsp.Signature;
-import org.bouncycastle2.asn1.ocsp.TBSRequest;
-import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.asn1.x509.GeneralName;
-import org.bouncycastle2.asn1.x509.X509CertificateStructure;
-import org.bouncycastle2.asn1.x509.X509Extensions;
-import org.bouncycastle2.jce.X509Principal;
 
 public class OCSPReqGenerator
 {

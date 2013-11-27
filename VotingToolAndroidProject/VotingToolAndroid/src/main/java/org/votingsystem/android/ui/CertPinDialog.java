@@ -30,7 +30,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
-
 import org.votingsystem.android.R;
 
 public class CertPinDialog extends DialogFragment implements OnKeyListener {

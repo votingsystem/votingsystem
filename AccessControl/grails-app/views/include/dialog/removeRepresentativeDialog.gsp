@@ -25,15 +25,15 @@ $("#removeRepresentativeDialog").dialog({
 function removeRepresentative() {
 	console.log("removeRepresentative")
    	var webAppMessage = new WebAppMessage(
-	    	StatusCode.SC_PROCESSING, 
+	    	ResponseVS.SC_PROCESSING,
 	    	Operation.REPRESENTATIVE_REVOKE)
-   	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
-	webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
-	webAppMessage.contenidoFirma = {operation:Operation.REPRESENTATIVE_REVOKE}
-	webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStamp', absolute:true)}"
-	webAppMessage.urlEnvioDocumento = "${createLink(controller:'representative', action:'revoke', absolute:true)}"
-	webAppMessage.asuntoMensajeFirmado = '<g:message code="removeRepresentativeMsgSubject"/>'
-	webAppMessage.respuestaConRecibo = true
+   	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+	webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
+	webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_REVOKE}
+	webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
+	webAppMessage.receiverSignServiceURL = "${createLink(controller:'representative', action:'revoke', absolute:true)}"
+	webAppMessage.signedMessageSubject = '<g:message code="removeRepresentativeMsgSubject"/>'
+	webAppMessage.isResponseWithReceipt = true
 	votingSystemClient.setMessageToSignatureClient(webAppMessage, removeRepresentativeCallback); 
 }
 
@@ -44,10 +44,10 @@ function removeRepresentativeCallback(appMessage) {
 		$("#workingWithAppletDialog" ).dialog("close");
 		var caption = '<g:message code="operationERRORCaption"/>'
 		var msg = appMessageJSON.message
-		if(StatusCode.SC_OK == appMessageJSON.statusCode) { 
+		if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
 			caption = "<g:message code='operationOKCaption'/>"
 			msg = "<g:message code='removeRepresentativeOKMsg'/>";
-		} else if (StatusCode.SC_CANCELLED== appMessageJSON.statusCode) {
+		} else if (ResponseVS.SC_CANCELLED== appMessageJSON.statusCode) {
 			caption = "<g:message code='operationCANCELLEDLbl'/>"
 		}
 		showResultDialog(caption, msg)

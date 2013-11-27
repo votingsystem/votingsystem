@@ -1,8 +1,4 @@
 package org.votingsystem.accesscontrol.controller
-
-import java.net.URLEncoder;
-import grails.converters.JSON
-
 /**
  * @infoController Android app Controller
  * @descController Controlador que sirve la aplicación para clientes Android.

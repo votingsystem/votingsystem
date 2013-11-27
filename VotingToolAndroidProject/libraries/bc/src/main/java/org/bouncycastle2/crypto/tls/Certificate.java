@@ -1,15 +1,15 @@
 package org.bouncycastle2.crypto.tls;
 
+import org.bouncycastle2.asn1.ASN1Encodable;
+import org.bouncycastle2.asn1.ASN1InputStream;
+import org.bouncycastle2.asn1.DERObject;
+import org.bouncycastle2.asn1.x509.X509CertificateStructure;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Vector;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1InputStream;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.x509.X509CertificateStructure;
 
 /**
  * A representation for a certificate chain as used by a tls server.

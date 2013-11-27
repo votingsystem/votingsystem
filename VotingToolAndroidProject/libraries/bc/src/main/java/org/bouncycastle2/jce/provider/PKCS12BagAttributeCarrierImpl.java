@@ -6,13 +6,13 @@ import org.bouncycastle2.asn1.DEREncodable;
 import org.bouncycastle2.asn1.DERObjectIdentifier;
 import org.bouncycastle2.jce.interfaces.PKCS12BagAttributeCarrier;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-import java.io.ObjectOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 class PKCS12BagAttributeCarrierImpl
     implements PKCS12BagAttributeCarrier

@@ -44,11 +44,7 @@
 package com.itextpdf.text.pdf.collection;
 
 import com.itextpdf.text.error_messages.MessageLocalization;
-import com.itextpdf.text.pdf.PdfArray;
-import com.itextpdf.text.pdf.PdfBoolean;
-import com.itextpdf.text.pdf.PdfDictionary;
-import com.itextpdf.text.pdf.PdfName;
-import com.itextpdf.text.pdf.PdfObject;
+import com.itextpdf.text.pdf.*;
 
 public class PdfCollectionSort extends PdfDictionary {
 	

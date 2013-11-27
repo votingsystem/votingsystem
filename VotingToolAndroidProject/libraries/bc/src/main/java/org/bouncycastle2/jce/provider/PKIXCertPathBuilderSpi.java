@@ -1,28 +1,13 @@
 package org.bouncycastle2.jce.provider;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.cert.CertPath;
-import java.security.cert.CertPathBuilderException;
-import java.security.cert.CertPathBuilderResult;
-import java.security.cert.CertPathBuilderSpi;
-import java.security.cert.CertPathParameters;
-import java.security.cert.CertPathValidator;
-import java.security.cert.CertificateFactory;
-import java.security.cert.CertificateParsingException;
-import java.security.cert.PKIXBuilderParameters;
-import java.security.cert.PKIXCertPathBuilderResult;
-import java.security.cert.PKIXCertPathValidatorResult;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-
 import org.bouncycastle2.jce.exception.ExtCertPathBuilderException;
 import org.bouncycastle2.util.Selector;
 import org.bouncycastle2.x509.ExtendedPKIXBuilderParameters;
 import org.bouncycastle2.x509.X509CertStoreSelector;
+
+import java.security.InvalidAlgorithmParameterException;
+import java.security.cert.*;
+import java.util.*;
 
 /**
  * Implements the PKIX CertPathBuilding algorithm for BouncyCastle.

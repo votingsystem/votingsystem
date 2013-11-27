@@ -1,33 +1,6 @@
 package org.bouncycastle2.jce.provider;
 
-import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEParameterSpec;
-import javax.crypto.spec.RC2ParameterSpec;
-import javax.crypto.spec.RC5ParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
-import org.bouncycastle2.crypto.BlockCipher;
-import org.bouncycastle2.crypto.BufferedBlockCipher;
-import org.bouncycastle2.crypto.CipherParameters;
-import org.bouncycastle2.crypto.DataLengthException;
-import org.bouncycastle2.crypto.InvalidCipherTextException;
+import org.bouncycastle2.crypto.*;
 import org.bouncycastle2.crypto.engines.DESEngine;
 import org.bouncycastle2.crypto.engines.DESedeEngine;
 import org.bouncycastle2.crypto.engines.TwofishEngine;
@@ -41,6 +14,17 @@ import org.bouncycastle2.crypto.params.ParametersWithIV;
 import org.bouncycastle2.crypto.params.RC2Parameters;
 import org.bouncycastle2.crypto.params.RC5Parameters;
 import org.bouncycastle2.util.Strings;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.*;
+import java.security.*;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 public class BrokenJCEBlockCipher
     implements BrokenPBE

@@ -9,8 +9,4 @@ class ManifestProtocolSimulationController {
 		render(view:"inputData")
 	}
 	
-	def listenSimulation() {
-		render(view:"listenSimulation")
-	}
-	
 }

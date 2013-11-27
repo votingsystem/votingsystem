@@ -40,12 +40,15 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.util.*;
-import java.io.IOException;
+import com.sun.mail.iap.Argument;
 
-import javax.mail.*;
+import javax.mail.Flags;
+import javax.mail.Message;
 import javax.mail.search.*;
-import com.sun.mail.iap.*;
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 /**
  * This class traverses a search-tree and generates the 

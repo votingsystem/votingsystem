@@ -1,81 +1,31 @@
 package org.votingsystem.accesscontrol.service
 
-import org.votingsystem.accesscontrol.model.*
-import org.bouncycastle.util.encoders.Base64;
-
-import grails.converters.JSON
-
-import org.codehaus.groovy.grails.web.json.JSONElement
-import com.itextpdf.text.pdf.PdfReader;
-
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.cert.*
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Set;
-
-import com.itextpdf.text.Element;
-import com.itextpdf.text.Font
-import com.itextpdf.text.Paragraph
-import com.itextpdf.text.Phrase
-import com.itextpdf.text.Image;
-import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.pdf.AcroFields;
-import com.itextpdf.text.pdf.BaseFont
-import com.itextpdf.text.pdf.PdfContentByte
-import com.itextpdf.text.pdf.PdfCopyFields;
-import com.itextpdf.text.pdf.PdfPCell
-import com.itextpdf.text.pdf.PdfPKCS7;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfEncryptor;
-import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.text.pdf.PdfSignatureAppearance;
-import com.itextpdf.text.pdf.PdfStamper;
-import com.itextpdf.text.pdf.draw.LineSeparator
-import com.itextpdf.text.*
-
-import org.bouncycastle.cms.RecipientId
-import org.bouncycastle.cms.RecipientInformation
-import org.bouncycastle.cms.RecipientInformationStore
-import org.bouncycastle.cms.SignerId
-import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient
-import org.bouncycastle.cms.jcajce.JceKeyTransRecipientId
-import org.bouncycastle.mail.smime.SMIMEEnveloped
-import org.bouncycastle.ocsp.BasicOCSPResp
+import com.itextpdf.text.Rectangle
+import com.itextpdf.text.pdf.*
 import org.bouncycastle.tsp.TimeStampToken
 import org.bouncycastle.tsp.TimeStampTokenInfo
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.*
-import org.springframework.context.ApplicationContext;
-import org.votingsystem.util.*;
+import org.votingsystem.model.CertificateVS
+import org.votingsystem.model.PDFDocumentVS
+import org.votingsystem.model.UserVS
+import org.votingsystem.model.ResponseVS
+import org.votingsystem.signature.util.KeyStoreUtil
+import org.votingsystem.util.DateUtils
+import org.votingsystem.util.FileUtils
 
-import java.util.Locale;
-
-import javax.mail.Session;
-import javax.mail.internet.MimeBodyPart
-import javax.mail.internet.MimeMessage
-
-import org.bouncycastle.mail.smime.SMIMEUtil;
-import org.springframework.beans.factory.InitializingBean
-
-
+import javax.mail.Session
+import java.security.KeyStore
+import java.security.PrivateKey
+import java.security.cert.Certificate
+import java.security.cert.X509Certificate
 //class PdfService implements InitializingBean {
 class PdfService {
 	
 	
 	def grailsApplication
-	def eventoFirmaService
-	def eventoReclamacionService
-	def eventoVotacionService
-	def mailSenderService
-	def firmaService
+    def timeStampVSService
+	def signatureVSService
 	def messageSource
-	def subscripcionService
+	def subscriptionVSService
 	def encryptionService
 	private PrivateKey key;
 	private Certificate[] chain;
@@ -100,14 +50,14 @@ class PdfService {
 	}
 	
 	public ResponseVS checkSignature (byte[] signedPDF, Locale locale) {
-		log.debug "checkSiganture - signedPDF.length: ${signedPDF.length}"
-		ResponseVS respuesta = null;
+		log.debug "checkSignature - signedPDF.length: ${signedPDF.length}"
+		ResponseVS responseVS = null;
 		PdfReader reader = new PdfReader(signedPDF);
-		Documento documento;
+		PDFDocumentVS documento;
 		AcroFields acroFields = reader.getAcroFields();
 		ArrayList<String> names = acroFields.getSignatureNames();
-		respuesta = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-			message:messageSource.getMessage('error.documentWithoutSigners', null, locale));
+		responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+			message:messageSource.getMessage('documentWithoutSignersErrorMsg', null, locale));
 		for (String name : names) {
 			log.debug("checkSignature - Signature name: " + name + " - covers whole document:" +
 				acroFields.signatureCoversWholeDocument(name));
@@ -115,18 +65,34 @@ class PdfService {
 			log.debug("checkSignature - Hash verified -> ${pk.verify()}");
 			if(!pk.verify()) {
 				log.debug("checkSignature - VERIFICATION FAILED!!!");
-				respuesta = new ResponseVS (statusCode:ResponseVS.SC_ERROR_REQUEST,
+				responseVS = new ResponseVS (statusCode:ResponseVS.SC_ERROR_REQUEST,
 					message:messageSource.getMessage('pdfSignedDocumentError', null, locale))
 			}
 			X509Certificate signingCert = pk.getSigningCertificate();
-			Usuario usuario = Usuario.getUsuario(signingCert);
-			log.debug("checkSignature - Subject: " + PdfPKCS7.getSubjectFields(pk.getSigningCertificate()));
-			Calendar signDate = pk.getSignDate();
+			UserVS userVS = UserVS.getUsuario(signingCert);
+			log.debug("checkSignature - Signing cert Subject:" + PdfPKCS7.getSubjectFields(pk.getSigningCertificate()));
+			//Calendar signDate = pk.getSignDate();
 			X509Certificate[] pkc = (X509Certificate[])pk.getSignCertificateChain();
 			TimeStampToken timeStampToken = pk.getTimeStampToken();
-			
-			KeyStore keyStore = firmaService.getTrustedCertsKeyStore()
-			
+
+
+
+            if(timeStampToken != null) {
+                ResponseVS timestampValidationResp = timeStampVSService.validateToken(timeStampToken, locale)
+                log.debug("validateSignersCertificate - timestampValidationResp - " +
+                        "statusCode:${timestampValidationResp.statusCode} - message:${timestampValidationResp.message}")
+                if(ResponseVS.SC_OK != timestampValidationResp.statusCode) {
+                    log.error("validateSignersCertificate - TIMESTAMP ERROR - ${timestampValidationResp.message}")
+                    return timestampValidationResp
+                }
+            } else {
+                String msg = messageSource.getMessage('documentWithoutTimeStampErrorMsg', null, locale)
+                log.error("ERROR - validateSignersCertificate - ${msg}")
+                return new ResponseVS(message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST)
+            }
+            Calendar signDate = Calendar.getInstance();
+            signDate.setTime(timeStampToken.getTimeStampInfo().getGenTime())
+			KeyStore keyStore = signatureVSService.getTrustedCertsKeyStore()
 			Object[] fails = PdfPKCS7.verifyCertificates(pkc, keyStore, null, signDate);
 			if(fails != null) {
 				log.debug("checkSignature - fails - Cert '${signingCert.getSerialNumber()?.longValue()}' has fails: ${fails[1]}" );
@@ -136,44 +102,33 @@ class PdfService {
 					log.debug("checkSignature - fails - Cert: ${cert.getSubjectDN()} - NotBefore: ${notBefore} - NotAfter: ${notAfter}")
 				}
 				return new ResponseVS (statusCode:ResponseVS.SC_ERROR_REQUEST, message:
-					messageSource.getMessage('error.caUnknown', null, locale))	
+					messageSource.getMessage('unknownCAErrorMSg', null, locale))
 			}
-			Certificado certificado = Certificado.findWhere(numeroSerie:signingCert.getSerialNumber()?.longValue())
-			if (!certificado) {
+			CertificateVS certificate = CertificateVS.findWhere(serialNumber:signingCert.getSerialNumber()?.longValue())
+			if (!certificate) {
 				String subject = PdfPKCS7.getSubjectFields(pk.getSigningCertificate())
-				Certificado certificadoCA
-				for(X509Certificate certificate : pkc) {
-					log.debug("checkSignature - checking document cert '${certificate?.getSerialNumber()?.longValue()}'")
+				CertificateVS certificateCA
+				for(X509Certificate x509Certificate : pkc) {
+					log.debug("checkSignature - checking document cert '${x509Certificate?.getSerialNumber()?.longValue()}'")
 					if(signingCert.getSerialNumber()?.longValue() !=
-						certificate.getSerialNumber()?.longValue()) {
-						log.debug("checkSignature - CA: '${certificate?.getSerialNumber()?.longValue()}' - ${certificate.getSubjectDN().toString()}")
-						certificadoCA = firmaService.getCertificadoCA(certificate.getSerialNumber()?.longValue())
-						//log.debug("checkSignature - CA id: ${certificadoCA?.id}")
-						usuario.setCertificateCA(certificadoCA);
+						x509Certificate.getSerialNumber()?.longValue()) {
+						log.debug("checkSignature - CA: '${x509Certificate?.getSerialNumber()?.longValue()}' - ${x509Certificate.getSubjectDN().toString()}")
+						certificateCA = signatureVSService.getCACertificate(x509Certificate.getSerialNumber()?.longValue())
+						//log.debug("checkSignature - CA id: ${certificateCA?.id}")
+						userVS.setCertificateCA(certificateCA);
 					}
 				}
-				ResponseVS respuestaValidacionUsu = subscripcionService.checkUser(usuario, locale);
-				if(ResponseVS.SC_OK != respuestaValidacionUsu.statusCode) return respuestaValidacionUsu;
-				usuario = respuestaValidacionUsu.userVS;
-				certificado = (Certificado)respuestaValidacionUsu.data;
-			} else usuario = certificado.usuario;
-			/*if (timeStampToken != null) {
-				boolean impr = pk.verifyTimestampImprint();
-				signDate= pk.getTimeStampDate();
-				log.debug("checkSignature - timeStampToken - verifyTimestampImprint: ${impr} - signDate:${signDate.getTime()}" );
-				TimeStampTokenInfo tsInfo= timeStampToken.getTimeStampInfo();
-				SignerId signer_id = timeStampToken.getSID();
-				BigInteger cert_serial_number = signer_id.getSerialNumber();
-				log.debug("checkSignature - timeStampToken - Generation time " + tsInfo.getGenTime());
-				log.debug("checkSignature - timeStampToken - Signer ID serial " + cert_serial_number);
-				log.debug("checkSignature - timeStampToken - Signer ID issuer " + signer_id.getIssuerAsString());
-			}*/
-			documento = new Documento(pdf:signedPDF, usuario:usuario, timeStampToken:timeStampToken,
-				signDate:signDate?.getTime(), estado:Documento.Estado.VALIDADO)
-			Documento.withTransaction {
-				documento.save()
-			}
-			respuesta = new ResponseVS(statusCode:ResponseVS.SC_OK, data:documento);
+				ResponseVS userValidationResponseVS = subscriptionVSService.checkUser(userVS, locale);
+				if(ResponseVS.SC_OK != userValidationResponseVS.statusCode) return userValidationResponseVS;
+				userVS = userValidationResponseVS.userVS;
+				certificate = (CertificateVS)userValidationResponseVS.data;
+			} else userVS = certificate.userVS;
+
+            userVS.setTimeStampToken(timeStampToken)
+            PDFDocumentVS pdfDocumentVS = new PDFDocumentVS(pdf:signedPDF, userVS:userVS, timeStampToken:timeStampToken,
+				signDate:timeStampToken?.getTimeStampInfo()?.getGenTime(), state:PDFDocumentVS.State.VALIDATED)
+			PDFDocumentVS.withTransaction { pdfDocumentVS.save() }
+			responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, data:pdfDocumentVS);
 			/*BasicOCSPResp ocsp = pk.getOcsp();
 			if (ocsp != null) {
 				// Get a trusted certificate (could have come from a certificate store)
@@ -185,8 +140,8 @@ class PdfService {
 				log.debug("OCSP revocation refers to this certificate: " + pk.isRevocationValid());
 			}*/
 		}
-		log.debug "checkSiganture - DOCUMENT OK"
-		return respuesta;
+		log.debug "checkSignature - DOCUMENT OK"
+		return responseVS;
 	}
 		
 	public ResponseVS checkTimeStampToken(TimeStampToken timeStampToken) {
@@ -195,10 +150,10 @@ class PdfService {
 	}
 
 	public ResponseVS firmar(PdfReader reader, String reason, 
-		String location, Documento documento) throws Exception {
-		ResponseVS respuesta
+		String location, PDFDocumentVS pdfDocumentVS) throws Exception {
+		ResponseVS responseVS
 		try {
-			File file = File.createTempFile("pdfFirmadoServidor", ".pdf")
+			File file = File.createTempFile("serverSignedPDF", ".pdf")
 			file.deleteOnExit();
 			FileOutputStream outputStream = new FileOutputStream(file)
 			PdfStamper stp = PdfStamper.createSignature(reader, outputStream, '\0' as char, null, true);
@@ -209,21 +164,21 @@ class PdfService {
 			signatureAppearance.setVisibleSignature(new Rectangle(330, 40, 580, 140), 1, null);
 			log.debug("firmar - stp.hasSignature: " + stp.hasSignature)
 			if (stp != null) stp.close();
-			documento.pdf = file.getBytes()
-			documento.save()
-			respuesta = new ResponseVS(statusCode:ResponseVS.SC_OK, file:file)
+			pdfDocumentVS.pdf = file.getBytes()
+			pdfDocumentVS.save()
+			responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, file:file)
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex)
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage())
 		}
-		return respuesta
+		return responseVS
 	}
 	
 	public ResponseVS firmarBloquear(PdfReader reader, String reason, 
-			String location, Documento documento) throws Exception {
-		ResponseVS respuesta
+			String location, PDFDocumentVS pdfDocumentVS) throws Exception {
+		ResponseVS responseVS
 		try {
-			File file = File.createTempFile("pdfFirmadoServidor", ".pdf")
+			File file = File.createTempFile("serverSignedPDF", ".pdf")
 			file.deleteOnExit();
 			FileOutputStream outputStream = new FileOutputStream(file)
 			PdfStamper stp = PdfStamper.createSignature(
@@ -236,14 +191,14 @@ class PdfService {
 			signatureAppearance.setVisibleSignature(new Rectangle(330, 40, 580, 140), 1, null);
 			log.debug("firmarBloquear - stp.hasSignature: " + stp.hasSignature)
 			if (stp != null) stp.close();
-			documento.pdf = file.getBytes()
-			documento.save()
-			respuesta = new ResponseVS(statusCode:ResponseVS.SC_OK, file:file)
+			pdfDocumentVS.pdf = file.getBytes()
+			pdfDocumentVS.save()
+			responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, file:file)
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex)
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage())
 		}
-		return respuesta
+		return responseVS
 	}
 	
 	public static void concatenate2PDF(PdfReader reader1, PdfReader reader2,

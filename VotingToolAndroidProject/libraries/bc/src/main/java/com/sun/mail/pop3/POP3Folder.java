@@ -40,19 +40,16 @@
 
 package com.sun.mail.pop3;
 
-import javax.mail.*;
-import javax.mail.internet.*;
-import javax.mail.event.*;
-import java.io.InputStream;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.EOFException;
-import java.util.Vector;
-import java.util.StringTokenizer;
-import java.lang.reflect.Constructor;
-
 import com.sun.mail.util.LineInputStream;
+
+import javax.mail.*;
+import javax.mail.event.ConnectionEvent;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 /**
  * A POP3 Folder (can only be "INBOX").

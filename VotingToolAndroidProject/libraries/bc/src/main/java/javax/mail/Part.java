@@ -40,9 +40,11 @@
 
 package javax.mail;
 
-import java.io.*;
-import java.util.Enumeration;
 import javax.activation.DataHandler;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Enumeration;
 
 /**
  * The <code>Part</code> interface is the common base interface for 
@@ -144,7 +146,7 @@ public interface Part {
      * The parameters of the content types are ignored. <p>
      *
      * For example, this method will return <code>true</code> when
-     * comparing a Part of content type <strong>"text/plain"</strong>
+     * comparing a Part of content type <strong>ContentTypeVS.TEXT</strong>
      * with <strong>"text/plain; charset=foobar"</strong>. <p>
      *
      * If the <code>subType</code> of <code>mimeType</code> is the
@@ -280,7 +282,7 @@ public interface Part {
     /**
      * Return the content as a Java object. The type of the returned 
      * object is of course dependent on the content itself. For example,
-     * the object returned for "text/plain" content is usually a String 
+     * the object returned for ContentTypeVS.TEXT content is usually a String
      * object. The object returned for a "multipart" content is always a
      * Multipart subclass. For content-types that are  unknown to the
      * DataHandler system, an input stream is returned as the content <p>
@@ -333,7 +335,7 @@ public interface Part {
 
     /**
      * A convenience method that sets the given String as this
-     * part's content with a MIME type of "text/plain". 
+     * part's content with a MIME type of ContentTypeVS.TEXT.
      *
      * @param  text    	The text that is the Message's content.
      * @exception	IllegalWriteException if the underlying 

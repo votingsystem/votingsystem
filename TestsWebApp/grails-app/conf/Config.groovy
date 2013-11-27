@@ -93,7 +93,7 @@ grails.hibernate.cache.queries = false
 environments {
     development {
         //grails.logging.jul.usebridge = true
-		//grails.resources.debug = true -> heats servlet error!!
+        grails.resources.debug = true
 		String localIP = getDevelopmentServerIP();
 		grails.serverURL = "http://${localIP}:8082/${appName}"
     }
@@ -129,12 +129,12 @@ log4j = {
     //}
 	
 	appenders {
-		file name:'SistemaVotacionTestERRORES', threshold:Level.ERROR,
-			file:"./logs/SistemaVotacionTestERRORES.log", datePattern: '\'_\'yyyy-MM-dd'
+		file name:'TestsWebAppERRORES', threshold:Level.ERROR,
+			file:"./logs/TestsWebAppERRORES.log", datePattern: '\'_\'yyyy-MM-dd'
 		
-		rollingFile name:"SistemaVotacionTest", threshold:org.apache.log4j.Level.DEBUG,
+		rollingFile name:"TestsWebApp", threshold:org.apache.log4j.Level.DEBUG,
 			layout:pattern(conversionPattern: '%d{[dd.MM.yy HH:mm:ss.SSS]} [%t] %p %c %x - %m%n'),
-			file:"./logs/SistemaVotacionTest.log", datePattern: '\'_\'yyyy-MM-dd'
+			file:"./logs/TestsWebApp.log", datePattern: '\'_\'yyyy-MM-dd'
 			
 		/*appender new SMTPAppender(name: 'smtp', to: mail.error.to, from: mail.error.from,
 			subject: mail.error.subject, threshold: Level.ERROR,
@@ -146,8 +146,8 @@ log4j = {
 	}
 	
 	root {
-			debug  'stdout', 'SistemaVotacionTest'
-			error 'SistemaVotacionTestERRORES', 'smtp'
+			debug  'stdout', 'TestsWebApp'
+			error 'TestsWebAppERRORES', 'smtp'
 	}
 	
 	debug  'org.votingsystem','filtros', 'grails.app'

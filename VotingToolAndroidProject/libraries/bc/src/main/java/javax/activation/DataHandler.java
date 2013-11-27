@@ -40,24 +40,16 @@
 
 package javax.activation;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.net.URL;
-
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMultipart;
-
+import android.util.Log;
 import myjava.awt.datatransfer.DataFlavor;
 import myjava.awt.datatransfer.Transferable;
 import myjava.awt.datatransfer.UnsupportedFlavorException;
-
 import org.bouncycastle2.mail.smime.SMIMEStreamingProcessor;
 
-import android.util.Log;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMultipart;
+import java.io.*;
+import java.net.URL;
 
 /**
  * The DataHandler class provides a consistent interface to data

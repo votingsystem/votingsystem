@@ -1,10 +1,10 @@
 package org.bouncycastle2.crypto.params;
 
-import java.math.BigInteger;
-
 import org.bouncycastle2.math.ec.ECConstants;
 import org.bouncycastle2.math.ec.ECCurve;
 import org.bouncycastle2.math.ec.ECPoint;
+
+import java.math.BigInteger;
 
 public class ECDomainParameters
     implements ECConstants

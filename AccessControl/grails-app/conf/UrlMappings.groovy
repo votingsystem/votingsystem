@@ -15,205 +15,205 @@ class UrlMappings {
 		"/"(view:"/index")
 		"500"(view:'/error500')
 		
-		"/android/SistemaVotacion.apk" {
+		"/android/VotingToolAndroid.apk" {
 			controller = "android"
 			action = "app"
 		}		
 		
-		"/anuladorVoto" {
-			controller = "anuladorVoto"
+		"/voteVSCanceller" {
+			controller = "voteVSCanceller"
 			action = [POST:"post"]
 		}
 		
-		"/anuladorVoto/$hashHex" {
-			controller = "anuladorVoto"
+		"/voteVSCanceller/$hashHex" {
+			controller = "voteVSCanceller"
 			action = "index"
 		}
 		
 		
-		"/anuladorVoto/voto/${id}"{
-			controller = "anuladorVoto"
+		"/voteVSCanceller/voteVS/${id}"{
+			controller = "voteVSCanceller"
 			action = "get"
 			constraints {
 				id(matches:/\d*/)
 			}
 		}		
 		
-		"/certificado/usuario/$userId" {
-			controller = "certificado"
-			action = "usuario"
+		"/certificateVS/userVS/$userId" {
+			controller = "certificateVS"
+			action = "userVS"
 			constraints {
 				userId(matches:/\d*/)
 			}
 		}
 		
-		"/certificado/eventCA/$idEvento" {
-			controller = "certificado"
+		"/certificateVS/eventCA/$eventVS_Id" {
+			controller = "certificateVS"
 			action = "eventCA"
 			constraints {
-				idEvento(matches:/\d*/)
+				eventVS_Id(matches:/\d*/)
 			}
 		}
 		
-		"/certificado/voto/hashHex/$hashHex" {
-			controller = "certificado"
-			action = "voto"
+		"/certificateVS/voteVS/hashHex/$hashHex" {
+			controller = "certificateVS"
+			action = "voteVS"
 		}
 		
-		"/evento/$id?" {
-			controller = "evento"
+		"/eventVS/$id?" {
+			controller = "eventVS"
 			action = "index"
 			constraints {
 				id(matches:/\d*/)
 			}
 		}
 		
-		"/evento/$id/comprobarFechas" {
-			controller = "evento"
-			action = "comprobarFechas"
+		"/eventVS/$id/checkDates" {
+			controller = "eventVS"
+			action = "checkDates"
 			constraints {
 				id(matches:/\d*/)
 			}
 		}
 		
-		"/evento/$id/estadisticas" {
-			controller = "evento"
-			action = "estadisticas"
+		"/eventVS/$id/statistics" {
+			controller = "eventVS"
+			action = "statistics"
 			constraints {
 				id(matches:/\d*/)
 			}
 		}
 		
-		"/eventoFirma" {
-			controller = "eventoFirma"
+		"/eventVSManifest" {
+			controller = "eventVSManifest"
 			action = [POST:"save"]
 		}
 		
-		"/eventoFirma/$id" {
-			controller = "eventoFirma"
+		"/eventVSManifest/$id" {
+			controller = "eventVSManifest"
 			action = [GET:"index", POST:"save"]
 			constraints {
 				id(matches:/\d*/)
 			}
 		}
 		
-		"/eventoFirma/$id/estadisticas" {
-			controller = "eventoFirma"
-			action = "estadisticas"
+		"/eventVSManifest/$id/statistics" {
+			controller = "eventVSManifest"
+			action = "statistics"
 			constraints {
 				id(matches:/\d*/)
 			}
 		}
 		
-		"/eventoFirma/$id/informacionFirmas" {
-			controller = "eventoFirma"
-			action = "informacionFirmas"
+		"/eventVSManifest/$id/signaturesInfo" {
+			controller = "eventVSManifest"
+			action = "signaturesInfo"
 			constraints {
 				id(matches:/\d*/)
 			}
 		}
 		
-		"/eventoFirma/firmado/$id" {
-			controller = "eventoFirma"
-			action = "firmado"
+		"/eventVSManifest/signed/$id" {
+			controller = "eventVSManifest"
+			action = "signed"
 			constraints {
 				id(matches:/\d*/)
 			}
 		}
 		
 		
-		"/eventoReclamacion" {
-			controller = "eventoReclamacion"
+		"/eventVSClaim" {
+			controller = "eventVSClaim"
 			action = [POST:"save"]
 		}
 
-		"/eventoReclamacion/$id?" {
-			controller = "eventoReclamacion"
+		"/eventVSClaim/$id?" {
+			controller = "eventVSClaim"
 			action = [GET:"index"]
 			constraints {
 				id(matches:/\d*/)
 			}
 		}
 		
-		"/eventoReclamacion/$id/estadisticas" {
-			controller = "eventoReclamacion"
-			action = "estadisticas"
+		"/eventVSClaim/$id/statistics" {
+			controller = "eventVSClaim"
+			action = "statistics"
 			constraints {
 				id(matches:/\d*/)
 			}
 		}
 		
-		"/eventoReclamacion/${id}/firmado" {
-			controller = "eventoReclamacion"
-			action = "firmado"
+		"/eventVSClaim/${id}/signed" {
+			controller = "eventVSClaim"
+			action = "signed"
 			constraints {
 				id(matches:/\d*/)
 			}
 		}
 		
-		"/eventoReclamacion/${id}/validado" {
-			controller = "eventoReclamacion"
-			action = "validado"
+		"/eventVSClaim/${id}/validated" {
+			controller = "eventVSClaim"
+			action = "validated"
 			constraints {
 				id(matches:/\d*/)
 			}
 		}
 		
-		"/eventoReclamacion/${id}/informacionFirmas" {
-			controller = "eventoReclamacion"
-			action = "informacionFirmas"
+		"/eventVSClaim/${id}/signaturesInfo" {
+			controller = "eventVSClaim"
+			action = "signaturesInfo"
 			constraints {
 				id(matches:/\d*/)
 			}
 		}
 		
-		"/eventoVotacion" {
-			controller = "eventoVotacion"
+		"/eventVSElection" {
+			controller = "eventVSElection"
 			action = [POST:"save"]
 		}
 		
-		"/eventoVotacion/$id?" {
-			controller = "eventoVotacion"
+		"/eventVSElection/$id?" {
+			controller = "eventVSElection"
 			action = "index"
 			constraints {
 				id(matches:/\d*/)
 			}
 		}
 		
-		"/eventoVotacion/$id/estadisticas" {
-			controller = "eventoVotacion"
-			action = "estadisticas"
+		"/eventVSElection/$id/statistics" {
+			controller = "eventVSElection"
+			action = "statistics"
 			constraints {
 				id(matches:/\d*/)
 			}
 		}
 		
-		"/eventoVotacion/$id/informacionVotos" {
-			controller = "eventoVotacion"
-			action = "estadisticas"
+		"/eventVSElection/$id/voteVSInfo" {
+			controller = "eventVSElection"
+			action = "statistics"
 			constraints {
 				id(matches:/\d*/)
 			}
 		}
 		
-		"/eventoVotacion/${id}/validado" {
-			controller = "eventoVotacion"
-			action = "validado"
+		"/eventVSElection/${id}/validated" {
+			controller = "eventVSElection"
+			action = "validated"
 			constraints {
 				id(matches:/\d*/)
 			}
 		}
 		
-		"/eventoVotacion/${id}/firmado" {
-			controller = "eventoVotacion"
-			action = "firmado"
+		"/eventVSElection/${id}/signed" {
+			controller = "eventVSElection"
+			action = "signed"
 			constraints {
 				id(matches:/\d*/)
 			}
 		}
 		
-		"/eventoVotacion/$id/votingErrors" {
-			controller = "eventoVotacion"
+		"/eventVSElection/$id/votingErrors" {
+			controller = "eventVSElection"
 			action = "votingErrors"
 			constraints {
 				id(matches:/\d*/)
@@ -230,8 +230,8 @@ class UrlMappings {
 			action = "recibo"
 		}
 		
-		"/recolectorFirma/$id?" {
-			controller = "recolectorFirma"
+		"/eventVSManifestCollector/$id?" {
+			controller = "eventVSManifestCollector"
 			action = "index"
 			constraints {
 				id(matches:/\d*/)
@@ -285,55 +285,55 @@ class UrlMappings {
 			}
 		} 
 		
-		"/solicitudAcceso" {
-			controller = "solicitudAcceso"
+		"/accessRequestVS" {
+			controller = "accessRequestVS"
 			action = [POST:"processFileMap"]
 		}
 		
-		"/solicitudAcceso/$id" {
-			controller = "solicitudAcceso"
+		"/accessRequestVS/$id" {
+			controller = "accessRequestVS"
 			action = [GET:"index"]
 		}
 		
-		"/solicitudAcceso/evento/$eventoId/nif/$nif" {
-			controller = "solicitudAcceso"
+		"/accessRequestVS/eventVS/$eventId/nif/$nif" {
+			controller = "accessRequestVS"
 			action = [GET:"encontrarPorNif"]
 		}
 		
-		"/solicitudAcceso/hashHex/$hashHex" {
-			controller = "solicitudAcceso"
+		"/accessRequestVS/hashHex/$hashHex" {
+			controller = "accessRequestVS"
 			action = [GET:"hashHex"]
 		}
 		
-		"/solicitudCopia/download/$id" {
-			controller = "solicitudCopia"
+		"/backupVS/download/$id" {
+			controller = "backupVS"
 			action = [GET:"download"]
 			constraints {
 				id(matches:/\d*/)
 			}
 		}
 		
-		"/solicitudCopia/$id" {
-			controller = "solicitudCopia"
+		"/backupVS/$id" {
+			controller = "backupVS"
 			action = [GET:"get"]
 			constraints {
 				id(matches:/\d*/)
 			}
 		}
 
-		"/subscripcion/reclamaciones/$feedType?"{
-			controller = "subscripcion"
-			action = "reclamaciones"
+		"/subscriptionVS/claims/$feedType?"{
+			controller = "subscriptionVS"
+			action = "claims"
 		}
 		
-		"/subscripcion/votaciones/$feedType?"{
-			controller = "subscripcion"
-			action = "votaciones"
+		"/subscriptionVS/elections/$feedType?"{
+			controller = "subscriptionVS"
+			action = "elections"
 		}
 		
-		"/subscripcion/manifiestos/$feedType?"{
-			controller = "subscripcion"
-			action = "manifiestos"
+		"/subscriptionVS/manifests/$feedType?"{
+			controller = "subscriptionVS"
+			action = "manifests"
 		}
 		
 		"/timeStamp/$serialNumber" {
@@ -344,24 +344,24 @@ class UrlMappings {
 			}
 		}
 		
-		"/user/$nif/representative" {
-			controller = "user"
+		"/userVS/$nif/representative" {
+			controller = "userVS"
 			action = [GET:"representative"]
 		}
 		
-		"/user" {
-			controller = "user"
+		"/userVS" {
+			controller = "userVS"
 			action = [POST:"save"]
 		}
 		
-		"/voto" {
-			controller = "voto"
+		"/voteVS" {
+			controller = "voteVS"
 			action = [POST:"save"]
 		}
 		
 		
-		"/voto/${id}" {
-			controller = "voto"
+		"/voteVS/${id}" {
+			controller = "voteVS"
 			action = "get"
 			constraints {
 				id(matches:/\d*/)

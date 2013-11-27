@@ -1,26 +1,5 @@
 package org.bouncycastle2.mail.smime;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.PublicKey;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.activation.CommandMap;
-import javax.activation.MailcapCommandMap;
-import javax.crypto.SecretKey;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-
 import org.bouncycastle2.asn1.ASN1EncodableVector;
 import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle2.cms.CMSEnvelopedDataGenerator;
@@ -33,6 +12,21 @@ import org.bouncycastle2.cms.jcajce.JceKeyAgreeRecipientInfoGenerator;
 import org.bouncycastle2.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle2.operator.OperatorCreationException;
 import org.bouncycastle2.operator.OutputEncryptor;
+
+import javax.activation.CommandMap;
+import javax.activation.MailcapCommandMap;
+import javax.crypto.SecretKey;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.*;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * General class for generating a pkcs7-mime message.

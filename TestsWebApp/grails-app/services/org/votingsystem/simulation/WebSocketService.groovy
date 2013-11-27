@@ -9,7 +9,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 import grails.transaction.Transactional
 import org.votingsystem.websocket.SocketServletVS.SocketMessageInbound;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.simulation.model.SimulationOperation
 import org.apache.catalina.websocket.MessageInbound;
 import org.codehaus.groovy.grails.web.json.JSONElement
 import org.codehaus.groovy.grails.web.json.JSONObject
@@ -71,8 +70,8 @@ class WebSocketService {
 		}
 	}
 	
-	public Map broadcastList(JSONObject messageJSON, Set<String> listeners) {
-		String messageStr = messageJSON.toString()
+	public Map broadcastList(Map dataMap, Set<String> listeners) {
+		String messageStr = "${dataMap as JSON}"
 		//log.debug("--- broadcastList - message: " + messageStr)
 		Map resultMap = [statusCode:ResponseVS.SC_OK]
 		def errorList = []
@@ -103,11 +102,9 @@ class WebSocketService {
 			Object targetService = grailsApplication.mainContext.getBean(messageJSON.service)
 			if(!targetService.metaClass.respondsTo(targetService, 'processRequest').isEmpty()) {
 				try {
-					SimulationOperation operation = SimulationOperation.valueOf(messageJSON.operation);
-					targetService.processRequest(operation, messageJSON)
+					targetService.processRequest(messageJSON)
 				} catch(Exception ex) {
-					log.error(ex.getMessage() + " UNKNOWN SimulationOperation - message: " +
-						messageJSON.toString(), ex);
+					log.error(ex.getMessage() + messageJSON.toString(), ex);
 				}
 			} else log.error("Target service '${messageJSON.service}' doesn't implements 'processRequest'")
 		} else log.error("Message without target service '${messageJSON.service}'")

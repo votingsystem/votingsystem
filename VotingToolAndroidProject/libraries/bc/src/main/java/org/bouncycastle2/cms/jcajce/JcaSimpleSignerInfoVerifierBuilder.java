@@ -1,10 +1,5 @@
 package org.bouncycastle2.cms.jcajce;
 
-import java.security.Provider;
-import java.security.PublicKey;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-
 import org.bouncycastle2.cert.X509CertificateHolder;
 import org.bouncycastle2.cms.SignerInformationVerifier;
 import org.bouncycastle2.operator.ContentVerifierProvider;
@@ -12,6 +7,11 @@ import org.bouncycastle2.operator.DigestCalculatorProvider;
 import org.bouncycastle2.operator.OperatorCreationException;
 import org.bouncycastle2.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle2.operator.jcajce.JcaDigestCalculatorProviderBuilder;
+
+import java.security.Provider;
+import java.security.PublicKey;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 public class JcaSimpleSignerInfoVerifierBuilder
 {

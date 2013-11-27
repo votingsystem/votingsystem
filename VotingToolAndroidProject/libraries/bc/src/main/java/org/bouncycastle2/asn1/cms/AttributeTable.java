@@ -1,15 +1,10 @@
 package org.bouncycastle2.asn1.cms;
 
+import org.bouncycastle2.asn1.*;
+
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.ASN1Set;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DERSet;
 
 public class AttributeTable
 {

@@ -1,18 +1,17 @@
 package org.bouncycastle2.jce.provider;
 
-import java.security.InvalidKeyException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-
-import javax.crypto.interfaces.DHPrivateKey;
-import javax.crypto.interfaces.DHPublicKey;
-
 import org.bouncycastle2.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle2.crypto.params.ElGamalParameters;
 import org.bouncycastle2.crypto.params.ElGamalPrivateKeyParameters;
 import org.bouncycastle2.crypto.params.ElGamalPublicKeyParameters;
 import org.bouncycastle2.jce.interfaces.ElGamalPrivateKey;
 import org.bouncycastle2.jce.interfaces.ElGamalPublicKey;
+
+import javax.crypto.interfaces.DHPrivateKey;
+import javax.crypto.interfaces.DHPublicKey;
+import java.security.InvalidKeyException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 /**
  * utility class for converting jce/jca ElGamal objects

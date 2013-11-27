@@ -1,9 +1,9 @@
 package org.votingsystem.model;
 
 /**
-* @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
-*/
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ */
 public class OptionVS {
 
     private Long id;
@@ -27,11 +27,11 @@ public class OptionVS {
         this.content = content;
     }
 
-    public EventVS getEventVSBase() {
+    public EventVS getEventVS() {
         return eventVS;
     }
 
-    public void setEventVSBase(EventVS eventVS) {
+    public void setEventVS(EventVS eventVS) {
         this.eventVS = eventVS;
     }
 

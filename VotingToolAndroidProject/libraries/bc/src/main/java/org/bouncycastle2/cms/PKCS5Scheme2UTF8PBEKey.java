@@ -1,11 +1,11 @@
 package org.bouncycastle2.cms;
 
-import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-
 import org.bouncycastle2.crypto.PBEParametersGenerator;
 import org.bouncycastle2.crypto.generators.PKCS5S2ParametersGenerator;
 import org.bouncycastle2.crypto.params.KeyParameter;
+
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
 
 /**
  * PKCS5 scheme-2 - password converted to bytes using UTF-8.

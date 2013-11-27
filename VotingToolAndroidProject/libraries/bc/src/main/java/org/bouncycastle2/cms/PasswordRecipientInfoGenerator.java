@@ -1,12 +1,6 @@
 package org.bouncycastle2.cms;
 
-import java.security.SecureRandom;
-
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.DEROctetString;
-import org.bouncycastle2.asn1.DERSequence;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.cms.PasswordRecipientInfo;
 import org.bouncycastle2.asn1.cms.RecipientInfo;
 import org.bouncycastle2.asn1.pkcs.PBKDF2Params;
@@ -16,6 +10,8 @@ import org.bouncycastle2.crypto.PBEParametersGenerator;
 import org.bouncycastle2.crypto.generators.PKCS5S2ParametersGenerator;
 import org.bouncycastle2.crypto.params.KeyParameter;
 import org.bouncycastle2.operator.GenericKey;
+
+import java.security.SecureRandom;
 
 public abstract class PasswordRecipientInfoGenerator
     implements RecipientInfoGenerator

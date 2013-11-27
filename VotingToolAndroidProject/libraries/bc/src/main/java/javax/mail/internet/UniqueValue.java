@@ -40,7 +40,6 @@
 
 package javax.mail.internet;
 
-import java.net.*;
 import javax.mail.Session;
 
 /**

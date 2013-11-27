@@ -1,8 +1,8 @@
 package org.bouncycastle2.crypto.digests;
 
-import java.io.ByteArrayOutputStream;
-
 import org.bouncycastle2.crypto.Digest;
+
+import java.io.ByteArrayOutputStream;
 
 
 public class NullDigest

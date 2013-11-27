@@ -1,30 +1,6 @@
 package org.bouncycastle2.x509;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
-import javax.security.auth.x500.X500Principal;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.DEREncodable;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERNull;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle2.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle2.asn1.oiw.OIWObjectIdentifiers;
@@ -35,6 +11,11 @@ import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle2.jce.X509Principal;
 import org.bouncycastle2.util.Strings;
+
+import javax.security.auth.x500.X500Principal;
+import java.io.IOException;
+import java.security.*;
+import java.util.*;
 
 class X509Util
 {

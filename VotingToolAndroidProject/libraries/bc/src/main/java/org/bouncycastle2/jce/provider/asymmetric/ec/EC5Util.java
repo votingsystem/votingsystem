@@ -1,16 +1,11 @@
 package org.bouncycastle2.jce.provider.asymmetric.ec;
 
-import java.math.BigInteger;
-import java.security.spec.ECField;
-import java.security.spec.ECFieldF2m;
-import java.security.spec.ECFieldFp;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.ECPoint;
-import java.security.spec.EllipticCurve;
-
 import org.bouncycastle2.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle2.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle2.math.ec.ECCurve;
+
+import java.math.BigInteger;
+import java.security.spec.*;
 
 public class EC5Util
 {

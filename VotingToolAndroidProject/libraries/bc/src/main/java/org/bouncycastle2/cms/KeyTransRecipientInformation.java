@@ -1,19 +1,5 @@
 package org.bouncycastle2.cms;
 
-import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Provider;
-import java.security.ProviderException;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.SecretKeySpec;
-
 import org.bouncycastle2.asn1.ASN1OctetString;
 import org.bouncycastle2.asn1.DERObjectIdentifier;
 import org.bouncycastle2.asn1.cms.IssuerAndSerialNumber;
@@ -21,6 +7,13 @@ import org.bouncycastle2.asn1.cms.KeyTransRecipientInfo;
 import org.bouncycastle2.asn1.cms.RecipientIdentifier;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.*;
 
 
 /**

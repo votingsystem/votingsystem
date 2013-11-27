@@ -41,7 +41,10 @@
 package com.sun.activation.registries;
 
 import java.io.*;
-import java.util.*;
+import java.util.Hashtable;
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 public class MimeTypeFile {
     private String fname = null;

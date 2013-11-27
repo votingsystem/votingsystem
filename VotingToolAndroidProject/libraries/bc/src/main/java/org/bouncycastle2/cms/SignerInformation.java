@@ -1,16 +1,19 @@
 package org.bouncycastle2.cms;
 
+import android.util.Base64;
+import android.util.Log;
+import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.asn1.cms.*;
+import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle2.asn1.x509.DigestInfo;
+import org.bouncycastle2.cert.X509CertificateHolder;
+import org.bouncycastle2.operator.*;
+import org.bouncycastle2.util.Arrays;
+
+import javax.crypto.Cipher;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Provider;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
+import java.security.*;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
@@ -18,42 +21,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.crypto.Cipher;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1InputStream;
-import org.bouncycastle2.asn1.ASN1Null;
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.ASN1Set;
-import org.bouncycastle2.asn1.DEREncodable;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DERSet;
-import org.bouncycastle2.asn1.DERTags;
-import org.bouncycastle2.asn1.cms.Attribute;
-import org.bouncycastle2.asn1.cms.AttributeTable;
-import org.bouncycastle2.asn1.cms.CMSAttributes;
-import org.bouncycastle2.asn1.cms.IssuerAndSerialNumber;
-import org.bouncycastle2.asn1.cms.SignerIdentifier;
-import org.bouncycastle2.asn1.cms.SignerInfo;
-import org.bouncycastle2.asn1.cms.Time;
-import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.asn1.x509.DigestInfo;
-import org.bouncycastle2.util.Arrays;
-import org.bouncycastle2.cert.X509CertificateHolder;
-import org.bouncycastle2.operator.ContentVerifier;
-import org.bouncycastle2.operator.DefaultSignatureAlgorithmIdentifierFinder;
-import org.bouncycastle2.operator.DigestCalculator;
-import org.bouncycastle2.operator.OperatorCreationException;
-import org.bouncycastle2.operator.RawContentVerifier;
-import org.bouncycastle2.operator.SignatureAlgorithmIdentifierFinder;
-
-import android.util.Base64;
-import android.util.Log;
 
 /**
  * an expanded SignerInfo block from a CMS Signed message

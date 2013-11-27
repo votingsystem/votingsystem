@@ -30,16 +30,6 @@ modules = {
 		resource url: 'js/utils.js.gsp'
 		resource url: 'js/mobileUtils.js.gsp'
 	}
-	
-	'textEditorPC' {
-		dependsOn 'masterStyles', 'application'
-		resource url: 'ckeditor/ckeditor.js'
-	}
-	
-	'textEditorMobile' {
-		dependsOn 'masterStyles', 'applicationMobile'
-		resource url: 'ckeditor/ckeditor.js'
-	}
 
 	'paginate' {
 		dependsOn 'jquery'

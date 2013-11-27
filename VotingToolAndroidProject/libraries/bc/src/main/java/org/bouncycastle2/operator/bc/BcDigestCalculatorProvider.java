@@ -1,13 +1,13 @@
 package org.bouncycastle2.operator.bc;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.crypto.Digest;
 import org.bouncycastle2.operator.DigestCalculator;
 import org.bouncycastle2.operator.DigestCalculatorProvider;
 import org.bouncycastle2.operator.OperatorCreationException;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 public class BcDigestCalculatorProvider
     implements DigestCalculatorProvider

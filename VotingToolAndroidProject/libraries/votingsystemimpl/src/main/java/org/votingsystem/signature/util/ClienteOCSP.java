@@ -1,25 +1,12 @@
 package org.votingsystem.signature.util;
 
 import android.util.Log;
-
 import org.bouncycastle2.asn1.ocsp.OCSPResponseStatus;
-import org.bouncycastle2.ocsp.BasicOCSPResp;
-import org.bouncycastle2.ocsp.CertificateID;
-import org.bouncycastle2.ocsp.CertificateStatus;
-import org.bouncycastle2.ocsp.OCSPReq;
-import org.bouncycastle2.ocsp.OCSPReqGenerator;
-import org.bouncycastle2.ocsp.OCSPResp;
-import org.bouncycastle2.ocsp.RevokedStatus;
-import org.bouncycastle2.ocsp.SingleResp;
-import org.bouncycastle2.ocsp.UnknownStatus;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import org.bouncycastle2.ocsp.*;
+import org.votingsystem.model.ContentTypeVS;
+import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.CertificateVS;
+import java.io.*;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -35,34 +22,15 @@ import java.util.Date;
 */
 public class ClienteOCSP {
 
-    public enum EstadoCertificado {OK, REVOCADO, DESCONOCIDO}
-
-    private static final String OCSP_DNIE_URL = "http://ocsp.dnie.es";
-
-    public static void main(String [] args){
-        Security.addProvider(new org.bouncycastle2.jce.provider.BouncyCastleProvider());
-        try {
-            X509Certificate caCert = readCert("/home/jj/temp/prueba/ca.pem");
-            X509Certificate interCert = readCert("/home/jj/temp/prueba/inter.pem");
-            X509Certificate clientCert = readCert("/home/jj/temp/prueba/jj.pem");
-            Log.i("", "Estado certificado: " +
-                validarCertificado(interCert, clientCert.getSerialNumber(),
-                new Date(System.currentTimeMillis())).toString());
-        } catch (Exception ex){
-        	Log.e("", ex.getMessage(), ex);
-        }
-    }
-
-    public static EstadoCertificado validarCertificado(X509Certificate certificadoIntermedio,
-            BigInteger numeroSerieCertificado, Date fechaComprobacion) throws Exception {
+    public static CertificateVS.State validarCertificado(X509Certificate certificate, BigInteger serialNumber,
+                 Date checkDate) throws Exception {
         OCSPReqGenerator ocspReqGen = new OCSPReqGenerator();
-        ocspReqGen.addRequest(new CertificateID(
-                CertificateID.HASH_SHA1, certificadoIntermedio, numeroSerieCertificado));
+        ocspReqGen.addRequest(new CertificateID(CertificateID.HASH_SHA1, certificate, serialNumber));
         OCSPReq ocspReq = ocspReqGen.generate();
-        URL url = new URL(OCSP_DNIE_URL);
+        URL url = new URL(ContextVS.OCSP_DNIE_URL);
         HttpURLConnection con = (HttpURLConnection)url.openConnection();
-        con.setRequestProperty("Content-Type", "application/ocsp-request");
-        con.setRequestProperty("Accept", "application/ocsp-response");
+        con.setRequestProperty("Content-Type", ContentTypeVS.OCSP_REQUEST);
+        con.setRequestProperty("Accept", ContentTypeVS.OCSP_RESPONSE);
         con.setDoOutput(true);
         OutputStream out = con.getOutputStream();
         DataOutputStream dataOut = new DataOutputStream(new BufferedOutputStream(out));
@@ -73,31 +41,23 @@ public class ClienteOCSP {
         OCSPResp ocspResponse = new OCSPResp(in);
         BasicOCSPResp basicOCSPResp ;
         if(ocspResponse.getStatus() == OCSPResponseStatus.SUCCESSFUL) {
-            EstadoCertificado estadoCertificado = null;
+            CertificateVS.State certificateState = null;
             basicOCSPResp = (BasicOCSPResp) ocspResponse.getResponseObject();
             for(SingleResp singleResponse : basicOCSPResp.getResponses()){
                 Object stat = singleResponse.getCertStatus();
                 if (stat == CertificateStatus.GOOD) {
-                    estadoCertificado = EstadoCertificado.OK;
+                    certificateState = CertificateVS.State.OK;
                 }else if (stat instanceof RevokedStatus) {
                     Date fechaRevocacion = ((RevokedStatus)stat).getRevocationTime();
-                    if (fechaComprobacion.after(fechaRevocacion)) 
-                        estadoCertificado = EstadoCertificado.REVOCADO;
-                    else estadoCertificado = EstadoCertificado.OK;
+                    if (checkDate.after(fechaRevocacion)) 
+                        certificateState = CertificateVS.State.CANCELLED;
+                    else certificateState = CertificateVS.State.OK;
                 }else if (stat instanceof UnknownStatus) {
-                    estadoCertificado = EstadoCertificado.DESCONOCIDO;
+                    certificateState = CertificateVS.State.UNKNOWN;
                 }
             }
-            return estadoCertificado;
+            return certificateState;
         } else return null;
-    }
-	    
-    private static X509Certificate readCert(String fileName) throws FileNotFoundException, CertificateException {
-        InputStream is = new FileInputStream(fileName);
-        BufferedInputStream bis = new BufferedInputStream(is);
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        X509Certificate cert = (X509Certificate) cf.generateCertificate(bis);
-        return cert;
     }
 
 }

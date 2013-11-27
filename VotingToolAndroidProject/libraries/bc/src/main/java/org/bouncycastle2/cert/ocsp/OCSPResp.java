@@ -1,7 +1,5 @@
 package org.bouncycastle2.cert.ocsp;
 
-import java.io.IOException;
-
 import org.bouncycastle2.asn1.ASN1InputStream;
 import org.bouncycastle2.asn1.ASN1Object;
 import org.bouncycastle2.asn1.ocsp.BasicOCSPResponse;
@@ -9,6 +7,8 @@ import org.bouncycastle2.asn1.ocsp.OCSPObjectIdentifiers;
 import org.bouncycastle2.asn1.ocsp.OCSPResponse;
 import org.bouncycastle2.asn1.ocsp.ResponseBytes;
 import org.bouncycastle2.cert.CertIOException;
+
+import java.io.IOException;
 
 public class OCSPResp
 {

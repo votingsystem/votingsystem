@@ -1,21 +1,5 @@
 package org.bouncycastle2.cms;
 
-import java.io.IOException;
-import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Provider;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
 import org.bouncycastle2.asn1.ASN1OctetString;
 import org.bouncycastle2.asn1.ASN1Sequence;
 import org.bouncycastle2.asn1.DEREncodable;
@@ -26,6 +10,15 @@ import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.crypto.PBEParametersGenerator;
 import org.bouncycastle2.crypto.generators.PKCS5S2ParametersGenerator;
 import org.bouncycastle2.crypto.params.KeyParameter;
+
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.IOException;
+import java.security.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * the RecipientInfo class for a recipient who has been sent a message

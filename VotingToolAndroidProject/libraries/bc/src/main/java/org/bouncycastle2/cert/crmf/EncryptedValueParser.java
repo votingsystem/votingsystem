@@ -1,15 +1,15 @@
 package org.bouncycastle2.cert.crmf;
 
+import org.bouncycastle2.asn1.crmf.EncryptedValue;
+import org.bouncycastle2.asn1.x509.X509CertificateStructure;
+import org.bouncycastle2.cert.X509CertificateHolder;
+import org.bouncycastle2.operator.InputDecryptor;
+import org.bouncycastle2.util.Strings;
+import org.bouncycastle2.util.io.Streams;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import org.bouncycastle2.asn1.crmf.EncryptedValue;
-import org.bouncycastle2.asn1.x509.X509CertificateStructure;
-import org.bouncycastle2.util.Strings;
-import org.bouncycastle2.util.io.Streams;
-import org.bouncycastle2.cert.X509CertificateHolder;
-import org.bouncycastle2.operator.InputDecryptor;
 
 /**
  * Parser for EncryptedValue structures.

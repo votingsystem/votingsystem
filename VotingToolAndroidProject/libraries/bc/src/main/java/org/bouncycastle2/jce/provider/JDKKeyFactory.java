@@ -1,31 +1,5 @@
 package org.bouncycastle2.jce.provider;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.KeyFactorySpi;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.interfaces.DSAPrivateKey;
-import java.security.interfaces.DSAPublicKey;
-import java.security.interfaces.RSAPrivateCrtKey;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.DSAPrivateKeySpec;
-import java.security.spec.DSAPublicKeySpec;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.RSAPrivateCrtKeySpec;
-import java.security.spec.RSAPrivateKeySpec;
-import java.security.spec.RSAPublicKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-
-import javax.crypto.interfaces.DHPrivateKey;
-import javax.crypto.interfaces.DHPublicKey;
-import javax.crypto.spec.DHPrivateKeySpec;
-import javax.crypto.spec.DHPublicKeySpec;
-
 import org.bouncycastle2.asn1.ASN1Object;
 import org.bouncycastle2.asn1.ASN1Sequence;
 import org.bouncycastle2.asn1.DERObjectIdentifier;
@@ -42,6 +16,15 @@ import org.bouncycastle2.jce.spec.ElGamalPrivateKeySpec;
 import org.bouncycastle2.jce.spec.ElGamalPublicKeySpec;
 import org.bouncycastle2.jce.spec.GOST3410PrivateKeySpec;
 import org.bouncycastle2.jce.spec.GOST3410PublicKeySpec;
+
+import javax.crypto.interfaces.DHPrivateKey;
+import javax.crypto.interfaces.DHPublicKey;
+import javax.crypto.spec.DHPrivateKeySpec;
+import javax.crypto.spec.DHPublicKeySpec;
+import java.io.IOException;
+import java.security.*;
+import java.security.interfaces.*;
+import java.security.spec.*;
 
 public abstract class JDKKeyFactory
     extends KeyFactorySpi

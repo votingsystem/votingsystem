@@ -1,14 +1,5 @@
 package org.bouncycastle2.jce.provider;
 
-import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.SignatureException;
-import java.security.SignatureSpi;
-import java.security.spec.AlgorithmParameterSpec;
-
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle2.crypto.CipherParameters;
@@ -22,6 +13,10 @@ import org.bouncycastle2.jce.interfaces.ECKey;
 import org.bouncycastle2.jce.interfaces.ECPublicKey;
 import org.bouncycastle2.jce.interfaces.GOST3410Key;
 import org.bouncycastle2.jce.provider.asymmetric.ec.ECUtil;
+
+import java.math.BigInteger;
+import java.security.*;
+import java.security.spec.AlgorithmParameterSpec;
 
 public class JDKGOST3410Signer
     extends SignatureSpi

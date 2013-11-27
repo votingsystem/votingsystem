@@ -1,14 +1,5 @@
 package org.bouncycastle2.jce.provider.asymmetric.ec;
 
-import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidParameterException;
-import java.security.KeyPair;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.ECGenParameterSpec;
-import java.util.Hashtable;
-
 import org.bouncycastle2.asn1.DERObjectIdentifier;
 import org.bouncycastle2.asn1.cryptopro.ECGOST3410NamedCurves;
 import org.bouncycastle2.asn1.nist.NISTNamedCurves;
@@ -30,6 +21,15 @@ import org.bouncycastle2.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle2.jce.spec.ECParameterSpec;
 import org.bouncycastle2.math.ec.ECCurve;
 import org.bouncycastle2.math.ec.ECPoint;
+
+import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidParameterException;
+import java.security.KeyPair;
+import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.ECGenParameterSpec;
+import java.util.Hashtable;
 
 public abstract class KeyPairGenerator
     extends JDKKeyPairGenerator

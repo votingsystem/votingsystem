@@ -1,15 +1,6 @@
 package org.bouncycastle2.asn1.x509;
 
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.ASN1TaggedObject;
-import org.bouncycastle2.asn1.DEREncodable;
-import org.bouncycastle2.asn1.DERNull;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DERSequence;
+import org.bouncycastle2.asn1.*;
 
 public class AlgorithmIdentifier
     extends ASN1Encodable

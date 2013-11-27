@@ -1,39 +1,12 @@
 package org.bouncycastle2.cms.jcajce;
 
-import java.security.GeneralSecurityException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECParameterSpec;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.crypto.Cipher;
-import javax.crypto.KeyAgreement;
-import javax.crypto.SecretKey;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DEROctetString;
-import org.bouncycastle2.asn1.DERSequence;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.cms.KeyAgreeRecipientIdentifier;
 import org.bouncycastle2.asn1.cms.RecipientEncryptedKey;
 import org.bouncycastle2.asn1.cms.RecipientKeyIdentifier;
 import org.bouncycastle2.asn1.cms.ecc.MQVuserKeyingMaterial;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle2.jce.spec.MQVPrivateKeySpec;
-import org.bouncycastle2.jce.spec.MQVPublicKeySpec;
 import org.bouncycastle2.cms.CMSAlgorithm;
 import org.bouncycastle2.cms.CMSEnvelopedGenerator;
 import org.bouncycastle2.cms.CMSException;
@@ -41,7 +14,20 @@ import org.bouncycastle2.cms.KeyAgreeRecipientInfoGenerator;
 import org.bouncycastle2.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle2.jcajce.NamedJcaJceHelper;
 import org.bouncycastle2.jcajce.ProviderJcaJceHelper;
+import org.bouncycastle2.jce.spec.MQVPrivateKeySpec;
+import org.bouncycastle2.jce.spec.MQVPublicKeySpec;
 import org.bouncycastle2.operator.GenericKey;
+
+import javax.crypto.Cipher;
+import javax.crypto.KeyAgreement;
+import javax.crypto.SecretKey;
+import java.security.*;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.ECPublicKey;
+import java.security.spec.ECParameterSpec;
+import java.util.ArrayList;
+import java.util.List;
 
 public class JceKeyAgreeRecipientInfoGenerator
     extends KeyAgreeRecipientInfoGenerator

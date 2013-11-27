@@ -40,8 +40,8 @@
 
 package javax.mail.util;
 
-import java.io.*;
 import javax.mail.internet.SharedInputStream;
+import java.io.*;
 
 /**
  * A <code>SharedFileInputStream</code> is a

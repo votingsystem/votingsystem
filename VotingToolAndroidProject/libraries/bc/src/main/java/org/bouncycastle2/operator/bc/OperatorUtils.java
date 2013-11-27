@@ -1,8 +1,8 @@
 package org.bouncycastle2.operator.bc;
 
-import java.security.Key;
-
 import org.bouncycastle2.operator.GenericKey;
+
+import java.security.Key;
 
 class OperatorUtils
 {

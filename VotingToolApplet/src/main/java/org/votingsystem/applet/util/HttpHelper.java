@@ -1,45 +1,39 @@
 package org.votingsystem.applet.util;
 
-import java.io.IOException;
-import java.text.ParseException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import java.io.File;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.FileEntity;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.util.EntityUtils;
-import org.votingsystem.model.ContextVS;
-
-import org.apache.log4j.Logger;
-
-import java.security.cert.PKIXParameters;
-import java.security.cert.TrustAnchor;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.HttpHostConnectException;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
+import org.apache.http.entity.FileEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
+import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.apache.http.util.EntityUtils;
+import org.apache.log4j.Logger;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtil;
+
+import java.io.File;
+import java.io.IOException;
+import java.security.cert.PKIXParameters;
+import java.security.cert.TrustAnchor;
+import java.security.cert.X509Certificate;
+import java.text.ParseException;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
 * @author jgzornoza
@@ -70,9 +64,13 @@ public class HttpHelper {
         httpclient = new DefaultHttpClient(cm, httpParams);
     }
     
-    public static void init() {
-        INSTANCE = new HttpHelper();
+
+    
+    public static HttpHelper getInstance() {
+        if(INSTANCE == null) INSTANCE = new HttpHelper();
+        return INSTANCE;
     }
+
     
     public synchronized void initMultiThreadedMode() {
         logger.debug("initMultiThreadedMode");
@@ -120,16 +118,15 @@ public class HttpHelper {
             logger.debug("----------------------------------------");
             if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
                 byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
-                responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
-                        new String(responseBytes), responseBytes);
+                responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes);
             } else {
                 responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
                         EntityUtils.toString(response.getEntity()));
             }
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
-            responseVS = new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.
-                    getString("hostConnectionErrorMsg", serverURL));
+            responseVS = new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().
+                    getMessage("hostConnectionErrorMsg", serverURL));
             if(httpget != null) httpget.abort();
         } finally {
             if(response != null) EntityUtils.consume(response.getEntity());
@@ -137,56 +134,56 @@ public class HttpHelper {
         }
     }
     
-    public X509Certificate obtenerCertificadoDeServidor (String serverURL) throws Exception {
-        logger.debug("obtenerCertificadoDeServidor - serverURL: " + serverURL);           
+    public X509Certificate getCertFromServer (String serverURL) throws Exception {
+        logger.debug("getCertFromServer - serverURL: " + serverURL);
         HttpGet httpget = new HttpGet(serverURL);
-        X509Certificate certificado = null;
+        X509Certificate certificate = null;
         HttpResponse response = httpclient.execute(httpget);
         logger.debug("----------------------------------------");
         logger.debug(response.getStatusLine().toString());
         logger.debug("----------------------------------------");
         HttpEntity entity = response.getEntity();
         if (ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
-            certificado = CertUtil.fromPEMToX509Cert(EntityUtils.toByteArray(entity));
+            certificate = CertUtil.fromPEMToX509Cert(EntityUtils.toByteArray(entity));
         }
         EntityUtils.consume(response.getEntity());
-        return certificado;
+        return certificate;
     }
     
-    public Collection<X509Certificate> obtenerCadenaCertificacionDeServidor (
+    public Collection<X509Certificate> getCertChainHTTP (
             String serverURL) throws Exception {
-        logger.debug("obtenerCadenaCertificacionDeServidor - serverURL: " + serverURL);   
+        logger.debug("getCertChainHTTP - serverURL: " + serverURL);
         HttpGet httpget = new HttpGet(serverURL);
-        Collection<X509Certificate> certificados = null;
-        logger.debug("obtenerCertificadoDeServidor - lanzando: " + httpget.getURI());
+        Collection<X509Certificate> certificates = null;
+        logger.debug("getCertFromServer - lanzando: " + httpget.getURI());
         HttpResponse response = httpclient.execute(httpget);
         logger.debug("----------------------------------------");
         logger.debug(response.getStatusLine().toString());
         logger.debug("----------------------------------------");
         HttpEntity entity = response.getEntity();
         if (ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
-            certificados = CertUtil.fromPEMToX509CertCollection(
+            certificates = CertUtil.fromPEMToX509CertCollection(
                     EntityUtils.toByteArray(entity));
         }
         EntityUtils.consume(response.getEntity());
-        return certificados;
+        return certificates;
     }
    
-    public PKIXParameters obtenerPKIXParametersDeServidor (String certChainURL) throws Exception {
-        logger.debug("obtenerPKIXParametersDeServidor - certChainURL: " + certChainURL);
-        Set<TrustAnchor> anchors = obtenerAnchorsDeServidor(certChainURL);
+    public PKIXParameters getPKIXParametersHTTP (String certChainURL) throws Exception {
+        logger.debug("getPKIXParametersHTTP - certChainURL: " + certChainURL);
+        Set<TrustAnchor> anchors = getTrustAnchorHTTP(certChainURL);
         PKIXParameters params = new PKIXParameters(anchors);
         params.setRevocationEnabled(false); // tell system do not check CRL's
         return params;       
     }   
     
-    public Set<TrustAnchor> obtenerAnchorsDeServidor (String certChainURL) throws Exception {
-        logger.debug("obtenerAnchorsDeServidor - certChainURL: " + certChainURL);
-        Collection<X509Certificate> certificados = obtenerCadenaCertificacionDeServidor(certChainURL);
+    public Set<TrustAnchor> getTrustAnchorHTTP (String certChainURL) throws Exception {
+        logger.debug("getTrustAnchorHTTP - certChainURL: " + certChainURL);
+        Collection<X509Certificate> certificates = getCertChainHTTP(certChainURL);
         Set<TrustAnchor> anchors = new HashSet<TrustAnchor>();
-        for (X509Certificate certificado:certificados) {
-            TrustAnchor anchorCertificado = new TrustAnchor(certificado, null);
-            anchors.add(anchorCertificado);
+        for (X509Certificate certificate:certificates) {
+            TrustAnchor certAnchor = new TrustAnchor(certificate, null);
+            anchors.add(certAnchor);
         }
         return anchors;
     }
@@ -207,8 +204,7 @@ public class HttpHelper {
             logger.debug(response.getStatusLine().toString());
             logger.debug("----------------------------------------"); 
             byte[] responseBytes =  EntityUtils.toByteArray(response.getEntity());
-            responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
-                    new String(responseBytes), responseBytes);
+            responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes);
             if(headerNames != null) {
                 List<String> headerValues = new ArrayList<String>();
                 for(String headerName: headerNames) {
@@ -251,10 +247,9 @@ public class HttpHelper {
         return responseVS;
     }
     
-    public ResponseVS sendByteArray(byte[] byteArray, String contentType,
+    public ResponseVS sendByteArray(byte[] byteArray, String contentType, 
             String serverURL, String... headerNames) throws IOException {
-        logger.debug("sendByteArray - contentType: " + contentType + 
-                " - serverURL: " + serverURL);
+        logger.debug("sendByteArray - contentType: " + contentType + " - serverURL: " + serverURL);
         ResponseVS responseVS = null;
         HttpPost httpPost = null;
         HttpResponse response = null;
@@ -270,22 +265,20 @@ public class HttpHelper {
             logger.debug(response.getStatusLine().toString());
             logger.debug("----------------------------------------");
             byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
-            responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
-                    new String(responseBytes), responseBytes);
-            if(headerNames != null) {
+            responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes);
+            if(headerNames != null && headerNames.length > 0) {
                 List<String> headerValues = new ArrayList<String>();
                 for(String headerName: headerNames) {
-                    org.apache.http.Header headerValue = 
-                            response.getFirstHeader(headerName);
-                    headerValues.add(headerValue.getValue());
+                    org.apache.http.Header headerValue = response.getFirstHeader(headerName);
+                    if(headerValue != null) headerValues.add(headerValue.getValue());
                 }
                 responseVS.setData(headerValues);
             }
             EntityUtils.consume(response.getEntity());
         } catch(HttpHostConnectException ex){
             logger.error(ex.getMessage(), ex);
-            responseVS = new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.
-                    getString("hostConnectionErrorMsg", serverURL));
+            responseVS = new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().
+                    getMessage("hostConnectionErrorMsg", serverURL));
             if(httpPost != null) httpPost.abort();
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
@@ -298,12 +291,11 @@ public class HttpHelper {
     }
     
     
-    public ResponseVS sendObjectMap(
-            Map<String, Object> fileMap, String serverURL) throws Exception {
+    public ResponseVS sendObjectMap(Map<String, Object> fileMap, String serverURL) throws Exception {
         logger.debug("sendObjectMap - serverURL: " + serverURL); 
         ResponseVS responseVS = null;
         if(fileMap == null || fileMap.isEmpty()) throw new Exception(
-                ContextVS.INSTANCE.getString("requestWithoutFileMapErrorMsg"));
+                ContextVS.getInstance().getMessage("requestWithoutFileMapErrorMsg"));
         HttpPost httpPost = null;
         HttpResponse response = null;
         try {
@@ -330,8 +322,7 @@ public class HttpHelper {
             logger.debug(response.getStatusLine().toString());
             logger.debug("----------------------------------------");
             byte[] responseBytes =  EntityUtils.toByteArray(response.getEntity());
-            responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
-                    new String(responseBytes), responseBytes);
+            responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes);
             //EntityUtils.consume(response.getEntity());
         } catch(Exception ex) {
             String statusLine = null;
@@ -344,7 +335,6 @@ public class HttpHelper {
         }
         return responseVS;  
     }
-
 
     public static class IdleConnectionEvictor extends Thread {
 

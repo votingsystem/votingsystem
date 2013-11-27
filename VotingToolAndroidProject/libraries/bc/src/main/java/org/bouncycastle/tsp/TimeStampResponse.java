@@ -1,9 +1,5 @@
 package org.bouncycastle.tsp;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.bouncycastle2.asn1.ASN1InputStream;
 import org.bouncycastle2.asn1.cmp.PKIFailureInfo;
 import org.bouncycastle2.asn1.cmp.PKIFreeText;
@@ -12,6 +8,10 @@ import org.bouncycastle2.asn1.cms.Attribute;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.asn1.tsp.TimeStampResp;
 import org.bouncycastle2.util.Arrays;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Base class for an RFC 3161 Time Stamp Response object.

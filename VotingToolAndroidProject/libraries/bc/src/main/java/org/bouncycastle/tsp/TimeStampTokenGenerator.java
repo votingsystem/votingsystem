@@ -1,34 +1,6 @@
 package org.bouncycastle.tsp;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.cert.CRLException;
-import java.security.cert.CertStore;
-import java.security.cert.CertStoreException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509CRL;
-import java.security.cert.X509Certificate;
-import java.security.interfaces.DSAPrivateKey;
-import java.security.interfaces.RSAPrivateKey;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.DERBoolean;
-import org.bouncycastle2.asn1.DERGeneralizedTime;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERNull;
-import org.bouncycastle2.asn1.DERSet;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.cms.Attribute;
 import org.bouncycastle2.asn1.cms.AttributeTable;
 import org.bouncycastle2.asn1.ess.ESSCertID;
@@ -41,16 +13,7 @@ import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.asn1.x509.GeneralName;
 import org.bouncycastle2.cert.jcajce.JcaX509CRLHolder;
 import org.bouncycastle2.cert.jcajce.JcaX509CertificateHolder;
-import org.bouncycastle2.cms.CMSAttributeTableGenerationException;
-import org.bouncycastle2.cms.CMSAttributeTableGenerator;
-import org.bouncycastle2.cms.CMSException;
-import org.bouncycastle2.cms.CMSProcessableByteArray;
-import org.bouncycastle2.cms.CMSSignedData;
-import org.bouncycastle2.cms.CMSSignedDataGenerator;
-import org.bouncycastle2.cms.CMSSignedGenerator;
-import org.bouncycastle2.cms.DefaultSignedAttributeTableGenerator;
-import org.bouncycastle2.cms.SignerInfoGenerator;
-import org.bouncycastle2.cms.SimpleAttributeTableGenerator;
+import org.bouncycastle2.cms.*;
 import org.bouncycastle2.cms.jcajce.JcaSignerInfoGeneratorBuilder;
 import org.bouncycastle2.jce.interfaces.GOST3410PrivateKey;
 import org.bouncycastle2.operator.OperatorCreationException;
@@ -58,6 +21,17 @@ import org.bouncycastle2.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle2.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle2.util.CollectionStore;
 import org.bouncycastle2.util.Store;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.cert.*;
+import java.security.interfaces.DSAPrivateKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.util.*;
 
 public class TimeStampTokenGenerator
 {

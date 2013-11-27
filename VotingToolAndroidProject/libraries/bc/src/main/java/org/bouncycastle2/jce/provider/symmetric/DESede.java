@@ -1,14 +1,5 @@
 package org.bouncycastle2.jce.provider.symmetric;
 
-import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
-import java.util.HashMap;
-
-import javax.crypto.SecretKey;
-import javax.crypto.spec.DESedeKeySpec;
-import javax.crypto.spec.SecretKeySpec;
-
 import org.bouncycastle2.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.crypto.KeyGenerationParameters;
@@ -21,11 +12,15 @@ import org.bouncycastle2.crypto.macs.CFBBlockCipherMac;
 import org.bouncycastle2.crypto.macs.CMac;
 import org.bouncycastle2.crypto.modes.CBCBlockCipher;
 import org.bouncycastle2.crypto.paddings.ISO7816d4Padding;
-import org.bouncycastle2.jce.provider.JCEBlockCipher;
-import org.bouncycastle2.jce.provider.JCEKeyGenerator;
-import org.bouncycastle2.jce.provider.JCEMac;
-import org.bouncycastle2.jce.provider.JCESecretKeyFactory;
-import org.bouncycastle2.jce.provider.WrapCipherSpi;
+import org.bouncycastle2.jce.provider.*;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.DESedeKeySpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
+import java.util.HashMap;
 
 public final class DESede
 {

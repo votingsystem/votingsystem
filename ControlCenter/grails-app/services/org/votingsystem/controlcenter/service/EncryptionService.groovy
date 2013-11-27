@@ -1,68 +1,24 @@
 package org.votingsystem.controlcenter.service
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.util.Properties;
+import org.bouncycastle.cms.*
+import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder
+import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientId
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator
+import org.bouncycastle.mail.smime.SMIMEEnveloped
+import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator
+import org.bouncycastle.mail.smime.SMIMEUtil
+import org.bouncycastle.util.Strings
+import org.votingsystem.model.ResponseVS
+import org.votingsystem.signature.smime.SMIMEMessageWrapper
 
-import javax.mail.Header;
-import javax.mail.Session;
-import javax.mail.internet.MimeMultipart;
-
-import org.springframework.beans.factory.InitializingBean
-import org.votingsystem.util.*
-import org.votingsystem.controlcenter.model.*
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.*
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
-import org.votingsystem.signature.smime.SignedMailGenerator;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-
+import javax.mail.Session
+import javax.mail.internet.MimeBodyPart
+import javax.mail.internet.MimeMessage
 import java.security.KeyStore
 import java.security.PrivateKey
-import java.security.PublicKey;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Properties;
-import java.util.Set;
-import java.security.cert.CertPathValidatorException
-import java.security.cert.PKIXCertPathValidatorResult
-import java.security.cert.TrustAnchor
-import java.security.cert.X509Certificate;
-
-import org.bouncycastle.jce.PKCS10CertificationRequest;
-import org.bouncycastle.mail.smime.SMIMEEnveloped
-import org.bouncycastle.asn1.pkcs.CertificationRequestInfo
-import org.bouncycastle.asn1.x509.X509Extensions
-
-import java.util.Locale;
-
-import org.bouncycastle.cms.CMSException
-import org.bouncycastle.cms.Recipient;
-import org.bouncycastle.cms.RecipientId;
-import org.bouncycastle.cms.RecipientInformation
-import org.bouncycastle.cms.RecipientInformationStore
-import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient
-import org.bouncycastle.cms.jcajce.JceKeyTransRecipientId;
-import org.bouncycastle.mail.smime.SMIMEUtil;
-import org.bouncycastle.cms.CMSAlgorithm;
-import org.bouncycastle.cms.SignerInformation;
-import org.bouncycastle.cms.SignerInformationStore;
-import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
-import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
-import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
-import org.bouncycastle.util.Strings;
-import org.bouncycastle.util.encoders.Base64;
-
-
+import java.security.PublicKey
+import java.security.cert.X509Certificate
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -162,21 +118,17 @@ class EncryptionService {
 	/**
 	 * Method to encrypt SMIME signed messages
 	 */
-	ResponseVS encryptSMIMEMessage(byte[] bytesToEncrypt,
-		X509Certificate receiverCert, Locale locale) throws Exception {
+	ResponseVS encryptSMIMEMessage(byte[] bytesToEncrypt, X509Certificate receiverCert, Locale locale) throws Exception {
 		log.debug(" - encryptSMIMEMessage(...) ");
 		//If the message isn't recreated there can be problems with
 		//multipart boundaries. TODO
-		SMIMEMessageWrapper msgToEncrypt = new SMIMEMessageWrapper(
-				new ByteArrayInputStream(bytesToEncrypt));
+		SMIMEMessageWrapper msgToEncrypt = new SMIMEMessageWrapper(new ByteArrayInputStream(bytesToEncrypt));
 		try {
 			SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
-			encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
-				receiverCert).setProvider("BC"));
+			encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(receiverCert).setProvider("BC"));
 			/* Encrypt the message */
 			MimeBodyPart encryptedPart = encrypter.generate(msgToEncrypt,
-				new JceCMSContentEncryptorBuilder(
-				CMSAlgorithm.DES_EDE3_CBC).setProvider("BC").build());
+				new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC).setProvider("BC").build());
 			// Create a new MimeMessage that contains the encrypted and signed content
 			/* Set all original MIME headers in the encrypted message */
 			Enumeration headers = msgToEncrypt.getAllHeaderLines();
@@ -197,8 +149,7 @@ class EncryptionService {
 			byte[] digestBytes = it.next().getContentDigest();//method can only be called after verify.*/
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			encryptedPart.writeTo(baos);
-			return new ResponseVS(messageBytes:baos.toByteArray(),
-				statusCode:ResponseVS.SC_OK);
+			return new ResponseVS(messageBytes:baos.toByteArray(), statusCode:ResponseVS.SC_OK);
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
 			return new ResponseVS(message:ex.getMessage(),
@@ -215,8 +166,7 @@ class EncryptionService {
 		log.debug(" - decryptSMIMEMessage - ")
 		SMIMEMessageWrapper smimeMessageReq = null
 		try {
-			MimeMessage msg = new MimeMessage(getSession(), 
-				new ByteArrayInputStream(encryptedMessageBytes));
+			MimeMessage msg = new MimeMessage(getSession(), new ByteArrayInputStream(encryptedMessageBytes));
 			
 			//String encryptedMessageBytesStr = new String(encryptedMessageBytes);
 			//log.debug("- decryptSMIMEMessage - encryptedMessageBytesStr: " + encryptedMessageBytesStr)
@@ -238,8 +188,7 @@ class EncryptionService {
 			byte[] messageContentBytes =  recipientInfo.getContent(getRecipient())
 			//log.debug(" ------- Message Contents: ${new String(messageContentBytes)}");
 			
-			smimeMessageReq = new SMIMEMessageWrapper(
-					new ByteArrayInputStream(messageContentBytes));
+			smimeMessageReq = new SMIMEMessageWrapper(new ByteArrayInputStream(messageContentBytes));
 		} catch(CMSException ex) {
 			log.error (ex.getMessage(), ex)
 			return new ResponseVS(message:messageSource.getMessage(

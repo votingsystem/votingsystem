@@ -1,9 +1,9 @@
 package org.bouncycastle2.asn1.pkcs;
 
-import java.util.Enumeration;
-
 import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+
+import java.util.Enumeration;
 
 /**
  * a PKCS#7 signer info object.

@@ -1,15 +1,7 @@
 
 package org.bouncycastle2.asn1.x509;
 
-import org.bouncycastle2.asn1.ASN1Choice;
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1String;
-import org.bouncycastle2.asn1.ASN1TaggedObject;
-import org.bouncycastle2.asn1.DERBMPString;
-import org.bouncycastle2.asn1.DERIA5String;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERUTF8String;
-import org.bouncycastle2.asn1.DERVisibleString;
+import org.bouncycastle2.asn1.*;
 
 /**
  * <code>DisplayText</code> class, used in

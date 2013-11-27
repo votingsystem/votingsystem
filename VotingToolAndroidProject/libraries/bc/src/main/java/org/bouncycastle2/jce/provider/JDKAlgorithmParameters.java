@@ -1,24 +1,9 @@
 package org.bouncycastle2.jce.provider;
 
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERNull;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DEROctetString;
-import org.bouncycastle2.asn1.DERSequence;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.cryptopro.GOST3410PublicKeyAlgParameters;
 import org.bouncycastle2.asn1.oiw.ElGamalParameter;
-import org.bouncycastle2.asn1.pkcs.DHParameter;
-import org.bouncycastle2.asn1.pkcs.PBKDF2Params;
-import org.bouncycastle2.asn1.pkcs.PKCS12PBEParams;
-import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle2.asn1.pkcs.RC2CBCParameter;
-import org.bouncycastle2.asn1.pkcs.RSAESOAEPparams;
-import org.bouncycastle2.asn1.pkcs.RSASSAPSSparams;
+import org.bouncycastle2.asn1.pkcs.*;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.asn1.x509.DSAParameter;
 import org.bouncycastle2.jce.spec.ElGamalParameterSpec;
@@ -27,19 +12,10 @@ import org.bouncycastle2.jce.spec.GOST3410PublicKeyParameterSetSpec;
 import org.bouncycastle2.jce.spec.IESParameterSpec;
 import org.bouncycastle2.util.Arrays;
 
-import javax.crypto.spec.DHParameterSpec;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.OAEPParameterSpec;
-import javax.crypto.spec.PBEParameterSpec;
-import javax.crypto.spec.PSource;
-import javax.crypto.spec.RC2ParameterSpec;
+import javax.crypto.spec.*;
 import java.io.IOException;
 import java.security.AlgorithmParametersSpi;
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.DSAParameterSpec;
-import java.security.spec.InvalidParameterSpecException;
-import java.security.spec.MGF1ParameterSpec;
-import java.security.spec.PSSParameterSpec;
+import java.security.spec.*;
 
 public abstract class JDKAlgorithmParameters
     extends AlgorithmParametersSpi

@@ -40,19 +40,17 @@
 
 package javax.mail;
 
-import java.lang.reflect.*;
-import java.io.*;
-import java.net.*;
-import java.security.*;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Properties;
-import java.util.StringTokenizer;
-import java.util.Vector;
-
-import javax.activation.*;
-
 import com.sun.mail.util.LineInputStream;
+
+import java.io.*;
+import java.lang.reflect.Constructor;
+import java.net.InetAddress;
+import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+import java.util.*;
 
 /**
  * The Session class represents a mail session and is not subclassed.

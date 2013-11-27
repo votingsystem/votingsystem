@@ -1,22 +1,11 @@
 package org.bouncycastle2.asn1.x509;
 
-import java.io.IOException;
-import java.util.StringTokenizer;
-
-import org.bouncycastle2.asn1.ASN1Choice;
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.ASN1TaggedObject;
-import org.bouncycastle2.asn1.DEREncodable;
-import org.bouncycastle2.asn1.DERIA5String;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DEROctetString;
-import org.bouncycastle2.asn1.DERTaggedObject;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.x500.X500Name;
 import org.bouncycastle2.util.IPAddress;
+
+import java.io.IOException;
+import java.util.StringTokenizer;
 
 /**
  * The GeneralName object.

@@ -1,5 +1,8 @@
 package org.bouncycastle2.cert.jcajce;
 
+import org.bouncycastle2.cert.X509CRLHolder;
+import org.bouncycastle2.util.CollectionStore;
+
 import java.io.IOException;
 import java.security.cert.CRLException;
 import java.security.cert.X509CRL;
@@ -7,9 +10,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-
-import org.bouncycastle2.util.CollectionStore;
-import org.bouncycastle2.cert.X509CRLHolder;
 
 /**
  * Class for storing CRLs for later lookup.

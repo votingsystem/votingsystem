@@ -1,12 +1,8 @@
 package org.votingsystem.simulation.util
 
-import org.votingsystem.simulation.ApplicationContextHolder as ACH;
-import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.*;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.UUID;
-
+import com.itextpdf.text.*
+import com.itextpdf.text.pdf.*
+import org.votingsystem.util.ApplicationContextHolder as ACH
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -18,7 +14,7 @@ public class PdfFormHelper {
 		@Override
 		public void cellLayout(PdfPCell cell, Rectangle rectangle, PdfContentByte[] canvases) {
 			PdfWriter writer = canvases[0].getPdfWriter();
-			TextField text = new TextField(writer, rectangle, "eventoId");
+			TextField text = new TextField(writer, rectangle, "eventId");
 			//text.setBorderStyle(PdfBorderDictionary.STYLE_BEVELED);			
 			text.setText(ACH.getMessage("eventIdPdfPCellEventLbl"));
 			text.setFontSize(0);
@@ -41,7 +37,7 @@ public class PdfFormHelper {
 		@Override
 		public void cellLayout(PdfPCell cell, Rectangle rectangle, PdfContentByte[] canvases) {
 			PdfWriter writer = canvases[0].getPdfWriter();
-			TextField text = new TextField(writer, rectangle, "asunto");
+			TextField text = new TextField(writer, rectangle, "subject");
 			//text.setBorderStyle(PdfBorderDictionary.STYLE_BEVELED);
 			text.setText(ACH.getMessage("subjectPdfPCellEvent"));
 			text.setFontSize(0);
@@ -84,7 +80,7 @@ public class PdfFormHelper {
 	};
 	
 	public static byte[] getBackupRequest(
-			String eventoId, String asuntoManifiesto,
+			String eventId, String eventVSManifestSubject,
 			String emailSolicitante) throws DocumentException, IOException {
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -120,9 +116,9 @@ public class PdfFormHelper {
 		PdfReader reader = new PdfReader(baos.toByteArray());
 		PdfStamper stamper = new PdfStamper(reader, formStamperBaos);
 		AcroFields form = stamper.getAcroFields();
-		if(asuntoManifiesto != null) form.setField("asunto", asuntoManifiesto);
+		if(eventVSManifestSubject != null) form.setField("subject", eventVSManifestSubject);
 		if(emailSolicitante != null) form.setField("email", emailSolicitante);
-		if(eventoId != null) form.setField("eventoId", eventoId);
+		if(eventId != null) form.setField("eventId", eventId);
 		form.setField("UUID", UUID.randomUUID().toString());
 		stamper.close();
 		formStamperBaos.close();

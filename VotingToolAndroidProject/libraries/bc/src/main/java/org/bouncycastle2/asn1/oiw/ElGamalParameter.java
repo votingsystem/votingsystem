@@ -1,9 +1,9 @@
 package org.bouncycastle2.asn1.oiw;
 
-import java.math.*;
-import java.util.*;
-
 import org.bouncycastle2.asn1.*;
+
+import java.math.BigInteger;
+import java.util.Enumeration;
 
 public class ElGamalParameter
     extends ASN1Encodable

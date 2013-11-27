@@ -1,21 +1,6 @@
 package org.votingsystem.signature.smime;
 
-import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.mail.Address;
-import javax.mail.Header;
-import javax.mail.Message;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMultipart;
 import org.apache.log4j.Logger;
-
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.smime.SMIMECapabilitiesAttribute;
@@ -28,6 +13,21 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.util.Store;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
+
+import javax.mail.Address;
+import javax.mail.Header;
+import javax.mail.Message;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMultipart;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.List;
+
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -108,17 +108,17 @@ public class SignedMailGenerator {
     }
 
     public SMIMEMessageWrapper genMimeMessage(String fromUser, String toUser, 
-            String textoAFirmar, String asunto, Header... headers) throws Exception {
-        if (asunto == null) throw new Exception("Subject null");
-        if (textoAFirmar == null) throw new Exception("Content null");
+            String textToSign, String subject, Header... headers) throws Exception {
+        if (subject == null) throw new Exception("Subject null");
+        if (textToSign == null) throw new Exception("Content null");
         MimeBodyPart msg = new MimeBodyPart();
-        msg.setText(textoAFirmar);
+        msg.setText(textToSign);
         MimeMultipart mimeMultipart = smimeSignedGenerator.generate(
                 msg,ContextVS.DEFAULT_SIGNED_FILE_NAME);
         SMIMEMessageWrapper body = new SMIMEMessageWrapper(ContextVS.MAIL_SESSION);
         if (headers != null) {
         	for(Header header : headers) {
-        		 body.setHeader(header.getName(), header.getValue());
+        		 if (header != null) body.setHeader(header.getName(), header.getValue());
         	}
         }
         if (fromUser != null && !"".equals(fromUser)) {
@@ -129,7 +129,7 @@ public class SignedMailGenerator {
         	Address toUserAddress = new InternetAddress(toUser.replace(" ", ""));
         	body.setRecipient(Message.RecipientType.TO, toUserAddress);
         }
-        body.setSubject(asunto);
+        body.setSubject(subject);
         body.setContent(mimeMultipart, mimeMultipart.getContentType());
         body.updateChanges();
         return body;
@@ -148,8 +148,7 @@ public class SignedMailGenerator {
          smimeSignedGenerator.addCertificates(smimeMessage.getSmimeSigned().getCertificates());
          smimeSignedGenerator.addCRLs(smimeMessage.getSmimeSigned().getCRLs());
          smimeSignedGenerator.getGeneratedDigests();
-         MimeMultipart newMimeMultipart = smimeSignedGenerator.generate(
-        		 bodyPart, ContextVS.MULTISIGNED_FILE_NAME);
+         MimeMultipart newMimeMultipart = smimeSignedGenerator.generate(bodyPart, ContextVS.MULTISIGNED_FILE_NAME);
          /*MimeMessage multiSignedMessage = new MimeMessage(ContextVS.MAIL_SESSION);
  		 multiSignedMessage.setSubject(mailSubject);
  		 multiSignedMessage.setContent(newMimeMultipart, newMimeMultipart.getContentType());

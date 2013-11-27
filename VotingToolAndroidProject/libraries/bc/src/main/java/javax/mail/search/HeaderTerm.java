@@ -40,8 +40,8 @@
 
 package javax.mail.search;
 
-import java.util.Locale;
 import javax.mail.Message;
+import java.util.Locale;
 
 /**
  * This class implements comparisons for Message headers.

@@ -1,11 +1,11 @@
 package org.bouncycastle2.asn1.cms;
 
-import java.io.IOException;
-
 import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle2.asn1.ASN1SequenceParser;
 import org.bouncycastle2.asn1.ASN1TaggedObjectParser;
 import org.bouncycastle2.asn1.DEREncodable;
+
+import java.io.IOException;
 
 /**
  * Produce an object suitable for an ASN1OutputStream.

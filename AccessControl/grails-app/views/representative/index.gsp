@@ -1,4 +1,4 @@
-<% def representativeFullName = representative?.nombre + " " + representative?.primerApellido %>
+<% def representativeFullName = representative?.name + " " + representative?.firstName %>
 <html>
 <head>
 	<meta name="layout" content="main" />
@@ -97,14 +97,14 @@
 				var dateFrom = $("#dateFrom"),
 					dateTo = $("#dateTo"); 
 	        	allFields = $([]).add(dateFrom).add(dateTo);
-				allFields.removeClass("ui-state-error");
+				allFields.removeClass("formFieldError");
 
 				if(dateFrom.datepicker("getDate") > 
 					dateTo.datepicker("getDate")) {
 					showResultDialog("${message(code:'dataFormERRORLbl')}",
 							'<g:message code="dateRangeERRORMsg"/>') 
-					dateFrom.addClass("ui-state-error");
-					dateTo.addClass("ui-state-error");
+					dateFrom.addClass("formFieldError");
+					dateTo.addClass("formFieldError");
 					return false
 				}
 				requestVotingHistory();
@@ -119,51 +119,51 @@
 
 		function selectRepresentative() {
 			console.log("selectRepresentative")
-	    	var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESSING, Operation.REPRESENTATIVE_SELECTION)
-	    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
-    		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
-			webAppMessage.contenidoFirma = {operation:Operation.REPRESENTATIVE_SELECTION, representativeNif:"${representative.nif}",
+	    	var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.REPRESENTATIVE_SELECTION)
+	    	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+    		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
+			webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_SELECTION, representativeNif:"${representative.nif}",
     				representativeName:"${representativeFullName}"}
-			webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStamp', absolute:true)}"
-			webAppMessage.urlEnvioDocumento = "${createLink(controller:'representative', action:'userSelection', absolute:true)}"
-			webAppMessage.asuntoMensajeFirmado = '<g:message code="requestRepresentativeAcreditationsLbl"/>'
-			webAppMessage.respuestaConRecibo = true
+			webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
+			webAppMessage.receiverSignServiceURL = "${createLink(controller:'representative', action:'userSelection', absolute:true)}"
+			webAppMessage.signedMessageSubject = '<g:message code="requestRepresentativeAcreditationsLbl"/>'
+			webAppMessage.isResponseWithReceipt = true
 			votingSystemClient.setMessageToSignatureClient(webAppMessage, selectRepresentativeCallback); 
 		}
 
 		function requestVotingHistory() {
 			console.log("requestVotingHistory")
-	    	var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESSING, Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST)
-	    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
-    		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
+	    	var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST)
+	    	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+    		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
         	var dateFromStr = $("#dateFrom").datepicker('getDate').format()
         	var dateToStr = $("#dateTo").datepicker('getDate').format() 
         	console.log("requestVotingHistory - dateFromStr: " + dateFromStr + " - dateToStr: " + dateToStr)
-			webAppMessage.contenidoFirma = {operation:Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST, representativeNif:"${representative.nif}",
+			webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST, representativeNif:"${representative.nif}",
     				representativeName:"${representativeFullName}", dateForm:dateFromStr, 
     				dateTo:dateToStr, email:$("#userEmailText").val()}
-			webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStamp', absolute:true)}"
-			webAppMessage.urlEnvioDocumento = "${createLink(controller:'representative', action:'history', absolute:true)}"
-			webAppMessage.asuntoMensajeFirmado = '<g:message code="requestVotingHistoryLbl"/>'
+			webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
+			webAppMessage.receiverSignServiceURL = "${createLink(controller:'representative', action:'history', absolute:true)}"
+			webAppMessage.signedMessageSubject = '<g:message code="requestVotingHistoryLbl"/>'
 			webAppMessage.emailSolicitante = $("#userEmailText").val()
-			webAppMessage.respuestaConRecibo = true
+			webAppMessage.isResponseWithReceipt = true
 			votingSystemClient.setMessageToSignatureClient(webAppMessage, representativeOperationCallback); 
 		}
 
 		function requestAccreditations() {
 			var accreditationDateSelectedStr = $("#accreditationDateSelected").val()
 			console.log("requestAccreditations - accreditationDateSelectedStr: " + accreditationDateSelectedStr)
-	    	var webAppMessage = new WebAppMessage(StatusCode.SC_PROCESSING, Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST)
-	    	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
-    		webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
-			webAppMessage.contenidoFirma = {operation:Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST, 
+	    	var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST)
+	    	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+    		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
+			webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST,
     				representativeNif:"${representative.nif}", email:$("#accreditationReqUserEmailText").val(),
     				representativeName:"${representativeFullName}", selectedDate:accreditationDateSelectedStr}
-			webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStamp', absolute:true)}"
-			webAppMessage.urlEnvioDocumento = "${createLink(controller:'representative', action:'accreditations', absolute:true)}"
-			webAppMessage.asuntoMensajeFirmado = '<g:message code="requestRepresentativeAcreditationsLbl"/>'
+			webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
+			webAppMessage.receiverSignServiceURL = "${createLink(controller:'representative', action:'accreditations', absolute:true)}"
+			webAppMessage.signedMessageSubject = '<g:message code="requestRepresentativeAcreditationsLbl"/>'
 			webAppMessage.emailSolicitante = $("#accreditationReqUserEmailText").val()
-			webAppMessage.respuestaConRecibo = true
+			webAppMessage.isResponseWithReceipt = true
 			votingSystemClient.setMessageToSignatureClient(webAppMessage, representativeOperationCallback); 
 		}
 
@@ -174,10 +174,10 @@
 				$("#workingWithAppletDialog" ).dialog("close");
 				var caption = '<g:message code="operationERRORCaption"/>'
 				var msg = appMessageJSON.message
-				if(StatusCode.SC_OK == appMessageJSON.statusCode) { 
+				if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
 					caption = "<g:message code='operationOKCaption'/>"
 					msg = "<g:message code='selectedRepresentativeMsg' args="${[representativeFullName]}"/>";
-				} else if (StatusCode.SC_CANCELLED== appMessageJSON.statusCode) {
+				} else if (ResponseVS.SC_CANCELLED== appMessageJSON.statusCode) {
 					caption = "<g:message code='operationCANCELLEDLbl'/>"
 				}
 				showResultDialog(caption, msg)
@@ -190,9 +190,9 @@
 			if(appMessageJSON != null) {
 				$("#workingWithAppletDialog" ).dialog("close");
 				var caption = '<g:message code="operationERRORCaption"/>'
-				if(StatusCode.SC_OK == appMessageJSON.statusCode) { 
+				if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
 					caption = "<g:message code='operationOKCaption'/>"
-				} else if (StatusCode.SC_CANCELLED== appMessageJSON.statusCode) {
+				} else if (ResponseVS.SC_CANCELLED== appMessageJSON.statusCode) {
 					caption = "<g:message code='operationCANCELLEDLbl'/>"
 				}
 				var msg = appMessageJSON.message

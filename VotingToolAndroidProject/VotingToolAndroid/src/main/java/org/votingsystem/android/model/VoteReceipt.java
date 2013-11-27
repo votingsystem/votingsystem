@@ -2,24 +2,21 @@ package org.votingsystem.android.model;
 
 import android.content.Context;
 import android.util.Log;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ActorVS;
+import org.votingsystem.model.EventVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
-import org.votingsystem.signature.util.PKCS10WrapperClient;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.util.PKCS10WrapperClient;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.security.PrivateKey;
 import java.util.Date;
 import java.util.Random;
-
-import javax.mail.MessagingException;
 
 
 /**
@@ -32,14 +29,14 @@ public class VoteReceipt {
     
     private int id;
     private int notificationId;
-    private int codigoEstado = 0;
+    private int statusCode = 0;
     private String mensaje;
-    private String eventoURL;    
-    private Long eventoVotacionId;
-    private Long opcionSeleccionadaId;
+    private String eventURL;
+    private Long eventVSElectionId;
+    private Long optionSelectedId;
     private TypeVS typeVS;
     private ActorVS actorVS;
-    private String controlAccesoServerURL;    
+    private String accessControlServerURL;
     private boolean esValido = false;
     private SMIMEMessageWrapper smimeMessage;
     private SMIMEMessageWrapper cancelVoteReceipt;
@@ -47,7 +44,7 @@ public class VoteReceipt {
     private boolean isCanceled = false;
     private PKCS10WrapperClient pkcs10WrapperClient;
     private PrivateKey certVotePrivateKey;
-    private EventVSAndroid voto;
+    private EventVS voto;
     private Date dateCreated;
     private Date dateUpdated;
     
@@ -61,36 +58,36 @@ public class VoteReceipt {
         return notificationId;
     }
     
-    public VoteReceipt (int codigoEstado, 
-            SMIMEMessageWrapper votoValidado, EventVSAndroid voto) throws Exception {
+    public VoteReceipt (int statusCode,
+            SMIMEMessageWrapper votoValidado, EventVS voto) throws Exception {
         this.smimeMessage = votoValidado;
-        this.codigoEstado = codigoEstado;
+        this.statusCode = statusCode;
         this.voto = voto;
-        String contenidoRecibo = votoValidado.getSignedContent();
-        JSONObject contenidoReciboJSON = new JSONObject(contenidoRecibo);
-        this.opcionSeleccionadaId = contenidoReciboJSON.getLong("opcionSeleccionadaId");
-        this.eventoURL = contenidoReciboJSON.getString("eventoURL");
+        String receiptContent = votoValidado.getSignedContent();
+        JSONObject receiptContentJSON = new JSONObject(receiptContent);
+        this.optionSelectedId = receiptContentJSON.getLong("optionSelectedId");
+        this.eventURL = receiptContentJSON.getString("eventURL");
         if (smimeMessage.isValidSignature()) {
             esValido = true;
         }
-        if (ResponseVS.SC_ERROR_VOTE_REPEATED == codigoEstado) {//voto repetido
+        if (ResponseVS.SC_ERROR_VOTE_REPEATED == statusCode) {//voto repetido
             esValido = false;
         }
-        if (!opcionSeleccionadaId.equals(voto.getOpcionSeleccionada().getId())) {
+        if (!optionSelectedId.equals(voto.getOptionSelected().getId())) {
             esValido = false;
         }
     }
     
-    public VoteReceipt (int codigoEstado, EventVSAndroid voto) throws Exception {
-        this.codigoEstado = codigoEstado;
+    public VoteReceipt (int statusCode, EventVS voto) throws Exception {
+        this.statusCode = statusCode;
         this.voto = voto;
     }
     
     public String toJSONString() throws JSONException {
-    	Log.d(TAG + ".toJSONString(...)", " --- voto.getHashSolicitudAccesoBase64(): " 
-    			+ voto.getHashSolicitudAccesoBase64());
+    	Log.d(TAG + ".toJSONString(...)", " --- voto.getAccessRequestHashBase64(): "
+    			+ voto.getAccessRequestHashBase64());
     	JSONObject jsonObject = new JSONObject();
-    	jsonObject.put("codigoEstado", codigoEstado);
+    	jsonObject.put("statusCode", statusCode);
         if(voto != null) jsonObject.put("voto", voto.toJSON());
         jsonObject.put("isCanceled", isCanceled);
         return jsonObject.toString();
@@ -99,18 +96,18 @@ public class VoteReceipt {
     public static VoteReceipt parse(String jsonVoteReceipt) throws Exception {
     	//Log.d(TAG + ".parse(...)", "- jsonVoteReceipt: '" + jsonVoteReceipt + "'");
     	if(jsonVoteReceipt == null) return null;
-    	int codigoEstado = 0;
+    	int statusCode = 0;
     	boolean isCanceled = false;
-    	EventVSAndroid voto = null;
+    	EventVS voto = null;
     	Log.d(TAG + ".parse(...)", " - parse(...)");
     	JSONObject jsonObject = new JSONObject (jsonVoteReceipt);
-        if(jsonObject.has("codigoEstado"))
-        	codigoEstado = jsonObject.getInt("codigoEstado");
+        if(jsonObject.has("statusCode"))
+        	statusCode = jsonObject.getInt("statusCode");
         if(jsonObject.has("isCanceled"))
         	isCanceled = jsonObject.getBoolean("isCanceled");
         if(jsonObject.has("voto"))
-        	voto = EventVSAndroid.parse(jsonObject.getJSONObject("voto"));
-        VoteReceipt voteReceipt = new VoteReceipt(codigoEstado, voto);
+        	voto = EventVS.parse(jsonObject.getJSONObject("voto"));
+        VoteReceipt voteReceipt = new VoteReceipt(statusCode, voto);
         voteReceipt.setCanceled(isCanceled);
     	return voteReceipt;
     }
@@ -133,45 +130,32 @@ public class VoteReceipt {
     }
 
     /**
-     * @return the eventoVotacionId
+     * @return the eventVSElectionId
      */
-    public Long getEventoVotacionId() {
-        return eventoVotacionId;
+    public Long getEventVSElectionId() {
+        return eventVSElectionId;
     }
 
     /**
-     * @param eventoVotacionId the eventoVotacionId to set
+     * @param eventVSElectionId the eventVSElectionId to set
      */
-    public void setEventoVotacionId(Long eventoVotacionId) {
-        this.eventoVotacionId = eventoVotacionId;
+    public void setEventVSElectionId(Long eventVSElectionId) {
+        this.eventVSElectionId = eventVSElectionId;
     }
 
     /**
-     * @return the opcionSeleccionadaId
+     * @return the optionSelectedId
      */
-    public Long getOpcionSeleccionadaId() {
-        return opcionSeleccionadaId;
+    public Long getOptionSelectedId() {
+        return optionSelectedId;
     }
 
     /**
-     * @param opcionSeleccionadaId the opcionSeleccionadaId to set
+     * @param optionSelectedId the optionSelectedId to set
      */
-    public void setOpcionSeleccionadaId(Long opcionSeleccionadaId) {
-        this.opcionSeleccionadaId = opcionSeleccionadaId;
+    public void setOptionSelectedId(Long optionSelectedId) {
+        this.optionSelectedId = optionSelectedId;
     }
-
-    /**
-     * @return the archivoRecibo
-     */
-    public File getArchivoRecibo() throws IOException, MessagingException {
-        File archivoRecibo = null;
-        if (smimeMessage != null) {
-            archivoRecibo = new File("recibo");
-            smimeMessage.writeTo(new FileOutputStream(archivoRecibo));
-        }
-        return archivoRecibo;
-    }
-
 
     /**
      * @return the actorVS
@@ -188,17 +172,17 @@ public class VoteReceipt {
     }
 
     /**
-     * @return the controlAccesoServerURL
+     * @return the accessControlServerURL
      */
-    public String getControlAccesoServerURL() {
-        return controlAccesoServerURL;
+    public String getAccessControlServerURL() {
+        return accessControlServerURL;
     }
 
     /**
-     * @param controlAccesoServerURL the controlAccesoServerURL to set
+     * @param accessControlServerURL the accessControlServerURL to set
      */
-    public void setControlAccesoServerURL(String controlAccesoServerURL) {
-        this.controlAccesoServerURL = controlAccesoServerURL;
+    public void setAccessControlServerURL(String accessControlServerURL) {
+        this.accessControlServerURL = accessControlServerURL;
     }
 
     /**
@@ -216,33 +200,33 @@ public class VoteReceipt {
     }
 
     /**
-     * @return the codigoEstado
+     * @return the statusCode
      */
-    public int getCodigoEstado() {
-        return codigoEstado;
+    public int getStatusCode() {
+        return statusCode;
     }
 
     /**
-     * @param codigoEstado the codigoEstado to set
+     * @param statusCode the statusCode to set
      */
-    public void setCodigoEstado(int codigoEstado) {
-        this.codigoEstado = codigoEstado;
+    public void setStatusCode(int statusCode) {
+        this.statusCode = statusCode;
     }
 
     /**
      * @return the mensaje
      */
     public String getMensaje(Context context) {
-        if (ResponseVS.SC_ERROR_VOTE_REPEATED == codigoEstado) {//voto repetido
+        if (ResponseVS.SC_ERROR_VOTE_REPEATED == statusCode) {//voto repetido
             return context.getString(R.string.vote_repeated_msg,
-                    voto.getAsunto(), voto.getOpcionSeleccionada().getContent());
+                    voto.getSubject(), voto.getOptionSelected().getContent());
         }
-        if (!opcionSeleccionadaId.equals(voto.getOpcionSeleccionada().getId())) {
+        if (!optionSelectedId.equals(voto.getOptionSelected().getId())) {
             return context.getString(R.string.option_error_msg);
         }
         if (smimeMessage.isValidSignature()) {
             return context.getString(R.string.vote_ok_msg,
-                    voto.getAsunto(), voto.getOpcionSeleccionada().getContent());
+                    voto.getSubject(), voto.getOptionSelected().getContent());
         }
         return null;
     }
@@ -269,30 +253,30 @@ public class VoteReceipt {
     }
 
     /**
-     * @return the eventoURL
+     * @return the eventURL
      */
-    public String getEventoURL() {
-        return eventoURL;
+    public String getEventURL() {
+        return eventURL;
     }
 
     /**
-     * @param eventoURL the eventoURL to set
+     * @param eventURL the eventURL to set
      */
-    public void setEventoURL(String eventoURL) {
-        this.eventoURL = eventoURL;
+    public void setEventURL(String eventURL) {
+        this.eventURL = eventURL;
     }
 
     /**
      * @return the voto
      */
-    public EventVSAndroid getVoto() {
+    public EventVS getVoto() {
         return voto;
     }
 
     /**
      * @param voto the voto to set
      */
-    public void setVoto(EventVSAndroid voto) {
+    public void setVoto(EventVS voto) {
         this.voto = voto;
     }
 

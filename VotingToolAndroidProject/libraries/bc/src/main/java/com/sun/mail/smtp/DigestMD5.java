@@ -40,11 +40,16 @@
 
 package com.sun.mail.smtp;
 
-import java.io.*;
-import java.util.*;
-import java.security.*;
+import com.sun.mail.util.ASCIIUtility;
+import com.sun.mail.util.BASE64DecoderStream;
+import com.sun.mail.util.BASE64EncoderStream;
 
-import com.sun.mail.util.*;
+import java.io.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Hashtable;
+import java.util.StringTokenizer;
 
 /**
  * DIGEST-MD5 authentication support.

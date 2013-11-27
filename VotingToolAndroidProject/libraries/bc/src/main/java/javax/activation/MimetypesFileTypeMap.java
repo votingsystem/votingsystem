@@ -40,11 +40,14 @@
 
 package javax.activation;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import com.sun.activation.registries.MimeTypeFile;
 import com.sun.activation.registries.LogSupport;
+import com.sun.activation.registries.MimeTypeFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Vector;
 
 /**
  * This class extends FileTypeMap and provides data typing of files
@@ -73,7 +76,7 @@ import com.sun.activation.registries.LogSupport;
  * # for example:<br>
  * text/plain    txt text TXT<br>
  * # this would map file.txt, file.text, and file.TXT to<br>
- * # the mime type "text/plain"<br>
+ * # the mime type ContentTypeVS.TEXT<br>
  * </code>
  *
  * @author Bart Calder

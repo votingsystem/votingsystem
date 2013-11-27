@@ -1,8 +1,5 @@
 package org.bouncycastle2.cms.jcajce;
 
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-
 import org.bouncycastle2.cert.X509CertificateHolder;
 import org.bouncycastle2.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle2.cms.CMSAttributeTableGenerator;
@@ -11,6 +8,9 @@ import org.bouncycastle2.cms.SignerInfoGeneratorBuilder;
 import org.bouncycastle2.operator.ContentSigner;
 import org.bouncycastle2.operator.DigestCalculatorProvider;
 import org.bouncycastle2.operator.OperatorCreationException;
+
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 
 public class JcaSignerInfoGeneratorBuilder
 {

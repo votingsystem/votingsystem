@@ -40,10 +40,10 @@
 
 package javax.mail.internet;
 
-import java.util.Vector;
-import java.util.StringTokenizer;
+import javax.mail.Address;
 import java.util.Locale;
-import javax.mail.*;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 /**
  * This class models an RFC1036 newsgroup address.

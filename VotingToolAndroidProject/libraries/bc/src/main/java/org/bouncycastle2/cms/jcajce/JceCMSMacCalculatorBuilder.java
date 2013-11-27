@@ -1,19 +1,5 @@
 package org.bouncycastle2.cms.jcajce;
 
-import java.io.OutputStream;
-import java.security.AlgorithmParameterGenerator;
-import java.security.AlgorithmParameters;
-import java.security.GeneralSecurityException;
-import java.security.Provider;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
-
-import javax.crypto.KeyGenerator;
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.RC2ParameterSpec;
-
 import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
@@ -24,6 +10,15 @@ import org.bouncycastle2.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle2.jcajce.io.MacOutputStream;
 import org.bouncycastle2.operator.GenericKey;
 import org.bouncycastle2.operator.MacCalculator;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.RC2ParameterSpec;
+import java.io.OutputStream;
+import java.security.*;
+import java.security.spec.AlgorithmParameterSpec;
 
 public class JceCMSMacCalculatorBuilder
 {

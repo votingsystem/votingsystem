@@ -1,11 +1,11 @@
 package org.bouncycastle2.asn1.esf;
 
-import java.util.Enumeration;
-
 import org.bouncycastle2.asn1.ASN1Encodable;
 import org.bouncycastle2.asn1.ASN1Sequence;
 import org.bouncycastle2.asn1.DERObject;
 import org.bouncycastle2.asn1.DERSequence;
+
+import java.util.Enumeration;
 
 /**
  * <pre>

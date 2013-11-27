@@ -40,14 +40,16 @@
 
 package com.sun.mail.dsn;
 
-import java.io.*;
-import java.util.*;
+import com.sun.mail.util.LineOutputStream;
 
-import javax.activation.*;
-import javax.mail.*;
-import javax.mail.internet.*;
-
-import com.sun.mail.util.LineOutputStream;	// XXX
+import javax.mail.MessagingException;
+import javax.mail.internet.InternetHeaders;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * A message/delivery-status message content, as defined in

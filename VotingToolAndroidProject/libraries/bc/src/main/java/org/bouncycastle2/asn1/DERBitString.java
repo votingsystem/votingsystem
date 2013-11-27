@@ -1,9 +1,9 @@
 package org.bouncycastle2.asn1;
 
+import org.bouncycastle2.util.Arrays;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
-import org.bouncycastle2.util.Arrays;
 
 public class DERBitString
     extends ASN1Object

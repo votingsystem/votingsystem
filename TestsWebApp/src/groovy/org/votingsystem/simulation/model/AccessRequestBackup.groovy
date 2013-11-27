@@ -1,18 +1,13 @@
-package org.votingsystem.simulation.model;
+package org.votingsystem.simulation.model
 
-import java.io.File;
-import java.security.KeyStore;
-import java.sql.Clob;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import org.votingsystem.model.*;
 import org.codehaus.groovy.grails.web.json.JSONObject
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.votingsystem.model.TypeVS
+import org.votingsystem.model.UserVS
 
-
+import java.security.KeyStore
+import java.sql.Clob
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -20,20 +15,20 @@ import org.slf4j.LoggerFactory;
 public class AccessRequestBackup {
     
 	
-	private static Logger log = LoggerFactory.getLogger(AccessRequestBackup.class);
+	private static Logger logger = LoggerFactory.getLogger(AccessRequestBackup.class);
 
 	private Long id;
 	private TypeVS tipo;
-	private Clob contenido;
-	private String hashCertificadoVotoBase64;
-	private String hashSolicitudAccesoBase64;
-	private String origenHashSolicitudAcceso;
-	private String origenHashCertificadoVoto;
+	private Clob content;
+	private String hashCertVoteBase64;
+	private String hashAccessRequestBase64;
+	private String originHashAccessRequest;
+	private String originHashCertVote;
 	private String userNif;
-	private String eventoURL;
-	private String eventoId;
+	private String eventURL;
+	private String eventId;
 	private boolean firmaCorrecta;
-	private UserVS usuario;
+	private UserVS userVS;
 	private byte[] hashEncabezado;
 	private Date dateCreated;
 	private File archivo;
@@ -46,20 +41,20 @@ public class AccessRequestBackup {
 		this.firmaCorrecta = firmaCorrecta;
 	}
 	
-	public TypeVS getTipo() {
+	public TypeVS getType() {
 		return tipo;
 	}
 
-	public void setTipo(TypeVS tipo) {
+	public void setType(TypeVS tipo) {
 		this.tipo = tipo;
 	}
 
-	public Clob getContenido () {
-		return contenido;
+	public Clob getContent () {
+		return content;
 	}
 
-	public void setContenido (Clob contenido) {
-		this.contenido = contenido;
+	public void setContent (Clob content) {
+		this.content = content;
 	}
 
 	 /**
@@ -76,12 +71,12 @@ public class AccessRequestBackup {
 		this.dateCreated = dateCreated;
 	}
 
-	public void setUsuario(UserVS usuario) {
-		this.usuario = usuario;
+	public void setUserVS(UserVS userVS) {
+		this.userVS = userVS;
 	}
 
-	public UserVS getUsuario() {
-		return usuario;
+	public UserVS getUserVS() {
+		return userVS;
 	}
 
 	public void setId(Long id) {
@@ -101,17 +96,17 @@ public class AccessRequestBackup {
 	}
 
 	/**
-	 * @return the hashCertificadoVotoBase64
+	 * @return the hashCertVoteBase64
 	 */
-	public String getHashCertificadoVotoBase64() {
-		return hashCertificadoVotoBase64;
+	public String getHashCertVoteBase64() {
+		return hashCertVoteBase64;
 	}
 
 	/**
-	 * @param hashCertificadoVotoBase64 the hashCertificadoVotoBase64 to set
+	 * @param hashCertVoteBase64 the hashCertVoteBase64 to set
 	 */
-	public void setHashCertificadoVotoBase64(String hashCertificadoVotoBase64) {
-		this.hashCertificadoVotoBase64 = hashCertificadoVotoBase64;
+	public void setHashCertVoteBase64(String hashCertVoteBase64) {
+		this.hashCertVoteBase64 = hashCertVoteBase64;
 	}
 
 	/**
@@ -129,31 +124,31 @@ public class AccessRequestBackup {
 	}
 
 	/**
-	 * @return the hashSolicitudAccesoBase64
+	 * @return the hashAccessRequestBase64
 	 */
-	public String getHashSolicitudAccesoBase64() {
-		return hashSolicitudAccesoBase64;
+	public String getAccessRequestHashBase64() {
+		return hashAccessRequestBase64;
 	}
 
 	/**
-	 * @param hashSolicitudAccesoBase64 the hashSolicitudAccesoBase64 to set
+	 * @param hashAccessRequestBase64 the hashAccessRequestBase64 to set
 	 */
-	public void setHashSolicitudAccesoBase64(String hashSolicitudAccesoBase64) {
-		this.hashSolicitudAccesoBase64 = hashSolicitudAccesoBase64;
+	public void setAccessRequestHashBase64(String hashAccessRequestBase64) {
+		this.hashAccessRequestBase64 = hashAccessRequestBase64;
 	}
 
 	/**
-	 * @return the eventoURL
+	 * @return the eventURL
 	 */
-	public String getEventoURL() {
-		return eventoURL;
+	public String getEventVSURL() {
+		return eventURL;
 	}
 
 	/**
-	 * @param eventoURL the eventoURL to set
+	 * @param eventURL the eventURL to set
 	 */
-	public void setEventoURL(String eventoURL) {
-		this.eventoURL = eventoURL;
+	public void setEventURL(String eventURL) {
+		this.eventURL = eventURL;
 	}
 
 	/**
@@ -171,31 +166,31 @@ public class AccessRequestBackup {
 	}
 
 	/**
-	 * @return the origenHashCertificadoVoto
+	 * @return the originHashCertVote
 	 */
-	public String getorigenHashCertificadoVoto() {
-		return origenHashCertificadoVoto;
+	public String getoriginHashCertVote() {
+		return originHashCertVote;
 	}
 
 	/**
-	 * @param origenHashCertificadoVoto the origenHashCertificadoVoto to set
+	 * @param originHashCertVote the originHashCertVote to set
 	 */
-	public void setorigenHashCertificadoVoto(String origenHashCertificadoVoto) {
-		this.origenHashCertificadoVoto = origenHashCertificadoVoto;
+	public void setoriginHashCertVote(String originHashCertVote) {
+		this.originHashCertVote = originHashCertVote;
 	}
 
 	/**
-	 * @return the origenHashSolicitudAcceso
+	 * @return the originHashAccessRequest
 	 */
-	public String getorigenHashSolicitudAcceso() {
-		return origenHashSolicitudAcceso;
+	public String getoriginHashAccessRequest() {
+		return originHashAccessRequest;
 	}
 
 	/**
-	 * @param origenHashSolicitudAcceso the origenHashSolicitudAcceso to set
+	 * @param originHashAccessRequest the originHashAccessRequest to set
 	 */
-	public void setorigenHashSolicitudAcceso(String origenHashSolicitudAcceso) {
-		this.origenHashSolicitudAcceso = origenHashSolicitudAcceso;
+	public void setoriginHashAccessRequest(String originHashAccessRequest) {
+		this.originHashAccessRequest = originHashAccessRequest;
 	}
 
 	/**
@@ -213,60 +208,46 @@ public class AccessRequestBackup {
 	}
 
 	/**
-	 * @return the eventoId
+	 * @return the eventId
 	 */
-	public String getEventoId() {
-		return eventoId;
+	public String getEventVSId() {
+		return eventId;
 	}
 
 	/**
-	 * @param eventoId the eventoId to set
+	 * @param eventId the eventId to set
 	 */
-	public void setEventoId(String eventoId) {
-		this.eventoId = eventoId;
-	}
-
-	/**
-	 * @return the archivo
-	 */
-	public File getArchivo() {
-		return archivo;
-	}
-
-	/**
-	 * @param archivo the archivo to set
-	 */
-	public void setArchivo(File archivo) {
-		this.archivo = archivo;
+	public void setEventVSId(String eventId) {
+		this.eventId = eventId;
 	}
 	
 	public JSONObject toJSON() {
-		log.debug("toJSON");
+		logger.debug("toJSON");
 		Map map = new HashMap();
-		map.put("origenHashCertificadoVoto", origenHashCertificadoVoto);
-		map.put("hashCertificadoVotoBase64", hashCertificadoVotoBase64);
-		map.put("origenHashSolicitudAcceso", origenHashSolicitudAcceso);
-		map.put("hashSolicitudAccesoBase64", hashSolicitudAccesoBase64);
+		map.put("originHashCertVote", originHashCertVote);
+		map.put("hashCertVoteBase64", hashCertVoteBase64);
+		map.put("originHashAccessRequest", originHashAccessRequest);
+		map.put("hashAccessRequestBase64", hashAccessRequestBase64);
 		map.put("UUID", UUID.randomUUID().toString());
 		JSONObject jsonObject = new JSONObject(map);
 		return jsonObject;
 	}
 	
 	public static AccessRequestBackup parse(String strSolicitud) throws Exception {
-		log.debug("parse ");
+		logger.debug("parse ");
 		AccessRequestBackup solicitud = new AccessRequestBackup();
 		JSONObject requestJSON = new JSONObject(strSolicitud);
-		if(requestJSON.containsKey("hashSolicitudAccesoBase64")) 
-			solicitud.setHashSolicitudAccesoBase64(requestJSON.getString("hashSolicitudAccesoBase64"));
-		if(requestJSON.containsKey("origenHashSolicitudAcceso")) 
-			solicitud.setorigenHashSolicitudAcceso(
-					requestJSON.getString("origenHashSolicitudAcceso"));
-		if(requestJSON.containsKey("hashCertificadoVotoBase64")) 
-			solicitud.setHashCertificadoVotoBase64(
-					requestJSON.getString("hashCertificadoVotoBase64"));
-		if(requestJSON.containsKey("origenHashCertificadoVoto")) 
-			solicitud.setorigenHashCertificadoVoto(
-					requestJSON.getString("origenHashCertificadoVoto"));
+		if(requestJSON.containsKey("hashAccessRequestBase64"))
+			solicitud.setAccessRequestHashBase64(requestJSON.getString("hashAccessRequestBase64"));
+		if(requestJSON.containsKey("originHashAccessRequest"))
+			solicitud.setoriginHashAccessRequest(
+					requestJSON.getString("originHashAccessRequest"));
+		if(requestJSON.containsKey("hashCertVoteBase64"))
+			solicitud.setHashCertVoteBase64(
+					requestJSON.getString("hashCertVoteBase64"));
+		if(requestJSON.containsKey("originHashCertVote"))
+			solicitud.setoriginHashCertVote(
+					requestJSON.getString("originHashCertVote"));
 		return solicitud;
 	}
 }

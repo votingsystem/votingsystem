@@ -40,21 +40,26 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.io.*;
-import java.util.*;
-import java.text.*;
-import java.lang.reflect.*;
-
-import javax.mail.*;
-import javax.mail.internet.*;
-import javax.mail.search.*;
-
-import com.sun.mail.util.*;
 import com.sun.mail.iap.*;
-
 import com.sun.mail.imap.ACL;
-import com.sun.mail.imap.Rights;
 import com.sun.mail.imap.AppendUID;
+import com.sun.mail.imap.Rights;
+import com.sun.mail.util.ASCIIUtility;
+import com.sun.mail.util.BASE64EncoderStream;
+
+import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.Quota;
+import javax.mail.UIDFolder;
+import javax.mail.internet.MimeUtility;
+import javax.mail.search.SearchException;
+import javax.mail.search.SearchTerm;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.lang.reflect.Constructor;
+import java.util.*;
 
 /**
  * This class extends the iap.Protocol object and implements IMAP

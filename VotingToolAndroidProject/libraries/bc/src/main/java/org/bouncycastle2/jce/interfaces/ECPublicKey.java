@@ -1,8 +1,8 @@
 package org.bouncycastle2.jce.interfaces;
 
-import java.security.PublicKey;
-
 import org.bouncycastle2.math.ec.ECPoint;
+
+import java.security.PublicKey;
 
 /**
  * interface for elliptic curve public keys.

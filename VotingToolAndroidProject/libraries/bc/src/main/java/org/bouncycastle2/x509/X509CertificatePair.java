@@ -1,14 +1,14 @@
 package org.bouncycastle2.x509;
 
-import java.io.IOException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateParsingException;
-import java.security.cert.X509Certificate;
-
 import org.bouncycastle2.asn1.ASN1InputStream;
 import org.bouncycastle2.asn1.x509.CertificatePair;
 import org.bouncycastle2.asn1.x509.X509CertificateStructure;
 import org.bouncycastle2.jce.provider.X509CertificateObject;
+
+import java.io.IOException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateParsingException;
+import java.security.cert.X509Certificate;
 
 /**
  * This class contains a cross certificate pair. Cross certificates pairs may

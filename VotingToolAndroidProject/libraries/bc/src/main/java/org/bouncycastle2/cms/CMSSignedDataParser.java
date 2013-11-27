@@ -1,5 +1,25 @@
 package org.bouncycastle2.cms;
 
+import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.asn1.cms.CMSObjectIdentifiers;
+import org.bouncycastle2.asn1.cms.ContentInfoParser;
+import org.bouncycastle2.asn1.cms.SignedDataParser;
+import org.bouncycastle2.asn1.cms.SignerInfo;
+import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle2.asn1.x509.AttributeCertificate;
+import org.bouncycastle2.asn1.x509.CertificateList;
+import org.bouncycastle2.asn1.x509.X509CertificateStructure;
+import org.bouncycastle2.cert.X509AttributeCertificateHolder;
+import org.bouncycastle2.cert.X509CRLHolder;
+import org.bouncycastle2.cert.X509CertificateHolder;
+import org.bouncycastle2.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.bouncycastle2.operator.SignatureAlgorithmIdentifierFinder;
+import org.bouncycastle2.util.CollectionStore;
+import org.bouncycastle2.util.Store;
+import org.bouncycastle2.util.io.Streams;
+import org.bouncycastle2.x509.NoSuchStoreException;
+import org.bouncycastle2.x509.X509Store;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,49 +30,7 @@ import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.cert.CertStore;
 import java.security.cert.CertStoreException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1Generator;
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.ASN1OctetStringParser;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.ASN1SequenceParser;
-import org.bouncycastle2.asn1.ASN1Set;
-import org.bouncycastle2.asn1.ASN1SetParser;
-import org.bouncycastle2.asn1.ASN1StreamParser;
-import org.bouncycastle2.asn1.ASN1TaggedObject;
-import org.bouncycastle2.asn1.BERSequenceGenerator;
-import org.bouncycastle2.asn1.BERSetParser;
-import org.bouncycastle2.asn1.BERTaggedObject;
-import org.bouncycastle2.asn1.DEREncodable;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERSet;
-import org.bouncycastle2.asn1.DERTaggedObject;
-import org.bouncycastle2.asn1.DERTags;
-import org.bouncycastle2.asn1.cms.CMSObjectIdentifiers;
-import org.bouncycastle2.asn1.cms.ContentInfoParser;
-import org.bouncycastle2.asn1.cms.SignedDataParser;
-import org.bouncycastle2.asn1.cms.SignerInfo;
-import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.asn1.x509.AttributeCertificate;
-import org.bouncycastle2.asn1.x509.CertificateList;
-import org.bouncycastle2.asn1.x509.X509CertificateStructure;
-import org.bouncycastle2.util.CollectionStore;
-import org.bouncycastle2.util.Store;
-import org.bouncycastle2.util.io.Streams;
-import org.bouncycastle2.x509.NoSuchStoreException;
-import org.bouncycastle2.x509.X509Store;
-import org.bouncycastle2.cert.X509AttributeCertificateHolder;
-import org.bouncycastle2.cert.X509CRLHolder;
-import org.bouncycastle2.cert.X509CertificateHolder;
-import org.bouncycastle2.operator.DefaultSignatureAlgorithmIdentifierFinder;
-import org.bouncycastle2.operator.SignatureAlgorithmIdentifierFinder;
+import java.util.*;
 
 /**
  * Parsing class for an CMS Signed Data object from an input stream.

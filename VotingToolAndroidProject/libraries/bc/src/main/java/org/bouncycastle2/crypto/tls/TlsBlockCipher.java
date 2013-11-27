@@ -1,13 +1,13 @@
 package org.bouncycastle2.crypto.tls;
 
-import java.io.IOException;
-import java.security.SecureRandom;
-
 import org.bouncycastle2.crypto.BlockCipher;
 import org.bouncycastle2.crypto.Digest;
 import org.bouncycastle2.crypto.params.KeyParameter;
 import org.bouncycastle2.crypto.params.ParametersWithIV;
 import org.bouncycastle2.util.Arrays;
+
+import java.io.IOException;
+import java.security.SecureRandom;
 
 /**
  * A generic TLS 1.0 block cipher. This can be used for AES or 3DES for example.

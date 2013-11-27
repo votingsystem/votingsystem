@@ -43,27 +43,11 @@
  */
 package com.itextpdf.text.pdf;
 
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.DocListener;
-import com.itextpdf.text.DocWriter;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.ExceptionConverter;
-import com.itextpdf.text.Image;
-import com.itextpdf.text.ImgJBIG2;
-import com.itextpdf.text.ImgWMF;
-import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.*;
 import com.itextpdf.text.error_messages.MessageLocalization;
 import com.itextpdf.text.pdf.collection.PdfCollection;
 import com.itextpdf.text.pdf.events.PdfPageEventForwarder;
-import com.itextpdf.text.pdf.interfaces.PdfAnnotations;
-import com.itextpdf.text.pdf.interfaces.PdfDocumentActions;
-import com.itextpdf.text.pdf.interfaces.PdfEncryptionSettings;
-import com.itextpdf.text.pdf.interfaces.PdfPageActions;
-import com.itextpdf.text.pdf.interfaces.PdfRunDirection;
-import com.itextpdf.text.pdf.interfaces.PdfVersion;
-import com.itextpdf.text.pdf.interfaces.PdfViewerPreferences;
-import com.itextpdf.text.pdf.interfaces.PdfXConformance;
+import com.itextpdf.text.pdf.interfaces.*;
 import com.itextpdf.text.pdf.internal.PdfVersionImp;
 import com.itextpdf.text.pdf.internal.PdfXConformanceImp;
 import com.itextpdf.text.xml.xmp.XmpWriter;
@@ -72,16 +56,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.cert.Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 /**
  * A <CODE>DocWriter</CODE> class for PDF.

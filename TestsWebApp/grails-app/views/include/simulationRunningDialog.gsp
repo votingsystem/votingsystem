@@ -24,8 +24,7 @@
 $("#listenButton").click(function() {	
 	console.log("============= listenButton")
 
-	messageToService = {service:"manifestSimulationService",
-		operation:Operation.LISTEN}
+	messageToService = {service:"manifestSimulationService", status:"LISTEN"}
 	SimulationService.initialize();
  })
 
@@ -89,7 +88,7 @@ SimulationService.connect = (function(host) {
 
 function processResponse(response) {
 	var responseJSON = toJSON(response)
-	if(StatusCode.SC_TERMINATED == responseJSON.statusCode) {
+	if(ResponseVS.SC_TERMINATED == responseJSON.statusCode) {
 		$("#progressDiv").hide()
 	}
 	$("#messageFromService").html(response)
@@ -115,7 +114,7 @@ SimulationService.sendMessage = (function(message) {
 
 SimulationService.close = (function() {
 	console.log("closing socket connection")
-	messageToService["operation"] = Operation.CANCEL_SIMULATION
+	messageToService["operation"] = "FINISH_SIMULATION"
 	SimulationService.sendMessage(messageToService)
 	SimulationService.socket.close()
 });
@@ -124,7 +123,7 @@ SimulationService.close = (function() {
 function showSimulationRunningDialog(simulationData) {
 	$("#simulationRunningDialog").dialog("open");
 	messageToService = simulationData
-	messageToService.operation = Operation.INIT_SIMULATION
+	messageToService.operation = "INIT_SIMULATION"
 	SimulationService.initialize();
 }
 

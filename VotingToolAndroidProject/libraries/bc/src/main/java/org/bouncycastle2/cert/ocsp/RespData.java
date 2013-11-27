@@ -1,11 +1,11 @@
 package org.bouncycastle2.cert.ocsp;
 
-import java.util.Date;
-
 import org.bouncycastle2.asn1.ASN1Sequence;
 import org.bouncycastle2.asn1.ocsp.ResponseData;
 import org.bouncycastle2.asn1.ocsp.SingleResponse;
 import org.bouncycastle2.asn1.x509.X509Extensions;
+
+import java.util.Date;
 
 public class RespData
 {

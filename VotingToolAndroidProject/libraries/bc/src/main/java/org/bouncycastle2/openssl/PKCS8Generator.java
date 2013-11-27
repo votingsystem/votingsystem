@@ -1,15 +1,12 @@
 package org.bouncycastle2.openssl;
 
-import java.io.IOException;
-import java.security.AlgorithmParameterGenerator;
-import java.security.AlgorithmParameters;
-import java.security.GeneralSecurityException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.SecureRandom;
-import java.security.Security;
+import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle2.asn1.pkcs.*;
+import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle2.util.io.pem.PemGenerationException;
+import org.bouncycastle2.util.io.pem.PemObject;
+import org.bouncycastle2.util.io.pem.PemObjectGenerator;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
@@ -17,25 +14,8 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
-
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DEROctetString;
-import org.bouncycastle2.asn1.DERSequence;
-import org.bouncycastle2.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle2.asn1.pkcs.EncryptedPrivateKeyInfo;
-import org.bouncycastle2.asn1.pkcs.EncryptionScheme;
-import org.bouncycastle2.asn1.pkcs.KeyDerivationFunc;
-import org.bouncycastle2.asn1.pkcs.PBES2Parameters;
-import org.bouncycastle2.asn1.pkcs.PBKDF2Params;
-import org.bouncycastle2.asn1.pkcs.PKCS12PBEParams;
-import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.util.io.pem.PemGenerationException;
-import org.bouncycastle2.util.io.pem.PemObject;
-import org.bouncycastle2.util.io.pem.PemObjectGenerator;
+import java.io.IOException;
+import java.security.*;
 
 public class PKCS8Generator
     implements PemObjectGenerator

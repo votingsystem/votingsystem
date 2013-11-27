@@ -27,7 +27,7 @@
             android:layout_marginRight="30dp"
             android:layout_weight="0.43"
             android:drawableLeft="@drawable/signature_ok_22"
-            android:text="@string/menu_solicitar_certificado"
+            android:text="@string/request_certificate_menu"
             android:textStyle="bold" />
 
     </LinearLayout>

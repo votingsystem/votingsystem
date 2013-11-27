@@ -1,22 +1,18 @@
 package org.bouncycastle2.pkcs;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.DERBitString;
-import org.bouncycastle2.asn1.DERSet;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.pkcs.Attribute;
 import org.bouncycastle2.asn1.pkcs.CertificationRequest;
 import org.bouncycastle2.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle2.asn1.x500.X500Name;
 import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle2.operator.ContentSigner;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * A class for creating PKCS#10 Certification requests.

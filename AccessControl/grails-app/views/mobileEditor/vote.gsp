@@ -43,9 +43,9 @@
 			<select id="controlCenterSelect" style="margin:0px 0px 0px 20px;display:inline;" required
 					oninvalid="this.setCustomValidity('<g:message code="selectControlCenterLbl"/>')"
 	   				onchange="this.setCustomValidity('')">
-				<g:each status="i" in="${controlCenters}" var="controlCenter">
+				<g:each status="i" in="${controlCenters}" var="controlCenterVS">
 					<option value=""> --- <g:message code="selectControlCenterLbl"/> --- </option>
-				  	<option value="${controlCenter.id}">${controlCenter.nombre}</option>
+				  	<option value="${controlCenterVS.id}">${controlCenterVS.name}</option>
 				</g:each>
 			</select>		
 		</div>
@@ -83,8 +83,8 @@
 <g:applyCodec encodeAs="none">
 		var numVoteOptions = 0
 		var controlCenters = {};
-		<g:each status="i" in="${controlCenters}" var="controlCenter">
-			controlCenters["${controlCenter.id}"] = ${controlCenter as JSON}
+		<g:each status="i" in="${controlCenters}" var="controlCenterVS">
+			controlCenters["${controlCenterVS.id}"] = ${controlCenterVS as JSON}
 		</g:each>
 		
 		$(function() {
@@ -140,23 +140,23 @@
 				}
 				
 			  	var event = new Evento();
-			  	event.asunto = subject.val();
-			  	event.contenido = htmlEditorContent;
-			  	event.fechaInicio = dateBegin.datepicker('getDate').format();
-			  	event.fechaFin = dateFinish.datepicker('getDate').format();
-				  	event.centroControl = controlCenters[$('#controlCenterSelect').val()]
+			  	event.subject = subject.val();
+			  	event.content = htmlEditorContent;
+			  	event.dateBegin = dateBegin.datepicker('getDate').format();
+			  	event.dateFinish = dateFinish.datepicker('getDate').format();
+				  	event.controlCenterVS = controlCenters[$('#controlCenterSelect').val()]
 		
-			  	event.opciones = pollOptions
+			  	event.fieldsEventVS = pollOptions
 			  	var webAppMessage = new WebAppMessage(
-			    	StatusCode.SC_PROCESSING, 
+			    	ResponseVS.SC_PROCESSING,
 			    	Operation.VOTING_PUBLISHING)
-				webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
-				webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
-				webAppMessage.contenidoFirma = event
-				webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStamp', absolute:true)}"
-				webAppMessage.urlEnvioDocumento = "${createLink(controller:'eventoVotacion', absolute:true)}"
-				webAppMessage.asuntoMensajeFirmado = "${message(code:'publishVoteSubject')}"
-				webAppMessage.respuestaConRecibo = true
+				webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+				webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
+				webAppMessage.signedContent = event
+				webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStampVS', absolute:true)}"
+				webAppMessage.receiverSignServiceURL = "${createLink(controller:'eventVS', absolute:true)}"
+				webAppMessage.signedMessageSubject = "${message(code:'publishVoteSubject')}"
+				webAppMessage.isResponseWithReceipt = true
 			
 				votingSystemClient.setMessageToSignatureClient(webAppMessage)
 				return false
@@ -171,31 +171,31 @@
 			editorDiv = $("#editorDiv"),
 			addOptionButton = $("#addOptionButton"), 
 			allFields = $( [] ).add( subject ).add(dateBegin).add(dateFinish).add(editorDiv);
-			allFields.removeClass("ui-state-error");
+			allFields.removeClass("formFieldError");
 			
 			if(!document.getElementById('subject').validity.valid) {
-				subject.addClass( "ui-state-error" );
+				subject.addClass( "formFieldError" );
 				showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 					'<g:message code="emptyFieldMsg"/>')
 				return null
 			}
 			
 			if(dateBegin.datepicker("getDate") === null) {
-				dateBegin.addClass( "ui-state-error" );
+				dateBegin.addClass( "formFieldError" );
 				showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 					'<g:message code="emptyFieldMsg"/>')
 				return null
 			}
 			
 			if(dateFinish.datepicker("getDate") === null) {
-				dateFinish.addClass( "ui-state-error" );
+				dateFinish.addClass( "formFieldError" );
 				showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 					'<g:message code="emptyFieldMsg"/>')
 				return null
 			}
 			
 			if(dateFinish.datepicker("getDate") < new Date() ) {
-				dateFinish.addClass( "ui-state-error" );
+				dateFinish.addClass( "formFieldError" );
 				showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 					'<g:message code="dateInitERRORMsg"/>')
 				return null
@@ -205,31 +205,31 @@
 				dateFinish.datepicker("getDate")) {
 				showResultDialog('<g:message code="dataFormERRORLbl"/>',
 						'<g:message code="dateRangeERRORMsg"/>') 
-				dateBegin.addClass("ui-state-error");
-				dateFinish.addClass("ui-state-error");
+				dateBegin.addClass("formFieldError");
+				dateFinish.addClass("formFieldError");
 				return null
 			}
 			     	
 			if(htmlEditorContent.trim() == 0) {
-				editorDiv.addClass( "ui-state-error" );
+				editorDiv.addClass( "formFieldError" );
 				showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 						'<g:message code="emptyDocumentERRORMsg"/>')
 				return null;
 			}  
 			
 			if(!document.getElementById('controlCenterSelect').validity.valid) {
-				$("#controlCenterSelect").addClass( "ui-state-error" );
+				$("#controlCenterSelect").addClass( "formFieldError" );
 				showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 					'<g:message code="selectControlCenterLbl"/>')
 				return null
-			} else $("#controlCenterSelect").removeClass("ui-state-error");
+			} else $("#controlCenterSelect").removeClass("formFieldError");
 
 			var pollOptions = new Array();
 			$("#fieldsBox div").children().each(function(){
 				var optionTxt = $(this).find('div.newFieldValueDiv').text();
 				if(optionTxt.length > 0) {
 					console.log("- adding option: " + optionTxt);
-					var claimField = {contenido:optionTxt}
+					var claimField = {content:optionTxt}
 					pollOptions.push(claimField)
 				}
 			});
@@ -238,7 +238,7 @@
 			if(pollOptions.length < 2) { //two options at least 
 				showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 						'<g:message code="optionsMissingERRORMsg"/>')
-				addOptionButton.addClass( "ui-state-error" );
+				addOptionButton.addClass( "formFieldError" );
 				return null
 			}
 			return pollOptions

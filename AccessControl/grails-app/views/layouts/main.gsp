@@ -2,13 +2,13 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<title><g:message code="nombreServidorLabel"/></title>
+	<title><g:message code="serverNameLabel"/></title>
 	<r:require module="application"/>
 	<g:layoutHead/>
 	<r:layoutResources />
 </head>
     <body>
-		<div class="header">
+		<div class="header"  style="display:none;">
 		   	<div class="col-subsystem">
 		   		<a id="subsystem_0_0_Link"></a>
 		   		<a id="subsystem_0_1_Link"></a>
@@ -31,12 +31,12 @@
 		   	</div>
 		</div>
 
-		<g:layoutBody/>
+        <div style="min-height: 600px;"><g:layoutBody/></div>
 	
 		<div class="footer" style="display:none;">
 			<a class="appLink" href="mailto:${grailsApplication.config.VotingSystem.emailAdmin}"
 				 style="">${message(code: 'emailLabel', null)}</a>
-			<a class="appLink" href="${createLink(controller: 'infoServidor', action: 'informacion')}"
+			<a class="appLink" href="${createLink(controller: 'serverInfo', action: 'info')}"
 				style="margin: 3px 0 0 20px; float:right;">
 				<g:message code="dataInfoLinkText"/>
 			</a>
@@ -59,6 +59,7 @@
 <r:script>
 	$(function() {
 		updateSubsystem("${selectedSubsystem}")
+		$(".header").fadeIn(3000)
 		$(".footer").fadeIn(3000)
 		
 		$("#advancedSearchLink").click(function () { 
@@ -78,7 +79,7 @@
 	function setMessageFromSignatureClient(appMessage) {
 		var appMessageJSON = toJSON(appMessage)
 		if(appMessageJSON != null) {
-			if(StatusCode.SC_PROCESSING == appMessageJSON.statusCode){
+			if(ResponseVS.SC_PROCESSING == appMessageJSON.statusCode){
 				signatureClientToolLoaded = true;
 				$("#loadingVotingSystemAppletDialog").dialog("close");
 				$("#workingWithAppletDialog").dialog("open");

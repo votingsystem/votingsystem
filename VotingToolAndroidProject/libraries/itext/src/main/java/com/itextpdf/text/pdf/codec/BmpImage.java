@@ -87,17 +87,9 @@
  */
 package com.itextpdf.text.pdf.codec;
 
-import com.itextpdf.text.BadElementException;
-import com.itextpdf.text.ExceptionConverter;
-import com.itextpdf.text.Image;
-import com.itextpdf.text.ImgRaw;
-import com.itextpdf.text.Utilities;
+import com.itextpdf.text.*;
 import com.itextpdf.text.error_messages.MessageLocalization;
-import com.itextpdf.text.pdf.PdfArray;
-import com.itextpdf.text.pdf.PdfDictionary;
-import com.itextpdf.text.pdf.PdfName;
-import com.itextpdf.text.pdf.PdfNumber;
-import com.itextpdf.text.pdf.PdfString;
+import com.itextpdf.text.pdf.*;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;

@@ -1,14 +1,10 @@
 package org.bouncycastle2.crypto.agreement;
 
-import java.math.BigInteger;
-
 import org.bouncycastle2.crypto.BasicAgreement;
 import org.bouncycastle2.crypto.CipherParameters;
-import org.bouncycastle2.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle2.crypto.params.DHParameters;
-import org.bouncycastle2.crypto.params.DHPrivateKeyParameters;
-import org.bouncycastle2.crypto.params.DHPublicKeyParameters;
-import org.bouncycastle2.crypto.params.ParametersWithRandom;
+import org.bouncycastle2.crypto.params.*;
+
+import java.math.BigInteger;
 
 /**
  * a Diffie-Hellman key agreement class.

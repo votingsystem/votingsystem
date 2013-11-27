@@ -1,20 +1,20 @@
 package org.votingsystem.applet.votingtool;
 
-import org.votingsystem.model.AppHostVS;
-import java.io.File;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.atomic.AtomicBoolean;
-import javax.swing.JApplet;
-import javax.swing.JFrame;
-import javax.swing.UIManager;
+import com.itextpdf.text.pdf.PdfName;
+import iaik.pkcs.pkcs11.Mechanism;
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.applet.votingtool.dialog.PreconditionsCheckerDialog;
 import org.votingsystem.model.OperationVS;
+import org.votingsystem.model.*;
 import org.votingsystem.util.FileUtils;
-import org.votingsystem.applet.model.AppletOperation;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ResponseVS;
+import javax.swing.*;
+import java.io.File;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import org.votingsystem.applet.votingtool.panel.AboutPanel;
 
 /**
 * @author jgzornoza
@@ -24,35 +24,34 @@ public class Applet extends JApplet implements AppHostVS {
     
     private static Logger logger = Logger.getLogger(Applet.class);
 
-    public static final String SERVER_INFO_URL_SUFIX = "infoServidor";
-    
-    public static enum ModoEjecucion {APPLET, APLICACION}
-    
-    private Timer recolectorOperaciones;
-    private AtomicBoolean cancelado = new AtomicBoolean(false);
-    private AppletOperation operacionEnCurso;
+    public static final Mechanism DNIe_SESSION_MECHANISM = Mechanism.SHA1_RSA_PKCS;
+    public static final PdfName PDF_SIGNATURE_NAME = PdfName.ADBE_PKCS7_SHA1;
+
+    private static enum ExecutionMode {APPLET, APPLICATION}
+
+    private Timer operationGetter;
     public static String locale = "es";
-    public static ModoEjecucion modoEjecucion = ModoEjecucion.APPLET;
-    
+    public static ExecutionMode executionMode = ExecutionMode.APPLET;
+
     public Applet() { }
-        
+
     public void init() {
         logger.debug("------ init");
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 logger.debug("ShutdownHook - ShutdownHook - ShutdownHook");
-                finalizar();
+                terminate();
         }});
         //Execute a job on the event-dispatching thread:
         //creating this applet's GUI.
         try {
-            VotingToolContext.init(this, "log4j.properties", "messages_", locale);
+            ContextVS.initSignatureApplet(this, "log4j.properties", "votingToolMessages_", locale);
             javax.swing.SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     try {
                         UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
-                        AcercaDePanel acercaDePanel = new AcercaDePanel();
-                        getContentPane().add(acercaDePanel);
+                        AboutPanel aboutPanel = new AboutPanel();
+                        getContentPane().add(aboutPanel);
                         getContentPane().repaint();
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -65,10 +64,9 @@ public class Applet extends JApplet implements AppHostVS {
             //logger.error(ex.getMessage(), ex);
         }
     }
-        
+
     public void start() {
-        logger.debug("start - java version: " + 
-                System.getProperty("java.version"));
+        logger.debug("start - java version: " + System.getProperty("java.version"));
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 try {
@@ -79,145 +77,125 @@ public class Applet extends JApplet implements AppHostVS {
                 }
             }
         });
-        if(modoEjecucion == ModoEjecucion.APPLET) {
-            lanzarTimer();
+        if(executionMode == ExecutionMode.APPLET) {
+            initOperationGetter();
             if(getParameter("locale") != null) locale = getParameter("locale");
-        } 
+        }
         init();
-        AppletOperation operacion = new AppletOperation(
-                ResponseVS.SC_PROCESSING, 
-                AppletOperation.Type.APPLET_MESSAGE, 
-                ContextVS.INSTANCE.getString("appletInicializado"));
+        OperationVS operacion = new OperationVS(ResponseVS.SC_PROCESSING,
+                ContextVS.getInstance().getMessage("appletInitMsg"));
         sendMessageToHost(operacion);
     }
 
     public void stop() {
         logger.debug("stop");
-        finalizar();
+        terminate();
     }
 
     public void destroy() {
         logger.debug("destroy");
-        finalizar();
+        terminate();
     }
-    
+
     /*
      * Timer that checks pending operations on web client app
      */
-    private void lanzarTimer() {
-        recolectorOperaciones =  new Timer(true);
-        final netscape.javascript.JSObject jsObject = 
-                netscape.javascript.JSObject.getWindow(this);
-        recolectorOperaciones.scheduleAtFixedRate(
+    private void initOperationGetter() {
+        operationGetter =  new Timer(true);
+        final netscape.javascript.JSObject jsObject = netscape.javascript.JSObject.getWindow(this);
+        operationGetter.scheduleAtFixedRate(
             new TimerTask(){
-                public void run() { 
+                public void run() {
                     //logger.debug("Comprobando operaciones pendientes");
                     Object object = jsObject.call("getMessageToSignatureClient", null);
                     if(object != null) {
-                        ejecutarOperacion(object.toString());
+                        runOperation(object.toString());
                     } else {
                         //logger.debug("Testeando JSObject - responseVS nula");
                     }
                 }
             }, 0, 1000);
     }
-    
-        
-    public void finalizar() {
-        logger.debug("finalizar");
-        if(cancelado.get()) {
-            logger.debug("finalizar - already cancelled");
-            return;
-        }
-        recolectorOperaciones.cancel();
-        AppletOperation operacion = new AppletOperation();
-        operacion.setType(AppletOperation.Type.APPLET_PAUSED_MESSAGE);
-        sendMessageToHost(operacion);
-        cancelado.set(true);
-        VotingToolContext.INSTANCE.shutdown();
+
+
+    public void terminate() {
+        logger.debug("terminate");
+        operationGetter.cancel();
+        sendMessageToHost(new OperationVS(TypeVS.TERMINATED));
+        ContextVS.getInstance().shutdown();
     }
- 
-    public void ejecutarOperacion(String operacionJSONStr) {
-        logger.debug("ejecutarOperacion: " + operacionJSONStr);
+
+    public void runOperation(String operacionJSONStr) {
+        logger.debug("runOperation: " + operacionJSONStr);
         if(operacionJSONStr == null || "".equals(operacionJSONStr)) return;
-        operacionEnCurso = AppletOperation.parse(operacionJSONStr);
-        if(operacionEnCurso.getErrorValidacion() != null) {
-            logger.debug("ejecutarOperacion - errorValidacion: " + 
-                    operacionEnCurso.getErrorValidacion());
-            operacionEnCurso.setStatusCode(ResponseVS.SC_ERROR_REQUEST);
-            sendMessageToHost(operacionEnCurso);
-            return;
+        JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(operacionJSONStr);
+        OperationVS runningOperation = OperationVS.populate(jsonObject);
+        if(runningOperation.getType() == null) {
+            logger.error("runOperation - missin operation type");
+            runningOperation.setMessage("missin operation type");
+            runningOperation.setStatusCode(ResponseVS.SC_ERROR_REQUEST);
+            sendMessageToHost(runningOperation);
         } else {
-            PreconditionsCheckerDialog preconditionsChecker = 
-                    new PreconditionsCheckerDialog(operacionEnCurso,
+            PreconditionsCheckerDialog preconditionsChecker = new PreconditionsCheckerDialog(
                     new JFrame(), true);
-            preconditionsChecker.showDialog();
+            preconditionsChecker.checkOperation(runningOperation);
         }
     }
-    
-    public static void main (String[] args) { 
-        modoEjecucion = ModoEjecucion.APLICACION;
-        AppletOperation operation = new AppletOperation();
-        String[] _args = {""};
-        operation.setArgs(_args);
-        logger.debug("operation: " + operation.toJSON());
+
+    public static void main (String[] args) {
+        executionMode = ExecutionMode.APPLICATION;
         try {
             javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
                 public void run() {
                     try {
                         UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
                         Applet appletFirma = new Applet();
-                        appletFirma.start();                        
-                        File jsonFile = File.createTempFile("signClaim", ".json");
+                        appletFirma.start();
+                        File jsonFile = File.createTempFile("signManifest", ".json");
                         jsonFile.deleteOnExit();
                         FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
-                            .getResourceAsStream("testFiles/signClaim.json"), jsonFile);        
-                        appletFirma.ejecutarOperacion(FileUtils.getStringFromFile(jsonFile));
+                            .getResourceAsStream("testFiles/signManifest.json"), jsonFile);
+                        appletFirma.runOperation(FileUtils.getStringFromFile(jsonFile));
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
                     }
                 }
             });
-            if(Applet.ModoEjecucion.APLICACION == 
-                Applet.modoEjecucion){
+            if(ExecutionMode.APPLICATION == Applet.executionMode){
                 logger.debug(" ------ System.exit(0) ------ ");
                 //System.exit(0);
-            } else logger.debug("-- finalizando aplicación --- ");
+            } else logger.debug("-- exiting App --- ");
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
- 
-    @Override public void sendMessageToHost(OperationVS operacion) {
-        if (operacion == null) {
+
+    @Override public void sendMessageToHost(OperationVS operation) {
+        if (operation == null) {
             logger.debug(" - sendMessageToHost - Operacion null");
             return;
         }
-        AppletOperation messageToHost = (AppletOperation)operacion;
+        OperationVS messageToHost = (OperationVS)operation;
+        Map appletOperationDataMap = ((OperationVS)operation).getDataMap();
+        JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(appletOperationDataMap);
         try {
-            if(modoEjecucion == ModoEjecucion.APPLET) {
+            if(executionMode == ExecutionMode.APPLET) {
                 String callbackFunction = "setMessageFromSignatureClient";
-                if(messageToHost.getCallerCallback() != null) 
-                    callbackFunction = messageToHost.getCallerCallback();        
-                logger.debug(" - sendMessageToHost - status: " + 
-                        messageToHost.getStatusCode() + " - operación: " + 
-                        messageToHost.toJSON().toString() + " - callbackFunction: " + 
-                        callbackFunction);          
-                Object[] args = {messageToHost.toJSON().toString()};
-                Object object = netscape.javascript.JSObject.getWindow(this).
-                        call(callbackFunction, args);
-            } else logger.debug("---> APP EXECUTION MODE: " + modoEjecucion.toString());
+                if(messageToHost.getCallerCallback() != null)
+                    callbackFunction = messageToHost.getCallerCallback();
+                logger.debug(" - sendMessageToHost - status: " +
+                        messageToHost.getStatusCode() + " - operación: " + messageJSON.toString() +
+                        " - callbackFunction: " + callbackFunction);
+                Object[] args = {messageJSON.toString()};
+                Object object = netscape.javascript.JSObject.getWindow(this).call(callbackFunction, args);
+            } else logger.debug("---> APP EXECUTION MODE: " + executionMode.toString());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        if(ModoEjecucion.APLICACION == modoEjecucion && 
-                messageToHost.getStatusCode() == ResponseVS.SC_CANCELLED){
+        if(ExecutionMode.APPLICATION == executionMode && messageToHost.getStatusCode() == ResponseVS.SC_CANCELLED){
             logger.debug(" ------  System.exit(0) ------ ");
             System.exit(0);
         }
     }
 
-    @Override public OperationVS getPendingOperation() {
-        return operacionEnCurso; 
-    }
 }

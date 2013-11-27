@@ -1,16 +1,16 @@
 package org.bouncycastle2.jce.provider;
 
-import java.math.BigInteger;
-import java.security.SignatureException;
-import java.security.SignatureSpi;
-import java.security.PrivateKey;
-import java.security.InvalidKeyException;
-import java.security.spec.AlgorithmParameterSpec;
-
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle2.crypto.DSA;
 import org.bouncycastle2.crypto.Digest;
+
+import java.math.BigInteger;
+import java.security.InvalidKeyException;
+import java.security.PrivateKey;
+import java.security.SignatureException;
+import java.security.SignatureSpi;
+import java.security.spec.AlgorithmParameterSpec;
 
 public abstract class DSABase
     extends SignatureSpi

@@ -40,9 +40,10 @@
 
 package com.sun.mail.smtp;
 
-import java.io.*;
-import javax.mail.*;
-import javax.mail.internet.*;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.internet.MimeMessage;
+import java.io.InputStream;
 
 /**
  * This class is a specialization of the MimeMessage class that allows

@@ -1,34 +1,12 @@
 package org.bouncycastle2.jce.provider;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.math.BigInteger;
-import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.ECPoint;
-import java.security.spec.ECPublicKeySpec;
-import java.security.spec.EllipticCurve;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DERBitString;
-import org.bouncycastle2.asn1.DERNull;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DEROctetString;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle2.asn1.cryptopro.ECGOST3410NamedCurves;
 import org.bouncycastle2.asn1.cryptopro.GOST3410PublicKeyAlgParameters;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle2.asn1.x9.X962Parameters;
-import org.bouncycastle2.asn1.x9.X9ECParameters;
-import org.bouncycastle2.asn1.x9.X9ECPoint;
-import org.bouncycastle2.asn1.x9.X9IntegerConverter;
-import org.bouncycastle2.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle2.asn1.x9.*;
 import org.bouncycastle2.crypto.params.ECDomainParameters;
 import org.bouncycastle2.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle2.jce.ECGOST3410NamedCurveTable;
@@ -38,6 +16,16 @@ import org.bouncycastle2.jce.provider.asymmetric.ec.ECUtil;
 import org.bouncycastle2.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle2.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle2.math.ec.ECCurve;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.math.BigInteger;
+import java.security.interfaces.ECPublicKey;
+import java.security.spec.ECParameterSpec;
+import java.security.spec.ECPoint;
+import java.security.spec.ECPublicKeySpec;
+import java.security.spec.EllipticCurve;
 
 public class JCEECPublicKey
     implements ECPublicKey, org.bouncycastle2.jce.interfaces.ECPublicKey, ECPointEncoder

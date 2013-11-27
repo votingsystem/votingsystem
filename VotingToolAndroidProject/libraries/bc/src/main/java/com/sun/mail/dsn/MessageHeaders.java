@@ -40,11 +40,13 @@
 
 package com.sun.mail.dsn;
 
-import java.io.*;
-
-import javax.activation.*;
-import javax.mail.*;
-import javax.mail.internet.*;
+import javax.activation.DataHandler;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.internet.InternetHeaders;
+import javax.mail.internet.MimeMessage;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 /**
  * A special MimeMessage object that contains only message headers,

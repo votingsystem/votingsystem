@@ -1,11 +1,11 @@
 package org.bouncycastle2.cms.bc;
 
-import java.io.IOException;
-
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle2.cert.X509CertificateHolder;
+import org.bouncycastle2.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle2.operator.bc.BcRSAAsymmetricKeyWrapper;
+
+import java.io.IOException;
 
 public class BcRSAKeyTransRecipientInfoGenerator
     extends BcKeyTransRecipientInfoGenerator

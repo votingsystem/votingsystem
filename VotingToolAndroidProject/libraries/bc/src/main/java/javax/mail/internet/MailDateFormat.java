@@ -40,17 +40,9 @@
 
 package javax.mail.internet;
 
-import java.util.Date;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Locale;
-import java.util.TimeZone;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.text.NumberFormat;
-import java.text.FieldPosition;
-import java.text.ParsePosition;
+import java.text.*;
 import java.text.ParseException;
+import java.util.*;
 
 /**
  * Formats and parses date specification based on the

@@ -1,23 +1,31 @@
 package org.votingsystem.model;
 
+import javax.persistence.*;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
+
+import static javax.persistence.GenerationType.IDENTITY;
 
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class TagVS {
+@Entity
+@Table(name="TagVS")
+public class TagVS implements java.io.Serializable {
 
+    private static final long serialVersionUID = 1L;
+	 
+    @Id @GeneratedValue(strategy=IDENTITY)
+    @Column(name="id", unique=true, nullable=false)
     private Long id;
-    private String nombre;
-    private Long frecuencia;
-    private Date dateCreated;
-    private Date lastUpdated;
-
-
-    private Set<EventTagVS> eventTagVSes = new HashSet<EventTagVS>(0);
+    @Column(name="name", nullable=false, length=50) private String name;
+    @Column(name="frequency") private Long frequency;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name="dateCreated", length=23) private Date dateCreated;
+    @ManyToMany(mappedBy = "tagVSSet") private Set<EventVS> eventVSSet;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name="lastUpdated", length=23) private Date lastUpdated;
 
     public TagVS() { }
    
@@ -29,28 +37,20 @@ public class TagVS {
         this.id = id;
     }
     
-    public String getNombre() {
-        return this.nombre;
+    public String getName() {
+        return this.name;
     }
     
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public Set<EventTagVS> getEventTagVSes() {
-        return this.eventTagVSes;
-    }
-    
-    public void setEventTagVSes(Set<EventTagVS> eventTagVSes) {
-        this.eventTagVSes = eventTagVSes;
+    public void setFrequency(Long frequency) {
+        this.frequency = frequency;
     }
 
-    public void setFrecuencia(Long frecuencia) {
-        this.frecuencia = frecuencia;
-    }
-
-    public Long getFrecuencia() {
-        return frecuencia;
+    public Long getFrequency() {
+        return frequency;
     }
 
     public void setDateCreated(Date dateCreated) {
@@ -68,5 +68,13 @@ public class TagVS {
     public Date getLastUpdated() {
         return lastUpdated;
     }
+
+	public Set<EventVS> getEventVSSet() {
+		return eventVSSet;
+	}
+
+	public void setEventVSSet(Set<EventVS> eventVSSet) {
+		this.eventVSSet = eventVSSet;
+	}
 
 }

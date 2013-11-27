@@ -1,16 +1,5 @@
 package org.bouncycastle2.jce.provider;
 
-import java.io.IOException;
-import java.security.AlgorithmParameters;
-import java.security.InvalidKeyException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SignatureException;
-import java.security.SignatureSpi;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.AlgorithmParameterSpec;
-
 import org.bouncycastle2.asn1.ASN1Encodable;
 import org.bouncycastle2.asn1.DERNull;
 import org.bouncycastle2.asn1.DERObjectIdentifier;
@@ -23,20 +12,15 @@ import org.bouncycastle2.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle2.crypto.AsymmetricBlockCipher;
 import org.bouncycastle2.crypto.CipherParameters;
 import org.bouncycastle2.crypto.Digest;
-import org.bouncycastle2.crypto.digests.MD2Digest;
-import org.bouncycastle2.crypto.digests.MD4Digest;
-import org.bouncycastle2.crypto.digests.MD5Digest;
-import org.bouncycastle2.crypto.digests.NullDigest;
-import org.bouncycastle2.crypto.digests.RIPEMD128Digest;
-import org.bouncycastle2.crypto.digests.RIPEMD160Digest;
-import org.bouncycastle2.crypto.digests.RIPEMD256Digest;
-import org.bouncycastle2.crypto.digests.SHA1Digest;
-import org.bouncycastle2.crypto.digests.SHA224Digest;
-import org.bouncycastle2.crypto.digests.SHA256Digest;
-import org.bouncycastle2.crypto.digests.SHA384Digest;
-import org.bouncycastle2.crypto.digests.SHA512Digest;
+import org.bouncycastle2.crypto.digests.*;
 import org.bouncycastle2.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle2.crypto.engines.RSABlindedEngine;
+
+import java.io.IOException;
+import java.security.*;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.AlgorithmParameterSpec;
 
 public class JDKDigestSignature
     extends SignatureSpi

@@ -1,22 +1,17 @@
 package org.bouncycastle2.cert.cmp;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 import org.bouncycastle2.asn1.ASN1EncodableVector;
 import org.bouncycastle2.asn1.DERSequence;
-import org.bouncycastle2.asn1.cmp.CMPCertificate;
-import org.bouncycastle2.asn1.cmp.CMPObjectIdentifiers;
-import org.bouncycastle2.asn1.cmp.PBMParameter;
-import org.bouncycastle2.asn1.cmp.PKIBody;
-import org.bouncycastle2.asn1.cmp.PKIHeader;
-import org.bouncycastle2.asn1.cmp.PKIMessage;
-import org.bouncycastle2.util.Arrays;
+import org.bouncycastle2.asn1.cmp.*;
 import org.bouncycastle2.cert.X509CertificateHolder;
 import org.bouncycastle2.cert.crmf.PKMACBuilder;
 import org.bouncycastle2.operator.ContentVerifier;
 import org.bouncycastle2.operator.ContentVerifierProvider;
 import org.bouncycastle2.operator.MacCalculator;
+import org.bouncycastle2.util.Arrays;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Wrapper for a PKIMessage with protection attached to it.

@@ -1,34 +1,34 @@
 Para añadir una Autoridad Certificadora hay que copiar en el directorio ./WEB_INF/cms
 la cadena de certificación de la misma en un archivo en formato PEM añadiendo el
-prefijo 'AC_' al nombre del archivo y poniendo como extensión la cadema '.pem'.
+prefijo 'AC_' al name del archivo y poniendo como extensión la cadema '.pem'.
 
 
-- 'AC_RAIZ_DNIE_SHA1.pem' certificado raíz del DNI electrónico emitido en España
+- 'AC_RAIZ_DNIE_SHA1.pem' certificateVS raíz del DNI electrónico emitido en España
 (http://www.dnielectronico.es/seccion_integradores/certs.html)
-- 'AC_RAIZ_DNIE_SHA2.pem' certificado raíz del DNI electrónico emitido en España
+- 'AC_RAIZ_DNIE_SHA2.pem' certificateVS raíz del DNI electrónico emitido en España
 (http://www.dnielectronico.es/seccion_integradores/certs.html)
-- 'AC_DNIE_001_SHA1.pem' certificado intermedio del DNI electrónico emitido en España
+- 'AC_DNIE_001_SHA1.pem' certificateVS intermedio del DNI electrónico emitido en España
 (http://www.dnielectronico.es/seccion_integradores/certs.html)
-- 'AC_DNIE_001_SHA1.pem' certificado intermedio del DNI electrónico emitido en España
+- 'AC_DNIE_001_SHA1.pem' certificateVS intermedio del DNI electrónico emitido en España
 (http://www.dnielectronico.es/seccion_integradores/certs.html)
-- 'AC_DNIE_002_SHA1.pem' certificado intermedio del DNI electrónico emitido en España
+- 'AC_DNIE_002_SHA1.pem' certificateVS intermedio del DNI electrónico emitido en España
 (http://www.dnielectronico.es/seccion_integradores/certs.html)
-- 'AC_DNIE_002_SHA2.pem' certificado intermedio del DNI electrónico emitido en España
+- 'AC_DNIE_002_SHA2.pem' certificateVS intermedio del DNI electrónico emitido en España
 (http://www.dnielectronico.es/seccion_integradores/certs.html)
-- 'AC_DNIE_003_SHA1.pem' certificado intermedio del DNI electrónico emitido en España
+- 'AC_DNIE_003_SHA1.pem' certificateVS intermedio del DNI electrónico emitido en España
 (http://www.dnielectronico.es/seccion_integradores/certs.html)
-- 'AC_DNIE_003_SHA2.pem' certificado intermedio del DNI electrónico emitido en España
+- 'AC_DNIE_003_SHA2.pem' certificateVS intermedio del DNI electrónico emitido en España
 (http://www.dnielectronico.es/seccion_integradores/certs.html)
 
 Generación y configuración del almacén de claves de la aplicación:
 https://github.com/jgzornoza/SistemaVotacion/wiki/Almacenes-de-claves
 
 --------------------------------------------------------------------------------------------
-- Para renovar los certificados del servidor renombrar el archivo ControlAcceso.jks a ControlAcceso.jks_cancelled
-y copiar los nuevos certificados en un almacén de claves JKS con el nombre ControlAcceso.jks.
+- Para renovar los certificados del servidor renombrar el archivo AccessControl.jks a AccessControl.jks_cancelled
+y copiar los nuevos certificados en un almacén de claves JKS con el name AccessControl.jks.
 
 - Para dar de baja en el sistema los certificados asociados a uno de los archivos del directorio, 
-renombrar el archivo correspondiente añadiendo al final del nombre la cadena "_cancelled"  
+renombrar el archivo correspondiente añadiendo al final del name la cadena "_cancelled"
 
 - Cada vez que se reinicia el servicio de firmas, se comprueba si existen archivos de certificados cancelados,
 en caso afirmativo actualiza el estado en la base de datos y borra el archivo. 

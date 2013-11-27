@@ -33,7 +33,7 @@
     <string name="claims_drop_down_lbl">Reclamaciones</string>
     <string name="manifiests_drop_down_lbl">Manifiestos</string>
     <string name="unknown_drop_down_lbl">Sistema desconocido</string>
-    <string name="unknown_event_state_lbl">Evento de typeVS desconocido</string>
+    <string name="unknown_event_state_lbl">Evento de tipo desconocido</string>
 
     <string name="subject_lbl">Asunto</string>
     <string name="menuSync">Sincronizar</string>
@@ -49,7 +49,7 @@
     <string name="publish_manifest_OK_prefix_msg">El manifiesto</string>
 
     <string name="publish_document_OK_sufix_msg">se ha publicado correctamente</string>    
-    <string name="publish_document_ERROR_msg">Error publicando el documento</string>    
+    <string name="publish_document_ERROR_msg">Error publicando el documento</string>
 
     <string name="publish_document_lbl">Publicar documento</string>
     <string name="publish_voting_lbl">Publicar votación</string>
@@ -68,13 +68,13 @@
     <string name="CLAIM_PUBLISHING">Publicación de documento de reclamación</string>
     <string name="SMIME_CLAIM_SIGNATURE">Enviando reclamación</string>
     <string name="VOTING_PUBLISHING">Publicación de documento de votación</string>
-    <string name="EVENT_CANCELLATION">Cancelar eventVSAndroid</string>
-    <string name="errorOperacionNoEncontrada">Operación desconocida</string>
-    <string name="errorDatosEvento">Errores en datos del eventVSAndroid</string>
-    <string name="errorCodigoEstadoNoEncontrado">Falta código de estado</string>
+    <string name="EVENT_CANCELLATION">Cancelar evento</string>
+    <string name="operationNotFoundErrorMsg">Operación desconocida</string>
+    <string name="eventVSDataWithErrors">Errores en datos del evento</string>
+    <string name="statusCodeNotFoundErrorMsg">Falta código de estado</string>
     <string name="errorEmail">Debe proporcionar una dirección de correo válida</string>
-    <string name="errorDatosCancelacionEvento">Error en los datos de cancelación de eventVSAndroid</string>
-    <string name="errorDestinatarioNoEncontrado">Falta el nombre de destinatario del documento firmado</string>
+    <string name="eventVsCancellationDataErrorMsg">Error en los datos de cancelación de evento</string>
+    <string name="receiverNotFoundErrorMSg">Falta el name de destinatario del documento firmado</string>
     
     <string name="open_voting_lbl">Abiertas</string>
     <string name="pending_voting_lbl">Pendientes</string>
@@ -88,7 +88,7 @@
     <string name="pending_manifest_lbl">Pendientes</string>
     <string name="closed_manifest_lbl">Cerrados</string>
 
-    <string name="unknown_lbl">... DESCONOCIDO ...</string>
+    <string name="unknown_lbl">... UNKNOWN ...</string>
     
 
     <string name="panel_principal_lbl">Panel principal</string>
@@ -114,7 +114,7 @@
 	<string name="repeat_password">Vuelva a introducir el código PIN</string>
 	
 	<string name="nif_error">NIF con errores. Por favor vuelva a intentarlo</string>
-	<string name="givenname_missing_msg">Introduzca el nombre</string>
+	<string name="givenname_missing_msg">Introduzca el name</string>
 	<string name="surname_missing_msg">Introduzca los apellidos</string>
 	<string name="searchLabel">Buscar</string>
 	<string name="app_unstable_msg">La aplicación tiene errores graves, por favor, vuelva a instalarla</string>
@@ -127,7 +127,7 @@
     <string name="cancel_back_msg">Pulsar \'atrás\' para cancelar</string>
     <string name="connecting_caption">Conectando...</string>
     <string name="cert_state_msg">Comprobando el estado de la solicitud de certificado</string>
-    <string name="cert_downloaded_msg">El certificado de userVSBase está disponible</string>
+    <string name="cert_downloaded_msg">El certificado de usuario está disponible</string>
     
     <string name="request_msg_subject">[SOLICITUD ACCESO]-%1$s</string>
     <string name="vote_msg_subject">[VOTO]</string>
@@ -159,27 +159,26 @@
     <string name="enviarVoto">Enviar Voto</string>
     <string name="receipt_error_msg">Error validando recibo de voto</string>
     <string name="cert_not_found_caption">Falta certificado de votación</string>
-    <string name="cert_not_found_msg">Para poder votar y firmar documentos debe tener instalado un certificado</string>
 
     <string name="lanzarServicio">Lanzar Servicio</string>
-    <string name="eventos_no_encontrados_message">No se han encontrado eventVSBases</string>
+    <string name="eventos_no_encontrados_message">No se han encontrado eventos</string>
     <string name="menu_actualizar">Actualizar</string>
-    <string name="menu_solicitar_certificado">Solicitar certificado</string>
+    <string name="request_certificate_menu">Solicitar certificado</string>
     <string name="menu_receipt_list">Lista de recibos</string>
-    <string name="receipt_list_screen_caption">Recibos guardados por el userVSBase</string>
+    <string name="receipt_list_screen_caption">Recibos guardados por el usuario</string>
     <string name="receipt_options_dialog_msg">Opciones disponibles para el recibo</string>
     <string name="canceling_vote_caption">Anulando voto</string>
     <string name="canceling_access_request_msg">Problemas con el servicio, por favor inténtelo mas tarde.</string>
     <string name="no_receipts">No tiene guardado ningún recibo</string>
     <string name="options_lbl">Opciones</string>
     
-    <string name="solicitud_certificado_usuario_activity_text">No dispone de ningún 
+    <string name="uservs_cert_request_activity_text">No dispone de ningún
         certificado con el que poder acceder a los servicios. Para poder votar debe solicitar
-        un certificado de userVSBase. ¿Desea solicitar el certificado?</string>
+        un certificado de usuario. ¿Desea solicitar el certificado?</string>
     <string name="cert_data_confirm_msg"><![CDATA[<b>Nombre: </b>%1$s<br/>
         <b>Apellidos: </b>%2$s<br/>
         <b>Nif: </b>%3$s]]></string>
-    <string name="resultado_solicitud_certificado_activity"><![CDATA[Para poder votar necesita tener
+    <string name="request_cert_result_activity"><![CDATA[Para poder votar necesita tener
         instalado un certificado.<br/><br/>Usted ya ha solicitado el certificado, ahora hace falta verificar
         su identidad, para ello puede presentarse en cualquiera de <br/><br/>
         <a href="%1$s"> las siguientes direcciones</a>]]></string>
@@ -187,8 +186,8 @@
     <string name="search_query_info_msg"><![CDATA[<b>Resultado de la busqueda</b>: %1$s]]></string>
     <string name="option_error_msg"><![CDATA[<html>La opción del recibo no coincide con la del voto.
         <br/> ¿Desea anular la operación?</html>]]></string>
-    <string name="vote_ok_msg"><![CDATA[En el eventVSAndroid \'%1$s\' usted ha elegido la opción \'%2$s\']]></string>
-    <string name="vote_repeated_msg"><![CDATA[Ya había enviado un voto para la convocatoria \'%1$s\' en el que 
+    <string name="vote_ok_msg"><![CDATA[En el evento \'%1$s\' usted ha elegido la opción \'%2$s\']]></string>
+    <string name="vote_repeated_msg"><![CDATA[Ya había enviado un voto para la convocatoria \'%1$s\' en el que
         había elegido la opción \'%2$s\']]></string>
         
     <string name="access_request_repeated_msg"><![CDATA[Usted ya ha votado en el asunto \'%1$s\' <br/><br/>
@@ -196,15 +195,15 @@
     <string name="access_request_repeated_caption">Error, voto repetido</string>
 
    <string name="access_request_repeated_url_msg"><![CDATA[
-        <a href="%1$s">Pulse aquí</a> para acceder a la solicitud que le impide volver a votar sobre este asunto]]></string>
+        <a href="%1$s">Pulse aquí</a> para acceder a la solicitud que le impide volver a votar sobre este subject]]></string>
 
-    <string name="cert_install_error_msg">Error instalando certificado de userVSBase</string>
-    <string name="resultado_solicitud_certificado_activity_ok">El certificado se
+    <string name="cert_install_error_msg">Error instalando certificado de usuario</string>
+    <string name="request_cert_result_activity_ok">El certificado se
         ha importado correctamente.</string>
-    <string name="request_cert_again_button">Volver a solicitar el certificado</string>   
-    <string name="install_cert_button">Instalar el certificado</string>   
+    <string name="request_cert_again_button">Volver a solicitar el certificado</string>
+    <string name="install_cert_button">Instalar el certificado</string>
     <string name="go_app_button">Ir a la aplicación</string>
-    <string name="request_cert_again_msg"><![CDATA[Si vuelve a solicitar el certificado deberá personarse 
+    <string name="request_cert_again_msg"><![CDATA[Si vuelve a solicitar el certificado deberá personarse
         en las instalaciones que se le indiquen para verificar su identidad.<br/>
         ¿Desea continuar?]]></string>
     
@@ -222,16 +221,16 @@
     <string name="cerrar_button">Cerrar</string>
     <string name="ok_button">OK</string>
     <string name="aceptar_button">Aceptar</string>
-    <string name="formulario_solicitud_certificado_label">Datos del certificado de userVSBase</string>
+    <string name="request_certificate_form_lbl">Datos del certificado de usuario</string>
 	<string name="campos_vacios_msg">Debe rellenar todos los campos</string>
 	<string name="password_error_msg">Las contraseñas no coinciden</string>
-	<string name="dialogo_campos_reclamacion_caption">Rellenar los campos</string>
+	<string name="claim_fields_dialog_caption">Rellenar los campos</string>
 	<string name="error_lbl">Error</string>   
 	<string name="msg_lbl">Mensaje</string>   
 	<string name="operacion_ok_msg">Operación completada con éxito</string> 
 	<string name="receipt_file_saved_msg">Documento incorporado a la lista de recibos</string> 
-	<string name="certificado_no_encontrado_msg">No tiene instalado ningún certificado con el que poder firmar la solicitud.</string>    
-	<string name="user_cert_request_form_message_label">Cada vez que vote se le pedirá el código PIN que introducirá a continuación. Recuerde, si lo olvida tendrá que pedir otro certificado para poder votar.</string>    
+	<string name="cert_not_found_msg">No tiene instalado ningún certificado con el que poder firmar la solicitud.</string>
+	<string name="user_cert_request_form_message_label">Cada vez que vote se le pedirá el código PIN que introducirá a continuación. Recuerde, si lo olvida tendrá que pedir otro certificado para poder votar.</string>
 	<string name="error_password_msg">Contraseña inválida</string>
 	<string name="error_vote_repeated_msg">Error, voto repetido</string>
 	<string name="connection_error_msg">Error de conexión</string>
@@ -257,4 +256,6 @@
     <string name="manifest_info_lbl">Datos sobre el manifiesto</string>
     <string name="claim_info_lbl">Datos sobre la reclamación</string>
     <string name="voting_info_lbl">Datos sobre la votación</string>
+    <string name="eventfields_dialog_caption">Campos de la evento</string>
+
 </resources>

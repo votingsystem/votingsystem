@@ -40,13 +40,22 @@
 
 package com.sun.mail.util;
 
-import java.security.*;
-import java.net.*;
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
-import javax.net.*;
-import javax.net.ssl.*;
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.StringTokenizer;
 
 /**
  * This class is used to get Sockets. Depending on the arguments passed

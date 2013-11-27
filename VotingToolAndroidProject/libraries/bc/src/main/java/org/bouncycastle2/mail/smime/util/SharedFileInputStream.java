@@ -1,12 +1,7 @@
 package org.bouncycastle2.mail.smime.util;
 
 import javax.mail.internet.SharedInputStream;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;

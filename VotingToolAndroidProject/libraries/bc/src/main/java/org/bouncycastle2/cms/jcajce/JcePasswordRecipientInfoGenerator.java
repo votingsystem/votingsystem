@@ -1,13 +1,5 @@
 package org.bouncycastle2.cms.jcajce;
 
-import java.security.GeneralSecurityException;
-import java.security.Key;
-import java.security.Provider;
-
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
 import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle2.asn1.ASN1OctetString;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
@@ -17,6 +9,13 @@ import org.bouncycastle2.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle2.jcajce.NamedJcaJceHelper;
 import org.bouncycastle2.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle2.operator.GenericKey;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.GeneralSecurityException;
+import java.security.Key;
+import java.security.Provider;
 
 public class JcePasswordRecipientInfoGenerator
     extends PasswordRecipientInfoGenerator

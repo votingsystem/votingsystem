@@ -1,13 +1,12 @@
 package org.bouncycastle2.cms.jcajce;
 
-import java.security.Provider;
-import java.security.SecureRandom;
-
-import javax.crypto.SecretKey;
-
 import org.bouncycastle2.asn1.cms.KEKIdentifier;
 import org.bouncycastle2.cms.KEKRecipientInfoGenerator;
 import org.bouncycastle2.operator.jcajce.JceSymmetricKeyWrapper;
+
+import javax.crypto.SecretKey;
+import java.security.Provider;
+import java.security.SecureRandom;
 
 public class JceKEKRecipientInfoGenerator
     extends KEKRecipientInfoGenerator

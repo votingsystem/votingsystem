@@ -40,11 +40,14 @@
 
 package com.sun.mail.handlers;
 
-import java.io.*;
-import javax.activation.*;
-import javax.mail.internet.*;
-
 import myjava.awt.datatransfer.DataFlavor;
+
+import javax.activation.ActivationDataFlavor;
+import javax.activation.DataContentHandler;
+import javax.activation.DataSource;
+import javax.mail.internet.ContentType;
+import javax.mail.internet.MimeUtility;
+import java.io.*;
 
 /**
  * DataContentHandler for text/plain.
@@ -53,9 +56,7 @@ import myjava.awt.datatransfer.DataFlavor;
  */
 public class text_plain implements DataContentHandler {
     private static ActivationDataFlavor myDF = new ActivationDataFlavor(
-	java.lang.String.class,
-	"text/plain",
-	"Text String");
+	java.lang.String.class, "text/plain", "Text String");
 
     protected ActivationDataFlavor getDF() {
 	return myDF;

@@ -1,46 +1,6 @@
 package org.bouncycastle2.mail.smime.validator;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.PublicKey;
-import java.security.cert.CertPath;
-import java.security.cert.CertStore;
-import java.security.cert.CertStoreException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateExpiredException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.CertificateNotYetValidException;
-import java.security.cert.PKIXParameters;
-import java.security.cert.TrustAnchor;
-import java.security.cert.X509CertSelector;
-import java.security.cert.X509Certificate;
-import java.security.interfaces.DSAPublicKey;
-import java.security.interfaces.RSAPublicKey;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
-
-import javax.mail.Address;
-import javax.mail.MessagingException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-
-import org.bouncycastle2.asn1.ASN1InputStream;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.ASN1TaggedObject;
-import org.bouncycastle2.asn1.DERIA5String;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DEROctetString;
-import org.bouncycastle2.asn1.DERSequence;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.cms.Attribute;
 import org.bouncycastle2.asn1.cms.AttributeTable;
 import org.bouncycastle2.asn1.cms.CMSAttributes;
@@ -50,16 +10,29 @@ import org.bouncycastle2.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle2.asn1.x509.ExtendedKeyUsage;
 import org.bouncycastle2.asn1.x509.KeyPurposeId;
 import org.bouncycastle2.asn1.x509.X509Extensions;
+import org.bouncycastle2.cms.SignerInformation;
+import org.bouncycastle2.cms.SignerInformationStore;
 import org.bouncycastle2.i18n.ErrorBundle;
 import org.bouncycastle2.i18n.filter.TrustedInput;
 import org.bouncycastle2.i18n.filter.UntrustedInput;
 import org.bouncycastle2.jce.PrincipalUtil;
 import org.bouncycastle2.jce.X509Principal;
+import org.bouncycastle2.mail.smime.SMIMESigned;
 import org.bouncycastle2.x509.CertPathReviewerException;
 import org.bouncycastle2.x509.PKIXCertPathReviewer;
-import org.bouncycastle2.cms.SignerInformation;
-import org.bouncycastle2.cms.SignerInformationStore;
-import org.bouncycastle2.mail.smime.SMIMESigned;
+
+import javax.mail.Address;
+import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
+import java.security.cert.*;
+import java.security.interfaces.DSAPublicKey;
+import java.security.interfaces.RSAPublicKey;
+import java.util.*;
 
 public class SignedMailValidator
 {

@@ -1,45 +1,17 @@
 package org.bouncycastle2.cms;
 
+import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.asn1.cms.*;
+import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.SecureRandom;
-import java.security.Signature;
-import java.security.SignatureException;
+import java.security.*;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.ASN1Set;
-import org.bouncycastle2.asn1.BERConstructedOctetString;
-import org.bouncycastle2.asn1.DERNull;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DEROctetString;
-import org.bouncycastle2.asn1.DEROutputStream;
-import org.bouncycastle2.asn1.DERSet;
-import org.bouncycastle2.asn1.cms.AttributeTable;
-import org.bouncycastle2.asn1.cms.CMSAttributes;
-import org.bouncycastle2.asn1.cms.CMSObjectIdentifiers;
-import org.bouncycastle2.asn1.cms.ContentInfo;
-import org.bouncycastle2.asn1.cms.SignedData;
-import org.bouncycastle2.asn1.cms.SignerIdentifier;
-import org.bouncycastle2.asn1.cms.SignerInfo;
-import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+import java.util.*;
 
 /**
  * general class for generating a pkcs7-signature message.

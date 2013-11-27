@@ -1,22 +1,7 @@
 package org.bouncycastle2.cert.ocsp;
 
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.DERBitString;
-import org.bouncycastle2.asn1.DERGeneralizedTime;
-import org.bouncycastle2.asn1.DERNull;
-import org.bouncycastle2.asn1.DERSequence;
-import org.bouncycastle2.asn1.ocsp.BasicOCSPResponse;
-import org.bouncycastle2.asn1.ocsp.CertStatus;
-import org.bouncycastle2.asn1.ocsp.ResponseData;
-import org.bouncycastle2.asn1.ocsp.RevokedInfo;
-import org.bouncycastle2.asn1.ocsp.SingleResponse;
+import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.asn1.ocsp.*;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.asn1.x509.CRLReason;
 import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
@@ -24,6 +9,12 @@ import org.bouncycastle2.asn1.x509.X509Extensions;
 import org.bouncycastle2.cert.X509CertificateHolder;
 import org.bouncycastle2.operator.ContentSigner;
 import org.bouncycastle2.operator.DigestCalculator;
+
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Generator for basic OCSP response objects.

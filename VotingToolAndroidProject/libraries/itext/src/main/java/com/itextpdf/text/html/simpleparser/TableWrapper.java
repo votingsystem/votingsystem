@@ -51,11 +51,7 @@ import com.itextpdf.text.html.HtmlUtilities;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * We use a TableWrapper because PdfPTable is rather complex

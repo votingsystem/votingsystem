@@ -1,30 +1,6 @@
 package org.bouncycastle2.cms;
 
-import java.io.IOException;
-import java.security.AlgorithmParameters;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.Signature;
-import java.security.cert.CertStore;
-import java.security.cert.CertStoreException;
-import java.security.cert.X509Certificate;
-import java.security.interfaces.DSAPrivateKey;
-import java.security.interfaces.RSAPrivateKey;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.ASN1Set;
-import org.bouncycastle2.asn1.DERNull;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DEROctetString;
-import org.bouncycastle2.asn1.DERSet;
-import org.bouncycastle2.asn1.DERTaggedObject;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.cms.AttributeTable;
 import org.bouncycastle2.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle2.asn1.cms.SignerIdentifier;
@@ -40,6 +16,18 @@ import org.bouncycastle2.jce.interfaces.GOST3410PrivateKey;
 import org.bouncycastle2.util.Store;
 import org.bouncycastle2.x509.X509AttributeCertificate;
 import org.bouncycastle2.x509.X509Store;
+
+import java.io.IOException;
+import java.security.AlgorithmParameters;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
+import java.security.Signature;
+import java.security.cert.CertStore;
+import java.security.cert.CertStoreException;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.DSAPrivateKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.util.*;
 
 public class CMSSignedGenerator
 {

@@ -1,17 +1,18 @@
 package org.votingsystem.applet.callable;
 
+import org.apache.log4j.Logger;
+import org.votingsystem.applet.util.HttpHelper;
+import org.votingsystem.model.ContentTypeVS;
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.util.Encryptor;
+
 import java.io.ByteArrayOutputStream;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import org.votingsystem.applet.util.HttpHelper;
-import org.votingsystem.model.ContentTypeVS;
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.Encryptor;
-import org.votingsystem.signature.smime.SMIMEMessageWrapper;
-import org.apache.log4j.Logger;
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -24,19 +25,12 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
     private SMIMEMessageWrapper smimeMessage;
     private X509Certificate destinationCert = null;
     private KeyPair keypair;
-    private Integer id;
     
-    private List<String> headerNameList = new ArrayList<String>();
+    String[] headers = null;
     
-    public SMIMESignedSender(Integer id, SMIMEMessageWrapper smimeMessage, 
-            String urlToSendDocument, KeyPair keypair, X509Certificate destinationCert,
-            String... headerNames) {
-        if(headerNames != null) {
-            for(String headerName: headerNames) {
-                headerNameList.add(headerName);
-            }
-        }
-        this.id = id;
+    public SMIMESignedSender(SMIMEMessageWrapper smimeMessage, String urlToSendDocument, KeyPair keypair,
+             X509Certificate destinationCert, String... headerNames) {
+        headers = headerNames;
         this.smimeMessage = smimeMessage;
         this.urlToSendDocument = urlToSendDocument;
         this.keypair = keypair;
@@ -52,8 +46,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
         byte[] messageToSendBytes = null; 
         String documentContentType = null;
         if(destinationCert != null) {
-            messageToSendBytes = Encryptor.encryptSMIME(
-                smimeMessage, destinationCert);
+            messageToSendBytes = Encryptor.encryptSMIME(smimeMessage, destinationCert);
             documentContentType = ContentTypeVS.SIGNED_AND_ENCRYPTED;
         } else {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -61,12 +54,10 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
             messageToSendBytes = baos.toByteArray();
             baos.close();
             documentContentType = org.votingsystem.model.ContentTypeVS.SIGNED;
-        } 
-        responseVS = HttpHelper.INSTANCE.sendByteArray(
-                messageToSendBytes, documentContentType, urlToSendDocument,
-                headerNameList.toArray(new String[headerNameList.size()]));            
-        
-       if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+        }
+        responseVS = HttpHelper.getInstance().sendByteArray(messageToSendBytes, documentContentType,
+                urlToSendDocument, headers);
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             if(keypair != null) {
                 byte[] encryptedResponseBytes = responseVS.getMessageBytes();
                 try {
@@ -75,7 +66,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
                     responseVS.setSmimeMessage(signedMessage);
                 } catch(Exception ex) {
                     logger.error(ex.getMessage(), ex);
-                    responseVS.appendErrorMessage(ex.getMessage());
+                    responseVS.appendMessage(ex.getMessage());
                 }
             }
         }

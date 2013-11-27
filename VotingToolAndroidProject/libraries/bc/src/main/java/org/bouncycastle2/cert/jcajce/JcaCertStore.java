@@ -1,5 +1,8 @@
 package org.bouncycastle2.cert.jcajce;
 
+import org.bouncycastle2.cert.X509CertificateHolder;
+import org.bouncycastle2.util.CollectionStore;
+
 import java.io.IOException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -7,9 +10,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-
-import org.bouncycastle2.util.CollectionStore;
-import org.bouncycastle2.cert.X509CertificateHolder;
 
 /**
  * Class for storing Certificates for later lookup.

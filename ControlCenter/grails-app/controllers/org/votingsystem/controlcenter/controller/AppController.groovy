@@ -27,7 +27,7 @@ class AppController {
 			render(view:"index")
 		String uri = "${grailsApplication.config.grails.serverURL}/app/home?androidClientLoaded=false"
 		if(params.browserToken) uri = "${uri}#${params.browserToken}"
-		if(params.eventoId) uri = "${uri}&eventoId=${params.eventoId}"
+		if(params.eventId) uri = "${uri}&eventId=${params.eventId}"
 		if(params.serverURL) uri = "${uri}&serverURL=${params.serverURL}"
 		if(params.msg) {
 			String msg = URLEncoder.encode(params.msg, "UTF-8")

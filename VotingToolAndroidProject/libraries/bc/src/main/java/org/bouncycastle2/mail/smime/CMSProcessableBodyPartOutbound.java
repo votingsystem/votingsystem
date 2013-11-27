@@ -1,15 +1,14 @@
 package org.bouncycastle2.mail.smime;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import org.bouncycastle2.cms.CMSException;
+import org.bouncycastle2.cms.CMSProcessable;
+import org.bouncycastle2.mail.smime.util.CRLFOutputStream;
 
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
-
-import org.bouncycastle2.cms.CMSException;
-import org.bouncycastle2.cms.CMSProcessable;
-import org.bouncycastle2.mail.smime.util.CRLFOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * a holding class for a BodyPart to be processed which does CRLF canocicalisation if 

@@ -1,16 +1,15 @@
 package org.bouncycastle2.jce.provider;
 
-import java.security.InvalidKeyException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-
-import javax.crypto.interfaces.DHPrivateKey;
-import javax.crypto.interfaces.DHPublicKey;
-
 import org.bouncycastle2.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle2.crypto.params.DHParameters;
 import org.bouncycastle2.crypto.params.DHPrivateKeyParameters;
 import org.bouncycastle2.crypto.params.DHPublicKeyParameters;
+
+import javax.crypto.interfaces.DHPrivateKey;
+import javax.crypto.interfaces.DHPublicKey;
+import java.security.InvalidKeyException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 /**
  * utility class for converting jce/jca DH objects

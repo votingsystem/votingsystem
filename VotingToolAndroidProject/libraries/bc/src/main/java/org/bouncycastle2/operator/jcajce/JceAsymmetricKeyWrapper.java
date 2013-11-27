@@ -1,14 +1,5 @@
 package org.bouncycastle2.operator.jcajce;
 
-import java.security.GeneralSecurityException;
-import java.security.Provider;
-import java.security.ProviderException;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
-
-import javax.crypto.Cipher;
-
 import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle2.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle2.jcajce.NamedJcaJceHelper;
@@ -16,6 +7,10 @@ import org.bouncycastle2.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle2.operator.AsymmetricKeyWrapper;
 import org.bouncycastle2.operator.GenericKey;
 import org.bouncycastle2.operator.OperatorException;
+
+import javax.crypto.Cipher;
+import java.security.*;
+import java.security.cert.X509Certificate;
 
 public class JceAsymmetricKeyWrapper
     extends AsymmetricKeyWrapper

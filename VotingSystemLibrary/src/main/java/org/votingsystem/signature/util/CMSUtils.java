@@ -1,34 +1,6 @@
 package org.votingsystem.signature.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.security.NoSuchProviderException;
-import java.security.Provider;
-import java.security.PublicKey;
-import java.security.Security;
-import java.security.cert.CRLException;
-import java.security.cert.CertStore;
-import java.security.cert.CertStoreException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509CRL;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.BEROctetStringGenerator;
-import org.bouncycastle.asn1.BERSet;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.SignerIdentifier;
@@ -44,6 +16,17 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.util.io.Streams;
+
+import javax.xml.bind.DatatypeConverter;
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.*;
+import java.security.cert.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
 * @author jgzornoza
@@ -201,12 +184,6 @@ public class CMSUtils {
         return null;
     }
 
-    public static Certificate obtenerCertificado (byte[] certBytes) throws Exception {
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        Certificate cert = cf.generateCertificate(new ByteArrayInputStream(certBytes)) ;
-        return cert;
-    }
-
     public static SignerIdentifier getSignerIdentifier(X509Certificate cert) {
         TBSCertificateStructure tbs;
         try {
@@ -236,6 +213,18 @@ public class CMSUtils {
             // Invalid key –> not self-signed
             return false;
         }
+    }
+
+    public static String getHashBase64 (String cadenaOrigen, String digestAlgorithm) throws NoSuchAlgorithmException {
+        MessageDigest sha = MessageDigest.getInstance(digestAlgorithm);
+        byte[] resultDigest =  sha.digest( cadenaOrigen.getBytes() );
+        return DatatypeConverter.printBase64Binary(resultDigest);
+    }
+
+    public static String getBase64ToHexStr(String base64Str) {
+        if (base64Str == null) return null;
+        HexBinaryAdapter hexConverter = new HexBinaryAdapter();
+        return hexConverter.marshal(base64Str.getBytes());
     }
 
     public static String getDigestId (String digestAlgOID) {

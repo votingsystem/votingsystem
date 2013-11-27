@@ -1,5 +1,7 @@
 package org.bouncycastle2.cert.jcajce;
 
+import org.bouncycastle2.cert.X509CRLHolder;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.NoSuchProviderException;
@@ -8,8 +10,6 @@ import java.security.cert.CRLException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509CRL;
-
-import org.bouncycastle2.cert.X509CRLHolder;
 
 /**
  * Class for converting an X509CRLHolder into a corresponding X509CRL object tied to a

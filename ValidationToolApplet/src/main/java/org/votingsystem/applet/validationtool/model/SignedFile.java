@@ -3,18 +3,9 @@ package org.votingsystem.applet.validationtool.model;
 import com.itextpdf.text.pdf.AcroFields;
 import com.itextpdf.text.pdf.PdfPKCS7;
 import com.itextpdf.text.pdf.PdfReader;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.security.KeyStore;
-import java.security.cert.PKIXCertPathValidatorResult;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Set;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
+import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Set;
@@ -28,17 +19,21 @@ import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.encoders.Base64;
-import org.votingsystem.applet.validationtool.ValidationToolContext;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.TypeVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 
-import org.apache.log4j.Logger;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.TypeVS;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.security.KeyStore;
+import java.security.cert.PKIXCertPathValidatorResult;
+import java.security.cert.X509Certificate;
+import java.util.*;
 
 /**
 * @author jgzornoza
@@ -84,7 +79,7 @@ public class SignedFile {
                 timeStampToken = pdfPKCS7.getTimeStampToken();
                 //logger.debug(" - checkSignature - timeStampToken: " + 
                 //        timeStampToken.getTimeStampInfo().getGenTime().toString());
-                //KeyStore keyStore = firmaService.getTrustedCertsKeyStore()
+                //KeyStore keyStore = signatureVSService.getTrustedCertsKeyStore()
                 //Object[] fails = PdfPKCS7.verifyCertificates(pkc, keyStore, null, signDate);
                 //if(fails != null) {...}
             }
@@ -94,7 +89,7 @@ public class SignedFile {
                 new ByteArrayInputStream(signedFileBytes));
             signatureVerified = smimeMessageWraper.isValidSignature();
             if(signatureVerified) timeStampToken = smimeMessageWraper.
-                    getFirmante().getTimeStampToken();
+                    getSigner().getTimeStampToken();
         } else {
             logger.error(" #### UNKNOWN FILE TYPE -> " + name + 
                     " trying with SMIMEMessageWrapper");
@@ -180,7 +175,7 @@ public class SignedFile {
     }
     
     public String getSignerNif() {
-        return smimeMessageWraper.getFirmante().getNif();
+        return smimeMessageWraper.getSigner().getNif();
     }
     
     public byte[] getFileBytes() {
@@ -207,8 +202,8 @@ public class SignedFile {
         Object content = JSONSerializer.toJSON(signedContent);
         if(content instanceof JSONObject) {
             JSONObject contentJSON = (JSONObject)content;
-            if(contentJSON.containsKey("opcionSeleccionadaId")) {
-                return contentJSON.getLong("opcionSeleccionadaId");
+            if(contentJSON.containsKey("optionSelectedId")) {
+                return contentJSON.getLong("optionSelectedId");
             }
         } else {
             logger.error(" File '" + name + "' content is instance of " + 
@@ -219,8 +214,8 @@ public class SignedFile {
     
     public Long getNumSerieSignerCert() {
         if(smimeMessageWraper == null) return null;
-        UserVS usuario = smimeMessageWraper.getFirmante();
-        return usuario.getCertificate().getSerialNumber().longValue();
+        UserVS userVS = smimeMessageWraper.getSigner();
+        return userVS.getCertificate().getSerialNumber().longValue();
     }
         
     //{"representativeNif":"00000002W","operation":"REPRESENTATIVE_SELECTION","UUID":"dcfacb17-a323-4853-b446-8e28d8f2d0a4"}   
@@ -229,21 +224,21 @@ public class SignedFile {
             Date dateFinish, String representativeNif, 
             X509Certificate timeStampServerCert) throws Exception {
         if(!signatureVerified) {            
-            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString(
-                "signatureErrorMsg", name));    
+            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
+                    "signatureErrorMsg", name));    
         }
         if(representativeNif == null) return new ResponseVS(
-                ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString("badRequestMsg") + 
-                " - " + ContextVS.INSTANCE.getString("missingRepresentativeNifErrorMsg"));
-        UserVS usuario = smimeMessageWraper.getFirmante();
+                ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("badRequestMsg") +
+                " - " + ContextVS.getInstance().getMessage("missingRepresentativeNifErrorMsg"));
+        UserVS userVS = smimeMessageWraper.getSigner();
         try {
             PKIXCertPathValidatorResult pkixResult = CertUtil.verifyCertificate(
-                    usuario.getCertificate(), systemTrustedCerts, false);
+                    userVS.getCertificate(), systemTrustedCerts, false);
             //logger.debug(" - pkixResult.toString(): " + pkixResult.toString());
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
-            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString(
-                    "certificateErrorMsg", usuario.getNif(), name));
+            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
+                    "certificateErrorMsg", userVS.getNif(), name));
         } 
         try {
             SignerInformationVerifier timeStampSignerInfoVerifier = new 
@@ -251,65 +246,64 @@ public class SignedFile {
             timeStampToken.validate(timeStampSignerInfoVerifier);
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
-            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.
-                        getString("timestampValidationErrorMsg", name));
+            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().
+                        getMessage("timestampValidationErrorMsg", name));
         }
         Date tokenDate = timeStampToken.getTimeStampInfo().getGenTime();
         if(!tokenDate.before(dateFinish)) {
-            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString(
+            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
                     "dateErrorMsg", DateUtils.getStringFromDate(dateFinish),
-                    DateUtils.getStringFromDate(tokenDate)), name);
+                    DateUtils.getStringFromDate(tokenDate), name));
         }
         JSONObject contentJSON = getContent(); 
         if(contentJSON.containsKey("representativeNif")) {
             String jsonNIF = contentJSON.getString("representativeNif");
             if(!representativeNif.trim().equals(jsonNIF)) {
-                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.
-                        getString("nifErrorMsg", representativeNif, jsonNIF, name));
+                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().
+                        getMessage("nifErrorMsg", representativeNif, jsonNIF, name));
             }
-        } else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString("jsonErrorMsg") + 
-                " - " + ContextVS.INSTANCE.getString("missingRepresentativeNifErrorMsg", name));
+        } else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("jsonErrorMsg") +
+                " - " + ContextVS.getInstance().getMessage("missingRepresentativeNifErrorMsg", name));
 
         if(contentJSON.containsKey("operation")) {
             TypeVS operationType = TypeVS.valueOf(contentJSON.getString("operation"));
             if(TypeVS.REPRESENTATIVE_SELECTION != operationType) {
-                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.
-                        getString("operationErrorMsg", TypeVS.REPRESENTATIVE_SELECTION.toString(),
-                        operationType.toString()), name);
+                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().
+                        getMessage("operationErrorMsg", TypeVS.REPRESENTATIVE_SELECTION.toString(),
+                                operationType.toString(), name));
             }
-        } else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString("jsonErrorMsg") + 
-                " - " + ContextVS.INSTANCE.getString("missingOperationErrorMsg", name));
+        } else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("jsonErrorMsg") +
+                " - " + ContextVS.getInstance().getMessage("missingOperationErrorMsg", name));
         
         return new ResponseVS(ResponseVS.SC_OK);
     }
     
-    //{"operation":"SEND_SMIME_VOTE","opcionSeleccionadaId":2,"UUID":"cfbeec4a-f87c-4e4f-b442-4b127259fbd5",
-    //"opcionSeleccionadaContenido":"depende","eventoURL":"http://192.168.1.20:8080/AccessControl/eventoVotacion/1"}
+    //{"operation":"SEND_SMIME_VOTE","optionSelectedId":2,"UUID":"cfbeec4a-f87c-4e4f-b442-4b127259fbd5",
+    //"optionSelectedContent":"depende","eventURL":"http://192.168.1.20:8080/AccessControl/eventVSElection/1"}
     public ResponseVS<Long> validateAsVote(Set<X509Certificate> systemTrustedCerts,
-        Set<X509Certificate> eventTrustedCerts, 
-        Long optionSelectedId, String eventURL, Date dateInit, 
+        Set<X509Certificate> eventTrustedCerts, Long optionSelectedId, String eventURL, Date dateInit,
         Date dateFinish, X509Certificate timeStampServerCert) throws Exception {
         Long signedFileOptionSelectedId = null;
         if(!signatureVerified) {            
-            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString(
-                "signatureErrorMsg", name));
+            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
+                    "signatureErrorMsg", name));
             
         }
-        Set<UserVS> firmantes = smimeMessageWraper.getSigners();
-        for(UserVS firmante:firmantes) {
+        Set<UserVS> signersVS = smimeMessageWraper.getSigners();
+        for(UserVS signerVS:signersVS) {
             try {
-                if(firmante.getTimeStampToken() != null) {//user signature
+                if(signerVS.getTimeStampToken() != null) {//user signature
                     PKIXCertPathValidatorResult pkixResult = CertUtil.verifyCertificate(
-                        firmante.getCertificate(), eventTrustedCerts, false);
+                        signerVS.getCertificate(), eventTrustedCerts, false);
                     //logger.debug(" - pkixResult.toString(): " + pkixResult.toString());
                 } else {//server signature
                     PKIXCertPathValidatorResult pkixResult = CertUtil.verifyCertificate(
-                        firmante.getCertificate(), systemTrustedCerts, false);
+                        signerVS.getCertificate(), systemTrustedCerts, false);
                 } 
             } catch(Exception ex) {
                 logger.error(ex.getMessage(), ex);
-                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString(
-                        "certificateErrorMsg", firmante.getNif(), name));
+                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
+                        "certificateErrorMsg", signerVS.getNif(), name));
             } 
         }
         try {
@@ -318,48 +312,48 @@ public class SignedFile {
             timeStampToken.validate(timeStampSignerInfoVerifier);
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
-            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.
-                        getString("timestampValidationErrorMsg", name));
+            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().
+                        getMessage("timestampValidationErrorMsg", name));
         }
-        Date tokenDate = smimeMessageWraper.getFirmante().getTimeStampToken().
+        Date tokenDate = smimeMessageWraper.getSigner().getTimeStampToken().
                 getTimeStampInfo().getGenTime();
         if(tokenDate.before(dateInit) || tokenDate.after(dateFinish)) {
-                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString(
-                    "tokenDateErrorMsg", name, DateUtils.getStringFromDate(tokenDate),
-                    DateUtils.getStringFromDate(dateInit),
-                    DateUtils.getStringFromDate(dateFinish)));
+                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
+                        "tokenDateErrorMsg", name, DateUtils.getStringFromDate(tokenDate),
+                        DateUtils.getStringFromDate(dateInit),
+                        DateUtils.getStringFromDate(dateFinish)));
         }
         
         JSONObject contentJSON = getContent(); 
         if(contentJSON.containsKey("operation")) {
             TypeVS operationType = TypeVS.valueOf(contentJSON.getString("operation"));
             if(TypeVS.SEND_SMIME_VOTE != operationType) {
-                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.
-                        getString("operationErrorMsg", TypeVS.SEND_SMIME_VOTE.toString(),
-                        operationType.toString()), name);
+                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().
+                        getMessage("operationErrorMsg", TypeVS.SEND_SMIME_VOTE.toString(),
+                                operationType.toString(), name));
             }
-        } else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString("jsonErrorMsg") + 
-                " - " + ContextVS.INSTANCE.getString("missingOperationErrorMsg", name));
-        if(contentJSON.containsKey("opcionSeleccionadaId")) {
-            signedFileOptionSelectedId = contentJSON.getLong("opcionSeleccionadaId");
+        } else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("jsonErrorMsg") +
+                " - " + ContextVS.getInstance().getMessage("missingOperationErrorMsg", name));
+        if(contentJSON.containsKey("optionSelectedId")) {
+            signedFileOptionSelectedId = contentJSON.getLong("optionSelectedId");
             if(optionSelectedId != null && signedFileOptionSelectedId != optionSelectedId) {
-                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.
-                        getString("optionSelectedErrorMsg", name, 
-                        optionSelectedId, signedFileOptionSelectedId));
+                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().
+                        getMessage("optionSelectedErrorMsg", name,
+                                optionSelectedId, signedFileOptionSelectedId));
             }
-        } else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString("jsonErrorMsg") + 
-                " - " + ContextVS.INSTANCE.getString(
+        } else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("jsonErrorMsg") +
+                " - " + ContextVS.getInstance().getMessage(
                 "missingOptionSelectedErrorMsg", name));
 
-        if(contentJSON.containsKey("eventoURL")) {
-            String  eventoURL = contentJSON.getString("eventoURL");
-            if(!eventoURL.equals(eventURL)) {
-                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.
-                        getString("eventoURLErrorMsg", name, eventURL, eventoURL));
+        if(contentJSON.containsKey("eventURL")) {
+            String documentEventURL = contentJSON.getString("eventURL");
+            if(!eventURL.equals(documentEventURL)) {
+                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().
+                        getMessage("eventURLErrorMsg", name, eventURL, documentEventURL));
             }
-        } else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.
-                getString("jsonErrorMsg") + " - " + ContextVS.INSTANCE.
-                getString("missingEventoURLErrorMsg", name));
+        } else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().
+                getMessage("jsonErrorMsg") + " - " + ContextVS.getInstance().
+                getMessage("missingEventURLErrorMsg", name));
         return new ResponseVS(ResponseVS.SC_OK, signedFileOptionSelectedId);
     }
     
@@ -368,17 +362,17 @@ public class SignedFile {
         String eventURL, Date dateInit, Date dateFinish, 
         X509Certificate timeStampServerCert) throws Exception {
         if(!signatureVerified) {            
-            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString(
-                "signatureErrorMsg", name));
+            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
+                    "signatureErrorMsg", name));
             
         }
-        UserVS signer = smimeMessageWraper.getFirmante();        try {
+        UserVS signer = smimeMessageWraper.getSigner();        try {
         PKIXCertPathValidatorResult pkixResult = CertUtil.verifyCertificate(
                     signer.getCertificate(), systemTrustedCerts, false);
             //logger.debug(" - pkixResult.toString(): " + pkixResult.toString());
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
-            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString(
+            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
                     "certificateErrorMsg", signer.getNif(), name));
         } 
         
@@ -386,22 +380,22 @@ public class SignedFile {
         if(contentJSON.containsKey("operation")) {
             TypeVS operationType = TypeVS.valueOf(contentJSON.getString("operation"));
             if(TypeVS.ACCESS_REQUEST != operationType) {
-                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.
-                        getString("operationErrorMsg", TypeVS.ACCESS_REQUEST.toString(),
-                        operationType.toString()), name);
+                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().
+                        getMessage("operationErrorMsg", TypeVS.ACCESS_REQUEST.toString(),
+                                operationType.toString(), name));
             }
-        } else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString("jsonErrorMsg") + 
-                " - " + ContextVS.INSTANCE.getString("missingOperationErrorMsg", name));
+        } else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("jsonErrorMsg") +
+                " - " + ContextVS.getInstance().getMessage("missingOperationErrorMsg", name));
         
         if(contentJSON.containsKey("eventURL")) {
-            String  eventoURL = contentJSON.getString("eventURL");
-            if(!eventoURL.equals(eventURL)) {
-                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.
-                        getString("eventoURLErrorMsg", name, eventURL, eventoURL));
+            String  documentEventURL = contentJSON.getString("eventURL");
+            if(!eventURL.equals(documentEventURL)) {
+                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().
+                        getMessage("eventURLErrorMsg", name, eventURL, documentEventURL));
             }
-        } else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString("jsonErrorMsg") + 
-                " - " + ContextVS.INSTANCE.getString(
-                "missingEventoURLErrorMsg", name));
+        } else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("jsonErrorMsg") +
+                " - " + ContextVS.getInstance().getMessage(
+                "missingEventURLErrorMsg", name));
         
         try {
             SignerInformationVerifier timeStampSignerInfoVerifier = new 
@@ -409,15 +403,15 @@ public class SignedFile {
             timeStampToken.validate(timeStampSignerInfoVerifier);
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
-            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.
-                        getString("timestampValidationErrorMsg", name));
+            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().
+                        getMessage("timestampValidationErrorMsg", name));
         }
         Date tokenDate = timeStampToken.getTimeStampInfo().getGenTime();
         if(tokenDate.before(dateInit) || tokenDate.after(dateFinish)) {
-                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString(
-                "tokenDateErrorMsg", name, DateUtils.getStringFromDate(tokenDate),
-                DateUtils.getStringFromDate(dateInit),
-                DateUtils.getStringFromDate(dateFinish)));
+                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
+                        "tokenDateErrorMsg", name, DateUtils.getStringFromDate(tokenDate),
+                        DateUtils.getStringFromDate(dateInit),
+                        DateUtils.getStringFromDate(dateFinish)));
         }
         return new ResponseVS(ResponseVS.SC_OK);
     }
@@ -426,8 +420,8 @@ public class SignedFile {
         KeyStore trustedKeyStore, Date dateInit, Date dateFinish, 
         X509Certificate timeStampServerCert) throws Exception {
         if(!signatureVerified) {            
-            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString(
-                "signatureErrorMsg", name));    
+            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
+                    "signatureErrorMsg", name));
         }
         
         
@@ -437,8 +431,8 @@ public class SignedFile {
             timeStampToken.validate(timeStampSignerInfoVerifier);
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
-            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.
-                        getString("timestampValidationErrorMsg", name));
+            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().
+                        getMessage("timestampValidationErrorMsg", name));
         }
         
         getDigestToken(timeStampToken);
@@ -468,18 +462,18 @@ public class SignedFile {
             String eventURL, Date dateInit, Date dateFinish, 
             X509Certificate timeStampServerCert) throws Exception {
         if(!signatureVerified) {            
-            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString(
-                "signatureErrorMsg", name));
+            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
+                    "signatureErrorMsg", name));
             
         }
-        UserVS signer = smimeMessageWraper.getFirmante();        
+        UserVS signer = smimeMessageWraper.getSigner();        
         try {
             PKIXCertPathValidatorResult pkixResult = CertUtil.verifyCertificate(
                     signer.getCertificate(), systemTrustedCerts, false);
             //logger.debug(" - pkixResult.toString(): " + pkixResult.toString());
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
-            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString(
+            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
                     "certificateErrorMsg", signer.getNif(), name));
         } 
         
@@ -487,23 +481,23 @@ public class SignedFile {
         if(contentJSON.containsKey("operation")) {
             TypeVS operationType = TypeVS.valueOf(contentJSON.getString("operation"));
             if(TypeVS.SMIME_CLAIM_SIGNATURE != operationType) {
-                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.
-                        getString("operationErrorMsg", 
-                        TypeVS.SMIME_CLAIM_SIGNATURE.toString(),
-                        operationType.toString()), name);
+                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().
+                        getMessage("operationErrorMsg",
+                                TypeVS.SMIME_CLAIM_SIGNATURE.toString(),
+                                operationType.toString(), name));
             }
-        } else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString("jsonErrorMsg") + 
-                " - " + ContextVS.INSTANCE.getString("missingOperationErrorMsg", name));
+        } else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("jsonErrorMsg") +
+                " - " + ContextVS.getInstance().getMessage("missingOperationErrorMsg", name));
         
         if(contentJSON.containsKey("URL")) {
-            String  eventoURL = contentJSON.getString("URL");
-            if(!eventoURL.equals(eventURL)) {
-                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.
-                        getString("eventoURLErrorMsg", name, eventURL, eventoURL));
+            String  documentEventURL = contentJSON.getString("URL");
+            if(!eventURL.equals(documentEventURL)) {
+                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().
+                        getMessage("eventURLErrorMsg", name, eventURL, documentEventURL));
             }
-        } else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString("jsonErrorMsg") + 
-                " - " + ContextVS.INSTANCE.getString(
-                "missingEventoURLErrorMsg", name));
+        } else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("jsonErrorMsg") +
+                " - " + ContextVS.getInstance().getMessage(
+                "missingEventURLErrorMsg", name));
         
         try {
             SignerInformationVerifier timeStampSignerInfoVerifier = new 
@@ -511,15 +505,15 @@ public class SignedFile {
             timeStampToken.validate(timeStampSignerInfoVerifier);
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
-            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.
-                        getString("timestampValidationErrorMsg", name));
+            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().
+                        getMessage("timestampValidationErrorMsg", name));
         }
         Date tokenDate = timeStampToken.getTimeStampInfo().getGenTime();
         if(tokenDate.before(dateInit) || tokenDate.after(dateFinish)) {
-                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.INSTANCE.getString(
-                "tokenDateErrorMsg", name, DateUtils.getStringFromDate(tokenDate),
-                DateUtils.getStringFromDate(dateInit),
-                DateUtils.getStringFromDate(dateFinish)));
+                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
+                        "tokenDateErrorMsg", name, DateUtils.getStringFromDate(tokenDate),
+                        DateUtils.getStringFromDate(dateInit),
+                        DateUtils.getStringFromDate(dateFinish)));
         }
         return new ResponseVS(ResponseVS.SC_OK);
     }

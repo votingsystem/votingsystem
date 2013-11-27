@@ -1,19 +1,15 @@
 package org.bouncycastle2.crypto.signers;
 
-import java.io.IOException;
-import java.math.BigInteger;
-
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERSequence;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.crypto.CipherParameters;
 import org.bouncycastle2.crypto.DSA;
 import org.bouncycastle2.crypto.Digest;
 import org.bouncycastle2.crypto.Signer;
 import org.bouncycastle2.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle2.crypto.params.ParametersWithRandom;
+
+import java.io.IOException;
+import java.math.BigInteger;
 
 public class DSADigestSigner
     implements Signer

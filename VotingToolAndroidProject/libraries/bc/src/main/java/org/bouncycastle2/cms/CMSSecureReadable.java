@@ -1,12 +1,11 @@
 package org.bouncycastle2.cms;
 
+import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Provider;
-
-import javax.crypto.SecretKey;
-
-import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 
 interface CMSSecureReadable
 {

@@ -1,75 +1,28 @@
 package org.bouncycastle2.jce.provider;
 
+import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.asn1.isismtt.ISISMTTObjectIdentifiers;
+import org.bouncycastle2.asn1.x509.*;
+import org.bouncycastle2.jce.X509LDAPCertStoreParameters;
+import org.bouncycastle2.jce.exception.ExtCertPathValidatorException;
+import org.bouncycastle2.util.Selector;
+import org.bouncycastle2.util.StoreException;
+import org.bouncycastle2.x509.*;
+
+import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.PublicKey;
-import java.security.cert.CertPath;
-import java.security.cert.CertPathValidatorException;
-import java.security.cert.CertStore;
-import java.security.cert.CertStoreException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateParsingException;
-import java.security.cert.PKIXParameters;
+import java.security.cert.*;
 import java.security.cert.PolicyQualifierInfo;
-import java.security.cert.TrustAnchor;
-import java.security.cert.X509CRL;
-import java.security.cert.X509CRLSelector;
-import java.security.cert.X509CertSelector;
-import java.security.cert.X509Certificate;
 import java.security.interfaces.DSAParams;
 import java.security.interfaces.DSAPublicKey;
 import java.security.spec.DSAPublicKeySpec;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.security.auth.x500.X500Principal;
-
-import org.bouncycastle2.asn1.ASN1InputStream;
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.ASN1OutputStream;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DEREnumerated;
-import org.bouncycastle2.asn1.DERGeneralizedTime;
-import org.bouncycastle2.asn1.DERIA5String;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DERSequence;
-import org.bouncycastle2.asn1.isismtt.ISISMTTObjectIdentifiers;
-import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.asn1.x509.CRLDistPoint;
-import org.bouncycastle2.asn1.x509.CRLNumber;
-import org.bouncycastle2.asn1.x509.CRLReason;
-import org.bouncycastle2.asn1.x509.CertificateList;
-import org.bouncycastle2.asn1.x509.DistributionPoint;
-import org.bouncycastle2.asn1.x509.DistributionPointName;
-import org.bouncycastle2.asn1.x509.GeneralName;
-import org.bouncycastle2.asn1.x509.GeneralNames;
-import org.bouncycastle2.asn1.x509.PolicyInformation;
-import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle2.asn1.x509.X509Extensions;
-import org.bouncycastle2.jce.X509LDAPCertStoreParameters;
-import org.bouncycastle2.jce.exception.ExtCertPathValidatorException;
-import org.bouncycastle2.util.Selector;
-import org.bouncycastle2.util.StoreException;
-import org.bouncycastle2.x509.ExtendedPKIXBuilderParameters;
-import org.bouncycastle2.x509.ExtendedPKIXParameters;
-import org.bouncycastle2.x509.X509AttributeCertStoreSelector;
-import org.bouncycastle2.x509.X509AttributeCertificate;
-import org.bouncycastle2.x509.X509CRLStoreSelector;
-import org.bouncycastle2.x509.X509CertStoreSelector;
-import org.bouncycastle2.x509.X509Store;
+import java.util.*;
 
 public class CertPathValidatorUtilities
 {

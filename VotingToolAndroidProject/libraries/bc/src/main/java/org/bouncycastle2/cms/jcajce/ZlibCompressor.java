@@ -1,11 +1,11 @@
 package org.bouncycastle2.cms.jcajce;
 
-import java.io.OutputStream;
-import java.util.zip.DeflaterOutputStream;
-
 import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.operator.OutputCompressor;
+
+import java.io.OutputStream;
+import java.util.zip.DeflaterOutputStream;
 
 public class ZlibCompressor
     implements OutputCompressor

@@ -5,7 +5,7 @@
    	<r:require modules="application"/>
     <style>
 	  	textarea { }
-	  	input[id="asunto"] { }
+	  	input[id="subject"] { }
   	</style>
   	<r:script>
 	  	$(document).ready(function(){
@@ -18,7 +18,7 @@
 <body>
 	<form id="testForm" style="display:block;margin:20px auto 30px auto; width:40%;">
 		    <label for="one">URL: </label>
-		    	<input type="text" id="urlCentroControl">
+		    	<input type="text" id="urlControlCenter">
 		    <button id="submitButton">Submit</button>
 	</form>
 	<div><input id="date" type="date" name="date" /></div>

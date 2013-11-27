@@ -1,41 +1,10 @@
 package org.bouncycastle2.asn1.util;
 
+import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.util.encoders.Hex;
+
 import java.io.IOException;
 import java.util.Enumeration;
-
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.ASN1Set;
-import org.bouncycastle2.asn1.BERApplicationSpecific;
-import org.bouncycastle2.asn1.BERConstructedOctetString;
-import org.bouncycastle2.asn1.BERSequence;
-import org.bouncycastle2.asn1.BERSet;
-import org.bouncycastle2.asn1.BERTaggedObject;
-import org.bouncycastle2.asn1.DERApplicationSpecific;
-import org.bouncycastle2.asn1.DERBMPString;
-import org.bouncycastle2.asn1.DERBitString;
-import org.bouncycastle2.asn1.DERBoolean;
-import org.bouncycastle2.asn1.DEREncodable;
-import org.bouncycastle2.asn1.DEREnumerated;
-import org.bouncycastle2.asn1.DERExternal;
-import org.bouncycastle2.asn1.DERGeneralizedTime;
-import org.bouncycastle2.asn1.DERIA5String;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERNull;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DEROctetString;
-import org.bouncycastle2.asn1.DERPrintableString;
-import org.bouncycastle2.asn1.DERSequence;
-import org.bouncycastle2.asn1.DERSet;
-import org.bouncycastle2.asn1.DERT61String;
-import org.bouncycastle2.asn1.DERTaggedObject;
-import org.bouncycastle2.asn1.DERTags;
-import org.bouncycastle2.asn1.DERUTCTime;
-import org.bouncycastle2.asn1.DERUTF8String;
-import org.bouncycastle2.asn1.DERUnknownTag;
-import org.bouncycastle2.asn1.DERVisibleString;
-import org.bouncycastle2.util.encoders.Hex;
 
 public class ASN1Dump
 {

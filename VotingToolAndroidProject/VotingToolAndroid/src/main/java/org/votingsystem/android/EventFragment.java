@@ -11,33 +11,21 @@ import android.text.Html;
 import android.text.InputType;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
-
-import org.votingsystem.android.model.ContextVSAndroid;
+import android.widget.*;
+import org.votingsystem.model.OptionVS;
+import org.votingsystem.android.callable.SMIMESignedSender;
+import org.votingsystem.android.callable.SignedPDFSender;
+import org.votingsystem.android.model.AndroidContextVS;
+import org.votingsystem.model.EventVS;
 import org.votingsystem.android.ui.CertNotFoundDialog;
 import org.votingsystem.android.ui.CertPinDialog;
 import org.votingsystem.android.ui.CertPinDialogListener;
-import org.votingsystem.callable.SMIMESignedSender;
-import org.votingsystem.callable.SignedPDFSender;
-import org.votingsystem.model.OptionVS;
-import org.votingsystem.android.model.EventVSAndroid;
+import org.votingsystem.android.util.ServerPaths;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.FileUtils;
-import org.votingsystem.android.util.ServerPaths;
 
 import java.io.FileInputStream;
 import java.net.URL;
@@ -45,9 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static org.votingsystem.android.model.ContextVSAndroid.ASUNTO_MENSAJE_FIRMA_DOCUMENTO;
-import static org.votingsystem.android.model.ContextVSAndroid.KEY_STORE_FILE;
-import static org.votingsystem.android.model.ContextVSAndroid.MAX_SUBJECT_SIZE;
+import static org.votingsystem.android.model.AndroidContextVS.*;
 
 /**
  * @author jgzornoza
@@ -58,9 +44,9 @@ public class EventFragment extends Fragment implements CertPinDialogListener {
     public static final String TAG = "EventFragment";
 
     private Button firmarEnviarButton;
-    private EventVSAndroid event = null;
+    private EventVS event = null;
     private int eventIndex;
-    private ContextVSAndroid contextVSAndroid;
+    private AndroidContextVS androidContextVS;
     private Map<Integer, EditText> mapaCamposReclamacion;
     private ProcessSignatureTask processSignatureTask;
 
@@ -75,27 +61,27 @@ public class EventFragment extends Fragment implements CertPinDialogListener {
         if(getActivity() == null) return null;
         Bundle args = getArguments();
         eventIndex =  args.getInt(EventPagerActivity.EventsPagerAdapter.EVENT_INDEX_KEY);
-        contextVSAndroid = ContextVSAndroid.getInstance(getActivity());
-        event = (EventVSAndroid) contextVSAndroid.getEvents().get(eventIndex);
+        androidContextVS = AndroidContextVS.getInstance(getActivity());
+        event = (EventVS) androidContextVS.getEvents().get(eventIndex);
         View rootView = inflater.inflate(R.layout.event_fragment, container, false);
-        TextView asuntoTextView = (TextView) rootView.findViewById(R.id.asunto_evento);
-        String subject = event.getAsunto();
+        TextView subjectTextView = (TextView) rootView.findViewById(R.id.subject_evento);
+        String subject = event.getSubject();
         if(subject != null && subject.length() > MAX_SUBJECT_SIZE)
             subject = subject.substring(0, MAX_SUBJECT_SIZE) + " ...";
-        asuntoTextView.setText(subject);
-        TextView contenidoTextView = (TextView) rootView.findViewById(R.id.contenido_evento);
+        subjectTextView.setText(subject);
+        TextView contentTextView = (TextView) rootView.findViewById(R.id.eventvs_content);
 
-        contenidoTextView.setText(Html.fromHtml(event.getContenido()));
-        contenidoTextView.setMovementMethod(LinkMovementMethod.getInstance());
+        contentTextView.setText(Html.fromHtml(event.getContent()));
+        contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
         firmarEnviarButton = (Button) rootView.findViewById(R.id.firmar_enviar_button);
-        if (!event.estaAbierto()) {
+        if (!event.isActive()) {
             Log.d(TAG + ".onCreate(..)", " - Event closed");
             firmarEnviarButton.setEnabled(false);
         }
         firmarEnviarButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                Log.d(TAG + "- firmarEnviarButton -", " - estado: " + contextVSAndroid.getEstado().toString());
-                if (!ContextVSAndroid.Estado.CON_CERTIFICADO.equals(contextVSAndroid.getEstado())) {
+                Log.d(TAG + "- firmarEnviarButton -", " - state: " + androidContextVS.getState().toString());
+                if (!AndroidContextVS.State.CON_CERTIFICADO.equals(androidContextVS.getState())) {
                     Log.d(TAG + "-firmarEnviarButton-", " - showCertNotFoundDialog");
                     showCertNotFoundDialog();
                     return;
@@ -153,11 +139,11 @@ public class EventFragment extends Fragment implements CertPinDialogListener {
 
     public void onClickSubject(View v) {
         Log.d(TAG + ".onClickSubject(...)", " - onClickSubject");
-        if(event != null && event.getAsunto() != null &&
-                event.getAsunto().length() > MAX_SUBJECT_SIZE) {
+        if(event != null && event.getSubject() != null &&
+                event.getSubject().length() > MAX_SUBJECT_SIZE) {
             AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
             builder.setTitle(getString(R.string.subject_lbl));
-            builder.setMessage(event.getAsunto());
+            builder.setMessage(event.getSubject());
             builder.show();
         }
     }
@@ -165,12 +151,12 @@ public class EventFragment extends Fragment implements CertPinDialogListener {
     private void showCertNotFoundDialog() {
         CertNotFoundDialog certDialog = new CertNotFoundDialog();
         FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(ContextVSAndroid.CERT_NOT_FOUND_DIALOG_ID);
+        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(AndroidContextVS.CERT_NOT_FOUND_DIALOG_ID);
         if (prev != null) {
             ft.remove(prev);
         }
         ft.addToBackStack(null);
-        certDialog.show(ft, ContextVSAndroid.CERT_NOT_FOUND_DIALOG_ID);
+        certDialog.show(ft, AndroidContextVS.CERT_NOT_FOUND_DIALOG_ID);
     }
 
 
@@ -265,7 +251,7 @@ public class EventFragment extends Fragment implements CertPinDialogListener {
             addFormField(campo.getContent(), InputType.TYPE_TEXT_VARIATION_PERSON_NAME,
                     mFormView, campo.getId().intValue());
         }
-        builder.setTitle(R.string.dialogo_campos_reclamacion_caption).setView(mScrollView).
+        builder.setTitle(R.string.eventfields_dialog_caption).setView(mScrollView).
                 setPositiveButton(getString(R.string.aceptar_button), null).
                 setNegativeButton(R.string.cancelar_button, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) { }
@@ -279,12 +265,12 @@ public class EventFragment extends Fragment implements CertPinDialogListener {
                 Set<OptionVS> campos = event.getCampos();
                 for (OptionVS campo : campos) {
                     EditText editText = mapaCamposReclamacion.get(campo.getId().intValue());
-                    String valorCampo = editText.getText().toString();
-                    if ("".equals(valorCampo)) {
+                    String fieldValue = editText.getText().toString();
+                    if ("".equals(fieldValue)) {
                         errorMsgTextView.setVisibility(View.VISIBLE);
                         return;
-                    } else campo.setValue(valorCampo);
-                    Log.d(TAG + " - claim field dialog", " - campo id: " + campo.getId() + " - text: " + valorCampo);
+                    } else campo.setValue(fieldValue);
+                    Log.d(TAG + " - claim field dialog", " - campo id: " + campo.getId() + " - text: " + fieldValue);
                 }
                 dialog.dismiss();
                 showPinScreen(null);
@@ -350,22 +336,22 @@ public class EventFragment extends Fragment implements CertPinDialogListener {
                 byte[] keyStoreBytes = null;
                 FileInputStream fis = getActivity().openFileInput(KEY_STORE_FILE);
                 keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
-                if(event.getTypeVS().equals(TypeVS.SIGN_EVENT)) {
+                if(event.getTypeVS().equals(TypeVS.MANIFEST_EVENT)) {
                     SignedPDFSender signedPDFSender = new SignedPDFSender(ServerPaths.getURLPDFManifest(
-                            contextVSAndroid.getAccessControlURL(), event.getEventoId()),
-                            ServerPaths.getURLPDFManifestCollector(contextVSAndroid.getAccessControlURL(),
-                            event.getEventoId()), keyStoreBytes, pin.toCharArray(), null, null,
+                            androidContextVS.getAccessControlURL(), event.getEventVSId()),
+                            ServerPaths.getURLPDFManifestCollector(androidContextVS.getAccessControlURL(),
+                            event.getEventVSId()), keyStoreBytes, pin.toCharArray(), null, null,
                             getActivity().getBaseContext());
                     responseVS = signedPDFSender.call();
                 } else if(event.getTypeVS().equals(TypeVS.CLAIM_EVENT)) {
-                    String subject = ASUNTO_MENSAJE_FIRMA_DOCUMENTO + event.getAsunto();
+                    String subject = ASUNTO_MENSAJE_FIRMA_DOCUMENTO + event.getSubject();
                     String signatureContent = event.getSignatureContentJSON();
                     String serviceURL = ServerPaths.getURLReclamacion(
-                            contextVSAndroid.getAccessControlURL());
+                            androidContextVS.getAccessControlURL());
                     boolean isEncryptedResponse = false;
                     SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
                             signatureContent, subject, isEncryptedResponse, keyStoreBytes, pin.toCharArray(),
-                            contextVSAndroid.getAccessControl().getCertificado(), getActivity().getBaseContext());
+                            androidContextVS.getAccessControlVS().getCertificate(), getActivity().getBaseContext());
                     responseVS = smimeSignedSender.call();
                 }
                 return responseVS;

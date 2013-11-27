@@ -1,13 +1,13 @@
 package org.votingsystem.applet.callable;
 
+import org.apache.log4j.Logger;
+import org.votingsystem.applet.util.HttpHelper;
+import org.votingsystem.model.ResponseVS;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import org.votingsystem.model.ResponseVS;
-
-import org.apache.log4j.Logger;
-import org.votingsystem.applet.util.HttpHelper;
 
 /**
 * @author jgzornoza
@@ -49,17 +49,17 @@ public class InfoSender implements Callable<ResponseVS> {
         ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR);
         try {
             if(documentoEnviado instanceof File) {
-                responseVS = HttpHelper.INSTANCE.sendFile((File)documentoEnviado, 
+                responseVS = HttpHelper.getInstance().sendFile((File)documentoEnviado,
                     documentContentType, urlToSendDocument,
                     headerNameList.toArray(new String[headerNameList.size()]));
             } else if(documentoEnviado instanceof byte[]) {
-                responseVS = HttpHelper.INSTANCE.sendByteArray(
+                responseVS = HttpHelper.getInstance().sendByteArray(
                         (byte[])documentoEnviado, documentContentType, urlToSendDocument, 
                         headerNameList.toArray(new String[headerNameList.size()]));
             }
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
-            responseVS.appendErrorMessage(ex.getMessage());
+            responseVS.appendMessage(ex.getMessage());
         } finally {
             return responseVS;
         }

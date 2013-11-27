@@ -1,20 +1,6 @@
 package org.bouncycastle2.cms;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.ASN1Set;
-import org.bouncycastle2.asn1.DERNull;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DEROctetString;
-import org.bouncycastle2.asn1.DERSet;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.cms.AttributeTable;
 import org.bouncycastle2.asn1.cms.SignerIdentifier;
 import org.bouncycastle2.asn1.cms.SignerInfo;
@@ -22,14 +8,13 @@ import org.bouncycastle2.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.util.io.TeeOutputStream;
 import org.bouncycastle2.cert.X509CertificateHolder;
-import org.bouncycastle2.operator.ContentSigner;
-import org.bouncycastle2.operator.DefaultDigestAlgorithmIdentifierFinder;
-import org.bouncycastle2.operator.DigestAlgorithmIdentifierFinder;
-import org.bouncycastle2.operator.DigestCalculator;
-import org.bouncycastle2.operator.DigestCalculatorProvider;
-import org.bouncycastle2.operator.OperatorCreationException;
+import org.bouncycastle2.operator.*;
+import org.bouncycastle2.util.io.TeeOutputStream;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.*;
 
 public class SignerInfoGenerator
 {

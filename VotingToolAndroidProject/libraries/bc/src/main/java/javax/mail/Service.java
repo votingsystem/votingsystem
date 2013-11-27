@@ -40,10 +40,12 @@
 
 package javax.mail;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import javax.mail.event.*;
+import javax.mail.event.ConnectionEvent;
+import javax.mail.event.ConnectionListener;
+import javax.mail.event.MailEvent;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Vector;
 
 /**
  * An abstract class that contains the functionality

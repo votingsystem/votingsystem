@@ -40,9 +40,13 @@
 
 package javax.mail.internet;
 
-import javax.mail.*;
-import javax.activation.*;
-import java.io.*;
+import javax.activation.DataSource;
+import javax.mail.MessageAware;
+import javax.mail.MessageContext;
+import javax.mail.MessagingException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.UnknownServiceException;
 
 /**

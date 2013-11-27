@@ -40,8 +40,10 @@
 
 package com.sun.mail.smtp;
 
-import java.io.*;
 import com.sun.mail.util.CRLFOutputStream;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * In addition to converting lines into the canonical format,

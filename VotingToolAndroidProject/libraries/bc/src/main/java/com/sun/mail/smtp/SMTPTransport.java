@@ -40,15 +40,16 @@
 
 package com.sun.mail.smtp;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.sun.mail.util.*;
 
 import javax.mail.*;
-import javax.mail.event.*;
+import javax.mail.event.TransportEvent;
 import javax.mail.internet.*;
-
-import com.sun.mail.util.*;
+import java.io.*;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.*;
 
 /**
  * This class implements the Transport abstract class using SMTP for

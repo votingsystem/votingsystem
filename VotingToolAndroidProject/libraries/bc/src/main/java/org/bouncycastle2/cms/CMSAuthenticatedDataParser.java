@@ -1,29 +1,21 @@
 package org.bouncycastle2.cms;
 
+import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.asn1.cms.AttributeTable;
+import org.bouncycastle2.asn1.cms.AuthenticatedDataParser;
+import org.bouncycastle2.asn1.cms.CMSAttributes;
+import org.bouncycastle2.asn1.cms.ContentInfoParser;
+import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle2.operator.DigestCalculatorProvider;
+import org.bouncycastle2.operator.OperatorCreationException;
+import org.bouncycastle2.util.Arrays;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.AlgorithmParameters;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
-
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.ASN1OctetStringParser;
-import org.bouncycastle2.asn1.ASN1SequenceParser;
-import org.bouncycastle2.asn1.ASN1Set;
-import org.bouncycastle2.asn1.ASN1SetParser;
-import org.bouncycastle2.asn1.DEREncodable;
-import org.bouncycastle2.asn1.DERSet;
-import org.bouncycastle2.asn1.DERTags;
-import org.bouncycastle2.asn1.cms.AttributeTable;
-import org.bouncycastle2.asn1.cms.AuthenticatedDataParser;
-import org.bouncycastle2.asn1.cms.CMSAttributes;
-import org.bouncycastle2.asn1.cms.ContentInfoParser;
-import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.util.Arrays;
-import org.bouncycastle2.operator.DigestCalculatorProvider;
-import org.bouncycastle2.operator.OperatorCreationException;
 
 /**
  * Parsing class for an CMS Authenticated Data object from an input stream.

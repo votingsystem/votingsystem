@@ -1,10 +1,10 @@
 package org.bouncycastle2.asn1.cmp;
 
-import java.math.BigInteger;
-
 import org.bouncycastle2.asn1.ASN1Encodable;
 import org.bouncycastle2.asn1.DERInteger;
 import org.bouncycastle2.asn1.DERObject;
+
+import java.math.BigInteger;
 
 public class PKIStatus
     extends ASN1Encodable

@@ -1,39 +1,6 @@
 package org.bouncycastle2.cert.crmf.jcajce;
 
-import java.io.IOException;
-import java.security.AlgorithmParameterGenerator;
-import java.security.AlgorithmParameters;
-import java.security.GeneralSecurityException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.InvalidParameterSpecException;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.Mac;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.RC2ParameterSpec;
-
-import org.bouncycastle2.asn1.ASN1Null;
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.DERBitString;
-import org.bouncycastle2.asn1.DEREncodable;
-import org.bouncycastle2.asn1.DERNull;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.iana.IANAObjectIdentifiers;
 import org.bouncycastle2.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle2.asn1.oiw.OIWObjectIdentifiers;
@@ -45,6 +12,17 @@ import org.bouncycastle2.cert.crmf.CRMFException;
 import org.bouncycastle2.cms.CMSAlgorithm;
 import org.bouncycastle2.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle2.jcajce.JcaJceHelper;
+
+import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.RC2ParameterSpec;
+import java.io.IOException;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.InvalidParameterSpecException;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.HashMap;
+import java.util.Map;
 
 class CRMFHelper
 {

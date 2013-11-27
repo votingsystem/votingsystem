@@ -1,12 +1,12 @@
 package org.bouncycastle2.cert.crmf;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 import org.bouncycastle2.asn1.DERBitString;
 import org.bouncycastle2.asn1.crmf.PKMACValue;
 import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle2.operator.MacCalculator;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 class PKMACValueGenerator
 {

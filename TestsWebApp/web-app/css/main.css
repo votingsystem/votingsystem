@@ -14,7 +14,6 @@ html {
 	background-image: -moz-linear-gradient(center top, #97b2c7, #f1f5f8);
 	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #97b2c7), color-stop(1, #f1f5f8));
 	background-image: linear-gradient(top, #97b2c7, #f1f5f8);
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorStr = '#97b2c7', EndColorStr = '#f1f5f8');
 	background-repeat: no-repeat;
 	height: 100%;
 	/* change the box model to exclude the padding from the calculation of 100% height (IE8+) */
@@ -236,4 +235,32 @@ hr {
 	text-align: center;
 	line-height: 19px;
 	color: #6bad74;
+}
+
+
+fieldset {
+    border: #f2f2f2 solid 1px;
+}
+
+fieldset legend {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+#userBaseData label {
+    width:270px;
+    display:inline-block;
+}
+
+.formFieldError{
+    font-weight: bold;
+    background: #f6ccd0;
+}
+
+.messageFromServiceBox {
+    padding: 20px;
+    margin: 0px 20px 0px 20px;
+    font-size: 1.4em;
+    color: #848d80;
+    border: 1pt solid #848d80;
 }

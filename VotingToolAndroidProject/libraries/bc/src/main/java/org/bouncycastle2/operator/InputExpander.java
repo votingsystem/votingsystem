@@ -1,8 +1,8 @@
 package org.bouncycastle2.operator;
 
-import java.io.InputStream;
-
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+
+import java.io.InputStream;
 
 /**
  * General interface for an operator that is able to produce

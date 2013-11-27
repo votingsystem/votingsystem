@@ -1,11 +1,5 @@
 package org.bouncycastle2.cert.ocsp;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
 import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle2.asn1.ASN1Sequence;
 import org.bouncycastle2.asn1.ocsp.BasicOCSPResponse;
@@ -17,6 +11,12 @@ import org.bouncycastle2.asn1.x509.X509Extensions;
 import org.bouncycastle2.cert.X509CertificateHolder;
 import org.bouncycastle2.operator.ContentVerifier;
 import org.bouncycastle2.operator.ContentVerifierProvider;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 /**
  * <pre>

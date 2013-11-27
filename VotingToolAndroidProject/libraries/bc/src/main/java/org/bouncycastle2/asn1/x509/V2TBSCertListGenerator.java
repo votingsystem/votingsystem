@@ -1,18 +1,11 @@
 package org.bouncycastle2.asn1.x509;
 
+import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.asn1.x500.X500Name;
+
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Vector;
-
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DERGeneralizedTime;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DEROctetString;
-import org.bouncycastle2.asn1.DERSequence;
-import org.bouncycastle2.asn1.DERTaggedObject;
-import org.bouncycastle2.asn1.DERUTCTime;
-import org.bouncycastle2.asn1.x500.X500Name;
 
 /**
  * Generator for Version 2 TBSCertList structures.

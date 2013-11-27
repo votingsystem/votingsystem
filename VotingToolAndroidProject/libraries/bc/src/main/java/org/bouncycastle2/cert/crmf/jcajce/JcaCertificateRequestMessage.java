@@ -1,10 +1,5 @@
 package org.bouncycastle2.cert.crmf.jcajce;
 
-import java.security.Provider;
-import java.security.PublicKey;
-
-import javax.security.auth.x500.X500Principal;
-
 import org.bouncycastle2.asn1.crmf.CertReqMsg;
 import org.bouncycastle2.asn1.x500.X500Name;
 import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
@@ -13,6 +8,10 @@ import org.bouncycastle2.cert.crmf.CertificateRequestMessage;
 import org.bouncycastle2.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle2.jcajce.NamedJcaJceHelper;
 import org.bouncycastle2.jcajce.ProviderJcaJceHelper;
+
+import javax.security.auth.x500.X500Principal;
+import java.security.Provider;
+import java.security.PublicKey;
 
 public class JcaCertificateRequestMessage
     extends CertificateRequestMessage

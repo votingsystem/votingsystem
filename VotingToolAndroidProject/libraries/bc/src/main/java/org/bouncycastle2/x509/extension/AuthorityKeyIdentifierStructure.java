@@ -1,21 +1,16 @@
 package org.bouncycastle2.x509.extension;
 
+import org.bouncycastle2.asn1.ASN1InputStream;
+import org.bouncycastle2.asn1.ASN1OctetString;
+import org.bouncycastle2.asn1.ASN1Sequence;
+import org.bouncycastle2.asn1.x509.*;
+import org.bouncycastle2.jce.PrincipalUtil;
+
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.PublicKey;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
-
-import org.bouncycastle2.asn1.ASN1InputStream;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.x509.AuthorityKeyIdentifier;
-import org.bouncycastle2.asn1.x509.GeneralName;
-import org.bouncycastle2.asn1.x509.GeneralNames;
-import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle2.asn1.x509.X509Extension;
-import org.bouncycastle2.asn1.x509.X509Extensions;
-import org.bouncycastle2.jce.PrincipalUtil;
 
 /**
  * A high level authority key identifier.

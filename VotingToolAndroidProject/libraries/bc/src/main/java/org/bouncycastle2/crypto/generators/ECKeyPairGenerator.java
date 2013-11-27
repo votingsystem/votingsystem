@@ -1,8 +1,5 @@
 package org.bouncycastle2.crypto.generators;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
-
 import org.bouncycastle2.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle2.crypto.AsymmetricCipherKeyPairGenerator;
 import org.bouncycastle2.crypto.KeyGenerationParameters;
@@ -12,6 +9,9 @@ import org.bouncycastle2.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle2.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle2.math.ec.ECConstants;
 import org.bouncycastle2.math.ec.ECPoint;
+
+import java.math.BigInteger;
+import java.security.SecureRandom;
 
 public class ECKeyPairGenerator
     implements AsymmetricCipherKeyPairGenerator, ECConstants

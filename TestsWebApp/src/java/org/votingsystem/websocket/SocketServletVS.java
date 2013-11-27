@@ -11,7 +11,7 @@ import org.apache.catalina.websocket.MessageInbound;
 import org.apache.catalina.websocket.StreamInbound;
 import org.apache.catalina.websocket.WebSocketServlet;
 import org.apache.catalina.websocket.WsOutbound;
-import org.votingsystem.simulation.ApplicationContextHolder;
+import org.votingsystem.util.ApplicationContextHolder;
 import org.votingsystem.simulation.WebSocketService;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 import org.apache.log4j.Logger;

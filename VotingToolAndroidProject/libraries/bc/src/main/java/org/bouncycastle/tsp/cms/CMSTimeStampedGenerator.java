@@ -1,7 +1,5 @@
 package org.bouncycastle.tsp.cms;
 
-import java.net.URI;
-
 import org.bouncycastle2.asn1.DERBoolean;
 import org.bouncycastle2.asn1.DERIA5String;
 import org.bouncycastle2.asn1.DERUTF8String;
@@ -9,6 +7,8 @@ import org.bouncycastle2.asn1.cms.Attributes;
 import org.bouncycastle2.asn1.cms.MetaData;
 import org.bouncycastle2.cms.CMSException;
 import org.bouncycastle2.operator.DigestCalculator;
+
+import java.net.URI;
 
 public class CMSTimeStampedGenerator
 {

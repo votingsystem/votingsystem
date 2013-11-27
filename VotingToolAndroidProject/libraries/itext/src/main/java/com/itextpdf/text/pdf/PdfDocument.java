@@ -43,25 +43,8 @@
  */
 package com.itextpdf.text.pdf;
 
-import com.itextpdf.text.Anchor;
-import com.itextpdf.text.Annotation;
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.Chunk;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.ExceptionConverter;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.Image;
+import com.itextpdf.text.*;
 import com.itextpdf.text.List;
-import com.itextpdf.text.ListItem;
-import com.itextpdf.text.MarkedObject;
-import com.itextpdf.text.MarkedSection;
-import com.itextpdf.text.Meta;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.Section;
 import com.itextpdf.text.api.WriterOperation;
 import com.itextpdf.text.error_messages.MessageLocalization;
 import com.itextpdf.text.pdf.collection.PdfCollection;
@@ -71,11 +54,7 @@ import com.itextpdf.text.pdf.internal.PdfViewerPreferencesImp;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * <CODE>PdfDocument</CODE> is the class that is used by <CODE>PdfWriter</CODE>

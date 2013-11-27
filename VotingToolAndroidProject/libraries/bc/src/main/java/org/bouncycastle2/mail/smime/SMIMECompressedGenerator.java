@@ -1,16 +1,15 @@
 package org.bouncycastle2.mail.smime;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import org.bouncycastle2.cms.CMSCompressedDataGenerator;
+import org.bouncycastle2.cms.CMSCompressedDataStreamGenerator;
 
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
-
-import org.bouncycastle2.cms.CMSCompressedDataGenerator;
-import org.bouncycastle2.cms.CMSCompressedDataStreamGenerator;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * General class for generating a pkcs7-mime compressed message.

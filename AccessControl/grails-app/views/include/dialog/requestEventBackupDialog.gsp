@@ -25,18 +25,18 @@ function showRequestEventBackupDialog(callback) {
 $('#requestEventBackupForm').submit(function(event){
 	event.preventDefault();
    	var webAppMessage = new WebAppMessage(
-	    	StatusCode.SC_PROCESSING, 
+	    	ResponseVS.SC_PROCESSING,
 	    	Operation.BACKUP_REQUEST)
-   	webAppMessage.nombreDestinatarioFirma="${grailsApplication.config.VotingSystem.serverName}"
-	webAppMessage.urlServer="${grailsApplication.config.grails.serverURL}"
-	webAppMessage.urlEnvioDocumento = "${createLink(controller:'solicitudCopia', absolute:true)}"
-	webAppMessage.asuntoMensajeFirmado = "${eventMap.asunto}"
-	webAppMessage.evento = pageEvent
+   	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+	webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
+	webAppMessage.receiverSignServiceURL = "${createLink(controller:'backupVS', absolute:true)}"
+	webAppMessage.signedMessageSubject = "${eventMap.subject}"
+	webAppMessage.eventVS = pageEvent
 	pageEvent.operation = Operation.BACKUP_REQUEST
-	webAppMessage.contenidoFirma = pageEvent
+	webAppMessage.signedContent = pageEvent
 	webAppMessage.emailSolicitante = $("#eventBackupUserEmailText").val()
-	webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStamp', absolute:true)}"
-	webAppMessage.respuestaConRecibo = true
+	webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStampVS', absolute:true)}"
+	webAppMessage.isResponseWithReceipt = true
 	pendingOperation = Operation.SMIME_CLAIM_SIGNATURE
 	votingSystemClient.setMessageToSignatureClient(webAppMessage, callerCallback); 
 });

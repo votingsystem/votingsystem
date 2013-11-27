@@ -1,16 +1,8 @@
 package org.bouncycastle2.asn1.cms;
 
-import java.io.IOException;
+import org.bouncycastle2.asn1.*;
 
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1OctetStringParser;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.ASN1SequenceParser;
-import org.bouncycastle2.asn1.BERSequence;
-import org.bouncycastle2.asn1.DEREncodable;
-import org.bouncycastle2.asn1.DERIA5String;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERObject;
+import java.io.IOException;
 
 public class TimeStampedDataParser
 {

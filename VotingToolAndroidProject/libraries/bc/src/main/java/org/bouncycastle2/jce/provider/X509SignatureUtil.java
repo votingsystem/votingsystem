@@ -1,10 +1,6 @@
 package org.bouncycastle2.jce.provider;
 
-import org.bouncycastle2.asn1.ASN1Null;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DEREncodable;
-import org.bouncycastle2.asn1.DERNull;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle2.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle2.asn1.oiw.OIWObjectIdentifiers;
@@ -15,12 +11,7 @@ import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.asn1.x9.X9ObjectIdentifiers;
 
 import java.io.IOException;
-import java.security.AlgorithmParameters;
-import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.Signature;
-import java.security.SignatureException;
+import java.security.*;
 import java.security.spec.PSSParameterSpec;
 
 class X509SignatureUtil

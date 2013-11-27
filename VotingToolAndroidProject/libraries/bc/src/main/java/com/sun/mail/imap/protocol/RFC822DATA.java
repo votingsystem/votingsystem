@@ -40,9 +40,10 @@
 
 package com.sun.mail.imap.protocol;
 
+import com.sun.mail.iap.ByteArray;
+import com.sun.mail.iap.ParsingException;
+
 import java.io.ByteArrayInputStream;
-import com.sun.mail.iap.*; 
-import com.sun.mail.util.ASCIIUtility;
 
 /**
  * This class 

@@ -12,36 +12,26 @@ public class ActorVS implements java.io.Serializable {
 
     private static final long serialVersionUID = 1L;
         
-    public enum Tipo {CONTROL_CENTER, ACCESS_CONTROL}
+    public enum Type {CONTROL_CENTER, ACCESS_CONTROL}
 
-    public enum Estado {
-        SUSPENDIDO ("Suspendido"), ACTIVO("Activo"), INACTIVO("Inactivo");
-        private String mensaje;
-        Estado(String mensaje) {
-            this.mensaje = mensaje;
-        }
-        public String getMensaje() {
-            return this.mensaje;
-        }
-    }        
+    public enum State {CANCELLED, ACTIVE, PAUSED}
 
     private Long id;
     private String serverURL;
-    private String nombre;
+    private String name;
     private String urlBlog;
     private Date dateCreated;
     private Date lastUpdated;
-    private Estado estado; 
-    private Tipo tipo;
-    private String certificadoURL;
-    private String certificadoPEM;
-    private X509Certificate certificado;
+    private State state;
+    private Type type;
+    private String certificateURL;
+    private String certificatePEM;
+    private X509Certificate certificate;
     private Collection<X509Certificate> certChain;
     private X509Certificate timeStampCert = null;
 
-    public void setServerURL(String serverURL) {
-            this.serverURL = serverURL;
-    }
+    public void setServerURL(String serverURL) {this.serverURL = serverURL;}
+
     public String getServerURL() {
             return serverURL;
     }
@@ -49,151 +39,92 @@ public class ActorVS implements java.io.Serializable {
     public void setUrlBlog(String urlBlog) {
             this.urlBlog = urlBlog;
     }
+
     public String getURLBlog() {
             return urlBlog;
     }
 
-    /**
-     * @return the id
-     */
     public Long getId() {
         return id;
     }
 
-    /**
-     * @param id the id to set
-     */
     public void setId(Long id) {
         this.id = id;
     }
 
-    /**
-     * @return the nombre
-     */
-    public String getNombre() {
-        return nombre;
+    public String getName() {
+        return name;
     }
     
-    public String getNombreNormalizado () {
-        return nombre.replaceAll("[\\/:.]", ""); 
+    public String getNameNormalized () { return name.replaceAll("[\\/:.]", ""); }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
-    /**
-     * @param nombre the nombre to set
-     */
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    /**
-     * @return the dateCreated
-     */
     public Date getDateCreated() {
         return dateCreated;
     }
 
-    /**
-     * @param dateCreated the dateCreated to set
-     */
     public void setDateCreated(Date dateCreated) {
         this.dateCreated = dateCreated;
     }
 
-    /**
-     * @return the lastUpdated
-     */
     public Date getLastUpdated() {
         return lastUpdated;
     }
 
-    /**
-     * @param lastUpdated the lastUpdated to set
-     */
     public void setLastUpdated(Date lastUpdated) {
         this.lastUpdated = lastUpdated;
     }
 
-        /**
-     * @return the estado
-     */
-    public Estado getEstado() {
-        return estado;
+    public State getState() {
+        return state;    }
+
+    public void setState(State state) { this.state = state; }
+
+    public Type getType() {
+        return type;
     }
 
-    /**
-     * @param estado the estado to set
-     */
-    public void setEstado(Estado estado) {
-        this.estado = estado;
+    public void setType(Type type) {
+        this.type = type;
     }
 
-    /**
-     * @return the tipo
-     */
-    public Tipo getTipo() {
-        return tipo;
+    public String getCertificateURL() {
+        return certificateURL;
     }
 
-    /**
-     * @param tipo the tipo to set
-     */
-    public void setTipo(Tipo tipo) {
-        this.tipo = tipo;
-    }
-    
-    
-    /**
-     * @return the certificadoURL
-     */
-    public String getCertificadoURL() {
-        return certificadoURL;
+    public void setCertificateURL(String certificateURL) {
+        this.certificateURL = certificateURL;
     }
 
-    /**
-     * @param certificadoURL the certificadoURL to set
-     */
-    public void setCertificadoURL(String certificadoURL) {
-        this.certificadoURL = certificadoURL;
+    public String getCertificatePEM() {
+        return certificatePEM;
     }
 
-    /**
-     * @return the certificadoPEM
-     */
-    public String getCertificadoPEM() {
-        return certificadoPEM;
+    public void setCertificatePEM(String certificatePEM) {
+        this.certificatePEM = certificatePEM;
     }
 
-    /**
-     * @param certificadoPEM the certificadoPEM to set
-     */
-    public void setCertificadoPEM(String certificadoPEM) {
-        this.certificadoPEM = certificadoPEM;
-    }
-    
-    
-    /**
-     * @return the certificado
-     */
-    public X509Certificate getCertificado() {
-        return certificado;
+    public X509Certificate getCertificate() {
+        return certificate;
     }
 
-    /**
-     * @param certificado the certificado to set
-     */
-    public void setCertificado(X509Certificate certificado) {
-        this.certificado = certificado;
+    public void setCertificate(X509Certificate certificate) {
+        this.certificate = certificate;
     }
-	public Collection<X509Certificate> getCertChain() {
+
+    public Collection<X509Certificate> getCertChain() {
 		return certChain;
 	}
+
 	public void setCertChain(Collection<X509Certificate> certChain) {
 		this.certChain = certChain;
 	}
 	
     public void setTimeStampCertPEM(String timeStampPEM) throws Exception {
-        timeStampCert = CertUtil.fromPEMToX509CertCollection(
-                    timeStampPEM.getBytes()).iterator().next();
+        timeStampCert = CertUtil.fromPEMToX509CertCollection(timeStampPEM.getBytes()).iterator().next();
     }
 
     public X509Certificate getTimeStampCert() {

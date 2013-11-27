@@ -1,12 +1,7 @@
 package org.bouncycastle2.jce.provider;
 
-import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
-import java.util.Hashtable;
+import org.bouncycastle2.crypto.params.DESParameters;
+import org.bouncycastle2.util.Strings;
 
 import javax.crypto.KeyAgreementSpi;
 import javax.crypto.SecretKey;
@@ -15,9 +10,13 @@ import javax.crypto.interfaces.DHPrivateKey;
 import javax.crypto.interfaces.DHPublicKey;
 import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-
-import org.bouncycastle2.crypto.params.DESParameters;
-import org.bouncycastle2.util.Strings;
+import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
+import java.util.Hashtable;
 
 /**
  * Diffie-Hellman key agreement. There's actually a better way of doing this

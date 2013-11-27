@@ -1,30 +1,17 @@
 package org.bouncycastle2.cert.crmf;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1Integer;
-import org.bouncycastle2.asn1.ASN1Null;
-import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERNull;
-import org.bouncycastle2.asn1.DERSequence;
-import org.bouncycastle2.asn1.crmf.AttributeTypeAndValue;
-import org.bouncycastle2.asn1.crmf.CertReqMsg;
-import org.bouncycastle2.asn1.crmf.CertRequest;
-import org.bouncycastle2.asn1.crmf.CertTemplateBuilder;
-import org.bouncycastle2.asn1.crmf.POPOPrivKey;
-import org.bouncycastle2.asn1.crmf.ProofOfPossession;
-import org.bouncycastle2.asn1.crmf.SubsequentMessage;
+import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.asn1.crmf.*;
 import org.bouncycastle2.asn1.x500.X500Name;
 import org.bouncycastle2.asn1.x509.GeneralName;
 import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle2.asn1.x509.X509ExtensionsGenerator;
 import org.bouncycastle2.operator.ContentSigner;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class CertificateRequestMessageBuilder
 {

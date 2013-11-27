@@ -1,15 +1,10 @@
 package org.bouncycastle2.asn1.esf;
 
-import java.util.Enumeration;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERSequence;
-import org.bouncycastle2.asn1.DERTaggedObject;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.ocsp.BasicOCSPResponse;
 import org.bouncycastle2.asn1.x509.CertificateList;
+
+import java.util.Enumeration;
 
 /**
  * <pre>

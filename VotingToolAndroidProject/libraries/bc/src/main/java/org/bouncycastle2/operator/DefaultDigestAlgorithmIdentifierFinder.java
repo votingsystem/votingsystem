@@ -1,8 +1,5 @@
 package org.bouncycastle2.operator;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.bouncycastle2.asn1.DERNull;
 import org.bouncycastle2.asn1.DERObjectIdentifier;
 import org.bouncycastle2.asn1.cryptopro.CryptoProObjectIdentifiers;
@@ -13,6 +10,9 @@ import org.bouncycastle2.asn1.pkcs.RSASSAPSSparams;
 import org.bouncycastle2.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.asn1.x9.X9ObjectIdentifiers;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class DefaultDigestAlgorithmIdentifierFinder
     implements DigestAlgorithmIdentifierFinder

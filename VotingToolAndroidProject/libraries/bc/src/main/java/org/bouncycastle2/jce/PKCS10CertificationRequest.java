@@ -1,35 +1,6 @@
 package org.bouncycastle2.jce;
 
-import java.io.IOException;
-import java.security.AlgorithmParameters;
-import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PSSParameterSpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Set;
-
-import javax.security.auth.x500.X500Principal;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1InputStream;
-import org.bouncycastle2.asn1.ASN1Object;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.ASN1Set;
-import org.bouncycastle2.asn1.DERBitString;
-import org.bouncycastle2.asn1.DEREncodable;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERNull;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle2.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle2.asn1.oiw.OIWObjectIdentifiers;
@@ -44,6 +15,16 @@ import org.bouncycastle2.asn1.x509.X509Name;
 import org.bouncycastle2.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle2.jce.provider.BouncyCastleProvider;
 import org.bouncycastle2.util.Strings;
+
+import javax.security.auth.x500.X500Principal;
+import java.io.IOException;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PSSParameterSpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Set;
 
 /**
  * A class for verifying and creating PKCS10 Certification requests. 

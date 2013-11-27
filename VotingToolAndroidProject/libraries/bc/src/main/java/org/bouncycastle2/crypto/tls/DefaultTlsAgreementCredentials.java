@@ -1,7 +1,5 @@
 package org.bouncycastle2.crypto.tls;
 
-import java.math.BigInteger;
-
 import org.bouncycastle2.crypto.BasicAgreement;
 import org.bouncycastle2.crypto.agreement.DHBasicAgreement;
 import org.bouncycastle2.crypto.agreement.ECDHBasicAgreement;
@@ -9,6 +7,8 @@ import org.bouncycastle2.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle2.crypto.params.DHPrivateKeyParameters;
 import org.bouncycastle2.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle2.util.BigIntegers;
+
+import java.math.BigInteger;
 
 public class DefaultTlsAgreementCredentials implements TlsAgreementCredentials
 {

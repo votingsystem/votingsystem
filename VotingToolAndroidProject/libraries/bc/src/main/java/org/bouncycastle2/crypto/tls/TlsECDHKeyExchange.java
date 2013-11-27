@@ -1,23 +1,19 @@
 package org.bouncycastle2.crypto.tls;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.math.BigInteger;
-
 import org.bouncycastle2.asn1.x509.KeyUsage;
 import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle2.asn1.x509.X509CertificateStructure;
 import org.bouncycastle2.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle2.crypto.agreement.ECDHBasicAgreement;
 import org.bouncycastle2.crypto.generators.ECKeyPairGenerator;
-import org.bouncycastle2.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle2.crypto.params.ECDomainParameters;
-import org.bouncycastle2.crypto.params.ECKeyGenerationParameters;
-import org.bouncycastle2.crypto.params.ECPrivateKeyParameters;
-import org.bouncycastle2.crypto.params.ECPublicKeyParameters;
+import org.bouncycastle2.crypto.params.*;
 import org.bouncycastle2.crypto.util.PublicKeyFactory;
 import org.bouncycastle2.util.BigIntegers;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.math.BigInteger;
 
 /**
  * ECDH key exchange (see RFC 4492)

@@ -9,11 +9,7 @@ import org.bouncycastle2.crypto.digests.SHA1Digest;
 import org.bouncycastle2.crypto.engines.RSABlindedEngine;
 import org.bouncycastle2.crypto.signers.ISO9796d2Signer;
 
-import java.security.InvalidKeyException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SignatureException;
-import java.security.SignatureSpi;
+import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.AlgorithmParameterSpec;

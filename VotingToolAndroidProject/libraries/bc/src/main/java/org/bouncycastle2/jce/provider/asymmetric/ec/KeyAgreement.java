@@ -1,21 +1,5 @@
 package org.bouncycastle2.jce.provider.asymmetric.ec;
 
-import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
-import java.util.Hashtable;
-
-import javax.crypto.KeyAgreementSpi;
-import javax.crypto.SecretKey;
-import javax.crypto.ShortBufferException;
-import javax.crypto.spec.SecretKeySpec;
-
 import org.bouncycastle2.asn1.DERObjectIdentifier;
 import org.bouncycastle2.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
@@ -29,15 +13,20 @@ import org.bouncycastle2.crypto.agreement.ECMQVBasicAgreement;
 import org.bouncycastle2.crypto.agreement.kdf.DHKDFParameters;
 import org.bouncycastle2.crypto.agreement.kdf.ECDHKEKGenerator;
 import org.bouncycastle2.crypto.digests.SHA1Digest;
-import org.bouncycastle2.crypto.params.ECDomainParameters;
-import org.bouncycastle2.crypto.params.ECPrivateKeyParameters;
-import org.bouncycastle2.crypto.params.ECPublicKeyParameters;
-import org.bouncycastle2.crypto.params.MQVPrivateParameters;
-import org.bouncycastle2.crypto.params.MQVPublicParameters;
+import org.bouncycastle2.crypto.params.*;
 import org.bouncycastle2.jce.interfaces.ECPrivateKey;
 import org.bouncycastle2.jce.interfaces.ECPublicKey;
 import org.bouncycastle2.jce.interfaces.MQVPrivateKey;
 import org.bouncycastle2.jce.interfaces.MQVPublicKey;
+
+import javax.crypto.KeyAgreementSpi;
+import javax.crypto.SecretKey;
+import javax.crypto.ShortBufferException;
+import javax.crypto.spec.SecretKeySpec;
+import java.math.BigInteger;
+import java.security.*;
+import java.security.spec.AlgorithmParameterSpec;
+import java.util.Hashtable;
 
 /**
  * Diffie-Hellman key agreement using elliptic curve keys, ala IEEE P1363

@@ -43,12 +43,7 @@
  */
 package com.itextpdf.text.pdf;
 
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.Chunk;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.Image;
-import com.itextpdf.text.SplitCharacter;
-import com.itextpdf.text.Utilities;
+import com.itextpdf.text.*;
 
 import java.util.HashMap;
 import java.util.HashSet;

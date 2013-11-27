@@ -1,42 +1,22 @@
 package org.votingsystem.applet.votingtool.dialog;
 
+import java.awt.Container;
 import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.SwingWorker;
+import javax.swing.UIManager;
+import net.miginfocom.swing.MigLayout;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
-import static org.votingsystem.applet.votingtool.Applet.SERVER_INFO_URL_SUFIX;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.applet.votingtool.FirmaDialog;
-import org.votingsystem.applet.votingtool.RepresentativeDataDialog;
-import org.votingsystem.applet.votingtool.SaveReceiptDialog;
-import org.votingsystem.applet.votingtool.VotacionDialog;
-import org.votingsystem.applet.model.AppletOperation;
-import static org.votingsystem.applet.model.AppletOperation.Type.ACCESS_REQUEST_CANCELLATION;
-import static org.votingsystem.applet.model.AppletOperation.Type.VOTE_CANCELLATION;
-import static org.votingsystem.applet.model.AppletOperation.Type.CONTROL_CENTER_ASSOCIATION;
-import static org.votingsystem.applet.model.AppletOperation.Type.EVENT_CANCELLATION;
-import static org.votingsystem.applet.model.AppletOperation.Type.SEND_SMIME_VOTE;
-import static org.votingsystem.applet.model.AppletOperation.Type.MANIFEST_SIGN;
-import static org.votingsystem.applet.model.AppletOperation.Type.SMIME_CLAIM_SIGNATURE;
-import static org.votingsystem.applet.model.AppletOperation.Type.NEW_REPRESENTATIVE;
-import static org.votingsystem.applet.model.AppletOperation.Type.MANIFEST_PUBLISHING;
-import static org.votingsystem.applet.model.AppletOperation.Type.CLAIM_PUBLISHING;
-import static org.votingsystem.applet.model.AppletOperation.Type.VOTING_PUBLISHING;
-import static org.votingsystem.applet.model.AppletOperation.Type.REPRESENTATIVE_ACCREDITATIONS_REQUEST;
-import static org.votingsystem.applet.model.AppletOperation.Type.REPRESENTATIVE_REVOKE;
-import static org.votingsystem.applet.model.AppletOperation.Type.REPRESENTATIVE_SELECTION;
-import static org.votingsystem.applet.model.AppletOperation.Type.REPRESENTATIVE_VOTING_HISTORY_REQUEST;
-import static org.votingsystem.applet.model.AppletOperation.Type.BACKUP_REQUEST;
-import org.votingsystem.applet.pdf.PdfFormHelper;
-import org.votingsystem.applet.callable.InfoGetter;
-import org.votingsystem.model.ActorVS;
-import org.votingsystem.model.ResponseVS;
 import org.apache.log4j.Logger;
+import org.votingsystem.applet.util.HttpHelper;
+import org.votingsystem.applet.votingtool.panel.ProgressBarPanel;
+import org.votingsystem.model.*;
 
 /**
 * @author jgzornoza
@@ -44,22 +24,19 @@ import org.apache.log4j.Logger;
 */
 public class PreconditionsCheckerDialog extends JDialog {
     
-    private static Logger logger = Logger.getLogger(
-            PreconditionsCheckerDialog.class);
+    private static Logger logger = Logger.getLogger(PreconditionsCheckerDialog.class);
     
-    private static final Map<String, ActorVS> actorMap = 
-            new HashMap<String, ActorVS>();
-    private AppletOperation operation;
-    private Frame frame = null;
-
-    public PreconditionsCheckerDialog(AppletOperation operation, 
-            Frame parent, boolean modal) {
+    private static final Map<String, ActorVS> actorMap = new HashMap<String, ActorVS>();
+    private OperationVS operationVS;
+    
+    private ProgressBarPanel progressBarPanel;
+    private Container container;
+    
+    public PreconditionsCheckerDialog(Frame parent, boolean modal) {
         super(parent, modal);
-        frame = parent;
-        this.operation = operation;
         initComponents();
         setLocationRelativeTo(null);  
-        setTitle(ContextVS.INSTANCE.getString("preconditionsCheckerDialogCaption"));
+        setTitle(ContextVS.getMessage("preconditionsCheckerDialogCaption"));
         addWindowListener(new WindowAdapter() {
             public void windowClosed(WindowEvent e) {
                 logger.debug("PreconditionsCheckerDialog window closed event received");
@@ -67,54 +44,81 @@ public class PreconditionsCheckerDialog extends JDialog {
 
             public void windowClosing(WindowEvent e) {
                 logger.debug(" - window closing event received");
-                sendResponse(ResponseVS.SC_CANCELLED,
-                        ContextVS.INSTANCE.getString("operacionCancelada"));
+                sendResponse(ResponseVS.SC_CANCELLED, ContextVS.getMessage("operationCancelled"));
             }
         });
         pack();
     }
     
-    public void showDialog() {
-        logger.debug("showDialog");
+    private void initComponents() {
+        logger.debug("initComponents");
+        container = getContentPane();   
+        container.setLayout(new MigLayout("fill"));
+        progressBarPanel = new ProgressBarPanel();
+        container.add(progressBarPanel, "width :400:, wrap"); 
+    }
+    
+    public void checkOperation(OperationVS operationVS) {
+        logger.debug("checkOperation");
+        this.operationVS = operationVS;
         PreconditionsCheckerWorker worker = new PreconditionsCheckerWorker();
         worker.execute();
         setVisible(true);
     }
+        
+    //we konw this is done in a background thread
+    private ResponseVS<ActorVS> checkActorVS(String serverURL) throws Exception {
+        logger.debug(" - checkActorVS: " + serverURL);
+        ActorVS actorVS = actorMap.get(serverURL.trim());
+        if(actorVS == null) { 
+            String serverInfoURL = ActorVS.getServerInfoURL(serverURL);
+            ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                JSONObject jsonObject = (JSONObject)JSONSerializer.toJSON(responseVS.getMessage());
+                actorVS = ActorVS.populate(jsonObject);
+                responseVS.setData(actorVS);
+                logger.error("checkActorVS - adding " + serverURL.trim() + " to actor map");
+                actorMap.put(serverURL.trim(), actorVS);
+            }
+            return responseVS;
+        } else {
+            ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK);
+            responseVS.setData(actorVS);
+            return responseVS;
+        }
+    }
     
     private void sendResponse(int status, String message) {
-        progressLabel.setText(ContextVS.INSTANCE.getString("errorLbl"));
-        progressBar.setVisible(false);
-        waitLabel.setText(message);
-        operation.setStatusCode(status);
-        operation.setMessage(message);
-        ContextVS.INSTANCE.sendMessageToHost(operation);
+        progressBarPanel.setResultMessage(message);
+        if(operationVS != null) {
+            operationVS.setStatusCode(status);
+            operationVS.setMessage(message);
+            ContextVS.getInstance().sendMessageToHost(operationVS);
+        } else logger.debug(" --- operationVS null ---");
         dispose();
     }
+  
     
     class PreconditionsCheckerWorker extends SwingWorker<ResponseVS, Object> {
        
         @Override public ResponseVS doInBackground() {
             logger.debug("PreconditionsCheckerWorker.doInBackground - operation:" + 
-                    operation.getType());
+                    operationVS.getType());
             ResponseVS responseVS = null;
             try {
-            switch(operation.getType()) {
+            switch(operationVS.getType()) {
                 case SEND_SMIME_VOTE:
-                    String accessControlURL = operation.getEvento().
-                            getControlAcceso().getServerURL().trim();
-                    responseVS = checkActorConIP(accessControlURL);
+                    String accessControlURL = operationVS.getEventVS().getAccessControlVS().getServerURL().trim();
+                    responseVS = checkActorVS(accessControlURL);
                     if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                         return responseVS;
                     } else {
-                        ContextVS.INSTANCE.setAccessControl(
-                                (ActorVS)responseVS.getData());
+                        ContextVS.getInstance().setAccessControl((AccessControlVS)responseVS.getData());
                     }
-                    String controlCenterURL = operation.getEvento().
-                            getCentroControl().getServerURL().trim();
-                    responseVS = checkActorConIP(controlCenterURL);
+                    String controlCenterURL = operationVS.getEventVS().getControlCenterVS().getServerURL().trim();
+                    responseVS = checkActorVS(controlCenterURL);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        ContextVS.INSTANCE.setControlCenter(
-                            (ActorVS)responseVS.getData());
+                        ContextVS.getInstance().setControlCenter((ControlCenterVS)responseVS.getData());
                     }
                     break;
                 case REPRESENTATIVE_REVOKE:
@@ -132,19 +136,17 @@ public class PreconditionsCheckerDialog extends JDialog {
                 case ACCESS_REQUEST_CANCELLATION:
                 case VOTE_CANCELLATION: 
                 case BACKUP_REQUEST:
-                    String serverURL = operation.getUrlServer().trim();
-                    responseVS = checkActorConIP(serverURL);
+                    String serverURL = operationVS.getUrlServer().trim();
+                    responseVS = checkActorVS(serverURL);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        ContextVS.INSTANCE.setAccessControl(
-                                (ActorVS)responseVS.getData());
+                        ContextVS.getInstance().setAccessControl((ActorVS)responseVS.getData());
                     }
                     break;
                 default: 
                     logger.error(" ################# UNKNOWN OPERATION -> " +  
-                            operation.getType());
-                    responseVS = new ResponseVS(ResponseVS.SC_ERROR, 
-                            ContextVS.INSTANCE.getString("unknownOperationErrorMsg") +  
-                            operation.getType());
+                            operationVS.getType());
+                    responseVS = new ResponseVS(ResponseVS.SC_ERROR,
+                            ContextVS.getInstance().getMessage("unknownOperationErrorMsg") +  operationVS.getType());
                     break;
             }
             } catch(Exception ex) {
@@ -157,27 +159,24 @@ public class PreconditionsCheckerDialog extends JDialog {
         @Override protected void done() {
             try{
                 ResponseVS responseVS = get();
-                logger.debug("PreconditionsCheckerWorker.done - operation:" + 
-                        operation.getType() + " - status: " + responseVS.getStatusCode());
+                logger.debug("PreconditionsCheckerWorker.done - operationVS:" + 
+                        operationVS.getType() + " - status: " + responseVS.getStatusCode());
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    switch(operation.getType()) {
+                    switch(operationVS.getType()) {
                         case SAVE_VOTE_RECEIPT:
-                            SaveReceiptDialog saveReceiptDialog = 
-                                new SaveReceiptDialog(frame, true);
+                            SaveReceiptDialog saveReceiptDialog = new SaveReceiptDialog(new JFrame(), true);
                             dispose();
-                            saveReceiptDialog.show(operation.getArgs()[0]);
+                            saveReceiptDialog.show(operationVS.getArgs()[0]);
                             break;
                         case NEW_REPRESENTATIVE:
-                            RepresentativeDataDialog representativeDialog = 
-                                new RepresentativeDataDialog(frame, true);
+                            RepresentativeFormDialog representativeDialog = new RepresentativeFormDialog(new JFrame(), true);
                             dispose();
-                            representativeDialog.show(operation);
+                            representativeDialog.show(operationVS);
                             break;
                         case SEND_SMIME_VOTE:
-                            VotacionDialog votacionDialog = new VotacionDialog(
-                                    frame, true);
+                            ElectionDialog votacionDialog = new ElectionDialog(new JFrame(), true);
                             dispose();
-                            votacionDialog.show(operation);
+                            votacionDialog.show(operationVS);
                             break;
                         case REPRESENTATIVE_REVOKE:
                         case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
@@ -193,16 +192,14 @@ public class PreconditionsCheckerDialog extends JDialog {
                         case ACCESS_REQUEST_CANCELLATION:
                         case VOTE_CANCELLATION:
                         case BACKUP_REQUEST:
-                            FirmaDialog firmaDialog = new FirmaDialog(frame, true);
+                            SignatureDialog signatureDialog = new SignatureDialog(new JFrame(), true);
                             dispose();
-                            firmaDialog.show(operation);
+                            signatureDialog.show(operationVS);
                             break;
                         default:
-                            logger.debug("############ UNKNOWN OPERATION -> " + 
-                            operation.getType().toString());
-                            sendResponse(ResponseVS.SC_ERROR, ContextVS.INSTANCE.
-                                    getString("unknownOperationErrorMsg") +  
-                                    operation.getType());
+                            logger.debug("############ UNKNOWN OPERATION -> " + operationVS.getType().toString());
+                            sendResponse(ResponseVS.SC_ERROR, ContextVS.getInstance().
+                                    getMessage("unknownOperationErrorMsg") + operationVS.getType());
                     }            
                 } else {
                     logger.debug("responseVS.getMessage(): " + responseVS.getMessage());
@@ -214,110 +211,27 @@ public class PreconditionsCheckerDialog extends JDialog {
             }
         }
     }
-
     
-    private ResponseVS<ActorVS> checkActorConIP(String serverURL) throws Exception {
-        logger.debug(" - checkActorConIP: " + serverURL);
-        ActorVS actorConIp = actorMap.get(serverURL.trim());
-        if(actorConIp == null) { 
-            String serverInfoURL = serverURL;
-            if (!serverInfoURL.endsWith("/")) serverInfoURL = serverInfoURL + "/";
-            serverInfoURL = serverInfoURL + SERVER_INFO_URL_SUFIX;
-            InfoGetter infoGetter = new InfoGetter(null, serverInfoURL, null);
-            ResponseVS responseVS = infoGetter.call();
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                JSONObject jsonObject = (JSONObject)JSONSerializer.toJSON(responseVS.getMessage());
-                ActorVS actorConIP = ActorVS.populate(jsonObject);
-                responseVS.setData(actorConIP);
-                logger.error("checkActorConIP - adding " + serverURL.trim() + 
-                        " to actor map");
-                actorMap.put(serverURL.trim(), actorConIP);
+    public static void main(String[] args) {
+
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    ContextVS.initSignatureApplet(null, "log4j.properties", "messages_", "es");
+                    UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
+                    PreconditionsCheckerDialog dialog = new PreconditionsCheckerDialog(new JFrame(), true);
+                    dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+                        @Override public void windowClosing(java.awt.event.WindowEvent e) {
+                            System.exit(0);
+                        }
+                    });
+                    dialog.setVisible(true);
+                } catch(Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                }
             }
-            return responseVS;
-        } else {
-            ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK);
-            responseVS.setData(actorConIp);
-            return responseVS;
-        }
-    }
-    
-    /**
-     * This method is called from within the constructor to initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is always
-     * regenerated by the Form Editor.
-     */
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+        });
 
-        messagePanel = new javax.swing.JPanel();
-        progressLabel = new javax.swing.JLabel();
-        progressBar = new javax.swing.JProgressBar();
-        waitLabel = new javax.swing.JLabel();
-
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-
-        progressLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 14)); // NOI18N
-        progressLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/votingsystem/applet/votingtool/Bundle"); // NOI18N
-        progressLabel.setText(bundle.getString("VotacionDialog.progressLabel.text")); // NOI18N
-
-        progressBar.setIndeterminate(true);
-
-        waitLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 14)); // NOI18N
-        waitLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        java.util.ResourceBundle bundle1 = java.util.ResourceBundle.getBundle("org/votingsystem/applet/votingtool/Bundle"); // NOI18N
-        waitLabel.setText(bundle1.getString("PreconditionsCheckerDialog.waitLabel.text")); // NOI18N
-
-        javax.swing.GroupLayout messagePanelLayout = new javax.swing.GroupLayout(messagePanel);
-        messagePanel.setLayout(messagePanelLayout);
-        messagePanelLayout.setHorizontalGroup(
-            messagePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(messagePanelLayout.createSequentialGroup()
-                .addGroup(messagePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(messagePanelLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(messagePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(progressBar, javax.swing.GroupLayout.DEFAULT_SIZE, 468, Short.MAX_VALUE)
-                            .addComponent(waitLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addGroup(messagePanelLayout.createSequentialGroup()
-                        .addGap(44, 44, 44)
-                        .addComponent(progressLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 436, Short.MAX_VALUE)))
-                .addContainerGap())
-        );
-        messagePanelLayout.setVerticalGroup(
-            messagePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(messagePanelLayout.createSequentialGroup()
-                .addComponent(progressLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(waitLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(messagePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(messagePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        pack();
-    }// </editor-fold>//GEN-END:initComponents
-
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel messagePanel;
-    private javax.swing.JProgressBar progressBar;
-    private javax.swing.JLabel progressLabel;
-    private javax.swing.JLabel waitLabel;
-    // End of variables declaration//GEN-END:variables
+    }   
 
 }

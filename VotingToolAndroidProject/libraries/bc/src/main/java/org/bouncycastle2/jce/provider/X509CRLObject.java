@@ -1,46 +1,21 @@
 package org.bouncycastle2.jce.provider;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Principal;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.cert.CRLException;
-import java.security.cert.Certificate;
-import java.security.cert.X509CRL;
-import java.security.cert.X509CRLEntry;
-import java.security.cert.X509Certificate;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
-import javax.security.auth.x500.X500Principal;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1InputStream;
-import org.bouncycastle2.asn1.ASN1OutputStream;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.util.ASN1Dump;
-import org.bouncycastle2.asn1.x509.CRLDistPoint;
-import org.bouncycastle2.asn1.x509.CRLNumber;
-import org.bouncycastle2.asn1.x509.CertificateList;
-import org.bouncycastle2.asn1.x509.IssuingDistributionPoint;
-import org.bouncycastle2.asn1.x509.TBSCertList;
+import org.bouncycastle2.asn1.x509.*;
 import org.bouncycastle2.asn1.x509.X509Extension;
-import org.bouncycastle2.asn1.x509.X509Extensions;
 import org.bouncycastle2.jce.X509Principal;
 import org.bouncycastle2.util.encoders.Hex;
 import org.bouncycastle2.x509.extension.X509ExtensionUtil;
+
+import javax.security.auth.x500.X500Principal;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.*;
+import java.security.cert.*;
+import java.security.cert.Certificate;
+import java.util.*;
 
 /**
  * The following extensions are listed in RFC 2459 as relevant to CRLs

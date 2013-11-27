@@ -1,13 +1,6 @@
 package org.bouncycastle2.asn1.cms;
 
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.ASN1Set;
-import org.bouncycastle2.asn1.BERSequence;
-import org.bouncycastle2.asn1.BERTaggedObject;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERObject;
+import org.bouncycastle2.asn1.*;
 
 public class EncryptedData
     extends ASN1Encodable

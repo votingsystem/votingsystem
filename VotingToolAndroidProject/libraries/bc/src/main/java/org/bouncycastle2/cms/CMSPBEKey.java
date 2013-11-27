@@ -1,11 +1,10 @@
 package org.bouncycastle2.cms;
 
+import javax.crypto.interfaces.PBEKey;
+import javax.crypto.spec.PBEParameterSpec;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.spec.InvalidParameterSpecException;
-
-import javax.crypto.interfaces.PBEKey;
-import javax.crypto.spec.PBEParameterSpec;
 
 public abstract class CMSPBEKey
     implements PBEKey

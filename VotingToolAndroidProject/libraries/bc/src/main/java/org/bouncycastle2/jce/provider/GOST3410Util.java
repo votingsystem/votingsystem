@@ -1,9 +1,5 @@
 package org.bouncycastle2.jce.provider;
 
-import java.security.InvalidKeyException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-
 import org.bouncycastle2.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle2.crypto.params.GOST3410Parameters;
 import org.bouncycastle2.crypto.params.GOST3410PrivateKeyParameters;
@@ -11,6 +7,10 @@ import org.bouncycastle2.crypto.params.GOST3410PublicKeyParameters;
 import org.bouncycastle2.jce.interfaces.GOST3410PrivateKey;
 import org.bouncycastle2.jce.interfaces.GOST3410PublicKey;
 import org.bouncycastle2.jce.spec.GOST3410PublicKeyParameterSetSpec;
+
+import java.security.InvalidKeyException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 /**
  * utility class for converting jce/jca GOST3410-94 objects

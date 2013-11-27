@@ -40,14 +40,16 @@
 
 package com.sun.mail.pop3;
 
-import java.util.*;
-import java.net.*;
-import java.io.*;
-import java.security.*;
-
 import com.sun.mail.util.LineInputStream;
 import com.sun.mail.util.SocketFetcher;
+
 import javax.mail.util.SharedByteArrayInputStream;
+import java.io.*;
+import java.net.Socket;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Properties;
+import java.util.StringTokenizer;
 
 class Response {
     boolean ok = false;		// true if "+OK"

@@ -40,20 +40,20 @@
 
 package com.sun.mail.imap;
 
-import java.util.Date;
-import java.io.*;
-import java.util.Enumeration;
-import java.util.Vector;
-import java.util.Hashtable;
-import java.util.Locale;
+import com.sun.mail.iap.CommandFailedException;
+import com.sun.mail.iap.ConnectionException;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.iap.Response;
+import com.sun.mail.imap.protocol.*;
 
+import javax.activation.DataHandler;
 import javax.mail.*;
 import javax.mail.internet.*;
-import javax.activation.*;
-
-import com.sun.mail.util.*;
-import com.sun.mail.iap.*;
-import com.sun.mail.imap.protocol.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.*;
 
 /**
  * This class implements an IMAPMessage object. <p>

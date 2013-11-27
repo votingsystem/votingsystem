@@ -1,27 +1,21 @@
 package org.bouncycastle2.cert.cmp;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 import org.bouncycastle2.asn1.ASN1EncodableVector;
 import org.bouncycastle2.asn1.DERBitString;
 import org.bouncycastle2.asn1.DERGeneralizedTime;
 import org.bouncycastle2.asn1.DERSequence;
-import org.bouncycastle2.asn1.cmp.CMPCertificate;
-import org.bouncycastle2.asn1.cmp.InfoTypeAndValue;
-import org.bouncycastle2.asn1.cmp.PKIBody;
-import org.bouncycastle2.asn1.cmp.PKIFreeText;
-import org.bouncycastle2.asn1.cmp.PKIHeader;
-import org.bouncycastle2.asn1.cmp.PKIHeaderBuilder;
-import org.bouncycastle2.asn1.cmp.PKIMessage;
+import org.bouncycastle2.asn1.cmp.*;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.asn1.x509.GeneralName;
 import org.bouncycastle2.cert.X509CertificateHolder;
 import org.bouncycastle2.operator.ContentSigner;
 import org.bouncycastle2.operator.MacCalculator;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Builder for creating a protected PKI message.

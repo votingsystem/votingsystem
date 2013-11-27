@@ -1,4 +1,3 @@
-import java.net.*;
 import org.apache.log4j.net.SMTPAppender
 import org.apache.log4j.Level
 
@@ -90,7 +89,7 @@ grails.exceptionresolver.params.exclude = ['password']
 // configure auto-caching of queries by default (if false you can cache individual queries with 'cache: true')
 grails.hibernate.cache.queries = false
 
-//To test production environments, on of DEVELOPMENT, PRODUCTION, TEST
+//To make tests on production environments. One of DEVELOPMENT, PRODUCTION, TEST
 VotingSystemEnvironment="DEVELOPMENT"
 
 environments {
@@ -99,17 +98,17 @@ environments {
 		grails.resources.debug = true// -> rendering problems
 		String localIP = getDevelopmentServerIP();
 		println("Setting test development to: ${localIP}")
-        grails.serverURL = "http://${localIP}:8080/${appName}"
+        grails.serverURL = "http://${localIP}:8081/${appName}"
     }
 	production {
 		grails.logging.jul.usebridge = false
-		grails.serverURL = "http://192.168.1.4:8080/ControlCenter"
+		grails.serverURL = "http://192.168.1.4:8081/ControlCenter"
 	}
     test {
 		grails.logging.jul.usebridge = true	
 		String localIP = getDevelopmentServerIP();
 		println("Setting test address to: ${localIP}")
-        grails.serverURL = "http://${localIP}:8080/${appName}"
+        grails.serverURL = "http://${localIP}:8081/${appName}"
     }
 }
 
@@ -198,18 +197,18 @@ grails.war.copyToWebApp = { args ->
 }
 
 
-VotingSystem.backupCopyPath='./VotingSystem/copiaRespaldo'
-VotingSystem.eventsMetaInfBaseDir='./VotingSystem/Eventos_MetaInf'
+VotingSystem.backupCopyPath='./VotingSystem/backup'
+VotingSystem.eventsMetaInfBaseDir='./VotingSystem/EventVS_MetaInf'
 VotingSystem.errorsBaseDir='./VotingSystem/errors'
 VotingSystem.keyStorePath='WEB-INF/cms/ControlCenter.jks'
 VotingSystem.signKeysAlias='ControlCenterKeys'
 VotingSystem.certAuthoritiesDirPath='WEB-INF/cms/'
-VotingSystem.certChainPath='WEB-INF/cms/cadenaCertificacion.pem'
+VotingSystem.certChainPath='WEB-INF/cms/certChain.pem'
 VotingSystem.signKeysPassword='PemPass'
 //milliseconds
 VotingSystem.requestTimeOut = 500
-//Nombre decriptivo del servidor
-VotingSystem.serverName='Primer CentroControl'
+//Name decriptivo del servidor
+VotingSystem.serverName='Primer ControlCenter'
 VotingSystem.votingHashAlgorithm='SHA256'
 VotingSystem.blogURL ='http://www.gruposp2p.org'
 VotingSystem.emailAdmin='jgzornoza@gmail.com'

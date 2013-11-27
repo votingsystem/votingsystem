@@ -1,10 +1,10 @@
 package org.bouncycastle2.cert.jcajce;
 
-import java.io.IOException;
-
 import org.bouncycastle2.asn1.x509.AttributeCertificate;
-import org.bouncycastle2.x509.X509AttributeCertificate;
 import org.bouncycastle2.cert.X509AttributeCertificateHolder;
+import org.bouncycastle2.x509.X509AttributeCertificate;
+
+import java.io.IOException;
 
 /**
  * JCA helper class for converting an old style X509AttributeCertificate into a X509AttributeCertificateHolder object.

@@ -1,12 +1,6 @@
 package org.bouncycastle2.asn1.pkcs;
 
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DERSequence;
-import org.bouncycastle2.asn1.DERTaggedObject;
+import org.bouncycastle2.asn1.*;
 
 public class CertBag
     extends ASN1Encodable

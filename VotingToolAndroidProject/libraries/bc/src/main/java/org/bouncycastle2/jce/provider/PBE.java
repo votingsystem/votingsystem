@@ -1,18 +1,8 @@
 package org.bouncycastle2.jce.provider;
 
-import java.security.spec.AlgorithmParameterSpec;
-
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.PBEParameterSpec;
-
 import org.bouncycastle2.crypto.CipherParameters;
 import org.bouncycastle2.crypto.PBEParametersGenerator;
-import org.bouncycastle2.crypto.digests.MD2Digest;
-import org.bouncycastle2.crypto.digests.MD5Digest;
-import org.bouncycastle2.crypto.digests.RIPEMD160Digest;
-import org.bouncycastle2.crypto.digests.SHA1Digest;
-import org.bouncycastle2.crypto.digests.SHA256Digest;
-import org.bouncycastle2.crypto.digests.TigerDigest;
+import org.bouncycastle2.crypto.digests.*;
 import org.bouncycastle2.crypto.generators.OpenSSLPBEParametersGenerator;
 import org.bouncycastle2.crypto.generators.PKCS12ParametersGenerator;
 import org.bouncycastle2.crypto.generators.PKCS5S1ParametersGenerator;
@@ -20,6 +10,10 @@ import org.bouncycastle2.crypto.generators.PKCS5S2ParametersGenerator;
 import org.bouncycastle2.crypto.params.DESParameters;
 import org.bouncycastle2.crypto.params.KeyParameter;
 import org.bouncycastle2.crypto.params.ParametersWithIV;
+
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.PBEParameterSpec;
+import java.security.spec.AlgorithmParameterSpec;
 
 public interface PBE
 {

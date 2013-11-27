@@ -18,7 +18,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/asunto_evento"
+                android:id="@+id/subject_evento"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -46,7 +46,7 @@
                     android:padding="10dp"
                     android:orientation="vertical">
                     <TextView
-                        android:id="@+id/contenido_evento"
+                        android:id="@+id/eventvs_content"
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
                         android:textSize="20sp"

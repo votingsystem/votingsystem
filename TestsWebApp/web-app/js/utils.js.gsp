@@ -1,75 +1,127 @@
 var WebAppMessage = function (statusCode, operacion) {
-	this.codigoEstado = statusCode
+	this.statusCode = statusCode
 	this.operacion = operacion
-	this.asunto ;
-	this.contenidoFirma;
-	this.urlEnvioDocumento;
+	this.subject ;
+	this.signedContent;
+	this.receiverSignServiceURL;
 	this.urlDocumento;
-	this.nombreDestinatarioFirma;
-	this.urlServer;
-	this.respuestaConRecibo;
-	this.evento;
+	this.receiverName;
+	this.serverURL;
+	this.isResponseWithReceipt;
+	this.eventVS;
 	this.redirectURL;
 	this.callerCallback;
 }
 
-var Evento = function () {
-    this.id
-    this.fechaCreacion
-    this.fechaFin
-    this.fechaInicio
-    this.usuario
-    this.estado
-    this.votante
-    this.copiaSeguridadDisponible
-    this.tipo
+EventVS.State = {
+        ACTIVE:"ACTIVE",
+        TERMINATED:"TERMINATED",
+        CANCELLED:"CANCELLED",
+        AWAITING:"AWAITING",
+        PENDING_SIGNATURE:"PENDING_SIGNATURE",
+        DELETED_FROM_SYSTEM:"DELETED_FROM_SYSTEM"
+}
+
+function EventVS(eventJSON, eventTemplate, subSystem) {
+
+    this.subSystem = subSystem
+    this.id = eventJSON.id
+    this.dateCreated
+    this.dateFinish = eventJSON.dateFinish
+    this.dateBegin = eventJSON.dateBegin
+    this.userVS = eventJSON.userVS
+    this.state = eventJSON.state
+    this.backupAvailable
+    this.type
     this.operation
-    this.hashSolicitudAccesoBase64
+    this.hashAccessRequestBase64
     this.hashSolicitudAccesoHex
-    this.hashCertificadoVotoBase64
-    this.hashCertificadoVotoHex
-    this.cardinalidad
-    this.urlSolicitudAcceso
-    this.urlRecolectorVotosCentroControl
-    this.controlAcceso
-    this.centroControl
-    this.opciones
-    this.opcionSeleccionada
-    this.campos
+    this.hashCertVoteBase64
+    this.hashCertVoteHex
+    this.cardinality
+    this.accessControl
+    this.controlCenterVS
+    this.fieldsEventVS
+    this.optionSelected
     this.duracion
     this.urlPDF
     this.URL
-    this.numeroFirmas
-    this.contenido
-    this.asunto
-    this.etiquetas
-    this.opciones
-    
-    this.isActive = function () {
-    	var result =  false;
-    	if(EstadoEvento.ACTIVO == estado) {
-    		result = DateUtils.checkDate(fechaFin, fechaFin);
-    	} else if(EstadoEvento.PENDIENTE_COMIENZO == estado) {
-    		result =  DateUtils.checkDate(fechaFin, fechaFin);
-    	}
-    	return result; 	
+    this.numSignatures
+    this.content
+    this.fieldsEventVS
+    this.subject = eventJSON.subject
+    if(eventTemplate != null) {
+        this.eventHTML = eventTemplate.format(this.subject, this.userVS, this.dateBegin,
+            this.dateFinish.getElapsedTime(), this.getMessage());
     }
-    
+
     this.getMessage = function () {
     	var result =  "";
-    	if(EstadoEvento.ACTIVO == estado) {
+    	if(EventVS.State.ACTIVE == this.state) {
     		result = "<g:message code='openLbl'/>";
-    	} else if(EstadoEvento.PENDIENTE_COMIENZO == estado) {
+    	} else if(EventVS.State.AWAITING == this.state) {
     		result =  "<g:message code='pendingLbl'/>";
-    	} else if(EstadoEvento.FINALIZADO == estado) {
+    	} else if(EventVS.State.TERMINATED == this.state) {
     		result =  "<g:message code='closedLbl'/>";
-    	} else if(EstadoEvento.CANCELADO == estado) {
+    	} else if(EventVS.State.CANCELLED == this.state) {
     		result =  "<g:message code='cancelledLbl'/>";
-    	} else if(EstadoEvento.ACTORES_PENDIENTES_NOTIFICACION == estado) {
-    		result =  "<g:message code='withoutNotificationsLbl'/>";
+    	}
+    	return result;
+    }
+
+    this.isActive = function () {
+    	var result =  false;
+    	if(EventVS.State.ACTIVE == this.state) {
+    		result = DateUtils.checkDate(this.dateBegin, this.dateFinish);
+    	} else if(EventVS.State.AWAITING == this.state) {
+    		result =  DateUtils.checkDate(this.dateBegin, this.dateFinish);
     	}
     	return result; 	
     }
+
+    this.getURL = function() {
+        var result
+        if(this.subSystem == SubSystem.VOTES) result = "${createLink( controller:'eventVSElection')}/" + this.id
+        if(this.subSystem == SubSystem.CLAIMS) result = "${createLink( controller:'eventVSClaim')}/" + this.id
+        if(this.subSystem == SubSystem.MANIFESTS) result = "${createLink( controller:'eventVSManifest')}/" + this.id
+		return result;
+    }
+
+    this.getElement = function() {
+        var $newEvent = $(this.eventHTML)
+
+        if(EventVS.State.ACTIVE == this.state) {
+            $newEvent.css('border-color', '#6bad74')
+            $newEvent.find(".eventSubjectDiv").css('background-color', '#6bad74')
+            $newEvent.find(".eventStateDiv").css('color', '#6bad74')
+        }
+        if(EventVS.State.TERMINATED == this.state) {
+            $newEvent.css('border-color', '#cc1606')
+            $newEvent.find(".eventSubjectDiv").css('background-color', '#cc1606')
+            $newEvent.find(".eventStateDiv").css('color', '#cc1606')
+        }
+        if(EventVS.State.CANCELLED == this.state) {
+            $newEvent.css('border-color', '#cc1606')
+            $newEvent.find(".eventSubjectDiv").css('background-color', '#cc1606')
+            $newEvent.find(".eventStateDiv").css('color', '#cc1606')
+            $newEvent.find(".cancelMessage").fadeIn(100)
+
+        }
+        if(EventVS.State.AWAITING == this.state) {
+            $newEvent.css('border-color', '#fba131')
+            $newEvent.find(".eventSubjectDiv").css('background-color', '#fba131')
+            $newEvent.find(".eventStateDiv").css('color', '#fba131')
+        }
+
+        var eventURL = this.getURL()
+        $newEvent.click(function() {
+            console.log("- eventURL: " + eventURL);
+            window.location.href = eventURL;
+        });
+
+        return $newEvent
+    }
+
 }
 
 var DateUtils = {
@@ -178,35 +230,21 @@ function toJSON(message){
 	}
 }
 
-var DocumentState = {
-		BORRADO_DE_SISTEMA : "BORRADO_DE_SISTEMA",
-		CANCELADO:"CANCELADO",
-		PENDIENTE_COMIENZO:"PENDIENTE_COMIENZO",
-		FINALIZADO:"FINALIZADO"		
-}
-
-var StatusCode = {
+var ResponseVS = {
 		SC_OK : 200,
 		SC_ERROR_REQUEST : 400,
 		SC_CANCELLATION_REPEATED : 471,
 		SC_ERROR_VOTE_REPEATED : 470,
 		SC_ERROR : 500,
-		SC_ERROR_ENVIO_VOTO : 570,
 		SC_PROCESSING : 700,
 		SC_TERMINATED :710,
 		SC_CANCELLED : 0,
-		
-		SC_SIMULATION_INITIATED:275,
-		SC_SIMULATION_RUNNING: 475
+		SC_INITIALIZED : 1,
+		SC_PAUSED:10
 }
 
 
-var Operation = {
-		INIT_SIMULATION : "INIT_SIMULATION",
-		CANCEL_SIMULATION:"CANCEL_SIMULATION",
-		LISTEN:"LISTEN",
-		
-		
+var TypeVS = {
 		CONTROL_CENTER_ASSOCIATION : "CONTROL_CENTER_ASSOCIATION",
 		CONTROL_CENTER_STATE_CHANGE_SMIME: "CONTROL_CENTER_STATE_CHANGE_SMIME",
 		BACKUP_REQUEST: "BACKUP_REQUEST", 
@@ -216,13 +254,11 @@ var Operation = {
 		SMIME_CLAIM_SIGNATURE: "SMIME_CLAIM_SIGNATURE",
 		VOTING_PUBLISHING: "VOTING_PUBLISHING", 
 		SEND_SMIME_VOTE: "SEND_SMIME_VOTE",
-		APPLET_MESSAGE: "APPLET_MESSAGE", 
-		APPLET_PAUSED_MESSAGE: "APPLET_PAUSED_MESSAGE", 
+		TERMINATED: "TERMINATED",
 		SAVE_VOTE_RECEIPT: "SAVE_VOTE_RECEIPT", 
 		VOTE_CANCELLATION: "VOTE_CANCELLATION", 
 		ACCESS_REQUEST_CANCELLATION:"ACCESS_REQUEST_CANCELLATION", 
-		EVENT_CANCELLATION: "EVENT_CANCELLATION", 
-		MENSAJE_HERRAMIENTA_VALIDACION:"MENSAJE_HERRAMIENTA_VALIDACION", 
+		EVENT_CANCELLATION: "EVENT_CANCELLATION",
 		MENSAJE_CIERRE_HERRAMIENTA_VALIDACION: "MENSAJE_CIERRE_HERRAMIENTA_VALIDACION",
 		NEW_REPRESENTATIVE:"NEW_REPRESENTATIVE",
 		REPRESENTATIVE_SELECTION:"REPRESENTATIVE_SELECTION", 
@@ -241,38 +277,6 @@ var SubSystem = {
 			
 }
 
-var DataType = {
-		CONTROL_CENTER : "CONTROL_CENTER",
-		ACCESS_CONTROL : "ACCESS_CONTROL"
-}
-
-var EstadoEvento = {
-		ACTIVO:"ACTIVO", 
-		FINALIZADO:"FINALIZADO", 
-		CANCELADO:"CANCELADO", 
-		ACTORES_PENDIENTES_NOTIFICACION:"ACTORES_PENDIENTES_NOTIFICACION", 
-		PENDIENTE_COMIENZO:"PENDIENTE_COMIENZO",
-		PENDIENTE_DE_FIRMA:"PENDIENTE_DE_FIRMA", 
-		BORRADO_DE_SISTEMA:"BORRADO_DE_SISTEMA"
-}
-
-function getEstadoEventoMsg(estadoEvento) { 
-	
-	if(EstadoEvento.ACTIVO == estadoEvento) {
-		return "<g:message code='openLbl'/>"
-	}
-	if(EstadoEvento.FINALIZADO == estadoEvento) {
-		return "<g:message code='closedLbl'/>"
-	}
-	if(EstadoEvento.CANCELADO == estadoEvento) {
-		return  "<g:message code='closedLbl'/>"
-	}
-	if(EstadoEvento.PENDIENTE_COMIENZO == estadoEvento) {
-		return  "<g:message code='pendingLbl'/>"
-	}
-	console.log("utils.getEstadoEventoMsg() - UNKNOWN STATE")
-	return "UNKNOWN STATE"
-}
 
 function getUrlParam(paramName, staticURL, decode){
    var currLocation = (staticURL.length)? staticURL : window.location.search,

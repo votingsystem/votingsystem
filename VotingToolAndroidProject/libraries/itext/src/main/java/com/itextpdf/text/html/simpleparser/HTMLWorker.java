@@ -43,18 +43,7 @@
  */
 package com.itextpdf.text.html.simpleparser;
 
-import com.itextpdf.text.Chunk;
-import com.itextpdf.text.DocListener;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.ExceptionConverter;
-import com.itextpdf.text.FontProvider;
-import com.itextpdf.text.Image;
-import com.itextpdf.text.ListItem;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.TextElementArray;
+import com.itextpdf.text.*;
 import com.itextpdf.text.html.HtmlTags;
 import com.itextpdf.text.html.HtmlUtilities;
 import com.itextpdf.text.log.Logger;
@@ -67,12 +56,8 @@ import com.itextpdf.text.xml.simpleparser.SimpleXMLParser;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Stack;
 
 public class HTMLWorker implements SimpleXMLDocHandler, DocListener {
 

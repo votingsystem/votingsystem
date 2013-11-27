@@ -40,9 +40,8 @@
 
 package javax.mail.search;
 
-import java.io.Serializable;
-
 import javax.mail.Message;
+import java.io.Serializable;
 
 /**
  * Search criteria are expressed as a tree of search-terms, forming

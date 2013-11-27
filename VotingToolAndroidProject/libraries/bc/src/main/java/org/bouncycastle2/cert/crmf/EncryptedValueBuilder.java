@@ -1,18 +1,18 @@
 package org.bouncycastle2.cert.crmf;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-
 import org.bouncycastle2.asn1.ASN1OctetString;
 import org.bouncycastle2.asn1.DERBitString;
 import org.bouncycastle2.asn1.crmf.EncryptedValue;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.util.Strings;
 import org.bouncycastle2.cert.X509CertificateHolder;
 import org.bouncycastle2.operator.KeyWrapper;
 import org.bouncycastle2.operator.OperatorException;
 import org.bouncycastle2.operator.OutputEncryptor;
+import org.bouncycastle2.util.Strings;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Builder for EncryptedValue structures.

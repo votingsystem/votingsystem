@@ -1,8 +1,5 @@
 package org.bouncycastle2.crypto.engines;
 
-import java.math.BigInteger;
-import java.util.Vector;
-
 import org.bouncycastle2.crypto.AsymmetricBlockCipher;
 import org.bouncycastle2.crypto.CipherParameters;
 import org.bouncycastle2.crypto.DataLengthException;
@@ -11,6 +8,9 @@ import org.bouncycastle2.crypto.params.NaccacheSternKeyParameters;
 import org.bouncycastle2.crypto.params.NaccacheSternPrivateKeyParameters;
 import org.bouncycastle2.crypto.params.ParametersWithRandom;
 import org.bouncycastle2.util.Arrays;
+
+import java.math.BigInteger;
+import java.util.Vector;
 
 /**
  * NaccacheStern Engine. For details on this cipher, please see

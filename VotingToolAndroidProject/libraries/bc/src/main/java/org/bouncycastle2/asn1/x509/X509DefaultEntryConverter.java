@@ -1,11 +1,6 @@
 package org.bouncycastle2.asn1.x509;
 
-import org.bouncycastle2.asn1.DERGeneralizedTime;
-import org.bouncycastle2.asn1.DERIA5String;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DERPrintableString;
-import org.bouncycastle2.asn1.DERUTF8String;
+import org.bouncycastle2.asn1.*;
 
 import java.io.IOException;
 

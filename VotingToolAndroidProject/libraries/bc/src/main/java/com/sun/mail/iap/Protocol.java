@@ -40,11 +40,14 @@
 
 package com.sun.mail.iap;
 
-import java.util.Vector;
-import java.util.Properties;
+import com.sun.mail.util.SocketFetcher;
+import com.sun.mail.util.TraceInputStream;
+import com.sun.mail.util.TraceOutputStream;
+
 import java.io.*;
-import java.net.*;
-import com.sun.mail.util.*;
+import java.net.Socket;
+import java.util.Properties;
+import java.util.Vector;
 
 /**
  * General protocol handling code for IMAP-like protocols. <p>

@@ -1,39 +1,16 @@
 package org.bouncycastle2.jce.provider;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.security.NoSuchProviderException;
-import java.security.cert.CertPath;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-
-import javax.security.auth.x500.X500Principal;
-
-import org.bouncycastle2.asn1.ASN1Encodable;
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1InputStream;
-import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.DERInteger;
-import org.bouncycastle2.asn1.DERObject;
-import org.bouncycastle2.asn1.DERSequence;
-import org.bouncycastle2.asn1.DERSet;
+import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.pkcs.ContentInfo;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.asn1.pkcs.SignedData;
 import org.bouncycastle2.openssl.PEMWriter;
+
+import javax.security.auth.x500.X500Principal;
+import java.io.*;
+import java.security.NoSuchProviderException;
+import java.security.cert.*;
+import java.util.*;
 
 /**
  * CertPath implementation for X.509 certificates.

@@ -1,30 +1,16 @@
 package org.bouncycastle2.jce.provider;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.PublicKey;
-import java.security.cert.CertPath;
-import java.security.cert.CertPathParameters;
-import java.security.cert.CertPathValidatorException;
-import java.security.cert.CertPathValidatorResult;
-import java.security.cert.CertPathValidatorSpi;
-import java.security.cert.PKIXCertPathChecker;
-import java.security.cert.PKIXCertPathValidatorResult;
-import java.security.cert.PKIXParameters;
-import java.security.cert.TrustAnchor;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
-import javax.security.auth.x500.X500Principal;
-
 import org.bouncycastle2.asn1.DEREncodable;
 import org.bouncycastle2.asn1.DERObjectIdentifier;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle2.jce.exception.ExtCertPathValidatorException;
 import org.bouncycastle2.x509.ExtendedPKIXParameters;
+
+import javax.security.auth.x500.X500Principal;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.PublicKey;
+import java.security.cert.*;
+import java.util.*;
 
 /**
  * CertPathValidatorSpi implementation for X.509 Certificate validation � la RFC

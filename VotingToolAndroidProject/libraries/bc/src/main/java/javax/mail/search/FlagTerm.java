@@ -40,7 +40,8 @@
 
 package javax.mail.search;
 
-import javax.mail.*;
+import javax.mail.Flags;
+import javax.mail.Message;
 
 /**
  * This class implements comparisons for Message Flags.

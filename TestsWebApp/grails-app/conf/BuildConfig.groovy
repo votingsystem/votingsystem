@@ -59,8 +59,7 @@ grails.project.dependency.resolution = {
 		}
 		
 		
-		compile(
-			//'org.votingsystem:votingsystemlibrary:0.2.0',
+		compile('org.votingsystem:votingsystemlibrary:0.2.0',
 			'org.apache.httpcomponents:httpmime:4.2.4',
 			'org.apache.httpcomponents:httpclient:4.2.4',
 			'org.bouncycastle:bcprov-jdk16:1.46',
@@ -69,10 +68,9 @@ grails.project.dependency.resolution = {
 			'javax.mail:mail:1.4.7',
 			'org.bouncycastle:bctsp-jdk16:1.46',
 			'com.itextpdf:itextpdf:5.1.3',
-			'com.lowagie:itext:2.1.0'
-			) {
-				excludes "slf4j-api", "log4j", "commons-logging", "xalan",
-					"xml-apis", "groovy","commons-io", 'bcprov-jdk15', 'bcpg-jdk15', 'bcprov-jdk14', 'bcmail-jdk14'
+			'com.lowagie:itext:2.1.0') {
+				excludes "slf4j-api", "log4j", "commons-logging", "xalan", "xml-apis", "groovy","commons-io",
+                        'bcprov-jdk15', 'bcpg-jdk15', 'bcprov-jdk14', 'bcmail-jdk14'
 			}
     }
 	
@@ -85,6 +83,7 @@ grails.project.dependency.resolution = {
         // plugins for the compile step
         compile ":scaffolding:2.0.1"
         compile ':cache:1.1.1'
+        compile ":fatcow-icons:0.1.0"
 
         // plugins needed at runtime but not for compilation
         runtime ":hibernate4:4.1.11.2" // or ":hibernate:3.6.10.2"

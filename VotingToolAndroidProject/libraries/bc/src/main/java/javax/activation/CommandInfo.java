@@ -40,10 +40,14 @@
 
 package javax.activation;
 
-import java.io.*;
-//import java.beans.Beans;
-
 import android.util.Log;
+
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+
+//import java.beans.Beans;
 
 /**
  * The CommandInfo class is used by CommandMap implementations to

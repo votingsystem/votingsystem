@@ -45,10 +45,8 @@ package com.itextpdf.text.pdf;
 
 import com.itextpdf.text.error_messages.MessageLocalization;
 import com.itextpdf.text.pdf.codec.Base64;
-
 import org.bouncycastle.tsp.*;
-import org.bouncycastle2.asn1.cmp.*;
-import org.bouncycastle2.asn1.x509.*;
+import org.bouncycastle2.asn1.cmp.PKIFailureInfo;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;

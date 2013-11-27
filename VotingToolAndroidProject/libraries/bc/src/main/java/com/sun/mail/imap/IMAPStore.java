@@ -40,18 +40,19 @@
 
 package com.sun.mail.imap;
 
-import java.util.Vector;
-import java.util.StringTokenizer;
-import java.io.PrintStream;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import com.sun.mail.iap.*;
+import com.sun.mail.imap.protocol.IMAPProtocol;
+import com.sun.mail.imap.protocol.Namespaces;
 
 import javax.mail.*;
-import javax.mail.event.*;
-
-import com.sun.mail.iap.*;
-import com.sun.mail.imap.protocol.*;
+import javax.mail.event.ConnectionEvent;
+import javax.mail.event.StoreEvent;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 /**
  * This class provides access to an IMAP message store. <p>
@@ -232,7 +233,7 @@ public class IMAPStore extends Store
 	 * command.
 	 *
 	 * The idleState field is protected by the store's lock.
-	 * The RUNNING state is the normal state and means no IDLE
+	 * The ACTIVO state is the normal state and means no IDLE
 	 * command is in progress.  The IDLE state means we've issued
 	 * an IDLE command and are reading responses.  The ABORTING
 	 * state means we've sent the DONE continuation command and
@@ -250,7 +251,7 @@ public class IMAPStore extends Store
 	 * The thread in the idle method that's reading the responses
 	 * from the IDLE command will see this ending response and
 	 * complete the idle method, setting the idleState field back
-	 * to RUNNING, and notifying any threads waiting to use the
+	 * to ACTIVO, and notifying any threads waiting to use the
 	 * connection.
 	 *
 	 * All uses of the IMAP connection (IMAPProtocol object) must
@@ -261,10 +262,10 @@ public class IMAPStore extends Store
 	 * will give up the connection pool lock.  This check is done by
 	 * the getStoreProtocol() method.
 	 */
-	private static final int RUNNING = 0;	// not doing IDLE command
+	private static final int ACTIVO = 0;	// not doing IDLE command
 	private static final int IDLE = 1;	// IDLE command in effect
 	private static final int ABORTING = 2;	// IDLE command aborting
-	private int idleState = RUNNING;
+	private int idleState = ACTIVO;
 	private IMAPProtocol idleProtocol;	// protocol object when IDLE
     }
  
@@ -1558,7 +1559,7 @@ public class IMAPStore extends Store
 	try {
 	    synchronized (pool) {
 		p = getStoreProtocol();
-		if (pool.idleState == ConnectionPool.RUNNING) {
+		if (pool.idleState == ConnectionPool.ACTIVO) {
 		    p.idleStart();
 		    pool.idleState = ConnectionPool.IDLE;
 		} else {
@@ -1591,7 +1592,7 @@ public class IMAPStore extends Store
 		Response r = p.readIdleResponse();
 		synchronized (pool) {
 		    if (r == null || !p.processIdleResponse(r)) {
-			pool.idleState = ConnectionPool.RUNNING;
+			pool.idleState = ConnectionPool.ACTIVO;
 			pool.notifyAll();
 			break;
 		    }
@@ -1638,7 +1639,7 @@ public class IMAPStore extends Store
      */
     private void waitIfIdle() throws ProtocolException {
 	assert Thread.holdsLock(pool);
-	while (pool.idleState != ConnectionPool.RUNNING) {
+	while (pool.idleState != ConnectionPool.ACTIVO) {
 	    if (pool.idleState == ConnectionPool.IDLE) {
 		pool.idleProtocol.idleAbort();
 		pool.idleState = ConnectionPool.ABORTING;

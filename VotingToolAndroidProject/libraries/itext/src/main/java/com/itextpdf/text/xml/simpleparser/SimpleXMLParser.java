@@ -78,12 +78,7 @@ import com.itextpdf.text.xml.XMLUtil;
 import com.itextpdf.text.xml.simpleparser.handler.HTMLNewLineHandler;
 import com.itextpdf.text.xml.simpleparser.handler.NeverNewLineHandler;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Stack;
 

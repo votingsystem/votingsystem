@@ -1,9 +1,9 @@
 package org.bouncycastle.tsp;
 
-import java.text.DecimalFormat;
-
 import org.bouncycastle2.asn1.DERInteger;
 import org.bouncycastle2.asn1.tsp.Accuracy;
+
+import java.text.DecimalFormat;
 
 public class GenTimeAccuracy
 {

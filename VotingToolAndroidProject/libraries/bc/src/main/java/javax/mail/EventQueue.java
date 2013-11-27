@@ -40,9 +40,8 @@
 
 package javax.mail;
 
-import java.io.*;
-import java.util.Vector;
 import javax.mail.event.MailEvent;
+import java.util.Vector;
 
 /**
  * Package private class used by Store & Folder to dispatch events.

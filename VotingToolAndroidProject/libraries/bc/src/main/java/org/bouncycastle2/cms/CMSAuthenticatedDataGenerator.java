@@ -1,43 +1,26 @@
 package org.bouncycastle2.cms;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.security.GeneralSecurityException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Provider;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.InvalidParameterSpecException;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Map;
+import org.bouncycastle2.asn1.*;
+import org.bouncycastle2.asn1.cms.AuthenticatedData;
+import org.bouncycastle2.asn1.cms.CMSObjectIdentifiers;
+import org.bouncycastle2.asn1.cms.ContentInfo;
+import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle2.operator.*;
+import org.bouncycastle2.util.io.TeeOutputStream;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
-
-import org.bouncycastle2.asn1.ASN1EncodableVector;
-import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.ASN1Set;
-import org.bouncycastle2.asn1.BERConstructedOctetString;
-import org.bouncycastle2.asn1.BERSet;
-import org.bouncycastle2.asn1.DEROctetString;
-import org.bouncycastle2.asn1.DERSet;
-import org.bouncycastle2.asn1.cms.AuthenticatedData;
-import org.bouncycastle2.asn1.cms.CMSObjectIdentifiers;
-import org.bouncycastle2.asn1.cms.ContentInfo;
-import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.util.io.TeeOutputStream;
-import org.bouncycastle2.operator.DigestCalculator;
-import org.bouncycastle2.operator.DigestCalculatorProvider;
-import org.bouncycastle2.operator.GenericKey;
-import org.bouncycastle2.operator.MacCalculator;
-import org.bouncycastle2.operator.OperatorCreationException;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.*;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.InvalidParameterSpecException;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * General class for generating a CMS authenticated-data message.

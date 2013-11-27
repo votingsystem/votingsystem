@@ -1,27 +1,16 @@
 package org.votingsystem.accesscontrol.service
 
+import org.apache.xerces.parsers.DOMParser
+import org.apache.xerces.xni.parser.XMLDocumentFilter
+import org.cyberneko.html.HTMLConfiguration
+import org.cyberneko.html.filters.ElementRemover
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-
-import org.apache.xerces.xni.parser.XMLDocumentFilter;
-import org.apache.xerces.xni.parser.XMLInputSource;
-import org.apache.xerces.xni.parser.XMLParserConfiguration;
-import org.cyberneko.html.HTMLConfiguration;
-
-import org.apache.xerces.parsers.DOMParser;
-import org.apache.xerces.xni.parser.XMLDocumentFilter;
-import org.cyberneko.html.HTMLConfiguration;
-import org.cyberneko.html.filters.*;
-
+import javax.xml.transform.OutputKeys
 import javax.xml.transform.Source
 import javax.xml.transform.Transformer
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
-import javax.xml.transform.OutputKeys
-import org.cyberneko.html.filters.ElementRemover
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia

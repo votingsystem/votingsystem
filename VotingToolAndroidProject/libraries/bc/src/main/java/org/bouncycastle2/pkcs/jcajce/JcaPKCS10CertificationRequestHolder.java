@@ -1,16 +1,5 @@
 package org.bouncycastle2.pkcs.jcajce;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Provider;
-import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Hashtable;
-
 import org.bouncycastle2.asn1.pkcs.CertificationRequest;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
@@ -20,6 +9,12 @@ import org.bouncycastle2.jcajce.JcaJceHelper;
 import org.bouncycastle2.jcajce.NamedJcaJceHelper;
 import org.bouncycastle2.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle2.pkcs.PKCS10CertificationRequestHolder;
+
+import java.io.IOException;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Hashtable;
 
 public class JcaPKCS10CertificationRequestHolder
     extends PKCS10CertificationRequestHolder

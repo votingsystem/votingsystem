@@ -1,34 +1,9 @@
 package org.bouncycastle2.cms;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.List;
-
-import javax.crypto.Cipher;
-import javax.crypto.KeyAgreement;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-
 import org.bouncycastle2.asn1.ASN1Object;
 import org.bouncycastle2.asn1.ASN1OctetString;
 import org.bouncycastle2.asn1.ASN1Sequence;
-import org.bouncycastle2.asn1.cms.IssuerAndSerialNumber;
-import org.bouncycastle2.asn1.cms.KeyAgreeRecipientIdentifier;
-import org.bouncycastle2.asn1.cms.KeyAgreeRecipientInfo;
-import org.bouncycastle2.asn1.cms.OriginatorIdentifierOrKey;
-import org.bouncycastle2.asn1.cms.OriginatorPublicKey;
-import org.bouncycastle2.asn1.cms.RecipientEncryptedKey;
-import org.bouncycastle2.asn1.cms.RecipientKeyIdentifier;
+import org.bouncycastle2.asn1.cms.*;
 import org.bouncycastle2.asn1.cms.ecc.MQVuserKeyingMaterial;
 import org.bouncycastle2.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
@@ -36,6 +11,16 @@ import org.bouncycastle2.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle2.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle2.jce.spec.MQVPrivateKeySpec;
 import org.bouncycastle2.jce.spec.MQVPublicKeySpec;
+
+import javax.crypto.Cipher;
+import javax.crypto.KeyAgreement;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import java.io.IOException;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.List;
 
 /**
  * the RecipientInfo class for a recipient who has been sent a message

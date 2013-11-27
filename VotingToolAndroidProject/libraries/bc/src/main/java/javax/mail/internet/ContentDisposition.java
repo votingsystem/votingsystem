@@ -40,10 +40,6 @@
 
 package javax.mail.internet;
 
-import javax.mail.*;
-import java.util.*;
-import java.io.*;
-
 /**
  * This class represents a MIME ContentDisposition value. It provides
  * methods to parse a ContentDisposition string into individual components

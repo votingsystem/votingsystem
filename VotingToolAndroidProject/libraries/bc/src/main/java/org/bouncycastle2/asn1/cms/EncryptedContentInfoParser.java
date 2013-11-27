@@ -1,12 +1,12 @@
 package org.bouncycastle2.asn1.cms;
 
-import java.io.IOException;
-
 import org.bouncycastle2.asn1.ASN1SequenceParser;
 import org.bouncycastle2.asn1.ASN1TaggedObjectParser;
 import org.bouncycastle2.asn1.DEREncodable;
 import org.bouncycastle2.asn1.DERObjectIdentifier;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+
+import java.io.IOException;
 
 /**
  * <pre>

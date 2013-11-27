@@ -40,20 +40,25 @@
 
 package com.sun.mail.imap;
 
-import java.util.Date;
-import java.util.Vector;
-import java.util.Hashtable;
-import java.util.NoSuchElementException;
-import java.io.*;
-
-import javax.mail.*;
-import javax.mail.event.*;
-import javax.mail.internet.*;
-import javax.mail.search.*;
-
-import com.sun.mail.util.*;
 import com.sun.mail.iap.*;
 import com.sun.mail.imap.protocol.*;
+import com.sun.mail.util.CRLFOutputStream;
+
+import javax.mail.*;
+import javax.mail.event.ConnectionEvent;
+import javax.mail.event.FolderEvent;
+import javax.mail.event.MessageChangedEvent;
+import javax.mail.internet.MimeMessage;
+import javax.mail.search.FlagTerm;
+import javax.mail.search.SearchException;
+import javax.mail.search.SearchTerm;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.NoSuchElementException;
+import java.util.Vector;
 
 /**
  * This class implements an IMAP folder. <p>
@@ -207,7 +212,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      * command.
      *
      * The idleState field is protected by the messageCacheLock.
-     * The RUNNING state is the normal state and means no IDLE
+     * The ACTIVO state is the normal state and means no IDLE
      * command is in progress.  The IDLE state means we've issued
      * an IDLE command and are reading responses.  The ABORTING
      * state means we've sent the DONE continuation command and
@@ -225,7 +230,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      * The thread in the idle method that's reading the responses
      * from the IDLE command will see this ending response and
      * complete the idle method, setting the idleState field back
-     * to RUNNING, and notifying any threads waiting to use the
+     * to ACTIVO, and notifying any threads waiting to use the
      * connection.
      *
      * All uses of the IMAP connection (IMAPProtocol object) must
@@ -242,10 +247,10 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      *		// ... use protocol
      *	    }
      */
-    private static final int RUNNING = 0;	// not doing IDLE command
+    private static final int ACTIVO = 0;	// not doing IDLE command
     private static final int IDLE = 1;		// IDLE command in effect
     private static final int ABORTING = 2;	// IDLE command aborting
-    private int idleState = RUNNING;
+    private int idleState = ACTIVO;
 
     private int total = -1;		// total number of messages in the
 					// message cache
@@ -1147,7 +1152,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	exists = false; // to force a recheck in exists().
 	attributes = null;
         opened = false;
-	idleState = RUNNING;	// just in case
+	idleState = ACTIVO;	// just in case
 	notifyConnectionListeners(ConnectionEvent.CLOSED);
     }
 
@@ -2205,7 +2210,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		new ProtocolCommand() {
 		    public Object doCommand(IMAPProtocol p)
 			    throws ProtocolException {
-			if (idleState == RUNNING) {
+			if (idleState == ACTIVO) {
 			    p.idleStart();
 			    idleState = IDLE;
 			    return Boolean.TRUE;
@@ -2246,7 +2251,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		synchronized (messageCacheLock) {
 		    if (r == null || protocol == null ||
 			    !protocol.processIdleResponse(r)) {
-			idleState = RUNNING;
+			idleState = ACTIVO;
 			messageCacheLock.notifyAll();
 			break;
 		    }
@@ -2279,7 +2284,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      */
     void waitIfIdle() throws ProtocolException {
 	assert Thread.holdsLock(messageCacheLock);
-	while (idleState != RUNNING) {
+	while (idleState != ACTIVO) {
 	    if (idleState == IDLE) {
 		protocol.idleAbort();
 		idleState = ABORTING;

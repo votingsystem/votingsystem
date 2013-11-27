@@ -1,14 +1,10 @@
 package org.bouncycastle2.cert.jcajce;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
 import org.bouncycastle2.util.CollectionStore;
 import org.bouncycastle2.x509.X509AttributeCertificate;
+
+import java.io.IOException;
+import java.util.*;
 
 /**
  * Class for storing Attribute Certificates for later lookup.

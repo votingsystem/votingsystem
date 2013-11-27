@@ -1,11 +1,11 @@
 package org.bouncycastle2.cms;
 
-import java.io.InputStream;
-
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.util.io.TeeInputStream;
 import org.bouncycastle2.operator.InputDecryptor;
 import org.bouncycastle2.operator.MacCalculator;
+import org.bouncycastle2.util.io.TeeInputStream;
+
+import java.io.InputStream;
 
 public class RecipientOperator
 {

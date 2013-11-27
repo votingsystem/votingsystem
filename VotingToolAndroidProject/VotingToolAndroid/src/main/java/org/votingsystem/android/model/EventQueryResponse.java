@@ -1,12 +1,11 @@
 package org.votingsystem.android.model;
 
 import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.votingsystem.model.EventQueryResponseVS;
 import org.votingsystem.model.EventVS;
+import org.votingsystem.model.EventQueryResponseVS;
 import org.votingsystem.model.TypeVS;
 
 import java.text.ParseException;
@@ -17,14 +16,14 @@ public class EventQueryResponse implements EventQueryResponseVS {
 	
 	public static final String TAG = "EventQueryResponse";
 
-    private int numeroEventosFirmaEnPeticion;
-    private int numeroTotalEventosFirmaEnSistema;
-    private int numeroEventosVotacionEnPeticion;
-    private int numeroTotalEventosVotacionEnSistema;
-    private int numeroEventosReclamacionEnPeticion;
-    private int numeroTotalEventosReclamacionEnSistema;
-    private int numeroEventosEnPeticion;
-    private int numeroTotalEventosEnSistema;
+    private int numEventsVSManifest;
+    private int numEventsVSManifestInSystem;
+    private int numEventsVSElection;
+    private int numEventsVSElectionInSystem;
+    private int numEventsVSClaim;
+    private int numEventsVSClaimInSystem;
+    private int numEventVSInRequest;
+    private int numEventVSInSystem;
     
     private int offset;
     private List<EventVS> eventVSes;
@@ -39,122 +38,122 @@ public class EventQueryResponse implements EventQueryResponseVS {
     }
 
     /**
-     * @return the numeroEventosFirmaEnPeticion
+     * @return the numEventsVSManifest
      */
     public int getNumeroEventosFirmaEnPeticion() {
-        return numeroEventosFirmaEnPeticion;
+        return numEventsVSManifest;
     }
 
     /**
-     * @param numeroEventosFirmaEnPeticion the numeroEventosFirmaEnPeticion to set
+     * @param numEventsVSManifest the numEventsVSManifest to set
      */
-    public void setNumeroEventosFirmaEnPeticion(int numeroEventosFirmaEnPeticion) {
-        this.numeroEventosFirmaEnPeticion = numeroEventosFirmaEnPeticion;
+    public void setNumeroEventosFirmaEnPeticion(int numEventsVSManifest) {
+        this.numEventsVSManifest = numEventsVSManifest;
     }
 
     /**
-     * @return the numeroTotalEventosFirmaEnSistema
+     * @return the numEventsVSManifestInSystem
      */
     public int getNumeroTotalEventosFirmaEnSistema() {
-        return numeroTotalEventosFirmaEnSistema;
+        return numEventsVSManifestInSystem;
     }
 
     /**
-     * @param numeroTotalEventosFirmaEnSistema the numeroTotalEventosFirmaEnSistema to set
+     * @param numEventsVSManifestInSystem the numEventsVSManifestInSystem to set
      */
-    public void setNumeroTotalEventosFirmaEnSistema(int numeroTotalEventosFirmaEnSistema) {
-        this.numeroTotalEventosFirmaEnSistema = numeroTotalEventosFirmaEnSistema;
+    public void setNumeroTotalEventosFirmaEnSistema(int numEventsVSManifestInSystem) {
+        this.numEventsVSManifestInSystem = numEventsVSManifestInSystem;
     }
 
     /**
-     * @return the numeroEventosVotacionEnPeticion
+     * @return the numEventsVSElection
      */
     public int getNumeroEventosVotacionEnPeticion() {
-        return numeroEventosVotacionEnPeticion;
+        return numEventsVSElection;
     }
 
     /**
-     * @param numeroEventosVotacionEnPeticion the numeroEventosVotacionEnPeticion to set
+     * @param numEventsVSElection the numEventsVSElection to set
      */
-    public void setNumeroEventosVotacionEnPeticion(int numeroEventosVotacionEnPeticion) {
-        this.numeroEventosVotacionEnPeticion = numeroEventosVotacionEnPeticion;
+    public void setNumeroEventosVotacionEnPeticion(int numEventsVSElection) {
+        this.numEventsVSElection = numEventsVSElection;
     }
 
     /**
-     * @return the numeroTotalEventosVotacionEnSistema
+     * @return the numEventsVSElectionInSystem
      */
     public int getNumeroTotalEventosVotacionEnSistema() {
-        return numeroTotalEventosVotacionEnSistema;
+        return numEventsVSElectionInSystem;
     }
 
     /**
-     * @param numeroTotalEventosVotacionEnSistema the numeroTotalEventosVotacionEnSistema to set
+     * @param numEventsVSElectionInSystem the numEventsVSElectionInSystem to set
      */
-    public void setNumeroTotalEventosVotacionEnSistema(int numeroTotalEventosVotacionEnSistema) {
-        this.numeroTotalEventosVotacionEnSistema = numeroTotalEventosVotacionEnSistema;
+    public void setNumeroTotalEventosVotacionEnSistema(int numEventsVSElectionInSystem) {
+        this.numEventsVSElectionInSystem = numEventsVSElectionInSystem;
     }
 
     /**
-     * @return the numeroEventosReclamacionEnPeticion
+     * @return the numEventsVSClaim
      */
     public int getNumeroEventosReclamacionEnPeticion() {
-        return numeroEventosReclamacionEnPeticion;
+        return numEventsVSClaim;
     }
 
     /**
-     * @param numeroEventosReclamacionEnPeticion the numeroEventosReclamacionEnPeticion to set
+     * @param numEventsVSClaim the numEventsVSClaim to set
      */
-    public void setNumeroEventosReclamacionEnPeticion(int numeroEventosReclamacionEnPeticion) {
-        this.numeroEventosReclamacionEnPeticion = numeroEventosReclamacionEnPeticion;
+    public void setNumeroEventosReclamacionEnPeticion(int numEventsVSClaim) {
+        this.numEventsVSClaim = numEventsVSClaim;
     }
 
     /**
-     * @return the numeroTotalEventosReclamacionEnSistema
+     * @return the numEventsVSClaimInSystem
      */
     public int getNumeroTotalEventosReclamacionEnSistema() {
-        return numeroTotalEventosReclamacionEnSistema;
+        return numEventsVSClaimInSystem;
     }
 
     /**
-     * @param numeroTotalEventosReclamacionEnSistema the numeroTotalEventosReclamacionEnSistema to set
+     * @param numEventsVSClaimInSystem the numEventsVSClaimInSystem to set
      */
-    public void setNumeroTotalEventosReclamacionEnSistema(int numeroTotalEventosReclamacionEnSistema) {
-        this.numeroTotalEventosReclamacionEnSistema = numeroTotalEventosReclamacionEnSistema;
+    public void setNumeroTotalEventosReclamacionEnSistema(int numEventsVSClaimInSystem) {
+        this.numEventsVSClaimInSystem = numEventsVSClaimInSystem;
     }
 
     /**
-     * @return the numeroEventosEnPeticion
+     * @return the numEventVSInRequest
      */
     public int getNumeroEventosEnPeticion() {
-        return numeroEventosEnPeticion;
+        return numEventVSInRequest;
     }
 
     /**
-     * @param numeroEventosEnPeticion the numeroEventosEnPeticion to set
+     * @param numEventVSInRequest the numEventVSInRequest to set
      */
-    public void setNumeroEventosEnPeticion(int numeroEventosEnPeticion) {
-        this.numeroEventosEnPeticion = numeroEventosEnPeticion;
+    public void setNumeroEventosEnPeticion(int numEventVSInRequest) {
+        this.numEventVSInRequest = numEventVSInRequest;
     }
 
     /**
-     * @return the numeroTotalEventosEnSistema
+     * @return the numEventVSInSystem
      */
     public int getNumeroTotalEventosEnSistema() {
-        return numeroTotalEventosEnSistema;
+        return numEventVSInSystem;
     }
 
     /**
-     * @param numeroTotalEventosEnSistema the numeroTotalEventosEnSistema to set
+     * @param numEventVSInSystem the numEventVSInSystem to set
      */
-    public void setNumeroTotalEventosEnSistema(int numeroTotalEventosEnSistema) {
-        this.numeroTotalEventosEnSistema = numeroTotalEventosEnSistema;
+    public void setNumeroTotalEventosEnSistema(int numEventVSInSystem) {
+        this.numEventVSInSystem = numEventVSInSystem;
     }
 
-	public List<EventVS> getEventVSBases() {
+	public List<EventVS> getEventVSs() {
 		return eventVSes;
 	}
 
-	public void setEventVSBases(List<EventVS> eventVSes) {
+	public void setEventVSs(List<EventVS> eventVSes) {
 		this.eventVSes = eventVSes;
 	}
     
@@ -162,60 +161,60 @@ public class EventQueryResponse implements EventQueryResponseVS {
     	Log.d(TAG + ".parse(...)", "parse(...)");
     	JSONObject jsonObject = new JSONObject (consultaStr);
         List<EventVS> eventVSes = new ArrayList<EventVS>();
-        JSONObject jsonEventos = jsonObject.getJSONObject("eventVSBases");
+        JSONObject jsonEventos = jsonObject.getJSONObject("eventVSs");
         JSONArray arrayEventos;
         if (jsonEventos != null) {
         	if(jsonEventos.has("firmas")) {
                 arrayEventos = jsonEventos.getJSONArray("firmas");
                 if (arrayEventos != null) {
                     for (int i=0; i<arrayEventos.length(); i++) {
-                        EventVSAndroid eventVSAndroid = EventVSAndroid.parse(arrayEventos.getJSONObject(i));
-                        eventVSAndroid.setTypeVS(TypeVS.SIGN_EVENT);
-                        eventVSes.add(eventVSAndroid);
+                        EventVS eventVS = EventVS.parse(arrayEventos.getJSONObject(i));
+                        eventVS.setTypeVS(TypeVS.MANIFEST_EVENT);
+                        eventVSes.add(eventVS);
                     }
                 }	
         	}
-        	if(jsonEventos.has("reclamaciones")) { 
-                arrayEventos = jsonEventos.getJSONArray("reclamaciones");
+        	if(jsonEventos.has("claims")) {
+                arrayEventos = jsonEventos.getJSONArray("claims");
                 if (arrayEventos != null) {
                     for (int i=0; i<arrayEventos.length(); i++) {
-                        EventVSAndroid eventVSAndroid = EventVSAndroid.parse(arrayEventos.getJSONObject(i));
-                        eventVSAndroid.setTypeVS(TypeVS.CLAIM_EVENT);
-                        eventVSes.add(eventVSAndroid);
+                        EventVS eventVS = EventVS.parse(arrayEventos.getJSONObject(i));
+                        eventVS.setTypeVS(TypeVS.CLAIM_EVENT);
+                        eventVSes.add(eventVS);
                     }
                 }	
         	}
-        	if(jsonEventos.has("votaciones")) {
-                arrayEventos = jsonEventos.getJSONArray("votaciones");
+        	if(jsonEventos.has("elections")) {
+                arrayEventos = jsonEventos.getJSONArray("elections");
                 if (arrayEventos != null) {
                     for (int i=0; i<arrayEventos.length(); i++) {
-                        EventVSAndroid eventVSAndroid = EventVSAndroid.parse(arrayEventos.getJSONObject(i));
-                        eventVSAndroid.setTypeVS(TypeVS.VOTING_EVENT);
-                        eventVSes.add(eventVSAndroid);
+                        EventVS eventVS = EventVS.parse(arrayEventos.getJSONObject(i));
+                        eventVS.setTypeVS(TypeVS.VOTING_EVENT);
+                        eventVSes.add(eventVS);
                     }
                 }	
         	}
         }
         EventQueryResponse eventQueryResponse = new EventQueryResponse();
-        if(jsonEventos.has("numeroEventosFirmaEnPeticion"))
-        	eventQueryResponse.setNumeroEventosFirmaEnPeticion(jsonObject.getInt("numeroEventosFirmaEnPeticion"));
-        if(jsonEventos.has("numeroTotalEventosFirmaEnSistema"))
-        	eventQueryResponse.setNumeroTotalEventosFirmaEnSistema(jsonObject.getInt("numeroTotalEventosFirmaEnSistema"));
-        if(jsonEventos.has("numeroEventosVotacionEnPeticion"))
-        	eventQueryResponse.setNumeroEventosVotacionEnPeticion(jsonObject.getInt("numeroEventosVotacionEnPeticion"));
-        if(jsonEventos.has("numeroTotalEventosVotacionEnSistema"))
-        	eventQueryResponse.setNumeroTotalEventosVotacionEnSistema(jsonObject.getInt("numeroTotalEventosVotacionEnSistema"));
-        if(jsonEventos.has("numeroEventosReclamacionEnPeticion"))
-        	eventQueryResponse.setNumeroEventosReclamacionEnPeticion(jsonObject.getInt("numeroEventosReclamacionEnPeticion"));
-        if(jsonEventos.has("numeroTotalEventosReclamacionEnSistema"))
-        	eventQueryResponse.setNumeroTotalEventosReclamacionEnSistema(jsonObject.getInt("numeroTotalEventosReclamacionEnSistema"));
-        if(jsonEventos.has("numeroEventosEnPeticion"))
-        	eventQueryResponse.setNumeroEventosEnPeticion(jsonObject.getInt("numeroEventosEnPeticion"));
-        if(jsonEventos.has("numeroTotalEventosEnSistema"))
-        	eventQueryResponse.setNumeroTotalEventosEnSistema(jsonObject.getInt("numeroTotalEventosEnSistema"));
+        if(jsonEventos.has("numEventsVSManifest"))
+        	eventQueryResponse.setNumeroEventosFirmaEnPeticion(jsonObject.getInt("numEventsVSManifest"));
+        if(jsonEventos.has("numEventsVSManifestInSystem"))
+        	eventQueryResponse.setNumeroTotalEventosFirmaEnSistema(jsonObject.getInt("numEventsVSManifestInSystem"));
+        if(jsonEventos.has("numEventsVSElection"))
+        	eventQueryResponse.setNumeroEventosVotacionEnPeticion(jsonObject.getInt("numEventsVSElection"));
+        if(jsonEventos.has("numEventsVSElectionInSystem"))
+        	eventQueryResponse.setNumeroTotalEventosVotacionEnSistema(jsonObject.getInt("numEventsVSElectionInSystem"));
+        if(jsonEventos.has("numEventsVSClaim"))
+        	eventQueryResponse.setNumeroEventosReclamacionEnPeticion(jsonObject.getInt("numEventsVSClaim"));
+        if(jsonEventos.has("numEventsVSClaimInSystem"))
+        	eventQueryResponse.setNumeroTotalEventosReclamacionEnSistema(jsonObject.getInt("numEventsVSClaimInSystem"));
+        if(jsonEventos.has("numEventVSInRequest"))
+        	eventQueryResponse.setNumeroEventosEnPeticion(jsonObject.getInt("numEventVSInRequest"));
+        if(jsonEventos.has("numEventVSInSystem"))
+        	eventQueryResponse.setNumeroTotalEventosEnSistema(jsonObject.getInt("numEventVSInSystem"));
         if (jsonObject.has("offset"))
             eventQueryResponse.setOffset(jsonObject.getInt("offset"));
-        eventQueryResponse.setEventVSBases(eventVSes);
+        eventQueryResponse.setEventVSs(eventVSes);
         return eventQueryResponse;
     }
 	
