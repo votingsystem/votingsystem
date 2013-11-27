@@ -3,6 +3,7 @@
 /target
 /target-eclipse
 /VotingSystem
+wrapper
 .VotingSystem
 .idea
 ControlCenter.iml
