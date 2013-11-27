@@ -6,11 +6,11 @@ import java.io.Serializable;
 import java.security.KeyStore;
 
 /**
-* @author jgzornoza
-* Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
-*/
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ */
 public class KeyStoreVS implements Serializable {
-	
+
     private static final long serialVersionUID = 1L;
 
     private Long id;
@@ -56,7 +56,7 @@ public class KeyStoreVS implements Serializable {
     public void setHashEncabezadoSolicitudTokenBase64(String hashEncabezadoSolicitudTokenBase64) {
         this.hashEncabezadoSolicitudTokenBase64 = hashEncabezadoSolicitudTokenBase64;
     }
-    
+
     /**
      * @return the almacenClaves
      */
@@ -70,6 +70,6 @@ public class KeyStoreVS implements Serializable {
     public static void setAlmacenClaves(KeyStore aAlmacenClaves) {
         almacenClaves = aAlmacenClaves;
     }
-    
-    
+
+
 }
