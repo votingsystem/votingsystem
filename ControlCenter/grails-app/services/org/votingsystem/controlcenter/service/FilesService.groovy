@@ -14,10 +14,8 @@ class FilesService {
 	def messageSource
 
 	public void init() {
-		File eventsMetaInfDir = new File("${grailsApplication.config.VotingSystem.eventsMetaInfBaseDir}")
-		eventsMetaInfDir.mkdirs()
-		File errorsDir = new File("${grailsApplication.config.VotingSystem.errorsBaseDir}")
-		errorsDir.mkdirs()
+		new File("${grailsApplication.config.VotingSystem.eventsMetaInfBaseDir}").mkdirs()
+		new File("${grailsApplication.config.VotingSystem.errorsBaseDir}").mkdirs()
 	}	 
 
 	 public File getEventMetaInf(EventVS event) {

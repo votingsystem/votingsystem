@@ -12,29 +12,24 @@ import org.votingsystem.signature.util.KeyStoreUtil
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.FileUtils
 
-import javax.mail.Session
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.cert.Certificate
 import java.security.cert.X509Certificate
-//class PdfService implements InitializingBean {
+
 class PdfService {
-	
-	
+
 	def grailsApplication
     def timeStampVSService
 	def signatureVSService
 	def messageSource
 	def subscriptionVSService
-	def encryptionService
+
 	private PrivateKey key;
 	private Certificate[] chain;
-	private Session session
-	
-	
-	//@Override 
-	public void afterPropertiesSet() throws Exception {
-		log.debug "afterPropertiesSet - afterPropertiesSet - afterPropertiesSet"
+
+	private synchronized void initService() throws Exception {
+		log.debug "initService - initService - initService"
 		File keyStoreFile = grailsApplication.mainContext.getResource(
 			grailsApplication.config.VotingSystem.keyStorePath).getFile()
 		String aliasClaves = grailsApplication.config.VotingSystem.signKeysAlias
@@ -44,9 +39,6 @@ class PdfService {
 		key = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray());
 		chain = keyStore.getCertificateChain(aliasClaves);
 		log.debug "aliasClaves: ${aliasClaves} - chain.length:${chain.length}"
-		Properties props = System.getProperties();
-		// Get a Session object with the default properties.
-		session = Session.getDefaultInstance(props, null);
 	}
 	
 	public ResponseVS checkSignature (byte[] signedPDF, Locale locale) {
@@ -74,9 +66,6 @@ class PdfService {
 			//Calendar signDate = pk.getSignDate();
 			X509Certificate[] pkc = (X509Certificate[])pk.getSignCertificateChain();
 			TimeStampToken timeStampToken = pk.getTimeStampToken();
-
-
-
             if(timeStampToken != null) {
                 ResponseVS timestampValidationResp = timeStampVSService.validateToken(timeStampToken, locale)
                 log.debug("validateSignersCertificate - timestampValidationResp - " +
@@ -143,14 +132,9 @@ class PdfService {
 		log.debug "checkSignature - DOCUMENT OK"
 		return responseVS;
 	}
-		
-	public ResponseVS checkTimeStampToken(TimeStampToken timeStampToken) {
-		TimeStampTokenInfo tokenInfo = timeStampToken.timeStampInfo
-		log.debug(" -TimeStampToken Serial Number: " + tokenInfo.getSerialNumber());
-	}
 
-	public ResponseVS firmar(PdfReader reader, String reason, 
-		String location, PDFDocumentVS pdfDocumentVS) throws Exception {
+	public ResponseVS signDocument(PdfReader reader, String reason, String location,
+                             PDFDocumentVS pdfDocumentVS) throws Exception {
 		ResponseVS responseVS
 		try {
 			File file = File.createTempFile("serverSignedPDF", ".pdf")
@@ -158,11 +142,11 @@ class PdfService {
 			FileOutputStream outputStream = new FileOutputStream(file)
 			PdfStamper stp = PdfStamper.createSignature(reader, outputStream, '\0' as char, null, true);
 			PdfSignatureAppearance signatureAppearance = stp.getSignatureAppearance();
-			signatureAppearance.setCrypto(key, chain, null, PdfSignatureAppearance.WINCER_SIGNED);
+			signatureAppearance.setCrypto(getPrivateKey(), getServerCertChain(), null, PdfSignatureAppearance.WINCER_SIGNED);
 			signatureAppearance.setReason(reason);
 			signatureAppearance.setLocation(location);
 			signatureAppearance.setVisibleSignature(new Rectangle(330, 40, 580, 140), 1, null);
-			log.debug("firmar - stp.hasSignature: " + stp.hasSignature)
+			log.debug("signDocument - stp.hasSignature: " + stp.hasSignature)
 			if (stp != null) stp.close();
 			pdfDocumentVS.pdf = file.getBytes()
 			pdfDocumentVS.save()
@@ -174,22 +158,21 @@ class PdfService {
 		return responseVS
 	}
 	
-	public ResponseVS firmarBloquear(PdfReader reader, String reason, 
+	public ResponseVS signDocumentAndBlock(PdfReader reader, String reason,
 			String location, PDFDocumentVS pdfDocumentVS) throws Exception {
 		ResponseVS responseVS
 		try {
 			File file = File.createTempFile("serverSignedPDF", ".pdf")
 			file.deleteOnExit();
 			FileOutputStream outputStream = new FileOutputStream(file)
-			PdfStamper stp = PdfStamper.createSignature(
-				reader, outputStream, '\0' as char, null, true);
+			PdfStamper stp = PdfStamper.createSignature(reader, outputStream, '\0' as char, null, true);
 			stp.setEncryption(null, null,PdfWriter.ALLOW_PRINTING, false);
 			PdfSignatureAppearance signatureAppearance = stp.getSignatureAppearance();
-			signatureAppearance.setCrypto(key, chain, null, PdfSignatureAppearance.WINCER_SIGNED);
+			signatureAppearance.setCrypto(getPrivateKey(), getServerCertChain(), null, PdfSignatureAppearance.WINCER_SIGNED);
 			signatureAppearance.setReason(reason);
 			signatureAppearance.setLocation(location);
 			signatureAppearance.setVisibleSignature(new Rectangle(330, 40, 580, 140), 1, null);
-			log.debug("firmarBloquear - stp.hasSignature: " + stp.hasSignature)
+			log.debug("signDocumentAndBlock - stp.hasSignature: " + stp.hasSignature)
 			if (stp != null) stp.close();
 			pdfDocumentVS.pdf = file.getBytes()
 			pdfDocumentVS.save()
@@ -210,4 +193,16 @@ class PdfService {
 		copy.addDocument(reader2);
 		copy.close();
 	}
+
+
+    private Certificate[] getServerCertChain() {
+        if(chain == null) initService();
+        return chain;
+    }
+
+    private PrivateKey getPrivateKey() {
+        if(key == null) initService();
+        return key;
+    }
+
 }

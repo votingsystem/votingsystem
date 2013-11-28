@@ -68,18 +68,13 @@
 				$contentDiv.css("display", "none")
 				$('#mainPageEventList ul').empty()
 				$loadingPanel.fadeIn(100)
-				$.ajax({
-					url: eventsURL,
-					type:requestType,
-					contentType:'application/json',
-					data: JSON.stringify(data),
-				}).done(function(jsonResult) {
+				$.ajax({url: eventsURL, type:requestType, contentType:'application/json',
+				        data: JSON.stringify(data)}).done(function(jsonResult) {
 					console.log(" - ajax call done - printEvents");
 					printEvents(jsonResult)
 				}).error(function() {
 					console.log("- ajax error - ");
-					showResultDialog('<g:message code="errorLbl"/>',
-						'<g:message code="connectionERRORMsg"/>') 
+					showResultDialog('<g:message code="errorLbl"/>', '<g:message code="connectionERRORMsg"/>')
 					$loadingPanel.fadeOut(100)
 				});
 			}

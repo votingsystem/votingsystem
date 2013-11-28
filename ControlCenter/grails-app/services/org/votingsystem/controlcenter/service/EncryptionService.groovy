@@ -32,10 +32,9 @@ class EncryptionService {
 	private RecipientId recId;
 	private Session session
 	private Recipient recipient;
-	
-	//@Override
-	public void afterPropertiesSet() throws Exception {
-		log.debug(" - afterPropertiesSet - ")
+
+	private synchronized void initService() throws Exception {
+		log.debug(" - initService - ")
 		File keyStoreFile =  grailsApplication.mainContext.getResource(
 			grailsApplication.config.VotingSystem.keyStorePath).getFile()
 		
@@ -60,7 +59,7 @@ class EncryptionService {
 		log.debug " - decryptMessage - "
 		//log.debug "decryptMessage - encryptedFile: ${new String(encryptedFile)} "
 		try {
-			MimeMessage msg = new MimeMessage(getSession(), 
+			MimeMessage msg = new MimeMessage(getSession(),
 				new ByteArrayInputStream(encryptedFile));
 			SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
 			RecipientInformationStore   recipients = smimeEnveloped.getRecipientInfos();
@@ -202,18 +201,19 @@ class EncryptionService {
 		return new ResponseVS(smimeMessage:smimeMessageReq,
 			statusCode:ResponseVS.SC_OK)
 	}
-	
-	
+
 	private Session getSession() {
+        if(session) initService()
 		return session
 	}
 	
 	private Recipient getRecipient() {
+        if(recipient) initService()
 		return recipient;	
 	}
 	
 	private RecipientId getRecipientId() {
-		if(recId == null) afterPropertiesSet()
+		if(recId == null) initService()
 		return recId;
 	}
 

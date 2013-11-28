@@ -65,7 +65,8 @@ function EventVS(eventJSON, eventTemplate, subSystem) {
     this.fieldsEventVS
     this.subject = eventJSON.subject
     if(eventTemplate != null) {
-        this.eventHTML = eventTemplate.format(this.subject, this.userVS, this.dateBegin,
+        var subjectStr = this.subject.substring(0,50) +  ((this.subject.length > 50)? "...":"");
+        this.eventHTML = eventTemplate.format(subjectStr, this.userVS, this.dateBegin,
             this.dateFinish.getElapsedTime(), this.getMessage());
     }
 

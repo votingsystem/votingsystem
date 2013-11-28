@@ -44,8 +44,8 @@ class SignatureVSService {
 			new HashMap<Long, Set<X509Certificate>>();
 			
 
-	public SignedMailGenerator init() {
-		log.debug "init"
+	private synchronized SignedMailGenerator initService() {
+		log.debug "initService"
 		File keyStore = grailsApplication.mainContext.getResource(
 			grailsApplication.config.VotingSystem.keyStorePath).getFile()
 		String aliasClaves = grailsApplication.config.VotingSystem.signKeysAlias
@@ -58,7 +58,7 @@ class SignatureVSService {
 		byte[] pemCertsArray
 		trustedCerts = new HashSet<X509Certificate>()
 		for (int i = 0; i < chain.length; i++) {
-			log.debug " --- init - Adding local kesystore cert '${i}' -> 'SubjectDN: ${chain[i].getSubjectDN()}'"
+			log.debug " --- initService - Adding local kesystore cert '${i}' -> 'SubjectDN: ${chain[i].getSubjectDN()}'"
 			trustedCerts.add(chain[i])
 			if(!pemCertsArray) pemCertsArray = CertUtil.getPEMEncoded (chain[i])
 			else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtil.getPEMEncoded (chain[i]))
@@ -77,9 +77,7 @@ class SignatureVSService {
 		def certificatesTest = null
 		CertificateVS.withTransaction {
 			certificatesTest = CertificateVS.findAllWhere(type:CertificateVS.Type.CERTIFICATE_AUTHORITY_TEST);
-			certificatesTest.each {
-				it.delete()
-			}
+			certificatesTest.each { it.delete() }
 		}
 		return new ResponseVS(statusCode:ResponseVS.SC_OK)
 	}
@@ -451,19 +449,17 @@ class SignatureVSService {
 	}
 	
 	public Set<X509Certificate> getTrustedCerts() {
-		if(!trustedCerts || trustedCerts.isEmpty()) {
-			init()
-		}
+		if(!trustedCerts || trustedCerts.isEmpty()) initService()
 		return trustedCerts;
 	}
 	
 	public File getCertChain() {
-		if(!certChainFile) init()
+		if(!certChainFile) initService()
 		return certChainFile;
 	}
 	
 	private SignedMailGenerator getSignedMailGenerator() {
-        if(signedMailGenerator == null) signedMailGenerator = init();
+        if(signedMailGenerator == null) signedMailGenerator = initService();
 		return signedMailGenerator
 	}
 	

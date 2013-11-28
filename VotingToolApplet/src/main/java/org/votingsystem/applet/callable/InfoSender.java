@@ -19,27 +19,26 @@ public class InfoSender implements Callable<ResponseVS> {
 
     private Integer id = null;
     private String urlToSendDocument;
-    private Object documentoEnviado;
+    private Object data;
     private String documentContentType = null;
     private List<String> headerNameList = new ArrayList<String>();
 
-    public InfoSender(Integer id, Object documentoEnviado, 
-            String documentContentType, String urlToSendDocument, 
-            String... headerNames) {
+    public InfoSender(Integer id, Object data, String documentContentType, String urlToSendDocument,
+                      String... headerNames) {
         if(headerNames != null) {
             for(String headerName: headerNames) {
                 headerNameList.add(headerName);
             }
         }
         this.id = id;
-        this.documentoEnviado = documentoEnviado;
+        this.data = data;
         this.documentContentType = documentContentType;
         this.urlToSendDocument = urlToSendDocument;
     }
     
-    public InfoSender setDocumentoEnviado(Object documentoEnviado,
+    public InfoSender setDocumentoEnviado(Object data,
             String documentContentType) {
-        this.documentoEnviado = documentoEnviado;
+        this.data = data;
         this.documentContentType = documentContentType;
         return this;
     }
@@ -48,21 +47,17 @@ public class InfoSender implements Callable<ResponseVS> {
         logger.debug("doInBackground - urlToSendDocument: " + urlToSendDocument);
         ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR);
         try {
-            if(documentoEnviado instanceof File) {
-                responseVS = HttpHelper.getInstance().sendFile((File)documentoEnviado,
-                    documentContentType, urlToSendDocument,
-                    headerNameList.toArray(new String[headerNameList.size()]));
-            } else if(documentoEnviado instanceof byte[]) {
-                responseVS = HttpHelper.getInstance().sendByteArray(
-                        (byte[])documentoEnviado, documentContentType, urlToSendDocument, 
+            if(data instanceof File) {
+                responseVS = HttpHelper.getInstance().sendFile((File)data, documentContentType, urlToSendDocument,
+                        headerNameList.toArray(new String[headerNameList.size()]));
+            } else if(data instanceof byte[]) {
+                responseVS = HttpHelper.getInstance().sendByteArray((byte[])data, documentContentType, urlToSendDocument,
                         headerNameList.toArray(new String[headerNameList.size()]));
             }
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
             responseVS.appendMessage(ex.getMessage());
-        } finally {
-            return responseVS;
-        }
+        } finally { return responseVS; }
     }
 
 }

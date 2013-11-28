@@ -130,8 +130,8 @@ log4j = {
 	//System.setProperty 'mail.smtp.starttls.enable', mail.error.starttls.toString()
   
     appenders {
-		file name:'ControlCenterERRORES', threshold:Level.ERROR, 
-			file:"./logs/ControlCenterERRORES.log", datePattern: '\'_\'yyyy-MM-dd'
+		file name:'ControlCenterERRORS', threshold:Level.ERROR,
+			file:"./logs/ControlCenterERRORS.log", datePattern: '\'_\'yyyy-MM-dd'
 		
 		rollingFile name:"ControlCenter", threshold:org.apache.log4j.Level.DEBUG, 
 			layout:pattern(conversionPattern: '%d{[dd.MM.yy HH:mm:ss.SSS]} [%t] %p %c %x - %m%n'),
@@ -212,5 +212,5 @@ VotingSystem.serverName='Primer ControlCenter'
 VotingSystem.votingHashAlgorithm='SHA256'
 VotingSystem.blogURL ='http://www.gruposp2p.org'
 VotingSystem.emailAdmin='jgzornoza@gmail.com'
-//TODO En un principio asi para no complicar mucho
+//_ TODO _
 VotingSystem.adminsDNI='07553172H'

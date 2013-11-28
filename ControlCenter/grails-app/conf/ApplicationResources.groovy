@@ -1,15 +1,5 @@
 modules = {
-	
-	'masterStyles' {
-		resource 'css/pcVotingSystem.css'
-		resource 'css/votingSystem.css'
-	}
-	
-	'masterStylesMobile' {
-		resource 'css/mobileVotingSystem.css'
-		resource 'css/votingSystem.css'
-	}
-	
+
 	'jquery' {
 		resource url: 'js/jquery-1.10.2.min.js'
 		resource url: 'js/jquery-ui-1.10.3.custom.min.js'
@@ -19,14 +9,16 @@ modules = {
 	
 	'application' {
 		//if (isDevMode()) {}
-		dependsOn 'masterStyles', 'jquery'
+		dependsOn 'jquery'
+        resource url: 'css/pcVotingSystem.css'
 		resource url: 'js/utils.js.gsp'
 		resource url: 'js/pcUtils.js.gsp'
 		resource url: 'js/deployJava.js'
 	}
 	
 	'applicationMobile' {
-		dependsOn 'masterStylesMobile', 'jquery'
+		dependsOn 'jquery'
+        resource url: 'css/mobileVotingSystem.css'
 		resource url: 'js/utils.js.gsp'
 		resource url: 'js/mobileUtils.js.gsp'
 	}

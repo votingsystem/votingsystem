@@ -131,8 +131,8 @@ log4j = {
 	//System.setProperty 'mail.smtp.starttls.enable', mail.error.starttls.toString()
   
     appenders {
-		file name:'AccessControlERRORES', threshold:Level.ERROR, 
-			file:"./logs/AccessControlERRORES.log", datePattern: '\'_\'yyyy-MM-dd'
+		file name:'AccessControlERRORS', threshold:Level.ERROR,
+			file:"./logs/AccessControlERRORS.log", datePattern: '\'_\'yyyy-MM-dd'
 		
 		rollingFile name:"AccessControl", threshold:org.apache.log4j.Level.DEBUG, 
 			layout:pattern(conversionPattern: '%d{[dd.MM.yy HH:mm:ss.SSS]} [%t] %p %c %x - %m%n'),
@@ -198,7 +198,7 @@ grails.war.copyToWebApp = { args ->
 	}
 }
 
-VotingSystem.backupCopyPath='./VotingSystem/copiaRespaldo'
+VotingSystem.backupCopyPath='./VotingSystem/backups'
 VotingSystem.errorsBaseDir='./VotingSystem/errors'
 SistemaVotacion.accessRequestFileName='accessRequest'
 SistemaVotacion.csrRequestFileName='csr'

@@ -36,10 +36,9 @@ class SignatureVSService {
 	private KeyStore trustedCertsKeyStore
 	static HashMap<Long, CertificateVS> trustedCertsHashMap;
 	private X509Certificate localServerCertSigner;
-	private static HashMap<Long, Set<TrustAnchor>> eventTrustedAnchorsHashMap = 
-		new HashMap<Long, Set<TrustAnchor>>();
+	private static HashMap<Long, Set<TrustAnchor>> eventTrustedAnchorsHashMap =  new HashMap<Long, Set<TrustAnchor>>();
 	private static HashMap<Long, Set<TrustAnchor>> controlCenterTrustedAnchorsHashMap =
-		new HashMap<Long, Set<TrustAnchor>>();
+            new HashMap<Long, Set<TrustAnchor>>();
 	def grailsApplication;
 	def messageSource
 	def csrService;
@@ -51,29 +50,17 @@ class SignatureVSService {
 	
 	public ResponseVS deleteTestCerts () {
 		log.debug(" - deleteTestCerts - ")
-
-
         /*def d = new DefaultGrailsDomainClass(CertificateVS.class)
-        d.persistentProperties.each {
-            log.debug("============ ${it}")
-        }*/
-
-
+        d.persistentProperties.each { log.debug("============ ${it}") }*/
 		int numTestCerts = CertificateVS.countByType(CertificateVS.Type.CERTIFICATE_AUTHORITY_TEST)
-		log.debug(" - deleteTestCerts - numTestCerts: ${numTestCerts}") 
-		long begin = System.currentTimeMillis()
+		log.debug(" - deleteTestCerts - numTestCerts: ${numTestCerts}")
 		def criteria = CertificateVS.createCriteria()
-		def testCerts = criteria.scroll {
-			eq("type", CertificateVS.Type.CERTIFICATE_AUTHORITY_TEST)
-		}   
+		def testCerts = criteria.scroll { eq("type", CertificateVS.Type.CERTIFICATE_AUTHORITY_TEST) }
 		while (testCerts.next()) {
 			CertificateVS cert = (CertificateVS) testCerts.get(0);
-
 			int numCerts = CertificateVS.countByAuthorityCertificateVS(cert)
 			def userCertCriteria = CertificateVS.createCriteria()
-			def userTestCerts = userCertCriteria.scroll {
-				eq("authorityCertificateVS", cert)
-			}
+			def userTestCerts = userCertCriteria.scroll { eq("authorityCertificateVS", cert) }
 			while (userTestCerts.next()) { 
 				CertificateVS userCert = (CertificateVS) userTestCerts.get(0);
 				userCert.delete()
@@ -82,19 +69,15 @@ class SignatureVSService {
 					sessionFactory.currentSession.clear()
 					log.debug(" - processed ${userTestCerts.getRowNumber()}/${numCerts} user certs from auth. cert ${cert.id}");
 				}
-				
 			}
-			CertificateVS.withTransaction {
-				cert.delete()
-			}
+			CertificateVS.withTransaction { cert.delete() }
 		}
-		afterPropertiesSet();
+        initService();
 		return new ResponseVS(statusCode:ResponseVS.SC_OK)
 	}
-	
-	//@Override
-	public SignedMailGenerator afterPropertiesSet() throws Exception {
-		log.debug(" - afterPropertiesSet - ")
+
+	public synchronized SignedMailGenerator initService() throws Exception {
+		log.debug(" - initService - ")
 		File keyStoreFile = grailsApplication.mainContext.getResource(
 			grailsApplication.config.VotingSystem.keyStorePath).getFile()
 		String aliasClaves = grailsApplication.config.VotingSystem.signKeysAlias
@@ -112,12 +95,10 @@ class SignatureVSService {
 			if(!pemCertsArray) pemCertsArray = CertUtil.getPEMEncoded (chain[i])
 			else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtil.getPEMEncoded (chain[i]))
 		}
-		
 		localServerCertSigner = (X509Certificate) ks.getCertificate(aliasClaves);
 		trustedCerts.add(localServerCertSigner)
-
 		File certChainFile = grailsApplication.mainContext.getResource(
-			grailsApplication.config.VotingSystem.certChainPath).getFile();
+                grailsApplication.config.VotingSystem.certChainPath).getFile();
 		certChainFile.createNewFile()
 		certChainFile.setBytes(pemCertsArray)
 		initCertAuthorities();
@@ -136,9 +117,7 @@ class SignatureVSService {
 	}
 	
 	public Set<X509Certificate> getTrustedCerts() {
-		if(!trustedCerts || trustedCerts.isEmpty()) {
-			afterPropertiesSet()
-		}
+		if(!trustedCerts || trustedCerts.isEmpty()) { initService()}
 		return trustedCerts;
 	}
 	
@@ -150,8 +129,8 @@ class SignatureVSService {
 		if(!eventVSCertificateVS) {
 			String msg = messageSource.getMessage('eventWithoutCAErrorMsg', [event.id].toArray(), locale)
 			log.error ("validateVoteCerts - ERROR EVENT CA CERT -> '${msg}'")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-				message:msg, type:TypeVS.VOTE_ERROR, eventVS:event)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,message:msg,
+                    type:TypeVS.VOTE_ERROR, eventVS:event)
 		}
 		X509Certificate certCAEventVS = CertUtil.loadCertificateFromStream (
 			new ByteArrayInputStream(eventVSCertificateVS.content))
@@ -182,7 +161,6 @@ class SignatureVSService {
 			eventTrustAnchors.add(anchor)
 			eventTrustedAnchorsHashMap.put(event.id, eventTrustAnchors)
 			responseVS.data = eventTrustAnchors
-			
 		}
 		return responseVS
 	}
@@ -596,7 +574,7 @@ class SignatureVSService {
 	}
 	
 	private SignedMailGenerator getSignedMailGenerator() {
-		if(signedMailGenerator == null) signedMailGenerator = afterPropertiesSet()
+		if(signedMailGenerator == null) signedMailGenerator = initService()
 		return signedMailGenerator
 	}
 

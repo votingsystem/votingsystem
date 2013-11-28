@@ -5,8 +5,6 @@ import grails.util.Metadata
 
 class BootStrap {
 
-	def signatureVSService
-	def encryptionService
 	def grailsApplication
 	def filesService
 	
@@ -17,9 +15,6 @@ class BootStrap {
 
         log.debug("isWarDeployed: ${Metadata.current.isWarDeployed()}")
         ContextVS.init()
-
-        signatureVSService.init()
-		encryptionService.afterPropertiesSet()
 		filesService.init()
     }
 	
