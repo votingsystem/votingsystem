@@ -14,7 +14,7 @@ import net.miginfocom.swing.MigLayout;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
-import org.votingsystem.applet.util.HttpHelper;
+import org.votingsystem.util.HttpHelper;
 import org.votingsystem.applet.votingtool.panel.ProgressBarPanel;
 import org.votingsystem.model.*;
 

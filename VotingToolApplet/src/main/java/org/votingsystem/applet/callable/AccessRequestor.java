@@ -6,7 +6,7 @@ import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.applet.util.HttpHelper;
+import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.Encryptor;

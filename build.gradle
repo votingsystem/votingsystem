@@ -23,7 +23,7 @@ ext {
 }
 
 task buildAll(dependsOn:['VotingSystemLibrary:publish', 'VotingToolApplet:signJar', 'ValidationToolApplet:signJar',
-	':VotingToolAndroidProject:VotingToolAndroid:release', 'AccessControl:war', 'ControlCenter:war']) << { }
+	 'AccessControl:war', 'ControlCenter:war', 'releaseAndroid']) << { }
 
 
 task genAppsCerts(dependsOn:['VotingSystemLibrary:classes']) {
@@ -87,22 +87,6 @@ task uploadAccessControl(dependsOn:['AccessControl:war']) << {
     } else println "${warFilePath} not found"
 }
 
-def getDevelopmentServerIP() {
-	Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
-	for (NetworkInterface netint : Collections.list(nets)){
-		Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
-		for (InetAddress inetAddress : Collections.list(inetAddresses)) {
-			if(inetAddress.isSiteLocalAddress()) {
-				String inetAddressStr = inetAddress.toString();
-				while(inetAddressStr.startsWith("/"))
-					inetAddressStr = inetAddressStr.substring(1)
-				return inetAddressStr
-			}
-			
-		}
-	}
-}
-
 task uploadControlCenter(dependsOn:['ControlCenter:war']) << {
 	//ncftpput -u jgzornoza -p hola 192.168.1.5 . target/ControlCenter.war
 	def warFilePath = "ControlCenter/target/ControlCenter.war"
@@ -121,11 +105,22 @@ task refreshDependencies(dependsOn:['VotingSystemLibrary:publish']) << {
     announce.announce("'$project.name' - Library Dependencies updated", "local")
 }
 
-task generateVotingSystemApps(dependsOn: [':VotingToolApplet:signJar', 
-	':ValidationToolApplet:signJar', 
-	':VotingSystemLibrary:publish',
-	':VotingToolAndroidProject:VotingToolAndroid:release']) {
+task generateVotingSystemApps(dependsOn: [':VotingToolApplet:signJar', ':ValidationToolApplet:signJar',
+	':VotingSystemLibrary:publish', ':releaseAndroid']) {
 }
+
+//_ TODO _
+task releaseAndroid() {
+    ProcessBuilder pb  = new ProcessBuilder("gradle", "release");
+    pb.directory(file("VotingToolAndroidProject"));
+    Process proc = pb.start();
+    proc.consumeProcessErrorStream(System.err)
+    proc.consumeProcessOutputStream(System.out)
+    if (proc.waitFor() != 0) {
+        throw new RuntimeException("android release failed")
+    }
+}
+
 
 def copyVotingSystemApps(project) {
 	File appletDir = project.file("web-app/applet/");

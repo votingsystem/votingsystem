@@ -1,7 +1,7 @@
 package org.votingsystem.applet.callable;
 
 import org.apache.log4j.Logger;
-import org.votingsystem.applet.util.HttpHelper;
+import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;

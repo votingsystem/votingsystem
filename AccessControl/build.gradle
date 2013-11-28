@@ -24,7 +24,7 @@ task generateRestDocs() << {task ->
 	runCommand(project, file(".") ,["grails", "generate-rest-docs"])
 }
 
-task war(dependsOn:['copyApps', 'installCkeditor']) << {task ->
+task war(dependsOn:['copyApps', 'installEditor']) << {task ->
 	runCommand(project, file(".") ,["grails", "war"])	
 	announce.announce("'$project.name' - WebApp WAR file generated", "local")
 }

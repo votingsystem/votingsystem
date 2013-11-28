@@ -17,7 +17,7 @@ import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.applet.signature.DNIePDFContentSigner;
-import org.votingsystem.applet.util.HttpHelper;
+import org.votingsystem.util.HttpHelper;
 import org.votingsystem.applet.votingtool.Applet;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;

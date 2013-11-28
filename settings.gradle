@@ -1,3 +1,4 @@
-include "VotingSystemLibrary", "VotingToolApplet", "ValidationToolApplet", "AccessControl", "ControlCenter", "TestsWebApp", ':VotingToolAndroidProject'
+include "VotingSystemLibrary", "VotingToolApplet", "ValidationToolApplet", "AccessControl", "ControlCenter", "TestsWebApp",
+        ':VotingToolAndroidProject'
 
 
