@@ -1,7 +1,5 @@
 version = '0.6.0'
 
-apply plugin: 'java'
-apply plugin: 'groovy'
 apply plugin: 'project-report'
 apply plugin: 'announce'
 

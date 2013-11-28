@@ -1,0 +1,1 @@
+include 'VotingToolAndroid', 'libraries:votingsystem', 'libraries:votingsystemimpl', 'libraries:bc', 'libraries:itext'
