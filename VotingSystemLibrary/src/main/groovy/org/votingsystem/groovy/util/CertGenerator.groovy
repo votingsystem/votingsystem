@@ -35,8 +35,8 @@ def processCertsDataMap(args) {
 	File rootCertFile = new File(jsonCertsData.rootCertFile);
 	String rootSubjectDN = jsonCertsData.rootSubjectDN;
 	String password  = jsonCertsData.password;
-	
-	 CertGenerator cerGenerator = new CertGenerator(rootCertFile, rootSubjectDN, password)
+
+    org.votingsystem.util.CertGenerator cerGenerator = new org.votingsystem.util.CertGenerator(rootCertFile, rootSubjectDN, password)
 
     jsonCertsData.certs.each {certData ->
 		if(!certData.file || !certData.distinguishedName
