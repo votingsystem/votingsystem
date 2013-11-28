@@ -23,7 +23,6 @@ class EventVSElectionController {
 
     def eventVSElectionService
 	def subscriptionVSService
-	def httpService
 	def grailsApplication
 	
 	/**

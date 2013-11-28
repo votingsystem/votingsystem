@@ -123,7 +123,7 @@ public class SignedPDFSender implements Callable<ResponseVS> {
             mimeBodyPart.writeTo(baos);
             byte[] bytesToSend = baos.toByteArray();
             baos.close();
-            response = HttpHelper.sendByteArray(bytesToSend,
+            response = HttpHelper.sendData(bytesToSend,
             		ContentTypeVS.PDF_SIGNED_AND_ENCRYPTED, serviceURL);
             responseVS = new ResponseVS(
                     response.getStatusLine().getStatusCode(),

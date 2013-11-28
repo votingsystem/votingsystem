@@ -22,9 +22,8 @@ import org.votingsystem.simulation.callable.VoteSender
 import org.votingsystem.simulation.model.SimulationData
 import org.votingsystem.simulation.model.UserBaseSimulationData
 import org.votingsystem.simulation.model.VotingSimulationData
-import org.votingsystem.simulation.util.HttpHelper
-import org.votingsystem.simulation.util.PdfFormHelper
-import org.votingsystem.simulation.util.SimulationUtils
+import org.votingsystem.util.HttpHelper
+import org.votingsystem.util.PdfFormHelper
 import org.votingsystem.util.DateUtils
 
 import java.security.KeyStore
@@ -384,7 +383,7 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
         log.info("NumAccessRequestsERROR: " + simulationData.getNumAccessRequestsERROR());
 		log.info("NumVotingRequestsERROR: " + simulationData.getNumVotingRequestsERROR());
 		if(!errorList.isEmpty()) {
-			String errorsMsg = SimulationUtils.getFormattedErrorList(errorList);
+			String errorsMsg = StringUtils.getFormattedErrorList(errorList);
 			log.info(" ************* " + errorList.size() + " ERRORS: \n" + errorsMsg);
             responseVS.appendMessage(errorsMsg)
         }

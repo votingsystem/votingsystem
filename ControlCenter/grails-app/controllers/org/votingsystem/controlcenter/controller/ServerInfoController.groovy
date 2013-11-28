@@ -12,6 +12,9 @@ import org.votingsystem.model.ActorVS
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  * */
 class ServerInfoController {
+
+    def signatureVSService
+
 	/**
 	 * @httpMethod [GET]
 	 * @serviceURL [/serverInfo]
@@ -27,9 +30,7 @@ class ServerInfoController {
         serverInfo.state = ActorVS.State.RUNNING.toString()
 		serverInfo.environmentMode = ApplicationContextHolder.getEnvironment().toString()
 		serverInfo.certChainURL = "${createLink(controller: 'certificateVS', action:'certChain', absolute:true)}"
-		File certChain = grailsApplication.mainContext.getResource(
-			grailsApplication.config.VotingSystem.certChainPath).getFile();
-		serverInfo.certChainPEM = certChain?.text
+		serverInfo.certChainPEM = signatureVSService.getServerCertChain().text
 		def controlesAcceso = AccessControlVS.getAll()
 		serverInfo.controlesAcceso = []
 		controlesAcceso?.each {accessControl ->

@@ -16,6 +16,7 @@ import org.votingsystem.model.UserVS
 import org.votingsystem.model.VoteVS
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.DateUtils
+import org.votingsystem.util.HttpHelper
 
 import javax.mail.Header
 import java.security.cert.X509Certificate
@@ -33,9 +34,7 @@ class EventVSElectionService {
     def eventVSService
     def grailsApplication
 	def keyStoreService
-	def httpService
 	def messageSource
-	def encryptionService
 	def representativeService
 	def filesService
 	def timeStampVSService
@@ -117,7 +116,7 @@ class EventVSElectionService {
 			String subject = messageSource.getMessage('mime.subject.votingEventValidated', null, locale)
 			byte[] smimeMessageRespBytes = signatureVSService.getSignedMimeMessage(
 				fromUser, toUser, messageJSON.toString(), subject, header)
-			ResponseVS encryptResponse = encryptionService.encryptSMIMEMessage(smimeMessageRespBytes,
+			ResponseVS encryptResponse = signatureVSService.encryptSMIMEMessage(smimeMessageRespBytes,
                     x509ControlCenterCert, locale)
 			if(ResponseVS.SC_OK != encryptResponse.statusCode) {
 				eventVS.state = EventVS.State.ERROR
@@ -127,25 +126,23 @@ class EventVSElectionService {
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:encryptResponse.message,
                         eventVS:eventVS, type:TypeVS.VOTING_EVENT_ERROR)
 			}
-			ResponseVS responseVSNotificacion = httpService.sendMessage(
-				encryptResponse.messageBytes, ContentTypeVS.SIGNED_AND_ENCRYPTED, controlCenterEventsURL)
-			if(ResponseVS.SC_OK != responseVSNotificacion.statusCode) {
+			responseVS = HttpHelper.getInstance().sendData(encryptResponse.messageBytes,
+                    ContentTypeVS.SIGNED_AND_ENCRYPTED, controlCenterEventsURL)
+			if(ResponseVS.SC_OK != responseVS.statusCode) {
 				eventVS.state = EventVS.State.ERROR
-                eventVS.metaInf = responseVSNotificacion.message
+                eventVS.metaInf = responseVS.message
 				EventVS.withTransaction { eventVS.save() }
 				msg = messageSource.getMessage('controlCenterCommunicationErrorMsg',
-					[responseVSNotificacion.message].toArray(), locale)	
+                        [responseVS.message].toArray(),locale)
 				log.error "saveEvent - ERROR NOTIFYING CONTROL CENTER - ${msg}"
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 					message:msg, type:TypeVS.VOTING_EVENT_ERROR, eventVS:eventVS)
 			}
 			MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT,
 				smimeParent:messageSMIMEReq, eventVS:eventVS,  content:smimeMessageRespBytes)
-			MessageSMIME.withTransaction {
-				messageSMIMEResp.save()
-			}
-			return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS,
-					type:TypeVS.VOTING_EVENT, data:messageSMIMEResp)
+			MessageSMIME.withTransaction { messageSMIMEResp.save() }
+			return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, type:TypeVS.VOTING_EVENT,
+                    data:messageSMIMEResp)
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
 			msg = messageSource.getMessage('publishVotingErrorMessage', null, locale)

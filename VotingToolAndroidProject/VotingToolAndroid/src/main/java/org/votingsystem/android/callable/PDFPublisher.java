@@ -103,7 +103,7 @@ public class PDFPublisher implements Callable<ResponseVS> {
                 Log.d(TAG + ".call(...)", " - call pdfContent null");
                 return new ResponseVS(ResponseVS.SC_ERROR, context.getString(R.string.content_error_msg));
             }
-            response = HttpHelper.sendByteArray(pdfContent.getBytes(), null, serviceURL);
+            response = HttpHelper.sendData(pdfContent.getBytes(), null, serviceURL);
             if(ResponseVS.SC_OK != response.getStatusLine().getStatusCode()) {
                 return new ResponseVS(response.getStatusLine().getStatusCode(),
                         EntityUtils.toString(response.getEntity()));
@@ -124,7 +124,7 @@ public class PDFPublisher implements Callable<ResponseVS> {
             mimeBodyPart.writeTo(baos);
             byte[] bytesToSend = baos.toByteArray();
             baos.close();
-            response = HttpHelper.sendByteArray(bytesToSend,
+            response = HttpHelper.sendData(bytesToSend,
             		ContentTypeVS.PDF_SIGNED_AND_ENCRYPTED, serviceURL + "/" + manifestId);
             responseVS = new ResponseVS(
                     response.getStatusLine().getStatusCode(),

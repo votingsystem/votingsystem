@@ -4,6 +4,7 @@ import com.sun.syndication.feed.synd.SyndContentImpl
 import com.sun.syndication.feed.synd.SyndEntryImpl
 import com.sun.syndication.feed.synd.SyndFeed
 import com.sun.syndication.feed.synd.SyndFeedImpl
+import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.StringUtils
 import org.votingsystem.model.AccessControlVS
 import org.votingsystem.model.ActorVS
@@ -25,8 +26,7 @@ import org.votingsystem.signature.smime.SMIMEMessageWrapper;
  * http://blogs.bytecode.com.au/glen/2006/12/22/generating-rss-feeds-with-grails-and-rome.html
  */
 class SubscriptionVSController {
-	
-	def httpService
+
 
 	def supportedFormats = [ "rss_0.90", "rss_0.91", "rss_0.92", "rss_0.93", "rss_0.94", "rss_1.0", "rss_2.0", "atom_0.3"]
 	
@@ -59,7 +59,7 @@ class SubscriptionVSController {
 				message = message(code: 'controlCenterAlreadyAssociatedMsg', args:[accessControl.serverURL])
 			} else {
 				def urlInfoAccessControlVS = "${serverURL}/serverInfo"
-				ResponseVS responseVS = httpService.getInfo(urlInfoAccessControl, null)
+				ResponseVS responseVS = HttpHelper.getInstance().getData(urlInfoAccessControl, null)
 				status = responseVS.statusCode
 				if (ResponseVS.SC_OK == responseVS.statusCode) {
 					message = message(code: 'controlCenterAssociatedMsg', args:[urlInfoAccessControl])

@@ -161,5 +161,5 @@ class EventVSController {
 	   render responseVS?.eventVS?.state?.toString()
 	   return false
    }
-	   
+
 }

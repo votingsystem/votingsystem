@@ -5,7 +5,6 @@ import org.votingsystem.model.*
 import org.votingsystem.simulation.callable.ServerInitializer
 import org.votingsystem.simulation.callable.TimeStamperTestSender
 import org.votingsystem.simulation.model.SimulationData
-import org.votingsystem.simulation.util.SimulationUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.NifUtils
 
@@ -168,7 +167,7 @@ class TimeStampSimulationService {
 		}
         ResponseVS responseVS = null;
         if(!errorList.isEmpty()) {
-            String errorsMsg = SimulationUtils.getFormattedErrorList(errorList);
+            String errorsMsg = StringUtils.getFormattedErrorList(errorList);
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, Status.SEND_SIGNATURES, errorsMsg);
         } else responseVS = new ResponseVS(ResponseVS.SC_OK, Status.SEND_SIGNATURES, null)
         changeSimulationStatus(responseVS);
@@ -192,7 +191,7 @@ class TimeStampSimulationService {
 
         String message = responseVS.getMessage();
 		if(!errorList.isEmpty()) {
-			String errorsMsg = SimulationUtils.getFormattedErrorList(errorList);
+			String errorsMsg = StringUtils.getFormattedErrorList(errorList);
             if(message == null) message = errorsMsg;
             else message = message + "\n" + errorsMsg;
 			log.info(" ************* " + errorList.size() + " ERRORS: \n" + errorsMsg);

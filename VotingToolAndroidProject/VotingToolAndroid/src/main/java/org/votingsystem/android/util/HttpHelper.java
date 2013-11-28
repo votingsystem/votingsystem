@@ -98,10 +98,10 @@ public class HttpHelper {
         return response;
     }
 
-    public static HttpResponse sendByteArray(
+    public static HttpResponse sendData(
     		byte[] data, String contentType, String serverURL) throws IOException {
         HttpPost httpPost = new HttpPost(serverURL);
-        Log.d(TAG + ".sendByteArray(...)" , " - serverURL: " + httpPost.getURI());
+        Log.d(TAG + ".sendData(...)" , " - serverURL: " + httpPost.getURI());
         
         ByteArrayEntity reqEntity = new ByteArrayEntity(data);
         if(contentType != null) reqEntity.setContentType(contentType);
@@ -109,9 +109,9 @@ public class HttpHelper {
 
         httpPost.setEntity(reqEntity);
         HttpResponse response = httpclient.execute(httpPost);
-        Log.d(TAG + ".sendByteArray(...)" ,"----------------------------------------");
-        Log.d(TAG + ".sendByteArray(...)" , response.getStatusLine().toString());
-        Log.d(TAG + ".sendByteArray(...)" , "----------------------------------------");
+        Log.d(TAG + ".sendData(...)" ,"----------------------------------------");
+        Log.d(TAG + ".sendData(...)" , response.getStatusLine().toString());
+        Log.d(TAG + ".sendData(...)" , "----------------------------------------");
         return response;  
     }
      

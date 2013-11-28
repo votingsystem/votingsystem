@@ -4,8 +4,8 @@ import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
 import org.votingsystem.simulation.callable.EncryptionTestSender
+import org.votingsystem.simulation.callable.ServerInitializer
 import org.votingsystem.simulation.model.SimulationData
-import org.votingsystem.simulation.util.SimulationUtils
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.NifUtils
 
@@ -13,7 +13,7 @@ import java.util.concurrent.*
 
 class EncryptionSimulationService {
 
-    public enum Status implements StatusVS<Status> {INIT_SIMULATION, SEND_REQUEST, FINISH_SIMULATION}
+    public enum Status implements StatusVS<Status> {INIT_SIMULATION, INIT_SERVER, SEND_REQUEST, FINISH_SIMULATION}
 
     private Long broadcastMessageInterval = 10000;
     private Locale locale = new Locale("es")
@@ -106,6 +106,15 @@ class EncryptionSimulationService {
         }
     }
 
+    private void initServer() {
+        log.debug("initSimulation ### Enter status INIT_SERVER")
+        ServerInitializer serverInitializer = new ServerInitializer(simulationData.getServerURL(),null);
+        ResponseVS responseVS = serverInitializer.call();
+        responseVS.setStatus(Status.INIT_SERVER)
+        changeSimulationStatus(responseVS)
+    }
+
+
     private void sendRequests(){
         log.debug("sendVotes ### Enter status SEND_REQUEST");
         if(!(simulationData.getNumRequestsProjected() > 0)) {
@@ -166,7 +175,7 @@ class EncryptionSimulationService {
         }
         ResponseVS responseVS = null;
         if(!errorList.isEmpty()) {
-            String errorsMsg = SimulationUtils.getFormattedErrorList(errorList);
+            String errorsMsg = StringUtils.getFormattedErrorList(errorList);
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, Status.SEND_REQUEST, errorsMsg);
         } else responseVS = new ResponseVS(ResponseVS.SC_OK, Status.SEND_REQUEST, null)
         changeSimulationStatus(responseVS);
@@ -190,7 +199,7 @@ class EncryptionSimulationService {
 
         String message = responseVS.getMessage();
         if(!errorList.isEmpty()) {
-            String errorsMsg = SimulationUtils.getFormattedErrorList(errorList);
+            String errorsMsg = StringUtils.getFormattedErrorList(errorList);
             if(message == null) message = errorsMsg;
             else message = message + "\n" + errorsMsg;
             log.info(" ************* " + errorList.size() + " ERRORS: \n" + errorsMsg);
@@ -209,6 +218,11 @@ class EncryptionSimulationService {
         try {
             switch(statusFromResponse.getStatus()) {
                 case Status.INIT_SIMULATION:
+                    if(ResponseVS.SC_OK == statusFromResponse.getStatusCode()) {
+                        initServer();
+                    } else finishSimulation(statusFromResponse);
+                    break;
+                case Status.INIT_SERVER:
                     if(ResponseVS.SC_OK == statusFromResponse.getStatusCode()) {
                         sendRequests();
                     } else finishSimulation(statusFromResponse);

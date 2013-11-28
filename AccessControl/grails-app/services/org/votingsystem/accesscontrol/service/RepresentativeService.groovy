@@ -16,7 +16,6 @@ import org.votingsystem.model.VoteVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.NifUtils
-import org.votingsystem.util.StringUtils
 
 import java.security.MessageDigest
 import java.text.DateFormat

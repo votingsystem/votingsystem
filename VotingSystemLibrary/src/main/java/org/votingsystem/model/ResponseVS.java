@@ -39,7 +39,7 @@ public class ResponseVS<T> {
     private TypeVS type;
     private UserVS userVS;
     private byte[] messageBytes;
-    private File archivo;
+    private File file;
     private List<String> errorList;
         
     public ResponseVS () {  }
@@ -167,5 +167,13 @@ public class ResponseVS<T> {
 
     public <E> void setStatus(StatusVS<E> status) {
         this.status = status;
+    }
+
+    public File getFile() {
+        return file;
+    }
+
+    public void setFile(File file) {
+        this.file = file;
     }
 }

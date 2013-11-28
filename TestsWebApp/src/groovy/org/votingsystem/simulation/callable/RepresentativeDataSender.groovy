@@ -9,7 +9,7 @@ import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.simulation.ContextService
-import org.votingsystem.simulation.util.HttpHelper
+import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.StringUtils
 

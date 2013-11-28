@@ -17,7 +17,6 @@ class ControlCenterFilters {
 
     def grailsApplication 
 	def messageSource
-	def encryptionService
 	def signatureVSService
 
     def filters = {
@@ -59,7 +58,7 @@ class ControlCenterFilters {
 				if(response.contentType?.contains(ContentTypeVS.MULTIPART_ENCRYPTED)) {
 					log.debug "after - ENCRYPTED PLAIN TEXT"
 					if(params.responseBytes && params.receiverCert) {
-						ResponseVS encryptResponse =  encryptionService.encryptMessage(
+						ResponseVS encryptResponse =  signatureVSService.encryptMessage(
                                 params.responseBytes, params.receiverCert)
 						if (ResponseVS.SC_OK != encryptResponse.statusCode) {
 							response.status = responseVS?.statusCode
@@ -110,7 +109,7 @@ class ControlCenterFilters {
 					if(request?.contentType?.contains(ContentTypeVS.ENCRYPTED)) {
 						if(request?.contentType?.contains(ContentTypeVS.SIGNED)) {
 							log.debug "---- pkcs7DocumentsFilter - before -> SIGNED AND ENCRYPTED"
-							responseVS =  encryptionService.decryptSMIMEMessage(
+							responseVS =  signatureVSService.decryptSMIMEMessage(
 								requestBytes, request.getLocale())
 							if(ResponseVS.SC_OK != responseVS.statusCode) {
 								response.status = responseVS.statusCode
@@ -119,7 +118,14 @@ class ControlCenterFilters {
 							}
 							smimeMessageReq = responseVS.smimeMessage
 						} else {
-							log.debug "---- pkcs7DocumentsFilter - before - ENCRYPTED - TODO"
+                            responseVS =  signatureVSService.decryptMessage(requestBytes, request.getLocale())
+                            if(ResponseVS.SC_OK != responseVS.statusCode) {
+                                response.status = responseVS.statusCode
+                                render responseVS.message
+                                return false
+                            }
+                            params.requestBytes = responseVS.messageBytes
+                            return
 						}
 					} else if(request?.contentType?.contains(ContentTypeVS.SIGNED)) {
 						log.debug "---- pkcs7DocumentsFilter - before - SIGNED"
@@ -158,7 +164,7 @@ class ControlCenterFilters {
 					if(response?.contentType?.contains(ContentTypeVS.ENCRYPTED)) {
 						if(response?.contentType?.contains(ContentTypeVS.SIGNED)) {
 							log.debug "---- pkcs7DocumentsFilter - after - SIGNED AND ENCRYPTED RESPONSE"
-							ResponseVS encryptResponse =  encryptionService.encryptSMIMEMessage(
+							ResponseVS encryptResponse =  signatureVSService.encryptSMIMEMessage(
 								smimeResponseBytes, encryptionReceiverCert, request.getLocale())
 							if(ResponseVS.SC_OK == encryptResponse.statusCode) {
 								response.contentLength = encryptResponse.messageBytes.length

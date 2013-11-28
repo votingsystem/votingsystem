@@ -8,7 +8,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.signature.util.VotingSystemKeyGenerator
 import org.votingsystem.simulation.ContextService
-import org.votingsystem.simulation.util.HttpHelper
+import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.ApplicationContextHolder
 
 import java.security.KeyPair
@@ -44,7 +44,7 @@ public class EncryptionTestSender implements Callable<ResponseVS> {
     @Override public ResponseVS call() throws Exception {
         byte[] encryptedRequestBytes = Encryptor.encryptMessage(
                 getTestJSON(requestNIF, publicKey).toString().getBytes(), serverCert);
-        responseVS = HttpHelper.getInstance().sendByteArray(encryptedRequestBytes, ContentTypeVS.ENCRYPTED, serverURL);
+        responseVS = HttpHelper.getInstance().sendData(encryptedRequestBytes, ContentTypeVS.ENCRYPTED, serverURL);
         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
             byte[] encryptedData = responseVS.getMessageBytes();
             byte[] decryptedData = Encryptor.decryptFile(encryptedData, publicKey, privateKey);

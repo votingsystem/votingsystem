@@ -1,5 +1,6 @@
 package org.votingsystem.accesscontrol.service
 
+import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.StringUtils
 import org.votingsystem.model.ActorVS
 import org.votingsystem.model.CertificateVS
@@ -24,7 +25,6 @@ class SubscriptionVSService {
 	static transactional = true
     def grailsApplication
 	def messageSource
-	def httpService
 	
 	ResponseVS checkUser(UserVS userVS, Locale locale) {
 		log.debug "checkUser - userVS.nif  '${userVS.getNif()}'"
@@ -113,7 +113,7 @@ class SubscriptionVSService {
 			if(controlCenterCert) return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg,
                     data:[controlCenterVS:controlCenterDB, certificateVS:controlCenterCert ])
 		}
-		ResponseVS responseVS = httpService.getInfo(ActorVS.getServerInfoURL(serverURL), ContentTypeVS.JSON)
+		ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL),ContentTypeVS.JSON)
 		if (ResponseVS.SC_OK == responseVS.statusCode) {
 			ActorVS actorVS = ActorVS.populate(JSON.parse(responseVS.message))
 			if (ActorVS.Type.CONTROL_CENTER != actorVS.getType()) {

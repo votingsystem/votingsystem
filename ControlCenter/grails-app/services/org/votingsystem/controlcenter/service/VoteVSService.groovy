@@ -14,6 +14,7 @@ import org.votingsystem.model.VoteVSCanceller
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.CMSUtils
 import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.util.HttpHelper
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import java.security.cert.X509Certificate
@@ -27,9 +28,7 @@ class VoteVSService {
 
 	def messageSource
 	def signatureVSService
-    def grailsApplication  
-    def httpService
-	def encryptionService
+    def grailsApplication
 	
 	
 	public synchronized ResponseVS validateVote(MessageSMIME messageSMIMEReq, Locale locale) {
@@ -64,7 +63,7 @@ class VoteVSService {
                     fromUser, toUser, messageSMIMEReq.getSmimeMessage(), subject)
             Collection<X509Certificate> accessControlCertChain =  CertUtil.fromPEMToX509CertCollection(
                     eventVS.certChainAccessControl)
-			ResponseVS encryptResponse = encryptionService.encryptSMIMEMessage(
+			ResponseVS encryptResponse = signatureVSService.encryptSMIMEMessage(
 				smimeVoteValidation.getBytes(), accessControlCertChain.iterator().next(), locale);
 			if (ResponseVS.SC_OK != encryptResponse.statusCode) {
 				log.error("validateVote - encryptResponse ERROR - > ${encryptResponse.message}")
@@ -77,8 +76,8 @@ class VoteVSService {
 			byte[] encryptResponseBytes = encryptResponse.messageBytes
 			//String encryptResponseStr = new String(encryptResponseBytes)
 			//log.debug(" - encryptResponseStr: ${encryptResponseStr}")
-			ResponseVS responseVS = httpService.sendMessage(encryptResponseBytes, ContentTypeVS.SIGNED_AND_ENCRYPTED,
-                    eventVS.accessControlVS.getVoteServiceURL())
+			ResponseVS responseVS = HttpHelper.getInstance().sendData(encryptResponseBytes,
+                    ContentTypeVS.SIGNED_AND_ENCRYPTED, eventVS.accessControlVS.getVoteServiceURL())
 			if (ResponseVS.SC_OK == responseVS.statusCode) {
 				SMIMEMessageWrapper smimeMessageResp = new SMIMEMessageWrapper(
 					new ByteArrayInputStream(responseVS.message.getBytes()));

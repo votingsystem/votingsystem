@@ -5,10 +5,12 @@ import org.apache.log4j.Logger;
 import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialException;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Clob;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -59,7 +61,31 @@ public class StringUtils {
         }
         return clob;
     }
-    
+
+    public static String getFormattedErrorList(List<String> errorList) {
+        if(errorList.isEmpty()) return null;
+        else {
+            StringBuilder result = new StringBuilder("");
+            for(String error:errorList) {
+                result.append(error + "\n");
+            }
+            return result.toString();
+        }
+    }
+
+    public static String getUserDirPath (String userNIF) {
+        int subPathLength = 3;
+        String basePath = "/";
+        while (userNIF.length() > 0) {
+            if(userNIF.length() <= subPathLength) subPathLength = userNIF.length();
+            String subPath = userNIF.substring(0, subPathLength);
+            userNIF = userNIF.substring(subPathLength);
+            basePath = basePath + subPath + File.separator;
+        }
+        if(!basePath.endsWith("/")) basePath = basePath + "/";
+        return basePath;
+    }
+
     public static String checkURL(String url) {
     	if(url == null) return null;
     	url = url.trim();

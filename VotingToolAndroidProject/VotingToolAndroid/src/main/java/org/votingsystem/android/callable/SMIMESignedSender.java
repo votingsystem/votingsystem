@@ -109,7 +109,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
                 baos.close();
                 documentContentType = ContentTypeVS.SIGNED;
             }
-            HttpResponse response  = HttpHelper.sendByteArray(
+            HttpResponse response  = HttpHelper.sendData(
                     messageToSend, documentContentType, serviceURL);
             if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
                 byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());

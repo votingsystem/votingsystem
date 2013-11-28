@@ -10,7 +10,6 @@ import org.votingsystem.model.SubSystemVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.util.DateUtils
-import org.votingsystem.util.StringUtils
 
 class RepresentativeController {
 

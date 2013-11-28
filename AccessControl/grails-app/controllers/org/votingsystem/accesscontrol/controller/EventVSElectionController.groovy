@@ -419,6 +419,6 @@ class EventVSElectionController {
 			response.setContentType("application/zip")
 		}
 	}
-	
-	
+
+
 }

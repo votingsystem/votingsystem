@@ -51,7 +51,7 @@ public class InfoSender implements Callable<ResponseVS> {
                 responseVS = HttpHelper.getInstance().sendFile((File)data, documentContentType, urlToSendDocument,
                         headerNameList.toArray(new String[headerNameList.size()]));
             } else if(data instanceof byte[]) {
-                responseVS = HttpHelper.getInstance().sendByteArray((byte[])data, documentContentType, urlToSendDocument,
+                responseVS = HttpHelper.getInstance().sendData((byte[])data, documentContentType, urlToSendDocument,
                         headerNameList.toArray(new String[headerNameList.size()]));
             }
         } catch(Exception ex) {

@@ -50,7 +50,7 @@ public class AccessRequestor implements Callable<ResponseVS> {
                 ((AccessControlVS)eventVS.getAccessControlVS()).getAccessServiceURL());
         TimeStampRequest timeStampRequest = smimeMessage.getTimeStampRequest();
         AccessControlVS accessControl = (AccessControlVS) ContextVS.getInstance().getAccessControl();
-        ResponseVS responseVS = HttpHelper.getInstance().sendByteArray(
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(
                 timeStampRequest.getEncoded(), ContentTypeVS.TIMESTAMP_QUERY, accessControl.getTimeStampServerURL());
         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
             byte[] bytesToken = responseVS.getMessageBytes();

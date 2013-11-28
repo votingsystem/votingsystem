@@ -12,7 +12,7 @@ task runApp << { task ->
 	runCommand(project, file(".") ,["grails", "run-app"])	
 }
 
-task installCkeditor << { task ->
+task installEditor << { task ->
 	installCkeditor(project)
 }
 

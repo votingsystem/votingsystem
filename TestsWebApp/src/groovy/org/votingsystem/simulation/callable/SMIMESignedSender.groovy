@@ -6,7 +6,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.simulation.ContextService
-import org.votingsystem.simulation.util.HttpHelper
+import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.ApplicationContextHolder as ACH
 
 import java.security.KeyPair
@@ -55,7 +55,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
             baos.close();
             documentContentType = ContentTypeVS.SIGNED;
         } 
-        responseVS = HttpHelper.getInstance().sendByteArray(messageToSendBytes, documentContentType, urlToSendDocument,
+        responseVS = HttpHelper.getInstance().sendData(messageToSendBytes, documentContentType, urlToSendDocument,
                 headerNameList.toArray(new String[headerNameList.size()]));            
         
        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

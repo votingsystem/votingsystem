@@ -1,7 +1,7 @@
 package org.votingsystem.simulation
 
 import org.apache.log4j.Logger
-import org.votingsystem.simulation.util.HttpHelper
+import org.votingsystem.util.HttpHelper
 
 import java.security.KeyStore
 import java.security.PrivateKey
@@ -27,8 +27,7 @@ import org.votingsystem.simulation.callable.ServerInitializer
 import org.votingsystem.model.*
 import org.votingsystem.util.*
 import org.votingsystem.simulation.model.*
-import org.votingsystem.simulation.util.PdfFormHelper;
-import org.votingsystem.simulation.util.SimulationUtils;
+import org.votingsystem.util.PdfFormHelper;
 import grails.converters.JSON
 import com.itextpdf.text.pdf.PdfReader
 
@@ -177,7 +176,7 @@ class ManifestSimulationService {
 		this.eventVS = eventVS;
 		String eventStr = "${eventVS.getDataMap() as JSON}".toString();
 		String urlPublishManifest = contextService.getAccessControl().getPublishManifestURL()
-		ResponseVS responseVS = HttpHelper.getInstance().sendByteArray(eventStr.getBytes(),
+		ResponseVS responseVS = HttpHelper.getInstance().sendData(eventStr.getBytes(),
 			ContentTypeVS.JSON, urlPublishManifest, "eventId")
 
 		if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -278,7 +277,7 @@ class ManifestSimulationService {
 		}
         ResponseVS responseVS = null;
         if(!errorList.isEmpty()) {
-            String errorsMsg = SimulationUtils.getFormattedErrorList(errorList);
+            String errorsMsg = StringUtils.getFormattedErrorList(errorList);
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, Status.SEND_SIGNATURES, errorsMsg);
         } else responseVS = new ResponseVS(ResponseVS.SC_OK, Status.SEND_SIGNATURES, null)
         changeSimulationStatus(responseVS);
@@ -358,7 +357,7 @@ class ManifestSimulationService {
 
         String message = responseVS.getMessage();
 		if(!errorList.isEmpty()) {
-			String errorsMsg = SimulationUtils.getFormattedErrorList(errorList);
+			String errorsMsg = StringUtils.getFormattedErrorList(errorList);
             if(message == null) message = errorsMsg;
             else message = message + "\n" + errorsMsg;
 			log.info(" ************* " + errorList.size() + " ERRORS: \n" + errorsMsg);

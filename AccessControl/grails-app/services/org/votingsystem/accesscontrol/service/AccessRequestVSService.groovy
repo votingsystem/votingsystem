@@ -24,7 +24,6 @@ class AccessRequestVSService {
 	def messageSource
     def signatureVSService
     def grailsApplication
-	def encryptionService
 	def timeStampVSService
 	
 	//{"operation":"ACCESS_REQUEST","hashAccessRequestBase64":"...",

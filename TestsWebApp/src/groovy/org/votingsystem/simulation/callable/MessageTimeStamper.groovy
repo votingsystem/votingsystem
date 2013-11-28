@@ -17,7 +17,7 @@ import org.bouncycastle.tsp.TimeStampToken
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
-import org.votingsystem.simulation.util.HttpHelper
+import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.ApplicationContextHolder as ACH
 
 import java.security.cert.X509Certificate
@@ -51,7 +51,7 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
         AtomicBoolean done = new AtomicBoolean(false);
         ResponseVS responseVS = null;
         while(!done.get()) {
-            responseVS = HttpHelper.getInstance().sendByteArray(timeStampRequest.getEncoded(),
+            responseVS = HttpHelper.getInstance().sendData(timeStampRequest.getEncoded(),
                 ContentTypeVS.TIMESTAMP_QUERY, ACH.getSimulationContext().getAccessControl().getTimeStampServerURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 byte[] bytesToken = responseVS.getMessageBytes();

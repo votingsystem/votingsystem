@@ -18,7 +18,6 @@ import org.votingsystem.signature.smime.*
 class AccessControlFilters {
 
     def signatureVSService
-	def encryptionService
     def grailsApplication
 	def messageSource
 	def pdfService
@@ -63,10 +62,10 @@ class AccessControlFilters {
 					if(params.responseBytes && (params.receiverCert || params.receiverPublicKey)) {
 						ResponseVS encryptResponse = null
 						if(params.receiverPublicKey) {
-							encryptResponse =  encryptionService.encryptMessage(
+							encryptResponse =  signatureVSService.encryptMessage(
                                     params.responseBytes, params.receiverPublicKey)
 						} else if(params.receiverCert) {
-							encryptResponse =  encryptionService.encryptToCMS(
+							encryptResponse =  signatureVSService.encryptToCMS(
 								params.responseBytes, params.receiverCert)
 						}
 						if (ResponseVS.SC_OK != encryptResponse.statusCode) {
@@ -120,7 +119,7 @@ class AccessControlFilters {
 						if(contentType.contains(ContentTypeVS.ENCRYPTED)) {
 							if(contentType.contains(ContentTypeVS.SIGNED)) {
 								log.debug "---- filemapFilter - file: ${fileName} -> SIGNED AND ENCRYPTED"
-								responseVS = encryptionService.decryptSMIMEMessage(
+								responseVS = signatureVSService.decryptSMIMEMessage(
 									fileMap.get(key)?.getBytes(), request.getLocale())
 								if(ResponseVS.SC_OK != responseVS.statusCode) {
 									response.status = responseVS.statusCode
@@ -130,7 +129,7 @@ class AccessControlFilters {
 								smimeMessageReq = responseVS.smimeMessage
 							} else {
 								log.debug "---- filemapFilter - before - file: ${fileName} -> ENCRYPTED "
-								responseVS = encryptionService.decryptMessage(
+								responseVS = signatureVSService.decryptMessage(
 									fileMap.get(key)?.getBytes(), request.getLocale())
 								if(ResponseVS.SC_OK != responseVS.statusCode) {
 									response.status = responseVS.statusCode
@@ -201,7 +200,7 @@ class AccessControlFilters {
 					ResponseVS responseVS
 					if(request?.contentType?.contains(ContentTypeVS.PDF)) {
 						if(request?.contentType?.contains(ContentTypeVS.ENCRYPTED)) {
-							responseVS = encryptionService.decryptMessage(requestBytes, request.getLocale())
+							responseVS = signatureVSService.decryptMessage(requestBytes, request.getLocale())
 							if(ResponseVS.SC_OK != responseVS.statusCode) {
 								log.debug "---- pkcs7DocumentsFilter - before  - PDF ENCRYPTION ERROR"
 								response.status = responseVS.statusCode
@@ -228,7 +227,7 @@ class AccessControlFilters {
 						if(request?.contentType?.contains(ContentTypeVS.ENCRYPTED)) {
 							if(request?.contentType?.contains(ContentTypeVS.SIGNED)) {
 								log.debug "---- pkcs7DocumentsFilter - before -> SIGNED AND ENCRYPTED"
-								responseVS =  encryptionService.decryptSMIMEMessage(
+								responseVS =  signatureVSService.decryptSMIMEMessage(
 									requestBytes, request.getLocale())
 								if(ResponseVS.SC_OK != responseVS.statusCode) {
 									response.status = responseVS.statusCode
@@ -237,9 +236,7 @@ class AccessControlFilters {
 								}
 								smimeMessageReq = responseVS.smimeMessage
 							} else {
-								log.debug "---- pkcs7DocumentsFilter - ENCRYPTED -TODO"
-								responseVS =  encryptionService.decryptMessage(
-									requestBytes, request.getLocale())
+								responseVS =  signatureVSService.decryptMessage(requestBytes, request.getLocale())
 								if(ResponseVS.SC_OK != responseVS.statusCode) {
 									response.status = responseVS.statusCode
 									render responseVS.message
@@ -288,8 +285,8 @@ class AccessControlFilters {
 						if(response?.contentType?.contains(ContentTypeVS.SIGNED)) {
 							log.debug "---- pkcs7DocumentsFilter - after - SIGNED AND ENCRYPTED RESPONSE"
 							//log.debug "---- pkcs7DocumentsFilter - after - receiver: ${encryptionReceiverCert.getSubjectDN()}"
-							// ori -> ResponseVS encryptResponse =  encryptionService.encryptSMIMEMessage(messageSMIME.smimeMessage.getBytes(), encryptionReceiverCert, request.getLocale())
-							ResponseVS encryptResponse =  encryptionService.encryptSMIMEMessage(
+							// ori -> ResponseVS encryptResponse =  signatureVSService.encryptSMIMEMessage(messageSMIME.smimeMessage.getBytes(), encryptionReceiverCert, request.getLocale())
+							ResponseVS encryptResponse =  signatureVSService.encryptSMIMEMessage(
 								messageSMIME.smimeMessage, encryptionReceiverCert, request.getLocale())
 							if(ResponseVS.SC_OK == encryptResponse.statusCode) {
 								response.contentLength = encryptResponse.messageBytes.length

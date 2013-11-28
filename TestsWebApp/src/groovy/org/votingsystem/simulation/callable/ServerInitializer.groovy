@@ -7,7 +7,7 @@ import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.simulation.ContextService
-import org.votingsystem.simulation.util.HttpHelper
+import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.ApplicationContextHolder as ACH
 
 import java.util.concurrent.Callable
@@ -59,7 +59,7 @@ public class ServerInitializer implements Callable<ResponseVS> {
                     break;
             }
             byte[] rootCACertPEMBytes = CertUtil.getPEMEncoded (contextService.getRootCACert());
-            responseVS = HttpHelper.getInstance().sendByteArray(rootCACertPEMBytes, null,
+            responseVS = HttpHelper.getInstance().sendData(rootCACertPEMBytes, null,
                     actorVS.getRootCAServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 if(actorVS instanceof AccessControlVS) contextService.setAccessControl(actorVS);

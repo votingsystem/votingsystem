@@ -199,7 +199,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
             bytesToSend = FileUtils.getBytesFromFile(fileToSend);
         }
 
-        ResponseVS senderResponse = HttpHelper.getInstance().sendByteArray(
+        ResponseVS senderResponse = HttpHelper.getInstance().sendData(
                 bytesToSend, contentType, urlToSendDocument);
         return senderResponse;
     }

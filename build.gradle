@@ -70,6 +70,10 @@ task genWebAppsCerts(dependsOn:['VotingSystemLibrary:classes']) {
 	}
 }
 
+genWebAppsCerts.mustRunAfter genAppsCerts
+
+task installCerts(dependsOn: ['genAppsCerts', 'genWebAppsCerts'])  { }
+
 
 task uploadApps(dependsOn:['uploadAccessControl', 'uploadControlCenter']) << {}
 
@@ -147,6 +151,9 @@ def copyVotingSystemApps(project) {
 def copyAppletDeps(project) {
 	installAppletBcprov(project)
 }
+
+task installEditor(dependsOn: [':TestsWebApp:installEditor', ':AccessControl:installEditor'])  { }
+
 
 def installAppletBcprov(project) {
 	println "installAppletBcprov - bcprovVersion '$bcprovVersion'"

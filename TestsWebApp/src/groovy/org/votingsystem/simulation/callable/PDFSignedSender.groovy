@@ -21,7 +21,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.signature.util.PDFContentSigner
 import org.votingsystem.simulation.ContextService
-import org.votingsystem.simulation.util.HttpHelper
+import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.ApplicationContextHolder as ACH
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.FileUtils
@@ -183,7 +183,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
             contentType = ContentTypeVS.PDF_SIGNED;
             bytesToSend = FileUtils.getBytesFromFile(fileToSend);
         }
-        ResponseVS senderResponse = HttpHelper.getInstance().sendByteArray(bytesToSend, contentType, urlToSendDocument)
+        ResponseVS senderResponse = HttpHelper.getInstance().sendData(bytesToSend, contentType, urlToSendDocument)
         return senderResponse;
     }
     

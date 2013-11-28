@@ -1,6 +1,10 @@
 package org.votingsystem.controlcenter.controller
 
+import org.votingsystem.model.ContentTypeVS
+import org.votingsystem.model.EnvironmentVS
 import org.votingsystem.model.MessageSMIME
+import org.votingsystem.model.TypeVS
+import org.votingsystem.util.ApplicationContextHolder
 
 import java.security.Key
 import java.security.KeyFactory
@@ -76,8 +80,7 @@ class EncryptorController {
 	 * @return  Recibo que consiste en el documento recibido con la firma añadida del servidor.
 	 */
 	def getMultiSignedMessage() {
-		if(!EnvironmentVS.DEVELOPMENT.equals(
-			ApplicationContextHolder.getEnvironment())) {
+		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
 			String msg = message(code: "serviceDevelopmentModeMsg")
 			log.error msg
 			response.status = ResponseVS.SC_ERROR_REQUEST
@@ -93,8 +96,7 @@ class EncryptorController {
 			render msg
 			return false
 		}
-		response.contentType = org.votingsystem.model.ContentTypeVS.SIGNED
-			
+        response.contentType = ContentTypeVS.SIGNED
 		SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage()
 		
 		String fromUser = "EncryptorController"
@@ -102,12 +104,8 @@ class EncryptorController {
 		String subject = "Multisigned response"
 		SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
 			fromUser, toUser, smimeMessage, subject)
-
-		MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.TEST,
-			content:smimeMessageResp.getBytes())
-		
-		params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK,
-			data:data, type:TypeVS.TEST)
+		MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.TEST, content:smimeMessageResp.getBytes())
+		params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, data:messageSMIMEResp, type:TypeVS.TEST)
 	}
 	
 	private getPemBytesFromKey(Key key) {

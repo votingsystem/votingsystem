@@ -2,6 +2,7 @@ package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.StringUtils
 import org.votingsystem.model.ControlCenterVS
 import org.votingsystem.model.EventVS
@@ -28,7 +29,6 @@ class EventVSService {
 	def messageSource
 	def subscriptionVSService
 	def grailsApplication
-	def httpService
 	def signatureVSService
 	def filesService
 
@@ -160,9 +160,9 @@ class EventVSService {
 						fromUser, toUser, smimeMessageReq, subject)
 					String controlCenterUrl = ((EventVSElection)eventVS).getControlCenterVS().serverURL
 					toUser = ((EventVSElection)eventVS).getControlCenterVS()?.name
-					String cancelCentroCentrolEventURL = controlCenterUrl + "/eventVSElection/cancelled"
-					ResponseVS responseVSControlCenter =	httpService.sendMessage(
-							smimeMessageResp.getBytes(), org.votingsystem.model.ContentTypeVS.SIGNED, cancelCentroCentrolEventURL);
+					String cancelServiceURL = controlCenterUrl + "/eventVSElection/cancelled"
+					ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(smimeMessageResp.getBytes(),
+                            org.votingsystem.model.ContentTypeVS.SIGNED, cancelServiceURL);
 					log.debug("responseVSControlCenter - status: ${responseVSControlCenter.statusCode}")
 					if(ResponseVS.SC_OK == responseVSControlCenter.statusCode ||
 						ResponseVS.SC_CANCELLATION_REPEATED == responseVSControlCenter.statusCode) {

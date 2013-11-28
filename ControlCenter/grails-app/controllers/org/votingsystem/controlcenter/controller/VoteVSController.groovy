@@ -22,8 +22,6 @@ import java.security.cert.X509Certificate
 class VoteVSController {
 
     def voteVSService
-    def httpService
-	def encryptionService
 	
 	
 	/**

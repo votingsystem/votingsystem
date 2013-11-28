@@ -15,7 +15,7 @@ import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.signature.util.PKCS10WrapperClient
 import org.votingsystem.simulation.ContextService
-import org.votingsystem.simulation.util.HttpHelper
+import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.ApplicationContextHolder
 
 import javax.mail.Header
@@ -50,7 +50,7 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
     @Override public ResponseVS call() throws Exception {
         logger.debug("doInBackground - accessServiceURL: " +  contextService.getAccessControl().getAccessServiceURL());
         TimeStampRequest timeStampRequest = smimeMessage.getTimeStampRequest();
-        ResponseVS responseVS = HttpHelper.getInstance().sendByteArray(timeStampRequest.getEncoded(),
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(timeStampRequest.getEncoded(),
                 ContentTypeVS.TIMESTAMP_QUERY, contextService.getAccessControl().getTimeStampServerURL());
         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
             byte[] bytesToken = responseVS.getMessageBytes();

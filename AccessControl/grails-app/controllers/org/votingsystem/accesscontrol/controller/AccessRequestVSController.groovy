@@ -21,7 +21,6 @@ class AccessRequestVSController {
     def accessRequestVSService
 	def signatureVSService
 	def csrService
-	def encryptionService
 
 	
 	/**

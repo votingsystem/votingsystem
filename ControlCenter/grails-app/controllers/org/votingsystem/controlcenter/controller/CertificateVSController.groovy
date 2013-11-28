@@ -29,7 +29,7 @@ class CertificateVSController {
 	 */
 	def certChain () {
 		try {
-			response.outputStream << signatureVSService.getCertChain().getBytes()
+			response.outputStream << signatureVSService.getServerCertChain().getBytes()
 			response.outputStream.flush()
 			return
 		} catch (Exception ex) {

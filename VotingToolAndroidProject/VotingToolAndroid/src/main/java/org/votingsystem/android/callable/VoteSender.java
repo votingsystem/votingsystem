@@ -103,7 +103,7 @@ public class VoteSender implements Callable<ResponseVS> {
             String documentContentType = ContentTypeVS.SIGNED_AND_ENCRYPTED;
             byte[] messageToSend = Encryptor.encryptSMIME(signedVote,
                     event.getControlCenter().getCertificate());
-            HttpResponse response  = HttpHelper.sendByteArray(messageToSend,
+            HttpResponse response  = HttpHelper.sendData(messageToSend,
                     documentContentType, serviceURL);
             if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
                 byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());

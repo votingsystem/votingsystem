@@ -55,5 +55,6 @@ class EventVSManifestCollectorController {
 			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
 		return false
 	}
-	
+
+
 }

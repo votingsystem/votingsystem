@@ -17,6 +17,7 @@ import org.votingsystem.model.VoteVSCanceller
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.CMSUtils
 import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.util.HttpHelper
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import java.security.cert.X509Certificate
@@ -26,8 +27,6 @@ class VoteVSService {
 	def messageSource
 	def grailsApplication
 	def signatureVSService
-	def httpService
-	def encryptionService
 	
     synchronized ResponseVS validateVote(MessageSMIME messageSMIMEReq, Locale locale) {
 		log.debug ("validateVote - ")
@@ -183,14 +182,13 @@ class VoteVSService {
 				String controlCenterURL = eventVSElection.controlCenterVS.serverURL
 				String eventURL = "${grailsApplication.config.grails.serverURL}/eventVSElection/${eventVSElection.id}"
 				String urlAnulacionVoto = "${controlCenterURL}/voteVSCanceller?url=${eventURL}"
-				ResponseVS encryptResponse = encryptionService.encryptSMIMEMessage(
+				ResponseVS encryptResponse = signatureVSService.encryptSMIMEMessage(
 					smimeMessageResp.getBytes(), eventVSElection.getControlCenterCert(), locale)
 				if (ResponseVS.SC_OK != encryptResponse.statusCode) return encryptResponse
-				ResponseVS responseVSControlCenter = httpService.sendMessage(
-					encryptResponse.messageBytes, ContentTypeVS.SIGNED_AND_ENCRYPTED, urlAnulacionVoto)
+				ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(encryptResponse.messageBytes,
+                        ContentTypeVS.SIGNED_AND_ENCRYPTED, urlAnulacionVoto)
 				if (ResponseVS.SC_OK == responseVSControlCenter.statusCode) {
-					//decrypt response
-					responseVSControlCenter = encryptionService.decryptSMIMEMessage(
+					responseVSControlCenter = signatureVSService.decryptSMIMEMessage(
 							responseVSControlCenter.message.getBytes(), locale)
 					if(ResponseVS.SC_OK != responseVSControlCenter.statusCode) {
 						msgArg = messageSource.getMessage(
@@ -215,7 +213,7 @@ class VoteVSService {
 					messageSMIMEResp.content = smimeMessageResp.getBytes()
 					cancellerState = VoteVSCanceller.State.CANCELLATION_OK
 				} else if(ResponseVS.SC_CANCELLATION_REPEATED) {
-					responseVSControlCenter =  encryptionService.decryptSMIMEMessage(
+					responseVSControlCenter =  signatureVSService.decryptSMIMEMessage(
 						responseVSControlCenter.message.getBytes(), locale)
 					if(ResponseVS.SC_OK != responseVSControlCenter.statusCode) {
 						msgArg = messageSource.getMessage(

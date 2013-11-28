@@ -19,7 +19,6 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.StatusVS
 import org.votingsystem.simulation.model.POP3SimulationData
 import org.votingsystem.simulation.model.SimulationData
-import org.votingsystem.simulation.util.SimulationUtils
 import org.votingsystem.util.DateUtils
 
 import java.util.concurrent.*
@@ -229,7 +228,7 @@ class MailSimulationService {
 
         String message = responseVS.getMessage();
         if(!errorList.isEmpty()) {
-            String errorsMsg = SimulationUtils.getFormattedErrorList(errorList);
+            String errorsMsg = StringUtils.getFormattedErrorList(errorList);
             if(message == null) message = errorsMsg;
             else message = message + "\n" + errorsMsg;
             log.info(" ************* " + errorList.size() + " ERRORS: \n" + errorsMsg);

@@ -8,8 +8,7 @@ import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.simulation.callable.RepresentativeDelegatorDataSender
 import org.votingsystem.simulation.callable.RepresentativeDataSender
 import org.votingsystem.simulation.model.UserBaseSimulationData
-import org.votingsystem.simulation.util.HttpHelper
-import org.votingsystem.simulation.util.SimulationUtils
+import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.NifUtils
@@ -111,7 +110,7 @@ class UserBaseDataSimulationService {
                 X509Certificate usertCert = (X509Certificate) chain[0];
                 byte[] usertCertPEMBytes = CertUtil.getPEMEncoded(usertCert);
                 String certServiceURL = contextService.getAccessControl().getServerURL() + "/userVS";
-                responseVS = HttpHelper.getInstance().sendByteArray(usertCertPEMBytes, ContentTypeVS.X509, certServiceURL);
+                responseVS = HttpHelper.getInstance().sendData(usertCertPEMBytes, ContentTypeVS.X509, certServiceURL);
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                     log.error("ERROR nif: " + userNif + " - msg:" + responseVS.getMessage());
                     errorList.add(responseVS.getMessage());
@@ -216,7 +215,7 @@ class UserBaseDataSimulationService {
         }
         ResponseVS responseVS = null;
         if(!errorList.isEmpty()) {
-            String errorsMsg = SimulationUtils.getFormattedErrorList(errorList);
+            String errorsMsg = StringUtils.getFormattedErrorList(errorList);
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, errorsMsg);
         } else responseVS = new ResponseVS(ResponseVS.SC_OK)
         responseVS.setStatus(Status.DELEGATIONS)
@@ -248,7 +247,7 @@ class UserBaseDataSimulationService {
         log.info("delegationRequestsERROR: " + simulationData.getNumDelegationsERROR());
         log.info("userWithoutRepresentative: " + userWithoutRepresentativeList.size());
         if(!errorList.isEmpty()) {
-            String errorsMsg = SimulationUtils.getFormattedErrorList(errorList);
+            String errorsMsg = StringUtils.getFormattedErrorList(errorList);
             log.info(" ************* " + errorList.size() + " ERRORS: \n" + errorsMsg);
             responseVS.setMessage(errorsMsg)
         }

@@ -8,8 +8,7 @@ import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.smime.ValidationResult
 import org.votingsystem.simulation.ContextService
 import org.votingsystem.simulation.model.AccessRequestBackup
-import org.votingsystem.simulation.util.HttpHelper
-import org.votingsystem.simulation.util.SimulationUtils
+import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.ApplicationContextHolder
 
 import javax.mail.internet.MimeMessage
@@ -46,10 +45,10 @@ public class AccessRequestCancellerDataSender implements Callable<ResponseVS> {
             mimeMessage.writeTo(baos);
             messageBytes = baos.toByteArray();
             baos.close();
-            contextService.copyFileToSimDir(messageBytes, SimulationUtils.getUserDirPath(request.getUserVS().getNif()),
+            contextService.copyFileToSimDir(messageBytes, StringUtils.getUserDirPath(request.getUserVS().getNif()),
                     voteCancellerFileName)
         }
-        ResponseVS responseVS = HttpHelper.getInstance().sendByteArray(messageBytes, ContentTypeVS.SIGNED,
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(messageBytes, ContentTypeVS.SIGNED,
                 contextService.getAccessControl().getVoteCancellerServiceURL())
         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
             SMIMEMessageWrapper mimeMessage = new SMIMEMessageWrapper(

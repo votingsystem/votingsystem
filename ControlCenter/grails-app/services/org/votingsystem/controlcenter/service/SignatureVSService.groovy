@@ -1,5 +1,15 @@
 package org.votingsystem.controlcenter.service
 
+import org.bouncycastle.cms.CMSAlgorithm
+import org.bouncycastle.cms.RecipientId
+import org.bouncycastle.cms.RecipientInformation
+import org.bouncycastle.cms.RecipientInformationStore
+import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator
+import org.bouncycastle.mail.smime.SMIMEEnveloped
+import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator
+import org.bouncycastle.mail.smime.SMIMEUtil
+import org.bouncycastle.util.Strings
 import org.votingsystem.model.AccessControlVS
 import org.votingsystem.model.CertificateVS
 import org.votingsystem.model.ContextVS
@@ -13,13 +23,17 @@ import org.votingsystem.model.VoteVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.FileUtils
 
 import javax.mail.Header
 import javax.mail.internet.InternetAddress
+import javax.mail.internet.MimeBodyPart
 import javax.mail.internet.MimeMessage
 import java.security.KeyStore
+import java.security.PrivateKey
+import java.security.PublicKey
 import java.security.cert.CertPathValidatorException
 import java.security.cert.PKIXCertPathValidatorResult
 import java.security.cert.TrustAnchor
@@ -33,8 +47,11 @@ class SignatureVSService {
 	def messageSource;
 	def subscriptionVSService
 	def timeStampService
-	private File certChainFile;
-	
+
+	private File serverCertChainFile;
+    private X509Certificate serverCert;
+    private Encryptor encryptor;
+
 	private SignedMailGenerator signedMailGenerator;
 	private static Set<X509Certificate> trustedCerts;
 	private static HashMap<Long, CertificateVS> trustedCertsHashMap;
@@ -44,17 +61,18 @@ class SignatureVSService {
 			new HashMap<Long, Set<X509Certificate>>();
 			
 
-	private synchronized SignedMailGenerator initService() {
+	private synchronized Map initService() {
 		log.debug "initService"
-		File keyStore = grailsApplication.mainContext.getResource(
+		File keyStoreFile = grailsApplication.mainContext.getResource(
 			grailsApplication.config.VotingSystem.keyStorePath).getFile()
 		String aliasClaves = grailsApplication.config.VotingSystem.signKeysAlias
 		String password = grailsApplication.config.VotingSystem.signKeysPassword
-		signedMailGenerator = new SignedMailGenerator(FileUtils.getBytesFromFile(keyStore),
+		signedMailGenerator = new SignedMailGenerator(FileUtils.getBytesFromFile(keyStoreFile),
 			aliasClaves, password.toCharArray(), ContextVS.SIGN_MECHANISM);
-		KeyStore ks = KeyStore.getInstance("JKS");
-		ks.load(new FileInputStream(keyStore), password.toCharArray());
-		java.security.cert.Certificate[] chain = ks.getCertificateChain(aliasClaves);
+		KeyStore keyStore = KeyStore.getInstance("JKS");
+		keyStore.load(new FileInputStream(keyStoreFile), password.toCharArray());
+		java.security.cert.Certificate[] chain = keyStore.getCertificateChain(aliasClaves);
+        serverCert = (X509Certificate)chain[0]
 		byte[] pemCertsArray
 		trustedCerts = new HashSet<X509Certificate>()
 		for (int i = 0; i < chain.length; i++) {
@@ -63,14 +81,16 @@ class SignatureVSService {
 			if(!pemCertsArray) pemCertsArray = CertUtil.getPEMEncoded (chain[i])
 			else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtil.getPEMEncoded (chain[i]))
 		}
-		certChainFile = grailsApplication.mainContext.getResource(
-			grailsApplication.config.VotingSystem.certChainPath)?.getFile();
-		certChainFile.createNewFile()
-		certChainFile.setBytes(pemCertsArray)
+		serverCertChainFile = grailsApplication.mainContext.getResource(
+                grailsApplication.config.VotingSystem.certChainPath)?.getFile();
+        PrivateKey serverPrivateKey = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray())
+		serverCertChainFile.createNewFile()
+		serverCertChainFile.setBytes(pemCertsArray)
+        encryptor = new Encryptor(serverCert, serverPrivateKey);
 		initCertAuthorities();
-        return signedMailGenerator;
+        return [serverCert:serverCert, serverCertChainFile:serverCertChainFile ,
+                signedMailGenerator:signedMailGenerator, trustedCerts:trustedCerts, encryptor:encryptor];
 	}
-	
 	
 	public ResponseVS deleteTestCerts () {
 		log.debug(" - deleteTestCerts - ")
@@ -127,8 +147,8 @@ class SignatureVSService {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:ex.getMessage())
 		}
 	}
-	
-	def initCertAuthorities() {
+
+    private synchronized ResponseVS initCertAuthorities() {
 		try {
 			trustedCertsHashMap = new HashMap<Long, CertificateVS>();
 			File directory=  grailsApplication.mainContext.getResource(
@@ -332,7 +352,7 @@ class SignatureVSService {
 			eventTrustedCerts = new HashSet<X509Certificate>()
 			Collection<X509Certificate> accessControlCerts = CertUtil.
 				fromPEMToX509CertCollection (eventVS.certChainAccessControl)
-			Collection<X509Certificate> controlCenterCerts = CertUtil.fromPEMToX509CertCollection (certChainFile.getBytes())
+			Collection<X509Certificate> controlCenterCerts = CertUtil.fromPEMToX509CertCollection (serverCertChainFile.getBytes())
 			eventTrustedCerts.addAll(accessControlCerts)
 			eventTrustedCerts.addAll(controlCenterCerts)
 			eventTrustedCerts.addAll(eventTrustedCertsHashMap.get(eventVS?.id))
@@ -447,19 +467,82 @@ class SignatureVSService {
 		}
 		return getSignedMailGenerator().genMultiSignedMessage(smimeMessage, subject);
 	}
-	
+
+    public ResponseVS encryptMessage(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {
+        log.debug("--- - encryptMessage(...) - ");
+        try {
+            return getEncryptor().encryptMessage(bytesToEncrypt, publicKey);
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex);
+            return new ResponseVS(messageSource.getMessage('dataToEncryptErrorMsg', null, locale),
+                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+        }
+    }
+
+    /**
+     * Method to decrypt files attached to SMIME (not signed) messages
+     */
+    public ResponseVS decryptMessage (byte[] encryptedFile, Locale locale) {
+        log.debug " - decryptMessage - "
+        try {
+            return getEncryptor().decryptMessage(encryptedFile);
+        } catch(Exception ex) {
+            log.error (ex.getMessage(), ex)
+            return new ResponseVS(message:messageSource.getMessage('encryptedMessageErrorMsg', null, locale),
+                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+        }
+    }
+
+    /**
+     * Method to encrypt SMIME signed messages
+     */
+    ResponseVS encryptSMIMEMessage(byte[] bytesToEncrypt, X509Certificate receiverCert, Locale locale) throws Exception {
+        log.debug(" - encryptSMIMEMessage(...) ");
+        try {
+            return getEncryptor().encryptSMIMEMessage(bytesToEncrypt, receiverCert);
+        } catch(Exception ex) {
+            log.error (ex.getMessage(), ex)
+            return new ResponseVS(messageSource.getMessage('dataToEncryptErrorMsg', null, locale),
+                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+        }
+    }
+
+    /**
+     * Method to decrypt SMIME signed messages
+     */
+    ResponseVS decryptSMIMEMessage(byte[] encryptedMessageBytes, Locale locale) {
+        log.debug(" - decryptSMIMEMessage")
+        try {
+            return getEncryptor().decryptSMIMEMessage(encryptedMessageBytes);
+        } catch(Exception ex) {
+            log.error (ex.getMessage(), ex)
+            return new ResponseVS(message:messageSource.getMessage('encryptedMessageErrorMsg', null, locale),
+                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+        }
+    }
+
 	public Set<X509Certificate> getTrustedCerts() {
-		if(!trustedCerts || trustedCerts.isEmpty()) initService()
+		if(!trustedCerts || trustedCerts.isEmpty()) trustedCerts = initService().trustedCerts
 		return trustedCerts;
 	}
-	
-	public File getCertChain() {
-		if(!certChainFile) initService()
-		return certChainFile;
-	}
-	
+
+    public X509Certificate getServerCert() {
+        if(serverCert == null) serverCert = initService().serverCert
+        return serverCert
+    }
+
+    public File getServerCertChain() {
+        if(serverCertChainFile == null) serverCertChainFile = initService().serverCertChainFile;
+        return serverCertChainFile;
+    }
+
+    private Encryptor getEncryptor() {
+        if(encryptor == null) encryptor = initService().encryptor;
+        return encryptor;
+    }
+
 	private SignedMailGenerator getSignedMailGenerator() {
-        if(signedMailGenerator == null) signedMailGenerator = initService();
+        if(signedMailGenerator == null) signedMailGenerator = initService().signedMailGenerator;
 		return signedMailGenerator
 	}
 	

@@ -14,22 +14,21 @@ import org.bouncycastle.tsp.TSPUtil
 import org.bouncycastle.tsp.TimeStampToken
 import org.bouncycastle.util.encoders.Base64
 import org.votingsystem.model.AccessControlVS
+import org.votingsystem.model.ContextVS
 import org.votingsystem.model.EventVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.util.HttpHelper
 
 import java.security.MessageDigest
 import java.security.cert.X509Certificate
 
 class TimeStampService {
 	
-	private static final String BC = org.bouncycastle.jce.provider.BouncyCastleProvider.PROVIDER_NAME;
-	
 	private static final int numMaxAttempts = 3;
 	
 	def grailsApplication
 	def messageSource
-	def httpService
 
 	private static final HashMap<Long, SignerInformationVerifier> timeStampVerifiers =
 			new HashMap<Long, Set<X509Certificate>>();
@@ -49,14 +48,15 @@ class TimeStampService {
 			SignerInformationVerifier timeStampVerifier = timeStampVerifiers.get(eventVS.accessControlVS.id)
 			if(!timeStampVerifier) {
 				String timeStampCertURL = "${eventVS.accessControlVS.serverURL}/timeStampVS/cert"
-				responseVS = httpService.getInfo(timeStampCertURL, null)
+				responseVS = HttpHelper.getInstance().getData(timeStampCertURL, null)
 				if(ResponseVS.SC_OK != responseVS.statusCode) {
 					msg = messageSource.getMessage('timeStampCertErrorMsg', [timeStampCertURL].toArray(), locale)
 					log.error("validateToken - ${msg}")
 					return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
 				} else {
 					X509Certificate timeStampCert = CertUtil.fromPEMToX509Cert(responseVS.messageBytes)
-					timeStampVerifier = new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(timeStampCert)
+					timeStampVerifier = new JcaSimpleSignerInfoVerifierBuilder().setProvider(
+                            ContextVS.PROVIDER).build(timeStampCert)
 					timeStampVerifiers.put(eventVS.accessControlVS.id, timeStampVerifier)
 				}
 			}

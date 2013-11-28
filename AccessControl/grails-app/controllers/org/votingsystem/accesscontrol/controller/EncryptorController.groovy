@@ -90,7 +90,6 @@ class EncryptorController {
 			return false
 		}
 		response.contentType = ContentTypeVS.SIGNED
-			
 		SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage()
 		
 		String fromUser = "EncryptorController"
@@ -98,8 +97,7 @@ class EncryptorController {
 		String subject = "Multisigned response"
 		SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
 			fromUser, toUser, smimeMessage, subject)
-		
-		//smimeMessageResp.init()
+
 		
 		//ByteArrayOutputStream messageBaos = new ByteArrayOutputStream();
 		//smimeMessageResp.writeTo(messageBaos)

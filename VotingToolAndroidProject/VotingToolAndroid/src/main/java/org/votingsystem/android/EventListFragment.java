@@ -364,7 +364,7 @@ public class EventListFragment extends ListFragment
                             androidContextVS.getAccessControlURL(), 0, androidContextVS.EVENTS_PAGE_SIZE);
                     QueryData queryData = new QueryData(
                             subSystem.getEventType(), eventState.getEventState(), queryString);
-                    response = HttpHelper.sendByteArray(
+                    response = HttpHelper.sendData(
                             queryData.toJSON().toString().getBytes(), null, url);
                     searchTextView.setText(Html.fromHtml(getContext().getString(
                             R.string.search_query_info_msg, queryString)));

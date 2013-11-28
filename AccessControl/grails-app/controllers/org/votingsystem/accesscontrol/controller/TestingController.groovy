@@ -24,7 +24,6 @@ class TestingController {
 
 	def representativeService
 	def grailsApplication
-	def httpService
 	def timeStampVSService
 	def signatureVSService
 	def accessControlBackgroundService

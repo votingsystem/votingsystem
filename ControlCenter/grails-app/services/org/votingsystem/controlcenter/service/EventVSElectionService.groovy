@@ -31,8 +31,7 @@ class EventVSElectionService {
     LinkGenerator grailsLinkGenerator
 	def messageSource
 	def subscriptionVSService
-    def grailsApplication  
-	def httpService
+    def grailsApplication
 	def tagVSService
 	def signatureVSService
 	

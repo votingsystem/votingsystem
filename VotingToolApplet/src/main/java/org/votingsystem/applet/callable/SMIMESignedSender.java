@@ -55,7 +55,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
             baos.close();
             documentContentType = org.votingsystem.model.ContentTypeVS.SIGNED;
         }
-        responseVS = HttpHelper.getInstance().sendByteArray(messageToSendBytes, documentContentType,
+        responseVS = HttpHelper.getInstance().sendData(messageToSendBytes, documentContentType,
                 urlToSendDocument, headers);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             if(keypair != null) {

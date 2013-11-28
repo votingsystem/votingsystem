@@ -39,7 +39,7 @@ class EventVSClaimService {
 		try {
 			UserVS signerVS = messageSMIMEReq.getUserVS()
 			String documentStr = messageSMIMEReq.getSmimeMessage().getSignedContent()
-			log.debug("saveEvent - signerVS: ${signerVS.nif} - documentStr: ${documentStr}")
+			log.debug("saveEvent - signerVS: ${signerVS.nif}")
 			def messageJSON = JSON.parse(documentStr)
 			Date dateFinish = new Date().parse("yyyy/MM/dd HH:mm:ss", messageJSON.dateFinish)
 			if(dateFinish.before(DateUtils.getTodayDate())) {

@@ -25,8 +25,7 @@ import org.votingsystem.simulation.callable.ServerInitializer
 import org.votingsystem.model.*
 import org.votingsystem.util.*
 import org.votingsystem.simulation.model.*
-import org.votingsystem.simulation.util.PdfFormHelper;
-import org.votingsystem.simulation.util.SimulationUtils;
+import org.votingsystem.util.PdfFormHelper;
 
 import com.itextpdf.text.pdf.PdfReader;
 import grails.converters.JSON
@@ -276,7 +275,7 @@ class ClaimSimulationService {
 		}
         ResponseVS responseVS = null;
         if(!errorList.isEmpty()) {
-            String errorsMsg = SimulationUtils.getFormattedErrorList(errorList);
+            String errorsMsg = StringUtils.getFormattedErrorList(errorList);
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, Status.SEND_CLAIMS, errorsMsg);
         } else responseVS = new ResponseVS(ResponseVS.SC_OK, Status.SEND_CLAIMS, null)
         changeSimulationStatus(responseVS);
@@ -350,7 +349,7 @@ class ClaimSimulationService {
 
         String message = responseVS.getMessage();
         if(!errorList.isEmpty()) {
-            String errorsMsg = SimulationUtils.getFormattedErrorList(errorList);
+            String errorsMsg = StringUtils.getFormattedErrorList(errorList);
             if(message == null) message = errorsMsg;
             else message = message + "\n" + errorsMsg;
             log.info(" ************* " + errorList.size() + " ERRORS: \n" + errorsMsg);

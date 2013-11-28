@@ -2,7 +2,9 @@ package org.votingsystem.controlcenter.service
 
 import grails.converters.JSON
 import org.votingsystem.model.CertificateVS
+import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
+import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.StringUtils
 import org.votingsystem.model.ActorVS
 import org.votingsystem.model.AccessControlVS
@@ -18,8 +20,7 @@ class SubscriptionVSService {
 	static transactional = true
 	
 	def messageSource
-    def grailsApplication  
-	def httpService
+    def grailsApplication
 	
 	ResponseVS checkUser(UserVS userVS, Locale locale) {
 		log.debug " --- checkUser - userVS '${userVS.nif}'"
@@ -80,7 +81,7 @@ class SubscriptionVSService {
 		AccessControlVS accessControl = AccessControlVS.findWhere(serverURL:serverURL)
         if(accessControl) return accessControl
 		else {
-			ResponseVS responseVS = httpService.getInfo(ActorVS.getServerInfoURL(serverURL), null)
+			ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL), null)
 			if (ResponseVS.SC_OK == responseVS.statusCode) {
 				try {
 					accessControl = new AccessControlVS(ActorVS.populate(JSON.parse(responseVS.message)))

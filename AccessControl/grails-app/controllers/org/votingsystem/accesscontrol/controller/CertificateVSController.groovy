@@ -193,4 +193,5 @@ class CertificateVSController {
 			render "OK"
 		} else render "ERROR"
 	}
+
 }

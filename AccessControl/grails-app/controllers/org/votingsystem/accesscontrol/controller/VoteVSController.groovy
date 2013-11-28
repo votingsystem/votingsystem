@@ -18,7 +18,6 @@ class VoteVSController {
 
 	def voteVSService
 	def grailsApplication
-	def encryptionService
         
     def index() {}
 	

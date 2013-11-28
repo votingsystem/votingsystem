@@ -14,6 +14,7 @@ import org.votingsystem.model.VoteVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.util.CertUtil
+import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.signature.util.SVCertExtensionChecker
 import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.FileUtils
@@ -23,6 +24,8 @@ import javax.mail.Header
 import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeMessage
 import java.security.KeyStore
+import java.security.PrivateKey
+import java.security.PublicKey
 import java.security.cert.*
 import org.codehaus.groovy.grails.commons.DefaultGrailsDomainClass
 
@@ -36,13 +39,13 @@ class SignatureVSService {
 	private KeyStore trustedCertsKeyStore
 	static HashMap<Long, CertificateVS> trustedCertsHashMap;
 	private X509Certificate localServerCertSigner;
+    private Encryptor encryptor;
 	private static HashMap<Long, Set<TrustAnchor>> eventTrustedAnchorsHashMap =  new HashMap<Long, Set<TrustAnchor>>();
 	private static HashMap<Long, Set<TrustAnchor>> controlCenterTrustedAnchorsHashMap =
             new HashMap<Long, Set<TrustAnchor>>();
 	def grailsApplication;
 	def messageSource
 	def csrService;
-	def encryptionService;
 	def subscriptionVSService
 	def timeStampVSService
 	def sessionFactory
@@ -76,7 +79,7 @@ class SignatureVSService {
 		return new ResponseVS(statusCode:ResponseVS.SC_OK)
 	}
 
-	public synchronized SignedMailGenerator initService() throws Exception {
+	public synchronized Map initService() throws Exception {
 		log.debug(" - initService - ")
 		File keyStoreFile = grailsApplication.mainContext.getResource(
 			grailsApplication.config.VotingSystem.keyStorePath).getFile()
@@ -84,9 +87,9 @@ class SignatureVSService {
 		String password = grailsApplication.config.VotingSystem.signKeysPassword
 		signedMailGenerator = new SignedMailGenerator(FileUtils.getBytesFromFile(keyStoreFile), 
 			aliasClaves, password.toCharArray(), ContextVS.SIGN_MECHANISM);
-		KeyStore ks = KeyStore.getInstance("JKS");
-		ks.load(new FileInputStream(keyStoreFile), password.toCharArray());
-		java.security.cert.Certificate[] chain = ks.getCertificateChain(aliasClaves);
+		KeyStore keyStore = KeyStore.getInstance("JKS");
+		keyStore.load(new FileInputStream(keyStoreFile), password.toCharArray());
+		java.security.cert.Certificate[] chain = keyStore.getCertificateChain(aliasClaves);
 		byte[] pemCertsArray
 		trustedCerts = new HashSet<X509Certificate>()
 		for (int i = 0; i < chain.length; i++) {
@@ -95,14 +98,16 @@ class SignatureVSService {
 			if(!pemCertsArray) pemCertsArray = CertUtil.getPEMEncoded (chain[i])
 			else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtil.getPEMEncoded (chain[i]))
 		}
-		localServerCertSigner = (X509Certificate) ks.getCertificate(aliasClaves);
+		localServerCertSigner = (X509Certificate) keyStore.getCertificate(aliasClaves);
+        PrivateKey serverPrivateKey = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray())
 		trustedCerts.add(localServerCertSigner)
 		File certChainFile = grailsApplication.mainContext.getResource(
                 grailsApplication.config.VotingSystem.certChainPath).getFile();
 		certChainFile.createNewFile()
 		certChainFile.setBytes(pemCertsArray)
+        encryptor = new Encryptor(localServerCertSigner, serverPrivateKey);
 		initCertAuthorities();
-        return signedMailGenerator;
+        return [signedMailGenerator:signedMailGenerator, encryptor:encryptor, trustedCerts:trustedCerts];
 	}
 	
 	public boolean isSystemSignedMessage(Set<UserVS> signers) {
@@ -117,7 +122,7 @@ class SignatureVSService {
 	}
 	
 	public Set<X509Certificate> getTrustedCerts() {
-		if(!trustedCerts || trustedCerts.isEmpty()) { initService()}
+		if(!trustedCerts || trustedCerts.isEmpty()) trustedCerts = initService().trustedCerts
 		return trustedCerts;
 	}
 	
@@ -572,9 +577,74 @@ class SignatureVSService {
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS,
 			smimeMessage:smimeMessageReq, type:TypeVS.CONTROL_CENTER_VALIDATED_VOTEVS)
 	}
-	
+
+
+    public ResponseVS encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert) throws Exception {
+        log.debug(" - encryptToCMS")
+        return getEncryptor().encryptToCMS(dataToEncrypt, receiverCert);
+    }
+
+
+    public ResponseVS encryptMessage(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {
+        log.debug("--- - encryptMessage(...) - ");
+        try {
+            return getEncryptor().encryptMessage(bytesToEncrypt, publicKey);
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex);
+            return new ResponseVS(messageSource.getMessage('dataToEncryptErrorMsg', null, locale),
+                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+        }
+    }
+
+    /**
+     * Method to decrypt files attached to SMIME (not signed) messages
+     */
+    public ResponseVS decryptMessage (byte[] encryptedFile, Locale locale) {
+        log.debug " - decryptMessage - "
+        try {
+            return getEncryptor().decryptMessage(encryptedFile);
+        } catch(Exception ex) {
+            log.error (ex.getMessage(), ex)
+            return new ResponseVS(message:messageSource.getMessage('encryptedMessageErrorMsg', null, locale),
+                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+        }
+    }
+
+    /**
+     * Method to encrypt SMIME signed messages
+     */
+    ResponseVS encryptSMIMEMessage(byte[] bytesToEncrypt, X509Certificate receiverCert, Locale locale) throws Exception {
+        log.debug(" - encryptSMIMEMessage(...) ");
+        try {
+            return getEncryptor().encryptSMIMEMessage(bytesToEncrypt, receiverCert);
+        } catch(Exception ex) {
+            log.error (ex.getMessage(), ex)
+            return new ResponseVS(messageSource.getMessage('dataToEncryptErrorMsg', null, locale),
+                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+        }
+    }
+
+    /**
+     * Method to decrypt SMIME signed messages
+     */
+    ResponseVS decryptSMIMEMessage(byte[] encryptedMessageBytes, Locale locale) {
+        log.debug(" - decryptSMIMEMessage")
+        try {
+            return getEncryptor().decryptSMIMEMessage(encryptedMessageBytes);
+        } catch(Exception ex) {
+            log.error (ex.getMessage(), ex)
+            return new ResponseVS(message:messageSource.getMessage('encryptedMessageErrorMsg', null, locale),
+                    statusCode:ResponseVS.SC_ERROR_REQUEST)
+        }
+    }
+
+    private Encryptor getEncryptor() {
+        if(encryptor == null) encryptor = initService().encryptor
+        return encryptor;
+    }
+
 	private SignedMailGenerator getSignedMailGenerator() {
-		if(signedMailGenerator == null) signedMailGenerator = initService()
+		if(signedMailGenerator == null) signedMailGenerator = initService().signedMailGenerator
 		return signedMailGenerator
 	}
 

@@ -60,7 +60,7 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
         while(!done.get()) {
         	String timeStampServiceURL = ServerPaths.getURLTimeStampService(
                     AndroidContextVS.getInstance(context).getAccessControlURL());
-            HttpResponse response = HttpHelper.sendByteArray(
+            HttpResponse response = HttpHelper.sendData(
             		timeStampRequest.getEncoded(), "timestamp-query", timeStampServiceURL);
             responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
             		response.getStatusLine().toString());

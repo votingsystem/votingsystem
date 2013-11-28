@@ -9,7 +9,6 @@ import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.signature.util.KeyStoreUtil
 import org.votingsystem.signature.util.VotingSystemKeyGenerator
-import org.votingsystem.simulation.util.SimulationUtils
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.NifUtils
 import org.votingsystem.util.StringUtils
@@ -249,7 +248,7 @@ class ContextService {
 				"GIVENNAME=NameDe" + userNIF + " ,SURNAME=ApellidoDe" + userNIF
 				+ ", SERIALNUMBER=" + userNIF);
 		byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, PASSWORD.toCharArray());
-		String userSubPath = SimulationUtils.getUserDirPath(userNIF)
+		String userSubPath = StringUtils.getUserDirPath(userNIF)
 		copyFileToSimDir(keyStoreBytes, userSubPath,  PREFIJO_USER_JKS + userNIF + SUFIJO_USER_JKS)
 		return keyStore;
 	}
