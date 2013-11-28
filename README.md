@@ -18,7 +18,7 @@ ejecutando en el servidor una instancia de la base de datos PostgreSQL según se
 
 Para instalar los editores de texto empleados en las aplicaciones **Control de Acceso**, y **TestsWebApp** hay que ejecutar :
 
-    <code>SistemaVotacion$gradle installEditor</code>
+    SistemaVotacion$gradle installEditor
 
 
 #### Instalar los certificados electrónicos
@@ -27,14 +27,14 @@ Para que las aplicaciones puedan generar firmas y descifrar documentos necesitan
 Para trabajar en entornos de pruebas se pueden emplear los que genera la aplicación al ejecutar:
 
 
-	<code>SistemaVotacion$gradle installCerts</code>
+	SistemaVotacion$gradle installCerts
 
 
 #### Generación de las aplicaciones
 
 Para generar las aplicaciones
 
-    ´´´SistemaVotacion$gradle buildAll´´´
+    SistemaVotacion$gradle buildAll
 
 Para generar los componentes de los distintos proyectos es necesario tener instalados certificados electrónicos
 (para entornos de pruebas se pueden emplear los generados en el paso anterior):
