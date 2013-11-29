@@ -52,16 +52,16 @@ android {
 
 dependencies {
 
-	compile 'com.android.support:appcompat-v7:+'
+    compile 'com.android.support:appcompat-v7:+'
     //compile fileTree(dir: 'libs', include: '*.jar')
     compile 'com.android.support:support-v4:18.0.0'
     compile ('org.apache.httpcomponents:httpmime:4.2.2') {
         exclude module: 'httpcore'
     }
-    compile project(':libraries:votingsystem')
-    compile project(':libraries:bc')
-    compile project(':libraries:itext')
-    compile project(':libraries:votingsystemimpl')
+    compile project(':VotingToolAndroidProject:libraries:votingsystem')
+    compile project(':VotingToolAndroidProject:libraries:bc')
+    compile project(':VotingToolAndroidProject:libraries:itext')
+    compile project(':VotingToolAndroidProject:libraries:votingsystemimpl')
 
 }
 
@@ -81,7 +81,7 @@ task setAndroidEnv() << {
 	
 	if(rootProject.hasProperty("SERVER_IP")) {
 		serverIP = "$rootProject.SERVER_IP"
-	} else serverIP = getDevelopmentServerIP()
+	} else serverIP = getLocalIP()
 
 	println " -------------> serverIP: ${serverIP}"
 	

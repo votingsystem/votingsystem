@@ -94,7 +94,7 @@ environments {
     development {
         //grails.logging.jul.usebridge = true
         grails.resources.debug = true
-		String localIP = getDevelopmentServerIP();
+		String localIP = getLocalIP();
 		grails.serverURL = "http://${localIP}:8082/${appName}"
     }
     production {
@@ -103,7 +103,7 @@ environments {
     }
 }
 
-def getDevelopmentServerIP() {
+def getLocalIP() {
 	Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
 	for (NetworkInterface netint : Collections.list(nets)){
 		Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();

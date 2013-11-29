@@ -38,5 +38,5 @@ sourceSets {
 }
 
 dependencies {
-    compile project(':libraries:bc')
+    compile project(':VotingToolAndroidProject:libraries:bc')
 }

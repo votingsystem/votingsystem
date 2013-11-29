@@ -23,7 +23,7 @@ ext {
 }
 
 task buildAll(dependsOn:['VotingSystemLibrary:publish', 'VotingToolApplet:signJar', 'ValidationToolApplet:signJar',
-	 'AccessControl:war', 'ControlCenter:war', 'releaseAndroid']) << { }
+	 'AccessControl:war', 'ControlCenter:war', ':VotingToolAndroidProject:VotingToolAndroid:release']) << { }
 
 
 task genAppsCerts(dependsOn:['VotingSystemLibrary:classes']) {
@@ -106,21 +106,8 @@ task refreshDependencies(dependsOn:['VotingSystemLibrary:publish']) << {
 }
 
 task generateVotingSystemApps(dependsOn: [':VotingToolApplet:signJar', ':ValidationToolApplet:signJar',
-	':VotingSystemLibrary:publish', ':releaseAndroid']) {
+	':VotingSystemLibrary:publish', ':VotingToolAndroidProject:VotingToolAndroid:release']) {
 }
-
-//_ TODO _
-task releaseAndroid() {
-    ProcessBuilder pb  = new ProcessBuilder("gradle", "release");
-    pb.directory(file("VotingToolAndroidProject"));
-    Process proc = pb.start();
-    proc.consumeProcessErrorStream(System.err)
-    proc.consumeProcessOutputStream(System.out)
-    if (proc.waitFor() != 0) {
-        throw new RuntimeException("android release failed")
-    }
-}
-
 
 def copyVotingSystemApps(project) {
 	File appletDir = project.file("web-app/applet/");
@@ -198,6 +185,22 @@ def runCommand(project, targetDir, commands) {
 	if (proc.waitFor() != 0) {
 		throw new RuntimeException("runCommand - project: '${project.name}' - commands: ${commands} - failed")
 	}
+}
+
+def getLocalIP() {
+    Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
+    for (NetworkInterface netint : Collections.list(nets)){
+        Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
+        for (InetAddress inetAddress : Collections.list(inetAddresses)) {
+            if(inetAddress.isSiteLocalAddress()) {
+                String inetAddressStr = inetAddress.toString();
+                while(inetAddressStr.startsWith("/"))
+                    inetAddressStr = inetAddressStr.substring(1)
+                return inetAddressStr
+            }
+
+        }
+    }
 }
 
 // This is a task that generates the gradlew scripts, allowing users to run gradle without having gradle installed

@@ -97,7 +97,7 @@ environments {
     development {
         grails.logging.jul.usebridge = true
 		grails.resources.debug = true// -> rendering problems
-		String localIP = getDevelopmentServerIP();
+		String localIP = getLocalIP();
 		println("Setting test development to: ${localIP}")
         grails.serverURL = "http://${localIP}:8080/${appName}"
     }
@@ -107,7 +107,7 @@ environments {
 	}
     test {
 		grails.logging.jul.usebridge = true	
-		String localIP = getDevelopmentServerIP();
+		String localIP = getLocalIP();
 		println("Setting test address to: ${localIP}")
         grails.serverURL = "http://${localIP}:8080/${appName}"
     }
@@ -177,7 +177,7 @@ log4j = {
 }
 
 
-def getDevelopmentServerIP() {
+def getLocalIP() {
 	Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
 	for (NetworkInterface netint : Collections.list(nets)){
 		Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();

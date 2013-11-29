@@ -39,7 +39,7 @@ android {
 
 
 dependencies {
-    compile project(':libraries:votingsystem')
-    compile project(':libraries:bc')
-    compile project(':libraries:itext')
+    compile project(':VotingToolAndroidProject:libraries:votingsystem')
+    compile project(':VotingToolAndroidProject:libraries:bc')
+    compile project(':VotingToolAndroidProject:libraries:itext')
 }
