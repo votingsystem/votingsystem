@@ -8,7 +8,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.MenuItem;
-import org.votingsystem.android.model.AndroidContextVS;
+import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.util.DateUtils;
 
@@ -19,11 +19,11 @@ public class EventStatisticsPagerActivity extends ActionBarActivity {
 
     public static final String TAG = "EventStatisticsPagerActivity";
 
-    private AndroidContextVS androidContextVS;
+    private ContextVSImpl contextVS;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        androidContextVS = AndroidContextVS.getInstance(getBaseContext());
+        contextVS = ContextVSImpl.getInstance(getBaseContext());
         setContentView(R.layout.event_pager_activity);
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -31,11 +31,11 @@ public class EventStatisticsPagerActivity extends ActionBarActivity {
         mViewPager.setAdapter(eventsPagerAdapter);
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override public void onPageSelected(int position) {
-                setActionBarTitle((EventVS) androidContextVS.getEvents().get(position));
+                setActionBarTitle((EventVS) contextVS.getEvents().get(position));
             }
         });
-        mViewPager.setCurrentItem(androidContextVS.getEventIndex(androidContextVS.getEvent()), true);
-        setActionBarTitle(androidContextVS.getEvent());
+        mViewPager.setCurrentItem(contextVS.getEventIndex(contextVS.getEvent()), true);
+        setActionBarTitle(contextVS.getEvent());
     }
 
     private void setActionBarTitle(EventVS event) {
@@ -161,7 +161,7 @@ public class EventStatisticsPagerActivity extends ActionBarActivity {
         }
 
         @Override public int getCount() {
-            return androidContextVS.getEvents().size();
+            return contextVS.getEvents().size();
         }
 
     }

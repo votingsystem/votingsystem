@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import org.json.JSONException;
-import org.votingsystem.android.model.VoteReceipt;
+import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.util.StringUtils;
 
@@ -67,27 +67,27 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 	}
 	  
 	//returns the receipt id in the database
-	public int insertVoteReceipt(VoteReceipt voteReceipt) throws 
+	public int insertVoteReceipt(VoteVS voteVS) throws
 		JSONException, IOException, MessagingException {
 		SQLiteDatabase db = this.getWritableDatabase();
 
 		ContentValues values = new ContentValues();
 		String receiptKey = StringUtils.getCadenaNormalizada(
-				voteReceipt.getEventURL());
+				voteVS.getEventURL());
 
-		if(voteReceipt.getSmimeMessage() != null) {
-	        values.put(SMIME_COL, voteReceipt.getSmimeMessage().getBytes());
+		if(voteVS.getSmimeMessage() != null) {
+	        values.put(SMIME_COL, voteVS.getSmimeMessage().getBytes());
 		}
-		if(voteReceipt.getCancelVoteReceipt() != null) {
+		if(voteVS.getCancelVoteReceipt() != null) {
 			values.put(CANCEL_VOTE_RECEIPT_SMIME_COL, 
-					voteReceipt.getCancelVoteReceipt().getBytes());
+					voteVS.getCancelVoteReceipt().getBytes());
 		}
-		if(voteReceipt.getEncryptedKey()!= null) {
+		if(voteVS.getEncryptedKey()!= null) {
 			values.put(ENCRYPTED_KEY_COL, 
-					voteReceipt.getEncryptedKey());
+					voteVS.getEncryptedKey());
 		}
 		byte[] jsonDataBytes = null;
-		String jsonDataStr = voteReceipt.toJSONString();
+		String jsonDataStr = voteVS.toJSONString();
 		//Log.d(TAG + ".insertVoteReceipt(...)", "===== jsonDataStr: " + jsonDataStr);
 		if(jsonDataStr != null) jsonDataBytes = jsonDataStr.getBytes();
 		values.put(KEY_COL, receiptKey);
@@ -102,13 +102,13 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 		return new Long(rowId).intValue();
 	}
 	
-	public void deleteVoteReceipt(VoteReceipt voteReceipt) {
+	public void deleteVoteReceipt(VoteVS voteVS) {
 		SQLiteDatabase db = this.getWritableDatabase();	
 		
-		int count = db.delete(TABLE_NAME, ID_COL + "=" + voteReceipt.getId(), null);
-	    //int count = db.delete(TABLE_NAME, ID_COL + "=" + voteReceipt.getId(), new String[] {});
+		int count = db.delete(TABLE_NAME, ID_COL + "=" + voteVS.getId(), null);
+	    //int count = db.delete(TABLE_NAME, ID_COL + "=" + voteVS.getId(), new String[] {});
 		
-    	Log.d(TAG + ".deleteVoteReceipt(...)", " - voteReceipt.id: " + voteReceipt.getId() + 
+    	Log.d(TAG + ".deleteVoteReceipt(...)", " - voteVS.id: " + voteVS.getId() +
     			" - count: " + count);
         //db.delete("repos", "orgId=?", new String[] { Integer.toString(org.getId()) });
         
@@ -116,9 +116,9 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 		db.close();
 	}
 
-	public List<VoteReceipt> getVoteReceiptList() {
+	public List<VoteVS> getVoteReceiptList() {
 		Log.d(TAG + ".getVoteReceiptList(...)", " - getVoteReceiptList");
-		List<VoteReceipt> voteReceiptList = new ArrayList<VoteReceipt>();
+		List<VoteVS> voteVSList = new ArrayList<VoteVS>();
 		// Select All Query
 		String selectQuery = "SELECT  * FROM " + TABLE_NAME;
 		SQLiteDatabase db = this.getWritableDatabase();
@@ -143,46 +143,46 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 						" - timestampUPdated: " + timestampUPdated + 
 						" - jsonDataStr: " + jsonDataStr);*/
 				try {
-					VoteReceipt voteReceipt = VoteReceipt.parse(jsonDataStr); 
-					voteReceipt.setId(id);
+					VoteVS voteVS = VoteVS.parse(jsonDataStr);
+					voteVS.setId(id);
 					if(timestampCreated != null) 
-						voteReceipt.setDateCreated(new Date(timestampCreated));
+						voteVS.setDateCreated(new Date(timestampCreated));
 					if(timestampUPdated != null) 
-						voteReceipt.setDateUpdated(new Date(timestampUPdated));
+						voteVS.setDateUpdated(new Date(timestampUPdated));
 					if(smimeMessageBytes != null)
-						voteReceipt.setSmimeMessage(new SMIMEMessageWrapper(null,
+						voteVS.setSmimeMessage(new SMIMEMessageWrapper(null,
 								new ByteArrayInputStream(smimeMessageBytes), null));
 					if(cancelVoteSmimeMessageBytes != null) {
 						SMIMEMessageWrapper smimeMessageWrapper = new SMIMEMessageWrapper(null,
 								new ByteArrayInputStream(cancelVoteSmimeMessageBytes), null);
-						voteReceipt.setCancelVoteReceipt(smimeMessageWrapper);
+						voteVS.setCancelVoteReceipt(smimeMessageWrapper);
 					}
 					if(encryptedKeyBytes != null) {
-						voteReceipt.setEncryptedKey(encryptedKeyBytes);
+						voteVS.setEncryptedKey(encryptedKeyBytes);
 					}
-					voteReceiptList.add(voteReceipt);
+					voteVSList.add(voteVS);
 				}catch(Exception ex) {
 					ex.printStackTrace();
 				}
 			} while (cursor.moveToNext());
 		}
 		close(cursor, db);
-		return voteReceiptList;
+		return voteVSList;
 	}
 
-	public void updateVoteReceipt(VoteReceipt voteReceipt) 
+	public void updateVoteReceipt(VoteVS voteVS)
 			throws IOException, MessagingException, JSONException {
 		Log.d(TAG + ".updateVoteReceipt(...)", " - updateVoteReceipt");
 		SQLiteDatabase db = this.getWritableDatabase();
 		ContentValues values = new ContentValues();
-		if(voteReceipt.getSmimeMessage() != null) 
-	        values.put(SMIME_COL, voteReceipt.getSmimeMessage().getBytes());
-		if(voteReceipt.getCancelVoteReceipt() != null)
+		if(voteVS.getSmimeMessage() != null)
+	        values.put(SMIME_COL, voteVS.getSmimeMessage().getBytes());
+		if(voteVS.getCancelVoteReceipt() != null)
 			values.put(CANCEL_VOTE_RECEIPT_SMIME_COL, 
-					voteReceipt.getCancelVoteReceipt().getBytes());
-		values.put(JSON_DATA_COL, voteReceipt.toJSONString());
+					voteVS.getCancelVoteReceipt().getBytes());
+		values.put(JSON_DATA_COL, voteVS.toJSONString());
 	    values.put(TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
-		db.update(TABLE_NAME, values, ID_COL + " = ?",new String[] {String.valueOf(voteReceipt.getId())});
+		db.update(TABLE_NAME, values, ID_COL + " = ?",new String[] {String.valueOf(voteVS.getId())});
 		db.close();
 	}
 

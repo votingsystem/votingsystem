@@ -64,5 +64,16 @@ public class StringUtils {
 	public static String getCadenaNormalizada(String cadena) {
         return cadena.replaceAll("[\\/:.]", ""); 
 	}
-        
+
+    public static String checkURL(String url) {
+        if(url == null) return null;
+        url = url.trim();
+        String result = null;
+        if(url.startsWith("http://") || url.startsWith("https://")) result = url;
+        else result = "http://" + url;
+        while(result.endsWith("/")) {
+            result = result.substring(0, result.length() -1);
+        }
+        return result;
+    }
 }

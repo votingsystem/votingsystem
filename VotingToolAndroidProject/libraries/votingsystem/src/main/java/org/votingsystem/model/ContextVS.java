@@ -1,8 +1,12 @@
 package org.votingsystem.model;
 
+
 public class ContextVS {
-	
-	public static final String TAG = "ContextVS";
+
+
+    public enum State {CON_CERTIFICADO, CON_CSR, SIN_CSR}
+
+    public static final String TAG = "ContextVS";
 
     public static final String OCSP_DNIE_URL = "http://ocsp.dnie.es";
 

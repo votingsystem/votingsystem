@@ -1,4 +1,4 @@
-package org.votingsystem.android.model;
+package org.votingsystem.model;
 
 import android.util.Log;
 import org.json.JSONObject;

@@ -9,7 +9,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.MenuItem;
-import org.votingsystem.android.model.AndroidContextVS;
+import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
@@ -23,13 +23,13 @@ public class EventPagerActivity  extends ActionBarActivity {
 
     public static final String TAG = "EventPagerActivity";
 
-    private AndroidContextVS androidContextVS;
+    private ContextVSImpl contextVS;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         Log.d(TAG + ".onCreate(...) ", " - onCreate ");
         super.onCreate(savedInstanceState);
-        androidContextVS = AndroidContextVS.getInstance(getBaseContext());
-        if(androidContextVS.getEvents() == null) {
+        contextVS = ContextVSImpl.getInstance(getBaseContext());
+        if(contextVS.getEvents() == null) {
             Log.d(TAG + ".onCreate(...) ", " - Events not found in context");
             return;
         }
@@ -37,18 +37,18 @@ public class EventPagerActivity  extends ActionBarActivity {
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         EventsPagerAdapter eventsPagerAdapter = new EventsPagerAdapter(
-                getSupportFragmentManager(), androidContextVS.getEvents());
+                getSupportFragmentManager(), contextVS.getEvents());
         mViewPager.setAdapter(eventsPagerAdapter);
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override public void onPageSelected(int position) {
-                EventVS selectedEvent = (EventVS) androidContextVS.getEvents().get(position);
-                androidContextVS.setEvent(selectedEvent);
+                EventVS selectedEvent = (EventVS) contextVS.getEvents().get(position);
+                contextVS.setEvent(selectedEvent);
                 setActionBarTitle(selectedEvent);
 
             }
         });
-        mViewPager.setCurrentItem(androidContextVS.getEventIndex(androidContextVS.getEvent()), true);
-        setActionBarTitle(androidContextVS.getEvent());
+        mViewPager.setCurrentItem(contextVS.getEventIndex(contextVS.getEvent()), true);
+        setActionBarTitle(contextVS.getEvent());
     }
 
     private void setActionBarTitle(EventVS event) {
@@ -169,7 +169,7 @@ public class EventPagerActivity  extends ActionBarActivity {
         @Override public Fragment getItem(int i) {
             Log.d(TAG + ".EventsPagerAdapter.getItem(...) ", " - item: " + i);
             Fragment fragment = null;
-            if (androidContextVS.getEvent().getTypeVS().equals(TypeVS.VOTING_EVENT)) {
+            if (contextVS.getEvent().getTypeVS().equals(TypeVS.VOTING_EVENT)) {
                 fragment = new VotingEventFragment();
             } else {
                 fragment = new EventFragment();

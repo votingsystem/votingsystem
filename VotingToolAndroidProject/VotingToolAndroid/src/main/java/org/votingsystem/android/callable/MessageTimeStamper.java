@@ -8,9 +8,8 @@ import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.cms.CMSSignedData;
-import org.votingsystem.android.model.AndroidContextVS;
-import org.votingsystem.android.util.HttpHelper;
-import org.votingsystem.android.util.ServerPaths;
+import org.votingsystem.model.ContextVSImpl;
+import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 
@@ -58,8 +57,8 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
         AtomicBoolean done = new AtomicBoolean(false);
         ResponseVS responseVS = null;
         while(!done.get()) {
-        	String timeStampServiceURL = ServerPaths.getURLTimeStampService(
-                    AndroidContextVS.getInstance(context).getAccessControlURL());
+        	String timeStampServiceURL = ContextVSImpl.getInstance(context).getAccessControlVS().
+                    getTimeStampServiceURL();
             HttpResponse response = HttpHelper.sendData(
             		timeStampRequest.getEncoded(), "timestamp-query", timeStampServiceURL);
             responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
@@ -67,14 +66,14 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
             if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
                 byte[] bytesToken = EntityUtils.toByteArray(response.getEntity());
                 timeStampToken = new TimeStampToken(new CMSSignedData(bytesToken));
-                X509Certificate timeStampCert = AndroidContextVS.getInstance(context).
+                X509Certificate timeStampCert = ContextVSImpl.getInstance(context).
                         getAccessControlVS().getTimeStampCert();
 
                 /* -> Android project config problem
                  * SignerInformationVerifier timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().
                     setProvider(MainActivity.PROVIDER).build(timeStampCert);
                 timeStampToken.validate(timeStampSignerInfoVerifier);*/
-                timeStampToken.validate(timeStampCert, AndroidContextVS.PROVIDER);/**/
+                timeStampToken.validate(timeStampCert, ContextVSImpl.PROVIDER);/**/
                 if(smimeMessage != null)
                 	smimeMessage.setTimeStampToken(timeStampToken);
                 done.set(true);

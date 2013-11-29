@@ -15,8 +15,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import org.votingsystem.android.R;
-import org.votingsystem.android.model.AndroidContextVS;
-import org.votingsystem.android.model.VoteReceipt;
+import org.votingsystem.model.VoteVS;
+import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.model.ContentTypeVS;
 
 import java.io.File;
@@ -32,14 +32,14 @@ public class ReceiptOptionsDialog  extends DialogFragment {
         // Empty constructor required for DialogFragment
     }
     
-    private static VoteReceipt receipt;
+    private static VoteVS receipt;
 	private static ReceiptOperationsListener listener = null;
 	
     public static ReceiptOptionsDialog newInstance(String caption, 
-    		String msg, VoteReceipt voteReceipt, ReceiptOperationsListener operationsListener) {
+    		String msg, VoteVS voteVS, ReceiptOperationsListener operationsListener) {
     	ReceiptOptionsDialog receiptOptionsDialog = new ReceiptOptionsDialog();
         Bundle args = new Bundle();
-        receipt = voteReceipt;
+        receipt = voteVS;
         listener = operationsListener;
         args.putString("caption", caption);
         if(msg != null && msg.length() > MAX_MSG_LENGTH)
@@ -115,7 +115,7 @@ public class ReceiptOptionsDialog  extends DialogFragment {
     		/*File receiptFile =  new File(getActivity()
     				.getExternalFilesDir(null), "vote_receipt_" + 
     				receipt.getNotificationId() + SIGNED_PART_EXTENSION);*/
-    		String fileName = "receipt_" + receipt.getId() + AndroidContextVS.SIGNED_PART_EXTENSION;
+    		String fileName = "receipt_" + receipt.getId() + ContextVSImpl.SIGNED_PART_EXTENSION;
        		File receiptFile = getTemporaryFile(getActivity(), fileName);
        		
     		if(receipt.getCancelVoteReceipt() != null) {

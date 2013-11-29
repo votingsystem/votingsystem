@@ -12,7 +12,7 @@ import android.widget.TextView;
 import org.votingsystem.android.R;
 import org.votingsystem.android.UserCertRequestActivity;
 import org.votingsystem.android.UserCertResponseActivity;
-import org.votingsystem.android.model.AndroidContextVS;
+import org.votingsystem.model.ContextVSImpl;
 
 public class CertNotFoundDialog  extends DialogFragment {
 
@@ -42,7 +42,7 @@ public class CertNotFoundDialog  extends DialogFragment {
         openReceiptButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
             	Intent intent = null;
-          	  	switch(AndroidContextVS.getInstance(getActivity().getBaseContext()).getState()) {
+          	  	switch(ContextVSImpl.getInstance(getActivity().getBaseContext()).getState()) {
           	  		case CON_CSR:
           	  			intent = new Intent(getActivity(), UserCertResponseActivity.class);
           	  			break;

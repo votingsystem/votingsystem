@@ -4,7 +4,6 @@ import android.util.Log;
 import org.json.JSONObject;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailValidator;
-import org.votingsystem.util.DateUtils;
 
 import java.security.cert.PKIXParameters;
 import java.util.Date;
@@ -35,7 +34,7 @@ public class ResponseVS<T> {
 
     private int statusCode;
     private String status;
-    private EventQueryResponseVS eventQueryResponse;
+    private EventVSResponse eventQueryResponse;
     private String message;
     private T data;
     private TypeVS typeVS;
@@ -122,14 +121,14 @@ public class ResponseVS<T> {
     /**
      * @return the eventQueryResponse
      */
-    public EventQueryResponseVS getEventQueryResponse() {
+    public EventVSResponse getEventQueryResponse() {
         return eventQueryResponse;
     }
 
     /**
      * @param eventQueryResponse the eventQueryResponse to set
      */
-    public void setEventQueryResponse(EventQueryResponseVS eventQueryResponse) {
+    public void setEventQueryResponse(EventVSResponse eventQueryResponse) {
         this.eventQueryResponse = eventQueryResponse;
     }
 

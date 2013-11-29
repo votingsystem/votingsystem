@@ -35,10 +35,9 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import org.votingsystem.android.callable.DataGetter;
 import org.votingsystem.model.AccessControlVS;
-import org.votingsystem.android.model.AndroidContextVS;
+import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.model.EventVS;
-import org.votingsystem.android.model.OperationVS;
-import org.votingsystem.android.util.ServerPaths;
+import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.StringUtils;
 
@@ -46,18 +45,17 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.UUID;
 
-import static org.votingsystem.android.model.AndroidContextVS.PREFS_ID_APLICACION;
-import static org.votingsystem.android.model.AndroidContextVS.SERVER_URL_EXTRA_PROP_NAME;
+import static org.votingsystem.model.ContextVSImpl.PREFS_ID_APLICACION;
+import static org.votingsystem.model.ContextVSImpl.SERVER_URL_EXTRA_PROP_NAME;
 
 //import org.eclipse.jetty.websocket.WebSocket;
 //import org.eclipse.jetty.websocket.WebSocketClient;
 //import org.eclipse.jetty.websocket.WebSocketClientFactory;
-
 public class MainActivity extends FragmentActivity {
 	
 	public static final String TAG = "MainActivity";
 
-    private AndroidContextVS androidContextVS;
+    private ContextVSImpl contextVS;
     private ProgressDialog progressDialog = null;
     private OperationVS operationVS = null;
     private Uri uriData = null;
@@ -72,8 +70,7 @@ public class MainActivity extends FragmentActivity {
             Log.d(TAG + ".onCreate()", " - Intent.ACTION_SEARCH - query: "+ query);
             return;
         }
-        androidContextVS = AndroidContextVS.getInstance(getBaseContext());
-
+        contextVS = ContextVSImpl.getInstance(getBaseContext());
         if(Intent.ACTION_VIEW.equals(getIntent().getAction())) {
         	//getIntent().getCategories().contains(Intent.CATEGORY_BROWSABLE);
             uriData = getIntent().getData();
@@ -139,11 +136,11 @@ public class MainActivity extends FragmentActivity {
         progressDialog.show();
     }
 
-    private void setActivityState(AndroidContextVS.State state) {
+    private void setActivityState(ContextVSImpl.State state) {
     	Log.d(TAG + ".setActivityState()", " - state: " + state);
     	Intent intent = null;
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        androidContextVS.setState(state);
+        contextVS.setState(state);
     	switch (state) {
 	    	case SIN_CSR:
 	    		String idAplicacion = settings.getString(PREFS_ID_APLICACION, null);
@@ -185,12 +182,12 @@ public class MainActivity extends FragmentActivity {
     	}
     }
     
-    private void processOperation(OperationVS operationVS, AndroidContextVS.State state) {
+    private void processOperation(OperationVS operationVS, ContextVSImpl.State state) {
     	Log.d(TAG + ".processOperation(...)", "- operationVS: " +
     			operationVS.getTypeVS() + " - state: " + state);
-        androidContextVS.setEvent(operationVS.getEventVS());
+        contextVS.setEvent(operationVS.getEventVS());
         Intent intent = null;
-        if(AndroidContextVS.State.CON_CERTIFICADO == state) {
+        if(ContextVSImpl.State.CON_CERTIFICADO == state) {
     		switch(operationVS.getTypeVS()) {
 		        case SEND_SMIME_VOTE:
                     intent = new Intent(MainActivity.this, VotingEventFragment.class);
@@ -204,7 +201,7 @@ public class MainActivity extends FragmentActivity {
 	        }
             if(intent != null) {
                 try {
-                    intent.putExtra(AndroidContextVS.EVENT_KEY, operationVS.getEventVS().toJSON().toString());
+                    intent.putExtra(ContextVSImpl.EVENT_KEY, operationVS.getEventVS().toJSON().toString());
                     startActivity(intent);
                 } catch(Exception ex) {
                     ex.printStackTrace();
@@ -325,8 +322,8 @@ public class MainActivity extends FragmentActivity {
                     selectedEvent.setOptionSelected(operationVS.
                             getEventVS().getOptionSelected());
                     operationVS.setEventVS(selectedEvent);
-                    androidContextVS.setEvent(selectedEvent);
-                    processOperation(operationVS, androidContextVS.getState());
+                    contextVS.setEvent(selectedEvent);
+                    processOperation(operationVS, contextVS.getState());
                 } else showMessage(getString(R.string.error_lbl), responseVS.getMessage());
             } catch(Exception ex) {
                 ex.printStackTrace();
@@ -351,7 +348,7 @@ public class MainActivity extends FragmentActivity {
             Log.d(TAG + ".AccessControlLoader.doInBackground() ", " - serviceURL: " + urls[0]);
             serviceURL = urls[0];
             try {
-                DataGetter dataGetter = new DataGetter(null, ServerPaths.getURLInfoServidor(urls[0]));
+                DataGetter dataGetter = new DataGetter(null, AccessControlVS.getServerInfoURL(urls[0]));
                 return dataGetter.call();
             } catch(Exception ex) {
                 ex.printStackTrace();
@@ -367,10 +364,9 @@ public class MainActivity extends FragmentActivity {
             try {
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     AccessControlVS accessControlVS = AccessControlVS.parse(responseVS.getMessage());
-                    androidContextVS.setAccessControlURL(serviceURL);
-                    androidContextVS.setAccessControlVS(accessControlVS);
+                    contextVS.setAccessControlVS(accessControlVS);
                     if(uriData == null) {
-                        setActivityState(androidContextVS.getState());
+                        setActivityState(contextVS.getState());
                     } else {//loaded from web browser session
                         String encodedMsg = uriData.getQueryParameter("msg");
                         String msg = StringUtils.decodeString(encodedMsg);

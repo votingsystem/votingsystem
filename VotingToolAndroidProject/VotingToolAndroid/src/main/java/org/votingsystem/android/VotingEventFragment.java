@@ -40,11 +40,11 @@ import org.votingsystem.android.callable.DataGetter;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.VoteSender;
 import org.votingsystem.android.db.VoteReceiptDBHelper;
-import org.votingsystem.android.model.AndroidContextVS;
+import org.votingsystem.model.ActorVS;
+import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.model.EventVS;
-import org.votingsystem.android.model.VoteReceipt;
+import org.votingsystem.model.VoteVS;
 import org.votingsystem.android.ui.*;
-import org.votingsystem.android.util.ServerPaths;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CertUtil;
@@ -58,8 +58,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import static org.votingsystem.android.model.AndroidContextVS.KEY_STORE_FILE;
-import static org.votingsystem.android.model.AndroidContextVS.MAX_SUBJECT_SIZE;
+import static org.votingsystem.model.ContextVSImpl.KEY_STORE_FILE;
+import static org.votingsystem.model.ContextVSImpl.MAX_SUBJECT_SIZE;
 
 public class VotingEventFragment extends Fragment implements CertPinDialogListener {
 
@@ -69,12 +69,12 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
 
     private Operation operation = Operation.VOTE;
     private EventVS eventVS;
-    private VoteReceipt receipt;
+    private VoteVS receipt;
     private List<Button> optionButtons = null;
     private byte[] keyStoreBytes = null;
     private Button saveReceiptButton;
     private Button cancelVoteButton;
-    private AndroidContextVS androidContextVS;
+    private ContextVSImpl contextVS;
 
     private View rootView;
     private View progressContainer;
@@ -87,14 +87,14 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
                                        ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG + ".onCreate(...)", " --- onCreate");
         super.onCreate(savedInstanceState);
-        androidContextVS = AndroidContextVS.getInstance(getActivity());
+        contextVS = ContextVSImpl.getInstance(getActivity());
         rootView = inflater.inflate(R.layout.voting_event_fragment, container, false);
         Bundle args = getArguments();
         Integer eventIndex =  args.getInt(EventPagerActivity.EventsPagerAdapter.EVENT_INDEX_KEY);
         if(eventIndex != null) {
-            eventVS = (EventVS) androidContextVS.getEvents().get(eventIndex);
+            eventVS = (EventVS) contextVS.getEvents().get(eventIndex);
         } else {
-            String eventStr = args.getString(AndroidContextVS.EVENT_KEY);
+            String eventStr = args.getString(ContextVSImpl.EVENT_KEY);
             try {
                 eventVS = EventVS.parse(eventStr);
             } catch(Exception ex) {
@@ -129,7 +129,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
         }
     }
 
-    private void setReceiptScreen(final VoteReceipt receipt) {
+    private void setReceiptScreen(final VoteVS receipt) {
         Log.d(TAG + ".setReceiptScreen(...)", " - setReceiptScreen");
         ((LinearLayout)rootView.findViewById(R.id.receipt_buttons)).setVisibility(View.VISIBLE);
         ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(
@@ -230,7 +230,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
                 public void onClick(View v) {
                     Log.d(TAG + "- opcionButton - opcionId: " +
                             optionSelected.getId(), "state: " +
-                            androidContextVS.getState().toString());
+                            contextVS.getState().toString());
                     processSelectedOption(optionSelected);
                 }
             });
@@ -249,13 +249,13 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
         Log.d(TAG + ".processSelectedOption", " -- processSelectedOption");
         operation = Operation.VOTE;
         eventVS.setOptionSelected(optionSelected);
-        if (!AndroidContextVS.State.CON_CERTIFICADO.equals(androidContextVS.getState())) {
+        if (!ContextVSImpl.State.CON_CERTIFICADO.equals(contextVS.getState())) {
             Log.d(TAG + "- firmarEnviarButton -", " mostrando dialogo certificado no encontrado");
             showCertNotFoundDialog();
         } else {
             String content = optionSelected.getContent().length() >
-                    AndroidContextVS.SELECTED_OPTION_MAX_LENGTH ?
-                    optionSelected.getContent().substring(0, AndroidContextVS.SELECTED_OPTION_MAX_LENGTH) +
+                    ContextVSImpl.SELECTED_OPTION_MAX_LENGTH ?
+                    optionSelected.getContent().substring(0, ContextVSImpl.SELECTED_OPTION_MAX_LENGTH) +
                             "..." : optionSelected.getContent();
             showPinScreen(getString(R.string.option_selected_msg, content));
         }
@@ -270,12 +270,12 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
         CertNotFoundDialog certDialog = new CertNotFoundDialog();
         FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
         Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(
-                AndroidContextVS.CERT_NOT_FOUND_DIALOG_ID);
+                ContextVSImpl.CERT_NOT_FOUND_DIALOG_ID);
         if (prev != null) {
             ft.remove(prev);
         }
         ft.addToBackStack(null);
-        certDialog.show(ft, AndroidContextVS.CERT_NOT_FOUND_DIALOG_ID);
+        certDialog.show(ft, ContextVSImpl.CERT_NOT_FOUND_DIALOG_ID);
     }
 
     public void onClickSubject(View v) {
@@ -346,10 +346,10 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
             Log.d(TAG + ".setPin()", "--- setPin - pin null");
             return;
         }
-        X509Certificate controlCenterCert = androidContextVS.getCert(eventVS.getControlCenter().getServerURL());
+        X509Certificate controlCenterCert = contextVS.getCert(eventVS.getControlCenter().getServerURL());
         if(eventVS.getControlCenter().getCertificate() == null && controlCenterCert == null) {
-            GetCertTask getCertTask = new GetCertTask(pin);
-            getCertTask.execute(eventVS.getControlCenter().getServerURL());
+            GetCertTask getCertTask = new GetCertTask(pin, eventVS.getControlCenter());
+            getCertTask.execute();
         } else {
             if(eventVS.getControlCenter().getCertificate() == null) {
                 eventVS.getControlCenter().setCertificate(controlCenterCert);
@@ -453,7 +453,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
                     break;
                 case CANCEL_VOTE:
                     String subject = getString(R.string.cancel_vote_msg_subject);
-                    String serviceURL = ServerPaths.getURLAnulacionVoto(androidContextVS.getAccessControlURL());
+                    String serviceURL = contextVS.getAccessControlVS().getCancelVoteServiceURL();
                     try {
                         String signatureContent = receipt.getVoto().getCancelVoteData();
                         boolean isEncryptedResponse = true;
@@ -461,7 +461,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
                         byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
                         SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
                                 signatureContent, subject, isEncryptedResponse, keyStoreBytes, pin.toCharArray(),
-                                androidContextVS.getAccessControlVS().getCertificate(), getActivity());
+                                contextVS.getAccessControlVS().getCertificate(), getActivity());
                         responseVS = smimeSignedSender.call();
                     } catch(Exception ex) {
                         ex.printStackTrace();
@@ -486,7 +486,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
                 case VOTE:
                     setOptionButtonsEnabled(false);
                     if(ResponseVS.SC_OK == response.getStatusCode()) {
-                        receipt = (VoteReceipt)response.getData();
+                        receipt = (VoteVS)response.getData();
                         VotingResultDialog votingResultDialog = VotingResultDialog.newInstance(
                                 getString(R.string.operacion_ok_msg), receipt);
                         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
@@ -517,8 +517,8 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
                                 Log.e(TAG + ".guardarReciboButton.setOnClickListener(...) ", ex.getMessage(), ex);
                             }
                         }
-                        androidContextVS.getEvent().setOptionSelected(null);
-                        setEventScreen(androidContextVS.getEvent());
+                        contextVS.getEvent().setOptionSelected(null);
+                        setEventScreen(contextVS.getEvent());
                         CancelVoteDialog cancelVoteDialog = CancelVoteDialog.newInstance(
                                 getString(R.string.msg_lbl), msg, receipt);
                         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
@@ -534,25 +534,24 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
 
     private class GetCertTask extends AsyncTask<String, Integer, ResponseVS> {
 
-        private String serverURL = null;
+        private ActorVS actorVS = null;
         private String pin = null;
 
-        public GetCertTask(String pin) {
+        public GetCertTask(String pin,ActorVS actorVS) {
+            this.actorVS = actorVS;
             this.pin = pin;
         }
 
         protected void onPreExecute() {
             Log.d(TAG + ".GetCertTask.onPreExecute(...)", " --- onPreExecute");
-            getActivity().getWindow().getDecorView().findViewById(
-                    android.R.id.content).invalidate();
+            getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
             showProgress(true, true);
         }
 
         protected ResponseVS doInBackground(String... urls) {
-            Log.d(TAG + ".GetCertTask.doInBackground(...)", " - serverURL: " + urls[0]);
-            serverURL = urls[0];
-            String serverCertURL = ServerPaths.getURLCertChain(serverURL);
-            DataGetter dataGetter = new DataGetter(null, serverCertURL);
+            Log.d(TAG + ".GetCertTask.doInBackground(...)", " - serviceURL: " +
+                    actorVS.getCertChainURL());
+            DataGetter dataGetter = new DataGetter(null, actorVS.getCertChainURL());
             return dataGetter.call();
         }
 
@@ -568,15 +567,15 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
                     Collection<X509Certificate> certChain = CertUtil.fromPEMToX509CertCollection(
                             responseVS.getMessageBytes());
                     X509Certificate serverCert = certChain.iterator().next();
-                    androidContextVS.putCert(serverURL, serverCert);
+                    contextVS.putCert(actorVS.getServerURL(), serverCert);
                     eventVS.getControlCenter().setCertificate(serverCert);
                     if(processSignatureTask != null) processSignatureTask.cancel(true);
                     processSignatureTask = new ProcessSignatureTask(pin);
                     processSignatureTask.execute();
                 } else {
                     Log.d(TAG + ".getServerCert() ", " - Error message: " + responseVS.getMessage());
-                    showMessage(getString(R.string.get_cert_error_msg) + ": " + serverURL,
-                            responseVS.getMessage());
+                    showMessage(getString(R.string.get_cert_error_msg) + ": " +
+                            actorVS.getServerURL(), responseVS.getMessage());
                 }
             } catch(Exception ex) {
                 ex.printStackTrace();

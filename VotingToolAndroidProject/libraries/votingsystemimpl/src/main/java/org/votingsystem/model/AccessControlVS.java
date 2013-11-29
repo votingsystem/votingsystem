@@ -5,6 +5,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.StringUtils;
 
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
@@ -63,6 +64,99 @@ public class AccessControlVS extends ActorVS implements Serializable {
      */
     public void setControlCenters(Set<ControlCenterVS> controlCenter) {
         this.controlCenter = controlCenter;
+    }
+
+
+    public String getEventVSManifestCollectorURL (Long manifestId) {
+        return getServerURL() + "/eventVSManifestCollector/" + manifestId;
+    }
+
+    public String getEventVSManifestURL (Long manifestId) {
+        return getServerURL() + "/eventVSManifest/" + manifestId;
+    }
+
+    public String getCancelVoteServiceURL() {
+        return getServerURL() + "/anuladorVoto";
+    }
+
+
+    public String getEventVSClaimCollectorURL () {
+        return getServerURL() + "/eventVSClaimCollector";
+    }
+
+    public String getSearchServiceURL (int offset, int max) {
+        return getServerURL() + "/buscador/consultaJSON?max=" + max + "&offset=" + offset;
+    }
+
+    public String getEventVSURL () {
+        return getServerURL() + "/eventVS";
+    }
+
+    public String getServerInfoURL () {
+        return getServerURL() + "/serverInfo";
+    }
+
+    public static String getServerInfoURL (String serverURL) {
+        return StringUtils.checkURL(serverURL) + "/serverInfo";
+    }
+
+    public String getEventVSURL (EventVSState eventVSState, SubSystemVS subSystemVS,
+            int max, int offset) {
+        String subSystemPath = null;
+        switch (subSystemVS) {
+            case CLAIMS: subSystemPath = "/eventVSClaim";
+                break;
+            case MANIFESTS: subSystemPath = "/eventVSManifest";
+                break;
+            case VOTING: subSystemPath = "/eventVSElection";
+                break;
+            default: subSystemPath = "/eventVS";
+                break;
+        }
+        String statePath = null;
+        switch(eventVSState) {
+            case CLOSED: statePath = "TERMINATED";
+                break;
+            case OPEN: statePath = "ACTIVE";
+                break;
+            case PENDING: statePath = "AWAITING";
+                break;
+            default: statePath = "";
+                break;
+        }
+        return getServerURL() + subSystemPath + "?max="+ max + "&offset=" + offset  +
+                "&eventVSState=" + statePath;
+    }
+
+
+    public String getPublishServiceURL(TypeVS formType) {
+        switch(formType) {
+            case CLAIM_PUBLISHING:return getServerURL() + "/mobileEditor/eventVSClaim";
+            case MANIFEST_PUBLISHING:return getServerURL() + "/mobileEditor/eventVSManifest";
+            case VOTING_PUBLISHING:return getServerURL() + "/mobileEditor/eventVSElection";
+        }
+        return null;
+    }
+
+    public String getUserCSRServiceURL (Long idSolicitudCSR) {
+        return getServerURL() + "/csr?idSolicitudCSR=" + idSolicitudCSR;
+    }
+
+    public String getUserCSRServiceURL () {
+        return getServerURL() + "/csr/solicitar";
+    }
+
+    public String getCertificationCentersURL () {
+        return getServerURL() + "/serverInfo/certificationCenters";
+    }
+
+
+    public String getAccessServiceURL () {
+        return getServerURL() +  "/accessRequestVS";
+    }
+
+    public String getTimeStampServiceURL () {
+        return getServerURL() + "/timeStampVS";
     }
 
     public static AccessControlVS parse(String actorVSStr) throws Exception {

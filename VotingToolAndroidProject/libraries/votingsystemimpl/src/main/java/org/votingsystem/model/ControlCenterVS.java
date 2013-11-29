@@ -34,20 +34,17 @@ public class ControlCenterVS extends ActorVS implements Serializable {
         return Type.CONTROL_CENTER;
     }
 
-    /**
-     * @return the controlesDeAcceso
-     */
     public Set<AccessControlVS> getControlesDeAcceso() {
         return controlesDeAcceso;
     }
 
-    /**
-     * @param controlesDeAcceso the controlesDeAcceso to set
-     */
     public void setControlesDeAcceso(Set<AccessControlVS> controlesDeAcceso) {
         this.controlesDeAcceso = controlesDeAcceso;
     }
 
+    public String getVoteServiceURL () {
+        return getServerURL() + "/voteVS";
+    }
 
     public static ControlCenterVS parse(String actorVSStr, Type type)
             throws Exception {

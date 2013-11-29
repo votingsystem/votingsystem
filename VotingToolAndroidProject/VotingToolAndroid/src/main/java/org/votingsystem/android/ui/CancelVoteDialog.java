@@ -10,7 +10,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import org.votingsystem.android.R;
 import org.votingsystem.android.db.VoteReceiptDBHelper;
-import org.votingsystem.android.model.VoteReceipt;
+import org.votingsystem.model.VoteVS;
 
 public class CancelVoteDialog  extends DialogFragment {
 
@@ -22,12 +22,12 @@ public class CancelVoteDialog  extends DialogFragment {
         // Empty constructor required for DialogFragment
     }
     
-    private VoteReceipt receipt;
+    private VoteVS receipt;
     private TextView msgTextView;
     private Button cancelVoteButton;
 
     public static CancelVoteDialog newInstance(String caption, 
-    		String msg, VoteReceipt receipt) {
+    		String msg, VoteVS receipt) {
     	CancelVoteDialog cancelVoteDialog = new CancelVoteDialog();
         Bundle args = new Bundle();
         cancelVoteDialog.setVoteReceipt(receipt);
@@ -39,7 +39,7 @@ public class CancelVoteDialog  extends DialogFragment {
         return cancelVoteDialog;
     }
     
-    private void setVoteReceipt(VoteReceipt receipt) {
+    private void setVoteReceipt(VoteVS receipt) {
     	this.receipt = receipt;
     }
     

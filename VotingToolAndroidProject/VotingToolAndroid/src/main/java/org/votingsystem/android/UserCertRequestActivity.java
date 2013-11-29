@@ -45,11 +45,10 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
-import org.votingsystem.android.model.AndroidContextVS;
+import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.android.ui.CertPinDialog;
 import org.votingsystem.android.ui.CertPinDialogListener;
-import org.votingsystem.android.util.HttpHelper;
-import org.votingsystem.android.util.ServerPaths;
+import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.KeyStoreUtil;
@@ -62,7 +61,7 @@ import java.text.Normalizer;
 import java.util.Date;
 import java.util.UUID;
 
-import static org.votingsystem.android.model.AndroidContextVS.*;
+import static org.votingsystem.model.ContextVSImpl.*;
 
 public class UserCertRequestActivity extends ActionBarActivity implements CertPinDialogListener {
 
@@ -76,7 +75,7 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
     private EditText nifText;
     private EditText givennameText;
     private EditText surnameText;
-    private AndroidContextVS androidContextVS;
+    private ContextVSImpl contextVS;
 
     private TextView progressMessage;
     private View progressContainer;
@@ -91,7 +90,7 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
     	super.onCreate(savedInstanceState);
         Log.d(TAG + ".onCreate(...) ", " - onCreate - ");
         setContentView(R.layout.user_cert_request_activity);
-        androidContextVS = AndroidContextVS.getInstance(getBaseContext());
+        contextVS = ContextVSImpl.getInstance(getBaseContext());
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(getString(R.string.request_certificate_form_lbl));
         
@@ -272,7 +271,7 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
 		if(password == null) return;
         if(sendDataTask != null) sendDataTask.cancel(true);
         sendDataTask = new SendDataTask();
-        sendDataTask.execute(ServerPaths.getURLSolicitudCSRUsuario(androidContextVS.getAccessControlURL()));
+        sendDataTask.execute(contextVS.getAccessControlVS().getUserCSRServiceURL());
 	}
 
     public void showProgress(boolean shown, boolean animate) {
@@ -374,7 +373,7 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
                 Long idSolictud = Long.valueOf(responseVS.getMessage());
                 editor.putLong(PREFS_ID_SOLICTUD_CSR, idSolictud);
                 editor.commit();
-                androidContextVS.setState(AndroidContextVS.State.CON_CSR);
+                contextVS.setState(ContextVSImpl.State.CON_CSR);
                 Intent intent = new Intent(getBaseContext(),
                         UserCertResponseActivity.class);
                 startActivity(intent);

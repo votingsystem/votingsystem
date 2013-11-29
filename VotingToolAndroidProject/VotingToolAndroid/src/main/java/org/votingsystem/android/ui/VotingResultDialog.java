@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import org.votingsystem.android.R;
-import org.votingsystem.android.model.VoteReceipt;
+import org.votingsystem.model.VoteVS;
 
 public class VotingResultDialog  extends DialogFragment {
 
@@ -19,10 +19,10 @@ public class VotingResultDialog  extends DialogFragment {
         // Empty constructor required for DialogFragment
     }
     
-    private VoteReceipt reciboVoto;
+    private VoteVS reciboVoto;
 
     public static VotingResultDialog newInstance(String caption, 
-    		VoteReceipt reciboVoto) {
+    		VoteVS reciboVoto) {
     	VotingResultDialog votingResultDialog = new VotingResultDialog();
         Bundle args = new Bundle();
         votingResultDialog.setReciboVoto(reciboVoto);
@@ -31,7 +31,7 @@ public class VotingResultDialog  extends DialogFragment {
         return votingResultDialog;
     }
     
-    private void setReciboVoto(VoteReceipt reciboVoto) {
+    private void setReciboVoto(VoteVS reciboVoto) {
     	this.reciboVoto = reciboVoto;
     }
     

@@ -23,13 +23,12 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import org.votingsystem.android.callable.PDFPublisher;
 import org.votingsystem.android.callable.SMIMESignedSender;
-import org.votingsystem.android.model.AndroidContextVS;
-import org.votingsystem.android.model.OperationVS;
+import org.votingsystem.model.ContextVSImpl;
+import org.votingsystem.model.SubSystemVS;
+import org.votingsystem.model.OperationVS;
 import org.votingsystem.android.ui.CertNotFoundDialog;
 import org.votingsystem.android.ui.CertPinDialog;
 import org.votingsystem.android.ui.CertPinDialogListener;
-import org.votingsystem.android.util.ServerPaths;
-import org.votingsystem.android.util.SubSystem;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
@@ -41,8 +40,8 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.util.UUID;
 
-import static org.votingsystem.android.model.AndroidContextVS.USER_CERT_ALIAS;
-import static org.votingsystem.android.model.AndroidContextVS.KEY_STORE_FILE;
+import static org.votingsystem.model.ContextVSImpl.USER_CERT_ALIAS;
+import static org.votingsystem.model.ContextVSImpl.KEY_STORE_FILE;
 
 /**
  * @author jgzornoza
@@ -59,7 +58,7 @@ public class EventPublishingActivity extends ActionBarActivity implements CertPi
 	private TypeVS formType;
 	private JavaScriptInterface javaScriptInterface;
 	private OperationVS pendingOperationVS;
-    private AndroidContextVS androidContextVS;
+    private ContextVSImpl contextVS;
     private TextView progressMessage;
     private View progressContainer;
     private FrameLayout mainLayout;
@@ -70,7 +69,7 @@ public class EventPublishingActivity extends ActionBarActivity implements CertPi
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.event_publishing_activity);
-        androidContextVS = AndroidContextVS.getInstance(getBaseContext());
+        contextVS = ContextVSImpl.getInstance(getBaseContext());
         String operation = getIntent().getStringExtra(OperationVS.OPERATION_KEY);
         if(operation!= null) { //called from browser
         	try {
@@ -81,26 +80,17 @@ public class EventPublishingActivity extends ActionBarActivity implements CertPi
         }
         String formTypeStr = getIntent().getStringExtra(FORM_TYPE_KEY);
         String screenTitle = null;
-        String serverURL = null;
+        String serverURL = contextVS.getAccessControlVS().getPublishServiceURL(formType);
         if(formTypeStr != null) {
             formType = TypeVS.valueOf(formTypeStr);
         	switch(formType) {
 	        	case CLAIM_PUBLISHING:
-	        		serverURL = ServerPaths.getURLPublish(
-                            androidContextVS.getAccessControlURL(),
-                            TypeVS.CLAIM_PUBLISHING);
 	        		screenTitle = getString(R.string.publish_claim_caption);
 	        		break;
 	        	case MANIFEST_PUBLISHING:
-	        		serverURL = ServerPaths.getURLPublish(
-                            androidContextVS.getAccessControlURL(),
-                            TypeVS.MANIFEST_PUBLISHING);
 	        		screenTitle = getString(R.string.publish_manifest_caption);
 	        		break;
 	        	case VOTING_PUBLISHING:
-	        		serverURL = ServerPaths.getURLPublish(
-                            androidContextVS.getAccessControlURL(),
-                            TypeVS.VOTING_PUBLISHING);
 	        		screenTitle = getString(R.string.publish_voting_caption);
 	        		break;
         	}  
@@ -215,7 +205,7 @@ public class EventPublishingActivity extends ActionBarActivity implements CertPi
 		Log.d(TAG + ".processOperation(...) ", 
 				" --- processOperation: " + operationVS.getTypeVS());
 		this.pendingOperationVS = operationVS;
-		if (!AndroidContextVS.State.CON_CERTIFICADO.equals(androidContextVS.getState())) {
+		if (!ContextVSImpl.State.CON_CERTIFICADO.equals(contextVS.getState())) {
     		Log.d(TAG + ".processOperation(...)", " - Cert Not Found - ");
     		showCertNotFoundDialog();
     	} else showPinScreen(null);
@@ -225,12 +215,12 @@ public class EventPublishingActivity extends ActionBarActivity implements CertPi
 		Log.d(TAG + ".showCertNotFoundDialog(...)", " - showCertNotFoundDialog - ");
 		CertNotFoundDialog certDialog = new CertNotFoundDialog();
 		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-	    Fragment prev = getSupportFragmentManager().findFragmentByTag(AndroidContextVS.CERT_NOT_FOUND_DIALOG_ID);
+	    Fragment prev = getSupportFragmentManager().findFragmentByTag(ContextVSImpl.CERT_NOT_FOUND_DIALOG_ID);
 	    if (prev != null) {
 	        ft.remove(prev);
 	    }
 	    ft.addToBackStack(null);
-	    certDialog.show(ft, AndroidContextVS.CERT_NOT_FOUND_DIALOG_ID);
+	    certDialog.show(ft, ContextVSImpl.CERT_NOT_FOUND_DIALOG_ID);
 	}
 	
 	public void sendMessageToWebApp(OperationVS operationVS) {
@@ -359,7 +349,7 @@ public class EventPublishingActivity extends ActionBarActivity implements CertPi
                                 pendingOperationVS.getContentFirma().toString(),
                                 pendingOperationVS.getSignedMessageSubject(), isEncryptedResponse,
                                 keyStoreBytes, pin.toCharArray(),
-                                androidContextVS.getAccessControlVS().getCertificate(), getBaseContext());
+                                contextVS.getAccessControlVS().getCertificate(), getBaseContext());
                         responseVS = smimeSignedSender.call();
                         break;
                     default:
@@ -390,29 +380,29 @@ public class EventPublishingActivity extends ActionBarActivity implements CertPi
             showProgress(false, true);
             String resultMsg = null;
             String resultCaption = null;
-            SubSystem selectedSubsystem = null;
+            SubSystemVS selectedSubsystem = null;
             if(ResponseVS.SC_OK == response.getStatusCode()) {
                 resultCaption = getString(R.string.operacion_ok_msg);
                 switch(pendingOperationVS.getTypeVS()) {
                     case MANIFEST_PUBLISHING:
                         resultMsg = getString(R.string.publish_manifest_OK_prefix_msg);
-                        selectedSubsystem = SubSystem.MANIFESTS;
+                        selectedSubsystem = SubSystemVS.MANIFESTS;
                         break;
                     case CLAIM_PUBLISHING:
                         resultMsg = getString(R.string.publish_claim_OK_prefix_msg);
-                        selectedSubsystem = SubSystem.CLAIMS;
+                        selectedSubsystem = SubSystemVS.CLAIMS;
                         break;
                     case VOTING_PUBLISHING:
                         resultMsg = getString(R.string.publish_voting_OK_prefix_msg);
-                        selectedSubsystem = SubSystem.VOTING;
+                        selectedSubsystem = SubSystemVS.VOTING;
                         break;
                 }
-                final SubSystem subSystem = selectedSubsystem;
+                final SubSystemVS subSystemVS = selectedSubsystem;
                 resultMsg = resultMsg + " " + getString(R.string.publish_document_OK_sufix_msg);
                 new AlertDialog.Builder(EventPublishingActivity.this).setTitle(resultCaption).
                         setMessage(resultMsg).setPositiveButton(R.string.ok_button, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        androidContextVS.setSelectedSubsystem(subSystem);
+                        contextVS.setSelectedSubsystem(subSystemVS);
                         Intent intent = new Intent(getBaseContext(), NavigationDrawer.class);
                         startActivity(intent);
                     }

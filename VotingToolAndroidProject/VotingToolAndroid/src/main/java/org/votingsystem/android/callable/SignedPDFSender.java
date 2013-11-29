@@ -20,8 +20,8 @@ import org.bouncycastle2.cms.CMSAttributeTableGenerator;
 import org.bouncycastle2.cms.CMSSignedData;
 import org.bouncycastle2.cms.CMSSignedDataGenerator;
 import org.votingsystem.android.R;
-import org.votingsystem.android.model.AndroidContextVS;
-import org.votingsystem.android.util.HttpHelper;
+import org.votingsystem.model.ContextVSImpl;
+import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.Encryptor;
@@ -42,7 +42,7 @@ import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.Callable;
 
-import static org.votingsystem.android.model.AndroidContextVS.USER_CERT_ALIAS;
+import static org.votingsystem.model.ContextVSImpl.USER_CERT_ALIAS;
 
 /**
  * @author jgzornoza
@@ -115,9 +115,9 @@ public class SignedPDFSender implements Callable<ResponseVS> {
 
             byte[] timeStampedSignedPDF = signWithTimestamp(pdfReader,
                     signerCert, signerPrivatekey, signerCertChain);
-            Header header = new Header(AndroidContextVS.VOTING_HEADER_LABEL,"SignedPDF");
+            Header header = new Header(ContextVSImpl.VOTING_HEADER_LABEL,"SignedPDF");
             MimeBodyPart mimeBodyPart = Encryptor.encryptBase64Message(
-                    timeStampedSignedPDF, AndroidContextVS.getInstance(context).getAccessControlVS().
+                    timeStampedSignedPDF, ContextVSImpl.getInstance(context).getAccessControlVS().
                     getCertificate(), header);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             mimeBodyPart.writeTo(baos);

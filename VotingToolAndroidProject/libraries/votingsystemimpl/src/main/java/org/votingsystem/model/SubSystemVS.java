@@ -1,11 +1,10 @@
-package org.votingsystem.android.util;
+package org.votingsystem.model;
 
 import android.content.Context;
 import org.votingsystem.android.R;
-import org.votingsystem.model.TypeVS;
 
 
-public enum SubSystem  {
+public enum SubSystemVS {
 	
 	VOTING(0, TypeVS.VOTING_EVENT),
 	MANIFESTS(1, TypeVS.MANIFEST_EVENT),
@@ -15,12 +14,12 @@ public enum SubSystem  {
 	int position;
 	TypeVS eventType;
 	
-	private SubSystem(int position, TypeVS eventType) {
+	private SubSystemVS(int position, TypeVS eventType) {
 		this.position = position;
 		this.eventType = eventType;
 	}
 	
-	public static SubSystem valueOf(int position)  {
+	public static SubSystemVS valueOf(int position)  {
         switch (position) {
 	        case 0: return VOTING;
 	        case 1: return MANIFESTS;

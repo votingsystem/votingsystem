@@ -19,7 +19,7 @@ package org.votingsystem.android;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
-import org.votingsystem.android.model.OperationVS;
+import org.votingsystem.model.OperationVS;
 
 
 public class JavaScriptInterface {

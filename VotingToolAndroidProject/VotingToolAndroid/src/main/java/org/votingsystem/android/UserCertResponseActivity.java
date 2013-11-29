@@ -37,11 +37,10 @@ import android.widget.Button;
 import android.widget.TextView;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
-import org.votingsystem.android.model.AndroidContextVS;
+import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.android.ui.CertPinDialog;
 import org.votingsystem.android.ui.CertPinDialogListener;
-import org.votingsystem.android.util.HttpHelper;
-import org.votingsystem.android.util.ServerPaths;
+import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.KeyStoreUtil;
@@ -54,7 +53,7 @@ import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 
-import static org.votingsystem.android.model.AndroidContextVS.*;
+import static org.votingsystem.model.ContextVSImpl.*;
 
 
 public class UserCertResponseActivity extends ActionBarActivity
@@ -73,7 +72,7 @@ public class UserCertResponseActivity extends ActionBarActivity
     private Button goAppButton;
     private Button insertPinButton;
     private Button requestCertButton;
-    private AndroidContextVS androidContextVS;
+    private ContextVSImpl contextVS;
     
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +80,7 @@ public class UserCertResponseActivity extends ActionBarActivity
     	super.onCreate(savedInstanceState);
         Log.d(TAG + ".onCreate(...) ", " - onCreate");
         setContentView(R.layout.user_cert_response_activity);
-        androidContextVS = AndroidContextVS.getInstance(getBaseContext());
+        contextVS = ContextVSImpl.getInstance(getBaseContext());
         getSupportActionBar().setTitle(getString(R.string.voting_system_lbl));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         goAppButton = (Button) findViewById(R.id.go_app_button);
@@ -103,7 +102,7 @@ public class UserCertResponseActivity extends ActionBarActivity
         requestCertButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             	Intent intent = null;
-          	  	switch(androidContextVS.getState()) {
+          	  	switch(contextVS.getState()) {
 			    	case SIN_CSR:
 			    		intent = new Intent(getBaseContext(), MainActivity.class);
 			    		break;
@@ -125,7 +124,7 @@ public class UserCertResponseActivity extends ActionBarActivity
     }
     
     private void checkCertState () {
-  	  	switch(androidContextVS.getState()) {
+  	  	switch(contextVS.getState()) {
 	    	case SIN_CSR:
 	    		Intent intent = new Intent(getBaseContext(), MainActivity.class);
 	    		startActivity(intent);
@@ -136,8 +135,7 @@ public class UserCertResponseActivity extends ActionBarActivity
 	        	Long idSolicitudCSR = settings.getLong(PREFS_ID_SOLICTUD_CSR, -1);
 	        	Log.d(TAG + ".checkCertState() ", "- idSolicitudCSR: " + idSolicitudCSR);
                 GetDataTask getDataTask = new GetDataTask(null);
-                getDataTask.execute(ServerPaths.getURLSolicitudCertificadoUsuario(
-                    androidContextVS.getAccessControlURL(), String.valueOf(idSolicitudCSR)));
+                getDataTask.execute(contextVS.getAccessControlVS().getUserCSRServiceURL(idSolicitudCSR));
   	  	}
     }
 
@@ -229,7 +227,7 @@ public class UserCertResponseActivity extends ActionBarActivity
 	        FileOutputStream fos = openFileOutput(KEY_STORE_FILE, Context.MODE_PRIVATE);
 	        fos.write(keyStoreBytes);
 	        fos.close();
-            androidContextVS.setState(AndroidContextVS.State.CON_CERTIFICADO);
+            contextVS.setState(ContextVSImpl.State.CON_CERTIFICADO);
     		return true;
 		} catch (Exception ex) {
 			Log.e(TAG, " - ex.getMessage(): " + ex.getMessage());
@@ -321,8 +319,7 @@ public class UserCertResponseActivity extends ActionBarActivity
                 insertPinButton.setVisibility(View.VISIBLE);
                 setCertStateChecked(true);
             } else if(ResponseVS.SC_NOT_FOUND == responseVS.getStatusCode()) {
-                String certificationAddresses = ServerPaths.
-                        getURLCertificationAddresses(androidContextVS.getAccessControlURL());
+                String certificationAddresses = contextVS.getAccessControlVS().getCertificationCentersURL();
                 setMessage(getString(R.string.request_cert_result_activity, certificationAddresses));
             } else showException(getString(
                     R.string.request_user_cert_error_msg));

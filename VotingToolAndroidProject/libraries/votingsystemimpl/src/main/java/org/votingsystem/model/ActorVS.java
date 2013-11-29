@@ -1,6 +1,7 @@
 package org.votingsystem.model;
 
 import org.votingsystem.signature.util.CertUtil;
+import org.votingsystem.util.StringUtils;
 
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -30,11 +31,18 @@ public class ActorVS implements java.io.Serializable {
     private Collection<X509Certificate> certChain;
     private X509Certificate timeStampCert = null;
 
-    public void setServerURL(String serverURL) {this.serverURL = serverURL;}
+    public void setServerURL(String serverURL) {
+        this.serverURL = StringUtils.checkURL(serverURL);
+    }
 
     public String getServerURL() {
             return serverURL;
     }
+
+    public String getCertChainURL () {
+        return serverURL + "/certificateVS/certChain";
+    }
+
 
     public void setUrlBlog(String urlBlog) {
             this.urlBlog = urlBlog;

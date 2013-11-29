@@ -17,14 +17,13 @@ import android.view.animation.AnimationUtils;
 import android.widget.*;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
-import org.votingsystem.android.model.AndroidContextVS;
+import org.votingsystem.model.EventVSState;
+import org.votingsystem.model.ContextVSImpl;
+import org.votingsystem.model.EventVSResponse;
+import org.votingsystem.model.SubSystemVS;
 import org.votingsystem.model.EventVS;
-import org.votingsystem.android.model.EventQueryResponse;
-import org.votingsystem.android.model.QueryData;
-import org.votingsystem.android.util.EventState;
-import org.votingsystem.android.util.HttpHelper;
-import org.votingsystem.android.util.ServerPaths;
-import org.votingsystem.android.util.SubSystem;
+import org.votingsystem.model.QueryData;
+import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.DateUtils;
 
@@ -50,11 +49,11 @@ public class EventListFragment extends ListFragment
     private View mListContainer;
 
     private EventListAdapter mAdapter = null;
-    private EventState eventState = null;
-    private SubSystem subSystem = SubSystem.VOTING;
+    private EventVSState eventVSState = null;
+    private SubSystemVS subSystemVS = SubSystemVS.VOTING;
     private String queryStr = null;
     private int offset = 0;
-    private static AndroidContextVS androidContextVS = null;
+    private static ContextVSImpl contextVS = null;
 
     /**
      * Perform alphabetical comparison of application entry objects.
@@ -68,8 +67,8 @@ public class EventListFragment extends ListFragment
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        androidContextVS = androidContextVS.getInstance(getActivity().getBaseContext());
-        if(androidContextVS.getAccessControlURL() == null) {
+        contextVS = contextVS.getInstance(getActivity().getBaseContext());
+        if(contextVS.getAccessControlVS() == null) {
             Intent intent = new Intent(getActivity(), MainActivity.class);
             startActivity(intent);
         }
@@ -77,15 +76,15 @@ public class EventListFragment extends ListFragment
         String eventStateStr = null;
         String subSystemStr = "";
         if (args != null) {
-            eventStateStr = args.getString("eventState");
-            if(eventStateStr != null) eventState = EventState.valueOf(eventStateStr);
-            subSystemStr = args.getString("subSystem");
-            if(subSystemStr != null) subSystem = SubSystem.valueOf(subSystemStr);
+            eventStateStr = args.getString("eventVSState");
+            if(eventStateStr != null) eventVSState = EventVSState.valueOf(eventStateStr);
+            subSystemStr = args.getString("subSystemVS");
+            if(subSystemStr != null) subSystemVS = SubSystemVS.valueOf(subSystemStr);
             queryStr = args.getString(SearchManager.QUERY);
             offset = args.getInt("offset");
         }
-        Log.d(TAG +  ".onCreate(..)", " - eventState: " + eventState +
-                " - subSystem: " + subSystem + " - queryStr: " + queryStr);
+        Log.d(TAG +  ".onCreate(..)", " - eventVSState: " + eventVSState +
+                " - subSystemVS: " + subSystemVS + " - queryStr: " + queryStr);
     };
 
 
@@ -184,15 +183,15 @@ public class EventListFragment extends ListFragment
     @Override public void onListItemClick(ListView l, View v, int position, long id) {
         Log.d(TAG +  ".onListItemClick", "Item clicked: " + id);
         EventVS event = ((EventVS) getListAdapter().getItem(position));
-        androidContextVS.setEvent(event);
-        androidContextVS.setEventList(mAdapter.getEvents());
+        contextVS.setEvent(event);
+        contextVS.setEventList(mAdapter.getEvents());
         Intent intent = new Intent(getActivity(), EventPagerActivity.class);
         startActivity(intent);
     }
 
     @Override public Loader<List<EventVS>> onCreateLoader(int id, Bundle args) {
-        Log.d(TAG +  ".onCreateLoader(..)", " - eventState: " + eventState + " - subSystem: " + subSystem);
-        return new EventListLoader(getActivity(), subSystem, eventState, queryStr, offset);
+        Log.d(TAG +  ".onCreateLoader(..)", " - eventVSState: " + eventVSState + " - subSystemVS: " + subSystemVS);
+        return new EventListLoader(getActivity(), subSystemVS, eventVSState, queryStr, offset);
     }
 
     @Override public void onAttach(Activity activity) {
@@ -329,8 +328,8 @@ public class EventListFragment extends ListFragment
     public static class EventListLoader extends AsyncTaskLoader<List<EventVS>> {
 
         List<EventVS> events;
-        SubSystem subSystem;
-        EventState eventState;
+        SubSystemVS subSystemVS;
+        EventVSState eventVSState;
         String queryString;
         int offset = 0;
 
@@ -338,11 +337,11 @@ public class EventListFragment extends ListFragment
             super(context);
         }
 
-        public EventListLoader(Context context, SubSystem subSystem,
-                               EventState eventState, String queryString, int offset) {
+        public EventListLoader(Context context, SubSystemVS subSystemVS,
+                               EventVSState eventVSState, String queryString, int offset) {
             super(context);
-            this.subSystem = subSystem;
-            this.eventState = eventState;
+            this.subSystemVS = subSystemVS;
+            this.eventVSState = eventVSState;
             this.queryString = queryString;
             this.offset = offset;
         }
@@ -353,31 +352,30 @@ public class EventListFragment extends ListFragment
          * data to be published by the loader.
          */
         @Override public List<EventVS> loadInBackground() {
-            Log.d(TAG + ".EventListLoader.loadInBackground()", " - subSystem: " + subSystem
-                    + " - eventState: " + eventState + " - queryString: " + queryString);
+            Log.d(TAG + ".EventListLoader.loadInBackground()", " - subSystemVS: " + subSystemVS
+                    + " - eventVSState: " + eventVSState + " - queryString: " + queryString);
 
             List<EventVS> eventList = null;
             try {
                 HttpResponse response = null;
                 if(queryString != null) {
-                    String url = ServerPaths.getURLSearch(
-                            androidContextVS.getAccessControlURL(), 0, androidContextVS.EVENTS_PAGE_SIZE);
+                    String url = contextVS.getAccessControlVS().getSearchServiceURL(0, contextVS.EVENTS_PAGE_SIZE);
                     QueryData queryData = new QueryData(
-                            subSystem.getEventType(), eventState.getEventState(), queryString);
+                            subSystemVS.getEventType(), eventVSState.getEventState(), queryString);
                     response = HttpHelper.sendData(
                             queryData.toJSON().toString().getBytes(), null, url);
                     searchTextView.setText(Html.fromHtml(getContext().getString(
                             R.string.search_query_info_msg, queryString)));
                     searchTextView.setVisibility(View.VISIBLE);
                 } else {
-                    String url = ServerPaths.getURLEventos(
-                            androidContextVS.getAccessControlURL(), eventState, subSystem, androidContextVS.EVENTS_PAGE_SIZE, offset);
+                    String url = contextVS.getAccessControlVS().getEventVSURL(eventVSState,
+                            subSystemVS, contextVS.EVENTS_PAGE_SIZE, offset);
                     response = HttpHelper.getData(url, null);
                     searchTextView.setVisibility(View.GONE);
                 }
                 int statusCode = response.getStatusLine().getStatusCode();
                 if(ResponseVS.SC_OK == statusCode) {
-                    EventQueryResponse consulta = EventQueryResponse.parse(EntityUtils.toString(response.getEntity()));
+                    EventVSResponse consulta = EventVSResponse.parse(EntityUtils.toString(response.getEntity()));
                     eventList = consulta.getEventVSs();
                 } else errorLoadingEventsMsg = response.getStatusLine().toString();
             } catch (Exception ex) {

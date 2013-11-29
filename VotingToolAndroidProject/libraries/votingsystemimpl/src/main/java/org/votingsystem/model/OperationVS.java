@@ -1,11 +1,9 @@
-package org.votingsystem.android.model;
+package org.votingsystem.model;
 
 import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.votingsystem.model.EventVS;
-import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.StringUtils;
 
 import java.text.ParseException;

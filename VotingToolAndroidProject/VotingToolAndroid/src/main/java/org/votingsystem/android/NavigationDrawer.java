@@ -35,10 +35,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListView;
-import org.votingsystem.android.model.AndroidContextVS;
+
+import org.votingsystem.model.EventVSState;
+import org.votingsystem.model.ContextVSImpl;
+import org.votingsystem.model.SubSystemVS;
 import org.votingsystem.android.ui.VoteReceiptListActivity;
-import org.votingsystem.android.util.EventState;
-import org.votingsystem.android.util.SubSystem;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.ScreenUtils;
 
@@ -68,7 +69,7 @@ public class NavigationDrawer extends ActionBarActivity {
     private ViewPager mViewPager;
     private ActionBarDrawerToggle mDrawerToggle;
 
-    private AndroidContextVS androidContextVS = null;
+    private ContextVSImpl contextVS = null;
     private String searchQuery = null;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
@@ -83,19 +84,19 @@ public class NavigationDrawer extends ActionBarActivity {
                 Log.d(TAG +  ".mViewPager - ", " - position: " + position);
                 switch(position) {
                     case OPEN_CHILD_POSITION:
-                        androidContextVS.setNavigationDrawerEventState(EventState.OPEN);
+                        contextVS.setNavigationDrawerEventState(EventVSState.OPEN);
                         break;
                     case PENDING_CHILD_POSITION:
-                        androidContextVS.setNavigationDrawerEventState(EventState.PENDING);
+                        contextVS.setNavigationDrawerEventState(EventVSState.PENDING);
                         break;
                     case CLOSED_CHILD_POSITION:
-                        androidContextVS.setNavigationDrawerEventState(EventState.CLOSED);
+                        contextVS.setNavigationDrawerEventState(EventVSState.CLOSED);
                         break;
                 }
                 updateActionBarTitle();
             }
         });
-        androidContextVS = AndroidContextVS.getInstance(getBaseContext());
+        contextVS = ContextVSImpl.getInstance(getBaseContext());
         expListView = (ExpandableListView) findViewById(R.id.left_drawer);
         prepareListData();
         listAdapter = new ExpandableListAdapter(this, listDataHeader, listDataChild);
@@ -136,31 +137,31 @@ public class NavigationDrawer extends ActionBarActivity {
                         listDataHeader.get(groupPosition) + " - : " +
                         listDataChild.get(listDataHeader.get(groupPosition)).get(childPosition));
                 searchQuery = null;
-                SubSystem selectedSubSystem = null;
-                EventState selectedEventState = null;
+                SubSystemVS selectedSubSystemVS = null;
+                EventVSState selectedEventVSState = null;
                 switch(groupPosition) {
                     case VOTING_GROUP_POSITION:
-                        selectedSubSystem = SubSystem.VOTING;
+                        selectedSubSystemVS = SubSystemVS.VOTING;
                         break;
                     case MANIFEST_GROUP_POSITION:
-                        selectedSubSystem = SubSystem.MANIFESTS;
+                        selectedSubSystemVS = SubSystemVS.MANIFESTS;
                         break;
                     case CLAIM_GROUP_POSITION:
-                        selectedSubSystem = SubSystem.CLAIMS;
+                        selectedSubSystemVS = SubSystemVS.CLAIMS;
                         break;
                 }
                 switch(childPosition) {
                     case OPEN_CHILD_POSITION:
-                        selectedEventState = EventState.OPEN;
+                        selectedEventVSState = EventVSState.OPEN;
                         break;
                     case PENDING_CHILD_POSITION:
-                        selectedEventState = EventState.PENDING;
+                        selectedEventVSState = EventVSState.PENDING;
                         break;
                     case CLOSED_CHILD_POSITION:
-                        selectedEventState = EventState.CLOSED;
+                        selectedEventVSState = EventVSState.CLOSED;
                         break;
                 }
-                selectItem(selectedSubSystem, selectedEventState);
+                selectItem(selectedSubSystemVS, selectedEventVSState);
                 return true;
             }
         });
@@ -183,10 +184,10 @@ public class NavigationDrawer extends ActionBarActivity {
         ) {
             public void onDrawerClosed(View view) {
                 getSupportActionBar().setTitle(
-                        androidContextVS.getSelectedSubsystem().getDescription(getBaseContext()));
+                        contextVS.getSelectedSubsystem().getDescription(getBaseContext()));
                 getSupportActionBar().setSubtitle(
-                        androidContextVS.getNavigationDrawerEventState().getDescription(
-                        androidContextVS.getSelectedSubsystem(), getBaseContext()));
+                        contextVS.getNavigationDrawerEventState().getDescription(
+                        contextVS.getSelectedSubsystem(), getBaseContext()));
                 updateActionbarLogo();
                 ActivityCompat.invalidateOptionsMenu(NavigationDrawer.this);
             }
@@ -203,18 +204,18 @@ public class NavigationDrawer extends ActionBarActivity {
         if (Intent.ACTION_SEARCH.equals(getIntent().getAction())) {
             searchQuery = getIntent().getStringExtra(SearchManager.QUERY);
         } else searchQuery = null;
-        selectItem(androidContextVS.getSelectedSubsystem(), androidContextVS.getNavigationDrawerEventState());
+        selectItem(contextVS.getSelectedSubsystem(), contextVS.getNavigationDrawerEventState());
     }
 
     private void updateActionBarTitle() {
-        getSupportActionBar().setTitle(androidContextVS.getSelectedSubsystem().getDescription(getBaseContext()));
-        getSupportActionBar().setSubtitle(androidContextVS.getNavigationDrawerEventState().getDescription(
-                androidContextVS.getSelectedSubsystem(), getBaseContext()));
+        getSupportActionBar().setTitle(contextVS.getSelectedSubsystem().getDescription(getBaseContext()));
+        getSupportActionBar().setSubtitle(contextVS.getNavigationDrawerEventState().getDescription(
+                contextVS.getSelectedSubsystem(), getBaseContext()));
         updateActionbarLogo();
     }
 
     private void updateActionbarLogo() {
-        switch (androidContextVS.getSelectedSubsystem()) {
+        switch (contextVS.getSelectedSubsystem()) {
             case CLAIMS:
                 getSupportActionBar().setLogo(R.drawable.filenew_22);
                 break;
@@ -236,31 +237,31 @@ public class NavigationDrawer extends ActionBarActivity {
     }
 
 
-    private void selectItem(SubSystem subSystem, EventState eventState) {
-        Log.d(TAG + ".selectItem()", " - subSystem: " + subSystem + " - eventState: " + eventState +
-             " - eventPosition: " +  eventState.getposition() + " - searchQuery: " + searchQuery);
+    private void selectItem(SubSystemVS subSystemVS, EventVSState eventVSState) {
+        Log.d(TAG + ".selectItem()", " - subSystemVS: " + subSystemVS + " - eventVSState: " + eventVSState +
+             " - eventPosition: " +  eventVSState.getposition() + " - searchQuery: " + searchQuery);
         // update the main content by replacing fragments
         /*Fragment fragment = new EventListFragment();
         Bundle args = new Bundle();
-        args.putString("eventState", eventState.toString());
-        args.putString("subSystem", subSystem.toString());
+        args.putString("eventVSState", eventVSState.toString());
+        args.putString("subSystemVS", subSystemVS.toString());
 
         fragment.setArguments(args);
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.pager, fragment).commit();*/
         boolean subSystemChanged = true;
-        SubSystem previousSelectedSubsystem = androidContextVS.getSelectedSubsystem();
-        if(subSystem == previousSelectedSubsystem) subSystemChanged = false;
+        SubSystemVS previousSelectedSubsystem = contextVS.getSelectedSubsystem();
+        if(subSystemVS == previousSelectedSubsystem) subSystemChanged = false;
         mDrawerLayout.closeDrawer(expListView);
-        androidContextVS.setSelectedSubsystem(subSystem);
-        androidContextVS.setNavigationDrawerEventState(eventState);
+        contextVS.setSelectedSubsystem(subSystemVS);
+        contextVS.setNavigationDrawerEventState(eventVSState);
         updateActionBarTitle();
         if(subSystemChanged) {
             Log.d(TAG +  ".selectItem", " - changing subsystem");
             SubsystemPagerAdapter subsystemPagerAdapter = new SubsystemPagerAdapter(getSupportFragmentManager());
             mViewPager.setAdapter(subsystemPagerAdapter);
         }
-        mViewPager.setCurrentItem(eventState.getposition(), true);
+        mViewPager.setCurrentItem(eventVSState.getposition(), true);
     }
 
     @Override public boolean onCreateOptionsMenu(Menu menu) {
@@ -288,7 +289,7 @@ public class NavigationDrawer extends ActionBarActivity {
                 onSearchRequested();
                 return true;
             case R.id.get_cert:
-                switch(androidContextVS.getState()) {
+                switch(contextVS.getState()) {
                     case SIN_CSR:
                         startActivity(new Intent(this, MainActivity.class));
                         return true;
@@ -408,24 +409,24 @@ public class NavigationDrawer extends ActionBarActivity {
         }
 
         @Override public Fragment getItem(int i) {
-            EventState eventState = null;
+            EventVSState eventVSState = null;
             switch(i) {
                 case OPEN_CHILD_POSITION:
-                    eventState = EventState.OPEN;
+                    eventVSState = EventVSState.OPEN;
                     break;
                 case PENDING_CHILD_POSITION:
-                    eventState = EventState.PENDING;
+                    eventVSState = EventVSState.PENDING;
                     break;
                 case CLOSED_CHILD_POSITION:
-                    eventState = EventState.CLOSED;
+                    eventVSState = EventVSState.CLOSED;
                     break;
             }
-            Log.d(TAG + ".SubsystemPagerAdapter.getItem(...) ", " - item: " + i + " - subSystem: " +
-                    androidContextVS.getSelectedSubsystem() + " - eventState: " + eventState +
+            Log.d(TAG + ".SubsystemPagerAdapter.getItem(...) ", " - item: " + i + " - subSystemVS: " +
+                    contextVS.getSelectedSubsystem() + " - eventVSState: " + eventVSState +
                     " - searchQuery: " + searchQuery);
             Bundle args = new Bundle();
-            args.putString("subSystem", androidContextVS.getSelectedSubsystem().toString());
-            args.putString("eventState", eventState.toString());
+            args.putString("subSystemVS", contextVS.getSelectedSubsystem().toString());
+            args.putString("eventVSState", eventVSState.toString());
             args.putString(SearchManager.QUERY, searchQuery);
             Fragment fragment = new EventListFragment();
             fragment.setArguments(args);

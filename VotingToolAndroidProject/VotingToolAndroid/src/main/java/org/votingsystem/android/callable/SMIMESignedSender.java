@@ -21,8 +21,8 @@ import android.util.Log;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.votingsystem.android.R;
-import org.votingsystem.android.model.AndroidContextVS;
-import org.votingsystem.android.util.HttpHelper;
+import org.votingsystem.model.ContextVSImpl;
+import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
@@ -40,8 +40,8 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Callable;
 
-import static org.votingsystem.android.model.AndroidContextVS.USER_CERT_ALIAS;
-import static org.votingsystem.android.model.AndroidContextVS.SIGNATURE_ALGORITHM;
+import static org.votingsystem.model.ContextVSImpl.USER_CERT_ALIAS;
+import static org.votingsystem.model.ContextVSImpl.SIGNATURE_ALGORITHM;
 
 public class SMIMESignedSender implements Callable<ResponseVS> {
 
@@ -54,7 +54,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
     private String serviceURL = null;
     private String subject = null;
     private String signatureContent = null;
-    private AndroidContextVS androidContextVS = null;
+    private ContextVSImpl contextVS = null;
     private byte[] keyStoreBytes = null;
     private boolean isEncryptedResponse = false;
 
@@ -69,13 +69,13 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
         this.serviceURL = serviceURL;
         this.isEncryptedResponse = isEncryptedResponse;
         this.destinationCert = destinationCert;
-        androidContextVS = AndroidContextVS.getInstance(context);
+        contextVS = ContextVSImpl.getInstance(context);
     }
 
     @Override public ResponseVS call() {
         Log.d(TAG + ".call", " - call - url: " + serviceURL);
         String userVS = null;
-        if (androidContextVS.getUserVS() != null) userVS = androidContextVS.getUserVS().getNif();
+        if (contextVS.getUserVS() != null) userVS = contextVS.getUserVS().getNif();
         MessageTimeStamper timeStamper = null;
         ResponseVS responseVS = null;
         KeyPair keypair = null;
@@ -83,7 +83,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
                     keyStoreBytes, USER_CERT_ALIAS, password, SIGNATURE_ALGORITHM);
             smimeMessage = signedMailGenerator.genMimeMessage(userVS,
-                    androidContextVS.getAccessControlVS().getNameNormalized(),
+                    contextVS.getAccessControlVS().getNameNormalized(),
                     signatureContent, subject, null);
             if(isEncryptedResponse) {
                 KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);

@@ -1,20 +1,17 @@
-package org.votingsystem.android.model;
+package org.votingsystem.model;
 
 import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.votingsystem.model.EventVS;
-import org.votingsystem.model.EventQueryResponseVS;
-import org.votingsystem.model.TypeVS;
 
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EventQueryResponse implements EventQueryResponseVS {
+public class EventVSResponse {
 	
-	public static final String TAG = "EventQueryResponse";
+	public static final String TAG = "EventVSResponse";
 
     private int numEventsVSManifest;
     private int numEventsVSManifestInSystem;
@@ -37,30 +34,18 @@ public class EventQueryResponse implements EventQueryResponseVS {
             return offset;
     }
 
-    /**
-     * @return the numEventsVSManifest
-     */
     public int getNumeroEventosFirmaEnPeticion() {
         return numEventsVSManifest;
     }
 
-    /**
-     * @param numEventsVSManifest the numEventsVSManifest to set
-     */
     public void setNumeroEventosFirmaEnPeticion(int numEventsVSManifest) {
         this.numEventsVSManifest = numEventsVSManifest;
     }
 
-    /**
-     * @return the numEventsVSManifestInSystem
-     */
     public int getNumeroTotalEventosFirmaEnSistema() {
         return numEventsVSManifestInSystem;
     }
 
-    /**
-     * @param numEventsVSManifestInSystem the numEventsVSManifestInSystem to set
-     */
     public void setNumeroTotalEventosFirmaEnSistema(int numEventsVSManifestInSystem) {
         this.numEventsVSManifestInSystem = numEventsVSManifestInSystem;
     }
@@ -157,7 +142,7 @@ public class EventQueryResponse implements EventQueryResponseVS {
 		this.eventVSes = eventVSes;
 	}
     
-	public static EventQueryResponse parse(String consultaStr) throws ParseException, JSONException {
+	public static EventVSResponse parse(String consultaStr) throws ParseException, JSONException {
     	Log.d(TAG + ".parse(...)", "parse(...)");
     	JSONObject jsonObject = new JSONObject (consultaStr);
         List<EventVS> eventVSes = new ArrayList<EventVS>();
@@ -195,27 +180,27 @@ public class EventQueryResponse implements EventQueryResponseVS {
                 }	
         	}
         }
-        EventQueryResponse eventQueryResponse = new EventQueryResponse();
+        EventVSResponse eventVSResponse = new EventVSResponse();
         if(jsonEventos.has("numEventsVSManifest"))
-        	eventQueryResponse.setNumeroEventosFirmaEnPeticion(jsonObject.getInt("numEventsVSManifest"));
+        	eventVSResponse.setNumeroEventosFirmaEnPeticion(jsonObject.getInt("numEventsVSManifest"));
         if(jsonEventos.has("numEventsVSManifestInSystem"))
-        	eventQueryResponse.setNumeroTotalEventosFirmaEnSistema(jsonObject.getInt("numEventsVSManifestInSystem"));
+        	eventVSResponse.setNumeroTotalEventosFirmaEnSistema(jsonObject.getInt("numEventsVSManifestInSystem"));
         if(jsonEventos.has("numEventsVSElection"))
-        	eventQueryResponse.setNumeroEventosVotacionEnPeticion(jsonObject.getInt("numEventsVSElection"));
+        	eventVSResponse.setNumeroEventosVotacionEnPeticion(jsonObject.getInt("numEventsVSElection"));
         if(jsonEventos.has("numEventsVSElectionInSystem"))
-        	eventQueryResponse.setNumeroTotalEventosVotacionEnSistema(jsonObject.getInt("numEventsVSElectionInSystem"));
+        	eventVSResponse.setNumeroTotalEventosVotacionEnSistema(jsonObject.getInt("numEventsVSElectionInSystem"));
         if(jsonEventos.has("numEventsVSClaim"))
-        	eventQueryResponse.setNumeroEventosReclamacionEnPeticion(jsonObject.getInt("numEventsVSClaim"));
+        	eventVSResponse.setNumeroEventosReclamacionEnPeticion(jsonObject.getInt("numEventsVSClaim"));
         if(jsonEventos.has("numEventsVSClaimInSystem"))
-        	eventQueryResponse.setNumeroTotalEventosReclamacionEnSistema(jsonObject.getInt("numEventsVSClaimInSystem"));
+        	eventVSResponse.setNumeroTotalEventosReclamacionEnSistema(jsonObject.getInt("numEventsVSClaimInSystem"));
         if(jsonEventos.has("numEventVSInRequest"))
-        	eventQueryResponse.setNumeroEventosEnPeticion(jsonObject.getInt("numEventVSInRequest"));
+        	eventVSResponse.setNumeroEventosEnPeticion(jsonObject.getInt("numEventVSInRequest"));
         if(jsonEventos.has("numEventVSInSystem"))
-        	eventQueryResponse.setNumeroTotalEventosEnSistema(jsonObject.getInt("numEventVSInSystem"));
+        	eventVSResponse.setNumeroTotalEventosEnSistema(jsonObject.getInt("numEventVSInSystem"));
         if (jsonObject.has("offset"))
-            eventQueryResponse.setOffset(jsonObject.getInt("offset"));
-        eventQueryResponse.setEventVSs(eventVSes);
-        return eventQueryResponse;
+            eventVSResponse.setOffset(jsonObject.getInt("offset"));
+        eventVSResponse.setEventVSs(eventVSes);
+        return eventVSResponse;
     }
 	
 }

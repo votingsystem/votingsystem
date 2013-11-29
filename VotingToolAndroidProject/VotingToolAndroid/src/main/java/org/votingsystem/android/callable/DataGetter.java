@@ -3,7 +3,7 @@ package org.votingsystem.android.callable;
 import android.util.Log;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
-import org.votingsystem.android.util.HttpHelper;
+import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.ResponseVS;
 
 import java.util.concurrent.Callable;

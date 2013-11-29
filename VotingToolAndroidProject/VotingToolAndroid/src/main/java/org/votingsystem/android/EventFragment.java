@@ -14,15 +14,15 @@ import android.util.Log;
 import android.view.*;
 import android.view.animation.AnimationUtils;
 import android.widget.*;
+
+import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.model.OptionVS;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.SignedPDFSender;
-import org.votingsystem.android.model.AndroidContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.android.ui.CertNotFoundDialog;
 import org.votingsystem.android.ui.CertPinDialog;
 import org.votingsystem.android.ui.CertPinDialogListener;
-import org.votingsystem.android.util.ServerPaths;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.FileUtils;
@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static org.votingsystem.android.model.AndroidContextVS.*;
+import static org.votingsystem.model.ContextVSImpl.*;
 
 /**
  * @author jgzornoza
@@ -46,7 +46,7 @@ public class EventFragment extends Fragment implements CertPinDialogListener {
     private Button firmarEnviarButton;
     private EventVS event = null;
     private int eventIndex;
-    private AndroidContextVS androidContextVS;
+    private ContextVSImpl contextVS;
     private Map<Integer, EditText> mapaCamposReclamacion;
     private ProcessSignatureTask processSignatureTask;
 
@@ -61,8 +61,8 @@ public class EventFragment extends Fragment implements CertPinDialogListener {
         if(getActivity() == null) return null;
         Bundle args = getArguments();
         eventIndex =  args.getInt(EventPagerActivity.EventsPagerAdapter.EVENT_INDEX_KEY);
-        androidContextVS = AndroidContextVS.getInstance(getActivity());
-        event = (EventVS) androidContextVS.getEvents().get(eventIndex);
+        contextVS = ContextVSImpl.getInstance(getActivity());
+        event = (EventVS) contextVS.getEvents().get(eventIndex);
         View rootView = inflater.inflate(R.layout.event_fragment, container, false);
         TextView subjectTextView = (TextView) rootView.findViewById(R.id.subject_evento);
         String subject = event.getSubject();
@@ -80,8 +80,8 @@ public class EventFragment extends Fragment implements CertPinDialogListener {
         }
         firmarEnviarButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                Log.d(TAG + "- firmarEnviarButton -", " - state: " + androidContextVS.getState().toString());
-                if (!AndroidContextVS.State.CON_CERTIFICADO.equals(androidContextVS.getState())) {
+                Log.d(TAG + "- firmarEnviarButton -", " - state: " + contextVS.getState().toString());
+                if (!ContextVSImpl.State.CON_CERTIFICADO.equals(contextVS.getState())) {
                     Log.d(TAG + "-firmarEnviarButton-", " - showCertNotFoundDialog");
                     showCertNotFoundDialog();
                     return;
@@ -151,12 +151,12 @@ public class EventFragment extends Fragment implements CertPinDialogListener {
     private void showCertNotFoundDialog() {
         CertNotFoundDialog certDialog = new CertNotFoundDialog();
         FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(AndroidContextVS.CERT_NOT_FOUND_DIALOG_ID);
+        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(ContextVSImpl.CERT_NOT_FOUND_DIALOG_ID);
         if (prev != null) {
             ft.remove(prev);
         }
         ft.addToBackStack(null);
-        certDialog.show(ft, AndroidContextVS.CERT_NOT_FOUND_DIALOG_ID);
+        certDialog.show(ft, ContextVSImpl.CERT_NOT_FOUND_DIALOG_ID);
     }
 
 
@@ -337,21 +337,20 @@ public class EventFragment extends Fragment implements CertPinDialogListener {
                 FileInputStream fis = getActivity().openFileInput(KEY_STORE_FILE);
                 keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
                 if(event.getTypeVS().equals(TypeVS.MANIFEST_EVENT)) {
-                    SignedPDFSender signedPDFSender = new SignedPDFSender(ServerPaths.getURLPDFManifest(
-                            androidContextVS.getAccessControlURL(), event.getEventVSId()),
-                            ServerPaths.getURLPDFManifestCollector(androidContextVS.getAccessControlURL(),
-                            event.getEventVSId()), keyStoreBytes, pin.toCharArray(), null, null,
+                    SignedPDFSender signedPDFSender = new SignedPDFSender(
+                            contextVS.getAccessControlVS().getEventVSManifestURL(event.getEventVSId()),
+                            contextVS.getAccessControlVS().getEventVSManifestCollectorURL(event.getEventVSId()),
+                            keyStoreBytes, pin.toCharArray(), null, null,
                             getActivity().getBaseContext());
                     responseVS = signedPDFSender.call();
                 } else if(event.getTypeVS().equals(TypeVS.CLAIM_EVENT)) {
                     String subject = ASUNTO_MENSAJE_FIRMA_DOCUMENTO + event.getSubject();
                     String signatureContent = event.getSignatureContentJSON();
-                    String serviceURL = ServerPaths.getURLReclamacion(
-                            androidContextVS.getAccessControlURL());
+                    String serviceURL = contextVS.getAccessControlVS().getEventVSClaimCollectorURL();
                     boolean isEncryptedResponse = false;
                     SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
                             signatureContent, subject, isEncryptedResponse, keyStoreBytes, pin.toCharArray(),
-                            androidContextVS.getAccessControlVS().getCertificate(), getActivity().getBaseContext());
+                            contextVS.getAccessControlVS().getCertificate(), getActivity().getBaseContext());
                     responseVS = smimeSignedSender.call();
                 }
                 return responseVS;

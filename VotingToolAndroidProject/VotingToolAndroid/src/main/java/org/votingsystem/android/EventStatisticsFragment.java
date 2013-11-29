@@ -26,9 +26,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
-import org.votingsystem.android.model.AndroidContextVS;
+import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.model.EventVS;
-import org.votingsystem.android.util.ServerPaths;
 
 
 public class EventStatisticsFragment extends Fragment {
@@ -40,7 +39,7 @@ public class EventStatisticsFragment extends Fragment {
 
 
     private EventVS eventVS =  null;
-    private AndroidContextVS androidContextVS;
+    private ContextVSImpl contextVS;
 
     private View progressContainer;
     private FrameLayout mainLayout;
@@ -53,11 +52,11 @@ public class EventStatisticsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
         eventIndex =  args.getInt(EventPagerActivity.EventsPagerAdapter.EVENT_INDEX_KEY);
-        androidContextVS = AndroidContextVS.getInstance(getActivity());
-        eventVS = (EventVS) androidContextVS.getEvents().get(eventIndex);
-        androidContextVS.setEvent(eventVS);
+        contextVS = ContextVSImpl.getInstance(getActivity());
+        eventVS = (EventVS) contextVS.getEvents().get(eventIndex);
+        contextVS.setEvent(eventVS);
         rootView = inflater.inflate(R.layout.event_statistics_fragment, container, false);
-        String eventStatisticsURL = ServerPaths.getURLStatistics(eventVS);
+        String eventStatisticsURL = eventVS.getURLStatistics();
         mainLayout = (FrameLayout) rootView.findViewById(R.id.mainLayout);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha( 0);
@@ -73,7 +72,7 @@ public class EventStatisticsFragment extends Fragment {
         Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case android.R.id.home:
-                androidContextVS.setEvent(eventVS);
+                contextVS.setEvent(eventVS);
                 Intent intent = new Intent(getActivity(), EventPagerActivity.class);
                 startActivity(intent);
                 return true;

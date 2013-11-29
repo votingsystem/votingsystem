@@ -1,15 +1,14 @@
-package org.votingsystem.android.util;
+package org.votingsystem.model;
 
 import android.content.Context;
 import org.votingsystem.android.R;
-import org.votingsystem.model.EventVS;
 
 
-public enum EventState {
+public enum EventVSState {
 	
 	OPEN, PENDING, CLOSED;
 	
-	public static EventState valueOf(int position)  {
+	public static EventVSState valueOf(int position)  {
         switch (position) {
 	        case 0: return OPEN;
 	        case 1: return PENDING;
@@ -45,8 +44,8 @@ public enum EventState {
         }
 	}
 
-    public String getDescription(SubSystem subSystem, Context context) {
-        switch(subSystem) {
+    public String getDescription(SubSystemVS subSystemVS, Context context) {
+        switch(subSystemVS) {
             case CLAIMS:
                 switch(this) {
                     case OPEN:

@@ -45,7 +45,6 @@ public class EventVS {
     private Set<OptionVS> fieldsEventVS = new HashSet<OptionVS>(0);
     private Set<OptionVS> campos = new HashSet<OptionVS>(0);
     private Set<EventTagVS> eventTagVSes = new HashSet<EventTagVS>(0);
-    private Set<KeyStoreVS> tokensAcceso = new HashSet<KeyStoreVS>(0);
     private Set<CommentVS> commentVSes = new HashSet<CommentVS>(0);
 
     private Date dateBegin;
@@ -225,114 +224,58 @@ public class EventVS {
         return numeroComentarios;
     }
 
-    /**
-     * @return the controlCenter
-     */
     public ControlCenterVS getControlCenter() {
         return controlCenter;
     }
 
-    /**
-     * @param controlCenter the controlCenter to set
-     */
     public void setControlCenter(ControlCenterVS controlCenter) {
         this.controlCenter = controlCenter;
     }
 
-    /**
-     * @return the numSignaturesCollected
-     */
     public Integer getNumSignaturesCollected() {
         return numSignaturesCollected;
     }
 
-    /**
-     * @param numSignaturesCollected the numSignaturesCollected to set
-     */
     public void setNumSignaturesCollected(Integer numSignaturesCollected) {
         this.numSignaturesCollected = numSignaturesCollected;
     }
 
-    /**
-     * @return the numVotesCollected
-     */
     public Integer getNumVotesCollected() {
         return numVotesCollected;
     }
 
-    /**
-     * @param numVotesCollected the numVotesCollected to set
-     */
     public void setNumVotesCollected(Integer numVotesCollected) {
         this.numVotesCollected = numVotesCollected;
     }
 
-    /**
-     * @return the userVS
-     */
     public UserVS getUserVS() {
         return userVS;
     }
 
-    /**
-     * @param userVS the userVS to set
-     */
     public void setUserVS(UserVS userVS) {
         this.userVS = userVS;
     }
 
-    /**
-     * @return the dateBegin
-     */
     public Date getDateBegin() {
         return dateBegin;
     }
 
-    /**
-     * @param dateBegin the dateBegin to set
-     */
     public void setDateBegin(Date dateBegin) {
         this.dateBegin = dateBegin;
     }
 
-    /**
-     * @return the dateFinish
-     */
     public Date getDateFinish() {
         return dateFinish;
     }
 
-    /**
-     * @param dateFinish the dateFinish to set
-     */
     public void setdateFinish(Date dateFinish) {
         this.dateFinish = dateFinish;
     }
 
-    /**
-     * @return the tokensAcceso
-     */
-    public Set<KeyStoreVS> getTokensAcceso() {
-        return tokensAcceso;
-    }
-
-    /**
-     * @param tokensAcceso the tokensAcceso to set
-     */
-    public void setTokensAcceso(Set<KeyStoreVS> tokensAcceso) {
-        this.tokensAcceso = tokensAcceso;
-    }
-
-    /**
-     * @return the accessControlVS
-     */
     public AccessControlVS getAccessControlVS() {
         return accessControlVS;
     }
 
-    /**
-     * @param accessControlVS the accessControlVS to set
-     */
     public void setAccessControlVS(AccessControlVS accessControlVS) {
         this.accessControlVS = accessControlVS;
     }
@@ -349,7 +292,7 @@ public class EventVS {
         if(!(fecha.after(dateBegin)
         		&& fecha.before(dateFinish))){
         	if(stateEnum == State.ACTIVE){
-        		final String checkURL = ServerPaths.getURLCheckEvent(accessControlURL, eventId);
+        		final String checkURL = ;
                 Runnable runnable = new Runnable() {
                     public void run() {
                     	try {
@@ -364,60 +307,35 @@ public class EventVS {
         }
     }*/
 
-    /**
-     * @return the originHashCertVote
-     */
     public String getOriginHashCertVote() {
         return originHashCertVote;
     }
 
-    /**
-     * @param originHashCertVote the originHashCertVote to set
-     */
     public void setOriginHashCertVote(String originHashCertVote) {
         this.originHashCertVote = originHashCertVote;
     }
 
-    /**
-     * @return the hashCertVoteBase64
-     */
     public String getHashCertVoteBase64() {
         return hashCertVoteBase64;
     }
 
-    /**
-     * @return the hashCertVoteBase64
-     */
     public String getHashCertVoteHex() {
         if (hashCertVoteBase64 == null) return null;
         return new String(Hex.encode(hashCertVoteBase64.getBytes()));
     }
 
-
-    /**
-     * @param hashCertVoteBase64 the hashCertVoteBase64 to set
-     */
     public void setHashCertVoteBase64(String hashCertVoteBase64) {
         this.hashCertVoteBase64 = hashCertVoteBase64;
     }
 
-    /**
-     * @return the originHashAccessRequest
-     */
     public String getOriginHashAccessRequest() {
         return originHashAccessRequest;
     }
 
-    /**
-     * @param originHashAccessRequest the originHashAccessRequest to set
-     */
     public void setOriginHashAccessRequest(String originHashAccessRequest) {
         this.originHashAccessRequest = originHashAccessRequest;
     }
 
-    /**
-     * @return the hashAccessRequestBase64
-     */
     public String getAccessRequestHashBase64() {
         return hashAccessRequestBase64;
     }
@@ -446,9 +364,23 @@ public class EventVS {
         return jsonObject.toString();
     }
 
-    /**
-     * @param hashAccessRequestBase64 the hashAccessRequestBase64 to set
-     */
+    public String getURLStatistics() {
+        String basePath = accessControlVS.getServerURL();
+        switch(this.getTypeVS()) {
+            case VOTING_EVENT:
+                basePath = basePath + "/eventVSElection/";
+                break;
+            case CLAIM_EVENT:
+                basePath = basePath + "/eventVSClaim/";
+                break;
+            case MANIFEST_EVENT:
+                basePath = basePath + "/eventVSManifest/";
+                break;
+        }
+        return basePath + id + "/statistics";
+    }
+
+
     public void setAccessRequestHashBase64(String hashAccessRequestBase64) {
         this.hashAccessRequestBase64 = hashAccessRequestBase64;
     }

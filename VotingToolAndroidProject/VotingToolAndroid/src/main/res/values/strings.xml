@@ -29,11 +29,6 @@
     <string name="option_selected_msg">Seleccionada opción \'%1$s\'</string>
     
     <string name="voting_system_lbl">Sistema de Votación</string>
-    <string name="voting_drop_down_lbl">Votaciones</string>
-    <string name="claims_drop_down_lbl">Reclamaciones</string>
-    <string name="manifiests_drop_down_lbl">Manifiestos</string>
-    <string name="unknown_drop_down_lbl">Sistema desconocido</string>
-    <string name="unknown_event_state_lbl">Evento de tipo desconocido</string>
 
     <string name="subject_lbl">Asunto</string>
     <string name="menuSync">Sincronizar</string>
@@ -75,18 +70,7 @@
     <string name="errorEmail">Debe proporcionar una dirección de correo válida</string>
     <string name="eventVsCancellationDataErrorMsg">Error en los datos de cancelación de evento</string>
     <string name="receiverNotFoundErrorMSg">Falta el name de destinatario del documento firmado</string>
-    
-    <string name="open_voting_lbl">Abiertas</string>
-    <string name="pending_voting_lbl">Pendientes</string>
-    <string name="closed_voting_lbl">Cerradas</string>
 
-    <string name="open_claim_lbl">Abiertas</string>
-    <string name="pending_claim_lbl">Pendientes</string>
-    <string name="closed_claim_lbl">Cerradas</string>
-
-    <string name="open_manifest_lbl">Abiertos</string>
-    <string name="pending_manifest_lbl">Pendientes</string>
-    <string name="closed_manifest_lbl">Cerrados</string>
 
     <string name="unknown_lbl">... UNKNOWN ...</string>
     
@@ -184,11 +168,8 @@
         <a href="%1$s"> las siguientes direcciones</a>]]></string>
         
     <string name="search_query_info_msg"><![CDATA[<b>Resultado de la busqueda</b>: %1$s]]></string>
-    <string name="option_error_msg"><![CDATA[<html>La opción del recibo no coincide con la del voto.
-        <br/> ¿Desea anular la operación?</html>]]></string>
-    <string name="vote_ok_msg"><![CDATA[En el evento \'%1$s\' usted ha elegido la opción \'%2$s\']]></string>
-    <string name="vote_repeated_msg"><![CDATA[Ya había enviado un voto para la convocatoria \'%1$s\' en el que
-        había elegido la opción \'%2$s\']]></string>
+
+
         
     <string name="access_request_repeated_msg"><![CDATA[Usted ya ha votado en el asunto \'%1$s\' <br/><br/>
 	Puede consultar la solicitud anterior visitando <a href="%2$s">este enlace</a>]]></string>
