@@ -58,10 +58,10 @@ dependencies {
     compile ('org.apache.httpcomponents:httpmime:4.2.2') {
         exclude module: 'httpcore'
     }
-    compile project(':VotingToolAndroidProject:libraries:votingsystem')
-    compile project(':VotingToolAndroidProject:libraries:bc')
-    compile project(':VotingToolAndroidProject:libraries:itext')
-    compile project(':VotingToolAndroidProject:libraries:votingsystemimpl')
+    compile project(':libraries:votingsystem')
+    compile project(':libraries:bc')
+    compile project(':libraries:itext')
+    compile project(':libraries:votingsystemimpl')
 
 }
 

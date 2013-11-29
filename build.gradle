@@ -23,8 +23,23 @@ ext {
 }
 
 task buildAll(dependsOn:['VotingSystemLibrary:publish', 'VotingToolApplet:signJar', 'ValidationToolApplet:signJar',
-	 'AccessControl:war', 'ControlCenter:war', ':VotingToolAndroidProject:VotingToolAndroid:release']) << { }
+	 'AccessControl:war', 'ControlCenter:war', ':releaseAndroid']) << { }
 
+
+task releaseAndroid () {
+    doLast {
+        ProcessBuilder pb  = new ProcessBuilder("gradle", "release");
+        pb.directory(file("VotingToolAndroidProject"));
+        Process proc = pb.start();
+        proc.consumeProcessErrorStream(System.err)
+        proc.consumeProcessOutputStream(System.out)
+        if (proc.waitFor() != 0) {
+            throw new Exception("runCommand - project: '${project.name}' - commands: ${commands} - failed")
+        }
+    }
+}
+
+tasks.getByPath('AccessControl:war').mustRunAfter releaseAndroid
 
 task genAppsCerts(dependsOn:['VotingSystemLibrary:classes']) {
 	
@@ -106,7 +121,7 @@ task refreshDependencies(dependsOn:['VotingSystemLibrary:publish']) << {
 }
 
 task generateVotingSystemApps(dependsOn: [':VotingToolApplet:signJar', ':ValidationToolApplet:signJar',
-	':VotingSystemLibrary:publish', ':VotingToolAndroidProject:VotingToolAndroid:release']) {
+	':VotingSystemLibrary:publish', ':releaseAndroid']) {
 }
 
 def copyVotingSystemApps(project) {
@@ -125,7 +140,7 @@ def copyVotingSystemApps(project) {
 	
 	File votingToolAndroid = project.file("web-app/android/VotingToolAndroid.apk")
 	if(votingToolAndroid.exists()) votingToolAndroid.delete()
-	votingToolAndroid << rootProject.votingToolAndroid?.bytes
+	votingToolAndroid << file("VotingToolAndroidProject/VotingToolAndroid/VotingToolAndroid.apk")?.bytes
 
 	copyAppletDeps(project)
 }
