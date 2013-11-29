@@ -10,8 +10,9 @@
       <excludeFolder url="file://$MODULE_DIR$/.gradle" />
       <excludeFolder url="file://$MODULE_DIR$/build" />
     </content>
-    <orderEntry type="jdk" jdkName="openjdk-1.7" jdkType="JavaSDK" />
+    <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" exported="" name="org.codehaus.groovy:groovy-all:2.1.9" level="project" />
     <orderEntry type="module" module-name="VotingSystemLibrary" exported="" />
     <orderEntry type="library" exported="" name="Gradle: plugin-1.3" level="project" />
     <orderEntry type="library" exported="" name="Gradle: httpmime-4.2.4" level="project" />

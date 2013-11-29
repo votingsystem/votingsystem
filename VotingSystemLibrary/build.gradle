@@ -20,7 +20,7 @@ repositories {
 
 dependencies {
 
-    compile localGroovy()
+    compile 'org.codehaus.groovy:groovy-all:2.1.9'
 
     compile 'commons-cli:commons-cli:1.2'
 
@@ -130,7 +130,7 @@ task sourceJar(type: Jar) {
     from sourceSets.main.allJava
 }
 
-task genCertsJava(dependsOn: ['classes'], type: JavaExec) {
+task generateCertificates(dependsOn: ['classes'], type: JavaExec) {
 
     onlyIf {rootProject.certsDataMap}
 
@@ -140,19 +140,6 @@ task genCertsJava(dependsOn: ['classes'], type: JavaExec) {
 
     main = 'org.votingsystem.util.CertGenerator'
     classpath = sourceSets.main.runtimeClasspath
-}
-
-task genCertsGroovy(dependsOn: ['classes'], type: JavaExec) {
-
-    onlyIf {rootProject.certsDataMap}
-
-    doFirst {
-        args groovy.json.JsonOutput.toJson(rootProject.certsDataMap)
-        //args "-h"
-        main = 'org.votingsystem.groovy.util.CertGenerator'
-        classpath = sourceSets.main.runtimeClasspath
-    }
-
 }
 
 

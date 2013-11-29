@@ -1,9 +1,10 @@
 package org.votingsystem.util;
 
+import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
-
+import net.sf.json.JSONSerializer;
 import javax.security.auth.x500.X500PrivateCredential;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -38,11 +39,19 @@ public class CertGenerator {
             certMap.put("rootSubjectDN", "CN=rootSUbjectDN");
             certMap.put("password", "password");      
             generate(certMap);
+        } else {
+            //logger.debug("args[0]: " + args[0]);
+            JSONObject jsonData = (JSONObject) JSONSerializer.toJSON(args[0]);
+            generate(jsonData);
+            /*File rootCertFile = new File(jsonData.getString("rootCertFile"));
+            CertGenerator certGenerator = new CertGenerator(rootCertFile, jsonData.getString("rootSubjectDN"),
+                    jsonData.getString("password"));
+            List<Map> certList = (List<Map>)jsonData.get("certs");
+            for(Map certDataMap : certList) generate(certDataMap);*/
         }
     }
 
-    public CertGenerator(File rootCertFile, String rootSubjectDN, 
-                    String password) throws Exception {
+    public CertGenerator(File rootCertFile, String rootSubjectDN, String password) throws Exception {
         if(ContextVS.getInstance() == null)
             ContextVS.init(null, "VotingSystemLibrary_log4j.properties", 
                     "VotingSystemLibraryMessages_", "es");
@@ -89,8 +98,7 @@ public class CertGenerator {
         File rootCertFile = null;
         String rootSubjectDN = null;
         String password = null;
-        if (certsMap.get("rootCertFile") != null && 
-                !"null".equals(certsMap.get("rootCertFile"))) {
+        if (certsMap.get("rootCertFile") != null &&  !"null".equals(certsMap.get("rootCertFile"))) {
         	rootCertFile = new File((String) certsMap.get("rootCertFile"));
         } else throw new Exception(" --- Missing arg -> rootCertFile");
         if (certsMap.get("rootSubjectDN") != null && 
@@ -102,8 +110,7 @@ public class CertGenerator {
         	password = (String) certsMap.get("password");
         } else throw new Exception(" --- Missing arg -> password");
         CertGenerator cerGenerator = new CertGenerator(rootCertFile, rootSubjectDN, password);
-        if (certsMap.get("certs") != null && 
-                !"null".equals(certsMap.get("certs"))) {
+        if (certsMap.get("certs") != null &&  !"null".equals(certsMap.get("certs"))) {
             List<Map> certList = (List<Map>) certsMap.get("certs");
             for(Map certMap : certList) {
             	File certFile = null;
@@ -123,12 +130,8 @@ public class CertGenerator {
                 if (certMap.containsKey("isTimeStampingCert")) {
                 	isTimeStampingCert = (Boolean) certMap.get("isTimeStampingCert");
                 } else throw new Exception("Cert with Missing arg -> isTimeStampingCert");
-                if(isTimeStampingCert) {
-                    cerGenerator.genTimeStampingKeyStore(
-                            distinguishedName, certFile, alias);
-                } else {
-                    cerGenerator.genUserKeyStore(distinguishedName, certFile, alias);
-                }
+                if(isTimeStampingCert) cerGenerator.genTimeStampingKeyStore(distinguishedName, certFile, alias);
+                else cerGenerator.genUserKeyStore(distinguishedName, certFile, alias);
             }
         }
     }
