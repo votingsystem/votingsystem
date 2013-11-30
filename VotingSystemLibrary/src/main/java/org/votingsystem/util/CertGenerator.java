@@ -32,7 +32,7 @@ public class CertGenerator {
     private X500PrivateCredential rootPrivateCredential;
 
     public static void main(String[] args) throws Exception{
-        ContextVS.init(null, "VotingSystemLibrary_log4j.properties", "VotingSystemLibraryMessages_", "es");
+        ContextVS.init(null, "VotingSystemLibrary_log4j.properties", "VotingSystemLibraryMessages.properties", "es");
         if(args == null || args.length == 0) {
             Map certMap = new HashMap();
             certMap.put("rootCertFile", "./webAppsRootCert.jks");
@@ -53,8 +53,7 @@ public class CertGenerator {
 
     public CertGenerator(File rootCertFile, String rootSubjectDN, String password) throws Exception {
         if(ContextVS.getInstance() == null)
-            ContextVS.init(null, "VotingSystemLibrary_log4j.properties", 
-                    "VotingSystemLibraryMessages_", "es");
+            ContextVS.init(null, "VotingSystemLibrary_log4j.properties","VotingSystemLibraryMessages.properties", "es");
         logger.debug(" - rootSubjectDN: " + rootSubjectDN + " - password: " + password + 
                 " - rootCertFile.getAbsolutePath(): " + rootCertFile.getAbsolutePath()); 
         this.password = password;

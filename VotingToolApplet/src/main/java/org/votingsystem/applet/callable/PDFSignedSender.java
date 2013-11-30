@@ -16,7 +16,7 @@ import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.applet.signature.DNIePDFContentSigner;
+import org.votingsystem.signature.dnie.DNIePDFContentSigner;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.applet.votingtool.Applet;
 import org.votingsystem.model.ContentTypeVS;
@@ -88,7 +88,8 @@ public class PDFSignedSender implements Callable<ResponseVS> {
             systemSignedGenerator = signedGenerator;
         } else {
             logger.debug("Generating smartcard VotingSystemSignedGenerator");
-            DNIePDFContentSigner sessionHelper = DNIePDFContentSigner.getInstance(password, Applet.DNIe_SESSION_MECHANISM);
+            DNIePDFContentSigner sessionHelper = DNIePDFContentSigner.getInstance(
+                    password, ContextVS.DNIe_SESSION_MECHANISM);
             signerCertChain = sessionHelper.getCertificateChain();
             systemSignedGenerator = sessionHelper;
         }
@@ -108,7 +109,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
         //sap.setSignDate(cal);
         //sap.setContact("This is the Contact");
         sap.setAcro6Layers(true);
-        final PdfSignature dic = new PdfSignature(PdfName.ADOBE_PPKLITE,  Applet.PDF_SIGNATURE_NAME);
+        final PdfSignature dic = new PdfSignature(PdfName.ADOBE_PPKLITE,  ContextVS.PDF_SIGNATURE_NAME);
         //dic.setDate(new PdfDate(sap.getSignDate()));
         dic.setName(PdfPKCS7.getSubjectFields((X509Certificate)signerCertChain[0]).getField("CN"));
         logger.debug("signAndTimestamp - Firmante: " + PdfPKCS7.getSubjectFields(

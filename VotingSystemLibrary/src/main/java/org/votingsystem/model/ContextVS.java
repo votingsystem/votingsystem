@@ -1,5 +1,8 @@
 package org.votingsystem.model;
 
+import com.itextpdf.text.pdf.PdfName;
+import iaik.pkcs.pkcs11.Mechanism;
+
 import java.io.File;
 import java.io.IOException;
 import org.apache.log4j.Logger;
@@ -17,7 +20,6 @@ import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.ResourceBundle;
 import java.util.logging.Level;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -34,6 +36,9 @@ public class ContextVS {
     public static Session MAIL_SESSION = Session.getDefaultInstance(System.getProperties(), null);
 
     static { Security.addProvider(new BouncyCastleProvider()); }
+
+    public static final Mechanism DNIe_SESSION_MECHANISM = Mechanism.SHA1_RSA_PKCS;
+    public static final PdfName PDF_SIGNATURE_NAME = PdfName.ADBE_PKCS7_SHA1;
 
     public static String BASEDIR =  System.getProperty("user.home");
     public static String APPDIR =  BASEDIR + File.separator +  ".VotingSystem"  + File.separator;
@@ -106,7 +111,7 @@ public class ContextVS {
     private Map<String, VoteVS> receiptMap;
 
     private AppHostVS appHost;
-    private static ResourceBundle resourceBundle;
+    private static Properties appProperties;
     private UserVS userVS;
     private ActorVS accessControl;
     private ActorVS controlCenter;
@@ -114,27 +119,33 @@ public class ContextVS {
 
     private ContextVS(){}
 
-    private ContextVS(AppHostVS appHost, String localizatedMessagesFileName, String locale) {
+    private ContextVS(AppHostVS appHost, String logPropertiesFile, String localizatedMessagesFileName, String locale) {
         this.appHost = appHost;
-        resourceBundle = ResourceBundle.getBundle(
-                localizatedMessagesFileName + locale);
+        try {
+            Properties props = new Properties();
+            props.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(logPropertiesFile));
+            PropertyConfigurator.configure(props);
+            appProperties = new Properties();
+            appProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(
+                    "VotingSystemLibraryMessages" + "_" + locale +  ".properties"));
+            appProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(
+                    localizatedMessagesFileName.split("\\.")[0] + "_" + locale + ".properties"));
+        } catch (Exception ex) {
+            logger.error("localizatedMessagesFileName: " + localizatedMessagesFileName);
+            java.util.logging.Logger.getLogger(ContextVS.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public static void init (AppHostVS appHost, String logPropertiesFile,
                              String localizatedMessagesFileName, String locale) throws Exception {
-        Properties props = new Properties();
-        props.load(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(logPropertiesFile));
-        PropertyConfigurator.configure(props);
         VotingSystemKeyGenerator.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
-        INSTANCE = new ContextVS(appHost, localizatedMessagesFileName, locale);
+        INSTANCE = new ContextVS(appHost, logPropertiesFile, localizatedMessagesFileName, locale);
     }
 
     public static void init () throws Exception {
         INSTANCE = new ContextVS();
         VotingSystemKeyGenerator.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
     }
-
 
     public static void initSignatureApplet (AppHostVS appHost, String logPropertiesFile, String localizatedMessagesFileName, String locale){
         try {
@@ -208,9 +219,9 @@ public class ContextVS {
 
     public static String getMessage(String key, Object... arguments) {
         try {
-            String pattern = resourceBundle.getString(key);
+            String pattern = appProperties.getProperty(key);
             if(arguments.length > 0) return MessageFormat.format(pattern, arguments);
-            else return resourceBundle.getString(key);
+            else return pattern;
         } catch(Exception ex) {
             logger.error("### Value not found for key: " + key);
             return "---" + key + "---";

@@ -25,7 +25,7 @@ dependencies {
 
 jar {
 	manifest {
-		attributes 'Main-Class': 'org.votingsystem.applet.votingtool.Applet',
+		attributes 'Main-Class': 'Applet',
 				   'SplashScreen-Image':'resources/fatcow_32/gnupg_keys.png',
 				   'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/VotingToolApplet',
 				   'provider': 'GruposP2P'
@@ -36,7 +36,7 @@ jar {
 task buildApplet(type:VotingSystemApplet){
 
 	manifest {
-		attributes 'Main-Class': 'org.votingsystem.applet.votingtool.Applet',
+		attributes 'Main-Class': 'Applet',
 				   'SplashScreen-Image':'resources/images/cert_100x108.png',
 				   'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/VotingToolApplet',
 				   'provider': 'GruposP2P'
@@ -63,7 +63,7 @@ buildApplet.dependsOn classes
 signJar.dependsOn buildApplet
 
 project.ext {
-  mainClass = "org.votingsystem.applet.votingtool.Applet"
+  mainClass = "Applet"
 }
 
 sourceSets {

@@ -76,8 +76,8 @@ public class OSValidator {
             } 
         }
         else if(isUnix()) {
-            //pkcs11LibraryPath = "/usr/local/lib/opensc-pkcs11.so";
-            //pkcs11LibraryPath = "/lib/opensc-pkcs11.so";
+            //pkcs11LibraryPath = "/usr/local/lib/opensc-iaik.pkcs.pkcs11.so";
+            //pkcs11LibraryPath = "/lib/opensc-iaik.pkcs.pkcs11.so";
             libName = LINUX_LIB;
             if (System.getProperty("os.arch").indexOf("64") >= 0) {
             	dirAddedToSystemClasspath = LINUX_x64_IAIK_SYSTEM_CLASSPATH;
@@ -122,11 +122,11 @@ public class OSValidator {
         }
         else if(isUnix()) {
             pkcs11LibraryPath = getPKCS11LibPath();
-            //pkcs11LibraryPath = "/usr/local/lib/opensc-pkcs11.so";
-            //pkcs11LibraryPath = "/lib/opensc-pkcs11.so";
+            //pkcs11LibraryPath = "/usr/local/lib/opensc-iaik.pkcs.pkcs11.so";
+            //pkcs11LibraryPath = "/lib/opensc-iaik.pkcs.pkcs11.so";
         }
         else if(isMac()) {
-            pkcs11LibraryPath = "/Library/OpenSC/lib/opensc-pkcs11.so";
+            pkcs11LibraryPath = "/Library/OpenSC/lib/opensc-iaik.pkcs.pkcs11.so";
         }
         return pkcs11LibraryPath;
     }
@@ -134,9 +134,9 @@ public class OSValidator {
     
     public static String getPKCS11LibPath() {
         String[] systemLibraryList = { "/usr/lib/opensc-pkcs11.so",
-            "/usr/local/lib/opensc-pkcs11.so",
-            "/lib/opensc-pkcs11.so", "C:\\WINDOWS\\system32\\UsrPkcs11.dll",
-            "C:\\Windows\\SysWOW64\\UsrPkcs11.dll"};
+                "/usr/local/lib/opensc-pkcs11.so",
+                "/lib/opensc-pkcs11.so", "C:\\WINDOWS\\system32\\UsrPkcs11.dll",
+                "C:\\Windows\\SysWOW64\\UsrPkcs11.dll"};
 
         for (String file : systemLibraryList) {
             File f = new File(file);

@@ -1,5 +1,5 @@
 <% def jarArchives = "ValidationToolApplet.jar"
-	String depsPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}/applet/lib"
+	String depsPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}/org.votingsystem.applet/lib"
 	def appletJarDependencies = []
 	new File(depsPath).eachFile() { file->
 		if(file.path.endsWith(".jar"))
@@ -16,8 +16,8 @@
         <r:layoutResources />
     </head>
     <body onload="loadCallerCallback()">
-		<APPLET CODEBASE="${grailsApplication.config.grails.serverURL}/applet" 
-     		CODE="org.votingsystem.applet.votingtool.Applet" 
+		<APPLET CODEBASE="${grailsApplication.config.grails.serverURL}/org.votingsystem.applet"
+     		CODE="Applet"
      		ARCHIVE="${jarArchives}" 
      		HEIGHT=200
      		WIDTH=600> 

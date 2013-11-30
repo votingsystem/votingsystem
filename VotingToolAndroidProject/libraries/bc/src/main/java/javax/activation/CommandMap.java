@@ -93,7 +93,7 @@ public abstract class CommandMap {
 	    } catch (SecurityException ex) {
 		// otherwise, we also allow it if this code and the
 		// factory come from the same class loader (e.g.,
-		// the JAF classes were loaded with the applet classes).
+		// the JAF classes were loaded with the org.votingsystem.applet classes).
 		if (CommandMap.class.getClassLoader() !=
 			    commandMap.getClass().getClassLoader())
 		    throw ex;

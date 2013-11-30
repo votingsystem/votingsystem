@@ -4,7 +4,7 @@ apply plugin: 'java'
 apply plugin:'application'
 apply plugin: "idea"
 
-mainClassName = "org.votingsystem.applet.validationtool.Applet"
+mainClassName = "org.votingsystem.org.votingsystem.applet.validationtool.Applet"
 
 dependencies {
 	
@@ -31,7 +31,7 @@ dependencies {
 task buildApplet(type:VotingSystemApplet) {
 
 	manifest {
-		attributes 'Main-Class': 'org.votingsystem.applet.validationtool.Applet',
+		attributes 'Main-Class': 'org.votingsystem.org.votingsystem.applet.validationtool.Applet',
 				   'SplashScreen-Image':'resources/fatcow_32/gnupg_keys.png',
 				   'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/ValidationToolApplet',
 				   'provider': 'VotingSystem'
@@ -60,7 +60,7 @@ signJar.dependsOn buildApplet
 
 
 project.ext {
-	mainClass = "org.votingsystem.applet.validationtool.Applet"
+	mainClass = "org.votingsystem.org.votingsystem.applet.validationtool.Applet"
 }
 
 sourceSets {

@@ -33,7 +33,7 @@ public class Applet extends JApplet implements AppHostVS {
     @Override  public void init() {
         logger.debug("init");
         //Execute a job on the event-dispatching thread:
-        //creating this applet's GUI.
+        //creating this org.votingsystem.applet's GUI.
         try {
             ContextVS.init(this, "log4jValidationTool.properties", "validationToolMessages_", locale);
             javax.swing.SwingUtilities.invokeLater(new Runnable() {

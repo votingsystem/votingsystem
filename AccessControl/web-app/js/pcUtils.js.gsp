@@ -113,7 +113,7 @@ var VotingSystemApplet = function () {
 	this.getMessageToSignatureClient = function (appMessage) {
 		var result
 		if(messageToSignatureClient != null) {
-			console.log("getMessageToSignatureClient - delivering message to applet");
+			console.log("getMessageToSignatureClient - delivering message to org.votingsystem.applet");
 			result = messageToSignatureClient
 			messageToSignatureClient = null
 		}
@@ -123,7 +123,7 @@ var VotingSystemApplet = function () {
 	this.getMessageToValidationTool = function (appMessage) {
 		var result
 		if(messageToValidationTool != null) {
-			console.log("getMessageToValidationTool - delivering message to applet: " + appMessage);
+			console.log("getMessageToValidationTool - delivering message to org.votingsystem.applet: " + appMessage);
 			result = messageToValidationTool
 			messageToValidationTool = null
 		}

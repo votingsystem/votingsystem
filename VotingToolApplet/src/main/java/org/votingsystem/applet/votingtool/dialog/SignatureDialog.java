@@ -30,7 +30,7 @@ import org.votingsystem.applet.callable.InfoSender;
 import org.votingsystem.applet.callable.PDFSignedSender;
 import org.votingsystem.applet.callable.SMIMESignedSender;
 import org.votingsystem.util.PdfFormHelper;
-import org.votingsystem.applet.signature.DNIeContentSignerImpl;
+import org.votingsystem.signature.dnie.DNIeContentSignerImpl;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.applet.votingtool.panel.ProgressBarPanel;
 import org.votingsystem.model.ContentTypeVS;

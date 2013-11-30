@@ -30,11 +30,11 @@ class VotingSystemApplet extends Jar {
 		println "--- :${project.name}:VotingSystemApplet --- "
 		buildDirectory = new File("$project.buildDir");
 		if(!buildDirectory.exists()) buildDirectory.mkdir();
-		outputFolder = new File("$project.buildDir/applet-dependencies");
+		outputFolder = new File("$project.buildDir/org.votingsystem.applet-dependencies");
 		if(!outputFolder.exists()) outputFolder.mkdir();
 		classesFolder = new File("$project.buildDir/classes");
 		if(!classesFolder.exists()) classesFolder.mkdir();
-		appletDependencies = new File("$project.buildDir/applet-dependencies.jar")
+		appletDependencies = new File("$project.buildDir/org.votingsystem.applet-dependencies.jar")
 		appletDependencies.delete()
 		from project.sourceSets.main.output
 		from {

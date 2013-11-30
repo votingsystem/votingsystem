@@ -41,53 +41,67 @@ task releaseAndroid () {
 
 tasks.getByPath('AccessControl:war').mustRunAfter releaseAndroid
 
-task genAppsCerts(dependsOn:['VotingSystemLibrary:classes']) {
-	
-	doFirst { }
-	
-	doLast {
-		rootProject.certsDataMap = [rootCertFile:"$projectDir/$rootKeyStorePath",
-			rootSubjectDN:rootSubjectDN, password:keyStorePassword]
-		
-		Map certMap = [file:"$projectDir/$testUserKeyStorePath", 
-			distinguishedName:rootProject.appCertDN, 
-			alias:rootProject.signKeyAlias, isTimeStampingCert:false]
-		
-		List certs = [certMap]
-		rootProject.certsDataMap.certs = certs
-		
-		tasks.getByPath('VotingSystemLibrary:generateCertificates').execute()
-		/*project(':VotingSystemLibrary').tasks.each {task ->
-			println task.path
-		}*/
-	}
+def initRootCertData() {
+    if(!rootProject.certsDataMap) {
+        rootProject.certsDataMap = [rootCertFile:"$projectDir/$rootKeyStorePath",
+                rootSubjectDN:rootSubjectDN, password:keyStorePassword]
+    }
 }
 
-task genWebAppsCerts(dependsOn:['VotingSystemLibrary:classes']) {
-	
-	doFirst { }
-	
+def initAppsCertsData() {
+    initRootCertData()
+    rootProject.certsDataMap = [rootCertFile:"$projectDir/$rootKeyStorePath",
+            rootSubjectDN:rootSubjectDN, password:keyStorePassword]
+
+    Map certMap = [file:"$projectDir/$testUserKeyStorePath",
+            distinguishedName:rootProject.appCertDN,
+            alias:rootProject.signKeyAlias, isTimeStampingCert:false]
+
+    List certs = [certMap]
+    rootProject.certsDataMap.certs = certs
+}
+
+
+def initWebAppsCertsData() {
+    initRootCertData()
+    Map accessControlMap = [file:"$projectDir/AccessControl/web-app/WEB-INF/cms/AccessControl.jks",
+            distinguishedName:accessControlDN, alias:accessControlCertAlias,
+            isTimeStampingCert:true]
+
+    Map controlCenterMap = [file:"$projectDir/ControlCenter/web-app/WEB-INF/cms/ControlCenter.jks",
+            distinguishedName:controlCenterDN, alias:controlCenterCertAlias,
+            isTimeStampingCert:true]
+
+    List certs = [accessControlMap, controlCenterMap]
+    rootProject.certsDataMap.certs = certs
+}
+
+task genWebAppsCerts() {
 	doLast {
-		rootProject.certsDataMap = [rootCertFile:"$projectDir/$rootKeyStorePath",
-			rootSubjectDN:rootSubjectDN, password:keyStorePassword]
-		
-		Map accessControlMap = [file:"$projectDir/AccessControl/web-app/WEB-INF/cms/AccessControl.jks",
-			distinguishedName:accessControlDN, alias:accessControlCertAlias,
-			isTimeStampingCert:true]
-		
-		Map controlCenterMap = [file:"$projectDir/ControlCenter/web-app/WEB-INF/cms/ControlCenter.jks",
-			distinguishedName:controlCenterDN, alias:controlCenterCertAlias,
-			isTimeStampingCert:true]
-		
-		List certs = [accessControlMap, controlCenterMap]
-		rootProject.certsDataMap.certs = certs
+        initWebAppsCertsData()
 		tasks.getByPath('VotingSystemLibrary:generateCertificates').execute()
 	}
 }
 
-genWebAppsCerts.mustRunAfter genAppsCerts
+task genAppsCerts() {
+    doLast {
+        initAppsCertsData()
+        tasks.getByPath('VotingSystemLibrary:generateCertificates').execute()
+    }
+}
 
-task installCerts(dependsOn: ['genAppsCerts', 'genWebAppsCerts'])  { }
+
+task installCerts()  {
+    doFirst { }
+    doLast {
+        initAppsCertsData()
+        initWebAppsCertsData()
+        tasks.getByPath('VotingSystemLibrary:generateCertificates').execute()
+        /*project(':VotingSystemLibrary').tasks.each {task ->
+            println task.path
+        }*/
+    }
+}
 
 
 task uploadApps(dependsOn:['uploadAccessControl', 'uploadControlCenter']) << {}
@@ -125,16 +139,16 @@ task generateVotingSystemApps(dependsOn: [':VotingToolApplet:signJar', ':Validat
 }
 
 def copyVotingSystemApps(project) {
-	File appletDir = project.file("web-app/applet/");
+	File appletDir = project.file("web-app/org.votingsystem.applet/");
 	appletDir.mkdirs();
 	File androidDir = project.file("web-app/android/");
 	androidDir.mkdirs();
 	
-	File votingToolApplet = project.file("web-app/applet/VotingToolApplet.jar")
+	File votingToolApplet = project.file("web-app/org.votingsystem.applet/VotingToolApplet.jar")
 	if(votingToolApplet.exists()) votingToolApplet.delete()
 	votingToolApplet << rootProject.votingToolApplet?.bytes
 	
-	File validationToolApplet = project.file("web-app/applet/ValidationToolApplet.jar")
+	File validationToolApplet = project.file("web-app/org.votingsystem.applet/ValidationToolApplet.jar")
 	if(validationToolApplet.exists()) validationToolApplet.delete()
 	validationToolApplet << rootProject.validationToolApplet?.bytes
 	
@@ -151,10 +165,11 @@ def copyAppletDeps(project) {
 
 task installEditor(dependsOn: [':TestsWebApp:installEditor', ':AccessControl:installEditor'])  { }
 
+task initDevEnvironment(dependsOn: [':installCerts', ':installEditor', ':']) {}
 
 def installAppletBcprov(project) {
 	println "installAppletBcprov - bcprovVersion '$bcprovVersion'"
-	File jarFile = project.file("web-app/applet/lib/bcprov-${bcprovVersion}.jar") 
+	File jarFile = project.file("web-app/org.votingsystem.applet/lib/bcprov-${bcprovVersion}.jar")
 	if(!jarFile.exists()) {
 		jarFile.getParentFile().mkdirs()
 		String jarFileURL = "http://central.maven.org/maven2/org/bouncycastle/bcprov-jdk16/1.46/bcprov-${bcprovVersion}.jar"

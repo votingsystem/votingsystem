@@ -6,7 +6,7 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.applet.callable.AccessRequestor;
 import org.votingsystem.applet.callable.SMIMESignedSender;
-import org.votingsystem.applet.signature.DNIeContentSignerImpl;
+import org.votingsystem.signature.dnie.DNIeContentSignerImpl;
 import org.votingsystem.applet.votingtool.panel.ProgressBarPanel;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;

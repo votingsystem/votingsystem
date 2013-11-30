@@ -149,15 +149,12 @@ log4j = {
 		
 	
     root {
-            debug  'stdout', 'AccessControl'
-			error 'AccessControlERRORES', 'smtp'
+        debug  'stdout', 'AccessControl'
+        error 'AccessControlERRORES', 'smtp'
     }
 
-    debug  'org.votingsystem','filtros',
-           'grails.app',
-           //'org.springframework.security',
-		   //'org.apache.catalina.core',
-		   'com.itextpdf.text.*'
+    debug  'org.votingsystem','filtros', 'grails.app',//, 'com.itextpdf.text.*'
+           'org.springframework.security', 'org.springframework.*', 'org.apache.catalina.core', 'grails.*'
 		   
     error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
            'org.codehaus.groovy.grails.web.pages', //  GSP

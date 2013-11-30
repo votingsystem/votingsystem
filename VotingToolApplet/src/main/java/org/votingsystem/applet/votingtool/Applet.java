@@ -1,7 +1,6 @@
 package org.votingsystem.applet.votingtool;
 
-import com.itextpdf.text.pdf.PdfName;
-import iaik.pkcs.pkcs11.Mechanism;
+
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
@@ -24,9 +23,6 @@ public class Applet extends JApplet implements AppHostVS {
     
     private static Logger logger = Logger.getLogger(Applet.class);
 
-    public static final Mechanism DNIe_SESSION_MECHANISM = Mechanism.SHA1_RSA_PKCS;
-    public static final PdfName PDF_SIGNATURE_NAME = PdfName.ADBE_PKCS7_SHA1;
-
     private static enum ExecutionMode {APPLET, APPLICATION}
 
     private Timer operationGetter;
@@ -45,7 +41,7 @@ public class Applet extends JApplet implements AppHostVS {
         //Execute a job on the event-dispatching thread:
         //creating this applet's GUI.
         try {
-            ContextVS.initSignatureApplet(this, "log4j.properties", "votingToolMessages_", locale);
+            ContextVS.initSignatureApplet(this, "log4j.properties", "votingToolMessages.properties", locale);
             javax.swing.SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     try {
@@ -142,7 +138,7 @@ public class Applet extends JApplet implements AppHostVS {
         }
     }
 
-    public static void main (String[] args) {
+    public static void main (final String[] args) {
         executionMode = ExecutionMode.APPLICATION;
         try {
             javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
@@ -151,10 +147,13 @@ public class Applet extends JApplet implements AppHostVS {
                         UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
                         Applet appletFirma = new Applet();
                         appletFirma.start();
-                        File jsonFile = File.createTempFile("signManifest", ".json");
+                        String fileName = "signManifest";
+                        if(args.length > 0) fileName = args[0];
+                        logger.debug("========== fileName: "  + fileName);
+                        File jsonFile = File.createTempFile(fileName, ".json");
                         jsonFile.deleteOnExit();
                         FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
-                            .getResourceAsStream("testFiles/signManifest.json"), jsonFile);
+                            .getResourceAsStream("testFiles/" + fileName + ".json"), jsonFile);
                         appletFirma.runOperation(FileUtils.getStringFromFile(jsonFile));
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
