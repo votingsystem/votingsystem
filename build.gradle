@@ -165,7 +165,7 @@ def copyAppletDeps(project) {
 
 task installEditor(dependsOn: [':TestsWebApp:installEditor', ':AccessControl:installEditor'])  { }
 
-task initDevEnvironment(dependsOn: [':installCerts', ':installEditor', ':']) {}
+task initDevEnvironment(dependsOn: [':installCerts', ':installEditor', ':AccessControl:copyApps']) {}
 
 def installAppletBcprov(project) {
 	println "installAppletBcprov - bcprovVersion '$bcprovVersion'"
