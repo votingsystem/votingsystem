@@ -17,10 +17,11 @@ import org.bouncycastle.tsp.TimeStampRequest
 import org.bouncycastle.tsp.TimeStampRequestGenerator
 import org.bouncycastle.tsp.TimeStampToken
 import org.votingsystem.model.ContentTypeVS
+import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.signature.util.PDFContentSigner
-import org.votingsystem.simulation.ContextService
+
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.ApplicationContextHolder as ACH
 import org.votingsystem.util.DateUtils
@@ -69,7 +70,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
     
     private ResponseVS doInBackground() throws Exception {
         signGenerator = new PDFContentSigner( signerPrivatekey, signerCertChain,
-				ContextService.PDF_SIGNATURE_MECHANISM, ContextService.PDF_SIGNATURE_DIGEST, ContextService.PDF_DIGEST_OID);
+				ContextVS.PDF_SIGNATURE_MECHANISM, ContextVS.PDF_SIGNATURE_DIGEST, ContextVS.PDF_DIGEST_OID);
         File fileToSend = File.createTempFile("signedPDF", ".pdf");
         fileToSend.deleteOnExit();
 		
@@ -120,13 +121,13 @@ public class PDFSignedSender implements Callable<ResponseVS> {
                     try {
                         // digests the signature
                         MessageDigest d = MessageDigest.getInstance(
-							ContextService.PDF_SIGNATURE_DIGEST);
+							ContextVS.PDF_SIGNATURE_DIGEST);
                         byte[] digest = d.digest(signatureBytes);
                         
                         TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
                         //reqgen.setReqPolicy(m_sPolicyOID);
                         TimeStampRequest timeStampRequest = reqgen.generate(
-							ContextService.TIMESTAMP_PDF_HASH, digest);
+							ContextVS.TIMESTAMP_PDF_HASH, digest);
                         MessageTimeStamper messageTimeStamper = 
                                 new MessageTimeStamper(timeStampRequest);
                         responseVS = messageTimeStamper.call();
@@ -160,7 +161,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
         dic.setDate(new PdfDate(sap.getSignDate()));
         sap.preClose(exc);
-        MessageDigest md = MessageDigest.getInstance(ContextService.PDF_SIGNATURE_DIGEST);
+        MessageDigest md = MessageDigest.getInstance(ContextVS.PDF_SIGNATURE_DIGEST);
         byte[] signatureHash = md.digest(FileUtils.getBytesFromInputStream(sap.getRangeStream()));
         
         CMSSignedData signedData = signGenerator.genSignedData(signatureHash, unsAttr);

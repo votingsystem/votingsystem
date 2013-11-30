@@ -2,11 +2,12 @@ package org.votingsystem.simulation.callable
 
 import org.apache.log4j.Logger
 import org.votingsystem.model.ContentTypeVS
+import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.smime.ValidationResult
-import org.votingsystem.simulation.ContextService
+
 import org.votingsystem.simulation.model.AccessRequestBackup
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.ApplicationContextHolder
@@ -23,37 +24,35 @@ public class AccessRequestCancellerDataSender implements Callable<ResponseVS> {
     private static Logger logger = Logger.getLogger(AccessRequestCancellerDataSender.class);
 
     private AccessRequestBackup request;
-    private ContextService contextService = null;
     
     public AccessRequestCancellerDataSender(AccessRequestBackup request) throws Exception {
         this.request = request;
-        contextService = ApplicationContextHolder.getSimulationContext();
     }
 
     @Override  public ResponseVS call() throws Exception {
-        KeyStore mockDnie = contextService.generateTestDNIe(request.getUserVS().getNif());
-        SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, contextService.END_ENTITY_ALIAS,
-                contextService.PASSWORD.toCharArray(), contextService.VOTE_SIGN_MECHANISM);
-        String subject = contextService.getMessage("cancelAccessRequestMsgSubject") + request.getEventVSId();
-        String voteCancellerFileName = contextService.CANCEL_VOTE_FILE + request.getEventVSId() +"_" +
+        KeyStore mockDnie = ContextVS.getInstance().generateKeyStore(request.getUserVS().getNif());
+        SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, ContextVS.END_ENTITY_ALIAS,
+                ContextVS.PASSWORD.toCharArray(), ContextVS.VOTE_SIGN_MECHANISM);
+        String subject = ContextVS.getInstance().getMessage("cancelAccessRequestMsgSubject") + request.getEventVSId();
+        String voteCancellerFileName = ContextVS.CANCEL_VOTE_FILE + request.getEventVSId() +"_" +
                 request.getUserVS().getNif() + ".p7m"
         byte[] messageBytes = null;
         synchronized(this) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             MimeMessage mimeMessage = signedMailGenerator.genMimeMessage(request.getUserVS().getNif(),
-                    contextService.getAccessControl().getNameNormalized(), request.toJSON().toString(), subject, null);
+                    ContextVS.getInstance().getAccessControl().getNameNormalized(), request.toJSON().toString(), subject, null);
             mimeMessage.writeTo(baos);
             messageBytes = baos.toByteArray();
             baos.close();
-            contextService.copyFileToSimDir(messageBytes, StringUtils.getUserDirPath(request.getUserVS().getNif()),
+            ContextVS.getInstance().copyFile(messageBytes, StringUtils.getUserDirPath(request.getUserVS().getNif()),
                     voteCancellerFileName)
         }
         ResponseVS responseVS = HttpHelper.getInstance().sendData(messageBytes, ContentTypeVS.SIGNED,
-                contextService.getAccessControl().getVoteCancellerServiceURL())
+                ContextVS.getInstance().getAccessControl().getVoteCancellerServiceURL())
         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
             SMIMEMessageWrapper mimeMessage = new SMIMEMessageWrapper(
                     new ByteArrayInputStream(responseVS.getMessageBytes()));
-            ValidationResult validationResult = mimeMessage.verify(contextService.getSessionPKIXParameters());
+            ValidationResult validationResult = mimeMessage.verify(ContextVS.getInstance().getSessionPKIXParameters());
             if (!validationResult.isValidSignature()) {
                 logger.error(" #### Error validating receipt");
             }

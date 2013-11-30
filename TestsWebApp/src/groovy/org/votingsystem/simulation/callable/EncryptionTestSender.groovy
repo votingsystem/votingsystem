@@ -4,10 +4,11 @@ import org.apache.log4j.Logger
 import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.ContentTypeVS
+import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.signature.util.VotingSystemKeyGenerator
-import org.votingsystem.simulation.ContextService
+
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.ApplicationContextHolder
 
@@ -30,7 +31,6 @@ public class EncryptionTestSender implements Callable<ResponseVS> {
     private X509Certificate serverCert = null;
     private PrivateKey privateKey;
     private PublicKey publicKey;
-    private ContextService contextService = null;
 
     public EncryptionTestSender(String requestNIF, String serverURL)  throws Exception {
         this.requestNIF = requestNIF;
@@ -38,8 +38,7 @@ public class EncryptionTestSender implements Callable<ResponseVS> {
         KeyPair keyPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
         this.privateKey = keyPair.getPrivate();
         this.publicKey = keyPair.getPublic();
-        contextService = ApplicationContextHolder.getSimulationContext();
-        serverCert = contextService.getAccessControl().getX509Certificate();
+        serverCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
     }
     @Override public ResponseVS call() throws Exception {
         byte[] encryptedRequestBytes = Encryptor.encryptMessage(

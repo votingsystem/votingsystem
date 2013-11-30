@@ -113,7 +113,7 @@ var VotingSystemApplet = function () {
 	this.getMessageToSignatureClient = function (appMessage) {
 		var result
 		if(messageToSignatureClient != null) {
-			console.log("getMessageToSignatureClient - delivering message to org.votingsystem.applet");
+			console.log("getMessageToSignatureClient - delivering message to applet");
 			result = messageToSignatureClient
 			messageToSignatureClient = null
 		}
@@ -123,7 +123,7 @@ var VotingSystemApplet = function () {
 	this.getMessageToValidationTool = function (appMessage) {
 		var result
 		if(messageToValidationTool != null) {
-			console.log("getMessageToValidationTool - delivering message to org.votingsystem.applet: " + appMessage);
+			console.log("getMessageToValidationTool - delivering message to applet: " + appMessage);
 			result = messageToValidationTool
 			messageToValidationTool = null
 		}
@@ -137,7 +137,7 @@ var VotingSystemApplet = function () {
 			if(isJavaEnabledClient()) {
 				console.log("Loading validationTool")
 				window.getMessageToValidationTool = this.getMessageToValidationTool
-				$("#validationToolAppletFrame").attr("src", '${createLink(controller:'applet', action:'herramientaValidacion')}');
+				$("#validationToolAppletFrame").attr("src", '${createLink(controller:'applet', action:'validationTool')}');
 				$("#loadingVotingSystemAppletDialog").dialog("open");
 				
 			}
@@ -180,7 +180,7 @@ var VotingSystemApplet = function () {
 				console.log("Loading signature client");
 				signatureClientCallback = callerCallback
 				window.getMessageToSignatureClient = this.getMessageToSignatureClient
-				$("#votingSystemAppletFrame").attr("src", '${createLink(controller:'applet', action:'cliente')}');
+				$("#votingSystemAppletFrame").attr("src", '${createLink(controller:'applet', action:'client')}');
 				$("#loadingVotingSystemAppletDialog").dialog("open");
 			} 
     	} else {

@@ -31,7 +31,7 @@ class MailSimulationService {
     private Locale locale = new Locale("es")
 
     def webSocketService
-    def contextService
+
     def messageSource
     private String simulationStarter
 
@@ -98,7 +98,7 @@ class MailSimulationService {
         Folder remoteInbox = pop3Store.getFolder("INBOX");
         remoteInbox.open(Folder.READ_WRITE);
 
-        contextService.init();
+        ContextVS.getInstance().initTestEnvironment("${grailsApplication.config.VotingSystem.simulationFilesBaseDir}");
         simulationData.init(System.currentTimeMillis());
         startBroadcatsTimer();
         errorList = new ArrayList<String>();

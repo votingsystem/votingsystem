@@ -32,6 +32,9 @@
       <sourceFolder url="file://$MODULE_DIR$/grails-app/controllers" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/grails-app/services" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/grails-app/taglib" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/test/integration" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/grails-app/utils" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/grails-app/domain" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.gradle" />
       <excludeFolder url="file://$MODULE_DIR$/build" />
       <excludeFolder url="file://$MODULE_DIR$/target/work/resources" />
@@ -71,11 +74,14 @@
           <root url="jar://$USER_HOME$/.grails/ivy-cache/jfree/jcommon/jars/jcommon-1.0.15.jar!/" />
           <root url="jar://$USER_HOME$/.grails/ivy-cache/jfree/jfreechart/jars/jfreechart-1.0.12.jar!/" />
           <root url="jar://$USER_HOME$/.grails/ivy-cache/com.lowagie/itext/jars/itext-4.2.1.jar!/" />
+          <root url="file://$MODULE_DIR$/lib" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
+        <jarDirectory url="file://$MODULE_DIR$/lib" recursive="false" />
       </library>
     </orderEntry>
+    <orderEntry type="module" module-name="TestsWebApp-grailsPlugins" />
   </component>
 </module>
 

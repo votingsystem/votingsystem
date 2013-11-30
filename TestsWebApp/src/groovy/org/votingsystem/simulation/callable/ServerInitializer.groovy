@@ -6,7 +6,7 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.CertUtil
-import org.votingsystem.simulation.ContextService
+
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.ApplicationContextHolder as ACH
 
@@ -21,12 +21,10 @@ public class ServerInitializer implements Callable<ResponseVS> {
     
     private String serverURL = null;
     private ActorVS.Type serverType = null;
-	private ContextService contextService = null;
     
     public ServerInitializer (String serverURL, ActorVS.Type serverType) throws Exception {
         this.serverType = serverType;
         this.serverURL = serverURL;
-		contextService = ACH.getSimulationContext();
     }
         
     @Override public ResponseVS call() throws Exception {
@@ -58,12 +56,12 @@ public class ServerInitializer implements Callable<ResponseVS> {
                     }
                     break;
             }
-            byte[] rootCACertPEMBytes = CertUtil.getPEMEncoded (contextService.getRootCACert());
+            byte[] rootCACertPEMBytes = CertUtil.getPEMEncoded (ContextVS.getInstance().getRootCACert());
             responseVS = HttpHelper.getInstance().sendData(rootCACertPEMBytes, null,
                     actorVS.getRootCAServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                if(actorVS instanceof AccessControlVS) contextService.setAccessControl(actorVS);
-                if(actorVS instanceof ControlCenterVS) contextService.setControlCenter(actorVS);
+                if(actorVS instanceof AccessControlVS) ContextVS.getInstance().setAccessControl(actorVS);
+                if(actorVS instanceof ControlCenterVS) ContextVS.getInstance().setControlCenter(actorVS);
                 responseVS.setData(actorVS)
             }
         }
@@ -72,17 +70,17 @@ public class ServerInitializer implements Callable<ResponseVS> {
 
     private ResponseVS checkControlCenter(String serverURL) {
         logger.debug("checkControlCenter - serverURL: " + serverURL);
-        String serviceURL = contextService.getAccessControl().getControlCenterCheckServiceURL(serverURL);
+        String serviceURL = ContextVS.getInstance().getAccessControl().getControlCenterCheckServiceURL(serverURL);
         ResponseVS responseVS = HttpHelper.getInstance().getData(serviceURL, ContentTypeVS.JSON);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) return responseVS;
         else {//serverURL isn't associated
             logger.debug("Control Center isn't associated -> Matching serverURL: " + serverURL);
             Map mapToSign = ActorVS.getAssociationDocumentMap(serverURL);
-            String msgSubject = contextService.getMessage("associateControlCenterMsgSubject");
-            SMIMEMessageWrapper smimeDocument = contextService.getUserTestSMIMEMessage(
-                    contextService.getAccessControl().getNameNormalized(), "${mapToSign as JSON}", msgSubject);
+            String msgSubject = ContextVS.getInstance().getMessage("associateControlCenterMsgSubject");
+            SMIMEMessageWrapper smimeDocument = ContextVS.getInstance().genTestSMIMEMessage(
+                    ContextVS.getInstance().getAccessControl().getNameNormalized(), "${mapToSign as JSON}", msgSubject);
             SMIMESignedSender signedSender = new SMIMESignedSender(smimeDocument,
-                    contextService.getAccessControl().getServerSubscriptionServiceURL(), null, null);
+                    ContextVS.getInstance().getAccessControl().getServerSubscriptionServiceURL(), null, null);
             responseVS = signedSender.call();
         }
         return responseVS;

@@ -39,7 +39,6 @@ class ClaimSimulationService {
     private Locale locale = new Locale("es")
 	
 	def webSocketService
-	def contextService
 	def messageSource
 	def grailsApplication
 	private String simulationStarter
@@ -95,7 +94,7 @@ class ClaimSimulationService {
         synchronizedListenerSet = Collections.synchronizedSet(new HashSet<String>())
 		synchronizedListenerSet.add(simulationStarter)
 		simulationData = SimulationData.parse(simulationDataJSON)
-		contextService.init();
+		ContextVS.getInstance().initTestEnvironment("${grailsApplication.config.VotingSystem.simulationFilesBaseDir}");
 		simulationData.init(System.currentTimeMillis());
         startBroadcatsTimer();
         changeSimulationStatus(new ResponseVS(ResponseVS.SC_OK, Status.INIT_SIMULATION, null));
@@ -173,27 +172,27 @@ class ClaimSimulationService {
 		event.setSubject(subject);
 		this.eventVS = event;
 		String eventStr = "${eventVS.getDataMap() as JSON}".toString();
-		String urlPublishClaim = contextService.getAccessControl().getPublishClaimURL()
+		String urlPublishClaim = ContextVS.getInstance().getAccessControl().getPublishClaimURL()
 		String msgSubject = messageSource.getMessage("publishClaimMsgSubject",null, locale);
-		KeyStore keyStore = contextService.getUserTest().getKeyStore()
+		KeyStore keyStore = ContextVS.getInstance().getUserTest().getKeyStore()
 		PrivateKey privateKey = (PrivateKey)keyStore.getKey(
-			contextService.END_ENTITY_ALIAS, contextService.PASSWORD.toCharArray());
-		Certificate[] chain = keyStore.getCertificateChain(contextService.END_ENTITY_ALIAS);
+			ContextVS.END_ENTITY_ALIAS, ContextVS.PASSWORD.toCharArray());
+		Certificate[] chain = keyStore.getCertificateChain(ContextVS.END_ENTITY_ALIAS);
 		signedMailGenerator = new SignedMailGenerator(
-			privateKey, chain, contextService.DNIe_SIGN_MECHANISM);
+			privateKey, chain, ContextVS.DNIe_SIGN_MECHANISM);
 		SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage(
-				contextService.getUserTest().getEmail(),
-				contextService.getAccessControl().getNameNormalized(),
+				ContextVS.getInstance().getUserTest().getEmail(),
+				ContextVS.getInstance().getAccessControl().getNameNormalized(),
 				eventStr, msgSubject,  null);
 		SMIMESignedSender signedSender = new SMIMESignedSender(smimeDocument, urlPublishClaim, null, null);
 		ResponseVS responseVS = signedSender.call();
 		if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
 			try {
 				byte[] responseBytes = responseVS.getMessageBytes();
-				contextService.copyFileToSimDir(responseBytes, "/claimSimulation", "ClaimPublishedReceipt")
+				ContextVS.getInstance().copyFile(responseBytes, "/claimSimulation", "ClaimPublishedReceipt")
 				SMIMEMessageWrapper dnieMimeMessage = new SMIMEMessageWrapper(
 						new ByteArrayInputStream(responseBytes));
-				dnieMimeMessage.verify(contextService.getSessionPKIXParameters());
+				dnieMimeMessage.verify(ContextVS.getInstance().getSessionPKIXParameters());
                 EventVS eventToSign = EventVS.populate(new JSONObject(dnieMimeMessage.getSignedContent()));
                 eventVS.setId(eventToSign.getId());
 			} catch (Exception ex) {
@@ -283,16 +282,16 @@ class ClaimSimulationService {
 
     private void changeEventState() throws Exception {
         log.debug("changeEventState ### Enter status CHANGE_EVENT_STATE");
-        Map cancelDataMap = eventVS.getChangeEventDataMap(contextService.getAccessControl().getServerURL(),
+        Map cancelDataMap = eventVS.getChangeEventDataMap(ContextVS.getInstance().getAccessControl().getServerURL(),
                 simulationData.getEventStateWhenFinished());
         String cancelDataStr = new JSONObject(cancelDataMap).toString()
         String msgSubject = messageSource.getMessage("cancelEventMsgSubject", [eventVS.getId()].toArray(), locale);
-        SignedMailGenerator signedMailGenerator = new SignedMailGenerator(contextService.getUserTest().getKeyStore(),
-                contextService.END_ENTITY_ALIAS, contextService.PASSWORD.toCharArray(), contextService.VOTE_SIGN_MECHANISM);
-        SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage(contextService.getUserTest().getEmail(),
-                contextService.getAccessControl().getNameNormalized(), cancelDataStr, msgSubject,  null);
+        SignedMailGenerator signedMailGenerator = new SignedMailGenerator(ContextVS.getInstance().getUserTest().getKeyStore(),
+                ContextVS.END_ENTITY_ALIAS, ContextVS.PASSWORD.toCharArray(), ContextVS.getInstance().VOTE_SIGN_MECHANISM);
+        SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage(ContextVS.getInstance().getUserTest().getEmail(),
+                ContextVS.getInstance().getAccessControl().getNameNormalized(), cancelDataStr, msgSubject,  null);
         SMIMESignedSender worker = new SMIMESignedSender(smimeDocument,
-                contextService.getAccessControl().getCancelEventServiceURL(), null, null);
+                ContextVS.getInstance().getAccessControl().getCancelEventServiceURL(), null, null);
         ResponseVS responseVS = worker.call();
         responseVS.setStatus(Status.CHANGE_EVENT_STATE);
         changeSimulationStatus(responseVS);
@@ -303,19 +302,19 @@ class ClaimSimulationService {
         byte[] requestBackupPDFBytes = PdfFormHelper.getBackupRequest(eventVS.getId().toString(), event.getSubject(),
                 simulationData.getBackupRequestEmail());
 
-        KeyStore userTestKeyStore = contextService.getUserTest().getKeyStore();
+        KeyStore userTestKeyStore = ContextVS.getInstance().getUserTest().getKeyStore();
         PrivateKey signerPrivateKey = (PrivateKey)userTestKeyStore.getKey(
-                ContextService.END_ENTITY_ALIAS, ContextService.PASSWORD.toCharArray());
-        Certificate[] signerCertChain = userTestKeyStore.getCertificateChain(ContextService.END_ENTITY_ALIAS);
+                ContextVS.END_ENTITY_ALIAS, ContextVS.PASSWORD.toCharArray());
+        Certificate[] signerCertChain = userTestKeyStore.getCertificateChain(ContextVS.END_ENTITY_ALIAS);
 
         PdfReader requestBackupPDF = new PdfReader(requestBackupPDFBytes);
-        String urlBackupEvents = contextService.getAccessControl().getBackupServiceURL();
+        String urlBackupEvents = ContextVS.getInstance().getAccessControl().getBackupServiceURL();
 
         PDFSignedSender worker = new PDFSignedSender(null, urlBackupEvents, null, null, null, requestBackupPDF,
                 signerPrivateKey, signerCertChain, null);
         ResponseVS responseVS = worker.call();
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            String downloadServiceURL = contextService.getAccessControl().getDownloadServiceURL(responseVS.getMessage());
+            String downloadServiceURL = ContextVS.getInstance().getAccessControl().getDownloadServiceURL(responseVS.getMessage());
             responseVS = HttpHelper.getInstance().getData(downloadServiceURL, ContentTypeVS.BACKUP);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 log.debug("TODO validate backup");

@@ -66,7 +66,7 @@ public class PreconditionsCheckerDialog extends JDialog {
         setVisible(true);
     }
         
-    //we konw this is done in a background thread
+    //we know this is done in a background thread
     private ResponseVS<ActorVS> checkActorVS(String serverURL) throws Exception {
         logger.debug(" - checkActorVS: " + serverURL);
         ActorVS actorVS = actorMap.get(serverURL.trim());
@@ -139,7 +139,7 @@ public class PreconditionsCheckerDialog extends JDialog {
                     String serverURL = operationVS.getUrlServer().trim();
                     responseVS = checkActorVS(serverURL);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        ContextVS.getInstance().setAccessControl((ActorVS)responseVS.getData());
+                        ContextVS.getInstance().setAccessControl((AccessControlVS)responseVS.getData());
                     }
                     break;
                 default: 

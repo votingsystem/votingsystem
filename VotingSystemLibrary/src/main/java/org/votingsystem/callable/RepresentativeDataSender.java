@@ -1,12 +1,12 @@
-package org.votingsystem.applet.callable;
+package org.votingsystem.callable;
 
 import org.apache.log4j.Logger;
-import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.Encryptor;
+import org.votingsystem.util.HttpHelper;
 
 import java.io.File;
 import java.security.cert.X509Certificate;

@@ -139,16 +139,16 @@ task generateVotingSystemApps(dependsOn: [':VotingToolApplet:signJar', ':Validat
 }
 
 def copyVotingSystemApps(project) {
-	File appletDir = project.file("web-app/org.votingsystem.applet/");
+	File appletDir = project.file("web-app/applet/");
 	appletDir.mkdirs();
 	File androidDir = project.file("web-app/android/");
 	androidDir.mkdirs();
 	
-	File votingToolApplet = project.file("web-app/org.votingsystem.applet/VotingToolApplet.jar")
+	File votingToolApplet = project.file("web-app/applet/VotingToolApplet.jar")
 	if(votingToolApplet.exists()) votingToolApplet.delete()
 	votingToolApplet << rootProject.votingToolApplet?.bytes
 	
-	File validationToolApplet = project.file("web-app/org.votingsystem.applet/ValidationToolApplet.jar")
+	File validationToolApplet = project.file("web-app/applet/ValidationToolApplet.jar")
 	if(validationToolApplet.exists()) validationToolApplet.delete()
 	validationToolApplet << rootProject.validationToolApplet?.bytes
 	
@@ -169,7 +169,7 @@ task initDevEnvironment(dependsOn: [':installCerts', ':installEditor', ':AccessC
 
 def installAppletBcprov(project) {
 	println "installAppletBcprov - bcprovVersion '$bcprovVersion'"
-	File jarFile = project.file("web-app/org.votingsystem.applet/lib/bcprov-${bcprovVersion}.jar")
+	File jarFile = project.file("web-app/applet/lib/bcprov-${bcprovVersion}.jar")
 	if(!jarFile.exists()) {
 		jarFile.getParentFile().mkdirs()
 		String jarFileURL = "http://central.maven.org/maven2/org/bouncycastle/bcprov-jdk16/1.46/bcprov-${bcprovVersion}.jar"

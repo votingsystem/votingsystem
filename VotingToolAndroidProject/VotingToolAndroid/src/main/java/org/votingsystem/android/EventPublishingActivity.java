@@ -179,11 +179,11 @@ public class EventPublishingActivity extends ActionBarActivity implements CertPi
         return true;
     }
     
-    public void setClienteFirmaMessage(final String mensaje){
+    public void setSignClientMessage(final String mensaje){
     	runOnUiThread(new Runnable() {
     	    public void run() {
-    	    	Log.d(TAG + ".setClienteFirmaMessage", "mensaje: " + mensaje);
-    	    	svWebView.loadUrl("javascript:setClienteFirmaMessage('" + mensaje + "')");
+    	    	Log.d(TAG + ".setSignClientMessage", "mensaje: " + mensaje);
+    	    	svWebView.loadUrl("javascript:setSignClientMessage('" + mensaje + "')");
     	    }
     	});
     }

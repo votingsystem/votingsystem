@@ -1,4 +1,4 @@
-package org.votingsystem.applet.callable;
+package org.votingsystem.callable;
 
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.ASN1EncodableVector;
@@ -14,14 +14,13 @@ import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.util.HttpHelper;
 
-import javax.mail.internet.ContentType;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.concurrent.Callable;

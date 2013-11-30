@@ -12,14 +12,14 @@ class AppletController {
 	 * @httpMethod [GET]
 	 * @return Página HTML que sirve para cargar el Applet principal de signatureVS.
 	 */
-	def cliente () { }
+	def client () { }
 	
 	/**
 	* @httpMethod [GET]
 	* @return Página HTML que sirve para cargar el Applet principal de la herramienta de validación
 	* 		   de archivos firmados y de copias de seguridad.
 	*/
-   def herramientaValidacion () { }
+   def validationTool () { }
 	
 	
 }

@@ -1,6 +1,0 @@
-{"statusCode":700, "operacion":"REPRESENTATIVE_REVOKE",
-            "signedContent":{"operation":"REPRESENTATIVE_REVOKE"},
-            "receiverSignServiceURL":"http://localhost:8080/SistemaVotacionAccessControl/representative/revoke",
-            "receiverName":"Primer AccessControl", "signedMessageSubject":"Dar de baja representante",
-            "isResponseWithReceipt":true, "urlTimeStampServer":"http://localhost:8080/SistemaVotacionAccessControl/timeStamp",
-            "serverURL":"http://localhost:8080/SistemaVotacionAccessControl/"}

@@ -21,7 +21,7 @@ class MultiSignSimulationService {
     private Locale locale = new Locale("es")
 
 	def webSocketService
-	def contextService
+
 	def messageSource
 	private String simulationStarter
 
@@ -69,7 +69,7 @@ class MultiSignSimulationService {
 		synchronizedListenerSet.add(simulationStarter)
 		simulationData = SimulationData.parse(simulationDataJSON)
 		log.debug("initSimulation - numRequestsProjected: " + simulationData.numRequestsProjected)
-		contextService.init();
+		ContextVS.getInstance().initTestEnvironment("${grailsApplication.config.VotingSystem.simulationFilesBaseDir}");
 		simulationData.init(System.currentTimeMillis());
         startBroadcatsTimer();
         errorList = new ArrayList<String>();

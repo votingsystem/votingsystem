@@ -1,18 +1,17 @@
-package org.votingsystem.applet.callable;
+package org.votingsystem.callable;
 
 import org.apache.log4j.Logger;
-import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.Encryptor;
+import org.votingsystem.util.HttpHelper;
 
 import java.io.ByteArrayOutputStream;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Callable;
+
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -53,7 +52,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
             smimeMessage.writeTo(baos);
             messageToSendBytes = baos.toByteArray();
             baos.close();
-            documentContentType = org.votingsystem.model.ContentTypeVS.SIGNED;
+            documentContentType = ContentTypeVS.SIGNED;
         }
         responseVS = HttpHelper.getInstance().sendData(messageToSendBytes, documentContentType,
                 urlToSendDocument, headers);

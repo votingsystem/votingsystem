@@ -37,7 +37,7 @@ public class SaveReceiptDialog extends javax.swing.JDialog {
     
     public void saveReceipt(String hashCertVoteBase64) {
         logger.debug(" - saveReceipt - ");
-        VoteVS voteVS = ContextVS.getInstance().getSessionVote(hashCertVoteBase64);
+        VoteVS voteVS = ContextVS.getInstance().getVote(hashCertVoteBase64);
         OperationVS operationVS = new OperationVS(ResponseVS.SC_CANCELLED);
         if(voteVS != null) {
             String result = ContextVS.getInstance().getMessage("operationCancelled");

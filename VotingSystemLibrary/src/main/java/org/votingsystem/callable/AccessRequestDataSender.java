@@ -1,4 +1,4 @@
-package org.votingsystem.applet.callable;
+package org.votingsystem.callable;
 
 import org.apache.log4j.Logger;
 import org.bouncycastle.cms.CMSSignedData;
@@ -6,11 +6,11 @@ import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.PKCS10WrapperClient;
+import org.votingsystem.util.HttpHelper;
 
 import javax.mail.Header;
 import java.security.cert.X509Certificate;
@@ -24,18 +24,18 @@ import static org.votingsystem.model.ContextVS.*;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class AccessRequestor implements Callable<ResponseVS> {
+public class AccessRequestDataSender implements Callable<ResponseVS> {
     
     private static Logger logger = Logger.getLogger(
-            AccessRequestor.class);
+            AccessRequestDataSender.class);
 
     private EventVS eventVS;
     private SMIMEMessageWrapper smimeMessage;
     private PKCS10WrapperClient pkcs10WrapperClient;
     private X509Certificate destinationCert = null;
  
-    public AccessRequestor(SMIMEMessageWrapper smimeMessage,
-            EventVS eventVS, X509Certificate destinationCert) throws Exception {
+    public AccessRequestDataSender(SMIMEMessageWrapper smimeMessage,
+                                   EventVS eventVS, X509Certificate destinationCert) throws Exception {
         this.smimeMessage = smimeMessage;
         this.eventVS = eventVS;
         this.destinationCert = destinationCert;

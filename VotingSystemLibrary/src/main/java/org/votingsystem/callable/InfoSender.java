@@ -1,8 +1,8 @@
-package org.votingsystem.applet.callable;
+package org.votingsystem.callable;
 
 import org.apache.log4j.Logger;
-import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.HttpHelper;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ public class InfoSender implements Callable<ResponseVS> {
         this.urlToSendDocument = urlToSendDocument;
     }
     
-    public InfoSender setDocumentoEnviado(Object data,
+    public InfoSender setDocumentToSend(Object data,
             String documentContentType) {
         this.data = data;
         this.documentContentType = documentContentType;

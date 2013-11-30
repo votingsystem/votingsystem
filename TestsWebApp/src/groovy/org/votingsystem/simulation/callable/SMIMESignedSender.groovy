@@ -5,7 +5,7 @@ import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.Encryptor
-import org.votingsystem.simulation.ContextService
+
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.ApplicationContextHolder as ACH
 
@@ -25,7 +25,6 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
     private X509Certificate destinationCert = null;
     private KeyPair keypair;
     private List<String> headerNameList = new ArrayList<String>();
-	private ContextService contextService = null;
     
     public SMIMESignedSender(SMIMEMessageWrapper smimeMessage, String urlToSendDocument, KeyPair keypair,
              X509Certificate destinationCert, String... headerNames) {
@@ -34,7 +33,6 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
         this.urlToSendDocument = urlToSendDocument;
         this.keypair = keypair;
         this.destinationCert = destinationCert;
-		contextService = ACH.getSimulationContext();
     }
 
     @Override public ResponseVS call() throws Exception {

@@ -1,4 +1,4 @@
-package org.votingsystem.applet.callable;
+package org.votingsystem.callable;
 
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.*;
@@ -16,17 +16,16 @@ import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.signature.dnie.DNIePDFContentSigner;
-import org.votingsystem.util.HttpHelper;
-import org.votingsystem.applet.votingtool.Applet;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.signature.dnie.DNIePDFContentSigner;
 import org.votingsystem.signature.util.ContentSignerVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.PDFContentSigner;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.HttpHelper;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -143,7 +142,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
                         TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
                         //reqgen.setReqPolicy(m_sPolicyOID);
                         TimeStampRequest timeStampRequest = reqgen.generate(TIMESTAMP_PDF_HASH, digest);
-                        MessageTimeStamper messageTimeStamper = 
+                        MessageTimeStamper messageTimeStamper =
                                 new MessageTimeStamper(timeStampRequest);
                         ResponseVS responseVS = messageTimeStamper.call();
                         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {

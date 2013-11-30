@@ -104,7 +104,7 @@ public abstract class FileTypeMap {
 	    } catch (SecurityException ex) {
 		// otherwise, we also allow it if this code and the
 		// factory come from the same class loader (e.g.,
-		// the JAF classes were loaded with the org.votingsystem.applet classes).
+		// the JAF classes were loaded with the applet classes).
 		if (FileTypeMap.class.getClassLoader() !=
 			map.getClass().getClassLoader())
 		    throw ex;

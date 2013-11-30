@@ -32,7 +32,7 @@ class UserBaseDataSimulationService {
             REPRESENTATIVES, DELEGATIONS, FINISH_SIMULATION}
 
     def grailsApplication
-    def contextService
+
 
 
     private ExecutorService requestExecutor;
@@ -74,7 +74,7 @@ class UserBaseDataSimulationService {
 
     private void initializeServer() {
         log.debug("initializeServer ### Enter INITIALIZE_SERVER status")
-        String serviceURL = "${contextService.getAccessControl().getServerURL()}/userVS/prepareUserBaseData"
+        String serviceURL = "${ContextVS.getInstance().getAccessControl().getServerURL()}/userVS/prepareUserBaseData"
         ResponseVS responseVS = HttpHelper.getInstance().getData(serviceURL, null)
         responseVS.setStatus(Status.INITIALIZE_SERVER);
         changeSimulationStatus(responseVS);
@@ -104,12 +104,12 @@ class UserBaseDataSimulationService {
             int userIndex = new Long(simulationData.getAndIncrementUserIndex()).intValue();
             try {
                 String userNif = NifUtils.getNif(userIndex);
-                KeyStore keyStore = contextService.generateTestDNIe(userNif);
+                KeyStore keyStore = ContextVS.getInstance().generateKeyStore(userNif);
                 userWithoutRepresentativeList.add(userNif);
-                Certificate[] chain = keyStore.getCertificateChain(ContextService.END_ENTITY_ALIAS);
+                Certificate[] chain = keyStore.getCertificateChain(ContextVS.END_ENTITY_ALIAS);
                 X509Certificate usertCert = (X509Certificate) chain[0];
                 byte[] usertCertPEMBytes = CertUtil.getPEMEncoded(usertCert);
-                String certServiceURL = contextService.getAccessControl().getServerURL() + "/userVS";
+                String certServiceURL = ContextVS.getInstance().getAccessControl().getServerURL() + "/userVS";
                 responseVS = HttpHelper.getInstance().sendData(usertCertPEMBytes, ContentTypeVS.X509, certServiceURL);
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                     log.error("ERROR nif: " + userNif + " - msg:" + responseVS.getMessage());
@@ -171,7 +171,7 @@ class UserBaseDataSimulationService {
         log.debug("createDelegations - enter status DELEGATIONS - NumUsersWithRepresentative - " +
                 simulationData.getNumUsersWithRepresentative());
         if(simulationData.getNumUsersWithRepresentative() > 0) {
-            String serviceURL = contextService.getAccessControl().getServerURL() + "/representative/userSelection";
+            String serviceURL = ContextVS.getInstance().getAccessControl().getServerURL() + "/representative/userSelection";
             while (simulationData.getNumDelegationRequests() < simulationData.getNumUsersWithRepresentative()) {
                 if((simulationData.getNumDelegationRequests() -simulationData.getNumDelegationRequestsColected()) <
                         simulationData.getMaxPendingResponses()) {

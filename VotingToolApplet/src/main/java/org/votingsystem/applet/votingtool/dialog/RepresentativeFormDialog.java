@@ -5,7 +5,7 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.bouncycastle.util.encoders.Base64;
-import org.votingsystem.applet.callable.RepresentativeDataSender;
+import org.votingsystem.callable.RepresentativeDataSender;
 import org.votingsystem.signature.dnie.DNIeContentSignerImpl;
 import org.votingsystem.applet.votingtool.panel.ImagePreviewPanel;
 import org.votingsystem.applet.votingtool.panel.ProgressBarPanel;

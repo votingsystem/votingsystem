@@ -6,6 +6,7 @@ import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.ActorVS
 import org.votingsystem.model.ContentTypeVS
+import org.votingsystem.model.ContextVS
 import org.votingsystem.model.EventVS
 import org.votingsystem.model.EventVSElection
 import org.votingsystem.model.ResponseVS
@@ -41,8 +42,7 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
     private Long broadcastMessageInterval = 10000;
     private Locale locale = new Locale("es")
 
-	def webSocketService;
-	def contextService;
+	def webSocketService
 	def messageSource
 	def grailsApplication
     def userBaseDataSimulationService
@@ -91,10 +91,9 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
         }
 	}
 
-
 	private void initSimulation(JSONObject simulationDataJSON) {
         log.debug("initSimulation ### Enter status INIT_SIMULATION")
-        contextService.init();
+        ContextVS.getInstance().initTestEnvironment("${grailsApplication.config.VotingSystem.simulationFilesBaseDir}");
         synchronizedListenerSet = Collections.synchronizedSet(new HashSet<String>())
 		simulationData = VotingSimulationData.parse(simulationDataJSON)
         errorList = Collections.synchronizedList(new ArrayList<String>());
@@ -121,7 +120,7 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
         public void run() {
             if(!synchronizedElectorList.isEmpty()) {
                 int randomElector = new Random().nextInt(synchronizedElectorList.size());
-                responseService.submit(new VoteSender(VoteVS.genRandomVote(contextService.VOTING_DATA_DIGEST, eventVS),
+                responseService.submit(new VoteSender(VoteVS.genRandomVote(ContextVS.VOTING_DATA_DIGEST, eventVS),
                         new UserVS(synchronizedElectorList.remove(randomElector))));
             } else simulationTimer.stop();
         }
@@ -186,29 +185,29 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
 		String subject = "Simulation Event -> " + eventVS.getSubject() + " -> " + dateStr;
         eventVS.setSubject(subject);
         eventVS.setType(EventVS.Type.ELECTION)
-        eventVS.setControlCenterVS(contextService.getControlCenter());
+        eventVS.setControlCenterVS(ContextVS.getInstance().getControlCenter());
 		this.eventVS = eventVS;
 		String eventStr = "${eventVS.getDataMap() as JSON}".toString();
-        String urlPublishELection = contextService.getAccessControl().getPublishElectionURL()
+        String urlPublishELection = ContextVS.getInstance().getAccessControl().getPublishElectionURL()
 		String msgSubject = messageSource.getMessage("publishElectionMsgSubject", null, locale);
-		KeyStore keyStore = contextService.getUserTest().getKeyStore()
+		KeyStore keyStore = ContextVS.getInstance().getUserTest().getKeyStore()
 		PrivateKey privateKey = (PrivateKey)keyStore.getKey(
-			contextService.END_ENTITY_ALIAS, contextService.PASSWORD.toCharArray());
-		Certificate[] chain = keyStore.getCertificateChain(contextService.END_ENTITY_ALIAS);
-		signedMailGenerator = new SignedMailGenerator(privateKey, chain, contextService.DNIe_SIGN_MECHANISM);
+			ContextVS.END_ENTITY_ALIAS, ContextVS.PASSWORD.toCharArray());
+		Certificate[] chain = keyStore.getCertificateChain(ContextVS.END_ENTITY_ALIAS);
+		signedMailGenerator = new SignedMailGenerator(privateKey, chain, ContextVS.DNIe_SIGN_MECHANISM);
 		SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage(
-				contextService.getUserTest().getEmail(),
-				contextService.getAccessControl().getNameNormalized(),
+				ContextVS.getInstance().getUserTest().getEmail(),
+				ContextVS.getInstance().getAccessControl().getNameNormalized(),
 				eventStr, msgSubject,  null);
 		SMIMESignedSender signedSender = new SMIMESignedSender(smimeDocument, urlPublishELection, null, null);
 		ResponseVS responseVS = signedSender.call();
 		if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             byte[] responseBytes = responseVS.getMessageBytes();
-            contextService.copyFileToSimDir(responseBytes,"/electionSimulation", "ElectionPublishedReceipt")
+            ContextVS.getInstance().copyFile(responseBytes,"/electionSimulation", "ElectionPublishedReceipt")
             SMIMEMessageWrapper smimeDocumentReceipt = new SMIMEMessageWrapper(
                     new ByteArrayInputStream(responseBytes));
             this.eventVS = EventVSElection.populate(new JSONObject(smimeDocumentReceipt.getSignedContent()))
-            //smimeDocumentReceipt.verify(contextService.getSessionPKIXParameters());
+            //smimeDocumentReceipt.verify(ContextVS.getInstance().getSessionPKIXParameters());
 		}
         responseVS.setStatus(Status.PUBLISH_EVENT)
         changeSimulationStatus(responseVS)
@@ -266,7 +265,7 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
             while(!synchronizedElectorList.isEmpty()) {
                 if(!simulationData.waitingForVoteRequests()) {
                     int randomElector = new Random().nextInt(synchronizedElectorList.size());
-                    responseService.submit(new VoteSender(VoteVS.genRandomVote(contextService.VOTING_DATA_DIGEST,
+                    responseService.submit(new VoteSender(VoteVS.genRandomVote(ContextVS.VOTING_DATA_DIGEST,
                             eventVS), new UserVS(synchronizedElectorList.remove(randomElector))));
                 } else Thread.sleep(500);
             }
@@ -296,7 +295,7 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
                         log.error(voteErrorMsg);
                         SMIMEMessageWrapper voteWithErrors = responseVS.getSmimeMessage();
                         if(voteWithErrors != null) {
-                            File outputFile = new File(contextService.ERROR_DIR + File.separator + "VoteError_" + nifFrom);
+                            File outputFile = new File(ContextVS.ERROR_DIR + File.separator + "VoteError_" + nifFrom);
                             voteWithErrors.writeTo(new FileOutputStream(outputFile));
                             log.error("VOTING ERROR file copy to file -> " + outputFile.getAbsolutePath());
                         } else log.error("VOTING ERROR - response without vote");
@@ -322,17 +321,17 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
 
     private void changeEventState() throws Exception {
         log.debug("changeEventState ### Enter status CHANGE_EVENT_STATE");
-        Map cancelDataMap = eventVS.getChangeEventDataMap(contextService.getAccessControl().getServerURL(),
+        Map cancelDataMap = eventVS.getChangeEventDataMap(ContextVS.getInstance().getAccessControl().getServerURL(),
                 simulationData.getEventStateWhenFinished());
         String cancelDataStr = new JSONObject(cancelDataMap).toString()
         String msgSubject = messageSource.getMessage("cancelEventMsgSubject",
                 [eventVS.getId()].toArray(), locale);
-        SignedMailGenerator signedMailGenerator = new SignedMailGenerator(contextService.getUserTest().getKeyStore(),
-                contextService.END_ENTITY_ALIAS, contextService.PASSWORD.toCharArray(), contextService.VOTE_SIGN_MECHANISM);
-        SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage( contextService.getUserTest().getEmail(),
-                contextService.getAccessControl().getNameNormalized(), cancelDataStr, msgSubject,  null);
+        SignedMailGenerator signedMailGenerator = new SignedMailGenerator(ContextVS.getInstance().getUserTest().getKeyStore(),
+                ContextVS.END_ENTITY_ALIAS, ContextVS.PASSWORD.toCharArray(), ContextVS.VOTE_SIGN_MECHANISM);
+        SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage( ContextVS.getInstance().getUserTest().getEmail(),
+                ContextVS.getInstance().getAccessControl().getNameNormalized(), cancelDataStr, msgSubject,  null);
         SMIMESignedSender worker = new SMIMESignedSender(smimeDocument,
-                contextService.getAccessControl().getCancelEventServiceURL(),null, null);
+                ContextVS.getInstance().getAccessControl().getCancelEventServiceURL(),null, null);
         ResponseVS responseVS = worker.call();
         responseVS.setStatus(Status.CHANGE_EVENT_STATE);
         changeSimulationStatus(responseVS);
@@ -342,19 +341,19 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
         log.debug("requestBackup ### Enter status REQUEST_BACKUP");
         byte[] requestBackupPDFBytes = PdfFormHelper.getBackupRequest(eventVS.getId().toString(),
                 eventVS.getSubject(), simulationData.getBackupRequestEmail());
-        KeyStore userTestKeyStore = contextService.getUserTest().getKeyStore();
+        KeyStore userTestKeyStore = ContextVS.getInstance().getUserTest().getKeyStore();
         PrivateKey signerPrivateKey = (PrivateKey)userTestKeyStore.getKey(
-                ContextService.END_ENTITY_ALIAS, ContextService.PASSWORD.toCharArray());
-        Certificate[] signerCertChain = userTestKeyStore.getCertificateChain(ContextService.END_ENTITY_ALIAS);
+                ContextVS.END_ENTITY_ALIAS, ContextVS.PASSWORD.toCharArray());
+        Certificate[] signerCertChain = userTestKeyStore.getCertificateChain(ContextVS.END_ENTITY_ALIAS);
 
         PdfReader requestBackupPDF = new PdfReader(requestBackupPDFBytes);
-        String urlBackupEvents = contextService.getAccessControl().getBackupServiceURL();
+        String urlBackupEvents = ContextVS.getInstance().getAccessControl().getBackupServiceURL();
 
         PDFSignedSender worker = new PDFSignedSender(null, urlBackupEvents, null, null, null, requestBackupPDF,
                 signerPrivateKey, signerCertChain, null);
         ResponseVS responseVS = worker.call();
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            String downloadServiceURL = contextService.getAccessControl().getDownloadServiceURL(responseVS.getMessage());
+            String downloadServiceURL = ContextVS.getInstance().getAccessControl().getDownloadServiceURL(responseVS.getMessage());
             responseVS = HttpHelper.getInstance().getData(downloadServiceURL, ContentTypeVS.BACKUP);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 log.debug("TODO validate backup");

@@ -3,10 +3,11 @@ package org.votingsystem.simulation.callable
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.ActorVS
+import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
-import org.votingsystem.simulation.ContextService
+
 import org.votingsystem.util.ApplicationContextHolder
 
 import java.security.KeyStore
@@ -23,25 +24,23 @@ public class TimeStamperTestSender implements Callable<ResponseVS> {
     private String requestNIF;
     private String urlTimeStampService;
     private Long eventId;
-    private ContextService contextService = null;
 
     public TimeStamperTestSender(String requestNIF, Long eventId)
             throws Exception {
         this.requestNIF = requestNIF;
         this.eventId = eventId;
-        contextService = ApplicationContextHolder.getSimulationContext();
-        this.urlTimeStampService = contextService.getAccessControl().getTimeStampServerURL();
+        this.urlTimeStampService = ContextVS.getInstance().getAccessControl().getTimeStampServerURL();
     }
         
     @Override public ResponseVS call() throws Exception {
-        KeyStore mockDnie = contextService.generateTestDNIe(requestNIF);
+        KeyStore mockDnie = ContextVS.getInstance().generateKeyStore(requestNIF);
 
-        ActorVS accessControl = contextService.getAccessControl();
+        ActorVS accessControl = ContextVS.getInstance().getAccessControl();
         String toUser = accessControl.getNameNormalized();
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie,
-                contextService.END_ENTITY_ALIAS, contextService.PASSWORD.toCharArray(),
-                contextService.VOTE_SIGN_MECHANISM);
-        String subject = contextService.getMessage("timeStampMsgSubject");
+                ContextVS.END_ENTITY_ALIAS, ContextVS.PASSWORD.toCharArray(),
+                ContextVS.VOTE_SIGN_MECHANISM);
+        String subject = ContextVS.getInstance().getMessage("timeStampMsgSubject");
         
         documentSMIME = signedMailGenerator.genMimeMessage(requestNIF, toUser, getRequestDataJSON(), subject , null);
 

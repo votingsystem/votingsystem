@@ -15,6 +15,7 @@ import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder
 import org.bouncycastle.tsp.TimeStampRequest
 import org.bouncycastle.tsp.TimeStampToken
 import org.votingsystem.model.ContentTypeVS
+import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.util.HttpHelper
@@ -52,12 +53,12 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
         ResponseVS responseVS = null;
         while(!done.get()) {
             responseVS = HttpHelper.getInstance().sendData(timeStampRequest.getEncoded(),
-                ContentTypeVS.TIMESTAMP_QUERY, ACH.getSimulationContext().getAccessControl().getTimeStampServerURL());
+                ContentTypeVS.TIMESTAMP_QUERY, ContextVS.getInstance().getAccessControl().getTimeStampServerURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 byte[] bytesToken = responseVS.getMessageBytes();
                 timeStampToken = new TimeStampToken(
                         new CMSSignedData(bytesToken));
-                X509Certificate timeStampCert = ACH.getSimulationContext().getAccessControl().getTimeStampCert();
+                X509Certificate timeStampCert = ContextVS.getInstance().getAccessControl().getTimeStampCert();
                 SignerInformationVerifier timeStampSignerInfoVerifier = new
                         JcaSimpleSignerInfoVerifierBuilder().build(timeStampCert);
                 timeStampToken.validate(timeStampSignerInfoVerifier);

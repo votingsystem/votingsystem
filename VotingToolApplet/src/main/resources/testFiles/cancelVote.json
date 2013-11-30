@@ -1,4 +1,0 @@
-{"statusCode":700, "args":["ybCe/N4tkZANd5O2f6dxOjrlo0h1rxXeCusVJatXYZMZS1mvndtuq3tPAFiJeoBoIwTyAZ+vZvilWNkASjs6Dw=="],
-            "operacion":"VOTE_CANCELLATION", "receiverSignServiceURL":"http://localhost:8080/SistemaVotacionAccessControl/anuladorVoto",
-            "receiverName":"Primer AccessControl", "urlTimeStampServer":"http://localhost:8080/SistemaVotacionAccessControl/timeStamp",
-            "serverURL":"http://localhost:8080/SistemaVotacionAccessControl/"}

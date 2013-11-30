@@ -31,6 +31,14 @@ public class UserVS implements Serializable {
         this.url = url;
     }
 
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
     public enum Type {USER, REPRESENTATIVE, USER_WITH_CANCELLED_REPRESENTATIVE, EX_REPRESENTATIVE}
 	
     private static final long serialVersionUID = 1L;
@@ -49,6 +57,8 @@ public class UserVS implements Serializable {
     @Column(name="metaInf", columnDefinition="TEXT") private String metaInf = "{\"numRepresentations\"=1}";
     
     @Column(name="firstName" ) private String firstName;
+
+    @Column(name="lastName" ) private String lastName;
     
     @Column(name="representativeMessage" ) private MessageSMIME representativeMessage;
     

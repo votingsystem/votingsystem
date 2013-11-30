@@ -23,9 +23,6 @@ public class PKCS10WrapperClient {
     
 	public static final String TAG = "PKCS10WrapperClient";
     
-    public static final String ALIAS_CLAVES = "certificadovoto";
-    public static final String PASSWORD_CLAVES = "certificadovoto";
-    
     private PKCS10CertificationRequest csr;
     private PrivateKey privateKey;
     private PublicKey publicKey;

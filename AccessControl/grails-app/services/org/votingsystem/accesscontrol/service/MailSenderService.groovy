@@ -115,12 +115,10 @@ class MailSenderService {
 
 	}
 	
-	def sendPDF(String email, String subject, 
-		String bodyView, Map model, byte[] pdfBytes) {
-		log.debug "- sendPDF - to userVS:${cliente.email}"
+	def sendPDF(String email, String subject, String bodyView, Map model, byte[] pdfBytes) {
+		log.debug "- sendPDF - to userVS:${email}"
 		
-		String renderedSrc = groovyPageRenderer.render (
-			view:bodyView, model:model)
+		String renderedSrc = groovyPageRenderer.render (view:bodyView, model:model)
 		
 		MimeMessage message = mailSender.createMimeMessage();
 		try {

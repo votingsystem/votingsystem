@@ -3,11 +3,12 @@ package org.votingsystem.simulation.callable
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.ActorVS
+import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
-import org.votingsystem.simulation.ContextService
+
 import org.votingsystem.util.ApplicationContextHolder as ACH
 
 import java.security.KeyStore
@@ -26,26 +27,24 @@ public class ClaimSignedSender implements Callable<ResponseVS> {
     private String submitClaimsURL = null;
     private Long eventId = null;
     private ResponseVS responseVS;
-	private ContextService contextService = null;
         
     public ClaimSignedSender(String nif, Long eventId)  throws Exception {
         this.nif = nif;
         this.eventId = eventId;
-		contextService = ACH.getSimulationContext();
-        submitClaimsURL = contextService.getAccessControl().getClaimServiceURL();
+        submitClaimsURL = ContextVS.getInstance().getAccessControl().getClaimServiceURL();
     }
     
     @Override public ResponseVS call() throws Exception {
         try {
-            KeyStore mockDnie = contextService.generateTestDNIe(nif);
-            ActorVS accessControl = contextService.getAccessControl();
+            KeyStore mockDnie = ContextVS.getInstance().generateKeyStore(nif);
+            ActorVS accessControl = ContextVS.getInstance().getAccessControl();
             String toUser = accessControl.getNameNormalized();
             String claimDataStr = getClaimDataStr(eventId);
-            String subject = contextService.getMessage("claimMsgSubject");
-            SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, contextService.END_ENTITY_ALIAS,
-                    contextService.PASSWORD.toCharArray(), contextService.DNIe_SIGN_MECHANISM);
+            String subject = ContextVS.getInstance().getMessage("claimMsgSubject");
+            SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, ContextVS.END_ENTITY_ALIAS,
+                    ContextVS.PASSWORD.toCharArray(), ContextVS.DNIe_SIGN_MECHANISM);
             smimeMessage = signedMailGenerator.genMimeMessage(nif, toUser, claimDataStr, subject);
-            X509Certificate destinationCert = contextService.getAccessControl().getX509Certificate();
+            X509Certificate destinationCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
             SMIMESignedSender worker = new SMIMESignedSender(smimeMessage, submitClaimsURL,null, destinationCert);
             responseVS = worker.call();
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -62,7 +61,7 @@ public class ClaimSignedSender implements Callable<ResponseVS> {
         Map map = new HashMap();
         map.put("operation", TypeVS.SMIME_CLAIM_SIGNATURE.toString());
         map.put("id", eventId);
-        map.put("URL", contextService.getAccessControl().getEventURL(eventId.toString()));
+        map.put("URL", ContextVS.getInstance().getAccessControl().getEventURL(eventId.toString()));
         map.put("UUID", UUID.randomUUID().toString());
         JSONObject jsonObject = new JSONObject(map);
         return jsonObject.toString();

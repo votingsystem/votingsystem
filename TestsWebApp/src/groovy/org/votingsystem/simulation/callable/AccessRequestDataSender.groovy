@@ -14,7 +14,7 @@ import org.votingsystem.model.VoteVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.signature.util.PKCS10WrapperClient
-import org.votingsystem.simulation.ContextService
+
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.ApplicationContextHolder
 
@@ -22,7 +22,7 @@ import javax.mail.Header
 import java.security.cert.X509Certificate
 import java.util.concurrent.Callable
 
-import static org.votingsystem.simulation.ContextService.*
+import static org.votingsystem.model.ContextVS.*
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
@@ -35,27 +35,25 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
     private SMIMEMessageWrapper smimeMessage;
     private PKCS10WrapperClient pkcs10WrapperClient;
     private X509Certificate destinationCert;
-    private ContextService contextService;
 
     public AccessRequestDataSender(SMIMEMessageWrapper smimeMessage, VoteVS voteVS) throws Exception {
         this.smimeMessage = smimeMessage;
         this.voteVS = voteVS;
-        contextService = ApplicationContextHolder.getSimulationContext();
-        this.destinationCert = contextService.getAccessControl().getX509Certificate();
+        this.destinationCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
         this.pkcs10WrapperClient = new PKCS10WrapperClient(KEY_SIZE, SIG_NAME, VOTE_SIGN_MECHANISM, ContextVS.PROVIDER,
-                contextService.getAccessControl().getServerURL(), voteVS.getEventVS().getId().toString(),
+                ContextVS.getInstance().getAccessControl().getServerURL(), voteVS.getEventVS().getId().toString(),
                 voteVS.getHashCertVoteHex());
     }
 
     @Override public ResponseVS call() throws Exception {
-        logger.debug("doInBackground - accessServiceURL: " +  contextService.getAccessControl().getAccessServiceURL());
+        logger.debug("doInBackground - accessServiceURL: " +  ContextVS.getInstance().getAccessControl().getAccessServiceURL());
         TimeStampRequest timeStampRequest = smimeMessage.getTimeStampRequest();
         ResponseVS responseVS = HttpHelper.getInstance().sendData(timeStampRequest.getEncoded(),
-                ContentTypeVS.TIMESTAMP_QUERY, contextService.getAccessControl().getTimeStampServerURL());
+                ContentTypeVS.TIMESTAMP_QUERY, ContextVS.getInstance().getAccessControl().getTimeStampServerURL());
         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
             byte[] bytesToken = responseVS.getMessageBytes();
             TimeStampToken timeStampToken = new TimeStampToken(new CMSSignedData(bytesToken));
-            X509Certificate timeStampCert = contextService.getAccessControl().getTimeStampCert();
+            X509Certificate timeStampCert = ContextVS.getInstance().getAccessControl().getTimeStampCert();
             SignerInformationVerifier timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().
                     setProvider(ContextVS.PROVIDER).build(timeStampCert);
             timeStampToken.validate(timeStampSignerInfoVerifier);
@@ -69,7 +67,7 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
             mapToSend.put(csrFileName, encryptedCSRBytes);
             mapToSend.put(accessRequestFileName, accessRequestEncryptedBytes);
             responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
-                    contextService.getAccessControl().getAccessServiceURL());
+                    ContextVS.getInstance().getAccessControl().getAccessServiceURL());
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 byte[] encryptedData = responseVS.getMessageBytes();
                 byte[] decryptedData = Encryptor.decryptFile(encryptedData, pkcs10WrapperClient.getPublicKey(),

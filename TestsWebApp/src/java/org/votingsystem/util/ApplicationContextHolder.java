@@ -8,7 +8,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.MessageSource;
 import org.votingsystem.model.EnvironmentVS;
-import org.votingsystem.simulation.ContextService;
+;
 import javax.servlet.ServletContext;
 import java.util.Locale;
 
@@ -60,13 +60,8 @@ public class ApplicationContextHolder implements ApplicationContextAware {
         return (GrailsPluginManager)getBean("pluginManager");
     }
 
-
     public static GrailsApplication getGrailsApplication() {
         return (GrailsApplication) getBean("grailsApplication");
-    }
-
-    public static ContextService getSimulationContext() {
-        return (ContextService) getBean("contextService");
     }
 
     public static String getMessage(String key, String... args) {

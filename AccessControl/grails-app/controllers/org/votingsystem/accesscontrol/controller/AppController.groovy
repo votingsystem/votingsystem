@@ -15,7 +15,7 @@ class AppController {
 	 * @return La página principal de la aplicación web de votación con parámetros de utilidad
 	 * 		   para una sesión con cliente Android.
 	 */
-	def clienteAndroid() {
+	def AndroidClient() {
 		log.debug("*** Si llega aqui mostrar message app market browserToken: ${params.browserToken}" )
 		if(params.boolean('androidClientLoaded'))
 			render(view:"index")

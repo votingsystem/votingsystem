@@ -153,10 +153,16 @@ log4j = {
         error 'AccessControlERRORES', 'smtp'
     }
 
-    debug  'org.votingsystem','filtros', 'grails.app',//, 'com.itextpdf.text.*'
-           'org.springframework.security', 'org.springframework.*', 'org.apache.catalina.core', 'grails.*'
+    debug  'org.votingsystem','filtros', 'grails.app',//,'org.springframework.security',  'com.itextpdf.text.*'
+           'org.springframework.*', 'org.apache.catalina.core', 'grails.*','org.hibernate.*' ,'org.codehaus.groovy.grails.*'
 		   
-    error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
+    error  'org.hibernate',
+            'grails.plugins',
+            'grails.app.services.org.grails.plugin.resource',
+            'grails.app.taglib.org.grails.plugin.resource',
+            'grails.app.resourceMappers.org.grails.plugin.resource',
+            'net.sf.ehcache.hibernate'
+            /*'org.codehaus.groovy.grails.web.servlet',  //  controllers
            'org.codehaus.groovy.grails.web.pages', //  GSP
            'org.codehaus.groovy.grails.web.sitemesh', //  layouts
            'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
@@ -164,13 +170,8 @@ log4j = {
            'org.codehaus.groovy.grails.commons', // core / classloading
            'org.codehaus.groovy.grails.plugins', // plugins
            'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
-           'org.springframework',
-           'org.hibernate',
-		   'grails.plugins',
-		   'grails.app.services.org.grails.plugin.resource',
-		   'grails.app.taglib.org.grails.plugin.resource',
-		   'grails.app.resourceMappers.org.grails.plugin.resource',
-           'net.sf.ehcache.hibernate'
+           'org.springframework',*/
+
 }
 
 

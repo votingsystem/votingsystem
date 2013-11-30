@@ -10,7 +10,6 @@ class TestingController {
 	
 	def testService
 	def grailsApplication
-	def contextService
 	
 	private Timer timer = null
 

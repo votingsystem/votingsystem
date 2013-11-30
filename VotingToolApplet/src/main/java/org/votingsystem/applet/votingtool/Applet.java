@@ -1,6 +1,5 @@
 package org.votingsystem.applet.votingtool;
 
-
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
@@ -132,8 +131,7 @@ public class Applet extends JApplet implements AppHostVS {
             runningOperation.setStatusCode(ResponseVS.SC_ERROR_REQUEST);
             sendMessageToHost(runningOperation);
         } else {
-            PreconditionsCheckerDialog preconditionsChecker = new PreconditionsCheckerDialog(
-                    new JFrame(), true);
+            PreconditionsCheckerDialog preconditionsChecker = new PreconditionsCheckerDialog(new JFrame(), true);
             preconditionsChecker.checkOperation(runningOperation);
         }
     }
@@ -149,7 +147,6 @@ public class Applet extends JApplet implements AppHostVS {
                         appletFirma.start();
                         String fileName = "signManifest";
                         if(args.length > 0) fileName = args[0];
-                        logger.debug("========== fileName: "  + fileName);
                         File jsonFile = File.createTempFile(fileName, ".json");
                         jsonFile.deleteOnExit();
                         FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()

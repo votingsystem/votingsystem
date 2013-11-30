@@ -4,8 +4,8 @@ import net.miginfocom.swing.MigLayout;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
-import org.votingsystem.applet.callable.AccessRequestor;
-import org.votingsystem.applet.callable.SMIMESignedSender;
+import org.votingsystem.callable.AccessRequestDataSender;
+import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.signature.dnie.DNIeContentSignerImpl;
 import org.votingsystem.applet.votingtool.panel.ProgressBarPanel;
 import org.votingsystem.model.*;
@@ -224,9 +224,9 @@ public class ElectionDialog extends JDialog {
                 eventVS.setUserVS(ContextVS.getInstance().getSessionUser());
 
                 X509Certificate accesRequestServerCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
-                AccessRequestor accessRequestor = new AccessRequestor(smimeMessage, eventVS, accesRequestServerCert);
-                ResponseVS responseVS =  accessRequestor.call();
-                responseVS.setData(accessRequestor.getPKCS10WrapperClient());
+                AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(smimeMessage, eventVS, accesRequestServerCert);
+                ResponseVS responseVS =  accessRequestDataSender.call();
+                responseVS.setData(accessRequestDataSender.getPKCS10WrapperClient());
                 return responseVS;
             } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);
@@ -296,7 +296,7 @@ public class ElectionDialog extends JDialog {
                     SMIMEMessageWrapper validatedVote = responseVS.getSmimeMessage();
                     Map validatedVoteDataMap = (JSONObject) JSONSerializer.toJSON(validatedVote.getSignedContent());
                     eventVS.getVoteVS().setReceipt(validatedVote);
-                    ContextVS.getInstance().setSessionVote(eventVS.getVoteVS().getHashCertVoteBase64(),
+                    ContextVS.getInstance().addVote(eventVS.getVoteVS().getHashCertVoteBase64(),
                             eventVS.getVoteVS());
                     //voteURL header
                     msg = ((List<String>)responseVS.getData()).iterator().next();
