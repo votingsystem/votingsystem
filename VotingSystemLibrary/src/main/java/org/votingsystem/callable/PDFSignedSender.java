@@ -48,8 +48,7 @@ import static org.votingsystem.model.ContextVS.*;
 public class PDFSignedSender implements Callable<ResponseVS> {
     
     private static Logger logger = Logger.getLogger(PDFSignedSender.class);
-    
-    private Integer id;
+
     private String urlToSendDocument;
     private String location;
     private String reason;
@@ -60,13 +59,10 @@ public class PDFSignedSender implements Callable<ResponseVS> {
     private Certificate[] signerCertChain;
     private ContentSignerVS systemSignedGenerator = null;
     
-    public PDFSignedSender(Integer id, String urlToSendDocument, 
-            String reason, String location, 
-            char[] password, PdfReader reader, PrivateKey signerPrivatekey, 
-            Certificate[] signerCertChain,  X509Certificate destinationCert)
-            throws NoSuchAlgorithmException, NoSuchAlgorithmException, 
-            NoSuchAlgorithmException, NoSuchProviderException, IOException, Exception {
-        this.id = id;
+    public PDFSignedSender(String urlToSendDocument, String reason, String location, char[] password, PdfReader reader,
+           PrivateKey signerPrivatekey, Certificate[] signerCertChain,  X509Certificate destinationCert)
+            throws NoSuchAlgorithmException, NoSuchAlgorithmException,  NoSuchAlgorithmException,
+            NoSuchProviderException, IOException, Exception {
         this.urlToSendDocument = urlToSendDocument;
         this.signerPrivatekey = signerPrivatekey;
         this.signerCertChain = signerCertChain;
@@ -77,9 +73,8 @@ public class PDFSignedSender implements Callable<ResponseVS> {
         this.signerCertChain = signerCertChain;
         this.destinationCert = destinationCert;
     }
-    
-    private ResponseVS doInBackground() throws Exception {
-        
+
+    @Override public ResponseVS call() throws Exception {
         if(signerPrivatekey != null && signerCertChain != null) {
             logger.debug("Generating PrivateKey VotingSystemSignedGenerator");
             PDFContentSigner signedGenerator = new PDFContentSigner( signerPrivatekey, signerCertChain,
@@ -94,13 +89,13 @@ public class PDFSignedSender implements Callable<ResponseVS> {
         }
         File fileToSend = File.createTempFile("signedPDF", ".pdf");
         fileToSend.deleteOnExit();
-        PdfStamper stp = PdfStamper.createSignature(pdfReader, 
+        PdfStamper stp = PdfStamper.createSignature(pdfReader,
                 new FileOutputStream(fileToSend), '\0');
         stp.setEncryption(null, null,PdfWriter.ALLOW_PRINTING, false);
-        final PdfSignatureAppearance sap = stp.getSignatureAppearance();  
-        sap.setVisibleSignature(new Rectangle(100, 10, 400, 40), 1, null);       
-        
-        
+        final PdfSignatureAppearance sap = stp.getSignatureAppearance();
+        sap.setVisibleSignature(new Rectangle(100, 10, 400, 40), 1, null);
+
+
         if(location != null) sap.setLocation(location);
         sap.setCrypto(null, signerCertChain, null, PdfSignatureAppearance.WINCER_SIGNED);
         if(reason != null) sap.setReason(reason);
@@ -125,59 +120,59 @@ public class PDFSignedSender implements Callable<ResponseVS> {
         } else signerVS = getUserNIF(((X509Certificate)signerCertChain[0]));
         sap.setLayer2Text(ContextVS.getInstance().getMessage(
                 "signedByPDFLabel") + ":\n" + signerVS);
-        
+
         final ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK);
         CMSAttributeTableGenerator unsAttr= new CMSAttributeTableGenerator() {
 
-                public AttributeTable getAttributes(final Map parameters) throws CMSAttributeTableGenerationException {
-                    AttributeTable attributeTable = null;
-                    // Gets the signature bytes
-                    byte[] signatureBytes = (byte[]) parameters.get(SIGNATURE);
-                    DERObject obj;                   
-                    try {
-                        // digests the signature
-                        MessageDigest d = MessageDigest.getInstance(PDF_SIGNATURE_DIGEST);
-                        byte[] digest = d.digest(signatureBytes);
-                        
-                        TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
-                        //reqgen.setReqPolicy(m_sPolicyOID);
-                        TimeStampRequest timeStampRequest = reqgen.generate(TIMESTAMP_PDF_HASH, digest);
-                        MessageTimeStamper messageTimeStamper =
-                                new MessageTimeStamper(timeStampRequest);
-                        ResponseVS responseVS = messageTimeStamper.call();
-                        if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                            logger.error("Error timestamping: " + responseVS.getMessage());
-                            return null;
-                        }
-                        TimeStampToken timeStampToken = messageTimeStamper.getTimeStampToken();
-                        final Calendar cal = new GregorianCalendar();
-                        cal.setTime(timeStampToken.getTimeStampInfo().getGenTime());
-                        logger.debug("*** TimeStamp: " + DateUtils.getStringFromDate(cal.getTime()));
+            public AttributeTable getAttributes(final Map parameters) throws CMSAttributeTableGenerationException {
+                AttributeTable attributeTable = null;
+                // Gets the signature bytes
+                byte[] signatureBytes = (byte[]) parameters.get(SIGNATURE);
+                DERObject obj;
+                try {
+                    // digests the signature
+                    MessageDigest d = MessageDigest.getInstance(PDF_SIGNATURE_DIGEST);
+                    byte[] digest = d.digest(signatureBytes);
 
-                        obj = new ASN1InputStream(timeStampToken.getEncoded()).readObject();
-                        // Creates the signatureTimestampToken attribute
-                        DERSet s = new DERSet(obj);                        
-                        Attribute att = new Attribute(PKCSObjectIdentifiers.
+                    TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
+                    //reqgen.setReqPolicy(m_sPolicyOID);
+                    TimeStampRequest timeStampRequest = reqgen.generate(TIMESTAMP_PDF_HASH, digest);
+                    MessageTimeStamper messageTimeStamper =
+                            new MessageTimeStamper(timeStampRequest);
+                    ResponseVS responseVS = messageTimeStamper.call();
+                    if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+                        logger.error("Error timestamping: " + responseVS.getMessage());
+                        return null;
+                    }
+                    TimeStampToken timeStampToken = messageTimeStamper.getTimeStampToken();
+                    final Calendar cal = new GregorianCalendar();
+                    cal.setTime(timeStampToken.getTimeStampInfo().getGenTime());
+                    logger.debug("*** TimeStamp: " + DateUtils.getStringFromDate(cal.getTime()));
+
+                    obj = new ASN1InputStream(timeStampToken.getEncoded()).readObject();
+                    // Creates the signatureTimestampToken attribute
+                    DERSet s = new DERSet(obj);
+                    Attribute att = new Attribute(PKCSObjectIdentifiers.
                             id_aa_signatureTimeStampToken, s);
-                        Hashtable oh = new Hashtable();
-                        //oh.put(PKCSObjectIdentifiers.id_aa_signatureTimeStampToken, att);
-                        oh.put(new DERObjectIdentifier("1.2.840.113549.1.9.16.2.14"), att);
-                        attributeTable = new AttributeTable(oh); 
+                    Hashtable oh = new Hashtable();
+                    //oh.put(PKCSObjectIdentifiers.id_aa_signatureTimeStampToken, att);
+                    oh.put(new DERObjectIdentifier("1.2.840.113549.1.9.16.2.14"), att);
+                    attributeTable = new AttributeTable(oh);
 
-                   } catch(Exception ex) {
-                        logger.error(ex.getMessage(), ex);
-                        responseVS.appendMessage(ex.getMessage());
-                   }
-                   return attributeTable;
+                } catch(Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                    responseVS.appendMessage(ex.getMessage());
                 }
-            };
-        
+                return attributeTable;
+            }
+        };
+
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
         dic.setDate(new PdfDate(sap.getSignDate()));
         sap.preClose(exc);
         MessageDigest md = MessageDigest.getInstance(PDF_SIGNATURE_DIGEST);
         byte[] signatureHash = md.digest(FileUtils.getBytesFromInputStream(sap.getRangeStream()));
-        
+
         CMSSignedData signedData = systemSignedGenerator.genSignedData(signatureHash, unsAttr);
         //ValidadoraCMS validadora = new ValidadoraCMS(certCA);
         //logger.info("validadora.isValid(signedData): " + validadora.isValid(signedData));
@@ -198,21 +193,12 @@ public class PDFSignedSender implements Callable<ResponseVS> {
             contentType = ContentTypeVS.PDF_SIGNED;
             bytesToSend = FileUtils.getBytesFromFile(fileToSend);
         }
-
-        ResponseVS senderResponse = HttpHelper.getInstance().sendData(
-                bytesToSend, contentType, urlToSendDocument);
-        return senderResponse;
+        return HttpHelper.getInstance().sendData(bytesToSend, contentType, urlToSendDocument);
     }
-    
+
     private String getUserNIF (X509Certificate certificate) {
-    	String subjectDN = certificate.getSubjectDN().getName();
-    	return subjectDN.split("SERIALNUMBER=")[1].split(",")[0];
-    }
-    
-
-    @Override public ResponseVS call() throws Exception {
-       ResponseVS responseVS = doInBackground();
-       return responseVS;
+        String subjectDN = certificate.getSubjectDN().getName();
+        return subjectDN.split("SERIALNUMBER=")[1].split(",")[0];
     }
     
 }

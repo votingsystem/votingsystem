@@ -1,6 +1,9 @@
 package org.votingsystem.simulation.callable
 
 import org.apache.log4j.Logger
+import org.votingsystem.callable.AccessRequestDataSender
+import org.votingsystem.callable.SMIMESignedSender
+import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.VoteVS
@@ -45,12 +48,13 @@ public class VoteSender implements Callable<ResponseVS> {
 
             SMIMEMessageWrapper smimeMessage = signedMailGenerator.genMimeMessage(userVS.getNif(),
                     ContextVS.getInstance().getAccessControl().getNameNormalized(), accessRequestStr, msgSubject, null);
-            AccessRequestDataSender accessRequestor = new AccessRequestDataSender(smimeMessage, voteVS);
-            ResponseVS responseVS = accessRequestor.call();
+            AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(smimeMessage, voteVS);
+            ResponseVS responseVS = accessRequestDataSender.call();
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                PKCS10WrapperClient wrapperClient = accessRequestor.getPKCS10WrapperClient();
+                PKCS10WrapperClient wrapperClient = responseVS.getData();
                 String votoStr = new JSON(voteVS.getVoteDataMap()).toString();
-                String subject = ContextVS.getInstance().getMessage("voteVSMsgSubject",voteVS.getEventVS()?.getId()?.toString());
+                String subject = ContextVS.getInstance().getMessage("voteVSMsgSubject",
+                        voteVS.getEventVS()?.getId()?.toString());
                 smimeMessage = wrapperClient.genMimeMessage(voteVS.getHashCertVoteBase64(),
                         ContextVS.getInstance().getAccessControl().getNameNormalized(), votoStr, subject, null);
                 SMIMESignedSender sender = new SMIMESignedSender(smimeMessage,

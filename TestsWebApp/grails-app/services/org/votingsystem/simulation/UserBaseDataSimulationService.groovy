@@ -6,7 +6,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.StatusVS
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.simulation.callable.RepresentativeDelegatorDataSender
-import org.votingsystem.simulation.callable.RepresentativeDataSender
+import org.votingsystem.simulation.callable.RepresentativeTestDataSender
 import org.votingsystem.simulation.model.UserBaseSimulationData
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.DateUtils
@@ -134,11 +134,10 @@ class UserBaseDataSimulationService {
                 simulationData.getNumRepresentatives());
         if(simulationData.getNumRepresentatives() > 0) {
             File representativeImage = grailsApplication.mainContext.getResource("images/Group_256x256.png").getFile()
-            byte[] imageFileBytes = FileUtils.getBytesFromFile(representativeImage);
             while (simulationData.hasRepresesentativeRequestsPending()){
                 if(!simulationData.waitingForRepresesentativeRequests()) {
-                    requestCompletionService.submit(new RepresentativeDataSender(NifUtils.getNif(
-                            new Long(simulationData.getAndIncrementUserIndex()).intValue()), imageFileBytes));
+                    requestCompletionService.submit(new RepresentativeTestDataSender(NifUtils.getNif(
+                            new Long(simulationData.getAndIncrementUserIndex()).intValue()), representativeImage));
                     simulationData.getAndIncrementNumRepresentativeRequests();
                 } else Thread.sleep(500);
             }

@@ -58,8 +58,7 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
                 timeStampRequest.getEncoded(), ContentTypeVS.TIMESTAMP_QUERY, accessControl.getTimeStampServerURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 byte[] bytesToken = responseVS.getMessageBytes();
-                timeStampToken = new TimeStampToken(
-                        new CMSSignedData(bytesToken));
+                timeStampToken = new TimeStampToken(new CMSSignedData(bytesToken));
                 X509Certificate timeStampCert = ContextVS.getInstance().getTimeStampServerCert();
                 SignerInformationVerifier timeStampSignerInfoVerifier = new 
                         JcaSimpleSignerInfoVerifierBuilder().build(timeStampCert); 
@@ -85,13 +84,11 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
         CMSSignedData tokenCMSSignedData = timeStampToken.toCMSSignedData();		
         Collection signers = tokenCMSSignedData.getSignerInfos().getSigners();
         SignerInformation tsaSignerInfo = (SignerInformation)signers.iterator().next();
-
         AttributeTable signedAttrTable = tsaSignerInfo.getSignedAttributes();
         ASN1EncodableVector v = signedAttrTable.getAll(CMSAttributes.messageDigest);
         Attribute t = (Attribute)v.get(0);
         ASN1Set attrValues = t.getAttrValues();
         DERObject validMessageDigest = attrValues.getObjectAt(0).getDERObject();
-
         ASN1OctetString signedMessageDigest = (ASN1OctetString)validMessageDigest;			
         byte[] digestToken = signedMessageDigest.getOctets();  
         //String digestTokenStr = new String(Base64.encode(digestToken));

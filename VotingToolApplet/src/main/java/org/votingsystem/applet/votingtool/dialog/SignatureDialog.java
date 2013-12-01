@@ -26,7 +26,6 @@ import net.miginfocom.swing.MigLayout;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
-import org.votingsystem.callable.InfoSender;
 import org.votingsystem.callable.PDFSignedSender;
 import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.util.PdfFormHelper;
@@ -255,9 +254,9 @@ public class SignatureDialog extends JDialog {
                         return responseVS;
                     case MANIFEST_PUBLISHING:
                         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(operation.getDocumentToSignMap());
-                        InfoSender infoSender = new InfoSender(null, jsonObject.toString().getBytes(),
+                        responseVS = HttpHelper.getInstance().sendData(jsonObject.toString().getBytes(),
                                 null, operation.getUrlEnvioDocumento(), "eventId");
-                        return infoSender.call();   
+                        return responseVS;
                 }  
             } catch(Exception ex) {
                 logger.error(ex.getMessage(), ex);
@@ -372,7 +371,7 @@ public class SignatureDialog extends JDialog {
                     String reason = null;
                     String location = null;
                     destinationCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
-                    PDFSignedSender pdfSignedSender = new PDFSignedSender(null,  operation.getUrlEnvioDocumento(),
+                    PDFSignedSender pdfSignedSender = new PDFSignedSender(operation.getUrlEnvioDocumento(),
                             reason, location, password.toCharArray(), readerManifesto, null, null, destinationCert);
                     return pdfSignedSender.call();
                 default:

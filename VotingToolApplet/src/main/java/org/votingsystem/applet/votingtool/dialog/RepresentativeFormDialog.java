@@ -305,8 +305,8 @@ public class RepresentativeFormDialog extends JDialog {
             SMIMEMessageWrapper representativeRequestSMIME = DNIeContentSignerImpl.genMimeMessage(null,
                     operation.getNormalizedReceiverName(), documentToSignJSON.toString(), password.toCharArray(),
                     operation.getSignedMessageSubject(), null);
-            RepresentativeDataSender dataSender = new RepresentativeDataSender( representativeRequestSMIME, selectedImage,
-                    operation.getUrlEnvioDocumento(), ContextVS.getInstance(). getAccessControl().getX509Certificate());
+            RepresentativeDataSender dataSender = new RepresentativeDataSender(representativeRequestSMIME, selectedImage,
+                    operation.getUrlEnvioDocumento());
             return dataSender.call();
         }
 

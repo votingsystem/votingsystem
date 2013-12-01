@@ -25,69 +25,58 @@ import static org.votingsystem.model.ContextVS.*;
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
 public class AccessRequestDataSender implements Callable<ResponseVS> {
-    
-    private static Logger logger = Logger.getLogger(
-            AccessRequestDataSender.class);
 
-    private EventVS eventVS;
+    private static Logger logger = Logger.getLogger(AccessRequestDataSender.class);
+
+    private VoteVS voteVS;
     private SMIMEMessageWrapper smimeMessage;
     private PKCS10WrapperClient pkcs10WrapperClient;
-    private X509Certificate destinationCert = null;
- 
-    public AccessRequestDataSender(SMIMEMessageWrapper smimeMessage,
-                                   EventVS eventVS, X509Certificate destinationCert) throws Exception {
+    private X509Certificate destinationCert;
+
+    public AccessRequestDataSender(SMIMEMessageWrapper smimeMessage, VoteVS voteVS) throws Exception {
         this.smimeMessage = smimeMessage;
-        this.eventVS = eventVS;
-        this.destinationCert = destinationCert;
-        this.pkcs10WrapperClient = new PKCS10WrapperClient(KEY_SIZE, SIG_NAME, VOTE_SIGN_MECHANISM, PROVIDER,
-                eventVS.getAccessControlVS().getServerURL(), eventVS.getId().toString(),
-                eventVS.getVoteVS().getHashCertVoteHex());
+        this.voteVS = voteVS;
+        this.destinationCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
+        this.pkcs10WrapperClient = new PKCS10WrapperClient(KEY_SIZE, SIG_NAME, VOTE_SIGN_MECHANISM, ContextVS.PROVIDER,
+                ContextVS.getInstance().getAccessControl().getServerURL(), voteVS.getEventVS().getId().toString(),
+                voteVS.getHashCertVoteHex());
     }
 
-    
     @Override public ResponseVS call() throws Exception {
-        logger.debug("doInBackground - accessServiceURL: " +
-                ((AccessControlVS)eventVS.getAccessControlVS()).getAccessServiceURL());
+        logger.debug("doInBackground - accessServiceURL: " +  ContextVS.getInstance().getAccessControl().getAccessServiceURL());
         TimeStampRequest timeStampRequest = smimeMessage.getTimeStampRequest();
-        AccessControlVS accessControl = (AccessControlVS) ContextVS.getInstance().getAccessControl();
-        ResponseVS responseVS = HttpHelper.getInstance().sendData(
-                timeStampRequest.getEncoded(), ContentTypeVS.TIMESTAMP_QUERY, accessControl.getTimeStampServerURL());
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(timeStampRequest.getEncoded(),
+                ContentTypeVS.TIMESTAMP_QUERY, ContextVS.getInstance().getAccessControl().getTimeStampServerURL());
         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
             byte[] bytesToken = responseVS.getMessageBytes();
-            TimeStampToken timeStampToken = new TimeStampToken(
-                    new CMSSignedData(bytesToken));
-            X509Certificate timeStampCert = ContextVS.getInstance().getTimeStampServerCert();
-            SignerInformationVerifier timeStampSignerInfoVerifier = new 
-                    JcaSimpleSignerInfoVerifierBuilder().
-                setProvider(ContextVS.PROVIDER).build(timeStampCert); 
+            TimeStampToken timeStampToken = new TimeStampToken(new CMSSignedData(bytesToken));
+            X509Certificate timeStampCert = ContextVS.getInstance().getAccessControl().getTimeStampCert();
+            SignerInformationVerifier timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().
+                    setProvider(ContextVS.PROVIDER).build(timeStampCert);
             timeStampToken.validate(timeStampSignerInfoVerifier);
             smimeMessage.setTimeStampToken(timeStampToken);
-
             Header header = new Header("votingSystemMessageType", "voteCsr");
-            byte[] encryptedCSRBytes =Encryptor.encryptMessage(pkcs10WrapperClient.getCsrPEM(),
-                    destinationCert, header);
+            byte[] encryptedCSRBytes = Encryptor.encryptMessage(pkcs10WrapperClient.getCsrPEM(),destinationCert,header);
             byte[] accessRequestEncryptedBytes = Encryptor.encryptSMIME(smimeMessage, destinationCert);
-            String csrFileName = ContextVS.CSR_FILE_NAME + ":" +  ContentTypeVS.ENCRYPTED;
-            String accessRequestFileName = ContextVS.ACCESS_REQUEST_FILE_NAME + ":" + 
-                    ContentTypeVS.SIGNED_AND_ENCRYPTED;
+            String csrFileName = ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.ENCRYPTED;
+            String accessRequestFileName = ContextVS.ACCESS_REQUEST_FILE_NAME + ":" + ContentTypeVS.SIGNED_AND_ENCRYPTED;
             Map<String, Object> mapToSend = new HashMap<String, Object>();
             mapToSend.put(csrFileName, encryptedCSRBytes);
             mapToSend.put(accessRequestFileName, accessRequestEncryptedBytes);
-
             responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
-                    ((AccessControlVS)eventVS.getAccessControlVS()).getAccessServiceURL());
+                    ContextVS.getInstance().getAccessControl().getAccessServiceURL());
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 byte[] encryptedData = responseVS.getMessageBytes();
                 byte[] decryptedData = Encryptor.decryptFile(encryptedData, pkcs10WrapperClient.getPublicKey(),
                         pkcs10WrapperClient.getPrivateKey());
                 pkcs10WrapperClient.initSigner(decryptedData);
+                responseVS.setData(pkcs10WrapperClient);
+            } else {
+                responseVS.setStatus(new StatusVS() {});
+                responseVS.setData(null);
             }
         }
         return responseVS;
-    }
-
-    public PKCS10WrapperClient getPKCS10WrapperClient() {
-        return pkcs10WrapperClient;
     }
 
 }

@@ -2,6 +2,7 @@ package org.votingsystem.simulation.callable
 
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.votingsystem.callable.SMIMESignedSender
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper

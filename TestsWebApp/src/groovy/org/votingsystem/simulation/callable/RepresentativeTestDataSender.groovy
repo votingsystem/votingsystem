@@ -3,15 +3,14 @@ package org.votingsystem.simulation.callable
 import org.apache.log4j.Logger
 import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.votingsystem.callable.MessageTimeStamper
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.util.Encryptor
-
 import org.votingsystem.util.HttpHelper
-import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.StringUtils
 
 import java.security.KeyStore
@@ -19,29 +18,30 @@ import java.security.MessageDigest
 import java.util.concurrent.Callable
 
 import static org.votingsystem.model.ContextVS.*
+
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class RepresentativeDataSender implements Callable<ResponseVS> {
-    
-    private static Logger logger = Logger.getLogger(RepresentativeDataSender.class);
+public class RepresentativeTestDataSender implements Callable<ResponseVS> {
+
+    private static Logger logger = Logger.getLogger(RepresentativeTestDataSender.class);
 
     public static final String IMAGE_FILE_NAME   = "image";
     public static final String REPRESENTATIVE_DATA_FILE_NAME = "representativeData";
 
     private String representativeNIF;
-    private byte[] imageBytes;
-        
-    public RepresentativeDataSender(String representativeNIF, byte[] imageBytes) throws Exception {
+    private File imageFile;
+
+    public RepresentativeTestDataSender(String representativeNIF, File imageFile) throws Exception {
         this.representativeNIF = representativeNIF;
-        this.imageBytes = imageBytes;
+        this.imageFile = imageFile;
     }
     
     @Override  public ResponseVS call() throws Exception {
         KeyStore mockDnie = ContextVS.getInstance().generateKeyStore(representativeNIF);
         MessageDigest messageDigest = MessageDigest.getInstance(VOTING_DATA_DIGEST);
-        byte[] resultDigest =  messageDigest.digest(imageBytes);
+        byte[] resultDigest =  messageDigest.digest(imageFile);
         String base64ResultDigestStr = new String(Base64.encode(resultDigest));
         String representativeDataStr = getRepresentativeDataJSON(representativeNIF, base64ResultDigestStr).toString();
         String toUser = StringUtils.getCadenaNormalizada(ContextVS.getInstance().getAccessControl().getName());
@@ -50,18 +50,9 @@ public class RepresentativeDataSender implements Callable<ResponseVS> {
         String subject = ContextVS.getInstance().getMessage("representativeRequestMsgSubject", null);
         SMIMEMessageWrapper smimeMessage = signedMailGenerator.genMimeMessage(
                 representativeNIF, toUser, representativeDataStr, subject , null);
-        String serviceURL = ContextVS.getInstance().getAccessControl().getServerURL() + "/representative";
-        MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage);
-        ResponseVS responseVS = timeStamper.call();
-        if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-        smimeMessage = timeStamper.getSmimeMessage();
-        byte[] representativeEncryptedDataBytes = Encryptor.encryptSMIME(smimeMessage,
-                ContextVS.getInstance().getAccessControl().getX509Certificate());
-        Map<String, Object> fileMap = new HashMap<String, Object>();
-        String representativeDataFileName = REPRESENTATIVE_DATA_FILE_NAME + ":" + ContentTypeVS.SIGNED_AND_ENCRYPTED;
-        fileMap.put(representativeDataFileName, representativeEncryptedDataBytes);
-        fileMap.put(IMAGE_FILE_NAME, imageBytes);
-        responseVS = HttpHelper.getInstance().sendObjectMap(fileMap, serviceURL);
+        RepresentativeDataSender representativeDataSender = new RepresentativeDataSender(smimeMessage, imageFile,
+                ContextVS.getInstance().getAccessControl().getRepresentativeServiceURL());
+        ResponseVS responseVS = representativeDataSender.call();
         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
             responseVS.setMessage(representativeNIF);
         } else responseVS.appendMessage("RepresentativeDataSender From nif: " + representativeNIF);

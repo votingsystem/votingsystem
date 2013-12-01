@@ -2,6 +2,7 @@ package org.votingsystem.simulation.callable
 
 import com.itextpdf.text.pdf.PdfReader
 import org.apache.log4j.Logger
+import org.votingsystem.callable.PDFSignedSender
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 
@@ -26,7 +27,6 @@ public class ManifestSignedSender implements Callable<ResponseVS> {
     private String location = null;
     private PdfReader manifestToSign = null;
     private ResponseVS responseVS;
-	
         
     public ManifestSignedSender(String nif, String urlToSendDocument,
             PdfReader manifestToSign, String reason, String location) throws Exception {
@@ -39,15 +39,10 @@ public class ManifestSignedSender implements Callable<ResponseVS> {
     
     @Override public ResponseVS call() throws Exception {
         KeyStore mockDnie = ContextVS.getInstance().generateKeyStore(nif);
-        
-        PrivateKey privateKey = (PrivateKey)mockDnie.getKey(
-                ContextVS.END_ENTITY_ALIAS, ContextVS.PASSWORD.toCharArray());
-        Certificate[] signerCertChain = mockDnie.getCertificateChain(
-                ContextVS.END_ENTITY_ALIAS);
-
+        PrivateKey privateKey =(PrivateKey)mockDnie.getKey(ContextVS.END_ENTITY_ALIAS,ContextVS.PASSWORD.toCharArray());
+        Certificate[] signerCertChain = mockDnie.getCertificateChain(ContextVS.END_ENTITY_ALIAS);
         X509Certificate destinationCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
-        PDFSignedSender worker = new PDFSignedSender(urlToSendDocument, 
-				reason, location, null,  manifestToSign, privateKey, 
+        PDFSignedSender worker = new PDFSignedSender(urlToSendDocument,reason,location,null,manifestToSign, privateKey,
 				signerCertChain, destinationCert);
         responseVS = worker.call();
         return responseVS;

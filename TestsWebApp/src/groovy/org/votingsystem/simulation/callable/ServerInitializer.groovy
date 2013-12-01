@@ -3,6 +3,7 @@ package org.votingsystem.simulation.callable
 import grails.converters.JSON
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.votingsystem.callable.SMIMESignedSender
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.CertUtil

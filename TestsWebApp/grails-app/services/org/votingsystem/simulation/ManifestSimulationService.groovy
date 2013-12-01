@@ -1,6 +1,8 @@
 package org.votingsystem.simulation
 
 import org.apache.log4j.Logger
+import org.votingsystem.callable.PDFSignedSender
+import org.votingsystem.callable.SMIMESignedSender
 import org.votingsystem.util.HttpHelper
 
 import java.security.KeyStore
@@ -21,8 +23,6 @@ import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.simulation.callable.ManifestSignedSender
-import org.votingsystem.simulation.callable.PDFSignedSender
-import org.votingsystem.simulation.callable.SMIMESignedSender
 import org.votingsystem.simulation.callable.ServerInitializer
 import org.votingsystem.model.*
 import org.votingsystem.util.*
@@ -320,7 +320,7 @@ class ManifestSimulationService {
         PdfReader requestBackupPDF = new PdfReader(requestBackupPDFBytes);
         String urlBackupEvents = ContextVS.getInstance().getAccessControl().getBackupServiceURL();
 
-        PDFSignedSender worker = new PDFSignedSender(null, urlBackupEvents, null, null, null, requestBackupPDF,
+        PDFSignedSender worker = new PDFSignedSender(urlBackupEvents, null, null, null, requestBackupPDF,
                 signerPrivateKey,signerCertChain, null);
         ResponseVS responseVS = worker.call();
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

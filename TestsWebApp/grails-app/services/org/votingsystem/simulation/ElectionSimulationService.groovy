@@ -4,6 +4,8 @@ import com.itextpdf.text.pdf.PdfReader
 import grails.converters.JSON
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.votingsystem.callable.PDFSignedSender
+import org.votingsystem.callable.SMIMESignedSender
 import org.votingsystem.model.ActorVS
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
@@ -15,9 +17,7 @@ import org.votingsystem.model.UserVS
 import org.votingsystem.model.VoteVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
-import org.votingsystem.simulation.callable.MultiSignTestSender
-import org.votingsystem.simulation.callable.PDFSignedSender
-import org.votingsystem.simulation.callable.SMIMESignedSender
+
 import org.votingsystem.simulation.callable.ServerInitializer
 import org.votingsystem.simulation.callable.VoteSender
 import org.votingsystem.simulation.model.SimulationData
@@ -349,7 +349,7 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
         PdfReader requestBackupPDF = new PdfReader(requestBackupPDFBytes);
         String urlBackupEvents = ContextVS.getInstance().getAccessControl().getBackupServiceURL();
 
-        PDFSignedSender worker = new PDFSignedSender(null, urlBackupEvents, null, null, null, requestBackupPDF,
+        PDFSignedSender worker = new PDFSignedSender(urlBackupEvents, null, null, null, requestBackupPDF,
                 signerPrivateKey, signerCertChain, null);
         ResponseVS responseVS = worker.call();
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

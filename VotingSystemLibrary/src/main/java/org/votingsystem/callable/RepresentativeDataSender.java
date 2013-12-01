@@ -27,21 +27,19 @@ public class RepresentativeDataSender implements Callable<ResponseVS>{
     private X509Certificate accesRequestServerCert = null;
     
     private File selectedImage;
-    private ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR);
     private String urlToSendDocument;
     
-    public RepresentativeDataSender(
-            SMIMEMessageWrapper representativeDataSmimeMessage, 
-            File selectedImage, String urlToSendDocument, 
-            X509Certificate accesRequestServerCert) throws Exception {
+    public RepresentativeDataSender(SMIMEMessageWrapper representativeDataSmimeMessage, File selectedImage,
+            String urlToSendDocument) throws Exception {
         this.urlToSendDocument = urlToSendDocument;
         this.selectedImage = selectedImage;
         this.representativeDataSmimeMessage = representativeDataSmimeMessage;
-        this.accesRequestServerCert = accesRequestServerCert;
+        this.accesRequestServerCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
     }
 
     @Override public ResponseVS call() throws Exception {
         logger.debug("doInBackground - RepresentativeRequest service: " + urlToSendDocument);
+        ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR);
         try {
             MessageTimeStamper timeStamper = new MessageTimeStamper(representativeDataSmimeMessage);
             responseVS = timeStamper.call();
@@ -51,12 +49,10 @@ public class RepresentativeDataSender implements Callable<ResponseVS>{
                     representativeDataSmimeMessage, accesRequestServerCert);
             Map<String, Object> fileMap = new HashMap<String, Object>();
             String representativeDataFileName = 
-                    ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" + 
-                    ContentTypeVS.SIGNED_AND_ENCRYPTED;
+                    ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" + ContentTypeVS.SIGNED_AND_ENCRYPTED;
             fileMap.put(representativeDataFileName, representativeEncryptedDataBytes);
             fileMap.put(ContextVS.IMAGE_FILE_NAME, selectedImage);
-            responseVS = HttpHelper.getInstance().sendObjectMap(
-                    fileMap, urlToSendDocument);
+            responseVS = HttpHelper.getInstance().sendObjectMap(fileMap, urlToSendDocument);
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             responseVS.appendMessage(ex.getMessage());

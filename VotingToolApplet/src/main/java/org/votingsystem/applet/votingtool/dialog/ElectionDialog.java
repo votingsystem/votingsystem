@@ -218,16 +218,12 @@ public class ElectionDialog extends JDialog {
                 JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(eventVS.getVoteVS().getAccessRequestDataMap());
                 smimeMessage = DNIeContentSignerImpl.genMimeMessage(fromUser, toUser, jsonObject.toString(),
                         password.toCharArray(), msgSubject, null);
-
                 //No se hace la comprobación antes porque no hay usuario en contexto
                 //hasta que no se firma al menos una vez
                 eventVS.setUserVS(ContextVS.getInstance().getSessionUser());
-
-                X509Certificate accesRequestServerCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
-                AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(smimeMessage, eventVS, accesRequestServerCert);
-                ResponseVS responseVS =  accessRequestDataSender.call();
-                responseVS.setData(accessRequestDataSender.getPKCS10WrapperClient());
-                return responseVS;
+                AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(
+                        smimeMessage, eventVS.getVoteVS());
+                return accessRequestDataSender.call();
             } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);
                 return new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
@@ -260,8 +256,7 @@ public class ElectionDialog extends JDialog {
         PKCS10WrapperClient pkcs10WrapperClient;
         EventVS eventVS;
         
-        private VoteSenderWorker(PKCS10WrapperClient pkcs10WrapperClient, 
-                EventVS eventVS) {
+        private VoteSenderWorker(PKCS10WrapperClient pkcs10WrapperClient, EventVS eventVS) {
             this.pkcs10WrapperClient = pkcs10WrapperClient;
             this.eventVS = eventVS;
         }

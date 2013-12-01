@@ -84,6 +84,10 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return getServerURL() + "/subscriptionVS";
     }
 
+    @Transient public String getRepresentativeServiceURL() {
+        return getServerURL() + "/representative";
+    }
+
     @Transient public String getControlCenterCheckServiceURL(String controlCenterServerURL) {
         return getServerURL() + "/subscriptionVS/checkControlCenter?serverURL=" + controlCenterServerURL;
     }
