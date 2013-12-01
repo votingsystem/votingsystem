@@ -13,11 +13,11 @@ import org.bouncycastle.asn1.smime.SMIMECapabilityVector;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
 import org.bouncycastle.cms.SignerInfoGenerator;
+import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.util.Store;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.signature.smime.DNIeContentSigner;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SMIMESignedGenerator;
 import org.votingsystem.signature.smime.SimpleSignerInfoGeneratorBuilder;
@@ -47,9 +47,9 @@ import static org.votingsystem.model.ContextVS.PROVIDER;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class DNIeContentSignerImpl implements DNIeContentSigner {
+public class DNIeContentSigner implements ContentSigner {
     
-    private static Logger logger = Logger.getLogger(DNIeContentSignerImpl.class);
+    private static Logger logger = Logger.getLogger(DNIeContentSigner.class);
 
 
     public static final String CERT_AUTENTICATION = "CertAutenticacion";
@@ -73,9 +73,9 @@ public class DNIeContentSignerImpl implements DNIeContentSigner {
     private Module pkcs11Module  = null;
 
 
-    private DNIeContentSignerImpl(String signatureAlgorithm, Session pkcs11Session, Token pkcs11Token,
-                                  Module pkcs11Module, RSAPrivateKey signatureKey,
-                                  X509Certificate certUser, X509Certificate certIntermediate, X509Certificate certCA) {
+    private DNIeContentSigner(String signatureAlgorithm, Session pkcs11Session, Token pkcs11Token,
+                              Module pkcs11Module, RSAPrivateKey signatureKey,
+                              X509Certificate certUser, X509Certificate certIntermediate, X509Certificate certCA) {
         stream = new SignatureOutputStream();
         this.signatureAlgorithm = signatureAlgorithm;
         this.pkcs11Session = pkcs11Session;
@@ -87,7 +87,7 @@ public class DNIeContentSignerImpl implements DNIeContentSigner {
         this.pkcs11Module = pkcs11Module;
     }
 
-    public static DNIeContentSignerImpl getInstance(char[] password, Mechanism signatureMechanism,
+    public static DNIeContentSigner getInstance(char[] password, Mechanism signatureMechanism,
                         String signatureAlgorithm) throws Exception {
         Module pkcs11Module  = null;
         Session pkcs11Session = null;
@@ -178,7 +178,7 @@ public class DNIeContentSignerImpl implements DNIeContentSigner {
             }
             throw ex;
         }
-        DNIeContentSignerImpl contentSigner = new DNIeContentSignerImpl(signatureAlgorithm, pkcs11Session, token, pkcs11Module,
+        DNIeContentSigner contentSigner = new DNIeContentSigner(signatureAlgorithm, pkcs11Session, token, pkcs11Module,
                 signatureKey, certUser, certIntermediate, certCA);
         return contentSigner;
     }
@@ -311,16 +311,16 @@ public class DNIeContentSignerImpl implements DNIeContentSigner {
         caps.addCapability(SMIMECapability.dES_CBC);
         signedAttrs.add(new SMIMECapabilitiesAttribute(caps));
         SMIMESignedGenerator gen = new SMIMESignedGenerator();
-        DNIeContentSignerImpl dnieContentSigner = null;
+        DNIeContentSigner dnieContentSigner = null;
         try {
-            dnieContentSigner = DNIeContentSignerImpl.getInstance(
+            dnieContentSigner = DNIeContentSigner.getInstance(
                     password, ContextVS.DNIe_SESSION_MECHANISM, DNIe_SIGN_MECHANISM);
         } catch(Exception ex) {
             if ("CKR_DEVICE_ERROR".equals(ex.getMessage()) ||
                     "CKR_CRYPTOKI_ALREADY_INITIALIZED".equals(ex.getMessage())) {
                 logger.debug("### Trying to get DNIe PKCS11 session ###");
                 Thread.sleep(3000);
-                dnieContentSigner = DNIeContentSignerImpl.getInstance(
+                dnieContentSigner = DNIeContentSigner.getInstance(
                         password, ContextVS.DNIe_SESSION_MECHANISM, DNIe_SIGN_MECHANISM);
             } else throw ex;
         }

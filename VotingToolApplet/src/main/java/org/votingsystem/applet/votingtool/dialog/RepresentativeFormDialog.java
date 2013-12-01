@@ -6,7 +6,7 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.bouncycastle.util.encoders.Base64;
 import org.votingsystem.callable.RepresentativeDataSender;
-import org.votingsystem.signature.dnie.DNIeContentSignerImpl;
+import org.votingsystem.signature.dnie.DNIeContentSigner;
 import org.votingsystem.applet.votingtool.panel.ImagePreviewPanel;
 import org.votingsystem.applet.votingtool.panel.ProgressBarPanel;
 import org.votingsystem.model.*;
@@ -302,7 +302,7 @@ public class RepresentativeFormDialog extends JDialog {
 
         @Override public ResponseVS doInBackground() throws Exception {
             JSONObject documentToSignJSON = (JSONObject)JSONSerializer.toJSON(operation.getDocumentToSignMap());
-            SMIMEMessageWrapper representativeRequestSMIME = DNIeContentSignerImpl.genMimeMessage(null,
+            SMIMEMessageWrapper representativeRequestSMIME = DNIeContentSigner.genMimeMessage(null,
                     operation.getNormalizedReceiverName(), documentToSignJSON.toString(), password.toCharArray(),
                     operation.getSignedMessageSubject(), null);
             RepresentativeDataSender dataSender = new RepresentativeDataSender(representativeRequestSMIME, selectedImage,

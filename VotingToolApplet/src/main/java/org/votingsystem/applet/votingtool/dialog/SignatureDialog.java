@@ -28,8 +28,8 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.callable.PDFSignedSender;
 import org.votingsystem.callable.SMIMESignedSender;
+import org.votingsystem.signature.dnie.DNIeContentSigner;
 import org.votingsystem.util.PdfFormHelper;
-import org.votingsystem.signature.dnie.DNIeContentSignerImpl;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.applet.votingtool.panel.ProgressBarPanel;
 import org.votingsystem.model.ContentTypeVS;
@@ -352,7 +352,7 @@ public class SignatureDialog extends JDialog {
                 case SMIME_CLAIM_SIGNATURE:
                 case EVENT_CANCELLATION:
                     JSONObject documentToSignJSON = (JSONObject)JSONSerializer.toJSON(operation.getDocumentToSignMap());
-                    SMIMEMessageWrapper smimeMessage = DNIeContentSignerImpl.genMimeMessage(null,
+                    SMIMEMessageWrapper smimeMessage = DNIeContentSigner.genMimeMessage(null,
                             operation.getNormalizedReceiverName(), documentToSignJSON.toString(),
                             password.toCharArray(), operation.getSignedMessageSubject(), null);
                     destinationCert = ContextVS.getInstance().getAccessControl().getX509Certificate();

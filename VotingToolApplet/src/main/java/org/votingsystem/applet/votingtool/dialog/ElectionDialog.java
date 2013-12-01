@@ -6,7 +6,7 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.callable.AccessRequestDataSender;
 import org.votingsystem.callable.SMIMESignedSender;
-import org.votingsystem.signature.dnie.DNIeContentSignerImpl;
+import org.votingsystem.signature.dnie.DNIeContentSigner;
 import org.votingsystem.applet.votingtool.panel.ProgressBarPanel;
 import org.votingsystem.model.*;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
@@ -23,7 +23,6 @@ import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -216,7 +215,7 @@ public class ElectionDialog extends JDialog {
                 String toUser =  eventVS.getAccessControlVS().getNameNormalized();
                 String msgSubject = ContextVS.getInstance().getMessage("accessRequestMsgSubject")  + eventVS.getId();
                 JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(eventVS.getVoteVS().getAccessRequestDataMap());
-                smimeMessage = DNIeContentSignerImpl.genMimeMessage(fromUser, toUser, jsonObject.toString(),
+                smimeMessage = DNIeContentSigner.genMimeMessage(fromUser, toUser, jsonObject.toString(),
                         password.toCharArray(), msgSubject, null);
                 //No se hace la comprobación antes porque no hay usuario en contexto
                 //hasta que no se firma al menos una vez
