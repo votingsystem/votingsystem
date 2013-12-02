@@ -49,20 +49,19 @@ class ServerInfoController {
 	 * @httpMethod [GET]
 	 * @return La lista de servicios de la aplicación
 	 */
-	def listaServicios () { }
+	def serviceList () { }
 	
 	/**
 	 * @httpMethod [GET]
 	 * @return Datos de las versiones de algunos componentes de la aplicación  
 	 */
-	def datosAplicacion () { }
+	def appData () { }
 	
 	/**
 	 * @httpMethod [GET]
 	 * @return Información general de la aplicación
 	 */
 	def info () { }
-	
-	def testing() {}
+
 
 }
