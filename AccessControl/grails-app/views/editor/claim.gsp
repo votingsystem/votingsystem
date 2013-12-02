@@ -28,8 +28,10 @@
 	   					oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
 	   					onchange="this.setCustomValidity('')"></votingSystem:datePicker>
 	</div>
-	
-	<votingSystem:textEditorPC id="editorDiv"/>
+
+    <div style="position:relative; width:100%;">
+        <votingSystem:textEditor id="editorDiv" style="height:300px; width:100%;"/>
+    </div>
 	
 	<div style="margin:0px 0px 30px 0px;">
 		<div style="font-size: 0.9em; margin:10px 0 0 10px; width:60%;display: inline-block;"> 
@@ -75,15 +77,15 @@
 			var numClaimFields = 0
 			
 		 	$(function() {
-		 		showEditor()
+		 		showEditor_editorDiv()
 
 	    		$("#addClaimFieldButton").click(function () {
-	    			hideEditor() 
+	    			hideEditor_editorDiv()
 	    			showAddClaimFieldDialog(addClaimField)
 	    		});
 	    		
 	    		function addClaimField (claimFieldText) {
-	    			showEditor()
+	    			showEditor_editorDiv()
 					if(claimFieldText == null) return
 			        var newFieldTemplate = $('#newFieldTemplate').html()
 			        var newFieldHTML = newFieldTemplate.format(claimFieldText);
@@ -107,9 +109,9 @@
 
 			    $('#mainForm').submit(function(event){
 			    	event.preventDefault();
-				    hideEditor()
+				    hideEditor_editorDiv()
 					if(!validateForm()) {
-						showEditor();
+						showEditor_editorDiv();
 						return;
 					} 					
 			    	var eventVS = new EventVS();

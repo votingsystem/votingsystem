@@ -155,7 +155,7 @@
                            onchange="this.setCustomValidity('')"/>
                 </div>
 
-                <votingSystem:textEditorPC id="electionEditorDiv" style="height:250px;"/>
+                <votingSystem:textEditor id="electionEditorDiv" style="height:250px;"/>
 
                 <div id="backupDiv" style="margin:10px 0px 10px 10px; overflow: hidden; height: 50px; display: table;">
                     <div class="checkBox" style="display:table-cell;vertical-align: middle;">

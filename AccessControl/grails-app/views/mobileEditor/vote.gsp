@@ -30,7 +30,9 @@
 			 onchange="this.setCustomValidity('')"></votingSystem:datePicker>   
 	</div>
 
-	<votingSystem:textEditorMobile id="editorDiv"/>
+    <div style="position:relative; width:100%;">
+        <votingSystem:textEditor id="editorDiv" type="mobile" style="height:300px; width:100%;"/>
+    </div>
 
 	<div style="margin: 15px auto 30px auto;">
 		<div style="display:inline;">
@@ -88,25 +90,25 @@
 		</g:each>
 		
 		$(function() {
-			showEditor()
+			showEditor_editorDiv()
 
     		$("#addOptionButton").click(function () { 
-    			hideEditor() 
+    			hideEditor_editorDiv()
     			showAddVoteOptionDialog(addVoteOption)
     		});
     		
 
 	  		$("#controlCenterLink").click(function () {
-	  			hideEditor()  
+	  			hideEditor_editorDiv()
 	  			showVoteControlCenterDialog(addControlCenterDialog)
 			});
 
 	  		function addControlCenterDialog () {
-	  			showEditor()
+	  			showEditor_editorDiv()
 		  	}
 	  		
 			function addVoteOption (voteOptionText) {
-				showEditor()
+				showEditor_editorDiv()
 				if(voteOptionText == null) return
 		        var newFieldTemplate = $('#newFieldTemplate').html()
 	            var newFieldHTML = newFieldTemplate.format(voteOptionText);
@@ -129,13 +131,13 @@
 
 			$('#mainForm').submit(function(event){	
 		    	event.preventDefault();
-			    hideEditor()		    	
+			    hideEditor_editorDiv()
 				var subject = $("#subject"),
 				dateBegin = $("#dateBegin"),
 				dateFinish = $("#dateFinish")
 				var pollOptions = getPollOptions()
 				if(pollOptions == null) {
-					showEditor();
+					showEditor_editorDiv();
 					return false;
 				}
 				

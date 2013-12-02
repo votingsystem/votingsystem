@@ -10,7 +10,7 @@ class VotingSystemTagLib {
 		out << render(template: "/template/taglib/button", model:[attrs: attrs])
 	}
 	
-	def textEditorPC = {attrs, body ->	
+	def textEditor = {attrs, body ->
 		out << render(template: "/template/taglib/textEditorPC", model:[attrs: attrs])
 	}
 	

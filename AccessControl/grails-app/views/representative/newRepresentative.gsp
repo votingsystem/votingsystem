@@ -1,7 +1,7 @@
 <html>
 <head>
         <meta name="layout" content="main" />
-   		<r:require modules="textEditorPC"/>
+   		<r:require modules="textEditor"/>
 </head>
 <body>
 
@@ -23,8 +23,10 @@
 	</div>	
 	
 	<form id="mainForm">
-	
-	<votingSystem:textEditorPC id="editorDiv"/>
+
+    <div style="position:relative; width:100%;">
+        <votingSystem:textEditor id="editorDiv" style="height:300px; width:100%;"/>
+    </div>
 		
 	<div style="position:relative; margin:10px 10px 0px 0px;height:20px;">
 		<div style="position:absolute; right:0;">
@@ -45,23 +47,21 @@
 </html>
 <r:script>
 		 	$(function() {
-		 		showEditor()
+		 		showEditor_editorDiv()
 		 		
 			    $('#mainForm').submit(function(event){
 			    	event.preventDefault();
 			    	var editorDiv = $("#editorDiv")
-			    	hideEditor()
+			    	hideEditor_editorDiv()
 					if(htmlEditorContent.trim() == 0) {
 						editorDiv.addClass( "formFieldError" );
-						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
-								'<g:message code="emptyDocumentERRORMsg"/>')
-						showEditor();
+						showResultDialog('<g:message code="dataFormERRORLbl"/>',
+						    '<g:message code="emptyDocumentERRORMsg"/>')
+						showEditor_editorDiv();
 						return
 					}  
 
-			    	var webAppMessage = new WebAppMessage(
-					    	ResponseVS.SC_PROCESSING,
-					    	Operation.NEW_REPRESENTATIVE)
+			    	var webAppMessage = new WebAppMessage( ResponseVS.SC_PROCESSING,Operation.NEW_REPRESENTATIVE)
 			    	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
 		    		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
 					webAppMessage.signedContent = {representativeInfo:htmlEditorContent.trim(),

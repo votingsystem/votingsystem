@@ -18,8 +18,10 @@
 			 oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
 			 onchange="this.setCustomValidity('')"></votingSystem:datePicker>   				
    		</div>
-	
-		<votingSystem:textEditorMobile id="editorDiv"/>
+
+        <div style="position:relative; width:100%;">
+            <votingSystem:textEditor id="editorDiv" type="mobile" style="height:300px; width:100%;"/>
+        </div>
 		
 		<div id="contents" style="display: none">
 			<!-- This div will be used to display the editor contents. -->
@@ -41,12 +43,12 @@
 </html>
  <r:script>
 		 	$(function() {
-		 		showEditor()
+		 		showEditor_editorDiv()
 
 			    $('#mainForm').submit(function(event){
 			    	event.preventDefault();
 			    	var isValidForm = true
-				    hideEditor()
+				    hideEditor_editorDiv()
     		    	var subject = $("#subject"),
 			    	dateFinish = $("#dateFinish"),
 			    	editorDiv = $("#editorDiv"),
@@ -77,7 +79,7 @@
 						isValidForm = false;
 					}  
 					if(!isValidForm) {
-						showEditor();
+						showEditor_editorDiv();
 						return false;
 					} 		
 			    	var event = new Evento();

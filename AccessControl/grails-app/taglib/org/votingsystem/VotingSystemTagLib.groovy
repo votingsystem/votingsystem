@@ -17,11 +17,8 @@ class VotingSystemTagLib {
 	}
 	
 	
-	def textEditorPC = {attrs, body ->
-		out << render(template: "/template/taglib/textEditorPC", model:[attrs: attrs])
+	def textEditor = {attrs, body ->
+		out << render(template: "/template/taglib/textEditor", model:[attrs: attrs])
 	}
-	
-	def textEditorMobile = {attrs, body ->
-		out << render(template: "/template/taglib/textEditorMobile", model:[attrs: attrs])
-	}
+
 }

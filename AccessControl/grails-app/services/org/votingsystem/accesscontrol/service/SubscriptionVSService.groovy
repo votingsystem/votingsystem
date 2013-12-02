@@ -127,6 +127,7 @@ class SubscriptionVSService {
             }
 			if(!controlCenterDB) {
                 controlCenterDB = new ControlCenterVS(actorVS)
+                controlCenterDB.setState(ActorVS.State.RUNNING)
                 ControlCenterVS.withTransaction {controlCenterDB.save()}
 				log.debug("checkControlCenter - SAVED NEW CONTROL CENTER id: '${controlCenterDB.id}'")
 			}

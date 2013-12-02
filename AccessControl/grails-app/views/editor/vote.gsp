@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta name="layout" content="main" /> 
+	<meta name="layout" content="main" />
 </head>
 <body>
 
@@ -39,8 +39,10 @@
 		
 		</div>
 	</div>
-	 
-	<votingSystem:textEditorPC id="editorDiv"/>
+
+    <div style="position:relative; width:100%;">
+        <votingSystem:textEditor id="editorDiv" style="height:300px; width:100%;"/>
+    </div>
 	
 	<div style="margin: 15px auto 30px auto; width:600px">
 		<img src="${resource(dir:'images',file:'info_16x16.png')}"></img>
@@ -99,24 +101,24 @@
 			</g:each>
 			
 		 	$(function() {
-		 		showEditor()
+		 		showEditor_editorDiv()
 			    	
 	    		$("#addOptionButton").click(function () { 
-	    			hideEditor() 
+	    			hideEditor_editorDiv()
 	    			showAddVoteOptionDialog(addVoteOption)
 	    		});
 
 		  		$("#controlCenterLink").click(function () {
-		  			hideEditor()  
+		  			hideEditor_editorDiv()
 		  			showVoteControlCenterDialog(addControlCenterDialog)
 				});
 
 		  		function addControlCenterDialog () {
-		  			showEditor()
+		  			showEditor_editorDiv()
 			  	}
 
 				function addVoteOption (voteOptionText) {
-					showEditor()
+					showEditor_editorDiv()
 					if(voteOptionText == null) return
 			        var newFieldTemplate = $('#newFieldTemplate').html()
 		            var newFieldHTML = newFieldTemplate.format(voteOptionText);
@@ -138,13 +140,13 @@
 
 				$('#mainForm').submit(function(event){	
 			    	event.preventDefault();
-				    hideEditor()		    	
+				    hideEditor_editorDiv()
 					var subject = $("#subject"),
 					dateBegin = $("#dateBegin"),
 					dateFinish = $("#dateFinish")
 					var pollOptions = getPollOptions()
 					if(pollOptions == null) {
-						showEditor();
+						showEditor_editorDiv();
 						return false;
 					}
 					

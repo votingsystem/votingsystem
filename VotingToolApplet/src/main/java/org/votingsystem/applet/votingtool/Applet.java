@@ -148,7 +148,15 @@ public class Applet extends JApplet implements AppHostVS {
                         Applet appletFirma = new Applet();
                         appletFirma.start();
                         String operationStr = null;
-                        if(args.length > 0) operationStr = args[0];
+                        if(args.length > 0) {
+                            operationStr = args[0];
+                        } else {
+                            File jsonFile = File.createTempFile("publishVoting", ".json");
+                            jsonFile.deleteOnExit();
+                            FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
+                                    .getResourceAsStream("testFiles/data.json"), jsonFile);
+                            appletFirma.runOperation(FileUtils.getStringFromFile(jsonFile));
+                        }
                         if(operationStr != null)appletFirma.runOperation(operationStr);
                         else logger.error("### Operation null ###");
                     } catch (Exception e) {

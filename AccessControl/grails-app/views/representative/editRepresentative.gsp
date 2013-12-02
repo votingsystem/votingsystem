@@ -1,7 +1,7 @@
 <html>
 <head>
         <meta name="layout" content="main" />
-       	<r:require modules="textEditorPC"/>
+       	<r:require modules="textEditor"/>
 </head>
 <body>
 
@@ -24,8 +24,10 @@
 	</div>	
 	
 	<form id="mainForm">
-	
-	<votingSystem:textEditorPC id="editorDiv"/>
+
+    <div style="position:relative; width:100%;">
+        <votingSystem:textEditor id="editorDiv" style="height:300px; width:100%;"/>
+    </div>
 		
 	<div style="position:relative; margin:10px 10px 0px 0px;height:20px;">
 		<div style="position:absolute; right:0;">
@@ -47,6 +49,8 @@
 </html>
 <r:script>
 		 	$(function() {
+                showEditor_editorDiv()
+
 			    $('#mainForm').submit(function(event){
 			    	event.preventDefault();
 			    	var editorDiv = $( "#editorDiv" )
