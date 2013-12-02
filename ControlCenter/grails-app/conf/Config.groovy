@@ -157,13 +157,13 @@ log4j = {
         development{
 
             debug 'org.votingsystem','filters'//,'org.springframework.security',  'com.itextpdf.text.*'
-            debug 'org.springframework'
             //debug 'org.apache'
             //debug 'grails'
             //debug 'grails.app.services'
             //debug 'grails.app.controllers'
             //debug 'org.grails.auth'
 
+            error 'org.springframework'
             error 'org.hibernate'
             error 'net.sf.ehcache.hibernate'
             error 'grails.app.services.org.grails.plugin.resource'
