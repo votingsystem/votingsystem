@@ -52,10 +52,10 @@
       <excludeFolder url="file://$MODULE_DIR$/target/work/scriptCache" />
       <excludeFolder url="file://$MODULE_DIR$/target/work/tomcat" />
     </content>
+    <orderEntry type="module" module-name="VotingSystemLibrary" exported="" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="grails-2.3.3" level="application" />
-    <orderEntry type="module" module-name="VotingSystemLibrary" exported="" />
     <orderEntry type="module-library" exported="">
       <library name="Grails User Library (AccessControl)">
         <CLASSES>

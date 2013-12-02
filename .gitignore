@@ -4,6 +4,7 @@
 GrailsRestDoc*
 .classpath
 .gradle
+gradle
 .settings
 .project
 .idea
