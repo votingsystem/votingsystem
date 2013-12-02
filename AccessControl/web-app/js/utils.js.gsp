@@ -38,13 +38,16 @@ function EventVS(eventJSON, eventTemplate, subSystem) {
     	return result;
     }
 
+    if(eventJSON != null) {
+        this.id = eventJSON.id
+        this.dateFinish = eventJSON.dateFinish
+        this.dateBegin = eventJSON.dateBegin
+        this.userVS = eventJSON.userVS
+        this.state = eventJSON.state
+        this.subject = eventJSON.subject
+    }
     this.subSystem = subSystem
-    this.id = eventJSON.id
     this.dateCreated
-    this.dateFinish = eventJSON.dateFinish
-    this.dateBegin = eventJSON.dateBegin
-    this.userVS = eventJSON.userVS
-    this.state = eventJSON.state
     this.backupAvailable
     this.type
     this.operation
@@ -63,7 +66,6 @@ function EventVS(eventJSON, eventTemplate, subSystem) {
     this.numSignatures
     this.content
     this.fieldsEventVS
-    this.subject = eventJSON.subject
     if(eventTemplate != null) {
         var subjectStr = this.subject.substring(0,50) +  ((this.subject.length > 50)? "...":"");
         this.eventHTML = eventTemplate.format(subjectStr, this.userVS, this.dateBegin,

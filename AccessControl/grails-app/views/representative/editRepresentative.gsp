@@ -56,7 +56,7 @@
 			    	var editorDiv = $( "#editorDiv" )
 			    	editorDiv.removeClass( "formFieldError" );
 					
-					if(htmlEditorContent.trim() == 0) {
+					if(editorDivContent.trim() == 0) {
 						editorDiv.addClass( "formFieldError" );
 						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 								'<g:message code="emptyDocumentERRORMsg"/>')

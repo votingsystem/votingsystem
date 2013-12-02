@@ -20,7 +20,7 @@ var editorData
 //showEditor and hideEditor are to avoid blocking the editor whith DOM changes
 function showEditor_${attrs.id}() {
 	if (editor) return;
-	// Create a new editor inside the <div id="editor">, setting its value to htmlEditorContent
+	// Create a new editor inside the <div id="editor">, setting its value to editorDivContent
 	$("#${attrs.id}EditorContents").hide()
 	editor = CKEDITOR.appendTo( '${attrs.id}', editorConfig, editorData);
 	$("#${attrs.id}").fadeIn()

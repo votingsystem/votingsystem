@@ -75,7 +75,7 @@
 						isValidForm = false
 					}
 
-					if(htmlEditorContent.trim() == 0) {
+					if(editorDivContent.trim() == 0) {
 						editorDiv.addClass( "formFieldError" );
 						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 								'<g:message code="emptyDocumentERRORMsg"/>')
@@ -86,9 +86,9 @@
 						return 
 					}
 					
-					var eventVS = new EventoVS();
+					var eventVS = new EventVS();
 			    	eventVS.subject = subject.val();
-			    	eventVS.content = htmlEditorContent.trim();
+			    	eventVS.content = editorDivContent.trim();
 			    	eventVS.dateFinish = dateFinish.datepicker('getDate').format();
 
 			    	var webAppMessage = new WebAppMessage(

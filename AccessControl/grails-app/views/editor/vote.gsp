@@ -124,8 +124,7 @@
 		            var newFieldHTML = newFieldTemplate.format(voteOptionText);
 		            var $newField = $(newFieldHTML)
 			      	$newField.find('div#deleteFieldButton').click(function() {
-		      			$(this).parent().fadeOut(1000, 
-	      						function() { $(this).parent().remove(); });
+		      			$(this).parent().fadeOut(1000, function() { $(this).parent().remove(); });
 			      		numVoteOptions--
 			      		if(numVoteOptions == 0) {
 	       					$("#fieldsBox").fadeOut(1000)
@@ -150,9 +149,9 @@
 						return false;
 					}
 					
-				  	var eventVS = new EventoVS();
+				  	var eventVS = new EventVS();
 				  	eventVS.subject = subject.val();
-				  	eventVS.content = htmlEditorContent;
+				  	eventVS.content = editorDivContent;
 				  	eventVS.dateBegin = dateBegin.datepicker('getDate').format();
 				  	eventVS.dateFinish = dateFinish.datepicker('getDate').format();
 					  	eventVS.controlCenterVS = controlCenters[$('#controlCenterSelect').val()]
@@ -183,53 +182,47 @@
 				allFields.removeClass("formFieldError");
 				
 				if(!document.getElementById('subject').validity.valid) {
-					subject.addClass( "formFieldError" );
-					showResultDialog('<g:message code="dataFormERRORLbl"/>', 
-						'<g:message code="emptyFieldMsg"/>')
+					subject.addClass("formFieldError");
+					showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="emptyFieldMsg"/>')
 					return null
 				}
 				
 				if(dateBegin.datepicker("getDate") === null) {
-					dateBegin.addClass( "formFieldError" );
-					showResultDialog('<g:message code="dataFormERRORLbl"/>', 
-						'<g:message code="emptyFieldMsg"/>')
+					dateBegin.addClass("formFieldError");
+					showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="emptyFieldMsg"/>')
 					return null
 				}
 				
 				if(dateFinish.datepicker("getDate") === null) {
-					dateFinish.addClass( "formFieldError" );
-					showResultDialog('<g:message code="dataFormERRORLbl"/>', 
-						'<g:message code="emptyFieldMsg"/>')
+					dateFinish.addClass("formFieldError");
+					showResultDialog('<g:message code="dataFormERRORLbl"/>',  '<g:message code="emptyFieldMsg"/>')
 					return null
 				}
 				
 				if(dateFinish.datepicker("getDate") < new Date() ) {
-					dateFinish.addClass( "formFieldError" );
-					showResultDialog('<g:message code="dataFormERRORLbl"/>', 
-						'<g:message code="dateInitERRORMsg"/>')
+					dateFinish.addClass("formFieldError");
+					showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="dateInitERRORMsg"/>')
 					return null
 				}
 									
 				if(dateBegin.datepicker("getDate") > 
 					dateFinish.datepicker("getDate")) {
-					showResultDialog('<g:message code="dataFormERRORLbl"/>',
-							'<g:message code="dateRangeERRORMsg"/>') 
+					showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="dateRangeERRORMsg"/>')
 					dateBegin.addClass("formFieldError");
 					dateFinish.addClass("formFieldError");
 					return null
 				}
 				     	
-				if(htmlEditorContent.trim() == 0) {
+				if(editorDivContent.trim() == 0) {
 					editorDiv.addClass( "formFieldError" );
-					showResultDialog('<g:message code="dataFormERRORLbl"/>', 
-							'<g:message code="emptyDocumentERRORMsg"/>')
+					showResultDialog('<g:message code="dataFormERRORLbl"/>','<g:message code="emptyDocumentERRORMsg"/>')
 					return null;
 				}  
 				
 				if(!document.getElementById('controlCenterSelect').validity.valid) {
 					$("#controlCenterSelect").addClass( "formFieldError" );
-					showResultDialog('<g:message code="dataFormERRORLbl"/>', 
-						'<g:message code="selectControlCenterLbl"/>')
+					showResultDialog('<g:message code="dataFormERRORLbl"/>',
+					'<g:message code="selectControlCenterLbl"/>')
 					return null
 				} else $("#controlCenterSelect").removeClass("formFieldError");
 
@@ -245,8 +238,8 @@
 				console.log("- pollOptions.length: " + pollOptions.length);
 				
 				if(pollOptions.length < 2) { //two options at least 
-					showResultDialog('<g:message code="dataFormERRORLbl"/>', 
-							'<g:message code="optionsMissingERRORMsg"/>')
+					showResultDialog('<g:message code="dataFormERRORLbl"/>',
+					    '<g:message code="optionsMissingERRORMsg"/>')
 					addOptionButton.addClass( "formFieldError" );
 					return null
 				}
@@ -263,8 +256,7 @@
 					if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
 						caption = '<g:message code="publishOKCaption"/>'
 				    	var msgTemplate = "<g:message code='documentLinkMsg'/>";
-						msg = "<p><g:message code='publishOKMsg'/>.</p>" + 
-							msgTemplate.format(appMessageJSON.message);
+						msg = "<p><g:message code='publishOKMsg'/>.</p>" +  msgTemplate.format(appMessageJSON.message);
 					}
 					showResultDialog(caption, msg)
 				}

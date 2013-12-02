@@ -72,7 +72,7 @@
 						'<g:message code="dateInitERRORMsg"/>')
 						isValidForm = false
 					}
-					if(htmlEditorContent.trim() == 0) {
+					if(editorDivContent.trim() == 0) {
 						editorDiv.addClass( "formFieldError" );
 						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 							'<g:message code="emptyDocumentERRORMsg"/>')
@@ -84,7 +84,7 @@
 					} 		
 			    	var event = new Evento();
 			    	event.subject = subject.val();
-			    	event.content = htmlEditorContent.trim();
+			    	event.content = editorDivContent.trim();
 			    	event.dateFinish = $("#dateFinish").datepicker('getDate').format();
 
 			    	var webAppMessage = new WebAppMessage(

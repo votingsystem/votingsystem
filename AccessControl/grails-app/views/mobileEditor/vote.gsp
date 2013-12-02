@@ -143,7 +143,7 @@
 				
 			  	var event = new Evento();
 			  	event.subject = subject.val();
-			  	event.content = htmlEditorContent;
+			  	event.content = editorDivContent;
 			  	event.dateBegin = dateBegin.datepicker('getDate').format();
 			  	event.dateFinish = dateFinish.datepicker('getDate').format();
 				  	event.controlCenterVS = controlCenters[$('#controlCenterSelect').val()]
@@ -212,7 +212,7 @@
 				return null
 			}
 			     	
-			if(htmlEditorContent.trim() == 0) {
+			if(editorDivContent.trim() == 0) {
 				editorDiv.addClass( "formFieldError" );
 				showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 						'<g:message code="emptyDocumentERRORMsg"/>')
