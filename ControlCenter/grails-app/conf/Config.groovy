@@ -158,8 +158,8 @@ log4j = {
 
             debug 'org.votingsystem','filters'//,'org.springframework.security',  'com.itextpdf.text.*'
             debug 'org.springframework'
-            debug 'org.apache'
-            debug 'grails'
+            //debug 'org.apache'
+            //debug 'grails'
             //debug 'grails.app.services'
             //debug 'grails.app.controllers'
             //debug 'org.grails.auth'

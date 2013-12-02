@@ -68,7 +68,7 @@ grails.project.dependency.resolution = {
 			//para hacer funcionar AntBuilder en Cloudfoundry
 			//'org.apache.ant:ant:1.8.3',
 			//for rendering plugin in production environments
-			'org.springframework:spring-test:3.2.4.RELEASE',
+			//'org.springframework:spring-test:3.2.4.RELEASE',
 			//'org.apache.ant:ant-launcher:1.8.3'
 			) {
 				excludes "slf4j-api", "log4j", "commons-logging", "xalan",
@@ -102,4 +102,4 @@ grails.project.dependency.resolution = {
     }
 }
 
-grails.tomcat.jvmArgs = [ '-Xmx512m', '-XX:MaxPermSize=256m' ]
+grails.tomcat.jvmArgs = [ '-Xmx1024m', '-Xms512m', '-XX:MaxPermSize=512m' ]
