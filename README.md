@@ -1,4 +1,4 @@
-Sistema de Votación
+# Sistema de Votación
 ======================================
 
 [Wiki](https://github.com/jgzornoza/SistemaVotacion/wiki)
