@@ -14,20 +14,15 @@ Si no se modifican los archivos <b>grails-app/conf/DataSource.groovy</b> las apl
 ejecutando en el servidor una instancia de la base de datos PostgreSQL según se explica en [este documento]
 (https://github.com/jgzornoza/SistemaVotacion/wiki/Configuraci%C3%B3n-de-la-base-de-datos)
 
-#### Instalar los editores de las aplicaciones
+#### Preparar el entorno de pruebas
 
-Para instalar los editores de texto empleados en las aplicaciones **Control de Acceso**, y **TestsWebApp** hay que ejecutar :
+Para preparar el entorno de pruebas hay que ejecutar:
 
-    SistemaVotacion$gradle installEditor
+    SistemaVotacion$gradle initDevEnvironment
 
-
-#### Instalar los certificados electrónicos
-
-Para que las aplicaciones puedan generar firmas y descifrar documentos necesitan tener instalados certificados electrónicos.
-Para trabajar en entornos de pruebas se pueden emplear los que genera la aplicación al ejecutar:
-
-
-	SistemaVotacion$gradle installCerts
+De esta forma:
+*   Se instalan los editores de texto empleados en las aplicaciones **Control de Acceso**, y **TestsWebApp**
+*   Se instalan los certificados empleados por la aplicación para generar firmas y descifrar documentos.
 
 
 #### Generación de las aplicaciones
