@@ -65,15 +65,10 @@ grails.project.dependency.resolution = {
 			'com.itextpdf:itextpdf:5.1.3',
 			'org.xhtmlrenderer:core-renderer:R8',
 			'org.rometools:rome-modules:1.0',
-			//para hacer funcionar AntBuilder en Cloudfoundry
-			//'org.apache.ant:ant:1.8.3',
-			//for rendering plugin in production environments
-			//'org.springframework:spring-test:3.2.4.RELEASE',
-			//'org.apache.ant:ant-launcher:1.8.3'
-			) {
-				excludes "slf4j-api", "log4j", "commons-logging", "xalan",
-					"xml-apis", "groovy","commons-io"
-			}
+			//for rendering plugin
+			'org.springframework:spring-test:3.2.5.RELEASE',
+			) {excludes "slf4j-api", "log4j", "commons-logging", "xalan",
+					"xml-apis", "groovy","commons-io"}
 			
 			compile 'org.postgresql:postgresql:9.2-1003-jdbc4'
     }
