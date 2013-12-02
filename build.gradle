@@ -83,6 +83,7 @@ task genWebAppsCerts() {
 	}
 }
 
+
 task genAppsCerts() {
     doLast {
         initAppsCertsData()
@@ -90,6 +91,8 @@ task genAppsCerts() {
     }
 }
 
+//allprojects { tasks.withType(Upload){ allprojects { mustRunAfter tasks.matching {it instanceof VerificationTask } } } }
+//project.tasks.each {task -> if(task.name.endsWith("AppsCerts")) {}}
 
 task installCerts()  {
     doFirst { }
@@ -97,9 +100,7 @@ task installCerts()  {
         initAppsCertsData()
         initWebAppsCertsData()
         tasks.getByPath('VotingSystemLibrary:generateCertificates').execute()
-        /*project(':VotingSystemLibrary').tasks.each {task ->
-            println task.path
-        }*/
+        /*project(':VotingSystemLibrary').tasks.each {task ->  println task.path}*/
     }
 }
 
@@ -165,7 +166,10 @@ def copyAppletDeps(project) {
 
 task installEditor(dependsOn: [':TestsWebApp:installEditor', ':AccessControl:installEditor'])  { }
 
-task initDevEnvironment(dependsOn: [':installCerts', ':installEditor', ':AccessControl:copyApps']) {}
+task initDevEnvironment(dependsOn: ['VotingSystemLibrary:classes', 'initDevEnvironmentApps']) {}
+task initDevEnvironmentApps(dependsOn: [':installCerts', ':installEditor', ':AccessControl:copyApps']) {}
+initDevEnvironmentApps.mustRunAfter tasks.getByPath('VotingSystemLibrary:classes')
+
 
 def installAppletBcprov(project) {
 	println "installAppletBcprov - bcprovVersion '$bcprovVersion'"

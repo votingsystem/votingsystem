@@ -114,10 +114,12 @@ public class Applet extends JApplet implements AppHostVS {
 
 
     public void terminate() {
-        logger.debug("terminate");
-        operationGetter.cancel();
-        sendMessageToHost(new OperationVS(TypeVS.TERMINATED));
-        ContextVS.getInstance().shutdown();
+        logger.debug(" --- terminate ---");
+        if(operationGetter != null) {
+            operationGetter.cancel();
+            sendMessageToHost(new OperationVS(TypeVS.TERMINATED));
+            ContextVS.getInstance().shutdown();
+        }
     }
 
     public void runOperation(String operacionJSONStr) {
@@ -145,13 +147,10 @@ public class Applet extends JApplet implements AppHostVS {
                         UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
                         Applet appletFirma = new Applet();
                         appletFirma.start();
-                        String fileName = "signManifest";
-                        if(args.length > 0) fileName = args[0];
-                        File jsonFile = File.createTempFile(fileName, ".json");
-                        jsonFile.deleteOnExit();
-                        FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
-                            .getResourceAsStream("testFiles/" + fileName + ".json"), jsonFile);
-                        appletFirma.runOperation(FileUtils.getStringFromFile(jsonFile));
+                        String operationStr = null;
+                        if(args.length > 0) operationStr = args[0];
+                        if(operationStr != null)appletFirma.runOperation(operationStr);
+                        else logger.error("### Operation null ###");
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
                     }

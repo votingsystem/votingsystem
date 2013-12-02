@@ -152,26 +152,56 @@ log4j = {
 			error 'ControlCenterERRORES', 'smtp'
     }
 
-    debug  'org.votingsystem','filters', 'grails.app', 
-           //'org.springframework.security',
-		   //'org.apache.catalina.core',
-		   'com.itextpdf.text.*'
-		   
-    error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
-           'org.codehaus.groovy.grails.web.pages', //  GSP
-           'org.codehaus.groovy.grails.web.sitemesh', //  layouts
-           'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
-           'org.codehaus.groovy.grails.web.mapping', // URL mapping
-           'org.codehaus.groovy.grails.commons', // core / classloading
-           'org.codehaus.groovy.grails.plugins', // plugins
-           'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
-           'org.springframework',
-           'org.hibernate',
-		   'grails.plugins',
-		   'grails.app.services.org.grails.plugin.resource',
-		   'grails.app.taglib.org.grails.plugin.resource',
-		   'grails.app.resourceMappers.org.grails.plugin.resource',
-           'net.sf.ehcache.hibernate'
+    environments {
+
+        development{
+
+            debug 'org.votingsystem','filters'//,'org.springframework.security',  'com.itextpdf.text.*'
+            debug 'org.springframework'
+            debug 'org.apache'
+            debug 'grails'
+            //debug 'grails.app.services'
+            //debug 'grails.app.controllers'
+            //debug 'org.grails.auth'
+
+            error 'org.hibernate'
+            error 'net.sf.ehcache.hibernate'
+            error 'grails.app.services.org.grails.plugin.resource'
+            error 'grails.app.taglib.org.grails.plugin.resource'
+            error 'grails.app.resourceMappers.org.grails.plugin.resource'
+        }
+
+        production { }
+
+        test{ }
+
+    }
+
+    environments {
+
+        development{
+
+            debug 'org.votingsystem','filters'//,'org.springframework.security',  'com.itextpdf.text.*'
+            debug 'org.springframework'
+            debug 'org.apache'
+            debug 'grails'
+            debug 'java.net'
+            //debug 'grails.app.services'
+            //debug 'grails.app.controllers'
+            //debug 'org.grails.auth'
+
+            error 'org.hibernate'
+            error 'net.sf.ehcache.hibernate'
+            error 'grails.app.services.org.grails.plugin.resource'
+            error 'grails.app.taglib.org.grails.plugin.resource'
+            error 'grails.app.resourceMappers.org.grails.plugin.resource'
+        }
+
+        production { }
+
+        test{ }
+
+    }
 }
 
 

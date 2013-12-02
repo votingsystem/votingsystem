@@ -72,7 +72,7 @@ grails.project.dependency.resolution = {
 			//'org.apache.ant:ant-launcher:1.8.3'
 			) {
 				excludes "slf4j-api", "log4j", "commons-logging", "xalan",
-					"xml-apis", "groovy","commons-io", 'h2'
+					"xml-apis", "groovy","commons-io"
 			}
 			
 			compile 'org.postgresql:postgresql:9.2-1003-jdbc4'
@@ -80,7 +80,7 @@ grails.project.dependency.resolution = {
 
     plugins {
         // plugins for the build system only
-        build ":tomcat:7.0.42"
+        build   ":tomcat:7.0.47"
 
         // plugins for the compile step
         compile ":scaffolding:2.0.1"
@@ -98,5 +98,8 @@ grails.project.dependency.resolution = {
         // Uncomment these (or add new ones) to enable additional resources capabilities
         //runtime ":zipped-resources:1.0.1"
         //runtime ":cached-resources:1.1"
+        if (Environment.current == Environment.DEVELOPMENT) {}
     }
 }
+
+grails.tomcat.jvmArgs = [ '-Xmx512m', '-XX:MaxPermSize=256m' ]

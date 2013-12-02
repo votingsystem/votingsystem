@@ -1,5 +1,5 @@
-<div>
-	<div style="margin:20px auto 20px auto;" id="paginationDiv" ></div>
+<div style="position: absolute; bottom: 0px; width:100%;">
+    <div style="margin:20px auto 20px auto;" id="paginationDiv" ></div>
 </div>
 <script>
 var offsetPage

@@ -4,41 +4,41 @@
 */
 class UrlMappings {
 
-	static mappings = {		
-		
+	static mappings = {
+
 		"/$controller/$action?/$id?"{
 			constraints {
 				// apply constraints here
 			}
 		}
-		
+
 		"/"(view:"/index")
 		"500"(view:'/error500')
-		
+
 		"/android/VotingToolAndroid.apk" {
 			controller = "android"
 			action = "app"
-		}		
-		
+		}
+
 		"/voteVSCanceller" {
 			controller = "voteVSCanceller"
 			action = [POST:"post"]
 		}
-		
+
 		"/voteVSCanceller/$hashHex" {
 			controller = "voteVSCanceller"
 			action = "index"
 		}
-		
-		
+
+
 		"/voteVSCanceller/voteVS/${id}"{
 			controller = "voteVSCanceller"
 			action = "get"
 			constraints {
 				id(matches:/\d*/)
 			}
-		}		
-		
+		}
+
 		"/certificateVS/userVS/$userId" {
 			controller = "certificateVS"
 			action = "userVS"
@@ -46,7 +46,7 @@ class UrlMappings {
 				userId(matches:/\d*/)
 			}
 		}
-		
+
 		"/certificateVS/eventCA/$eventVS_Id" {
 			controller = "certificateVS"
 			action = "eventCA"
@@ -54,12 +54,12 @@ class UrlMappings {
 				eventVS_Id(matches:/\d*/)
 			}
 		}
-		
+
 		"/certificateVS/voteVS/hashHex/$hashHex" {
 			controller = "certificateVS"
 			action = "voteVS"
 		}
-		
+
 		"/eventVS/$id?" {
 			controller = "eventVS"
 			action = "index"
@@ -67,7 +67,7 @@ class UrlMappings {
 				id(matches:/\d*/)
 			}
 		}
-		
+
 		"/eventVS/$id/checkDates" {
 			controller = "eventVS"
 			action = "checkDates"
@@ -75,7 +75,7 @@ class UrlMappings {
 				id(matches:/\d*/)
 			}
 		}
-		
+
 		"/eventVS/$id/statistics" {
 			controller = "eventVS"
 			action = "statistics"
@@ -83,12 +83,12 @@ class UrlMappings {
 				id(matches:/\d*/)
 			}
 		}
-		
+
 		"/eventVSManifest" {
 			controller = "eventVSManifest"
 			action = [POST:"save"]
 		}
-		
+
 		"/eventVSManifest/$id" {
 			controller = "eventVSManifest"
 			action = [GET:"index", POST:"save"]
@@ -96,7 +96,7 @@ class UrlMappings {
 				id(matches:/\d*/)
 			}
 		}
-		
+
 		"/eventVSManifest/$id/statistics" {
 			controller = "eventVSManifest"
 			action = "statistics"
@@ -104,7 +104,7 @@ class UrlMappings {
 				id(matches:/\d*/)
 			}
 		}
-		
+
 		"/eventVSManifest/$id/signaturesInfo" {
 			controller = "eventVSManifest"
 			action = "signaturesInfo"
@@ -112,7 +112,7 @@ class UrlMappings {
 				id(matches:/\d*/)
 			}
 		}
-		
+
 		"/eventVSManifest/signed/$id" {
 			controller = "eventVSManifest"
 			action = "signed"
@@ -120,8 +120,8 @@ class UrlMappings {
 				id(matches:/\d*/)
 			}
 		}
-		
-		
+
+
 		"/eventVSClaim" {
 			controller = "eventVSClaim"
 			action = [POST:"save"]
@@ -134,7 +134,7 @@ class UrlMappings {
 				id(matches:/\d*/)
 			}
 		}
-		
+
 		"/eventVSClaim/$id/statistics" {
 			controller = "eventVSClaim"
 			action = "statistics"
@@ -142,7 +142,7 @@ class UrlMappings {
 				id(matches:/\d*/)
 			}
 		}
-		
+
 		"/eventVSClaim/${id}/signed" {
 			controller = "eventVSClaim"
 			action = "signed"
@@ -150,7 +150,7 @@ class UrlMappings {
 				id(matches:/\d*/)
 			}
 		}
-		
+
 		"/eventVSClaim/${id}/validated" {
 			controller = "eventVSClaim"
 			action = "validated"
@@ -158,7 +158,7 @@ class UrlMappings {
 				id(matches:/\d*/)
 			}
 		}
-		
+
 		"/eventVSClaim/${id}/signaturesInfo" {
 			controller = "eventVSClaim"
 			action = "signaturesInfo"
@@ -166,12 +166,12 @@ class UrlMappings {
 				id(matches:/\d*/)
 			}
 		}
-		
+
 		"/eventVSElection" {
 			controller = "eventVSElection"
 			action = [POST:"save"]
 		}
-		
+
 		"/eventVSElection/$id?" {
 			controller = "eventVSElection"
 			action = "index"
@@ -179,7 +179,7 @@ class UrlMappings {
 				id(matches:/\d*/)
 			}
 		}
-		
+
 		"/eventVSElection/$id/statistics" {
 			controller = "eventVSElection"
 			action = "statistics"
@@ -187,7 +187,7 @@ class UrlMappings {
 				id(matches:/\d*/)
 			}
 		}
-		
+
 		"/eventVSElection/$id/voteVSInfo" {
 			controller = "eventVSElection"
 			action = "statistics"
@@ -195,7 +195,7 @@ class UrlMappings {
 				id(matches:/\d*/)
 			}
 		}
-		
+
 		"/eventVSElection/${id}/validated" {
 			controller = "eventVSElection"
 			action = "validated"
@@ -203,7 +203,7 @@ class UrlMappings {
 				id(matches:/\d*/)
 			}
 		}
-		
+
 		"/eventVSElection/${id}/signed" {
 			controller = "eventVSElection"
 			action = "signed"
@@ -211,7 +211,7 @@ class UrlMappings {
 				id(matches:/\d*/)
 			}
 		}
-		
+
 		"/eventVSElection/$id/votingErrors" {
 			controller = "eventVSElection"
 			action = "votingErrors"
@@ -219,17 +219,17 @@ class UrlMappings {
 				id(matches:/\d*/)
 			}
 		}
-		
+
 		"/messageSMIME/$id" {
 			controller = "messageSMIME"
 			action = "index"
 		}
-		
+
 		"/messageSMIME/recibo/$requestMessageId" {
 			controller = "messageSMIME"
 			action = "recibo"
 		}
-		
+
 		"/eventVSManifestCollector/$id?" {
 			controller = "eventVSManifestCollector"
 			action = "index"
@@ -242,7 +242,7 @@ class UrlMappings {
 			controller = "representative"
 			action = [POST:"processFileMap"]
 		}
-		
+
 		"/representative/$id?" {
 			controller = "representative"
 			action = "index"
@@ -250,17 +250,17 @@ class UrlMappings {
 				id(matches:/\d*/)
 			}
 		}
-		
+
 		"/representative/nif/$nif" {
 			controller = "representative"
 			action = "getByNif"
 		}
-		
+
 		"/representative/edit/$nif" {
 			controller = "representative"
 			action = "editRepresentative"
 		}
-		
+
 		"/representative/image/$id" {
 			controller = "representative"
 			action = "image"
@@ -268,7 +268,7 @@ class UrlMappings {
 				id(matches:/\d*/)
 			}
 		}
-		
+
 		"/representative/$representativeId/image" {
 			controller = "representative"
 			action = [GET:"image"]
@@ -276,35 +276,35 @@ class UrlMappings {
 				representativeId(matches:/\d*/)
 			}
 		}
-		
+
 		"/representative/accreditationsBackupForEvent/$id" {
 			controller = "representative"
 			action = "accreditationsBackupForEvent"
 			constraints {
 				id(matches:/\d*/)
 			}
-		} 
-		
+		}
+
 		"/accessRequestVS" {
 			controller = "accessRequestVS"
 			action = [POST:"processFileMap"]
 		}
-		
+
 		"/accessRequestVS/$id" {
 			controller = "accessRequestVS"
 			action = [GET:"index"]
 		}
-		
+
 		"/accessRequestVS/eventVS/$eventId/nif/$nif" {
 			controller = "accessRequestVS"
 			action = [GET:"encontrarPorNif"]
 		}
-		
+
 		"/accessRequestVS/hashHex/$hashHex" {
 			controller = "accessRequestVS"
 			action = [GET:"hashHex"]
 		}
-		
+
 		"/backupVS/download/$id" {
 			controller = "backupVS"
 			action = [GET:"download"]
@@ -312,7 +312,7 @@ class UrlMappings {
 				id(matches:/\d*/)
 			}
 		}
-		
+
 		"/backupVS/$id" {
 			controller = "backupVS"
 			action = [GET:"get"]
@@ -325,17 +325,17 @@ class UrlMappings {
 			controller = "subscriptionVS"
 			action = "claims"
 		}
-		
+
 		"/subscriptionVS/elections/$feedType?"{
 			controller = "subscriptionVS"
 			action = "elections"
 		}
-		
+
 		"/subscriptionVS/manifests/$feedType?"{
 			controller = "subscriptionVS"
 			action = "manifests"
 		}
-		
+
 		"/timeStamp/$serialNumber" {
 			controller = "timeStamp"
 			action = [GET:"getBySerialNumber"]
@@ -343,23 +343,23 @@ class UrlMappings {
 				serialNumber(matches:/\d*/)
 			}
 		}
-		
+
 		"/userVS/$nif/representative" {
 			controller = "userVS"
 			action = [GET:"representative"]
 		}
-		
+
 		"/userVS" {
 			controller = "userVS"
 			action = [POST:"save"]
 		}
-		
+
 		"/voteVS" {
 			controller = "voteVS"
 			action = [POST:"save"]
 		}
-		
-		
+
+
 		"/voteVS/${id}" {
 			controller = "voteVS"
 			action = "get"
