@@ -1,57 +1,54 @@
 @font-face {
-      src: url(../fonts/arial.ttf);
-      -fs-pdf-font-embed: embed;
-      -fs-pdf-font-encoding: ISO-8859-1;
-    }
+    src: url(../fonts/arial.ttf);
+    -fs-pdf-font-embed: embed;
+    -fs-pdf-font-encoding: ISO-8859-1;
+}
     
-    @page {
-      size: 210mm 297mm;
-    }
-    
+@page {
+    size: 210mm 297mm;
+}
 
 #header {
-font: bold serif;
-position: absolute; top: 0; left: 0; 
--fs-move-to-flow: "header";
+    font: bold serif;
+    position: absolute; top: 0; left: 0;
+    -fs-move-to-flow: "header";
 } 
     
 #footer {
-font-size: 90%; font-style: italic; 
-position: absolute; top: 0; left: 0;
--fs-move-to-flow: "footer";
+    font-size: 90%; font-style: italic;
+    position: absolute; top: 0; left: 0;
+    -fs-move-to-flow: "footer";
 }
 
 #pagenumber:before {
-content: counter(page); 
+    content: counter(page);
 }
 
 #pagecount:before {
-content: counter(pages);  
+    content: counter(pages);
 }
     
-body
-{
-    BACKGROUND-COLOR: #ffffff;
+body {
+    background-color: #ffffff;
     font-family: "Arial Unicode MS", Arial, sans-serif;
     background-color: white;
-    FONT-SIZE: 29pt;
     padding: 0 0 0 0;
     margin-top: 0;
 }
 
 
-.cuerpo{
+.content {
     font-family: "Arial Unicode MS", Arial, sans-serif;
     background-color: white;
-    FONT-SIZE: 10pt;
+    font-size: 1em;
     padding: 0 0 0 0;
     margin-top: 0;
 }
-.titulo
-{
-  FONT-SIZE: 12pt;
-  font-weight:bold;
-  text-align:center;
-  TEXT-TRANSFORM: uppercase
+
+.title {
+    font-size: 1.3em;
+    font-weight:bold;
+    text-align:center;
+    text-transform: uppercase
 }
 
