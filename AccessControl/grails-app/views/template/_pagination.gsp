@@ -1,4 +1,4 @@
-<div style="position: absolute; bottom: 0px; width:100%;">
+<div style="width:100%;">
 	<div style="margin:20px auto 20px auto;" id="paginationDiv" ></div>
 </div>
 <r:script>
@@ -7,6 +7,12 @@ var offsetPage
 function printPaginate (offset, numItems, numMaxItemsForPage) {
 	var numPages = ( (numItems - numItems%numMaxItemsForPage)/numMaxItemsForPage) + 
 		((numItems%numMaxItemsForPage == 0)?0:1)
+
+    if(!(numPages > 1) ){
+        $("#paginationDiv").hide()
+        return
+    }
+
 	offsetPage = ( (offset -offset%numMaxItemsForPage)/numMaxItemsForPage) + 1
 	console.log("/template/_pagination - offsetItem:" + offset + " - num. total items: " + numItems + 
 			" - offsetPage: " + offsetPage + " - numPages:" + numPages)
