@@ -85,7 +85,7 @@ public class AccessControlVS extends ActorVS implements Serializable {
     }
 
     public String getSearchServiceURL (int offset, int max) {
-        return getServerURL() + "/buscador/consultaJSON?max=" + max + "&offset=" + offset;
+        return getServerURL() + "/search/find?max=" + max + "&offset=" + offset;
     }
 
     public String getEventVSURL () {

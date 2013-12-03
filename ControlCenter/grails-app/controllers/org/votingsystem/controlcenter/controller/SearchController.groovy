@@ -142,7 +142,7 @@ class SearchController {
 	 * @responseContentType [application/json]
 	 * @return Documento JSON con la lista de eventsVS que cumplen el criterio de la búsqueda.
 	 */
-	def consultaJSON() {
+	def find() {
 		String consulta = "${request.getInputStream()}"
 		log.debug("consulta: ${consulta}")
 		if (!consulta) {

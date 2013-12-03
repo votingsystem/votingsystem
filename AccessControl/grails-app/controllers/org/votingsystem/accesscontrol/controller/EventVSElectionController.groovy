@@ -27,16 +27,25 @@ class EventVSElectionController {
     def eventVSElectionService
     def eventVSService
 
-	
-	/**
-	 * @httpMethod [GET]
-	 * @return La página principal de la aplicación web de votación.
-	 */
-	def mainPage() {
-		render(view:"mainPage" , model:[selectedSubsystem:SubSystemVS.VOTES.toString()])
-	}
-	
-	/**
+
+    /**
+     * @httpMethod [GET]
+     * @return La página principal de la aplicación web de votación.
+     */
+    def main() {
+        render(view:"main" , model:[selectedSubsystem:SubSystemVS.VOTES.toString()])
+    }
+
+    /**
+     * @httpMethod [GET]
+     * @return La página principal de la aplicación web de votación.
+     */
+    def elections() {
+        render(view:"elections" , model:[selectedSubsystem:SubSystemVS.VOTES.toString()])
+    }
+
+
+    /**
 	 * @httpMethod [GET]
      * @serviceURL [/eventVSElection/$id]
 	 * @param [id] Opcional. El identificador de la votación en la base de datos. Si no se pasa ningún id

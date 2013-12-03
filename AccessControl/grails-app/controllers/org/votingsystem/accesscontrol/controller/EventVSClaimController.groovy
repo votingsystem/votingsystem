@@ -30,8 +30,8 @@ class EventVSClaimController {
 	 * @httpMethod [GET]
 	 * @return La página principal de la aplicación web de reclamaciones.
 	 */
-	def mainPage() {
-		render(view:"mainPage" , model:[selectedSubsystem:SubSystemVS.CLAIMS.toString()])
+	def main() {
+		render(view:"main" , model:[selectedSubsystem:SubSystemVS.CLAIMS.toString()])
 	}
 	
 	/**

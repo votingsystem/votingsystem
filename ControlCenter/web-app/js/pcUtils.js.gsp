@@ -40,35 +40,35 @@ function updateSubsystem(selectedSubsystem) {
 	var selectedSubsystemLink
 	var selectedSubsystemText
 	if(SubSystem.VOTES == selectedSubsystem) {
-		subsystem_0_0_Link = "${createLink(controller: 'eventVSManifest', action: 'mainPage')}"
+		subsystem_0_0_Link = "${createLink(controller: 'eventVSManifest', action: 'main')}"
 		subsystem_0_0_Text = "<g:message code="manifestLbl"/>"
-		subsystem_0_1_Link = "${createLink(controller: 'eventVSClaim', action: 'mainPage')}"
+		subsystem_0_1_Link = "${createLink(controller: 'eventVSClaim', action: 'main')}"
 		subsystem_0_1_Text = "<g:message code="claimLbl"/>"
-		selectedSubsystemLink = "${createLink(controller: 'eventVSElection', action: 'mainPage')}"
+		selectedSubsystemLink = "${createLink(controller: 'eventVSElection', action: 'main')}"
 		selectedSubsystemText = "<g:message code="votingSystemLbl"/>"
 
 	} else if(SubSystem.CLAIMS == selectedSubsystem) {
-		subsystem_0_0_Link = "${createLink(controller: 'eventVSElection', action: 'mainPage')}"
+		subsystem_0_0_Link = "${createLink(controller: 'eventVSElection', action: 'main')}"
 		subsystem_0_0_Text = "<g:message code="votingLbl"/>"
-		subsystem_0_1_Link = "${createLink(controller: 'eventVSManifest', action: 'mainPage')}"
+		subsystem_0_1_Link = "${createLink(controller: 'eventVSManifest', action: 'main')}"
 		subsystem_0_1_Text = "<g:message code="manifestLbl"/>"
-		selectedSubsystemLink = "${createLink(controller: 'eventVSClaim', action: 'mainPage')}"
+		selectedSubsystemLink = "${createLink(controller: 'eventVSClaim', action: 'main')}"
 		selectedSubsystemText = "<g:message code="claimSystemLbl"/>"
 	} else if(SubSystem.MANIFESTS == selectedSubsystem) {
-		subsystem_0_0_Link = "${createLink(controller: 'eventVSElection', action: 'mainPage')}"
+		subsystem_0_0_Link = "${createLink(controller: 'eventVSElection', action: 'main')}"
 		subsystem_0_0_Text = "<g:message code="votingLbl"/>"
-		subsystem_0_1_Link = "${createLink(controller: 'eventVSClaim', action: 'mainPage')}"
+		subsystem_0_1_Link = "${createLink(controller: 'eventVSClaim', action: 'main')}"
 		subsystem_0_1_Text = "<g:message code="claimLbl"/>"
-		selectedSubsystemLink = "${createLink(controller: 'eventVSManifest', action: 'mainPage')}"
+		selectedSubsystemLink = "${createLink(controller: 'eventVSManifest', action: 'main')}"
 		selectedSubsystemText = "<g:message code="manifestSystemLbl"/>"
 	} else if(SubSystem.REPRESENTATIVES == selectedSubsystem) {
-		subsystem_0_0_Link = "${createLink(controller: 'eventVSElection', action: 'mainPage')}"
+		subsystem_0_0_Link = "${createLink(controller: 'eventVSElection', action: 'main')}"
 		subsystem_0_0_Text = "<g:message code="votingLbl"/>"
-		subsystem_0_1_Link = "${createLink(controller: 'eventVSClaim', action: 'mainPage')}"
+		subsystem_0_1_Link = "${createLink(controller: 'eventVSClaim', action: 'main')}"
 		subsystem_0_1_Text = "<g:message code="claimLbl"/>"
-		subsystem_0_2_Link = "${createLink(controller: 'eventVSManifest', action: 'mainPage')}"
+		subsystem_0_2_Link = "${createLink(controller: 'eventVSManifest', action: 'main')}"
 		subsystem_0_2_Text = "<g:message code="manifestSystemLbl"/>"
-		selectedSubsystemLink = "${createLink(controller: 'representative', action: 'mainPage')}"
+		selectedSubsystemLink = "${createLink(controller: 'representative', action: 'main')}"
 		selectedSubsystemText = "<g:message code="representativesPageLbl"/>"
 	} else {
 		console.log("### updateSubsystem - unknown subsytem -> " + selectedSubsystem)

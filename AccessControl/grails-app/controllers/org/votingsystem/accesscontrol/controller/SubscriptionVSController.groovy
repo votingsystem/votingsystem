@@ -197,7 +197,7 @@ class SubscriptionVSController {
 		" -${grailsApplication.config.VotingSystem.serverName}-"
 		SyndFeed feed = new SyndFeedImpl(feedType: feedType,
 				title: tituloSubscripcionReclamaciones,
-				link: "${createLink(controller: 'eventVSClaim', action: 'mainPage')}",
+				link: "${createLink(controller: 'eventVSClaim', action: 'main')}",
 				description: message(code: 'claimsSubscriptionDescription'),
 				entries: entradas);
 		StringWriter writer = new StringWriter();
@@ -235,7 +235,7 @@ class SubscriptionVSController {
 		" -${grailsApplication.config.VotingSystem.serverName}-"
 		SyndFeed feed = new SyndFeedImpl(feedType: feedType,
 				title: tituloSubscripcionVotaciones,
-				link: "${createLink(controller: 'eventVSElection', action: 'mainPage')}",
+				link: "${createLink(controller: 'eventVSElection', action: 'main')}",
 				description: message(code: 'electionsSubscriptionDescription'),
 				entries: entradas);
 		StringWriter writer = new StringWriter();
@@ -273,7 +273,7 @@ class SubscriptionVSController {
 		" -${grailsApplication.config.VotingSystem.serverName}-"
 		SyndFeed feed = new SyndFeedImpl(feedType: feedType, 
 				title: manifestSubscriptionTitle,
-				link: "${createLink(controller: 'eventVSManifest', action: 'mainPage')}",
+				link: "${createLink(controller: 'eventVSManifest', action: 'main')}",
 				description: message(code: 'manifestSubscriptionDescription'),
 				entries: entradas);
 		StringWriter writer = new StringWriter();

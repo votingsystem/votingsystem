@@ -19,7 +19,7 @@ class AppController {
 		log.debug("*** Si llega aqui mostrar message app market browserToken: ${params.browserToken}" )
 		if(params.boolean('androidClientLoaded'))
 			render(view:"index")
-		/*String uri = "${grailsApplication.config.grails.serverURL}/eventVSElection/mainPage?androidClientLoaded=false"
+		/*String uri = "${grailsApplication.config.grails.serverURL}/eventVSElection/main?androidClientLoaded=false"
 		if(params.browserToken) uri = "${uri}#${params.browserToken}"
 		if(params.eventId) uri = "${uri}&eventId=${params.eventId}"
 		if(params.serverURL) uri = "${uri}&serverURL=${params.serverURL}"
@@ -28,7 +28,7 @@ class AppController {
 			uri = "${uri}&msg=${msg}"
 			log.debug("msg: ${msg}")
 		}*/
-		String uri = "${grailsApplication.config.grails.serverURL}/eventVSElection/mainPage?androidClientLoaded=false"
+		String uri = "${grailsApplication.config.grails.serverURL}/eventVSElection/main?androidClientLoaded=false"
 		if(params.browserToken) uri = "${uri}#${params.browserToken}"
 		if(params.eventId) uri = "${uri}&eventId=${params.eventId}"
 		if(params.serverURL) uri = "${uri}&serverURL=${params.serverURL}"

@@ -223,16 +223,16 @@ class CsrController {
 			return false	
 		}
 		log.debug ("consulta: ${consulta}")
-		def consultaJSON = JSON.parse(consulta)
-		DeviceVS dispositivo = DeviceVS.findByDeviceId(consultaJSON?.deviceId?.trim())
+		def dataJSON = JSON.parse(consulta)
+		DeviceVS dispositivo = DeviceVS.findByDeviceId(dataJSON?.deviceId?.trim())
 		if (!dispositivo) {
 			response.status = ResponseVS.SC_ERROR_REQUEST
 			render message(code: "csr.solicitudNoEncontrada", args: 
-				["deviceId: ${consultaJSON?.deviceId}"])
+				["deviceId: ${dataJSON?.deviceId}"])
 			return false
 		}
 		UserVS userVS
-		String nifValidado = NifUtils.validate(consultaJSON?.nif)
+		String nifValidado = NifUtils.validate(dataJSON?.nif)
 		if(nifValidado) userVS = UserVS.findByNif(nifValidado)
 		if (!userVS) {
 			response.status = ResponseVS.SC_ERROR_REQUEST

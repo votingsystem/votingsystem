@@ -22,13 +22,6 @@ public class EventVSElection extends EventVS implements Serializable {
     @Lob @Column(name="certChainControlCenter") private byte[] certChainControlCenter;
     @Lob @Column(name="certChainAccessControl") private byte[] certChainAccessControl;
 
-    @Transient private Type type = Type.ELECTION;
-
-    @Override @Transient public Type getType() { return type; }
-
-    @Override public void setType(Type type) { this.type = type; }
-
-
 	public byte[] getCertChainControlCenter() {
 		return certChainControlCenter;
 	}
@@ -37,28 +30,6 @@ public class EventVSElection extends EventVS implements Serializable {
 			byte[] certChainControlCenter) {
 		this.certChainControlCenter = certChainControlCenter;
 	}
-	
-	public FieldEventVS checkOptionId(Long opcionId) {
-		if(opcionId == null) return null;
-		for(FieldEventVS opcion: getFieldsEventVS()) {
-			if(opcionId.longValue() == opcion.getId().longValue()) return opcion;
-		}
-		return null;
-	}
-	
-	public X509Certificate getControlCenterCert() throws Exception {
-		if(certChainControlCenter == null) return null;
-		Collection<X509Certificate> controlCenterCertCollection = 
-				CertUtil.fromPEMToX509CertCollection(certChainControlCenter);
-		return controlCenterCertCollection.iterator().next();		
-	}
-
-    public X509Certificate getAccessControlCert() throws Exception {
-        if(certChainAccessControl == null) return null;
-        Collection<X509Certificate> accessControlCertCollection =
-                CertUtil.fromPEMToX509CertCollection(certChainAccessControl);
-        return accessControlCertCollection.iterator().next();
-    }
 
     public byte[] getCertChainAccessControl() {
         return certChainAccessControl;
@@ -68,5 +39,26 @@ public class EventVSElection extends EventVS implements Serializable {
         this.certChainAccessControl = certChainAccessControl;
     }
 
+    @Transient public FieldEventVS checkOptionId(Long opcionId) {
+        if(opcionId == null) return null;
+        for(FieldEventVS opcion: getFieldsEventVS()) {
+            if(opcionId.longValue() == opcion.getId().longValue()) return opcion;
+        }
+        return null;
+    }
+
+    @Transient public X509Certificate getControlCenterCert() throws Exception {
+        if(certChainControlCenter == null) return null;
+        Collection<X509Certificate> controlCenterCertCollection =
+                CertUtil.fromPEMToX509CertCollection(certChainControlCenter);
+        return controlCenterCertCollection.iterator().next();
+    }
+
+    @Transient public X509Certificate getAccessControlCert() throws Exception {
+        if(certChainAccessControl == null) return null;
+        Collection<X509Certificate> accessControlCertCollection =
+                CertUtil.fromPEMToX509CertCollection(certChainAccessControl);
+        return accessControlCertCollection.iterator().next();
+    }
 
 }

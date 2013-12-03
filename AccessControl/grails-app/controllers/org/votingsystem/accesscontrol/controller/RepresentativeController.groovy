@@ -25,8 +25,8 @@ class RepresentativeController {
 	 * @httpMethod [GET]
 	 * @return La página principal de la aplicación web de representantes.
 	 */
-	def mainPage() {
-		render(view:"mainPage" , model:[selectedSubsystem:SubSystemVS.REPRESENTATIVES.toString()])
+	def main() {
+		render(view:"main" , model:[selectedSubsystem:SubSystemVS.REPRESENTATIVES.toString()])
 	}
 	
 	/**

@@ -18,10 +18,4 @@ public class EventVSClaim extends EventVS implements Serializable {
     
     private static final long serialVersionUID = 1L;
 
-    @Transient private Type type = Type.CLAIM;
-
-    @Override @Transient public Type getType() { return type; }
-
-    @Override public void setType(Type type) { this.type = type; }
-
 }

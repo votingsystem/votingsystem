@@ -1,6 +1,7 @@
 import java.net.*;
 import org.apache.log4j.net.SMTPAppender
 import org.apache.log4j.Level
+import org.votingsystem.util.HttpHelper
 
 // locations to search for config files that get merged into the main config;
 // config files can be ConfigSlurper scripts, Java properties files, or classes
@@ -97,7 +98,7 @@ environments {
     development {
         grails.logging.jul.usebridge = true
 		grails.resources.debug = true// -> rendering problems
-		String localIP = getLocalIP();
+		String localIP = HttpHelper.getLocalIP();
 		println("Setting test development to: ${localIP}")
         grails.serverURL = "http://${localIP}:8080/${appName}"
     }
@@ -107,7 +108,7 @@ environments {
 	}
     test {
 		grails.logging.jul.usebridge = true	
-		String localIP = getLocalIP();
+		String localIP = HttpHelper.getLocalIP();
 		println("Setting test address to: ${localIP}")
         grails.serverURL = "http://${localIP}:8080/${appName}"
     }
@@ -144,7 +145,6 @@ log4j = {
 			SMTPDebug: mail.error.debug.toString(), SMTPPassword: mail.error.password,
 			layout: pattern(conversionPattern:
 			   '%d{[ dd.MM.yyyy HH:mm:ss.SSS]} [%t] %n%-5p %n%c %n%C %n %x %n %m%n'))*/
-		 
 	}
 		
 	
@@ -153,17 +153,16 @@ log4j = {
         error 'AccessControlERRORES', 'smtp'
     }
 
-
     environments {
 
         development{
+            debug   'org.votingsystem','filters', 'grails.app', 'com.itextpdf.text.*'
+            //debug   'org.springframework.security'
+            //debug   'org.hibernate'
+            //debug   'org.apache'
 
-            debug 'org.votingsystem','filters', 'grails.app', 'com.itextpdf.text.*'
-            debug 'org.springframework.security'
-            //debug 'org.apache,
 
-
-            error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
+            error   'org.codehaus.groovy.grails.web.servlet',  //  controllers
                     'org.codehaus.groovy.grails.web.pages', //  GSP
                     'org.codehaus.groovy.grails.web.sitemesh', //  layouts
                     'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
@@ -172,12 +171,11 @@ log4j = {
                     'org.codehaus.groovy.grails.plugins', // plugins
                     'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
                     'org.springframework',
-                    'org.hibernate',
                     'grails.plugins',
                     'grails.app.services.org.grails.plugin.resource',
                     'grails.app.taglib.org.grails.plugin.resource',
-                    'grails.app.resourceMappers.org.grails.plugin.resource',
-                    'net.sf.ehcache.hibernate'
+                    'grails.app.resourceMappers.org.grails.plugin.resource'
+            error   'org.hibernate'
         }
 
         production { }
@@ -188,27 +186,7 @@ log4j = {
 
 }
 
-
-def getLocalIP() {
-	Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
-	for (NetworkInterface netint : Collections.list(nets)){
-		Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
-		for (InetAddress inetAddress : Collections.list(inetAddresses)) {
-			if(inetAddress.isSiteLocalAddress()) {
-				String inetAddressStr = inetAddress.toString();
-				while(inetAddressStr.startsWith("/"))
-					inetAddressStr = inetAddressStr.substring(1)
-				return inetAddressStr
-			}
-			
-		}
-	}
-}
-
-grails.war.copyToWebApp = { args ->
-	fileset(dir:"WEB-INF/cms") {
-	}
-}
+grails.war.copyToWebApp = { args -> fileset(dir:"WEB-INF/cms") { }}
 
 VotingSystem.backupCopyPath='./VotingSystem/backups'
 VotingSystem.errorsBaseDir='./VotingSystem/errors'

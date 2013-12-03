@@ -31,20 +31,11 @@ public class EventVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public Set<FieldEventVS> getFieldsEventVS() {
-        return fieldsEventVS;
-    }
+    public enum Cardinality { EXCLUSIVE, MULTIPLE }
 
-    public void setFieldsEventVS(Set<FieldEventVS> fieldsEventVS) {
-        this.fieldsEventVS = fieldsEventVS;
-    }
+    public enum Type { CLAIM, MANIFEST, ELECTION }
 
-
-    public enum Cardinality { EXCLUSIVE, MULTIPLE}
-
-    public enum Type { CLAIM, MANIFEST, ELECTION}
-
-    public enum State {ACTIVE, TERMINATED, CANCELLED, ERROR, AWAITING, PENDING_SIGNATURE, DELETED_FROM_SYSTEM}
+    public enum State { ACTIVE, TERMINATED, CANCELLED, ERROR, AWAITING, PENDING_SIGNATURE, DELETED_FROM_SYSTEM }
 
 
     @Id @GeneratedValue(strategy=IDENTITY) 
@@ -152,6 +143,14 @@ public class EventVS implements Serializable {
 
     public void setNumVotesCollected(Integer numVotesCollected) {
         this.numVotesCollected = numVotesCollected;
+    }
+
+    public Set<FieldEventVS> getFieldsEventVS() {
+        return fieldsEventVS;
+    }
+
+    public void setFieldsEventVS(Set<FieldEventVS> fieldsEventVS) {
+        this.fieldsEventVS = fieldsEventVS;
     }
 
     public Cardinality getCardinality() {
@@ -396,6 +395,13 @@ public class EventVS implements Serializable {
         }
         if (cardinality != null) map.put("cardinality", cardinality.toString());
         return resultMap;
+    }
+
+    public static Type getType(EventVS eventVS) {
+        if(eventVS instanceof EventVSClaim) return Type.CLAIM;
+        if(eventVS instanceof EventVSElection) return Type.ELECTION;
+        if(eventVS instanceof EventVSManifest) return Type.MANIFEST;
+        return null;
     }
 
     @Transient public HashMap getChangeEventDataMap(String serverURL, State state) {

@@ -124,7 +124,7 @@
 				if(newOffsetPage == 0) offsetItem = 0
 				else offsetItem = (newOffsetPage -1) * numMaxEventsForPage
 				var targetURL = "${createLink( controller:'eventVSClaim')}?max=" + numMaxEventsForPage + "&offset=" + offsetItem
-				if(searchQuery != null) targetURL = "${createLink( controller:'search', action:'consultaJSON')}?max=" +
+				if(searchQuery != null) targetURL = "${createLink( controller:'search', action:'find')}?max=" +
 						numMaxEventsForPage + "&offset=" + offsetItem
 				loadEvents(targetURL, searchQuery)	
 			}
@@ -134,7 +134,7 @@
 				newSearchQuery.subsystem = "${selectedSubsystem}"
 				searchQuery = newSearchQuery
 				showEventsSearchInfoMsg(newSearchQuery)
-				loadEvents("${createLink(controller:'search', action:'consultaJSON')}?max=" +
+				loadEvents("${createLink(controller:'search', action:'find')}?max=" +
 						numMaxEventsForPage + "&offset=0", newSearchQuery)
 			}
 			

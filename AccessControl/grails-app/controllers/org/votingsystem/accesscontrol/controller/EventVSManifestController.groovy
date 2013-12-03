@@ -27,8 +27,8 @@ class EventVSManifestController {
 	 * @httpMethod [GET]
 	 * @return La página principal de la aplicación web de manifiestos.
 	 */
-	def mainPage() {
-		render(view:"mainPage" , model:[selectedSubsystem:SubSystemVS.MANIFESTS.toString()])
+	def main() {
+		render(view:"main" , model:[selectedSubsystem:SubSystemVS.MANIFESTS.toString()])
 	}
 	
 	/**

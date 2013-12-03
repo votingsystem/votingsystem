@@ -147,7 +147,7 @@ class SearchController {
 	 * @responseContentType [application/json]
 	 * @return PDFDocumentVS JSON con la lista de eventos que cumplen el criterio de la búsqueda.
 	 */
-	def consultaJSON() {
+	def find() {
 		String consulta = "${request.getInputStream()}"
 		log.debug("consulta: ${consulta} - offset:${params.offset} - max: ${params.max}")
 		if (!consulta) {

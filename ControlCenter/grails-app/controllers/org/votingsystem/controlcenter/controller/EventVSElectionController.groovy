@@ -29,8 +29,8 @@ class EventVSElectionController {
 	 * @httpMethod [GET]
 	 * @return La página principal de la aplicación web de votación.
 	 */
-	def mainPage() {
-		render(view:"mainPage" , model:[selectedSubsystem:SubSystemVS.VOTES.toString()])
+	def main() {
+		render(view:"main" , model:[selectedSubsystem:SubSystemVS.VOTES.toString()])
 	}
 
 	/**
