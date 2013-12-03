@@ -1,6 +1,7 @@
 import java.net.*;
 import org.apache.log4j.net.SMTPAppender
 import org.apache.log4j.Level
+import org.votingsystem.util.HttpHelper
 
 // locations to search for config files that get merged into the main config;
 // config files can be ConfigSlurper scripts, Java properties files, or classes
@@ -94,30 +95,13 @@ environments {
     development {
         //grails.logging.jul.usebridge = true
         grails.resources.debug = true
-		String localIP = getLocalIP();
+		String localIP = HttpHelper.getLocalIP();
 		grails.serverURL = "http://${localIP}:8082/${appName}"
     }
     production {
         grails.logging.jul.usebridge = false
         // TODO: grails.serverURL = "http://www.sistemavotacion.org/${appName}"
     }
-}
-
-def getLocalIP() {
-	Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
-	for (NetworkInterface netint : Collections.list(nets)){
-		Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
-		for (InetAddress inetAddress : Collections.list(inetAddresses)) {
-			if(inetAddress.isSiteLocalAddress()) {
-				String inetAddressStr = inetAddress.toString();
-				while(inetAddressStr.startsWith("/"))
-					inetAddressStr = inetAddressStr.substring(1)
-				log.debug("Setting development address to: ${inetAddressStr}")
-				return inetAddressStr
-			}
-			
-		}
-	}
 }
 
 // log4j configuration
@@ -152,20 +136,25 @@ log4j = {
 
     environments {
         development{
+            debug   'org.votingsystem','filters', 'grails.app', 'com.itextpdf.text.*'
+            //debug   'org.springframework.security'
+            //debug   'org.hibernate'
+            //debug   'org.apache'
 
-            debug 'org.votingsystem','filters'//,'org.springframework.security',  'com.itextpdf.text.*'
-            //debug 'org.springframework'
-            debug 'org.apache'
-            //debug 'grails'
-            //debug 'grails.app.services'
-            //debug 'grails.app.controllers'
-            //debug 'org.grails.auth'
-
-            error 'org.hibernate'
-            error 'net.sf.ehcache.hibernate'
-            error 'grails.app.services.org.grails.plugin.resource'
-            error 'grails.app.taglib.org.grails.plugin.resource'
-            error 'grails.app.resourceMappers.org.grails.plugin.resource'
+            error   'org.codehaus.groovy.grails.web.servlet',  //  controllers
+                    'org.codehaus.groovy.grails.web.pages', //  GSP
+                    'org.codehaus.groovy.grails.web.sitemesh', //  layouts
+                    'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
+                    'org.codehaus.groovy.grails.web.mapping', // URL mapping
+                    'org.codehaus.groovy.grails.commons', // core / classloading
+                    'org.codehaus.groovy.grails.plugins', // plugins
+                    'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
+                    'org.springframework',
+                    'grails.plugins',
+                    'grails.app.services.org.grails.plugin.resource',
+                    'grails.app.taglib.org.grails.plugin.resource',
+                    'grails.app.resourceMappers.org.grails.plugin.resource'
+            error   'org.hibernate'
         }
 
         production { }

@@ -168,7 +168,7 @@ SimulationService.close = (function() {
 
 function showSimulationProgress(simulationData) {
     var msg = '<g:message code="listeningEventProtocolSimulationMsg"/>' + ": '" + $('#subject').val() + "'"
-    console.log(" =========== msg: " + msg)
+    console.log("showSimulationProgress - msg: " + msg)
     $('#pageTitle').html(msg)
     if(simulationData != null) {
         messageToService = simulationData

@@ -6,16 +6,13 @@ import org.votingsystem.model.EventVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.StringUtils
-
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 
 class SimulationData {
 	
 	 private static Logger logger = Logger.getLogger(SimulationData.class);
 	
-	 private AtomicInteger statusCode;
+	 private Integer statusCode = ResponseVS.SC_PAUSED;
 	 private String message = null;
 	 private String accessControlURL = null;
      private String serverURL = null;
@@ -79,7 +76,7 @@ class SimulationData {
              long timeDuration = System.currentTimeMillis() - begin;
              timeDurationStr = DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(timeDuration);
          } else timeDurationStr = durationStr;
-		 resultMap.statusCode = statusCode.get();
+		 resultMap.statusCode = getStatusCode();
 		 resultMap.errorList = errorList;
          resultMap.numRequestsProjected = numRequestsProjected?.longValue()
 		 resultMap.numRequests = numRequests?.longValue();
@@ -156,107 +153,105 @@ class SimulationData {
 		 return simulationData;
 	 }
 	 
-	 public Long getNumRequestsColected() {
-		 return numRequestsOK.get() + numRequestsERROR.get();
-	 }
-	 
-	 public Long getNumRequests() {
-		 return numRequests.get();
-	 }
-		 
-	 public Long getAndIncrementNumRequests() {
-		 return numRequests.getAndIncrement();
-	 }
-	 
-	 public Long getAndAddNumRequestsOK(long delta) {
-		 return numRequestsOK.getAndAdd(delta);
-	 }
-	 
-	 public Long getNumRequestsOK() {
-		 return numRequestsOK.get();
-	 }
-		 
-	 public Long getAndIncrementNumRequestsOK() {
-		 return numRequestsOK.getAndIncrement();
-	 }
-	 
-	 public Long getNumRequestsERROR() {
-		 return numRequestsERROR.get();
-	 }
-		 
-	 public Long getAndIncrementNumRequestsERROR() {
-		 return numRequestsERROR.getAndIncrement();
-	 }
+    public Long getNumRequestsColected() {
+        return numRequestsOK.get() + numRequestsERROR.get();
+    }
+
+    public Long getNumRequests() {
+        return numRequests.get();
+    }
+
+    public Long getAndIncrementNumRequests() {
+        return numRequests.getAndIncrement();
+    }
+
+    public Long getAndAddNumRequestsOK(long delta) {
+        return numRequestsOK.getAndAdd(delta);
+    }
+
+    public Long getNumRequestsOK() {
+        return numRequestsOK.get();
+    }
+
+    public Long getAndIncrementNumRequestsOK() {
+        return numRequestsOK.getAndIncrement();
+    }
+
+    public Long getNumRequestsERROR() {
+        return numRequestsERROR.get();
+    }
+
+    public Long getAndIncrementNumRequestsERROR() {
+        return numRequestsERROR.getAndIncrement();
+    }
 
 
-     public void setUserBaseSimulationData(UserBaseSimulationData userBaseSimulationData) {
+    public void setUserBaseSimulationData(UserBaseSimulationData userBaseSimulationData) {
         this.userBaseSimulationData = userBaseSimulationData;
-     }
+    }
 
-     public UserBaseSimulationData getUserBaseSimulationData() {
+    public UserBaseSimulationData getUserBaseSimulationData() {
         return userBaseSimulationData;
-     }
+    }
 
-	 public String getMessage() {
-		 return message;
-	 }
+    public String getMessage() {
+        return message;
+    }
 
-	 public void setMessage(String message) {
-		 this.message = message;
-	 }
+    public void setMessage(String message) {
+        this.message = message;
+    }
 
-	 public int getStatusCode() {
-         if(statusCode == null) return null;
-		 return statusCode.get();
-	 }
+    public synchronized int getStatusCode() {
+        return statusCode;
+    }
 
-	 public void setStatusCode(int statusCode) {
-		 this.statusCode.set(statusCode);
-	 }
+    public synchronized void setStatusCode(int statusCode) {
+        this.statusCode = statusCode;
+    }
 
-	 public Long getBegin() {
-		 return begin;
-	 }
-	
-	 public Date getBeginDate() {
-		 if(begin == null) return null;
-		 else return new Date(begin);
-	 }
+    public Long getBegin() {
+        return begin;
+    }
 
-	 public void init(Long begin) {
-         statusCode = new AtomicInteger(ResponseVS.SC_PROCESSING);
-		 this.begin = begin;
-	 }
-	
-	 public Long getFinish() {
-		 return finish;
-	 }
-	
-	 public void finish(int statusCode, Long finish) throws Exception {
-         setStatusCode(statusCode)
-		 if(begin != null && finish != null) {
-			 long duration = finish - begin;
-			 durationStr = DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(duration);
+    public Date getBeginDate() {
+        if(begin == null) return null;
+        else return new Date(begin);
+    }
+
+    public void init(Long begin) {
+        statusCode = begin.intValue();
+        this.begin = begin;
+    }
+
+    public Long getFinish() {
+    return finish;
+    }
+
+    public void finish(int statusCode, Long finish) throws Exception {
+        setStatusCode(statusCode)
+        if(begin != null && finish != null) {
+             long duration = finish - begin;
+             durationStr = DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(duration);
              this.finish = finish;
-		 }
-	 }
-	
-	 public String getDurationStr() {
-		 return durationStr;
-	 }
-	
-	 public String getAccessControlURL() {
-		 return accessControlURL;
-	 }
-	
-	 public void setAccessControlURL(String accessControlURL) {
-		 this.accessControlURL = accessControlURL;
-	 }
+        }
+    }
+
+    public String getDurationStr() {
+        return durationStr;
+    }
+
+    public String getAccessControlURL() {
+        return accessControlURL;
+    }
+
+    public void setAccessControlURL(String accessControlURL) {
+        this.accessControlURL = accessControlURL;
+    }
 
     public String getServerURL() {
         return serverURL;
     }
-
 
     public void setServerURL(String serverURL) {
         this.serverURL = StringUtils.checkURL(serverURL);
@@ -329,10 +324,6 @@ class SimulationData {
 
 	 public List<String> getErrorList() {
 		 return errorList;
-	 }
-
-	 public void seterrorList(List<String> errorList) {
-		 this.errorList = errorList;
 	 }
 
 	 public Long getEventId() {

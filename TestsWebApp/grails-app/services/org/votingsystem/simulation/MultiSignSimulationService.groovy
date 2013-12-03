@@ -23,6 +23,7 @@ class MultiSignSimulationService {
 	def webSocketService
 
 	def messageSource
+    def grailsApplication
 	private String simulationStarter
 
 	private List<String> errorList = new ArrayList<String>();
