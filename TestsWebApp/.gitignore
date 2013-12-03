@@ -4,6 +4,7 @@
 /target-eclipse
 /VotingSystem
 /simulationFiles
+*.iml
 .VotingSystem
 .classpath
 .project

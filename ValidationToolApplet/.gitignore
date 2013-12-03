@@ -2,4 +2,4 @@
 /build
 .settings
 .project
-ValidationToolApplet.iml
+*.iml

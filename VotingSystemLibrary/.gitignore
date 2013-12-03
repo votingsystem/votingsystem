@@ -3,4 +3,4 @@
 .VotingSystem
 .classpath
 .project
-VotingSystemLibrary.iml
+*.iml

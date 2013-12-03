@@ -2,6 +2,7 @@
 /build
 /libs_dev
 GrailsRestDoc*
+*.iml
 .classpath
 .gradle
 gradle
@@ -10,5 +11,4 @@ gradle
 .idea
 icons
 classes
-SistemaVotacion.iml
 
