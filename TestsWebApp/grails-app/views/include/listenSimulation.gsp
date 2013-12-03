@@ -129,9 +129,7 @@ function processResponse(response) {
         if(responseJSON.message == null) {
 	        $("#messageDiv").hide()
 	    }
-	    if(typeof responseJSON.simulationData !== 'undefined' &&
-	            typeof responseJSON.simulationData.errorList !== 'undefined' &&
-	            responseJSON.simulationData.errorList.length == 0) {
+	    if(typeof responseJSON.simulationData != null && responseJSON.simulationData.errorList.length == 0) {
 	        $("#errorsDiv").hide()
 	    }
 	    if(!$("#messageFromService").is(":visible")) $("#messageFromService").fadeIn();

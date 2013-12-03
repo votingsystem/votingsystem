@@ -153,7 +153,7 @@
 				  	eventVS.content = editorDivContent;
 				  	eventVS.dateBegin = dateBegin.datepicker('getDate').format();
 				  	eventVS.dateFinish = dateFinish.datepicker('getDate').format();
-					  	eventVS.controlCenterVS = controlCenters[$('#controlCenterSelect').val()]
+					  	eventVS.controlCenter = controlCenters[$('#controlCenterSelect').val()]
 			
 				  	eventVS.fieldsEventVS = pollOptions
 				  	var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.VOTING_PUBLISHING)
@@ -161,7 +161,7 @@
 					webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
 					webAppMessage.signedContent = eventVS
 					webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStampVS', absolute:true)}"
-					webAppMessage.receiverSignServiceURL = "${createLink(controller:'eventVS', absolute:true)}"
+					webAppMessage.receiverSignServiceURL = "${createLink(controller:'eventVSElection', absolute:true)}"
 					webAppMessage.signedMessageSubject = "${message(code:'publishVoteSubject')}"
 					webAppMessage.isResponseWithReceipt = true
 				
