@@ -31,4 +31,12 @@ Para generar las aplicaciones
     SistemaVotacion$gradle buildAll
 
 Para generar los componentes de los distintos proyectos es necesario tener instalados certificados electrónicos
-(para entornos de pruebas se pueden emplear los generados en el paso anterior):
+(para entornos de pruebas se pueden emplear los generados en el paso anterior)
+
+
+=======================================================================================================
+*   Las aplicaciones que utilizan **Hibernate** y **Grails** (**AccessControl**, **ControlCenter** y **TestsWebApp**
+dan problemas con OpenJDK 1.7.0_25).
+
+*   En entornos de desarrollo con máquinas virtuales Oracle pueden presentarse problemas de colisión de clases entre las
+librerías **jfxrt.jar** y la librería **plugin.jar** en las aplicaciones **ValidationToolApplet** y **VotingToolApplet**.
