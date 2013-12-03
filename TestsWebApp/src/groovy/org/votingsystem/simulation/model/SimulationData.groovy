@@ -220,12 +220,11 @@ class SimulationData {
     }
 
     public void init(Long begin) {
-        statusCode = begin.intValue();
         this.begin = begin;
     }
 
     public Long getFinish() {
-    return finish;
+        return finish;
     }
 
     public void finish(int statusCode, Long finish) throws Exception {

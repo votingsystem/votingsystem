@@ -2,6 +2,7 @@ package org.votingsystem.simulation
 
 import grails.transaction.Transactional
 import org.votingsystem.model.ContentTypeVS
+import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.StatusVS
 import org.votingsystem.signature.util.CertUtil
@@ -133,7 +134,7 @@ class UserBaseDataSimulationService {
         log.debug("createRepresentatives ### Enter status REPRESENTATIVES - NumRepresentatives: " +
                 simulationData.getNumRepresentatives());
         if(simulationData.getNumRepresentatives() > 0) {
-            File representativeImage = grailsApplication.mainContext.getResource("images/Group_256x256.png").getFile()
+            File representativeImage = grailsApplication.mainContext.getResource("images/advert_64x64.png").getFile()
             while (simulationData.hasRepresesentativeRequestsPending()){
                 if(!simulationData.waitingForRepresesentativeRequests()) {
                     requestCompletionService.submit(new RepresentativeTestDataSender(NifUtils.getNif(

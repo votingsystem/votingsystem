@@ -336,50 +336,37 @@ public class SignatureDialog extends JDialog {
             this.password = password;
         }
         
-        @Override public ResponseVS doInBackground() 
-                throws Exception {
-            logger.debug("SignedSenderWorker.doInBackground");
-            X509Certificate destinationCert = null;
+        @Override public ResponseVS doInBackground() throws Exception {
+            logger.debug("SignedSenderWorker.doInBackground - operation: "  + operation.getType().toString());
             switch(operation.getType()) {
-                case REPRESENTATIVE_REVOKE:
-                case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
-                case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
-                case REPRESENTATIVE_SELECTION:
-                case VOTE_CANCELLATION:
-                case ACCESS_REQUEST_CANCELLATION:
-                case CONTROL_CENTER_STATE_CHANGE_SMIME:
-                case CONTROL_CENTER_ASSOCIATION:
-                case SMIME_CLAIM_SIGNATURE:
-                case EVENT_CANCELLATION:
-                    JSONObject documentToSignJSON = (JSONObject)JSONSerializer.toJSON(operation.getDocumentToSignMap());
-                    SMIMEMessageWrapper smimeMessage = DNIeContentSigner.genMimeMessage(null,
-                            operation.getNormalizedReceiverName(), documentToSignJSON.toString(),
-                            password.toCharArray(), operation.getSignedMessageSubject(), null);
-                    destinationCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
-                    String header = null;
-                    if(operation.getType() == TypeVS.VOTING_PUBLISHING ||
-                            operation.getType() == TypeVS.CLAIM_PUBLISHING) {
-                        header = "eventURL";
-                    }
-                    SMIMESignedSender senderWorker = new SMIMESignedSender(smimeMessage,
-                            operation.getUrlEnvioDocumento(), null, destinationCert, header);
-                    return senderWorker.call();
+                case CLAIM_PUBLISHING:
+                case VOTING_PUBLISHING:
+                    return runSMIMEOperation("eventURL");
                 case BACKUP_REQUEST:
                 case MANIFEST_SIGN:
                 case MANIFEST_PUBLISHING:
                     PdfReader readerManifesto = new PdfReader(pdfDocumentBytes);
                     String reason = null;
                     String location = null;
-                    destinationCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
                     PDFSignedSender pdfSignedSender = new PDFSignedSender(operation.getUrlEnvioDocumento(),
-                            reason, location, password.toCharArray(), readerManifesto, null, null, destinationCert);
+                            reason, location, password.toCharArray(), readerManifesto, null, null,
+                            ContextVS.getInstance().getAccessControl().getX509Certificate());
                     return pdfSignedSender.call();
                 default:
-                    logger.debug("Operation not found" + operation.getType().toString());
-                    break;
+                    logger.debug("Operation without headers");
+                    return runSMIMEOperation(null);
             }
-            return null;
        }
+
+        private ResponseVS runSMIMEOperation(String header) throws Exception {
+            JSONObject documentToSignJSON = (JSONObject)JSONSerializer.toJSON(operation.getDocumentToSignMap());
+            SMIMEMessageWrapper smimeMessage = DNIeContentSigner.genMimeMessage(null,
+                    operation.getNormalizedReceiverName(), documentToSignJSON.toString(),
+                    password.toCharArray(), operation.getSignedMessageSubject(), null);
+            SMIMESignedSender senderWorker = new SMIMESignedSender(smimeMessage, operation.getUrlEnvioDocumento(),
+                    null, ContextVS.getInstance().getAccessControl().getX509Certificate(), header);
+            return senderWorker.call();
+        }
 
        @Override protected void done() {
             showProgressPanel(false);

@@ -11,6 +11,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.util.Encryptor
+import org.votingsystem.util.FileUtils
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.StringUtils
 
@@ -42,7 +43,7 @@ public class RepresentativeTestDataSender implements Callable<ResponseVS> {
     @Override  public ResponseVS call() throws Exception {
         KeyStore mockDnie = ContextVS.getInstance().generateKeyStore(representativeNIF);
         MessageDigest messageDigest = MessageDigest.getInstance(VOTING_DATA_DIGEST);
-        byte[] resultDigest =  messageDigest.digest(imageFile);
+        byte[] resultDigest =  messageDigest.digest(FileUtils.getBytesFromFile(imageFile));
         String base64ResultDigestStr = new String(Base64.encode(resultDigest));
         String representativeDataStr = getRepresentativeDataJSON(representativeNIF, base64ResultDigestStr).toString();
         String toUser = StringUtils.getCadenaNormalizada(ContextVS.getInstance().getAccessControl().getName());

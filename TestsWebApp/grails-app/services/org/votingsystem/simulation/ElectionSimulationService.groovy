@@ -26,6 +26,7 @@ import org.votingsystem.simulation.model.VotingSimulationData
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.PdfFormHelper
 import org.votingsystem.util.DateUtils
+import org.votingsystem.util.StringUtils
 
 import java.security.KeyStore
 import java.security.PrivateKey

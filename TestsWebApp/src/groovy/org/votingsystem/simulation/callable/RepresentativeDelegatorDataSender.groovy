@@ -31,7 +31,6 @@ public class RepresentativeDelegatorDataSender implements Callable<ResponseVS> {
     private ResponseVS reponseVS;
     
     public RepresentativeDelegatorDataSender(String userNIF, String representativeNIF, String serviceURL) throws Exception {
-        this.contextService = contextService;
         this.userNIF = userNIF;
         this.serviceURL = serviceURL;
         this.representativeNIF = representativeNIF;
