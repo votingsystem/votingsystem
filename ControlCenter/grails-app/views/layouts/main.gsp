@@ -8,11 +8,10 @@
 	<r:layoutResources />
 </head>
 <body>
-
 	<div class="header">
 		<div class="col-subsystem" style="width:200px;">
-			<g:img dir="images" file="feed.png" style="margin:3px 0 0 15px;"></g:img>
-			<g:link controller="subscriptionVS" action="elections" style="font-size: 0.8em; display:inline;"><g:message code="subscribeToFeedsLbl"/></g:link>
+            <votingSystem:feed href="${createLink(controller:'subscriptionVS', action:'elections')}">
+                <g:message code="subscribeToFeedsLbl"/></votingSystem:feed>
 		</div>
 	   	<div id="selectedSubsystemDiv" class="col-selectedSystem"  style="width:300px;">
 	        <a id="selectedSubsystemLink"></a>

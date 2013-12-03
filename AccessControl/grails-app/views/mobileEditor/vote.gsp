@@ -64,7 +64,7 @@
 				<g:message code="addOptionLbl"/>
 		</votingSystem:simpleButton>
 		<votingSystem:simpleButton id="buttonAccept" isButton='true' style="position:absolute; right:10px; top:0px;"
-			imgSrc="${resource(dir:'images',file:'accept_16x16.png')}">
+			imgSrc="${resource(dir:'images/fatcow_16',file:'accept.png')}">
 				<g:message code="publishDocumentLbl"/>
 		</votingSystem:simpleButton>
 	</div>

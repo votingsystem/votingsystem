@@ -1,4 +1,4 @@
-<div id="addVoteOptionDialog" title="<g:message code="addOptionLbl"/>"  style="padding:20px 20px 20px 20px">
+<div id="addVoteOptionDialog" title="<g:message code="addOptionLbl"/>"  style="display:none;padding:20px 20px 20px 20px">
    	<label for="newOptionText"><g:message code="pollOptionContentMsg"/></label>
 	<form id="addVoteOptionForm">
 		<input type="text" id="newOptionText" style="width:350px; margin:0px auto 0px auto;" 

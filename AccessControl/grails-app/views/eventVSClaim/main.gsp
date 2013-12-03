@@ -1,23 +1,21 @@
 <html>
 <head>
-        <meta name="layout" content="main" />
-       	<r:require modules="paginate"/>
+    <meta name="layout" content="main" />
+    <r:require modules="paginate"/>
 </head>
 <body>
 <div style="position:relative;">
     <div id="contentDiv" style="display:none;">
-
         <div style="display:inline-block;width:100%;vertical-align: middle;margin:0px 0 10px 0px;">
             <div style="display:inline;float:left;width:30%;">
-                <div>
-                    <img src="${resource(dir:'images',file:'feed.png')}" style="margin:3px 0 0 10px;"></img>
-                    <g:link controller="subscriptionVS" action="claims" style="font-size: 0.8em;"><g:message code="subscribeToFeedsLbl"/></g:link>
+                <div><votingSystem:feed href="${createLink(controller:'subscriptionVS', action:'claim')}">
+                    <g:message code="subscribeToFeedsLbl"/></votingSystem:feed>
                 </div>
             </div>
             <div style="display:inline;float:left;margin:0px auto 0px auto;">
                 <div style="margin:0px auto 0px auto;">
                     <select id="eventsStateSelect" style="margin:0px 0px 0px 40px;color:black;">
-                        <option value="" style="color:black;"> - <g:message code="selectPollsLbl"/> - </option>
+                        <option value="" style="color:black;"> - <g:message code="selectClaimsLbl"/> - </option>
                         <option value="ACTIVE" style="color:#6bad74;"> - <g:message code="selectOpenClaimsLbl"/> - </option>
                         <option value="AWAITING" style="color:#fba131;"> - <g:message code="selectPendingClaimsLbl"/> - </option>
                         <option value="TERMINATED" style="color:#cc1606;"> - <g:message code="selectClosedClaimsLbl"/> - </option>
@@ -26,8 +24,7 @@
             </div>
             <div style="display:inline;float:right;">
                 <votingSystem:simpleButton href="${createLink(controller:'editor', action:'claim')}"
-                       imgSrc="${resource(dir:'images',file:'claim_22.png')}" style="margin:0px 20px 0px 0px;">
-                    <g:message code="publishDocumentLbl"/>
+                                           style="margin:0px 0px 0px 15px;"><g:message code="publishDocumentLbl"/>
                 </votingSystem:simpleButton>
             </div>
         </div>
@@ -42,23 +39,27 @@
 
     <div id="mainPageEventList" class="mainPageEventList"><ul></ul></div>
 
+
+    <div style="width:100%;position:relative;display:block;">
+        <div style="right:50%;">
+            <div style="width:500px; margin:20px auto 20px auto;" id="paginationDiv" ></div>
+        </div>
+    </div>
+
     <g:render template="/template/pagination"/>
 
     <div id="eventTemplate" style="display:none;">
         <g:render template="/template/event" model="[isTemplate:'true']"/>
     </div>
+
 </div>
 </body>
 </html>
 <r:script>
-    		var eventState = ''
+			var eventState = ''
             var searchQuery
 		 	$(function() {
 		 		paginate(0)
-		 		
-		 		$('#publishButton').click(function() {
-		 			window.location.href = "${createLink(controller:'editor', action:'claim')}";
-				})
 			 	
 		 		$('#eventsStateSelect').on('change', function (e) {
 		 			eventState = $(this).val()
@@ -69,7 +70,7 @@
 				 		    							 'border-color': '#cccccc'})
 				 		} else {
 			 		    	$('#eventsStateSelect').css({'color': $( "#eventsStateSelect option:selected" ).css('color'),
-								 'border-color': $( "#eventsStateSelect option:selected" ).css('color')})
+    							 'border-color': $( "#eventsStateSelect option:selected" ).css('color')})
 					 	}
 			 		}
 					var targetURL = "${createLink( controller:'eventVSClaim')}"
@@ -137,5 +138,4 @@
 				loadEvents("${createLink(controller:'search', action:'find')}?max=" +
 						numMaxEventsForPage + "&offset=0", newSearchQuery)
 			}
-			
 </r:script>

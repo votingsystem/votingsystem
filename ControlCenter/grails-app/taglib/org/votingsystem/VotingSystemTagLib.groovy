@@ -12,8 +12,13 @@ class VotingSystemTagLib {
 	}
 	
 	def datePicker = { attrs, body ->
-				
+        attrs.message = body()
 		out << render(template: "/template/taglib/datePickerTemplate", model:[attrs: attrs])
 	}
+
+    def feed = {attrs, body ->
+        attrs.message = body()
+        out << render(template: "/template/taglib/feed", model:[attrs: attrs])
+    }
 	
 }

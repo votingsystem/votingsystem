@@ -7,15 +7,12 @@
 	
 		<div style="width: 50%;height: 50%;overflow: auto;margin: auto;top: 0; left: 0; bottom: 0; right: 0;">
 			<votingSystem:simpleButton href="${createLink(controller:'representative', action:'newRepresentative')}"
-				imgSrc="${resource(dir:'images',file:'newRepresentative.png')}" style="margin:10px 20px 0px 0px; width:400px;">
-					<g:message code="newRepresentativeLbl"/>
+			        style="margin:10px 20px 0px 0px; width:400px;"><g:message code="newRepresentativeLbl"/>
 			</votingSystem:simpleButton>
-			<votingSystem:simpleButton id="removeRepresentativeButton" style="margin:10px 20px 0px 0px; width:400px;"
-				imgSrc="${resource(dir:'images',file:'removeRepresentative.png')}">
+			<votingSystem:simpleButton id="removeRepresentativeButton" style="margin:10px 20px 0px 0px; width:400px;">
 				<g:message code="removeRepresentativeLbl"/>
 			</votingSystem:simpleButton>
-			<votingSystem:simpleButton  id="editRepresentativeButton" style="margin:10px 20px 0px 0px; width:400px;"
-					imgSrc="${resource(dir:'images',file:'editRepresentative.png')}">
+			<votingSystem:simpleButton  id="editRepresentativeButton" style="margin:10px 20px 0px 0px; width:400px;">
 					<g:message code="editRepresentativeLbl"/>
 			</votingSystem:simpleButton>
 		</div>

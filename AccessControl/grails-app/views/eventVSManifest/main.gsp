@@ -8,10 +8,8 @@
     <div id="contentDiv" style="display:none;">
         <div style="display:inline-block;width:100%;vertical-align: middle;margin:0px 0 10px 0px;">
             <div style="display:inline;float:left;width:30%;">
-                <div>
-                    <img src="${resource(dir:'images',file:'feed.png')}" style="margin:3px 0 0 10px;"></img>
-                    <g:link controller="subscriptionVS" action="manifests" style="font-size: 0.8em;"><g:message code="subscribeToFeedsLbl"/></g:link>
-                </div>
+                <div><votingSystem:feed href="${createLink(controller:'subscriptionVS', action:'manifests')}">
+                    <g:message code="subscribeToFeedsLbl"/></votingSystem:feed></div>
             </div>
             <div style="display:inline;float:left;margin:0px auto 0px auto;">
                 <div style="margin:0px auto 0px auto;">
@@ -25,8 +23,7 @@
             </div>
             <div style="display:inline;float:right;">
                 <votingSystem:simpleButton href="${createLink(controller:'editor', action:'manifest')}"
-                                           imgSrc="document_export" style="margin:0px 0px 0px 15px;">
-                    <g:message code="publishDocumentLbl"/>
+                        style="margin:0px 0px 0px 15px;"><g:message code="publishDocumentLbl"/>
                 </votingSystem:simpleButton>
             </div>
         </div>

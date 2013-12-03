@@ -7,31 +7,27 @@
 <div class="mainPage">
     <div id="contentDiv" style="display:none;">
 
-        <div style="display:inline-block;width:100%;vertical-align: middle;margin:0px 0 10px 0px;">
-            <div style="display:inline;float:left;width:300px;">
-                <votingSystem:simpleButton href="${createLink(controller:'representative', action:'mainPage')}"
-                                           imgSrc="${resource(dir:'images',file:'group_24x24.png')}" style="margin:0px 0px 0px 15px;">
+        <div style="display: table;width:100%;vertical-align: middle;margin:0px 0 10px 0px;">
+            <div style="display:table-cell;width:300px;">
+                <votingSystem:simpleButton href="${createLink(controller:'representative', action:'main')}" style="margin:0px 0px 0px 15px;">
                     <g:message code="representativesPageLbl"/>
                 </votingSystem:simpleButton>
-                <div>
-                    <img src="${resource(dir:'images',file:'feed.png')}" style="margin:3px 0 0 15px;"></img>
-                    <g:link controller="subscriptionVS" action="elections" style="font-size: 0.8em;"><g:message code="subscribeToFeedsLbl"/></g:link>
+                <div style="margin: 10px 0 0 30px;"><votingSystem:feed  href="${createLink(controller:'subscriptionVS', action:'elections')}">
+                    <g:message code="subscribeToFeedsLbl"/>
+                    </votingSystem:feed>
                 </div>
             </div>
-            <div style="display:inline;float:left;margin:0px auto 0px auto;">
-                <div style="margin:0px auto 0px auto;">
-                    <select id="eventsStateSelect" style="margin:0px 0px 0px 40px;color:black;">
-                        <option value="" style="color:black;"> - <g:message code="selectPollsLbl"/> - </option>
-                        <option value="ACTIVE" style="color:#6bad74;"> - <g:message code="selectOpenPollsLbl"/> - </option>
-                        <option value="AWAITING" style="color:#fba131;"> - <g:message code="selectPendingPollsLbl"/> - </option>
-                        <option value="TERMINATED" style="color:#cc1606;"> - <g:message code="selectClosedPollsLbl"/> - </option>
-                    </select>
-                </div>
+            <div style="display:table-cell;margin: auto; vertical-align: top;">
+                <select id="eventsStateSelect" style="margin:0px 0px 0px 40px;color:black;">
+                    <option value="" style="color:black;"> - <g:message code="selectPollsLbl"/> - </option>
+                    <option value="ACTIVE" style="color:#6bad74;"> - <g:message code="selectOpenPollsLbl"/> - </option>
+                    <option value="AWAITING" style="color:#fba131;"> - <g:message code="selectPendingPollsLbl"/> - </option>
+                    <option value="TERMINATED" style="color:#cc1606;"> - <g:message code="selectClosedPollsLbl"/> - </option>
+                </select>
             </div>
 
-            <div style="display:inline;float:right;">
-                <votingSystem:simpleButton href="${createLink(controller:'editor', action:'vote')}"
-                                           imgSrc="${resource(dir:'images',file:'poll_22x22.png')}" style="margin:0px 20px 0px 0px;">
+            <div style="display:table-cell; vertical-align: top;">
+                <votingSystem:simpleButton href="${createLink(controller:'editor', action:'vote')}" style="margin:0px 20px 0px 0px;">
                     <g:message code="publishDocumentLbl"/>
                 </votingSystem:simpleButton>
             </div>

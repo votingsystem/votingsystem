@@ -39,8 +39,7 @@
 			<input type="checkbox" id="allowBackupRequestCheckbox"><g:message code="allowBackupRequestLbl"/>
 		</div>
 	    <div style="float:right; margin:10px 20px 0px 0px;">
-			<votingSystem:simpleButton id="addClaimFieldButton" style="margin:0px 20px 0px 0px;"
-				imgSrc="${resource(dir:'images',file:'info_16x16.png')}">
+			<votingSystem:simpleButton id="addClaimFieldButton" style="margin:0px 20px 0px 0px;">
 					<g:message code="addClaimFieldLbl"/>
 			</votingSystem:simpleButton>
 	    </div>
@@ -54,7 +53,7 @@
 	<div style='overflow:hidden;'>
 		<div style="float:right; margin:0px 10px 0px 0px;">
 			<votingSystem:simpleButton id="buttonAccept" isButton='true' 
-				imgSrc="${resource(dir:'images',file:'accept_16x16.png')}" style="margin:0px 20px 0px 0px;">
+				imgSrc="${resource(dir:'images/fatcow_16',file:'accept.png')}" style="margin:0px 20px 0px 0px;">
 					<g:message code="publishDocumentLbl"/>
 			</votingSystem:simpleButton>
 		</div>	

@@ -32,7 +32,7 @@
 	
 		<div style="margin:15px 20px 0px 0px; display: block;">
 			<votingSystem:simpleButton style="float:right;" isButton='true' id="submitEditorData" 
-					imgSrc="${resource(dir:'images',file:'accept_16x16.png')}">
+					imgSrc="${resource(dir:'images/fatcow_16',file:'accept.png')}">
 					<g:message code="publishDocumentLbl"/>
 			</votingSystem:simpleButton>
 		</div>

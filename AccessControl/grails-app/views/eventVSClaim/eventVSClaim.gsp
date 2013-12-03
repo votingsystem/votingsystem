@@ -95,9 +95,8 @@
 		</g:if>
 		<g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state)}">
 			<div style="overflow: hidden;">
-				<votingSystem:simpleButton id="signClaimFieldButton"  isButton='true'  
-					style="margin:0px 20px 0px 0px; float:right;"
-					imgSrc="${resource(dir:'images',file:'claim_22.png')}">
+				<votingSystem:simpleButton id="signClaimFieldButton" isButton='true'
+					style="margin:0px 20px 0px 0px; float:right;">
 						<g:message code="signClaim"/>
 				</votingSystem:simpleButton>
 			</div>

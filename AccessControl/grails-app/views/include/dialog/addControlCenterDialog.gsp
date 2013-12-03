@@ -1,4 +1,4 @@
-<div id="addControlCenterDialog" title="<g:message code="controlCenterLbl"/>">
+<div id="addControlCenterDialog" title="<g:message code="controlCenterLbl"/>" style="display:none;">
 	<p style="text-align: center;">
 		<g:message code="controlCenterDescriptionMsg"/>
   	</p>

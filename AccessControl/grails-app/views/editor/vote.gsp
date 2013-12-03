@@ -45,12 +45,12 @@
     </div>
 	
 	<div style="margin: 15px auto 30px auto; width:600px">
-		<img src="${resource(dir:'images',file:'info_16x16.png')}"></img>
+		<img src="${resource(dir:'images/fatcow_16',file:'information.png')}"/>
 		<span id="controlCenterLink" style="font-size:1.1em; color:#02227a; cursor: pointer; cursor: hand;">
 			<g:message code="controlCenterLbl"/>
 		</span>
 		     	
-		<select id="controlCenterSelect" style="margin:0px 0px 0px 40px;" required
+		<select id="controlCenterSelect" style="margin:0px 0px 0px 40px;min-width: 300px;" required
 				oninvalid="this.setCustomValidity('<g:message code="selectControlCenterLbl"/>')"
    				onchange="this.setCustomValidity('')">
 			<g:each status="i" in="${controlCenters}" var="controlCenterVS">
@@ -65,14 +65,13 @@
 		<div id="fields"></div>
 	</fieldset>
 	
-	<div style="position:relative; margin:0px 0px 20px 0px;">
-		<votingSystem:simpleButton id="addOptionButton" 
-			imgSrc="${resource(dir:'images',file:'poll_16x16.png')}" style="margin:0px 20px 0px 0px;">
+	<div style="position:relative; margin:0px 0px 20px 30px;">
+		<votingSystem:simpleButton id="addOptionButton" style="margin:0px 20px 0px 0px;">
 				<g:message code="addOptionLbl"/>
 		</votingSystem:simpleButton>
 
 		<votingSystem:simpleButton id="buttonAccept" isButton='true' 
-			imgSrc="${resource(dir:'images',file:'accept_16x16.png')}" style="position:absolute; right:10px; top:0px;">
+			imgSrc="${resource(dir:'images/fatcow_16',file:'accept.png')}" style="position:absolute; right:10px; top:0px;">
 				<g:message code="publishDocumentLbl"/>
 		</votingSystem:simpleButton>
 	</div>

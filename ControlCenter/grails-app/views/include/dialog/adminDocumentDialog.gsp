@@ -1,4 +1,4 @@
-<div id="adminDocumentDialog" title="<g:message code="confirmOptionDialogCaption"/>">	    	
+<div id="adminDocumentDialog" title="<g:message code="confirmOptionDialogCaption"/>" style="display:none;">
 	<p style="text-align: center;"><g:message code="adminDocumenInfoMsg"/></p>
 	<g:message code="documentStateSelectionMsg"/>:<br/>
 	<div style="font-size: 0.9em; margin:10px 0 0 10px;"> 
