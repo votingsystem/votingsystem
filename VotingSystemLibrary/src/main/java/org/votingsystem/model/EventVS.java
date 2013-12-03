@@ -102,7 +102,7 @@ public class EventVS implements Serializable {
     private Date dateFinish;
     
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="fechaCancelacion", length=23)
+    @Column(name="dateCanceled", length=23)
     private Date dateCanceled;
     
     @Temporal(TemporalType.TIMESTAMP)
@@ -122,16 +122,7 @@ public class EventVS implements Serializable {
     @Transient private Boolean signed;
     @Transient private VoteVS voteVS;
 
-
-    public VoteVS getVoteVS() {
-        return voteVS;
-    }
-
-    public void setVoteVS(VoteVS voteVS) {
-        this.voteVS = voteVS;
-    }
-
-    public Type getType() {
+    @Transient public Type getType() {
         return type;
     }
 
@@ -139,7 +130,7 @@ public class EventVS implements Serializable {
         this.type = type;
     }
 
-    public Integer getNumSignaturesCollected() {
+    @Transient public Integer getNumSignaturesCollected() {
         return numSignaturesCollected;
     }
 
@@ -147,7 +138,15 @@ public class EventVS implements Serializable {
         this.numSignaturesCollected = numSignaturesCollected;
     }
 
-    public Integer getNumVotesCollected() {
+    @Transient public VoteVS getVoteVS() {
+        return voteVS;
+    }
+
+    public void setVoteVS(VoteVS voteVS) {
+        this.voteVS = voteVS;
+    }
+
+    @Transient public Integer getNumVotesCollected() {
         return numVotesCollected;
     }
 
@@ -169,11 +168,6 @@ public class EventVS implements Serializable {
 
     public void setUrl(String url) {
         this.url = url;
-    }
-
-
-    public String[] getTags() {
-        return tags;
     }
 
     public void setTags(String[] tags) {
@@ -199,7 +193,6 @@ public class EventVS implements Serializable {
     public Date getDateCreated() {
         return dateCreated;
     }
-
 
     public void setDateCreated(Date dateCreated) {
         this.dateCreated = dateCreated;
@@ -237,7 +230,7 @@ public class EventVS implements Serializable {
         return dateBegin;
     }
 
-    public void setdateFinish(Date dateFinish) { this.dateFinish = dateFinish; }
+    public void setDateFinish(Date dateFinish) { this.dateFinish = dateFinish; }
 
     public State getState() {
         return state;
@@ -261,14 +254,6 @@ public class EventVS implements Serializable {
 
 	public void setKeyStoreVS(KeyStoreVS keyStoreVS) {
 		this.keyStoreVS = keyStoreVS;
-	}
-        
-	public boolean isActive(Date selectedDate) {
-		if(selectedDate == null) return false;
-		boolean result = false;
-		if (selectedDate.after(dateBegin) && selectedDate.before(dateFinish)) result = true;
-		if(state != null && (state == State.CANCELLED || state == State.DELETED_FROM_SYSTEM)) result = false;
-		return result;
 	}
 
 	public byte[] getPdf() {
@@ -309,7 +294,6 @@ public class EventVS implements Serializable {
 		this.metaInf = metaInf;
 	}
 
-
     public AccessControlVS getAccessControlVS() {
         return accessControlVS;
     }
@@ -326,12 +310,24 @@ public class EventVS implements Serializable {
         this.accessControlEventVSId = accessControlEventVSId;
     }
 
-	public Date getDateFinish() {
+    @Transient public String[] getTags() {
+        return tags;
+    }
+
+    @Transient public Date getDateFinish() {
 		if(dateCanceled != null) return dateCanceled;
 		else return dateFinish;
 	}
 
-    public String getDateBeginStr() {
+    @Transient public boolean isActive(Date selectedDate) {
+        if(selectedDate == null) return false;
+        boolean result = false;
+        if (selectedDate.after(dateBegin) && selectedDate.before(dateFinish)) result = true;
+        if(state != null && (state == State.CANCELLED || state == State.DELETED_FROM_SYSTEM)) result = false;
+        return result;
+    }
+
+    @Transient public String getDateBeginStr() {
         return dateBeginStr;
     }
 
@@ -340,16 +336,16 @@ public class EventVS implements Serializable {
         this.dateBegin = DateUtils.getDateFromString(dateBeginStr);
     }
 
-    public String getDateFinishStr() {
+    @Transient public String getDateFinishStr() {
         return dateFinishStr;
     }
 
-    public void setdateFinishStr(String dateFinishStr) throws ParseException {
+    public void setDateFinishStr(String dateFinishStr) throws ParseException {
         this.dateFinishStr = dateFinishStr;
         this.dateFinish = DateUtils.getDateFromString(dateFinishStr);
     }
 
-    public Map getDataMap() {
+    @Transient public Map getDataMap() {
         logger.debug("getDataMap");
         Map map = new HashMap();
         map.put("subject", subject);
@@ -402,7 +398,7 @@ public class EventVS implements Serializable {
         return resultMap;
     }
 
-    public HashMap getChangeEventDataMap(String serverURL, State state) {
+    @Transient public HashMap getChangeEventDataMap(String serverURL, State state) {
         logger.debug("getCancelEventDataMap");
         Map map = new HashMap();
         map.put("operation", TypeVS.EVENT_CANCELLATION.toString());
@@ -447,7 +443,7 @@ public class EventVS implements Serializable {
             }
             if(eventMap.containsKey("content")) eventVS.setContent((String) eventMap.get("content"));
             if(eventMap.containsKey("dateBegin")) eventVS.setDateBeginStr((String) eventMap.get("dateBegin"));
-            if(eventMap.containsKey("dateFinish")) eventVS.setdateFinishStr((String) eventMap.get("dateFinish"));
+            if(eventMap.containsKey("dateFinish")) eventVS.setDateFinishStr((String) eventMap.get("dateFinish"));
             if (eventMap.containsKey("numSignaturesCollected"))
                 eventVS.setNumSignaturesCollected((Integer) eventMap.get("numSignaturesCollected"));
             if (eventMap.containsKey("numVotesCollected"))eventVS.setNumVotesCollected((Integer) eventMap.get("numVotesCollected"));

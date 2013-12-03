@@ -217,7 +217,7 @@ public class SignatureDialog extends JDialog {
                 openDocumentButton.setIcon(ContextVS.getIcon(this, "file_extension_pdf"));
                 try {
                     pdfDocumentBytes = PdfFormHelper.getBackupRequest(operation.getEventVS().getId().toString(),
-                        operation.getEventVS().getSubject(), operation.getEmailSolicitante());
+                        operation.getEventVS().getSubject(), operation.getEmail());
                 } catch(Exception ex) {
                     logger.error(ex.getMessage(), ex);
                 }

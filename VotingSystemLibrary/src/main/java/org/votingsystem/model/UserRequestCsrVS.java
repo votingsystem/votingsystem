@@ -27,7 +27,7 @@ public class UserRequestCsrVS implements Serializable {
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
-    @OneToOne private MessageSMIME cancelacion;
+    @OneToOne private MessageSMIME cancelMessage;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23, insertable=true) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23, insertable=true) private Date lastUpdated;
 
@@ -96,12 +96,12 @@ public class UserRequestCsrVS implements Serializable {
 		this.deviceVS = deviceVS;
 	}
 
-	public MessageSMIME getCancelacion() {
-		return cancelacion;
+	public MessageSMIME getCancelMessage() {
+		return cancelMessage;
 	}
 
-	public void setCancelacion(MessageSMIME cancelacion) {
-		this.cancelacion = cancelacion;
+	public void setCancelMessage(MessageSMIME cancelMessage) {
+		this.cancelMessage = cancelMessage;
 	}
 
 	public UserVS getUserVS() {

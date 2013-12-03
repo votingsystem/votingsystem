@@ -8,5 +8,7 @@ gradle
 .settings
 .project
 .idea
+icons
+classes
 SistemaVotacion.iml
 

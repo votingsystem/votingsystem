@@ -39,16 +39,10 @@ public class VoteVSCanceller implements Serializable {
     @Column(name="dateCreated", length=23)
     private Date dateCreated;
 
-     /**
-     * @return the dateCreated
-     */
     public Date getDateCreated() {
         return dateCreated;
     }
 
-    /**
-     * @param dateCreated the dateCreated to set
-     */
     public void setDateCreated(Date dateCreated) {
         this.dateCreated = dateCreated;
     }

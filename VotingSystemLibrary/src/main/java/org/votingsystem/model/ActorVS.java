@@ -200,19 +200,19 @@ public class ActorVS implements Serializable {
         return serverURL + "/certificateVS/addCertificateAuthority";
     }
 
-    public String getServerInfoURL() {
+    @Transient public String getServerInfoURL() {
         return serverURL + "/serverInfo";
     }
 
-    public String getMultiSignedMessageTestServiceURL() {
+    @Transient public String getMultiSignedMessageTestServiceURL() {
         return serverURL + "/encryptor/getMultiSignedMessage";
     }
 
-    public static String getServerInfoURL(String serverURL) {
+    @Transient public static String getServerInfoURL(String serverURL) {
         return serverURL + "/serverInfo";
     }
 
-    public Map getDataMap() {
+    @Transient public Map getDataMap() {
         log.debug("getDataMap");
         Map map = new HashMap();
         map.put("id", id);

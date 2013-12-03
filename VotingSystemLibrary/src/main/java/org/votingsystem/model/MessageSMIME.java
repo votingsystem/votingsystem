@@ -51,14 +51,9 @@ public class MessageSMIME implements Serializable {
     @Column(name="lastUpdated", length=23, insertable=true)
     private Date lastUpdated;
 
+    @Transient private transient SMIMEMessageWrapper smimeMessage;
+    @Transient private transient Set<UserVS> signers;
 
-    @Transient
-    private transient SMIMEMessageWrapper smimeMessage;
-    @Transient
-    private transient Set<UserVS> signers;
-    /**
-     * @return the content
-     */
     public byte[] getContent() {
         return content;
     }
@@ -152,8 +147,8 @@ public class MessageSMIME implements Serializable {
 	public void setBase64ContentDigest(String base64ContentDigest) {
 		this.base64ContentDigest = base64ContentDigest;
 	}
-	
-	public SMIMEMessageWrapper getSmimeMessage() throws Exception {
+
+    @Transient public SMIMEMessageWrapper getSmimeMessage() throws Exception {
 		if(smimeMessage == null && content != null) {
 			smimeMessage = new SMIMEMessageWrapper(
 				new ByteArrayInputStream(content));

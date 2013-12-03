@@ -5,6 +5,7 @@ import org.hibernate.search.annotations.Indexed;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.io.Serializable;
 
 /**
@@ -20,9 +21,9 @@ public class EventVSManifest extends EventVS implements Serializable {
     private static final long serialVersionUID = 1L;
 
 
-    private Type type = Type.MANIFEST;
+    @Transient private Type type = Type.MANIFEST;
 
-    public Type getType() { return type; }
+    @Transient public Type getType() { return type; }
 
     public void setType(Type type) { this.type = type; }
 

@@ -34,7 +34,7 @@ $('#requestEventBackupForm').submit(function(event){
 	webAppMessage.eventVS = pageEvent
 	pageEvent.operation = Operation.BACKUP_REQUEST
 	webAppMessage.signedContent = pageEvent
-	webAppMessage.emailSolicitante = $("#eventBackupUserEmailText").val()
+	webAppMessage.email = $("#eventBackupUserEmailText").val()
 	webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStampVS', absolute:true)}"
 	webAppMessage.isResponseWithReceipt = true
 	pendingOperation = Operation.SMIME_CLAIM_SIGNATURE

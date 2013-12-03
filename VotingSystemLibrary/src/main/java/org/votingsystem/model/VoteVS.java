@@ -152,7 +152,7 @@ public class VoteVS implements Serializable {
 		this.certificateVS = certificateVS;
 	}
 
-    public String getHashCertVoteHex() {
+    @Transient public String getHashCertVoteHex() {
         if(hashCertVoteHex != null) return hashCertVoteHex;
         if (hashCertVoteBase64 == null) return null;
         HexBinaryAdapter hexConverter = new HexBinaryAdapter();
@@ -223,7 +223,7 @@ public class VoteVS implements Serializable {
         this.timeStampToken = timeStampToken;
     }
 
-    public void genVote() throws NoSuchAlgorithmException {
+    @Transient public void genVote() throws NoSuchAlgorithmException {
         logger.debug(" --- genVote ---");
         originHashAccessRequest = UUID.randomUUID().toString();
         hashAccessRequestBase64 = CMSUtils.getHashBase64(originHashAccessRequest, ContextVS.VOTING_DATA_DIGEST);
@@ -276,7 +276,7 @@ public class VoteVS implements Serializable {
         return voteVS;
     }
 
-    public HashMap getVoteDataMap() {
+    @Transient public HashMap getVoteDataMap() {
         logger.debug("getVoteDataMap");
         Map map = new HashMap();
         map.put("operation", TypeVS.SEND_SMIME_VOTE.toString());
@@ -289,7 +289,7 @@ public class VoteVS implements Serializable {
         return new HashMap(map);
     }
 
-    public HashMap getAccessRequestDataMap() {
+    @Transient public HashMap getAccessRequestDataMap() {
         logger.debug("getAccessRequestDataMap");
         Map map = new HashMap();
         map.put("operation", TypeVS.ACCESS_REQUEST.toString());
@@ -300,7 +300,7 @@ public class VoteVS implements Serializable {
         return new HashMap(map);
     }
 
-    public HashMap getCancelVoteDataMap() {
+    @Transient public HashMap getCancelVoteDataMap() {
         logger.debug("getCancelVoteDataMap");
         Map map = new HashMap();
         map.put("operation", TypeVS.CANCEL_VOTE.toString());
@@ -313,7 +313,7 @@ public class VoteVS implements Serializable {
         return jsonObject;
     }
 
-    public Map getDataMap() {
+    @Transient public Map getDataMap() {
         logger.debug("getDataMap");
         Map resultMap = new HashMap();
         if(optionSelected != null) {

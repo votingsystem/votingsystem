@@ -24,7 +24,7 @@ public class EventVSElection extends EventVS implements Serializable {
 
     @Transient private Type type = Type.ELECTION;
 
-    @Override public Type getType() { return type; }
+    @Override @Transient public Type getType() { return type; }
 
     @Override public void setType(Type type) { this.type = type; }
 

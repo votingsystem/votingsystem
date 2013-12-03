@@ -28,6 +28,9 @@ import org.votingsystem.signature.util.CertUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
@@ -372,7 +375,24 @@ public class HttpHelper {
             }
         }
     }
-        
+
+
+    public static String getLocalIP() throws SocketException {
+        Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
+        for (NetworkInterface netint : Collections.list(nets)){
+            Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
+            for (InetAddress inetAddress : Collections.list(inetAddresses)) {
+                if(inetAddress.isSiteLocalAddress()) {
+                    String inetAddressStr = inetAddress.toString();
+                    while(inetAddressStr.startsWith("/")) inetAddressStr = inetAddressStr.substring(1);
+                    return inetAddressStr;
+                }
+
+            }
+        }
+        return null;
+    }
+
     public static void main(String[] args) throws IOException, Exception { }
     
 }

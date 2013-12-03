@@ -67,8 +67,7 @@ grails.project.dependency.resolution = {
 			'org.rometools:rome-modules:1.0',
 			//for rendering plugin
 			'org.springframework:spring-test:3.2.5.RELEASE',
-			) {excludes "slf4j-api", "log4j", "commons-logging", "xalan",
-					"xml-apis", "groovy","commons-io"}
+			) {excludes "slf4j-api", "log4j", "commons-logging", "xalan",  "xml-apis", "groovy","commons-io"}
 			
 			compile 'org.postgresql:postgresql:9.2-1003-jdbc4'
     }

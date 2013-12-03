@@ -17,72 +17,42 @@ public class CommentVS implements Comparable {
     private Date dateCreated;
     private Date lastUpdated;
 
-    /**
-     * @return the content
-     */
     public String getContent() {
         return content;
     }
 
-    /**
-     * @param content the content to set
-     */
     public void setContent(String content) {
         this.content = content;
     }
 
-    /**
-     * @return the userVS
-     */
     public UserVS getUserVS() {
         return userVS;
     }
 
-    /**
-     * @param userVS the userVS to set
-     */
     public void setUserVS(UserVS userVS) {
         this.userVS = userVS;
     }
 
-    /**
-     * @return the id
-     */
     public Long getId() {
         return id;
     }
 
-    /**
-     * @param id the id to set
-     */
     public void setId(Long id) {
         this.id = id;
     }
 
-    /**
-     * @return the dateCreated
-     */
     public Date getDateCreated() {
         return dateCreated;
     }
 
-    /**
-     * @param dateCreated the dateCreated to set
-     */
     public void setDateCreated(Date dateCreated) {
         this.dateCreated = dateCreated;
     }
 
-    /**
-     * @return the lastUpdated
-     */
     public Date getLastUpdated() {
         return lastUpdated;
     }
 
-    /**
-     * @param lastUpdated the lastUpdated to set
-     */
     public void setLastUpdated(Date lastUpdated) {
         this.lastUpdated = lastUpdated;
     }
@@ -111,8 +81,7 @@ public class CommentVS implements Comparable {
 		return mensajeMimeId;
 	}
 
-	@Override
-	public int compareTo(Object comentario) {
+	@Override public int compareTo(Object comentario) {
 		return dateCreated.compareTo(((CommentVS)comentario).dateCreated);
 	}
 

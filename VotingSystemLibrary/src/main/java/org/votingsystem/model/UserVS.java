@@ -161,8 +161,8 @@ public class UserVS implements Serializable {
 		if (subjectDN.split("OU=phone:").length > 1) { userVS.setPhone(subjectDN.split("OU=phone:")[1].split(",")[0]); }
     	return userVS;
     }
-    
-    public String getDescription () {
+
+    @Transient public String getDescription () {
     	String result = "";
     	if (country != null) result.concat(" - Country: " + country);
     	if (nif != null) result.concat(" - Nif: " + nif);
@@ -319,31 +319,31 @@ public class UserVS implements Serializable {
         return userVS;
     }
 
-    public String getSignatureBase64() {
+    @Transient public String getSignatureBase64() {
         if (signerInformation.getSignature() == null) return null;
         return DatatypeConverter.printBase64Binary(signerInformation.getSignature());
     }
 
-    public String getSignatureHex() {
+    @Transient public String getSignatureHex() {
         if (signerInformation.getSignature() == null) return null;
         return new String(signerInformation.getSignature());
     }
 
-    public String getEncryptiontId() { 
+    @Transient public String getEncryptiontId() {
         if(signerInformation == null) return null;
         else return CMSUtils.getEncryptiontId(signerInformation.getEncryptionAlgOID()); 
     }
 
-    public Date getSignatureDate() {
+    @Transient public Date getSignatureDate() {
         if(timeStampToken == null) return null;
         return timeStampToken.getTimeStampInfo().getGenTime();
     }
 
-    public String getDigestId() { 
+    @Transient public String getDigestId() {
         if(signerInformation == null) return null;
         else return CMSUtils.getDigestId(signerInformation.getDigestAlgOID()); }
 
-    public String getContentDigestHex() {
+    @Transient public String getContentDigestHex() {
         if (signerInformation.getContentDigest() == null) return null;
         return new String(Hex.encode(signerInformation.getContentDigest()));
     }
@@ -352,7 +352,7 @@ public class UserVS implements Serializable {
         this.signerInformation = signer;
     }
 
-    public String getContentDigestBase64() {
+    @Transient public String getContentDigestBase64() {
         if (signerInformation.getContentDigest() == null) return null;
         return DatatypeConverter.printBase64Binary(signerInformation.getContentDigest());
     }

@@ -25,7 +25,7 @@ public class OperationVS {
     private String serverURL;
     private String receiverSignServiceURL;
     private String receiverName;
-    private String emailSolicitante;
+    private String email;
     private String signedMessageSubject;
     private Boolean isResponseWithReceipt = false;
     private Map documentToSign;
@@ -195,12 +195,12 @@ public class OperationVS {
         this.isResponseWithReceipt = isResponseWithReceipt;
     }
 
-    public String getEmailSolicitante() {
-        return emailSolicitante;
+    public String getEmail() {
+        return email;
     }
 
-    public void setEmailSolicitante(String emailSolicitante) {
-        this.emailSolicitante = emailSolicitante;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getCallerCallback() {
@@ -254,8 +254,8 @@ public class OperationVS {
         if (dataMap.containsKey("isResponseWithReceipt"))
             operationVS.setRespuestaConRecibo((Boolean)dataMap.get("isResponseWithReceipt"));
 
-        if (dataMap.containsKey("emailSolicitante"))
-            operationVS.setEmailSolicitante((String)dataMap.get("emailSolicitante"));
+        if (dataMap.containsKey("email"))
+            operationVS.setEmail((String)dataMap.get("email"));
         return operationVS;
     }
 

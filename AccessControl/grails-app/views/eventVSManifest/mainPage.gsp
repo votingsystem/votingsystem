@@ -25,7 +25,7 @@
             </div>
             <div style="display:inline;float:right;">
                 <votingSystem:simpleButton href="${createLink(controller:'editor', action:'manifest')}"
-                                           imgSrc="${resource(dir:'images',file:'poll_22x22.png')}" style="margin:0px 0px 0px 15px;">
+                                           imgSrc="document_export" style="margin:0px 0px 0px 15px;">
                     <g:message code="publishDocumentLbl"/>
                 </votingSystem:simpleButton>
             </div>

@@ -145,7 +145,7 @@
 			webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
 			webAppMessage.receiverSignServiceURL = "${createLink(controller:'representative', action:'history', absolute:true)}"
 			webAppMessage.signedMessageSubject = '<g:message code="requestVotingHistoryLbl"/>'
-			webAppMessage.emailSolicitante = $("#userEmailText").val()
+			webAppMessage.email = $("#userEmailText").val()
 			webAppMessage.isResponseWithReceipt = true
 			votingSystemClient.setMessageToSignatureClient(webAppMessage, representativeOperationCallback); 
 		}
@@ -162,7 +162,7 @@
 			webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
 			webAppMessage.receiverSignServiceURL = "${createLink(controller:'representative', action:'accreditations', absolute:true)}"
 			webAppMessage.signedMessageSubject = '<g:message code="requestRepresentativeAcreditationsLbl"/>'
-			webAppMessage.emailSolicitante = $("#accreditationReqUserEmailText").val()
+			webAppMessage.email = $("#accreditationReqUserEmailText").val()
 			webAppMessage.isResponseWithReceipt = true
 			votingSystemClient.setMessageToSignatureClient(webAppMessage, representativeOperationCallback); 
 		}

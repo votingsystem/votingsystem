@@ -14,7 +14,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Table(name="AddressVS")
 public class AddressVS implements Serializable {
 	
-	public enum Type {OFICINA_CERTIFICACION}
+	public enum Type {CERTIFICATION_OFFICE}
 
     public static final long serialVersionUID = 1L;
     
@@ -23,14 +23,14 @@ public class AddressVS implements Serializable {
     private Long id;
     @Column(name="name")
     private String name;
-    @Column(name="descripcion")
-    private String descripcion;
-    @Column(name = "codigoPostal", length = 10)
-    private String codigoPostal;
-    @Column(name = "provincia", nullable = false, length = 48)
-    private String provincia;
-    @Column(name = "poblacion", nullable = false, length = 48)
-    private String poblacion;
+    @Column(name="metaInf")
+    private String metaInf;
+    @Column(name = "postalCode", length = 10)
+    private String postalCode;
+    @Column(name = "province", nullable = false, length = 48)
+    private String province;
+    @Column(name = "city", nullable = false, length = 48)
+    private String city;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="dateCreated", length=23, insertable=true)
     public Date dateCreated;
@@ -63,50 +63,44 @@ public class AddressVS implements Serializable {
         return id;
     }
 
-    /**
-     * @return the name
-     */
     public String getName() {
         return name;
     }
 
-    /**
-     * @param name the name to set
-     */
     public void setName(String name) {
         this.name = name;
     }
 
-	public String getCodigoPostal() {
-		return codigoPostal;
+	public String getPostalCode() {
+		return postalCode;
 	}
 
-	public void setCodigoPostal(String codigoPostal) {
-		this.codigoPostal = codigoPostal;
+	public void setPostalCode(String postalCode) {
+		this.postalCode = postalCode;
 	}
 
-	public String getProvincia() {
-		return provincia;
+	public String getProvince() {
+		return province;
 	}
 
-	public void setProvincia(String provincia) {
-		this.provincia = provincia;
+	public void setProvince(String province) {
+		this.province = province;
 	}
 
-	public String getPoblacion() {
-		return poblacion;
+	public String getCity() {
+		return city;
 	}
 
-	public void setPoblacion(String poblacion) {
-		this.poblacion = poblacion;
+	public void setCity(String city) {
+		this.city = city;
 	}
 
-	public String getDescripcion() {
-		return descripcion;
+	public String getMetaInf() {
+		return metaInf;
 	}
 
-	public void setDescripcion(String descripcion) {
-		this.descripcion = descripcion;
+	public void setMetaInf(String metaInf) {
+		this.metaInf = metaInf;
 	}
 
 }

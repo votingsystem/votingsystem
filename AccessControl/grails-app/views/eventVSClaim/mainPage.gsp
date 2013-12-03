@@ -26,7 +26,7 @@
             </div>
             <div style="display:inline;float:right;">
                 <votingSystem:simpleButton href="${createLink(controller:'editor', action:'claim')}"
-                                           imgSrc="${resource(dir:'images',file:'claim_22.png')}" style="margin:0px 20px 0px 0px;">
+                       imgSrc="${resource(dir:'images',file:'claim_22.png')}" style="margin:0px 20px 0px 0px;">
                     <g:message code="publishDocumentLbl"/>
                 </votingSystem:simpleButton>
             </div>

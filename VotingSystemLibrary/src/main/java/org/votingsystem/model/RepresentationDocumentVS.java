@@ -40,7 +40,7 @@ public class RepresentationDocumentVS implements Serializable {
     @JoinColumn(name="representative") private UserVS representative;
 	
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="fechaCancelacion", length=23) private Date dateCanceled;
+    @Column(name="dateCanceled", length=23) private Date dateCanceled;
     
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="dateCreated", length=23) private Date dateCreated;

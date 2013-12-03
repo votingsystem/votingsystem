@@ -37,7 +37,7 @@ public class TimeStampVS {
     @Column(name="lastUpdated", length=23)
     private Date lastUpdated;
    
-   public TimeStampVS() { }
+    public TimeStampVS() { }
 
 	public Long getSerialNumber() {
 		return serialNumber;
@@ -86,18 +86,6 @@ public class TimeStampVS {
 	public void setLastUpdated(Date lastUpdated) {
 		this.lastUpdated = lastUpdated;
 	}
- 
-	public TimeStampToken getTimeStampToken() throws 
-		TSPException, IOException, CMSException {
-		if(tokenBytes == null) return null;
-		return new TimeStampToken(
-	            new CMSSignedData(tokenBytes));
-	}
-	
-	public TimeStampRequest getTimeStampRequest() throws IOException {
-		if(timeStampRequestBytes == null) return null;
-		return new TimeStampRequest(timeStampRequestBytes);
-	}
 
 	public String getReason() {
 		return reason;
@@ -106,5 +94,17 @@ public class TimeStampVS {
 	public void setReason(String reason) {
 		this.reason = reason;
 	}
-	
+
+    @Transient public TimeStampToken getTimeStampToken() throws
+            TSPException, IOException, CMSException {
+        if(tokenBytes == null) return null;
+        return new TimeStampToken(
+                new CMSSignedData(tokenBytes));
+    }
+
+    @Transient public TimeStampRequest getTimeStampRequest() throws IOException {
+        if(timeStampRequestBytes == null) return null;
+        return new TimeStampRequest(timeStampRequestBytes);
+    }
+
 }
