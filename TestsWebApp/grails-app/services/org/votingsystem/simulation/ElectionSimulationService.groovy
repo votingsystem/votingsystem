@@ -34,6 +34,7 @@ import java.security.cert.Certificate
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.concurrent.*
+import java.util.concurrent.atomic.AtomicInteger
 
 class ElectionSimulationService implements SimulatorListener<UserBaseSimulationData> {
 
@@ -58,6 +59,7 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
 	private VotingSimulationData simulationData;
 	private EventVS eventVS;
 	private SignedMailGenerator signedMailGenerator
+    private AtomicInteger simulationCounter = new AtomicInteger(0)
 
 	
 	public void processRequest(JSONObject messageJSON) {
@@ -94,7 +96,8 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
 
 	private void initSimulation(JSONObject simulationDataJSON) {
         log.debug("initSimulation ### Enter status INIT_SIMULATION")
-        ContextVS.getInstance().initTestEnvironment("${grailsApplication.config.VotingSystem.simulationFilesBaseDir}");
+        ContextVS.getInstance().initTestEnvironment("${grailsApplication.config.VotingSystem.simulationFilesBaseDir}/" +
+                "simulation_" + simulationCounter.getAndIncrement());
         synchronizedListenerSet = Collections.synchronizedSet(new HashSet<String>())
 		simulationData = VotingSimulationData.parse(simulationDataJSON)
         errorList = Collections.synchronizedList(new ArrayList<String>());

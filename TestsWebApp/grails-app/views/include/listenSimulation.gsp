@@ -107,21 +107,22 @@ var messageTemplate = $('#messageTemplate').html()
 function processResponse(response) {
 	var responseJSON = toJSON(response)
 	if(responseJSON != null) {
-	    var messageFromServiceHTML
 
+	    if(responseJSON.statusCode == ResponseVS.SC_PROCESSING) {
+            if(!$("#progressDiv").is(":visible")) $("#progressDiv").fadeIn();
+	    }  else $("#progressDiv").hide()
 
-	    if(responseJSON.statusCode == ResponseVS.SC_PROCESSING || responseJSON.statusCode == ResponseVS.SC_OK) {
+        var messageFromServiceHTML
+
+	    if(responseJSON.simulationData != null) {
             messageFromServiceHTML = processingMessageTemplate.format(responseJSON.statusCode, responseJSON.message,
                 responseJSON.simulationData.numRequestsProjected, responseJSON.simulationData.numRequestsOK,
                 responseJSON.simulationData.numRequestsERROR, responseJSON.simulationData.timeDuration,
                 responseJSON.simulationData.errorList);
-            if(responseJSON.statusCode == ResponseVS.SC_OK) {
-                 $("#progressDiv").hide()
-            } else if(!$("#progressDiv").is(":visible")) $("#progressDiv").fadeIn();
-	    }  else {
-	        messageFromServiceHTML = messageTemplate.format(responseJSON.statusCode, responseJSON.message)
-	        $("#progressDiv").hide()
+	    } else {
+            messageFromServiceHTML = messageTemplate.format(responseJSON.statusCode, responseJSON.message)
 	    }
+
         $("#messageFromService").html(messageFromServiceHTML)
 
 	    console.log("responseJSON.message: " + responseJSON.message)
@@ -171,9 +172,13 @@ function showSimulationProgress(simulationData) {
     console.log("showSimulationProgress - msg: " + msg)
     $('#pageTitle').html(msg)
     if(simulationData != null) {
+        processResponse({statusCode:ResponseVS.SC_PROCESSING, message:''})
+        var messageFromServiceHTML = messageTemplate.format('', '')
+        $("#messageFromService").html(messageFromServiceHTML)
+
         messageToService = simulationData
         messageToService.operation = TypeVS.INIT_SIMULATION
-	    SimulationService.initialize();
+        SimulationService.initialize();
         $(".errorMsgWrapper").fadeOut()
     } else showErrorMsg('<g:message code="simulationDataNull"/>')
 }
