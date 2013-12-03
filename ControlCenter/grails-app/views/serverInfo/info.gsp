@@ -25,8 +25,8 @@
 			           </div>
 			           <p id="contentText" style="margin: 40px 0px 0px 0px;">${message(code: 'urlMatch', null)}: <b>${grailsApplication.config.grails.serverURL}</b></p>
    			           <p>
-       						<img src="${resource(dir:'images',file:'password_22x22.png')}"></img>
-           					<a id="validationToolLink" class="appLink" style="color: #09287e;">
+                           <img src="${resource(dir:'images',file:'java_16.png')}"/>
+           					<a id="validationToolLink" class="appLink" style="color: #09287e;font-size: 0.9em;">
 								<g:message code="validationToolLinkText"/>
 							</a>
 			           </p>
