@@ -137,6 +137,7 @@ $("#addControlCenterDialog").dialog({
 			    	$("#addControlCenterDialog").dialog("open")
 				}
                 $("#addControlCenterDialog").dialog("close");
+                if(callerCallback != null) callerCallback()
 				showResultDialog(caption, msg)
 			}
 		}
