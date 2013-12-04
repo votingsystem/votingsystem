@@ -11,7 +11,7 @@ select, textarea, text, input {
     margin: 0;
     border: 0;
     font-size: 1.2em;
-    padding: 1px 10px 1px 1px;
+    padding: 1px 1px 1px 1px;
     height: 30px;
     text-align: center;
     box-sizing: border-box;
@@ -24,6 +24,7 @@ select, textarea, text, input {
     text-decoration: none;
     background-color: #f1f5f8;
     /*button_simple_rollover*/
+    display: table;  margin: auto;
     color: #769ab5;
     border: #769ab5 solid 1px;
     border-radius: 4px;
@@ -38,7 +39,7 @@ select, textarea, text, input {
 .button_base .buttonText {
 	display:table-cell;
 	vertical-align:middle;
-	padding:0px 0px 0px 5px;
+	padding:0px 10px 0px 5px;
 }
 
 .button_base:hover {

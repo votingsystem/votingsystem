@@ -117,41 +117,57 @@ input:focus:invalid {
 
 input:focus:valid {   
 	background: url('../images/fatcow_16/accept.png') no-repeat right;   padding-right: 7px;
-} 
+}
 
 .button_base {
-	position:relative;
+    display:table;
+    position:relative;
     margin: 0;
     border: 0;
     font-size: 1.2em;
-    padding: 0px 10px 10px 50px;
+    padding: 1px 1px 1px 1px;
+    height: 30px;
     text-align: center;
     box-sizing: border-box;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-user-select: none;
-    cursor: pointer; 
+    cursor: pointer;
     cursor: hand;
-    border-radius: 5px;
     vertical-align: middle;
     text-decoration: none;
     background-color: #f1f5f8;
-    overflow: hidden;
     /*button_simple_rollover*/
+    display: table;  margin: auto;
     color: #769ab5;
     border: #769ab5 solid 1px;
+    border-radius: 4px;
+}
+
+.button_base .buttonImage {
+    display:table-cell;
+    vertical-align:middle;
+    margin:5px 0px 5px 5px;
+}
+
+.button_base .buttonText {
+    display:table-cell;
+    vertical-align:middle;
+    padding:0px 10px 0px 5px;
 }
 
 .button_base:hover {
-	color: #0066cc;
+    color: #0066cc;
     background-color: #dae7f1;
     border-radius: 5px;
 }
+
 .button_base:active {
-   border-top-color: #1b435e;
-   background: #1b435e;
-   color:white;
- }
+    border-top-color: #1b435e;
+    background: #1b435e;
+    color:white;
+    border-radius: 5px;
+}
 
 .clearing{clear:both;}
 
