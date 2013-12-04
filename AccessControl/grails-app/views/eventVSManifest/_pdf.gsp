@@ -6,8 +6,8 @@
 	</head>
 	<body>
 		<div class="pdf">
-			<div class="title">${eventVS.subject}</div>
-			<div class="content">${eventVS.content}</div>
+			<div class="title">${eventVS?.subject}</div>
+			<div class="content">${raw(eventVS?.content)}</div>
 		</div> 			
 	</body>
 </html>

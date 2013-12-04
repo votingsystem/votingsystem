@@ -119,7 +119,7 @@
 				    	var msgTemplate = "<g:message code='documentLinkMsg'/>";
 						msg = "<p><g:message code='publishOKMsg'/>.</p>" + 
 							msgTemplate.format(appMessageJSON.receiverSignServiceURL);
-					}
+					} else showEditor_editorDiv()
 					showResultDialog(caption, msg)
 				}
 			}

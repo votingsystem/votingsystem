@@ -69,8 +69,8 @@
 		
 		<g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state)}">
 			<votingSystem:simpleButton id="signManifestButton"  isSubmitButton='true'
-				style="margin:15px 20px 0px 0px; float:right;"
-				imgSrc="${resource(dir:'images',file:'claim_22.png')}">
+				style="margin:15px 20px 30px 0px; float:right;"
+				imgSrc="${resource(dir:'images/fatcow_16',file:'accept.png')}">
 					<g:message code="signManifest"/>
 			</votingSystem:simpleButton>
 		</g:if>
