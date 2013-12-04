@@ -133,9 +133,10 @@ $("#addControlCenterDialog").dialog({
 				if(ResponseVS.SC_OK ==  appMessageJSON.statusCode) {
 					caption = '<g:message code="operationOKCaption"/>'
 					var msgArg = 
-			    	msg = "<g:message code='operationOKMsg' args='${[message(code:'addControlCenterOperation')]}'/>";
+			    	msg = "<g:message code='operationOKMsg'/>";
 			    	$("#addControlCenterDialog").dialog("open")
 				}
+                $("#addControlCenterDialog").dialog("close");
 				showResultDialog(caption, msg)
 			}
 		}
