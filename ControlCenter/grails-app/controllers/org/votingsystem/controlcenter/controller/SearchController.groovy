@@ -1,6 +1,7 @@
 package org.votingsystem.controlcenter.controller
 
 import org.apache.lucene.search.SortField
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.EventVS
 import org.hibernate.search.FullTextQuery
 import org.hibernate.search.FullTextSession

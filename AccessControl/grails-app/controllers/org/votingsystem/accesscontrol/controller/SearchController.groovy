@@ -6,6 +6,7 @@ import org.apache.lucene.search.SortField
 import org.hibernate.search.FullTextQuery
 import org.hibernate.search.FullTextSession
 import org.hibernate.search.Search
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.EventVSClaim
 import org.votingsystem.model.EventVSElection
 import org.votingsystem.model.EventVSManifest
