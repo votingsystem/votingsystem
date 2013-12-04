@@ -62,7 +62,7 @@
 					<g:if test="${EventVS.State.ACTIVE.toString() == eventMap?.state}">
 						<g:each in="${eventMap?.fieldsEventVS}">
 							<button class="voteOptionButton button_base"
-								style="width: 90%;margin: 10px auto 0px auto;"
+								style="width: 90%;margin: 10px auto 30px auto;"
 								optionId = "${it.id}" optionContent="${it.content}"  onclick="return false;">
 								${it.content}
 							</button>

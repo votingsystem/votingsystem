@@ -79,7 +79,9 @@ public class ElectionDialog extends JDialog {
         ParserDelegator workaround = new ParserDelegator();
         messageLabel.setText(ContextVS.getInstance().getMessage("electionDialogMsg", eventVS.getSubject(),
                 eventVS.getVoteVS().getOptionSelected().getContent()));
-        setTitle(operation.getCaption());
+        String caption = eventVS.getSubject();
+        if(caption.length() > 50) caption = caption.substring(0, 50) + "...";
+        setTitle(caption);
         setVisible(true);
     }
 
