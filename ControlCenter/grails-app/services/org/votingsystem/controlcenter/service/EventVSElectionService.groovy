@@ -281,6 +281,9 @@ class EventVSElectionService {
 			voteVSInfoURL:"${grailsApplication.config.grails.serverURL}/eventVS/votes?eventAccessControlURL=${eventVS.url}"]
 			def accessControlMap = [serverURL:eventVS.accessControlVS?.serverURL, name:eventVS.accessControlVS?.name]
 			eventVSMap.accessControl = accessControlMap
+            def controlCenterMap = [serverURL:"${grailsApplication.config.grails.serverURL}",
+                    name:"${grailsApplication.config.VotingSystem.serverName}"]
+            eventVSMap.controlCenterMap = controlCenterMap
 			if(eventVS.userVS) eventVSMap.userVS = "${eventVS.userVS?.name} ${eventVS.userVS?.firstName}"
 			else eventVSMap.userVS = null
 		eventVSMap.fieldsEventVS = eventVS.fieldsEventVS?.collect {option ->
