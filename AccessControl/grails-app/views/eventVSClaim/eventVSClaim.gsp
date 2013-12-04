@@ -36,7 +36,7 @@
 	
 	<div style="width:100%; font-size:0.8em; margin:2px 0px 25px 0px;">
 		<div style="display:inline;margin:0px 20px 0px 20px;">
-			<b><g:message code="dateLimitLbl"/>: </b>${eventMap?.dateFinish}
+			<b><g:message code="dateLimitLbl"/>: </b>${eventMap?.dateFinishStr}
 		</div>
 		<g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state) ||
 			EventVS.State.AWAITING.toString().equals(eventMap?.state)}">

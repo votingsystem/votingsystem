@@ -37,7 +37,7 @@
 	
 	<div style="display:inline-block; width:100%; font-size:0.8em;">
 		<div style="display:inline;margin:0px 20px 0px 20px;">
-			<b><g:message code="dateLimitLbl"/>: </b>${eventMap?.dateFinish}
+			<b><g:message code="dateLimitLbl"/>: </b>${eventMap?.dateFinishStr}
 		</div>
 		
 		<g:if test="${EventVS.State.ACTIVE.toString() == eventMap?.state ||
