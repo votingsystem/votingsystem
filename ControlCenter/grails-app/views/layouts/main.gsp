@@ -39,7 +39,17 @@
 		
 	<g:include view="/include/dialog/advancedSearchDialog.gsp"/>
 
+    <div id="appletsFrame"  style="width:0px; height:0px;">
+        <iframe id="votingSystemAppletFrame" src="" style="visibility:hidden;width:0px; height:0px;"></iframe>
+    </div>
 </body>
+
+<g:include view="/include/dialog/advancedSearchDialog.gsp"/>
+<g:include view="/include/dialog/loadingAppletDialog.gsp"/>
+<g:include view="/include/dialog/workingWithAppletDialog.gsp"/>
+<g:include view="/include/dialog/browserWithoutJavaDialog.gsp"/>
+<g:include view="/include/dialog/resultDialog.gsp"/>
+
 </html>
 <r:script>
 	        

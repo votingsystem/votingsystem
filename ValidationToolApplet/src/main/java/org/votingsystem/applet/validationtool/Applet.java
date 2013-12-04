@@ -31,11 +31,11 @@ public class Applet extends JApplet implements AppHostVS {
     public Applet() { }
 
     @Override  public void init() {
-        logger.debug("init");
         //Execute a job on the event-dispatching thread:
         //creating this org.votingsystem.applet's GUI.
         try {
-            ContextVS.init(this, "log4jValidationTool.properties", "validationToolMessages_", locale);
+            ContextVS.init(this, "log4jValidationTool.properties", "validationToolMessages.properties", locale);
+            logger.debug("init");
             javax.swing.SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     try {
@@ -53,7 +53,6 @@ public class Applet extends JApplet implements AppHostVS {
     }
 
     public void start() {
-        logger.debug("start");
         if(executionMode == ExecutionMode.APPLET) {
             if(getParameter("locale") != null) locale = getParameter("locale");
         }
@@ -89,7 +88,7 @@ public class Applet extends JApplet implements AppHostVS {
     }
 
     public static void main (String[] args) {
-        logger.info("Arrancando aplicación");
+        //logger.info("Arrancando aplicación");
         executionMode = ExecutionMode.APLICACION;
         try {
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());

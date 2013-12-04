@@ -1,7 +1,7 @@
 <div style="position: absolute; bottom: 0px; width:100%;">
     <div style="margin:20px auto 20px auto;" id="paginationDiv" ></div>
 </div>
-<script>
+<r:script>
 var offsetPage
 
 function printPaginate (offset, numItems, numMaxItemsForPage) {
@@ -26,4 +26,4 @@ function printPaginate (offset, numItems, numMaxItemsForPage) {
 		onChange				: paginate
 	});
 }
-</script>
+</r:script>

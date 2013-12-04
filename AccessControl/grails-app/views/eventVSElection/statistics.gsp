@@ -1,26 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <r:require module="charts"/>
+	<r:require module="charts"/>
     <r:layoutResources />
 </head>
-<body>
-<div id="chart_div">
-    <div class='loading'>
-        <img src="${resource(dir:'images',file:'Indeterminate.gif')}"/>
-    </div>
-</div>
-</body>
+    <body>    
+        <div id="chart_div">
+            <div class='loading'>
+                <img src="${resource(dir:'images',file:'Indeterminate.gif')}"/>
+            </div>        
+        </div>
+    </body>
 </html>
 <r:script>
-    <g:applyCodec encodeAs="none">
-        var jsonData = ${statisticsJSON}
-        google.load('visualization', '1', {'packages':['corechart']});
-        google.setOnLoadCallback(drawChart);
-
-        function drawChart() {
-            var data = new google.visualization.DataTable();
-            data.addColumn('string', '${message(code: 'optionLabel', null)}');
+<g:applyCodec encodeAs="none">
+    var jsonData = ${statisticsJSON}
+    google.load('visualization', '1', {'packages':['corechart']});
+    google.setOnLoadCallback(drawChart);
+    
+    function drawChart() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', '${message(code: 'optionLabel', null)}');
         data.addColumn('number', '${message(code: 'numVotesLabel', null)}');
         
        for (var key in jsonData.fieldsEventVS) {
@@ -37,6 +37,6 @@
         };
         chart.draw(data, options);
     }
-    </g:applyCodec>
+</g:applyCodec>
 </r:script>
 <r:layoutResources />

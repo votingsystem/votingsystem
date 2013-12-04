@@ -180,7 +180,7 @@ var VotingSystemApplet = function () {
 				console.log("Loading signature client");
 				signatureClientCallback = callerCallback
 				window.getMessageToSignatureClient = this.getMessageToSignatureClient
-				$("#votingSystemAppletFrame").attr("src", '${createLink(controller:'applet', action:'cliente')}');
+				$("#votingSystemAppletFrame").attr("src", '${createLink(controller:'applet', action:'client')}');
 				$("#loadingVotingSystemAppletDialog").dialog("open");
 			} 
     	} else {

@@ -2,7 +2,7 @@
 	<p id='resultMessage' style='text-align: center;'>
 </p>
 </div>
-<script>
+<r:script>
 $("#resultDialog").dialog({
 	 width: 600, autoOpen: false, modal: true,
 	 buttons: [{text:"<g:message code="acceptLbl"/>",
@@ -19,4 +19,4 @@ function showResultDialog(caption, message) {
 	$('#resultDialog').dialog('option', 'title', caption);
 	$("#resultDialog").dialog( "open" );
 }
-</script>
+</r:script>

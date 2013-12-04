@@ -181,8 +181,7 @@ class EventVSElectionController {
             else eventVSElection = params.eventVS
             if (eventVSElection) {
                 response.status = ResponseVS.SC_OK
-                def statisticsMap = eventVSElectionService.getStatisticsMap(
-			eventVSElection, request.getLocale())
+                def statisticsMap = eventVSElectionService.getStatisticsMap(eventVSElection, request.getLocale())
                 if(request.contentType?.contains(ContentTypeVS.JSON)) {
                     if (params.callback) render "${params.callback}(${statisticsMap as JSON})"
                     else render statisticsMap as JSON

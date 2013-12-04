@@ -1,14 +1,24 @@
-<div id="adminDocumentDialog" title="<g:message code="confirmOptionDialogCaption"/>" style="display:none;">
+<div id="adminDocumentDialog" title="<g:message code="confirmOptionDialogCaption"/>">	    	
 	<p style="text-align: center;"><g:message code="adminDocumenInfoMsg"/></p>
 	<g:message code="documentStateSelectionMsg"/>:<br/>
 	<div style="font-size: 0.9em; margin:10px 0 0 10px;"> 
 		<div style="margin:0px 0 10px 0px;display:block;">
-			<input type="checkbox" id="selectDeleteDocument"><g:message code="selectDeleteDocumentMsg"/>
+			<input type="checkbox" id="selectDeleteDocument"/><label for="selectDeleteDocument"><g:message code="selectDeleteDocumentMsg"/></label>
 		</div>
-		<input type="checkbox" id="selectCloseDocument"><g:message code="selectCloseDocumentMsg"/>
+		<input type="checkbox" id="selectCloseDocument"/><g:message code="selectCloseDocumentMsg"/>
 	</div>
 </div> 
-<script>
+<r:script>
+
+
+var callerCallback
+
+function showAdminDocumentDialog(callback) {
+	$("#adminDocumentDialog").dialog("open");
+	callerCallback = callback	
+}
+
+
 $("#selectDeleteDocument").click(function () {
 	if($("#selectCloseDocument").is(':checked')) {
 		$("#selectCloseDocument").prop('checked', false);
@@ -43,16 +53,17 @@ $("#adminDocumentDialog").dialog({
     });
 
 function submitAdminForm() {
-	console.log("submitAdminForm")
+	console.log("adminDocumentDialog.submitAdminForm()")
 	if(!$("#selectDeleteDocument").is(':checked') &&
 			!$("#selectCloseDocument").is(':checked')) {
-		showResultDialog("<g:message code='errorLbl'/>", "<g:message code='selectEventVSStateERRORMsg'/>")
+		showResultDialog("<g:message code='errorLbl'/>", 
+				"<g:message code='selectDocumentStateERRORMsg'/>")
 	} else {
 		var state
 		if($("#selectDeleteDocument").is(':checked')) {
-			state= EventVS.State.DELETED_FROM_SYSTEM
+			state = EventVS.State.DELETED_FROM_SYSTEM
 		} else if($("#selectCloseDocument").is(':checked')) {
-            state = EventVSState.CANCELLED
+			state = EventVS.State.CANCELLED
 		}
     	var webAppMessage = new WebAppMessage(
 		    	ResponseVS.SC_PROCESSING,
@@ -60,14 +71,15 @@ function submitAdminForm() {
     	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
 		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
 		webAppMessage.isResponseWithReceipt = false
-		webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStamp', absolute:true)}"
+		webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStampVS', absolute:true)}"
 		webAppMessage.receiverSignServiceURL= "${createLink(controller:'eventVS', action:'cancelled', absolute:true)}"
-		var signedContent = {operation:Operation.EVENT_CANCELLATION, state:state,
-                accessControlURL:"${grailsApplication.config.grails.serverURL}", eventId:"${eventMap?.id}"}
+		var signedContent = {operation:Operation.EVENT_CANCELLATION,
+				accessControlURL:"${grailsApplication.config.grails.serverURL}",
+				eventId:"${eventMap?.id}", state:state}
 		webAppMessage.signedContent = signedContent
 		pendingOperation = Operation.EVENT_CANCELLATION
 		//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-		votingSystemClient.setMessageToSignatureClient(JSON.stringify(webAppMessage)); 
+		votingSystemClient.setMessageToSignatureClient(webAppMessage); 
 	}
 }
-</script>
+</r:script>

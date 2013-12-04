@@ -7,7 +7,7 @@
 		<div style='display:table-cell; vertical-align:middle;'><g:message code='browserWithoutJavaMsg'/>.</div>
 	</div>
 </div>
-<script>
+<r:script>
 $("#browserWithoutJavaDialog").dialog({
 	width: 600, autoOpen: false, modal: true,
 	buttons: [{text:"<g:message code="acceptLbl"/>",
@@ -16,4 +16,4 @@ $("#browserWithoutJavaDialog").dialog({
 	show: {effect:"fade", duration: 300},
 	hide: {effect: "fade",duration: 300}
 });
-</script>
+</r:script>

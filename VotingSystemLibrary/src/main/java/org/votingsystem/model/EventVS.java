@@ -440,7 +440,7 @@ public class EventVS implements Serializable {
             }
             if(eventMap.containsKey("subject")) eventVS.setSubject((String) eventMap.get("subject"));
             if(eventMap.containsKey("voteVS")) {
-                VoteVS voteVS = VoteVS.populate((Map) eventMap.get("vote"));
+                VoteVS voteVS = VoteVS.populate((Map) eventMap.get("voteVS"));
                 eventVS.setVoteVS(voteVS);
             }
             if(eventMap.containsKey("state")) {

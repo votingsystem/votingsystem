@@ -120,7 +120,7 @@ public class ElectionDialog extends JDialog {
         progressBarPanel = new ProgressBarPanel();
 
         Border formPanelBorder = BorderFactory.createLineBorder(Color.GRAY, 1);
-        JPanel formPanel = new JPanel();
+        formPanel = new JPanel();
         formPanel.setBorder(formPanelBorder);
         formPanel.setLayout(new MigLayout("fill", "15[grow]15","10[][]10"));
 
@@ -142,7 +142,7 @@ public class ElectionDialog extends JDialog {
         });
         container.add(signAndSendButton, "width :150:, cell 0 2, split2, align right");
 
-        JButton cancelButton = new JButton(ContextVS.getMessage("closeLbl"));
+        cancelButton = new JButton(ContextVS.getMessage("closeLbl"));
         cancelButton.setIcon(ContextVS.getIcon(this, "cancel_16"));
         cancelButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) { cancel();}

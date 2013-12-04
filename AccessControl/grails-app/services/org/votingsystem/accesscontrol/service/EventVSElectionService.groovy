@@ -331,17 +331,13 @@ class EventVSElectionService {
                         eventVS, AccessRequestVS.State.OK)
         statisticsMap.numAccessRequestsCancelled =   AccessRequestVS.countByEventVSElectionAndState(
                         eventVS, AccessRequestVS.State.CANCELLED)
-        statisticsMap.numVotesVS = VoteVS.countByEventVSElection(eventVS)
-        statisticsMap.numVotesVSOK = VoteVS.countByEventVSElectionAndState(
-                        eventVS, VoteVS.State.OK)
-        statisticsMap.numVotesVSVotesVSCANCELLED = VoteVS.countByEventVSElectionAndState(
-                eventVS, VoteVS.State.CANCELLED)
-        eventVS.fieldsEventVS.each { opcion ->
-            def numVotesVS = VoteVS.countByOpcionDeEventoAndState(
-                    opcion, VoteVS.State.OK)
-            def opcionMap = [id:opcion.id, content:opcion.content,
-                    numVotesVS:numVotesVS]
-            statisticsMap.fieldsEventVS.add(opcionMap)
+        statisticsMap.numVotesVS = VoteVS.countByEventVS(eventVS)
+        statisticsMap.numVotesVSOK = VoteVS.countByEventVSAndState(eventVS, VoteVS.State.OK)
+        statisticsMap.numVotesVSVotesVSCANCELLED = VoteVS.countByEventVSAndState(eventVS,VoteVS.State.CANCELLED)
+        eventVS.fieldsEventVS.each { option ->
+            def numVotesVS = VoteVS.countByOptionSelectedAndState(option, VoteVS.State.OK)
+            def optionMap = [id:option.id, content:option.content, numVotesVS:numVotesVS]
+            statisticsMap.fieldsEventVS.add(optionMap)
         }
         return statisticsMap
     }
