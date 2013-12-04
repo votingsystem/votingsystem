@@ -1,8 +1,8 @@
 <div id="addControlCenterDialog" title="<g:message code="controlCenterLbl"/>" style="display:none;">
-	<p style="text-align: center;">
-		<g:message code="controlCenterDescriptionMsg"/>
-  	</p>
-  	<div>
+  	<div id="formDiv">
+        <p style="text-align: center;">
+            <g:message code="controlCenterDescriptionMsg"/>
+        </p>
    		<span><g:message code="controlCenterURLLbl"/></span>
    		<form id="newControlCenter">
    			<input type="url" id="controlCenterURL" style="width:500px; margin:0px auto 0px auto;" 
@@ -13,6 +13,11 @@
    		</form>
 
   	</div>
+
+    <div id="checkControlCenterProgressDiv" style="display:none;">
+        <p style='text-align: center;'><g:message code="checkingControlCenterLbl"/></p>
+        <progress style='display:block;margin:0px auto 10px auto;'></progress>
+    </div>
 </div> 
 <r:script>
 
@@ -43,6 +48,9 @@ $('#newControlCenter').submit(function(event){
 	if(controlCenterURL.indexOf("http://") != 0) {
 		controlCenterURL = "http://" + controlCenterURL
 	}
+    $("#formDiv").hide()
+    $("#checkControlCenterProgressDiv").show()
+
 	console.log("checking control center at: " + controlCenterURL)
 	var jqxhr = $.getJSON(controlCenterURL, function() {});
 	jqxhr.done(function(data) {
@@ -65,30 +73,35 @@ $('#newControlCenter').submit(function(event){
 				'<g:message code="controlCenterURLERRORMsg"/>', function() {
 					$("#addControlCenterDialog").dialog("open")
 				}) 
-		}).always(function() {});
+		}).always(function() {
+            $("#formDiv").show()
+            $("#checkControlCenterProgressDiv").hide()
+		});
 });
 
 
 $("#addControlCenterDialog").dialog({
-   	  width: 600, autoOpen: false, modal: true,
-      buttons: [{
-        		text:"<g:message code="acceptLbl"/>",
-               	icons: { primary: "ui-icon-check"},
-             	click:function() {
- 			   				$("#submitControlCenter").click() 	   	   			   				
- 			        	}},
-           {text:"<g:message code="cancelLbl"/>",
-               	icons: { primary: "ui-icon-closethick"},
-             	click:function() {
-	   				$(this).dialog( "close" );
-	   				if(callerCallback != null) callerCallback()
-       	 	}}],
-      show: {effect:"fade", duration: 700},
-      hide: {effect: "fade",duration: 700},
-      open: function( event, ui ) {
-    	  $('#controlCenterURL').val("")
-	  }
-    });
+        width: 600, autoOpen: false, modal: true,
+        buttons: [{
+            text:"<g:message code="acceptLbl"/>",
+            icons: { primary: "ui-icon-check"},
+            click:function() {
+            $("#submitControlCenter").click()
+        }},
+        {text:"<g:message code="cancelLbl"/>",
+        icons: { primary: "ui-icon-closethick"},
+        click:function() {
+            $(this).dialog( "close" );
+            if(callerCallback != null) callerCallback()
+        }}],
+        show: {effect:"fade", duration: 700},
+        hide: {effect: "fade",duration: 700},
+        open: function( event, ui ) {
+            $('#controlCenterURL').val("")
+            $("#formDiv").show()
+            $("#checkRepresentativeDialogProgressDiv").hide()
+        }
+        });
     
 	function associateControlCenter(controlCenterURL){ 
 		console.log("addControlCenterDialog.associateControlCenter - controlCenterURL: " + controlCenterURL);
