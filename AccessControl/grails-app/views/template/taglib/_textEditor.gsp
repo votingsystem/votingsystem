@@ -24,13 +24,12 @@ CKEDITOR.on('instanceReady',function( ev ) {
 	editor.resize( '100%', height, true )
 });
 
-var editorData
 //showEditor and hideEditor are to avoid blocking the editor whith DOM changes
 function showEditor_${attrs.id}() {
 	if (editor) return;
 	// Create a new editor inside the <div id="editor">, setting its value to editorDivContent
 	$("#${attrs.id}EditorContents").hide()
-	editor = CKEDITOR.appendTo( '${attrs.id}', editorConfig, editorData);
+	editor = CKEDITOR.appendTo( '${attrs.id}', editorConfig, ${attrs.id}Content);
 	$("#${attrs.id}").fadeIn()
 	editor.focus();
 }
@@ -41,8 +40,10 @@ function hideEditor_${attrs.id}() {
     $("#${attrs.id}").hide()
 	var editorWidth = $("#${attrs.id}").width() - 20 //css padding
 	var editorHeight = $("#${attrs.id}").height() - 20//css padding
-	editorData = editor.getData()
-	document.getElementById('${attrs.id}EditorContents').innerHTML = ${attrs.id}Content = editor.getData().substring(0,100) + "...";
+    ${attrs.id}Content = editor.getData()
+	var editorContent = editor.getData()
+	if(editorContent.length > 100) editorContent = editorContent.substring(0,100) + "...";
+	document.getElementById('${attrs.id}EditorContents').innerHTML = editorContent;
 	$("#${attrs.id}EditorContents").width(editorWidth).height(editorHeight);
 	$("#${attrs.id}EditorContents").fadeIn(300)
 	editor.destroy();

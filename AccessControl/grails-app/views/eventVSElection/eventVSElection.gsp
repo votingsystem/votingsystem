@@ -46,9 +46,9 @@
 
 	<div class="eventPageContentDiv">
 		<div style="width:100%;position:relative;">
-			<div class="eventContentDiv">${eventMap?.content}</div>
+			<div class="eventContentDiv">${raw(eventMap?.content)}</div>
 		</div>
-		
+
 		<div style="width:100%;position:relative;margin:0px 0px 0px 0px;">
 			<div id="eventAuthorDiv"><b>
 				<g:message code="publisshedByLbl"/>:</b>${eventMap?.userVS}
@@ -61,11 +61,11 @@
 				<div id="fields" style="width:100%;">
 					<g:if test="${EventVS.State.ACTIVE.toString() == eventMap?.state}">
 						<g:each in="${eventMap?.fieldsEventVS}">
-							<div class="voteOptionButton button_base" 
+							<button class="voteOptionButton button_base"
 								style="width: 90%;margin: 10px auto 0px auto;"
-								optionId = "${it.id}" optionContent="${it.content}">
+								optionId = "${it.id}" optionContent="${it.content}"  onclick="return false;">
 								${it.content}
-							</div>
+							</button>
 						</g:each>
 					</g:if>
 					<g:if test="${EventVS.State.CANCELLED.toString() == eventMap?.state ||
@@ -94,6 +94,10 @@
 		var votingEvent = ${eventMap as JSON} 
 		var selectedOption
 		$(function() {
+
+		    string eventCont = '${eventMap?.content}'
+            var htmlObject = $(s); // jquery call
+
 			if(${messageToUser != null?true:false}) { 
 				$("#eventMessagePanel").addClass("${eventClass}");
 			}

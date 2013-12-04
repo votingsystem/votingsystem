@@ -50,7 +50,7 @@
 
 	<div class="eventPageContentDiv">
 		<div style="width:100%;position:relative;">
-			<div class="eventContentDiv">${eventMap?.content}</div>
+			<div class="eventContentDiv">${raw(eventMap?.content)}</div>
 		</div>
 		
 		<div style="width:100%; height: 50px;">
