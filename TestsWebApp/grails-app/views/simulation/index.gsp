@@ -41,8 +41,6 @@
                 </votingSystem:simpleButton>
 
 
-
-
 				<votingSystem:simpleButton id="simulationRunningButton"
 					            style="margin:15px 20px 0px 0px;padding:2px 5px 2px 0px; height:30px;width:400px;">
 						Show simulation running window
