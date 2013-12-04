@@ -1,3 +1,15 @@
+/web-app/WEB-INF/cms/*.jks
+/web-app/WEB-INF/cms/certChain
+
+/grails-app/views/restDoc
+/grails-app/views/restDocTemplates
+
+/web-app/android
+/web-app/applet
+/web-app/ckeditor
+
+/grails-app/controllers/org/votingsystem/accesscontrol/controller/Prueba*
+
 /build
 /logs
 /target
