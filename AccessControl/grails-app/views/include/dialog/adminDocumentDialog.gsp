@@ -1,4 +1,4 @@
-<div id="adminDocumentDialog" title="<g:message code="confirmOptionDialogCaption"/>">	    	
+<div id="adminDocumentDialog" title="<g:message code="cancelEventCaption"/>">
 	<p style="text-align: center;"><g:message code="adminDocumenInfoMsg"/></p>
 	<g:message code="documentStateSelectionMsg"/>:<br/>
 	<div style="font-size: 0.9em; margin:10px 0 0 10px;"> 
@@ -57,7 +57,7 @@ function submitAdminForm() {
 	if(!$("#selectDeleteDocument").is(':checked') &&
 			!$("#selectCloseDocument").is(':checked')) {
 		showResultDialog("<g:message code='errorLbl'/>", 
-				"<g:message code='selectDocumentStateERRORMsg'/>")
+				"<g:message code='selectDocumentStateERRORMsg'/>", showAdminDocumentDialog)
 	} else {
 		var state
 		if($("#selectDeleteDocument").is(':checked')) {
@@ -75,7 +75,7 @@ function submitAdminForm() {
 		webAppMessage.receiverSignServiceURL= "${createLink(controller:'eventVS', action:'cancelled', absolute:true)}"
 		var signedContent = {operation:Operation.EVENT_CANCELLATION,
 				accessControlURL:"${grailsApplication.config.grails.serverURL}",
-				eventId:"${eventMap?.id}", state:state}
+				eventId:Number("${eventMap?.id}"), state:state}
 		webAppMessage.signedContent = signedContent
 		pendingOperation = Operation.EVENT_CANCELLATION
 		//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))

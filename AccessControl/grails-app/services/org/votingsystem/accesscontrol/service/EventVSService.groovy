@@ -100,14 +100,12 @@ class EventVSService {
 				cancelDataJSON.state && (TypeVS.EVENT_CANCELLATION == operationType) &&
 				((EventVS.State.CANCELLED == EventVS.State.valueOf(cancelDataJSON.state)) ||
 					(EventVS.State.DELETED_FROM_SYSTEM == EventVS.State.valueOf(cancelDataJSON.state)))) {
-				String requestURL = StringUtils.getCheckURL(cancelDataJSON.accessControlURL)
+				String requestURL = StringUtils.checkURL(cancelDataJSON.accessControlURL)
 				String serverURL = grailsApplication.config.grails.serverURL
 				if(requestURL.equals(serverURL))  status = ResponseVS.SC_OK
 				else msg = messageSource.getMessage('accessControlURLError', [serverURL, requestURL].toArray(), locale)
-
 			} else {
-				msg = messageSource.getMessage(
-					'eventCancellationDataError', null, locale)
+				msg = messageSource.getMessage('eventCancellationDataError', null, locale)
 			}
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex)

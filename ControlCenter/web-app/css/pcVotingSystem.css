@@ -381,17 +381,17 @@ body {
 }
 
 .eventBodyDiv .cancelMessage {
-	display:none;
-	transform:rotate(20deg);
-	-ms-transform:rotate(20deg);
-	-webkit-transform:rotate(20deg);
-	-moz-transform:rotate(20deg);
-	padding:3px 5px 3px 5px;
-	opacity:0.4;
-	text-transform:uppercase;
-	font-weight:bold; 
-	font-size: 1.8em;
-	background-color: #fff;
+    display:none;
+    transform:rotate(15deg);
+    -ms-transform:rotate(15deg);
+    -webkit-transform:rotate(15deg);
+    -moz-transform:rotate(15deg);
+    padding:3px 5px 3px 5px;
+    margin: 0 0 0 20px;
+    opacity:0.4;
+    text-transform:uppercase;
+    font-weight:bold;
+    font-size: 1.9em;
 }
 
 .eventAuthorLblDiv {

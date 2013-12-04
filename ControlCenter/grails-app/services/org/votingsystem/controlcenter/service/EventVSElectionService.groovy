@@ -200,7 +200,7 @@ class EventVSElectionService {
 			if(ResponseVS.SC_OK !=  responseVS.statusCode) return responseVS
 			byte[] certChainBytes
 			EventVS.withTransaction {
-				eventVS = EventVS.findWhere(accessControlEventVSId:messageJSON.eventId?.toString())
+				eventVS = EventVS.findWhere(accessControlEventVSId:Long.valueOf(messageJSON.eventId))
 				certChainBytes = eventVS?.certChainAccessControl
 			}
 			if(!eventVS) {
@@ -230,7 +230,7 @@ class EventVSElectionService {
                         message:msg, eventVS:eventVS)
 			}
 			String fromUser = grailsApplication.config.VotingSystem.serverName
-			String toUser = eventVS.accessControl.serverURL
+			String toUser = eventVS.accessControlVS.serverURL
 			String subject = messageSource.getMessage('mime.subject.eventCancellationValidated', null, locale)
 			SMIMEMessageWrapper smimeMessageResp = signatureVSService.
 					getMultiSignedMimeMessage(fromUser, toUser, smimeMessageReq, subject)
