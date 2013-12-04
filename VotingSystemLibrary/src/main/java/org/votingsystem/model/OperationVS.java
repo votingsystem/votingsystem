@@ -172,7 +172,7 @@ public class OperationVS {
     
     public String getNormalizedReceiverName() {
         if(receiverName == null) return null;
-        return StringUtils.getCadenaNormalizada(receiverName);
+        return StringUtils.getNormalized(receiverName);
     }
 
     public void setReceiverName(String receiverName) {

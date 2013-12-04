@@ -266,7 +266,7 @@ public class ElectionDialog extends JDialog {
             String textToSign = jsonObject.toString();
             try {
                 String fromUser = eventVS.getVoteVS().getHashCertVoteBase64();
-                String toUser = StringUtils.getCadenaNormalizada(eventVS.getControlCenterVS().getName());
+                String toUser = StringUtils.getNormalized(eventVS.getControlCenterVS().getName());
                 String msgSubject = ContextVS.getInstance().getMessage("voteVSSubject");
                 smimeMessage = pkcs10WrapperClient.genMimeMessage(fromUser, toUser, textToSign, msgSubject, null);
                 String urlVoteService = ((ControlCenterVS)ContextVS.getInstance().getControlCenter()).getVoteServiceURL();

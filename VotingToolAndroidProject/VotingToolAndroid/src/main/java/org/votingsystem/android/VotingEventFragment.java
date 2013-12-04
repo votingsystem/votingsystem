@@ -178,7 +178,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
         notificationManager.cancel(receipt.getNotificationId());
 		/*Log.d(TAG + ".guardarReciboButton ", " - Files dir path: " +
 		getActivity().getApplicationContext().getFilesDir().getAbsolutePath());
-		String receiptFileName = StringUtils.getCadenaNormalizada(reciboVoto.getEventURL()) ;
+		String receiptFileName = StringUtils.getNormalized(reciboVoto.getEventURL()) ;
 
 		File file = new File(getActivity().getApplicationContext().getFilesDir(), receiptFileName);
 		Log.d(TAG + ".guardarReciboButton ", " - Files path: " + file.getAbsolutePath());

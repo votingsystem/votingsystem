@@ -21,6 +21,8 @@ public class StringUtils {
 	
     private static Logger logger = Logger.getLogger(StringUtils.class);
 
+    private static final String ALPHA_NUMERIC_STRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
     public static String getStringFromClob (Clob clob) {
     		if(clob == null) return null;
             String stringClob = "";
@@ -110,9 +112,18 @@ public class StringUtils {
         return new String(salida.toByteArray(), "UTF-8");
     }
     
-    public static String getCadenaNormalizada (String cadena) {
+    public static String getNormalized (String cadena) {
         if(cadena == null) return null;
         else return cadena.replaceAll("[\\/:.]", ""); 
+    }
+
+    public static String getRandomAlphaNumeric(int count) {
+        StringBuilder builder = new StringBuilder();
+        while (count-- != 0) {
+            int character = (int)(Math.random()* ALPHA_NUMERIC_STRING.length());
+            builder.append(ALPHA_NUMERIC_STRING.charAt(character));
+        }
+        return builder.toString();
     }
 
 }

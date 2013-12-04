@@ -46,7 +46,7 @@ public class RepresentativeTestDataSender implements Callable<ResponseVS> {
         byte[] resultDigest =  messageDigest.digest(FileUtils.getBytesFromFile(imageFile));
         String base64ResultDigestStr = new String(Base64.encode(resultDigest));
         String representativeDataStr = getRepresentativeDataJSON(representativeNIF, base64ResultDigestStr).toString();
-        String toUser = StringUtils.getCadenaNormalizada(ContextVS.getInstance().getAccessControl().getName());
+        String toUser = StringUtils.getNormalized(ContextVS.getInstance().getAccessControl().getName());
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie,
                 END_ENTITY_ALIAS, PASSWORD.toCharArray(), DNIe_SIGN_MECHANISM);
         String subject = ContextVS.getInstance().getMessage("representativeRequestMsgSubject", null);

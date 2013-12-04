@@ -1,5 +1,6 @@
 package org.votingsystem
 
+import org.votingsystem.util.StringUtils;
 //http://sysgears.com/articles/tag-libraries-grails/
 class VotingSystemTagLib {
 	
@@ -7,6 +8,7 @@ class VotingSystemTagLib {
 	
 	def simpleButton = { attrs, body ->		
 		attrs.message = body()
+        if(!attrs.id) attrs.id = StringUtils.getRandomAlphaNumeric(3)
 		out << render(template: "/template/taglib/button", model:[attrs: attrs])
 	}
 	

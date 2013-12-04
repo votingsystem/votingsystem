@@ -57,7 +57,7 @@
 
 
             <div style="position: relative; overflow:hidden; ">
-                <votingSystem:simpleButton id="submitButton" isButton='true'
+                <votingSystem:simpleButton id="submitButton" isSubmitButton='true'
                     style="margin:15px 20px 20px 0px;padding:2px 5px 2px 0px; height:30px; width:400px; float:right;">
                     <g:message code="initTimeStampProtocolSimulationButton"/>
                 </votingSystem:simpleButton>

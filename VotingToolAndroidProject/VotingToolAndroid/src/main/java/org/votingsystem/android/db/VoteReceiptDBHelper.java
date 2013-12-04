@@ -72,7 +72,7 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 		SQLiteDatabase db = this.getWritableDatabase();
 
 		ContentValues values = new ContentValues();
-		String receiptKey = StringUtils.getCadenaNormalizada(
+		String receiptKey = StringUtils.getNormalized(
 				voteVS.getEventURL());
 
 		if(voteVS.getSmimeMessage() != null) {

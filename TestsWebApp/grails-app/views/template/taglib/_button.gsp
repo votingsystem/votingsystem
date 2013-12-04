@@ -1,31 +1,19 @@
-<g:if test="${'true'.equals(attrs.isButton)}">
-	<input id='${attrs.id}Hidden' type="submit" style="display:none;">
-	<div id='${attrs.id}' class='button_base' href='${attrs.href}' style='padding:2px 5px 2px 5px;height:30px;${attrs.style}'>
-        <g:if test="${attrs.imgSrc}"><img class='buttonImage' src='${attrs.imgSrc}'/></g:if>
-		${attrs.message}
-	</div>
-	<r:script>
-  		$("#${attrs.id}").click(function () {
-  			$("#${attrs.id}Hidden").click();
-		});
-	</r:script>
+<g:if test="${'true'.equals(attrs.isSubmitButton)}">
+    <button id='${attrs.id}' class='button_base' href='${attrs.href}' style='${attrs.style}'>
 </g:if>
 <g:else>
-	<g:if test="${attrs.href}">
-        <g:if test="${attrs.imgSrc}"><img class='buttonImage' src='${attrs.imgSrc}'/></g:if>
-		<a id='${attrs.id}' class='button_base' href='${attrs.href}' style='padding:2px 5px 2px 5px;height:30px;${attrs.style}'>
-		${attrs.message}
-		</a>
-	</g:if>
-	<g:else>
-		<div id='${attrs.id}' class='button_base' style='padding:2px 5px 2px 5px;height:30px;${attrs.style}'>
-            <g:if test="${attrs.imgSrc}"><img class='buttonImage' src='${attrs.imgSrc}'/></g:if>
-            ${attrs.message}
-		</div>
-	</g:else>
+    <button id='${attrs.id}' class='button_base' style='${attrs.style}' onclick="return false;">
 </g:else>
-
-
-
-
-
+<g:if test="${attrs.imgSrc}">
+    <div class="buttonImage"><img src='${attrs.imgSrc}' style='margin:0px 0px 0px 5px;'/></div>
+    <span class='buttonText'>${attrs.message}</span>
+</g:if>
+<g:else><span style='margin:0 7px 0 7px;'>${attrs.message}</span></g:else>
+</button>
+<r:script>
+    <g:if test="${attrs.href}">
+        $("#${attrs.id}").click(function () {
+            window.location.href = "${attrs.href}"
+        });
+    </g:if>
+</r:script>

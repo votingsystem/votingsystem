@@ -43,7 +43,7 @@ public class RepresentativeDelegatorDataSender implements Callable<ResponseVS> {
         String delegationDataJSON = getDelegationDataJSON(representativeNIF);
 
         ActorVS accessRequest = ContextVS.getInstance().getAccessControl();
-        String toUser = StringUtils.getCadenaNormalizada(accessRequest.getName());
+        String toUser = StringUtils.getNormalized(accessRequest.getName());
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie,
                 END_ENTITY_ALIAS, PASSWORD.toCharArray(), DNIe_SIGN_MECHANISM);
 

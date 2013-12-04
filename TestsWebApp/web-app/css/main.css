@@ -147,13 +147,6 @@ input:focus:valid {
     background-color: #dae7f1;
     border-radius: 5px;
 }
-
-.button_base:active {
-	color: #0066cc;
-    background-color: #dae7f1;
-    border-radius: 5px;
-}
-
 .button_base:active {
    border-top-color: #1b435e;
    background: #1b435e;

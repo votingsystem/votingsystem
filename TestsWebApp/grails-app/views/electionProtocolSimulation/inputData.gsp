@@ -177,7 +177,7 @@
             </fieldset>
 
             <div style="position: relative; overflow:hidden; ">
-                <votingSystem:simpleButton id="submitButton" isButton='true' style="margin:15px 20px 20px 0px;
+                <votingSystem:simpleButton id="submitButton" isSubmitButton='true' style="margin:15px 20px 20px 0px;
                         padding:2px 5px 2px 0px; height:30px; width:450px; float:right;">
                     <g:message code="initElectionProtocolSimulationButton"/>
                 </votingSystem:simpleButton>

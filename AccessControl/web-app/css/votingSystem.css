@@ -6,19 +6,19 @@ select, textarea, text, input {
 }
 
 .button_base {
-	display:table;
-	position:relative;
+    display:table;
+    position:relative;
     margin: 0;
     border: 0;
     font-size: 1.2em;
-    padding: 0px 10px 0px 0px;
+    padding: 1px 10px 1px 1px;
     height: 30px;
     text-align: center;
     box-sizing: border-box;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-user-select: none;
-    cursor: pointer; 
+    cursor: pointer;
     cursor: hand;
     vertical-align: middle;
     text-decoration: none;
@@ -26,9 +26,10 @@ select, textarea, text, input {
     /*button_simple_rollover*/
     color: #769ab5;
     border: #769ab5 solid 1px;
+    border-radius: 4px;
 }
 
-.button_base .buttonImage { 
+.button_base .buttonImage {
 	display:table-cell;
 	vertical-align:middle;
 	margin:5px 0px 5px 5px;
@@ -43,6 +44,14 @@ select, textarea, text, input {
 .button_base:hover {
 	color: #0066cc;
     background-color: #dae7f1;
+    border-radius: 5px;
+}
+
+.button_base:active {
+    border-top-color: #1b435e;
+    background: #1b435e;
+    color:white;
+    border-radius: 5px;
 }
 
 .clearing{clear:both;}

@@ -61,7 +61,7 @@ public class StringUtils {
     	return result;
     }
     
-	public static String getCadenaNormalizada(String cadena) {
+	public static String getNormalized(String cadena) {
         return cadena.replaceAll("[\\/:.]", ""); 
 	}
 

@@ -47,7 +47,7 @@
 			</votingSystem:simpleButton>
 		</div>
 		<div style="float:right;">
-			<votingSystem:simpleButton isButton='true' id="addOptionButton"
+			<votingSystem:simpleButton isSubmitButton='true' id="addOptionButton"
 				imgSrc="${resource(dir:'images/fatcow_16',file:'accept.png')}">
 					<g:message code="publishDocumentLbl"/>
 			</votingSystem:simpleButton>	
