@@ -179,7 +179,7 @@ body {
     vertical-align:middle;
     text-align:center;
     width: 580px;
-    display: block;
+    height: 100%;
 }
 
 .col-selectedSystem a {text-decoration: none;}

@@ -98,7 +98,7 @@ class SubscriptionVSService {
 		DeviceVS dispositivo = DeviceVS.findWhere(deviceId:deviceId)
 		if (!dispositivo || (dispositivo.userVS.id != userVS.id)) dispositivo =
                 new DeviceVS(userVS:userVS, phone:phone, email:email, deviceId:deviceId).save()
-		return new ResponseVS(statusCode:ResponseVS.SC_OK, userVS:userVS, dispositivo:dispositivo)
+		return new ResponseVS(statusCode:ResponseVS.SC_OK, userVS:userVS, data:dispositivo)
 	}
     
 	ResponseVS checkControlCenter(String serverURL, Locale locale) {

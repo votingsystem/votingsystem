@@ -15,7 +15,7 @@ public class ActorVS implements java.io.Serializable {
         
     public enum Type {CONTROL_CENTER, ACCESS_CONTROL}
 
-    public enum State {CANCELLED, ACTIVE, PAUSED}
+    public enum State {CANCELLED, ACTIVE, PAUSED, RUNNING}
 
     private Long id;
     private String serverURL;

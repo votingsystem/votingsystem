@@ -18,7 +18,7 @@ import android.widget.*;
 import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.model.OptionVS;
 import org.votingsystem.android.callable.SMIMESignedSender;
-import org.votingsystem.android.callable.SignedPDFSender;
+import org.votingsystem.android.callable.PDFSignedSender;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.android.ui.CertNotFoundDialog;
 import org.votingsystem.android.ui.CertPinDialog;
@@ -337,12 +337,12 @@ public class EventFragment extends Fragment implements CertPinDialogListener {
                 FileInputStream fis = getActivity().openFileInput(KEY_STORE_FILE);
                 keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
                 if(event.getTypeVS().equals(TypeVS.MANIFEST_EVENT)) {
-                    SignedPDFSender signedPDFSender = new SignedPDFSender(
+                    PDFSignedSender PDFSignedSender = new PDFSignedSender(
                             contextVS.getAccessControlVS().getEventVSManifestURL(event.getEventVSId()),
                             contextVS.getAccessControlVS().getEventVSManifestCollectorURL(event.getEventVSId()),
                             keyStoreBytes, pin.toCharArray(), null, null,
                             getActivity().getBaseContext());
-                    responseVS = signedPDFSender.call();
+                    responseVS = PDFSignedSender.call();
                 } else if(event.getTypeVS().equals(TypeVS.CLAIM_EVENT)) {
                     String subject = ASUNTO_MENSAJE_FIRMA_DOCUMENTO + event.getSubject();
                     String signatureContent = event.getSignatureContentJSON();

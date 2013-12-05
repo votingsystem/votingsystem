@@ -290,22 +290,7 @@ public class UserCertResponseActivity extends ActionBarActivity
         @Override
         protected ResponseVS doInBackground(String... urls) {
             Log.d(TAG + ".doInBackground", " - url: " + urls[0]);
-            ResponseVS responseVS = null;
-            try {
-                HttpResponse response = HttpHelper.getData(urls[0], contentType);
-                if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
-                    byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
-                    responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
-                            new String(responseBytes), responseBytes);
-                } else {
-                    responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
-                            EntityUtils.toString(response.getEntity()));
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
-            }
-            return responseVS;
+            return  HttpHelper.getData(urls[0], contentType);
         }
 
         @Override  protected void onPostExecute(ResponseVS responseVS) {

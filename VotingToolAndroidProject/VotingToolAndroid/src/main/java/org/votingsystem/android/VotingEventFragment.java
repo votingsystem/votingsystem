@@ -36,7 +36,6 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
-import org.votingsystem.android.callable.DataGetter;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.VoteSender;
 import org.votingsystem.android.db.VoteReceiptDBHelper;
@@ -50,6 +49,8 @@ import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.model.OptionVS;
+import org.votingsystem.util.HttpHelper;
+
 import java.io.FileInputStream;
 import java.net.URL;
 import java.security.cert.X509Certificate;
@@ -551,8 +552,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
         protected ResponseVS doInBackground(String... urls) {
             Log.d(TAG + ".GetCertTask.doInBackground(...)", " - serviceURL: " +
                     actorVS.getCertChainURL());
-            DataGetter dataGetter = new DataGetter(null, actorVS.getCertChainURL());
-            return dataGetter.call();
+            return HttpHelper.getData(actorVS.getCertChainURL(), null);
         }
 
         // This is called each time you call publishProgress()

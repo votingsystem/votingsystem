@@ -48,9 +48,9 @@ import static org.votingsystem.model.ContextVSImpl.USER_CERT_ALIAS;
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class SignedPDFSender implements Callable<ResponseVS> {
+public class PDFSignedSender implements Callable<ResponseVS> {
 
-    public static final String TAG = "SignedPDFSender";
+    public static final String TAG = "PDFSignedSender";
 
     public static final PdfName PDF_SIGNATURE_NAME     = PdfName.ADBE_PKCS7_SHA1;
     public static final String PDF_SIGNATURE_DIGEST    = "SHA1";
@@ -69,7 +69,7 @@ public class SignedPDFSender implements Callable<ResponseVS> {
     private String documentToSignURL = null;
     private String serviceURL = null;
 
-    public SignedPDFSender(String documentToSignURL, String serviceURL, byte[] keyStoreBytes,
+    public PDFSignedSender(String documentToSignURL, String serviceURL, byte[] keyStoreBytes,
                            char[] password, String reason, String location, Context context) {
         this.documentToSignURL = documentToSignURL;
         this.serviceURL = serviceURL;
@@ -82,7 +82,6 @@ public class SignedPDFSender implements Callable<ResponseVS> {
 
     @Override public ResponseVS call() {
         ResponseVS responseVS = null;
-
         try {
             KeyStore keyStore = null;
             PrivateKey signerPrivatekey = null;
@@ -96,17 +95,12 @@ public class SignedPDFSender implements Callable<ResponseVS> {
             //X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(USER_CERT_ALIAS);
             Certificate[] signerCertChain = keyStore.getCertificateChain(USER_CERT_ALIAS);
             X509Certificate signerCert = (X509Certificate) signerCertChain[0];
-            HttpResponse response = null;
             byte[] pdfBytes = null;
             //Get the PDF to sign
             if(documentToSignURL != null) {
-                response = HttpHelper.getData(documentToSignURL, ContentTypeVS.PDF);
-                if(ResponseVS.SC_OK != response.getStatusLine().getStatusCode()) {
-                    return new ResponseVS(response.getStatusLine().getStatusCode(),
-                            EntityUtils.toString(response.getEntity()));
-                } else {
-                    pdfBytes = EntityUtils.toByteArray(response.getEntity());
-                }
+                responseVS = HttpHelper.getData(documentToSignURL, ContentTypeVS.PDF);
+                if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
+                else pdfBytes = responseVS.getMessageBytes();
             } else {
                 Log.d(TAG + ".call(...)", " - documentToSignURL null ");
                 return new ResponseVS(ResponseVS.SC_ERROR);
@@ -123,22 +117,17 @@ public class SignedPDFSender implements Callable<ResponseVS> {
             mimeBodyPart.writeTo(baos);
             byte[] bytesToSend = baos.toByteArray();
             baos.close();
-            response = HttpHelper.sendData(bytesToSend,
-            		ContentTypeVS.PDF_SIGNED_AND_ENCRYPTED, serviceURL);
-            responseVS = new ResponseVS(
-                    response.getStatusLine().getStatusCode(),
-                    EntityUtils.toString(response.getEntity()));
+            responseVS = HttpHelper.sendData(bytesToSend,ContentTypeVS.PDF_SIGNED_AND_ENCRYPTED,
+                    serviceURL);
         }catch (Exception ex) {
             ex.printStackTrace();
-            responseVS = new ResponseVS(
-                    ResponseVS.SC_ERROR, ex.getMessage());
+            responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
         }
         return responseVS;
     }
 
-    public byte[] signWithTimestamp(PdfReader pdfReader,
-                                    X509Certificate signerCert, PrivateKey signerPrivatekey,
-                                    Certificate[] signerCertChain) throws Exception {
+    public byte[] signWithTimestamp(PdfReader pdfReader, X509Certificate signerCert,
+            PrivateKey signerPrivatekey, Certificate[] signerCertChain) throws Exception {
         Log.d(TAG + ".signWithTimestamp(...)", " - certsChain.length: " + signerCertChain.length);
         PDF_CMSSignedGenerator signedGenerator = new PDF_CMSSignedGenerator(signerPrivatekey,
                 signerCertChain, PDF_SIGNATURE_MECHANISM, PDF_SIGNATURE_DIGEST, PDF_DIGEST_OID);

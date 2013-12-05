@@ -2,8 +2,6 @@ package org.votingsystem.android.callable;
 
 import android.content.Context;
 import android.util.Log;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
@@ -16,6 +14,7 @@ import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
 * @author jgzornoza
@@ -53,22 +52,18 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
         
     @Override public ResponseVS call() throws Exception {
         //byte[] base64timeStampRequest = Base64.encode(timeStampRequest.getEncoded());        
-        int numAttemp = 0;
+        AtomicInteger numAttemp = new AtomicInteger(0);
         AtomicBoolean done = new AtomicBoolean(false);
         ResponseVS responseVS = null;
         while(!done.get()) {
         	String timeStampServiceURL = ContextVSImpl.getInstance(context).getAccessControlVS().
                     getTimeStampServiceURL();
-            HttpResponse response = HttpHelper.sendData(
-            		timeStampRequest.getEncoded(), "timestamp-query", timeStampServiceURL);
-            responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
-            		response.getStatusLine().toString());
-            if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
-                byte[] bytesToken = EntityUtils.toByteArray(response.getEntity());
-                timeStampToken = new TimeStampToken(new CMSSignedData(bytesToken));
+            responseVS = HttpHelper.sendData(timeStampRequest.getEncoded(), "timestamp-query",
+                    timeStampServiceURL);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                timeStampToken= new TimeStampToken(new CMSSignedData(responseVS.getMessageBytes()));
                 X509Certificate timeStampCert = ContextVSImpl.getInstance(context).
                         getAccessControlVS().getTimeStampCert();
-
                 /* -> Android project config problem
                  * SignerInformationVerifier timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().
                     setProvider(MainActivity.PROVIDER).build(timeStampCert);
@@ -77,18 +72,13 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
                 if(smimeMessage != null)
                 	smimeMessage.setTimeStampToken(timeStampToken);
                 done.set(true);
-            } else if(ResponseVS.SC_ERROR_TIMESTAMP ==
-            		response.getStatusLine().getStatusCode()) {
-                if(numAttemp < numMaxAttempts) {
-                    ++numAttemp;
-                	Log.e(TAG + ".call(...)", "Error getting timestamp - attemp: " + numAttemp);
+            } else if(ResponseVS.SC_ERROR_TIMESTAMP == responseVS.getStatusCode()) {
+                if(numAttemp.getAndIncrement() < numMaxAttempts) {
+                	Log.e(TAG + ".call(...)", "Error getting timestamp - attemp: " + numAttemp.get());
                 } else done.set(true);
-                responseVS.setMessage(EntityUtils.toString(response.getEntity()));
             } else {
             	done.set(true);
-            	responseVS.setMessage(EntityUtils.toString(response.getEntity()));
-            } 
-            
+            }
         }
         return responseVS;
     }

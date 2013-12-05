@@ -18,8 +18,6 @@ package org.votingsystem.android.callable;
 
 import android.content.Context;
 import android.util.Log;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.android.R;
 import org.votingsystem.model.VoteVS;
@@ -82,13 +80,13 @@ public class VoteSender implements Callable<ResponseVS> {
             SMIMEMessageWrapper solicitudAcceso = signedMailGenerator.genMimeMessage(
                     userVS, contextVS.getAccessControlVS().getNameNormalized(),
                     signedContent, subject, null);
-            AccessRequestor accessRequestor = new AccessRequestor(solicitudAcceso,
+            AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(solicitudAcceso,
                     event, contextVS.getAccessControlVS().getCertificate(),
                     contextVS.getAccessControlVS().getAccessServiceURL(),context);
-            responseVS = accessRequestor.call();
+            responseVS = accessRequestDataSender.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
             String votoJSON = event.getVoteJSON().toString();
-            PKCS10WrapperClient pkcs10WrapperClient = accessRequestor.getPKCS10WrapperClient();
+            PKCS10WrapperClient pkcs10WrapperClient = accessRequestDataSender.getPKCS10WrapperClient();
             SMIMEMessageWrapper signedVote = pkcs10WrapperClient.genSignedMessage(
                     event.getHashCertVoteBase64(), event.getControlCenter().getNameNormalized(),
                     votoJSON, context.getString(R.string.vote_msg_subject), null);
@@ -102,25 +100,19 @@ public class VoteSender implements Callable<ResponseVS> {
             String documentContentType = ContentTypeVS.SIGNED_AND_ENCRYPTED;
             byte[] messageToSend = Encryptor.encryptSMIME(signedVote,
                     event.getControlCenter().getCertificate());
-            HttpResponse response  = HttpHelper.sendData(messageToSend,
-                    documentContentType, serviceURL);
-            if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
-                byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
-                SMIMEMessageWrapper votoValidado = Encryptor.decryptSMIMEMessage(
-                        responseBytes, pkcs10WrapperClient.getKeyPair().getPublic(),
+            responseVS  = HttpHelper.sendData(messageToSend,documentContentType, serviceURL);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                SMIMEMessageWrapper voteReceipt = Encryptor.decryptSMIMEMessage(
+                        responseVS.getMessageBytes(), pkcs10WrapperClient.getKeyPair().getPublic(),
                         pkcs10WrapperClient.getKeyPair().getPrivate());
-                VoteVS receipt = new VoteVS(ResponseVS.SC_OK, votoValidado, event);
+                VoteVS receipt = new VoteVS(ResponseVS.SC_OK, voteReceipt, event);
                 byte[] base64EncodedKey = Base64.encode(
                         pkcs10WrapperClient.getPrivateKey().getEncoded());
                 byte[] encryptedKey = Encryptor.encryptMessage(base64EncodedKey, userCert);
                 receipt.setPkcs10WrapperClient(pkcs10WrapperClient);
                 receipt.setEncryptedKey(encryptedKey);
                 responseVS.setData(receipt);
-            } else {
-                cancelAccessRequest(signedMailGenerator, userVS);
-                responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
-                        EntityUtils.toString(response.getEntity()));
-            }
+            } else return responseVS;
             /* problema -> javax.activation.UnsupportedDataTypeException:
              * no object DCH for MIME type application/pkcs7-signature
             MimeMessage solicitudAccesoMimeMessage = dnies.gen(userVS,

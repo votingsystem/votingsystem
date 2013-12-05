@@ -353,9 +353,7 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
                 FileOutputStream fos = openFileOutput(KEY_STORE_FILE, Context.MODE_PRIVATE);
                 fos.write(keyStoreBytes);
                 fos.close();
-                HttpResponse response = HttpHelper.sendData(csrBytes, null, urls[0]);
-                return new ResponseVS(response.getStatusLine().getStatusCode(),
-                        EntityUtils.toString(response.getEntity()));
+                return HttpHelper.sendData(csrBytes, null, urls[0]);
             } catch (Exception ex) {
                 ex.printStackTrace();
                 return new ResponseVS(ResponseVS.SC_ERROR,

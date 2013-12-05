@@ -15,8 +15,6 @@ import android.util.Log;
 import android.view.*;
 import android.view.animation.AnimationUtils;
 import android.widget.*;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
 import org.votingsystem.model.EventVSState;
 import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.model.EventVSResponse;
@@ -357,12 +355,12 @@ public class EventListFragment extends ListFragment
 
             List<EventVS> eventList = null;
             try {
-                HttpResponse response = null;
+                ResponseVS responseVS = null;
                 if(queryString != null) {
                     String url = contextVS.getAccessControlVS().getSearchServiceURL(0, contextVS.EVENTS_PAGE_SIZE);
                     QueryData queryData = new QueryData(
                             subSystemVS.getEventType(), eventVSState.getEventState(), queryString);
-                    response = HttpHelper.sendData(
+                    responseVS = HttpHelper.sendData(
                             queryData.toJSON().toString().getBytes(), null, url);
                     searchTextView.setText(Html.fromHtml(getContext().getString(
                             R.string.search_query_info_msg, queryString)));
@@ -370,14 +368,13 @@ public class EventListFragment extends ListFragment
                 } else {
                     String url = contextVS.getAccessControlVS().getEventVSURL(eventVSState,
                             subSystemVS, contextVS.EVENTS_PAGE_SIZE, offset);
-                    response = HttpHelper.getData(url, null);
+                    responseVS = HttpHelper.getData(url, null);
                     searchTextView.setVisibility(View.GONE);
                 }
-                int statusCode = response.getStatusLine().getStatusCode();
-                if(ResponseVS.SC_OK == statusCode) {
-                    EventVSResponse consulta = EventVSResponse.parse(EntityUtils.toString(response.getEntity()));
+                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    EventVSResponse consulta = EventVSResponse.parse(responseVS.getMessage());
                     eventList = consulta.getEventVSs();
-                } else errorLoadingEventsMsg = response.getStatusLine().toString();
+                } else errorLoadingEventsMsg = responseVS.getMessage();
             } catch (Exception ex) {
                 Log.e(TAG + ".doInBackground", ex.getMessage(), ex);
                 errorLoadingEventsMsg = getContext().getString(R.string.connection_error_msg);

@@ -18,8 +18,6 @@ package org.votingsystem.android.callable;
 
 import android.content.Context;
 import android.util.Log;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
 import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.util.HttpHelper;
@@ -109,17 +107,14 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
                 baos.close();
                 documentContentType = ContentTypeVS.SIGNED;
             }
-            HttpResponse response  = HttpHelper.sendData(
-                    messageToSend, documentContentType, serviceURL);
-            if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
-                byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
+            responseVS  = HttpHelper.sendData(messageToSend, documentContentType, serviceURL);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 if(keypair != null) {
                     SMIMEMessageWrapper signedMessage = Encryptor.decryptSMIMEMessage(
-                            responseBytes, keypair.getPublic(), keypair.getPrivate());
+                            responseVS.getMessageBytes(), keypair.getPublic(), keypair.getPrivate());
                     responseVS.setSmimeMessage(signedMessage);
-                } else return new ResponseVS(ResponseVS.SC_OK, responseBytes);
-            } else responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
-                    EntityUtils.toString(response.getEntity()));
+                } else return new ResponseVS(ResponseVS.SC_OK, responseVS.getMessageBytes());
+            } else return responseVS;
         } catch(VotingSystemKeyStoreException ex) {
             ex.printStackTrace();
             return new ResponseVS(ResponseVS.SC_ERROR, context.getString(R.string.pin_error_msg));

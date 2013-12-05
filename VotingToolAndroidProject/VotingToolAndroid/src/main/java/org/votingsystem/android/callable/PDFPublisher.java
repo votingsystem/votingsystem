@@ -50,7 +50,7 @@ import static org.votingsystem.model.ContextVSImpl.USER_CERT_ALIAS;
  */
 public class PDFPublisher implements Callable<ResponseVS> {
 
-    public static final String TAG = "SignedPDFSender";
+    public static final String TAG = "PDFSignedSender";
 
     public static final PdfName PDF_SIGNATURE_NAME     = PdfName.ADBE_PKCS7_SHA1;
     public static final String PDF_SIGNATURE_DIGEST    = "SHA1";
@@ -95,24 +95,18 @@ public class PDFPublisher implements Callable<ResponseVS> {
             //X509Certificate signerCert = (X509Certificate) keyStore.getCertificate(USER_CERT_ALIAS);
             Certificate[] signerCertChain = keyStore.getCertificateChain(USER_CERT_ALIAS);
             X509Certificate signerCert = (X509Certificate) signerCertChain[0];
-            HttpResponse response = null;
-            byte[] pdfBytes = null;
             String manifestId = null;
             //Get the PDF to sign
             if(pdfContent == null) {
                 Log.d(TAG + ".call(...)", " - call pdfContent null");
                 return new ResponseVS(ResponseVS.SC_ERROR, context.getString(R.string.content_error_msg));
             }
-            response = HttpHelper.sendData(pdfContent.getBytes(), null, serviceURL);
-            if(ResponseVS.SC_OK != response.getStatusLine().getStatusCode()) {
-                return new ResponseVS(response.getStatusLine().getStatusCode(),
-                        EntityUtils.toString(response.getEntity()));
-            } else {
-                org.apache.http.Header manifestIdHeader = response.getFirstHeader("eventId");
-                pdfBytes = EntityUtils.toByteArray(response.getEntity());
-                manifestId = manifestIdHeader.getValue();
-            }
-            PdfReader pdfReader = new PdfReader(pdfBytes);
+            responseVS = HttpHelper.sendData(pdfContent.getBytes(), null, serviceURL, "eventId");
+
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
+
+            manifestId = ((List<String>)responseVS.getData()).iterator().next();
+            PdfReader pdfReader = new PdfReader(responseVS.getMessageBytes());
 
             byte[] timeStampedSignedPDF = signWithTimestamp(pdfReader,
                     signerCert, signerPrivatekey, signerCertChain);
@@ -124,15 +118,11 @@ public class PDFPublisher implements Callable<ResponseVS> {
             mimeBodyPart.writeTo(baos);
             byte[] bytesToSend = baos.toByteArray();
             baos.close();
-            response = HttpHelper.sendData(bytesToSend,
+            responseVS = HttpHelper.sendData(bytesToSend,
             		ContentTypeVS.PDF_SIGNED_AND_ENCRYPTED, serviceURL + "/" + manifestId);
-            responseVS = new ResponseVS(
-                    response.getStatusLine().getStatusCode(),
-                    EntityUtils.toString(response.getEntity()));
         }catch (Exception ex) {
             ex.printStackTrace();
-            responseVS = new ResponseVS(
-                    ResponseVS.SC_ERROR, ex.getMessage());
+            responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
         }
         return responseVS;
     }

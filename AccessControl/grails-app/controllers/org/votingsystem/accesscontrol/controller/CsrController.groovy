@@ -1,6 +1,7 @@
 package org.votingsystem.accesscontrol.controller
 
 import grails.converters.JSON
+import org.votingsystem.model.EnvironmentVS
 import org.votingsystem.util.StringUtils
 import org.votingsystem.model.CertificateVS
 import org.votingsystem.model.DeviceVS

@@ -98,7 +98,8 @@ public class ResponseVS<T> {
      * @return the message
      */
     public String getMessage() {
-        return message;
+        if(message == null && messageBytes != null) return new String(messageBytes);
+        else return message;
     }
 
     /**

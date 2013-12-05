@@ -218,17 +218,15 @@ class CsrService {
 		ResponseVS responseVS = subscriptionVSService.checkDevice(nif, phone, email, deviceId, locale)
 		if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS;
 		UserRequestCsrVS solicitudCSR
-		def solicitudesPrevias = UserRequestCsrVS.findAllByDispositivoAndUsuarioAndState(
-			responseVS.getDeviceVS, responseVS.userVS, UserRequestCsrVS.State.PENDING)
+		def solicitudesPrevias = UserRequestCsrVS.findAllByDeviceVSAndUserVSAndState(
+			responseVS.data, responseVS.userVS, UserRequestCsrVS.State.PENDING)
 		solicitudesPrevias.each {eventVSItem ->
 			eventVSItem.state = UserRequestCsrVS.State.CANCELLED
 			eventVSItem.save();
 		}
 		UserRequestCsrVS.withTransaction {
-			solicitudCSR = new UserRequestCsrVS(
-				state:UserRequestCsrVS.State.PENDING,
-				content:csrPEMBytes, userVS:responseVS.userVS,
-				deviceVS:responseVS.getDeviceVS).save()
+			solicitudCSR = new UserRequestCsrVS(state:UserRequestCsrVS.State.PENDING,
+				content:csrPEMBytes, userVS:responseVS.userVS,deviceVS:responseVS.data).save()
 		}
 		if(solicitudCSR) return new ResponseVS(statusCode:ResponseVS.SC_OK, message:solicitudCSR.id)
 		else return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST)

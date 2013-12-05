@@ -33,12 +33,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import org.votingsystem.android.callable.DataGetter;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
 
 import java.io.IOException;
@@ -300,15 +300,8 @@ public class MainActivity extends FragmentActivity {
         }
 
         @Override protected ResponseVS doInBackground(String... urls) {
-            String eventURL = urls[0];
-            Log.d(TAG + ".EventInfoLoader.doInBackground() ", " - eventURL: " + eventURL);
-            try {
-                DataGetter dataGetter = new DataGetter(null, eventURL);
-                return dataGetter.call();
-            } catch(Exception ex) {
-                ex.printStackTrace();
-                return new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
-            }
+            Log.d(TAG + ".EventInfoLoader.doInBackground() ", " - eventURL: " + urls[0]);
+            return HttpHelper.getData(urls[0], null);
         }
 
         @Override  protected void onPostExecute(ResponseVS responseVS) {
@@ -346,14 +339,7 @@ public class MainActivity extends FragmentActivity {
 
         @Override protected ResponseVS doInBackground(String... urls) {
             Log.d(TAG + ".AccessControlLoader.doInBackground() ", " - serviceURL: " + urls[0]);
-            serviceURL = urls[0];
-            try {
-                DataGetter dataGetter = new DataGetter(null, AccessControlVS.getServerInfoURL(urls[0]));
-                return dataGetter.call();
-            } catch(Exception ex) {
-                ex.printStackTrace();
-                return new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
-            }
+            return HttpHelper.getData(AccessControlVS.getServerInfoURL(urls[0]), null);
         }
 
         @Override  protected void onPostExecute(ResponseVS responseVS) {

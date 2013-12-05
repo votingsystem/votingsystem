@@ -29,6 +29,8 @@ import org.votingsystem.model.ResponseVS;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -66,23 +68,74 @@ public class HttpHelper {
         }
     }
     
-    public static HttpResponse getData (String serverURL, String contentType) 
-            throws IOException, ParseException {
+    public static ResponseVS getData (String serverURL, String contentType) {
         Log.d(TAG + ".getData(...)" ," - serverURL: " + serverURL);
-        HttpGet httpget = new HttpGet(serverURL);
-        if(contentType != null) httpget.setHeader("Content-Type", contentType);
-        HttpResponse response = httpclient.execute(httpget);
-        Log.d(TAG + ".getInformacion" ,"----------------------------------------");
-        /*Header[] headers = response.getAllHeaders();
-        for (int i = 0; i < headers.length; i++) {
-        System.out.println(headers[i]);
-        }*/
-        Log.d(TAG + ".getData" ,"Connections in pool: " + cm.getConnectionsInPool());
-        Log.d(TAG + ".getData" ,response.getStatusLine().toString());
-        Log.d(TAG + ".getData" ,"----------------------------------------");
-        return response;    
-    } 
-    
+        HttpResponse response = null;
+        ResponseVS responseVS = null;
+        try {
+            HttpGet httpget = new HttpGet(serverURL);
+            if(contentType != null) httpget.setHeader("Content-Type", contentType);
+            response = httpclient.execute(httpget);
+            Log.d(TAG + ".getInformacion" ,"----------------------------------------");
+            /*Header[] headers = response.getAllHeaders();
+            for (int i = 0; i < headers.length; i++) {
+            System.out.println(headers[i]);
+            }*/
+            Log.d(TAG + ".getData" ,"Connections in pool: " + cm.getConnectionsInPool());
+            Log.d(TAG + ".getData" ,response.getStatusLine().toString());
+            Log.d(TAG + ".getData" ,"----------------------------------------");
+            if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
+                byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
+                responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes);
+            } else {
+                responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
+                        EntityUtils.toString(response.getEntity()));
+            }
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
+        }
+        return responseVS;
+    }
+
+
+    public static ResponseVS sendData(byte[] data, String contentType,
+              String serverURL, String... headerNames) throws IOException {
+        HttpPost httpPost = new HttpPost(serverURL);
+        Log.d(TAG + ".sendData(...)" , " - serverURL: " + serverURL);
+        HttpResponse response = null;
+        ResponseVS responseVS = null;
+        try {
+            ByteArrayEntity reqEntity = new ByteArrayEntity(data);
+            if(contentType != null) reqEntity.setContentType(contentType);
+            httpPost.setEntity(reqEntity);
+            httpPost.setEntity(reqEntity);
+            response = httpclient.execute(httpPost);
+            Log.d(TAG + ".sendData(...)" ,"----------------------------------------");
+            Log.d(TAG + ".sendData(...)" , response.getStatusLine().toString());
+            Log.d(TAG + ".sendData(...)" , "----------------------------------------");
+            if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
+                byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
+                responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),responseBytes);
+            } else {
+                responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
+                        EntityUtils.toString(response.getEntity()));
+            }
+            if(headerNames != null && headerNames.length > 0) {
+                List<String> headerValues = new ArrayList<String>();
+                for(String headerName: headerNames) {
+                    org.apache.http.Header headerValue = response.getFirstHeader(headerName);
+                    if(headerValue != null) headerValues.add(headerValue.getValue());
+                }
+                responseVS.setData(headerValues);
+            }
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
+        }
+        return responseVS;
+    }
+
     public static HttpResponse sendFile (File file, String serverURL) throws IOException {
         HttpPost httpPost = new HttpPost(serverURL);
         Log.d(TAG + ".sendFile(...)" , " - serverURL: " + httpPost.getURI() 
@@ -96,23 +149,6 @@ public class HttpHelper {
         Log.d(TAG + ".sendFile" , response.getStatusLine().toString());
         Log.d(TAG + ".sendFile" , "----------------------------------------");
         return response;
-    }
-
-    public static HttpResponse sendData(
-    		byte[] data, String contentType, String serverURL) throws IOException {
-        HttpPost httpPost = new HttpPost(serverURL);
-        Log.d(TAG + ".sendData(...)" , " - serverURL: " + httpPost.getURI());
-        
-        ByteArrayEntity reqEntity = new ByteArrayEntity(data);
-        if(contentType != null) reqEntity.setContentType(contentType);
-        httpPost.setEntity(reqEntity);
-
-        httpPost.setEntity(reqEntity);
-        HttpResponse response = httpclient.execute(httpPost);
-        Log.d(TAG + ".sendData(...)" ,"----------------------------------------");
-        Log.d(TAG + ".sendData(...)" , response.getStatusLine().toString());
-        Log.d(TAG + ".sendData(...)" , "----------------------------------------");
-        return response;  
     }
      
      public static ResponseVS sendObjectMap(

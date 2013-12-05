@@ -23,9 +23,9 @@ import static org.votingsystem.model.ContextVSImpl.*;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class AccessRequestor implements Callable<ResponseVS> {
+public class AccessRequestDataSender implements Callable<ResponseVS> {
     
-	public static final String TAG = "AccessRequestor";
+	public static final String TAG = "AccessRequestDataSender";
 
     private SMIMEMessageWrapper accessRequets;
     private PKCS10WrapperClient pkcs10WrapperClient;
@@ -33,9 +33,9 @@ public class AccessRequestor implements Callable<ResponseVS> {
     private String serviceURL = null;
     private Context context = null;
 
-    public AccessRequestor (SMIMEMessageWrapper accessRequets,
-            EventVS eventVS, X509Certificate destinationCert,
-            String serviceURL, Context context) throws Exception {
+    public AccessRequestDataSender(SMIMEMessageWrapper accessRequets,
+                                   EventVS eventVS, X509Certificate destinationCert,
+                                   String serviceURL, Context context) throws Exception {
         this.accessRequets = accessRequets;
         this.serviceURL = serviceURL;
         this.destinationCert = destinationCert;
