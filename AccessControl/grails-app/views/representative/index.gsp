@@ -147,7 +147,7 @@
 		}
 
 		function requestAccreditations() {
-			var accreditationDateSelectedStr = $("#accreditationDateSelected").val()
+			var accreditationDateSelectedStr = $("#accreditationDateSelected").datepicker('getDate').format()
 			console.log("requestAccreditations - accreditationDateSelectedStr: " + accreditationDateSelectedStr)
 	    	var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST)
 	    	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
@@ -159,7 +159,6 @@
 			webAppMessage.receiverSignServiceURL = "${createLink(controller:'representative', action:'accreditations', absolute:true)}"
 			webAppMessage.signedMessageSubject = '<g:message code="requestRepresentativeAcreditationsLbl"/>'
 			webAppMessage.email = $("#accreditationReqUserEmailText").val()
-			webAppMessage.isResponseWithReceipt = true
 			votingSystemClient.setMessageToSignatureClient(webAppMessage, representativeOperationCallback); 
 		}
 
