@@ -93,13 +93,13 @@
 			showEditor_editorDiv()
 
     		$("#addOptionButton").click(function () { 
-    			hideEditor_editorDiv()
+                getEditor_editorDivData()
     			showAddVoteOptionDialog(addVoteOption)
     		});
     		
 
 	  		$("#controlCenterLink").click(function () {
-	  			hideEditor_editorDiv()
+                getEditor_editorDivData()
 	  			showVoteControlCenterDialog(addControlCenterDialog)
 			});
 
@@ -131,7 +131,7 @@
 
 			$('#mainForm').submit(function(event){	
 		    	event.preventDefault();
-			    hideEditor_editorDiv()
+                var editorContent = getEditor_editorDivData()
 				var subject = $("#subject"),
 				dateBegin = $("#dateBegin"),
 				dateFinish = $("#dateFinish")
@@ -143,15 +143,13 @@
 				
 			  	var event = new Evento();
 			  	event.subject = subject.val();
-			  	event.content = editorDivContent;
+			  	event.content = editorContent;
 			  	event.dateBegin = dateBegin.datepicker('getDate').format();
 			  	event.dateFinish = dateFinish.datepicker('getDate').format();
 				  	event.controlCenterVS = controlCenters[$('#controlCenterSelect').val()]
 		
 			  	event.fieldsEventVS = pollOptions
-			  	var webAppMessage = new WebAppMessage(
-			    	ResponseVS.SC_PROCESSING,
-			    	Operation.VOTING_PUBLISHING)
+			  	var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING,Operation.VOTING_PUBLISHING)
 				webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
 				webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
 				webAppMessage.signedContent = event
@@ -212,7 +210,7 @@
 				return null
 			}
 			     	
-			if(editorDivContent.trim() == 0) {
+			if(getEditor_editorDivData().length == 0) {
 				editorDiv.addClass( "formFieldError" );
 				showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 						'<g:message code="emptyDocumentERRORMsg"/>')

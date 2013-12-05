@@ -151,8 +151,8 @@ $('#manifestProtocolSinulationDataForm').submit(function(event){
 
 
  	allFields.removeClass("formFieldError");   
- 	$(".errorMsgWrapper").fadeOut() 
-	hideEditor_manifestEditorDiv() 
+ 	$(".errorMsgWrapper").fadeOut()
+    getEditor_manifestEditorDivData()
 	if(!isValidForm()) {
 		showEditor_manifestEditorDiv()
 		return false
@@ -160,7 +160,7 @@ $('#manifestProtocolSinulationDataForm').submit(function(event){
 
 	var dateBeginStr = new Date().format()
 	var event = {subject:$('#subject').val(),
-	        content:manifestEditorDivContent.trim(),
+	        content:getEditor_manifestEditorDivData(),
 	        dateBegin:dateBeginStr,
 	        dateFinish:dateFinish.datepicker("getDate").format()}
 	
@@ -211,7 +211,7 @@ function isValidForm() {
 		return false
 	}
 
-	if('' == manifestEditorDivContent.trim()) {
+	if('' == getEditor_manifestEditorDivData()) {
 		showErrorMsg('<g:message code="eventContentEmptyERRORMsg"/>') 
 		manifestEditorDiv.addClass("formFieldError");
 		return false

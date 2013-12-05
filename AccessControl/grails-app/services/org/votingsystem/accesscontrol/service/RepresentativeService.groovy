@@ -594,7 +594,7 @@ class RepresentativeService {
 				msg = messageSource.getMessage('representativeDataUpdatedMsg',
 					[userVS.name, userVS.firstName].toArray(), locale)
 			} 
-			userVS.setMetaInf(messageJSON.representativeInfo)
+			userVS.setDescription(messageJSON.representativeInfo)
 			userVS.representativeMessage = messageSMIMEReq
 			UserVS.withTransaction {
 				userVS.save(flush:true)
@@ -958,7 +958,7 @@ class RepresentativeService {
 	
 	public Map getRepresentativeDetailedMap(UserVS representative) {
 		Map representativeMap = getRepresentativeMap(representative)
-		representativeMap.metaInf = representative.metaInf
+		representativeMap.description = representative.description
 		representativeMap.votingHistory = []
 		return representativeMap
 	}

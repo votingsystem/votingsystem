@@ -2,6 +2,7 @@
 	<div class="errorMsgWrapper" style="display:none;"></div>
 	<p style="text-align: center;"><g:message code="advancedSearchMsg"/>.</p>
   		<form id="advancedSearchForm">
+        <input id="resetAdvancedSearchForm" type="reset" style="display:none;">
 		<input type="hidden" autofocus="autofocus" />
 		<div style="margin:0px auto 0px auto; width:50%">
   				<input type="text" id="advancedSearchText" style="" required
@@ -68,11 +69,7 @@ var dateBeginFrom  = $("#dateBeginFrom"),
 	      show: {effect: "fade",duration: 300},
 	      hide: {effect: "fade",duration: 300},
 	      open: function( event, ui ) {
-	 			$("#advancedSearchText").val("");
-	 			$("#dateBeginFrom").val("");
-	 			$("#dateBeginTo").val("");
-	 			$("#dateFinishFrom").val("");
-	 			$("#dateFinishTo").val("");
+                $("#resetAdvancedSearchForm").click()
 		  }
 	    });
 

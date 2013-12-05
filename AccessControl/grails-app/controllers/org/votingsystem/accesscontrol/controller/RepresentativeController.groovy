@@ -10,6 +10,7 @@ import org.votingsystem.model.SubSystemVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.util.DateUtils
+import org.votingsystem.util.NifUtils
 
 class RepresentativeController {
 
@@ -64,7 +65,7 @@ class RepresentativeController {
 		} else {
 			String name = "${representative.name} ${representative.firstName}"
 			def resultMap = [id: representative.id, name:representative.name,
-				firstName:representative.firstName, info:representative.info,
+				firstName:representative.firstName, info:representative.description,
 				nif:representative.nif, fullName:"${representative.name} ${representative.firstName}"]
 			if(request.contentType?.contains(ContentTypeVS.JSON)) {
 				render resultMap as JSON
@@ -189,8 +190,7 @@ class RepresentativeController {
 			render msg
 			return false
 		}
-		ResponseVS responseVS = representativeService.
-			processRevoke(messageSMIME, request.getLocale())
+		ResponseVS responseVS = representativeService.processRevoke(messageSMIME, request.getLocale())
 		params.responseVS = responseVS
 		if (ResponseVS.SC_OK == responseVS.statusCode){
 			response.contentType = org.votingsystem.model.ContentTypeVS.SIGNED
@@ -248,8 +248,7 @@ class RepresentativeController {
 			render msg
 			return false
 		}
-		ResponseVS responseVS = representativeService.processVotingHistoryRequest(
-			messageSMIME, request.getLocale())
+		ResponseVS responseVS = representativeService.processVotingHistoryRequest(messageSMIME, request.getLocale())
 		params.responseVS = responseVS
 		if (ResponseVS.SC_OK == responseVS.statusCode){
 			render responseVS.message
@@ -276,9 +275,7 @@ class RepresentativeController {
 			render msg
 			return false
 		}
-		ResponseVS responseVS = representativeService.saveUserRepresentative(
-			messageSMIME, request.getLocale())
-		
+		ResponseVS responseVS = representativeService.saveUserRepresentative(messageSMIME, request.getLocale())
 		params.responseVS = responseVS
 		if (ResponseVS.SC_OK == responseVS.statusCode){
 			response.contentType = org.votingsystem.model.ContentTypeVS.SIGNED
@@ -300,8 +297,7 @@ class RepresentativeController {
 	 */
     def processFileMap() { 
 		byte[] imageBytes = params[grailsApplication.config.SistemaVotacion.imageFileName]
-		MessageSMIME messageSMIMEReq = params[
-			grailsApplication.config.SistemaVotacion.representativeDataFileName]
+		MessageSMIME messageSMIMEReq = params[grailsApplication.config.SistemaVotacion.representativeDataFileName]
 		if(!messageSMIMEReq || !imageBytes) {
 			String msg
 			if(!imageBytes) msg = message(code: 'imageMissingErrorMsg')
@@ -314,8 +310,7 @@ class RepresentativeController {
 		params.messageSMIMEReq = messageSMIMEReq
 		if(imageBytes.length > MAX_FILE_SIZE) {
 			response.status =  ResponseVS.SC_ERROR_REQUEST
-			String msg = message(code: 'imageSizeExceededMsg', 
-				args:[imageBytes.length/1024, MAX_FILE_SIZE_KB])
+			String msg = message(code: 'imageSizeExceededMsg', args:[imageBytes.length/1024, MAX_FILE_SIZE_KB])
 			log.error "processFileMap - ERROR - msg: ${msg}"
 			params.responseVS = new ResponseVS(message:msg, statusCode:ResponseVS.SC_ERROR_REQUEST,
                     type:TypeVS.REPRESENTATIVE_DATA_ERROR)

@@ -74,7 +74,7 @@
 		 		showEditor_editorDiv()
 			    
 	    		$("#addClaimFieldButton").click(function () {
-	    			hideEditor_editorDiv()
+                    getEditor_editorDivData()
 	    			showAddClaimFieldDialog(addClaimField)
 	    		});
 
@@ -103,14 +103,14 @@
 
 			    $('#mainForm').submit(function(event){
 			    	event.preventDefault();
-				    hideEditor_editorDiv()
+                    var editorContent = getEditor_editorDivData()
 					if(!validateForm()) {
 						showEditor_editorDiv();
 						return;
 					} 					
 			    	var eventVS = new EventVS();
 			    	eventVS.subject = $("#subject").val();
-			    	eventVS.content = editorDivContent.trim();
+			    	eventVS.content = editorContent;
 			    	eventVS.dateFinish = $("#dateFinish").datepicker('getDate').format();
 			    	
 					var claimFields = new Array();
@@ -177,7 +177,7 @@
 					return false
 				}
 	
-				if(editorDivContent.trim() == 0) {
+				if(getEditor_editorDivData().length == 0) {
 					editorDiv.addClass( "formFieldError" );
 					showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 							'<g:message code="emptyDocumentERRORMsg"/>')

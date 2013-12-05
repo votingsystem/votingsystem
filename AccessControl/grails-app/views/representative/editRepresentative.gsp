@@ -8,10 +8,8 @@
 <div id="contentDiv" style="display:none;">
 
 	<div class="publishPageTitle">
-        <p style="margin: 0px 0px 0px 0px; text-align:center;">
-            <% def msgParams = [representative.fullName]%>
-            <g:message code="editingRepresentativeMsgTitle" args='${msgParams}'/>
-        </p>
+        <% def msgParams = [representative.fullName]%>
+        <g:message code="editingRepresentativeMsgTitle" args='${msgParams}'/>
 	</div>
 	
 	<div class="userAdvert" >
@@ -28,7 +26,7 @@
             <votingSystem:textEditor id="editorDiv" style="height:300px; width:100%;"/>
         </div>
 
-        <div style="position:relative; margin:10px 10px 0px 0px;height:20px;">
+        <div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
             <div style="position:absolute; right:0;">
                     <votingSystem:simpleButton isSubmitButton='true'
                         imgSrc="${resource(dir:'images/fatcow_16',file:'accept.png')}" style="margin:0px 20px 0px 0px;">
@@ -48,24 +46,22 @@
     $(function() {
         showEditor_editorDiv()
 
+    	var editorDiv = $("#editorDiv")
         $('#mainForm').submit(function(event){
             event.preventDefault();
-            var editorDiv = $( "#editorDiv" )
-            editorDiv.removeClass( "formFieldError" );
+            var editorContent = getEditor_editorDivData()
 
-            if(editorDivContent.trim() == 0) {
+
+            if(editorContent.length == 0) {
                 editorDiv.addClass( "formFieldError" );
-                showResultDialog('<g:message code="dataFormERRORLbl"/>',
-                        '<g:message code="emptyDocumentERRORMsg"/>')
+                showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="emptyDocumentERRORMsg"/>')
+                showEditor_editorDiv()
                 return false;
-            }
-
-            var webAppMessage = new WebAppMessage(
-                    ResponseVS.SC_PROCESSING,
-                    Operation.NEW_REPRESENTATIVE)
+            } else editorDiv.removeClass( "formFieldError" );
+            var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.NEW_REPRESENTATIVE)
             webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
             webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-            webAppMessage.signedContent = {representativeInfo:editor.getData(), operation:Operation.REPRESENTATIVE_DATA}
+            webAppMessage.signedContent = {representativeInfo:editorContent, operation:Operation.REPRESENTATIVE_DATA}
             webAppMessage.receiverSignServiceURL = "${createLink( controller:'representative', absolute:true)}"
             webAppMessage.signedMessageSubject = '<g:message code="representativeDataLbl"/>'
             webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"

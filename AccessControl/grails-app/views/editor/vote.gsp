@@ -103,12 +103,12 @@
 		 		showEditor_editorDiv()
 			    	
 	    		$("#addOptionButton").click(function () { 
-	    			hideEditor_editorDiv()
+	    			getEditor_editorDivData()
 	    			showAddVoteOptionDialog(addVoteOption)
 	    		});
 
 		  		$("#controlCenterLink").click(function () {
-		  			hideEditor_editorDiv()
+		  			getEditor_editorDivData()
 		  			showVoteControlCenterDialog(addControlCenterDialog)
 				});
 
@@ -138,7 +138,7 @@
 
 				$('#mainForm').submit(function(event){	
 			    	event.preventDefault();
-				    hideEditor_editorDiv()
+                    var editorContent = getEditor_editorDivData()
 					var subject = $("#subject"),
 					dateBegin = $("#dateBegin"),
 					dateFinish = $("#dateFinish")
@@ -150,7 +150,7 @@
 					
 				  	var eventVS = new EventVS();
 				  	eventVS.subject = subject.val();
-				  	eventVS.content = editorDivContent;
+				  	eventVS.content = editorContent;
 				  	eventVS.dateBegin = dateBegin.datepicker('getDate').format();
 				  	eventVS.dateFinish = dateFinish.datepicker('getDate').format();
 					  	eventVS.controlCenter = controlCenters[$('#controlCenterSelect').val()]
@@ -212,7 +212,7 @@
 					return null
 				}
 				     	
-				if(editorDivContent.trim() == 0) {
+				if(getEditor_editorDivData() == 0) {
 					editorDiv.addClass( "formFieldError" );
 					showResultDialog('<g:message code="dataFormERRORLbl"/>','<g:message code="emptyDocumentERRORMsg"/>')
 					return null;

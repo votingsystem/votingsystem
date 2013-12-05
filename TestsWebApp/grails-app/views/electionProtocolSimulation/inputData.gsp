@@ -294,8 +294,8 @@ showEditor_electionEditorDiv()
 $('#electionProtocolSinulationDataForm').submit(function(event){
 	event.preventDefault();
  	allFields.removeClass("formFieldError");   
- 	$(".errorMsgWrapper").fadeOut() 
-	hideEditor_electionEditorDiv()
+ 	$(".errorMsgWrapper").fadeOut()
+    getEditor_electionEditorDivData()
 	if(!isValidForm()) {
 		showEditor_electionEditorDiv()
 		return false
@@ -303,7 +303,7 @@ $('#electionProtocolSinulationDataForm').submit(function(event){
 
 	var dateBeginStr = new Date().format()
 	var event = {subject:$('#subject').val(),
-	        content:electionEditorDivContent.trim(),
+	        content:getEditor_electionEditorDivData(),
 	        dateBegin:dateBeginStr,
 	        dateFinish:dateFinish.datepicker("getDate").format()}
 
@@ -389,7 +389,7 @@ function isValidForm() {
 		return false
 	}
 
-	if('' == electionEditorDivContent.trim()) {
+	if('' == getEditor_electionEditorDivData()) {
 		showErrorMsg('<g:message code="eventContentEmptyERRORMsg"/>') 
 		electionEditorDiv.addClass("formFieldError");
 		return false
@@ -433,7 +433,7 @@ $("#testButton").click(function () {
 
 
 $("#addElectionFieldButton").click(function () {
-    hideEditor_electionEditorDiv()
+    getEditor_electionEditorDivData()
     showAddVoteOptionDialog(addElectionField)
 });
 

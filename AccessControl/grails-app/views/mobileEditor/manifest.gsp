@@ -48,7 +48,7 @@
 			    $('#mainForm').submit(function(event){
 			    	event.preventDefault();
 			    	var isValidForm = true
-				    hideEditor_editorDiv()
+                    var editorContent = getEditor_editorDivData()
     		    	var subject = $("#subject"),
 			    	dateFinish = $("#dateFinish"),
 			    	editorDiv = $("#editorDiv"),
@@ -72,7 +72,7 @@
 						'<g:message code="dateInitERRORMsg"/>')
 						isValidForm = false
 					}
-					if(editorDivContent.trim() == 0) {
+					if(editorContent.length == 0) {
 						editorDiv.addClass( "formFieldError" );
 						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 							'<g:message code="emptyDocumentERRORMsg"/>')
@@ -84,7 +84,7 @@
 					} 		
 			    	var event = new Evento();
 			    	event.subject = subject.val();
-			    	event.content = editorDivContent.trim();
+			    	event.content = editorContent;
 			    	event.dateFinish = $("#dateFinish").datepicker('getDate').format();
 
 			    	var webAppMessage = new WebAppMessage(

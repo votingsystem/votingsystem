@@ -1,6 +1,7 @@
 <div id="editRepresentativeDialog" title="<g:message code="editRepresentativeLbl"/>" style="margin:20px auto 20px auto;">	
 	<div id="editRepresentativeDialogFormDiv" style="margin:0px auto 0px 20px;">
 		<form id="editRepresentativeForm">
+            <input id="resetEditRepresentativeForm" type="reset" style="display:none;">
 	    	<label for="userNifText" style="margin:0px 0px 20px 0px"><g:message code="nifForEditRepresentativeLbl"/></label>
 			<input type="text" id="representativeNifText" style="width:350px; margin:0px auto 0px auto;" required
 				oninvalid="this.setCustomValidity('<g:message code="nifERRORMsg"/>')"
@@ -33,6 +34,7 @@ $("#editRepresentativeDialog").dialog({
       show: {effect:"fade", duration: 300},
       hide: {effect: "fade",duration: 300},
       open: function( event, ui ) {
+          $("#resetEditRepresentativeForm").click()
     	  $("#userNifText").val("");
           $("#editRepresentativeDialogFormDiv").show()
           $("#editRepresentativeDialogProgressDiv").hide()
@@ -41,11 +43,13 @@ $("#editRepresentativeDialog").dialog({
 	  }
 });
 
+var nifValidationResult
+
 var nifValidation = function () {
     var nifInput = document.getElementById('representativeNifText')
-    var validationResult = validateNIF(nifInput.value)
-    console.log("validateNIF result: " + validationResult)
-    if (!validationResult) {
+    nifValidationResult = validateNIF(nifInput.value)
+    console.log("validateNIF result: " + nifValidationResult)
+    if (!nifValidationResult) {
             document.getElementById('userNifText').setCustomValidity("<g:message code='nifERRORMsg'/>");
     }
 }
@@ -57,7 +61,7 @@ var nifValidation = function () {
 		$("#cancelButton").button("disable");
 		$("#editRepresentativeDialogFormDiv").hide()
 		$("#editRepresentativeDialogProgressDiv").fadeIn(500)
-		var urlRequest = "${createLink(controller:'representative')}/edit/" + $("#userNifText").val()
+		var urlRequest = "${createLink(controller:'representative')}/edit/" + nifValidationResult
 		console.log(" - editRepresentative - urlRequest: " + urlRequest)
 		$.ajax({///user/$nif/representative
 			contentType:'application/json',

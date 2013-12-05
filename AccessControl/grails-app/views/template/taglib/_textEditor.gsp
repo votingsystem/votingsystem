@@ -27,7 +27,6 @@ CKEDITOR.on('instanceReady',function( ev ) {
 //showEditor and hideEditor are to avoid blocking the editor whith DOM changes
 function showEditor_${attrs.id}() {
 	if (editor) return;
-	// Create a new editor inside the <div id="editor">, setting its value to editorDivContent
 	$("#${attrs.id}EditorContents").hide()
 	editor = CKEDITOR.appendTo( '${attrs.id}', editorConfig, ${attrs.id}Content);
 	$("#${attrs.id}").fadeIn()
@@ -35,8 +34,8 @@ function showEditor_${attrs.id}() {
 }
 
 //showEditor and hideEditor are to avoid blocking the editor whith DOM changes
-function hideEditor_${attrs.id}() {
-	if(!editor) return;
+function getEditor_${attrs.id}Data() {
+	if(!editor) return ${attrs.id}Content.trim();
     $("#${attrs.id}").hide()
 	var editorWidth = $("#${attrs.id}").width() - 20 //css padding
 	var editorHeight = $("#${attrs.id}").height() - 20//css padding
@@ -48,6 +47,7 @@ function hideEditor_${attrs.id}() {
 	$("#${attrs.id}EditorContents").fadeIn(300)
 	editor.destroy();
 	editor = null;
+	return editorContent.trim()
 }
 
 </r:script>

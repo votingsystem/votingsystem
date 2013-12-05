@@ -58,7 +58,7 @@
 
 			    $('#mainForm').submit(function(event){
 			    	event.preventDefault();
-			    	hideEditor_editorDiv()
+                    var editorContent = getEditor_editorDivData()
 			    	var isValidForm = true
 			    	
 			    	var subject = $( "#subject" ),
@@ -75,7 +75,7 @@
 						isValidForm = false
 					}
 
-					if(editorDivContent.trim() == 0) {
+					if(editorContent.length == 0) {
 						editorDiv.addClass( "formFieldError" );
 						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
 								'<g:message code="emptyDocumentERRORMsg"/>')
@@ -88,7 +88,7 @@
 					
 					var eventVS = new EventVS();
 			    	eventVS.subject = subject.val();
-			    	eventVS.content = editorDivContent.trim();
+			    	eventVS.content = editorContent;
 			    	eventVS.dateFinish = dateFinish.datepicker('getDate').format();
 
 			    	var webAppMessage = new WebAppMessage(

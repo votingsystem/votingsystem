@@ -39,6 +39,10 @@ public class UserVS implements Serializable {
         this.lastName = lastName;
     }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public enum Type {USER, REPRESENTATIVE, USER_WITH_CANCELLED_REPRESENTATIVE, EX_REPRESENTATIVE}
 	
     private static final long serialVersionUID = 1L;
@@ -59,6 +63,8 @@ public class UserVS implements Serializable {
     @Column(name="firstName" ) private String firstName;
 
     @Column(name="lastName" ) private String lastName;
+
+    @Column(name="description" ) private String description;
     
     @Column(name="representativeMessage" ) private MessageSMIME representativeMessage;
     
@@ -162,11 +168,11 @@ public class UserVS implements Serializable {
     	return userVS;
     }
 
-    @Transient public String getDescription () {
+    @Transient public String getDetails () {
     	String result = "";
     	if (country != null) result.concat(" - Country: " + country);
     	if (nif != null) result.concat(" - Nif: " + nif);
-    	if (firstName != null) result.concat(" - Apellido: " + firstName);
+    	if (firstName != null) result.concat(" - FirstName: " + firstName);
     	if (name != null) result.concat(" - Name: " + name);
     	if (cn != null) result.concat(" - CN: " + cn);
     	return result;

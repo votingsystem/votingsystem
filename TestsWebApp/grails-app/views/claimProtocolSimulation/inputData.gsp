@@ -140,8 +140,8 @@ showEditor_claimEditorDiv()
 $('#claimProtocolSinulationDataForm').submit(function(event){
 	event.preventDefault();
  	allFields.removeClass("formFieldError");   
- 	$(".errorMsgWrapper").fadeOut() 
-	hideEditor_claimEditorDiv() 
+ 	$(".errorMsgWrapper").fadeOut()
+	getEditor_claimEditorDivData()
 	if(!isValidForm()) {
 		showEditor_claimEditorDiv()
 		return false
@@ -149,7 +149,7 @@ $('#claimProtocolSinulationDataForm').submit(function(event){
 
 	var dateBeginStr = new Date().format()
 	var event = {subject:$('#subject').val(),
-	        content:claimEditorDivContent.trim(),
+	        content:getEditor_claimEditorDivData(),
 	        dateBegin:dateBeginStr,
 	        dateFinish:dateFinish.datepicker("getDate").format()}
 
@@ -209,7 +209,7 @@ function isValidForm() {
 		return false
 	}
 
-	if('' == claimEditorDivContent.trim()) {
+	if('' == getEditor_claimEditorDivData()) {
 		showErrorMsg('<g:message code="eventContentEmptyERRORMsg"/>') 
 		claimEditorDiv.addClass("formFieldError");
 		return false
@@ -241,7 +241,7 @@ $("#testButton").click(function () {
 
 
 $("#addClaimFieldButton").click(function () {
-    hideEditor_claimEditorDiv()
+    getEditor_claimEditorDivData()
     showAddClaimFieldDialog(addClaimField)
 });
 

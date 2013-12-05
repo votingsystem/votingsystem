@@ -52,8 +52,8 @@
 			    $('#mainForm').submit(function(event){
 			    	event.preventDefault();
 			    	var editorDiv = $("#editorDiv")
-			    	hideEditor_editorDiv()
-					if(editorDivContent.trim() == 0) {
+                    var editorContent = getEditor_editorDivData()
+					if(editorContent.length == 0) {
 						editorDiv.addClass( "formFieldError" );
 						showResultDialog('<g:message code="dataFormERRORLbl"/>',
 						    '<g:message code="emptyDocumentERRORMsg"/>')
@@ -64,7 +64,7 @@
 			    	var webAppMessage = new WebAppMessage( ResponseVS.SC_PROCESSING,Operation.NEW_REPRESENTATIVE)
 			    	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
 		    		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-					webAppMessage.signedContent = {representativeInfo:editorDivContent.trim(),
+					webAppMessage.signedContent = {representativeInfo:getEditor_editorDivData(),
 							operation:Operation.REPRESENTATIVE_DATA}
 					webAppMessage.receiverSignServiceURL = "${createLink( controller:'representative', absolute:true)}"
 					webAppMessage.signedMessageSubject = '<g:message code="representativeDataLbl"/>'

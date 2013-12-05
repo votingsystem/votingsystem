@@ -32,7 +32,7 @@
 						<img id="representativeImg" src="${representative.imageURL}" style="text-align:center; width: 200px;"></img>
 					</div>
 					<div style="display: table;  margin:0px auto 15px auto; vertical-align: top;">
-                        ${raw(representative.metaInf)}
+                        ${raw(representative.description)}
 					</div>
 				</div>
 			</div>
