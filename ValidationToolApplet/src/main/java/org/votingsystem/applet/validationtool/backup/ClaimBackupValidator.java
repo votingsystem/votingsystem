@@ -181,7 +181,7 @@ public class ClaimBackupValidator implements Callable<ResponseVS> {
     public static void main(String[] args) throws Exception {
         
         ClaimBackupValidator dirBackupValidator = new ClaimBackupValidator(
-                "./Descargas/ReclamacionesEvento_5", null);
+                "./Descargas/ClaimsEvent_5", null);
         dirBackupValidator.call();
 
         System.exit(0);

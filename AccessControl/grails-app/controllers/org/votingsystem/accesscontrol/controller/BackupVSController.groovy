@@ -3,6 +3,7 @@ package org.votingsystem.accesscontrol.controller
 import com.itextpdf.text.pdf.AcroFields
 import com.itextpdf.text.pdf.PdfReader
 import org.votingsystem.model.BackupRequestVS
+import org.votingsystem.model.EnvironmentVS
 import org.votingsystem.model.EventVS
 import org.votingsystem.model.EventVSClaim
 import org.votingsystem.model.EventVSElection
@@ -28,7 +29,7 @@ class BackupVSController {
 	 * Servicio que recibe solicitudes de copias de seguridad
 	 *
 	 * @httpMethod [POST]
-     * @serviceURL [/solicitudCopia]
+     * @serviceURL [/backupVS]
      * @requestContentType [application/pdf,application/x-pkcs7-signature] Obligatorio. 
      *              El archivo PDF con los datos de la copia de seguridad.
 	 * @return Si los datos son correctos el solicitante recibirá un
@@ -37,19 +38,15 @@ class BackupVSController {
 	def index() { 
 		
 		try {
-			
-			final PDFDocumentVS documento = params.pdfDocument
-			if (documento && documento.state == PDFDocumentVS.State.VALIDATED) {
-				PdfReader reader = new PdfReader(documento.pdf);
+			final PDFDocumentVS pdfDocument = params.pdfDocument
+			if (pdfDocument && pdfDocument.state == PDFDocumentVS.State.VALIDATED) {
+				PdfReader reader = new PdfReader(pdfDocument.pdf);
 				AcroFields form = reader.getAcroFields();
 				String eventId = form.getField("eventId");
 				String msg = null
-				
 				def eventVS
 				if(eventId) {
-					EventVS.withTransaction {
-						eventVS = EventVS.get(new Long(eventId))
-					}
+					EventVS.withTransaction {eventVS = EventVS.get(new Long(eventId))}
 				} else msg = message(code: 'backupRequestEventWithoutIdErrorMsg')
 
 				if(!eventVS)
@@ -62,37 +59,32 @@ class BackupVSController {
 					msg =  message(code:'backupRequestEmailMissingErrorMsg')
 				
 				if(msg) {
-					documento.state = PDFDocumentVS.State.BACKUP_REQUEST_ERROR
-				} else documento.state = PDFDocumentVS.State.BACKUP_REQUEST
+					pdfDocument.state = PDFDocumentVS.State.BACKUP_REQUEST_ERROR
+				} else pdfDocument.state = PDFDocumentVS.State.BACKUP_REQUEST
 			
 				PDFDocumentVS.withTransaction {
-					documento.eventVS = eventVS
-					documento.save(flush:true)
+					pdfDocument.eventVS = eventVS
+					pdfDocument.save(flush:true)
 				}
 				if(msg) {
-					params.responseVS = new ResponseVS(
-						statusCode:ResponseVS.SC_ERROR_REQUEST,
-						message:msg)
+					params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,message:msg)
 					return false
 				}
 				
 				log.debug "backup request - eventId: ${eventId} - subject: ${subject} - email: ${email}"
 				ResponseVS backupGenResponseVS = null
-				if(EnvironmentVS.DEVELOPMENT.equals(
-					ApplicationContextHolder.getEnvironment())) {
+				if(EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
 					log.debug "Request from DEVELOPMENT environment generating sync response"
 					backupGenResponseVS = requestBackup(eventVS, request.locale)
 					if(ResponseVS.SC_OK == backupGenResponseVS?.statusCode) {
-						BackupRequestVS solicitudCopia = new BackupRequestVS(
+						BackupRequestVS backupRequest = new BackupRequestVS(
 							filePath:backupGenResponseVS.message,
 							type:backupGenResponseVS.type,
-							PDFDocumentVS:documento, email:email)
-						BackupRequestVS.withTransaction {
-							solicitudCopia.save()
-						}
+							PDFDocumentVS:pdfDocument, email:email)
+						BackupRequestVS.withTransaction {backupRequest.save()}
 						response.status = ResponseVS.SC_OK
-						render solicitudCopia.id
-						return
+						render backupRequest.id
+						return false
 					} else {
 						log.error("DEVELOPMENT - error generating backup");
 						params.responseVS = backupGenResponseVS
@@ -105,12 +97,12 @@ class BackupVSController {
 					runAsync {
 						ResponseVS backupResponse = requestBackup(event, locale)
 						if(ResponseVS.SC_OK == backupResponse?.statusCode) {
-							BackupRequestVS solicitudCopia = new BackupRequestVS(
+							BackupRequestVS backupRequest = new BackupRequestVS(
 								filePath:backupResponse.message, type:backupResponse.type,
-								PDFDocumentVS:documento, email:emailRequest)
-							BackupRequestVS.withTransaction { solicitudCopia.save() }
-							mailSenderService.sendInstruccionesDescargaCopiaSeguridad(solicitudCopia, locale)
-						} else log.error("Error generando archivo de copias de respaldo");
+								PDFDocumentVS:pdfDocument, email:emailRequest)
+							BackupRequestVS.withTransaction { backupRequest.save() }
+							mailSenderService.sendBackupMsg(backupRequest, locale)
+						} else log.error("Error generating Backup");
 					}
 					response.status = ResponseVS.SC_OK
 					render message(code:'backupRequestOKMsg', args:[email])
@@ -138,14 +130,14 @@ class BackupVSController {
 		log.debug ("requestBackup")
 		ResponseVS backupGenResponseVS
 		if(eventVS instanceof EventVSManifest) {
-			backupGenResponseVS = eventVSManifestService.generarCopiaRespaldo((EventVSManifest)eventVS, locale)
+			backupGenResponseVS = eventVSManifestService.generateBackup((EventVSManifest)eventVS, locale)
 			log.debug("---> EventVSManifest")
 		} else if(eventVS instanceof EventVSClaim) {
 			log.debug("---> EventVSClaim")
-			backupGenResponseVS = eventVSClaimService.generarCopiaRespaldo((EventVSClaim)eventVS,locale)
+			backupGenResponseVS = eventVSClaimService.generateBackup((EventVSClaim)eventVS,locale)
 		} else if(eventVS instanceof EventVSElection) {
 			log.debug("---> EventVSElection")
-			backupGenResponseVS = eventVSElectionService.generarCopiaRespaldo((EventVSElection)eventVS, locale)
+			backupGenResponseVS = eventVSElectionService.generateBackup((EventVSElection)eventVS, locale)
 		}
 		return backupGenResponseVS
 	}
@@ -191,7 +183,7 @@ class BackupVSController {
 	 * al solicitante en el mail de confirmación que recibe al enviar la solicitud.
 	 * 
 	 * @httpMethod [GET]
-     * @serviceURL [/solicitudCopia/download/$id]
+     * @serviceURL [/backupVS/download/$id]
 	 * @param [id] Obligatorio. El identificador de la solicitud de copia de seguridad la base de datos.
 	 * @return Archivo zip con la copia de seguridad.
 	 */
@@ -212,7 +204,7 @@ class BackupVSController {
 	 * Servicio que proporciona copias de las solicitudes de copias de seguridad recibidas.
 	 *
 	 * @httpMethod [GET]
-     * @serviceURL [/solicitudCopia/$id]
+     * @serviceURL [/backupVS/$id]
 	 * @param [id] Obligatorio. El identificador de la solicitud de copia de seguridad la base de datos.
 	 * @return El PDF en el que se solicita la copia de seguridad.
 	 */

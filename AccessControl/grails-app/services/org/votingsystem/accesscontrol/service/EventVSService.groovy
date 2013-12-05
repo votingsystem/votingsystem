@@ -67,16 +67,16 @@ class EventVSService {
 	}
 	
    ResponseVS setEventDatesState (EventVS eventVS, Locale locale) {
-		EventVS.State state
-		if(eventVS.dateBegin.after(eventVS.dateFinish)) {
+       if(!eventVS.dateBegin) eventVS.dateBegin = new Date(System.currentTimeMillis());
+       Date todayDate = new Date(System.currentTimeMillis() + 1);// to avoid race conditions
+       if(eventVS.dateBegin.after(eventVS.dateFinish)) {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:messageSource.getMessage(
                     'dateRangeErrorMsg', [eventVS.dateBegin, eventVS.dateFinish].toArray(), locale) )
 		}
-		Date fecha = DateUtils.getTodayDate()
-		if (fecha.after(eventVS.dateFinish)) eventVS.setState(EventVS.State.TERMINATED)
-		if (fecha.after(eventVS.dateBegin) && fecha.before(eventVS.dateFinish))
+		if (todayDate.after(eventVS.dateFinish)) eventVS.setState(EventVS.State.TERMINATED)
+		if (todayDate.after(eventVS.dateBegin) && todayDate.before(eventVS.dateFinish))
 			eventVS.setState(EventVS.State.ACTIVE)
-		if (fecha.before(eventVS.dateBegin)) eventVS.setState(EventVS.State.AWAITING)
+		if (todayDate.before(eventVS.dateBegin)) eventVS.setState(EventVS.State.AWAITING)
 		log.debug("setEventDatesState - state ${eventVS.state.toString()}")
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS)
 	}
@@ -139,7 +139,7 @@ class EventVSService {
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR, message:msg)
 			}
 			if(eventVS.userVS?.nif.equals(signer.nif) || isUserAdmin(signer.nif)){
-				log.debug("UserVS con privilegios para cancelar eventVS")
+				log.debug("UserVS with cancel event cancel privileges")
 				switch(eventVS.state) {
 					case EventVS.State.CANCELLED:
 						 msg = messageSource.getMessage('eventCancelled', [messageJSON?.eventId].toArray(), locale)

@@ -52,8 +52,8 @@ class EventVSManifestService {
 
 	}
 
-	public synchronized ResponseVS generarCopiaRespaldo(EventVSManifest eventVS, Locale locale) {
-		log.debug("generarCopiaRespaldo - eventId: ${eventVS.id}")
+	public synchronized ResponseVS generateBackup(EventVSManifest eventVS, Locale locale) {
+		log.debug("generateBackup - eventId: ${eventVS.id}")
 		ResponseVS responseVS;
 		if(!eventVS) {
 			return responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
@@ -75,8 +75,8 @@ class EventVSManifestService {
 		String webappBackupPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}${backupURL}"
 		
 		if(zipResult.exists()) {
-			log.debug("generarCopiaRespaldo - backup file already exists")
-			return new ResponseVS(statusCode:ResponseVS.SC_OK, message:backupURL)
+			log.debug("generateBackup - backup file already exists")
+			return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.MANIFEST_EVENT, message:backupURL)
 		}
 		
 		Set<X509Certificate> systemTrustedCerts = signatureVSService.getTrustedCerts()

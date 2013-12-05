@@ -151,8 +151,8 @@ class EventVSElectionService {
 		}
     }
     
-	public synchronized ResponseVS generarCopiaRespaldo (EventVSElection eventVS, Locale locale) {
-		log.debug("generarCopiaRespaldo - eventVSId: ${eventVS.id}")
+	public synchronized ResponseVS generateBackup (EventVSElection eventVS, Locale locale) {
+		log.debug("generateBackup - eventVSId: ${eventVS.id}")
 		ResponseVS responseVS;
 		String msg = null
 		try {
@@ -160,7 +160,7 @@ class EventVSElectionService {
 				msg = messageSource.getMessage('eventDateNotFinished', null, locale)
 				String currentDateStr = DateUtils.getStringFromDate(
 					new Date(System.currentTimeMillis()))
-				log.error("generarCopiaRespaldo - DATE ERROR  ${msg} - " + 
+				log.error("generateBackup - DATE ERROR  ${msg} - " +
 					"fecha actual '${currentDateStr}' fecha final eventVS '${eventVS.dateFinish}'")
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
 					message:msg, type:TypeVS.BACKUP_ERROR)
@@ -178,13 +178,13 @@ class EventVSElectionService {
 			String webappBackupPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}${backupURL}"
 			
 			if(zipResult.exists()) {
-				log.debug("generarCopiaRespaldo - backup file already exists")
-				return new ResponseVS(statusCode:ResponseVS.SC_OK, message:backupURL)
+				log.debug("generateBackup - backup file already exists")
+				return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VOTING_EVENT, message:backupURL)
 			}
 			responseVS = representativeService.getAccreditationsBackupForEvent(eventVS, locale)
 			Map representativeDataMap = responseVS.data
 			if(ResponseVS.SC_OK != responseVS.statusCode) {
-				log.error("generarCopiaRespaldo - REPRESENTATIVE DATA GEN ERROR  ${responseVS.message}")
+				log.error("generateBackup - REPRESENTATIVE DATA GEN ERROR  ${responseVS.message}")
 				return responseVS
 			}			
 			
@@ -307,14 +307,11 @@ class EventVSElectionService {
 			eventVS.save()
 			
 			log.debug("zip backup of event ${eventVS.id} on file ${zipResult.absolutePath}")
-			return new ResponseVS(statusCode:ResponseVS.SC_OK, message:backupURL,
-				data:eventMetaInfMap)
+			return new ResponseVS(statusCode:ResponseVS.SC_OK, message:backupURL, data:eventMetaInfMap)
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex)
-			msg =  messageSource.getMessage('backupError',
-				[eventVS?.id].toArray(), locale)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR, 
-				message:msg, type:TypeVS.BACKUP_ERROR)
+			msg =  messageSource.getMessage('backupError', [eventVS?.id].toArray(), locale)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR,  message:msg, type:TypeVS.ERROR)
 		}
 
 	}

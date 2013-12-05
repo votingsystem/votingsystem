@@ -59,6 +59,7 @@ public class DNIeContentSigner implements ContentSigner {
     public static final String DNIe_SIGN_PRIVATE_KEY_LABEL = "KprivFirmaDigital";
 
     private RSAPrivateKey signatureKey;
+    private static DNIeContentSigner instance;
     private X509Certificate certUser;
     private X509Certificate certIntermediate;
     private X509Certificate certCA;
@@ -72,6 +73,8 @@ public class DNIeContentSigner implements ContentSigner {
     private Token pkcs11Token = null;
     private Module pkcs11Module  = null;
 
+    private static Mechanism instanceSignatureMechanism;
+    private static String instanceSignatureAlgorithm;
 
     private DNIeContentSigner(String signatureAlgorithm, Session pkcs11Session, Token pkcs11Token,
                               Module pkcs11Module, RSAPrivateKey signatureKey,
@@ -89,6 +92,13 @@ public class DNIeContentSigner implements ContentSigner {
 
     public static DNIeContentSigner getInstance(char[] password, Mechanism signatureMechanism,
                         String signatureAlgorithm) throws Exception {
+        if(instance != null && instanceSignatureAlgorithm.equals(signatureAlgorithm)
+                && instanceSignatureMechanism == signatureMechanism) {
+            return instance;
+        } else if(instance != null) instance.closeSession();
+        instance = null;
+        instanceSignatureMechanism = signatureMechanism;
+        instanceSignatureAlgorithm = signatureAlgorithm;
         Module pkcs11Module  = null;
         Session pkcs11Session = null;
         Token token = null;
@@ -97,10 +107,8 @@ public class DNIeContentSigner implements ContentSigner {
         X509Certificate certIntermediate = null;
         X509Certificate certCA = null;
         try {
-            if (pkcs11Module == null) {
-                pkcs11Module  = Module.getInstance(OSValidator.getPKCS11ModulePath());
-                pkcs11Module.initialize(null);
-            }
+            pkcs11Module  = Module.getInstance(OSValidator.getPKCS11ModulePath());
+            pkcs11Module.initialize(null);
             final SlotReader slotReader = new SlotReader(pkcs11Module.getSlotList(Module.SlotRequirement.TOKEN_PRESENT));
             Slot slot = slotReader.getSelected();
             if(slot == null) throw new VotingSystemException(
@@ -178,9 +186,9 @@ public class DNIeContentSigner implements ContentSigner {
             }
             throw ex;
         }
-        DNIeContentSigner contentSigner = new DNIeContentSigner(signatureAlgorithm, pkcs11Session, token, pkcs11Module,
+        instance = new DNIeContentSigner(signatureAlgorithm, pkcs11Session, token, pkcs11Module,
                 signatureKey, certUser, certIntermediate, certCA);
-        return contentSigner;
+        return instance;
     }
 
     public Store getCertificates() throws CertificateEncodingException {

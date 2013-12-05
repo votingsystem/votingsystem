@@ -36,8 +36,8 @@
 		<div style="display:inline;margin:0px 20px 0px 20px;">
 			<b><g:message code="dateLimitLbl"/>: </b>${eventMap?.dateFinishStr}
 		</div>
-		<g:if test="${EventVS.State.ACTIVE.toString() == eventMap?.state ||
-			EventVS.State.AWAITING.toString()}">
+		<g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state) ||
+			EventVS.State.AWAITING.toString().equals(eventMap?.state)}">
 			<div id="adminDocumentLink" class="appLink" style="float:right;margin:0px 20px 0px 0px;">
 				<g:message code="adminDocumentLinkLbl"/>
 			</div>
@@ -59,7 +59,7 @@
 			<fieldset id="fieldsBox" style="">
 				<legend id="fieldsLegend"><g:message code="pollFieldLegend"/></legend>
 				<div id="fields" style="width:100%;">
-					<g:if test="${EventVS.State.ACTIVE.toString() == eventMap?.state}">
+					<g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state)}">
 						<g:each in="${eventMap?.fieldsEventVS}">
 							<button class="voteOptionButton button_base"
 								style="width: 90%;margin: 10px auto 30px auto;"
@@ -68,9 +68,9 @@
 							</button>
 						</g:each>
 					</g:if>
-					<g:if test="${EventVS.State.CANCELLED.toString() == eventMap?.state ||
-						EventVS.State.TERMINATED.toString() == eventMap?.state ||
-						EventVS.State.AWAITING.toString() == eventMap?.state}">
+					<g:if test="${EventVS.State.CANCELLED.toString().equals(eventMap?.state) ||
+						EventVS.State.TERMINATED.toString().equals(eventMap?.state) ||
+						EventVS.State.AWAITING.toString().equals(eventMap?.state)}">
 						<g:each in="${eventMap?.fieldsEventVS}">
 							<div class="voteOption" style="width: 90%;margin: 10px auto 0px auto;">
 								 - ${it.content}

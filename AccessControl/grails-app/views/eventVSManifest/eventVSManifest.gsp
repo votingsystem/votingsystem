@@ -40,8 +40,8 @@
 			<b><g:message code="dateLimitLbl"/>: </b>${eventMap?.dateFinishStr}
 		</div>
 		
-		<g:if test="${EventVS.State.ACTIVE.toString() == eventMap?.state ||
-			EventVS.State.AWAITING.toString()}">
+		<g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state)  ||
+			EventVS.State.AWAITING.toString().equals(eventMap?.state)}">
 			<div id="adminDocumentLink" class="appLink" style="float:right;margin:0px 20px 0px 0px;">
 				<g:message code="adminDocumentLinkLbl"/>
 			</div>

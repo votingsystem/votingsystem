@@ -84,9 +84,8 @@ public class PdfFormHelper {
         }
     };
     
-    public static byte[] getBackupRequest(
-            String eventId, String eventVSManifestSubject,
-            String email) throws DocumentException, IOException {
+    public static byte[] getBackupRequest(String eventId,String subject,String email)
+            throws DocumentException, IOException {
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         Document document = new Document();
@@ -115,12 +114,11 @@ public class PdfFormHelper {
         document.close();
         baos.close();
         
-        
         ByteArrayOutputStream formStamperBaos = new ByteArrayOutputStream();
         PdfReader reader = new PdfReader(baos.toByteArray());
         PdfStamper stamper = new PdfStamper(reader, formStamperBaos);
         AcroFields form = stamper.getAcroFields();
-        if(eventVSManifestSubject != null) form.setField("subject", eventVSManifestSubject);
+        if(subject != null) form.setField("subject", subject);
         if(email != null) form.setField("email", email);
         if(eventId != null) form.setField("eventId", eventId);
         form.setField("UUID", UUID.randomUUID().toString());

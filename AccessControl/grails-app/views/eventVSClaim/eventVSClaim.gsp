@@ -129,9 +129,13 @@
 		        sendSignature()
 		    });
     		$("#requestBackupButton").click(function () {
-    			showRequestEventBackupDialog(requestBackupCallback)
+                <g:if test="${eventMap?.backupAvailable}">
+                    showRequestEventBackupDialog(requestBackupCallback)
+                </g:if>
+                <g:else>
+                    showRequestEventBackupDialog(requestBackupCallback, "<g:message code="backupOnlyForPublisherMsg"/>")
+                </g:else>
 	    	})
-			    
 		 });
 
 		function sendSignature() {
@@ -186,8 +190,7 @@
 				} else if (ResponseVS.SC_CANCELLED== appMessageJSON.statusCode) {
 					caption = "<g:message code='operationCANCELLEDLbl'/>"
 				}
-				var msg = appMessageJSON.message
-				showResultDialog(caption, msg)
+				showResultDialog(caption, "<g:message code='operationOKMsg'/>")
 			}
 		}
 		

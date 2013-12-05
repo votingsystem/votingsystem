@@ -36,6 +36,9 @@ public class DNIePDFContentSigner extends CMSSignedGenerator implements ContentS
 
     private static Logger logger = Logger.getLogger(DNIePDFContentSigner.class);
 
+    private static DNIePDFContentSigner instance;
+    private static Mechanism instanceSignatureMechanism;
+
     private Session pkcs11Session;
     private Module pkcs11Module;
     private Token token;
@@ -234,6 +237,11 @@ public class DNIePDFContentSigner extends CMSSignedGenerator implements ContentS
 
     public static DNIePDFContentSigner getInstance(char[] password, Mechanism signatureMechanism) throws Exception {
         logger.debug("getInstance");
+        if(instance != null  && instanceSignatureMechanism == signatureMechanism) {
+            return instance;
+        } else if(instance != null) instance.closeSession();
+        instance = null;
+        instanceSignatureMechanism = signatureMechanism;
         Session pkcs11Session;
         Module pkcs11Module;
         Token token;
@@ -298,9 +306,9 @@ public class DNIePDFContentSigner extends CMSSignedGenerator implements ContentS
             }
             throw ex;
         }
-        DNIePDFContentSigner contentSigner = new DNIePDFContentSigner(pkcs11Session, pkcs11Module, token, signatureKey,
+        instance = new DNIePDFContentSigner(pkcs11Session, pkcs11Module, token, signatureKey,
                 certUser, certIntermediate, certCA);
-        return contentSigner;
+        return instance;
     }
 
 

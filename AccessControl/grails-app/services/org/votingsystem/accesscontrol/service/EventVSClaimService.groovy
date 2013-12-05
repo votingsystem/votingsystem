@@ -57,7 +57,6 @@ class EventVSClaimService {
 			else eventVS.cardinality = EventVS.Cardinality.EXCLUSIVE
 			if(messageJSON.dateBegin) eventVS.dateBegin = new Date().parse(
                     "yyyy/MM/dd HH:mm:ss", messageJSON.dateBegin)
-			else eventVS.dateBegin = DateUtils.getTodayDate();
 			ResponseVS responseVS = eventVSService.setEventDatesState(eventVS, locale)
 			if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
 			eventVS = responseVS.eventVS.save()
@@ -96,8 +95,8 @@ class EventVSClaimService {
 		}
     }
 
-    public synchronized ResponseVS generarCopiaRespaldo (EventVSClaim event, Locale locale) {
-        log.debug("generarCopiaRespaldo - eventId: ${event.id}")
+    public synchronized ResponseVS generateBackup (EventVSClaim event, Locale locale) {
+        log.debug("generateBackup - eventId: ${event.id}")
 		ResponseVS responseVS;
         if (!event) {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
@@ -116,11 +115,11 @@ class EventVSClaimService {
 		String webappBackupPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}${backupURL}"
 		
 		if(zipResult.exists()) {
-			log.debug("generarCopiaRespaldo - backup file already exists")
-			return new ResponseVS(statusCode:ResponseVS.SC_OK, message:backupURL)
+			log.debug("generateBackup - backup file already exists")
+			return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.CLAIM_EVENT, message:backupURL)
 		}		
 		
-		int numSignatures = SignatureVS.countByEvento(event)
+		int numSignatures = SignatureVS.countByEventVS(event)
 		def backupMetaInfMap = [numSignatures:numSignatures]
 		Map eventMetaInfMap =  eventVSService.getMetaInfMap(event)
 		eventMetaInfMap.put(TypeVS.BACKUP.toString(), backupMetaInfMap);
@@ -181,8 +180,7 @@ class EventVSClaimService {
 		}
 		ant.copy(file: zipResult, tofile: webappBackupPath)
 
-		return new ResponseVS(statusCode:ResponseVS.SC_OK,
-			type:TypeVS.CLAIM_EVENT, message:backupURL)
+		return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.CLAIM_EVENT, message:backupURL)
     }
 
 }

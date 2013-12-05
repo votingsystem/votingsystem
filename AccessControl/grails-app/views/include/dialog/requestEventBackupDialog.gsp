@@ -1,5 +1,5 @@
 <div id='requestEventBackupDialog' title='<g:message code="backupRequestCaption"/>' style="display:none;">
-	<div style='text-align:center;'>
+	<div id="messageDiv" style='text-align:center;'>
 		<g:message code="backupRequestMsg"/>
 	</div>
 	<form id="requestEventBackupForm">
@@ -17,9 +17,10 @@
 
 var callerCallback
 
-function showRequestEventBackupDialog(callback) {
+function showRequestEventBackupDialog(callback, messageToUser) {
 	$("#requestEventBackupDialog").dialog("open");
-	callerCallback = callback	
+	callerCallback = callback
+	if(messageToUser != null) $("#messageDiv").html(messageToUser);
 }
 
 $('#requestEventBackupForm').submit(function(event){
@@ -36,7 +37,6 @@ $('#requestEventBackupForm').submit(function(event){
 	webAppMessage.signedContent = pageEvent
 	webAppMessage.email = $("#eventBackupUserEmailText").val()
 	webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStampVS', absolute:true)}"
-	webAppMessage.isResponseWithReceipt = true
 	pendingOperation = Operation.SMIME_CLAIM_SIGNATURE
 	votingSystemClient.setMessageToSignatureClient(webAppMessage, callerCallback); 
 });

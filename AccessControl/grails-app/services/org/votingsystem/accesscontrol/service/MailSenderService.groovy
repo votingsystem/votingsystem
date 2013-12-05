@@ -32,7 +32,7 @@ class MailSenderService {
 		}
 	}	
 	
-	public void sendInstruccionesDescargaCopiaSeguridad (BackupRequestVS solicitud, Locale locale) {
+	public void sendBackupMsg (BackupRequestVS solicitud, Locale locale) {
 		log.debug "sendInstruccionesDescarga - email:${solicitud.email} - solicitud:${solicitud.id}"
 		def subject;
 		String eventVSSubject

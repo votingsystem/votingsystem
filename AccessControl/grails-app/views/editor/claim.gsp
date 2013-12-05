@@ -131,9 +131,9 @@
 			    	eventVS.fieldsEventVS = claimFields
 
 					if($("#multipleSignaturesCheckbox").is(':checked') ) {
-						eventVS.cardinality = "EXCLUSIVE"
-					} else {
 						eventVS.cardinality = "MULTIPLE"
+					} else {
+						eventVS.cardinality = "EXCLUSIVE"
 					}
 					eventVS.backupAvailable = $("#allowBackupRequestCheckbox").is(':checked')
 
@@ -184,9 +184,12 @@
 				return true
 			}
 
+			var claimDocumentURL
+
 			function publishDocumentCallback(appMessage) {
 				console.log("publishDocumentCallback - message from native client: " + appMessage);
 				var appMessageJSON = toJSON(appMessage)
+				claimDocumentURL = null
 				if(appMessageJSON != null) {
 					$("#workingWithAppletDialog" ).dialog("close");
 					var caption = '<g:message code="publishERRORCaption"/>'
@@ -196,9 +199,14 @@
 				    	var msgTemplate = "<g:message code='documentLinkMsg'/>";
 						msg = "<p><g:message code='publishOKMsg'/>.</p>" + 
 							msgTemplate.format(appMessageJSON.message);
+					    claimDocumentURL = appMessageJSON.message
 					} else showEditor_editorDiv()
-					showResultDialog(caption, msg)
+					showResultDialog(caption, msg, resultCallback)
 				}
 			}
+
+            function resultCallback() {
+                if(claimDocumentURL != null) window.location.href = claimDocumentURL
+            }
 
 </r:script>
