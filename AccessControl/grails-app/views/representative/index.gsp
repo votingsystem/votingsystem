@@ -9,7 +9,7 @@
 		<div style="margin:0px auto 15px 0px; position:relative;display:table;">
 			<div style="display:table-cell;">
 				<votingSystem:simpleButton id="selectRepresentativeButton"
-					imgSrc="${resource(dir:'images/fatcow_16',file:'accept.png')}" style="margin:0px 20px 0px 0px;">
+					imgSrc="${resource(dir:'images/fatcow_16',file:'accept.png')}" style="margin:0px 20px 0px 30px;">
 						<g:message code="selectRepresentativeLbl"/>
 				</votingSystem:simpleButton>
 			</div>
@@ -21,7 +21,7 @@
 			</div>
 		</div>
 	</div>
-	<div id="tabs" style="min-height: 700px;">
+	<div id="tabs" style="min-height: 700px; margin: 0 30px 0 30px;">
 		    <ul>
 			    <li><a href="#tabs-1" style="font-size: 0.8em;"><g:message code='profileLbl'/></a></li>
 			    <li><a href="#tabs-2" style="font-size: 0.8em;"><g:message code='votingHistoryLbl'/></a></li>
@@ -39,12 +39,12 @@
 			<div id="tabs-2">
 				<div style="margin: auto;top: 0; left: 0; right: 0; position:relative;display:table;">
 					<div style="display:table-cell;">
-						<votingSystem:simpleButton id="votingHistoryButton" style="margin:0px 20px 0px 0px;">
+						<votingSystem:simpleButton id="votingHistoryButton" style="margin:0px 20px 0px 0px; width:300px;">
 								<g:message code="requestVotingHistoryLbl"/>
 						</votingSystem:simpleButton>
 					</div>
 					<div style="display:table-cell;">
-						<votingSystem:simpleButton id="accreditationRequestButton" style="margin:0px 20px 0px 0px;">
+						<votingSystem:simpleButton id="accreditationRequestButton" style="margin:0px 20px 0px 0px; width:300px;">
 								<g:message code="requestRepresentativeAcreditationsLbl"/>
 						</votingSystem:simpleButton>
 					</div>
@@ -137,13 +137,12 @@
         	var dateToStr = $("#dateTo").datepicker('getDate').format() 
         	console.log("requestVotingHistory - dateFromStr: " + dateFromStr + " - dateToStr: " + dateToStr)
 			webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST, representativeNif:"${representative.nif}",
-    				representativeName:"${representativeFullName}", dateForm:dateFromStr, 
+    				representativeName:"${representativeFullName}", dateFrom:dateFromStr,
     				dateTo:dateToStr, email:$("#userEmailText").val()}
 			webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
 			webAppMessage.receiverSignServiceURL = "${createLink(controller:'representative', action:'history', absolute:true)}"
 			webAppMessage.signedMessageSubject = '<g:message code="requestVotingHistoryLbl"/>'
 			webAppMessage.email = $("#userEmailText").val()
-			webAppMessage.isResponseWithReceipt = true
 			votingSystemClient.setMessageToSignatureClient(webAppMessage, representativeOperationCallback); 
 		}
 
