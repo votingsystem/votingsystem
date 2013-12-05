@@ -52,3 +52,10 @@ body {
     text-transform: uppercase
 }
 
+b {
+    font-family:"arial bold";
+}
+
+em {
+    font-family:"arial italic";
+}

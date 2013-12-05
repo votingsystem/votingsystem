@@ -7,11 +7,11 @@
 <r:script>
 <g:if test="${'mobile'.equals(attrs.type)}">
     var editorConfig = {
-        toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', '-', 'Link', 'Unlink' ],
+        toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Link', 'Unlink' ],
 			[ 'FontSize', 'TextColor', 'BGColor' ]]}
 </g:if>
 <g:else>
-    var editorConfig = { toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', '-', 'Link', 'Unlink' ],
+    var editorConfig = { toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Link', 'Unlink' ],
                 [ 'FontSize', 'TextColor', 'BGColor' ]]}
 </g:else>
 

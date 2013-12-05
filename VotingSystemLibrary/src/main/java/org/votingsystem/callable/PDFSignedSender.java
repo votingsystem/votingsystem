@@ -82,8 +82,16 @@ public class PDFSignedSender implements Callable<ResponseVS> {
             systemSignedGenerator = signedGenerator;
         } else {
             logger.debug("Generating smartcard VotingSystemSignedGenerator");
-            DNIePDFContentSigner sessionHelper = DNIePDFContentSigner.getInstance(
-                    password, ContextVS.DNIe_SESSION_MECHANISM);
+            DNIePDFContentSigner sessionHelper = null;
+            try {
+                sessionHelper = DNIePDFContentSigner.getInstance(password, ContextVS.DNIe_SESSION_MECHANISM);
+            } catch(Exception ex) {
+                if ("CKR_CRYPTOKI_ALREADY_INITIALIZED".equals(ex.getMessage())) {
+                    logger.debug("### Trying to get DNIe PKCS11 session ###");
+                    Thread.sleep(3000);
+                    sessionHelper = DNIePDFContentSigner.getInstance(password, ContextVS.DNIe_SESSION_MECHANISM);
+                } else throw ex;
+            }
             signerCertChain = sessionHelper.getCertificateChain();
             systemSignedGenerator = sessionHelper;
         }

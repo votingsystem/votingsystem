@@ -27,10 +27,13 @@ class HtmlService {
 	
 		ElementRemover remover = new ElementRemover();
 		remover.acceptElement("b", null);
+        remover.acceptElement("strong", null);
+        remover.acceptElement("em", null);
 		remover.acceptElement("i", null);
 		remover.acceptElement("u", null);
 		remover.acceptElement("br", null);
 		remover.acceptElement("ol", null);
+        remover.acceptElement("ul", null);
 		remover.acceptElement("li", null);
 		remover.acceptElement("strike", null);
 		remover.acceptElement("img", (String[])["src"]);
