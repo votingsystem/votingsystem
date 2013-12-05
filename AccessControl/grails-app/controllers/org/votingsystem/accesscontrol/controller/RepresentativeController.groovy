@@ -43,7 +43,7 @@ class RepresentativeController {
 	 * @serviceURL [/representative/edit/$nif] 
 	 * @param [nif] NIF del representante que se desea consultar.
 	 * @responseContentType [application/json]
-	 * @return PDFDocumentVS JSON con datos del representante
+	 * @return documento JSON con datos del representante
 	 */
 	def editRepresentative() {
 		String nif = NifUtils.validate(params.nif)
@@ -142,7 +142,7 @@ class RepresentativeController {
 	 * @serviceURL [/representative/nif/$nif]
 	 * @param [nif] NIF del representante que se desea consultar.
 	 * @responseContentType [application/json]
-	 * @return PDFDocumentVS JSON con datos del representante
+	 * @return documento JSON con datos del representante
 	 */
 	def getByNif() {
 		String nif = NifUtils.validate(params.nif)
@@ -175,7 +175,7 @@ class RepresentativeController {
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/representative/revoke]
-	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. PDFDocumentVS firmado
+	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. documento firmado
 	 *                     en formato SMIME con los datos de la baja.
 	 * @responseContentType [application/x-pkcs7-signature] Obligatorio. Recibo firmado por el sistema.
 	 * 
@@ -208,7 +208,7 @@ class RepresentativeController {
 	 * @serviceURL [/representative/accreditations]
 	 * 
 	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. 
-	 * 					   PDFDocumentVS firmado en formato SMIME con los datos de la solicitud
+	 * 					   documento firmado en formato SMIME con los datos de la solicitud
 	 */
 	def accreditations() {
 		MessageSMIME messageSMIME = params.messageSMIMEReq
@@ -236,7 +236,7 @@ class RepresentativeController {
 	 * @serviceURL [/representative/history]
 	 * 
 	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. 
-	 *                     PDFDocumentVS en formato SMIME con los datos del representante consultado.
+	 *                     documento en formato SMIME con los datos del representante consultado.
 	 * @return 
 	 */
 	def history() {
@@ -262,10 +262,10 @@ class RepresentativeController {
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/representative/userSelection]
-	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. PDFDocumentVS firmado
+	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. documento firmado
 	 *                     por el userVS que está eligiendo el representante.
 	 * @responseContentType [application/x-pkcs7-signature] Recibo firmado por el sistema.
-	 * @return Recibo que consiste en el PDFDocumentVS enviado por el userVS con la signatureVS añadida del servidor.
+	 * @return Recibo que consiste en el documento enviado por el userVS con la signatureVS añadida del servidor.
 	 */
 	def userSelection() {
 		MessageSMIME messageSMIME = params.messageSMIMEReq

@@ -57,7 +57,7 @@ class VoteVSController {
 	 * @serviceURL [/voteVS/${id}]
 	 * @param [id] Obligatorio. Identificador del voteVS en la base de datos
 	 * @responseContentType [application/json]
-	 * @return PDFDocumentVS JSON con la información del voteVS solicitado.
+	 * @return documento JSON con la información del voteVS solicitado.
 	 */
 	def get() {
 		VoteVS voteVS

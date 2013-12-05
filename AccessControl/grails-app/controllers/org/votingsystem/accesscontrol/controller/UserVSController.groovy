@@ -26,7 +26,7 @@ class UserVSController {
 	 * @serviceURL [/user/$nif/representative]
 	 * @param [nif] NIF del userVS que se desea consultar.
 	 * @responseContentType [application/json]
-	 * @return PDFDocumentVS JSON con información básica del representante asociado
+	 * @return documento JSON con información básica del representante asociado
 	 *         al userVS cuyo nif se pada como parámetro nif
 	 */
 	def representative() {

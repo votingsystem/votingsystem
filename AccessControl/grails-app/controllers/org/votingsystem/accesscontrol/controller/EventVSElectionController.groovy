@@ -56,7 +56,7 @@ class EventVSElectionController {
 	 * @param [order] Opcional, posibles valores 'asc', 'desc'(por defecto). Orden en que se muestran los
 	 *        resultados según la fecha de inicio.
 	 * @responseContentType [application/json]
-	 * @return PDFDocumentVS JSON con las votaciones que cumplen con el criterio de búsqueda.
+	 * @return documento JSON con las votaciones que cumplen con el criterio de búsqueda.
 	 */
 	def index() {
 		try {
@@ -133,7 +133,7 @@ class EventVSElectionController {
 	 * @serviceURL [/eventVSElection]
 	 * @httpMethod [POST]
 	 * 
-	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. PDFDocumentVS firmado
+	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. documento firmado
 	 *                     en formato SMIME con los datos de la votación que se desea publicar
 	 * @responseContentType [application/x-pkcs7-signature] Obligatorio. Recibo firmado por el sistema.
 	 * 
@@ -168,7 +168,7 @@ class EventVSElectionController {
          * @requestContentType [text/html] Para solicitar una respuesta en formato HTML
          * @responseContentType [application/json]                    
 	 * @responseContentType [text/html]
-	 * @return PDFDocumentVS JSON con las estadísticas asociadas a la votación solicitada.
+	 * @return documento JSON con las estadísticas asociadas a la votación solicitada.
 	 */
     def statistics () {
         if (params.long('id')) {
@@ -296,7 +296,7 @@ class EventVSElectionController {
 	 * @serviceURL [/eventVSElection/$id/voteVSInfo]
 	 * @param [id] Obligatorio. El identificador de la votación en la base de datos.
 	 * @responseContentType [application/json]
-	 * @return PDFDocumentVS JSON con información sobre los votos y solicitudes de acceso de una votación.
+	 * @return documento JSON con información sobre los votos y solicitudes de acceso de una votación.
 	 */
 	def voteVSInfo () {
 		if (params.long('id')) {

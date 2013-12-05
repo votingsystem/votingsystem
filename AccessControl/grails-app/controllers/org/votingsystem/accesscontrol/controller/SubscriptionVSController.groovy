@@ -67,7 +67,7 @@ class SubscriptionVSController {
      *
      * @param [serverURL] Obligatorio. La URL del Centro de Control que se desee comprobar
      * @responseContentType [application/json]
-     * @return PDFDocumentVS JSON con el mapa de datos del Centro de Control solicitado
+     * @return documento JSON con el mapa de datos del Centro de Control solicitado
      * @requestContentType [application/] Obligatorio.
      *					Archivo con los datos del Centro de Control que se desea dar de alta.
      */

@@ -30,7 +30,7 @@ class EventVSController {
 	 * @param [order] Opcional, posibles valores 'asc', 'desc'(por defecto). Orden en que se muestran los
 	 *        resultados según la fecha de creación.
 	 * @responseContentType [application/json]
-	 * @return PDFDocumentVS JSON con los manifiestos que cumplen con el criterio de búsqueda.
+	 * @return documento JSON con los manifiestos que cumplen con el criterio de búsqueda.
 	 */
 	def index() { 
         def eventVSList = []
@@ -91,7 +91,7 @@ class EventVSController {
 	 * @httpMethod [GET]
 	 * @serviceURL [/eventVS/$id/statistics]
 	 * @param [id] Identificador en la base de datos del eventVS que se desea consultar.
-	 * @return PDFDocumentVS JSON con estadísticas asociadas al eventVS consultado.
+	 * @return documento JSON con estadísticas asociadas al eventVS consultado.
 	 */
     def statistics () {
 		EventVS eventVS

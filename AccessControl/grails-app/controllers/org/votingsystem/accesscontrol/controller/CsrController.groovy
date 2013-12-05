@@ -126,7 +126,7 @@ class CsrController {
 	 * por personal dado de alta en la base de datos.
 	 *
 	 * @httpMethod [POST]
-	 * @requestContentType [application/x-pkcs7-signature] Obligatorio. PDFDocumentVS
+	 * @requestContentType [application/x-pkcs7-signature] Obligatorio. documento
 	 * firmadoArchivo firmado en formato SMIME en cuyo content
 	 * se encuentran los datos de la solicitud que se desea validar.
 	 * <code>{deviceId:"000000000000000", phone:"15555215554", nif:"1R" }</code>
@@ -202,7 +202,7 @@ class CsrController {
 	 * Servicio que signatureVS solicitudes de certificación de userVS.<br/>
 	 * 
 	 * @httpMethod [POST]
-	 * @requestContentType [application/json] PDFDocumentVS JSON con los datos del userVS
+	 * @requestContentType [application/json] documento JSON con los datos del userVS
 	 * <code>{deviceId:"000000000000000", phone:"15555215554", nif:"1R" }</code>
 	 * @return Si todo es correcto devuelve un código de estado HTTP 200.
 	 */

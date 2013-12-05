@@ -17,8 +17,8 @@ class PDFDocumentVSController {
 	 * Servicio que proporciona acceso a las firmas que recibe un manifiesto.
 	 * 
 	 * @httpMethod [GET]
-	 * @param [id] El identificador del PDFDocumentVS en la base de datos.
-	 * @return El PDFDocumentVS PDF asociado al identificador.
+	 * @param [id] El identificador del documento en la base de datos.
+	 * @return El documento PDF asociado al identificador.
 	 */
 	def getSignedManifest () {
 		PDFDocumentVS documento

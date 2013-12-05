@@ -58,7 +58,7 @@ class VoteVSCancellerController {
 	 * 
      * @httpMethod [POST]
 	 * @serviceURL [/voteVSCanceller]
-	 * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] PDFDocumentVS correspondiente al
+	 * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] documento correspondiente al
 	 *              <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Anulador-de-voteVS">anulador de voteVS</a>
 	 * 				firmado y cifrado	 
      * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] 
@@ -88,7 +88,7 @@ class VoteVSCancellerController {
 	 * @serviceURL [/voteVSCanceller/voteVS/${id}]
 	 * @param [id] Obligatorio. Identificador del voteVS en la base de datos
 	 * @responseContentType [application/json]
-	 * @return PDFDocumentVS JSON con la información del voteVS solicitado.
+	 * @return documento JSON con la información del voteVS solicitado.
 	 */
 	def get() {
 		VoteVS voteVS

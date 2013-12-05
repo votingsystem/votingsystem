@@ -44,7 +44,7 @@ class EventVSClaimController {
 	 * @param [order] Opcional, posibles valores 'asc', 'desc'(por defecto). Orden en que se muestran los
 	 *        resultados según la fecha de inicio.
 	 * @responseContentType [application/json]
-	 * @return PDFDocumentVS JSON con los manifiestos que cumplen con el criterio de búsqueda.
+	 * @return documento JSON con los manifiestos que cumplen con el criterio de búsqueda.
 	 */
     def index () {
         def eventVSList = []
@@ -115,7 +115,7 @@ class EventVSClaimController {
 	 * @httpMethod [GET]
 	 * @serviceURL [/eventVSClaim/${id}/validated]
 	 * @param [id] Obligatorio. El identificador de la reclamación en la base de datos.
-	 * @return PDFDocumentVS SMIME con el recibo.
+	 * @return documento SMIME con el recibo.
 	 */
     def validated () {
         def eventVS
@@ -154,7 +154,7 @@ class EventVSClaimController {
 	 * @httpMethod [GET]
 	 * @serviceURL [/eventVSClaim/${id}/signed]
 	 * @param [id] Obligatorio. El identificador de la reclamación en la base de datos.
-	 * @return PDFDocumentVS SMIME con la solicitud de publicación de la reclamación.
+	 * @return documento SMIME con la solicitud de publicación de la reclamación.
 	 */
 	def signed () {
 		def eventVS
@@ -186,10 +186,10 @@ class EventVSClaimController {
 	 *
 	 * @httpMethod [POST]
 	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. 
-	 *                     PDFDocumentVS en formato SMIME  en cuyo content se
+	 *                     documento en formato SMIME  en cuyo content se
 	 *        encuentra la reclamación que se desea publicar en formato HTML.
 	 * @responseContentType [application/x-pkcs7-signature] Obligatorio. Recibo firmado por el sistema.
-	 * @return Recibo que consiste en el PDFDocumentVS SMIME recibido con la signatureVS añadida del servidor.
+	 * @return Recibo que consiste en el documento SMIME recibido con la signatureVS añadida del servidor.
 	 */
     def save () {
 		MessageSMIME messageSMIMEReq = params.messageSMIMEReq
@@ -223,7 +223,7 @@ class EventVSClaimController {
 	 * @serviceURL [/eventVSClaim/$id/statistics]
 	 * @param [id] Obligatorio. Identificador en la base de datos de la reclamación que se desea consultar.
 	 * @responseContentType [application/json]
-	 * @return PDFDocumentVS JSON con las estadísticas asociadas a la reclamación solicitada.
+	 * @return documento JSON con las estadísticas asociadas a la reclamación solicitada.
 	 */
     def statistics () {
         EventVSClaim eventVSClaim
@@ -256,7 +256,7 @@ class EventVSClaimController {
 	 * @serviceURL [/eventVSClaim/$id/signaturesInfo]
 	 * @param [id] Obligatorio. El identificador de la reclamación la base de datos.
 	 * @responseContentType [application/json]
-	 * @return PDFDocumentVS JSON con información sobre las firmas recibidas por la reclamación solicitada.
+	 * @return documento JSON con información sobre las firmas recibidas por la reclamación solicitada.
 	 */
 	def signaturesInfo () {
 		EventVSClaim eventVS = EventVSClaim.get(params.id)

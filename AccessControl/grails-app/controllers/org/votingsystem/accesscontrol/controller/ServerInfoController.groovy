@@ -19,7 +19,7 @@ class ServerInfoController {
 	/**
 	 * @httpMethod [GET]
 	 * @responseContentType [application/json]
-	 * @return PDFDocumentVS JSON con datos de la aplicación
+	 * @return documento JSON con datos de la aplicación
 	 */
 	def index() { 
         HashMap serverInfo = new HashMap()

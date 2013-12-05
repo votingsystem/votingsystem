@@ -36,7 +36,7 @@ class EventVSManifestController {
      * @serviceURL [/eventVSManifest/$id]
 	 * @param [id] Opcional. El identificador del manifiesto en la base de datos.
 	 * @responseContentType [application/json]
-	 * @return PDFDocumentVS JSON con información del manifiesto solicitado.
+	 * @return documento JSON con información del manifiesto solicitado.
 	 */
 	def index() { 
 		if(request.contentType?.contains(ContentTypeVS.PDF)) {
@@ -371,7 +371,7 @@ class EventVSManifestController {
 	 * @serviceURL [/eventVSManifest/$id/signaturesInfo]
 	 * @param [id] Obligatorio. El identificador del manifiesto en la base de datos.
 	 * @responseContentType [application/json]
-	 * @return PDFDocumentVS JSON con información sobre las firmas recibidas por el manifiesto solicitado.
+	 * @return documento JSON con información sobre las firmas recibidas por el manifiesto solicitado.
 	 */
 	def signaturesInfo () {
 		EventVSManifest eventVS
@@ -411,7 +411,7 @@ class EventVSManifestController {
 	 * @serviceURL [/eventVSManifest/$id/statistics]
 	 * @param [id] Identificador en la base de datos del manifiesto que se desea consultar.
 	 * @responseContentType [application/json]
-	 * @return PDFDocumentVS JSON con las estadísticas asociadas al manifiesto solicitado.
+	 * @return documento JSON con las estadísticas asociadas al manifiesto solicitado.
 	 */
 	def statistics () {
 		if (params.long('id')) {
