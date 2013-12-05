@@ -2,6 +2,7 @@
     <div style="margin:20px auto 20px auto;" id="paginationDiv" ></div>
 </div>
 <r:script>
+var numMaxEventsForPage = 12
 var offsetPage
 
 function printPaginate (offset, numItems, numMaxItemsForPage) {

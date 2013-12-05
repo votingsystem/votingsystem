@@ -71,8 +71,4 @@ function getFnName(fn) {
 	  var s = f && ((fn.name && ['', fn.name]) || fn.toString().match(/function ([^\(]+)/));
 	  return (!f && 'not a function') || (s && s[1] || 'anonymous');
 }
-	
-//"yy/MM/dd 12:00:00"
-var pickerOpts = {showOn: 'both', buttonImage: "${createLinkTo(dir: 'images', file: 'appointment.png')}", 
-		buttonImageOnly: true, dateFormat: 'yy/MM/dd'};
  

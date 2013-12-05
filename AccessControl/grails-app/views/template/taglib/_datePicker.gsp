@@ -5,7 +5,9 @@
 	   					oninvalid='${attrs.oninvalid}'
 	   					onchange='${attrs.onchange}'/>
 <r:script>
-$("#${attrs.id}").datepicker(pickerOpts);
+//"yy/MM/dd 12:00:00"
+$("#${attrs.id}").datepicker({showOn: 'both', buttonImage: "${createLinkTo(dir: 'images', file: 'appointment.png')}",
+		buttonImageOnly: true, dateFormat: 'yy/MM/dd'});
 </r:script>
 
 

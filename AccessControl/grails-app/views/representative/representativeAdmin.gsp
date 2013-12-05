@@ -5,7 +5,7 @@
 <body>
 	<div id="contentDiv" style="position:relative; height:700px;">
 	
-		<div style="width: 50%;height: 50%;overflow: auto;margin: auto;top: 0; left: 0; bottom: 0; right: 0;">
+		<div style="display: table;  margin: auto;height: 100%;margin: auto;">
 			<votingSystem:simpleButton href="${createLink(controller:'representative', action:'newRepresentative')}"
 			        style="margin:10px 20px 0px 0px; width:400px;"><g:message code="newRepresentativeLbl"/>
 			</votingSystem:simpleButton>

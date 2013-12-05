@@ -23,30 +23,28 @@
 	</div>
 	<div id="tabs" style="min-height: 700px;">
 		    <ul>
-			    <li><a href="#tabs-1"><g:message code='profileLbl'/></a></li>
-			    <li><a href="#tabs-2"><g:message code='votingHistoryLbl'/></a></li>
+			    <li><a href="#tabs-1" style="font-size: 0.8em;"><g:message code='profileLbl'/></a></li>
+			    <li><a href="#tabs-2" style="font-size: 0.8em;"><g:message code='votingHistoryLbl'/></a></li>
 		  	</ul>
 			<div id="tabs-1">
 				<div style="width: 90%;margin: auto;top: 0; left: 0;right: 0; position:relative;display:table;">
 					<div style="display:table-cell; vertical-align: top; float:left;">
 						<img id="representativeImg" src="${representative.imageURL}" style="text-align:center; width: 200px;"></img>
 					</div>
-					<div style="display:table-cell;margin:0px 15px 15px 20px; vertical-align: top;text-align:center;">
-						${representative.info} 
+					<div style="display: table;  margin:0px auto 15px auto; vertical-align: top;">
+                        ${raw(representative.metaInf)}
 					</div>
 				</div>
 			</div>
 			<div id="tabs-2">
-				<div style="width: 90%;margin: auto;top: 0; left: 0; right: 0; position:relative;display:table;">
+				<div style="margin: auto;top: 0; left: 0; right: 0; position:relative;display:table;">
 					<div style="display:table-cell;">
-						<votingSystem:simpleButton id="votingHistoryButton"
-							imgSrc="${resource(dir:'images',file:'requestRepresentativeVotingHistory.png')}" style="margin:0px 20px 0px 0px;">
+						<votingSystem:simpleButton id="votingHistoryButton" style="margin:0px 20px 0px 0px;">
 								<g:message code="requestVotingHistoryLbl"/>
 						</votingSystem:simpleButton>
 					</div>
 					<div style="display:table-cell;">
-						<votingSystem:simpleButton id="accreditationRequestButton"
-							imgSrc="${resource(dir:'images',file:'requestRepresentativeAccreditations.png')}" style="margin:0px 20px 0px 0px;">
+						<votingSystem:simpleButton id="accreditationRequestButton" style="margin:0px 20px 0px 0px;">
 								<g:message code="requestRepresentativeAcreditationsLbl"/>
 						</votingSystem:simpleButton>
 					</div>
@@ -101,8 +99,7 @@
 
 				if(dateFrom.datepicker("getDate") > 
 					dateTo.datepicker("getDate")) {
-					showResultDialog("${message(code:'dataFormERRORLbl')}",
-							'<g:message code="dateRangeERRORMsg"/>') 
+					showResultDialog("${message(code:'dataFormERRORLbl')}",'<g:message code="dateRangeERRORMsg"/>')
 					dateFrom.addClass("formFieldError");
 					dateTo.addClass("formFieldError");
 					return false

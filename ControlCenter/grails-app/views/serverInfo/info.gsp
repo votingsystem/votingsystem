@@ -11,9 +11,9 @@
         	<a class="headerTitle" href="${grailsApplication.config.grails.serverURL}">${message(code: 'serverNameLabel', null)}</a>
 			<div id="tabs" style="min-height: 700px;">
 			  <ul>
-			    <li><a href="#tabs-1"><span><g:message code="infoLabel"/></span></a></li>
-			    <li><a href="serviceList"><span><g:message code="serviceURLSMsg"/></span></a></li>
-			    <li><a href="appData"><span><g:message code="appDataLabel"/></span></a></li>
+			    <li><a href="#tabs-1" style="font-size: 0.8em;"><span><g:message code="infoLabel"/></span></a></li>
+			    <li><a href="serviceList" style="font-size: 0.8em;"><span><g:message code="serviceURLSMsg"/></span></a></li>
+			    <li><a href="appData" style="font-size: 0.8em;"><span><g:message code="appDataLabel"/></span></a></li>
 			  </ul>
 			  <div id="tabs-1">
 			  	<div class="container"  style="height:100%;">

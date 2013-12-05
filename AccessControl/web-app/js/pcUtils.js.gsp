@@ -202,12 +202,6 @@ function getFnName(fn) {
 }
 
 var signatureClientCallback
-	
-//"yy/MM/dd 12:00:00"
-var pickerOpts = {showOn: 'both', buttonImage: "${createLinkTo(dir: 'images', file: 'appointment.png')}", 
-		buttonImageOnly: true, dateFormat: 'yy/MM/dd'};
-
-var numMaxEventsForPage = 12
 
 var validationToolLoaded = false
 var signatureClientToolLoaded = false

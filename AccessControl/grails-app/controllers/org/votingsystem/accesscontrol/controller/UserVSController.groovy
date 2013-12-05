@@ -8,6 +8,7 @@ import org.votingsystem.util.ApplicationContextHolder;
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.util.DateUtils
+import org.votingsystem.util.NifUtils
 import org.votingsystem.util.StringUtils
 
 import java.security.cert.X509Certificate

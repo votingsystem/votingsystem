@@ -28,10 +28,10 @@
         <votingSystem:textEditor id="editorDiv" style="height:300px; width:100%;"/>
     </div>
 		
-	<div style="position:relative; margin:10px 10px 0px 0px;height:20px;">
+	<div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
 		<div style="position:absolute; right:0;">
 				<votingSystem:simpleButton isSubmitButton='true'
-					imgSrc="${resource(dir:'images/fatcow_16',file:'accept.png')}" style="margin:0px 20px 0px 0px;">
+					imgSrc="${resource(dir:'images/fatcow_16',file:'accept.png')}" style="margin:0px 20px 30px 0px;">
 						<g:message code="newRepresentativeLbl"/>
 				</votingSystem:simpleButton>
 		</div>	
