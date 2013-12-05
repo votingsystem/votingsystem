@@ -157,28 +157,29 @@ body {
 	padding:0px 0px 0px 0px;
 }
 
+
 .col-subsystem {
-	font-size: 0.72em;
-	width: 150px;
-	display:table-cell;
-	vertical-align:middle;
-	padding:0px 0px 0px 20px;
+    font-size: 0.75em;
+    width: 150px;
+    display:table-cell;
+    vertical-align:middle;
+    padding:0px 0px 0px 20px;
 }
 
 .col-subsystem a {
-	display:block;
-	font-size: 0.9em;
-	text-decoration: none;
+    display:block;
+    text-decoration: none;
 }
 
 .col-selectedSystem {
-	font-size: 1.8em;
-	margin: 0px auto 0px auto;
-	display:table-cell;
-	vertical-align:middle;
-	text-align:center;
-	width: 580px;
-	display: block;
+    font-size: 1.8em;
+    font-weight: bold;
+    margin: 0px auto 0px auto;
+    display:table-cell;
+    vertical-align:middle;
+    text-align:center;
+    width: 580px;
+    display: block;
 }
 
 .col-selectedSystem a {text-decoration: none;}

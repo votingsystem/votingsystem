@@ -3,7 +3,7 @@
 <div id="${attrs.id}EditorContents" class="editorContents"  style="display: none;"></div>
 <r:script>
 var editorConfig = {
-        toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Link', 'Unlink' ],
+        toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', '-', 'Link', 'Unlink' ],
 			[ 'FontSize', 'TextColor', 'BGColor' ]]}
 
 var editor, ${attrs.id}Content = '';

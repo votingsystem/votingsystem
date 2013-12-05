@@ -202,9 +202,6 @@ function getFnName(fn) {
 }
 
 var signatureClientCallback
-
-var editorConfig = {toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Link', 'Unlink' ],
-  	      					[ 'FontSize', 'TextColor', 'BGColor' ]]}
 	
 //"yy/MM/dd 12:00:00"
 var pickerOpts = {showOn: 'both', buttonImage: "${createLinkTo(dir: 'images', file: 'appointment.png')}", 

@@ -71,10 +71,6 @@ function getFnName(fn) {
 	  var s = f && ((fn.name && ['', fn.name]) || fn.toString().match(/function ([^\(]+)/));
 	  return (!f && 'not a function') || (s && s[1] || 'anonymous');
 }
-
-
-var editorConfig = {toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Link', 'Unlink' ],
-  	      					[ 'FontSize', 'TextColor', 'BGColor' ]]}
 	
 //"yy/MM/dd 12:00:00"
 var pickerOpts = {showOn: 'both', buttonImage: "${createLinkTo(dir: 'images', file: 'appointment.png')}", 

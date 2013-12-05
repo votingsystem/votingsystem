@@ -7,11 +7,11 @@
 <r:script>
 <g:if test="${'mobile'.equals(attrs.type)}">
     var editorConfig = {
-        toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Link', 'Unlink' ],
+        toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', '-', 'Link', 'Unlink' ],
 			[ 'FontSize', 'TextColor', 'BGColor' ]]}
 </g:if>
 <g:else>
-    var editorConfig = { toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Link', 'Unlink' ],
+    var editorConfig = { toolbar: [[ 'Bold', 'Italic', '-', 'NumberedList', '-', 'Link', 'Unlink' ],
                 [ 'FontSize', 'TextColor', 'BGColor' ]]}
 </g:else>
 
@@ -42,7 +42,7 @@ function hideEditor_${attrs.id}() {
 	var editorHeight = $("#${attrs.id}").height() - 20//css padding
     ${attrs.id}Content = editor.getData()
 	var editorContent = editor.getData()
-	if(editorContent.length > 100) editorContent = editorContent.substring(0,100) + "...";
+	if(editorContent.length > 800) editorContent = editorContent.substring(0,800) + "...";
 	document.getElementById('${attrs.id}EditorContents').innerHTML = editorContent;
 	$("#${attrs.id}EditorContents").width(editorWidth).height(editorHeight);
 	$("#${attrs.id}EditorContents").fadeIn(300)
