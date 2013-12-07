@@ -69,11 +69,11 @@ class ServerInfoController {
 	
 	/**
 	 * <br/><u>SERVICIO DE PRUEBAS - DATOS FICTICIOS</u>. El esquema actual de certificación en plataformas
-	 * Android pasa por que el userVS tenga que identificarse en un centro autorizado
-	 * para poder instalar en su deviceVS el certificateVS de identificación.
+	 * Android pasa por que el usuario tenga que identificarse en un centro autorizado
+	 * para poder instalar en su deviceVS el certificado de identificación.
 	 *
 	 * @httpMethod [GET]
-	 * @return Direcciones a las que tendrían que ir los usuarios para poder get un certificateVS
+	 * @return Direcciones a las que tendrían que ir los usuarios para poder get un certificado
 	 * 		   de identificación.
 	 */
 	def certificationCenters () {  }

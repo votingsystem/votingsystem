@@ -41,6 +41,7 @@ public class ResponseVS<T> {
     private Date fecha;
     private Long eventId;
     private SMIMEMessageWrapper smimeMessage;
+    private ContentTypeVS contentType = ContentTypeVS.TEXT;
     private ActorVS actorVS;
     private byte[] messageBytes;
     
@@ -212,5 +213,13 @@ public class ResponseVS<T> {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public ContentTypeVS getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(ContentTypeVS contentType) {
+        this.contentType = contentType;
     }
 }

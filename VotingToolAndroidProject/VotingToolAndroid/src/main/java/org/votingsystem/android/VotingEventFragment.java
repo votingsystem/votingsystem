@@ -40,6 +40,7 @@ import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.VoteSender;
 import org.votingsystem.android.db.VoteReceiptDBHelper;
 import org.votingsystem.model.ActorVS;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.VoteVS;
@@ -59,8 +60,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import static org.votingsystem.model.ContextVSImpl.KEY_STORE_FILE;
-import static org.votingsystem.model.ContextVSImpl.MAX_SUBJECT_SIZE;
+import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
+import static org.votingsystem.model.ContextVS.MAX_SUBJECT_SIZE;
 
 public class VotingEventFragment extends Fragment implements CertPinDialogListener {
 
@@ -250,7 +251,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
         Log.d(TAG + ".processSelectedOption", " -- processSelectedOption");
         operation = Operation.VOTE;
         eventVS.setOptionSelected(optionSelected);
-        if (!ContextVSImpl.State.CON_CERTIFICADO.equals(contextVS.getState())) {
+        if (!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState())) {
             Log.d(TAG + "- firmarEnviarButton -", " mostrando dialogo certificado no encontrado");
             showCertNotFoundDialog();
         } else {

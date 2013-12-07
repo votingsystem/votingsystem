@@ -9,7 +9,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
-
+import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.ApplicationContextHolder as ACH
 
 import java.security.KeyStore
@@ -41,7 +41,7 @@ public class ClaimSignedSender implements Callable<ResponseVS> {
             ActorVS accessControl = ContextVS.getInstance().getAccessControl();
             String toUser = accessControl.getNameNormalized();
             String claimDataStr = getClaimDataStr(eventId);
-            String subject = ContextVS.getInstance().getMessage("claimMsgSubject");
+            String subject =ApplicationContextHolder.getInstance().getMessage("claimMsgSubject");
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, ContextVS.END_ENTITY_ALIAS,
                     ContextVS.PASSWORD.toCharArray(), ContextVS.DNIe_SIGN_MECHANISM);
             smimeMessage = signedMailGenerator.genMimeMessage(nif, toUser, claimDataStr, subject);

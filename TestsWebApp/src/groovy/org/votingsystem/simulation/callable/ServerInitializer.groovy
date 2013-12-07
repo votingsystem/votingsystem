@@ -7,7 +7,7 @@ import org.votingsystem.callable.SMIMESignedSender
 import org.votingsystem.model.*
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.util.CertUtil
-
+import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.ApplicationContextHolder as ACH
 
@@ -31,7 +31,7 @@ public class ServerInitializer implements Callable<ResponseVS> {
     @Override public ResponseVS call() throws Exception {
         logger.debug("call - serverType: " + serverType.toString());
 		ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL),
-                ContentTypeVS.JSON);
+                ContentTypeVS.JSON.getName());
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             ActorVS actorVS = ActorVS.populate(new JSONObject(responseVS.getMessage()));
             if(actorVS.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != actorVS.getEnvironmentVS()) {
@@ -72,12 +72,12 @@ public class ServerInitializer implements Callable<ResponseVS> {
     private ResponseVS checkControlCenter(String serverURL) {
         logger.debug("checkControlCenter - serverURL: " + serverURL);
         String serviceURL = ContextVS.getInstance().getAccessControl().getControlCenterCheckServiceURL(serverURL);
-        ResponseVS responseVS = HttpHelper.getInstance().getData(serviceURL, ContentTypeVS.JSON);
+        ResponseVS responseVS = HttpHelper.getInstance().getData(serviceURL, ContentTypeVS.JSON.getName());
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) return responseVS;
         else {//serverURL isn't associated
             logger.debug("Control Center isn't associated -> Matching serverURL: " + serverURL);
             Map mapToSign = ActorVS.getAssociationDocumentMap(serverURL);
-            String msgSubject = ContextVS.getInstance().getMessage("associateControlCenterMsgSubject");
+            String msgSubject = ApplicationContextHolder.getInstance().getMessage("associateControlCenterMsgSubject");
             SMIMEMessageWrapper smimeDocument = ContextVS.getInstance().genTestSMIMEMessage(
                     ContextVS.getInstance().getAccessControl().getNameNormalized(), "${mapToSign as JSON}", msgSubject);
             SMIMESignedSender signedSender = new SMIMESignedSender(smimeDocument,

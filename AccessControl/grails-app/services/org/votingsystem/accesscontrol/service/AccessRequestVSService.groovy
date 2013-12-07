@@ -75,7 +75,7 @@ class AccessRequestVSService {
 				AccessRequestVS.withTransaction {
 					accessRequestVS = AccessRequestVS.findWhere(userVS:signerVS, eventVSElection:eventVSElection, state:TypeVS.OK)
 				}
-				if (accessRequestVS){//Ha votado el userVS?
+				if (accessRequestVS){//Ha votado el usuario?
 						msg = "${grailsApplication.config.grails.serverURL}/messageSMIME/${accessRequestVS.messageSMIME.id}"
 						log.error("saveRequest - ACCESS REQUEST ERROR - ${msg}")
 						return new ResponseVS(accessRequestVS:accessRequestVS,

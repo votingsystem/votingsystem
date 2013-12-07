@@ -11,6 +11,7 @@ import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.util.Encryptor
+import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.StringUtils
@@ -49,7 +50,7 @@ public class RepresentativeTestDataSender implements Callable<ResponseVS> {
         String toUser = StringUtils.getNormalized(ContextVS.getInstance().getAccessControl().getName());
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie,
                 END_ENTITY_ALIAS, PASSWORD.toCharArray(), DNIe_SIGN_MECHANISM);
-        String subject = ContextVS.getInstance().getMessage("representativeRequestMsgSubject", null);
+        String subject = ApplicationContextHolder.getInstance().getMessage("representativeRequestMsgSubject", null);
         SMIMEMessageWrapper smimeMessage = signedMailGenerator.genMimeMessage(
                 representativeNIF, toUser, representativeDataStr, subject , null);
         RepresentativeDataSender representativeDataSender = new RepresentativeDataSender(smimeMessage, imageFile,

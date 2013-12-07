@@ -19,6 +19,7 @@ import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder
 import org.bouncycastle.tsp.*
 import org.bouncycastle.util.Store
 import org.bouncycastle.util.encoders.Base64
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.EventVS
 import org.votingsystem.model.TimeStampVS
 import org.votingsystem.model.ResponseVS
@@ -57,7 +58,7 @@ class TimeStampVSService {
 	private AtomicLong sernoGenerator
 	private org.votingsystem.signature.util.TimeStampResponseGenerator timeStampResponseGen;
 	private SignerInformationVerifier timeStampSignerInfoVerifier
-	private byte[] signingCertBytes
+	private byte[] signingCertPEMBytes
 	private String tsaName
 	
 	
@@ -75,7 +76,7 @@ class TimeStampVSService {
 			"SHA512":TSPAlgorithms.SHA512
 		];
 
-	private synchronized void initService() throws Exception {
+	private synchronized Map initService() throws Exception {
 		log.debug(" - initService - initService - initService");
 		File keyStoreFile = grailsApplication.mainContext.getResource(
 			grailsApplication.config.VotingSystem.keyStorePath).getFile()
@@ -85,7 +86,7 @@ class TimeStampVSService {
 			FileUtils.getBytesFromFile(keyStoreFile), password.toCharArray());
 		PrivateKey signingKey = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray());
 		signingCert = keyStore.getCertificate(aliasClaves)
-		signingCertBytes = CertUtil.getPEMEncoded (signingCert)
+		signingCertPEMBytes = CertUtil.getPEMEncoded (signingCert)
 		timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(signingCert);
 		
 		Certificate[] chain = keyStore.getCertificateChain(aliasClaves);
@@ -102,17 +103,19 @@ class TimeStampVSService {
 		timeStampTokenGen.addCertificates(certs);
 		timeStampResponseGen = new TimeStampResponseGenerator(timeStampTokenGen, getAcceptedAlgorithms(),
                 getAcceptedPolicies(), getAcceptedExtensions())
+        return [timeStampResponseGen:timeStampResponseGen, signingCertPEMBytes: signingCertPEMBytes,
+                timeStampSignerInfoVerifier:timeStampSignerInfoVerifier]
 	}
 	
 	private TimeStampResponseGenerator getTimeStampResponseGen() {
-		if(!timeStampResponseGen) initService()
+		if(!timeStampResponseGen) timeStampResponseGen = initService().timeStampResponseGen
 		return timeStampResponseGen
 	}
 	
-	public byte[] getSigningCert() {
+	public byte[] getSigningCertPEMBytes() {
 		log.debug("getSigningCerts");
-		if(!signingCertBytes) initService()
-		return signingCertBytes
+		if(!signingCertPEMBytes) signingCertPEMBytes = initService().signingCertPEMBytes
+		return signingCertPEMBytes
 	}
 	
 	/*Method to Tests*/
@@ -173,13 +176,14 @@ class TimeStampVSService {
 		log.debug("processRequest - serialNumber: '${serialNumber}' - CertReq: ${timeStampRequest.getCertReq()}");
 		final TimeStampToken token = null;
 		synchronized(this) {
-			final TimeStampResponse timeStampResponse = getTimeStampResponseGen().generate(
-				timeStampRequest, serialNumber, date);
+			TimeStampResponse timeStampResponse =getTimeStampResponseGen().generate(timeStampRequest,serialNumber,date);
 			token = timeStampResponse.getTimeStampToken();
 			PKIFailureInfo failureInfo = timeStampResponse.getFailInfo();
 			if (failureInfo != null) {
-				log.debug("timeStampResponse Status: " + timeStampResponse.getStatus())
+				log.error("timeStampResponse Status: " + timeStampResponse.getStatus())
 				log.error("timeStampResponse Failure info: ${failureInfo.intValue()}");
+                log.error("timeStampResponse error: ${timeStampResponse.getStatusString()}");
+                return new ResponseVS(ResponseVS.SC_ERROR, messageSource.getMessage('timestampGenErrorMsg', null, locale))
 			}
 		}
 		//String timeStampRequestStr = new String(Base64.encode(timeStampRequestBytes));
@@ -187,20 +191,11 @@ class TimeStampVSService {
 		//String digestStr = new String(Base64.encode(timeStampRequest.getMessageImprintDigest()));
 		//log.debug("timeStampRequest MessageImprintDigest: ${digestStr}")
 		//log.debug("timeStampRequest MessageImprintAlgOID: ${timeStampRequest.getMessageImprintAlgOID()}")
-		
-		if(!token) {
-			log.error("processRequest - error:'${timeStampResponse.getStatusString()}'")
-			String msg = messageSource.getMessage('timestampRequestNullMsg', null, locale)
-			log.debug("processRequest - ${msg}"); 
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-				message:msg)
-		}
-		
-		SignerInformationVerifier sigVerifier = getTimeStampSignerInfoVerifier()
+		/*SignerInformationVerifier sigVerifier = getTimeStampSignerInfoVerifier()
 		AtomicBoolean done = new AtomicBoolean(false);
 		int numAttemp = 0;
 		while(!done.get()) {
-			log.debug(" ------ validating token");
+			log.debug("validating token");
 			try {
 				token.validate(sigVerifier)
 				//validate(token, locale)
@@ -215,12 +210,13 @@ class TimeStampVSService {
 					throw ex
 				}
 			}
-		}
+		}*/
 		//String tokenStr = new String(Base64.encode(token.getEncoded()));
 		//log.debug("processRequest - tokenStr: '${tokenStr}'");
 		new TimeStampVS(serialNumber:numSerie, tokenBytes:token.getEncoded(), state:TimeStampVS.State.OK,
 			timeStampRequestBytes:timeStampRequestBytes).save()
-		return new ResponseVS(statusCode:ResponseVS.SC_OK, messageBytes:token.getEncoded())
+		return new ResponseVS(statusCode:ResponseVS.SC_OK, messageBytes:token.getEncoded(),
+                contentType:ContentTypeVS.TIMESTAMP_RESPONSE)
 	}
 		
 	public ResponseVS validateToken(TimeStampToken  tsToken, Locale locale) {
@@ -290,7 +286,7 @@ class TimeStampVSService {
 	}
 	
 	public SignerInformationVerifier getTimeStampSignerInfoVerifier(){
-		if(!timeStampSignerInfoVerifier) initService()
+		if(!timeStampSignerInfoVerifier) timeStampSignerInfoVerifier = initService().timeStampSignerInfoVerifier
 		return timeStampSignerInfoVerifier
 	}
 	

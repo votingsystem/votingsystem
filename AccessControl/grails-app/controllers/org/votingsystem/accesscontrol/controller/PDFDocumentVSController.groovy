@@ -21,20 +21,15 @@ class PDFDocumentVSController {
 	 * @return El documento PDF asociado al identificador.
 	 */
 	def getSignedManifest () {
-		PDFDocumentVS documento
+		PDFDocumentVS pdfDocument
 		PDFDocumentVS.withTransaction {
-			documento = PDFDocumentVS.findWhere(id:params.long('id'),
+			pdfDocument = PDFDocumentVS.findWhere(id:params.long('id'),
 				state:PDFDocumentVS.State.MANIFEST_SIGNATURE_VALIDATED)
 		}
-		if(!documento) {
-			response.status = ResponseVS.SC_NOT_FOUND
-			render message(code: 'documentNotFoundMsg', args:[params.id])
-			return false
-		}
-		//response.setHeader("Content-disposition", "attachment; filename=manifest.pdf")
-		response.contentType = ContentTypeVS.PDF
-		response.setHeader("Content-Length", "${documento.pdf.length}")
-		response.outputStream << documento.pdf // Performing a binary stream copy
-		response.outputStream.flush()
+		if(pdfDocument) {
+            params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.PDF,
+                messageBytes: pdfDocument.pdf)
+		} else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                message(code: 'documentNotFoundMsg', args:[params.id]))
 	}
 }

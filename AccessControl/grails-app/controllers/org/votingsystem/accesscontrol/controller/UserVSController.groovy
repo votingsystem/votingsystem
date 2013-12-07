@@ -21,71 +21,63 @@ class UserVSController {
 
 	/**
 	 *
-	 * Servicio que sirve para comprobar el representante de un userVS
+	 * Servicio que sirve para comprobar el representante de un usuario
 	 *
 	 * @httpMethod [GET]
 	 * @serviceURL [/user/$nif/representative]
-	 * @param [nif] NIF del userVS que se desea consultar.
+	 * @param [nif] NIF del usuario que se desea consultar.
 	 * @responseContentType [application/json]
 	 * @return documento JSON con información básica del representante asociado
-	 *         al userVS cuyo nif se pada como parámetro nif
+	 *         al usuario cuyo nif se pada como parámetro nif
 	 */
 	def representative() {
 		String nif = NifUtils.validate(params.nif)
-		if(!nif) {
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render message(code: 'nifWithErrors', args:[params.nif])
-			return false
-		}
-		UserVS userVS = UserVS.findByNif(nif)
-		if(!userVS) {
-			response.status = ResponseVS.SC_NOT_FOUND
-			render message(code: 'userVSNotFoundByNIF', args:[nif])
-			return false
-		}
-		String msg = null
-		if(UserVS.Type.REPRESENTATIVE == userVS.type) {
-			response.status = ResponseVS.SC_NOT_FOUND
-			render message(code: 'userIsRepresentativeMsg', args:[nif])
-			return false
-		}
-		if(!userVS.representative) {
-			response.status = ResponseVS.SC_NOT_FOUND
-			if(UserVS.Type.USER_WITH_CANCELLED_REPRESENTATIVE == userVS.type) {
-				msg = message(code: 'userRepresentativeUnsubscribedMsg', args:[nif])
-			} else msg = message(code: 'nifWithoutRepresentative', args:[nif])
-			render msg
-			return false
+		if(nif) {
+            UserVS userVS = UserVS.findByNif(nif)
+            if(userVS) {
+                String msg = null
+                if(UserVS.Type.REPRESENTATIVE == userVS.type) {
+                    params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                            message(code: 'userIsRepresentativeMsg', args:[nif]))
+                } else {
+                    if(!userVS.representative) {
+                        if(UserVS.Type.USER_WITH_CANCELLED_REPRESENTATIVE == userVS.type) {
+                            msg = message(code: 'userRepresentativeUnsubscribedMsg', args:[nif])
+                        } else msg = message(code: 'nifWithoutRepresentative', args:[nif])
+                        params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND, msg)
+                    } else {
+                        UserVS representative = userVS.representative
+                        String name = "${representative.name} ${representative.firstName}"
+                        def resultMap = [representativeId: representative.id, representativeName:name,
+                                representativeNIF:representative.nif]
+                        render resultMap as JSON
+                    }
+                }
+            } else {
+                params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                        message(code: 'userVSNotFoundByNIF', args:[nif]))
+            }
 		} else {
-			UserVS representative = userVS.representative
-			String name = "${representative.name} ${representative.firstName}"
-			def resultMap = [representativeId: representative.id, representativeName:name,
-				representativeNIF:representative.nif]
-			render resultMap as JSON
-			return false
-		}
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code: 'nifWithErrors', args:[params.nif]))
+        }
 	}
 	
 	/**
-	 *
 	 * Servicio que sirve para añadir usuarios de pruebas.
 	 * SOLO DISPONIBLES EN ENTORNOS DE DESARROLLO.
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/user]
-	 * @param [userCert] CertificateVS de userVS en formato PEM
+	 * @param [userCert] Certificado de usuario en formato PEM
 	 * 
 	 * @requestContentType [application/x-x509-ca-cert]
 	 * 
 	 */
 	def save() {
-		if(!EnvironmentVS.DEVELOPMENT.equals(
-			ApplicationContextHolder.getEnvironment())) {
-			def msg = message(code: "serviceDevelopmentModeMsg")
-			log.error msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
+		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))
+            return
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		String pemCert = "${request.getInputStream()}"
@@ -99,15 +91,9 @@ class UserVSController {
 			responseVS.userVS.representativeMessage = null
 			responseVS.userVS.representativeRegisterDate = null
 			responseVS.userVS.metaInf = null
-			UserVS.withTransaction {
-				responseVS.userVS.save()
-			}
-			response.status = responseVS.statusCode
-			render responseVS.message
-		} else {
-			response.status = ResponseVS.SC_ERROR
-			render message(code:"nullCertificateErrorMsg")
-		}
+			UserVS.withTransaction { responseVS.userVS.save() }
+            params.responseVS = responseVS
+		} else  params.responseVS = new ResponseVS(ResponseVS.SC_ERROR, message(code:"nullCertificateErrorMsg"))
 	}
 	
 	
@@ -122,13 +108,9 @@ class UserVSController {
 	 *
 	 */
 	def prepareUserBaseData() {
-		if(!EnvironmentVS.DEVELOPMENT.equals(
-			ApplicationContextHolder.getEnvironment())) {
-			def msg = message(code: "serviceDevelopmentModeMsg")
-			log.error msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
+		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))
+            return
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		def usersVS = UserVS.findAll()

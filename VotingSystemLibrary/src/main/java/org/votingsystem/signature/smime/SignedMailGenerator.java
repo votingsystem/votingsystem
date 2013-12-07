@@ -109,8 +109,8 @@ public class SignedMailGenerator {
 
     public SMIMEMessageWrapper genMimeMessage(String fromUser, String toUser, 
             String textToSign, String subject, Header... headers) throws Exception {
-        if (subject == null) throw new Exception("Subject null");
-        if (textToSign == null) throw new Exception("Content null");
+        if (subject == null) throw new IllegalArgumentException("Subject null");
+        if (textToSign == null) throw new IllegalArgumentException("Content null");
         MimeBodyPart msg = new MimeBodyPart();
         msg.setText(textToSign);
         MimeMultipart mimeMultipart = smimeSignedGenerator.generate(

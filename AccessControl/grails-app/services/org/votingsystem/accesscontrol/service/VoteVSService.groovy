@@ -186,7 +186,7 @@ class VoteVSService {
 					smimeMessageResp.getBytes(), eventVSElection.getControlCenterCert(), locale)
 				if (ResponseVS.SC_OK != encryptResponse.statusCode) return encryptResponse
 				ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(encryptResponse.messageBytes,
-                        ContentTypeVS.SIGNED_AND_ENCRYPTED, urlAnulacionVoto)
+                        ContentTypeVS.SIGNED_AND_ENCRYPTED.getName(), urlAnulacionVoto)
 				if (ResponseVS.SC_OK == responseVSControlCenter.statusCode) {
 					responseVSControlCenter = signatureVSService.decryptSMIMEMessage(
 							responseVSControlCenter.message.getBytes(), locale)

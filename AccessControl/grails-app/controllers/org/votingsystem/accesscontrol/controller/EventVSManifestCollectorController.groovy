@@ -26,34 +26,18 @@ class EventVSManifestCollectorController {
 	 */
 	def index() {
 		PDFDocumentVS pdfDocument = params.pdfDocument
-		if(params.long('id') && pdfDocument &&
-			pdfDocument.state == PDFDocumentVS.State.VALIDATED) {
+		if(params.long('id') && pdfDocument && pdfDocument.state == PDFDocumentVS.State.VALIDATED) {
 			EventVSManifest eventVS = null;
-			EventVSManifest.withTransaction{
-				eventVS = EventVSManifest.get(params.long('id'))
-			}
+			EventVSManifest.withTransaction{ eventVS = EventVSManifest.get(params.long('id')) }
 			if(!eventVS) {
-				response.status = ResponseVS.SC_ERROR_REQUEST
-				render message(code: 'manifestNotFound', args:[params.id])
-				return false
-			}
-			try {
-				ResponseVS responseVS = eventVSManifestSignatureCollectorService.saveManifestSignature(
-					pdfDocument, eventVS, request.getLocale())
-				response.status = responseVS.statusCode
-				render responseVS.message
-				return false
-			} catch (Exception ex) {
-				log.error (ex.getMessage(), ex)
-				response.status = ResponseVS.SC_ERROR_REQUEST
-				render(ex.getMessage())
-				return false
-			}
-		}
-		response.status = ResponseVS.SC_ERROR_REQUEST
-		render message(code: 'requestWithErrorsHTML', args:[
-			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
-		return false
+                params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                        message(code: 'manifestNotFound', args:[params.id]))
+			} else {
+                params.responseVS =  eventVSManifestSignatureCollectorService.saveManifestSignature(
+                        pdfDocument, eventVS, request.getLocale())
+            }
+		} else params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}"]))
 	}
 
 

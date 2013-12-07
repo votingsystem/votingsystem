@@ -24,8 +24,8 @@ class VoteVSCancellerController {
 	 *
 	 * @httpMethod [GET]
 	 * @serviceURL [/voteVSCanceller/$hashHex]
-	 * @param [hashHex] El hash en Hexadecimal del certificateVS del voteVS anulado.
-	 * @return La anulación de voteVS firmada por el userVS.
+	 * @param [hashHex] El hash en Hexadecimal del certificado del voto anulado.
+	 * @return La anulación de voto firmada por el usuario.
 	 */
 	def index () {
 		if(params.hashHex) {
@@ -33,24 +33,18 @@ class VoteVSCancellerController {
 			String hashCertVoteBase64 = new String(
 				hexConverter.unmarshal(params.hashHex))
 			log.debug "hashCertVoteBase64: '${hashCertVoteBase64}'"
-			VoteVSCanceller anuladorVoto = null
+			VoteVSCanceller voteCanceller = null
 			VoteVSCanceller.withTransaction{
-				anuladorVoto = VoteVSCanceller.findWhere(
-					hashCertVoteBase64:hashCertVoteBase64)
+				voteCanceller = VoteVSCanceller.findWhere(hashCertVoteBase64:hashCertVoteBase64)
 			}
-			if(!anuladorVoto) {
-				response.status = ResponseVS.SC_NOT_FOUND
-				render message(code: 'voteNotFound', args:[params.id])
-			} else {
-				Map anuladorvoteVSMap = voteVSService.getAnuladorVotoMap(anuladorVoto)
+			if(!voteCanceller) params.responseVS = new ResponseVS(ResponseVS.SC_OK,
+                    message(code: 'voteNotFound', args:[params.id]))
+			else {
+				Map anuladorvoteVSMap = voteVSService.getAnuladorVotoMap(voteCanceller)
 				render anuladorvoteVSMap as JSON
 			}
-		} else {
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render message(code: 'requestWithErrorsHTML', args:[
-				"${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
-		}
-		return false
+		} else params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
 	}
 	
 	/**
@@ -59,59 +53,49 @@ class VoteVSCancellerController {
      * @httpMethod [POST]
 	 * @serviceURL [/voteVSCanceller]
 	 * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] documento correspondiente al
-	 *              <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Anulador-de-voteVS">anulador de voteVS</a>
+	 *              <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Anulador-de-voto">anulador de voto</a>
 	 * 				firmado y cifrado	 
      * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] 
 	 * @return Recibo que consiste en el archivo firmado recibido con la signatureVS añadida del servidor. La respuesta viaja cifrada.
 	 */
     def post () {
 		MessageSMIME messageSMIMEReq = params.messageSMIMEReq
-		if(!messageSMIMEReq) {
-			String msg = message(code:'requestWithoutFile')
-			log.error msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
-		}
+        if(!messageSMIMEReq) {
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))
+            return
+        }
 		params.receiverCert = messageSMIMEReq.getUserVS().getCertificate()
 		ResponseVS responseVS = voteVSService.processCancel(messageSMIMEReq, request.getLocale())
 		if (ResponseVS.SC_OK == responseVS.statusCode) {
-			response.setContentType(ContentTypeVS.SIGNED_AND_ENCRYPTED)		
+            responseVS.setContentType(ContentTypeVS.SIGNED_AND_ENCRYPTED)
         }
 		params.responseVS = responseVS
     }
 
 	/**
-	 * Servicio que devuelve la información de la anulación de un voteVS a partir del
-	 * identifiacador del voteVS en la base de datos
+	 * Servicio que devuelve la información de la anulación de un voto a partir del
+	 * identifiacador del voto en la base de datos
 	 * @httpMethod [GET]
 	 * @serviceURL [/voteVSCanceller/voteVS/${id}]
-	 * @param [id] Obligatorio. Identificador del voteVS en la base de datos
+	 * @param [id] Obligatorio. Identificador del voto en la base de datos
 	 * @responseContentType [application/json]
-	 * @return documento JSON con la información del voteVS solicitado.
+	 * @return documento JSON con la información del voto solicitado.
 	 */
 	def get() {
 		VoteVS voteVS
-		Map  anuladorvoteVSMap
-		VoteVS.withTransaction {
-			voteVS = VoteVS.get(params.long('id'))
-		}
-		if(!voteVS) {
-			response.status = ResponseVS.SC_NOT_FOUND
-			render message(code: 'voteNotFound', args:[params.id])
-			return false
-		}
-		VoteVSCanceller anulador
-		VoteVSCanceller.withTransaction {
-			anulador = VoteVSCanceller.findWhere(voteVS:voteVS)
-		}
-		if(!anulador) {
-			response.status = ResponseVS.SC_NOT_FOUND
-			render message(code: 'voteNotFound', args:[params.id])
-		} else {
-			anuladorvoteVSMap = voteVSService.getAnuladorVotoMap(anulador)
-			render anuladorvoteVSMap as JSON
-		}
-		return false
+		Map  cancellerMap
+		VoteVS.withTransaction { voteVS = VoteVS.get(params.long('id')) }
+		if(!voteVS) params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                message(code: 'voteNotFound', args:[params.id]))
+		else {
+            VoteVSCanceller canceller
+            VoteVSCanceller.withTransaction { canceller = VoteVSCanceller.findWhere(voteVS:voteVS) }
+            if(!canceller) params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                    message(code: 'voteNotFound', args:[params.id]))
+            else {
+                cancellerMap = voteVSService.getAnuladorVotoMap(canceller)
+                render cancellerMap as JSON
+            }
+        }
 	}
 }

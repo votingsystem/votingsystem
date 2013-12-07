@@ -39,7 +39,7 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Callable;
 
-import static org.votingsystem.model.ContextVSImpl.USER_CERT_ALIAS;
+import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 
 public class VoteSender implements Callable<ResponseVS> {
 
@@ -97,10 +97,10 @@ public class VoteSender implements Callable<ResponseVS> {
                 return responseVS;
             }
             signedVote = timeStamper.getSmimeMessage();
-            String documentContentType = ContentTypeVS.SIGNED_AND_ENCRYPTED;
             byte[] messageToSend = Encryptor.encryptSMIME(signedVote,
                     event.getControlCenter().getCertificate());
-            responseVS  = HttpHelper.sendData(messageToSend,documentContentType, serviceURL);
+            responseVS  = HttpHelper.sendData(messageToSend,
+                    ContentTypeVS.SIGNED_AND_ENCRYPTED.getName(), serviceURL);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 SMIMEMessageWrapper voteReceipt = Encryptor.decryptSMIMEMessage(
                         responseVS.getMessageBytes(), pkcs10WrapperClient.getKeyPair().getPublic(),

@@ -61,12 +61,12 @@ public class RestHelper {
     public static HttpResponse doPost (final String url,final JSONObject json) {
     	Log.d(CLASSTAG + ".doPost a url: " + url, "- JSON: " + json.toString());
 		HttpPost httpPost = new HttpPost(url);
-    	httpPost.addHeader("Accept", ContentTypeVS.JSON);
-    	httpPost.addHeader("Content-Type", ContentTypeVS.JSON);
+    	httpPost.addHeader("Accept", ContentTypeVS.JSON.getName());
+    	httpPost.addHeader("Content-Type", ContentTypeVS.JSON.getName());
     	HttpResponse response = null;
     	try {
     	    StringEntity entity = new StringEntity(json.toString(), "UTF-8");
-    	    entity.setContentType(ContentTypeVS.JSON);
+    	    entity.setContentType(ContentTypeVS.JSON.getName());
     	    httpPost.setEntity(entity);
     	    // execute is a blocking call, it's best to call this code in a thread separate from the ui's
     	    response = httpClient.execute(httpPost);
@@ -81,12 +81,12 @@ public class RestHelper {
     public static HttpResponse doPut (final String url,final JSONObject json) {
     	Log.d(CLASSTAG + ".doPut a url: " + url, "- JSON: " + json.toString());
 		HttpPut httpPut = new HttpPut(url);
-		httpPut.addHeader("Accept", ContentTypeVS.JSON);
-		httpPut.addHeader("Content-Type", ContentTypeVS.JSON);
+		httpPut.addHeader("Accept", ContentTypeVS.JSON.getName());
+		httpPut.addHeader("Content-Type", ContentTypeVS.JSON.getName());
 		HttpResponse response = null;
     	try {
     	    StringEntity entity = new StringEntity(json.toString(), "UTF-8");
-    	    entity.setContentType(ContentTypeVS.JSON);
+    	    entity.setContentType(ContentTypeVS.JSON.getName());
     	    httpPut.setEntity(entity);
     	    // execute is a blocking call, it's best to call this code in a thread separate from the ui's
     	    response = httpClient.execute(httpPut);
@@ -101,7 +101,7 @@ public class RestHelper {
     public static HttpResponse doDelete (final String url) {
     	Log.d(CLASSTAG + ".doDelete" , " - url: " + url);
 		HttpDelete httpDelete = new HttpDelete(url);
-		httpDelete.addHeader("Accept", ContentTypeVS.JSON);
+		httpDelete.addHeader("Accept", ContentTypeVS.JSON.getName());
 		HttpResponse response = null;
     	try {
     		// execute is a blocking call, it's best to call this code in a thread separate from the ui's

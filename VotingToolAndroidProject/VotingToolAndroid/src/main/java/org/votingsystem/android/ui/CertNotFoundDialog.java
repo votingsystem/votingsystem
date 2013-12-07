@@ -43,10 +43,10 @@ public class CertNotFoundDialog  extends DialogFragment {
             public void onClick(View v) {
             	Intent intent = null;
           	  	switch(ContextVSImpl.getInstance(getActivity().getBaseContext()).getState()) {
-          	  		case CON_CSR:
+          	  		case WITH_CSR:
           	  			intent = new Intent(getActivity(), UserCertResponseActivity.class);
           	  			break;
-          	  		case SIN_CSR:
+          	  		case WITHOUT_CSR:
           	  			intent = new Intent(getActivity(), UserCertRequestActivity.class);
           	  			break;
           	  	}

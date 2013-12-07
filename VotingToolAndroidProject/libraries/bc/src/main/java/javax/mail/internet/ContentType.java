@@ -225,13 +225,13 @@ public class ContentType {
      * are ignored. <p>
      *
      * For example, this method will return <code>true</code> when
-     * comparing the ContentTypes for <strong>ContentTypeVS.TEXT</strong>
+     * comparing the ContentTypes for <strong>text.plain</strong>
      * and <strong>"text/plain; charset=foobar"</strong>.
      *
      * If the <code>subType</code> of either operand is the special
      * character '*', then the subtype is ignored during the match. 
      * For example, this method will return <code>true</code> when 
-     * comparing the ContentTypes for <strong>ContentTypeVS.TEXT</strong>
+     * comparing the ContentTypes for <strong>text.plain</strong>
      * and <strong>"text/*" </strong>
      *
      * @param   cType	ContentType to compare this against
@@ -261,13 +261,13 @@ public class ContentType {
      * The parameters of both operands are ignored. <p>
      *
      * For example, this method will return <code>true</code> when
-     * comparing the ContentType for <strong>ContentTypeVS.TEXT</strong>
+     * comparing the ContentType for <strong>text.plain</strong>
      * with <strong>"text/plain; charset=foobar"</strong>.
      *
      * If the <code>subType</code> of either operand is the special 
      * character '*', then the subtype is ignored during the match. 
      * For example, this method will return <code>true</code> when 
-     * comparing the ContentType for <strong>ContentTypeVS.TEXT</strong>
+     * comparing the ContentType for <strong>text.plain</strong>
      * with <strong>"text/*" </strong>
      */
     public boolean match(String s) {

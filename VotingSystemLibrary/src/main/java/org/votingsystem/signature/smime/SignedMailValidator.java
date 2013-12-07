@@ -121,16 +121,16 @@ public class SignedMailValidator
             throw new IllegalArgumentException("certPathReviewerClass is not a subclass of " + DEFAULT_CERT_PATH_REVIEWER.getName());
         }
 
-        SMIMESigned s;
+        SMIMESigned smimeSigned;
 
         try {
             // check if message is multipart signed
-            if (message.isMimeType(ContentTypeVS.MULTIPART_SIGNED)) {
+            if (message.isMimeType(ContentTypeVS.MULTIPART_SIGNED.getName())) {
                 MimeMultipart mimemp = (MimeMultipart) message.getContent();
-                s = new SMIMESigned(mimemp);
+                smimeSigned = new SMIMESigned(mimemp);
             }
-            else if (message.isMimeType("application/pkcs7-mime") || message.isMimeType(ContentTypeVS.ENCRYPTED))  {
-                s = new SMIMESigned(message);
+            else if (message.isMimeType("application/pkcs7-mime") || message.isMimeType(ContentTypeVS.ENCRYPTED.getName()))  {
+                smimeSigned = new SMIMESigned(message);
             }
             else {
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME, "SignedMailValidator.noSignedMessage");
@@ -138,8 +138,8 @@ public class SignedMailValidator
             }
 
             // save certstore and signerInformationStore
-            certs = s.getCertificatesAndCRLs("Collection", "BC");
-            signers = s.getSignerInfos();
+            certs = smimeSigned.getCertificatesAndCRLs("Collection", "BC");
+            signers = smimeSigned.getSignerInfos();
 
             // save "from" addresses from message
         /* TODO-ADDRESSES

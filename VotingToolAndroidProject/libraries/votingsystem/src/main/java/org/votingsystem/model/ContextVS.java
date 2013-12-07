@@ -3,18 +3,17 @@ package org.votingsystem.model;
 
 public class ContextVS {
 
-
-    public enum State {CON_CERTIFICADO, CON_CSR, SIN_CSR}
+    public enum State {WITH_CERTIFICATE, WITH_CSR, WITHOUT_CSR}
 
     public static final String TAG = "ContextVS";
 
     public static final String OCSP_DNIE_URL = "http://ocsp.dnie.es";
 
-    public static final String PREFS_ESTADO               = "state";
-    public static final String PREFS_ID_SOLICTUD_CSR      = "idSolicitudCSR";
-    public static final String PREFS_ID_APLICACION        = "idAplicacion";
+    public static final String STATE_KEY                  = "state";
+    public static final String CSR_REQUEST_ID_KEY         = "csrRequestId";
+    public static final String APPLICATION_ID_KEY         = "idAplicacion";
     public static final String EVENT_KEY                  = "eventKey";
-    public static final String SIGNED_FILE_NAME     = "signedFile";
+    public static final String SIGNED_FILE_NAME           = "signedFile";
     public static final String CSR_FILE_NAME              = "csr";
     public static final String ACCESS_REQUEST_FILE_NAME   = "accessRequest";
     public static final String SIGNED_PART_EXTENSION      = ".p7m";

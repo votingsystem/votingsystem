@@ -418,7 +418,7 @@ public class EventVS {
         URL = uRL;
     }
 
-    public String getSignatureContentJSON() throws JSONException {
+    public JSONObject getSignatureContentJSON() throws JSONException {
         Log.d(TAG + ".getSignatureData(...)", "");
         Map<String, Object> map = new HashMap<String, Object>();
         if(accessControlVS != null) {
@@ -450,7 +450,7 @@ public class EventVS {
             }
             jsonObject.put("campos", jsonArray);
         }
-        return jsonObject.toString();
+        return jsonObject;
     }
 
     public static EventVS parse(String eventoStr) throws ParseException, JSONException  {

@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.votingsystem.model.ContextVSImpl.SIGNED_FILE_NAME;
+import static org.votingsystem.model.ContextVS.SIGNED_FILE_NAME;
 /**
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia

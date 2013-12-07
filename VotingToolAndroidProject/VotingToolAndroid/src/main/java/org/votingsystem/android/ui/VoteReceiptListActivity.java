@@ -21,6 +21,7 @@ import org.votingsystem.android.NavigationDrawer;
 import org.votingsystem.android.R;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.db.VoteReceiptDBHelper;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.model.ResponseVS;
@@ -39,8 +40,8 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.votingsystem.model.ContextVSImpl.USER_CERT_ALIAS;
-import static org.votingsystem.model.ContextVSImpl.KEY_STORE_FILE;
+import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
+import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 
 public class VoteReceiptListActivity extends ActionBarActivity
         implements CertPinDialogListener, ReceiptOperationsListener {
@@ -289,7 +290,7 @@ public class VoteReceiptListActivity extends ActionBarActivity
     @Override public void cancelVote(VoteVS receipt) {
         Log.d(TAG + ".cancelVote(...)", " - cancelVote");
         operationReceipt = receipt;
-        if (!ContextVSImpl.State.CON_CERTIFICADO.equals(contextVS.getState())) {
+        if (!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState())) {
             Log.d(TAG + "- firmarEnviarButton -", " mostrando dialogo certificado no encontrado");
             showCertNotFoundDialog();
         } else {

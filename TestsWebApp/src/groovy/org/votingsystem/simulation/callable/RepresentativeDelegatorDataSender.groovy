@@ -47,7 +47,7 @@ public class RepresentativeDelegatorDataSender implements Callable<ResponseVS> {
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie,
                 END_ENTITY_ALIAS, PASSWORD.toCharArray(), DNIe_SIGN_MECHANISM);
 
-        String msgSubject = ContextVS.getInstance().getMessage("representativeDelegationMsgSubject", null);
+        String msgSubject = ApplicationContextHolder.getInstance().getMessage("representativeDelegationMsgSubject", null);
                 
         SMIMEMessageWrapper smimeMessage = signedMailGenerator.genMimeMessage(
                 userNIF, toUser, delegationDataJSON, msgSubject, null);        

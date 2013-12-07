@@ -132,7 +132,7 @@ public class SignedMailValidator
                 s = new SMIMESigned(mimemp);
             }
             else if (message.isMimeType("application/pkcs7-mime")
-                    || message.isMimeType(ContentTypeVS.ENCRYPTED))
+                    || message.isMimeType(ContentTypeVS.ENCRYPTED.getName()))
             {
                 s = new SMIMESigned(message);
             }

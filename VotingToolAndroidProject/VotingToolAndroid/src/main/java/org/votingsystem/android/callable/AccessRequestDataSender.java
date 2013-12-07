@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import static org.votingsystem.model.ContextVSImpl.*;
+import static org.votingsystem.model.ContextVS.*;
 
 /**
 * @author jgzornoza

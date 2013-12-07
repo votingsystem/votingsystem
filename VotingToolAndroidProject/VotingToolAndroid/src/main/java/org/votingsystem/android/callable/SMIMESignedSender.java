@@ -38,8 +38,8 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Callable;
 
-import static org.votingsystem.model.ContextVSImpl.USER_CERT_ALIAS;
-import static org.votingsystem.model.ContextVSImpl.SIGNATURE_ALGORITHM;
+import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
+import static org.votingsystem.model.ContextVS.SIGNATURE_ALGORITHM;
 
 public class SMIMESignedSender implements Callable<ResponseVS> {
 
@@ -99,13 +99,13 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
             if(destinationCert != null) {
                 messageToSend = Encryptor.encryptSMIME(
                         smimeMessage, destinationCert);
-                documentContentType = ContentTypeVS.SIGNED_AND_ENCRYPTED;
+                documentContentType = ContentTypeVS.SIGNED_AND_ENCRYPTED.getName();
             } else {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 smimeMessage.writeTo(baos);
                 messageToSend = baos.toByteArray();
                 baos.close();
-                documentContentType = ContentTypeVS.SIGNED;
+                documentContentType = ContentTypeVS.SIGNED.getName();
             }
             responseVS  = HttpHelper.sendData(messageToSend, documentContentType, serviceURL);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

@@ -46,13 +46,13 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
         String documentContentType = null;
         if(destinationCert != null) {
             messageToSendBytes = Encryptor.encryptSMIME(smimeMessage, destinationCert);
-            documentContentType = ContentTypeVS.SIGNED_AND_ENCRYPTED;
+            documentContentType = ContentTypeVS.SIGNED_AND_ENCRYPTED.getName();
         } else {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             smimeMessage.writeTo(baos);
             messageToSendBytes = baos.toByteArray();
             baos.close();
-            documentContentType = ContentTypeVS.SIGNED;
+            documentContentType = ContentTypeVS.SIGNED.getName();
         }
         responseVS = HttpHelper.getInstance().sendData(messageToSendBytes, documentContentType,
                 urlToSendDocument, headers);

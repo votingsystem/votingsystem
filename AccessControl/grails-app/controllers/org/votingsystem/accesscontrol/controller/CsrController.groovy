@@ -1,6 +1,7 @@
 package org.votingsystem.accesscontrol.controller
 
 import grails.converters.JSON
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.EnvironmentVS
 import org.votingsystem.util.StringUtils
 import org.votingsystem.model.CertificateVS
@@ -32,20 +33,19 @@ class CsrController {
 	
 	/**
 	 * Servicio que devuelve las solicitudes de certificados firmadas una vez que
-	 * se ha validado la identidad del userVS.
+	 * se ha validado la identidad del usuario.
 	 *
 	 * @httpMethod [GET]
-	 * @param idSolicitudCSR Identificador de la solicitud de certificación enviada previamente por el userVS.
-	 * @return Si el sistema ha validado al userVS devuelve la solicitud de certificación firmada.
+	 * @param csrRequestId Identificador de la solicitud de certificación enviada previamente por el usuario.
+	 * @return Si el sistema ha validado al usuario devuelve la solicitud de certificación firmada.
 	 */
 	def index() { 
-		UserRequestCsrVS solicitudCSR
+		UserRequestCsrVS csrRequest
 		UserRequestCsrVS.withTransaction {
-			solicitudCSR = UserRequestCsrVS.findWhere(
-				id:params.long('idSolicitudCSR'), state:UserRequestCsrVS.State.OK)
+			csrRequest = UserRequestCsrVS.findWhere(id:params.long('csrRequestId'), state:UserRequestCsrVS.State.OK)
 		}
-		if (solicitudCSR) {
-			def certificate = CertificateVS.findWhere(solicitudCSRUsuario:solicitudCSR)
+		if (csrRequest) {
+			def certificate = CertificateVS.findWhere(userRequestCsrVS:csrRequest)
 			if (certificate) {
 				response.status = ResponseVS.SC_OK
 				ByteArrayInputStream bais = new ByteArrayInputStream(certificate.content)
@@ -53,75 +53,45 @@ class CsrController {
 				File keyStoreFile = grailsApplication.mainContext.getResource(
 					grailsApplication.config.VotingSystem.keyStorePath).getFile()
 				
-				String aliasClaves = grailsApplication.config.VotingSystem.signKeysAlias
+				String keyAlias = grailsApplication.config.VotingSystem.signKeysAlias
 				String password = grailsApplication.config.VotingSystem.signKeysPassword
 				KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(
 					FileUtils.getBytesFromFile(keyStoreFile), password.toCharArray());
-				Certificate[] certsServer =  keyStore.getCertificateChain(aliasClaves);
-				
-				List<X509Certificate> certs =new ArrayList<X509Certificate>();
-				certs.add(certX509);
-				for(Certificate cert : certsServer) {
-					certs.add((X509Certificate)cert);
-				}
-				
-				log.debug("certs.size(): " + certs.size())
-				
-				
-				byte[] pemCert = CertUtil.getPEMEncoded(certs)
-				
-				//byte[] pemCert = CertUtil.getPEMEncoded (certX509)
-				response.setContentType(ContentTypeVS.TEXT)
-				response.contentLength = pemCert.length
-				response.outputStream <<  pemCert
-				response.outputStream.flush()
-				return false
-			}
-			response.status = ResponseVS.SC_NOT_FOUND
-			render message(code: "csr.ErrorGeneracionCert")
-			return false
-		} 
-		response.status = ResponseVS.SC_NOT_FOUND
-		render message(code: "csrRequestNotValidated")
-		return false
+				Certificate[] certsServer =  keyStore.getCertificateChain(keyAlias);
+				List<X509Certificate> certs =Arrays.asList(certsServer)
+				certs.add(certX509, 0);
+                params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
+                        messageBytes: CertUtil.getPEMEncoded (certs))
+			} else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code: "csrGenerationErrorMsg"))
+		} else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code: "csrRequestNotValidated"))
 	}
 	
 	
 	/**
 	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS)<br/>
-	 * Servicio para la creación de certificados de userVS.
+	 * Servicio para la creación de certificados de usuario.
 	 * 
 	 * @httpMethod [POST]
-	 * @param csr Solicitud de certificación con los datos de userVS.
+	 * @param csr Solicitud de certificación con los datos de usuario.
 	 * @return Si todo es correcto devuelve un código de estado HTTP 200 y el identificador 
 	 *         de la solicitud en la base de datos.
 	 */
-	def solicitar() {
-        if(!EnvironmentVS.DEVELOPMENT.equals(
-                ApplicationContextHolder.getEnvironment())) {
-            def msg = message(code: "serviceDevelopmentModeMsg")
-            log.error msg
-            response.status = ResponseVS.SC_ERROR_REQUEST
-            render msg
-            return false
+	def request() {
+        if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))
+            return
         }
 		String consulta = "${request.getInputStream()}"
 		if (!consulta) {
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render message(code: 'requestWithErrorsHTML', args:[
-				"${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
-			return false
-		}
-		ResponseVS responseVS = csrService.saveUserCSR(consulta.getBytes(), request.getLocale())
-		response.status = responseVS.statusCode
-		render responseVS.message
-		return false;
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',args:[
+                    "${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
+		} else  params.responseVS = csrService.saveUserCSR(consulta.getBytes(), request.getLocale())
 	}
 	
 	/**
 	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS).
 	 *
-	 * Servicio que signatureVS solicitudes de certificación de userVS.<br/>
+	 * Servicio que signatureVS solicitudes de certificación de usuario.<br/>
 	 *
 	 * TODO - Hacer las validaciones sólo sobre solicitudes firmadas electrónicamente
 	 * por personal dado de alta en la base de datos.
@@ -135,21 +105,14 @@ class CsrController {
 	 * @return Si todo es correcto devuelve un código de estado HTTP 200.
 	 */
 	def validacion() {
-        if(!EnvironmentVS.DEVELOPMENT.equals(
-                ApplicationContextHolder.getEnvironment())) {
-            def msg = message(code: "serviceDevelopmentModeMsg")
-            log.error msg
-            response.status = ResponseVS.SC_ERROR_REQUEST
-            render msg
-            return false
+        if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))
+            return
         }
 		MessageSMIME messageSMIME = params.messageSMIMEReq
 		if(!messageSMIME) {
-			String msg = message(code:'requestWithoutFile')
-			log.error msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))
+            return
 		}
 		List<String> administradores = Arrays.asList(
 			grailsApplication.config.VotingSystem.adminsDNI.split(","))
@@ -157,41 +120,28 @@ class CsrController {
 		def docValidacionJSON = JSON.parse(messageSMIME.getSmimeMessage().getSignedContent())
 		SMIMEMessageWrapper smimeMessageReq = messageSMIME.getSmimeMessage()
 		if (administradores.contains(userVS.nif) || userVS.nif.equals(docValidacionJSON.nif)) {
-			String msg = message(code: "userWithCSRPrivileges", args: [userVS.nif])
 			DeviceVS dispositivo = DeviceVS.findWhere(deviceId: docValidacionJSON.deviceId)
 			if (!dispositivo?.userVS) {
-				response.status = ResponseVS.SC_ERROR_REQUEST
-				render message(code: "csr.solicitudNoEncontrada", args: [smimeMessageReq.getSignedContent()])
-				return false
+                params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code:"csr.solicitudNoEncontrada",
+                        args: [smimeMessageReq.getSignedContent()]))
+				return
 			}
 			if(dispositivo.userVS.nif != userVS.nif) {
-				log.debug "UserVS con nif:'${userVS.nif}' intentando validar deviceVS:" +
-					"'${dispositivo.id}' con nif:'${dispositivo.userVS.nif}'"
-				render message(code: "userWithoutPrivilegesToValidateCSR", args: [userVS.nif])
-				return false
+                params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                        message(code: "userWithoutPrivilegesToValidateCSR", args: [userVS.nif]))
+                return
 			}
-			UserRequestCsrVS solicitudCSR = UserRequestCsrVS.findWhere(userVS:dispositivo.userVS,
+			UserRequestCsrVS csrRequest = UserRequestCsrVS.findWhere(userVS:dispositivo.userVS,
 				state:UserRequestCsrVS.State.PENDING);
-			if (!solicitudCSR) {
-				response.status = ResponseVS.SC_ERROR_REQUEST
-				render message(code: "userCSRNotFoundMsg", args: [userVSMovil.nif])
-				return false
+			if (!csrRequest) {
+                params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                        message(code: "userCSRNotFoundMsg", args: [userVSMovil.nif]))
+                return
 			}
-			ResponseVS csrValidationResponseVS = csrService.signCertUserVS(solicitudCSR, request.getLocale())
-			if (ResponseVS.SC_OK == csrValidationResponseVS.statusCode) {
-				response.status = ResponseVS.SC_OK
-				render message(code: "csr.generacionCertOK")
-			} else {
-				response.status = csrValidationResponseVS.statusCode
-				render csrValidationResponseVS.message
-			}
-			return false
+			params.csrValidationResponseVS = csrService.signCertUserVS(csrRequest, request.getLocale())
 		} else {
-			String msg = message(code: "userWithoutPrivilegesToValidateCSR", args: [userVS.nif])
-			log.error msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code: "userWithoutPrivilegesToValidateCSR", args: [userVS.nif]))
 		}
 	}
 	
@@ -200,21 +150,17 @@ class CsrController {
 	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS). 
 	 * ==================================================
 	 * 
-	 * Servicio que signatureVS solicitudes de certificación de userVS.<br/>
+	 * Servicio que signatureVS solicitudes de certificación de usuario.<br/>
 	 * 
 	 * @httpMethod [POST]
-	 * @requestContentType [application/json] documento JSON con los datos del userVS
+	 * @requestContentType [application/json] documento JSON con los datos del usuario
 	 * <code>{deviceId:"000000000000000", phone:"15555215554", nif:"1R" }</code>
 	 * @return Si todo es correcto devuelve un código de estado HTTP 200.
 	 */
-	def validar() {
-		if(!EnvironmentVS.DEVELOPMENT.equals(
-			ApplicationContextHolder.getEnvironment())) {
-			def msg = message(code: "serviceDevelopmentModeMsg")
-			log.error msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
+	def validate() {
+		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))
+            return
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		String consulta = "${request.getInputStream()}"
@@ -227,39 +173,27 @@ class CsrController {
 		def dataJSON = JSON.parse(consulta)
 		DeviceVS dispositivo = DeviceVS.findByDeviceId(dataJSON?.deviceId?.trim())
 		if (!dispositivo) {
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render message(code: "csr.solicitudNoEncontrada", args: 
-				["deviceId: ${dataJSON?.deviceId}"])
-			return false
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code: "csr.solicitudNoEncontrada", args:["deviceId: ${dataJSON?.deviceId}"]))
+			return
 		}
 		UserVS userVS
-		String nifValidado = NifUtils.validate(dataJSON?.nif)
-		if(nifValidado) userVS = UserVS.findByNif(nifValidado)
+		String validatedNIF = NifUtils.validate(dataJSON?.nif)
+		if(validatedNIF) userVS = UserVS.findByNif(validatedNIF)
 		if (!userVS) {
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render message(code: "csr.solicitudNoEncontrada", args: ["nif: ${nifValidado}"])
-			return false
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code: "csr.solicitudNoEncontrada", args: ["nif: ${validatedNIF}"]))
+			return
 		}
-		UserRequestCsrVS solicitudCSR
+		UserRequestCsrVS csrRequest
 		UserRequestCsrVS.withTransaction{
-			solicitudCSR = UserRequestCsrVS.findByDispositivoAndUsuarioAndState(
+			csrRequest = UserRequestCsrVS.findByDeviceVSAndUserVSAndState(
 				dispositivo, userVS, UserRequestCsrVS.State.PENDING);
 		}
-		if (!solicitudCSR) {
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render message(code: "csr.solicitudNoEncontrada", args: [consulta])
-			return false
-		}
-		ResponseVS csrValidationResponseVS = csrService.signCertUserVS(
-			solicitudCSR, request.getLocale())
-		if (ResponseVS.SC_OK == csrValidationResponseVS.statusCode) {
-			response.status = ResponseVS.SC_OK
-			render message(code: "csr.generacionCertOK")
-		} else {
-			response.status = csrValidationResponseVS.statusCode
-			render csrValidationResponseVS.message
-		}
-		return false
+		if (!csrRequest) {
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code: "csr.solicitudNoEncontrada", args: [consulta]))
+		} else params.responseVS = csrService.signCertUserVS(csrRequest, request.getLocale())
 	}
 	
 }

@@ -76,7 +76,7 @@ import java.util.Vector;
  * # for example:<br>
  * text/plain    txt text TXT<br>
  * # this would map file.txt, file.text, and file.TXT to<br>
- * # the mime type ContentTypeVS.TEXT<br>
+ * # the mime type "text/plain"<br>
  * </code>
  *
  * @author Bart Calder

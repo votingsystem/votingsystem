@@ -45,11 +45,8 @@ class SubscriptionVSController {
 	def index() { 
 		MessageSMIME messageSMIME = params.messageSMIMEReq
 		if(!messageSMIME) {
-			String msg = message(code:'requestWithoutFile')
-			log.error msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))
+            return
 		}
 		ResponseVS responseVS = subscriptionVSService.matchControlCenter(messageSMIME, request.getLocale())
 		params.responseVS = responseVS
@@ -73,20 +70,18 @@ class SubscriptionVSController {
      */
     def checkControlCenter() {
         if(!params.serverURL) {
-            response.status = ResponseVS.SC_ERROR_REQUEST
-            render message(code: 'missingParamErrorMsg', args:["serverURL"])
-            return false
-        }
-        String serverURL = StringUtils.checkURL(params.serverURL)
-        ControlCenterVS controlCenter = ControlCenterVS.findWhere(serverURL:serverURL)
-        if(!controlCenter) {
-            response.status = ResponseVS.SC_ERROR_REQUEST
-            render message(code: 'serverNotFoundErrorMsg', args:[serverURL])
-            return false
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code: 'missingParamErrorMsg', args:["serverURL"]))
         } else {
-            Map controlCenterMap = userVSService.getControlCenterMap(controlCenter)
-            render controlCenterMap as JSON
-            return false
+            String serverURL = StringUtils.checkURL(params.serverURL)
+            ControlCenterVS controlCenter = ControlCenterVS.findWhere(serverURL:serverURL)
+            if(!controlCenter) {
+                params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                        message(code: 'serverNotFoundErrorMsg', args:[serverURL]))
+            } else {
+                Map controlCenterMap = userVSService.getControlCenterMap(controlCenter)
+                render controlCenterMap as JSON
+            }
         }
     }
 
@@ -101,20 +96,14 @@ class SubscriptionVSController {
 	 */
 	def claims() {
 		if(params.feedType && supportedFormats.contains(params.feedType)) {
-			render(text: getClaimsFeeds(params.feedType),
-				contentType:"text/xml", encoding:"UTF-8")
+			render(text: getClaimsFeeds(params.feedType), contentType:"text/xml", encoding:"UTF-8")
 		} else {
 			if(params.feedType && "rss".equals(params.feedType)) {
-				render(text: getClaimsFeeds("rss_1.0"),
-					contentType:"text/xml", encoding:"UTF-8")
-				return false;
+				render(text: getClaimsFeeds("rss_1.0"), contentType:"text/xml", encoding:"UTF-8")
 			} else if(params.feedType && "atom".equals(params.feedType)) {
-				render(text: getClaimsFeeds("atom_1.0"),
-					contentType:"text/xml", encoding:"UTF-8")
-			} else {
-				render(text: getClaimsFeeds("atom_1.0"),
-					contentType:"text/xml", encoding:"UTF-8")
-			}
+				render(text: getClaimsFeeds("atom_1.0"), contentType:"text/xml", encoding:"UTF-8")
+			} else  render(text: getClaimsFeeds("atom_1.0"), contentType:"text/xml", encoding:"UTF-8")
+            return false;
 		}
 	}
 	
@@ -128,20 +117,14 @@ class SubscriptionVSController {
 	 */
 	def elections() {
 		if(params.feedType && supportedFormats.contains(params.feedType)) {
-			render(text: getElectionFeeds(params.feedType),
-				contentType:"text/xml", encoding:"UTF-8")
+			render(text: getElectionFeeds(params.feedType), contentType:"text/xml", encoding:"UTF-8")
 		} else {
 			if(params.feedType && "rss".equals(params.feedType)) {
-				render(text: getElectionFeeds("rss_1.0"),
-					contentType:"text/xml", encoding:"UTF-8")
-				return false;
+				render(text: getElectionFeeds("rss_1.0"), contentType:"text/xml", encoding:"UTF-8")
 			} else if(params.feedType && "atom".equals(params.feedType)) {
-				render(text: getElectionFeeds("atom_1.0"),
-					contentType:"text/xml", encoding:"UTF-8")
-			} else {
-				render(text: getElectionFeeds("atom_1.0"),
-					contentType:"text/xml", encoding:"UTF-8")
-			}
+				render(text: getElectionFeeds("atom_1.0"), contentType:"text/xml", encoding:"UTF-8")
+			} else  render(text: getElectionFeeds("atom_1.0"), contentType:"text/xml", encoding:"UTF-8")
+            return false;
 		}
 	}
 	
@@ -155,20 +138,14 @@ class SubscriptionVSController {
 	 */
     def manifests() {
 		if(params.feedType && supportedFormats.contains(params.feedType)) {
-			render(text: getManifestsNews(params.feedType),
-				contentType:"text/xml", encoding:"UTF-8")
+			render(text: getManifestsNews(params.feedType), contentType:"text/xml", encoding:"UTF-8")
 		} else {
 			if(params.feedType && "rss".equals(params.feedType)) {
-				render(text: getManifestsNews("rss_1.0"),
-					contentType:"text/xml", encoding:"UTF-8")
-				return false;
+				render(text: getManifestsNews("rss_1.0"), contentType:"text/xml", encoding:"UTF-8")
 			} else if(params.feedType && "atom".equals(params.feedType)) {
-				render(text: getManifestsNews("atom_1.0"),
-					contentType:"text/xml", encoding:"UTF-8")
-			} else {
-				render(text: getManifestsNews("atom_1.0"),
-					contentType:"text/xml", encoding:"UTF-8")
-			}
+				render(text: getManifestsNews("atom_1.0"), contentType:"text/xml", encoding:"UTF-8")
+			} else  render(text: getManifestsNews("atom_1.0"), contentType:"text/xml", encoding:"UTF-8")
+            return false;
 		}
 	}
 	

@@ -8,6 +8,7 @@ import org.votingsystem.simulation.callable.ServerInitializer
 import org.votingsystem.simulation.model.SimulationData
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.NifUtils
+import org.votingsystem.util.StringUtils
 
 import java.util.concurrent.*
 
@@ -21,6 +22,7 @@ class EncryptionSimulationService {
     def webSocketService
 
     def messageSource
+    def grailsApplication
     private String simulationStarter
 
     private List<String> errorList = new ArrayList<String>();
@@ -46,6 +48,10 @@ class EncryptionSimulationService {
                     } else initSimulation(messageJSON)
                     break;
                 case Status.FINISH_SIMULATION:
+                    if(!simulationData || !simulationData.isRunning()) {
+                        log.error("SIMULATION ALREADY FINISHED")
+                        return
+                    }
                     if(simulationStarter?.equals(messageJSON.userId)) {
                         String message = messageSource.getMessage("simulationCancelledByUserMsg", null, locale) +
                                 " - message: ${messageJSON.message}"
@@ -99,7 +105,7 @@ class EncryptionSimulationService {
                     broadcastResul.errorList.each {synchronizedListenerSet.remove(it)}
                 }
             } else {
-                Logger.getLogger(AccessRequestSimulationService.class).debug("Cancelling BroadcastTimerTask - statusCode(): "
+                Logger.getLogger(EncryptionSimulationService.class).debug("Cancelling BroadcastTimerTask - statusCode(): "
                         + simulationData.getStatusCode() + " - message: " + simulationData.getMessage())
                 launcher.cancel();
             }

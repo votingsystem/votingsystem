@@ -23,7 +23,7 @@ public class ClienteOCSP {
 
     private static Logger logger = Logger.getLogger(ClienteOCSP.class);
 
-    public static CertificateVS.State validarCertificado(X509Certificate intermediateCert, BigInteger serialNumber,
+    public static CertificateVS.State validateCert(X509Certificate intermediateCert, BigInteger serialNumber,
                     Date dateCheck) throws Exception {
         OCSPReqGenerator ocspReqGen = new OCSPReqGenerator();
         ocspReqGen.addRequest(new CertificateID(CertificateID.HASH_SHA1, intermediateCert, serialNumber));
@@ -66,7 +66,7 @@ public class ClienteOCSP {
             X509Certificate caCert = readCert("./test/ca.pem");
             X509Certificate interCert = readCert("./test/inter.pem");
             X509Certificate clientCert = readCert("./test/client.pem");
-            logger.info("Cert state: " + validarCertificado(interCert, clientCert.getSerialNumber(),
+            logger.info("Cert state: " + validateCert(interCert, clientCert.getSerialNumber(),
                     new Date(System.currentTimeMillis())).toString());
         } catch (Exception ex){
             logger.error(ex.getMessage(), ex);

@@ -15,6 +15,7 @@ public enum TypeVS {
     OK,
     TEST,
     ERROR,
+    CANCELLED,
     USER_ERROR,
     RECEIPT,
     VOTING_EVENT,

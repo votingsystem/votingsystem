@@ -59,16 +59,15 @@ class EventVSClaimController {
 						eventVS.state == EventVS.State.CANCELLED || eventVS.state == EventVS.State.TERMINATED)) eventVS = null
 			}
 			if(!eventVS) {
-				response.status = ResponseVS.SC_NOT_FOUND
-				render message(code: 'eventVSNotFound', args:[params.id])
-				return false
+                params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                        message(code: 'eventVSNotFound', args:[params.id]))
+				return
 			} else {
-				if(request.contentType?.contains(ContentTypeVS.JSON)) {
+				if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
 					render eventVSService.getEventVSMap(eventVS) as JSON
 					return false
 				} else {
-					render(view:"eventVSClaim", model: [
-						selectedSubsystem:SubSystemVS.CLAIMS.toString(),
+					render(view:"eventVSClaim", model: [selectedSubsystem:SubSystemVS.CLAIMS.toString(),
 						eventMap: eventVSService.getEventVSMap(eventVS)])
 					return
 				}
@@ -104,7 +103,6 @@ class EventVSClaimController {
                 eventsVSMap.eventsVS.claims.add(
 				eventVSService.getEventVSClaimMap(eventVSItem))
         }
-        response.setContentType(ContentTypeVS.JSON)
         render eventsVSMap as JSON
     }
     
@@ -135,16 +133,14 @@ class EventVSClaimController {
             if (messageSMIME) {
                     response.status = ResponseVS.SC_OK
                     response.contentLength = messageSMIME.content.length
-                    //response.setContentType(ContentTypeVS.TEXT)
+                    //response.setContentType(ContentTypeVS.TEXT.getName())
                     response.outputStream <<  messageSMIME.content
                     response.outputStream.flush()
                     return false
             }
         }
         if (!eventVS || !messageSMIME) {
-            response.status = ResponseVS.SC_NOT_FOUND
-            render message(code: 'eventVSNotFound', args:[params.id])
-            return false
+            params.responseVS =new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code:'eventVSNotFound',args:[params.id]))
         }
     }
     
@@ -158,27 +154,19 @@ class EventVSClaimController {
 	 */
 	def signed () {
 		def eventVS
-		EventVS.withTransaction {
-			eventVS = EventVSClaim.get(params.long('id'))
-		}
+		EventVS.withTransaction { eventVS = EventVSClaim.get(params.long('id')) }
 		if (eventVS) {
 			MessageSMIME messageSMIME
 			MessageSMIME.withTransaction {
-				messageSMIME = MessageSMIME.findWhere(eventVS:eventVS, type:
-					TypeVS.CLAIM_EVENT)
+				messageSMIME = MessageSMIME.findWhere(eventVS:eventVS, type:TypeVS.CLAIM_EVENT)
 			}
 			if (messageSMIME) {
-				response.status = ResponseVS.SC_OK
-				response.contentLength = messageSMIME.content.length
-				response.setContentType(ContentTypeVS.TEXT)
-				response.outputStream <<  messageSMIME.content
-				response.outputStream.flush()
-				return false
+                params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType:ContentTypeVS.TEXT_STREAM,
+                        messageBytes: messageSMIME.content)
+                return
 			}
 		}
-		response.status = ResponseVS.SC_NOT_FOUND
-		render message(code: 'eventVSNotFound', args:[params.id])
-		return false
+        params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code: 'eventVSNotFound', args:[params.id]))
 	}
     
 	/**
@@ -193,27 +181,18 @@ class EventVSClaimController {
 	 */
     def save () {
 		MessageSMIME messageSMIMEReq = params.messageSMIMEReq
-		if(!messageSMIMEReq) {
-			String msg = message(code:'requestWithoutFile')
-			log.error msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
-		}
-        try {
-			ResponseVS responseVS = eventVSClaimService.saveEvent(
-				messageSMIMEReq, request.getLocale())
-			if(ResponseVS.SC_OK == responseVS.statusCode) {
-				response.setHeader('eventURL',
-					"${grailsApplication.config.grails.serverURL}/eventVSClaim/${responseVS.eventVS.id}")
-				response.setContentType(ContentTypeVS.SIGNED)
-			} 
-			params.responseVS = responseVS
-        } catch (Exception ex) {
-			log.error (ex.getMessage(), ex)
-			params.responseVS = new ResponseVS( statusCode:ResponseVS.SC_ERROR_REQUEST,
-				message:message(code:'publishClaimErrorMessage'),  type:TypeVS.CLAIM_EVENT_ERROR)
+        if(!messageSMIMEReq) {
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))
+            return
         }
+        ResponseVS responseVS = eventVSClaimService.saveEvent(
+                messageSMIMEReq, request.getLocale())
+        if(ResponseVS.SC_OK == responseVS.statusCode) {
+            response.setHeader('eventURL',
+                    "${grailsApplication.config.grails.serverURL}/eventVSClaim/${responseVS.eventVS.id}")
+            responseVS.setContentType(ContentTypeVS.SIGNED)
+        }
+        params.responseVS = responseVS
     }
 	
 	/**
@@ -234,7 +213,7 @@ class EventVSClaimController {
 		} else eventVSClaim = params.eventVS
         if (eventVSClaim) {
             def statisticsMap = eventVSClaimSignatureCollectorService.getStatisticsMap(eventVSClaim, request.getLocale())
-			if(request.contentType?.contains(ContentTypeVS.JSON)) {
+			if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
 				if (params.callback) render "${params.callback}(${statisticsMap as JSON})"
 				else render statisticsMap as JSON
 				return false
@@ -243,9 +222,7 @@ class EventVSClaimController {
 				return
 			}
         }
-        response.status = ResponseVS.SC_NOT_FOUND
-        render message(code: 'eventVSNotFound', args:[params.id])
-        return false
+        params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code: 'eventVSNotFound', args:[params.id]))
     }
 
 	
@@ -261,9 +238,9 @@ class EventVSClaimController {
 	def signaturesInfo () {
 		EventVSClaim eventVS = EventVSClaim.get(params.id)
 		if (!eventVS) {
-			response.status = ResponseVS.SC_NOT_FOUND
-			render message(code: 'eventVSNotFound', args:[params.id])
-			return false
+            params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                    message(code: 'eventVSNotFound', args:[params.id]))
+			return
 		}
 		def eventVSClaimInfoMap = new HashMap()
 		List<SignatureVS> signatures
@@ -281,7 +258,7 @@ class EventVSClaimController {
 			firmaReclamacionURL:"${grailsApplication.config.grails.serverURL}/messageSMIME" +
 				"/get?id=${firma.messageSMIME.id}",
 			reciboFirmaReclamacionURL:"${grailsApplication.config.grails.serverURL}/messageSMIME" +
-				"/recibo/${firma.messageSMIME?.id}"]
+				"/receipt/${firma.messageSMIME?.id}"]
 			def fieldValues = FieldValueEventVS.findAllWhere(firma:firma)
 			signatureMap.fieldsEventVS = []
 			fieldValues.each { fieldValue ->
@@ -289,8 +266,6 @@ class EventVSClaimController {
 			}
 			eventVSClaimInfoMap.signatures.add(signatureMap)
 		}
-		response.status = ResponseVS.SC_OK
-		response.setContentType(ContentTypeVS.JSON)
 		render eventVSClaimInfoMap as JSON
 	}
 }

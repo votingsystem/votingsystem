@@ -7,6 +7,7 @@ import org.votingsystem.simulation.callable.ServerInitializer
 import org.votingsystem.simulation.model.SimulationData
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.NifUtils
+import org.votingsystem.util.StringUtils
 
 import java.util.concurrent.*
 
@@ -49,6 +50,10 @@ class MultiSignSimulationService {
                     } else initSimulation(messageJSON)
                     break;
                 case Status.FINISH_SIMULATION:
+                    if(!simulationData || !simulationData.isRunning()) {
+                        log.error("SIMULATION ALREADY FINISHED")
+                        return
+                    }
                     if(simulationStarter?.equals(messageJSON.userId)) {
                         String message = messageSource.getMessage("simulationCancelledByUserMsg", null, locale) +
                                 " - message: ${messageJSON.message}"

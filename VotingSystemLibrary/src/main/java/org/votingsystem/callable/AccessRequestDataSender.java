@@ -46,7 +46,7 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
         logger.debug("doInBackground - accessServiceURL: " +  ContextVS.getInstance().getAccessControl().getAccessServiceURL());
         TimeStampRequest timeStampRequest = smimeMessage.getTimeStampRequest();
         ResponseVS responseVS = HttpHelper.getInstance().sendData(timeStampRequest.getEncoded(),
-                ContentTypeVS.TIMESTAMP_QUERY, ContextVS.getInstance().getAccessControl().getTimeStampServerURL());
+                ContentTypeVS.TIMESTAMP_QUERY.getName(), ContextVS.getInstance().getAccessControl().getTimeStampServerURL());
         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
             byte[] bytesToken = responseVS.getMessageBytes();
             TimeStampToken timeStampToken = new TimeStampToken(new CMSSignedData(bytesToken));
@@ -58,8 +58,9 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
             Header header = new Header("votingSystemMessageType", "voteCsr");
             byte[] encryptedCSRBytes = Encryptor.encryptMessage(pkcs10WrapperClient.getCsrPEM(),destinationCert,header);
             byte[] accessRequestEncryptedBytes = Encryptor.encryptSMIME(smimeMessage, destinationCert);
-            String csrFileName = ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.ENCRYPTED;
-            String accessRequestFileName = ContextVS.ACCESS_REQUEST_FILE_NAME + ":" + ContentTypeVS.SIGNED_AND_ENCRYPTED;
+            String csrFileName = ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.ENCRYPTED.getName();
+            String accessRequestFileName = ContextVS.ACCESS_REQUEST_FILE_NAME + ":" +
+                    ContentTypeVS.SIGNED_AND_ENCRYPTED.getName();
             Map<String, Object> mapToSend = new HashMap<String, Object>();
             mapToSend.put(csrFileName, encryptedCSRBytes);
             mapToSend.put(accessRequestFileName, accessRequestEncryptedBytes);

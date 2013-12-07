@@ -21,6 +21,7 @@ public class ResponseVS<T> {
     public static final int SC_NOT_FOUND = 404;
     public static final int SC_ERROR_VOTE_REPEATED = 470;
     public static final int SC_CANCELLATION_REPEATED = 471;
+    public static final int SC_EXCEPTION = 490;
     public static final int SC_NULL_REQUEST = 472;
     public static final int SC_ERROR           = 500;
     public static final int SC_ERROR_TIMESTAMP = 570;
@@ -39,6 +40,7 @@ public class ResponseVS<T> {
     private TypeVS type;
     private UserVS userVS;
     private byte[] messageBytes;
+    private ContentTypeVS contentType = ContentTypeVS.TEXT;
     private File file;
     private List<String> errorList;
         
@@ -175,5 +177,13 @@ public class ResponseVS<T> {
 
     public void setFile(File file) {
         this.file = file;
+    }
+
+    public ContentTypeVS getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(ContentTypeVS contentType) {
+        this.contentType = contentType;
     }
 }

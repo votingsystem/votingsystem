@@ -23,6 +23,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import org.votingsystem.android.callable.PDFPublisher;
 import org.votingsystem.android.callable.SMIMESignedSender;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.model.SubSystemVS;
 import org.votingsystem.model.OperationVS;
@@ -40,8 +41,8 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.util.UUID;
 
-import static org.votingsystem.model.ContextVSImpl.USER_CERT_ALIAS;
-import static org.votingsystem.model.ContextVSImpl.KEY_STORE_FILE;
+import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
+import static org.votingsystem.model.ContextVS.KEY_STORE_FILE;
 
 /**
  * @author jgzornoza
@@ -73,15 +74,21 @@ public class EventPublishingActivity extends ActionBarActivity implements CertPi
         String operation = getIntent().getStringExtra(OperationVS.OPERATION_KEY);
         if(operation!= null) { //called from browser
         	try {
-				processOperation(OperationVS.parse(operation));
+                this.pendingOperationVS = OperationVS.parse(operation);
+                if (!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState())) {
+                    Log.d(TAG + ".processOperation(...)", " - Cert Not Found - ");
+                    showCertNotFoundDialog();
+                } else showPinScreen(null);
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
         }
         String formTypeStr = getIntent().getStringExtra(FORM_TYPE_KEY);
+        Log.d(TAG + ".onCreate(...) ", " - formType: " + formTypeStr);
         String screenTitle = null;
-        String serverURL = contextVS.getAccessControlVS().getPublishServiceURL(formType);
+        String serverURL = null;
         if(formTypeStr != null) {
+            serverURL = contextVS.getAccessControlVS().getPublishServiceURL(formType);
             formType = TypeVS.valueOf(formTypeStr);
         	switch(formType) {
 	        	case CLAIM_PUBLISHING:
@@ -138,6 +145,17 @@ public class EventPublishingActivity extends ActionBarActivity implements CertPi
 	    }
 	    ft.addToBackStack(null);
 	    pinDialog.show(ft, CertPinDialog.TAG);
+    }
+
+    //This is for JavaScriptInterface.java operation processing
+    public void processOperation(OperationVS operationVS) {
+        Log.d(TAG + ".processOperation(...) ",
+                " --- processOperation: " + operationVS.getTypeVS());
+        this.pendingOperationVS = operationVS;
+        if (!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState())) {
+            Log.d(TAG + ".processOperation(...)", " - Cert Not Found - ");
+            showCertNotFoundDialog();
+        } else showPinScreen(null);
     }
 	
     private void loadUrl(String serverURL) {
@@ -199,16 +217,6 @@ public class EventPublishingActivity extends ActionBarActivity implements CertPi
 	@Override
 	public void onRestoreInstanceState(Bundle savedInstanceState) {
 		Log.d(TAG + ".onRestoreInstanceState(...) ", " --- onRestoreInstanceState");
-	}
-
-	public void processOperation(OperationVS operationVS) {
-		Log.d(TAG + ".processOperation(...) ", 
-				" --- processOperation: " + operationVS.getTypeVS());
-		this.pendingOperationVS = operationVS;
-		if (!ContextVSImpl.State.CON_CERTIFICADO.equals(contextVS.getState())) {
-    		Log.d(TAG + ".processOperation(...)", " - Cert Not Found - ");
-    		showCertNotFoundDialog();
-    	} else showPinScreen(null);
 	}
 	
 	private void showCertNotFoundDialog() {

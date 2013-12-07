@@ -34,6 +34,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import org.votingsystem.model.AccessControlVS;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.OperationVS;
@@ -45,8 +46,8 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.UUID;
 
-import static org.votingsystem.model.ContextVSImpl.PREFS_ID_APLICACION;
-import static org.votingsystem.model.ContextVSImpl.SERVER_URL_EXTRA_PROP_NAME;
+import static org.votingsystem.model.ContextVS.APPLICATION_ID_KEY;
+import static org.votingsystem.model.ContextVS.SERVER_URL_EXTRA_PROP_NAME;
 
 //import org.eclipse.jetty.websocket.WebSocket;
 //import org.eclipse.jetty.websocket.WebSocketClient;
@@ -136,19 +137,19 @@ public class MainActivity extends FragmentActivity {
         progressDialog.show();
     }
 
-    private void setActivityState(ContextVSImpl.State state) {
+    private void setActivityState(ContextVS.State state) {
     	Log.d(TAG + ".setActivityState()", " - state: " + state);
     	Intent intent = null;
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         contextVS.setState(state);
     	switch (state) {
-	    	case SIN_CSR:
-	    		String idAplicacion = settings.getString(PREFS_ID_APLICACION, null);
+	    	case WITHOUT_CSR:
+	    		String idAplicacion = settings.getString(APPLICATION_ID_KEY, null);
 	    		if (idAplicacion == null || "".equals(idAplicacion)) {
 	    			Log.d(TAG + ".setActivityState() ", " - guardando ID aplicación");
 	    			idAplicacion = UUID.randomUUID().toString();
 	    			SharedPreferences.Editor editor = settings.edit();
-	    			editor.putString(PREFS_ID_APLICACION, idAplicacion);
+	    			editor.putString(APPLICATION_ID_KEY, idAplicacion);
 			        editor.commit();
 	    		}
 	            setContentView(R.layout.main_activity);
@@ -169,10 +170,10 @@ public class MainActivity extends FragmentActivity {
 	                }
 	            });
 	    		break;
-	    	case CON_CSR:
+	    	case WITH_CSR:
 	    		intent = new Intent(getBaseContext(), UserCertResponseActivity.class);
 	    		break;
-	    	case CON_CERTIFICADO:
+	    	case WITH_CERTIFICATE:
 	    		intent = new Intent(getBaseContext(), NavigationDrawer.class);
 	    		break;
     	}
@@ -182,12 +183,12 @@ public class MainActivity extends FragmentActivity {
     	}
     }
     
-    private void processOperation(OperationVS operationVS, ContextVSImpl.State state) {
+    private void processOperation(OperationVS operationVS, ContextVS.State state) {
     	Log.d(TAG + ".processOperation(...)", "- operationVS: " +
     			operationVS.getTypeVS() + " - state: " + state);
         contextVS.setEvent(operationVS.getEventVS());
         Intent intent = null;
-        if(ContextVSImpl.State.CON_CERTIFICADO == state) {
+        if(ContextVS.State.WITH_CERTIFICATE == state) {
     		switch(operationVS.getTypeVS()) {
 		        case SEND_SMIME_VOTE:
                     intent = new Intent(MainActivity.this, VotingEventFragment.class);

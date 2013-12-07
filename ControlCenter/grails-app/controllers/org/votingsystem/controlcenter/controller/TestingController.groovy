@@ -7,14 +7,9 @@ class TestingController {
 
 	def grailsApplication
 	
-    def index() { 
-		//render "${Metadata.current.isWarDeployed()}"
-	}
+    def index() { }
 	
-	def android() {
-		render org.bouncycastle.tsp.TSPAlgorithms.SHA256
-		return false
-	}
+
 
 
 }

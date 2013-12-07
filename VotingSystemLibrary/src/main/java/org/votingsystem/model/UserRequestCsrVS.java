@@ -23,7 +23,7 @@ public class UserRequestCsrVS implements Serializable {
     @Column(name="content", nullable=false) @Lob private byte[] content;
     @OneToOne(mappedBy="userRequestCsrVS") private CertificateVS certificateVS;
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="dispositivo") private DeviceVS deviceVS;
+    @JoinColumn(name="device") private DeviceVS deviceVS;
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;

@@ -274,7 +274,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * Returns the value of the RFC 822 "Content-Type" header field.
      * This represents the content type of the content of this
      * body part. This value must not be null. If this field is
-     * unavailable, ContentTypeVS.TEXT should be returned. <p>
+     * unavailable, text.plain should be returned. <p>
      *
      * This implementation uses <code>getHeader(name)</code>
      * to obtain the requisite header field.
@@ -296,7 +296,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * The parameters of the content types are ignored. <p>
      *
      * For example, this method will return <code>true</code> when
-     * comparing a Part of content type <strong>ContentTypeVS.TEXT</strong>
+     * comparing a Part of content type <strong>text.plain</strong>
      * with <strong>"text/plain; charset=foobar"</strong>. <p>
      *
      * If the <code>subType</code> of <code>mimeType</code> is the
@@ -715,7 +715,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
 
     /**
      * Convenience method that sets the given String as this
-     * part's content, with a MIME type of ContentTypeVS.TEXT. If the
+     * part's content, with a MIME type of text.plain. If the
      * string contains non US-ASCII characters, it will be encoded
      * using the platform's default charset. The charset is also
      * used to set the "charset" parameter. <p>
@@ -738,7 +738,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
 
     /**
      * Convenience method that sets the given String as this part's
-     * content, with a MIME type of ContentTypeVS.TEXT and the specified
+     * content, with a MIME type of text.plain and the specified
      * charset. The given Unicode string will be charset-encoded
      * using the specified charset. The charset is also used to set
      * the "charset" parameter.

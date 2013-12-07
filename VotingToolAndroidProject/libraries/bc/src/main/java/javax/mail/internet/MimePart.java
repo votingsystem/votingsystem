@@ -178,7 +178,7 @@ public interface MimePart extends Part {
     
     /**
      * Convenience method that sets the given String as this
-     * part's content, with a MIME type of ContentTypeVS.TEXT. If the
+     * part's content, with a MIME type of text.plain. If the
      * string contains non US-ASCII characters. it will be encoded
      * using the platform's default charset. The charset is also
      * used to set the "charset" parameter. <p>
@@ -199,7 +199,7 @@ public interface MimePart extends Part {
 
     /**
      * Convenience method that sets the given String as this part's
-     * content, with a MIME type of ContentTypeVS.TEXT and the specified
+     * content, with a MIME type of text.plain and the specified
      * charset. The given Unicode string will be charset-encoded
      * using the specified charset. The charset is also used to set
      * "charset" parameter.

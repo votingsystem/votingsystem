@@ -290,13 +290,13 @@ public class NavigationDrawer extends ActionBarActivity {
                 return true;
             case R.id.get_cert:
                 switch(contextVS.getState()) {
-                    case SIN_CSR:
+                    case WITHOUT_CSR:
                         startActivity(new Intent(this, MainActivity.class));
                         return true;
-                    case CON_CSR:
+                    case WITH_CSR:
                         startActivity(new Intent(this, UserCertResponseActivity.class));
                         return true;
-                    case CON_CERTIFICADO:
+                    case WITH_CERTIFICATE:
                         AlertDialog.Builder builder= new AlertDialog.Builder(this);
                         builder.setTitle(getString(R.string.
                                 request_certificate_menu));

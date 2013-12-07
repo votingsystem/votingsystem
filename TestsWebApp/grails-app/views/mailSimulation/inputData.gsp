@@ -14,16 +14,14 @@
 <div id="mailProtocolSinulationDataDialog" title="<g:message code="initMailProtocolSimulationButton"/>"
 	style="padding:10px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
 	<div class="errorMsgWrapper" style="display:none;"></div>
-    <div style="display:block;overflow: hidden; position: relative; margin:0px 0px 1px 0px; padding: 0 0 10px 0; ">
-        <div style="margin:10px 0px 0px 0px; display: inline; position: absolute; right: 0px; left: 0px;">
-            <p style="text-align: center;font-weight: bold; font-size: 1.4em; color: #48802c;">
-                <g:message code="initMailProtocolSimulationMsg"/>
-            </p>
+    <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
+        <div id="pageTitle" style="display:table-cell;font-weight: bold; font-size: 1.4em; color: #48802c; text-align:center;vertical-align: middle;">
+            <g:message code="initMailProtocolSimulationMsg"/>
         </div>
-        <votingSystem:simpleButton id="testButton"
-            style="margin:0px 20px 0px 0px; padding: 0px 10px 0px 10px; float:right; display: inline;">
-            Test
-        </votingSystem:simpleButton>
+        <div id="testButtonDiv" style="display:table-cell; text-align:center;vertical-align: middle;">
+            <votingSystem:simpleButton id="testButton" style="margin:0px 0px 0px 30px;">
+                <g:message code="goToResultViewMsg"/></votingSystem:simpleButton>
+        </div>
     </div>
   	<div id="formDataDiv">
    		<form id="mailProtocolSinulationDataForm">
@@ -111,12 +109,10 @@
             </div>
 
             <div style="position: relative; overflow:hidden; ">
-                <votingSystem:simpleButton id="submitButton" isSubmitButton='true'
-                    style="margin:15px 20px 20px 0px;padding:2px 5px 2px 0px; height:30px; width:400px; float:right;">
-                    <g:message code="initMailProtocolSimulationButton"/>
+                <votingSystem:simpleButton id="submitButton" isSubmitButton='true' style="margin:15px 20px 20px 0px;
+                    width:400px; float:right;"> <g:message code="initMailProtocolSimulationButton"/>
                 </votingSystem:simpleButton>
             </div>
-
    		</form>
 
   	</div>
@@ -145,22 +141,27 @@ $("#isWithTimer").click(function () {
 	}
 })
 
-var isFormView = true
+$("#testButtonDiv").hide()
 
-$("#testButton").click(function () {
-    if(isFormView) {
+function showListenerDiv(isListening) {
+    $("#testButtonDiv").show()
+    if(isListening) {
+        $("#testButton").text("<g:message code="goToFormViewMsg"/>")
         $('#formDataDiv').fadeOut()
         $('#simulationListenerDiv').fadeIn()
-        $('#pageTitle').text('<g:message code="listeningMailProtocolSimulationMsg"/>' + ": '" + $('#subject').val() + "'")
-        isFormView = false;
+        $('#pageTitle').text('<g:message code="listeningMailProtocolSimulationMsg"/>')
     } else {
+        $("#testButton").text("<g:message code="goToResultViewMsg"/>")
         $('#simulationListenerDiv').fadeOut()
         $('#formDataDiv').fadeIn()
         SimulationService.close()
         $('#pageTitle').text('<g:message code="initMailProtocolSimulationMsg"/>')
-        isFormView = true;
     }
+}
 
+
+$("#testButton").click(function () {
+    showListenerDiv(!$("#simulationListenerDiv").is(":visible"))
 });
 
 $('#mailProtocolSinulationDataForm').submit(function(event){
@@ -180,15 +181,12 @@ $('#mailProtocolSinulationDataForm').submit(function(event){
 			 numRequestsProjected: $('#numRequestsProjected').val(),
 			 timer:timer}
 
-
-    $('#formDataDiv').fadeOut()
-    $('#simulationListenerDiv').fadeIn()
+     showListenerDiv(true)
      showSimulationProgress(simulationData)
-	return false
+  	 return false
 });
 
 function isValidForm() {
-
 	return true
 }
 

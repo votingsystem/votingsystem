@@ -41,46 +41,28 @@ class SubscriptionVSController {
 	def index() { 
 		MessageSMIME messageSMIME = params.messageSMIMEReq
 		if(!messageSMIME) {
-			String msg = message(code:'requestWithoutFile')
-			log.error msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))
+            return
 		}
 		SMIMEMessageWrapper smimeMessageReq = messageSMIME.getSmimeMessage()
         def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
-		int status
 		if (messageJSON.serverURL) {
             String serverURL = StringUtils.checkURL(messageJSON.serverURL)
 			AccessControlVS accessControl = AccessControlVS.findWhere(serverURL:serverURL)
-			String message
 			if (accessControl) {
-				response.status = ResponseVS.SC_ERROR_REQUEST
-				message = message(code: 'controlCenterAlreadyAssociatedMsg', args:[accessControl.serverURL])
+                params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                        message(code: 'controlCenterAlreadyAssociatedMsg', args:[accessControl.serverURL]))
 			} else {
-				def urlInfoAccessControlVS = "${serverURL}/serverInfo"
-				ResponseVS responseVS = HttpHelper.getInstance().getData(urlInfoAccessControl, null)
-				status = responseVS.statusCode
+				String accessControlURL = "${serverURL}/serverInfo"
+				ResponseVS responseVS = HttpHelper.getInstance().getData(accessControlURL, null)
 				if (ResponseVS.SC_OK == responseVS.statusCode) {
-					message = message(code: 'controlCenterAssociatedMsg', args:[urlInfoAccessControl])
-					try {
-						AccessControlVS actorVS = ActorVS.parse(responseVS.message)
-						actorVS.save()
-					} catch(Exception ex) {
-						log.error(ex.getMessage(), ex)
-						status = ResponseVS.SC_ERROR
-						message = "ERROR"
-					}
-				} else message = responseVS.message
-			}
-			log.debug message
-			response.status = status
-            render message
-            return false
-        } 
-        response.status = ResponseVS.SC_ERROR_REQUEST
-        render message(code: 'requestWithErrors')
-        return false	
+                    AccessControlVS actorVS = ActorVS.parse(responseVS.message)
+                    actorVS.save()
+                    responseVS.setMessage( message(code: 'controlCenterAssociatedMsg', args:[accessControlURL]))
+				}
+                params.responseVS = responseVS
+            }
+        } else params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrors'))
 	}
 	
 	/**
@@ -93,54 +75,43 @@ class SubscriptionVSController {
 	 */
 	def elections() {
 		if(params.feedType && supportedFormats.contains(params.feedType)) {
-			render(text: getEntradasVotaciones(params.feedType),
-				contentType:"text/xml", encoding:"UTF-8")
+			render(text: getElectionsNews(params.feedType), contentType:"text/xml", encoding:"UTF-8")
 		} else {
 			if(params.feedType && "rss".equals(params.feedType)) {
-				render(text: getEntradasVotaciones("rss_1.0"),
-					contentType:"text/xml", encoding:"UTF-8")
-				return false;
+				render(text: getElectionsNews("rss_1.0"), contentType:"text/xml", encoding:"UTF-8")
 			} else if(params.feedType && "atom".equals(params.feedType)) {
-				render(text: getEntradasVotaciones("atom_1.0"),
-					contentType:"text/xml", encoding:"UTF-8")
+				render(text: getElectionsNews("atom_1.0"), contentType:"text/xml", encoding:"UTF-8")
 			} else {
-				render(text: getEntradasVotaciones("atom_1.0"),
-					contentType:"text/xml", encoding:"UTF-8")
+				render(text: getElectionsNews("atom_1.0"), contentType:"text/xml", encoding:"UTF-8")
 			}
+            return false;
 		}
 	}
 	
-	private String getEntradasVotaciones(feedType) {
+	private String getElectionsNews(feedType) {
 		def elections
 		EventVS.withTransaction {
-			elections = EventVS.findAllWhere(state:EventVS.State.ACTIVE,
-				[max: 30, sort: "dateCreated", order: "desc"])
+			elections = EventVS.findAllWhere(state:EventVS.State.ACTIVE, [max: 30, sort: "dateCreated", order: "desc"])
 		}
-		def entradas = []
+		def news = []
 		elections.each { votacion ->
 			String content = votacion.content
 			String author = message(code: 'publishedBySystem')
-			if(votacion.userVS) {
-				author = "${votacion.userVS.name} ${votacion.userVS.firstName}"
-			}
+			if(votacion.userVS) { author = "${votacion.userVS.name} ${votacion.userVS.firstName}" }
 			String urlVotacion = "${createLink(controller: 'eventVSElection')}/" + votacion.id
-			String accion = message(code: 'subscriptionVS.votar')
+			String accion = message(code: 'electionFeedAction')
 			 //if(content?.length() > 500) content = content.substring(0, 500)
-			String feedContent = "<p>${content}</p>" +
-				"<a href='${urlVotacion}'>${accion}</a>"
+			String feedContent = "<p>${content}</p>" + "<a href='${urlVotacion}'>${accion}</a>"
 			def desc = new SyndContentImpl(type: "text/html", value: feedContent);
-			def entrada = new SyndEntryImpl(title: votacion.subject, author:author,
-					link: urlVotacion,
-					publishedDate: votacion.dateCreated, description: desc);
-			entradas.add(entrada);
+			def newFeed = new SyndEntryImpl(title: votacion.subject, author:author,
+					link: urlVotacion, publishedDate: votacion.dateCreated, description: desc);
+			news.add(newFeed);
 		}
-		String tituloSubscripcionVotaciones = "${message(code: 'subscriptionVS.tituloSubscripcionVotaciones')}" +
+		String feedsTitle = "${message(code: 'electionFeedsTitle')}" +
 		" -${grailsApplication.config.VotingSystem.serverName}-"
-		SyndFeed feed = new SyndFeedImpl(feedType: feedType,
-				title: tituloSubscripcionVotaciones,
+		SyndFeed feed = new SyndFeedImpl(feedType: feedType, title: feedsTitle,
 				link: "${grailsApplication.config.grails.serverURL}/app/home#VOTACIONES",
-				description: message(code: 'subscriptionVS.descripcionSubscripcionVotaciones'),
-				entries: entradas);
+				description: message(code: 'subscriptionVS.descripcionSubscripcionVotaciones'), entries: news);
 		StringWriter writer = new StringWriter();
 		SyndFeedOutput output = new SyndFeedOutput();
 		output.output(feed,writer);

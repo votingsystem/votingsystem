@@ -126,7 +126,7 @@ public class ReceiptOptionsDialog  extends DialogFragment {
     		Log.d(TAG + ".openReceipt - ", " - receiptFile path: " + receiptFile.getAbsolutePath() 
     				+ " - length: " + receiptFile.length() );
         	Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
-        	intent.setDataAndType(Uri.fromFile(receiptFile), ContentTypeVS.TEXT);
+        	intent.setDataAndType(Uri.fromFile(receiptFile), ContentTypeVS.TEXT.getName());
         	startActivity(intent);	
     	}catch(Exception ex) {
     		ex.printStackTrace();

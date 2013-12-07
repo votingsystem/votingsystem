@@ -21,6 +21,7 @@ class TimeStampSimulationService {
 	def webSocketService
 
 	def messageSource
+    def grailsApplication
 	private String simulationStarter
 
 	private List<String> errorList = new ArrayList<String>();
@@ -46,6 +47,10 @@ class TimeStampSimulationService {
                     } else initSimulation(messageJSON)
                     break;
                 case Status.FINISH_SIMULATION:
+                    if(!simulationData || !simulationData.isRunning()) {
+                        log.error("SIMULATION ALREADY FINISHED")
+                        return
+                    }
                     if(simulationStarter?.equals(messageJSON.userId)) {
                         String message = messageSource.getMessage("simulationCancelledByUserMsg", null, locale) +
                                 " - message: ${messageJSON.message}"

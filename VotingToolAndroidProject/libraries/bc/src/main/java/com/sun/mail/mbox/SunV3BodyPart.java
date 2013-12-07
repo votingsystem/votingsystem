@@ -157,7 +157,7 @@ public class SunV3BodyPart extends MimeBodyPart {
      * Returns the value of the RFC822 "Content-Type" header field.
      * This represents the content-type of the content of this
      * BodyPart. This value must not be null. If this field is
-     * unavailable, ContentTypeVS.TEXT should be returned. <p>
+     * unavailable, "text/plain" should be returned. <p>
      *
      * This implementation uses <code>getHeader(name)</code>
      * to obtain the requisite header field.

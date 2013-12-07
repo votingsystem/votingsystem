@@ -22,15 +22,15 @@ import java.util.Date;
 */
 public class ClienteOCSP {
 
-    public static CertificateVS.State validarCertificado(X509Certificate certificate, BigInteger serialNumber,
+    public static CertificateVS.State validateCert(X509Certificate certificate, BigInteger serialNumber,
                  Date checkDate) throws Exception {
         OCSPReqGenerator ocspReqGen = new OCSPReqGenerator();
         ocspReqGen.addRequest(new CertificateID(CertificateID.HASH_SHA1, certificate, serialNumber));
         OCSPReq ocspReq = ocspReqGen.generate();
         URL url = new URL(ContextVS.OCSP_DNIE_URL);
         HttpURLConnection con = (HttpURLConnection)url.openConnection();
-        con.setRequestProperty("Content-Type", ContentTypeVS.OCSP_REQUEST);
-        con.setRequestProperty("Accept", ContentTypeVS.OCSP_RESPONSE);
+        con.setRequestProperty("Content-Type", ContentTypeVS.OCSP_REQUEST.getName());
+        con.setRequestProperty("Accept", ContentTypeVS.OCSP_RESPONSE.getName());
         con.setDoOutput(true);
         OutputStream out = con.getOutputStream();
         DataOutputStream dataOut = new DataOutputStream(new BufferedOutputStream(out));

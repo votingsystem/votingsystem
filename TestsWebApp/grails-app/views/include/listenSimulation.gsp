@@ -119,17 +119,16 @@ function processResponse(response) {
                 responseJSON.simulationData.numRequestsProjected, responseJSON.simulationData.numRequestsOK,
                 responseJSON.simulationData.numRequestsERROR, responseJSON.simulationData.timeDuration,
                 responseJSON.simulationData.errorList);
-	    } else {
+	    } else if(responseJSON.message != null && '' != responseJSON.message) {
             messageFromServiceHTML = messageTemplate.format(responseJSON.statusCode, responseJSON.message)
 	    }
 
         $("#messageFromService").html(messageFromServiceHTML)
 
-	    console.log("responseJSON.message: " + responseJSON.message)
-        if(responseJSON.message == null) {
+        if(responseJSON.message == null || '' == responseJSON.message) {
 	        $("#messageDiv").hide()
 	    }
-	    if(typeof responseJSON.simulationData != null && responseJSON.simulationData.errorList.length == 0) {
+	    if(responseJSON.simulationData != null) {
 	        $("#errorsDiv").hide()
 	    }
 	    if(!$("#messageFromService").is(":visible")) $("#messageFromService").fadeIn();
@@ -150,15 +149,21 @@ SimulationService.initialize = function() {
 SimulationService.sendMessage = (function(message) {
 	var messageStr = JSON.stringify(message); 
 	console.log("sendMessage to simulation service: " + messageStr)
-    if (messageStr != '') {
+    if(SimulationService.socket == null || 3 == SimulationService.socket.readyState) {
+        console.log("missing message - socket closed")
+    } else if(messageStr != ''){
         SimulationService.socket.send(messageStr);
     }
 });
 
 SimulationService.close = (function() {
-	console.log("closing socket connection")
+	//states: CONNECTING	0, OPEN	1, CLOSING	2, CLOSED	3
+    if(SimulationService.socket == null || 3 == SimulationService.socket.readyState) {
+        console.log("socket already closed")
+        return
+    } else console.log(" closing socket connection")
 	if(messageToService != null) {
-        messageToService["operation"] = TypeVS.CANCEL_SIMULATION
+        messageToService.status = Status.FINISH_SIMULATION
 	    SimulationService.sendMessage(messageToService)
 	}
 	if(SimulationService.socket != null) SimulationService.socket.close()
@@ -166,16 +171,11 @@ SimulationService.close = (function() {
 
 
 function showSimulationProgress(simulationData) {
-    var msg = '<g:message code="listeningEventProtocolSimulationMsg"/>' + ": '" + $('#subject').val() + "'"
-    console.log("showSimulationProgress - msg: " + msg)
-    $('#pageTitle').html(msg)
+    console.log("listenSimulation.showSimulationProgress")
     if(simulationData != null) {
-        processResponse({statusCode:ResponseVS.SC_PROCESSING, message:''})
-        var messageFromServiceHTML = messageTemplate.format('', '')
-        $("#messageFromService").html(messageFromServiceHTML)
-
+        $("#messageFromService").hide()
+        if(!$("#progressDiv").is(":visible")) $("#progressDiv").fadeIn();
         messageToService = simulationData
-        messageToService.operation = TypeVS.INIT_SIMULATION
         SimulationService.initialize();
         $(".errorMsgWrapper").fadeOut()
     } else showErrorMsg('<g:message code="simulationDataNull"/>')

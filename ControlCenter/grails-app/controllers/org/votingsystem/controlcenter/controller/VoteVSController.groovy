@@ -3,12 +3,14 @@ package org.votingsystem.controlcenter.controller
 import grails.converters.JSON
 import org.votingsystem.model.CertificateVS
 import org.votingsystem.model.ContentTypeVS
+import org.votingsystem.model.EnvironmentVS
 import org.votingsystem.model.EventVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.VoteVS
 import org.votingsystem.model.VoteVSCanceller
+import org.votingsystem.util.ApplicationContextHolder
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import java.security.cert.X509Certificate
@@ -29,28 +31,23 @@ class VoteVSController {
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/voteVS]
-	 * @contentType [application/x-pkcs7-signature,application/x-pkcs7-mime] Obligatorio. El archivo de voteVS firmado por el
-	 *        <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/CertificateVS-de-voteVS">certificateVS de VoteVS.</a>
-	 * @return  <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Recibo-de-VoteVS">El recibo del voteVS.</a>
+	 * @contentType [application/x-pkcs7-signature,application/x-pkcs7-mime] Obligatorio. El archivo de voto firmado por el
+	 *        <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Certificado-de-voto">certificado de VoteVS.</a>
+	 * @return  <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Recibo-de-VoteVS">El recibo del voto.</a>
 	 */
 	def index() {
 		MessageSMIME messageSMIMEReq = params.messageSMIMEReq
-		if(!messageSMIMEReq) {
-			String msg = message(code:'requestWithoutFile')
-			log.error msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
-		}
-
-
+        if(!messageSMIMEReq) {
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))
+            return
+        }
 		ResponseVS responseVS = voteVSService.validateVote(messageSMIMEReq, request.getLocale())
 		if (ResponseVS.SC_OK == responseVS.statusCode) {
             params.receiverCert = responseVS.data?.receiverCert
 			responseVS.data = responseVS.data?.messageSMIME
 			if(messageSMIMEReq.getUserVS())
 				response.addHeader("representativeNIF", messageSMIMEReq.getUserVS().nif)
-			response.setContentType(ContentTypeVS.SIGNED_AND_ENCRYPTED)
+            responseVS.setContentType(ContentTypeVS.SIGNED_AND_ENCRYPTED)
             String voteURL = "${createLink(controller:'messageSMIME', absolute:'true')}/${responseVS?.data?.id}"
             response.setHeader('voteURL', voteURL)
 		}
@@ -58,13 +55,13 @@ class VoteVSController {
 	}
 	
 	/**
-	 * Servicio que devuelve la información de un voteVS a partir del identificador
+	 * Servicio que devuelve la información de un voto a partir del identificador
 	 * del mismo en la base de datos
 	 * @httpMethod [GET]
 	 * @serviceURL [/voteVS/${id}]
-	 * @param [id] Obligatorio. Identificador del voteVS en la base de datos
+	 * @param [id] Obligatorio. Identificador del voto en la base de datos
 	 * @responseContentType [application/json]
-	 * @return Documento JSON con la información del voteVS solicitado.
+	 * @return Documento JSON con la información del voto solicitado.
 	 */
 	def get() {
 		VoteVS voteVS
@@ -73,14 +70,9 @@ class VoteVSController {
 			voteVS = VoteVS.get(params.long('id'))
 			if(voteVS) voteVSMap = voteVSService.getVotoMap(voteVS)
 		}
-		if(!voteVS) {
-			response.status = ResponseVS.SC_NOT_FOUND
-			render message(code: 'voteNotFound', args:[params.id])
-			return false
-		}
-
-		render voteVSMap as JSON
-		return false
+        if(!voteVS) params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                message(code: 'voteNotFound', args:[params.id]))
+		else render voteVSMap as JSON
 	}
 	
 	/**
@@ -94,38 +86,33 @@ class VoteVSController {
 	 * @return Documento ZIP con los errores de una votación
 	 */
 	def errors() {
-		if(!EnvironmentVS.DEVELOPMENT.equals(
-			ApplicationContextHolder.getEnvironment())) {
-			def msg = message(code: "serviceDevelopmentModeMsg")
-			log.error msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
+		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))
+            return
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		EventVS event = EventVS.getAt(params.long('id'))
 		if(!event) {
-			response.status = ResponseVS.SC_NOT_FOUND
-			render message(code: 'eventVSNotFound', args:[params.id])
-			return false
-		}
-		def errorMessages
-		MessageSMIME.withTransaction {
-			errorMessages = MessageSMIME.findAllByEventVSAndTypeAndType(event, TypeVS.ERROR, TypeVS.VOTE_ERROR)
-		}
-
-		render errorMessages.size()
-		return false
+            params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                    message(code: 'eventVSNotFound', args:[params.id]))
+		} else {
+            def errorMessages
+            MessageSMIME.withTransaction {
+                errorMessages = MessageSMIME.findAllByEventVSAndTypeAndType(event, TypeVS.ERROR, TypeVS.VOTE_ERROR)
+            }
+            render errorMessages.size()
+            return false
+        }
 	}
 	
 	/**
-	 * Servicio que devuelve la información de un voteVS a partir del
+	 * Servicio que devuelve la información de un voto a partir del
 	 * hash asociado al mismo
 	 * @httpMethod [GET]
 	 * @serviceURL [/voteVS/hashHex/$hashHex]
-	 * @param [hashHex] Obligatorio. Hash en hexadecimal asociado al voteVS.
+	 * @param [hashHex] Obligatorio. Hash en hexadecimal asociado al voto.
 	 * @responseContentType [application/json]
-	 * @return Documento JSON con la información del voteVS solicitado.
+	 * @return Documento JSON con la información del voto solicitado.
 	 */
 	def hashCertVoteHex() {
 		if (params.hashHex) {
@@ -138,10 +125,9 @@ class VoteVSController {
 				certificate = CertificateVS.findWhere(hashCertVoteBase64:hashCertVoteBase64)
 			}
 			if(!certificate) {
-				response.status = ResponseVS.SC_NOT_FOUND
-				render message(code: 'certByHEXNotFound',
-					args:[params.hashHex])
-				return false
+                params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                        message(code: 'certByHEXNotFound', args:[params.hashHex]))
+				return
 			}
 			VoteVS voteVS
 			def voteVSMap
@@ -150,10 +136,9 @@ class VoteVSController {
 				voteVSMap = voteVSService.getVotoMap(voteVS)
 			}
 			if(!voteVS) {
-				response.status = ResponseVS.SC_NOT_FOUND
-				render message(code: 'voteVS.voteVSConCertNotFound',
-					args:[params.hashHex])
-				return false
+                params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                        message(code: 'voteVS.voteVSConCertNotFound', args:[params.hashHex]))
+				return
 			}
 			 
 			if(VoteVS.State.CANCELLED.equals(voteVS.state)) {
@@ -163,14 +148,11 @@ class VoteVSController {
 				}
 				voteVSMap.cancellerURL="${grailsApplication.config.grails.serverURL}/messageSMIME/${voteVSCanceller?.messageSMIME?.id}"
 			}
-			response.status = ResponseVS.SC_OK
-			response.setContentType(ContentTypeVS.JSON)
 			render voteVSMap as JSON
-			return false
+			return
 		}
-		response.status = ResponseVS.SC_ERROR_REQUEST
-		render message(code: 'requestWithErrorsHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
-		return false
+        params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
 	}
 
 	
@@ -199,7 +181,7 @@ class VoteVSController {
 			 responseVS = future.get()
 			 if (ResponseVS.SC_OK == responseVS?.statusCode) {
 				 ctx.response.status = ResponseVS.SC_OK
-				 ctx.response.setContentType(ContentTypeVS.SIGNED_AND_ENCRYPTED)
+				 ctx.response.setContentType(ContentTypeVS.SIGNED_AND_ENCRYPTED.getName())
 				 ctx.response.contentLength = responseVS.voteVS.messageSMIME.content.length
 				 ctx.response.outputStream <<  responseVS.voteVS.messageSMIME.content
 				 ctx.response.outputStream.flush()

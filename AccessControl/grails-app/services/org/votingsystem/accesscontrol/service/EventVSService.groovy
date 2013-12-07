@@ -63,7 +63,7 @@ class EventVSService {
 				eventVS.save()
 			}
 		}
-		return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS)
+		return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, message:eventVS?.state?.toString())
 	}
 	
    ResponseVS setEventDatesState (EventVS eventVS, Locale locale) {
@@ -160,7 +160,7 @@ class EventVSService {
 					toUser = ((EventVSElection)eventVS).getControlCenterVS()?.name
 					String cancelServiceURL = controlCenterUrl + "/eventVSElection/cancelled"
 					ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(smimeMessageResp.getBytes(),
-                            org.votingsystem.model.ContentTypeVS.SIGNED, cancelServiceURL);
+                            org.votingsystem.model.ContentTypeVS.SIGNED.getName(), cancelServiceURL);
 					log.debug("responseVSControlCenter - status: ${responseVSControlCenter.statusCode}")
 					if(ResponseVS.SC_OK == responseVSControlCenter.statusCode ||
 						ResponseVS.SC_CANCELLATION_REPEATED == responseVSControlCenter.statusCode) {

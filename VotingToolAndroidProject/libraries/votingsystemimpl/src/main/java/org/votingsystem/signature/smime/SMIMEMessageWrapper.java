@@ -415,8 +415,6 @@ public class SMIMEMessageWrapper extends MimeMessage {
         TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
         reqgen.setCertReq(true);
         //reqgen.setReqPolicy(m_sPolicyOID);
-        Log.d(TAG, " ========= getTimeStampRequest - signerInformation.getDigestAlgOID(): " + 
-        		signerInformation.getDigestAlgOID()); 
         return reqgen.generate(signerInformation.getDigestAlgOID(), as.getOctets());
     }
     

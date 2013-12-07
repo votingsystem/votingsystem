@@ -15,7 +15,10 @@ import android.view.*;
 import android.view.animation.AnimationUtils;
 import android.widget.*;
 
+import org.json.JSONObject;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ContextVSImpl;
+import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.OptionVS;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.PDFSignedSender;
@@ -33,7 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static org.votingsystem.model.ContextVSImpl.*;
+import static org.votingsystem.model.ContextVS.*;
 
 /**
  * @author jgzornoza
@@ -81,7 +84,7 @@ public class EventFragment extends Fragment implements CertPinDialogListener {
         firmarEnviarButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 Log.d(TAG + "- firmarEnviarButton -", " - state: " + contextVS.getState().toString());
-                if (!ContextVSImpl.State.CON_CERTIFICADO.equals(contextVS.getState())) {
+                if (!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState())) {
                     Log.d(TAG + "-firmarEnviarButton-", " - showCertNotFoundDialog");
                     showCertNotFoundDialog();
                     return;
@@ -345,12 +348,14 @@ public class EventFragment extends Fragment implements CertPinDialogListener {
                     responseVS = PDFSignedSender.call();
                 } else if(event.getTypeVS().equals(TypeVS.CLAIM_EVENT)) {
                     String subject = ASUNTO_MENSAJE_FIRMA_DOCUMENTO + event.getSubject();
-                    String signatureContent = event.getSignatureContentJSON();
+                    JSONObject signatureContent = event.getSignatureContentJSON();
+                    signatureContent.put("operation", TypeVS.SMIME_CLAIM_SIGNATURE);
                     String serviceURL = contextVS.getAccessControlVS().getEventVSClaimCollectorURL();
                     boolean isEncryptedResponse = false;
                     SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
-                            signatureContent, subject, isEncryptedResponse, keyStoreBytes, pin.toCharArray(),
-                            contextVS.getAccessControlVS().getCertificate(), getActivity().getBaseContext());
+                            signatureContent.toString(), subject, isEncryptedResponse,keyStoreBytes,
+                            pin.toCharArray(), contextVS.getAccessControlVS().getCertificate(),
+                            getActivity().getBaseContext());
                     responseVS = smimeSignedSender.call();
                 }
                 return responseVS;

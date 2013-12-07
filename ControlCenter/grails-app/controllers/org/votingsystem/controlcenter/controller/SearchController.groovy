@@ -39,20 +39,14 @@ class SearchController {
 	* @httpMethod [GET]
 	*/
    def reindexTest () {
-	   if(!EnvironmentVS.DEVELOPMENT.equals(
-		   ApplicationContextHolder.getEnvironment())) {
-		   def msg = message(code: "serviceDevelopmentModeMsg")
-		   log.error msg
-		   response.status = ResponseVS.SC_ERROR_REQUEST
-		   render msg
-		   return false
+	   if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
+           params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))
+           return
 	   }
 	   log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 	   FullTextSession fullTextSession = Search.getFullTextSession(sessionFactory.currentSession);
 	   fullTextSession.createIndexer().startAndWait()
-	   response.status = ResponseVS.SC_OK
-	   render "OK"
-	   return false
+       params.responseVS = new ResponseVS(ResponseVS.SC_OK, "OK")
    }
    
    /**
@@ -62,53 +56,28 @@ class SearchController {
 	* @requestContentType [application/x-pkcs7-signature] Obligatorio. Documento firmado 
 	*             en formato SMIME con los datos de la solicitud de reindexación.
 	*/
-	def reindex () { 
-		try {
-			MessageSMIME messageSMIME = params.messageSMIMEReq
-			if(!messageSMIME) {
-				String msg = message(code:'requestWithoutFile')
-				log.error msg
-				response.status = ResponseVS.SC_ERROR_REQUEST
-				render msg
-				return false
-			}
-			def requestJSON = JSON.parse(messageSMIME.getSmimeMessage().getSignedContent())
-			UserVS userVS = messageSMIME.getUserVS()
-			TypeVSoperacion = TypeVS.valueOf(requestJSON.operacion)
-			String msg
-			if(TypeVS.INDEX_REQUEST != operacion) {
-				msg = message(code:'operationErrorMsg',
-					args:[operacion.toString()])
-				response.status = ResponseVS.SC_ERROR_REQUEST
-				log.debug("ERROR - ${msg}")
-				render msg
-				return false
-			}
-			if(userVSService.isUserAdmin(userVS.nif)) {
-				log.debug "UserVS en la lista de administradores, reindexando"
-				FullTextSession fullTextSession = Search.getFullTextSession(sessionFactory.currentSession);
-				fullTextSession.createIndexer().startAndWait()
-				params.responseVS = new ResponseVS(type:TypeVS.INDEX_REQUEST,
-					statusCode:ResponseVS.SC_ERROR_REQUEST)
-				response.status = ResponseVS.SC_OK
-				render "OK"
-			} else {
-				log.debug "UserVS no esta en la lista de administradores, petición denegada"
-				msg = message(code: 'adminIdentificationErrorMsg', [userVS.nif])
-				params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-					type:TypeVS.INDEX_REQUEST_ERROR, message:msg)
-				response.status = ResponseVS.SC_ERROR_REQUEST
-				render msg
-			}
-			return false
-		} catch(Exception ex) {
-			log.error (ex.getMessage(), ex)
-			params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-				type:TypeVS.INDEX_REQUEST_ERROR, message:ex.getMessage())
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render ex.getMessage()
-			return false
-		}
+	def reindex () {
+        MessageSMIME messageSMIME = params.messageSMIMEReq
+        if(!messageSMIME) {
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))
+            return
+        }
+        def requestJSON = JSON.parse(messageSMIME.getSmimeMessage().getSignedContent())
+        TypeVS operation = TypeVS.valueOf(requestJSON.operation)
+        if(TypeVS.INDEX_REQUEST != operation) {
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code:'operationErrorMsg', args:[operation.toString()]))
+        } else {
+            UserVS userVS = messageSMIME.getUserVS()
+            if (userVSService.isUserAdmin(userVS.nif)) {
+                FullTextSession fullTextSession = Search.getFullTextSession(sessionFactory.currentSession);
+                fullTextSession.createIndexer().startAndWait()
+                params.responseVS = new ResponseVS(type:TypeVS.INDEX_REQUEST, statusCode:ResponseVS.SC_OK)
+            } else {
+                params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+                        type:TypeVS.INDEX_REQUEST_ERROR, message:message(code: 'adminIdentificationErrorMsg', [userVS.nif]))
+            }
+        }
 	}
 	
 	/**
@@ -133,7 +102,6 @@ class SearchController {
 			}
         }
         render eventVSElectionMap as JSON
-		return false
     }
 	
 	/**
@@ -144,13 +112,14 @@ class SearchController {
 	 * @return Documento JSON con la lista de eventsVS que cumplen el criterio de la búsqueda.
 	 */
 	def find() {
-		String consulta = "${request.getInputStream()}"
-		log.debug("consulta: ${consulta}")
-		if (!consulta) {
-			render(view:"index")
-			return false
+		String requestStr = "${request.getInputStream()}"
+		log.debug("requestStr: ${requestStr}")
+		if (!requestStr) {
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
+                    args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
+            return
 		}
-		def messageJSON = JSON.parse(consulta)
+		def messageJSON = JSON.parse(requestStr)
 		def eventsVSMap = new HashMap()
 		eventsVSMap.eventsVS = new HashMap()
 		eventsVSMap.eventsVS.elections = []
@@ -163,27 +132,20 @@ class SearchController {
 			Date dateFinishFrom
 			Date dateFinishTo
 			List<EventVS.State> eventVSStates
-			try{
-				if(messageJSON.dateBeginFrom)
-					dateBeginFrom = DateUtils.getDateFromString(messageJSON.dateBeginFrom)
-				if(messageJSON.dateBeginTo)
-					dateBeginTo = DateUtils.getDateFromString(messageJSON.dateBeginTo)
-				if(messageJSON.dateFinishFrom)
-					dateFinishFrom = DateUtils.getDateFromString(messageJSON.dateFinishFrom)
-				if(messageJSON.dateFinishTo)
-					dateFinishTo = DateUtils.getDateFromString(messageJSON.dateFinishTo)
-				if(messageJSON.eventState &&  !"".equals(messageJSON.eventState.trim())) {
-					eventVSStates = new ArrayList<EventVS.State>();
-					EventVS.State eventVSState = EventVS.State.valueOf(messageJSON.eventState)
-					eventVSStates.add(eventVSState);
-					if(EventVS.State.TERMINATED == eventVSState) eventVSStates.add(EventVS.State.CANCELLED)
-				}
-			} catch(Exception ex){
-				log.error (ex.getMessage(), ex)
-				response.status = ResponseVS.SC_ERROR
-				render ex.getMessage()
-				return false
-			}
+            if(messageJSON.dateBeginFrom)
+                dateBeginFrom = DateUtils.getDateFromString(messageJSON.dateBeginFrom)
+            if(messageJSON.dateBeginTo)
+                dateBeginTo = DateUtils.getDateFromString(messageJSON.dateBeginTo)
+            if(messageJSON.dateFinishFrom)
+                dateFinishFrom = DateUtils.getDateFromString(messageJSON.dateFinishFrom)
+            if(messageJSON.dateFinishTo)
+                dateFinishTo = DateUtils.getDateFromString(messageJSON.dateFinishTo)
+            if(messageJSON.eventState &&  !"".equals(messageJSON.eventState.trim())) {
+                eventVSStates = new ArrayList<EventVS.State>();
+                EventVS.State eventVSState = EventVS.State.valueOf(messageJSON.eventState)
+                eventVSStates.add(eventVSState);
+                if(EventVS.State.TERMINATED == eventVSState) eventVSStates.add(EventVS.State.CANCELLED)
+            }
 			FullTextQuery fullTextQuery =  searchHelper.getCombinedQuery(EventVS.class,
 				['subject', 'content']  as String[], messageJSON.textQuery?.toString(),
 				dateBeginFrom, dateBeginTo, dateFinishFrom, dateFinishTo, eventVSStates)
@@ -227,9 +189,7 @@ class SearchController {
 			eventoMap.url = eventoItem.url
 			eventsVSMap.eventsVS.elections.add(eventoMap)
 		}
-		response.setContentType(ContentTypeVS.JSON)
 		render eventsVSMap as JSON
-		return false
 	}
 	
 	/**
@@ -243,22 +203,21 @@ class SearchController {
 	 * @httpMethod [GET]
 	 */
 	def eventvsByTag () {
-		def eventsVSMap = new HashMap()
-		if (!params.tag) {
-			render(view:"index")
-			return false	
-		}
-		def tag = TagVS.findByName(params.tag)
-		if (tag) {
-			eventsVSMap.eventsVS = TagVSEventVS.findAllByEtiqueta(tag,
-				 [max: params.max, offset: params.offset]).collect { eventVSTag ->
-				return [id: eventVSTag.eventVS.id,
-					URL:"${grailsApplication.config.grails.serverURL}/eventVS/${eventVSTag.eventVS.id}",
-					subject:eventVSTag.eventVS.subject,
-					content: eventVSTag?.eventVS?.content]
-			} 
-		}
-		render eventsVSMap as JSON
+        def eventsVSMap = new HashMap()
+        if (!params.tag) {
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR, message(code: 'searchMissingParamTag'))
+        } else {
+            def tag = TagVS.findByName(params.tag)
+            if (tag) {
+                eventsVSMap.eventsVS = TagVSEventVS.findAllByEtiqueta(tag,
+                        [max: params.max, offset: params.offset]).collect { eventVSTag ->
+                    return [id: eventVSTag.eventVS.id,
+                            URL:"${grailsApplication.config.grails.serverURL}/eventVS/${eventVSTag.eventVS.id}",
+                            subject:eventVSTag?.eventVS?.subject, content:eventVSTag?.eventVS?.content]
+                }
+            }
+            render eventsVSMap as JSON
+        }
 	}
 
 }

@@ -41,7 +41,7 @@ public class TimeStamperTestSender implements Callable<ResponseVS> {
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie,
                 ContextVS.END_ENTITY_ALIAS, ContextVS.PASSWORD.toCharArray(),
                 ContextVS.VOTE_SIGN_MECHANISM);
-        String subject = ContextVS.getInstance().getMessage("timeStampMsgSubject");
+        String subject = ApplicationContextHolder.getInstance().getMessage("timeStampMsgSubject");
         
         documentSMIME = signedMailGenerator.genMimeMessage(requestNIF, toUser, getRequestDataJSON(), subject , null);
 

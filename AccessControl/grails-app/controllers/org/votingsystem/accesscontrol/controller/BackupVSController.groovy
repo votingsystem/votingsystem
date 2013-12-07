@@ -3,6 +3,7 @@ package org.votingsystem.accesscontrol.controller
 import com.itextpdf.text.pdf.AcroFields
 import com.itextpdf.text.pdf.PdfReader
 import org.votingsystem.model.BackupRequestVS
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.EnvironmentVS
 import org.votingsystem.model.EventVS
 import org.votingsystem.model.EventVSClaim
@@ -35,94 +36,77 @@ class BackupVSController {
 	 * @return Si los datos son correctos el solicitante recibirá un
 	 *         email con información para poder get la copia de seguridad.
 	 */
-	def index() { 
-		
-		try {
-			final PDFDocumentVS pdfDocument = params.pdfDocument
-			if (pdfDocument && pdfDocument.state == PDFDocumentVS.State.VALIDATED) {
-				PdfReader reader = new PdfReader(pdfDocument.pdf);
-				AcroFields form = reader.getAcroFields();
-				String eventId = form.getField("eventId");
-				String msg = null
-				def eventVS
-				if(eventId) {
-					EventVS.withTransaction {eventVS = EventVS.get(new Long(eventId))}
-				} else msg = message(code: 'backupRequestEventWithoutIdErrorMsg')
+	def index() {
+        PDFDocumentVS pdfDocument = params.pdfDocument
+        if (pdfDocument && pdfDocument.state == PDFDocumentVS.State.VALIDATED) {
+            PdfReader reader = new PdfReader(pdfDocument.pdf);
+            AcroFields form = reader.getAcroFields();
+            String eventId = form.getField("eventId");
+            String msg = null
+            def eventVS
+            if(eventId) {
+                EventVS.withTransaction {eventVS = EventVS.get(new Long(eventId))}
+            } else msg = message(code: 'backupRequestEventWithoutIdErrorMsg')
 
-				if(!eventVS)
-					msg = message(code:'backupRequestEventIdErrorMsg', [eventId])
-				if(!eventVS.backupAvailable)
-					msg = message(code:'eventWithoutBackup', args:[eventVS.subject])
-				String subject = form.getField("subject");
-				String email = form.getField("email");
-				if(!email) 
-					msg =  message(code:'backupRequestEmailMissingErrorMsg')
-				
-				if(msg) {
-					pdfDocument.state = PDFDocumentVS.State.BACKUP_REQUEST_ERROR
-				} else pdfDocument.state = PDFDocumentVS.State.BACKUP_REQUEST
-			
-				PDFDocumentVS.withTransaction {
-					pdfDocument.eventVS = eventVS
-					pdfDocument.save(flush:true)
-				}
-				if(msg) {
-					params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,message:msg)
-					return false
-				}
-				
-				log.debug "backup request - eventId: ${eventId} - subject: ${subject} - email: ${email}"
-				ResponseVS backupGenResponseVS = null
-				if(EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
-					log.debug "Request from DEVELOPMENT environment generating sync response"
-					backupGenResponseVS = requestBackup(eventVS, request.locale)
-					if(ResponseVS.SC_OK == backupGenResponseVS?.statusCode) {
-						BackupRequestVS backupRequest = new BackupRequestVS(
-							filePath:backupGenResponseVS.message,
-							type:backupGenResponseVS.type,
-							PDFDocumentVS:pdfDocument, email:email)
-						BackupRequestVS.withTransaction {backupRequest.save()}
-						response.status = ResponseVS.SC_OK
-						render backupRequest.id
-						return false
-					} else {
-						log.error("DEVELOPMENT - error generating backup");
-						params.responseVS = backupGenResponseVS
-						return false
-					} 
-				} else {
-					final EventVS event = eventVS
-					final Locale locale = request.locale
-					final String emailRequest = email
-					runAsync {
-						ResponseVS backupResponse = requestBackup(event, locale)
-						if(ResponseVS.SC_OK == backupResponse?.statusCode) {
-							BackupRequestVS backupRequest = new BackupRequestVS(
-								filePath:backupResponse.message, type:backupResponse.type,
-								PDFDocumentVS:pdfDocument, email:emailRequest)
-							BackupRequestVS.withTransaction { backupRequest.save() }
-							mailSenderService.sendBackupMsg(backupRequest, locale)
-						} else log.error("Error generating Backup");
-					}
-					response.status = ResponseVS.SC_OK
-					render message(code:'backupRequestOKMsg', args:[email])
-					return false
-				}
-				
+            if(!eventVS)
+                msg = message(code:'backupRequestEventIdErrorMsg', [eventId])
+            if(!eventVS.backupAvailable)
+                msg = message(code:'eventWithoutBackup', args:[eventVS.subject])
+            String subject = form.getField("subject");
+            String email = form.getField("email");
+            if(!email)
+                msg =  message(code:'backupRequestEmailMissingErrorMsg')
 
+            if(msg) {
+                pdfDocument.state = PDFDocumentVS.State.BACKUP_REQUEST_ERROR
+            } else pdfDocument.state = PDFDocumentVS.State.BACKUP_REQUEST
 
-			} else {
-				response.status = ResponseVS.SC_ERROR_REQUEST
-				render message(code: 'requestWithErrorsHTML', args:[
-					"${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
-				return false
-			}
-		} catch (Exception ex) {
-			log.error (ex.getMessage(), ex)
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render(ex.getMessage())
-			return false
-		}
+            PDFDocumentVS.withTransaction {
+                pdfDocument.eventVS = eventVS
+                pdfDocument.save(flush:true)
+            }
+            if(msg) {
+                params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,message:msg)
+                return false
+            }
+
+            log.debug "backup request - eventId: ${eventId} - subject: ${subject} - email: ${email}"
+            ResponseVS backupGenResponseVS = null
+            if(EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
+                log.debug "Request from DEVELOPMENT environment generating sync response"
+                backupGenResponseVS = requestBackup(eventVS, request.locale)
+                if(ResponseVS.SC_OK == backupGenResponseVS?.statusCode) {
+                    BackupRequestVS backupRequest = new BackupRequestVS( filePath:backupGenResponseVS.message,
+                            type:backupGenResponseVS.type, PDFDocumentVS:pdfDocument, email:email)
+                    BackupRequestVS.withTransaction {backupRequest.save()}
+                    params.responseVS = new ResponseVS(ResponseVS.SC_OK, backupRequest.id.toString())
+                    return false
+                } else {
+                    log.error("DEVELOPMENT - error generating backup");
+                    params.responseVS = backupGenResponseVS
+                    return false
+                }
+            } else {
+                final EventVS event = eventVS
+                final Locale locale = request.locale
+                final String emailRequest = email
+                runAsync {
+                    ResponseVS backupResponse = requestBackup(event, locale)
+                    if(ResponseVS.SC_OK == backupResponse?.statusCode) {
+                        BackupRequestVS backupRequest = new BackupRequestVS(
+                                filePath:backupResponse.message, type:backupResponse.type,
+                                PDFDocumentVS:pdfDocument, email:emailRequest)
+                        BackupRequestVS.withTransaction { backupRequest.save() }
+                        mailSenderService.sendBackupMsg(backupRequest, locale)
+                    } else log.error("Error generating Backup");
+                }
+                params.responseVS= new ResponseVS(ResponseVS.SC_OK, message(code:'backupRequestOKMsg',args:[email]))
+            }
+        } else {
+            params.responseVS= new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code: 'requestWithErrorsHTML', args:[
+                            "${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
+        }
 	}
 	
 	
@@ -149,33 +133,23 @@ class BackupVSController {
 	 * @httpMethod [GET]
 	 */
 	def devDownload() {
-		if(!EnvironmentVS.DEVELOPMENT.equals(
-			ApplicationContextHolder.getEnvironment())) {
-			def msg = message(code: "serviceDevelopmentModeMsg")
-			log.error msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
-		}
-		EventVS event = null
-		EventVS.withTransaction {
-			event = EventVS.get(params.long('id'))
-		}
-		if(!event) {
-			def msg = message(code: "nullParamErrorMsg")
-			log.error msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
-		}
-		ResponseVS requestBackup = requestBackup(event, request.locale)
-		if(ResponseVS.SC_OK == requestBackup?.statusCode) {
-			redirect(uri: requestBackup.message)
+		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: "serviceDevelopmentModeMsg"))
 		} else {
-			log.error("DEVELOPMENT - error generating backup");
-			params.responseVS = requestBackup
-			return false
-		}
+            EventVS event = null
+            EventVS.withTransaction { event = EventVS.get(params.long('id')) }
+            if(!event) {
+                params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: "nullParamErrorMsg"))
+            } else {
+                ResponseVS requestBackup = requestBackup(event, request.locale)
+                if(ResponseVS.SC_OK == requestBackup?.statusCode) {
+                    redirect(uri: requestBackup.message)
+                } else {
+                    log.error("DEVELOPMENT - error generating backup");
+                    params.responseVS = requestBackup
+                }
+            }
+        }
 	}
 	
 	/**
@@ -193,9 +167,9 @@ class BackupVSController {
 			solicitud = BackupRequestVS.get(params.long('id'))
 		}
 		if(!solicitud) {
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render message(code: 'backupRequestNotFound', args:[params.id])
-			return false
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code: 'backupRequestNotFound', args:[params.id]))
+			return
 		}
 		redirect(uri: solicitud.filePath)
 	}
@@ -211,29 +185,23 @@ class BackupVSController {
 	def get() {
 		BackupRequestVS solicitud
 		byte[] solicitudBytes
+        ResponseVS responseVS
 		BackupRequestVS.withTransaction {
 			solicitud = BackupRequestVS.get(params.long('id'))
 			if(solicitud) {
 				if(solicitud.PDFDocumentVS) {//has PDF
-					//response.setHeader("Content-disposition", "attachment; filename=manifest.pdf")
-					response.contentType = ContentTypeVS.PDF
-					solicitudBytes = solicitud.PDFDocumentVS?.pdf
+                    responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PDF,
+                        messageBytes: solicitud.PDFDocumentVS?.pdf)
 				} else {//has SMIME
-					response.contentType = ContentTypeVS.TEXT
-					solicitudBytes = solicitud.messageSMIME?.content
+                    responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.TEXT_STREAM,
+                            messageBytes: solicitud.messageSMIME?.content)
 				}
 			} 
 		}
 		if(!solicitud) {
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render message(code: 'backupRequestNotFound', args:[params.id])
-			return false
-		}
-
-		response.setHeader("Content-Length", "${solicitudBytes.length}")
-		response.outputStream << solicitudBytes // Performing a binary stream copy
-		response.outputStream.flush()
-		return false
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code: 'backupRequestNotFound', args:[params.id]))
+		} else params.responseVS = responseVS
 	}
 
 }

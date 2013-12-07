@@ -16,27 +16,22 @@ class EditorController {
 	def messageSource
 
 	def manifest() {
-		render(view:"manifest" , model:[
-			selectedSubsystem:SubSystemVS.MANIFESTS.toString()])
+		render(view:"manifest" , model:[selectedSubsystem:SubSystemVS.MANIFESTS.toString()])
 	}
         
     def vote() { 
 		def controlCenters = ControlCenterVS.findAllWhere(state: ActorVS.State.RUNNING)
 		def controlCenterList = []
 		controlCenters.each {controlCenter ->
-            def controlCenterMap = [id:controlCenter.id, name:controlCenter.name,
-                state:controlCenter.state?.toString(),
+            def controlCenterMap = [id:controlCenter.id, name:controlCenter.name, state:controlCenter.state?.toString(),
                 serverURL:controlCenter.serverURL, dateCreated:controlCenter.dateCreated]
             controlCenterList.add(controlCenterMap)
         }
-		
-		render(view:"vote" , model:[controlCenters: controlCenterList, 
-			selectedSubsystem:SubSystemVS.VOTES.toString()])
+		render(view:"vote" , model:[controlCenters: controlCenterList, selectedSubsystem:SubSystemVS.VOTES.toString()])
 	}
         
     def claim() { 
-		render(view:"claim" , model:[
-			selectedSubsystem:SubSystemVS.CLAIMS.toString()])
+		render(view:"claim" , model:[selectedSubsystem:SubSystemVS.CLAIMS.toString()])
 	}
 		
 }

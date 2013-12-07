@@ -45,6 +45,7 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.android.ui.CertPinDialog;
 import org.votingsystem.android.ui.CertPinDialogListener;
@@ -61,7 +62,7 @@ import java.text.Normalizer;
 import java.util.Date;
 import java.util.UUID;
 
-import static org.votingsystem.model.ContextVSImpl.*;
+import static org.votingsystem.model.ContextVS.*;
 
 public class UserCertRequestActivity extends ActionBarActivity implements CertPinDialogListener {
 
@@ -181,7 +182,7 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
     	InputMethodManager imm = (InputMethodManager)getSystemService(
   		      Context.INPUT_METHOD_SERVICE);
   		imm.hideSoftInputFromWindow(nifText.getWindowToken(), 0);
-      	if (validarFormulario ()) {
+      	if (validateForm ()) {
 
     		String givenName = Normalizer.normalize(
     				givennameText.getText().toString().toUpperCase(), Normalizer.Form.NFD);
@@ -220,8 +221,8 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
 		builder.setTitle(caption).setMessage(message).show();
 	}
     
-    private boolean validarFormulario () {
-    	Log.d(TAG + ".validarFormulario", " - validarFormulario");
+    private boolean validateForm () {
+    	Log.d(TAG + ".validateForm", " - validateForm");
     	if(NifUtils.validate(nifText.getText().toString()) == null) {
     		showMessage(getString(R.string.error_lbl), getString(R.string.nif_error));
     		return false;
@@ -246,7 +247,7 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
     			deviceId = UUID.randomUUID().toString();
     		}
     	}
-		Log.d(TAG + ".validarFormulario() ", " - deviceId: " + deviceId);
+		Log.d(TAG + ".validateForm() ", " - deviceId: " + deviceId);
     	return true;
     }
     
@@ -369,9 +370,9 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
                 SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
                 SharedPreferences.Editor editor = settings.edit();
                 Long idSolictud = Long.valueOf(responseVS.getMessage());
-                editor.putLong(PREFS_ID_SOLICTUD_CSR, idSolictud);
+                editor.putLong(CSR_REQUEST_ID_KEY, idSolictud);
                 editor.commit();
-                contextVS.setState(ContextVSImpl.State.CON_CSR);
+                contextVS.setState(ContextVS.State.WITH_CSR);
                 Intent intent = new Intent(getBaseContext(),
                         UserCertResponseActivity.class);
                 startActivity(intent);

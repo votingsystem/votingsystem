@@ -250,7 +250,7 @@ public class SignatureDialog extends JDialog {
             try {
                 switch(operation.getType()) {
                     case MANIFEST_SIGN:
-                        responseVS = HttpHelper.getInstance().getData(operation.getUrlDocumento(), ContentTypeVS.PDF);
+                        responseVS = HttpHelper.getInstance().getData(operation.getUrlDocumento(), ContentTypeVS.PDF.getName());
                         return responseVS;
                     case MANIFEST_PUBLISHING:
                         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(operation.getDocumentToSignMap());

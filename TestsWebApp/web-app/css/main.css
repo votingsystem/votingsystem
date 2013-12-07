@@ -122,11 +122,8 @@ input:focus:valid {
 .button_base {
     display:table;
     position:relative;
-    margin: 0;
-    border: 0;
     font-size: 1.2em;
-    padding: 1px 1px 1px 1px;
-    height: 30px;
+    padding: 4px 5px 4px 5px;
     text-align: center;
     box-sizing: border-box;
     -webkit-box-sizing: border-box;
@@ -137,8 +134,6 @@ input:focus:valid {
     vertical-align: middle;
     text-decoration: none;
     background-color: #f1f5f8;
-    /*button_simple_rollover*/
-    display: table;  margin: auto;
     color: #769ab5;
     border: #769ab5 solid 1px;
     border-radius: 4px;

@@ -10,17 +10,13 @@
 <div id="claimProtocolSinulationDataDialog" title="<g:message code="initClaimProtocolSimulationButton"/>"
      style="padding:10px 20px 20px 20px; margin:0px 0px 0px 0px;overflow: hidden; position:relative;">
     <div class="errorMsgWrapper" style="display:none;"></div>
-    <div style="overflow: hidden; position: relative; margin:0px 0px 15px 0px;">
-        <div style="display:block;overflow: hidden; position: relative; margin:0px 0px 1px 0px; padding: 0 0 10px 0; ">
-            <div style="margin:10px 0px 0px 0px; display: inline; position: absolute; right: 0px; left: 0px;">
-                <p id="pageTitle" style="text-align: center;font-weight: bold; font-size: 1.4em; color: #48802c;">
-                    <g:message code="initClaimProtocolSimulationMsg"/>
-                </p>
-            </div>
-            <votingSystem:simpleButton id="testButton"
-                   style="margin:0px 20px 0px 0px; padding: 0px 10px 0px 10px; float:right; display: inline;">
-                Test
-            </votingSystem:simpleButton>
+    <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
+        <div id="pageTitle" style="display:table-cell;font-weight: bold; font-size: 1.4em; color: #48802c; text-align:center;vertical-align: middle;">
+            <g:message code="initClaimProtocolSimulationMsg"/>
+        </div>
+        <div  id="testButtonDiv" style="display:table-cell; text-align:center;vertical-align: middle;">
+            <votingSystem:simpleButton id="testButton" style="margin:0px 0px 0px 30px;">
+                <g:message code="goToResultViewMsg"/></votingSystem:simpleButton>
         </div>
     </div>
     <div id="formDataDiv">
@@ -92,7 +88,7 @@
             </fieldset>
             <div style="position: relative; overflow:hidden; ">
                 <votingSystem:simpleButton id="submitButton" isSubmitButton='true' style="margin:15px 20px 20px 0px;
-                        padding:2px 5px 2px 0px; height:30px; width:450px; float:right;">
+                        width:450px; float:right;">
                     <g:message code="initClaimProtocolSimulationButton"/>
                 </votingSystem:simpleButton>
             </div>
@@ -163,7 +159,7 @@ $('#claimProtocolSinulationDataForm').submit(function(event){
         }
     });
      event.fieldsEventVS = claimFields
-	 var simulationData = {service:"claimSimulationService", status:"INIT_SIMULATION",
+	 var simulationData = {service:"claimSimulationService", status:Status.INIT_SIMULATION,
 	 		 accessControlURL:$('#accessControlURL').val(), 
 			 maxPendingResponses: $('#maxPendingResponses').val(), 
 			 numRequestsProjected: $('#numRequestsProjected').val(),
@@ -173,10 +169,9 @@ $('#claimProtocolSinulationDataForm').submit(function(event){
 			 backupRequestEmail:$('#emailRequestBackup').val(), 
 			 event:event}
 
-    $('#formDataDiv').fadeOut()
-    $('#simulationListenerDiv').fadeIn()
+     showListenerDiv(true)
      showSimulationProgress(simulationData)
-	return false
+	 return false
 });
 
 function isValidForm() {
@@ -217,26 +212,27 @@ function isValidForm() {
 	return true
 }
 
+$("#testButtonDiv").hide()
 
-var isFormView = true
-
-$("#testButton").click(function () {
-    if(isFormView) {
+function showListenerDiv(isListening) {
+     $("#testButtonDiv").show()
+    if(isListening) {
+        $("#testButton").text("<g:message code="goToFormViewMsg"/>")
         $('#formDataDiv').fadeOut()
         $('#simulationListenerDiv').fadeIn()
-        var msg = '<g:message code="listeningClaimProtocolSimulationMsg"/>' + ": '" + $('#subject').val() + "'"
-        $('#pageTitle').html(msg)
-        isFormView = false;
+        $('#pageTitle').text('<g:message code="listeningClaimProtocolSimulationMsg"/>')
     } else {
+        $("#testButton").text("<g:message code="goToResultViewMsg"/>")
         $('#simulationListenerDiv').fadeOut()
         $('#formDataDiv').fadeIn()
-        showEditor_claimEditorDiv()
         SimulationService.close()
-        var msg = '<g:message code="initClaimProtocolSimulationMsg"/>'
-        $('#pageTitle').text(msg)
-        isFormView = true
+        $('#pageTitle').text('<g:message code="initClaimProtocolSimulationMsg"/>')
     }
+}
 
+
+$("#testButton").click(function () {
+    showListenerDiv(!$("#simulationListenerDiv").is(":visible"))
 });
 
 

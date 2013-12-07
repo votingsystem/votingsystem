@@ -49,33 +49,24 @@ class RepresentativeController {
 	def editRepresentative() {
 		String nif = NifUtils.validate(params.nif)
 		if(!nif) {
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render message(code: 'nifWithErrors', args:[params.nif])
-			return false
-		}
-		UserVS representative
-		UserVS.withTransaction {
-			representative =  UserVS.findWhere(type:UserVS.Type.REPRESENTATIVE,
-				nif:nif)
-		}
-		if(!representative) {
-			response.status = ResponseVS.SC_NOT_FOUND
-			render message(code: 'representativeNifErrorMsg', args:[nif])
-			return false
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code: 'nifWithErrors', args:[params.nif]))
 		} else {
-			String name = "${representative.name} ${representative.firstName}"
-			def resultMap = [id: representative.id, name:representative.name,
-				firstName:representative.firstName, info:representative.description,
-				nif:representative.nif, fullName:"${representative.name} ${representative.firstName}"]
-			if(request.contentType?.contains(ContentTypeVS.JSON)) {
-				render resultMap as JSON
-				return false
-			} else {
-				render(view:"editRepresentative" , model:[representative:resultMap,
-				selectedSubsystem:SubSystemVS.REPRESENTATIVES.toString()])
-				return
-			}
-		}
+            UserVS representative
+            UserVS.withTransaction { representative =  UserVS.findWhere(type:UserVS.Type.REPRESENTATIVE, nif:nif) }
+            if(!representative) {
+                params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                        message(code: 'representativeNifErrorMsg', args:[nif]))
+            } else {
+                String name = "${representative.name} ${representative.firstName}"
+                def resultMap = [id: representative.id, name:representative.name,
+                        firstName:representative.firstName, info:representative.description,
+                        nif:representative.nif, fullName:"${representative.name} ${representative.firstName}"]
+                if(request.contentType?.contains(ContentTypeVS.JSON.getName())) render resultMap as JSON
+                else render(view:"editRepresentative" , model:[representative:resultMap,
+                            selectedSubsystem:SubSystemVS.REPRESENTATIVES.toString()])
+            }
+        }
 	}
 	
 	/**
@@ -105,20 +96,15 @@ class RepresentativeController {
 			}
 			if (representative) {
 				representativeMap = representativeService.getRepresentativeDetailedMap(representative)
-				if(request.contentType?.contains(ContentTypeVS.JSON)) {
+				if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
 					render representativeMap as JSON
-					return false
 				} else {
 					render(view:"index", model: [selectedSubsystem:SubSystemVS.REPRESENTATIVES.toString(),
 						representative:representativeMap])
-					return false
 				}
-			} else {
-				String msg = message(code:'representativeIdErrorMsg', args:[params.id])
-				log.debug msg
-				render msg
-			}
-			return false
+			} else params.responseVS = new ResponseVS(ResponseVS.SC_ERROR,
+                        message(code:'representativeIdErrorMsg', args:[params.id]))
+			return
 		} else {
 			UserVS.withTransaction {
 				representativeList = UserVS.findAllByType(UserVS.Type.REPRESENTATIVE, params)
@@ -148,25 +134,19 @@ class RepresentativeController {
 	def getByNif() {
 		String nif = NifUtils.validate(params.nif)
 		if(!nif) {
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render message(code: 'nifWithErrors', args:[params.nif])
-			return false
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code: 'nifWithErrors', args:[params.nif]))
+			return
 		}
-		UserVS index
-		UserVS.withTransaction {
-			representative =  UserVS.findWhere(type:UserVS.Type.REPRESENTATIVE,
-				nif:nif)
-		}
-		if(!index) {
-			response.status = ResponseVS.SC_NOT_FOUND
-			render message(code: 'representativeNifErrorMsg', args:[nif])
-			return false
+		UserVS representative
+		UserVS.withTransaction { representative =  UserVS.findWhere(type:UserVS.Type.REPRESENTATIVE, nif:nif) }
+		if(!representative) {
+            params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                    message(code: 'representativeNifErrorMsg', args:[nif]))
 		} else {
-			String name = "${index.name} ${index.firstName}"
-			def resultMap = [representativeId: index.id, representativeName:name,
+			def resultMap = [representativeId: index.id, representativeName:"${index.name} ${index.firstName}",
 				representativeNIF:index.nif]
 			render resultMap as JSON
-			return false
 		}
 	}
 	
@@ -184,17 +164,14 @@ class RepresentativeController {
 	def revoke() {
 		MessageSMIME messageSMIME = params.messageSMIMEReq
 		if(!messageSMIME) {
-			String msg = message(code:'requestWithoutFile')
-			log.debug msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))
+            return
 		}
 		ResponseVS responseVS = representativeService.processRevoke(messageSMIME, request.getLocale())
-		params.responseVS = responseVS
 		if (ResponseVS.SC_OK == responseVS.statusCode){
-			response.contentType = org.votingsystem.model.ContentTypeVS.SIGNED
+            responseVS.setContentType(ContentTypeVS.SIGNED)
 		}
+        params.responseVS = responseVS
 	}
 	
 	/**
@@ -213,18 +190,9 @@ class RepresentativeController {
 	def accreditations() {
 		MessageSMIME messageSMIME = params.messageSMIMEReq
 		if(!messageSMIME) {
-			String msg = message(code:'requestWithoutFile')
-			log.debug msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
-		}
-		ResponseVS responseVS = representativeService.processAccreditationsRequest(
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))
+		} else params.responseVS = representativeService.processAccreditationsRequest(
 			messageSMIME, request.getLocale())
-		params.responseVS = responseVS
-		if (ResponseVS.SC_OK == responseVS.statusCode){
-			render responseVS.message
-		}
 	}
 	
 	/**
@@ -242,17 +210,8 @@ class RepresentativeController {
 	def history() {
 		MessageSMIME messageSMIME = params.messageSMIMEReq
 		if(!messageSMIME) {
-			String msg = message(code:'requestWithoutFile')
-			log.debug msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
-		}
-		ResponseVS responseVS = representativeService.processVotingHistoryRequest(messageSMIME, request.getLocale())
-		params.responseVS = responseVS
-		if (ResponseVS.SC_OK == responseVS.statusCode){
-			render responseVS.message
-		}
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))
+		} else params.responseVS = representativeService.processVotingHistoryRequest(messageSMIME, request.getLocale())
 	}
 	
 	/**
@@ -262,24 +221,21 @@ class RepresentativeController {
 	 * @httpMethod [POST]
 	 * @serviceURL [/representative/userSelection]
 	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. documento firmado
-	 *                     por el userVS que está eligiendo el representante.
+	 *                     por el usuario que está eligiendo el representante.
 	 * @responseContentType [application/x-pkcs7-signature] Recibo firmado por el sistema.
-	 * @return Recibo que consiste en el documento enviado por el userVS con la signatureVS añadida del servidor.
+	 * @return Recibo que consiste en el documento enviado por el usuario con la signatureVS añadida del servidor.
 	 */
 	def userSelection() {
 		MessageSMIME messageSMIME = params.messageSMIMEReq
 		if(!messageSMIME) {
-			String msg = message(code:'requestWithoutFile')
-			log.debug msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))
+            return
 		}
 		ResponseVS responseVS = representativeService.saveUserRepresentative(messageSMIME, request.getLocale())
-		params.responseVS = responseVS
 		if (ResponseVS.SC_OK == responseVS.statusCode){
-			response.contentType = org.votingsystem.model.ContentTypeVS.SIGNED
+            responseVS.setContentType(ContentTypeVS.SIGNED)
 		}
+        params.responseVS = responseVS
 	}
 	
 	/**
@@ -302,10 +258,8 @@ class RepresentativeController {
 			String msg
 			if(!imageBytes) msg = message(code: 'imageMissingErrorMsg')
 			else msg = message(code: 'representativeDataMissingErrorMsg')
-			log.error "processFileMap - ERROR - msg: ${msg}"
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, msg)
+            return
 		}
 		params.messageSMIMEReq = messageSMIMEReq
 		if(imageBytes.length > MAX_FILE_SIZE) {
@@ -318,9 +272,6 @@ class RepresentativeController {
 			ResponseVS responseVS = representativeService.saveRepresentativeData(
 				messageSMIMEReq, imageBytes, request.getLocale())
 			params.responseVS = responseVS
-			if(ResponseVS.SC_OK == responseVS.statusCode) {
-				render responseVS.message
-			}
 		}
 	}
 
@@ -337,35 +288,19 @@ class RepresentativeController {
 		ImageVS image;
 		String msg
 		if(params.long('id')) {
-			ImageVS.withTransaction{
-				image = ImageVS.get(params.long('id'))
-			}
+			ImageVS.withTransaction{ image = ImageVS.get(params.long('id')) }
 			if(!image) msg = message(code:'imageNotFound', args:[params.id])
 		} else if(params.long('representativeId')) {
-			UserVS index
-			UserVS.withTransaction {
-				representative = UserVS.get(params.long('representativeId'))
-			}
-			if (UserVS.Type.REPRESENTATIVE == index?.type) {
-				image = ImageVS.findWhere(userVS:index,
-					type:ImageVS.Type.REPRESENTATIVE)
+			UserVS representative
+			UserVS.withTransaction { representative = UserVS.get(params.long('representativeId')) }
+			if (UserVS.Type.REPRESENTATIVE == representative?.type) {
+				image = ImageVS.findWhere(userVS:representative, type:ImageVS.Type.REPRESENTATIVE)
 				if(!image) msg = message(code:'representativeWithoutImageErrorMsg', args:[params.representativeId])
-			} else {
-				msg = message(code:'representativeIdErrorMsg', args[params.representativeId])
-			}
+			} else  msg = message(code:'representativeIdErrorMsg', args[params.representativeId])
 		}
-		if (image) {
-			response.status = ResponseVS.SC_OK
-			//response.setContentType(ContentTypeVS.TEXT)
-			response.contentLength = image.fileBytes.length
-			response.outputStream <<  image.fileBytes
-			response.outputStream.flush()
-			return false
-		}
-		response.status = ResponseVS.SC_NOT_FOUND
-		log.debug msg
-		render msg
-		return false
+		if (image) params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.IMAGE,
+                    messageBytes: image.fileBytes)
+		else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND, msg)
 	}
 	
 	/**
@@ -379,46 +314,23 @@ class RepresentativeController {
 	 * @param [id] Obligatorio. El id del eventVS en la base de datos del Control de Acceso
 	 * 							en que se publicó
 	 * @return El archivo zip con todos los datos necesarios para establecer el valor 
-	 * del voteVS de los representates en el momento en que finaliza una votación.
+	 * del voto de los representates en el momento en que finaliza una votación.
 	 */
 	def accreditationsBackupForEvent() {
 		log.debug("getAccreditationsBackupForEvent - event: ${params.id}")
 		EventVSElection event = null
-		EventVSElection.withTransaction {
-			event = EventVSElection.get(params.long('id'))
-		}
+		EventVSElection.withTransaction { event = EventVSElection.get(params.long('id')) }
 		String msg = null
 		if(!event) {
-			msg = message(code: 'eventVSNotFound')
-			log.error "accreditationsBackupForEvent - ERROR - msg: ${msg}"
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
-		}
-		if(event.isActive(DateUtils.getTodayDate())) {
-			msg = message(code: 'eventDateNotFinished')
-			log.error "accreditationsBackupForEvent - ERROR - msg: ${msg}"
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
-		}
-
-		String downloadFileName = message(code:'repAccreditationsBackupForEventFileName',
-			args:[event.id])
-		ResponseVS responseVS = representativeService.getAccreditationsBackupForEvent(
-				event, request.getLocale()) 
-		
-		if(ResponseVS.SC_OK == responseVS.statusCode) {
-			File baseDirZipped = responseVS.file
-			byte[] fileBytes = baseDirZipped.getBytes()
-			response.setHeader("Content-Disposition", "inline; filename='${downloadFileName}'");
-			response.setContentType("application/zip")
-			response.contentLength = fileBytes.length
-			response.outputStream <<  fileBytes
-			response.outputStream.flush()
-		} else params.status = responseVS
-		
-		
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'eventVSNotFound'))
+		} else {
+            if(event.isActive(DateUtils.getTodayDate())) {
+                params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'eventDateNotFinished'))
+            } else {
+                params.responseVS = representativeService.getAccreditationsBackupForEvent(
+                        event, request.getLocale())
+            }
+        }
 	}
 
 }

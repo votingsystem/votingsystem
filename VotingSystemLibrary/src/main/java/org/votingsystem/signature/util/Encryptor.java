@@ -71,10 +71,12 @@ public class Encryptor {
         SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
         RecipientInformationStore   recipients = smimeEnveloped.getRecipientInfos();
         RecipientInformation        recipientInfo = recipients.get(recipientId);
-        RecipientId recipientId = null;
-        if(recipientInfo.getRID() != null) {
-            recipientId = recipientInfo.getRID();
-            logger.debug(" -- recipientId.getSerialNumber(): " + recipientId.getSerialNumber());
+        RecipientId messageRecipientId = null;
+        if(recipientInfo != null && recipientInfo.getRID() != null) {
+            messageRecipientId = recipientInfo.getRID();
+            logger.debug(" -- messageRecipientId.getSerialNumber(): " + messageRecipientId.getSerialNumber());
+        } else {
+            logger.error(": " + recipientId.getSerialNumber());
         }
         MimeBodyPart mimeMessage = SMIMEUtil.toMimeBodyPart(recipientInfo.getContent(recipient));
         			/*ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -416,9 +418,9 @@ public class Encryptor {
         if(recipientInfo == null && recipients.getRecipients().size() == 1) {
             recipientInfo = (RecipientInformation) recipients.getRecipients().iterator().next();
         }
-        RecipientId recipientId = null;
+        RecipientId fileRecipientId = null;
         if(recipientInfo.getRID() != null) {
-            recipientId = recipientInfo.getRID();
+            fileRecipientId = recipientInfo.getRID();
         }
         byte[] result = recipientInfo.getContent(recipient);
         return result;

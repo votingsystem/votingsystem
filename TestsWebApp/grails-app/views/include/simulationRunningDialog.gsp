@@ -11,8 +11,7 @@
 		<progress style="display:block;margin:0px auto 20px auto;"></progress>
 	</div>
 	
-	<votingSystem:simpleButton id="listenButton" isSubmitButton='true'
-		style="margin:15px 20px 0px 0px;padding:2px 5px 2px 0px; height:30px;">
+	<votingSystem:simpleButton id="listenButton" isSubmitButton='true' style="margin:15px 20px 0px 0px;">
 			Listen broadcast
 	</votingSystem:simpleButton>
   	
@@ -20,10 +19,7 @@
 
 <r:script>
 
-
 $("#listenButton").click(function() {	
-	console.log("============= listenButton")
-
 	messageToService = {service:"manifestSimulationService", status:"LISTEN"}
 	SimulationService.initialize();
  })

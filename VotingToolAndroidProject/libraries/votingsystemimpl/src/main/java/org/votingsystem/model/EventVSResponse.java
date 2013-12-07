@@ -146,11 +146,11 @@ public class EventVSResponse {
     	Log.d(TAG + ".parse(...)", "parse(...)");
     	JSONObject jsonObject = new JSONObject (consultaStr);
         List<EventVS> eventVSes = new ArrayList<EventVS>();
-        JSONObject jsonEventos = jsonObject.getJSONObject("eventVSs");
+        JSONObject jsonEventos = jsonObject.getJSONObject("eventsVS");
         JSONArray arrayEventos;
         if (jsonEventos != null) {
-        	if(jsonEventos.has("firmas")) {
-                arrayEventos = jsonEventos.getJSONArray("firmas");
+        	if(jsonEventos.has("manifests")) {
+                arrayEventos = jsonEventos.getJSONArray("manifests");
                 if (arrayEventos != null) {
                     for (int i=0; i<arrayEventos.length(); i++) {
                         EventVS eventVS = EventVS.parse(arrayEventos.getJSONObject(i));

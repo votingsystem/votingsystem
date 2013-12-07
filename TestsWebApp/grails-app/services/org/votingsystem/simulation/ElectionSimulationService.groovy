@@ -78,6 +78,10 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
                      }
                     break;
                 case Status.FINISH_SIMULATION:
+                    if(!simulationData || !simulationData.isRunning()) {
+                        log.error("SIMULATION ALREADY FINISHED")
+                        return
+                    }
                     if(simulationStarter?.equals(messageJSON.userId)) {
                         String message = messageSource.getMessage("simulationCancelledByUserMsg", null, locale) +
                                 " - message: ${messageJSON.message}"
@@ -358,7 +362,7 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
         ResponseVS responseVS = worker.call();
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             String downloadServiceURL = ContextVS.getInstance().getAccessControl().getDownloadServiceURL(responseVS.getMessage());
-            responseVS = HttpHelper.getInstance().getData(downloadServiceURL, ContentTypeVS.BACKUP);
+            responseVS = HttpHelper.getInstance().getData(downloadServiceURL, ContentTypeVS.BACKUP.getName());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 log.debug("TODO validate backup");
                 /*FutureTask<ResponseVS> future = new FutureTask<ResponseVS>(

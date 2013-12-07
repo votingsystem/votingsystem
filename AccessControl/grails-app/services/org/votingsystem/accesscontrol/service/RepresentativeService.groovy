@@ -5,6 +5,7 @@ import org.bouncycastle.util.encoders.Base64
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.model.AccessRequestVS
 import org.votingsystem.model.BackupRequestVS
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.EventVSElection
 import org.votingsystem.model.ImageVS
 import org.votingsystem.model.MessageSMIME
@@ -56,11 +57,12 @@ class RepresentativeService {
 		File filesDir    = mapFiles.filesDir
 
 		Date selectedDate = event.getDateFinish();
+        String downloadFileName = message(code:'repAccreditationsBackupForEventFileName', args:[event.id])
 
 		if(zipResult.exists()) {
 			log.debug("getAccreditationsBackupForEvent - backup file already exists")
-			return new ResponseVS(statusCode:ResponseVS.SC_OK,
-				file:zipResult)
+			return new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.ZIP,
+                    messageBytes: zipResult.getBytes(), message: downloadFileName)
 		}		
 		
 		Map optionsMap = [:]

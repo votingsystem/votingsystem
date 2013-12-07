@@ -26,38 +26,35 @@ class VoteVSController {
 	 *
 	 * @httpMethod [POST]
 	 * @serviceURL [/voteVS]
-	 * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] Obligatorio. El archivo voteVS firmado por el
-	 *        <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/CertificateVS-de-voteVS">certificateVS de VoteVS.</a>
-	 *        y el certificateVS del Centro de Control.
+	 * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] Obligatorio. El archivo voto firmado por el
+	 *        <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Certificado-de-voto">certificado de VoteVS.</a>
+	 *        y el certificado del Centro de Control.
 	 * @responseContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] 
-	 * @return  <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Recibo-de-VoteVS">El recibo del voteVS.</a>
+	 * @return  <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Recibo-de-VoteVS">El recibo del voto.</a>
 	 */
     def save() { 
 		MessageSMIME messageSMIMEReq = params.messageSMIMEReq
-		if(!messageSMIMEReq) {
-			String msg = message(code:'requestWithoutFile')
-			log.error msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg 
-			return false
-		}
+        if(!messageSMIMEReq) {
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))
+            return
+        }
 	    ResponseVS responseVS = voteVSService.validateVote(messageSMIMEReq, request.getLocale())
 		if (ResponseVS.SC_OK == responseVS.statusCode) {
 			params.receiverCert = responseVS.data.certificate
 			responseVS.data = responseVS.data.messageSMIME
-			response.setContentType(ContentTypeVS.SIGNED)
+            responseVS.setContentType(ContentTypeVS.SIGNED.getName())
 		}
 		params.responseVS = responseVS
 	}
 	
 	/**
-	 * Servicio que devuelve la información de un voteVS a partir del identificador
+	 * Servicio que devuelve la información de un voto a partir del identificador
 	 * del mismo en la base de datos
 	 * @httpMethod [GET]
 	 * @serviceURL [/voteVS/${id}]
-	 * @param [id] Obligatorio. Identificador del voteVS en la base de datos
+	 * @param [id] Obligatorio. Identificador del voto en la base de datos
 	 * @responseContentType [application/json]
-	 * @return documento JSON con la información del voteVS solicitado.
+	 * @return documento JSON con la información del voto solicitado.
 	 */
 	def get() {
 		VoteVS voteVS
@@ -66,14 +63,9 @@ class VoteVSController {
 			voteVS = VoteVS.get(params.long('id'))
 			if(voteVS) voteVSMap = voteVSService.getVotoMap(voteVS)
 		}
-		if(!voteVS) {
-			response.status = ResponseVS.SC_NOT_FOUND
-			render message(code: 'voteNotFound', args:[params.id])
-			return false
-		}
-
-		render voteVSMap as JSON
-		return false
+		if(!voteVS) params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                message(code: 'voteNotFound', args:[params.id]))
+		else render voteVSMap as JSON
 	}
 	
 }

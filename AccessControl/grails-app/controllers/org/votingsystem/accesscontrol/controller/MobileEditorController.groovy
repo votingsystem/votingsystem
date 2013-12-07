@@ -24,7 +24,6 @@ class MobileEditorController {
 				serverURL:controlCenter.serverURL, dateCreated:controlCenter.dateCreated]
 			controlCenterList.add(controlCenterMap)
 		}
-		
 		render(view:"vote" , model:[controlCenters: controlCenterList])
 	}
         

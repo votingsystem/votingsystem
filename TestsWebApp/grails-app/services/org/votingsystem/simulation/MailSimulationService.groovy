@@ -61,6 +61,10 @@ class MailSimulationService {
                     } else initSimulation(messageJSON)
                     break;
                 case Status.FINISH_SIMULATION:
+                    if(!simulationData || !simulationData.isRunning()) {
+                        log.error("SIMULATION ALREADY FINISHED")
+                        return
+                    }
                     if(simulationStarter?.equals(messageJSON.userId)) {
                         String message = messageSource.getMessage("simulationCancelledByUserMsg", null, locale) +
                                 " - message: ${messageJSON.message}"

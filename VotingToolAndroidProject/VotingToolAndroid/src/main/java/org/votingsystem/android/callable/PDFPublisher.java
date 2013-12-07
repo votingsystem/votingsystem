@@ -42,7 +42,7 @@ import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.Callable;
 
-import static org.votingsystem.model.ContextVSImpl.USER_CERT_ALIAS;
+import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 
 /**
  * @author jgzornoza
@@ -118,8 +118,8 @@ public class PDFPublisher implements Callable<ResponseVS> {
             mimeBodyPart.writeTo(baos);
             byte[] bytesToSend = baos.toByteArray();
             baos.close();
-            responseVS = HttpHelper.sendData(bytesToSend,
-            		ContentTypeVS.PDF_SIGNED_AND_ENCRYPTED, serviceURL + "/" + manifestId);
+            responseVS = HttpHelper.sendData(bytesToSend, ContentTypeVS.PDF_SIGNED_AND_ENCRYPTED.
+                    getName(), serviceURL + "/" + manifestId);
         }catch (Exception ex) {
             ex.printStackTrace();
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());

@@ -13,7 +13,8 @@ class UrlMappings {
 		}
 
 		"/"(view:"/index")
-		"500"(view:'/error500')
+		//"500"(view:'/error500')
+        "500"(controller:'error')
 
 		"/android/VotingToolAndroid.apk" {
 			controller = "android"
@@ -225,9 +226,9 @@ class UrlMappings {
 			action = "index"
 		}
 
-		"/messageSMIME/recibo/$requestMessageId" {
+		"/messageSMIME/receipt/$requestMessageId" {
 			controller = "messageSMIME"
-			action = "recibo"
+			action = "receipt"
 		}
 
 		"/eventVSManifestCollector/$id?" {
@@ -297,7 +298,7 @@ class UrlMappings {
 
 		"/accessRequestVS/eventVS/$eventId/nif/$nif" {
 			controller = "accessRequestVS"
-			action = [GET:"encontrarPorNif"]
+			action = [GET:"findByNif"]
 		}
 
 		"/accessRequestVS/hashHex/$hashHex" {

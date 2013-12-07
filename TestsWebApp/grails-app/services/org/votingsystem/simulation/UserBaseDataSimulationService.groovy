@@ -13,6 +13,8 @@ import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.DateUtils
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.NifUtils
+import org.votingsystem.util.StringUtils
+
 import java.lang.management.ManagementFactory
 import java.security.KeyStore
 import java.security.cert.Certificate
@@ -111,7 +113,7 @@ class UserBaseDataSimulationService {
                 X509Certificate usertCert = (X509Certificate) chain[0];
                 byte[] usertCertPEMBytes = CertUtil.getPEMEncoded(usertCert);
                 String certServiceURL = ContextVS.getInstance().getAccessControl().getServerURL() + "/userVS";
-                responseVS = HttpHelper.getInstance().sendData(usertCertPEMBytes, ContentTypeVS.X509, certServiceURL);
+                responseVS = HttpHelper.getInstance().sendData(usertCertPEMBytes, ContentTypeVS.X509.getName(), certServiceURL);
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                     log.error("ERROR nif: " + userNif + " - msg:" + responseVS.getMessage());
                     errorList.add(responseVS.getMessage());

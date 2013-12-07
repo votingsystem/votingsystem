@@ -127,7 +127,7 @@ class EventVSElectionService {
                         eventVS:eventVS, type:TypeVS.VOTING_EVENT_ERROR)
 			}
 			responseVS = HttpHelper.getInstance().sendData(encryptResponse.messageBytes,
-                    ContentTypeVS.SIGNED_AND_ENCRYPTED, controlCenterEventsURL)
+                    ContentTypeVS.SIGNED_AND_ENCRYPTED.getName(), controlCenterEventsURL)
 			if(ResponseVS.SC_OK != responseVS.statusCode) {
 				eventVS.state = EventVS.State.ERROR
                 eventVS.metaInf = responseVS.message

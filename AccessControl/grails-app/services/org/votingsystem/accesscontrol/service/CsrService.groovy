@@ -71,7 +71,7 @@ class CsrService {
 	}
 	
 	/**
-	 * Genera un certificateVS V3
+	 * Genera un certificado V3
 	 */
 	public X509Certificate signCSR(byte[] csrPEMBytes, String organizationalUnit,
 			PrivateKey caKey, X509Certificate caCert, Date dateBegin, Date dateFinish)

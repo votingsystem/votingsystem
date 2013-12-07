@@ -23,20 +23,13 @@ class EncryptorController {
 	def signatureVSService
 
     def index() { 
-		if(!EnvironmentVS.DEVELOPMENT.equals(
-			ApplicationContextHolder.getEnvironment())) {
-			String msg = message(code: "serviceDevelopmentModeMsg")
-			log.error msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
+		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))
+            return
 		}
 		if(!params.requestBytes) {
-			String msg = message(code:'requestWithoutFile')
-			log.error msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code:'requestWithoutFile'))
+            return
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		byte[] solicitud = params.requestBytes
@@ -45,27 +38,18 @@ class EncryptorController {
 		def messageJSON = JSON.parse(new String(solicitud))
 		
 		if(!messageJSON.publicKey) {
-			String msg = message(code: "publicKeyMissingErrorMsg")
-			log.error msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code:'publicKeyMissingErrorMsg'))
+            return
 		}
 		
 	    byte[] decodedPK = Base64.decode(messageJSON.publicKey);
 	    PublicKey receiverPublic =  KeyFactory.getInstance("RSA").
 	            generatePublic(new X509EncodedKeySpec(decodedPK));
 	    //log.debug("receiverPublic.toString(): " + receiverPublic.toString());
-		
 		messageJSON.message="Hello '${messageJSON.from}' from server"
-		
 		params.receiverPublicKey = receiverPublic
-		response.setContentType(ContentTypeVS.MULTIPART_ENCRYPTED)
-		
-		params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK)
-		
-		params.responseBytes = messageJSON.toString().getBytes()
-		
+        params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.MULTIPART_ENCRYPTED,
+                messageBytes: messageJSON.toString().getBytes())
 	}
 	
 	
@@ -89,14 +73,11 @@ class EncryptorController {
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		MessageSMIME messageSMIMEReq = params.messageSMIMEReq
-		if(!messageSMIMEReq) {
-			String msg = message(code:'requestWithoutFile')
-			log.error msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
-		}
-        response.contentType = ContentTypeVS.SIGNED
+        if(!messageSMIMEReq) {
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))
+            return
+        }
+        response.contentType = ContentTypeVS.SIGNED.getName()
 		SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage()
 		
 		String fromUser = "EncryptorController"
@@ -107,13 +88,5 @@ class EncryptorController {
 		MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.TEST, content:smimeMessageResp.getBytes())
 		params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, data:messageSMIMEResp, type:TypeVS.TEST)
 	}
-	
-	private getPemBytesFromKey(Key key) {
-		ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-		PEMWriter pemWrt = new PEMWriter(new OutputStreamWriter(bOut));
-		pemWrt.writeObject(key);
-		pemWrt.close();
-		bOut.close();
-		return bOut.toByteArray()
-	}
+
 }

@@ -40,7 +40,7 @@ public class VoteSender implements Callable<ResponseVS> {
     @Override public ResponseVS call() {
         try {
             KeyStore mockDnie = ContextVS.getInstance().generateKeyStore(userVS.getNif());
-            String msgSubject = ContextVS.getInstance().getMessage("accessRequestMsgSubject",
+            String msgSubject = ApplicationContextHolder.getInstance().getMessage("accessRequestMsgSubject",
                     voteVS.getEventVS().getId().toString());
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, END_ENTITY_ALIAS,
                     PASSWORD.toCharArray(), DNIe_SIGN_MECHANISM);

@@ -77,7 +77,7 @@ class VoteVSService {
 			//String encryptResponseStr = new String(encryptResponseBytes)
 			//log.debug(" - encryptResponseStr: ${encryptResponseStr}")
 			ResponseVS responseVS = HttpHelper.getInstance().sendData(encryptResponseBytes,
-                    ContentTypeVS.SIGNED_AND_ENCRYPTED, eventVS.accessControlVS.getVoteServiceURL())
+                    ContentTypeVS.SIGNED_AND_ENCRYPTED.getName(), eventVS.accessControlVS.getVoteServiceURL())
 			if (ResponseVS.SC_OK == responseVS.statusCode) {
 				SMIMEMessageWrapper smimeMessageResp = new SMIMEMessageWrapper(
 					new ByteArrayInputStream(responseVS.message.getBytes()));
@@ -133,9 +133,9 @@ class VoteVSService {
 				hashCertVoteBase64:hashCertVoteBase64)
 			if(voteVSCanceller) {
 				String voteURL = "${grailsApplication.config.grails.serverURL}/voteVS/${voteVSCanceller.getVoteVS.id}"
-				return new ResponseVS(statusCode:ResponseVS.SC_CANCELLATION_REPEATED,
-					data:voteVSCanceller.messageSMIME, type:TypeVS.CANCEL_VOTE_ERROR,
-					message:messageSource.getMessage('voteAlreadyCancelled', 
+				return new ResponseVS(statusCode:ResponseVS.SC_CANCELLATION_REPEATED, data:voteVSCanceller.messageSMIME,
+                        type:TypeVS.CANCEL_VOTE_ERROR,ContentTypeVS.SIGNED_AND_ENCRYPTED,
+					    message:messageSource.getMessage('voteAlreadyCancelled',
 						[voteURL].toArray(), locale), eventVS:voteVSCanceller.eventVS)
 			}
 			def certificateVS = CertificateVS.findWhere(hashCertVoteBase64:hashCertVoteBase64)
@@ -178,8 +178,8 @@ class VoteVSService {
 					type:TypeVS.CANCEL_VOTE_ERROR, message:msg, eventVS:eventVS)
 			} else {
 				log.debug("processCancel - voteVSCanceller.id: ${voteVSCanceller.id}")
-				return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS,
-					data:messageSMIMEResp, type:TypeVS.CANCEL_VOTE)
+				return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, type:TypeVS.CANCEL_VOTE,
+                        contentType: ContentTypeVS.SIGNED_AND_ENCRYPTED, data:messageSMIMEResp)
 			}			
 		}catch(Exception ex) {
 			log.error (ex.getMessage(), ex)

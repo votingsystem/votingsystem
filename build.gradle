@@ -171,6 +171,9 @@ task initDevEnvironmentApps(dependsOn: [':installCerts', ':installEditor', ':Acc
 initDevEnvironmentApps.mustRunAfter tasks.getByPath('VotingSystemLibrary:classes')
 
 
+task installVotingSystem(dependsOn: ['buildAll', 'initDevEnvironment']) {}
+initDevEnvironment.mustRunAfter buildAll
+
 def installAppletBcprov(project) {
 	println "installAppletBcprov - bcprovVersion '$bcprovVersion'"
 	File jarFile = project.file("web-app/applet/lib/bcprov-${bcprovVersion}.jar")

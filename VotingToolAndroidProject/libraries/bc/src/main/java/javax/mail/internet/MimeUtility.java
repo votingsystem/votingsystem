@@ -226,7 +226,7 @@ public class MimeUtility {
      * <code>writeTo</code> method to examine the data.  This is more
      * efficient in the common case of a <code>DataHandler</code>
      * created with an object and a MIME type (for example, a
-     * ContentTypeVS.TEXT String) because all the I/O is done in this
+     * text.plain String) because all the I/O is done in this
      * thread.  In the case requiring an <code>InputStream</code> the
      * <code>DataHandler</code> uses a thread, a pair of pipe streams,
      * and the <code>writeTo</code> method to produce the data. <p>

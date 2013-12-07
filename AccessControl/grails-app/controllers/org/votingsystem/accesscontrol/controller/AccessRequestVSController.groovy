@@ -7,7 +7,6 @@ import org.votingsystem.model.UserVS
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
-
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 /**
  * @infoController Solicitudes de acceso
@@ -33,24 +32,13 @@ class AccessRequestVSController {
     def index () {
         if (params.long('id')) {
 			def accessRequestVS
-			AccessRequestVS.withTransaction {
-				accessRequestVS = AccessRequestVS.get(params.id)
-			}
+			AccessRequestVS.withTransaction {accessRequestVS = AccessRequestVS.get(params.id)}
             if (accessRequestVS) {
-                    response.status = ResponseVS.SC_OK
-                    response.contentLength = accessRequestVS.messageSMIME?.content?.length
-                    response.setContentType(ContentTypeVS.TEXT)
-                    response.outputStream <<  accessRequestVS.messageSMIME?.content
-                    response.outputStream.flush()
-                    return false
-            }
-            response.status = ResponseVS.SC_NOT_FOUND
-            render  message(code: 'voteCancellationAccessRequestNotFoundError')
-            return false
-        }
-        response.status = ResponseVS.SC_ERROR_REQUEST
-        render message(code: 'requestWithErrors')
-        return false
+                params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, messageBytes: accessRequestVS.
+                        messageSMIME.content, contentType: ContentTypeVS.TEXT_STREAM.TEXT_STREAM)
+            } else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                    message(code: 'voteCancellationAccessRequestNotFoundError'))
+        } else params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrors'))
     }
 
 	/**
@@ -60,17 +48,14 @@ class AccessRequestVSController {
 	 * @httpMethod [POST]
 	 * @serviceURL [/accessRequestVS]
 	 * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] La solicitud de acceso.
-	 * @param [csr] Obligatorio. La solicitud de certificateVS de voteVS.
-	 * @return La solicitud de certificateVS de voteVS firmada.
+	 * @param [csr] Obligatorio. La solicitud de certificado de voto.
+	 * @return La solicitud de certificado de voto firmada.
 	 */
     def processFileMap () {
 		MessageSMIME messageSMIMEReq = params[grailsApplication.config.SistemaVotacion.accessRequestFileName]
 		if(!messageSMIMEReq) {
-			String msg = message(code:'requestWithoutFile')
-			log.error msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))
+			return
 		}
 		params.messageSMIMEReq = messageSMIMEReq
 		AccessRequestVS accessRequestVS;
@@ -88,10 +73,10 @@ class AccessRequestVSController {
                     representative, request.getLocale())
 			if (ResponseVS.SC_OK == csrValidationResponseVS.statusCode) {
 				responseVS.type = TypeVS.ACCESS_REQUEST;
-				params.responseVS = responseVS
-				params.responseBytes = csrValidationResponseVS.data.issuedCert
+                responseVS.messageBytes = csrValidationResponseVS.data.issuedCert
+                params.responseVS = responseVS
 				params.receiverPublicKey = csrValidationResponseVS.data.requestPublicKey
-				response.setContentType(ContentTypeVS.MULTIPART_ENCRYPTED)
+                params.responseVS.setContentType(ContentTypeVS.MULTIPART_ENCRYPTED.getName())
 				return false
 			} else {
 				csrValidationResponseVS.type = TypeVS.ACCESS_REQUEST_ERROR;
@@ -116,23 +101,13 @@ class AccessRequestVSController {
             log.debug "hashAccessRequestBase64: ${hashAccessRequestBase64}"
             AccessRequestVS accessRequestVS = AccessRequestVS.findWhere(hashAccessRequestBase64:
                 hashAccessRequestBase64)
-            if (accessRequestVS) {
-                response.status = ResponseVS.SC_OK
-                response.contentLength = accessRequestVS.content.length
-                response.setContentType(ContentTypeVS.TEXT)
-                response.outputStream <<  accessRequestVS.content
-                response.outputStream.flush()
-                return false  
-            }
-            response.status = ResponseVS.SC_NOT_FOUND
-            render message(code: 'accessRequestNotFound',
-                args:[params.hashHex])
-            return false
+            if (accessRequestVS)  params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK,
+                contentType:ContentTypeVS.TEXT_STREAM, messageBytes:accessRequestVS.content)
+            else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                    message(code: 'accessRequestNotFound',args:[params.hashHex]))
         }
-        response.status = ResponseVS.SC_ERROR_REQUEST
-        render message(code: 'requestWithErrorsHTML', args:[
-			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
-        return false
+        params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}"]))
     }
 	
 	/**
@@ -142,46 +117,37 @@ class AccessRequestVSController {
 	 * @param [nif] Obligatorio. El nif del solicitante.
 	 * @return La solicitud de acceso asociada al nif y el eventVS.
 	 */
-	def encontrarPorNif () {
+	def findByNif () {
 		if(params.nif && params.long('eventId')) {
 			EventVSElection evento
-			EventVSElection.withTransaction {
-				evento =  EventVSElection.get(params.eventId)
-			}
+			EventVSElection.withTransaction {evento =  EventVSElection.get(params.eventId)}
 			if(!evento) {
-				response.status = ResponseVS.SC_NOT_FOUND
-				render message(code: 'eventVSNotFound', args:[params.eventId])
-				return
-			}
-			UserVS userVS
-			UserVS.withTransaction {
-				userVS =  UserVS.findByNif(params.nif)
-			}
-			if(!userVS) {
-				response.status = ResponseVS.SC_NOT_FOUND
-				render message(code: 'userVSNotFoundByNIF', args:[params.nif])
-				return
-			}
-			AccessRequestVS accessRequestVS
-			AccessRequestVS.withTransaction {
-				accessRequestVS =  AccessRequestVS.findWhere(
-					userVS: userVS, eventVSElection:evento)
-			}
-			if(!accessRequestVS) {
-				response.status = ResponseVS.SC_NOT_FOUND
-				render message(code: 'nifWithoutAccessRequest', args:[params.eventId, params.nif])
-				return
-			}
-			response.status = ResponseVS.SC_OK
-			response.contentLength = accessRequestVS.messageSMIME?.content.length
-			response.setContentType(ContentTypeVS.TEXT)
-			response.outputStream <<  accessRequestVS.messageSMIME?.content
-			response.outputStream.flush()
-			return false
-		}
-		response.status = ResponseVS.SC_ERROR_REQUEST
-		render message(code: 'requestWithErrorsHTML', args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
-		return false
+                params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code: 'eventVSNotFound',
+                        args:[params.eventId]))
+			} else {
+                UserVS userVS
+                UserVS.withTransaction { userVS =  UserVS.findByNif(params.nif)}
+                if(!userVS) {
+                    params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                            message(code: 'userVSNotFoundByNIF', args:[params.nif]))
+                } else {
+                    AccessRequestVS accessRequestVS
+                    AccessRequestVS.withTransaction {
+                        accessRequestVS =  AccessRequestVS.findWhere(userVS: userVS, eventVSElection:evento)
+                    }
+                    if(!accessRequestVS) {
+                        params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                                message(code: 'nifWithoutAccessRequest', args:[params.eventId, params.nif]))
+                    } else {
+                        params.responseVS = new ResponseVS(ResponseVS.SC_OK, contentType: ContentTypeVS.TEXT_STREAM,
+                                messageBytes:  accessRequestVS.messageSMIME.content)
+                    }
+                }
+            }
+		} else {
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
+                    args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
+        }
 	}
 
 	

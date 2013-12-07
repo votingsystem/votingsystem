@@ -37,6 +37,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.android.ui.CertPinDialog;
 import org.votingsystem.android.ui.CertPinDialogListener;
@@ -53,7 +54,7 @@ import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 
-import static org.votingsystem.model.ContextVSImpl.*;
+import static org.votingsystem.model.ContextVS.*;
 
 
 public class UserCertResponseActivity extends ActionBarActivity
@@ -103,11 +104,11 @@ public class UserCertResponseActivity extends ActionBarActivity
             public void onClick(View v) {
             	Intent intent = null;
           	  	switch(contextVS.getState()) {
-			    	case SIN_CSR:
+			    	case WITHOUT_CSR:
 			    		intent = new Intent(getBaseContext(), MainActivity.class);
 			    		break;
-			    	case CON_CSR:
-			    	case CON_CERTIFICADO:
+			    	case WITH_CSR:
+			    	case WITH_CERTIFICATE:
 			    		intent = new Intent(getBaseContext(), UserCertRequestActivity.class);
 			    		break;
           	  	}
@@ -125,17 +126,17 @@ public class UserCertResponseActivity extends ActionBarActivity
     
     private void checkCertState () {
   	  	switch(contextVS.getState()) {
-	    	case SIN_CSR:
+	    	case WITHOUT_CSR:
 	    		Intent intent = new Intent(getBaseContext(), MainActivity.class);
 	    		startActivity(intent);
 	    		break;
-	    	case CON_CSR:
+	    	case WITH_CSR:
 	    		if(isCertStateChecked) break;
 	        	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-	        	Long idSolicitudCSR = settings.getLong(PREFS_ID_SOLICTUD_CSR, -1);
-	        	Log.d(TAG + ".checkCertState() ", "- idSolicitudCSR: " + idSolicitudCSR);
+	        	Long csrRequestId = settings.getLong(CSR_REQUEST_ID_KEY, -1);
+	        	Log.d(TAG + ".checkCertState() ", "- csrRequestId: " + csrRequestId);
                 GetDataTask getDataTask = new GetDataTask(null);
-                getDataTask.execute(contextVS.getAccessControlVS().getUserCSRServiceURL(idSolicitudCSR));
+                getDataTask.execute(contextVS.getAccessControlVS().getUserCSRServiceURL(csrRequestId));
   	  	}
     }
 
@@ -227,7 +228,7 @@ public class UserCertResponseActivity extends ActionBarActivity
 	        FileOutputStream fos = openFileOutput(KEY_STORE_FILE, Context.MODE_PRIVATE);
 	        fos.write(keyStoreBytes);
 	        fos.close();
-            contextVS.setState(ContextVSImpl.State.CON_CERTIFICADO);
+            contextVS.setState(ContextVS.State.WITH_CERTIFICATE);
     		return true;
 		} catch (Exception ex) {
 			Log.e(TAG, " - ex.getMessage(): " + ex.getMessage());

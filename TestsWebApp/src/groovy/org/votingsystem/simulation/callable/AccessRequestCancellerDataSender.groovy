@@ -33,7 +33,7 @@ public class AccessRequestCancellerDataSender implements Callable<ResponseVS> {
         KeyStore mockDnie = ContextVS.getInstance().generateKeyStore(request.getUserVS().getNif());
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, ContextVS.END_ENTITY_ALIAS,
                 ContextVS.PASSWORD.toCharArray(), ContextVS.VOTE_SIGN_MECHANISM);
-        String subject = ContextVS.getInstance().getMessage("cancelAccessRequestMsgSubject") + request.getEventVSId();
+        String subject = ApplicationContextHolder.getInstance().getMessage("cancelAccessRequestMsgSubject") + request.getEventVSId();
         String voteCancellerFileName = ContextVS.CANCEL_VOTE_FILE + request.getEventVSId() +"_" +
                 request.getUserVS().getNif() + ".p7m"
         byte[] messageBytes = null;
@@ -47,7 +47,7 @@ public class AccessRequestCancellerDataSender implements Callable<ResponseVS> {
             ContextVS.getInstance().copyFile(messageBytes, StringUtils.getUserDirPath(request.getUserVS().getNif()),
                     voteCancellerFileName)
         }
-        ResponseVS responseVS = HttpHelper.getInstance().sendData(messageBytes, ContentTypeVS.SIGNED,
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(messageBytes, ContentTypeVS.SIGNED.getName(),
                 ContextVS.getInstance().getAccessControl().getVoteCancellerServiceURL())
         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
             SMIMEMessageWrapper mimeMessage = new SMIMEMessageWrapper(

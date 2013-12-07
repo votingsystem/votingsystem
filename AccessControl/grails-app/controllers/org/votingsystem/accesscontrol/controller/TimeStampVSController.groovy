@@ -2,6 +2,7 @@ package org.votingsystem.accesscontrol.controller
 
 import org.bouncycastle.tsp.TSPException
 import org.bouncycastle.tsp.TSPValidationException
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.TimeStampVS
 import org.votingsystem.model.ResponseVS
@@ -11,14 +12,12 @@ import java.util.concurrent.atomic.AtomicBoolean
 class TimeStampVSController {
 	
 	def timeStampVSService
-	
-	int maxNumAttempts = 3
 
 	/**
 	 * Servicio de generación de sellos de tiempo.
 	 *
 	 * @httpMethod [POST]
-	 * @serviceURL [/timeStamp/$serialNumber]
+	 * @serviceURL [/timeStamp]
 	 * @param [timeStampRequest] Solicitud de sellado de tiempo en formato RFC 3161.
 	 * @responseContentType [application/timestamp-query]
 	 * @responseContentType [application/timestamp-response]
@@ -26,66 +25,8 @@ class TimeStampVSController {
 	 * @return Si todo es correcto un sello de tiempo en formato RFC 3161.
 	 */
 	def index() {
-		try {
-			byte[] timeStampRequestBytes = getStringFromInputStream(request.getInputStream()) 
-			
-			//String timeStampRequestStr = new String(Base64.encode(timeStampRequestBytes));
-			//log.debug(" - timeStampRequestStr: ${timeStampRequestStr}")
-			
-			int attempts = 0
-			AtomicBoolean pending = new AtomicBoolean(Boolean.TRUE)
-			ResponseVS responseVS = null
-			while(pending.get()) {
-				try {
-					responseVS = timeStampVSService.processRequest(timeStampRequestBytes, request.getLocale())
-					pending.set(false)
-				} catch(TSPException ex) {
-					log.error(ex.getMessage(), ex)
-					if(attempts < maxNumAttempts) {
-						attempts++;
-					} else {
-						log.debug(" ---- consumidos los tres intentos")
-						pending.set(false)
-						responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_TIMESTAMP,
-							message:message(code: 'error.timeStampGeneration'))
-					} 
-				} catch(TSPValidationException ex) {
-					log.error(ex.getMessage(), ex)
-					if(attempts < maxNumAttempts) {
-						attempts++;
-					} else {
-						log.debug(" ---- consumidos los tres intentos")
-						pending.set(false)
-						responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_TIMESTAMP,
-							message:message(code: 'error.timeStampGeneration'))
-					}
-				}catch(Exception ex) {
-					log.error(ex.getMessage(), ex)
-					responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_TIMESTAMP,
-						message:message(code: 'error.timeStampGeneration'))
-					pending.set(false)
-				}
-			}
-			
-			if(ResponseVS.SC_OK == responseVS.statusCode) {
-				response.status = ResponseVS.SC_OK
-				response.contentType = "application/timestamp-response"
-				response.outputStream << responseVS.messageBytes // Performing a binary stream copy
-				//response.outputStream.flush()
-			} else {
-				response.status = responseVS.statusCode
-				render responseVS.message
-			} 
-			return false
-		} catch(Exception ex) {
-			log.debug (ex.getMessage(), ex)
-			response.status = ResponseVS.SC_ERROR_REQUEST
-		}
-		response.status = ResponseVS.SC_ERROR_REQUEST
-		render message(code: 'requestWithErrorsHTML', args:[
-			"${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
-		return false
-		
+        byte[] timeStampRequestBytes = getStringFromInputStream(request.getInputStream())
+        params.responseVS = timeStampVSService.processRequest(timeStampRequestBytes, request.getLocale())
 	}
 	
 	/**
@@ -97,15 +38,8 @@ class TimeStampVSController {
 	 * @return El certificado en formato PEM con el que se firman los sellos de tiempo
 	 */
 	def cert() {
-		byte[] signingCertBytes = timeStampVSService.getSigningCert()
-		if(signingCertBytes) {
-			response.contentLength = signingCertBytes.length
-			response.outputStream <<  signingCertBytes
-			response.outputStream.flush()
-		} else {
-			response.status = ResponseVS.SC_ERROR 
-			render message(code: 'serviceErrorMsg')
-		}
+        params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, contenType:ContentTypeVS.PEM,
+                messageBytes:timeStampVSService.getSigningCertPEMBytes())
 	}
 
     /**
@@ -119,21 +53,9 @@ class TimeStampVSController {
     def test() {
         MessageSMIME messageSMIMEReq = params.messageSMIMEReq
         if(!messageSMIMEReq) {
-            String msg = message(code:'requestWithoutFile')
-            log.error msg
-            response.status = ResponseVS.SC_ERROR_REQUEST
-            render msg
-            return false
-        } else {
-            response.status = ResponseVS.SC_OK
-            render "TIMESTAMP OK"
-            return false
-        }
-
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))
+        } else params.responseVS = new ResponseVS(ResponseVS.SC_OK, "TIMESTAMP OK")
     }
-
-
-
 
 	/*def test() {
 		TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
@@ -163,37 +85,23 @@ class TimeStampVSController {
 	 */
 	def getBySerialNumber() {
 		if(params.long('serialNumber')) {
-			TimeStampVS selloDeTiempo
-			TimeStampVS.withTransaction {
-				selloDeTiempo = TimeStampVS.findBySerialNumber(params.long('serialNumber'))
-			}
-			if(selloDeTiempo) {
-				response.status = ResponseVS.SC_OK
-				response.outputStream << selloDeTiempo.getTokenBytes() // Performing a binary stream copy
-				response.outputStream.flush()
-			} else {
-				response.status = ResponseVS.SC_NOT_FOUND
-				render "ERROR"
-			}
-			return false
-		}
-		response.status = ResponseVS.SC_ERROR_REQUEST
-		render message(code: 'requestWithErrorsHTML', args:[
-			"${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
-		return false
-		return
+			TimeStampVS timeStamp
+			TimeStampVS.withTransaction { timeStamp = TimeStampVS.findBySerialNumber(params.long('serialNumber')) }
+			if(timeStamp)  params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK,
+                messageBytes: timeStamp.getTokenBytes(), contentType:ContentTypeVS.CMS_SIGNED)
+			else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND, "ERROR")
+		} else params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
 	}
 	
-	private byte[] getStringFromInputStream(InputStream entrada) throws IOException {
-		ByteArrayOutputStream salida = new ByteArrayOutputStream();
-		byte[] buf =new byte[1024];
+	private byte[] getStringFromInputStream(InputStream input) throws IOException {
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		byte[] buf =new byte[4096];
 		int len;
-		while((len = entrada.read(buf)) > 0){
-			salida.write(buf,0,len);
-		}
-		salida.close();
-		entrada.close();
-		return salida.toByteArray();
+		while((len = input.read(buf)) > 0){ output.write(buf,0,len); }
+		output.close();
+		input.close();
+		return output.toByteArray();
 	}
 
 }

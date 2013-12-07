@@ -27,27 +27,16 @@ class EventVSClaimCollectorController {
 	 */
 	def index() { 
 		MessageSMIME messageSMIMEReq = params.messageSMIMEReq
-		if(!messageSMIMEReq) {
-			String msg = message(code:'requestWithoutFile')
-			log.error msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
-		}
-        try {
-            ResponseVS responseVS = eventVSClaimSignatureCollectorService.save(
-				messageSMIMEReq, request.getLocale())
-			if (ResponseVS.SC_OK == responseVS?.statusCode) {
-				response.contentType = ContentTypeVS.SIGNED
-				params.receiverCert = messageSMIMEReq.getSmimeMessage().getSigner().certificate
-			}	
-			params.responseVS = responseVS
-        } catch (Exception ex) {
-            log.error (ex.getMessage(), ex)
-			params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-				message:message(code:'signClaimErrorMessage'), 
-				type:TypeVS.CLAIM_EVENT_SIGNATURE_ERROR)
+        if(!messageSMIMEReq) {
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))
+            return
         }
+        ResponseVS responseVS = eventVSClaimSignatureCollectorService.save(messageSMIMEReq, request.getLocale())
+        if (ResponseVS.SC_OK == responseVS?.statusCode) {
+            responseVS.setContentType(ContentTypeVS.SIGNED)
+            params.receiverCert = messageSMIMEReq.getSmimeMessage().getSigner().certificate
+        }
+        params.responseVS = responseVS
 	}
 	
 

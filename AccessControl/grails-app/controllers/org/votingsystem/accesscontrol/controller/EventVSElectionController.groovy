@@ -59,72 +59,63 @@ class EventVSElectionController {
 	 * @return documento JSON con las votaciones que cumplen con el criterio de búsqueda.
 	 */
 	def index() {
-		try {
-			def eventVSList = []
-			def eventsVSMap = new HashMap()
-			eventsVSMap.eventsVS = new HashMap()
-			eventsVSMap.eventsVS.elections = []
-			if (params.long('id')) {
-				EventVSElection eventVS = null
-				EventVSElection.withTransaction {
-					eventVS = EventVSElection.get(params.long('id'))
-				}
-				if(!(eventVS.state == EventVS.State.ACTIVE || eventVS.state == EventVS.State.AWAITING ||
-					eventVS.state == EventVS.State.CANCELLED || eventVS.state == EventVS.State.TERMINATED)) eventVS = null
-				if(!eventVS) {
-					response.status = ResponseVS.SC_NOT_FOUND
-					render message(code: 'eventVSNotFound', args:[params.id])
-					return false
-				} else {
-					if(request.contentType?.contains(ContentTypeVS.JSON)) {
-						render eventVSService.getEventVSMap(eventVS) as JSON
-						return false
-					} else {
-						render(view:"eventVSElection", model: [
-							selectedSubsystem:SubSystemVS.VOTES.toString(),
-							eventMap: eventVSService.getEventVSMap(eventVS)])
-						return
-					}
-				}
-			} else {
-				params.sort = "dateBegin"
-				log.debug " -Params: " + params
-				EventVS.State eventVSState
-				if(params.eventVSState) eventVSState = EventVS.State.valueOf(params.eventVSState)
-				EventVSElection.withTransaction {
-					if(eventVSState) {
-						if(eventVSState == EventVS.State.TERMINATED) {
-							eventVSList =  EventVSElection.findAllByStateOrState(
-								EventVS.State.CANCELLED, EventVS.State.TERMINATED, params)
-							eventsVSMap.numEventsVSElectionInSystem = EventVSElection.countByStateOrState(
-								EventVS.State.CANCELLED, EventVS.State.TERMINATED)
-						} else {
-							eventVSList =  EventVSElection.findAllByState(eventVSState, params)
-							log.debug " -eventVSState: " + eventVSState
-							eventsVSMap.numEventsVSElectionInSystem = EventVSElection.countByState(eventVSState)
-						}
-					} else {
-						eventVSList =  EventVSElection.findAllByStateOrStateOrStateOrState(EventVS.State.ACTIVE,
-							   EventVS.State.CANCELLED, EventVS.State.TERMINATED, EventVS.State.AWAITING, params)
-						eventsVSMap.numEventsVSElectionInSystem =
-								EventVSElection.countByStateOrStateOrStateOrState(EventVS.State.ACTIVE,
-								EventVS.State.CANCELLED, EventVS.State.TERMINATED, EventVS.State.AWAITING)
-					}
-				}
-				eventsVSMap.offset = params.long('offset')
-			}
-			eventsVSMap.numEventsVSElection = eventVSList.size()
-			eventVSList.each {eventVSItem ->
-					eventsVSMap.eventsVS.elections.add(eventVSService.getEventVSElectionMap(eventVSItem))
-			}
-			response.setContentType(ContentTypeVS.JSON)
-			render eventsVSMap as JSON
-		} catch(Exception ex) {
-			log.error (ex.getMessage(), ex)
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render ex.getMessage()
-			return false
-		}
+        def eventVSList = []
+        def eventsVSMap = new HashMap()
+        eventsVSMap.eventsVS = new HashMap()
+        eventsVSMap.eventsVS.elections = []
+        if (params.long('id')) {
+            EventVSElection eventVS = null
+            EventVSElection.withTransaction {
+                eventVS = EventVSElection.get(params.long('id'))
+            }
+            if(!(eventVS.state == EventVS.State.ACTIVE || eventVS.state == EventVS.State.AWAITING ||
+                    eventVS.state == EventVS.State.CANCELLED || eventVS.state == EventVS.State.TERMINATED)) eventVS = null
+            if(!eventVS) {
+                params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                        message(code: 'eventVSNotFound', args:[params.id]))
+                return
+            } else {
+                if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
+                    render eventVSService.getEventVSMap(eventVS) as JSON
+                    return
+                } else {
+                    render(view:"eventVSElection", model: [selectedSubsystem:SubSystemVS.VOTES.toString(),
+                            eventMap: eventVSService.getEventVSMap(eventVS)])
+                    return
+                }
+            }
+        } else {
+            params.sort = "dateBegin"
+            log.debug " -Params: " + params
+            EventVS.State eventVSState
+            if(params.eventVSState) eventVSState = EventVS.State.valueOf(params.eventVSState)
+            EventVSElection.withTransaction {
+                if(eventVSState) {
+                    if(eventVSState == EventVS.State.TERMINATED) {
+                        eventVSList =  EventVSElection.findAllByStateOrState(
+                                EventVS.State.CANCELLED, EventVS.State.TERMINATED, params)
+                        eventsVSMap.numEventsVSElectionInSystem = EventVSElection.countByStateOrState(
+                                EventVS.State.CANCELLED, EventVS.State.TERMINATED)
+                    } else {
+                        eventVSList =  EventVSElection.findAllByState(eventVSState, params)
+                        log.debug " -eventVSState: " + eventVSState
+                        eventsVSMap.numEventsVSElectionInSystem = EventVSElection.countByState(eventVSState)
+                    }
+                } else {
+                    eventVSList =  EventVSElection.findAllByStateOrStateOrStateOrState(EventVS.State.ACTIVE,
+                            EventVS.State.CANCELLED, EventVS.State.TERMINATED, EventVS.State.AWAITING, params)
+                    eventsVSMap.numEventsVSElectionInSystem =
+                            EventVSElection.countByStateOrStateOrStateOrState(EventVS.State.ACTIVE,
+                                    EventVS.State.CANCELLED, EventVS.State.TERMINATED, EventVS.State.AWAITING)
+                }
+            }
+            eventsVSMap.offset = params.long('offset')
+        }
+        eventsVSMap.numEventsVSElection = eventVSList.size()
+        eventVSList.each {eventVSItem ->
+            eventsVSMap.eventsVS.elections.add(eventVSService.getEventVSElectionMap(eventVSItem))
+        }
+        render eventsVSMap as JSON
 	}
 	
 	/**
@@ -142,19 +133,15 @@ class EventVSElectionController {
     def save () {
 		MessageSMIME messageSMIME = params.messageSMIMEReq
 		if(!messageSMIME) {
-			String msg = message(code:'requestWithoutFile')
-			log.error msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
+            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))
+            return
 		}
-        ResponseVS responseVS = eventVSElectionService.saveEvent(
-			messageSMIME, request.getLocale())
+        ResponseVS responseVS = eventVSElectionService.saveEvent(messageSMIME, request.getLocale())
 		params.responseVS = responseVS
 		if (ResponseVS.SC_OK == responseVS.statusCode) {
 			response.setHeader('eventURL', 
 				"${grailsApplication.config.grails.serverURL}/eventVSElection/${responseVS.eventVS.id}")
-			response.contentType =  org.votingsystem.model.ContentTypeVS.SIGNED
+            responseVS.setContentType(ContentTypeVS.SIGNED)
 		}
     }
 
@@ -174,31 +161,20 @@ class EventVSElectionController {
         if (params.long('id')) {
             EventVSElection eventVSElection
             if (!params.eventVS) {
-				EventVSElection.withTransaction {
-					eventVSElection = EventVSElection.get(params.id)
-				}
+				EventVSElection.withTransaction {eventVSElection = EventVSElection.get(params.id)}
 			} 
             else eventVSElection = params.eventVS
             if (eventVSElection) {
                 response.status = ResponseVS.SC_OK
                 def statisticsMap = eventVSElectionService.getStatisticsMap(eventVSElection, request.getLocale())
-                if(request.contentType?.contains(ContentTypeVS.JSON)) {
+                if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
                     if (params.callback) render "${params.callback}(${statisticsMap as JSON})"
                     else render statisticsMap as JSON
-                    return false
-                } else {
-                    render(view:"statistics", model: [statisticsJSON: statisticsMap  as JSON])
-                    return
-                }
-            }
-            response.status = ResponseVS.SC_NOT_FOUND
-            render message(code: 'eventVSNotFound', args:[params.id])
-            return false
-        }
-        response.status = ResponseVS.SC_ERROR_REQUEST
-        render message(code: 'requestWithErrorsHTML', args:[
-			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
-        return false
+                } else render(view:"statistics", model: [statisticsJSON: statisticsMap  as JSON])
+            } else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                    message(code: 'eventVSNotFound', args:[params.id]))
+        } else params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
+                args:[ "${grailsApplication.config.grails.serverURL}/${params.controller}"]))
     }
     
 	/**
@@ -208,7 +184,7 @@ class EventVSElectionController {
 	 * @httpMethod [GET]
 	 * @serviceURL [/eventVSElection/${id}/validated]
 	 * @param [id] Obligatorio. El identificador de la votación en la base de datos.
-	 * @return Archivo SMIME de la publicación de la votación firmada por el userVS que
+	 * @return Archivo SMIME de la publicación de la votación firmada por el usuario que
 	 *         la publicó y el servidor.
 	 */
     def validated () {
@@ -227,27 +203,17 @@ class EventVSElectionController {
 					}
 					messageSMIME = results.iterator().next()
 				}
-				
-				log.debug("messageSMIME.id: ${messageSMIME.id}")
                 if (messageSMIME) {
-                        response.status = ResponseVS.SC_OK
-                        response.contentLength = messageSMIME.content.length
-                        //response.setContentType(ContentTypeVS.TEXT)
-                        response.outputStream <<  messageSMIME.content
-                        response.outputStream.flush()
-                        return false
+                    params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK,
+                            contentType:ContentTypeVS.TEXT_STREAM, messageBytes: messageSMIME.content)
                 }
             }
             if (!eventVS || !messageSMIME) {
-                response.status = ResponseVS.SC_NOT_FOUND
-                render message(code: 'eventVSNotFound', args:[params.id])
-                return false
+                params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                        message(code: 'eventVSNotFound', args:[params.id]))
             }
-        }
-        response.status = ResponseVS.SC_ERROR_REQUEST
-        render message(code: 'requestWithErrorsHTML', args:[
-			"${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
-        return false
+        } else params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
     }
 	
 	/**
@@ -256,37 +222,26 @@ class EventVSElectionController {
 	 * @httpMethod [GET]
 	 * @serviceURL [/eventVSElection/${id}/signed]
 	 * @param [id] Obligatorio. El identificador de la votación en la base de datos.
-	 * @return Archivo SMIME de la publicación de la votación firmada por el userVS
+	 * @return Archivo SMIME de la publicación de la votación firmada por el usuario
 	 *         que la publicó.
 	 */
 	def signed () {
 		if (params.long('id')) {
 			def eventVS
-			EventVS.withTransaction {
-				eventVS = EventVS.get(params.id)
-			}
+			EventVS.withTransaction { eventVS = EventVS.get(params.id) }
 			if (eventVS) {
 				MessageSMIME messageSMIME
 				MessageSMIME.withTransaction {
 					messageSMIME = MessageSMIME.findWhere(eventVS:eventVS, type: TypeVS.VOTING_EVENT)
 				}
 				if (messageSMIME) {
-					response.status = ResponseVS.SC_OK
-					response.contentLength = messageSMIME.content.length
-					response.setContentType(ContentTypeVS.TEXT)
-					response.outputStream <<  messageSMIME.content
-					response.outputStream.flush()
-					return false
+                    params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, messageBytes: messageSMIME.content,
+                            contentType: ContentTypeVS.TEXT_STREAM)
 				}
-			}
-			response.status = ResponseVS.SC_NOT_FOUND
-			render message(code: 'eventVSNotFound', args:[params.id])
-			return false
-		}
-		response.status = ResponseVS.SC_ERROR_REQUEST
-		render message(code: 'requestWithErrorsHTML', args:[
-			"${grailsApplication.config.grails.serverURL}/${params.controller}"])
-		return false
+			} else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                    message(code: 'eventVSNotFound', args:[params.id]))
+        } else params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}"]))
 	}
 
 	/**
@@ -305,28 +260,24 @@ class EventVSElectionController {
 				eventVS = EventVSElection.get(params.long('id'))
 			}
 			if (!eventVS) {
-				response.status = ResponseVS.SC_NOT_FOUND
-				render message(code: 'eventVSNotFound', args:[params.id])
-				return false
+                params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                        message(code: 'eventVSNotFound', args:[params.id]))
 			}
 			def voteVSInfoMap = new HashMap()
-			def solicitudesOk, solicitudesAnuladas;
+			def requestsOK, requestsCancelled;
 			AccessRequestVS.withTransaction {
-				solicitudesOk = AccessRequestVS.findAllWhere(
-					state:TypeVS.OK, eventVSElection:eventVS)
-				solicitudesAnuladas = AccessRequestVS.findAllWhere(
-					state:TypeVS.CANCELLED, eventVSElection:eventVS)
+				requestsOK = AccessRequestVS.findAllWhere(state:TypeVS.OK, eventVSElection:eventVS)
+				requestsCancelled = AccessRequestVS.findAllWhere(state:TypeVS.CANCELLED, eventVSElection:eventVS)
 			}
 			def solicitudesCSROk, numCSRCollected_CANCELLED;
 			VoteRequestCsrVS.withTransaction {
-				solicitudesCSROk = VoteRequestCsrVS.findAllWhere(
-					state:VoteRequestCsrVS.State.OK, eventVSElection:eventVS)
+				solicitudesCSROk =VoteRequestCsrVS.findAllWhere(state:VoteRequestCsrVS.State.OK,eventVSElection:eventVS)
 				numCSRCollected_CANCELLED = VoteRequestCsrVS.findAllWhere(
 					state:VoteRequestCsrVS.State.CANCELLED, eventVSElection:eventVS)
 			}
 			voteVSInfoMap.numRequestCollected = eventVS.accessRequest.size()
-			voteVSInfoMap.numRequestCollected_OK = solicitudesOk.size()
-			voteVSInfoMap.numRequestCollected_CANCELLED = solicitudesAnuladas.size()
+			voteVSInfoMap.numRequestCollected_OK = requestsOK.size()
+			voteVSInfoMap.numRequestCollected_CANCELLED = requestsCancelled.size()
 			voteVSInfoMap.numCSRCollected = eventVS.solicitudesCSR.size()
 			voteVSInfoMap.numCSRCollected_OK = solicitudesCSROk.size()
 			voteVSInfoMap.numCSRCollected_CANCELLED = numCSRCollected_CANCELLED.size()
@@ -373,14 +324,9 @@ class EventVSElectionController {
 				}
 				voteVSInfoMap.votesVS.add(voteVSMap)
 			}
-			response.status = ResponseVS.SC_OK
-			response.setContentType(ContentTypeVS.JSON)
 			render voteVSInfoMap as JSON
-		}
-		response.status = ResponseVS.SC_ERROR_REQUEST
-		render message(code: 'requestWithErrorsHTML',
-			args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"])
-		return false
+		} else params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
 	}
 
 	/**
@@ -398,20 +344,15 @@ class EventVSElectionController {
 			eventVS = EventVSElection.get(params.long('id'))
 		}
 		if (!eventVS) {
-			response.status = ResponseVS.SC_NOT_FOUND
-			render message(code: 'eventVSNotFound', args:[params.id])
-			return false
+            params.responseVS =new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code:'eventVSNotFound',args:[params.id]))
+            return
 		}
 		def errors
-		MessageSMIME.withTransaction {
-			errors = MessageSMIME.findAllWhere (
-				type:TypeVS.VOTE_ERROR,  eventVS:eventVS)
-		}
-		
+		MessageSMIME.withTransaction { errors = MessageSMIME.findAllWhere ( type:TypeVS.VOTE_ERROR,  eventVS:eventVS) }
+
 		if(errors.size == 0){
-			response.status = ResponseVS.SC_OK
-			render message(code: 'votingWithoutErrorsMsg',
-				args:[eventVS.id, eventVS.subject])
+            params.responseVS = new ResponseVS(ResponseVS.SC_OK, message(code: 'votingWithoutErrorsMsg',
+                    args:[eventVS.id, eventVS.subject]))
 		} else {
 			String datePathPart = DateUtils.getShortStringFromDate(eventVS.getDateFinish())
 			String baseDirPath = "${grailsApplication.config.VotingSystem.errorsBaseDir}" +
@@ -423,8 +364,8 @@ class EventVSElectionController {
 			File zipResult = new File("${baseDirPath}.zip")
 			def ant = new AntBuilder()
 			ant.zip(destfile: zipResult, basedir: "${baseDirPath}")
-			
-			response.setContentType("application/zip")
+            params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, messageBytes:zipResult.getBytes(),
+                contentType: ContentTypeVS.ZIP)
 		}
 	}
 

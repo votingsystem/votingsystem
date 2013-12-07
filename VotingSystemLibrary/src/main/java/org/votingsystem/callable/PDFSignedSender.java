@@ -196,9 +196,9 @@ public class PDFSignedSender implements Callable<ResponseVS> {
         if(destinationCert != null) {
             logger.debug("---- with destinationCert -> encrypting response");
             bytesToSend = Encryptor.encryptFile(fileToSend,destinationCert);
-            contentType = ContentTypeVS.PDF_SIGNED_AND_ENCRYPTED;
+            contentType = ContentTypeVS.PDF_SIGNED_AND_ENCRYPTED.getName();
         } else {
-            contentType = ContentTypeVS.PDF_SIGNED;
+            contentType = ContentTypeVS.PDF_SIGNED.getName();
             bytesToSend = FileUtils.getBytesFromFile(fileToSend);
         }
         return HttpHelper.getInstance().sendData(bytesToSend, contentType, urlToSendDocument);

@@ -45,9 +45,9 @@ class EventVSController {
 				eventVS = EventVS.get(params.long('id'))
 			}
 			if(!eventVS) {
-				response.status = ResponseVS.SC_NOT_FOUND
-				render message(code: 'eventVSNotFound', args:[params.id])
-				return false
+                params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                        message(code: 'eventVSNotFound', args:[params.id]))
+				return
 			} else {
 				render eventVSService.getEventVSMap(eventVS) as JSON
 				return false
@@ -105,9 +105,7 @@ class EventVSController {
 			if (eventVS instanceof EventVSElection) forward(controller:"eventVSElection",action:"statistics")
 			return false
 		}
-		response.status = ResponseVS.SC_NOT_FOUND
-		render message(code: 'eventVSNotFound', args:[params.id])
-		return false
+        params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code: 'eventVSNotFound', args:[params.id]))
     }
   
 	/**
@@ -115,23 +113,20 @@ class EventVSController {
 	 *
 	 * @httpMethod [POST]
 	 * @requestContentType application/x-pkcs7-signature Obligatorio. Archivo con los datos del eventVS que se desea
-	 * 				cancelar firmado por el userVS que publicó o un administrador de sistema.
+	 * 				cancelar firmado por el usuario que publicó o un administrador de sistema.
 	 * @return Si todo va bien devuelve un código de estado HTTP 200.
 	 */
    def cancelled() {
 		MessageSMIME messageSMIMEReq = params.messageSMIMEReq
-		if(!messageSMIMEReq) {
-			String msg = message(code:'requestWithoutFile')
-			log.error msg
-			response.status = ResponseVS.SC_ERROR_REQUEST
-			render msg
-			return false
-		}
+       if(!messageSMIMEReq) {
+           params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))
+           return
+       }
 		ResponseVS responseVS = eventVSService.cancelEvent(
 			messageSMIMEReq, request.getLocale());
 		if(ResponseVS.SC_OK == responseVS.statusCode) {
 			response.status = ResponseVS.SC_OK
-			response.setContentType(org.votingsystem.model.ContentTypeVS.SIGNED)
+            responseVS.setContentType(ContentTypeVS.SIGNED)
 	    }
 	    params.responseVS = responseVS
    }
@@ -147,19 +142,11 @@ class EventVSController {
    def checkDates () {
 	   EventVS eventVS
 	   if (params.long('id')) {
-		   EventVS.withTransaction {
-			   eventVS = EventVS.get(params.id)
-		   }
+		   EventVS.withTransaction {eventVS = EventVS.get(params.id)}
 	   }
-	   if(!eventVS) {
-		   response.status = ResponseVS.SC_NOT_FOUND
-		   render message(code: 'eventVSNotFound', args:[params.id])
-		   return false
-	   }
-	   ResponseVS responseVS = eventVSService.checkDatesEventVS(eventVS, request.getLocale())
-	   response.status = responseVS.statusCode
-	   render responseVS?.eventVS?.state?.toString()
-	   return false
+	   if(!eventVS) params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+               message(code: 'eventVSNotFound', args:[params.id]))
+	   else params.responseVS = eventVSService.checkDatesEventVS(eventVS, request.getLocale())
    }
 
 }

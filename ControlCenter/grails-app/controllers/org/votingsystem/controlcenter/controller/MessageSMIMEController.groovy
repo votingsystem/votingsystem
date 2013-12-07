@@ -1,5 +1,6 @@
 package org.votingsystem.controlcenter.controller
 
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.ResponseVS;
 
@@ -25,16 +26,10 @@ class MessageSMIMEController {
 			messageSMIME = MessageSMIME.get(params.id)
 		}
         if (messageSMIME) {
-            response.status = ResponseVS.SC_OK
-            response.contentLength = messageSMIME.content.length
-            response.setContentType(ContentTypeVS.TEXT)
-            response.outputStream <<  messageSMIME.content
-            response.outputStream.flush()
-            return false
-        }
-        response.status = ResponseVS.SC_NOT_FOUND
-        render message(code: 'eventVSNotFound', args:[params.id])
-        return false
+            params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, contentType:ContentTypeVS.TEXT_STREAM,
+                    messageBytes:messageSMIME.content)
+        } else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                message(code: 'eventVSNotFound', args:[params.id]))
     }
 	
 }
