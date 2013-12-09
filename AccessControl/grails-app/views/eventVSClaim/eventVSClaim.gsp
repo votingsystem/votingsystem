@@ -28,14 +28,10 @@
 		</div>
 	</g:if>
 
-	<div class="publishPageTitle" style="margin:0px 0px 0px 0px;">
-		<p style="margin: 0px 0px 0px 0px; text-align:center; width:100%;">
-			${eventMap?.subject}
-		</p>
-	</div>
+    <div class="publishPageTitle"> ${eventMap?.subject}</div>
 	
-	<div style="width:100%; font-size:0.8em; margin:2px 0px 25px 0px;">
-		<div style="display:inline;margin:0px 20px 0px 20px;">
+	<div style="width:100%; font-size:0.8em; margin:2px 0px 10px 0px;">
+		<div class="datetime" style="display:inline;margin:0px 20px 0px 60px;">
 			<b><g:message code="dateLimitLbl"/>: </b>${eventMap?.dateFinishStr}
 		</div>
 		<g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state) ||

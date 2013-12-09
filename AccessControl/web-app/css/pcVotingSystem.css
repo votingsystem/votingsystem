@@ -223,6 +223,16 @@ body {
 	margin: 5px auto 20px auto;
 }
 
+.datetime {
+    color: #52515e;
+    font-style: italic;
+}
+
+#eventAuthorDiv {
+    color: #52515e;
+    font-style: italic;
+}
+
 .publishPageTitle p {
 	width:600px;
 	margin: 0px 0px 0px 0px; 

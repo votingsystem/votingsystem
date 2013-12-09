@@ -29,14 +29,10 @@
 		</div>
 	</g:if>
 
-	<div class="publishPageTitle" style="margin:0px 0px 0px 0px;">
-		<p style="margin: 0px 0px 0px 0px; text-align:center; width:100%;">
-			${eventMap?.subject}
-		</p>
-	</div>
+    <div class="publishPageTitle"> ${eventMap?.subject}</div>
 	
 	<div style="display:inline-block; width:100%; font-size:0.8em;">
-		<div style="display:inline;margin:0px 20px 0px 20px;">
+		<div class="datetime"  style="display:inline;margin:0px 20px 0px 60px;">
 			<b><g:message code="dateLimitLbl"/>: </b>${eventMap?.dateFinishStr}
 		</div>
 		

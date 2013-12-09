@@ -113,7 +113,7 @@ class TimeStampVSService {
 	}
 	
 	public byte[] getSigningCertPEMBytes() {
-		log.debug("getSigningCerts");
+		log.debug("getSigningCertPEMBytess");
 		if(!signingCertPEMBytes) signingCertPEMBytes = initService().signingCertPEMBytes
 		return signingCertPEMBytes
 	}

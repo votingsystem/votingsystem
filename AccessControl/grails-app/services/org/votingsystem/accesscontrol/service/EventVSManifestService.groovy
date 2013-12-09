@@ -84,7 +84,7 @@ class EventVSManifestService {
 		File systemTrustedCertsFile = new File("${filesDir.absolutePath}/systemTrustedCerts.pem")
 		systemTrustedCertsFile.setBytes(systemTrustedCertsPEMBytes)
 		
-		byte[] timeStampCertPEMBytes = timeStampVSService.getSigningCert()
+		byte[] timeStampCertPEMBytes = timeStampVSService.getSigningCertPEMBytes()
 		File timeStampCertFile = new File("${filesDir.absolutePath}/timeStampCert.pem")
 		timeStampCertFile.setBytes(timeStampCertPEMBytes)
 		

@@ -17,7 +17,7 @@
     </head>
     <body onload="loadCallerCallback()">
 		<APPLET CODEBASE="${grailsApplication.config.grails.serverURL}/applet"
-     		CODE="org.votingsystem.applet.votingtool.Applet"
+     		CODE="org.votingsystem.applet.votingtool.VotingApplet"
      		ARCHIVE="${jarArchives}" 
      		HEIGHT=200
      		WIDTH=600> 

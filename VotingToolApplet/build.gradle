@@ -5,7 +5,12 @@ apply plugin: 'groovy'
 
 dependencies {
 
-	compile project(':VotingSystemLibrary')
+	compile (project(':VotingSystemLibrary')) {
+        exclude module: 'hibernate-search'
+        exclude module: 'commons-cli'
+        exclude module: 'groovy-all'
+        exclude module: 'hibernate-jpa-2.0-api'
+    }
 	
 	compile ('org.apache.httpcomponents:httpmime:4.2.4',
 		'org.apache.httpcomponents:httpclient:4.2.4',
@@ -22,24 +27,13 @@ dependencies {
 	
 }
 
-
-jar {
-	manifest {
-		attributes 'Main-Class': 'Applet',
-				   'SplashScreen-Image':'resources/fatcow_32/gnupg_keys.png',
-				   'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/VotingToolApplet',
-				   'provider': 'GruposP2P'
-	}
-	
-}
-
 task buildApplet(type:VotingSystemApplet){
 
 	manifest {
-		attributes 'Main-Class': 'Applet',
-				   'SplashScreen-Image':'resources/images/cert_100x108.png',
+		attributes 'Main-Class': 'VotingApplet',
+				   'SplashScreen-Image':'resources/fatcow_32/gnupg_keys.png',
 				   'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/VotingToolApplet',
-				   'provider': 'GruposP2P'
+				   'provider': 'SistemaVotacion.org'
 	}
 }
 
@@ -63,7 +57,7 @@ buildApplet.dependsOn classes
 signJar.dependsOn buildApplet
 
 project.ext {
-  mainClass = "Applet"
+  mainClass = "VotingApplet"
 }
 
 sourceSets {

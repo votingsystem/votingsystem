@@ -1,6 +1,5 @@
 import org.gradle.api.tasks.TaskAction
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 import org.gradle.api.tasks.bundling.*
 import java.io.File
 import java.util.zip.ZipInputStream
@@ -8,22 +7,14 @@ import java.util.zip.ZipEntry
 import java.util.UUID;
 
 class VotingSystemApplet extends Jar {
-	
-	private static Logger logger = LoggerFactory.getLogger(VotingSystemApplet.class);
+
+    private static Logger logger = Logger.getLogger(VotingSystemApplet.class);
 	
 	File appletDependencies
 	File outputFolder
 	File buildDirectory
 	File classesFolder
-	/*def ignoredJars = ["groovy-all-1.8.6.jar", 
-		"bcprov-jdk16-1.46.jar", "bcmail-jdk16-1.46.jar", "bctsp-jdk16-1.46.jar",
-		"groovy-2.1.0.jar", "antlr-2.7.7.jar", "asm-4.0.jar", "asm-tree-4.0.jar", 
-		"asm-commons-4.0.jar", "asm-util-4.0.jar", "asm-analysis-4.0.jar",
-		"mail-1.4.1.jar", "activation-1.1.1.jar"]*/
-	def ignoredJars = ["groovy-all-1.8.6.jar", 
-		"groovy-2.1.0.jar", "antlr-2.7.7.jar", "asm-4.0.jar", "asm-tree-4.0.jar", 
-		"bcprov-jdk16-1.46.jar",
-		"asm-commons-4.0.jar", "asm-util-4.0.jar", "asm-analysis-4.0.jar"]
+	def ignoredJars = ["bcprov-jdk16-1.46.jar"]
 
 	VotingSystemApplet () {
 		super()

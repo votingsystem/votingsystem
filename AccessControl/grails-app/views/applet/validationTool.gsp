@@ -17,7 +17,7 @@
     </head>
     <body>    	
 		<APPLET CODEBASE="${grailsApplication.config.grails.serverURL}/applet"
-     		CODE="org.votingsystem.applet.validationtool.Applet"
+     		CODE="org.votingsystem.applet.validationtool.ValidationApplet"
      		ARCHIVE="${jarArchives}" 
      		HEIGHT=200
      		WIDTH=600> 

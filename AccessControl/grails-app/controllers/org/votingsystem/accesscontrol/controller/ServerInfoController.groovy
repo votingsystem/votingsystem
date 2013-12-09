@@ -40,7 +40,7 @@ class ServerInfoController {
 		File certChain = grailsApplication.mainContext.getResource(
 			grailsApplication.config.VotingSystem.certChainPath).getFile();
 		serverInfo.certChainPEM = certChain?.text
-		serverInfo.timeStampCertPEM = new String(timeStampVSService.getSigningCert())
+		serverInfo.timeStampCertPEM = new String(timeStampVSService.getSigningCertPEMBytes())
 		
 		response.setHeader('Access-Control-Allow-Origin', "*")
 		

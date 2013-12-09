@@ -18,9 +18,9 @@ import org.votingsystem.applet.votingtool.panel.AboutPanel;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class Applet extends JApplet implements AppHostVS {
+public class VotingApplet extends JApplet implements AppHostVS {
     
-    private static Logger logger = Logger.getLogger(Applet.class);
+    private static Logger logger = Logger.getLogger(VotingApplet.class);
 
     private static enum ExecutionMode {APPLET, APPLICATION}
 
@@ -28,7 +28,7 @@ public class Applet extends JApplet implements AppHostVS {
     public static String locale = "es";
     public static ExecutionMode executionMode = ExecutionMode.APPLET;
 
-    public Applet() { }
+    public VotingApplet() { }
 
     public void init() {
         logger.debug("------ init");
@@ -145,8 +145,8 @@ public class Applet extends JApplet implements AppHostVS {
                 public void run() {
                     try {
                         UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
-                        Applet appletFirma = new Applet();
-                        appletFirma.start();
+                        VotingApplet votingAppletFirma = new VotingApplet();
+                        votingAppletFirma.start();
                         String operationStr = null;
                         if(args.length > 0) {
                             operationStr = args[0];
@@ -155,16 +155,16 @@ public class Applet extends JApplet implements AppHostVS {
                             jsonFile.deleteOnExit();
                             FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
                                     .getResourceAsStream("testFiles/data.json"), jsonFile);
-                            appletFirma.runOperation(FileUtils.getStringFromFile(jsonFile));
+                            votingAppletFirma.runOperation(FileUtils.getStringFromFile(jsonFile));
                         }
-                        if(operationStr != null)appletFirma.runOperation(operationStr);
+                        if(operationStr != null) votingAppletFirma.runOperation(operationStr);
                         else logger.error("### Operation null ###");
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
                     }
                 }
             });
-            if(ExecutionMode.APPLICATION == Applet.executionMode){
+            if(ExecutionMode.APPLICATION == VotingApplet.executionMode){
                 logger.debug(" ------ System.exit(0) ------ ");
                 //System.exit(0);
             } else logger.debug("-- exiting App --- ");

@@ -104,11 +104,8 @@
 <r:script>
 
 $("#requestBackup").click(function () {
-	if($("#requestBackup").is(':checked')) {
-		$('#emailDiv').append($('#emailTemplate').html());
-	} else {
-		$('#emailDiv').html("");
-	}
+	if($("#requestBackup").is(':checked')) $('#emailDiv').append($('#emailTemplate').html());
+	else $('#emailDiv').html("");
 })
 
 $("#testButtonDiv").hide()

@@ -1,5 +1,6 @@
 package filters
 
+import grails.converters.JSON
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
 import java.security.cert.X509Certificate;
@@ -251,10 +252,13 @@ class AccessControlFilters {
                         if(ResponseVS.SC_OK != response.status) log.error "after - message: '${resultMessage}'"
                         render resultMessage
                         return false;
+                    case ContentTypeVS.JSON:
+                        render responseVS.getMessage() as JSON
+                        return false;
                     case ContentTypeVS.PDF:
                         //response.setHeader("Content-disposition", "attachment; filename=manifest.pdf")
                     case ContentTypeVS.PEM:
-                    case ContentTypeVS.CMS:
+                    case ContentTypeVS.CMS_SIGNED:
                     case ContentTypeVS.TIMESTAMP_RESPONSE:
                     case ContentTypeVS.IMAGE:
                     case ContentTypeVS.ZIP:

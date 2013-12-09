@@ -204,7 +204,7 @@ class EventVSElectionService {
 			File eventTrustedCertsFile = new File("${filesDir.absolutePath}/eventTrustedCerts.pem")
 			eventTrustedCertsFile.setBytes(eventTrustedCertsPEMBytes)
 
-			byte[] timeStampCertPEMBytes = timeStampVSService.getSigningCert()
+			byte[] timeStampCertPEMBytes = timeStampVSService.getSigningCertPEMBytes()
 			File timeStampCertFile = new File("${filesDir.absolutePath}/timeStampCert.pem")
 			timeStampCertFile.setBytes(timeStampCertPEMBytes)
 				

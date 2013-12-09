@@ -4,13 +4,16 @@ apply plugin: 'java'
 apply plugin:'application'
 apply plugin: "idea"
 
-mainClassName = "org.votingsystem.org.votingsystem.applet.validationtool.Applet"
+mainClassName = "org.votingsystem.org.votingsystem.applet.validationtool.ValidationApplet"
 
 dependencies {
-	
-	//compile group: "org.votingsystem", name: "ValidationToolApplet", version: "0.6.0"
-	
-	compile project(':VotingSystemLibrary')
+
+    compile (project(':VotingSystemLibrary')) {
+        exclude module: 'hibernate-search'
+        exclude module: 'commons-cli'
+        exclude module: 'groovy-all'
+        exclude module: 'hibernate-jpa-2.0-api'
+    }
 
 	compile ('org.apache.httpcomponents:httpmime:4.2.4',
 		'org.apache.httpcomponents:httpclient:4.2.4',
@@ -31,7 +34,7 @@ dependencies {
 task buildApplet(type:VotingSystemApplet) {
 
 	manifest {
-		attributes 'Main-Class': 'org.votingsystem.org.votingsystem.applet.validationtool.Applet',
+		attributes 'Main-Class': 'org.votingsystem.org.votingsystem.applet.validationtool.ValidationApplet',
 				   'SplashScreen-Image':'resources/fatcow_32/gnupg_keys.png',
 				   'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/ValidationToolApplet',
 				   'provider': 'VotingSystem'
@@ -60,7 +63,7 @@ signJar.dependsOn buildApplet
 
 
 project.ext {
-	mainClass = "org.votingsystem.org.votingsystem.applet.validationtool.Applet"
+	mainClass = "org.votingsystem.org.votingsystem.applet.validationtool.ValidationApplet"
 }
 
 sourceSets {

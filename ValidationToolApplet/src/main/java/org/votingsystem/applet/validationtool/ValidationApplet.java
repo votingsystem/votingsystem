@@ -18,9 +18,9 @@ import java.util.TimerTask;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class Applet extends JApplet implements AppHostVS {
+public class ValidationApplet extends JApplet implements AppHostVS {
     
-    private static Logger logger = Logger.getLogger(Applet.class);
+    private static Logger logger = Logger.getLogger(ValidationApplet.class);
     
     public static enum ExecutionMode {APPLET, APLICACION}
 
@@ -28,7 +28,7 @@ public class Applet extends JApplet implements AppHostVS {
     private Timer operationGetter;
     public static ExecutionMode executionMode = ExecutionMode.APPLET;
 
-    public Applet() { }
+    public ValidationApplet() { }
 
     @Override  public void init() {
         //Execute a job on the event-dispatching thread:
@@ -95,8 +95,8 @@ public class Applet extends JApplet implements AppHostVS {
             javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
                 public void run() {
                     try {
-                        Applet appletFirma = new Applet();
-                        appletFirma.start();
+                        ValidationApplet validationAppletFirma = new ValidationApplet();
+                        validationAppletFirma.start();
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
                     }
