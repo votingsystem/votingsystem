@@ -68,7 +68,7 @@ public class SignedMailGenerator {
 
 	private void init (PrivateKey key, Certificate[] chain, String signatureMechanism) 
             throws CertificateEncodingException, OperatorCreationException {
-    	Log.e(TAG + ".init(...)", " - signatureMechanism: " + signatureMechanism);                              
+    	Log.d(TAG + ".init(...)", " - signatureMechanism: " + signatureMechanism);
         ASN1EncodableVector signedAttrs = new ASN1EncodableVector();
         SMIMECapabilityVector caps = new SMIMECapabilityVector();
         //create some smime capabilities in case someone wants to respond        
