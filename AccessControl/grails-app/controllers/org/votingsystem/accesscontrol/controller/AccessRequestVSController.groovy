@@ -35,7 +35,7 @@ class AccessRequestVSController {
 			AccessRequestVS.withTransaction {accessRequestVS = AccessRequestVS.get(params.id)}
             if (accessRequestVS) {
                 params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, messageBytes: accessRequestVS.
-                        messageSMIME.content, contentType: ContentTypeVS.TEXT_STREAM.TEXT_STREAM)
+                        messageSMIME.content, contentType: ContentTypeVS.TEXT_STREAM)
             } else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
                     message(code: 'voteCancellationAccessRequestNotFoundError'))
         } else params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrors'))

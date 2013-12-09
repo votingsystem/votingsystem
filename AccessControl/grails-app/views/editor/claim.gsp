@@ -9,12 +9,10 @@
 <div id="contentDiv" style="display:none; padding: 0px 20px 0px 20px;">
 
 	<div class="publishPageTitle">
-		<p style="text-align:center; width: 100%;">
-			<g:message code="publishClaimLbl"/>
-		</p>
+		<p style="text-align:center; width: 100%;"> <g:message code="publishClaimLbl"/> </p>
 	</div>
 
-	<form id="mainForm">
+	<form id="mainForm" onsubmit="return submitForm(this);">
 	
 	<div style="margin:0px 0px 20px 0px">
     	<input type="text" name="subject" id="subject" style="width:400px;margin:0px 40px 0px 0px" required
@@ -39,8 +37,8 @@
 			<input type="checkbox" id="allowBackupRequestCheckbox"><g:message code="allowBackupRequestLbl"/>
 		</div>
 	    <div style="float:right; margin:10px 20px 0px 0px;">
-			<votingSystem:simpleButton id="addClaimFieldButton" style="margin:0px 20px 0px 0px;">
-					<g:message code="addClaimFieldLbl"/>
+			<votingSystem:simpleButton id="addClaimFieldButton" style="margin:0px 20px 0px 0px;"
+                   onclick="showAddClaimFieldDialog(addClaimField)"><g:message code="addClaimFieldLbl"/>
 			</votingSystem:simpleButton>
 	    </div>
 	</div>
@@ -73,140 +71,118 @@
 </body>
 </html>
 <r:script>
-			var numClaimFields = 0
-			
-		 	$(function() {
-		 		showEditor_editorDiv()
+    var numClaimFields = 0
 
-	    		$("#addClaimFieldButton").click(function () {
-	    			getEditor_editorDivData()
-	    			showAddClaimFieldDialog(addClaimField)
-	    		});
-	    		
-	    		function addClaimField (claimFieldText) {
-	    			showEditor_editorDiv()
-					if(claimFieldText == null) return
-			        var newFieldTemplate = $('#newFieldTemplate').html()
-			        var newFieldHTML = newFieldTemplate.format(claimFieldText);
-			        var $newField = $(newFieldHTML)
-   					$newField.find('div#deleteFieldButton').click(function() {
-							$(this).parent().fadeOut(1000, 
-   							function() { $(this).parent().remove(); });
-							numClaimFields--
-							if(numClaimFields == 0) {
-			   					$("#fieldsBox").fadeOut(1000)
-				   			}
-    					}
-					)
-	   				$("#fieldsBox #fields").append($newField)
-	   				if(numClaimFields == 0) {
-	   					$("#fieldsBox").fadeIn(1000)
-		   			}
-	   				numClaimFields++
-	   				$("#claimFieldText").val("");
-		    	}
+    $(function() {  });
 
-			    $('#mainForm').submit(function(event){
-			    	event.preventDefault();
-                    var editorContent = getEditor_editorDivData()
-					if(!validateForm()) {
-						showEditor_editorDiv();
-						return;
-					} 					
-			    	var eventVS = new EventVS();
-			    	eventVS.subject = $("#subject").val();
-			    	eventVS.content = editorContent;
-			    	eventVS.dateFinish = $("#dateFinish").datepicker('getDate').format();
-			    	
-					var claimFields = new Array();
-					$("#fieldsBox").children().each(function(){
-						var claimField = $(this).find('div.newFieldValueDiv');
-						var claimFieldTxt = claimField.text();
-						if(claimFieldTxt.length > 0) {
-							var claimField = {content:claimFieldTxt}
-							claimFields.push(claimField)
-						}
-					});
-
-			    	eventVS.fieldsEventVS = claimFields
-
-					if($("#multipleSignaturesCheckbox").is(':checked') ) {
-						eventVS.cardinality = "MULTIPLE"
-					} else {
-						eventVS.cardinality = "EXCLUSIVE"
-					}
-					eventVS.backupAvailable = $("#allowBackupRequestCheckbox").is(':checked')
-
-			    	var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.CLAIM_PUBLISHING)
-			    	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-		    		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-					webAppMessage.signedContent = eventVS
-					webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
-					webAppMessage.receiverSignServiceURL = "${createLink( controller:'eventVSClaim', absolute:true)}"
-					webAppMessage.signedMessageSubject = "${message(code:'publishClaimSubject')}"
-					webAppMessage.isResponseWithReceipt = true
-					votingSystemClient.setMessageToSignatureClient(webAppMessage, publishDocumentCallback)
-					return false
-				 })
-			    
-			  });
-
-			function validateForm() {
-				var subject = $("#subject"),
-	    		dateFinish = $("#dateFinish"),
-	    		editorDiv = $("#editorDiv"),
-	        	allFields = $([]).add(subject).add(dateFinish).add(editorDiv);
-				allFields.removeClass( "formFieldError" );
-	
-				if(!document.getElementById('subject').validity.valid) {
-					subject.addClass( "formFieldError" );
-					showResultDialog('<g:message code="dataFormERRORLbl"/>',  '<g:message code="emptyFieldMsg"/>')
-					return false
-				}
-	
-				if(!document.getElementById('dateFinish').validity.valid) {
-					dateFinish.addClass( "formFieldError" );
-					showResultDialog('<g:message code="dataFormERRORLbl"/>',  '<g:message code="emptyFieldMsg"/>')
-					return false
-				}
-				
-				if(dateFinish.datepicker("getDate") < new Date() ) {
-					dateFinish.addClass( "formFieldError" );
-					showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="dateInitERRORMsg"/>')
-					return false
-				}
-	
-				if(getEditor_editorDivData().length == 0) {
-					editorDiv.addClass( "formFieldError" );
-					showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="emptyDocumentERRORMsg"/>')
-					return false;
-				}  
-				return true
-			}
-
-			var claimDocumentURL
-
-			function publishDocumentCallback(appMessage) {
-				console.log("publishDocumentCallback - message from native client: " + appMessage);
-				var appMessageJSON = toJSON(appMessage)
-				claimDocumentURL = null
-				if(appMessageJSON != null) {
-					$("#workingWithAppletDialog" ).dialog("close");
-					var caption = '<g:message code="publishERRORCaption"/>'
-					var msg = appMessageJSON.message
-					if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-						caption = '<g:message code="publishOKCaption"/>'
-				    	var msgTemplate = "<g:message code='documentLinkMsg'/>";
-						msg = "<p><g:message code='publishOKMsg'/>.</p>" + 
-							msgTemplate.format(appMessageJSON.message);
-					    claimDocumentURL = appMessageJSON.message
-					} else showEditor_editorDiv()
-					showResultDialog(caption, msg, resultCallback)
-				}
-			}
-
-            function resultCallback() {
-                if(claimDocumentURL != null) window.location.href = claimDocumentURL
+    function submitForm(form) {
+        if(!validateForm()) return false;
+        var eventVS = new EventVS();
+        eventVS.subject = $("#subject").val();
+        eventVS.content = getEditor_editorDivData();
+        eventVS.dateFinish = $("#dateFinish").datepicker('getDate').format();
+        var claimFields = new Array();
+        $("#fieldsBox").children().each(function(){
+            var claimField = $(this).find('div.newFieldValueDiv');
+            var claimFieldTxt = claimField.text();
+            if(claimFieldTxt.length > 0) {
+                var claimField = {content:claimFieldTxt}
+                claimFields.push(claimField)
             }
+        });
+        eventVS.fieldsEventVS = claimFields
+        if($("#multipleSignaturesCheckbox").is(':checked') ) eventVS.cardinality = "MULTIPLE"
+        else eventVS.cardinality = "EXCLUSIVE"
+        eventVS.backupAvailable = $("#allowBackupRequestCheckbox").is(':checked')
+        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.CLAIM_PUBLISHING)
+        webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+        webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
+        webAppMessage.signedContent = eventVS
+        webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
+        webAppMessage.receiverSignServiceURL = "${createLink( controller:'eventVSClaim', absolute:true)}"
+        webAppMessage.signedMessageSubject = "${message(code:'publishClaimSubject')}"
+        webAppMessage.isResponseWithReceipt = true
+        votingSystemClient.setMessageToSignatureClient(webAppMessage, publishDocumentCallback)
+        return false
+    }
+
+    function addClaimField (claimFieldText) {
+        if(claimFieldText == null) return
+        var newFieldTemplate = $('#newFieldTemplate').html()
+        var newFieldHTML = newFieldTemplate.format(claimFieldText);
+        var $newField = $(newFieldHTML)
+        $newField.find('#deleteFieldButton').click(function() {
+                $(this).parent().fadeOut(1000,
+                function() { $(this).parent().remove(); });
+                numClaimFields--
+                if(numClaimFields == 0) {
+                    $("#fieldsBox").fadeOut(1000)
+                }
+            }
+        )
+        $("#fieldsBox #fields").append($newField)
+        if(numClaimFields == 0) {
+            $("#fieldsBox").fadeIn(1000)
+        }
+        numClaimFields++
+        $("#claimFieldText").val("");
+    }
+
+    function validateForm() {
+        var subject = $("#subject"),
+        dateFinish = $("#dateFinish"),
+        editorDiv = $("#editorDiv"),
+        allFields = $([]).add(subject).add(dateFinish).add(editorDiv);
+        allFields.removeClass( "formFieldError" );
+
+        if(!document.getElementById('subject').validity.valid) {
+            subject.addClass( "formFieldError" );
+            showResultDialog('<g:message code="dataFormERRORLbl"/>',  '<g:message code="emptyFieldMsg"/>')
+            return false
+        }
+
+        if(!document.getElementById('dateFinish').validity.valid) {
+            dateFinish.addClass( "formFieldError" );
+            showResultDialog('<g:message code="dataFormERRORLbl"/>',  '<g:message code="emptyFieldMsg"/>')
+            return false
+        }
+
+        if(dateFinish.datepicker("getDate") < new Date() ) {
+            dateFinish.addClass( "formFieldError" );
+            showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="dateInitERRORMsg"/>')
+            return false
+        }
+
+        if(getEditor_editorDivData().length == 0) {
+            editorDiv.addClass( "formFieldError" );
+            showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="emptyDocumentERRORMsg"/>')
+            return false;
+        }
+        return true
+    }
+
+    var claimDocumentURL
+
+    function publishDocumentCallback(appMessage) {
+        console.log("publishDocumentCallback - message from native client: " + appMessage);
+        var appMessageJSON = toJSON(appMessage)
+        claimDocumentURL = null
+        if(appMessageJSON != null) {
+            $("#workingWithAppletDialog" ).dialog("close");
+            var caption = '<g:message code="publishERRORCaption"/>'
+            var msg = appMessageJSON.message
+            if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                caption = '<g:message code="publishOKCaption"/>'
+                var msgTemplate = "<g:message code='documentLinkMsg'/>";
+                msg = "<p><g:message code='publishOKMsg'/>.</p>" + msgTemplate.format(appMessageJSON.message);
+                claimDocumentURL = appMessageJSON.message
+            }
+            showResultDialog(caption, msg, resultCallback)
+        }
+    }
+
+    function resultCallback() {
+        if(claimDocumentURL != null) window.location.href = claimDocumentURL
+    }
 
 </r:script>

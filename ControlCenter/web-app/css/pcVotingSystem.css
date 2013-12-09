@@ -341,12 +341,6 @@ body {
 	margin: 0px 20px 20px 20px;
 }
 
-.editorContents {
-	border: 1px solid #cccccc;
-	font-size: 1em;
-	padding: 10px 10px 10px 10px;
-}
-
 #eventsDiv {
 	width:90%;
 	margin:0px auto 0px auto;

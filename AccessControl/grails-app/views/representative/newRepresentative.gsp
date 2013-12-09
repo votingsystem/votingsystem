@@ -46,47 +46,46 @@
 </body>
 </html>
 <r:script>
-		 	$(function() {
-		 		showEditor_editorDiv()
-		 		
-			    $('#mainForm').submit(function(event){
-			    	event.preventDefault();
-			    	var editorDiv = $("#editorDiv")
-                    var editorContent = getEditor_editorDivData()
-					if(editorContent.length == 0) {
-						editorDiv.addClass( "formFieldError" );
-						showResultDialog('<g:message code="dataFormERRORLbl"/>',
-						    '<g:message code="emptyDocumentERRORMsg"/>')
-						showEditor_editorDiv();
-						return
-					}  
+    $(function() {
 
-			    	var webAppMessage = new WebAppMessage( ResponseVS.SC_PROCESSING,Operation.NEW_REPRESENTATIVE)
-			    	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-		    		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-					webAppMessage.signedContent = {representativeInfo:getEditor_editorDivData(),
-							operation:Operation.REPRESENTATIVE_DATA}
-					webAppMessage.receiverSignServiceURL = "${createLink( controller:'representative', absolute:true)}"
-					webAppMessage.signedMessageSubject = '<g:message code="representativeDataLbl"/>'
-					webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
-					votingSystemClient.setMessageToSignatureClient(webAppMessage, newRepresentativeCallback);
-			    });
-			  });
 
-			function newRepresentativeCallback(appMessage) {
-				console.log("newRepresentativeCallback - message from native client: " + appMessage);
-				var appMessageJSON = toJSON(appMessage)
-				if(appMessageJSON != null) {
-					$("#workingWithAppletDialog" ).dialog("close");
-					var caption = '<g:message code="publishERRORCaption"/>'
-					var msg = appMessageJSON.message
-					if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-						caption = '<g:message code="publishOKCaption"/>'
-				    	var msgTemplate = "<g:message code='documentLinkMsg'/>";
-						msg = "<p><g:message code='publishOKMsg'/>.</p>" + 
-							msgTemplate.format(appMessageJSON.message);
-					}
-					showResultDialog(caption, msg)
-				}
-			}
+        $('#mainForm').submit(function(event){
+            event.preventDefault();
+            var editorDiv = $("#editorDiv")
+            var editorContent = getEditor_editorDivData()
+            if(editorContent.length == 0) {
+                editorDiv.addClass( "formFieldError" );
+                showResultDialog('<g:message code="dataFormERRORLbl"/>',
+                    '<g:message code="emptyDocumentERRORMsg"/>')
+                return
+            }
+
+            var webAppMessage = new WebAppMessage( ResponseVS.SC_PROCESSING,Operation.NEW_REPRESENTATIVE)
+            webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+            webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
+            webAppMessage.signedContent = {representativeInfo:getEditor_editorDivData(),
+                    operation:Operation.REPRESENTATIVE_DATA}
+            webAppMessage.receiverSignServiceURL = "${createLink( controller:'representative', absolute:true)}"
+            webAppMessage.signedMessageSubject = '<g:message code="representativeDataLbl"/>'
+            webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
+            votingSystemClient.setMessageToSignatureClient(webAppMessage, newRepresentativeCallback);
+        });
+      });
+
+    function newRepresentativeCallback(appMessage) {
+        console.log("newRepresentativeCallback - message from native client: " + appMessage);
+        var appMessageJSON = toJSON(appMessage)
+        if(appMessageJSON != null) {
+            $("#workingWithAppletDialog" ).dialog("close");
+            var caption = '<g:message code="publishERRORCaption"/>'
+            var msg = appMessageJSON.message
+            if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                caption = '<g:message code="publishOKCaption"/>'
+                var msgTemplate = "<g:message code='documentLinkMsg'/>";
+                msg = "<p><g:message code='publishOKMsg'/>.</p>" +
+                    msgTemplate.format(appMessageJSON.message);
+            }
+            showResultDialog(caption, msg)
+        }
+    }
 </r:script>

@@ -1,8 +1,11 @@
 package filters
 
 import grails.converters.JSON
+import org.apache.http.HttpResponse
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
+
+import javax.servlet.http.HttpServletResponseWrapper
 import java.security.cert.X509Certificate;
 import org.votingsystem.model.TypeVS
 import org.springframework.web.multipart.MultipartHttpServletRequest
@@ -114,14 +117,10 @@ class AccessControlFilters {
 				}
 			}
 		}
-		
+
+
 		votingSystemFilter(controller:'*', action:'*') {
 			before = {
-				if(flash.forwarded) {
-					log.debug("before - flash.forwarded - BYPASS PKCS7 FILTER");
-					flash.forwarded = null
-					return;
-				}
                 try {
                     ContentTypeVS contentTypeVS = ContentTypeVS.getByName(request?.contentType)
                     log.debug("before - contentType: ${contentTypeVS}")
@@ -141,12 +140,14 @@ class AccessControlFilters {
                             if(ResponseVS.SC_OK == responseVS.statusCode) {
                                 requestBytes = responseVS.messageBytes
                                 responseVS = pdfService.checkSignature(requestBytes, request.getLocale())
+                                if(ResponseVS.SC_OK == responseVS.statusCode) params.pdfDocument = responseVS?.data
                             }
-                            params.pdfDocument = responseVS?.data
+                            if(ResponseVS.SC_OK != responseVS.statusCode) return printText(response, responseVS)
                             break;
                         case ContentTypeVS.PDF_SIGNED:
                             responseVS = pdfService.checkSignature(requestBytes, request.getLocale())
-                            params.pdfDocument = responseVS?.data
+                            if(ResponseVS.SC_OK != responseVS.statusCode) return printText(response, responseVS)
+                            params.pdfDocument = responseVS.data
                             break;
                         case ContentTypeVS.PDF:
                             params.plainPDFDocument = requestBytes
@@ -197,39 +198,25 @@ class AccessControlFilters {
                 }
                 if(!responseVS) return;
                 MessageSMIME messageSMIME = null
-                if(responseVS?.data instanceof MessageSMIME) messageSMIME = responseVS?.data
-                log.debug "after - status: ${responseVS.getStatusCode()} - contentType: ${responseVS.getContentType()}"
+                if(responseVS?.data instanceof MessageSMIME) {
+                    messageSMIME = responseVS?.data
+                    responseVS.setMessageBytes(messageSMIME.content)
+                }
+                log.debug "after - response status: ${responseVS.getStatusCode()} - contentType: ${responseVS.getContentType()}"
                 switch(responseVS.getContentType()) {
                     case ContentTypeVS.SIGNED_AND_ENCRYPTED:
                         ResponseVS encryptResponse =  signatureVSService.encryptSMIMEMessage(
                                 messageSMIME.smimeMessage, params.receiverCert, request.getLocale())
-                        if(ResponseVS.SC_OK == encryptResponse.statusCode) {
-                            response.contentLength = encryptResponse.messageBytes.length
-                            response.outputStream << encryptResponse.messageBytes
-                            response.outputStream.flush()
-                        } else {
-                            log.error "after - error encrypting response '${encryptResponse.message}'";
+                        if(ResponseVS.SC_OK == encryptResponse.statusCode)
+                            return printOutputStream(response, encryptResponse)
+                        else {
                             messageSMIME.metaInf = encryptResponse.message
                             messageSMIME.save()
-                            response.contentType = ContentTypeVS.TEXT
-                            response.status = encryptResponse.statusCode
-                            render encryptResponse.message
+                            return printText(response, encryptResponse)
                         }
-                        return false
-                        break;
                     case ContentTypeVS.SIGNED:
-                        if(messageSMIME?.content) {
-                            response.contentLength = messageSMIME.content.length
-                            response.outputStream << messageSMIME.content
-                            response.outputStream.flush()
-                        } else {
-                            response.contentType = ContentTypeVS.TEXT.getName()
-                            response.status = ResponseVS.SC_ERROR
-                            log.error "after - missing MessageSMIME content"
-                            render "Missing MessageSMIME content"
-                        }
-                        return false;
-                        break;
+                        if(ResponseVS.SC_OK == responseVS.statusCode) return printOutputStream(response, responseVS)
+                        else return printText(response, responseVS)
                     case ContentTypeVS.MULTIPART_ENCRYPTED:
                         if(responseVS.messageBytes && (params.receiverCert || params.receiverPublicKey)) {
                             if(params.receiverPublicKey) {
@@ -238,41 +225,49 @@ class AccessControlFilters {
                             } else if(params.receiverCert) {
                                 responseVS = signatureVSService.encryptToCMS(responseVS.messageBytes,params.receiverCert)
                             }
-                            if (ResponseVS.SC_OK == responseVS.statusCode) {
-                                response.contentLength = responseVS.messageBytes.length
-                                response.outputStream << responseVS.messageBytes
-                                response.outputStream.flush()
-                                return false
-                            }
-                        } else log.error "after - contentType MULTIPART_ENCRYPTED ERROR - missing params"
-                        break;
+                            if (ResponseVS.SC_OK == responseVS.statusCode) return printOutputStream(response,responseVS)
+                        }
+                        return printText(response, responseVS)
                     case ContentTypeVS.TEXT:
-                        response.status = responseVS.statusCode
-                        String resultMessage = responseVS.message? responseVS.message: "statusCode: ${responseVS.statusCode}"
-                        if(ResponseVS.SC_OK != response.status) log.error "after - message: '${resultMessage}'"
-                        render resultMessage
-                        return false;
+                        return printText(response, responseVS)
                     case ContentTypeVS.JSON:
-                        render responseVS.getMessage() as JSON
-                        return false;
+                        render responseVS.getData() as JSON
+                        return false
+                    case ContentTypeVS.ZIP:
+                        response.setHeader("Content-Disposition", "inline; filename='${responseVS.message}'");
+                        return printOutputStream(response, responseVS)
                     case ContentTypeVS.PDF:
-                        //response.setHeader("Content-disposition", "attachment; filename=manifest.pdf")
+                        response.setHeader("Content-disposition", "attachment; filename='${responseVS.message}'")
+                        return printOutputStream(response, responseVS)
                     case ContentTypeVS.PEM:
                     case ContentTypeVS.CMS_SIGNED:
                     case ContentTypeVS.TIMESTAMP_RESPONSE:
                     case ContentTypeVS.IMAGE:
-                    case ContentTypeVS.ZIP:
-                        //response.setHeader("Content-Disposition", "inline; filename='${responseVS.message}'");
                     case ContentTypeVS.TEXT_STREAM:
-                        response.status = responseVS.getStatusCode()
-                        response.contentLength = responseVS.getMessageBytes().length
-                        response.setContentType(responseVS.getContentType().getName())
-                        response.outputStream <<  responseVS.getMessageBytes()
-                        response.outputStream.flush()
-                        return false
+                        return printOutputStream(response, responseVS)
                 }
+                log.debug("### responseVS not processed ###");
 			}
 		}
+    }
+
+    private boolean printText(HttpServletResponseWrapper response, ResponseVS responseVS) {
+        response.status = responseVS.statusCode
+        response.setContentType(ContentTypeVS.TEXT.getName())
+        String resultMessage = responseVS.message? responseVS.message: "statusCode: ${responseVS.statusCode}"
+        if(ResponseVS.SC_OK != response.status) log.error "after - message: '${resultMessage}'"
+        response.outputStream <<  resultMessage
+        response.outputStream.flush()
+        return false
+    }
+
+    private boolean printOutputStream(HttpServletResponseWrapper response, ResponseVS responseVS) {
+        response.status = responseVS.getStatusCode()
+        response.contentLength = responseVS.getMessageBytes().length
+        response.setContentType(responseVS.getContentType().getName())
+        response.outputStream <<  responseVS.getMessageBytes()
+        response.outputStream.flush()
+        return false
     }
 	
 	/**
@@ -280,7 +275,7 @@ class AccessControlFilters {
 	 */
 	public byte[] getBytesFromInputStream(InputStream inputStream) throws IOException {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		byte[] buf =new byte[5120];
+		byte[] buf =new byte[4096];
 		int len;
 		while((len = inputStream.read(buf)) > 0){ outputStream.write(buf,0,len);}
 		outputStream.close();

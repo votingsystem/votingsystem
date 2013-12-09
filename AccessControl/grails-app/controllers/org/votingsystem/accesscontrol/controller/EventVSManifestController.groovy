@@ -39,32 +39,27 @@ class EventVSManifestController {
 	 * @return documento JSON con información del manifiesto solicitado.
 	 */
 	def index() { 
-		if(request.contentType?.contains(ContentTypeVS.PDF.getName())) {
-			forward action: "getPDF"
-			return false
-		}
-		if(params.long('id')) {
-			EventVSManifest eventVS
-			EventVSManifest.withTransaction { eventVS = EventVSManifest.get(params.long('id')) }
-			if(!(eventVS.state == EventVS.State.ACTIVE || eventVS.state == EventVS.State.AWAITING ||
-				eventVS.state == EventVS.State.CANCELLED || eventVS.state == EventVS.State.TERMINATED)) eventVS = null
-			if(!eventVS) {
-                params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                        message(code:'eventVSNotFound', args:["${params.id}"]))
-                return
-			}
-			if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
-				render eventVSService.getEventVSMap(eventVS) as JSON
-				return false
-			} else {
-				render(view:"eventVSManifest", model: [ selectedSubsystem:SubSystemVS.MANIFESTS.toString(),
-					eventMap:eventVSService.getEventVSMap(eventVS)])
-				return
-			}
-		}
-		flash.forwarded = true
-		forward action: "getManifests"
-		return false
+		if(request.contentType?.contains(ContentTypeVS.PDF.getName())) getPDF();
+		else {
+            if(params.long('id')) {
+                EventVSManifest eventVS
+                EventVSManifest.withTransaction { eventVS = EventVSManifest.get(params.long('id')) }
+                if(!(eventVS.state == EventVS.State.ACTIVE || eventVS.state == EventVS.State.AWAITING ||
+                        eventVS.state == EventVS.State.CANCELLED || eventVS.state == EventVS.State.TERMINATED)) eventVS = null
+                if(!eventVS) {
+                    if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
+                        params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.JSON,
+                                data:eventVSService.getEventVSMap(eventVS))
+                    } else {
+                        render(view:"eventVSManifest", model: [ selectedSubsystem:SubSystemVS.MANIFESTS.toString(),
+                                eventMap:eventVSService.getEventVSMap(eventVS)])
+                    }
+                } else {
+                    params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                            message(code:'eventVSNotFound', args:["${params.id}"]))
+                }
+            } else getManifests()
+        }
 	}
 	
 	/**
@@ -95,7 +90,7 @@ class EventVSManifestController {
                     }
                 }
                 params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.PDF,
-                        messageBytes: eventVS.pdf)
+                        messageBytes: eventVS.pdf, message:"manifest_${params.id}.pdf")
             }
 		} else params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
                 args:["${grailsApplication.config.grails.serverURL}/${params.controller}"]))
@@ -103,14 +98,8 @@ class EventVSManifestController {
 
 	
 	def save() {
-		if(request.contentType?.contains(ContentTypeVS.PDF.getName())) {
-			flash.forwarded = Boolean.TRUE
-			forward action: "validatePDF"
-			return false
-		} else {
-			forward action: "publishPDF"
-			return false
-		}
+		if(request.contentType?.contains(ContentTypeVS.PDF.getName())) validatePDF()
+		else publishPDF()
 	}
 	
 	/**
@@ -282,9 +271,7 @@ class EventVSManifestController {
 	 */
 	def signed () {
 		EventVSManifest eventVS
-		EventVSManifest.withTransaction {
-			eventVS = EventVSManifest.get(params.long('id'))
-		}
+		EventVSManifest.withTransaction { eventVS = EventVSManifest.get(params.long('id')) }
 		if(!eventVS) {
             params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
                     message(code: 'eventVSNotFound', args:[params.id]))

@@ -13,7 +13,7 @@
 		</p>
 	</div>
 	
-	<form id="mainForm">
+	<form id="mainForm" onsubmit="return submitForm(this);">
 	
 	<div style="margin:0px 0px 20px 0px">
     	<input type="text" name="subject" id="subject" style="width:400px"  required 
@@ -52,76 +52,67 @@
 </body>
 </html>
 <r:script>
-		
-		 	$(function() {
-		 		showEditor_editorDiv()
+    $(function() { });
 
-			    $('#mainForm').submit(function(event){
-			    	event.preventDefault();
-                    var editorContent = getEditor_editorDivData()
-			    	var isValidForm = true
-			    	
-			    	var subject = $( "#subject" ),
-			    	dateFinish = $( "#dateFinish" ),
-			    	editorDiv = $( "#editorDiv" ),
-			        allFields = $( [] ).add( subject ).add( dateFinish ).add(editorDiv);
-			        allFields.removeClass( "formFieldError" );
+    function submitForm(form) {
+        var subject = $( "#subject" ),
+        dateFinish = $( "#dateFinish" ),
+        editorDiv = $( "#editorDiv" ),
+        allFields = $( [] ).add( subject ).add( dateFinish ).add(editorDiv);
+        allFields.removeClass( "formFieldError" );
 
 
-					if(dateFinish.datepicker("getDate") < new Date() ) {
-						dateFinish.addClass( "formFieldError" );
-						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
-							'<g:message code="dateInitERRORMsg"/>')
-						isValidForm = false
-					}
+        if(dateFinish.datepicker("getDate") < new Date() ) {
+            dateFinish.addClass( "formFieldError" );
+            showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="dateInitERRORMsg"/>')
+            return false
+        }
 
-					if(editorContent.length == 0) {
-						editorDiv.addClass( "formFieldError" );
-						showResultDialog('<g:message code="dataFormERRORLbl"/>', 
-								'<g:message code="emptyDocumentERRORMsg"/>')
-						isValidForm = false
-					}  
-					if(!isValidForm) {
-						showEditor_editorDiv()
-						return 
-					}
-					
-					var eventVS = new EventVS();
-			    	eventVS.subject = subject.val();
-			    	eventVS.content = editorContent;
-			    	eventVS.dateFinish = dateFinish.datepicker('getDate').format();
+        if(getEditor_editorDivData().length == 0) {
+            editorDiv.addClass( "formFieldError" );
+            showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="emptyDocumentERRORMsg"/>')
+            return false
+        }
 
-			    	var webAppMessage = new WebAppMessage(
-					    	ResponseVS.SC_PROCESSING,
-					    	Operation.MANIFEST_PUBLISHING)
-			    	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-			    		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-					webAppMessage.signedContent = eventVS
-					webAppMessage.receiverSignServiceURL = "${createLink( controller:'eventVSManifest', absolute:true)}"
-					webAppMessage.signedMessageSubject = '<g:message code="publishManifestSubject"/>'
+        var eventVS = new EventVS();
+        eventVS.subject = subject.val();
+        eventVS.content = getEditor_editorDivData();
+        eventVS.dateFinish = dateFinish.datepicker('getDate').format();
 
-					votingSystemClient.setMessageToSignatureClient(webAppMessage, publishDocumentCallback);
-			    	return false 
-			    });
+        var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.MANIFEST_PUBLISHING)
+        webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
+        webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
+        webAppMessage.signedContent = eventVS
+        webAppMessage.receiverSignServiceURL = "${createLink( controller:'eventVSManifest', absolute:true)}"
+        webAppMessage.signedMessageSubject = '<g:message code="publishManifestSubject"/>'
 
-			  });
+        votingSystemClient.setMessageToSignatureClient(webAppMessage, publishDocumentCallback);
+        return false
+    }
 
+    var manifestDocumentURL
 
-			function publishDocumentCallback(appMessage) {
-				console.log("publishDocumentCallback - message from native client: " + appMessage);
-				var appMessageJSON = toJSON(appMessage)
-				if(appMessageJSON != null) {
-					$("#workingWithAppletDialog" ).dialog("close");
-					var caption = '<g:message code="publishERRORCaption"/>'
-					var msg = appMessageJSON.message
-					if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-						caption = '<g:message code="publishOKCaption"/>'
-				    	var msgTemplate = "<g:message code='documentLinkMsg'/>";
-						msg = "<p><g:message code='publishOKMsg'/>.</p>" + 
-							msgTemplate.format(appMessageJSON.receiverSignServiceURL);
-					} else showEditor_editorDiv()
-					showResultDialog(caption, msg)
-				}
-			}
+    function publishDocumentCallback(appMessage) {
+        console.log("publishDocumentCallback - message from native client: " + appMessage);
+        var appMessageJSON = toJSON(appMessage)
+        manifestDocumentURL = null
+        if(appMessageJSON != null) {
+            $("#workingWithAppletDialog" ).dialog("close");
+            var caption = '<g:message code="publishERRORCaption"/>'
+            var msg = appMessageJSON.message
+            if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                caption = '<g:message code="publishOKCaption"/>'
+                var msgTemplate = "<g:message code='documentLinkMsg'/>";
+                msg = "<p><g:message code='publishOKMsg'/>.</p>" +
+                    msgTemplate.format(appMessageJSON.receiverSignServiceURL);
+                manifestDocumentURL = appMessageJSON.message
+            }
+            showResultDialog(caption, msg, resultCallback)
+        }
+    }
+
+    function resultCallback() {
+        if(claimDocumentURL != null) window.location.href = manifestDocumentURL
+    }
 
 </r:script>

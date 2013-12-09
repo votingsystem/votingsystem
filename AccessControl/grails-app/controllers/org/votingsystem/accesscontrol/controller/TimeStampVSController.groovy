@@ -6,6 +6,7 @@ import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.TimeStampVS
 import org.votingsystem.model.ResponseVS
+import org.votingsystem.model.TypeVS
 
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -53,8 +54,9 @@ class TimeStampVSController {
     def test() {
         MessageSMIME messageSMIMEReq = params.messageSMIMEReq
         if(!messageSMIMEReq) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))
-        } else params.responseVS = new ResponseVS(ResponseVS.SC_OK, "TIMESTAMP OK")
+            params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+                    message:message(code:'requestWithoutFile'), type:TypeVS.ERROR)
+        } else params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, message:"TIMESTAMP OK", type: TypeVS.TEST)
     }
 
 	/*def test() {

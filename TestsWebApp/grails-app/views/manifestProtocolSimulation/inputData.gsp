@@ -138,8 +138,6 @@ allFields = $( [] ).add(dateFinish).add(manifestEditorDiv);
 
 var callerCallback
 
-showEditor_manifestEditorDiv()
-
 
 function showManifestProtocolSinulationDataDialog(callback) {
 	$("#manifestProtocolSinulationDataDialog").dialog("open");
@@ -153,7 +151,6 @@ $('#manifestProtocolSinulationDataForm').submit(function(event){
  	$(".errorMsgWrapper").fadeOut()
     getEditor_manifestEditorDivData()
 	if(!isValidForm()) {
-		showEditor_manifestEditorDiv()
 		return false
 	}
 

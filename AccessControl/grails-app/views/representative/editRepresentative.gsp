@@ -44,18 +44,17 @@
 </html>
 <r:script>
     $(function() {
-        showEditor_editorDiv()
+
 
     	var editorDiv = $("#editorDiv")
         $('#mainForm').submit(function(event){
             event.preventDefault();
             var editorContent = getEditor_editorDivData()
 
-
             if(editorContent.length == 0) {
                 editorDiv.addClass( "formFieldError" );
                 showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="emptyDocumentERRORMsg"/>')
-                showEditor_editorDiv()
+
                 return false;
             } else editorDiv.removeClass( "formFieldError" );
             var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.NEW_REPRESENTATIVE)

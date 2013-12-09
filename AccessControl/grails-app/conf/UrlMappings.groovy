@@ -13,8 +13,7 @@ class UrlMappings {
 		}
 
 		"/"(view:"/index")
-		//"500"(view:'/error500')
-        "500"(controller:'error')
+		"500"(view:'/error500')
 
 		"/android/VotingToolAndroid.apk" {
 			controller = "android"

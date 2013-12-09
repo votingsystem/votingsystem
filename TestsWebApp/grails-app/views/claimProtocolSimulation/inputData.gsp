@@ -20,7 +20,7 @@
         </div>
     </div>
     <div id="formDataDiv">
-        <form id="claimProtocolSinulationDataForm">
+        <form id="claimProtocolSinulationDataForm" onsubmit="return submitForm(this);">
             <input type="hidden" autofocus="autofocus" />
             <input id="resetClaimProtocolSinulationDataForm" type="reset" style="display:none;">
 
@@ -130,18 +130,8 @@ var claimEditorDiv = $("#claimEditorDiv")
 dateFinish    = $("#dateFinish")
 allFields = $( [] ).add(dateFinish).add(claimEditorDiv);
 
-showEditor_claimEditorDiv()
-
-
-$('#claimProtocolSinulationDataForm').submit(function(event){
-	event.preventDefault();
- 	allFields.removeClass("formFieldError");   
- 	$(".errorMsgWrapper").fadeOut()
-	getEditor_claimEditorDivData()
-	if(!isValidForm()) {
-		showEditor_claimEditorDiv()
-		return false
-	}
+function submitForm(form) {
+    if(!isValidForm()) return false
 
 	var dateBeginStr = new Date().format()
 	var event = {subject:$('#subject').val(),
@@ -160,21 +150,26 @@ $('#claimProtocolSinulationDataForm').submit(function(event){
     });
      event.fieldsEventVS = claimFields
 	 var simulationData = {service:"claimSimulationService", status:Status.INIT_SIMULATION,
-	 		 accessControlURL:$('#accessControlURL').val(), 
-			 maxPendingResponses: $('#maxPendingResponses').val(), 
+	 		 accessControlURL:$('#accessControlURL').val(),
+			 maxPendingResponses: $('#maxPendingResponses').val(),
 			 numRequestsProjected: $('#numRequestsProjected').val(),
-			 dateBeginDocument: dateBeginStr, 
+			 dateBeginDocument: dateBeginStr,
 			 dateFinishDocument: dateFinish.datepicker("getDate").format(),
-			 whenFinishChangeEventStateTo:$( "#eventStateOnFinishSelect option:selected").val(), 
-			 backupRequestEmail:$('#emailRequestBackup').val(), 
+			 whenFinishChangeEventStateTo:$( "#eventStateOnFinishSelect option:selected").val(),
+			 backupRequestEmail:$('#emailRequestBackup').val(),
 			 event:event}
 
      showListenerDiv(true)
      showSimulationProgress(simulationData)
-	 return false
-});
+     return false
+}
+
 
 function isValidForm() {
+ 	allFields.removeClass("formFieldError");
+ 	$(".errorMsgWrapper").fadeOut()
+    console.log("=============== isValidForm")
+
 	if(!document.getElementById('accessControlURL').validity.valid) {
 		$("#accessControlURL").addClass("formFieldError");
 		showResultDialog('<g:message code="dataFormERRORLbl"/>', '<g:message code="emptyFieldLbl"/>', function() {
@@ -244,12 +239,11 @@ $("#addClaimFieldButton").click(function () {
 var numClaimFields = 0
 
 function addClaimField (claimFieldText) {
-    showEditor_claimEditorDiv()
     if(claimFieldText == null) return
     var newFieldTemplate = $('#newFieldTemplate').html()
     var newFieldHTML = newFieldTemplate.format(claimFieldText);
     var $newField = $(newFieldHTML)
-    $newField.find('div#deleteFieldButton').click(function() {
+    $newField.find('#deleteFieldButton').click(function() {
             $(this).parent().fadeOut(1000,
             function() { $(this).parent().remove(); });
             numClaimFields--

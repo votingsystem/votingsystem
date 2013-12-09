@@ -285,8 +285,6 @@ dateFinish    = $("#dateFinish")
 electionEditorDivButton = $("#addElectionFieldButton");
 allFields = $( [] ).add(dateFinish).add(electionEditorDiv).add(electionEditorDivButton);
 
-showEditor_electionEditorDiv()
-
 
 $('#electionProtocolSinulationDataForm').submit(function(event){
 	event.preventDefault();
@@ -294,7 +292,6 @@ $('#electionProtocolSinulationDataForm').submit(function(event){
  	$(".errorMsgWrapper").fadeOut()
     getEditor_electionEditorDivData()
 	if(!isValidForm()) {
-		showEditor_electionEditorDiv()
 		return false
 	}
 
@@ -440,12 +437,11 @@ $("#addElectionFieldButton").click(function () {
 var numElectionFields = 0
 
 function addElectionField (electionFieldText) {
-    showEditor_electionEditorDiv()
     if(electionFieldText == null) return
     var newFieldTemplate = $('#newFieldTemplate').html()
     var newFieldHTML = newFieldTemplate.format(electionFieldText);
     var $newField = $(newFieldHTML)
-    $newField.find('div#deleteFieldButton').click(function() {
+    $newField.find('#deleteFieldButton').click(function() {
             $(this).parent().fadeOut(1000,
             function() { $(this).parent().remove(); });
             numElectionFields--

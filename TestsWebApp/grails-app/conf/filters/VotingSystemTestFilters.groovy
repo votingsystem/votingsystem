@@ -1,5 +1,9 @@
 package filters
 
+import org.votingsystem.model.ContentTypeVS
+import org.votingsystem.model.ResponseVS
+
+import javax.servlet.http.HttpServletResponseWrapper
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,11 +34,33 @@ class VotingSystemTestFilters {
                 if(!params.sort) params.sort = "dateCreated"
                 if(!params.order) params.order = "desc"
                 response.setHeader("Cache-Control", "no-store")
-
             }
+
+            after = {
+                if(params.responseVS == null) return;
+                ResponseVS responseVS = params.responseVS
+                switch(responseVS.getContentType()) {
+                    case ContentTypeVS.TEXT:
+                        return printText(response, responseVS);
+                    case ContentTypeVS.JSON:
+                        render responseVS.getData() as JSON
+                        return false
+                }
+            }
+
         }
 
 
+    }
+
+    private boolean printText(HttpServletResponseWrapper response, ResponseVS responseVS) {
+        response.status = responseVS.statusCode
+        response.setContentType(ContentTypeVS.TEXT.getName())
+        String resultMessage = responseVS.message? responseVS.message: "statusCode: ${responseVS.statusCode}"
+        if(ResponseVS.SC_OK != response.status) log.error "after - message: '${resultMessage}'"
+        response.outputStream <<  resultMessage
+        response.outputStream.flush()
+        return false
     }
 	
 }

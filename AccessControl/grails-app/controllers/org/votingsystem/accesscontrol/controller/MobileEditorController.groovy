@@ -13,9 +13,9 @@ class MobileEditorController {
 
 	def grailsApplication;
 
-	def manifest() { }
+	def eventVSClaim() { }
         
-    def vote() { 
+    def eventVSElection() {
 		def controlCenters = ControlCenterVS.findAllWhere(state: ActorVS.State.RUNNING)
 		def controlCenterList = []
 		controlCenters.each {controlCenter ->
@@ -24,9 +24,9 @@ class MobileEditorController {
 				serverURL:controlCenter.serverURL, dateCreated:controlCenter.dateCreated]
 			controlCenterList.add(controlCenterMap)
 		}
-		render(view:"vote" , model:[controlCenters: controlCenterList])
+		render(view:"eventVSElection" , model:[controlCenters: controlCenterList])
 	}
         
-    def claim() { }
+    def eventVSManifest() { }
 		
 }

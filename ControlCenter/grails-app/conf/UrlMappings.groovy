@@ -9,8 +9,7 @@ class UrlMappings {
 		}
 
 		"/"(view:"/index")
-        //"500"(view:'/error500')
-        "500"(controller:'error')
+        "500"(view:'/error500')
 		
 		
 		"/voteVSCanceller/voteVS/${id}"{

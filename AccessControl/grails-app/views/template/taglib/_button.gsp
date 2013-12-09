@@ -2,7 +2,7 @@
     <button id='${attrs.id}' class='button_base' href='${attrs.href}' style='${attrs.style}'>
 </g:if>
 <g:else>
-    <button id='${attrs.id}' class='button_base' style='${attrs.style}' onclick="return false;">
+    <button id='${attrs.id}' class='button_base' style='${attrs.style}' onclick='${attrs.onclick}; return false;'>
 </g:else>
 <g:if test="${attrs.imgSrc}">
     <div class="buttonImage"><img src='${attrs.imgSrc}' style='margin:0px 0px 0px 5px;'/></div>

@@ -58,8 +58,11 @@ class CsrController {
 				KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(
 					FileUtils.getBytesFromFile(keyStoreFile), password.toCharArray());
 				Certificate[] certsServer =  keyStore.getCertificateChain(keyAlias);
-				List<X509Certificate> certs =Arrays.asList(certsServer)
-				certs.add(certX509, 0);
+
+                List<X509Certificate> certs = new ArrayList<X509Certificate>();
+                certs.add(certX509)
+                certs.addAll(Arrays.asList(certsServer))
+
                 params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
                         messageBytes: CertUtil.getPEMEncoded (certs))
 			} else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code: "csrGenerationErrorMsg"))
