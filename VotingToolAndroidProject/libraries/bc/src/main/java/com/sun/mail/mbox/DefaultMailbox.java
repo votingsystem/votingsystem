@@ -90,9 +90,6 @@ class DefaultMailFile extends File implements MailFile {
 	    return true;
 	} catch (FileNotFoundException fe) {
 	    return false;
-	} catch (IOException ie) {
-	    file = null;
-	    return false;
 	}
     }
 

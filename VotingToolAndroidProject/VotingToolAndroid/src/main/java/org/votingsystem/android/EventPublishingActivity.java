@@ -88,8 +88,8 @@ public class EventPublishingActivity extends ActionBarActivity implements CertPi
         String screenTitle = null;
         String serverURL = null;
         if(formTypeStr != null) {
-            serverURL = contextVS.getAccessControlVS().getPublishServiceURL(formType);
             formType = TypeVS.valueOf(formTypeStr);
+            serverURL = contextVS.getAccessControlVS().getPublishServiceURL(formType);
         	switch(formType) {
 	        	case CLAIM_PUBLISHING:
 	        		screenTitle = getString(R.string.publish_claim_caption);

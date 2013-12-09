@@ -984,7 +984,7 @@ public class CertPathValidatorUtilities
                 // (i) or (j) (2)
                 else
                 {
-                    certStatus.setCertStatus(CRLReason.unspecified);
+                    certStatus.setCertStatus(org.bouncycastle2.asn1.x509.CRLReason.unspecified);
                 }
                 certStatus.setRevocationDate(crl_entry.getRevocationDate());
             }

@@ -40,7 +40,6 @@
 
 package javax.activation;
 
-import android.util.Log;
 import myjava.awt.datatransfer.DataFlavor;
 import myjava.awt.datatransfer.Transferable;
 import myjava.awt.datatransfer.UnsupportedFlavorException;
@@ -910,13 +909,12 @@ class ObjectDataContentHandler implements DataContentHandler {
 			try {
 				mm.writeTo(os);
 			} catch (MessagingException e) {
-				Log.e("DataHandler.writeTo", e.getMessage(), e);
+                e.printStackTrace();
 			}
 		} else if (dch != null) {
             dch.writeTo(obj, mimeType, os);
         } else
-		    throw new UnsupportedDataTypeException(
-					"no object DCH for MIME type " + this.mimeType);
+		    throw new UnsupportedDataTypeException("no object DCH for MIME type " + this.mimeType);
 		}
     
 }

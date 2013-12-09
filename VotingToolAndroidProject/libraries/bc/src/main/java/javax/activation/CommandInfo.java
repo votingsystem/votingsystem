@@ -40,7 +40,6 @@
 
 package javax.activation;
 
-import android.util.Log;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -135,7 +134,6 @@ public class CommandInfo {
 	Object new_bean = null;
 
 	// try to instantiate the bean
-	Log.i("javax.activation.CommandInfo", "Mirar - Tratando de instanciar bean: " + className);
 	//new_bean = java.beans.Beans.instantiate(loader, className);
 
 	// if we got one and it is a CommandObject

@@ -1,7 +1,5 @@
 package org.bouncycastle2.cms;
 
-import android.util.Base64;
-import android.util.Log;
 import org.bouncycastle2.asn1.*;
 import org.bouncycastle2.asn1.cms.*;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
@@ -612,11 +610,11 @@ public class SignerInformation
 
                 ASN1OctetString signedMessageDigest = (ASN1OctetString)validMessageDigest;
 
-                String resultDigestStr = Base64.encodeToString(resultDigest, Base64.DEFAULT);
+                /*String resultDigestStr = Base64.encodeToString(resultDigest, Base64.DEFAULT);
                 String signedMessageDigestStr = Base64.encodeToString(signedMessageDigest.getOctets(), Base64.DEFAULT);
                 
 				Log.d("SignerInformation ", ".doVerify(...) - resultDigestStr: " + resultDigestStr 
-						+ " - signedMessageDigestStr: " + signedMessageDigestStr);
+						+ " - signedMessageDigestStr: " + signedMessageDigestStr);*/
                 
                 if (!Arrays.constantTimeAreEqual(resultDigest, signedMessageDigest.getOctets()))
                 {

@@ -1796,7 +1796,7 @@ public class RFC3280CertPathUtilities
                 RFC3280CertPathUtilities.processCRLJ(validDate, crl, cert, certStatus);
 
                 // (k)
-                if (certStatus.getCertStatus() == CRLReason.removeFromCRL)
+                if (certStatus.getCertStatus() == org.bouncycastle2.asn1.x509.CRLReason.removeFromCRL)
                 {
                     certStatus.setCertStatus(CertStatus.UNREVOKED);
                 }

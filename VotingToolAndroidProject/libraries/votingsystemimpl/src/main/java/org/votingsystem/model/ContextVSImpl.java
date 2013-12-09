@@ -42,11 +42,11 @@ public class ContextVSImpl extends  ContextVS {
     private static PropertyResourceBundle resourceBundle;
 
     private ContextVSImpl(Context context) {
+        System.setProperty("android.os.Build.ID", android.os.Build.ID);
         this.context = context.getApplicationContext();
         try {
             InputStream inputStream = context.getAssets().open("messages_es.properties");
             resourceBundle = new PropertyResourceBundle(inputStream);
-            Log.d(TAG + "ContextVSImpl(...)",  resourceBundle.getString("prueba"));
         } catch(Exception ex) {
             ex.printStackTrace();
         }
@@ -54,7 +54,8 @@ public class ContextVSImpl extends  ContextVS {
 
     public static ContextVSImpl getInstance(Context context) {
         if(INSTANCE == null) {
-            Log.d(TAG + ".getInstance(...)", "getInstance");
+            Log.d(TAG + ".getInstance(...)", "getInstance -  android.os.Build.ID: " +
+                    android.os.Build.ID);
             INSTANCE = new ContextVSImpl(context);
         }
         return INSTANCE;
@@ -92,6 +93,10 @@ public class ContextVSImpl extends  ContextVS {
         }
     }
 
+
+    public String getHostID() {
+        return android.os.Build.ID;
+    }
 
     public int getEventIndex(EventVS event) {
         return eventsSelectedList.indexOf(event);

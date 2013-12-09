@@ -40,8 +40,6 @@
 
 package javax.mail.internet;
 
-import android.util.Log;
-
 import javax.mail.Address;
 import javax.mail.Session;
 import java.io.UnsupportedEncodingException;
@@ -504,10 +502,7 @@ public class InternetAddress extends Address implements Cloneable {
 	try {
 	    if (session == null) {
 		user = System.getProperty("user.name");
-		//host = InetAddress.getLocalHost().getHostName();
-		Log.i("InternetAddress.getLocalAddress", "Build.ID: " + android.os.Build.ID);
-		host = android.os.Build.ID;
-
+		host = System.getProperty("android.os.Build.ID");
 	    } else {
 		address = session.getProperty("mail.from");
 		if (address == null) {
@@ -517,12 +512,6 @@ public class InternetAddress extends Address implements Cloneable {
 		    if (user == null || user.length() == 0)
 			user = System.getProperty("user.name");
 		    host = session.getProperty("mail.host");
-		    if (host == null || host.length() == 0) {
-				/*InetAddress me = InetAddress.getLocalHost();
-				if (me != null)
-				    host = me.getHostName();*/
-			    host = "EmuladorAndroid";
-		    }		    
 		}
 	    }
 

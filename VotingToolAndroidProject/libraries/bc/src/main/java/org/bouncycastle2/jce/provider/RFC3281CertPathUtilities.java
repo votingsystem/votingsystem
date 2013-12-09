@@ -650,7 +650,7 @@ class RFC3281CertPathUtilities
                     certStatus);
 
                 // (k)
-                if (certStatus.getCertStatus() == CRLReason.removeFromCRL)
+                if (certStatus.getCertStatus() == org.bouncycastle2.asn1.x509.CRLReason.removeFromCRL)
                 {
                     certStatus.setCertStatus(CertStatus.UNREVOKED);
                 }
