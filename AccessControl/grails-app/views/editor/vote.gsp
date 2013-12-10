@@ -101,7 +101,7 @@
 
     $(function() {
         $("#controlCenterLink").click(function () {
-            showVoteControlCenterDialog(addControlCenterDialog)
+            showVoteControlCenterDialog()
         });
 
     });
@@ -240,7 +240,7 @@
     }
 
     function resultCallback() {
-        if(claimDocumentURL != null) window.location.href = electionDocumentURL
+        if(electionDocumentURL != null) window.location.href = electionDocumentURL
     }
 
 </g:applyCodec>

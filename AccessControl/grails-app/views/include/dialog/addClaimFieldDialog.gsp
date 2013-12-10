@@ -1,4 +1,5 @@
-<div id="addClaimFieldDialog" title="<g:message code="addClaimFieldLbl"/>" style="display:none;">
+<div id="addClaimFieldDialog" title="<g:message code="addClaimFieldLbl"/>"
+     style="display:none;padding:30px 20px 30px 20px; display: table; margin:auto;">
 	<p style="text-align: center;">
 		<g:message code="claimFieldDescriptionMsg"/>
 	</p>

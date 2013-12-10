@@ -112,7 +112,7 @@
     }
 
     function resultCallback() {
-        if(claimDocumentURL != null) window.location.href = manifestDocumentURL
+        if(manifestDocumentURL != null) window.location.href = manifestDocumentURL
     }
 
 </r:script>

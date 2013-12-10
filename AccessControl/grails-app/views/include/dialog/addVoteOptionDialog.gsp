@@ -1,7 +1,8 @@
-<div id="addVoteOptionDialog" title="<g:message code="addOptionLbl"/>"  style="display:none;padding:20px 20px 20px 20px">
-   	<label for="newOptionText"><g:message code="pollOptionContentMsg"/></label>
+<div id="addVoteOptionDialog" title="<g:message code="addOptionLbl"/>"
+        style="display:none;padding:30px 20px 30px 20px; display: table; margin:auto;">
+   	<label for="newOptionText" style=""><g:message code="pollOptionContentMsg"/></label>
 	<form id="addVoteOptionForm">
-		<input type="text" id="newOptionText" style="width:350px; margin:0px auto 0px auto;" 
+		<input type="text" id="newOptionText" style="width:350px; margin:10px auto 0px auto;"
 			oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
 			onchange="this.setCustomValidity('')"
 			class="text ui-widget-content ui-corner-all" required/>
@@ -10,7 +11,6 @@
 </div>
 <r:script>
 var callerCallback
-
 
 $('#addVoteOptionForm').submit(function(event){	
 	event.preventDefault();

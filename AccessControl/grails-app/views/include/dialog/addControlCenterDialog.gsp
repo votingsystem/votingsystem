@@ -21,11 +21,8 @@
 </div> 
 <r:script>
 
-var callerCallback
-
 function showVoteControlCenterDialog(callback) {
 	$("#addControlCenterDialog").dialog("open");
-	callerCallback = callback	
 }
 
 
@@ -92,7 +89,6 @@ $("#addControlCenterDialog").dialog({
         icons: { primary: "ui-icon-closethick"},
         click:function() {
             $(this).dialog( "close" );
-            if(callerCallback != null) callerCallback()
         }}],
         show: {effect:"fade", duration: 700},
         hide: {effect: "fade",duration: 700},
@@ -137,7 +133,6 @@ $("#addControlCenterDialog").dialog({
 			    	$("#addControlCenterDialog").dialog("open")
 				}
                 $("#addControlCenterDialog").dialog("close");
-                if(callerCallback != null) callerCallback()
 				showResultDialog(caption, msg)
 			}
 		}
