@@ -44,9 +44,12 @@ class EventVSManifestController {
             if(params.long('id')) {
                 EventVSManifest eventVS
                 EventVSManifest.withTransaction { eventVS = EventVSManifest.get(params.long('id')) }
+
+                log.debug("=========== eventVS: ${eventVS.state} - EventVS.State.ACTIVE: ${eventVS.state == EventVS.State.ACTIVE}")
+
                 if(!(eventVS.state == EventVS.State.ACTIVE || eventVS.state == EventVS.State.AWAITING ||
                         eventVS.state == EventVS.State.CANCELLED || eventVS.state == EventVS.State.TERMINATED)) eventVS = null
-                if(!eventVS) {
+                if(eventVS) {
                     if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
                         params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.JSON,
                                 data:eventVSService.getEventVSMap(eventVS))
