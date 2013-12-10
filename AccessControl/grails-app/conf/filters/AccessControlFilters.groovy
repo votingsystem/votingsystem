@@ -223,7 +223,7 @@ class AccessControlFilters {
                         response.setHeader("Content-Disposition", "inline; filename='${responseVS.message}'");
                         return printOutputStream(response, responseVS)
                     case ContentTypeVS.PDF:
-                        response.setHeader("Content-disposition", "attachment; filename='${responseVS.message}'")
+                        //response.setHeader("Content-disposition", "attachment; filename='${responseVS.message}'")
                         return printOutputStream(response, responseVS)
                     case ContentTypeVS.PEM:
                     case ContentTypeVS.CMS_SIGNED:

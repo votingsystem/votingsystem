@@ -276,14 +276,13 @@ class EventVSManifestController {
             params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
                     message(code: 'eventVSNotFound', args:[params.id]))
 		} else {
-            PDFDocumentVS documento
+            PDFDocumentVS pdfDocument
             PDFDocumentVS.withTransaction {
-                documento = PDFDocumentVS.findWhere(eventVS:eventVS, state:PDFDocumentVS.State.VALIDATED_MANIFEST)
+                pdfDocument = PDFDocumentVS.findWhere(eventVS:eventVS, state:PDFDocumentVS.State.VALIDATED_MANIFEST)
             }
-            if(documento) {
-                //response.setHeader("Content-disposition", "attachment; filename=manifiesto.pdf")
+            if(pdfDocument) {
                 params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PDF,
-                        messageBytes: documento.pdf)
+                       message:"manifest_${eventVS.id}.pdf", messageBytes: pdfDocument.pdf)
             } else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
                     message(code: 'validatedManifestNotFoundErrorMsg', args:[params.id]))
         }
