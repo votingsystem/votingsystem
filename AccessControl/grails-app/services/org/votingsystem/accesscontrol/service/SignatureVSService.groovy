@@ -600,7 +600,7 @@ class SignatureVSService {
      * Method to decrypt files attached to SMIME (not signed) messages
      */
     public ResponseVS decryptMessage (byte[] encryptedFile, Locale locale) {
-        log.debug " - decryptMessage - ${new String(encryptedFile)}"
+        log.debug " - decryptMessage"
         try {
             return getEncryptor().decryptMessage(encryptedFile);
         } catch(Exception ex) {
