@@ -4,6 +4,7 @@ import iaik.pkcs.pkcs11.*;
 import iaik.pkcs.pkcs11.Session;
 import iaik.pkcs.pkcs11.objects.*;
 import iaik.pkcs.pkcs11.objects.Object;
+import iaik.pkcs.pkcs11.wrapper.PKCS11Exception;
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.cms.AttributeTable;
@@ -150,33 +151,26 @@ public class DNIeContentSigner implements ContentSigner {
                 }
             }
             pkcs11Session.findObjectsFinal();
-        } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            if (ex instanceof ArrayIndexOutOfBoundsException) {
-                throw new VotingSystemException(ContextVS.getInstance().getMessage("smartCardReaderErrorMsg"));
-            }
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            throw new VotingSystemException(ContextVS.getInstance().getMessage("smartCardReaderErrorMsg"));
+        } catch (PKCS11Exception ex) {
             if ("CKR_DEVICE_ERROR".equals(ex.getMessage()) ||
                     "CKR_CRYPTOKI_ALREADY_INITIALIZED".equals(ex.getMessage()) ||
                     "CKR_USER_ALREADY_LOGGED_IN".equals(ex.getMessage())) {
                 logger.error(ex.getMessage(), ex);
-                try {
-                    if (token != null && token.getTokenInfo() != null && token.getTokenInfo().isTokenInitialized()) {
-                        token.closeAllSessions();
-                    }
-                    if (pkcs11Session != null ) {
-                        //pkcs11Session.closeSession(); -> exeption
-                        pkcs11Session = null;
-                        System.gc();
-                    }
-                    if (pkcs11Module != null ) {
-                        pkcs11Module.finalize(null);
-                        pkcs11Module = null;
-                    }
-                    System.gc();
-                } catch (TokenException ex1) {
-                    logger.error(ex1.getMessage(), ex1);
+                if (token != null && token.getTokenInfo() != null && token.getTokenInfo().isTokenInitialized()) {
+                    token.closeAllSessions();
                 }
-                return null;
+                if (pkcs11Session != null ) {
+                    //pkcs11Session.closeSession(); -> exception
+                    pkcs11Session = null;
+                    System.gc();
+                }
+                if (pkcs11Module != null ) {
+                    pkcs11Module.finalize(null);
+                    pkcs11Module = null;
+                }
+                System.gc();
             }
             if ("CKR_PIN_INCORRECT".equals(ex.getMessage())) {
                 throw new VotingSystemException(ContextVS.getInstance().getMessage("passwordErrorMsg"));
@@ -320,18 +314,8 @@ public class DNIeContentSigner implements ContentSigner {
         signedAttrs.add(new SMIMECapabilitiesAttribute(caps));
         SMIMESignedGenerator gen = new SMIMESignedGenerator();
         DNIeContentSigner dnieContentSigner = null;
-        try {
-            dnieContentSigner = DNIeContentSigner.getInstance(
-                    password, ContextVS.DNIe_SESSION_MECHANISM, DNIe_SIGN_MECHANISM);
-        } catch(Exception ex) {
-            if ("CKR_DEVICE_ERROR".equals(ex.getMessage()) ||
-                    "CKR_CRYPTOKI_ALREADY_INITIALIZED".equals(ex.getMessage())) {
-                logger.debug("### Trying to get DNIe PKCS11 session ###");
-                Thread.sleep(3000);
-                dnieContentSigner = DNIeContentSigner.getInstance(
-                        password, ContextVS.DNIe_SESSION_MECHANISM, DNIe_SIGN_MECHANISM);
-            } else throw ex;
-        }
+        dnieContentSigner = DNIeContentSigner.getInstance(
+                password, ContextVS.DNIe_SESSION_MECHANISM, DNIe_SIGN_MECHANISM);
         SimpleSignerInfoGeneratorBuilder dnieSignerInfoGeneratorBuilder =  new SimpleSignerInfoGeneratorBuilder();
         dnieSignerInfoGeneratorBuilder = dnieSignerInfoGeneratorBuilder.setProvider(PROVIDER);
         dnieSignerInfoGeneratorBuilder.setSignedAttributeGenerator(new AttributeTable(signedAttrs));
