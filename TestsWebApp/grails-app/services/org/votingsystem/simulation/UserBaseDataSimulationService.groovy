@@ -113,7 +113,8 @@ class UserBaseDataSimulationService {
                 X509Certificate usertCert = (X509Certificate) chain[0];
                 byte[] usertCertPEMBytes = CertUtil.getPEMEncoded(usertCert);
                 String certServiceURL = ContextVS.getInstance().getAccessControl().getServerURL() + "/userVS";
-                responseVS = HttpHelper.getInstance().sendData(usertCertPEMBytes, ContentTypeVS.X509.getName(), certServiceURL);
+                responseVS = HttpHelper.getInstance().sendData(usertCertPEMBytes,
+                        ContentTypeVS.X509_USER.getName(), certServiceURL);
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                     log.error("ERROR nif: " + userNif + " - msg:" + responseVS.getMessage());
                     errorList.add(responseVS.getMessage());

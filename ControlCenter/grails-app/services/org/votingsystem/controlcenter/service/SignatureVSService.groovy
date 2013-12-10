@@ -72,7 +72,7 @@ class SignatureVSService {
 		KeyStore keyStore = KeyStore.getInstance("JKS");
 		keyStore.load(new FileInputStream(keyStoreFile), password.toCharArray());
 		java.security.cert.Certificate[] chain = keyStore.getCertificateChain(aliasClaves);
-        serverCert = (X509Certificate)chain[0]
+        serverCert = (X509Certificate) keyStore.getCertificate(aliasClaves);
 		byte[] pemCertsArray
 		trustedCerts = new HashSet<X509Certificate>()
 		for (int i = 0; i < chain.length; i++) {
@@ -483,7 +483,7 @@ class SignatureVSService {
      * Method to decrypt files attached to SMIME (not signed) messages
      */
     public ResponseVS decryptMessage (byte[] encryptedFile, Locale locale) {
-        log.debug " - decryptMessage - "
+        log.debug " - decryptMessage"
         try {
             return getEncryptor().decryptMessage(encryptedFile);
         } catch(Exception ex) {

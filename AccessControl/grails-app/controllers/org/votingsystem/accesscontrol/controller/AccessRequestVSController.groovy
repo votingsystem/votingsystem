@@ -74,9 +74,9 @@ class AccessRequestVSController {
 			if (ResponseVS.SC_OK == csrValidationResponseVS.statusCode) {
 				responseVS.type = TypeVS.ACCESS_REQUEST;
                 responseVS.messageBytes = csrValidationResponseVS.data.issuedCert
+                responseVS.setContentType(ContentTypeVS.MULTIPART_ENCRYPTED)
                 params.responseVS = responseVS
 				params.receiverPublicKey = csrValidationResponseVS.data.requestPublicKey
-                params.responseVS.setContentType(ContentTypeVS.MULTIPART_ENCRYPTED.getName())
 				return false
 			} else {
 				csrValidationResponseVS.type = TypeVS.ACCESS_REQUEST_ERROR;

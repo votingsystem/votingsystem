@@ -207,7 +207,8 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
 				ContextVS.getInstance().getUserTest().getEmail(),
 				ContextVS.getInstance().getAccessControl().getNameNormalized(),
 				eventStr, msgSubject,  null);
-		SMIMESignedSender signedSender = new SMIMESignedSender(smimeDocument, urlPublishELection, null, null);
+		SMIMESignedSender signedSender = new SMIMESignedSender(smimeDocument, urlPublishELection,
+                ContentTypeVS.JSON_SIGNED, null, null);
 		ResponseVS responseVS = signedSender.call();
 		if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             byte[] responseBytes = responseVS.getMessageBytes();
@@ -339,7 +340,8 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
         SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage( ContextVS.getInstance().getUserTest().getEmail(),
                 ContextVS.getInstance().getAccessControl().getNameNormalized(), cancelDataStr, msgSubject,  null);
         SMIMESignedSender worker = new SMIMESignedSender(smimeDocument,
-                ContextVS.getInstance().getAccessControl().getCancelEventServiceURL(),null, null);
+                ContextVS.getInstance().getAccessControl().getCancelEventServiceURL(),
+                ContentTypeVS.JSON_SIGNED, null, null);
         ResponseVS responseVS = worker.call();
         responseVS.setStatus(Status.CHANGE_EVENT_STATE);
         changeSimulationStatus(responseVS);

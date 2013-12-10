@@ -78,7 +78,7 @@ class AccessRequestVSService {
 				if (accessRequestVS){//Ha votado el usuario?
 						msg = "${grailsApplication.config.grails.serverURL}/messageSMIME/${accessRequestVS.messageSMIME.id}"
 						log.error("saveRequest - ACCESS REQUEST ERROR - ${msg}")
-						return new ResponseVS(accessRequestVS:accessRequestVS,
+						return new ResponseVS(data:accessRequestVS,
 							type:TypeVS.ACCESS_REQUEST_ERROR, message:msg, eventVS:eventVSElection,
 							statusCode:ResponseVS.SC_ERROR_VOTE_REPEATED)
 				} else {

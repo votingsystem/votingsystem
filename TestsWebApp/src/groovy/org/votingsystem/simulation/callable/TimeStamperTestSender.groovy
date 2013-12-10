@@ -4,6 +4,7 @@ import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.callable.SMIMESignedSender
 import org.votingsystem.model.ActorVS
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
@@ -50,10 +51,9 @@ public class TimeStamperTestSender implements Callable<ResponseVS> {
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
         documentSMIME = timeStamper.getSmimeMessage();*/
         String urlTimeStampTestService = urlTimeStampService + "/test"
-        SMIMESignedSender signedSender = new SMIMESignedSender(documentSMIME, urlTimeStampTestService, null, null);
-        ResponseVS responseVS = signedSender.call();
-        
-        return responseVS;
+        SMIMESignedSender signedSender = new SMIMESignedSender(documentSMIME, urlTimeStampTestService,
+                ContentTypeVS.JSON_SIGNED, null, null);
+        return signedSender.call();
     }
         
     public String getRequestDataJSON() {

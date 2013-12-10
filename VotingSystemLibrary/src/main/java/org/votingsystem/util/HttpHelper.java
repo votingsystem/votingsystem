@@ -22,6 +22,7 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtil;
@@ -264,11 +265,14 @@ public class HttpHelper {
             } else entity = new ByteArrayEntity(byteArray); 
             httpPost.setEntity(entity);
             response = httpclient.execute(httpPost);
-            logger.debug("----------------------------------------");
-            logger.debug(response.getStatusLine().toString());
-            logger.debug("----------------------------------------");
+            ContentTypeVS responseContentType = ContentTypeVS.getByName(
+                    response.getFirstHeader("Content-Type").getValue());
+            logger.debug("------------------------------------------------");
+            logger.debug("status: " + response.getStatusLine().toString() + " - contentType:" + responseContentType);
+            logger.debug("------------------------------------------------");
             byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
             responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes);
+            responseVS.setContentType(responseContentType);
             if(headerNames != null && headerNames.length > 0) {
                 List<String> headerValues = new ArrayList<String>();
                 for(String headerName: headerNames) {
@@ -309,14 +313,12 @@ public class HttpHelper {
                 Object objectToSend = fileMap.get(objectName);
                 if(objectToSend instanceof File) {
                     File file = (File)objectToSend;
-                    logger.debug("sendFileMap - fileName: " + objectName + 
-                            " - filePath: " + file.getAbsolutePath());  
+                    logger.debug("sendFileMap - fileName: " + objectName + " - filePath: " + file.getAbsolutePath());
                     FileBody  fileBody = new FileBody(file);
                     reqEntity.addPart(objectName, fileBody);
                 } else if (objectToSend instanceof byte[]) {
                     byte[] byteArray = (byte[])objectToSend;
-                    reqEntity.addPart(
-                            objectName, new ByteArrayBody(byteArray, objectName));
+                    reqEntity.addPart(objectName, new ByteArrayBody(byteArray, objectName));
                 }
             }
             httpPost.setEntity(reqEntity);

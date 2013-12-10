@@ -3,6 +3,7 @@ package org.votingsystem.simulation.callable
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.callable.SMIMESignedSender
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
@@ -43,10 +44,8 @@ public class MultiSignTestSender implements Callable<ResponseVS> {
         String toUser = "MultiSignController";
         SMIMEMessageWrapper smimeMessage = signedMailGenerator.genMimeMessage(
                 requestNIF, toUser, testJSONstr, msgSubject, null);
-
-        SMIMESignedSender sender= new SMIMESignedSender(smimeMessage, serverURL, null, null);
+        SMIMESignedSender sender= new SMIMESignedSender(smimeMessage, serverURL,ContentTypeVS.JSON_SIGNED, null, null);
         ResponseVS senderResponse = sender.call();
-
         if(ResponseVS.SC_OK == senderResponse.getStatusCode()) {
             byte[] multiSigendResponseBytes = senderResponse.getMessageBytes();
             SMIMEMessageWrapper smimeResponse = new SMIMEMessageWrapper(new ByteArrayInputStream(multiSigendResponseBytes));
@@ -59,7 +58,6 @@ public class MultiSignTestSender implements Callable<ResponseVS> {
         String result = null;
         try {
             logger.debug("getTestJSON");
-            
             Map map = new HashMap();
             map.put("from", from);
             map.put("UUID", UUID.randomUUID().toString());

@@ -81,7 +81,8 @@ public class ServerInitializer implements Callable<ResponseVS> {
             SMIMEMessageWrapper smimeDocument = ContextVS.getInstance().genTestSMIMEMessage(
                     ContextVS.getInstance().getAccessControl().getNameNormalized(), "${mapToSign as JSON}", msgSubject);
             SMIMESignedSender signedSender = new SMIMESignedSender(smimeDocument,
-                    ContextVS.getInstance().getAccessControl().getServerSubscriptionServiceURL(), null, null);
+                    ContextVS.getInstance().getAccessControl().getServerSubscriptionServiceURL(),
+                    ContentTypeVS.JSON_SIGNED, null, null);
             responseVS = signedSender.call();
         }
         return responseVS;

@@ -364,7 +364,8 @@ public class SignatureDialog extends JDialog {
                     operation.getNormalizedReceiverName(), documentToSignJSON.toString(),
                     password.toCharArray(), operation.getSignedMessageSubject(), null);
             SMIMESignedSender senderWorker = new SMIMESignedSender(smimeMessage, operation.getUrlEnvioDocumento(),
-                    null, ContextVS.getInstance().getAccessControl().getX509Certificate(), header);
+                    ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED, null, ContextVS.getInstance().getAccessControl().
+                    getX509Certificate(), header);
             return senderWorker.call();
         }
 

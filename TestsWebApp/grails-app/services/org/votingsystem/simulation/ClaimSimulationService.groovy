@@ -188,7 +188,8 @@ class ClaimSimulationService {
 				ContextVS.getInstance().getUserTest().getEmail(),
 				ContextVS.getInstance().getAccessControl().getNameNormalized(),
 				eventStr, msgSubject,  null);
-		SMIMESignedSender signedSender = new SMIMESignedSender(smimeDocument, urlPublishClaim, null, null);
+		SMIMESignedSender signedSender = new SMIMESignedSender(smimeDocument, urlPublishClaim,
+                ContentTypeVS.JSON_SIGNED, null, null);
 		ResponseVS responseVS = signedSender.call();
 		if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
 			try {
@@ -295,7 +296,8 @@ class ClaimSimulationService {
         SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage(ContextVS.getInstance().getUserTest().getEmail(),
                 ContextVS.getInstance().getAccessControl().getNameNormalized(), cancelDataStr, msgSubject,  null);
         SMIMESignedSender worker = new SMIMESignedSender(smimeDocument,
-                ContextVS.getInstance().getAccessControl().getCancelEventServiceURL(), null, null);
+                ContextVS.getInstance().getAccessControl().getCancelEventServiceURL(),
+                ContentTypeVS.JSON_SIGNED, null, null);
         ResponseVS responseVS = worker.call();
         responseVS.setStatus(Status.CHANGE_EVENT_STATE);
         changeSimulationStatus(responseVS);

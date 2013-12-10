@@ -4,6 +4,7 @@ import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.callable.SMIMESignedSender
 import org.votingsystem.model.ActorVS
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
@@ -46,7 +47,8 @@ public class ClaimSignedSender implements Callable<ResponseVS> {
                     ContextVS.PASSWORD.toCharArray(), ContextVS.DNIe_SIGN_MECHANISM);
             smimeMessage = signedMailGenerator.genMimeMessage(nif, toUser, claimDataStr, subject);
             X509Certificate destinationCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
-            SMIMESignedSender worker = new SMIMESignedSender(smimeMessage, submitClaimsURL,null, destinationCert);
+            SMIMESignedSender worker = new SMIMESignedSender(smimeMessage, submitClaimsURL,
+                    ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED, null, destinationCert);
             responseVS = worker.call();
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 responseVS.setMessage(nif);

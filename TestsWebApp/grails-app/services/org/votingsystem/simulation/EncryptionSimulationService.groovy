@@ -33,6 +33,7 @@ class EncryptionSimulationService {
     private Timer broadcastTimer;
     private SimulationData simulationData;
     private EventVS eventVS;
+    private ActorVS actorVS;
 
     public void processRequest(JSONObject messageJSON) {
         log.debug("--- processRequest - status: '${messageJSON?.status}'")
@@ -152,7 +153,7 @@ class EncryptionSimulationService {
             if((simulationData.getNumRequests() - simulationData.
                     getNumRequestsColected()) <= simulationData.getMaxPendingResponses()) {
                 String nifFrom = NifUtils.getNif(simulationData.getAndIncrementNumRequests().intValue());
-                signCompletionService.submit(new EncryptionTestSender(nifFrom, serviceURL));
+                signCompletionService.submit(new EncryptionTestSender(nifFrom, serviceURL, actorVS.getX509Certificate()));
             } else Thread.sleep(300);
         }
     }
@@ -230,6 +231,7 @@ class EncryptionSimulationService {
                     break;
                 case Status.INIT_SERVER:
                     if(ResponseVS.SC_OK == statusFromResponse.getStatusCode()) {
+                        actorVS = statusFromResponse.getData()
                         sendRequests();
                     } else finishSimulation(statusFromResponse);
                     break;

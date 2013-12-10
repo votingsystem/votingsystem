@@ -76,7 +76,10 @@ public class Encryptor {
             messageRecipientId = recipientInfo.getRID();
             logger.debug(" -- messageRecipientId.getSerialNumber(): " + messageRecipientId.getSerialNumber());
         } else {
-            logger.error(": " + recipientId.getSerialNumber());
+            logger.error("No message found for recipientId: " + recipientId.getSerialNumber());
+            return new ResponseVS(ResponseVS.SC_ERROR, "No message found for recipientId: " +
+                    recipientId.getSerialNumber());
+
         }
         MimeBodyPart mimeMessage = SMIMEUtil.toMimeBodyPart(recipientInfo.getContent(recipient));
         			/*ByteArrayOutputStream baos = new ByteArrayOutputStream();

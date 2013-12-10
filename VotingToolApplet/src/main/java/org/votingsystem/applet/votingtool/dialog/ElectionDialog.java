@@ -274,7 +274,7 @@ public class ElectionDialog extends JDialog {
                 smimeMessage = pkcs10WrapperClient.genMimeMessage(fromUser, toUser, textToSign, msgSubject, null);
                 String urlVoteService = ((ControlCenterVS)ContextVS.getInstance().getControlCenter()).getVoteServiceURL();
                 SMIMESignedSender signedSender = new SMIMESignedSender(smimeMessage, urlVoteService,
-                        pkcs10WrapperClient.getKeyPair(), ContextVS.getInstance().getControlCenter().
+                        ContentTypeVS.VOTE, pkcs10WrapperClient.getKeyPair(), ContextVS.getInstance().getControlCenter().
                         getX509Certificate(), "voteURL");
                 return signedSender.call();
             } catch (Exception ex) {

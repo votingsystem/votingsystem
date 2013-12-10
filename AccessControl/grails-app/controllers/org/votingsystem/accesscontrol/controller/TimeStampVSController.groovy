@@ -7,6 +7,7 @@ import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.TimeStampVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
+import org.votingsystem.util.FileUtils
 
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -26,7 +27,7 @@ class TimeStampVSController {
 	 * @return Si todo es correcto un sello de tiempo en formato RFC 3161.
 	 */
 	def index() {
-        byte[] timeStampRequestBytes = getStringFromInputStream(request.getInputStream())
+        byte[] timeStampRequestBytes = FileUtils.getBytesFromInputStream(request.getInputStream())
         params.responseVS = timeStampVSService.processRequest(timeStampRequestBytes, request.getLocale())
 	}
 	
@@ -94,16 +95,6 @@ class TimeStampVSController {
 			else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND, "ERROR")
 		} else params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
                 args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
-	}
-	
-	private byte[] getStringFromInputStream(InputStream input) throws IOException {
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		byte[] buf =new byte[4096];
-		int len;
-		while((len = input.read(buf)) > 0){ output.write(buf,0,len); }
-		output.close();
-		input.close();
-		return output.toByteArray();
 	}
 
 }

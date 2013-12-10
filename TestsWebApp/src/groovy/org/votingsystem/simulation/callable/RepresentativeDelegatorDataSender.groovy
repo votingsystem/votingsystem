@@ -4,6 +4,7 @@ import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.callable.SMIMESignedSender
 import org.votingsystem.model.ActorVS
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
@@ -34,8 +35,7 @@ public class RepresentativeDelegatorDataSender implements Callable<ResponseVS> {
         this.userNIF = userNIF;
         this.serviceURL = serviceURL;
         this.representativeNIF = representativeNIF;
-        logger.debug("userNIF: " + userNIF + " - representativeNIF: " + representativeNIF +
-                " - serviceURL: " + serviceURL);
+        logger.debug("NIF: " + userNIF + " - representativeNIF: " + representativeNIF + " - serviceURL: " + serviceURL);
     }
     
     @Override public ResponseVS call() throws Exception {
@@ -53,11 +53,10 @@ public class RepresentativeDelegatorDataSender implements Callable<ResponseVS> {
                 userNIF, toUser, delegationDataJSON, msgSubject, null);        
         
         X509Certificate destinationCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
-        SMIMESignedSender senderSender = new SMIMESignedSender(smimeMessage, serviceURL, null, destinationCert);
+        SMIMESignedSender senderSender = new SMIMESignedSender(smimeMessage, serviceURL,
+                ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED, null, destinationCert);
         reponseVS = senderSender.call();
-        if (ResponseVS.SC_OK == reponseVS.getStatusCode()) {
-            reponseVS.setMessage(userNIF);
-        }
+        if (ResponseVS.SC_OK == reponseVS.getStatusCode()) reponseVS.setMessage(userNIF);
         return reponseVS;
     }
 

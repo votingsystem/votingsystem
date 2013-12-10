@@ -296,16 +296,14 @@ class ManifestSimulationService {
         String msgSubject = messageSource.getMessage("cancelEventMsgSubject",
                 [eventVS.getId()].toArray(), locale);
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
-                ContextVS.getInstance().getUserTest().getKeyStore(),
-                ContextVS.END_ENTITY_ALIAS,
-                ContextVS.PASSWORD.toCharArray(),
-                ContextVS.VOTE_SIGN_MECHANISM);
+                ContextVS.getInstance().getUserTest().getKeyStore(), ContextVS.END_ENTITY_ALIAS,
+                ContextVS.PASSWORD.toCharArray(), ContextVS.VOTE_SIGN_MECHANISM);
         SMIMEMessageWrapper smimeDocument = signedMailGenerator.genMimeMessage(
                 ContextVS.getInstance().getUserTest().getEmail(),
                 ContextVS.getInstance().getAccessControl().getNameNormalized(),
                 cancelDataStr, msgSubject,  null);
         SMIMESignedSender worker = new SMIMESignedSender(smimeDocument, ContextVS.getInstance().getAccessControl().
-                getCancelEventServiceURL(), null, null);
+                getCancelEventServiceURL(), ContentTypeVS.JSON_SIGNED, null, null);
         ResponseVS responseVS = worker.call();
         responseVS.setStatus(Status.CHANGE_EVENT_STATE);
         changeSimulationStatus(responseVS);

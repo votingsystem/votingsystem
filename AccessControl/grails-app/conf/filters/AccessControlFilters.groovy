@@ -55,17 +55,18 @@ class AccessControlFilters {
                             messageSource.getMessage('requestWithoutFile', null, request.getLocale())))
                 }
                 Map fileMap = ((MultipartHttpServletRequest)request)?.getFileMap();
-                while(fileMap.keySet().iterator().hasNext()) {
-                    String key = fileMap.keySet().iterator().next()
+                Set<String> fileNames = fileMap.keySet()
+                for(String key : fileNames) {
+                    //String key = fileMap.keySet().iterator().next()
                     if(key.contains(":")) {
                         String[] keySplitted = key.split(":")
                         String fileName = keySplitted[0]
                         ContentTypeVS contentTypeVS = ContentTypeVS.getByName(keySplitted[1])
                         log.debug "---- filemapFilter - file: ${fileName} - contentType: ${contentTypeVS}"
                         if(contentTypeVS == null) {
-                            return printOutputStream(response,new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                            return printTextOutput(response,new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                                     messageSource.getMessage('unknownContentType', [keySplitted[1]].toArray(),
-                                            request.getLocale())))
+                                    request.getLocale())))
                         }
                         ResponseVS responseVS = null
                         SMIMEMessageWrapper smimeMessageReq = null
@@ -92,7 +93,7 @@ class AccessControlFilters {
                                 break;
                         }
                         if(smimeMessageReq) {
-                            responseVS = processSMIMERequest(smimeMessageReq, params, request)
+                            responseVS = processSMIMERequest(smimeMessageReq, contentTypeVS, params, request)
                             if(ResponseVS.SC_OK == responseVS.statusCode) params[fileName] = responseVS.data
                             else params[fileName] = null
                         }
@@ -134,10 +135,11 @@ class AccessControlFilters {
                         case ContentTypeVS.PDF:
                             params.plainPDFDocument = requestBytes
                             break;
+                        case ContentTypeVS.VOTE:
                         case ContentTypeVS.SIGNED_AND_ENCRYPTED:
                             responseVS =  signatureVSService.decryptSMIMEMessage(requestBytes, request.getLocale())
                             if(ResponseVS.SC_OK == responseVS.getStatusCode())
-                                responseVS = processSMIMERequest(responseVS.smimeMessage, params, request)
+                                responseVS = processSMIMERequest(responseVS.smimeMessage,contentTypeVS, params, request)
                             if(ResponseVS.SC_OK == responseVS.getStatusCode()) params.messageSMIMEReq = responseVS.data
                             break;
                         case ContentTypeVS.ENCRYPTED:
@@ -147,7 +149,7 @@ class AccessControlFilters {
                             break;
                         case ContentTypeVS.SIGNED:
                             responseVS = processSMIMERequest(new SMIMEMessageWrapper(
-                                    new ByteArrayInputStream(requestBytes)), params, request)
+                                    new ByteArrayInputStream(requestBytes)), contentTypeVS, params, request)
                             if(ResponseVS.SC_OK == responseVS.getStatusCode()) params.messageSMIMEReq = responseVS.data
                             break;
                         default: return;
@@ -261,20 +263,23 @@ class AccessControlFilters {
         return outputStream.toByteArray();
     }
 
-    private ResponseVS processSMIMERequest(SMIMEMessageWrapper smimeMessageReq,Map params, HttpServletRequest request) {
+    private ResponseVS processSMIMERequest(SMIMEMessageWrapper smimeMessageReq, ContentTypeVS contenType,
+            Map params, HttpServletRequest request) {
         if (smimeMessageReq?.isValidSignature()) {
-            log.debug "---- processSMIMERequest - signature OK - "
+            log.debug "processSMIMERequest - ValidSignature"
             ResponseVS certValidationResponse = null;
-            if("voteVS".equals(params.controller)) {
-                certValidationResponse = signatureVSService.validateSMIMEVote(smimeMessageReq, request.getLocale())
-            } else certValidationResponse = signatureVSService.validateSMIME(smimeMessageReq, request.getLocale())
-
+            switch(contenType) {
+                case ContentTypeVS.VOTE:
+                    certValidationResponse = signatureVSService.validateSMIMEVote(smimeMessageReq, request.getLocale())
+                    break;
+                default:
+                    certValidationResponse = signatureVSService.validateSMIME(smimeMessageReq, request.getLocale());
+            }
             MessageSMIME messageSMIME
             if(ResponseVS.SC_OK != certValidationResponse.statusCode) {
                 messageSMIME = new MessageSMIME(metaInf:certValidationResponse.message, type:TypeVS.ERROR,
                         content:smimeMessageReq.getBytes())
                 MessageSMIME.withTransaction { messageSMIME.save() }
-                log.error "*** Filter - processSMIMERequest - failed document validation - request rejected"
                 log.error "*** Filter - processSMIMERequest - failed - status: ${certValidationResponse.statusCode}" +
                         " - message: ${certValidationResponse.message}"
                 return certValidationResponse

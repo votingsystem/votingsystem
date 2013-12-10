@@ -32,13 +32,13 @@ public class EncryptionTestSender implements Callable<ResponseVS> {
     private PrivateKey privateKey;
     private PublicKey publicKey;
 
-    public EncryptionTestSender(String requestNIF, String serverURL)  throws Exception {
+    public EncryptionTestSender(String requestNIF, String serverURL, X509Certificate serverCert)  throws Exception {
         this.requestNIF = requestNIF;
         this.serverURL = serverURL;
         KeyPair keyPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
         this.privateKey = keyPair.getPrivate();
         this.publicKey = keyPair.getPublic();
-        serverCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
+        this.serverCert = serverCert;
     }
     @Override public ResponseVS call() throws Exception {
         byte[] encryptedRequestBytes = Encryptor.encryptMessage(

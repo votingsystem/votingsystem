@@ -77,7 +77,7 @@ class VoteVSService {
 			//String encryptResponseStr = new String(encryptResponseBytes)
 			//log.debug(" - encryptResponseStr: ${encryptResponseStr}")
 			ResponseVS responseVS = HttpHelper.getInstance().sendData(encryptResponseBytes,
-                    ContentTypeVS.SIGNED_AND_ENCRYPTED.getName(), eventVS.accessControlVS.getVoteServiceURL())
+                    ContentTypeVS.VOTE.getName(), eventVS.accessControlVS.getVoteServiceURL())
 			if (ResponseVS.SC_OK == responseVS.statusCode) {
 				SMIMEMessageWrapper smimeMessageResp = new SMIMEMessageWrapper(
 					new ByteArrayInputStream(responseVS.message.getBytes()));

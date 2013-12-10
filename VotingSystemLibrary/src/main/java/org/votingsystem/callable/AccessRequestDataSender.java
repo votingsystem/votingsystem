@@ -60,7 +60,7 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
             byte[] accessRequestEncryptedBytes = Encryptor.encryptSMIME(smimeMessage, destinationCert);
             String csrFileName = ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.ENCRYPTED.getName();
             String accessRequestFileName = ContextVS.ACCESS_REQUEST_FILE_NAME + ":" +
-                    ContentTypeVS.SIGNED_AND_ENCRYPTED.getName();
+                    ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED.getName();
             Map<String, Object> mapToSend = new HashMap<String, Object>();
             mapToSend.put(csrFileName, encryptedCSRBytes);
             mapToSend.put(accessRequestFileName, accessRequestEncryptedBytes);
