@@ -81,6 +81,7 @@ public class ElectionDialog extends JDialog {
                 eventVS.getVoteVS().getOptionSelected().getContent()));
         String caption = eventVS.getSubject();
         if(caption.length() > 50) caption = caption.substring(0, 50) + "...";
+        pack();
         setTitle(caption);
         setVisible(true);
     }
