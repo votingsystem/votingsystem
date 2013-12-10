@@ -184,12 +184,14 @@ class AccessControlFilters {
                 }
                 log.debug "after - response status: ${responseVS.getStatusCode()} - contentType: ${responseVS.getContentType()}"
                 switch(responseVS.getContentType()) {
+                    case ContentTypeVS.VOTE:
                     case ContentTypeVS.SIGNED_AND_ENCRYPTED:
                         ResponseVS encryptResponse =  signatureVSService.encryptSMIMEMessage(
-                                messageSMIME.smimeMessage, params.receiverCert, request.getLocale())
-                        if(ResponseVS.SC_OK == encryptResponse.statusCode)
+                                messageSMIME.content, params.receiverCert, request.getLocale())
+                        if(ResponseVS.SC_OK == encryptResponse.statusCode) {
+                            encryptResponse.setContentType(responseVS.getContentType())
                             return printOutputStream(response, encryptResponse)
-                        else {
+                        } else {
                             messageSMIME.metaInf = encryptResponse.message
                             messageSMIME.save()
                             return printTextOutput(response, encryptResponse)
@@ -266,7 +268,7 @@ class AccessControlFilters {
     private ResponseVS processSMIMERequest(SMIMEMessageWrapper smimeMessageReq, ContentTypeVS contenType,
             Map params, HttpServletRequest request) {
         if (smimeMessageReq?.isValidSignature()) {
-            log.debug "processSMIMERequest - ValidSignature"
+            log.debug "processSMIMERequest - isValidSignature"
             ResponseVS certValidationResponse = null;
             switch(contenType) {
                 case ContentTypeVS.VOTE:

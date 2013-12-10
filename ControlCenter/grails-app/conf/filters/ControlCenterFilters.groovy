@@ -60,10 +60,11 @@ class ControlCenterFilters {
                     if(!requestBytes) return printTextOutput(response, new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                             messageSource.getMessage('requestWithoutFile', null, request.getLocale())))
                     switch(contentTypeVS) {
+                        case ContentTypeVS.VOTE:
                         case ContentTypeVS.SIGNED_AND_ENCRYPTED:
                             responseVS =  signatureVSService.decryptSMIMEMessage(requestBytes, request.getLocale())
                             if(ResponseVS.SC_OK == responseVS.getStatusCode())
-                                responseVS = processSMIMERequest(responseVS.smimeMessage, params, request)
+                                responseVS = processSMIMERequest(responseVS.smimeMessage,contentTypeVS, params, request)
                             if(ResponseVS.SC_OK == responseVS.getStatusCode()) params.messageSMIMEReq = responseVS.data
                             break;
                         case ContentTypeVS.ENCRYPTED:
@@ -73,7 +74,7 @@ class ControlCenterFilters {
                             break;
                         case ContentTypeVS.SIGNED:
                             responseVS = processSMIMERequest(new SMIMEMessageWrapper(
-                                    new ByteArrayInputStream(requestBytes)), params, request)
+                                    new ByteArrayInputStream(requestBytes)), contentTypeVS, params, request)
                             if(ResponseVS.SC_OK == responseVS.getStatusCode()) params.messageSMIMEReq = responseVS.data
                             break;
                         default: return;
@@ -108,9 +109,10 @@ class ControlCenterFilters {
                 }
                 log.debug "after - response status: ${responseVS.getStatusCode()} - contentType: ${responseVS.getContentType()}"
                 switch(responseVS.getContentType()) {
+                    case ContentTypeVS.VOTE:
                     case ContentTypeVS.SIGNED_AND_ENCRYPTED:
                         ResponseVS encryptResponse =  signatureVSService.encryptSMIMEMessage(
-                                messageSMIME.smimeMessage, params.receiverCert, request.getLocale())
+                                messageSMIME.content, params.receiverCert, request.getLocale())
                         if(ResponseVS.SC_OK == encryptResponse.statusCode)
                             return printOutputStream(response, encryptResponse)
                         else {
@@ -187,20 +189,23 @@ class ControlCenterFilters {
         return outputStream.toByteArray();
     }
 
-    private ResponseVS processSMIMERequest(SMIMEMessageWrapper smimeMessageReq,Map params, HttpServletRequest request) {
+    private ResponseVS processSMIMERequest(SMIMEMessageWrapper smimeMessageReq, ContentTypeVS contenType,
+           Map params, HttpServletRequest request) {
         if (smimeMessageReq?.isValidSignature()) {
-            log.debug "---- processSMIMERequest - signature OK - "
+            log.debug "processSMIMERequest - isValidSignature"
             ResponseVS certValidationResponse = null;
-            if("voteVS".equals(params.controller)) {
-                certValidationResponse = signatureVSService.validateSMIMEVote(smimeMessageReq, request.getLocale())
-            } else certValidationResponse = signatureVSService.validateSMIME(smimeMessageReq, request.getLocale())
-
+            switch(contenType) {
+                case ContentTypeVS.VOTE:
+                    certValidationResponse = signatureVSService.validateSMIMEVote(smimeMessageReq, request.getLocale())
+                    break;
+                default:
+                    certValidationResponse = signatureVSService.validateSMIME(smimeMessageReq, request.getLocale());
+            }
             MessageSMIME messageSMIME
             if(ResponseVS.SC_OK != certValidationResponse.statusCode) {
                 messageSMIME = new MessageSMIME(metaInf:certValidationResponse.message, type:TypeVS.ERROR,
                         content:smimeMessageReq.getBytes())
                 MessageSMIME.withTransaction { messageSMIME.save() }
-                log.error "*** Filter - processSMIMERequest - failed document validation - request rejected"
                 log.error "*** Filter - processSMIMERequest - failed - status: ${certValidationResponse.statusCode}" +
                         " - message: ${certValidationResponse.message}"
                 return certValidationResponse

@@ -120,6 +120,8 @@ public enum ContentTypeVS {
         if(contentTypeStr.contains(TIMESTAMP_QUERY.getName())) result = TIMESTAMP_QUERY;
         if(contentTypeStr.contains(TIMESTAMP_RESPONSE.getName())) result = TIMESTAMP_RESPONSE;
 
+        if(contentTypeStr.contains(VOTE.getName())) result = VOTE;
+
         if(result != null) result.setName(contentTypeStr);
         return result;
     }

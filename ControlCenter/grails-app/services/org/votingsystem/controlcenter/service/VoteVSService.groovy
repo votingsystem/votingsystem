@@ -79,8 +79,8 @@ class VoteVSService {
 			ResponseVS responseVS = HttpHelper.getInstance().sendData(encryptResponseBytes,
                     ContentTypeVS.VOTE.getName(), eventVS.accessControlVS.getVoteServiceURL())
 			if (ResponseVS.SC_OK == responseVS.statusCode) {
-				SMIMEMessageWrapper smimeMessageResp = new SMIMEMessageWrapper(
-					new ByteArrayInputStream(responseVS.message.getBytes()));
+                ResponseVS validatedVoteResponse = signatureVSService.decryptSMIMEMessage(responseVS.messageBytes, locale)
+				SMIMEMessageWrapper smimeMessageResp = validatedVoteResponse.getSmimeMessage();
 				if(!smimeMessageResp.getContentDigestStr().equals(signedVoteDigest)) {
 					log.error("validateVote - ERROR digest sent: " + signedVoteDigest +
 						" - digest received: " + smimeMessageResp.getContentDigestStr())
@@ -101,7 +101,8 @@ class VoteVSService {
 					certificateVS:certificateVS, messageSMIME:messageSMIMEResp)
 				voteVS.save()
 				return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ACCESS_CONTROL_VALIDATED_VOTEVS,
-                        eventVS:eventVS, data:[voteVS:voteVS, messageSMIME:messageSMIMEResp, receiverCert:responseReceiverCert])
+                        eventVS:eventVS, contentType: ContentTypeVS.VOTE,
+                        data:[voteVS:voteVS, messageSMIME:messageSMIMEResp, receiverCert:responseReceiverCert])
 			} else {
 				msg = messageSource.getMessage('accessRequestVoteErrorMsg', [responseVS.message].toArray(), locale)
 				log.error("validateVote - ${msg}")

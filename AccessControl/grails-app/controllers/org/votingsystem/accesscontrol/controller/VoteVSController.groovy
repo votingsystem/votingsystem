@@ -42,7 +42,7 @@ class VoteVSController {
 		if (ResponseVS.SC_OK == responseVS.statusCode) {
 			params.receiverCert = responseVS.data.certificate
 			responseVS.data = responseVS.data.messageSMIME
-            responseVS.setContentType(ContentTypeVS.SIGNED.getName())
+            responseVS.setContentType(ContentTypeVS.VOTE)
 		}
 		params.responseVS = responseVS
 	}

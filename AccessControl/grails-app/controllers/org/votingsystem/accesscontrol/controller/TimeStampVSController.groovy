@@ -40,7 +40,7 @@ class TimeStampVSController {
 	 * @return El certificado en formato PEM con el que se firman los sellos de tiempo
 	 */
 	def cert() {
-        params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, contenType:ContentTypeVS.PEM,
+        params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, contentType:ContentTypeVS.PEM,
                 messageBytes:timeStampVSService.getSigningCertPEMBytes())
 	}
 

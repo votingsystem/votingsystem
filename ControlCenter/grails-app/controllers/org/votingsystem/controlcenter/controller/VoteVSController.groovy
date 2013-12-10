@@ -47,7 +47,6 @@ class VoteVSController {
 			responseVS.data = responseVS.data?.messageSMIME
 			if(messageSMIMEReq.getUserVS())
 				response.addHeader("representativeNIF", messageSMIMEReq.getUserVS().nif)
-            responseVS.setContentType(ContentTypeVS.SIGNED_AND_ENCRYPTED)
             String voteURL = "${createLink(controller:'messageSMIME', absolute:'true')}/${responseVS?.data?.id}"
             response.setHeader('voteURL', voteURL)
 		}
