@@ -66,10 +66,6 @@ public enum ContentTypeVS {
         return name;
     }
 
-    private void setName(String name) {
-        this.name = name;
-    }
-
     public String getExtension() {
         return extension;
     }
@@ -127,7 +123,6 @@ public enum ContentTypeVS {
 
         if(contentTypeStr.contains(VOTE.getName())) result = VOTE;
 
-        if(result != null) result.setName(contentTypeStr);
         return result;
     }
 
