@@ -105,14 +105,14 @@ public enum ContentTypeVS {
 
         if(contentTypeStr.contains(TEXT.getName())) result = TEXT;
 
-        if(contentTypeStr.contains(PDF_SIGNED_AND_ENCRYPTED.getName())) result = PDF_SIGNED_AND_ENCRYPTED;
         if(contentTypeStr.contains(PDF_ENCRYPTED.getName())) result = PDF_ENCRYPTED;
         if(contentTypeStr.contains(PDF_SIGNED.getName())) result = PDF_SIGNED;
         if(contentTypeStr.contains(PDF.getName())) result = PDF;
+        if(contentTypeStr.contains(PDF_SIGNED_AND_ENCRYPTED.getName())) result = PDF_SIGNED_AND_ENCRYPTED;
 
-        if(contentTypeStr.contains(SIGNED_AND_ENCRYPTED.getName())) result = SIGNED_AND_ENCRYPTED;
         if(contentTypeStr.contains(ENCRYPTED.getName())) result = ENCRYPTED;
         if(contentTypeStr.contains(SIGNED.getName())) result = SIGNED;
+        if(contentTypeStr.contains(SIGNED_AND_ENCRYPTED.getName())) result = SIGNED_AND_ENCRYPTED;
 
         if(contentTypeStr.contains(MULTIPART_ENCRYPTED.getName())) result = MULTIPART_ENCRYPTED;
         if(contentTypeStr.contains(MULTIPART_SIGNED.getName())) result = MULTIPART_SIGNED;
