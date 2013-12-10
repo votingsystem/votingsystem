@@ -49,7 +49,7 @@ public class RepresentativeDataSender implements Callable<ResponseVS>{
                     representativeDataSmimeMessage, accesRequestServerCert);
             Map<String, Object> fileMap = new HashMap<String, Object>();
             String representativeDataFileName = 
-                    ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" + ContentTypeVS.SIGNED_AND_ENCRYPTED.getName();
+                    ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" + ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED.getName();
             fileMap.put(representativeDataFileName, representativeEncryptedDataBytes);
             fileMap.put(ContextVS.IMAGE_FILE_NAME, selectedImage);
             responseVS = HttpHelper.getInstance().sendObjectMap(fileMap, urlToSendDocument);

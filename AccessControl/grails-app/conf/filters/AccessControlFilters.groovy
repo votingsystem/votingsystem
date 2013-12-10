@@ -71,6 +71,7 @@ class AccessControlFilters {
                         ResponseVS responseVS = null
                         SMIMEMessageWrapper smimeMessageReq = null
                         switch(contentTypeVS) {
+                            case ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED:
                             case ContentTypeVS.SIGNED_AND_ENCRYPTED:
                                 responseVS = signatureVSService.decryptSMIMEMessage(
                                         fileMap.get(key)?.getBytes(), request.getLocale())
@@ -136,17 +137,20 @@ class AccessControlFilters {
                             params.plainPDFDocument = requestBytes
                             break;
                         case ContentTypeVS.VOTE:
+                        case ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED:
                         case ContentTypeVS.SIGNED_AND_ENCRYPTED:
                             responseVS =  signatureVSService.decryptSMIMEMessage(requestBytes, request.getLocale())
                             if(ResponseVS.SC_OK == responseVS.getStatusCode())
                                 responseVS = processSMIMERequest(responseVS.smimeMessage,contentTypeVS, params, request)
                             if(ResponseVS.SC_OK == responseVS.getStatusCode()) params.messageSMIMEReq = responseVS.data
                             break;
+                        case ContentTypeVS.JSON_ENCRYPTED:
                         case ContentTypeVS.ENCRYPTED:
                             responseVS =  signatureVSService.decryptMessage(requestBytes, request.getLocale())
                             if(ResponseVS.SC_OK == responseVS.getStatusCode())
                                 params.requestBytes = responseVS.messageBytes
                             break;
+                        case ContentTypeVS.JSON_SIGNED:
                         case ContentTypeVS.SIGNED:
                             responseVS = processSMIMERequest(new SMIMEMessageWrapper(
                                     new ByteArrayInputStream(requestBytes)), contentTypeVS, params, request)
