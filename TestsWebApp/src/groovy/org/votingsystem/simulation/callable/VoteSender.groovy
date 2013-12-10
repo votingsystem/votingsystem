@@ -61,7 +61,7 @@ public class VoteSender implements Callable<ResponseVS> {
                 SMIMESignedSender sender = new SMIMESignedSender(smimeMessage,
                         ContextVS.getInstance().getControlCenter().getVoteServiceURL(),
                         ContentTypeVS.VOTE, wrapperClient.getKeyPair(),
-                        ContextVS.getInstance().getAccessControl().getX509Certificate());
+                        ContextVS.getInstance().getControlCenter().getX509Certificate());
                 responseVS = sender.call();
                 if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     SMIMEMessageWrapper voteReceipt = responseVS.getSmimeMessage();
