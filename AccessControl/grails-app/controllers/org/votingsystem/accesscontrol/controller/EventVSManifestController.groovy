@@ -38,15 +38,12 @@ class EventVSManifestController {
 	 * @responseContentType [application/json]
 	 * @return documento JSON con información del manifiesto solicitado.
 	 */
-	def index() { 
+	def index() {
 		if(request.contentType?.contains(ContentTypeVS.PDF.getName())) getPDF();
 		else {
             if(params.long('id')) {
                 EventVSManifest eventVS
                 EventVSManifest.withTransaction { eventVS = EventVSManifest.get(params.long('id')) }
-
-                log.debug("=========== eventVS: ${eventVS.state} - EventVS.State.ACTIVE: ${eventVS.state == EventVS.State.ACTIVE}")
-
                 if(!(eventVS.state == EventVS.State.ACTIVE || eventVS.state == EventVS.State.AWAITING ||
                         eventVS.state == EventVS.State.CANCELLED || eventVS.state == EventVS.State.TERMINATED)) eventVS = null
                 if(eventVS) {

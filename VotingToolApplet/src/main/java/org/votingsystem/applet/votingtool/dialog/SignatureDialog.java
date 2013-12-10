@@ -271,27 +271,16 @@ public class SignatureDialog extends JDialog {
                 ResponseVS responseVS = get();
                 switch(operation.getType()) {
                     case MANIFEST_SIGN:
-                        if (ResponseVS.SC_OK == responseVS.getStatusCode()) { 
-                            try {
-                                pdfDocumentBytes = responseVS.getMessageBytes();
-                            } catch (Exception ex) {
-                                logger.error(ex.getMessage(), ex);
-                            }
-                        } else {
-                            sendResponse(responseVS.getStatusCode(), ContextVS.getInstance().getMessage(
+                        if (ResponseVS.SC_OK == responseVS.getStatusCode()) pdfDocumentBytes = responseVS.getMessageBytes();
+                        else sendResponse(responseVS.getStatusCode(), ContextVS.getInstance().getMessage(
                                     "errorDownloadingDocument") + " - " + responseVS.getMessage());
-                        }
                         break;
                     case MANIFEST_PUBLISHING:
-                        if (ResponseVS.SC_OK == responseVS.getStatusCode()) { 
-                          try {
-                                pdfDocumentBytes = responseVS.getMessageBytes();
-                                eventId = ((List<String>)responseVS.getData()).iterator().next();
-                                String receiverSignServiceURL = operation.getUrlEnvioDocumento() +  "/" + eventId;
-                                operation.setUrlEnvioDocumento(receiverSignServiceURL);
-                            } catch (Exception ex) {
-                                logger.error(ex.getMessage(), ex);
-                            }
+                        if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                            pdfDocumentBytes = responseVS.getMessageBytes();
+                            eventId = ((List<String>)responseVS.getData()).iterator().next();
+                            String receiverSignServiceURL = operation.getUrlEnvioDocumento() +  "/" + eventId;
+                            operation.setUrlEnvioDocumento(receiverSignServiceURL);
                         } else {
                             sendResponse(responseVS.getStatusCode(), ContextVS.getInstance().getMessage(
                                     "errorDownloadingDocument") + " - " + responseVS.getMessage());
