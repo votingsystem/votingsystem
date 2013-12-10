@@ -1,3 +1,9 @@
+apply plugin: 'java'
+
+dependencies {
+    compile (project(':VotingSystemLibrary'))
+}
+
 task copyApps(dependsOn: [':generateVotingSystemApps']) {
 	doLast {
 		copyVotingSystemApps(project)
