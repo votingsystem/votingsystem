@@ -108,14 +108,11 @@ public class PreconditionsCheckerDialog extends JDialog {
             try {
             switch(operationVS.getType()) {
                 case SEND_SMIME_VOTE:
-                    String accessControlURL = operationVS.getEventVS().getAccessControlVS().getServerURL().trim();
+                    String accessControlURL = operationVS.getEventVS().getAccessControlVS().getServerURL();
                     responseVS = checkActorVS(accessControlURL);
-                    if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                        return responseVS;
-                    } else {
-                        ContextVS.getInstance().setAccessControl((AccessControlVS)responseVS.getData());
-                    }
-                    String controlCenterURL = operationVS.getEventVS().getControlCenterVS().getServerURL().trim();
+                    if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
+                    else ContextVS.getInstance().setAccessControl((AccessControlVS)responseVS.getData());
+                    String controlCenterURL = operationVS.getEventVS().getControlCenterVS().getServerURL();
                     responseVS = checkActorVS(controlCenterURL);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         ContextVS.getInstance().setControlCenter((ControlCenterVS)responseVS.getData());

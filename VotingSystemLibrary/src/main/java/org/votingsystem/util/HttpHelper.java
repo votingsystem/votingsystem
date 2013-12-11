@@ -104,7 +104,7 @@ public class HttpHelper {
     
     public ResponseVS getData (String serverURL, ContentTypeVS contentType)
             throws IOException, ParseException {
-        logger.debug("getData - contentType: "  + contentType + "serverURL: " + serverURL);
+        logger.debug("getData - contentType: "  + contentType + " - serverURL: " + serverURL);
         ResponseVS responseVS = null;
         HttpResponse response = null;
         HttpGet httpget = null;
@@ -189,7 +189,7 @@ public class HttpHelper {
     }
     
     public ResponseVS sendFile (File file, ContentTypeVS contentTypeVS, String serverURL,  String... headerNames) {
-        logger.debug("sendFile - serverURL: " + serverURL + " - contentType: " + contentTypeVS );
+        logger.debug("sendFile - contentType: " + contentTypeVS +  " - serverURL: " + serverURL);
         ResponseVS responseVS = null;
         HttpPost httpPost = null;
         try {
