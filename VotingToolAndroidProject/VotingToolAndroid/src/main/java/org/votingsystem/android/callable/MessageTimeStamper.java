@@ -6,7 +6,7 @@ import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.cms.CMSSignedData;
-import org.votingsystem.model.ContextVSImpl;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
@@ -56,19 +56,19 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
         AtomicBoolean done = new AtomicBoolean(false);
         ResponseVS responseVS = null;
         while(!done.get()) {
-        	String timeStampServiceURL = ContextVSImpl.getInstance(context).getAccessControlVS().
+        	String timeStampServiceURL = ContextVS.getInstance(context).getAccessControlVS().
                     getTimeStampServiceURL();
             responseVS = HttpHelper.sendData(timeStampRequest.getEncoded(), "timestamp-query",
                     timeStampServiceURL);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 timeStampToken= new TimeStampToken(new CMSSignedData(responseVS.getMessageBytes()));
-                X509Certificate timeStampCert = ContextVSImpl.getInstance(context).
+                X509Certificate timeStampCert = ContextVS.getInstance(context).
                         getAccessControlVS().getTimeStampCert();
                 /* -> Android project config problem
                  * SignerInformationVerifier timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().
                     setProvider(MainActivity.PROVIDER).build(timeStampCert);
                 timeStampToken.validate(timeStampSignerInfoVerifier);*/
-                timeStampToken.validate(timeStampCert, ContextVSImpl.PROVIDER);/**/
+                timeStampToken.validate(timeStampCert, ContextVS.PROVIDER);/**/
                 if(smimeMessage != null)
                 	smimeMessage.setTimeStampToken(timeStampToken);
                 done.set(true);

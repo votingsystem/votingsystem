@@ -17,8 +17,6 @@ import android.widget.*;
 
 import org.json.JSONObject;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ContextVSImpl;
-import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.OptionVS;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.PDFSignedSender;
@@ -49,7 +47,7 @@ public class EventFragment extends Fragment implements CertPinDialogListener {
     private Button firmarEnviarButton;
     private EventVS event = null;
     private int eventIndex;
-    private ContextVSImpl contextVS;
+    private ContextVS contextVS;
     private Map<Integer, EditText> mapaCamposReclamacion;
     private ProcessSignatureTask processSignatureTask;
 
@@ -64,7 +62,7 @@ public class EventFragment extends Fragment implements CertPinDialogListener {
         if(getActivity() == null) return null;
         Bundle args = getArguments();
         eventIndex =  args.getInt(EventPagerActivity.EventsPagerAdapter.EVENT_INDEX_KEY);
-        contextVS = ContextVSImpl.getInstance(getActivity());
+        contextVS = ContextVS.getInstance(getActivity());
         event = (EventVS) contextVS.getEvents().get(eventIndex);
         View rootView = inflater.inflate(R.layout.event_fragment, container, false);
         TextView subjectTextView = (TextView) rootView.findViewById(R.id.subject_evento);
@@ -154,12 +152,12 @@ public class EventFragment extends Fragment implements CertPinDialogListener {
     private void showCertNotFoundDialog() {
         CertNotFoundDialog certDialog = new CertNotFoundDialog();
         FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(ContextVSImpl.CERT_NOT_FOUND_DIALOG_ID);
+        Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(ContextVS.CERT_NOT_FOUND_DIALOG_ID);
         if (prev != null) {
             ft.remove(prev);
         }
         ft.addToBackStack(null);
-        certDialog.show(ft, ContextVSImpl.CERT_NOT_FOUND_DIALOG_ID);
+        certDialog.show(ft, ContextVS.CERT_NOT_FOUND_DIALOG_ID);
     }
 
 

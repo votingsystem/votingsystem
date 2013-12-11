@@ -26,7 +26,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
-import org.votingsystem.model.ContextVSImpl;
+
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 
 
@@ -39,7 +40,7 @@ public class EventStatisticsFragment extends Fragment {
 
 
     private EventVS eventVS =  null;
-    private ContextVSImpl contextVS;
+    private ContextVS contextVS;
 
     private View progressContainer;
     private FrameLayout mainLayout;
@@ -52,7 +53,7 @@ public class EventStatisticsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
         eventIndex =  args.getInt(EventPagerActivity.EventsPagerAdapter.EVENT_INDEX_KEY);
-        contextVS = ContextVSImpl.getInstance(getActivity());
+        contextVS = ContextVS.getInstance(getActivity());
         eventVS = (EventVS) contextVS.getEvents().get(eventIndex);
         contextVS.setEvent(eventVS);
         rootView = inflater.inflate(R.layout.event_statistics_fragment, container, false);

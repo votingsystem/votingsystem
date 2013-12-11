@@ -7,7 +7,6 @@ import org.bouncycastle2.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle2.operator.DigestCalculator;
 import org.bouncycastle2.operator.DigestCalculatorProvider;
 import org.bouncycastle2.operator.OperatorCreationException;
-import org.votingsystem.model.ContextVS;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -48,8 +47,7 @@ public class JcaDigestCalculatorProviderBuilder
                 final DigestOutputStream stream;
 
                 try {
-                    //JJGZ - MessageDigest dig = helper.createDigest(algorithm);
-                	MessageDigest dig = MessageDigest.getInstance(ContextVS.SIG_HASH);
+                    MessageDigest dig = helper.createDigest(algorithm);
                     stream = new DigestOutputStream(dig);
                 }
                 catch (GeneralSecurityException e)

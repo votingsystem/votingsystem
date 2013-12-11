@@ -36,8 +36,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListView;
 
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVSState;
-import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.model.SubSystemVS;
 import org.votingsystem.android.ui.VoteReceiptListActivity;
 import org.votingsystem.model.TypeVS;
@@ -69,7 +69,7 @@ public class NavigationDrawer extends ActionBarActivity {
     private ViewPager mViewPager;
     private ActionBarDrawerToggle mDrawerToggle;
 
-    private ContextVSImpl contextVS = null;
+    private ContextVS contextVS = null;
     private String searchQuery = null;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
@@ -96,7 +96,7 @@ public class NavigationDrawer extends ActionBarActivity {
                 updateActionBarTitle();
             }
         });
-        contextVS = ContextVSImpl.getInstance(getBaseContext());
+        contextVS = ContextVS.getInstance(getBaseContext());
         expListView = (ExpandableListView) findViewById(R.id.left_drawer);
         prepareListData();
         listAdapter = new ExpandableListAdapter(this, listDataHeader, listDataChild);

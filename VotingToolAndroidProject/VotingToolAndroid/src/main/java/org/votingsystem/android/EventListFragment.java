@@ -15,8 +15,9 @@ import android.util.Log;
 import android.view.*;
 import android.view.animation.AnimationUtils;
 import android.widget.*;
+
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVSState;
-import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.model.EventVSResponse;
 import org.votingsystem.model.SubSystemVS;
 import org.votingsystem.model.EventVS;
@@ -51,7 +52,7 @@ public class EventListFragment extends ListFragment
     private SubSystemVS subSystemVS = SubSystemVS.VOTING;
     private String queryStr = null;
     private int offset = 0;
-    private static ContextVSImpl contextVS = null;
+    private static ContextVS contextVS = null;
 
     /**
      * Perform alphabetical comparison of application entry objects.

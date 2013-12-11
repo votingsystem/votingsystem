@@ -2,7 +2,8 @@ package org.votingsystem.android.callable;
 
 import android.content.Context;
 import android.util.Log;
-import org.votingsystem.model.ContextVSImpl;
+
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.ContentTypeVS;
@@ -62,11 +63,11 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
 
             byte[] csrEncryptedAccessRequestBytes = Encryptor.encryptSMIME(
                     accessRequets, destinationCert);
-            String csrFileName = ContextVSImpl.CSR_FILE_NAME + ":" +
-            		ContentTypeVS.ENCRYPTED;
+            String csrFileName = ContextVS.CSR_FILE_NAME + ":" +
+            		ContentTypeVS.ENCRYPTED.getName();
 
-            String accessRequestFileName = ContextVSImpl.ACCESS_REQUEST_FILE_NAME + ":" +
-                    ContentTypeVS.SIGNED_AND_ENCRYPTED;
+            String accessRequestFileName = ContextVS.ACCESS_REQUEST_FILE_NAME + ":" +
+                    ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED.getName();
             Map<String, Object> mapToSend = new HashMap<String, Object>();
             mapToSend.put(csrFileName, csrEncryptedBytes);
             mapToSend.put(accessRequestFileName, csrEncryptedAccessRequestBytes);

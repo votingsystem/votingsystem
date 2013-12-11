@@ -41,7 +41,6 @@ import org.votingsystem.android.callable.VoteSender;
 import org.votingsystem.android.db.VoteReceiptDBHelper;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.android.ui.*;
@@ -76,7 +75,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
     private byte[] keyStoreBytes = null;
     private Button saveReceiptButton;
     private Button cancelVoteButton;
-    private ContextVSImpl contextVS;
+    private ContextVS contextVS;
 
     private View rootView;
     private View progressContainer;
@@ -89,14 +88,14 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
                                        ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG + ".onCreate(...)", " --- onCreate");
         super.onCreate(savedInstanceState);
-        contextVS = ContextVSImpl.getInstance(getActivity());
+        contextVS = ContextVS.getInstance(getActivity());
         rootView = inflater.inflate(R.layout.voting_event_fragment, container, false);
         Bundle args = getArguments();
         Integer eventIndex =  args.getInt(EventPagerActivity.EventsPagerAdapter.EVENT_INDEX_KEY);
         if(eventIndex != null) {
             eventVS = (EventVS) contextVS.getEvents().get(eventIndex);
         } else {
-            String eventStr = args.getString(ContextVSImpl.EVENT_KEY);
+            String eventStr = args.getString(ContextVS.EVENT_KEY);
             try {
                 eventVS = EventVS.parse(eventStr);
             } catch(Exception ex) {
@@ -256,8 +255,8 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
             showCertNotFoundDialog();
         } else {
             String content = optionSelected.getContent().length() >
-                    ContextVSImpl.SELECTED_OPTION_MAX_LENGTH ?
-                    optionSelected.getContent().substring(0, ContextVSImpl.SELECTED_OPTION_MAX_LENGTH) +
+                    ContextVS.SELECTED_OPTION_MAX_LENGTH ?
+                    optionSelected.getContent().substring(0, ContextVS.SELECTED_OPTION_MAX_LENGTH) +
                             "..." : optionSelected.getContent();
             showPinScreen(getString(R.string.option_selected_msg, content));
         }
@@ -272,12 +271,12 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
         CertNotFoundDialog certDialog = new CertNotFoundDialog();
         FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
         Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(
-                ContextVSImpl.CERT_NOT_FOUND_DIALOG_ID);
+                ContextVS.CERT_NOT_FOUND_DIALOG_ID);
         if (prev != null) {
             ft.remove(prev);
         }
         ft.addToBackStack(null);
-        certDialog.show(ft, ContextVSImpl.CERT_NOT_FOUND_DIALOG_ID);
+        certDialog.show(ft, ContextVS.CERT_NOT_FOUND_DIALOG_ID);
     }
 
     public void onClickSubject(View v) {

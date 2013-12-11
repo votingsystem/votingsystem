@@ -8,7 +8,8 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.MenuItem;
-import org.votingsystem.model.ContextVSImpl;
+
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.util.DateUtils;
 
@@ -19,11 +20,11 @@ public class EventStatisticsPagerActivity extends ActionBarActivity {
 
     public static final String TAG = "EventStatisticsPagerActivity";
 
-    private ContextVSImpl contextVS;
+    private ContextVS contextVS;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = ContextVSImpl.getInstance(getBaseContext());
+        contextVS = ContextVS.getInstance(getBaseContext());
         setContentView(R.layout.event_pager_activity);
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

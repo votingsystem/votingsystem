@@ -4,8 +4,7 @@ import android.content.Context;
 import android.util.Log;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.*;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
+
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.asn1.ASN1InputStream;
@@ -20,7 +19,7 @@ import org.bouncycastle2.cms.CMSAttributeTableGenerator;
 import org.bouncycastle2.cms.CMSSignedData;
 import org.bouncycastle2.cms.CMSSignedDataGenerator;
 import org.votingsystem.android.R;
-import org.votingsystem.model.ContextVSImpl;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ResponseVS;
@@ -110,9 +109,9 @@ public class PDFPublisher implements Callable<ResponseVS> {
 
             byte[] timeStampedSignedPDF = signWithTimestamp(pdfReader,
                     signerCert, signerPrivatekey, signerCertChain);
-            Header header = new Header(ContextVSImpl.VOTING_HEADER_LABEL,"SignedPDF");
+            Header header = new Header(ContextVS.VOTING_HEADER_LABEL,"SignedPDF");
             MimeBodyPart mimeBodyPart = Encryptor.encryptBase64Message(
-                    timeStampedSignedPDF, ContextVSImpl.getInstance(context).getAccessControlVS().
+                    timeStampedSignedPDF, ContextVS.getInstance(context).getAccessControlVS().
                     getCertificate(), header);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             mimeBodyPart.writeTo(baos);

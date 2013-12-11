@@ -43,6 +43,7 @@
  */
 package com.itextpdf.text.pdf;
 
+import com.itextpdf.text.Context_iTextVS;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.error_messages.MessageLocalization;
@@ -183,7 +184,8 @@ class Type1Font extends BaseFont
             try {
                 if (resourceAnchor == null)
                     resourceAnchor = new FontsResourceAnchor();
-                is = getResourceStream(RESOURCE_PATH + afmFile + ".afm", resourceAnchor.getClass().getClassLoader());
+                //is = getResourceStream(RESOURCE_PATH + afmFile + ".afm", resourceAnchor.getClass().getClassLoader());
+                is = Context_iTextVS.getInstance().getContext().getAssets().open(afmFile + ".afm");
                 if (is == null) {
                     String msg = MessageLocalization.getComposedMessage("1.not.found.as.resource", afmFile);
                     System.err.println(msg);

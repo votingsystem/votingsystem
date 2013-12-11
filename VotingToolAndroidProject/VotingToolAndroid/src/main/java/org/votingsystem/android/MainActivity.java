@@ -35,7 +35,6 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
@@ -56,7 +55,7 @@ public class MainActivity extends FragmentActivity {
 	
 	public static final String TAG = "MainActivity";
 
-    private ContextVSImpl contextVS;
+    private ContextVS contextVS;
     private ProgressDialog progressDialog = null;
     private OperationVS operationVS = null;
     private Uri uriData = null;
@@ -71,7 +70,7 @@ public class MainActivity extends FragmentActivity {
             Log.d(TAG + ".onCreate()", " - Intent.ACTION_SEARCH - query: "+ query);
             return;
         }
-        contextVS = ContextVSImpl.getInstance(getBaseContext());
+        contextVS = ContextVS.getInstance(getBaseContext());
         if(Intent.ACTION_VIEW.equals(getIntent().getAction())) {
         	//getIntent().getCategories().contains(Intent.CATEGORY_BROWSABLE);
             uriData = getIntent().getData();
@@ -202,7 +201,7 @@ public class MainActivity extends FragmentActivity {
 	        }
             if(intent != null) {
                 try {
-                    intent.putExtra(ContextVSImpl.EVENT_KEY, operationVS.getEventVS().toJSON().toString());
+                    intent.putExtra(ContextVS.EVENT_KEY, operationVS.getEventVS().toJSON().toString());
                     startActivity(intent);
                 } catch(Exception ex) {
                     ex.printStackTrace();

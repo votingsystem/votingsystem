@@ -24,7 +24,6 @@ import android.widget.TextView;
 import org.votingsystem.android.callable.PDFPublisher;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.model.SubSystemVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.android.ui.CertNotFoundDialog;
@@ -59,7 +58,7 @@ public class EventPublishingActivity extends ActionBarActivity implements CertPi
 	private TypeVS formType;
 	private JavaScriptInterface javaScriptInterface;
 	private OperationVS pendingOperationVS;
-    private ContextVSImpl contextVS;
+    private ContextVS contextVS;
     private TextView progressMessage;
     private View progressContainer;
     private FrameLayout mainLayout;
@@ -70,7 +69,7 @@ public class EventPublishingActivity extends ActionBarActivity implements CertPi
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.event_publishing_activity);
-        contextVS = ContextVSImpl.getInstance(getBaseContext());
+        contextVS = ContextVS.getInstance(getBaseContext());
         String operation = getIntent().getStringExtra(OperationVS.OPERATION_KEY);
         if(operation!= null) { //called from browser
         	try {
@@ -223,12 +222,12 @@ public class EventPublishingActivity extends ActionBarActivity implements CertPi
 		Log.d(TAG + ".showCertNotFoundDialog(...)", " - showCertNotFoundDialog - ");
 		CertNotFoundDialog certDialog = new CertNotFoundDialog();
 		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-	    Fragment prev = getSupportFragmentManager().findFragmentByTag(ContextVSImpl.CERT_NOT_FOUND_DIALOG_ID);
+	    Fragment prev = getSupportFragmentManager().findFragmentByTag(ContextVS.CERT_NOT_FOUND_DIALOG_ID);
 	    if (prev != null) {
 	        ft.remove(prev);
 	    }
 	    ft.addToBackStack(null);
-	    certDialog.show(ft, ContextVSImpl.CERT_NOT_FOUND_DIALOG_ID);
+	    certDialog.show(ft, ContextVS.CERT_NOT_FOUND_DIALOG_ID);
 	}
 	
 	public void sendMessageToWebApp(OperationVS operationVS) {

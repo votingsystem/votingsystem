@@ -23,7 +23,6 @@ import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.db.VoteReceiptDBHelper;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.VoteVS;
-import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyStoreUtil;
@@ -54,7 +53,7 @@ public class VoteReceiptListActivity extends ActionBarActivity
     private List<VoteVS> voteVSList;
     private ReceiptListAdapter adapter;
     private VoteVS operationReceipt = null;
-    private ContextVSImpl contextVS;
+    private ContextVS contextVS;
     private View progressContainer;
     private FrameLayout mainLayout;
     private boolean isProgressShown;
@@ -66,7 +65,7 @@ public class VoteReceiptListActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         Log.d(TAG + ".onCreate(...) ", " - onCreate ");
         setContentView(R.layout.vote_receipt_list);
-        contextVS = ContextVSImpl.getInstance(getBaseContext());
+        contextVS = ContextVS.getInstance(getBaseContext());
         db = new VoteReceiptDBHelper(this);
         try {
             voteVSList = db.getVoteReceiptList();
@@ -313,12 +312,12 @@ public class VoteReceiptListActivity extends ActionBarActivity
     private void showCertNotFoundDialog() {
         CertNotFoundDialog certDialog = new CertNotFoundDialog();
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        Fragment prev = getSupportFragmentManager().findFragmentByTag(ContextVSImpl.CERT_NOT_FOUND_DIALOG_ID);
+        Fragment prev = getSupportFragmentManager().findFragmentByTag(ContextVS.CERT_NOT_FOUND_DIALOG_ID);
         if (prev != null) {
             ft.remove(prev);
         }
         ft.addToBackStack(null);
-        certDialog.show(ft, ContextVSImpl.CERT_NOT_FOUND_DIALOG_ID);
+        certDialog.show(ft, ContextVS.CERT_NOT_FOUND_DIALOG_ID);
     }
 
 

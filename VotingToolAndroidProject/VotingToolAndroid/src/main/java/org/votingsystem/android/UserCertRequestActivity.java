@@ -43,10 +43,8 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
+
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.android.ui.CertPinDialog;
 import org.votingsystem.android.ui.CertPinDialogListener;
 import org.votingsystem.util.HttpHelper;
@@ -76,7 +74,7 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
     private EditText nifText;
     private EditText givennameText;
     private EditText surnameText;
-    private ContextVSImpl contextVS;
+    private ContextVS contextVS;
 
     private TextView progressMessage;
     private View progressContainer;
@@ -91,7 +89,7 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
     	super.onCreate(savedInstanceState);
         Log.d(TAG + ".onCreate(...) ", " - onCreate - ");
         setContentView(R.layout.user_cert_request_activity);
-        contextVS = ContextVSImpl.getInstance(getBaseContext());
+        contextVS = ContextVS.getInstance(getBaseContext());
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(getString(R.string.request_certificate_form_lbl));
         

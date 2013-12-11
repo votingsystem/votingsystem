@@ -43,6 +43,7 @@
  */
 package com.itextpdf.text.error_messages;
 
+import com.itextpdf.text.Context_iTextVS;
 import com.itextpdf.text.pdf.BaseFont;
 
 import java.io.*;
@@ -60,18 +61,8 @@ public final class MessageLocalization {
     private static HashMap<String, String> currentLanguage;
     private static final String BASE_PATH = "com/itextpdf/text/l10n/error/";
 
-    private MessageLocalization() {
-    }
+    private MessageLocalization() {  }
 
-    static {
-        try {
-            defaultLanguage = getLanguageMessages("en", null);
-        } catch (Exception ex) {
-            // do nothing
-        }
-        if (defaultLanguage == null)
-            defaultLanguage = new HashMap<String, String>();
-    }
 
     /**
      * Get a message without parameters.
@@ -106,30 +97,30 @@ public final class MessageLocalization {
         return getComposedMessage(key, String.valueOf(p1), null, null, null);
     }
 
-	/**
-	 * Get a message with param.length parameters or none if param is null. In
-	 * the message the "{1}", "{2}" to "{lenght of param array}" are replaced
-	 * with the object.toString of the param array. (with param[0] being "{1}")
-	 *
-	 * @since iText 5.0.6
-	 * @param key
-	 *            the key to the message
-	 * @param param array of parameter objects, (toString is used to add it to the message)
-	 * @return the message
-	 */
-	public static String getComposedMessage(final String key, final Object... param) {
-		String msg = getMessage(key);
-		if (null != param) {
-			int i = 1;
-			for (Object o : param) {
-				if (null != o) {
-					msg = msg.replace("{" + i + "}", o.toString());
-				}
-				i++;
-			}
-		}
-		return msg;
-	}
+    /**
+     * Get a message with param.length parameters or none if param is null. In
+     * the message the "{1}", "{2}" to "{lenght of param array}" are replaced
+     * with the object.toString of the param array. (with param[0] being "{1}")
+     *
+     * @since iText 5.0.6
+     * @param key
+     *            the key to the message
+     * @param param array of parameter objects, (toString is used to add it to the message)
+     * @return the message
+     */
+    public static String getComposedMessage(final String key, final Object... param) {
+        String msg = getMessage(key);
+        if (null != param) {
+            int i = 1;
+            for (Object o : param) {
+                if (null != o) {
+                    msg = msg.replace("{" + i + "}", o.toString());
+                }
+                i++;
+            }
+        }
+        return msg;
+    }
 
     /**
      * Sets the language to be used globally for the error messages. The language
@@ -157,32 +148,38 @@ public final class MessageLocalization {
         currentLanguage = readLanguageStream(r);
     }
 
+    public static void init() {
+        try {
+            defaultLanguage = getLanguageMessages("en", null);
+        } catch (Exception ex) {
+            // do nothing
+        }
+        if (defaultLanguage == null)
+            defaultLanguage = new HashMap<String, String>();
+    }
+
     private static HashMap<String, String> getLanguageMessages(String language, String country) throws IOException {
         if (language == null)
             throw new IllegalArgumentException("The language cannot be null.");
         InputStream is = null;
         try {
             String file;
-            if (country != null)
-                file = language + "_" + country + ".lng";
-            else
-                file = language + ".lng";
-            is = BaseFont.getResourceStream(BASE_PATH + file, new MessageLocalization().getClass().getClassLoader());
-            if (is != null)
-                return readLanguageStream(is);
-            if (country == null)
-                return null;
+            if (country != null) file = language + "_" + country + ".lng";
+            else file = language + ".lng";
+            //is = BaseFont.getResourceStream(BASE_PATH + file, new MessageLocalization().getClass().getClassLoader());
+            is = Context_iTextVS.getInstance().getContext().getAssets().open(file);
+            if (is != null) return readLanguageStream(is);
+            if (country == null) return null;
             file = language + ".lng";
-            is = BaseFont.getResourceStream(BASE_PATH + file, new MessageLocalization().getClass().getClassLoader());
-            if (is != null)
-                return readLanguageStream(is);
-            else
-                return null;
+            //is = BaseFont.getResourceStream(BASE_PATH + file, new MessageLocalization().getClass().getClassLoader());
+            is = Context_iTextVS.getInstance().getContext().getAssets().open(file);
+            if (is != null) return readLanguageStream(is);
+            else return null;
         }
         finally {
             try {
                 if (null != is){
-                	is.close();
+                    is.close();
                 }
             } catch (Exception exx) {
             }

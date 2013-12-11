@@ -20,8 +20,8 @@ import android.content.Context;
 import android.util.Log;
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.android.R;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.VoteVS;
-import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.ContentTypeVS;
@@ -49,7 +49,7 @@ public class VoteSender implements Callable<ResponseVS> {
     private char[] password;
     private Context context = null;
     private String serviceURL = null;
-    private ContextVSImpl contextVS = null;
+    private ContextVS contextVS = null;
     private byte[] keyStoreBytes = null;
 
     public VoteSender(EventVS event, byte[] keyStoreBytes, char[] password, Context context) {
@@ -57,7 +57,7 @@ public class VoteSender implements Callable<ResponseVS> {
         this.keyStoreBytes = keyStoreBytes;
         this.password = password;
         this.context = context;
-        contextVS = ContextVSImpl.getInstance(context);
+        contextVS = ContextVS.getInstance(context);
     }
 
     @Override public ResponseVS call() {
@@ -75,7 +75,7 @@ public class VoteSender implements Callable<ResponseVS> {
             Certificate[] chain = keyStore.getCertificateChain(USER_CERT_ALIAS);
             X509Certificate userCert = (X509Certificate) chain[0];
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
-                    privateKey, chain, ContextVSImpl.SIGNATURE_ALGORITHM);
+                    privateKey, chain, ContextVS.SIGNATURE_ALGORITHM);
             String signedContent = event.getAccessRequestJSON().toString();
             SMIMEMessageWrapper solicitudAcceso = signedMailGenerator.genMimeMessage(
                     userVS, contextVS.getAccessControlVS().getNameNormalized(),
@@ -99,8 +99,7 @@ public class VoteSender implements Callable<ResponseVS> {
             signedVote = timeStamper.getSmimeMessage();
             byte[] messageToSend = Encryptor.encryptSMIME(signedVote,
                     event.getControlCenter().getCertificate());
-            responseVS  = HttpHelper.sendData(messageToSend,
-                    ContentTypeVS.SIGNED_AND_ENCRYPTED.getName(), serviceURL);
+            responseVS = HttpHelper.sendData(messageToSend,ContentTypeVS.VOTE.getName(),serviceURL);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 SMIMEMessageWrapper voteReceipt = Encryptor.decryptSMIMEMessage(
                         responseVS.getMessageBytes(), pkcs10WrapperClient.getKeyPair().getPublic(),

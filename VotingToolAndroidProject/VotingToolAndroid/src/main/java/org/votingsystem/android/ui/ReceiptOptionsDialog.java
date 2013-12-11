@@ -15,8 +15,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import org.votingsystem.android.R;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.VoteVS;
-import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.model.ContentTypeVS;
 
 import java.io.File;
@@ -115,7 +115,7 @@ public class ReceiptOptionsDialog  extends DialogFragment {
     		/*File receiptFile =  new File(getActivity()
     				.getExternalFilesDir(null), "vote_receipt_" + 
     				receipt.getNotificationId() + SIGNED_PART_EXTENSION);*/
-    		String fileName = "receipt_" + receipt.getId() + ContextVSImpl.SIGNED_PART_EXTENSION;
+    		String fileName = "receipt_" + receipt.getId() + ContextVS.SIGNED_PART_EXTENSION;
        		File receiptFile = getTemporaryFile(getActivity(), fileName);
        		
     		if(receipt.getCancelVoteReceipt() != null) {

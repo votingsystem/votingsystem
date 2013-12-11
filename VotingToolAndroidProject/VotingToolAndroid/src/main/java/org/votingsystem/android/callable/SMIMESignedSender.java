@@ -19,7 +19,7 @@ package org.votingsystem.android.callable;
 import android.content.Context;
 import android.util.Log;
 import org.votingsystem.android.R;
-import org.votingsystem.model.ContextVSImpl;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ResponseVS;
@@ -52,7 +52,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
     private String serviceURL = null;
     private String subject = null;
     private String signatureContent = null;
-    private ContextVSImpl contextVS = null;
+    private ContextVS contextVS = null;
     private byte[] keyStoreBytes = null;
     private boolean isEncryptedResponse = false;
 
@@ -67,7 +67,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
         this.serviceURL = serviceURL;
         this.isEncryptedResponse = isEncryptedResponse;
         this.destinationCert = destinationCert;
-        contextVS = ContextVSImpl.getInstance(context);
+        contextVS = ContextVS.getInstance(context);
     }
 
     @Override public ResponseVS call() {

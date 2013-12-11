@@ -56,7 +56,7 @@ dependencies {
     compile 'com.android.support:support-v4:18.0.0'
     compile project(':libraries:bc')
     compile project(':libraries:itext')
-    compile project(':libraries:votingsystemimpl')
+    compile project(':libraries:votingsystem')
 }
 
 preBuild.dependsOn 'setAndroidEnv'

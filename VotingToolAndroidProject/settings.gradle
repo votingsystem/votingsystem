@@ -1,1 +1,1 @@
-include "VotingToolAndroid" , ":libraries:bc", ":libraries:itext", ":libraries:votingsystemimpl"
+include "VotingToolAndroid" , ":libraries:bc", ":libraries:itext", ":libraries:votingsystem"

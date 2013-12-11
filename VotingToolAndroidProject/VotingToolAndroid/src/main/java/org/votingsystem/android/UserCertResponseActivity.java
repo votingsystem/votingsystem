@@ -35,10 +35,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
+
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ContextVSImpl;
 import org.votingsystem.android.ui.CertPinDialog;
 import org.votingsystem.android.ui.CertPinDialogListener;
 import org.votingsystem.util.HttpHelper;
@@ -73,7 +71,7 @@ public class UserCertResponseActivity extends ActionBarActivity
     private Button goAppButton;
     private Button insertPinButton;
     private Button requestCertButton;
-    private ContextVSImpl contextVS;
+    private ContextVS contextVS;
     
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +79,7 @@ public class UserCertResponseActivity extends ActionBarActivity
     	super.onCreate(savedInstanceState);
         Log.d(TAG + ".onCreate(...) ", " - onCreate");
         setContentView(R.layout.user_cert_response_activity);
-        contextVS = ContextVSImpl.getInstance(getBaseContext());
+        contextVS = ContextVS.getInstance(getBaseContext());
         getSupportActionBar().setTitle(getString(R.string.voting_system_lbl));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         goAppButton = (Button) findViewById(R.id.go_app_button);
