@@ -65,11 +65,12 @@ class EventVSElectionController {
         eventsVSMap.eventsVS.elections = []
         if (params.long('id')) {
             EventVSElection eventVS = null
-            EventVSElection.withTransaction {
-                eventVS = EventVSElection.get(params.long('id'))
+            EventVSElection.withTransaction { eventVS = EventVSElection.get(params.long('id'))}
+            if(eventVS) {
+                if(!(eventVS.state == EventVS.State.ACTIVE || eventVS.state == EventVS.State.AWAITING ||
+                        eventVS.state == EventVS.State.CANCELLED || eventVS.state == EventVS.State.TERMINATED)) {
+                    eventVS = null   }
             }
-            if(!(eventVS.state == EventVS.State.ACTIVE || eventVS.state == EventVS.State.AWAITING ||
-                    eventVS.state == EventVS.State.CANCELLED || eventVS.state == EventVS.State.TERMINATED)) eventVS = null
             if(!eventVS) {
                 params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
                         message(code: 'eventVSNotFound', args:[params.id]))

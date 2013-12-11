@@ -53,11 +53,13 @@ class EventVSClaimController {
         eventsVSMap.eventsVS.claims = []
         if (params.long('id')) {
 			EventVSClaim eventVS = null
-			EventVSClaim.withTransaction {
-				eventVS = EventVSClaim.get(params.long('id'))
-				if(!(eventVS.state == EventVS.State.ACTIVE || eventVS.state == EventVS.State.AWAITING ||
-						eventVS.state == EventVS.State.CANCELLED || eventVS.state == EventVS.State.TERMINATED)) eventVS = null
-			}
+			EventVSClaim.withTransaction {eventVS = EventVSClaim.get(params.long('id'))}
+            if(eventVS) {
+                if(!(eventVS.state == EventVS.State.ACTIVE || eventVS.state == EventVS.State.AWAITING ||
+                        eventVS.state == EventVS.State.CANCELLED || eventVS.state == EventVS.State.TERMINATED)) {
+                    eventVS = null
+                }
+            }
 			if(!eventVS) {
                 params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
                         message(code: 'eventVSNotFound', args:[params.id]))
