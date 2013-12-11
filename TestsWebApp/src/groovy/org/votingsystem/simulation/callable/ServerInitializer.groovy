@@ -71,7 +71,7 @@ public class ServerInitializer implements Callable<ResponseVS> {
     private ResponseVS checkControlCenter(String serverURL) {
         logger.debug("checkControlCenter - serverURL: " + serverURL);
         String serviceURL = ContextVS.getInstance().getAccessControl().getControlCenterCheckServiceURL(serverURL);
-        ResponseVS responseVS = HttpHelper.getInstance().getData(serviceURL, ContentTypeVS.JSON.getName());
+        ResponseVS responseVS = HttpHelper.getInstance().getData(serviceURL, ContentTypeVS.JSON);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) return responseVS;
         else {//serverURL isn't associated
             logger.debug("Control Center isn't associated -> Matching serverURL: " + serverURL);

@@ -6,6 +6,7 @@ import com.sun.syndication.feed.synd.SyndFeed
 import com.sun.syndication.feed.synd.SyndFeedImpl
 import com.sun.syndication.io.SyndFeedOutput
 import grails.converters.JSON
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ControlCenterVS
 import org.votingsystem.model.EventVS
 import org.votingsystem.model.EventVSClaim
@@ -49,11 +50,11 @@ class SubscriptionVSController {
             return
 		}
 		ResponseVS responseVS = subscriptionVSService.matchControlCenter(messageSMIME, request.getLocale())
-		params.responseVS = responseVS
 		if(ResponseVS.SC_OK == responseVS.statusCode) {
-			Map controlCenterMap = userVSService.getControlCenterMap(responseVS.data.controlCenterVS)
-			render controlCenterMap as JSON
+            responseVS.data = userVSService.getControlCenterMap(responseVS.data.controlCenterVS)
+            responseVS.setContentType(ContentTypeVS.JSON)
 		}
+        params.responseVS = responseVS
 	}
 
     /**
