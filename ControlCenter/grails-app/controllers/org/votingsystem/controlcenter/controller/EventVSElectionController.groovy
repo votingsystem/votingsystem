@@ -176,8 +176,9 @@ class EventVSElectionController {
                     args:[params.eventAccessControlURL]))
             return
         }
-        params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: 'requestWithErrorsHTML', args:[
-                "${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
+        params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
     }
 
 	/**
@@ -232,7 +233,8 @@ class EventVSElectionController {
 			if (params.callback) render "${params.callback}(${statisticsMap as JSON})"
 			else render statisticsMap as JSON
         } else {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
+            params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                    contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
                     args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
 		}
     }

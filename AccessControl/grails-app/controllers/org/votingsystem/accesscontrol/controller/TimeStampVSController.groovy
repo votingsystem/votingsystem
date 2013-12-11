@@ -93,7 +93,8 @@ class TimeStampVSController {
 			if(timeStamp)  params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK,
                 messageBytes: timeStamp.getTokenBytes(), contentType:ContentTypeVS.CMS_SIGNED)
 			else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND, "ERROR")
-		} else params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
+		} else params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
                 args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
 	}
 

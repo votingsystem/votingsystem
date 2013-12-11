@@ -121,7 +121,8 @@ class SearchController {
 		String requestStr = "${request.getInputStream()}"
 		log.debug("requestStr: ${requestStr} - offset:${params.offset} - max: ${params.max}")
 		if (!requestStr) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
+            params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                    contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
                     args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
 			return
 		}
@@ -132,8 +133,9 @@ class SearchController {
 		if(targetSubsystem == SubSystemVS.MANIFESTS) entityClass = EventVSManifest.class
 		if(targetSubsystem == SubSystemVS.CLAIMS) entityClass = EventVSClaim.class
 		if(!entityClass) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: 'requestWithErrorsHTML', args:[
-                    "${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
+            params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                    contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
+                    args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
 			return
 		}
 		def eventsVSMap = new HashMap()

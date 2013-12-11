@@ -1,5 +1,6 @@
 package org.votingsystem.accesscontrol.controller
 
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.PDFDocumentVS
 import org.votingsystem.model.EventVSManifest
 import org.votingsystem.model.ResponseVS
@@ -36,8 +37,9 @@ class EventVSManifestCollectorController {
                 params.responseVS =  eventVSManifestSignatureCollectorService.saveManifestSignature(
                         pdfDocument, eventVS, request.getLocale())
             }
-		} else params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}"]))
+		} else params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
 	}
 
 

@@ -16,13 +16,12 @@
             android:orientation="vertical" >
 
             <TextView
-                android:id="@+id/subject_evento"
+                android:id="@+id/eventVS_subject"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:clickable="true"
                 android:gravity="center"
-                android:onClick="onClickSubject"
-                android:text="@string/label_evento"
+                android:text="@string/eventVS_label"
                 android:textColor="@color/event_subject"
                 android:textSize="23sp" />
 
@@ -40,7 +39,6 @@
                     android:layout_weight="0.32"
                     android:drawableLeft="@drawable/cancel_22x22"
                     android:text="@string/cancel_vote_lbl"
-                    android:onClick="cancelVote"
                     android:textStyle="bold" />
 
                 <Button
@@ -54,7 +52,6 @@
                     android:layout_weight="0.43"
                     android:drawableLeft="@drawable/filesave_22x22"
                     android:text="@string/guardar_recibo_voto_label"
-                    android:onClick="saveVote"
                     android:textStyle="bold" />
 
             </LinearLayout>

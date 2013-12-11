@@ -174,8 +174,9 @@ class EventVSElectionController {
                 } else render(view:"statistics", model: [statisticsJSON: statisticsMap  as JSON])
             } else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
                     message(code: 'eventVSNotFound', args:[params.id]))
-        } else params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
-                args:[ "${grailsApplication.config.grails.serverURL}/${params.controller}"]))
+        } else params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
     }
     
 	/**
@@ -213,7 +214,8 @@ class EventVSElectionController {
                 params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
                         message(code: 'eventVSNotFound', args:[params.id]))
             }
-        } else params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
+        } else params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
                 args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
     }
 	
@@ -241,8 +243,9 @@ class EventVSElectionController {
 				}
 			} else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
                     message(code: 'eventVSNotFound', args:[params.id]))
-        } else params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}"]))
+        } else params.responseVS =  new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
 	}
 
 	/**
@@ -326,7 +329,8 @@ class EventVSElectionController {
 				voteVSInfoMap.votesVS.add(voteVSMap)
 			}
 			render voteVSInfoMap as JSON
-		} else params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
+		} else params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
                 args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
 	}
 

@@ -40,7 +40,7 @@ import static org.votingsystem.model.ContextVS.*;
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class EventFragment extends Fragment implements CertPinDialogListener {
+public class EventFragment extends Fragment implements CertPinDialogListener, View.OnClickListener {
 
     public static final String TAG = "EventFragment";
 
@@ -65,7 +65,7 @@ public class EventFragment extends Fragment implements CertPinDialogListener {
         contextVS = ContextVS.getInstance(getActivity());
         event = (EventVS) contextVS.getEvents().get(eventIndex);
         View rootView = inflater.inflate(R.layout.event_fragment, container, false);
-        TextView subjectTextView = (TextView) rootView.findViewById(R.id.subject_evento);
+        TextView subjectTextView = (TextView) rootView.findViewById(R.id.eventVS_subject);
         String subject = event.getSubject();
         if(subject != null && subject.length() > MAX_SUBJECT_SIZE)
             subject = subject.substring(0, MAX_SUBJECT_SIZE) + " ...";
@@ -102,7 +102,17 @@ public class EventFragment extends Fragment implements CertPinDialogListener {
         isProgressShown = false;
         setHasOptionsMenu(true);
         isDestroyed = false;
+        TextView eventSubject = (TextView) rootView.findViewById(R.id.eventVS_subject);
+        eventSubject.setOnClickListener(this);
         return rootView;
+    }
+
+    @Override public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.eventVS_subject:
+                onClickSubject(view);
+                break;
+        }
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {

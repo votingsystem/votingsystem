@@ -96,8 +96,9 @@ class EventVSManifestController {
                 params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.PDF,
                         messageBytes: eventVS.pdf, message:"manifest_${params.id}.pdf")
             }
-		} else params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}"]))
+		} else params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
 	}
 
 	
@@ -138,8 +139,9 @@ class EventVSManifestController {
                 }
             }
 		} else {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
-                    args:["${grailsApplication.config.grails.serverURL}/${params.controller}"]))
+            params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                    contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
+                    args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
         }
 	}
 	
@@ -155,7 +157,8 @@ class EventVSManifestController {
 	def publishPDF () {
         String eventVSStr = "${request.getInputStream()}"
         if (!eventVSStr) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
+            params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                    contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
                     args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
         } else {
             def eventVSJSON = JSON.parse(eventVSStr)
@@ -199,8 +202,9 @@ class EventVSManifestController {
 			if(eventVS) params.responseVS = new ResponseVS(ResponseVS.SC_OK, eventVS.content)
             else params.responseVS = new ResponseVS(ResponseVS.SC_OK,
                     message(code:'eventVSNotFound', args:["${params.id}"]))
-		} else params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}"]))
+		} else params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
 	}
 	
 	/**
@@ -363,8 +367,9 @@ class EventVSManifestController {
 				}
 			} else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
                     message(code: 'eventVSNotFound', args:[params.id]))
-		} else params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}"]))
+		} else params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
 	}
 
 }

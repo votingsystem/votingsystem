@@ -57,7 +57,7 @@ class ControlCenterFilters {
                     if(!contentTypeVS?.isPKCS7()) return;
                     byte[] requestBytes = getBytesFromInputStream(request.getInputStream())
                     //log.debug "---- pkcs7DocumentsFilter - before  - consulta: ${new String(requestBytes)}"
-                    if(!requestBytes) return printTextOutput(response, new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    if(!requestBytes) return printOutput(response, new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                             messageSource.getMessage('requestWithoutFile', null, request.getLocale())))
                     switch(contentTypeVS) {
                         case ContentTypeVS.VOTE:
@@ -81,11 +81,11 @@ class ControlCenterFilters {
                     }
                 } catch(Exception ex) {
                     log.error(ex.getMessage(), ex)
-                    return printTextOutput(response, new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    return printOutput(response, new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                             messageSource.getMessage('signedDocumentErrorMsg', null, request.getLocale())))
                 }
                 if(responseVS != null && ResponseVS.SC_OK !=responseVS.statusCode)
-                    return printTextOutput(response,responseVS)
+                    return printOutput(response,responseVS)
             }
 
             after = {
@@ -119,11 +119,11 @@ class ControlCenterFilters {
                         } else {
                             messageSMIME.metaInf = encryptResponse.message
                             messageSMIME.save()
-                            return printTextOutput(response, encryptResponse)
+                            return printOutput(response, encryptResponse)
                         }
                     case ContentTypeVS.SIGNED:
                         if(ResponseVS.SC_OK == responseVS.statusCode) return printOutputStream(response, responseVS)
-                        else return printTextOutput(response, responseVS)
+                        else return printOutput(response, responseVS)
                     case ContentTypeVS.MULTIPART_ENCRYPTED:
                         if(responseVS.messageBytes && (params.receiverCert || params.receiverPublicKey)) {
                             if(params.receiverPublicKey) {
@@ -134,9 +134,10 @@ class ControlCenterFilters {
                             }
                             if (ResponseVS.SC_OK == responseVS.statusCode) return printOutputStream(response,responseVS)
                         }
-                        return printTextOutput(response, responseVS)
+                        return printOutput(response, responseVS)
+                    case ContentTypeVS.HTML:
                     case ContentTypeVS.TEXT:
-                        return printTextOutput(response, responseVS)
+                        return printOutput(response, responseVS)
                     case ContentTypeVS.JSON:
                         render responseVS.getData() as JSON
                         return false
@@ -158,9 +159,9 @@ class ControlCenterFilters {
         }
     }
 
-    private boolean printTextOutput(HttpServletResponseWrapper response, ResponseVS responseVS) {
+    private boolean printOutput(HttpServletResponseWrapper response, ResponseVS responseVS) {
         response.status = responseVS.statusCode
-        response.setContentType(ContentTypeVS.TEXT.getName())
+        response.setContentType(responseVS.getContentType()?.getName()+";charset=UTF-8")
         String resultMessage = responseVS.message? responseVS.message: "statusCode: ${responseVS.statusCode}"
         if(ResponseVS.SC_OK != response.status) log.error "after - message: '${resultMessage}'"
         response.outputStream <<  resultMessage

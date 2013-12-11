@@ -103,9 +103,9 @@ class BackupVSController {
                 params.responseVS= new ResponseVS(ResponseVS.SC_OK, message(code:'backupRequestOKMsg',args:[email]))
             }
         } else {
-            params.responseVS= new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    message(code: 'requestWithErrorsHTML', args:[
-                            "${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
+            params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                    contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
+                    args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
         }
 	}
 	

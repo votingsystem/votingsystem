@@ -137,8 +137,8 @@
     <string name="cancel_vote_msg">Si continua anulará su voto</string>
     <string name="save_receipt_lbl">Guardar recibo de voto</string>
     <string name="app_name_lbl">Aplicación de votación</string>
-    <string name="label_eventos">Eventos</string>
-    <string name="label_evento">Evento</string>
+    <string name="eventsVS_label">Eventos</string>
+    <string name="eventVS_label">Evento</string>
     <string name="solicitud_csr">Solicitud CSR</string>
     <string name="enviarVoto">Enviar Voto</string>
     <string name="receipt_error_msg">Error validando recibo de voto</string>

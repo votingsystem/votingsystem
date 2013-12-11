@@ -18,15 +18,14 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/subject_evento"
+                android:id="@+id/eventVS_subject"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:textSize="23sp"
                 android:textColor="@color/event_subject"
-                android:onClick="onClickSubject"
                 android:clickable="true"
-                android:text="@string/label_evento" />
+                android:text="@string/eventVS_label" />
 
 
             <View

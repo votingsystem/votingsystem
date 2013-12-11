@@ -86,8 +86,9 @@ class CsrController {
         }
 		String consulta = "${request.getInputStream()}"
 		if (!consulta) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',args:[
-                    "${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
+            params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                    contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
+                    args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
 		} else  params.responseVS = csrService.saveUserCSR(consulta.getBytes(), request.getLocale())
 	}
 	

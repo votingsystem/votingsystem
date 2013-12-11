@@ -43,7 +43,8 @@ class VoteVSCancellerController {
 				Map anuladorvoteVSMap = voteVSService.getAnuladorVotoMap(voteCanceller)
 				render anuladorvoteVSMap as JSON
 			}
-		} else params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrorsHTML',
+		} else params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
                 args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
 	}
 	

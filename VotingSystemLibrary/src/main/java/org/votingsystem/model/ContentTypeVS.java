@@ -25,6 +25,7 @@ public enum ContentTypeVS {
     PDF_SIGNED("application/pdf;application/pkcs7-signature", "pdf"),
     PDF_ENCRYPTED("application/pdf;application/pkcs7-mime", "pdf"),
     TEXT("text/plain", "txt"),
+    HTML("text/html", "html"),
     TEXT_STREAM("text/plain", "txt"),
     TIMESTAMP_QUERY("timestamp-query", null),
     TIMESTAMP_RESPONSE("timestamp-response", null),
@@ -100,6 +101,8 @@ public enum ContentTypeVS {
         ContentTypeVS result = null;
 
         if(contentTypeStr.contains(TEXT.getName())) result = TEXT;
+
+        if(contentTypeStr.contains(HTML.getName())) result = HTML;
 
         if(contentTypeStr.contains(ENCRYPTED.getName())) result = ENCRYPTED;
         if(contentTypeStr.contains(SIGNED.getName())) result = SIGNED;
