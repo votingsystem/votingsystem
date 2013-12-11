@@ -4,6 +4,9 @@
 /build
 *.iml
 
+/VotingToolAndroid/build
+/VotingToolAndroid/VotingToolAndroid.apk
+
 /libraries/build
 /libraries/*.iml
 /libraries/.settings
