@@ -110,7 +110,6 @@ class SubscriptionVSService {
 		ControlCenterVS controlCenterDB = ControlCenterVS.findWhere(serverURL:serverURL)
 		if(controlCenterDB) {
 			controlCenterCert = CertificateVS.findWhere(actorVS:controlCenterDB, state:CertificateVS.State.OK)
-			map
             if(controlCenterCert) return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg,
                     data:[controlCenterVS:controlCenterDB, certificateVS:controlCenterCert ])
 		}
