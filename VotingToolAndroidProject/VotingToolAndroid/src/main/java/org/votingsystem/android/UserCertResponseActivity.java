@@ -36,6 +36,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.android.ui.CertPinDialog;
 import org.votingsystem.android.ui.CertPinDialogListener;
@@ -276,9 +277,9 @@ public class UserCertResponseActivity extends ActionBarActivity
         public static final String TAG = "GetDataTask";
 
 
-        private String contentType = null;
+        private ContentTypeVS contentType = null;
 
-        public GetDataTask(String contentType) {
+        public GetDataTask(ContentTypeVS contentType) {
             this.contentType = contentType;
         }
 

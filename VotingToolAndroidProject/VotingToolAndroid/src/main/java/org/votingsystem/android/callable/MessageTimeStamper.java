@@ -6,6 +6,7 @@ import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.cms.CMSSignedData;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.ResponseVS;
@@ -58,8 +59,8 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
         while(!done.get()) {
         	String timeStampServiceURL = ContextVS.getInstance(context).getAccessControlVS().
                     getTimeStampServiceURL();
-            responseVS = HttpHelper.sendData(timeStampRequest.getEncoded(), "timestamp-query",
-                    timeStampServiceURL);
+            responseVS = HttpHelper.sendData(timeStampRequest.getEncoded(),
+                    ContentTypeVS.TIMESTAMP_QUERY, timeStampServiceURL);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 timeStampToken= new TimeStampToken(new CMSSignedData(responseVS.getMessageBytes()));
                 X509Certificate timeStampCert = ContextVS.getInstance(context).

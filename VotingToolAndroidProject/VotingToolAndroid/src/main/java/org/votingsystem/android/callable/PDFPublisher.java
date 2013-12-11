@@ -117,8 +117,8 @@ public class PDFPublisher implements Callable<ResponseVS> {
             mimeBodyPart.writeTo(baos);
             byte[] bytesToSend = baos.toByteArray();
             baos.close();
-            responseVS = HttpHelper.sendData(bytesToSend, ContentTypeVS.PDF_SIGNED_AND_ENCRYPTED.
-                    getName(), serviceURL + "/" + manifestId);
+            responseVS = HttpHelper.sendData(bytesToSend, ContentTypeVS.PDF_SIGNED_AND_ENCRYPTED,
+                    serviceURL + "/" + manifestId);
         }catch (Exception ex) {
             ex.printStackTrace();
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
