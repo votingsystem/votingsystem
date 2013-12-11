@@ -97,30 +97,30 @@ public final class MessageLocalization {
         return getComposedMessage(key, String.valueOf(p1), null, null, null);
     }
 
-    /**
-     * Get a message with param.length parameters or none if param is null. In
-     * the message the "{1}", "{2}" to "{lenght of param array}" are replaced
-     * with the object.toString of the param array. (with param[0] being "{1}")
-     *
-     * @since iText 5.0.6
-     * @param key
-     *            the key to the message
-     * @param param array of parameter objects, (toString is used to add it to the message)
-     * @return the message
-     */
-    public static String getComposedMessage(final String key, final Object... param) {
-        String msg = getMessage(key);
-        if (null != param) {
-            int i = 1;
-            for (Object o : param) {
-                if (null != o) {
-                    msg = msg.replace("{" + i + "}", o.toString());
-                }
-                i++;
-            }
-        }
-        return msg;
-    }
+	/**
+	 * Get a message with param.length parameters or none if param is null. In
+	 * the message the "{1}", "{2}" to "{lenght of param array}" are replaced
+	 * with the object.toString of the param array. (with param[0] being "{1}")
+	 *
+	 * @since iText 5.0.6
+	 * @param key
+	 *            the key to the message
+	 * @param param array of parameter objects, (toString is used to add it to the message)
+	 * @return the message
+	 */
+	public static String getComposedMessage(final String key, final Object... param) {
+		String msg = getMessage(key);
+		if (null != param) {
+			int i = 1;
+			for (Object o : param) {
+				if (null != o) {
+					msg = msg.replace("{" + i + "}", o.toString());
+				}
+				i++;
+			}
+		}
+		return msg;
+	}
 
     /**
      * Sets the language to be used globally for the error messages. The language
@@ -179,7 +179,7 @@ public final class MessageLocalization {
         finally {
             try {
                 if (null != is){
-                    is.close();
+                	is.close();
                 }
             } catch (Exception exx) {
             }

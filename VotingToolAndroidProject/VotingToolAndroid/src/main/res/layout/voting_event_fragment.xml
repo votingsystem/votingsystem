@@ -24,7 +24,7 @@
                 android:onClick="onClickSubject"
                 android:text="@string/label_evento"
                 android:textColor="@color/event_subject"
-                android:textSize="23sp" />
+                android:textSize="30sp" />
 
             <LinearLayout android:id="@+id/receipt_buttons"
                 android:layout_width="fill_parent" android:layout_height="wrap_content">

@@ -24,7 +24,6 @@
 /libraries/itext/.project
 /libraries/itext/*.iml
 
-
 /libraries/votingsystem/bin
 /libraries/votingsystem/build
 /libraries/votingsystem/.settings
@@ -32,5 +31,12 @@
 /libraries/votingsystem/.project
 /libraries/votingsystem/*.iml
 
-/libraries/votingsystem/build
-/libraries/votingsystem/*.apk
+/libraries/votingsystemimpl/bin
+/libraries/votingsystemimpl/build
+/libraries/votingsystemimpl/.settings
+/libraries/votingsystemimpl/.classpath
+/libraries/votingsystemimpl/.project
+/libraries/votingsystemimpl/*.iml
+
+/libraries/votingsystemimpl/build
+/libraries/votingsystemimpl/*.apk

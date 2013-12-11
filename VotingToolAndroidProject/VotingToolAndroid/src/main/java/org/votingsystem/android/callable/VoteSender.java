@@ -99,7 +99,8 @@ public class VoteSender implements Callable<ResponseVS> {
             signedVote = timeStamper.getSmimeMessage();
             byte[] messageToSend = Encryptor.encryptSMIME(signedVote,
                     event.getControlCenter().getCertificate());
-            responseVS = HttpHelper.sendData(messageToSend,ContentTypeVS.VOTE.getName(),serviceURL);
+            responseVS  = HttpHelper.sendData(messageToSend,
+                    ContentTypeVS.SIGNED_AND_ENCRYPTED.getName(), serviceURL);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 SMIMEMessageWrapper voteReceipt = Encryptor.decryptSMIMEMessage(
                         responseVS.getMessageBytes(), pkcs10WrapperClient.getKeyPair().getPublic(),

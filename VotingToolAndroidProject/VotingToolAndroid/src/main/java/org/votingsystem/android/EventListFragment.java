@@ -15,9 +15,8 @@ import android.util.Log;
 import android.view.*;
 import android.view.animation.AnimationUtils;
 import android.widget.*;
-
-import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVSState;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVSResponse;
 import org.votingsystem.model.SubSystemVS;
 import org.votingsystem.model.EventVS;
