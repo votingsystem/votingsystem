@@ -162,7 +162,7 @@ public class Encryptor {
         //logger.debug("- decryptSMIMEMessage - encryptedMessageBytesStr: " + encryptedMessageBytesStr)
         SMIMEEnveloped smimeEnveloped = new SMIMEEnveloped(msg);
         RecipientInformationStore   recipients = smimeEnveloped.getRecipientInfos();
-        RecipientInformation        recipientInfo = recipients.get(recipientId);
+        RecipientInformation recipientInfo = recipients.get(recipientId);
 			/*RecipientId recipientRID = null;
 			if(recipient.getRID() != null) {
 				recipientRID = recipient.getRID();
@@ -173,6 +173,17 @@ public class Encryptor {
 			} else logger.debug(" -- getRID NULL");
 			MimeBodyPart res = SMIMEUtil.toMimeBodyPart(
 				 recipient.getContent(new JceKeyTransEnvelopedRecipient(serverPrivateKey).setProvider("BC")));*/
+        if(recipientInfo == null) {
+            String msgStr = ContextVS.getMessage("encryptionRecipientErrorMsg");
+            logger.error(msgStr);
+            logger.error("Expected recipientId.getSerialNumber(): " + recipientId.getSerialNumber());
+            Collection<RecipientInformation> recipientCollection = recipients.getRecipients();
+            for(RecipientInformation recipientInf : recipientCollection) {
+                logger.error("Encrypted document recipientId.getSerialNumber(): " +
+                        recipientInf.getRID().getSerialNumber());
+            }
+            return new ResponseVS(ResponseVS.SC_ERROR_REQUEST, msgStr);
+        }
         byte[] messageContentBytes =  recipientInfo.getContent(recipient);
         //logger.debug(" ------- Message Contents: ${new String(messageContentBytes)}");
         smimeMessageReq = new SMIMEMessageWrapper(new ByteArrayInputStream(messageContentBytes));

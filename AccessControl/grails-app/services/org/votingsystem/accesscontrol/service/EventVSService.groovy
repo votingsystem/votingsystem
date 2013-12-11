@@ -160,7 +160,7 @@ class EventVSService {
 					toUser = ((EventVSElection)eventVS).getControlCenterVS()?.name
 					String cancelServiceURL = controlCenterUrl + "/eventVSElection/cancelled"
 					ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(smimeMessageResp.getBytes(),
-                            org.votingsystem.model.ContentTypeVS.SIGNED.getName(), cancelServiceURL);
+                            org.votingsystem.model.ContentTypeVS.SIGNED, cancelServiceURL);
 					log.debug("responseVSControlCenter - status: ${responseVSControlCenter.statusCode}")
 					if(ResponseVS.SC_OK == responseVSControlCenter.statusCode ||
 						ResponseVS.SC_CANCELLATION_REPEATED == responseVSControlCenter.statusCode) {

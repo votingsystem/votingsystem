@@ -191,14 +191,14 @@ public class PDFSignedSender implements Callable<ResponseVS> {
         System.arraycopy(pk, 0, outc, 0, pk.length);
         dic2.put(PdfName.CONTENTS, new PdfString(outc).setHexWriting(true));
         sap.close(dic2);
-        String contentType = null;
+        ContentTypeVS contentType = null;
         byte[] bytesToSend = null;
         if(destinationCert != null) {
             logger.debug("---- with destinationCert -> encrypting response");
             bytesToSend = Encryptor.encryptFile(fileToSend,destinationCert);
-            contentType = ContentTypeVS.PDF_SIGNED_AND_ENCRYPTED.getName();
+            contentType = ContentTypeVS.PDF_SIGNED_AND_ENCRYPTED;
         } else {
-            contentType = ContentTypeVS.PDF_SIGNED.getName();
+            contentType = ContentTypeVS.PDF_SIGNED;
             bytesToSend = FileUtils.getBytesFromFile(fileToSend);
         }
         return HttpHelper.getInstance().sendData(bytesToSend, contentType, urlToSendDocument);

@@ -47,7 +47,7 @@ public class AccessRequestCancellerDataSender implements Callable<ResponseVS> {
             ContextVS.getInstance().copyFile(messageBytes, StringUtils.getUserDirPath(request.getUserVS().getNif()),
                     voteCancellerFileName)
         }
-        ResponseVS responseVS = HttpHelper.getInstance().sendData(messageBytes, ContentTypeVS.SIGNED.getName(),
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(messageBytes, ContentTypeVS.SIGNED,
                 ContextVS.getInstance().getAccessControl().getVoteCancellerServiceURL())
         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
             SMIMEMessageWrapper mimeMessage = new SMIMEMessageWrapper(

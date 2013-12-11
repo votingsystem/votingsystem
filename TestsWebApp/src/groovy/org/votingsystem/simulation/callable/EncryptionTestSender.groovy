@@ -43,7 +43,7 @@ public class EncryptionTestSender implements Callable<ResponseVS> {
     @Override public ResponseVS call() throws Exception {
         byte[] encryptedRequestBytes = Encryptor.encryptMessage(
                 getTestJSON(requestNIF, publicKey).toString().getBytes(), serverCert);
-        responseVS = HttpHelper.getInstance().sendData(encryptedRequestBytes, ContentTypeVS.ENCRYPTED.getName(), serverURL);
+        responseVS = HttpHelper.getInstance().sendData(encryptedRequestBytes, ContentTypeVS.ENCRYPTED, serverURL);
         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
             byte[] encryptedData = responseVS.getMessageBytes();
             byte[] decryptedData = Encryptor.decryptFile(encryptedData, publicKey, privateKey);

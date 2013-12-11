@@ -4,6 +4,7 @@ import com.sun.syndication.feed.synd.SyndContentImpl
 import com.sun.syndication.feed.synd.SyndEntryImpl
 import com.sun.syndication.feed.synd.SyndFeed
 import com.sun.syndication.feed.synd.SyndFeedImpl
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.StringUtils
 import org.votingsystem.model.AccessControlVS
@@ -54,7 +55,7 @@ class SubscriptionVSController {
                         message(code: 'controlCenterAlreadyAssociatedMsg', args:[accessControl.serverURL]))
 			} else {
 				String accessControlURL = "${serverURL}/serverInfo"
-				ResponseVS responseVS = HttpHelper.getInstance().getData(accessControlURL, null)
+				ResponseVS responseVS = HttpHelper.getInstance().getData(accessControlURL, ContentTypeVS.JSON)
 				if (ResponseVS.SC_OK == responseVS.statusCode) {
                     AccessControlVS actorVS = ActorVS.parse(responseVS.message)
                     actorVS.save()

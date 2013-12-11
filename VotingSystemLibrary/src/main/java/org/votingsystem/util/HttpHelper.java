@@ -102,16 +102,15 @@ public class HttpHelper {
         }
     }
     
-    public ResponseVS getData (String serverURL, String contentType) 
+    public ResponseVS getData (String serverURL, ContentTypeVS contentType)
             throws IOException, ParseException {
-        logger.debug("getData - serverURL: " + serverURL + " - contentType: " 
-                + contentType);  
+        logger.debug("getData - serverURL: " + serverURL + " - contentType: "  + contentType);
         ResponseVS responseVS = null;
         HttpResponse response = null;
         HttpGet httpget = null;
         try {
             httpget = new HttpGet(serverURL);
-            if(contentType != null) httpget.setHeader("Content-Type", contentType);
+            if(contentType != null) httpget.setHeader("Content-Type", contentType.getName());
             response = httpclient.execute(httpget);
             logger.debug("----------------------------------------");
             /*Header[] headers = response.getAllHeaders();
@@ -193,15 +192,15 @@ public class HttpHelper {
     }
 
     
-    public ResponseVS sendFile (File file, String contentType, String serverURL, 
-            String... headerNames) {
-        logger.debug("sendFile - contentType: " + contentType + 
-                " - serverURL: " + serverURL); 
+    public ResponseVS sendFile (File file, ContentTypeVS contentTypeVS, String serverURL,  String... headerNames) {
+        logger.debug("sendFile - serverURL: " + serverURL + " - contentType: " + contentTypeVS );
         ResponseVS responseVS = null;
         HttpPost httpPost = null;
         try {
             httpPost = new HttpPost(serverURL);
-            FileEntity entity = new FileEntity(file, ContentType.create(contentType));
+            ContentType contentType = null;
+            if(contentTypeVS != null) contentType = ContentType.create(contentTypeVS.getName());
+            FileEntity entity = new FileEntity(file, contentType);
             httpPost.setEntity(entity);
             HttpResponse response = httpclient.execute(httpPost);
             logger.debug("----------------------------------------");
@@ -226,32 +225,8 @@ public class HttpHelper {
         }
         return responseVS;
     }
-        
-        
-    public ResponseVS sendString (String stringToSend, 
-            String paramName, String serverURL) {
-        logger.debug("sendString - serverURL: " + serverURL);
-        ResponseVS responseVS = null;
-        HttpPost httpPost = null;
-        try {
-            httpPost = new HttpPost(serverURL);
-            StringBody stringBody = new StringBody(stringToSend);
-            MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.STRICT);
-            reqEntity.addPart(paramName, stringBody);
-            httpPost.setEntity(reqEntity);
-            HttpResponse response = httpclient.execute(httpPost);
-            logger.debug("----------------------------------------");
-            logger.debug(response.getStatusLine().toString());
-            logger.debug("----------------------------------------");
-        } catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
-            if(httpPost != null) httpPost.abort();
-        }
-        return responseVS;
-    }
     
-    public ResponseVS sendData(byte[] byteArray, String contentType,
+    public ResponseVS sendData(byte[] byteArray, ContentTypeVS contentType,
             String serverURL, String... headerNames) throws IOException {
         logger.debug("sendData - contentType: " + contentType + " - serverURL: " + serverURL);
         ResponseVS responseVS = null;
@@ -261,7 +236,7 @@ public class HttpHelper {
             httpPost = new HttpPost(serverURL);
             ByteArrayEntity entity = null;
             if(contentType != null) {
-                entity = new ByteArrayEntity(byteArray,  ContentType.create(contentType));
+                entity = new ByteArrayEntity(byteArray,  ContentType.create(contentType.getName()));
             } else entity = new ByteArrayEntity(byteArray); 
             httpPost.setEntity(entity);
             response = httpclient.execute(httpPost);

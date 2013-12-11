@@ -54,8 +54,8 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
         ResponseVS responseVS = null;
         while(!done.get()) {
             AccessControlVS accessControl = (AccessControlVS) ContextVS.getInstance().getAccessControl();
-            responseVS = HttpHelper.getInstance().sendData(
-                timeStampRequest.getEncoded(), ContentTypeVS.TIMESTAMP_QUERY.getName(), accessControl.getTimeStampServerURL());
+            responseVS = HttpHelper.getInstance().sendData(timeStampRequest.getEncoded(), ContentTypeVS.TIMESTAMP_QUERY,
+                    accessControl.getTimeStampServerURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 byte[] bytesToken = responseVS.getMessageBytes();
                 timeStampToken = new TimeStampToken(new CMSSignedData(bytesToken));

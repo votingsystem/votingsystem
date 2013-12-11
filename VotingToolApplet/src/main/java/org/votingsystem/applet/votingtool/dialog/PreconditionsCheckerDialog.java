@@ -72,7 +72,7 @@ public class PreconditionsCheckerDialog extends JDialog {
         ActorVS actorVS = actorMap.get(serverURL.trim());
         if(actorVS == null) { 
             String serverInfoURL = ActorVS.getServerInfoURL(serverURL);
-            ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON.getName());
+            ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 JSONObject jsonObject = (JSONObject)JSONSerializer.toJSON(responseVS.getMessage());
                 actorVS = ActorVS.populate(jsonObject);

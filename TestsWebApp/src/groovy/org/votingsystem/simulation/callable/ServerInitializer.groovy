@@ -30,8 +30,7 @@ public class ServerInitializer implements Callable<ResponseVS> {
         
     @Override public ResponseVS call() throws Exception {
         logger.debug("call - serverType: " + serverType.toString());
-		ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL),
-                ContentTypeVS.JSON.getName());
+		ResponseVS responseVS =HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL),ContentTypeVS.JSON);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             ActorVS actorVS = ActorVS.populate(new JSONObject(responseVS.getMessage()));
             if(actorVS.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != actorVS.getEnvironmentVS()) {

@@ -70,14 +70,14 @@ class VoteVSService {
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR,type:TypeVS.VOTE_ERROR, eventVS:eventVS,
                         message:encryptResponse.message)
 			}
-			messageSMIMEReq.type = TypeVS.CONTROL_CENTER_VALIDATED_VOTEVS
+			messageSMIMEReq.type = TypeVS.CONTROL_CENTER_VALIDATED_VOTE
 			messageSMIMEReq.content = smimeVoteValidation.getBytes()
 			messageSMIMEReq.save();
 			byte[] encryptResponseBytes = encryptResponse.messageBytes
 			//String encryptResponseStr = new String(encryptResponseBytes)
 			//log.debug(" - encryptResponseStr: ${encryptResponseStr}")
 			ResponseVS responseVS = HttpHelper.getInstance().sendData(encryptResponseBytes,
-                    ContentTypeVS.VOTE.getName(), eventVS.accessControlVS.getVoteServiceURL())
+                    ContentTypeVS.VOTE, eventVS.accessControlVS.getVoteServiceURL())
 			if (ResponseVS.SC_OK == responseVS.statusCode) {
                 ResponseVS validatedVoteResponse = signatureVSService.decryptSMIMEMessage(responseVS.messageBytes, locale)
 				SMIMEMessageWrapper smimeMessageResp = validatedVoteResponse.getSmimeMessage();
@@ -93,14 +93,14 @@ class VoteVSService {
 					return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
 						type:TypeVS.VOTE_ERROR, eventVS:eventVS, message:responseVS.message)
 				} 
-				messageSMIMEReq.type = TypeVS.ACCESS_CONTROL_VALIDATED_VOTEVS
+				messageSMIMEReq.type = TypeVS.ACCESS_CONTROL_VALIDATED_VOTE
 				messageSMIMEReq.content = smimeMessageResp.getBytes()
 				MessageSMIME messageSMIMEResp = messageSMIMEReq
 				MessageSMIME.withTransaction { messageSMIMEResp.save() }
 				voteVS = new VoteVS(optionSelected:optionSelected, eventVS:eventVS, state:VoteVS.State.OK,
 					certificateVS:certificateVS, messageSMIME:messageSMIMEResp)
 				voteVS.save()
-				return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ACCESS_CONTROL_VALIDATED_VOTEVS,
+				return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ACCESS_CONTROL_VALIDATED_VOTE,
                         eventVS:eventVS, contentType: ContentTypeVS.VOTE,
                         data:[voteVS:voteVS, messageSMIME:messageSMIMEResp, receiverCert:responseReceiverCert])
 			} else {

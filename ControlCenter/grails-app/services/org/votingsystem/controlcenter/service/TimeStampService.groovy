@@ -14,6 +14,7 @@ import org.bouncycastle.tsp.TSPUtil
 import org.bouncycastle.tsp.TimeStampToken
 import org.bouncycastle.util.encoders.Base64
 import org.votingsystem.model.AccessControlVS
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ContextVS
 import org.votingsystem.model.EventVS
 import org.votingsystem.model.ResponseVS
@@ -48,7 +49,7 @@ class TimeStampService {
 			SignerInformationVerifier timeStampVerifier = timeStampVerifiers.get(eventVS.accessControlVS.id)
 			if(!timeStampVerifier) {
 				String timeStampCertURL = "${eventVS.accessControlVS.serverURL}/timeStampVS/cert"
-				responseVS = HttpHelper.getInstance().getData(timeStampCertURL, null)
+				responseVS = HttpHelper.getInstance().getData(timeStampCertURL, ContentTypeVS.X509_CA)
 				if(ResponseVS.SC_OK != responseVS.statusCode) {
 					msg = messageSource.getMessage('timeStampCertErrorMsg', [timeStampCertURL].toArray(), locale)
 					log.error("validateToken - ${msg}")

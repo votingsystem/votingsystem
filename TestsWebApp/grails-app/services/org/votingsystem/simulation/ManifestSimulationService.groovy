@@ -181,8 +181,8 @@ class ManifestSimulationService {
 		this.eventVS = eventVS;
 		String eventStr = "${eventVS.getDataMap() as JSON}".toString();
 		String urlPublishManifest = ContextVS.getInstance().getAccessControl().getPublishManifestURL()
-		ResponseVS responseVS = HttpHelper.getInstance().sendData(eventStr.getBytes(),
-			ContentTypeVS.JSON.getName(), urlPublishManifest, "eventId")
+		ResponseVS responseVS = HttpHelper.getInstance().sendData(eventStr.getBytes(), ContentTypeVS.JSON,
+                urlPublishManifest, "eventId")
 
 		if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
 			pdfToSignBytes = responseVS.getMessageBytes();
@@ -327,7 +327,7 @@ class ManifestSimulationService {
         ResponseVS responseVS = worker.call();
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             String downloadServiceURL = ContextVS.getInstance().getAccessControl().getDownloadServiceURL(responseVS.getMessage());
-            responseVS = HttpHelper.getInstance().getData(downloadServiceURL, ContentTypeVS.BACKUP.getName());
+            responseVS = HttpHelper.getInstance().getData(downloadServiceURL, ContentTypeVS.BACKUP);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 log.debug("TODO validate backup");
                 /*FutureTask<ResponseVS> future = new FutureTask<ResponseVS>(

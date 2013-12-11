@@ -47,8 +47,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
         if(cotentType.isEncrypted()) messageToSendBytes = Encryptor.encryptSMIME(smimeMessage, destinationCert);
         else if(cotentType.isSigned()) messageToSendBytes = smimeMessage.getBytes();
 
-        responseVS = HttpHelper.getInstance().sendData(messageToSendBytes, cotentType.getName(),
-                urlToSendDocument, headers);
+        responseVS = HttpHelper.getInstance().sendData(messageToSendBytes, cotentType, urlToSendDocument, headers);
         ContentTypeVS responseContentType = responseVS.getContentType();
         try {
             if(responseContentType != null && responseContentType.isSignedAndEncrypted()) {

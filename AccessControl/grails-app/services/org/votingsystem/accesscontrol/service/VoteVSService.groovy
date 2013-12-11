@@ -50,7 +50,7 @@ class VoteVSService {
 			smimeMessageReq.setMessageID("${localServerURL}/messageSMIME/${messageSMIMEReq.id}")
 			SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
 				fromUser,toUser, smimeMessageReq, subject)
-			messageSMIMEReq.type = TypeVS.ACCESS_CONTROL_VALIDATED_VOTEVS
+			messageSMIMEReq.type = TypeVS.ACCESS_CONTROL_VALIDATED_VOTE
 			messageSMIMEReq.content = smimeMessageResp.getBytes()
 			MessageSMIME messageSMIMEResp = messageSMIMEReq
 			MessageSMIME.withTransaction { messageSMIMEResp.save() }
@@ -63,7 +63,7 @@ class VoteVSService {
                     eventVS.certChainControlCenter)?.iterator()?.next()
 			Map data = [certificate:controlCenterCert, messageSMIME:messageSMIMEResp]
 			return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS,
-				type:TypeVS.ACCESS_CONTROL_VALIDATED_VOTEVS, data:data)
+				type:TypeVS.ACCESS_CONTROL_VALIDATED_VOTE, data:data)
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR, type:TypeVS.VOTE_ERROR, eventVS:eventVS,
@@ -186,7 +186,7 @@ class VoteVSService {
 					smimeMessageResp.getBytes(), eventVSElection.getControlCenterCert(), locale)
 				if (ResponseVS.SC_OK != encryptResponse.statusCode) return encryptResponse
 				ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(encryptResponse.messageBytes,
-                        ContentTypeVS.SIGNED_AND_ENCRYPTED.getName(), urlAnulacionVoto)
+                        ContentTypeVS.SIGNED_AND_ENCRYPTED, urlAnulacionVoto)
 				if (ResponseVS.SC_OK == responseVSControlCenter.statusCode) {
 					responseVSControlCenter = signatureVSService.decryptSMIMEMessage(
 							responseVSControlCenter.message.getBytes(), locale)

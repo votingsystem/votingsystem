@@ -29,10 +29,7 @@ import java.security.PublicKey
 import java.security.cert.*
 import org.codehaus.groovy.grails.commons.DefaultGrailsDomainClass
 
-//class SignatureVSService implements InitializingBean {
 class SignatureVSService {
-
-	private static final String BC = BouncyCastleProvider.PROVIDER_NAME;
 	
 	private SignedMailGenerator signedMailGenerator;
 	static Set<X509Certificate> trustedCerts;
@@ -453,7 +450,7 @@ class SignatureVSService {
 		pkixParameters.addCertPathChecker(checker);
 		
 		pkixParameters.setRevocationEnabled(checkCRL); // if false tell system do not check CRL's
-		CertPathValidator certPathValidator = CertPathValidator.getInstance("PKIX","BC");
+		CertPathValidator certPathValidator = CertPathValidator.getInstance("PKIX", ContextVS.PROVIDER);
 		CertificateFactory certFact = CertificateFactory.getInstance("X.509");
 		CertPath certPath = certFact.generateCertPath(certs);
 		CertPathValidatorResult result = certPathValidator.validate(certPath, pkixParameters);
@@ -575,7 +572,7 @@ class SignatureVSService {
 				message:msg, type:TypeVS.VOTE_ERROR, eventVS:eventVS)
 		}
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS,
-			smimeMessage:smimeMessageReq, type:TypeVS.CONTROL_CENTER_VALIDATED_VOTEVS)
+			smimeMessage:smimeMessageReq, type:TypeVS.CONTROL_CENTER_VALIDATED_VOTE)
 	}
 
 
@@ -628,7 +625,7 @@ class SignatureVSService {
      * Method to decrypt SMIME signed messages
      */
     ResponseVS decryptSMIMEMessage(byte[] encryptedMessageBytes, Locale locale) {
-        log.debug(" - decryptSMIMEMessage")
+        log.debug(" - decryptSMIMEMessage ")
         try {
             return getEncryptor().decryptSMIMEMessage(encryptedMessageBytes);
         } catch(Exception ex) {

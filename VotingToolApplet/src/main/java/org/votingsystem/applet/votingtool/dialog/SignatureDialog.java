@@ -250,12 +250,12 @@ public class SignatureDialog extends JDialog {
             try {
                 switch(operation.getType()) {
                     case MANIFEST_SIGN:
-                        responseVS = HttpHelper.getInstance().getData(operation.getUrlDocumento(), ContentTypeVS.PDF.getName());
+                        responseVS = HttpHelper.getInstance().getData(operation.getUrlDocumento(), ContentTypeVS.PDF);
                         return responseVS;
                     case MANIFEST_PUBLISHING:
                         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(operation.getDocumentToSignMap());
                         responseVS = HttpHelper.getInstance().sendData(jsonObject.toString().getBytes(),
-                                null, operation.getUrlEnvioDocumento(), "eventId");
+                                ContentTypeVS.JSON, operation.getUrlEnvioDocumento(), "eventId");
                         return responseVS;
                 }  
             } catch(Exception ex) {
