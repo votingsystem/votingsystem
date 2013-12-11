@@ -40,6 +40,7 @@ import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.VoteSender;
 import org.votingsystem.android.db.VoteReceiptDBHelper;
 import org.votingsystem.model.ActorVS;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.VoteVS;
@@ -478,11 +479,11 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
                     String serviceURL = contextVS.getAccessControlVS().getCancelVoteServiceURL();
                     try {
                         String signatureContent = receipt.getVoto().getCancelVoteData();
-                        boolean isEncryptedResponse = true;
                         FileInputStream fis = getActivity().openFileInput(KEY_STORE_FILE);
                         byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
                         SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
-                                signatureContent, subject, isEncryptedResponse, keyStoreBytes, pin.toCharArray(),
+                                signatureContent, ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
+                                subject, keyStoreBytes, pin.toCharArray(),
                                 contextVS.getAccessControlVS().getCertificate(), getActivity());
                         responseVS = smimeSignedSender.call();
                     } catch(Exception ex) {

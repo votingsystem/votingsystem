@@ -23,6 +23,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import org.votingsystem.android.callable.PDFPublisher;
 import org.votingsystem.android.callable.SMIMESignedSender;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.SubSystemVS;
 import org.votingsystem.model.OperationVS;
@@ -349,12 +350,12 @@ public class EventPublishingActivity extends ActionBarActivity implements CertPi
                     case VOTING_PUBLISHING:
                     case CLAIM_PUBLISHING:
                     case CONTROL_CENTER_ASSOCIATION:
-                        boolean isEncryptedResponse = false;
                         pendingOperationVS.getContentFirma().put("UUID", UUID.randomUUID().toString());
                         SMIMESignedSender smimeSignedSender = new SMIMESignedSender(
                                 pendingOperationVS.getUrlEnvioDocumento(),
                                 pendingOperationVS.getContentFirma().toString(),
-                                pendingOperationVS.getSignedMessageSubject(), isEncryptedResponse,
+                                ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
+                                pendingOperationVS.getSignedMessageSubject(),
                                 keyStoreBytes, pin.toCharArray(),
                                 contextVS.getAccessControlVS().getCertificate(), getBaseContext());
                         responseVS = smimeSignedSender.call();

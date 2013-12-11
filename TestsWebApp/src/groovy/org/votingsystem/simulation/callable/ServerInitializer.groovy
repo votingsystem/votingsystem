@@ -57,7 +57,7 @@ public class ServerInitializer implements Callable<ResponseVS> {
                     break;
             }
             byte[] rootCACertPEMBytes = CertUtil.getPEMEncoded (ContextVS.getInstance().getRootCACert());
-            responseVS = HttpHelper.getInstance().sendData(rootCACertPEMBytes, null,
+            responseVS = HttpHelper.getInstance().sendData(rootCACertPEMBytes, ContentTypeVS.X509_CA,
                     actorVS.getRootCAServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 if(actorVS instanceof AccessControlVS) ContextVS.getInstance().setAccessControl(actorVS);

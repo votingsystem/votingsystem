@@ -52,28 +52,27 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
     private String serviceURL = null;
     private String subject = null;
     private String signatureContent = null;
-    private ContextVS contextVS = null;
     private byte[] keyStoreBytes = null;
-    private boolean isEncryptedResponse = false;
+    private ContentTypeVS contentType;
 
-    public SMIMESignedSender(String serviceURL, String signatureContent, String subject,
-                             boolean isEncryptedResponse, byte[] keyStoreBytes, char[] password,
-                             X509Certificate destinationCert, Context context) {
+    public SMIMESignedSender(String serviceURL, String signatureContent, ContentTypeVS contentType,
+            String subject, byte[] keyStoreBytes, char[] password,
+            X509Certificate destinationCert, Context context) {
         this.subject = subject;
         this.signatureContent = signatureContent;
+        this.contentType = contentType;
         this.keyStoreBytes = keyStoreBytes;
         this.password = password;
         this.context = context;
         this.serviceURL = serviceURL;
-        this.isEncryptedResponse = isEncryptedResponse;
         this.destinationCert = destinationCert;
-        contextVS = ContextVS.getInstance(context);
     }
 
     @Override public ResponseVS call() {
         Log.d(TAG + ".call", " - call - url: " + serviceURL);
         String userVS = null;
-        if (contextVS.getUserVS() != null) userVS = contextVS.getUserVS().getNif();
+        if (ContextVS.getInstance(context).getUserVS() != null) userVS =
+                ContextVS.getInstance(context).getUserVS().getNif();
         MessageTimeStamper timeStamper = null;
         ResponseVS responseVS = null;
         KeyPair keypair = null;
@@ -81,48 +80,37 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
                     keyStoreBytes, USER_CERT_ALIAS, password, SIGNATURE_ALGORITHM);
             smimeMessage = signedMailGenerator.genMimeMessage(userVS,
-                    contextVS.getAccessControlVS().getNameNormalized(),
+                    ContextVS.getInstance(context).getAccessControlVS().getNameNormalized(),
                     signatureContent, subject, null);
-            if(isEncryptedResponse) {
-                KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
-                PrivateKey privateKey = (PrivateKey)keyStore.getKey(USER_CERT_ALIAS, password);
-                Certificate[] chain = keyStore.getCertificateChain(USER_CERT_ALIAS);
-                PublicKey publicKey = ((X509Certificate)chain[0]).getPublicKey();
-                keypair = new KeyPair(publicKey, privateKey);
-            }
             timeStamper = new MessageTimeStamper(smimeMessage, context);
             responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
             smimeMessage = timeStamper.getSmimeMessage();
-            ContentTypeVS documentContentType = null;
             byte[] messageToSend = null;
-            if(destinationCert != null) {
-                messageToSend = Encryptor.encryptSMIME(
-                        smimeMessage, destinationCert);
-                documentContentType = ContentTypeVS.SIGNED_AND_ENCRYPTED;
-            } else {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                smimeMessage.writeTo(baos);
-                messageToSend = baos.toByteArray();
-                baos.close();
-                documentContentType = ContentTypeVS.SIGNED;
-            }
-            responseVS  = HttpHelper.sendData(messageToSend, documentContentType, serviceURL);
+            if(contentType.isEncrypted())
+                messageToSend = Encryptor.encryptSMIME(smimeMessage, destinationCert);
+            else messageToSend = smimeMessage.getBytes();
+            responseVS  = HttpHelper.sendData(messageToSend, contentType, serviceURL);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                if(keypair != null) {
+                if(responseVS.getContentType() != null &&
+                        responseVS.getContentType().isEncrypted()) {
+                    KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
+                    PrivateKey privateKey = (PrivateKey)keyStore.getKey(USER_CERT_ALIAS, password);
+                    Certificate[] chain = keyStore.getCertificateChain(USER_CERT_ALIAS);
+                    PublicKey publicKey = ((X509Certificate)chain[0]).getPublicKey();
+                    keypair = new KeyPair(publicKey, privateKey);
                     SMIMEMessageWrapper signedMessage = Encryptor.decryptSMIMEMessage(
                             responseVS.getMessageBytes(), keypair.getPublic(), keypair.getPrivate());
                     responseVS.setSmimeMessage(signedMessage);
-                } else return new ResponseVS(ResponseVS.SC_OK, responseVS.getMessageBytes());
-            } else return responseVS;
+                }
+            }
         } catch(VotingSystemKeyStoreException ex) {
             ex.printStackTrace();
-            return new ResponseVS(ResponseVS.SC_ERROR, context.getString(R.string.pin_error_msg));
+            responseVS = new ResponseVS(ResponseVS.SC_ERROR, context.getString(R.string.pin_error_msg));
         } catch(Exception ex) {
             ex.printStackTrace();
-            return new ResponseVS(ResponseVS.SC_ERROR, ex.getLocalizedMessage());
-        }
-        return responseVS;
+            responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getLocalizedMessage());
+        } finally {return responseVS;}
     }
 
     public SMIMEMessageWrapper getSmimeMessage() {

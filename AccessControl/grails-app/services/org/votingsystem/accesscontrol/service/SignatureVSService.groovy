@@ -104,9 +104,15 @@ class SignatureVSService {
 		certChainFile.setBytes(pemCertsArray)
         encryptor = new Encryptor(localServerCertSigner, serverPrivateKey);
 		initCertAuthorities();
-        return [signedMailGenerator:signedMailGenerator, encryptor:encryptor, trustedCerts:trustedCerts];
+        return [signedMailGenerator:signedMailGenerator, encryptor:encryptor, trustedCerts:trustedCerts,
+                localServerCertSigner:localServerCertSigner];
 	}
-	
+
+    public X509Certificate getServerCert() {
+        if(localServerCertSigner == null) localServerCertSigner = initService().localServerCertSigner
+        return localServerCertSigner
+    }
+
 	public boolean isSystemSignedMessage(Set<UserVS> signers) {
 		boolean result = false
 		log.debug "isSystemSignedMessage - localServerCert num. serie: ${localServerCertSigner.getSerialNumber().longValue()}"

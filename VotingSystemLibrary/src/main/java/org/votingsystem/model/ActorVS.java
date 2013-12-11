@@ -196,7 +196,11 @@ public class ActorVS implements Serializable {
         this.controlCenters = controlCenters;
     }
 
-    public String getRootCAServiceURL() {
+    @Transient public String getRootCAServiceURL() {
+        return serverURL + "/certificateVS/addCertificateAuthority";
+    }
+
+    public static String getRootCAServiceURL(String serverURL) {
         return serverURL + "/certificateVS/addCertificateAuthority";
     }
 

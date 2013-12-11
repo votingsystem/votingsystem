@@ -1,15 +1,11 @@
 package org.votingsystem.controlcenter.controller
 
-import org.votingsystem.model.EventVS
 import org.votingsystem.model.EventVSElection
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.VoteVS
 import org.votingsystem.model.VoteVSCanceller
-
 import java.security.cert.X509Certificate
-
 import grails.converters.JSON
-import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.signature.util.CertUtil
 
@@ -35,16 +31,18 @@ class VoteVSCancellerController {
 	def index() { 
 		MessageSMIME messageSMIMEReq = params.messageSMIMEReq
         if(!messageSMIMEReq) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))
-            return
+            return params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))
         }
-        params.responseVS = voteVSService.processCancel( messageSMIMEReq, request.getLocale())
-		byte[] certChainBytes
-        EventVSElection.withTransaction { certChainBytes = params.responseVS.eventVS.certChainAccessControl }
-		Collection<X509Certificate> certColl = CertUtil.fromPEMToX509CertCollection(certChainBytes)
-		X509Certificate receiverCert = certColl.iterator().next()
-		params.receiverCert = receiverCert
-	}
+        ResponseVS responseVS = voteVSService.processCancel( messageSMIMEReq, request.getLocale())
+        if(ResponseVS.SC_OK == responseVS.statusCode) {
+            byte[] certChainBytes
+            EventVSElection.withTransaction { certChainBytes = params.responseVS.eventVS.certChainAccessControl }
+            Collection<X509Certificate> certColl = CertUtil.fromPEMToX509CertCollection(certChainBytes)
+            X509Certificate receiverCert = certColl.iterator().next()
+            params.receiverCert = receiverCert
+        }
+        params.responseVS = responseVS
+    }
 	
 
 	/**
@@ -59,9 +57,7 @@ class VoteVSCancellerController {
 	def get() {
 		VoteVS voteVS
 		Map  cancellerMap
-		VoteVS.withTransaction {
-			voteVS = VoteVS.get(params.long('id'))
-		}
+		VoteVS.withTransaction {voteVS = VoteVS.get(params.long('id'))}
         if(!voteVS) params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
                 message(code: 'voteNotFound', args:[params.id]))
         else {

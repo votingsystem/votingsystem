@@ -21,6 +21,7 @@ import org.votingsystem.android.NavigationDrawer;
 import org.votingsystem.android.R;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.db.VoteReceiptDBHelper;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.model.ResponseVS;
@@ -397,12 +398,11 @@ public class VoteReceiptListActivity extends ActionBarActivity
                 KeyFactory kf = KeyFactory.getInstance("RSA");
                 PrivateKey certPrivKey = kf.generatePrivate(keySpec);
                 operationReceipt.setCertVotePrivateKey(certPrivKey);
-                boolean isEncryptedResponse = true;
                 String signatureContent = operationReceipt.getVoto().getCancelVoteData();
                 String serviceURL =contextVS.getAccessControlVS().getCancelVoteServiceURL();
-
                 SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
-                        signatureContent, subject, isEncryptedResponse, keyStoreBytes, pin.toCharArray(),
+                        signatureContent, ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED, subject,
+                        keyStoreBytes, pin.toCharArray(),
                         contextVS.getAccessControlVS().getCertificate(), getBaseContext());
                 return smimeSignedSender.call();
             } catch(Exception ex) {

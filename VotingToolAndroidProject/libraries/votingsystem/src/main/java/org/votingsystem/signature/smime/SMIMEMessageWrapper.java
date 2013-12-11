@@ -73,7 +73,6 @@ public class SMIMEMessageWrapper extends MimeMessage {
     private String signedContent;
     private SMIMESigned smimeSigned = null;
     private boolean isValidSignature = false;
-	private byte[] messageBytes = null;
     private Set<UserVS> usersVS;
 
     
@@ -308,10 +307,6 @@ public class SMIMEMessageWrapper extends MimeMessage {
             // boolean cmsVerifySignature = CMSUtils.verifySignature(signer, cert, PROVIDER);
             // Log.d(TAG, " -- cmsVerifySignature: " + cmsVerifySignature);
         }
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        writeTo(baos);
-        messageBytes = baos.toByteArray();
-        baos.close();
     }
     
     
@@ -433,6 +428,10 @@ public class SMIMEMessageWrapper extends MimeMessage {
     }
 
     public byte[] getBytes () throws IOException, MessagingException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        writeTo(baos);
+        byte[] messageBytes = baos.toByteArray();
+        baos.close();
         return messageBytes;
     }
 

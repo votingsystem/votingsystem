@@ -144,12 +144,12 @@ public class VoteSender implements Callable<ResponseVS> {
         try {
             String subject = context.getString(R.string.cancel_vote_msg_subject);
             String serviceURL = contextVS.getAccessControlVS().getCancelVoteServiceURL();
-            boolean isEncryptedResponse = true;
             SMIMEMessageWrapper cancelAccessRequest = signedMailGenerator.genMimeMessage(
                     userVS, contextVS.getAccessControlVS().getNameNormalized(),
                     event.getCancelVoteData(), subject, null);
-            SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL, event.getCancelVoteData(),
-                    subject, isEncryptedResponse, keyStoreBytes, password,
+            SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
+                    event.getCancelVoteData(), ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
+                    subject,  keyStoreBytes, password,
                     contextVS.getAccessControlVS().getCertificate(), context);
             return smimeSignedSender.call();
         } catch(Exception ex) {

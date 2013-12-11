@@ -16,6 +16,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.*;
 
 import org.json.JSONObject;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OptionVS;
 import org.votingsystem.android.callable.SMIMESignedSender;
@@ -359,10 +360,10 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
                     JSONObject signatureContent = event.getSignatureContentJSON();
                     signatureContent.put("operation", TypeVS.SMIME_CLAIM_SIGNATURE);
                     String serviceURL = contextVS.getAccessControlVS().getEventVSClaimCollectorURL();
-                    boolean isEncryptedResponse = false;
                     SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
-                            signatureContent.toString(), subject, isEncryptedResponse,keyStoreBytes,
-                            pin.toCharArray(), contextVS.getAccessControlVS().getCertificate(),
+                            signatureContent.toString(), ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
+                            subject,keyStoreBytes, pin.toCharArray(),
+                            contextVS.getAccessControlVS().getCertificate(),
                             getActivity().getBaseContext());
                     responseVS = smimeSignedSender.call();
                 }
