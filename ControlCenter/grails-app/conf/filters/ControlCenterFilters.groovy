@@ -113,9 +113,10 @@ class ControlCenterFilters {
                     case ContentTypeVS.SIGNED_AND_ENCRYPTED:
                         ResponseVS encryptResponse =  signatureVSService.encryptSMIMEMessage(
                                 messageSMIME.content, params.receiverCert, request.getLocale())
-                        if(ResponseVS.SC_OK == encryptResponse.statusCode)
+                        if(ResponseVS.SC_OK == encryptResponse.statusCode) {
+                            encryptResponse.setContentType(responseVS.getContentType())
                             return printOutputStream(response, encryptResponse)
-                        else {
+                        } else {
                             messageSMIME.metaInf = encryptResponse.message
                             messageSMIME.save()
                             return printTextOutput(response, encryptResponse)
