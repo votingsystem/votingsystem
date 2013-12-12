@@ -185,6 +185,7 @@ class AccessControlFilters {
                 log.debug "after - response status: ${responseVS.getStatusCode()} - contentType: ${responseVS.getContentType()}"
                 switch(responseVS.getContentType()) {
                     case ContentTypeVS.VOTE:
+                    case ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED:
                     case ContentTypeVS.SIGNED_AND_ENCRYPTED:
                         ResponseVS encryptResponse =  signatureVSService.encryptSMIMEMessage(
                                 messageSMIME.content, model.receiverCert, request.getLocale())
@@ -196,6 +197,7 @@ class AccessControlFilters {
                             messageSMIME.save()
                             return printOutput(response, encryptResponse)
                         }
+                    case ContentTypeVS.JSON_SIGNED:
                     case ContentTypeVS.SIGNED:
                         if(ResponseVS.SC_OK == responseVS.statusCode) return printOutputStream(response, responseVS)
                         else return printOutput(response, responseVS)
