@@ -25,18 +25,13 @@ class EventVSClaimCollectorController {
 	 * @responseContentType [application/x-pkcs7-signature]. Recibo firmado por el sistema.
 	 * @return  Recibo que consiste en el documento recibido con la signatureVS añadida del servidor.
 	 */
-	def index() { 
-		MessageSMIME messageSMIMEReq = params.messageSMIMEReq
+	def index() {
+		MessageSMIME messageSMIMEReq = request.messageSMIMEReq
         if(!messageSMIMEReq) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))
-            return
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
         ResponseVS responseVS = eventVSClaimSignatureCollectorService.save(messageSMIMEReq, request.getLocale())
-        if (ResponseVS.SC_OK == responseVS?.statusCode) {
-            responseVS.setContentType(ContentTypeVS.SIGNED)
-            params.receiverCert = messageSMIMEReq.getSmimeMessage().getSigner().certificate
-        }
-        params.responseVS = responseVS
+        return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getSmimeMessage()?.getSigner()?.certificate]
 	}
 	
 

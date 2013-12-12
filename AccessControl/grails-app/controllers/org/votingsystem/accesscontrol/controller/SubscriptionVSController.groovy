@@ -44,17 +44,16 @@ class SubscriptionVSController {
 	 *					Archivo con los datos del Centro de Control que se desea dar de alta.
 	 */
 	def index() { 
-		MessageSMIME messageSMIME = params.messageSMIMEReq
+		MessageSMIME messageSMIME = request.messageSMIMEReq
 		if(!messageSMIME) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))
-            return
+            return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
 		}
 		ResponseVS responseVS = subscriptionVSService.matchControlCenter(messageSMIME, request.getLocale())
 		if(ResponseVS.SC_OK == responseVS.statusCode) {
             responseVS.data = userVSService.getControlCenterMap(responseVS.data.controlCenterVS)
             responseVS.setContentType(ContentTypeVS.JSON)
 		}
-        params.responseVS = responseVS
+        return [responseVS : responseVS]
 	}
 
     /**
@@ -71,14 +70,14 @@ class SubscriptionVSController {
      */
     def checkControlCenter() {
         if(!params.serverURL) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    message(code: 'missingParamErrorMsg', args:["serverURL"]))
+            return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code: 'missingParamErrorMsg', args:["serverURL"]))]
         } else {
             String serverURL = StringUtils.checkURL(params.serverURL)
             ControlCenterVS controlCenter = ControlCenterVS.findWhere(serverURL:serverURL)
             if(!controlCenter) {
-                params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                        message(code: 'serverNotFoundErrorMsg', args:[serverURL]))
+                return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                        message(code: 'serverNotFoundErrorMsg', args:[serverURL]))]
             } else {
                 Map controlCenterMap = userVSService.getControlCenterMap(controlCenter)
                 render controlCenterMap as JSON

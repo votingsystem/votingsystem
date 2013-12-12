@@ -2,6 +2,7 @@ package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.FieldValueEventVS
 import org.votingsystem.model.SignatureVS
 import org.votingsystem.model.EventVS
@@ -71,7 +72,7 @@ class EventVSClaimSignatureCollectorService {
         }
         messageSMIMEResp.smimeMessage = smimeMessageResp
         return new ResponseVS(statusCode:ResponseVS.SC_OK, data:messageSMIMEResp, eventVS:eventVSClaim,
-            smimeMessage:smimeMessage, type:TypeVS.CLAIM_EVENT_SIGN)
+            smimeMessage:smimeMessage, type:TypeVS.CLAIM_EVENT_SIGN, contentType:ContentTypeVS.JSON_SIGNED)
         } else {
             msg = messageSource.getMessage('claimSignatureRepeated',
                 [userVS.nif, eventVSClaim.subject].toArray() , locale)

@@ -29,11 +29,10 @@ class CertificateVSController {
 	 * @return La cadena de certificación en formato PEM del servidor
 	 */
 	def certChain () {
-        File certChain = grailsApplication.mainContext.getResource(
+        File certChainPEMFile = grailsApplication.mainContext.getResource(
                 grailsApplication.config.VotingSystem.certChainPath).getFile();
-        response.outputStream << certChain.getBytes() // Performing a binary stream copy
-        response.outputStream.flush()
-        return false
+        return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
+                messageBytes:certChainPEMFile.getBytes())]
 	}
 
 	/**
@@ -54,13 +53,12 @@ class CertificateVSController {
 			if (certificate) {
 				ByteArrayInputStream bais = new ByteArrayInputStream(certificate.content)
 				X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
-                params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
-                    messageBytes: CertUtil.getPEMEncoded (certX509))
-                return
+                return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
+                    messageBytes: CertUtil.getPEMEncoded (certX509))]
 			}
 		}
-        params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                message(code: 'certByHEXNotFound', args:[params.hashHex]))
+        return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                message(code: 'certByHEXNotFound', args:[params.hashHex]))]
 	}
 	
 	/**
@@ -74,8 +72,8 @@ class CertificateVSController {
 	def userVS () {
 		UserVS userVS = UserVS.get(params.long('userId'))
 		if(!userVS) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                    message(code:'userNotFounError',args:[params.userId]))
+            return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                    message(code:'userNotFounError',args:[params.userId]))]
 		} else {
             CertificateVS certificate
             CertificateVS.withTransaction{certificate = CertificateVS.findWhere(
@@ -83,12 +81,10 @@ class CertificateVSController {
             if (certificate) {
                 ByteArrayInputStream bais = new ByteArrayInputStream(certificate.content)
                 X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
-                params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
-                        messageBytes: CertUtil.getPEMEncoded (certX509))
-                return
-            }
-            params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                    message(code:'userWithoutCert',args:[params.userId]))
+                return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
+                        messageBytes: CertUtil.getPEMEncoded (certX509))]
+            } else return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                    message(code:'userWithoutCert',args:[params.userId]))]
         }
 	}
 	
@@ -114,10 +110,10 @@ class CertificateVSController {
 			}
 			ByteArrayInputStream bais = new ByteArrayInputStream(certificateCA.content)
 			X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
-            params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
-                    messageBytes: CertUtil.getPEMEncoded (certX509))
-		} else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                message(code: 'eventVSNotFound', args:[params.eventVS_Id]))
+            return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
+                    messageBytes: CertUtil.getPEMEncoded (certX509))]
+		} else return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                message(code: 'eventVSNotFound', args:[params.eventVS_Id]))]
 	}
 
 	/**
@@ -130,13 +126,13 @@ class CertificateVSController {
 	 */
 	def addCertificateAuthority () {
 		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
-            return params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    message(code: "serviceDevelopmentModeMsg"))
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code: "serviceDevelopmentModeMsg"))]
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		signatureVSService.deleteTestCerts()
-		params.responseVS = signatureVSService.addCertificateAuthority(
-			"${request.getInputStream()}".getBytes(), request.getLocale())
+		return [responseVS:signatureVSService.addCertificateAuthority(
+			"${request.getInputStream()}".getBytes(), request.getLocale())]
 	}
 
 	/**
@@ -147,8 +143,8 @@ class CertificateVSController {
 	 */
 	def trustedCerts () {
 		Set<X509Certificate> trustedCerts = signatureVSService.getTrustedCerts()
-        params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
-                messageBytes: CertUtil.getPEMEncoded (trustedCerts))
+        return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
+                messageBytes: CertUtil.getPEMEncoded (trustedCerts))]
 	}
 
     /**
@@ -161,11 +157,11 @@ class CertificateVSController {
      */
 	def deleteTestCerts() {
         if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
-            return params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    message(code: "serviceDevelopmentModeMsg"))
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code: "serviceDevelopmentModeMsg"))]
         }
         log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
-		params.responseVS = signatureVSService.deleteTestCerts()
+		return [responseVS:signatureVSService.deleteTestCerts()]
 	}
 
     /**
@@ -177,19 +173,19 @@ class CertificateVSController {
      */
     def sendCA() {
         if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
-            return params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    message(code: "serviceDevelopmentModeMsg"))
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code: "serviceDevelopmentModeMsg"))]
         }
         log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
-        if(!params.serverURL) return params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                message(code: "missingParamErrorMsg", args:["serverURL"]))
+        if(!params.serverURL) return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                message(code: "missingParamErrorMsg", args:["serverURL"]))]
         else {
             X509Certificate serverCert = signatureVSService.getServerCert()
             byte[] rootCACertPEMBytes = CertUtil.getPEMEncoded (serverCert);
             //String serviceURL = ActorVS.getRootCAServiceURL(params.serverURL)
             String serviceURL = "${params.serverURL}/certificateVS/addCertificateAuthority"
-            return params.responseVS = HttpHelper.getInstance().sendData(rootCACertPEMBytes, ContentTypeVS.X509_CA,
-                    serviceURL);
+            return [responseVS:HttpHelper.getInstance().sendData(rootCACertPEMBytes, ContentTypeVS.X509_CA,
+                    serviceURL)]
         }
 
     }

@@ -27,9 +27,9 @@ class PDFDocumentVSController {
 				state:PDFDocumentVS.State.MANIFEST_SIGNATURE_VALIDATED)
 		}
 		if(pdfDocument) {
-            params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.PDF,
-                messageBytes: pdfDocument.pdf)
-		} else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                message(code: 'documentNotFoundMsg', args:[params.id]))
+            return [responseVS : new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.PDF,
+                messageBytes: pdfDocument.pdf)]
+		} else  return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                message(code: 'documentNotFoundMsg', args:[params.id]))]
 	}
 }

@@ -61,9 +61,11 @@ class VoteVSService {
 			//X509Certificate controlCenterCert = smimeMessageReq.getVoteVS()?.getServerCerts()?.iterator()?.next()
             X509Certificate controlCenterCert = CertUtil.fromPEMToX509CertCollection(
                     eventVS.certChainControlCenter)?.iterator()?.next()
-			Map data = [certificate:controlCenterCert, messageSMIME:messageSMIMEResp]
-			return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS,
-				type:TypeVS.ACCESS_CONTROL_VALIDATED_VOTE, data:data)
+
+            ResponseVS modelResponseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType:ContentTypeVS.VOTE,
+                    type:TypeVS.ACCESS_CONTROL_VALIDATED_VOTE, data:messageSMIMEResp, eventVS:eventVS)
+            Map model = [receiverCert:controlCenterCert, responseVS:modelResponseVS]
+			return new ResponseVS(statusCode:ResponseVS.SC_OK, data:model)
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR, type:TypeVS.VOTE_ERROR, eventVS:eventVS,
@@ -275,8 +277,8 @@ class VoteVSService {
 			certificate.voteRequestCsrVS.state = VoteRequestCsrVS.State.CANCELLED
 			certificate.state = CertificateVS.State.CANCELLED
 			certificate.save()
-			return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.CANCEL_VOTE, 
-				data:messageSMIMEResp, eventVS:eventVSElection)
+			return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.CANCEL_VOTE, data:messageSMIMEResp,
+                    contentType:ContentTypeVS.SIGNED_AND_ENCRYPTED, eventVS:eventVSElection)
 		}catch(Exception ex) {
 			log.error(ex.getMessage(), ex)
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 

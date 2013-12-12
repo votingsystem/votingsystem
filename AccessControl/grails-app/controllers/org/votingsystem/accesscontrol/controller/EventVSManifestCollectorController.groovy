@@ -31,15 +31,15 @@ class EventVSManifestCollectorController {
 			EventVSManifest eventVS = null;
 			EventVSManifest.withTransaction{ eventVS = EventVSManifest.get(params.long('id')) }
 			if(!eventVS) {
-                params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                        message(code: 'manifestNotFound', args:[params.id]))
+                return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                        message(code: 'manifestNotFound', args:[params.id]))]
 			} else {
-                params.responseVS =  eventVSManifestSignatureCollectorService.saveManifestSignature(
-                        pdfDocument, eventVS, request.getLocale())
+                return [responseVS:eventVSManifestSignatureCollectorService.saveManifestSignature(
+                        pdfDocument, eventVS, request.getLocale())]
             }
-		} else params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+		} else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                 contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
 	}
 
 

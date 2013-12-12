@@ -37,15 +37,15 @@ class VoteVSCancellerController {
 			VoteVSCanceller.withTransaction{
 				voteCanceller = VoteVSCanceller.findWhere(hashCertVoteBase64:hashCertVoteBase64)
 			}
-			if(!voteCanceller) params.responseVS = new ResponseVS(ResponseVS.SC_OK,
-                    message(code: 'voteNotFound', args:[params.id]))
+			if(!voteCanceller) return [responseVS : new ResponseVS(ResponseVS.SC_OK,
+                    message(code: 'voteNotFound', args:[params.id]))]
 			else {
 				Map anuladorvoteVSMap = voteVSService.getAnuladorVotoMap(voteCanceller)
 				render anuladorvoteVSMap as JSON
 			}
-		} else params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+		} else return [responseVS : new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                 contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
 	}
 	
 	/**
@@ -60,17 +60,12 @@ class VoteVSCancellerController {
 	 * @return Recibo que consiste en el archivo firmado recibido con la signatureVS añadida del servidor. La respuesta viaja cifrada.
 	 */
     def post () {
-		MessageSMIME messageSMIMEReq = params.messageSMIMEReq
+		MessageSMIME messageSMIMEReq = request.messageSMIMEReq
         if(!messageSMIMEReq) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))
-            return
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-		params.receiverCert = messageSMIMEReq.getUserVS().getCertificate()
 		ResponseVS responseVS = voteVSService.processCancel(messageSMIMEReq, request.getLocale())
-		if (ResponseVS.SC_OK == responseVS.statusCode) {
-            responseVS.setContentType(ContentTypeVS.SIGNED_AND_ENCRYPTED)
-        }
-		params.responseVS = responseVS
+		return [responseVS:responseVS, receiverCert:messageSMIMEReq?.getUserVS()?.getCertificate()]
     }
 
 	/**
@@ -86,13 +81,13 @@ class VoteVSCancellerController {
 		VoteVS voteVS
 		Map  cancellerMap
 		VoteVS.withTransaction { voteVS = VoteVS.get(params.long('id')) }
-		if(!voteVS) params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                message(code: 'voteNotFound', args:[params.id]))
+		if(!voteVS) return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                message(code: 'voteNotFound', args:[params.id]))]
 		else {
             VoteVSCanceller canceller
             VoteVSCanceller.withTransaction { canceller = VoteVSCanceller.findWhere(voteVS:voteVS) }
-            if(!canceller) params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                    message(code: 'voteNotFound', args:[params.id]))
+            if(!canceller) return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                    message(code: 'voteNotFound', args:[params.id]))]
             else {
                 cancellerMap = voteVSService.getAnuladorVotoMap(canceller)
                 render cancellerMap as JSON

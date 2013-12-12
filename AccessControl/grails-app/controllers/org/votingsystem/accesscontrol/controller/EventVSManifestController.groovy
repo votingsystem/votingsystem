@@ -52,15 +52,15 @@ class EventVSManifestController {
 
                 if(eventVS) {
                     if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
-                        params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.JSON,
-                                data:eventVSService.getEventVSMap(eventVS))
+                        return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.JSON,
+                                data:eventVSService.getEventVSMap(eventVS))]
                     } else {
                         render(view:"eventVSManifest", model: [ selectedSubsystem:SubSystemVS.MANIFESTS.toString(),
                                 eventMap:eventVSService.getEventVSMap(eventVS)])
                     }
                 } else {
-                    params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                            message(code:'eventVSNotFound', args:["${params.id}"]))
+                    return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                            message(code:'eventVSNotFound', args:["${params.id}"]))]
                 }
             } else getManifests()
         }
@@ -82,8 +82,8 @@ class EventVSManifestController {
 			EventVSManifest eventVS
 			EventVS.withTransaction{ eventVS = EventVSManifest.get(params.id) }
 			if(!eventVS) {
-                params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                        message(code:'eventVSNotFound', args:["${params.id}"]))
+                return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                        message(code:'eventVSNotFound', args:["${params.id}"]))]
 			} else {
                 if(!eventVS.pdf) {
                     ByteArrayOutputStream bytes = pdfRenderingService.render(
@@ -93,12 +93,12 @@ class EventVSManifestController {
                         eventVS.save()
                     }
                 }
-                params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.PDF,
-                        messageBytes: eventVS.pdf, message:"manifest_${params.id}.pdf")
+                return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.PDF,
+                        messageBytes: eventVS.pdf, message:"manifest_${params.id}.pdf")]
             }
-		} else params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+		} else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                 contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
 	}
 
 	
@@ -128,20 +128,20 @@ class EventVSManifestController {
 			EventVSManifest eventVS = null;
 			EventVSManifest.withTransaction{ eventVS = EventVSManifest.get(params.id) }
 			if(!eventVS) {
-                params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                        message(code:'eventVSNotFound', args:["${params.id}"]))
+                return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                        message(code:'eventVSNotFound', args:["${params.id}"]))]
 			} else {
                 if(eventVS.state != EventVS.State.PENDING_SIGNATURE) {
-                    params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                            message(code:'manifestNotPending', args:["${params.id}"]))
+                    return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                            message(code:'manifestNotPending', args:["${params.id}"]))]
                 } else {
-                    params.responseVS = eventVSManifestService.saveManifest(pdfDocument, eventVS, request.getLocale())
+                    return [responseVS:eventVSManifestService.saveManifest(pdfDocument, eventVS, request.getLocale())]
                 }
             }
 		} else {
-            params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+            return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                     contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                    args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
+                    args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
         }
 	}
 	
@@ -157,9 +157,9 @@ class EventVSManifestController {
 	def publishPDF () {
         String eventVSStr = "${request.getInputStream()}"
         if (!eventVSStr) {
-            params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+            return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                     contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                    args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
+                    args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
         } else {
             def eventVSJSON = JSON.parse(eventVSStr)
             log.debug "eventVSJSON.content: ${eventVSJSON.content}"
@@ -169,8 +169,7 @@ class EventVSManifestController {
                 String msg = message(code:'publishDocumentDateErrorMsg',
                         args:[DateUtils.getStringFromDate(dateFinish)])
                 log.error("DATE ERROR - msg: ${msg}")
-                params.responseVS = new ResponseVS(ResponseVS.SC_ERROR, msg)
-                return
+                return [responseVS:new ResponseVS(ResponseVS.SC_ERROR, msg)]
             }
             EventVSManifest eventVS = new EventVSManifest(subject:eventVSJSON.subject,
                     dateBegin:DateUtils.todayDate, state: EventVS.State.PENDING_SIGNATURE,
@@ -185,9 +184,8 @@ class EventVSManifestController {
             }*/
             log.debug "Saved event ${eventVS.id}"
             response.setHeader('eventId', "${eventVS.id}")
-            response.contentType = ContentTypeVS.PDF.getName()
-            response.outputStream << pdfByteStream.toByteArray() // Performing a binary stream copy
-            return false
+            return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PDF,
+                messageBytes: pdfByteStream.toByteArray())]
         }
 	}
 	
@@ -199,12 +197,12 @@ class EventVSManifestController {
 	def getHtml () {
 		if (params.long('id')) {
 			EventVSManifest eventVS = EventVSManifest.get(params.id)
-			if(eventVS) params.responseVS = new ResponseVS(ResponseVS.SC_OK, eventVS.content)
-            else params.responseVS = new ResponseVS(ResponseVS.SC_OK,
-                    message(code:'eventVSNotFound', args:["${params.id}"]))
-		} else params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+			if(eventVS) return [responseVS:new ResponseVS(ResponseVS.SC_OK, eventVS.content)]
+            else return [responseVS:new ResponseVS(ResponseVS.SC_OK,
+                    message(code:'eventVSNotFound', args:["${params.id}"]))]
+		} else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                 contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
 	}
 	
 	/**
@@ -229,8 +227,8 @@ class EventVSManifestController {
 			EventVSManifest eventVS = null
 			EventVSManifest.withTransaction { eventVS = EventVSManifest.get(params.long('id')) }
 			if(!eventVS) {
-                params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                        message(code: 'eventVSNotFound', args:[params.id]))
+                return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                        message(code: 'eventVSNotFound', args:[params.id]))]
 			} else {
 				render eventVSService.getEventVSMap(eventVS) as JSON
 			}
@@ -281,18 +279,18 @@ class EventVSManifestController {
 		EventVSManifest eventVS
 		EventVSManifest.withTransaction { eventVS = EventVSManifest.get(params.long('id')) }
 		if(!eventVS) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                    message(code: 'eventVSNotFound', args:[params.id]))
+            return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                    message(code: 'eventVSNotFound', args:[params.id]))]
 		} else {
             PDFDocumentVS pdfDocument
             PDFDocumentVS.withTransaction {
                 pdfDocument = PDFDocumentVS.findWhere(eventVS:eventVS, state:PDFDocumentVS.State.VALIDATED_MANIFEST)
             }
             if(pdfDocument) {
-                params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PDF,
-                       message:"manifest_${eventVS.id}.pdf", messageBytes: pdfDocument.pdf)
-            } else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                    message(code: 'validatedManifestNotFoundErrorMsg', args:[params.id]))
+                return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PDF,
+                       message:"manifest_${eventVS.id}.pdf", messageBytes: pdfDocument.pdf)]
+            } else return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                    message(code: 'validatedManifestNotFoundErrorMsg', args:[params.id]))]
         }
 	}
 	
@@ -365,11 +363,11 @@ class EventVSManifestController {
 				} else {
 					render(view:"statistics", model: [statisticsMap:statisticsMap])
 				}
-			} else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                    message(code: 'eventVSNotFound', args:[params.id]))
-		} else params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+			} else return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                    message(code: 'eventVSNotFound', args:[params.id]))]
+		} else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                 contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
 	}
 
 }

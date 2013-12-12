@@ -55,13 +55,12 @@ class CertificateVSController {
 				response.status = ResponseVS.SC_OK
 				ByteArrayInputStream bais = new ByteArrayInputStream(certificate.content)
 				X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
-                params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
-                        messageBytes: CertUtil.getPEMEncoded (certX509))
-				return
+                return [responseVS : new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
+                        messageBytes: CertUtil.getPEMEncoded (certX509))]
 			}
 		}
-        params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                message(code: 'certByHEXNotFound', args:[params.hashHex]))
+        return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                message(code: 'certByHEXNotFound', args:[params.hashHex]))]
 	}
 	
 	/**
@@ -84,12 +83,11 @@ class CertificateVSController {
         if (certificate) {
             ByteArrayInputStream bais = new ByteArrayInputStream(certificate.content)
             X509Certificate certX509 = CertUtil.loadCertificateFromStream (bais)
-            params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
-                    messageBytes: CertUtil.getPEMEncoded (certX509))
-            return
+            return [responseVS : new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
+                    messageBytes: CertUtil.getPEMEncoded (certX509))]
         }
-        params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                message(code:'userWithoutCert',args:[params.userId]))
+        return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                message(code:'userWithoutCert',args:[params.userId]))]
 	}
 	
 	/**
@@ -106,9 +104,7 @@ class CertificateVSController {
 	def eventCA () {
 		EventVS eventVSElection
 		if (params.eventAccessControlURL){
-			EventVS.withTransaction {
-				eventVSElection = EventVS.findWhere(url:params.eventAccessControlURL)
-			}
+			EventVS.withTransaction { eventVSElection = EventVS.findWhere(url:params.eventAccessControlURL) }
 			if (eventVSElection) {
 				CertificateVS certificateCA
 				CertificateVS.withTransaction {
@@ -143,12 +139,11 @@ class CertificateVSController {
 	 */
 	def addCertificateAuthority () {
 		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))
-            return
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		signatureVSService.deleteTestCerts()
-        params.responseVS  = signatureVSService.addCertificateAuthority(
-			"${request.getInputStream()}".getBytes(), request.getLocale())
+        return [responseVS : signatureVSService.addCertificateAuthority(
+			"${request.getInputStream()}".getBytes(), request.getLocale())]
 	}
 }

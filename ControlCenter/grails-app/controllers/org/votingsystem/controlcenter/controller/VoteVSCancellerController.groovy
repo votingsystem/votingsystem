@@ -29,19 +29,13 @@ class VoteVSCancellerController {
 	 * @return Recibo firmado con el certificado del servidor
 	 */
 	def index() { 
-		MessageSMIME messageSMIMEReq = params.messageSMIMEReq
+		MessageSMIME messageSMIMEReq = request.messageSMIMEReq
         if(!messageSMIMEReq) {
-            return params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
         ResponseVS responseVS = voteVSService.processCancel( messageSMIMEReq, request.getLocale())
-        if(ResponseVS.SC_OK == responseVS.statusCode) {
-            byte[] certChainBytes
-            EventVSElection.withTransaction { certChainBytes = params.responseVS.eventVS.certChainAccessControl }
-            Collection<X509Certificate> certColl = CertUtil.fromPEMToX509CertCollection(certChainBytes)
-            X509Certificate receiverCert = certColl.iterator().next()
-            params.receiverCert = receiverCert
-        }
-        params.responseVS = responseVS
+        if(ResponseVS.SC_OK == responseVS.statusCode) return responseVS.data
+        else return [responseVS:responseVS]
     }
 	
 
@@ -58,13 +52,13 @@ class VoteVSCancellerController {
 		VoteVS voteVS
 		Map  cancellerMap
 		VoteVS.withTransaction {voteVS = VoteVS.get(params.long('id'))}
-        if(!voteVS) params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                message(code: 'voteNotFound', args:[params.id]))
+        if(!voteVS) return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                message(code: 'voteNotFound', args:[params.id]))]
         else {
             VoteVSCanceller canceller
             VoteVSCanceller.withTransaction { canceller = VoteVSCanceller.findWhere(voteVS:voteVS) }
-            if(!canceller) params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                    message(code: 'voteNotFound', args:[params.id]))
+            if(!canceller) return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                    message(code: 'voteNotFound', args:[params.id]))]
             else {
                 cancellerMap = voteVSService.getAnuladorVotoMap(canceller)
                 render cancellerMap as JSON

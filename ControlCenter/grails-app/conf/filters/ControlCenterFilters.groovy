@@ -40,10 +40,6 @@ class ControlCenterFilters {
                 if(!params.sort) params.sort = "dateCreated"
                 if(!params.order) params.order = "desc"
                 response.setHeader("Cache-Control", "no-store")
-                params.messageSMIMEReq = null
-                params.receiverCert = null
-                params.receiverPublicKey = null;
-                params.responseVS = null
             }
         }
 
@@ -65,7 +61,7 @@ class ControlCenterFilters {
                             responseVS =  signatureVSService.decryptSMIMEMessage(requestBytes, request.getLocale())
                             if(ResponseVS.SC_OK == responseVS.getStatusCode())
                                 responseVS = processSMIMERequest(responseVS.smimeMessage,contentTypeVS, params, request)
-                            if(ResponseVS.SC_OK == responseVS.getStatusCode()) params.messageSMIMEReq = responseVS.data
+                            if(ResponseVS.SC_OK == responseVS.getStatusCode()) request.messageSMIMEReq = responseVS.data
                             break;
                         case ContentTypeVS.ENCRYPTED:
                             responseVS =  signatureVSService.decryptMessage(requestBytes, request.getLocale())
@@ -75,7 +71,7 @@ class ControlCenterFilters {
                         case ContentTypeVS.SIGNED:
                             responseVS = processSMIMERequest(new SMIMEMessageWrapper(
                                     new ByteArrayInputStream(requestBytes)), contentTypeVS, params, request)
-                            if(ResponseVS.SC_OK == responseVS.getStatusCode()) params.messageSMIMEReq = responseVS.data
+                            if(ResponseVS.SC_OK == responseVS.getStatusCode()) request.messageSMIMEReq = responseVS.data
                             break;
                         default: return;
                     }
@@ -88,9 +84,9 @@ class ControlCenterFilters {
                     return printOutput(response,responseVS)
             }
 
-            after = {
-                MessageSMIME messageSMIMEReq = params.messageSMIMEReq
-                ResponseVS responseVS = params.responseVS
+            after = { model ->
+                MessageSMIME messageSMIMEReq = request.messageSMIMEReq
+                ResponseVS responseVS = model.responseVS
                 if(messageSMIMEReq && responseVS){
                     MessageSMIME.withTransaction {
                         messageSMIMEReq = messageSMIMEReq.merge()
@@ -112,7 +108,7 @@ class ControlCenterFilters {
                     case ContentTypeVS.VOTE:
                     case ContentTypeVS.SIGNED_AND_ENCRYPTED:
                         ResponseVS encryptResponse =  signatureVSService.encryptSMIMEMessage(
-                                messageSMIME.content, params.receiverCert, request.getLocale())
+                                messageSMIME.content, model.receiverCert, request.getLocale())
                         if(ResponseVS.SC_OK == encryptResponse.statusCode) {
                             encryptResponse.setContentType(responseVS.getContentType())
                             return printOutputStream(response, encryptResponse)
@@ -125,12 +121,12 @@ class ControlCenterFilters {
                         if(ResponseVS.SC_OK == responseVS.statusCode) return printOutputStream(response, responseVS)
                         else return printOutput(response, responseVS)
                     case ContentTypeVS.MULTIPART_ENCRYPTED:
-                        if(responseVS.messageBytes && (params.receiverCert || params.receiverPublicKey)) {
-                            if(params.receiverPublicKey) {
-                                responseVS =  signatureVSService.encryptMessage(
-                                        responseVS.messageBytes, params.receiverPublicKey)
-                            } else if(params.receiverCert) {
-                                responseVS = signatureVSService.encryptToCMS(responseVS.messageBytes,params.receiverCert)
+                        if(responseVS.messageBytes && (model.receiverCert || model.receiverPublicKey)) {
+                            if(model.receiverPublicKey) {
+                                responseVS =  signatureVSService.encryptMessage(responseVS.messageBytes,
+                                        model.receiverPublicKey)
+                            } else if(model.receiverCert) {
+                                responseVS = signatureVSService.encryptToCMS(responseVS.messageBytes,model.receiverCert)
                             }
                             if (ResponseVS.SC_OK == responseVS.statusCode) return printOutputStream(response,responseVS)
                         }

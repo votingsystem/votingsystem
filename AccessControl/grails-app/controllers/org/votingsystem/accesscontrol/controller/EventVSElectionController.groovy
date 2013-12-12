@@ -72,9 +72,9 @@ class EventVSElectionController {
                     eventVS = null   }
             }
             if(!eventVS) {
-                params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                        message(code: 'eventVSNotFound', args:[params.id]))
-                return
+                return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                        message(code: 'eventVSNotFound', args:[params.id]))]
+
             } else {
                 if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
                     render eventVSService.getEventVSMap(eventVS) as JSON
@@ -132,18 +132,17 @@ class EventVSElectionController {
 	 * @return Recibo que consiste en el archivo firmado recibido con la signatureVS añadida del servidor.
 	 */
     def save () {
-		MessageSMIME messageSMIME = params.messageSMIMEReq
+		MessageSMIME messageSMIME = request.messageSMIMEReq
 		if(!messageSMIME) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))
-            return
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
 		}
         ResponseVS responseVS = eventVSElectionService.saveEvent(messageSMIME, request.getLocale())
-		params.responseVS = responseVS
 		if (ResponseVS.SC_OK == responseVS.statusCode) {
 			response.setHeader('eventURL', 
 				"${grailsApplication.config.grails.serverURL}/eventVSElection/${responseVS.eventVS.id}")
             responseVS.setContentType(ContentTypeVS.SIGNED)
 		}
+        return [responseVS:responseVS]
     }
 
 	/**
@@ -172,11 +171,11 @@ class EventVSElectionController {
                     if (params.callback) render "${params.callback}(${statisticsMap as JSON})"
                     else render statisticsMap as JSON
                 } else render(view:"statistics", model: [statisticsJSON: statisticsMap  as JSON])
-            } else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                    message(code: 'eventVSNotFound', args:[params.id]))
-        } else params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+            } else return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                    message(code: 'eventVSNotFound', args:[params.id]))]
+        } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                 contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
     }
     
 	/**
@@ -206,17 +205,17 @@ class EventVSElectionController {
 					messageSMIME = results.iterator().next()
 				}
                 if (messageSMIME) {
-                    params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK,
-                            contentType:ContentTypeVS.TEXT_STREAM, messageBytes: messageSMIME.content)
+                    return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK,
+                            contentType:ContentTypeVS.TEXT_STREAM, messageBytes: messageSMIME.content)]
                 }
             }
             if (!eventVS || !messageSMIME) {
-                params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                        message(code: 'eventVSNotFound', args:[params.id]))
+                return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                        message(code: 'eventVSNotFound', args:[params.id]))]
             }
-        } else params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+        } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                 contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
     }
 	
 	/**
@@ -238,14 +237,14 @@ class EventVSElectionController {
 					messageSMIME = MessageSMIME.findWhere(eventVS:eventVS, type: TypeVS.VOTING_EVENT)
 				}
 				if (messageSMIME) {
-                    params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, messageBytes: messageSMIME.content,
-                            contentType: ContentTypeVS.TEXT_STREAM)
+                    return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK, messageBytes: messageSMIME.content,
+                            contentType: ContentTypeVS.TEXT_STREAM)]
 				}
-			} else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                    message(code: 'eventVSNotFound', args:[params.id]))
-        } else params.responseVS =  new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+			} else return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                    message(code: 'eventVSNotFound', args:[params.id]))]
+        } else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                 contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
 	}
 
 	/**
@@ -264,8 +263,8 @@ class EventVSElectionController {
 				eventVS = EventVSElection.get(params.long('id'))
 			}
 			if (!eventVS) {
-                params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                        message(code: 'eventVSNotFound', args:[params.id]))
+                return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                        message(code: 'eventVSNotFound', args:[params.id]))]
 			}
 			def voteVSInfoMap = new HashMap()
 			def requestsOK, requestsCancelled;
@@ -329,9 +328,9 @@ class EventVSElectionController {
 				voteVSInfoMap.votesVS.add(voteVSMap)
 			}
 			render voteVSInfoMap as JSON
-		} else params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+		} else return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                 contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
 	}
 
 	/**
@@ -349,15 +348,14 @@ class EventVSElectionController {
 			eventVS = EventVSElection.get(params.long('id'))
 		}
 		if (!eventVS) {
-            params.responseVS =new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code:'eventVSNotFound',args:[params.id]))
-            return
+            return [responseVS =new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code:'eventVSNotFound',args:[params.id]))]
 		}
 		def errors
 		MessageSMIME.withTransaction { errors = MessageSMIME.findAllWhere ( type:TypeVS.VOTE_ERROR,  eventVS:eventVS) }
 
 		if(errors.size == 0){
-            params.responseVS = new ResponseVS(ResponseVS.SC_OK, message(code: 'votingWithoutErrorsMsg',
-                    args:[eventVS.id, eventVS.subject]))
+            return [responseVS:new ResponseVS(ResponseVS.SC_OK, message(code: 'votingWithoutErrorsMsg',
+                    args:[eventVS.id, eventVS.subject]))]
 		} else {
 			String datePathPart = DateUtils.getShortStringFromDate(eventVS.getDateFinish())
 			String baseDirPath = "${grailsApplication.config.VotingSystem.errorsBaseDir}" +
@@ -369,8 +367,8 @@ class EventVSElectionController {
 			File zipResult = new File("${baseDirPath}.zip")
 			def ant = new AntBuilder()
 			ant.zip(destfile: zipResult, basedir: "${baseDirPath}")
-            params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, messageBytes:zipResult.getBytes(),
-                contentType: ContentTypeVS.ZIP)
+            return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK, messageBytes:zipResult.getBytes(),
+                contentType: ContentTypeVS.ZIP)]
 		}
 	}
 

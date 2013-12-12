@@ -40,13 +40,12 @@ class SearchController {
 	*/
    def reindexTest () {
 	   if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
-           params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))
-           return
+           return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
 	   }
 	   log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 	   FullTextSession fullTextSession = Search.getFullTextSession(sessionFactory.currentSession);
 	   fullTextSession.createIndexer().startAndWait()
-       params.responseVS = new ResponseVS(ResponseVS.SC_OK, "OK")
+       return [responseVS : new ResponseVS(ResponseVS.SC_OK, "OK")]
    }
    
    /**
@@ -57,25 +56,25 @@ class SearchController {
 	*             en formato SMIME con los datos de la solicitud de reindexación.
 	*/
 	def reindex () {
-        MessageSMIME messageSMIME = params.messageSMIMEReq
+        MessageSMIME messageSMIME = request.messageSMIMEReq
         if(!messageSMIME) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))
-            return
+            return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
         }
         def requestJSON = JSON.parse(messageSMIME.getSmimeMessage().getSignedContent())
         TypeVS operation = TypeVS.valueOf(requestJSON.operation)
         if(TypeVS.INDEX_REQUEST != operation) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    message(code:'operationErrorMsg', args:[operation.toString()]))
+            return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code:'operationErrorMsg', args:[operation.toString()]))]
         } else {
             UserVS userVS = messageSMIME.getUserVS()
             if (userVSService.isUserAdmin(userVS.nif)) {
                 FullTextSession fullTextSession = Search.getFullTextSession(sessionFactory.currentSession);
                 fullTextSession.createIndexer().startAndWait()
-                params.responseVS = new ResponseVS(type:TypeVS.INDEX_REQUEST, statusCode:ResponseVS.SC_OK)
+                return [responseVS : new ResponseVS(type:TypeVS.INDEX_REQUEST, statusCode:ResponseVS.SC_OK)]
             } else {
-                params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-                        type:TypeVS.INDEX_REQUEST_ERROR, message:message(code: 'adminIdentificationErrorMsg', [userVS.nif]))
+                return [responseVS : new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
+                        type:TypeVS.INDEX_REQUEST_ERROR, message:message(code: 'adminIdentificationErrorMsg',
+                        args:[userVS.nif]))]
             }
         }
 	}
@@ -115,10 +114,9 @@ class SearchController {
 		String requestStr = "${request.getInputStream()}"
 		log.debug("requestStr: ${requestStr}")
 		if (!requestStr) {
-            params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+            return [responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                     contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                    args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
-            return
+                    args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
 		}
 		def messageJSON = JSON.parse(requestStr)
 		def eventsVSMap = new HashMap()
@@ -206,7 +204,7 @@ class SearchController {
 	def eventvsByTag () {
         def eventsVSMap = new HashMap()
         if (!params.tag) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR, message(code: 'searchMissingParamTag'))
+            return [responseVS : new ResponseVS(ResponseVS.SC_ERROR, message(code: 'searchMissingParamTag'))]
         } else {
             def tag = TagVS.findByName(params.tag)
             if (tag) {

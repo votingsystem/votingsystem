@@ -37,14 +37,14 @@ class UserVSController {
             if(userVS) {
                 String msg = null
                 if(UserVS.Type.REPRESENTATIVE == userVS.type) {
-                    params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                            message(code: 'userIsRepresentativeMsg', args:[nif]))
+                    return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                            message(code: 'userIsRepresentativeMsg', args:[nif]))]
                 } else {
                     if(!userVS.representative) {
                         if(UserVS.Type.USER_WITH_CANCELLED_REPRESENTATIVE == userVS.type) {
                             msg = message(code: 'userRepresentativeUnsubscribedMsg', args:[nif])
                         } else msg = message(code: 'nifWithoutRepresentative', args:[nif])
-                        params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND, msg)
+                        return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND, msg)]
                     } else {
                         UserVS representative = userVS.representative
                         String name = "${representative.name} ${representative.firstName}"
@@ -54,13 +54,11 @@ class UserVSController {
                     }
                 }
             } else {
-                params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                        message(code: 'userVSNotFoundByNIF', args:[nif]))
+                return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                        message(code: 'userVSNotFoundByNIF', args:[nif]))]
             }
-		} else {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    message(code: 'nifWithErrors', args:[params.nif]))
-        }
+		} else return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code: 'nifWithErrors', args:[params.nif]))]
 	}
 	
 	/**
@@ -76,8 +74,7 @@ class UserVSController {
 	 */
 	def save() {
 		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))
-            return
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		String pemCert = "${request.getInputStream()}"
@@ -92,8 +89,8 @@ class UserVSController {
 			responseVS.userVS.representativeRegisterDate = null
 			responseVS.userVS.metaInf = null
 			UserVS.withTransaction { responseVS.userVS.save() }
-            params.responseVS = responseVS
-		} else  params.responseVS = new ResponseVS(ResponseVS.SC_ERROR, message(code:"nullCertificateErrorMsg"))
+            return [responseVS : responseVS]
+		} else return [responseVS : new ResponseVS(ResponseVS.SC_ERROR, message(code:"nullCertificateErrorMsg"))]
 	}
 	
 	
@@ -109,8 +106,7 @@ class UserVSController {
 	 */
 	def prepareUserBaseData() {
 		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))
-            return
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		def usersVS = UserVS.findAll()

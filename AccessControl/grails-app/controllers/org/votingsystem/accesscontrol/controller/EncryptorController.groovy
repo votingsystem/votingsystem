@@ -26,28 +26,25 @@ class EncryptorController {
 
     def index() { 
 		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))
-            return
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
 		}
 		if(!params.requestBytes) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code:'requestWithoutFile'))
-			return
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code:'requestWithoutFile'))]
+
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		byte[] solicitud = params.requestBytes
 		//log.debug("Solicitud" + new String(solicitud))
 		def messageJSON = JSON.parse(new String(solicitud))
 		if(!messageJSON.publicKey) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code:'publicKeyMissingErrorMsg'))
-            return
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code:'publicKeyMissingErrorMsg'))]
 		}
 	    byte[] decodedPK = Base64.decode(messageJSON.publicKey);
 	    PublicKey receiverPublic =  KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(decodedPK));
 	    //log.debug("receiverPublic.toString(): " + receiverPublic.toString());
 		messageJSON.message="Hello '${messageJSON.from}' from server"
-		params.receiverPublicKey = receiverPublic
-		params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.MULTIPART_ENCRYPTED,
-            messageBytes: messageJSON.toString().getBytes())
+        return [receiverPublicKey:receiverPublic, responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK,
+                contentType: ContentTypeVS.MULTIPART_ENCRYPTED, messageBytes: messageJSON.toString().getBytes())]
 	}
 	
 	/**
@@ -62,14 +59,12 @@ class EncryptorController {
 	 */
 	def getMultiSignedMessage() {
 		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))
-            return
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
-		MessageSMIME messageSMIMEReq = params.messageSMIMEReq
+		MessageSMIME messageSMIMEReq = request.messageSMIMEReq
         if(!messageSMIMEReq) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))
-            return
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
 		response.contentType = ContentTypeVS.SIGNED
 		SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage()
@@ -86,19 +81,17 @@ class EncryptorController {
 		//log.debug("========= ${new String(messageBaos.toByteArray())}")
 		
 		MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.TEST, content:smimeMessageResp.getBytes())
-		params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, data:messageSMIMEResp, type:TypeVS.TEST,
-                contentType:ContentTypeVS.SIGNED)
+		return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK, data:messageSMIMEResp, type:TypeVS.TEST,
+                contentType:ContentTypeVS.SIGNED)]
 	}
 	
 	def validateTimeStamp() {
 		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))
-            return
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
 		}
-		MessageSMIME messageSMIMEReq = params.messageSMIMEReq
+		MessageSMIME messageSMIMEReq = request.messageSMIMEReq
         if(!messageSMIMEReq) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))
-            return
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage()
@@ -111,21 +104,12 @@ class EncryptorController {
 			eventVS = EventVS.get(msgJSON.eventId)
 			//eventVS.dateFinish = dateFinish
 		}
-
         Date signatureTime = userVS.getTimeStampToken()?.getTimeStampInfo().getGenTime()
-        ResponseVS responseVS = null
-
         if(!eventVS.isActive(signatureTime)) {
             String msg = message(code: "checkedDateRangeErrorMsg",
                     args: [signatureTime, eventVS.getDateBegin(), eventVS.getDateFinish()])
-            responseVS = new ResponseVS(ResponseVS.SC_ERROR, msg)
-        } else responseVS = new ResponseVS(ResponseVS.SC_OK)
-
-        responseVS.type = TypeVS.TEST
-		params.responseVS = responseVS
-        response.status = responseVS.statusCode
-        render responseVS.message
-		
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR, msg)]
+        } else return [responseVS:new ResponseVS(ResponseVS.SC_OK)]
 	}
 
 }

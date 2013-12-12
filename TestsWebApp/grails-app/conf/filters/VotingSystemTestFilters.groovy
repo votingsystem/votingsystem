@@ -36,9 +36,9 @@ class VotingSystemTestFilters {
                 response.setHeader("Cache-Control", "no-store")
             }
 
-            after = {
-                if(params.responseVS == null) return;
-                ResponseVS responseVS = params.responseVS
+            after = { model ->
+                if(model.responseVS == null) return;
+                ResponseVS responseVS = model.responseVS
                 switch(responseVS.getContentType()) {
                     case ContentTypeVS.TEXT:
                         return printText(response, responseVS);

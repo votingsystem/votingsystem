@@ -27,10 +27,10 @@ class MessageSMIMEController {
 			messageSMIME = MessageSMIME.get(params.long('id'))
 		}
         if (messageSMIME) {
-            params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, contentType:ContentTypeVS.TEXT_STREAM,
-                    messageBytes:messageSMIME.content)
-        } else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                message(code: 'eventVSNotFound', args:[params.id]))
+            return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK, contentType:ContentTypeVS.TEXT_STREAM,
+                    messageBytes:messageSMIME.content)]
+        } else return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                message(code: 'eventVSNotFound', args:[params.id]))]
 	}
 	
 	
@@ -48,13 +48,12 @@ class MessageSMIMEController {
 		if (messageSMIMEOri) {
 			def messageSMIME = MessageSMIME.findWhere(smimeParent:messageSMIMEOri, type: TypeVS.RECEIPT)
 			if (messageSMIME) {
-                params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.TEXT_STREAM,
-                        messageBytes: messageSMIME.content)
-                return
+                return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.TEXT_STREAM,
+                        messageBytes: messageSMIME.content)]
 			}
 		}
-        params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                message(code: 'eventVSNotFound', args:[params.smimeParentId]))
+        return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                message(code: 'eventVSNotFound', args:[params.smimeParentId]))]
 	}
 	
 }

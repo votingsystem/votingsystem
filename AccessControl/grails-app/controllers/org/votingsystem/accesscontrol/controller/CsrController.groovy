@@ -63,10 +63,10 @@ class CsrController {
                 certs.add(certX509)
                 certs.addAll(Arrays.asList(certsServer))
 
-                params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
-                        messageBytes: CertUtil.getPEMEncoded (certs))
-			} else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code: "csrGenerationErrorMsg"))
-		} else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code: "csrRequestNotValidated"))
+                return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PEM,
+                        messageBytes: CertUtil.getPEMEncoded (certs))]
+			} else return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code: "csrGenerationErrorMsg"))]
+		} else return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code: "csrRequestNotValidated"))]
 	}
 	
 	
@@ -81,15 +81,14 @@ class CsrController {
 	 */
 	def request() {
         if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))
-            return
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
         }
 		String consulta = "${request.getInputStream()}"
 		if (!consulta) {
-            params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+            return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                     contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                    args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
-		} else  params.responseVS = csrService.saveUserCSR(consulta.getBytes(), request.getLocale())
+                    args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
+		} else return [responseVS:csrService.saveUserCSR(consulta.getBytes(), request.getLocale())]
 	}
 	
 	/**
@@ -110,13 +109,11 @@ class CsrController {
 	 */
 	def validacion() {
         if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))
-            return
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
         }
-		MessageSMIME messageSMIME = params.messageSMIMEReq
+		MessageSMIME messageSMIME = request.messageSMIMEReq
 		if(!messageSMIME) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))
-            return
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
 		}
 		List<String> administradores = Arrays.asList(
 			grailsApplication.config.VotingSystem.adminsDNI.split(","))
@@ -126,27 +123,22 @@ class CsrController {
 		if (administradores.contains(userVS.nif) || userVS.nif.equals(docValidacionJSON.nif)) {
 			DeviceVS dispositivo = DeviceVS.findWhere(deviceId: docValidacionJSON.deviceId)
 			if (!dispositivo?.userVS) {
-                params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code:"csr.solicitudNoEncontrada",
-                        args: [smimeMessageReq.getSignedContent()]))
-				return
+                return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code:"csr.solicitudNoEncontrada",
+                        args: [smimeMessageReq.getSignedContent()]))]
 			}
 			if(dispositivo.userVS.nif != userVS.nif) {
-                params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                        message(code: "userWithoutPrivilegesToValidateCSR", args: [userVS.nif]))
-                return
+                return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                        message(code: "userWithoutPrivilegesToValidateCSR", args: [userVS.nif]))]
 			}
 			UserRequestCsrVS csrRequest = UserRequestCsrVS.findWhere(userVS:dispositivo.userVS,
 				state:UserRequestCsrVS.State.PENDING);
 			if (!csrRequest) {
-                params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                        message(code: "userCSRNotFoundMsg", args: [userVSMovil.nif]))
-                return
+                return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                        message(code: "userCSRNotFoundMsg", args: [userVSMovil.nif]))]
 			}
-			params.csrValidationResponseVS = csrService.signCertUserVS(csrRequest, request.getLocale())
-		} else {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    message(code: "userWithoutPrivilegesToValidateCSR", args: [userVS.nif]))
-		}
+            return [responseVS:csrService.signCertUserVS(csrRequest, request.getLocale())]
+		} else return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                message(code: "userWithoutPrivilegesToValidateCSR", args: [userVS.nif]))]
 	}
 	
 	/**
@@ -163,8 +155,7 @@ class CsrController {
 	 */
 	def validate() {
 		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))
-            return
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		String consulta = "${request.getInputStream()}"
@@ -177,17 +168,15 @@ class CsrController {
 		def dataJSON = JSON.parse(consulta)
 		DeviceVS dispositivo = DeviceVS.findByDeviceId(dataJSON?.deviceId?.trim())
 		if (!dispositivo) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    message(code: "csr.solicitudNoEncontrada", args:["deviceId: ${dataJSON?.deviceId}"]))
-			return
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code: "csr.solicitudNoEncontrada", args:["deviceId: ${dataJSON?.deviceId}"]))]
 		}
 		UserVS userVS
 		String validatedNIF = NifUtils.validate(dataJSON?.nif)
 		if(validatedNIF) userVS = UserVS.findByNif(validatedNIF)
 		if (!userVS) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    message(code: "csr.solicitudNoEncontrada", args: ["nif: ${validatedNIF}"]))
-			return
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code: "csr.solicitudNoEncontrada", args: ["nif: ${validatedNIF}"]))]
 		}
 		UserRequestCsrVS csrRequest
 		UserRequestCsrVS.withTransaction{
@@ -195,9 +184,9 @@ class CsrController {
 				dispositivo, userVS, UserRequestCsrVS.State.PENDING);
 		}
 		if (!csrRequest) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    message(code: "csr.solicitudNoEncontrada", args: [consulta]))
-		} else params.responseVS = csrService.signCertUserVS(csrRequest, request.getLocale())
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code: "csr.solicitudNoEncontrada", args: [consulta]))]
+		} else return [responseVS:csrService.signCertUserVS(csrRequest, request.getLocale())]
 	}
 	
 }

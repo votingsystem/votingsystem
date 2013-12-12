@@ -28,7 +28,7 @@ class TimeStampVSController {
 	 */
 	def index() {
         byte[] timeStampRequestBytes = FileUtils.getBytesFromInputStream(request.getInputStream())
-        params.responseVS = timeStampVSService.processRequest(timeStampRequestBytes, request.getLocale())
+        return [responseVS : timeStampVSService.processRequest(timeStampRequestBytes, request.getLocale())]
 	}
 	
 	/**
@@ -40,8 +40,8 @@ class TimeStampVSController {
 	 * @return El certificado en formato PEM con el que se firman los sellos de tiempo
 	 */
 	def cert() {
-        params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, contentType:ContentTypeVS.PEM,
-                messageBytes:timeStampVSService.getSigningCertPEMBytes())
+        return [responseVS : new ResponseVS(statusCode:ResponseVS.SC_OK, contentType:ContentTypeVS.PEM,
+                messageBytes:timeStampVSService.getSigningCertPEMBytes())]
 	}
 
     /**
@@ -53,11 +53,10 @@ class TimeStampVSController {
      * @return Si se recibe un mensaje firmado con un sello de tiempo correcto devuelve un codigo de estado 200
      */
     def test() {
-        MessageSMIME messageSMIMEReq = params.messageSMIMEReq
+        MessageSMIME messageSMIMEReq = request.messageSMIMEReq
         if(!messageSMIMEReq) {
-            params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-                    message:message(code:'requestWithoutFile'), type:TypeVS.ERROR)
-        } else params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK, message:"TIMESTAMP OK", type: TypeVS.TEST)
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
+        } else return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK, message:"TIMESTAMP OK", type: TypeVS.TEST)]
     }
 
 	/*def test() {
@@ -90,12 +89,12 @@ class TimeStampVSController {
 		if(params.long('serialNumber')) {
 			TimeStampVS timeStamp
 			TimeStampVS.withTransaction { timeStamp = TimeStampVS.findBySerialNumber(params.long('serialNumber')) }
-			if(timeStamp)  params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_OK,
-                messageBytes: timeStamp.getTokenBytes(), contentType:ContentTypeVS.CMS_SIGNED)
-			else params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND, "ERROR")
-		} else params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+			if(timeStamp)  return [responseVS : new ResponseVS(statusCode:ResponseVS.SC_OK,
+                messageBytes: timeStamp.getTokenBytes(), contentType:ContentTypeVS.CMS_SIGNED)]
+			else return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND, "ERROR")]
+		} else return [responseVS : new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                 contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
 	}
 
 }

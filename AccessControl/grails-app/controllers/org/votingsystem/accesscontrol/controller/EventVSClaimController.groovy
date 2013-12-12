@@ -61,13 +61,12 @@ class EventVSClaimController {
                 }
             }
 			if(!eventVS) {
-                params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                        message(code: 'eventVSNotFound', args:[params.id]))
-				return
+                return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                        message(code: 'eventVSNotFound', args:[params.id]))]
 			} else {
 				if(request.contentType?.contains(ContentTypeVS.JSON.getName())) {
-					render eventVSService.getEventVSMap(eventVS) as JSON
-					return false
+					return [responseVS: new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.JSON,
+                            data:eventVSService.getEventVSMap(eventVS))]
 				} else {
 					render(view:"eventVSClaim", model: [selectedSubsystem:SubSystemVS.CLAIMS.toString(),
 						eventMap: eventVSService.getEventVSMap(eventVS)])
@@ -142,7 +141,7 @@ class EventVSClaimController {
             }
         }
         if (!eventVS || !messageSMIME) {
-            params.responseVS =new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code:'eventVSNotFound',args:[params.id]))
+            return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,message(code:'eventVSNotFound',args:[params.id]))]
         }
     }
     
@@ -163,12 +162,11 @@ class EventVSClaimController {
 				messageSMIME = MessageSMIME.findWhere(eventVS:eventVS, type:TypeVS.CLAIM_EVENT)
 			}
 			if (messageSMIME) {
-                params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType:ContentTypeVS.TEXT_STREAM,
-                        messageBytes: messageSMIME.content)
-                return
+                return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK, contentType:ContentTypeVS.TEXT_STREAM,
+                        messageBytes: messageSMIME.content)]
 			}
-		}
-        params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code: 'eventVSNotFound', args:[params.id]))
+		} else return [responseVS: new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                message(code: 'eventVSNotFound', args:[params.id]))]
 	}
     
 	/**
@@ -182,19 +180,17 @@ class EventVSClaimController {
 	 * @return Recibo que consiste en el documento SMIME recibido con la signatureVS añadida del servidor.
 	 */
     def save () {
-		MessageSMIME messageSMIMEReq = params.messageSMIMEReq
+		MessageSMIME messageSMIMEReq = request.messageSMIMEReq
         if(!messageSMIMEReq) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))
-            return
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-        ResponseVS responseVS = eventVSClaimService.saveEvent(
-                messageSMIMEReq, request.getLocale())
+        ResponseVS responseVS = eventVSClaimService.saveEvent(messageSMIMEReq, request.getLocale())
         if(ResponseVS.SC_OK == responseVS.statusCode) {
             response.setHeader('eventURL',
                     "${grailsApplication.config.grails.serverURL}/eventVSClaim/${responseVS.eventVS.id}")
             responseVS.setContentType(ContentTypeVS.SIGNED)
         }
-        params.responseVS = responseVS
+        return [responseVS:responseVS]
     }
 	
 	/**
@@ -224,7 +220,7 @@ class EventVSClaimController {
 				return
 			}
         }
-        params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code: 'eventVSNotFound', args:[params.id]))
+        return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code: 'eventVSNotFound', args:[params.id]))]
     }
 
 	
@@ -240,9 +236,8 @@ class EventVSClaimController {
 	def signaturesInfo () {
 		EventVSClaim eventVS = EventVSClaim.get(params.id)
 		if (!eventVS) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                    message(code: 'eventVSNotFound', args:[params.id]))
-			return
+            return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                    message(code: 'eventVSNotFound', args:[params.id]))]
 		}
 		def eventVSClaimInfoMap = new HashMap()
 		List<SignatureVS> signatures

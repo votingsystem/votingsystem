@@ -1,6 +1,7 @@
 package org.votingsystem.controlcenter.service
 
 import grails.converters.JSON
+import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.model.CertificateVS
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.EventVS
@@ -26,6 +27,7 @@ class VoteVSService {
 
     static transactional = true
 
+    LinkGenerator grailsLinkGenerator
 	def messageSource
 	def signatureVSService
     def grailsApplication
@@ -100,9 +102,13 @@ class VoteVSService {
 				voteVS = new VoteVS(optionSelected:optionSelected, eventVS:eventVS, state:VoteVS.State.OK,
 					certificateVS:certificateVS, messageSMIME:messageSMIMEResp)
 				voteVS.save()
-				return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ACCESS_CONTROL_VALIDATED_VOTE,
-                        eventVS:eventVS, contentType: ContentTypeVS.VOTE,
-                        data:[voteVS:voteVS, messageSMIME:messageSMIMEResp, receiverCert:responseReceiverCert])
+
+                String voteURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${messageSMIMEResp.id}"
+                Map modelData = [voteURL:voteURL, receiverCert: responseReceiverCert,
+                        responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ACCESS_CONTROL_VALIDATED_VOTE,
+                        eventVS:eventVS, contentType: ContentTypeVS.VOTE, data:messageSMIMEResp)]
+
+				return new ResponseVS(statusCode:ResponseVS.SC_OK, data:modelData)
 			} else {
 				msg = messageSource.getMessage('accessRequestVoteErrorMsg', [responseVS.message].toArray(), locale)
 				log.error("validateVote - ${msg}")
@@ -119,7 +125,6 @@ class VoteVSService {
 		log.debug ("processCancel")
 		EventVS eventVS
 		SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
-		String msg
 		try {
 			def anulacionJSON = JSON.parse(smimeMessageReq.getSignedContent())
 			def originHashCertVote = anulacionJSON.originHashCertVote
@@ -160,27 +165,28 @@ class VoteVSService {
 				eventVS:eventVS, type:TypeVS.RECEIPT)
 			messageSMIMEResp.save()
 			if (!messageSMIMEResp.save()) {
-			    messageSMIMEResp.errors.each { 
-					msg = "${msg} - ${it}"
-					log.error("processCancel - ${it}")
-				}
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-					type:TypeVS.CANCEL_VOTE_ERROR, message:msg, eventVS:eventVS)
+			    messageSMIMEResp.errors.each { log.error("processCancel - ${it}") }
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.CANCEL_VOTE_ERROR,
+                        eventVS:eventVS)
 			}
 			voteVSCanceller = new VoteVSCanceller(voteVS:voteVS, certificateVS:certificateVS, eventVSElection:eventVS,
 				    originHashCertVoteBase64:originHashCertVote, hashCertVoteBase64:hashCertVoteBase64,
                     messageSMIME:messageSMIMEResp)
 			if (!voteVSCanceller.save()) {
-			    voteVSCanceller.errors.each {
-					msg = "${msg} - ${it}" 
-					log.error("processCancel - ${it}")
-				}
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-					type:TypeVS.CANCEL_VOTE_ERROR, message:msg, eventVS:eventVS)
+			    voteVSCanceller.errors.each { log.error("processCancel - ${it}") }
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.CANCEL_VOTE_ERROR,message:msg,
+                        eventVS:eventVS)
 			} else {
 				log.debug("processCancel - voteVSCanceller.id: ${voteVSCanceller.id}")
-				return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, type:TypeVS.CANCEL_VOTE,
-                        contentType: ContentTypeVS.SIGNED_AND_ENCRYPTED, data:messageSMIMEResp)
+
+                Collection<X509Certificate> certColl = CertUtil.fromPEMToX509CertCollection(eventVS.certChainAccessControl)
+                X509Certificate receiverCert = certColl.iterator().next()
+
+                Map modelData = [responseVS:new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS,
+                        type:TypeVS.CANCEL_VOTE, contentType: ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
+                        data:messageSMIMEResp), receiverCert:receiverCert]
+
+				return new ResponseVS(statusCode:ResponseVS.SC_OK, data:modelData)
 			}			
 		}catch(Exception ex) {
 			log.error (ex.getMessage(), ex)

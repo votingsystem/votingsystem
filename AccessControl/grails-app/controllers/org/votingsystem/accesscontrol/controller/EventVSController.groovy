@@ -1,6 +1,7 @@
 package org.votingsystem.accesscontrol.controller
 
 import grails.converters.JSON
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.EventVS
 import org.votingsystem.model.EventVSClaim
 import org.votingsystem.model.EventVSElection
@@ -45,12 +46,11 @@ class EventVSController {
 				eventVS = EventVS.get(params.long('id'))
 			}
 			if(!eventVS) {
-                params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                        message(code: 'eventVSNotFound', args:[params.id]))
-				return
+                return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                        message(code: 'eventVSNotFound', args:[params.id]))]
 			} else {
-				render eventVSService.getEventVSMap(eventVS) as JSON
-				return false
+                return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_OK,
+                        contentType:ContentTypeVS.JSON, data:eventVSService.getEventVSMap(eventVS))]
 			} 
         } else {
 			EventVS.withTransaction {
@@ -105,7 +105,7 @@ class EventVSController {
 			if (eventVS instanceof EventVSElection) forward(controller:"eventVSElection",action:"statistics")
 			return false
 		}
-        params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code: 'eventVSNotFound', args:[params.id]))
+        return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code: 'eventVSNotFound', args:[params.id]))]
     }
   
 	/**
@@ -117,10 +117,9 @@ class EventVSController {
 	 * @return Si todo va bien devuelve un código de estado HTTP 200.
 	 */
    def cancelled() {
-		MessageSMIME messageSMIMEReq = params.messageSMIMEReq
+		MessageSMIME messageSMIMEReq = request.messageSMIMEReq
        if(!messageSMIMEReq) {
-           params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))
-           return
+           return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
        }
 		ResponseVS responseVS = eventVSService.cancelEvent(
 			messageSMIMEReq, request.getLocale());
@@ -128,7 +127,7 @@ class EventVSController {
 			response.status = ResponseVS.SC_OK
             responseVS.setContentType(ContentTypeVS.SIGNED)
 	    }
-	    params.responseVS = responseVS
+       return [responseVS : responseVS]
    }
 
    /**
@@ -144,9 +143,9 @@ class EventVSController {
 	   if (params.long('id')) {
 		   EventVS.withTransaction {eventVS = EventVS.get(params.id)}
 	   }
-	   if(!eventVS) params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-               message(code: 'eventVSNotFound', args:[params.id]))
-	   else params.responseVS = eventVSService.checkDatesEventVS(eventVS, request.getLocale())
+	   if(!eventVS) return [responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+               message(code: 'eventVSNotFound', args:[params.id]))]
+	   else return [responseVS:eventVSService.checkDatesEventVS(eventVS, request.getLocale())]
    }
 
 }

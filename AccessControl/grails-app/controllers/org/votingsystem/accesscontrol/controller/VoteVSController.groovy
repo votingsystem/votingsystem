@@ -19,7 +19,7 @@ class VoteVSController {
 	def voteVSService
 	def grailsApplication
         
-    def index() {}
+    def index() { }
 	
 	/**
 	 * Servicio que recoge los votos enviados por los Centrol de Control
@@ -33,18 +33,11 @@ class VoteVSController {
 	 * @return  <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Recibo-de-VoteVS">El recibo del voto.</a>
 	 */
     def save() { 
-		MessageSMIME messageSMIMEReq = params.messageSMIMEReq
+		MessageSMIME messageSMIMEReq = request.messageSMIMEReq
         if(!messageSMIMEReq) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))
-            return
+             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-	    ResponseVS responseVS = voteVSService.validateVote(messageSMIMEReq, request.getLocale())
-		if (ResponseVS.SC_OK == responseVS.statusCode) {
-			params.receiverCert = responseVS.data.certificate
-			responseVS.data = responseVS.data.messageSMIME
-            responseVS.setContentType(ContentTypeVS.VOTE)
-		}
-		params.responseVS = responseVS
+		return [responseVS:voteVSService.validateVote(messageSMIMEReq, request.getLocale())]
 	}
 	
 	/**
@@ -63,8 +56,8 @@ class VoteVSController {
 			voteVS = VoteVS.get(params.long('id'))
 			if(voteVS) voteVSMap = voteVSService.getVotoMap(voteVS)
 		}
-		if(!voteVS) params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                message(code: 'voteNotFound', args:[params.id]))
+		if(!voteVS) return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                message(code: 'voteNotFound', args:[params.id]))]
 		else render voteVSMap as JSON
 	}
 	

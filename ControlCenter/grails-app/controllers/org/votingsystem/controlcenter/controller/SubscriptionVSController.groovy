@@ -40,10 +40,9 @@ class SubscriptionVSController {
 	 *					Dcoumento con los datos del control de acceso que se desea dar de alta.
 	 */
 	def index() { 
-		MessageSMIME messageSMIME = params.messageSMIMEReq
+		MessageSMIME messageSMIME = request.messageSMIMEReq
 		if(!messageSMIME) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))
-            return
+            return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
 		}
 		SMIMEMessageWrapper smimeMessageReq = messageSMIME.getSmimeMessage()
         def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
@@ -51,8 +50,8 @@ class SubscriptionVSController {
             String serverURL = StringUtils.checkURL(messageJSON.serverURL)
 			AccessControlVS accessControl = AccessControlVS.findWhere(serverURL:serverURL)
 			if (accessControl) {
-                params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                        message(code: 'controlCenterAlreadyAssociatedMsg', args:[accessControl.serverURL]))
+                return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                        message(code: 'controlCenterAlreadyAssociatedMsg', args:[accessControl.serverURL]))]
 			} else {
 				String accessControlURL = "${serverURL}/serverInfo"
 				ResponseVS responseVS = HttpHelper.getInstance().getData(accessControlURL, ContentTypeVS.JSON)
@@ -61,9 +60,9 @@ class SubscriptionVSController {
                     actorVS.save()
                     responseVS.setMessage( message(code: 'controlCenterAssociatedMsg', args:[accessControlURL]))
 				}
-                params.responseVS = responseVS
+                return [responseVS : responseVS]
             }
-        } else params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrors'))
+        } else return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'requestWithErrors'))]
 	}
 	
 	/**

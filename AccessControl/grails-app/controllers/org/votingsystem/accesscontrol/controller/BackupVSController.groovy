@@ -65,10 +65,7 @@ class BackupVSController {
                 pdfDocument.eventVS = eventVS
                 pdfDocument.save(flush:true)
             }
-            if(msg) {
-                params.responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,message:msg)
-                return false
-            }
+            if(msg) return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,message:msg)]
 
             log.debug "backup request - eventId: ${eventId} - subject: ${subject} - email: ${email}"
             ResponseVS backupGenResponseVS = null
@@ -79,12 +76,10 @@ class BackupVSController {
                     BackupRequestVS backupRequest = new BackupRequestVS( filePath:backupGenResponseVS.message,
                             type:backupGenResponseVS.type, PDFDocumentVS:pdfDocument, email:email)
                     BackupRequestVS.withTransaction {backupRequest.save()}
-                    params.responseVS = new ResponseVS(ResponseVS.SC_OK, backupRequest.id.toString())
-                    return false
+                    return [responseVS:new ResponseVS(ResponseVS.SC_OK, backupRequest.id.toString())]
                 } else {
                     log.error("DEVELOPMENT - error generating backup");
-                    params.responseVS = backupGenResponseVS
-                    return false
+                    return [responseVS:backupGenResponseVS]
                 }
             } else {
                 final EventVS event = eventVS
@@ -100,12 +95,12 @@ class BackupVSController {
                         mailSenderService.sendBackupMsg(backupRequest, locale)
                     } else log.error("Error generating Backup");
                 }
-                params.responseVS= new ResponseVS(ResponseVS.SC_OK, message(code:'backupRequestOKMsg',args:[email]))
+                return [responseVS:new ResponseVS(ResponseVS.SC_OK, message(code:'backupRequestOKMsg',args:[email]))]
             }
         } else {
-            params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+            return [responseVS:new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                     contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                    args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
+                    args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
         }
 	}
 	
@@ -134,19 +129,19 @@ class BackupVSController {
 	 */
 	def devDownload() {
 		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: "serviceDevelopmentModeMsg"))
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: "serviceDevelopmentModeMsg"))]
 		} else {
             EventVS event = null
             EventVS.withTransaction { event = EventVS.get(params.long('id')) }
             if(!event) {
-                params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: "nullParamErrorMsg"))
+                return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: "nullParamErrorMsg"))]
             } else {
                 ResponseVS requestBackup = requestBackup(event, request.locale)
                 if(ResponseVS.SC_OK == requestBackup?.statusCode) {
                     redirect(uri: requestBackup.message)
                 } else {
                     log.error("DEVELOPMENT - error generating backup");
-                    params.responseVS = requestBackup
+                    return [responseVS:requestBackup]
                 }
             }
         }
@@ -167,9 +162,8 @@ class BackupVSController {
 			solicitud = BackupRequestVS.get(params.long('id'))
 		}
 		if(!solicitud) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    message(code: 'backupRequestNotFound', args:[params.id]))
-			return
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code: 'backupRequestNotFound', args:[params.id]))]
 		}
 		redirect(uri: solicitud.filePath)
 	}
@@ -198,10 +192,9 @@ class BackupVSController {
 				}
 			} 
 		}
-		if(!solicitud) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    message(code: 'backupRequestNotFound', args:[params.id]))
-		} else params.responseVS = responseVS
+		if(!solicitud) return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code: 'backupRequestNotFound', args:[params.id]))]
+		else return [responseVS:responseVS]
 	}
 
 }

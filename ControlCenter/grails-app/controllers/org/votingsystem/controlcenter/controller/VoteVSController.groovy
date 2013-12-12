@@ -36,21 +36,16 @@ class VoteVSController {
 	 * @return  <a href="https://github.com/jgzornoza/SistemaVotacion/wiki/Recibo-de-VoteVS">El recibo del voto.</a>
 	 */
 	def index() {
-		MessageSMIME messageSMIMEReq = params.messageSMIMEReq
+		MessageSMIME messageSMIMEReq = request.messageSMIMEReq
         if(!messageSMIMEReq) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))
-            return
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
 		ResponseVS responseVS = voteVSService.validateVote(messageSMIMEReq, request.getLocale())
 		if (ResponseVS.SC_OK == responseVS.statusCode) {
-            params.receiverCert = responseVS.data?.receiverCert
-			responseVS.data = responseVS.data?.messageSMIME
-			if(messageSMIMEReq.getUserVS())
-				response.addHeader("representativeNIF", messageSMIMEReq.getUserVS().nif)
-            String voteURL = "${createLink(controller:'messageSMIME', absolute:'true')}/${responseVS?.data?.id}"
-            response.setHeader('voteURL', voteURL)
-		}
-        params.responseVS = responseVS
+			if(messageSMIMEReq.getUserVS()) response.setHeader("representativeNIF", messageSMIMEReq.getUserVS().nif)
+            response.setHeader('voteURL', responseVS.data.voteURL)
+            return [responseVS:responseVS.data]
+		} else return [responseVS:responseVS]
 	}
 	
 	/**
@@ -69,8 +64,8 @@ class VoteVSController {
 			voteVS = VoteVS.get(params.long('id'))
 			if(voteVS) voteVSMap = voteVSService.getVotoMap(voteVS)
 		}
-        if(!voteVS) params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                message(code: 'voteNotFound', args:[params.id]))
+        if(!voteVS) return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                message(code: 'voteNotFound', args:[params.id]))]
 		else render voteVSMap as JSON
 	}
 	
@@ -86,14 +81,13 @@ class VoteVSController {
 	 */
 	def errors() {
 		if(!EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))
-            return
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
 		EventVS event = EventVS.getAt(params.long('id'))
 		if(!event) {
-            params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                    message(code: 'eventVSNotFound', args:[params.id]))
+            return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                    message(code: 'eventVSNotFound', args:[params.id]))]
 		} else {
             def errorMessages
             MessageSMIME.withTransaction {
@@ -124,9 +118,8 @@ class VoteVSController {
 				certificate = CertificateVS.findWhere(hashCertVoteBase64:hashCertVoteBase64)
 			}
 			if(!certificate) {
-                params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                        message(code: 'certByHEXNotFound', args:[params.hashHex]))
-				return
+                return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                        message(code: 'certByHEXNotFound', args:[params.hashHex]))]
 			}
 			VoteVS voteVS
 			def voteVSMap
@@ -135,9 +128,8 @@ class VoteVSController {
 				voteVSMap = voteVSService.getVotoMap(voteVS)
 			}
 			if(!voteVS) {
-                params.responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
-                        message(code: 'voteVS.voteVSConCertNotFound', args:[params.hashHex]))
-				return
+                return [responseVS : new ResponseVS(ResponseVS.SC_NOT_FOUND,
+                        message(code: 'voteVS.voteVSConCertNotFound', args:[params.hashHex]))]
 			}
 			 
 			if(VoteVS.State.CANCELLED.equals(voteVS.state)) {
@@ -150,9 +142,9 @@ class VoteVSController {
 			render voteVSMap as JSON
 			return
 		}
-        params.responseVS = new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+        return [responseVS : new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
                 contentType: ContentTypeVS.HTML, message: message(code: 'requestWithErrorsHTML',
-                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))
+                args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
 	}
 
 	
