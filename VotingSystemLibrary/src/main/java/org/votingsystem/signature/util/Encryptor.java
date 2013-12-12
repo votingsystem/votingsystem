@@ -79,7 +79,6 @@ public class Encryptor {
             logger.error("No message found for recipientId: " + recipientId.getSerialNumber());
             return new ResponseVS(ResponseVS.SC_ERROR, "No message found for recipientId: " +
                     recipientId.getSerialNumber());
-
         }
         MimeBodyPart mimeMessage = SMIMEUtil.toMimeBodyPart(recipientInfo.getContent(recipient));
         			/*ByteArrayOutputStream baos = new ByteArrayOutputStream();

@@ -407,7 +407,7 @@ class SignatureVSService {
 				TrustAnchor ta = pkixResult.getTrustAnchor();
 				X509Certificate certCaResult = ta.getTrustedCert();
 				userVS.certificateCA = trustedCertsHashMap.get(certCaResult?.getSerialNumber()?.longValue())
-				log.debug("CertificateVS de userVS emitido por: " + certCaResult?.getSubjectDN()?.toString() +
+				log.debug("Certificate from: " + certCaResult?.getSubjectDN()?.toString() +
 						"- serialNumber: " + certCaResult?.getSerialNumber()?.longValue());
 				ResponseVS responseVS = subscriptionVSService.checkUser(userVS, locale)
 				if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
@@ -502,7 +502,7 @@ class SignatureVSService {
             return getEncryptor().encryptSMIMEMessage(bytesToEncrypt, receiverCert);
         } catch(Exception ex) {
             log.error (ex.getMessage(), ex)
-            return new ResponseVS(messageSource.getMessage('dataToEncryptErrorMsg', null, locale),
+            return new ResponseVS(message: messageSource.getMessage('dataToEncryptErrorMsg', null, locale),
                     statusCode:ResponseVS.SC_ERROR_REQUEST)
         }
     }

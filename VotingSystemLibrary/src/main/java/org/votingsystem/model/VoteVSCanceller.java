@@ -14,7 +14,8 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Table(name="VoteVSCanceller")
 public class VoteVSCanceller implements Serializable {
 	
-	public enum State {CANCELLATION_WITHOUT_VOTE, CANCELLATION_OK, CANCELLED, ERROR}
+	public enum State {CANCELLATION_WITHOUT_VOTE,//Access request without vote
+	    CANCELLATION_OK, CANCELLATION_ERROR}
 	
     private static final long serialVersionUID = 1L;
 

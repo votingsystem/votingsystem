@@ -48,6 +48,7 @@ class VoteVSService {
 			}
 			CertificateVS certificateVS = new CertificateVS(isRoot:false, state: CertificateVS.State.OK,
 				    type:CertificateVS.Type.VOTEVS, content:voteVS.getX509Certificate().getEncoded(),
+                    hashCertVoteBase64:voteVS.getHashCertVoteBase64(),
 				    userVS:messageSMIMEReq.userVS, eventVSElection:eventVS,
                     serialNumber:voteVS.getX509Certificate().getSerialNumber().longValue(),
 				    validFrom:voteVS.getX509Certificate().getNotBefore(),
@@ -126,9 +127,9 @@ class VoteVSService {
 		EventVS eventVS
 		SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
 		try {
-			def anulacionJSON = JSON.parse(smimeMessageReq.getSignedContent())
-			def originHashCertVote = anulacionJSON.originHashCertVote
-			def hashCertVoteBase64 = anulacionJSON.hashCertVoteBase64
+			def cancelDataJSON = JSON.parse(smimeMessageReq.getSignedContent())
+			def originHashCertVote = cancelDataJSON.originHashCertVote
+			def hashCertVoteBase64 = cancelDataJSON.hashCertVoteBase64
 			def hashCertVoteVS = CMSUtils.getHashBase64(originHashCertVote,
 				"${grailsApplication.config.VotingSystem.votingHashAlgorithm}")
 			if (!hashCertVoteBase64.equals(hashCertVoteVS))
@@ -161,8 +162,8 @@ class VoteVSService {
 			String subject = messageSource.getMessage('mime.subject.voteCancellationValidated', null, locale)
 			SMIMEMessageWrapper smimeMessageResp = signatureVSService.
 					getMultiSignedMimeMessage(fromUser, toUser, smimeMessageReq, subject)
-			MessageSMIME messageSMIMEResp = new MessageSMIME(smimeMessage:smimeMessageResp, smimeParent:messageSMIMEReq,
-				eventVS:eventVS, type:TypeVS.RECEIPT)
+			MessageSMIME messageSMIMEResp = new MessageSMIME(content:smimeMessageResp.getBytes(),
+                    smimeParent:messageSMIMEReq, eventVS:eventVS, type:TypeVS.RECEIPT)
 			messageSMIMEResp.save()
 			if (!messageSMIMEResp.save()) {
 			    messageSMIMEResp.errors.each { log.error("processCancel - ${it}") }
@@ -170,11 +171,11 @@ class VoteVSService {
                         eventVS:eventVS)
 			}
 			voteVSCanceller = new VoteVSCanceller(voteVS:voteVS, certificateVS:certificateVS, eventVSElection:eventVS,
-				    originHashCertVoteBase64:originHashCertVote, hashCertVoteBase64:hashCertVoteBase64,
-                    messageSMIME:messageSMIMEResp)
+                    state:VoteVSCanceller.State.CANCELLATION_OK,messageSMIME:messageSMIMEResp,
+				    originHashCertVoteBase64:originHashCertVote, hashCertVoteBase64:hashCertVoteBase64)
 			if (!voteVSCanceller.save()) {
 			    voteVSCanceller.errors.each { log.error("processCancel - ${it}") }
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.CANCEL_VOTE_ERROR,message:msg,
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.CANCEL_VOTE_ERROR,
                         eventVS:eventVS)
 			} else {
 				log.debug("processCancel - voteVSCanceller.id: ${voteVSCanceller.id}")

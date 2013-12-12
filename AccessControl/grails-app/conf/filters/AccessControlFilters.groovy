@@ -188,7 +188,7 @@ class AccessControlFilters {
                     case ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED:
                     case ContentTypeVS.SIGNED_AND_ENCRYPTED:
                         ResponseVS encryptResponse =  signatureVSService.encryptSMIMEMessage(
-                                messageSMIME.content, model.receiverCert, request.getLocale())
+                                responseVS.getMessageBytes(), model.receiverCert, request.getLocale())
                         if(ResponseVS.SC_OK == encryptResponse.statusCode) {
                             encryptResponse.setContentType(responseVS.getContentType())
                             return printOutputStream(response, encryptResponse)
