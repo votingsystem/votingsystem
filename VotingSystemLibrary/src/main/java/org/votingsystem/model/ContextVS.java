@@ -232,7 +232,7 @@ public class ContextVS {
             rootCAPrivateCredential = new X500PrivateCredential(rootCACert, rootCAPrivateKey,  ROOT_ALIAS);
             userTest = new UserVS();
             userTest.setNif(NifUtils.getNif(Integer.valueOf(getMessage("testUserNifNumber"))));
-            userTest.setFirstName(getMessage("testUserName"));
+            userTest.setFirstName(getMessage("testUserFirstName"));
             userTest.setLastName(getMessage("testUserLastName"));
             userTest.setEmail(getMessage("testUserEmail"));
             String testUserDN = getMessage("userDN", userTest.getName(), userTest.getLastName(), userTest.getNif());
