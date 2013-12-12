@@ -141,7 +141,6 @@
         webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStampVS', absolute:true)}"
         webAppMessage.receiverSignServiceURL = "${createLink(controller:'eventVSElection', absolute:true)}"
         webAppMessage.signedMessageSubject = "${message(code:'publishVoteSubject')}"
-        webAppMessage.isResponseWithReceipt = true
         votingSystemClient.setMessageToSignatureClient(webAppMessage, publishDocumentCallback)
         return false
     }

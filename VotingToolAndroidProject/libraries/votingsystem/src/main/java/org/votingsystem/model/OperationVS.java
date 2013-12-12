@@ -27,7 +27,6 @@ public class OperationVS {
     private String receiverName;
     private String emailSolicitante;
     private String signedMessageSubject;
-    private Boolean isResponseWithReceipt = false;
     private JSONObject signedContent;
     private EventVS eventVS;
     private String sessionId;
@@ -252,9 +251,6 @@ public class OperationVS {
         if (operacionJSON.has("signedMessageSubject")) {
             operacion.setSignedMessageSubject(operacionJSON.getString("signedMessageSubject"));
         }
-        if (operacionJSON.has("isResponseWithReceipt")) {
-            operacion.setRespuestaConRecibo(operacionJSON.getBoolean("isResponseWithReceipt"));
-        }
         if (operacionJSON.has("emailSolicitante")) {
             operacion.setEmailSolicitante(operacionJSON.getString("emailSolicitante"));
         }
@@ -273,7 +269,6 @@ public class OperationVS {
         if(receiverSignServiceURL != null) jsonObject.put("receiverSignServiceURL", receiverSignServiceURL);
         if(signedMessageSubject != null) jsonObject.put("signedMessageSubject", receiverSignServiceURL);
         if(receiverName != null) jsonObject.put("receiverName", receiverName);
-        if(isResponseWithReceipt != null) jsonObject.put("isResponseWithReceipt", isResponseWithReceipt);
         if(urlTimeStampServer != null) jsonObject.put("urlTimeStampServer", urlTimeStampServer);
         if(args != null) jsonObject.put("args", args);
         if(sessionId != null) jsonObject.put("sessionId", sessionId);
@@ -300,20 +295,6 @@ public class OperationVS {
      */
     public void setSignedMessageSubject(String signedMessageSubject) {
         this.signedMessageSubject = signedMessageSubject;
-    }
-
-    /**
-     * @return the isResponseWithReceipt
-     */
-    public boolean isRespuestaConRecibo() {
-        return isResponseWithReceipt;
-    }
-
-    /**
-     * @param isResponseWithReceipt the isResponseWithReceipt to set
-     */
-    public void setRespuestaConRecibo(boolean isResponseWithReceipt) {
-        this.isResponseWithReceipt = isResponseWithReceipt;
     }
 
     /**

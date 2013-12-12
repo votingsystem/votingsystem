@@ -124,8 +124,6 @@
         webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
         webAppMessage.receiverSignServiceURL = "${createLink( controller:'eventVSClaim', absolute:true)}"
         webAppMessage.signedMessageSubject = "${message(code:'publishClaimSubject')}"
-        webAppMessage.isResponseWithReceipt = true
-
         votingSystemClient.setMessageToSignatureClient(webAppMessage)
         return false
     }

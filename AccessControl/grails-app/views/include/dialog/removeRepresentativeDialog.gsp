@@ -33,7 +33,6 @@ function removeRepresentative() {
 	webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
 	webAppMessage.receiverSignServiceURL = "${createLink(controller:'representative', action:'revoke', absolute:true)}"
 	webAppMessage.signedMessageSubject = '<g:message code="removeRepresentativeMsgSubject"/>'
-	webAppMessage.isResponseWithReceipt = true
 	votingSystemClient.setMessageToSignatureClient(webAppMessage, removeRepresentativeCallback); 
 }
 

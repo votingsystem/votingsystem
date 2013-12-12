@@ -27,7 +27,6 @@ public class OperationVS {
     private String receiverName;
     private String email;
     private String signedMessageSubject;
-    private Boolean isResponseWithReceipt = false;
     private Map documentToSign;
     private String contentType;
     private EventVS eventVS;
@@ -187,14 +186,6 @@ public class OperationVS {
         this.signedMessageSubject = signedMessageSubject;
     }
 
-    public boolean isRespuestaConRecibo() {
-        return isResponseWithReceipt;
-    }
-
-    public void setRespuestaConRecibo(boolean isResponseWithReceipt) {
-        this.isResponseWithReceipt = isResponseWithReceipt;
-    }
-
     public String getEmail() {
         return email;
     }
@@ -251,9 +242,6 @@ public class OperationVS {
         if (dataMap.containsKey("signedMessageSubject"))
             operationVS.setSignedMessageSubject((String)dataMap.get("signedMessageSubject"));
 
-        if (dataMap.containsKey("isResponseWithReceipt"))
-            operationVS.setRespuestaConRecibo((Boolean)dataMap.get("isResponseWithReceipt"));
-
         if (dataMap.containsKey("email"))
             operationVS.setEmail((String)dataMap.get("email"));
         return operationVS;
@@ -269,7 +257,6 @@ public class OperationVS {
         if(receiverSignServiceURL != null) dataMap.put("receiverSignServiceURL", receiverSignServiceURL);
         if(signedMessageSubject != null) dataMap.put("signedMessageSubject", signedMessageSubject);
         if(receiverName != null) dataMap.put("receiverName", receiverName);
-        if(isResponseWithReceipt != null) dataMap.put("isResponseWithReceipt", isResponseWithReceipt);
         if(urlTimeStampServer != null) dataMap.put("urlTimeStampServer", urlTimeStampServer);
         if(args != null) dataMap.put("args", args);
         if(eventVS != null) dataMap.put("eventVS", eventVS.getDataMap());

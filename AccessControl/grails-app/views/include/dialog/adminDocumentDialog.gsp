@@ -70,7 +70,6 @@ function submitAdminForm() {
 		    	Operation.EVENT_CANCELLATION)
     	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
 		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-		webAppMessage.isResponseWithReceipt = false
 		webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStampVS', absolute:true)}"
 		webAppMessage.receiverSignServiceURL= "${createLink(controller:'eventVS', action:'cancelled', absolute:true)}"
 		var signedContent = {operation:Operation.EVENT_CANCELLATION,
@@ -79,7 +78,7 @@ function submitAdminForm() {
 		webAppMessage.signedContent = signedContent
 		pendingOperation = Operation.EVENT_CANCELLATION
 		//console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-		votingSystemClient.setMessageToSignatureClient(webAppMessage); 
+		votingSystemClient.setMessageToSignatureClient(webAppMessage, callerCallback);
 	}
 }
 </r:script>

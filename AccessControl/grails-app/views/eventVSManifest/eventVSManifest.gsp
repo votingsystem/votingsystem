@@ -112,7 +112,6 @@
    				webAppMessage.signedMessageSubject = "${eventMap.subject}"
 		    	//signed and encrypted
     			webAppMessage.contentType = 'application/x-pkcs7-signature, application/x-pkcs7-mime'
-   				webAppMessage.isResponseWithReceipt = false
 	    		webAppMessage.eventVS = pageEvent
 				webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStampVS', absolute:true)}"
 				webAppMessage.urlDocumento = pageEvent.URL
@@ -149,22 +148,27 @@
 				}
 			}
 
-			function adminDocumentCallback(appMessage) {
-				console.log("adminDocumentCallback - message from native client: " + appMessage);
-				var appMessageJSON = toJSON(appMessage)
-				if(appMessageJSON != null) {
-					$("#workingWithAppletDialog").dialog("close");
-					var callBack
-					if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-						caption = "<g:message code='operationOKCaption'/>"
-						msgTemplate = "<g:message code='documentCancellationOKMsg'/>"
-						msg = msgTemplate.format('${eventMap?.subject}');
-						callBack = function() {
-							window.location.href = "${createLink(controller:'eventVSClaim')}/" + claimEvent.id;
-						}
-					}
-					showResultDialog(caption, msg, callBack)
-				}
-			}
+    		function adminDocumentCallback(appMessage) {
+                console.log("adminDocumentCallback - message from native client: " + appMessage);
+                var appMessageJSON = toJSON(appMessage)
+                if(appMessageJSON != null) {
+                    $("#workingWithAppletDialog").dialog("close");
+                    var callBack
+                    var caption
+                    var msg
+                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                        caption = "<g:message code='operationOKCaption'/>"
+                        var msgTemplate = "<g:message code='documentCancellationOKMsg'/>"
+                        msg = msgTemplate.format('${eventMap?.subject}');
+                        callBack = function() {
+                            window.location.href = "${createLink(controller:'eventVSManifest')}/" + pageEvent.id;
+                        }
+                    } else {
+                        caption = "<g:message code='operationERRORCaption'/>"
+                        msg = "<g:message code='operationERRORCaption'/>"
+                    }
+                    showResultDialog(caption, msg, callBack)
+                }
+            }
 </g:applyCodec>
 </r:script>

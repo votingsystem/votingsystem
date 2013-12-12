@@ -56,8 +56,7 @@ function submitAdminForm() {
 	console.log("adminDocumentDialog.submitAdminForm()")
 	if(!$("#selectDeleteDocument").is(':checked') &&
 			!$("#selectCloseDocument").is(':checked')) {
-		showResultDialog("<g:message code='errorLbl'/>", 
-				"<g:message code='selectDocumentStateERRORMsg'/>")
+		showResultDialog("<g:message code='errorLbl'/>", "<g:message code='selectDocumentStateERRORMsg'/>")
 	} else {
 		var state
 		if($("#selectDeleteDocument").is(':checked')) {
@@ -65,12 +64,9 @@ function submitAdminForm() {
 		} else if($("#selectCloseDocument").is(':checked')) {
 			state = EventVS.State.CANCELLED
 		}
-    	var webAppMessage = new WebAppMessage(
-		    	ResponseVS.SC_PROCESSING,
-		    	Operation.EVENT_CANCELLATION)
+    	var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.EVENT_CANCELLATION)
     	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
 		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-		webAppMessage.isResponseWithReceipt = false
 		webAppMessage.urlTimeStampServer = "${createLink(controller:'timeStampVS', absolute:true)}"
 		webAppMessage.receiverSignServiceURL= "${createLink(controller:'eventVS', action:'cancelled', absolute:true)}"
 		var signedContent = {operation:Operation.EVENT_CANCELLATION,

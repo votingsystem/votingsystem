@@ -124,7 +124,6 @@
 			webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
 			webAppMessage.receiverSignServiceURL = "${createLink(controller:'representative', action:'userSelection', absolute:true)}"
 			webAppMessage.signedMessageSubject = '<g:message code="requestRepresentativeAcreditationsLbl"/>'
-			webAppMessage.isResponseWithReceipt = true
 			votingSystemClient.setMessageToSignatureClient(webAppMessage, selectRepresentativeCallback); 
 		}
 

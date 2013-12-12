@@ -7,7 +7,6 @@ var WebAppMessage = function (statusCode, operacion) {
 	this.urlDocumento;
 	this.receiverName;
 	this.serverURL;
-	this.isResponseWithReceipt;
 	this.eventVS;
 	this.callerCallback;
 }
@@ -207,7 +206,8 @@ Date.prototype.getElapsedTime = function() {
 
 String.prototype.format = function() {
 	  var args = arguments;
-	  return this.replace(/{(\d+)}/g, function(match, number) { 
+	  var str =  this.replace(/''/g, "'")
+	  return str.replace(/{(\d+)}/g, function(match, number) {
 	    return typeof args[number] != 'undefined'
 	      ? args[number]
 	      : match

@@ -60,7 +60,6 @@ public class DNIeContentSigner implements ContentSigner {
     public static final String DNIe_SIGN_PRIVATE_KEY_LABEL = "KprivFirmaDigital";
 
     private RSAPrivateKey signatureKey;
-    private static DNIeContentSigner instance;
     private X509Certificate certUser;
     private X509Certificate certIntermediate;
     private X509Certificate certCA;
@@ -93,11 +92,7 @@ public class DNIeContentSigner implements ContentSigner {
 
     public static DNIeContentSigner getInstance(char[] password, Mechanism signatureMechanism,
                         String signatureAlgorithm) throws Exception {
-        if(instance != null && instanceSignatureAlgorithm.equals(signatureAlgorithm)
-                && instanceSignatureMechanism == signatureMechanism) {
-            return instance;
-        } else if(instance != null) instance.closeSession();
-        instance = null;
+        DNIeContentSigner instance = null;
         instanceSignatureMechanism = signatureMechanism;
         instanceSignatureAlgorithm = signatureAlgorithm;
         Module pkcs11Module  = null;

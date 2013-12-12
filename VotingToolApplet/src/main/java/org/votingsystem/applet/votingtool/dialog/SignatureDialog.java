@@ -364,9 +364,8 @@ public class SignatureDialog extends JDialog {
                 ResponseVS responseVS = get();
                 if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     logger.debug("SignedSenderWorker.done - statusCode:" + responseVS.getStatusCode());
-                    if(operation.isRespuestaConRecibo()) {
+                    if(responseVS.getContentType() != null && responseVS.getContentType().isSigned()) {
                         try {
-                            logger.debug("SignedSenderWorker.done - isRespuestaConRecibo");
                             SMIMEMessageWrapper smimeMessageResp = responseVS.getSmimeMessage();
                             if(smimeMessageResp == null) {
                                 ByteArrayInputStream bais = new ByteArrayInputStream(responseVS.getMessageBytes());
@@ -386,8 +385,7 @@ public class SignatureDialog extends JDialog {
                             logger.error(ex.getMessage(), ex);
                             sendResponse(ResponseVS.SC_ERROR, ex.getMessage());
                         }
-                    } else sendResponse(responseVS.getStatusCode(), 
-                            responseVS.getMessage());   
+                    } else sendResponse(responseVS.getStatusCode(), responseVS.getMessage());
                 } else {
                     sendResponse(responseVS.getStatusCode(), responseVS.getMessage());
                 }

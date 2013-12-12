@@ -87,7 +87,7 @@
 </html>
 <r:script>
 <g:applyCodec encodeAs="none">
-		var votingEvent = ${eventMap as JSON} 
+        var votingEvent = ${eventMap as JSON}
 		var selectedOption
 		$(function() {
 			if(${messageToUser != null?true:false}) {
@@ -126,15 +126,15 @@
 			var appMessageJSON = toJSON(appMessage)
 			if(appMessageJSON != null) {
 				$("#workingWithAppletDialog").dialog("close");
-				caption = '<g:message code="voteERRORCaption"/>'
+				var caption = '<g:message code="voteERRORCaption"/>'
 				var msgTemplate = "<g:message code='voteResultMsg'/>"
 				var msg
 				if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
 					caption = "<g:message code='voteOKCaption'/>"
 					msg = msgTemplate.format('<g:message code="voteResultOKMsg"/>',appMessageJSON.message);
 				} else if(ResponseVS.SC_ERROR_VOTE_REPEATED == appMessageJSON.statusCode) {
-					msgTemplate =  "<g:message code='accessRequestRepeatedMsg'/>" 
-					msg = msgTemplate.format(msgTemplate.format('${eventMap?.subject}'),appMessageJSON.message);
+					msgTemplate =  "<g:message code='accessRequestRepeatedMsg'/>"
+					msg = msgTemplate.format(votingEvent.subject, appMessageJSON.message);
 				} else msg = appMessageJSON.message
 				showResultDialog(caption, msg)
 			}
@@ -146,13 +146,18 @@
 			if(appMessageJSON != null) {
 				$("#workingWithAppletDialog").dialog("close");
 				var callBack
+				var caption
+				var msg
 				if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
 					caption = "<g:message code='operationOKCaption'/>"
-					msgTemplate = "<g:message code='documentCancellationOKMsg'/>"
+					var msgTemplate = "<g:message code='documentCancellationOKMsg'/>"
 					msg = msgTemplate.format('${eventMap?.subject}');
 					callBack = function() {
-						window.location.href = "${createLink(controller:'eventVSClaim')}/" + claimEvent.id;
+						window.location.href = "${createLink(controller:'eventVSElection')}/" + pageEvent.id;
 					}
+				} else {
+				    caption = "<g:message code='operationERRORCaption'/>"
+				    msg = "<g:message code='operationERRORCaption'/>"
 				}
 				showResultDialog(caption, msg, callBack)
 			}
