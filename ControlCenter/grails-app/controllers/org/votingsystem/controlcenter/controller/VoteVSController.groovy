@@ -44,7 +44,7 @@ class VoteVSController {
 		if (ResponseVS.SC_OK == responseVS.statusCode) {
 			if(messageSMIMEReq.getUserVS()) response.setHeader("representativeNIF", messageSMIMEReq.getUserVS().nif)
             response.setHeader('voteURL', responseVS.data.voteURL)
-            return [responseVS:responseVS.data]
+            return responseVS.data
 		} else return [responseVS:responseVS]
 	}
 	

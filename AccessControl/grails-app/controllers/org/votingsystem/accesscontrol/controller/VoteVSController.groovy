@@ -37,7 +37,9 @@ class VoteVSController {
         if(!messageSMIMEReq) {
              return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-		return [responseVS:voteVSService.validateVote(messageSMIMEReq, request.getLocale())]
+        ResponseVS responseVS = voteVSService.validateVote(messageSMIMEReq, request.getLocale())
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) return responseVS.data
+		else return [responseVS:responseVS]
 	}
 	
 	/**
