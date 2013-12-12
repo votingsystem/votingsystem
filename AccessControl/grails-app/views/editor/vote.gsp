@@ -53,8 +53,8 @@
 		<select id="controlCenterSelect" style="margin:0px 0px 0px 40px;min-width: 300px;" required
 				oninvalid="this.setCustomValidity('<g:message code="selectControlCenterLbl"/>')"
    				onchange="this.setCustomValidity('')">
+            <option value=""> --- <g:message code="selectControlCenterLbl"/> --- </option>
 			<g:each status="i" in="${controlCenters}" var="controlCenterVS">
-				<option value=""> --- <g:message code="selectControlCenterLbl"/> --- </option>
 			  	<option value="${controlCenterVS.id}">${controlCenterVS.name}</option>
 			</g:each>
 		</select>		
