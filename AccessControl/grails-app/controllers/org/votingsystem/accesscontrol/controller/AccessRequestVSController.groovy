@@ -57,9 +57,11 @@ class AccessRequestVSController {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
 		}
 		AccessRequestVS accessRequestVS;
+        EventVSElection eventVS
 		ResponseVS responseVS = accessRequestVSService.saveRequest(messageSMIMEReq, request.getLocale())
 		if (ResponseVS.SC_OK == responseVS.statusCode) {
 			accessRequestVS = responseVS.data
+            eventVS = responseVS.eventVS
 			byte[] csrRequest = params[grailsApplication.config.SistemaVotacion.csrRequestFileName]
 			UserVS representative = null
 			if(accessRequestVS.userVS.type == UserVS.Type.REPRESENTATIVE) {
@@ -70,6 +72,7 @@ class AccessRequestVSController {
                     representative, request.getLocale())
 			if (ResponseVS.SC_OK == csrValidationResponseVS.statusCode) {
 				responseVS.type = TypeVS.ACCESS_REQUEST;
+                responseVS.message = "EventVS_${eventVS.id}"
                 responseVS.messageBytes = csrValidationResponseVS.data.issuedCert
                 responseVS.setContentType(ContentTypeVS.MULTIPART_ENCRYPTED)
 				return [responseVS:responseVS, receiverPublicKey:csrValidationResponseVS.data.requestPublicKey]

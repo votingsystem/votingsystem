@@ -320,6 +320,20 @@ body {
 	color:#cc1606;
 }
 
+.eventCancelleddBox {
+    position: absolute;
+    top: 200px;
+    margin: 0 0 0 150px;
+    width: 600px;
+    border-color: #cc1606;
+    color:#cc1606;
+    opacity:0.4;
+    transform:rotate(20deg);
+    -ms-transform:rotate(20deg);
+    -webkit-transform:rotate(20deg);
+    -moz-transform: rotate(20deg);
+}
+
 .cancelNotification {
 	transform:rotate(20deg);
 	-ms-transform:rotate(20deg); 

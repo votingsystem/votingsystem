@@ -3,16 +3,22 @@
 <%
 	def messageToUser = null
 	def eventClass = null
-	if(EventVS.State.TERMINATED.toString().equals(eventMap?.state)) {
-		messageToUser =  message(code: 'claimEventFinishedLbl')
-		eventClass = "eventFinishedBox"
-	} else if(EventVS.State.AWAITING.toString().equals(eventMap?.state)) {
-		messageToUser = message(code: 'claimEventPendingLbl')
-		eventClass = "eventPendingBox"
-	} else if(EventVS.State.CANCELLED.toString().equals(eventMap?.state)) {
-		messageToUser = message(code: 'claimEventCancelledLbl')
-		eventClass = "eventFinishedBox"
-	}
+    if(eventMap?.state) {
+        switch(EventVS.State.valueOf(eventMap?.state)) {
+            case EventVS.State.CANCELLED:
+                messageToUser = message(code: 'claimEventCancelledLbl')
+                eventClass = "eventCancelleddBox"
+                break;
+            case EventVS.State.AWAITING:
+                messageToUser = message(code: 'claimEventPendingLbl')
+                eventClass = "eventPendingBox"
+                break;
+            case EventVS.State.TERMINATED:
+                messageToUser =  message(code: 'claimEventFinishedLbl')
+                eventClass = "eventFinishedBox"
+                break;
+        }
+    }
 %>
 <html>
 <head>
