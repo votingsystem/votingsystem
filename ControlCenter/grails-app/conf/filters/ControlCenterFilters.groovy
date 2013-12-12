@@ -86,7 +86,7 @@ class ControlCenterFilters {
 
             after = { model ->
                 MessageSMIME messageSMIMEReq = request.messageSMIMEReq
-                ResponseVS responseVS = model.responseVS
+                ResponseVS responseVS = model?.responseVS
                 if(messageSMIMEReq && responseVS){
                     MessageSMIME.withTransaction {
                         messageSMIMEReq = messageSMIMEReq.merge()

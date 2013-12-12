@@ -164,9 +164,8 @@ class AccessControlFilters {
             }
 
             after = { model ->
-                log.debug("========== ${model}")
                 MessageSMIME messageSMIMEReq = request.messageSMIMEReq
-                ResponseVS responseVS = model.responseVS
+                ResponseVS responseVS = model?.responseVS
                 if(messageSMIMEReq && responseVS){
                     MessageSMIME.withTransaction {
                         messageSMIMEReq = messageSMIMEReq.merge()
