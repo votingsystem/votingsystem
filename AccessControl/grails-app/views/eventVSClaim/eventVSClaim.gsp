@@ -202,7 +202,8 @@
                     var msgTemplate = "<g:message code='documentCancellationOKMsg'/>"
                     msg = msgTemplate.format('${eventMap?.subject}');
                     callBack = function() {
-                        window.location.href = "${createLink(controller:'eventVSClaim')}/" + pageEvent.id;
+                        var eventVSService = "${createLink(controller:'eventVSClaim')}/"
+						window.location.href = eventVSService.concat(pageEvent.id);
                     }
                 } else {
                     caption = "<g:message code='operationERRORCaption'/>"
