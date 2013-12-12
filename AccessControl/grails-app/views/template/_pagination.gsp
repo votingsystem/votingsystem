@@ -12,7 +12,7 @@ function printPaginate (offset, numItems, numMaxItemsForPage) {
     if(!(numPages > 1) ){
         $("#paginationDiv").hide()
         return
-    }
+    } else $("#paginationDiv").show()
 
 	offsetPage = ( (offset -offset%numMaxItemsForPage)/numMaxItemsForPage) + 1
 	console.log("/template/_pagination - offsetItem:" + offset + " - num. total items: " + numItems + 

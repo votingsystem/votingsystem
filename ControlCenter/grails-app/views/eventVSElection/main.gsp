@@ -52,8 +52,9 @@
     							 'border-color': $( "#eventsStateSelect option:selected" ).css('color')})
 					 	}
 			 		}
-					var targetURL = "${createLink( controller:'eventVSElection')}"
-					if("" != eventState) targetURL = targetURL + "?eventVSState=" + $(this).val()
+					var targetURL = "${createLink( controller:'eventVSElection')}?&max=" + numMaxEventsForPage;
+					if("" != eventState) targetURL = targetURL + "&eventVSState=" + $(this).val()
+                    $("#paginationDiv").hide()
 		 		    loadEvents(targetURL)
 		 		});
 		 		$("#searchFormDiv").fadeIn()

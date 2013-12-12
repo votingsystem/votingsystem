@@ -69,8 +69,9 @@
     							 'border-color': $( "#eventsStateSelect option:selected" ).css('color')})
 					 	}
 			 		}
-					var targetURL = "${createLink( controller:'eventVS')}"
-					if("" != eventState) targetURL = targetURL + "?eventVSState=" + $(this).val()
+					var targetURL = "${createLink( controller:'eventVSElection')}?&max=" + numMaxEventsForPage;
+					if("" != eventState) targetURL = targetURL + "&eventVSState=" + $(this).val()
+					$("#paginationDiv").hide()
 		 		    loadEvents(targetURL)
 		 		});
 				$("#searchFormDiv").fadeIn()
@@ -95,8 +96,7 @@
 					printEvents(jsonResult)
 				}).error(function() {
 					console.log("- ajax error - ");
-					showResultDialog('<g:message code="errorLbl"/>',
-						'<g:message code="connectionERRORMsg"/>') 
+					showResultDialog('<g:message code="errorLbl"/>', '<g:message code="connectionERRORMsg"/>')
 					$loadingPanel.fadeOut(100)
 				});
 			}
@@ -114,13 +114,15 @@
 			}
 
 			function paginate (newOffsetPage) {
-				console.log(" - paginate - offsetPage : " + offsetPage + " - newOffsetPage: " + newOffsetPage)
+				console.log(" - paginate - offsetPage : " + offsetPage + " - newOffsetPage: " + newOffsetPage +
+				        " - eventState: " + eventState)
 				if(newOffsetPage == offsetPage) return
 				offsetPage = newOffsetPage
 				var offsetItem
 				if(newOffsetPage == 0) offsetItem = 0
 				else offsetItem = (newOffsetPage -1) * numMaxEventsForPage
-				var targetURL = "${createLink( controller:'eventVS')}?max=" + numMaxEventsForPage + "&offset=" + offsetItem
+				var targetURL = "${createLink( controller:'eventVSElection')}?max=" + numMaxEventsForPage +
+				    "&offset=" + offsetItem + "&eventVSState=" + eventState
 				if(searchQuery != null) targetURL = "${createLink( controller:'search', action:'find')}?max=" +
 						numMaxEventsForPage + "&offset=" + offsetItem
 				loadEvents(targetURL, searchQuery)	

@@ -73,8 +73,9 @@
     							 'border-color': $( "#eventsStateSelect option:selected" ).css('color')})
 					 	}
 			 		}
-					var targetURL = "${createLink( controller:'eventVSClaim')}"
-					if("" != eventState) targetURL = targetURL + "?eventVSState=" + $(this).val()
+					var targetURL = "${createLink( controller:'eventVSClaim')}?&max=" + numMaxEventsForPage;
+					if("" != eventState) targetURL = targetURL + "&eventVSState=" + $(this).val()
+                    $("#paginationDiv").hide()
 		 		    loadEvents(targetURL)
 		 		});
 				$("#searchFormDiv").fadeIn()
