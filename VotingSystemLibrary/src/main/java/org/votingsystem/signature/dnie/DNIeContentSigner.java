@@ -332,17 +332,19 @@ public class DNIeContentSigner implements ContentSigner {
         // Get a Session object and create the mail message
         Properties props = System.getProperties();
         javax.mail.Session session = javax.mail.Session.getDefaultInstance(props, null);
-        String userVS = null;
-        if (ContextVS.getInstance().getSessionUser() != null) userVS =
+        String userNIF = null;
+        if (ContextVS.getInstance().getSessionUser() != null) userNIF =
                 ContextVS.getInstance().getSessionUser().getNif();
-        Address fromUserAddress = new InternetAddress(userVS);
-        Address toUserAddress = new InternetAddress(toUser.replace(" ", ""));
+        Address fromUserAddress = null;
+        if(userNIF != null) fromUserAddress = new InternetAddress(userNIF);
+        Address toUserAddress = null;
+        if(toUser != null) toUserAddress = new InternetAddress(toUser.replace(" ", ""));
 
         SMIMEMessageWrapper body = new SMIMEMessageWrapper(session);
         if (header != null) body.setHeader(header.getName(), header.getValue());
         body.setHeader("Content-Type", "text/plain; charset=UTF-8");
-        body.setFrom(fromUserAddress);
-        body.setRecipient(Message.RecipientType.TO, toUserAddress);
+        if(fromUserAddress != null) body.setFrom(fromUserAddress);
+        if(toUserAddress != null) body.setRecipient(Message.RecipientType.TO, toUserAddress);
         body.setSubject(subject, "UTF-8");
         body.setContent(mimeMultipart, mimeMultipart.getContentType());
         body.updateChanges();
