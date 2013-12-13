@@ -92,27 +92,12 @@ function EventVS(eventJSON, eventTemplate, subSystem) {
 
         var $newEvent = $(this.eventHTML)
 
-        if(EventVS.State.ACTIVE == this.state) {
-            $newEvent.css('border-color', '#6bad74')
-            $newEvent.find(".eventSubjectDiv").css('background-color', '#6bad74')
-            $newEvent.find(".eventStateDiv").css('color', '#6bad74')
-        }
-        if(EventVS.State.TERMINATED == this.state) {
-            $newEvent.css('border-color', '#cc1606')
-            $newEvent.find(".eventSubjectDiv").css('background-color', '#cc1606')
-            $newEvent.find(".eventStateDiv").css('color', '#cc1606')
-        }
+        if(EventVS.State.AWAITING == this.state) $newEvent.addClass("eventVSAwaiting");
+        if(EventVS.State.ACTIVE == this.state) $newEvent.addClass("eventVSActive");
+        if(EventVS.State.TERMINATED == this.state) $newEvent.addClass("eventVSFinished");
         if(EventVS.State.CANCELLED == this.state) {
-            $newEvent.css('border-color', '#cc1606')
-            $newEvent.find(".eventSubjectDiv").css('background-color', '#cc1606')
-            $newEvent.find(".eventStateDiv").css('color', '#cc1606')
+            $newEvent.addClass("eventVSFinished");
             $newEvent.find(".cancelMessage").fadeIn(100)
-
-        }
-        if(EventVS.State.AWAITING == this.state) {
-            $newEvent.css('border-color', '#fba131')
-            $newEvent.find(".eventSubjectDiv").css('background-color', '#fba131')
-            $newEvent.find(".eventStateDiv").css('color', '#fba131')
         }
 
         var eventURL = this.getURL()

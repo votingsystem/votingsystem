@@ -148,8 +148,6 @@ body {
 	text-decoration: none;
 }
 
-
-
 .mainLinkContainer {
 	display:table;
 }
@@ -275,6 +273,46 @@ body {
 
 .eventOptionsDiv .voteOption {
 	font-size: 1.9em;
+}
+
+.eventVSActive {
+    border-color:#6bad74;
+}
+
+.eventVSActive .eventSubjectDiv{
+    background-color:#6bad74;
+}
+
+.eventVSActive .eventStateDiv{
+    color:#6bad74;
+}
+
+.eventVSAwaiting {
+    border-color:#fba131;
+}
+
+.eventVSAwaiting .eventSubjectDiv{
+    background-color:#fba131;
+}
+
+.eventVSAwaiting .eventStateDiv{
+    color:#fba131;
+}
+
+.eventVSFinished {
+    border-color:#cc1606;
+}
+
+.eventVSFinished .eventSubjectDiv{
+    background-color:#cc1606;
+}
+
+.eventVSFinished .eventStateDiv{
+    color:#cc1606;
+}
+
+.eventVSFinished .eventRemainingDiv{
+    display: none;
 }
 
 #fieldsBox {
