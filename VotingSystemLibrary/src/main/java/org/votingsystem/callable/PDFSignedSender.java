@@ -83,26 +83,16 @@ public class PDFSignedSender implements Callable<ResponseVS> {
         } else {
             logger.debug("Generating smartcard VotingSystemSignedGenerator");
             DNIePDFContentSigner sessionHelper = null;
-            try {
-                sessionHelper = DNIePDFContentSigner.getInstance(password, ContextVS.DNIe_SESSION_MECHANISM);
-            } catch(Exception ex) {
-                if ("CKR_CRYPTOKI_ALREADY_INITIALIZED".equals(ex.getMessage())) {
-                    logger.debug("### Trying to get DNIe PKCS11 session ###");
-                    Thread.sleep(3000);
-                    sessionHelper = DNIePDFContentSigner.getInstance(password, ContextVS.DNIe_SESSION_MECHANISM);
-                } else throw ex;
-            }
+            sessionHelper = DNIePDFContentSigner.getInstance(password, ContextVS.DNIe_SESSION_MECHANISM);
             signerCertChain = sessionHelper.getCertificateChain();
             systemSignedGenerator = sessionHelper;
         }
         File fileToSend = File.createTempFile("signedPDF", ".pdf");
         fileToSend.deleteOnExit();
-        PdfStamper stp = PdfStamper.createSignature(pdfReader,
-                new FileOutputStream(fileToSend), '\0');
+        PdfStamper stp = PdfStamper.createSignature(pdfReader, new FileOutputStream(fileToSend), '\0');
         stp.setEncryption(null, null,PdfWriter.ALLOW_PRINTING, false);
         final PdfSignatureAppearance sap = stp.getSignatureAppearance();
         sap.setVisibleSignature(new Rectangle(100, 10, 400, 40), 1, null);
-
 
         if(location != null) sap.setLocation(location);
         sap.setCrypto(null, signerCertChain, null, PdfSignatureAppearance.WINCER_SIGNED);

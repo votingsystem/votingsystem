@@ -235,7 +235,7 @@ public class ContextVS {
             userTest.setFirstName(getMessage("testUserFirstName"));
             userTest.setLastName(getMessage("testUserLastName"));
             userTest.setEmail(getMessage("testUserEmail"));
-            String testUserDN = getMessage("userDN", userTest.getName(), userTest.getLastName(), userTest.getNif());
+            String testUserDN = getMessage("userDN", userTest.getFirstName(),userTest.getLastName(), userTest.getNif());
             KeyStore userKeySTore = KeyStoreUtil.createUserKeyStore(CERT_VALID_FROM, USER_KEYSTORE_PERIOD,
                     PASSWORD.toCharArray(), END_ENTITY_ALIAS, rootCAPrivateCredential, testUserDN);
             userTest.setKeyStore(userKeySTore);
