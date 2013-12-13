@@ -8,14 +8,9 @@
     <div id="contentDiv" style="display:none;">
 
         <div style="display: table;width:100%;vertical-align: middle;margin:0px 0 10px 0px;">
-            <div style="display:table-cell;width:300px;">
-                <votingSystem:simpleButton href="${createLink(controller:'representative', action:'main')}" style="margin:0px 0px 0px 15px;">
-                    <g:message code="representativesPageLbl"/>
-                </votingSystem:simpleButton>
-                <div style="margin: 10px 0 0 30px;"><votingSystem:feed  href="${createLink(controller:'subscriptionVS', action:'elections')}">
-                    <g:message code="subscribeToFeedsLbl"/>
-                    </votingSystem:feed>
-                </div>
+            <div style="display:inline;float:left;">
+                <div><votingSystem:feed href="${createLink(controller:'subscriptionVS', action:'elections')}">
+                    <g:message code="subscribeToFeedsLbl"/></votingSystem:feed></div>
             </div>
             <div style="display:table-cell;margin: auto; vertical-align: top;">
                 <select id="eventsStateSelect" style="margin:0px 0px 0px 40px;color:black;">
@@ -43,8 +38,17 @@
 
     <div id="mainPageEventList" class="mainPageEventList"><ul></ul></div>
 
-    <g:render template="/template/pagination"/>
 
+    <div style="margin: 0 0 0 0; position: absolute; bottom: 20px;">
+        <votingSystem:simpleButton href="${createLink(controller:'representative', action:'main')}"
+                                   style="margin:0px 0px 0px 45px;">
+            <g:message code="representativesPageLbl"/>
+        </votingSystem:simpleButton>
+    </div>
+
+    <div style="display:table-cell;margin: auto; vertical-align: top;">
+        <g:render template="/template/pagination"/>
+    </div>
 
     <div id="eventTemplate" style="display:none;">
         <g:render template="/template/event" model="[isTemplate:'true']"/>
