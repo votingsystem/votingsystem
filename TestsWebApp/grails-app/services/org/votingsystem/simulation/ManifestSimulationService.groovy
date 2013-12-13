@@ -306,6 +306,7 @@ class ManifestSimulationService {
                 getCancelEventServiceURL(), ContentTypeVS.JSON_SIGNED, null, null);
         ResponseVS responseVS = worker.call();
         responseVS.setStatus(Status.CHANGE_EVENT_STATE);
+        if(ResponseVS.SC_OK == responseVS.statusCode) responseVS.setMessage("Event state changed")
         changeSimulationStatus(responseVS);
     }
 
