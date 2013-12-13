@@ -7,6 +7,7 @@
         </style>
     </head>
     <body>
-		<g:message code="representativeVotingHistoryMailBody" args="${[fromUser, requestURL, representative, dateFromStr, dateToStr, urlDescarga]}"/>
+		<g:message code="representativeVotingHistoryMailBody"
+                   args="${[fromUser, requestURL, representative, dateFromStr, dateToStr, urlDescarga]}"/>
     </body>
 </html>

@@ -7,6 +7,7 @@
         </style>
     </head>
     <body>
-	<g:message code="representativeAccreditationsMailBody" args="${[fromUser, requestURL, representative, dateStr, downloadURL]}"/>
+	<g:message code="representativeAccreditationsMailBody"
+               args="${[fromUser, requestURL, representative, dateStr, downloadURL]}"/>
     </body>
 </html>
