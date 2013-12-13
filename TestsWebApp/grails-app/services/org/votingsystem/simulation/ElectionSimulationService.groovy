@@ -367,6 +367,7 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
             responseVS = HttpHelper.getInstance().getData(downloadServiceURL, ContentTypeVS.BACKUP);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 log.debug("TODO validate backup");
+                responseVS.setMessage(ContentTypeVS.ZIP.getName());
                 /*FutureTask<ResponseVS> future = new FutureTask<ResponseVS>(
                     new ZipBackupValidator(responseVS.getMessageBytes()));
                 simulatorExecutor.execute(future);

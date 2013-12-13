@@ -330,6 +330,7 @@ class ManifestSimulationService {
             responseVS = HttpHelper.getInstance().getData(downloadServiceURL, ContentTypeVS.BACKUP);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 log.debug("TODO validate backup");
+                responseVS.setMessage(ContentTypeVS.ZIP.getName());
                 /*FutureTask<ResponseVS> future = new FutureTask<ResponseVS>(
                     new ZipBackupValidator(responseVS.getMessageBytes()));
                 simulatorExecutor.execute(future);
@@ -398,6 +399,8 @@ class ManifestSimulationService {
                     if(ResponseVS.SC_OK == statusFromResponse.getStatusCode()) {
                         if(simulationData.getEventStateWhenFinished() != null) {
                             changeEventState();
+                        } else if(simulationData.getBackupRequestEmail() != null) {
+                            requestBackup();
                         } else finishSimulation(statusFromResponse);
                     } else finishSimulation(statusFromResponse);
                     break;

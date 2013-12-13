@@ -37,7 +37,7 @@ class VotingSystemTestFilters {
             }
 
             after = { model ->
-                if(model.responseVS == null) return;
+                if(model?.responseVS == null) return;
                 ResponseVS responseVS = model.responseVS
                 switch(responseVS.getContentType()) {
                     case ContentTypeVS.TEXT:
