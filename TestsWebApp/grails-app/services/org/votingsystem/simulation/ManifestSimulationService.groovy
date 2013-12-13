@@ -405,10 +405,9 @@ class ManifestSimulationService {
                     } else finishSimulation(statusFromResponse);
                     break;
                 case Status.CHANGE_EVENT_STATE:
-                    if(ResponseVS.SC_OK == statusFromResponse.getStatusCode()) {
-                        if(simulationData.getBackupRequestEmail() != null) {
-                            requestBackup();
-                        }
+                    if(ResponseVS.SC_OK == statusFromResponse.getStatusCode() &&
+                            simulationData.getBackupRequestEmail() != null) {
+                        requestBackup();
                     } else finishSimulation(statusFromResponse);
                     break;
                 case Status.REQUEST_BACKUP:
