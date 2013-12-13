@@ -4,7 +4,7 @@
     <r:require modules="paginate"/>
 </head>
 <body>
-<div style="position:relative;">
+<div class="mainPage">
     <div id="contentDiv" style="display:none;">
         <div style="display:inline-block;width:100%;vertical-align: middle;margin:0px 0 10px 0px;">
             <div style="display:inline;float:left;width:30%;">
@@ -40,10 +40,8 @@
     <div id="mainPageEventList" class="mainPageEventList"><ul></ul></div>
 
 
-    <div style="width:100%;position:relative;display:block;">
-        <div style="right:50%;">
-            <div style="width:500px; margin:20px auto 20px auto;" id="paginationDiv" ></div>
-        </div>
+    <div style="width:100%;position:absolute;display:block; margin:auto; bottom:20px;">
+        <div style="width:500px; margin:20px auto 20px auto;" id="paginationDiv" ></div>
     </div>
 
     <g:render template="/template/pagination"/>

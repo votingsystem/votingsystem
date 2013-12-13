@@ -85,7 +85,8 @@ class EventVSElectionController {
 				} else {
 					eventVSList =  EventVSElection.findAllByStateOrStateOrStateOrState(EventVS.State.ACTIVE,
 						   EventVS.State.CANCELLED, EventVS.State.TERMINATED, EventVS.State.AWAITING, params)
-                    responseMap.numEventsVSElectionInSystem = EventVSElection.countByState(eventVSState)
+                    responseMap.numEventsVSElectionInSystem = EventVSElection.countByStateOrStateOrStateOrState(
+                            EventVS.State.ACTIVE, EventVS.State.CANCELLED, EventVS.State.TERMINATED, EventVS.State.AWAITING)
 				}
 			}
 			responseMap.offset = params.long('offset')

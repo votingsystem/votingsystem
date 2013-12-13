@@ -503,4 +503,5 @@ body {
 .mainPage {
     position: relative;
     min-height: 600px;
+    overflow: hidden;
 }

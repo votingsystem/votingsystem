@@ -4,34 +4,38 @@
       	<r:require module="paginate"/>
 </head>
 <body>
+<div class="mainPage">
+    <div id="contentDiv" style="display:none;">
+        <div style="position:relative; height: 30px;">
+            <div style="position:absolute;width: 50%;  margin: auto; left: 0; right: 0;">
+                <select id="eventsStateSelect" style="margin:0px 0px 0px 40px;color:black;">
+                    <option value="" style="color:black;"> - <g:message code="selectPollsLbl"/> - </option>
+                    <option value="ACTIVE" style="color:#6bad74;"> - <g:message code="selectOpenPollsLbl"/> - </option>
+                    <option value="AWAITING" style="color:#fba131;"> - <g:message code="selectPendingPollsLbl"/> - </option>
+                    <option value="TERMINATED" style="color:#cc1606;"> - <g:message code="selectClosedPollsLbl"/> - </option>
+                </select>
+            </div>
+        </div>
 
-<div id="contentDiv" style="display:none;">
-	<div style="position:relative; height: 30px;">
-		<div style="position:absolute;width: 50%;  margin: auto; left: 0; right: 0;">
-			<select id="eventsStateSelect" style="margin:0px 0px 0px 40px;color:black;">
-				<option value="" style="color:black;"> - <g:message code="selectPollsLbl"/> - </option>
-			  	<option value="ACTIVE" style="color:#6bad74;"> - <g:message code="selectOpenPollsLbl"/> - </option>
-			  	<option value="AWAITING" style="color:#fba131;"> - <g:message code="selectPendingPollsLbl"/> - </option>
-			  	<option value="TERMINATED" style="color:#cc1606;"> - <g:message code="selectClosedPollsLbl"/> - </option>
-			</select>
-		</div>
-	</div>
-	
-	<g:render template="/template/eventsSearchInfo"/>
-		
-	<div id="mainPageEventList" class="mainPageEventList"><ul></ul></div>
-	
-	<div id="progressDiv" style="vertical-align: middle;height:100%;">
-		<progress style="display:block;margin:0px auto 20px auto;"></progress>
-	</div>
+        <g:render template="/template/eventsSearchInfo"/>
+
+        <div id="mainPageEventList" class="mainPageEventList"><ul></ul></div>
+
+        <div id="progressDiv" style="vertical-align: middle;height:100%;">
+            <progress style="display:block;margin:0px auto 20px auto;"></progress>
+        </div>
+    </div>
+
+    <div style="width:100%;position:absolute;display:block; margin:auto; bottom:20px;">
+        <div style="width:500px; margin:20px auto 20px auto;" id="paginationDiv" ></div>
+    </div>
+
+    <g:render template="/template/pagination"/>
+
+    <div id="eventTemplate" style="display:none;">
+        <g:render template="/template/event" model="[isTemplate:'true']"/>
+    </div>
 </div>
-
-<g:render template="/template/pagination"/>	
-
-	<div id="eventTemplate" style="display:none;">
-		<g:render template="/template/event" model="[isTemplate:'true']"/>
-	</div>
-
 </body>
 </html>
 <r:script>
@@ -105,7 +109,7 @@
 				    "&offset=" + offsetItem + "&eventVSState=" + eventState
 				if(searchQuery != null) targetURL = "${createLink( controller:'search', action:'find')}?max=" +
 						numMaxEventsForPage + "&offset=" + offsetItem
-				loadEvents(targetURL, searchQuery)	
+				loadEvents(targetURL, searchQuery)
 			}
 
 			function getSearchResult(newSearchQuery) {

@@ -38,11 +38,8 @@
 
     <div id="mainPageEventList" class="mainPageEventList"><ul></ul></div>
 
-
-    <div style="width:100%;position:relative;display:block;">
-        <div style="right:50%;">
-            <div style="width:500px; margin:0px auto 20px auto;" id="paginationDiv" ></div>
-        </div>
+    <div style="width:100%;position:absolute;display:block; margin:auto; bottom:20px;">
+        <div style="width:500px; margin:20px auto 20px auto;" id="paginationDiv" ></div>
     </div>
 
     <g:render template="/template/pagination"/>

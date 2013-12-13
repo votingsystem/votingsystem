@@ -50,9 +50,7 @@
         <div style="width:500px; margin:20px auto 20px auto;" id="paginationDiv" ></div>
     </div>
 
-    <div style="display:table-cell;margin: auto; vertical-align: top;">
-        <g:render template="/template/pagination"/>
-    </div>
+    <g:render template="/template/pagination"/>
 
     <div id="eventTemplate" style="display:none;">
         <g:render template="/template/event" model="[isTemplate:'true']"/>

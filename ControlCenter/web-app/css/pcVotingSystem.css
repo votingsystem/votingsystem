@@ -55,7 +55,8 @@ body {
 
 .mainPageEventList {
 	display:block;
-	overflow:hidden; margin:0px 0px 0px 0px;
+	overflow:hidden;
+    margin:0px 0px 75px 0px;
 	min-height: 100%;
 }
 
@@ -492,4 +493,10 @@ body {
 	font-weight:bold; 
 	float:right;
 	position: relative;
+}
+
+.mainPage {
+    position: relative;
+    min-height: 600px;
+    overflow: hidden;
 }

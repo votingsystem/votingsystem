@@ -28,7 +28,7 @@
 
     <div style="min-height: 600px;"><g:layoutBody/></div>
 
-	<div class="footer" style="display:none;width:100%; margin:30px 0 0 0;">
+	<div class="footer" style="display:none;width:100%; margin:0 0 0 0;">
 		<a class="appLink" href="mailto:${grailsApplication.config.VotingSystem.emailAdmin}"
 			 style="">${message(code: 'emailLabel', null)}</a>
 		<a class="appLink" href="${createLink(controller: 'serverInfo', action: 'info')}"
