@@ -168,7 +168,6 @@ function submitForm(form) {
 function isValidForm() {
  	allFields.removeClass("formFieldError");
  	$(".errorMsgWrapper").fadeOut()
-    console.log("=============== isValidForm")
 
 	if(!document.getElementById('accessControlURL').validity.valid) {
 		$("#accessControlURL").addClass("formFieldError");

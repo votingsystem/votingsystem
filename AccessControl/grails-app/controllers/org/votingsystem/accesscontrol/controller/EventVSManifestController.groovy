@@ -123,7 +123,7 @@ class EventVSManifestController {
 	 * @return Si todo va bien devuelve un código de estado HTTP 200.
 	 */
 	def validatePDF() {
-		PDFDocumentVS pdfDocument = params.pdfDocument
+		PDFDocumentVS pdfDocument = request.pdfDocument
 		if (params.long('id') && pdfDocument && pdfDocument.state == PDFDocumentVS.State.VALIDATED) {
 			EventVSManifest eventVS = null;
 			EventVSManifest.withTransaction{ eventVS = EventVSManifest.get(params.id) }

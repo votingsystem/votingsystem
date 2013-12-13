@@ -7,7 +7,7 @@
         </style>
     </head>
     <body>
-        <% def bodyParams = [solicitante, urlSolicitud, representative, dateFromStr, dateToStr, urlDescarga]%>
+        <% def bodyParams = [fromUser, requestURL, representative, dateFromStr, dateToStr, urlDescarga]%>
 		<g:message code="representativeVotingHistoryMailBody" args="${bodyParams}"/>
     </body>
 </html>

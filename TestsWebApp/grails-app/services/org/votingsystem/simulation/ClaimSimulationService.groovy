@@ -305,7 +305,7 @@ class ClaimSimulationService {
 
     private void requestBackup() throws Exception {
         log.debug("requestBackup ### Enter status REQUEST_BACKUP");
-        byte[] requestBackupPDFBytes = PdfFormHelper.getBackupRequest(eventVS.getId().toString(), event.getSubject(),
+        byte[] requestBackupPDFBytes = PdfFormHelper.getBackupRequest(eventVS.getId().toString(), eventVS.getSubject(),
                 simulationData.getBackupRequestEmail());
 
         KeyStore userTestKeyStore = ContextVS.getInstance().getUserTest().getKeyStore();
@@ -393,6 +393,8 @@ class ClaimSimulationService {
                     if(ResponseVS.SC_OK == statusFromResponse.getStatusCode()) {
                         if(simulationData.getEventStateWhenFinished() != null) {
                             changeEventState();
+                        } else if(simulationData.getBackupRequestEmail() != null) {
+                            requestBackup();
                         } else finishSimulation(statusFromResponse);
                     } else finishSimulation(statusFromResponse);
                     break;

@@ -26,7 +26,7 @@ class EventVSManifestCollectorController {
 	 * @return Si todo va bien devuelve un código de estado HTTP 200.
 	 */
 	def index() {
-		PDFDocumentVS pdfDocument = params.pdfDocument
+		PDFDocumentVS pdfDocument = request.pdfDocument
 		if(params.long('id') && pdfDocument && pdfDocument.state == PDFDocumentVS.State.VALIDATED) {
 			EventVSManifest eventVS = null;
 			EventVSManifest.withTransaction{ eventVS = EventVSManifest.get(params.long('id')) }

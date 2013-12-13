@@ -20,8 +20,8 @@ class MailSenderService {
 	PageRenderer groovyPageRenderer
 	
 	
-	public void sendMail(String toUser, String msg, String subject) {
-		log.debug "sendMail - toUser:${toUser} - subject:${subject}"
+	public void sendTextMail(String toUser, String msg, String subject) {
+		log.debug "sendTextMail - toUser:${toUser} - subject:${subject}"
 		runAsync {
 			SimpleMailMessage message = new SimpleMailMessage();
 			//message.setFrom(fromUser);
@@ -30,114 +30,122 @@ class MailSenderService {
 			message.setText(msg);
 			mailSender.send(message);
 		}
-	}	
+	}
+
+    public void sendHTMLMail(String toUser, String htmlMessage, String subject) {
+        log.debug "sendHTMLMail - toUser:${toUser} - subject:${subject}"
+        runAsync {
+            MimeMessage message = mailSender.createMimeMessage();
+            try {
+                MimeMessageHelper helper = new MimeMessageHelper(message, true, "ISO-8859-1");
+                //helper.setFrom("from");
+                helper.setTo(toUser);
+                helper.setSubject(subject);
+                helper.setText(htmlMessage, true)
+                mailSender.send(message);
+            } catch(MessagingException ex) {
+                log.error(ex.getMessage(), ex)
+            }
+        }
+    }
 	
-	public void sendBackupMsg (BackupRequestVS solicitud, Locale locale) {
-		log.debug "sendInstruccionesDescarga - email:${solicitud.email} - solicitud:${solicitud.id}"
+	public void sendBackupMsg (BackupRequestVS request, Locale locale) {
+		log.debug "sendInstruccionesDescarga - email:${request.email} - request:${request.id}"
 		def subject;
 		String eventVSSubject
-		String solicitante
-		String urlSolicitud
-		String urlDescarga
+		String fromUser
+		String requestURL
+		String downloadURL
 		BackupRequestVS.withTransaction {
-			eventVSSubject = solicitud.PDFDocumentVS?.eventVS?.subject
+			eventVSSubject = request.PDFDocumentVS?.eventVS?.subject
 			if(eventVSSubject) subject = (eventVSSubject.length() > 90)?eventVSSubject.substring(0, 90) + "...":eventVSSubject
-			solicitante = "${solicitud.PDFDocumentVS?.userVS?.name} ${solicitud.PDFDocumentVS?.userVS?.firstName}"
-			urlSolicitud = "${grailsApplication.config.grails.serverURL}/solicitudCopia/${solicitud.id}"
-			urlDescarga = "${grailsApplication.config.grails.serverURL}/solicitudCopia/download/${solicitud.id}"
+			fromUser = "${request.PDFDocumentVS?.userVS?.name} ${request.PDFDocumentVS?.userVS?.firstName}"
+			requestURL = "${grailsApplication.config.grails.serverURL}/backupVS/${request.id}"
+			downloadURL = "${grailsApplication.config.grails.serverURL}/backupVS/download/${request.id}"
 		}
-		log.debug "solicitante:${solicitante} - urlSolicitud:${urlSolicitud} - urlDescarga:${urlDescarga}"
+		log.debug "fromUser:${fromUser} - requestURL:${requestURL} - downloadURL:${downloadURL}"
 		String emailSubject = messageSource.getMessage('downloadBackupMailSubject', null, locale)
 		
-		String renderedSrc = groovyPageRenderer.render (
-			view:"/mail/notificacionUrlCopias", model:[solicitante:solicitante,
-				   urlSolicitud:urlSolicitud, eventVSManifestSubject:subject, urlDescarga:urlDescarga])
-		sendMail(solicitud.email, renderedSrc, emailSubject);
+		String htmlMessage = groovyPageRenderer.render (view:"/mail/backupRequestMessage", model:[fromUser:fromUser,
+				   requestURL:requestURL, subject:subject, downloadURL:downloadURL])
+        sendHTMLMail(request.email, htmlMessage, emailSubject);
    }
 	
-	public void sendRepresentativeAccreditations (
-		BackupRequestVS solicitud, String dateStr, Locale locale) {
-		log.debug "sendRepresentativeAccreditations - email:${solicitud.email} - solicitud:${solicitud.id}"
+	public void sendRepresentativeAccreditations (BackupRequestVS request, String dateStr, Locale locale) {
+		log.debug "sendRepresentativeAccreditations - email:${request.email} - request:${request.id}"
 		String subject;
 		UserVS userRequest
 		String userRequestName
 		UserVS representative
 		String representativeName
-		String urlSolicitud
-		String urlDescarga
+		String requestURL
+		String downloadURL
 		BackupRequestVS.withTransaction {
-			representative = solicitud.representative
-			userRequest = solicitud.messageSMIME?.userVS
+			representative = request.representative
+			userRequest = request.messageSMIME?.userVS
 			representativeName = "${representative?.name} ${representative?.firstName}"
 			userRequestName = "${userRequest?.name} ${userRequest?.firstName}"
-			urlSolicitud = "${grailsApplication.config.grails.serverURL}/solicitudCopia/${solicitud.id}"
-			urlDescarga = "${grailsApplication.config.grails.serverURL}/solicitudCopia/download/${solicitud.id}"
+			requestURL = "${grailsApplication.config.grails.serverURL}/backupVS/${request.id}"
+			downloadURL = "${grailsApplication.config.grails.serverURL}/backupVS/download/${request.id}"
 		}
 		String emailSubject = messageSource.getMessage('representativeAccreditationsMailSubject',
 			[representativeName].toArray(), locale)
 		
-		String renderedSrc = groovyPageRenderer.render (
+		String htmlMessage = groovyPageRenderer.render (
 				view:"/mail/RepresentativeAccreditationRequestDownloadInstructions", 
-				model:[solicitante:userRequestName, dateStr:dateStr, pageTitle:emailSubject,
-						urlSolicitud:urlSolicitud, representative:representativeName, urlDescarga:urlDescarga])
-				
-		sendMail(solicitud.email, renderedSrc, emailSubject);
+				model:[fromUser:userRequestName, dateStr:dateStr, pageTitle:emailSubject,
+						requestURL:requestURL, representative:representativeName, downloadURL:downloadURL])
+
+        sendHTMLMail(request.email, htmlMessage, emailSubject);
 
 	}
 	
-	public void sendRepresentativeVotingHistory (BackupRequestVS solicitud,
+	public void sendRepresentativeVotingHistory (BackupRequestVS request,
 		String dateFromStr, String dateToStr, Locale locale) {
-		log.debug "sendRepresentativeVotingHistory - email:${solicitud.email} - solicitud:${solicitud.id}"
+		log.debug "sendRepresentativeVotingHistory - email:${request.email} - request:${request.id}"
 		String subject;
 		UserVS userRequest
 		String userRequestName
 		UserVS representative
 		String representativeName
-		String urlSolicitud
-		String urlDescarga
+		String requestURL
+		String downloadURL
 		BackupRequestVS.withTransaction {
-			representative = solicitud.representative
-			userRequest = solicitud.messageSMIME?.userVS
+			representative = request.representative
+			userRequest = request.messageSMIME?.userVS
 			representativeName = "${representative?.name} ${representative?.firstName}"
 			userRequestName = "${userRequest?.name} ${userRequest?.firstName}"
-			urlSolicitud = "${grailsApplication.config.grails.serverURL}/solicitudCopia/${solicitud.id}"
-			urlDescaimport grails.gsp.PageRendererrga = "${grailsApplication.config.grails.serverURL}/solicitudCopia/download/${solicitud.id}"
+			requestURL = "${grailsApplication.config.grails.serverURL}/backupVS/${request.id}"
+			urlDescaimport grails.gsp.PageRendererrga = "${grailsApplication.config.grails.serverURL}/backupVS/download/${request.id}"
 		}
 		String emailSubject = messageSource.getMessage('representativeVotingHistoryMailSubject',
 			[representativeName].toArray(), locale)
 		
-		String renderedSrc = groovyPageRenderer.render (
+		String htmlMessage = groovyPageRenderer.render (
 			view:"/mail/RepresentativeVotingHistoryDownloadInstructions",
-			model:[solicitante:userRequestName, dateFromStr:dateFromStr, dateToStr:dateToStr,
-				pageTitle:emailSubject,	urlSolicitud:urlSolicitud, representative:representativeName, urlDescarga:urlDescarga])
-		
-		sendMail(solicitud.email, renderedSrc, emailSubject);
+			model:[fromUser:userRequestName, dateFromStr:dateFromStr, dateToStr:dateToStr,
+				pageTitle:emailSubject,	requestURL:requestURL, representative:representativeName, downloadURL:downloadURL])
+
+        sendHTMLMail(request.email, htmlMessage, emailSubject);
 
 	}
 	
 	def sendPDF(String email, String subject, String bodyView, Map model, byte[] pdfBytes) {
 		log.debug "- sendPDF - to userVS:${email}"
-		
-		String renderedSrc = groovyPageRenderer.render (view:bodyView, model:model)
-		
-		MimeMessage message = mailSender.createMimeMessage();
-		try {
-			MimeMessageHelper helper = new MimeMessageHelper(message, true);
-	 
-			//helper.setFrom("from");
-			helper.setTo(email);
-			helper.setSubject(subject);
-			helper.setText(renderedSrc);
-	 
-			ByteArrayResource byteArrayResource = new ByteArrayResource(pdfBytes)
-			
-			helper.addAttachment("attached.pdf", byteArrayResource);
-	 
-	   } catch(MessagingException ex) {
-			log.error(ex.getMessage(), ex)
-	   }
-		mailSender.send(message);
-		
-	}
+        String htmlMessage = groovyPageRenderer.render (view:bodyView, model:model)
+        MimeMessage message = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            //helper.setFrom("from");
+            helper.setTo(email);
+            helper.setSubject(subject);
+            helper.setText(htmlMessage);
+            ByteArrayResource byteArrayResource = new ByteArrayResource(pdfBytes)
+            helper.addAttachment("attached.pdf", byteArrayResource);
+            mailSender.send(message);
+        } catch(MessagingException ex) {
+            log.error(ex.getMessage(), ex)
+        }
+    }
 	
 }

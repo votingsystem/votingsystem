@@ -20,11 +20,9 @@ import org.votingsystem.model.ResponseVS
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
 class BackupVSController {
-	
-	def eventVSManifestService
-	def eventVSClaimService
-	def eventVSElectionService
+
 	def mailSenderService
+    def backupService
 
 	/**
 	 * Servicio que recibe solicitudes de copias de seguridad
@@ -37,62 +35,50 @@ class BackupVSController {
 	 *         email con información para poder get la copia de seguridad.
 	 */
 	def index() {
-        PDFDocumentVS pdfDocument = params.pdfDocument
+        PDFDocumentVS pdfDocument = request.pdfDocument
         if (pdfDocument && pdfDocument.state == PDFDocumentVS.State.VALIDATED) {
             PdfReader reader = new PdfReader(pdfDocument.pdf);
             AcroFields form = reader.getAcroFields();
             String eventId = form.getField("eventId");
-            String msg = null
             def eventVS
-            if(eventId) {
-                EventVS.withTransaction {eventVS = EventVS.get(new Long(eventId))}
-            } else msg = message(code: 'backupRequestEventWithoutIdErrorMsg')
-
-            if(!eventVS)
-                msg = message(code:'backupRequestEventIdErrorMsg', [eventId])
-            if(!eventVS.backupAvailable)
-                msg = message(code:'eventWithoutBackup', args:[eventVS.subject])
+            if(eventId) EventVS.withTransaction {eventVS = EventVS.get(new Long(eventId))}
+            if(!eventVS)  return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                        message(code:'backupRequestEventIdErrorMsg', args:[eventId]))]
+            if(!eventVS.backupAvailable) return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code:'eventWithoutBackup', args:[eventVS.subject]))]
             String subject = form.getField("subject");
             String email = form.getField("email");
-            if(!email)
-                msg =  message(code:'backupRequestEmailMissingErrorMsg')
-
-            if(msg) {
-                pdfDocument.state = PDFDocumentVS.State.BACKUP_REQUEST_ERROR
-            } else pdfDocument.state = PDFDocumentVS.State.BACKUP_REQUEST
-
+            if(!email) return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+                    message(code:'backupRequestEmailMissingErrorMsg'))]
+            pdfDocument.state = PDFDocumentVS.State.BACKUP_REQUEST
             PDFDocumentVS.withTransaction {
                 pdfDocument.eventVS = eventVS
                 pdfDocument.save(flush:true)
             }
-            if(msg) return [responseVS:new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,message:msg)]
-
             log.debug "backup request - eventId: ${eventId} - subject: ${subject} - email: ${email}"
             ResponseVS backupGenResponseVS = null
             if(EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
                 log.debug "Request from DEVELOPMENT environment generating sync response"
-                backupGenResponseVS = requestBackup(eventVS, request.locale)
+                backupGenResponseVS = backupService.requestBackup(eventVS, request.locale)
                 if(ResponseVS.SC_OK == backupGenResponseVS?.statusCode) {
-                    BackupRequestVS backupRequest = new BackupRequestVS( filePath:backupGenResponseVS.message,
+                    BackupRequestVS backupRequest = new BackupRequestVS(filePath:backupGenResponseVS.message,
                             type:backupGenResponseVS.type, PDFDocumentVS:pdfDocument, email:email)
                     BackupRequestVS.withTransaction {backupRequest.save()}
+                    mailSenderService.sendBackupMsg(backupRequest, request.locale)
                     return [responseVS:new ResponseVS(ResponseVS.SC_OK, backupRequest.id.toString())]
-                } else {
-                    log.error("DEVELOPMENT - error generating backup");
-                    return [responseVS:backupGenResponseVS]
                 }
             } else {
                 final EventVS event = eventVS
                 final Locale locale = request.locale
                 final String emailRequest = email
                 runAsync {
-                    ResponseVS backupResponse = requestBackup(event, locale)
+                    ResponseVS backupResponse = backupService.requestBackup(event, locale)
                     if(ResponseVS.SC_OK == backupResponse?.statusCode) {
                         BackupRequestVS backupRequest = new BackupRequestVS(
                                 filePath:backupResponse.message, type:backupResponse.type,
                                 PDFDocumentVS:pdfDocument, email:emailRequest)
                         BackupRequestVS.withTransaction { backupRequest.save() }
-                        mailSenderService.sendBackupMsg(backupRequest, locale)
+                        mailSenderService.sendBackupMsg(backupRequest, request.locale)
                     } else log.error("Error generating Backup");
                 }
                 return [responseVS:new ResponseVS(ResponseVS.SC_OK, message(code:'backupRequestOKMsg',args:[email]))]
@@ -103,23 +89,7 @@ class BackupVSController {
                     args:["${grailsApplication.config.grails.serverURL}/${params.controller}/restDoc"]))]
         }
 	}
-	
-	
-	private ResponseVS requestBackup(EventVS eventVS, Locale locale) {
-		log.debug ("requestBackup")
-		ResponseVS backupGenResponseVS
-		if(eventVS instanceof EventVSManifest) {
-			backupGenResponseVS = eventVSManifestService.generateBackup((EventVSManifest)eventVS, locale)
-			log.debug("---> EventVSManifest")
-		} else if(eventVS instanceof EventVSClaim) {
-			log.debug("---> EventVSClaim")
-			backupGenResponseVS = eventVSClaimService.generateBackup((EventVSClaim)eventVS,locale)
-		} else if(eventVS instanceof EventVSElection) {
-			log.debug("---> EventVSElection")
-			backupGenResponseVS = eventVSElectionService.generateBackup((EventVSElection)eventVS, locale)
-		}
-		return backupGenResponseVS
-	}
+
 	
 	/**
 	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE DESARROLLO). Que genera copias la copia de
@@ -136,7 +106,7 @@ class BackupVSController {
             if(!event) {
                 return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: "nullParamErrorMsg"))]
             } else {
-                ResponseVS requestBackup = requestBackup(event, request.locale)
+                ResponseVS requestBackup = backupService.requestBackup(event, request.locale)
                 if(ResponseVS.SC_OK == requestBackup?.statusCode) {
                     redirect(uri: requestBackup.message)
                 } else {
@@ -157,15 +127,13 @@ class BackupVSController {
 	 * @return Archivo zip con la copia de seguridad.
 	 */
 	def download() {
-		BackupRequestVS solicitud
-		BackupRequestVS.withTransaction {
-			solicitud = BackupRequestVS.get(params.long('id'))
-		}
-		if(!solicitud) {
+		BackupRequestVS backupRequest
+		BackupRequestVS.withTransaction { backupRequest = BackupRequestVS.get(params.long('id')) }
+		if(!backupRequest) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                     message(code: 'backupRequestNotFound', args:[params.id]))]
 		}
-		redirect(uri: solicitud.filePath)
+		redirect(uri: backupRequest.filePath)
 	}
 	
 	/**
@@ -177,22 +145,21 @@ class BackupVSController {
 	 * @return El PDF en el que se solicita la copia de seguridad.
 	 */
 	def get() {
-		BackupRequestVS solicitud
-		byte[] solicitudBytes
+		BackupRequestVS backupRequest
         ResponseVS responseVS
 		BackupRequestVS.withTransaction {
-			solicitud = BackupRequestVS.get(params.long('id'))
-			if(solicitud) {
-				if(solicitud.PDFDocumentVS) {//has PDF
+			backupRequest = BackupRequestVS.get(params.long('id'))
+			if(backupRequest) {
+				if(backupRequest.PDFDocumentVS) {//has PDF
                     responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.PDF,
-                        messageBytes: solicitud.PDFDocumentVS?.pdf)
+                        messageBytes: backupRequest.PDFDocumentVS?.pdf)
 				} else {//has SMIME
                     responseVS = new ResponseVS(statusCode: ResponseVS.SC_OK, contentType: ContentTypeVS.TEXT_STREAM,
-                            messageBytes: solicitud.messageSMIME?.content)
+                            messageBytes: backupRequest.messageSMIME?.content)
 				}
 			} 
 		}
-		if(!solicitud) return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
+		if(!backupRequest) return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
                     message(code: 'backupRequestNotFound', args:[params.id]))]
 		else return [responseVS:responseVS]
 	}

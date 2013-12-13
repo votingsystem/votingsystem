@@ -2,9 +2,12 @@ package org.votingsystem.simulation
 
 import org.codehaus.groovy.grails.web.json.JSONObject
 import grails.converters.JSON
+import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.EventVS
 import org.votingsystem.model.FieldEventVS
+import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.VoteVS
+import org.votingsystem.util.HttpHelper
 
 class TestingController {
 	
@@ -13,9 +16,19 @@ class TestingController {
 	
 	private Timer timer = null
 
+
 	def index() {
-		render (view:"test")
-        return false;
+        ResponseVS responseVS = HttpHelper.getInstance().getData(
+                "http://192.168.1.20:8080/AccessControl/backupVS/download/13", ContentTypeVS.BACKUP);
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+            render "TODO validate backup";
+            /*FutureTask<ResponseVS> future = new FutureTask<ResponseVS>(
+                new ZipBackupValidator(responseVS.getMessageBytes()));
+            simulatorExecutor.execute(future);
+            responseVS = future.get();
+            log.debug("BackupRequestWorker - status: " + responseVS.getStatusCode());*/
+        } else render "Error"
+        return false
 	}
 
     def vote() {

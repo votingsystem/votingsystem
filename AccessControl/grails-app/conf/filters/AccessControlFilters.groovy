@@ -122,12 +122,12 @@ class AccessControlFilters {
                             if(ResponseVS.SC_OK == responseVS.statusCode) {
                                 requestBytes = responseVS.messageBytes
                                 responseVS = pdfService.checkSignature(requestBytes, request.getLocale())
-                                if(ResponseVS.SC_OK == responseVS.statusCode) params.pdfDocument = responseVS?.data
+                                if(ResponseVS.SC_OK == responseVS.statusCode) request.pdfDocument = responseVS?.data
                             }
                             break;
                         case ContentTypeVS.PDF_SIGNED:
                             responseVS = pdfService.checkSignature(requestBytes, request.getLocale())
-                            if(ResponseVS.SC_OK == responseVS.statusCode) params.pdfDocument = responseVS.data
+                            if(ResponseVS.SC_OK == responseVS.statusCode) request.pdfDocument = responseVS.data
                             break;
                         case ContentTypeVS.PDF:
                             params.plainPDFDocument = requestBytes

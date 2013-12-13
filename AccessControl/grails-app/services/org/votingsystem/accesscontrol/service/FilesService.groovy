@@ -18,7 +18,7 @@ class FilesService {
         new File("${grailsApplication.config.VotingSystem.errorsBaseDir}").mkdirs()
         new File("${grailsApplication.config.VotingSystem.backupCopyPath}").mkdirs()
 	}
-	
+
  	public Map<String, File> getBackupFiles(EventVS event, TypeVS type, Locale locale){
 		 String servicePathPart = null
 		 Map<String, File> result = new HashMap<String, File>()

@@ -300,6 +300,7 @@ class EventVSElectionService {
 			ant.zip(destfile: zipResult, basedir: "${filesDir}") {
 				fileset(dir:"${filesDir}/..", includes: "meta.inf")
 			}
+            //The file is copied and available to download but triggers a null pointer exception with ResourcesPlugin
 			ant.copy(file: zipResult, tofile: webappBackupPath)
 			
 			if (!eventVS.isAttached()) { eventVS.attach() }
