@@ -35,6 +35,7 @@ class VotingSimulationData extends SimulationData {
         setAccessControlURL(simulData.getAccessControlURL());
         setEventVS(simulData.getEventVS());
         init(simulData.getBegin());
+        setEventStateWhenFinished(simulData.getEventStateWhenFinished());
         setUserBaseData(simulData.getUserBaseSimulationData());
         setMaxPendingResponses(simulData.getMaxPendingResponses());
         setMessage(simulData.getMessage());

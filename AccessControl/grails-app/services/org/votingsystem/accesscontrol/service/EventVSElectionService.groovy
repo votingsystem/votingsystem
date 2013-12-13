@@ -161,9 +161,8 @@ class EventVSElectionService {
 				String currentDateStr = DateUtils.getStringFromDate(
 					new Date(System.currentTimeMillis()))
 				log.error("generateBackup - DATE ERROR  ${msg} - " +
-					"fecha actual '${currentDateStr}' fecha final eventVS '${eventVS.dateFinish}'")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
-					message:msg, type:TypeVS.BACKUP_ERROR)
+					"Actual date '${currentDateStr}' - dateFinish eventVS '${eventVS.dateFinish}'")
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,  message:msg, type:TypeVS.ERROR)
 			}
 			
 			Map<String, File> mapFiles = filesService.getBackupFiles(eventVS, TypeVS.VOTING_EVENT, locale)
@@ -171,8 +170,7 @@ class EventVSElectionService {
 			File metaInfFile = mapFiles.metaInfFile
 			File filesDir    = mapFiles.filesDir
 			
-			String serviceURLPart = messageSource.getMessage(
-				'votingBackupPartPath', [eventVS.id].toArray(), locale)
+			String serviceURLPart = messageSource.getMessage('votingBackupPartPath', [eventVS.id].toArray(), locale)
 			String datePathPart = DateUtils.getShortStringFromDate(eventVS.getDateFinish())
 			String backupURL = "/backup/${datePathPart}/${serviceURLPart}.zip"
 			String webappBackupPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}${backupURL}"
@@ -184,13 +182,13 @@ class EventVSElectionService {
 			responseVS = representativeService.getAccreditationsBackupForEvent(eventVS, locale)
 			Map representativeDataMap = responseVS.data
 			if(ResponseVS.SC_OK != responseVS.statusCode) {
-				log.error("generateBackup - REPRESENTATIVE DATA GEN ERROR  ${responseVS.message}")
+				log.error("generateBackup - REPRESENTATIVE BACKUP DATA GENERATION ERROR:  ${responseVS.message}")
 				return responseVS
 			}			
 			
 			responseVS = signatureVSService.getEventTrustedCerts(eventVS, locale)
 			if(ResponseVS.SC_OK != responseVS.statusCode) {
-				responseVS.type = TypeVS.BACKUP_ERROR
+				responseVS.type = TypeVS.ERROR
 				return responseVS
 			}
 			
@@ -208,9 +206,9 @@ class EventVSElectionService {
 			File timeStampCertFile = new File("${filesDir.absolutePath}/timeStampCert.pem")
 			timeStampCertFile.setBytes(timeStampCertPEMBytes)
 				
-			int numTotalVotes = VoteVS.countByStateAndEventVSElection(VoteVS.State.OK, eventVS)
+			int numTotalVotes = VoteVS.countByStateAndEventVS(VoteVS.State.OK, eventVS)
 			int numTotalAccessRequests = AccessRequestVS.countByStateAndEventVSElection(
-				AccessRequestVS.State.OK, eventVS)
+                    AccessRequestVS.State.OK, eventVS)
 			def backupMetaInfMap = [numVotes:numTotalVotes,
 				numAccessRequest:numTotalAccessRequests]
 			Map eventMetaInfMap = eventVSService.getMetaInfMap(eventVS)
@@ -239,17 +237,17 @@ class EventVSElectionService {
 				def criteria = VoteVS.createCriteria()
 				votes = criteria.scroll {
 					eq("state", VoteVS.State.OK)
-					eq("eventVSElection", eventVS)
+					eq("eventVS", eventVS)
 				}
 				while (votes.next()) {
 					VoteVS voteVS = (VoteVS) votes.get(0);
-					UserVS representative = voteVS?.certificateVS?.getUserVS
+					UserVS representative = voteVS?.certificateVS?.userVS
 					String voteFilePath = null
 					if(representative) {//representative vote, not anonymous
 						voteFilePath = "${votesBaseDir}/${representativeVoteFileName}_${representative.nif}.p7m"
 					} else {
 						//user vote, is anonymous
-						voteFilePath = "${votesBaseDir}${voteFileName}_${formatted.format(voteVS.id)}.p7m"
+						voteFilePath = "${votesBaseDir}/${voteFileName}_${formatted.format(voteVS.id)}.p7m"
 					}
 					MessageSMIME messageSMIME = voteVS.messageSMIME
 					File smimeFile = new File(voteFilePath)
@@ -308,7 +306,8 @@ class EventVSElectionService {
 			eventVS.save()
 			
 			log.debug("zip backup of event ${eventVS.id} on file ${zipResult.absolutePath}")
-			return new ResponseVS(statusCode:ResponseVS.SC_OK, message:backupURL, data:eventMetaInfMap)
+			return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.VOTING_EVENT,
+                    message:backupURL, data:eventMetaInfMap)
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex)
 			msg =  messageSource.getMessage('backupError', [eventVS?.id].toArray(), locale)

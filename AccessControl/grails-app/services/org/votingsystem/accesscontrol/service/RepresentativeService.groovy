@@ -57,7 +57,8 @@ class RepresentativeService {
 		File filesDir    = mapFiles.filesDir
 
 		Date selectedDate = event.getDateFinish();
-        String downloadFileName = message(code:'repAccreditationsBackupForEventFileName', args:[event.id])
+        String downloadFileName = messageSource.getMessage('repAccreditationsBackupForEventFileName',
+                [event.id].toArray(), locale)
 
 		if(zipResult.exists()) {
 			log.debug("getAccreditationsBackupForEvent - backup file already exists")
@@ -67,14 +68,14 @@ class RepresentativeService {
 		
 		Map optionsMap = [:]
 		event.fieldsEventVS.each {option ->
-			def numVoteRequests = VoteVS.countByOpcionDeEventoAndState(option, VoteVS.State.OK)
+			def numVoteRequests = VoteVS.countByOptionSelectedAndState(option, VoteVS.State.OK)
 			def voteCriteria = VoteVS.createCriteria()
 			def numUsersWithVote = voteCriteria.count {
 				createAlias("certificateVS", "certificateVS")
 				isNull("certificateVS.userVS")
 				eq("state", VoteVS.State.OK)
-				eq("eventVSElection", event)
-				eq("fieldEventVS", option)
+				eq("eventVS", event)
+				eq("optionSelected", option)
 			}
 			int numRepresentativesWithVote = numVoteRequests - numUsersWithVote
 			Map optionMap = [content:option.content,
@@ -140,7 +141,7 @@ class RepresentativeService {
 			while (representationDocuments.next()) {
 				++numRepresented
 				RepresentationDocumentVS repDocument = (RepresentationDocumentVS) representationDocuments.get(0);
-				UserVS represented = repDocument.user
+				UserVS represented = repDocument.userVS
 				AccessRequestVS representedAccessRequest = AccessRequestVS.findWhere(
 					state:AccessRequestVS.State.OK, userVS:represented, eventVSElection:event)
 				String repDocFileName = null
@@ -182,7 +183,7 @@ class RepresentativeService {
 						createAlias("certificateVS", "certificateVS")
 						eq("certificateVS.userVS", representative)
 						eq("state", VoteVS.State.OK)
-						eq("eventVSElection", event)
+						eq("eventVS", event)
 					}
 				}
 			}
@@ -193,11 +194,11 @@ class RepresentativeService {
 				numVotesRepresentedByRepresentative =
 					numRepresented  - numRepresentedWithAccessRequest
 				numVotesRepresentedByRepresentatives += numVotesRepresentedByRepresentative
-				optionsMap[representativeVote.getFieldEventVS.id].numVotesResult += numVotesRepresentedByRepresentative
+				optionsMap[representativeVote.optionSelected.id].numVotesResult += numVotesRepresentedByRepresentative
 			}			
 			
 			Map representativeMap = [id:representative.id,
-				optionSelectedId:representativeVote?.getFieldEventVS?.id,
+				optionSelectedId:representativeVote?.optionSelected.id,
 				numRepresentedWithVote:numRepresentedWithAccessRequest,
 				numRepresentations: numRepresented,
 				numVotesRepresented:numVotesRepresentedByRepresentative]

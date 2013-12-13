@@ -439,6 +439,8 @@ class ElectionSimulationService implements SimulatorListener<UserBaseSimulationD
                     if(ResponseVS.SC_OK == statusFromResponse.getStatusCode()) {
                         if(simulationData.getEventStateWhenFinished() != null) {
                             changeEventState();
+                        } else if(simulationData.getBackupRequestEmail() != null) {
+                            requestBackup();
                         } else finishSimulation(statusFromResponse);
                     } else finishSimulation(statusFromResponse);
                     break;
