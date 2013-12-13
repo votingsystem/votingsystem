@@ -53,7 +53,7 @@
 
 		<div style="width:100%;position:relative;margin:0px 0px 0px 0px;">
 			<div id="eventAuthorDiv"><b>
-				<g:message code="publisshedByLbl"/>:</b>${eventMap?.userVS}
+				<g:message code="publishedByLbl"/>:</b>${eventMap?.userVS}
 			</div>
 		</div>
 	

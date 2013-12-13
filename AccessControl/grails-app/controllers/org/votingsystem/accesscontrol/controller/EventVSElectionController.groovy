@@ -99,7 +99,6 @@ class EventVSElectionController {
                                 EventVS.State.CANCELLED, EventVS.State.TERMINATED)
                     } else {
                         eventVSList =  EventVSElection.findAllByState(eventVSState, params)
-                        log.debug " -eventVSState: " + eventVSState
                         eventsVSMap.numEventsVSElectionInSystem = EventVSElection.countByState(eventVSState)
                     }
                 } else {

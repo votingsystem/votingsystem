@@ -39,11 +39,15 @@
     <div id="mainPageEventList" class="mainPageEventList"><ul></ul></div>
 
 
-    <div style="margin: 0 0 0 0; position: absolute; bottom: 20px;">
+    <div style="margin: 0 0 0 0; position: absolute; bottom: 37px;">
         <votingSystem:simpleButton href="${createLink(controller:'representative', action:'main')}"
                                    style="margin:0px 0px 0px 45px;">
             <g:message code="representativesPageLbl"/>
         </votingSystem:simpleButton>
+    </div>
+
+    <div style="width:100%;position:absolute;display:block; margin:auto; bottom:20px;">
+        <div style="width:500px; margin:20px auto 20px auto;" id="paginationDiv" ></div>
     </div>
 
     <div style="display:table-cell;margin: auto; vertical-align: top;">
@@ -74,7 +78,7 @@
 					 	}
 			 		}
 					var targetURL = "${createLink( controller:'eventVSElection')}?&max=" + numMaxEventsForPage;
-					if("" != eventState) targetURL = targetURL + "&eventVSState=" + $(this).val()
+					if("" != eventState) targetURL = targetURL + "&eventVSState=" + eventState
 					$("#paginationDiv").hide()
 		 		    loadEvents(targetURL)
 		 		});
@@ -128,7 +132,7 @@
 				var targetURL = "${createLink( controller:'eventVSElection')}?max=" + numMaxEventsForPage +
 				    "&offset=" + offsetItem + "&eventVSState=" + eventState
 				if(searchQuery != null) targetURL = "${createLink( controller:'search', action:'find')}?max=" +
-						numMaxEventsForPage + "&offset=" + offsetItem
+						numMaxEventsForPage + "&offset=" + offsetItem + "&eventVSState=" + eventState
 				loadEvents(targetURL, searchQuery)	
 			}
 

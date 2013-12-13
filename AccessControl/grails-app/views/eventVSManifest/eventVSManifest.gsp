@@ -65,7 +65,7 @@
 				</div>
 			</g:if>
 			<div id="eventAuthorDiv" style="float:right;top:0px;">
-				<b><g:message code="publisshedByLbl"/>: </b>${eventMap?.userVS}
+				<b><g:message code="publishedByLbl"/>: </b>${eventMap?.userVS}
 			</div>
 		</div>
 		

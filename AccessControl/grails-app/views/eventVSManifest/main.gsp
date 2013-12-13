@@ -4,7 +4,7 @@
        	<r:require modules="paginate"/>
 </head>
 <body>
-<div style="position:relative;">
+<div class="mainPage">
     <div id="contentDiv" style="display:none;">
         <div style="display:inline-block;width:100%;vertical-align: middle;margin:0px 0 10px 0px;">
             <div style="display:inline;float:left;width:30%;">
@@ -41,7 +41,7 @@
 
     <div style="width:100%;position:relative;display:block;">
         <div style="right:50%;">
-            <div style="width:500px; margin:20px auto 20px auto;" id="paginationDiv" ></div>
+            <div style="width:500px; margin:0px auto 20px auto;" id="paginationDiv" ></div>
         </div>
     </div>
 
@@ -118,15 +118,17 @@
 			}
 
 			function paginate (newOffsetPage) {
-				console.log(" - paginate - offsetPage : " + offsetPage + " - newOffsetPage: " + newOffsetPage)
+				console.log(" - paginate - offsetPage : " + offsetPage + " - newOffsetPage: " + newOffsetPage +
+				        " - eventState: " + eventState)
 				if(newOffsetPage == offsetPage) return
 				offsetPage = newOffsetPage
 				var offsetItem
 				if(newOffsetPage == 0) offsetItem = 0
 				else offsetItem = (newOffsetPage -1) * numMaxEventsForPage
-				var targetURL = "${createLink( controller:'eventVSManifest')}?max=" + numMaxEventsForPage + "&offset=" + offsetItem
+				var targetURL = "${createLink( controller:'eventVSManifest')}?max=" + numMaxEventsForPage +
+				    "&offset=" + offsetItem + "&eventVSState=" + eventState
 				if(searchQuery != null) targetURL = "${createLink( controller:'search', action:'find')}?max=" +
-						numMaxEventsForPage + "&offset=" + offsetItem
+						numMaxEventsForPage + "&offset=" + offsetItem + "&eventVSState=" + eventState
 				loadEvents(targetURL, searchQuery)	
 			}
 

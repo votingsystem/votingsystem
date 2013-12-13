@@ -55,7 +55,8 @@ body {
 
 .mainPageEventList {
 	display:block;
-	overflow:hidden; margin:0px 0px 30px 0px;
+	overflow:hidden;
+    margin:0px 0px 75px 0px;
 	min-height: 100%;
 }
 
@@ -74,6 +75,14 @@ body {
 	height:100px;
 	overflow:hidden; 
 	float:left;
+}
+
+.bottomPaginationWrapper {
+    width:100%;
+    position:absolute;
+    display:block;
+    margin:auto;
+    bottom:20px;
 }
 
 .representativeDiv .representativeImgCol{

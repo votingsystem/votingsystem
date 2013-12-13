@@ -246,7 +246,7 @@
 						if(i == (o.display-1)){
 							outsidewidth_tmp = this.offsetLeft + this.offsetWidth ;
 						}
-						insidewidth += this.offsetWidth;
+						insidewidth += this.offsetWidth + 1;
 					})
 					 var bodyWidth = $("body").width()
 					 var maxInsideWidth = bodyWidth - _firstPageButton.width() - _lastPageButton.width() - 30 //30 -> margin
