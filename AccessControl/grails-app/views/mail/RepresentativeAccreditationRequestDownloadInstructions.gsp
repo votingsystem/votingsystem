@@ -1,5 +1,5 @@
 <%@ page contentType="text/html" %>
-<%@page pageEncoding="UTF-8"%>
+<%@page pageEncoding="ISO-8859-1"%>
 <html>
     <head>
         <title>${pageTitle}</title>
@@ -7,7 +7,6 @@
         </style>
     </head>
     <body>
-    <% def bodyParams = [fromUser, requestURL, representative, dateStr, urlDescarga]%>
-	<g:message code="representativeAccreditationsMailBody" args="${bodyParams}"/>
+	<g:message code="representativeAccreditationsMailBody" args="${[fromUser, requestURL, representative, dateStr, downloadURL]}"/>
     </body>
 </html>

@@ -1,5 +1,5 @@
 <%@ page contentType="text/html" %>
-<%@page pageEncoding="UTF-8"%>
+<%@page pageEncoding="ISO-8859-1"%>
 <html>
     <head>
         <title>${pageTitle}</title>
@@ -7,7 +7,6 @@
         </style>
     </head>
     <body>
-        <% def bodyParams = [fromUser, requestURL, representative, dateFromStr, dateToStr, urlDescarga]%>
-		<g:message code="representativeVotingHistoryMailBody" args="${bodyParams}"/>
+		<g:message code="representativeVotingHistoryMailBody" args="${[fromUser, requestURL, representative, dateFromStr, dateToStr, urlDescarga]}"/>
     </body>
 </html>
