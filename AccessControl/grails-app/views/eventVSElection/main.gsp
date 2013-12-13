@@ -20,7 +20,10 @@
                     <option value="TERMINATED" style="color:#cc1606;"> - <g:message code="selectClosedPollsLbl"/> - </option>
                 </select>
             </div>
-
+            <votingSystem:simpleButton href="${createLink(controller:'representative', action:'main')}"
+                                       style="margin:0px 0px 0px 45px;">
+                <g:message code="representativesPageLbl"/>
+            </votingSystem:simpleButton>
             <div style="display:table-cell; vertical-align: top;">
                 <votingSystem:simpleButton href="${createLink(controller:'editor', action:'vote')}" style="margin:0px 20px 0px 0px;">
                     <g:message code="publishDocumentLbl"/>
@@ -37,14 +40,6 @@
     </div>
 
     <div id="mainPageEventList" class="mainPageEventList"><ul></ul></div>
-
-
-    <div style="margin: 0 0 0 0; position: absolute; bottom: 37px;">
-        <votingSystem:simpleButton href="${createLink(controller:'representative', action:'main')}"
-                                   style="margin:0px 0px 0px 45px;">
-            <g:message code="representativesPageLbl"/>
-        </votingSystem:simpleButton>
-    </div>
 
     <div style="width:100%;position:absolute;display:block; margin:auto; bottom:20px;">
         <div style="width:500px; margin:20px auto 20px auto;" id="paginationDiv" ></div>
