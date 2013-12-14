@@ -159,8 +159,10 @@ public class ContextVS {
                 PropertyConfigurator.configure(props);
             }
             appProperties = new Properties();
-            appProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(
-                    "votingSystemLibraryMessages" + "_" + locale +  ".properties"));
+            String messagesFileName = null;
+            if(locale == null) messagesFileName = "votingSystemLibraryMessages" + ".properties";
+            else messagesFileName = "votingSystemLibraryMessages" + "_" + locale +  ".properties";
+            appProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(messagesFileName));
             if(localizatedMessagesFileName != null) {
                 appProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(
                         localizatedMessagesFileName.split("\\.")[0] + "_" + locale + ".properties"));

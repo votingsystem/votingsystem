@@ -78,7 +78,15 @@ class AccessRequestVSController {
 				return [responseVS:responseVS, receiverPublicKey:csrValidationResponseVS.data.requestPublicKey]
 			} else {
 				csrValidationResponseVS.type = TypeVS.ACCESS_REQUEST_ERROR;
-				if (accessRequestVS) accessRequestVSService.rechazarSolicitud(accessRequestVS, responseVS.message)
+				if (accessRequestVS) {
+                    log.debug("cancelling accessRequestVS '${accessRequestVS.id}'")
+                    AccessRequestVS.withTransaction {
+                        accessRequestVS.metaInf = responseVS.message
+                        accessRequestVS = accessRequestVS.merge()
+                        accessRequestVS.state = AccessRequestVS.State.CANCELLED
+                        accessRequestVS.save()
+                    }
+                }
                 return [responseVS:csrValidationResponseVS]
 			}
 		} else return [responseVS:responseVS]

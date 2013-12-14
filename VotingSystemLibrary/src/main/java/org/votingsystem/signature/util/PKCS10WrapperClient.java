@@ -3,7 +3,9 @@ package org.votingsystem.signature.util;
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
@@ -13,6 +15,7 @@ import java.io.IOException;
 import java.security.*;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+import java.util.Enumeration;
 
 
 /**
@@ -22,6 +25,10 @@ import java.util.Collection;
 public class PKCS10WrapperClient {
     
     private static Logger logger = Logger.getLogger(PKCS10WrapperClient.class);
+
+    public static final int ACCESS_CONTROL_URL_TAG = 0;
+    public static final int EVENT_ID_TAG           = 1;
+    public static final int HASH_CERT_VOTE_TAG     = 2;
 
     private PKCS10CertificationRequest csr;
     private KeyPair keyPair;
@@ -36,12 +43,9 @@ public class PKCS10WrapperClient {
         this.signatureMechanism = signatureMechanism;
         X500Principal subject = new X500Principal("CN=accessControlURL:" + accessControlURL +", OU=eventId:" + eventId);
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
-        /* 0 -> accessControlURL
-         * 1 -> eventId
-         * 2 -> hashCertVoteHex */
-        asn1EncodableVector.add(new DERUTF8String(accessControlURL));
-        asn1EncodableVector.add(new DERUTF8String(eventId));
-        asn1EncodableVector.add(new DERUTF8String(hashCertVoteHex));
+        asn1EncodableVector.add(new DERTaggedObject(ACCESS_CONTROL_URL_TAG, new DERUTF8String(accessControlURL)));
+        asn1EncodableVector.add(new DERTaggedObject(EVENT_ID_TAG, new DERUTF8String(eventId)));
+        asn1EncodableVector.add(new DERTaggedObject(HASH_CERT_VOTE_TAG, new DERUTF8String(hashCertVoteHex)));
         csr = new PKCS10CertificationRequest(signatureMechanism, subject, keyPair.getPublic(),
                 new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);
     }

@@ -1,9 +1,11 @@
 package org.votingsystem.accesscontrol.service
 
 import org.bouncycastle.asn1.ASN1Set
+import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.asn1.DERUTF8String
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo
 import org.bouncycastle.jce.PKCS10CertificationRequest
+import org.votingsystem.signature.util.PKCS10WrapperClient
 import org.votingsystem.util.StringUtils
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.model.CertificateVS
@@ -100,14 +102,26 @@ class CsrService {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ACCESS_REQUEST_ERROR)
 		}
         CertificationRequestInfo info = csr.getCertificationRequestInfo();
-        ASN1Set asn1Set = info.getAttributes();
-        /* 0 -> accessControlURL
-         * 1 -> eventId
-         * 2 -> hashCertVoteHex */
-        String accessControlURL = ((DERUTF8String)asn1Set.getObjectAt(0)).getString()
-        String eventId = ((DERUTF8String)asn1Set.getObjectAt(1)).getString()
-        String hashCertVoteHex = ((DERUTF8String)asn1Set.getObjectAt(1)).getString()
-        log.debug("validateCSRVote - accessControlURL: ${accessControlURL} - eventId: ${eventId} - hashCertVoteHex: ${hashCertVoteHex}")
+        Enumeration csrAttributes = info.getAttributes().getObjects()
+        String accessControlURL
+        String eventId
+        String hashCertVoteHex
+        while(csrAttributes.hasMoreElements()) {
+            DERTaggedObject attribute = (DERTaggedObject)csrAttributes.nextElement();
+            switch(attribute.getTagNo()) {
+                case PKCS10WrapperClient.ACCESS_CONTROL_URL_TAG:
+                    accessControlURL = ((DERUTF8String)attribute.getObject()).getString()
+                    break;
+                case PKCS10WrapperClient.EVENT_ID_TAG:
+                    eventId = ((DERUTF8String)attribute.getObject()).getString()
+                    break;
+                case PKCS10WrapperClient.HASH_CERT_VOTE_TAG:
+                    hashCertVoteHex = ((DERUTF8String)attribute.getObject()).getString()
+                    break;
+            }
+        }
+        log.debug("validateCSRVote - accessControlURL: ${accessControlURL} - eventId: ${eventId} - " +
+                "hashCertVoteHex: ${hashCertVoteHex}")
         if (!eventId.equals(String.valueOf(eventVS.getId()))) {
             String msg = messageSource.getMessage('csrRequestError', null, locale)
             log.error("- validateCSRVote - ERROR - ${msg}")
@@ -195,10 +209,10 @@ class CsrService {
     /*  C=ES,
         ST=State or Province,
         L=locality name,
-        O=orhanization name,
+        O=organization name,
         OU=org unit,
         CN=common name,
-        emailAddress=bob@example.com,
+        emailAddress=user@votingsystem.org,
         serialNumber=1234,
         mobilePhone=555555555,
         deviceId=4321,

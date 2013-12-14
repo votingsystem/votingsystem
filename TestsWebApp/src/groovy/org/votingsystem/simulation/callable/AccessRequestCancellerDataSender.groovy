@@ -11,6 +11,7 @@ import org.votingsystem.signature.smime.ValidationResult
 import org.votingsystem.simulation.model.AccessRequestBackup
 import org.votingsystem.util.HttpHelper
 import org.votingsystem.util.ApplicationContextHolder
+import org.votingsystem.util.StringUtils
 
 import javax.mail.internet.MimeMessage
 import java.security.KeyStore

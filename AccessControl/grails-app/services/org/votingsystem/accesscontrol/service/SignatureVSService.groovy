@@ -413,9 +413,8 @@ class SignatureVSService {
 				TrustAnchor ta = pkixResult.getTrustAnchor();
 				X509Certificate certCaResult = ta.getTrustedCert();
 				userVS.setCertificateCA(trustedCertsHashMap.get(certCaResult?.getSerialNumber()?.longValue()))
-				log.debug("validateSignersCertificate - CertificateVS de userVS emitido por: " +
-						certCaResult?.getSubjectDN()?.toString() +
-                        " - serialNumber: " + certCaResult?.getSerialNumber()?.longValue());
+				log.debug("validateSignersCertificate - user cert issuer: " + certCaResult?.getSubjectDN()?.toString() +
+                        " - issuer serialNumber: " + certCaResult?.getSerialNumber()?.longValue());
 				ResponseVS responseVS = subscriptionVSService.checkUser(userVS, locale)
 				if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
 				if(userVS.getTimeStampToken() != null) {

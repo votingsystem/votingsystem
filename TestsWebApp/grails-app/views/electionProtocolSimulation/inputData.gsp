@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  	<title><g:message code="electionProtocolSimulationCaption"/></title>
-   	<r:require modules="application"/>
-   	<r:require modules="textEditorPC"/>
-	<r:layoutResources />
+    <title><g:message code="electionProtocolSimulationCaption"/></title>
+    <r:require modules="application"/>
+    <r:require modules="textEditorPC"/>
+    <r:layoutResources />
 </head>
 <body style="overflow-y: scroll;">
 <div id="electionProtocolSinulationDataDialog"
@@ -12,7 +12,7 @@
     <div class="errorMsgWrapper" style="display:none;"></div>
     <div style="margin: 15px 0px 30px 0px;display: table; width: 100%;">
         <div id="pageTitle" style="display:table-cell;font-weight: bold; font-size: 1.4em; color: #48802c;
-            text-align:center;vertical-align: middle;width: 80%;">
+        text-align:center;vertical-align: middle;width: 80%;">
             <g:message code="initElectionProtocolSimulationMsg"/>
         </div>
         <div id="testButtonDiv" style="display:table-cell; text-align:center;vertical-align: middle;">
@@ -123,15 +123,15 @@
 
                 <div>
                     <votingSystem:datePicker id="dateInit"  style="width:160px;"
-                             title="${message(code:'dateInitLbl')}"
-                             placeholder="${message(code:'dateInitLbl')}"
-                             oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
-                             onchange="this.setCustomValidity('')"></votingSystem:datePicker>
+                                             title="${message(code:'dateInitLbl')}"
+                                             placeholder="${message(code:'dateInitLbl')}"
+                                             oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
+                                             onchange="this.setCustomValidity('')"></votingSystem:datePicker>
                     <votingSystem:datePicker style="width:160px; margin:0px 0px 0px 15px;" id="dateFinish"
-                             title="${message(code:'dateFinishLbl')}"
-                             placeholder="${message(code:'dateFinishLbl')}"
-                             oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
-                             onchange="this.setCustomValidity('')"></votingSystem:datePicker>
+                                             title="${message(code:'dateFinishLbl')}"
+                                             placeholder="${message(code:'dateFinishLbl')}"
+                                             oninvalid="this.setCustomValidity('${message(code:'emptyFieldLbl')}')"
+                                             onchange="this.setCustomValidity('')"></votingSystem:datePicker>
                 </div>
 
                 <div style="margin:10px 0px 10px 0px">
@@ -202,8 +202,19 @@
 </template>
 
 </body>
-</html> 
+</html>
 <r:script>
+
+$(function() {$('#backupDiv').hide()})
+
+$('#eventStateOnFinishSelect').on('change', function (e) {
+    var eventState = $(this).val()
+    if(document.getElementById('eventStateOnFinishSelect').selectedIndex != 0) {
+        $('#backupDiv').show()
+    } else $('#backupDiv').hide()
+});
+
+
 //$("#resetElectionProtocolSinulationDataForm").click()
 //This is for number validation in Firefox
 var allNumberFields = document.getElementsByClassName('userBaseDataInputNumber');
@@ -288,7 +299,7 @@ allFields = $( [] ).add(dateFinish).add(electionEditorDiv).add(electionEditorDiv
 
 $('#electionProtocolSinulationDataForm').submit(function(event){
 	event.preventDefault();
- 	allFields.removeClass("formFieldError");   
+ 	allFields.removeClass("formFieldError");
  	$(".errorMsgWrapper").fadeOut()
     getEditor_electionEditorDivData()
 	if(!isValidForm()) {
@@ -325,10 +336,10 @@ $('#electionProtocolSinulationDataForm').submit(function(event){
 	 		 accessControlURL:$('#accessControlURL').val(),
 	 		 controlCenterURL:$('#controlCenterURL').val(),
 			 maxPendingResponses: $('#maxPendingResponses').val(),
-			 dateBeginDocument: dateBeginStr, 
+			 dateBeginDocument: dateBeginStr,
 			 dateFinishDocument: dateFinish.datepicker("getDate").format(),
-			 whenFinishChangeEventStateTo:$( "#eventStateOnFinishSelect option:selected").val(), 
-			 backupRequestEmail:$('#emailRequestBackup').val(), 
+			 whenFinishChangeEventStateTo:$( "#eventStateOnFinishSelect option:selected").val(),
+			 backupRequestEmail:$('#emailRequestBackup').val(),
 			 event:event}
 
 	 simulationData.userBaseData = userBaseData
@@ -354,12 +365,12 @@ function isValidForm() {
 
 	if(!document.getElementById('accessControlURL').validity.valid) {
 		$("#accessControlURL").addClass( "formFieldError" );
-		showResultDialog('<g:message code="dataFormERRORLbl"/>', 
+		showResultDialog('<g:message code="dataFormERRORLbl"/>',
 			'<g:message code="emptyFieldLbl"/>', function() {
 			$("#addControlCenterDialog").dialog("open")
 		})
 		return false
-	}	      
+	}
 	var accessControlURL = $('#accessControlURL').val()
 	var suffix = "/"
 	if((accessControlURL.indexOf(suffix, accessControlURL.length - suffix.length) == -1)) {
@@ -383,7 +394,7 @@ function isValidForm() {
 	}
 
 	if('' == getEditor_electionEditorDivData()) {
-		showErrorMsg('<g:message code="eventContentEmptyERRORMsg"/>') 
+		showErrorMsg('<g:message code="eventContentEmptyERRORMsg"/>')
 		electionEditorDiv.addClass("formFieldError");
 		return false
 	}
@@ -463,6 +474,6 @@ function showErrorMsg(errorMsg) {
 	$("#electionProtocolSinulationDataDialog .errorMsgWrapper").html('<p>' + errorMsg + '<p>')
 	$("#electionProtocolSinulationDataDialog .errorMsgWrapper").fadeIn()
 }
-	
+
 </r:script>
 <r:layoutResources />

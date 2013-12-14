@@ -140,13 +140,5 @@ class AccessRequestVSService {
 					message:messageSource.getMessage('accessRequestWithErrorsMsg', null, locale))
 		}
     }
-	
-	def rechazarSolicitud(AccessRequestVS accessRequestVS, String detalles) {
-		log.debug("rechazarSolicitud '${accessRequestVS.id}'")
-		accessRequestVS.detalles = detalles
-		accessRequestVS = accessRequestVS.merge()
-		accessRequestVS.state = AccessRequestVS.State.CANCELLED
-		accessRequestVS.save()
-	}
 
 }
