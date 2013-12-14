@@ -1,6 +1,8 @@
 package org.votingsystem.signature.util;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.X509Extensions;
+import org.votingsystem.model.ContextVS;
 
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.Certificate;
@@ -16,11 +18,15 @@ import java.util.Set;
  */
 public class SVCertExtensionChecker extends PKIXCertPathChecker {
 	
-	Set supportedExtensions;
+	private Set<String> supportedExtensions;
 	
-	SVCertExtensionChecker() {
-		supportedExtensions = new HashSet();
-		supportedExtensions.add(X509Extensions.ExtendedKeyUsage);
+	public SVCertExtensionChecker() {
+		supportedExtensions = new HashSet<String>();
+		supportedExtensions.add(X509Extensions.ExtendedKeyUsage.toString());
+        supportedExtensions.add(ContextVS.HASH_CERT_VOTE_OID);
+        supportedExtensions.add(ContextVS.EVENT_ID_OID);
+        supportedExtensions.add(ContextVS.ACCESS_CONTROL_OID);
+        supportedExtensions.add(ContextVS.REPRESENTATIVE_URL_OID);
 	}
 	
 	public void init(boolean forward) throws CertPathValidatorException {
@@ -35,13 +41,14 @@ public class SVCertExtensionChecker extends PKIXCertPathChecker {
 		return null;
 	}
 
-	public void check(Certificate cert, Collection<String> unresolvedCritExts)
-			throws CertPathValidatorException {
-		for(String ext : unresolvedCritExts) {
-			if(X509Extensions.ExtendedKeyUsage.toString().equals(ext)) {
-				//logger.debug("------------- ExtendedKeyUsage removed from validation");
-				unresolvedCritExts.remove(ext);
-			}
-		}
+	public void check(Certificate cert, Collection<String> unresolvedCritExts) throws CertPathValidatorException {
+        while(unresolvedCritExts.iterator().hasNext()) {
+            String ext = unresolvedCritExts.iterator().next();
+            if(supportedExtensions.contains(ext)) {
+                //logger.debug("------------- ExtendedKeyUsage removed from validation");
+                unresolvedCritExts.remove(ext);
+            }
+        }
 	}
+
 }

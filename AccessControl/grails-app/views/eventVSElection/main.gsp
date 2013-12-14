@@ -21,7 +21,7 @@
                 </select>
             </div>
             <votingSystem:simpleButton href="${createLink(controller:'representative', action:'main')}"
-                                       style="margin:0px 0px 0px 45px;">
+                                       style="margin:0px 10px 0px 20px;">
                 <g:message code="representativesPageLbl"/>
             </votingSystem:simpleButton>
             <div style="display:table-cell; vertical-align: top;">

@@ -332,13 +332,13 @@ class SignatureVSService {
 			log.error(ex.getMessage(), ex)
 			msg = messageSource.getMessage('certValidationErrorMsg',
                     [checkedCert.getSubjectDN()?.toString()].toArray(), locale)
-			log.error ("validateVoteCerts - msg:{msg} - Event '${eventVS.id}'")
+			log.error ("validateVoteCerts - msg: ${msg} - EventVS '${eventVS.id}'")
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg)
 		}
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, eventVS:eventVS, smimeMessage:smimeMessageReq,
                 data:[checkedSigner:checkedSigner])
 	}
-			
+
 	public ResponseVS validateVoteValidationCerts(SMIMEMessageWrapper smimeMessageReq, EventVS eventVS, Locale locale) {
 		log.debug("validateVoteValidationCerts");
 		Set<UserVS> signersVS = smimeMessageReq.getSigners();

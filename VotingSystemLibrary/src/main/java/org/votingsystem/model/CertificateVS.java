@@ -1,9 +1,13 @@
 package org.votingsystem.model;
 
 import org.apache.log4j.Logger;
+import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
+import java.io.IOException;
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.Date;
@@ -72,30 +76,36 @@ public class CertificateVS implements Serializable {
 
     public CertificateVS() {}
 
-    public CertificateVS(X509Certificate certificate) {
-        String subjectDN = certificate.getSubjectDN().getName();
-        log.debug("Certificate - subjectDN: " +subjectDN);
-        if(subjectDN.split("OU=eventId:").length > 1) {
-            setEventVSId(subjectDN.split("OU=eventId:")[1].split(",")[0]);
+    public CertificateVS(X509Certificate x509Certificate) throws IOException {
+        String subjectDN = x509Certificate.getSubjectDN().getName();
+        log.debug("Certificate - subjectDN: " + subjectDN);
+        byte[] eventIdExtensionValue = x509Certificate.getExtensionValue(ContextVS.EVENT_ID_OID);
+        if(eventIdExtensionValue != null) {
+            DERTaggedObject eventIdDER = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(eventIdExtensionValue);
+            setEventVSId(((DERUTF8String)eventIdDER.getObject()).toString());
         }
-        if(subjectDN.split("CN=accessControlURL:").length > 1) {
-            String parte = subjectDN.split("CN=accessControlURL:")[1];
-            log.debug("Certificate - parte: " + parte);
-            if (parte.split(",").length > 1) {
-                serverURL = parte.split(",")[0];
-            } else serverURL = parte;
+
+        byte[] accesssControlExtensionValue = x509Certificate.getExtensionValue(ContextVS.ACCESS_CONTROL_OID);
+        if(accesssControlExtensionValue != null) {
+            DERTaggedObject accesssControlDER = (DERTaggedObject)X509ExtensionUtil.fromExtensionValue(
+                    accesssControlExtensionValue);
+            setServerURL(((DERUTF8String)accesssControlDER.getObject()).toString());
         }
-        if (subjectDN.split("OU=hashCertVoteHex:").length > 1) {
-            String hashCertVoteHex = subjectDN.split("OU=hashCertVoteHex:")[1].split(",")[0];
+
+        byte[] hashCertExtensionValue = x509Certificate.getExtensionValue(ContextVS.HASH_CERT_VOTE_OID);
+        if (hashCertExtensionValue != null) {
+            DERTaggedObject hashCertDER = (DERTaggedObject)X509ExtensionUtil.fromExtensionValue(
+                    hashCertExtensionValue);
+            String hashCertVoteHex = ((DERUTF8String)hashCertDER.getObject()).toString();
             HexBinaryAdapter hexConverter = new HexBinaryAdapter();
-            hashCertVoteBase64 = new String(
-                    hexConverter.unmarshal(hashCertVoteHex));
+            setHashCertVoteBase64(new String(hexConverter.unmarshal(hashCertVoteHex)));
         }
-        if(subjectDN.split("OU=RepresentativeURL:").length > 1) {
-            String parte = subjectDN.split("OU=RepresentativeURL:")[1];
-            if (parte.split(",").length > 1) {
-                setRepresentativeURL(parte.split(",")[0]);
-            } else setRepresentativeURL(parte);
+
+        byte[] representativeURLExtensionValue = x509Certificate.getExtensionValue(ContextVS.REPRESENTATIVE_URL_OID);
+        if(representativeURLExtensionValue != null) {
+            DERTaggedObject representativeURL_DER = (DERTaggedObject)X509ExtensionUtil.fromExtensionValue(
+                    representativeURLExtensionValue);
+            setRepresentativeURL(((DERUTF8String)representativeURL_DER.getObject()).toString());
         }
     }
 

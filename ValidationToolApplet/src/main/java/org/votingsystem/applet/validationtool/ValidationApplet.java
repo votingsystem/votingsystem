@@ -88,7 +88,6 @@ public class ValidationApplet extends JApplet implements AppHostVS {
     }
 
     public static void main (String[] args) {
-        //logger.info("Arrancando aplicación");
         executionMode = ExecutionMode.APLICACION;
         try {
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());

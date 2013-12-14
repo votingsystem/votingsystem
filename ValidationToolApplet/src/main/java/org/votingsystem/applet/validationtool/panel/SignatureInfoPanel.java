@@ -51,9 +51,11 @@ public class SignatureInfoPanel extends JPanel {
 
         JLabel signatureDateLabel = createBoldLabel(ContextVS.getMessage("signatureDateLbl") + ": ");
         add(signatureDateLabel, "width 200::, gapleft 30");
-        JLabel signatureDateValueLabel = new JLabel(DateUtils.getSpanishFormattedStringFromDate(
-                signer.getSignatureDate()));
-        add(signatureDateValueLabel, "width 200::, wrap");
+        if(signer.getSignatureDate() != null) {
+            JLabel signatureDateValueLabel = new JLabel(DateUtils.getSpanishFormattedStringFromDate(
+                    signer.getSignatureDate()));
+            add(signatureDateValueLabel, "width 200::, wrap");
+        }
 
         JLabel signerLabel = createBoldLabel(ContextVS.getMessage("Firmante") + ": ");
         add(signerLabel, "width 200::, span 2");

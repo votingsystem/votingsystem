@@ -1,12 +1,16 @@
 package org.votingsystem.model;
 
 import org.apache.log4j.Logger;
+import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.tsp.TimeStampToken;
+import org.bouncycastle.x509.extension.X509ExtensionUtil;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.CMSUtils;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
+import java.io.IOException;
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
@@ -244,34 +248,44 @@ public class VoteVS implements Serializable {
         return (FieldEventVS) options.toArray()[item];
     }
 
-    public static VoteVS getInstance(Map contentMap, X509Certificate x509Certificate, TimeStampToken timeStampToken) {
+    public static VoteVS getInstance(Map contentMap, X509Certificate x509Certificate, TimeStampToken timeStampToken)
+            throws IOException {
         VoteVS voteVS = VoteVS.populate(contentMap);
         voteVS.setTimeStampToken(timeStampToken);
         voteVS.setX509Certificate(x509Certificate);
         String subjectDN = x509Certificate.getSubjectDN().getName();
         //log.debug("setCertificateVoto - subjectDN: " +subjectDN);
-        if(subjectDN.split("OU=eventId:").length > 1) {
+
+        byte[] eventIdExtensionValue = x509Certificate.getExtensionValue(ContextVS.EVENT_ID_OID);
+        if(eventIdExtensionValue != null) {
+            DERTaggedObject eventIdDER = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(eventIdExtensionValue);
             EventVS eventVS = new EventVS();
-            eventVS.setId(Long.valueOf(subjectDN.split("OU=eventId:")[1].split(",")[0]));
+            eventVS.setId(Long.valueOf(((DERUTF8String)eventIdDER.getObject()).toString()));
             voteVS.setEventVS(eventVS);
         }
-        if(subjectDN.split("CN=accessControlURL:").length > 1) {
-            String part = subjectDN.split("CN=accessControlURL:")[1];
-            if (part.split(",").length > 1) {
-                voteVS.setAccessControlURL(part.split(",")[0]);
-            } else voteVS.setAccessControlURL(part);
+
+        byte[] accesssControlExtensionValue = x509Certificate.getExtensionValue(ContextVS.ACCESS_CONTROL_OID);
+        if(accesssControlExtensionValue != null) {
+            DERTaggedObject accesssControlDER = (DERTaggedObject)X509ExtensionUtil.fromExtensionValue(
+                    accesssControlExtensionValue);
+            voteVS.setAccessControlURL(((DERUTF8String)accesssControlDER.getObject()).toString());
         }
-        if (subjectDN.split("OU=hashCertVoteHex:").length > 1) {
-            String hashCertVoteHex = subjectDN.split("OU=hashCertVoteHex:")[1].split(",")[0];
+
+        byte[] hashCertExtensionValue = x509Certificate.getExtensionValue(ContextVS.HASH_CERT_VOTE_OID);
+        if (hashCertExtensionValue != null) {
+            DERTaggedObject hashCertDER = (DERTaggedObject)X509ExtensionUtil.fromExtensionValue(
+                    hashCertExtensionValue);
+            String hashCertVoteHex = ((DERUTF8String)hashCertDER.getObject()).toString();
             voteVS.setHashCertVoteHex(hashCertVoteHex);
             HexBinaryAdapter hexConverter = new HexBinaryAdapter();
             voteVS.setHashCertVoteBase64(new String(hexConverter.unmarshal(hashCertVoteHex)));
         }
-        if(subjectDN.split("OU=RepresentativeURL:").length > 1) {
-            String parte = subjectDN.split("OU=RepresentativeURL:")[1];
-            if (parte.split(",").length > 1) {
-                voteVS.setRepresentativeURL(parte.split(",")[0]);
-            } else voteVS.setRepresentativeURL(parte);
+
+        byte[] representativeURLExtensionValue = x509Certificate.getExtensionValue(ContextVS.REPRESENTATIVE_URL_OID);
+        if(representativeURLExtensionValue != null) {
+            DERTaggedObject representativeURL_DER = (DERTaggedObject)X509ExtensionUtil.fromExtensionValue(
+                    representativeURLExtensionValue);
+            voteVS.setRepresentativeURL(((DERUTF8String)representativeURL_DER.getObject()).toString());
         }
         return voteVS;
     }

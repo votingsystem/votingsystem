@@ -171,6 +171,7 @@ body {
 
 .col-selectedSystem {
 	font-size: 1.8em;
+    font-weight: bold;
 	margin: 0px auto 0px auto;
 	display:table-cell;
 	vertical-align:middle;

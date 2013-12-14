@@ -5,7 +5,7 @@ import org.bouncycastle2.jce.PKCS10CertificationRequest;
 import org.bouncycastle2.openssl.PEMWriter;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
-
+import org.bouncycastle.asn1.ASN1EncodableVector;
 import javax.mail.Header;
 import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayOutputStream;
@@ -42,10 +42,14 @@ public class PKCS10WrapperClient {
         privateKey = keyPair.getPrivate();
         this.signatureAlgorithm = signatureAlgorithm;
         publicKey = keyPair.getPublic();
-        X500Principal subject = new X500Principal("CN=accessControlURL:" + accessControlURL +
-                ", OU=eventId:" + eventId +", OU=hashCertVoteHex:" + hashCertVoteHex);
-        csr = new PKCS10CertificationRequest(signatureAlgorithm, subject, 
-        		keyPair.getPublic(), null, keyPair.getPrivate(), provider);
+        X500Principal subject = new X500Principal("CN=accessControlURL:" + accessControlURL +", OU=eventId:" + eventId);
+        ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
+        asn1EncodableVector.add(new DERTaggedObject(ContextVS.ACCESS_CONTROL_URL_TAG,
+                new DERUTF8String(accessControlURL)));
+        asn1EncodableVector.add(new DERTaggedObject(ContextVS.EVENT_ID_TAG, new DERUTF8String(eventId)));
+        asn1EncodableVector.add(new DERTaggedObject(ContextVS.HASH_CERT_VOTE_TAG, new DERUTF8String(hashCertVoteHex)));
+        csr = new PKCS10CertificationRequest(signatureAlgorithm, subject, keyPair.getPublic(),
+                new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);
     }
     
     public PKCS10WrapperClient(int keySize, String keyName,  String signatureAlgorithm, String provider, String nif,

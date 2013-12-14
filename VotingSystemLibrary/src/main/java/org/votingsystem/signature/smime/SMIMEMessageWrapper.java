@@ -18,9 +18,11 @@ import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.util.encoders.Base64;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.VoteVS;
+import org.votingsystem.signature.util.PKCS10WrapperClient;
 import org.votingsystem.signature.util.PKIXCertPathReviewer;
 import org.votingsystem.signature.util.VotingSystemKeyGenerator;
 import org.votingsystem.util.StringUtils;
@@ -229,7 +231,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
                 }
             }
             signers.add(userVS);
-            if (cert.getSubjectDN().toString().contains("OU=hashCertVoteHex:")) {
+            if (cert.getExtensionValue(ContextVS.HASH_CERT_VOTE_OID) != null) {
                 JSONObject voteJSON = (JSONObject) JSONSerializer.toJSON(signedContent);
                 voteVS = VoteVS.getInstance(voteJSON, cert, timeStampToken);
             } else {signerCerts.add(cert);}

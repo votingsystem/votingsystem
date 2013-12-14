@@ -1,9 +1,7 @@
 package org.votingsystem.signature.util;
 
 import org.apache.log4j.Logger;
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.*;
@@ -36,6 +34,8 @@ import java.util.*;
 public class CertUtil {
     
     private static Logger logger = Logger.getLogger(CertUtil.class);
+
+    private static SVCertExtensionChecker checker = new SVCertExtensionChecker();
 
     /**
      * Generate V3 certificate for users
@@ -175,14 +175,72 @@ public class CertUtil {
      * Generate V3 Certificate from CSR
      */
     public static X509Certificate signCSR(byte[] csrPEMBytes, String organizationalUnit, PrivateKey caKey,
-            X509Certificate caCert, Date dateBegin, Date dateFinish) throws Exception {
-        PKCS10CertificationRequest csr = fromPEMToPKCS10CertificationRequest(csrPEMBytes);
+               X509Certificate caCert, Date dateBegin, Date dateFinish, DERTaggedObject... certExtensions) throws Exception {
+        PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
         String strSubjectDN = csr.getCertificationRequestInfo().getSubject().toString();
         if (!csr.verify() || strSubjectDN == null) throw new Exception("ERROR VERIFYING CSR");
         if(organizationalUnit != null) strSubjectDN = organizationalUnit + "," + strSubjectDN;
         X509Certificate issuedCert = generateV3EndEntityCertFromCsr(csr, caKey, caCert, dateBegin, dateFinish,
-                strSubjectDN);
+                strSubjectDN, certExtensions);
         return issuedCert;
+    }
+
+    /**
+     * Genera un certificado V3 a partir de una CSR (Certificate Signing Request)
+     */
+    public static X509Certificate generateV3EndEntityCertFromCsr(PKCS10CertificationRequest csr,
+            PrivateKey caKey, X509Certificate caCert, Date dateBegin, Date dateFinish, String strSubjectDN,
+            DERTaggedObject... certExtensions) throws Exception {
+        X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
+        PublicKey requestPublicKey = csr.getPublicKey();
+        X509Principal x509Principal = new X509Principal(strSubjectDN);
+        certGen.setSerialNumber(VotingSystemKeyGenerator.INSTANCE.getSerno());
+        logger.debug("generateV3EndEntityCertFromCsr - SubjectX500Principal(): " + caCert.getSubjectX500Principal());
+        certGen.setIssuerDN(PrincipalUtil.getSubjectX509Principal(caCert));
+        certGen.setNotBefore(dateBegin);
+        certGen.setNotAfter(dateFinish);
+        certGen.setSubjectDN(x509Principal);
+        certGen.setPublicKey(requestPublicKey);
+        certGen.setSignatureAlgorithm(ContextVS.CERT_GENERATION_SIG_ALGORITHM);
+        certGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(caCert));
+        certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false,
+                new SubjectKeyIdentifierStructure(requestPublicKey));
+        certGen.addExtension(X509Extensions.BasicConstraints, true,
+                new BasicConstraints(false));//Certificado final
+        certGen.addExtension(X509Extensions.KeyUsage, true, new KeyUsage(
+                KeyUsage.digitalSignature | KeyUsage.keyEncipherment));
+        ASN1Set attributes = csr.getCertificationRequestInfo().getAttributes();
+        if (attributes != null) {
+            for (int i = 0; i != attributes.size(); i++) {
+                if(attributes.getObjectAt(i) instanceof DERTaggedObject) {
+                    DERTaggedObject taggedObject = (DERTaggedObject)attributes.getObjectAt(i);
+                    ASN1ObjectIdentifier oid = new  ASN1ObjectIdentifier(ContextVS.VOTING_SYSTEM_BASE_OID +
+                            taggedObject.getTagNo());
+                    certGen.addExtension(oid, true, taggedObject);
+                } else {
+                    Attribute attr = Attribute.getInstance(attributes.getObjectAt(i));
+                    if (attr.getAttrType().equals(PKCSObjectIdentifiers.pkcs_9_at_extensionRequest)) {
+                        X509Extensions extensions = X509Extensions.getInstance(attr.getAttrValues().getObjectAt(0));
+                        Enumeration e = extensions.oids();
+                        while (e.hasMoreElements()) {
+                            DERObjectIdentifier oid = (DERObjectIdentifier) e.nextElement();
+                            X509Extension ext = extensions.getExtension(oid);
+                            certGen.addExtension(oid, ext.isCritical(), ext.getValue().getOctets());
+                        }
+                    }
+                }
+            }
+        }
+        if(certExtensions != null) {
+            for(DERTaggedObject taggedObject: certExtensions) {
+                ASN1ObjectIdentifier oid = new  ASN1ObjectIdentifier(ContextVS.VOTING_SYSTEM_BASE_OID +
+                        taggedObject.getTagNo());
+                certGen.addExtension(oid, true, taggedObject);
+            }
+        }
+        X509Certificate cert = certGen.generate(caKey, ContextVS.PROVIDER);
+        cert.verify(caCert.getPublicKey());
+        return cert;
     }
 
     public static byte[] getPEMEncoded (Object objectToEncode) throws IOException {
@@ -259,22 +317,24 @@ public class CertUtil {
             TrustAnchor anchor = new TrustAnchor(certificate, null);
             anchors.add(anchor);
         }
-        PKIXParameters params = new PKIXParameters(anchors);
-        SVCertExtensionChecker checker = new SVCertExtensionChecker();
-        params.addCertPathChecker(checker);
-        params.setRevocationEnabled(checkCRL); // if false tell system do not check CRL's
+        return verifyCertificate(anchors, checkCRL,Arrays.asList(cert));
+    }
+
+    public static PKIXCertPathValidatorResult verifyCertificate(Set<TrustAnchor> anchors,
+             boolean checkCRL, List<X509Certificate> certs) throws Exception {
+        PKIXParameters pkixParameters = new PKIXParameters(anchors);
+        pkixParameters.addCertPathChecker(checker);
+        pkixParameters.setRevocationEnabled(checkCRL); // if false tell system do not check CRL's
         CertPathValidator certPathValidator = CertPathValidator.getInstance("PKIX", ContextVS.PROVIDER);
-        //List<Certificate> certificates = new ArrayList<Certificate>();
-        //certificates.add(cert);
         CertificateFactory certFact = CertificateFactory.getInstance("X.509");
-        CertPath certPath = certFact.generateCertPath(Arrays.asList(cert));
-        CertPathValidatorResult result = certPathValidator.validate(certPath, params);
+        CertPath certPath = certFact.generateCertPath(certs);
+        CertPathValidatorResult result = certPathValidator.validate(certPath, pkixParameters);
         // Get the CA used to validate this path
         //PKIXCertPathValidatorResult pkixResult = (PKIXCertPathValidatorResult)result;
         //TrustAnchor ta = pkixResult.getTrustAnchor();
         //X509Certificate certCaResult = ta.getTrustedCert();
         //logger.debug("certCaResult: " + certCaResult.getSubjectDN().toString()+
-        //        "- numserie: " + certCaResult.getSerialNumber().longValue());
+        //        "- serialNumber: " + certCaResult.getSerialNumber().longValue());
         return (PKIXCertPathValidatorResult)result;
     }
     

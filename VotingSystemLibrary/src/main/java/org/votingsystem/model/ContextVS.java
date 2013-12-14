@@ -51,6 +51,17 @@ public class ContextVS {
 
     static { Security.addProvider(new BouncyCastleProvider()); }
 
+    public static final int ACCESS_CONTROL_URL_TAG = 0;
+    public static final int EVENT_ID_TAG           = 1;
+    public static final int HASH_CERT_VOTE_TAG     = 2;
+    public static final int REPRESENTATIVE_URL_TAG = 3;
+
+    public static final String VOTING_SYSTEM_BASE_OID = "0.0.0.0.0.0.0.0.0.";
+    public static final String ACCESS_CONTROL_OID     = VOTING_SYSTEM_BASE_OID + ACCESS_CONTROL_URL_TAG;
+    public static final String EVENT_ID_OID           = VOTING_SYSTEM_BASE_OID + EVENT_ID_TAG;
+    public static final String HASH_CERT_VOTE_OID     = VOTING_SYSTEM_BASE_OID + HASH_CERT_VOTE_TAG;
+    public static final String REPRESENTATIVE_URL_OID = VOTING_SYSTEM_BASE_OID + REPRESENTATIVE_URL_TAG;
+
     public static final Mechanism DNIe_SESSION_MECHANISM = Mechanism.SHA1_RSA_PKCS;
     public static final PdfName PDF_SIGNATURE_NAME = PdfName.ADBE_PKCS7_SHA1;
 

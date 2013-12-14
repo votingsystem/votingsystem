@@ -15,7 +15,6 @@ import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.signature.util.Encryptor
-import org.votingsystem.signature.util.SVCertExtensionChecker
 import org.votingsystem.util.ApplicationContextHolder
 import org.votingsystem.util.FileUtils
 import org.votingsystem.util.StringUtils
@@ -27,7 +26,6 @@ import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.cert.*
-import org.codehaus.groovy.grails.commons.DefaultGrailsDomainClass
 
 class SignatureVSService {
 	
@@ -444,22 +442,6 @@ class SignatureVSService {
 		}
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, smimeMessage:messageWrapper,
                 data:[checkedSigners:checkedSigners, checkedSigner:checkedSigner])
-	} 
-		        
-			
-	public PKIXCertPathValidatorResult verifyCertificate(Set<TrustAnchor> anchors, 
-		boolean checkCRL, List<X509Certificate> certs) throws Exception {
-		PKIXParameters pkixParameters = new PKIXParameters(anchors);
-		
-		SVCertExtensionChecker checker = new SVCertExtensionChecker();
-		pkixParameters.addCertPathChecker(checker);
-		
-		pkixParameters.setRevocationEnabled(checkCRL); // if false tell system do not check CRL's
-		CertPathValidator certPathValidator = CertPathValidator.getInstance("PKIX", ContextVS.PROVIDER);
-		CertificateFactory certFact = CertificateFactory.getInstance("X.509");
-		CertPath certPath = certFact.generateCertPath(certs);
-		CertPathValidatorResult result = certPathValidator.validate(certPath, pkixParameters);
-		return (PKIXCertPathValidatorResult)result;
 	}
 
 	public ResponseVS validateSMIMEVote(
@@ -523,7 +505,7 @@ class SignatureVSService {
 		X509Certificate certCaResult;
 		X509Certificate checkedCert = voteVS.getX509Certificate()
 		try {
-			pkixResult = verifyCertificate(trustedAnchors, false, [checkedCert])
+			pkixResult = CertUtil.verifyCertificate(trustedAnchors, false, [checkedCert])
 			certCaResult = pkixResult.getTrustAnchor().getTrustedCert();
 			log.debug("validateVoteCerts - vote cert -> CA Result: " + certCaResult?.getSubjectDN()?.toString()+
 					"- numserie: " + certCaResult?.getSerialNumber()?.longValue());
@@ -564,7 +546,7 @@ class SignatureVSService {
 		}
 		checkedCert = voteVS.getServerCerts()?.iterator()?.next()
 		try {
-			pkixResult = verifyCertificate(trustedAnchors, false, [checkedCert])
+			pkixResult = CertUtil.verifyCertificate(trustedAnchors, false, [checkedCert])
 			certCaResult = pkixResult.getTrustAnchor().getTrustedCert();
 			log.debug("validateVoteCerts - Control Center cert -> CA Result: " + certCaResult?.getSubjectDN()?.toString() +
 					"- numserie: " + certCaResult?.getSerialNumber()?.longValue());
