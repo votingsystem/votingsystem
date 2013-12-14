@@ -81,7 +81,7 @@ class UserVSController {
 		Collection<X509Certificate> userCertCollection = CertUtil.fromPEMToX509CertCollection(pemCert.getBytes())
 		X509Certificate userCert = userCertCollection?.toArray()[0]
 		if(userCert) {
-			UserVS userVS = UserVS.getUsuario(userCert);
+			UserVS userVS = UserVS.getUserVS(userCert);
 			ResponseVS responseVS = subscriptionVSService.checkUser(userVS, request.locale)
 			responseVS.userVS.type = UserVS.Type.USER
 			responseVS.userVS.representative = null

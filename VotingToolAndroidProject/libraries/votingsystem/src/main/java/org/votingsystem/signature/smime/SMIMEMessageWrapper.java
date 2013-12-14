@@ -206,27 +206,20 @@ public class SMIMEMessageWrapper extends MimeMessage {
         Store certs = smimeSigned.getCertificates();
         // SignerInfo blocks which contain the signatures
         SignerInformationStore  signers = smimeSigned.getSignerInfos();
-		Log.d(TAG + ".isValidSignature(...) ", 
-				"signers.size(): " + signers.size());
+		Log.d(TAG + ".isValidSignature(...) ", "signers.size(): " + signers.size());
         Iterator it = signers.getSigners().iterator();
         boolean result = false;
         // check each signer
         while (it.hasNext()) {
             SignerInformation   signer = (SignerInformation)it.next();
             Collection          certCollection = certs.getMatches(signer.getSID());
-    		Log.d(TAG + ".isValidSignature(...) ", 
-    				"Collection matches: " + certCollection.size());
+    		Log.d(TAG + ".isValidSignature(...) ", "Collection matches: " + certCollection.size());
             Iterator        certIt = certCollection.iterator();
-            X509Certificate cert = new JcaX509CertificateConverter()
-                    .setProvider(PROVIDER).getCertificate(
+            X509Certificate cert = new JcaX509CertificateConverter().setProvider(PROVIDER).getCertificate(
                     (X509CertificateHolder)certIt.next());
-    		Log.d(TAG + ".isValidSignature(...) ", 
-    				"cert.getSubjectDN(): " + cert.getSubjectDN());
-    		Log.d(TAG + ".isValidSignature(...) ", 
-    				"cert.getNotBefore(): " + cert.getNotBefore());
-    		Log.d(TAG + ".isValidSignature(...) ", 
-    				"cert.getNotAfter(): " + cert.getNotAfter());    		
-    		
+    		Log.d(TAG + ".isValidSignature(...) ", "cert.getSubjectDN(): " + cert.getSubjectDN());
+    		Log.d(TAG + ".isValidSignature(...) ", "cert.getNotBefore(): " + cert.getNotBefore());
+    		Log.d(TAG + ".isValidSignature(...) ", "cert.getNotAfter(): " + cert.getNotAfter());
 
             if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().
                     setProvider(PROVIDER).build(cert))){
@@ -270,7 +263,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
                     .setProvider(PROVIDER).getCertificate(
                             (X509CertificateHolder)certIt.next());
 
-            UserVS userVS = UserVS.getUsuario(cert);
+            UserVS userVS = UserVS.getUserVS(cert);
             userVS.setSigner(signer);
             userVS.setContentSigned(getSignedContent());
             byte[] hash = null;

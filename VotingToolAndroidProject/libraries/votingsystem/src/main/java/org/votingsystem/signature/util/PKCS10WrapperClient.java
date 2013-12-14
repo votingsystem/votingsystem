@@ -42,29 +42,24 @@ public class PKCS10WrapperClient {
         privateKey = keyPair.getPrivate();
         this.signatureAlgorithm = signatureAlgorithm;
         publicKey = keyPair.getPublic();
-        X500Principal subject = new X500Principal(
-                "CN=accessControlURL:" + accessControlURL + 
-                ", OU=eventId:" + eventId +
-                ", OU=hashCertVoteHex:" + hashCertVoteHex);
+        X500Principal subject = new X500Principal("CN=accessControlURL:" + accessControlURL +
+                ", OU=eventId:" + eventId +", OU=hashCertVoteHex:" + hashCertVoteHex);
         csr = new PKCS10CertificationRequest(signatureAlgorithm, subject, 
         		keyPair.getPublic(), null, keyPair.getPrivate(), provider);
     }
     
-    public PKCS10WrapperClient(int keySize, String keyName, 
-            String signatureAlgorithm, String provider, String nif, String email,
-            String phone, String deviceId, String givenName, String surName)
-            		throws NoSuchAlgorithmException, 
-            NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
+    public PKCS10WrapperClient(int keySize, String keyName,  String signatureAlgorithm, String provider, String nif,
+           String email, String phone, String deviceId, String givenName, String surName) throws NoSuchAlgorithmException,
+           NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(keyName, provider);
         keyPairGenerator.initialize(keySize, new SecureRandom());
         keyPair = keyPairGenerator.genKeyPair();
         privateKey = keyPair.getPrivate();
         this.signatureAlgorithm = signatureAlgorithm;
-        String principal = "SERIALNUMBER=" + nif + 
-        		", OU=deviceId:" + deviceId + ", GIVENNAME=" + givenName + 
+        String principal = "SERIALNUMBER=" + nif + ", deviceId=" + deviceId + ", GIVENNAME=" + givenName +
         		", SURNAME=" + surName;
-        if (email != null) principal.concat(", OU=email:" + email);
-        if (phone != null) principal.concat(", OU=phone:" + phone);
+        if (email != null) principal.concat(", emailAddress=" + email);
+        if (phone != null) principal.concat(", mobilePhone=" + phone);
         X500Principal subject = new X500Principal(principal.toString()); 
         csr = new PKCS10CertificationRequest(signatureAlgorithm, subject, 
         		keyPair.getPublic(), null, keyPair.getPrivate(), provider);

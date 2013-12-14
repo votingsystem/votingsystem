@@ -70,7 +70,7 @@ public class UserVS {
         this.commentVSes = commentVSes;
     }
 
-    public static UserVS getUsuario (X509Certificate certificate) {
+    public static UserVS getUserVS (X509Certificate certificate) {
         UserVS userVS = new UserVS();
         userVS.setCertificate(certificate);
         String subjectDN = certificate.getSubjectDN().getName();

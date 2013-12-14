@@ -61,7 +61,7 @@ class PdfService {
 					message:messageSource.getMessage('pdfSignedDocumentError', null, locale))
 			}
 			X509Certificate signingCert = pk.getSigningCertificate();
-			UserVS userVS = UserVS.getUsuario(signingCert);
+			UserVS userVS = UserVS.getUserVS(signingCert);
 			log.debug("checkSignature - Signing cert Subject:" + PdfPKCS7.getSubjectFields(pk.getSigningCertificate()));
 			//Calendar signDate = pk.getSignDate();
 			X509Certificate[] pkc = (X509Certificate[])pk.getSignCertificateChain();

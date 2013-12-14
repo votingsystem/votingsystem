@@ -140,44 +140,6 @@ public class UserVS implements Serializable {
         this.name = name;
     }
 
-    public static UserVS getUsuario (X509Certificate certificate) {
-    	UserVS userVS = new UserVS();
-    	userVS.setCertificate(certificate);
-    	String subjectDN = certificate.getSubjectDN().getName();
-    	if (subjectDN.contains("C="))
-    		userVS.setCountry(subjectDN.split("C=")[1].split(",")[0]);
-    	if (subjectDN.contains("SERIALNUMBER="))
-    		userVS.setNif(subjectDN.split("SERIALNUMBER=")[1].split(",")[0]);
-    	if (subjectDN.contains("SURNAME="))
-    		userVS.setFirstName(subjectDN.split("SURNAME=")[1].split(",")[0]);
-    	if (subjectDN.contains("GIVENNAME="))
-    		userVS.setName(subjectDN.split("GIVENNAME=")[1].split(",")[0]);
-    	if (subjectDN.contains("CN="))
-    		userVS.setCn(subjectDN.split("CN=")[1]);
-		if(subjectDN.split("OU=email:").length > 1) {
-			userVS.setEmail(subjectDN.split("OU=email:")[1].split(",")[0]);
-		}
-		if(subjectDN.split("CN=nif:").length > 1) {
-			String nif = subjectDN.split("CN=nif:")[1];
-			if (nif.split(",").length > 1) {
-				nif = nif.split(",")[0];
-			}
-			userVS.setNif(nif);
-		}
-		if (subjectDN.split("OU=phone:").length > 1) { userVS.setPhone(subjectDN.split("OU=phone:")[1].split(",")[0]); }
-    	return userVS;
-    }
-
-    @Transient public String getDetails () {
-    	String result = "";
-    	if (country != null) result.concat(" - Country: " + country);
-    	if (nif != null) result.concat(" - Nif: " + nif);
-    	if (firstName != null) result.concat(" - FirstName: " + firstName);
-    	if (name != null) result.concat(" - Name: " + name);
-    	if (cn != null) result.concat(" - CN: " + cn);
-    	return result;
-    }
-
     public void setCountry(String country) {
         this.country = country;
     }
@@ -295,36 +257,6 @@ public class UserVS implements Serializable {
         this.signerInformation = signer;
     }
 
-    public static UserVS getUserVS (X509Certificate certificate) {
-        UserVS userVS = new UserVS();
-        userVS.setCertificate(certificate);
-        String subjectDN = certificate.getSubjectDN().getName();
-        if (subjectDN.contains("C="))
-            userVS.setCountry(subjectDN.split("C=")[1].split(",")[0]);
-        if (subjectDN.contains("SERIALNUMBER="))
-            userVS.setNif(subjectDN.split("SERIALNUMBER=")[1].split(",")[0]);
-        if (subjectDN.contains("SURNAME="))
-            userVS.setFirstName(subjectDN.split("SURNAME=")[1].split(",")[0]);
-        if (subjectDN.contains("GIVENNAME="))
-            userVS.setName(subjectDN.split("GIVENNAME=")[1].split(",")[0]);
-        if (subjectDN.contains("CN="))
-            userVS.setCn(subjectDN.split("CN=")[1]);
-        if(subjectDN.split("OU=email:").length > 1) {
-            userVS.setEmail(subjectDN.split("OU=email:")[1].split(",")[0]);
-        }
-        if(subjectDN.split("CN=nif:").length > 1) {
-            String nif = subjectDN.split("CN=nif:")[1];
-            if (nif.split(",").length > 1) {
-                nif = nif.split(",")[0];
-            }
-            userVS.setNif(nif);
-        }
-        if (subjectDN.split("OU=phone:").length > 1) {
-            userVS.setPhone(subjectDN.split("OU=phone:")[1].split(",")[0]);
-        }
-        return userVS;
-    }
-
     @Transient public String getSignatureBase64() {
         if (signerInformation.getSignature() == null) return null;
         return DatatypeConverter.printBase64Binary(signerInformation.getSignature());
@@ -361,6 +293,20 @@ public class UserVS implements Serializable {
     @Transient public String getContentDigestBase64() {
         if (signerInformation.getContentDigest() == null) return null;
         return DatatypeConverter.printBase64Binary(signerInformation.getContentDigest());
+    }
+
+    public static UserVS getUserVS (X509Certificate certificate) {
+        UserVS userVS = new UserVS();
+        userVS.setCertificate(certificate);
+        String subjectDN = certificate.getSubjectDN().getName();
+        if (subjectDN.contains("C=")) userVS.setCountry(subjectDN.split("C=")[1].split(",")[0]);
+        if (subjectDN.contains("SERIALNUMBER=")) userVS.setNif(subjectDN.split("SERIALNUMBER=")[1].split(",")[0]);
+        if (subjectDN.contains("SURNAME=")) userVS.setFirstName(subjectDN.split("SURNAME=")[1].split(",")[0]);
+        if (subjectDN.contains("GIVENNAME=")) userVS.setName(subjectDN.split("GIVENNAME=")[1].split(",")[0]);
+        if (subjectDN.contains("CN=")) userVS.setCn(subjectDN.split("CN=")[1]);
+        if (subjectDN.split("emailAddress=").length > 1) userVS.setEmail(subjectDN.split("emailAddress=")[1].split(",")[0]);
+        if (subjectDN.split("mobilePhone=").length > 1) userVS.setPhone(subjectDN.split("mobilePhone=")[1].split(",")[0]);
+        return userVS;
     }
 
     public static UserVS populate (Map userVSDataMap) {

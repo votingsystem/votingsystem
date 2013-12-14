@@ -1,7 +1,6 @@
-package org.votingsystem.search;
+package org.votingsystem.util;
 
 import org.hibernate.search.bridge.StringBridge;
-import org.votingsystem.util.StringUtils;
 
 import java.sql.Clob;
 

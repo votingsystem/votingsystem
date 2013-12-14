@@ -18,7 +18,7 @@ class UserVSService {
 	List<String> administradoresSistema
 	def grailsApplication
 
-	public Map getUsuario(Date fromDate){
+	public Map getUserVS(Date fromDate){
 		def usersVS
 		UserVS.withTransaction {
 			def criteria = UserVS.createCriteria()

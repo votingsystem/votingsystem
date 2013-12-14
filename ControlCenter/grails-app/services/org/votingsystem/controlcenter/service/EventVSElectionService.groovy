@@ -48,8 +48,7 @@ class EventVSElectionService {
 			if(!accessControl) {
 				msg = message(code:'accessControlNotFound', args:[serverURL])
 				log.debug("- saveEvent - ${msg}")
-				return new ResponseVS(type:TypeVS.VOTING_EVENT_ERROR, message:msg,
-                        statusCode:ResponseVS.SC_ERROR_REQUEST)
+				return new ResponseVS(type:TypeVS.VOTING_EVENT_ERROR,message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST)
 			}
 			def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
 			if(!messageJSON.certCAVotacion || !messageJSON.userVS || !messageJSON.id ||
@@ -68,8 +67,7 @@ class EventVSElectionService {
 			X509Certificate certCAVotacion = CertUtil.fromPEMToX509Cert(messageJSON.certCAVotacion?.bytes)
 			byte[] certChain = messageJSON.certChain?.getBytes()
 			X509Certificate userCert = CertUtil.fromPEMToX509Cert(messageJSON.userVS?.bytes)
-			
-			UserVS user = UserVS.getUsuario(userCert);
+			UserVS user = UserVS.getUserVS(userCert);
 			//Publish request comes with Access Control cert
 			responseVS = subscriptionVSService.checkUser(user, locale)
 			if(ResponseVS.SC_OK != responseVS.statusCode) {
@@ -112,9 +110,9 @@ class EventVSElectionService {
     Set<FieldEventVS> saveFieldsEventVS(EventVS eventVS, JSONObject json) {
         log.debug("saveFieldsEventVS - ")
         def fieldsEventVSSet = json.fieldsEventVS.collect { opcionItem ->
-                def opcion = new FieldEventVS(eventVS:eventVS, content:opcionItem.content,
-                        accessControlFieldEventId:opcionItem.id)
-                return opcion.save();
+            def opcion = new FieldEventVS(eventVS:eventVS, content:opcionItem.content,
+                    accessControlFieldEventId:opcionItem.id)
+            return opcion.save();
         }
         return fieldsEventVSSet
     }
@@ -132,7 +130,6 @@ class EventVSElectionService {
 		return new ResponseVS(statusCode:ResponseVS.SC_OK)
 	}
 	
-	
 	ResponseVS checkDatesEventVS (EventVS eventVS, Locale locale) {
 		log.debug("checkDatesEventVS")
 		if(eventVS.state && eventVS.state == EventVS.State.CANCELLED) {
@@ -140,8 +137,7 @@ class EventVSElectionService {
 		}
 		if(eventVS.dateBegin.after(eventVS.dateFinish)) {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
-				message:messageSource.getMessage(
-                'error.dateBeginAfterdateFinishalMsg', null, locale) )
+				message:messageSource.getMessage('error.dateBeginAfterdateFinishalMsg', null, locale) )
 		}
 		Date fecha = DateUtils.getTodayDate()
 		if (fecha.after(eventVS.dateFinish) && eventVS.state != EventVS.State.TERMINATED) {
@@ -176,9 +172,7 @@ class EventVSElectionService {
 				((EventVS.State.CANCELLED == EventVS.State.valueOf(cancelDataJSON.state)) ||
 					(EventVS.State.DELETED_FROM_SYSTEM == EventVS.State.valueOf(cancelDataJSON.state)))) {
 				status = ResponseVS.SC_OK
-			} else {
-				msg = messageSource.getMessage('eventCancellationDataError', null, locale)
-			}
+			} else msg = messageSource.getMessage('eventCancellationDataError', null, locale)
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex)
 			msg = messageSource.getMessage('eventCancellationDataError', null, locale)
@@ -218,8 +212,8 @@ class EventVSElectionService {
 			if(!signatureVSService.isSignerCertificate(messageSMIMEReq.getSigners(), accessControlCert)) {
 				msg = messageSource.getMessage('eventCancelacionCertError', null, locale)
 				log.error("cancelEvent - msg: ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
-					type:TypeVS.ERROR, message:msg, eventVS:eventVS)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.ERROR, message:msg,
+                        eventVS:eventVS)
 			}
 			//new state must be or CANCELLED or DELETED
 			EventVS.State newState = EventVS.State.valueOf(messageJSON.state)
@@ -237,22 +231,18 @@ class EventVSElectionService {
 			MessageSMIME messageSMIMEResp = new MessageSMIME(type:TypeVS.RECEIPT,
 				smimeParent:messageSMIMEReq, eventVS:eventVS, content:smimeMessageResp.getBytes())
 			if (!messageSMIMEResp.validate()) {
-				messageSMIMEResp.errors.each {
-					log.debug("messageSMIMEResp - error: ${it}")
-				}
+                messageSMIMEResp.errors.each {log.debug("messageSMIMEResp - error: ${it}")}
 			}
 			MessageSMIME.withTransaction {
 				if (!messageSMIMEResp.save()) {
-					messageSMIMEResp.errors.each {
-						log.error("cancel event error saving messageSMIMEResp - ${it}")}
+					messageSMIMEResp.errors.each {log.error("cancel event error saving messageSMIMEResp - ${it}")}
 				}
 			}
 			eventVS.state = newState
 			eventVS.dateCanceled = DateUtils.getTodayDate();
 			EventVS.withTransaction {
 				if (!eventVS.save()) {
-					eventVS.errors.each {
-						log.error("cancel event error saving eventVS - ${it}")}
+					eventVS.errors.each {log.error("cancel event error saving eventVS - ${it}")}
 				}
 			}
 			log.debug("cancelEvent - cancelled event with id: ${eventVS.id}")

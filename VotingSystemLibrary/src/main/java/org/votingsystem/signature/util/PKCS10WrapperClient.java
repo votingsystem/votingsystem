@@ -1,6 +1,9 @@
 package org.votingsystem.signature.util;
 
 import org.apache.log4j.Logger;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
@@ -31,17 +34,22 @@ public class PKCS10WrapperClient {
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         keyPair = VotingSystemKeyGenerator.INSTANCE.genKeyPair();
         this.signatureMechanism = signatureMechanism;
-        X500Principal subject = new X500Principal("CN=accessControlURL:" + accessControlURL +
-                ", OU=eventId:" + eventId + ", OU=hashCertVoteHex:" + hashCertVoteHex);
-        csr = new PKCS10CertificationRequest(signatureMechanism, subject, keyPair.getPublic(), null,
-                keyPair.getPrivate(), provider);
+        X500Principal subject = new X500Principal("CN=accessControlURL:" + accessControlURL +", OU=eventId:" + eventId);
+        ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
+        /* 0 -> accessControlURL
+         * 1 -> eventId
+         * 2 -> hashCertVoteHex */
+        asn1EncodableVector.add(new DERUTF8String(accessControlURL));
+        asn1EncodableVector.add(new DERUTF8String(eventId));
+        asn1EncodableVector.add(new DERUTF8String(hashCertVoteHex));
+        csr = new PKCS10CertificationRequest(signatureMechanism, subject, keyPair.getPublic(),
+                new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);
     }
     
     public void initSigner (byte[] signedCsr) throws Exception {
         Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(signedCsr);
         logger.debug("initSigner - Num certs: " + certificates.size());
-        if(certificates.isEmpty())
-            throw new Exception (" --- signedCsr without certs --- ");
+        if(certificates.isEmpty()) throw new Exception (" --- missing certs --- ");
         certificate = certificates.iterator().next();
         X509Certificate[] arrayCerts = new X509Certificate[certificates.size()];
         certificates.toArray(arrayCerts);

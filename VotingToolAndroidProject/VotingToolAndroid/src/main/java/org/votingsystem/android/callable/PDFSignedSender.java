@@ -252,12 +252,7 @@ public class PDFSignedSender implements Callable<ResponseVS> {
     private String getUserNIF (X509Certificate certificate) {
         String subjectDN = certificate.getSubjectDN().getName();
         String nif = null;
-        if(subjectDN.split("CN=nif:").length > 1) {
-            nif = subjectDN.split("CN=nif:")[1];
-            if (nif.split(",").length > 1) {
-                nif = nif.split(",")[0];
-            }
-        } else if(subjectDN.split("SERIALNUMBER=").length > 1) {
+        if(subjectDN.split("SERIALNUMBER=").length > 1) {
             nif = subjectDN.split("SERIALNUMBER=")[1];
             if (nif.split(",").length > 1) {
                 nif = nif.split(",")[0];

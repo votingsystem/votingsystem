@@ -57,7 +57,7 @@ public class CertUtil {
                 KeyUsage.digitalSignature | KeyUsage.keyEncipherment));
         return certGen.generate(caKey, ContextVS.PROVIDER);
     }
-    
+
     /**
      * Generate V3 certificate for root CA Authority
      */
@@ -171,6 +171,20 @@ public class CertUtil {
         return certGen.generate(caKey, ContextVS.PROVIDER);
     }
 
+    /**
+     * Generate V3 Certificate from CSR
+     */
+    public static X509Certificate signCSR(byte[] csrPEMBytes, String organizationalUnit, PrivateKey caKey,
+            X509Certificate caCert, Date dateBegin, Date dateFinish) throws Exception {
+        PKCS10CertificationRequest csr = fromPEMToPKCS10CertificationRequest(csrPEMBytes);
+        String strSubjectDN = csr.getCertificationRequestInfo().getSubject().toString();
+        if (!csr.verify() || strSubjectDN == null) throw new Exception("ERROR VERIFYING CSR");
+        if(organizationalUnit != null) strSubjectDN = organizationalUnit + "," + strSubjectDN;
+        X509Certificate issuedCert = generateV3EndEntityCertFromCsr(csr, caKey, caCert, dateBegin, dateFinish,
+                strSubjectDN);
+        return issuedCert;
+    }
+
     public static byte[] getPEMEncoded (Object objectToEncode) throws IOException {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
         PEMWriter pemWrt = new PEMWriter(new OutputStreamWriter(bOut));
@@ -183,6 +197,13 @@ public class CertUtil {
         pemWrt.close();
         bOut.close();
         return bOut.toByteArray();
+    }
+
+    public static PKCS10CertificationRequest fromPEMToPKCS10CertificationRequest (byte[] csrBytes) throws Exception {
+        PEMReader pemReader = new PEMReader(new InputStreamReader(new ByteArrayInputStream(csrBytes)));
+        PKCS10CertificationRequest result = (PKCS10CertificationRequest)pemReader.readObject();
+        pemReader.close();
+        return result;
     }
 
     public static X509Certificate fromPEMToX509Cert (byte[] pemFileBytes) throws Exception {
