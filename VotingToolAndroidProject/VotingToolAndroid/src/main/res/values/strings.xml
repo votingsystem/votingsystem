@@ -208,7 +208,7 @@
 	<string name="claim_fields_dialog_caption">Rellenar los campos</string>
 	<string name="error_lbl">Error</string>   
 	<string name="msg_lbl">Mensaje</string>   
-	<string name="operacion_ok_msg">Operación completada con éxito</string> 
+	<string name="operation_ok_msg">Operación completada con éxito</string>
 	<string name="receipt_file_saved_msg">Documento incorporado a la lista de recibos</string> 
 	<string name="cert_not_found_msg">No tiene instalado ningún certificado con el que poder firmar la solicitud.</string>
 	<string name="user_cert_request_form_message_label">Cada vez que vote se le pedirá el código PIN que introducirá a continuación. Recuerde, si lo olvida tendrá que pedir otro certificado para poder votar.</string>

@@ -6,6 +6,6 @@ package org.votingsystem.model;
 */
 public interface AppHostVS {
     
-    public void sendMessageToHost(OperationVS operacion);
+    public void sendMessageToHost(OperationVS operation);
 
 }

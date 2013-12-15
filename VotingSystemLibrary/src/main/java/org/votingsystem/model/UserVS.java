@@ -8,6 +8,7 @@ import org.votingsystem.signature.util.CMSUtils;
 
 import javax.persistence.*;
 import javax.xml.bind.DatatypeConverter;
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.io.Serializable;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
@@ -264,7 +265,8 @@ public class UserVS implements Serializable {
 
     @Transient public String getSignatureHex() {
         if (signerInformation.getSignature() == null) return null;
-        return new String(signerInformation.getSignature());
+        HexBinaryAdapter hexConverter = new HexBinaryAdapter();
+        return hexConverter.marshal(getSignatureBase64().getBytes());
     }
 
     @Transient public String getEncryptiontId() {

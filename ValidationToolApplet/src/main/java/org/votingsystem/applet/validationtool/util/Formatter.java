@@ -5,8 +5,10 @@ import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
+import org.votingsystem.model.OperationVS;
 import org.votingsystem.util.DateUtils;
 
+import javax.swing.*;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
 
@@ -16,23 +18,20 @@ import java.text.ParseException;
 */
 public class Formatter {
     
-   private static Logger logger = Logger.getLogger(Formatter.class);
+    private static Logger logger = Logger.getLogger(Formatter.class);
 
-   private static String accessControlLbl = ContextVS.getInstance().getMessage("accessControlLbl");
-   private static String nameLabel = ContextVS.getInstance().getMessage("nameLabel");
-   private static String subjectLabel = ContextVS.getInstance().getMessage("subjectLabel");
-   private static String contentLabel = ContextVS.getInstance().getMessage("contentLabel");
-   private static String dateBeginLabel = ContextVS.getInstance().getMessage("dateBeginLabel");
-   private static String dateFinishLabel = ContextVS.getInstance().getMessage("dateFinishLabel");
-   private static String urlLabel = ContextVS.getInstance().getMessage("urlLabel");
-    private static String hashAccessRequestBase64Label = ContextVS.getInstance().
-              getMessage("hashAccessRequestBase64Label");
-    private static String optionSelectedContentLabel = ContextVS.getInstance().
-              getMessage("optionSelectedContentLabel");
-    
+    private static String accessControlLbl = ContextVS.getMessage("accessControlLbl");
+    private static String nameLabel = ContextVS.getMessage("nameLabel");
+    private static String subjectLabel = ContextVS.getMessage("subjectLabel");
+    private static String contentLabel = ContextVS.getMessage("contentLabel");
+    private static String dateBeginLabel = ContextVS.getMessage("dateBeginLabel");
+    private static String dateFinishLabel = ContextVS.getMessage("dateFinishLabel");
+    private static String urlLabel = ContextVS.getMessage("urlLabel");
+    private static String hashAccessRequestBase64Label = ContextVS.getMessage("hashAccessRequestBase64Label");
+    private static String optionSelectedContentLabel = ContextVS.getMessage("optionSelectedContentLabel");
 
     public static String getInfoCert(X509Certificate certificate) {
-        return ContextVS.getInstance().getMessage("certInfoFormattedMsg",
+        return ContextVS.getMessage("certInfoFormattedMsg",
                 certificate.getSubjectDN().toString(),
                 certificate.getIssuerDN().toString(),
                 certificate.getSerialNumber().toString(),
@@ -41,24 +40,38 @@ public class Formatter {
                 DateUtils.getSpanishFormattedStringFromDate(
                         certificate.getNotAfter()));
     }
-    public static String procesar (String cadena) throws ParseException {
-        if(cadena == null) {
-            logger.debug(" - procesar null string");
-            return null;
-        }
-        EventVS evento = null;
+
+    public static String format(String textToFormat) {
         String result = null;
         try {
-            JSONObject jsonObject = (JSONObject)JSONSerializer.toJSON(cadena);
-            evento = EventVS.populate(jsonObject);
-            result = getEvento(evento);
+            JSONObject jsonObject = (JSONObject)JSONSerializer.toJSON(textToFormat);
+            OperationVS operation = OperationVS.populate(jsonObject);
+            switch(operation.getType()) {
+                case SEND_SMIME_VOTE:
+                    result = formatVote(jsonObject);
+                    break;
+                default:
+                    logger.debug("Formatter nor found for "  + operation.getType());
+                    result = textToFormat;
+            }
+
         } catch(Exception ex) {
-            logger.error("cadena: " + cadena + " - " + ex.getMessage(), ex);
+            logger.error("textToFormat: " + textToFormat + " - " + ex.getMessage(), ex);
         }
         return result;
     }
     
-    	
+    private static String formatVote(JSONObject jsonObject){
+        StringBuilder result = new StringBuilder("<html>");
+        result.append("<b><u><big>" + ContextVS.getMessage("voteLbl") +"</big></u></b><br/>");
+        result.append("<b>" + ContextVS.getMessage("eventURLLbl") +": </b>");
+        result.append("<a href='" + jsonObject.get("eventURL") + "'>" + jsonObject.get("eventURL") +"</a><br/>");
+        JSONObject optionSelectedJSON = (JSONObject) jsonObject.get("optionSelected");
+        result.append("<b>" + ContextVS.getMessage("optionSelectedLbl") +": </b>" + optionSelectedJSON.get("content"));
+        result.append("</html>");
+        return result.toString();
+    }
+
     public static String getEvento (EventVS evento) {
         logger.debug("getEvento - evento: " + evento.getId());
         if (evento == null) return null;

@@ -5,7 +5,6 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.applet.validationtool.panel.MessagePanel;
-import org.votingsystem.applet.validationtool.util.Formatter;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.util.CertUtil;
 
@@ -24,45 +23,40 @@ public class TimeStampValidationWithCertDialog extends JDialog {
 
     private Container container;
     private MessagePanel messagePanel;
-    TimeStampToken timeStampToken = null;
+    private JEditorPane pemCertPane;
+    private TimeStampToken timeStampToken = null;
+    private JButton validateTimeStampButton = null;
     
     public TimeStampValidationWithCertDialog(java.awt.Frame parent, boolean modal, TimeStampToken timeStampToken) {
         super(parent, modal);
+        setTitle(ContextVS.getMessage("validateTimeStampDialogCaption"));
         initComponents();
         setLocationRelativeTo(null);
-        validationResultPanel.setVisible(false);
         this.timeStampToken = timeStampToken;
         pack();
     }
 
-
-    private javax.swing.JButton closeButton;
-    private javax.swing.JLabel messageLabel;
-    private javax.swing.JTextArea pemCertTextArea;
-    private javax.swing.JScrollPane scrollPane1;
-    private javax.swing.JButton validationButton;
-    private javax.swing.JLabel validationResultIconLabel;
-    private javax.swing.JLabel validationResultMsgLabel;
-    private javax.swing.JPanel validationResultPanel;
-
     private void initComponents() {
         container = getContentPane();
-        container.setLayout(new MigLayout("fill", "", "[][]20[]"));
-        JLabel messageLabel = new JLabel(ContextVS.getMessage("timeStampValidationWithCertMsg"));
-        container.add(messageLabel, "cell 0 0, grow, wrap");
+        container.setLayout(new MigLayout("fill", "", ""));
+
+
+        container.add(new JLabel("<html><b>" + ContextVS.getMessage("timeStampValidationWithCertMsg") + ": </b></html>"),
+                "cell 0 1, height 35:35:35, span2, grow, wrap");
+
         JScrollPane pemCertScrollPane = new JScrollPane();
-        JEditorPane pemCertPane = new JEditorPane();
+        pemCertPane = new JEditorPane();
         pemCertPane.setBackground(java.awt.Color.white);
         pemCertScrollPane.setViewportView(pemCertPane);
-        add(pemCertScrollPane, "cell 0 1, width 400::, grow, wrap");
+        add(pemCertScrollPane, "span 2, height 300::, width 500::, grow, wrap 20");
 
-        JButton validateTimeStampButton = new JButton(ContextVS.getMessage("validateLbl"));
+        validateTimeStampButton = new JButton(ContextVS.getMessage("validateLbl"));
         validateTimeStampButton.setIcon(ContextVS.getIcon(this, "accept"));
         validateTimeStampButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) { validateTimeStamp();}
         });
 
-        container.add(validateTimeStampButton, "width :150:");
+        container.add(validateTimeStampButton, "height 35:35:35, width :150:");
 
         JButton cancelButton = new JButton(ContextVS.getMessage("closeLbl"));
         cancelButton.setIcon(ContextVS.getIcon(this, "cancel"));
@@ -70,31 +64,37 @@ public class TimeStampValidationWithCertDialog extends JDialog {
             public void actionPerformed(java.awt.event.ActionEvent evt) { dispose();}
         });
 
-        container.add(cancelButton, "width :150:, align right");
+        container.add(cancelButton, "height 35:35:35, width :150:, align right");
     }
 
     private void validateTimeStamp() {
-        X509Certificate validationCert = null;
+        logger.debug("validateTimeStamp");
         Collection<X509Certificate> certs = null;
         try {
-            String pemCert = pemCertTextArea.getText();
+            String pemCert = pemCertPane.getText();
             certs = CertUtil.fromPEMToX509CertCollection(pemCert.getBytes());
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-            messagePanel.setMessage(ContextVS.getInstance().getMessage("pemCertsErrorMsg"), ContextVS.getIcon(this, "cancel"));
+            messagePanel.setMessage(ContextVS.getInstance().getMessage("pemCertsErrorMsg"),
+                    ContextVS.getIcon(this, "cancel"));
         }
+
+        messagePanel = new MessagePanel();
+        container.add(messagePanel, "cell 0 0, span2, grow, wrap");
         for(X509Certificate cert:certs) {
-            logger.debug(" ----------- Validating timeStampToken with cert: "  + cert.getSubjectDN().toString());
+            logger.debug("Validating timeStampToken with cert: "  + cert.getSubjectDN().toString());
             try {
                 timeStampToken.validate(new JcaSimpleSignerInfoVerifierBuilder().setProvider(
                         ContextVS.PROVIDER).build(cert));
-                messagePanel.setMessage(ContextVS.getInstance().getMessage("pemCertsValidationOKMsg",
-                        validationCert.getSubjectDN().toString()), ContextVS.getIcon(this, "accept"));
+                messagePanel.setMessage(ContextVS.getMessage("timeStampCertsValidationOKMsg",
+                        cert.getSubjectDN().toString()), ContextVS.getIcon(this, "accept"));
             } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);
                 messagePanel.setMessage(ex.getMessage(), ContextVS.getIcon(this, "cancel"));
             }
         }
+        validateTimeStampButton.setVisible(false);
+        pack();
     }
 
 }

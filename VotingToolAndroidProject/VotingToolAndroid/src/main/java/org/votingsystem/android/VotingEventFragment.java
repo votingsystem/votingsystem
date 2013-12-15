@@ -208,7 +208,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
 		try {
 			reciboVoto.writoToFile(file);
 			AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
-			builder.setTitle(getString(R.string.operacion_ok_msg)).
+			builder.setTitle(getString(R.string.operation_ok_msg)).
 				setMessage(getString(R.string.receipt_file_saved_msg)).show();
 		} catch(Exception ex) {
 			AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
@@ -511,7 +511,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
                     if(ResponseVS.SC_OK == response.getStatusCode()) {
                         receipt = (VoteVS)response.getData();
                         VotingResultDialog votingResultDialog = VotingResultDialog.newInstance(
-                                getString(R.string.operacion_ok_msg), receipt);
+                                getString(R.string.operation_ok_msg), receipt);
                         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                         votingResultDialog.show(fragmentManager, "fragment_voting_result");
 

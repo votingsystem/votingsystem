@@ -390,7 +390,7 @@ public class EventPublishingActivity extends ActionBarActivity implements CertPi
             String resultCaption = null;
             SubSystemVS selectedSubsystem = null;
             if(ResponseVS.SC_OK == response.getStatusCode()) {
-                resultCaption = getString(R.string.operacion_ok_msg);
+                resultCaption = getString(R.string.operation_ok_msg);
                 switch(pendingOperationVS.getTypeVS()) {
                     case MANIFEST_PUBLISHING:
                         resultMsg = getString(R.string.publish_manifest_OK_prefix_msg);

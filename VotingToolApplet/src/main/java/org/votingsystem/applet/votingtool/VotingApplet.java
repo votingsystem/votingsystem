@@ -77,9 +77,9 @@ public class VotingApplet extends JApplet implements AppHostVS {
             if(getParameter("locale") != null) locale = getParameter("locale");
         }
         init();
-        OperationVS operacion = new OperationVS(ResponseVS.SC_PROCESSING,
+        OperationVS operation = new OperationVS(ResponseVS.SC_PROCESSING,
                 ContextVS.getInstance().getMessage("appletInitMsg"));
-        sendMessageToHost(operacion);
+        sendMessageToHost(operation);
     }
 
     public void stop() {
@@ -122,10 +122,10 @@ public class VotingApplet extends JApplet implements AppHostVS {
         }
     }
 
-    public void runOperation(String operacionJSONStr) {
-        logger.debug("runOperation: " + operacionJSONStr);
-        if(operacionJSONStr == null || "".equals(operacionJSONStr)) return;
-        JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(operacionJSONStr);
+    public void runOperation(String operationJSONStr) {
+        logger.debug("runOperation: " + operationJSONStr);
+        if(operationJSONStr == null || "".equals(operationJSONStr)) return;
+        JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(operationJSONStr);
         OperationVS runningOperation = OperationVS.populate(jsonObject);
         if(runningOperation.getType() == null) {
             logger.error("runOperation - missin operation type");

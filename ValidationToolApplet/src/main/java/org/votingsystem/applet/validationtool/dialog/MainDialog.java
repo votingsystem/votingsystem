@@ -2,9 +2,10 @@ package org.votingsystem.applet.validationtool.dialog;
 
 import net.miginfocom.swing.MigLayout;
 import org.apache.log4j.Logger;
-import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
@@ -31,21 +32,21 @@ public class MainDialog extends JDialog implements DecompressFileDialog.Listener
 
     private void initComponents() {
         container = getContentPane();
-        container.setLayout(new MigLayout("fill", "50[]50", "[][]20[]"));
+        container.setLayout(new MigLayout("fill, insets 20 30 10 30", "", ""));
 
         JButton openSignedFileButton = new JButton(ContextVS.getMessage("openSignedFileButtonLbl"));
         openSignedFileButton.setIcon(ContextVS.getIcon(this, "document_signature"));
         openSignedFileButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) { openSignedFile();}
         });
-        container.add(openSignedFileButton, "cell 0 0, width :400:, wrap");
+        container.add(openSignedFileButton, "cell 0 0, width :400:, wrap 10");
 
         JButton openBackupButton = new JButton(ContextVS.getMessage("openBackupButtonLbl"));
         openBackupButton.setIcon(ContextVS.getIcon(this, "file_extension_zip"));
         openBackupButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) { openBackup();}
         });
-        container.add(openBackupButton, "cell 0 1, width :400:, wrap");
+        container.add(openBackupButton, "cell 0 1, width :400:, wrap 20");
 
         JButton cancelButton = new JButton(ContextVS.getMessage("closeLbl"));
         cancelButton.setIcon(ContextVS.getIcon(this, "cancel_16"));

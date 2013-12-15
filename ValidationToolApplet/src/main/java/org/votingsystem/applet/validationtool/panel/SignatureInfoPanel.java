@@ -23,16 +23,11 @@ public class SignatureInfoPanel extends JPanel {
     private UserVS signer;
     private SMIMEMessageWrapper signedMessage;
 
-    private JCheckBox contentFormattedCheckBox;
-    private JEditorPane signatureContentPane;
-
-
     public SignatureInfoPanel(UserVS signer, SMIMEMessageWrapper signedMessage) throws Exception {
         this.signer = signer;
         this.signedMessage = signedMessage;
         initComponents();
     }
-
 
     private JLabel createBoldLabel(String labelContent) {
         return new JLabel("<html><b>" + labelContent + "</b></html>");
@@ -41,83 +36,61 @@ public class SignatureInfoPanel extends JPanel {
     private void initComponents() {
         setLayout(new MigLayout("fill"));
 
-        this.signedMessage = signedMessage;
-
         JLabel signatureAlgorithmLabel = createBoldLabel(ContextVS.getMessage("signatureAlgorithmLbl") + ": ");
-        add(signatureAlgorithmLabel, "width 200::");
-        String algorithValue = signer.getEncryptiontId() + " - " + signer.getDigestId();
-        JLabel signatureAlgorithmValueLabel = new JLabel(algorithValue);
-        add(signatureAlgorithmValueLabel, "width 200::");
+        add(signatureAlgorithmLabel);
+        JLabel signatureAlgorithmValueLabel = new JLabel(signer.getEncryptiontId() + " - " + signer.getDigestId());
 
-        JLabel signatureDateLabel = createBoldLabel(ContextVS.getMessage("signatureDateLbl") + ": ");
-        add(signatureDateLabel, "width 200::, gapleft 30");
-        if(signer.getSignatureDate() != null) {
+        if(signer.getTimeStampToken() != null) {
+            add(signatureAlgorithmValueLabel);
+            JLabel signatureDateLabel = createBoldLabel(ContextVS.getMessage("signatureDateLbl") + ": ");
+            add(signatureDateLabel, "gapleft 50");
             JLabel signatureDateValueLabel = new JLabel(DateUtils.getSpanishFormattedStringFromDate(
                     signer.getSignatureDate()));
-            add(signatureDateValueLabel, "width 200::, wrap");
-        }
-
-        JLabel signerLabel = createBoldLabel(ContextVS.getMessage("Firmante") + ": ");
-        add(signerLabel, "width 200::, span 2");
-
-
-        if(signer.getTimeStampToken() == null) {
+            add(signatureDateValueLabel, "split 2");
             JButton timeStampButton = new JButton(ContextVS.getMessage("timeStampButtonLbl"));
+            timeStampButton.setIcon(ContextVS.getIcon(this, "clock"));
             timeStampButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent evt) { openTimeStampInfoDialog();}
             });
-            add(timeStampButton, "span 2, wrap");
-        } else {
-            JPanel dummyPanel = new JPanel();
-            add(dummyPanel, "span 2, wrap");
-        }
+            add(timeStampButton, "gapleft 20, wrap");
+        } else  add(signatureAlgorithmValueLabel, "wrap");
 
-        JScrollPane signerInfoScrollPane = new JScrollPane();
-        JEditorPane signerInfoPane = new JEditorPane();
-        signerInfoPane.setEditable(false);
-        signerInfoPane.setContentType("text/html");
-        signerInfoPane.setBackground(java.awt.Color.white);
-        signerInfoPane.setText(Formatter.getInfoCert(signer.getCertificate()));
-        signerInfoScrollPane.setViewportView(signerInfoPane);
-        add(signerInfoScrollPane, "span 4, wrap");
+        JLabel signerLabel = createBoldLabel(ContextVS.getMessage("signerLbl") + ": ");
+        add(signerLabel, "wrap");
 
-        JLabel signatureContentLabel = createBoldLabel(ContextVS.getMessage("signatureContentLbl") + ": ");
-        add(signatureContentLabel, "span 2");
-
-        contentFormattedCheckBox = new JCheckBox(ContextVS.getMessage("formattedCheckBoxLbl"));
-        contentFormattedCheckBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) { contentFormattedCheckBoxChanged();}
-        });
-        add(contentFormattedCheckBox, "span 2, wrap");
-
-        JScrollPane signatureContentScrollPane = new JScrollPane();
-        signatureContentPane = new JEditorPane();
-        signatureContentPane.setEditable(false);
-        signatureContentPane.setContentType("text/html");
-        signatureContentPane.setBackground(java.awt.Color.white);
-        signatureContentPane.setText(signedMessage.getSignedContent());
-        signatureContentScrollPane.setViewportView(signatureContentPane);
-        add(signatureContentScrollPane, "span 4, wrap");
+        add(getJScrollPane(Formatter.getInfoCert(signer.getCertificate())), "span 4, height 150:150:, grow, wrap");
 
         JLabel hashBase64Label = createBoldLabel(ContextVS.getMessage("hashBase64Lbl") + ": ");
         add(hashBase64Label, "span 4, wrap");
         JTextField hashBase64Value = new JTextField(signer.getContentDigestBase64());
-        add(hashBase64Value, "span 4, wrap");
+        add(hashBase64Value, "span 4, width 800:800:800, wrap");
 
         JLabel hashHexadecimalLabel = createBoldLabel(ContextVS.getMessage("hashHexadecimalLbl") + ": ");
         add(hashHexadecimalLabel, "span 4, wrap");
         JTextField hashHexadecimalValue = new JTextField(signer.getContentDigestHex());
-        add(hashHexadecimalValue, "span 4, wrap");
+        add(hashHexadecimalValue, "span 4, width 800:800:800, wrap");
 
-        JLabel signatureBase64lLabel = createBoldLabel(ContextVS.getMessage("signatureBase64lLbl") + ": ");
-        add(signatureBase64lLabel, "span 4, wrap");
+        JLabel signatureBase64Label = createBoldLabel(ContextVS.getMessage("signatureBase64lLbl") + ": ");
+        add(signatureBase64Label, "span 4, wrap");
         JTextField signatureBase64Value = new JTextField(signer.getSignatureBase64());
-        add(signatureBase64Value, "span 4, wrap");
+        add(signatureBase64Value, "span 4, width 800:800:800, wrap");
 
         JLabel signatureHexadecimalLabel = createBoldLabel(ContextVS.getMessage("signatureHexadecimalLbl") + ": ");
         add(signatureHexadecimalLabel, "span 4, wrap");
         JTextField signatureHexadecimalValue = new JTextField(signer.getSignatureHex());
-        add(signatureHexadecimalValue, "span 4, wrap");
+        add(signatureHexadecimalValue, "span 4, width 800:800:800, wrap");
+    }
+
+    private JScrollPane getJScrollPane(String contentText) {
+        JScrollPane scrollPane = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        JEditorPane editorPane = new JEditorPane();
+        editorPane.setEditable(false);
+        editorPane.setContentType("text/html");
+        editorPane.setBackground(java.awt.Color.white);
+        editorPane.setText(contentText);
+        scrollPane.setViewportView(editorPane);
+        return scrollPane;
     }
 
     private void openTimeStampInfoDialog() {
@@ -126,22 +99,8 @@ public class SignatureInfoPanel extends JPanel {
             logger.debug("TimeStampToken NULL");
             return;
         }
-        TimeStampDialog timeStampDialog = new TimeStampDialog(
-                new JFrame(), true, timeStampToken);
+        TimeStampDialog timeStampDialog = new TimeStampDialog(new JFrame(), true, timeStampToken);
         timeStampDialog.setVisible(true);
     }
 
-
-    public void contentFormattedCheckBoxChanged() {
-        logger.debug("contentFormattedCheckBoxChanged");
-        String formattedText = null;
-        if (!contentFormattedCheckBox.isSelected()) {
-            try {
-                formattedText = Formatter.procesar( signedMessage.getSignedContent());
-                signatureContentPane.setText(formattedText);
-            } catch(Exception ex) {
-                logger.error(ex.getMessage(), ex);
-            }
-        } else signatureContentPane.setText(signedMessage.getSignedContent());
-    }
 }

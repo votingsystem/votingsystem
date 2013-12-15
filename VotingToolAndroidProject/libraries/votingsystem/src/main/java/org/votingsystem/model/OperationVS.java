@@ -208,63 +208,63 @@ public class OperationVS {
         this.receiverName = receiverName;
     }
 
-    public static OperationVS parse (String operacionStr) throws JSONException, ParseException {
-		Log.d(TAG + ".parse(...) ", "operacionStr: " + operacionStr);
-        if(operacionStr == null) return null;
-        OperationVS operacion = new OperationVS();
-        JSONObject operacionJSON = new JSONObject(operacionStr);
-        if (operacionJSON.has("operacion")) {
-            operacion.setTypeVS(TypeVS.valueOf(operacionJSON.getString("operacion")));
+    public static OperationVS parse (String operationStr) throws JSONException, ParseException {
+		Log.d(TAG + ".parse(...) ", "operationStr: " + operationStr);
+        if(operationStr == null) return null;
+        OperationVS operation = new OperationVS();
+        JSONObject operationJSON = new JSONObject(operationStr);
+        if (operationJSON.has("operation")) {
+            operation.setTypeVS(TypeVS.valueOf(operationJSON.getString("operation")));
         }
-        if (operacionJSON.has("args")) {
-            JSONArray arrayArgs = operacionJSON.getJSONArray("args");
+        if (operationJSON.has("args")) {
+            JSONArray arrayArgs = operationJSON.getJSONArray("args");
             String[] args = new String[arrayArgs.length()];
             for(int i = 0; i < arrayArgs.length(); i++) {
                 args[i] = arrayArgs.getString(i);
             }
-            operacion.setArgs(args);
+            operation.setArgs(args);
         }
-        if (operacionJSON.has("statusCode")) {
-            operacion.setStatusCode(operacionJSON.getInt("statusCode"));
+        if (operationJSON.has("statusCode")) {
+            operation.setStatusCode(operationJSON.getInt("statusCode"));
         }
-        if (operacionJSON.has("mensaje")) {
-            operacion.setMensaje(operacionJSON.getString("mensaje"));
+        if (operationJSON.has("mensaje")) {
+            operation.setMensaje(operationJSON.getString("mensaje"));
         }   
-        if (operacionJSON.has("receiverSignServiceURL")) {
-            operacion.setUrlEnvioDocumento(operacionJSON.getString("receiverSignServiceURL"));
+        if (operationJSON.has("receiverSignServiceURL")) {
+            operation.setUrlEnvioDocumento(operationJSON.getString("receiverSignServiceURL"));
         }  
-        if (operacionJSON.has("urlDocumento")) {
-            operacion.setUrlDocumento(operacionJSON.getString("urlDocumento"));
+        if (operationJSON.has("urlDocumento")) {
+            operation.setUrlDocumento(operationJSON.getString("urlDocumento"));
         }  
-        if (operacionJSON.has("urlTimeStampServer")) {
-            operacion.setUrlTimeStampServer(operacionJSON.getString("urlTimeStampServer"));
+        if (operationJSON.has("urlTimeStampServer")) {
+            operation.setUrlTimeStampServer(operationJSON.getString("urlTimeStampServer"));
         }  
-        if (operacionJSON.has("eventVS")) {
-            EventVS eventVS = EventVS.parse(operacionJSON.getJSONObject("eventVS"));
-            operacion.setEventVS(eventVS);
+        if (operationJSON.has("eventVS")) {
+            EventVS eventVS = EventVS.parse(operationJSON.getJSONObject("eventVS"));
+            operation.setEventVS(eventVS);
         }  
-        if (operacionJSON.has("signedContent"))
-             operacion.setContentFirma(operacionJSON.getJSONObject("signedContent"));
-        if (operacionJSON.has("receiverName")) {
-            operacion.setReceiverName(operacionJSON.getString("receiverName"));
+        if (operationJSON.has("signedContent"))
+             operation.setContentFirma(operationJSON.getJSONObject("signedContent"));
+        if (operationJSON.has("receiverName")) {
+            operation.setReceiverName(operationJSON.getString("receiverName"));
         }
-        if (operacionJSON.has("signedMessageSubject")) {
-            operacion.setSignedMessageSubject(operacionJSON.getString("signedMessageSubject"));
+        if (operationJSON.has("signedMessageSubject")) {
+            operation.setSignedMessageSubject(operationJSON.getString("signedMessageSubject"));
         }
-        if (operacionJSON.has("emailSolicitante")) {
-            operacion.setEmailSolicitante(operacionJSON.getString("emailSolicitante"));
+        if (operationJSON.has("emailSolicitante")) {
+            operation.setEmailSolicitante(operationJSON.getString("emailSolicitante"));
         }
-        if (operacionJSON.has("sessionId")) {
-        	operacion.setSessionId(operacionJSON.getString("sessionId"));
+        if (operationJSON.has("sessionId")) {
+        	operation.setSessionId(operationJSON.getString("sessionId"));
         }
-        return operacion;
+        return operation;
     }
 
     public JSONObject getJSON () throws JSONException {
     	JSONObject jsonObject = new JSONObject();
         if(statusCode != null) jsonObject.put("statusCode", statusCode);
         if(mensaje != null) jsonObject.put("mensaje", mensaje);
-        if(typeVS != null) jsonObject.put("operacion", typeVS.toString());
+        if(typeVS != null) jsonObject.put("operation", typeVS.toString());
         if(urlDocumento != null) jsonObject.put("urlDocumento", urlDocumento);
         if(receiverSignServiceURL != null) jsonObject.put("receiverSignServiceURL", receiverSignServiceURL);
         if(signedMessageSubject != null) jsonObject.put("signedMessageSubject", receiverSignServiceURL);
@@ -278,9 +278,9 @@ public class OperationVS {
     }
     
     public String getJSONStr () throws JSONException {
-        JSONObject operacionJSON = getJSON();
-        if(operacionJSON == null) return null;
-        else return operacionJSON.toString();
+        JSONObject operationJSON = getJSON();
+        if(operationJSON == null) return null;
+        else return operationJSON.toString();
     }
 
     /**

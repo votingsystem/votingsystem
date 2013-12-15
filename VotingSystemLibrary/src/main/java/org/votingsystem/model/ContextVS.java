@@ -284,7 +284,7 @@ public class ContextVS {
         return signedMailGenerator.genMimeMessage(userTest.getEmail(),toUser, textToSign, subject);
     }
 
-    public void sendMessageToHost(OperationVS operacion) { appHost.sendMessageToHost(operacion); }
+    public void sendMessageToHost(OperationVS operation) { appHost.sendMessageToHost(operation); }
 
     public void setSessionUser(UserVS userVS) {
         logger.debug("setSessionUser - nif: " + userVS.getNif());

@@ -46,10 +46,10 @@ public class DocumentSignersDialog extends JDialog {
 
     private void initComponents() {
         container = getContentPane();
-        container.setLayout(new MigLayout("fill", "", "[]20[]"));
+        container.setLayout(new MigLayout("fill"));
 
         tabbedPane = new JTabbedPane();
-        container.add(tabbedPane, "growx, wrap");
+        container.add(tabbedPane, "grow, wrap 20");
 
         JButton cancelButton = new JButton(ContextVS.getMessage("closeLbl"));
         cancelButton.setIcon(ContextVS.getIcon(this, "cancel_16"));
@@ -58,7 +58,7 @@ public class DocumentSignersDialog extends JDialog {
                 cancel();
             }
         });
-        container.add(cancelButton, "width :150:, align right");
+        container.add(cancelButton, "height 35:35:35, width :150:, align right");
     }
 
     public void show (SMIMEMessageWrapper signedMessage) throws Exception {
@@ -66,7 +66,9 @@ public class DocumentSignersDialog extends JDialog {
         logger.debug("Num. signers: " + signersVS.size());
         for (UserVS signerVS:signersVS) {
             SignatureInfoPanel signerVSPanel = new SignatureInfoPanel(signerVS, signedMessage);
-            tabbedPane.addTab(ContextVS.getMessage("signerLb"), signerVSPanel);
+            String tabName = ContextVS.getMessage("signerLbl");
+            if(signerVS.getNif() != null) tabName = signerVS.getNif();
+            tabbedPane.addTab(tabName, signerVSPanel);
         }
         pack();
         setVisible(true);

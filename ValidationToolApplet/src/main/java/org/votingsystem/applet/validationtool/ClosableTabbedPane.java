@@ -20,12 +20,16 @@ import java.util.List;
 public class ClosableTabbedPane extends JTabbedPane {
     
     private static Logger logger = Logger.getLogger(ClosableTabbedPane.class);
-	
+
+    private static int CLOSE_TAB_GAP_Y = 18;
+    private static int CLOSE_TAB_GAP_X = 8;
+
+
     private TabCloseUI closeUI = new TabCloseUI(this);
 
-    private List<String> listaArchivos = new ArrayList<String>();
+    private List<String> fileList = new ArrayList<String>();
     
-        
+
     @Override
     public void paint(Graphics g){
         super.paint(g);
@@ -39,16 +43,16 @@ public class ClosableTabbedPane extends JTabbedPane {
 	
     public void addTab(File file, Component component) {
         String tituloTab = file.getName();
-        if (listaArchivos.contains(file.getPath())) {
-            setSelectedIndex(listaArchivos.indexOf(file.getPath()));
+        if (fileList.contains(file.getPath())) {
+            setSelectedIndex(fileList.indexOf(file.getPath()));
             return;
-        } else listaArchivos.add(file.getPath());
+        } else fileList.add(file.getPath());
         if (tituloTab.length() > 15) tituloTab = tituloTab.substring(0, 15);
         super.addTab(tituloTab + "     ", component);
     }
     
     public int indexOfFile (File file) throws IOException {
-        return listaArchivos.indexOf(file.getPath());
+        return fileList.indexOf(file.getPath());
     }
                 
 	
@@ -122,8 +126,8 @@ public class ClosableTabbedPane extends JTabbedPane {
             int tabCount = tabbedPane.getTabCount();
             for(int j = 0; j < tabCount; j++)
                 if(tabbedPane.getComponent(j).isShowing()){			
-                    int x = tabbedPane.getBoundsAt(j).x + tabbedPane.getBoundsAt(j).width -width- 5;
-                    int y = tabbedPane.getBoundsAt(j).y + 10;	
+                    int x = tabbedPane.getBoundsAt(j).x + tabbedPane.getBoundsAt(j).width -width - CLOSE_TAB_GAP_X;
+                    int y = tabbedPane.getBoundsAt(j).y + CLOSE_TAB_GAP_Y;
                     drawClose(g,x,y);
                     break;
                 }
@@ -161,8 +165,8 @@ public class ClosableTabbedPane extends JTabbedPane {
             for(int j = 0; j < tabCount; j++)
                 if(tabbedPane.getBoundsAt(j).contains(meX, meY)){
                     selectedTab = j;
-                    closeX = tabbedPane.getBoundsAt(j).x + tabbedPane.getBoundsAt(j).width -width-5;
-                    closeY = tabbedPane.getBoundsAt(j).y + 10;					
+                    closeX = tabbedPane.getBoundsAt(j).x + tabbedPane.getBoundsAt(j).width - width - CLOSE_TAB_GAP_X;
+                    closeY = tabbedPane.getBoundsAt(j).y + CLOSE_TAB_GAP_Y;
                     return true;
                 }
             return false;
@@ -171,8 +175,7 @@ public class ClosableTabbedPane extends JTabbedPane {
     }
 
     public boolean tabAboutToClose(int tabIndex) {
-        logger.debug("tabAboutToClose tabIndex: " + tabIndex + " - borrado '" 
-                + listaArchivos.remove(tabIndex));        
+        logger.debug("tabAboutToClose tabIndex: " + tabIndex + " - closed "  + fileList.remove(tabIndex));
         return true;
     }
 	

@@ -169,10 +169,7 @@ class TimeStampVSService {
 		}
 		TimeStampRequest timeStampRequest = new TimeStampRequest(timeStampRequestBytes)
 		final Date date = DateUtils.getTodayDate();
-		//long numSerie = getSernoGenerator().incrementAndGet()
-		//final BigInteger serialNumber = BigInteger.valueOf(numSerie);
 		final BigInteger serialNumber = VotingSystemKeyGenerator.INSTANCE.getSerno()
-		long numSerie = serialNumber.longValue()
 		log.debug("processRequest - serialNumber: '${serialNumber}' - CertReq: ${timeStampRequest.getCertReq()}");
 		final TimeStampToken token = null;
 		synchronized(this) {
@@ -213,7 +210,7 @@ class TimeStampVSService {
 		}*/
 		//String tokenStr = new String(Base64.encode(token.getEncoded()));
 		//log.debug("processRequest - tokenStr: '${tokenStr}'");
-		new TimeStampVS(serialNumber:numSerie, tokenBytes:token.getEncoded(), state:TimeStampVS.State.OK,
+		new TimeStampVS(serialNumber:serialNumber.longValue(), tokenBytes:token.getEncoded(), state:TimeStampVS.State.OK,
 			timeStampRequestBytes:timeStampRequestBytes).save()
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, messageBytes:token.getEncoded(),
                 contentType:ContentTypeVS.TIMESTAMP_RESPONSE)

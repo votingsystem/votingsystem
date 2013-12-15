@@ -427,7 +427,7 @@ public class VotingBackupValidator implements Callable<ResponseVS>, AppHostVS {
         System.exit(0);
     }
 
-    @Override public void sendMessageToHost(OperationVS operacion) {
+    @Override public void sendMessageToHost(OperationVS operation) {
         throw new UnsupportedOperationException("Not supported yet."); 
     }
 

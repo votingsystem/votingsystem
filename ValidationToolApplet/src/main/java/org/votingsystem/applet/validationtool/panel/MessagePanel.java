@@ -14,7 +14,7 @@ public class MessagePanel extends JPanel {
     private JLabel messageLabel;
 
     public MessagePanel() {
-        setLayout(new MigLayout("fill", "[][]"));
+        setLayout(new MigLayout("fill"));
     }
 
     public void setMessage(String message, Icon icon) {
@@ -25,7 +25,7 @@ public class MessagePanel extends JPanel {
             }
         } else {
             iconLabel =  new JLabel(icon);
-            add(iconLabel, "cell 0 0");
+            add(iconLabel);
         }
         if(message == null) {
             if(messageLabel != null) {
@@ -34,7 +34,7 @@ public class MessagePanel extends JPanel {
             }
         } else {
             messageLabel = new JLabel();
-            add(messageLabel, "cell 0 1");
+            add(messageLabel, "gapleft 15");
             messageLabel.setText("<html><b><u>" + message + "</u></b></html>");
         }
 

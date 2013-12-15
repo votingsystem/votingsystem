@@ -9,6 +9,9 @@ import org.apache.log4j.Logger;
 import org.votingsystem.applet.validationtool.util.Formatter;
 import org.votingsystem.model.ContextVS;
 import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+
 import org.votingsystem.applet.validationtool.dialog.DocumentSignersDialog;
 import org.votingsystem.applet.validationtool.model.SignedFile;
 
@@ -26,6 +29,7 @@ public class SignedFilePanel extends JPanel {
 
     public SignedFilePanel(SignedFile signedFile) throws Exception {
         logger.debug("SignedFilePanel");
+        this.signedFile = signedFile;
         initComponents(signedFile);
     }
 
@@ -38,8 +42,7 @@ public class SignedFilePanel extends JPanel {
         if(signedFile.isPDF()) return;
         if (contentFormattedCheckBox.isSelected()) {
             try {
-                String formattedText = Formatter.procesar(signedFile.
-                        getSMIMEMessageWraper().getSignedContent()); 
+                String formattedText = Formatter.format(signedFile.getSMIMEMessageWraper().getSignedContent());
                 contentPane.setText(formattedText);
             } catch(Exception ex) {
                 logger.error(ex.getMessage(), ex);
@@ -62,7 +65,7 @@ public class SignedFilePanel extends JPanel {
     }
     
     private void openDocumentSignersDialog() {
-            try {
+        try {
             /*JFrame frame = null;
             Component component = SwingUtilities.getRoot(this);
             if(component instanceof JFrame) {
@@ -81,12 +84,11 @@ public class SignedFilePanel extends JPanel {
     }
 
     private void initComponents(SignedFile signedFile) {
-        this.signedFile = signedFile;
         if(signedFile == null) {
             logger.debug("### NULL signedFile");
             return;
         }
-        setLayout(new MigLayout("fill"));
+        setLayout(new MigLayout("fill", "", "[35:35:35][][15:15:15]"));
 
         if(!signedFile.isPDF()) {
             JButton signatureResultButton = new JButton();
@@ -100,10 +102,21 @@ public class SignedFilePanel extends JPanel {
             if (signedFile.isValidSignature()) {
                 signatureResultButton.setText("<html><b>" + ContextVS.getMessage("signatureOKLbl") + "</b><html>");
                 signatureResultButton.setIcon(ContextVS.getIcon(this, "accept"));
-                JEditorPane contentPane = new JEditorPane();
+                contentPane = new JEditorPane();
                 contentPane.setEditable(false);
                 contentPane.setContentType("text/html");
                 contentPane.setBackground(java.awt.Color.white);
+                contentPane.addHyperlinkListener(new HyperlinkListener() {
+                    public void hyperlinkUpdate(HyperlinkEvent e) {
+                        if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                            if(Desktop.isDesktopSupported()) {
+                                try {Desktop.getDesktop().browse(e.getURL().toURI());}
+                                catch(Exception ex) {logger.error(ex.getMessage(), ex);}
+                            }
+                        }
+                    }
+                });
+
                 contentPaneScrollPane.setViewportView(contentPane);
                 String conntentStr = null;
                 try {
@@ -113,14 +126,21 @@ public class SignedFilePanel extends JPanel {
                 }  catch(Exception ex) {
                     conntentStr = signedFile.getSMIMEMessageWraper().getSignedContent();
                 }
-                contentPane.setText(conntentStr);
+                contentPane.setText(Formatter.format(conntentStr));
             } else {
                 signatureResultButton.setText("<html><b>" + ContextVS.getMessage("signatureERRORLbl") + "</b><html>");
                 signatureResultButton.setIcon(ContextVS.getIcon(this, "cancel"));
                 signatureResultButton.setEnabled(false);
             }
-            add(signatureResultButton, "width 200::, gapleft 30, wrap");
-            add(contentPaneScrollPane, "width 400::, height 400::, span2, wrap");
+            add(signatureResultButton, "width 200::, align right, wrap");
+            add(contentPaneScrollPane, "height 400::,grow, span2, wrap");
+
+            contentFormattedCheckBox = new JCheckBox(ContextVS.getMessage("formattedCheckBoxLbl"));
+            contentFormattedCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent evt) { changeContentFormat();}
+            });
+            add(contentFormattedCheckBox, "wrap");
+            contentFormattedCheckBox.setSelected(true);
         } else {
             JButton openPDFButton = new JButton(ContextVS.getMessage("openPDFLbl"));
             openPDFButton.setIcon(ContextVS.getIcon(this, "file_extension_pdf"));
@@ -128,14 +148,6 @@ public class SignedFilePanel extends JPanel {
                 public void actionPerformed(java.awt.event.ActionEvent evt) { openPDFDocument();}
             });
             add(openPDFButton, "");
-        }
-
-        if(!signedFile.isPDF()) {
-            contentFormattedCheckBox = new JCheckBox(ContextVS.getMessage("formattedCheckBoxLbl"));
-            contentFormattedCheckBox.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent evt) { changeContentFormat();}
-            });
-            add(contentFormattedCheckBox, "span 2, wrap");
         }
     }
 

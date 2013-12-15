@@ -1,6 +1,6 @@
-var WebAppMessage = function (statusCode, operacion) {
+var WebAppMessage = function (statusCode, operation) {
 	this.statusCode = statusCode
-	this.operacion = operacion
+	this.operation = operation
 	this.subject ;
 	this.signedContent;
 	this.receiverSignServiceURL;

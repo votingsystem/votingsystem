@@ -1,6 +1,5 @@
 package org.votingsystem.applet.validationtool.dialog;
 
-import org.votingsystem.applet.validationtool.*;
 import net.miginfocom.swing.MigLayout;
 import org.apache.log4j.Logger;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -11,6 +10,7 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.tsp.TimeStampTokenInfo;
 import org.bouncycastle.util.CollectionStore;
 import org.votingsystem.applet.validationtool.panel.MessagePanel;
+import org.votingsystem.applet.validationtool.panel.TimeStampCertPanel;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.util.DateUtils;
 
@@ -20,8 +20,6 @@ import java.math.BigInteger;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import org.votingsystem.applet.validationtool.dialog.TimeStampValidationWithCertDialog;
-import org.votingsystem.applet.validationtool.panel.TimeStampCertPanel;
 
 /**
 * @author jgzornoza
@@ -37,19 +35,21 @@ public class TimeStampDialog extends JDialog {
     
     public TimeStampDialog(java.awt.Frame parent, boolean modal, TimeStampToken timeStampToken) {
         super(parent, modal);
+        setTitle(ContextVS.getMessage("timeStampInfoDialogCaption"));
         this.timeStampToken = timeStampToken;
         initComponents();
         setLocationRelativeTo(null);
         pack();
     }
 
-
     private void initComponents() {
         container = getContentPane();
         container.setLayout(new MigLayout("fill"));
 
         TimeStampTokenInfo tsInfo= timeStampToken.getTimeStampInfo();
-        logger.debug ("tsInfo.toString(): " + tsInfo.toString());
+        logger.debug ("timeStampToken.getAttributeCertificates().toString(): " +
+                timeStampToken.getAttributeCertificates().getMatches(null).size());
+
         SignerId signerId = timeStampToken.getSID();
         logger.debug ("signerId.toString(): " + signerId.toString());
         BigInteger cert_serial_number = signerId.getSerialNumber();
@@ -58,26 +58,25 @@ public class TimeStampDialog extends JDialog {
         container.add(timeStampDateLabel, "width 250::");
         JTextField timeStampTextField =new JTextField(DateUtils.getSpanishFormattedStringFromDate(tsInfo.getGenTime()));
         timeStampTextField.setEditable(false);
-        container.add(timeStampTextField, "wrap");
+        container.add(timeStampTextField, "width 250::, wrap");
 
         JLabel serialNumberLabel = createBoldLabel(ContextVS.getMessage("timeStampSerialNumberLbl"));
         container.add(serialNumberLabel, "width 250::");
         JTextField serialNumberTextField = new JTextField(tsInfo.getSerialNumber().toString());
         serialNumberTextField.setEditable(false);
-        container.add(serialNumberTextField, "wrap");
+        container.add(serialNumberTextField, "width 250::, wrap");
 
         JLabel certSignerSerialNumberLabel = createBoldLabel(ContextVS.getMessage("certSignerSerialNumberLbl"));
         container.add(certSignerSerialNumberLabel, "width 250::");
         JTextField certSignerSerialNumberTextField =new JTextField(signerId.getSerialNumber().toString());
         certSignerSerialNumberTextField.setEditable(false);
-        container.add(certSignerSerialNumberTextField, "wrap");
+        container.add(certSignerSerialNumberTextField, "width 250::, wrap");
 
         JLabel certIssuerLabel = createBoldLabel(ContextVS.getMessage("signingCertIssuerLbl"));
         container.add(certIssuerLabel, "wrap");
-        JTextField certIssuerTextField =new JTextField(signerId.getIssuerAsString());
+        JTextField certIssuerTextField = new JTextField(signerId.getIssuerAsString());
         certIssuerTextField.setEditable(false);
-        container.add(certIssuerTextField, "wrap");
-
+        container.add(certIssuerTextField, "wrap 20, span 2, growx");
 
         CollectionStore store = (CollectionStore) timeStampToken.getCertificates();
         Collection<X509CertificateHolder> matches = store.getMatches(null);
@@ -106,14 +105,11 @@ public class TimeStampDialog extends JDialog {
                     }
                 }
                 try {
-                    X509Certificate certificate = new JcaX509CertificateConverter().
-                            getCertificate(certificateHolder);
-                    TimeStampCertPanel timeStampCertPanel =
-                            new TimeStampCertPanel(certificate, isSigner);
+                    X509Certificate certificate = new JcaX509CertificateConverter().getCertificate(certificateHolder);
+                    TimeStampCertPanel timeStampCertPanel = new TimeStampCertPanel(certificate, isSigner);
                     certsPanel.add(timeStampCertPanel, "wrap");
                     JSeparator separator = new JSeparator();
                     certsPanel.add(separator, "growx, wrap");
-                    logger.debug (" ----- Añadido panel de certificado ----- ");
                 } catch (CertificateException ex) {
                     logger.error(ex.getMessage(), ex);
                 }
@@ -130,14 +126,13 @@ public class TimeStampDialog extends JDialog {
         //assertEquals(1, accuracy.getMillis());
         //assertEquals(2, accuracy.getMicros());
         //AttributeTable  table = timeStampToken.getSignedAttributes();
-        JButton certValidationButton = new JButton(ContextVS.getMessage("closeLbl"));
+        JButton certValidationButton = new JButton(ContextVS.getMessage("validateLbl"));
         certValidationButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 certValidation();
             }
         });
         container.add(certValidationButton, "width :150:");
-
 
         JButton cancelButton = new JButton(ContextVS.getMessage("closeLbl"));
         cancelButton.setIcon(ContextVS.getIcon(this, "cancel_16"));

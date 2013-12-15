@@ -3,7 +3,6 @@ package org.votingsystem.applet.validationtool.dialog;
 import net.miginfocom.swing.MigLayout;
 import org.apache.log4j.Logger;
 import org.votingsystem.applet.validationtool.ClosableTabbedPane;
-import org.votingsystem.applet.validationtool.backup.*;
 import org.votingsystem.applet.validationtool.model.MetaInf;
 import org.votingsystem.applet.validationtool.model.SignedFile;
 import org.votingsystem.applet.validationtool.panel.EventVSInfoPanel;
@@ -11,7 +10,6 @@ import org.votingsystem.applet.validationtool.panel.MessagePanel;
 import org.votingsystem.applet.validationtool.panel.ProgressBarPanel;
 import org.votingsystem.applet.validationtool.panel.SignedFilePanel;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
@@ -22,10 +20,10 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.UUID;
 
 /**
 * @author jgzornoza
@@ -72,14 +70,13 @@ public class SignedDocumentsBrowser extends JDialog {
 
     private void initComponents() {
         container = getContentPane();
-        container.setLayout(new MigLayout("fill", "[][][]20[]"));
+        container.setLayout(new MigLayout("fill", "[800:800:]", "[grow][]20[]"));
 
         tabbedPane = new ClosableTabbedPane();
-        container.add(tabbedPane, "cell 0 0, span 2, width :800:800, wrap");
+        container.add(tabbedPane, "cell 0 0, grow, wrap");
         
-        messagePanel = new MessagePanel();
-        container.add(messagePanel, "cell 0 1, growx, wrap");
-
+        //messagePanel = new MessagePanel();
+        //container.add(messagePanel, "cell 0 1, growx, wrap");
 
         buttonsPanel = new JPanel();
         buttonsPanel.setLayout(new MigLayout("fill"));
@@ -124,7 +121,6 @@ public class SignedDocumentsBrowser extends JDialog {
         saveButton.setVisible(false);
         buttonsPanel.add(saveButton, "gapleft 20");
 
-
         cancelButton = new JButton(ContextVS.getMessage("closeLbl"));
         cancelButton.setIcon(ContextVS.getIcon(this, "cancel"));
         cancelButton.addActionListener(new java.awt.event.ActionListener() {
@@ -134,8 +130,7 @@ public class SignedDocumentsBrowser extends JDialog {
         });
         buttonsPanel.add(cancelButton, "width :150:, align right");
 
-        container.add(buttonsPanel, "cell 0 3");
-
+        container.add(buttonsPanel, "cell 0 2, growx");
     }
 
     public void openSignedFile() {
@@ -144,7 +139,6 @@ public class SignedDocumentsBrowser extends JDialog {
             final JFileChooser chooser = new JFileChooser();
             int returnVal = chooser.showOpenDialog(parentFrame);
             if (returnVal == JFileChooser.APPROVE_OPTION) file = chooser.getSelectedFile();
-
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
         }
@@ -180,12 +174,12 @@ public class SignedDocumentsBrowser extends JDialog {
 
     private void openFile (File file) {
         fileDir = file.getParent();
-        String titulo = (dialogTitle == null ? file.getName() : dialogTitle + " - " + file.getName());
-        setTitle(titulo);
+        String title = (dialogTitle == null ? file.getName() : dialogTitle + " - " + file.getName());
+        setTitle(title);
         try {
-            int indiceArchivo = tabbedPane.indexOfFile (file);
-            if (indiceArchivo != -1 && tabbedPane.getTabCount() >1) {
-                tabbedPane.setSelectedIndex(indiceArchivo);
+            int fileIndex = tabbedPane.indexOfFile (file);
+            if (fileIndex != -1 && tabbedPane.getTabCount() >1) {
+                tabbedPane.setSelectedIndex(fileIndex);
                 return;
             }
             byte[] fileBytes = FileUtils.getBytesFromFile(file);
@@ -258,7 +252,8 @@ public class SignedDocumentsBrowser extends JDialog {
         logger.debug("checkFileSize");
         String result = null;
         if (file.length() > ContextVS.SIGNED_MAX_FILE_SIZE) {
-            result = ContextVS.getInstance().getMessage("fileSizeExceededMsg", file.length(), ContextVS.SIGNED_MAX_FILE_SIZE_KB);
+            result = ContextVS.getInstance().getMessage("fileSizeExceededMsg", file.length(),
+                    ContextVS.SIGNED_MAX_FILE_SIZE_KB);
         }
         return result;
     }
@@ -279,16 +274,14 @@ public class SignedDocumentsBrowser extends JDialog {
     }
 
     public String getSignatureMessage (Date date) {
-        return "<html><b>Fecha de la firma:</b> " + DateUtils.getSpanishFormattedStringFromDate(date) + "</html>";
+        return "<html><b>" + ContextVS.getMessage("signatureDateLbl") +
+                DateUtils.getSpanishFormattedStringFromDate(date) + "</html>";
     }
 
     public void setVisible(String decompressedBackupBaseDir) {
-        logger.debug("setVisible - decompressedBackupBaseDir: " +
-                decompressedBackupBaseDir);
+        logger.debug("setVisible - decompressedBackupBaseDir: " + decompressedBackupBaseDir);
         this.decompressedBackupBaseDir = decompressedBackupBaseDir;
-        File metaInfFile = new File(decompressedBackupBaseDir + File.separator +
-                "meta.inf");
-
+        File metaInfFile = new File(decompressedBackupBaseDir + File.separator + "meta.inf");
         if(!metaInfFile.exists()) {
             String message = ContextVS.getInstance().getMessage("metaInfNotFoundMsg",metaInfFile.getAbsolutePath());
             logger.error(message);

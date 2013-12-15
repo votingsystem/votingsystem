@@ -207,7 +207,7 @@ public class OperationVS {
         logger.debug("- populate ");
         if(dataMap == null) return null;
         OperationVS operationVS = new OperationVS();
-        if (dataMap.containsKey("operacion")) operationVS.setType(TypeVS.valueOf((String) dataMap.get("operacion")));
+        if (dataMap.containsKey("operation")) operationVS.setType(TypeVS.valueOf((String) dataMap.get("operation")));
         if (dataMap.containsKey("args")) {
             List<String> argList = (List<String>) dataMap.get("args");
             if(argList != null) {
@@ -252,7 +252,7 @@ public class OperationVS {
         Map dataMap = new HashMap();
         if(statusCode != null) dataMap.put("statusCode", statusCode);
         if(message != null) dataMap.put("message", message);
-        if(typeVS != null) dataMap.put("operacion", typeVS.toString());
+        if(typeVS != null) dataMap.put("operation", typeVS.toString());
         if(urlDocumento != null) dataMap.put("urlDocumento", urlDocumento);
         if(receiverSignServiceURL != null) dataMap.put("receiverSignServiceURL", receiverSignServiceURL);
         if(signedMessageSubject != null) dataMap.put("signedMessageSubject", signedMessageSubject);

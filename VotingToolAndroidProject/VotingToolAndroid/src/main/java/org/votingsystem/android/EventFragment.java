@@ -392,7 +392,7 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
             if(ResponseVS.SC_OK == response.getStatusCode()) {
                 Log.d(TAG + ".ProcessSignatureTask.onPostExecute(...)", "- response.getMessage():" +
                         response.getMessage());
-                showMessage(getString(R.string.operacion_ok_msg), getString(R.string.operacion_ok_msg));
+                showMessage(getString(R.string.operation_ok_msg), getString(R.string.operation_ok_msg));
             } else {
                 showMessage(getString(R.string.error_lbl), response.getMessage());
                 firmarEnviarButton.setEnabled(true);

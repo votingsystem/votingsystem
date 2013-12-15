@@ -74,9 +74,9 @@ public class ValidationApplet extends JApplet implements AppHostVS {
             initOperationGetter();
             if(getParameter("locale") != null) locale = getParameter("locale");
         }
-        OperationVS operacion = new OperationVS(ResponseVS.SC_PROCESSING);
-        operacion.setMessage(ContextVS.getInstance().getMessage("appletInitialized"));
-        sendMessageToHost(operacion);
+        OperationVS operation = new OperationVS(ResponseVS.SC_PROCESSING);
+        operation.setMessage(ContextVS.getInstance().getMessage("appletInitialized"));
+        sendMessageToHost(operation);
     }
 
     public void stop() {
@@ -123,10 +123,10 @@ public class ValidationApplet extends JApplet implements AppHostVS {
     }
 
 
-    public void runOperation(String operacionJSONStr) {
-        logger.debug("runOperation: " + operacionJSONStr);
-        //if(operacionJSONStr == null || "".equals(operacionJSONStr)) return;
-        //JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(operacionJSONStr);
+    public void runOperation(String operationJSONStr) {
+        logger.debug("runOperation: " + operationJSONStr);
+        //if(operationJSONStr == null || "".equals(operationJSONStr)) return;
+        //JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(operationJSONStr);
         //OperationVS runningOperation = OperationVS.populate(jsonObject);
         MainDialog dialogo = new MainDialog(new JFrame(), false);
         dialogo.setVisible(true);

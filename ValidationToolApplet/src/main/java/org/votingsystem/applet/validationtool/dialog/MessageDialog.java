@@ -1,13 +1,11 @@
 package org.votingsystem.applet.validationtool.dialog;
 
-import java.awt.Container;
-import javax.swing.JButton;
-import javax.swing.JEditorPane;
-import javax.swing.JScrollPane;
-import javax.swing.UIManager;
 import net.miginfocom.swing.MigLayout;
 import org.apache.log4j.Logger;
 import org.votingsystem.model.ContextVS;
+
+import javax.swing.*;
+import java.awt.*;
 
 /**
 * @author jgzornoza
