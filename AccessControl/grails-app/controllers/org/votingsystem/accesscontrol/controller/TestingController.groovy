@@ -15,11 +15,7 @@ import org.votingsystem.model.ResponseVS
  * */
 class TestingController {
 
-    def backupService
 
-    def index() {
-        EventVS eventVS = EventVS.get(38)
-        return [responseVS:backupService.requestBackup(eventVS, request.locale)]
-    }
+    def index() { }
 
 }

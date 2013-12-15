@@ -198,7 +198,7 @@ class RepresentativeService {
 			}			
 			
 			Map representativeMap = [id:representative.id,
-				optionSelectedId:representativeVote?.optionSelected.id,
+				optionSelectedId:representativeVote?.optionSelected?.id,
 				numRepresentedWithVote:numRepresentedWithAccessRequest,
 				numRepresentations: numRepresented,
 				numVotesRepresented:numVotesRepresentedByRepresentative]

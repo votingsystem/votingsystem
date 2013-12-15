@@ -22,7 +22,9 @@ import org.votingsystem.model.ResponseVS
 class BackupVSController {
 
 	def mailSenderService
-    def backupService
+    def eventVSManifestService
+    def eventVSClaimService
+    def eventVSElectionService
 
 	/**
 	 * Servicio que recibe solicitudes de copias de seguridad
@@ -59,7 +61,7 @@ class BackupVSController {
             ResponseVS backupGenResponseVS = null
             if(EnvironmentVS.DEVELOPMENT.equals(ApplicationContextHolder.getEnvironment())) {
                 log.debug "Request from DEVELOPMENT environment generating sync response"
-                backupGenResponseVS = backupService.requestBackup(eventVS, request.locale)
+                backupGenResponseVS = requestBackup(eventVS, request.locale)
                 if(ResponseVS.SC_OK == backupGenResponseVS?.statusCode) {
                     BackupRequestVS backupRequest = new BackupRequestVS(filePath:backupGenResponseVS.message,
                             type:backupGenResponseVS.type, PDFDocumentVS:pdfDocument, email:email)
@@ -72,7 +74,7 @@ class BackupVSController {
                 final Locale locale = request.locale
                 final String emailRequest = email
                 runAsync {
-                    ResponseVS backupResponse = backupService.requestBackup(event, locale)
+                    ResponseVS backupResponse = requestBackup(event, locale)
                     if(ResponseVS.SC_OK == backupResponse?.statusCode) {
                         BackupRequestVS backupRequest = new BackupRequestVS(
                                 filePath:backupResponse.message, type:backupResponse.type,
@@ -106,7 +108,7 @@ class BackupVSController {
             if(!event) {
                 return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: "nullParamErrorMsg"))]
             } else {
-                ResponseVS requestBackup = backupService.requestBackup(event, request.locale)
+                ResponseVS requestBackup = requestBackup(event, request.locale)
                 if(ResponseVS.SC_OK == requestBackup?.statusCode) {
                     redirect(uri: requestBackup.message)
                 } else {
@@ -163,5 +165,20 @@ class BackupVSController {
                     message(code: 'backupRequestNotFound', args:[params.id]))]
 		else return [responseVS:responseVS]
 	}
+
+    private ResponseVS requestBackup(EventVS eventVS, Locale locale) {
+        ResponseVS backupGenResponseVS
+        if(eventVS instanceof EventVSManifest) {
+            backupGenResponseVS = eventVSManifestService.generateBackup((EventVSManifest)eventVS, locale)
+            log.debug("requestBackup - EventVSManifest")
+        } else if(eventVS instanceof EventVSClaim) {
+            log.debug("requestBackup - EventVSClaim")
+            backupGenResponseVS = eventVSClaimService.generateBackup((EventVSClaim)eventVS,locale)
+        } else if(eventVS instanceof EventVSElection) {
+            log.debug("requestBackup - EventVSElection")
+            backupGenResponseVS = eventVSElectionService.generateBackup((EventVSElection)eventVS, locale)
+        } else  log.debug ("unknown eventVS class: ${eventVS.class}")
+        return backupGenResponseVS
+    }
 
 }
