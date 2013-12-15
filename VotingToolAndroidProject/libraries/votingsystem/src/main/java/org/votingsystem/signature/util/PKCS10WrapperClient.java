@@ -1,11 +1,16 @@
 package org.votingsystem.signature.util;
 
 import android.util.Log;
+
+import org.bouncycastle2.asn1.DERSet;
+import org.bouncycastle2.asn1.DERTaggedObject;
+import org.bouncycastle2.asn1.DERUTF8String;
 import org.bouncycastle2.jce.PKCS10CertificationRequest;
 import org.bouncycastle2.openssl.PEMWriter;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
-import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle2.asn1.ASN1EncodableVector;
 import javax.mail.Header;
 import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayOutputStream;
