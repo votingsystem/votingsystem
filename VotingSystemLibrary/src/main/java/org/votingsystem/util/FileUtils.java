@@ -189,8 +189,7 @@ public class FileUtils {
         }
      }
 
-    public static List<File> findRecursively(
-            File baseDir, final String textToFind) throws IOException {
+    public static List<File> findRecursively( File baseDir, final String textToFind) throws IOException {
     	List<File> result = new ArrayList<File>();
         if(baseDir.isDirectory()){
             File[] matchingFiles = baseDir.listFiles(new FilenameFilter() {

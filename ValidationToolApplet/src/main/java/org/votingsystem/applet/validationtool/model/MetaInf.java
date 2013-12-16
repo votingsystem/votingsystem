@@ -4,11 +4,14 @@ import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
+import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.EventVS;
 import org.votingsystem.model.FieldEventVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.StringUtils;
 
+import javax.swing.*;
 import java.text.ParseException;
 import java.util.*;
 
@@ -38,32 +41,55 @@ public class MetaInf {
     
     
     public String getFormattedInfo() {
-        StringBuilder result = new StringBuilder("");
-        result.append("\n id: " + getId())
-              .append("\n subject: " + getSubject())
-              .append("\n type: " + getType().toString());
-        if(numSignatures != null ) result.append("\n numSignatures: " + 
-                numSignatures );
-        if(numAccessRequest != null ) result.append("\n numAccessRequest: " + 
-                numAccessRequest);
-        if(numVotes != null ) result.append("\n numVotes: " + numVotes);
-        if(getRepresentativesData() != null ) result.append(
-                "\n numRepresentatives: " + getRepresentativesData().getNumRepresentatives()); 
-        if(numRepresentativesWithAccessRequest != null ) result.append(
-                "\n numRepresentativesWithAccessRequest: " + 
-                numRepresentativesWithAccessRequest);  
-        if(representativesData != null){
-            if(representativesData.getNumRepresentativesWithVote() != null ) 
-                    result.append( "\n numRepresentativesWithVote: " + 
-                    representativesData.getNumRepresentativesWithVote());
+        StringBuilder result = new StringBuilder("<html>");
+        result.append("<b>" + ContextVS.getMessage("eventIdLbl") + "</b>:" + getId() + "<br/>");
+        String eventURL = EventVS.getURL(type, serverURL, id);
+        result.append("<b>" + ContextVS.getMessage("eventURLLbl") +": </b>");
+        result.append("<a href='" + eventURL + "'>" + eventURL +"</a><br/>");
+        switch (type) {
+            case MANIFEST_EVENT:
+                result.append("<b>" + ContextVS.getMessage("numSignaturesLbl") +": </b>" +
+                        String.valueOf(numSignatures) + "<br/>");
+                break;
+            case CLAIM_EVENT:
+                result.append("<b>" + ContextVS.getMessage("numClaimsLbl") +": </b>" +
+                        String.valueOf(numSignatures) + "<br/>");
+                break;
+            case VOTING_EVENT:
+                result.append("<b>" + ContextVS.getMessage("accessRequestLbl") +": </b>");
+                result.append( numAccessRequest + "<br/>");
+                result.append("<b>" + ContextVS.getMessage("numVotesVSLbl") +": </b>" +
+                        String.valueOf(numVotes) + "<br/>");
+                if(representativesData != null) {
+                    result.append("<b>" + ContextVS.getMessage("numRepresentativesLbl") +": </b>" +
+                            representativesData.getNumRepresentatives() + "<br/>");
+                    result.append("<b>" + ContextVS.getMessage("numRepresentativesWithVoteLbl") +": </b>" +
+                            representativesData.getNumRepresentativesWithVote() + "<br/>");
+                    result.append("<b>" + ContextVS.getMessage("numUsersRepresentedLbl") +": </b>" +
+                            representativesData.getNumRepresented() + "<br/>");
+                    result.append("<b>" + ContextVS.getMessage("numUsersRepresentedWithAcessRequestLbl") +": </b>" +
+                            representativesData.getNumRepresentedWithAccessRequest() + "<br/>");
+                }
+                if(optionList != null) {
+                    result.append("<div style='font-size:1.1em;'><b><u>" + ContextVS.getMessage("votingResultLbl") +
+                            "</u><b></div>");
+                    for(FieldEventVS option: optionList) {
+                        result.append("<div style='margin:10px 0 0 40px;'>");
+                        result.append("<div style='font-size:1.1em;'><b>" + option.getContent() +"</b></div>");
+                        result.append("<b>" + ContextVS.getMessage("numVoteRequestsLbl") +": </b>" +
+                                option.getNumVoteRequests() + "<br/>");
+                        result.append("<b>" + ContextVS.getMessage("numUsersWithVoteLbl") +": </b>" +
+                                option.getNumUsersWithVote() + "<br/>");
+                        result.append("<b>" + ContextVS.getMessage("numRepresentativesWithVote1Lbl") +": </b>" +
+                                option.getNumRepresentativesWithVote() + "<br/>");
+                        result.append("<b>" + ContextVS.getMessage("numVotesResultLbl") +": </b>" +
+                                option.getNumVotesResult() + "<br/>");
+                        result.append("</div>");
+                    }
+                }
+                break;
         }
- 
-        if(representativesData.getNumRepresented() != null ) result.append(
-                "\n numRepresented: " + representativesData.getNumRepresented()); 
-        if(representativesData.getNumRepresentedWithAccessRequest() != null ) result.append(
-                "\n numRepresentedWithAccessRequest: " + 
-                representativesData.getNumRepresentedWithAccessRequest());         
-        return result.toString();
+        return result.append("</html>").toString();
     }
 			
 
@@ -102,15 +128,12 @@ public class MetaInf {
         }
         if(metaInfoJSON.containsKey("REPRESENTATIVE_DATA")) {
             RepresentativesData representativesData = new RepresentativesData();
-            JSONObject repJSON = metaInfoJSON.getJSONObject(
-                    "REPRESENTATIVE_DATA");
+            JSONObject repJSON = metaInfoJSON.getJSONObject("REPRESENTATIVE_DATA");
             if(repJSON.containsKey("numRepresentatives")) {
-                representativesData.setNumRepresentatives(
-                        repJSON.getLong("numRepresentatives"));
+                representativesData.setNumRepresentatives(repJSON.getLong("numRepresentatives"));
             }
             if(repJSON.containsKey("numRepresented")) {
-                representativesData.setNumRepresented(
-                        repJSON.getLong("numRepresented"));
+                representativesData.setNumRepresented(repJSON.getLong("numRepresented"));
             }
             if(repJSON.containsKey("numRepresentedWithAccessRequest")) {
                 representativesData.setNumRepresentedWithAccessRequest(
@@ -121,8 +144,7 @@ public class MetaInf {
                         repJSON.getLong("numRepresentativesWithAccessRequest"));
             }
             if(repJSON.containsKey("numRepresentativesWithVote")) {
-                representativesData.setNumRepresentativesWithVote(
-                        repJSON.getLong("numRepresentativesWithVote"));
+                representativesData.setNumRepresentativesWithVote(repJSON.getLong("numRepresentativesWithVote"));
             } 
             if(repJSON.containsKey("numVotesRepresentedByRepresentatives")) {
                 representativesData.setNumVotesRepresentedByRepresentatives(
@@ -139,10 +161,8 @@ public class MetaInf {
                     option.setContent(optionJSON.getString("content"));
                     option.setNumVoteRequests(optionJSON.getLong("numVoteRequests"));
                     option.setNumUsersWithVote(optionJSON.getLong("numUsersWithVote"));
-                    option.setNumRepresentativesWithVote(optionJSON.getLong(
-                            "numRepresentativesWithVote"));
-                    option.setNumVotesResult(optionJSON.getLong(
-                            "numVotesResult"));
+                    option.setNumRepresentativesWithVote(optionJSON.getLong("numRepresentativesWithVote"));
+                    option.setNumVotesResult(optionJSON.getLong("numVotesResult"));
                     optionList.add(option);
                 }
                 metaInf.setOptionList(optionList);
@@ -150,26 +170,19 @@ public class MetaInf {
             if(repJSON.containsKey("representatives")) {
                 JSONObject representatives = repJSON.getJSONObject("representatives");
                 Set<String> keySet = representatives.keySet();
-                Map<String, RepresentativeData> representativeMap = 
-                        new HashMap<String, RepresentativeData>();
+                Map<String, RepresentativeData> representativeMap = new HashMap<String, RepresentativeData>();
                 for(String key:keySet) {
                     JSONObject representativeJSON = representatives.getJSONObject(key);
                     RepresentativeData repData = new RepresentativeData();
-                    if(representativeJSON.containsKey("id"))
-                        repData.setId(representativeJSON.getLong("id"));
+                    if(representativeJSON.containsKey("id")) repData.setId(representativeJSON.getLong("id"));
                     repData.setNif(key);
-                    if(representativeJSON.containsKey("optionSelectedId") &&
-                            !JSONNull.getInstance().equals(
+                    if(representativeJSON.containsKey("optionSelectedId") && !JSONNull.getInstance().equals(
                             representativeJSON.get("optionSelectedId"))){
-                        repData.setOptionSelectedId(representativeJSON.getLong(
-                            "optionSelectedId"));
+                        repData.setOptionSelectedId(representativeJSON.getLong("optionSelectedId"));
                     }
-                    repData.setNumRepresentedWithVote(representativeJSON.getLong(
-                            "numRepresentedWithVote"));
-                    repData.setNumRepresentations(representativeJSON.getLong(
-                            "numRepresentations"));
-                    repData.setNumVotesRepresented(representativeJSON.getLong(
-                            "numVotesRepresented"));
+                    repData.setNumRepresentedWithVote(representativeJSON.getLong("numRepresentedWithVote"));
+                    repData.setNumRepresentations(representativeJSON.getLong("numRepresentations"));
+                    repData.setNumVotesRepresented(representativeJSON.getLong("numVotesRepresented"));
                     representativeMap.put(key, repData);
                 }
                 representativesData.setRepresentativeMap(representativeMap);
@@ -180,7 +193,7 @@ public class MetaInf {
     }
         
     public String getOptionsHTML() {
-        StringBuilder result = new StringBuilder("<HTML>");
+        StringBuilder result = new StringBuilder("<html>");
         if(TypeVS.VOTING_EVENT == type) {
             result.append("<ul>");
             for(FieldEventVS option : optionList) {
@@ -194,7 +207,7 @@ public class MetaInf {
             }
             result.append("</ul>");
         }
-        result.append("</HTML>");
+        result.append("</html>");
         return result.toString();
     }
     

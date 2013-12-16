@@ -50,14 +50,15 @@ public class DecompressFileDialog extends JDialog {
             }
         });
         setTitle(ContextVS.getMessage("decompressBackupCaption"));
-        setLocationRelativeTo(null);
         pack();
+        setLocationRelativeTo(null);
     }
 
     public void unZipBackup(Listener listener, final String zipFilePath, final String outputFolder) 
-            throws Exception{
+            throws Exception {
         this.decompressListener = listener;
         DecompressWorker decompressWorker = new DecompressWorker(zipFilePath, outputFolder);
+        runningTask = decompressWorker;
         decompressWorker.execute();
         setVisible(true);
     }
@@ -97,8 +98,8 @@ public class DecompressFileDialog extends JDialog {
         }
 
         @Override public ResponseVS doInBackground() {
-            logger.debug("DecompressWorker.doInBackground: " + zipFilePath + " - outputFolder: " + outputFolder);
-            progressBarPanel.setMessage(ContextVS.getInstance().getMessage("decompressProgressBarLabel", zipFilePath));
+            logger.debug("worker.doInBackground: " + zipFilePath + " - outputFolder: " + outputFolder);
+            progressBarPanel.setMessage(ContextVS.getMessage("decompressProgressBarLabel", zipFilePath));
             byte[] buffer = new byte[2048];
             try{
                 File folder = new File(outputFolder);
@@ -142,7 +143,7 @@ public class DecompressFileDialog extends JDialog {
         }
 
        @Override protected void done() {
-           logger.debug("DecompressWorker.done");
+           logger.debug("worker.done");
            ResponseVS response = new ResponseVS(ResponseVS.SC_OK);
            response.setData(outputFolder);
            decompressListener.processDecompressedFile(response);

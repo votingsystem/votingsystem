@@ -32,10 +32,7 @@ public class PasswordDialog extends javax.swing.JDialog {
 
     public PasswordDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
-
-        setLocationRelativeTo(null);       
         initComponents();
-        setLocationRelativeTo(null);
         password1Field.addKeyListener(new KeyListener(){
             boolean shiftPressed = false;
             @Override public void keyPressed(KeyEvent e){
@@ -79,6 +76,7 @@ public class PasswordDialog extends javax.swing.JDialog {
         else messageLabel.setText(getMessage("adviceDNIE")); */
         setMessage(ContextVS.getInstance().getMessage("adviceDNIE"));
         pack();
+        setLocationRelativeTo(null);
     }
 
     private void initComponents() {

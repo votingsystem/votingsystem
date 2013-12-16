@@ -23,11 +23,9 @@ public class MessageDialog extends javax.swing.JDialog {
     
     public MessageDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
-
-        //this.setLocationRelativeTo(parent);
-        setLocationRelativeTo(null);       
         initComponents();
         pack();
+        setLocationRelativeTo(null);
     }
     
     private void initComponents() {

@@ -37,7 +37,6 @@ public class SignedDocumentsBrowser extends JDialog {
     private Container container;
     private ProgressBarPanel progressBarPanel;
     private MessagePanel messagePanel;
-    private Frame parentFrame;
     private String fileDir;
     private boolean isProgressBarVisible = false;
     private String mensajeMime;
@@ -64,13 +63,13 @@ public class SignedDocumentsBrowser extends JDialog {
                 logger.debug(" - window closing event received");
             }
         });
-        setLocationRelativeTo(null);
         pack();
+        setLocationRelativeTo(null);
     }
 
     private void initComponents() {
         container = getContentPane();
-        container.setLayout(new MigLayout("fill", "[800:800:]", "[grow][]20[]"));
+        container.setLayout(new MigLayout("fill, insets 10 10 10 10", "[800:800:]", "[grow][]20[]"));
 
         tabbedPane = new ClosableTabbedPane();
         container.add(tabbedPane, "cell 0 0, grow, wrap");
@@ -137,7 +136,7 @@ public class SignedDocumentsBrowser extends JDialog {
         File file = null;
         try {
             final JFileChooser chooser = new JFileChooser();
-            int returnVal = chooser.showOpenDialog(parentFrame);
+            int returnVal = chooser.showOpenDialog(new JFrame());
             if (returnVal == JFileChooser.APPROVE_OPTION) file = chooser.getSelectedFile();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
@@ -164,7 +163,7 @@ public class SignedDocumentsBrowser extends JDialog {
     }
 
     private void validateBackup() {
-        BackupValidationDialog validationDialog = new BackupValidationDialog(parentFrame, metaInf, false);
+        BackupValidationDialog validationDialog = new BackupValidationDialog(new JFrame(), metaInf, false);
         try {
             validationDialog.initValidation(decompressedBackupBaseDir);
         } catch(Exception ex) {
@@ -184,14 +183,15 @@ public class SignedDocumentsBrowser extends JDialog {
             }
             byte[] fileBytes = FileUtils.getBytesFromFile(file);
             SignedFile signedFile = new SignedFile(fileBytes, file.getName());
-            SignedFilePanel signedFilePanel = new SignedFilePanel(signedFile);
-            tabbedPane.addTab(file, signedFilePanel);
+            if(signedFile.isPDF()) tabbedPane.addTab(file, new SignedFilePanel(signedFile));
+            else  tabbedPane.addTab(file, new SignedFilePanel(signedFile));
             tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
             tabbedPane.setVisible(true);
             pack();
         } catch (Exception ex) {
-            showError();
+            showErrorMessage(ContextVS.getMessage("openFileErrorMsg", file.getAbsolutePath()));
             logger.error(ex.getMessage(), ex);
+
         }
     }
 
@@ -219,9 +219,12 @@ public class SignedDocumentsBrowser extends JDialog {
         pack();
     }
 
-    private void showError () {
+    private void showErrorMessage (String message) {
         buttonsPanel.setVisible(false);
         tabbedPane.setVisible(false);
+        messagePanel = new MessagePanel();
+        messagePanel.setMessage(message, ContextVS.getIcon(this, "cancel_32"));
+        container.add(messagePanel, "cell 0 0, wrap");
         pack();
     }
 
@@ -233,7 +236,7 @@ public class SignedDocumentsBrowser extends JDialog {
     public void saveMessage () {
         try {
             final JFileChooser chooser = new JFileChooser();
-            int returnVal = chooser.showSaveDialog(parentFrame);
+            int returnVal = chooser.showSaveDialog(new JFrame());
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = chooser.getSelectedFile();
                 if (file.getName().indexOf(".") == -1) {
@@ -283,9 +286,9 @@ public class SignedDocumentsBrowser extends JDialog {
         this.decompressedBackupBaseDir = decompressedBackupBaseDir;
         File metaInfFile = new File(decompressedBackupBaseDir + File.separator + "meta.inf");
         if(!metaInfFile.exists()) {
-            String message = ContextVS.getInstance().getMessage("metaInfNotFoundMsg",metaInfFile.getAbsolutePath());
+            String message = ContextVS.getMessage("metaInfNotFoundMsg", metaInfFile.getAbsolutePath());
             logger.error(message);
-            MessageDialog messageDialog = new MessageDialog(parentFrame, true);
+            MessageDialog messageDialog = new MessageDialog(new JFrame(), true);
             messageDialog.showMessage(message, "Error");
             return;
         }
@@ -293,8 +296,21 @@ public class SignedDocumentsBrowser extends JDialog {
             metaInf = MetaInf.parse(FileUtils.getStringFromFile(metaInfFile));
             EventVSInfoPanel eventPanel = new EventVSInfoPanel(metaInf);
             tabbedPane.removeAll();
-            tabbedPane.addTab("<html><b>" + metaInf.getType().toString() +
-                    "</b>&nbsp;&nbsp;&nbsp;&nbsp;</html>",  eventPanel);
+            String dialogTitle = null;
+            switch(metaInf.getType()) {
+                case CLAIM_EVENT:
+                    dialogTitle = ContextVS.getMessage("claimEventTabTitle");
+                    break;
+                case MANIFEST_EVENT:
+                    dialogTitle = ContextVS.getMessage("manifestEventTabTitle");
+                    break;
+                case VOTING_EVENT:
+                    dialogTitle = ContextVS.getMessage("electionEventTabTitle");
+                    break;
+            }
+            setTitle(dialogTitle);
+            tabbedPane.addTab("<html><div style='margin:0 20px 0 0;'><b>" + dialogTitle + "</b></div></html>",
+                    eventPanel);
             if(TypeVS.VOTING_EVENT == metaInf.getType() || TypeVS.MANIFEST_EVENT == metaInf.getType() ||
                     TypeVS.CLAIM_EVENT == metaInf.getType()) {
                 validateBackupButton.setVisible(true);
@@ -302,8 +318,6 @@ public class SignedDocumentsBrowser extends JDialog {
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
         }
-
-
 
         /*try {
             ZipFile backupZip = new ZipFile(zip);
@@ -366,6 +380,7 @@ public class SignedDocumentsBrowser extends JDialog {
             logger.error(ex.getMessage(), ex);
             showProgress(false);
         } */
+        pack();
         setVisible(true);
     }
 

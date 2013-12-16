@@ -38,8 +38,8 @@ public class TimeStampDialog extends JDialog {
         setTitle(ContextVS.getMessage("timeStampInfoDialogCaption"));
         this.timeStampToken = timeStampToken;
         initComponents();
-        setLocationRelativeTo(null);
         pack();
+        setLocationRelativeTo(null);
     }
 
     private void initComponents() {

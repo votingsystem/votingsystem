@@ -25,9 +25,9 @@ public class MainDialog extends JDialog implements DecompressFileDialog.Listener
     public MainDialog(java.awt.Frame parentFrame, boolean modal) {
         super(parentFrame, modal);
         initComponents();
-        setLocationRelativeTo(null);   
         setTitle(ContextVS.getInstance().getMessage("mainDialogCaption"));
         pack();
+        setLocationRelativeTo(null);
     }
 
     private void initComponents() {
@@ -54,7 +54,6 @@ public class MainDialog extends JDialog implements DecompressFileDialog.Listener
             public void actionPerformed(java.awt.event.ActionEvent evt) { cancel();}
         });
         container.add(cancelButton, "cell 0 2, width :150:, align right");
-
     }
 
     private void openBackup() {
@@ -62,8 +61,7 @@ public class MainDialog extends JDialog implements DecompressFileDialog.Listener
         try {
             final JFileChooser chooser = new JFileChooser();
             chooser.setFileFilter(new FileFilter() {
-                @Override
-                public boolean accept(File f) {
+                @Override public boolean accept(File f) {
                     return f.getName().toLowerCase().endsWith(".zip") || f.isDirectory();
                 }
 
@@ -74,8 +72,7 @@ public class MainDialog extends JDialog implements DecompressFileDialog.Listener
             int returnVal = chooser.showOpenDialog(new JFrame());
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File result = chooser.getSelectedFile();
-                String outputFolder = ContextVS.APPTEMPDIR +
-                    File.separator + UUID.randomUUID();
+                String outputFolder = ContextVS.APPTEMPDIR + File.separator + UUID.randomUUID();
                 DecompressFileDialog dialog = new DecompressFileDialog(new JFrame(), true);
                 dialog.unZipBackup(this,result.getAbsolutePath(), outputFolder); 
             }

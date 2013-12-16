@@ -12,6 +12,9 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
 import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+
 import org.votingsystem.applet.validationtool.model.MetaInf;
 
 /**
@@ -36,37 +39,12 @@ public class EventVSInfoPanel extends JPanel {
     }
 
     private void initComponents() throws URISyntaxException {
-        String eventPathPart = null;
-        String metaInfURL = metaInf.getServerURL();
-        String numSignaturesLblStr = null;
-        String numSignaturesValueLblStr = null;
-        switch (metaInf.getType()) {
-            case MANIFEST_EVENT:
-                eventPathPart = "/eventVSManifest";
-                numSignaturesLblStr = ContextVS.getInstance().getMessage("numSignaturesLabel");
-                numSignaturesValueLblStr = String.valueOf(metaInf.getNumSignatures());
-                break;
-            case CLAIM_EVENT:
-                eventPathPart = "/eventVSClaim";
-                numSignaturesLblStr = ContextVS.getInstance().getMessage("numSignaturesLabel");
-                numSignaturesValueLblStr = String.valueOf(metaInf.getNumSignatures());
-                break;
-            case VOTING_EVENT:
-                eventPathPart = "/eventVSElection";
-                numSignaturesLblStr = ContextVS.getInstance().getMessage("numVotesVSLabel");
-                numSignaturesValueLblStr = String.valueOf(metaInf.getNumVotes());
-                break;
-        }
-        if(eventPathPart != null) {
-            metaInfURL = metaInfURL.concat(eventPathPart);
-            if(metaInf.getId() != null) metaInfURL = metaInfURL.concat("/"+ metaInf.getId());
-        }
+        setLayout(new MigLayout("fill", "", "[][][][]"));
 
-        setLayout(new MigLayout("fill"));
         JLabel subjectLabel = createBoldLabel(ContextVS.getMessage("subjectLbl") + ": ");
         add(subjectLabel);
         JLabel subjectValueLabel = new JLabel(metaInf.getSubject());
-        add(subjectValueLabel, "wrap");
+        add(subjectValueLabel, "span 3, wrap");
 
         JLabel dateInitLabel = createBoldLabel(ContextVS.getMessage("dateInitLbl") + ": ");
         add(dateInitLabel);
@@ -74,19 +52,9 @@ public class EventVSInfoPanel extends JPanel {
         add(dateInitValueLabel, "");
 
         JLabel dateFinishLabel = createBoldLabel(ContextVS.getMessage("dateFinishLbl") + ": ");
-        add(dateFinishLabel);
+        add(dateFinishLabel, "gapleft 30");
         JLabel dateFinishValueLabel = new JLabel(DateUtils.getShortStringFromDate(metaInf.getDateFinish()));
         add(dateFinishValueLabel, "wrap");
-
-        JLabel numSignaturesLabel = createBoldLabel(numSignaturesLblStr + ": ");
-        add(numSignaturesLabel);
-        JLabel numSignaturesValueLabel = new JLabel(numSignaturesValueLblStr);
-        add(dateInitValueLabel, "wrap");
-
-        JLabel numAccessRequestsLabel = createBoldLabel(ContextVS.getInstance().getMessage("accessRequestLabel") +": ");
-        add(numAccessRequestsLabel);
-        JLabel numAccessRequestsValueLabel = new JLabel(String.valueOf(metaInf.getNumAccessRequest()));
-        add(numAccessRequestsValueLabel, "wrap");
 
         JScrollPane contentScrollPane = new JScrollPane();
         JEditorPane contentPane = new JEditorPane();
@@ -94,23 +62,24 @@ public class EventVSInfoPanel extends JPanel {
         contentPane.setContentType("text/html");
         contentPane.setBackground(java.awt.Color.white);
         contentPane.setText(metaInf.getFormattedInfo());
-        contentScrollPane.setViewportView(contentPane);
-        add(contentScrollPane, "grow, wrap");
-
-        final URI uriToOpen = new URI(metaInfURL);
-        JButton webInfoButton = new JButton(ContextVS.getMessage("webInfoButtonLbl"));
-        webInfoButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) { open(uriToOpen);}
+        contentPane.addHyperlinkListener(new HyperlinkListener() {
+            public void hyperlinkUpdate(HyperlinkEvent e) {
+                if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                    if(Desktop.isDesktopSupported()) {
+                        try {Desktop.getDesktop().browse(e.getURL().toURI());}
+                        catch(Exception ex) {logger.error(ex.getMessage(), ex);}
+                    }
+                }
+            }
         });
-        add(webInfoButton, "");
-
-
-        if(TypeVS.VOTING_EVENT == metaInf.getType()) {
+        contentScrollPane.setViewportView(contentPane);
+        add(contentScrollPane, "height 400::, grow, span 4, wrap");
+        if(metaInf.getType() == TypeVS.VOTING_EVENT) {
             JButton representativesButton = new JButton(ContextVS.getMessage("representativesDetailsLbl"));
             representativesButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent evt) { showRepresentativeDetails();}
             });
-            add(representativesButton, "");
+            add(representativesButton, "cell 0 5, span 2");
         }
     }
 

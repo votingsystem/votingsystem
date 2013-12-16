@@ -47,7 +47,7 @@ public class ClosableTabbedPane extends JTabbedPane {
             setSelectedIndex(fileList.indexOf(file.getPath()));
             return;
         } else fileList.add(file.getPath());
-        if (tituloTab.length() > 15) tituloTab = tituloTab.substring(0, 15);
+        if (tituloTab.length() > 20) tituloTab = tituloTab.substring(0, 20);
         super.addTab(tituloTab + "     ", component);
     }
     

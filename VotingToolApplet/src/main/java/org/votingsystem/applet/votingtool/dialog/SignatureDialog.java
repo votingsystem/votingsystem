@@ -65,7 +65,6 @@ public class SignatureDialog extends JDialog {
     public SignatureDialog(Frame parent, boolean modal) {
         super(parent, modal);
         //parentFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null); 
         initComponents();
         addWindowListener(new WindowAdapter() {
             public void windowClosed(WindowEvent e) { logger.debug(" - window closed event received"); }
@@ -76,6 +75,7 @@ public class SignatureDialog extends JDialog {
             }
         });
         pack();
+        setLocationRelativeTo(null);
     }        
     
     private void initComponents() {

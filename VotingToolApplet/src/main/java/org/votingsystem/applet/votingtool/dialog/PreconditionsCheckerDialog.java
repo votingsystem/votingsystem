@@ -35,7 +35,6 @@ public class PreconditionsCheckerDialog extends JDialog {
     public PreconditionsCheckerDialog(Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-        setLocationRelativeTo(null);  
         setTitle(ContextVS.getMessage("preconditionsCheckerDialogCaption"));
         addWindowListener(new WindowAdapter() {
             public void windowClosed(WindowEvent e) {
@@ -48,6 +47,7 @@ public class PreconditionsCheckerDialog extends JDialog {
             }
         });
         pack();
+        setLocationRelativeTo(null);
     }
     
     private void initComponents() {

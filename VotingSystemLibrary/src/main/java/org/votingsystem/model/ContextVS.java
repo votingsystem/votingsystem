@@ -185,9 +185,9 @@ public class ContextVS {
     }
 
     private void initDirs(String baseDir) {
-        APPDIR =  baseDir + File.separator +  ".VotingSystem"  + File.separator;
-        APPTEMPDIR =  APPDIR + File.separator + "temp" + File.separator;
-        ERROR_DIR =  APPDIR + File.separator + "Error" + File.separator;
+        APPDIR =  baseDir + File.separator +  ".VotingSystem";
+        APPTEMPDIR =  APPDIR + File.separator + "temp";
+        ERROR_DIR =  APPDIR + File.separator + "error";
         new File(APPDIR).mkdir();
         new File(APPTEMPDIR).mkdir();
         new File(ERROR_DIR).mkdirs();

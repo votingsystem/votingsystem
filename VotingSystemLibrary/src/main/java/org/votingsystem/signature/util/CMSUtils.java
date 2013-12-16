@@ -1,9 +1,7 @@
 package org.votingsystem.signature.util;
 
 import org.bouncycastle.asn1.*;
-import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
-import org.bouncycastle.asn1.cms.SignerIdentifier;
+import org.bouncycastle.asn1.cms.*;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
@@ -15,6 +13,10 @@ import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.cms.SignerInformation;
+import org.bouncycastle.tsp.TimeStampToken;
+import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.io.Streams;
 
 import javax.xml.bind.DatatypeConverter;
@@ -25,6 +27,7 @@ import java.io.OutputStream;
 import java.security.*;
 import java.security.cert.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -215,9 +218,9 @@ public class CMSUtils {
         }
     }
 
-    public static String getHashBase64 (String cadenaOrigen, String digestAlgorithm) throws NoSuchAlgorithmException {
+    public static String getHashBase64 (String origStr, String digestAlgorithm) throws NoSuchAlgorithmException {
         MessageDigest sha = MessageDigest.getInstance(digestAlgorithm);
-        byte[] resultDigest =  sha.digest( cadenaOrigen.getBytes() );
+        byte[] resultDigest =  sha.digest( origStr.getBytes() );
         return DatatypeConverter.printBase64Binary(resultDigest);
     }
 
@@ -257,5 +260,24 @@ public class CMSUtils {
         }
         return algId;
     }
-    
+
+
+    public static byte[] getDigestToken(TimeStampToken timeStampToken) {
+        if(timeStampToken == null) return null;
+        CMSSignedData tokenCMSSignedData = timeStampToken.toCMSSignedData();
+        Collection signers = tokenCMSSignedData.getSignerInfos().getSigners();
+        SignerInformation tsaSignerInfo = (SignerInformation)signers.iterator().next();
+
+        AttributeTable signedAttrTable = tsaSignerInfo.getSignedAttributes();
+        ASN1EncodableVector v = signedAttrTable.getAll(CMSAttributes.messageDigest);
+        Attribute t = (Attribute)v.get(0);
+        ASN1Set attrValues = t.getAttrValues();
+        DERObject validMessageDigest = attrValues.getObjectAt(0).getDERObject();
+
+        ASN1OctetString signedMessageDigest = (ASN1OctetString)validMessageDigest;
+        byte[] digestToken = signedMessageDigest.getOctets();
+        //String digestTokenStr = new String(Base64.encode(digestToken));
+        return digestToken;
+    }
+
 }

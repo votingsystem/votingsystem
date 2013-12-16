@@ -3,11 +3,15 @@ package org.votingsystem.applet.validationtool.backup;
 import org.apache.log4j.Logger;
 import org.votingsystem.applet.validationtool.model.MetaInf;
 import org.votingsystem.applet.validationtool.model.SignedFile;
+import org.votingsystem.applet.validationtool.util.DocumentVSValidator;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.EventVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.StringUtils;
 
 import java.io.File;
 import java.security.KeyStore;
@@ -26,15 +30,13 @@ public class ManifestBackupValidator implements Callable<ResponseVS> {
     private ValidatorListener validatorListener = null;
     private File backupDir = null;
     private List<String> errorList = new ArrayList<String>();
-    //private Set<X509Certificate> systemTrustedCerts;
     private KeyStore trustedCertsKeyStore;
     private X509Certificate timeStampServerCert;
     private MetaInf metaInf;
     private String eventURL = null;
     private String manifestFileName = null;
     
-    public ManifestBackupValidator(String backupPath, 
-            ValidatorListener validatorListener) throws Exception {
+    public ManifestBackupValidator(String backupPath, ValidatorListener validatorListener) throws Exception {
         backupDir = new File(backupPath);
         this.validatorListener =  validatorListener;
     }
@@ -43,59 +45,53 @@ public class ManifestBackupValidator implements Callable<ResponseVS> {
         //logger.debug("checkByteArraySize");
         String result = null;
         if (signedFileBytes.length > ContextVS.SIGNED_MAX_FILE_SIZE) {
-            result = ContextVS.getInstance().getMessage("fileSizeExceededMsg",                    ContextVS.SIGNED_MAX_FILE_SIZE_KB, signedFileBytes.length);
+            result = ContextVS.getInstance().getMessage("fileSizeExceededMsg", ContextVS.SIGNED_MAX_FILE_SIZE_KB,
+                    signedFileBytes.length);
         }
         return result;
     }
     
     @Override public ResponseVS call() throws Exception {
         long begin = System.currentTimeMillis();
-        manifestFileName = ContextVS.getInstance().
-                getMessage("manifestFileName");
+        manifestFileName = ContextVS.getMessage("manifestFileName");
 
         String backupPath = backupDir.getAbsolutePath();
-        File trustedCertsFile = new File(backupPath + File.separator + 
-                "systemTrustedCerts.pem");
+        File trustedCertsFile = new File(backupPath + File.separator + "systemTrustedCerts.pem");
         Collection<X509Certificate> trustedCerts = CertUtil.fromPEMToX509CertCollection(
                 FileUtils.getBytesFromFile(trustedCertsFile));
         trustedCertsKeyStore = KeyStore.getInstance("JKS");
         trustedCertsKeyStore.load(null, null);
         for(X509Certificate certificate:trustedCerts) {
-            trustedCertsKeyStore.setCertificateEntry(
-                    certificate.getSubjectDN().toString(), certificate);
+            trustedCertsKeyStore.setCertificateEntry(certificate.getSubjectDN().toString(), certificate);
         }
-        File timeStampCertFile = new File(backupPath + File.separator + 
-                "timeStampCert.pem");
+        File timeStampCertFile = new File(backupPath + File.separator +"timeStampCert.pem");
         Collection<X509Certificate> timeStampCerts = CertUtil.fromPEMToX509CertCollection(
                 FileUtils.getBytesFromFile(timeStampCertFile));   
         timeStampServerCert = timeStampCerts.iterator().next();
             
-        File metaInfFile = new File(backupPath + File.separator + 
-                "meta.inf");
+        File metaInfFile = new File(backupPath + File.separator + "meta.inf");
         if(!metaInfFile.exists()) {
-            logger.error(" - metaInfFile: " + metaInfFile.getAbsolutePath() + " not found");
+            String message = ContextVS.getMessage("metaInfFileNotFoundErrorMsg", metaInfFile.getAbsolutePath());
+            logger.error(message);
+            return new ResponseVS(ResponseVS.SC_ERROR, message);
         } else {
             metaInf = MetaInf.parse(FileUtils.getStringFromFile(metaInfFile));
-            eventURL = metaInf.getEventURL();
+            eventURL= EventVS.getURL(null, metaInf.getServerURL(), metaInf.getId());
         }
-        
         ResponseVS responseVS = validateManifests();
-
         Integer statusCode = errorList.size() > 0? ResponseVS.SC_ERROR:ResponseVS.SC_OK;
         responseVS.setErrorList(errorList);
         responseVS.setStatusCode(statusCode);
         if(!errorList.isEmpty()) {
             logger.error(" ------- " + errorList.size() + " errors: ");
-            for(String error : errorList) {
-                logger.error(error);
-            }
-        } else logger.debug("Backup without errors");
+            String errorsMsg = StringUtils.getFormattedErrorList(errorList);
+            logger.error(errorsMsg);
+        }
         long finish = System.currentTimeMillis();
         long duration = finish - begin;
         String durationStr = DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(duration);
         logger.debug("duration: " + durationStr);
-        notifyValidationListener(responseVS.getStatusCode(), 
-                durationStr, ValidationEvent.MANIFEST_FINISIH);        
+        notifyValidationListener(responseVS.getStatusCode(), durationStr, ValidationEvent.MANIFEST_FINISIH);
         responseVS.setMessage(durationStr);
         responseVS.setData(metaInf);
         return responseVS;
@@ -107,8 +103,7 @@ public class ManifestBackupValidator implements Callable<ResponseVS> {
             ResponseVS response = new ResponseVS(statusCode, message);
             response.setData(validationEvent);
             response.setErrorList(errorList);
-            validatorListener.
-                processValidationEvent(response);
+            validatorListener.processValidationEvent(response);
         }
     }
     
@@ -123,69 +118,47 @@ public class ManifestBackupValidator implements Callable<ResponseVS> {
             if(batchDir.isDirectory()) {
                 File[] manifests = batchDir.listFiles();
                 for(File manifest : manifests) {
+                    if(!manifest.getAbsolutePath().contains(manifestFileName)) continue;
                     String errorMessage = null;
-                    byte[] accessRequestBytes = FileUtils.
-                            getBytesFromFile(manifest);
-                    SignedFile signedFile = new SignedFile(
-                            accessRequestBytes, manifest.getName());
-                    ResponseVS validationResponse = signedFile.validateAsManifestSignature(
-                            trustedCertsKeyStore, metaInf.getDateInit(), 
-                            metaInf.getDateFinish(), timeStampServerCert);
+                    byte[] accessRequestBytes = FileUtils.getBytesFromFile(manifest);
+                    SignedFile signedFile = new SignedFile(accessRequestBytes, manifest.getName());
+                    ResponseVS validationResponse = DocumentVSValidator.validateManifestSignature(signedFile,
+                            trustedCertsKeyStore, metaInf.getDateInit(),  metaInf.getDateFinish(), timeStampServerCert);
                     statusCode = validationResponse.getStatusCode();
                     if(ResponseVS.SC_OK == validationResponse.getStatusCode()) {
-                        numManifestOK++;
-                        /*boolean repeatedAccessrequest = signersNifMap.containsKey(signedFile.getSignerNif());
-                        if(repeatedAccessrequest) {
-                            numAccessRequestERROR++;
-                            errorMessage = ContextoHerramienta.INSTANCE.getMessage(
-                                    "accessRequetsRepeatedErrorMsg", 
-                                    signedFile.getSignerNif()) + " - " + 
-                                    accessRequest.getAbsolutePath() + " - " + 
+                        boolean repeatedSignature = signersNifMap.containsKey(signedFile.getSignerNif());
+                        if(repeatedSignature) {
+                            numManifestERROR++;
+                            errorMessage = ContextVS.getInstance().getMessage("claimSignatureRepeatedErrorMsg",
+                                    signedFile.getSignerNif()) + " - " + manifest.getAbsolutePath() + " - " +
                                     signersNifMap.get(signedFile.getSignerNif());
                         } else {
-                            numAccessRequestOK++;
-                            signersNifMap.put(signedFile.getSignerNif(), 
-                                    accessRequest.getAbsolutePath());
-                        } */
-                    } else {
-                        numManifestERROR++;
-                        /*errorMessage = "ERROR ACCES REQUEST - File: " + 
-                                accessRequest.getAbsolutePath() + " - msg: " +
-                                validationResponse.getMessage();*/
-                    }
+                            numManifestOK++;
+                            signersNifMap.put(signedFile.getSignerNif(), manifest.getAbsolutePath());
+                        }
+                    } else numManifestERROR++;
                     if(errorMessage != null) {
                         statusCode = ResponseVS.SC_ERROR;
                         logger.error(errorMessage);
                         errorList.add(errorMessage);
                     } 
-                    notifyValidationListener(statusCode, 
-                            validationResponse.getMessage(), 
-                            ValidationEvent.ACCESS_REQUEST);
+                    notifyValidationListener(statusCode, validationResponse.getMessage(),ValidationEvent.MANIFEST);
                 }
             }
         }
-        statusCode = ResponseVS.SC_OK;
-        logger.debug("numManifestOK: " + numManifestOK + 
-                " - numManifestERROR: " + numManifestERROR);
-        String message = null;
+        logger.debug("numManifestOK: " + numManifestOK + " - numManifestERROR: " + numManifestERROR);
+        ResponseVS result = null;
         if(metaInf.getNumSignatures() != numManifestOK) {
-            statusCode = ResponseVS.SC_ERROR;
-            message = ContextVS.getInstance().getMessage("numAccessRequestErrorMsg",
-                    metaInf.getNumSignatures(), numManifestOK);
-        } else message =  ContextVS.getInstance().getMessage(
-                "accessRequestValidationResultMsg", metaInf.getNumSignatures());
-        return new ResponseVS(statusCode, message);
+            result = new ResponseVS(ResponseVS.SC_ERROR,
+                    ContextVS.getMessage("numSignaturesErrorMsg", metaInf.getNumSignatures(), numManifestOK));
+        } else {
+            result = new ResponseVS(ResponseVS.SC_OK, ContextVS.getMessage(
+                    "signaturesValidationResultMsg", numManifestOK));
+        }
+        notifyValidationListener(result.getStatusCode(), result.getMessage(),ValidationEvent.MANIFEST_FINISIH);
+        return result;
     }
     
-    public static void main(String[] args) throws Exception {
-        
-        ManifestBackupValidator dirBackupValidator = new ManifestBackupValidator(
-                "./Descargas/FirmasRecibidasEvento_4", null);
-        dirBackupValidator.call();
-
-        System.exit(0);
-    }
-
-    
+    public static void main(String[] args) throws Exception { }
 
 }

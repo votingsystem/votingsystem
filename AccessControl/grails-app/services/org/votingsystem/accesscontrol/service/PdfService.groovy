@@ -45,7 +45,6 @@ class PdfService {
 		log.debug "checkSignature - signedPDF.length: ${signedPDF.length}"
 		ResponseVS responseVS = null;
 		PdfReader reader = new PdfReader(signedPDF);
-		PDFDocumentVS documento;
 		AcroFields acroFields = reader.getAcroFields();
 		ArrayList<String> names = acroFields.getSignatureNames();
 		responseVS = new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,

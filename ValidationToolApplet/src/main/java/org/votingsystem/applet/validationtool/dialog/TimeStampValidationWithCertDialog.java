@@ -31,9 +31,9 @@ public class TimeStampValidationWithCertDialog extends JDialog {
         super(parent, modal);
         setTitle(ContextVS.getMessage("validateTimeStampDialogCaption"));
         initComponents();
-        setLocationRelativeTo(null);
         this.timeStampToken = timeStampToken;
         pack();
+        setLocationRelativeTo(null);
     }
 
     private void initComponents() {

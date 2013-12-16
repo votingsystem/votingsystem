@@ -8,6 +8,7 @@ import org.votingsystem.applet.validationtool.panel.MessagePanel;
 import org.votingsystem.applet.validationtool.panel.ProgressBarPanel;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.StatusVS;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,16 +24,14 @@ import java.util.concurrent.*;
 */
 public class BackupValidationDialog extends JDialog implements ValidatorListener<ValidationEvent> {
 
+    public enum Status implements StatusVS<Status> {INIT_VALIDATION, FINISH_VALIDATION}
+
     private static Logger logger = Logger.getLogger(BackupValidationDialog.class);
-
-
-    private static ExecutorService executor;
-    private static CompletionService<ResponseVS> completionService;
 
     private java.util.List<String> errorList;
     private MetaInf metaInf;
     private int filesProcessed = 0;
-    
+    private ValidatorListener validatorListener = null;
     private Container container;
     private ProgressBarPanel progressBarPanel;
     private MessagePanel messagePanel;
@@ -45,27 +44,24 @@ public class BackupValidationDialog extends JDialog implements ValidatorListener
         this.metaInf = metaInf;
         initComponents();
         addWindowListener(new WindowAdapter() {
-            public void windowClosed(WindowEvent e) {
-                logger.debug(" - window closed event received");
-            }
+            public void windowClosed(WindowEvent e) { logger.debug(" - window closed event received"); }
 
-            public void windowClosing(WindowEvent e) {
-                logger.debug(" - window closing event received");
-            }
+            public void windowClosing(WindowEvent e) { logger.debug(" - window closing event received"); }
         });
-        setLocationRelativeTo(null);
         pack();
+        setLocationRelativeTo(null);
+        validatorListener = this;
     }
 
     private void initComponents() {
         container = getContentPane();
-        container.setLayout(new MigLayout("fill", "", "[][]20[]"));
+        container.setLayout(new MigLayout("fill, insets 10 10 10 10", "", "[center][]20[]"));
 
         messagePanel = new MessagePanel();
-        container.add(messagePanel, "cell 0 0, growx, wrap");
+        container.add(messagePanel, "cell 0 0, span 2, height 50::, grow, width 400:400:400, wrap");
 
         progressBarPanel = new ProgressBarPanel();
-        container.add(progressBarPanel, "cell 0 1, width 400::, growx, wrap");
+        container.add(progressBarPanel, "cell 0 1, span 2, width 400::, growx, wrap");
 
         errorsButton = new JButton(ContextVS.getMessage("errorsLbl"));
         errorsButton.addActionListener(new java.awt.event.ActionListener() {
@@ -103,36 +99,22 @@ public class BackupValidationDialog extends JDialog implements ValidatorListener
                 break;
         }
         progressBarPanel.setMaximum(new Long(filesToProcess).intValue());
-        setLocationRelativeTo(null);
     }
 
     private void cancel() {
         logger.debug("cancel");
-        shutdown();
+        if(runningTask != null) runningTask.cancel(true);
         dispose();
     }
 
     public void initValidation(String decompressedBackupBaseDir) throws Exception {
-        switch(metaInf.getType()) {
-            case VOTING_EVENT:
-                VotingBackupValidator votingBackupValidator = new VotingBackupValidator(decompressedBackupBaseDir, this);
-                runningTask = submit(votingBackupValidator);
-                break;
-            case MANIFEST_EVENT:
-                ManifestBackupValidator manifestBackupValidator = new ManifestBackupValidator(
-                        decompressedBackupBaseDir, this);
-                runningTask = submit(manifestBackupValidator);
-                break;
-            case CLAIM_EVENT:
-                ClaimBackupValidator claimBackupValidator = new ClaimBackupValidator(decompressedBackupBaseDir, this);
-                runningTask = submit(claimBackupValidator);
-                break;
-        }
+        BackupWorker backupWorker = new BackupWorker(decompressedBackupBaseDir);
+        runningTask = backupWorker;
+        backupWorker.execute();
         setVisible(true);
     }
 
-    @Override public void processValidationEvent(
-            ResponseVS<ValidationEvent> validationEventResponse) {
+    @Override public void processValidationEvent(ResponseVS<ValidationEvent> validationEventResponse) {
         switch(metaInf.getType()) {
             case MANIFEST_EVENT:
                 processManifestValidationEvent(validationEventResponse);
@@ -146,18 +128,12 @@ public class BackupValidationDialog extends JDialog implements ValidatorListener
         }
     }
 
-    public void processVotingValidationEvent(
-            ResponseVS<ValidationEvent> responseVS) {
-        if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-            this.errorList = responseVS.getErrorList();
-            if(!errorList.isEmpty()) {
-                errorsButton.setVisible(true);
-                String msg = null;
-                if(errorList.size() > 1) {
-                    msg = ContextVS.getInstance().getMessage("errorsLbl");
-                } else msg = ContextVS.getInstance().getMessage("errorLbl");
-                errorsButton.setText(errorList.size() + " " + msg);
-            }
+    public void processVotingValidationEvent(ResponseVS<ValidationEvent> responseVS) {
+        if(!responseVS.getErrorList().isEmpty()) {
+            errorsButton.setVisible(true);
+            String msg =  (errorList.size() > 1)? ContextVS.getInstance().getMessage("errorsLbl"):
+                    ContextVS.getInstance().getMessage("errorLbl");
+            errorsButton.setText(errorList.size() + " " + msg);
         }
         progressBarPanel.setValue(filesProcessed++);
         switch(responseVS.getData()) {
@@ -179,34 +155,56 @@ public class BackupValidationDialog extends JDialog implements ValidatorListener
                 Icon icon = null;
                 if(errorList == null || errorList.isEmpty()) {
                     icon = ContextVS.getIcon(this, "accept_32");
-                    message = ContextVS.getInstance().getMessage("validationWithoutErrorsMsg",responseVS.getMessage());
+                    message = ContextVS.getMessage("validationWithoutErrorsMsg",responseVS.getMessage());
                 } else {
                     icon = ContextVS.getIcon(this, "cancel_32");
-                    message = ContextVS.getInstance().getMessage("validationWithErrorsMsg", responseVS.getMessage());
+                    message = ContextVS.getMessage("validationWithErrorsMsg", responseVS.getMessage());
                 }
                 cancelButton.setText(ContextVS.getInstance().getMessage("closeLbl"));
 
                 messagePanel.setMessage(message, icon);
-                progressBarPanel.setVisible(false);
+                container.remove(progressBarPanel);
+                break;
+        }
+        pack();
+    }
+
+    public void processManifestValidationEvent( ResponseVS<ValidationEvent> responseVS) {
+        if(!responseVS.getErrorList().isEmpty()) {
+            errorsButton.setVisible(true);
+            String msg =  (errorList.size() > 1)? ContextVS.getInstance().getMessage("errorsLbl"):
+                    ContextVS.getInstance().getMessage("errorLbl");
+            errorsButton.setText(errorList.size() + " " + msg);
+        }
+        progressBarPanel.setValue(filesProcessed++);
+        switch(responseVS.getData()) {
+            case MANIFEST:
+                messagePanel.setMessage(ContextVS.getInstance().getMessage("validatingManifestsMsg"), null);
+                break;
+            case MANIFEST_FINISIH:
+                String message = null;
+                Icon icon = null;
+                if(errorList == null || errorList.isEmpty()) {
+                    icon = ContextVS.getIcon(this, "accept_32");
+                    message = ContextVS.getMessage("validationWithoutErrorsMsg",responseVS.getMessage());
+                } else {
+                    icon = ContextVS.getIcon(this, "cancel_32");
+                    message = ContextVS.getMessage("validationWithErrorsMsg", responseVS.getMessage());
+                }
+                cancelButton.setText(ContextVS.getMessage("closeLbl"));
+                messagePanel.setMessage(message, icon);
+                container.remove(progressBarPanel);
                 pack();
                 break;
         }
     }
 
-    public void processManifestValidationEvent( ResponseVS<ValidationEvent> responseVS) { }
-
-    public void processClaimValidationEvent(
-            ResponseVS<ValidationEvent> responseVS) {
-        if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-            this.errorList = responseVS.getErrorList();
-            if(!errorList.isEmpty()) {
-                errorsButton.setVisible(true);
-                String msg = null;
-                if(errorList.size() > 1) {
-                    msg = ContextVS.getInstance().getMessage("errorsLbl");
-                } else msg = ContextVS.getInstance().getMessage("errorLbl");
-                errorsButton.setText(errorList.size() + " " + msg);
-            }
+    public void processClaimValidationEvent( ResponseVS<ValidationEvent> responseVS) {
+        if(!responseVS.getErrorList().isEmpty()) {
+            errorsButton.setVisible(true);
+            String msg =  (errorList.size() > 1)? ContextVS.getInstance().getMessage("errorsLbl"):
+                    ContextVS.getInstance().getMessage("errorLbl");
+            errorsButton.setText(errorList.size() + " " + msg);
         }
         progressBarPanel.setValue(filesProcessed++);
         switch(responseVS.getData()) {
@@ -218,14 +216,14 @@ public class BackupValidationDialog extends JDialog implements ValidatorListener
                 Icon icon = null;
                 if(errorList == null || errorList.isEmpty()) {
                     icon = ContextVS.getIcon(this, "accept_32");
-                    message = ContextVS.getInstance().getMessage("validationWithoutErrorsMsg",responseVS.getMessage());
+                    message = ContextVS.getMessage("validationWithoutErrorsMsg",responseVS.getMessage());
                 } else {
                     icon = ContextVS.getIcon(this, "cancel_32");
-                    message = ContextVS.getInstance().getMessage("validationWithErrorsMsg", responseVS.getMessage());
+                    message = ContextVS.getMessage("validationWithErrorsMsg", responseVS.getMessage());
                 }
-                cancelButton.setText(ContextVS.getInstance().getMessage("closeLbl"));
+                cancelButton.setText(ContextVS.getMessage("closeLbl"));
                 messagePanel.setMessage(message, icon);
-                progressBarPanel.setVisible(false);
+                container.remove(progressBarPanel);
                 pack();
                 break;
         }
@@ -242,23 +240,46 @@ public class BackupValidationDialog extends JDialog implements ValidatorListener
                 ContextVS.getInstance().getMessage("votingBackupErrorCaption"));
     }
 
-    public void shutdown() {
-        try {
-            logger.debug("------------- shutdown ----------------- ");
-            if(executor != null) executor.shutdown();
-            //HttpHelper.getInstance().shutdown();
-        } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-        }
-    }
+    class BackupWorker extends SwingWorker<ResponseVS, Object> {
 
+        private String decompressedBackupBaseDir = null;
 
-    public Future<ResponseVS> submit(Callable<ResponseVS> callable) {
-        if(executor == null || executor.isShutdown()) {
-            executor = Executors.newFixedThreadPool(10);
-            completionService = new ExecutorCompletionService<ResponseVS>(executor);
+        public BackupWorker(String decompressedBackupBaseDir) {
+            this.decompressedBackupBaseDir = decompressedBackupBaseDir;
         }
-        return completionService.submit(callable);
+
+        @Override public ResponseVS doInBackground() {
+            logger.debug("worker.doInBackground: ");
+            try {
+                switch(metaInf.getType()) {
+                    case VOTING_EVENT:
+                        VotingBackupValidator votingBackupValidator = new VotingBackupValidator(
+                                decompressedBackupBaseDir, validatorListener);
+                        return votingBackupValidator.call();
+                    case MANIFEST_EVENT:
+                        ManifestBackupValidator manifestBackupValidator = new ManifestBackupValidator(
+                                decompressedBackupBaseDir, validatorListener);
+                        return manifestBackupValidator.call();
+                    case CLAIM_EVENT:
+                        ClaimBackupValidator claimBackupValidator = new ClaimBackupValidator(
+                                decompressedBackupBaseDir, validatorListener);
+                        return claimBackupValidator.call();
+                }
+            } catch(Exception ex) {
+                logger.error(ex.getMessage(), ex);
+            }
+            return new ResponseVS(ResponseVS.SC_ERROR, "Unknown event type: " + metaInf.getType());
+        }
+
+        @Override protected void done() {
+            try {
+                ResponseVS response = get();
+                logger.debug("worker.done status:" + response.getStatusCode() + " - message: " + response.getMessage());
+            } catch(Exception ex) {
+                logger.error(ex.getMessage(), ex);
+            }
+        }
+
     }
 
     public static void main(String args[]) {

@@ -309,6 +309,16 @@ public class EventVS implements Serializable {
         this.accessControlEventVSId = accessControlEventVSId;
     }
 
+    public static String getURL(TypeVS type, String serverURL, Long id) {
+        if(type == null) return serverURL + "/eventVS/" + id;
+        switch (type) {
+            case MANIFEST_EVENT: return serverURL + "/eventVSManifest/" + id;
+            case CLAIM_EVENT: return serverURL + "/eventVSClaim/" + id;
+            case VOTING_EVENT: return serverURL + "/eventVSElection/" + id;
+            default: return serverURL + "/eventVS/" + id;
+        }
+    }
+
     @Transient public String[] getTags() {
         return tags;
     }

@@ -3,6 +3,7 @@ package org.votingsystem.applet.validationtool.panel;
 import net.miginfocom.swing.MigLayout;
 import org.apache.log4j.Logger;
 import org.bouncycastle.tsp.TimeStampToken;
+import org.votingsystem.applet.validationtool.model.SignedFile;
 import org.votingsystem.applet.validationtool.util.Formatter;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
@@ -22,10 +23,22 @@ public class SignatureInfoPanel extends JPanel {
 
     private UserVS signer;
     private SMIMEMessageWrapper signedMessage;
+    private SignedFile signedFile;
+    private String signatureAlgorithmValue = null;
 
     public SignatureInfoPanel(UserVS signer, SMIMEMessageWrapper signedMessage) throws Exception {
         this.signer = signer;
         this.signedMessage = signedMessage;
+        signatureAlgorithmValue = signer.getEncryptiontId() + " - " + signer.getDigestId();
+        initComponents();
+    }
+
+    public SignatureInfoPanel(SignedFile signedFile) throws Exception {
+        this.signedFile = signedFile;
+        this.signer = signedFile.getPdfDocument().getUserVS();
+        /*signatureAlgorithmValue = signedFile.getPdfPKCS7().getDigestEncryptionAlgorithmOid() + " - " +
+                signedFile.getPdfPKCS7().getDigestAlgorithm();*/
+        signatureAlgorithmValue = signedFile.getPdfPKCS7().getDigestAlgorithm();
         initComponents();
     }
 
@@ -38,7 +51,7 @@ public class SignatureInfoPanel extends JPanel {
 
         JLabel signatureAlgorithmLabel = createBoldLabel(ContextVS.getMessage("signatureAlgorithmLbl") + ": ");
         add(signatureAlgorithmLabel);
-        JLabel signatureAlgorithmValueLabel = new JLabel(signer.getEncryptiontId() + " - " + signer.getDigestId());
+        JLabel signatureAlgorithmValueLabel = new JLabel(signatureAlgorithmValue);
 
         if(signer.getTimeStampToken() != null) {
             add(signatureAlgorithmValueLabel);
@@ -60,25 +73,27 @@ public class SignatureInfoPanel extends JPanel {
 
         add(getJScrollPane(Formatter.getInfoCert(signer.getCertificate())), "span 4, height 150:150:, grow, wrap");
 
-        JLabel hashBase64Label = createBoldLabel(ContextVS.getMessage("hashBase64Lbl") + ": ");
-        add(hashBase64Label, "span 4, wrap");
-        JTextField hashBase64Value = new JTextField(signer.getContentDigestBase64());
-        add(hashBase64Value, "span 4, width 800:800:800, wrap");
+        if(signedMessage != null) {
+            JLabel hashBase64Label = createBoldLabel(ContextVS.getMessage("hashBase64Lbl") + ": ");
+            add(hashBase64Label, "span 4, wrap");
+            JTextField hashBase64Value = new JTextField(signer.getContentDigestBase64());
+            add(hashBase64Value, "span 4, width 800:800:800, wrap");
 
-        JLabel hashHexadecimalLabel = createBoldLabel(ContextVS.getMessage("hashHexadecimalLbl") + ": ");
-        add(hashHexadecimalLabel, "span 4, wrap");
-        JTextField hashHexadecimalValue = new JTextField(signer.getContentDigestHex());
-        add(hashHexadecimalValue, "span 4, width 800:800:800, wrap");
+            JLabel hashHexadecimalLabel = createBoldLabel(ContextVS.getMessage("hashHexadecimalLbl") + ": ");
+            add(hashHexadecimalLabel, "span 4, wrap");
+            JTextField hashHexadecimalValue = new JTextField(signer.getContentDigestHex());
+            add(hashHexadecimalValue, "span 4, width 800:800:800, wrap");
 
-        JLabel signatureBase64Label = createBoldLabel(ContextVS.getMessage("signatureBase64lLbl") + ": ");
-        add(signatureBase64Label, "span 4, wrap");
-        JTextField signatureBase64Value = new JTextField(signer.getSignatureBase64());
-        add(signatureBase64Value, "span 4, width 800:800:800, wrap");
+            JLabel signatureBase64Label = createBoldLabel(ContextVS.getMessage("signatureBase64lLbl") + ": ");
+            add(signatureBase64Label, "span 4, wrap");
+            JTextField signatureBase64Value = new JTextField(signer.getSignatureBase64());
+            add(signatureBase64Value, "span 4, width 800:800:800, wrap");
 
-        JLabel signatureHexadecimalLabel = createBoldLabel(ContextVS.getMessage("signatureHexadecimalLbl") + ": ");
-        add(signatureHexadecimalLabel, "span 4, wrap");
-        JTextField signatureHexadecimalValue = new JTextField(signer.getSignatureHex());
-        add(signatureHexadecimalValue, "span 4, width 800:800:800, wrap");
+            JLabel signatureHexadecimalLabel = createBoldLabel(ContextVS.getMessage("signatureHexadecimalLbl") + ": ");
+            add(signatureHexadecimalLabel, "span 4, wrap");
+            JTextField signatureHexadecimalValue = new JTextField(signer.getSignatureHex());
+            add(signatureHexadecimalValue, "span 4, width 800:800:800, wrap");
+        }
     }
 
     private JScrollPane getJScrollPane(String contentText) {

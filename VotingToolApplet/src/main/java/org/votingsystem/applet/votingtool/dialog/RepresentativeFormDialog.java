@@ -52,7 +52,6 @@ public class RepresentativeFormDialog extends JDialog {
     public RepresentativeFormDialog(Frame parent, boolean modal) {
         super(parent, modal);
         //parentFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
         initComponents();
         addWindowListener(new WindowAdapter() {
             public void windowClosed(WindowEvent e) { logger.debug(" - window closed event received"); }
@@ -63,6 +62,7 @@ public class RepresentativeFormDialog extends JDialog {
             }
         });
         pack();
+        setLocationRelativeTo(null);
     }
 
 

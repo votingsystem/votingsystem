@@ -2,6 +2,7 @@ package org.votingsystem.applet.validationtool.dialog;
 
 import net.miginfocom.swing.MigLayout;
 import org.apache.log4j.Logger;
+import org.votingsystem.applet.validationtool.model.SignedFile;
 import org.votingsystem.applet.validationtool.panel.SignatureInfoPanel;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.UserVS;
@@ -39,8 +40,8 @@ public class DocumentSignersDialog extends JDialog {
             }
         });
         setTitle(ContextVS.getMessage("signersLbl"));
-        setLocationRelativeTo(null);
         pack();
+        setLocationRelativeTo(null);
     }
 
 
@@ -61,14 +62,22 @@ public class DocumentSignersDialog extends JDialog {
         container.add(cancelButton, "height 35:35:35, width :150:, align right");
     }
 
-    public void show (SMIMEMessageWrapper signedMessage) throws Exception {
-        Set<UserVS> signersVS = signedMessage.getSigners();
-        logger.debug("Num. signers: " + signersVS.size());
-        for (UserVS signerVS:signersVS) {
-            SignatureInfoPanel signerVSPanel = new SignatureInfoPanel(signerVS, signedMessage);
+    public void show (SignedFile signedFile) throws Exception {
+        if(signedFile.isPDF()) {
+            SignatureInfoPanel signerVSPanel = new SignatureInfoPanel(signedFile);
             String tabName = ContextVS.getMessage("signerLbl");
-            if(signerVS.getNif() != null) tabName = signerVS.getNif();
+            if(signedFile.getPdfDocument().getUserVS() != null)
+                tabName = signedFile.getPdfDocument().getUserVS().getNif();
             tabbedPane.addTab(tabName, signerVSPanel);
+        } else {
+            Set<UserVS> signersVS = signedFile.getSMIMEMessageWraper().getSigners();
+            logger.debug("Num. signers: " + signersVS.size());
+            for (UserVS signerVS:signersVS) {
+                SignatureInfoPanel signerVSPanel = new SignatureInfoPanel(signerVS, signedFile.getSMIMEMessageWraper());
+                String tabName = ContextVS.getMessage("signerLbl");
+                if(signerVS.getNif() != null) tabName = signerVS.getNif();
+                tabbedPane.addTab(tabName, signerVSPanel);
+            }
         }
         pack();
         setVisible(true);

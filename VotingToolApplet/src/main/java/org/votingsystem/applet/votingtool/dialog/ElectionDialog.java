@@ -52,7 +52,6 @@ public class ElectionDialog extends JDialog {
     public ElectionDialog(Frame parent, boolean modal) {
         super(parent, modal);
         //parentFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
         initComponents();
         addWindowListener(new WindowAdapter() {
             public void windowClosed(WindowEvent e) {
@@ -65,6 +64,7 @@ public class ElectionDialog extends JDialog {
             }
         });
         pack();
+        setLocationRelativeTo(null);
     }
 
     public void show(OperationVS operation) {

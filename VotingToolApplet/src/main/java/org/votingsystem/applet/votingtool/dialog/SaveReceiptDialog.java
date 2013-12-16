@@ -23,9 +23,9 @@ public class SaveReceiptDialog extends javax.swing.JDialog {
 
     public SaveReceiptDialog(Frame parent, boolean modal) {
         super(parent, modal);
-        setLocationRelativeTo(null);
         initComponents();
-        parent.setLocationRelativeTo(null);
+        pack();
+        setLocationRelativeTo(null);
     }
     
     public void show(final String hashCertVoteBase64) {
