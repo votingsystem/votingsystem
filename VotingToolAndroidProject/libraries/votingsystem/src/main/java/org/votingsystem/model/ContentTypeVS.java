@@ -60,7 +60,7 @@ public enum ContentTypeVS {
 
     private ContentTypeVS(String name, String extension) {
         this.name = name;
-        this.extension = extension;
+        this.extension = "." + extension;
     }
 
     public String getName() {

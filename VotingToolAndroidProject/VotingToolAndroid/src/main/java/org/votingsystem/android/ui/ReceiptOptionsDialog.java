@@ -114,8 +114,8 @@ public class ReceiptOptionsDialog  extends DialogFragment {
        	try {
     		/*File receiptFile =  new File(getActivity()
     				.getExternalFilesDir(null), "vote_receipt_" + 
-    				receipt.getNotificationId() + SIGNED_PART_EXTENSION);*/
-    		String fileName = "receipt_" + receipt.getId() + ContextVS.SIGNED_PART_EXTENSION;
+    				receipt.getNotificationId() + ContentTypeVS.SIGNED.getExtension());*/
+    		String fileName = "receipt_" + receipt.getId() + ContentTypeVS.SIGNED.getExtension();
        		File receiptFile = getTemporaryFile(getActivity(), fileName);
        		
     		if(receipt.getCancelVoteReceipt() != null) {

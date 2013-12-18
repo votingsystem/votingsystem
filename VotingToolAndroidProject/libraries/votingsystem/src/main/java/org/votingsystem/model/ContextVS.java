@@ -46,7 +46,6 @@ public class ContextVS {
     public static final String SIGNED_FILE_NAME           = "signedFile";
     public static final String CSR_FILE_NAME              = "csr";
     public static final String ACCESS_REQUEST_FILE_NAME   = "accessRequest";
-    public static final String SIGNED_PART_EXTENSION      = ".p7m";
     public static final String DEFAULT_SIGNED_FILE_NAME   = "smimeMessage.p7m";
     public static final String PROVIDER                   = "BC";
     public static final String SERVER_URL_EXTRA_PROP_NAME = "serverURL";
@@ -70,9 +69,7 @@ public class ContextVS {
     public static final String ASUNTO_MENSAJE_FIRMA_DOCUMENTO = "[Firma]-";
     public static final String VOTING_HEADER_LABEL  = "votingSystemMessageType";
 
-
     public static final String CERT_NOT_FOUND_DIALOG_ID      = "certNotFoundDialog";
-
 
     private State state = State.WITHOUT_CSR;
     private List<SubSystemChangeListener> subSystemChangeListeners = new ArrayList<SubSystemChangeListener>();

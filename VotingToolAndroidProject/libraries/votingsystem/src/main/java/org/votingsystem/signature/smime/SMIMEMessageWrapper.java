@@ -18,6 +18,7 @@ import org.bouncycastle2.mail.smime.SMIMEException;
 import org.bouncycastle2.mail.smime.SMIMESigned;
 import org.bouncycastle2.util.Store;
 import org.bouncycastle2.util.encoders.Base64;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.PKIXCertPathReviewer;
 import org.votingsystem.util.DateUtils;
@@ -83,8 +84,9 @@ public class SMIMEMessageWrapper extends MimeMessage {
     public SMIMEMessageWrapper(Session session) throws MessagingException {
         super(session);
         fileName =  StringUtils.randomLowerString(System.currentTimeMillis(), 7);
-        setDisposition("attachment; fileName=" + fileName + SIGNED_PART_EXTENSION);
-        contentType = "application/x-pkcs7-mime; smime-type=signed-data; name=" + fileName + SIGNED_PART_EXTENSION;
+        setDisposition("attachment; fileName=" + fileName + ContentTypeVS.SIGNED.getExtension());
+        contentType = "application/x-pkcs7-mime; smime-type=signed-data; name=" + fileName +
+                ContentTypeVS.SIGNED.getExtension();
     }
 
     public SMIMEMessageWrapper (Session session, InputStream inputStream, String fileName) 
@@ -109,7 +111,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
         } else if (getContent() instanceof SharedByteArrayInputStream) {
          	File tempFile = FileUtils.copyStreamToFile(
          			(SharedByteArrayInputStream)getContent(), 
-         			File.createTempFile("multipart", ContenTypeVS.SIGNED.getExtension()));
+         			File.createTempFile("multipart", ContentTypeVS.SIGNED.getExtension()));
          	FileDataSource fileDataSource = new FileDataSource(tempFile);
          	smimeSigned = new SMIMESigned(new MimeMultipart(fileDataSource));
          	tempFile.deleteOnExit();
