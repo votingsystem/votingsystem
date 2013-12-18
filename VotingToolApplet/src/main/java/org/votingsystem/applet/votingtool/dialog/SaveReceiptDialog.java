@@ -82,15 +82,15 @@ public class SaveReceiptDialog extends javax.swing.JDialog {
         Map delegationDataMap = (Map) responseVS.getData();
         JSONObject messageJSON = (JSONObject) JSONSerializer.toJSON(delegationDataMap);
         java.util.List<File> fileList = new ArrayList<File>();
-        File smimeTempFile = File.createTempFile("receipt", ".p7s");
+        File smimeTempFile = File.createTempFile(ContextVS.RECEIPT_FILE_NAME, ".p7s");
         smimeTempFile.deleteOnExit();
         FileUtils.copyStreamToFile(new ByteArrayInputStream(responseVS.getSmimeMessage().getBytes()), smimeTempFile);
-        File certVSDataFile = File.createTempFile("certVSData", "");
+        File certVSDataFile = File.createTempFile(ContextVS.CANCEL_DATA_FILE_NAME, "");
         certVSDataFile.deleteOnExit();
         FileUtils.copyStreamToFile(new ByteArrayInputStream(messageJSON.toString().getBytes("UTF-8")), certVSDataFile);
         fileList.add(certVSDataFile);
         fileList.add(smimeTempFile);
-        File outputZip = File.createTempFile("vsFile", ".zip");
+        File outputZip = File.createTempFile(ContextVS.CANCEL_BUNDLE_FILE_NAME, ".zip");
         outputZip.deleteOnExit();
         FileUtils.packZip(outputZip, fileList);
         return outputZip;

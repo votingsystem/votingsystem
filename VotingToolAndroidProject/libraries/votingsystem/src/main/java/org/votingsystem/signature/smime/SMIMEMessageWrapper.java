@@ -109,7 +109,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
         } else if (getContent() instanceof SharedByteArrayInputStream) {
          	File tempFile = FileUtils.copyStreamToFile(
          			(SharedByteArrayInputStream)getContent(), 
-         			File.createTempFile("multipart", SIGNED_PART_EXTENSION)); 
+         			File.createTempFile("multipart", ContenTypeVS.SIGNED.getExtension()));
          	FileDataSource fileDataSource = new FileDataSource(tempFile);
          	smimeSigned = new SMIMESigned(new MimeMultipart(fileDataSource));
          	tempFile.deleteOnExit();

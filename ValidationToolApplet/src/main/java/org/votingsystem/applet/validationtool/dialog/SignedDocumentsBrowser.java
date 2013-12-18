@@ -9,6 +9,7 @@ import org.votingsystem.applet.validationtool.panel.EventVSInfoPanel;
 import org.votingsystem.applet.validationtool.panel.MessagePanel;
 import org.votingsystem.applet.validationtool.panel.ProgressBarPanel;
 import org.votingsystem.applet.validationtool.panel.SignedFilePanel;
+import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.util.DateUtils;
@@ -240,7 +241,7 @@ public class SignedDocumentsBrowser extends JDialog {
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = chooser.getSelectedFile();
                 if (file.getName().indexOf(".") == -1) {
-                    String fileName = file.getAbsolutePath() + ContextVS.SIGNED_PART_EXTENSION;
+                    String fileName = file.getAbsolutePath() + ContentTypeVS.SIGNED.getExtension();
                     FileOutputStream fos = new FileOutputStream(new File(fileName));
                     fos.write(mensajeMime.getBytes());
                     fos.close();

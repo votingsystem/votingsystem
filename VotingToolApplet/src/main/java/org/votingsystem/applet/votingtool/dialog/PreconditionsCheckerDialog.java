@@ -147,7 +147,7 @@ public class PreconditionsCheckerDialog extends JDialog {
                         case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:
                             CancelRepresentationDialog cancelDialog= new CancelRepresentationDialog(new JFrame(), true);
                             dispose();
-                            cancelDialog.show();
+                            cancelDialog.show(operationVS);
                             break;
                         case NEW_REPRESENTATIVE:
                             RepresentativeFormDialog representativeDialog = new RepresentativeFormDialog(new JFrame(), true);

@@ -37,6 +37,8 @@ public enum ContentTypeVS {
     OCSP_RESPONSE("application/ocsp-response", null),
 
     CMS_SIGNED("signed-data", null),
+    //smime.p7m -> Email message encrypted
+    //smime.p7s -> Email message that includes a digital signature
     SIGNED("application/pkcs7-signature","p7s"),
     ENCRYPTED("application/pkcs7-mime","p7m"),//.p7c
     SIGNED_AND_ENCRYPTED("application/pkcs7-signature;application/pkcs7-mime", "p7m"),
@@ -60,7 +62,7 @@ public enum ContentTypeVS {
 
     private ContentTypeVS(String name, String extension) {
         this.name = name;
-        this.extension = extension;
+        this.extension = "." + extension;
     }
 
     public String getName() {

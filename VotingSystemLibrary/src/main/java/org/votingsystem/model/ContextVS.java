@@ -72,8 +72,9 @@ public class ContextVS {
     public static String APPTEMPDIR;
     public static String ERROR_DIR;
 
-    public static String VOTE_FILE = "Vote_";
-    public static String CANCEL_VOTE_FILE = "Anulador_";
+    public static String RECEIPT_FILE_NAME = "receipt";
+    public static String CANCEL_DATA_FILE_NAME = "cancellationDataVS";
+    public static String CANCEL_BUNDLE_FILE_NAME = "cancellationBundleVS";
 
     public static final String CSR_FILE_NAME   = "csr";
     public static final String IMAGE_FILE_NAME   = "image";
@@ -123,9 +124,9 @@ public class ContextVS {
 
     public static final String MULTISIGNED_FILE_NAME = "MultiSign";
 
-    //smime.p7m -> Email message encrypted
-    //smime.p7s -> Email message that includes a digital signature
-    public static final String SIGNED_PART_EXTENSION = ".p7s";
+    public static final String HASH_CERTVS_KEY        = "hashCertVSBase64";
+    public static final String ORIGIN_HASH_CERTVS_KEY = "originHashCertVS";
+
 
     //For tests environments
     private static final String ROOT_ALIAS = "rootAlias";

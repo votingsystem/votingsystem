@@ -120,10 +120,6 @@ public class SignedMailGenerator {
          smimeSignedGenerator.addCertificates(dnieMimeMessage.getSmimeSigned().getCertificates());
          smimeSignedGenerator.addCRLs(dnieMimeMessage.getSmimeSigned().getCRLs());
          smimeSignedGenerator.getGeneratedDigests();
-         //MimeMultipart mimeMultipart = smimeSignedGenerator.generate(body, type.toString() + SIGNED_PART_EXTENSION);
-        // MimeMultipart mimeMultipart = smimeSignedGenerator.generate(
-         //        dnieMimeMessage, PROVIDER,
-           //      type.toString() + SIGNED_PART_EXTENSION);
          MimeMultipart mimeMultipart = smimeSignedGenerator.generate(
         		 body, ContextVS.PROVIDER, ContextVS.SIGNATURE_ALGORITHM);
          return mimeMultipart;

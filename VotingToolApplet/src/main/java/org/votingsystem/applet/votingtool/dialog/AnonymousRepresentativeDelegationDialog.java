@@ -308,8 +308,8 @@ public class AnonymousRepresentativeDelegationDialog extends JDialog {
                     Map receiptDataMap = (JSONObject) JSONSerializer.toJSON(receipt.getSignedContent());
                     responseVS = operation.validateReceiptDataMap(receiptDataMap);
                     Map delegationDataMap = new HashMap();
-                    delegationDataMap.put("hashCertVSBase64", hashCertVSBase64);
-                    delegationDataMap.put("originHashCertVS", originHashCertVS);
+                    delegationDataMap.put(ContextVS.HASH_CERTVS_KEY, hashCertVSBase64);
+                    delegationDataMap.put(ContextVS.ORIGIN_HASH_CERTVS_KEY, originHashCertVS);
                     ResponseVS hashCertVSData = new ResponseVS(ResponseVS.SC_OK);
                     hashCertVSData.setSmimeMessage(receipt);
                     hashCertVSData.setData(delegationDataMap);

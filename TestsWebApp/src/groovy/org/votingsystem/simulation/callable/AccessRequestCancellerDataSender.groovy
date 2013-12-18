@@ -35,7 +35,7 @@ public class AccessRequestCancellerDataSender implements Callable<ResponseVS> {
         SignedMailGenerator signedMailGenerator = new SignedMailGenerator(mockDnie, ContextVS.END_ENTITY_ALIAS,
                 ContextVS.PASSWORD.toCharArray(), ContextVS.VOTE_SIGN_MECHANISM);
         String subject = ApplicationContextHolder.getInstance().getMessage("cancelAccessRequestMsgSubject") + request.getEventVSId();
-        String voteCancellerFileName = ContextVS.CANCEL_VOTE_FILE + request.getEventVSId() +"_" +
+        String voteCancellerFileName = ContextVS.CANCEL_DATA_FILE_NAME + request.getEventVSId() +"_" +
                 request.getUserVS().getNif() + ".p7m"
         byte[] messageBytes = null;
         synchronized(this) {

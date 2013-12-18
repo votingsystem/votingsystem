@@ -1,5 +1,7 @@
 package org.votingsystem.model;
 
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 
@@ -79,6 +81,11 @@ public class ResponseVS<T> {
     public String getMessage() {
         if(message == null && messageBytes != null) message = new String(messageBytes);
         return message;
+    }
+
+    public JSONObject getSignedJSON() {
+        if(smimeMessage == null) return null;
+        else return (JSONObject) JSONSerializer.toJSON(smimeMessage.getSignedContent());
     }
 
     public void setMessage(String message) {

@@ -34,18 +34,19 @@ public class CancelRepresentationDialog extends JDialog {
     private JButton cancelButton;
     private JButton signAndSendButton;
     private JPanel formPanel;
+    private JPanel messagePanel;
+    private JLabel messageLabel;
     private File cancellationData;
+    private String outputFolder;
+    private String documentToSignStr = null;
+    private OperationVS operation;
 
     public CancelRepresentationDialog(Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        outputFolder = ContextVS.APPTEMPDIR + File.separator + UUID.randomUUID();
         pack();
         setLocationRelativeTo(null);
-    }
-
-    @Override public void show() {
-        openDataFile();
-        setVisible(true);
     }
 
     public void showProgressPanel (final boolean visibility, String... messages) {
@@ -81,24 +82,30 @@ public class CancelRepresentationDialog extends JDialog {
     private void initComponents() {
         logger.debug("initComponents");
         container = getContentPane();
+        container.setLayout(new MigLayout("fill", "", ""));
         progressBarPanel = new ProgressBarPanel();
-        container.setLayout(new MigLayout("fill", "", "[][]20[]"));
-        JLabel messageLabel = new JLabel(ContextVS.getMessage("saveReceiptLbl"));
-        messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        add(messageLabel, "growx, wrap");
+
+        messagePanel = new JPanel();
+        messagePanel.setLayout(new MigLayout("fill"));
+        messageLabel = new JLabel();
+        messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        messagePanel.add(messageLabel, "growx, wrap");
 
         Border formPanelBorder = BorderFactory.createLineBorder(Color.GRAY, 1);
         formPanel = new JPanel();
         formPanel.setBorder(formPanelBorder);
         formPanel.setLayout(new MigLayout("fill", "15[grow]15",""));
 
+        JLabel cancelBundleAdviceLabel = new JLabel(ContextVS.getMessage("cancelBundleAdviceMsg"), SwingConstants.CENTER);
+        formPanel.add(cancelBundleAdviceLabel, "growx, height 50::");
         JButton selectCancelationDataFile = new JButton(ContextVS.getMessage("selectCancelationDataButtonLbl"));
         selectCancelationDataFile.setIcon(ContextVS.getIcon(this, "open_folder"));
         selectCancelationDataFile.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) { openDataFile();}
         });
-        selectCancelationDataFile.add(signAndSendButton, "width :150:, cell 0 2, split2, align right");
+        formPanel.add(selectCancelationDataFile, "align right, wrap");
 
+        container.add(formPanel, "cell 0 1, grow, wrap 20");
 
         signAndSendButton = new JButton(ContextVS.getMessage("signAndSendLbl"));
         signAndSendButton.setIcon(ContextVS.getIcon(this, "document_signature_16"));
@@ -113,7 +120,7 @@ public class CancelRepresentationDialog extends JDialog {
         cancelButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) { cancel();}
         });
-        container.add(cancelButton, "width :150:, align right");
+        container.add(cancelButton, "width :150:, gapleft 30, align right");
     }
 
     private void openDataFile() {
@@ -123,8 +130,18 @@ public class CancelRepresentationDialog extends JDialog {
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File cancellationData = chooser.getSelectedFile();
                 if (cancellationData != null) {
-                    String outputFolder = ContextVS.APPTEMPDIR + File.separator + UUID.randomUUID();
                     FileUtils.unpackZip(cancellationData, new File(outputFolder));
+                    File cancelDataFile = new File(outputFolder + File.separator + ContextVS.CANCEL_DATA_FILE_NAME);
+                    if(cancelDataFile.exists()) {
+                        String jsonDataStr = FileUtils.getStringFromFile(cancelDataFile);
+                        JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(jsonDataStr);
+                        if(jsonObject.containsKey(ContextVS.ORIGIN_HASH_CERTVS_KEY)) {
+                            jsonObject.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED);
+                            jsonObject.put("UUID", UUID.randomUUID().toString());
+                            documentToSignStr = jsonObject.toString();
+                            signAndSendButton.setVisible(true);
+                        }
+                    }
                 }
             }
         } catch (Exception ex) {
@@ -160,6 +177,21 @@ public class CancelRepresentationDialog extends JDialog {
         dispose();
     }
 
+    private void setMessage (String message) {
+        if (message == null) container.remove(messagePanel);
+        else {
+            container.add(messagePanel, "cell 0 1, growx, wrap");
+            messageLabel.setText("<html><div style=\"margin: 5px 0 5px 0;color:#cc1606;\"><b>" +
+                    message + "</b></div></html>");
+        }
+        pack();
+    }
+
+    public void show(OperationVS operationVS) {
+        this.operation = operationVS;
+        setVisible(true);
+    }
+
     class SignedSenderWorker extends SwingWorker<ResponseVS, Object> {
 
         private String password = null;
@@ -170,16 +202,14 @@ public class CancelRepresentationDialog extends JDialog {
 
         @Override public ResponseVS doInBackground() throws Exception {
             logger.debug("SignedSenderWorker.doInBackground");
-            JSONObject documentToSignJSON = (JSONObject)JSONSerializer.toJSON(operation.getDocumentToSignMap());
             SMIMEMessageWrapper smimeMessage = DNIeContentSigner.genMimeMessage(null,
-                    operation.getNormalizedReceiverName(), documentToSignJSON.toString(),
+                    ContextVS.getInstance().getAccessControl().getNameNormalized(), documentToSignStr,
                     password.toCharArray(), operation.getSignedMessageSubject(), null);
             SMIMESignedSender senderWorker = new SMIMESignedSender(smimeMessage, operation.getUrlEnvioDocumento(),
                     ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED, null, ContextVS.getInstance().getAccessControl().
-                    getX509Certificate(), header);
+                    getX509Certificate());
             return senderWorker.call();
         }
-
 
         @Override protected void done() {
             showProgressPanel(false);
@@ -195,20 +225,12 @@ public class CancelRepresentationDialog extends JDialog {
                                 smimeMessageResp = new SMIMEMessageWrapper(bais);
                             }
                             JSONObject jsonObject = (JSONObject)JSONSerializer.toJSON(smimeMessageResp.getSignedContent());
-                            OperationVS result = OperationVS.populate(jsonObject);
-                            String msg = result.getMessage();
-                            if(TypeVS.VOTING_PUBLISHING == operation.getType() ||
-                                    TypeVS.CLAIM_PUBLISHING == operation.getType()) {
-                                String eventURL = ((java.util.List<String>)responseVS.getData()).iterator().next();
-                                result.setUrlDocumento(eventURL);
-                                msg = eventURL;
-                            }
-                            sendResponse(responseVS.getStatusCode(), msg);
+                            sendResponse(responseVS.getStatusCode(), jsonObject.getString("message"));
                         } catch (Exception ex) {
                             logger.error(ex.getMessage(), ex);
                             sendResponse(ResponseVS.SC_ERROR, ex.getMessage());
                         }
-                    } else sendResponse(responseVS.getStatusCode(), responseVS.getMessage());
+                    } else sendResponse(responseVS.getStatusCode(), responseVS.getSignedJSON().getString("message"));
                 } else {
                     sendResponse(responseVS.getStatusCode(), responseVS.getMessage());
                 }
