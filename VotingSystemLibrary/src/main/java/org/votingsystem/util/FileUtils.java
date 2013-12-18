@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 /**
@@ -22,9 +23,11 @@ public class FileUtils {
 
     private static Logger logger = Logger.getLogger(FileUtils.class);
 
+    private static final int  BUFFER_SIZE = 4096;
+
     public static byte[] getBytesFromInputStream(InputStream entrada) throws IOException {
         ByteArrayOutputStream salida = new ByteArrayOutputStream();
-        byte[] buf =new byte[1024];
+        byte[] buf =new byte[BUFFER_SIZE];
         int len;
         while((len = entrada.read(buf)) > 0){
             salida.write(buf,0,len);
@@ -55,7 +58,7 @@ public class FileUtils {
     public static File copyStreamToFile(InputStream entrada, File outputFile)
             throws Exception {
         OutputStream salida = new FileOutputStream(outputFile);
-        byte[] buf =new byte[1024];
+        byte[] buf =new byte[BUFFER_SIZE];
         int len;
         while((len = entrada.read(buf)) > 0){
             salida.write(buf,0,len);
@@ -173,9 +176,7 @@ public class FileUtils {
                             + file.getAbsolutePath());
                 }
             }
-        }else{
-            file.delete();//if file, then delete it
-        }
+        } else file.delete();//if file, then delete it
     }
 
     public static String getStringFromFile (File file) throws FileNotFoundException, IOException {
@@ -211,6 +212,46 @@ public class FileUtils {
         return result;
     }
 
+    private static String buildPath(String path, String file)  {
+        if (path == null || path.isEmpty()) return file;
+        else return path + "/" + file;
+    }
+
+    private static void zipDir(ZipOutputStream zos, String path, File dir) throws IOException {
+        if (!dir.canRead()) {
+           logger.debug("Cannot read " + dir.getCanonicalPath() + " (maybe because of permissions)");
+            return;
+        }
+        File[] files = dir.listFiles();
+        path = buildPath(path, dir.getName());
+        logger.debug("Adding Directory " + path);
+        for (File source : files) {
+            if (source.isDirectory()) zipDir(zos, path, source);
+            else zipFile(zos, path, source);
+        }
+        logger.debug("Leaving Directory " + path);
+    }
+
+    private static void zipFile(ZipOutputStream zos, String path, File file) throws IOException {
+        if (!file.canRead()) {
+            logger.debug("Cannot read " + file.getCanonicalPath() + " (maybe because of permissions)");
+            return;
+        }
+        logger.debug("Compressing " + file.getName());
+        zos.putNextEntry(new ZipEntry(buildPath(path, file.getName())));
+        FileInputStream fis = new FileInputStream(file);
+        byte[] buffer = new byte[4092];
+        int byteCount = 0;
+        while ((byteCount = fis.read(buffer)) != -1) {
+            zos.write(buffer, 0, byteCount);
+        }
+        fis.close();
+        zos.closeEntry();
+    }
+
+    /*
+     * From -> http://stackoverflow.com/questions/10103861/adding-files-to-zip-file
+     */
     public static void packZip(File output, List<File> sources) throws IOException {
         logger.debug("Packaging to " + output.getName());
         ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(output));
@@ -223,60 +264,55 @@ public class FileUtils {
         zipOut.close();
     }
 
-    private static String buildPath(String path, String file)  {
-        if (path == null || path.isEmpty()) return file;
-        else return path + "/" + file;
+    private static void extractFile(ZipInputStream in, File outdir, String name) throws IOException {
+        byte[] buffer = new byte[BUFFER_SIZE];
+        BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(new File(outdir,name)));
+        int count = -1;
+        while ((count = in.read(buffer)) != -1) out.write(buffer, 0, count);
+        out.close();
     }
 
-    private static void zipDir(ZipOutputStream zos, String path, File dir) throws IOException
-    {
-        if (!dir.canRead())
-        {
-           logger.debug("Cannot read " + dir.getCanonicalPath() + " (maybe because of permissions)");
-            return;
-        }
+    private static void mkdirs(File outdir,String path) {
+        File d = new File(outdir, path);
+        if( !d.exists() )
+            d.mkdirs();
+    }
 
-        File[] files = dir.listFiles();
-        path = buildPath(path, dir.getName());
-       logger.debug("Adding Directory " + path);
+    private static String dirpart(String name) {
+        int s = name.lastIndexOf( File.separatorChar );
+        return s == -1 ? null : name.substring( 0, s );
+    }
 
-        for (File source : files)
-        {
-            if (source.isDirectory())
-            {
-                zipDir(zos, path, source);
-            } else
-            {
-                zipFile(zos, path, source);
+    /***
+     * from - >http://stackoverflow.com/questions/10633595/java-zip-how-to-unzip-folder
+     * Extract zipfile to outdir with complete directory structure
+     * @param zipfile Input .zip file
+     * @param outdir Output directory
+     */
+    public static void extract(File zipfile, File outdir) {
+        try {
+            ZipInputStream zin = new ZipInputStream(new FileInputStream(zipfile));
+            ZipEntry entry;
+            String name, dir;
+            while ((entry = zin.getNextEntry()) != null) {
+                name = entry.getName();
+                if( entry.isDirectory() ) {
+                    mkdirs(outdir,name);
+                    continue;
+                }
+                /* this part is necessary because file entry can come before
+                 * directory entry where is file located
+                 * i.e.:
+                 *   /foo/foo.txt
+                 *   /foo/
+                 */
+                dir = dirpart(name);
+                if( dir != null ) mkdirs(outdir,dir);
+                extractFile(zin, outdir, name);
             }
+            zin.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-       logger.debug("Leaving Directory " + path);
     }
-
-    private static void zipFile(ZipOutputStream zos, String path, File file) throws IOException {
-        if (!file.canRead()) {
-           logger.debug("Cannot read " + file.getCanonicalPath() + " (maybe because of permissions)");
-            return;
-        }
-
-       logger.debug("Compressing " + file.getName());
-        zos.putNextEntry(new ZipEntry(buildPath(path, file.getName())));
-
-        FileInputStream fis = new FileInputStream(file);
-
-        byte[] buffer = new byte[4092];
-        int byteCount = 0;
-        while ((byteCount = fis.read(buffer)) != -1)
-        {
-            zos.write(buffer, 0, byteCount);
-            System.out.print('.');
-            System.out.flush();
-        }
-
-
-        fis.close();
-        zos.closeEntry();
-    }
-
 }
