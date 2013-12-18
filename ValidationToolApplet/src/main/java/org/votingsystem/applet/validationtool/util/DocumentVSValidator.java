@@ -153,7 +153,8 @@ public class DocumentVSValidator {
 
         if(contentJSON.containsKey("operation")) {
             TypeVS operationType = TypeVS.valueOf(contentJSON.getString("operation"));
-            if(TypeVS.REPRESENTATIVE_SELECTION != operationType) {
+            if(TypeVS.REPRESENTATIVE_SELECTION != operationType ||
+                    TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION != operationType) {
                 return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().
                         getMessage("operationErrorMsg", TypeVS.REPRESENTATIVE_SELECTION.toString(),
                                 operationType.toString(), signedFile.getName()));

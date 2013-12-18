@@ -134,18 +134,17 @@ public class PasswordDialog extends javax.swing.JDialog {
         logger.debug("checkPasswords");
         String password1 = new String(password1Field.getPassword());
         String password2 = new String(password2Field.getPassword());
-        if("".equals(password1) && "".equals(password1)) {
-            setMessage(ContextVS.getMessage("passwordMissing"));
-            return;
-        }
-        pack();
-        if (password1.equals(password2)) {
-            password = password1;
-            dispose();
-        } else {
-            setMessage(ContextVS.getMessage("passwordError"));
-            password1Field.setText("");
-            password2Field.setText("");
+        if(password1.trim().isEmpty() && password2.trim().isEmpty()) setMessage(ContextVS.getMessage("passwordMissing"));
+        else {
+            if (password1.equals(password2)) {
+                password = password1;
+                dispose();
+            } else {
+                setMessage(ContextVS.getMessage("passwordError"));
+                password1Field.setText("");
+                password2Field.setText("");
+                pack();
+            }
         }
     }
 

@@ -6,6 +6,7 @@ import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.model.AccessRequestVS
 import org.votingsystem.model.BackupRequestVS
 import org.votingsystem.model.ContentTypeVS
+import org.votingsystem.model.ContextVS
 import org.votingsystem.model.EventVSElection
 import org.votingsystem.model.ImageVS
 import org.votingsystem.model.MessageSMIME
@@ -15,13 +16,14 @@ import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.VoteVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
-import org.votingsystem.util.DateUtils
+import org.apache.commons.lang.time.DateUtils
 import org.votingsystem.util.NifUtils
 
 import java.security.MessageDigest
 import java.text.DateFormat
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
+
 
 class RepresentativeService {
 	
@@ -46,7 +48,7 @@ class RepresentativeService {
 			msg = messageSource.getMessage('nullParamErrorMsg', null, locale)
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:msg)
 		}
-		if(event.isActive(DateUtils.getTodayDate())) {
+		if(event.isActive(Calendar.getInstance().getTime())) {
 			msg = messageSource.getMessage('eventOpenErrorMsg',  [event.id].toArray(), locale)
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:msg)	
 		}
@@ -204,7 +206,7 @@ class RepresentativeService {
 				numVotesRepresented:numVotesRepresentedByRepresentative]
 			representativesMap[representative.nif] = representativeMap
 			
-			String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillisFromMilliseconds(
+			String elapsedTimeStr = getElapsedTimeHoursMinutesMillisFromMilliseconds(
 				System.currentTimeMillis() - representativeBegin)
 			
 			
@@ -249,7 +251,7 @@ class RepresentativeService {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:msg)
 		}
 		
-		Date selectedDate = DateUtils.getTodayDate();	
+		Date selectedDate = Calendar.getInstance().getTime();
 		/*if(event.getDateFinish().before(selectedDate)) {
 			log.debug("Event finished, fetching map from backup data")
 			Map eventMetaInfMap = JSON.parse(event.metaInf)
@@ -404,7 +406,7 @@ class RepresentativeService {
 			}
 		}
 		
-		def selectedDateStr = DateUtils.getShortStringFromDate(selectedDate)
+		def selectedDateStr = getShortStringFromDate(selectedDate)
 		String serviceURLPart = messageSource.getMessage(
 			'representativeAcreditationsBackupPath', [representative.nif].toArray(), locale)
 		def basedir = "${grailsApplication.config.VotingSystem.backupCopyPath}" +
@@ -568,8 +570,7 @@ class RepresentativeService {
 		try {
 			def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
 			String base64ImageHash = messageJSON.base64ImageHash
-			MessageDigest messageDigest = MessageDigest.getInstance(
-                    grailsApplication.config.VotingSystem.votingHashAlgorithm);
+			MessageDigest messageDigest = MessageDigest.getInstance(ContextVS.VOTING_DATA_DIGEST);
 			byte[] resultDigest =  messageDigest.digest(imageBytes);
 			String base64ResultDigest = new String(Base64.encode(resultDigest));
 			log.debug("saveRepresentativeData - base64ImageHash: ${base64ImageHash}" + 
@@ -587,7 +588,7 @@ class RepresentativeService {
 				type:ImageVS.Type.REPRESENTATIVE, fileBytes:imageBytes)
 			if(UserVS.Type.REPRESENTATIVE != userVS.type) {
 				userVS.type = UserVS.Type.REPRESENTATIVE
-				userVS.representativeRegisterDate = DateUtils.getTodayDate()
+				userVS.representativeRegisterDate = Calendar.getInstance().getTime()
 				userVS.representative = null
 				cancelRepresentationDocument(messageSMIMEReq, userVS);
 				msg = messageSource.getMessage('representativeDataCreatedOKMsg', 
@@ -635,8 +636,8 @@ class RepresentativeService {
 		log.debug("getVotingHistoryBackup - representative: ${representative.nif}" + 
 			" - dateFrom: ${dateFrom} - dateTo: ${dateTo}")
 		
-		def dateFromStr = DateUtils.getShortStringFromDate(dateFrom)
-		def dateToStr = DateUtils.getShortStringFromDate(dateTo)
+		def dateFromStr = getShortStringFromDate(dateFrom)
+		def dateToStr = getShortStringFromDate(dateTo)
 		
 		String serviceURLPart = messageSource.getMessage(
 			'representativeVotingHistoryBackupPartPath', [representative.nif].toArray(), locale)
@@ -645,7 +646,7 @@ class RepresentativeService {
 		log.debug("getVotingHistoryBackup - basedir: ${basedir}")
 		File zipResult = new File("${basedir}.zip")
 
-		String datePathPart = DateUtils.getShortStringFromDate(DateUtils.getTodayDate())
+		String datePathPart = getShortStringFromDate(Calendar.getInstance().getTime())
 		String backupURL = "/backup/${datePathPart}/${serviceURLPart}.zip"
 		String webappBackupPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}${backupURL}"
 		
@@ -687,8 +688,8 @@ class RepresentativeService {
 				sessionFactory.currentSession.clear()
 			}
 		}
-		def metaInfMap = [dateFrom: DateUtils.getStringFromDate(dateFrom),
-			dateTo:DateUtils.getStringFromDate(dateTo), numVotes:numVotes, 
+		def metaInfMap = [dateFrom: getStringFromDate(dateFrom),
+			dateTo:getStringFromDate(dateTo), numVotes:numVotes,
 			representativeURL:"${grailsApplication.config.grails.serverURL}/representative/${representative.id}"]
 		String metaInfJSONStr = metaInfMap as JSON
 		metaInfFile = new File("${basedir}/meta.inf")
@@ -703,9 +704,48 @@ class RepresentativeService {
 			data:metaInfMap, message:backupURL)
 	}
 
+    ResponseVS validateAnonymousRequest(MessageSMIME messageSMIMEReq, Locale locale) {
+        log.debug("validateAnonymousRequest")
+        SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+        UserVS userVS = messageSMIMEReq.getUserVS()
+        String msg
+        try {
+            if(userVS.getDelegationFinish() != null) {
+                MessageSMIME userDelegation = MessageSMIME.findWhere(type:TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION,
+                        userVS:userVS)
+                String userDelegationURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${userDelegation?.id}"
+                msg = messageSource.getMessage('userWithPreviousDelegationErrorMsg' ,[userVS.nif,
+                        userVS.delegationFinish].toArray(), locale)
+                log.error(msg)
+                return new ResponseVS(statusCode: ResponseVS.SC_ERROR, contentType: ContentTypeVS.JSON,
+                        data:[message:msg, URL:userDelegationURL])
+            }
+            def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
+            TypeVS operationType = TypeVS.valueOf(messageJSON.operation)
+            if (messageJSON.accessControlURL && messageJSON.weeksOperationActive &&
+                    (TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION == operationType)) {
+                msg = messageSource.getMessage('requestWithErrorsMsg', null, locale)
+                log.error("validateAnonymousRequest - msg: ${msg} - ${messageJSON}")
+                return new ResponseVS(statusCode: ResponseVS.SC_ERROR,contentType:ContentTypeVS.JSON,data:[message:msg])
+            }
+            // _ TODO _
+            //Date nearestMinute = DateUtils.round(now, Calendar.MINUTE);
+            //??? Date nearestMonday = DateUtils.round(now, Calendar.MONDAY);
+            Date delegationFinish = DateUtils.addDays(Calendar.getInstance().getTime(),
+                    Integer.valueOf(messageJSON.weeksOperationActive) * 7)
+            userVS.setDelegationFinish(delegationFinish)
+            userVS.save()
+            return new ResponseVS(statusCode: ResponseVS.SC_OK, type: TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION,
+                    userVS:userVS, data:[weeksOperationActive:messageJSON.weeksOperationActive])
+        } catch(Exception ex) {
+            log.error (ex.getMessage(), ex)
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR, type:TypeVS.ERROR,
+                    message:messageSource.getMessage('anonymousDelegationErrorMsg', null, locale))
+        }
+    }
 	
 	ResponseVS processVotingHistoryRequest(MessageSMIME messageSMIMEReq, Locale locale) {
-		log.debug("processVotingHistoryRequest -")
+		log.debug("processVotingHistoryRequest")
 		SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage()
 		UserVS userVS = messageSMIMEReq.getUserVS()
 		def messageJSON
@@ -714,8 +754,8 @@ class RepresentativeService {
 			TypeVS type = TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST 
 			//REPRESENTATIVE_VOTING_HISTORY_REQUEST_ERROR
 			messageJSON = JSON.parse(smimeMessage.getSignedContent())
-			Date dateFrom = DateUtils.getDateFromString(messageJSON.dateFrom)
-			Date dateTo = DateUtils.getDateFromString(messageJSON.dateTo)
+			Date dateFrom = getDateFromString(messageJSON.dateFrom)
+			Date dateTo = getDateFromString(messageJSON.dateTo)
 			if(dateFrom.after(dateTo)) {
 				log.error "processVotingHistoryRequest - DATE ERROR - dateFrom '${dateFrom}' dateTo '${dateTo}'"
 				DateFormat formatter = new SimpleDateFormat("dd MMM 'de' yyyy 'a las' HH:mm");
@@ -889,7 +929,7 @@ class RepresentativeService {
 		try {
 			messageJSON = JSON.parse(smimeMessage.getSignedContent())
 			String requestValidatedNIF =  NifUtils.validate(messageJSON.representativeNif)
-			Date selectedDate = DateUtils.getDateFromString(messageJSON.selectedDate)
+			Date selectedDate = getDateFromString(messageJSON.selectedDate)
 			if(!requestValidatedNIF || !messageJSON.operation || 
 				(TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST != TypeVS.valueOf(messageJSON.operation))||
 				!selectedDate || !messageJSON.email || !messageJSON.UUID ){

@@ -14,8 +14,7 @@ class TagVSService {
 
 	Set<TagVS> save(JSONArray tags) {
 		log.debug("save - tags: ${tags}")
-		def tagSet = tags.findAll {it != JSONObject.NULL &&
-				!"".equals(it)}.collect { tagItem ->
+		def tagSet = tags.findAll {it != JSONObject.NULL && !it.toString().isEmpty()}.collect { tagItem ->
 			tagItem = tagItem.toLowerCase().trim()
 			def tag
 			TagVS.withTransaction {

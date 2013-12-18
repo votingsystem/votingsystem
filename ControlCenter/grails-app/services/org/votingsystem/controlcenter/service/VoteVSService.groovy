@@ -4,6 +4,7 @@ import grails.converters.JSON
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.votingsystem.model.CertificateVS
 import org.votingsystem.model.ContentTypeVS
+import org.votingsystem.model.ContextVS
 import org.votingsystem.model.EventVS
 import org.votingsystem.model.EventVSElection
 import org.votingsystem.model.FieldEventVS
@@ -48,7 +49,7 @@ class VoteVSService {
 			}
 			CertificateVS certificateVS = new CertificateVS(isRoot:false, state: CertificateVS.State.OK,
 				    type:CertificateVS.Type.VOTEVS, content:voteVS.getX509Certificate().getEncoded(),
-                    hashCertVoteBase64:voteVS.getHashCertVoteBase64(),
+                    hashCertVSBase64:voteVS.getHashCertVSBase64(),
 				    userVS:messageSMIMEReq.userVS, eventVSElection:eventVS,
                     serialNumber:voteVS.getX509Certificate().getSerialNumber().longValue(),
 				    validFrom:voteVS.getX509Certificate().getNotBefore(),
@@ -129,15 +130,14 @@ class VoteVSService {
 		try {
 			def cancelDataJSON = JSON.parse(smimeMessageReq.getSignedContent())
 			def originHashCertVote = cancelDataJSON.originHashCertVote
-			def hashCertVoteBase64 = cancelDataJSON.hashCertVoteBase64
-			def hashCertVoteVS = CMSUtils.getHashBase64(originHashCertVote,
-				"${grailsApplication.config.VotingSystem.votingHashAlgorithm}")
-			if (!hashCertVoteBase64.equals(hashCertVoteVS))
+			def hashCertVSBase64 = cancelDataJSON.hashCertVSBase64
+			def hashCertVoteVS = CMSUtils.getHashBase64(originHashCertVote, ContextVS.VOTING_DATA_DIGEST)
+			if (!hashCertVSBase64.equals(hashCertVoteVS))
 					return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 						message:messageSource.getMessage(
 						'voteCancellationHashCertificateError', null, locale))
 			VoteVSCanceller voteVSCanceller = VoteVSCanceller.findWhere(
-				hashCertVoteBase64:hashCertVoteBase64)
+				hashCertVSBase64:hashCertVSBase64)
 			if(voteVSCanceller) {
 				String voteURL = "${grailsApplication.config.grails.serverURL}/voteVS/${voteVSCanceller.getVoteVS.id}"
 				return new ResponseVS(statusCode:ResponseVS.SC_CANCELLATION_REPEATED, data:voteVSCanceller.messageSMIME,
@@ -145,7 +145,7 @@ class VoteVSService {
 					    message:messageSource.getMessage('voteAlreadyCancelled',
 						[voteURL].toArray(), locale), eventVS:voteVSCanceller.eventVS)
 			}
-			def certificateVS = CertificateVS.findWhere(hashCertVoteBase64:hashCertVoteBase64)
+			def certificateVS = CertificateVS.findWhere(hashCertVSBase64:hashCertVSBase64)
 			if (!certificateVS)
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.CANCEL_VOTE_ERROR,
 					message:messageSource.getMessage( 'certNotFoundErrorMsg', null, locale))
@@ -172,7 +172,7 @@ class VoteVSService {
 			}
 			voteVSCanceller = new VoteVSCanceller(voteVS:voteVS, certificateVS:certificateVS, eventVSElection:eventVS,
                     state:VoteVSCanceller.State.CANCELLATION_OK,messageSMIME:messageSMIMEResp,
-				    originHashCertVoteBase64:originHashCertVote, hashCertVoteBase64:hashCertVoteBase64)
+				    originHashCertVSBase64:originHashCertVote, hashCertVSBase64:hashCertVSBase64)
 			if (!voteVSCanceller.save()) {
 			    voteVSCanceller.errors.each { log.error("processCancel - ${it}") }
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.CANCEL_VOTE_ERROR,
@@ -199,8 +199,8 @@ class VoteVSService {
 	public Map getVotoMap(VoteVS voteVS) {
 		if(!voteVS) return [:]
 		HexBinaryAdapter hexConverter = new HexBinaryAdapter();
-		String hashHex = hexConverter.marshal(voteVS.certificateVS?.hashCertVoteBase64?.getBytes());
-		Map voteVSMap = [id:voteVS.id, hashCertVoteBase64:voteVS.certificateVS.hashCertVoteBase64,
+		String hashHex = hexConverter.marshal(voteVS.certificateVS?.hashCertVSBase64?.getBytes());
+		Map voteVSMap = [id:voteVS.id, hashCertVSBase64:voteVS.certificateVS.hashCertVSBase64,
 			    fieldEventVSId:voteVS.getFieldEventVS.fieldEventVSId,
                 accessControlEventVSId: voteVS.eventVS.accessControlEventVSId,
 			eventVSElectionURL:voteVS.eventVS?.url, state:voteVS?.state?.toString(),

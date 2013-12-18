@@ -42,7 +42,7 @@ class EventVSService {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
 				message:messageSource.getMessage('error.dateBeginAfterdateFinishalMsg', null, locale) )
 		}
-		Date fecha = DateUtils.getTodayDate()
+		Date fecha = Calendar.getInstance().getTime()
 		if (fecha.after(eventVS.dateFinish) &&
 			eventVS.state != EventVS.State.TERMINATED) {
 			EventVSElection.withTransaction {

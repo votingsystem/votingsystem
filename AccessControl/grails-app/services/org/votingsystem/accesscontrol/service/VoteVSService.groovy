@@ -5,13 +5,13 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import org.votingsystem.model.AccessRequestVS
 import org.votingsystem.model.CertificateVS
 import org.votingsystem.model.ContentTypeVS
+import org.votingsystem.model.ContextVS
 import org.votingsystem.model.EventVSElection
 import org.votingsystem.model.FieldEventVS
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
-import org.votingsystem.model.VoteRequestCsrVS
 import org.votingsystem.model.VoteVS
 import org.votingsystem.model.VoteVSCanceller
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
@@ -75,21 +75,19 @@ class VoteVSService {
 	
 	private ResponseVS checkCancelJSONData(JSONObject cancelDataJSON) {
 		def originHashCertVote = cancelDataJSON.originHashCertVote
-		def hashCertVoteBase64 = cancelDataJSON.hashCertVoteBase64
+		def hashCertVSBase64 = cancelDataJSON.hashCertVSBase64
 		def originHashAccessRequest = cancelDataJSON.originHashAccessRequest
 		def hashAccessRequestBase64 = cancelDataJSON.hashAccessRequestBase64
-		if(!originHashCertVote || !hashCertVoteBase64 || !originHashAccessRequest || !hashAccessRequestBase64) {
+		if(!originHashCertVote || !hashCertVSBase64 || !originHashAccessRequest || !hashAccessRequestBase64) {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, type:TypeVS.CANCEL_VOTE_ERROR,
 				message:messageSource.getMessage('voteCancellationDataError', null, locale))
 		}
-		def hashCertVoteVS = CMSUtils.getHashBase64(originHashCertVote,
-			"${grailsApplication.config.VotingSystem.votingHashAlgorithm}")
-		def hashRequest = CMSUtils.getHashBase64(originHashAccessRequest,
-			"${grailsApplication.config.VotingSystem.votingHashAlgorithm}")
+		def hashCertVoteVS = CMSUtils.getHashBase64(originHashCertVote, ContextVS.VOTING_DATA_DIGEST)
+		def hashRequest = CMSUtils.getHashBase64(originHashAccessRequest, ContextVS.VOTING_DATA_DIGEST)
 		if (!hashAccessRequestBase64.equals(hashRequest))
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:messageSource.getMessage(
 				'voteCancellationAccessRequestHashError', null, locale), type:TypeVS.CANCEL_VOTE_ERROR)
-		if (!hashCertVoteBase64.equals(hashCertVoteVS))
+		if (!hashCertVSBase64.equals(hashCertVoteVS))
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:messageSource.getMessage(
 					'voteCancellationHashCertificateError', null, locale), type:TypeVS.CANCEL_VOTE_ERROR)
 		return new ResponseVS(statusCode:ResponseVS.SC_OK)
@@ -99,7 +97,7 @@ class VoteVSService {
            JSONObject responseDataJSON, Locale locale) {
 		ResponseVS responseVS = checkCancelJSONData(responseDataJSON)
 		if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
-		if(!(requestDataJSON.hashCertVoteBase64.equals(responseDataJSON.hashCertVoteBase64)) ||
+		if(!(requestDataJSON.hashCertVSBase64.equals(responseDataJSON.hashCertVSBase64)) ||
 			!(requestDataJSON.hashAccessRequestBase64.equals(responseDataJSON.hashAccessRequestBase64))){
 			String msg = messageSource.getMessage('cancelDataWithErrorsMsg', null, locale)
 			log.error("checkCancelResponseJSONData - requestDataJSON: '${requestDataJSON}'" + 
@@ -118,7 +116,7 @@ class VoteVSService {
 			def cancelDataJSON = JSON.parse(messageSMIME.getSmimeMessage().getSignedContent())
 			ResponseVS responseVS = checkCancelJSONData(cancelDataJSON)
 			if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
-			def hashCertVoteBase64 = cancelDataJSON.hashCertVoteBase64
+			def hashCertVSBase64 = cancelDataJSON.hashCertVSBase64
 			def hashAccessRequestBase64 = cancelDataJSON.hashAccessRequestBase64
 
 			String msg
@@ -133,7 +131,7 @@ class VoteVSService {
 				return new ResponseVS(statusCode:ResponseVS.SC_CANCELLATION_REPEATED, 
 					message:msg, type:TypeVS.CANCEL_VOTE_ERROR)
 			}
-			CertificateVS certificateVS = CertificateVS.findWhere(hashCertVoteBase64:hashCertVoteBase64)
+			CertificateVS certificateVS = CertificateVS.findWhere(hashCertVSBase64:hashCertVSBase64)
 			if (!certificateVS){
 				msg = messageSource.getMessage(
 					'voteCancellationCsrRequestNotFoundError', null, locale)
@@ -143,7 +141,7 @@ class VoteVSService {
 			} 
 			else eventVSElection = certificateVS.eventVSElection
 			def voteVS = VoteVS.findWhere(certificateVS:certificateVS)
-			VoteVSCanceller voteCanceller = VoteVSCanceller.findWhere(hashCertVoteBase64:hashCertVoteBase64)
+			VoteVSCanceller voteCanceller = VoteVSCanceller.findWhere(hashCertVSBase64:hashCertVSBase64)
 			if(voteCanceller) {
 				String voteURL = "${grailsApplication.config.grails.serverURL}/voteVS/${voteCanceller.voteVS.id}"
 				msg = messageSource.getMessage('voteAlreadyCancelled',[voteURL].toArray(), locale)
@@ -254,9 +252,9 @@ class VoteVSService {
 			voteCanceller = new VoteVSCanceller(messageSMIME:messageSMIMEResp, state:cancellerState,
 				accessRequestVS:accessRequestVS, voteRequestCsrVS:certificateVS.voteRequestCsrVS,
 				originHashAccessRequestBase64:cancelDataJSON.originHashAccessRequest,
-				originHashCertVoteBase64:cancelDataJSON.originHashCertVote,
+				originHashCertVSBase64:cancelDataJSON.originHashCertVote,
 				hashAccessRequestBase64:hashAccessRequestBase64,
-				hashCertVoteBase64:hashCertVoteBase64,
+				hashCertVSBase64:hashCertVSBase64,
 				eventVSElection:eventVSElection, voteVS:voteVS)
 			if (!voteCanceller.save()) {voteCanceller.errors.each { log.error("processCancel - error - ${it}")}}
 			if(voteVS) {
@@ -265,7 +263,6 @@ class VoteVSService {
 			}
 			accessRequestVS.state = AccessRequestVS.State.CANCELLED
 			accessRequestVS.save()
-            certificateVS.voteRequestCsrVS.state = VoteRequestCsrVS.State.CANCELLED
             certificateVS.state = CertificateVS.State.CANCELLED
             certificateVS.save()
 			return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.CANCEL_VOTE, data:messageSMIMEResp,
@@ -280,8 +277,8 @@ class VoteVSService {
 	public Map getVotoMap(VoteVS voteVS) {
 		if(!voteVS) return [:]
 		HexBinaryAdapter hexConverter = new HexBinaryAdapter();
-		String hashHex = hexConverter.marshal(voteVS.certificateVS?.hashCertVoteBase64?.getBytes());
-		Map voteVSMap = [id:voteVS.id, hashCertVoteBase64:voteVS.certificateVS.hashCertVoteBase64,
+		String hashHex = hexConverter.marshal(voteVS.certificateVS?.hashCertVSBase64?.getBytes());
+		Map voteVSMap = [id:voteVS.id, hashCertVSBase64:voteVS.certificateVS.hashCertVSBase64,
 			fieldEventVSId:voteVS.getFieldEventVS.id, eventVSElectionId:voteVS.eventVSElection.id,
 			eventVSElectionURL:"${grailsApplication.config.grails.serverURL}/eventVSElection/${voteVS.eventVSElection?.id}",
 			state:voteVS?.state?.toString(),

@@ -118,33 +118,12 @@ public class PreconditionsCheckerDialog extends JDialog {
                         ContextVS.getInstance().setControlCenter((ControlCenterVS)responseVS.getData());
                     }
                     break;
-                case REPRESENTATIVE_REVOKE:
-                case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
-                case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
-                case NEW_REPRESENTATIVE:
-                case REPRESENTATIVE_SELECTION:
-                case MANIFEST_PUBLISHING:
-                case MANIFEST_SIGN:
-                case CLAIM_PUBLISHING:
-                case SMIME_CLAIM_SIGNATURE:
-                case VOTING_PUBLISHING:
-                case EVENT_CANCELLATION:
-                case CONTROL_CENTER_ASSOCIATION:
-                case ACCESS_REQUEST_CANCELLATION:
-                case VOTE_CANCELLATION: 
-                case BACKUP_REQUEST:
+                default:
                     String serverURL = operationVS.getUrlServer().trim();
                     responseVS = checkActorVS(serverURL);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         ContextVS.getInstance().setAccessControl((AccessControlVS)responseVS.getData());
                     }
-                    break;
-                default: 
-                    logger.error(" ################# UNKNOWN OPERATION -> " +  
-                            operationVS.getType());
-                    responseVS = new ResponseVS(ResponseVS.SC_ERROR,
-                            ContextVS.getInstance().getMessage("unknownOperationErrorMsg") +  operationVS.getType());
-                    break;
             }
             } catch(Exception ex) {
                 logger.error(ex.getMessage(), ex);
@@ -160,10 +139,15 @@ public class PreconditionsCheckerDialog extends JDialog {
                         operationVS.getType() + " - status: " + responseVS.getStatusCode());
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     switch(operationVS.getType()) {
-                        case SAVE_VOTE_RECEIPT:
+                        case SAVE_RECEIPT:
                             SaveReceiptDialog saveReceiptDialog = new SaveReceiptDialog(new JFrame(), true);
                             dispose();
                             saveReceiptDialog.show(operationVS.getArgs()[0]);
+                            break;
+                        case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:
+                            CancelRepresentationDialog cancelDialog= new CancelRepresentationDialog(new JFrame(), true);
+                            dispose();
+                            cancelDialog.show();
                             break;
                         case NEW_REPRESENTATIVE:
                             RepresentativeFormDialog representativeDialog = new RepresentativeFormDialog(new JFrame(), true);
@@ -175,28 +159,16 @@ public class PreconditionsCheckerDialog extends JDialog {
                             dispose();
                             votacionDialog.show(operationVS);
                             break;
-                        case REPRESENTATIVE_REVOKE:
-                        case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
-                        case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
-                        case REPRESENTATIVE_SELECTION:
-                        case MANIFEST_PUBLISHING:
-                        case MANIFEST_SIGN:
-                        case CLAIM_PUBLISHING:
-                        case SMIME_CLAIM_SIGNATURE:
-                        case VOTING_PUBLISHING:
-                        case EVENT_CANCELLATION:
-                        case CONTROL_CENTER_ASSOCIATION:
-                        case ACCESS_REQUEST_CANCELLATION:
-                        case VOTE_CANCELLATION:
-                        case BACKUP_REQUEST:
+                        case ANONYMOUS_REPRESENTATIVE_SELECTION:
+                            AnonymousRepresentativeDelegationDialog repDelegationDialog =
+                                    new AnonymousRepresentativeDelegationDialog(new JFrame(), true);
+                            dispose();
+                            repDelegationDialog.show(operationVS);
+                            break;
+                        default:
                             SignatureDialog signatureDialog = new SignatureDialog(new JFrame(), true);
                             dispose();
                             signatureDialog.show(operationVS);
-                            break;
-                        default:
-                            logger.debug("############ UNKNOWN OPERATION -> " + operationVS.getType().toString());
-                            sendResponse(ResponseVS.SC_ERROR, ContextVS.getInstance().
-                                    getMessage("unknownOperationErrorMsg") + operationVS.getType());
                     }            
                 } else {
                     logger.debug("responseVS.getMessage(): " + responseVS.getMessage());

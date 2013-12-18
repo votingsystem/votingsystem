@@ -158,7 +158,7 @@ class SearchController {
             dateFinishFrom = DateUtils.getDateFromString(messageJSON.dateFinishFrom)
         if(messageJSON.dateFinishTo)
             dateFinishTo = DateUtils.getDateFromString(messageJSON.dateFinishTo)
-        if(messageJSON.eventState &&  !"".equals(messageJSON.eventState.trim())) {
+        if(messageJSON.eventState &&  !messageJSON.eventState.trim().isEmpty()) {
             eventVSStates = new ArrayList<EventVS.State>();
             EventVS.State eventVSState = EventVS.State.valueOf(messageJSON.eventState)
             eventVSStates.add(eventVSState);

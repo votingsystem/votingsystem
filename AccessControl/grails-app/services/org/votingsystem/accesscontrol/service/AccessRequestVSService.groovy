@@ -39,10 +39,10 @@ class AccessRequestVSService {
 				accessDataJSON.hashAccessRequestBase64 &&
 				(TypeVS.ACCESS_REQUEST == operationType)) {
 				status = ResponseVS.SC_OK
-			} else msg = messageSource.getMessage('accessRequestWithErrorsMsg', null, locale)
+			} else msg = messageSource.getMessage('requestWithErrorsMsg', null, locale)
 		} catch(Exception ex) {
 			log.error(ex.getMessage(), ex)
-			msg = messageSource.getMessage('accessRequestWithErrorsMsg', null, locale)
+			msg = messageSource.getMessage('requestWithErrorsMsg', null, locale)
 		}
 		if(ResponseVS.SC_OK == status) typeRespuesta = TypeVS.ACCESS_REQUEST
 		else log.error("checkAccessRequestJSONData - msg: ${msg} - data:${accessDataJSON.toString()}")
@@ -66,7 +66,7 @@ class AccessRequestVSService {
 				eventVSElection = EventVSElection.findById(Long.valueOf(messageJSON.eventId))
 			}
 			if (eventVSElection) {
-				if (!eventVSElection.isActive(DateUtils.getTodayDate())) {
+				if (!eventVSElection.isActive(Calendar.getInstance().getTime())) {
 					msg = messageSource.getMessage('eventVS.messageCerrado', null, locale)
 					log.error("saveRequest - EVENT CLOSED - ${msg}")
 					return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
@@ -137,7 +137,7 @@ class AccessRequestVSService {
 		}catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR, type:TypeVS.ACCESS_REQUEST_ERROR,
-					message:messageSource.getMessage('accessRequestWithErrorsMsg', null, locale))
+					message:messageSource.getMessage('requestWithErrorsMsg', null, locale))
 		}
     }
 

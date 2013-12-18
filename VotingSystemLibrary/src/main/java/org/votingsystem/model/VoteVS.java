@@ -46,7 +46,7 @@ public class VoteVS implements Serializable {
     @Transient private String voteUUID;
     @Transient private String originHashCertVote;
     @Transient private String hashCertVoteHex;
-    @Transient private String hashCertVoteBase64;
+    @Transient private String hashCertVSBase64;
     @Transient private String originHashAccessRequest;
     @Transient private String hashAccessRequestBase64;
     @Transient private String accessControlURL;
@@ -158,21 +158,21 @@ public class VoteVS implements Serializable {
 
     @Transient public String getHashCertVoteHex() {
         if(hashCertVoteHex != null) return hashCertVoteHex;
-        if (hashCertVoteBase64 == null) return null;
+        if (hashCertVSBase64 == null) return null;
         HexBinaryAdapter hexConverter = new HexBinaryAdapter();
-        return hexConverter.marshal(hashCertVoteBase64.getBytes());
+        return hexConverter.marshal(hashCertVSBase64.getBytes());
     }
 
     public void setHashCertVoteHex(String hashCertVoteHex) {
         this.hashCertVoteHex = hashCertVoteHex;
     }
 
-    public String getHashCertVoteBase64() {
-        return hashCertVoteBase64;
+    public String getHashCertVSBase64() {
+        return hashCertVSBase64;
     }
 
-    public void setHashCertVoteBase64(String hashCertVoteBase64) {
-        this.hashCertVoteBase64 = hashCertVoteBase64;
+    public void setHashCertVSBase64(String hashCertVSBase64) {
+        this.hashCertVSBase64 = hashCertVSBase64;
     }
 
     public String getAccessControlURL() {
@@ -232,7 +232,7 @@ public class VoteVS implements Serializable {
         originHashAccessRequest = UUID.randomUUID().toString();
         hashAccessRequestBase64 = CMSUtils.getHashBase64(originHashAccessRequest, ContextVS.VOTING_DATA_DIGEST);
         originHashCertVote = UUID.randomUUID().toString();
-        hashCertVoteBase64 = CMSUtils.getHashBase64(originHashCertVote, ContextVS.VOTING_DATA_DIGEST);
+        hashCertVSBase64 = CMSUtils.getHashBase64(originHashCertVote, ContextVS.VOTING_DATA_DIGEST);
     }
 
     public static VoteVS genRandomVote (String digestAlg, EventVS eventVS)throws NoSuchAlgorithmException {
@@ -278,7 +278,7 @@ public class VoteVS implements Serializable {
             String hashCertVoteHex = ((DERUTF8String)hashCertDER.getObject()).toString();
             voteVS.setHashCertVoteHex(hashCertVoteHex);
             HexBinaryAdapter hexConverter = new HexBinaryAdapter();
-            voteVS.setHashCertVoteBase64(new String(hexConverter.unmarshal(hashCertVoteHex)));
+            voteVS.setHashCertVSBase64(new String(hexConverter.unmarshal(hashCertVoteHex)));
         }
 
         byte[] representativeURLExtensionValue = x509Certificate.getExtensionValue(ContextVS.REPRESENTATIVE_URL_OID);
@@ -319,7 +319,7 @@ public class VoteVS implements Serializable {
         Map map = new HashMap();
         map.put("operation", TypeVS.CANCEL_VOTE.toString());
         map.put("originHashCertVote", originHashCertVote);
-        map.put("hashCertVoteBase64", hashCertVoteBase64);
+        map.put("hashCertVSBase64", hashCertVSBase64);
         map.put("originHashAccessRequest", originHashAccessRequest);
         map.put("hashAccessRequestBase64", hashAccessRequestBase64);
         map.put("UUID", UUID.randomUUID().toString());
@@ -336,9 +336,9 @@ public class VoteVS implements Serializable {
             opcionHashMap.put("content", optionSelected.getContent());
             resultMap.put("optionSelected", opcionHashMap);
         }
-        if(hashCertVoteBase64 != null) {
-            resultMap.put("hashCertVoteBase64", hashCertVoteBase64);
-            resultMap.put("hashCertVoteHex", CMSUtils.getBase64ToHexStr(hashCertVoteBase64));
+        if(hashCertVSBase64 != null) {
+            resultMap.put("hashCertVSBase64", hashCertVSBase64);
+            resultMap.put("hashCertVoteHex", CMSUtils.getBase64ToHexStr(hashCertVSBase64));
         }
         if(hashAccessRequestBase64 != null) {
             resultMap.put("hashAccessRequestBase64", hashAccessRequestBase64);

@@ -26,10 +26,10 @@ public class ProgressBarPanel extends JPanel {
     }
     
     public void setMessage(String message) {
-        if(message != null || "".equals(message)) {
+        if(message != null || !message.trim().isEmpty()) {
             messageLabel.setText("<html><div style=\"margin: 5px 0 5px 0;\"><b>" + message + "</b></div></html>");
+            progressBar.setVisible(true);
         }
-        progressBar.setVisible(true);
     }
 
     public void setMaximum(Integer value) {

@@ -51,16 +51,19 @@ public class ContextVS {
 
     static { Security.addProvider(new BouncyCastleProvider()); }
 
-    public static final int ACCESS_CONTROL_URL_TAG = 0;
-    public static final int EVENT_ID_TAG           = 1;
-    public static final int HASH_CERT_VOTE_TAG     = 2;
-    public static final int REPRESENTATIVE_URL_TAG = 3;
+    public static final int ACCESS_CONTROL_URL_TAG                  = 0;
+    public static final int EVENT_ID_TAG                            = 1;
+    public static final int HASH_CERT_VOTE_TAG                      = 2;
+    public static final int REPRESENTATIVE_URL_TAG                  = 3;
+    public static final int ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG = 4;
 
     public static final String VOTING_SYSTEM_BASE_OID = "0.0.0.0.0.0.0.0.0.";
     public static final String ACCESS_CONTROL_OID     = VOTING_SYSTEM_BASE_OID + ACCESS_CONTROL_URL_TAG;
     public static final String EVENT_ID_OID           = VOTING_SYSTEM_BASE_OID + EVENT_ID_TAG;
     public static final String HASH_CERT_VOTE_OID     = VOTING_SYSTEM_BASE_OID + HASH_CERT_VOTE_TAG;
     public static final String REPRESENTATIVE_URL_OID = VOTING_SYSTEM_BASE_OID + REPRESENTATIVE_URL_TAG;
+    public static final String ANONYMOUS_REPRESENTATIVE_DELEGATION_OID = VOTING_SYSTEM_BASE_OID +
+            ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG;
 
     public static final Mechanism DNIe_SESSION_MECHANISM = Mechanism.SHA1_RSA_PKCS;
     public static final PdfName PDF_SIGNATURE_NAME = PdfName.ADBE_PKCS7_SHA1;
@@ -141,7 +144,7 @@ public class ContextVS {
     private Locale locale = new Locale("es");
 
 
-    private Map<String, VoteVS> receiptMap;
+    private Map<String, ResponseVS> hashCertVSDataMap;
     private AppHostVS appHost;
     private static Properties appProperties;
     private UserVS userVS;
@@ -303,18 +306,19 @@ public class ContextVS {
         return accessControl.getTimeStampCert();
     }
     
-    public VoteVS getVote(String hashCertVoteBase64) {
-        logger.debug("getVote");
-        if(receiptMap == null || hashCertVoteBase64 == null) {
-            logger.debug("getVote - receiptMap: " + receiptMap + " - hashCertVoteBase64: " + hashCertVoteBase64);
+    public ResponseVS getHashCertVSData(String hashCertVSBase64) {
+        logger.debug("getHashCertVSData");
+        if(hashCertVSDataMap == null || hashCertVSBase64 == null) {
+            logger.debug("getHashCertVSData - hashCertVSDataMap: " + hashCertVSDataMap +
+                    " - hashCertVSBase64: " + hashCertVSBase64);
             return null;
         }
-        return receiptMap.get(hashCertVoteBase64);
+        return hashCertVSDataMap.get(hashCertVSBase64);
     }
     
-    public void addVote(String hashCertVoteBase64, VoteVS receipt) {
-        if(receiptMap == null) receiptMap = new HashMap<String, VoteVS>();
-        receiptMap.put(hashCertVoteBase64, receipt);
+    public void addHashCertVSData(String hashCertVSBase64, ResponseVS hashCertVSData) {
+        if(hashCertVSDataMap == null) hashCertVSDataMap = new HashMap<String, ResponseVS>();
+        hashCertVSDataMap.put(hashCertVSBase64, hashCertVSData);
     }
 
     public void copyFile(byte[] fileToCopy, String subPath, String fileName) throws Exception {

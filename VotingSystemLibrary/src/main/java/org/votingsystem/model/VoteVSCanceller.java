@@ -24,13 +24,12 @@ public class VoteVSCanceller implements Serializable {
     private Long id;
     @OneToOne private MessageSMIME messageSMIME;
     @OneToOne private AccessRequestVS accessRequestVS;
-    @OneToOne private VoteRequestCsrVS voteRequestCsrVS;
     @OneToOne private VoteVS voteVS;
     @Enumerated(EnumType.STRING)
     @Column(name="state", nullable=false)
     private State state;
-    @Column(name="hashCertVoteBase64") private String hashCertVoteBase64;
-    @Column(name="originHashCertVoteBase64") private String originHashCertVoteBase64;
+    @Column(name="hashCertVSBase64") private String hashCertVSBase64;
+    @Column(name="originHashCertVSBase64") private String originHashCertVSBase64;
     @Column(name="hashAccessRequestBase64") private String hashAccessRequestBase64;
     @Column(name="originHashAccessRequestBase64") private String originHashAccessRequestBase64;
     @ManyToOne(fetch=FetchType.LAZY)
@@ -80,21 +79,21 @@ public class VoteVSCanceller implements Serializable {
 		this.accessRequestVS = accessRequestVS;
 	}
 
-	public String getHashCertVoteBase64() {
-		return hashCertVoteBase64;
+	public String getHashCertVSBase64() {
+		return hashCertVSBase64;
 	}
 
-	public void setHashCertVoteBase64(String hashCertVoteBase64) {
-		this.hashCertVoteBase64 = hashCertVoteBase64;
+	public void setHashCertVSBase64(String hashCertVSBase64) {
+		this.hashCertVSBase64 = hashCertVSBase64;
 	}
 
-	public String getOriginHashCertVoteBase64() {
-		return originHashCertVoteBase64;
+	public String getOriginHashCertVSBase64() {
+		return originHashCertVSBase64;
 	}
 
-	public void setOriginHashCertVoteBase64(
-			String originHashCertVoteBase64) {
-		this.originHashCertVoteBase64 = originHashCertVoteBase64;
+	public void setOriginHashCertVSBase64(
+			String originHashCertVSBase64) {
+		this.originHashCertVSBase64 = originHashCertVSBase64;
 	}
 
 	public String getAccessRequestHashBase64() {
@@ -112,14 +111,6 @@ public class VoteVSCanceller implements Serializable {
 	public void setOriginHashAccessRequestBase64(
 			String originHashAccessRequestBase64) {
 		this.originHashAccessRequestBase64 = originHashAccessRequestBase64;
-	}
-
-	public VoteRequestCsrVS getVoteRequestCsrVS() {
-		return voteRequestCsrVS;
-	}
-
-	public void setVoteRequestCsrVS(VoteRequestCsrVS solicitudCSR) {
-		this.voteRequestCsrVS = solicitudCSR;
 	}
 
 	public VoteVS getVoteVS() {

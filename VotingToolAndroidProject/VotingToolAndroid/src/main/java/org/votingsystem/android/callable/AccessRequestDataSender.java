@@ -29,7 +29,7 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
 	public static final String TAG = "AccessRequestDataSender";
 
     private SMIMEMessageWrapper accessRequets;
-    private PKCS10WrapperClient pkcs10WrapperClient;
+    private PKCS10WrapperClient certificationRequest;
     private X509Certificate destinationCert = null;
     private String serviceURL = null;
     private Context context = null;
@@ -41,7 +41,7 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
         this.serviceURL = serviceURL;
         this.destinationCert = destinationCert;
         this.context = context;
-        this.pkcs10WrapperClient = new PKCS10WrapperClient(
+        this.certificationRequest = new PKCS10WrapperClient(
                 KEY_SIZE, SIG_NAME, VOTE_SIGN_MECHANISM, PROVIDER, 
                 eventVS.getAccessControlVS().getServerURL(),
                 eventVS.getEventVSId().toString(),
@@ -58,7 +58,7 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
             accessRequets = timeStamper.getSmimeMessage();
 
             Header header = new Header("votingSystemMessageType", "voteCsr");
-            byte[] csrEncryptedBytes = Encryptor.encryptMessage(pkcs10WrapperClient.
+            byte[] csrEncryptedBytes = Encryptor.encryptMessage(certificationRequest.
             		getCsrPEM(), destinationCert, header);
 
             byte[] csrEncryptedAccessRequestBytes = Encryptor.encryptSMIME(
@@ -76,9 +76,9 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 byte[] encryptedData = responseVS.getMessageBytes();
                 byte[] decryptedData = Encryptor.decryptFile(encryptedData, 
-                        pkcs10WrapperClient.getPublicKey(), 
-                        pkcs10WrapperClient.getPrivateKey());
-                pkcs10WrapperClient.initSigner(decryptedData);
+                        certificationRequest.getPublicKey(),
+                        certificationRequest.getPrivateKey());
+                certificationRequest.initSigner(decryptedData);
             }
             
             return responseVS;
@@ -89,7 +89,7 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
     }
     
     public PKCS10WrapperClient getPKCS10WrapperClient() {
-        return pkcs10WrapperClient;
+        return certificationRequest;
     }
     
 }

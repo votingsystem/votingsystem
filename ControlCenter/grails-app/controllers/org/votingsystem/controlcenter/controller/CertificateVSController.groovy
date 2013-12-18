@@ -47,10 +47,10 @@ class CertificateVSController {
 	def voteVS () {
 		if (params.hashHex) {
 			HexBinaryAdapter hexConverter = new HexBinaryAdapter();
-			String hashCertVoteBase64 = new String(hexConverter.unmarshal(params.hashHex))
-			log.debug "hashCertVoteBase64: ${hashCertVoteBase64}"
+			String hashCertVSBase64 = new String(hexConverter.unmarshal(params.hashHex))
+			log.debug "hashCertVSBase64: ${hashCertVSBase64}"
 			def certificate
-			CertificateVS.withTransaction {certificate = CertificateVS.findWhere(hashCertVoteBase64:hashCertVoteBase64)}
+			CertificateVS.withTransaction {certificate = CertificateVS.findWhere(hashCertVSBase64:hashCertVSBase64)}
 			if (certificate) {
 				response.status = ResponseVS.SC_OK
 				ByteArrayInputStream bais = new ByteArrayInputStream(certificate.content)

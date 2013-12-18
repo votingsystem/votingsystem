@@ -288,9 +288,9 @@ class SignatureVSService {
 			log.error ("validateVoteCerts - ERROR EVENT '${eventVS.id}' STATE -> ${eventVS.state}")
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.VOTE_ERROR)
 		}
-		CertificateVS certificateVS = CertificateVS.findWhere(hashCertVoteBase64:voteVS.hashCertVoteBase64)
+		CertificateVS certificateVS = CertificateVS.findWhere(hashCertVSBase64:voteVS.hashCertVSBase64)
 		if (certificateVS) {
-			log.error("validateVoteCerts - repeated vote - hashCertVoteBase64:${voteVS.hashCertVoteBase64}")
+			log.error("validateVoteCerts - repeated vote - hashCertVSBase64:${voteVS.hashCertVSBase64}")
 			VoteVS repeatedVoteVS = VoteVS.findWhere(certificateVS:certificateVS)
 			msg = messageSource.getMessage('voteRepeatedErrorMsg', [repeatedVoteVS.id].toArray(), locale)
 			log.error("validateVoteCerts - ${msg}")

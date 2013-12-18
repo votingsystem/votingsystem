@@ -124,7 +124,7 @@ public class VotingApplet extends JApplet implements AppHostVS {
 
     public void runOperation(String operationJSONStr) {
         logger.debug("runOperation: " + operationJSONStr);
-        if(operationJSONStr == null || "".equals(operationJSONStr)) return;
+        if(operationJSONStr == null || operationJSONStr.trim().isEmpty()) return;
         JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(operationJSONStr);
         OperationVS runningOperation = OperationVS.populate(jsonObject);
         if(runningOperation.getType() == null) {
@@ -173,31 +173,26 @@ public class VotingApplet extends JApplet implements AppHostVS {
         }
     }
 
-    @Override public void sendMessageToHost(OperationVS operation) {
-        if (operation == null) {
-            logger.debug(" - sendMessageToHost - Operacion null");
-            return;
-        }
-        OperationVS messageToHost = (OperationVS)operation;
-        Map appletOperationDataMap = ((OperationVS)operation).getDataMap();
-        JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(appletOperationDataMap);
-        try {
-            if(executionMode == ExecutionMode.APPLET) {
-                String callbackFunction = "setMessageFromSignatureClient";
-                if(messageToHost.getCallerCallback() != null)
-                    callbackFunction = messageToHost.getCallerCallback();
-                logger.debug(" - sendMessageToHost - status: " +
-                        messageToHost.getStatusCode() + " - operación: " + messageJSON.toString() +
-                        " - callbackFunction: " + callbackFunction);
-                Object[] args = {messageJSON.toString()};
-                Object object = netscape.javascript.JSObject.getWindow(this).call(callbackFunction, args);
-            } else logger.debug("---> APP EXECUTION MODE: " + executionMode.toString());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        if(ExecutionMode.APPLICATION == executionMode && messageToHost.getStatusCode() == ResponseVS.SC_CANCELLED){
-            logger.debug(" ------  System.exit(0) ------ ");
-            System.exit(0);
+    @Override public void sendMessageToHost(OperationVS messageToHost) {
+        if (messageToHost == null) logger.debug(" - sendMessageToHost - Operacion null");
+        else {
+            JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(messageToHost.getDataMap());
+            try {
+                if(executionMode == ExecutionMode.APPLET) {
+                    String callbackFunction = "setMessageFromSignatureClient";
+                    if(messageToHost.getCallerCallback() != null) callbackFunction = messageToHost.getCallerCallback();
+                    logger.debug(" - sendMessageToHost - status: " + messageToHost.getStatusCode() +
+                            " - callbackFunction: " + callbackFunction + " - message: " + messageJSON.toString());
+                    Object[] args = {messageJSON.toString()};
+                    Object object = netscape.javascript.JSObject.getWindow(this).call(callbackFunction, args);
+                } else logger.debug("---> APP EXECUTION MODE: " + executionMode.toString());
+            } catch (Exception ex) {
+                logger.error(ex.getMessage(), ex);
+            }
+            if(ExecutionMode.APPLICATION == executionMode && messageToHost.getStatusCode() == ResponseVS.SC_CANCELLED){
+                logger.debug(" ------  System.exit(0) ------ ");
+                System.exit(0);
+            }
         }
     }
 

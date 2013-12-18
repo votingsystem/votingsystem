@@ -1,5 +1,6 @@
 package org.votingsystem.accesscontrol.service
 
+import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.votingsystem.model.CertificateVS
 import org.votingsystem.model.ContextVS
@@ -34,6 +35,7 @@ class SignatureVSService {
 	private KeyStore trustedCertsKeyStore
 	static HashMap<Long, CertificateVS> trustedCertsHashMap;
 	private X509Certificate localServerCertSigner;
+    private PrivateKey serverPrivateKey;
     private Encryptor encryptor;
 	private static HashMap<Long, Set<TrustAnchor>> eventTrustedAnchorsHashMap =  new HashMap<Long, Set<TrustAnchor>>();
 	private static HashMap<Long, Set<TrustAnchor>> controlCenterTrustedAnchorsHashMap =
@@ -94,7 +96,7 @@ class SignatureVSService {
 			else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtil.getPEMEncoded (chain[i]))
 		}
 		localServerCertSigner = (X509Certificate) keyStore.getCertificate(aliasClaves);
-        PrivateKey serverPrivateKey = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray())
+        serverPrivateKey = (PrivateKey)keyStore.getKey(aliasClaves, password.toCharArray())
 		trustedCerts.add(localServerCertSigner)
 		File certChainFile = grailsApplication.mainContext.getResource(
                 grailsApplication.config.VotingSystem.certChainPath).getFile();
@@ -103,12 +105,17 @@ class SignatureVSService {
         encryptor = new Encryptor(localServerCertSigner, serverPrivateKey);
 		initCertAuthorities();
         return [signedMailGenerator:signedMailGenerator, encryptor:encryptor, trustedCerts:trustedCerts,
-                localServerCertSigner:localServerCertSigner];
+                localServerCertSigner:localServerCertSigner, serverPrivateKey:serverPrivateKey];
 	}
 
     public X509Certificate getServerCert() {
         if(localServerCertSigner == null) localServerCertSigner = initService().localServerCertSigner
         return localServerCertSigner
+    }
+
+    private PrivateKey getServerPrivateKey() {
+        if(serverPrivateKey == null) serverPrivateKey = initService().serverPrivateKey
+        return serverPrivateKey
     }
 
 	public boolean isSystemSignedMessage(Set<UserVS> signers) {
@@ -144,7 +151,17 @@ class SignatureVSService {
 		eventTrustedCerts.add(certCAEventVS)
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, data:eventTrustedCerts)
 	}
-	
+
+    /**
+     * Generate V3 Certificate from CSR
+     */
+    public X509Certificate signCSR(byte[] csrPEMBytes, String organizationalUnit, Date dateBegin, Date dateFinish,
+           DERTaggedObject... certExtensions) throws Exception {
+        X509Certificate issuedCert = CertUtil.signCSR(csrPEMBytes, organizationalUnit, getServerPrivateKey(),
+                getServerCert(), dateBegin, dateFinish, certExtensions)
+        return issuedCert
+    }
+
 	public ResponseVS getEventTrustedAnchors(EventVS event, Locale locale) {
 		log.debug("getEventTrustedAnchors")
 		if(!event) return new ResponseVS(ResponseVS.SC_ERROR)
@@ -488,10 +505,10 @@ class SignatureVSService {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
                     type:TypeVS.VOTE_ERROR, eventVS:eventVS)
 		}
-		CertificateVS certificate = CertificateVS.findWhere(hashCertVoteBase64:voteVS.hashCertVoteBase64,
+		CertificateVS certificate = CertificateVS.findWhere(hashCertVSBase64:voteVS.hashCertVSBase64,
 			    state:CertificateVS.State.OK)
 		if (!certificate) {
-			msg = messageSource.getMessage('hashVoteValidationErrorMsg', [voteVS.hashCertVoteBase64].toArray(), locale)
+			msg = messageSource.getMessage('hashVoteValidationErrorMsg', [voteVS.hashCertVSBase64].toArray(), locale)
 			log.error ("validateVoteCerts - ERROR CERT '${msg}'")
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg,
                     type:TypeVS.VOTE_ERROR, eventVS:eventVS)

@@ -125,37 +125,33 @@ public class ValidationApplet extends JApplet implements AppHostVS {
 
     public void runOperation(String operationJSONStr) {
         logger.debug("runOperation: " + operationJSONStr);
-        //if(operationJSONStr == null || "".equals(operationJSONStr)) return;
+        //if(operationJSONStr == null || operationJSONStr.trim().isEmpty()) return;
         //JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(operationJSONStr);
         //OperationVS runningOperation = OperationVS.populate(jsonObject);
-        MainDialog dialogo = new MainDialog(new JFrame(), false);
-        dialogo.setVisible(true);
+        MainDialog mainDialog = new MainDialog(new JFrame(), false);
+        mainDialog.setVisible(true);
     }
 
-    @Override public void sendMessageToHost(OperationVS operation) {
-        if (operation == null) {
-            logger.debug(" - sendMessageToHost - Operacion null");
-            return;
-        }
-        OperationVS messageToHost = (OperationVS)operation;
-        Map appletOperationDataMap = ((OperationVS)operation).getDataMap();
-        JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(appletOperationDataMap);
-        logger.debug(" - sendMessageToHost - status: " +  messageToHost.getStatusCode() +
-                " - operación: " + messageJSON.toString());
-        try {
-            if(executionMode == ExecutionMode.APPLET) {
-                Object[] args = {messageJSON.toString()};
-                JSObject jsObject = null;
-                Object object = netscape.javascript.JSObject.getWindow(this).
-                        call("setMessageFromValidationTool", args);
-            } else logger.debug("---> APP EXECUTION MODE: " + executionMode.toString());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        if(ExecutionMode.APLICACION == executionMode &&
-                messageToHost.getStatusCode() == ResponseVS.SC_CANCELLED){
-            logger.debug(" ------  System.exit(0) ------ ");
-            System.exit(0);
+    @Override public void sendMessageToHost(OperationVS messageToHost) {
+        if (messageToHost == null) logger.debug(" - sendMessageToHost - Operacion null");
+        else {
+            JSONObject messageJSON = (JSONObject)JSONSerializer.toJSON(messageToHost.getDataMap());
+            logger.debug(" - sendMessageToHost - status: " +  messageToHost.getStatusCode() +
+                    " - message: " + messageJSON.toString());
+            try {
+                if(executionMode == ExecutionMode.APPLET) {
+                    Object[] args = {messageJSON.toString()};
+                    JSObject jsObject = null;
+                    Object object = netscape.javascript.JSObject.getWindow(this).
+                            call("setMessageFromValidationTool", args);
+                } else logger.debug("---> APP EXECUTION MODE: " + executionMode.toString());
+            } catch (Exception ex) {
+                logger.error(ex.getMessage(), ex);
+            }
+            if(ExecutionMode.APLICACION == executionMode && messageToHost.getStatusCode() == ResponseVS.SC_CANCELLED){
+                logger.debug(" ------  System.exit(0) ------ ");
+                System.exit(0);
+            }
         }
     }
 

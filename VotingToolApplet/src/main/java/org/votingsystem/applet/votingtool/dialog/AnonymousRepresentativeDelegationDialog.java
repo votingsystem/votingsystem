@@ -4,12 +4,14 @@ import net.miginfocom.swing.MigLayout;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
-import org.votingsystem.callable.AccessRequestDataSender;
-import org.votingsystem.callable.SMIMESignedSender;
-import org.votingsystem.signature.dnie.DNIeContentSigner;
 import org.votingsystem.applet.votingtool.panel.ProgressBarPanel;
+import org.votingsystem.callable.AccessRequestDataSender;
+import org.votingsystem.callable.AnonymousDelegationRequestDataSender;
+import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.model.*;
+import org.votingsystem.signature.dnie.DNIeContentSigner;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
+import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.StringUtils;
@@ -22,9 +24,10 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -32,9 +35,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class ElectionDialog extends JDialog {
+public class AnonymousRepresentativeDelegationDialog extends JDialog {
 
-    private static Logger logger = Logger.getLogger(ElectionDialog.class);
+    private static Logger logger = Logger.getLogger(AnonymousRepresentativeDelegationDialog.class);
 
     private Container container;
     private ProgressBarPanel progressBarPanel;
@@ -45,21 +48,23 @@ public class ElectionDialog extends JDialog {
     private JButton openDocumentButton;
     private OperationVS operation;
     private Future<ResponseVS> runningTask;
-    private EventVS eventVS;
+    private String originHashCertVS;
+    private String hashCertVSBase64;
     private SMIMEMessageWrapper smimeMessage;
+    private Map documentToSignMap;
     private final AtomicBoolean done = new AtomicBoolean(false);
 
-    public ElectionDialog(Frame parent, boolean modal) {
+    public AnonymousRepresentativeDelegationDialog(Frame parent, boolean modal) {
         super(parent, modal);
         //parentFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         initComponents();
         addWindowListener(new WindowAdapter() {
             public void windowClosed(WindowEvent e) {
-                logger.debug("VotacionDialog window closed event received");
+                logger.debug("AnonymousRepresentativeDelegationDialog window closed event received");
             }
 
             public void windowClosing(WindowEvent e) {
-                logger.debug("VotacionDialog window closing event received");
+                logger.debug("AnonymousRepresentativeDelegationDialog window closing event received");
                 sendResponse(ResponseVS.SC_CANCELLED, ContextVS.getInstance().getMessage("operationCancelled"));
             }
         });
@@ -69,18 +74,17 @@ public class ElectionDialog extends JDialog {
 
     public void show(OperationVS operation) {
         this.operation = operation;
-        eventVS = operation.getEventVS();
-        try {
-            eventVS.getVoteVS().genVote();
-        } catch (NoSuchAlgorithmException ex) {
-            logger.error(ex.getMessage(), ex);
-        }
+        String representativeName = (String) operation.getDocumentToSignMap().get("representativeName");
         //Bug similar to -> http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6993691
         ParserDelegator workaround = new ParserDelegator();
-        messageLabel.setText(ContextVS.getInstance().getMessage("electionDialogMsg", eventVS.getSubject(),
-                eventVS.getVoteVS().getOptionSelected().getContent()));
-        String caption = eventVS.getSubject();
+        messageLabel.setText(ContextVS.getMessage("anonymousRepresentativeMsg", representativeName));
+        String caption = operation.getCaption();
         if(caption.length() > 50) caption = caption.substring(0, 50) + "...";
+        documentToSignMap = new HashMap();
+        documentToSignMap.put("weeksOperationActive", operation.getDocumentToSignMap().get("weeksOperationActive"));
+        documentToSignMap.put("UUID", UUID.randomUUID().toString());
+        documentToSignMap.put("accessControlURL", ContextVS.getInstance().getAccessControl().getServerURL());
+        documentToSignMap.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION);
         pack();
         setTitle(caption);
         setVisible(true);
@@ -135,6 +139,14 @@ public class ElectionDialog extends JDialog {
         openDocumentButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) { openDocument();}
         });
+
+
+        JButton infoButton = new JButton(ContextVS.getMessage("anonymousDelegationInfoButtonLbl"));
+        infoButton.setIcon(ContextVS.getIcon(this, "information"));
+        infoButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) { openInfoDocument();}
+        });
+
         formPanel.add(openDocumentButton, "wrap");
         container.add(formPanel, "cell 0 1, growx, wrap");
 
@@ -176,9 +188,9 @@ public class ElectionDialog extends JDialog {
         password = dialogoPassword.getPassword();
         if (password == null) return;
         showProgressPanel(true, ContextVS.getMessage("progressLabel"));
-        AccesRequestWorker accesRequestWorker = new AccesRequestWorker(password);
-        runningTask = accesRequestWorker;
-        accesRequestWorker.execute();
+        DelegationRequestWorker requestWorker = new DelegationRequestWorker(password);
+        runningTask = requestWorker;
+        requestWorker.execute();
         pack();
     }
 
@@ -194,7 +206,8 @@ public class ElectionDialog extends JDialog {
         try {
             File tempFile = File.createTempFile(operation.getFileName(), "");
             tempFile.deleteOnExit();
-            JSONObject documentToSignJSON = (JSONObject) JSONSerializer.toJSON(eventVS.getVoteVS().getAccessRequestDataMap());
+
+            JSONObject documentToSignJSON = (JSONObject) JSONSerializer.toJSON(documentToSignMap);
             FileUtils.copyStreamToFile(new ByteArrayInputStream(documentToSignJSON.toString().getBytes()),tempFile);
             desktop.open(tempFile);
         } catch (Exception ex) {
@@ -202,29 +215,31 @@ public class ElectionDialog extends JDialog {
         }
     }
 
- 
-    class AccesRequestWorker extends SwingWorker<ResponseVS, Object> {
+    private void openInfoDocument() {
+        logger.debug("openDocument");
+    }
+
+    class DelegationRequestWorker extends SwingWorker<ResponseVS, Object> {
 
         private String password = null;
         
-        private AccesRequestWorker(String password) {
+        private DelegationRequestWorker(String password) {
             this.password = password;
         }
        
         @Override public ResponseVS doInBackground() {
-            logger.debug("AccesRequestWorker.doInBackground");
+            logger.debug("DelegationRequestWorker.doInBackground");
             try {
                 String fromUser = ContextVS.getInstance().getMessage("electorLbl");
-                String toUser =  eventVS.getAccessControlVS().getNameNormalized();
-                String msgSubject = ContextVS.getInstance().getMessage("accessRequestMsgSubject")  + eventVS.getId();
-                JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(eventVS.getVoteVS().getAccessRequestDataMap());
+                String toUser =  ContextVS.getInstance().getAccessControl().getNameNormalized();
+                JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(documentToSignMap);
                 smimeMessage = DNIeContentSigner.genMimeMessage(fromUser, toUser, jsonObject.toString(),
-                        password.toCharArray(), msgSubject, null);
-                //No se hace la comprobación antes porque no hay usuario en contexto
-                //hasta que no se firma al menos una vez
-                eventVS.setUserVS(ContextVS.getInstance().getSessionUser());
-                AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(
-                        smimeMessage, eventVS.getVoteVS());
+                        password.toCharArray(), operation.getSignedMessageSubject(), null);
+                originHashCertVS = UUID.randomUUID().toString();
+                hashCertVSBase64 = CMSUtils.getHashBase64(originHashCertVS, ContextVS.VOTING_DATA_DIGEST);
+                String weeksOperationActive = (String)operation.getDocumentToSignMap().get("weeksOperationActive");
+                AnonymousDelegationRequestDataSender accessRequestDataSender = new AnonymousDelegationRequestDataSender(
+                        smimeMessage, weeksOperationActive, hashCertVSBase64);
                 return accessRequestDataSender.call();
             } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);
@@ -236,13 +251,13 @@ public class ElectionDialog extends JDialog {
            showProgressPanel(false);
             try {
                 ResponseVS responseVS = get();
-                logger.debug("AccesRequestWorker.done - statusCode: " +  responseVS.getStatusCode());
+                logger.debug("DelegationRequestWorker.done - statusCode: " +  responseVS.getStatusCode());
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    showProgressPanel(true, ContextVS.getInstance().getMessage("sendingDataToControlCenterMsg"));
-                    VoteSenderWorker voteSenderWorker = new VoteSenderWorker(
-                            (CertificationRequestVS) responseVS.getData(), eventVS);
-                    runningTask = voteSenderWorker;
-                    voteSenderWorker.execute();
+                    showProgressPanel(true, ContextVS.getInstance().getMessage("sendingDataToAccessControlMsg"));
+                    AnonymousDelegationWorker delegationWorker = new AnonymousDelegationWorker(
+                            (CertificationRequestVS) responseVS.getData());
+                    runningTask = delegationWorker;
+                    delegationWorker.execute();
                 } else {
                     sendResponse(responseVS.getStatusCode(), responseVS.getMessage());
                 }
@@ -253,29 +268,28 @@ public class ElectionDialog extends JDialog {
    }
     
     
-    class VoteSenderWorker extends SwingWorker<ResponseVS, Object> {
+    class AnonymousDelegationWorker extends SwingWorker<ResponseVS, Object> {
 
         CertificationRequestVS certificationRequest;
-        EventVS eventVS;
         
-        private VoteSenderWorker(CertificationRequestVS certificationRequest, EventVS eventVS) {
+        private AnonymousDelegationWorker(CertificationRequestVS certificationRequest) {
             this.certificationRequest = certificationRequest;
-            this.eventVS = eventVS;
         }
        
         @Override public ResponseVS doInBackground() {
-            logger.debug("VoteSenderWorker.doInBackground");
-            JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(eventVS.getVoteVS().getVoteDataMap());
+            logger.debug("AnonymousDelegationWorker.doInBackground");
+            JSONObject jsonObject = (JSONObject) JSONSerializer.toJSON(operation.getDocumentToSignMap());
             String textToSign = jsonObject.toString();
             try {
-                String fromUser = eventVS.getVoteVS().getHashCertVSBase64();
-                String toUser = StringUtils.getNormalized(eventVS.getControlCenterVS().getName());
-                String msgSubject = ContextVS.getInstance().getMessage("voteVSSubject");
-                smimeMessage = certificationRequest.genMimeMessage(fromUser, toUser, textToSign, msgSubject, null);
-                String urlVoteService = ((ControlCenterVS)ContextVS.getInstance().getControlCenter()).getVoteServiceURL();
-                SMIMESignedSender signedSender = new SMIMESignedSender(smimeMessage, urlVoteService,
-                        ContentTypeVS.VOTE, certificationRequest.getKeyPair(), ContextVS.getInstance().getControlCenter().
-                        getX509Certificate(), "voteURL");
+                String fromUser = hashCertVSBase64;
+                String toUser = StringUtils.getNormalized(ContextVS.getInstance().getAccessControl().getName());
+                smimeMessage = certificationRequest.genMimeMessage(fromUser, toUser, textToSign,
+                        operation.getSignedMessageSubject(), null);
+                String anonymousDelegationService = ContextVS.getInstance().getAccessControl().
+                        getAnonymousDelegationServiceURL();
+                SMIMESignedSender signedSender = new SMIMESignedSender(smimeMessage, anonymousDelegationService,
+                        ContentTypeVS.SIGNED_AND_ENCRYPTED, certificationRequest.getKeyPair(),
+                        ContextVS.getInstance().getAccessControl().getX509Certificate());
                 return signedSender.call();
             } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);
@@ -287,18 +301,20 @@ public class ElectionDialog extends JDialog {
            showProgressPanel(false);
             try {
                 ResponseVS responseVS = get();
-                logger.debug("VoteSenderWorker.done - StatusCode: " + responseVS.getStatusCode());
+                logger.debug("AnonymousDelegationWorker.done - StatusCode: " + responseVS.getStatusCode());
                 String msg = responseVS.getMessage();
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {  
-                    SMIMEMessageWrapper validatedVote = responseVS.getSmimeMessage();
-                    Map validatedVoteDataMap = (JSONObject) JSONSerializer.toJSON(validatedVote.getSignedContent());
-                    eventVS.getVoteVS().setReceipt(validatedVote);
-                    ResponseVS voteResponse = new ResponseVS(ResponseVS.SC_OK);
-                    voteResponse.setType(TypeVS.VOTEVS);
-                    voteResponse.setData(eventVS.getVoteVS());
-                    ContextVS.getInstance().addHashCertVSData(eventVS.getVoteVS().getHashCertVSBase64(), voteResponse);
-                    //voteURL header
-                    msg = ((List<String>)responseVS.getData()).iterator().next();
+                    SMIMEMessageWrapper receipt = responseVS.getSmimeMessage();
+                    Map receiptDataMap = (JSONObject) JSONSerializer.toJSON(receipt.getSignedContent());
+                    responseVS = operation.validateReceiptDataMap(receiptDataMap);
+                    Map delegationDataMap = new HashMap();
+                    delegationDataMap.put("hashCertVSBase64", hashCertVSBase64);
+                    delegationDataMap.put("originHashCertVS", originHashCertVS);
+                    ResponseVS hashCertVSData = new ResponseVS(ResponseVS.SC_OK);
+                    hashCertVSData.setSmimeMessage(receipt);
+                    hashCertVSData.setData(delegationDataMap);
+                    hashCertVSData.setType(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION);
+                    ContextVS.getInstance().addHashCertVSData(hashCertVSBase64, hashCertVSData);
                 }
                 sendResponse(responseVS.getStatusCode(), msg);
             } catch(Exception ex) {

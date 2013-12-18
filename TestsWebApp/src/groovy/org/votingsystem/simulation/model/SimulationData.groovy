@@ -115,7 +115,7 @@ class SimulationData {
 		 
 		 if (!dataJSON.isNull("backupRequestEmail")) {
 			 String email = dataJSON.getString("backupRequestEmail");
-			 if(!"".equals(email)) simulationData.setBackupRequestEmail(email);
+			 if(email != null && !email.trim().isEmpty()) simulationData.setBackupRequestEmail(email);
 		 }
 		 if(dataJSON.containsKey("timer")) {
 			 JSONObject timerJSONObject = dataJSON.getJSONObject("timer");

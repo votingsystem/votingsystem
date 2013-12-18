@@ -2,6 +2,7 @@ package org.votingsystem.accesscontrol.controller
 
 import grails.converters.JSON
 import org.votingsystem.model.ContentTypeVS
+import org.votingsystem.model.ContextVS
 import org.votingsystem.model.EventVSElection
 import org.votingsystem.model.ImageVS
 import org.votingsystem.model.MessageSMIME
@@ -17,6 +18,7 @@ class RepresentativeController {
 	def representativeService
 	def signatureVSService
 	def grailsApplication
+    def csrService
 	
 	private static final int MAX_FILE_SIZE_KB = 512;
 	private static final int MAX_FILE_SIZE = 512 * 1024;
@@ -249,8 +251,8 @@ class RepresentativeController {
 	 * 					   asociado a los datos del representante. 
 	 */
     def processFileMap() { 
-		byte[] imageBytes = params[grailsApplication.config.SistemaVotacion.imageFileName]
-		MessageSMIME messageSMIMEReq = params[grailsApplication.config.SistemaVotacion.representativeDataFileName]
+		byte[] imageBytes = params[ContextVS.IMAGE_FILE_NAME]
+		MessageSMIME messageSMIMEReq = params[ContextVS.REPRESENTATIVE_DATA_FILE_NAME]
 		if(!messageSMIMEReq || !imageBytes) {
 			String msg
 			if(!imageBytes) msg = message(code: 'imageMissingErrorMsg')
@@ -316,7 +318,7 @@ class RepresentativeController {
 		String msg = null
 		if(!event) return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'eventVSNotFound'))]
 		else {
-            if(event.isActive(DateUtils.getTodayDate())) {
+            if(event.isActive(Calendar.getInstance().getTime())) {
                 return [responseVS : new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code: 'eventDateNotFinished'))]
             } else {
                 return [responseVS : representativeService.getAccreditationsBackupForEvent(
@@ -324,5 +326,32 @@ class RepresentativeController {
             }
         }
 	}
+
+    /**
+     * Servicio que valida las delegaciones anónimas de representantes.
+     *
+     * @httpMethod [POST]
+     * @serviceURL [/representative/anonymousDelegation]
+     * @requestContentType [application/x-pkcs7-signature,application/x-pkcs7-mime] La solicitud de certificado de delegación.
+     * @param [csr] Obligatorio. La solicitud de certificado de delegación anónima.
+     * @return La solicitud de certificado de delegación anónima firmada.
+     */
+    def processAnonymousDelegationFileMap() {
+        MessageSMIME messageSMIMEReq = params[ContextVS.REPRESENTATIVE_DATA_FILE_NAME]
+        if(!messageSMIMEReq) {
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
+        }
+        ResponseVS responseVS = representativeService.validateAnonymousRequest(messageSMIMEReq, request.getLocale())
+        if (ResponseVS.SC_OK == responseVS.statusCode) {
+            byte[] csrRequest = params[ContextVS.CSR_FILE_NAME]
+            //log.debug("======== csrRequest: ${new String(csrRequest)}")
+            ResponseVS csrValidationResponse = csrService.signAnonymousDelegationCert(csrRequest,
+                    responseVS.data.weeksOperationActive, request.getLocale())
+            if (ResponseVS.SC_OK == csrValidationResponseVS.statusCode) {
+                responseVS.setContentType(ContentTypeVS.MULTIPART_ENCRYPTED)
+                return [responseVS:responseVS, receiverPublicKey:csrValidationResponse.data.requestPublicKey]
+            } else return [responseVS:csrValidationResponse]
+        } else return [responseVS:responseVS]
+    }
 
 }

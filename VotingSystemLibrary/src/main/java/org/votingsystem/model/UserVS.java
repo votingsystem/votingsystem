@@ -44,6 +44,14 @@ public class UserVS implements Serializable {
         this.description = description;
     }
 
+    public Date getDelegationFinish() {
+        return delegationFinish;
+    }
+
+    public void setDelegationFinish(Date delegationFinish) {
+        this.delegationFinish = delegationFinish;
+    }
+
     public enum Type {USER, REPRESENTATIVE, USER_WITH_CANCELLED_REPRESENTATIVE, EX_REPRESENTATIVE}
 	
     private static final long serialVersionUID = 1L;
@@ -79,6 +87,8 @@ public class UserVS implements Serializable {
     
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="representative") private UserVS representative;
+
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="delegationFinish", length=23) private Date delegationFinish;
     
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
 

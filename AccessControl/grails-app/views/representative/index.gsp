@@ -8,7 +8,7 @@
 	<div>
 		<div style="margin:0px auto 15px 0px; position:relative;display:table;">
 			<div style="display:table-cell;">
-				<votingSystem:simpleButton id="selectRepresentativeButton"
+				<votingSystem:simpleButton onclick="showSelectRepresentativeDialog(representativeOperationCallback)"
 					imgSrc="${resource(dir:'images/fatcow_16',file:'accept.png')}" style="margin:0px 20px 0px 30px;">
 						<g:message code="selectRepresentativeLbl"/>
 				</votingSystem:simpleButton>
@@ -54,10 +54,12 @@
 
 </div>
 
-<g:include view="/include/dialog/selectRepresentativeDialog.gsp" model="${[representativeName:representativeFullName]}" />	
-<g:include view="/include/dialog/representativeImageDialog.gsp"/>	
+<g:include view="/include/dialog/selectRepresentativeDialog.gsp" model="${[representativeName:representativeFullName]}" />
+<g:include view="/include/dialog/anonymousRepresentativeDateRangeDialog.gsp"/>
+<g:include view="/include/dialog/representativeImageDialog.gsp"/>
 <g:include view="/include/dialog/requestRepresentativeVotingHistoryDialog.gsp"/>	
-<g:include view="/include/dialog/requestRepresentativeAccreditationsDialog.gsp"/>	
+<g:include view="/include/dialog/requestRepresentativeAccreditationsDialog.gsp"/>
+
 
 	<div id="tabProgressTemplate" style="display:none;">
 		<g:include view="/include/tabProgress.gsp"/>
@@ -85,10 +87,6 @@
 		    	$("#requestRepresentativeAccreditationsDialog").dialog("open");
 			})
 		    
-   		    $("#selectRepresentativeButton").click(function() {
-		    	$("#selectRepresentativeDialog").dialog("open");
-			})
-		    
 		    
 		   $('#reqVotingHistoryForm').submit(function(event){
 		 		event.preventDefault();
@@ -111,21 +109,7 @@
 			   event.preventDefault();
 			   requestAccreditations();
 			})
-	  	}); 
-
-
-		function selectRepresentative() {
-			console.log("selectRepresentative")
-	    	var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.REPRESENTATIVE_SELECTION)
-	    	webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
-    		webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
-			webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_SELECTION, representativeNif:"${representative.nif}",
-    				representativeName:"${representativeFullName}"}
-			webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
-			webAppMessage.receiverSignServiceURL = "${createLink(controller:'representative', action:'userSelection', absolute:true)}"
-			webAppMessage.signedMessageSubject = '<g:message code="requestRepresentativeAcreditationsLbl"/>'
-			votingSystemClient.setMessageToSignatureClient(webAppMessage, selectRepresentativeCallback); 
-		}
+	  	});
 
 		function requestVotingHistory() {
 			console.log("requestVotingHistory")

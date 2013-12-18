@@ -1,15 +1,17 @@
 package org.votingsystem.applet.votingtool.dialog;
 
 import net.miginfocom.swing.MigLayout;
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
-import org.votingsystem.model.OperationVS;
-import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.VoteVS;
+import org.votingsystem.model.*;
 import org.votingsystem.util.FileUtils;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Map;
 
 /**
 * @author jgzornoza
@@ -28,48 +30,76 @@ public class SaveReceiptDialog extends javax.swing.JDialog {
         setLocationRelativeTo(null);
     }
     
-    public void show(final String hashCertVoteBase64) {
+    public void show(final String hashCertVSBase64) {
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() { saveReceipt(hashCertVoteBase64); }
+            public void run() { saveReceipt(hashCertVSBase64); }
         });   
         setVisible(true);
     }
     
-    public void saveReceipt(String hashCertVoteBase64) {
+    public void saveReceipt(String hashCertVSBase64) {
         logger.debug(" - saveReceipt - ");
-        VoteVS voteVS = ContextVS.getInstance().getVote(hashCertVoteBase64);
-        OperationVS operationVS = new OperationVS(ResponseVS.SC_CANCELLED);
-        if(voteVS != null) {
-            String result = ContextVS.getInstance().getMessage("operationCancelled");
+        ResponseVS responseVS = ContextVS.getInstance().getHashCertVSData(hashCertVSBase64);
+        File fileToSave = null;
+        if(responseVS == null || responseVS.getType() == null || responseVS.getData() == null) {
+            logger.error("Missing receipt data");
+            sendResponse(ResponseVS.SC_ERROR, ContextVS.getMessage("receiptNotFoundMsg", hashCertVSBase64));
+        } else {
             try {
-                final JFileChooser chooser = new JFileChooser();
-                File voteVSFile = FileUtils.getFileFromBytes(voteVS.getReceipt().getBytes());
-                chooser.setSelectedFile(voteVSFile);
-                int returnVal = chooser.showSaveDialog(new JFrame());
-                if (returnVal == JFileChooser.APPROVE_OPTION) {
-                    File file = chooser.getSelectedFile();
-                    if (file.getName().indexOf(".") == -1) {
-                        String fileName = file.getAbsolutePath();
-                        file = new File(fileName);
-                    }
-                    if (file != null) {
-                        voteVSFile.renameTo(file);
-                        result = file.getAbsolutePath();
-                        operationVS.setStatusCode(ResponseVS.SC_OK);
+                switch(responseVS.getType()) {
+                    case VOTEVS:
+                        VoteVS voteVS = (VoteVS)responseVS.getData();
+                        fileToSave = FileUtils.getFileFromBytes(voteVS.getReceipt().getBytes());
+                        break;
+                    case ANONYMOUS_REPRESENTATIVE_SELECTION:
+                        fileToSave = getAnonymousRepresentativeSelectionCancelFile(responseVS);
+                        break;
+                }
+                if(fileToSave != null) {
+                    fileToSave.deleteOnExit();
+                    final JFileChooser chooser = new JFileChooser();
+                    chooser.setSelectedFile(fileToSave);
+                    int returnVal = chooser.showSaveDialog(new JFrame());
+                    if (returnVal == JFileChooser.APPROVE_OPTION) {
+                        File file = chooser.getSelectedFile();
+                        if (file != null) {
+                            fileToSave.renameTo(file);
+                            sendResponse(ResponseVS.SC_OK,file.getAbsolutePath());
+                            return;
+                        }
                     }
                 }
-                voteVSFile.delete();
+                sendResponse(ResponseVS.SC_CANCELLED, null);
             } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);
+                sendResponse(ResponseVS.SC_ERROR, ContextVS.getMessage("operationErrorMsg"));
             }
-            operationVS.setMessage(result);
-            logger.debug("- saveReceipt - result: " + result);
-        } else {
-            logger.debug(" - Receipt Null - ");
-            operationVS.setStatusCode(ResponseVS.SC_ERROR_REQUEST);
-            operationVS.setMessage(ContextVS.getInstance().getMessage("receiptNotFoundMsg", hashCertVoteBase64));
         }
-        ContextVS.getInstance().sendMessageToHost(operationVS);
+    }
+
+    private File getAnonymousRepresentativeSelectionCancelFile(ResponseVS responseVS) throws Exception {
+        Map delegationDataMap = (Map) responseVS.getData();
+        JSONObject messageJSON = (JSONObject) JSONSerializer.toJSON(delegationDataMap);
+        java.util.List<File> fileList = new ArrayList<File>();
+        File smimeTempFile = File.createTempFile("receipt", ".p7s");
+        smimeTempFile.deleteOnExit();
+        FileUtils.copyBytesToFile(smimeTempFile, responseVS.getSmimeMessage().getBytes());
+        File certVSDataFile = File.createTempFile("certVSData", "");
+        certVSDataFile.deleteOnExit();
+        FileUtils.copyBytesToFile(certVSDataFile, messageJSON.toString().getBytes("UTF-8"));
+        fileList.add(certVSDataFile);
+        fileList.add(smimeTempFile);
+        File outputZip = File.createTempFile("vsFile", ".zip");
+        outputZip.deleteOnExit();
+        FileUtils.packZip(outputZip, fileList);
+        return outputZip;
+    }
+
+    private void sendResponse(int status, String message) {
+        OperationVS operation = new OperationVS();
+        operation.setStatusCode(status);
+        operation.setMessage(message);
+        ContextVS.getInstance().sendMessageToHost(operation);
         dispose();
     }
 

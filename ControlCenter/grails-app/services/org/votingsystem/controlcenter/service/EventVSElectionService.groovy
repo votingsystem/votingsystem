@@ -122,7 +122,7 @@ class EventVSElectionService {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:messageSource.getMessage(
                     'dateRangeErrorMsg', [eventVS.dateBegin, eventVS.dateFinish].toArray(), locale) )
 		}
-		Date fecha = DateUtils.getTodayDate()
+		Date fecha = Calendar.getInstance().getTime()
 		if (fecha.after(eventVS.dateFinish)) eventVS.setState(EventVS.State.TERMINATED)
 		if (fecha.after(eventVS.dateBegin) && fecha.before(eventVS.dateFinish)) eventVS.setState(EventVS.State.ACTIVE)
 		if (fecha.before(eventVS.dateBegin)) eventVS.setState(EventVS.State.AWAITING)
@@ -139,7 +139,7 @@ class EventVSElectionService {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
 				message:messageSource.getMessage('error.dateBeginAfterdateFinishalMsg', null, locale) )
 		}
-		Date fecha = DateUtils.getTodayDate()
+		Date fecha = Calendar.getInstance().getTime()
 		if (fecha.after(eventVS.dateFinish) && eventVS.state != EventVS.State.TERMINATED) {
 			EventVS.withTransaction {
 				eventVS.state = EventVS.State.TERMINATED
@@ -239,7 +239,7 @@ class EventVSElectionService {
 				}
 			}
 			eventVS.state = newState
-			eventVS.dateCanceled = DateUtils.getTodayDate();
+			eventVS.dateCanceled = Calendar.getInstance().getTime();
 			EventVS.withTransaction {
 				if (!eventVS.save()) {
 					eventVS.errors.each {log.error("cancel event error saving eventVS - ${it}")}

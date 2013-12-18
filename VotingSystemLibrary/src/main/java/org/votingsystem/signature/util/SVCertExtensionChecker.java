@@ -27,6 +27,7 @@ public class SVCertExtensionChecker extends PKIXCertPathChecker {
         supportedExtensions.add(ContextVS.EVENT_ID_OID);
         supportedExtensions.add(ContextVS.ACCESS_CONTROL_OID);
         supportedExtensions.add(ContextVS.REPRESENTATIVE_URL_OID);
+        supportedExtensions.add(ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_OID);
 	}
 	
 	public void init(boolean forward) throws CertPathValidatorException {

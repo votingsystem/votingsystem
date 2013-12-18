@@ -12,8 +12,8 @@ $("#resultDialog").dialog({
 		       		$(this).dialog( "close" );
 					if(clientCallback != null) clientCallback()
 		       	}}],
-	show: {effect: "fade",duration: 1000},
-	hide: { effect: "fade", duration: 1000}
+	show: {effect: "fade",duration: 100},
+	hide: { effect: "fade", duration: 100}
 });
 
 function showResultDialog(caption, message, callback) {

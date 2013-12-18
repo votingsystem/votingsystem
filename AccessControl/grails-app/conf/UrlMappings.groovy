@@ -243,6 +243,11 @@ class UrlMappings {
 			action = [POST:"processFileMap"]
 		}
 
+        "/representative/anonymousDelegationRequest" {
+            controller = "representative"
+            action = [POST:"processAnonymousDelegationFileMap"]
+        }
+
 		"/representative/$id?" {
 			controller = "representative"
 			action = "index"

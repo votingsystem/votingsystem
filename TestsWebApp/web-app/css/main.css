@@ -197,50 +197,47 @@ hr {
 }
 
 .checkBox label {
-	display: inline-block;
-	position: relative;
-	font-size: 1em;
-	padding: 15px 10px 15px 25px;
-	vertical-align: top;
-	cursor: pointer;
+    display: inline-block;
+    position: relative;
+    font-size: 1em;
+    padding: 15px 10px 15px 25px;
+    vertical-align: top;
+    cursor: pointer;
 }
 
 .checkBox label span {
-	vertical-align: middle;
-	display: inline-block;
+    vertical-align: middle;
+    display: inline-block;
 }
 
 .checkBox input[type="checkbox"],
 .checkBox label::before,
 .checkBox input[type="checkbox"]:checked + label::after {
-	width: 18px;
-	height: 18px;
-	top: 15px;
-	left: 0px;
-	position: absolute;
-	cursor: pointer;
+    width: 18px;
+    height: 18px;
+    top: 15px;
+    left: 0px;
+    position: absolute;
+    cursor: pointer;
+    content: '\2713';
+    font-size: 1.6em;
+    text-align: left;
+    line-height: 19px;
+    color: #6bad74;
 }
 
 .checkBox input[type="checkbox"] {
-	opacity: 0;
-	-webkit-appearance: none;
-	display: inline-block;
-	vertical-align: middle;
-	z-index: 100;
+    opacity: 0;
+    -webkit-appearance: none;
+    display: inline-block;
+    vertical-align: middle;
+    z-index: 100;
 }
 
 .checkBox label::before {
-	content: '';
-	border: 2px solid rgba(0,0,0,0.3);
+    content: '';
+    border: 2px solid rgba(0,0,0,0.3);
 }
-
-.checkBox input[type="checkbox"]:checked + label::after {
-	content: '\2713';
-	text-align: center;
-	line-height: 19px;
-	color: #6bad74;
-}
-
 
 fieldset {
     border: #f2f2f2 solid 1px;

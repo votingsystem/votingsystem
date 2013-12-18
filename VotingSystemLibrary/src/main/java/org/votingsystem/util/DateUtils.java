@@ -15,7 +15,14 @@ import java.util.GregorianCalendar;
 public class DateUtils {
 
     private static Logger logger = Logger.getLogger(DateUtils.class);
-	
+
+    public static Date addDays(Date date, int days){
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.DATE, days); //minus number would decrement the days
+        return cal.getTime();
+    }
+
     public static int getDayOfMonthFromDate (Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -32,10 +39,6 @@ public class DateUtils {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         return calendar.get(Calendar.YEAR);
-    }
-
-    public static Date getTodayDate () {
-        return new Date(System.currentTimeMillis());
     }
     
     public static Date getYesterdayDate () {

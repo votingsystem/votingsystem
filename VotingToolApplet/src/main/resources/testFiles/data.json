@@ -1,1 +1,6 @@
-{"statusCode":700,"operacion":"CONTROL_CENTER_ASSOCIATION","receiverName":"Primer AccessControlVS","serverURL":"http://192.168.1.20:8080/AccessControl","signedContent":{"serverURL":"http://192.168.1.20:8081/ControlCenter","operation":"CONTROL_CENTER_ASSOCIATION"},"urlTimeStampServer":"http://192.168.1.20:8080/AccessControl/timeStampVS/index","receiverSignServiceURL":"http://192.168.1.20:8080/AccessControl/subscriptionVS/index","callerCallback":"associateControlCenterCallback"}
+{"statusCode":700,"operation":"ANONYMOUS_REPRESENTATIVE_SELECTION","receiverName":"Primer AccessControlVS",
+    "serverURL":"http://192.168.1.20:8080/AccessControl","signedContent":{"operation":"ANONYMOUS_REPRESENTATIVE_SELECTION",
+    "representativeNif":"00000005M","representativeName":""},
+    "urlTimeStampServer":"http://192.168.1.20:8080/AccessControl/timeStampVS/index",
+    "receiverSignServiceURL":"http://192.168.1.20:8080/AccessControl/representative/userSelection",
+    "signedMessageSubject":"Solicitar acreditaciones","callerCallback":"selectRepresentativeCallback"}

@@ -78,7 +78,7 @@ public class SearchHelper {
         		entityFields, new StandardAnalyzer(Version.LUCENE_31));
         Query luceneQuery = null;
         try {
-        	if(textToFind != null && !"".equals(textToFind))
+        	if(textToFind != null && !textToFind.isEmpty())
         		luceneQuery = parser.parse(textToFind);
         } catch (ParseException e) {
             log.error("Cannot parse [" + textToFind + "] to a full text query", e);

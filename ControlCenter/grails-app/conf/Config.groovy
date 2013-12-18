@@ -199,7 +199,6 @@ VotingSystem.signKeysPassword='PemPass'
 VotingSystem.requestTimeOut = 500
 //Name decriptivo del servidor
 VotingSystem.serverName='Primer ControlCenter'
-VotingSystem.votingHashAlgorithm='SHA256'
 VotingSystem.blogURL ='http://www.gruposp2p.org'
 VotingSystem.emailAdmin='jgzornoza@gmail.com'
 //_ TODO _

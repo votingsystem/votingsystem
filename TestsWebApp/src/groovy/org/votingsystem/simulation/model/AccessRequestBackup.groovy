@@ -20,7 +20,7 @@ public class AccessRequestBackup {
 	private Long id;
 	private TypeVS tipo;
 	private Clob content;
-	private String hashCertVoteBase64;
+	private String hashCertVSBase64;
 	private String hashAccessRequestBase64;
 	private String originHashAccessRequest;
 	private String originHashCertVote;
@@ -96,17 +96,17 @@ public class AccessRequestBackup {
 	}
 
 	/**
-	 * @return the hashCertVoteBase64
+	 * @return the hashCertVSBase64
 	 */
-	public String getHashCertVoteBase64() {
-		return hashCertVoteBase64;
+	public String getHashCertVSBase64() {
+		return hashCertVSBase64;
 	}
 
 	/**
-	 * @param hashCertVoteBase64 the hashCertVoteBase64 to set
+	 * @param hashCertVSBase64 the hashCertVSBase64 to set
 	 */
-	public void setHashCertVoteBase64(String hashCertVoteBase64) {
-		this.hashCertVoteBase64 = hashCertVoteBase64;
+	public void setHashCertVSBase64(String hashCertVSBase64) {
+		this.hashCertVSBase64 = hashCertVSBase64;
 	}
 
 	/**
@@ -225,7 +225,7 @@ public class AccessRequestBackup {
 		logger.debug("toJSON");
 		Map map = new HashMap();
 		map.put("originHashCertVote", originHashCertVote);
-		map.put("hashCertVoteBase64", hashCertVoteBase64);
+		map.put("hashCertVSBase64", hashCertVSBase64);
 		map.put("originHashAccessRequest", originHashAccessRequest);
 		map.put("hashAccessRequestBase64", hashAccessRequestBase64);
 		map.put("UUID", UUID.randomUUID().toString());
@@ -242,9 +242,9 @@ public class AccessRequestBackup {
 		if(requestJSON.containsKey("originHashAccessRequest"))
 			solicitud.setoriginHashAccessRequest(
 					requestJSON.getString("originHashAccessRequest"));
-		if(requestJSON.containsKey("hashCertVoteBase64"))
-			solicitud.setHashCertVoteBase64(
-					requestJSON.getString("hashCertVoteBase64"));
+		if(requestJSON.containsKey("hashCertVSBase64"))
+			solicitud.setHashCertVSBase64(
+					requestJSON.getString("hashCertVSBase64"));
 		if(requestJSON.containsKey("originHashCertVote"))
 			solicitud.setoriginHashCertVote(
 					requestJSON.getString("originHashCertVote"));

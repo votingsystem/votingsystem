@@ -70,7 +70,7 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
     private String email = null;
     private String phone = null;
     private String deviceId = null;
-    private PKCS10WrapperClient pkcs10WrapperClient;
+    private PKCS10WrapperClient certificationRequest;
     private EditText nifText;
     private EditText givennameText;
     private EditText surnameText;
@@ -337,16 +337,16 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
                         surnameText.getText().toString().toUpperCase(), Normalizer.Form.NFD);
                 surname  = surname.replaceAll("[^\\p{ASCII}]", "");
                 String nif = NifUtils.validate(nifText.getText().toString().toUpperCase());
-                pkcs10WrapperClient = PKCS10WrapperClient.buildCSRUsuario (KEY_SIZE, SIG_NAME,
+                certificationRequest = PKCS10WrapperClient.buildCSRUsuario (KEY_SIZE, SIG_NAME,
                         SIGNATURE_ALGORITHM, PROVIDER, nif, email, phone, deviceId, givenName, surname);
-                csrBytes = pkcs10WrapperClient.getCsrPEM();
-                X509Certificate[] arrayCerts = CertUtil.generateCertificate(pkcs10WrapperClient.getKeyPair(),
+                csrBytes = certificationRequest.getCsrPEM();
+                X509Certificate[] arrayCerts = CertUtil.generateCertificate(certificationRequest.getKeyPair(),
                         new Date(System.currentTimeMillis()),
                         new Date(System.currentTimeMillis() + 365 * 24 * 60 * 60 * 1000),
                         "CN=" + USER_CERT_ALIAS);
                 KeyStore keyStore = KeyStore.getInstance("PKCS12");
                 keyStore.load(null, null);
-                keyStore.setKeyEntry(USER_CERT_ALIAS, pkcs10WrapperClient.getPrivateKey(),
+                keyStore.setKeyEntry(USER_CERT_ALIAS, certificationRequest.getPrivateKey(),
                         password.toCharArray(), arrayCerts);
                 byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, password.toCharArray());
                 FileOutputStream fos = openFileOutput(KEY_STORE_FILE, Context.MODE_PRIVATE);

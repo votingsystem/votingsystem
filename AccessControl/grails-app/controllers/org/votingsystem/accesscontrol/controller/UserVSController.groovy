@@ -121,7 +121,7 @@ class UserVSController {
 				repDocsFromUser = RepresentationDocumentVS.findAllWhere(userVS:user)
 				repDocsFromUser.each { repDocFromUser ->
 					repDocFromUser.state = RepresentationDocumentVS.State.CANCELLED
-					repDocFromUser.dateCanceled = DateUtils.getTodayDate()
+					repDocFromUser.dateCanceled = Calendar.getInstance().getTime()
 					repDocFromUser.save()
 				}
 			}

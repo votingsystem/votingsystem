@@ -35,7 +35,7 @@ function EventVS(eventJSON, eventTemplate, subSystem) {
     this.operation
     this.hashAccessRequestBase64
     this.hashSolicitudAccesoHex
-    this.hashCertVoteBase64
+    this.hashCertVSBase64
     this.hashCertVoteHex
     this.cardinality
     this.accessControl
@@ -259,8 +259,7 @@ var TypeVS = {
 		VOTING_PUBLISHING: "VOTING_PUBLISHING", 
 		SEND_SMIME_VOTE: "SEND_SMIME_VOTE",
 		TERMINATED: "TERMINATED",
-		SAVE_VOTE_RECEIPT: "SAVE_VOTE_RECEIPT", 
-		VOTE_CANCELLATION: "VOTE_CANCELLATION", 
+		SAVE_RECEIPT: "SAVE_RECEIPT",
 		ACCESS_REQUEST_CANCELLATION:"ACCESS_REQUEST_CANCELLATION", 
 		EVENT_CANCELLATION: "EVENT_CANCELLATION",
 		MENSAJE_CIERRE_HERRAMIENTA_VALIDACION: "MENSAJE_CIERRE_HERRAMIENTA_VALIDACION",

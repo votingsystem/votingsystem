@@ -38,7 +38,7 @@ public class VoteVS {
     private SMIMEMessageWrapper cancelVoteReceipt;
     private byte[] encryptedKey = null;
     private boolean isCanceled = false;
-    private PKCS10WrapperClient pkcs10WrapperClient;
+    private PKCS10WrapperClient certificationRequest;
     private PrivateKey certVotePrivateKey;
     private EventVS voto;
     private Date dateCreated;
@@ -318,11 +318,11 @@ public class VoteVS {
 	}
 
 	public PKCS10WrapperClient getPkcs10WrapperClient() {
-		return pkcs10WrapperClient;
+		return certificationRequest;
 	}
 
-	public void setPkcs10WrapperClient(PKCS10WrapperClient pkcs10WrapperClient) {
-		this.pkcs10WrapperClient = pkcs10WrapperClient;
+	public void setPkcs10WrapperClient(PKCS10WrapperClient certificationRequest) {
+		this.certificationRequest = certificationRequest;
 	}
 
 	public PrivateKey getCertVotePrivateKey() {

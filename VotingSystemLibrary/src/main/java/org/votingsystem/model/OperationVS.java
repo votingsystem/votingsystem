@@ -82,29 +82,7 @@ public class OperationVS {
     }
 
     public String getCaption() {
-        switch(typeVS) {
-            case ACCESS_REQUEST: return ContextVS.getInstance().getMessage("CANCEL_VOTE");
-            case CANCEL_VOTE: return ContextVS.getInstance().getMessage("ACCESS_REQUEST");
-            case CONTROL_CENTER_ASSOCIATION: return ContextVS.getInstance().getMessage("CONTROL_CENTER_ASSOCIATION");
-            case CONTROL_CENTER_STATE_CHANGE_SMIME: return ContextVS.getInstance().getMessage("CONTROL_CENTER_STATE_CHANGE_SMIME");
-            case BACKUP_REQUEST: return ContextVS.getInstance().getMessage("BACKUP_REQUEST");
-            case MANIFEST_PUBLISHING: return ContextVS.getInstance().getMessage("MANIFEST_PUBLISHING");
-            case MANIFEST_SIGN: return ContextVS.getInstance().getMessage("MANIFEST_SIGN");
-            case CLAIM_PUBLISHING: return ContextVS.getInstance().getMessage("CLAIM_PUBLISHING");
-            case SMIME_CLAIM_SIGNATURE: return ContextVS.getInstance().getMessage("SMIME_CLAIM_SIGNATURE");
-            case VOTING_PUBLISHING: return ContextVS.getInstance().getMessage("VOTING_PUBLISHING");
-            case SEND_SMIME_VOTE: return ContextVS.getInstance().getMessage("SEND_SMIME_VOTE");
-            case VOTE_CANCELLATION: return ContextVS.getInstance().getMessage("VOTE_CANCELLATION");
-            case ACCESS_REQUEST_CANCELLATION: return ContextVS.getInstance().getMessage("ACCESS_REQUEST_CANCELLATION");
-            case EVENT_CANCELLATION: return ContextVS.getInstance().getMessage("EVENT_CANCELLATION");
-            case SAVE_VOTE_RECEIPT: return ContextVS.getInstance().getMessage("SAVE_VOTE_RECEIPT");
-            case NEW_REPRESENTATIVE: return ContextVS.getInstance().getMessage("NEW_REPRESENTATIVE");
-            case REPRESENTATIVE_VOTING_HISTORY_REQUEST: return ContextVS.getInstance().getMessage("REPRESENTATIVE_VOTING_HISTORY_REQUEST");
-            case REPRESENTATIVE_SELECTION: return ContextVS.getInstance().getMessage("REPRESENTATIVE_SELECTION");
-            case REPRESENTATIVE_ACCREDITATIONS_REQUEST: return ContextVS.getInstance().getMessage("REPRESENTATIVE_ACCREDITATIONS_REQUEST");
-            case REPRESENTATIVE_REVOKE: return ContextVS.getInstance().getMessage("REPRESENTATIVE_REVOKE");
-            default: return "NULL_APPLET_OPERATION_CAPTION";
-        }
+        return ContextVS.getMessage(typeVS.toString());
     }
 
     public void setType(TypeVS typeVS) {
@@ -202,6 +180,21 @@ public class OperationVS {
         this.callerCallback = callerCallback;
     }
 
+    public ResponseVS validateReceiptDataMap(Map receiptDataMap) {
+        switch(typeVS) {
+            case ANONYMOUS_REPRESENTATIVE_SELECTION:
+                TypeVS receiptTypeVS = TypeVS.valueOf((String) receiptDataMap.get("operation"));
+                if(!documentToSign.get("weeksOperationActive").equals(receiptDataMap.get("weeksOperationActive")) ||
+                   !documentToSign.get("accessControlURL").equals(receiptDataMap.get("accessControlURL")) ||
+                   !documentToSign.get("representativeNif").equals(receiptDataMap.get("representativeNif")) ||
+                   TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION != receiptTypeVS) {
+                    return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("receiptDataMismatchErrorMsg"));
+                } else return new ResponseVS(ResponseVS.SC_OK);
+            default:
+                return new ResponseVS(ResponseVS.SC_ERROR,
+                        ContextVS.getMessage("serviceNotAvailableForOperationMsg", typeVS));
+        }
+    }
 
     public static OperationVS populate (Map dataMap) {
         logger.debug("- populate ");

@@ -86,9 +86,9 @@ public class VoteSender implements Callable<ResponseVS> {
             responseVS = accessRequestDataSender.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
             String votoJSON = event.getVoteJSON().toString();
-            PKCS10WrapperClient pkcs10WrapperClient = accessRequestDataSender.getPKCS10WrapperClient();
-            SMIMEMessageWrapper signedVote = pkcs10WrapperClient.genSignedMessage(
-                    event.getHashCertVoteBase64(), event.getControlCenter().getNameNormalized(),
+            PKCS10WrapperClient certificationRequest = accessRequestDataSender.getPKCS10WrapperClient();
+            SMIMEMessageWrapper signedVote = certificationRequest.genSignedMessage(
+                    event.getHashCertVSBase64(), event.getControlCenter().getNameNormalized(),
                     votoJSON, context.getString(R.string.vote_msg_subject), null);
             MessageTimeStamper timeStamper = new MessageTimeStamper(signedVote, context);
             responseVS = timeStamper.call();
@@ -102,13 +102,13 @@ public class VoteSender implements Callable<ResponseVS> {
             responseVS = HttpHelper.sendData(messageToSend,ContentTypeVS.VOTE,serviceURL);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 SMIMEMessageWrapper voteReceipt = Encryptor.decryptSMIMEMessage(
-                        responseVS.getMessageBytes(), pkcs10WrapperClient.getKeyPair().getPublic(),
-                        pkcs10WrapperClient.getKeyPair().getPrivate());
+                        responseVS.getMessageBytes(), certificationRequest.getKeyPair().getPublic(),
+                        certificationRequest.getKeyPair().getPrivate());
                 VoteVS receipt = new VoteVS(ResponseVS.SC_OK, voteReceipt, event);
                 byte[] base64EncodedKey = Base64.encode(
-                        pkcs10WrapperClient.getPrivateKey().getEncoded());
+                        certificationRequest.getPrivateKey().getEncoded());
                 byte[] encryptedKey = Encryptor.encryptMessage(base64EncodedKey, userCert);
-                receipt.setPkcs10WrapperClient(pkcs10WrapperClient);
+                receipt.setPkcs10WrapperClient(certificationRequest);
                 receipt.setEncryptedKey(encryptedKey);
                 responseVS.setData(receipt);
             } else return responseVS;

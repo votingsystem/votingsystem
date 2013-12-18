@@ -1,5 +1,6 @@
 package org.votingsystem.accesscontrol.controller
 
+import org.votingsystem.model.ContextVS
 import org.votingsystem.model.EventVSElection
 import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.AccessRequestVS
@@ -52,7 +53,7 @@ class AccessRequestVSController {
 	 * @return La solicitud de certificado de voto firmada.
 	 */
     def processFileMap () {
-		MessageSMIME messageSMIMEReq = params[grailsApplication.config.SistemaVotacion.accessRequestFileName]
+		MessageSMIME messageSMIMEReq = params[ContextVS.ACCESS_REQUEST_FILE_NAME]
 		if(!messageSMIMEReq) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
 		}
@@ -62,7 +63,7 @@ class AccessRequestVSController {
 		if (ResponseVS.SC_OK == responseVS.statusCode) {
 			accessRequestVS = responseVS.data
             eventVS = responseVS.eventVS
-			byte[] csrRequest = params[grailsApplication.config.SistemaVotacion.csrRequestFileName]
+			byte[] csrRequest = params[ContextVS.CSR_FILE_NAME]
 			UserVS representative = null
 			if(accessRequestVS.userVS.type == UserVS.Type.REPRESENTATIVE) {
 				representative = accessRequestVS.userVS

@@ -42,7 +42,7 @@ class EventVSClaimService {
 			log.debug("saveEvent - signerVS: ${signerVS.nif}")
 			def messageJSON = JSON.parse(documentStr)
 			Date dateFinish = new Date().parse("yyyy/MM/dd HH:mm:ss", messageJSON.dateFinish)
-			if(dateFinish.before(DateUtils.getTodayDate())) {
+			if(dateFinish.before(Calendar.getInstance().getTime())) {
 				String msg = messageSource.getMessage(
 					'publishDocumentDateErrorMsg', 
 					[DateUtils.getStringFromDate(dateFinish)].toArray(), locale)

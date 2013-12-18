@@ -53,7 +53,7 @@ public class EventVS {
     private Date lastUpdated;
 
     private String originHashCertVote;
-    private String hashCertVoteBase64;
+    private String hashCertVSBase64;
     private String originHashAccessRequest;
     private String hashAccessRequestBase64;
 
@@ -315,17 +315,17 @@ public class EventVS {
         this.originHashCertVote = originHashCertVote;
     }
 
-    public String getHashCertVoteBase64() {
-        return hashCertVoteBase64;
+    public String getHashCertVSBase64() {
+        return hashCertVSBase64;
     }
 
     public String getHashCertVoteHex() {
-        if (hashCertVoteBase64 == null) return null;
-        return new String(Hex.encode(hashCertVoteBase64.getBytes()));
+        if (hashCertVSBase64 == null) return null;
+        return new String(Hex.encode(hashCertVSBase64.getBytes()));
     }
 
-    public void setHashCertVoteBase64(String hashCertVoteBase64) {
-        this.hashCertVoteBase64 = hashCertVoteBase64;
+    public void setHashCertVSBase64(String hashCertVSBase64) {
+        this.hashCertVSBase64 = hashCertVSBase64;
     }
 
     public String getOriginHashAccessRequest() {
@@ -345,7 +345,7 @@ public class EventVS {
         this.hashAccessRequestBase64 = CMSUtils.getHashBase64(
                 this.originHashAccessRequest, ContextVS.SIG_HASH);
         this.originHashCertVote = UUID.randomUUID().toString();
-        this.hashCertVoteBase64 = CMSUtils.getHashBase64(
+        this.hashCertVSBase64 = CMSUtils.getHashBase64(
                 this.originHashCertVote, ContextVS.SIG_HASH);
         return this;
     }
@@ -355,8 +355,8 @@ public class EventVS {
         jsonObject.put("eventURL", URL);
         jsonObject.put("originHashCertVote",
                 getOriginHashCertVote());
-        jsonObject.put("hashCertVoteBase64",
-                getHashCertVoteBase64());
+        jsonObject.put("hashCertVSBase64",
+                getHashCertVSBase64());
         jsonObject.put("originHashAccessRequest",
                 getOriginHashAccessRequest());
         jsonObject.put("hashAccessRequestBase64",
@@ -557,9 +557,9 @@ public class EventVS {
         if (eventoJSON.has("originHashAccessRequest")) {
             androidEventVS.setOriginHashAccessRequest(eventoJSON.getString("originHashAccessRequest"));
         }
-        if (eventoJSON.has("hashCertVoteBase64")) {
-            androidEventVS.setHashCertVoteBase64(eventoJSON.
-                    getString("hashCertVoteBase64"));
+        if (eventoJSON.has("hashCertVSBase64")) {
+            androidEventVS.setHashCertVSBase64(eventoJSON.
+                    getString("hashCertVSBase64"));
         }
         if (eventoJSON.has("originHashCertVote")) {
             androidEventVS.setOriginHashCertVote(eventoJSON.getString("originHashCertVote"));
@@ -633,7 +633,7 @@ public class EventVS {
         }
         if(hashAccessRequestBase64 != null) jsonObject.put("hashAccessRequestBase64", hashAccessRequestBase64);
         if(originHashAccessRequest != null) jsonObject.put("originHashAccessRequest", originHashAccessRequest);
-        if(hashCertVoteBase64 != null) jsonObject.put("hashCertVoteBase64", hashCertVoteBase64);
+        if(hashCertVSBase64 != null) jsonObject.put("hashCertVSBase64", hashCertVSBase64);
         if(originHashCertVote != null) jsonObject.put("originHashCertVote", originHashCertVote);
         return jsonObject;
     }

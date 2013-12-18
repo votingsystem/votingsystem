@@ -79,7 +79,7 @@ public class ApplicationContextHolder implements ApplicationContextAware {
         if(getInstance().environment == null) {
             String environmentStr = (String) ((GrailsApplication)getBean("grailsApplication")).getConfig().
                     getProperty("VotingSystemEnvironment");
-            if(environmentStr == null || "".equals(environmentStr.trim())) {
+            if(environmentStr == null || environmentStr.trim().isEmpty()) {
                 getInstance().environment = EnvironmentVS.valueOf(grails.util.Environment.getCurrent().
                         getName().toUpperCase());
             } else getInstance().environment = EnvironmentVS.valueOf(environmentStr);

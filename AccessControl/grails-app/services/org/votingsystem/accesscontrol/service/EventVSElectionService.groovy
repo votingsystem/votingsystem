@@ -156,7 +156,7 @@ class EventVSElectionService {
 		ResponseVS responseVS;
 		String msg = null
 		try {
-			if (eventVS.isActive(DateUtils.getTodayDate())) {
+			if (eventVS.isActive(Calendar.getInstance().getTime())) {
 				msg = messageSource.getMessage('eventDateNotFinished', null, locale)
 				String currentDateStr = DateUtils.getStringFromDate(
 					new Date(System.currentTimeMillis()))

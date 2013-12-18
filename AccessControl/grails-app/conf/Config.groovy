@@ -190,19 +190,13 @@ grails.war.copyToWebApp = { args -> fileset(dir:"WEB-INF/cms") { }}
 
 VotingSystem.backupCopyPath='./VotingSystem/backups'
 VotingSystem.errorsBaseDir='./VotingSystem/errors'
-SistemaVotacion.accessRequestFileName='accessRequest'
-SistemaVotacion.csrRequestFileName='csr'
-SistemaVotacion.imageFileName='image'
-SistemaVotacion.representativeDataFileName='representativeData'
 VotingSystem.keyStorePath='WEB-INF/cms/AccessControl.jks'
 VotingSystem.signKeysAlias='AccessControlKeys'
 VotingSystem.signKeysPassword='PemPass'
 VotingSystem.certAuthoritiesDirPath='WEB-INF/cms/'
 VotingSystem.certChainPath='WEB-INF/cms/certChain.pem'
-
 VotingSystem.requestTimeOut = 500
 VotingSystem.serverName='Primer AccessControlVS'
-VotingSystem.votingHashAlgorithm='SHA256'
 VotingSystem.blogURL = 'http://www.gruposp2p.org'
 VotingSystem.emailAdmin='jgzornoza@gmail.com'
 //_ TODO _

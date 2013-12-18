@@ -35,8 +35,6 @@ public class CertUtil {
     
     private static Logger logger = Logger.getLogger(CertUtil.class);
 
-    private static SVCertExtensionChecker checker = new SVCertExtensionChecker();
-
     /**
      * Generate V3 certificate for users
      */
@@ -323,6 +321,7 @@ public class CertUtil {
     public static PKIXCertPathValidatorResult verifyCertificate(Set<TrustAnchor> anchors,
              boolean checkCRL, List<X509Certificate> certs) throws Exception {
         PKIXParameters pkixParameters = new PKIXParameters(anchors);
+        SVCertExtensionChecker checker = new SVCertExtensionChecker();
         pkixParameters.addCertPathChecker(checker);
         pkixParameters.setRevocationEnabled(checkCRL); // if false tell system do not check CRL's
         CertPathValidator certPathValidator = CertPathValidator.getInstance("PKIX", ContextVS.PROVIDER);

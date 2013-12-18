@@ -28,11 +28,11 @@ public class CertificateVS implements Serializable {
 
     public enum State {OK, ERROR, CANCELLED, USED, UNKNOWN}
 
-    public enum Type {VOTEVS_ROOT, VOTEVS, USER, CERTIFICATE_AUTHORITY, CERTIFICATE_AUTHORITY_TEST, ACTOR_VS}
+    public enum Type {VOTEVS_ROOT, VOTEVS, USER, CERTIFICATE_AUTHORITY, CERTIFICATE_AUTHORITY_TEST, ACTOR_VS,
+        ANONYMOUS_REPRESENTATIVE_DELEGATION}
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
-    @OneToOne private VoteRequestCsrVS voteRequestCsrVS;
     @OneToOne private UserRequestCsrVS userRequestCsrVS;
     @OneToOne(mappedBy="certificateVS") private VoteVS voteVS;
     @Column(name="serialNumber", unique=true, nullable=false) private Long serialNumber;
@@ -47,7 +47,7 @@ public class CertificateVS implements Serializable {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="eventVSElection") private EventVSElection eventVSElection;
 
-    @Column(name="hashCertVoteBase64") private String hashCertVoteBase64;
+    @Column(name="hashCertVSBase64", unique=true) private String hashCertVSBase64;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="authorityCertificateVS") private CertificateVS authorityCertificateVS;
@@ -98,7 +98,7 @@ public class CertificateVS implements Serializable {
                     hashCertExtensionValue);
             String hashCertVoteHex = ((DERUTF8String)hashCertDER.getObject()).toString();
             HexBinaryAdapter hexConverter = new HexBinaryAdapter();
-            setHashCertVoteBase64(new String(hexConverter.unmarshal(hashCertVoteHex)));
+            setHashCertVSBase64(new String(hexConverter.unmarshal(hashCertVoteHex)));
         }
 
         byte[] representativeURLExtensionValue = x509Certificate.getExtensionValue(ContextVS.REPRESENTATIVE_URL_OID);
@@ -157,12 +157,12 @@ public class CertificateVS implements Serializable {
         return id;
     }
 
-    public String getHashCertVoteBase64() {
-        return hashCertVoteBase64;
+    public String getHashCertVSBase64() {
+        return hashCertVSBase64;
     }
 
-    public void setHashCertVoteBase64(String hashCertVoteBase64) {
-        this.hashCertVoteBase64 = hashCertVoteBase64;
+    public void setHashCertVSBase64(String hashCertVSBase64) {
+        this.hashCertVSBase64 = hashCertVSBase64;
     }
 
     public State getState() {
@@ -201,17 +201,8 @@ public class CertificateVS implements Serializable {
         return serverURL;
     }
 
-
     public void setServerURL(String serverURL) {
         this.serverURL = serverURL;
-    }
-
-    public VoteRequestCsrVS getVoteRequestCsrVS() {
-        return voteRequestCsrVS;
-    }
-
-    public void setVoteRequestCsrVS(VoteRequestCsrVS solicitudCSR) {
-        this.voteRequestCsrVS = solicitudCSR;
     }
 
     public VoteVS getVoteVS() {

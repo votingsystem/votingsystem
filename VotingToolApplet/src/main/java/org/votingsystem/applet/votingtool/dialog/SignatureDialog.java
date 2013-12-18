@@ -147,7 +147,6 @@ public class SignatureDialog extends JDialog {
         dispose();
     }
     
-    
     private void cancel() {
         if(runningTask == null )  logger.debug("cancel - runningTask null");
         else logger.debug("cancel - runningTask.isDone(): " + runningTask.isDone());

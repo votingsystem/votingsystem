@@ -24,26 +24,26 @@ import static org.votingsystem.model.ContextVS.*;
 * @author jgzornoza
 * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
 */
-public class AccessRequestDataSender implements Callable<ResponseVS> {
+public class AnonymousDelegationRequestDataSender implements Callable<ResponseVS> {
 
-    private static Logger logger = Logger.getLogger(AccessRequestDataSender.class);
+    private static Logger logger = Logger.getLogger(AnonymousDelegationRequestDataSender.class);
 
-    private VoteVS voteVS;
     private SMIMEMessageWrapper smimeMessage;
     private CertificationRequestVS certificationRequest;
     private X509Certificate destinationCert;
 
-    public AccessRequestDataSender(SMIMEMessageWrapper smimeMessage, VoteVS voteVS) throws Exception {
+    public AnonymousDelegationRequestDataSender(SMIMEMessageWrapper smimeMessage, String weeksOperationActive,
+                    String hashCertVS) throws Exception {
         this.smimeMessage = smimeMessage;
-        this.voteVS = voteVS;
         this.destinationCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
-        this.certificationRequest = CertificationRequestVS.getVoteRequest(KEY_SIZE, SIG_NAME, VOTE_SIGN_MECHANISM,
-                ContextVS.PROVIDER, ContextVS.getInstance().getAccessControl().getServerURL(),
-                voteVS.getEventVS().getId().toString(), voteVS.getHashCertVoteHex());
+        this.certificationRequest = CertificationRequestVS.getAnonymousDelegationRequest(KEY_SIZE, SIG_NAME,
+                VOTE_SIGN_MECHANISM, ContextVS.PROVIDER, ContextVS.getInstance().getAccessControl().getServerURL(),
+                hashCertVS, weeksOperationActive);
     }
 
     @Override public ResponseVS call() throws Exception {
-        logger.debug("doInBackground - accessServiceURL: " +  ContextVS.getInstance().getAccessControl().getAccessServiceURL());
+        logger.debug("doInBackground - accessServiceURL: " +
+                ContextVS.getInstance().getAccessControl().getAnonymousDelegationRequestServiceURL());
         TimeStampRequest timeStampRequest = smimeMessage.getTimeStampRequest();
         ResponseVS responseVS = HttpHelper.getInstance().sendData(timeStampRequest.getEncoded(),
                 ContentTypeVS.TIMESTAMP_QUERY, ContextVS.getInstance().getAccessControl().getTimeStampServerURL());
@@ -55,17 +55,17 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
                     setProvider(ContextVS.PROVIDER).build(timeStampCert);
             timeStampToken.validate(timeStampSignerInfoVerifier);
             smimeMessage.setTimeStampToken(timeStampToken);
-            Header header = new Header("votingSystemMessageType", "voteCsr");
+            Header header = new Header("votingSystemMessageType", "anonymousDelegationCsr");
             byte[] encryptedCSRBytes = Encryptor.encryptMessage(certificationRequest.getCsrPEM(),destinationCert,header);
-            byte[] accessRequestEncryptedBytes = Encryptor.encryptSMIME(smimeMessage, destinationCert);
+            byte[] delegationEncryptedBytes = Encryptor.encryptSMIME(smimeMessage, destinationCert);
             String csrFileName = ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.ENCRYPTED.getName();
-            String accessRequestFileName = ContextVS.ACCESS_REQUEST_FILE_NAME + ":" +
+            String representativeDataFileName = ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" +
                     ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED.getName();
             Map<String, Object> mapToSend = new HashMap<String, Object>();
             mapToSend.put(csrFileName, encryptedCSRBytes);
-            mapToSend.put(accessRequestFileName, accessRequestEncryptedBytes);
+            mapToSend.put(representativeDataFileName, delegationEncryptedBytes);
             responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
-                    ContextVS.getInstance().getAccessControl().getAccessServiceURL());
+                    ContextVS.getInstance().getAccessControl().getAnonymousDelegationServiceURL());
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 byte[] encryptedData = responseVS.getMessageBytes();
                 byte[] decryptedData = Encryptor.decryptFile(encryptedData, certificationRequest.getPublicKey(),

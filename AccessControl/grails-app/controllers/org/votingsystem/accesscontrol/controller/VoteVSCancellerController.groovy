@@ -30,12 +30,12 @@ class VoteVSCancellerController {
 	def index () {
 		if(params.hashHex) {
 			HexBinaryAdapter hexConverter = new HexBinaryAdapter();
-			String hashCertVoteBase64 = new String(
+			String hashCertVSBase64 = new String(
 				hexConverter.unmarshal(params.hashHex))
-			log.debug "hashCertVoteBase64: '${hashCertVoteBase64}'"
+			log.debug "hashCertVSBase64: '${hashCertVSBase64}'"
 			VoteVSCanceller voteCanceller = null
 			VoteVSCanceller.withTransaction{
-				voteCanceller = VoteVSCanceller.findWhere(hashCertVoteBase64:hashCertVoteBase64)
+				voteCanceller = VoteVSCanceller.findWhere(hashCertVSBase64:hashCertVSBase64)
 			}
 			if(!voteCanceller) return [responseVS : new ResponseVS(ResponseVS.SC_OK,
                     message(code: 'voteNotFound', args:[params.id]))]

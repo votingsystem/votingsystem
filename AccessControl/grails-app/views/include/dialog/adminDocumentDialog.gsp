@@ -1,11 +1,15 @@
 <div id="adminDocumentDialog" title="<g:message code="cancelEventCaption"/>">
 	<p style="text-align: center;"><g:message code="adminDocumenInfoMsg"/></p>
 	<g:message code="documentStateSelectionMsg"/>:<br/>
-	<div style="font-size: 0.9em; margin:10px 0 0 10px;"> 
+	<div class="checkBox" style="font-size: 0.9em; margin:10px 0 0 10px;">
 		<div style="margin:0px 0 10px 0px;display:block;">
-			<input type="checkbox" id="selectDeleteDocument"/><label for="selectDeleteDocument"><g:message code="selectDeleteDocumentMsg"/></label>
+			<input type="checkbox" id="selectDeleteDocument" onclick="setDocumentStateCheckBox(this)"/>
+                <label for="selectDeleteDocument"><g:message code="selectDeleteDocumentMsg"/></label>
 		</div>
-		<input type="checkbox" id="selectCloseDocument"/><g:message code="selectCloseDocumentMsg"/>
+        <div>
+            <input type="checkbox" id="selectCloseDocument" onclick="setDocumentStateCheckBox(this)"/>
+            <label for="selectCloseDocument"><g:message code="selectCloseDocumentMsg"/></label>
+        </div>
 	</div>
 </div> 
 <r:script>
@@ -30,6 +34,17 @@ $("#selectCloseDocument").click(function () {
 		$("#selectDeleteDocument").prop('checked', false);
 	}
 })
+
+function setDocumentStateCheckBox(documentStateCheckBox) {
+    console.log("setRepresentativeModeCheckBox: " + documentStateCheckBox.id)
+    if("selectDeleteDocument" == documentStateCheckBox.id &&
+        $("#selectDeleteDocument").is(':checked')) {
+        document.getElementById("selectCloseDocument").checked = false
+    } else if("selectCloseDocument" == documentStateCheckBox.id &&
+        $("#selectCloseDocument").is(':checked')) {
+        document.getElementById("selectDeleteDocument").checked = false
+    }
+}
 
 $("#adminDocumentDialog").dialog({
  	  width: 600, autoOpen: false, modal: true,

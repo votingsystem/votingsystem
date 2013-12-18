@@ -165,7 +165,7 @@ class EventVSManifestController {
             log.debug "eventVSJSON.content: ${eventVSJSON.content}"
             eventVSJSON.content = htmlService.prepareHTMLToPDF(eventVSJSON.content.getBytes())
             Date dateFinish = new Date().parse("yyyy/MM/dd HH:mm:ss", eventVSJSON.dateFinish)
-            if(dateFinish.before(DateUtils.getTodayDate())) {
+            if(dateFinish.before(Calendar.getInstance().getTime())) {
                 String msg = message(code:'publishDocumentDateErrorMsg',
                         args:[DateUtils.getStringFromDate(dateFinish)])
                 log.error("DATE ERROR - msg: ${msg}")

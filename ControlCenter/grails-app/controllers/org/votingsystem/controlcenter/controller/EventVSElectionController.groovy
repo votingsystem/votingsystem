@@ -146,8 +146,8 @@ class EventVSElectionController {
 				votesVSMap.eventVSElectionURL=eventVSElection.url
                 HexBinaryAdapter hexConverter = new HexBinaryAdapter();
                 votesVS.each {voteVS ->
-                    String hashCertVoteHex = hexConverter.marshal(voteVS.getCertificateVS.hashCertVoteBase64.getBytes());
-                    def voteVSMap = [id:voteVS.id, hashCertVoteBase64:voteVS.getCertificateVS.hashCertVoteBase64,
+                    String hashCertVoteHex = hexConverter.marshal(voteVS.getCertificateVS.hashCertVSBase64.getBytes());
+                    def voteVSMap = [id:voteVS.id, hashCertVSBase64:voteVS.getCertificateVS.hashCertVSBase64,
                         fieldEventVSId:voteVS.getFieldEventVS.fieldEventVSId, eventVSElectionId:voteVS.eventVS.eventVSElectionId,
                         state:voteVS.state,
 						certificateURL:"${grailsApplication.config.grails.serverURL}/certificateVS/voteVS/hashHex/${hashCertVoteHex}",

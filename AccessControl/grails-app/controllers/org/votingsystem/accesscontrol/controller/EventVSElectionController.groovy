@@ -2,6 +2,7 @@ package org.votingsystem.accesscontrol.controller
 
 import grails.converters.JSON
 import org.votingsystem.model.AccessRequestVS
+import org.votingsystem.model.CertificateVS
 import org.votingsystem.model.ContentTypeVS
 import org.votingsystem.model.EventVS
 import org.votingsystem.model.EventVSElection
@@ -9,7 +10,6 @@ import org.votingsystem.model.MessageSMIME
 import org.votingsystem.model.ResponseVS
 import org.votingsystem.model.SubSystemVS
 import org.votingsystem.model.TypeVS
-import org.votingsystem.model.VoteRequestCsrVS
 import org.votingsystem.model.VoteVS
 import org.votingsystem.model.VoteVSCanceller
 import org.votingsystem.util.DateUtils
@@ -272,10 +272,11 @@ class EventVSElectionController {
 				requestsCancelled = AccessRequestVS.findAllWhere(state:TypeVS.CANCELLED, eventVSElection:eventVS)
 			}
 			def solicitudesCSROk, numCSRCollected_CANCELLED;
-			VoteRequestCsrVS.withTransaction {
-				solicitudesCSROk =VoteRequestCsrVS.findAllWhere(state:VoteRequestCsrVS.State.OK,eventVSElection:eventVS)
-				numCSRCollected_CANCELLED = VoteRequestCsrVS.findAllWhere(
-					state:VoteRequestCsrVS.State.CANCELLED, eventVSElection:eventVS)
+            CertificateVS.withTransaction {
+				solicitudesCSROk = CertificateVS.findAllWhere(type:CertificateVS.Type.VOTEVS,
+                        state:CertificateVS.State.OK, eventVSElection:eventVS)
+				numCSRCollected_CANCELLED = CertificateVS.findAllWhere(
+					state:CertificateVS.State.CANCELLED, eventVSElection:eventVS)
 			}
 			voteVSInfoMap.numRequestCollected = eventVS.accessRequest.size()
 			voteVSInfoMap.numRequestCollected_OK = requestsOK.size()
@@ -311,10 +312,10 @@ class EventVSElectionController {
 			HexBinaryAdapter hexConverter = new HexBinaryAdapter();
 			eventVS.votesVS.each { voteVS ->
 				def hashCertVoteHex = hexConverter.marshal(
-					voteVS.getCertificateVS.hashCertVoteBase64.getBytes() )
+					voteVS.getCertificateVS.hashCertVSBase64.getBytes() )
 				def voteVSMap = [id:voteVS.id, optionSelectedId:voteVS.getFieldEventVS.id,
 					state:voteVS.state.toString(),
-					hashCertVoteBase64:voteVS.getCertificateVS.hashCertVoteBase64,
+					hashCertVSBase64:voteVS.getCertificateVS.hashCertVSBase64,
 					certificateURL:"${grailsApplication.config.grails.serverURL}/certificateVS" +
 						"/voteVS/${hashCertVoteHex}",
 					voteVSURL:"${grailsApplication.config.grails.serverURL}/messageSMIME" +
