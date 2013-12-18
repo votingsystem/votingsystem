@@ -140,6 +140,7 @@ public class FileUtils {
         return tempFile;
     }
 
+
     public static void deleteDir(File dir) throws IOException {
         logger.info("deleteDir: " + dir.getAbsolutePath());
         if (dir.isDirectory()) {
@@ -289,7 +290,7 @@ public class FileUtils {
      * @param zipfile Input .zip file
      * @param outdir Output directory
      */
-    public static void extract(File zipfile, File outdir) {
+    public static void unpackZip(File zipfile, File outdir) {
         try {
             ZipInputStream zin = new ZipInputStream(new FileInputStream(zipfile));
             ZipEntry entry;

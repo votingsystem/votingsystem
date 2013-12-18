@@ -123,7 +123,8 @@ public class CancelRepresentationDialog extends JDialog {
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File cancellationData = chooser.getSelectedFile();
                 if (cancellationData != null) {
-
+                    String outputFolder = ContextVS.APPTEMPDIR + File.separator + UUID.randomUUID();
+                    FileUtils.unpackZip(cancellationData, new File(outputFolder));
                 }
             }
         } catch (Exception ex) {
@@ -150,15 +151,12 @@ public class CancelRepresentationDialog extends JDialog {
     private void cancel() {
         if(runningTask == null )  logger.debug("cancel - runningTask null");
         else logger.debug("cancel - runningTask.isDone(): " + runningTask.isDone());
-
         if(runningTask != null && !runningTask.isDone()) {
             logger.debug(" --- cancelling task ---");
             runningTask.cancel(true);
             showProgressPanel(false);
             return;
-        } else {
-            sendResponse(ResponseVS.SC_CANCELLED, ContextVS.getMessage("operationCancelledMsg"));
-        }
+        } else sendResponse(ResponseVS.SC_CANCELLED, ContextVS.getMessage("operationCancelledMsg"));
         dispose();
     }
 
@@ -171,7 +169,7 @@ public class CancelRepresentationDialog extends JDialog {
         }
 
         @Override public ResponseVS doInBackground() throws Exception {
-            logger.debug("SignedSenderWorker.doInBackground - operation: "  + operation.getType().toString());
+            logger.debug("SignedSenderWorker.doInBackground");
             JSONObject documentToSignJSON = (JSONObject)JSONSerializer.toJSON(operation.getDocumentToSignMap());
             SMIMEMessageWrapper smimeMessage = DNIeContentSigner.genMimeMessage(null,
                     operation.getNormalizedReceiverName(), documentToSignJSON.toString(),

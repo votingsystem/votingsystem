@@ -158,6 +158,7 @@ public class ContextVS {
             appProperties = new Properties();
             appProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(
                     "votingSystemLibraryMessages" + "_" + locale +  ".properties"));
+            Runtime.getRuntime().addShutdownHook(new Thread() { public void run() { shutdown(); } });
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
         }
