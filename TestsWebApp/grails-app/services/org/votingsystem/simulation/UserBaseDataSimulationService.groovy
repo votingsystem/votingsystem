@@ -36,8 +36,6 @@ class UserBaseDataSimulationService {
 
     def grailsApplication
 
-
-
     private ExecutorService requestExecutor;
     private static CompletionService<ResponseVS> requestCompletionService;
 
@@ -77,7 +75,7 @@ class UserBaseDataSimulationService {
 
     private void initializeServer() {
         log.debug("initializeServer ### Enter INITIALIZE_SERVER status")
-        String serviceURL = "${ContextVS.getInstance().getAccessControl().getServerURL()}/userVS/prepareUserBaseData"
+        String serviceURL = ContextVS.getInstance().getAccessControl().getUserBaseInitServiceURL()
         ResponseVS responseVS = HttpHelper.getInstance().getData(serviceURL, null)
         responseVS.setStatus(Status.INITIALIZE_SERVER);
         changeSimulationStatus(responseVS);
@@ -112,7 +110,7 @@ class UserBaseDataSimulationService {
                 Certificate[] chain = keyStore.getCertificateChain(ContextVS.END_ENTITY_ALIAS);
                 X509Certificate usertCert = (X509Certificate) chain[0];
                 byte[] usertCertPEMBytes = CertUtil.getPEMEncoded(usertCert);
-                String certServiceURL = ContextVS.getInstance().getAccessControl().getServerURL() + "/userVS";
+                String certServiceURL = ContextVS.getInstance().getAccessControl().getUserCertServiceURL();
                 responseVS =HttpHelper.getInstance().sendData(usertCertPEMBytes,ContentTypeVS.X509_USER,certServiceURL);
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                     log.error("ERROR nif: " + userNif + " - msg:" + responseVS.getMessage());
@@ -173,7 +171,7 @@ class UserBaseDataSimulationService {
         log.debug("createDelegations - enter status DELEGATIONS - NumUsersWithRepresentative - " +
                 simulationData.getNumUsersWithRepresentative());
         if(simulationData.getNumUsersWithRepresentative() > 0) {
-            String serviceURL = ContextVS.getInstance().getAccessControl().getServerURL() + "/representative/userSelection";
+            String serviceURL = ContextVS.getInstance().getAccessControl().getDelegationServiceURL();
             while (simulationData.getNumDelegationRequests() < simulationData.getNumUsersWithRepresentative()) {
                 if((simulationData.getNumDelegationRequests() -simulationData.getNumDelegationRequestsColected()) <
                         simulationData.getMaxPendingResponses()) {

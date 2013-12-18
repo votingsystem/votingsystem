@@ -219,18 +219,18 @@ class RepresentativeController {
 	 * Servicio que guarda las selecciones de representantes echas por los usuarios
 	 *
 	 * @httpMethod [POST]
-	 * @serviceURL [/representative/userSelection]
+	 * @serviceURL [/representative/delegation]
 	 * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. documento firmado
 	 *                     por el usuario que está eligiendo el representante.
 	 * @responseContentType [application/x-pkcs7-signature] Recibo firmado por el sistema.
 	 * @return Recibo que consiste en el documento enviado por el usuario con la signatureVS añadida del servidor.
 	 */
-	def userSelection() {
+	def delegation() {
 		MessageSMIME messageSMIME = request.messageSMIMEReq
 		if(!messageSMIME) {
             return [responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
 		}
-		ResponseVS responseVS = representativeService.saveUserRepresentative(messageSMIME, request.getLocale())
+		ResponseVS responseVS = representativeService.saveAnonymousDelegation(messageSMIME, request.getLocale())
 		if (ResponseVS.SC_OK == responseVS.statusCode){
             responseVS.setContentType(ContentTypeVS.SIGNED)
 		}
@@ -327,6 +327,30 @@ class RepresentativeController {
         }
 	}
 
+
+    /**
+     *
+     * Servicio que guarda las selecciones anónimas de representantes echas por los usuarios
+     *
+     * @httpMethod [POST]
+     * @serviceURL [/representative/anonymousDelegation]
+     * @requestContentType [application/x-pkcs7-signature, application/x-pkcs7-mime] Obligatorio. documento firmado por
+     *                      el usuario con un certificado anónimo en el que figuran los datos del representante.
+     * @responseContentType [application/x-pkcs7-signature] Recibo firmado por el sistema.
+     * @return Recibo que consiste en el documento enviado por el usuario con la firma añadida del servidor.
+     */
+    def anonymousDelegation() {
+        MessageSMIME messageSMIME = request.messageSMIMEReq
+        if(!messageSMIME) {
+            return [responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
+        }
+        ResponseVS responseVS = representativeService.saveDelegation(messageSMIME, request.getLocale())
+        if (ResponseVS.SC_OK == responseVS.statusCode){
+            responseVS.setContentType(ContentTypeVS.SIGNED)
+        }
+        return [responseVS : responseVS]
+    }
+
     /**
      * Servicio que valida las delegaciones anónimas de representantes.
      *
@@ -336,7 +360,7 @@ class RepresentativeController {
      * @param [csr] Obligatorio. La solicitud de certificado de delegación anónima.
      * @return La solicitud de certificado de delegación anónima firmada.
      */
-    def processAnonymousDelegationFileMap() {
+    def processAnonymousDelegationRequestFileMap() {
         MessageSMIME messageSMIMEReq = params[ContextVS.REPRESENTATIVE_DATA_FILE_NAME]
         if(!messageSMIMEReq) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]

@@ -245,7 +245,7 @@ class UrlMappings {
 
         "/representative/anonymousDelegationRequest" {
             controller = "representative"
-            action = [POST:"processAnonymousDelegationFileMap"]
+            action = [POST:"processAnonymousDelegationRequestFileMap"]
         }
 
 		"/representative/$id?" {

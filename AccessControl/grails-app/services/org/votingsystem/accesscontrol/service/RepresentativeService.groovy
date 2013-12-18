@@ -457,8 +457,8 @@ class RepresentativeService {
 	}
 	
 	//{"operation":"REPRESENTATIVE_SELECTION","representativeNif":"...","representativeName":"...","UUID":"..."}
-	public synchronized ResponseVS saveUserRepresentative(MessageSMIME messageSMIMEReq, Locale locale) {
-		log.debug("saveUserRepresentative -")
+	public synchronized ResponseVS saveDelegation(MessageSMIME messageSMIMEReq, Locale locale) {
+		log.debug("saveDelegation -")
 		//def future = callAsync {}
 		//return future.get(30, TimeUnit.SECONDS)
 		MessageSMIME messageSMIME = null
@@ -470,7 +470,7 @@ class RepresentativeService {
 			if(UserVS.Type.REPRESENTATIVE == userVS.type) {
 				msg = messageSource.getMessage('userIsRepresentativeErrorMsg',
 					[userVS.nif].toArray(), locale)
-				log.error "saveUserRepresentative - ERROR - user '${userVS.nif}' is REPRESENTATIVE - ${msg}"
+				log.error "saveDelegation - ERROR - user '${userVS.nif}' is REPRESENTATIVE - ${msg}"
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
 					message:msg, type:TypeVS.REPRESENTATIVE_SELECTION_ERROR)
 			}
@@ -479,14 +479,14 @@ class RepresentativeService {
 			if(userVS.nif == requestValidatedNIF) {
 				msg = messageSource.getMessage('representativeSameUserNifErrorMsg',
 					[requestValidatedNIF].toArray(), locale)
-				log.error("saveUserRepresentative - ERROR SAME USER SELECTION - ${msg}")
+				log.error("saveDelegation - ERROR SAME USER SELECTION - ${msg}")
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
 					message:msg, type:TypeVS.REPRESENTATIVE_SELECTION_ERROR)
 			}
 			if(!requestValidatedNIF || !messageJSON.operation || !messageJSON.representativeNif ||
 				(TypeVS.REPRESENTATIVE_SELECTION != TypeVS.valueOf(messageJSON.operation))) {
 				msg = messageSource.getMessage('representativeSelectionDataErrorMsg', null, locale)
-				log.error("saveUserRepresentative - ERROR DATA - ${msg}")
+				log.error("saveDelegation - ERROR DATA - ${msg}")
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
 					message:msg, type:TypeVS.REPRESENTATIVE_SELECTION_ERROR)
 			}
@@ -495,7 +495,7 @@ class RepresentativeService {
 			if(!representative) {
 				msg = messageSource.getMessage('representativeNifErrorMsg',
 					[requestValidatedNIF].toArray(), locale)
-				log.error "saveUserRepresentative - ERROR NIF REPRESENTATIVE - ${msg}"
+				log.error "saveDelegation - ERROR NIF REPRESENTATIVE - ${msg}"
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
 					message:msg, type:TypeVS.REPRESENTATIVE_SELECTION_ERROR)
 			}
@@ -520,7 +520,7 @@ class RepresentativeService {
 						
 			msg = messageSource.getMessage('representativeAssociatedMsg',
 				[messageJSON.representativeName, userVS.nif].toArray(), locale)
-			log.debug "saveUserRepresentative - ${msg}"
+			log.debug "saveDelegation - ${msg}"
 			
 			String fromUser = grailsApplication.config.VotingSystem.serverName
 			String toUser = userVS.getNif()
@@ -543,7 +543,13 @@ class RepresentativeService {
 				message:msg, type:TypeVS.REPRESENTATIVE_SELECTION_ERROR)
 		}
 	}
-	
+
+    public ResponseVS saveAnonymousDelegation(MessageSMIME messageSMIMEReq, Locale locale) {
+        log.debug("saveAnonymousDelegation")
+
+    }
+
+
 	private void cancelRepresentationDocument(MessageSMIME messageSMIMEReq, UserVS userVS) {
 		RepresentationDocumentVS.withTransaction {
 			RepresentationDocumentVS representationDocument = RepresentationDocumentVS.
