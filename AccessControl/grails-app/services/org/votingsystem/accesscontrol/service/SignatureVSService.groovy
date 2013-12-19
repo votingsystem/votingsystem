@@ -1,6 +1,7 @@
 package org.votingsystem.accesscontrol.service
 
 import org.bouncycastle.asn1.DERTaggedObject
+import org.bouncycastle.jce.PKCS10CertificationRequest
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.votingsystem.model.CertificateVS
 import org.votingsystem.model.ContextVS
@@ -153,9 +154,9 @@ class SignatureVSService {
     /**
      * Generate V3 Certificate from CSR
      */
-    public X509Certificate signCSR(byte[] csrPEMBytes, String organizationalUnit, Date dateBegin, Date dateFinish,
-           DERTaggedObject... certExtensions) throws Exception {
-        X509Certificate issuedCert = CertUtil.signCSR(csrPEMBytes, organizationalUnit, getServerPrivateKey(),
+    public X509Certificate signCSR(PKCS10CertificationRequest csr, String organizationalUnit, Date dateBegin,
+           Date dateFinish, DERTaggedObject... certExtensions) throws Exception {
+        X509Certificate issuedCert = CertUtil.signCSR(csr, organizationalUnit, getServerPrivateKey(),
                 getServerCert(), dateBegin, dateFinish, certExtensions)
         return issuedCert
     }

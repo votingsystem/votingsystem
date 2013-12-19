@@ -26,7 +26,7 @@ class CsrService {
 	def messageSource
     def signatureVSService
 	
-	public synchronized ResponseVS signCertVoteVS (byte[] csr, EventVS eventVS, UserVS userVS, Locale locale) {
+	public synchronized ResponseVS signCertVoteVS (byte[] csrPEMBytes, EventVS eventVS, UserVS userVS, Locale locale) {
 		log.debug("signCertVoteVS - eventVS: ${eventVS?.id}");
 		ResponseVS responseVS = validateCSRVote(csr, eventVS, locale)
 		if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
@@ -44,6 +44,7 @@ class CsrService {
             representativeExtension = new DERTaggedObject(ContextVS.REPRESENTATIVE_URL_TAG,
                     new DERUTF8String(representativeURL))
         }
+        PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
 		X509Certificate issuedCert = CertUtil.signCSR(csr, null, privateKeySigner, certSigner, eventVS.dateBegin,
                 eventVS.dateFinish, representativeExtension)
 		if (!issuedCert) {
@@ -238,9 +239,8 @@ class CsrService {
 		Date today = Calendar.getInstance().getTime();
 		Calendar today_plus_year = Calendar.getInstance();
 		today_plus_year.add(Calendar.YEAR, 1);
-		/*X509Certificate issuedCert = CertUtil.signCSR(requestCSR.content, null, privateKeySigner,
-				certSigner, today, today_plus_year.getTime())*/
-        X509Certificate issuedCert = CertUtil.signCSR(requestCSR.content, null, privateKeySigner,
+        PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(requestCSR.content);
+        X509Certificate issuedCert = CertUtil.signCSR(csr, null, privateKeySigner,
                 certSigner, today, today_plus_year.getTime())
 
 		if (!issuedCert) {

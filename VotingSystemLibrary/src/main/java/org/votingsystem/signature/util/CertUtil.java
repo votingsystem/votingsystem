@@ -172,9 +172,8 @@ public class CertUtil {
     /**
      * Generate V3 Certificate from CSR
      */
-    public static X509Certificate signCSR(byte[] csrPEMBytes, String organizationalUnit, PrivateKey caKey,
+    public static X509Certificate signCSR(PKCS10CertificationRequest csr, String organizationalUnit, PrivateKey caKey,
                X509Certificate caCert, Date dateBegin, Date dateFinish, DERTaggedObject... certExtensions) throws Exception {
-        PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
         String strSubjectDN = csr.getCertificationRequestInfo().getSubject().toString();
         if (!csr.verify() || strSubjectDN == null) throw new Exception("ERROR VERIFYING CSR");
         if(organizationalUnit != null) strSubjectDN = organizationalUnit + "," + strSubjectDN;
