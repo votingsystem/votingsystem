@@ -217,6 +217,7 @@ class AccessControlFilters {
                     case ContentTypeVS.TEXT:
                         return printOutput(response, responseVS)
                     case ContentTypeVS.JSON:
+                        response.status = responseVS.statusCode
                         render responseVS.getData() as JSON
                         return false
                     case ContentTypeVS.ZIP:

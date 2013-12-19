@@ -157,7 +157,6 @@ public class VotingApplet extends JApplet implements AppHostVS {
                             votingAppletFirma.runOperation(FileUtils.getStringFromFile(jsonFile));
                         }
                         if(operationStr != null) votingAppletFirma.runOperation(operationStr);
-                        else logger.error("### Operation null ###");
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
                     }

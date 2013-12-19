@@ -97,8 +97,9 @@ class CsrService {
             log.error("- signAnonymousDelegationCert - ERROR - ${msg}")
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ERROR)
         }
-        HexBinaryAdapter hexConverter = new HexBinaryAdapter();
-        String hashCertVSBase64 = new String(hexConverter.unmarshal(certAttributeJSON.hashCertVS));
+        //HexBinaryAdapter hexConverter = new HexBinaryAdapter();
+        //String hashCertVSBase64 = new String(hexConverter.unmarshal(certAttributeJSON.hashCertVS));
+        String hashCertVSBase64 = certAttributeJSON.hashCertVS
         Date certValidFrom = Calendar.getInstance().getTime()
         Calendar today_plus_day = Calendar.getInstance();
         today_plus_day.add(Calendar.DATE, 1);

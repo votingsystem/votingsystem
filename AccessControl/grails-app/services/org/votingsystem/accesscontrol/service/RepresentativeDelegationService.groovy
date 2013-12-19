@@ -106,6 +106,52 @@ class RepresentativeDelegationService {
 		}
 	}
 
+    ResponseVS validateAnonymousRequest(MessageSMIME messageSMIMEReq, Locale locale) {
+        log.debug("validateAnonymousRequest")
+        SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
+        UserVS userVS = messageSMIMEReq.getUserVS()
+        String msg
+        try {
+            if(userVS.getDelegationFinish() != null) {
+                MessageSMIME userDelegation = MessageSMIME.findWhere(type:TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION,
+                        userVS:userVS)
+                String userDelegationURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${userDelegation?.id}"
+                msg = messageSource.getMessage('userWithPreviousDelegationErrorMsg' ,[userVS.nif,
+                        userVS.delegationFinish].toArray(), locale)
+                log.error(msg)
+                return new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST, contentType: ContentTypeVS.JSON,
+                        data:[message:msg, URL:userDelegationURL])
+            }
+            if(UserVS.Type.REPRESENTATIVE == userVS.type) {
+                msg = messageSource.getMessage('userIsRepresentativeErrorMsg', [userVS.nif].toArray(), locale)
+                log.error "validateAnonymousRequest - ${msg}"
+                return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ERROR)
+            }
+            def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
+            TypeVS operationType = TypeVS.valueOf(messageJSON.operation)
+            if (!messageJSON.accessControlURL || !messageJSON.weeksOperationActive ||
+                    (TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION != operationType)) {
+                msg = messageSource.getMessage('requestWithErrorsMsg', null, locale)
+                log.error("validateAnonymousRequest - msg: ${msg} - ${messageJSON}")
+                return new ResponseVS(statusCode: ResponseVS.SC_ERROR_REQUEST,
+                        contentType:ContentTypeVS.JSON,data:[message:msg])
+            }
+            // _ TODO _ round dates to avoid tracking
+            //Date nearestMinute = DateUtils.round(now, Calendar.MINUTE);
+            //??? Date nearestMonday = DateUtils.round(now, Calendar.MONDAY);
+            Date delegationFinish = DateUtils.addDays(Calendar.getInstance().getTime(),
+                    Integer.valueOf(messageJSON.weeksOperationActive) * 7)
+            userVS.setDelegationFinish(delegationFinish)
+            userVS.save()
+            return new ResponseVS(statusCode: ResponseVS.SC_OK, type: TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION,
+                    userVS:userVS, data:[weeksOperationActive:messageJSON.weeksOperationActive])
+        } catch(Exception ex) {
+            log.error (ex.getMessage(), ex)
+            return new ResponseVS(statusCode:ResponseVS.SC_ERROR, type:TypeVS.ERROR,
+                    message:messageSource.getMessage('anonymousDelegationErrorMsg', null, locale))
+        }
+    }
+
     public ResponseVS saveAnonymousDelegation(MessageSMIME messageSMIMEReq, Locale locale) {
         log.debug("saveAnonymousDelegation")
         MessageSMIME messageSMIME = null
@@ -177,51 +223,6 @@ class RepresentativeDelegationService {
 			} else log.debug("cancelRepresentationDocument - user '${userVS.nif}' doesn't have representative")
 		}
 	}
-
-    ResponseVS validateAnonymousRequest(MessageSMIME messageSMIMEReq, Locale locale) {
-        log.debug("validateAnonymousRequest")
-        SMIMEMessageWrapper smimeMessageReq = messageSMIMEReq.getSmimeMessage()
-        UserVS userVS = messageSMIMEReq.getUserVS()
-        String msg
-        try {
-            if(userVS.getDelegationFinish() != null) {
-                MessageSMIME userDelegation = MessageSMIME.findWhere(type:TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION,
-                        userVS:userVS)
-                String userDelegationURL = "${grailsLinkGenerator.link(controller:"messageSMIME", absolute:true)}/${userDelegation?.id}"
-                msg = messageSource.getMessage('userWithPreviousDelegationErrorMsg' ,[userVS.nif,
-                        userVS.delegationFinish].toArray(), locale)
-                log.error(msg)
-                return new ResponseVS(statusCode: ResponseVS.SC_ERROR, contentType: ContentTypeVS.JSON,
-                        data:[message:msg, URL:userDelegationURL])
-            }
-            if(UserVS.Type.REPRESENTATIVE == userVS.type) {
-                msg = messageSource.getMessage('userIsRepresentativeErrorMsg', [userVS.nif].toArray(), locale)
-                log.error "validateAnonymousRequest - ${msg}"
-                return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ERROR)
-            }
-            def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
-            TypeVS operationType = TypeVS.valueOf(messageJSON.operation)
-            if (messageJSON.accessControlURL && messageJSON.weeksOperationActive &&
-                    (TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION == operationType)) {
-                msg = messageSource.getMessage('requestWithErrorsMsg', null, locale)
-                log.error("validateAnonymousRequest - msg: ${msg} - ${messageJSON}")
-                return new ResponseVS(statusCode: ResponseVS.SC_ERROR,contentType:ContentTypeVS.JSON,data:[message:msg])
-            }
-            // _ TODO _
-            //Date nearestMinute = DateUtils.round(now, Calendar.MINUTE);
-            //??? Date nearestMonday = DateUtils.round(now, Calendar.MONDAY);
-            Date delegationFinish = DateUtils.addDays(Calendar.getInstance().getTime(),
-                    Integer.valueOf(messageJSON.weeksOperationActive) * 7)
-            userVS.setDelegationFinish(delegationFinish)
-            userVS.save()
-            return new ResponseVS(statusCode: ResponseVS.SC_OK, type: TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION,
-                    userVS:userVS, data:[weeksOperationActive:messageJSON.weeksOperationActive])
-        } catch(Exception ex) {
-            log.error (ex.getMessage(), ex)
-            return new ResponseVS(statusCode:ResponseVS.SC_ERROR, type:TypeVS.ERROR,
-                    message:messageSource.getMessage('anonymousDelegationErrorMsg', null, locale))
-        }
-    }
 	
 	//{"operation":"REPRESENTATIVE_ACCREDITATIONS_REQUEST","representativeNif":"...",
 	//"representativeName":"...","selectedDate":"2013-05-20 09:50:33","email":"...","UUID":"..."}

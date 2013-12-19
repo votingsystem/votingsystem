@@ -258,9 +258,7 @@ public class AnonymousRepresentativeDelegationDialog extends JDialog {
                             (CertificationRequestVS) responseVS.getData());
                     runningTask = delegationWorker;
                     delegationWorker.execute();
-                } else {
-                    sendResponse(responseVS.getStatusCode(), responseVS.getMessage());
-                }
+                } else sendResponse(responseVS.getStatusCode(), responseVS.getMessage());
             } catch(Exception ex) {
                 sendResponse(ResponseVS.SC_ERROR, ex.getMessage());
             }
