@@ -211,7 +211,7 @@ class AccessControlFilters {
                                 responseVS = signatureVSService.encryptToCMS(responseVS.messageBytes,model.receiverCert)
                             }
                             if (ResponseVS.SC_OK == responseVS.statusCode) return printOutputStream(response,responseVS)
-                        }
+                        } else log.error("missing params - messageBytes && (receiverCert ||receiverPublicKey)")
                         return printOutput(response, responseVS)
                     case ContentTypeVS.HTML:
                     case ContentTypeVS.TEXT:

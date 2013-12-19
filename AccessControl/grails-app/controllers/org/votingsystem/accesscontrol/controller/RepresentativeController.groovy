@@ -373,9 +373,9 @@ class RepresentativeController {
             //log.debug("======== csrRequest: ${new String(csrRequest)}")
             ResponseVS csrValidationResponse = csrService.signAnonymousDelegationCert(csrRequest,
                     responseVS.data.weeksOperationActive, request.getLocale())
-            if (ResponseVS.SC_OK == csrValidationResponseVS.statusCode) {
-                responseVS.setContentType(ContentTypeVS.MULTIPART_ENCRYPTED)
-                return [responseVS:responseVS, receiverPublicKey:csrValidationResponse.data.requestPublicKey]
+            if (ResponseVS.SC_OK == csrValidationResponse.statusCode) {
+                csrValidationResponse.setContentType(ContentTypeVS.MULTIPART_ENCRYPTED)
+                return [responseVS:csrValidationResponse, receiverPublicKey:csrValidationResponse.data.requestPublicKey]
             } else return [responseVS:csrValidationResponse]
         } else return [responseVS:responseVS]
     }

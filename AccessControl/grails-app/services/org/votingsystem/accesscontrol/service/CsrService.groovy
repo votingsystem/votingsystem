@@ -118,7 +118,7 @@ class CsrService {
             byte[] issuedCertPEMBytes = CertUtil.getPEMEncoded(issuedCert);
             Map data = [requestPublicKey:csr.getPublicKey()]
             return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION,
-                    data:data, message:"certificateVS_${certificate.id}" ,messageBytes:issuedCertPEMBytes)
+                    data:data, message:"certificateVS_${certificate.id}" , messageBytes:issuedCertPEMBytes)
         }
     }
 		
