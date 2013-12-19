@@ -143,7 +143,7 @@ class EventVSController {
 	   if (params.long('id')) {
 		   EventVS.withTransaction {eventVS = EventVS.get(params.id)}
 	   }
-	   if(!eventVS) return [responseVS = new ResponseVS(ResponseVS.SC_NOT_FOUND,
+	   if(!eventVS) return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND,
                message(code: 'eventVSNotFound', args:[params.id]))]
 	   else return [responseVS:eventVSService.checkDatesEventVS(eventVS, request.getLocale())]
    }

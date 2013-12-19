@@ -348,7 +348,7 @@ class EventVSElectionController {
 			eventVS = EventVSElection.get(params.long('id'))
 		}
 		if (!eventVS) {
-            return [responseVS =new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code:'eventVSNotFound',args:[params.id]))]
+            return [responseVS:new ResponseVS(ResponseVS.SC_NOT_FOUND, message(code:'eventVSNotFound',args:[params.id]))]
 		}
 		def errors
 		MessageSMIME.withTransaction { errors = MessageSMIME.findAllWhere ( type:TypeVS.VOTE_ERROR,  eventVS:eventVS) }

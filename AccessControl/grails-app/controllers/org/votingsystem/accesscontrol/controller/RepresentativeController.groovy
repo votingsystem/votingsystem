@@ -229,7 +229,7 @@ class RepresentativeController {
 	def delegation() {
 		MessageSMIME messageSMIME = request.messageSMIMEReq
 		if(!messageSMIME) {
-            return [responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
+            return [responseVS: new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
 		}
 		ResponseVS responseVS = representativeDelegationService.saveDelegation(messageSMIME, request.getLocale())
 		if (ResponseVS.SC_OK == responseVS.statusCode){
@@ -343,7 +343,7 @@ class RepresentativeController {
     def anonymousDelegation() {
         MessageSMIME messageSMIME = request.messageSMIMEReq
         if(!messageSMIME) {
-            return [responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
+            return [responseVS: new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
         }
         ResponseVS responseVS = representativeDelegationService.saveAnonymousDelegation(messageSMIME, request.getLocale())
         if (ResponseVS.SC_OK == responseVS.statusCode){
