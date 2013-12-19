@@ -19,9 +19,11 @@ import java.util.Set;
 public class SVCertExtensionChecker extends PKIXCertPathChecker {
 	
 	private Set<String> supportedExtensions;
+    private Set<String> certExtensions;
 	
 	public SVCertExtensionChecker() {
 		supportedExtensions = new HashSet<String>();
+        certExtensions = new HashSet<String>();
 		supportedExtensions.add(X509Extensions.ExtendedKeyUsage.toString());
         supportedExtensions.add(ContextVS.HASH_CERT_VOTE_OID);
         supportedExtensions.add(ContextVS.EVENT_ID_OID);
@@ -38,6 +40,11 @@ public class SVCertExtensionChecker extends PKIXCertPathChecker {
 		return true;
 	}
 
+    public Set<String> getSupportedExtensionsVS()	{
+        return certExtensions;
+    }
+
+
 	public Set getSupportedExtensions()	{
 		return null;
 	}
@@ -48,6 +55,7 @@ public class SVCertExtensionChecker extends PKIXCertPathChecker {
             if(supportedExtensions.contains(ext)) {
                 //logger.debug("------------- ExtendedKeyUsage removed from validation");
                 unresolvedCritExts.remove(ext);
+                certExtensions.add(ext);
             }
         }
 	}
