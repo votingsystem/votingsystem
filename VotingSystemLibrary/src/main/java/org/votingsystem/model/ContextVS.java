@@ -166,6 +166,8 @@ public class ContextVS {
     }
 
     private ContextVS(AppHostVS appHost, String logPropertiesFile, String localizatedMessagesFileName, String locale) {
+        logger.debug("logPropertiesFile: " + logPropertiesFile + " - localizatedMessagesFileName: " +
+                localizatedMessagesFileName + " - locale: " + locale);
         this.appHost = appHost;
         try {
             initDirs(System.getProperty("user.home"));
@@ -180,8 +182,10 @@ public class ContextVS {
             else messagesFileName = "votingSystemLibraryMessages" + "_" + locale +  ".properties";
             appProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(messagesFileName));
             if(localizatedMessagesFileName != null) {
+                String providedProperties = localizatedMessagesFileName.split("\\.")[0] + "_" + locale + ".properties";
+                logger.debug("provided localizatedMessagesFileName: " + providedProperties);
                 appProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(
-                        localizatedMessagesFileName.split("\\.")[0] + "_" + locale + ".properties"));
+                        providedProperties));
             }
         } catch (Exception ex) {
             logger.error("localizatedMessagesFileName: " + localizatedMessagesFileName);

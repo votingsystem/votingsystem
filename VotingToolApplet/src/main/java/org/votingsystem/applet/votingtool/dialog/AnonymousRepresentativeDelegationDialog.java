@@ -65,7 +65,7 @@ public class AnonymousRepresentativeDelegationDialog extends JDialog {
 
             public void windowClosing(WindowEvent e) {
                 logger.debug("AnonymousRepresentativeDelegationDialog window closing event received");
-                sendResponse(ResponseVS.SC_CANCELLED, ContextVS.getInstance().getMessage("operationCancelled"));
+                sendResponse(ResponseVS.SC_CANCELLED, ContextVS.getMessage("operationCancelled"));
             }
         });
         pack();

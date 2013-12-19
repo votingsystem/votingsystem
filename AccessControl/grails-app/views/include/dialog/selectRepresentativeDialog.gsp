@@ -37,12 +37,14 @@
 
 var callerCallback
 var weeksAnonymousDelegation
+var representativeFullName
 
-function showSelectRepresentativeDialog(callback) {
+function showSelectRepresentativeDialog(callback, representativeName) {
 	$("#selectRepresentativeDialog").dialog("open");
     $("#confirmRepresentativeSelectionDiv").hide()
     $("#representativeSelectionFormDiv").show()
     weeksAnonymousDelegation = null
+    representativeFullName = representativeName
     seeMoreDetails(false)
 	if(callback != null) callerCallback = callback
 }
@@ -120,7 +122,7 @@ function submitSelectRepresentativeForm() {
             webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
             webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
             webAppMessage.signedContent = {operation:representativeOperation, representativeNif:"${representative.nif}",
-                    representativeName:"${representativeFullName}", weeksOperationActive:weeksAnonymousDelegation}
+                    representativeName:representativeFullName, weeksOperationActive:weeksAnonymousDelegation}
             webAppMessage.urlTimeStampServer = "${createLink( controller:'timeStampVS', absolute:true)}"
             webAppMessage.receiverSignServiceURL = "${createLink(controller:'representative', action:'delegation', absolute:true)}"
             webAppMessage.signedMessageSubject = '<g:message code="representativeDelegationMsgSubject"/>'

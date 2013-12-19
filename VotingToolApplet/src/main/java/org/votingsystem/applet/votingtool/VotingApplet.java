@@ -31,7 +31,6 @@ public class VotingApplet extends JApplet implements AppHostVS {
     public VotingApplet() { }
 
     public void init() {
-        logger.debug("------ init");
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 logger.debug("ShutdownHook - ShutdownHook - ShutdownHook");
@@ -40,7 +39,7 @@ public class VotingApplet extends JApplet implements AppHostVS {
         //Execute a job on the event-dispatching thread:
         //creating this applet's GUI.
         try {
-            ContextVS.initSignatureApplet(this, "log4j.properties", "votingToolMessages.properties", locale);
+            ContextVS.initSignatureApplet(this, "log4jVotingTool.properties", "votingToolMessages.properties", locale);
             javax.swing.SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     try {
