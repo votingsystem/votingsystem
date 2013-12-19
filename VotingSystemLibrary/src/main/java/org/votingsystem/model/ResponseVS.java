@@ -85,7 +85,7 @@ public class ResponseVS<T> {
 
     public JSONObject getSignedJSON() {
         if(smimeMessage == null) return null;
-        else return (JSONObject) JSONSerializer.toJSON(smimeMessage.getSignedContent());
+        else return (JSONObject) JSONSerializer.toJSON(smimeMessageResp.getSignedContent());
     }
 
     public void setMessage(String message) {

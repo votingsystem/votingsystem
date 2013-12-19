@@ -49,6 +49,8 @@ public class CertificateVS implements Serializable {
 
     @Column(name="hashCertVSBase64", unique=true) private String hashCertVSBase64;
 
+    @Column(name="messageSMIME" ) private MessageSMIME messageSMIME;
+
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="authorityCertificateVS") private CertificateVS authorityCertificateVS;
 
@@ -107,6 +109,15 @@ public class CertificateVS implements Serializable {
                     representativeURLExtensionValue);
             setRepresentativeURL(((DERUTF8String)representativeURL_DER.getObject()).toString());
         }
+    }
+
+
+    public MessageSMIME getMessageSMIME() {
+        return messageSMIME;
+    }
+
+    public void setMessageSMIME(MessageSMIME messageSMIME) {
+        this.messageSMIME = messageSMIME;
     }
 
     public byte[] getContent() {

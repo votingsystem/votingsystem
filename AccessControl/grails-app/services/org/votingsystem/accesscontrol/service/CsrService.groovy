@@ -99,10 +99,11 @@ class CsrService {
         }
         HexBinaryAdapter hexConverter = new HexBinaryAdapter();
         String hashCertVSBase64 = new String(hexConverter.unmarshal(certAttributeJSON.hashCertVS));
+        Date certValidFrom = Calendar.getInstance().getTime()
         Calendar today_plus_day = Calendar.getInstance();
         today_plus_day.add(Calendar.DATE, 1);
-        X509Certificate issuedCert = signatureVSService.signCSR(csr, null, Calendar.getInstance().getTime(),
-                today_plus_day.getTime())
+        Date certValidTo = today_plus_day.getTime()
+        X509Certificate issuedCert = signatureVSService.signCSR(csr, null, certValidFrom, certValidTo)
         if (!issuedCert) {
             String msg = messageSource.getMessage('csrRequestErrorMsg', null, locale)
             log.error("signAnonymousDelegationCert - error signing cert")
@@ -110,7 +111,8 @@ class CsrService {
         } else {
             CertificateVS certificate = new CertificateVS(serialNumber:issuedCert.getSerialNumber().longValue(),
                     content:issuedCert.getEncoded(), type:CertificateVS.Type.ANONYMOUS_REPRESENTATIVE_DELEGATION,
-                    state:CertificateVS.State.OK, hashCertVSBase64:hashCertVSBase64)
+                    state:CertificateVS.State.OK, hashCertVSBase64:hashCertVSBase64, validFrom:certValidFrom,
+                    validTo: certValidTo)
             byte[] issuedCertPEMBytes = CertUtil.getPEMEncoded(issuedCert);
             Map data = [requestPublicKey:csr.getPublicKey()]
             return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION,

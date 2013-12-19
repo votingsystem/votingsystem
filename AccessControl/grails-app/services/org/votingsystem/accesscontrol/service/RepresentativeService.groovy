@@ -16,7 +16,7 @@ import org.votingsystem.model.TypeVS
 import org.votingsystem.model.UserVS
 import org.votingsystem.model.VoteVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
-import org.apache.commons.lang.time.DateUtils
+import org.votingsystem.util.DateUtils
 import org.votingsystem.util.NifUtils
 
 import java.security.MessageDigest
@@ -37,7 +37,9 @@ class RepresentativeService {
 	def filesService
 	def eventVSService
 	def sessionFactory
+    def representativeDelegationService
 	LinkGenerator grailsLinkGenerator
+
 	/**
 	 * Creates backup of the state of all the representatives for a closed event
 	 */
@@ -232,8 +234,7 @@ class RepresentativeService {
 			numVotesRepresentedByRepresentatives:numVotesRepresentedByRepresentatives,
 			representatives: representativesMap, options:optionsMap]
 		
-		return new ResponseVS(data:metaInfMap,
-			statusCode:ResponseVS.SC_OK)
+		return new ResponseVS(data:metaInfMap, statusCode:ResponseVS.SC_OK)
 	}
 	
 	/**
@@ -242,8 +243,7 @@ class RepresentativeService {
 	 * en los resultados debido a los usuarios que hayan cambiado de representante a mitad de la votación. 
 	 * En el backup no se presenta este fallo)
 	 */
-	private synchronized ResponseVS getAccreditationsMapForEvent (
-			EventVSElection event, Locale locale){
+	private synchronized ResponseVS getAccreditationsMapForEvent (EventVSElection event, Locale locale){
 		log.debug("getAccreditationsMapForEvent - event: ${event?.id}")
 		String msg = null
 		if(!event) {
@@ -273,16 +273,13 @@ class RepresentativeService {
 				eq("fieldEventVS", option)
 			}
 			int numRepresentativesWithVote = numVoteRequests - numUsersWithVote
-			Map optionMap = [content:option.content,
-				numVoteRequests:numVoteRequests, numUsersWithVote:numUsersWithVote,
-				numRepresentativesWithVote:numRepresentativesWithVote,
-				numVotesResult:numUsersWithVote]
+			Map optionMap = [content:option.content, numVoteRequests:numVoteRequests, numUsersWithVote:numUsersWithVote,
+				numRepresentativesWithVote:numRepresentativesWithVote, numVotesResult:numUsersWithVote]
 			optionsMap[option.id] = optionMap
 		}		
 		
-		int numRepresentatives = UserVS.
-			countByTypeAndRepresentativeRegisterDateLessThanEquals(
-			UserVS.Type.REPRESENTATIVE, selectedDate)
+		int numRepresentatives = UserVS.countByTypeAndRepresentativeRegisterDateLessThanEquals(
+			    UserVS.Type.REPRESENTATIVE, selectedDate)
 		int numRepresentativesWithAccessRequest = 0
 		
 		AccessRequestVS.withTransaction {
@@ -351,8 +348,7 @@ class RepresentativeService {
 				
 				if(representativeVote) {
 					++numRepresentativesWithVote
-					numVotesRepresentedByRepresentative =
-						numRepresented  - numRepresentedWithAccessRequest
+					numVotesRepresentedByRepresentative = numRepresented  - numRepresentedWithAccessRequest
 					optionsMap[representativeVote.getFieldEventVS.id].numVotesResult += numVotesRepresentedByRepresentative
 				}
 				numVotesRepresentedByRepresentatives += numVotesRepresentedByRepresentative
@@ -383,12 +379,9 @@ class RepresentativeService {
 		
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, data:metaInfMap)
 	}
-	
-					
-	private synchronized ResponseVS getAccreditationsBackup (
-		UserVS representative, Date selectedDate, Locale locale){
-		log.debug("getAccreditationsBackup - representative: ${representative.nif}" +
-			" - selectedDate: ${selectedDate}")
+
+	private synchronized ResponseVS getAccreditationsBackup (UserVS representative, Date selectedDate, Locale locale){
+		log.debug("getAccreditationsBackup - representative: ${representative.nif}" +" - selectedDate: ${selectedDate}")
 		def representationDocuments
 		RepresentationDocumentVS.withTransaction {
 			def criteria = RepresentationDocumentVS.createCriteria()
@@ -405,10 +398,9 @@ class RepresentativeService {
 				}
 			}
 		}
-		
-		def selectedDateStr = getShortStringFromDate(selectedDate)
-		String serviceURLPart = messageSource.getMessage(
-			'representativeAcreditationsBackupPath', [representative.nif].toArray(), locale)
+		def selectedDateStr = DateUtils.getShortStringFromDate(selectedDate)
+		String serviceURLPart = messageSource.getMessage('representativeAcreditationsBackupPath',
+                [representative.nif].toArray(), locale)
 		def basedir = "${grailsApplication.config.VotingSystem.backupCopyPath}" +
 			"/AccreditationsBackup/${selectedDateStr}/${serviceURLPart}"
 			
@@ -422,8 +414,7 @@ class RepresentativeService {
 			 if(metaInfFile) {
 				 def metaInfMap = JSON.parse(metaInfFile.text)
 				 log.debug("getAccreditationsBackup - send previous request")
-				 return new ResponseVS(statusCode:ResponseVS.SC_OK, 
-					 message:backupURL, data:metaInfMap)
+				 return new ResponseVS(statusCode:ResponseVS.SC_OK, message:backupURL, data:metaInfMap)
 			 }
 		}
 		new File(basedir).mkdirs()
@@ -452,103 +443,8 @@ class RepresentativeService {
 		ant.copy(file: zipResult, tofile: webappBackupPath)
 		
 		log.debug("getAccreditationsBackup - destfile.name '${zipResult.name}'")
-		return new ResponseVS(statusCode:ResponseVS.SC_OK, 
-			data:metaInfMap, message:backupURL)
+		return new ResponseVS(statusCode:ResponseVS.SC_OK, data:metaInfMap, message:backupURL)
 	}
-	
-	//{"operation":"REPRESENTATIVE_SELECTION","representativeNif":"...","representativeName":"...","UUID":"..."}
-	public synchronized ResponseVS saveDelegation(MessageSMIME messageSMIMEReq, Locale locale) {
-		log.debug("saveDelegation -")
-		//def future = callAsync {}
-		//return future.get(30, TimeUnit.SECONDS)
-		MessageSMIME messageSMIME = null
-		SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage()
-		RepresentationDocumentVS representationDocument = null
-		UserVS userVS = messageSMIMEReq.getUserVS()
-		String msg = null
-		try { 
-			if(UserVS.Type.REPRESENTATIVE == userVS.type) {
-				msg = messageSource.getMessage('userIsRepresentativeErrorMsg',
-					[userVS.nif].toArray(), locale)
-				log.error "saveDelegation - ERROR - user '${userVS.nif}' is REPRESENTATIVE - ${msg}"
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
-					message:msg, type:TypeVS.REPRESENTATIVE_SELECTION_ERROR)
-			}
-			def messageJSON = JSON.parse(smimeMessage.getSignedContent())
-			String requestValidatedNIF =  NifUtils.validate(messageJSON.representativeNif)
-			if(userVS.nif == requestValidatedNIF) {
-				msg = messageSource.getMessage('representativeSameUserNifErrorMsg',
-					[requestValidatedNIF].toArray(), locale)
-				log.error("saveDelegation - ERROR SAME USER SELECTION - ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
-					message:msg, type:TypeVS.REPRESENTATIVE_SELECTION_ERROR)
-			}
-			if(!requestValidatedNIF || !messageJSON.operation || !messageJSON.representativeNif ||
-				(TypeVS.REPRESENTATIVE_SELECTION != TypeVS.valueOf(messageJSON.operation))) {
-				msg = messageSource.getMessage('representativeSelectionDataErrorMsg', null, locale)
-				log.error("saveDelegation - ERROR DATA - ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
-					message:msg, type:TypeVS.REPRESENTATIVE_SELECTION_ERROR)
-			}
-			UserVS representative = UserVS.findWhere(
-				nif:requestValidatedNIF, type:UserVS.Type.REPRESENTATIVE)
-			if(!representative) {
-				msg = messageSource.getMessage('representativeNifErrorMsg',
-					[requestValidatedNIF].toArray(), locale)
-				log.error "saveDelegation - ERROR NIF REPRESENTATIVE - ${msg}"
-				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, 
-					message:msg, type:TypeVS.REPRESENTATIVE_SELECTION_ERROR)
-			}
-			userVS.representative = representative
-			RepresentationDocumentVS.withTransaction {
-				representationDocument = RepresentationDocumentVS.findWhere(
-                        userVS:userVS, state:RepresentationDocumentVS.State.OK)
-				if(representationDocument) {
-					log.debug("cancelRepresentationDocument - User changing representative")
-					representationDocument.state = RepresentationDocumentVS.State.CANCELLED
-					representationDocument.cancellationSMIME = messageSMIMEReq
-					representationDocument.dateCanceled = userVS.getTimeStampToken().
-							getTimeStampInfo().getGenTime();
-					representationDocument.save(flush:true)
-					log.debug("cancelRepresentationDocument - cancelled user '${userVS.nif}' " +
-                            " - representationDocument ${representationDocument.id}")
-				} else log.debug("cancelRepresentationDocument - user '${userVS.nif}' without representative")
-				representationDocument = new RepresentationDocumentVS(activationSMIME:messageSMIMEReq,
-                        userVS:userVS, representative:representative, state:RepresentationDocumentVS.State.OK);
-				representationDocument.save()
-			}
-						
-			msg = messageSource.getMessage('representativeAssociatedMsg',
-				[messageJSON.representativeName, userVS.nif].toArray(), locale)
-			log.debug "saveDelegation - ${msg}"
-			
-			String fromUser = grailsApplication.config.VotingSystem.serverName
-			String toUser = userVS.getNif()
-			String subject = messageSource.getMessage(
-					'representativeSelectValidationSubject', null, locale)
-			SMIMEMessageWrapper smimeMessageResp = signatureVSService.getMultiSignedMimeMessage(
-				fromUser, toUser, smimeMessage, subject)
-			MessageSMIME messageSMIMEResp = new MessageSMIME( smimeMessage:smimeMessageResp,
-					type:TypeVS.RECEIPT, smimeParent: messageSMIMEReq, content:smimeMessageResp.getBytes())
-			MessageSMIME.withTransaction {
-				messageSMIMEResp.save();
-			}
-			return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg,
-				data:messageSMIMEResp, type:TypeVS.REPRESENTATIVE_SELECTION)
-		} catch(Exception ex) {
-			log.error (ex.getMessage(), ex)
-			msg = messageSource.getMessage(
-				'representativeSelectErrorMsg', null, locale)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
-				message:msg, type:TypeVS.REPRESENTATIVE_SELECTION_ERROR)
-		}
-	}
-
-    public ResponseVS saveAnonymousDelegation(MessageSMIME messageSMIMEReq, Locale locale) {
-        log.debug("saveAnonymousDelegation")
-
-    }
-
 
 	private void cancelRepresentationDocument(MessageSMIME messageSMIMEReq, UserVS userVS) {
 		RepresentationDocumentVS.withTransaction {
@@ -596,7 +492,7 @@ class RepresentativeService {
 				userVS.type = UserVS.Type.REPRESENTATIVE
 				userVS.representativeRegisterDate = Calendar.getInstance().getTime()
 				userVS.representative = null
-				cancelRepresentationDocument(messageSMIMEReq, userVS);
+                representativeDelegationService.cancelRepresentationDocument(messageSMIMEReq, userVS);
 				msg = messageSource.getMessage('representativeDataCreatedOKMsg', 
 					[userVS.name, userVS.firstName].toArray(), locale)
 			} else {
@@ -606,9 +502,7 @@ class RepresentativeService {
 			} 
 			userVS.setDescription(messageJSON.representativeInfo)
 			userVS.representativeMessage = messageSMIMEReq
-			UserVS.withTransaction {
-				userVS.save(flush:true)
-			}
+			UserVS.withTransaction { userVS.save(flush:true) }
 			ImageVS.withTransaction {
 				def images = ImageVS.findAllWhere(userVS:userVS,
 					type:ImageVS.Type.REPRESENTATIVE)
@@ -618,10 +512,8 @@ class RepresentativeService {
 				}
 				newImage.save(flush:true)
 			}
-			
 			MessageSMIME.withTransaction {
-				def previousMessages = MessageSMIME.findAllWhere(userVS:userVS,
-					type:TypeVS.REPRESENTATIVE_DATA)
+				def previousMessages = MessageSMIME.findAllWhere(userVS:userVS, type:TypeVS.REPRESENTATIVE_DATA)
 				previousMessages?.each {message ->
 					message.type = TypeVS.REPRESENTATIVE_DATA_OLD
 					message.save()
@@ -632,8 +524,7 @@ class RepresentativeService {
 		} catch(Exception ex) {
 			log.error ("${ex.getMessage()} - user: ${userVS.nif}", ex)
 			msg = messageSource.getMessage('representativeDataErrorMsg', null, locale)
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
-				message:msg, type:TypeVS.REPRESENTATIVE_DATA_ERROR)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:msg, type:TypeVS.REPRESENTATIVE_DATA_ERROR)
 		}
     }
 	
@@ -642,8 +533,8 @@ class RepresentativeService {
 		log.debug("getVotingHistoryBackup - representative: ${representative.nif}" + 
 			" - dateFrom: ${dateFrom} - dateTo: ${dateTo}")
 		
-		def dateFromStr = getShortStringFromDate(dateFrom)
-		def dateToStr = getShortStringFromDate(dateTo)
+		def dateFromStr = DateUtils.getShortStringFromDate(dateFrom)
+		def dateToStr = DateUtils.getShortStringFromDate(dateTo)
 		
 		String serviceURLPart = messageSource.getMessage(
 			'representativeVotingHistoryBackupPartPath', [representative.nif].toArray(), locale)
@@ -652,7 +543,7 @@ class RepresentativeService {
 		log.debug("getVotingHistoryBackup - basedir: ${basedir}")
 		File zipResult = new File("${basedir}.zip")
 
-		String datePathPart = getShortStringFromDate(Calendar.getInstance().getTime())
+		String datePathPart = DateUtils.getShortStringFromDate(Calendar.getInstance().getTime())
 		String backupURL = "/backup/${datePathPart}/${serviceURLPart}.zip"
 		String webappBackupPath = "${grailsApplication.mainContext.getResource('.')?.getFile()}${backupURL}"
 		
@@ -662,8 +553,7 @@ class RepresentativeService {
 			 if(metaInfFile) {
 				 def metaInfMap = JSON.parse(metaInfFile.text)
 				 log.debug("getVotingHistoryBackup - ${zipResult.name} already exists");
-				 return new ResponseVS(statusCode:ResponseVS.SC_OK,
-					 data:metaInfMap, message:backupURL)
+				 return new ResponseVS(statusCode:ResponseVS.SC_OK, data:metaInfMap, message:backupURL)
 			 }
 		}
 		new File(basedir).mkdirs()
@@ -694,8 +584,7 @@ class RepresentativeService {
 				sessionFactory.currentSession.clear()
 			}
 		}
-		def metaInfMap = [dateFrom: getStringFromDate(dateFrom),
-			dateTo:getStringFromDate(dateTo), numVotes:numVotes,
+		def metaInfMap = [dateFrom: getStringFromDate(dateFrom), dateTo:getStringFromDate(dateTo), numVotes:numVotes,
 			representativeURL:"${grailsApplication.config.grails.serverURL}/representative/${representative.id}"]
 		String metaInfJSONStr = metaInfMap as JSON
 		metaInfFile = new File("${basedir}/meta.inf")
@@ -704,10 +593,8 @@ class RepresentativeService {
 		ant.zip(destfile: zipResult, basedir: basedir)
 		ant.copy(file: zipResult, tofile: webappBackupPath)
 		
-		log.debug("getVotingHistoryBackup - zipResult: ${zipResult.absolutePath} " + 
-			" - backupURL: ${backupURL}")
-		return new ResponseVS(statusCode:ResponseVS.SC_OK, 
-			data:metaInfMap, message:backupURL)
+		log.debug("getVotingHistoryBackup - zipResult: ${zipResult.absolutePath} - backupURL: ${backupURL}")
+		return new ResponseVS(statusCode:ResponseVS.SC_OK, data:metaInfMap, message:backupURL)
 	}
 
     ResponseVS validateAnonymousRequest(MessageSMIME messageSMIMEReq, Locale locale) {
@@ -725,6 +612,11 @@ class RepresentativeService {
                 log.error(msg)
                 return new ResponseVS(statusCode: ResponseVS.SC_ERROR, contentType: ContentTypeVS.JSON,
                         data:[message:msg, URL:userDelegationURL])
+            }
+            if(UserVS.Type.REPRESENTATIVE == userVS.type) {
+                msg = messageSource.getMessage('userIsRepresentativeErrorMsg', [userVS.nif].toArray(), locale)
+                log.error "validateAnonymousRequest - ${msg}"
+                return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ERROR)
             }
             def messageJSON = JSON.parse(smimeMessageReq.getSignedContent())
             TypeVS operationType = TypeVS.valueOf(messageJSON.operation)
@@ -760,8 +652,8 @@ class RepresentativeService {
 			TypeVS type = TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST 
 			//REPRESENTATIVE_VOTING_HISTORY_REQUEST_ERROR
 			messageJSON = JSON.parse(smimeMessage.getSignedContent())
-			Date dateFrom = getDateFromString(messageJSON.dateFrom)
-			Date dateTo = getDateFromString(messageJSON.dateTo)
+			Date dateFrom = DateUtils.getDateFromString(messageJSON.dateFrom)
+			Date dateTo = DateUtils.getDateFromString(messageJSON.dateTo)
 			if(dateFrom.after(dateTo)) {
 				log.error "processVotingHistoryRequest - DATE ERROR - dateFrom '${dateFrom}' dateTo '${dateTo}'"
 				DateFormat formatter = new SimpleDateFormat("dd MMM 'de' yyyy 'a las' HH:mm");
@@ -773,8 +665,7 @@ class RepresentativeService {
 			}
 			TypeVS operationType = TypeVS.valueOf(messageJSON.operation)
 			if(TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST != operationType) {
-				msg = messageSource.getMessage('operationErrorMsg',
-					[messageJSON.operation].toArray(), locale)
+				msg = messageSource.getMessage('operationErrorMsg', [messageJSON.operation].toArray(), locale)
 				log.error "processVotingHistoryRequest - OPERATION ERROR - ${msg}"
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,
 					message:msg, type:TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST_ERROR)
@@ -784,8 +675,7 @@ class RepresentativeService {
 			UserVS representative = UserVS.findWhere(nif:requestValidatedNIF,
 				type:UserVS.Type.REPRESENTATIVE)
 			if(!representative) {
-				msg = messageSource.getMessage('representativeNifErrorMsg',
-					[requestValidatedNIF].toArray(), locale)
+				msg = messageSource.getMessage('representativeNifErrorMsg', [requestValidatedNIF].toArray(), locale)
 				log.error "processVotingHistoryRequest - USER NOT REPRESENTATIVE ${msg}"
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, 
 					type:TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST_ERROR)
@@ -804,14 +694,13 @@ class RepresentativeService {
 					log.debug("messageSMIME: ${messageSMIMEReq.id} - ${solicitudCopia.type}");
 					BackupRequestVS.withTransaction {
 						if (!solicitudCopia.save()) {
-							solicitudCopia.errors.each { 
-								log.error("processVotingHistoryRequest - ERROR solicitudCopia - ${it}")}
+							solicitudCopia.errors.each {
+                                log.error("processVotingHistoryRequest - ERROR solicitudCopia - ${it}")}
 						}
-						
 					}
 					mailSenderService.sendRepresentativeVotingHistory(
-						solicitudCopia, messageJSON.dateFrom, messageJSON.dateTo, locale)
-				} else log.error("Error generando archivo de copias de respaldo");
+                            solicitudCopia, messageJSON.dateFrom, messageJSON.dateTo, locale)
+				} else log.error("Error generating backup");
 			}
 		} catch(Exception ex) {
 			log.error (ex.getMessage(), ex)
@@ -819,8 +708,7 @@ class RepresentativeService {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR,
 				message:msg, type:TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST_ERROR)
 		}
-		msg = messageSource.getMessage('backupRequestOKMsg',
-			[messageJSON.email].toArray(), locale)
+		msg = messageSource.getMessage('backupRequestOKMsg', [messageJSON.email].toArray(), locale)
 		return new ResponseVS(statusCode:ResponseVS.SC_OK,
 			type:TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST, message:msg)
 	}

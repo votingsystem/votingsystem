@@ -16,6 +16,7 @@ import org.votingsystem.util.NifUtils
 class RepresentativeController {
 
 	def representativeService
+    def representativeDelegationService
 	def signatureVSService
 	def grailsApplication
     def csrService
@@ -230,7 +231,7 @@ class RepresentativeController {
 		if(!messageSMIME) {
             return [responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
 		}
-		ResponseVS responseVS = representativeService.saveAnonymousDelegation(messageSMIME, request.getLocale())
+		ResponseVS responseVS = representativeDelegationService.saveDelegation(messageSMIME, request.getLocale())
 		if (ResponseVS.SC_OK == responseVS.statusCode){
             responseVS.setContentType(ContentTypeVS.SIGNED)
 		}
@@ -344,7 +345,7 @@ class RepresentativeController {
         if(!messageSMIME) {
             return [responseVS = new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
         }
-        ResponseVS responseVS = representativeService.saveDelegation(messageSMIME, request.getLocale())
+        ResponseVS responseVS = representativeDelegationService.saveAnonymousDelegation(messageSMIME, request.getLocale())
         if (ResponseVS.SC_OK == responseVS.statusCode){
             responseVS.setContentType(ContentTypeVS.SIGNED)
         }

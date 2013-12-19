@@ -42,11 +42,9 @@ class SignatureVSService {
             new HashMap<Long, Set<TrustAnchor>>();
 	def grailsApplication;
 	def messageSource
-	def csrService;
 	def subscriptionVSService
 	def timeStampVSService
 	def sessionFactory
-	boolean testMode = false
 	
 	public ResponseVS deleteTestCerts () {
 		log.debug(" - deleteTestCerts - ")
