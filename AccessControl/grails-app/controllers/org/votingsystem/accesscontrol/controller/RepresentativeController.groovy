@@ -229,7 +229,7 @@ class RepresentativeController {
 	def delegation() {
 		MessageSMIME messageSMIME = request.messageSMIMEReq
 		if(!messageSMIME) {
-            return [responseVS: new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
+            return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "requestWithoutFile"))]
 		}
 		ResponseVS responseVS = representativeDelegationService.saveDelegation(messageSMIME, request.getLocale())
 		if (ResponseVS.SC_OK == responseVS.statusCode){
@@ -366,7 +366,8 @@ class RepresentativeController {
         if(!messageSMIMEReq) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST, message(code:'requestWithoutFile'))]
         }
-        ResponseVS responseVS = representativeService.validateAnonymousRequest(messageSMIMEReq, request.getLocale())
+        ResponseVS responseVS = representativeDelegationService.validateAnonymousRequest(
+                messageSMIMEReq, request.getLocale())
         if (ResponseVS.SC_OK == responseVS.statusCode) {
             byte[] csrRequest = params[ContextVS.CSR_FILE_NAME]
             //log.debug("======== csrRequest: ${new String(csrRequest)}")
