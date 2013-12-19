@@ -253,7 +253,7 @@ public class AnonymousRepresentativeDelegationDialog extends JDialog {
                 ResponseVS responseVS = get();
                 logger.debug("DelegationRequestWorker.done - statusCode: " +  responseVS.getStatusCode());
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    showProgressPanel(true, ContextVS.getInstance().getMessage("sendingDataToAccessControlMsg"));
+                    showProgressPanel(true, ContextVS.getMessage("sendingDataToAccessControlMsg"));
                     AnonymousDelegationWorker delegationWorker = new AnonymousDelegationWorker(
                             (CertificationRequestVS) responseVS.getData());
                     runningTask = delegationWorker;

@@ -65,7 +65,7 @@ public class AnonymousDelegationRequestDataSender implements Callable<ResponseVS
             mapToSend.put(csrFileName, encryptedCSRBytes);
             mapToSend.put(representativeDataFileName, delegationEncryptedBytes);
             responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
-                    ContextVS.getInstance().getAccessControl().getAnonymousDelegationServiceURL());
+                    ContextVS.getInstance().getAccessControl().getAnonymousDelegationRequestServiceURL());
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 byte[] encryptedData = responseVS.getMessageBytes();
                 byte[] decryptedData = Encryptor.decryptFile(encryptedData, certificationRequest.getPublicKey(),
