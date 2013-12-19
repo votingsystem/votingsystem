@@ -320,7 +320,7 @@ public class CertUtil {
     public static PKIXCertPathValidatorResult verifyCertificate(Set<TrustAnchor> anchors,
              boolean checkCRL, List<X509Certificate> certs) throws Exception {
         PKIXParameters pkixParameters = new PKIXParameters(anchors);
-        SVCertExtensionChecker checker = new SVCertExtensionChecker();
+        CertExtensionCheckerVS checker = new CertExtensionCheckerVS();
         pkixParameters.addCertPathChecker(checker);
         pkixParameters.setRevocationEnabled(checkCRL); // if false tell system do not check CRL's
         CertPathValidator certPathValidator = CertPathValidator.getInstance("PKIX", ContextVS.PROVIDER);

@@ -16,12 +16,12 @@ import java.util.Set;
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  * To bypass id_kp_timeStamping ExtendedKeyUsage exception
  */
-public class SVCertExtensionChecker extends PKIXCertPathChecker {
+public class CertExtensionCheckerVS extends PKIXCertPathChecker {
 	
 	private Set<String> supportedExtensions;
     private Set<String> certExtensions;
 	
-	public SVCertExtensionChecker() {
+	public CertExtensionCheckerVS() {
 		supportedExtensions = new HashSet<String>();
         certExtensions = new HashSet<String>();
 		supportedExtensions.add(X509Extensions.ExtendedKeyUsage.toString());
