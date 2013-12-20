@@ -47,11 +47,11 @@ import android.widget.TextView.OnEditorActionListener;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.android.ui.CertPinDialog;
 import org.votingsystem.android.ui.CertPinDialogListener;
+import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.signature.util.KeyStoreUtil;
-import org.votingsystem.signature.util.PKCS10WrapperClient;
 import org.votingsystem.util.NifUtils;
 import java.io.FileOutputStream;
 import java.security.KeyStore;
@@ -70,7 +70,7 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
     private String email = null;
     private String phone = null;
     private String deviceId = null;
-    private PKCS10WrapperClient certificationRequest;
+    private CertificationRequestVS certificationRequest;
     private EditText nifText;
     private EditText givennameText;
     private EditText surnameText;
@@ -337,7 +337,7 @@ public class UserCertRequestActivity extends ActionBarActivity implements CertPi
                         surnameText.getText().toString().toUpperCase(), Normalizer.Form.NFD);
                 surname  = surname.replaceAll("[^\\p{ASCII}]", "");
                 String nif = NifUtils.validate(nifText.getText().toString().toUpperCase());
-                certificationRequest = PKCS10WrapperClient.buildCSRUsuario (KEY_SIZE, SIG_NAME,
+                certificationRequest = CertificationRequestVS.getUserRequest(KEY_SIZE, SIG_NAME,
                         SIGNATURE_ALGORITHM, PROVIDER, nif, email, phone, deviceId, givenName, surname);
                 csrBytes = certificationRequest.getCsrPEM();
                 X509Certificate[] arrayCerts = CertUtil.generateCertificate(certificationRequest.getKeyPair(),

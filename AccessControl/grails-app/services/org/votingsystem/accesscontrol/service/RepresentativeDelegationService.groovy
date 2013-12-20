@@ -156,8 +156,7 @@ class RepresentativeDelegationService {
         log.debug("saveAnonymousDelegation")
         MessageSMIME messageSMIME = null
         SMIMEMessageWrapper smimeMessage = messageSMIMEReq.getSmimeMessage()
-        UserVS userVS = messageSMIMEReq.getUserVS()
-        X509Certificate x509UserCert =  userVS.getCertificate()
+        X509Certificate x509UserCert =  messageSMIMEReq.getAnonymousSigner().getCertificate()
         String msg = null
         try {
             CertificateVS certificateVS = CertificateVS.findWhere(serialNumber:x509UserCert.serialNumber.longValue(),
@@ -192,9 +191,8 @@ class RepresentativeDelegationService {
             certificateVS.state = CertificateVS.State.USED
             certificateVS.messageSMIME = messageSMIMEResp
             certificateVS.save()
-            RepresentationDocumentVS representationDocument = new RepresentationDocumentVS(
-                    activationSMIME:messageSMIMEResp, userVS:userVS, representative:representative,
-                    state:RepresentationDocumentVS.State.OK);
+            RepresentationDocumentVS representationDocument =new RepresentationDocumentVS(representative:representative,
+                    activationSMIME:messageSMIMEResp, state:RepresentationDocumentVS.State.OK);
             representationDocument.save()
             msg = messageSource.getMessage('anonymousRepresentativeAssociatedMsg',
                     [messageJSON.representativeName].toArray(), locale)

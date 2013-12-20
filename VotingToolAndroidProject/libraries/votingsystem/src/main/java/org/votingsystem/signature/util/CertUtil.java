@@ -264,7 +264,21 @@ public class CertUtil {
         }
         
     }
-    
+
+    public static byte[] getPEMEncoded (Object objectToEncode) throws IOException {
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        PEMWriter pemWrt = new PEMWriter(new OutputStreamWriter(bOut));
+        if(objectToEncode instanceof Collection) {
+            Collection objectToEncodeColection = ((Collection)objectToEncode);
+            for(Object object : objectToEncodeColection) {
+                pemWrt.writeObject(object);
+            }
+        } else pemWrt.writeObject(objectToEncode);
+        pemWrt.close();
+        bOut.close();
+        return bOut.toByteArray();
+    }
+
     public static byte[] getPEMEncoded (X509Certificate certificate) throws IOException {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
         PEMWriter pemWrt = new PEMWriter(new OutputStreamWriter(bOut));

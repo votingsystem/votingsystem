@@ -319,11 +319,6 @@ public class EventVS {
         return hashCertVSBase64;
     }
 
-    public String getHashCertVoteHex() {
-        if (hashCertVSBase64 == null) return null;
-        return new String(Hex.encode(hashCertVSBase64.getBytes()));
-    }
-
     public void setHashCertVSBase64(String hashCertVSBase64) {
         this.hashCertVSBase64 = hashCertVSBase64;
     }

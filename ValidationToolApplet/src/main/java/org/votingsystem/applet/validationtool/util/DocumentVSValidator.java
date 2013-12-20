@@ -43,11 +43,10 @@ public class DocumentVSValidator {
         for(UserVS signerVS:signersVS) {
             try {
                 if(signerVS.getTimeStampToken() != null) {//user signature
-                    PKIXCertPathValidatorResult pkixResult = CertUtil.verifyCertificate(
+                    ResponseVS validationResponse = CertUtil.verifyCertificate(
                             signerVS.getCertificate(), eventTrustedCerts, false);
-                    //logger.debug(" - pkixResult.toString(): " + pkixResult.toString());
                 } else {//server signature
-                    PKIXCertPathValidatorResult pkixResult = CertUtil.verifyCertificate(
+                    ResponseVS validationResponse = CertUtil.verifyCertificate(
                             signerVS.getCertificate(), systemTrustedCerts, false);
                 }
             } catch(Exception ex) {
@@ -118,7 +117,7 @@ public class DocumentVSValidator {
                 ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("badRequestMsg") +
                 " - " + ContextVS.getInstance().getMessage("missingRepresentativeNifErrorMsg"));
         try {
-            PKIXCertPathValidatorResult pkixResult = CertUtil.verifyCertificate(
+            ResponseVS validationResult = CertUtil.verifyCertificate(
                     userVS.getCertificate(), systemTrustedCerts, false);
             //logger.debug(" - pkixResult.toString(): " + pkixResult.toString());
         } catch(Exception ex) {
@@ -174,12 +173,11 @@ public class DocumentVSValidator {
         }
         UserVS signer = signedFile.getSMIMEMessageWraper().getSigner();
         try {
-            PKIXCertPathValidatorResult pkixResult = CertUtil.verifyCertificate(
+            ResponseVS validationResponse = CertUtil.verifyCertificate(
                     signer.getCertificate(), systemTrustedCerts, false);
-            //logger.debug(" - pkixResult.toString(): " + pkixResult.toString());
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
-            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
+            return new ResponseVS(ResponseVS.SC_ERROR_REQUEST, ContextVS.getInstance().getMessage(
                     "certificateErrorMsg", signer.getNif(), signedFile.getName()));
         }
 
@@ -228,9 +226,8 @@ public class DocumentVSValidator {
         }
         UserVS signer = signedFile.getSMIMEMessageWraper().getSigner();
         try {
-            PKIXCertPathValidatorResult pkixResult = CertUtil.verifyCertificate(
+            ResponseVS validationResult = CertUtil.verifyCertificate(
                     signer.getCertificate(), systemTrustedCerts, false);
-            //logger.debug(" - pkixResult.toString(): " + pkixResult.toString());
         } catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(

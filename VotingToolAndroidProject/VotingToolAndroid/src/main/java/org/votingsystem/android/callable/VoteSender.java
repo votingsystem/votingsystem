@@ -30,7 +30,7 @@ import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyStoreUtil;
-import org.votingsystem.signature.util.PKCS10WrapperClient;
+import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.VotingSystemKeyStoreException;
 
 import java.security.KeyStore;
@@ -79,15 +79,15 @@ public class VoteSender implements Callable<ResponseVS> {
             String signedContent = event.getAccessRequestJSON().toString();
             SMIMEMessageWrapper solicitudAcceso = signedMailGenerator.genMimeMessage(
                     userVS, contextVS.getAccessControlVS().getNameNormalized(),
-                    signedContent, subject, null);
+                    signedContent, subject);
             AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(solicitudAcceso,
                     event, contextVS.getAccessControlVS().getCertificate(),
                     contextVS.getAccessControlVS().getAccessServiceURL(),context);
             responseVS = accessRequestDataSender.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
             String votoJSON = event.getVoteJSON().toString();
-            PKCS10WrapperClient certificationRequest = accessRequestDataSender.getPKCS10WrapperClient();
-            SMIMEMessageWrapper signedVote = certificationRequest.genSignedMessage(
+            CertificationRequestVS certificationRequest = accessRequestDataSender.getPKCS10WrapperClient();
+            SMIMEMessageWrapper signedVote = certificationRequest.genMimeMessage(
                     event.getHashCertVSBase64(), event.getControlCenter().getNameNormalized(),
                     votoJSON, context.getString(R.string.vote_msg_subject), null);
             MessageTimeStamper timeStamper = new MessageTimeStamper(signedVote, context);
@@ -146,7 +146,7 @@ public class VoteSender implements Callable<ResponseVS> {
             String serviceURL = contextVS.getAccessControlVS().getCancelVoteServiceURL();
             SMIMEMessageWrapper cancelAccessRequest = signedMailGenerator.genMimeMessage(
                     userVS, contextVS.getAccessControlVS().getNameNormalized(),
-                    event.getCancelVoteData(), subject, null);
+                    event.getCancelVoteData(), subject);
             SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
                     event.getCancelVoteData(), ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
                     subject,  keyStoreBytes, password,

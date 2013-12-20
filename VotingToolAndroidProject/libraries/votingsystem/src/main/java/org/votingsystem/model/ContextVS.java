@@ -7,6 +7,8 @@ import android.util.Log;
 
 import com.itextpdf.text.Context_iTextVS;
 
+import org.votingsystem.signature.util.VotingSystemKeyGenerator;
+
 import java.io.InputStream;
 import java.security.cert.X509Certificate;
 import java.text.MessageFormat;
@@ -28,16 +30,15 @@ public class ContextVS {
 
     public static final String OCSP_DNIE_URL = "http://ocsp.dnie.es";
 
-    public static final int ACCESS_CONTROL_URL_TAG = 0;
-    public static final int EVENT_ID_TAG           = 1;
-    public static final int HASH_CERT_VOTE_TAG     = 2;
-    public static final int REPRESENTATIVE_URL_TAG = 3;
+    public static final int VOTE_TAG                                = 0;
+    public static final int REPRESENTATIVE_VOTE_TAG                 = 1;
+    public static final int ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG = 2;
 
     public static final String VOTING_SYSTEM_BASE_OID = "0.0.0.0.0.0.0.0.0.";
-    public static final String ACCESS_CONTROL_OID     = VOTING_SYSTEM_BASE_OID + ACCESS_CONTROL_URL_TAG;
-    public static final String EVENT_ID_OID           = VOTING_SYSTEM_BASE_OID + EVENT_ID_TAG;
-    public static final String HASH_CERT_VOTE_OID     = VOTING_SYSTEM_BASE_OID + HASH_CERT_VOTE_TAG;
-    public static final String REPRESENTATIVE_URL_OID = VOTING_SYSTEM_BASE_OID + REPRESENTATIVE_URL_TAG;
+    public static final String REPRESENTATIVE_VOTE_OID = VOTING_SYSTEM_BASE_OID + REPRESENTATIVE_VOTE_TAG;
+    public static final String ANONYMOUS_REPRESENTATIVE_DELEGATION_OID = VOTING_SYSTEM_BASE_OID +
+            ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG;
+    public static final String VOTE_OID = VOTING_SYSTEM_BASE_OID + VOTE_TAG;
 
     public static final String STATE_KEY                  = "state";
     public static final String CSR_REQUEST_ID_KEY         = "csrRequestId";
@@ -57,6 +58,8 @@ public class ContextVS {
     //TODO por el bug en froyo de -> JcaDigestCalculatorProviderBuilder
     public static final String SIG_HASH = "SHA256";
     public static final String SIG_NAME = "RSA";
+    /** Random Number Generator algorithm. */
+    private static final String ALGORITHM_RNG = "SHA1PRNG";
     public static final String SIGNATURE_ALGORITHM = "SHA256WithRSA";
     //public static final String VOTE_SIGN_MECHANISM = "SHA512withRSA";
     public static final String VOTE_SIGN_MECHANISM = "SHA256WithRSA";
@@ -95,6 +98,7 @@ public class ContextVS {
         this.context = context.getApplicationContext();
         try {
             Context_iTextVS.init(context);
+            VotingSystemKeyGenerator.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
             InputStream inputStream = context.getAssets().open("messages_es.properties");
             resourceBundle = new PropertyResourceBundle(inputStream);
         } catch(Exception ex) {

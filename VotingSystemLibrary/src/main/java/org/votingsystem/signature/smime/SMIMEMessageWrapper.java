@@ -229,7 +229,7 @@ public class SMIMEMessageWrapper extends MimeMessage {
                 }
             }
             signers.add(userVS);
-            if (cert.getExtensionValue(ContextVS.HASH_CERT_VOTE_OID) != null) {
+            if (cert.getExtensionValue(ContextVS.VOTE_OID) != null) {
                 JSONObject voteJSON = (JSONObject) JSONSerializer.toJSON(signedContent);
                 voteVS = VoteVS.getInstance(voteJSON, cert, timeStampToken);
             } else {signerCerts.add(cert);}

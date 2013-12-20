@@ -292,6 +292,7 @@ class AccessControlFilters {
                 return certValidationResponse
             } else {
                 messageSMIME = new MessageSMIME(signers:certValidationResponse.data?.checkedSigners,
+                        anonymousSigner:certValidationResponse.data?.anonymousSigner,
                         userVS:certValidationResponse.data?.checkedSigner, smimeMessage:smimeMessageReq,
                         eventVS:certValidationResponse.eventVS, type:TypeVS.OK,
                         content:smimeMessageReq.getBytes(), base64ContentDigest:smimeMessageReq.getContentDigestStr())

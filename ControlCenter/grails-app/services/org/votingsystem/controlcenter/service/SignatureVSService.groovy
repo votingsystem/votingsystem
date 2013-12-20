@@ -323,9 +323,8 @@ class SignatureVSService {
 		X509Certificate checkedCert = voteVS.getX509Certificate()
 		log.debug("validateVoteCerts - vote cert: ${checkedCert.getSubjectDN()}")
 		try {
-			PKIXCertPathValidatorResult pkixResult = CertUtil.verifyCertificate(checkedCert, eventTrustedCerts, false)
-			TrustAnchor ta = pkixResult.getTrustAnchor();
-			X509Certificate certCaResult = ta.getTrustedCert();
+			ResponseVS validationResponse = CertUtil.verifyCertificate(checkedCert, eventTrustedCerts, false)
+			X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
 			log.debug("validateVoteCerts - certCaResult: " + certCaResult?.getSubjectDN()?.toString()+
 					"- serialNumber: " + certCaResult?.getSerialNumber()?.longValue());
 		} catch (Exception ex) {
@@ -363,10 +362,9 @@ class SignatureVSService {
 		for(UserVS userVS: signersVS) {
 			log.debug("validateAccessControlVoteCerts - validating signer: ${userVS.getCertificate().getSubjectDN()}")
 			try {
-				PKIXCertPathValidatorResult pkixResult = CertUtil.verifyCertificate(
+				ResponseVS validationResponse = CertUtil.verifyCertificate(
                         userVS.getCertificate(), eventTrustedCerts, false)
-				TrustAnchor ta = pkixResult.getTrustAnchor();
-				X509Certificate certCaResult = ta.getTrustedCert();
+                X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
 				log.debug("validateAccessControlVoteCerts - certCaResult: " + certCaResult?.getSubjectDN()?.toString()+
 						"- serialNumber: " + certCaResult?.getSerialNumber()?.longValue());
 			} catch (Exception ex) {
@@ -402,10 +400,9 @@ class SignatureVSService {
         String signerNIF = smimeMessageReq.getSigner().getNif()
 		for(UserVS userVS: signersVS) {
 			try {
-				PKIXCertPathValidatorResult pkixResult = CertUtil.verifyCertificate(
+				ResponseVS validationResponse = CertUtil.verifyCertificate(
 					userVS.getCertificate(), getTrustedCerts(), false)
-				TrustAnchor ta = pkixResult.getTrustAnchor();
-				X509Certificate certCaResult = ta.getTrustedCert();
+                X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
 				userVS.certificateCA = trustedCertsHashMap.get(certCaResult?.getSerialNumber()?.longValue())
 				log.debug("Certificate from: " + certCaResult?.getSubjectDN()?.toString() +
 						"- serialNumber: " + certCaResult?.getSerialNumber()?.longValue());

@@ -1,5 +1,7 @@
 package org.votingsystem.model;
 
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
@@ -156,13 +158,6 @@ public class VoteVS implements Serializable {
 		this.certificateVS = certificateVS;
 	}
 
-    @Transient public String getHashCertVoteHex() {
-        if(hashCertVoteHex != null) return hashCertVoteHex;
-        if (hashCertVSBase64 == null) return null;
-        HexBinaryAdapter hexConverter = new HexBinaryAdapter();
-        return hexConverter.marshal(hashCertVSBase64.getBytes());
-    }
-
     public void setHashCertVoteHex(String hashCertVoteHex) {
         this.hashCertVoteHex = hashCertVoteHex;
     }
@@ -253,35 +248,18 @@ public class VoteVS implements Serializable {
         VoteVS voteVS = VoteVS.populate(contentMap);
         voteVS.setTimeStampToken(timeStampToken);
         voteVS.setX509Certificate(x509Certificate);
-        String subjectDN = x509Certificate.getSubjectDN().getName();
-        //log.debug("setCertificateVoto - subjectDN: " +subjectDN);
-
-        byte[] eventIdExtensionValue = x509Certificate.getExtensionValue(ContextVS.EVENT_ID_OID);
-        if(eventIdExtensionValue != null) {
-            DERTaggedObject eventIdDER = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(eventIdExtensionValue);
+        byte[] voteExtensionValue = x509Certificate.getExtensionValue(ContextVS.VOTE_OID);
+        if(voteExtensionValue != null) {
+            DERTaggedObject voteCertDataDER = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(voteExtensionValue);
+            JSONObject voteCertData = (JSONObject) JSONSerializer.toJSON(
+                    ((DERUTF8String) voteCertDataDER.getObject()).toString());
             EventVS eventVS = new EventVS();
-            eventVS.setId(Long.valueOf(((DERUTF8String)eventIdDER.getObject()).toString()));
+            eventVS.setId(Long.valueOf(voteCertData.getString("eventId")));
             voteVS.setEventVS(eventVS);
+            voteVS.setAccessControlURL(voteCertData.getString("accessControlURL"));
+            voteVS.setHashCertVSBase64(voteCertData.getString("hashCertVS"));
         }
-
-        byte[] accesssControlExtensionValue = x509Certificate.getExtensionValue(ContextVS.ACCESS_CONTROL_OID);
-        if(accesssControlExtensionValue != null) {
-            DERTaggedObject accesssControlDER = (DERTaggedObject)X509ExtensionUtil.fromExtensionValue(
-                    accesssControlExtensionValue);
-            voteVS.setAccessControlURL(((DERUTF8String)accesssControlDER.getObject()).toString());
-        }
-
-        byte[] hashCertExtensionValue = x509Certificate.getExtensionValue(ContextVS.HASH_CERT_VOTE_OID);
-        if (hashCertExtensionValue != null) {
-            DERTaggedObject hashCertDER = (DERTaggedObject)X509ExtensionUtil.fromExtensionValue(
-                    hashCertExtensionValue);
-            String hashCertVoteHex = ((DERUTF8String)hashCertDER.getObject()).toString();
-            voteVS.setHashCertVoteHex(hashCertVoteHex);
-            HexBinaryAdapter hexConverter = new HexBinaryAdapter();
-            voteVS.setHashCertVSBase64(new String(hexConverter.unmarshal(hashCertVoteHex)));
-        }
-
-        byte[] representativeURLExtensionValue = x509Certificate.getExtensionValue(ContextVS.REPRESENTATIVE_URL_OID);
+        byte[] representativeURLExtensionValue = x509Certificate.getExtensionValue(ContextVS.REPRESENTATIVE_VOTE_OID);
         if(representativeURLExtensionValue != null) {
             DERTaggedObject representativeURL_DER = (DERTaggedObject)X509ExtensionUtil.fromExtensionValue(
                     representativeURLExtensionValue);

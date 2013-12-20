@@ -1,6 +1,8 @@
 package org.votingsystem.accesscontrol.service
 
 import grails.converters.JSON
+import org.bouncycastle.asn1.ASN1ObjectIdentifier
+import org.bouncycastle.asn1.ASN1Set
 import org.bouncycastle.asn1.DERTaggedObject
 import org.bouncycastle.asn1.DERUTF8String
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo
@@ -39,12 +41,13 @@ class CsrService {
 			grailsApplication.config.VotingSystem.signKeysPassword.toCharArray());
 		X509Certificate certSigner = (X509Certificate) keyStore.getCertificate(keyStoreVS.keyAlias);
         DERTaggedObject representativeExtension = null
+        PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
 		if(userVS?.type == UserVS.Type.REPRESENTATIVE) {
             String representativeURL = "${grailsLinkGenerator.link(controller:"representative", absolute:true)}/${userVS?.id}"
-            representativeExtension = new DERTaggedObject(ContextVS.REPRESENTATIVE_URL_TAG,
+            representativeExtension = new DERTaggedObject(ContextVS.REPRESENTATIVE_VOTE_TAG,
                     new DERUTF8String(representativeURL))
         }
-        PKCS10CertificationRequest csr = CertUtil.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
+
 		X509Certificate issuedCert = CertUtil.signCSR(csr, null, privateKeySigner, certSigner, eventVS.dateBegin,
                 eventVS.dateFinish, representativeExtension)
 		if (!issuedCert) {
@@ -115,6 +118,8 @@ class CsrService {
                     content:issuedCert.getEncoded(), type:CertificateVS.Type.ANONYMOUS_REPRESENTATIVE_DELEGATION,
                     state:CertificateVS.State.OK, hashCertVSBase64:hashCertVSBase64, validFrom:certValidFrom,
                     validTo: certValidTo)
+            certificate.save()
+            log.error("signAnonymousDelegationCert - expended anonymous CertificateVS '${certificate.id}'")
             byte[] issuedCertPEMBytes = CertUtil.getPEMEncoded(issuedCert);
             Map data = [requestPublicKey:csr.getPublicKey()]
             return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION,
@@ -135,7 +140,7 @@ class CsrService {
 	public X509Certificate getUserCert(byte[] pemCertCollection) throws Exception {
 		Collection<X509Certificate> certificates = CertUtil.fromPEMToX509CertCollection(pemCertCollection);
 		for (X509Certificate certificate : certificates) {
-			if (certificate.subjectDN.toString().contains("deviceId=")) {
+			if (certificate.subjectDN.toString().contains("UID=deviceId:")) {
 				return certificate;
 			}
 		}
@@ -151,41 +156,32 @@ class CsrService {
 		}
         CertificationRequestInfo info = csr.getCertificationRequestInfo();
         Enumeration csrAttributes = info.getAttributes().getObjects()
-        String accessControlURL
-        String eventId
-        String hashCertVoteHex
+        def voteCertDataJSON
         while(csrAttributes.hasMoreElements()) {
             DERTaggedObject attribute = (DERTaggedObject)csrAttributes.nextElement();
             switch(attribute.getTagNo()) {
-                case ContextVS.ACCESS_CONTROL_URL_TAG:
-                    accessControlURL = ((DERUTF8String)attribute.getObject()).getString()
-                    break;
-                case ContextVS.EVENT_ID_TAG:
-                    eventId = ((DERUTF8String)attribute.getObject()).getString()
-                    break;
-                case ContextVS.HASH_CERT_VOTE_TAG:
-                    hashCertVoteHex = ((DERUTF8String)attribute.getObject()).getString()
+                case ContextVS.VOTE_TAG:
+                    voteCertDataJSON = JSON.parse(((DERUTF8String)attribute.getObject()).getString())
                     break;
             }
         }
-        log.debug("validateCSRVote - accessControlURL: ${accessControlURL} - eventId: ${eventId} - " +
-                "hashCertVoteHex: ${hashCertVoteHex}")
+        String eventId = voteCertDataJSON.eventId
+        log.debug("validateCSRVote - accessControlURL: ${voteCertDataJSON.accessControlURL} - " +
+                "eventId: ${voteCertDataJSON.eventId} - hashCertVS: ${voteCertDataJSON.hashCertVS}")
         if (!eventId.equals(String.valueOf(eventVS.getId()))) {
             String msg = messageSource.getMessage('csrRequestError', null, locale)
             log.error("- validateCSRVote - ERROR - ${msg}")
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST,message:msg, type:TypeVS.ACCESS_REQUEST_ERROR)
         }
-        accessControlURL = StringUtils.checkURL(accessControlURL)
+        String accessControlURL = StringUtils.checkURL(voteCertDataJSON.accessControlURL)
         String serverURL = grailsApplication.config.grails.serverURL
         if (!serverURL.equals(accessControlURL)) {
             String msg = messageSource.getMessage('accessControlURLError',[serverURL,accessControlURL].toArray(),locale)
             log.error("- validateCSRVote - ERROR - ${msg}")
             return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:msg, type:TypeVS.ACCESS_REQUEST_ERROR)
         }
-        HexBinaryAdapter hexConverter = new HexBinaryAdapter();
-        String hashCertVSBase64 = new String(hexConverter.unmarshal(hashCertVoteHex));
         return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ACCESS_REQUEST,
-                data:[publicKey:csr.getPublicKey(), hashCertVSBase64:hashCertVSBase64])
+                data:[publicKey:csr.getPublicKey(), hashCertVSBase64:voteCertDataJSON.hashCertVS])
     }
 
     /*  C=ES, ST=State or Province, L=locality name, O=organization name, OU=org unit, CN=common name,
@@ -206,7 +202,7 @@ class CsrService {
 			if (nif.split(",").length > 1)  nif = nif.split(",")[0];
 		}
 		if (subjectDN.split("mobilePhone=").length > 1)  phone = subjectDN.split("mobilePhone=")[1].split(",")[0];
-		if (subjectDN.split("deviceId=").length > 1) deviceId = subjectDN.split("deviceId=")[1].split(",")[0];
+		if (subjectDN.split("UID=deviceId:").length > 1) deviceId = subjectDN.split("UID=deviceId:")[1].split(",")[0];
 		ResponseVS responseVS = subscriptionVSService.checkDevice(nif, phone, email, deviceId, locale)
 		if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS;
 		UserRequestCsrVS requestCSR

@@ -90,7 +90,7 @@ public class SignedMailGenerator {
     }
     
     public SMIMEMessageWrapper genMimeMessage(String fromUser, String toUser, String textToSign,
-            String subject, Header header) throws Exception {
+            String subject, Header... headers) throws Exception {
         if (subject == null) subject = "";
         if (textToSign == null) textToSign = "";
         MimeBodyPart msg = new MimeBodyPart();
@@ -98,7 +98,11 @@ public class SignedMailGenerator {
         MimeMultipart mimeMultipart = smimeSignedGenerator.generate(msg,
                 ContextVS.DEFAULT_SIGNED_FILE_NAME);
         SMIMEMessageWrapper body = new SMIMEMessageWrapper(session);
-        if (header != null) body.setHeader(header.getName(), header.getValue());
+        if (headers != null) {
+            for(Header header : headers) {
+                if (header != null) body.setHeader(header.getName(), header.getValue());
+            }
+        }
         if (fromUser != null && !"".equals(fromUser)) {
         	Address fromUserAddress = new InternetAddress(fromUser);
         	body.setFrom(fromUserAddress);

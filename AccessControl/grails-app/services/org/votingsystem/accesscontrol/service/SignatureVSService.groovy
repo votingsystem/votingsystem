@@ -15,6 +15,7 @@ import org.votingsystem.model.UserVS
 import org.votingsystem.model.VoteVS
 import org.votingsystem.signature.smime.SMIMEMessageWrapper
 import org.votingsystem.signature.smime.SignedMailGenerator
+import org.votingsystem.signature.util.CertExtensionCheckerVS
 import org.votingsystem.signature.util.CertUtil
 import org.votingsystem.signature.util.Encryptor
 import org.votingsystem.util.ApplicationContextHolder
@@ -419,45 +420,56 @@ class SignatureVSService {
 		log.debug("validateSignersCertificate - number of signers: ${signersVS.size()}")
 		Set<UserVS> checkedSigners = new HashSet<UserVS>()
         UserVS checkedSigner = null
+        UserVS anonymousSigner = null
+        CertExtensionCheckerVS extensionChecker
         String signerNIF = messageWrapper.getSigner().getNif()
 		for(UserVS userVS: signersVS) {
 			try {
-				PKIXCertPathValidatorResult pkixResult = CertUtil.verifyCertificate(userVS.getCertificate(),
+                if(userVS.getTimeStampToken() != null) {
+                    ResponseVS timestampValidationResp = timeStampVSService.validateToken(
+                            userVS.getTimeStampToken(), locale)
+                    log.debug("validateSignersCertificate - timestampValidationResp - " +
+                            "statusCode:${timestampValidationResp.statusCode} - message:${timestampValidationResp.message}")
+                    if(ResponseVS.SC_OK != timestampValidationResp.statusCode) {
+                        log.error("validateSignersCertificate - TIMESTAMP ERROR - ${timestampValidationResp.message}")
+                        return timestampValidationResp
+                    }
+                } else {
+                    String msg = messageSource.getMessage('documentWithoutTimeStampErrorMsg', null, locale)
+                    log.error("ERROR - validateSignersCertificate - ${msg}")
+                    return new ResponseVS(message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST)
+                }
+				ResponseVS validationResponse = CertUtil.verifyCertificate(userVS.getCertificate(),
                         getTrustedCerts(), false)
-				TrustAnchor ta = pkixResult.getTrustAnchor();
-				X509Certificate certCaResult = ta.getTrustedCert();
+				X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
 				userVS.setCertificateCA(trustedCertsHashMap.get(certCaResult?.getSerialNumber()?.longValue()))
 				log.debug("validateSignersCertificate - user cert issuer: " + certCaResult?.getSubjectDN()?.toString() +
                         " - issuer serialNumber: " + certCaResult?.getSerialNumber()?.longValue());
-				ResponseVS responseVS = subscriptionVSService.checkUser(userVS, locale)
-				if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
-				if(userVS.getTimeStampToken() != null) {
-					ResponseVS timestampValidationResp = timeStampVSService.validateToken(
-						userVS.getTimeStampToken(), locale)
-					log.debug("validateSignersCertificate - timestampValidationResp - " +
-                        "statusCode:${timestampValidationResp.statusCode} - message:${timestampValidationResp.message}")
-					if(ResponseVS.SC_OK != timestampValidationResp.statusCode) {
-						log.error("validateSignersCertificate - TIMESTAMP ERROR - ${timestampValidationResp.message}")
-						return timestampValidationResp
-					}
-				} else {
-					String msg = messageSource.getMessage('documentWithoutTimeStampErrorMsg', null, locale)
-					log.error("ERROR - validateSignersCertificate - ${msg}")
-					return new ResponseVS(message:msg,statusCode:ResponseVS.SC_ERROR_REQUEST)
-				}
-				checkedSigners.add(responseVS.userVS)
-                if(userVS.getNif().equals(signerNIF)) checkedSigner = responseVS.userVS;
+                extensionChecker = validationResponse.data.extensionChecker
+                ResponseVS responseVS = null
+                if(!extensionChecker.supportedExtensionsVS.isEmpty()) {
+                    log.debug("validateSignersCertificate - anonymous signer")
+                    anonymousSigner = userVS
+                    responseVS = new ResponseVS(ResponseVS.SC_OK)
+                    responseVS.setUserVS(anonymousSigner)
+                } else {
+                    responseVS = subscriptionVSService.checkUser(userVS, locale)
+                    if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
+                    if(userVS.getNif().equals(signerNIF)) checkedSigner = responseVS.userVS;
+                }
+                checkedSigners.add(responseVS.userVS)
 			} catch (CertPathValidatorException ex) {
 				log.error(ex.getMessage(), ex)
 				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
 					messageSource.getMessage('unknownCAErrorMSg', null, locale))
 			} catch (Exception ex) {
 				log.error(ex.getMessage(), ex)
-				return new ResponseVS(message:ex.getMessage(), statusCode:ResponseVS.SC_ERROR_REQUEST)
+				return new ResponseVS(message:ex.getMessage(), statusCode:ResponseVS.SC_ERROR)
 			}
 		}
 		return new ResponseVS(statusCode:ResponseVS.SC_OK, smimeMessage:messageWrapper,
-                data:[checkedSigners:checkedSigners, checkedSigner:checkedSigner])
+                data:[checkedSigners:checkedSigners, checkedSigner:checkedSigner, anonymousSigner:anonymousSigner,
+                extensionChecker:extensionChecker])
 	}
 
 	public ResponseVS validateSMIMEVote(
@@ -517,14 +529,14 @@ class SignatureVSService {
 		if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
 		Set<TrustAnchor> trustedAnchors = (Set<TrustAnchor>) responseVS.data
 		//Vote validation
-		PKIXCertPathValidatorResult pkixResult;
+        ResponseVS validationResponse;
 		X509Certificate certCaResult;
 		X509Certificate checkedCert = voteVS.getX509Certificate()
 		try {
-			pkixResult = CertUtil.verifyCertificate(trustedAnchors, false, [checkedCert])
-			certCaResult = pkixResult.getTrustAnchor().getTrustedCert();
+            validationResponse = CertUtil.verifyCertificate(trustedAnchors, false, [checkedCert])
+			certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
 			log.debug("validateVoteCerts - vote cert -> CA Result: " + certCaResult?.getSubjectDN()?.toString()+
-					"- numserie: " + certCaResult?.getSerialNumber()?.longValue());
+					"- serialNumber: " + certCaResult?.getSerialNumber()?.longValue());
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex)
 			msg = messageSource.getMessage('certValidationErrorMsg',
@@ -562,8 +574,8 @@ class SignatureVSService {
 		}
 		checkedCert = voteVS.getServerCerts()?.iterator()?.next()
 		try {
-			pkixResult = CertUtil.verifyCertificate(trustedAnchors, false, [checkedCert])
-			certCaResult = pkixResult.getTrustAnchor().getTrustedCert();
+            validationResponse = CertUtil.verifyCertificate(trustedAnchors, false, [checkedCert])
+			certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
 			log.debug("validateVoteCerts - Control Center cert -> CA Result: " + certCaResult?.getSubjectDN()?.toString() +
 					"- numserie: " + certCaResult?.getSerialNumber()?.longValue());
 		} catch (Exception ex) {

@@ -53,6 +53,7 @@ public class MessageSMIME implements Serializable {
 
     @Transient private transient SMIMEMessageWrapper smimeMessage;
     @Transient private transient Set<UserVS> signers;
+    @Transient private transient UserVS anonymousSigner;
 
     public byte[] getContent() {
         return content;
@@ -160,7 +161,7 @@ public class MessageSMIME implements Serializable {
 		this.smimeMessage = smimeMessage;
 	}
 
-	public Set<UserVS> getSigners() {
+    @Transient public Set<UserVS> getSigners() {
 		return signers;
 	}
 
@@ -168,5 +169,11 @@ public class MessageSMIME implements Serializable {
 		this.signers = signers;
 	}
 
+    @Transient public UserVS getAnonymousSigner() {
+        return anonymousSigner;
+    }
 
+    public void setAnonymousSigner(UserVS anonymousSigner) {
+        this.anonymousSigner = anonymousSigner;
+    }
 }

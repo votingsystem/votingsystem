@@ -103,8 +103,7 @@ class AccessRequestVSController {
     def hashHex () {
         if (params.hashHex) {
             HexBinaryAdapter hexConverter = new HexBinaryAdapter();
-            String hashAccessRequestBase64 = new String(
-				hexConverter.unmarshal(params.hashHex))
+            String hashAccessRequestBase64 = new String(hexConverter.unmarshal(params.hashHex))
             log.debug "hashAccessRequestBase64: ${hashAccessRequestBase64}"
             AccessRequestVS accessRequestVS = AccessRequestVS.findWhere(hashAccessRequestBase64:
                 hashAccessRequestBase64)

@@ -82,7 +82,7 @@ class SubscriptionVSService {
 	ResponseVS checkDevice(String nif, String phone, String email,  String deviceId, Locale locale) {
 		log.debug "checkDevice - nif:${nif} - phone:${phone} - email:${email} - deviceId:${deviceId}"
 		if(!nif || !deviceId) {
-			log.debug "Sin datos"
+			log.debug "Missing params"
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST, message:
 				messageSource.getMessage('requestWithoutData', null, locale))
 		}

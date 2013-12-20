@@ -6,7 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
-import org.votingsystem.signature.util.PKCS10WrapperClient;
+import org.votingsystem.signature.util.CertificationRequestVS;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -38,7 +38,7 @@ public class VoteVS {
     private SMIMEMessageWrapper cancelVoteReceipt;
     private byte[] encryptedKey = null;
     private boolean isCanceled = false;
-    private PKCS10WrapperClient certificationRequest;
+    private CertificationRequestVS certificationRequest;
     private PrivateKey certVotePrivateKey;
     private EventVS voto;
     private Date dateCreated;
@@ -317,11 +317,11 @@ public class VoteVS {
 		this.encryptedKey = encryptedKey;
 	}
 
-	public PKCS10WrapperClient getPkcs10WrapperClient() {
+	public CertificationRequestVS getPkcs10WrapperClient() {
 		return certificationRequest;
 	}
 
-	public void setPkcs10WrapperClient(PKCS10WrapperClient certificationRequest) {
+	public void setPkcs10WrapperClient(CertificationRequestVS certificationRequest) {
 		this.certificationRequest = certificationRequest;
 	}
 

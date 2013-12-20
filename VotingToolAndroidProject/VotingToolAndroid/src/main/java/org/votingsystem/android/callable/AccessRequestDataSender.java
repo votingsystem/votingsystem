@@ -5,12 +5,12 @@ import android.util.Log;
 
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
+import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 import org.votingsystem.signature.util.Encryptor;
-import org.votingsystem.signature.util.PKCS10WrapperClient;
 
 import javax.mail.Header;
 import java.security.cert.X509Certificate;
@@ -29,28 +29,24 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
 	public static final String TAG = "AccessRequestDataSender";
 
     private SMIMEMessageWrapper accessRequets;
-    private PKCS10WrapperClient certificationRequest;
+    private CertificationRequestVS certificationRequest;
     private X509Certificate destinationCert = null;
     private String serviceURL = null;
     private Context context = null;
 
-    public AccessRequestDataSender(SMIMEMessageWrapper accessRequets,
-                                   EventVS eventVS, X509Certificate destinationCert,
-                                   String serviceURL, Context context) throws Exception {
+    public AccessRequestDataSender(SMIMEMessageWrapper accessRequets, EventVS eventVS,
+            X509Certificate destinationCert, String serviceURL, Context context) throws Exception {
         this.accessRequets = accessRequets;
         this.serviceURL = serviceURL;
         this.destinationCert = destinationCert;
         this.context = context;
-        this.certificationRequest = new PKCS10WrapperClient(
-                KEY_SIZE, SIG_NAME, VOTE_SIGN_MECHANISM, PROVIDER, 
-                eventVS.getAccessControlVS().getServerURL(),
-                eventVS.getEventVSId().toString(),
-                eventVS.getHashCertVoteHex());
+        this.certificationRequest = CertificationRequestVS.getVoteRequest(KEY_SIZE, SIG_NAME,
+               VOTE_SIGN_MECHANISM, PROVIDER, eventVS.getAccessControlVS().getServerURL(),
+               eventVS.getEventVSId().toString(), eventVS.getHashCertVSBase64());
     }
     
     @Override public ResponseVS call() {
         Log.d(TAG + ".call", " - urlAccessRequest: " + serviceURL);
-
         try {
             MessageTimeStamper timeStamper = new MessageTimeStamper(accessRequets, context);
             ResponseVS responseVS = timeStamper.call();
@@ -63,8 +59,7 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
 
             byte[] csrEncryptedAccessRequestBytes = Encryptor.encryptSMIME(
                     accessRequets, destinationCert);
-            String csrFileName = ContextVS.CSR_FILE_NAME + ":" +
-            		ContentTypeVS.ENCRYPTED.getName();
+            String csrFileName = ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.ENCRYPTED.getName();
 
             String accessRequestFileName = ContextVS.ACCESS_REQUEST_FILE_NAME + ":" +
                     ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED.getName();
@@ -80,7 +75,6 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
                         certificationRequest.getPrivateKey());
                 certificationRequest.initSigner(decryptedData);
             }
-            
             return responseVS;
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -88,7 +82,7 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
         }
     }
     
-    public PKCS10WrapperClient getPKCS10WrapperClient() {
+    public CertificationRequestVS getPKCS10WrapperClient() {
         return certificationRequest;
     }
     

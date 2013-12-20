@@ -1,5 +1,7 @@
 package org.votingsystem.model;
 
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
@@ -77,40 +79,6 @@ public class CertificateVS implements Serializable {
     @Transient private String serverURL;
 
     public CertificateVS() {}
-
-    public CertificateVS(X509Certificate x509Certificate) throws IOException {
-        String subjectDN = x509Certificate.getSubjectDN().getName();
-        log.debug("Certificate - subjectDN: " + subjectDN);
-        byte[] eventIdExtensionValue = x509Certificate.getExtensionValue(ContextVS.EVENT_ID_OID);
-        if(eventIdExtensionValue != null) {
-            DERTaggedObject eventIdDER = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(eventIdExtensionValue);
-            setEventVSId(((DERUTF8String)eventIdDER.getObject()).toString());
-        }
-
-        byte[] accesssControlExtensionValue = x509Certificate.getExtensionValue(ContextVS.ACCESS_CONTROL_OID);
-        if(accesssControlExtensionValue != null) {
-            DERTaggedObject accesssControlDER = (DERTaggedObject)X509ExtensionUtil.fromExtensionValue(
-                    accesssControlExtensionValue);
-            setServerURL(((DERUTF8String)accesssControlDER.getObject()).toString());
-        }
-
-        byte[] hashCertExtensionValue = x509Certificate.getExtensionValue(ContextVS.HASH_CERT_VOTE_OID);
-        if (hashCertExtensionValue != null) {
-            DERTaggedObject hashCertDER = (DERTaggedObject)X509ExtensionUtil.fromExtensionValue(
-                    hashCertExtensionValue);
-            String hashCertVoteHex = ((DERUTF8String)hashCertDER.getObject()).toString();
-            HexBinaryAdapter hexConverter = new HexBinaryAdapter();
-            setHashCertVSBase64(new String(hexConverter.unmarshal(hashCertVoteHex)));
-        }
-
-        byte[] representativeURLExtensionValue = x509Certificate.getExtensionValue(ContextVS.REPRESENTATIVE_URL_OID);
-        if(representativeURLExtensionValue != null) {
-            DERTaggedObject representativeURL_DER = (DERTaggedObject)X509ExtensionUtil.fromExtensionValue(
-                    representativeURLExtensionValue);
-            setRepresentativeURL(((DERUTF8String)representativeURL_DER.getObject()).toString());
-        }
-    }
-
 
     public MessageSMIME getMessageSMIME() {
         return messageSMIME;

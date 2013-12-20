@@ -16,6 +16,8 @@ import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
 import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.model.ResponseVS;
+
 import javax.security.auth.x500.X500Principal;
 import java.io.*;
 import java.math.BigInteger;
@@ -307,7 +309,7 @@ public class CertUtil {
      * @return result PKIXCertPathValidatorResult	if the certificate's signature is
      * 		   valid and can be validated using a trustedCertificated, false otherwise.
      */
-    public static PKIXCertPathValidatorResult verifyCertificate(X509Certificate cert, 
+    public static ResponseVS verifyCertificate(X509Certificate cert,
             Set<X509Certificate> trustedCerts, boolean checkCRL) throws Exception {
         Set<TrustAnchor> anchors = new HashSet<TrustAnchor>();
         for(X509Certificate certificate: trustedCerts) {
@@ -317,7 +319,7 @@ public class CertUtil {
         return verifyCertificate(anchors, checkCRL,Arrays.asList(cert));
     }
 
-    public static PKIXCertPathValidatorResult verifyCertificate(Set<TrustAnchor> anchors,
+    public static ResponseVS verifyCertificate(Set<TrustAnchor> anchors,
              boolean checkCRL, List<X509Certificate> certs) throws Exception {
         PKIXParameters pkixParameters = new PKIXParameters(anchors);
         CertExtensionCheckerVS checker = new CertExtensionCheckerVS();
@@ -333,7 +335,12 @@ public class CertUtil {
         //X509Certificate certCaResult = ta.getTrustedCert();
         //logger.debug("certCaResult: " + certCaResult.getSubjectDN().toString()+
         //        "- serialNumber: " + certCaResult.getSerialNumber().longValue());
-        return (PKIXCertPathValidatorResult)result;
+        Map resultMap = new HashMap();
+        resultMap.put("extensionChecker", checker);
+        resultMap.put("pkixResult", (PKIXCertPathValidatorResult)result);
+        ResponseVS response = new ResponseVS(ResponseVS.SC_OK);
+        response.setData(resultMap);
+        return response;
     }
     
 	/**
