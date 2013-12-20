@@ -25,7 +25,9 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,6 +35,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+
+import org.votingsystem.android.ui.CertPinDialog;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
@@ -152,8 +156,8 @@ public class MainActivity extends FragmentActivity {
 			        editor.commit();
 	    		}
 	            setContentView(R.layout.main_activity);
-	            Button cancelarButton = (Button) findViewById(R.id.cancelar_button);
-	            cancelarButton.setOnClickListener(new OnClickListener() {
+	            Button cancelButton = (Button) findViewById(R.id.cancelar_button);
+	            cancelButton.setOnClickListener(new OnClickListener() {
 	                public void onClick(View v) { 
 	                	//finish(); 
 	                	Intent intent = new Intent(getBaseContext(), NavigationDrawer.class);
@@ -161,10 +165,10 @@ public class MainActivity extends FragmentActivity {
 	                }
 	            });
 	            
-	            Button solicitarButton = (Button) findViewById(R.id.solicitar_button);
-	            solicitarButton.setOnClickListener(new OnClickListener() {
+	            Button requestButton = (Button) findViewById(R.id.solicitar_button);
+	            requestButton.setOnClickListener(new OnClickListener() {
 	                public void onClick(View v) {
-	                	Intent intent = new Intent(getBaseContext(), UserCertRequestActivity.class);
+                        Intent intent = new Intent(getBaseContext(), UserCertRequestActivity.class);
 	                	startActivity(intent);
 	                }
 	            });

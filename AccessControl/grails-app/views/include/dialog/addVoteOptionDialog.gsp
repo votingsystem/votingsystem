@@ -1,13 +1,15 @@
-<div id="addVoteOptionDialog" title="<g:message code="addOptionLbl"/>"
-        style="display:none;padding:30px 20px 30px 20px; display: table; margin:auto;">
-   	<label for="newOptionText" style=""><g:message code="pollOptionContentMsg"/></label>
-	<form id="addVoteOptionForm">
-		<input type="text" id="newOptionText" style="width:350px; margin:10px auto 0px auto;"
-			oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
-			onchange="this.setCustomValidity('')"
-			class="text ui-widget-content ui-corner-all" required/>
-		<input id="submitOption" type="submit" style="display:none;">
-	</form>
+<div style="display:none;">
+    <div id="addVoteOptionDialog" title="<g:message code="addOptionLbl"/>"
+         style="display:none;padding:30px 20px 30px 20px; display: table; margin:auto;">
+        <label for="newOptionText" style=""><g:message code="pollOptionContentMsg"/></label>
+        <form id="addVoteOptionForm">
+            <input type="text" id="newOptionText" style="width:350px; margin:10px auto 0px auto;"
+                   oninvalid="this.setCustomValidity('<g:message code="emptyFieldLbl"/>')"
+                   onchange="this.setCustomValidity('')"
+                   class="text ui-widget-content ui-corner-all" required/>
+            <input id="submitOption" type="submit" style="display:none;">
+        </form>
+    </div>
 </div>
 <r:script>
 var callerCallback

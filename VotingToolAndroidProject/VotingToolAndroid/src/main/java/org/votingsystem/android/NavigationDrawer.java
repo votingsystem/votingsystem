@@ -36,6 +36,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListView;
 
+import org.votingsystem.android.fragment.EventPublishingFragment;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVSState;
 import org.votingsystem.model.SubSystemVS;
@@ -339,15 +340,15 @@ public class NavigationDrawer extends ActionBarActivity {
                         Intent intent = new Intent(NavigationDrawer.this, EventPublishingActivity.class);
                         switch (which) {
                             case 0:
-                                intent.putExtra(EventPublishingActivity.FORM_TYPE_KEY,
+                                intent.putExtra(EventPublishingFragment.FORM_TYPE_KEY,
                                         TypeVS.VOTING_PUBLISHING.toString());
                                 break;
                             case 1:
-                                intent.putExtra(EventPublishingActivity.FORM_TYPE_KEY,
+                                intent.putExtra(EventPublishingFragment.FORM_TYPE_KEY,
                                         TypeVS.MANIFEST_PUBLISHING.toString());
                                 break;
                             case 2:
-                                intent.putExtra(EventPublishingActivity.FORM_TYPE_KEY,
+                                intent.putExtra(EventPublishingFragment.FORM_TYPE_KEY,
                                         TypeVS.CLAIM_PUBLISHING.toString());
                                 break;
                         }
@@ -358,20 +359,10 @@ public class NavigationDrawer extends ActionBarActivity {
         dialog.show();
     }
 
-    /**
-     * When using the ActionBarDrawerToggle, you must call it during
-     * onPostCreate() and onConfigurationChanged()...
-     */
     @Override protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         // Sync the toggle state after onRestoreInstanceState has occurred.
         mDrawerToggle.syncState();
-    }
-
-    @Override public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        // Pass any configuration change to the drawer toggls
-        mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
     private void prepareListData() {

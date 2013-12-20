@@ -58,7 +58,6 @@ public class VoteReceiptListActivity extends ActionBarActivity
     private View progressContainer;
     private FrameLayout mainLayout;
     private boolean isProgressShown;
-    private boolean isDestroyed = true;
     private ProcessSignatureTask processSignatureTask;
 
     @Override
@@ -96,7 +95,6 @@ public class VoteReceiptListActivity extends ActionBarActivity
         progressContainer = findViewById(R.id.progressContainer);
         mainLayout.getForeground().setAlpha( 0);
         isProgressShown = false;
-        isDestroyed = false;
     }
 
 
@@ -269,9 +267,7 @@ public class VoteReceiptListActivity extends ActionBarActivity
     }
 
     private void showMessage(String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", " - caption: "
-                + caption + "  - showMessage: " + message);
-        if(isDestroyed) return;
+        Log.d(TAG + ".showMessage(...) ", " - caption: " + caption + "  - showMessage: " + message);
         AlertDialog.Builder builder= new AlertDialog.Builder(this);
         builder.setTitle(caption).setMessage(message).show();
     }
@@ -333,15 +329,13 @@ public class VoteReceiptListActivity extends ActionBarActivity
     }
     @Override protected void onDestroy() {
         super.onDestroy();
-        Log.d(TAG + ".onDestroy()", " - onDestroy");
-        isDestroyed = true;
+        Log.d(TAG + ".onDestroy()", "onDestroy");
         if(processSignatureTask != null) processSignatureTask.cancel(true);
     };
 
     @Override public void onStop() {
         super.onStop();
-        Log.d(TAG + ".onStop()", " - onStop");
-        isDestroyed = true;
+        Log.d(TAG + ".onStop()", "onStop");
         if(processSignatureTask != null) processSignatureTask.cancel(true);
     }
 
@@ -383,7 +377,7 @@ public class VoteReceiptListActivity extends ActionBarActivity
         protected ResponseVS doInBackground(URL... urls) {
             Log.d(TAG + ".ProcessSignatureTask.doInBackground(...)", " - doInBackground " );
             String subject = getString(R.string.cancel_vote_msg_subject);
-            String serverURL = contextVS.getAccessControlVS().getAccessServiceURL();
+            String serverURL = contextVS.getAccessControl().getAccessServiceURL();
             try {
                 FileInputStream fis = openFileInput(KEY_STORE_FILE);
                 byte[] keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
@@ -399,11 +393,11 @@ public class VoteReceiptListActivity extends ActionBarActivity
                 PrivateKey certPrivKey = kf.generatePrivate(keySpec);
                 operationReceipt.setCertVotePrivateKey(certPrivKey);
                 String signatureContent = operationReceipt.getVoto().getCancelVoteData();
-                String serviceURL =contextVS.getAccessControlVS().getCancelVoteServiceURL();
+                String serviceURL =contextVS.getAccessControl().getCancelVoteServiceURL();
                 SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
                         signatureContent, ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED, subject,
                         keyStoreBytes, pin.toCharArray(),
-                        contextVS.getAccessControlVS().getCertificate(), getBaseContext());
+                        contextVS.getAccessControl().getCertificate(), getBaseContext());
                 return smimeSignedSender.call();
             } catch(Exception ex) {
                 ex.printStackTrace();

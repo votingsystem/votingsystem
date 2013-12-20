@@ -80,8 +80,8 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(
                     keyStoreBytes, USER_CERT_ALIAS, password, SIGNATURE_ALGORITHM);
             smimeMessage = signedMailGenerator.genMimeMessage(userVS,
-                    ContextVS.getInstance(context).getAccessControlVS().getNameNormalized(),
-                    signatureContent, subject, null);
+                    ContextVS.getInstance(context).getAccessControl().getNameNormalized(),
+                    signatureContent, subject);
             timeStamper = new MessageTimeStamper(smimeMessage, context);
             responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;

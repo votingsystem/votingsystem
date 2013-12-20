@@ -30,7 +30,7 @@ class CsrService {
 	
 	public synchronized ResponseVS signCertVoteVS (byte[] csrPEMBytes, EventVS eventVS, UserVS userVS, Locale locale) {
 		log.debug("signCertVoteVS - eventVS: ${eventVS?.id}");
-		ResponseVS responseVS = validateCSRVote(csr, eventVS, locale)
+		ResponseVS responseVS = validateCSRVote(csrPEMBytes, eventVS, locale)
 		if(ResponseVS.SC_OK != responseVS.statusCode) return responseVS
 		PublicKey requestPublicKey = responseVS.data.publicKey
 		KeyStoreVS keyStoreVS = eventVS.getKeyStoreVS()

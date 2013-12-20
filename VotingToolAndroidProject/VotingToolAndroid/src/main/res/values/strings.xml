@@ -89,7 +89,7 @@
 	<string name="lockscreen_sim_unlock_progress_dialog_message">lockscreen sim unlock progress dialog message</string>
 	<string name="keyguard_password_enter_pin_code">Introduzca el código PIN de votación</string>
 	<string name="keyguard_password_enter_first_pin_code">Introduzca el código PIN que deberá introducir en cada votación</string>
-	<string name="pin_dialog_Caption">PIN de certificado de voto</string>
+	<string name="pin_dialog_Caption">PIN de su certificado</string>
 	<string name="invalidPin">Código PIN inválido</string>
 	<string name="pin_short">Código PIN debe tener al menos %1$d caracteres</string>
 	<string name="enter_pin_import_cert_msg">Introduzca el PIN que eligió al solicitar el certificado</string>

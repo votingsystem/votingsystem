@@ -135,7 +135,7 @@ public class UserCertResponseActivity extends ActionBarActivity
 	        	Long csrRequestId = settings.getLong(CSR_REQUEST_ID_KEY, -1);
 	        	Log.d(TAG + ".checkCertState() ", "- csrRequestId: " + csrRequestId);
                 GetDataTask getDataTask = new GetDataTask(null);
-                getDataTask.execute(contextVS.getAccessControlVS().getUserCSRServiceURL(csrRequestId));
+                getDataTask.execute(contextVS.getAccessControl().getUserCSRServiceURL(csrRequestId));
   	  	}
     }
 
@@ -203,10 +203,10 @@ public class UserCertResponseActivity extends ActionBarActivity
 	    pinDialog.show(ft, "pinDialog");
     }
     
-    private boolean actualizarKeyStore (char[] password) {
-    	Log.d(TAG + ".actualizarKeyStore(...)", "");
+    private boolean updateKeyStore (char[] password) {
+    	Log.d(TAG + ".updateKeyStore(...)", "");
     	if (csrSigned == null) {
-    		Log.d(TAG + ".actualizarKeyStore(...)", " - csrSigned: " + csrSigned);
+    		Log.d(TAG + ".updateKeyStore(...)", " - csrSigned: " + csrSigned);
     		return false;
     	}
     	try {
@@ -215,10 +215,10 @@ public class UserCertResponseActivity extends ActionBarActivity
 			KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
 			PrivateKey privateKey = (PrivateKey)keyStore.getKey(USER_CERT_ALIAS, password);
 	        Collection<X509Certificate> certificates =
-	        		CertUtil.fromPEMToX509CertCollection(csrSigned.getBytes());
-	        Log.d(TAG + ".actualizarKeyStore(...)", " - certificates.size(): " + certificates.size());
+                    CertUtil.fromPEMToX509CertCollection(csrSigned.getBytes());
+	        Log.d(TAG + ".updateKeyStore(...)", " - certificates.size(): " + certificates.size());
 	        for(X509Certificate cert:certificates) {
-	        	Log.d(TAG + ".actualizarKeyStore(...)", "************ cert.toString(): " + cert.toString());
+	        	Log.d(TAG + ".updateKeyStore(...)", "************ cert.toString(): " + cert.toString());
 	        }
 	        X509Certificate[] arrayCerts = new X509Certificate[certificates.size()];
 	        certificates.toArray(arrayCerts);
@@ -256,7 +256,7 @@ public class UserCertResponseActivity extends ActionBarActivity
 	@Override
 	public void setPin(String pin) {
 		if(pin != null) {
-			if(actualizarKeyStore(pin.toCharArray())) {
+			if(updateKeyStore(pin.toCharArray())) {
 				setMessage(getString(
 	    				R.string.request_cert_result_activity_ok));
 			    insertPinButton.setVisibility(View.GONE);
@@ -304,7 +304,7 @@ public class UserCertResponseActivity extends ActionBarActivity
                 insertPinButton.setVisibility(View.VISIBLE);
                 setCertStateChecked(true);
             } else if(ResponseVS.SC_NOT_FOUND == responseVS.getStatusCode()) {
-                String certificationAddresses = contextVS.getAccessControlVS().getCertificationCentersURL();
+                String certificationAddresses = contextVS.getAccessControl().getCertificationCentersURL();
                 setMessage(getString(R.string.request_cert_result_activity, certificationAddresses));
             } else showException(getString(
                     R.string.request_user_cert_error_msg));

@@ -170,7 +170,7 @@ public class VoteVS {
     /**
      * @return the accessControlServerURL
      */
-    public String getAccessControlServerURL() {
+    public String getAccessControllServerURL() {
         return accessControlServerURL;
     }
 

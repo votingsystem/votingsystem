@@ -41,7 +41,7 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
         this.destinationCert = destinationCert;
         this.context = context;
         this.certificationRequest = CertificationRequestVS.getVoteRequest(KEY_SIZE, SIG_NAME,
-               VOTE_SIGN_MECHANISM, PROVIDER, eventVS.getAccessControlVS().getServerURL(),
+               VOTE_SIGN_MECHANISM, PROVIDER, eventVS.getAccessControl().getServerURL(),
                eventVS.getEventVSId().toString(), eventVS.getHashCertVSBase64());
     }
     

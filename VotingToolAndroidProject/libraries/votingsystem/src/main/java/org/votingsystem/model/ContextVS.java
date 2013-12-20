@@ -222,8 +222,7 @@ public class ContextVS {
         this.userVS = userVS;
     }
 
-    public AccessControlVS getAccessControlVS() {
-        Log.d(TAG + ".getAccessControlVS() ", " - getAccessControlVS");
+    public AccessControlVS getAccessControl() {
         return accessControlVS;
     }
 

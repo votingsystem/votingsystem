@@ -77,7 +77,6 @@
         event.subject = subject.val();
         event.content = getEditor_editorDivData();
         event.dateFinish = $("#dateFinish").datepicker('getDate').format();
-
         var webAppMessage = new WebAppMessage(ResponseVS.SC_PROCESSING, Operation.MANIFEST_PUBLISHING)
         webAppMessage.receiverName="${grailsApplication.config.VotingSystem.serverName}"
         webAppMessage.serverURL="${grailsApplication.config.grails.serverURL}"
@@ -86,8 +85,10 @@
         webAppMessage.signedMessageSubject = '<g:message code="publishManifestSubject"/>'
         votingSystemClient.setMessageToSignatureClient(webAppMessage)
         return false
-
     }
+
+
+
 
     $(function() {  });
 

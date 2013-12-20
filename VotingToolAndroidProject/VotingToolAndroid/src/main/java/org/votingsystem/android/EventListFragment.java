@@ -67,7 +67,7 @@ public class EventListFragment extends ListFragment
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         contextVS = contextVS.getInstance(getActivity().getBaseContext());
-        if(contextVS.getAccessControlVS() == null) {
+        if(contextVS.getAccessControl() == null) {
             Intent intent = new Intent(getActivity(), MainActivity.class);
             startActivity(intent);
         }
@@ -358,7 +358,7 @@ public class EventListFragment extends ListFragment
             try {
                 ResponseVS responseVS = null;
                 if(queryString != null) {
-                    String url = contextVS.getAccessControlVS().getSearchServiceURL(0, contextVS.EVENTS_PAGE_SIZE);
+                    String url = contextVS.getAccessControl().getSearchServiceURL(0, contextVS.EVENTS_PAGE_SIZE);
                     QueryData queryData = new QueryData(
                             subSystemVS.getEventType(), eventVSState.getEventState(), queryString);
                     responseVS = HttpHelper.sendData(
@@ -367,7 +367,7 @@ public class EventListFragment extends ListFragment
                             R.string.search_query_info_msg, queryString)));
                     searchTextView.setVisibility(View.VISIBLE);
                 } else {
-                    String url = contextVS.getAccessControlVS().getEventVSURL(eventVSState,
+                    String url = contextVS.getAccessControl().getEventVSURL(eventVSState,
                             subSystemVS, contextVS.EVENTS_PAGE_SIZE, offset);
                     responseVS = HttpHelper.getData(url, null);
                     searchTextView.setVisibility(View.GONE);

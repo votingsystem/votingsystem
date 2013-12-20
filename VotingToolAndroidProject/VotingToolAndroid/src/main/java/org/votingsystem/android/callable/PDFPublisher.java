@@ -111,7 +111,7 @@ public class PDFPublisher implements Callable<ResponseVS> {
                     signerCert, signerPrivatekey, signerCertChain);
             Header header = new Header(ContextVS.VOTING_HEADER_LABEL,"SignedPDF");
             MimeBodyPart mimeBodyPart = Encryptor.encryptBase64Message(
-                    timeStampedSignedPDF, ContextVS.getInstance(context).getAccessControlVS().
+                    timeStampedSignedPDF, ContextVS.getInstance(context).getAccessControl().
                     getCertificate(), header);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             mimeBodyPart.writeTo(baos);

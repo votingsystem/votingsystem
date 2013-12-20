@@ -82,13 +82,6 @@ public class CertPinDialog extends DialogFragment implements OnKeyListener {
         firstPin = null;
         return view;
     }
-  
-    
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-    	//super.onConfigurationChanged(newConfig);
-    	Log.d(TAG + ".onConfigurationChanged(...) ", " - onConfigurationChanged");
-    }
     
     private void setPin(final String pin) {
     	if(withPasswordConfirm) {

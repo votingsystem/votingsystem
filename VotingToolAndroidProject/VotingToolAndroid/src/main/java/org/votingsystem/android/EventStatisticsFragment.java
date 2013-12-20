@@ -37,15 +37,11 @@ public class EventStatisticsFragment extends Fragment {
 
     private int eventIndex;
     private View rootView;
-
-
     private EventVS eventVS =  null;
     private ContextVS contextVS;
-
     private View progressContainer;
     private FrameLayout mainLayout;
     private boolean isProgressShown;
-    private boolean isDestroyed = true;
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                        Bundle savedInstanceState) {
@@ -63,7 +59,6 @@ public class EventStatisticsFragment extends Fragment {
         mainLayout.getForeground().setAlpha( 0);
         isProgressShown = false;
         setHasOptionsMenu(true);
-        isDestroyed = false;
         showProgress(true, true);
         loadUrl(eventStatisticsURL);
         return rootView;

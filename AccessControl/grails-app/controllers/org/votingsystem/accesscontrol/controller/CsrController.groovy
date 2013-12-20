@@ -94,7 +94,7 @@ class CsrController {
 	/**
 	 * (SERVICIO DISPONIBLE SOLO EN ENTORNOS DE PRUEBAS).
 	 *
-	 * Servicio que signatureVS solicitudes de certificación de usuario.<br/>
+	 * Servicio que firma solicitudes de certificación de usuario.<br/>
 	 *
 	 * TODO - Hacer las validaciones sólo sobre solicitudes firmadas electrónicamente
 	 * por personal dado de alta en la base de datos.
@@ -123,7 +123,7 @@ class CsrController {
 		if (administradores.contains(userVS.nif) || userVS.nif.equals(docValidacionJSON.nif)) {
 			DeviceVS dispositivo = DeviceVS.findWhere(deviceId: docValidacionJSON.deviceId)
 			if (!dispositivo?.userVS) {
-                return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code:"csr.solicitudNoEncontrada",
+                return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code:"csrRequestNotFound",
                         args: [smimeMessageReq.getSignedContent()]))]
 			}
 			if(dispositivo.userVS.nif != userVS.nif) {
@@ -158,34 +158,34 @@ class CsrController {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,message(code: "serviceDevelopmentModeMsg"))]
 		}
 		log.debug "===============****¡¡¡¡¡ DEVELOPMENT Environment !!!!!****=================== "
-		String consulta = "${request.getInputStream()}"
-		if (!consulta) {
+		String requestStr = "${request.getInputStream()}"
+        log.debug "requestStr: ${requestStr}"
+		if (!requestStr) {
 			response.status = ResponseVS.SC_ERROR_REQUEST
 			render(view:"index")
 			return false	
 		}
-		log.debug ("consulta: ${consulta}")
-		def dataJSON = JSON.parse(consulta)
-		DeviceVS dispositivo = DeviceVS.findByDeviceId(dataJSON?.deviceId?.trim())
-		if (!dispositivo) {
+		def dataJSON = JSON.parse(requestStr)
+		DeviceVS device = DeviceVS.findByDeviceId(dataJSON?.deviceId?.trim())
+		if (!device) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    message(code: "csr.solicitudNoEncontrada", args:["deviceId: ${dataJSON?.deviceId}"]))]
+                    message(code: "csrRequestNotFound", args:["deviceId: ${dataJSON?.deviceId}"]))]
 		}
 		UserVS userVS
 		String validatedNIF = NifUtils.validate(dataJSON?.nif)
 		if(validatedNIF) userVS = UserVS.findByNif(validatedNIF)
 		if (!userVS) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    message(code: "csr.solicitudNoEncontrada", args: ["nif: ${validatedNIF}"]))]
+                    message(code: "csrRequestNotFound", args: ["nif: ${validatedNIF}"]))]
 		}
 		UserRequestCsrVS csrRequest
 		UserRequestCsrVS.withTransaction{
 			csrRequest = UserRequestCsrVS.findByDeviceVSAndUserVSAndState(
-				dispositivo, userVS, UserRequestCsrVS.State.PENDING);
+				device, userVS, UserRequestCsrVS.State.PENDING);
 		}
 		if (!csrRequest) {
             return [responseVS:new ResponseVS(ResponseVS.SC_ERROR_REQUEST,
-                    message(code: "csr.solicitudNoEncontrada", args: [consulta]))]
+                    message(code: "csrRequestNotFound", args: [requestStr]))]
 		} else return [responseVS:csrService.signCertUserVS(csrRequest, request.getLocale())]
 	}
 	

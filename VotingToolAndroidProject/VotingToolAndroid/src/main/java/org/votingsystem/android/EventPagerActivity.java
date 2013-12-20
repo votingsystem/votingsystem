@@ -41,10 +41,9 @@ public class EventPagerActivity  extends ActionBarActivity {
         mViewPager.setAdapter(eventsPagerAdapter);
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override public void onPageSelected(int position) {
-                EventVS selectedEvent = (EventVS) contextVS.getEvents().get(position);
+                EventVS selectedEvent = contextVS.getEvents().get(position);
                 contextVS.setEvent(selectedEvent);
                 setActionBarTitle(selectedEvent);
-
             }
         });
         mViewPager.setCurrentItem(contextVS.getEventIndex(contextVS.getEvent()), true);

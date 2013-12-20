@@ -172,7 +172,7 @@ class EventVSManifestController {
                 return [responseVS:new ResponseVS(ResponseVS.SC_ERROR, msg)]
             }
             EventVSManifest eventVS = new EventVSManifest(subject:eventVSJSON.subject,
-                    dateBegin:DateUtils.todayDate, state: EventVS.State.PENDING_SIGNATURE,
+                    dateBegin:Calendar.getInstance().getTime(), state: EventVS.State.PENDING_SIGNATURE,
                     content:eventVSJSON.content, dateFinish:dateFinish)
             eventVS.save()
             ByteArrayOutputStream pdfByteStream = pdfRenderingService.render(

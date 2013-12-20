@@ -209,7 +209,6 @@ public class OperationVS {
     }
 
     public static OperationVS parse (String operationStr) throws JSONException, ParseException {
-		Log.d(TAG + ".parse(...) ", "operationStr: " + operationStr);
         if(operationStr == null) return null;
         OperationVS operation = new OperationVS();
         JSONObject operationJSON = new JSONObject(operationStr);
@@ -272,15 +271,8 @@ public class OperationVS {
         if(urlTimeStampServer != null) jsonObject.put("urlTimeStampServer", urlTimeStampServer);
         if(args != null) jsonObject.put("args", args);
         if(sessionId != null) jsonObject.put("sessionId", sessionId);
-        
         if(eventVS != null) jsonObject.put("eventVS", eventVS.toJSON());
         return jsonObject;
-    }
-    
-    public String getJSONStr () throws JSONException {
-        JSONObject operationJSON = getJSON();
-        if(operationJSON == null) return null;
-        else return operationJSON.toString();
     }
 
     /**

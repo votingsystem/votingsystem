@@ -272,7 +272,7 @@ public class EventVS {
         this.dateFinish = dateFinish;
     }
 
-    public AccessControlVS getAccessControlVS() {
+    public AccessControlVS getAccessControl() {
         return accessControlVS;
     }
 

@@ -57,14 +57,14 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
         AtomicBoolean done = new AtomicBoolean(false);
         ResponseVS responseVS = null;
         while(!done.get()) {
-        	String timeStampServiceURL = ContextVS.getInstance(context).getAccessControlVS().
+        	String timeStampServiceURL = ContextVS.getInstance(context).getAccessControl().
                     getTimeStampServiceURL();
             responseVS = HttpHelper.sendData(timeStampRequest.getEncoded(),
                     ContentTypeVS.TIMESTAMP_QUERY, timeStampServiceURL);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 timeStampToken= new TimeStampToken(new CMSSignedData(responseVS.getMessageBytes()));
                 X509Certificate timeStampCert = ContextVS.getInstance(context).
-                        getAccessControlVS().getTimeStampCert();
+                        getAccessControl().getTimeStampCert();
                 /* -> Android project config problem
                  * SignerInformationVerifier timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().
                     setProvider(MainActivity.PROVIDER).build(timeStampCert);

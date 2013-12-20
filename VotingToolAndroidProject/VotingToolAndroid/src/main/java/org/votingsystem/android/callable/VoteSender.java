@@ -78,11 +78,11 @@ public class VoteSender implements Callable<ResponseVS> {
                     privateKey, chain, ContextVS.SIGNATURE_ALGORITHM);
             String signedContent = event.getAccessRequestJSON().toString();
             SMIMEMessageWrapper solicitudAcceso = signedMailGenerator.genMimeMessage(
-                    userVS, contextVS.getAccessControlVS().getNameNormalized(),
+                    userVS, contextVS.getAccessControl().getNameNormalized(),
                     signedContent, subject);
             AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(solicitudAcceso,
-                    event, contextVS.getAccessControlVS().getCertificate(),
-                    contextVS.getAccessControlVS().getAccessServiceURL(),context);
+                    event, contextVS.getAccessControl().getCertificate(),
+                    contextVS.getAccessControl().getAccessServiceURL(),context);
             responseVS = accessRequestDataSender.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
             String votoJSON = event.getVoteJSON().toString();
@@ -115,7 +115,7 @@ public class VoteSender implements Callable<ResponseVS> {
             /* problema -> javax.activation.UnsupportedDataTypeException:
              * no object DCH for MIME type application/pkcs7-signature
             MimeMessage solicitudAccesoMimeMessage = dnies.gen(userVS,
-                    Aplicacion.getAccessControlVS().getNameNormalized(),
+                    Aplicacion.getAccessControl().getNameNormalized(),
                     signedContent, subject, null, SignedMailGenerator.Type.USER);
             Object content = solicitudAccesoMimeMessage.getContent();
             MimeMultipart mimeMultipart = null;
@@ -143,14 +143,14 @@ public class VoteSender implements Callable<ResponseVS> {
         Log.d(TAG + ".cancelAccessRequest(...)", " - cancelAccessRequest ");
         try {
             String subject = context.getString(R.string.cancel_vote_msg_subject);
-            String serviceURL = contextVS.getAccessControlVS().getCancelVoteServiceURL();
+            String serviceURL = contextVS.getAccessControl().getCancelVoteServiceURL();
             SMIMEMessageWrapper cancelAccessRequest = signedMailGenerator.genMimeMessage(
-                    userVS, contextVS.getAccessControlVS().getNameNormalized(),
+                    userVS, contextVS.getAccessControl().getNameNormalized(),
                     event.getCancelVoteData(), subject);
             SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
                     event.getCancelVoteData(), ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
                     subject,  keyStoreBytes, password,
-                    contextVS.getAccessControlVS().getCertificate(), context);
+                    contextVS.getAccessControl().getCertificate(), context);
             return smimeSignedSender.call();
         } catch(Exception ex) {
             ex.printStackTrace();

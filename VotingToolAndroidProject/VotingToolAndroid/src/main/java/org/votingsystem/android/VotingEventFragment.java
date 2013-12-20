@@ -84,11 +84,10 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
     private FrameLayout mainLayout;
     private boolean isProgressShown;
     private ProcessSignatureTask processSignatureTask;
-    private boolean isDestroyed = true;
 
     @Override public View onCreateView(LayoutInflater inflater,
                                        ViewGroup container, Bundle savedInstanceState) {
-        Log.d(TAG + ".onCreate(...)", " --- onCreate");
+        Log.d(TAG + ".onCreate(...)", "onCreate");
         super.onCreate(savedInstanceState);
         contextVS = ContextVS.getInstance(getActivity());
         rootView = inflater.inflate(R.layout.voting_event_fragment, container, false);
@@ -112,7 +111,6 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
         mainLayout.getForeground().setAlpha(0);
         isProgressShown = false;
         setHasOptionsMenu(true);
-        isDestroyed = false;
         Button cancelVoteButton = (Button) rootView.findViewById(R.id.cancel_vote_button);
         cancelVoteButton.setOnClickListener(this);
         Button saveReceiptButton = (Button) rootView.findViewById(R.id.save_receipt_button);
@@ -337,15 +335,12 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
     }
 
     private void showMessage(String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", " - caption: " + caption + "  - showMessage: " +
-                message + " - isDestroyed: " + isDestroyed);
-        if(isDestroyed) return;
+        Log.d(TAG + ".showMessage(...) ", "caption: " + caption + " - showMessage: " + message);
         AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
         builder.setTitle(caption).setMessage(message).show();
     }
 
     private void showPinScreen(String message) {
-        isDestroyed = false;
         CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
         FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
         Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
@@ -355,7 +350,6 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
         ft.addToBackStack(null);
         pinDialog.show(ft, CertPinDialog.TAG);
     }
-
 
     @Override public void setPin(final String pin) {
         Log.d(TAG + ".setPin()", "--- setPin - operation: " + operation);
@@ -386,14 +380,12 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
     @Override public void onDestroy() {
         super.onDestroy();
         Log.d(TAG + ".onDestroy()", " - onDestroy");
-        isDestroyed = true;
         if(processSignatureTask != null) processSignatureTask.cancel(true);
-    };
+    }
 
     @Override public void onStop() {
         super.onStop();
         Log.d(TAG + ".onStop()", " - onStop");
-        isDestroyed = true;
         if(processSignatureTask != null) processSignatureTask.cancel(true);
     }
 
@@ -476,7 +468,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
                     break;
                 case CANCEL_VOTE:
                     String subject = getString(R.string.cancel_vote_msg_subject);
-                    String serviceURL = contextVS.getAccessControlVS().getCancelVoteServiceURL();
+                    String serviceURL = contextVS.getAccessControl().getCancelVoteServiceURL();
                     try {
                         String signatureContent = receipt.getVoto().getCancelVoteData();
                         FileInputStream fis = getActivity().openFileInput(KEY_STORE_FILE);
@@ -484,7 +476,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
                         SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
                                 signatureContent, ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
                                 subject, keyStoreBytes, pin.toCharArray(),
-                                contextVS.getAccessControlVS().getCertificate(), getActivity());
+                                contextVS.getAccessControl().getCertificate(), getActivity());
                         responseVS = smimeSignedSender.call();
                     } catch(Exception ex) {
                         ex.printStackTrace();

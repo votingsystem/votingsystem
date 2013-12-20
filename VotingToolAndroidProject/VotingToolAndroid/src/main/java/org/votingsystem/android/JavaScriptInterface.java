@@ -28,7 +28,7 @@ public class JavaScriptInterface {
 
     private FragmentActivity hostActivity;
 
-    JavaScriptInterface(FragmentActivity hostActivity) {
+    public JavaScriptInterface(FragmentActivity hostActivity) {
     	this.hostActivity = hostActivity;
     }
     

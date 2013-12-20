@@ -55,7 +55,6 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
     private View progressContainer;
     private FrameLayout mainLayout;
     private boolean isProgressShown;
-    private boolean isDestroyed = true;
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                        Bundle savedInstanceState) {
@@ -102,7 +101,6 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
         mainLayout.getForeground().setAlpha( 0);
         isProgressShown = false;
         setHasOptionsMenu(true);
-        isDestroyed = false;
         TextView eventSubject = (TextView) rootView.findViewById(R.id.eventVS_subject);
         eventSubject.setOnClickListener(this);
         return rootView;
@@ -137,14 +135,12 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
     @Override public void onDestroy() {
         super.onDestroy();
         Log.d(TAG + ".onDestroy()", " - onDestroy");
-        isDestroyed = true;
         if(processSignatureTask != null) processSignatureTask.cancel(true);
     };
 
     @Override public void onStop() {
         super.onStop();
         Log.d(TAG + ".onStop()", " - onStop");
-        isDestroyed = true;
         if(processSignatureTask != null) processSignatureTask.cancel(true);
     }
 
@@ -176,10 +172,8 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
         CertPinDialog pinDialog = CertPinDialog.newInstance(message, this, false);
         FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
         Fragment prev = getActivity().getSupportFragmentManager().findFragmentByTag(CertPinDialog.TAG);
-        if (prev != null) {
-            ft.remove(prev);
-        }
-        ft.addToBackStack(null);
+        if (prev != null)  ft.remove(prev);
+        //ft.addToBackStack(null);
         pinDialog.show(ft, CertPinDialog.TAG);
     }
 
@@ -325,8 +319,7 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
     }
 
     private void showMessage(String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", " - caption: " + caption + "  - showMessage: " +
-                message + " - isDestroyed: " + isDestroyed);
+        Log.d(TAG + ".showMessage(...) ", "caption: " + caption + " - showMessage: " + message);
         AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
         builder.setTitle(caption).setMessage(message).show();
     }
@@ -350,8 +343,8 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
                 keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
                 if(event.getTypeVS().equals(TypeVS.MANIFEST_EVENT)) {
                     PDFSignedSender PDFSignedSender = new PDFSignedSender(
-                            contextVS.getAccessControlVS().getEventVSManifestURL(event.getEventVSId()),
-                            contextVS.getAccessControlVS().getEventVSManifestCollectorURL(event.getEventVSId()),
+                            contextVS.getAccessControl().getEventVSManifestURL(event.getEventVSId()),
+                            contextVS.getAccessControl().getEventVSManifestCollectorURL(event.getEventVSId()),
                             keyStoreBytes, pin.toCharArray(), null, null,
                             getActivity().getBaseContext());
                     responseVS = PDFSignedSender.call();
@@ -359,11 +352,11 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
                     String subject = ASUNTO_MENSAJE_FIRMA_DOCUMENTO + event.getSubject();
                     JSONObject signatureContent = event.getSignatureContentJSON();
                     signatureContent.put("operation", TypeVS.SMIME_CLAIM_SIGNATURE);
-                    String serviceURL = contextVS.getAccessControlVS().getEventVSClaimCollectorURL();
+                    String serviceURL = contextVS.getAccessControl().getEventVSClaimCollectorURL();
                     SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
                             signatureContent.toString(), ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
                             subject,keyStoreBytes, pin.toCharArray(),
-                            contextVS.getAccessControlVS().getCertificate(),
+                            contextVS.getAccessControl().getCertificate(),
                             getActivity().getBaseContext());
                     responseVS = smimeSignedSender.call();
                 }
