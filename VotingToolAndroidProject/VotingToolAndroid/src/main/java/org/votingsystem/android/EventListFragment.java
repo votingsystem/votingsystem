@@ -36,17 +36,15 @@ public class EventListFragment extends ListFragment
 
     public static final String TAG = "EventListFragment";
 
+    public static final String LOADED_KEY = "isLoaded";
+
     private static String errorLoadingEventsMsg = null;
-
-
     private static TextView searchTextView;
     private static TextView emptyResultsView;
     private static ListView listView;
-
     private boolean mListShown;
     private View mProgressContainer;
     private View mListContainer;
-
     private EventListAdapter mAdapter = null;
     private EventVSState eventVSState = null;
     private SubSystemVS subSystemVS = SubSystemVS.VOTING;
@@ -92,14 +90,12 @@ public class EventListFragment extends ListFragment
         View rootView = inflater.inflate(R.layout.event_list_fragment, container, false);
         searchTextView = (TextView) rootView.findViewById(R.id.search_query);
         listView = (ListView) rootView.findViewById(android.R.id.list);
-
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> av, View v, int pos, long id) {
                 return onLongListItemClick(v,pos,id);
             }
         });
-
         emptyResultsView = (TextView) rootView.findViewById(android.R.id.empty);
         searchTextView.setVisibility(View.GONE);
         mProgressContainer = rootView.findViewById(R.id.progressContainer);
@@ -147,22 +143,27 @@ public class EventListFragment extends ListFragment
     }
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
+        Log.d(TAG +  ".onActivityCreated(...)", "onActivityCreated - savedInstanceState: " +
+                savedInstanceState);
         super.onActivityCreated(savedInstanceState);
         getView().setBackgroundColor(Color.WHITE);
-  //      setEmptyText(getActivity().getBaseContext().
-  //              getString(R.string.empty_search_lbl));
-
+        if(savedInstanceState != null) return;
         mAdapter = new EventListAdapter(getActivity());
         setListAdapter(mAdapter);
         // Start out with a progress indicator.
         setListShown(false);
-        // Prepare the loader.  Either re-connect with an existing one,
-        // or start a new one.
+        // Prepare the loader.  Either re-connect with an existing one or start a new one.
         getLoaderManager().initLoader(0, null, this);
     }
 
+    @Override public void onSaveInstanceState(Bundle outState) {
+        Log.d(TAG +  "onSaveInstanceState(...)", "onSaveInstanceState");
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(LOADED_KEY, true);
+    }
+
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        Log.d(TAG +  "onCreateOptionsMenu(..)", " - onCreateOptionsMenu - onCreateOptionsMenu");
+        Log.d(TAG +  ".onCreateOptionsMenu(..)", " - onCreateOptionsMenu - onCreateOptionsMenu");
         inflater.inflate(R.menu.event_list_fragment, menu);
     }
 

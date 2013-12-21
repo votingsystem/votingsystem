@@ -167,8 +167,8 @@ public class UserCertRequestFragment extends Fragment implements CertPinDialogLi
         setRetainInstance(true);
     }
 
-    @Override public void onSaveInstanceState(Bundle savedInstanceState) {
-        Log.d(TAG + ".onSaveInstanceState(...)", "onSaveInstanceState");
+    @Override public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
     }
 
     @Override public void onStop() {

@@ -53,6 +53,8 @@ public class NavigationDrawer extends ActionBarActivity {
 
     public static final String TAG = "NavigationDrawer";
 
+    public static final String LOADED_KEY = "isLoaded";
+
     private static final int VOTING_GROUP_POSITION   = 0;
     private static final int MANIFEST_GROUP_POSITION = 1;
     private static final int CLAIM_GROUP_POSITION    = 2;
@@ -231,7 +233,11 @@ public class NavigationDrawer extends ActionBarActivity {
         }
     }
 
-    @Override public void onSaveInstanceState(Bundle savedInstanceState) { }
+    @Override public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(LOADED_KEY, true);
+    }
+
 
     @Override public void onRestoreInstanceState(Bundle savedInstanceState) {
         Log.d(TAG + ".onRestoreInstanceState(...) ", " - onRestoreInstanceState");
@@ -395,21 +401,41 @@ public class NavigationDrawer extends ActionBarActivity {
 
     public class SubsystemPagerAdapter extends FragmentStatePagerAdapter {
 
+        private Fragment openEventsFragment;
+        private Fragment pendingEventsFragment;
+        private Fragment closedEventsFragment;
+
         public SubsystemPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
         @Override public Fragment getItem(int i) {
             EventVSState eventVSState = null;
+            Fragment selectedFragment = null;
             switch(i) {
                 case OPEN_CHILD_POSITION:
                     eventVSState = EventVSState.OPEN;
+                    if(openEventsFragment != null) selectedFragment = openEventsFragment;
+                    else {
+                        openEventsFragment = new EventListFragment();
+                        selectedFragment = openEventsFragment;
+                    }
                     break;
                 case PENDING_CHILD_POSITION:
                     eventVSState = EventVSState.PENDING;
+                    if(pendingEventsFragment != null) selectedFragment = pendingEventsFragment;
+                    else {
+                        pendingEventsFragment = new EventListFragment();
+                        selectedFragment = pendingEventsFragment;
+                    }
                     break;
                 case CLOSED_CHILD_POSITION:
                     eventVSState = EventVSState.CLOSED;
+                    if(closedEventsFragment != null) selectedFragment = closedEventsFragment;
+                    else {
+                        closedEventsFragment = new EventListFragment();
+                        selectedFragment = closedEventsFragment;
+                    }
                     break;
             }
             Log.d(TAG + ".SubsystemPagerAdapter.getItem(...) ", " - item: " + i + " - subSystemVS: " +
@@ -419,9 +445,9 @@ public class NavigationDrawer extends ActionBarActivity {
             args.putString("subSystemVS", contextVS.getSelectedSubsystem().toString());
             args.putString("eventVSState", eventVSState.toString());
             args.putString(SearchManager.QUERY, searchQuery);
-            Fragment fragment = new EventListFragment();
-            fragment.setArguments(args);
-            return fragment;
+
+            selectedFragment.setArguments(args);
+            return selectedFragment;
        }
 
         @Override public int getCount() {

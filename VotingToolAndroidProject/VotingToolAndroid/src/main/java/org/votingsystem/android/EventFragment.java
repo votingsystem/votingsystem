@@ -150,8 +150,7 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
         if(event != null && event.getSubject() != null &&
                 event.getSubject().length() > MAX_SUBJECT_SIZE) {
             AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
-            builder.setTitle(getString(R.string.subject_lbl));
-            builder.setMessage(event.getSubject());
+            builder.setTitle(event.getSubject());
             builder.show();
         }
     }
