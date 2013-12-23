@@ -294,7 +294,7 @@ class SignatureVSService {
 			VoteVS repeatedVoteVS = VoteVS.findWhere(certificateVS:certificateVS)
 			msg = messageSource.getMessage('voteRepeatedErrorMsg', [repeatedVoteVS.id].toArray(), locale)
 			log.error("validateVoteCerts - ${msg}")
-			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_VOTE_REPEATED, eventVS:eventVS, message:msg)
+			return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST_REPEATED, eventVS:eventVS, message:msg)
 		}
 		Set<X509Certificate> eventTrustedCerts = eventTrustedCertsHashMap.get(eventVS?.id)
 		if(!eventTrustedCerts) {

@@ -42,10 +42,12 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -67,11 +69,11 @@ public class MainActivity extends FragmentActivity {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         //boolean isTablet = getResources().getBoolean(R.bool.isTablet); this doesn't work
-        Log.i(TAG + ".onCreate(...)", " - onCreate  ");
-    	super.onCreate(savedInstanceState);  
+        Log.i(TAG + ".onCreate(...)", "onCreate");
+    	super.onCreate(savedInstanceState);
         if (Intent.ACTION_SEARCH.equals(getIntent().getAction())) {
             String query = getIntent().getStringExtra(SearchManager.QUERY);
-            Log.d(TAG + ".onCreate()", " - Intent.ACTION_SEARCH - query: "+ query);
+            Log.d(TAG + ".onCreate()", "Intent.ACTION_SEARCH - query: " + query);
             return;
         }
         contextVS = ContextVS.getInstance(getBaseContext());
@@ -97,14 +99,14 @@ public class MainActivity extends FragmentActivity {
     }
 
     @Override public boolean onCreateOptionsMenu(Menu menu) {
-        Log.d(TAG +  ".onCreateOptionsMenu(..)", " - onCreateOptionsMenu");
+        Log.d(TAG +  ".onCreateOptionsMenu(...)", "onCreateOptionsMenu");
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
+        Log.d(TAG + ".onOptionsItemSelected(...) ", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.reload:
                 if(accessControlURL == null) {
@@ -126,12 +128,11 @@ public class MainActivity extends FragmentActivity {
 
     @Override public void onResume() {
     	super.onResume();
-    	Log.d(TAG + ".onResume() ", " - onResume");
+    	Log.d(TAG + ".onResume() ", "onResume");
     }
 
     private void showProgressDialog(String title, String dialogMessage) {
-        if (progressDialog == null)
-            progressDialog = new ProgressDialog(this);
+        if (progressDialog == null) progressDialog = new ProgressDialog(this);
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle(title);
         progressDialog.setMessage(dialogMessage);
@@ -141,7 +142,7 @@ public class MainActivity extends FragmentActivity {
     }
 
     private void setActivityState(ContextVS.State state) {
-    	Log.d(TAG + ".setActivityState()", " - state: " + state);
+    	Log.d(TAG + ".setActivityState()", "state: " + state);
     	Intent intent = null;
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         contextVS.setState(state);
@@ -187,7 +188,7 @@ public class MainActivity extends FragmentActivity {
     }
     
     private void processOperation(OperationVS operationVS, ContextVS.State state) {
-    	Log.d(TAG + ".processOperation(...)", "- operationVS: " +
+    	Log.d(TAG + ".processOperation(...)", "operationVS: " +
     			operationVS.getTypeVS() + " - state: " + state);
         contextVS.setEvent(operationVS.getEventVS());
         Intent intent = null;
@@ -201,7 +202,7 @@ public class MainActivity extends FragmentActivity {
                     intent = new Intent(MainActivity.this, EventFragment.class);
 		        	break;
 		        default: 
-		        	Log.e(TAG + ".processOperation(...)", "- unknown operationVS");;
+		        	Log.e(TAG + ".processOperation(...)", "unknown operationVS");;
 	        }
             if(intent != null) {
                 try {
@@ -220,20 +221,19 @@ public class MainActivity extends FragmentActivity {
     }
 
     private void showMessage(String caption, String message) {
-        Log.d(TAG + ".showMessage(...) ", " - caption: "
-                + caption + "  - showMessage: " + message);
+        Log.d(TAG + ".showMessage(...) ", "caption: " + caption + "  - showMessage: " + message);
         AlertDialog.Builder builder= new AlertDialog.Builder(this);
         builder.setTitle(caption).setMessage(message).show();
     }
 
     @Override protected void onStop() {
         super.onStop();
-    	Log.d(TAG + ".onStop()", " - onStop");
+    	Log.d(TAG + ".onStop()", "onStop");
     };
 
     @Override protected void onDestroy() {
         super.onDestroy();
-    	Log.d(TAG + ".onDestroy()", " - onDestroy");
+    	Log.d(TAG + ".onDestroy()", "onDestroy");
     };
 
     /*public class WebsocketLoader extends AsyncTask<String, String, ResponseVS> {
@@ -304,15 +304,14 @@ public class MainActivity extends FragmentActivity {
         }
 
         @Override protected ResponseVS doInBackground(String... urls) {
-            Log.d(TAG + ".EventInfoLoader.doInBackground() ", " - eventURL: " + urls[0]);
+            Log.d(TAG + ".EventInfoLoader.doInBackground() ", "eventURL: " + urls[0]);
             return HttpHelper.getData(urls[0], null);
         }
 
         @Override  protected void onPostExecute(ResponseVS responseVS) {
-            Log.d(TAG + ".EventInfoLoader.onPostExecute() ", " - statusCode: " + responseVS.getStatusCode());
-            if (progressDialog != null && progressDialog.isShowing()) {
-                progressDialog.dismiss();
-            }
+            Log.d(TAG + ".EventInfoLoader.onPostExecute() ",
+                    "statusCode: " + responseVS.getStatusCode());
+            if (progressDialog != null && progressDialog.isShowing()) progressDialog.dismiss();
             try {
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     EventVS selectedEvent = EventVS.parse(responseVS.getMessage());
@@ -342,39 +341,36 @@ public class MainActivity extends FragmentActivity {
         }
 
         @Override protected ResponseVS doInBackground(String... urls) {
-            Log.d(TAG + ".AccessControlLoader.doInBackground() ", " - serviceURL: " + urls[0]);
+            Log.d(TAG + ".AccessControlLoader.doInBackground() ", "serviceURL: " + urls[0]);
             return HttpHelper.getData(AccessControlVS.getServerInfoURL(urls[0]), null);
         }
 
         @Override  protected void onPostExecute(ResponseVS responseVS) {
-            Log.d(TAG + ".AccessControlLoader.onPostExecute() ", " - statusCode: " + responseVS.getStatusCode());
-            if (progressDialog != null && progressDialog.isShowing()) {
-                progressDialog.dismiss();
-            }
+            Log.d(TAG + ".AccessControlLoader.onPostExecute() ", "statusCode: " + responseVS.getStatusCode());
+            if (progressDialog != null && progressDialog.isShowing()) progressDialog.dismiss();
             try {
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    AccessControlVS accessControlVS = AccessControlVS.parse(responseVS.getMessage());
-                    contextVS.setAccessControlVS(accessControlVS);
-                    if(uriData == null) {
-                        setActivityState(contextVS.getState());
-                    } else {//loaded from web browser session
+                    AccessControlVS accessControl = AccessControlVS.parse(responseVS.getMessage());
+                    contextVS.setAccessControlVS(accessControl);
+                    if(uriData == null) setActivityState(contextVS.getState());
+                    else {//loaded from web browser session
                         String encodedMsg = uriData.getQueryParameter("msg");
                         String msg = StringUtils.decodeString(encodedMsg);
-                        Log.d(TAG + ".onPostExecute() - ", " - launched by browser - host: " +
+                        Log.d(TAG + ".onPostExecute(...)", "launched by browser - host: " +
                                 uriData.getHost() + " - path: " + uriData.getPath() +
                                 " - userInfo: " + uriData.getUserInfo() +
                                 " - msg: " + msg);
                         if(msg != null) {
                             operationVS = OperationVS.parse(msg);
                         } else {
-                            Log.d(TAG + ".onPostExecute(...)", "- msg null");
+                            Log.d(TAG + ".onPostExecute(...)", "msg null");
                             operationVS = new OperationVS();
                         }
                         if(operationVS.getEventVS() != null) {
                             EventInfoLoader getDataTask = new EventInfoLoader();
                             getDataTask.execute(operationVS.getEventVS().getURL());
                         } else {
-                            Log.d(TAG + ".onPostExecute(...)", " - operationVS: " + operationVS.getTypeVS());
+                            Log.d(TAG + ".onPostExecute(...)", "operationVS: " + operationVS.getTypeVS());
                             if(msg != null) {
                                 Intent intent = new Intent(MainActivity.this, EventPublishingActivity.class);
                                 intent.putExtra(OperationVS.OPERATION_KEY, msg);

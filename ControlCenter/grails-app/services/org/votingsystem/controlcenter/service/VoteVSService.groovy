@@ -140,7 +140,7 @@ class VoteVSService {
 				hashCertVSBase64:hashCertVSBase64)
 			if(voteVSCanceller) {
 				String voteURL = "${grailsApplication.config.grails.serverURL}/voteVS/${voteVSCanceller.getVoteVS.id}"
-				return new ResponseVS(statusCode:ResponseVS.SC_CANCELLATION_REPEATED, data:voteVSCanceller.messageSMIME,
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST_REPEATED, data:voteVSCanceller.messageSMIME,
                         type:TypeVS.CANCEL_VOTE_ERROR,ContentTypeVS.SIGNED_AND_ENCRYPTED,
 					    message:messageSource.getMessage('voteAlreadyCancelled',
 						[voteURL].toArray(), locale), eventVS:voteVSCanceller.eventVS)

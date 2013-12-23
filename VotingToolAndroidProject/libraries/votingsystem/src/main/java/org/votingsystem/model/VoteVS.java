@@ -66,7 +66,7 @@ public class VoteVS {
         if (smimeMessage.isValidSignature()) {
             esValido = true;
         }
-        if (ResponseVS.SC_ERROR_VOTE_REPEATED == statusCode) {//voto repetido
+        if (ResponseVS.SC_ERROR_REQUEST_REPEATED == statusCode) {//voto repetido
             esValido = false;
         }
         if (!optionSelectedId.equals(voto.getOptionSelected().getId())) {
@@ -213,7 +213,7 @@ public class VoteVS {
      * @return the mensaje
      */
     public String getMensaje(Context context) {
-        if (ResponseVS.SC_ERROR_VOTE_REPEATED == statusCode) {//voto repetido
+        if (ResponseVS.SC_ERROR_REQUEST_REPEATED == statusCode) {//voto repetido
             return context.getString(R.string.vote_repeated_msg,
                     voto.getSubject(), voto.getOptionSelected().getContent());
         }

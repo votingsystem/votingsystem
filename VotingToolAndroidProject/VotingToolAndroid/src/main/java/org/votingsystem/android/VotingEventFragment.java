@@ -508,7 +508,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
                         votingResultDialog.show(fragmentManager, "fragment_voting_result");
 
                         setReceiptScreen(receipt);
-                    } else if(ResponseVS.SC_ERROR_VOTE_REPEATED == response.getStatusCode()) {
+                    } else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == response.getStatusCode()) {
                         showHtmlMessage(getString(R.string.access_request_repeated_caption), getString(
                                 R.string.access_request_repeated_msg,
                                 eventVS.getSubject(), response.getMessage()));

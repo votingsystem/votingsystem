@@ -163,7 +163,7 @@ class EventVSService {
                             org.votingsystem.model.ContentTypeVS.SIGNED, cancelServiceURL);
 					log.debug("responseVSControlCenter - status: ${responseVSControlCenter.statusCode}")
 					if(ResponseVS.SC_OK == responseVSControlCenter.statusCode ||
-						ResponseVS.SC_CANCELLATION_REPEATED == responseVSControlCenter.statusCode) {
+						ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVSControlCenter.statusCode) {
 						msg = msg + " - " + messageSource.getMessage(
 							'controlCenterNotified', [controlCenterUrl].toArray(), locale)
 					} else {

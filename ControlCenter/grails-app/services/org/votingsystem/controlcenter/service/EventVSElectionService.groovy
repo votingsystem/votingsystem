@@ -205,7 +205,7 @@ class EventVSElectionService {
 			if(eventVS.state != EventVS.State.ACTIVE) {
 				msg = messageSource.getMessage('eventAllreadyCancelledMsg', [messageJSON?.eventId].toArray(), locale)
 				log.error("cancelEvent - msg: ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_CANCELLATION_REPEATED, type:TypeVS.ERROR, message:msg)
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST_REPEATED, type:TypeVS.ERROR, message:msg)
             }
 			Collection<X509Certificate> certColl = CertUtil.fromPEMToX509CertCollection(certChainBytes)
 			X509Certificate accessControlCert = certColl.iterator().next()

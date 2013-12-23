@@ -52,6 +52,9 @@ public class ContextVS {
     public static final String SERVER_URL_EXTRA_PROP_NAME = "serverURL";
 
     public static final int KEY_SIZE = 1024;
+    public static final int SYMETRIC_ENCRYPTION_KEY_LENGTH = 256;
+    public static final int SYMETRIC_ENCRYPTION_ITERATION_COUNT = 100;
+
     public static final int EVENTS_PAGE_SIZE = 30;
     public static final int MAX_SUBJECT_SIZE = 60;
     public static final int SELECTED_OPTION_MAX_LENGTH       = 60;

@@ -128,7 +128,7 @@ class VoteVSService {
 				msg = messageSource.getMessage(
 					'voteCancellationAlreadyCancelledError', null, locale)
 				log.error("processCancel - ERROR ACCESS REQUEST ALREADY CANCELLED - ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_CANCELLATION_REPEATED, 
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST_REPEATED,
 					message:msg, type:TypeVS.CANCEL_VOTE_ERROR)
 			}
 			CertificateVS certificateVS = CertificateVS.findWhere(hashCertVSBase64:hashCertVSBase64)
@@ -146,7 +146,7 @@ class VoteVSService {
 				String voteURL = "${grailsApplication.config.grails.serverURL}/voteVS/${voteCanceller.voteVS.id}"
 				msg = messageSource.getMessage('voteAlreadyCancelled',[voteURL].toArray(), locale)
 				log.error("processCancel - REAPEATED CANCEL REQUEST - ${msg}")
-				return new ResponseVS(statusCode:ResponseVS.SC_CANCELLATION_REPEATED,
+				return new ResponseVS(statusCode:ResponseVS.SC_ERROR_REQUEST_REPEATED,
 					data:voteCanceller.messageSMIME, type:TypeVS.CANCEL_VOTE_ERROR,
 					message:msg, eventVS:eventVSElection)
 			}
@@ -204,7 +204,7 @@ class VoteVSService {
 					}
 					messageSMIMEResp.content = smimeMessageResp.getBytes()
 					cancellerState = VoteVSCanceller.State.CANCELLATION_OK
-				} else if(ResponseVS.SC_CANCELLATION_REPEATED) {
+				} else if(ResponseVS.SC_ERROR_REQUEST_REPEATED) {
 					responseVSControlCenter =  signatureVSService.decryptSMIMEMessage(
 						responseVSControlCenter.message.getBytes(), locale)
 					if(ResponseVS.SC_OK != responseVSControlCenter.statusCode) {

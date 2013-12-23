@@ -19,8 +19,7 @@ public class ResponseVS<T> {
     public static final int SC_OK_ANULACION_ACCESS_REQUEST = 270;
     public static final int SC_ERROR_REQUEST = 400;
     public static final int SC_NOT_FOUND = 404;
-    public static final int SC_ERROR_VOTE_REPEATED = 470;
-    public static final int SC_CANCELLATION_REPEATED = 471;
+    public static final int SC_ERROR_REQUEST_REPEATED = 470;
     public static final int SC_NULL_REQUEST = 472;
 
     public static final int SC_ERROR           = 500;

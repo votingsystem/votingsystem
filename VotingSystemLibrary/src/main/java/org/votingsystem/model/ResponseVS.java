@@ -16,22 +16,22 @@ public class ResponseVS<T> {
     
 	private static Logger logger = Logger.getLogger(ResponseVS.class);
     
-    public static final int SC_OK = 200;
+    public static final int SC_OK                       = 200;
+    public static final int SC_OK_WITHOUT_BODY          = 204;
     public static final int SC_OK_CANCEL_ACCESS_REQUEST = 270;
-    public static final int SC_REQUEST_TIMEOUT  = 408;
-    public static final int SC_ERROR_REQUEST = 400;
-    public static final int SC_NOT_FOUND = 404;
-    public static final int SC_ERROR_VOTE_REPEATED = 470;
-    public static final int SC_CANCELLATION_REPEATED = 471;
-    public static final int SC_EXCEPTION = 490;
-    public static final int SC_NULL_REQUEST = 472;
-    public static final int SC_ERROR           = 500;
-    public static final int SC_ERROR_TIMESTAMP = 570;
-    public static final int SC_PROCESSING      = 700;
-    public static final int SC_TERMINATED      = 710;
-    public static final int SC_CANCELLED       = 0;
-    public static final int SC_INITIALIZED     = 1;
-    public static final int SC_PAUSED          = 10;
+    public static final int SC_REQUEST_TIMEOUT          = 408;
+    public static final int SC_ERROR_REQUEST            = 400;
+    public static final int SC_NOT_FOUND                = 404;
+    public static final int SC_ERROR_REQUEST_REPEATED   = 409;
+    public static final int SC_EXCEPTION                = 490;
+    public static final int SC_NULL_REQUEST             = 472;
+    public static final int SC_ERROR                    = 500;
+    public static final int SC_ERROR_TIMESTAMP          = 570;
+    public static final int SC_PROCESSING               = 700;
+    public static final int SC_TERMINATED               = 710;
+    public static final int SC_CANCELLED                = 0;
+    public static final int SC_INITIALIZED              = 1;
+    public static final int SC_PAUSED                   = 10;
     
     private Integer statusCode;
     private StatusVS<?> status;

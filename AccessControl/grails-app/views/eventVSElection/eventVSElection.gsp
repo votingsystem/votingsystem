@@ -138,7 +138,7 @@
 				if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
 					caption = "<g:message code='voteOKCaption'/>"
 					msg = msgTemplate.format('<g:message code="voteResultOKMsg"/>',appMessageJSON.message);
-				} else if(ResponseVS.SC_ERROR_VOTE_REPEATED == appMessageJSON.statusCode) {
+				} else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == appMessageJSON.statusCode) {
 					msgTemplate =  "<g:message code='accessRequestRepeatedMsg'/>"
 					msg = msgTemplate.format(votingEvent.subject, appMessageJSON.message);
 				} else msg = appMessageJSON.message

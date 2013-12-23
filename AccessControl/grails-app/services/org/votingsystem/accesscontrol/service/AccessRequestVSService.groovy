@@ -80,7 +80,7 @@ class AccessRequestVSService {
 						log.error("saveRequest - ACCESS REQUEST ERROR - ${msg}")
 						return new ResponseVS(data:accessRequestVS,
 							type:TypeVS.ACCESS_REQUEST_ERROR, message:msg, eventVS:eventVSElection,
-							statusCode:ResponseVS.SC_ERROR_VOTE_REPEATED)
+							statusCode:ResponseVS.SC_ERROR_REQUEST_REPEATED)
 				} else {
 					//TimeStamp comes cert validated from filters. Check date
                     Date signatureTime = signerVS.getTimeStampToken()?.getTimeStampInfo().getGenTime()

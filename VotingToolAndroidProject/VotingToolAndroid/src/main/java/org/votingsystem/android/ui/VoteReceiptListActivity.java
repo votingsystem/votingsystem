@@ -434,7 +434,7 @@ public class VoteReceiptListActivity extends ActionBarActivity
             } else {
                 caption = getString(R.string.error_lbl) + " "
                         + responseVS.getStatusCode();
-                if(ResponseVS.SC_CANCELLATION_REPEATED == responseVS.getStatusCode()) {
+                if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
                     Log.e(TAG + ".setSignServiceMsg(...)", " --- ANULACION_REPETIDA --- ");
                     operationReceipt.setCanceled(true);
                     try {

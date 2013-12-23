@@ -6,15 +6,28 @@ import org.bouncycastle2.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle2.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle2.cms.jcajce.JceKeyTransRecipientId;
 import org.bouncycastle2.cms.jcajce.JceKeyTransRecipientInfoGenerator;
+import org.bouncycastle2.crypto.DataLengthException;
+import org.bouncycastle2.crypto.InvalidCipherTextException;
 import org.bouncycastle2.mail.smime.SMIMEEnveloped;
 import org.bouncycastle2.mail.smime.SMIMEEnvelopedGenerator;
 import org.bouncycastle2.util.Strings;
 import org.bouncycastle2.util.encoders.Base64;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EncryptedBundleVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessageWrapper;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 import javax.mail.Header;
 import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
@@ -22,13 +35,23 @@ import javax.mail.internet.MimeMessage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.security.Key;
+import java.io.UnsupportedEncodingException;
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.InvalidParameterSpecException;
+import java.security.spec.KeySpec;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -279,19 +302,92 @@ public class Encryptor {
 		}
 		return result;
 	}
-	
-    public static byte[] encryptSymmetric(Key key, byte[] dataBytes) throws Exception {
-        Cipher cipher = Cipher.getInstance("AES");
-        cipher.init(Cipher.ENCRYPT_MODE, key);
-        byte[] encrypted = cipher.doFinal(dataBytes);
-        return encrypted;
-	}
-	
-	public static byte[] decryptSymmetric(Key key, byte[] encryptedDataBytes) throws Exception {
-        Cipher cipher = Cipher.getInstance("AES");
-        cipher.init(Cipher.DECRYPT_MODE, key);
-        byte[] decryptedData = cipher.doFinal(encryptedDataBytes);
-        return decryptedData;
-	}
+
+    private static byte[] generateSalt() throws NoSuchAlgorithmException {
+        byte salt[] = new byte[8];
+        SecureRandom saltGen = SecureRandom.getInstance("SHA1PRNG");
+        saltGen.nextBytes(salt);
+        return salt;
+    }
+
+    /* http://stackoverflow.com/questions/992019/java-256-bit-aes-password-based-encryption?rq=1
+     * Share the password (a char[]) and salt (a byte[]—8 bytes selected by a SecureRandom makes a
+     * good salt—which doesn't need to be kept secret) with the recipient
+     */
+    public static Map encrypt(String textToEncrypt, char[] password) throws
+            NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
+            InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException,
+            BadPaddingException, UnsupportedEncodingException, InvalidParameterSpecException {
+        //Security.addProvider(new BouncyCastleProvider());
+        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+        byte[] salt = generateSalt();
+        KeySpec spec = new PBEKeySpec(password, salt, ContextVS.SYMETRIC_ENCRYPTION_ITERATION_COUNT,
+                ContextVS.SYMETRIC_ENCRYPTION_KEY_LENGTH);
+        SecretKey tmp = factory.generateSecret(spec);
+        SecretKey secret = new SecretKeySpec(tmp.getEncoded(), "AES");
+        /* Encrypt the message. */
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, secret);
+        AlgorithmParameters params = cipher.getParameters();
+        //send the encryptedText and the iv to the recipient.
+        Map responseMap = new HashMap();
+        byte[] iv = params.getParameterSpec(IvParameterSpec.class).getIV();
+        byte[] encryptedText = cipher.doFinal(textToEncrypt.getBytes("UTF-8"));
+        responseMap.put("iv", iv);
+        responseMap.put("encryptedText", encryptedText);
+        responseMap.put("salt", salt);
+        return responseMap;
+    }
+
+    public static JSONObject getEncryptedJSONDataBundle(String textToEncrypt, char[] password) throws
+            NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
+            InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException,
+            BadPaddingException, UnsupportedEncodingException, InvalidParameterSpecException,
+            JSONException {
+        Map encryptedDataMap = encrypt(textToEncrypt, password);
+        byte[] iv = (byte[]) encryptedDataMap.get("iv");
+        String ivBase64 = android.util.Base64.encodeToString(iv, android.util.Base64.DEFAULT);
+        byte[] encryptedText = (byte[]) encryptedDataMap.get("encryptedText");
+        String encryptedTextBase64 = android.util.Base64.encodeToString(
+                encryptedText, android.util.Base64.DEFAULT);
+        byte[] salt = (byte[]) encryptedDataMap.get("salt");
+        String saltBase64 = android.util.Base64.encodeToString(salt, android.util.Base64.DEFAULT);
+        JSONObject resultJSON = new JSONObject();
+        resultJSON.put("iv", ivBase64);
+        resultJSON.put("encryptedText", encryptedTextBase64);
+        resultJSON.put("salt", saltBase64);
+        return resultJSON;
+    }
+
+    public static String decryptDataBundle(JSONObject jsonData, char[] password) throws
+            DataLengthException, IllegalStateException, InvalidCipherTextException,
+            InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException,
+            UnsupportedEncodingException, InvalidAlgorithmParameterException, JSONException {
+        byte[] encryptedText = android.util.Base64.decode(jsonData.getString("encryptedText"),
+                android.util.Base64.DEFAULT);
+        byte[] salt = android.util.Base64.decode(jsonData.getString("salt"),
+                android.util.Base64.DEFAULT);
+        byte[] iv = android.util.Base64.decode(jsonData.getString("iv"),
+                android.util.Base64.DEFAULT);
+        return decrypt(encryptedText, password, salt, iv);
+    }
+
+    public static String decrypt(byte[] encryptedTextBytes, char[] password, byte[] salt,
+            byte[] iv) throws DataLengthException, IllegalStateException, InvalidCipherTextException,
+            InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException,
+            UnsupportedEncodingException, InvalidAlgorithmParameterException {
+        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+        KeySpec spec = new PBEKeySpec(password, salt, ContextVS.SYMETRIC_ENCRYPTION_ITERATION_COUNT,
+                ContextVS.SYMETRIC_ENCRYPTION_KEY_LENGTH);
+        SecretKey tmp = factory.generateSecret(spec);
+        SecretKey secret = new SecretKeySpec(tmp.getEncoded(), "AES");
+        /* Decrypt the message, given derived key and initialization vector. */
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        cipher.init(Cipher.DECRYPT_MODE, secret, new IvParameterSpec(iv));
+        String plaintext = new String(cipher.doFinal(encryptedTextBytes), "UTF-8");
+        return plaintext;
+    }
 
 }

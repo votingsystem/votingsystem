@@ -36,6 +36,8 @@ public class DNIePDFContentSigner extends CMSSignedGenerator implements ContentS
 
     private static Logger logger = Logger.getLogger(DNIePDFContentSigner.class);
 
+    private static final int  BUFFER_SIZE = 4096;
+
     private static Mechanism instanceSignatureMechanism;
 
     private Session pkcs11Session;
@@ -98,7 +100,7 @@ public class DNIePDFContentSigner extends CMSSignedGenerator implements ContentS
             ByteArrayInputStream bais = new ByteArrayInputStream(out.toByteArray());
             MessageDigest softwareDigestEngine = MessageDigest.getInstance(PDF_SIGNATURE_DIGEST);
             int bytesRead;
-            byte[] dataBuffer = new byte[ResponseVS.SC_ERROR_VOTE_REPEATED];
+            byte[] dataBuffer = new byte[BUFFER_SIZE];
             while ((bytesRead = bais.read(dataBuffer)) >= 0) {
               softwareDigestEngine.update(dataBuffer, 0, bytesRead);
             }

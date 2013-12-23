@@ -80,13 +80,14 @@ public class EventListFragment extends ListFragment
             queryStr = args.getString(SearchManager.QUERY);
             offset = args.getInt("offset");
         }
-        Log.d(TAG +  ".onCreate(..)", " - eventVSState: " + eventVSState +
+        Log.d(TAG +  ".onCreate(..)", "eventVSState: " + eventVSState +
                 " - subSystemVS: " + subSystemVS + " - queryStr: " + queryStr);
     };
 
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.d(TAG +  ".onCreate(..)", "onCreate - savedInstanceState: " + savedInstanceState);
         View rootView = inflater.inflate(R.layout.event_list_fragment, container, false);
         searchTextView = (TextView) rootView.findViewById(R.id.search_query);
         listView = (ListView) rootView.findViewById(android.R.id.list);
@@ -286,8 +287,8 @@ public class EventListFragment extends ListFragment
                 switch(eventVS.getStateEnumValue()) {
                     case ACTIVE:
                         imgView.setImageResource(R.drawable.open);
-                        dateInfoStr = "<b>" + getContext().getString(R.string.remain_lbl,
-                                DateUtils.getElpasedTimeHoursFromNow(eventVS.getDateFinish()))  +"</b>";
+                        dateInfoStr = "<b>" + getContext().getString(R.string.remain_lbl, DateUtils.
+                                getElpasedTimeHoursFromNow(eventVS.getDateFinish()))  +"</b>";
                         break;
                     case AWAITING:
                         imgView.setImageResource(R.drawable.pending);
@@ -305,15 +306,14 @@ public class EventListFragment extends ListFragment
                                 DateUtils.getShortSpanishStringFromDate(eventVS.getDateFinish());
                         break;
                     default:
-                        Log.d(TAG +  ".getView", " - event state: " + eventVS.getStateEnumValue());
+                        Log.d(TAG +  ".getView", "event state: " + eventVS.getStateEnumValue());
                 }
 
                 if(dateInfoStr != null) dateInfo.setText(Html.fromHtml(dateInfoStr));
                 else dateInfo.setVisibility(View.GONE);
-                if(eventVS.getUserVS() != null && !"".equals(
-                        eventVS.getUserVS().getFullName())) {
-                    String authorStr =  "<b>" + getContext().getString(R.string.author_lbl) + "</b>: " +
-                            eventVS.getUserVS().getFullName();
+                if(eventVS.getUserVS() != null && !"".equals( eventVS.getUserVS().getFullName())) {
+                    String authorStr =  "<b>" + getContext().getString(R.string.author_lbl) +
+                            "</b>: " + eventVS.getUserVS().getFullName();
                     author.setText(Html.fromHtml(authorStr));
                 } else author.setVisibility(View.GONE);
             }

@@ -179,8 +179,8 @@ class VoteVSController {
 				 ctx.response.outputStream.flush()
 			 } 
 			 ctx.complete();
-		 } else if (ResponseVS.SC_ERROR_VOTE_REPEATED == responseVS.statusCode){
-			 response.status = ResponseVS.SC_ERROR_VOTE_REPEATED
+		 } else if (ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.statusCode){
+			 response.status = ResponseVS.SC_ERROR_REQUEST_REPEATED
 			 response.contentLength = responseVS.voteVS.messageSMIME.content.length
 			 response.outputStream <<  responseVS.voteVS.messageSMIME.content
 			 response.outputStream.flush()
