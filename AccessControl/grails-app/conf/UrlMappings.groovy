@@ -31,7 +31,7 @@ class UrlMappings {
 		}
 
 
-		"/voteVSCanceller/voteVS/${id}"{
+		"/voteVSCanceller/voteVS/$id"{
 			controller = "voteVSCanceller"
 			action = "get"
 			constraints {
@@ -143,7 +143,7 @@ class UrlMappings {
 			}
 		}
 
-		"/eventVSClaim/${id}/signed" {
+		"/eventVSClaim/$id/signed" {
 			controller = "eventVSClaim"
 			action = "signed"
 			constraints {
@@ -151,7 +151,7 @@ class UrlMappings {
 			}
 		}
 
-		"/eventVSClaim/${id}/validated" {
+		"/eventVSClaim/$id/validated" {
 			controller = "eventVSClaim"
 			action = "validated"
 			constraints {
@@ -159,7 +159,7 @@ class UrlMappings {
 			}
 		}
 
-		"/eventVSClaim/${id}/signaturesInfo" {
+		"/eventVSClaim/$id/signaturesInfo" {
 			controller = "eventVSClaim"
 			action = "signaturesInfo"
 			constraints {
@@ -196,7 +196,7 @@ class UrlMappings {
 			}
 		}
 
-		"/eventVSElection/${id}/validated" {
+		"/eventVSElection/$id/validated" {
 			controller = "eventVSElection"
 			action = "validated"
 			constraints {
@@ -204,7 +204,7 @@ class UrlMappings {
 			}
 		}
 
-		"/eventVSElection/${id}/signed" {
+		"/eventVSElection/$id/signed" {
 			controller = "eventVSElection"
 			action = "signed"
 			constraints {
@@ -365,7 +365,7 @@ class UrlMappings {
 		}
 
 
-		"/voteVS/${id}" {
+		"/voteVS/$id" {
 			controller = "voteVS"
 			action = "get"
 			constraints {
