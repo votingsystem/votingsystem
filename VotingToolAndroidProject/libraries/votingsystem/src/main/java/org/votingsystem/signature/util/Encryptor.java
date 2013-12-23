@@ -303,24 +303,18 @@ public class Encryptor {
 		return result;
 	}
 
-    private static byte[] generateSalt() throws NoSuchAlgorithmException {
-        byte salt[] = new byte[8];
-        SecureRandom saltGen = SecureRandom.getInstance("SHA1PRNG");
-        saltGen.nextBytes(salt);
-        return salt;
-    }
-
     /* http://stackoverflow.com/questions/992019/java-256-bit-aes-password-based-encryption?rq=1
      * Share the password (a char[]) and salt (a byte[]—8 bytes selected by a SecureRandom makes a
      * good salt—which doesn't need to be kept secret) with the recipient
+     *
      */
-    public static Map encrypt(String textToEncrypt, char[] password) throws
+    public static Map encrypt(String textToEncrypt, char[] password, byte[] salt) throws
             NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
             InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException,
             BadPaddingException, UnsupportedEncodingException, InvalidParameterSpecException {
         //Security.addProvider(new BouncyCastleProvider());
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        byte[] salt = generateSalt();
+        //byte[] salt = VotingSystemKeyGenerator.INSTANCE.getEncryptionSalt();
         KeySpec spec = new PBEKeySpec(password, salt, ContextVS.SYMETRIC_ENCRYPTION_ITERATION_COUNT,
                 ContextVS.SYMETRIC_ENCRYPTION_KEY_LENGTH);
         SecretKey tmp = factory.generateSecret(spec);
@@ -339,18 +333,19 @@ public class Encryptor {
         return responseMap;
     }
 
-    public static JSONObject getEncryptedJSONDataBundle(String textToEncrypt, char[] password) throws
+    public static JSONObject getEncryptedJSONDataBundle(String textToEncrypt, char[] password,
+                            byte[] salt) throws
             NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
             InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException,
             BadPaddingException, UnsupportedEncodingException, InvalidParameterSpecException,
             JSONException {
-        Map encryptedDataMap = encrypt(textToEncrypt, password);
+        //byte[] salt = VotingSystemKeyGenerator.INSTANCE.getEncryptionSalt();
+        Map encryptedDataMap = encrypt(textToEncrypt, password, salt);
         byte[] iv = (byte[]) encryptedDataMap.get("iv");
         String ivBase64 = android.util.Base64.encodeToString(iv, android.util.Base64.DEFAULT);
         byte[] encryptedText = (byte[]) encryptedDataMap.get("encryptedText");
         String encryptedTextBase64 = android.util.Base64.encodeToString(
                 encryptedText, android.util.Base64.DEFAULT);
-        byte[] salt = (byte[]) encryptedDataMap.get("salt");
         String saltBase64 = android.util.Base64.encodeToString(salt, android.util.Base64.DEFAULT);
         JSONObject resultJSON = new JSONObject();
         resultJSON.put("iv", ivBase64);
