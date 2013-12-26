@@ -19,6 +19,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ */
 public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 
 	public static final String TAG = "VoteReceiptDBHelper";

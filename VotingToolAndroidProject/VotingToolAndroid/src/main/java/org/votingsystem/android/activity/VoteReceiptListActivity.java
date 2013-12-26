@@ -1,4 +1,4 @@
-package org.votingsystem.android.ui;
+package org.votingsystem.android.activity;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -17,10 +17,14 @@ import android.view.animation.AnimationUtils;
 import android.widget.*;
 import android.widget.AdapterView.OnItemClickListener;
 import org.bouncycastle2.util.encoders.Base64;
-import org.votingsystem.android.NavigationDrawer;
 import org.votingsystem.android.R;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.db.VoteReceiptDBHelper;
+import org.votingsystem.android.ui.CertNotFoundDialog;
+import org.votingsystem.android.ui.CertPinDialog;
+import org.votingsystem.android.ui.CertPinDialogListener;
+import org.votingsystem.android.ui.ReceiptOperationsListener;
+import org.votingsystem.android.ui.ReceiptOptionsDialog;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.VoteVS;

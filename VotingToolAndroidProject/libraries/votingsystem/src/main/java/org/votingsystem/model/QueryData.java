@@ -13,31 +13,22 @@ public class QueryData {
 	
 	public static final String TAG = "QueryData";
 	
-	private TypeVS typeVS;
-	private EventVS.State eventVSState;
+	private SubSystemVS subsystem;
+	private EventVS.State eventState;
 	private String textQuery;
 	
-	public QueryData(TypeVS typeVS, EventVS.State eventVSState,
-                     String textQuery) {
-		this.typeVS = typeVS;
-		this.eventVSState = eventVSState;
+	public QueryData(SubSystemVS subsystem, EventVS.State eventState, String textQuery) {
+		this.subsystem = subsystem;
+		this.eventState = eventState;
 		this.textQuery = textQuery;
 	}
 
-	public TypeVS getTypeVS() {
-		return typeVS;
+	public EventVS.State getEventState() {
+		return eventState;
 	}
 
-	public void setTypeVS(TypeVS typeVS) {
-		this.typeVS = typeVS;
-	}
-
-	public EventVS.State getEventVSState() {
-		return eventVSState;
-	}
-
-	public void setEventVSState(EventVS.State eventVSState) {
-		this.eventVSState = eventVSState;
+	public void setEventState(EventVS.State eventState) {
+		this.eventState = eventState;
 	}
 
 	public String getTextQuery() {
@@ -51,10 +42,10 @@ public class QueryData {
 	public JSONObject toJSON() {
 		Log.d(TAG + ".toJSON(...)", " - toJSON");
 		Map<String, Object> map = new HashMap<String, Object>();
-		if(typeVS != null)
-			map.put("typeVS", typeVS.toString());
-		if(eventVSState != null)
-			map.put("eventVSState", eventVSState.toString());
+		if(subsystem != null)
+			map.put("typeVS", subsystem.toString());
+		if(eventState != null)
+			map.put("eventVSState", eventState.toString());
 		if(textQuery != null)
 			map.put("textQuery", textQuery);
 	    return new JSONObject(map);

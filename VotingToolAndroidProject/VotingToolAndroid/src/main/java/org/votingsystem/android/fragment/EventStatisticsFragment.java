@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.votingsystem.android;
+package org.votingsystem.android.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -27,6 +27,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 
+import org.votingsystem.android.activity.EventPagerActivity;
+import org.votingsystem.android.R;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 

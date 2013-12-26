@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package org.votingsystem.android;
+package org.votingsystem.android.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+
+import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.UserCertRequestFragment;
 
 public class UserCertRequestActivity  extends ActionBarActivity {

@@ -91,7 +91,7 @@ public class ReceiptOptionsDialog  extends DialogFragment {
 	    		            }
 	    					});
 	    		builder.setNegativeButton(getString(
-	    				R.string.cancelar_button), new DialogInterface.OnClickListener() {
+	    				R.string.cancel_button), new DialogInterface.OnClickListener() {
 		            		public void onClick(DialogInterface dialog, int whichButton) {
 		            			removeReceiptButton.setEnabled(true);
 		            		}

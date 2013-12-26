@@ -1,4 +1,4 @@
-package org.votingsystem.android;
+package org.votingsystem.android.fragment;
 
 import android.app.Activity;
 import android.app.SearchManager;
@@ -16,27 +16,36 @@ import android.view.*;
 import android.view.animation.AnimationUtils;
 import android.widget.*;
 
+import org.votingsystem.android.activity.EventPagerActivity;
+import org.votingsystem.android.activity.MainActivity;
+import org.votingsystem.android.R;
+import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.model.ContextVS;
-import org.votingsystem.model.EventVSState;
 import org.votingsystem.model.EventVSResponse;
-import org.votingsystem.model.SubSystemVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.QueryData;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.DateUtils;
-
+import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class EventListFragment extends ListFragment
-        implements LoaderManager.LoaderCallbacks<List<EventVS>> {
+/**
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ */
+public class EventListFragment extends ListFragment implements
+        LoaderManager.LoaderCallbacks<List<EventVS>> {
 
     public static final String TAG = "EventListFragment";
 
-    public static final String LOADED_KEY = "isLoaded";
+    public static final String EVENT_STATE_KEY = "eventState";
+    public static final String EVENT_TYPE_KEY  = "eventType";
+    private static final int EVENT_LIST_LOADER_ID = 0;
+
 
     private static String errorLoadingEventsMsg = null;
     private static TextView searchTextView;
@@ -46,8 +55,8 @@ public class EventListFragment extends ListFragment
     private View mProgressContainer;
     private View mListContainer;
     private EventListAdapter mAdapter = null;
-    private EventVSState eventVSState = null;
-    private SubSystemVS subSystemVS = SubSystemVS.VOTING;
+    private EventVS.State eventState = null;
+    private GroupPosition groupPosition = GroupPosition.VOTING;
     private String queryStr = null;
     private int offset = 0;
     private static ContextVS contextVS = null;
@@ -73,21 +82,30 @@ public class EventListFragment extends ListFragment
         String eventStateStr = null;
         String subSystemStr = "";
         if (args != null) {
-            eventStateStr = args.getString("eventVSState");
-            if(eventStateStr != null) eventVSState = EventVSState.valueOf(eventStateStr);
-            subSystemStr = args.getString("subSystemVS");
-            if(subSystemStr != null) subSystemVS = SubSystemVS.valueOf(subSystemStr);
+            eventStateStr = args.getString(EVENT_STATE_KEY);
+            if(eventStateStr != null) eventState = EventVS.State.valueOf(eventStateStr);
+            subSystemStr = args.getString(EVENT_TYPE_KEY);
+            if(subSystemStr != null) groupPosition = GroupPosition.valueOf(subSystemStr);
             queryStr = args.getString(SearchManager.QUERY);
-            offset = args.getInt("offset");
+            offset = args.getInt(ContextVS.OFFSET_KEY);
         }
-        Log.d(TAG +  ".onCreate(..)", "eventVSState: " + eventVSState +
-                " - subSystemVS: " + subSystemVS + " - queryStr: " + queryStr);
+        Log.d(TAG +  ".onCreate(..)", "args: " + args);
+        setRetainInstance(true);
     };
 
+    public NavigatorDrawerOptionsAdapter.ChildPosition childPosition = null;
+
+    public void setChildPosition(NavigatorDrawerOptionsAdapter.ChildPosition childPosition) {
+        this.childPosition = childPosition;
+    }
+
+    public NavigatorDrawerOptionsAdapter.ChildPosition getChildPosition() {
+        return childPosition;
+    }
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.d(TAG +  ".onCreate(..)", "onCreate - savedInstanceState: " + savedInstanceState);
+        Log.d(TAG +  ".onCreateView(...)", "savedInstanceState: " + savedInstanceState);
         View rootView = inflater.inflate(R.layout.event_list_fragment, container, false);
         searchTextView = (TextView) rootView.findViewById(R.id.search_query);
         listView = (ListView) rootView.findViewById(android.R.id.list);
@@ -107,7 +125,7 @@ public class EventListFragment extends ListFragment
     }
 
     protected boolean onLongListItemClick(View v, int pos, long id) {//context menu
-        Log.i(TAG, ".onLongListItemClick - id: =========== " + id);
+        Log.i(TAG, ".onLongListItemClick - id: " + id);
         return true;
     }
 
@@ -148,24 +166,23 @@ public class EventListFragment extends ListFragment
                 savedInstanceState);
         super.onActivityCreated(savedInstanceState);
         getView().setBackgroundColor(Color.WHITE);
-        if(savedInstanceState != null) return;
+        //if(savedInstanceState != null) return;
         mAdapter = new EventListAdapter(getActivity());
         setListAdapter(mAdapter);
         // Start out with a progress indicator.
         setListShown(false);
         // Prepare the loader.  Either re-connect with an existing one or start a new one.
-        getLoaderManager().initLoader(0, null, this);
+        getLoaderManager().initLoader(EVENT_LIST_LOADER_ID, null, this);
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
-        Log.d(TAG +  "onSaveInstanceState(...)", "onSaveInstanceState");
         super.onSaveInstanceState(outState);
-        outState.putBoolean(LOADED_KEY, true);
+        Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        Log.d(TAG +  ".onCreateOptionsMenu(..)", " - onCreateOptionsMenu - onCreateOptionsMenu");
-        inflater.inflate(R.menu.event_list_fragment, menu);
+        Log.d(TAG +  ".onCreateOptionsMenu(...)", "onCreateOptionsMenu - onCreateOptionsMenu");
+        if(menu.findItem(R.id.reload) == null) inflater.inflate(R.menu.event_list_fragment, menu);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -191,8 +208,8 @@ public class EventListFragment extends ListFragment
     }
 
     @Override public Loader<List<EventVS>> onCreateLoader(int id, Bundle args) {
-        Log.d(TAG +  ".onCreateLoader(..)", " - eventVSState: " + eventVSState + " - subSystemVS: " + subSystemVS);
-        return new EventListLoader(getActivity(), subSystemVS, eventVSState, queryStr, offset);
+        Log.d(TAG +  ".onCreateLoader(..)", " - eventState: " + eventState + " - groupPosition: " + groupPosition);
+        return new EventListLoader(getActivity(), groupPosition, eventState, queryStr, offset);
     }
 
     @Override public void onAttach(Activity activity) {
@@ -203,7 +220,7 @@ public class EventListFragment extends ListFragment
             if (Intent.ACTION_SEARCH.equals(intent)) {
                 query = intent.getStringExtra(SearchManager.QUERY);
             }
-            Log.d(TAG + ".onAttach()", " - activity: " + activity.getClass().getName() +
+            Log.d(TAG + ".onAttach()", "activity: " + activity.getClass().getName() +
                     " - query: " + query + " - activity: ");
         }
     }
@@ -217,7 +234,8 @@ public class EventListFragment extends ListFragment
         Log.i(TAG +  ".onLoadFinished", " - onLoadFinished - data: " +
                 ((data == null) ? "NULL":data.size()));
         if(errorLoadingEventsMsg == null) {
-            mAdapter.setData(data);
+
+            ((EventListAdapter)getListAdapter()).setData(data);
         } else {
             //setEmptyText(getString(R.string.connection_error_msg));
             //emptyResultsView.setText(getString(R.string.connection_error_msg));
@@ -328,8 +346,8 @@ public class EventListFragment extends ListFragment
     public static class EventListLoader extends AsyncTaskLoader<List<EventVS>> {
 
         List<EventVS> events;
-        SubSystemVS subSystemVS;
-        EventVSState eventVSState;
+        GroupPosition groupPosition;
+        EventVS.State eventState;
         String queryString;
         int offset = 0;
 
@@ -337,11 +355,11 @@ public class EventListFragment extends ListFragment
             super(context);
         }
 
-        public EventListLoader(Context context, SubSystemVS subSystemVS,
-                               EventVSState eventVSState, String queryString, int offset) {
+        public EventListLoader(Context context, GroupPosition groupPosition, EventVS.State eventState,
+                               String queryString, int offset) {
             super(context);
-            this.subSystemVS = subSystemVS;
-            this.eventVSState = eventVSState;
+            this.groupPosition = groupPosition;
+            this.eventState = eventState;
             this.queryString = queryString;
             this.offset = offset;
         }
@@ -352,30 +370,31 @@ public class EventListFragment extends ListFragment
          * data to be published by the loader.
          */
         @Override public List<EventVS> loadInBackground() {
-            Log.d(TAG + ".EventListLoader.loadInBackground()", " - subSystemVS: " + subSystemVS
-                    + " - eventVSState: " + eventVSState + " - queryString: " + queryString);
+            Log.d(TAG + ".EventListLoader.loadInBackground()", " - groupPosition: " + groupPosition
+                    + " - eventState: " + eventState + " - queryString: " + queryString);
 
             List<EventVS> eventList = null;
             try {
                 ResponseVS responseVS = null;
                 if(queryString != null) {
-                    String url = contextVS.getAccessControl().getSearchServiceURL(0, contextVS.EVENTS_PAGE_SIZE);
+                    String url = contextVS.getAccessControl().getSearchServiceURL(
+                            0, contextVS.EVENTS_PAGE_SIZE);
                     QueryData queryData = new QueryData(
-                            subSystemVS.getEventType(), eventVSState.getEventState(), queryString);
+                            groupPosition.getSubsystem(), eventState, queryString);
                     responseVS = HttpHelper.sendData(
                             queryData.toJSON().toString().getBytes(), null, url);
                     searchTextView.setText(Html.fromHtml(getContext().getString(
                             R.string.search_query_info_msg, queryString)));
                     searchTextView.setVisibility(View.VISIBLE);
                 } else {
-                    String url = contextVS.getAccessControl().getEventVSURL(eventVSState,
-                            subSystemVS, contextVS.EVENTS_PAGE_SIZE, offset);
+                    String url = contextVS.getAccessControl().getEventVSURL(eventState,
+                            groupPosition.getURLPart(), contextVS.EVENTS_PAGE_SIZE, offset);
                     responseVS = HttpHelper.getData(url, null);
                     searchTextView.setVisibility(View.GONE);
                 }
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    EventVSResponse consulta = EventVSResponse.parse(responseVS.getMessage());
-                    eventList = consulta.getEventVSs();
+                    EventVSResponse response = EventVSResponse.parse(responseVS.getMessage());
+                    eventList = response.getEvents();
                 } else errorLoadingEventsMsg = responseVS.getMessage();
             } catch (Exception ex) {
                 Log.e(TAG + ".doInBackground", ex.getMessage(), ex);

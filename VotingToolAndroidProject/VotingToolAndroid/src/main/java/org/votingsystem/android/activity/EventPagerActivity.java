@@ -1,4 +1,4 @@
-package org.votingsystem.android;
+package org.votingsystem.android.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,6 +9,10 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.MenuItem;
+
+import org.votingsystem.android.R;
+import org.votingsystem.android.fragment.EventFragment;
+import org.votingsystem.android.fragment.VotingEventFragment;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.TypeVS;

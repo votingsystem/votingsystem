@@ -4,10 +4,13 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.cms.SignerInformation;
 import org.bouncycastle2.util.encoders.Base64;
 import org.bouncycastle2.util.encoders.Hex;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.votingsystem.signature.smime.CMSUtils;
 
 import java.security.cert.CertPath;
 import java.security.cert.X509Certificate;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,13 +23,16 @@ public class UserVS {
 
     private static final long serialVersionUID = 1L;
 
+    private Long id;
+    private Long numRepresentations;
     private String nif;
     private String firstName;
     private String country;
     private String cn;
+    private String URL;
     private String name;
     private String fullName = "";
-    private String organizacion;
+    private String organization;
     private String email;
     private String phone;
 
@@ -109,6 +115,14 @@ public class UserVS {
 
     public String getCn() {
         return cn;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     /**
@@ -212,6 +226,14 @@ public class UserVS {
         return CMSUtils.getDigestId(signer.getDigestAlgOID());
     }
 
+    public String getURL() {
+        return URL;
+    }
+
+    public void setURL(String URL) {
+        this.URL = URL;
+    }
+
     /**
      * @return the timeStampToken
      */
@@ -246,7 +268,6 @@ public class UserVS {
         this.certPath = certPath;
     }
 
-
     /**
      * @return the signedContent
      */
@@ -260,18 +281,19 @@ public class UserVS {
     public void setContentSigned(String signedContent) {
         this.signedContent = signedContent;
     }
+
     /**
-     * @return the organizacion
+     * @return the organization
      */
-    public String getOrganizacion() {
-        return organizacion;
+    public String getOrganization() {
+        return organization;
     }
 
     /**
-     * @param organizacion the organizacion to set
+     * @param organization the organization to set
      */
-    public void setOrganizacion(String organizacion) {
-        this.organizacion = organizacion;
+    public void setOrganization(String organization) {
+        this.organization = organization;
     }
 
     public void setName(String name) {
@@ -290,5 +312,35 @@ public class UserVS {
         return fullName;
     }
 
+    public Long getNumRepresentations() {
+        return numRepresentations;
+    }
+
+    public void setNumRepresentations(Long numRepresentations) {
+        this.numRepresentations = numRepresentations;
+    }
+
+    public static UserVS parse(JSONObject userJSON) throws ParseException, JSONException {
+        UserVS userVS = new UserVS();
+        String name = null;
+        String firsName = null;
+        if (userJSON.has("id")) userVS.setId(userJSON.getLong("id"));
+        if (userJSON.has("URL")) userVS.setURL(userJSON.getString("URL"));
+        if (userJSON.has("nif")) userVS.setNif(userJSON.getString("nif"));
+        if (userJSON.has("numRepresentations")) userVS.setNumRepresentations(
+                userJSON.getLong("numRepresentations"));
+        if (userJSON.has("name")) {
+            name = userJSON.getString("name");
+            userVS.setName(name);
+        }
+        if (userJSON.has("firstName")) {
+            firsName = userJSON.getString("firstName");
+            userVS.setName(firsName);
+            if(name != null) userVS.setFullName(name + " " + firsName);
+            else userVS.setFullName(firsName);
+        }
+        if(firsName == null && name != null) userVS.setFullName(name);
+        return userVS;
+    }
 
 }

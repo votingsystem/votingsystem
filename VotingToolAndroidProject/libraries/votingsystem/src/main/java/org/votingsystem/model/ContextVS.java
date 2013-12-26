@@ -13,10 +13,13 @@ import java.io.InputStream;
 import java.security.cert.X509Certificate;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.PropertyResourceBundle;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -41,6 +44,7 @@ public class ContextVS {
     public static final String VOTE_OID = VOTING_SYSTEM_BASE_OID + VOTE_TAG;
 
     public static final String STATE_KEY                  = "state";
+    public static final String OFFSET_KEY                 = "offset";
     public static final String CSR_REQUEST_ID_KEY         = "csrRequestId";
     public static final String APPLICATION_ID_KEY         = "idAplicacion";
     public static final String EVENT_KEY                  = "eventKey";
@@ -78,14 +82,12 @@ public class ContextVS {
     public static final String CERT_NOT_FOUND_DIALOG_ID      = "certNotFoundDialog";
 
     private State state = State.WITHOUT_CSR;
-    private List<SubSystemChangeListener> subSystemChangeListeners = new ArrayList<SubSystemChangeListener>();
-    private SubSystemVS selectedSubsystem = SubSystemVS.VOTING;
-    private EventVSState navigationDrawerEventState = EventVSState.OPEN;
     private EventVS eventVSSeleccionado;
     private ArrayList<EventVS> eventsSelectedList;
 
     private AccessControlVS accessControlVS;
     private UserVS userVS;
+    private List<UserVS> representativeList;
     private Map<String, X509Certificate> certsMap = new HashMap<String, X509Certificate>();
     private OperationVS operationVS = null;
 
@@ -141,8 +143,9 @@ public class ContextVS {
     public static String getMessage(String key, Object... arguments) {
         try {
             String pattern = resourceBundle.getString(key);
-            if(arguments.length > 0) return MessageFormat.format(pattern, arguments);
-            else return resourceBundle.getString(key);
+            if(arguments != null && arguments.length > 0)
+                return MessageFormat.format(pattern, arguments);
+            else return pattern;
         } catch(Exception ex) {
             ex.printStackTrace();
             Log.d(TAG + "getMessage(...)", "### Value not found for key: " + key);
@@ -150,6 +153,18 @@ public class ContextVS {
         }
     }
 
+    public List<UserVS> getRepresentatives(int offset, int size) {
+        if(representativeList == null) return null;
+        return representativeList.subList(offset, size);
+    }
+
+    public void setRepresentatives(int offset, Collection<UserVS> representativeSet) {
+        if(representativeList == null) {
+            int initialCapacity = offset + representativeSet.size();
+            representativeList = new ArrayList<UserVS>(initialCapacity);
+            representativeList.addAll(offset, representativeSet);
+        } else representativeList.addAll(offset, representativeSet);
+    }
 
     public String getHostID() {
         return android.os.Build.ID;
@@ -193,19 +208,6 @@ public class ContextVS {
         return state;
     }
 
-    public EventVSState getNavigationDrawerEventState() {
-        return navigationDrawerEventState;
-    }
-
-    public void setNavigationDrawerEventState(EventVSState eventState) {
-        this.navigationDrawerEventState = eventState;
-    }
-
-
-    public SubSystemVS getSelectedSubsystem () {
-        return selectedSubsystem;
-    }
-
     public X509Certificate getCert(String serverURL) {
         Log.d(TAG + ".getCert(...)", " - getCert - serverURL: " + serverURL);
         if(serverURL == null) return null;
@@ -237,22 +239,6 @@ public class ContextVS {
                 STATE_KEY + "_" + accessControlVS.getServerURL(), State.WITHOUT_CSR.toString());
         state = State.valueOf(stateStr);
         this.accessControlVS = accessControlVS;
-    }
-
-    public void addSubSystemChangeListener(SubSystemChangeListener listener) {
-        subSystemChangeListeners.add(listener);
-    }
-
-    public void removeSubSystemChangeListener(SubSystemChangeListener listener) {
-        subSystemChangeListeners.remove(listener);
-    }
-
-    public void setSelectedSubsystem (SubSystemVS selectedSubsystem) {
-        Log.d(TAG + ".setSelectedSubsystem(...)", " - Subsystem: " + selectedSubsystem);
-        this.selectedSubsystem = selectedSubsystem;
-        for(SubSystemChangeListener listener : subSystemChangeListeners) {
-            listener.onChangeSubSystem(selectedSubsystem);
-        }
     }
 
 }

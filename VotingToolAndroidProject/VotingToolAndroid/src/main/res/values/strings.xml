@@ -191,14 +191,14 @@
     <string name="documents_lbl">Documentos</string>
     
     <string name="request_user_cert_error_msg">Error comprobando el estado de la solicitud</string>
-    <string name="cancelar_label">Cancelar</string>
+    <string name="cancel_lbl">Cancelar</string>
     <string name="continue_label">Continuar</string>
-    <string name="solicitar_label">Solicitar</string>
+    <string name="request_lbl">Solicitar</string>
     <string name="nif_label">Introduzca su NIF</string>
     <string name="password_label">Contraseña del certificado</string>
     <string name="dialogo_password_text_entry">Introducir contraseña</string>
     <string name="repeat_password_label">Repita la contraseña</string>
-    <string name="cancelar_button">Cancelar</string>
+    <string name="cancel_button">Cancelar</string>
     <string name="cerrar_button">Cerrar</string>
     <string name="ok_button">OK</string>
     <string name="aceptar_button">Aceptar</string>
@@ -238,5 +238,11 @@
     <string name="claim_info_lbl">Datos sobre la reclamación</string>
     <string name="voting_info_lbl">Datos sobre la votación</string>
     <string name="eventfields_dialog_caption">Campos de la evento</string>
+
+
+    <string name="check_representative_button">Comprobar mi representante</string>
+    <string name="new_representative_button">Darse de alta como representante</string>
+    <string name="cancel_representative_button">Darse de baja como representante</string>
+    <string name="edit_representative_button">Editar datos del representante</string>
 
 </resources>

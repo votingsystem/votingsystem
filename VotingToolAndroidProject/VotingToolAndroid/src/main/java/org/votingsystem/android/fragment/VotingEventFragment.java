@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.votingsystem.android;
+package org.votingsystem.android.fragment;
 
 import android.app.AlertDialog;
 import android.app.NotificationManager;
@@ -36,6 +36,10 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
+
+import org.votingsystem.android.activity.EventPagerActivity;
+import org.votingsystem.android.activity.EventStatisticsPagerActivity;
+import org.votingsystem.android.R;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.VoteSender;
 import org.votingsystem.android.db.VoteReceiptDBHelper;

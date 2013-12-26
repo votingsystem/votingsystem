@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.votingsystem.android;
+package org.votingsystem.android.activity;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -25,9 +25,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -36,18 +34,18 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
-import org.votingsystem.android.ui.CertPinDialog;
+import org.votingsystem.android.R;
+import org.votingsystem.android.fragment.EventFragment;
+import org.votingsystem.android.fragment.VotingEventFragment;
 import org.votingsystem.model.AccessControlVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -157,7 +155,7 @@ public class MainActivity extends FragmentActivity {
 			        editor.commit();
 	    		}
 	            setContentView(R.layout.main_activity);
-	            Button cancelButton = (Button) findViewById(R.id.cancelar_button);
+	            Button cancelButton = (Button) findViewById(R.id.cancel_button);
 	            cancelButton.setOnClickListener(new OnClickListener() {
 	                public void onClick(View v) { 
 	                	//finish(); 
@@ -166,7 +164,7 @@ public class MainActivity extends FragmentActivity {
 	                }
 	            });
 	            
-	            Button requestButton = (Button) findViewById(R.id.solicitar_button);
+	            Button requestButton = (Button) findViewById(R.id.request_button);
 	            requestButton.setOnClickListener(new OnClickListener() {
 	                public void onClick(View v) {
                         Intent intent = new Intent(getBaseContext(), UserCertRequestActivity.class);

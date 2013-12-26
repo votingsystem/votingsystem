@@ -1,4 +1,4 @@
-package org.votingsystem.android;
+package org.votingsystem.android.activity;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -9,12 +9,15 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.MenuItem;
 
+import org.votingsystem.android.R;
+import org.votingsystem.android.fragment.EventStatisticsFragment;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.EventVS;
 import org.votingsystem.util.DateUtils;
 
 /**
- * Created by jgzornoza on 9/10/13.
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
 public class EventStatisticsPagerActivity extends ActionBarActivity {
 

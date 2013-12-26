@@ -1,8 +1,8 @@
 <%@ page import="org.votingsystem.model.EventVS; grails.converters.JSON" %>
 <%@ page import="org.votingsystem.accesscontrol.model.*" %>
 <%
-	def messageToUser = null
-	def eventClass = null
+    def messageToUser = null
+    def eventClass = null
     if(eventMap?.state) {
         switch(EventVS.State.valueOf(eventMap?.state)) {
             case EventVS.State.CANCELLED:
@@ -24,67 +24,67 @@
 <head><meta name="layout" content="main" /></head>
 <body>
 
-	<g:if test="${messageToUser != null}">
-		<div id="eventMessagePanel" class="eventMessagePanel">
-			<p class="messageContent">
-				${messageToUser}
-			</p>
-		</div>
-	</g:if>
+<g:if test="${messageToUser != null}">
+    <div id="eventMessagePanel" class="eventMessagePanel">
+        <p class="messageContent">
+            ${messageToUser}
+        </p>
+    </div>
+</g:if>
 
-    <div class="publishPageTitle"> ${eventMap?.subject}</div>
-	
-	<div style="display:inline-block; width:100%; font-size:0.8em;">
-		<div class="datetime" style="display:inline;margin:0px 20px 0px 60px;">
-			<b><g:message code="dateLimitLbl"/>: </b>${eventMap?.dateFinishStr}
-		</div>
-		<g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state) ||
-			EventVS.State.AWAITING.toString().equals(eventMap?.state)}">
-			<div id="adminDocumentLink" class="appLink" style="float:right;margin:0px 20px 0px 0px;">
-				<g:message code="adminDocumentLinkLbl"/>
-			</div>
-		</g:if>
-	</div>
+<div class="publishPageTitle"> ${eventMap?.subject}</div>
 
-	<div class="eventPageContentDiv">
-		<div style="width:100%;position:relative;">
-			<div class="eventContentDiv">${raw(eventMap?.content)}</div>
-		</div>
+<div style="display:inline-block; width:100%; font-size:0.8em;">
+    <div class="datetime" style="display:inline;margin:0px 20px 0px 60px;">
+        <b><g:message code="dateLimitLbl"/>: </b>${eventMap?.dateFinishStr}
+    </div>
+    <g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state) ||
+            EventVS.State.AWAITING.toString().equals(eventMap?.state)}">
+        <div id="adminDocumentLink" class="appLink" style="float:right;margin:0px 20px 0px 0px;">
+            <g:message code="adminDocumentLinkLbl"/>
+        </div>
+    </g:if>
+</div>
 
-		<div style="width:100%;position:relative;margin:0px 0px 0px 0px;">
-			<div id="eventAuthorDiv"><b>
-				<g:message code="publishedByLbl"/>: </b>${eventMap?.userVS}
-			</div>
-		</div>
-	
-		<div class="eventOptionsDiv">
-			<fieldset id="fieldsBox" style="">
-				<legend id="fieldsLegend"><g:message code="pollFieldLegend"/></legend>
-				<div id="fields" style="width:100%;">
-					<g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state)}">
-						<g:each in="${eventMap?.fieldsEventVS}">
-							<button class="voteOptionButton button_base"
-								style="width: 90%;margin: 10px auto 30px auto;"
-								optionId = "${it.id}" optionContent="${it.content}"  onclick="return false;">
-								${it.content}
-							</button>
-						</g:each>
-					</g:if>
-					<g:if test="${EventVS.State.CANCELLED.toString().equals(eventMap?.state) ||
-						EventVS.State.TERMINATED.toString().equals(eventMap?.state) ||
-						EventVS.State.AWAITING.toString().equals(eventMap?.state)}">
-						<g:each in="${eventMap?.fieldsEventVS}">
-							<div class="voteOption" style="width: 90%;margin: 10px auto 0px auto;">
-								 - ${it.content}
-							</div>
-						</g:each>
-					</g:if>
-				</div>
-			</fieldset>
-		</div>
-	</div>
+<div class="eventPageContentDiv">
+    <div style="width:100%;position:relative;">
+        <div class="eventContentDiv">${raw(eventMap?.content)}</div>
+    </div>
 
-	<g:render template="/template/signatureMechanismAdvert"/>
+    <div style="width:100%;position:relative;margin:0px 0px 0px 0px;">
+        <div id="eventAuthorDiv"><b>
+            <g:message code="publishedByLbl"/>: </b>${eventMap?.userVS}
+        </div>
+    </div>
+
+    <div class="eventOptionsDiv">
+        <fieldset id="fieldsBox" style="">
+            <legend id="fieldsLegend"><g:message code="pollFieldLegend"/></legend>
+            <div id="fields" style="width:100%;">
+                <g:if test="${EventVS.State.ACTIVE.toString().equals(eventMap?.state)}">
+                    <g:each in="${eventMap?.fieldsEventVS}">
+                        <button class="voteOptionButton button_base"
+                                style="width: 90%;margin: 10px auto 30px auto;"
+                                optionId = "${it.id}" optionContent="${it.content}"  onclick="return false;">
+                            ${it.content}
+                        </button>
+                    </g:each>
+                </g:if>
+                <g:if test="${EventVS.State.CANCELLED.toString().equals(eventMap?.state) ||
+                        EventVS.State.TERMINATED.toString().equals(eventMap?.state) ||
+                        EventVS.State.AWAITING.toString().equals(eventMap?.state)}">
+                    <g:each in="${eventMap?.fieldsEventVS}">
+                        <div class="voteOption" style="width: 90%;margin: 10px auto 0px auto;">
+                            - ${it.content}
+                        </div>
+                    </g:each>
+                </g:if>
+            </div>
+        </fieldset>
+    </div>
+</div>
+
+<g:render template="/template/signatureMechanismAdvert"/>
 
 <g:include view="/include/dialog/confirmOptionDialog.gsp"/>
 <g:include view="/include/dialog/adminDocumentDialog.gsp"/>
@@ -92,11 +92,11 @@
 </body>
 </html>
 <r:script>
-<g:applyCodec encodeAs="none">
+    <g:applyCodec encodeAs="none">
         var votingEvent = ${eventMap as JSON}
-		var selectedOption
-		$(function() {
-			if(${messageToUser != null?true:false}) {
+        var selectedOption
+        $(function() {
+            if(${messageToUser != null?true:false}) {
 				$("#eventMessagePanel").addClass("${eventClass}");
 			}
 
@@ -169,5 +169,5 @@
 				showResultDialog(caption, msg, callBack)
 			}
 		}
-</g:applyCodec>
+    </g:applyCodec>
 </r:script>

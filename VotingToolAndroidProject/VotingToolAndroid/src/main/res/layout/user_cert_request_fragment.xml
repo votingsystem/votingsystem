@@ -39,7 +39,7 @@
                     android:layout_marginRight="20dip"
                     android:singleLine="true"
                     android:imeOptions="actionNext"
-                    android:nextFocusDown="@+id/solicitar_button"
+                    android:nextFocusDown="@+id/request_button"
                     android:gravity="center_vertical|center_horizontal">
                     <requestFocus />
                 </EditText>
@@ -63,7 +63,7 @@
                     android:layout_marginRight="20dip"
                     android:singleLine="true"
                     android:imeOptions="actionNext"
-                    android:nextFocusDown="@+id/solicitar_button"
+                    android:nextFocusDown="@+id/request_button"
                     android:gravity="center_vertical|center_horizontal">
                 </EditText>
 
@@ -86,7 +86,7 @@
                     android:layout_marginRight="20dip"
                     android:singleLine="true"
                     android:imeOptions="actionNext"
-                    android:nextFocusDown="@+id/solicitar_button"
+                    android:nextFocusDown="@+id/request_button"
                     android:gravity="center_vertical|center_horizontal">
                 </EditText>
 
@@ -105,25 +105,25 @@
                     android:layout_marginTop="15dip">
 
                     <Button
-                        android:id="@+id/cancelar_button"
+                        android:id="@+id/cancel_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="30dp"
                         android:layout_marginRight="20dip"
                         android:layout_weight="0.32"
                         android:drawableLeft="@drawable/cancel_22x22"
-                        android:text="@string/cancelar_label"
+                        android:text="@string/cancel_lbl"
                         android:textStyle="bold"/>
 
                     <Button
-                        android:id="@+id/solicitar_button"
+                        android:id="@+id/request_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="20dip"
                         android:layout_marginRight="30dp"
                         android:layout_weight="0.43"
                         android:drawableLeft="@drawable/accept_22x22"
-                        android:text="@string/solicitar_label"
+                        android:text="@string/request_lbl"
                         android:textStyle="bold" />
 
                 </LinearLayout>

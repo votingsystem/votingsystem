@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.votingsystem.android;
+package org.votingsystem.android.activity;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -36,6 +36,10 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.votingsystem.android.R;
+import org.votingsystem.android.activity.MainActivity;
+import org.votingsystem.android.activity.NavigationDrawer;
+import org.votingsystem.android.activity.UserCertRequestActivity;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.android.ui.CertPinDialog;

@@ -22,19 +22,20 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import org.votingsystem.android.JavaScriptInterface;
-import org.votingsystem.android.NavigationDrawer;
+import org.votingsystem.android.ui.JavaScriptInterface;
+import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.android.R;
 import org.votingsystem.android.callable.PDFPublisher;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.ui.CertNotFoundDialog;
 import org.votingsystem.android.ui.CertPinDialog;
 import org.votingsystem.android.ui.CertPinDialogListener;
+import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
+import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
 import org.votingsystem.model.OperationVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.SubSystemVS;
 import org.votingsystem.model.TypeVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.FileUtils;
@@ -369,30 +370,31 @@ public class EventPublishingFragment extends Fragment implements CertPinDialogLi
             showProgress(false, true);
             String resultMsg = null;
             String resultCaption = null;
-            SubSystemVS selectedSubsystem = null;
+            GroupPosition selectedSubsystem = null;
             if(ResponseVS.SC_OK == response.getStatusCode()) {
                 resultCaption = getString(R.string.operation_ok_msg);
                 switch(pendingOperationVS.getTypeVS()) {
                     case MANIFEST_PUBLISHING:
                         resultMsg = getString(R.string.publish_manifest_OK_prefix_msg);
-                        selectedSubsystem = SubSystemVS.MANIFESTS;
+                        selectedSubsystem = GroupPosition.MANIFESTS;
                         break;
                     case CLAIM_PUBLISHING:
                         resultMsg = getString(R.string.publish_claim_OK_prefix_msg);
-                        selectedSubsystem = SubSystemVS.CLAIMS;
+                        selectedSubsystem = GroupPosition.CLAIMS;
                         break;
                     case VOTING_PUBLISHING:
                         resultMsg = getString(R.string.publish_voting_OK_prefix_msg);
-                        selectedSubsystem = SubSystemVS.VOTING;
+                        selectedSubsystem = GroupPosition.VOTING;
                         break;
                 }
-                final SubSystemVS subSystemVS = selectedSubsystem;
+                final GroupPosition groupPosition = selectedSubsystem;
                 resultMsg = resultMsg + " " + getString(R.string.publish_document_OK_sufix_msg);
                 new AlertDialog.Builder(getActivity()).setTitle(resultCaption).
                         setMessage(resultMsg).setPositiveButton(R.string.ok_button, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        contextVS.setSelectedSubsystem(subSystemVS);
                         Intent intent = new Intent(getActivity(), NavigationDrawer.class);
+                        intent.putExtra(NavigatorDrawerOptionsAdapter.GROUP_POSITION_KEY,
+                                groupPosition.getPosition());
                         startActivity(intent);
                     }
                 }).show();

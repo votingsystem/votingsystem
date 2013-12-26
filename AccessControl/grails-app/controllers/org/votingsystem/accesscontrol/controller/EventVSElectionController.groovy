@@ -87,7 +87,6 @@ class EventVSElectionController {
             }
         } else {
             params.sort = "dateBegin"
-            log.debug " -Params: " + params
             EventVS.State eventVSState
             if(params.eventVSState) eventVSState = EventVS.State.valueOf(params.eventVSState)
             EventVSElection.withTransaction {

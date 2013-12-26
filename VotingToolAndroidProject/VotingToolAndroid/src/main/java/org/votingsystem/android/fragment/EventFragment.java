@@ -1,4 +1,4 @@
-package org.votingsystem.android;
+package org.votingsystem.android.fragment;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -16,6 +16,9 @@ import android.view.animation.AnimationUtils;
 import android.widget.*;
 
 import org.json.JSONObject;
+import org.votingsystem.android.activity.EventPagerActivity;
+import org.votingsystem.android.activity.EventStatisticsPagerActivity;
+import org.votingsystem.android.R;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.OptionVS;
@@ -258,7 +261,7 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
         }
         builder.setTitle(R.string.eventfields_dialog_caption).setView(mScrollView).
                 setPositiveButton(getString(R.string.aceptar_button), null).
-                setNegativeButton(R.string.cancelar_button, new DialogInterface.OnClickListener() {
+                setNegativeButton(R.string.cancel_button, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) { }
                 });
         final AlertDialog dialog = builder.create();

@@ -42,7 +42,7 @@
     		var eventState = ''
             var searchQuery
 		 	$(function() {
-		 		paginate(0)
+		 		paginate(1)
 		 		$('#eventsStateSelect').on('change', function (e) {
 		 			eventState = $(this).val()
 		 		    var optionSelected = $("option:selected", this);
@@ -103,7 +103,7 @@
 				if(newOffsetPage == offsetPage) return
 				offsetPage = newOffsetPage
 				var offsetItem
-				if(newOffsetPage == 0) offsetItem = 0
+				if(newOffsetPage <= 1) offsetItem = 0
 				else offsetItem = (newOffsetPage -1) * numMaxEventsForPage
 				var targetURL = "${createLink( controller:'eventVSElection')}?max=" + numMaxEventsForPage +
 				    "&offset=" + offsetItem + "&eventVSState=" + eventState

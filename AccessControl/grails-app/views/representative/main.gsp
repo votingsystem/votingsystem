@@ -35,16 +35,16 @@
 
 <g:include view="/include/dialog/checkRepresentativeDialog.gsp"/>	
 
-		<div id="representativeTemplate" style="display:none;">
-			<g:render template="/template/representative"/>
-		</div> 
+<template id="representativeTemplate" style="display:none;">
+    <g:render template="/template/representative"/>
+</template>
 </body>
 </html>
 <r:script>
        	var numMaxRepresentativesForPage = 20
        	
 	 	$(function() {		
-	 		paginate(0)	
+	 		paginate(1)
 
 	 		$('#checkRepresentativeButton').click(function() {
 	 			$("#checkRepresentativeDialog").dialog("open");
@@ -69,7 +69,7 @@
 	  			    //console.log( " - ajax call done - dataStr: " + dataStr);
 					//console.log("votacion " + this);
 				});
-				printPaginate(jsonResult.offset, jsonResult.representativesTotalNumber, numMaxRepresentativesForPage)
+				printPaginate(jsonResult.offset, jsonResult.numTotalRepresentatives, numMaxRepresentativesForPage)
 				$contentDiv.fadeIn(500)
 				$loadingPanel.fadeOut(500)
 			}).error(function() {
@@ -110,7 +110,7 @@
 			if(newOffsetPage == offsetPage) return
 			offsetPage = newOffsetPage
 			var offsetItem
-			if(newOffsetPage == 0) offsetItem = 0
+			if(newOffsetPage <= 1) offsetItem = 0
 			else offsetItem = (newOffsetPage -1) * numMaxRepresentativesForPage
 			loadRepresentatives("${createLink( controller:'representative')}?max=" + numMaxRepresentativesForPage + "&offset=" + offsetItem)	
 		}

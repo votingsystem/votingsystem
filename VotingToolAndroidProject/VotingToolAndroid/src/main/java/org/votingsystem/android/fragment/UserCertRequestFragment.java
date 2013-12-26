@@ -1,19 +1,3 @@
-/*
- * Copyright 2011 - Jose. J. García Zornoza
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.votingsystem.android.fragment;
 
 import android.app.AlertDialog;
@@ -26,7 +10,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.telephony.TelephonyManager;
 import android.text.Html;
@@ -48,9 +31,9 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-import org.votingsystem.android.NavigationDrawer;
+import org.votingsystem.android.activity.NavigationDrawer;
 import org.votingsystem.android.R;
-import org.votingsystem.android.UserCertResponseActivity;
+import org.votingsystem.android.activity.UserCertResponseActivity;
 import org.votingsystem.android.ui.CertPinDialog;
 import org.votingsystem.android.ui.CertPinDialogListener;
 import org.votingsystem.model.ContextVS;
@@ -77,6 +60,10 @@ import static org.votingsystem.model.ContextVS.SIG_NAME;
 import static org.votingsystem.model.ContextVS.State;
 import static org.votingsystem.model.ContextVS.USER_CERT_ALIAS;
 
+/**
+ * @author jgzornoza
+ * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
+ */
 public class UserCertRequestFragment extends Fragment implements CertPinDialogListener {
 
 	public static final String TAG = "UserCertRequestFragment";
@@ -103,7 +90,7 @@ public class UserCertRequestFragment extends Fragment implements CertPinDialogLi
         View rootView = inflater.inflate(R.layout.user_cert_request_fragment, container, false);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         getActivity().setTitle(getString(R.string.request_certificate_form_lbl));
-        Button cancelButton = (Button) rootView.findViewById(R.id.cancelar_button);
+        Button cancelButton = (Button) rootView.findViewById(R.id.cancel_button);
         cancelButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 //finish();
@@ -137,7 +124,7 @@ public class UserCertRequestFragment extends Fragment implements CertPinDialogLi
                 } else return false;
             }
         });
-        Button requestButton = (Button) rootView.findViewById(R.id.solicitar_button);
+        Button requestButton = (Button) rootView.findViewById(R.id.request_button);
         requestButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 processNif();
@@ -221,7 +208,7 @@ public class UserCertRequestFragment extends Fragment implements CertPinDialogLi
     		            }
     					});
     		builder.setNegativeButton(getString(
-    				R.string.cancelar_button), null);
+    				R.string.cancel_button), null);
     		//builder.show();
     		Dialog dialog = builder.create();
             dialog.show();

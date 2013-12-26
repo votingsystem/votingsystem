@@ -6,7 +6,6 @@ import org.json.JSONObject;
 import org.votingsystem.signature.util.CertUtil;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.StringUtils;
-
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -95,36 +94,18 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return getServerURL() + "/serverInfo";
     }
 
+    public String getRepresentativesURL () {
+        return getServerURL() + "/representative";
+    }
+
     public static String getServerInfoURL (String serverURL) {
         return StringUtils.checkURL(serverURL) + "/serverInfo";
     }
 
-    public String getEventVSURL (EventVSState eventVSState, SubSystemVS subSystemVS,
+    public String getEventVSURL (EventVS.State eventState, String groupPartURL,
             int max, int offset) {
-        String subSystemPath = null;
-        switch (subSystemVS) {
-            case CLAIMS: subSystemPath = "/eventVSClaim";
-                break;
-            case MANIFESTS: subSystemPath = "/eventVSManifest";
-                break;
-            case VOTING: subSystemPath = "/eventVSElection";
-                break;
-            default: subSystemPath = "/eventVS";
-                break;
-        }
-        String statePath = null;
-        switch(eventVSState) {
-            case CLOSED: statePath = "TERMINATED";
-                break;
-            case OPEN: statePath = "ACTIVE";
-                break;
-            case PENDING: statePath = "AWAITING";
-                break;
-            default: statePath = "";
-                break;
-        }
-        return getServerURL() + subSystemPath + "?max="+ max + "&offset=" + offset  +
-                "&eventVSState=" + statePath;
+        return getServerURL() + groupPartURL + "?max="+ max + "&offset=" + offset  +
+                "&eventVSState=" + eventState.toString();
     }
 
 

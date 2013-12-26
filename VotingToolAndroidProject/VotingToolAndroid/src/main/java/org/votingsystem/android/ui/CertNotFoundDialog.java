@@ -10,8 +10,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import org.votingsystem.android.R;
-import org.votingsystem.android.UserCertRequestActivity;
-import org.votingsystem.android.UserCertResponseActivity;
+import org.votingsystem.android.activity.UserCertRequestActivity;
+import org.votingsystem.android.activity.UserCertResponseActivity;
 import org.votingsystem.model.ContextVS;
 
 public class CertNotFoundDialog  extends DialogFragment {

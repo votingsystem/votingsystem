@@ -115,8 +115,8 @@ class RepresentativeController {
 			representativeMap.offset = params.long('offset')
 		}
 
-		representativeMap.representativesTotalNumber = UserVS.countByType(UserVS.Type.REPRESENTATIVE)
-		representativeMap.numberRepresentatives = representativeList.size()
+		representativeMap.numTotalRepresentatives = UserVS.countByType(UserVS.Type.REPRESENTATIVE)
+		representativeMap.numRepresentatives = representativeList.size()
 		representativeList.each {representative ->
 				representativeMap.representatives.add(representativeService.getRepresentativeMap(representative))
 		}
