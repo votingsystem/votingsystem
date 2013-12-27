@@ -15,11 +15,9 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.PropertyResourceBundle;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -48,12 +46,24 @@ public class ContextVS {
     public static final String CSR_REQUEST_ID_KEY         = "csrRequestId";
     public static final String APPLICATION_ID_KEY         = "idAplicacion";
     public static final String EVENT_KEY                  = "eventKey";
+
     public static final String SIGNED_FILE_NAME           = "signedFile";
     public static final String CSR_FILE_NAME              = "csr";
     public static final String ACCESS_REQUEST_FILE_NAME   = "accessRequest";
     public static final String DEFAULT_SIGNED_FILE_NAME   = "smimeMessage.p7m";
     public static final String PROVIDER                   = "BC";
     public static final String SERVER_URL_EXTRA_PROP_NAME = "serverURL";
+
+    //Intent keys
+    public static final String PIN_KEY = "PIN_KEY";
+
+    //Actions IDs
+    public static final String SIGN_AND_SEND_ACTION_ID = "SIGN_AND_SEND_ACTION_ID";
+    public static final String PIN_ACTION_ID = "PIN_ACTION_ID";
+
+    //Notifications IDs
+    public static final int RSS_SERVICE_NOTIFICATION_ID           = 1;
+    public static final int SIGN_AND_SEND_SERVICE_NOTIFICATION_ID = 2;
 
     public static final int KEY_SIZE = 1024;
     public static final int SYMETRIC_ENCRYPTION_KEY_LENGTH = 256;

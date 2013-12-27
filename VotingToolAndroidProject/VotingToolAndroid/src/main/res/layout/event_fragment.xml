@@ -18,7 +18,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/eventVS_subject"
+                android:id="@+id/event_subject"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -39,20 +39,20 @@
                 android:layout_height="fill_parent"
                 android:fillViewport="true" >
                 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:id="@+id/contenedor_evento"
+                    android:id="@+id/event_data_container"
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
                     android:padding="10dp"
                     android:orientation="vertical">
                     <TextView
-                        android:id="@+id/eventvs_content"
+                        android:id="@+id/event_content"
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
                         android:textSize="20sp"
                         android:layout_weight="1.0"/>
 
                     <Button
-                        android:id="@+id/firmar_enviar_button"
+                        android:id="@+id/sign_and_send_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"

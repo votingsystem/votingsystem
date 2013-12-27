@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.text.Html;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -105,7 +106,7 @@ public class EventPublishingFragment extends Fragment implements CertPinDialogLi
     private void loadForm() {
         contextVS = ContextVS.getInstance(getActivity());
         String operationStr = getArguments().getString(OperationVS.OPERATION_KEY);
-        if(operationStr!= null && !operationStr.isEmpty()) { //called from browser
+        if(!TextUtils.isEmpty(operationStr)) { //called from browser
             try {
                 this.pendingOperationVS = OperationVS.parse(operationStr);
                 Log.d(TAG + ".onCreateView(...) ", "restoring: " + operationStr);

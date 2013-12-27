@@ -42,7 +42,7 @@ import org.votingsystem.android.activity.EventStatisticsPagerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.android.callable.SMIMESignedSender;
 import org.votingsystem.android.callable.VoteSender;
-import org.votingsystem.android.db.VoteReceiptDBHelper;
+import org.votingsystem.android.contentprovider.VoteReceiptDBHelper;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ContentTypeVS;
 import org.votingsystem.model.ContextVS;
@@ -119,7 +119,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
         cancelVoteButton.setOnClickListener(this);
         Button saveReceiptButton = (Button) rootView.findViewById(R.id.save_receipt_button);
         saveReceiptButton.setOnClickListener(this);
-        TextView eventSubject = (TextView) rootView.findViewById(R.id.eventVS_subject);
+        TextView eventSubject = (TextView) rootView.findViewById(R.id.event_subject);
         eventSubject.setOnClickListener(this);
         return rootView;
     }
@@ -132,7 +132,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
             case R.id.save_receipt_button:
                 saveVote(view);
                 break;
-            case R.id.eventVS_subject:
+            case R.id.event_subject:
                 onClickSubject(view);
                 break;
         }
@@ -160,14 +160,14 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
         ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(
                 R.string.already_voted_lbl, receipt.getVoto().
                 getOptionSelected().getContent()));
-        TextView subjectTextView = (TextView) rootView.findViewById(R.id.eventVS_subject);
+        TextView subjectTextView = (TextView) rootView.findViewById(R.id.event_subject);
         String subject = receipt.getVoto().getSubject();
         if(subject != null && subject.length() > MAX_SUBJECT_SIZE)
             subject = subject.substring(0, MAX_SUBJECT_SIZE) + " ...";
         subjectTextView.setText(subject);
         cancelVoteButton.setEnabled(true);
         saveReceiptButton.setEnabled(true);
-        TextView contentTextView = (TextView) rootView.findViewById(R.id.eventvs_content);
+        TextView contentTextView = (TextView) rootView.findViewById(R.id.event_content);
         contentTextView.setText(Html.fromHtml(receipt.getVoto().getContent()) + "\n");
         contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
         Set<OptionVS> fieldsEventVS = receipt.getVoto().getFieldsEventVS();
@@ -230,14 +230,14 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
     private void setEventScreen(final EventVS event) {
         Log.d(TAG + ".setEventScreen(...)", " - setEventScreen");
         ((LinearLayout)rootView.findViewById(R.id.receipt_buttons)).setVisibility(View.GONE);
-        TextView subjectTextView = (TextView) rootView.findViewById(R.id.eventVS_subject);
+        TextView subjectTextView = (TextView) rootView.findViewById(R.id.event_subject);
         cancelVoteButton.setEnabled(true);
         saveReceiptButton.setEnabled(true);
         String subject = event.getSubject();
         if(subject != null && subject.length() > MAX_SUBJECT_SIZE)
             subject = subject.substring(0, MAX_SUBJECT_SIZE) + " ...";
         subjectTextView.setText(subject);
-        TextView contentTextView = (TextView) rootView.findViewById(R.id.eventvs_content);
+        TextView contentTextView = (TextView) rootView.findViewById(R.id.event_content);
         contentTextView.setText(Html.fromHtml(event.getContent()));
         //contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
         Set<OptionVS> fieldsEventVS = event.getFieldsEventVS();

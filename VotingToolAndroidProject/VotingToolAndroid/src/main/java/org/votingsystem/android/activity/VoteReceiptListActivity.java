@@ -19,7 +19,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.android.R;
 import org.votingsystem.android.callable.SMIMESignedSender;
-import org.votingsystem.android.db.VoteReceiptDBHelper;
+import org.votingsystem.android.contentprovider.VoteReceiptDBHelper;
 import org.votingsystem.android.ui.CertNotFoundDialog;
 import org.votingsystem.android.ui.CertPinDialog;
 import org.votingsystem.android.ui.CertPinDialogListener;

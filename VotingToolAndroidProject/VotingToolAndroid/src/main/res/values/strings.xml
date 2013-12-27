@@ -98,7 +98,7 @@
 	<string name="repeat_password">Vuelva a introducir el código PIN</string>
 	
 	<string name="nif_error">NIF con errores. Por favor vuelva a intentarlo</string>
-	<string name="givenname_missing_msg">Introduzca el name</string>
+	<string name="givenname_missing_msg">Introduzca el nombre</string>
 	<string name="surname_missing_msg">Introduzca los apellidos</string>
 	<string name="searchLabel">Buscar</string>
 	<string name="app_unstable_msg">La aplicación tiene errores graves, por favor, vuelva a instalarla</string>
@@ -130,6 +130,7 @@
     <string name="low_memory_msg">Memoria baja</string>
     
     <string name="sign_send_msg">Firmar y enviar</string>
+    <string name="select_representative_button">Seleccionar como representante</string>
     
     <string name="voted_lbl">Seleccionada opción</string>
     <string name="cancel_vote_lbl">Anular voto</string>

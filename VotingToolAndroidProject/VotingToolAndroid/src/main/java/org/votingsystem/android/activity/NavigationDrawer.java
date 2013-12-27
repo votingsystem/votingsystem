@@ -147,10 +147,6 @@ public class NavigationDrawer extends ActionBarActivity {
             String searchQuery = getIntent().getStringExtra(SearchManager.QUERY);
             pagerAdapter.setSearchQuery(searchQuery);
         }
-        int  groupPosition = getIntent().getIntExtra(
-                NavigatorDrawerOptionsAdapter.GROUP_POSITION_KEY, -1);
-        if(groupPosition >= 0) pagerAdapter.selectItem(groupPosition,
-                NavigatorDrawerOptionsAdapter.ChildPosition.OPEN.getPosition());
         int selectedGroupPosition = pagerAdapter.getSelectedGroupPosition();
         int selectedChildPosition = pagerAdapter.getSelectedChildPosition();
         if(savedInstanceState != null) {
@@ -178,7 +174,7 @@ public class NavigationDrawer extends ActionBarActivity {
     }
 
     @Override public void onRestoreInstanceState(Bundle savedInstanceState) {
-        Log.d(TAG + ".onRestoreInstanceState(...) ", "onRestoreInstanceState:" + savedInstanceState);
+        Log.d(TAG + ".onRestoreInstanceState(...)", "onRestoreInstanceState:" + savedInstanceState);
         super.onRestoreInstanceState(savedInstanceState);
     }
 

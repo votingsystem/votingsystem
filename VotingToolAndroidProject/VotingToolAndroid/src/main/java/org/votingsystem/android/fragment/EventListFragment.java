@@ -47,7 +47,6 @@ public class EventListFragment extends ListFragment implements
     private static final int EVENT_LIST_LOADER_ID = 0;
 
 
-    private static String errorLoadingEventsMsg = null;
     private static TextView searchTextView;
     private static TextView emptyResultsView;
     private static ListView listView;
@@ -124,7 +123,7 @@ public class EventListFragment extends ListFragment implements
         return rootView;
     }
 
-    protected boolean onLongListItemClick(View v, int pos, long id) {//context menu
+    protected boolean onLongListItemClick(View v, int pos, long id) {
         Log.i(TAG, ".onLongListItemClick - id: " + id);
         return true;
     }
@@ -154,12 +153,6 @@ public class EventListFragment extends ListFragment implements
             mListContainer.setVisibility(View.INVISIBLE);
         }
     }
-    public void setListShown(boolean shown){
-        setListShown(shown, true);
-    }
-    public void setListShownNoAnimation(boolean shown) {
-        setListShown(shown, false);
-    }
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
         Log.d(TAG +  ".onActivityCreated(...)", "onActivityCreated - savedInstanceState: " +
@@ -170,7 +163,7 @@ public class EventListFragment extends ListFragment implements
         mAdapter = new EventListAdapter(getActivity());
         setListAdapter(mAdapter);
         // Start out with a progress indicator.
-        setListShown(false);
+        setListShown(false, true);
         // Prepare the loader.  Either re-connect with an existing one or start a new one.
         getLoaderManager().initLoader(EVENT_LIST_LOADER_ID, null, this);
     }
@@ -233,19 +226,9 @@ public class EventListFragment extends ListFragment implements
     @Override public void onLoadFinished(Loader<List<EventVS>> loader, List<EventVS> data) {
         Log.i(TAG +  ".onLoadFinished", " - onLoadFinished - data: " +
                 ((data == null) ? "NULL":data.size()));
-        if(errorLoadingEventsMsg == null) {
-
-            ((EventListAdapter)getListAdapter()).setData(data);
-        } else {
-            //setEmptyText(getString(R.string.connection_error_msg));
-            //emptyResultsView.setText(getString(R.string.connection_error_msg));
-            errorLoadingEventsMsg = null;
-        }
-        if (isResumed()) {
-            setListShown(true);//Can't be used with a custom content view
-        } else {
-            setListShownNoAnimation(true);
-        }
+        ((EventListAdapter)getListAdapter()).setData(data);
+        if (isResumed()) setListShown(true, true);
+        else setListShown(true, false);
     }
 
     @Override public void onLoaderReset(Loader<List<EventVS>> loader) {
@@ -395,10 +378,9 @@ public class EventListFragment extends ListFragment implements
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     EventVSResponse response = EventVSResponse.parse(responseVS.getMessage());
                     eventList = response.getEvents();
-                } else errorLoadingEventsMsg = responseVS.getMessage();
+                }
             } catch (Exception ex) {
                 Log.e(TAG + ".doInBackground", ex.getMessage(), ex);
-                errorLoadingEventsMsg = getContext().getString(R.string.connection_error_msg);
             }
             return eventList;
         }

@@ -68,16 +68,16 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
         contextVS = ContextVS.getInstance(getActivity());
         event = (EventVS) contextVS.getEvents().get(eventIndex);
         View rootView = inflater.inflate(R.layout.event_fragment, container, false);
-        TextView subjectTextView = (TextView) rootView.findViewById(R.id.eventVS_subject);
+        TextView subjectTextView = (TextView) rootView.findViewById(R.id.event_subject);
         String subject = event.getSubject();
         if(subject != null && subject.length() > MAX_SUBJECT_SIZE)
             subject = subject.substring(0, MAX_SUBJECT_SIZE) + " ...";
         subjectTextView.setText(subject);
-        TextView contentTextView = (TextView) rootView.findViewById(R.id.eventvs_content);
+        TextView contentTextView = (TextView) rootView.findViewById(R.id.event_content);
 
         contentTextView.setText(Html.fromHtml(event.getContent()));
         contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
-        firmarEnviarButton = (Button) rootView.findViewById(R.id.firmar_enviar_button);
+        firmarEnviarButton = (Button) rootView.findViewById(R.id.sign_and_send_button);
         if (!event.isActive()) {
             Log.d(TAG + ".onCreate(..)", " - Event closed");
             firmarEnviarButton.setEnabled(false);
@@ -104,14 +104,14 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
         mainLayout.getForeground().setAlpha( 0);
         isProgressShown = false;
         setHasOptionsMenu(true);
-        TextView eventSubject = (TextView) rootView.findViewById(R.id.eventVS_subject);
+        TextView eventSubject = (TextView) rootView.findViewById(R.id.event_subject);
         eventSubject.setOnClickListener(this);
         return rootView;
     }
 
     @Override public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.eventVS_subject:
+            case R.id.event_subject:
                 onClickSubject(view);
                 break;
         }

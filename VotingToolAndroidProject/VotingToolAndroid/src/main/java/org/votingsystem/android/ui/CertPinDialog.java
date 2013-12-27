@@ -35,45 +35,45 @@ import org.votingsystem.android.R;
 public class CertPinDialog extends DialogFragment implements OnKeyListener {
 
 	public static final String TAG = "CertPinDialog";
+
+    private static final String MESSAGE_KEY          = "MESSAGE_KEY";
+    private static final String PASSWORD_CONFIRM_KEY = "PASSWORD_CONFIRM_KEY";
 	
-    public CertPinDialog() {
-        // Empty constructor required for DialogFragment
-    }
+    public CertPinDialog() {} // Empty constructor required for DialogFragment
     
     private TextView msgTextView;
     private EditText userPinEditText;
     //orientation changes
     private static CertPinDialogListener listener;
     private static String firstPin = null;
-    private static Boolean withPasswordConfirm = null;
+    private Boolean withPasswordConfirm = null;
 
     public static CertPinDialog newInstance(String msg, 
     		CertPinDialogListener dialogListener, boolean isWithPasswordConfirm) {
     	CertPinDialog dialog = new CertPinDialog();
         Bundle args = new Bundle();
-        args.putString("message", msg);
+        args.putString(MESSAGE_KEY, msg);
+        args.putBoolean(PASSWORD_CONFIRM_KEY, isWithPasswordConfirm);
         dialog.setArguments(args);
         listener = dialogListener;
-        withPasswordConfirm = isWithPasswordConfirm;
         return dialog;
     }
 
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-    	Log.d(TAG + ".onCreateView(...) ", " - onCreateView -");
+    	Log.d(TAG + ".onCreateView(...) ", "");
         View view = inflater.inflate(R.layout.cert_pin_dialog, container, false);
         msgTextView = (TextView) view.findViewById(R.id.msg);
         userPinEditText = (EditText)view.findViewById(R.id.user_pin);;
         getDialog().setTitle(getString(R.string.pin_dialog_Caption));
-        if(getArguments().getString("message") == null || 
-        		"".equals(getArguments().getString("message"))) {
+        if(getArguments().getString(MESSAGE_KEY) == null) {
         	msgTextView.setVisibility(View.GONE);
         } else {
         	msgTextView.setVisibility(View.VISIBLE);
-        	msgTextView.setText(getArguments().getString("message"));
+        	msgTextView.setText(getArguments().getString(MESSAGE_KEY));
         }
+        withPasswordConfirm = getArguments().getBoolean(PASSWORD_CONFIRM_KEY);
         getDialog().setOnKeyListener(this);
         setRetainInstance(true);
         /*int width = getResources().getDimensionPixelSize(R.dimen.cert_pin_dialog_width);

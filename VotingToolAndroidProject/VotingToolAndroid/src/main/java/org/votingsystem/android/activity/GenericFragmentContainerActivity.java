@@ -17,18 +17,20 @@
 package org.votingsystem.android.activity;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
-
+import android.util.Log;
 import org.votingsystem.android.R;
-import org.votingsystem.android.fragment.UserCertRequestFragment;
 
 /**
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class UserCertRequestActivity  extends ActionBarActivity {
+public class GenericFragmentContainerActivity extends ActionBarActivity {
 
-	public static final String TAG = "UserCertRequestActivity";
+	public static final String TAG = "GenericFragmentContainerActivity";
+
+    public static final String REQUEST_FRAGMENT_KEY = "REQUEST_FRAGMENT_KEY";
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,10 +41,25 @@ public class UserCertRequestActivity  extends ActionBarActivity {
         if (savedInstanceState != null) {
             return;
         }
-        UserCertRequestFragment requestFragment = new UserCertRequestFragment();
-        requestFragment.setArguments(getIntent().getExtras());
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.fragment_container, requestFragment).commit();
+        Log.d(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
+        String fragmentToOpen = savedInstanceState.getString(REQUEST_FRAGMENT_KEY);
+        if(fragmentToOpen == null) {
+            Log.e(TAG + ".onCreate(...)", "fragmentToOpen null");
+            return;
+        }
+        try {
+            Class fragmentClass = Class.forName(fragmentToOpen);
+            Fragment requestFragment = (Fragment)fragmentClass.newInstance();
+            requestFragment.setArguments(getIntent().getExtras());
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment_container, requestFragment).commit();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
 }

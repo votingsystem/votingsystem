@@ -29,6 +29,7 @@ import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.SubSystemVS;
 import org.votingsystem.model.TypeVS;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -43,37 +44,42 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
     public static final String TAG = "NavigatorDrawerOptionsAdapter";
     public static final String GROUP_POSITION_KEY = "groupPosition";
 
+    public static final int VOTING_GROUP_POSITION          = 0;
+    public static final int MANIFESTS_GROUP_POSITION       = 1;
+    public static final int CLAIMS_GROUP_POSITION          = 2;
+    public static final int REPRESENTATIVES_GROUP_POSITION = 3;
 
     public enum GroupPosition {
-        VOTING(0, SubSystemVS.VOTES, EnumSet.of(
-            ChildPosition.OPEN, ChildPosition.PENDING, ChildPosition.CLOSED)),
-        MANIFESTS(1, SubSystemVS.MANIFESTS, EnumSet.of(
+        VOTING(VOTING_GROUP_POSITION, SubSystemVS.VOTES, Arrays.asList(
                 ChildPosition.OPEN, ChildPosition.PENDING, ChildPosition.CLOSED)),
-        CLAIMS(2, SubSystemVS.CLAIMS, EnumSet.of(
+        MANIFESTS(MANIFESTS_GROUP_POSITION, SubSystemVS.MANIFESTS, Arrays.asList(
                 ChildPosition.OPEN, ChildPosition.PENDING, ChildPosition.CLOSED)),
-        REPRESENTATIVES(3, SubSystemVS.REPRESENTATIVES,  EnumSet.of(
+        CLAIMS(CLAIMS_GROUP_POSITION, SubSystemVS.CLAIMS, Arrays.asList(
+                ChildPosition.OPEN, ChildPosition.PENDING, ChildPosition.CLOSED)),
+        REPRESENTATIVES(REPRESENTATIVES_GROUP_POSITION, SubSystemVS.REPRESENTATIVES,  Arrays.asList(
                 ChildPosition.REPRESENTATIVE_LIST, ChildPosition.REPRESENTATIVE_OPERATION));
+
         int position;
         SubSystemVS subsystem;
-        Set<ChildPosition> childSet;
+        List<ChildPosition> childList;
 
-        private GroupPosition(int position, SubSystemVS subsystem, Set<ChildPosition> childSet) {
+        private GroupPosition(int position, SubSystemVS subsystem, List<ChildPosition> childList) {
             this.position = position;
             this.subsystem = subsystem;
-            this.childSet = childSet;
+            this.childList = childList;
         }
         public static GroupPosition valueOf(int position)  {
             switch (position) {
-                case 0: return VOTING;
-                case 1: return MANIFESTS;
-                case 2: return CLAIMS;
-                case 3: return REPRESENTATIVES;
+                case VOTING_GROUP_POSITION: return VOTING;
+                case MANIFESTS_GROUP_POSITION: return MANIFESTS;
+                case CLAIMS_GROUP_POSITION: return CLAIMS;
+                case REPRESENTATIVES_GROUP_POSITION: return REPRESENTATIVES;
                 default: return null;
             }
         }
 
-        public Set<ChildPosition> getChildSet() {
-            return childSet;
+        public List<ChildPosition> getChildList() {
+            return childList;
         }
 
         public String getURLPart() {
@@ -110,36 +116,7 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
 
     }
 
-    public enum ChildPosition{ OPEN(0), PENDING(1), CLOSED(2), REPRESENTATIVE_LIST(0),
-        REPRESENTATIVE_OPERATION(1);
-
-        private int position;
-
-        private ChildPosition(int position) {
-            this.position = position;
-        }
-
-        public int getPosition() {
-            return position;
-        }
-
-        public static ChildPosition getEventPosition(int position) {
-            switch (position) {
-                case 0: return OPEN;
-                case 1: return PENDING;
-                case 2: return CLOSED;
-                default: return null;
-            }
-        }
-
-        public static ChildPosition getRepresentativePosition(int position) {
-            switch (position) {
-                case 0: return REPRESENTATIVE_LIST;
-                case 1: return REPRESENTATIVE_OPERATION;
-                default: return null;
-            }
-        }
-    }
+    public enum ChildPosition{OPEN, PENDING, CLOSED, REPRESENTATIVE_LIST, REPRESENTATIVE_OPERATION;}
 
 	private Context context;
 	private List<String> listDataHeader; // header titles
@@ -151,9 +128,9 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
         initListData();
 	}
 
-	@Override public Object getChild(int groupPosition, int childPosititon) {
+	@Override public Object getChild(int groupPosition, int childPosition) {
 		return this.listDataChild.get(this.listDataHeader.get(groupPosition))
-				.get(childPosititon);
+				.get(childPosition);
 	}
 
 	@Override public long getChildId(int groupPosition, int childPosition) {
@@ -196,7 +173,7 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
 
 	@Override public View getGroupView(int groupPosition, boolean isExpanded,
 			View convertView, ViewGroup parent) {
-        Log.d(TAG + ".getGroupView(...)", "isExpanded: " + isExpanded);
+        //Log.d(TAG + ".getGroupView(...)", "isExpanded: " + isExpanded);
 		String headerTitle = (String) getGroup(groupPosition);
 		if (convertView == null) {
 			LayoutInflater layoutInflater = (LayoutInflater) this.context
@@ -237,34 +214,24 @@ public class NavigatorDrawerOptionsAdapter extends BaseExpandableListAdapter {
                 ContextVS.getMessage("representativeNavDrawerLbl"));
 
         List<String> voting = new ArrayList<String>();
-        voting.add(ChildPosition.OPEN.getPosition(),
-                context.getString(R.string.open_voting_lbl));
-        voting.add(ChildPosition.PENDING.getPosition(),
-                context.getString(R.string.pending_voting_lbl));
-        voting.add(ChildPosition.CLOSED.getPosition(),
-                context.getString(R.string.closed_voting_lbl));
+        voting.add(context.getString(R.string.open_voting_lbl));
+        voting.add(context.getString(R.string.pending_voting_lbl));
+        voting.add(context.getString(R.string.closed_voting_lbl));
+
 
         List<String> manifests = new ArrayList<String>();
-        manifests.add(ChildPosition.OPEN.getPosition(),
-                context.getString(R.string.open_manifest_lbl));
-        manifests.add(ChildPosition.PENDING.getPosition(),
-                context.getString(R.string.pending_manifest_lbl));
-        manifests.add(ChildPosition.CLOSED.getPosition(),
-                context.getString(R.string.closed_manifest_lbl));
+        manifests.add(context.getString(R.string.open_manifest_lbl));
+        manifests.add(context.getString(R.string.pending_manifest_lbl));
+        manifests.add(context.getString(R.string.closed_manifest_lbl));
 
         List<String> claims = new ArrayList<String>();
-        claims.add(ChildPosition.OPEN.getPosition(),
-                context.getString(R.string.open_claim_lbl));
-        claims.add(ChildPosition.PENDING.getPosition(),
-                context.getString(R.string.pending_claim_lbl));
-        claims.add(ChildPosition.CLOSED.getPosition(),
-                context.getString(R.string.closed_claim_lbl));
+        claims.add(context.getString(R.string.open_claim_lbl));
+        claims.add(context.getString(R.string.pending_claim_lbl));
+        claims.add(context.getString(R.string.closed_claim_lbl));
 
         List<String> representatives = new ArrayList<String>();
-        representatives.add(ChildPosition.REPRESENTATIVE_LIST.getPosition(),
-                ContextVS.getMessage("representativeListOptionLbl"));
-        representatives.add(ChildPosition.REPRESENTATIVE_OPERATION.getPosition(),
-                ContextVS.getMessage("representativeOperationsOptionLbl"));
+        representatives.add(ContextVS.getMessage("representativeListOptionLbl"));
+        representatives.add(ContextVS.getMessage("representativeOperationsOptionLbl"));
 
         listDataChild.put(listDataHeader.get(GroupPosition.VOTING.getPosition()), voting);
         listDataChild.put(listDataHeader.get(GroupPosition.MANIFESTS.getPosition()), manifests);

@@ -9,8 +9,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.View;
-
 import org.votingsystem.android.fragment.EventListFragment;
 import org.votingsystem.android.R;
 import org.votingsystem.model.EventVS;
@@ -21,81 +19,35 @@ import org.votingsystem.android.ui.NavigatorDrawerOptionsAdapter.GroupPosition;
  * @author jgzornoza
  * Licencia: https://github.com/jgzornoza/SistemaVotacion/wiki/Licencia
  */
-public class EventNavigationPagerAdapter extends FragmentStatePagerAdapter implements PagerAdapterVS {
+public class EventNavigationPagerAdapter extends FragmentStatePagerAdapter
+        implements PagerAdapterVS {
 
     public static final String TAG = "EventNavigationPagerAdapter";
 
-    private ChildPosition selectedChild = ChildPosition.OPEN;
     private GroupPosition selectedSubsystem = GroupPosition.VOTING;
-
-    private Fragment openEventsFragment;
-    private Fragment pendingEventsFragment;
-    private Fragment closedEventsFragment;
+    private ChildPosition selectedChild = GroupPosition.VOTING.getChildList().get(0);
 
     private String searchQuery = null;
-
-    private Fragment representativeListFragment;
-    private FragmentManager fragmentManager;
     private ViewPager viewPager;
-    //private Fragment operationsFragment;
 
     public EventNavigationPagerAdapter(FragmentManager fragmentManager, ViewPager viewPager) {
         super(fragmentManager);
-        this.fragmentManager = fragmentManager;
         this.viewPager = viewPager;
     }
 
     @Override public Fragment getItem(int position) {
         EventVS.State eventState = null;
-        Fragment selectedFragment = null;
-        ChildPosition childPosition = ChildPosition.getEventPosition(position);
+        Fragment selectedFragment = new EventListFragment();
+        ChildPosition childPosition = selectedSubsystem.getChildList().get(position);
         switch(childPosition) {
             case OPEN:
                 eventState = EventVS.State.ACTIVE;
-                //selectedFragment = fragmentManager.findFragmentByTag(ChildPosition.OPEN.toString());
-                if(selectedFragment == null) {
-                    selectedFragment = new EventListFragment();
-                    //fragmentManager.beginTransaction().add(selectedFragment, ChildPosition.OPEN.toString()).commit();
-                    Log.d(TAG + ".getItem(...) ", "created new OPEN EventListFragment - id: " + selectedFragment.getId());
-                }
-                /*if(openEventsFragment != null) selectedFragment = openEventsFragment;
-                else {
-                    Log.d(TAG + ".getItem(...) ", "created new OPEN EventListFragment");
-                    openEventsFragment = new EventListFragment();
-                    selectedFragment = openEventsFragment;
-                }*/
                 break;
             case PENDING:
                 eventState = EventVS.State.AWAITING;
-                //selectedFragment = fragmentManager.findFragmentByTag(ChildPosition.PENDING.toString());
-                if(selectedFragment == null) {
-
-                    selectedFragment = new EventListFragment();
-                    Log.d(TAG + ".getItem(...) ", "created new PENDING EventListFragment - id: " + selectedFragment.getId());
-                    //fragmentManager.beginTransaction().add(selectedFragment, ChildPosition.PENDING.toString()).commit();
-                }
-                /*if(pendingEventsFragment != null) selectedFragment = pendingEventsFragment;
-                else {
-                    Log.d(TAG + ".getItem(...) ", "created new AWAITING EventListFragment");
-                    pendingEventsFragment = new EventListFragment();
-                    selectedFragment = pendingEventsFragment;
-                }*/
                 break;
             case CLOSED:
                 eventState = EventVS.State.TERMINATED;
-                //selectedFragment = fragmentManager.findFragmentByTag(ChildPosition.CLOSED.toString());
-                if(selectedFragment == null) {
-
-                    selectedFragment = new EventListFragment();
-                    //  fragmentManager.beginTransaction().add(selectedFragment, ChildPosition.CLOSED.toString()).commit();
-                    Log.d(TAG + ".getItem(...) ", "created new CLOSED EventListFragment - id: " + selectedFragment.getId());
-                }
-                /*if(closedEventsFragment != null) selectedFragment = closedEventsFragment;
-                else {
-                    Log.d(TAG + ".getItem(...) ", "created new TERMINATED EventListFragment");
-                    closedEventsFragment = new EventListFragment();
-                    selectedFragment = closedEventsFragment;
-                }*/
                 break;
         }
         Bundle args = new Bundle();
@@ -164,15 +116,15 @@ public class EventNavigationPagerAdapter extends FragmentStatePagerAdapter imple
             selectedSubsystem = newSelectedSubsystem;
             viewPager.setAdapter(this);
         }
-        selectedChild = ChildPosition.getEventPosition(childPosition);
+        selectedChild = selectedSubsystem.getChildList().get(childPosition);
     }
 
     public void updateChildPosition(int childPosition) {
-        selectedChild = ChildPosition.getEventPosition(childPosition);
+        selectedChild = selectedSubsystem.getChildList().get(childPosition);
     }
 
     public int getSelectedChildPosition() {
-        return selectedChild.getPosition();
+        return selectedSubsystem.getChildList().indexOf(selectedChild);
     }
 
     public int getSelectedGroupPosition() {
@@ -193,9 +145,9 @@ public class EventNavigationPagerAdapter extends FragmentStatePagerAdapter imple
 
     @Override public int getCount() {
         switch(selectedSubsystem) {
-            case CLAIMS: return GroupPosition.CLAIMS.getChildSet().size();
-            case MANIFESTS: return GroupPosition.MANIFESTS.getChildSet().size();
-            case VOTING:return GroupPosition.VOTING.getChildSet().size();
+            case CLAIMS: return GroupPosition.CLAIMS.getChildList().size();
+            case MANIFESTS: return GroupPosition.MANIFESTS.getChildList().size();
+            case VOTING:return GroupPosition.VOTING.getChildList().size();
             default:
                 Log.d(TAG + ".getCount(...)", " system without pages: " + selectedSubsystem);
                 return 0;

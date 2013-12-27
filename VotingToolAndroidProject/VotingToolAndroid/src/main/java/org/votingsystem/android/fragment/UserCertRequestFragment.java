@@ -13,6 +13,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.telephony.TelephonyManager;
 import android.text.Html;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -229,11 +230,11 @@ public class UserCertRequestFragment extends Fragment implements CertPinDialogLi
     		showMessage(getString(R.string.error_lbl), getString(R.string.nif_error));
     		return false;
     	}
-    	if(givennameText.getText().toString().trim().isEmpty()){
+    	if(TextUtils.isEmpty(givennameText.getText().toString())){
     		showMessage(getString(R.string.error_lbl), getString(R.string.givenname_missing_msg));
     		return false;
     	}
-    	if(surnameText.getText().toString().trim().isEmpty()){
+    	if(TextUtils.isEmpty(surnameText.getText().toString())){
     		showMessage(getString(R.string.error_lbl), getString(R.string.surname_missing_msg));
     		return false;
     	}

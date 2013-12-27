@@ -18,7 +18,7 @@ public class EventPublishingActivity extends ActionBarActivity {
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        setContentView(R.layout.user_cert_request_activity);
+        setContentView(R.layout.generic_fragment_container_activity);
         // if we're being restored from a previous state should return or else
         // we could end up with overlapping fragments.
         if (savedInstanceState != null) {

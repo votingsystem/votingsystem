@@ -16,7 +16,7 @@
             android:orientation="vertical" >
 
             <TextView
-                android:id="@+id/eventVS_subject"
+                android:id="@+id/event_subject"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:clickable="true"
@@ -70,14 +70,14 @@
 
                 <LinearLayout
                     xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:id="@+id/contenedor_evento"
+                    android:id="@+id/event_data_container"
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
                     android:orientation="vertical"
                     android:padding="10dp" >
 
                     <TextView
-                        android:id="@+id/eventvs_content"
+                        android:id="@+id/event_content"
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
                         android:minHeight="100dp"

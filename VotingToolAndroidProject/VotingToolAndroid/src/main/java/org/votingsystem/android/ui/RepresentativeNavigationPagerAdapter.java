@@ -9,7 +9,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.View;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.RepresentativeListFragment;
 import org.votingsystem.android.fragment.RepresentativeOperationsFragment;
@@ -26,7 +25,7 @@ public class RepresentativeNavigationPagerAdapter extends FragmentStatePagerAdap
 
     public static final String TAG = "RepresentativeNavigationPagerAdapter";
 
-    private ChildPosition selectedChild = ChildPosition.OPEN;
+    private ChildPosition selectedChild = GroupPosition.REPRESENTATIVES.getChildList().get(0);
 
     private String searchQuery = null;
     private FragmentManager fragmentManager;
@@ -41,7 +40,7 @@ public class RepresentativeNavigationPagerAdapter extends FragmentStatePagerAdap
 
     @Override public Fragment getItem(int position) {
         Fragment selectedFragment = null;
-        ChildPosition childPosition = ChildPosition.getRepresentativePosition(position);
+        ChildPosition childPosition = GroupPosition.REPRESENTATIVES.getChildList().get(position);
         switch(childPosition) {
             case REPRESENTATIVE_LIST:
                 selectedFragment = new RepresentativeListFragment();
@@ -78,15 +77,15 @@ public class RepresentativeNavigationPagerAdapter extends FragmentStatePagerAdap
     }
 
     public void selectItem(int groupPosition, int childPosition) {
-        selectedChild = ChildPosition.getEventPosition(childPosition);
+        selectedChild = GroupPosition.REPRESENTATIVES.getChildList().get(childPosition);
     }
 
     public void updateChildPosition(int childPosition) {
-        selectedChild = ChildPosition.getEventPosition(childPosition);
+        selectedChild = GroupPosition.REPRESENTATIVES.getChildList().get(childPosition);
     }
 
     public int getSelectedChildPosition() {
-        return selectedChild.getPosition();
+        return  GroupPosition.REPRESENTATIVES.getChildList().indexOf(selectedChild);
     }
 
     public int getSelectedGroupPosition() {
@@ -98,7 +97,7 @@ public class RepresentativeNavigationPagerAdapter extends FragmentStatePagerAdap
     }
 
     @Override public int getCount() {
-        return GroupPosition.REPRESENTATIVES.getChildSet().size();
+        return GroupPosition.REPRESENTATIVES.getChildList().size();
     }
 
 }

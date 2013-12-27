@@ -1,4 +1,4 @@
-package org.votingsystem.android.db;
+package org.votingsystem.android.contentprovider;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -28,7 +28,7 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 	public static final String TAG = "VoteReceiptDBHelper";
 	
 	private static final int DATABASE_VERSION = 3;
-	private static final String DB_NAME               = "voting_system.db";
+	private static final String DB_NAME               = "voting_system_vote_receipt.db";
 	static final String TABLE_NAME                    = "vote_receipt";
 	static final String ID_COL                        = "id";
 	static final String KEY_COL                       = "key";
@@ -47,8 +47,7 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 		Log.d(TAG + ".onCreate(...)" , "dbFile.getAbsolutePath(): " + dbFile.getAbsolutePath());
 	}
 
-	@Override
-	public void onCreate(SQLiteDatabase db) {
+	@Override public void onCreate(SQLiteDatabase db) {
 		String sql = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " ( "	+ 
 				ID_COL                        + " INTEGER PRIMARY KEY AUTOINCREMENT, " + 
 				KEY_COL                       + " TEXT NOT NULL, " + 
@@ -58,14 +57,13 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 				JSON_DATA_COL                 + " blob, " +
 				CANCEL_VOTE_RECEIPT_SMIME_COL + " blob, " +
 				ENCRYPTED_KEY_COL             + " blob);";
-		Log.d(TAG + ".onCreate(...)", " - onCreate");
+		Log.d(TAG + ".onCreate(...)", "");
 		db.execSQL(sql);
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldV, int newV) {
-		Log.d(TAG + ".onUpgrade(...)", " - onUpgrade - oldV: " + oldV + 
-				" - newV: " + newV);
+		Log.d(TAG + ".onUpgrade(...)", "oldV: " + oldV + " - newV: " + newV);
 		db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
 		onCreate(db);// Create tables again
 	}
@@ -191,11 +189,8 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 	}
 
   private static void close(Cursor cursor, SQLiteDatabase database) {
-	    if (cursor != null) {
-	      cursor.close();
-	    }
-	    if (database != null) {
-	      database.close();
-	    }
+	    if (cursor != null) cursor.close();
+	    if (database != null) database.close();
   }
+
 }
