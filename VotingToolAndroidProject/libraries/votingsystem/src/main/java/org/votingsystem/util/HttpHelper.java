@@ -80,7 +80,7 @@ public class HttpHelper {
             HttpGet httpget = new HttpGet(serverURL);
             if(contentType != null) httpget.setHeader("Content-Type", contentType.getName());
             response = httpclient.execute(httpget);
-            Log.d(TAG + ".getInformacion" ,"----------------------------------------");
+            Log.d(TAG + ".getData" ,"----------------------------------------");
             /*Header[] headers = response.getAllHeaders();
             for (int i = 0; i < headers.length; i++) {
             System.out.println(headers[i]);

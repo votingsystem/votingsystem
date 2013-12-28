@@ -44,7 +44,7 @@ public class RepresentativeOperationsFragment extends Fragment implements CertPi
            Bundle savedInstanceState) {
         Log.d(TAG + ".onCreateView(...)", "onCreateView");
         super.onCreate(savedInstanceState);
-        contextVS = ContextVS.getInstance(getActivity());
+        contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
         View rootView = inflater.inflate(R.layout.representative_operations_fragment, container, false);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         getActivity().setTitle(ContextVS.getMessage("representativeOperationsDescription"));
@@ -98,7 +98,7 @@ public class RepresentativeOperationsFragment extends Fragment implements CertPi
 		switch (item.getItemId()) {
 	    	case android.R.id.home:
 	    		Log.d(TAG + ".onOptionsItemSelected(...) ", "home");
-	    		Intent intent = new Intent(getActivity(), NavigationDrawer.class);
+	    		Intent intent = new Intent(getActivity().getApplicationContext(), NavigationDrawer.class);
 	    		startActivity(intent);
 	    		return true;
 	    	default:
@@ -140,8 +140,8 @@ public class RepresentativeOperationsFragment extends Fragment implements CertPi
         isProgressShown = shown;
         if (!shown) {
             if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(getActivity(),
-                        android.R.anim.fade_out));
+                progressContainer.startAnimation(AnimationUtils.loadAnimation(
+                        getActivity().getApplicationContext(), android.R.anim.fade_out));
                 //eventContainer.startAnimation(AnimationUtils.loadAnimation(
                 //        this, android.R.anim.fade_in));
             }
@@ -155,7 +155,7 @@ public class RepresentativeOperationsFragment extends Fragment implements CertPi
         } else {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_in));
+                        getActivity().getApplicationContext(), android.R.anim.fade_in));
                 //eventContainer.startAnimation(AnimationUtils.loadAnimation(
                 //        this, android.R.anim.fade_out));
             }

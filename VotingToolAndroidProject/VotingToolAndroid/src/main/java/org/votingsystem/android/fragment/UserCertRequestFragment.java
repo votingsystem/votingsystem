@@ -87,7 +87,7 @@ public class UserCertRequestFragment extends Fragment implements CertPinDialogLi
            Bundle savedInstanceState) {
         Log.d(TAG + ".onCreateView(...)", "onCreateView");
         super.onCreate(savedInstanceState);
-        contextVS = ContextVS.getInstance(getActivity());
+        contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
         View rootView = inflater.inflate(R.layout.user_cert_request_fragment, container, false);
         progressContainer = rootView.findViewById(R.id.progressContainer);
         getActivity().setTitle(getString(R.string.request_certificate_form_lbl));
@@ -95,7 +95,8 @@ public class UserCertRequestFragment extends Fragment implements CertPinDialogLi
         cancelButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 //finish();
-                Intent intent = new Intent(getActivity(), NavigationDrawer.class);
+                Intent intent = new Intent(getActivity().getApplicationContext(),
+                        NavigationDrawer.class);
                 startActivity(intent);
             }
         });
@@ -175,7 +176,8 @@ public class UserCertRequestFragment extends Fragment implements CertPinDialogLi
 		switch (item.getItemId()) {
 	    	case android.R.id.home:
 	    		Log.d(TAG + ".onOptionsItemSelected(...) ", "home");
-	    		Intent intent = new Intent(getActivity(), NavigationDrawer.class);
+	    		Intent intent = new Intent(getActivity().getApplicationContext(),
+                        NavigationDrawer.class);
 	    		startActivity(intent);
 	    		return true;
 	    	default:
@@ -281,8 +283,8 @@ public class UserCertRequestFragment extends Fragment implements CertPinDialogLi
         isProgressShown = shown;
         if (!shown) {
             if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(getActivity(),
-                        android.R.anim.fade_out));
+                progressContainer.startAnimation(AnimationUtils.loadAnimation(
+                        getActivity().getApplicationContext(), android.R.anim.fade_out));
                 //eventContainer.startAnimation(AnimationUtils.loadAnimation(
                 //        this, android.R.anim.fade_in));
             }
@@ -296,7 +298,7 @@ public class UserCertRequestFragment extends Fragment implements CertPinDialogLi
         } else {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_in));
+                        getActivity().getApplicationContext(), android.R.anim.fade_in));
                 //eventContainer.startAnimation(AnimationUtils.loadAnimation(
                 //        this, android.R.anim.fade_out));
             }
@@ -362,13 +364,15 @@ public class UserCertRequestFragment extends Fragment implements CertPinDialogLi
             Log.d(TAG + ".SendDataTask.onPostExecute", "statusCode: " + responseVS.getStatusCode());
             //showProgress(false, true);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(
+                        getActivity().getApplicationContext());
                 SharedPreferences.Editor editor = settings.edit();
                 Long requestId = Long.valueOf(responseVS.getMessage());
                 editor.putLong(CSR_REQUEST_ID_KEY, requestId);
                 editor.commit();
                 contextVS.setState(State.WITH_CSR);
-                Intent intent = new Intent(getActivity(), UserCertResponseActivity.class);
+                Intent intent = new Intent(getActivity().getApplicationContext(),
+                        UserCertResponseActivity.class);
                 startActivity(intent);
             } else {
                 AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());

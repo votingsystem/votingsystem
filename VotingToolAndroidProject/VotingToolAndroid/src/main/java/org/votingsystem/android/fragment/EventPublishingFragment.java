@@ -104,7 +104,7 @@ public class EventPublishingFragment extends Fragment implements CertPinDialogLi
     }
 
     private void loadForm() {
-        contextVS = ContextVS.getInstance(getActivity());
+        contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
         String operationStr = getArguments().getString(OperationVS.OPERATION_KEY);
         if(!TextUtils.isEmpty(operationStr)) { //called from browser
             try {
@@ -168,7 +168,8 @@ public class EventPublishingFragment extends Fragment implements CertPinDialogLi
 		switch (item.getItemId()) {        
 	    	case android.R.id.home:  
 	    		Log.d(TAG + ".onOptionsItemSelected(...) ", " - home - ");
-	    		Intent intent = new Intent(getActivity(), NavigationDrawer.class);
+	    		Intent intent = new Intent(getActivity().getApplicationContext(),
+                        NavigationDrawer.class);
 	    		startActivity(intent); 
 	    		return true;        
 	    	default:            
@@ -278,7 +279,7 @@ public class EventPublishingFragment extends Fragment implements CertPinDialogLi
         if (!shown) {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_out));
+                        getActivity().getApplicationContext(), android.R.anim.fade_out));
                 //eventContainer.startAnimation(AnimationUtils.loadAnimation(
                 //        this, android.R.anim.fade_in));
             }
@@ -292,7 +293,7 @@ public class EventPublishingFragment extends Fragment implements CertPinDialogLi
         } else {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_in));
+                        getActivity().getApplicationContext(), android.R.anim.fade_in));
                 //eventContainer.startAnimation(AnimationUtils.loadAnimation(
                 //        this, android.R.anim.fade_out));
             }
@@ -328,7 +329,8 @@ public class EventPublishingFragment extends Fragment implements CertPinDialogLi
                     case MANIFEST_PUBLISHING:
                         PDFPublisher publisher = new PDFPublisher(pendingOperationVS.getUrlEnvioDocumento(),
                                 pendingOperationVS.getContentFirma().toString(),
-                                keyStoreBytes, pin.toCharArray(), null, null, getActivity());
+                                keyStoreBytes, pin.toCharArray(), null, null,
+                                getActivity().getApplicationContext());
                         responseVS = publisher.call();
                         break;
                     case VOTING_PUBLISHING:
@@ -341,7 +343,8 @@ public class EventPublishingFragment extends Fragment implements CertPinDialogLi
                                 ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
                                 pendingOperationVS.getSignedMessageSubject(),
                                 keyStoreBytes, pin.toCharArray(),
-                                contextVS.getAccessControl().getCertificate(), getActivity());
+                                contextVS.getAccessControl().getCertificate(),
+                                getActivity().getApplicationContext());
                         responseVS = smimeSignedSender.call();
                         break;
                     default:
@@ -393,7 +396,8 @@ public class EventPublishingFragment extends Fragment implements CertPinDialogLi
                 new AlertDialog.Builder(getActivity()).setTitle(resultCaption).
                         setMessage(resultMsg).setPositiveButton(R.string.ok_button, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        Intent intent = new Intent(getActivity(), NavigationDrawer.class);
+                        Intent intent = new Intent(getActivity().getApplicationContext(),
+                                NavigationDrawer.class);
                         intent.putExtra(NavigatorDrawerOptionsAdapter.GROUP_POSITION_KEY,
                                 groupPosition.getPosition());
                         startActivity(intent);

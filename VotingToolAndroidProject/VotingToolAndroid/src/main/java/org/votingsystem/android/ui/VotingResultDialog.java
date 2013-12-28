@@ -46,7 +46,7 @@ public class VotingResultDialog  extends DialogFragment {
         }
 
         if(reciboVoto != null) {
-            String msg = reciboVoto.getMensaje(getActivity().getBaseContext());
+            String msg = reciboVoto.getMensaje(getActivity().getApplicationContext());
             if(msg != null && msg.length() > MAX_MSG_LENGTH)
                 msg = msg.substring(0, MAX_MSG_LENGTH) + "...";
             msgTextView.setText(msg);

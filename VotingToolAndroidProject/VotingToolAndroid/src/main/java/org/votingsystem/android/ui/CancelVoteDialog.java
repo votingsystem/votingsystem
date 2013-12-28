@@ -45,7 +45,7 @@ public class CancelVoteDialog  extends DialogFragment {
     
 	public void saveCancelReceipt(View v) {
 		Log.d(TAG + ".saveCancelReceipt(...)", " - saveCancelReceipt");
-    	VoteReceiptDBHelper db = new VoteReceiptDBHelper(getActivity());
+    	VoteReceiptDBHelper db = new VoteReceiptDBHelper(getActivity().getApplicationContext());
 		try {
 			if(receipt.getId() > 0) {
 				db.updateVoteReceipt(receipt);

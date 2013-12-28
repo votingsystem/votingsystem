@@ -42,12 +42,14 @@ public class CertNotFoundDialog  extends DialogFragment {
         openReceiptButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
             	Intent intent = null;
-          	  	switch(ContextVS.getInstance(getActivity().getBaseContext()).getState()) {
+          	  	switch(ContextVS.getInstance(getActivity().getApplicationContext()).getState()) {
           	  		case WITH_CSR:
-          	  			intent = new Intent(getActivity(), UserCertResponseActivity.class);
+          	  			intent = new Intent(getActivity().getApplicationContext(),
+                                UserCertResponseActivity.class);
           	  			break;
           	  		case WITHOUT_CSR:
-          	  			intent = new Intent(getActivity(), UserCertRequestActivity.class);
+          	  			intent = new Intent(getActivity().getApplicationContext(),
+                                UserCertRequestActivity.class);
           	  			break;
           	  	}
           	  	if(intent != null) startActivity(intent);

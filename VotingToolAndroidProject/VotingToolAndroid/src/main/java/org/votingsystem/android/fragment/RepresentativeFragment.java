@@ -95,12 +95,12 @@ public class RepresentativeFragment extends Fragment implements CertPinDialogLis
            Bundle savedInstanceState) {
         Log.d(TAG + ".onCreateView(...)", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
-        contextVS = ContextVS.getInstance(getActivity());
+        contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ContextVS.SIGN_AND_SEND_ACTION_ID);
 
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, intentFilter);
 
         View rootView = inflater.inflate(R.layout.representative_fragment, container, false);
@@ -138,7 +138,8 @@ public class RepresentativeFragment extends Fragment implements CertPinDialogLis
     @Override public void onDestroy() {
         super.onDestroy();
         Log.d(TAG + ".onDestroy()", "onDestroy");
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
+                unregisterReceiver(broadcastReceiver);
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
@@ -161,7 +162,8 @@ public class RepresentativeFragment extends Fragment implements CertPinDialogLis
 		switch (item.getItemId()) {
 	    	case android.R.id.home:
 	    		Log.d(TAG + ".onOptionsItemSelected(...) ", "home");
-	    		Intent intent = new Intent(getActivity(), NavigationDrawer.class);
+	    		Intent intent = new Intent(getActivity().getApplicationContext(),
+                        NavigationDrawer.class);
 	    		startActivity(intent);
 	    		return true;
 	    	default:
@@ -193,8 +195,9 @@ public class RepresentativeFragment extends Fragment implements CertPinDialogLis
         if (prev != null) ft.remove(prev);
         ft.commit();
         if(pin == null) return;
-        Intent signAndSendServiceIntent = new Intent(getActivity(), SignAndSendService.class);
-        signAndSendServiceIntent.putExtra("pin", pin);
+        Intent signAndSendServiceIntent = new Intent(getActivity().getApplicationContext(),
+                SignAndSendService.class);
+        signAndSendServiceIntent.putExtra(ContextVS.PIN_KEY, pin);
         getActivity().startService(signAndSendServiceIntent);
         showProgress(true, true);
     }
@@ -204,8 +207,8 @@ public class RepresentativeFragment extends Fragment implements CertPinDialogLis
         isProgressShown = shown;
         if (!shown) {
             if (animate) {
-                progressContainer.startAnimation(AnimationUtils.loadAnimation(getActivity(),
-                        android.R.anim.fade_out));
+                progressContainer.startAnimation(AnimationUtils.loadAnimation(
+                        getActivity().getApplicationContext(), android.R.anim.fade_out));
                 //eventContainer.startAnimation(AnimationUtils.loadAnimation(
                 //        this, android.R.anim.fade_in));
             }
@@ -219,7 +222,7 @@ public class RepresentativeFragment extends Fragment implements CertPinDialogLis
         } else {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_in));
+                        getActivity().getApplicationContext(), android.R.anim.fade_in));
                 //eventContainer.startAnimation(AnimationUtils.loadAnimation(
                 //        this, android.R.anim.fade_out));
             }

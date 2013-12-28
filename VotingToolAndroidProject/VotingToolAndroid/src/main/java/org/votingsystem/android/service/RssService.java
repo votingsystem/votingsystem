@@ -73,11 +73,9 @@ public class RssService extends Service  implements Runnable {
         lastCheckedTime = new GregorianCalendar();
         lastCheckedTime.setTimeInMillis(pref.getLong(LAST_CHECKED_KEY, 0));
 
-
-        // Need to run ourselves on a new thread, because
-        // we will be making resource-intensive HTTP calls.
-        // Our run() method will check whether we need to requery
-        // our sources.
+        /*Services run in the main thread of their hosting process. This means that, if
+        * it's going to do any CPU intensive (such as networking) operations, it should
+        * spawn its own thread in which to do that work.*/
         Thread thr = new Thread(null, this, "rss_service_thread");
         thr.start();
         Log.i(TAG + ".onCreate(...) ", "RssService created");

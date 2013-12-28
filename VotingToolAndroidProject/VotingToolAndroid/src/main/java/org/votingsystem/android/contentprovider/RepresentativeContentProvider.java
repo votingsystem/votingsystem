@@ -27,13 +27,16 @@ public class RepresentativeContentProvider extends ContentProvider {
     private static final String DB_NAME = "voting_system_representatives.db";
     static final String TABLE_REPRESENTATIVES = "representatives";
 
-    public static final String ID = "id";
-    public static final String URL = "url";
+    public static final String ID_COL = "id";
+    public static final String URL_COL = "url";
+    public static final String NIF_COL = "nif";
+    public static final String NUM_REPRESENTATIONS_COL = "numRepresentations";
+    public static final String FULL_NAME_COL = "fullName";
     static final String JSON_DATA_COL = "jsonData";
     static final String IMAGE_COL = "image";
     static final String TIMESTAMP_CREATED_COL = "timestampCreated";
     static final String TIMESTAMP_UPDATED_COL = "timestampUpdated";
-    public static final String DEFAULT_SORT_ORDER = ID + " DESC";
+    public static final String DEFAULT_SORT_ORDER = ID_COL + " DESC";
 
     private SQLiteDatabase database;
 
@@ -47,8 +50,9 @@ public class RepresentativeContentProvider extends ContentProvider {
         URI_MATCHER.addURI("votingsysten.org", "representative/#", SPECIFIC_REPRESENTATIVES);
     }
 
+    public static final String AUTHORITY = "votingsystem.org.representative";
     // Here's the public URI used to query for representative items.
-    public static final Uri CONTENT_URI = Uri.parse( "content://votingsysten.org/representative");
+    public static final Uri CONTENT_URI = Uri.parse( "content://" + AUTHORITY);
 
     @Override public boolean onCreate() {
         // First we need to open the database. If this is our first time,
@@ -126,7 +130,7 @@ public class RepresentativeContentProvider extends ContentProvider {
 
     @Override public int delete(Uri uri, String selection, String[] selectionArgs) {
         // NOTE Argument checking code omitted. Check your parameters!
-        int rowCount = database.delete(TABLE_REPRESENTATIVES, ID + " = ?",
+        int rowCount = database.delete(TABLE_REPRESENTATIVES, ID_COL + " = ?",
                 new String[]{String.valueOf(ContentUris.parseId(uri))});
         // Notify any listeners and return the deleted row count.
         getContext().getContentResolver().notifyChange(uri, null);
@@ -138,8 +142,11 @@ public class RepresentativeContentProvider extends ContentProvider {
         public static final String TAG = "DatabaseHelper";
 
         private static final String DATABASE_CREATE = "CREATE TABLE " + TABLE_REPRESENTATIVES + "(" +
-                ID + " INTEGER PRIMARY KEY, " +
-                URL + " TEXT," +
+                ID_COL + " INTEGER PRIMARY KEY, " +
+                URL_COL + " TEXT," +
+                NIF_COL + " TEXT," +
+                NUM_REPRESENTATIONS_COL + " INTEGER DEFAULT 1, " +
+                FULL_NAME_COL + " TEXT, " +
                 JSON_DATA_COL + " TEXT, " +
                 IMAGE_COL + " blob, " +
                 TIMESTAMP_UPDATED_COL + " INTEGER DEFAULT 0, " +

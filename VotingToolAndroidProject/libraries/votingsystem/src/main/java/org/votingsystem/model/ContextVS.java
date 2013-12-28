@@ -56,10 +56,13 @@ public class ContextVS {
 
     //Intent keys
     public static final String PIN_KEY = "PIN_KEY";
+    public static final String URL_KEY = "URL_KEY";
+    public static final String HTTP_RESPONSE_KEY = "HTTP_RESPONSE_KEY";
 
     //Actions IDs
     public static final String SIGN_AND_SEND_ACTION_ID = "SIGN_AND_SEND_ACTION_ID";
     public static final String PIN_ACTION_ID = "PIN_ACTION_ID";
+    public static final String HTTP_DATA_INITIALIZED_ACTION_ID = "HTTP_DATA_INITIALIZED_ACTION_ID";
 
     //Notifications IDs
     public static final int RSS_SERVICE_NOTIFICATION_ID           = 1;
@@ -110,7 +113,7 @@ public class ContextVS {
 
     private ContextVS(Context context) {
         System.setProperty("android.os.Build.ID", android.os.Build.ID);
-        this.context = context.getApplicationContext();
+        this.context = context;
         try {
             Context_iTextVS.init(context);
             VotingSystemKeyGenerator.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);

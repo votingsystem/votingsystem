@@ -27,7 +27,7 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 
 	public static final String TAG = "VoteReceiptDBHelper";
 	
-	private static final int DATABASE_VERSION = 3;
+	private static final int DATABASE_VERSION = 1;
 	private static final String DB_NAME               = "voting_system_vote_receipt.db";
 	static final String TABLE_NAME                    = "vote_receipt";
 	static final String ID_COL                        = "id";

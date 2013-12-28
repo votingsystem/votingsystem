@@ -72,9 +72,9 @@ public class EventListFragment extends ListFragment implements
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = contextVS.getInstance(getActivity().getBaseContext());
+        contextVS = contextVS.getInstance(getActivity().getApplicationContext());
         if(contextVS.getAccessControl() == null) {
-            Intent intent = new Intent(getActivity(), MainActivity.class);
+            Intent intent = new Intent(getActivity().getApplicationContext(), MainActivity.class);
             startActivity(intent);
         }
         Bundle args = getArguments();
@@ -136,18 +136,18 @@ public class EventListFragment extends ListFragment implements
         if (shown) {
             if (animate) {
                 mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_out));
+                        getActivity().getApplicationContext(), android.R.anim.fade_out));
                 mListContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_in));
+                        getActivity().getApplicationContext(), android.R.anim.fade_in));
             }
             mProgressContainer.setVisibility(View.GONE);
             mListContainer.setVisibility(View.VISIBLE);
         } else {
             if (animate) {
                 mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_in));
+                        getActivity().getApplicationContext(), android.R.anim.fade_in));
                 mListContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_out));
+                        getActivity().getApplicationContext(), android.R.anim.fade_out));
             }
             mProgressContainer.setVisibility(View.VISIBLE);
             mListContainer.setVisibility(View.INVISIBLE);
@@ -160,7 +160,7 @@ public class EventListFragment extends ListFragment implements
         super.onActivityCreated(savedInstanceState);
         getView().setBackgroundColor(Color.WHITE);
         //if(savedInstanceState != null) return;
-        mAdapter = new EventListAdapter(getActivity());
+        mAdapter = new EventListAdapter(getActivity().getApplicationContext());
         setListAdapter(mAdapter);
         // Start out with a progress indicator.
         setListShown(false, true);
@@ -196,13 +196,14 @@ public class EventListFragment extends ListFragment implements
         EventVS event = ((EventVS) getListAdapter().getItem(position));
         contextVS.setEvent(event);
         contextVS.setEventList(mAdapter.getEvents());
-        Intent intent = new Intent(getActivity(), EventPagerActivity.class);
+        Intent intent = new Intent(getActivity().getApplicationContext(), EventPagerActivity.class);
         startActivity(intent);
     }
 
     @Override public Loader<List<EventVS>> onCreateLoader(int id, Bundle args) {
         Log.d(TAG +  ".onCreateLoader(..)", " - eventState: " + eventState + " - groupPosition: " + groupPosition);
-        return new EventListLoader(getActivity(), groupPosition, eventState, queryStr, offset);
+        return new EventListLoader(getActivity().getApplicationContext(), groupPosition,
+                eventState, queryStr, offset);
     }
 
     @Override public void onAttach(Activity activity) {

@@ -18,10 +18,14 @@ package org.votingsystem.android.activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.SearchManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.*;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -65,10 +69,12 @@ public class NavigationDrawer extends ActionBarActivity {
     private RepresentativeNavigationPagerAdapter representativePagerAdapter;
     private EventNavigationPagerAdapter pagerAdapter;
 
+
     @Override protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG + ".onCreate(...)", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.navigation_drawer);
+
 
         mViewPager = (ViewPager) findViewById(R.id.pager);
         pagerAdapter = new EventNavigationPagerAdapter(getSupportFragmentManager(), mViewPager);

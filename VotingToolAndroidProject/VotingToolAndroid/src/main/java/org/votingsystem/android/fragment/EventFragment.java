@@ -61,11 +61,9 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                        Bundle savedInstanceState) {
-        //TODO, this is for long inactive periods
-        if(getActivity() == null) return null;
         Bundle args = getArguments();
         eventIndex =  args.getInt(EventPagerActivity.EventsPagerAdapter.EVENT_INDEX_KEY);
-        contextVS = ContextVS.getInstance(getActivity());
+        contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
         event = (EventVS) contextVS.getEvents().get(eventIndex);
         View rootView = inflater.inflate(R.layout.event_fragment, container, false);
         TextView subjectTextView = (TextView) rootView.findViewById(R.id.event_subject);
@@ -126,7 +124,8 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
         Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.eventInfo:
-                Intent intent = new Intent(getActivity(), EventStatisticsPagerActivity.class);
+                Intent intent = new Intent(getActivity().getApplicationContext(),
+                        EventStatisticsPagerActivity.class);
                 startActivity(intent);
                 return true;
             default:
@@ -204,7 +203,7 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
         if (!shown) {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_out));
+                        getActivity().getApplicationContext(), android.R.anim.fade_out));
                 //eventContainer.startAnimation(AnimationUtils.loadAnimation(
                 //        this, android.R.anim.fade_in));
             }
@@ -221,7 +220,7 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
         } else {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_in));
+                        getActivity().getApplicationContext(), android.R.anim.fade_in));
                 //eventContainer.startAnimation(AnimationUtils.loadAnimation(
                 //        this, android.R.anim.fade_out));
             }
@@ -290,11 +289,11 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
 
     private void addFormField(String label, int type, LinearLayout mFormView, int id) {
         Log.d(TAG + ".addFormField(...)", " - addFormField - field: " + label);
-        TextView tvLabel = new TextView(getActivity());
+        TextView tvLabel = new TextView(getActivity().getApplicationContext());
         tvLabel.setLayoutParams(getDefaultParams(true));
         tvLabel.setText(label);
 
-        EditText editView = new EditText(getActivity());
+        EditText editView = new EditText(getActivity().getApplicationContext());
         editView.setLayoutParams(getDefaultParams(false));
         // setting an unique id is important in order to save the state
         // (content) of this view across screen configuration changes
@@ -348,7 +347,7 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
                             contextVS.getAccessControl().getEventVSManifestURL(event.getEventVSId()),
                             contextVS.getAccessControl().getEventVSManifestCollectorURL(event.getEventVSId()),
                             keyStoreBytes, pin.toCharArray(), null, null,
-                            getActivity().getBaseContext());
+                            getActivity().getApplicationContext());
                     responseVS = PDFSignedSender.call();
                 } else if(event.getTypeVS().equals(TypeVS.CLAIM_EVENT)) {
                     String subject = ASUNTO_MENSAJE_FIRMA_DOCUMENTO + event.getSubject();
@@ -359,7 +358,7 @@ public class EventFragment extends Fragment implements CertPinDialogListener, Vi
                             signatureContent.toString(), ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
                             subject,keyStoreBytes, pin.toCharArray(),
                             contextVS.getAccessControl().getCertificate(),
-                            getActivity().getBaseContext());
+                            getActivity().getApplicationContext());
                     responseVS = smimeSignedSender.call();
                 }
                 return responseVS;

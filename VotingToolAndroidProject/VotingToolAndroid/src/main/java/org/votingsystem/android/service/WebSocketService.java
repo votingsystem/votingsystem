@@ -23,8 +23,6 @@ public class WebSocketService extends Service {
 
     public static final String TAG = "WebSocketService";
 
-    private NotificationManager notificationManager;
-
     @Override public void onCreate(){
         NotificationManager notificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);

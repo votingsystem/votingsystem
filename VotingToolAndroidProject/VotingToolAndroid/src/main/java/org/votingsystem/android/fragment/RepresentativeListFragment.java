@@ -2,14 +2,17 @@ package org.votingsystem.android.fragment;
 
 import android.app.Activity;
 import android.app.SearchManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -29,6 +32,7 @@ import org.votingsystem.android.activity.EventPagerActivity;
 import org.votingsystem.android.activity.GenericFragmentContainerActivity;
 import org.votingsystem.android.activity.MainActivity;
 import org.votingsystem.android.R;
+import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
@@ -57,6 +61,7 @@ public class RepresentativeListFragment extends ListFragment
     private static ContextVS contextVS = null;
     private AtomicBoolean isLoading = null;
 
+    private BroadcastReceiver broadcastReceiver = null;
     /**
      * Perform alphabetical comparison of application entry objects.
      */
@@ -69,9 +74,9 @@ public class RepresentativeListFragment extends ListFragment
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = contextVS.getInstance(getActivity().getBaseContext());
+        contextVS = contextVS.getInstance(getActivity().getApplicationContext());
         if(contextVS.getAccessControl() == null) {
-            Intent intent = new Intent(getActivity(), MainActivity.class);
+            Intent intent = new Intent(getActivity().getApplicationContext(), MainActivity.class);
             startActivity(intent);
         }
         if (getArguments() != null) {
@@ -79,7 +84,29 @@ public class RepresentativeListFragment extends ListFragment
             offset = getArguments().getInt("offset");
         }
         Log.d(TAG +  ".onCreate(...)", "args: " + getArguments());
-        setRetainInstance(true);
+        mAdapter = new RepresentativeListAdapter(getActivity().getApplicationContext());
+        setListAdapter(mAdapter);
+        //setRetainInstance(true);
+        setHasOptionsMenu(true);
+        isLoading = new AtomicBoolean(false);
+
+        broadcastReceiver = new BroadcastReceiver() {
+            @Override public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if(action.equalsIgnoreCase(ContextVS.HTTP_DATA_INITIALIZED_ACTION_ID)){
+                    String responseData = intent.getStringExtra(ContextVS.HTTP_RESPONSE_KEY);
+                    Log.d(TAG + ".broadcastReceiver.onReceive(...)", "");
+                }
+            }
+        };
+        IntentFilter intentFilter = new IntentFilter(ContextVS.HTTP_DATA_INITIALIZED_ACTION_ID);
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+                broadcastReceiver, intentFilter);
+        Intent startIntent = new Intent(getActivity().getApplicationContext(),
+                RepresentativeService.class);
+        startIntent.putExtra(ContextVS.URL_KEY, contextVS.getAccessControl().
+                getRepresentativesURL());
+        getActivity().startService(startIntent);
     };
 
 
@@ -96,14 +123,12 @@ public class RepresentativeListFragment extends ListFragment
             }
         });
         listView.setOnScrollListener(this);
-
         emptyResultsView = (TextView) rootView.findViewById(android.R.id.empty);
         searchTextView.setVisibility(View.GONE);
         mProgressContainer = rootView.findViewById(R.id.progressContainer);
         mListContainer =  rootView.findViewById(R.id.listContainer);
         mListShown = true;
-        setHasOptionsMenu(true);
-        isLoading = new AtomicBoolean(false);
+        rootView.setBackgroundColor(Color.WHITE);
         return rootView;
     }
 
@@ -112,24 +137,24 @@ public class RepresentativeListFragment extends ListFragment
         return true;
     }
 
-    public void setListShown(boolean shown, boolean animate){
+    public void showProgressIndicator(boolean shown, boolean animate){
         if (mListShown == shown) return;
         mListShown = shown;
         if (shown) {
             if (animate) {
                 mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_out));
+                        getActivity().getApplicationContext(), android.R.anim.fade_out));
                 mListContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_in));
+                        getActivity().getApplicationContext(), android.R.anim.fade_in));
             }
             mProgressContainer.setVisibility(View.GONE);
             mListContainer.setVisibility(View.VISIBLE);
         } else {
             if (animate) {
                 mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_in));
+                        getActivity().getApplicationContext(), android.R.anim.fade_in));
                 mListContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_out));
+                        getActivity().getApplicationContext(), android.R.anim.fade_out));
             }
             mProgressContainer.setVisibility(View.VISIBLE);
             mListContainer.setVisibility(View.INVISIBLE);
@@ -159,13 +184,9 @@ public class RepresentativeListFragment extends ListFragment
     @Override public void onActivityCreated(Bundle savedInstanceState) {
         Log.d(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
         super.onActivityCreated(savedInstanceState);
-        getView().setBackgroundColor(Color.WHITE);
-        if(savedInstanceState != null) return;
-        mAdapter = new RepresentativeListAdapter(getActivity());
-        setListAdapter(mAdapter);
-        // Start out with a progress indicator.
-        setListShown(false, true);
-        // Prepare the loader.  Either re-connect with an existing one or start a new one.
+        //if(savedInstanceState != null) return;
+        showProgressIndicator(true, true);
+        // Prepare the loader. Either re-connect with an existing one or start a new one.
         getLoaderManager().initLoader(REPRESENTATIVE_LOADER_ID, null, this);
     }
 
@@ -195,7 +216,7 @@ public class RepresentativeListFragment extends ListFragment
     @Override public void onListItemClick(ListView l, View v, int position, long id) {
         Log.d(TAG +  ".onListItemClick(...)", "Item clicked: " + id);
         UserVS userVS = ((UserVS) getListAdapter().getItem(position));
-        Intent intent = new Intent(getActivity(), EventPagerActivity.class);
+        Intent intent = new Intent(getActivity().getApplicationContext(), EventPagerActivity.class);
         intent.putExtra(GenericFragmentContainerActivity.REQUEST_FRAGMENT_KEY,
                 RepresentativeFragment.class.getName());
         intent.putExtra(RepresentativeFragment.REPRESENTATIVE_ID_KEY, userVS.getId());
@@ -204,7 +225,7 @@ public class RepresentativeListFragment extends ListFragment
 
     @Override public Loader<List<UserVS>> onCreateLoader(int id, Bundle args) {
         Log.d(TAG +  ".onCreateLoader(..)", "id: " + id + " - args: " + args);
-        return new RepresentativeListLoader(getActivity());
+        return new RepresentativeListLoader(getActivity().getApplicationContext());
     }
 
     @Override public void onAttach(Activity activity) {
@@ -225,12 +246,19 @@ public class RepresentativeListFragment extends ListFragment
         Log.d(TAG +  ".onStop()", " - onStop - ");
     }
 
+    @Override public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG + ".onDestroy()", "onDestroy");
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).
+                unregisterReceiver(broadcastReceiver);
+    }
+
     @Override public void onLoadFinished(Loader<List<UserVS>> loader, List<UserVS> data) {
         Log.i(TAG +  ".onLoadFinished", "onLoadFinished - data: " +
                 ((data == null) ? "NULL":data.size()));
         mAdapter.setData(data);
-        if (isResumed()) setListShown(true, true);
-        else setListShown(true, false);
+        if (isResumed()) showProgressIndicator(false, true);
+        else showProgressIndicator(false, false);
     }
 
     @Override public void onLoaderReset(Loader<List<UserVS>> loader) {

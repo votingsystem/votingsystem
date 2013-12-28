@@ -51,7 +51,7 @@ public class EventStatisticsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
         eventIndex =  args.getInt(EventPagerActivity.EventsPagerAdapter.EVENT_INDEX_KEY);
-        contextVS = ContextVS.getInstance(getActivity());
+        contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
         eventVS = (EventVS) contextVS.getEvents().get(eventIndex);
         contextVS.setEvent(eventVS);
         rootView = inflater.inflate(R.layout.event_statistics_fragment, container, false);
@@ -71,7 +71,8 @@ public class EventStatisticsFragment extends Fragment {
         switch (item.getItemId()) {
             case android.R.id.home:
                 contextVS.setEvent(eventVS);
-                Intent intent = new Intent(getActivity(), EventPagerActivity.class);
+                Intent intent = new Intent(getActivity().getApplicationContext(),
+                        EventPagerActivity.class);
                 startActivity(intent);
                 return true;
             default:
@@ -92,7 +93,7 @@ public class EventStatisticsFragment extends Fragment {
         if (!shown) {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_out));
+                        getActivity().getApplicationContext(), android.R.anim.fade_out));
                 //eventContainer.startAnimation(AnimationUtils.loadAnimation(
                 //        this, android.R.anim.fade_in));
             }
@@ -109,7 +110,7 @@ public class EventStatisticsFragment extends Fragment {
         } else {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_in));
+                        getActivity().getApplicationContext(), android.R.anim.fade_in));
                 //eventContainer.startAnimation(AnimationUtils.loadAnimation(
                 //        this, android.R.anim.fade_out));
             }

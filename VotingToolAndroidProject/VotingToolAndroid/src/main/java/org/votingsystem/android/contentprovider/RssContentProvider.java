@@ -62,8 +62,9 @@ public class RssContentProvider extends ContentProvider {
         URI_MATCHER.addURI("votingsysten.org", "rssitem/#", SPECIFIC_MESSAGE);
     }
 
+    public static final String AUTHORITY = "votingsysten.org/rssitem";
     // Here's the public URI used to query for RSS items.
-    public static final Uri CONTENT_URI = Uri.parse( "content://votingsysten.org/rssitem");
+    public static final Uri CONTENT_URI = Uri.parse( "content://" + AUTHORITY);
 
     @Override public boolean onCreate() {
         // First we need to open the database. If this is our first time,

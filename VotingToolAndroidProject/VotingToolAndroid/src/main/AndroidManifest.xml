@@ -103,6 +103,16 @@
         <provider android:name="org.votingsystem.util.SearchSuggestionProvider"
                   android:authorities="org.votingsystem.util.SuggestionProvider" />
 
-        <service android:name=".service.SignAndSendService" android:process=":sign_and_send_service"/>
+        <!-- The attribute "android:exported" must be set to "false" to restrict this content
+            provider to its own app. Otherwise, all apps could access it. -->
+        <provider android:name=".contentprovider.RepresentativeContentProvider"
+            android:exported="false" android:authorities="votingsystem.org.representative"/>
+
+        <!-- No intent filters are specified, so android:exported defaults to "false". The
+            service is only available to this app. -->
+        <service android:name=".service.SignAndSendService" android:exported="false"
+            android:process=":sign_and_send_service"/>
+        <service android:name=".service.RssService" android:process=":rss_service"/>
+        <service android:name=".service.RepresentativeService"/>
     </application>
 </manifest>

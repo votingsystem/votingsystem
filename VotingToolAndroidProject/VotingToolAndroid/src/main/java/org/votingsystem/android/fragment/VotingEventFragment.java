@@ -93,7 +93,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
                                        ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG + ".onCreate(...)", "onCreate");
         super.onCreate(savedInstanceState);
-        contextVS = ContextVS.getInstance(getActivity());
+        contextVS = ContextVS.getInstance(getActivity().getApplicationContext());
         rootView = inflater.inflate(R.layout.voting_event_fragment, container, false);
         Bundle args = getArguments();
         Integer eventIndex =  args.getInt(EventPagerActivity.EventsPagerAdapter.EVENT_INDEX_KEY);
@@ -146,7 +146,8 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
         Log.d(TAG + ".onOptionsItemSelected(...) ", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.eventInfo:
-                Intent intent = new Intent(getActivity(), EventStatisticsPagerActivity.class);
+                Intent intent = new Intent(getActivity().getApplicationContext(),
+                        EventStatisticsPagerActivity.class);
                 startActivity(intent);
                 return true;
             default:
@@ -157,8 +158,8 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
     private void setReceiptScreen(final VoteVS receipt) {
         Log.d(TAG + ".setReceiptScreen(...)", " - setReceiptScreen");
         ((LinearLayout)rootView.findViewById(R.id.receipt_buttons)).setVisibility(View.VISIBLE);
-        ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(
-                R.string.already_voted_lbl, receipt.getVoto().
+        ((ActionBarActivity)getActivity().getApplicationContext()).getSupportActionBar().
+                setTitle(getString(R.string.already_voted_lbl, receipt.getVoto().
                 getOptionSelected().getContent()));
         TextView subjectTextView = (TextView) rootView.findViewById(R.id.event_subject);
         String subject = receipt.getVoto().getSubject();
@@ -178,7 +179,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
                     FrameLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
             paramsButton.setMargins(15, 15, 15, 15);
             for (final OptionVS opcion:fieldsEventVS) {
-                Button opcionButton = new Button(getActivity());
+                Button opcionButton = new Button(getActivity().getApplicationContext());
                 opcionButton.setText(opcion.getContent());
                 optionButtons.add(opcionButton);
                 opcionButton.setEnabled(false);
@@ -217,7 +218,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
 			builder.setTitle(getString(R.string.error_lbl)).
 				setMessage(ex.getMessage()).show();
 		}*/
-        VoteReceiptDBHelper db = new VoteReceiptDBHelper(getActivity());
+        VoteReceiptDBHelper db = new VoteReceiptDBHelper(getActivity().getApplicationContext());
         try {
             receipt.setId(db.insertVoteReceipt(receipt));
             saveReceiptButton.setEnabled(false);
@@ -247,35 +248,34 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
         FrameLayout.LayoutParams paramsButton = new FrameLayout.LayoutParams(
                 LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
         paramsButton.setMargins(15, 15, 15, 15);
-        for (final OptionVS opcion:fieldsEventVS) {
-            Button opcionButton = new Button(getActivity());
-            opcionButton.setText(opcion.getContent());
-            opcionButton.setOnClickListener(new Button.OnClickListener() {
-                OptionVS optionSelected = opcion;
+        for (final OptionVS option:fieldsEventVS) {
+            Button optionButton = new Button(getActivity().getApplicationContext());
+            optionButton.setText(option.getContent());
+            optionButton.setOnClickListener(new Button.OnClickListener() {
+                OptionVS optionSelected = option;
                 public void onClick(View v) {
-                    Log.d(TAG + "- opcionButton - opcionId: " +
+                    Log.d(TAG + "- optionButton - optionId: " +
                             optionSelected.getId(), "state: " +
                             contextVS.getState().toString());
                     processSelectedOption(optionSelected);
                 }
             });
-            optionButtons.add(opcionButton);
-            if (!event.isActive()) opcionButton.setEnabled(false);
-            linearLayout.addView(opcionButton, paramsButton);
+            optionButtons.add(optionButton);
+            if (!event.isActive()) optionButton.setEnabled(false);
+            linearLayout.addView(optionButton, paramsButton);
 
         }
         if(event.getOptionSelected() != null) {
-            Log.d(TAG + ".setEventScreen", " --- Tiene seleccionada la opcion: " +event.getOptionSelected().getContent() );
+            Log.d(TAG + ".setEventScreen", "Selected option: " +event.getOptionSelected().getContent() );
             processSelectedOption(event.getOptionSelected());
-        } else Log.d(TAG + ".setEventScreen", "Opción seleccionada nula");
+        } else Log.d(TAG + ".setEventScreen", "Selected null option");
     }
 
     private void processSelectedOption(OptionVS optionSelected) {
-        Log.d(TAG + ".processSelectedOption", " -- processSelectedOption");
+        Log.d(TAG + ".processSelectedOption", "processSelectedOption");
         operation = Operation.VOTE;
         eventVS.setOptionSelected(optionSelected);
         if (!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState())) {
-            Log.d(TAG + "- firmarEnviarButton -", " mostrando dialogo certificado no encontrado");
             showCertNotFoundDialog();
         } else {
             String content = optionSelected.getContent().length() >
@@ -288,7 +288,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
 
     @Override public void onResume() {
         super.onResume();
-        Log.d(TAG + ".onResume() ", " - onResume");
+        Log.d(TAG + ".onResume() ", "onResume");
     }
 
     private void showCertNotFoundDialog() {
@@ -401,7 +401,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
         if (!shown) {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_out));
+                        getActivity().getApplicationContext(), android.R.anim.fade_out));
                 //eventContainer.startAnimation(AnimationUtils.loadAnimation(
                 //        this, android.R.anim.fade_in));
             }
@@ -415,7 +415,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
         } else {
             if (animate) {
                 progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_in));
+                        getActivity().getApplicationContext(), android.R.anim.fade_in));
                 //eventContainer.startAnimation(AnimationUtils.loadAnimation(
                 //        this, android.R.anim.fade_out));
             }
@@ -463,7 +463,7 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
                         fis = getActivity().openFileInput(KEY_STORE_FILE);
                         keyStoreBytes = FileUtils.getBytesFromInputStream(fis);
                         VoteSender voteSender = new VoteSender(eventVS, keyStoreBytes,
-                                pin.toCharArray(), getActivity());
+                                pin.toCharArray(), getActivity().getApplicationContext());
                         responseVS = voteSender.call();
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -480,7 +480,8 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
                         SMIMESignedSender smimeSignedSender = new SMIMESignedSender(serviceURL,
                                 signatureContent, ContentTypeVS.JSON_SIGNED_AND_ENCRYPTED,
                                 subject, keyStoreBytes, pin.toCharArray(),
-                                contextVS.getAccessControl().getCertificate(), getActivity());
+                                contextVS.getAccessControl().getCertificate(),
+                                getActivity().getApplicationContext());
                         responseVS = smimeSignedSender.call();
                     } catch(Exception ex) {
                         ex.printStackTrace();
@@ -529,7 +530,8 @@ public class VotingEventFragment extends Fragment implements CertPinDialogListen
                         String msg = getString(R.string.cancel_vote_result_msg,
                                 receipt.getVoto().getSubject());
                         if(receipt.getId() > 0) {
-                            VoteReceiptDBHelper db = new VoteReceiptDBHelper(getActivity());
+                            VoteReceiptDBHelper db = new VoteReceiptDBHelper(
+                                    getActivity().getApplicationContext());
                             try {
                                 db.insertVoteReceipt(receipt);
                             } catch (Exception ex) {
