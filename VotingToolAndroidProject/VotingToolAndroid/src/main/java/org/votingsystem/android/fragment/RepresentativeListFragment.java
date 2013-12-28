@@ -1,18 +1,21 @@
 package org.votingsystem.android.fragment;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.CursorAdapter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,7 +26,6 @@ import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -32,19 +34,17 @@ import org.votingsystem.android.activity.EventPagerActivity;
 import org.votingsystem.android.activity.GenericFragmentContainerActivity;
 import org.votingsystem.android.activity.MainActivity;
 import org.votingsystem.android.R;
+import org.votingsystem.android.contentprovider.RepresentativeContentProvider;
 import org.votingsystem.android.service.RepresentativeService;
 import org.votingsystem.model.ContextVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.UserVSResponse;
-import org.votingsystem.util.HttpHelper;
 import java.text.Collator;
 import java.util.Comparator;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RepresentativeListFragment extends ListFragment
-        implements LoaderManager.LoaderCallbacks<List<UserVS>>, AbsListView.OnScrollListener {
+        implements LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener {
 
     public static final String TAG = "RepresentativeListFragment";
     private static final int REPRESENTATIVE_LOADER_ID = 1;
@@ -52,16 +52,37 @@ public class RepresentativeListFragment extends ListFragment
     private static TextView searchTextView;
     private static TextView emptyResultsView;
     private static ListView listView;
-    private boolean mListShown;
+    private AtomicBoolean progressVisible = null;
     private View mProgressContainer;
     private View mListContainer;
     private RepresentativeListAdapter mAdapter = null;
     private String queryStr = null;
-    private int offset = 0;
     private static ContextVS contextVS = null;
-    private AtomicBoolean isLoading = null;
 
-    private BroadcastReceiver broadcastReceiver = null;
+    private Long offset = new Long(0);
+    private Long numTotalRepresentatives = new Long(0);
+    private Integer firstVisiblePosition = null;
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if(action.equalsIgnoreCase(ContextVS.HTTP_DATA_INITIALIZED_ACTION_ID)){
+                int responseStatus = intent.getIntExtra(ContextVS.HTTP_RESPONSE_STATUS_KEY, -1);
+                Log.d(TAG + ".broadcastReceiver.onReceive(...)", "status: " + responseStatus +
+                        " - extras: " + intent.getExtras());
+                if(ResponseVS.SC_OK == responseStatus) {
+                    //Prepare the loader. Either re-connect with an existing one or start a new one.
+                    getLoaderManager().restartLoader(REPRESENTATIVE_LOADER_ID, null,
+                            RepresentativeListFragment.this);
+                    offset = intent.getLongExtra(ContextVS.OFFSET_KEY, 0L);
+                    numTotalRepresentatives = intent.getLongExtra(ContextVS.NUM_TOTAL_KEY, 0L);
+                    Log.d(TAG + ".broadcastReceiver.onReceive(...)", "Loader restarted" +
+                        " - offset: " + offset + " - numTotal: " + numTotalRepresentatives);
+                } else showMessage(contextVS.getMessage("connErrorCaption"),
+                        intent.getStringExtra(ContextVS.HTTP_RESPONSE_DATA_KEY));
+            }
+        }
+    };
     /**
      * Perform alphabetical comparison of application entry objects.
      */
@@ -81,34 +102,27 @@ public class RepresentativeListFragment extends ListFragment
         }
         if (getArguments() != null) {
             queryStr = getArguments().getString(SearchManager.QUERY);
-            offset = getArguments().getInt("offset");
         }
         Log.d(TAG +  ".onCreate(...)", "args: " + getArguments());
-        mAdapter = new RepresentativeListAdapter(getActivity().getApplicationContext());
+        mAdapter = new RepresentativeListAdapter(getActivity().getApplicationContext(), null,false);
         setListAdapter(mAdapter);
-        //setRetainInstance(true);
+        setRetainInstance(true);
         setHasOptionsMenu(true);
-        isLoading = new AtomicBoolean(false);
-
-        broadcastReceiver = new BroadcastReceiver() {
-            @Override public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if(action.equalsIgnoreCase(ContextVS.HTTP_DATA_INITIALIZED_ACTION_ID)){
-                    String responseData = intent.getStringExtra(ContextVS.HTTP_RESPONSE_KEY);
-                    Log.d(TAG + ".broadcastReceiver.onReceive(...)", "");
-                }
-            }
-        };
         IntentFilter intentFilter = new IntentFilter(ContextVS.HTTP_DATA_INITIALIZED_ACTION_ID);
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, intentFilter);
         Intent startIntent = new Intent(getActivity().getApplicationContext(),
                 RepresentativeService.class);
         startIntent.putExtra(ContextVS.URL_KEY, contextVS.getAccessControl().
-                getRepresentativesURL());
+                getRepresentativesURL(offset));
         getActivity().startService(startIntent);
     };
 
+    private void showMessage(String caption, String message) {
+        Log.d(TAG + ".showMessage(...) ", "caption: " + caption + "  - showMessage: " + message);
+        AlertDialog.Builder builder= new AlertDialog.Builder(getActivity());
+        builder.setTitle(caption).setMessage(message).show();
+    }
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
              Bundle savedInstanceState) {
@@ -127,7 +141,6 @@ public class RepresentativeListFragment extends ListFragment
         searchTextView.setVisibility(View.GONE);
         mProgressContainer = rootView.findViewById(R.id.progressContainer);
         mListContainer =  rootView.findViewById(R.id.listContainer);
-        mListShown = true;
         rootView.setBackgroundColor(Color.WHITE);
         return rootView;
     }
@@ -137,19 +150,11 @@ public class RepresentativeListFragment extends ListFragment
         return true;
     }
 
-    public void showProgressIndicator(boolean shown, boolean animate){
-        if (mListShown == shown) return;
-        mListShown = shown;
-        if (shown) {
-            if (animate) {
-                mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_out));
-                mListContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity().getApplicationContext(), android.R.anim.fade_in));
-            }
-            mProgressContainer.setVisibility(View.GONE);
-            mListContainer.setVisibility(View.VISIBLE);
-        } else {
+    public void showProgressIndicator(boolean showProgress, boolean animate){
+        if (progressVisible != null && progressVisible.get() == showProgress) return;
+        if (progressVisible == null) progressVisible = new AtomicBoolean(showProgress);
+        else progressVisible.set(showProgress);
+        if (progressVisible.get()) {
             if (animate) {
                 mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
                         getActivity().getApplicationContext(), android.R.anim.fade_in));
@@ -158,36 +163,44 @@ public class RepresentativeListFragment extends ListFragment
             }
             mProgressContainer.setVisibility(View.VISIBLE);
             mListContainer.setVisibility(View.INVISIBLE);
+        } else {
+            if (animate) {
+                mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
+                        getActivity().getApplicationContext(), android.R.anim.fade_out));
+                mListContainer.startAnimation(AnimationUtils.loadAnimation(
+                        getActivity().getApplicationContext(), android.R.anim.fade_in));
+            }
+            mProgressContainer.setVisibility(View.GONE);
+            mListContainer.setVisibility(View.VISIBLE);
         }
     }
+
+    @Override public void onScrollStateChanged(AbsListView absListView, int i) { }
 
     @Override public void onScroll(AbsListView view, int firstVisibleItem,
              int visibleItemCount, int totalItemCount) {
-        Log.d(TAG +  ".onScroll(...)", "firstVisibleItem: " + firstVisibleItem +
-                " - visibleItemCount:" + visibleItemCount + " - totalItemCount:" + totalItemCount);
-        if (getListAdapter() == null) return ;
-        if (getListAdapter().getCount() == 0) return ;
-
-
-        if(firstVisibleItem + visibleItemCount == 20 && !isLoading.get()) {
-            Bundle args = new Bundle();
-            args.putInt("offset", 557);
-            isLoading.set(true);
-            getLoaderManager().restartLoader(REPRESENTATIVE_LOADER_ID, args, this);
+        if (getListAdapter() == null || getListAdapter().getCount() == 0) return ;
+        /* maybe add a padding */
+        boolean loadMore = firstVisibleItem + visibleItemCount >= totalItemCount;
+        if(loadMore && !progressVisible.get() && offset < numTotalRepresentatives &&
+                totalItemCount < numTotalRepresentatives) {
+            Log.d(TAG +  ".onScroll(...)", "loadMore - firstVisibleItem: " + firstVisibleItem +
+            " - visibleItemCount:" + visibleItemCount + " - totalItemCount:" + totalItemCount);
+            firstVisiblePosition = firstVisibleItem;
+            showProgressIndicator(true, true);
+            Intent startIntent = new Intent(getActivity().getApplicationContext(),
+                    RepresentativeService.class);
+            startIntent.putExtra(ContextVS.URL_KEY, contextVS.getAccessControl().
+                    getRepresentativesURL(new Long(totalItemCount)));
+            getActivity().startService(startIntent);
         }
-    }
 
-    @Override public void onScrollStateChanged(AbsListView view, int scrollState) {
-        Log.d(TAG +  ".onScrollStateChanged(...)", "scrollState: " + scrollState);
     }
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
         Log.d(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
         super.onActivityCreated(savedInstanceState);
-        //if(savedInstanceState != null) return;
         showProgressIndicator(true, true);
-        // Prepare the loader. Either re-connect with an existing one or start a new one.
-        getLoaderManager().initLoader(REPRESENTATIVE_LOADER_ID, null, this);
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
@@ -223,9 +236,25 @@ public class RepresentativeListFragment extends ListFragment
         startActivity(intent);
     }
 
-    @Override public Loader<List<UserVS>> onCreateLoader(int id, Bundle args) {
-        Log.d(TAG +  ".onCreateLoader(..)", "id: " + id + " - args: " + args);
-        return new RepresentativeListLoader(getActivity().getApplicationContext());
+    @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        Log.d(TAG + ".onCreateLoader(...)", "");
+        showProgressIndicator(false, true);
+        CursorLoader loader = new CursorLoader(this.getActivity(),
+                RepresentativeContentProvider.CONTENT_URI, null, null, null, null);
+        return loader;
+    }
+
+    @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        Log.d(TAG + ".onLoadFinished(...)", " - cursor.getCount(): " + cursor.getCount());
+        showProgressIndicator(false, true);
+        if(firstVisiblePosition != null) cursor.moveToPosition(firstVisiblePosition);
+        ((CursorAdapter)this.getListAdapter()).swapCursor(cursor);
+    }
+
+    @Override public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        Log.d(TAG + ".onLoaderReset(...)", "");
+        showProgressIndicator(false, true);
+        ((CursorAdapter)this.getListAdapter()).swapCursor(null);
     }
 
     @Override public void onAttach(Activity activity) {
@@ -243,7 +272,7 @@ public class RepresentativeListFragment extends ListFragment
 
     @Override public void onStop() {
         super.onStop();
-        Log.d(TAG +  ".onStop()", " - onStop - ");
+        Log.d(TAG + ".onStop()", " - onStop - ");
     }
 
     @Override public void onDestroy() {
@@ -253,116 +282,37 @@ public class RepresentativeListFragment extends ListFragment
                 unregisterReceiver(broadcastReceiver);
     }
 
-    @Override public void onLoadFinished(Loader<List<UserVS>> loader, List<UserVS> data) {
-        Log.i(TAG +  ".onLoadFinished", "onLoadFinished - data: " +
-                ((data == null) ? "NULL":data.size()));
-        mAdapter.setData(data);
-        if (isResumed()) showProgressIndicator(false, true);
-        else showProgressIndicator(false, false);
-    }
+    public class RepresentativeListAdapter  extends CursorAdapter {
 
-    @Override public void onLoaderReset(Loader<List<UserVS>> loader) {
-        Log.i(TAG +  ".onLoaderReset(...)", "onLoaderReset");
-        mAdapter.setData(null);
-    }
+        private LayoutInflater inflater = null;
 
-    public class RepresentativeListAdapter extends ArrayAdapter<UserVS> {
-
-        private final LayoutInflater mInflater;
-
-        public RepresentativeListAdapter(Context context) {
-            super(context, R.layout.row_representative);
-            mInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        public RepresentativeListAdapter(Context context, Cursor c, boolean autoRequery) {
+            super(context, c, autoRequery);
+            inflater = LayoutInflater.from(context);
         }
 
-        public void setData(List<UserVS> data) {
-            clear();
-            if (data != null) {
-                for(UserVS userVS : data) {
-                    add(userVS);
-                }
-            }
+        @Override public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
+            return inflater.inflate(R.layout.row_representative, viewGroup, false);
         }
 
-        @Override public View getView(int position, View convertView, ViewGroup parent) {
-            View view;
-            if (convertView == null) view = mInflater.inflate(
-                    R.layout.row_representative, parent, false);
-            else view = convertView;
-            UserVS userVS = (UserVS) getItem(position);
-            if (userVS != null) {
+        @Override public void bindView(View view, Context context, Cursor cursor) {
+            if(cursor != null) {
+                String fullName = cursor.getString(cursor.getColumnIndex(
+                        RepresentativeContentProvider.FULL_NAME_COL));
+                int numRepresentations = cursor.getInt(cursor.getColumnIndex(
+                        RepresentativeContentProvider.NUM_REPRESENTATIONS_COL));
                 LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
                 linearLayout.setBackgroundColor(Color.WHITE);
                 TextView representativeName = (TextView)view.findViewById(R.id.representative_name);
                 TextView delegationInfo = (TextView) view.findViewById(R.id.representative_delegations);
-                representativeName.setText(userVS.getFullName());
-                delegationInfo.setText(ContextVS.getMessage("representationsMessage", userVS.getNumRepresentations().toString()));
+                representativeName.setText(fullName);
+                delegationInfo.setText(ContextVS.getMessage("representationsMessage", String.valueOf(numRepresentations)));
                 ImageView imgView = (ImageView)view.findViewById(R.id.representative_icon);
                 //imgView.setImageDrawable();
             }
-            return view;
-        }
-    }
-
-
-    public static class RepresentativeListLoader extends AsyncTaskLoader<List<UserVS>> {
-
-        List<UserVS> representatives;
-
-        public RepresentativeListLoader(Context context) {
-            super(context);
-        }
-
-        @Override public List<UserVS> loadInBackground() {
-            Log.d(TAG + ".RepresentativeListLoader.loadInBackground()", "loadInBackground");
-            List<UserVS> representativeList = null;
-            try {
-                ResponseVS responseVS = HttpHelper.getData(contextVS.getAccessControl().
-                        getRepresentativesURL(), null);
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    UserVSResponse response = UserVSResponse.parse(responseVS.getMessage());
-                    representativeList = response.getUsers();
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-            return representativeList;
-        }
-
-        /**
-         * Called when there is new data to deliver to the client.  The
-         * super class will take care of delivering it; the implementation
-         * here just adds a little more logic.
-         */
-        @Override public void deliverResult(List<UserVS> representatives) {
-            Log.d(TAG + ".deliverResult", "deliverResult - representatives.size(): " +
-                    (representatives == null? " NULL " : representatives.size()));
-            if (isStarted()) {
-                // If the Loader is currently started, we can immediately
-                // deliver its results.
-                super.deliverResult(representatives);
-            }
-        }
-
-        @Override protected void onStartLoading() {
-            Log.d(TAG + ".onStartLoading()", "onStartLoading");
-            forceLoad();
-        }
-
-        @Override protected void onStopLoading() {
-            Log.d(TAG + ".onStopLoading()", "onStopLoading");
-            cancelLoad();
-        }
-
-        @Override public void onCanceled(List<UserVS> representativeList) {
-            super.onCanceled(representativeList);
-        }
-
-        @Override protected void onReset() {
-            super.onReset();
-            onStopLoading();
         }
 
     }
+
 
 }

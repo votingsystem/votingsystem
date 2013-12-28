@@ -42,7 +42,6 @@ public class ContextVS {
     public static final String VOTE_OID = VOTING_SYSTEM_BASE_OID + VOTE_TAG;
 
     public static final String STATE_KEY                  = "state";
-    public static final String OFFSET_KEY                 = "offset";
     public static final String CSR_REQUEST_ID_KEY         = "csrRequestId";
     public static final String APPLICATION_ID_KEY         = "idAplicacion";
     public static final String EVENT_KEY                  = "eventKey";
@@ -57,7 +56,10 @@ public class ContextVS {
     //Intent keys
     public static final String PIN_KEY = "PIN_KEY";
     public static final String URL_KEY = "URL_KEY";
-    public static final String HTTP_RESPONSE_KEY = "HTTP_RESPONSE_KEY";
+    public static final String HTTP_RESPONSE_DATA_KEY = "HTTP_RESPONSE_DATA_KEY";
+    public static final String HTTP_RESPONSE_STATUS_KEY = "HTTP_RESPONSE_STATUS_KEY";
+    public static final String OFFSET_KEY = "OFFSET_KEY";
+    public static final String NUM_TOTAL_KEY = "NUM_TOTAL_KEY";
 
     //Actions IDs
     public static final String SIGN_AND_SEND_ACTION_ID = "SIGN_AND_SEND_ACTION_ID";

@@ -42,7 +42,7 @@ public class RssContentProvider extends ContentProvider {
     private static final String DB_NAME = "voting_system_rss.db";
     static final String TABLE_RSS = "rss";
 
-    public static final String ID_COL = "id";
+    public static final String ID_COL = "_id";
     public static final String URL_COL = "url";
     public static final String TITLE_COL = "title";
     public static final String HAS_BEEN_READ_COL = "hasbeenread";

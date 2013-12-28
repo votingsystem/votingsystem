@@ -27,8 +27,6 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.model.UserVSResponse;
 import org.votingsystem.util.HttpHelper;
 import java.text.ParseException;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author jgzornoza
@@ -38,41 +36,56 @@ public class RepresentativeService extends Service {
 
     public static final String TAG = "RepresentativeService";
 
-    private AtomicBoolean httpDataInitialized = new AtomicBoolean(false);
     private static ContextVS contextVS = null;
+
+    private Long offset = null;
+    private Long numTotalRepresentatives = new Long(0);
 
     @Override public void onCreate(){
         contextVS = contextVS.getInstance(this);
-        NotificationManager notificationManager = (NotificationManager)
-                getSystemService(NOTIFICATION_SERVICE);
-        Notification note = new NotificationCompat.Builder(this)
-                .setContentTitle(contextVS.getMessage("loadingRepresentativeDataMsg"))
-                .setSmallIcon(R.drawable.manifest_22).build();
-        notificationManager.notify(ContextVS.SIGN_AND_SEND_SERVICE_NOTIFICATION_ID, note);
         Log.i(TAG + ".onCreate(...) ", "RepresentativeService created");
     }
 
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG + ".onStartCommand(...) ", "Service initialized: " + httpDataInitialized.get());
+        Log.d(TAG + ".onStartCommand(...) ", "offset: " + offset);
         super.onStartCommand(intent, flags, startId);
         final Bundle arguments = intent.getExtras();
         if(arguments != null && arguments.containsKey(ContextVS.URL_KEY)) {
-            if(!httpDataInitialized.get()) {
+            final String urlService = arguments.getString(ContextVS.URL_KEY);
+            Uri serviceUri = Uri.parse(urlService);
+            Long requestOffset = Long.valueOf(serviceUri.getQueryParameter("offset"));
+            if(offset == null || (requestOffset > offset &&
+                    requestOffset < numTotalRepresentatives)) {
                 /*Services run in the main thread of their hosting process. This means that, if
                 * it's going to do any CPU intensive (such as networking) operations, it should
                 * spawn its own thread in which to do that work.*/
                 Runnable runnable = new Runnable() {
                     @Override public void run() {
-                        loadURLData(arguments.getString(ContextVS.URL_KEY));
+                        loadURLData(urlService);
                     }
                 };
                 Thread thr = new Thread(null, runnable, "representative_service_thread");
                 thr.start();
+            } else {
+                Log.d(TAG + ".onStartCommand(...) ", "offset: " + offset + " - requestOffset: " +
+                        requestOffset + " - numTotalRepresentatives: " + numTotalRepresentatives);
+                sendMessage(ResponseVS.SC_OK, null);
             }
         }
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
         return START_STICKY;
+    }
+
+    private void sendMessage(Integer statusCode, String message) {
+        Intent intent = new Intent(ContextVS.HTTP_DATA_INITIALIZED_ACTION_ID);
+        if(statusCode != null)
+            intent.putExtra(ContextVS.HTTP_RESPONSE_STATUS_KEY, statusCode.intValue());
+        if(message != null)
+            intent.putExtra(ContextVS.HTTP_RESPONSE_DATA_KEY, statusCode.intValue());
+        intent.putExtra(ContextVS.OFFSET_KEY, offset);
+        intent.putExtra(ContextVS.NUM_TOTAL_KEY, numTotalRepresentatives);
+        LocalBroadcastManager.getInstance(RepresentativeService.this).sendBroadcast(intent);
     }
 
 
@@ -82,6 +95,8 @@ public class RepresentativeService extends Service {
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             try {
                 UserVSResponse response = UserVSResponse.parse(responseVS.getMessage());
+                numTotalRepresentatives = response.getNumTotalRepresentatives();
+                offset = response.getOffset();
                 for(UserVS representative : response.getUsers()) {
                     ContentValues values = new ContentValues(5);
                     values.put(RepresentativeContentProvider.ID_COL, representative.getId());
@@ -93,16 +108,13 @@ public class RepresentativeService extends Service {
                             RepresentativeContentProvider.CONTENT_URI, values);
                     Log.d(TAG + ".loadURLData(...)", "inserted representative: " + uri.toString());
                 }
-                Intent intent = new Intent(ContextVS.HTTP_DATA_INITIALIZED_ACTION_ID);
-                intent.putExtra(ContextVS.HTTP_RESPONSE_KEY, responseVS.getStatusCode());
-                LocalBroadcastManager.getInstance(RepresentativeService.this).sendBroadcast(intent);
-                httpDataInitialized.set(true);
+                sendMessage(responseVS.getStatusCode(), responseVS.getMessage());
             } catch (ParseException e) {
                 e.printStackTrace();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        }
+        } else sendMessage(responseVS.getStatusCode(), responseVS.getMessage());
     }
 
     // When the service is destroyed, get rid of our persistent icon.

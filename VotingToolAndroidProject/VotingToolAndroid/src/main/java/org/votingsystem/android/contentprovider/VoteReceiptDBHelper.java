@@ -30,7 +30,7 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 	private static final int DATABASE_VERSION = 1;
 	private static final String DB_NAME               = "voting_system_vote_receipt.db";
 	static final String TABLE_NAME                    = "vote_receipt";
-	static final String ID_COL                        = "id";
+	static final String ID_COL                        = "_id";
 	static final String KEY_COL                       = "key";
 	static final String SMIME_COL                     = "smime";
 	static final String CANCEL_VOTE_RECEIPT_SMIME_COL = "cancelVoteRecepitSmime";
@@ -48,7 +48,7 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 	}
 
 	@Override public void onCreate(SQLiteDatabase db) {
-		String sql = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " ( "	+ 
+        String sql = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " ( "	+
 				ID_COL                        + " INTEGER PRIMARY KEY AUTOINCREMENT, " + 
 				KEY_COL                       + " TEXT NOT NULL, " + 
 				SMIME_COL                     + " blob, " + 
@@ -61,8 +61,7 @@ public class VoteReceiptDBHelper extends SQLiteOpenHelper {
 		db.execSQL(sql);
 	}
 
-	@Override
-	public void onUpgrade(SQLiteDatabase db, int oldV, int newV) {
+	@Override public void onUpgrade(SQLiteDatabase db, int oldV, int newV) {
 		Log.d(TAG + ".onUpgrade(...)", "oldV: " + oldV + " - newV: " + newV);
 		db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
 		onCreate(db);// Create tables again

@@ -221,9 +221,6 @@ public class UserCertResponseActivity extends ActionBarActivity
 	        Collection<X509Certificate> certificates =
                     CertUtil.fromPEMToX509CertCollection(csrSigned.getBytes());
 	        Log.d(TAG + ".updateKeyStore(...)", " - certificates.size(): " + certificates.size());
-	        for(X509Certificate cert:certificates) {
-	        	Log.d(TAG + ".updateKeyStore(...)", "************ cert.toString(): " + cert.toString());
-	        }
 	        X509Certificate[] arrayCerts = new X509Certificate[certificates.size()];
 	        certificates.toArray(arrayCerts);
 	        keyStore.setKeyEntry(USER_CERT_ALIAS, privateKey, password, arrayCerts);

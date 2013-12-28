@@ -27,7 +27,7 @@ public class RepresentativeContentProvider extends ContentProvider {
     private static final String DB_NAME = "voting_system_representatives.db";
     static final String TABLE_REPRESENTATIVES = "representatives";
 
-    public static final String ID_COL = "id";
+    public static final String ID_COL = "_id";
     public static final String URL_COL = "url";
     public static final String NIF_COL = "nif";
     public static final String NUM_REPRESENTATIONS_COL = "numRepresentations";
@@ -55,9 +55,10 @@ public class RepresentativeContentProvider extends ContentProvider {
     public static final Uri CONTENT_URI = Uri.parse( "content://" + AUTHORITY);
 
     @Override public boolean onCreate() {
-        // First we need to open the database. If this is our first time,
-        // the attempt to retrieve a database will throw
-        // FileNotFoundException, and we will then create the database.
+        //Delete previous session database
+        getContext().deleteDatabase(DB_NAME);
+        // If database file isn't found this will throw a  FileNotFoundException, and we will
+        // then create the database.
         DatabaseHelper databaseHelper = new DatabaseHelper(getContext());
         try{
             database = databaseHelper.getWritableDatabase();
@@ -154,8 +155,8 @@ public class RepresentativeContentProvider extends ContentProvider {
 
         public DatabaseHelper(Context context) {
             super(context, DB_NAME, null, DATABASE_VERSION);
-            File dbFile = context.getDatabasePath(DB_NAME);
-            Log.d(TAG + ".DatabaseHelper(...)", "dbFile.getAbsolutePath(): " + dbFile.getAbsolutePath());
+            //File dbFile = context.getDatabasePath(DB_NAME);
+            //Log.d(TAG + ".DatabaseHelper(...)", "dbFile.getAbsolutePath(): " + dbFile.getAbsolutePath());
         }
 
         @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
@@ -169,7 +170,7 @@ public class RepresentativeContentProvider extends ContentProvider {
         @Override public void onCreate(SQLiteDatabase db){
             try{
                 db.execSQL(DATABASE_CREATE);
-                Log.d(TAG + ".onCreate()", "database created");
+                Log.d(TAG + ".onCreate(...)", "Database created");
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }

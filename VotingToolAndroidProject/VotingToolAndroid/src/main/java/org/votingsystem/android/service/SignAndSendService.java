@@ -44,15 +44,15 @@ public class SignAndSendService extends Service {
 
     public static final String TAG = "SignAndSendService";
 
-    private NotificationManager notificationManager;
+    private static ContextVS contextVS = null;
 
     @Override public void onCreate(){
+        contextVS = contextVS.getInstance(this);
         NotificationManager notificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
         Notification note = new NotificationCompat.Builder(this)
-                .setContentTitle(ContextVS.getMessage("signAndSendNotificationMsg"))
-                .setSmallIcon(R.drawable.manifest_22)
-                .build();
+                .setContentTitle("SignAndSendService created")
+                .setSmallIcon(R.drawable.manifest_22).build();
         notificationManager.notify(ContextVS.SIGN_AND_SEND_SERVICE_NOTIFICATION_ID, note);
         Log.i(TAG + ".onCreate(...) ", "SignAndSendService created");
     }
