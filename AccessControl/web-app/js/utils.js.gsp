@@ -44,6 +44,14 @@ function EventVS(eventJSON, eventTemplate, subSystem) {
         this.userVS = eventJSON.userVS
         this.state = eventJSON.state
         this.subject = eventJSON.subject
+        this.checkDateURL ="${createLink( controller:'eventVS')}/checkDates?id=" + this.id
+        this.isActive = DateUtils.checkDate(this.dateBegin.getDate(), this.dateFinish.getDate())
+        if(EventVS.State.ACTIVE == this.state) {
+            if(!this.isActive) httpGet(this.checkDateURL)
+    	} else if(EventVS.State.AWAITING == this.state) {
+            if(his.isActive) httpGet(this.checkDateURL)
+    		result =  DateUtils.checkDate(this.dateBegin, this.dateFinish);
+    	}
     }
     this.subSystem = subSystem
     this.dateCreated
@@ -69,16 +77,6 @@ function EventVS(eventJSON, eventTemplate, subSystem) {
         var subjectStr = this.subject.substring(0,50) +  ((this.subject.length > 50)? "...":"");
         this.eventHTML = eventTemplate.format(subjectStr, this.userVS, this.dateBegin,
             this.dateFinish.getElapsedTime(), this.getMessage());
-    }
-
-    this.isActive = function () {
-    	var result =  false;
-    	if(EventVS.State.ACTIVE == this.state) {
-    		result = DateUtils.checkDate(this.dateBegin, this.dateFinish);
-    	} else if(EventVS.State.AWAITING == this.state) {
-    		result =  DateUtils.checkDate(this.dateBegin, this.dateFinish);
-    	}
-    	return result;
     }
 
     this.getURL = function() {
@@ -113,6 +111,13 @@ function EventVS(eventJSON, eventTemplate, subSystem) {
 
 }
 
+function httpGet(theUrl){
+    var xmlHttp = null;
+    xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", theUrl, false );
+    xmlHttp.send( null );
+    return xmlHttp.responseText;
+}
 
 var DateUtils = {
 

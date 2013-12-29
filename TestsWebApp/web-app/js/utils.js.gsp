@@ -30,6 +30,7 @@ function EventVS(eventJSON, eventTemplate, subSystem) {
     this.dateBegin = eventJSON.dateBegin
     this.userVS = eventJSON.userVS
     this.state = eventJSON.state
+    this.isActive = DateUtils.checkDate(this.dateBegin.getDate(), this.dateFinish.getDate())
     this.backupAvailable
     this.type
     this.operation
@@ -66,16 +67,6 @@ function EventVS(eventJSON, eventTemplate, subSystem) {
     		result =  "<g:message code='cancelledLbl'/>";
     	}
     	return result;
-    }
-
-    this.isActive = function () {
-    	var result =  false;
-    	if(EventVS.State.ACTIVE == this.state) {
-    		result = DateUtils.checkDate(this.dateBegin, this.dateFinish);
-    	} else if(EventVS.State.AWAITING == this.state) {
-    		result =  DateUtils.checkDate(this.dateBegin, this.dateFinish);
-    	}
-    	return result; 	
     }
 
     this.getURL = function() {

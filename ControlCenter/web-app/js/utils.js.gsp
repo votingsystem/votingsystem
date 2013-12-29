@@ -44,6 +44,7 @@ function EventVS(eventJSON, eventTemplate, subSystem) {
     this.dateBegin = eventJSON.dateBegin
     this.userVS = eventJSON.userVS
     this.state = eventJSON.state
+    this.isActive = DateUtils.checkDate(this.dateBegin.getDate(), this.dateFinish.getDate())
     this.backupAvailable
     this.type
     this.operation
@@ -67,16 +68,6 @@ function EventVS(eventJSON, eventTemplate, subSystem) {
         var subjectStr = this.subject.substring(0,50) +  ((this.subject.length > 50)? "...":"");
         this.eventHTML = eventTemplate.format(subjectStr, this.userVS, this.dateBegin,
             this.dateFinish.getElapsedTime(), this.getMessage());
-    }
-
-    this.isActive = function () {
-    	var result =  false;
-    	if(EventVS.State.ACTIVE == this.state) {
-    		result = DateUtils.checkDate(this.dateBegin, this.dateFinish);
-    	} else if(EventVS.State.AWAITING == this.state) {
-    		result =  DateUtils.checkDate(this.dateBegin, this.dateFinish);
-    	}
-    	return result;
     }
 
     this.getURL = function() {
