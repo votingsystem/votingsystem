@@ -2,6 +2,7 @@
 <html>
 <head>
   	<title><g:message code="mailSimulationCaption"/></title>
+    <r:external uri="/images/TestWebApp.ico"/>
    	<r:require modules="application"/>
 	<r:layoutResources />
 </head>

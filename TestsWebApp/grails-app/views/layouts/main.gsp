@@ -2,6 +2,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<title><g:message code="appTitle"/></title>
+    <r:external uri="/images/TestWebApp.ico"/>
 	<r:require module="masterStyles"/>
 	<g:layoutHead/>
 	<r:layoutResources />

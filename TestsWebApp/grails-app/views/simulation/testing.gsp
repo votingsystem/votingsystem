@@ -2,6 +2,7 @@
 <html>
 <head>
   	<title>Testing Resources plugin</title>
+    <r:external uri="/images/TestWebApp.ico"/>
    	<r:require modules="application"/>
     <style>
 	  	textarea { }
