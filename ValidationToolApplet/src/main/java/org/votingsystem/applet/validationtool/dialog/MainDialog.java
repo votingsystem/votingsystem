@@ -35,7 +35,7 @@ public class MainDialog extends JDialog implements DecompressFileDialog.Listener
         container.setLayout(new MigLayout("fill, insets 20 30 10 30", "", ""));
 
         JButton openSignedFileButton = new JButton(ContextVS.getMessage("openSignedFileButtonLbl"));
-        openSignedFileButton.setIcon(ContextVS.getIcon(this, "document_signature"));
+        openSignedFileButton.setIcon(ContextVS.getIcon(this, "application-certificate"));
         openSignedFileButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) { openSignedFile();}
         });

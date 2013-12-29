@@ -117,7 +117,7 @@ public class RepresentativeFormDialog extends JDialog {
         formsPanel.add(openDocumentPanel, "growx, wrap");
 
         signAndSendButton = new JButton(ContextVS.getMessage("signAndSendLbl"));
-        signAndSendButton.setIcon(ContextVS.getIcon(this, "document_signature"));
+        signAndSendButton.setIcon(ContextVS.getIcon(this, "application-certificate"));
         signAndSendButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) { signAndSend();}
         });

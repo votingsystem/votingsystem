@@ -87,7 +87,7 @@ public class SignedDocumentsBrowser extends JDialog {
                 validateBackup();
             }
         });
-        validateBackupButton.setIcon(ContextVS.getIcon(this, "check_box_list"));
+        validateBackupButton.setIcon(ContextVS.getIcon(this, "document-properties"));
         validateBackupButton.setVisible(false);
         buttonsPanel.add(validateBackupButton);
 

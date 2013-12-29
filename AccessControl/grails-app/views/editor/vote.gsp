@@ -45,7 +45,7 @@
     </div>
 	
 	<div style="margin: 15px auto 30px auto; width:600px">
-		<img src="${resource(dir:'images/fatcow_16',file:'information.png')}"/>
+		<img src="${resource(dir:'images/icon_16',file:'information.png')}"/>
 		<span id="controlCenterLink" style="font-size:1.1em; color:#02227a; cursor: pointer; cursor: hand;">
 			<g:message code="controlCenterLbl"/>
 		</span>
@@ -71,7 +71,7 @@
 		</votingSystem:simpleButton>
 
 		<votingSystem:simpleButton id="buttonAccept" isSubmitButton='true'
-			imgSrc="${resource(dir:'images/fatcow_16',file:'accept.png')}" style="position:absolute; right:10px; top:0px;">
+			imgSrc="${resource(dir:'images/icon_16',file:'accept.png')}" style="position:absolute; right:10px; top:0px;">
 				<g:message code="publishDocumentLbl"/>
 		</votingSystem:simpleButton>
 	</div>

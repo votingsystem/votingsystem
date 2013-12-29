@@ -16,7 +16,7 @@ public class AboutPanel  extends JPanel {
         setLayout(new MigLayout("wrap 2"));
 
         JLabel iconLabel =  new JLabel("");
-        iconLabel.setIcon(ContextVS.getIcon(this, "gnupg_keys_32"));
+        iconLabel.setIcon(ContextVS.getIcon(this, "application-certificate_32"));
         add(iconLabel, "span 1 3");
 
 

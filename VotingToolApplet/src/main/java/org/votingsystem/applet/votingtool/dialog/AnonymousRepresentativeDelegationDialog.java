@@ -135,7 +135,7 @@ public class AnonymousRepresentativeDelegationDialog extends JDialog {
         formPanel.add(messageLabel, "growx, height 50::, wrap");
 
         openDocumentButton = new JButton(ContextVS.getMessage("openDocumentToSignLbl"));
-        openDocumentButton.setIcon(ContextVS.getIcon(this, "email_at_sign"));
+        openDocumentButton.setIcon(ContextVS.getIcon(this, "application-certificate"));
         openDocumentButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) { openDocument();}
         });
@@ -151,7 +151,7 @@ public class AnonymousRepresentativeDelegationDialog extends JDialog {
         container.add(formPanel, "cell 0 1, growx, wrap");
 
         signAndSendButton = new JButton(ContextVS.getMessage("signAndSendLbl"));
-        signAndSendButton.setIcon(ContextVS.getIcon(this, "document_signature_16"));
+        signAndSendButton.setIcon(ContextVS.getIcon(this, "application-certificate_16"));
         signAndSendButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) { signAndSend();}
         });

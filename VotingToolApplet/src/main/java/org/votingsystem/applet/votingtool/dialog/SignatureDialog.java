@@ -100,7 +100,7 @@ public class SignatureDialog extends JDialog {
         container.add(formPanel, "cell 0 1, growx, wrap");
         
         signAndSendButton = new JButton(ContextVS.getMessage("signAndSendLbl"));
-        signAndSendButton.setIcon(ContextVS.getIcon(this, "document_signature_16"));
+        signAndSendButton.setIcon(ContextVS.getIcon(this, "application-certificate_16"));
         signAndSendButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) { signAndSend();}
         });

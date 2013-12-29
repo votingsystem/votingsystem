@@ -112,11 +112,11 @@ input:required {
 }
 
 input:focus:invalid {   
-	background: url('../images/fatcow_16/cancel.png') no-repeat right;   padding-right: 7px;
+	background: url('../images/icon_16/cancel.png') no-repeat right;   padding-right: 7px;
 } 
 
 input:focus:valid {   
-	background: url('../images/fatcow_16/accept.png') no-repeat right;   padding-right: 7px;
+	background: url('../images/icon_16/accept.png') no-repeat right;   padding-right: 7px;
 }
 
 .button_base {

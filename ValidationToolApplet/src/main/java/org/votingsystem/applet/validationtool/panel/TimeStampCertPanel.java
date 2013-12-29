@@ -35,7 +35,7 @@ public class TimeStampCertPanel extends JPanel {
         }
 
         JButton showPEMcertButton = new JButton(ContextVS.getMessage("showCertPemLbl"));
-        showPEMcertButton.setIcon(ContextVS.getIcon(this, "document_signature"));
+        showPEMcertButton.setIcon(ContextVS.getIcon(this, "application-certificate"));
         showPEMcertButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) { showPEMCert();}
         });

@@ -29,7 +29,7 @@
         <div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
             <div style="position:absolute; right:0;">
                     <votingSystem:simpleButton isSubmitButton='true'
-                        imgSrc="${resource(dir:'images/fatcow_16',file:'accept.png')}" style="margin:0px 20px 0px 0px;">
+                        imgSrc="${resource(dir:'images/icon_16',file:'accept.png')}" style="margin:0px 20px 0px 0px;">
                             <g:message code="acceptLbl"/>
                     </votingSystem:simpleButton>
             </div>

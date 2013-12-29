@@ -31,7 +31,7 @@ task buildApplet(type:VotingSystemApplet){
 
 	manifest {
 		attributes 'Main-Class': 'VotingApplet',
-				   'SplashScreen-Image':'resources/fatcow_32/gnupg_keys.png',
+				   'SplashScreen-Image':'resources/icon_32/application-certificate.png',
 				   'url':'https://github.com/jgzornoza/SistemaVotacion/tree/master/VotingToolApplet',
 				   'provider': 'SistemaVotacion.org'
 	}

@@ -9,7 +9,7 @@
 		<div style="margin:0px auto 15px 0px; position:relative;display:table;">
 			<div style="display:table-cell;">
 				<votingSystem:simpleButton onclick="showSelectRepresentativeDialog(representativeOperationCallback, '${representativeFullName}')"
-					imgSrc="${resource(dir:'images/fatcow_16',file:'accept.png')}" style="margin:0px 20px 0px 30px;">
+					imgSrc="${resource(dir:'images/icon_16',file:'accept.png')}" style="margin:0px 20px 0px 30px;">
 						<g:message code="selectRepresentativeLbl"/>
 				</votingSystem:simpleButton>
 			</div>
