@@ -49,8 +49,7 @@ function EventVS(eventJSON, eventTemplate, subSystem) {
         if(EventVS.State.ACTIVE == this.state) {
             if(!this.isActive) httpGet(this.checkDateURL)
     	} else if(EventVS.State.AWAITING == this.state) {
-            if(his.isActive) httpGet(this.checkDateURL)
-    		result =  DateUtils.checkDate(this.dateBegin, this.dateFinish);
+            if(this.isActive) httpGet(this.checkDateURL)
     	}
     }
     this.subSystem = subSystem
