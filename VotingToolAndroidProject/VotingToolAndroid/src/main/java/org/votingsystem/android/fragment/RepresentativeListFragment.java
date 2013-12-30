@@ -11,7 +11,7 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.v4.app.ListFragment;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -27,6 +27,7 @@ import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -44,14 +45,14 @@ import java.text.Collator;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class RepresentativeListFragment extends ListFragment
+public class RepresentativeListFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener {
 
     public static final String TAG = "RepresentativeListFragment";
 
     private static TextView searchTextView;
     private static TextView emptyResultsView;
-    private static ListView listView;
+    private static GridView gridView;
     private AtomicBoolean progressVisible = null;
     private View mProgressContainer;
     private View mListContainer;
@@ -101,8 +102,6 @@ public class RepresentativeListFragment extends ListFragment
             queryStr = getArguments().getString(SearchManager.QUERY);
         }
         Log.d(TAG +  ".onCreate(...)", "args: " + getArguments());
-        mAdapter = new RepresentativeListAdapter(getActivity().getApplicationContext(), null,false);
-        setListAdapter(mAdapter);
         setHasOptionsMenu(true);
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(ContextVS.HTTP_DATA_INITIALIZED_ACTION_ID));
@@ -121,14 +120,20 @@ public class RepresentativeListFragment extends ListFragment
         Log.d(TAG +  ".onCreateView(..)", "savedInstanceState: " + savedInstanceState);
         View rootView = inflater.inflate(R.layout.representative_list_fragment, container, false);
         searchTextView = (TextView) rootView.findViewById(R.id.search_query);
-        listView = (ListView) rootView.findViewById(android.R.id.list);
-        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> av, View v, int pos, long id) {
+        gridView = (GridView) rootView.findViewById(R.id.gridview);
+        mAdapter = new RepresentativeListAdapter(getActivity().getApplicationContext(), null,false);
+        gridView.setAdapter(mAdapter);
+        gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override public boolean onItemLongClick(AdapterView<?> av, View v, int pos, long id) {
                 return onLongListItemClick(v,pos,id);
             }
         });
-        listView.setOnScrollListener(this);
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                onListItemClick(parent, v, position, id);
+            }
+        });
+        gridView.setOnScrollListener(this);
         emptyResultsView = (TextView) rootView.findViewById(android.R.id.empty);
         searchTextView.setVisibility(View.GONE);
         mProgressContainer = rootView.findViewById(R.id.progressContainer);
@@ -171,7 +176,7 @@ public class RepresentativeListFragment extends ListFragment
 
     @Override public void onScroll(AbsListView view, int firstVisibleItem,
                                    int visibleItemCount, int totalItemCount) {
-        if (getListAdapter() == null || getListAdapter().getCount() == 0) return ;
+        if (gridView.getAdapter() == null || gridView.getAdapter().getCount() == 0) return ;
         /* maybe add a padding */
         boolean loadMore = firstVisibleItem + visibleItemCount >= totalItemCount;
         if(loadMore && !progressVisible.get() && offset < numTotalRepresentatives &&
@@ -197,8 +202,8 @@ public class RepresentativeListFragment extends ListFragment
         Log.d(TAG +  ".onActivityCreated(...)", "savedInstanceState: " + savedInstanceState);
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState != null) {
-            Parcelable listState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
-            listView.onRestoreInstanceState(listState);
+            Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
+            gridView.onRestoreInstanceState(gridState);
             offset = savedInstanceState.getLong(ContextVS.OFFSET_KEY);
             numTotalRepresentatives = savedInstanceState.getLong(ContextVS.NUM_TOTAL_KEY);
         }
@@ -208,8 +213,8 @@ public class RepresentativeListFragment extends ListFragment
         super.onSaveInstanceState(outState);
         outState.putLong(ContextVS.OFFSET_KEY, offset);
         outState.putLong(ContextVS.NUM_TOTAL_KEY, numTotalRepresentatives);
-        Parcelable listState = listView.onSaveInstanceState();
-        outState.putParcelable(ContextVS.LIST_STATE_KEY, listState);
+        Parcelable gridState = gridView.onSaveInstanceState();
+        outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
         Log.d(TAG +  ".onSaveInstanceState(...)", "outState: " + outState);
     }
 
@@ -231,9 +236,9 @@ public class RepresentativeListFragment extends ListFragment
         }
     }
 
-    @Override public void onListItemClick(ListView l, View v, int position, long id) {
+    private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
         Log.d(TAG +  ".onListItemClick(...)", "Item clicked: " + id);
-        UserVS userVS = ((UserVS) getListAdapter().getItem(position));
+        UserVS userVS = ((UserVS) gridView.getAdapter().getItem(position));
         Intent intent = new Intent(getActivity().getApplicationContext(), EventPagerActivity.class);
         intent.putExtra(GenericFragmentContainerActivity.REQUEST_FRAGMENT_KEY,
                 RepresentativeFragment.class.getName());
@@ -249,19 +254,20 @@ public class RepresentativeListFragment extends ListFragment
     }
 
     @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        Log.d(TAG + ".onLoadFinished(...)", " - cursor.getCount(): " + cursor.getCount());
+        Log.d(TAG + ".onLoadFinished(...)", " - cursor.getCount(): " + cursor.getCount() +
+                " - firstVisiblePosition: " + firstVisiblePosition);
         if(numTotalRepresentatives == null) loadHttpItems(offset);
         else {
             showProgressIndicator(false, true);
             if(firstVisiblePosition != null) cursor.moveToPosition(firstVisiblePosition);
             firstVisiblePosition = null;
-            ((CursorAdapter)this.getListAdapter()).swapCursor(cursor);
+            ((CursorAdapter)gridView.getAdapter()).swapCursor(cursor);
         }
     }
 
     @Override public void onLoaderReset(Loader<Cursor> cursorLoader) {
         Log.d(TAG + ".onLoaderReset(...)", "");
-        ((CursorAdapter)this.getListAdapter()).swapCursor(null);
+        ((CursorAdapter)gridView.getAdapter()).swapCursor(null);
     }
 
     @Override public void onAttach(Activity activity) {
