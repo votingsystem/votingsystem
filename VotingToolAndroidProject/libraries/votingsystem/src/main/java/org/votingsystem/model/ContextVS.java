@@ -54,17 +54,24 @@ public class ContextVS {
     public static final String SERVER_URL_EXTRA_PROP_NAME = "serverURL";
 
     //Intent keys
-    public static final String PIN_KEY = "PIN_KEY";
-    public static final String URL_KEY = "URL_KEY";
-    public static final String HTTP_RESPONSE_DATA_KEY = "HTTP_RESPONSE_DATA_KEY";
-    public static final String HTTP_RESPONSE_STATUS_KEY = "HTTP_RESPONSE_STATUS_KEY";
-    public static final String OFFSET_KEY = "OFFSET_KEY";
-    public static final String NUM_TOTAL_KEY = "NUM_TOTAL_KEY";
+    public static final String PIN_KEY = "PIN";
+    public static final String URL_KEY = "URL";
+    public static final String HTTP_RESPONSE_DATA_KEY = "HTTP_RESPONSE_DATA";
+    public static final String HTTP_RESPONSE_STATUS_KEY = "HTTP_RESPONSE_STATUS";
+    public static final String OFFSET_KEY = "OFFSET";
+    public static final String NUM_TOTAL_KEY = "NUM_TOTAL";
+    public static final String LIST_STATE_KEY = "LIST_STATE";
 
     //Actions IDs
-    public static final String SIGN_AND_SEND_ACTION_ID = "SIGN_AND_SEND_ACTION_ID";
+    public static final String SIGN_AND_SEND_ACTION_ID = "SIGN_AND_SEND_ACTION";
     public static final String PIN_ACTION_ID = "PIN_ACTION_ID";
-    public static final String HTTP_DATA_INITIALIZED_ACTION_ID = "HTTP_DATA_INITIALIZED_ACTION_ID";
+    public static final String HTTP_DATA_INITIALIZED_ACTION_ID = "HTTP_DATA_INITIALIZED_ACTION";
+
+    //Loaders
+    public static final int REPRESENTATIVE_LOADER_ID = 1;
+
+    //Pages size
+    public static final Integer REPRESENTATIVE_PAGE_SIZE = 100;
 
     //Notifications IDs
     public static final int RSS_SERVICE_NOTIFICATION_ID           = 1;

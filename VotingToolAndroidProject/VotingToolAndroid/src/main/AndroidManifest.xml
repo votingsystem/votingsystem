@@ -113,6 +113,6 @@
         <service android:name=".service.SignAndSendService" android:exported="false"
             android:process=":sign_and_send_service"/>
         <service android:name=".service.RssService" android:process=":rss_service"/>
-        <service android:name=".service.RepresentativeService"/>
+        <service android:name=".service.RepresentativeService"  android:exported="false"/>
     </application>
 </manifest>
